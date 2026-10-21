@@ -23,7 +23,7 @@ export type AchievementData = Pick<
 // startCents is the money the run began with, which a money goal leaves out.
 export interface RunCounters {
   bumpsByZone: number[];
-  debuffZones: Partial<Record<DebuffId, number>>;
+  debuffsGot: Partial<Record<DebuffId, number>>;
   firstZone: number;
   squirrelChases: number;
   startCents: Cents;
@@ -38,15 +38,12 @@ export interface RunFacts extends RunCounters {
 }
 
 export function runCountersOf(
-  run: Pick<
-    RunState,
-    "bumpsByZone" | "debuffZones" | "firstZone" | "squirrelChases" | "startMoney"
-  >,
+  run: Pick<RunState, "bumpsByZone" | "debuffsGot" | "firstZone" | "squirrelChases" | "startMoney">,
 ): RunCounters {
-  const { bumpsByZone, debuffZones, firstZone, squirrelChases, startMoney } = run;
+  const { bumpsByZone, debuffsGot, firstZone, squirrelChases, startMoney } = run;
   return {
     bumpsByZone: [...bumpsByZone],
-    debuffZones: { ...debuffZones },
+    debuffsGot: { ...debuffsGot },
     firstZone,
     squirrelChases,
     startCents: startMoney,
@@ -73,7 +70,7 @@ function zonesWalked(facts: RunFacts): number {
   return Math.max(0, facts.zonesFinished - facts.firstZone);
 }
 
-// The pack hit an obstacle, minor or not, in the current zone.
+// A plain hit landed in the current zone; a dodge or a card obstacle does not count.
 export function countBump(state: RunState): RunState {
   const bumpsByZone = [...state.bumpsByZone];
   while (bumpsByZone.length <= state.zoneIndex) {
@@ -81,15 +78,6 @@ export function countBump(state: RunState): RunState {
   }
   bumpsByZone[state.zoneIndex] = (bumpsByZone[state.zoneIndex] ?? 0) + 1;
   return { ...state, bumpsByZone };
-}
-
-// At the end of a zone, before its effects expire: each debuff on counts the zone.
-export function countDebuffZones(state: RunState): RunState {
-  const debuffZones: Partial<Record<DebuffId, number>> = { ...state.debuffZones };
-  for (const { debuff } of state.debuffs) {
-    debuffZones[debuff] = (debuffZones[debuff] ?? 0) + 1;
-  }
-  return { ...state, debuffZones };
 }
 
 // A card option that lets the chasers chase counts one squirrel chase.
@@ -124,8 +112,8 @@ export function conditionHolds(
   switch (condition.kind) {
     case "cleanZones":
       return facts !== null && cleanZones(facts) >= needed(zones, condition.count);
-    case "debuffZones":
-      return facts !== null && (facts.debuffZones[condition.debuff] ?? 0) >= condition.count;
+    case "debuffsGot":
+      return facts !== null && (facts.debuffsGot[condition.debuff] ?? 0) >= condition.count;
     case "dogSlotsOwned":
       return save !== null && save.owned.dogSlots >= needed(data.dogSlots.length, condition.count);
     case "dogsFinishedWith":
@@ -193,8 +181,8 @@ export function achievementConditionText(
   switch (condition.kind) {
     case "cleanZones":
       return `${thresholdText(condition.count, "zones")} of a run finished without a bump`;
-    case "debuffZones":
-      return `${condition.count} zones of a run ended ${data.debuffs[condition.debuff].name}`;
+    case "debuffsGot":
+      return `${data.debuffs[condition.debuff].name} ${condition.count} times in one run`;
     case "dogSlotsOwned":
       return `own ${thresholdText(condition.count, "dog slots")}`;
     case "dogsFinishedWith":

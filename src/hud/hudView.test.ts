@@ -23,7 +23,7 @@ describe("changeLabels", () => {
         before: clampHearts(10, 5),
         causes: [
           { amount: -1, kind: "effect", source: skunkIgnore },
-          { amount: -1, kind: "temperament", temperament: "dramatic" },
+          { amount: -1, kind: "modifier", source: { gear: "luckyCollar", kind: "gear" } },
         ],
         dog: "nugget",
         kind: "hearts",
@@ -48,10 +48,10 @@ describe("changeLabels", () => {
     expect(labels).toEqual([
       {
         amount: -2,
-        cause: "dramatic",
+        cause: gameData.shopGear.luckyCollar.name,
         gain: false,
         target: { dog: "nugget", kind: "dog" },
-        text: "−2 ♥, dramatic",
+        text: `−2 ♥, ${gameData.shopGear.luckyCollar.name}`,
       },
       {
         amount: 1,

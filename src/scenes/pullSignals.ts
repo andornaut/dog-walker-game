@@ -1,10 +1,8 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
-import { needIconKey } from "../assets/iconKeys";
-import { NEED_ART, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
-import { gameData } from "../data";
-import type { DogId, NeedId } from "../data/types";
+import { PULL_ART } from "../assets/spriteKeys";
+import type { DogId } from "../data/types";
 import { PALETTE } from "./palette";
 import { playEffect, playTag, playTagOnce, spriteTopY } from "./sprites";
 
@@ -14,17 +12,15 @@ export interface IconArt {
   readonly key: string;
 }
 
-// What a dog shows over its head. top is its centre column and top opaque row on screen.
-// The bubble holds icon; while the dog strains it has a target, which the dotted line and
-// arrow point to, and blocked marks a strain the fairness rule holds back. urgent is an
-// urgent need.
+// What a straining dog shows over its head. top is its centre column and top opaque row on
+// screen. The bubble holds icon; target is what the dotted line and arrow point to, and
+// blocked marks a strain the fairness rule holds back.
 export interface DogSignal {
   readonly blocked: boolean;
   readonly dog: DogId;
   readonly icon: IconArt;
   readonly target: { readonly x: number; readonly y: number } | null;
   readonly top: { readonly x: number; readonly y: number };
-  readonly urgent: boolean;
 }
 
 // The bubble's frame is 32x28: its tail tip, row 27, sits a row above the dog's top, the icon
@@ -35,8 +31,6 @@ const ICON_SIZE = 16;
 const LINE = { arrow: 7, dot: 2, spacing: 7 };
 // The show tag's frames during which the bubble is too small to hold the icon.
 const SHOW_FRAMES_WITHOUT_ICON = 2;
-// A need met without its burst art: the bubble rises this far over this long, then fades.
-const MET = { durationMs: 1200, rise: 24 };
 
 // The first frame of a texture, so a sprite sheet such as the treat's can stand in as an icon.
 function firstFrame(scene: Scene, key: string): string | undefined {
@@ -45,10 +39,10 @@ function firstFrame(scene: Scene, key: string): string | undefined {
 
 // The bubble's texture: the art's, or a drawn white bubble with a tail.
 function bubbleKey(scene: Scene): string {
-  if (scene.textures.exists(NEED_ART.bubble)) {
-    return NEED_ART.bubble;
+  if (scene.textures.exists(PULL_ART.bubble)) {
+    return PULL_ART.bubble;
   }
-  const key = `${NEED_ART.bubble}-drawn`;
+  const key = `${PULL_ART.bubble}-drawn`;
   if (!scene.textures.exists(key)) {
     const { height, width } = BUBBLE;
     const g = scene.make.graphics({}, false);
@@ -85,11 +79,6 @@ function letterIcon(scene: Scene, key: string, letter: string, color: number): s
   return key;
 }
 
-// A need's icon: the art's, or its word's first letter in a circle.
-export function needIcon(scene: Scene, need: NeedId): IconArt {
-  return iconArt(scene, needIconKey(need), gameData.needs[need].name.charAt(0));
-}
-
 // Any icon key: the art's first frame, or a letter for it.
 export function iconArt(scene: Scene, key: string, letter: string): IconArt {
   return scene.textures.exists(key)
@@ -99,21 +88,19 @@ export function iconArt(scene: Scene, key: string, letter: string): IconArt {
 
 // The blocked mark's texture: the art's, or a red X.
 function blockedKey(scene: Scene): string {
-  return scene.textures.exists(NEED_ART.pullBlocked)
-    ? NEED_ART.pullBlocked
-    : letterIcon(scene, `${NEED_ART.pullBlocked}-drawn`, "X", PALETTE.red);
+  return scene.textures.exists(PULL_ART.pullBlocked)
+    ? PULL_ART.pullBlocked
+    : letterIcon(scene, `${PULL_ART.pullBlocked}-drawn`, "X", PALETTE.red);
 }
 
 interface Bubble {
   readonly blocked: GameObjects.Image;
   readonly frame: GameObjects.Sprite;
   readonly icon: GameObjects.Image;
-  // The loop it plays once shown: idle, or urgent for an urgent need.
-  loop: string;
 }
 
 // The bubbles over the dogs and the strain's dotted line and arrow, redrawn every frame.
-export class NeedSignals {
+export class PullSignals {
   private readonly bubbles = new Map<DogId, Bubble>();
   private readonly lines: GameObjects.Graphics;
 
@@ -136,13 +123,6 @@ export class NeedSignals {
       const bubble = this.bubbles.get(signal.dog) ?? this.addBubble(signal.dog, still);
       const left = Math.round(signal.top.x) - BUBBLE.width / 2;
       const top = Math.round(signal.top.y) - 1 - (BUBBLE.height - 1);
-      const loop = signal.urgent ? "urgent" : "idle";
-      if (loop !== bubble.loop) {
-        bubble.loop = loop;
-        if (!this.showing(bubble)) {
-          playTag(bubble.frame, bubble.frame.texture.key, loop, still);
-        }
-      }
       bubble.frame.setPosition(left, top);
       bubble.icon
         .setTexture(signal.icon.key, signal.icon.frame)
@@ -159,33 +139,6 @@ export class NeedSignals {
     }
   }
 
-  // A need met, burst at the dog's feet with the need's tag; without the art, its bubble
-  // rises over the dog and fades.
-  met(feet: { x: number; y: number }, need: NeedId, icon: IconArt, still: boolean): void {
-    const { depth, scene } = this;
-    if (scene.anims.exists(animationKey(NEED_ART.needMet, need))) {
-      playEffect(scene, NEED_ART.needMet, need, feet, depth)?.setOrigin(0.5, 1);
-      return;
-    }
-    const over = feet.y - ROAD_SPRITE_SIZE;
-    const frame = scene.add.image(feet.x, over, bubbleKey(scene)).setOrigin(0.5, 1);
-    const shown = scene.add
-      .image(feet.x, over - BUBBLE.height + BUBBLE.icon.y, icon.key, icon.frame)
-      .setOrigin(0.5, 0)
-      .setDisplaySize(ICON_SIZE, ICON_SIZE);
-    scene.tweens.add({
-      alpha: 0,
-      duration: MET.durationMs,
-      ease: "Sine.easeIn",
-      onComplete: () => {
-        frame.destroy();
-        shown.destroy();
-      },
-      targets: [frame.setDepth(depth), shown.setDepth(depth + 1)],
-      ...(still ? {} : { y: `-=${MET.rise}` }),
-    });
-  }
-
   private addBubble(dog: DogId, still: boolean): Bubble {
     const { depth, scene } = this;
     const key = bubbleKey(scene);
@@ -199,12 +152,11 @@ export class NeedSignals {
         .image(0, 0, "__DEFAULT")
         .setOrigin(0)
         .setDepth(depth + 1),
-      loop: "idle",
     };
     if (still) {
-      playTag(bubble.frame, key, bubble.loop, true);
+      playTag(bubble.frame, key, "idle", true);
     } else {
-      playTagOnce(bubble.frame, key, "show", () => playTag(bubble.frame, key, bubble.loop));
+      playTagOnce(bubble.frame, key, "show", () => playTag(bubble.frame, key, "idle"));
     }
     this.bubbles.set(dog, bubble);
     return bubble;
@@ -272,7 +224,7 @@ export function dogTop(sprite: GameObjects.Sprite): { x: number; y: number } {
 // The burst over a dog whose blocked strain ended without a pull: bottom-centre on its centre
 // column, 6px below its top opaque row.
 export function playPullFail(scene: Scene, top: { x: number; y: number }, depth: number): void {
-  playEffect(scene, NEED_ART.pullFail, "play", { x: top.x, y: top.y + 6 }, depth)?.setOrigin(
+  playEffect(scene, PULL_ART.pullFail, "play", { x: top.x, y: top.y + 6 }, depth)?.setOrigin(
     0.5,
     1,
   );

@@ -30,23 +30,15 @@ function shortZones(data: GameData, share: number): GameData {
   };
 }
 
-// Dogs that never pull, so every hit is the bot's own doing: none is food-driven or a chaser,
-// and no need turns urgent.
+// No squirrels on the road, so no dog pulls and every hit is the bot's own doing.
 function withoutPulls(data: GameData): GameData {
-  const never = 1e9;
-  const dogs = Object.fromEntries(
-    Object.entries(data.dogs).map(([id, dog]) => [id, { ...dog, trait: "fancy" }]),
-  ) as unknown as GameData["dogs"];
+  const zones = data.world.zones.map((zone) => ({
+    ...zone,
+    weights: { ...zone.weights, obstacles: { ...zone.weights.obstacles, squirrel: 0 } },
+  }));
   return {
     ...data,
-    dogs,
-    tuning: {
-      ...data.tuning,
-      seconds: {
-        ...data.tuning.seconds,
-        needUrgentByEnergy: { calm: never, hyper: never, steady: never },
-      },
-    },
+    world: { ...data.world, zones: zones as unknown as GameData["world"]["zones"] },
   };
 }
 
@@ -130,14 +122,15 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   });
 
   // A pull never moves the pack into an obstacle too close to react to, so an ideal player is
-  // never hit right after one, whatever the pack pulls toward.
+  // never hit right after one, whatever the pack pulls toward. Steering away during a strain
+  // cancels its pull, so only some strains pull.
   it("is never hit right after a pull, as an ideal player, with pulls on", () => {
     const pulling: PackDogs = ["koda", "biscuit", "zippy"];
     const results = [1, 2, 3].map((seed) => run(SHORT, seed, IDEAL_SKILL, pulling));
     const hits = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
     const pulls = results.reduce((sum, result) => sum + result.pullsMoved, 0);
 
-    expect(pulls).toBeGreaterThan(10);
+    expect(pulls).toBeGreaterThan(0);
     expect(hits).toBe(0);
   });
 });

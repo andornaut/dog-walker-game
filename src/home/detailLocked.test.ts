@@ -10,7 +10,7 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const owned: Owned = {
   dogSlots: 1,
   dogs: ["biscuit", "duchess", "koda"],
-  gear: ["whistle"],
+  gear: ["luckyCollar"],
   walkers: ["casey"],
 };
 const noStats = { dogs: {} };
@@ -30,7 +30,11 @@ describe("a detail card's locked status", () => {
       card: () => gearDetail(data, owned, cents(0), loadout, "fannyPack"),
       locked: true,
     },
-    { bank: 0, card: () => gearDetail(data, owned, cents(0), loadout, "whistle"), locked: false },
+    {
+      bank: 0,
+      card: () => gearDetail(data, owned, cents(0), loadout, "luckyCollar"),
+      locked: false,
+    },
   ])("is $locked with $bank cents banked", ({ card, locked }) => {
     expect(card().locked).toBe(locked);
   });

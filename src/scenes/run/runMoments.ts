@@ -2,7 +2,7 @@ import type { Scene } from "phaser";
 
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
-import type { DebuffId, DogId, HintId, HintTrigger } from "../../data/types";
+import type { DogId, HintId, HintTrigger } from "../../data/types";
 import { changeLabels } from "../../hud/hudView";
 import {
   endScreenDelayMs,
@@ -17,36 +17,30 @@ import {
 } from "../../hud/moments";
 import { amountText, type Change, type MoneyChange } from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
-import { quirkScaledDogs } from "../../rules/effects";
 import { hintFor } from "../../rules/hints";
 import { currentZoneId, walkLength } from "../../rules/route";
 import { encounterLook, minorObstacleLook } from "../../rules/skins";
-import { flourishesAt, type NeedStep } from "../../runner/needs";
 import type { PullStep } from "../../runner/pulls";
 import type { Random } from "../../runner/random";
 import {
   type EncounterCard,
   isMinorObstacle,
-  sniffersOf,
   type WalkItemKind,
   type WalkStep,
 } from "../../runner/walk";
-import { walkerFootY } from "../../runner/walkGeometry";
 import {
   type AchievementPreview,
   NOTHING_PREVIEWED,
   previewAchievements,
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
-import { packDogs } from "../../state/pack";
 import type { RunState } from "../../state/runState";
 import { hitLabelOf, playHitMoment, playMinorHitLabel } from "../hitMoment";
-import { playHops, playHopSplash, playMinorBump } from "../packFeedback";
+import { playBump, playDodge } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
 import { playEffect } from "../sprites";
-import type { AccidentSpots } from "./accidentSpots";
 import type { PackView } from "./packView";
 import { showInstantPopup } from "./roadBanners";
 import { DEPTH, firingSeconds, LAYOUT } from "./stage";
@@ -95,7 +89,6 @@ export interface ZonePayout {
 export interface RunMomentsDeps {
   pack: PackView;
   quips: Random;
-  spots: AccidentSpots;
   // Whether animations and bursts keep still, from the player's settings.
   still: () => boolean;
 }
@@ -145,17 +138,6 @@ export class RunMoments {
     }
   }
 
-  // A treat from the doghouses: the HUD floats the change's label when the treat lands. Debuffs
-  // it cured end with a puff over the pack.
-  treatGiven(dog: DogId, change: Change, cured: readonly DebuffId[]): void {
-    this.changes.push(change);
-    if (cured.length > 0) {
-      this.deps.pack.debuffsCured();
-    }
-    const cue: TreatCue = { dog, labels: changeLabels(gameData, [change]) };
-    this.scene.events.emit(TREAT_EVENT, cue);
-  }
-
   // A tell barks and a blocked strain that ends without a pull bursts over its dog. The
   // strain, the bubble and the bark pop are drawn with the pack.
   pulled(step: PullStep): void {
@@ -166,34 +148,6 @@ export class RunMoments {
     this.deps.pack.pullFailed(step.failed);
   }
 
-  // A need met bursts at each met dog's feet, with its changes and the owners' lines; one gone
-  // wrong raises its hint and shows its changes, and a Regular dog's accident bursts on the dog and leaves a spot
-  // on the road, scrolled to scroll.
-  needs(step: NeedStep, scroll: number): void {
-    const still = this.deps.still();
-    for (const moment of step.moments) {
-      const { outcome } = moment;
-      if (moment.kind === "met") {
-        soundboardOf(this.scene).play("treat");
-        this.deps.pack.needMet(moment.dogs, moment.need, still);
-        this.deps.pack.quirkActed(flourishesAt(gameData, moment));
-      } else {
-        this.hint({ kind: "accident" });
-        if (moment.need === "regular") {
-          const feet = this.deps.pack.accident(moment.dog);
-          if (feet !== undefined) {
-            this.deps.spots.add(scroll - feet.distance, feet.x, still);
-          }
-        }
-      }
-      if (outcome !== null) {
-        this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
-        this.sayQuips(outcome.quips);
-        this.afterOutcome(outcome);
-      }
-    }
-  }
-
   // Sounds, bursts, labels and hints for what happened in a step, around the pack at pack.
   walked(step: WalkStep, pack: { x: number; y: number }): void {
     const sound = soundboardOf(this.scene);
@@ -202,7 +156,6 @@ export class RunMoments {
       this.hint({ kind: "tip" });
     }
     this.addChanges(step.tips);
-    this.deps.pack.quirkActed(sniffersOf(gameData, step.walk, step.collected));
     for (const item of step.collected) {
       playEffect(this.scene, "fx-sparkle", "play", { x: pack.x, y: pack.y - 24 }, DEPTH.fx);
       if (item.kind === "treat") {
@@ -210,36 +163,35 @@ export class RunMoments {
         this.hint({ kind: "treat" });
       }
     }
+    // A treat cheers the owner of the dog that grabbed it.
+    for (const { change, dog } of step.treats) {
+      if (change !== null) {
+        this.changes.push(change);
+        const cue: TreatCue = { dog, labels: changeLabels(gameData, [change]) };
+        this.scene.events.emit(TREAT_EVENT, cue);
+      }
+    }
+    // A bump costs the owner of the dog it landed on; a small dog may dodge it.
     for (const bump of step.bumps) {
+      const moment = { depth: DEPTH.fx, still: this.deps.still() };
+      if (bump.dodged) {
+        this.deps.pack
+          .sprites([bump.dog])
+          .forEach((sprite) => playDodge(this.scene, moment, sprite));
+        continue;
+      }
+      const top = this.deps.pack.dogPoint(bump.dog);
+      if (top !== undefined) {
+        playBump(this.scene, moment, top);
+      }
       sound.play("bump");
-      this.changes.push(...(bump.change === null ? [] : [bump.change]));
-      const contact = { x: pack.x, y: pack.y - 20 };
-      playMinorBump(
-        this.scene,
-        { contact, depth: DEPTH.fx, still: this.deps.still() },
-        { amount: bump.change?.amount ?? null, walker: this.deps.pack.walkerSprite() },
-      );
-      this.deps.pack.stumble(this.deps.still());
-      this.deps.pack.showDizzy();
+      this.addChanges(bump.change === null ? [] : [bump.change]);
       this.playBumpLabel(bump.item.kind, step, pack);
       this.hint({ kind: "minorBump" });
     }
-    // An area effect that caught no dog splashes at the pack's feet with its HOP!, and opens
-    // no card; one that caught some has "Hop!" over each dog that hopped.
-    for (const { caught, hopped } of step.areaContacts) {
-      const moment = { depth: DEPTH.fx, still: this.deps.still() };
-      if (caught.length === 0) {
-        playHopSplash(this.scene, { ...moment, feetY: walkerFootY(LAYOUT.road), x: pack.x });
-      } else {
-        const tops = hopped.flatMap((dog) => this.deps.pack.dogPoint(dog) ?? []);
-        playHops(this.scene, moment, tops);
-      }
-      this.hint({ kind: "areaEffect" });
-    }
+    this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
+    this.fired(step.fired, step.walk.run);
     for (const { encounter, outcome } of step.instants) {
-      const { resolution } = gameData.encounters[encounter];
-      const effects = resolution.kind === "instant" ? resolution.effects : [];
-      this.deps.pack.quirkActed(quirkScaledDogs(gameData, effects, packDogs(outcome.state)));
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
       showInstantPopup(this.scene, encounter, this.deps.still());
       this.sayQuips(outcome.quips);
@@ -259,24 +211,20 @@ export class RunMoments {
     }
   }
 
-  // Firings and debuffs a choice or find brought about.
-  // The dogs whose quirk a card choice set acting, such as a ratter on a chase.
-  quirkActed(dogs: readonly DogId[]): void {
-    this.deps.pack.quirkActed(dogs);
+  // Firings a choice or find brought about.
+  afterOutcome(outcome: ChoiceOutcome): void {
+    this.fired(outcome.fired, outcome.state);
   }
 
-  afterOutcome(outcome: ChoiceOutcome): void {
-    if (outcome.fired.length > 0) {
-      soundboardOf(this.scene).play("fired");
-      outcome.fired.forEach((dog) =>
-        this.deps.pack.trotOff(dog, firingSeconds(), this.deps.still()),
-      );
-      if (outcome.state.phase.kind === "ended") {
-        this.endMoments.firingSeconds = firingSeconds();
-      }
+  // Each owner who fired you has their dog trot off the road, with their fired line.
+  private fired(dogs: readonly DogId[], run: RunState): void {
+    if (dogs.length === 0) {
+      return;
     }
-    for (const { debuff } of outcome.state.debuffs) {
-      this.hint({ debuff, kind: "debuff" });
+    soundboardOf(this.scene).play("fired");
+    dogs.forEach((dog) => this.deps.pack.trotOff(dog, firingSeconds(), this.deps.still()));
+    if (run.phase.kind === "ended") {
+      this.endMoments.firingSeconds = firingSeconds();
     }
   }
 
@@ -310,8 +258,9 @@ export class RunMoments {
     }
   }
 
-  // Each fee flies as a coin from its doghouse to the bank while its amount rises over the
-  // doghouse.
+  // At a zone's end, each dog's pay flies as a coin from its doghouse to the bank while its
+  // amount rises over the doghouse. Returns the zone's changes, for its celebration, and how
+  // long the coins take to land.
   payOut(fees: readonly MoneyChange[], run: RunState): ZonePayout {
     this.changes.push(...fees);
     const cues = fees.flatMap((fee): PayoutCue[] =>

@@ -3,14 +3,9 @@ import type {
   DogId,
   Effect,
   EncounterId,
-  ForcedStopId,
   GameData,
   GearId,
   Modifier,
-  NeedCardId,
-  NeedId,
-  NeedSpotId,
-  QuirkId,
   UpgradeId,
   WalkerId,
   ZoneId,
@@ -20,7 +15,7 @@ import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
 import { modifiedStat } from "../rules/modifiers";
 import { firstZoneId } from "../rules/route";
-import { type Cents, cents, type Hearts, type Pixels, pixels } from "../rules/units";
+import { type Cents, cents, type Hearts, type Pixels, pixels, read } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
 import { packFor } from "./pack";
 
@@ -43,19 +38,13 @@ export type Pack =
   readonly [PackSlot] | readonly [PackSlot, PackSlot] | readonly [PackSlot, PackSlot, PackSlot];
 
 export type PackDogs = readonly [DogId] | readonly [DogId, DogId] | readonly [DogId, DogId, DogId];
-export type UpgradeOffer = readonly [UpgradeId, UpgradeId, UpgradeId];
 
 // What a list of effects came from: a card option by its index in the source's data, an
-// instant encounter, gear, a need met at a spot, a need gone wrong, or the walker.
+// instant encounter, gear, an upgrade, or the walker.
 export type EffectSource =
   | { readonly encounter: EncounterId; readonly kind: "encounter"; readonly option: number }
-  | { readonly kind: "forcedStop"; readonly option: number; readonly stop: ForcedStopId }
   | { readonly gear: GearId; readonly kind: "gear" }
   | { readonly encounter: EncounterId; readonly kind: "instant" }
-  | { readonly card: NeedCardId; readonly kind: "needCard"; readonly option: number }
-  | { readonly kind: "needGoneWrong"; readonly need: NeedId }
-  | { readonly kind: "needMet"; readonly spot: NeedSpotId }
-  | { readonly kind: "quirk"; readonly quirk: QuirkId }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId }
   | { readonly kind: "walker"; readonly walker: WalkerId };
 
@@ -65,74 +54,69 @@ export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonl
 // lasts through.
 export type ActiveModifier = Lasting & Modifier & { readonly source: ModifierSource };
 
-// secondsLeft is the walking time a timed debuff has left; absent, it lasts to its zone's end.
+// secondsLeft is the walking time the debuff has left.
 export type ActiveDebuff = Lasting & {
   readonly debuff: DebuffId;
-  readonly secondsLeft?: number;
+  readonly secondsLeft: number;
 };
 
 // No card opens for the encounter while the immunity lasts.
 export type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
 
-// What opened a card. affected is the dogs the encounter affected (caught by an area roll,
-// the chasers for a squirrel, or the whole pack), or the dogs whose need opened it; lucky
-// encounters are encounters too. A fork's paths are the zones it leads to, left to right.
+// What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
+// paths are the zones it leads to, left to right, each carrying the upgrade at its index.
 export type CardSource =
   | {
       readonly affected: readonly DogId[];
       readonly encounter: EncounterId;
       readonly kind: "encounter";
     }
-  | { readonly kind: "forcedStop"; readonly stop: ForcedStopId }
-  | { readonly kind: "fork"; readonly paths: readonly ZoneId[] }
   | {
-      readonly affected: readonly DogId[];
-      readonly card: NeedCardId;
-      readonly kind: "need";
-    }
-  | { readonly kind: "upgradeOffer"; readonly offered: UpgradeOffer };
+      readonly kind: "fork";
+      readonly paths: readonly ZoneId[];
+      readonly upgrades: readonly UpgradeId[];
+    };
 
 export type EndReason = "finished" | "noDogs" | "wentHome";
 
 export type Phase =
-  | {
-      readonly kind: "card";
-      readonly source: Exclude<CardSource, { readonly kind: "upgradeOffer" }>;
-    }
+  | { readonly kind: "card"; readonly source: CardSource }
   | { readonly kind: "ended"; readonly reason: EndReason }
-  | { readonly kind: "upgrade"; readonly offered: UpgradeOffer }
   | { readonly kind: "walking" };
 
 export interface RunState {
-  // Obstacle hits, minor ones included, by zone index. A zone with no entry had none.
+  // Plain hits that landed, by zone index. A zone with no entry had none.
   readonly bumpsByZone: readonly number[];
-  // How many zones ended with each debuff on.
-  readonly debuffZones: Readonly<Partial<Record<DebuffId, number>>>;
+  // How many times each debuff was applied this run.
+  readonly debuffsGot: Readonly<Partial<Record<DebuffId, number>>>;
   // Each debuff at most once: applying one the pack has refreshes it.
   readonly debuffs: readonly ActiveDebuff[];
   // The zone index the run began in. A dev start skips the zones before it, which count
   // toward no achievement.
   readonly firstZone: number;
   readonly gear: GearId | null;
+  // Hearts lost this zone that forgivenHearts modifiers forgave.
+  readonly heartsForgiven: number;
   readonly immunities: readonly ActiveImmunity[];
   // The dev panel's cheat: no owner loses hearts. Absent in normal play.
   readonly invincible?: boolean;
   readonly modifiers: readonly ActiveModifier[];
   readonly money: Cents;
-  // Seconds each dog has walked this zone since its need was last met or went wrong.
-  readonly needSeconds: Readonly<Partial<Record<DogId, number>>>;
   readonly pack: Pack;
   readonly phase: Phase;
   // The zones walked and the zone being walked, in order: zoneIndex is a position in it.
   // Between a zone's end and the fork after it, it has no entry at zoneIndex yet.
   readonly route: readonly ZoneId[];
-  readonly skipsLeft: number;
-  // Squirrel cards on which the chasers were let chase.
+  // Encounter cards resolved this zone, for the free cards of freeCards modifiers.
+  readonly cardsThisZone: number;
+  // Hall pass's free Skip: skipPass offers it on every obstacle card until skipUsed, which
+  // each zone's start clears.
+  readonly skipPass: boolean;
+  readonly skipUsed: boolean;
+  // Squirrel cards on which the pack was let chase.
   readonly squirrelChases: number;
   // The money the run began with, which a money goal leaves out.
   readonly startMoney: Cents;
-  // Carried, up to counts.treatCarryMax.
-  readonly treats: number;
   // Picked upgrades leave the pool for the rest of the run.
   readonly upgradesPicked: readonly UpgradeId[];
   readonly walker: WalkerId;
@@ -154,15 +138,7 @@ export interface Loadout {
 export function newRun(
   data: Pick<
     GameData,
-    | "debuffs"
-    | "dogs"
-    | "encounters"
-    | "shopGear"
-    | "tuning"
-    | "walkerPaces"
-    | "walkerStyles"
-    | "walkers"
-    | "world"
+    "debuffs" | "dogs" | "encounters" | "shopGear" | "tuning" | "walkerPerks" | "walkers" | "world"
   >,
   dogSlots: number,
   loadout: Loadout,
@@ -185,21 +161,22 @@ export function newRun(
   const { walker } = loadout;
   const empty: RunState = {
     bumpsByZone: [],
-    debuffZones: {},
+    cardsThisZone: 0,
     debuffs: [],
+    debuffsGot: {},
     firstZone: 0,
     gear: loadout.gear,
+    heartsForgiven: 0,
     immunities: [],
     modifiers: [],
     money: cents(0),
-    needSeconds: {},
     pack: packWith([]),
     phase: { kind: "walking" },
     route: [firstZoneId(data)],
-    skipsLeft: 0,
+    skipPass: false,
+    skipUsed: false,
     squirrelChases: 0,
     startMoney: cents(0),
-    treats: 0,
     upgradesPicked: [],
     walker,
     zoneDistance: pixels(0),
@@ -217,6 +194,7 @@ export function newRun(
           data.shopGear[loadout.gear].effects,
           walked,
         );
-  const money = cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", 0));
+  const purse = read(data.tuning, "money", "startPurse");
+  const money = cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", purse));
   return { ...geared, money, pack: packWith(geared.modifiers), startMoney: money };
 }

@@ -13,7 +13,7 @@ export const MENU_TEXT = {
     bank: "Bank",
     earnings: {
       cardCosts: "Card costs",
-      fees: "Fees",
+      fees: "Pay",
       luckyFinds: "Lucky finds",
       start: "Starting money",
       tips: "Tips",
@@ -26,7 +26,7 @@ export const MENU_TEXT = {
       wentHome: "Headed home",
     },
     total: "Total",
-    zonesWalked: "Zones walked",
+    zonesWalked: "Neighborhoods walked",
   },
   help: {
     gotIt: "Got it",
@@ -37,7 +37,7 @@ export const MENU_TEXT = {
   pause: {
     headHome: "Head home",
     help: "Help",
-    note: "Keeps tips and earlier zones' fees",
+    note: "Keeps your cash and earlier neighborhoods' pay",
     resume: "Resume",
     settings: "Settings",
     title: "Paused",
@@ -62,7 +62,7 @@ export const MENU_TEXT = {
       dog: "Dog",
       fired: "Fired",
       walks: "Walks",
-      zones: "Zones",
+      zones: "Neighborhoods",
     },
     earnedCount: "{earned}/{total} earned",
     outcomes: {
@@ -72,7 +72,7 @@ export const MENU_TEXT = {
     },
     overall: {
       bestRun: "Best walk",
-      bestZone: "Best zone completed",
+      bestZone: "Best neighborhood completed",
       lifetime: "Lifetime earnings",
       runsPlayed: "Walks played",
       timesFired: "Times fired",

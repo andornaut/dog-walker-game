@@ -3,22 +3,21 @@ import * as v from "valibot";
 import type { LaneDirection } from "../layout/lanes";
 import { parseRunSetup, type RunSetup, type RunSetupLimits, runSetupToQuery } from "./runSetup";
 
-// Version 2 added treats and version 3 heading home; an older log, which has neither, still
-// decodes.
-export const INPUT_LOG_VERSION = 3;
+// Version 2 added treats, version 3 heading home, and version 4 dropped treats, which are no
+// longer given; an older log still decodes, its treats left out.
+export const INPUT_LOG_VERSION = 4;
 
 // A card option's index in its source's data, or the Skip option, as chooseOption takes it.
 export type CardChoice = number | "skip";
 
 // timeMs is run time: the simulated milliseconds since the run started, not counting time
 // paused, taken at the step that applied the input. Replaying an event at the same step then
-// reproduces the run. A treat names the dog slot it was given to. Heading home, from the pause
-// menu, ends the run between steps; its timeMs is the run time of the step it came before.
+// reproduces the run. Heading home, from the pause menu, ends the run between steps; its timeMs
+// is the run time of the step it came before.
 export type InputEvent =
   | { readonly choice: CardChoice; readonly kind: "card"; readonly timeMs: number }
   | { readonly direction: LaneDirection; readonly kind: "lane"; readonly timeMs: number }
-  | { readonly kind: "home"; readonly timeMs: number }
-  | { readonly kind: "treat"; readonly slot: number; readonly timeMs: number };
+  | { readonly kind: "home"; readonly timeMs: number };
 
 export interface InputLog<DogId extends string = string, GearId extends string = string> {
   readonly events: readonly InputEvent[];
@@ -48,8 +47,8 @@ export function* replayInputs(log: InputLog): Generator<InputEvent, void, undefi
   yield* [...log.events].sort((a, b) => a.timeMs - b.timeMs);
 }
 
-// The inputs a simulation step applies before it walks: lane moves, treats and heading home.
-export type StepInput = Extract<InputEvent, { readonly kind: "home" | "lane" | "treat" }>;
+// The inputs a simulation step applies before it walks: lane moves and heading home.
+export type StepInput = Extract<InputEvent, { readonly kind: "home" | "lane" }>;
 
 // The replayed step inputs due by timeMs, from events[next] on, and the index after them.
 // They stop at a card choice, which waits for its card to open.
@@ -81,8 +80,9 @@ export function takeCardChoice(
     : { choice: undefined, next };
 }
 
-// Each event is a tuple, [timeMs, "l", direction], [timeMs, "c", choice], [timeMs, "t", slot]
-// or [timeMs, "h"], and the setup is its URL query, which keeps a long replay small.
+// Each event is a tuple, [timeMs, "l", direction], [timeMs, "c", choice] or [timeMs, "h"], and
+// the setup is its URL query, which keeps a long replay small. Versions 2 and 3 also held
+// [timeMs, "t", slot] for a treat given.
 const timeMs = v.pipe(v.number(), v.finite(), v.minValue(0));
 const index = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
 const laneTuple = v.tuple([timeMs, v.literal("l"), v.picklist([-1, 1])]);
@@ -103,6 +103,11 @@ const encodedSchema = v.variant("version", [
   v.object({
     events: v.array(v.union([laneTuple, cardTuple, treatTuple, homeTuple])),
     setup: v.string(),
+    version: v.literal(3),
+  }),
+  v.object({
+    events: v.array(v.union([laneTuple, cardTuple, homeTuple])),
+    setup: v.string(),
     version: v.literal(INPUT_LOG_VERSION),
   }),
 ]);
@@ -118,23 +123,22 @@ function encodeEvent(event: InputEvent): EncodedEvent {
       return [event.timeMs, "c", event.choice];
     case "home":
       return [event.timeMs, "h"];
-    case "lane":
-      return [event.timeMs, "l", event.direction];
     default:
-      return [event.timeMs, "t", event.slot];
+      return [event.timeMs, "l", event.direction];
   }
 }
 
-function decodeEvent(event: EncodedEvent): InputEvent {
+// An old log's treat decodes to nothing.
+function decodeEvent(event: EncodedEvent): InputEvent[] {
   switch (event[1]) {
     case "c":
-      return { choice: event[2], kind: "card", timeMs: event[0] };
+      return [{ choice: event[2], kind: "card", timeMs: event[0] }];
     case "h":
-      return { kind: "home", timeMs: event[0] };
+      return [{ kind: "home", timeMs: event[0] }];
     case "l":
-      return { direction: event[2], kind: "lane", timeMs: event[0] };
+      return [{ direction: event[2], kind: "lane", timeMs: event[0] }];
     default:
-      return { kind: "treat", slot: event[2], timeMs: event[0] };
+      return [];
   }
 }
 
@@ -179,5 +183,5 @@ export function decodeInputLog<DogId extends string, GearId extends string>(
   if (errors.length > 0) {
     return { errors, ok: false };
   }
-  return { log: { events: parsed.output.events.map(decodeEvent), setup }, ok: true };
+  return { log: { events: parsed.output.events.flatMap(decodeEvent), setup }, ok: true };
 }

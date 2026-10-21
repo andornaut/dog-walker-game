@@ -2,9 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { gameData } from "../data";
 import { fittingTextStyle, TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
-import { read } from "../rules/units";
 import {
   buttonIcon,
   DOLLAR_GAP,
@@ -26,7 +24,6 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
-  TREAT_WELL,
   walkCovered,
   walkPaused,
   WELL_INSET,
@@ -37,7 +34,6 @@ const WALKING: RunPause = {
   hitStop: false,
   menu: "closed",
   page: "shown",
-  stripBubble: false,
 };
 // A card and the zone celebration hold the walk alike.
 const CARD: RunPause = { ...WALKING, card: true };
@@ -45,7 +41,7 @@ const HIT_STOP: RunPause = { ...WALKING, hitStop: true };
 
 describe("the top bar in each pause state", () => {
   interface Expected {
-    // The pause button's icon, and whether lane moves and treats act.
+    // The pause button's icon, and whether lane moves act.
     icon: "icon-pause" | "icon-play";
     gameplay: boolean;
     // Whether a card or a menu takes the walk's presses, and whether the walk drops them.
@@ -82,11 +78,6 @@ describe("the top bar in each pause state", () => {
     ["walking", WALKING, { ...walking, gameplay: true }],
     ["under a card", CARD, card],
     ["through the hit stop", HIT_STOP, walking],
-    [
-      "under the strip's bubble",
-      { ...WALKING, stripBubble: true },
-      { ...walking, held: true, paused: true, player: true },
-    ],
     ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
     ["with the window out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
     ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
@@ -242,19 +233,4 @@ describe("the money well", () => {
       MONEY_WELL.top + MONEY_WELL.capRows * 2,
     );
   });
-});
-
-describe("the treat well", () => {
-  const max = read(gameData.tuning, "counts", "treatCarryMax");
-
-  it.each(Array.from({ length: max + 1 }, (_, count) => `${count}/${max}`))(
-    "fits %s under the icon, inside the well",
-    (count) => {
-      const ink = titleInk(TREAT_WELL.countStyle, count);
-      const well = TOP_BAR.treats;
-      const bottom = TREAT_WELL.countTop + MONEY_WELL.capRows * TREAT_WELL.countStyle.scale;
-      expect(ink.right - ink.left).toBeLessThanOrEqual(well.width - 2 * WELL_INSET);
-      expect(bottom).toBeLessThanOrEqual(well.y + well.height - WELL_INSET);
-    },
-  );
 });

@@ -1,16 +1,19 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { ENCOUNTERS } from "../data/encounters";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { NEED_SPOTS } from "../data/needs";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import type { DogId } from "../data/types";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
-import { touchesPack } from "./collision";
-import { itemHeight, type WalkItemKind } from "./walk";
+import { testState } from "../testing/runState";
+import { dogsTouching, itemBox } from "./collision";
+import { stillInLane } from "./laneMotion";
+import { dogBoxes, itemHeight, type WalkItemKind } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 
-const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES, needSpots: NEED_SPOTS };
+const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const ROAD_VIEW_BOTTOM = LAYOUT.roadView.y + LAYOUT.roadView.height;
@@ -20,7 +23,6 @@ const SCROLL_STEP = 0.25;
 const KINDS: readonly WalkItemKind[] = [
   ...(Object.keys(ENCOUNTERS) as WalkItemKind[]),
   ...(Object.keys(MINOR_OBSTACLES) as WalkItemKind[]),
-  ...(Object.keys(NEED_SPOTS) as WalkItemKind[]),
   "tip",
   "treat",
 ];
@@ -31,18 +33,21 @@ const CASES = [...new Set(KINDS)].flatMap((kind) =>
 
 describe("screenRoadGeometry", () => {
   it.each(CASES)(
-    "hits %s only while it is drawn standing in view, not below a pack of %i",
+    "hits %s only while its far edge is drawn in view, not below a pack of %i",
     (kind, dogs) => {
       const geometry = walkGeometry(LANE_COUNT, dogs, PROJECTION, LAYOUT.road);
       const height = itemHeight(DATA, geometry, kind);
-      const pack = { ...geometry.packBand, lanes: [0] };
+      const slots = Object.fromEntries(
+        (Object.keys(gameData.dogs) as DogId[]).slice(0, dogs).map((dog) => [dog, 3]),
+      );
+      const boxes = dogBoxes(geometry, stillInLane(0), testState(slots));
       const hitRows: number[] = [];
       // From where the item spawns until it has scrolled off the road and is dropped.
       for (let y = geometry.roadTop - height; y < geometry.roadBottom; y += SCROLL_STEP) {
         const item = { height, id: 0, kind, lane: 0, laneSpan: 1, y };
-        if (touchesPack(pack, item)) {
-          // Drawn as the item views draw it: standing on its near edge, through the projection.
-          hitRows.push(screenYAt(PROJECTION, PROJECTION.footY - (y + height)));
+        if (dogsTouching(boxes, itemBox(geometry.cell, item)).length > 0) {
+          // Its far edge as the item views draw it, through the projection.
+          hitRows.push(screenYAt(PROJECTION, PROJECTION.footY - y));
         }
       }
       expect(hitRows.length).toBeGreaterThan(0);

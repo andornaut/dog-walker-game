@@ -1,6 +1,6 @@
-import type { DebuffId, DogId } from "../data/types";
+import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import type { HeartChange, MoneyChange } from "../rules/causes";
+import type { MoneyChange } from "../rules/causes";
 import {
   type CardData,
   cardFor,
@@ -9,15 +9,12 @@ import {
   type ChoiceOutcome,
   chooseOption,
   offerFork,
-  offerUpgrades,
   openCard,
 } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
-import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
 import type { CardSource, RunState } from "../state/runState";
 import { holdForFiring } from "./firingStop";
-import { isNeedSpot, type NeedData, type NeedStep, stepNeeds } from "./needs";
 import { NO_PULLS, type PullData, type Pulls, type PullStep, stepPulls } from "./pulls";
 import { type Random, randomStream } from "./random";
 import { startStatuses, type StatusData, type StatusMark } from "./statuses";
@@ -35,29 +32,26 @@ import {
 } from "./walk";
 
 // One walk's step order, shared by the run scene and the simulator: the inputs, the pulls, the
-// walk, the needs, the firing hold, then the queued cards, the zone's end and the next zone's
-// plan. The walk stands still while a card waits for its choice.
+// walk, the firing hold, then the queued cards, the zone's end and the next zone's plan. The
+// walk stands still while a card waits for its choice.
 
-export type SessionData = CardData & NeedData & PullData & StatusData & WalkData;
+export type SessionData = CardData & PullData & StatusData & WalkData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
 // the walk is driven. Each zone is planned from a stream of its own, spawns-<zone index>.
 export interface RunStreams {
   readonly cards: Random;
   readonly forks: Random;
-  readonly needs: Random;
   readonly seed: number;
 }
 
 // The road's geometry for the run's pack, which changes when an owner fires you.
 export type SessionGeometry = (run: RunState) => RoadGeometry;
 
-// What a step applies before it walks, in order: a lane move, a treat for the dog in a slot
-// (an empty slot takes none), or heading home, which ends the walk before the step.
+// What a step applies before it walks, in order: a lane move, or heading home, which ends the
+// walk before the step.
 export type SessionInput =
-  | { readonly direction: LaneDirection; readonly kind: "lane" }
-  | { readonly kind: "home" }
-  | { readonly kind: "treat"; readonly slot: number };
+  { readonly direction: LaneDirection; readonly kind: "lane" } | { readonly kind: "home" };
 
 export interface Session {
   // The card waiting for a choice.
@@ -78,9 +72,8 @@ export interface Session {
 }
 
 // What a step or a choice did, in order. input and chosen are stamped with the run time they
-// applied at, which is where a replay applies them. needs follows walked, met on the walked
-// run, with the road walked this run, zones before included. zoneEnded has the run before and
-// after the zone's fees.
+// applied at, which is where a replay applies them. walked has the road walked this run, zones
+// before included. zoneEnded has the run before and after the zone's fees.
 export type SessionEvent =
   | { readonly kind: "cardOpened"; readonly view: CardView }
   | {
@@ -91,15 +84,8 @@ export type SessionEvent =
       readonly view: CardView;
     }
   | { readonly input: SessionInput; readonly kind: "input"; readonly timeMs: number }
-  | { readonly distance: number; readonly kind: "needs"; readonly step: NeedStep }
   | { readonly kind: "pulled"; readonly step: PullStep }
-  | {
-      readonly change: HeartChange;
-      readonly cured: readonly DebuffId[];
-      readonly dog: DogId;
-      readonly kind: "treat";
-    }
-  | { readonly kind: "walked"; readonly step: WalkStep }
+  | { readonly distance: number; readonly kind: "walked"; readonly step: WalkStep }
   | {
       readonly after: RunState;
       readonly before: RunState;
@@ -117,7 +103,6 @@ export function runStreams(seed: number): RunStreams {
   return {
     cards: randomStream(seed, "cards"),
     forks: randomStream(seed, "forks"),
-    needs: randomStream(seed, "needs"),
     seed,
   };
 }
@@ -142,10 +127,9 @@ export function startSession(
   };
 }
 
-// One step of seconds: the inputs, the pulls, the walk, then the needs on the walked run, then
-// the step's cards are queued and an owner who fired you holds the walk. Then the next card
-// opens, or the zone ends, or the next zone is planned. Does nothing while a card is open or
-// unless walking.
+// One step of seconds: the inputs, the pulls, the walk, then the step's cards are queued and
+// an owner who fired you holds the walk. Then the next card opens, or the zone ends, or the
+// next zone is planned. Does nothing while a card is open or unless walking.
 export function stepSession(
   data: SessionData,
   streams: RunStreams,
@@ -164,38 +148,20 @@ export function stepSession(
     if (input.kind === "home") {
       return { events, session: { ...session, walk: { ...walk, run: headHome(walk.run) } } };
     }
-    walk =
-      input.kind === "lane"
-        ? steerWalk(data, geometry(walk.run).laneCount, input.direction, walk)
-        : treated(data, events, input.slot, walk);
+    walk = steerWalk(data, geometry(walk.run).laneCount, input.direction, walk);
   }
   const road = geometry(walk.run);
   const pulled = stepPulls(data, road, seconds, session.pulls, walk);
   events.push({ kind: "pulled", step: pulled });
-  const moving = pulled.walk.road.hitStop === null;
   const step = stepWalk(data, road, streams.cards, seconds, pulled.walk);
-  const spots =
-    step.spots.length === 0
-      ? []
-      : step.spots.flatMap(({ kind }) => (isNeedSpot(data, kind) ? [kind] : []));
-  const needs = stepNeeds(data, streams.needs, seconds, moving, spots, step.walk.run);
-  walk = { ...step.walk, run: needs.run };
+  walk = step.walk;
   const distance = session.distanceBeforeZone + walk.run.zoneDistance;
-  events.push({ kind: "walked", step }, { distance, kind: "needs", step: needs });
-  const fired =
-    step.instants.length === 0 && needs.moments.length === 0
-      ? []
-      : [
-          ...step.instants.flatMap(({ outcome }) => outcome.fired),
-          ...needs.moments.flatMap(({ outcome }) => outcome?.fired ?? []),
-        ];
+  events.push({ distance, kind: "walked", step });
+  const fired = [...step.fired, ...step.instants.flatMap(({ outcome }) => outcome.fired)];
   const walked: Session = {
     ...session,
     pulls: pulled.pulls,
-    queue:
-      step.cards.length === 0 && needs.cards.length === 0
-        ? session.queue
-        : [...session.queue, ...step.cards, ...needs.cards],
+    queue: step.cards.length === 0 ? session.queue : [...session.queue, ...step.cards],
     timeMs: session.timeMs + seconds * 1000,
     walk,
     zoneEndPending: session.zoneEndPending || step.zoneEnded,
@@ -270,18 +236,6 @@ function planned(
   return planZone(data, geometry(walk.run), spawns, walk);
 }
 
-function treated(data: SessionData, events: SessionEvent[], slot: number, walk: Walk): Walk {
-  const dog = walk.run.pack[slot]?.dog;
-  if (dog === undefined) {
-    return walk;
-  }
-  const { change, cured, state: run } = giveTreat(data, dog, walk.run);
-  if (change !== null) {
-    events.push({ change, cured, dog, kind: "treat" });
-  }
-  return { ...walk, run };
-}
-
 // An owner who just fired you holds the walk while their moment plays, as a hit stop does:
 // the queued cards and the zone's end wait for it.
 function heldForFiring(data: SessionData, fired: readonly DogId[], session: Session): Session {
@@ -333,8 +287,8 @@ function continueWalk(
   return { events, session };
 }
 
-// Pays the zone's fees, then, unless the walk is over, queues the upgrade offer and the fork
-// before the next zone is planned.
+// Pays the zone's fees, then, unless the walk is over, queues the fork, each of whose paths
+// carries an upgrade, before the next zone is planned.
 function endZone(
   data: SessionData,
   streams: RunStreams,
@@ -349,14 +303,11 @@ function endZone(
   if (run.phase.kind === "ended") {
     return { events, session: ended };
   }
-  const offers: CardSource[] = [
-    { kind: "upgradeOffer", offered: offerUpgrades(data, streams.cards, run) },
-    offerFork(data, streams.forks, run),
-  ];
+  const fork: CardSource = offerFork(data, { forks: streams.forks, upgrades: streams.cards }, run);
   return continueWalk(data, streams, geometry, events, {
     ...ended,
-    distanceBeforeZone: session.distanceBeforeZone + zoneLength(data, before),
+    distanceBeforeZone: session.distanceBeforeZone + zoneLength(data),
     needsZonePlan: true,
-    queue: [...session.queue, ...offers],
+    queue: [...session.queue, fork],
   });
 }

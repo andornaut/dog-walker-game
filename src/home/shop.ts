@@ -90,7 +90,7 @@ export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
     return {
       blocked: null,
       id: `dog:${dog}`,
-      line: homeLine(data.homeText, "zoneFee", { fee: dogFeeText(data, dog) }),
+      line: homeLine(data.homeText, "zoneFee", { fee: dogFeeText(data) }),
       name: data.dogs[dog].name,
       price: purchasePrice(data, owned, purchase),
       purchase,

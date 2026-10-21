@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import type { GestureAction } from "./gestures";
 import {
   cardNumberForKey,
-  dogSlotForKey,
   isConfirmKey,
   isMuteKey,
   isPauseKey,
@@ -51,11 +50,6 @@ describe("key bindings", () => {
       read: (key) => cardNumberForKey(3, key),
     },
     {
-      expected: { "0": undefined, "1": 0, "3": 2, "4": undefined, a: undefined },
-      name: "dogSlotForKey maps the digits 1..3 to slots 0..2",
-      read: (key) => dogSlotForKey(3, key),
-    },
-    {
       expected: { M: true, m: true, n: false },
       name: "isMuteKey is M in either case",
       read: isMuteKey,
@@ -86,17 +80,16 @@ describe("key bindings", () => {
 });
 
 describe("walkKeyAction", () => {
-  // A key going down during a walk with 3 dog slots, first pressed or auto-repeated.
+  // A key going down during a walk, first pressed or auto-repeated.
   it.each<{ action: GestureAction | undefined; key: string; repeat: boolean }>([
     { action: { direction: -1, kind: "move" }, key: "ArrowLeft", repeat: false },
     { action: { direction: 1, kind: "move" }, key: "d", repeat: false },
-    { action: { kind: "treat", slot: 1 }, key: "2", repeat: false },
-    { action: undefined, key: "4", repeat: false },
+    { action: undefined, key: "2", repeat: false },
     { action: undefined, key: "w", repeat: false },
     { action: undefined, key: "ArrowLeft", repeat: true },
     { action: undefined, key: "d", repeat: true },
     { action: undefined, key: "2", repeat: true },
   ])("acts on $key, repeat $repeat", ({ action, key, repeat }) => {
-    expect(walkKeyAction(3, key, repeat)).toEqual(action);
+    expect(walkKeyAction(key, repeat)).toEqual(action);
   });
 });

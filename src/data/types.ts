@@ -2,62 +2,29 @@ import type { ACHIEVEMENTS } from "./achievements";
 import type { DEBUFFS } from "./debuffs";
 import type { DOGS } from "./dogs";
 import type { ENCOUNTERS } from "./encounters";
-import type { FORCED_STOPS } from "./forcedStops";
 import type { HINTS } from "./hints";
 import type { MINOR_OBSTACLES } from "./minorObstacles";
-import type { NEED_CARDS, NEED_SPOTS } from "./needs";
 import type { SHOP_GEAR } from "./shop";
 import type { TUNING } from "./tuning";
 import type { UPGRADES } from "./upgrades";
-import type { WALKER_PACES, WALKER_STYLES, WALKERS } from "./walkers";
+import type { WALKER_PERKS, WALKERS } from "./walkers";
 import type { WORLD } from "./world";
 
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
-  | "biscuitNeighbour"
-  | "cafe"
-  | "goose"
-  | "lemonade"
-  | "lostWallet"
-  | "otherDog"
-  | "petunias"
-  | "photoOp"
-  | "picnic"
-  | "puddle"
-  | "skunk"
-  | "squirrel"
-  | "thief"
-  | "trash";
-export type Energy = "calm" | "hyper" | "steady";
-export type NeedId = "friendly" | "nosy" | "playful" | "regular" | "thirsty";
-export type QuirkId =
-  | "acrobatic"
-  | "cameraReady"
-  | "crowdPleaser"
-  | "nervous"
-  | "pampered"
-  | "ratter"
-  | "scentHound"
-  | "showDog"
-  | "sledDog";
+  "biscuitNeighbour" | "lostWallet" | "otherDog" | "puddle" | "skunk" | "squirrel" | "thief";
 export type Size = "big" | "medium" | "small";
-export type Temperament = "dramatic" | "fussy" | "laidBack";
-export type TraitId = "chaser" | "fancy" | "foodDriven";
 
 // Ids come from the data, so adding an entry to a value file is a data-only change.
 export type AchievementId = (typeof ACHIEVEMENTS)[number]["id"];
 export type DebuffId = keyof typeof DEBUFFS;
 export type DogId = keyof typeof DOGS;
-export type ForcedStopId = keyof typeof FORCED_STOPS;
 export type GearId = keyof typeof SHOP_GEAR;
 export type HintId = keyof typeof HINTS;
 export type MinorObstacleId = keyof typeof MINOR_OBSTACLES;
-export type NeedCardId = keyof typeof NEED_CARDS;
-export type NeedSpotId = keyof typeof NEED_SPOTS;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
-export type WalkerPace = keyof typeof WALKER_PACES;
-export type WalkerStyle = keyof typeof WALKER_STYLES;
+export type WalkerPerkId = keyof typeof WALKER_PERKS;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 
 type EncounterOfKind<Kind extends Encounter["kind"]> = {
@@ -95,61 +62,41 @@ export interface Tuning {
     readonly maxSlowVehicles: number;
     readonly minorObstaclesFirstZone: number;
     readonly minorObstaclesGainPerZone: number;
-    readonly needSpotsPerZone: number;
     readonly obstaclesFirstZone: number;
     readonly obstaclesGainPerZone: number;
     readonly packSizeMax: number;
     readonly packSizeMin: number;
-    readonly scentHoundLanes: number;
     readonly tipsFirstZone: number;
     readonly tipsGainPerZone: number;
-    readonly treatCarryMax: number;
     readonly treatsPerZone: number;
     readonly upgradeChoiceCount: number;
   };
   readonly hearts: OpenGroup & {
     readonly maxBySize: Table<Size>;
-    readonly pamperedTreatHearts: number;
-    readonly showDogMessyHearts: number;
-    readonly startByTemperament: Table<Temperament>;
     readonly treat: number;
   };
   readonly money: OpenGroup & {
-    readonly crowdPleaserTip: number;
-    readonly feeByTemperament: Table<Temperament>;
-    readonly prices: Table<string> & { readonly lockedDog: number };
-    readonly minorBump: number;
-    readonly showDogFee: number;
+    readonly payPerDog: number;
+    readonly prices: Table<string>;
+    readonly startPurse: number;
     readonly tip: number;
   };
   readonly multipliers: OpenGroup & {
-    readonly crowdPleaserStrangerWeight: number;
-    readonly heartsByTemperament: Table<Temperament>;
-    readonly nervousAloneUrgency: number;
     readonly scrollSpeedGainPerZone: number;
-    readonly sledDogLaneSpeed: number;
-    readonly tipSpawnsByPackSize: Table<number>;
   };
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
-  readonly probability: OpenGroup & {
-    readonly needPayoffCard: number;
-  };
+  readonly probability: OpenGroup & { readonly smallDodgeChance: number };
   readonly seconds: OpenGroup & {
     readonly ballBounceSeconds: number;
     readonly firingHoldSeconds: number;
     readonly hitStopSeconds: number;
-    readonly inputLockBySize: Table<Size>;
     readonly lookAheadSeconds: number;
     readonly minorHitStopSeconds: number;
-    readonly minorStumble: number;
     readonly moverStepSeconds: number;
     readonly moverWarningSeconds: number;
-    readonly needGoneWrong: number;
-    readonly needUrgentByEnergy: Table<Energy>;
     readonly pathReactionMargin: number;
     readonly pullReactionWindow: number;
     readonly pullTell: number;
-    readonly statusVisualSeconds: number;
     readonly zoneAtBaseSpeed: number;
   };
 }
@@ -161,7 +108,6 @@ export type Unlock =
 export interface Owner {
   readonly name: string;
   readonly role: string;
-  readonly temperament: Temperament;
 }
 
 export type Dog = Unlock & {
@@ -169,103 +115,68 @@ export type Dog = Unlock & {
   // portrait-dog-<art>, face-owner-<art>, owner-<art> and the <art> tag of ui-doghouse.
   readonly art: string;
   readonly breed: string;
-  readonly energy: Energy;
   readonly look: string;
   readonly name: string;
-  readonly need: NeedId;
   readonly owner: Owner;
-  readonly quirk: QuirkId;
   readonly size: Size;
-  readonly trait: TraitId;
 };
 
-// A quirk in words, for the dog's detail card and the card text that names it.
-export interface Quirk {
-  readonly description: string;
-  readonly name: string;
-}
-
 // Which dogs an effect reaches, among the dogs still in the pack. "affected" is the dogs
-// the encounter affected; "randomOne" is one dog drawn at random; "unhappiest" is the dog
-// whose owner has the fewest hearts, the first in pack order on a tie.
+// the encounter affected; "randomOne" is one dog drawn at random.
 export type Target =
-  | { readonly kind: "affected" }
-  | { readonly kind: "all" }
-  | { readonly kind: "need"; readonly need: NeedId }
-  | { readonly kind: "randomOne" }
-  | { readonly kind: "temperament"; readonly temperament: Temperament }
-  | { readonly kind: "trait"; readonly trait: TraitId }
-  | { readonly kind: "unhappiest" };
-
-export type Condition =
-  | { readonly kind: "packHasSize"; readonly size: Size }
-  | { readonly kind: "packHasTrait"; readonly trait: TraitId };
+  { readonly kind: "affected" } | { readonly kind: "all" } | { readonly kind: "randomOne" };
 
 // "zone": the rest of the current zone; "nextZone": the whole of the next zone.
 export type Duration = "nextZone" | "run" | "zone";
 
 // Stats a modifier changes. An "add" names a key in the stat's own unit group.
-export type CountStat = "treatReach";
-export type HeartsStat = "maxHearts" | "startHearts";
-export type MoneyStat = "costPerDog" | "startMoney" | "tipValue";
-// The seconds lane input stays locked after each lane change, from 0.
-export type SecondsStat = "laneChangeLock";
+// How many lanes beside the pack's tips and treats are grabbed from, and how many encounter
+// cards each zone cost no money.
+export type CountStat = "freeCards" | "tipReach" | "treatReach";
+// forgivenHearts: how many of the first hearts lost in each zone are forgiven.
+export type HeartsStat = "forgivenHearts" | "maxHearts";
+export type MoneyStat = "startMoney" | "tipValue";
 export type Stat =
   | CountStat
   | HeartsStat
   | MoneyStat
-  | SecondsStat
-  | "chaserSquirrelPulls"
-  | "fees"
-  | "inputLock"
+  // How many hearts a minor bump costs.
+  | "bumpHearts"
+  // How long a debuff lasts.
+  | "debuffSeconds"
+  // The walker's agility: how many times faster than the base the pack changes lanes.
+  | "agility"
   // How long one lane change takes.
   | "laneMove"
-  | "needSpotSpawns"
-  // How fast every dog's need fills toward urgent.
-  | "needUrgency"
   | "obstacleSpawns"
-  // The road's speed, which the spawns and movers are planned for.
-  | "scrollSpeed"
+  // How many pulls a squirrel draws.
+  | "squirrelPulls"
   | "tipSpawns"
-  | "zoneLength";
+  | "treatSpawns";
 
 // duration is absent for gear, which lasts every run it is taken on.
 export type Modifier = { readonly duration?: Duration } & (
   | { readonly by: CountKey; readonly operation: "add"; readonly stat: CountStat }
   | { readonly by: HeartsKey; readonly operation: "add"; readonly stat: HeartsStat }
   | { readonly by: MoneyKey; readonly operation: "add"; readonly stat: MoneyStat }
-  | { readonly by: SecondsKey; readonly operation: "add"; readonly stat: SecondsStat }
+  | { readonly by: MultiplierKey; readonly operation: "add"; readonly stat: "agility" }
   | { readonly by: MultiplierKey; readonly operation: "multiply"; readonly stat: Stat }
 );
 
 export type HeartsDelta = -3 | -2 | -1 | 1 | 2 | 3;
 
-// Without perDog the amount applies once; with it, once per dog the target reaches.
-// quirkMultipliers multiplies the whole amount when a dog with that quirk is among the
-// affected dogs.
+// Applies once, whatever the pack size.
 export interface MoneyEffect {
   readonly amount: MoneyKey;
   readonly change: "gain" | "lose";
   readonly kind: "money";
-  readonly perDog?: Target;
-  readonly quirkMultipliers?: Readonly<Partial<Record<QuirkId, MultiplierKey>>>;
 }
 
-// Per owner, before the temperament multiplier; traitAmounts replaces amount for those traits,
-// and quirkAmounts replaces either for those quirks, where 0 changes nothing.
+// Per owner.
 export interface HeartsEffect {
   readonly amount: HeartsDelta;
   readonly kind: "hearts";
-  readonly quirkAmounts?: Readonly<Partial<Record<QuirkId, HeartsDelta | 0>>>;
   readonly target: Target;
-  readonly traitAmounts?: Readonly<Partial<Record<TraitId, HeartsDelta>>>;
-}
-
-// Treats carried, up to counts.treatCarryMax.
-export interface TreatsEffect {
-  readonly amount: CountKey;
-  readonly kind: "treats";
-  readonly perDog?: Target;
 }
 
 export interface DebuffEffect {
@@ -282,26 +193,13 @@ export interface ImmuneEffect {
 
 export type ModifierEffect = Modifier & { readonly kind: "modifier" };
 
-// Meets the need of every dog in the pack that has it, so its urgency starts again from 0.
-export interface FulfilNeedEffect {
-  readonly kind: "fulfilNeed";
-  readonly need: NeedId;
-}
-
+// A free Skip on every obstacle card until it is taken, once per walk.
 export interface SkipOptionEffect {
   readonly kind: "skipOption";
-  readonly usesPerRun: CountKey;
 }
 
 export type Effect =
-  | DebuffEffect
-  | FulfilNeedEffect
-  | HeartsEffect
-  | ImmuneEffect
-  | ModifierEffect
-  | MoneyEffect
-  | SkipOptionEffect
-  | TreatsEffect;
+  DebuffEffect | HeartsEffect | ImmuneEffect | ModifierEffect | MoneyEffect | SkipOptionEffect;
 
 export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
@@ -309,7 +207,7 @@ export interface CardOption {
   // What its changes name as their cause, such as "grumpy neighbour"; the option's name when
   // absent.
   readonly cause?: string;
-  // Picking it lets the chasers chase, which counts toward squirrelsChased.
+  // Picking it lets the pack chase, which counts toward squirrelsChased.
   readonly chase?: true;
   readonly effects: readonly Effect[];
   readonly name: string;
@@ -320,13 +218,6 @@ export type CardOptions =
   readonly [CardOption, CardOption] | readonly [CardOption, CardOption, CardOption];
 
 export type NonEmptyEffects = readonly [Effect, ...Effect[]];
-
-// Which dogs an encounter affects. "caught" is an area effect: it catches the dogs of the sizes
-// in catches, and every other dog hops over it.
-export type AffectRule =
-  | { readonly kind: "all" }
-  | { readonly catches: readonly Size[]; readonly kind: "caught" }
-  | { readonly kind: "trait"; readonly trait: TraitId };
 
 // The encounter opens a card of options.
 export interface CardResolution {
@@ -385,20 +276,14 @@ export interface Skin {
 // each key is a zone's id.
 export type Skins = Readonly<Partial<Record<string, Skin>>>;
 
-// "obstacle": hit by accident, always a card, with hitLabel shown large as it hits; "lucky":
-// a good thing to bump into, a card or instant. A lucky card with a hitLabel shows it as the
-// pack meets it, before its card. Nothing happens when no dog is affected, when the pack is
-// immune, or when noCardWhen holds. A messy encounter's card costs a show dog's owner
-// hearts.showDogMessyHearts more wherever it costs them hearts. skins are its looks by zone.
-// An obstacle with a movement comes as a mover at the zone's moverShare.
+// "obstacle": hit by accident, always a card for the whole pack, with hitLabel shown large as
+// it hits; no card opens while the pack is immune. "lucky": a good thing to bump into, applied
+// on contact with no card. skins are its looks by zone. An obstacle with a movement comes as a
+// mover at the zone's moverShare.
 export type Encounter = {
-  readonly affects: AffectRule;
-  readonly messy?: true;
   readonly name: string;
-  readonly noCardWhen?: Condition;
   readonly skins?: Skins;
 } & (
-  | { readonly hitLabel?: string; readonly kind: "lucky"; readonly resolution: CardResolution }
   | { readonly kind: "lucky"; readonly resolution: InstantResolution }
   | {
       readonly hitLabel: string;
@@ -420,43 +305,6 @@ export interface MinorObstacle {
   readonly name: string;
   readonly shape: Shape;
   readonly skins?: Skins;
-}
-
-export interface ForcedStop {
-  readonly name: string;
-  readonly options: CardOptions;
-}
-
-// A need: name is its one player-facing word ("Regular"), on a dog's card and in card text.
-// Meeting it at a spot applies met to the dogs with the need, unless the payoff card opens
-// instead, at probability.needPayoffCard. Gone wrong, it opens its card or applies its
-// effects to the dog.
-export interface Need {
-  readonly goneWrong:
-    | { readonly card: NeedCardId; readonly kind: "card" }
-    | { readonly effects: NonEmptyEffects; readonly kind: "effects" };
-  readonly met: NonEmptyEffects;
-  readonly name: string;
-  readonly payoff: NeedCardId;
-}
-
-// A spot on the road that meets a need, steered into like a pickup. otherDog marks a spot that
-// is another dog: a nervous dog strains toward it, and it meets nothing for her. stranger marks
-// a spot that is a person, drawn multipliers.crowdPleaserStrangerWeight times as often while a
-// crowd pleaser walks.
-export interface NeedSpot {
-  readonly name: string;
-  readonly need: NeedId;
-  readonly otherDog?: true;
-  readonly stranger?: true;
-}
-
-// A card a need opens: a payoff for meeting it, or trouble when it goes wrong. A {dog} in
-// the name is the names of the dogs it affects.
-export interface NeedCard {
-  readonly kind: "payoff" | "trouble";
-  readonly name: string;
-  readonly options: CardOptions;
 }
 
 // How long an upgrade card's effects last: applied at once, through the next zone, or for
@@ -485,37 +333,37 @@ export type DogSlot = Unlock;
 
 // "start": walks from the first run; "finishZone": unlocked the first time any walk finishes
 // its zone-th zone, counting from 1.
+// A walker walks from the start, or unlocks the first time a walk finishes zone.
 export type WalkerUnlock =
-  { readonly unlock: "finishZone"; readonly zone: number } | { readonly unlock: "start" };
+  { readonly unlock: "finishZone"; readonly zone: ZoneId } | { readonly unlock: "start" };
 
-// A walker's pace or style. Its effects last every run the walker walks, as gear's do.
-export interface WalkerTrait {
+// A walker's perk: its name, its effect in one line, and its effects, which last every walk the
+// walker walks, as gear's do.
+export interface WalkerPerk {
+  readonly effect: string;
   readonly effects: NonEmptyEffects;
   readonly name: string;
 }
 
-// A walker the player can pick, walking with the effects of its pace and style. spriteKey and
-// portraitKey are keys into the art manifest.
+// A walker the player can pick, walking with its agility and the effects of its perk. agility
+// multiplies the pack's lane-change speed. spriteKey and portraitKey are keys into the art
+// manifest.
 export type Walker = WalkerUnlock & {
-  // Lines shown in the body of the walker's detail card.
-  readonly detail?: readonly string[];
+  readonly agility: number;
   readonly name: string;
-  readonly pace: WalkerPace;
-  readonly style: WalkerStyle;
+  readonly perk: WalkerPerkId;
   readonly portraitKey: string;
   readonly spriteKey: string;
 };
 
-// "zone": the rest of the current zone. seconds: that many seconds of walking, a time that
-// stops during a hit stop and under a card, and never past the zone's end.
-export type DebuffDuration = "zone" | { readonly seconds: SecondsKey };
-
-// curedByTreat: a treat given to any dog clears it.
+// A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
+// and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
+// after the debuff's name, its {seconds} filled with how long it would last.
 export interface Debuff {
-  readonly curedByTreat: boolean;
-  readonly duration: DebuffDuration;
   readonly modifiers: readonly Modifier[];
   readonly name: string;
+  readonly seconds: SecondsKey;
+  readonly stake: string;
 }
 
 // Paws out of 5 on a fork's path card.
@@ -524,10 +372,8 @@ export type Difficulty = 1 | 2 | 3 | 4 | 5;
 // How often each kind is drawn in a zone, relative to the others of its group. 0 keeps it out
 // of the zone; each group needs at least one kind above 0.
 export interface ZoneWeights {
-  readonly forcedStops: Readonly<Record<ForcedStopId, number>>;
   readonly luckyFinds: Readonly<Record<LuckyEncounterId, number>>;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, number>>;
-  readonly needSpots: Readonly<Record<NeedSpotId, number>>;
   readonly obstacles: Readonly<Record<ObstacleEncounterId, number>>;
 }
 
@@ -561,8 +407,9 @@ export interface Zone {
 }
 
 export interface World {
-  // The id of the zone every walk starts in.
+  // The id of the zone every walk starts in, and of the zone every walk ends in.
   readonly firstZone: string;
+  readonly lastZone: string;
   readonly name: string;
   // How many zones a walk visits, none twice.
   readonly walkLength: number;
@@ -578,9 +425,17 @@ export interface HelpPage {
   readonly title: string;
 }
 
+export interface AgilityWord {
+  readonly from: number;
+  readonly word: string;
+}
+
 // The home screen's text. A {name} in a line is filled by code, and each line may use only
 // the names src/home/homeText.ts lists for it.
 export interface HomeText {
+  // An agility's word, by band: the word of the last band whose from the agility reaches, in
+  // ascending order.
+  readonly agilityWords: readonly [AgilityWord, ...AgilityWord[]];
   // The walker's speech bubble, by what happened last. Picking a dog shows its owner's
   // parting quip instead.
   readonly bubble: {
@@ -600,15 +455,16 @@ export interface HomeText {
     readonly dogFee: string;
     readonly dogKind: string;
     readonly dogOwner: string;
-    readonly dogQuirk: string;
     readonly dogStatus: string;
-    readonly dogTemperament: string;
     readonly dogTotals: string;
     readonly gearEquipped: string;
     readonly gearOwned: string;
     readonly gearSubtitle: string;
     readonly priceBuy: string;
     readonly priceLocked: string;
+    // A walker's detail card's agility word and perk with its effect.
+    readonly walkerAgility: string;
+    readonly walkerPerk: string;
     readonly walkerStatus: string;
     readonly walkerSubtitle: string;
   };
@@ -627,7 +483,6 @@ export interface HomeText {
     readonly kind: string;
     readonly priceBuy: string;
     readonly priceShort: string;
-    readonly temper: string;
   };
   // The street sign on the gate art.
   readonly gateSign: string;
@@ -694,7 +549,7 @@ export interface HomeText {
   };
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
-  // What the bubble says for an owned walker picked or focused: its pace and style.
+  // What the bubble says for an owned walker picked or focused: its agility and perk.
   readonly walkerInfo: string;
   // What the walker's bubble says when a locked walker is tapped: the goal that unlocks it.
   readonly walkerLocked: string;
@@ -720,13 +575,10 @@ export interface RunText {
     readonly free: string;
     readonly need: string;
     readonly pickOne: string;
-    // A money loss a quirk cancels, in place of the amount, such as a ratter's chase.
-    readonly quirkNoLoss: string;
     readonly skip: string;
     // The Skip card's effect on its face, and in its body when held.
     readonly skipEffect: string;
     readonly skipHeld: string;
-    readonly stopSubtitle: string;
     // An upgrade card's plaque, by how long it lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeTitle: string;
@@ -734,24 +586,29 @@ export interface RunText {
     // that unlocks them.
     readonly walkerGreeting: string;
   };
+  // Over a small dog that dodged a hit.
+  readonly dodge: string;
   readonly fired: string;
   readonly firedBy: string;
+  // The end screen's line when every dog set out with got home after the last zone.
+  readonly fullPackHome: string;
   // keep is what going home keeps (the walk's money so far), lose the fees the current zone
   // would pay the dogs still walking, and zonesLeft the zones after this one, shown when any are.
+  // lose is the zone's pay given up, loseWithBonus that and the Full pack bonus, and
+  // loseBonus the bonus alone, at a fork.
   readonly homeQuestion: {
     readonly headHome: string;
-    readonly keep: string;
     readonly keepWalking: string;
     readonly lose: string;
+    readonly loseBonus: string;
+    readonly loseWithBonus: string;
     readonly title: string;
     readonly zonesLeft: string;
   };
-  // Shown over each dog that hops over an area effect.
-  readonly hopOver: string;
   readonly lowHearts: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about
-  // 28), their pace and style under their greeting, and the button.
+  // 28), their agility and perk under their greeting, and the button.
   readonly newWalker: {
     readonly button: string;
     readonly info: string;
@@ -880,27 +737,19 @@ export type Quips = Readonly<Record<QuipMoment, readonly [string, string]>>;
 // What a first-time hint waits for: an encounter, a debuff, or another event happening for
 // the first time.
 export type HintTrigger =
-  | { readonly debuff: DebuffId; readonly kind: "debuff" }
   | { readonly encounter: EncounterId; readonly kind: "encounter" }
   | {
       readonly kind:
-        | "accident"
-        | "areaEffect"
         | "card"
         | "drag"
         | "firedOwner"
-        | "forcedStop"
         | "fork"
         | "homeButton"
         | "luckyFind"
         | "minorBump"
-        | "needSpot"
-        | "needUrgent"
         | "pull"
-        | "strip"
         | "tip"
-        | "treat"
-        | "upgrade";
+        | "treat";
     };
 
 // A one-line hint shown the first time its trigger happens.
@@ -919,7 +768,7 @@ export type Threshold = number | "all";
 // one in the data), finished walks with no owner firing you, times fired, distinct dogs that
 // finished a walk without firing you (all: every dog), and squirrel chases let happen.
 export type AchievementCondition =
-  | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffZones" }
+  | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffsGot" }
   | { readonly count: number; readonly kind: "packSize" }
   | { readonly count: number; readonly kind: "squirrelsChased" }
   | { readonly count: number; readonly kind: "timesFired" }
@@ -955,23 +804,17 @@ export interface GameData {
   readonly dogSlots: readonly [DogSlot, ...DogSlot[]];
   readonly dogs: Readonly<Record<DogId, Dog>>;
   readonly encounters: Readonly<Record<EncounterId, Encounter>>;
-  readonly forcedStops: Readonly<Record<ForcedStopId, ForcedStop>>;
   readonly help: readonly [HelpPage, ...HelpPage[]];
   readonly hints: Readonly<Record<HintId, Hint>>;
   readonly homeText: HomeText;
   readonly menuText: MenuText;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
-  readonly needCards: Readonly<Record<NeedCardId, NeedCard>>;
-  readonly needSpots: Readonly<Record<NeedSpotId, NeedSpot>>;
-  readonly needs: Readonly<Record<NeedId, Need>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
-  readonly quirks: Readonly<Record<QuirkId, Quirk>>;
   readonly runText: RunText;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;
   readonly upgrades: Readonly<Record<UpgradeId, Upgrade>>;
-  readonly walkerPaces: Readonly<Record<WalkerPace, WalkerTrait>>;
-  readonly walkerStyles: Readonly<Record<WalkerStyle, WalkerTrait>>;
+  readonly walkerPerks: Readonly<Record<WalkerPerkId, WalkerPerk>>;
   readonly walkers: Readonly<Record<WalkerId, Walker>>;
   readonly world: World;
 }

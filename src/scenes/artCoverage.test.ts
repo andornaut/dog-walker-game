@@ -5,15 +5,7 @@ import { describe, expect, it } from "vitest";
 import shippedManifest from "../../public/art/manifest.json";
 import { animationKey, animationSpecs } from "../assets/asepriteAnimations";
 import { splitDepthKey, stepSize } from "../assets/depthSteps";
-import {
-  energyIconKey,
-  GROWL_ICON_KEY,
-  needIconKey,
-  quirkIconKey,
-  statusIconKey,
-  temperamentIconKey,
-  traitIconKey,
-} from "../assets/iconKeys";
+import { SQUIRREL_ICON_KEY, statusIconKey } from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";
 import {
   CARD_FRAME_KEY,
@@ -25,36 +17,18 @@ import {
   dogPortraitKey,
   dogSpriteKey,
   encounterSpriteKey,
-  kebabCase,
   minorObstacleSpriteKey,
   MOVER_SPRITE_KEYS,
   MOVING_TAGS,
-  NEED_ART,
-  needSpotSpriteKey,
   ownerFaceKey,
+  PULL_ART,
   SKUNK_CLOUD_KEY,
   ZONE_CELEBRATION_ART,
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
-import type {
-  DebuffId,
-  DogId,
-  EncounterId,
-  Energy,
-  ForcedStopId,
-  GearId,
-  MinorObstacleId,
-  NeedCardId,
-  NeedId,
-  NeedSpotId,
-  QuirkId,
-  Temperament,
-  TraitId,
-  UpgradeId,
-  ZoneId,
-} from "../data/types";
+import type { DogId, EncounterId, GearId, MinorObstacleId, UpgradeId, ZoneId } from "../data/types";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { pipLook, zonePips } from "../hud/hudView";
@@ -67,7 +41,7 @@ import { walkLength } from "../rules/route";
 import { baseCardArtPrefix } from "../rules/skins";
 import { faceMood } from "../rules/treats";
 import type { PullPose } from "../runner/pulls";
-import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
+import type { DogStatusId } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
@@ -117,14 +91,7 @@ function members<K extends string>(record: Readonly<Record<K, true>>): K[] {
 const DOGS = Object.keys(gameData.dogs) as DogId[];
 const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
 const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
-const STATUSES = members<DogStatusId>({
-  soaked: true,
-  spooked: true,
-  stinky: true,
-  tangled: true,
-  tuckeredOut: true,
-});
-const TEMPERAMENTS = members<Temperament>({ dramatic: true, fussy: true, laidBack: true });
+const STATUSES = members<DogStatusId>({ muddy: true, stinky: true });
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
 // The steps below 1 at which any of keys has a variant. Art adds a step to a whole family of
 // sprites at once, so each of them must then have it.
@@ -177,39 +144,6 @@ describe("dog art", () => {
   it.todo("names owner-<dog> with idle and wave through ownerSpriteKey, once return home lands");
 });
 
-describe("quirk art", () => {
-  // The road and face tags each quirk's dogs play, beyond every dog's own.
-  const ROAD_TAGS: Readonly<Partial<Record<QuirkId, readonly string[]>>> = {
-    acrobatic: ["flourish"],
-    cameraReady: ["pose"],
-    nervous: ["lunge", "worried"],
-    ratter: ["pounce"],
-    scentHound: ["sniff"],
-  };
-  const FACE_TAGS: Readonly<Partial<Record<QuirkId, readonly string[]>>> = {
-    nervous: ["worried"],
-  };
-
-  it("names each quirk's road and face tags for every dog with the quirk", () => {
-    const missing = DOGS.flatMap((dog) => {
-      const { quirk } = gameData.dogs[dog];
-      return [
-        ...missingTags(dogSpriteKey(gameData, dog), ROAD_TAGS[quirk] ?? []),
-        ...missingTags(dogFaceKey(gameData, dog), FACE_TAGS[quirk] ?? []),
-      ];
-    });
-    expect(missing).toEqual([]);
-  });
-
-  it("names the growl a nervous dog's bubble shows", () => {
-    expect(missingTags(GROWL_ICON_KEY, ["normal"])).toEqual([]);
-  });
-
-  it("names a quirk icon for every dog", () => {
-    expect(missingImages(DOGS.map((dog) => quirkIconKey(gameData, dog)))).toEqual([]);
-  });
-});
-
 describe("walker art", () => {
   it("names a road sprite and a picker face with their tags for every walker", () => {
     const missing = Object.values(gameData.walkers).flatMap(({ portraitKey, spriteKey }) => [
@@ -247,11 +181,8 @@ describe("image art", () => {
     ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
     ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
     [
-      "a strip icon for every debuff, upgrade and gear item",
+      "an effect icon for every upgrade and gear item",
       () => [
-        ...(Object.keys(gameData.debuffs) as DebuffId[]).map((debuff) =>
-          stripIconKey({ debuff, kind: "debuff" }),
-        ),
         ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
           stripIconKey({ kind: "upgrade", upgrade }),
         ),
@@ -261,42 +192,18 @@ describe("image art", () => {
       ],
     ],
     [
-      "an icon for every trait, energy and temperament",
-      () => [
-        ...members<TraitId>({ chaser: true, fancy: true, foodDriven: true }).map(traitIconKey),
-        ...members<Energy>({ calm: true, hyper: true, steady: true }).map(energyIconKey),
-        ...TEMPERAMENTS.map(temperamentIconKey),
-      ],
-    ],
-    [
       "every section's fill and the Pocket's stitch",
       () => [...Object.values(HOME_LAYOUT.sectionFillKeys), "ui-stitch-h", "ui-stitch-v"],
     ],
     ["a help illustration for every help page", () => gameData.help.map(({ art }) => art)],
-    [
-      "card art for every option of every need card",
-      () =>
-        Object.values(gameData.needCards).flatMap(({ options }) => options.map(({ art }) => art)),
-    ],
   ])("names %s", (_, keys) => {
     expect(missingImages(keys())).toEqual([]);
   });
 });
 
 describe("icon art", () => {
-  it("names a slot icon and a looping overlay for every status at every step any overlay has", () => {
-    const steps = [1, ...variantSteps(STATUSES.map(statusOverlayKey))];
-    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
-    const missing = STATUSES.flatMap((status) => {
-      const overlay = statusOverlayKey(status);
-      return [
-        ...missingImages([statusIconKey(status)]),
-        ...steps.flatMap((step) =>
-          missingTags(depthVariantKey(overlay, step) ?? overlay, ["loop"]),
-        ),
-      ];
-    });
-    expect(missing).toEqual([]);
+  it("names a doghouse icon for every status", () => {
+    expect(missingImages(STATUSES.map(statusIconKey))).toEqual([]);
   });
 
   it("names a badge with earned and locked for every achievement", () => {
@@ -324,10 +231,6 @@ describe("icon art", () => {
     expect(missingTags(DIFFICULTY_KEY, ["1", "2", "3", "4", "5", ...tags])).toEqual([]);
   });
 
-  it("tags ui-fired-plate with every owner temperament", () => {
-    expect(missingTags("ui-fired-plate", TEMPERAMENTS.map(kebabCase))).toEqual([]);
-  });
-
   it("tags ui-fires, the card marker for an option that fires an owner, static and pulse", () => {
     expect(missingTags("ui-fires", ["static", "pulse"])).toEqual([]);
   });
@@ -341,20 +244,10 @@ describe("card art", () => {
         encounter,
         kind: "encounter",
       })),
-      ...(Object.keys(gameData.forcedStops) as ForcedStopId[]).map((stop): CardSource => ({
-        kind: "forcedStop",
-        stop,
-      })),
-      { kind: "upgradeOffer", offered: ["bellyRubs", "bigTipper", "raincoats"] },
-      ...(Object.keys(gameData.needCards) as NeedCardId[]).map((card): CardSource => ({
-        affected: [],
-        card,
-        kind: "need",
-      })),
-      { kind: "fork", paths: ["park"] },
+      { kind: "fork", paths: ["park"], upgrades: ["bellyRubs"] },
     ];
-    const tags = [...new Set(sources.map((source) => cardFrameTag(gameData, source)))];
-    expect(tags).toHaveLength(5);
+    const tags = [...new Set(sources.map((source) => cardFrameTag(source)))];
+    expect(tags).toHaveLength(2);
     const missing = [CARD_FRAME_KEY, "card-frame-large"].flatMap((key) => missingTags(key, tags));
     expect(missing).toEqual([]);
   });
@@ -378,67 +271,35 @@ describe("card art", () => {
   it("names a card preview for every zone, as a fork's path card shows it", () => {
     const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
     const arts = [zones.slice(0, 3), zones.slice(3)].flatMap((paths) =>
-      cardFor(gameData, testState({ koda: 4 }), { kind: "fork", paths }).options.map(
-        ({ art }) => art,
-      ),
+      cardFor(gameData, testState({ koda: 4 }), {
+        kind: "fork",
+        paths,
+        upgrades: paths.map(() => "bellyRubs"),
+      }).options.map(({ art }) => art),
     );
     expect(arts).toHaveLength(zones.length);
     expect(missingImages(arts)).toEqual([]);
   });
 });
 
-describe("need art", () => {
-  const NEEDS = Object.keys(gameData.needs) as NeedId[];
-
-  it("names an icon for every need", () => {
-    expect(NEEDS.flatMap((need) => missingTags(needIconKey(need), ["normal"]))).toEqual([]);
+describe("pull art", () => {
+  it("tags the pull bubble with idle and show, and names the blocked mark and squirrel icon", () => {
+    expect(missingTags(PULL_ART.bubble, ["idle", "show"])).toEqual([]);
+    expect(sprites.has(PULL_ART.pullBlocked)).toBe(true);
+    expect(missingImages([SQUIRREL_ICON_KEY])).toEqual([]);
   });
 
-  it("tags the pull bubble with idle, show and urgent, and names the blocked mark", () => {
-    expect(missingTags(NEED_ART.bubble, ["idle", "show", "urgent"])).toEqual([]);
-    expect(sprites.has(NEED_ART.pullBlocked)).toBe(true);
-  });
-
-  it("names the pull fail, need met, accident and accident spot effects with their tags", () => {
-    const missing = [
-      ...missingTags(NEED_ART.pullFail, ["play"]),
-      ...missingTags(NEED_ART.needMet, NEEDS),
-      ...missingTags(NEED_ART.accident, ["play"]),
-      ...missingTags(NEED_ART.accidentSpot, ["idle"]),
-    ];
-    expect(missing).toEqual([]);
-  });
-
-  // The other dog reuses its obstacle's art.
-  it("names a road sprite for every need spot with its own art, at every step any spot has", () => {
-    const spots = Object.keys(gameData.needSpots) as NeedSpotId[];
-    const own = spots
-      .map(needSpotSpriteKey)
-      .filter((key) => key !== encounterSpriteKey("otherDog"));
-    expect(own).toHaveLength(5);
-    const steps = variantSteps(own);
-    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
-    const missing = own.flatMap((key) => {
-      return [
-        ...missingTags(key, ["idle"]),
-        ...steps
-          .map((step) => depthVariantKey(key, step) ?? "")
-          .filter((variant) => !sprites.has(variant)),
-      ];
-    });
-    expect(missing).toEqual([]);
-    expect(missingTags(needSpotSpriteKey("stranger"), ["wave"])).toEqual([]);
+  it("tags the pull fail effect with play", () => {
+    expect(missingTags(PULL_ART.pullFail, ["play"])).toEqual([]);
   });
 });
 
 describe("feedback art", () => {
-  it("names the coin burst, heart pops, doghouse loss and hop splash with their tags", () => {
-    const { coinBurst, doghouseLoss, heartGain, heartLoss, hopSplash } = FEEDBACK_ART;
+  it("names the heart pops and doghouse loss with their tags", () => {
+    const { doghouseLoss, heartGain, heartLoss } = FEEDBACK_ART;
     const missing = [
-      ...missingTags(coinBurst.key, [coinBurst.tag]),
       ...missingTags(doghouseLoss.key, [doghouseLoss.tag]),
       ...[heartGain, heartLoss].flatMap((heart) => missingTags(heart.key, [heart.pop, heart.fly])),
-      ...missingTags(hopSplash.key, [hopSplash.tag, `${hopSplash.tag}${hopSplash.word}`]),
     ];
     expect(missing).toEqual([]);
   });
@@ -457,15 +318,13 @@ describe("hit moment art", () => {
         ...(look.flash === null ? [] : missingTags(hitFlashKey(loadedScene, look.flash), ["play"])),
       ];
     });
-    expect(hits).toEqual(expect.arrayContaining(["goose", "lemonade", "otherDog"]));
+    expect(hits).toEqual(expect.arrayContaining(["otherDog", "skunk"]));
     expect(missing).toEqual([]);
   });
 
   it("flashes the edges for every obstacle, and for no lucky find", () => {
     const flashed = hits.filter((id) => lookOf(id).flash !== null);
     expect(flashed).toEqual(hits.filter((id) => gameData.encounters[id].kind === "obstacle"));
-    expect(lookOf("goose").flash).toBe("ui-hit-flash-white");
-    expect(lookOf("lemonade")).toEqual({ burst: "fx-lemonade", flash: null, plate: "lucky" });
   });
 
   it("gives every hit moment its own burst, with fx-bump as the fallback for one without", () => {
@@ -485,18 +344,12 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // A skin may name art not drawn yet, which falls back to the base; once drawn, it must do
-  // A Stink skin's own cloud and a skin's own status overlay, once drawn, play what the base's
-  // do at every step the base has: skunk-cloud's tags, and a status overlay's loop.
-  it("draws every listed skin cloud and status overlay with its base's tags at each base step", () => {
-    const overlays = STATUSES.map(statusOverlayKey);
+  // A Stink skin's own cloud, once drawn, plays what skunk-cloud does at every step it has.
+  it("draws every listed skin cloud with skunk-cloud's tags at each of its steps", () => {
     const skins = ENCOUNTERS.flatMap((id) => Object.values(gameData.encounters[id].skins ?? {}));
     const pairs = skins.flatMap((skin) => [
       ...(skin?.cloudArt !== undefined && sprites.has(skin.cloudArt)
         ? [{ art: skin.cloudArt, bases: [SKUNK_CLOUD_KEY], tags: tagsOf(SKUNK_CLOUD_KEY) }]
-        : []),
-      ...(skin?.statusArt !== undefined && sprites.has(skin.statusArt)
-        ? [{ art: skin.statusArt, bases: overlays, tags: ["loop"] }]
         : []),
     ]);
     const missing = pairs.flatMap(({ art, bases, tags }) =>
@@ -616,7 +469,6 @@ describe("sound art", () => {
   it("has its own hit sound for every encounter with a hit moment", () => {
     const hits = ENCOUNTERS.filter((id) => hitLabel(gameData.encounters[id]) !== null);
     const keys = hits.map((id) => soundKeysOf(hitCue(gameData.encounters[id].kind, id))[0] ?? "");
-    expect(keys).toEqual(expect.arrayContaining(["sfx-hit-goose", "sfx-lemonade"]));
     expect(keys.filter((key) => !sounds.has(key))).toEqual([]);
   });
 });

@@ -4,9 +4,6 @@ function matches(trigger: HintTrigger, event: HintTrigger): boolean {
   if (trigger.kind === "encounter") {
     return event.kind === "encounter" && event.encounter === trigger.encounter;
   }
-  if (trigger.kind === "debuff") {
-    return event.kind === "debuff" && event.debuff === trigger.debuff;
-  }
   return event.kind === trigger.kind;
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
+import { agilityWord } from "../rules/walkers";
 import { newPlayerSave } from "../save/fixtures";
 import { homeLine } from "./homeText";
 import { type ItemTile, itemTileState, type TileState } from "./interaction";
@@ -33,24 +34,41 @@ describe("walkerTile", () => {
   });
 });
 
-describe("walkerInfo", () => {
-  it.each<[WalkerId, string]>([
-    ["ada", "Ada: fast, charmer."],
-    ["ben", "Ben: slow, hustler."],
-    ["casey", "Casey: slow, charmer."],
-    ["trista", "Trista: fast, hustler."],
-  ])("writes %s's pace and style", (walker, expected) => {
-    expect(walkerInfo(gameData, walker)).toBe(expected);
+// A walker's info line, from the data: its agility word in lower case and its perk.
+const info = (walker: WalkerId) => {
+  const { agility, name, perk } = gameData.walkers[walker];
+  return homeLine(gameData.homeText, "walkerInfo", {
+    agility: agilityWord(gameData.homeText, agility).toLowerCase(),
+    perk: gameData.walkerPerks[perk].name,
+    walker: name,
   });
+};
+// The locked line names the zone whose finish unlocks the walker.
+const locked = (walker: WalkerId) => {
+  const data = gameData.walkers[walker];
+  const goal = data.unlock === "start" ? undefined : data.zone;
+  return homeLine(gameData.homeText, "walkerLocked", {
+    walker: data.name,
+    zone: gameData.world.zones.find(({ id }) => id === goal)?.name ?? "",
+  });
+};
+
+describe("walkerInfo", () => {
+  it.each(Object.keys(gameData.walkers) as WalkerId[])(
+    "writes %s's agility word and perk",
+    (walker) => {
+      expect(walkerInfo(gameData, walker)).toBe(info(walker));
+    },
+  );
 });
 
 describe("tapWalker", () => {
-  it.each<[WalkerId, WalkerTap]>([
-    ["ben", { kind: "drop" }],
-    ["casey", { kind: "pick", text: "Casey: slow, charmer.", walker: "casey" }],
-    ["ada", { kind: "locked", text: "Finish zone 2 to unlock Ada." }],
-    ["trista", { kind: "locked", text: "Finish zone 3 to unlock Trista." }],
-  ])("on %s gives %o", (walker, tap) => {
-    expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap);
+  it.each<[WalkerId, () => WalkerTap]>([
+    ["ben", () => ({ kind: "drop" })],
+    ["casey", () => ({ kind: "pick", text: info("casey"), walker: "casey" })],
+    ["ada", () => ({ kind: "locked", text: locked("ada") })],
+    ["trista", () => ({ kind: "locked", text: locked("trista") })],
+  ])("on %s", (walker, tap) => {
+    expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap());
   });
 });

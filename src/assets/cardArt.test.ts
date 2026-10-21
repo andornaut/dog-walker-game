@@ -8,7 +8,7 @@ const images = new Set(manifest.images.map(({ key }) => key));
 
 describe("card art", () => {
   it("finds every card option's, upgrade's, instant popup's and the Skip card's art", () => {
-    const { encounters, forcedStops, upgrades } = gameData;
+    const { encounters, upgrades } = gameData;
     const keys = [
       SKIP_CARD_ART,
       ...Object.values(encounters).flatMap(({ resolution }) =>
@@ -16,7 +16,6 @@ describe("card art", () => {
           ? [resolution.art]
           : resolution.options.map((option) => option.art),
       ),
-      ...Object.values(forcedStops).flatMap((stop) => stop.options.map((option) => option.art)),
       ...Object.values(upgrades).map((upgrade) => upgrade.art),
     ];
     expect(keys.filter((key) => !images.has(key))).toEqual([]);

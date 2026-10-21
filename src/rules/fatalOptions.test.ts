@@ -10,8 +10,14 @@ import { cardFor, firesText } from "./choices";
 import { resolveEffects } from "./effects";
 
 const data = { ...gameData, tuning: TEST_TUNING };
-// Skunk's "Hold your nose": −2 ♥ to each dog caught.
+// Skunk's "Hold your nose", its hearts option, and what it costs each owner.
 const HOLD_YOUR_NOSE = 2;
+const NOSE_EFFECT = (() => {
+  const { resolution } = gameData.encounters.skunk;
+  const option = resolution.kind === "card" ? resolution.options[HOLD_YOUR_NOSE] : undefined;
+  const effect = option?.effects.find((candidate) => candidate.kind === "hearts");
+  return effect?.kind === "hearts" ? -effect.amount : 0;
+})();
 
 const skunk = (affected: DogId[]): CardSource => ({
   affected,
@@ -21,11 +27,10 @@ const skunk = (affected: DogId[]): CardSource => ({
 
 describe("an option that would fire an owner", () => {
   it.each([
-    { fires: ["koda"], hearts: { koda: 1 }, why: "a meter cut short at 0" },
-    { fires: ["koda"], hearts: { koda: 2 }, why: "a meter landing on 0" },
-    { fires: [], hearts: { koda: 3 }, why: "a meter left above 0" },
-  ] as const)("is flagged for $why", ({ fires, hearts }) => {
-    const option = cardFor(data, testState(hearts), skunk(["koda"])).options.find(
+    { fires: ["koda"], hearts: NOSE_EFFECT, why: "a meter landing on 0" },
+    { fires: [], hearts: NOSE_EFFECT + 1, why: "a meter left above 0" },
+  ])("is flagged for $why", ({ fires, hearts }) => {
+    const option = cardFor(data, testState({ koda: hearts }), skunk(["koda"])).options.find(
       ({ index }) => index === HOLD_YOUR_NOSE,
     );
     expect(option?.fires).toEqual(fires);
@@ -36,7 +41,7 @@ describe("an option that would fire an owner", () => {
       ({ index }) => index === HOLD_YOUR_NOSE,
     );
     expect(option?.breakdown.map(({ dog, name, text }) => [dog, text, name])).toEqual([
-      ["koda", "−2 ♥", "Hold your nose"],
+      ["koda", "−1 ♥", "Hold your nose"],
       ["koda", "", "Jesse fires you"],
     ]);
   });

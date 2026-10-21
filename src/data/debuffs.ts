@@ -1,29 +1,18 @@
 import type { Debuff } from "./types";
 
-// Applying a debuff the pack already has refreshes it; debuffs never stack.
+// Applying a debuff the pack already has restarts its time; debuffs never stack. Nothing
+// cures one: it runs out.
 export const DEBUFFS = {
-  spooked: {
-    curedByTreat: true,
-    duration: { seconds: "spookedSeconds" },
-    modifiers: [{ by: "spookedLaneMove", operation: "multiply", stat: "laneMove" }],
-    name: "Spooked",
+  muddy: {
+    modifiers: [{ by: "muddyBumpHearts", operation: "multiply", stat: "bumpHearts" }],
+    name: "Muddy",
+    seconds: "muddySeconds",
+    stake: "bumps cost 2♥ for {seconds}s",
   },
   stinky: {
-    curedByTreat: true,
-    duration: "zone",
     modifiers: [{ by: "stinkyTipSpawns", operation: "multiply", stat: "tipSpawns" }],
     name: "Stinky",
-  },
-  tangled: {
-    curedByTreat: true,
-    duration: { seconds: "tangledSeconds" },
-    modifiers: [{ by: "tangledLaneLock", operation: "add", stat: "laneChangeLock" }],
-    name: "Tangled",
-  },
-  tuckeredOut: {
-    curedByTreat: true,
-    duration: "zone",
-    modifiers: [{ by: "tuckeredUrgency", operation: "multiply", stat: "needUrgency" }],
-    name: "Tuckered out",
+    seconds: "stinkySeconds",
+    stake: "half the tips for {seconds}s",
   },
 } as const satisfies Record<string, Debuff>;

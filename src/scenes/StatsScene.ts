@@ -1,6 +1,5 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badgesView";
@@ -274,12 +273,6 @@ export class StatsScene extends Scene {
     const lines = this.add.graphics();
     dogRows(gameData, save.owned, save.stats).forEach((row, i) => {
       const y = DOG_ROW.top + 8 + i * DOG_ROW.pitch;
-      const dog = gameData.dogs[row.dog];
-      [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
-        if (this.textures.exists(key)) {
-          this.add.image(DOG_ROW.iconX + n * 18, y, key).setOrigin(0);
-        }
-      });
       this.text(DOG_ROW.nameX, y + 3, row.name);
       const values = { fired: row.timesFired, walks: row.walks, zones: row.zonesFinished };
       for (const key of ["walks", "zones", "fired"] as const) {

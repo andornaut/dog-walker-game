@@ -2,7 +2,7 @@ import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
-import { MONEY_ICON_KEY, quirkIconKey, temperamentIconKey, traitIconKey } from "../assets/iconKeys";
+import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import {
   dogFaceKey,
   dogPortraitKey,
@@ -12,7 +12,7 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
+import type { DogId, GearId, Size, WalkerId } from "../data/types";
 import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
@@ -198,7 +198,6 @@ const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
 const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
-const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
 
 // The widest line the speech bubble holds, in characters, and how many lines it shows.
 const SPEECH_CHARS = 30;
@@ -255,12 +254,9 @@ function targetId(target: Target): string {
   }
 }
 
-// The roster in rows by size, each row in trait order, as the mock lays it out.
+// The roster in rows by size, each row in data order, as the mock lays it out.
 function rosterOrder(): DogId[] {
-  const rank = (dog: DogId) => {
-    const { size, trait } = gameData.dogs[dog];
-    return SIZE_ORDER.indexOf(size) * TRAIT_ORDER.length + TRAIT_ORDER.indexOf(trait);
-  };
+  const rank = (dog: DogId) => SIZE_ORDER.indexOf(gameData.dogs[dog].size);
   return (Object.keys(gameData.dogs) as DogId[]).sort((a, b) => rank(a) - rank(b));
 }
 
@@ -1122,7 +1118,6 @@ export class StartScene extends Scene {
   private detailPicture(target: DetailTarget): DetailPicture {
     if (target.kind === "dog") {
       return {
-        badge: quirkIconKey(gameData, target.dog),
         key: dogPortraitKey(gameData, target.dog),
         scale: 1,
       };
@@ -1492,14 +1487,7 @@ export class StartScene extends Scene {
         }
         return;
       }
-      // The trait and the owner's temperament as icons; the info line says them in words.
-      [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
-        if (this.textures.exists(key)) {
-          const iconKey = tileTextureKey(this, state, key);
-          content.add(this.add.image(x + 38 + n * 18, y + 13, iconKey).setOrigin(0));
-        }
-      });
-      const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData, id) });
+      const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) });
       this.text(content, x + 39, y + 29, fee, ink);
     });
   }

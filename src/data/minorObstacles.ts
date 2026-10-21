@@ -1,9 +1,9 @@
 import type { MinorObstacle } from "./types";
 
 // Obstacles that open no card. Shapes are lanes across by rows along the road; each zone
-// weighs how often they appear there, in world.ts. Each obstacle has one look everywhere. A ball, car or
-// cyclist comes as a mover at the zone's mover share, like any obstacle with a movement, and
-// stands still otherwise.
+// weighs how often they appear there, in world.ts. Each obstacle has one look everywhere. An
+// obstacle with a movement comes as a mover at the zone's mover share, and stands still
+// otherwise.
 export const MINOR_OBSTACLES = {
   ball: { movement: { kind: "dart" }, name: "Ball", shape: { lanes: 1, rows: 1 } },
   barrier2: {
@@ -23,6 +23,16 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
+  iceCreamTruck: {
+    movement: { factor: 0.7, kind: "inLane" },
+    name: "Ice cream truck",
+    shape: { lanes: 1, rows: 3 },
+  },
+  mailCarrier: {
+    movement: { kind: "step", steps: 1 },
+    name: "Mail carrier",
+    shape: { lanes: 1, rows: 1 },
+  },
   parkedCar: {
     movement: { factor: 1.3, kind: "inLane" },
     name: "Car",

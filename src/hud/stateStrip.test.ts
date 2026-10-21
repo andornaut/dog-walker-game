@@ -1,55 +1,26 @@
 import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
-import type { DebuffId, GearId, UpgradeId, WalkerId } from "../data/types";
-import { read } from "../rules/units";
-import { defined } from "../testing/defined";
+import type { GearId, UpgradeId, WalkerId, WalkerPerkId } from "../data/types";
 import { activeModifier, testState } from "../testing/runState";
-import { TEST_TUNING } from "../testing/tuning";
 import {
-  moveStripPress,
-  onStrip,
   STRIP,
   stripIconFallback,
   stripIconKey,
   type StripItem,
   stripItems,
   stripLayout,
-  stripTapAllowed,
-  stripTapped,
-  stripText,
   walkerStripItems,
 } from "./stateStrip";
-import { PAUSE_BUTTON, type RunPause } from "./topBar";
-
-const data = { ...gameData, tuning: TEST_TUNING };
-const SPOOKED_PERCENT = Math.round((read(TEST_TUNING, "multipliers", "spookedLaneMove") - 1) * 100);
-const SPOOKED_SECONDS = read(TEST_TUNING, "seconds", "spookedSeconds");
-// Walkers that change what they do, for their text.
-const walkerData = {
-  ...data,
-  tuning: {
-    ...TEST_TUNING,
-    hearts: { ...TEST_TUNING.hearts, charmerStart: 1 },
-    multipliers: {
-      ...TEST_TUNING.multipliers,
-      charmerTipSpawns: 0.85,
-      slowWalkerFees: 0.9,
-      slowWalkerSpeed: 0.9,
-    },
-  },
-};
 
 describe("stripItems", () => {
-  it("lists the debuffs, then the upgrades in effect in pick order, the gear, then the walker's pace and style", () => {
+  it("lists the upgrades in effect in pick order, the gear, then the walker's perk", () => {
     const run = testState(
       { koda: 5 },
       {
-        debuffs: [{ debuff: "stinky" }],
-        gear: "whistle",
-        immunities: [{ encounter: "thief" }, { encounter: "puddle" }],
+        gear: "luckyCollar",
+        immunities: [{ encounter: "puddle" }],
         modifiers: [
           activeModifier(
             { kind: "upgrade", upgrade: "bigTipper" },
@@ -60,97 +31,42 @@ describe("stripItems", () => {
         walker: "trista",
       },
     );
-    expect(stripItems(data, run)).toEqual([
-      { debuff: "stinky", kind: "debuff" },
+    expect(stripItems(gameData, run)).toEqual([
       { kind: "upgrade", upgrade: "raincoats" },
       { kind: "upgrade", upgrade: "bigTipper" },
-      { gear: "whistle", kind: "gear" },
-      { kind: "pace", pace: "fast" },
-      { kind: "style", style: "hustle" },
+      { gear: "luckyCollar", kind: "gear" },
+      { kind: "perk", perk: gameData.walkers.trista.perk },
     ]);
   });
 
-  it("drops an upgrade once its effects expire, and never shows a boost given at once", () => {
-    const run = testState({ koda: 5 }, { upgradesPicked: ["shortcut", "secondWind"] });
-    expect(stripItems(data, run)).toEqual(walkerStripItems(data, run.walker));
+  it("drops an upgrade once its effects expire, and never shows one applied at once", () => {
+    const run = testState({ koda: 5 }, { upgradesPicked: ["bigTipper", "bellyRubs"] });
+    expect(stripItems(gameData, run)).toEqual(walkerStripItems(gameData, run.walker));
   });
 });
 
 describe("walkerStripItems", () => {
-  it.each<[WalkerId, StripItem[]]>([
-    [
-      "ada",
-      [
-        { kind: "pace", pace: "fast" },
-        { kind: "style", style: "charm" },
-      ],
-    ],
-    [
-      "ben",
-      [
-        { kind: "pace", pace: "slow" },
-        { kind: "style", style: "hustle" },
-      ],
-    ],
-  ])("gives %s's pace, then style", (walker, expected) => {
-    expect(walkerStripItems(data, walker)).toEqual(expected);
-  });
-});
-
-describe("stripText", () => {
-  it.each<[string, StripItem, string]>([
-    [
-      "an upgrade's name and effect as its card does",
-      { kind: "upgrade", upgrade: "bigTipper" },
-      "Big tipper: +$1 per tip for the run.",
-    ],
-    [
-      "gear's name and effect as its home line does",
-      { gear: "fannyPack", kind: "gear" },
-      "Fanny pack: starting money +$15.",
-    ],
-    [
-      "a debuff's modifiers for its duration",
-      { debuff: "stinky", kind: "debuff" },
-      "Stinky: tips −50% for the rest of the zone, or until a treat.",
-    ],
-    [
-      "a timed debuff's modifiers for its seconds",
-      { debuff: "spooked", kind: "debuff" },
-      `Spooked: lane change time +${SPOOKED_PERCENT}% for ${SPOOKED_SECONDS} seconds, or until a treat.`,
-    ],
-    [
-      "a walker's pace and its effects",
-      { kind: "pace", pace: "slow" },
-      "Slow: road speed −10%, zone length −10%, obstacles −10%, tips −10%, need spots −10%, fees −10%.",
-    ],
-    [
-      "a walker's style and its effects",
-      { kind: "style", style: "charm" },
-      "Charmer: starting ♥ +1, tips −15%.",
-    ],
-  ])("writes %s", (_name, item, expected) => {
-    expect(stripText(walkerData, item)).toBe(expected);
+  it.each(Object.keys(gameData.walkers) as WalkerId[])("gives %s's perk", (walker) => {
+    expect(walkerStripItems(gameData, walker)).toEqual([
+      { kind: "perk", perk: gameData.walkers[walker].perk },
+    ]);
   });
 });
 
 describe("stripIconFallback", () => {
   it.each<[StripItem, string]>([
-    [{ gear: "fannyPack", kind: "gear" }, "F"],
-    [{ kind: "style", style: "hustle" }, "H"],
-  ])("shows %o as the first letter of its name", (item, expected) => {
-    expect(stripIconFallback(data, item)).toBe(expected);
+    [{ gear: "fannyPack", kind: "gear" }, gameData.shopGear.fannyPack.name],
+    [{ kind: "perk", perk: "kindWords" }, gameData.walkerPerks.kindWords.name],
+    [{ kind: "upgrade", upgrade: "raincoats" }, gameData.upgrades.raincoats.name],
+  ])("shows %o as the first letter of its name", (item, name) => {
+    expect(stripIconFallback(gameData, item)).toBe(name.slice(0, 1));
   });
 });
 
 describe("stripIconKey", () => {
-  it("names an icon the art manifest has for every debuff, upgrade and gear item", () => {
+  it("names an icon for every upgrade, gear item and perk, and the manifest has the upgrades' and gear's", () => {
     const keys = new Set(manifest.images.map((image) => image.key));
-    const items: StripItem[] = [
-      ...(Object.keys(gameData.debuffs) as DebuffId[]).map((debuff): StripItem => ({
-        debuff,
-        kind: "debuff",
-      })),
+    const shipped: StripItem[] = [
       ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade): StripItem => ({
         kind: "upgrade",
         upgrade,
@@ -160,79 +76,31 @@ describe("stripIconKey", () => {
         kind: "gear",
       })),
     ];
-    expect(items.map(stripIconKey).filter((key) => !keys.has(key))).toEqual([]);
-  });
-});
-
-describe("stripTapAllowed", () => {
-  const pause: RunPause = {
-    card: false,
-    hitStop: false,
-    menu: "closed",
-    page: "shown",
-    stripBubble: false,
-  };
-
-  it.each<[string, RunPause, boolean]>([
-    ["takes taps while walking", pause, true],
-    ["takes taps in a hit stop", { ...pause, hitStop: true }, true],
-    ["takes the tap that closes its open bubble", { ...pause, stripBubble: true }, true],
-    ["leaves taps to a card, which dims the band", { ...pause, card: true }, false],
-    ["leaves taps to the pause menu", { ...pause, menu: "open" }, false],
-    ["leaves taps to the Home question", { ...pause, menu: "confirmHome" }, false],
-    ["leaves taps to help", { ...pause, menu: "help" }, false],
-    ["leaves taps to settings", { ...pause, menu: "settings" }, false],
-  ])("%s", (_name, state, expected) => {
-    expect(stripTapAllowed(state)).toBe(expected);
+    expect(shipped.map(stripIconKey).filter((key) => !keys.has(key))).toEqual([]);
+    const perks = (Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk) =>
+      stripIconKey({ kind: "perk", perk }),
+    );
+    expect(new Set(perks).size).toBe(perks.length);
   });
 });
 
 describe("stripLayout", () => {
   it("draws nothing for no items", () => {
-    expect(stripLayout(360, 0)).toBeUndefined();
+    expect(stripLayout(0)).toBeUndefined();
   });
 
-  it("hangs the tab under the bar, right-aligned with the zone well, icons 18px apart", () => {
-    const layout = stripLayout(360, 5);
-    expect(layout?.tab).toEqual({ height: 26, width: 99, x: 257, y: 40 });
-    expect(layout?.well).toEqual({ height: 20, width: 92, x: 260, y: 41 });
-    expect(layout?.icons.map((icon) => icon.x)).toEqual([262, 280, 298, 316, 334]);
-    expect(layout?.icons.every((icon) => icon.y === 43)).toBe(true);
-  });
-
-  it("keeps a tap target at least 44px square inside the screen, clear of the pause button", () => {
-    for (const count of [1, 2, 5]) {
-      const layout = defined(stripLayout(360, count));
-      const { hit } = layout;
-      expect(Math.min(hit.width, hit.height)).toBeGreaterThanOrEqual(STRIP.minHit);
-      expect(hit.x + hit.width).toBeLessThanOrEqual(360);
-      expect(hit.x).toBeLessThanOrEqual(layout.tab.x);
-      expect(hit.x).toBeGreaterThanOrEqual(PAUSE_BUTTON.hit.x + PAUSE_BUTTON.hit.width);
-      const last = itemAt(layout.icons, count - 1);
-      expect(last.x + STRIP.icon).toBeLessThanOrEqual(hit.x + hit.width);
+  it.each([1, 3, 5])("hangs %i icons under the bar, right-aligned, a gap apart", (count) => {
+    const layout = stripLayout(count);
+    if (layout === undefined) {
+      throw new Error("a strip");
     }
-  });
-});
-
-describe("onStrip", () => {
-  it("is the strip's hit area, and nowhere while the strip is empty", () => {
-    const { hit } = defined(stripLayout(360, 2));
-    expect(onStrip(360, 2, { x: hit.x + 1, y: hit.y + 1 })).toBe(true);
-    expect(onStrip(360, 2, { x: hit.x - 1, y: hit.y + 1 })).toBe(false);
-    expect(onStrip(360, 0, { x: hit.x + 1, y: hit.y + 1 })).toBe(false);
-  });
-});
-
-describe("strip presses", () => {
-  const start = { x: 330, y: 60 };
-
-  it("tap the strip on a release within the tap distance", () => {
-    expect(stripTapped(10, { x: 336, y: 64 }, { start, tapping: true })).toBe(true);
-    expect(stripTapped(10, { x: 345, y: 60 }, { start, tapping: true })).toBe(false);
-  });
-
-  it("stay a drag after travelling past the tap distance and back", () => {
-    const dragged = moveStripPress(10, { x: 300, y: 60 }, { start, tapping: true });
-    expect(stripTapped(10, start, dragged)).toBe(false);
+    expect(layout.tab.y).toBe(STRIP.y);
+    expect(layout.tab.x + layout.tab.width).toBe(STRIP.right);
+    expect(layout.icons).toHaveLength(count);
+    layout.icons.slice(1).forEach((icon, i) => {
+      expect(icon.x - (layout.icons[i]?.x ?? 0)).toBe(STRIP.icon + STRIP.gap);
+    });
+    const last = layout.icons[count - 1];
+    expect((last?.x ?? 0) + STRIP.icon + STRIP.padding).toBe(layout.well.x + layout.well.width);
   });
 });

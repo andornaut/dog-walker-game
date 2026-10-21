@@ -4,79 +4,66 @@ import { gameData } from "../data";
 import { cardFor } from "../rules/choices";
 import { cents } from "../rules/units";
 import { type Random, seededRandom } from "../runner/random";
-import type { CardSource, RunState, UpgradeOffer } from "../state/runState";
-import { heartsFactor } from "../testing/dogs";
+import type { CardSource, RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import {
   chooseCardOption,
   choosePath,
-  chooseUpgrade,
   LOW_HEARTS,
   MIXED_PAY_SHARE,
   type PolicyId,
-  treatTarget,
 } from "./policies";
 
-const SKUNK: CardSource = { affected: ["duchess"], encounter: "skunk", kind: "encounter" };
-const RINSE = 1;
-const IGNORE = 2;
-// Grooming is $20, Quick rinse $10, and Hold your nose costs Duchess's owner 2 hearts, scaled
-// by their temperament. At SAFE hearts it leaves the owner above LOW_HEARTS; at LOW it does not.
-const SAFE = LOW_HEARTS + 2 * heartsFactor(gameData, "duchess") + 1;
+// The thief's card: a money option and a hearts option.
+const THIEF: CardSource = { affected: ["duchess"], encounter: "thief", kind: "encounter" };
+const THIEF_OPTIONS = (() => {
+  const { resolution } = gameData.encounters.thief;
+  return resolution.kind === "card" ? resolution.options : [];
+})();
+const PAY = THIEF_OPTIONS.findIndex(({ effects }) => effects.some(({ kind }) => kind === "money"));
+const HEARTS = THIEF_OPTIONS.findIndex(({ effects }) =>
+  effects.some(({ kind }) => kind === "hearts"),
+);
+// What the hearts option costs Duchess's owner. At SAFE hearts it leaves the owner above
+// LOW_HEARTS; at LOW it does not.
+const HEARTS_LOST = (() => {
+  const effect = THIEF_OPTIONS[HEARTS]?.effects.find(({ kind }) => kind === "hearts");
+  return effect?.kind === "hearts" ? -effect.amount : 0;
+})();
+const SAFE = LOW_HEARTS + HEARTS_LOST + 1;
 const LOW = SAFE - 1;
 // For a choice that must not draw.
 const NO_DRAWS: Random = () => {
   throw new Error("drew");
 };
 
-function skunkChoice(policy: PolicyId, state: RunState, random: Random = NO_DRAWS) {
-  return chooseCardOption(gameData, random, policy, state, cardFor(gameData, state, SKUNK));
+function thiefChoice(policy: PolicyId, state: RunState, random: Random = NO_DRAWS) {
+  return chooseCardOption(gameData, random, policy, state, cardFor(gameData, state, THIEF));
 }
 
 describe("chooseCardOption", () => {
   it.each([
-    ["heartsUnlessLow", SAFE, IGNORE],
-    ["heartsUnlessLow", LOW, RINSE],
-    ["alwaysHearts", LOW, IGNORE],
-    ["alwaysPay", SAFE, RINSE],
+    ["heartsUnlessLow", SAFE, HEARTS],
+    ["heartsUnlessLow", LOW, PAY],
+    ["alwaysHearts", LOW, HEARTS],
+    ["alwaysPay", SAFE, PAY],
   ] as const)("%s at %i hearts takes option %i", (policy, hearts, expected) => {
     const state = testState({ duchess: hearts }, { money: cents(5000) });
 
-    expect(skunkChoice(policy, state)).toBe(expected);
+    expect(thiefChoice(policy, state)).toBe(expected);
   });
 
   it("takes hearts when no money option is affordable", () => {
-    const state = testState({ duchess: 3 }, { money: cents(0) });
+    const state = testState({ duchess: SAFE }, { money: cents(0) });
 
-    expect(skunkChoice("heartsUnlessLow", state)).toBe(IGNORE);
-    expect(skunkChoice("alwaysPay", state)).toBe(IGNORE);
+    expect(thiefChoice("heartsUnlessLow", state)).toBe(HEARTS);
+    expect(thiefChoice("alwaysPay", state)).toBe(HEARTS);
   });
 
-  it("takes poop bags' Skip whenever it is offered", () => {
-    const state = testState({ duchess: 5 }, { money: cents(5000), skipsLeft: 1 });
+  it("takes Hall pass's Skip whenever it is offered", () => {
+    const state = testState({ duchess: 5 }, { money: cents(5000), skipPass: true });
 
-    expect(skunkChoice("alwaysPay", state)).toBe("skip");
-  });
-
-  it("returns a lost wallet rather than leave an owner at 1 heart", () => {
-    const source: CardSource = {
-      affected: ["duchess"],
-      encounter: "lostWallet",
-      kind: "encounter",
-    };
-    const choose = (hearts: number) => {
-      const state = testState({ duchess: hearts });
-      return chooseCardOption(
-        gameData,
-        NO_DRAWS,
-        "heartsUnlessLow",
-        state,
-        cardFor(gameData, state, source),
-      );
-    };
-
-    expect(choose(5)).toBe(1);
-    expect(choose(2)).toBe(0);
+    expect(thiefChoice("alwaysPay", state)).toBe("skip");
   });
 });
 
@@ -84,43 +71,25 @@ describe("the mixed policy", () => {
   const rich = (hearts: number) => testState({ duchess: hearts }, { money: cents(5000) });
 
   it("pays for the cheapest safe option on a draw below the pay share, else takes hearts", () => {
-    expect(skunkChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE - 0.01)).toBe(RINSE);
-    expect(skunkChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE)).toBe(IGNORE);
+    expect(thiefChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE - 0.01)).toBe(PAY);
+    expect(thiefChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE)).toBe(HEARTS);
   });
 
   it("keeps heartsUnlessLow's guard, and takes hearts with nothing affordable, without drawing", () => {
-    expect(skunkChoice("mixed", rich(LOW))).toBe(RINSE);
-    expect(skunkChoice("mixed", testState({ duchess: 3 }, { money: cents(0) }))).toBe(IGNORE);
+    expect(thiefChoice("mixed", rich(LOW))).toBe(PAY);
+    expect(thiefChoice("mixed", testState({ duchess: SAFE }, { money: cents(0) }))).toBe(HEARTS);
   });
 
   it("makes the same choices from the same seed, about half of them paid", () => {
     const choices = (seed: number) => {
       const random = seededRandom(seed);
-      return Array.from({ length: 200 }, () => skunkChoice("mixed", rich(SAFE), random));
+      return Array.from({ length: 200 }, () => thiefChoice("mixed", rich(SAFE), random));
     };
     const first = choices(7);
     expect(choices(7)).toEqual(first);
-    const paid = first.filter((choice) => choice === RINSE).length;
+    const paid = first.filter((choice) => choice === PAY).length;
     expect(paid).toBeGreaterThan(70);
     expect(paid).toBeLessThan(130);
-  });
-});
-
-describe("chooseUpgrade", () => {
-  const offer: UpgradeOffer = ["raincoats", "secondWind", "bigTipper"];
-  const choose = (state: RunState) =>
-    chooseUpgrade(
-      gameData,
-      state,
-      cardFor(gameData, state, { kind: "upgradeOffer", offered: offer }),
-    );
-
-  it("takes a hearts upgrade when an owner looks upset", () => {
-    expect(choose(testState({ biscuit: 6, duchess: 2 }))).toBe(1);
-  });
-
-  it("takes a tips upgrade otherwise", () => {
-    expect(choose(testState({ biscuit: 6, duchess: 4 }))).toBe(2);
   });
 });
 
@@ -138,13 +107,5 @@ describe("choosePath", () => {
 
   it("draws the random path from its random", () => {
     expect([0, 0.4, 0.99].map((roll) => choosePath(() => roll, "random", 3))).toEqual([0, 1, 2]);
-  });
-});
-
-describe("treatTarget", () => {
-  it("picks the owner with the fewest hearts among those below their max", () => {
-    expect(treatTarget(gameData, testState({ biscuit: 3, duchess: 2, koda: 2 }))).toBe("duchess");
-    expect(treatTarget(gameData, testState({ duchess: 6, koda: 8 }))).toBe("koda");
-    expect(treatTarget(gameData, testState({ duchess: 6 }))).toBeUndefined();
   });
 });

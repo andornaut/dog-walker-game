@@ -2,51 +2,22 @@ import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import type { Modifier } from "../data/types";
-import { temperamentStart } from "../testing/dogs";
 import { TEST_TUNING } from "../testing/tuning";
-import { inputLockSeconds, maxHearts, needUrgentSeconds, startHearts, zoneFee } from "./dogs";
+import { maxHearts, startHearts } from "./dogs";
 import { zoneStats } from "./zones";
 
 describe("dog stats", () => {
-  it("derives start and max hearts, fee, need urgency and input lock", () => {
-    const { duchess, penny } = DOGS;
-    const start = temperamentStart({ dogs: DOGS, tuning: TEST_TUNING }, "duchess");
-    expect(startHearts(TEST_TUNING, [], duchess)).toBe(start);
-    expect(maxHearts(TEST_TUNING, [], penny)).toBe(10);
-    expect(zoneFee(TEST_TUNING, [], penny)).toBe(1300);
-    expect(needUrgentSeconds(TEST_TUNING, penny)).toBe(100);
-    expect(inputLockSeconds(TEST_TUNING, [], penny)).toBe(0.5);
+  it.each(Object.values(DOGS))("derives $name's max hearts from its size", (dog) => {
+    expect(maxHearts(TEST_TUNING, [], dog)).toBe(TEST_TUNING.hearts.maxBySize[dog.size]);
   });
 
-  it("starts an owner no higher than their dog's max", () => {
-    // Duchess with a laid-back owner starts at her max, so a raised start without a raised max
-    // is clamped.
-    const duchess = {
-      ...DOGS.duchess,
-      owner: { ...DOGS.duchess.owner, temperament: "laidBack" as const },
-    };
-    const raisedStart: Modifier = { by: "luckyCollarStart", operation: "add", stat: "startHearts" };
-    expect(startHearts(TEST_TUNING, [], duchess)).toBe(maxHearts(TEST_TUNING, [], duchess));
-    expect(startHearts(TEST_TUNING, [raisedStart], duchess)).toBe(
-      maxHearts(TEST_TUNING, [], duchess),
-    );
-  });
-
-  it("removes the input lock with running shoes", () => {
-    const runningShoes: Modifier = {
-      by: "runningShoesInputLock",
-      operation: "multiply",
-      stat: "inputLock",
-    };
-    expect(inputLockSeconds(TEST_TUNING, [runningShoes], DOGS.koda)).toBe(0);
-  });
-
-  it("never locks input after an acrobatic dog's pull, whatever its size", () => {
-    const doubled: Modifier = { by: "rushHourObstacles", operation: "multiply", stat: "inputLock" };
-    const acrobat = { ...DOGS.koda, quirk: "acrobatic" } as const;
-    expect(inputLockSeconds(TEST_TUNING, [], DOGS.koda)).toBe(0.5);
-    expect(inputLockSeconds(TEST_TUNING, [], acrobat)).toBe(0);
-    expect(inputLockSeconds(TEST_TUNING, [doubled], acrobat)).toBe(0);
+  it.each<[string, readonly Modifier[]]>([
+    ["with no gear", []],
+    ["with a raised max", [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }]],
+  ])("starts every owner full, %s", (_, modifiers) => {
+    for (const dog of Object.values(DOGS)) {
+      expect(startHearts(TEST_TUNING, modifiers, dog)).toBe(maxHearts(TEST_TUNING, modifiers, dog));
+    }
   });
 });
 

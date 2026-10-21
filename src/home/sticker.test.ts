@@ -7,19 +7,23 @@ import { TEST_TUNING } from "../testing/tuning";
 import { homeSticker, type Sticker } from "./sticker";
 
 // The prices these cases step between, held so a price change in the tuning keeps their order:
-// the fanny pack is the cheapest, then the whistle and every locked dog, then poop bags.
+// the fanny pack is the cheapest, then every locked dog, then poop bags.
 const tuning = {
   ...TEST_TUNING,
   money: {
     ...TEST_TUNING.money,
     prices: {
       ...TEST_TUNING.money.prices,
+      archie: 600,
       fannyPack: 400,
-      lockedDog: 600,
       luckyCollar: 1000,
+      nugget: 600,
+      penny: 600,
+      pierre: 600,
       poopBags: 700,
       runningShoes: 800,
-      whistle: 600,
+      snowball: 600,
+      zippy: 600,
     },
   },
 };
@@ -33,7 +37,7 @@ const owned: Owned = {
   walkers: ["casey"],
 };
 const fannyPack = price("fannyPack") / 100;
-const lockedDog = price("lockedDog") / 100;
+const lockedDog = price("archie") / 100;
 
 describe("homeSticker", () => {
   it.each<[string, number, number, Sticker | null]>([
@@ -53,7 +57,7 @@ describe("homeSticker", () => {
       "puts new on the first newly covered item in the shop's order",
       fannyPack,
       lockedDog,
-      { item: { dog: "archie", kind: "dog" }, kind: "new", price: price("lockedDog") },
+      { item: { dog: "archie", kind: "dog" }, kind: "new", price: price("archie") },
     ],
     [
       "prices the next item once nothing is new",

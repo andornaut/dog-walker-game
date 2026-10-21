@@ -38,7 +38,6 @@ const events: InputEvent[] = [
   { direction: 1, kind: "lane", timeMs: 2500.5 },
   { choice: 2, kind: "card", timeMs: 4000 },
   { choice: "skip", kind: "card", timeMs: 9000 },
-  { kind: "treat", slot: 2, timeMs: 9500 },
   { kind: "home", timeMs: 10_000 },
 ];
 const logOf = (logEvents: readonly InputEvent[]): InputLog =>
@@ -83,7 +82,6 @@ describe("encodeInputLog and decodeInputLog", () => {
         [2500.5, "l", 1],
         [4000, "c", 2],
         [9000, "c", "skip"],
-        [9500, "t", 2],
         [10_000, "h"],
       ],
       setup: "seed=31337&pack=koda,bo&gear=collar&zone=2",
@@ -106,9 +104,20 @@ describe("encodeInputLog and decodeInputLog", () => {
       ],
     ],
     [
-      "a version 2 log, from before heading home was logged",
+      "a version 2 log, leaving out its treats",
       encoded({ events: [[100, "t", 1]], version: 2 }),
-      [{ kind: "treat", slot: 1, timeMs: 100 }],
+      [],
+    ],
+    [
+      "a version 3 log, leaving out its treats",
+      encoded({
+        events: [
+          [100, "t", 1],
+          [200, "h"],
+        ],
+        version: 3,
+      }),
+      [{ kind: "home", timeMs: 200 }],
     ],
   ])("still decode %s", (_name, json, expected) => {
     expect(decodeOk(json).events).toEqual(expected);
@@ -121,7 +130,8 @@ describe("encodeInputLog and decodeInputLog", () => {
 
   it.each([
     ["not JSON", "{"],
-    ["another version", encoded({ events: [], version: 4 })],
+    ["another version", encoded({ events: [], version: INPUT_LOG_VERSION + 1 })],
+    ["a treat in a current log", encoded({ events: [[0, "t", 1]], version: INPUT_LOG_VERSION })],
     ["a treat in a version 1 log", encoded({ events: [[0, "t", 1]] })],
     ["a fractional treat slot", encoded({ events: [[0, "t", 0.5]], version: 2 })],
     ["heading home in a version 2 log", encoded({ events: [[0, "h"]], version: 2 })],
@@ -140,21 +150,19 @@ describe("encodeInputLog and decodeInputLog", () => {
 describe("takeDueInputs", () => {
   const replayed: InputEvent[] = [
     { direction: 1, kind: "lane", timeMs: 100 },
-    { kind: "treat", slot: 0, timeMs: 100 },
-    { kind: "treat", slot: 1, timeMs: 200 },
+    { direction: -1, kind: "lane", timeMs: 150 },
     { choice: 0, kind: "card", timeMs: 200 },
     { direction: -1, kind: "lane", timeMs: 250 },
     { kind: "home", timeMs: 300 },
   ];
 
   it.each([
-    ["takes the lane moves and treats due by the step's time, in order", 0, 150, [0, 1], 2],
-    ["holds a treat until the step it was given in", 2, 199, [], 2],
-    ["applies a treat at the step it was given in", 2, 200, [2], 3],
-    ["stops at a card choice, which its card takes", 3, 1000, [], 3],
-    ["takes a lane move after the card choice", 4, 260, [4], 5],
-    ["holds heading home until its step", 5, 299, [], 5],
-    ["takes heading home at the step it came before", 5, 300, [5], 6],
+    ["takes the lane moves due by the step's time, in order", 0, 150, [0, 1], 2],
+    ["holds a lane move until its step", 1, 149, [], 1],
+    ["stops at a card choice, which its card takes", 2, 1000, [], 2],
+    ["takes a lane move after the card choice", 3, 260, [3], 4],
+    ["holds heading home until its step", 4, 299, [], 4],
+    ["takes heading home at the step it came before", 4, 300, [4], 5],
   ])("%s", (_name, from, nowMs, due, next) => {
     expect(takeDueInputs(replayed, from, nowMs)).toEqual({
       due: due.map((index) => replayed[index]),
@@ -176,9 +184,7 @@ describe("takeCardChoice", () => {
 
 describe("replayInputs", () => {
   it("yields the events in time order", () => {
-    const shuffled = [events[2], events[5], events[4], events[0], events[3], events[1]].map(
-      defined,
-    );
+    const shuffled = [events[2], events[4], events[0], events[3], events[1]].map(defined);
     expect([...replayInputs(logOf(shuffled))]).toEqual(events);
   });
 

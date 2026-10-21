@@ -4,13 +4,12 @@ import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
 import { DOGHOUSE } from "./doghouse";
 import type { ChangeLabel } from "./hudView";
-import { TREAT_WELL } from "./topBar";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
-// zone's fees paid, and a treat given.
+// zone's pay banked, and a treat grabbed.
 export const FIRING_EVENT = "firing";
 export const PAYOUT_EVENT = "payout";
-export const TREAT_EVENT = "treat-given";
+export const TREAT_EVENT = "treat-grabbed";
 
 // seconds is how long the firing holds the walk.
 export interface FiringCue {
@@ -42,15 +41,12 @@ export const MOMENTS = {
   // pixels right of the straight line, and takes flightMs to reach the bank; the amount rises
   // from the roof and fades over chipMs.
   payout: { bow: 48, chipMs: 900, flightMs: 650, roof: { x: 60, y: 10 }, staggerMs: 200 },
-  // The treat's arc peaks this many pixels above its higher end; the owner smiles on landing.
-  treat: { arcMs: 420, peak: 40, smileMs: 900 },
+  // The owner smiles this long over a treat grabbed.
+  treat: { smileMs: 900 },
 } as const;
 
-// The top bar's money and treat icons' centres, where coins land and treats leave from.
-export const TOP_BAR_POINTS = {
-  bank: { x: 16, y: 21 },
-  treats: { x: TREAT_WELL.icon.x + 8, y: TREAT_WELL.icon.y + 8 },
-} as const;
+// The top bar's money icon's centre, where coins land.
+export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 } } as const;
 
 // An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the
 // bubble's bottom rim, and tipX is the column it points from.

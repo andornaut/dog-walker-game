@@ -27,10 +27,10 @@ describe("homeSections", () => {
       dogs: ["koda"],
       expected: {
         dogs: { note: homeLine(text, "packCount", { count: "1", max: "2" }), state: "complete" },
-        pocket: { note: data.shopGear.whistle.name, state: "complete" },
+        pocket: { note: data.shopGear.luckyCollar.name, state: "complete" },
         walker: { note: "Casey", state: "complete" },
       },
-      gear: "whistle",
+      gear: "luckyCollar",
       walker: "casey",
     },
   ] as const)(

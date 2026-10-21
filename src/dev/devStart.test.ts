@@ -26,8 +26,8 @@ describe("devRunLoadout", () => {
     [
       "takes the link's pack, gear and walker over the saved loadout",
       { dogs: ["biscuit"], gear: null },
-      { gear: "whistle", pack: ["koda", "duchess"], walker: "trista" },
-      { dogs: ["koda", "duchess"], gear: "whistle", walker: "trista" },
+      { gear: "luckyCollar", pack: ["koda", "duchess"], walker: "trista" },
+      { dogs: ["koda", "duchess"], gear: "luckyCollar", walker: "trista" },
     ],
     [
       "keeps the saved loadout and walker for what the link leaves out",
@@ -71,7 +71,7 @@ describe("homeRunSetup", () => {
   ])("%s", (_name, dev, disableDev) => {
     const overridden: RunSetup<DogId, GearId, WalkerId> = {
       dev,
-      gear: "whistle",
+      gear: "luckyCollar",
       money: 5,
       pack: ["koda"],
       route: ["a"],

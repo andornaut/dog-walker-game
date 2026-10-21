@@ -24,21 +24,23 @@ vi.mock("./simulate", async (importOriginal) => {
   const { cents } = await import("../rules/units");
   const { newRun } = await import("../state/runState");
   const { seededRandom } = await import("../runner/random");
+  const { SKILL_PRESETS } = await import("./skills");
   const simulateRun: typeof actual.simulateRun = (data, seed, config) => {
     const random = seededRandom(seed);
+    // A novice finishes half its walks and is fired twice in each.
+    const novice = config.player.skill === SKILL_PRESETS.novice;
     return {
       badges: [],
       cardsSeen: Math.floor(random() * 10),
       choices: [],
       earnings: cents(random() * 10_000),
-      finished: random() >= (config.player.kind === "rates" ? config.player.hitRate : 0.1),
-      firings:
-        config.player.kind === "rates" && config.player.hitRate === 0.5
-          ? [
-              { dog: "koda", zoneIndex: 0 },
-              { dog: "koda", zoneIndex: 1 },
-            ]
-          : [],
+      finished: random() >= (novice ? 0.5 : 0.1),
+      firings: novice
+        ? [
+            { dog: "koda", zoneIndex: 0 },
+            { dog: "koda", zoneIndex: 1 },
+          ]
+        : [],
       hits: { afterPull: 1, all: 4 },
       inputs: [],
       items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
@@ -67,8 +69,8 @@ const SMALL: Matrix = {
     { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
   ],
   players: [
-    { hitRate: 0.06, kind: "rates" },
-    { hitRate: 0.15, kind: "rates" },
+    { kind: "skill", preset: "typical" },
+    { kind: "skill", preset: "expert" },
   ],
   policies: ["heartsUnlessLow", "alwaysPay"],
 };
@@ -92,7 +94,7 @@ describe("simulateMatrix", () => {
     const rows = simulateMatrix(gameData, 3, 2, {
       ...SMALL,
       gears: [null, "runningShoes"],
-      players: [{ hitRate: 0.06, kind: "rates" }],
+      players: [{ kind: "skill", preset: "typical" }],
       policies: ["heartsUnlessLow"],
     });
 
@@ -125,14 +127,14 @@ describe("simulateMatrix", () => {
     const rows = simulateMatrix(gameData, 3, 4, SMALL);
 
     expect(rows.map(({ pack, player, policy }) => [policy, player, pack])).toEqual([
-      ["heartsUnlessLow", "6%", "Koda"],
-      ["heartsUnlessLow", "6%", "Risky trio"],
-      ["heartsUnlessLow", "15%", "Koda"],
-      ["heartsUnlessLow", "15%", "Risky trio"],
-      ["alwaysPay", "6%", "Koda"],
-      ["alwaysPay", "6%", "Risky trio"],
-      ["alwaysPay", "15%", "Koda"],
-      ["alwaysPay", "15%", "Risky trio"],
+      ["heartsUnlessLow", "typical", "Koda"],
+      ["heartsUnlessLow", "typical", "Risky trio"],
+      ["heartsUnlessLow", "expert", "Koda"],
+      ["heartsUnlessLow", "expert", "Risky trio"],
+      ["alwaysPay", "typical", "Koda"],
+      ["alwaysPay", "typical", "Risky trio"],
+      ["alwaysPay", "expert", "Koda"],
+      ["alwaysPay", "expert", "Risky trio"],
     ]);
     for (const row of rows) {
       expect(row.runs).toBe(4);
@@ -154,7 +156,7 @@ describe("simulateMatrix", () => {
     const [alone] = simulateMatrix(gameData, 5, 3, {
       ...SMALL,
       packs: SMALL.packs.slice(1),
-      players: [{ hitRate: 0.15, kind: "rates" }],
+      players: [{ kind: "skill", preset: "expert" }],
       policies: ["alwaysPay"],
     });
 
@@ -202,14 +204,14 @@ describe("simulateMatrix", () => {
   });
 
   it.each([
-    { expected: 0, hitRate: 0.06 },
-    { expected: 1, hitRate: 0.5 },
-  ])(
-    "gives the share of walks with a firing, $expected at hit rate $hitRate",
-    ({ expected, hitRate }) => {
+    { expected: 0, preset: "typical" },
+    { expected: 1, preset: "novice" },
+  ] as const)(
+    "gives the share of walks with a firing, $expected for a $preset player",
+    ({ expected, preset }) => {
       const [row] = simulateMatrix(gameData, 3, 4, {
         ...SMALL,
-        players: [{ hitRate, kind: "rates" }],
+        players: [{ kind: "skill", preset }],
       });
 
       expect(row?.firedShare).toBe(expected);

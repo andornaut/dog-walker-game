@@ -13,14 +13,10 @@ export interface GestureConfig {
 
 export interface GestureContext {
   config: GestureConfig;
-  layout: Pick<ScreenLayout, "dogRow" | "dogSlots" | "road" | "topBar">;
-  // TREAT TAP (delete with the doghouse treat tap): whether a dog in the slot has a treat to
-  // give. Absent means none, so every tap in the doghouse row steers.
-  treatToGive?: (slot: number) => boolean;
+  layout: Pick<ScreenLayout, "road" | "topBar">;
 }
 
-export type GestureAction =
-  { direction: LaneDirection; kind: "move" } | { kind: "pause" } | { kind: "treat"; slot: number };
+export type GestureAction = { direction: LaneDirection; kind: "move" } | { kind: "pause" };
 
 // One leg of a drag: a run of travel one way. Its lane steps count from anchorX: the first at
 // swipeStartDistance and the Nth at N lane-widths. direction is the way its steps
@@ -48,13 +44,6 @@ export interface GestureResult {
 }
 
 export const idleGesture: GestureState = { kind: "idle" };
-
-// The row is split into equal bands, one per slot. x is inside the row, so the band is a
-// valid slot.
-function dogSlotAt(layout: GestureContext["layout"], x: number): number {
-  const { dogRow, dogSlots } = layout;
-  return Math.floor(((x - dogRow.x) * dogSlots.length) / dogRow.width);
-}
 
 // Split at the road's centre, so both halves of the road are the same width.
 function tapDirection(layout: GestureContext["layout"], x: number): LaneDirection {
@@ -153,17 +142,13 @@ export function pointerMove(
   };
 }
 
-function tapAction({ layout, treatToGive }: GestureContext, { x, y }: Point): GestureAction {
+// A tap on the top bar pauses; anywhere else, the doghouse cards included, it steers toward
+// the tapped half of the road: the cards take no taps of their own.
+function tapAction(layout: GestureContext["layout"], { x, y }: Point): GestureAction[] {
   if (containsPoint(layout.topBar, x, y)) {
-    return { kind: "pause" };
+    return [{ kind: "pause" }];
   }
-  // TREAT TAP (delete this block with the doghouse treat tap, and dogSlotAt with it): a tap on
-  // a doghouse with a treat to give gives it; any other tap in the row steers.
-  const slot = containsPoint(layout.dogRow, x, y) ? dogSlotAt(layout, x) : -1;
-  if (slot >= 0 && treatToGive?.(slot) === true) {
-    return { kind: "treat", slot };
-  }
-  return move(tapDirection(layout, x));
+  return [move(tapDirection(layout, x))];
 }
 
 // A tap acts on release, once it can no longer turn into a drag.
@@ -176,11 +161,5 @@ export function pointerUp(
   if (moved.kind === "idle" || !moved.tapping) {
     return { actions, state: idleGesture };
   }
-  return { actions: [tapAction(context, moved.start)], state: idleGesture };
-}
-
-// A pull moved the pack: lane steps count again from the pointer's latest position, as a new
-// leg.
-export function reanchorDrag(state: GestureState): GestureState {
-  return state.kind === "dragging" ? { ...state, leg: legAt(state.x) } : state;
+  return { actions: tapAction(context.layout, moved.start), state: idleGesture };
 }

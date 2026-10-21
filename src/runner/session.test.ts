@@ -20,16 +20,17 @@ import {
 import { type RoadGeometry, startRoad, zoneLength } from "./walk";
 
 const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
-const STOP: CardSource = { kind: "forcedStop", stop: "stopSign" };
+const STOP: CardSource = { affected: ["koda"], encounter: "puddle", kind: "encounter" };
 const GEOMETRY: RoadGeometry = {
   cell: { inset: 12, length: 56 },
-  itemHeights: { forcedStop: 16, lucky: 20, needSpot: 20, tip: 12, treat: 12 },
+  itemHeights: { lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
   packBand: { bottom: 630, top: 554 },
   roadBottom: 640,
   roadTop: 40,
   sightLength: 514,
   tallestPackBand: 76,
+  walkerFootY: 634,
 };
 const geometry = () => GEOMETRY;
 const FIRING_SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");
@@ -41,7 +42,7 @@ function started(seed = 1): Session {
 
 // A started walk with nothing on its road or still to come, so a step only walks.
 function emptyRoad(session: Session): Session {
-  const road = { ...session.walk.road, forcedStopAhead: null, pending: [] };
+  const road = { ...session.walk.road, pending: [] };
   return { ...session, walk: { ...session.walk, road } };
 }
 
@@ -51,8 +52,8 @@ const kinds = (events: readonly SessionEvent[]) => events.map(({ kind }) => kind
 describe("runStreams", () => {
   it("names each stream from the seed, so a seed repeats them and another seed does not", () => {
     const draws = (seed: number) => {
-      const { cards, forks, needs } = runStreams(seed);
-      return [take(5, cards), take(5, forks), take(5, needs)];
+      const { cards, forks } = runStreams(seed);
+      return [take(5, cards), take(5, forks)];
     };
     expect(draws(3)).toEqual(draws(3));
     expect(draws(4)).not.toEqual(draws(3));
@@ -102,7 +103,7 @@ describe("stepSession", () => {
     expect(session.timeMs).toBe(0);
   });
 
-  it("walks a step: pulls, the walk, then the needs on the walked run", () => {
+  it("walks a step: pulls, then the walk", () => {
     const { events, session } = stepSession(
       gameData,
       runStreams(1),
@@ -112,31 +113,26 @@ describe("stepSession", () => {
       emptyRoad(started()),
     );
 
-    expect(kinds(events)).toEqual(["pulled", "walked", "needs"]);
+    expect(kinds(events)).toEqual(["pulled", "walked"]);
     expect(session.timeMs).toBe(STEP_SECONDS * 1000);
     expect(session.walk.run.zoneDistance).toBeGreaterThan(0);
-    expect(session.walk.run.needSeconds).not.toEqual({});
   });
 
-  it("ends the zone, offers the upgrades then the fork, and plans the next zone once both are chosen", () => {
+  it("ends the zone, offers the fork with its upgrades, and plans the next zone once a path is chosen", () => {
     const streams = runStreams(1);
     const walked = emptyRoad(started());
-    const length = zoneLength(gameData, walked.walk.run);
+    const length = zoneLength(gameData);
     const atEnd: Session = {
       ...walked,
       walk: { ...walked.walk, run: { ...walked.walk.run, zoneDistance: pixels(length - 0.01) } },
     };
 
     const end = stepSession(gameData, streams, geometry, STEP_SECONDS, [], atEnd);
-    expect(kinds(end.events)).toEqual(["pulled", "walked", "needs", "zoneEnded", "cardOpened"]);
-    expect(end.session.card?.source.kind).toBe("upgradeOffer");
+    expect(kinds(end.events)).toEqual(["pulled", "walked", "zoneEnded", "cardOpened"]);
+    expect(end.session.card?.source.kind).toBe("fork");
     expect(end.session.distanceBeforeZone).toBe(length);
 
-    const upgrade = chooseCard(gameData, streams, geometry, 0, end.session);
-    expect(kinds(upgrade.events)).toEqual(["chosen", "cardOpened"]);
-    expect(upgrade.session.card?.source.kind).toBe("fork");
-
-    const fork = chooseCard(gameData, streams, geometry, 0, upgrade.session);
+    const fork = chooseCard(gameData, streams, geometry, 0, end.session);
     expect(kinds(fork.events)).toEqual(["chosen", "zonePlanned"]);
     expect(fork.session.card).toBeNull();
     expect(fork.session.walk.run.zoneIndex).toBe(1);
@@ -146,12 +142,13 @@ describe("stepSession", () => {
 
 describe("a firing in the walk", () => {
   it("holds the road, the queued cards and the zone's end for firingHoldSeconds of steps", () => {
-    // Koda's owner down to 1 heart, a skunk card open on Koda, a forced stop queued behind it
-    // and the zone's end waiting.
+    // Koda's owner down to 1 heart with Kind words' forgiveness used, a skunk card open on Koda,
+    // a puddle queued behind it and the zone's end waiting.
     const streams = runStreams(1);
     const walk = emptyRoad(started()).walk;
     const run = {
       ...walk.run,
+      heartsForgiven: 1,
       pack: mapPack(
         (slot) => (slot.dog === "koda" ? { ...slot, hearts: clampHearts(10, 1) } : slot),
         walk.run.pack,
@@ -187,12 +184,12 @@ describe("a firing in the walk", () => {
     const frames = Math.round(FIRING_SECONDS / STEP_SECONDS);
     for (let frame = 1; frame < frames; frame++) {
       const still = stepSession(gameData, streams, geometry, STEP_SECONDS, [], session);
-      expect(kinds(still.events)).toEqual(["pulled", "walked", "needs"]);
+      expect(kinds(still.events)).toEqual(["pulled", "walked"]);
       expect(still.session.walk.run.zoneDistance).toBe(session.walk.run.zoneDistance);
       session = still.session;
     }
     const released = stepSession(gameData, streams, geometry, STEP_SECONDS, [], session);
-    expect(kinds(released.events)).toEqual(["pulled", "walked", "needs", "cardOpened"]);
+    expect(kinds(released.events)).toEqual(["pulled", "walked", "cardOpened"]);
     expect(released.session.card?.source).toEqual(STOP);
     expect(released.session.zoneEndPending).toBe(true);
   });

@@ -44,7 +44,6 @@ const moving = (elapsed: number, from = 2, to = 3, duration = 1): LaneMotion => 
 });
 const right: SessionInput = { direction: 1, kind: "lane" };
 const left: SessionInput = { direction: -1, kind: "lane" };
-const treat: SessionInput = { kind: "treat", slot: 0 };
 
 describe("stepAlpha", () => {
   it.each([
@@ -141,13 +140,6 @@ describe("leadWalk", () => {
       queued: [left],
       seconds: 0.01,
     },
-    {
-      expected: still,
-      motion: still,
-      name: "a queued treat, which never moves the pack",
-      queued: [treat],
-      seconds: 0.01,
-    },
   ])("leads $name", ({ expected, motion, queued, seconds }) => {
     const drawn = leadWalk(gameData, 5, seconds, queued, walk(0, [], motion)).road.control.motion;
     const near = (lane: LaneMotion) =>
@@ -191,7 +183,7 @@ describe("leadWalk", () => {
     { queued: [], steps: 0 },
     { queued: [right], steps: 0 },
     { queued: [right, right], steps: 0 },
-    { queued: [left, treat], steps: 0 },
+    { queued: [left, right], steps: 0 },
     { queued: [], steps: 5 },
     { queued: [left], steps: 5 },
     { queued: [right], steps: 5 },

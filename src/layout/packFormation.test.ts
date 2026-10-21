@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ROAD_HIT_SIZE } from "../assets/spriteKeys";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import {
   type DrawnDog,
@@ -10,7 +11,6 @@ import {
   PACK_DRAW_SCALE,
   packBand,
   packClearance,
-  type PackPlacement,
   packPlacements,
   sideDx,
   tallestPackBand,
@@ -27,23 +27,21 @@ const DOGS: readonly DrawnDog[] = [
 ];
 const packOf = (count: number) => DOGS.slice(0, count);
 
-// The widest dog's opaque pixels across a frame at the hit size.
-const WIDEST_DOG = 24;
 const LANE_WIDTH = SCREEN_CONFIG.roadWidth / LANE_COUNT;
 const FOOT_Y = 634;
 
 describe("packPlacements", () => {
-  // One dog per pack member, all ahead of the walker, each dog within the lane at the hit size.
+  // One dog per pack member, all ahead of the walker, each hit box within the lane.
   it.each([1, 2, 3])("places a pack of %d ahead of the walker, within the lane", (count) => {
     const placements = hitPackPlacements(count);
     expect(placements).toHaveLength(count);
     for (const { dx, footDy } of placements) {
       expect(footDy).toBeLessThan(0);
-      expect(Math.abs(dx) + WIDEST_DOG / 2).toBeLessThanOrEqual(LANE_WIDTH / 2);
+      expect(Math.abs(dx) + ROAD_HIT_SIZE / 2).toBeLessThanOrEqual(LANE_WIDTH / 2);
     }
   });
 
-  // The hit formation's sides and stagger at the draw scale, its nearest dog packClearance up.
+  // The laid-out sides and stagger at the draw scale, its nearest dog packClearance up.
   it.each([1, 2, 3])("draws a pack of %d at its hit stagger times the draw scale", (count) => {
     const dogs = packOf(count);
     const hit = hitPackPlacements(count);
@@ -63,32 +61,30 @@ describe("packPlacements", () => {
     expect(nearest).toBeLessThan(-WALKER.feetY);
   });
 
+  // No hit box sits farther out than its drawn dog.
   it.each(DOGS.map((dog) => [dog.opaqueWidth, dog] as const))(
-    "keeps a %dpx-wide side dog inside the lane's edge",
+    "keeps a %dpx-wide side dog inside the lane's edge, outside its hit box",
     (_width, dog) => {
       const [left, right] = packPlacements(WALKER, [dog, dog]).map(({ dx }) => dx);
       expect(right).toBe(sideDx(dog.opaqueWidth));
       expect(left).toBe(-sideDx(dog.opaqueWidth));
       expect(sideDx(dog.opaqueWidth) + dog.opaqueWidth / 2).toBeLessThanOrEqual(laneHalfWidth());
       expect(sideDx(dog.opaqueWidth) + dog.opaqueWidth / 2).toBeGreaterThan(laneHalfWidth() - 1);
+      const hit = hitPackPlacements(2).map(({ dx }) => Math.abs(dx));
+      expect(Math.min(Math.abs(left ?? 0), Math.abs(right ?? 0))).toBeGreaterThanOrEqual(
+        Math.max(...hit),
+      );
     },
   );
 
-  // The drawn band runs from the lead dog's feet less the hit body height at the draw scale to
-  // the hit band's bottom at the draw scale, give or take each length's rounding.
-  it.each([1, 2, 3])("draws a pack of %d's band from its drawn lead dog", (count) => {
+  // The drawn band reaches higher than the hit band, and on down to the walker's legs.
+  it.each([1, 2, 3])("draws a pack of %d's band around its hit band", (count) => {
     const clearance = packClearance(WALKER, packOf(count));
     const hit = packBand(count, FOOT_Y);
     const drawn = drawnPackBand(count, FOOT_Y, clearance);
-    const leadOf = (placements: readonly PackPlacement[]) =>
-      FOOT_Y + Math.min(...placements.map(({ footDy }) => footDy));
-    const hitBody = leadOf(hitPackPlacements(count)) - hit.top;
-    const drawnBody = leadOf(packPlacements(WALKER, packOf(count))) - drawn.top;
     expect(drawn.top).toBeLessThan(FOOT_Y - clearance);
-    expect(Math.abs(drawnBody - hitBody * PACK_DRAW_SCALE)).toBeLessThanOrEqual(1);
-    expect(
-      Math.abs(FOOT_Y - drawn.bottom - (FOOT_Y - hit.bottom) * PACK_DRAW_SCALE),
-    ).toBeLessThanOrEqual(1);
+    expect(drawn.top).toBeLessThan(hit.top);
+    expect(drawn.bottom).toBeGreaterThan(hit.bottom);
   });
 
   it("staggers dogs side by side so no two share a spot", () => {
@@ -148,17 +144,13 @@ describe("tautLeashLine", () => {
 });
 
 describe("packBand", () => {
-  it("runs from above the leading dog to just above the walker's feet", () => {
-    const band = packBand(3, 634);
-    expect(band.bottom).toBeLessThan(634);
-    expect(band.top).toBeLessThan(634 - 58);
-  });
-
-  it("is taller for a pack whose lead dog walks further ahead", () => {
-    const one = packBand(1, 634);
-    const three = packBand(3, 634);
-    expect(three.top).toBeLessThan(one.top);
-    expect(three.bottom).toBe(one.bottom);
+  // Each dog's box is ROAD_HIT_SIZE tall, standing on its feet.
+  it.each([1, 2, 3])("runs from the lead dog's box top to the last dog's feet, for %i", (count) => {
+    const feet = hitPackPlacements(count).map(({ footDy }) => 634 + footDy);
+    expect(packBand(count, 634)).toEqual({
+      bottom: Math.max(...feet),
+      top: Math.min(...feet) - ROAD_HIT_SIZE,
+    });
   });
 });
 

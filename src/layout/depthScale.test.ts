@@ -8,7 +8,6 @@ import { depthVariantKey, dogSpriteKey, standsOnGround } from "../assets/spriteK
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
-import { dogDepthStep, STATUS_OVERLAY_LIFT, statusOverlayLift } from "../runner/statuses";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";
@@ -114,15 +113,13 @@ describe("depthDraw", () => {
     expect(depthDraw(arts, 1.07)).toEqual(depthDraw(arts, 1));
   });
 
-  it("draws every pack dog's full-size art unscaled, with its status loop at 1, at every step", () => {
+  it("draws every pack dog's full-size art unscaled, at every step", () => {
     const dogs = (Object.keys(gameData.dogs) as DogId[]).map((dog) => dogSpriteKey(gameData, dog));
     expect(dogs.length).toBeGreaterThan(0);
     for (const arts of stepSets(dogs)) {
       const drawn = depthDraw(arts, PACK_DEPTH);
       expect(drawn, drawn.key).toMatchObject({ depth: 1, key: itemAt(arts, 0).key, scale: 1 });
-      expect(dogDepthStep(drawn.key, drawn.scale), drawn.key).toBe(1);
     }
-    expect(statusOverlayLift(1)).toBe(STATUS_OVERLAY_LIFT);
   });
 
   // A 32-wide cone with only @75 and @50, whatever steps the shipped cone has.

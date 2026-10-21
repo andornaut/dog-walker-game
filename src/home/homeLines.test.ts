@@ -65,8 +65,8 @@ describe("messageLine", () => {
     ],
     [
       "announces bought gear",
-      { kind: "bought", name: "Whistle", purchase: { gear: "whistle", kind: "gear" } },
-      "Got Whistle.",
+      { kind: "bought", name: "Lucky collar", purchase: { gear: "luckyCollar", kind: "gear" } },
+      "Got Lucky collar.",
     ],
     [
       "announces a bought slot",

@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { WalkerId } from "../data/types";
+import type { WalkerId, ZoneId } from "../data/types";
 import type { Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
+import { agilityWord } from "../rules/walkers";
+import { perkIconKey } from "./stateStrip";
 import { celebrationText, zoneCelebration } from "./zoneCelebration";
 
-function money(kind: "bump" | "fee" | "tip", amount: number): MoneyChange {
+function money(kind: "bump" | "pay" | "tip", amount: number): MoneyChange {
   return {
     amount: cents(amount),
     causes: [{ amount, kind }],
-    dog: kind === "fee" ? "koda" : null,
+    dog: kind === "pay" ? "koda" : null,
     kind: "money",
   };
 }
@@ -28,21 +30,26 @@ const ZONE_CHANGES: readonly Change[] = [
   hearts,
   money("bump", -200),
   money("tip", 500),
-  money("fee", 12000),
-  money("fee", 6000),
+  money("pay", 12000),
+  money("pay", 6000),
 ];
 
 describe("zoneCelebration", () => {
   // Each zone's walker joins only while not owned; a walker who joined earlier in the walk is
   // not owned yet, and still does not join again.
-  it.each<{ expected: WalkerId | null; finished: number; owned: WalkerId[] }>([
-    { expected: "ben", finished: 1, owned: ["casey"] },
-    { expected: "ada", finished: 2, owned: ["casey"] },
-    { expected: "trista", finished: 3, owned: ["casey"] },
-    { expected: "ada", finished: 2, owned: ["casey", "ben"] },
-    { expected: null, finished: 1, owned: ["casey", "ben"] },
-    { expected: null, finished: 3, owned: ["ada", "ben", "casey", "trista"] },
-  ])("finishing zone $finished owning $owned: $expected joins", ({ expected, finished, owned }) => {
+  // Each walker joins on finishing the zone their data names, while not owned.
+  const goal = (walker: WalkerId): ZoneId => {
+    const data = gameData.walkers[walker];
+    return data.unlock === "start" ? "street" : data.zone;
+  };
+  it.each<{ expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }>([
+    { expected: "ben", finished: ["street", goal("ben")], owned: ["casey"] },
+    { expected: "ada", finished: ["street", goal("ada")], owned: ["casey"] },
+    { expected: "trista", finished: ["street", goal("trista")], owned: ["casey"] },
+    { expected: null, finished: ["street", goal("ben")], owned: ["casey", "ben"] },
+    { expected: null, finished: ["street"], owned: ["casey"] },
+    { expected: null, finished: [goal("ben")], owned: ["ada", "ben", "casey", "trista"] },
+  ])("finishing $finished owning $owned: $expected joins", ({ expected, finished, owned }) => {
     const finish = { changes: [], finished, walker: "casey", zone: "Elm Avenue" } as const;
     const joined = zoneCelebration(gameData, owned, finish);
     expect(joined.kind === "newWalker" ? joined.walker : null).toBe(expected);
@@ -51,7 +58,7 @@ describe("zoneCelebration", () => {
   it("counts the zone's fees and tips, and leaves out bumps and hearts", () => {
     const finish = {
       changes: ZONE_CHANGES,
-      finished: 1,
+      finished: ["street"],
       walker: "ben",
       zone: "Elm Avenue",
     } as const;
@@ -93,12 +100,9 @@ describe("celebrationText", () => {
     ]);
   });
 
-  it.each<{ pace: string; style: string; walker: WalkerId }>([
-    { pace: "Slow", style: "Hustler", walker: "ben" },
-    { pace: "Fast", style: "Charmer", walker: "ada" },
-  ])("names $walker, with an icon before $pace and $style", ({ pace, style, walker }) => {
+  it.each<WalkerId>(["ben", "ada"])("names %s, with its agility word and perk icon", (walker) => {
     const shown = celebrationText(gameData, { kind: "newWalker", walker });
-    const name = gameData.walkers[walker].name;
+    const { agility, name, perk } = gameData.walkers[walker];
     expect(shown).toMatchObject({
       button: text.newWalker.button,
       greeting: text.card.walkerGreeting,
@@ -108,12 +112,12 @@ describe("celebrationText", () => {
     if (shown.kind !== "newWalker") {
       throw new Error("a new walker's text");
     }
-    const filled = text.newWalker.info.replace("{pace}", pace).replace("{style}", style);
+    const word = agilityWord(gameData.homeText, agility);
+    const perkName = gameData.walkerPerks[perk].name;
+    const filled = text.newWalker.info.replace("{agility}", word).replace("{perk}", perkName);
     expect(shown.info.map((part) => part.text).join("")).toBe(filled);
-    const { pace: paceId, style: styleId } = gameData.walkers[walker];
     expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
-      { icon: `icon-pace-${paceId}`, kind: "icon", text: pace },
-      { icon: `icon-style-${styleId}`, kind: "icon", text: style },
+      { icon: perkIconKey(perk), kind: "icon", text: perkName },
     ]);
   });
 });

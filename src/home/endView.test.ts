@@ -12,7 +12,8 @@ const money = (amount: number, base: Cause): MoneyChange => ({
   dog: null,
   kind: "money",
 });
-const fee = (amount: number) => money(amount, { amount, kind: "fee" });
+const pay = (amount: number) => money(amount, { amount, kind: "pay" });
+const bonus = (amount: number) => money(amount, { amount, kind: "bonus" });
 const tip = (amount: number) => money(amount, { amount, kind: "tip" });
 const card = (amount: number) =>
   money(amount, {
@@ -29,17 +30,30 @@ const hearts: Change = {
 };
 
 describe("earningsBreakdown", () => {
-  it("totals fees, tips and card costs, and ignores heart changes", () => {
-    const changes = [fee(1_000), tip(150), tip(100), card(-400), hearts, fee(1_000)];
+  const labels = gameData.menuText.end.earnings;
+
+  it("totals pay, tips and card costs, and ignores heart changes", () => {
+    const changes = [pay(1_000), tip(150), tip(100), card(-400), hearts, pay(1_000)];
     expect(earningsBreakdown(gameData, changes, cents(1_850))).toEqual([
-      { amount: 2_000, kind: "fees", label: "Fees" },
-      { amount: 250, kind: "tips", label: "Tips" },
-      { amount: -400, kind: "cardCosts", label: "Card costs" },
+      { amount: 2_000, kind: "fees", label: labels.fees },
+      { amount: 250, kind: "tips", label: labels.tips },
+      { amount: -400, kind: "cardCosts", label: labels.cardCosts },
     ]);
   });
 
+  it("labels the full pack bonus with its amount", () => {
+    const line = earningsBreakdown(gameData, [bonus(3_000)], cents(3_000)).find(
+      ({ kind }) => kind === "fullPack",
+    );
+    expect(line).toEqual({
+      amount: 3_000,
+      kind: "fullPack",
+      label: gameData.runText.fullPackHome.replace("{amount}", "$30"),
+    });
+  });
+
   it("adds lucky finds and starting money only when the run had some", () => {
-    const changes = [fee(1_000), card(500)];
+    const changes = [pay(1_000), card(500)];
     expect(
       earningsBreakdown(gameData, changes, cents(2_500)).map(({ amount, kind }) => [kind, amount]),
     ).toEqual([
@@ -52,7 +66,7 @@ describe("earningsBreakdown", () => {
   });
 
   it("always adds up to the earnings", () => {
-    const lines = earningsBreakdown(gameData, [fee(700), tip(55), card(-300)], cents(9_999));
+    const lines = earningsBreakdown(gameData, [pay(700), tip(55), card(-300)], cents(9_999));
     expect(lines.reduce((total, line) => total + line.amount, 0)).toBe(9_999);
   });
 });

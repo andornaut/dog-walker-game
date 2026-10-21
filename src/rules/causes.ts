@@ -1,24 +1,20 @@
-import type { CardOption, DogId, GameData, QuirkId, Temperament } from "../data/types";
+import type { CardOption, DogId, GameData } from "../data/types";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
 import { fillNames } from "../text/lines";
 import { assertNever } from "./assertNever";
-import { sign, TEMPERAMENT_NAMES } from "./effectText";
+import { sign } from "./effectText";
 import type { Contribution } from "./modifiers";
 import { type Cents, type Hearts, roundDollars } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
-// base: the effect, tip, fee, treat or bump. The rest are what changed it: a dog's
-// quirk, a temperament multiplier, a modifier, a zone's fee
-// multiplier, or a limit (a meter held within 0 and its max, money held at $0 or more).
+// base: the effect, tip, pay, treat or bump. The rest are what changed it: a modifier, a zone's
+// fee multiplier, or a limit (a meter held within 0 and its max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
-  | { readonly amount: number; readonly kind: "bump" | "fee" | "tip" | "treat" }
+  | { readonly amount: number; readonly kind: "bonus" | "bump" | "pay" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
-  // What a dog's quirk added, such as a show dog's fee.
-  | { readonly amount: number; readonly kind: "quirk"; readonly quirk: QuirkId }
-  | { readonly amount: number; readonly kind: "temperament"; readonly temperament: Temperament }
   // A zone's fee multiplier, with the zone's name.
   | { readonly amount: number; readonly kind: "zone"; readonly zone: string };
 
@@ -46,13 +42,10 @@ export type CauseData = Pick<
   | "debuffs"
   | "dogs"
   | "encounters"
-  | "forcedStops"
-  | "needCards"
-  | "needSpots"
-  | "quirks"
   | "runText"
   | "shopGear"
   | "upgrades"
+  | "walkerPerks"
   | "walkers"
 >;
 
@@ -106,37 +99,28 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
         ? (optionCause(resolution.options[source.option]) ?? name)
         : name;
     }
-    case "forcedStop":
-      return optionCause(data.forcedStops[source.stop].options[source.option]) ?? "";
     case "gear":
       return data.shopGear[source.gear].name;
     case "instant":
       return data.encounters[source.encounter].name;
-    case "needCard":
-      return optionCause(data.needCards[source.card].options[source.option]) ?? "";
-    case "needGoneWrong":
-      return "need ignored";
-    case "needMet":
-      return data.needSpots[source.spot].name;
-    case "quirk":
-      return data.quirks[source.quirk].name;
     case "upgrade":
       return data.upgrades[source.upgrade].name;
     case "walker":
-      return data.walkers[source.walker].name;
+      return data.walkerPerks[data.walkers[source.walker].perk].name;
     default:
       return assertNever(source);
   }
 }
 
-// A readable name for one cause of a change, such as "dramatic" or "Big tipper".
+// A readable name for one cause of a change, such as "tip" or "Big tipper".
 export function causeName(data: CauseData, change: Change, cause: Cause): string {
   switch (cause.kind) {
     case "effect":
     case "modifier":
       return effectSourceName(data, cause.source);
+    case "bonus":
     case "bump":
-    case "fee":
+    case "pay":
     case "tip":
     case "treat":
       return cause.kind;
@@ -146,10 +130,6 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       }
       // A meter held at 0 means its owner fires you.
       return cause.bound === "max" ? "at max" : firedByText(data, change.dog);
-    case "quirk":
-      return data.quirks[cause.quirk].name;
-    case "temperament":
-      return TEMPERAMENT_NAMES[cause.temperament];
     case "zone":
       return cause.zone;
     default:
@@ -176,7 +156,7 @@ function namesBase(cause: Cause): boolean {
     return true;
   }
   const { kind } = cause.source;
-  return kind !== "encounter" && kind !== "forcedStop" && kind !== "upgrade";
+  return kind !== "encounter" && kind !== "upgrade";
 }
 
 // The short floating label for a change: its amount, then its base unless the player just

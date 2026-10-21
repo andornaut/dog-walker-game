@@ -6,14 +6,14 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Every walk starts somewhere.",
     conditions: [{ count: 1, kind: "zonesFinished" }],
-    goal: "Finish your first zone",
+    goal: "Finish your first neighborhood",
     id: "firstSteps",
     name: "First Steps",
   },
   {
     badgeLine: "Home before the streetlights.",
     conditions: [{ count: "all", kind: "zonesFinished" }],
-    goal: "Finish all 4 zones of a walk",
+    goal: "Finish all 4 neighborhoods of a walk",
     id: "roundTrip",
     name: "Round Trip",
   },
@@ -34,7 +34,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Not a speck on them.",
     conditions: [{ count: 1, kind: "cleanZones" }],
-    goal: "Finish a zone without a bump",
+    goal: "Finish a neighborhood without a bump",
     id: "cleanPaws",
     name: "Clean Paws",
   },
@@ -54,8 +54,8 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "Treats are on you.",
-    conditions: [{ dollars: 2000, kind: "earnings" }],
-    goal: "Earn $2,000 in one walk",
+    conditions: [{ dollars: 300, kind: "earnings" }],
+    goal: "Earn $300 in one walk",
     id: "bigPayday",
     name: "Big Payday",
   },
@@ -69,7 +69,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "A pocket for everything.",
     conditions: [{ count: "all", kind: "gearOwned" }],
-    goal: "Own all 5 gear items",
+    goal: "Own every gear item",
     id: "kittedOut",
     name: "Kitted Out",
   },
@@ -78,7 +78,7 @@ export const ACHIEVEMENTS = [
     conditions: [{ count: "all", kind: "dogsFinishedWith" }],
     goal: "Finish a walk with every dog",
     id: "neighbourhoodFavourite",
-    name: "Neighbourhood Favourite",
+    name: "Neighborhood Favorite",
     shortGoal: "All 9 dogs finish",
   },
   {
@@ -100,15 +100,15 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "You can smell this badge.",
-    conditions: [{ count: 3, debuff: "stinky", kind: "debuffZones" }],
-    goal: "Be Stinky in 3 zones of one walk",
+    conditions: [{ count: 3, debuff: "stinky", kind: "debuffsGot" }],
+    goal: "Get Stinky 3 times in one walk",
     id: "eauDeSkunk",
     name: "Eau de Skunk",
   },
   {
     badgeLine: "So close. Every time.",
     conditions: [{ count: 5, kind: "squirrelsChased" }],
-    goal: "Let a chaser chase 5 squirrels",
+    goal: "Let the pack chase 5 squirrels",
     id: "squirrel",
     name: "Squirrel!",
   },

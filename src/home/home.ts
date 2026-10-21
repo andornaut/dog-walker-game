@@ -1,7 +1,8 @@
 import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
 import { quipLine } from "../rules/choices";
-import { zoneFee } from "../rules/dogs";
-import { effectClause, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
+import { maxHearts } from "../rules/dogs";
+import { effectClause, SIZE_NAMES } from "../rules/effectText";
+import { payFor } from "../rules/run";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
@@ -156,10 +157,10 @@ export function packOf(loadout: HomeLoadout): PackDogs | undefined {
   return third === undefined ? [first, second] : [first, second, third];
 }
 
-// What the picked pack pays for each zone it finishes, before upgrades.
-// A dog's fee for each zone it is walked, as the shop shows it.
-export function dogFeeText(data: Pick<GameData, "dogs" | "tuning">, dog: DogId): string {
-  return dollarText(zoneFee(data.tuning, [], data.dogs[dog]));
+// A dog's pay for each zone it walks, before the zone's multiplier, as its tile and the shop
+// show it.
+export function dogFeeText(data: Pick<GameData, "tuning">): string {
+  return dollarText(payFor(data.tuning));
 }
 
 // The name of the walk's zone at position zone, counting from 1, or the world's name for a
@@ -258,8 +259,7 @@ export function partingSpeech(
   return `${data.dogs[dog].owner.name}: ${line}`;
 }
 
-type InfoData = ShopData &
-  Pick<GameData, "debuffs" | "encounters" | "homeText" | "needs" | "quirks">;
+type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText">;
 
 const FOCUS_FIELDS = HOME_TEXT_FIELDS.focus;
 
@@ -271,28 +271,22 @@ function priceInfo(text: HomeText["focus"], bank: Cents, cost: Cents): string {
     : fillLine(FOCUS_FIELDS, text, "priceBuy", { price });
 }
 
-// A dog in words for the home screen's info line, so its tile's icons never stand alone: size
-// and trait, need word and quirk, fee or price, and its owner's temperament.
+// A dog in words for the home screen's info line, so its tile's icons never stand alone: its
+// size and hearts, and its pay or price.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
   const text = data.homeText.focus;
-  const { name, need, owner, quirk, size, trait } = data.dogs[dog];
+  const { name, size } = data.dogs[dog];
   const kind = fillLine(FOCUS_FIELDS, text, "kind", {
-    need: data.needs[need].name,
-    quirk: data.quirks[quirk].name,
+    hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
     size: SIZE_NAMES[size],
-    trait: TRAIT_NAMES[trait].toLowerCase(),
-  });
-  const temper = fillLine(FOCUS_FIELDS, text, "temper", {
-    owner: owner.name,
-    temperament: TEMPERAMENT_NAMES[owner.temperament],
   });
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   if (cost === null) {
-    const fee = dogFeeText(data, dog);
-    return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: name, fee, kind, temper });
+    const fee = dogFeeText(data);
+    return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: name, fee, kind });
   }
   const price = priceInfo(text, bank, cost);
-  return fillLine(FOCUS_FIELDS, text, "dogLocked", { dog: name, kind, price, temper });
+  return fillLine(FOCUS_FIELDS, text, "dogLocked", { dog: name, kind, price });
 }
 
 // A gear item and what it does, with its price while locked.

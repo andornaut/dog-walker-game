@@ -23,7 +23,7 @@ function dogRuns(data: RunSliceData, run: RunState): DogRun[] {
   );
 }
 
-// The run so far, for the save after a zone's fees are paid (finishZone has moved zoneIndex on
+// The run so far, for the save after a zone's pay is banked (finishZone has moved zoneIndex on
 // to the next zone, whose fork is not yet taken).
 export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {

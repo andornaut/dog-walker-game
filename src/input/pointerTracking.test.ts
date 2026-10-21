@@ -13,7 +13,7 @@ import {
 } from "../runner/laneControl";
 import { destinationLane, stillInLane } from "../runner/laneMotion";
 import { chance, type Random, randomInt, randomPick, seededRandom } from "../runner/random";
-import { type GestureAction, type GestureContext, reanchorDrag } from "./gestures";
+import type { GestureAction, GestureContext } from "./gestures";
 import {
   idleTrack,
   type PointerPhase,
@@ -45,7 +45,6 @@ const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
 interface Event {
   held?: boolean;
   onButton?: boolean;
-  onStrip?: boolean;
   phase: PointerPhase;
   press: Press;
   x: number;
@@ -60,11 +59,11 @@ function feed(
   const actions: GestureAction[] = [];
   let current = track;
   for (const event of events) {
-    const { held = false, onButton = false, onStrip = false, phase, press, x, y = 400 } = event;
+    const { held = false, onButton = false, phase, press, x, y = 400 } = event;
     const result = trackPointer(
       context,
       held,
-      { onButton, onStrip, phase, point: { x, y }, press },
+      { onButton, phase, point: { x, y }, press },
       current,
     );
     actions.push(...result.actions);
@@ -183,25 +182,6 @@ describe("trackPointer", () => {
       name: "steers by the latest finger, ignoring one that rests on the screen",
       tracking: true,
     },
-    {
-      actions: [],
-      events: [
-        { onStrip: true, phase: "down", press: first, x: 330, y: 60 },
-        { phase: "up", press: first, x: 331, y: 61 },
-      ],
-      name: "never taps on the state strip, as the tap is the strip's",
-      tracking: false,
-    },
-    {
-      actions: [left],
-      events: [
-        { onStrip: true, phase: "down", press: first, x: 330, y: 60 },
-        { phase: "move", press: first, x: 273, y: 70 },
-        { phase: "up", press: first, x: 273, y: 70 },
-      ],
-      name: "drags from the state strip",
-      tracking: false,
-    },
   ])("$name", ({ actions, events, tracking }) => {
     const result = feed(events);
     expect({ actions: result.actions, tracking: result.track.press !== undefined }).toEqual({
@@ -244,7 +224,7 @@ describe("trackPointer fuzz", () => {
     world: World,
     phase: PointerPhase,
     id: number,
-    on: "button" | "strip" | "walk" = "walk",
+    on: "button" | "walk" = "walk",
   ): void {
     const press = world.down.get(id);
     if (press === undefined) {
@@ -252,7 +232,6 @@ describe("trackPointer fuzz", () => {
     }
     const sample = {
       onButton: on === "button",
-      onStrip: on === "strip",
       phase,
       point: { x: press.x, y: press.y },
       press,
@@ -288,7 +267,7 @@ describe("trackPointer fuzz", () => {
       if (pressed !== undefined) {
         send(world, "up", id);
       }
-      const on = randomPick(random, ["button", "strip", "walk", "walk", "walk"] as const);
+      const on = randomPick(random, ["button", "walk", "walk", "walk"] as const);
       world.down.set(id, { downTime: world.time, id, x: roadX(random), y: anyY(random) });
       send(world, "down", id, on);
     } else if (roll < 0.55) {
@@ -309,8 +288,7 @@ describe("trackPointer fuzz", () => {
     } else if (roll < 0.85) {
       world.hitStop = !world.hitStop;
     } else if (roll < 0.9) {
-      world.control = pullLane(laneConfig, 0.5, chance(random, 0.5) ? 1 : -1, world.control);
-      world.track = { ...world.track, gesture: reanchorDrag(world.track.gesture) };
+      world.control = pullLane(laneConfig, 0, chance(random, 0.5) ? 1 : -1, world.control);
     } else if (roll < 0.93) {
       world.control = lockSteering(random() * 0.6, world.control);
     } else {

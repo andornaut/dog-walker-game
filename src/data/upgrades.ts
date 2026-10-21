@@ -14,11 +14,11 @@ export const UPGRADES = {
   },
   bigTipper: {
     art: "card-big-tipper",
-    duration: "run",
+    duration: "nextZone",
     effects: [
       {
         by: "bigTipperTipBonus",
-        duration: "run",
+        duration: "nextZone",
         kind: "modifier",
         operation: "add",
         stat: "tipValue",
@@ -37,7 +37,7 @@ export const UPGRADES = {
         duration: "run",
         kind: "modifier",
         operation: "multiply",
-        stat: "chaserSquirrelPulls",
+        stat: "squirrelPulls",
       },
     ],
     kind: "boost",
@@ -72,63 +72,19 @@ export const UPGRADES = {
     kind: "tradeOff",
     name: "Rush hour",
   },
-  secondWind: {
-    art: "card-second-wind",
-    duration: "now",
-    effects: [{ amount: 2, kind: "hearts", target: { kind: "unhappiest" } }],
-    kind: "boost",
-    name: "Second wind",
-  },
-  shortcut: {
-    art: "card-shortcut",
-    duration: "nextZone",
-    effects: [
-      {
-        by: "shortcutZoneLength",
-        duration: "nextZone",
-        kind: "modifier",
-        operation: "multiply",
-        stat: "zoneLength",
-      },
-      {
-        by: "shortcutFees",
-        duration: "nextZone",
-        kind: "modifier",
-        operation: "multiply",
-        stat: "fees",
-      },
-    ],
-    kind: "tradeOff",
-    name: "Shortcut",
-  },
   sweetTalker: {
     art: "card-sweet-talker",
     duration: "run",
     effects: [
       {
-        by: "sweetTalkerCostPerDog",
+        by: "sweetTalkerFreeCards",
         duration: "run",
         kind: "modifier",
         operation: "add",
-        stat: "costPerDog",
+        stat: "freeCards",
       },
     ],
     kind: "boost",
     name: "Sweet talker",
-  },
-  treatMagnet: {
-    art: "card-treat-magnet",
-    duration: "run",
-    effects: [
-      {
-        by: "treatMagnetReachLanes",
-        duration: "run",
-        kind: "modifier",
-        operation: "add",
-        stat: "treatReach",
-      },
-    ],
-    kind: "boost",
-    name: "Treat magnet",
   },
 } as const satisfies Record<string, Upgrade>;

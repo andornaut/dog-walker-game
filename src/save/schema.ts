@@ -38,10 +38,11 @@ const dogRunSchema = v.object({
   zonesFinished: count,
 });
 
-// A run's achievement counters (RunCounters), keyed by debuff id.
+// A run's achievement counters (RunCounters). debuffsGot is keyed by debuff id; a checkpoint
+// saved before it counted zones ended with a debuff instead, which is dropped.
 const runCountersSchema = v.object({
   bumpsByZone: v.array(count),
-  debuffZones: v.record(contentId, count),
+  debuffsGot: v.optional(v.record(contentId, count), {}),
   // Checkpoints saved before it walked from the first zone.
   firstZone: v.optional(count, 0),
   squirrelChases: count,

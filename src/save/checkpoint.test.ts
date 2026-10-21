@@ -113,8 +113,12 @@ describe("recordRunEnd", () => {
   });
 
   it.each<[string, Partial<RunResult>, WalkerId[]]>([
-    ["no walker for heading home in zone 1", { outcome: "wentHome", zone: 1 }, ["casey"]],
-    ["Ben for heading home in zone 2", { outcome: "wentHome", zone: 2 }, ["casey", "ben"]],
+    ["no walker for heading home in zone 2", { outcome: "wentHome", zone: 2 }, ["casey"]],
+    [
+      "Ben for heading home once park is finished",
+      { outcome: "wentHome", zone: 3 },
+      ["casey", "ben"],
+    ],
     ["every walker for a finished walk", {}, ["casey", "ada", "ben", "trista"]],
   ])("unlocks %s", (_, changes, walkers) => {
     expect(recordRunEnd(testAwards, newPlayerSave, runResult(changes)).owned.walkers).toEqual(

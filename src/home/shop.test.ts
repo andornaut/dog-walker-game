@@ -134,7 +134,7 @@ describe("shopRowId and shopTabOf", () => {
   it.each<[Purchase, string, ShopTab]>([
     [{ dog: "nugget", kind: "dog" }, "dog:nugget", "dogs"],
     [{ kind: "dogSlot" }, "slot:2", "dogs"],
-    [{ gear: "whistle", kind: "gear" }, "gear:whistle", "gear"],
+    [{ gear: "luckyCollar", kind: "gear" }, "gear:luckyCollar", "gear"],
   ])("opens %o on its row and tab", (purchase, id, tab) => {
     expect(shopRowId(owned, purchase)).toBe(id);
     expect(shopTabOf(purchase)).toBe(tab);
@@ -148,7 +148,7 @@ describe("shopRowId and shopTabOf", () => {
     const purchases: Purchase[] = [
       { dog: "nugget", kind: "dog" },
       { kind: "dogSlot" },
-      { gear: "whistle", kind: "gear" },
+      { gear: "luckyCollar", kind: "gear" },
     ];
     for (const purchase of purchases) {
       const ids = rows[shopTabOf(purchase)].map(({ id }) => id);

@@ -40,7 +40,6 @@ export type PauseSceneData = {
 
 // The Home question's note lines' colours, by what they say.
 const NOTE_COLORS: Readonly<Record<HomeNoteLine["kind"], number>> = {
-  keep: PALETTE.forest,
   lose: PALETTE.darkRed,
   zonesLeft: PALETTE.plum,
 };

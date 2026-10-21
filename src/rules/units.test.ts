@@ -6,7 +6,9 @@ import { clampHearts, dollarsToCents, probability, read, readTable } from "./uni
 describe("units", () => {
   it("reads dollars from the tuning as integer cents", () => {
     expect(read(TEST_TUNING, "money", "tip")).toBe(100);
-    expect(readTable(TEST_TUNING, "money", "feeByTemperament", "fussy")).toBe(1300);
+    expect(readTable(TEST_TUNING, "money", "prices", "fannyPack")).toBe(
+      TEST_TUNING.money.prices.fannyPack * 100,
+    );
     expect(dollarsToCents(1.5)).toBe(150);
   });
 
@@ -26,10 +28,10 @@ describe("units", () => {
     expect(() =>
       readTable(
         TEST_TUNING,
-        "multipliers",
-        "tipSpawnsByPackSize",
-        4 as keyof typeof TEST_TUNING.multipliers.tipSpawnsByPackSize,
+        "hearts",
+        "maxBySize",
+        "huge" as keyof typeof TEST_TUNING.hearts.maxBySize,
       ),
-    ).toThrow("multipliers.tipSpawnsByPackSize.4");
+    ).toThrow("hearts.maxBySize.huge");
   });
 });

@@ -11,32 +11,21 @@ export const SHOP_GEAR = {
     short: "Start with extra cash",
   },
   luckyCollar: {
-    effects: [
-      { by: "luckyCollarStart", kind: "modifier", operation: "add", stat: "startHearts" },
-      { by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" },
-    ],
+    effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],
     name: "Lucky collar",
     price: "luckyCollar",
     short: "+1 ♥ for every owner",
   },
   poopBags: {
-    effects: [{ kind: "skipOption", usesPerRun: "poopBagsSkipsPerRun" }],
+    effects: [{ kind: "skipOption" }],
     name: "Poop bags",
     price: "poopBags",
     short: "One free Skip a walk",
   },
   runningShoes: {
-    effects: [
-      { by: "runningShoesInputLock", kind: "modifier", operation: "multiply", stat: "inputLock" },
-    ],
+    effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],
     name: "Running shoes",
     price: "runningShoes",
-    short: "No stumble after a pull",
-  },
-  whistle: {
-    effects: [{ duration: "run", encounter: "thief", kind: "immune" }],
-    name: "Whistle",
-    price: "whistle",
-    short: "Thieves flee",
+    short: "Faster lane changes",
   },
 } as const satisfies Record<string, Gear>;

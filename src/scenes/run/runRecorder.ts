@@ -103,7 +103,7 @@ export function emitDevState(
     setup,
     time: {
       clocks,
-      expectedRoadMs: expectedRoadMs(zoneLength(gameData, walk.run), scrollSpeed),
+      expectedRoadMs: expectedRoadMs(zoneLength(gameData), scrollSpeed),
     },
     zoneDistance: walk.run.zoneDistance,
     zoneIndex: walk.run.zoneIndex,

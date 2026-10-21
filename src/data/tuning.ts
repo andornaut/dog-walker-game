@@ -6,10 +6,11 @@ import type { Tuning } from "./types";
 export const TUNING = {
   // Plain counts.
   counts: {
-    biscuitNeighbourTreatsPerDog: 1,
     // A darting mover crosses the road this many lanes a second.
     dartLanesPerSecond: 3,
     loadoutMax: 1,
+    // Long reach grabs tips and treats this many lanes beside the pack.
+    longReachLanes: 1,
     luckyEncountersPerZone: 2,
     // At most this many movers are on screen at once, of them at most maxDartMovers darting
     // and maxSlowVehicles in-lane slower than the road.
@@ -19,123 +20,88 @@ export const TUNING = {
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 22,
     minorObstaclesGainPerZone: 4,
-    // Spots that meet a dog's need, drawn from those the pack's needs match.
-    needSpotsPerZone: 6,
     obstaclesFirstZone: 18,
     obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
     packSizeMax: 3,
     packSizeMin: 1,
-    poopBagsSkipsPerRun: 1,
-    // A scent hound in the pack picks up tips this many lanes beside the pack.
-    scentHoundLanes: 1,
+    // Sweet talker makes this many encounter cards each zone cost no money.
+    sweetTalkerFreeCards: 1,
     tipsFirstZone: 52,
     tipsGainPerZone: 7,
-    treatCarryMax: 3,
-    treatMagnetReachLanes: 1,
     treatsPerZone: 2,
     upgradeChoiceCount: 3,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
   hearts: {
-    // A charmer walker's owners each start with this many more.
-    charmerStart: 1,
+    // The hearts a minor bump costs the owner of the dog that touched it.
+    bump: 1,
     // A face looks happy at this many hearts or more, and upset below faceNeutralFrom.
-    faceHappyFrom: 6,
-    faceNeutralFrom: 3,
+    faceHappyFrom: 3,
+    faceNeutralFrom: 2,
+    // Kind words forgives this many hearts lost in each zone, the first ones lost.
+    kindWordsForgiven: 1,
     luckyCollarMax: 1,
-    luckyCollarStart: 1,
-    maxBySize: { big: 10, medium: 8, small: 6 },
-    // A treat given to a pampered dog's owner, in place of treat.
-    pamperedTreatHearts: 2,
-    // How many more hearts a messy card costs a show dog's owner, wherever it costs them any.
-    showDogMessyHearts: 1,
-    startByTemperament: { dramatic: 3, fussy: 2, laidBack: 3 },
+    maxBySize: { big: 5, medium: 4, small: 3 },
     treat: 1,
   },
   // Whole dollars: $1 is the smallest amount, and an amount a multiplier changes is rounded to
   // the nearest dollar.
   money: {
-    // A Regular dog's accident, cleaned up with a bag.
-    accidentCleanUp: 20,
     // Added to each tip while Big tipper is on.
     bigTipperTipBonus: 1,
-    chattyNeighbourTip: 100,
-    // The tip when a crowd pleaser's need is met.
-    crowdPleaserTip: 8,
-    encounterHigh: 40,
-    encounterLow: 20,
-    fannyPackStart: 60,
-    feeByTemperament: { dramatic: 80, fussy: 100, laidBack: 80 },
-    lemonadeCup: 12,
-    // The construction detour's long way, per dog: less than missedTips, since it also tires the pack.
-    longWayMissedTips: 12,
-    lostWalletKeep: 120,
-    // The tips the pack drops on a minor obstacle, once for the pack.
-    minorBump: 8,
-    missedTips: 20,
-    photoOpTip: 40,
+    encounterHigh: 15,
+    encounterLow: 5,
+    fannyPackStart: 10,
+    // Paid into the bank per dog when every dog set out with gets home after the last zone.
+    fullPackBonusPerDog: 10,
+    lostWalletKeep: 10,
+    missedTips: 4,
+    // Each walking dog's pay for a zone, before the zone's pay multiplier.
+    payPerDog: 10,
     prices: {
+      archie: 150,
       // The second and third dog slots; every player starts with one.
-      dogSlot2: 3200,
-      dogSlot3: 7200,
-      fannyPack: 1600,
-      lockedDog: 2400,
-      luckyCollar: 4000,
-      poopBags: 2800,
-      runningShoes: 3200,
-      whistle: 2400,
+      dogSlot2: 1000,
+      dogSlot3: 2500,
+      duchess: 100,
+      fannyPack: 300,
+      koda: 200,
+      luckyCollar: 750,
+      nugget: 150,
+      penny: 250,
+      pierre: 200,
+      poopBags: 500,
+      runningShoes: 600,
+      snowball: 300,
+      zippy: 125,
     },
-    // Added to a show dog's fee each zone, before fee modifiers.
-    showDogFee: 20,
-    squirrelChase: 20,
-    strangerTip: 40,
-    sweetTalkerCostPerDog: -16,
-    thiefLetGo: 40,
+    squirrelChase: 5,
+    // The cash every walk starts with, before gear.
+    startPurse: 5,
+    thiefLetGo: 10,
     tip: 1,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
-    // A photo op's tip while a camera-ready dog walks.
-    cameraReadyTip: 2,
-    // How many tips appear for a charmer walker.
-    charmerTipSpawns: 0.85,
-    // How much more often stranger spots are drawn while a crowd pleaser walks.
-    crowdPleaserStrangerWeight: 2,
-    // A fast walker's fees, and the factor on its road speed, zone length and spawns.
-    fastWalkerFees: 1.1,
-    fastWalkerSpeed: 1.1,
+    // Each big dog in the pack adds this to the walker's agility.
+    bigDogAgility: -0.05,
+    // How long a debuff lasts while Ada's Calm voice walks.
+    calmVoiceDebuffFactor: 0.5,
     goodLeashSquirrelPull: 0,
-    heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
-    // How many tips appear for a hustler walker.
-    hustlerTipSpawns: 1.2,
-    // A nervous dog's need fills this much faster once firings leave her the only dog walking.
-    nervousAloneUrgency: 2,
-    otherDogChangePerBigDog: -0.25,
-    otherDogChangePerSmallDog: 0.25,
-    // The tips a squirrel chase drops when a ratter joins it.
-    ratterChaseTips: 0,
-    runningShoesInputLock: 0,
+    // How many hearts a minor bump costs while the pack is Muddy.
+    muddyBumpHearts: 2,
+    // Running shoes add this much to the walker's agility.
+    runningShoesAgility: 0.1,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     scrollSpeedGainPerZone: 0.15,
-    shortcutFees: 0.75,
-    shortcutZoneLength: 0.75,
-    // How much faster the pack changes lanes while a sled dog walks.
-    sledDogLaneSpeed: 1.15,
-    // A slow walker's fees, and the factor on its road speed, zone length and spawns.
-    slowWalkerFees: 0.9,
-    slowWalkerSpeed: 0.9,
-    // How long a lane change takes while the pack is Spooked.
-    spookedLaneMove: 1.25,
-    // How many tips appear for the rest of the zone while the pack is Stinky.
+    // How many tips appear while the pack is Stinky.
     stinkyTipSpawns: 0.5,
-    // How many tips appear in a zone, by the number of dogs in the pack at its start.
-    tipSpawnsByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },
-    // How fast every dog's need fills toward urgent while the pack is Tuckered out.
-    tuckeredUrgency: 1.5,
+    // How many treats appear while Ben's Treat finder walks.
+    treatFinderSpawns: 1.5,
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {
@@ -150,8 +116,8 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
-    // Meeting a need at a spot opens its payoff card instead of its plain reward.
-    needPayoffCard: 0.25,
+    // A hit that would land on a small dog misses it this often, costing nothing.
+    smallDodgeChance: 0.25,
   },
   seconds: {
     // One hop of a bouncing ball, which is only drawn.
@@ -166,38 +132,27 @@ export const TUNING = {
     hintStaleSeconds: 5,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
-    inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
     // Road in view ahead of the walker at the base scroll speed. Read once at load.
     lookAheadSeconds: 3.6,
     // A minor bump holds the road and the pack still this long.
-    minorHitStopSeconds: 0.6,
-    // Then lane input stays locked this long.
-    minorStumble: 0.3,
+    minorHitStopSeconds: 0.3,
     // Each step of a stepping mover takes this long.
     moverStepSeconds: 0.6,
     // A mover's cue shows this long before each move.
     moverWarningSeconds: 1,
-    // An urgent need left this long goes wrong, then starts again.
-    needGoneWrong: 20,
-    // A need turns urgent after this much walking since it was last met or went wrong.
-    needUrgentByEnergy: { calm: 90, hyper: 50, steady: 60 },
+    // How long the Muddy debuff lasts, in walking time.
+    muddySeconds: 20,
     // Wherever the path changes lanes between two obstacles, the road between them also leaves
     // the pack this long to react, on top of the pack's height and the lane moves.
     pathReactionMargin: 0.5,
     // A pull never lands the pack where an obstacle reaches it sooner than the pull's lane
-    // move, the dog's input lock, this and a lane move back.
+    // move, this and a lane move back.
     pullReactionWindow: 0.6,
     // How long a dog strains toward its target, with its bubble, before it pulls.
     pullTell: 1,
-    // How long the Spooked debuff lasts, in walking time.
-    spookedSeconds: 10,
-    // How long Soaked shows on a dog; it changes nothing in the rules.
-    statusVisualSeconds: 10,
-    // While the pack is Tangled, lane input stays locked this long after each lane change.
-    tangledLaneLock: 0.3,
-    // How long the Tangled debuff lasts, in walking time.
-    tangledSeconds: 10,
+    // How long the Stinky debuff lasts, in walking time.
+    stinkySeconds: 20,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 144,
   },

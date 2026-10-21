@@ -6,10 +6,7 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
-import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
-import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
@@ -40,20 +37,19 @@ import { screenLayout } from "../layout/screenLayout";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
-import { giveTreat } from "../rules/treats";
-import { cents, pixels, read, readTable } from "../rules/units";
+import { clampHearts, pixels, read } from "../rules/units";
+import { mapPack } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
+import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
 import { STEP_SECONDS } from "./fixedStep";
-import { isSteeringLocked } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
 import { seededRandom } from "./random";
 import {
-  type AreaContact,
   blocksLane,
   finishZone,
   footprintOf,
@@ -99,7 +95,6 @@ const tuning = {
     hitStopSeconds: 1,
     laneMove: 0.18,
     minorHitStopSeconds: 0.6,
-    minorStumble: 0.5,
     zoneAtBaseSpeed: 30,
   },
 };
@@ -107,12 +102,7 @@ const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
   encounters: ENCOUNTERS,
-  forcedStops: FORCED_STOPS,
   minorObstacles: MINOR_OBSTACLES,
-  needCards: NEED_CARDS,
-  needSpots: NEED_SPOTS,
-  needs: NEEDS,
-  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   ...TEST_WALKER_DATA,
@@ -168,7 +158,7 @@ const walkwayOf = (tuned: Real, run: RunState) => ({
   laneCount: LANE_COUNT,
   laneMoveSeconds: read(TUNING, "seconds", "laneMove"),
   scrollSpeed: walkScrollSpeed(tuned, run),
-  zoneLength: zoneLength(tuned, run),
+  zoneLength: zoneLength(tuned),
 });
 // The walker whose pace scrolls the road fastest.
 const FASTEST_WALKER = (Object.keys(WALKERS) as WalkerId[]).reduce((fastest, walker) => {
@@ -267,13 +257,14 @@ function expectCapsOnScreen(movers: readonly { distance: number; mover: MoverPat
 }
 const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
-  itemHeights: { forcedStop: 16, lucky: 20, needSpot: 20, tip: 12, treat: 12 },
+  itemHeights: { lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
   packBand: { bottom: 630, top: 554 },
   roadBottom: 640,
   roadTop: 40,
   sightLength: 514,
   tallestPackBand: 76,
+  walkerFootY: 634,
 };
 
 const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
@@ -295,6 +286,18 @@ const inLane = (lane: number, walk: Walk): Walk => ({
   road: {
     ...walk.road,
     control: { ...walk.road.control, motion: stillInLane(lane), target: lane },
+  },
+});
+// The walk with every owner at hearts.
+const withHearts = (hearts: number, walk: Walk): Walk => ({
+  ...walk,
+  run: {
+    ...walk.run,
+    pack: mapPack(
+      (slot) =>
+        slot.status === "walking" ? { ...slot, hearts: clampHearts(hearts, hearts) } : slot,
+      walk.run.pack,
+    ),
   },
 });
 const graced = (walk: Walk): Walk => ({
@@ -330,51 +333,9 @@ describe("planZone", { timeout: 15_000 }, () => {
   it("plans the zone's counts of each kind of spawn", () => {
     expect(countOf("obstacle")).toBe(6);
     expect(countOf("minor")).toBe(4);
-    const solo = readTable(tuning, "multipliers", "tipSpawnsByPackSize", 1);
-    expect(countOf("tip")).toBe(Math.round(tuning.counts.tipsFirstZone * solo));
-    expect(countOf("treat")).toBe(2);
+    expect(countOf("tip")).toBe(tuning.counts.tipsFirstZone);
+    expect(countOf("treat")).toBe(tuning.counts.treatsPerZone);
     expect(countOf("lucky")).toBe(2);
-  });
-
-  it("scales the obstacles, tips and need spots by the walker's pace, and nothing else", () => {
-    const paced = {
-      ...data,
-      tuning: { ...tuning, multipliers: { ...tuning.multipliers, fastWalkerSpeed: 2 } },
-    };
-    const counts = (tuned: typeof data) => {
-      const walk = {
-        ...walkWith(["koda"]),
-        run: newRun(tuned, 1, { dogs: ["koda"], gear: null, walker: "trista" }),
-      };
-      const plan = planZone(tuned, geometry, seededRandom(3), walk);
-      const count = (category: string) =>
-        plan.road.pending.filter((event) => itemCategory(tuned, event.kind) === category).length;
-      return {
-        lucky: count("lucky"),
-        minor: count("minor"),
-        needSpot: count("needSpot"),
-        obstacle: count("obstacle"),
-        tip: count("tip"),
-        treat: count("treat"),
-      };
-    };
-    const base = counts(data);
-    expect(base.needSpot).toBeGreaterThan(0);
-    expect(counts(paced)).toEqual({
-      lucky: base.lucky,
-      minor: 2 * base.minor,
-      needSpot: 2 * base.needSpot,
-      obstacle: 2 * base.obstacle,
-      tip: 2 * base.tip,
-      treat: base.treat,
-    });
-  });
-
-  it("places a forced stop in the middle third of the zone", () => {
-    const distance = planned.road.forcedStopAhead?.distance ?? 0;
-    const length = zoneLength(data, planned.run);
-    expect(distance).toBeGreaterThan(length / 3 - 160);
-    expect(distance).toBeLessThan((2 * length) / 3 + 160);
   });
 
   it("draws only the minor obstacles the current zone weighs above 0", () => {
@@ -404,16 +365,11 @@ describe("planZone", { timeout: 15_000 }, () => {
         weights: {
           ...TEST_WORLD.zones[0].weights,
           obstacles: {
-            cafe: 0,
-            goose: 0,
             otherDog: 0,
-            petunias: 0,
-            picnic: 0,
             puddle: 2,
             skunk: 0,
             squirrel: 0,
             thief: 0,
-            trash: 0,
           },
         },
       },
@@ -548,14 +504,6 @@ describe("planZone", { timeout: 15_000 }, () => {
       }
     },
   );
-
-  it("draws a forced stop not met yet this run", () => {
-    let walk = planned;
-    for (let zone = 0; zone < 4; zone++) {
-      walk = planZone(data, geometry, seededRandom(zone), walk);
-    }
-    expect(new Set(walk.road.forcedStopsSeen).size).toBe(walk.road.forcedStopsSeen.length);
-  });
 });
 
 describe("stepWalk", () => {
@@ -563,7 +511,10 @@ describe("stepWalk", () => {
     const walk = walkWith(["koda"]);
     const pending = [0, 1, 3, 4].map((lane) => ({ distance: 0.5, kind: "tip", lane }) as const);
     const due: Walk = { ...walk, road: { ...walk.road, pending } };
-    const stinky: Walk = { ...due, run: { ...due.run, debuffs: [{ debuff: "stinky" }] } };
+    const stinky: Walk = {
+      ...due,
+      run: { ...due.run, debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
+    };
     const tipsInView = (from: Walk) =>
       step(from, 0.05).walk.road.items.filter(({ kind }) => kind === "tip").length;
     expect(tipsInView(due)).toBe(pending.length);
@@ -590,19 +541,22 @@ describe("stepWalk", () => {
     const walk = walkWith(["koda"], [atPack("tip")]);
     const { collected, tips, walk: after } = step(walk);
     expect(collected.map(({ kind }) => kind)).toEqual(["tip"]);
-    expect(after.run.money).toBe(tipValue(data, walk.run).amount);
+    expect(after.run.money).toBe(walk.run.money + tipValue(data, walk.run).amount);
     expect(tips).toEqual([tipValue(data, walk.run)]);
     expect(after.road.items).toEqual([]);
   });
 
-  it("carries a treat, up to the carry limit", () => {
-    const walk = walkWith(["koda"], [atPack("treat")]);
-    expect(step(walk).walk.run.treats).toBe(1);
-    const full = { ...walk, run: { ...walk.run, treats: 3 } };
-    expect(step(full).walk.run.treats).toBe(3);
+  it("gives a treat the pack walks into to its dog's owner, up to their max", () => {
+    const walk = withHearts(1, walkWith(["koda"], [atPack("treat")]));
+    const { collected, treats, walk: after } = step(walk);
+    expect(collected.map(({ kind }) => kind)).toEqual(["treat"]);
+    expect(treats.map(({ dog }) => dog)).toEqual(["koda"]);
+    expect(heartsByDog(after.run).koda).toBe(1 + read(tuning, "hearts", "treat"));
+    const full = walkWith(["koda"], [atPack("treat")]);
+    expect(step(full).treats.map(({ change }) => change)).toEqual([null]);
   });
 
-  it("carries every treat of a planned zone that the pack walks into", () => {
+  it("grabs every treat of a planned zone that the pack walks into", () => {
     // The pack stands in the lane of the lowest treat in view, ignoring obstacles.
     let walk = planZone(data, geometry, seededRandom(4), walkWith(["koda"]));
     let carried = 0;
@@ -612,9 +566,9 @@ describe("stepWalk", () => {
         .sort((a, b) => b.y - a.y)[0];
       const moved = inLane(treat?.lane ?? 2, walk);
       walk = { ...moved, road: { ...moved.road, invulnerableSeconds: 99 } };
-      const after = step(walk, FRAME).walk;
-      carried += after.run.treats - walk.run.treats;
-      walk = { ...after, run: { ...after.run, treats: 0 } };
+      const stepped = step(walk, FRAME);
+      carried += stepped.treats.length;
+      walk = stepped.walk;
     }
     expect(carried).toBe(2);
   });
@@ -637,44 +591,73 @@ describe("stepWalk", () => {
     expect(bumps).toEqual([0, 1, 1, 1, 0]);
   });
 
-  it("drops tips once for a minor bump, locks steering and starts the grace window", () => {
+  it("costs a plain hit's dog's owner a heart, with no money, and starts the grace window", () => {
     const walk = walkWith(["koda", "duchess"], [atPack("cone"), atPack("otherDog", 1)]);
-    const drop = read(tuning, "money", "minorBump");
-    const rich = { ...walk, run: { ...walk.run, money: cents(drop + 300) } };
-    const { bumps, cards, walk: after } = step(rich);
-    expect(bumps.map(({ change }) => change?.amount)).toEqual([-drop]);
-    expect(bumps[0]?.change?.causes).toEqual([{ amount: -drop, kind: "bump" }]);
-    expect(after.run.money).toBe(300);
+    const { bumps, cards, walk: after } = step(walk);
+    const bump = read(tuning, "hearts", "bump");
+    expect(bumps.map(({ change, dodged, dog }) => [dog, dodged, change?.causes])).toEqual([
+      ["koda", false, [{ amount: -bump, kind: "bump" }]],
+    ]);
+    expect(after.run.money).toBe(walk.run.money);
+    expect(heartsByDog(after.run).koda).toBe((heartsByDog(walk.run).koda ?? 0) - bump);
     expect(cards).toEqual([]);
-    expect(isSteeringLocked(after.road.control)).toBe(true);
     expect(after.road.invulnerableSeconds).toBe(1);
     expect(after.road.items.map(({ kind }) => kind)).toEqual(["otherDog"]);
   });
 
-  it("counts a minor bump and an obstacle hit as bumps in the zone, but not a lucky find", () => {
+  it("costs muddyBumpHearts times as much while Muddy", () => {
+    const walk = walkWith(["koda"], [atPack("cone")]);
+    const muddy = {
+      ...walk,
+      run: { ...walk.run, debuffs: [{ debuff: "muddy", secondsLeft: 20, untilZone: 0 }] },
+    } as const;
+    const bump = read(tuning, "hearts", "bump") * read(tuning, "multipliers", "muddyBumpHearts");
+    expect(heartsByDog(step(muddy).walk.run).koda).toBe((heartsByDog(walk.run).koda ?? 0) - bump);
+  });
+
+  // The pack's first dog leads; a head-on hit lands on it, a side hit mid-move on the dog
+  // touching it.
+  it.each<[string, PackDogs, (walk: Walk) => Walk, string]>([
+    ["head-on on the front dog", ["koda", "biscuit"], (walk) => walk, "koda"],
+    ["head-on on the front dog, whoever leads", ["biscuit", "koda"], (walk) => walk, "biscuit"],
+  ])("lands a plain hit %s", (_, dogs, place, dog) => {
+    const { bumps } = step(place(walkWith(dogs, [atPack("cone")])));
+    expect(bumps.map((bump) => bump.dog)).toEqual([dog]);
+  });
+
+  it.each<[string, number, boolean]>([
+    ["dodges a hit on a small dog at the dodge chance", 0, true],
+    ["takes the hit on a small dog above the dodge chance", 0.99, false],
+  ])("%s", (_, draw, dodged) => {
+    // The game's dodge chance, which the test tuning pins to 0.
+    const dodging = { ...data, tuning: { ...tuning, probability: TUNING.probability } };
+    const walk = walkWith(["duchess"], [atPack("cone")]);
+    const { bumps, walk: after } = stepWalk(dodging, geometry, () => draw, 0.01, walk);
+    expect(bumps.map((bump) => bump.dodged)).toEqual([dodged]);
+    expect(bumps[0]?.change === null).toBe(dodged);
+    expect(after.run.bumpsByZone).toEqual(dodged ? [] : [1]);
+    expect(after.road.hitStop === null).toBe(dodged);
+  });
+
+  it("never dodges a hit on a bigger dog", () => {
+    const walk = walkWith(["koda"], [atPack("cone")]);
+    expect(stepWalk(data, geometry, () => 0, 0.01, walk).bumps.map((bump) => bump.dodged)).toEqual([
+      false,
+    ]);
+  });
+
+  it("counts only a plain hit as a bump in the zone, not a card obstacle or a lucky find", () => {
     const walk = walkWith(["koda"], [atPack("cone")]);
     const zoned = { ...walk, run: { ...walk.run, zoneIndex: 1 } };
     expect(step(zoned).walk.run.bumpsByZone).toEqual([0, 1]);
-    expect(step(walkWith(["koda"], [atPack("otherDog")])).walk.run.bumpsByZone).toEqual([1]);
+    expect(step(walkWith(["koda"], [atPack("otherDog")])).walk.run.bumpsByZone).toEqual([]);
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
   });
 
-  it.each<[string, Walk, AreaContact]>([
-    [
-      "a skunk catches every dog",
-      walkWith(["koda", "duchess"], [atPack("skunk")]),
-      { caught: ["koda", "duchess"], encounter: "skunk", hopped: [] },
-    ],
-    [
-      "a puddle catches the big and medium dogs while the small one hops",
-      walkWith(["koda", "duchess", "pierre"], [atPack("puddle")]),
-      { caught: ["koda", "pierre"], encounter: "puddle", hopped: ["duchess"] },
-    ],
-  ])("%s, and opens its card for the dogs it caught", (_, walk, contact) => {
-    const after = step(walk);
-    expect(after.areaContacts).toEqual([contact]);
-    expect(after.encounterHits).toEqual([
-      { affected: contact.caught, encounter: contact.encounter, kind: "encounter" },
+  it.each(["skunk", "puddle"] as const)("opens the %s's card for the whole pack", (encounter) => {
+    const dogs: PackDogs = ["koda", "duchess", "pierre"];
+    expect(step(walkWith(dogs, [atPack(encounter)])).encounterHits).toEqual([
+      { affected: dogs, encounter, kind: "encounter" },
     ]);
   });
 
@@ -683,30 +666,17 @@ describe("stepWalk", () => {
       ...walk,
       run: { ...walk.run, immunities: [{ encounter: "puddle" }] },
     });
-    // Each with the area contacts it reports.
-    const scenery: [string, Walk, AreaContact[]][] = [
-      ["a squirrel with no chaser", walkWith(["duchess"], [atPack("squirrel")]), []],
-      ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), []],
-      [
-        "a puddle every dog hops",
-        walkWith(["duchess"], [atPack("puddle")]),
-        [{ caught: [], encounter: "puddle", hopped: ["duchess"] }],
-      ],
-      [
-        "a picnic with no food-driven dog",
-        walkWith(["duchess", "koda"], [atPack("picnic", 0, 2, 2)]),
-        [],
-      ],
-      ["a puddle Raincoats keep off", raincoats(walkWith(["koda"], [atPack("puddle")])), []],
+    const scenery: [string, Walk][] = [
+      ["a puddle Raincoats keep off", raincoats(walkWith(["koda"], [atPack("puddle")]))],
     ];
 
     it.each(scenery)(
-      "is scenery for %s: removed, with no bump, grace or hit stop",
-      (_, walk, contacts) => {
+      "is harmless for %s: removed, with no card, heart, grace or hit stop",
+      (_, walk) => {
         const after = step(walk);
         expect(after.cards).toEqual([]);
         expect(after.encounterHits).toEqual([]);
-        expect(after.areaContacts).toEqual(contacts);
+        expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
         expect(after.walk.road.items).toEqual([]);
         expect(after.walk.road.hitStop).toBeNull();
         expect(after.walk.road.invulnerableSeconds).toBe(0);
@@ -716,16 +686,15 @@ describe("stepWalk", () => {
 
     it("opens no grace window, so an obstacle met with it is still hit", () => {
       const after = step(
-        walkWith(["koda"], [atPack("thief", 0), { ...atPack("otherDog", 1), y: 550 }]),
+        raincoats(walkWith(["koda"], [atPack("puddle", 0), { ...atPack("otherDog", 2), y: 550 }])),
       );
       expect(after.encounterHits.map(({ encounter }) => encounter)).toEqual(["otherDog"]);
-      expect(after.walk.run.bumpsByZone).toEqual([1]);
     });
 
     it("leaves a zone clean for Clean Paws, and a walk for Not a Scratch", () => {
-      let walk = walkWith(["duchess"]);
+      let walk = raincoats(walkWith(["duchess"]));
       for (let zone = 0; zone < data.world.walkLength; zone++) {
-        const met = step({ ...walk, road: { ...walk.road, items: [atPack("squirrel")] } }).walk;
+        const met = step({ ...walk, road: { ...walk.road, items: [atPack("puddle")] } }).walk;
         walk = { ...met, run: finishZone(data, met.run).run };
       }
       const facts = {
@@ -747,48 +716,31 @@ describe("stepWalk", () => {
       atPack("tip", 2),
       atPack("lostWallet", 3),
     ];
-    const { bumps, cards, collected, encounterHits, walk } = step(
+    const { bumps, cards, collected, encounterHits, instants, walk } = step(
       graced(walkWith(["koda"], items)),
     );
+    expect(instants.map(({ encounter }) => encounter)).toEqual(["lostWallet"]);
     expect(encounterHits).toEqual([]);
     expect(bumps).toEqual([]);
     expect(walk.run.bumpsByZone).toEqual([]);
     expect(collected.map(({ kind }) => kind)).toEqual(["tip"]);
-    expect(cards).toEqual([{ affected: ["koda"], encounter: "lostWallet", kind: "encounter" }]);
+    expect(cards).toEqual([]);
     expect(walk.road.items.map(({ kind }) => kind)).toEqual(["otherDog", "cone"]);
   });
 
-  it("drops no more tips than the pack has", () => {
-    const walk = walkWith(["koda"], [atPack("bin")]);
-    const { bumps, walk: after } = step({ ...walk, run: { ...walk.run, money: cents(50) } });
-    expect(bumps[0]?.change?.amount).toBe(-50);
-    expect(after.run.money).toBe(0);
-  });
-
   it("applies an instant lucky find at once, with no card", () => {
-    const walk = walkWith(["koda", "snowball"], [atPack("photoOp")]);
+    const walk = walkWith(["koda", "snowball"], [atPack("lostWallet")]);
     const { cards, instants, walk: after } = step(walk);
     expect(cards).toEqual([]);
-    expect(instants.map(({ encounter }) => encounter)).toEqual(["photoOp"]);
-    expect(instants[0]?.outcome.quips).toEqual([{ dog: "snowball", moment: "happier" }]);
-    expect(after.run.money).toBe(walk.run.money + TEST_TUNING.money.photoOpTip * 100);
+    expect(instants.map(({ encounter }) => encounter)).toEqual(["lostWallet"]);
+    expect(instants[0]?.outcome.quips).toEqual([]);
+    expect(after.run.money).toBe(walk.run.money + read(tuning, "money", "lostWalletKeep"));
     expect(after.run.phase).toEqual({ kind: "walking" });
-  });
-
-  it("opens the forced stop's card when it reaches the pack, in any lane", () => {
-    const walk = walkWith(["koda"]);
-    const stopped: Walk = {
-      ...walk,
-      road: { ...walk.road, forcedStopOnRoad: { stop: "stopSign", y: 540 } },
-    };
-    const { cards, walk: after } = step(stopped);
-    expect(cards).toEqual([{ kind: "forcedStop", stop: "stopSign" }]);
-    expect(after.road.forcedStopOnRoad).toBeNull();
   });
 
   it("ends the zone at its length and goes no further", () => {
     const walk = walkWith(["koda"]);
-    const length = zoneLength(data, walk.run);
+    const length = zoneLength(data);
     const nearEnd = { ...walk, run: { ...walk.run, zoneDistance: pixels(length - 1) } };
     const { walk: after, zoneEnded } = step(nearEnd, 1);
     expect(zoneEnded).toBe(true);
@@ -819,7 +771,10 @@ describe("stepWalk", () => {
       ...walk,
       run: {
         ...walk.run,
-        phase: { kind: "card", source: { kind: "forcedStop", stop: "stopSign" } },
+        phase: {
+          kind: "card",
+          source: { affected: ["koda"], encounter: "puddle", kind: "encounter" },
+        },
       },
     };
     expect(step(carded).walk).toBe(carded);
@@ -842,19 +797,11 @@ describe("hit stop", () => {
     opens: boolean;
   }>([
     {
-      bumpsByZone: [1],
+      bumpsByZone: [],
       dogs: ["koda"],
       frames: 60,
       item: "otherDog",
       name: "an obstacle encounter, then opens its card",
-      opens: true,
-    },
-    {
-      bumpsByZone: [],
-      dogs: ["duchess", "koda"],
-      frames: 60,
-      item: "lemonade",
-      name: "the lemonade stand's moment, then opens its card, with no bump",
       opens: true,
     },
     {
@@ -898,7 +845,7 @@ describe("hit stop", () => {
 
   it("never stops for a lucky find without a hit label", () => {
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.road.hitStop).toBeNull();
-    expect(step(walkWith(["koda"], [atPack("photoOp")])).walk.road.hitStop).toBeNull();
+    expect(step(walkWith(["koda"], [atPack("biscuitNeighbour")])).walk.road.hitStop).toBeNull();
   });
 
   it("advances neither distance, the spawn plan, the road nor the pack during the stop", () => {
@@ -915,7 +862,7 @@ describe("hit stop", () => {
     expect(step(walk, FRAME).walk.run.zoneDistance).toBeGreaterThan(walk.run.zoneDistance);
   });
 
-  it("keeps the grace window and the stumble lock for after the stop", () => {
+  it("keeps the grace window and the steering for after the stop", () => {
     const hit = step(walkWith(["koda"], [atPack("cone")]), FRAME);
     const { control, invulnerableSeconds } = hit.walk.road;
     const after = step(hit.walk, FRAME).walk.road;
@@ -941,7 +888,7 @@ describe("hit stop", () => {
 
   it("holds a zone end met on the hit's step until the stop ends", () => {
     const walk = walkWith(["koda"], [atPack("otherDog")]);
-    const length = zoneLength(data, walk.run);
+    const length = zoneLength(data);
     const nearEnd = { ...walk, run: { ...walk.run, zoneDistance: pixels(length - 1) } };
     const hit = step(nearEnd, FRAME);
     expect(hit.zoneEnded).toBe(false);
@@ -1002,7 +949,7 @@ describe("hit stop", () => {
     expect(replayed.cards).toEqual(recorded.cards);
   });
 
-  it("replays lane moves, treats, card choices and heading home to the same final state", () => {
+  it("replays lane moves, card choices and heading home to the same final state", () => {
     const setup = { dev: true, seed: 8, speed: 1, zone: 1 };
     const start = planZone(data, geometry, seededRandom(8), walkWith(["koda", "duchess"]));
     const homeFrame = 60 * 25;
@@ -1016,23 +963,15 @@ describe("hit stop", () => {
       const rolls = seededRandom(9);
       const cardRolls = seededRandom(10);
       let log = startInputLog(setup);
-      let walk: Walk = { ...start, run: { ...start.run, treats: 4 } };
-      let treatsGiven = 0;
+      let walk: Walk = start;
       let cardsChosen = 0;
       for (let frame = 0; frame <= homeFrame && walk.run.phase.kind === "walking"; frame++) {
         const timeMs = frame * FRAME * 1000;
         for (const input of inputs.due(frame, timeMs)) {
-          if (input.kind === "lane") {
-            walk = steerWalk(data, 5, input.direction, walk);
-          } else if (input.kind === "treat") {
-            const dog = walk.run.pack[input.slot]?.dog;
-            const before = walk.run.treats;
-            walk =
-              dog === undefined ? walk : { ...walk, run: giveTreat(data, dog, walk.run).state };
-            treatsGiven += before - walk.run.treats;
-          } else {
-            walk = { ...walk, run: headHome(walk.run) };
-          }
+          walk =
+            input.kind === "lane"
+              ? steerWalk(data, 5, input.direction, walk)
+              : { ...walk, run: headHome(walk.run) };
           log = recordInput(input, log);
         }
         if (walk.run.phase.kind !== "walking") {
@@ -1045,11 +984,11 @@ describe("hit stop", () => {
           const view = cardFor(data, run, source);
           const choice = inputs.choose(view);
           walk = { ...walk, run: chooseOption(data, cardRolls, run, view, choice).state };
-          log = recordInput({ choice, kind: "card", timeMs: timeMs + FRAME * 1000 }, log);
+          log = recordInput({ choice, kind: "card", timeMs: (frame + 1) * FRAME * 1000 }, log);
           cardsChosen += 1;
         }
       }
-      return { cardsChosen, log, treatsGiven, walk };
+      return { cardsChosen, log, walk };
     };
     const recorded = play({
       // The last option the run can pay for.
@@ -1062,16 +1001,12 @@ describe("hit stop", () => {
         if (frame % 13 === 0) {
           inputs.push({ direction: Math.floor(frame / 13) % 4 < 2 ? -1 : 1, kind: "lane", timeMs });
         }
-        if (frame % 97 === 0) {
-          inputs.push({ kind: "treat", slot: Math.floor(frame / 97) % 2, timeMs });
-        }
         if (frame === homeFrame) {
           inputs.push({ kind: "home", timeMs });
         }
         return inputs;
       },
     });
-    expect(recorded.treatsGiven).toBeGreaterThan(0);
     expect(recorded.cardsChosen).toBeGreaterThan(0);
     expect(recorded.walk.run.phase).toEqual({ kind: "ended", reason: "wentHome" });
 
@@ -1098,57 +1033,45 @@ describe("hit stop", () => {
 });
 
 describe("walkScrollSpeed", () => {
-  const paced = {
-    ...data,
-    tuning: {
-      ...tuning,
-      multipliers: { ...tuning.multipliers, fastWalkerSpeed: 2, slowWalkerSpeed: 0.5 },
-    },
-  };
-
-  it.each<[WalkerId, number]>([
-    ["ben", 0.5],
-    ["trista", 2],
-  ])("scales the zone's speed by %s's pace", (walker, factor) => {
-    const loadout = { dogs: ["koda"], gear: null, walker } as const;
-    expect(walkScrollSpeed(paced, newRun(paced, 1, loadout))).toBe(
-      walkScrollSpeed(data, newRun(data, 1, loadout)) * factor,
+  it("walks every walker on the same road at the same speed", () => {
+    const speeds = (Object.keys(WALKERS) as WalkerId[]).map((walker) =>
+      walkScrollSpeed(REAL, realRun(REAL, walker)),
     );
-  });
-
-  it("takes the same time over a zone with every walker, a faster one covering more road", () => {
-    const zoneSeconds = (walker: WalkerId) => {
-      const run = realRun(REAL, walker);
-      return zoneLength(REAL, run) / walkScrollSpeed(REAL, run);
-    };
-    const walkers = Object.keys(WALKERS) as WalkerId[];
-    for (const walker of walkers) {
-      expect(zoneSeconds(walker), walker).toBeCloseTo(zoneSeconds(DEFAULT_WALKER), 9);
-    }
-    const lengths = new Set(walkers.map((walker) => zoneLength(REAL, realRun(REAL, walker))));
-    expect(lengths.size).toBeGreaterThan(1);
+    expect(new Set(speeds).size).toBe(1);
   });
 });
 
 describe("finishZone", () => {
-  it("pays every walking dog's fee and moves on to the next zone", () => {
+  const pay = read(tuning, "money", "payPerDog");
+
+  it("banks every walking dog's pay and moves on to the next zone", () => {
     const { run } = walkWith(["koda", "duchess"]);
-    const { fees, run: next } = finishZone(data, { ...run, zoneDistance: zoneLength(data, run) });
-    expect(next.money).toBe(2000);
+    const { fees, run: next } = finishZone(data, { ...run, zoneDistance: zoneLength(data) });
+    expect(next.money).toBe(run.money + 2 * pay);
     expect(fees.map(({ amount, dog }) => ({ amount, dog }))).toEqual([
-      { amount: 1000, dog: "koda" },
-      { amount: 1000, dog: "duchess" },
+      { amount: pay, dog: "koda" },
+      { amount: pay, dog: "duchess" },
     ]);
     expect(next.zoneIndex).toBe(1);
     expect(next.zoneDistance).toBe(0);
     expect(next.phase).toEqual({ kind: "walking" });
   });
 
-  it("ends the zone's effects after paying its fees, keeping run-long ones", () => {
+  it("starts the next zone with Hall pass's Skip back and no cards counted", () => {
+    const { run } = walkWith(["koda"]);
+    const used = { ...run, cardsThisZone: 2, skipPass: true, skipUsed: true };
+    expect(finishZone(data, used).run).toMatchObject({
+      cardsThisZone: 0,
+      skipPass: true,
+      skipUsed: false,
+    });
+  });
+
+  it("ends the zone's effects, keeping run-long ones", () => {
     const { run } = walkWith(["koda"]);
     const withEffects = {
       ...run,
-      debuffs: [{ debuff: "stinky" as const, untilZone: 0 }],
+      debuffs: [{ debuff: "stinky" as const, secondsLeft: 20, untilZone: 0 }],
       immunities: [{ encounter: "puddle" as const }, { encounter: "thief" as const, untilZone: 0 }],
     };
     const { run: next } = finishZone(data, withEffects);
@@ -1156,21 +1079,39 @@ describe("finishZone", () => {
     expect(next.immunities).toEqual([{ encounter: "puddle" }]);
   });
 
-  it("counts the zone for each debuff on as it ends", () => {
-    const { run } = walkWith(["koda"]);
-    const stinky = {
-      ...run,
-      debuffZones: { stinky: 1 },
-      debuffs: [{ debuff: "stinky" as const, untilZone: 0 }],
-    };
-    expect(finishZone(data, stinky).run.debuffZones).toEqual({ stinky: 2 });
-    expect(finishZone(data, run).run.debuffZones).toEqual({});
+  it("ends the run, finished, after the last zone, banking its pay and the full pack bonus", () => {
+    const { run } = walkWith(["koda", "duchess"]);
+    const end = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 });
+    const bonus = 2 * read(tuning, "money", "fullPackBonusPerDog");
+    expect(end.run.phase).toEqual({ kind: "ended", reason: "finished" });
+    expect(end.run.money).toBe(run.money + 2 * pay + bonus);
+    expect(end.fees.map(({ causes }) => causes[0]?.kind)).toEqual(["pay", "pay", "bonus"]);
   });
 
-  it("ends the run, finished, after the last zone", () => {
-    const { run } = walkWith(["koda"]);
-    const last = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 }).run;
-    expect(last.phase).toEqual({ kind: "ended", reason: "finished" });
+  it("pays no full pack bonus once an owner has fired you", () => {
+    const { run } = walkWith(["koda", "duchess"]);
+    const fired = {
+      ...run,
+      pack: mapPack(
+        (slot) =>
+          slot.dog === "duchess" ? { dog: slot.dog, status: "fired" as const, zoneIndex: 0 } : slot,
+        run.pack,
+      ),
+      zoneIndex: WORLD.walkLength - 1,
+    };
+    const end = finishZone(data, fired);
+    expect(end.run.money).toBe(run.money + pay);
+    expect(end.fees.map(({ causes }) => causes[0]?.kind)).toEqual(["pay"]);
+  });
+});
+
+describe("headHome", () => {
+  it("keeps the money banked and pays nothing for the current zone", () => {
+    const { run } = walkWith(["koda", "duchess"]);
+    const banked = finishZone(data, run).run;
+    const home = headHome(banked);
+    expect(home.money).toBe(banked.money);
+    expect(home.phase).toEqual({ kind: "ended", reason: "wentHome" });
   });
 });
 
@@ -1198,22 +1139,12 @@ describe("thinTips", () => {
 });
 
 describe("obstacleWeights", () => {
-  const weightOf = (dogs: PackDogs, id: EncounterId) =>
-    obstacleWeights(data, walkWith(dogs).run).find(([encounter]) => encounter === id)?.[1];
-
   it("weighs every obstacle encounter, and no lucky one", () => {
     const ids = obstacleWeights(data, walkWith(["biscuit"]).run).map(([id]) => id as string);
     const obstacles = Object.entries(ENCOUNTERS)
       .filter(([, encounter]) => encounter.kind === "obstacle")
       .map(([id]) => id);
     expect(ids.sort()).toEqual(obstacles.sort());
-  });
-
-  it("draws other dogs more often for each small dog and less for each big dog", () => {
-    expect(weightOf(["biscuit"], "otherDog")).toBe(1);
-    expect(weightOf(["duchess", "nugget"], "otherDog")).toBeCloseTo(1.5);
-    expect(weightOf(["koda"], "otherDog")).toBeCloseTo(0.75);
-    expect(weightOf(["koda"], "skunk")).toBe(1);
   });
 });
 
@@ -1270,15 +1201,12 @@ describe("movers", { timeout: 60_000 }, () => {
     expect(draws).toBe(before);
   });
 
-  it.each(["tip", "treat", "photoOp", "fireHydrant"] as const)(
-    "never moves a %s, drawing nothing",
-    (kind) => {
-      const never = () => {
-        throw new Error("drew");
-      };
-      expect(moverMovement(REAL, never, 1, kind)).toBeNull();
-    },
-  );
+  it.each(["tip", "treat", "lostWallet"] as const)("never moves a %s, drawing nothing", (kind) => {
+    const never = () => {
+      throw new Error("drew");
+    };
+    expect(moverMovement(REAL, never, 1, kind)).toBeNull();
+  });
 
   // Movement values the planner can build: a dart is one cell, its tilt keeps it coming down
   // the road, and an in-lane mover moves at another speed than the road.
@@ -1332,6 +1260,7 @@ describe("movers", { timeout: 60_000 }, () => {
             const { lanes } = footprintOf(tuned, event.kind);
             return {
               end: event.distance + itemHeight(tuned, GAME_ROAD, event.kind),
+              kind: event.kind,
               lanes: new Set(Array.from({ length: lanes }, (_, i) => event.lane + i)),
               start: event.distance,
             };
@@ -1341,6 +1270,7 @@ describe("movers", { timeout: 60_000 }, () => {
           const to = Math.max(...touched.map(({ distance }) => distance + 1));
           return {
             end: to - GAME_ROAD.tallestPackBand,
+            kind: event.kind,
             lanes: new Set(touched.map(({ lane }) => lane)),
             start: from,
           };
@@ -1356,7 +1286,9 @@ describe("movers", { timeout: 60_000 }, () => {
             );
             const gap = far.start - near.end;
             if (steppedIn && gap > 0) {
-              expect(gap, `seed ${seed}`).toBeGreaterThanOrEqual(fit - 1);
+              expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
+                fit - 1,
+              );
             }
           }
         }
@@ -1413,18 +1345,12 @@ describe("movers", { timeout: 60_000 }, () => {
       item: moverAt("otherDog", crossing, 82),
       name: "a loose dog",
     },
-    {
-      dogs: ["koda"],
-      encounter: "goose",
-      item: moverAt("goose", crossing, 82),
-      name: "a goose, big dog or not",
-    },
   ])("opens the $encounter card on contact with $name", ({ dogs, encounter, item }) => {
     const { walk } = step(walkWith(dogs, [item]));
     expect(walk.road.hitStop?.cards).toEqual([{ affected: dogs, encounter, kind: "encounter" }]);
   });
 
-  it("bumps the pack like a minor obstacle on contact with a ball or an in-lane cyclist", () => {
+  it("bumps the pack like a plain obstacle on contact with a ball or an in-lane cyclist", () => {
     const ball = crossing;
     expect(step(walkWith(["koda"], [moverAt("ball", ball, 82)])).bumps).toHaveLength(1);
     const cyclist: MoverPath = {

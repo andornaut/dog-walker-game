@@ -2,12 +2,10 @@ import type {
   AchievementId,
   DogId,
   EncounterId,
-  ForcedStopId,
   GameData,
   GearId,
   MinorObstacleId,
   MovementKind,
-  NeedSpotId,
   Size,
   WalkerId,
   Zone,
@@ -15,36 +13,12 @@ import type {
 import type { CardSource } from "../state/runState";
 import { depthStepOfScale } from "./depthSteps";
 
-// Forced stops whose sprite is named for the figure on the road rather than the stop.
-const FORCED_STOP_SPRITES: Readonly<Partial<Record<ForcedStopId, string>>> = {
-  constructionDetour: "construction",
-  kidWantsToPet: "kid",
-};
-
-export function forcedStopSpriteKey(stop: ForcedStopId): string {
-  return FORCED_STOP_SPRITES[stop] ?? kebabCase(stop);
-}
-
 export const CARD_FRAME_KEY = "card-frame";
-export type CardFrameTag = "encounter" | "lucky" | "route" | "stop" | "upgrade";
+export type CardFrameTag = "encounter" | "route";
 
-// The card frame's colour comes from what opened the card.
-export function cardFrameTag(
-  data: Pick<GameData, "encounters" | "needCards">,
-  source: CardSource,
-): CardFrameTag {
-  switch (source.kind) {
-    case "encounter":
-      return data.encounters[source.encounter].kind === "lucky" ? "lucky" : "encounter";
-    case "forcedStop":
-      return "stop";
-    case "fork":
-      return "route";
-    case "need":
-      return data.needCards[source.card].kind === "payoff" ? "lucky" : "encounter";
-    default:
-      return "upgrade";
-  }
+// The card frame's colour comes from what opened the card: an obstacle, or a fork.
+export function cardFrameTag(source: CardSource): CardFrameTag {
+  return source.kind === "fork" ? "route" : "encounter";
 }
 
 // Manifest keys are kebab-case; data ids are camelCase.
@@ -52,15 +26,8 @@ export function kebabCase(id: string): string {
   return id.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
 
-// Encounters whose sprite is named for the thing on the road rather than the encounter.
-const ENCOUNTER_SPRITES: Readonly<Partial<Record<EncounterId, string>>> = {
-  cafe: "cafe-patio",
-  lemonade: "lemonade-stand",
-  trash: "trash-bins",
-};
-
 export function encounterSpriteKey(encounter: EncounterId): string {
-  return ENCOUNTER_SPRITES[encounter] ?? kebabCase(encounter);
+  return kebabCase(encounter);
 }
 
 // Every dog-keyed art key names the dog by its art id, which can differ from its data id.
@@ -113,29 +80,10 @@ export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
   return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
 }
 
-// Each need spot's road sprite. The other dog reuses its obstacle's art; it and the hydrant
-// are marked on the road by the need's icon.
-const NEED_SPOT_SPRITES: Readonly<Record<NeedSpotId, string>> = {
-  fireHydrant: "hydrant",
-  lampPost: "spot-lamp-post",
-  playmate: "other-dog",
-  stranger: "spot-stranger",
-  tree: "spot-tree",
-  waterBowl: "spot-water-bowl",
-};
-
-export function needSpotSpriteKey(spot: NeedSpotId): string {
-  return NEED_SPOT_SPRITES[spot];
-}
-
-// The pull and need signals over a dog: the bubble a need or target icon sits in, the mark of
-// a pull blocked by the fairness rule and its burst, a need met, and a Regular dog's accident
-// with the decal it leaves on the road.
-export const NEED_ART = {
-  accident: "fx-accident",
-  accidentSpot: "accident-spot",
+// The pull signals over a dog: the bubble its target's icon sits in, and the mark of a pull
+// blocked by the fairness rule and its burst.
+export const PULL_ART = {
   bubble: "ui-pull-bubble",
-  needMet: "fx-need-met",
   pullBlocked: "ui-pull-blocked",
   pullFail: "fx-pull-fail",
 } as const;

@@ -18,17 +18,15 @@ describe("an upgrade's duration", () => {
     expect(new Set(upgrade.effects.map(effectDuration))).toEqual(new Set([upgrade.duration]));
   });
 
-  it("is on each upgrade card, for its plaque", () => {
-    const offered: [UpgradeId, UpgradeId, UpgradeId] = ["bellyRubs", "rushHour", "bigTipper"];
-    const card = cardFor(gameData, testState({ koda: 5 }), { kind: "upgradeOffer", offered });
-    expect(card.options.map(({ duration }) => duration)).toEqual(["now", "nextZone", "run"]);
-  });
-
-  it("is not on a fork's path cards", () => {
+  it("is on each fork path card, for the upgrade it carries", () => {
+    const upgrades: UpgradeId[] = ["bellyRubs", "rushHour", "raincoats"];
     const card = cardFor(gameData, testState({ koda: 5 }), {
       kind: "fork",
-      paths: ["snoozeCrescent", "park"],
+      paths: ["snoozeCrescent", "park", "street"],
+      upgrades,
     });
-    expect(card.options.map(({ duration }) => duration)).toEqual([undefined, undefined]);
+    expect(card.options.map(({ duration }) => duration)).toEqual(
+      upgrades.map((id) => gameData.upgrades[id].duration),
+    );
   });
 });

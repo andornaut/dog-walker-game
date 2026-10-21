@@ -2,46 +2,53 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
-import { effectText } from "../rules/effectText";
+import { maxHearts } from "../rules/dogs";
+import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
+import { fillNames } from "../text/lines";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
+import { dogFeeText } from "./home";
 import { homeLine } from "./homeText";
+import { walkerDetailLines } from "./walkers";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: 1,
   dogs: ["biscuit", "duchess", "koda"],
-  gear: ["whistle"],
+  gear: ["luckyCollar"],
   walkers: ["casey"],
 };
 const noStats = { dogs: {} };
 
 describe("dogDetail", () => {
-  it("gives the breed, traits, need and quirk in words, owner and temperament, fee and stats", () => {
+  it("gives the breed, size and hearts, owner, pay and stats", () => {
     const stats = { dogs: { koda: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
     const card = dogDetail(data, owned, dollars(0), stats, "koda");
-    const { breed, name, need, owner, quirk } = data.dogs.koda;
-    const { description, name: quirkName } = data.quirks[quirk];
-    expect(card.title).toBe(name);
-    expect(card.subtitle).toBe(breed);
+    const dog = data.dogs.koda;
+    const text = data.homeText.detail;
+    expect(card.title).toBe(dog.name);
+    expect(card.subtitle).toBe(dog.breed);
     expect(card.lines).toEqual([
-      "Big · Chaser · Steady energy",
-      `${data.needs[need].name} · ${quirkName}: ${description}`,
-      `Owner ${owner.name}, ${owner.role}`,
-      "Laid-back owner",
-      expect.stringMatching(/^Fee \$\d+\/zone$/),
-      "Walks 5 · Zones 12 · Fired 1",
+      fillNames(text.dogKind, {
+        hearts: String(maxHearts(data.tuning, [], dog)),
+        size: capitalize(SIZE_NAMES[dog.size]),
+      }),
+      fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
+      fillNames(text.dogFee, { fee: dogFeeText(data) }),
+      fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
     ]);
-    expect(card.status).toBe("Your client");
+    expect(card.status).toBe(text.dogStatus);
   });
 
   it("counts zeros for a dog never walked, and shows a locked dog's price", () => {
     const card = dogDetail(data, owned, dollars(100), noStats, "archie");
-    expect(card.lines).toContain("Walks 0 · Zones 0 · Fired 0");
+    expect(card.lines).toContain(
+      fillNames(data.homeText.detail.dogTotals, { fired: "0", walks: "0", zones: "0" }),
+    );
     expect(card.status).toBe("Price $600, locked");
     expect(dogDetail(data, owned, dollars(600), noStats, "archie").status).toBe(
       "Price $600, tap to buy",
@@ -51,15 +58,21 @@ describe("dogDetail", () => {
 
 describe("gearDetail", () => {
   it("gives the effect, and whether it is equipped", () => {
-    const card = gearDetail(data, owned, dollars(0), { dogs: [], gear: "whistle" }, "whistle");
-    expect(card.title).toBe(data.shopGear.whistle.name);
+    const card = gearDetail(
+      data,
+      owned,
+      dollars(0),
+      { dogs: [], gear: "luckyCollar" },
+      "luckyCollar",
+    );
+    expect(card.title).toBe(data.shopGear.luckyCollar.name);
     expect(card.lines.join(" ").toLowerCase()).toContain(
-      effectText(data, data.shopGear.whistle.effects).toLowerCase(),
+      effectText(data, data.shopGear.luckyCollar.effects).toLowerCase(),
     );
     expect(card.status).toBe(data.homeText.detail.gearEquipped);
-    expect(gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "whistle").status).toBe(
-      data.homeText.detail.gearOwned,
-    );
+    expect(
+      gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "luckyCollar").status,
+    ).toBe(data.homeText.detail.gearOwned);
   });
 
   it("shows a locked item's price", () => {
@@ -75,7 +88,7 @@ describe("walkerDetail", () => {
   it.each(walkerIds)("gives %s's name, description and owned status when owned", (walker) => {
     const card = walkerDetail(data, walkerOwned([walker]), walker);
     expect(card).toEqual({
-      lines: data.walkers[walker].detail ?? [],
+      lines: walkerDetailLines(data, walker),
       locked: false,
       status: data.homeText.detail.walkerStatus,
       subtitle: data.homeText.detail.walkerSubtitle,
@@ -88,11 +101,12 @@ describe("walkerDetail", () => {
     const { name } = data.walkers[walker];
     expect(card.locked).toBe(true);
     expect(card.title).toBe(name);
-    expect(card.lines).toEqual(data.walkers[walker].detail ?? []);
+    expect(card.lines).toEqual(walkerDetailLines(data, walker));
+    const goal = walkerGoal(data.walkers[walker]);
     expect(card.status).toBe(
       homeLine(data.homeText, "walkerLocked", {
         walker: name,
-        zone: String(walkerGoal(data.walkers[walker])),
+        zone: data.world.zones.find(({ id }) => id === goal)?.name ?? "",
       }),
     );
   });

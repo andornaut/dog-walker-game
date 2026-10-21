@@ -3,21 +3,18 @@ import { DEBUFFS } from "./debuffs";
 import { DOGS } from "./dogs";
 import { DOG_SLOTS } from "./dogSlots";
 import { ENCOUNTERS } from "./encounters";
-import { FORCED_STOPS } from "./forcedStops";
 import { HELP_PAGES } from "./help";
 import { HINTS } from "./hints";
 import { HOME_TEXT } from "./homeText";
 import { MENU_TEXT } from "./menuText";
 import { MINOR_OBSTACLES } from "./minorObstacles";
-import { NEED_CARDS, NEED_SPOTS, NEEDS } from "./needs";
 import { QUIPS } from "./quips";
-import { QUIRKS } from "./quirks";
 import { RUN_TEXT } from "./runText";
 import { SHOP_GEAR } from "./shop";
 import { TUNING } from "./tuning";
 import type { GameData } from "./types";
 import { UPGRADES } from "./upgrades";
-import { DEFAULT_WALKER, WALKER_PACES, WALKER_STYLES, WALKERS } from "./walkers";
+import { DEFAULT_WALKER, WALKER_PERKS, WALKERS } from "./walkers";
 import { WORLD } from "./world";
 
 function toGameData(values: ValueExports): GameData {
@@ -28,23 +25,17 @@ function toGameData(values: ValueExports): GameData {
     dogSlots: values.DOG_SLOTS,
     dogs: values.DOGS,
     encounters: values.ENCOUNTERS,
-    forcedStops: values.FORCED_STOPS,
     help: values.HELP_PAGES,
     hints: values.HINTS,
     homeText: values.HOME_TEXT,
     menuText: values.MENU_TEXT,
     minorObstacles: values.MINOR_OBSTACLES,
-    needCards: values.NEED_CARDS,
-    needSpots: values.NEED_SPOTS,
-    needs: values.NEEDS,
     quips: values.QUIPS,
-    quirks: values.QUIRKS,
     runText: values.RUN_TEXT,
     shopGear: values.SHOP_GEAR,
     tuning: values.TUNING,
     upgrades: values.UPGRADES,
-    walkerPaces: values.WALKER_PACES,
-    walkerStyles: values.WALKER_STYLES,
+    walkerPerks: values.WALKER_PERKS,
     walkers: values.WALKERS,
     world: values.WORLD,
   };
@@ -57,24 +48,18 @@ const INITIAL_VALUES = {
   DOGS,
   DOG_SLOTS,
   ENCOUNTERS,
-  FORCED_STOPS,
   HELP_PAGES,
   HINTS,
   HOME_TEXT,
   MENU_TEXT,
   MINOR_OBSTACLES,
-  NEEDS,
-  NEED_CARDS,
-  NEED_SPOTS,
   QUIPS,
-  QUIRKS,
   RUN_TEXT,
   SHOP_GEAR,
   TUNING,
   UPGRADES,
   WALKERS,
-  WALKER_PACES,
-  WALKER_STYLES,
+  WALKER_PERKS,
   WORLD,
 } as const;
 type ValueExports = typeof INITIAL_VALUES;
@@ -101,15 +86,12 @@ if (import.meta.hot) {
       "./dogSlots.ts",
       "./dogs.ts",
       "./encounters.ts",
-      "./forcedStops.ts",
       "./help.ts",
       "./hints.ts",
       "./homeText.ts",
       "./menuText.ts",
       "./minorObstacles.ts",
-      "./needs.ts",
       "./quips.ts",
-      "./quirks.ts",
       "./runText.ts",
       "./shop.ts",
       "./tuning.ts",

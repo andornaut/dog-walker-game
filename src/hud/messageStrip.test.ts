@@ -158,12 +158,10 @@ describe("messageStripLayout", () => {
     y: top,
   });
   const iconRect = { ...strip.icon, height: 16, width: 16 };
-  // Every item the state strip can hold at once: each debuff and upgrade, gear, pace, style.
-  const mostItems =
-    Object.keys(gameData.debuffs).length + Object.keys(gameData.upgrades).length + 3;
+  // Every item the state strip can hold at once: each upgrade, gear, pace, style.
+  const mostItems = Object.keys(gameData.upgrades).length + 3;
   // The walker's pace and style, which the strip always holds.
   const fewestItems = stripItems(gameData, {
-    debuffs: [],
     gear: null,
     immunities: [],
     modifiers: [],
@@ -194,7 +192,7 @@ describe("messageStripLayout", () => {
   it.each(Array.from({ length: mostItems - fewestItems + 1 }, (_, i) => fewestItems + i))(
     "keeps clear of the state strip's tab with %i items",
     (count) => {
-      const tab = stripLayout(SCREEN_CONFIG.width, count)?.tab;
+      const tab = stripLayout(count)?.tab;
       expect(tab).toBeDefined();
       expect(overlaps(strip.panel, tab ?? strip.panel)).toBe(false);
     },

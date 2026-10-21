@@ -2,17 +2,14 @@ import { type Point, type Rect, rectsOverlap } from "../layout/rect";
 import { type Cents, cents } from "../rules/units";
 import { signedText } from "../text/lines";
 
-// The heart change, hop and minor bump moments' timings, in ms, and offsets, in pixels.
+// The heart change and dodge moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {
-  // The bump's amount rises rise pixels and fades over labelMs; the walker tips by
-  // wobbleDegrees each way, wobbleMs a swing, wobbles times.
-  bump: { labelMs: 900, rise: 10, wobbleDegrees: 8, wobbleMs: 70, wobbles: 2 },
+  // The dodge label rises rise pixels and fades over ms.
+  dodge: { ms: 900, rise: 10 },
   // A heart flies into its doghouse over flyMs, peaking peak pixels above its higher end; a
   // dog's later change in one batch starts staggerMs after the one before. The doghouse shakes
   // by shakeDx, one step a frame of its flash.
   heart: { flyMs: 360, peak: 10, shakeDx: [1, -1, 1, 0], staggerMs: 1200 },
-  // The hop label rises rise pixels and fades over ms.
-  hop: { ms: 900, rise: 10 },
   // The money counter counts to a new amount at msPerDollar a dollar, taking at most maxMs.
   moneyTick: { maxMs: 600, msPerDollar: 150 },
 } as const;
@@ -62,28 +59,6 @@ export function heartLabelAt(
   const right = frame.x + 31;
   const x = right + width <= bounds.screenWidth ? right : frame.x + 1 - width;
   return { x, y: Math.min(frame.y + 14, bounds.bottom - 5) };
-}
-
-// The 32x32 hop splash's top-left, its centre column on the pack's and its bottom row on the
-// walker's feet, and its label centred over it, 2px above its top.
-export function hopSplashLayout(pack: { feetY: number; x: number }): {
-  frame: Point;
-  label: LabelAnchor;
-} {
-  const frame = { x: pack.x - 16, y: pack.feetY - 31 };
-  return { frame, label: { centreX: frame.x + 16, lineBottom: frame.y - 2 } };
-}
-
-// The hop label over a dog, centred on its centre column, 2px above its top opaque row.
-export function hopLabelAnchor(dogTop: Point): LabelAnchor {
-  return { centreX: dogTop.x, lineBottom: dogTop.y - 2 };
-}
-
-// The 64x48 coin burst's top-left, its (32, 28) on the contact point, and its amount
-// centred on its x 32 with the line's bottom on its row 6.
-export function coinBurstLayout(contact: Point): { frame: Point; label: LabelAnchor } {
-  const frame = { x: contact.x - 32, y: contact.y - 28 };
-  return { frame, label: { centreX: frame.x + 32, lineBottom: frame.y + 6 } };
 }
 
 // The money counter counting from one amount to another, from startMs.

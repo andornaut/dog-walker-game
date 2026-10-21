@@ -65,13 +65,18 @@ export function unwalkedZones(data: RouteData, route: readonly ZoneId[]): ZoneId
 }
 
 // Up to three unwalked zones drawn at random, sorted easiest on the left to hardest on the
-// right.
+// right. The world's last zone ends every walk: the fork before the last zone leads only
+// there, and no earlier fork offers it.
 export function forkPaths(
   data: RouteData,
   random: () => number,
   route: readonly ZoneId[],
 ): ZoneId[] {
-  const pool = unwalkedZones(data, route);
+  const last = data.world.lastZone as ZoneId;
+  if (route.length >= data.world.walkLength - 1) {
+    return [last];
+  }
+  const pool = unwalkedZones(data, route).filter((zone) => zone !== last);
   const drawn = new Set<ZoneId>();
   while (drawn.size < Math.min(PATH_SIDES.length, pool.length)) {
     const left = pool.filter((zone) => !drawn.has(zone));

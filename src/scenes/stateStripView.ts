@@ -1,69 +1,45 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
 import {
-  onStrip,
   STRIP,
   stripIconFallback,
   stripIconKey,
   type StripItem,
   stripItemsKey,
-  type StripLayout,
   stripLayout,
-  stripText,
 } from "../hud/stateStrip";
-import type { Point, Rect } from "../layout/rect";
+import type { Point } from "../layout/rect";
 import { fillRect } from "./draw";
 import { PALETTE } from "./palette";
-import { addPixelText, placePixelText } from "./pixelText";
-import { addNineSlice, addPanel, addTapBurst } from "./uiKit";
+import { addPixelText } from "./pixelText";
+import { addNineSlice } from "./uiKit";
 
-// The description bubble sits in its lane, right-aligned with the strip and growing down as far
-// as its rows need: one row per item, its icon then its text, at 2x.
-const BUBBLE = { gap: 4, holdMs: 6000, padding: 6, rowGap: 4 };
 const DEPTH = 20;
 
-// The top bar's state strip and the bubble a tap on it opens.
+// The effect icons beside the zone's progress in the top bar. They take no taps.
 export class StateStripView {
-  private bubble: GameObjects.GameObject[] = [];
   private icons: (GameObjects.BitmapText | GameObjects.Image)[] = [];
-  private items: readonly StripItem[] = [];
   private itemsKey: string | undefined;
-  private layout: StripLayout | undefined;
   private tab: GameObjects.NineSlice | undefined;
   private readonly well: GameObjects.Graphics;
 
-  // lane is where the bubble opens. tappable says whether a press on the strip is the strip's,
-  // which it is unless a screen covers the bar; onOpen and onClose run as the bubble opens and
-  // closes.
-  constructor(
-    private readonly scene: Scene,
-    private readonly lane: Rect,
-    private readonly hooks: { onClose: () => void; onOpen: () => void; tappable: () => boolean },
-  ) {
+  constructor(private readonly scene: Scene) {
     this.well = scene.add.graphics().setDepth(DEPTH);
   }
 
-  isOpen(): boolean {
-    return this.bubble.length > 0;
-  }
-
-  // Draws the items when they change, closing the bubble, whose text would no longer match.
+  // Draws the items when they change.
   show(items: readonly StripItem[]): void {
     const key = stripItemsKey(items);
     if (key === this.itemsKey) {
       return;
     }
     this.itemsKey = key;
-    this.closeBubble();
-    this.items = items;
-    this.layout = stripLayout(SCREEN_CONFIG.width, items.length);
     this.well.clear();
     this.icons.forEach((icon) => icon.destroy());
     this.tab?.destroy();
     this.tab = undefined;
-    const layout = this.layout;
+    const layout = stripLayout(items.length);
     if (layout === undefined) {
       this.icons = [];
       return;
@@ -76,106 +52,21 @@ export class StateStripView {
     }
     this.icons = items.flatMap((item, i) => {
       const at = layout.icons[i];
-      return at === undefined ? [] : [this.addIcon(item, at, DEPTH, PALETTE.cream)];
+      return at === undefined ? [] : [this.addIcon(item, at)];
     });
   }
 
-  // The item's icon at its top-left corner, or its fallback letter in color while the art is
-  // missing.
-  private addIcon(
-    item: StripItem,
-    at: Point,
-    depth: number,
-    color: number,
-  ): GameObjects.BitmapText | GameObjects.Image {
+  // The item's icon at its top-left corner, or its fallback letter while the art is missing.
+  private addIcon(item: StripItem, at: Point): GameObjects.BitmapText | GameObjects.Image {
     const key = stripIconKey(item);
     if (this.scene.textures.exists(key)) {
-      return this.scene.add.image(at.x, at.y, key).setOrigin(0).setDepth(depth);
+      return this.scene.add.image(at.x, at.y, key).setOrigin(0).setDepth(DEPTH);
     }
     const half = STRIP.icon / 2;
-    const letter = stripIconFallback(gameData, item);
-    return addPixelText(this.scene, at.x + half, at.y + half, letter, {
-      color,
+    return addPixelText(this.scene, at.x + half, at.y + half, stripIconFallback(gameData, item), {
+      color: PALETTE.cream,
       originX: 0.5,
       originY: 0.5,
-    }).setDepth(depth);
-  }
-
-  // Whether a press at point lands on the strip. The HUD reads presses at the scene, not
-  // through an interactive zone, which would keep them from the walk below.
-  contains(point: Point): boolean {
-    return onStrip(SCREEN_CONFIG.width, this.items.length, point);
-  }
-
-  // A tap on the strip, at point, opens or closes the bubble.
-  tap(point: Point): void {
-    if (this.hooks.tappable()) {
-      addTapBurst(this.scene, point.x, point.y);
-      this.toggleBubble();
-    }
-  }
-
-  private toggleBubble(): void {
-    if (this.bubble.length > 0) {
-      this.closeBubble();
-    } else {
-      this.openBubble();
-    }
-  }
-
-  closeBubble(): void {
-    if (this.bubble.length === 0) {
-      return;
-    }
-    this.bubble.forEach((part) => part.destroy());
-    this.bubble = [];
-    this.hooks.onClose();
-  }
-
-  private openBubble(): void {
-    const layout = this.layout;
-    if (layout === undefined) {
-      return;
-    }
-    const { gap, padding, rowGap } = BUBBLE;
-    const { lane } = this;
-    const icon = 16;
-    const room = lane.width - 2 * padding - icon - gap;
-    const texts = this.items.map((item) =>
-      addPixelText(this.scene, 0, 0, stripText(gameData, item), {
-        color: PALETTE.plum,
-        maxWidth: room,
-        scale: 2,
-      }),
-    );
-    const rows = texts.map((text) => Math.max(icon, Math.ceil(text.height)));
-    const textWidth = Math.max(...texts.map((text) => Math.ceil(text.width)));
-    const width = 2 * padding + icon + gap + textWidth;
-    const height =
-      2 * padding + rows.reduce((sum, row) => sum + row, 0) + (rows.length - 1) * rowGap;
-    const right = Math.min(lane.x + lane.width, layout.tab.x + layout.tab.width);
-    const x = Math.max(lane.x, right - width);
-    const y = lane.y;
-    const parts: GameObjects.GameObject[] = [
-      addPanel(this.scene, { height, width, x, y }, "ui-hint").setDepth(DEPTH),
-    ];
-    let rowY = y + padding;
-    texts.forEach((text, i) => {
-      const item = this.items[i];
-      if (item !== undefined) {
-        parts.push(this.addIcon(item, { x: x + padding, y: rowY }, DEPTH + 1, PALETTE.plum));
-      }
-      placePixelText(text, x + padding + icon + gap, rowY + 2);
-      text.setDepth(DEPTH + 1);
-      parts.push(text);
-      rowY += (rows[i] ?? icon) + rowGap;
-    });
-    this.bubble = parts;
-    this.hooks.onOpen();
-    this.scene.time.delayedCall(BUBBLE.holdMs, () => {
-      if (this.bubble === parts) {
-        this.closeBubble();
-      }
-    });
+    }).setDepth(DEPTH);
   }
 }

@@ -2,12 +2,7 @@ import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { SKIP_CARD_ART } from "../assets/cardArt";
-import {
-  CARD_FRAME_KEY,
-  cardFrameTag,
-  DIFFICULTY_KEY,
-  forcedStopSpriteKey,
-} from "../assets/spriteKeys";
+import { CARD_FRAME_KEY, cardFrameTag, DIFFICULTY_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
@@ -43,11 +38,13 @@ import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
-import { addNineSlice, tagFrame } from "./uiKit";
+import { addMenuButton, addNineSlice, listenButtonTap, tagFrame } from "./uiKit";
 
 export interface CardSceneData {
   // Called with the option's data index, or "skip"; the run decides what happens next.
   onChoose: (choice: Choice) => void;
+  // A fork card's Head home button, under the paths.
+  onHeadHome: () => void;
   view: CardView;
   // The zone the card opened in, which picks an encounter's look.
   zone: ZoneId;
@@ -74,6 +71,8 @@ const LARGE_BODY_GAP = 4;
 // pixels, and card-frame-large pixels where it is drawn at 2x.
 const FIRES_KEY = "ui-fires";
 const FIRES_AT = { large: { x: 8, y: 238 }, small: { x: 4, y: 119 } };
+// A fork card's Head home button, centred under the paths, gap rows below them.
+const FORK_HOME = { gap: 6, height: 44, width: 160 };
 
 interface Entry {
   choice: Choice;
@@ -107,10 +106,7 @@ function sourceSpriteKey(
   source: CardSource,
 ): string | undefined {
   const look = sourceLook(zone, source);
-  if (look !== null) {
-    return skinnedArt(has, look);
-  }
-  return source.kind === "forcedStop" ? forcedStopSpriteKey(source.stop) : undefined;
+  return look === null ? undefined : skinnedArt(has, look);
 }
 
 // The option's illustration, an encounter's in its look, or the Skip card's. A path card's is
@@ -153,7 +149,7 @@ export class CardScene extends Scene {
     super(SCENE_KEYS.card);
   }
 
-  create({ onChoose, view, zone }: CardSceneData): void {
+  create({ onChoose, onHeadHome, view, zone }: CardSceneData): void {
     this.onChoose = onChoose;
     this.chosen = false;
     this.pressed = undefined;
@@ -193,7 +189,7 @@ export class CardScene extends Scene {
     addNineSlice(this, "ui-strip-well", header.band);
     this.centered(centerX, header.subtitleTop, this.subtitle(view), PALETTE.white);
 
-    const tag = cardFrameTag(gameData, view.source);
+    const tag = cardFrameTag(view.source);
     const bandFont = this.bandFont();
     this.entries.forEach((entry, i) => {
       const before = this.children.list.length;
@@ -208,6 +204,18 @@ export class CardScene extends Scene {
       this.parts[i] = this.children.list.slice(before);
     });
     this.outline = this.add.graphics();
+    if (view.source.kind === "fork") {
+      const row = itemAt(this.cardRects, 0);
+      const rect = {
+        height: FORK_HOME.height,
+        width: FORK_HOME.width,
+        x: Math.round(centerX - FORK_HOME.width / 2),
+        y: row.y + row.height + FORK_HOME.gap,
+      };
+      const label = gameData.runText.homeQuestion.headHome;
+      const button = addMenuButton(this, rect, label, { available: true, primary: false });
+      listenButtonTap(this, button, onHeadHome);
+    }
 
     // A tap picks a card; holding one enlarges it until the finger lifts, and picks nothing.
     this.presses = listenTargetPress<number>(this, {
@@ -253,14 +261,9 @@ export class CardScene extends Scene {
 
   private subtitle(view: CardView): string {
     switch (view.source.kind) {
-      case "encounter":
-      case "need": {
+      case "encounter": {
         const names = view.affected.map((dog) => gameData.dogs[dog].name);
         return names.length === 0 ? gameData.runText.card.pickOne : `${names.join(", ")}`;
-      }
-      case "forcedStop": {
-        const names = view.affected.map((dog) => gameData.dogs[dog].name);
-        return names.length === 0 ? gameData.runText.card.stopSubtitle : names.join(", ");
       }
       case "fork":
         return gameData.runText.card.forkSubtitle;
@@ -335,7 +338,7 @@ export class CardScene extends Scene {
     const { walkView } = screenLayout(SCREEN_CONFIG);
     const { x, y } = largeCardRect(walkView, height);
     const before = this.children.list.length;
-    const tag = cardFrameTag(gameData, view.source);
+    const tag = cardFrameTag(view.source);
     const g = this.add.graphics();
     if (this.textures.exists(LARGE.key)) {
       // The frame's top down to the body's end, then its foot, over the body's last rows.
@@ -457,16 +460,18 @@ export class CardScene extends Scene {
     return marker === undefined ? left + width / 2 : (marker + left + width) / 2;
   }
 
-  // A path card's plaque shows its zone's fee multiplier instead of a cost, and an upgrade
-  // card's how long it lasts.
+  // A path card's plaque shows its zone's pay multiplier instead of a cost, and how long its
+  // upgrade lasts.
   private costText(entry: Entry): string {
     const option = entry.option;
     const text = gameData.runText.card;
     if (option?.path !== undefined) {
-      return fillLine(RUN_TEXT_FIELDS.card, text, "forkFees", { fees: String(option.path.fees) });
-    }
-    if (option?.duration !== undefined) {
-      return text.upgradeDuration[option.duration];
+      const pay = fillLine(RUN_TEXT_FIELDS.card, text, "forkFees", {
+        fees: String(option.path.fees),
+      });
+      return option.duration === undefined
+        ? pay
+        : `${pay} · ${text.upgradeDuration[option.duration]}`;
     }
     if (option === undefined || option.cost === 0) {
       return gameData.runText.card.free;
@@ -598,7 +603,7 @@ export class CardScene extends Scene {
     }
 
     // The effect at 2x where it fits the card, else at 1x; holding the card shows it larger.
-    const text = path?.difficultyName ?? entry.option?.text ?? gameData.runText.card.skipEffect;
+    const text = entry.option?.text ?? gameData.runText.card.skipEffect;
     const effect = this.centered(
       x + EFFECT.x + EFFECT.width / 2,
       effectY,

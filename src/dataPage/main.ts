@@ -3,7 +3,6 @@ import "./main.css";
 import { badgeKey } from "../assets/spriteKeys";
 import { gameData, onGameDataChange } from "../data";
 import type {
-  CardOption,
   DogId,
   GameData,
   HintTrigger,
@@ -14,29 +13,12 @@ import type {
   Zone,
 } from "../data/types";
 import { achievementConditionText } from "../rules/achievements";
-import {
-  inputLockSeconds,
-  maxHearts,
-  needUrgentSeconds,
-  startHearts,
-  zoneFee,
-} from "../rules/dogs";
-import {
-  affectText,
-  capitalize,
-  conditionText,
-  debuffText,
-  effectText,
-  ENERGY_NAMES,
-  formatDollars,
-  SIZE_NAMES,
-  TEMPERAMENT_NAMES,
-  TRAIT_NAMES,
-} from "../rules/effectText";
+import { maxHearts, startHearts } from "../rules/dogs";
+import { capitalize, debuffText, effectText, formatDollars, SIZE_NAMES } from "../rules/effectText";
 import { modifiersOf } from "../rules/modifiers";
 import { firstZoneId, walkLength, zoneById } from "../rules/route";
 import { price, unlockPrice } from "../rules/shop";
-import { walkerEffects } from "../rules/walkers";
+import { agilityWord } from "../rules/walkers";
 import { zoneStats } from "../rules/zones";
 import { POLICY_NAMES } from "../sim/policies";
 import {
@@ -98,15 +80,6 @@ function renderSection({ headers, note, rows, title }: Section): HTMLElement {
   return section;
 }
 
-function optionRows(data: GameData, name: string, options: readonly CardOption[]): Cell[][] {
-  return options.map((option, i) => [
-    i === 0 ? name : "",
-    option.name,
-    effectText(data, option.effects),
-    option.art,
-  ]);
-}
-
 function priceText(data: GameData, item: Unlock): string {
   return item.unlock === "start" ? "Start" : formatDollars(unlockPrice(data.tuning, item));
 }
@@ -115,38 +88,15 @@ function dogsSection(data: GameData): Section {
   const { tuning } = data;
   const luckyCollar: readonly Modifier[] = modifiersOf(data.shopGear.luckyCollar.effects);
   return {
-    headers: [
-      "Dog",
-      "Breed",
-      "Size",
-      "Trait",
-      "Quirk",
-      "Energy",
-      "Owner",
-      "Temperament",
-      "Start ♥",
-      "Max ♥",
-      "With Lucky collar",
-      "Fee",
-      "Need urgent after",
-      "Input lock",
-      "Unlock",
-    ],
+    headers: ["Dog", "Breed", "Size", "Owner", "Start ♥", "Max ♥", "With Lucky collar", "Unlock"],
     rows: Object.values(data.dogs).map((dog) => [
       dog.name,
       dog.breed,
       capitalize(SIZE_NAMES[dog.size]),
-      TRAIT_NAMES[dog.trait],
-      data.quirks[dog.quirk].name,
-      capitalize(ENERGY_NAMES[dog.energy]),
       `${dog.owner.name}, ${dog.owner.role}`,
-      capitalize(TEMPERAMENT_NAMES[dog.owner.temperament]),
       startHearts(tuning, [], dog),
       maxHearts(tuning, [], dog),
       `${startHearts(tuning, luckyCollar, dog)} / ${maxHearts(tuning, luckyCollar, dog)}`,
-      formatDollars(zoneFee(tuning, [], dog)),
-      `${needUrgentSeconds(tuning, dog)}s`,
-      `${inputLockSeconds(tuning, [], dog)}s`,
       priceText(data, dog),
     ]),
     title: "Dogs",
@@ -157,14 +107,13 @@ const QUIP_MOMENTS: readonly QuipMoment[] = ["happier", "upset", "fired", "parti
 
 function quipsSection(data: GameData): Section {
   return {
-    headers: ["Dog", "Owner", "Temperament", "Moment", "Lines"],
+    headers: ["Dog", "Owner", "Moment", "Lines"],
     note: "Parting lines show when the player picks the dog on the home screen.",
     rows: (Object.keys(data.dogs) as DogId[]).flatMap((id) => {
       const dog = data.dogs[id];
       return QUIP_MOMENTS.map((moment, i) => [
         i === 0 ? dog.name : "",
         i === 0 ? dog.owner.name : "",
-        i === 0 ? capitalize(TEMPERAMENT_NAMES[dog.owner.temperament]) : "",
         moment,
         data.quips[id][moment].join(" / "),
       ]);
@@ -177,9 +126,6 @@ function hintsSection(data: GameData): Section {
   const triggerText = (trigger: HintTrigger): string => {
     if (trigger.kind === "encounter") {
       return `first ${data.encounters[trigger.encounter].name}`;
-    }
-    if (trigger.kind === "debuff") {
-      return `first ${data.debuffs[trigger.debuff].name}`;
     }
     return `first ${trigger.kind}`;
   };
@@ -197,12 +143,7 @@ function hintsSection(data: GameData): Section {
 
 function encountersSection(data: GameData): Section {
   const rows = Object.values(data.encounters).flatMap((encounter): Cell[][] => {
-    const head = [
-      encounter.name,
-      encounter.kind,
-      affectText(encounter.affects),
-      encounter.noCardWhen === undefined ? "" : conditionText(encounter.noCardWhen),
-    ];
+    const head = [encounter.name, encounter.kind];
     const { resolution } = encounter;
     if (resolution.kind === "instant") {
       return [[...head, "Instant", effectText(data, resolution.effects), resolution.art]];
@@ -215,20 +156,10 @@ function encountersSection(data: GameData): Section {
     ]);
   });
   return {
-    headers: ["Encounter", "Kind", "Affects", "No card when", "Option", "Effect", "Art"],
-    note: "An instant encounter opens no card: it applies on contact, with a popup.",
+    headers: ["Encounter", "Kind", "Option", "Effect", "Art"],
+    note: "A lucky find opens no card: it applies on contact, with a popup.",
     rows,
     title: "Encounters",
-  };
-}
-
-function forcedStopsSection(data: GameData): Section {
-  return {
-    headers: ["Forced stop", "Option", "Effect", "Art"],
-    rows: Object.values(data.forcedStops).flatMap((stop) =>
-      optionRows(data, stop.name, stop.options),
-    ),
-    title: "Forced stops",
   };
 }
 
@@ -268,7 +199,7 @@ function dogSlotsSection(data: GameData): Section {
 
 function walkersSection(data: GameData): Section {
   return {
-    headers: ["Walker", "Pace", "Style", "Effect", "Unlock", "Sprite", "Portrait"],
+    headers: ["Walker", "Agility", "Perk", "Effect", "Unlock", "Sprite", "Portrait"],
     note:
       "A new player starts with the default walker. The others unlock the first time a walk " +
       "finishes their zone.",
@@ -277,9 +208,9 @@ function walkersSection(data: GameData): Section {
       const name = id === data.defaultWalker ? `${walker.name} (default)` : walker.name;
       return [
         name,
-        data.walkerPaces[walker.pace].name,
-        data.walkerStyles[walker.style].name,
-        effectText(data, walkerEffects(data, id)),
+        `${agilityWord(data.homeText, walker.agility)} (${walker.agility})`,
+        data.walkerPerks[walker.perk].name,
+        data.walkerPerks[walker.perk].effect,
         walker.unlock === "start" ? "Start" : `Finish zone ${walker.zone}`,
         walker.spriteKey,
         walker.portraitKey,
@@ -440,7 +371,6 @@ function render(): void {
   const sections = [
     dogsSection,
     encountersSection,
-    forcedStopsSection,
     upgradesSection,
     shopSection,
     dogSlotsSection,

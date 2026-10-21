@@ -129,10 +129,10 @@ describe("loadSave", () => {
       ["street", "pawsPromenade"],
     ],
     [
-      "a checkpoint's run counters, from the first zone with no starting money when saved before them",
+      "a checkpoint's run counters saved before the first zone, starting money and debuffs got",
       (document) => {
         document.checkpoint = {
-          counters: { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, squirrelChases: 2 },
+          counters: { bumpsByZone: [0, 3], squirrelChases: 2 },
           dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
           earnedCents: 4_250,
           zonesFinished: 2,
@@ -141,11 +141,54 @@ describe("loadSave", () => {
       (save) => save.checkpoint?.counters,
       {
         bumpsByZone: [0, 3],
-        debuffZones: { stinky: 1 },
+        debuffsGot: {},
         firstZone: 0,
         squirrelChases: 2,
         startCents: 0,
       },
+    ],
+    [
+      // Saved before the rules rewrite: a checkpoint counting zones ended with a debuff, the
+      // Whistle owned and picked, and a carried treat count.
+      "a save from before the rules rewrite, keeping its dogs and money",
+      (document) => {
+        document.owned.gear = ["fannyPack", "whistle"];
+        document.lastLoadout.gear = "whistle";
+        document.checkpoint = {
+          counters: { bumpsByZone: [1], debuffZones: { stinky: 1 }, squirrelChases: 0 },
+          dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
+          earnedCents: 700,
+          route: ["street"],
+          treats: 2,
+          zonesFinished: 1,
+        } as unknown as StoredInput["checkpoint"];
+      },
+      (save) => [
+        save.bankCents,
+        save.owned.dogs,
+        save.owned.gear,
+        save.lastLoadout,
+        save.checkpoint,
+      ],
+      [
+        veteranSave().bankCents,
+        veteranSave().owned.dogs,
+        ["fannyPack"],
+        { dogs: veteranSave().lastLoadout.dogs, gear: null },
+        {
+          counters: {
+            bumpsByZone: [1],
+            debuffsGot: {},
+            firstZone: 0,
+            squirrelChases: 0,
+            startCents: 0,
+          },
+          dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
+          earnedCents: 700,
+          route: ["street"],
+          zonesFinished: 1,
+        },
+      ],
     ],
     [
       "a last walk from before forks on the pre-fork route",
@@ -187,7 +230,7 @@ describe("loadSave", () => {
         document.owned = {
           dogSlots: 2,
           dogs: ["koda", "ghost", "penny", "koda"],
-          gear: ["whistle", "jetpack", "whistle"],
+          gear: ["runningShoes", "jetpack", "runningShoes"],
           walkers: ["ben", "ghost", "ben"],
         };
       },
@@ -195,7 +238,7 @@ describe("loadSave", () => {
       {
         dogSlots: 2,
         dogs: ["biscuit", "koda", "penny"],
-        gear: ["whistle"],
+        gear: ["runningShoes"],
         walkers: ["casey", "ben"],
       },
     ],
@@ -220,10 +263,10 @@ describe("loadSave", () => {
     [
       "with an empty loadout keeping owned gear when no loadout dog is left",
       (document) => {
-        document.lastLoadout = { dogs: ["ghost"], gear: "whistle" };
+        document.lastLoadout = { dogs: ["ghost"], gear: "runningShoes" };
       },
       (save) => save.lastLoadout,
-      { dogs: [], gear: "whistle" },
+      { dogs: [], gear: "runningShoes" },
     ],
     [
       "with an unknown walker swapped for the default",
@@ -476,10 +519,7 @@ describe("saveContextFrom", () => {
 
   it("refuses game data with no starter dog", () => {
     const dogs = Object.fromEntries(
-      Object.entries(gameData.dogs).map(([id, dog]) => [
-        id,
-        { ...dog, price: "lockedDog" as const, unlock: "shop" as const },
-      ]),
+      Object.entries(gameData.dogs).map(([id, dog]) => [id, { ...dog, unlock: "shop" as const }]),
     ) as typeof gameData.dogs;
     expect(() => saveContextFrom({ ...gameData, dogs })).toThrow("needs a starter dog");
   });

@@ -1,17 +1,13 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { inputLockSeconds } from "../rules/dogs";
-import { read } from "../rules/units";
 import { levelWithPack } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
-import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
-import { isNeedUrgent, needFill, needSpotOf, spotMeets } from "../runner/needs";
+import { hasLeftRoad, moverPlace } from "../runner/movers";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
   isPickup,
   itemCategory,
-  laneChangeLockSeconds,
   laneMoveSeconds,
   pickupReach,
   type RoadGeometry,
@@ -21,7 +17,6 @@ import {
   type WalkItem,
   type WalkItemKind,
 } from "../runner/walk";
-import { packDogs } from "../state/pack";
 import {
   type LaneHazard,
   type LanePrize,
@@ -74,10 +69,6 @@ const MARGIN_SECONDS = STEP_SECONDS;
 const GRID_SECONDS = 0.1;
 
 const PRIZE_VALUES = { lucky: 1, tip: 1, treat: 1 } as const;
-// A need spot is worth NEED_SPOT_VALUE for each dog whose urgent need it meets, and up to half
-// of NEED_URGENCY_VALUE more as that need runs on toward going wrong.
-const NEED_SPOT_VALUE = 1;
-const NEED_URGENCY_VALUE = 3;
 
 export function newBot(random: Random, skill: Skill): Bot {
   return {
@@ -97,15 +88,15 @@ export function newBot(random: Random, skill: Skill): Bot {
   };
 }
 
-// When an item at y, height tall, starts and stops touching the pack, in seconds from now.
+// When an item at y, height tall, starts and stops overlapping the pack's band, in seconds from
+// now: from its near edge reaching the band's top until its far edge passes the band's bottom.
 export function contactWindow(
   band: RoadGeometry["packBand"],
   speed: number,
   y: number,
   height: number,
 ): { readonly end: number; readonly start: number } {
-  const standsAt = y + height;
-  return { end: (band.bottom - standsAt) / speed, start: (band.top - standsAt) / speed };
+  return { end: (band.bottom - y) / speed, start: (band.top - (y + height)) / speed };
 }
 
 // How often a mover's path is sampled, in road pixels of scroll.
@@ -148,27 +139,29 @@ function scrollContacts(
     return known;
   }
   const contacts: ScrollContact[] = [];
-  // The contact under way in each lane of the mover's span, by its offset in the span.
-  const current: (ScrollContact | null)[] = Array.from({ length: laneSpan }, () => null);
+  // The contact under way in each lane, by lane. Between lanes, a mover's box covers part of
+  // each lane it straddles, so it can touch a dog in any of them.
+  const current = new Map<number, ScrollContact>();
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
     const y = roadTop - height + place.travel;
-    if (hasLeftRoad(laneCount, place) || y + height > packBand.bottom) {
+    if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
       break;
     }
     const level = place.solid && levelWithPack(packBand, { height, y });
-    for (let offset = 0; offset < laneSpan; offset++) {
-      const lane = laneAt(place.lanePosition) + offset;
-      const touching = level && lane >= 0 && lane < laneCount;
-      const last = current[offset];
-      if (touching && last?.lane === lane) {
-        last.to = since;
+    const first = Math.floor(place.lanePosition + 1e-9);
+    const last = Math.ceil(place.lanePosition + laneSpan - 1e-9) - 1;
+    for (let lane = 0; lane < laneCount; lane++) {
+      const touching = level && lane >= first && lane <= last;
+      const under = current.get(lane);
+      if (touching && under !== undefined) {
+        under.to = since;
       } else if (touching) {
         const contact = { from: since, lane, to: since };
         contacts.push(contact);
-        current[offset] = contact;
+        current.set(lane, contact);
       } else {
-        current[offset] = null;
+        current.delete(lane);
       }
     }
   }
@@ -271,7 +264,6 @@ function botView(
   const hazards: LaneHazard[] = [];
   const prizes: LanePrize[] = [];
   const treatReach = treatReachOf(data, walk);
-  const treatsFull = walk.run.treats >= read(data.tuning, "counts", "treatCarryMax");
   const horizon = bot.skill.lookAheadSeconds;
   for (const item of walk.road.items) {
     if (!bot.perceived.has(item.id)) {
@@ -292,18 +284,11 @@ function botView(
     if (category === "minor" || category === "obstacle") {
       hazards.push({ from: start - MARGIN_SECONDS, lanes, to: end + MARGIN_SECONDS });
     } else if (category === "treat") {
-      if (!treatsFull) {
-        prizes.push({
-          at: start,
-          lanes: widenMask(geometry.laneCount, treatReach, lanes),
-          value: PRIZE_VALUES.treat,
-        });
-      }
-    } else if (category === "needSpot") {
-      const value = needSpotValue(data, walk, item);
-      if (value > 0) {
-        prizes.push({ at: start, lanes, value });
-      }
+      prizes.push({
+        at: start,
+        lanes: widenMask(geometry.laneCount, treatReach, lanes),
+        value: PRIZE_VALUES.treat,
+      });
     } else {
       const reach = category === "tip" ? pickupReach(data, walk.run, "tip") : 0;
       prizes.push({
@@ -326,28 +311,12 @@ function botView(
           {
             at: strain.tellSeconds,
             direction: strain.direction,
-            lockSeconds: inputLockSeconds(data.tuning, walk.run.modifiers, data.dogs[strain.dog]),
+            lockSeconds: 0,
             reactSeconds: bot.skill.reactionSeconds,
           },
         ]
       : [];
   return { hazards, prizes, pulls: seenPulls };
-}
-
-// What steering into a need spot is worth to the bot: only a dog whose need is urgent gains
-// from it, more the longer that need has been urgent.
-function needSpotValue(data: WalkData, walk: Walk, item: WalkItem): number {
-  const spot = needSpotOf(data, item.kind);
-  if (spot === null) {
-    return 0;
-  }
-  return packDogs(walk.run)
-    .filter((dog) => spotMeets(data, spot, dog) && isNeedUrgent(data, walk.run, dog))
-    .reduce(
-      (value, dog) =>
-        value + NEED_SPOT_VALUE + NEED_URGENCY_VALUE * Math.min(1.5, needFill(data, walk.run, dog)),
-      0,
-    );
 }
 
 // The walk steps' length a lane change lasts: it ends on the first step at or after its
@@ -364,9 +333,6 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
   const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
   const moveSeconds = wholeSteps(laneMoveSeconds(road.data, walk.run));
-  // A lane change's own lock, such as Tangled's, spaces the moves after it.
-  const lockAfterMove = laneChangeLockSeconds(road.data, walk.run);
-  const changeLock = lockAfterMove > 0 ? lockAfterMove + LOCK_MARGIN : 0;
   const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
   const view = botView(bot, road, pulls, walk);
   const moves = planLanes(
@@ -375,7 +341,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
       horizon: lookAheadSeconds,
       laneCount: road.geometry.laneCount,
       moveSeconds,
-      moveStep: Math.max(moveSeconds + changeLock, laneChangeCooldown),
+      moveStep: Math.max(moveSeconds, laneChangeCooldown),
     },
     {
       lane: moving ? motion.to : motion.lane,

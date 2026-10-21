@@ -19,11 +19,9 @@ export interface Press {
   readonly id: number;
 }
 
-// onButton: the press went down on a top-bar button. onStrip: on the top bar's state strip,
-// whose tap is the HUD's, so the press can drag but never taps.
+// onButton: the press went down on a top-bar button.
 export interface PointerSample {
   readonly onButton: boolean;
-  readonly onStrip: boolean;
   readonly phase: PointerPhase;
   readonly point: Point;
   readonly press: Press;
@@ -72,9 +70,7 @@ export function trackPointer(
     if (sample.onButton) {
       return none(current);
     }
-    const { state } = pointerDown(context, point);
-    const gesture = sample.onStrip && state.kind !== "idle" ? { ...state, tapping: false } : state;
-    return none({ gesture, press });
+    return none({ gesture: pointerDown(context, point).state, press });
   }
   if (!samePress(current.press, press)) {
     return none(current);

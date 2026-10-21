@@ -1,10 +1,6 @@
-import type { DogId, GameData } from "../data/types";
 import { type CardView, type Choice, type ChoiceData, chooseOption } from "../rules/choices";
-import { maxHearts } from "../rules/dogs";
-import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
 import { chance, type Random } from "../runner/random";
-import { heartsOf, packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 
 // heartsUnlessLow: take hearts unless an owner whose meter falls would end at LOW_HEARTS or
@@ -183,66 +179,4 @@ export function chooseCardOption(
     throw new Error(`${card.title} has no option the ${policy} policy can take`);
   }
   return picked.choice;
-}
-
-function lowestHearts(state: RunState): number {
-  return Math.min(...packDogs(state).map((dog) => heartsOf(state, dog) ?? 0));
-}
-
-// When an owner's face looks upset, the upgrade that leaves the unhappiest owner with the
-// most hearts, if any raises them. Otherwise the first upgrade that changes tips (their value
-// or how many spawn), then the first boost, then the first card.
-export function chooseUpgrade(
-  data: ChoiceData & Pick<GameData, "upgrades">,
-  state: RunState,
-  card: CardView,
-): Choice {
-  if (card.source.kind !== "upgradeOffer") {
-    throw new Error(`${card.title} is not an upgrade offer`);
-  }
-  const { offered } = card.source;
-  const before = lowestHearts(state);
-  if (packDogs(state).some((dog) => faceMood(data, heartsOf(state, dog) ?? 0) === "upset")) {
-    const lifted = offered
-      .map((_, index) => ({
-        index,
-        lowest: lowestHearts(chooseOption(data, () => 0, state, card, index).state),
-      }))
-      .filter(({ lowest }) => lowest > before);
-    const top = lifted.reduce<(typeof lifted)[number] | undefined>(
-      (leader, entry) => (leader === undefined || entry.lowest > leader.lowest ? entry : leader),
-      undefined,
-    );
-    if (top !== undefined) {
-      return top.index;
-    }
-  }
-  const changesTips = offered.findIndex((id) =>
-    data.upgrades[id].effects.some(
-      (effect) =>
-        effect.kind === "modifier" && (effect.stat === "tipValue" || effect.stat === "tipSpawns"),
-    ),
-  );
-  if (changesTips >= 0) {
-    return changesTips;
-  }
-  const boost = offered.findIndex((id) => data.upgrades[id].kind === "boost");
-  return boost >= 0 ? boost : 0;
-}
-
-// The owner to give a carried treat to: the one with the fewest hearts among those below
-// their max, the first in pack order on a tie.
-export function treatTarget(
-  data: Pick<GameData, "dogs" | "tuning">,
-  state: RunState,
-): DogId | undefined {
-  let target: { readonly dog: DogId; readonly hearts: number } | undefined;
-  for (const dog of packDogs(state)) {
-    const hearts = heartsOf(state, dog) ?? 0;
-    const below = hearts < maxHearts(data.tuning, state.modifiers, data.dogs[dog]);
-    if (below && (target === undefined || hearts < target.hearts)) {
-      target = { dog, hearts };
-    }
-  }
-  return target?.dog;
 }

@@ -10,16 +10,16 @@ import {
   conditionHolds,
   countBump,
   countChase,
-  countDebuffZones,
   earnedByRun,
   newlyEarned,
   type RunFacts,
 } from "./achievements";
+import { applyEffects } from "./effects";
 import { cents } from "./units";
 
 const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   bumpsByZone: [],
-  debuffZones: {},
+  debuffsGot: {},
   earnedCents: cents(0),
   firstZone: 0,
   packSize: 1,
@@ -48,7 +48,7 @@ const zonesFinished = (count: Count) => ({ count, kind: "zonesFinished" }) as co
 const cleanZones = (count: Count) => ({ count, kind: "cleanZones" }) as const;
 const packOf2 = { count: 2, kind: "packSize" } as const;
 const payday = { dollars: 500, kind: "earnings" } as const;
-const stinky3 = { count: 3, debuff: "stinky", kind: "debuffZones" } as const;
+const stinky3 = { count: 3, debuff: "stinky", kind: "debuffsGot" } as const;
 const bumped = (bumpsByZone: number[], finished: number) => ({
   bumpsByZone,
   zonesFinished: finished,
@@ -68,7 +68,7 @@ describe("run conditions", () => {
     ["cleanZones, the finished zone bumped", cleanZones(1), bumped([2], 1), false],
     ["cleanZones, never the zone in progress", cleanZones(1), bumped([1], 1), false],
     ["cleanZones, no zone finished", cleanZones(1), { zonesFinished: 0 }, false],
-    ["cleanZones, spoilt by a minor bump", cleanZones(1), bumped(minorBump, 1), false],
+    ["cleanZones, spoilt by a plain hit", cleanZones(1), bumped(minorBump, 1), false],
     ["cleanZones all, no bump", cleanZones("all"), { zonesFinished: 4 }, true],
     ["cleanZones all, a bump in the last zone", cleanZones("all"), bumped([0, 0, 0, 1], 4), false],
     ["cleanZones all, a zone short", cleanZones("all"), { zonesFinished: 3 }, false],
@@ -95,8 +95,8 @@ describe("run conditions", () => {
       { earnedCents: cents(52_000), startCents: cents(2_000) },
       true,
     ],
-    ["debuffZones below the count", stinky3, { debuffZones: { stinky: 2 } }, false],
-    ["debuffZones at the count", stinky3, { debuffZones: { stinky: 3 } }, true],
+    ["debuffsGot below the count", stinky3, { debuffsGot: { stinky: 2 } }, false],
+    ["debuffsGot at the count", stinky3, { debuffsGot: { stinky: 3 } }, true],
   ])("%s", (_, condition, run, holds) => {
     expect(holdsForRun(condition, run)).toBe(holds);
   });
@@ -214,13 +214,16 @@ describe("counters", () => {
     expect(countBump(countBump(run)).bumpsByZone).toEqual([0, 0, 2]);
   });
 
-  it("counts a zone for each debuff on", () => {
-    const run = testState(
-      { koda: 5 },
-      { debuffZones: { stinky: 1 }, debuffs: [{ debuff: "stinky", untilZone: 1 }] },
-    );
-    expect(countDebuffZones(run).debuffZones).toEqual({ stinky: 2 });
-    expect(countDebuffZones(testState({ koda: 5 })).debuffZones).toEqual({});
+  it("counts each time a debuff is applied, again on a debuff already on", () => {
+    const stinky = { debuff: "stinky", kind: "debuff" } as const;
+    const context = {
+      affected: [],
+      random: () => 0,
+      source: { kind: "walker", walker: "casey" },
+    } as const;
+    const once = applyEffects(gameData, context, [stinky], testState({ koda: 5 }));
+    expect(once.debuffsGot).toEqual({ stinky: 1 });
+    expect(applyEffects(gameData, context, [stinky], once).debuffsGot).toEqual({ stinky: 2 });
   });
 
   it("counts a chase only for an option that lets the chasers chase", () => {

@@ -33,7 +33,7 @@ const presetLines = SKILL_PRESET_IDS.map((id) => {
 });
 
 const USAGE = [
-  "npm run simulate -- [--skill preset,...] [--hit percent,...] [--policy id,...]",
+  "npm run simulate -- [--skill preset,...] [--policy id,...]",
   "                    [--route id,...] [--gear id,...] [--walker id,...] [--runs N] [--seed N]",
   "                    [--out file]",
   "",
@@ -42,8 +42,6 @@ const USAGE = [
   "",
   "  --skill   steering bots of these skill presets play the real walk loop, with pulls, chases",
   "            and movers, and their hit rates are measured (default: every preset)",
-  "  --hit     instead or as well, players that hit each obstacle at these fixed rates and",
-  "            collect tips, treats and lucky finds at 70%",
   `  --policy  card choice policies (default: ${POLICY_IDS.join(",")})`,
   `  --route   the path taken at each fork, of ${ROUTE_POLICY_IDS.join(", ")}: straight is the`,
   "            middle path, left the easiest and right the hardest",
@@ -109,23 +107,12 @@ function parseGears(text: string): (GearId | null)[] {
   });
 }
 
-function parseHitRates(text: string): MatrixPlayer[] {
-  return text.split(",").map((part) => {
-    const value = Number(part.replace(/%$/, ""));
-    if (part === "" || !(value >= 0 && value <= 100)) {
-      throw new Error(`--hit takes percentages from 0 to 100, not ${part}`);
-    }
-    return { hitRate: value / 100, kind: "rates" };
-  });
-}
-
 function parseArgs(args: readonly string[]): Options {
   let matrix = DEFAULT_MATRIX;
   let out: string | undefined;
   let runs = DEFAULT_RUNS;
   let seed = DEFAULT_SEED;
   let skills: MatrixPlayer[] = [];
-  let hits: MatrixPlayer[] = [];
   if (args.includes("--help") || args.includes("-h")) {
     return { help: true, matrix, out, runs, seed };
   }
@@ -138,9 +125,6 @@ function parseArgs(args: readonly string[]): Options {
     switch (flag) {
       case "--gear":
         matrix = { ...matrix, gears: parseGears(value) };
-        break;
-      case "--hit":
-        hits = parseHitRates(value);
         break;
       case "--skill":
         skills = parseIds(flag, SKILL_PRESET_IDS, value).map((preset): MatrixPlayer => ({
@@ -170,9 +154,8 @@ function parseArgs(args: readonly string[]): Options {
         throw new Error(`Unknown option ${flag}\n\n${USAGE}`);
     }
   }
-  const players = [...skills, ...hits];
-  if (players.length > 0) {
-    matrix = { ...matrix, players };
+  if (skills.length > 0) {
+    matrix = { ...matrix, players: skills };
   }
   return { help: false, matrix, out, runs, seed };
 }

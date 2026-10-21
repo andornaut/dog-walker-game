@@ -1,12 +1,12 @@
-import type { GameData, WalkerId } from "../data/types";
+import type { GameData, WalkerId, ZoneId } from "../data/types";
 import { earningsKind } from "../home/endView";
 import { signedDollarText } from "../home/home";
 import type { Change } from "../rules/causes";
 import { type Cents, cents } from "../rules/units";
-import { newWalkers } from "../rules/walkers";
+import { agilityWord, newWalkers } from "../rules/walkers";
 import { fillLine } from "../text/lines";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
-import { stripIconKey } from "./stateStrip";
+import { perkIconKey } from "./stateStrip";
 
 // What plays between a zone's fee coins and the upgrade card, after every zone but the last:
 // the walker that zone unlocks for the first time joins, or else the walker in use cheers over
@@ -24,8 +24,8 @@ export type ZoneCelebration =
 export interface ZoneFinish {
   // The changes made since the zone began, its fees included.
   readonly changes: readonly Change[];
-  // The zones the run has finished, this one included.
-  readonly finished: number;
+  // The zones the run has finished, in order, this one included.
+  readonly finished: readonly ZoneId[];
   readonly walker: WalkerId;
   // The finished zone's name.
   readonly zone: string;
@@ -38,7 +38,7 @@ export function zoneCelebration(
   owned: readonly WalkerId[],
   finish: ZoneFinish,
 ): ZoneCelebration {
-  const before = newWalkers(data, owned, finish.finished - 1);
+  const before = newWalkers(data, owned, finish.finished.slice(0, -1));
   const joining = newWalkers(data, owned, finish.finished).find((id) => !before.includes(id));
   if (joining !== undefined) {
     return { kind: "newWalker", walker: joining };
@@ -92,7 +92,7 @@ function lineParts(line: string, named: Readonly<Record<string, LinePart>>): Lin
 }
 
 export function celebrationText(
-  data: Pick<GameData, "runText" | "walkerPaces" | "walkerStyles" | "walkers">,
+  data: Pick<GameData, "homeText" | "runText" | "walkerPerks" | "walkers">,
   celebration: ZoneCelebration,
 ): CelebrationText {
   const text = data.runText;
@@ -111,18 +111,10 @@ export function celebrationText(
     };
   }
   const words = text.newWalker;
-  const { name, pace, style } = data.walkers[celebration.walker];
-  const named: Record<"pace" | "style", LinePart> = {
-    pace: {
-      icon: stripIconKey({ kind: "pace", pace }),
-      kind: "icon",
-      text: data.walkerPaces[pace].name,
-    },
-    style: {
-      icon: stripIconKey({ kind: "style", style }),
-      kind: "icon",
-      text: data.walkerStyles[style].name,
-    },
+  const { agility, name, perk } = data.walkers[celebration.walker];
+  const named: Record<"agility" | "perk", LinePart> = {
+    agility: { kind: "text", text: agilityWord(data.homeText, agility) },
+    perk: { icon: perkIconKey(perk), kind: "icon", text: data.walkerPerks[perk].name },
   };
   const info = lineParts(words.info, named);
   return {

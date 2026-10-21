@@ -6,7 +6,6 @@ import { itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
 import {
-  DEFAULT_RATES,
   type ItemCount,
   type RunResult,
   type SimData,
@@ -20,24 +19,20 @@ export interface NamedPack {
   readonly name: string;
 }
 
-// A matrix's player: a fixed obstacle hit rate from 0 to 1, with the matrix's pickup rates,
-// or a steering bot of a skill preset.
-export type MatrixPlayer =
-  | { readonly hitRate: number; readonly kind: "rates" }
-  | { readonly kind: "skill"; readonly preset: SkillPresetId };
+// A matrix's player: a steering bot of a skill preset.
+export interface MatrixPlayer {
+  readonly kind: "skill";
+  readonly preset: SkillPresetId;
+}
 
-// Every combination of policy, route policy, player, gear, pack and walker is one cell. Rates
-// are chances from 0 to 1, for players with a fixed hit rate. A null gear is a walk with none
-// equipped.
+// Every combination of policy, route policy, player, gear, pack and walker is one cell. A null
+// gear is a walk with none equipped.
 export interface Matrix {
   readonly gears: readonly (GearId | null)[];
-  readonly luckyRate: number;
   readonly packs: readonly NamedPack[];
   readonly players: readonly MatrixPlayer[];
   readonly policies: readonly PolicyId[];
   readonly routes: readonly RoutePolicyId[];
-  readonly tipRate: number;
-  readonly treatRate: number;
   readonly walkers: readonly WalkerId[];
 }
 
@@ -119,7 +114,6 @@ export const DEFAULT_MATRIX: Matrix = {
   policies: POLICY_IDS,
   routes: [DEFAULT_ROUTE_POLICY],
   walkers: [DEFAULT_WALKER],
-  ...DEFAULT_RATES,
 };
 
 export function gearName(gear: GearId | null): string {
@@ -127,7 +121,7 @@ export function gearName(gear: GearId | null): string {
 }
 
 export function playerName(player: MatrixPlayer): string {
-  return player.kind === "skill" ? player.preset : percent(player.hitRate);
+  return player.preset;
 }
 
 export function matrixCells(matrix: Matrix): MatrixCell[] {
@@ -161,12 +155,8 @@ function percentile(sorted: readonly number[], fraction: number): number {
 const mean = (values: readonly number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
-function simPlayer(matrix: Matrix, player: MatrixPlayer): SimPlayer {
-  if (player.kind === "skill") {
-    return { kind: "skill", skill: SKILL_PRESETS[player.preset] };
-  }
-  const { luckyRate, tipRate, treatRate } = matrix;
-  return { hitRate: player.hitRate, kind: "rates", luckyRate, tipRate, treatRate };
+function simPlayer(player: MatrixPlayer): SimPlayer {
+  return { kind: "skill", skill: SKILL_PRESETS[player.preset] };
 }
 
 // Run number run of a cell. It is seeded by the seed, the pack's dog ids in pack order and the
@@ -182,7 +172,7 @@ export function simulateCellRun(
   return simulateRun(data, hashSeed(`${seed}:${cell.pack.dogs.join(",")}:${run}`), {
     gear: cell.gear,
     pack: cell.pack.dogs,
-    player: simPlayer(matrix, cell.player),
+    player: simPlayer(cell.player),
     policy: cell.policy,
     route: cell.route,
     walker: cell.walker,
@@ -204,7 +194,7 @@ export function simulateCell(
 
 // Every obstacle kind that can stand still, those that open a card first, then the minor ones.
 export function obstacleKinds(
-  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
+  data: Pick<GameData, "encounters" | "minorObstacles">,
 ): WalkItemKind[] {
   const kinds = [
     ...Object.keys(data.encounters),
@@ -222,7 +212,7 @@ function touchedShare(counts: readonly ItemCount[]): number | null {
 }
 
 export function summarizeCell(
-  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
+  data: Pick<GameData, "encounters" | "minorObstacles">,
   cell: MatrixCell,
   results: readonly RunResult[],
 ): MatrixRow {
@@ -398,7 +388,7 @@ export function formatTable(rows: readonly MatrixRow[]): string {
 
 // The measured hit rate of each obstacle kind, one column per kind, then of each mover.
 export function formatKindTable(
-  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
+  data: Pick<GameData, "encounters" | "minorObstacles">,
   rows: readonly MatrixRow[],
 ): string {
   const kinds = obstacleKinds(data);

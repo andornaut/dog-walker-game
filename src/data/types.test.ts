@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { type Cents, type Hearts, read, readTable, type Seconds } from "../rules/units";
-import type { Pack, UpgradeOffer } from "../state/runState";
+import { type Cents, type Hearts, read, type Seconds } from "../rules/units";
+import type { Pack } from "../state/runState";
 import { TUNING } from "./tuning";
 import type {
   CardOptions,
@@ -23,10 +23,8 @@ const option = { art: "card-option", effects: [], name: "Option" };
 describe("types", () => {
   it("reads each tuning group in its unit", () => {
     expectTypeOf(read(TUNING, "money", "tip")).toEqualTypeOf<Cents>();
-    expectTypeOf(
-      readTable(TUNING, "seconds", "needUrgentByEnergy", "calm"),
-    ).toEqualTypeOf<Seconds>();
-    expectTypeOf(read(TUNING, "counts", "treatCarryMax")).toEqualTypeOf<number>();
+    expectTypeOf(read(TUNING, "seconds", "laneMove")).toEqualTypeOf<Seconds>();
+    expectTypeOf(read(TUNING, "counts", "luckyEncountersPerZone")).toEqualTypeOf<number>();
   });
 
   it("derives content ids from the data", () => {
@@ -79,8 +77,8 @@ describe("types", () => {
   it("requires an upgrade effect, every dog attribute and every encounter", () => {
     // @ts-expect-error: an upgrade with no effects
     check<Upgrade>({ effects: [], kind: "boost", name: "Nothing" });
-    const owner = { name: "Pat", role: "baker", temperament: "fussy" } as const;
-    const noSize = { breed: "Mutt", energy: "calm", look: "", name: "Rex", owner, trait: "fancy" };
+    const owner = { name: "Pat", role: "baker" } as const;
+    const noSize = { art: "rex", breed: "Mutt", look: "", name: "Rex", owner, price: "rex" };
     // @ts-expect-error: a dog with no size
     check<Dog>({ ...noSize, unlock: "shop" });
     // @ts-expect-error: encounters missing
@@ -93,16 +91,14 @@ describe("types", () => {
       effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
       kind: "instant",
     } as const;
-    const base = { affects: { kind: "all" }, name: "Find" } as const;
+    const base = { name: "Find" } as const;
     // @ts-expect-error: an obstacle always opens a card
     check<Encounter>({ ...base, kind: "obstacle", resolution: instant });
     expect(check<Encounter>({ ...base, kind: "lucky", resolution: instant }).kind).toBe("lucky");
   });
 
-  it("holds 1 to 3 dogs in a pack and offers exactly 3 upgrades", () => {
+  it("holds 1 to 3 dogs in a pack", () => {
     // @ts-expect-error: an empty pack
     check<Pack>([]);
-    // @ts-expect-error: two upgrades offered
-    check<UpgradeOffer>(["bellyRubs", "bigTipper"]);
   });
 });

@@ -1,6 +1,5 @@
 import { type GameObjects, type Input, Scene } from "phaser";
 
-import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { dogFaceKey, dogPortraitKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -631,13 +630,6 @@ export class ShopScene extends Scene {
       }
       return;
     }
-    const dog = gameData.dogs[row.purchase.dog];
-    [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
-      if (this.textures.exists(key)) {
-        const x = at.x - ROW.textDx + ROW.iconDx + n * ROW.iconPitch;
-        parent.add(this.add.image(x, at.mid + 1, key).setOrigin(0));
-      }
-    });
     this.text(parent, { x: at.x - ROW.textDx + ROW.feeDx, y: at.mid + 4 }, row.line, { color });
   }
 

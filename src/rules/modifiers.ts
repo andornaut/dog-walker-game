@@ -4,21 +4,20 @@ import { read } from "./units";
 
 // An "add" value is in its stat's unit (cents for money stats); a "multiply" value is a factor.
 export function modifierValue(tuning: LiveTuning, modifier: Modifier): number {
-  if (modifier.operation === "multiply") {
+  if (modifier.operation === "multiply" || modifier.stat === "agility") {
     return read(tuning, "multipliers", modifier.by);
   }
   switch (modifier.stat) {
-    case "costPerDog":
     case "startMoney":
     case "tipValue":
       return read(tuning, "money", modifier.by);
+    case "forgivenHearts":
     case "maxHearts":
-    case "startHearts":
       return read(tuning, "hearts", modifier.by);
+    case "freeCards":
+    case "tipReach":
     case "treatReach":
       return read(tuning, "counts", modifier.by);
-    case "laneChangeLock":
-      return read(tuning, "seconds", modifier.by);
     default:
       return assertNever(modifier);
   }

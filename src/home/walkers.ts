@@ -1,21 +1,28 @@
 import type { GameData, WalkerId } from "../data/types";
 import { cents } from "../rules/units";
-import { walkerGoal } from "../rules/walkers";
+import { agilityWord, walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
+import { fillLine } from "../text/lines";
 import { togglePick } from "./home";
-import { homeLine } from "./homeText";
+import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 import { type ItemTile, itemTile } from "./interaction";
 
-type WalkerText = Pick<GameData, "homeText" | "walkerPaces" | "walkerStyles" | "walkers">;
+type WalkerText = Pick<GameData, "homeText" | "walkerPerks" | "walkers" | "world">;
 
-function goalZone(data: Pick<GameData, "walkers">, walker: WalkerId): string {
-  return String(walkerGoal(data.walkers[walker]));
+// The name of the zone whose finish unlocks the walker.
+function goalZone(data: Pick<GameData, "walkers" | "world">, walker: WalkerId): string {
+  const goal = walkerGoal(data.walkers[walker]);
+  return data.world.zones.find(({ id }) => id === goal)?.name ?? "";
 }
 
 // The walkers as the picker shows them, left to right in the order they unlock: the starting
-// walkers, then by the zone that unlocks each, ties in data order.
-export function walkerOrder(data: Pick<GameData, "walkers">): WalkerId[] {
-  const goal = (walker: WalkerId) => walkerGoal(data.walkers[walker]);
+// walkers, then by the zone that unlocks each in the world's order, ties in data order.
+export function walkerOrder(data: Pick<GameData, "walkers" | "world">): WalkerId[] {
+  const ids = data.world.zones.map(({ id }) => id);
+  const goal = (walker: WalkerId) => {
+    const zone = walkerGoal(data.walkers[walker]);
+    return zone === null ? -1 : ids.indexOf(zone);
+  };
   return (Object.keys(data.walkers) as WalkerId[]).sort((a, b) => goal(a) - goal(b));
 }
 
@@ -40,17 +47,29 @@ export function walkerTile(
   });
 }
 
-// An owned walker in words, as a pick or keyboard focus says it: "Ben: slow, hustler."
+// An owned walker in words, as a pick or keyboard focus says it: "Ben: relaxed, Treat finder."
 export function walkerInfo(data: WalkerText, walker: WalkerId): string {
-  const { name, pace, style } = data.walkers[walker];
+  const { agility, name, perk } = data.walkers[walker];
   return homeLine(data.homeText, "walkerInfo", {
-    pace: data.walkerPaces[pace].name.toLowerCase(),
-    style: data.walkerStyles[style].name.toLowerCase(),
+    agility: agilityWord(data.homeText, agility).toLowerCase(),
+    perk: data.walkerPerks[perk].name,
     walker: name,
   });
 }
 
-// A tap on a walker's tile picks an owned walker, saying its pace and style, drops the one
+// A walker's detail card lines: its agility in words, then its perk and what the perk does.
+export function walkerDetailLines(data: WalkerText, walker: WalkerId): string[] {
+  const { agility, perk } = data.walkers[walker];
+  const { effect, name } = data.walkerPerks[perk];
+  return [
+    fillLine(HOME_TEXT_FIELDS.detail, data.homeText.detail, "walkerAgility", {
+      agility: agilityWord(data.homeText, agility),
+    }),
+    fillLine(HOME_TEXT_FIELDS.detail, data.homeText.detail, "walkerPerk", { effect, perk: name }),
+  ];
+}
+
+// A tap on a walker's tile picks an owned walker, saying its agility and perk, drops the one
 // picked, or says what unlocks one not owned. It toggles as a dog does, in a pick of one.
 export type WalkerTap =
   | { readonly kind: "drop" }

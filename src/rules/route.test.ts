@@ -18,29 +18,34 @@ const data = { world: WORLD };
 const order = WORLD.zones.map(({ id }) => id);
 
 describe("forkPaths", () => {
-  it("offers three unwalked zones, easiest on the left", () => {
+  const last = WORLD.lastZone;
+
+  it("offers three unwalked zones but the last, easiest on the left", () => {
     for (let seed = 1; seed <= 20; seed++) {
       const paths = forkPaths(data, seededRandom(seed), ["street"]);
       expect(paths).toHaveLength(3);
       expect(paths).not.toContain("street");
+      expect(paths).not.toContain(last);
       expect([...paths].sort((a, b) => order.indexOf(a) - order.indexOf(b))).toEqual(paths);
     }
   });
 
-  it("offers every zone not yet walked when three or fewer are left", () => {
+  it("offers only the last zone at the fork before it", () => {
     const route = ["street", "park", "shops"] as const;
-    expect(forkPaths(data, seededRandom(1), route)).toEqual(
-      order.filter((zone) => !(route as readonly string[]).includes(zone)),
-    );
+    expect(forkPaths(data, seededRandom(1), route)).toEqual([last]);
   });
 
-  it("draws each unwalked zone at some fork", () => {
+  it("draws each unwalked zone but the last at some early fork", () => {
     const seen = new Set(
       Array.from({ length: 40 }, (_, seed) =>
         forkPaths(data, seededRandom(seed), ["street"]),
       ).flat(),
     );
-    expect([...seen].sort()).toEqual(unwalkedZones(data, ["street"]).sort());
+    expect([...seen].sort()).toEqual(
+      unwalkedZones(data, ["street"])
+        .filter((zone) => zone !== last)
+        .sort(),
+    );
   });
 });
 

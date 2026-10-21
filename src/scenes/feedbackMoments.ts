@@ -1,7 +1,7 @@
 import type { Animations, GameObjects, Scene, Time, Tweens, Types } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
-import { kebabCase, ownerFaceKey } from "../assets/spriteKeys";
+import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
@@ -9,7 +9,6 @@ import { DOGHOUSE } from "../hud/doghouse";
 import { type MoneyTick, retarget, tickShown } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import {
-  arcControl,
   bowRightControl,
   curvePoint,
   downTail,
@@ -240,7 +239,7 @@ export class HudFeedback {
     const showMs = firingShowMs(cue.seconds);
     const pop = this.addPop(layout.pop);
     const face = this.addFace(cue.dog, layout.face);
-    const plate = this.addPlate(cue.dog, layout.plate);
+    const plate = this.addPlate(layout.plate);
     if (still) {
       pop?.anims.pause(pop.anims.currentAnim?.frames.at(-1));
     } else if (pop === undefined) {
@@ -347,18 +346,16 @@ export class HudFeedback {
     return container;
   }
 
-  // ui-fired-plate in the owner's temperament's colour, else the hit label's plate, else a
-  // drawn one, with "FIRED!" across it.
-  private addPlate(dog: DogId, rect: Rect): GameObjects.Container {
+  // ui-fired-plate, else the hit label's plate, else a drawn one, with "FIRED!" across it.
+  private addPlate(rect: Rect): GameObjects.Container {
     const container = this.scene.add.container(rect.x, rect.y).setDepth(DEPTH);
-    const { temperament } = gameData.dogs[dog].owner;
     const { corner } = PLATE;
     const slice = (key: string, frame: number | string | undefined) =>
       this.scene.add
         .nineslice(0, 0, key, frame, rect.width, rect.height, corner, corner, corner, corner)
         .setOrigin(0);
     if (this.scene.textures.exists(PLATE.key)) {
-      container.add(slice(PLATE.key, tagFrame(this.scene, PLATE.key, kebabCase(temperament))));
+      container.add(slice(PLATE.key, undefined));
     } else if (this.scene.textures.exists("ui-hit-label")) {
       container.add(slice("ui-hit-label", tagFrame(this.scene, "ui-hit-label", "normal")));
     } else {
@@ -503,8 +500,8 @@ export class HudFeedback {
     return this.scene.add.rectangle(at.x, at.y, 10, 10, PALETTE.amber).setDepth(DEPTH + 1);
   }
 
-  // The treat arcs from the treat counter to the dog's face; on landing it pops, the owner
-  // smiles and the heart label floats. Reduced motion lands it at once.
+  // A treat grabbed pops over the dog's face on its doghouse, the owner smiles and the heart
+  // label floats.
   private playTreat(cue: TreatCue): void {
     const rect = this.slotOf(cue.dog);
     if (rect === undefined) {
@@ -512,26 +509,11 @@ export class HudFeedback {
       return;
     }
     const half = FACE.size / 2;
-    const to = { x: rect.x + DOGHOUSE.dogFace.x + half, y: rect.y + DOGHOUSE.dogFace.y + half };
-    const land = () => {
-      const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
-      playEffect(this.scene, key, TREAT_POP.tag, to, DEPTH);
-      this.smile(cue.dog, rect);
-      this.hooks.floatLabels(cue.labels);
-    };
-    if (this.run.reducedMotion()) {
-      land();
-      return;
-    }
-    const from = TOP_BAR_POINTS.treats;
-    const treat = this.scene.textures.exists("treat")
-      ? this.scene.add.sprite(from.x, from.y, "treat").setDepth(DEPTH)
-      : this.scene.add.rectangle(from.x, from.y, 8, 8, PALETTE.tan).setDepth(DEPTH);
-    const path = { control: arcControl(from, to, MOMENTS.treat.peak), from, to };
-    this.fly(treat, path, MOMENTS.treat.arcMs, () => {
-      treat.destroy();
-      land();
-    });
+    const at = { x: rect.x + DOGHOUSE.dogFace.x + half, y: rect.y + DOGHOUSE.dogFace.y + half };
+    const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
+    playEffect(this.scene, key, TREAT_POP.tag, at, DEPTH);
+    this.smile(cue.dog, rect);
+    this.hooks.floatLabels(cue.labels);
   }
 
   // The owner's happy face over their window for a moment.

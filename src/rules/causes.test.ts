@@ -3,12 +3,9 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
-import { FORCED_STOPS } from "../data/forcedStops";
-import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
-import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, Effect } from "../data/types";
+import type { DogId, Effect, ZoneId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import type { EffectSource, RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
@@ -16,20 +13,15 @@ import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
 import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
-import { resolveEffects } from "./effects";
-import { payZoneFees, tipValue } from "./run";
-import { giveTreat } from "./treats";
-import { cents, read, readTable, roundDollars } from "./units";
+import { changeHearts, resolveEffects } from "./effects";
+import { formatDollars } from "./effectText";
+import { payZone, tipValue } from "./run";
+import { cents, read, readTable } from "./units";
 
 const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
   encounters: ENCOUNTERS,
-  forcedStops: FORCED_STOPS,
-  needCards: NEED_CARDS,
-  needSpots: NEED_SPOTS,
-  needs: NEEDS,
-  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   ...TEST_WALKER_DATA,
@@ -56,30 +48,26 @@ const resolved = (
 
 const sweetTalker = activeModifier(
   { kind: "upgrade", upgrade: "sweetTalker" },
-  { by: "sweetTalkerCostPerDog", operation: "add", stat: "costPerDog" },
+  { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
 );
-// The test tuning's walkers change nothing, so Ben's pace gets a fee factor of its own here.
-const benTuning = {
-  ...TEST_TUNING,
-  multipliers: { ...TEST_TUNING.multipliers, slowWalkerFees: 0.9 },
+// The first zone at twice the pay, for a lone dog.
+const [firstZone, ...laterZones] = TEST_WORLD.zones;
+const doublePay = {
+  ...TEST_WORLD,
+  zones: [{ ...firstZone, fees: 2 }, ...laterZones] as typeof TEST_WORLD.zones,
 };
-// Duchess's fee under Ben's pace, to the dollar.
-const bensFee = roundDollars(
-  readTable(benTuning, "money", "feeByTemperament", "dramatic") *
-    read(benTuning, "multipliers", "slowWalkerFees"),
+const lonePay = read(TEST_TUNING, "money", "payPerDog");
+const tipText = formatDollars(
+  cents(read(TEST_TUNING, "money", "tip") + read(TEST_TUNING, "money", "bigTipperTipBonus")),
 );
-const bensFees = activeModifier(
-  { kind: "walker", walker: "ben" },
-  { by: "slowWalkerFees", operation: "multiply", stat: "fees" },
-);
+
 const towel: Effect = {
   amount: "encounterLow",
   change: "lose",
   kind: "money",
-  perDog: { kind: "affected" },
 };
 const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
-const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
+const maxOf = (dog: DogId) => readTable(TEST_TUNING, "hearts", "maxBySize", DOGS[dog].size);
 const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
@@ -90,72 +78,74 @@ const bigTipperTip = () => tipValue(data, testState({ koda: 5 }, { modifiers: [b
 describe("causeLabel and causeNames", () => {
   it.each<[string, () => Change | null, string, string[]]>([
     [
-      "a dramatic owner's doubling, without the card option just picked",
+      "a card option just picked by its amount alone",
       () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
-      "−2 ♥, dramatic",
-      ["dramatic"],
+      "−1 ♥",
+      [],
     ],
     [
       "the max when a gain is cut short there",
       () =>
-        resolved(gainOne, testState({ nugget: 5 }), [], { kind: "upgrade", upgrade: "bellyRubs" }),
-      "+1 ♥, dramatic, at max",
-      ["dramatic", "at max"],
+        resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], {
+          kind: "upgrade",
+          upgrade: "bellyRubs",
+        }),
+      "+1 ♥, at max",
+      ["at max"],
     ],
-    ["the tip and Big tipper's bonus", bigTipperTip, "+$2 tip, Big tipper", ["tip", "Big tipper"]],
     [
-      "the walker who changed a fee",
+      "the tip and Big tipper's bonus",
+      bigTipperTip,
+      `+${tipText} tip, ${UPGRADES.bigTipper.name}`,
+      ["tip", UPGRADES.bigTipper.name],
+    ],
+    [
+      "the zone that changed a pay",
       () => {
-        const [fee] = payZoneFees(
-          { ...data, tuning: benTuning, world: TEST_WORLD },
-          testState({ duchess: 5 }, { modifiers: [bensFees] }),
-        ).changes;
-        if (fee === undefined) {
-          throw new Error("Expected a fee");
+        const run = testState({ duchess: 5 }, { route: [firstZone.id as ZoneId] });
+        const [pay] = payZone({ ...data, world: doublePay }, run).changes;
+        if (pay === undefined) {
+          throw new Error("Expected a pay");
         }
-        return fee;
+        return pay;
       },
-      `+$${bensFee / 100} fee, Ben`,
-      ["fee", "Ben"],
+      `+${formatDollars(cents(2 * lonePay))} pay, ${firstZone.name}`,
+      ["pay", firstZone.name],
     ],
     [
-      "Sweet talker on a per-dog cost",
+      "a cost by its amount alone",
       () =>
         resolved(
           towel,
-          testState({ duchess: 5, koda: 5 }, { modifiers: [sweetTalker], money: cents(5000) }),
+          testState({ duchess: 5, koda: 5 }, { cardsThisZone: 1, modifiers: [sweetTalker] }),
           ["duchess", "koda"],
         ),
-      "−$6, Sweet talker",
-      ["Sweet talker"],
-    ],
-    [
-      "a cost held at the $0 floor",
-      () =>
-        resolved(towel, testState({ duchess: 5, koda: 5 }, { money: cents(500) }), [
-          "duchess",
-          "koda",
-        ]),
-      "−$5, you're out of money",
-      ["you're out of money"],
+      `−${formatDollars(read(TEST_TUNING, "money", "encounterLow"))}`,
+      [],
     ],
     [
       "a treat as the base",
-      () => giveTreat(data, "koda", testState({ koda: 3 }, { treats: 1 })).change,
-      "+1 ♥ treat",
+      () =>
+        changeHearts(
+          data,
+          [{ amount: read(TEST_TUNING, "hearts", "treat"), kind: "treat" }],
+          "koda",
+          testState({ koda: 3 }),
+        ).change,
+      `+${read(TEST_TUNING, "hearts", "treat")} ♥ treat`,
       ["treat"],
     ],
     [
       "an instant encounter as the base",
       () =>
         resolved(
-          { amount: "photoOpTip", change: "gain", kind: "money" },
+          { amount: "lostWalletKeep", change: "gain", kind: "money" },
           testState({ koda: 5 }),
           [],
-          { encounter: "photoOp", kind: "instant" },
+          { encounter: "lostWallet", kind: "instant" },
         ),
-      "+$10 Photo op",
-      ["Photo op"],
+      `+${formatDollars(read(TEST_TUNING, "money", "lostWalletKeep"))} ${ENCOUNTERS.lostWallet.name}`,
+      [ENCOUNTERS.lostWallet.name],
     ],
   ])("names %s", (_, change, text, names) => {
     const made = change();
@@ -167,7 +157,10 @@ describe("causeLabel and causeNames", () => {
 describe("change causes", () => {
   it.each<[string, () => Change]>([
     ["a tip with Big tipper's bonus", bigTipperTip],
-    ["hearts doubled and capped", () => resolved(gainTwo, testState({ nugget: 4 }))],
+    [
+      "hearts capped",
+      () => resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], skunkIgnore),
+    ],
   ])("add up to the change: %s", (_, change) => {
     const made = change();
     expect(made.causes.reduce((total, { amount }) => total + amount, 0)).toBe(changeAmount(made));

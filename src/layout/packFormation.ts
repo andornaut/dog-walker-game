@@ -3,7 +3,7 @@ import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 
-// Where a dog walks, relative to the walker's feet: dx across, footDy up the road or the screen
+// Where a dog walks, relative to the walker's feet: dx across, footDy up the screen
 // (negative). Dogs walk just ahead of the walker in the same lane, staggered because three
 // dogs do not fit side by side in a 64px lane: the centre dog of three stands behind the side
 // dogs' heads.
@@ -19,8 +19,9 @@ export interface PackPlacement {
 export const PACK_DRAW_SCALE = ROAD_SPRITE_SIZE / ROAD_HIT_SIZE;
 const drawn = (length: number) => Math.round(length * PACK_DRAW_SCALE);
 
-// Indexed by pack size - 1; the first dog picked leads. At the hit size.
-const HIT_FORMATIONS: readonly (readonly PackPlacement[])[] = [
+// Indexed by pack size - 1; the first dog picked leads. At the hit size, before the hit
+// formation brings the side dogs in and the drawn formation sets them by their width.
+const LAID_OUT: readonly (readonly PackPlacement[])[] = [
   [{ dx: 0, footDy: -53 }],
   [
     { dx: -20, footDy: -53 },
@@ -33,6 +34,19 @@ const HIT_FORMATIONS: readonly (readonly PackPlacement[])[] = [
   ],
 ];
 
+// The farthest a dog's hit box sits from the lane's centre: half a 64px lane less half a box,
+// so no box reaches into the next lane and a pack settled in a lane never touches an obstacle
+// beside it.
+const HIT_SIDE_DX = 12;
+
+// Where the dogs stand for collisions: as laid out, side dogs brought in to HIT_SIDE_DX.
+const HIT_FORMATIONS = LAID_OUT.map((formation) =>
+  formation.map(({ dx, footDy }) => ({
+    dx: Math.sign(dx) * Math.min(Math.abs(dx), HIT_SIDE_DX),
+    footDy,
+  })),
+);
+
 // A drawn formation's place: the side of the walker a dog walks on (-1 left, 0 centre, 1
 // right), and its feet from the nearest dog's, up the screen in pixels.
 export interface DrawnSlot {
@@ -40,8 +54,8 @@ export interface DrawnSlot {
   side: number;
 }
 
-// The drawn formations' shapes: the hit formations' sides, and their stagger at the draw scale.
-export const DRAWN_SHAPES: readonly (readonly DrawnSlot[])[] = HIT_FORMATIONS.map((formation) => {
+// The drawn formations' shapes: the laid-out sides, and their stagger at the draw scale.
+export const DRAWN_SHAPES: readonly (readonly DrawnSlot[])[] = LAID_OUT.map((formation) => {
   const nearest = Math.max(...formation.map(({ footDy }) => footDy));
   return formation.map(({ dx, footDy }) => ({
     footDy: drawn(footDy - nearest),
@@ -56,14 +70,13 @@ export function laneHalfWidth(): number {
 }
 
 // The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
-// ahead of the walker, so they never change size, and following the
-// projection there would drop two or three pixel rows from every dog. Their status loops
-// follow, at full size.
+// ahead of the walker, so they never change size, and following the projection there would
+// drop two or three pixel rows from every dog. Their status loops follow, at full size.
 export const PACK_DEPTH = 1;
 
-// How far a dog's body reaches up from its feet, for collisions: the shortest dog's height.
+// How far a dog's body reaches up from its feet, for the drawn band: the shortest dog's height.
 const DOG_BODY_HEIGHT = 26;
-// The walker's legs below the collision band, so things brushing their feet miss.
+// The walker's legs below the drawn band.
 const WALKER_FEET_CLEARANCE = 5;
 
 // The walker sprite's hands, relative to its feet, as drawn at the sprite size.
@@ -89,12 +102,6 @@ interface PackSize {
   feetClearance: number;
   formations: readonly (readonly PackPlacement[])[];
 }
-
-const HIT_PACK: PackSize = {
-  bodyHeight: DOG_BODY_HEIGHT,
-  feetClearance: WALKER_FEET_CLEARANCE,
-  formations: HIT_FORMATIONS,
-};
 
 // A sprite's frame rows from its top to its feet line, and its frame height.
 export interface FrameFeet {
@@ -176,11 +183,21 @@ export function tautLeashLine(
   return { from: shift(from), to: shift(to) };
 }
 
-// The pack's hit band in screen pixels, from the leading dog's head to the walker's feet, at
-// the hit size: the pack collides as one unit. Every collision, the planner's pack-fit gap and
-// the bots read this band.
+// The centre of a dog's hit box, relative to the walker's feet: the middle of its sprite at the
+// hit size, a square ROAD_HIT_SIZE tall standing on its feet.
+export function dogHitCentre(placement: PackPlacement): { dx: number; dy: number } {
+  return { dx: placement.dx, dy: placement.footDy - ROAD_HIT_SIZE / 2 };
+}
+
+// The pack's hit band in screen pixels, from the lead dog's box to the last dog's, with every
+// box at the largest hit size, ROAD_HIT_SIZE. The walker has no box. The planner's pack-fit
+// gap, the pulls and the bots read this band.
 export function packBand(dogCount: number, walkerFootY: number): { bottom: number; top: number } {
-  return bandOf(HIT_PACK, dogCount, walkerFootY);
+  const feet = formationOf(HIT_FORMATIONS, dogCount).map(({ footDy }) => footDy);
+  return {
+    bottom: walkerFootY + Math.max(...feet),
+    top: walkerFootY + Math.min(...feet) - ROAD_HIT_SIZE,
+  };
 }
 
 // The band as drawn, from the leading dog's head to the walker's feet, at the sprite size and

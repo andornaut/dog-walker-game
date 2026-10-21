@@ -17,9 +17,7 @@ function footprintInset(cellLength: number): number {
 // Collision heights in screen pixels of what is not an obstacle: the part of each sprite that
 // bumps into the pack, at the hit size, whatever size it is drawn.
 const ITEM_HEIGHTS: RoadGeometry["itemHeights"] = {
-  forcedStop: 20,
   lucky: 25,
-  needSpot: 25,
   tip: 15,
   treat: 15,
 };
@@ -54,5 +52,6 @@ export function walkGeometry(
     roadTop,
     sightLength: bandBottom - tallest - roadTop,
     tallestPackBand: tallest,
+    walkerFootY: footY,
   };
 }

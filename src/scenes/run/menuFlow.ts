@@ -26,7 +26,7 @@ export interface MenuFlowHost {
 export type MenuPause = Omit<RunPause, "hitStop">;
 
 // What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the
-// Home button's question, the state strip's bubble, and the page out of view or focus. pause()
+// Home button's question, and the page out of view or focus. pause()
 // reports all of them, and walkPaused decides from it, so each new one pauses the walk.
 export class MenuFlow {
   private blurred = false;
@@ -39,7 +39,6 @@ export class MenuFlow {
   private pauseMode: PauseSceneData["mode"] = "menu";
   private pauseOpen = false;
   private readonly scene: Scene;
-  private stripBubble = false;
 
   constructor(scene: Scene, host: MenuFlowHost) {
     this.scene = scene;
@@ -56,7 +55,6 @@ export class MenuFlow {
       card: this.cardView !== undefined || this.celebrating,
       menu: this.menuState(),
       page: this.hidden ? "hidden" : this.blurred ? "blurred" : "shown",
-      stripBubble: this.stripBubble,
     };
   }
 
@@ -87,21 +85,21 @@ export class MenuFlow {
     this.cardView = view;
   }
 
+  // A fork card's Head home button asks the Home question over it.
   showCard(zone: ZoneId, view: CardView, onChoose: (choice: Choice) => void): void {
     soundboardOf(this.scene).play("cardOpen");
-    const data: CardSceneData = { onChoose, view, zone };
+    const data: CardSceneData = {
+      onChoose,
+      onHeadHome: () => this.openPause("homeQuestion"),
+      view,
+      zone,
+    };
     this.scene.scene.launch(SCENE_KEYS.card, data);
   }
 
   closeCard(): void {
     this.cardView = undefined;
     this.scene.scene.stop(SCENE_KEYS.card);
-  }
-
-  // The state strip's bubble opened or closed; it pauses the walk while open.
-  setStripBubble(open: boolean): void {
-    this.stripBubble = open;
-    this.hold();
   }
 
   // The tab hid or showed again.

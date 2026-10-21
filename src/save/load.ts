@@ -160,7 +160,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
                 ? null
                 : {
                     ...counters,
-                    debuffZones: keepKnownEntries(known.debuffs, counters.debuffZones),
+                    debuffsGot: keepKnownEntries(known.debuffs, counters.debuffsGot),
                   },
             dogs: checkpoint.dogs.flatMap(({ id, ...dog }) =>
               isKnown(known.dogs, id) ? [{ ...dog, id }] : [],

@@ -1,12 +1,6 @@
 import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
-import {
-  capitalize,
-  effectText,
-  ENERGY_NAMES,
-  SIZE_NAMES,
-  TEMPERAMENT_NAMES,
-  TRAIT_NAMES,
-} from "../rules/effectText";
+import { maxHearts } from "../rules/dogs";
+import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveStats } from "../save/schema";
@@ -14,6 +8,7 @@ import { ZERO_DOG_STATS } from "../save/stats";
 import { fillLine } from "../text/lines";
 import { dogFeeText, dollarText, type HomeLoadout, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
+import { walkerDetailLines } from "./walkers";
 
 type DetailData = Pick<
   GameData,
@@ -22,11 +17,11 @@ type DetailData = Pick<
   | "dogs"
   | "encounters"
   | "homeText"
-  | "needs"
-  | "quirks"
   | "shopGear"
   | "tuning"
+  | "walkerPerks"
   | "walkers"
+  | "world"
 >;
 
 // What a held dog or gear tile's detail card says: a title, a line under it, rows of
@@ -51,8 +46,8 @@ function priceLine(text: HomeText["detail"], cost: Cents | null, bank: Cents): s
   return fillLine(FIELDS, text, cost > bank ? "priceLocked" : "priceBuy", { price });
 }
 
-// A dog's breed, its traits, need and quirk in words, its owner and their temperament, its fee,
-// and the walks, zones and firings the save has counted for it.
+// A dog's breed, its size and hearts, its owner, its pay, and the walks, zones and firings the
+// save has counted for it.
 export function dogDetail(
   data: DetailData,
   owned: Owned,
@@ -60,27 +55,18 @@ export function dogDetail(
   stats: Pick<SaveStats, "dogs">,
   dog: DogId,
 ): DetailCard {
-  const { breed, energy, name, need, owner, quirk, size, trait } = data.dogs[dog];
+  const { breed, name, owner, size } = data.dogs[dog];
   const counted = stats.dogs[dog] ?? ZERO_DOG_STATS;
-  const fee = dogFeeText(data, dog);
+  const fee = dogFeeText(data);
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   const text = data.homeText.detail;
   return {
     lines: [
       fillLine(FIELDS, text, "dogKind", {
-        energy: capitalize(ENERGY_NAMES[energy]),
+        hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
-        trait: TRAIT_NAMES[trait],
-      }),
-      fillLine(FIELDS, text, "dogQuirk", {
-        description: data.quirks[quirk].description,
-        need: data.needs[need].name,
-        quirk: data.quirks[quirk].name,
       }),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
-      fillLine(FIELDS, text, "dogTemperament", {
-        temperament: capitalize(TEMPERAMENT_NAMES[owner.temperament]),
-      }),
       fillLine(FIELDS, text, "dogFee", { fee }),
       fillLine(FIELDS, text, "dogTotals", {
         fired: String(counted.timesFired),
@@ -116,19 +102,20 @@ export function gearDetail(
   };
 }
 
-// A walker's description lines from the data. An owned walker's status says so; one not owned
-// is locked, and its status is the zone that unlocks it.
+// A walker's agility word and perk lines. An owned walker's status says so; one not owned is
+// locked, and its status names the zone whose finish unlocks it.
 export function walkerDetail(
   data: DetailData,
   owned: Pick<Owned, "walkers">,
   walker: WalkerId,
 ): DetailCard {
-  const { detail, name } = data.walkers[walker];
+  const { name } = data.walkers[walker];
   const text = data.homeText;
   const has = owned.walkers.includes(walker);
-  const zone = String(walkerGoal(data.walkers[walker]));
+  const goal = walkerGoal(data.walkers[walker]);
+  const zone = data.world.zones.find(({ id }) => id === goal)?.name ?? "";
   return {
-    lines: detail ?? [],
+    lines: walkerDetailLines(data, walker),
     locked: !has,
     status: has ? text.detail.walkerStatus : homeLine(text, "walkerLocked", { walker: name, zone }),
     subtitle: text.detail.walkerSubtitle,

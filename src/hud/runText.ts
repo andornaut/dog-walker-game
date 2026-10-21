@@ -7,16 +7,17 @@ export const RUN_TEXT_FIELDS = {
     fires: ["owners"],
     forkFees: ["fees"],
     need: ["amount"],
-    quirkNoLoss: ["quirk"],
   },
   firedBy: ["owner"],
+  fullPackHome: ["amount"],
   homeQuestion: {
-    keep: ["money"],
     lose: ["fees", "zone"],
+    loseBonus: [],
+    loseWithBonus: ["fees", "zone"],
     zonesLeft: ["count"],
   },
   newWalker: {
-    info: ["pace", "style"],
+    info: ["agility", "perk"],
     subtitle: ["walker"],
   },
   strip: {

@@ -45,11 +45,10 @@ describe("soundKeysOf", () => {
       ["sfx-hit-other-dog", "sfx-bump"],
     ],
     ["plays the skunk hit's own sound", hitCue("obstacle", "skunk"), ["sfx-hit-skunk", "sfx-bump"]],
-    ["plays the goose hit's own sound", hitCue("obstacle", "goose"), ["sfx-hit-goose", "sfx-bump"]],
     [
       "plays a lucky hit's own sfx-<encounter>, with no bump in its place",
-      hitCue("lucky", "lemonade"),
-      ["sfx-lemonade"],
+      hitCue("lucky", "lostWallet"),
+      ["sfx-lost-wallet"],
     ],
   ])("%s", (_name, cue, expected) => {
     expect(soundKeysOf(cue)).toEqual(expected);

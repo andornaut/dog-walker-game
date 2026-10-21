@@ -6,7 +6,7 @@ import { type FiringHold, holdForFiring } from "./firingStop";
 import type { HitStop } from "./hitStop";
 
 const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
-const STOP: CardSource = { kind: "forcedStop", stop: "stopSign" };
+const STOP: CardSource = { affected: ["koda"], encounter: "puddle", kind: "encounter" };
 const NOTHING = { cards: [], zoneEnded: false };
 
 describe("holdForFiring", () => {

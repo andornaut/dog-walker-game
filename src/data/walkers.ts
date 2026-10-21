@@ -1,94 +1,83 @@
-import type { Walker, WalkerTrait } from "./types";
+import type { Walker, WalkerPerk } from "./types";
 
-// A walker's pace is the difficulty: every zone takes the same time with any walker, so the
-// speed factor scales the road's speed, the zone's length and the obstacles, tips and need
-// spots in it. A fast walker meets more each second, with less time to react, and earns
-// higher fees; a slow walker's is the reverse. The art is icon-pace-<id>.
-export const WALKER_PACES = {
-  fast: {
+// Each walker's one perk: its name, its effect in one line for the walker's detail card and
+// the top bar's icon, and its effects, which last every walk the walker walks, as gear's do.
+// The art is icon-perk-<kebab id>.
+export const WALKER_PERKS = {
+  calmVoice: {
+    effect: "Debuffs last half as long",
     effects: [
-      { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "scrollSpeed" },
-      { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "zoneLength" },
-      { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "obstacleSpawns" },
-      { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
-      { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "needSpotSpawns" },
-      { by: "fastWalkerFees", kind: "modifier", operation: "multiply", stat: "fees" },
+      {
+        by: "calmVoiceDebuffFactor",
+        kind: "modifier",
+        operation: "multiply",
+        stat: "debuffSeconds",
+      },
     ],
-    name: "Fast",
+    name: "Calm voice",
   },
-  slow: {
+  kindWords: {
+    effect: "The first ♥ lost in each neighborhood is forgiven",
     effects: [
-      { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "scrollSpeed" },
-      { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "zoneLength" },
-      { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "obstacleSpawns" },
-      { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
-      { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "needSpotSpawns" },
-      { by: "slowWalkerFees", kind: "modifier", operation: "multiply", stat: "fees" },
+      { by: "kindWordsForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
     ],
-    name: "Slow",
+    name: "Kind words",
   },
-} as const satisfies Record<string, WalkerTrait>;
-
-// A walker's style is the play style: a charmer's owners start happier but fewer tips appear,
-// and more appear for a hustler. The art is icon-style-<id>.
-export const WALKER_STYLES = {
-  charm: {
+  longReach: {
+    effect: "Grabs tips and treats one lane to either side of the pack",
     effects: [
-      { by: "charmerStart", kind: "modifier", operation: "add", stat: "startHearts" },
-      { by: "charmerTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
+      { by: "longReachLanes", kind: "modifier", operation: "add", stat: "tipReach" },
+      { by: "longReachLanes", kind: "modifier", operation: "add", stat: "treatReach" },
     ],
-    name: "Charmer",
+    name: "Long reach",
   },
-  hustle: {
+  treatFinder: {
+    effect: "1.5× as many treats appear",
     effects: [
-      { by: "hustlerTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
+      { by: "treatFinderSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
     ],
-    name: "Hustler",
+    name: "Treat finder",
   },
-} as const satisfies Record<string, WalkerTrait>;
+} as const satisfies Record<string, WalkerPerk>;
 
 // The walkers the player picks from, never sold: each walks from the start or unlocks the
-// first time any walk finishes its zone. spriteKey and portraitKey are keys into the art
-// manifest.
+// first time any walk finishes its zone. agility multiplies the pack's lane-change speed.
+// spriteKey and portraitKey are keys into the art manifest.
 export const WALKERS = {
   ada: {
-    detail: ["Walks fast, with more to meet each second.", "Charms owners, so they start happier."],
+    agility: 1.1,
     name: "Ada",
-    pace: "fast",
+    perk: "calmVoice",
     portraitKey: "face-walker-ada",
     spriteKey: "walker-ada",
-    style: "charm",
     unlock: "finishZone",
-    zone: 2,
+    zone: "pawsPromenade",
   },
   ben: {
-    detail: ["Walks slow, with more time to react.", "Hustles for tips, so more appear."],
+    agility: 0.9,
     name: "Ben",
-    pace: "slow",
+    perk: "treatFinder",
     portraitKey: "face-walker-ben",
     spriteKey: "walker-ben",
-    style: "hustle",
     unlock: "finishZone",
-    zone: 1,
+    zone: "park",
   },
   casey: {
-    detail: ["Walks slow, with more time to react.", "Charms owners, so they start happier."],
+    agility: 1,
     name: "Casey",
-    pace: "slow",
+    perk: "kindWords",
     portraitKey: "face-walker-casey",
     spriteKey: "walker-casey",
-    style: "charm",
     unlock: "start",
   },
   trista: {
-    detail: ["Walks fast, with more to meet each second.", "Hustles for tips, so more appear."],
+    agility: 1.2,
     name: "Trista",
-    pace: "fast",
+    perk: "longReach",
     portraitKey: "face-walker-trista",
     spriteKey: "walker-trista",
-    style: "hustle",
     unlock: "finishZone",
-    zone: 3,
+    zone: "homeStretch",
   },
 } as const satisfies Record<string, Walker>;
 

@@ -27,7 +27,7 @@ export const testContext: SaveContext = {
       "snowball",
       "zippy",
     ]),
-    gear: new Set(["fannyPack", "luckyCollar", "poopBags", "runningShoes", "whistle"]),
+    gear: new Set(["fannyPack", "luckyCollar", "poopBags", "runningShoes"]),
     hints: new Set(["card", "puddle", "tip"]),
     walkers: new Set(["ada", "ben", "casey", "trista"]),
     zones: new Set(["homeStretch", "park", "pawsPromenade", "shops", "snoozeCrescent", "street"]),
@@ -40,7 +40,7 @@ export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000
 // A run with no bumps, debuffs, chases or starting money.
 export const quietCounters = (): RunCounters => ({
   bumpsByZone: [],
-  debuffZones: {},
+  debuffsGot: {},
   firstZone: 0,
   squirrelChases: 0,
   startCents: cents(0),
@@ -84,11 +84,11 @@ export function veteranSave(): SaveDocument {
     bankCents: cents(12_345),
     checkpoint: null,
     helpSeen: true,
-    lastLoadout: { dogs: ["koda", "penny"], gear: "whistle" },
+    lastLoadout: { dogs: ["koda", "penny"], gear: "fannyPack" },
     owned: {
       dogSlots: 2,
       dogs: ["biscuit", "duchess", "koda", "penny"],
-      gear: ["fannyPack", "whistle"],
+      gear: ["fannyPack", "runningShoes"],
       walkers: ["casey", "ada", "ben", "trista"],
     },
     settings: { musicVolume: 0.25, muted: true, reducedMotion: true, sfxVolume: 0.5 },

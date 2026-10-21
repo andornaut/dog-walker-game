@@ -79,7 +79,10 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     checkpoint: null,
     owned: {
       ...owned,
-      walkers: [...owned.walkers, ...newWalkers(context.data, owned.walkers, bestZoneFinished)],
+      walkers: [
+        ...owned.walkers,
+        ...newWalkers(context.data, owned.walkers, run.route.slice(0, zonesFinished)),
+      ],
     },
     stats: {
       ...stats,

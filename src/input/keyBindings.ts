@@ -21,28 +21,14 @@ export function cardNumberForKey(cardCount: number, key: string): number | undef
   return cardNumber >= 1 && cardNumber <= cardCount ? cardNumber : undefined;
 }
 
-// During a walk, the digit keys 1..slotCount give that dog slot a treat. Zero-based.
-export function dogSlotForKey(slotCount: number, key: string): number | undefined {
-  const slotNumber = cardNumberForKey(slotCount, key);
-  return slotNumber === undefined ? undefined : slotNumber - 1;
-}
-
-// During a walk, a lane key moves a lane and a digit key gives that slot a treat, at once on
-// the key going down. A held key's repeats do nothing, so each press acts once.
-export function walkKeyAction(
-  slotCount: number,
-  key: string,
-  repeat: boolean,
-): GestureAction | undefined {
+// During a walk, a lane key moves a lane at once on the key going down. A held key's repeats
+// do nothing, so each press acts once.
+export function walkKeyAction(key: string, repeat: boolean): GestureAction | undefined {
   if (repeat) {
     return undefined;
   }
   const direction = laneDirectionForKey(key);
-  if (direction !== undefined) {
-    return { direction, kind: "move" };
-  }
-  const slot = dogSlotForKey(slotCount, key);
-  return slot === undefined ? undefined : { kind: "treat", slot };
+  return direction === undefined ? undefined : { direction, kind: "move" };
 }
 
 // Escape or P opens the pause menu, and closes it again. Over any other overlay or card it

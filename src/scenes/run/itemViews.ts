@@ -2,9 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
 import {
-  encounterSpriteKey,
   minorObstacleSpriteKey,
-  needSpotSpriteKey,
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
   WARNING_ARROW_KEY,
@@ -23,22 +21,18 @@ import {
   skinnedCloudArt,
   skinnedOwnerArt,
 } from "../../rules/skins";
-import { isNeedSpot } from "../../runner/needs";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
-import { needIcon } from "../needSignals";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
-import { ItemCueViews } from "./itemCueViews";
+import { applyItemCue } from "./itemCueViews";
 import { drawMover, moverBodyKey } from "./moverView";
 import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.
 const PLACEHOLDER_HEIGHT = ROAD_SPRITE_SIZE;
-// The icon of a need spot that shares an obstacle's art floats this high over it, at 1x.
-const SPOT_ICON_LIFT = ROAD_SPRITE_SIZE * 1.25;
 // Road pixels the skunk stands behind its cloud's near edge, so it reads as inside the spray.
 const SKUNK_IN_CLOUD = 10;
 
@@ -61,8 +55,8 @@ export interface ItemView {
   parts: ItemPart[];
 }
 
-// A box for each minor obstacle, the skunk's cloud and the hydrant whose art is missing, from
-// its shape in the data. The hydrant stands in for any need spot whose art is missing.
+// A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape in
+// the data.
 export function ensureRoadPlaceholders(scene: Scene): void {
   const { cell } = walkGeometry(LANE_COUNT, 1, PROJECTION, LAYOUT.road);
   const add = (key: string, lanes: number) =>
@@ -76,12 +70,10 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   }
   const skunk = gameData.encounters.skunk;
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
-  add(needSpotSpriteKey("fireHydrant"), 1);
 }
 
 // The sprites of everything spawned on the road, by item id.
 export class ItemViews {
-  private readonly cues: ItemCueViews;
   private readonly hint: (event: HintTrigger) => void;
   private readonly scene: Scene;
   private readonly views = new Map<number, ItemView>();
@@ -89,7 +81,6 @@ export class ItemViews {
   constructor(scene: Scene, hint: (event: HintTrigger) => void) {
     this.scene = scene;
     this.hint = hint;
-    this.cues = new ItemCueViews(scene);
   }
 
   // Each item's sprites stand on the road through the projection, sized for where they stand
@@ -108,8 +99,6 @@ export class ItemViews {
       }
       const first = itemAt(LANE_XS, item.lane);
       const laneX = (first + itemAt(LANE_XS, item.lane + item.laneSpan - 1)) / 2;
-      // A need spot, such as the waving stranger, holds its idle frame under reduced motion.
-      const itemTags = still && isNeedSpot(gameData, item.kind) ? ITEM_TAGS.halted : tags;
       for (const part of view.parts) {
         const distance = PROJECTION.footY - part.footY(item);
         const placed = project(PROJECTION, { distance, x: laneX + part.dx });
@@ -118,7 +107,7 @@ export class ItemViews {
         const y = Math.round(placed.y);
         part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
         clipToRoad(part.sprite);
-        const tag = firstTag(this.scene, drawn.key, itemTags);
+        const tag = firstTag(this.scene, drawn.key, tags);
         if (tag !== undefined) {
           playTag(part.sprite, drawn.key, tag, still);
         }
@@ -131,9 +120,8 @@ export class ItemViews {
           shadow(part.key, drawn.depth, x, y);
         }
       }
-      this.cues.apply(item, view.parts, still);
+      applyItemCue(item, view.parts, still, this.scene.time.now);
     }
-    this.cues.prune(seen);
     for (const [id, view] of this.views) {
       if (!seen.has(id)) {
         view.parts.forEach(({ sprite }) => sprite.destroy());
@@ -185,17 +173,6 @@ export class ItemViews {
       parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY), part(WARNING_WANDER_KEY)];
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
-    } else if (isNeedSpot(gameData, item.kind)) {
-      this.hint({ kind: "needSpot" });
-      // A spot whose art is missing stands in as a hydrant. The need's icon floats over a spot
-      // that looks like an obstacle, the hydrant and the other dog, and any without its art.
-      const art = needSpotSpriteKey(item.kind);
-      const key = scene.textures.exists(art) ? art : "hydrant";
-      const shared = key === "hydrant" || key === encounterSpriteKey("otherDog");
-      const icon = needIcon(scene, gameData.needSpots[item.kind].need);
-      parts = shared
-        ? [part(key), part(icon.key, { feet: "bottom", lift: SPOT_ICON_LIFT })]
-        : [part(key)];
     } else if (isMinorObstacle(gameData, item.kind)) {
       parts = [part(skinnedArt(has, minorObstacleLook(gameData, zone, item.kind)))];
     } else if (item.kind === "skunk") {

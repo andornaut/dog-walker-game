@@ -1,47 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { EncounterId, MinorObstacleId, NeedSpotId } from "../data/types";
-import { bobOffset, FORCED_STOP_CUE, itemCue } from "./itemCues";
+import type { EncounterId, MinorObstacleId } from "../data/types";
+import { bobOffset, itemBobs } from "./itemCues";
 
-const encounterRows = (Object.keys(gameData.encounters) as EncounterId[]).map((id) => {
-  const instant = gameData.encounters[id].resolution.kind === "instant";
-  return { bob: instant, id, mark: !instant };
-});
-
-describe("itemCue", () => {
-  it.each(encounterRows)("encounter $id: bob $bob, mark $mark", ({ bob, id, mark }) => {
-    expect(itemCue(gameData, id)).toEqual({ bob, mark });
+describe("itemBobs", () => {
+  it.each(Object.keys(gameData.encounters) as EncounterId[])("encounter %s bobs if lucky", (id) => {
+    expect(itemBobs(gameData, id)).toBe(gameData.encounters[id].kind === "lucky");
   });
 
   it.each(Object.keys(gameData.minorObstacles) as MinorObstacleId[])(
-    "minor obstacle %s has no mark and no bob",
+    "minor obstacle %s does not bob",
     (id) => {
-      expect(itemCue(gameData, id)).toEqual({ bob: false, mark: false });
+      expect(itemBobs(gameData, id)).toBe(false);
     },
   );
 
-  it.each(Object.keys(gameData.needSpots) as NeedSpotId[])(
-    "need spot %s never bobs and marks only when its payoff card is certain",
-    (id) => {
-      expect(itemCue(gameData, id)).toEqual({
-        bob: false,
-        mark: gameData.tuning.probability.needPayoffCard >= 1,
-      });
-    },
-  );
-
-  it.each([
-    { bob: false, kind: "ball" },
-    { bob: false, kind: "cyclist" },
-    { bob: true, kind: "tip" },
-    { bob: true, kind: "treat" },
-  ] as const)("$kind bobs: $bob, and has no mark", ({ bob, kind }) => {
-    expect(itemCue(gameData, kind)).toEqual({ bob, mark: false });
-  });
-
-  it("marks a forced stop", () => {
-    expect(FORCED_STOP_CUE).toEqual({ bob: false, mark: true });
+  it.each(["tip", "treat"] as const)("%s bobs", (kind) => {
+    expect(itemBobs(gameData, kind)).toBe(true);
   });
 });
 

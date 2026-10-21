@@ -5,9 +5,7 @@ import { DOGS } from "../data/dogs";
 import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
-import { NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
-import { QUIRKS } from "../data/quirks";
 import { SHOP_GEAR } from "../data/shop";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
@@ -15,6 +13,7 @@ import { cents, readTable } from "../rules/units";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import type { LastWalk, Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
+import { fillNames } from "../text/lines";
 import {
   buy,
   type BuyResult,
@@ -46,9 +45,7 @@ const data = {
   dogs: DOGS,
   encounters: ENCOUNTERS,
   homeText: HOME_TEXT,
-  needs: NEEDS,
   quips: QUIPS,
-  quirks: QUIRKS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   world: WORLD,
@@ -60,7 +57,7 @@ const owned: Owned = {
   walkers: ["casey"],
 };
 const dollars = (amount: number) => cents(amount * 100);
-const whistlePrice = readTable(TEST_TUNING, "money", "prices", "whistle");
+const collarPrice = readTable(TEST_TUNING, "money", "prices", "luckyCollar");
 
 describe("money text", () => {
   it.each<[string, (amount: number) => string, number, string]>([
@@ -122,9 +119,9 @@ describe("tapDog and tapGear", () => {
       tap: () => tapGear(owned, "fannyPack", { dogs: [], gear: "fannyPack" }),
     },
     {
-      expected: { kind: "shop", purchase: { gear: "whistle", kind: "gear" } },
+      expected: { kind: "shop", purchase: { gear: "luckyCollar", kind: "gear" } },
       name: "opens the shop on gear not owned yet",
-      tap: () => tapGear(owned, "whistle", emptyLoadout),
+      tap: () => tapGear(owned, "luckyCollar", emptyLoadout),
     },
   ])("$name", ({ expected, tap }) => {
     expect(tap()).toEqual(expected);
@@ -141,7 +138,7 @@ describe("packCapacity", () => {
 describe("purchasePrice", () => {
   it.each<[string, Owned, Purchase, number | null]>([
     ["a locked dog", owned, { dog: "nugget", kind: "dog" }, dollars(600)],
-    ["locked gear", owned, { gear: "whistle", kind: "gear" }, whistlePrice],
+    ["locked gear", owned, { gear: "luckyCollar", kind: "gear" }, collarPrice],
     ["the second dog slot", { ...owned, dogSlots: 1 }, { kind: "dogSlot" }, dollars(800)],
     ["the third dog slot", { ...owned, dogSlots: 2 }, { kind: "dogSlot" }, dollars(1800)],
     ["an owned dog as not for sale", owned, { dog: "koda", kind: "dog" }, null],
@@ -175,10 +172,10 @@ describe("buy", () => {
       purchase: { dog: "nugget", kind: "dog" },
     },
     {
-      bank: whistlePrice / 100 + 600,
-      expected: { bankCents: dollars(600), owned: { ...start, gear: ["whistle"] } },
+      bank: collarPrice / 100 + 600,
+      expected: { bankCents: dollars(600), owned: { ...start, gear: ["luckyCollar"] } },
       name: "adds gear",
-      purchase: { gear: "whistle", kind: "gear" },
+      purchase: { gear: "luckyCollar", kind: "gear" },
     },
     {
       bank: 2_000,
@@ -254,7 +251,11 @@ describe("lastWalkLine", () => {
     },
     {
       changes: { outcome: "finished", zonesFinished: 4 },
-      expected: `+$64. Walked 4 zones of ${WORLD.name}.`,
+      expected: fillNames(HOME_TEXT.logbook.lastFinished, {
+        earned: "+$64.",
+        world: WORLD.name,
+        zones: "4",
+      }),
       name: "counts the zones a finished walk walked",
     },
   ])("$name", ({ changes, expected }) => {
@@ -270,7 +271,10 @@ describe("logbookOf", () => {
   it("shows the best walk, totals and the last walk", () => {
     expect(logbookOf(data, veteranSave().stats)).toEqual({
       best: "$90",
-      bestNote: "4 zones with Koda and Penny",
+      bestNote: fillNames(HOME_TEXT.logbook.bestNote, {
+        dogs: "Koda and Penny",
+        zones: fillNames(HOME_TEXT.logbook.zoneMany, { count: "4" }),
+      }),
       last: `+$25. Jesse fired you on ${zoneName("park")}.`,
       totals: "Walks 5   Dogs walked 7   Fired 1",
     });
@@ -287,12 +291,9 @@ describe("partingSpeech", () => {
 describe("dogInfo and gearInfo", () => {
   it.each<[string, () => string, RegExp]>([
     [
-      "describes an owned dog in words, with its need, quirk and fee",
+      "describes an owned dog in words, with its size, hearts and pay",
       () => dogInfo(data, owned, cents(0), "koda"),
-      new RegExp(
-        `^Koda: big chaser, ${NEEDS[DOGS.koda.need].name}, ${QUIRKS[DOGS.koda.quirk].name}, ` +
-          "\\$\\d+ a zone\\. Jesse is laid-back\\.$",
-      ),
+      new RegExp(`^${DOGS.koda.name}: ${DOGS.koda.size}, \\d+ ♥, \\$\\d+ a neighborhood\\.$`),
     ],
     [
       "adds a locked dog's price and how much more the bank needs",
@@ -311,8 +312,8 @@ describe("dogInfo and gearInfo", () => {
     ],
     [
       "adds locked gear's price",
-      () => gearInfo(data, owned, cents(0), "whistle"),
-      new RegExp(`\\${dollarText(whistlePrice)}: need \\${dollarText(whistlePrice)} more\\.$`),
+      () => gearInfo(data, owned, cents(0), "luckyCollar"),
+      new RegExp(`\\${dollarText(collarPrice)}: need \\${dollarText(collarPrice)} more\\.$`),
     ],
   ])("%s", (_name, line, pattern) => {
     expect(line()).toMatch(pattern);

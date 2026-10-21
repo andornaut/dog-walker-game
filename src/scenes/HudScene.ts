@@ -1,6 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { MONEY_ICON_KEY, quirkIconKey, statusIconKey, TREAT_ICON_KEY } from "../assets/iconKeys";
+import { MONEY_ICON_KEY, statusIconKey } from "../assets/iconKeys";
 import {
   dogFaceKey,
   doghouseTag,
@@ -18,13 +18,7 @@ import { centredInLane, hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
 import { RUN_TEXT_FIELDS } from "../hud/runText";
-import {
-  moveStripPress,
-  stripItems,
-  type StripPress,
-  stripTapAllowed,
-  stripTapped,
-} from "../hud/stateStrip";
+import { stripItems } from "../hud/stateStrip";
 import {
   buttonIcon,
   DOLLAR_GAP,
@@ -41,8 +35,6 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
-  TREAT_WELL,
-  walkCovered,
   WELL_INSET,
 } from "../hud/topBar";
 import { insetRect, type Rect } from "../layout/rect";
@@ -52,8 +44,7 @@ import { maxHearts } from "../rules/dogs";
 import { hintFor } from "../rules/hints";
 import { currentZone, walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
-import { type Cents, read } from "../rules/units";
-import { isNervousAlone } from "../runner/needs";
+import type { Cents } from "../rules/units";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
 import { fillLine } from "../text/lines";
@@ -85,7 +76,7 @@ import {
 import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { firstTag, playTag } from "./sprites";
+import { playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
 import { addPanel, artFits, BUBBLE_FADE_MS, fadeAway, soundIcon } from "./uiKit";
 
@@ -119,7 +110,6 @@ interface SlotView {
   name: GameObjects.BitmapText;
   ownerFace: GameObjects.Sprite;
   ownerName: GameObjects.BitmapText;
-  quirk: GameObjects.Image;
   statuses: GameObjects.Image[];
 }
 
@@ -157,7 +147,7 @@ export class HudScene extends Scene {
   private slots: SlotView[] = [];
   private soundHolder: GameObjects.Container | undefined;
   private strip: StateStripView | undefined;
-  private treats: GameObjects.BitmapText | undefined;
+
   private zoneIcon: GameObjects.Image | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
 
@@ -186,9 +176,7 @@ export class HudScene extends Scene {
     } else {
       fillRect(g, PALETTE.plum, topBar);
       fillRect(g, PALETTE.darkBrown, { ...topBar, height: 2, y: topBar.y + topBar.height - 2 });
-      [TOP_BAR.money, TOP_BAR.treats, TOP_BAR.zone].forEach((well) =>
-        fillRect(g, PALETTE.ink, well),
-      );
+      [TOP_BAR.money, TOP_BAR.zone].forEach((well) => fillRect(g, PALETTE.ink, well));
     }
     this.addButton(HOME_BUTTON);
     this.addHomeIcon();
@@ -209,12 +197,6 @@ export class HudScene extends Scene {
       ...money,
     });
     this.money = addPixelText(this, 0, MONEY_WELL.top, "", { color: PALETTE.cream, ...money });
-    this.add.image(TREAT_WELL.icon.x, TREAT_WELL.icon.y, TREAT_ICON_KEY).setOrigin(0);
-    this.treats = addPixelText(this, 0, TREAT_WELL.countTop, "", {
-      color: PALETTE.cream,
-      font: "title",
-      scale: TREAT_WELL.countStyle.scale,
-    }).setLetterSpacing(TREAT_WELL.countStyle.letterSpacing);
     this.zoneIcon = this.add.image(0, zoneWell.y - 1, "__DEFAULT").setOrigin(1, 0);
     this.zoneLabel = addPixelText(this, ZONE_WELL.right, ZONE_WELL.y, "", {
       color: PALETTE.cream,
@@ -227,12 +209,7 @@ export class HudScene extends Scene {
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
     this.frames = this.add.graphics();
-    // The walk pauses while the strip's bubble is open.
-    this.strip = new StateStripView(this, LANES.stripBubble, {
-      onClose: () => this.runScene().setStripBubble(false),
-      onOpen: () => this.runScene().setStripBubble(true),
-      tappable: () => stripTapAllowed(this.runScene().runPause()),
-    });
+    this.strip = new StateStripView(this);
 
     const run = this.runScene();
     this.feedback = new HudFeedback(this, run, {
@@ -257,40 +234,15 @@ export class HudScene extends Scene {
     );
     onSceneEvent(this, run.events, QUIPS_EVENT, (quips: QuipBubble[]) => this.queueQuips(quips));
 
-    // A button acts on the press, as the walk's gestures never see it. A press on the strip
-    // taps it on release, and is the walk's drag if it travels. While the strip's bubble is
-    // open, a press anywhere else closes it on release; the walk drops that press.
-    const tapMaxDistance = read(gameData.tuning, "pixels", "tapMaxDistance");
-    let stripPress: StripPress | undefined;
-    let closesBubble = false;
+    // A button acts on the press, as the walk's gestures never see it.
     listenOnePress(this, {
       down: (pointer) => {
-        const point = { x: pointer.x, y: pointer.y };
-        const button = topBarButtonAt(point.x, point.y);
-        const onStrip = this.strip?.contains(point) === true;
-        stripPress = onStrip ? { start: point, tapping: true } : undefined;
-        closesBubble = !onStrip && button === undefined && this.strip?.isOpen() === true;
+        const button = topBarButtonAt(pointer.x, pointer.y);
         if (button !== undefined) {
           this.press("tap", button);
         }
       },
-      move: (pointer) => {
-        if (stripPress !== undefined) {
-          stripPress = moveStripPress(tapMaxDistance, { x: pointer.x, y: pointer.y }, stripPress);
-        }
-      },
-      up: (pointer, cancelled) => {
-        const press = stripPress;
-        stripPress = undefined;
-        if (closesBubble) {
-          closesBubble = false;
-          this.strip?.closeBubble();
-        }
-        const point = { x: pointer.x, y: pointer.y };
-        if (press !== undefined && !cancelled && stripTapped(tapMaxDistance, point, press)) {
-          this.strip?.tap(press.start);
-        }
-      },
+      up: () => undefined,
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const button = topBarButtonForKey(event.repeat, event.key);
@@ -439,10 +391,6 @@ export class HudScene extends Scene {
       }),
       ownerFace: sprite("treat", DOGHOUSE.ownerFace),
       ownerName: addPixelText(this, owner.x, owner.y, "", { color: PALETTE.plum }),
-      quirk: this.add
-        .image(at(DOGHOUSE.quirk).x, at(DOGHOUSE.quirk).y, "__DEFAULT")
-        .setOrigin(0)
-        .setVisible(false),
       statuses: DOGHOUSE.statuses.map((cell) =>
         this.add.image(at(cell).x, at(cell).y, "__DEFAULT").setOrigin(0).setVisible(false),
       ),
@@ -457,13 +405,8 @@ export class HudScene extends Scene {
     }
     const pause = run.runPause();
     this.feedback?.update(view.run, pause);
-    const items = stripItems(gameData, view.run);
-    this.strip?.show(items);
-    // A card or a menu dims the band, so the strip's bubble closes under it.
-    if (walkCovered(pause)) {
-      this.strip?.closeBubble();
-    }
-    this.raiseHints(runHintTriggers(gameData, view.run, items.length));
+    this.strip?.show(stripItems(gameData, view.run));
+    this.raiseHints(runHintTriggers(view.run));
     const overlay = this.overlayScene();
     const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
     this.messages.update(delta, overlay, depth);
@@ -478,7 +421,6 @@ export class HudScene extends Scene {
       pauseIcon: pauseButtonIcon(pause),
       route: view.run.route,
       statuses: statusesKey(view.statuses),
-      treats: view.run.treats,
       zone: view.run.zoneIndex,
     };
     if (Object.keys(state).some((key) => state[key] !== this.drawn[key])) {
@@ -511,18 +453,6 @@ export class HudScene extends Scene {
     placePixelText(money, start - inkSpan(money).left, moneyTop(style.scale));
   }
 
-  // The treat count centred across the treat well, under the treat icon.
-  private showTreats(count: string): void {
-    const { treats } = this;
-    if (treats === undefined || treats.text === count) {
-      return;
-    }
-    setPixelText(treats, count);
-    const ink = inkSpan(treats);
-    const centre = TOP_BAR.treats.x + TOP_BAR.treats.width / 2;
-    placePixelText(treats, centre - (ink.left + ink.right) / 2, TREAT_WELL.countTop);
-  }
-
   private redraw(view: RunHudView): void {
     const g = this.dynamic;
     if (g === undefined) {
@@ -531,7 +461,6 @@ export class HudScene extends Scene {
     const { run } = view;
     g.clear();
     this.showMoney(dollarAmountText(this.shownMoney(run.money)));
-    this.showTreats(`${run.treats}/${read(gameData.tuning, "counts", "treatCarryMax")}`);
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);
@@ -611,7 +540,7 @@ export class HudScene extends Scene {
     run: RunState,
     slot: PackSlot | null | undefined,
   ): void {
-    const parts = [view.house, view.dogFace, view.ownerFace, view.quirk, ...view.hearts];
+    const parts = [view.house, view.dogFace, view.ownerFace, ...view.hearts];
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
       [view.name, view.count, view.ownerName].forEach((label) => setPixelText(label, ""));
@@ -635,9 +564,7 @@ export class HudScene extends Scene {
     this.fitName(view.name, dog.name, DOGHOUSE.name, view.anchors.name);
     setPixelText(view.fired.setTint(PALETTE.white), fired ? "Fired" : "");
     if (fired) {
-      [view.dogFace, view.ownerFace, view.quirk, ...view.hearts].forEach((part) =>
-        part.setVisible(false),
-      );
+      [view.dogFace, view.ownerFace, ...view.hearts].forEach((part) => part.setVisible(false));
       setPixelText(view.count, "");
       setPixelText(view.ownerName, "");
       return;
@@ -647,15 +574,8 @@ export class HudScene extends Scene {
     const ownerKey = ownerFaceKey(gameData, slot.dog);
     const dogKey = dogFaceKey(gameData, slot.dog);
     playTag(view.ownerFace.setTexture(ownerKey).setVisible(true), ownerKey, mood);
-    // A nervous dog left alone by firings looks worried, where her face has it.
-    const worried = isNervousAlone(gameData, run, slot.dog)
-      ? firstTag(this, dogKey, ["worried"])
-      : undefined;
-    playTag(view.dogFace.setTexture(dogKey).setVisible(true), dogKey, worried ?? mood);
+    playTag(view.dogFace.setTexture(dogKey).setVisible(true), dogKey, mood);
     this.fitName(view.ownerName, dog.owner.name, DOGHOUSE.ownerName, view.anchors.ownerName);
-    const quirkKey = quirkIconKey(gameData, slot.dog);
-    const quirkArt = this.textures.exists(quirkKey);
-    view.quirk.setTexture(quirkArt ? quirkKey : "__DEFAULT").setVisible(quirkArt);
 
     const max = maxHearts(gameData.tuning, run.modifiers, dog);
     setPixelText(view.count, heartCount(hearts, max));

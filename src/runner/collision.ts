@@ -1,10 +1,52 @@
 import type { RoadItem } from "./roadItems";
 
-// The pack's vertical band in screen pixels and the lanes it occupies.
-export interface PackFootprint {
-  bottom: number;
-  lanes: readonly number[];
-  top: number;
+// A box in road pixels: x across the road from its left edge, y down the screen.
+export interface Box {
+  readonly bottom: number;
+  readonly left: number;
+  readonly right: number;
+  readonly top: number;
+}
+
+// One dog's hit box. The walker has none.
+export interface DogBox<Dog extends string = string> extends Box {
+  readonly dog: Dog;
+}
+
+// The pack's vertical band in screen pixels, from the lead dog's box to the last dog's.
+export interface PackBand {
+  readonly bottom: number;
+  readonly top: number;
+}
+
+// Whether an item's hit box, y to y + height, overlaps the pack's band, where it can touch a
+// dog's box: from when its near edge passes the band's top until its far edge passes the
+// band's bottom.
+export function levelWithPack(pack: PackBand, item: Pick<RoadItem, "height" | "y">): boolean {
+  return item.y + item.height > pack.top && item.y < pack.bottom;
+}
+
+// Boxes that share any area overlap; boxes that only meet at an edge do not.
+export function overlaps(a: Box, b: Box): boolean {
+  return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+}
+
+// An item's hit box: its lanes less the inset at each side, along its height.
+export function itemBox(
+  cell: { readonly inset: number; readonly length: number },
+  item: Pick<RoadItem, "height" | "lane" | "laneSpan" | "y">,
+): Box {
+  return {
+    bottom: item.y + item.height,
+    left: item.lane * cell.length + cell.inset,
+    right: (item.lane + item.laneSpan) * cell.length - cell.inset,
+    top: item.y,
+  };
+}
+
+// The dogs whose boxes overlap the box, in pack order.
+export function dogsTouching<Dog extends string>(dogs: readonly DogBox<Dog>[], box: Box): Dog[] {
+  return dogs.flatMap((dog) => (overlaps(dog, box) ? [dog.dog] : []));
 }
 
 // graced picks the items, such as obstacles, ignored while the window is open; other items,
@@ -16,58 +58,50 @@ export interface CollisionRules<Item extends RoadItem> {
   startsInvulnerability: (item: Item) => boolean;
 }
 
+// An item hit, with the dogs whose boxes touch it.
+export interface Hit<Item extends RoadItem, Dog extends string> {
+  readonly dogs: readonly Dog[];
+  readonly item: Item;
+}
+
 // hits are removed from remaining. invulnerableSeconds is the time left in the window.
-export interface CollisionResult<Item extends RoadItem> {
-  hits: Item[];
+export interface CollisionResult<Item extends RoadItem, Dog extends string> {
+  hits: Hit<Item, Dog>[];
   invulnerableSeconds: number;
   remaining: Item[];
 }
 
-// An item is drawn standing on the near edge of its hit box, y + height, so it is level with
-// the pack from when it stands below the band's top until it stands below the band's bottom.
-// Past that it is drawn in front of the walker, having passed the pack, however long it is.
-export function levelWithPack(
-  pack: Pick<PackFootprint, "bottom" | "top">,
-  item: Pick<RoadItem, "height" | "y">,
-): boolean {
-  const standsAt = item.y + item.height;
-  return standsAt > pack.top && standsAt <= pack.bottom;
-}
-
-// Touching any of an item's lanes while it is level with the pack counts.
-export function touchesPack(pack: PackFootprint, item: RoadItem): boolean {
-  const inLane = pack.lanes.some((lane) => lane >= item.lane && lane < item.lane + item.laneSpan);
-  return inLane && levelWithPack(pack, item);
-}
-
 // Items nearest the bottom are hit first, so of two obstacles touching at once only the
-// lower one is hit; the window it opens lets the other pass.
-export function collideWithPack<Item extends RoadItem>(
+// lower one is hit; the window it opens lets the other pass. An item is hit when any dog's
+// box overlaps it, by touching.
+export function collideWithPack<Item extends RoadItem, Dog extends string>(
   rules: CollisionRules<Item>,
-  pack: PackFootprint,
+  touching: (item: Item) => readonly Dog[],
   invulnerableSeconds: number,
   items: readonly Item[],
-): CollisionResult<Item> {
-  const touching = items
-    .filter((item) => touchesPack(pack, item))
-    .sort((a, b) => b.y + b.height - (a.y + a.height));
-  const hits: Item[] = [];
+): CollisionResult<Item, Dog> {
+  const touched = items
+    .map((item) => ({ dogs: touching(item), item }))
+    .filter(({ dogs }) => dogs.length > 0)
+    .sort((a, b) => b.item.y + b.item.height - (a.item.y + a.item.height));
+  const hits: Hit<Item, Dog>[] = [];
   let windowSeconds = invulnerableSeconds;
-  for (const item of touching) {
-    if (rules.graced(item)) {
+  for (const hit of touched) {
+    if (rules.graced(hit.item)) {
       if (windowSeconds > 0) {
         continue;
       }
-      if (rules.startsInvulnerability(item)) {
+      if (rules.startsInvulnerability(hit.item)) {
         windowSeconds = rules.invulnerabilitySeconds;
       }
     }
-    hits.push(item);
+    hits.push(hit);
   }
+  const hitItems = new Set(hits.map(({ item }) => item));
   return {
     hits,
     invulnerableSeconds: windowSeconds,
-    remaining: items.filter((item) => !hits.includes(item)),
+    remaining: items.filter((item) => !hitItems.has(item)),
   };
 }
 

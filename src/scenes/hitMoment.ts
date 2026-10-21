@@ -36,16 +36,11 @@ export interface HitMoment {
 type FlashColour = "amber" | "green" | "mauve" | "orange" | "pink" | "sky" | "white";
 
 const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
-  cafe: "amber",
-  goose: "white",
   otherDog: "pink",
-  petunias: "pink",
-  picnic: "orange",
   puddle: "sky",
   skunk: "mauve",
   squirrel: "orange",
   thief: "amber",
-  trash: "green",
 };
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
 // The flash drawn while a colour's own strip is missing.

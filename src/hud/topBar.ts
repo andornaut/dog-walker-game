@@ -1,11 +1,10 @@
 import { isMuteKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
 
-// The run's top bar, as ui-top-bar draws it: the money, treat and zone wells. The zone's
-// name is right-aligned at zone.nameRight.
+// The run's top bar, as ui-top-bar draws it: the money and zone wells. The zone's name is
+// right-aligned at zone.nameRight.
 export const TOP_BAR = {
   money: { height: 26, width: 88, x: 4, y: 8 },
-  treats: { height: 26, width: 32, x: 96, y: 8 },
   zone: { height: 29, nameRight: 352, width: 144, x: 212, y: 5 },
 } as const;
 
@@ -23,20 +22,10 @@ export function moneyTop(scale: number): number {
   return MONEY_WELL.top + MONEY_WELL.capRows * (2 - scale);
 }
 
-// The treat well stacks the 16px treat icon, its bone in rows 4 to 10, over the count, such as
-// 0/3, both centred across the well. The count is at 2x with its glyphs a font pixel closer, so
-// it keeps WELL_INSET clear of the well's sides, and its capitals start 2px under the bone.
-export const TREAT_WELL = {
-  countStyle: { letterSpacing: -1, scale: 2 },
-  countTop: TOP_BAR.treats.y + 13,
-  icon: { x: TOP_BAR.treats.x + (TOP_BAR.treats.width - 16) / 2, y: TOP_BAR.treats.y },
-} as const;
-
 // A top-bar button: its 20x20 face, and a 44px-square hit area so a thumb finds it. The faces
 // sit 2px apart, so neighbouring hit areas overlap, and a press where they do is the button
 // whose face centre is nearer. A press in any of them is that button's and never a road
-// gesture. Home's reaches over the treat well, which takes no taps, and pause's ends at
-// x=206, clear of the zone well and the state strip.
+// gesture. Pause's ends at x=206, clear of the zone well and the effect icons.
 export interface TopBarButton {
   face: Point;
   hit: Rect;
@@ -97,28 +86,27 @@ export function topBarButtonForKey(repeat: boolean, key: string): TopBarPress | 
 
 // What holds the walk still. card: a card or the zone celebration, which can sit under the
 // pause menu or the Home button's question, as the hit stop can. Help and settings, opened from
-// the menu, cover the whole screen, top bar included. stripBubble: the state strip's bubble is
-// open. page: the tab is hidden or the window has lost focus.
+// the menu, cover the whole screen, top bar included. page: the tab is hidden or the window has
+// lost focus.
 export interface RunPause {
   card: boolean;
   hitStop: boolean;
   menu: "closed" | "confirmHome" | "help" | "open" | "settings";
   page: "blurred" | "hidden" | "shown";
-  stripBubble: boolean;
 }
 
 // Whether the walk is paused: no scroll, timers, needs or pulls, and the session does not step.
 // Every overlay over the walk, and the page out of view or focus, pauses it. A hit stop is part
 // of the walk and steps on.
 export function walkPaused(pause: Omit<RunPause, "hitStop">): boolean {
-  return pause.card || pause.menu !== "closed" || pause.stripBubble || pause.page !== "shown";
+  return pause.card || pause.menu !== "closed" || pause.page !== "shown";
 }
 
-// Whether the player paused the walk: the pause menu and what opens from it, the Home question,
-// or the strip's bubble. The music ducks and the walk's timers stop; a card or the celebration
-// pauses the walk without either.
-export function playerPaused(pause: Pick<RunPause, "menu" | "stripBubble">): boolean {
-  return pause.menu !== "closed" || pause.stripBubble;
+// Whether the player paused the walk: the pause menu and what opens from it, or the Home
+// question. The music ducks and the walk's timers stop; a card or the celebration pauses the
+// walk without either.
+export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
+  return pause.menu !== "closed";
 }
 
 // A card or a menu over the walk takes every press. A hit stop covers nothing.
@@ -126,13 +114,12 @@ export function walkCovered(pause: RunPause): boolean {
   return pause.card || pause.menu !== "closed";
 }
 
-// Whether the walk drops its presses: under a card or a menu, and while the strip's bubble is
-// open, whose closing tap never moves the pack.
+// Whether the walk drops its presses: under a card or a menu.
 export function pressesHeld(pause: RunPause): boolean {
-  return walkCovered(pause) || pause.stripBubble;
+  return walkCovered(pause);
 }
 
-// Lane moves and treats act only while nothing pauses the walk or holds it in a hit stop.
+// Lane moves act only while nothing pauses the walk or holds it in a hit stop.
 export function gameplayAllowed(pause: RunPause): boolean {
   return !walkPaused(pause) && !pause.hitStop;
 }

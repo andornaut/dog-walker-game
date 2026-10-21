@@ -19,9 +19,8 @@ import { homeQuestionNote } from "../hud/homeQuestion";
 import { type RunPause, walkPaused } from "../hud/topBar";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
-import { type CardView, type Choice, quirkActorsOf } from "../rules/choices";
+import type { CardView, Choice } from "../rules/choices";
 import { currentZone, currentZoneId } from "../rules/route";
-import { read } from "../rules/units";
 import {
   type FixedStepLimits,
   frameSteps,
@@ -42,7 +41,7 @@ import {
   startSession,
   stepSession,
 } from "../runner/session";
-import { activeStatuses, shownStatus, type StatusMark } from "../runner/statuses";
+import { activeStatuses, type StatusMark } from "../runner/statuses";
 import { startRoad, type Walk, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
@@ -58,9 +57,7 @@ import {
   profileSave,
   type Settings,
 } from "./profileStore";
-import { AccidentSpots } from "./run/accidentSpots";
 import { BackdropView } from "./run/backdropView";
-import { ForcedStopView } from "./run/forcedStopView";
 import { HitBoxView } from "./run/hitBoxView";
 import { blendWalk, leadWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
@@ -100,7 +97,7 @@ const STEP_MS = STEP_SECONDS * 1000;
 const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 
 // Before the walk's menus exist, nothing is open over it.
-const NO_MENU_PAUSE: MenuPause = { card: false, menu: "closed", page: "shown", stripBubble: false };
+const NO_MENU_PAUSE: MenuPause = { card: false, menu: "closed", page: "shown" };
 
 // The zone celebration due once a zone's fee coins have landed, delayMs from its end.
 interface Celebration {
@@ -123,8 +120,6 @@ interface RunWorld {
   road: RoadView;
   setup: RunSetup;
   shadows: ShadowPool;
-  spots: AccidentSpots;
-  stop: ForcedStopView;
   streams: RunStreams;
 }
 
@@ -227,7 +222,6 @@ export class RunScene extends Scene {
     const backdrop = new BackdropView(this, random.scenery);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const pack = new PackView(this, picked.loadout.dogs, picked.walkerSprite);
-    const spots = new AccidentSpots(this);
     const still = () => this.reducedMotion();
     return {
       ...run,
@@ -252,12 +246,10 @@ export class RunScene extends Scene {
           this.session === undefined ? [] : homeQuestionNote(gameData, this.session.walk.run),
         over: () => this.session === undefined || this.session.walk.run.phase.kind === "ended",
       }),
-      moments: new RunMoments(this, { pack, quips: random.quips, spots, still }),
+      moments: new RunMoments(this, { pack, quips: random.quips, still }),
       pack,
       road,
       shadows: new ShadowPool(this),
-      spots,
-      stop: new ForcedStopView(this),
     };
   }
 
@@ -300,7 +292,7 @@ export class RunScene extends Scene {
       affected: this.world?.menus.card()?.affected ?? [],
       run,
       statuses: statusesOf(session),
-      zoneFraction: run.zoneDistance / zoneLength(gameData, run),
+      zoneFraction: run.zoneDistance / zoneLength(gameData),
     };
   }
 
@@ -403,7 +395,12 @@ export class RunScene extends Scene {
     }
     const { run } = step.session.walk;
     if (run.phase.kind === "ended") {
-      this.endWalk();
+      // A walker the last zone unlocks joins before the end screen.
+      if (celebration === undefined) {
+        this.endWalk();
+      } else {
+        this.celebrate(celebration, () => this.endWalk());
+      }
       return;
     }
     this.world?.moments.previewAchievements(run);
@@ -418,8 +415,8 @@ export class RunScene extends Scene {
     }
   }
 
-  // Pays out the zone's fees and saves the walk between zones. Unless the walk is over or
-  // replayed, returns the celebration that plays once the coins land.
+  // Pays out the zone's fees and saves the walk between zones. Unless replayed, returns the
+  // celebration that plays once the coins land: after the last zone, only a New walker's.
   private endZone(event: Extract<SessionEvent, { kind: "zoneEnded" }>): Celebration | undefined {
     const world = this.world;
     if (world === undefined) {
@@ -427,20 +424,22 @@ export class RunScene extends Scene {
     }
     const { after, before } = event;
     const payout = world.moments.payOut(event.fees, before);
-    if (after.phase.kind === "ended") {
-      return undefined;
+    const ended = after.phase.kind === "ended";
+    if (!ended) {
+      void checkpointRun(this, checkpointOf(gameData, after));
     }
-    void checkpointRun(this, checkpointOf(gameData, after));
     if (world.recorder.replaying()) {
       return undefined;
     }
     const celebration = zoneCelebration(gameData, profileSave(this).owned.walkers, {
       changes: payout.changes,
-      finished: after.zoneIndex,
+      finished: before.route.slice(0, before.zoneIndex + 1),
       walker: before.walker,
       zone: currentZone(gameData, before).name,
     });
-    return { celebration, delayMs: payout.ms };
+    return ended && celebration.kind !== "newWalker"
+      ? undefined
+      : { celebration, delayMs: payout.ms };
   }
 
   // The celebration holds the walk while the fee coins land, then plays; next follows it.
@@ -466,12 +465,11 @@ export class RunScene extends Scene {
     if (world === undefined) {
       return;
     }
-    const { input, moments, recorder } = world;
+    const { moments, recorder } = world;
     switch (event.kind) {
       case "chosen": {
-        const { choice, outcome, timeMs, view } = event;
+        const { choice, outcome, timeMs } = event;
         recorder.log({ choice, kind: "card", timeMs });
-        moments.quirkActed(quirkActorsOf(gameData, view, choice));
         world.menus.closeCard();
         moments.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
         moments.sayQuips(outcome.quips);
@@ -481,15 +479,8 @@ export class RunScene extends Scene {
       case "input":
         recorder.log({ ...event.input, timeMs: event.timeMs });
         return;
-      case "needs":
-        moments.needs(event.step, event.distance);
-        return;
       case "pulled":
         moments.pulled(event.step);
-        input.afterPulls(event.step.pulled);
-        return;
-      case "treat":
-        moments.treatGiven(event.dog, event.change, event.cured);
         return;
       case "walked":
         moments.walked(event.step, packPoint(event.step.walk));
@@ -508,7 +499,7 @@ export class RunScene extends Scene {
     }
     world.menus.holdForCard(view);
     world.input.dropPress();
-    cardHintTriggers(gameData, view.source).forEach((trigger) => showHint(this, trigger));
+    cardHintTriggers(view.source).forEach((trigger) => showHint(this, trigger));
     const replayed = world.recorder.cardChoice();
     if (replayed !== undefined) {
       this.choose(view, replayed);
@@ -528,16 +519,10 @@ export class RunScene extends Scene {
     this.apply(chooseShownCard(gameData, world.streams, screenRoadGeometry, view, choice, session));
   }
 
-  // What holds the walk still, for the walk's steps, the HUD's top bar, and lane moves and
-  // treats.
+  // What holds the walk still, for the walk's steps, the HUD's top bar, and lane moves.
   runPause(): RunPause {
     const hitStop = this.session?.walk.road.hitStop != null;
     return { ...(this.world?.menus.pause() ?? NO_MENU_PAUSE), hitStop };
-  }
-
-  // The state strip's bubble opened or closed in the HUD.
-  setStripBubble(open: boolean): void {
-    this.world?.menus.setStripBubble(open);
   }
 
   openPause(mode: PauseSceneData["mode"] = "menu"): void {
@@ -587,7 +572,7 @@ export class RunScene extends Scene {
     if (session === undefined || world === undefined) {
       return;
     }
-    const { distanceBeforeZone, pulls, timeMs } = session;
+    const { distanceBeforeZone, pulls } = session;
     const before = this.stepBefore ?? session.walk;
     const halted = !this.walking();
     const alpha = stepAlpha(this.stepClock.bankedMs, STEP_MS);
@@ -602,17 +587,13 @@ export class RunScene extends Scene {
     world.road.draw(walk, zone, distanceBeforeZone);
     const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
     world.items.draw(walk, halted, still, shadow);
-    world.stop.draw(walk, halted, still, shadow);
-    const statuses = statusesOf(session);
     world.pack.draw(walk, {
       halted,
       itemPoint: (id) => world.items.point(id),
       pulls,
       shadow,
-      statusOf: (dog) => shownStatus(statuses, timeMs, dog),
       still,
     });
-    world.spots.draw(distanceBeforeZone + walk.run.zoneDistance);
     const cheats = cheatsFrom(this.registry.get(DEV_CHEATS_KEY));
     world.hitBoxes.draw(walk, cheatActive(cheats, "hitBoxes"));
     world.shadows.hideUnused();
@@ -620,6 +601,5 @@ export class RunScene extends Scene {
 }
 
 function statusesOf(session: Session): StatusMark[] {
-  const seconds = read(gameData.tuning, "seconds", "statusVisualSeconds");
-  return activeStatuses(seconds, session.walk.run, session.timeMs, session.statusMarks);
+  return activeStatuses(session.walk.run, session.statusMarks);
 }

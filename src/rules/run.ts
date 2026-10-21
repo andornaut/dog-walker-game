@@ -1,11 +1,10 @@
-import type { DogId, GameData } from "../data/types";
+import type { DogId, GameData, LiveTuning } from "../data/types";
 import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
-import { type Cause, dollarCauses, modifierCauses, type MoneyChange } from "./causes";
-import { zoneFeeParts } from "./dogs";
+import { dollarCauses, modifierCauses, type MoneyChange } from "./causes";
 import { statParts } from "./modifiers";
 import { currentZone } from "./route";
-import { addCents, cents, nonNegativeCents, read, roundDollars } from "./units";
+import { addCents, type Cents, cents, read, roundDollars } from "./units";
 
 // The modifiers the pack's debuffs apply, such as Stinky's on tipSpawns.
 export function debuffModifiers(
@@ -44,59 +43,49 @@ export function tipValue(data: Pick<GameData, "debuffs" | "tuning">, state: RunS
   return { amount: roundDollars(value.value), causes, dog: null, kind: "money" };
 }
 
-export interface Payment {
-  readonly change: MoneyChange | null;
-  readonly state: RunState;
-}
-
-// Bumping a minor obstacle drops money.minorBump in tips, once for the whole pack. Money never
-// goes below $0; a drop cut short there is reported as a limit, and no drop at all as null.
-export function minorBump(data: Pick<GameData, "tuning">, state: RunState): Payment {
-  const drop = -read(data.tuning, "money", "minorBump");
-  const money = nonNegativeCents(cents(state.money + drop));
-  const delta = money - state.money;
-  if (delta === 0) {
-    return { change: null, state };
-  }
-  const causes: Cause[] = [{ amount: drop, kind: "bump" }];
-  if (delta !== drop) {
-    causes.push({ amount: delta - drop, bound: "min", kind: "limit" });
-  }
-  return {
-    change: { amount: cents(delta), causes: dollarCauses(causes), dog: null, kind: "money" },
-    state: { ...state, money },
-  };
-}
-
 export interface Payments {
   readonly changes: readonly MoneyChange[];
   readonly state: RunState;
 }
 
-// At the end of a zone, every dog still walking pays its fee times the zone's fee multiplier,
-// rounded to the dollar, one change per dog.
-export function payZoneFees(
-  data: Pick<GameData, "dogs" | "tuning" | "world">,
-  state: RunState,
-): Payments {
-  let money = state.money;
+// Each dog's pay for a zone, before the zone's multiplier.
+export function payFor(tuning: LiveTuning): Cents {
+  return read(tuning, "money", "payPerDog");
+}
+
+// At the end of a zone, every dog still walking earns the pay times the zone's pay multiplier,
+// rounded to the dollar, banked into the money, one change per dog.
+export function payZone(data: Pick<GameData, "tuning" | "world">, state: RunState): Payments {
   const zone = currentZone(data, state);
-  const changes = packDogs(state).map((id): MoneyChange => {
-    const fee = zoneFeeParts(data.tuning, state.modifiers, data.dogs[id]);
-    const amount = roundDollars(fee.value * zone.fees);
-    money = addCents(money, amount);
-    const { quirk } = data.dogs[id];
+  const pay = payFor(data.tuning);
+  const changes = packDogs(state).map((dog): MoneyChange => {
+    const amount = roundDollars(pay * zone.fees);
     const causes = dollarCauses([
-      { amount: fee.base, kind: "fee" },
-      ...(fee.quirk === 0 ? [] : [{ amount: fee.quirk, kind: "quirk", quirk } as const]),
-      ...modifierCauses(fee.contributions),
+      { amount: pay, kind: "pay" },
       ...(zone.fees === 1
         ? []
-        : [{ amount: fee.value * (zone.fees - 1), kind: "zone", zone: zone.name } as const]),
+        : [{ amount: pay * (zone.fees - 1), kind: "zone", zone: zone.name } as const]),
     ]);
-    return { amount, causes, dog: id, kind: "money" };
+    return { amount, causes, dog, kind: "money" };
   });
+  const money = changes.reduce((sum, change) => addCents(sum, change.amount), state.money);
   return { changes, state: { ...state, money } };
+}
+
+// When every dog the walk set out with gets home after its last zone, the walk pays
+// money.fullPackBonusPerDog for each of them into the money, as one change.
+export function fullPackBonus(data: Pick<GameData, "tuning">, state: RunState): Payments {
+  if (packDogs(state).length !== state.pack.length) {
+    return { changes: [], state };
+  }
+  const amount = cents(read(data.tuning, "money", "fullPackBonusPerDog") * state.pack.length);
+  const change: MoneyChange = {
+    amount,
+    causes: [{ amount, kind: "bonus" }],
+    dog: null,
+    kind: "money",
+  };
+  return { changes: [change], state: { ...state, money: addCents(state.money, amount) } };
 }
 
 export interface Firing {
@@ -104,12 +93,15 @@ export interface Firing {
   readonly state: RunState;
 }
 
-// Every owner at 0 hearts fires you and their dog leaves. Money doesn't change: the zone they
-// fire you in pays nothing for their dog, and earlier zones' fees and all tips stay.
+// Every owner at 0 hearts fires you and their dog leaves, so it earns no pay for the zone.
+// Money already banked stays.
 export function fireOwnersAtZero(state: RunState): Firing {
   const fired = state.pack.flatMap((slot) =>
     slot.status === "walking" && slot.hearts === 0 ? [slot.dog] : [],
   );
+  if (fired.length === 0) {
+    return { fired, state };
+  }
   const pack = mapPack(
     (slot) =>
       fired.includes(slot.dog)

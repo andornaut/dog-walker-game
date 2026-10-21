@@ -4,8 +4,7 @@ import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { dollarText } from "../home/home";
 import { currentZone, defaultRoute, walkLength } from "../rules/route";
-import { payZoneFees } from "../rules/run";
-import { cents } from "../rules/units";
+import { cents, read, roundDollars } from "../rules/units";
 import { testState } from "../testing/runState";
 import { fillNames } from "../text/lines";
 import { homeQuestionNote } from "./homeQuestion";
@@ -25,28 +24,37 @@ describe("homeQuestionNote", () => {
   const words = gameData.runText.homeQuestion;
   const zones = walkLength(gameData);
   const route = defaultRoute(zones);
+  const pay = read(gameData.tuning, "money", "payPerDog");
 
-  it.each<[string, Readonly<Partial<Record<DogId, number | "fired">>>, number, number]>([
-    ["at the walk's start", { duchess: 5, zippy: 3 }, 0, 0],
-    ["mid walk, with money banked", { duchess: 5, koda: 2, zippy: 3 }, 1, 31_250],
-    ["with a fired dog, whose fee is not counted", { duchess: 5, koda: "fired" }, 1, 12_000],
-    ["in the last zone, with no zones left", { zippy: 4 }, zones - 1, 50_000],
-  ])("states what going home keeps and gives up %s", (_name, slots, zoneIndex, money) => {
-    const run = testState(slots, { money: cents(money), route, zoneIndex });
-    const paid = payZoneFees(gameData, run).changes.reduce((sum, change) => sum + change.amount, 0);
+  it.each<[string, Readonly<Partial<Record<DogId, number | "fired">>>, number, boolean]>([
+    ["at the walk's start, with the bonus", { duchess: 5, zippy: 3 }, 0, true],
+    ["mid walk, with the bonus", { duchess: 5, koda: 2, zippy: 3 }, 1, true],
+    [
+      "with a fired dog, whose pay is not counted, and no bonus",
+      { duchess: 5, koda: "fired" },
+      1,
+      false,
+    ],
+    ["in the last zone, with no zones left", { zippy: 4 }, zones - 1, true],
+  ])("states what going home gives up %s", (_name, slots, zoneIndex, bonus) => {
+    const run = testState(slots, { route, zoneIndex });
+    const walking = Object.values(slots).filter((hearts) => hearts !== "fired").length;
+    const fees = roundDollars(pay * currentZone(gameData, run).fees * walking);
     const left = zones - zoneIndex - 1;
+    const named = { fees: dollarText(cents(fees)), zone: currentZone(gameData, run).name };
     expect(homeQuestionNote(gameData, run)).toEqual([
-      { kind: "keep", text: fillNames(words.keep, { money: dollarText(run.money) }) },
-      {
-        kind: "lose",
-        text: fillNames(words.lose, {
-          fees: dollarText(cents(paid)),
-          zone: currentZone(gameData, run).name,
-        }),
-      },
+      { kind: "lose", text: fillNames(bonus ? words.loseWithBonus : words.lose, named) },
       ...(left > 0
         ? [{ kind: "zonesLeft", text: fillNames(words.zonesLeft, { count: String(left) }) }]
         : []),
     ]);
+  });
+
+  it("gives up only the bonus at a fork, and nothing once an owner has fired you", () => {
+    const fork = { route: route.slice(0, 1), zoneIndex: 1 };
+    const lines = (slots: Readonly<Partial<Record<DogId, number | "fired">>>) =>
+      homeQuestionNote(gameData, testState(slots, fork)).filter(({ kind }) => kind === "lose");
+    expect(lines({ duchess: 5 })).toEqual([{ kind: "lose", text: words.loseBonus }]);
+    expect(lines({ duchess: 5, koda: "fired" })).toEqual([]);
   });
 });

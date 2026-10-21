@@ -8,7 +8,6 @@ import {
   dogPortraitKey,
   dogSpriteKey,
   encounterSpriteKey,
-  forcedStopSpriteKey,
   gearIconKey,
   kebabCase,
   minorObstacleSpriteKey,
@@ -21,17 +20,13 @@ import type {
   CardOption,
   DogId,
   EncounterId,
-  ForcedStopId,
   GameData,
   GearId,
   MinorObstacleId,
-  NeedCardId,
   UpgradeId,
   WalkerId,
-  ZoneId,
 } from "../data/types";
-import { forkCard } from "../rules/choices";
-import { maxHearts, startHearts, zoneFee } from "../rules/dogs";
+import { maxHearts, startHearts } from "../rules/dogs";
 import { effectText } from "../rules/effectText";
 import { faceMood } from "../rules/treats";
 import type { CardSource } from "../state/runState";
@@ -80,8 +75,8 @@ function optionFaces(
   }));
 }
 
-// Every card face the game can show, one per option: encounter, forced stop and need card
-// options in data order, each zone's fork path card, each upgrade, then Skip.
+// Every card face the game can show, one per option: encounter options in data order, each
+// zone's fork path card, each upgrade a path can carry, then Skip.
 function cardFaces(data: GameData): CardFace[] {
   const encounterCards = entries<EncounterId, GameData["encounters"][EncounterId]>(
     data.encounters,
@@ -92,57 +87,33 @@ function cardFaces(data: GameData): CardFace[] {
     const source: CardSource = { affected: [], encounter: id, kind: "encounter" };
     return optionFaces(
       data,
-      cardFrameTag(data, source),
+      cardFrameTag(source),
       encounter.resolution.options,
       { id, kind: "encounter" },
       encounter.name,
     );
   });
-  const stopCards = entries<ForcedStopId, GameData["forcedStops"][ForcedStopId]>(
-    data.forcedStops,
-  ).flatMap(([id, stop]) =>
-    optionFaces(
-      data,
-      cardFrameTag(data, { kind: "forcedStop", stop: id }),
-      stop.options,
-      { id, kind: "forcedStop" },
-      stop.name,
-    ),
-  );
-  const needCards = entries<NeedCardId, GameData["needCards"][NeedCardId]>(data.needCards).flatMap(
-    ([id, card]) =>
-      optionFaces(
-        data,
-        cardFrameTag(data, { affected: [], card: id, kind: "need" }),
-        card.options,
-        { id, kind: "need" },
-        card.name,
-      ),
-  );
-  // Every zone's path card, as a fork shows it.
-  const pathCards = data.world.zones.flatMap(({ id }) => {
-    const fork = forkCard(data, { kind: "fork", paths: [id as ZoneId] });
-    return fork.options.map((option): CardFace => ({
-      art: option.art,
-      frame: cardFrameTag(data, fork.source),
-      id,
-      index: null,
-      name: option.label,
-      source: { id, kind: "fork" },
-      text: option.text,
-      title: fork.title,
-    }));
-  });
+  // Every zone's path card, as a fork shows it, before its upgrade.
+  const pathCards = data.world.zones.map((zone): CardFace => ({
+    art: cardZoneKey(zone),
+    frame: "route",
+    id: zone.id,
+    index: null,
+    name: zone.name,
+    source: { id: zone.id, kind: "fork" },
+    text: zone.difficultyName,
+    title: data.runText.card.forkTitle,
+  }));
   const upgradeCards = entries<UpgradeId, GameData["upgrades"][UpgradeId]>(data.upgrades).map(
     ([id, upgrade]): CardFace => ({
       art: upgrade.art,
-      frame: cardFrameTag(data, { kind: "upgradeOffer", offered: [id, id, id] }),
+      frame: "route",
       id,
       index: null,
       name: upgrade.name,
       source: { id, kind: "upgrade" },
       text: effectText(data, upgrade.effects),
-      title: data.runText.card.upgradeTitle,
+      title: data.runText.card.forkTitle,
     }),
   );
   const skip: CardFace = {
@@ -155,7 +126,7 @@ function cardFaces(data: GameData): CardFace[] {
     text: effectText(data, []),
     title: "",
   };
-  return [...encounterCards, ...stopCards, ...needCards, ...pathCards, ...upgradeCards, skip];
+  return [...encounterCards, ...pathCards, ...upgradeCards, skip];
 }
 
 export function gameDataExport(data: GameData) {
@@ -171,7 +142,6 @@ export function gameDataExport(data: GameData) {
         ...dog,
         // Before modifiers: what a dog brings to a walk with no gear or upgrades.
         figures: {
-          feeCents: zoneFee(tuning, [], dog),
           maxHearts: maxHearts(tuning, [], dog),
           startHearts: start,
           startMood: faceMood(data, start),
@@ -188,9 +158,6 @@ export function gameDataExport(data: GameData) {
     encounters: entries<EncounterId, GameData["encounters"][EncounterId]>(data.encounters).map(
       ([id, encounter]) => ({ id, ...encounter, spriteKey: encounterSpriteKey(id) }),
     ),
-    forcedStops: entries<ForcedStopId, GameData["forcedStops"][ForcedStopId]>(data.forcedStops).map(
-      ([id, stop]) => ({ id, ...stop, spriteKey: forcedStopSpriteKey(id) }),
-    ),
     gear: entries<GearId, GameData["shopGear"][GearId]>(data.shopGear).map(([id, gear]) => ({
       id,
       ...gear,
@@ -200,9 +167,6 @@ export function gameDataExport(data: GameData) {
     minorObstacles: entries<MinorObstacleId, GameData["minorObstacles"][MinorObstacleId]>(
       data.minorObstacles,
     ).map(([id, obstacle]) => ({ id, ...obstacle, spriteKey: minorObstacleSpriteKey(id) })),
-    needCards: entries(data.needCards).map(([id, card]) => ({ id, ...card })),
-    needSpots: entries(data.needSpots).map(([id, spot]) => ({ id, ...spot })),
-    needs: entries(data.needs).map(([id, need]) => ({ id, ...need })),
     tuning,
     upgrades: entries<UpgradeId, GameData["upgrades"][UpgradeId]>(data.upgrades).map(
       ([id, upgrade]) => ({ id, ...upgrade }),

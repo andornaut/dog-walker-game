@@ -1,8 +1,7 @@
 import type { Input, Scene } from "phaser";
 
 import { gameData } from "../../data";
-import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
-import { onStrip, stripItems } from "../../hud/stateStrip";
+import { LANE_COUNT } from "../../data/screen";
 import { gameplayAllowed, pressesHeld, type RunPause, topBarButtonAt } from "../../hud/topBar";
 import type { GestureAction, GestureContext } from "../../input/gestures";
 import { walkKeyAction } from "../../input/keyBindings";
@@ -12,9 +11,7 @@ import {
   type PointerTrack,
   trackPointer,
 } from "../../input/pointerTracking";
-import { giveTreat } from "../../rules/treats";
 import { read } from "../../rules/units";
-import { gestureAfterPulls, type PullStep } from "../../runner/pulls";
 import type { SessionInput } from "../../runner/session";
 import type { Walk } from "../../runner/walk";
 import { LAYOUT } from "./stage";
@@ -68,38 +65,28 @@ export class RunInput {
     this.pointers = idleTrack;
   }
 
-  // A pull that moved the pack re-anchors the drag.
-  afterPulls(pulled: PullStep["pulled"]): void {
-    this.pointers = { ...this.pointers, gesture: gestureAfterPulls(pulled, this.pointers.gesture) };
-  }
-
   // M, P and Escape are the top bar's keys, which the HUD handles. Phaser hands a key down to
   // this listener as the browser fires it, auto-repeats included.
   private onKey(event: KeyboardEvent): void {
-    const action = walkKeyAction(SCREEN_CONFIG.dogSlotCount, event.key, event.repeat);
+    const action = walkKeyAction(event.key, event.repeat);
     if (action !== undefined) {
       this.act(action);
     }
   }
 
   // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
-  // running while a card or the pause menu covers the walk, and the press is theirs then, as
-  // is the press that closes the state strip's bubble.
+  // running while a card or the pause menu covers the walk, and the press is theirs then.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     const walk = this.host.walk();
     const walking = walk !== undefined && walk.run.phase.kind === "walking";
     const held = !walking || pressesHeld(this.host.runPause());
     const sample: PointerSample = {
       onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
-      onStrip:
-        phase === "down" &&
-        walk !== undefined &&
-        onStrip(SCREEN_CONFIG.width, stripItems(gameData, walk.run).length, pointer),
       phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
       point: { x: pointer.x, y: pointer.y },
       press: { downTime: pointer.downTime, id: pointer.id },
     };
-    const result = trackPointer(gestureContext(walk), held, sample, this.pointers);
+    const result = trackPointer(gestureContext(), held, sample, this.pointers);
     this.pointers = result.track;
     result.actions.forEach((action) => this.act(action));
   }
@@ -122,27 +109,13 @@ export class RunInput {
       case "pause":
         this.host.openPause();
         return;
-      case "treat":
-        if (!this.host.replaying()) {
-          this.pending.push({ kind: "treat", slot: action.slot });
-        }
-        return;
       default:
         action satisfies never;
     }
   }
 }
 
-// TREAT TAP (delete with the doghouse treat tap): whether a tap on the doghouse in the slot
-// gives its dog a treat.
-function treatToGive(walk: Walk | undefined, slot: number): boolean {
-  const dog = walk?.run.pack[slot]?.dog;
-  return (
-    walk !== undefined && dog !== undefined && giveTreat(gameData, dog, walk.run).change !== null
-  );
-}
-
-function gestureContext(walk: Walk | undefined): GestureContext {
+function gestureContext(): GestureContext {
   return {
     config: {
       laneCount: LANE_COUNT,
@@ -150,6 +123,5 @@ function gestureContext(walk: Walk | undefined): GestureContext {
       tapMaxDistance: read(gameData.tuning, "pixels", "tapMaxDistance"),
     },
     layout: LAYOUT,
-    treatToGive: (slot) => treatToGive(walk, slot),
   };
 }

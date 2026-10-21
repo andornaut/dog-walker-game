@@ -1,13 +1,9 @@
 import type { GameData } from "../data/types";
-import { DEFAULT_WALKER, WALKER_PACES, WALKER_STYLES, WALKERS } from "../data/walkers";
+import { DEFAULT_WALKER, WALKER_PERKS, WALKERS } from "../data/walkers";
 
-// The walker data, for a test's data object. Under TEST_TUNING no walker changes anything.
-export const TEST_WALKER_DATA: Pick<
-  GameData,
-  "defaultWalker" | "walkerPaces" | "walkerStyles" | "walkers"
-> = {
+// The walker data, for a test's data object.
+export const TEST_WALKER_DATA: Pick<GameData, "defaultWalker" | "walkerPerks" | "walkers"> = {
   defaultWalker: DEFAULT_WALKER,
-  walkerPaces: WALKER_PACES,
-  walkerStyles: WALKER_STYLES,
+  walkerPerks: WALKER_PERKS,
   walkers: WALKERS,
 };

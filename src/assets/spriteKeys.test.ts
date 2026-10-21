@@ -3,11 +3,9 @@ import { describe, expect, it } from "vitest";
 import manifest from "../../public/art/manifest.json";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
-import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { NEED_CARDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
-import type { ForcedStopId, GearId, MinorObstacleId } from "../data/types";
+import type { GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
 import type { CardSource } from "../state/runState";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
@@ -20,7 +18,6 @@ import {
   dogFaceKey,
   doghouseTag,
   dogSpriteKey,
-  forcedStopSpriteKey,
   gearIconKey,
   kebabCase,
   minorObstacleSpriteKey,
@@ -41,7 +38,7 @@ import {
 
 const spriteKeys = new Set(manifest.sprites.map(({ key }) => key));
 const images = new Set(manifest.images.map(({ key }) => key));
-const data = { dogs: DOGS, encounters: ENCOUNTERS, needCards: NEED_CARDS };
+const data = { dogs: DOGS, encounters: ENCOUNTERS };
 const renamed = { dogs: { ...DOGS, koda: { ...DOGS.koda, art: "kodiak" } } };
 const zone = { art: "woof-way" };
 
@@ -79,14 +76,11 @@ describe("key names", () => {
 
   it.each([
     [{ affected: [], encounter: "skunk", kind: "encounter" }, "encounter"],
-    [{ affected: [], encounter: "lostWallet", kind: "encounter" }, "lucky"],
-    [{ kind: "forcedStop", stop: "kidWantsToPet" }, "stop"],
-    [{ kind: "upgradeOffer", offered: ["bellyRubs", "bigTipper", "raincoats"] }, "upgrade"],
-    [{ kind: "fork", paths: ["park"] }, "route"],
+    [{ kind: "fork", paths: ["park"], upgrades: ["bellyRubs"] }, "route"],
   ] as const satisfies readonly (readonly [CardSource, string])[])(
     "tags a card frame for %o as %s",
     (source, tag) => {
-      expect(cardFrameTag(data, source)).toBe(tag);
+      expect(cardFrameTag(source)).toBe(tag);
     },
   );
 });
@@ -128,11 +122,6 @@ describe("the art manifest", () => {
       keys: () => (Object.keys(SHOP_GEAR) as GearId[]).map(gearIconKey),
       name: "an icon image for every gear item",
       set: images,
-    },
-    {
-      keys: () => (Object.keys(FORCED_STOPS) as ForcedStopId[]).map(forcedStopSpriteKey),
-      name: "a sprite for every forced stop",
-      set: spriteKeys,
     },
     {
       keys: () => [

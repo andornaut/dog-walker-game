@@ -26,7 +26,7 @@ function lerp(alpha: number, from: number, to: number): number {
 // the control; the step's own control replaces the lead once it runs. A hit stop holds the
 // pack and drops steering, as the step does.
 export function leadWalk(
-  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
   laneCount: number,
   seconds: number,
   queued: readonly SessionInput[],
@@ -70,15 +70,10 @@ export function blendWalk(alpha: number, previous: Walk, current: Walk): Walk {
   }
   const before = new Map(previous.road.items.map((item) => [item.id, item]));
   const { road, run } = current;
-  const stop = road.forcedStopOnRoad;
-  const stopBefore = previous.road.forcedStopOnRoad;
   return {
     road: {
       ...road,
-      forcedStopOnRoad:
-        stop === null || stopBefore?.stop !== stop.stop
-          ? stop
-          : { ...stop, y: lerp(alpha, stopBefore.y, stop.y) },
+
       items: road.items.map((item) => blendItem(alpha, before.get(item.id), item)),
     },
     run: {

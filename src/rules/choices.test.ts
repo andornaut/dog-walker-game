@@ -3,17 +3,13 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
-import { FORCED_STOPS } from "../data/forcedStops";
-import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
-import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, EncounterId, ForcedStopId, UpgradeId } from "../data/types";
+import type { DogId, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { type CardSource, newRun, type RunState, type UpgradeOffer } from "../state/runState";
-import { heartsAfter, temperamentStart } from "../testing/dogs";
-import { heartsByDog, testState } from "../testing/runState";
+import { type CardSource, newRun, type RunState } from "../state/runState";
+import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
@@ -27,18 +23,14 @@ import {
   openCard,
   quipLine,
 } from "./choices";
-import { cents } from "./units";
+import { startHearts } from "./dogs";
+import { cents, read } from "./units";
 
 const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
   encounters: ENCOUNTERS,
-  forcedStops: FORCED_STOPS,
-  needCards: NEED_CARDS,
-  needSpots: NEED_SPOTS,
-  needs: NEEDS,
   quips: QUIPS,
-  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   ...TEST_WALKER_DATA,
@@ -53,6 +45,33 @@ const encounter = (id: EncounterId, affected: DogId[]): CardSource => ({
   kind: "encounter",
 });
 
+// The index of the encounter's first card option with an effect of kind.
+function optionWith(id: EncounterId, kind: "debuff" | "hearts" | "money"): number {
+  const { resolution } = ENCOUNTERS[id];
+  const options = resolution.kind === "card" ? resolution.options : [];
+  const index = options.findIndex(({ effects }) =>
+    effects.some(
+      (effect) =>
+        effect.kind === kind &&
+        (kind !== "money" || effect.kind !== "money" || effect.change === "lose"),
+    ),
+  );
+  if (index < 0) {
+    throw new Error(`${id} has no ${kind} option`);
+  }
+  return index;
+}
+// The hearts the encounter's first hearts option changes each owner by.
+function heartsOf(id: EncounterId): number {
+  const { resolution } = ENCOUNTERS[id];
+  const option =
+    resolution.kind === "card" ? resolution.options[optionWith(id, "hearts")] : undefined;
+  const effect = option?.effects.find((candidate) => candidate.kind === "hearts");
+  return effect?.kind === "hearts" ? effect.amount : 0;
+}
+const low = read(TEST_TUNING, "money", "encounterLow");
+const high = read(TEST_TUNING, "money", "encounterHigh");
+
 function choose(state: RunState, source: CardSource, choice: Choice, random = () => 0) {
   const opened = openCard(source, state);
   return chooseOption(data, random, opened, cardFor(data, opened, source), choice);
@@ -60,14 +79,16 @@ function choose(state: RunState, source: CardSource, choice: Choice, random = ()
 
 describe("cardFor", () => {
   it("disables an option the player cannot afford, with the reason", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { money: cents(900) });
+    const state = testState({ duchess: 5, koda: 5 }, { money: cents(low - 100) });
     const card = cardFor(data, state, encounter("puddle", ["duchess", "koda"]));
-    expect(card.title).toBe("Puddle");
-    expect(card.options.map(({ availability }) => availability)).toEqual([
-      { enabled: true },
-      { enabled: false, reason: "not enough money" },
-    ]);
-    expect(card.options[1]?.cost).toBe(1000);
+    const towel = optionWith("puddle", "money");
+    expect(card.title).toBe(ENCOUNTERS.puddle.name);
+    expect(card.options.map(({ availability }) => availability)).toEqual(
+      card.options.map((_, index) =>
+        index === towel ? { enabled: false, reason: "not enough money" } : { enabled: true },
+      ),
+    );
+    expect(card.options[towel]?.cost).toBe(low);
   });
 
   it("keeps every card's free option enabled with no money", () => {
@@ -75,13 +96,7 @@ describe("cardFor", () => {
     const cardEncounters = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
       (id) => ENCOUNTERS[id].resolution.kind === "card",
     );
-    const sources: CardSource[] = [
-      ...cardEncounters.map((id) => encounter(id, ["duchess", "koda", "pierre"])),
-      ...(Object.keys(FORCED_STOPS) as ForcedStopId[]).map((stop): CardSource => ({
-        kind: "forcedStop",
-        stop,
-      })),
-    ];
+    const sources = cardEncounters.map((id) => encounter(id, ["duchess", "koda", "pierre"]));
     for (const source of sources) {
       const card = cardFor(data, state, source);
       const free = card.options.filter(({ cost }) => cost === 0);
@@ -104,195 +119,69 @@ describe("cardFor", () => {
     const { resolution } = ENCOUNTERS.thief;
     const options = resolution.kind === "card" ? resolution.options : [];
     expect(card.options.map(({ art }) => art)).toEqual(options.map(({ art }) => art));
-    const [chase, letGo] = options;
-    expect(card.options[0]?.breakdown).toEqual([
-      { dog: "koda", name: chase?.name, text: "−1 ♥" },
-      { dog: "nugget", name: chase?.name, text: "−1 ♥" },
-      { dog: "nugget", name: "dramatic", text: "−1 ♥" },
+    const letGo = options[optionWith("thief", "money")];
+    const chase = options[optionWith("thief", "hearts")];
+    const lost = `−${Math.abs(heartsOf("thief"))} ♥`;
+    expect(card.options[optionWith("thief", "hearts")]?.breakdown).toEqual([
+      { dog: "koda", name: chase?.name, text: lost },
+      { dog: "nugget", name: chase?.name, text: lost },
     ]);
-    expect(card.options[1]?.breakdown.filter(({ dog }) => dog === null)).toEqual([
-      { dog: null, name: letGo?.name, text: `−$${TEST_TUNING.money.thiefLetGo}` },
-    ]);
+    expect(
+      card.options[optionWith("thief", "money")]?.breakdown.filter(({ dog }) => dog === null),
+    ).toEqual([{ dog: null, name: letGo?.name, text: `−$${TEST_TUNING.money.thiefLetGo}` }]);
   });
 
   it("refuses an instant encounter, which opens no card", () => {
     const state = testState({ koda: 5 });
-    expect(() => cardFor(data, state, encounter("photoOp", ["koda"]))).toThrow("opens no card");
-  });
-});
-
-describe("the zone encounters' options", () => {
-  // In dollars, as the card text shows them; the state counts cents.
-  const { encounterLow, lemonadeCup, missedTips } = TEST_TUNING.money;
-  const start = cents(5000);
-  // Every need half way to urgent, so a need met shows as 0.
-  const walking = (dogs: DogId[]) =>
-    testState(Object.fromEntries(dogs.map((dog) => [dog, 5])), {
-      money: start,
-      needSeconds: Object.fromEntries(dogs.map((dog) => [dog, 30])),
-    });
-  const pick = (id: EncounterId, dogs: DogId[], name: string, affected = dogs) => {
-    const state = walking(dogs);
-    const card = cardFor(data, state, encounter(id, affected));
-    const option = card.options.find(({ label }) => label === name);
-    if (option === undefined) {
-      throw new Error(`${card.title} has no option ${name}`);
-    }
-    const { state: after } = choose(state, encounter(id, affected), option.index);
-    return {
-      hearts: heartsByDog(after),
-      met: Object.keys(after.needSeconds).filter((dog) => after.needSeconds[dog as DogId] === 0),
-      spent: start - after.money,
-      text: option.text,
-    };
-  };
-
-  // Koda is a laid-back chaser, Nugget a dramatic food-driven dog, Pepe a fussy fancy one,
-  // Biscuit Regular and Duchess Friendly.
-  const kodaTrio: DogId[] = ["koda", "nugget", "pierre"];
-  const biscuitTrio: DogId[] = ["biscuit", "koda", "nugget"];
-  const duchessTrio: DogId[] = ["duchess", "nugget", "pierre"];
-  const tips = 3 * missedTips * 100;
-  const low = encounterLow * 100;
-
-  it.each<[EncounterId, string, DogId[], Partial<ReturnType<typeof pick>>, DogId[]?]>([
-    [
-      "goose",
-      "Back off slowly",
-      kodaTrio,
-      { hearts: { koda: 5, nugget: 5, pierre: 5 }, spent: tips },
-    ],
-    [
-      "goose",
-      "Honk back",
-      kodaTrio,
-      {
-        hearts: { koda: 3, nugget: 3, pierre: 4 },
-        spent: 0,
-        text: `−2 ♥ ${DOGS.koda.name} and ${DOGS.nugget.name}, −1 ♥ ${DOGS.pierre.name}`,
-      },
-    ],
-    ["picnic", "Buy a new lunch", kodaTrio, { spent: low }, ["nugget"]],
-    [
-      "picnic",
-      "Drop it!",
-      kodaTrio,
-      { hearts: { koda: 5, nugget: 3, pierre: 5 }, spent: 0 },
-      ["nugget"],
-    ],
-    ["petunias", "Replant them", biscuitTrio, { spent: 3 * low }],
-    [
-      "petunias",
-      "Nature calls",
-      biscuitTrio,
-      { hearts: { biscuit: 4, koda: 4, nugget: 3 }, met: ["biscuit"], spent: 0 },
-    ],
-    [
-      "trash",
-      "Sniff it all",
-      kodaTrio,
-      {
-        hearts: { koda: 5, nugget: 5, pierre: 3 },
-        met: ["koda", "pierre"],
-        spent: tips,
-        // Pepe is a show dog and the trash is messy: his heart lost there costs one more.
-        text: `Nosy needs met, −2 ♥ ${DOGS.pierre.name}, −$${3 * missedTips}`,
-      },
-    ],
-    ["trash", "Tidy up", kodaTrio, { hearts: { koda: 5, nugget: 5, pierre: 6 }, spent: tips }],
-    ["trash", "Drag them on", kodaTrio, { hearts: { koda: 4, nugget: 1, pierre: 3 }, spent: 0 }],
-    [
-      "cafe",
-      "Charm the crowd",
-      duchessTrio,
-      { hearts: { duchess: 5, nugget: 5, pierre: 5 }, met: ["duchess"], spent: tips },
-    ],
-    [
-      "cafe",
-      "Buy new lattes",
-      duchessTrio,
-      { hearts: { duchess: 5, nugget: 5, pierre: 6 }, spent: 3 * low },
-    ],
-    [
-      "cafe",
-      "Slink away",
-      duchessTrio,
-      {
-        hearts: Object.fromEntries(duchessTrio.map((dog) => [dog, heartsAfter(data, dog, 5, -1)])),
-        spent: 0,
-      },
-    ],
-    [
-      "lemonade",
-      "Water, please",
-      duchessTrio,
-      {
-        met: ["nugget"],
-        spent: 3 * lemonadeCup * 100,
-        text: `Thirsty needs met, −$${3 * lemonadeCup}`,
-      },
-    ],
-    ["lemonade", "Say hi", duchessTrio, { met: ["duchess"], spent: tips }],
-    [
-      "lemonade",
-      "Maybe later",
-      duchessTrio,
-      { hearts: { duchess: 5, nugget: 5, pierre: 5 }, met: [], spent: 0, text: "Nothing" },
-    ],
-  ])("%s: %s", (id, option, pack, expected, affected) => {
-    expect(pick(id, pack, option, affected)).toMatchObject(expected);
+    expect(() => cardFor(data, state, encounter("lostWallet", ["koda"]))).toThrow("opens no card");
   });
 });
 
 describe("applyInstantEncounter", () => {
-  it("pays a photo op at once, with a quip from the owners who gained hearts", () => {
+  it("pays a lost wallet at once, with no quip when no owner's hearts changed", () => {
     const state = testState({ koda: 5, snowball: 3 });
-    const outcome = applyInstantEncounter(data, () => 0, state, "photoOp", ["koda", "snowball"]);
-    expect(outcome.moneyDelta).toBe(1000);
-    expect(heartsByDog(outcome.state)).toEqual({ koda: 5, snowball: 5 });
-    expect(outcome.quips).toEqual([{ dog: "snowball", moment: "happier" }]);
+    const outcome = applyInstantEncounter(data, () => 0, state, "lostWallet", ["koda", "snowball"]);
+    const keep = read(TEST_TUNING, "money", "lostWalletKeep");
+    expect(outcome.moneyDelta).toBe(keep);
+    expect(heartsByDog(outcome.state)).toEqual(heartsByDog(state));
+    expect(outcome.quips).toEqual([]);
     expect(outcome.moneyChanges[0]?.causes).toEqual([
-      { amount: 1000, kind: "effect", source: { encounter: "photoOp", kind: "instant" } },
+      { amount: keep, kind: "effect", source: { encounter: "lostWallet", kind: "instant" } },
     ]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
-  // The carry limit is 3 treats.
-  it.each<[string, number, DogId[], number, DogId[]]>([
-    ["one dog", 0, ["koda"], 1, ["koda"]],
-    ["two dogs", 0, ["duchess", "koda"], 2, ["duchess", "koda"]],
-    ["a full treat bag", 3, ["koda"], 0, []],
-  ])(
-    "gives the biscuit neighbour's treats per caught dog, a happier line and no hearts: %s",
-    (_, treats, affected, treatsDelta, quips) => {
-      const state = testState({ duchess: 5, koda: 5 }, { treats });
-      const outcome = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", affected);
-      expect(outcome.treatsDelta).toBe(treatsDelta);
-      expect(outcome.heartChanges).toEqual([]);
-      expect(outcome.quips).toEqual(quips.map((dog) => ({ dog, moment: "happier" })));
-    },
-  );
+  it("gives the generous neighbour's hearts to every owner, with a happier line", () => {
+    const state = testState({ duchess: 3, koda: 3 });
+    const outcome = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", [
+      "duchess",
+      "koda",
+    ]);
+    expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "koda"]);
+    expect(outcome.quips).toEqual([
+      { dog: "duchess", moment: "happier" },
+      { dog: "koda", moment: "happier" },
+    ]);
+  });
 
   it("refuses an encounter that opens a card, and an ended run", () => {
     const state = testState({ koda: 5 });
-    expect(() => applyInstantEncounter(data, () => 0, state, "lostWallet", ["koda"])).toThrow(
+    expect(() => applyInstantEncounter(data, () => 0, state, "puddle", ["koda"])).toThrow(
       "opens a card",
     );
     const ended = { ...state, phase: { kind: "ended", reason: "noDogs" } as const };
-    expect(() => applyInstantEncounter(data, () => 0, ended, "photoOp", ["koda"])).toThrow("ended");
+    expect(() => applyInstantEncounter(data, () => 0, ended, "lostWallet", ["koda"])).toThrow(
+      "ended",
+    );
   });
 });
 
 describe("openCard", () => {
-  it("waits in the upgrade phase for an upgrade offer, and the card phase for anything else", () => {
-    const state = testState({ koda: 5 });
-    const offered: UpgradeOffer = ["bellyRubs", "bigTipper", "raincoats"];
-    expect(openCard({ kind: "upgradeOffer", offered }, state).phase).toEqual({
-      kind: "upgrade",
-      offered,
-    });
-    const skunk = encounter("skunk", ["koda"]);
-    expect(openCard(skunk, state).phase).toEqual({ kind: "card", source: skunk });
+  it.each<CardSource>([
+    { affected: ["koda"], encounter: "skunk", kind: "encounter" },
+    { kind: "fork", paths: ["park"], upgrades: ["bellyRubs"] },
+  ])("waits in the card phase for a $kind card", (source) => {
+    expect(openCard(source, testState({ koda: 5 })).phase).toEqual({ kind: "card", source });
   });
 });
 
@@ -305,25 +194,33 @@ describe("quipLine", () => {
 });
 
 describe("chooseOption", () => {
+  const nose = optionWith("skunk", "hearts");
+  const groom = optionWith("skunk", "money");
+  const lost = heartsOf("skunk");
+
   it("counts a squirrel chase only when the chasers are let chase", () => {
     const state = testState({ koda: 5 }, { money: cents(5_000) });
     const squirrel = encounter("squirrel", ["koda"]);
-    expect(choose(state, squirrel, 1).state.squirrelChases).toBe(1);
-    expect(choose(state, squirrel, 0).state.squirrelChases).toBe(0);
+    const { resolution } = ENCOUNTERS.squirrel;
+    const options = resolution.kind === "card" ? resolution.options : [];
+    const chase = options.findIndex((option) => "chase" in option && option.chase === true);
+    const hold = options.findIndex((option) => !("chase" in option));
+    expect(choose(state, squirrel, chase).state.squirrelChases).toBe(1);
+    expect(choose(state, squirrel, hold).state.squirrelChases).toBe(0);
   });
 
-  it("applies an option only to the caught dogs, and reports each heart change", () => {
-    const outcome = choose(testState({ duchess: 5, koda: 5 }), encounter("skunk", ["koda"]), 2);
-    expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, koda: 3 });
+  it("applies an option only to the affected dogs, and reports each heart change", () => {
+    const outcome = choose(testState({ duchess: 5, koda: 5 }), encounter("skunk", ["koda"]), nose);
+    expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, koda: 5 + lost });
     expect(outcome.heartChanges).toEqual([
       {
-        after: 3,
+        after: 5 + lost,
         before: 5,
         causes: [
           {
-            amount: -2,
+            amount: lost,
             kind: "effect",
-            source: { encounter: "skunk", kind: "encounter", option: 2 },
+            source: { encounter: "skunk", kind: "encounter", option: nose },
           },
         ],
         dog: "koda",
@@ -336,21 +233,21 @@ describe("chooseOption", () => {
 
   it("charges the option's cost and reports the money change", () => {
     const state = testState({ duchess: 5, koda: 5 }, { money: cents(4000) });
-    const outcome = choose(state, encounter("skunk", ["duchess", "koda"]), 0);
-    expect(outcome.state.money).toBe(1000);
-    expect(outcome.moneyDelta).toBe(-1500 * 2);
+    const outcome = choose(state, encounter("skunk", ["duchess", "koda"]), groom);
+    expect(outcome.state.money).toBe(4000 - high);
+    expect(outcome.moneyDelta).toBe(-high);
   });
 
   it("rejects a disabled option", () => {
-    const state = testState({ duchess: 5, koda: 5 });
-    expect(() => choose(state, encounter("puddle", ["duchess", "koda"]), 1)).toThrow(
-      "not enough money",
-    );
+    const state = testState({ duchess: 5, koda: 5 }, { money: cents(0) });
+    expect(() =>
+      choose(state, encounter("puddle", ["duchess", "koda"]), optionWith("puddle", "money")),
+    ).toThrow("not enough money");
   });
 
   it("fires an owner at 0 hearts, and the money stays", () => {
-    const state = testState({ duchess: 5, pierre: 2 }, { money: cents(5000), zoneIndex: 2 });
-    const outcome = choose(state, encounter("skunk", ["pierre"]), 2);
+    const state = testState({ duchess: 5, pierre: -lost }, { money: cents(5000), zoneIndex: 2 });
+    const outcome = choose(state, encounter("skunk", ["pierre"]), nose);
     expect(outcome.fired).toEqual(["pierre"]);
     expect(outcome.state.money).toBe(state.money);
     expect(outcome.moneyDelta).toBe(0);
@@ -361,70 +258,58 @@ describe("chooseOption", () => {
   });
 
   it("ends the run when the last owner fires you", () => {
-    const outcome = choose(testState({ koda: 2 }), encounter("skunk", ["koda"]), 2);
+    const outcome = choose(testState({ koda: -lost }), encounter("skunk", ["koda"]), nose);
     expect(outcome.state.phase).toEqual({ kind: "ended", reason: "noDogs" });
     const source = encounter("skunk", ["koda"]);
     const card = cardFor(data, outcome.state, source);
-    expect(() => chooseOption(data, () => 0, outcome.state, card, 2)).toThrow("ended");
+    expect(() => chooseOption(data, () => 0, outcome.state, card, nose)).toThrow("ended");
+  });
+
+  it("makes the zone's first card free with Sweet talker, and the next one not", () => {
+    const sweetTalker = activeModifier(
+      { kind: "upgrade", upgrade: "sweetTalker" },
+      { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
+    );
+    const state = testState(
+      { duchess: 5, koda: 5 },
+      { modifiers: [sweetTalker], money: cents(4000) },
+    );
+    const skunk = encounter("skunk", ["duchess", "koda"]);
+    const first = choose(state, skunk, groom);
+    expect(first.state.money).toBe(4000);
+    expect(first.state.cardsThisZone).toBe(1);
+    expect(choose(first.state, skunk, groom).state.money).toBe(4000 - high);
   });
 });
 
-describe("upgrades", () => {
-  it("records a picked upgrade, which then leaves the pool", () => {
-    const offered = offerUpgrades(data, () => 0, testState({ koda: 5 }));
-    const picked = choose(testState({ koda: 5 }), { kind: "upgradeOffer", offered }, 1).state;
-    expect(picked.upgradesPicked).toEqual([offered[1]]);
-    for (let draw = 0; draw < 1; draw += 0.1) {
-      expect(offerUpgrades(data, () => draw, picked)).not.toContain(offered[1]);
-    }
-  });
-
-  it("never offers both trade-off cards together", () => {
-    const tradeOffs = (Object.keys(UPGRADES) as UpgradeId[]).filter(
-      (id) => UPGRADES[id].kind === "tradeOff",
-    );
-    expect(tradeOffs).toHaveLength(2);
-    // A seeded linear congruential generator, so every run of the test draws the same offers.
-    let seed = 1;
-    const seeded = () => {
-      seed = (seed * 1_103_515_245 + 12_345) % 2_147_483_648;
-      return seed / 2_147_483_648;
-    };
-    let offersWithTradeOff = 0;
-    for (let draw = 0; draw < 500; draw++) {
-      const offer = offerUpgrades(data, seeded, testState({ koda: 5 }));
-      const count = offer.filter((id) => tradeOffs.includes(id)).length;
-      expect(count, offer.join(", ")).toBeLessThanOrEqual(1);
-      offersWithTradeOff += count;
-    }
-    expect(offersWithTradeOff).toBeGreaterThan(0);
-  });
-
-  it("sets a second trade-off aside and draws another card instead", () => {
-    // The first draws take rushHour (index 4 of 9), then shortcut (index 5 of the 8 left).
-    const draws = [4.5 / 9, 5.5 / 8, 0];
-    const offer = offerUpgrades(data, () => draws.shift() ?? 0, testState({ koda: 5 }));
-    expect(offer).toEqual(["rushHour", "bellyRubs", "bigTipper"]);
-  });
-
-  it("offers the only three left when the rest are picked, and fails with fewer", () => {
+describe("offerUpgrades", () => {
+  it("never offers an upgrade already picked", () => {
     const all = Object.keys(UPGRADES) as UpgradeId[];
-    const sixPicked = testState({ koda: 5 }, { upgradesPicked: all.slice(0, 6) });
-    expect([...offerUpgrades(data, () => 0.5, sixPicked)].sort()).toEqual(all.slice(6).sort());
-    const sevenPicked = testState({ koda: 5 }, { upgradesPicked: all.slice(0, 7) });
-    expect(() => offerUpgrades(data, () => 0, sevenPicked)).toThrow("Fewer than 3");
+    const picked = testState({ koda: 5 }, { upgradesPicked: all.slice(0, 2) });
+    for (let draw = 0; draw < 1; draw += 0.1) {
+      const offer = offerUpgrades(data, () => draw, 3, picked);
+      expect(offer).toHaveLength(3);
+      expect(offer.filter((id) => all.slice(0, 2).includes(id))).toEqual([]);
+    }
+  });
+
+  it("offers the only ones left when the rest are picked, and fails with fewer", () => {
+    const all = Object.keys(UPGRADES) as UpgradeId[];
+    const left = testState({ koda: 5 }, { upgradesPicked: all.slice(0, all.length - 3) });
+    expect([...offerUpgrades(data, () => 0.5, 3, left)].sort()).toEqual(all.slice(-3).sort());
+    const fewer = testState({ koda: 5 }, { upgradesPicked: all.slice(0, all.length - 2) });
+    expect(() => offerUpgrades(data, () => 0, 3, fewer)).toThrow("Fewer than 3");
   });
 });
 
 describe("skip option", () => {
-  it("is offered on an obstacle card with poop bags, and only once per run", () => {
+  it("is offered on every obstacle card with Hall pass until it is taken, once per zone", () => {
     const state = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
     const source = encounter("skunk", ["koda"]);
     expect(cardFor(data, state, source).skip).toBe(true);
-    expect(cardFor(data, state, encounter("lostWallet", ["koda"])).skip).toBe(false);
     const skipped = choose(state, source, "skip");
     expect(heartsByDog(skipped.state)).toEqual(heartsByDog(state));
-    expect(skipped.state.skipsLeft).toBe(0);
+    expect(skipped.state.skipUsed).toBe(true);
     expect(cardFor(data, skipped.state, source).skip).toBe(false);
     expect(() => choose(skipped.state, source, "skip")).toThrow("no Skip option");
   });
@@ -433,12 +318,13 @@ describe("skip option", () => {
     const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
     const skunk = encounter("skunk", ["koda"]);
     const indexes = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.index);
-    // Skunk's options in data order: grooming (the costliest), quick rinse, then the free one.
+    // Skunk's options in data order, the money one the costliest.
     expect(indexes(newRun(data, 1, { dogs: ["koda"], gear: null, walker: "casey" }))).toEqual([
       0, 1, 2,
     ]);
-    expect(indexes(withBags)).toEqual([1, 2]);
-    expect(() => choose(withBags, skunk, 0)).toThrow("not on the Skunk card");
+    const groom = optionWith("skunk", "money");
+    expect(indexes(withBags)).toEqual([0, 1, 2].filter((index) => index !== groom));
+    expect(() => choose(withBags, skunk, groom)).toThrow("not on the Skunk card");
   });
 
   it("is added beside the options of a card with fewer than three", () => {
@@ -449,103 +335,39 @@ describe("skip option", () => {
   });
 });
 
-describe("Second wind", () => {
-  const offer: CardSource = {
-    kind: "upgradeOffer",
-    offered: ["secondWind", "bigTipper", "raincoats"],
-  };
-
-  it.each<[string, Parameters<typeof testState>[0], Parameters<typeof testState>[0]]>([
-    [
-      "+2 hearts to the unhappiest owner only",
-      { duchess: 4, koda: 2, pierre: 3 },
-      { duchess: 4, koda: 4, pierre: 3 },
-    ],
-    ["+4 hearts to a dramatic unhappiest owner", { koda: 5, nugget: 1 }, { koda: 5, nugget: 5 }],
-    [
-      "the first in pack order on a tie",
-      { duchess: 3, koda: 2, pierre: 2 },
-      { duchess: 3, koda: 4, pierre: 2 },
-    ],
-  ])("gives %s", (_, before, after) => {
-    expect(heartsByDog(choose(testState(before), offer, 0).state)).toEqual(after);
-  });
-});
-
 describe("Lucky collar", () => {
-  it("starts every owner one heart higher and raises the max by one", () => {
+  it("starts every owner full at a max one heart higher", () => {
     const state = newRun(data, 2, {
       dogs: ["duchess", "pierre"],
       gear: "luckyCollar",
       walker: "casey",
     });
-    const { luckyCollarMax, luckyCollarStart } = TEST_TUNING.hearts;
-    const collared = (dog: DogId) => temperamentStart(data, dog) + luckyCollarStart;
+    const { luckyCollarMax } = TEST_TUNING.hearts;
+    const collared = (dog: DogId) => startHearts(TEST_TUNING, [], DOGS[dog]) + luckyCollarMax;
     expect(heartsByDog(state)).toEqual({
       duchess: collared("duchess"),
       pierre: collared("pierre"),
     });
-    const offer: CardSource = {
-      kind: "upgradeOffer",
-      offered: ["bellyRubs", "bigTipper", "raincoats"],
+    const fork: CardSource = {
+      kind: "fork",
+      paths: ["park", "shops"],
+      upgrades: ["bellyRubs", "bigTipper"],
     };
-    // Belly rubs lifts Duchess to her raised max.
-    expect(heartsByDog(choose(state, offer, 0).state)).toEqual({
-      duchess: TEST_TUNING.hearts.maxBySize[DOGS.duchess.size] + luckyCollarMax,
-      pierre: heartsAfter(data, "pierre", collared("pierre"), 1),
-    });
-  });
-});
-
-describe("need cards", () => {
-  const need = (card: "accident" | "strangerLoves", affected: DogId[]): CardSource => ({
-    affected,
-    card,
-    kind: "need",
-  });
-
-  it("names the dogs whose need opened the card, and affects only them", () => {
-    const state = testState({ duchess: 3, koda: 3, snowball: 3 });
-    const card = cardFor(data, state, need("strangerLoves", ["duchess", "snowball"]));
-    expect(card.title).toBe(`A stranger loves ${DOGS.duchess.name} and ${DOGS.snowball.name}`);
-    expect(card.affected).toEqual(["duchess", "snowball"]);
-    const outcome = choose(state, need("strangerLoves", ["duchess", "snowball"]), 0);
-    expect(heartsByDog(outcome.state)).toEqual({
-      duchess: heartsAfter(data, "duchess", 3, 1),
-      koda: 3,
-      snowball: heartsAfter(data, "snowball", 3, 1),
-    });
-  });
-
-  it("names the grumpy neighbour as the cause of an accident's Walk on", () => {
-    const state = testState({ biscuit: 5, koda: 5 }, { money: cents(10_000) });
-    const { amount } = NEED_CARDS.accident.options[1].effects[0];
-    const card = cardFor(data, state, need("accident", ["biscuit"]));
-    expect(card.options[1]?.breakdown).toEqual([
-      { dog: "biscuit", name: "grumpy neighbour", text: `−${-amount} ♥` },
-    ]);
-    const walkOn = choose(state, need("accident", ["biscuit"]), 1);
-    expect(heartsByDog(walkOn.state)).toEqual({ biscuit: 5 + amount, koda: 5 });
-    expect(walkOn.quips).toEqual([{ dog: "biscuit", moment: "upset" }]);
-  });
-
-  it("meets Playful needs with Let them sniff, and Friendly ones with Of course!", () => {
-    const state = testState(
-      { duchess: 3, koda: 3, zippy: 3 },
-      { money: cents(10_000), needSeconds: { duchess: 30, koda: 30, zippy: 30 } },
-    );
-    const sniffed = choose(state, encounter("otherDog", ["duchess", "koda", "zippy"]), 0);
-    expect(sniffed.state.needSeconds).toEqual({ duchess: 30, koda: 30, zippy: 0 });
-    const petted = choose(state, { kind: "forcedStop", stop: "kidWantsToPet" }, 0);
-    expect(petted.state.needSeconds).toEqual({ duchess: 0, koda: 30, zippy: 30 });
+    // Belly rubs, on the first path, leaves full owners at their raised max.
+    expect(heartsByDog(choose(state, fork, 0).state)).toEqual(heartsByDog(state));
   });
 });
 
 describe("a fork", () => {
-  const source: CardSource = { kind: "fork", paths: ["snoozeCrescent", "shops", "homeStretch"] };
+  const upgrades: UpgradeId[] = ["bellyRubs", "bigTipper", "raincoats"];
+  const source: CardSource = {
+    kind: "fork",
+    paths: ["snoozeCrescent", "shops", "homeStretch"],
+    upgrades,
+  };
   const afterZone = testState({ koda: 4 }, { route: ["street"], zoneIndex: 1 });
 
-  it("shows a free path card per path with its zone, difficulty and fee multiplier", () => {
+  it("shows a free path card per path with its zone, difficulty, pay multiplier and upgrade", () => {
     const card = cardFor(data, openCard(source, afterZone), source);
     expect(card.title).toBe(data.runText.card.forkTitle);
     expect(card.affected).toEqual([]);
@@ -569,6 +391,7 @@ describe("a fork", () => {
             difficultyName: zone?.difficultyName,
             fees: zone?.fees,
             side: ["left", "straight", "right"][index],
+            upgrade: upgrades[index],
             zone: id,
           },
         };
@@ -577,10 +400,11 @@ describe("a fork", () => {
     expect(card.options[0]?.art).toBe("card-zone-snooze-crescent");
   });
 
-  it("adds the chosen path's zone to the route and walks on", () => {
+  it("adds the chosen path's zone to the route, takes its upgrade and walks on", () => {
     const opened = openCard(source, afterZone);
     const outcome = chooseOption(data, () => 0, opened, cardFor(data, opened, source), 2);
     expect(outcome.state.route).toEqual(["street", "homeStretch"]);
+    expect(outcome.state.upgradesPicked).toEqual([upgrades[2]]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
     expect(outcome.moneyDelta).toBe(0);
   });
@@ -592,11 +416,17 @@ describe("a fork", () => {
     expect(() => chooseOption(data, () => 0, opened, card, "skip")).toThrow(RangeError);
   });
 
-  it("offers only zones the route has not walked", () => {
+  it("offers only zones the route has not walked, each with an upgrade", () => {
+    const walked = testState({ koda: 4 }, { route: ["street", "park"], zoneIndex: 2 });
+    const fork = offerFork(data, { forks: () => 0, upgrades: () => 0 }, walked);
+    expect(fork.paths).toEqual(["snoozeCrescent", "shops", "pawsPromenade"]);
+    expect(fork.upgrades).toHaveLength(fork.paths.length);
+  });
+
+  it("leads only to the last zone, with its upgrade, before it", () => {
     const walked = testState({ koda: 4 }, { route: ["street", "park", "shops"], zoneIndex: 3 });
-    expect(offerFork(data, () => 0, walked)).toEqual({
-      kind: "fork",
-      paths: ["snoozeCrescent", "pawsPromenade", "homeStretch"],
-    });
+    const fork = offerFork(data, { forks: () => 0, upgrades: () => 0 }, walked);
+    expect(fork.paths).toEqual([TEST_WORLD.lastZone]);
+    expect(fork.upgrades).toHaveLength(1);
   });
 });

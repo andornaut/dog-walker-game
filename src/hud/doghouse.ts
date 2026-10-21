@@ -15,8 +15,6 @@ export const DOGHOUSE = {
   name: { scales: [2, 1], width: 108, x: 60, y: 6 },
   ownerFace: { x: 42, y: 24 },
   ownerName: { scales: [1], width: 70, x: 6, y: 62 },
-  // The dog's quirk icon (16x16, top-left corner) under the owner's name.
-  quirk: { x: 6, y: 72 },
   // The roof band, which the name plate sits on.
   roof: { height: 20 },
   size: { height: 90, width: 120 },

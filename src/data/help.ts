@@ -15,9 +15,7 @@ export const HELP_PAGES = [
   },
   {
     art: "help-pickups",
-    body:
-      "Run into tips for $1 each. Smaller packs see a few more. Treats are carried, up to 3. " +
-      "Tap a doghouse to give its owner a treat: +1♥.",
+    body: "Run into tips for $1 each. A dog that runs into a treat cheers its owner: +1♥.",
     title: "Tips and treats",
   },
   {
@@ -25,40 +23,40 @@ export const HELP_PAGES = [
     body:
       "Hit a skunk, puddle or thief and the walk pauses. " +
       "Pick a card: pay up, or upset the owners. " +
-      "Every card shows its outcome; hold one for details. One is always free. " +
-      "Cones and bins just cost a few tips. " +
+      "Every card shows its outcome; hold one for details. One always costs no money. " +
+      "Cones and bins cost the bumped dog's owner a heart. " +
       "Some bumps are lucky, like a lost wallet.",
     title: "Bumps become cards",
   },
   {
     art: "help-owners",
     body:
-      "Each owner has a happiness meter: ♥. Bumps and choices raise or lower it. " +
-      "At 0♥ the owner fires you and the dog goes home. That zone pays nothing for them; earlier fees stay yours.",
+      "Each owner has a happiness meter: ♥, 3 for a small dog, 4 medium, 5 big. " +
+      "A bump costs the owner of the dog it touches, and big dogs get bumped most. " +
+      "At 0♥ the owner fires you, the dog goes home, and you lose its pay for the walk.",
     title: "Keep owners happy",
   },
   {
     art: "help-pulls",
     body:
       "A bubble and a dotted line over a dog mean a pull. " +
-      "It tugs the pack one lane toward what it wants, never into an obstacle. " +
+      "Every dog pulls toward squirrels: one lane at a time, never into an obstacle. " +
       "Drag back any time.",
     title: "Watch for pulls",
   },
   {
     art: "help-needs",
     body:
-      "Each dog has a need: Friendly, Playful, Nosy, Regular or Thirsty. " +
-      "When it's urgent, a bubble shows and the dog pulls toward its spot. " +
-      "Steer into the spot for a happy owner. Left too long, it goes wrong.",
-    title: "Needs",
+      "Hydrants, lamp posts, trees, water bowls and waving strangers are heart spots. " +
+      "Steer into one and the dog that reaches it cheers its owner: +1♥.",
+    title: "Heart spots",
   },
   {
     art: "help-zones",
     body:
-      "Walk 4 zones of Maplewood, picking the next at each fork. " +
-      "Every dog pays its fee after each zone. " +
-      "Between zones, pick an upgrade card. Head home any time from the pause menu.",
-    title: "Four zones",
+      "Walk 4 neighborhoods of Maplewood, picking the next at each fork. " +
+      "Each dog earns pay for each neighborhood, paid when it gets home. " +
+      "Between neighborhoods, pick an upgrade card. Head home any time from the pause menu.",
+    title: "Four neighborhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];

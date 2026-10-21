@@ -1,14 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { type ScreenConfig, screenLayout } from "../layout/screenLayout";
-import {
-  advanceLaneControl,
-  type LaneControl,
-  laneControlIn,
-  pullLane,
-  steerLane,
-} from "../runner/laneControl";
-import { destinationLane, type LaneMotion, stillInLane } from "../runner/laneMotion";
+import { advanceLaneControl, laneControlIn, steerLane } from "../runner/laneControl";
+import { type LaneMotion, stillInLane } from "../runner/laneMotion";
 import {
   type GestureAction,
   type GestureContext,
@@ -18,7 +12,6 @@ import {
   pointerDown,
   pointerMove,
   pointerUp,
-  reanchorDrag,
 } from "./gestures";
 
 // Road y 40-470 with its lanes at x 40-320, so five lanes are 56px wide and the centre is
@@ -33,9 +26,10 @@ const screen: ScreenConfig = {
   topBarHeight: 40,
   width: 360,
 };
+const layout = screenLayout(screen);
 const context: GestureContext = {
   config: { laneCount: 5, swipeStartDistance: 20, tapMaxDistance: 10 },
-  layout: screenLayout(screen),
+  layout,
 };
 
 type Step = ["down" | "move" | "up", number, number];
@@ -71,7 +65,6 @@ const drag = (fromX: number, ...xs: number[]): Step[] => [
 ];
 const left: GestureAction = { direction: -1, kind: "move" };
 const right: GestureAction = { direction: 1, kind: "move" };
-const treat = (slot: number): GestureAction => ({ kind: "treat", slot });
 const pause: GestureAction = { kind: "pause" };
 
 describe("pointer sequences", () => {
@@ -171,7 +164,7 @@ describe("pointer sequences", () => {
     },
     {
       expected: [right],
-      name: "drags instead of giving a treat once a doghouse press reaches the swipe start distance",
+      name: "drags from a doghouse press once it reaches the swipe start distance",
       steps: [
         ["down", 40, 500],
         ["move", 60, 500],
@@ -180,7 +173,7 @@ describe("pointer sequences", () => {
     },
     {
       expected: [],
-      name: "gives nothing for a doghouse press that leaves the tap distance short of a step",
+      name: "does nothing for a doghouse press that leaves the tap distance short of a step",
       steps: [
         ["down", 40, 500],
         ["move", 59, 500],
@@ -188,6 +181,12 @@ describe("pointer sequences", () => {
       ],
     },
     { expected: [pause], name: "pauses on a tap anywhere across the top bar", steps: tap(300, 5) },
+    { expected: [left], name: "steers on a tap on the doghouses' left half", steps: tap(100, 500) },
+    {
+      expected: [right],
+      name: "steers on a tap on the doghouses' right half",
+      steps: tap(260, 500),
+    },
   ])("$name", ({ expected, steps }) => {
     expect(all(steps)).toEqual(expected);
   });
@@ -233,19 +232,15 @@ describe("swipe start distance", () => {
 });
 
 describe("tap regions", () => {
-  // Every doghouse has a treat to give.
-  const giving: GestureContext = { ...context, treatToGive: () => true };
   // A tap on each side of a boundary between the screen's regions.
-  it.each<[string, [number, number], GestureAction, [number, number], GestureAction]>([
-    ["the road's halves at x 180", [177, 300], left, [180, 300], right],
-    ["doghouse slots 0 and 1 at x 120", [117, 480], treat(0), [120, 480], treat(1)],
-    ["doghouse slots 1 and 2 at x 240", [237, 480], treat(1), [240, 480], treat(2)],
-    ["the road and the doghouses at y 470", [60, 468], left, [60, 470], treat(0)],
-    ["the top bar and the road at y 40", [60, 38], pause, [60, 40], left],
-  ])("splits %s", (_name, [beforeX, beforeY], beforeAction, [afterX, afterY], afterAction) => {
-    expect([all(tap(beforeX, beforeY), giving), all(tap(afterX, afterY), giving)]).toEqual([
-      [beforeAction],
-      [afterAction],
+  it.each<[string, [number, number], GestureAction[], [number, number], GestureAction[]]>([
+    ["the road's halves at x 180", [177, 300], [left], [180, 300], [right]],
+    ["nothing between the road and the doghouses at y 470", [60, 468], [left], [60, 470], [left]],
+    ["the top bar and the road at y 40", [60, 38], [pause], [60, 40], [left]],
+  ])("splits %s", (_name, [beforeX, beforeY], beforeActions, [afterX, afterY], afterActions) => {
+    expect([all(tap(beforeX, beforeY)), all(tap(afterX, afterY))]).toEqual([
+      beforeActions,
+      afterActions,
     ]);
   });
 });
@@ -351,66 +346,11 @@ describe("drags over time", () => {
   });
 });
 
-describe("reanchorDrag", () => {
-  it("counts lane steps again from the pointer's position when the pull came", () => {
-    const { state } = run(drag(150, 160));
-    const reanchored = reanchorDrag(state);
-    expect(pointerMove(context, { x: 175, y: 300 }, state).actions).toEqual([right]);
-    expect(pointerMove(context, { x: 175, y: 300 }, reanchored).actions).toEqual([]);
-    expect(pointerMove(context, { x: 180, y: 300 }, reanchored).actions).toEqual([right]);
-  });
-
-  it("counts travel back from the new anchor, not the old one", () => {
-    const { state } = run(drag(150, 270));
-    expect(pointerMove(context, { x: 150, y: 300 }, reanchorDrag(state)).actions).toEqual([
-      left,
-      left,
-    ]);
-  });
-
-  it("leaves a press that is not a drag as it was", () => {
-    const { state } = run([["down", 100, 20]]);
-    expect(reanchorDrag(state)).toBe(state);
-    expect(reanchorDrag(idleGesture)).toBe(idleGesture);
-  });
-});
-
-describe("drags during a pull's input lock", () => {
-  const laneConfig = { laneCount: 5, moveDuration: 0.2 };
-  const steer = (actions: GestureAction[], control: LaneControl) =>
-    actions.reduce(
-      (current, action) =>
-        action.kind === "move" ? steerLane(laneConfig, action.direction, current) : current,
-      control,
-    );
-
-  it("drops steps taken while locked instead of applying them once the lock ends", () => {
-    let { state: gesture } = run(drag(200, 215));
-    let control = pullLane(laneConfig, 0.5, 1, laneControlIn(stillInLane(2)));
-    gesture = reanchorDrag(gesture);
-    control = advanceLaneControl(laneConfig, 0.2, control);
-
-    const locked = pointerMove(context, { x: 170, y: 300 }, gesture);
-    expect(locked.actions).toEqual([left]);
-    control = advanceLaneControl(laneConfig, 0.6, steer(locked.actions, control));
-    expect(destinationLane(control.motion)).toBe(3);
-
-    const unlocked = pointerMove(context, { x: 100, y: 300 }, locked.state);
-    control = steer(unlocked.actions, control);
-    expect(destinationLane(control.motion)).toBe(2);
-  });
-});
-
 describe("doghouse row routing", () => {
-  const { dogRow, dogSlots, road } = context.layout;
+  const { dogRow, dogSlots, road } = layout;
   const rowY = dogRow.y + dogRow.height / 2;
   const roadMid = road.x + road.width / 2;
   const houses = dogSlots.map((rect, slot) => ({ slot, x: rect.x + rect.width / 2 }));
-  const allSlots = houses.map(({ slot }) => slot);
-  const treatsFor = (given: number[]): GestureContext => ({
-    ...context,
-    treatToGive: (slot) => given.includes(slot),
-  });
 
   it.each(houses.flatMap((house) => [-1, 1].map((way) => ({ ...house, way }))))(
     "a drag starting on doghouse $slot steers $way lane",
@@ -421,29 +361,11 @@ describe("doghouse row routing", () => {
         ["move", end, rowY],
         ["up", end, rowY],
       ];
-      // Even a doghouse with a treat to give steers on a drag.
-      expect(all(steps, treatsFor(allSlots))).toEqual([way === 1 ? right : left]);
+      expect(all(steps)).toEqual([way === 1 ? right : left]);
     },
   );
 
-  it.each(houses)(
-    "a tap on doghouse $slot with no treat to give steers by the road's halves",
-    ({ x }) => {
-      const steered = x < roadMid ? left : right;
-      expect(all(tap(x, rowY), treatsFor([]))).toEqual([steered]);
-      expect(all(tap(x, rowY))).toEqual([steered]);
-    },
-  );
-
-  it.each(houses)("a tap on doghouse $slot with a treat to give gives it", ({ slot, x }) => {
-    expect(all(tap(x, rowY), treatsFor([slot]))).toEqual([treat(slot)]);
+  it.each(houses)("a tap on doghouse $slot steers by the road's halves", ({ x }) => {
+    expect(all(tap(x, rowY))).toEqual([x < roadMid ? left : right]);
   });
-
-  it.each(houses)(
-    "a tap on doghouse $slot steers while only the other doghouses have a treat",
-    ({ slot, x }) => {
-      const others = allSlots.filter((other) => other !== slot);
-      expect(all(tap(x, rowY), treatsFor(others))).toEqual([x < roadMid ? left : right]);
-    },
-  );
 });
