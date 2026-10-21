@@ -316,7 +316,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "archie",
+        "dogCardTag": "archie",
         "face": "face-dog-archie",
         "ownerFace": "face-owner-archie",
         "portrait": "portrait-dog-archie",
@@ -341,7 +341,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "biscuit",
+        "dogCardTag": "biscuit",
         "face": "face-dog-biscuit",
         "ownerFace": "face-owner-biscuit",
         "portrait": "portrait-dog-biscuit",
@@ -367,7 +367,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "duchess",
+        "dogCardTag": "duchess",
         "face": "face-dog-duchess",
         "ownerFace": "face-owner-duchess",
         "portrait": "portrait-dog-duchess",
@@ -393,7 +393,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "koda",
+        "dogCardTag": "koda",
         "face": "face-dog-koda",
         "ownerFace": "face-owner-koda",
         "portrait": "portrait-dog-koda",
@@ -419,7 +419,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "nugget",
+        "dogCardTag": "nugget",
         "face": "face-dog-nugget",
         "ownerFace": "face-owner-nugget",
         "portrait": "portrait-dog-nugget",
@@ -445,7 +445,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "penny",
+        "dogCardTag": "penny",
         "face": "face-dog-penny",
         "ownerFace": "face-owner-penny",
         "portrait": "portrait-dog-penny",
@@ -471,7 +471,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "pierre",
+        "dogCardTag": "pierre",
         "face": "face-dog-pierre",
         "ownerFace": "face-owner-pierre",
         "portrait": "portrait-dog-pierre",
@@ -497,7 +497,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "snowball",
+        "dogCardTag": "snowball",
         "face": "face-dog-snowball",
         "ownerFace": "face-owner-snowball",
         "portrait": "portrait-dog-snowball",
@@ -523,7 +523,7 @@
         "startMood": "happy"
       },
       "keys": {
-        "doghouseTag": "zippy",
+        "dogCardTag": "zippy",
         "face": "face-dog-zippy",
         "ownerFace": "face-owner-zippy",
         "portrait": "portrait-dog-zippy",
@@ -1046,6 +1046,7 @@
     "seconds": {
       "ballBounceSeconds": 0.4,
       "collisionGrace": 1,
+      "explainHoldSeconds": 0.3,
       "firingHoldSeconds": 2,
       "hintStaleSeconds": 5,
       "hitStopSeconds": 1,
