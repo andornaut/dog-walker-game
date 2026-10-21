@@ -955,7 +955,7 @@
       "json": "sprites/dog-koda.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 36
+        "opaqueWidth": 30
       }
     },
     {
@@ -964,7 +964,7 @@
       "json": "sprites/dog-koda@50.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 18
+        "opaqueWidth": 14
       }
     },
     {
@@ -973,7 +973,7 @@
       "json": "sprites/dog-koda@62.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 23
+        "opaqueWidth": 18
       }
     },
     {
@@ -982,7 +982,7 @@
       "json": "sprites/dog-koda@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 27
+        "opaqueWidth": 22
       }
     },
     {
@@ -991,7 +991,7 @@
       "json": "sprites/dog-koda@88.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 31
+        "opaqueWidth": 26
       }
     },
     {
@@ -1045,7 +1045,7 @@
       "json": "sprites/dog-penny.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 32
+        "opaqueWidth": 28
       }
     },
     {
@@ -1054,7 +1054,7 @@
       "json": "sprites/dog-penny@50.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -1063,7 +1063,7 @@
       "json": "sprites/dog-penny@62.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -1072,7 +1072,7 @@
       "json": "sprites/dog-penny@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 24
+        "opaqueWidth": 21
       }
     },
     {
@@ -1081,7 +1081,7 @@
       "json": "sprites/dog-penny@88.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 28
+        "opaqueWidth": 24
       }
     },
     {
@@ -1135,7 +1135,7 @@
       "json": "sprites/dog-snowball.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 36
+        "opaqueWidth": 30
       }
     },
     {
@@ -1144,7 +1144,7 @@
       "json": "sprites/dog-snowball@50.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 18
+        "opaqueWidth": 14
       }
     },
     {
@@ -1153,7 +1153,7 @@
       "json": "sprites/dog-snowball@62.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 23
+        "opaqueWidth": 18
       }
     },
     {
@@ -1162,7 +1162,7 @@
       "json": "sprites/dog-snowball@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 27
+        "opaqueWidth": 22
       }
     },
     {
@@ -1171,7 +1171,7 @@
       "json": "sprites/dog-snowball@88.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 32
+        "opaqueWidth": 26
       }
     },
     {

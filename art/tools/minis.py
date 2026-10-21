@@ -242,16 +242,23 @@ def bottom(f):
 
 
 def zoomed(f, s, zoom, top):
-    """Frame f, drawn at s x zoom ((across, down), or one factor for both), cut to the frame side(32, s) about
-    DOG_AXIS from row top, so the dog fills more of its frame."""
+    """Frame f, drawn at s x zoom ((across, down), or one factor for both), set in the frame side(32, s) about
+    DOG_AXIS from row top of f, so the dog fills more (or, zoomed below 1, less) of its frame."""
     zx = zoom[0] if isinstance(zoom, tuple) else zoom
     side_ = side(32, s)
     left = math.floor(DOG_AXIS * s * zx + 0.5) - math.floor(DOG_AXIS * s + 0.5)
-    lost = sum(1 for y, row in enumerate(f) for x, c in enumerate(row)
-               if c and not (left <= x < left + side_ and top <= y < top + side_))
+    out = [[None] * side_ for _ in range(side_)]
+    lost = 0
+    for y, row in enumerate(f):
+        for x, c in enumerate(row):
+            if c:
+                if 0 <= x - left < side_ and 0 <= y - top < side_:
+                    out[y - top][x - left] = c
+                else:
+                    lost += 1
     if lost:
         print(f"zoomed: {lost} pixels fall outside the {side_}px frame")
-    return [row[left:left + side_] for row in f[top:top + side_]]
+    return out
 
 
 def dog_frames(draw, poses, s, module=dogs, zoom=1):
@@ -268,9 +275,9 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
         q = {k: v if k == "glint" or isinstance(v, bool) else v / z for k, v in module.pose(q).items()}
         return small(module, at, draw, snap(q, s * z, up)).outlined()
 
-    # zoomed, the feet of the dog standing square go one row lower than at s, onto the frame's spare bottom
-    # rows, for headroom
-    top = zoom != 1 and bottom(drawn({})) - bottom(drawn({}, at=s, z=1)) - 1
+    # zoomed, the feet of the dog standing square stay on their row at s, or, zoomed taller, go one row lower,
+    # onto the frame's spare bottom rows, for headroom
+    top = zoom != 1 and bottom(drawn({})) - bottom(drawn({}, at=s, z=1)) - (zy > 1)
 
     def frame(q, up=False):
         f = drawn(q, up)
