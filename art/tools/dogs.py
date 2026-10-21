@@ -3,7 +3,7 @@
 
 Each dog gets two sprites in Endesga 32 with coloured outlines:
 
-- dog-<name>: the road sprite, 48x48 (ROAD_SIZE), seen from above and behind. Its drawing
+- dog-<name>: the road sprite, 48x48 (ROAD_SIZE; DOG_SIZE sets each dog's), seen from above and behind. Its drawing
   functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.5),
   which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
@@ -992,13 +992,22 @@ DOGS = {
 }
 
 
+# Each dog's road sprite side, by its size class: every dog is drawn at the medium ROAD_SIZE for now.
+DOG_SIZE = {name: ROAD_SIZE for name in DOGS}
+
+
+def road_scale(name):
+    """The scale dog-<name>'s 32-unit design is drawn at: its DOG_SIZE over 32."""
+    return DOG_SIZE.get(name, ROAD_SIZE) / 32
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     import minis
 
     here = sys.modules[__name__]
     for name, (road, face) in DOGS.items():
-        yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, ROAD_SCALE, here), ms)
+        yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, road_scale(name), here), ms)
                               for tag, poses, ms in road_tags(name)]
         yield f"face-dog-{name}", [(m, [face(m).outlined()], 1000) for m in face_tags(name)]
 

@@ -17,7 +17,7 @@ grow taller.
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
 lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog,
 skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
-drawn at dogs.ROAD_SCALE times the step, so its frame is 42x42 at @88, 36x36
+drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 42x42 at @88, 36x36
 at @75, 30x30 at @62 and 24x24 at @50.
 
 Usage:
@@ -379,7 +379,7 @@ def sprites():
             yield f"{key}@{suffix}", tags
     for suffix, s in STEPS:
         for name, (draw, _) in dogs.DOGS.items():
-            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.ROAD_SCALE * s), ms)
+            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.road_scale(name) * s), ms)
                                            for tag, poses, ms in dogs.road_tags(name)]
 
 

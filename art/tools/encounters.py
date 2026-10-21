@@ -516,44 +516,48 @@ CAFE_IDLE = (0, 1, 2, 3), 350
 
 # ---------- lemonade stand ----------
 
-def lemonade_stand(bob=0, glint=False, new=Grid):
+def lemonade_stand(bob=0, glint=False, new=Grid, narrow=0, drop=0):
     """road.kid behind a cardboard stand, 3px lower than in kid.png so the sign over its head fits; bob is
-    the kid's breath and glint the pitcher's."""
+    the kid's breath and glint the pitcher's. narrow pulls the posts, sign, counter, pitcher, cups and box in
+    by that many drawing units each side and drop lowers the posts' tops and the whole sign over the kid's
+    cap, so a depth step keeps inside the larger step's size (LEMONADE_FIT) without losing a row or column of
+    its sign."""
     g = edged(new(32, 48))
+    n = narrow
     # posts at the back corners and the sign nailed across them
-    for x in (2, 28):
-        g.rect(x, 1, 2, 32, "brown")
-        g.rect(x, 1, 1, 32, "tan")
+    for x in (2 + n, 28 - n):
+        g.rect(x, 1 + drop, 2, 32 - drop, "brown")
+        g.rect(x, 1 + drop, 1, 32 - drop, "tan")
     borrow(g, road.kid, 0, 3, bob=bob)
-    g.rect(3, 1, 26, 13, "cream")
-    g.rect(3, 13, 26, 1, "tan")
-    g.rect(3, 2, 26, 1, "white")
-    letter(g, "yellow", (("LEMON", 6, 2), ("ADE", 9, 8)), clip=(3, 1, 28, 13))
-    g.ell(25, 10.5, 2, 1.6, "yellow", "amber")
+    g.rect(3 + n, 1 + drop, 26 - 2 * n, 13, "cream")
+    g.rect(3 + n, 13 + drop, 26 - 2 * n, 1, "tan")
+    g.rect(3 + n, 2 + drop, 26 - 2 * n, 1, "white")
+    letter(g, "yellow", (("LEMON", 6, 2 + drop), ("ADE", 9, 8 + drop)), clip=(3 + n, 1 + drop, 28 - n, 13 + drop))
+    g.ell(25, 10.5 + drop, 2, 1.6, "yellow", "amber")
     # the counter, a pitcher and two paper cups on it
-    g.rect(2, 31, 28, 2, "tan")
-    g.rect(2, 32, 28, 1, "brown")
-    g.rect(2, 23, 6, 8, "lgrey")
-    g.rect(3, 25, 4, 6, "yellow")
-    g.rect(3, 25, 4, 1, "white")
-    g.rect(8, 25, 1, 4, "lgrey")
-    g.p(5, 27, "amber")
-    g.p(6, 29, "cream")
-    g.rect(2, 22, 6, 1, "grey")
+    g.rect(2 + n, 31, 28 - 2 * n, 2, "tan")
+    g.rect(2 + n, 32, 28 - 2 * n, 1, "brown")
+    g.rect(2 + n, 23, 6, 8, "lgrey")
+    g.rect(3 + n, 25, 4, 6, "yellow")
+    g.rect(3 + n, 25, 4, 1, "white")
+    g.rect(8 + n, 25, 1, 4, "lgrey")
+    g.p(5 + n, 27, "amber")
+    g.p(6 + n, 29, "cream")
+    g.rect(2 + n, 22, 6, 1, "grey")
     if glint:
-        g.p(3, 27, "white")
-        g.p(3, 28, "white")
-    for x in (22, 26):
+        g.p(3 + n, 27, "white")
+        g.p(3 + n, 28, "white")
+    for x in (22 - n, 26 - n):
         g.rect(x, 27, 4, 4, "white")
         g.rect(x, 27, 4, 1, "red")
         g.rect(x + 3, 28, 1, 3, "lgrey")
     # the box: cardboard, its flaps, "50c" with a lemon, and a drop beside a coin for the dogs' water (no
     # number, so the sign never disagrees with the tuned price)
     g.rect(0, 46, 32, 2, None)
-    g.rect(2, 33, 28, 13, "tan")
-    g.rect(2, 33, 28, 1, "cream")
-    g.rect(27, 34, 3, 12, "brown")
-    g.rect(2, 45, 28, 1, "brown")
+    g.rect(2 + n, 33, 28 - 2 * n, 13, "tan")
+    g.rect(2 + n, 33, 28 - 2 * n, 1, "cream")
+    g.rect(27 - n, 34, 3, 12, "brown")
+    g.rect(2 + n, 45, 28 - 2 * n, 1, "brown")
     g.ell(6, 37.5, 2.5, 2, "yellow", "amber")
     g.p(8, 36, "green")
     letter(g, "yellow", (("50c", 11, 34),))
@@ -564,6 +568,8 @@ def lemonade_stand(bob=0, glint=False, new=Grid):
     return lit(g)
 
 
+# Each depth step's (narrow, drop), so it keeps inside the next larger step scaled down.
+LEMONADE_FIT = {0.875: (0.5, 0.5), 0.75: (0.5, 1.5), 0.625: (1, 2), 0.5: (1, 2)}
 LEMONADE_IDLE = [dict(), dict(bob=-1), dict(glint=True), dict(bob=-1)], 400
 
 
@@ -592,7 +598,8 @@ def sprites():
         yield f"petunias{suffix}", idle(petunias, PETUNIAS_IDLE, w=TWO_LANES)
         yield f"trash-bins{suffix}", idle(trash_bins, TRASH_IDLE, w=TWO_LANES)
         yield f"cafe-patio{suffix}", idle(cafe_patio, CAFE_IDLE, w=TWO_LANES)
-        yield f"lemonade-stand{suffix}", idle(lemonade_stand, LEMONADE_IDLE, ("bob",))
+        narrow, drop = LEMONADE_FIT.get(step, (0, 0))
+        yield f"lemonade-stand{suffix}", idle(lemonade_stand, LEMONADE_IDLE, ("bob",), narrow=narrow, drop=drop)
 
 
 if __name__ == "__main__":

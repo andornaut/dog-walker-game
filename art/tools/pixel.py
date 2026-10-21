@@ -317,8 +317,8 @@ def depth_envelope(w, h, scales):
 def _without_rows(frames, n, first=False, below=None):
     """frames with n rows taken out from inside their opaque bounds (frame 0's when first), or from the rows
     past row below to their last opaque row, then as many clear rows added on top. Each goes where the art
-    changes least: the row most like the one above it in every frame, in the longest run of equal rows,
-    nearest the middle."""
+    changes least: the row most like the one above it in every frame and crossing the fewest features 2 rows
+    thin or less, in the longest run of equal rows, nearest the middle."""
     for _ in range(n):
         top, bottom = opaque_rows(frames[:1] if first else frames)
         rows = range(top + 1, bottom)
@@ -340,9 +340,34 @@ def _without_rows(frames, n, first=False, below=None):
                 b += 1
             return b - a + 1
 
+        counts = [{} for _ in frames]
+        for f, cnt in zip(frames, counts):
+            for row in f:
+                for c in row:
+                    if c:
+                        cnt[c] = cnt.get(c, 0) + 1
+
+        def thin(r):
+            """The weight of the small features row r crosses: each opaque pixel in a run of its colour at
+            most 2 long across rows (a line, a knot, an eye) that taking the row out would thin away, ten
+            times over when its colour is rare in the frame (a bow's knot, a collar's tag)."""
+            n = 0
+            for f, cnt in zip(frames, counts):
+                for x, c in enumerate(f[r]):
+                    if not c:
+                        continue
+                    a, b = r, r
+                    while a > 0 and f[a - 1][x] == c:
+                        a -= 1
+                    while b < len(f) - 1 and f[b + 1][x] == c:
+                        b += 1
+                    if b - a + 1 <= 2:
+                        n += 10 if cnt[c] <= 16 else 1
+            return n
+
         def score(r):
             diff = sum(x != y for f in frames for x, y in zip(f[r], f[r - 1]))
-            return diff, -run(r), abs(r - mid)
+            return diff + thin(r), -run(r), abs(r - mid)
 
         r = min(rows, key=score)
         frames = [[[None] * len(f[0])] + f[:r] + f[r + 1:] for f in frames]
@@ -390,6 +415,29 @@ def _regrouped(tags, frames):
     return out
 
 
+def narrowed(tags, cols):
+    """tags with frame 0's art cut to at most cols opaque columns, by taking out the columns that change it
+    least (see _without_rows), then moved back to centre on the side with more margin."""
+    frames = [f for _, fs, _ in tags for f in fs]
+    cut = _transposed(frames)
+    left, right = opaque_rows(cut[:1]) or (0, -1)
+    n = max(0, right - left + 1 - cols)
+    if not n:
+        return tags
+    cut = _without_rows(cut, n, first=True)
+    fw = len(cut[0])
+    lo, hi = opaque_rows(cut) or (0, fw - 1)
+    while lo > 0 and lo - 1 > fw - 1 - hi:
+        cut = [c[1:] + [[None] * len(c[0])] for c in cut]
+        lo, hi = lo - 1, hi - 1
+    return _regrouped(tags, _transposed(cut))
+
+
+def opaque_cols(frames):
+    """The first and last column with an opaque pixel in any of frames, or None when all are blank."""
+    return opaque_rows(_transposed(frames))
+
+
 def shortened(tags, rows):
     """tags with frame 0's art cut to at most rows opaque rows, by taking out the rows that change it least
     (see _without_rows)."""
@@ -401,9 +449,10 @@ def shortened(tags, rows):
 def depth_settled(sprites, originals=None):
     """sprites with each depth variant (<key>@<step>) cut to its step's depth_envelope (see squatted) and, for
     a ground sprite, held to the next larger step L's frame 0 and seated on a feet row from it. The game
-    draws a ground sprite one pixel past a step's side from L scaled by (side + 1) / L's side
-    (src/layout/depthScale.ts), so the step's frame 0 keeps to L's opaque rows at that scale, to the nearest
-    pixel, and it does not shrink when the drawing switches steps (see shortened). Its feet row is L's at
+    draws a ground sprite smoothly, from the smallest step at least its true size scaled down
+    (src/layout/depthScale.ts), so the step's frame 0 keeps inside L's opaque rows and columns at this
+    step's scale over L's, rounded half up, and it does not shrink when the drawing switches steps (see
+    shortened and narrowed). Its feet row is L's at
     side / L's side, rounded up, or the frame's bottom row when that is past it, so the feet move less than
     1px when it switches. The others (status overlays) are drawn at their own step, not from L. The
     full-size sprite is the one in sprites, else in originals ({key: tags}), else the one already exported;
@@ -445,9 +494,15 @@ def depth_settled(sprites, originals=None):
                 print(f"{key}: no {lkey} to settle it by")
                 frame_l = frame0_full
             top_l, feet_l = opaque_rows([frame_l]) or (0, len(frame_l) - 1)
+            left_l, right_l = opaque_cols([frame_l]) or (0, len(frame_l[0]) - 1)
             side_l = max(len(frame_l[0]), len(frame_l))
             side = max(len(tags[0][1][0][0]), len(tags[0][1][0]))
-            tags = shortened(tags, math.floor((feet_l - top_l + 1) * (side + 1) / side_l + 0.5))
+            # drawn smoothly, L shrinks to this step's scale as it nears the switch, so this step's art keeps
+            # inside L's opaque rows and columns at scale / larger, whole pixels rounded half up
+            k = scale / larger
+            tags = shortened(tags, min(math.floor((feet_l - top_l + 1) * (side + 1) / side_l + 0.5),
+                                       math.floor((feet_l - top_l + 1) * k + 0.5)))
+            tags = narrowed(tags, math.floor((right_l - left_l + 1) * k + 0.5))
             tags = seated(key, tags, math.ceil(feet_l * side / side_l - 1e-9))
         settled[key] = tags[0][1][0]
         full[key] = tags
