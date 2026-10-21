@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
+import { maxHearts } from "../rules/dogs";
+import { modifiersOf } from "../rules/modifiers";
+import { faceMood } from "../rules/treats";
 import { cents, clampHearts } from "../rules/units";
 import type { Pack } from "../state/runState";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -15,6 +18,7 @@ import {
   arcControl,
   bowRightControl,
   bubbleX,
+  cardOwnerMood,
   curvePoint,
   DOWN_TAILS,
   downTail,
@@ -207,6 +211,36 @@ describe("lowHeartDogs and newlyLow", () => {
     expect(newlyLow([], ["duchess"])).toEqual(["duchess"]);
     expect(newlyLow(["duchess"], ["duchess"])).toEqual([]);
     expect(newlyLow(["duchess"], ["duchess", "koda"])).toEqual(["koda"]);
+  });
+});
+
+describe("cardOwnerMood", () => {
+  // Every max a dog can have, with no gear and with every gear's raise.
+  const gear = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
+  const maxes = [
+    ...new Set(
+      Object.values(gameData.dogs).flatMap((dog) => [
+        maxHearts(gameData.tuning, [], dog),
+        maxHearts(gameData.tuning, gear, dog),
+      ]),
+    ),
+  ];
+  const cases = maxes.flatMap((max) =>
+    Array.from({ length: max + 1 }, (_, hearts) => [max, hearts] as const),
+  );
+
+  it.each(cases)(
+    "shows a walking dog's owner (max %i) at %i hearts worried on the last heart, else as the dog's face",
+    (max, hearts) => {
+      const mood = cardOwnerMood(gameData, max, walking("koda", hearts));
+      expect(mood).toBe(hearts === MOMENTS.lowHearts ? "worried" : faceMood(gameData, max, hearts));
+    },
+  );
+
+  it.each(maxes)("shows a fired dog's owner (max %i) fired", (max) => {
+    expect(cardOwnerMood(gameData, max, { dog: "koda", status: "fired", zoneIndex: 0 })).toBe(
+      "fired",
+    );
   });
 });
 

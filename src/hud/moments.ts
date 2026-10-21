@@ -1,9 +1,10 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
+import type { DogId, GameData } from "../data/types";
 import type { Point, Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { type FaceMood, faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
-import type { Pack } from "../state/runState";
+import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { ChangeLabel } from "./hudView";
 import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
@@ -203,6 +204,21 @@ export function lowHeartDogs(pack: Pack): DogId[] {
   return pack.flatMap((slot) =>
     slot.status === "walking" && slot.hearts === MOMENTS.lowHearts ? [slot.dog] : [],
   );
+}
+
+export type CardOwnerMood = FaceMood | "fired" | "worried";
+
+// The owner's face on their dog's card, out of max hearts: fired on a fired dog's card, worried
+// at lowHearts, else the mood the dog's face shows.
+export function cardOwnerMood(
+  data: Pick<GameData, "tuning">,
+  max: number,
+  slot: PackSlot,
+): CardOwnerMood {
+  if (slot.status === "fired") {
+    return "fired";
+  }
+  return slot.hearts === MOMENTS.lowHearts ? "worried" : faceMood(data, max, slot.hearts);
 }
 
 // The dogs low now that were not low before: each gets the one-off cue.

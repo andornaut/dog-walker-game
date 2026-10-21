@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
+import { decodePng } from "../assets/atlas/atlasBuild";
+import { opaqueRect } from "../assets/atlas/atlasPixels";
+import { dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
@@ -33,6 +36,7 @@ import {
   explainTargetAt,
   leadSlot,
   OWNER_TAB,
+  ownerNameLines,
   ownerTabRect,
   QUIP_STYLES,
   quipOverLaneBlocked,
@@ -96,11 +100,14 @@ function pngSize(path: string): { height: number; width: number } {
   const png = readFileSync(new URL(`../../public/art/${path}`, import.meta.url));
   return { height: png.readUInt32BE(20), width: png.readUInt32BE(16) };
 }
-const HEART_SHEET = JSON.parse(
-  readFileSync(new URL("../../public/art/sprites/ui-heart.json", import.meta.url), "utf8"),
-) as { frames: Record<string, { sourceSize: { h: number; w: number } }> };
-const HEART_FRAME = Object.values(HEART_SHEET.frames)[0]?.sourceSize ?? { h: 0, w: 0 };
-const HEART_SIZE = { height: HEART_FRAME.h, width: HEART_FRAME.w };
+function frameSize(key: string): { height: number; width: number } {
+  const sheet = JSON.parse(
+    readFileSync(new URL(`../../public/art/sprites/${key}.json`, import.meta.url), "utf8"),
+  ) as { frames: Record<string, { sourceSize: { h: number; w: number } }> };
+  const frame = Object.values(sheet.frames)[0]?.sourceSize ?? { h: 0, w: 0 };
+  return { height: frame.h, width: frame.w };
+}
+const HEART_SIZE = frameSize("ui-heart");
 
 // The columns text inks in the title font at 1x, from its left edge to its last ink.
 function titleWidth(text: string): number {
@@ -364,26 +371,57 @@ describe("the dog cards", () => {
   const mostHearts = Math.max(
     ...Object.values(gameData.dogs).map((dog) => maxHearts(gameData.tuning, gearModifiers, dog)),
   );
+  const card = { ...DOG_CARD.size, x: 0, y: 0 };
+  const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };
+  const { face } = DOG_CARD.owner;
+  // The owner's photo: its ink frame and white mat, 2px round the face.
+  const ownerPhoto = { height: face.size + 4, width: face.size + 4, x: face.x - 2, y: face.y - 2 };
+  const heartRects = (max: number) =>
+    cardHearts(max, max).map((cell) => ({ ...HEART_SIZE, x: cell.x, y: cell.y }));
+
+  it("fits the most hearts an owner can have on one row", () => {
+    expect(mostHearts).toBeLessThanOrEqual(DOG_CARD.hearts.perRow);
+    expect(new Set(cardHearts(mostHearts, mostHearts).map(({ y }) => y))).toEqual(
+      new Set([DOG_CARD.hearts.y]),
+    );
+  });
+
   it.each([DOG_CARD.hearts.perRow, mostHearts])(
-    "keeps every heart of %i inside the card and clear of LEAD",
+    "keeps every heart of %i inside the card, under the owner's photo and clear of LEAD",
     (max) => {
-      const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };
-      const card = { ...DOG_CARD.size, x: 0, y: 0 };
-      const hit = cardHearts(max, max)
-        .map((cell) => ({ ...HEART_SIZE, x: cell.x, y: cell.y }))
-        .filter((heart) => overlaps(heart, lead) || !inside(heart, card));
+      const hit = heartRects(max).filter(
+        (heart) => overlaps(heart, lead) || overlaps(heart, ownerPhoto) || !inside(heart, card),
+      );
       expect(hit).toEqual([]);
     },
   );
 
-  it("puts a sixth heart under the first", () => {
-    const { perRow, pitch, x, y } = DOG_CARD.hearts;
-    expect(cardHearts(perRow + 1, perRow + 1)[perRow]).toMatchObject({ x, y: y + pitch });
+  // ui-dog-card's heart-loss flash, from its first frame's opaque pixels.
+  const flashArea = (() => {
+    const sheet = JSON.parse(
+      readFileSync(new URL("../../public/art/sprites/ui-dog-card.json", import.meta.url), "utf8"),
+    ) as {
+      frames: Record<string, { frame: { h: number; w: number; x: number; y: number } }>;
+      meta: { frameTags: { from: number; name: string }[] };
+    };
+    const from = sheet.meta.frameTags.find(({ name }) => name === "heart-loss")?.from ?? -1;
+    const frame = Object.values(sheet.frames)[from]?.frame ?? { h: 0, w: 0, x: 0, y: 0 };
+    const image = decodePng(
+      readFileSync(new URL("../../public/art/sprites/ui-dog-card.png", import.meta.url)),
+    );
+    const area = opaqueRect(image, { height: frame.h, width: frame.w, x: frame.x, y: frame.y });
+    return area === undefined ? undefined : { ...area, x: area.x - frame.x, y: area.y - frame.y };
+  })();
+
+  it("flashes a heart loss over every heart of the most an owner can have, clear of the owner's photo", () => {
+    expect(flashArea).toBeDefined();
+    const area = flashArea ?? card;
+    expect(heartRects(mostHearts).filter((heart) => !inside(heart, area))).toEqual([]);
+    expect(overlaps(area, ownerPhoto)).toBe(false);
   });
 
-  it("ends LEAD on the owner's column's right edge", () => {
-    const { lead, owner } = DOG_CARD;
-    expect(lead.x + pngSize("images/ui-lead-tag.png").width).toBe(owner.x + owner.room);
+  it("keeps LEAD inside the card", () => {
+    expect(inside(lead, card)).toBe(true);
   });
 
   it("centres Empty's capitals in the card's outline", () => {
@@ -392,14 +430,89 @@ describe("the dog cards", () => {
     expect(empty.y + Math.floor(TITLE_CAP_ROWS / 2)).toBe(Math.floor(size.height / 2));
   });
 
-  it("keeps the owner's name inside the card over the hearts", () => {
-    const { owner } = DOG_CARD;
-    expect(owner.x + owner.room).toBeLessThanOrEqual(DOG_CARD.size.width);
-    expect(owner.y).toBeLessThan(DOG_CARD.hearts.y);
+  it("keeps the owner's photo inside the card, right of the dog's", () => {
+    const dogFace = frameSize(dogFaceKey(gameData, "koda"));
+    expect(inside(ownerPhoto, card)).toBe(true);
+    expect(ownerPhoto.x).toBeGreaterThan(DOG_CARD.dogFace.x + dogFace.width);
   });
 
-  it.each(owners)("fits the name of %s's owner, %s, on the card in the body font", (_dog, name) => {
-    expect(inkRight(name)).toBeLessThanOrEqual(DOG_CARD.owner.room);
+  it.each(owners)("draws the card face of %s's owner, %s, the photo's size", (dog) => {
+    expect(frameSize(ownerCardFaceKey(gameData, dog))).toEqual({
+      height: face.size,
+      width: face.size,
+    });
+  });
+
+  it("centres FIRED in the dog's photo, clear of the owner's", () => {
+    const width = titleWidth(gameData.runText.fired);
+    const { dogFace, fired } = DOG_CARD;
+    const left = fired.x - Math.floor(width / 2);
+    const text = { height: TITLE_CAP_ROWS, width, x: left, y: fired.y };
+    const photo = { ...frameSize(dogFaceKey(gameData, "koda")), ...dogFace };
+    expect(inside(text, photo)).toBe(true);
+    expect(overlaps(text, ownerPhoto)).toBe(false);
+  });
+
+  // Each line of the owner's name as the card sets it: its ink from the top of its capitals to
+  // its lowest ink, from owner.x.
+  const nameRects = (name: string) =>
+    ownerNameLines(inkRight, name).map((line) => ({
+      height: inkRowsFromCapTop(BODY),
+      width: inkRight(line.text),
+      x: DOG_CARD.owner.x,
+      y: line.top,
+    }));
+
+  it.each(owners)(
+    "fits the name of %s's owner, %s, beside their photo within the room, one line when it fits",
+    (_dog, name) => {
+      const lines = ownerNameLines(inkRight, name);
+      expect(lines).toHaveLength(inkRight(name) <= DOG_CARD.owner.room ? 1 : 2);
+      expect(lines.map(({ text }) => text).join(" ")).toBe(name);
+      expect(lines.filter(({ text }) => inkRight(text) > DOG_CARD.owner.room)).toEqual([]);
+    },
+  );
+
+  it.each(owners)(
+    "keeps the name of %s's owner, %s, inside the card, clear of the photos and over the hearts",
+    (_dog, name) => {
+      const hearts = heartRects(mostHearts);
+      const hit = nameRects(name).filter(
+        (rect) =>
+          !inside(rect, card) ||
+          overlaps(rect, ownerPhoto) ||
+          overlaps(rect, lead) ||
+          hearts.some((heart) => overlaps(rect, heart)),
+      );
+      expect(hit).toEqual([]);
+    },
+  );
+
+  const { oneLine, twoLines } = DOG_CARD.owner.tops;
+  it.each<[string, string, number, { text: string; top: number }[]]>([
+    ["a name that fits on one line", "Ab Cd", 0, [{ text: "Ab Cd", top: oneLine }]],
+    [
+      "a name one pixel too wide at its first space",
+      "Ab Cd",
+      1,
+      [
+        { text: "Ab", top: twoLines[0] },
+        { text: "Cd", top: twoLines[1] },
+      ],
+    ],
+    [
+      "a three-word name too wide at its first space only",
+      "Ab Cd Ef",
+      1,
+      [
+        { text: "Ab", top: twoLines[0] },
+        { text: "Cd Ef", top: twoLines[1] },
+      ],
+    ],
+    ["a name too wide with no space on one line", "Abcdef", 1, [{ text: "Abcdef", top: oneLine }]],
+  ])("sets %s", (_case, name, over, expected) => {
+    const rightEdge = (line: string) => (line === name ? DOG_CARD.owner.room + over : 0);
+    expect(ownerNameLines(rightEdge, name)).toEqual(expected);
   });
 
   const { room } = DOG_CARD.name;

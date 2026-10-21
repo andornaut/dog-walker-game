@@ -24,6 +24,7 @@ import {
   MOVER_SPRITE_KEYS,
   moverBodyTag,
   MOVING_TAGS,
+  ownerCardFaceKey,
   ownerFaceKey,
   PULL_ART,
   SKUNK_CLOUD_KEY,
@@ -48,12 +49,14 @@ import { HOME_LAYOUT } from "../home/homeLayout";
 import { effectIconKey, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
 import { pipLook, zonePips } from "../hud/hudView";
 import { MESSAGE_ICONS } from "../hud/messageStrip";
+import { cardOwnerMood } from "../hud/moments";
 import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { walkLength } from "../rules/route";
 import { baseCardArtPrefix } from "../rules/skins";
 import { faceMood } from "../rules/treats";
+import { clampHearts } from "../rules/units";
 import type { PullPose } from "../runner/pulls";
 import type { DogStatusId } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
@@ -126,6 +129,23 @@ const MOODS = [
   ),
 ];
 
+// Every mood an owner's face on a dog card can show: a walking dog's at every max up to well
+// past any size's and each hearts up to it, and a fired dog's.
+const CARD_OWNER_MOODS = [
+  ...new Set(
+    Array.from({ length: 21 }, (_, max) => [
+      ...Array.from({ length: max + 1 }, (__, hearts) =>
+        cardOwnerMood(gameData, max, {
+          dog: "koda",
+          hearts: clampHearts(max, hearts),
+          status: "walking",
+        }),
+      ),
+      cardOwnerMood(gameData, max, { dog: "koda", status: "fired", zoneIndex: 0 }),
+    ]).flat(),
+  ),
+];
+
 // A scene that has loaded exactly the shipped art.
 const loadedScene = {
   textures: { exists: (key: string) => images.has(key) || sprites.has(key) },
@@ -155,6 +175,14 @@ describe("dog art", () => {
       ...missingTags(ownerFaceKey(gameData, dog), [...MOODS, "fired"]),
     ]);
     expect(MOODS).toEqual(expect.arrayContaining(["happy", "neutral", "upset"]));
+    expect(missing).toEqual([]);
+  });
+
+  it("names an owner's card face with every mood the card shows for every dog", () => {
+    const missing = DOGS.flatMap((dog) =>
+      missingTags(ownerCardFaceKey(gameData, dog), CARD_OWNER_MOODS),
+    );
+    expect(CARD_OWNER_MOODS).toEqual(expect.arrayContaining([...MOODS, "fired", "worried"]));
     expect(missing).toEqual([]);
   });
 

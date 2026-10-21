@@ -9,6 +9,7 @@ import {
   dogFaceKey,
   dogSpriteKey,
   encounterSpriteKey,
+  ownerCardFaceKey,
   ownerFaceKey,
   ROAD_SPRITE_SIZE,
 } from "../assets/spriteKeys";
@@ -78,6 +79,7 @@ function placeholderSizes(): Map<string, Size> {
     sizes.set(dogSpriteKey(gameData, dog), box(dogSide, dogSide, PALETTE.slate));
     sizes.set(dogFaceKey(gameData, dog), box(32, 32, PALETTE.slate));
     sizes.set(ownerFaceKey(gameData, dog), box(32, 32, PALETTE.brown));
+    sizes.set(ownerCardFaceKey(gameData, dog), box(20, 20, PALETTE.brown));
   }
   const tall: readonly EncounterId[] = ["biscuitNeighbour", "thief"];
   for (const encounter of Object.keys(gameData.encounters) as EncounterId[]) {

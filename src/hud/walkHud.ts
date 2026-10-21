@@ -166,24 +166,53 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
 }
 
 // A dog card (ui-dog-card, the size of a slot in the card row). The name is centred on name.x
-// at the largest of its scales that fits name.room, its top by scale. The owner's name labels
-// the hearts under it on every card with a dog, a fired dog's included, within owner.room.
-// Hearts sit in rows of perRow, pitch apart. The LEAD tag is on the front dog's card, and FIRED
-// is centred on fired.x on a fired dog's. An owned slot with no dog shows "Empty" centred on
-// empty.x in its outline.
+// at the largest of its scales that fits name.room, its top by scale. The owner's photo heads
+// the column right of the dog's, their face (face.size square) at owner.face on every card with
+// a dog, a fired dog's included, and their name goes beside it from owner.x within owner.room,
+// on one line or broken onto two (ownerNameLines). The hearts sit under the owner's photo in
+// rows of perRow, pitch apart. The LEAD tag is pinned across the foot of the front dog's photo,
+// and FIRED is centred on fired.x across a fired dog's empty photo. An owned slot with no dog
+// shows "Empty" centred on empty.x in its outline.
 export const DOG_CARD = {
   dogFace: { x: 8, y: 28 },
   empty: { x: 60, y: 35 },
-  fired: { x: 79, y: 42 },
-  hearts: { perRow: 5, pitch: 9, x: 45, y: 36 },
-  lead: { x: 86, y: 51 },
+  fired: { x: 24, y: 41 },
+  hearts: { perRow: 6, pitch: 9, x: 45, y: 55 },
+  lead: { x: 10, y: 57 },
   name: { room: 108, tops: { 1: 7, 2: 5 }, x: 60 },
-  owner: { room: 68, x: 45, y: 26 },
+  owner: {
+    face: { size: 20, x: 47, y: 28 },
+    room: 41,
+    tops: { oneLine: 35, twoLines: [30, 40] },
+    x: 72,
+  },
   size: {
     height: SCREEN_CONFIG.dogCardHeight,
     width: SCREEN_CONFIG.width / SCREEN_CONFIG.dogSlotCount,
   },
 } as const;
+
+export interface CardLine {
+  text: string;
+  // The top of the line's capitals, from the card's top.
+  top: number;
+}
+
+// The owner's name in the body font at 1x: one line when its right edge, as rightEdge measures a
+// line from its left, fits owner.room, else broken at its first space onto two lines. A name too
+// wide with no space stays on one line.
+export function ownerNameLines(rightEdge: (line: string) => number, name: string): CardLine[] {
+  const { room, tops } = DOG_CARD.owner;
+  const space = name.indexOf(" ");
+  if (rightEdge(name) <= room || space < 0) {
+    return [{ text: name, top: tops.oneLine }];
+  }
+  const [first, second] = tops.twoLines;
+  return [
+    { text: name.slice(0, space), top: first },
+    { text: name.slice(space + 1), top: second },
+  ];
+}
 
 export interface CardHeart extends Point {
   full: boolean;

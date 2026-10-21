@@ -11,6 +11,7 @@ import {
   gearIconKey,
   kebabCase,
   minorObstacleSpriteKey,
+  ownerCardFaceKey,
   ownerFaceKey,
   roadStartKey,
   roadTileKey,
@@ -150,6 +151,7 @@ export function gameDataExport(data: GameData) {
         keys: {
           dogCardTag: dogCardTag(data, id),
           face: dogFaceKey(data, id),
+          ownerCardFace: ownerCardFaceKey(data, id),
           ownerFace: ownerFaceKey(data, id),
           portrait: dogPortraitKey(data, id),
           sprite: dogSpriteKey(data, id),

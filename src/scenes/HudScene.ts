@@ -1,7 +1,7 @@
 import { type GameObjects, Scene } from "phaser";
 
 import { statusIconKey } from "../assets/iconKeys";
-import { dogCardTag, dogFaceKey } from "../assets/spriteKeys";
+import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
@@ -24,7 +24,7 @@ import {
 } from "../hud/hudLanes";
 import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
-import { FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
+import { cardOwnerMood, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
 import {
   buttonIcon,
@@ -49,6 +49,7 @@ import {
   DOG_CARD,
   type ExplainTarget,
   leadSlot,
+  ownerNameLines,
   slotShown,
   WALK_BAR,
   WALK_BAR_BUTTONS,
@@ -109,8 +110,8 @@ const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
 // An owner's quip shows this long, and their tab this long on a heart change.
 const QUIP_HOLD_MS = 2600;
 const HEART_TAB_MS = 1200;
-// A card holds up to three rows of five hearts.
-const MAX_CARD_HEARTS = 15;
+// A card holds one row of hearts, as many as the most an owner can have.
+const MAX_CARD_HEARTS = DOG_CARD.hearts.perRow;
 const HEART_KEY = "ui-heart";
 const CARD_KEY = "ui-dog-card";
 
@@ -122,7 +123,9 @@ interface CardView {
   hearts: GameObjects.Sprite[];
   lead: GameObjects.Image | GameObjects.BitmapText;
   name: GameObjects.BitmapText;
-  owner: GameObjects.BitmapText;
+  // The owner's name, one label per line.
+  owner: GameObjects.BitmapText[];
+  ownerFace: GameObjects.Sprite;
 }
 
 // A card's parts that shake with it.
@@ -130,8 +133,8 @@ function cardParts(view: CardView | undefined): GameObjects.Components.Transform
   if (view === undefined) {
     return [];
   }
-  const { card, dogFace, empty, fired, hearts, lead, name, owner } = view;
-  return [card, dogFace, name, owner, empty, fired, lead, ...hearts];
+  const { card, dogFace, empty, fired, hearts, lead, name, owner, ownerFace } = view;
+  return [card, dogFace, ownerFace, name, ...owner, empty, fired, lead, ...hearts];
 }
 
 interface DebuffBarView {
@@ -457,7 +460,10 @@ export class HudScene extends Scene {
         font: "title",
         originX: 0.5,
       }),
-      owner: addPixelText(this, x + owner.x, y + owner.y, "", { color: PALETTE.tan }),
+      owner: owner.tops.twoLines.map((top) =>
+        addPixelText(this, x + owner.x, y + top, "", { color: PALETTE.tan }),
+      ),
+      ownerFace: sprite("treat", owner.face),
     };
   }
 
@@ -657,10 +663,10 @@ export class HudScene extends Scene {
     });
   }
 
-  // A dog's card: its name, face, owner's name and hearts, and the LEAD tag on the front dog's.
-  // A fired dog's card is the empty one with the owner's name and FIRED. An owned slot with no
-  // dog is a dashed "Empty" outline on the band, and a slot not bought (null) shows the band
-  // alone.
+  // A dog's card: its name and face, its owner's face, name and hearts, and the LEAD tag on the
+  // front dog's. A fired dog's card is the empty one with FIRED across the dog's photo, the
+  // owner's fired face, their name and all their hearts empty. An owned slot with no dog is a
+  // dashed "Empty" outline on the band, and a slot not bought (null) shows the band alone.
   private drawCard(
     g: GameObjects.Graphics,
     rect: Rect,
@@ -668,11 +674,11 @@ export class HudScene extends Scene {
     run: RunState,
     slot: PackSlot | null | undefined,
   ): void {
-    const parts = [view.card, view.dogFace, ...view.hearts];
+    const parts = [view.card, view.dogFace, view.ownerFace, ...view.hearts];
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
       setPixelText(view.name, "");
-      setPixelText(view.owner, "");
+      view.owner.forEach((label) => setPixelText(label, ""));
       setPixelText(view.fired, "");
       if (slot === null) {
         setPixelText(view.empty, "");
@@ -697,20 +703,26 @@ export class HudScene extends Scene {
       });
     }
     this.fitName(view.name, dog.name, rect);
-    setPixelText(view.owner, dog.owner.name);
+    this.showOwnerName(view.owner, dog.owner.name, rect);
     setPixelText(view.fired, fired ? gameData.runText.fired : "");
-    if (fired) {
-      [view.dogFace, ...view.hearts].forEach((part) => part.setVisible(false));
-      return;
-    }
-    const dogKey = dogFaceKey(gameData, slot.dog);
     const max = maxHearts(gameData.tuning, run.modifiers, dog);
+    const ownerKey = ownerCardFaceKey(gameData, slot.dog);
     playTag(
-      view.dogFace.setTexture(dogKey).setVisible(true),
-      dogKey,
-      faceMood(gameData, max, slot.hearts),
+      view.ownerFace.setTexture(ownerKey).setVisible(true),
+      ownerKey,
+      cardOwnerMood(gameData, max, slot),
     );
-    const cells = cardHearts(slot.hearts, max);
+    if (fired) {
+      view.dogFace.setVisible(false);
+    } else {
+      const dogKey = dogFaceKey(gameData, slot.dog);
+      playTag(
+        view.dogFace.setTexture(dogKey).setVisible(true),
+        dogKey,
+        faceMood(gameData, max, slot.hearts),
+      );
+    }
+    const cells = cardHearts(fired ? 0 : slot.hearts, max);
     const heartArt = this.textures.exists(HEART_KEY);
     view.hearts.forEach((sprite, i) => {
       const cell = cells[i];
@@ -732,6 +744,26 @@ export class HudScene extends Scene {
     setPixelText(label, text);
     const fit = cardNameFit(label.width / label.scaleX);
     scalePixelText(label, fit.scale, rect.x + DOG_CARD.name.x, rect.y + fit.top);
+  }
+
+  // The owner's name beside their photo, on one line or two, measured on the first label.
+  private showOwnerName(labels: readonly GameObjects.BitmapText[], name: string, rect: Rect): void {
+    const [probe] = labels;
+    if (probe === undefined) {
+      return;
+    }
+    const rightEdge = (line: string) => {
+      setPixelText(probe, line);
+      return inkSpan(probe).right;
+    };
+    const lines = ownerNameLines(rightEdge, name);
+    labels.forEach((label, i) => {
+      const line = lines[i];
+      setPixelText(label, line?.text ?? "");
+      if (line !== undefined) {
+        placePixelText(label, rect.x + DOG_CARD.owner.x, rect.y + line.top);
+      }
+    });
   }
 
   // An owner's tab on their dog's card, in mood, for ms.

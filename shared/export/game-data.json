@@ -318,6 +318,7 @@
       "keys": {
         "dogCardTag": "archie",
         "face": "face-dog-archie",
+        "ownerCardFace": "face-owner-archie-20",
         "ownerFace": "face-owner-archie",
         "portrait": "portrait-dog-archie",
         "sprite": "dog-archie"
@@ -343,6 +344,7 @@
       "keys": {
         "dogCardTag": "biscuit",
         "face": "face-dog-biscuit",
+        "ownerCardFace": "face-owner-biscuit-20",
         "ownerFace": "face-owner-biscuit",
         "portrait": "portrait-dog-biscuit",
         "sprite": "dog-biscuit"
@@ -369,6 +371,7 @@
       "keys": {
         "dogCardTag": "duchess",
         "face": "face-dog-duchess",
+        "ownerCardFace": "face-owner-duchess-20",
         "ownerFace": "face-owner-duchess",
         "portrait": "portrait-dog-duchess",
         "sprite": "dog-duchess"
@@ -395,6 +398,7 @@
       "keys": {
         "dogCardTag": "koda",
         "face": "face-dog-koda",
+        "ownerCardFace": "face-owner-koda-20",
         "ownerFace": "face-owner-koda",
         "portrait": "portrait-dog-koda",
         "sprite": "dog-koda"
@@ -421,6 +425,7 @@
       "keys": {
         "dogCardTag": "nugget",
         "face": "face-dog-nugget",
+        "ownerCardFace": "face-owner-nugget-20",
         "ownerFace": "face-owner-nugget",
         "portrait": "portrait-dog-nugget",
         "sprite": "dog-nugget"
@@ -447,6 +452,7 @@
       "keys": {
         "dogCardTag": "penny",
         "face": "face-dog-penny",
+        "ownerCardFace": "face-owner-penny-20",
         "ownerFace": "face-owner-penny",
         "portrait": "portrait-dog-penny",
         "sprite": "dog-penny"
@@ -473,6 +479,7 @@
       "keys": {
         "dogCardTag": "pierre",
         "face": "face-dog-pierre",
+        "ownerCardFace": "face-owner-pierre-20",
         "ownerFace": "face-owner-pierre",
         "portrait": "portrait-dog-pierre",
         "sprite": "dog-pierre"
@@ -499,6 +506,7 @@
       "keys": {
         "dogCardTag": "snowball",
         "face": "face-dog-snowball",
+        "ownerCardFace": "face-owner-snowball-20",
         "ownerFace": "face-owner-snowball",
         "portrait": "portrait-dog-snowball",
         "sprite": "dog-snowball"
@@ -525,6 +533,7 @@
       "keys": {
         "dogCardTag": "zippy",
         "face": "face-dog-zippy",
+        "ownerCardFace": "face-owner-zippy-20",
         "ownerFace": "face-owner-zippy",
         "portrait": "portrait-dog-zippy",
         "sprite": "dog-zippy"
