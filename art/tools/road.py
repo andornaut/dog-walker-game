@@ -1251,8 +1251,8 @@ def kid(wave=False, mood="happy", bob=0):
     g.rect(7, 29 + b, 3, 6, "yellow")
     g.rect(7, 35 + b, 3, 2, "skin1")
     if wave:
-        g.rect(22, 20 + b, 3, 8, "yellow")
-        g.rect(22, 18 + b, 3, 2, "skin1")
+        # the arm raised from the shoulder behind the head
+        g.rect(22, 25 + b, 3, 5, "yellow")
     else:
         g.rect(22, 29 + b, 3, 6, "yellow")
         g.rect(22, 35 + b, 3, 2, "skin1")
@@ -1262,6 +1262,10 @@ def kid(wave=False, mood="happy", bob=0):
     g.rect(8, 18 + b, 2, 4, "ochre")
     g.rect(22, 18 + b, 2, 4, "ochre")
     face_front(g, 16, 21 + b, mood if mood != "sad" else "neutral")
+    if wave:
+        # the forearm up in front of the cap's brim, clear of the face, the hand open above it
+        g.rect(24, 19 + b, 3, 7, "yellow")
+        g.rect(24, 16 + b, 3, 3, "skin1")
     if mood == "sad":
         g.rect(15, 26 + b, 2, 1, "dbrown")
         g.p(14, 27 + b, "dbrown")
