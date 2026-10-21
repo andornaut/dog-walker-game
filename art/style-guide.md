@@ -299,7 +299,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 Houses, fences, trees and yard props stand on the lawns beyond the sidewalks. `art/tools/roadside.py` draws them and holds the per-zone placement table (`PLACEMENT`, keyed by zone art id; `python3 art/tools/roadside.py table` prints it as JSON). Only Elm Avenue (`woof-way`) has a table.
 
-- Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms. Every other prop is static, one frame with no motion, so the verges never pull the eye from the road.
+- Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms. The placement table places static props only, one frame with no motion, so the verges never pull the eye from the road; the sprinkler is not placed.
 - Houses follow the backdrops' slim houses: about as tall as they are wide (the two-storey house a little taller), under a steep gable that rises a row for each column it narrows, past 2px eaves in a 2px band a step darker than the roof. Light comes from the top left: the roof's left edge is a ramp step lighter and the wall's right 3 columns a step darker. Each has a chimney; the porch houses have a dormer, its cap's right edge a step darker so it stands out of the roof.
 - They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket (`spot-lamp-post` is a navy lantern), the street tree three round lobes (`spot-tree` is blocky), the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box (`petunias` has one), the gnome a blue hat and red coat (`minor-gnome` has a red hat and blue coat; a zone with `minor-gnome` does not take `roadside-gnome`), the mailbox blue with a yellow flag (the hydrant is red), the bird bath a white basin on a pedestal (`spot-water-bowl` is a bowl on the ground), the shrub round and in bloom, and the little library a box on a post (the bench and the bin stand on the ground).
 
@@ -316,7 +316,7 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 | 0   | `house-cottage` 280, 0; `fence` 299, −32; `mailbox` 231, −38; `flowers` 295, −42; `birdbath` 286, −16 |
 | 1   | `house-tall` 277, 0; `hedge` 290, −32; `mailbox` 231, −38; `gnome` 265, −15; `topiary` 317, −12       |
 | 2   | `house-porch` 283, 0; `fence-cat` 299, −32; `bike` 267, −45                                           |
-| 3   | `house-cottage-pink` 280, 0; `fence` 299, −32; `mailbox` 231, −38; `sprinkler` 314, −15               |
+| 3   | `house-cottage-pink` 280, 0; `fence` 299, −32; `mailbox` 231, −38; `well` 305, −15                    |
 | 4   | `house-tall-grey` 277, 0; `fence` 299, −32; `gnome` 275, −15; `flamingos` 326, −18                    |
 | 5   | `house-porch-tan` 283, 0; `hedge` 290, −32; `mailbox` 231, −38; `flowers` 300, −42                    |
 
@@ -334,7 +334,7 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 
 - A prop d road px ahead of the feet draws at the road camera's scale s, at x = 180 − across × s on the left and 180 + across × s on the right, its feet on the row of d, from the smallest of its steps at least its projected size, as the road objects.
 - Draw order: depth `DEPTH.sprite` + feet row, so back to front with the road objects; over the backdrop, cropped at the juncture (row 126), so a far prop shows in full from the cross street; and under the doghouses.
-- Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in dgreen, the lawn one ramp step darker. Houses, fences, the hedge, the flower border, the sprinkler, the washing line and the swing set take none.
+- Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary, wishing well) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in dgreen, the lawn one ramp step darker. Houses, fences, the hedge, the flower border, the washing line and the swing set take none.
 - With 20px of verge at the pack, a prop leaves the screen's side once its inner edge does, at about s 0.85; houses never show whole. No prop stands within the 64 rows of a zone's start strip, so the cross street stays clear.
 
 ## Backdrops

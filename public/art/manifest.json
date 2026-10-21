@@ -4292,6 +4292,51 @@
       }
     },
     {
+      "key": "roadside-well",
+      "png": "sprites/roadside-well.png",
+      "json": "sprites/roadside-well.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "roadside-well@50",
+      "png": "sprites/roadside-well@50.png",
+      "json": "sprites/roadside-well@50.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-well@62",
+      "png": "sprites/roadside-well@62.png",
+      "json": "sprites/roadside-well@62.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-well@75",
+      "png": "sprites/roadside-well@75.png",
+      "json": "sprites/roadside-well@75.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "roadside-well@88",
+      "png": "sprites/roadside-well@88.png",
+      "json": "sprites/roadside-well@88.json",
+      "anchor": {
+        "feetY": 73,
+        "opaqueWidth": 49
+      }
+    },
+    {
       "key": "roadside-wheelbarrow",
       "png": "sprites/roadside-wheelbarrow.png",
       "json": "sprites/roadside-wheelbarrow.json",

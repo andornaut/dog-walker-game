@@ -170,32 +170,33 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 
 ### Roadside props
 
-Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside table. Each has `@88`, `@75`, `@62` and `@50` variants with the same tag and timing; one tag, `idle`, one static frame except the sprinkler's.
+Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside table. Each has `@88`, `@75`, `@62` and `@50` variants with the same tag and timing; one tag, `idle`, one static frame except the sprinkler's, which is not placed.
 
-| Key                                                     | Type   | Size    | `@88`, `@75`, `@62`, `@50`    | Pri  | Note                                                |
-| ------------------------------------------------------- | ------ | ------- | ----------------------------- | ---- | --------------------------------------------------- |
-| `roadside-bike`                                         | sprite | 72×48   | 63×42, 54×36, 45×30, 36×24    | core | A kid's red bike, side on                           |
-| `roadside-birdbath`                                     | sprite | 48×66   | 42×58, 36×50, 30×41, 24×33    | core | A white stone bird bath, a sky bird on its rim      |
-| `roadside-fence`                                        | sprite | 150×42  | 131×37, 113×32, 94×26, 75×21  | core | White pickets                                       |
-| `roadside-fence-cat`                                    | sprite | 150×60  | 131×53, 113×45, 94×38, 75×30  | core | The fence with a plum cat on top                    |
-| `roadside-flamingos`                                    | sprite | 60×66   | 53×58, 45×50, 38×41, 30×33    | core | Two pink plastic lawn flamingos                     |
-| `roadside-flowers`                                      | sprite | 90×30   | 79×26, 68×23, 56×19, 45×15    | core | A flower border, no box                             |
-| `roadside-gnome`                                        | sprite | 30×42   | 26×37, 23×32, 19×26, 15×21    | core | Blue hat, red coat                                  |
-| `roadside-hedge`                                        | sprite | 132×48  | 116×42, 99×36, 83×30, 66×24   | core | Bumped top, white flowers                           |
-| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 120×120 | 105×105, 90×90, 75×75, 60×60  | core | Tan and pink                                        |
-| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 126×126 | 110×110, 95×95, 79×79, 63×63  | core | Sky and tan                                         |
-| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 114×132 | 100×116, 86×99, 71×83, 57×66  | core | Cream and light grey                                |
-| `roadside-lamp-post`                                    | sprite | 36×150  | 32×131, 27×113, 23×94, 18×75  | core | White globe, forest post, a flower basket           |
-| `roadside-laundry`                                      | sprite | 162×96  | 142×84, 122×72, 101×60, 81×48 | core | A washing line on two T posts                       |
-| `roadside-library`                                      | sprite | 48×96   | 42×84, 36×72, 30×60, 24×48    | core | A little free library: a red box of books on a post |
-| `roadside-mailbox`                                      | sprite | 36×48   | 32×42, 27×36, 23×30, 18×24    | core | Blue, a yellow flag                                 |
-| `roadside-shrub`                                        | sprite | 66×54   | 58×47, 50×41, 41×34, 33×27    | core | A round hydrangea, sky and mauve mopheads           |
-| `roadside-sprinkler`                                    | sprite | 78×42   | 68×37, 59×32, 49×26, 39×21    | core | `idle` 2 frames of 200ms: the spray runs            |
-| `roadside-swing`                                        | sprite | 114×96  | 100×84, 86×72, 71×60, 57×48   | core | A swing set, red and yellow seats                   |
-| `roadside-topiary`                                      | sprite | 42×90   | 37×79, 32×68, 26×56, 21×45    | core | Three clipped balls in a white box                  |
-| `roadside-tree`, `roadside-tree-blossom`                | sprite | 114×156 | 100×137, 86×117, 71×98, 57×78 | core | Green and pink blossom                              |
-| `roadside-urn`                                          | sprite | 48×66   | 42×58, 36×50, 30×41, 24×33    | core | A terracotta urn of geraniums on a stone plinth     |
-| `roadside-wheelbarrow`                                  | sprite | 84×54   | 74×47, 63×41, 53×34, 42×27    | core | A red wheelbarrow of flowers, side on               |
+| Key                                                     | Type   | Size    | `@88`, `@75`, `@62`, `@50`    | Pri  | Note                                                 |
+| ------------------------------------------------------- | ------ | ------- | ----------------------------- | ---- | ---------------------------------------------------- |
+| `roadside-bike`                                         | sprite | 72×48   | 63×42, 54×36, 45×30, 36×24    | core | A kid's red bike, side on                            |
+| `roadside-birdbath`                                     | sprite | 48×66   | 42×58, 36×50, 30×41, 24×33    | core | A white stone bird bath, a sky bird on its rim       |
+| `roadside-fence`                                        | sprite | 150×42  | 131×37, 113×32, 94×26, 75×21  | core | White pickets                                        |
+| `roadside-fence-cat`                                    | sprite | 150×60  | 131×53, 113×45, 94×38, 75×30  | core | The fence with a plum cat on top                     |
+| `roadside-flamingos`                                    | sprite | 60×66   | 53×58, 45×50, 38×41, 30×33    | core | Two pink plastic lawn flamingos                      |
+| `roadside-flowers`                                      | sprite | 90×30   | 79×26, 68×23, 56×19, 45×15    | core | A flower border, no box                              |
+| `roadside-gnome`                                        | sprite | 30×42   | 26×37, 23×32, 19×26, 15×21    | core | Blue hat, red coat                                   |
+| `roadside-hedge`                                        | sprite | 132×48  | 116×42, 99×36, 83×30, 66×24   | core | Bumped top, white flowers                            |
+| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 120×120 | 105×105, 90×90, 75×75, 60×60  | core | Tan and pink                                         |
+| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 126×126 | 110×110, 95×95, 79×79, 63×63  | core | Sky and tan                                          |
+| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 114×132 | 100×116, 86×99, 71×83, 57×66  | core | Cream and light grey                                 |
+| `roadside-lamp-post`                                    | sprite | 36×150  | 32×131, 27×113, 23×94, 18×75  | core | White globe, forest post, a flower basket            |
+| `roadside-laundry`                                      | sprite | 162×96  | 142×84, 122×72, 101×60, 81×48 | core | A washing line on two T posts                        |
+| `roadside-library`                                      | sprite | 48×96   | 42×84, 36×72, 30×60, 24×48    | core | A little free library: a red box of books on a post  |
+| `roadside-mailbox`                                      | sprite | 36×48   | 32×42, 27×36, 23×30, 18×24    | core | Blue, a yellow flag                                  |
+| `roadside-shrub`                                        | sprite | 66×54   | 58×47, 50×41, 41×34, 33×27    | core | A round hydrangea, sky and mauve mopheads            |
+| `roadside-sprinkler`                                    | sprite | 78×42   | 68×37, 59×32, 49×26, 39×21    | core | `idle` 2 frames of 200ms: the spray runs; not placed |
+| `roadside-swing`                                        | sprite | 114×96  | 100×84, 86×72, 71×60, 57×48   | core | A swing set, red and yellow seats                    |
+| `roadside-topiary`                                      | sprite | 42×90   | 37×79, 32×68, 26×56, 21×45    | core | Three clipped balls in a white box                   |
+| `roadside-tree`, `roadside-tree-blossom`                | sprite | 114×156 | 100×137, 86×117, 71×98, 57×78 | core | Green and pink blossom                               |
+| `roadside-urn`                                          | sprite | 48×66   | 42×58, 36×50, 30×41, 24×33    | core | A terracotta urn of geraniums on a stone plinth      |
+| `roadside-wheelbarrow`                                  | sprite | 84×54   | 74×47, 63×41, 53×34, 42×27    | core | A red wheelbarrow of flowers, side on                |
+| `roadside-well`                                         | sprite | 60×84   | 53×74, 45×63, 38×53, 30×42    | core | A stone wishing well under a dred gable              |
 
 ## Doghouse row and top bar
 

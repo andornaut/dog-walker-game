@@ -35,7 +35,7 @@ roadside-lamp-post           36x150   a white globe lamp on a forest post with a
 roadside-gnome               30x42    a garden gnome in a blue hat and red coat
 roadside-flowers             90x30    a border of mixed blooms on their stems
 roadside-bike                72x48    a kid's red bike on its stand, side on, streamers
-roadside-sprinkler           78x42    a lawn sprinkler's fan of water; idle 2 frames x 200ms
+roadside-sprinkler           78x42    a lawn sprinkler's fan of water; idle 2 frames x 200ms; not placed
 roadside-laundry             162x96   a washing line on two T posts: a shirt, a sheet, socks, a dress
 roadside-birdbath            48x66    a white stone bird bath, a sky bird on its rim
 roadside-flamingos           60x66    a pair of pink plastic lawn flamingos on wire legs
@@ -45,9 +45,10 @@ roadside-urn                 48x66    a terracotta urn of red geraniums on a sto
 roadside-shrub               66x54    a round hydrangea bush in sky and mauve mopheads
 roadside-topiary             42x90    a pom-pom topiary, three clipped balls, in a white box planter
 roadside-swing               114x96   a swing set: a sky A-frame each end, a red seat and a yellow one
+roadside-well                60x84    a stone wishing well under a dred gable, its winch and bucket
 
 Every prop has one tag, `idle`: one frame of 1000ms, or the sprinkler's two. Every other prop is
-static: one frame, no motion. The ground row is the
+static: one frame, no motion. PLACEMENT places static props only. The ground row is the
 last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no
 light rim (road.LIT), since the props stand on the lawn, never on the road.
 
@@ -443,6 +444,35 @@ def bar(g, a, b, c, wide=2):
     g.tri((x0, y0), (x1, y1), (x1 + wide, y1), c)
 
 
+def wishing_well():
+    """A stone wishing well: a round wall of grey stones under a lit rim, two wooden posts holding a
+    dred gable, its winch, rope and bucket."""
+    w, h = 40, 56
+
+    def draw(g, f=0):
+        base = h - 2
+        gable(g, 6, 28, 22, "dred")
+        for x in (7, 30):
+            g.rect(x, 21, 3, 18, "brown")
+            g.rect(x + 2, 21, 1, 18, "dbrown")
+        g.rect(7, 26, 26, 2, "dbrown")
+        g.rect(33, 25, 3, 1, "lgrey")
+        g.rect(35, 25, 1, 3, "lgrey")
+        g.rect(19, 28, 1, 5, "tan")
+        g.rect(17, 33, 5, 4, "slate")
+        g.rect(17, 33, 5, 1, "lgrey")
+        g.rect(4, base - 14, 32, 15, "grey")
+        g.rect(31, base - 14, 5, 15, "slate")
+        for i, y in enumerate(range(base - 10, base, 4)):
+            g.rect(4, y, 32, 1, "slate")
+            for x in range(6 + 4 * (i % 2), 34, 8):
+                g.rect(x, y - 3, 1, 3, "slate")
+        g.rect(2, base - 16, 36, 3, "lgrey")
+        g.rect(2, base - 16, 6, 3, "white")
+        g.rect(33, base - 16, 5, 3, "grey")
+    return w, h, draw
+
+
 def birdbath():
     """A white stone bird bath: a wide basin of water on a waisted pedestal and a square foot, a sky bird
     perched on its rim."""
@@ -671,6 +701,7 @@ PROPS = {
     "roadside-shrub": (shrub(), (0,), STILL_MS, True),
     "roadside-topiary": (topiary(), (0,), STILL_MS, True),
     "roadside-swing": (swing(), (0,), STILL_MS, False),
+    "roadside-well": (wishing_well(), (0,), STILL_MS, True),
 }
 
 
@@ -739,7 +770,7 @@ PLACEMENT = {
             lot("house-cottage", "fence", ("mailbox", 213, -38), ("flowers", 250, -42), ("birdbath", 262, -16)),
             lot("house-tall", "hedge", ("mailbox", 213, -38), ("gnome", 250, -15), ("topiary", 296, -12)),
             lot("house-porch", "fence-cat", ("bike", 231, -45)),
-            lot("house-cottage-pink", "fence", ("mailbox", 213, -38), ("sprinkler", 275, -15)),
+            lot("house-cottage-pink", "fence", ("mailbox", 213, -38), ("well", 275, -15)),
             lot("house-tall-grey", "fence", ("gnome", 260, -15), ("flamingos", 296, -18)),
             lot("house-porch-tan", "hedge", ("mailbox", 213, -38), ("flowers", 255, -42)),
         ),
