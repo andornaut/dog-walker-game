@@ -4,8 +4,9 @@ import { gameData } from "../data";
 import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import type { Effect, MoneyKey, MultiplierKey } from "../data/types";
+import { UPGRADES } from "../data/upgrades";
 import { TEST_TUNING } from "../testing/tuning";
-import { effectText, formatDollars } from "./effectText";
+import { capitalize, effectText, formatDollars } from "./effectText";
 import { cents, read } from "./units";
 
 const data = {
@@ -64,6 +65,30 @@ describe("effectText", () => {
       "an immunity as the cards it stops",
       [{ duration: "run", encounter: "thief", kind: "immune" }],
       `No ${ENCOUNTERS.thief.name} cards all walk`,
+    ],
+    [
+      "a contact obstacle's immunity as its own line",
+      [{ duration: "run", encounter: "puddle", kind: "immune" }],
+      `${capitalize(ENCOUNTERS.puddle.resolution.immuneText)} all walk`,
+    ],
+    [
+      "a duration every phrase shares once, at the end",
+      UPGRADES.rushHour.effects,
+      `Tips +${percent("rushHourTips")}%, obstacles +${percent("rushHourObstacles")}%, ` +
+        `treats +${percent("rushHourTreats")}% next neighborhood`,
+    ],
+    [
+      "starting cash",
+      [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
+      `Starting cash +${dollars("fannyPackStart")}`,
+    ],
+    ["a free Walk on by", [{ kind: "skipOption" }], "A free Walk on by each neighborhood"],
+    [
+      "free cards as cash options free",
+      [{ by: "sweetTalkerFreeCards", kind: "modifier", operation: "add", stat: "freeCards" }],
+      read(TEST_TUNING, "counts", "sweetTalkerFreeCards") === 1
+        ? "First card's cash options free each neighborhood"
+        : `First ${read(TEST_TUNING, "counts", "sweetTalkerFreeCards")} cards' cash options free each neighborhood`,
     ],
     ["no effects as nothing", [], "Nothing"],
   ])("writes %s", (_, effects, text) => {

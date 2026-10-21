@@ -15,18 +15,18 @@ exports[`every card's text > matches the snapshot 1`] = `
     "thief: Let them go": "−$10",
   },
   "gear": {
-    "fannyPack": "Starting money +$10",
+    "fannyPack": "Starting cash +$20",
     "luckyCollar": "Max ♥ +1",
-    "poopBags": "A free Skip on one card each neighborhood",
+    "poopBags": "A free Walk on by each neighborhood",
     "runningShoes": "Agility +0.1",
   },
   "upgrades": {
     "bellyRubs": "+1♥ each",
     "bigTipper": "+$1 per tip next neighborhood",
     "goodLeash": "No pulls toward squirrels all walk",
-    "raincoats": "No Puddle cards all walk",
-    "rushHour": "Tips +100% next neighborhood, obstacles +50% next neighborhood, treats +100% next neighborhood",
-    "sweetTalker": "The first card each neighborhood has free cash options all walk",
+    "raincoats": "Puddles don't muddy the pack all walk",
+    "rushHour": "Tips +100%, obstacles +50%, treats +100% next neighborhood",
+    "sweetTalker": "First card's cash options free each neighborhood all walk",
   },
 }
 `;

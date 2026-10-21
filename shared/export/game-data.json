@@ -218,7 +218,7 @@
         "id": "raincoats",
         "kind": "upgrade"
       },
-      "text": "No Puddle cards all walk",
+      "text": "Puddles don't muddy the pack all walk",
       "title": "Which way?"
     },
     {
@@ -231,7 +231,7 @@
         "id": "rushHour",
         "kind": "upgrade"
       },
-      "text": "Tips +100% next neighborhood, obstacles +50% next neighborhood, treats +100% next neighborhood",
+      "text": "Tips +100%, obstacles +50%, treats +100% next neighborhood",
       "title": "Which way?"
     },
     {
@@ -244,7 +244,7 @@
         "id": "sweetTalker",
         "kind": "upgrade"
       },
-      "text": "The first card each neighborhood has free cash options all walk",
+      "text": "First card's cash options free each neighborhood all walk",
       "title": "Which way?"
     },
     {
@@ -627,6 +627,7 @@
             "kind": "debuff"
           }
         ],
+        "immuneText": "puddles don't muddy the pack",
         "kind": "contact"
       },
       "shape": {

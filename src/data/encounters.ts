@@ -55,7 +55,11 @@ export const ENCOUNTERS = {
   puddle: {
     kind: "obstacle",
     name: "Puddle",
-    resolution: { effects: [{ debuff: "muddy", kind: "debuff" }], kind: "contact" },
+    resolution: {
+      effects: [{ debuff: "muddy", kind: "debuff" }],
+      immuneText: "puddles don't muddy the pack",
+      kind: "contact",
+    },
     shape: { lanes: 2, rows: 1 },
   },
   skunk: {

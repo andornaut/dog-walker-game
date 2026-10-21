@@ -4,6 +4,7 @@ import type {
   DogId,
   Duration,
   Effect,
+  EncounterId,
   GameData,
   HeartsEffect,
   LiveTuning,
@@ -36,7 +37,7 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
   maxHearts: "max ♥",
   obstacleSpawns: "obstacles",
   squirrelPulls: "pulls toward squirrels",
-  startMoney: "starting money",
+  startMoney: "starting cash",
   tipReach: "tip reach",
   tipSpawns: "tips",
   tipValue: "tip value",
@@ -102,49 +103,66 @@ function addedText(modifier: Modifier, value: number): string {
   }
 }
 
-// One modifier, such as "+$1 per tip for the run", "tips +100% next zone" or "no lane-input
-// lock after a pull".
-export function modifierText(tuning: LiveTuning, modifier: Modifier): string {
+// A phrase of an effect's text, and how long what it says lasts when it says.
+interface Phrase {
+  readonly duration?: Duration | undefined;
+  readonly text: string;
+}
+
+// One modifier's change, without its duration: "+$1 per tip", "tips +100%".
+function modifierChange(tuning: LiveTuning, modifier: Modifier): string {
   const value = modifierValue(tuning, modifier);
   const name = STAT_NAMES[modifier.stat];
   const percent = Math.round((value - 1) * 100);
-  let change: string;
   if (modifier.operation === "add" && modifier.stat === "freeCards") {
-    change =
-      value === 1
-        ? "the first card each neighborhood has free cash options"
-        : `the first ${value} cards each neighborhood have free cash options`;
-  } else if (modifier.operation === "add") {
-    change =
-      modifier.stat === "tipValue"
-        ? `${addedText(modifier, value)} per tip`
-        : `${name} ${addedText(modifier, value)}`;
-  } else if (value === 0) {
-    change = `no ${name}`;
-  } else {
-    change = `${name} ${sign(percent)}${Math.abs(percent)}%`;
+    return value === 1
+      ? "first card's cash options free each neighborhood"
+      : `first ${value} cards' cash options free each neighborhood`;
   }
-  return modifier.duration === undefined ? change : `${change} ${DURATION_TEXT[modifier.duration]}`;
+  if (modifier.operation === "add") {
+    return modifier.stat === "tipValue"
+      ? `${addedText(modifier, value)} per tip`
+      : `${name} ${addedText(modifier, value)}`;
+  }
+  return value === 0 ? `no ${name}` : `${name} ${sign(percent)}${Math.abs(percent)}%`;
 }
 
-function effectPhrase(data: TextData, effect: Effect): string {
+function withDuration({ duration, text }: Phrase): string {
+  return duration === undefined ? text : `${text} ${DURATION_TEXT[duration]}`;
+}
+
+// One modifier, such as "+$1 per tip all walk", "tips +100% next neighborhood" or "no pulls
+// toward squirrels".
+export function modifierText(tuning: LiveTuning, modifier: Modifier): string {
+  return withDuration({ duration: modifier.duration, text: modifierChange(tuning, modifier) });
+}
+
+// What an immunity to an encounter says: a contact obstacle's own line, or the cards it stops.
+function immuneText(data: TextData, encounter: EncounterId): string {
+  const { name, resolution } = data.encounters[encounter];
+  return resolution.kind === "contact" ? resolution.immuneText : `no ${name} cards`;
+}
+
+function effectPhrase(data: TextData, effect: Effect): Phrase {
   switch (effect.kind) {
     case "debuff":
-      return debuffStake(
-        data,
-        effect.debuff,
-        read(data.tuning, "seconds", data.debuffs[effect.debuff].seconds),
-      );
+      return {
+        text: debuffStake(
+          data,
+          effect.debuff,
+          read(data.tuning, "seconds", data.debuffs[effect.debuff].seconds),
+        ),
+      };
     case "hearts":
-      return heartsText(effect);
+      return { text: heartsText(effect) };
     case "immune":
-      return `no ${data.encounters[effect.encounter].name} cards ${DURATION_TEXT[effect.duration]}`;
+      return { duration: effect.duration, text: immuneText(data, effect.encounter) };
     case "modifier":
-      return modifierText(data.tuning, effect);
+      return { duration: effect.duration, text: modifierChange(data.tuning, effect) };
     case "money":
-      return moneyText(data, effect);
+      return { text: moneyText(data, effect) };
     case "skipOption":
-      return "a free Skip on one card each neighborhood";
+      return { text: "a free Walk on by each neighborhood" };
     default:
       return assertNever(effect);
   }
@@ -155,8 +173,21 @@ export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function phrasesText(phrases: readonly string[]): string {
-  return phrases.length === 0 ? "Nothing" : capitalize(phrases.join(", "));
+// The phrases joined, with a duration every phrase shares said once at the end.
+function phrasesText(phrases: readonly Phrase[]): string {
+  const [first] = phrases;
+  if (first === undefined) {
+    return "Nothing";
+  }
+  const shared = phrases.every(({ duration }) => duration === first.duration);
+  const text =
+    shared && first.duration !== undefined
+      ? withDuration({
+          duration: first.duration,
+          text: phrases.map((phrase) => phrase.text).join(", "),
+        })
+      : phrases.map(withDuration).join(", ");
+  return capitalize(text);
 }
 
 // The one-line effect an item shows, built from its effects and the live tuning, for no
@@ -224,14 +255,18 @@ function cardPhrase(
   data: CardTextData,
   context: CardTextContext,
   effect: Effect,
-): string | undefined {
+): Phrase | undefined {
   switch (effect.kind) {
     case "debuff":
-      return debuffStake(data, effect.debuff, context.seconds(effect.debuff));
-    case "hearts":
-      return cardHeartsText(data, context, effect);
+      return { text: debuffStake(data, effect.debuff, context.seconds(effect.debuff)) };
+    case "hearts": {
+      const text = cardHeartsText(data, context, effect);
+      return text === undefined ? undefined : { text };
+    }
     case "money":
-      return `${effect.change === "gain" ? "+" : MINUS}${formatDollars(context.money(effect))}`;
+      return {
+        text: `${effect.change === "gain" ? "+" : MINUS}${formatDollars(context.money(effect))}`,
+      };
     default:
       return effectPhrase(data, effect);
   }

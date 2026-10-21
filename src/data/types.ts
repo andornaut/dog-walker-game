@@ -242,6 +242,9 @@ export interface InstantResolution {
 // hit stop and no card.
 export interface ContactResolution {
   readonly effects: NonEmptyEffects;
+  // What an immunity to the obstacle does, as an effect's text says it, lower case: "puddles
+  // don't muddy the pack".
+  readonly immuneText: string;
   readonly kind: "contact";
 }
 
