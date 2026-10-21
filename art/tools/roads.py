@@ -13,8 +13,8 @@ road-<zone>-start  320x64 images, one per zone. Rows 20 to 63 are a neutral cros
 Each strip keeps its zone's road colour (src/data/world.ts) as the base, so the
 game's shadows (one ramp step darker) still match. The four lane dividers sit
 at x = 64k-1 (2px wide) and share one look per zone, so lane edges stay
-readable at speed; the outer 3 to 7 px of each side is a curb or verge that
-stays clear of the 12px sprite margin.
+readable at speed; the outer 3 to 7 px of each side is a curb or verge, which an
+outer lane's 56px sprite (4 px in from its 64px lane's edge) overlaps by up to 3 px.
 
 Usage:
   roads.py preview OUT.png   each zone's road scrolling up: two strips of the zone

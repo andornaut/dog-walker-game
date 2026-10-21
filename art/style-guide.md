@@ -204,8 +204,8 @@ While a debuff (muddy, stinky or tangled) lasts, every pack dog's card shows it,
 | Fee payout               | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                                                                                       |
 | Firing                   | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2× (an amber starburst behind a cream POOF cloud, and a front door slamming shut beside the face); the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                        |
 | Heart change             | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog beside the "−1" or "+1" label, then `fly` tweened into its doghouse's heart labels band; on a loss the house plays `ui-doghouse` `heart-loss` while the slot shakes                                                               |
-| Minor bump               | `fx-coin-burst` at the pack under the "−$2" label; `fx-dizzy` over the walker while lane input is locked                                                                                                                                                                                |
 | Moving hazard            | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead: the arrow's `pulse` (right, mirrored for left) for a crosser, `down-pulse` for a mover about to come at the pack, `up-pulse` for one about to move off ahead; `ui-warning-wander` over a wanderer before each step |
+| Plain hit                | `fx-bump` at the contact point and the heart change over the dog that touched it; a small dog that dodges plays `fx-dodge` on its frame instead                                                                                                                                         |
 | Puddle, pickup           | `fx-splash`, `fx-sparkle`                                                                                                                                                                                                                                                               |
 | Treat given              | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                                                                                             |
 
@@ -221,6 +221,7 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 | Effect             | Word     | Where it is                                                |
 | ------------------ | -------- | ---------------------------------------------------------- |
 | `fx-bark-word`     | WOOF!    | Its own 32×16 key, `pop` (4 frames, 60, 60, 140 and 140ms) |
+| `fx-dodge`         | DODGE!   | `play`, over frames 0 to 3                                 |
 | `fx-hop-splash`    | HOP!     | `splash-word`, over frames 0 to 3                          |
 | `fx-hit-cafe`      | SPLAT!   | `play-word`                                                |
 | `fx-hit-goose`     | HONK!    | `play-word`                                                |
@@ -299,7 +300,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 - 320×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Willow Crescent grey (slate), Fairview Park tan (brown), Elm Avenue dslate (navy), Main Street pink (mauve), Riverside Path cream (tan), The Long Way Home skin2 (brown).
 - The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Willow Crescent; dbrown on Fairview Park; white dashes 12 rows long in 32 with a mauve edge on Main Street; dbrown dashes 20 rows long in 32 on Riverside Path; white outlined in plum on The Long Way Home.
-- Curbs and verges stay inside the outer 3 to 7px, clear of the 12px sprite margin.
+- Curbs and verges stay inside the outer 3 to 7px of the strip. A 56px sprite leaves 4px each side of its 64px lane, so an outer lane's sprite overlaps its curb or verge by up to 3px.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The camera has its horizon at y −164 and the walker's feet at y 464; the road's far edge meets the backdrop at y 150 at scale 0.5. Its ratio r derives from speed (the visible distance is 3.6 s × `roadScrollSpeed`, 720 road px at 200 px/s, so r is 0.872). The rows from the far edge down to about y 170 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
 

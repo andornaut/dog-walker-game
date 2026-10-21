@@ -12,9 +12,9 @@ cone                56x56   1 lane, a glint runs down its highlight
 bin                 56x56   1 lane, the lid lifts 1px in a breeze
 hydrant             56x56   the Regular dog's need spot (not an obstacle), a drip off the side cap
 bench               120x42  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-barrier-2           120x42  2 lanes, a striped rail and plank on short legs; lamps blink (Elm Avenue,
-                            Main Street)
-barrier-3           184x42  3 lanes, lamps blink
+barrier-2           120x42  2 lanes, a striped rail and plank on short legs; lamps blink (Willow
+                            Crescent, Elm Avenue, Main Street and Riverside Path)
+barrier-3           184x42  3 lanes, lamps blink (the same zones)
 hedge               184x42  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
                             spots in turn
 parked-car          56x49   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Draw the road feedback for heart changes, near misses and minor bumps: the
+"""Draw the road feedback for heart changes, near misses and dodges: the
 broken heart that pops over a dog and arcs into its doghouse, the pink heart
 that pops and flies up, the small splash when an all-small pack hops a puddle,
-and the coins that burst from the pack on a minor bump.
+a small dog's dodge, and the coins that burst from the pack.
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
 ink holds on the light roads and the cream doghouse and the white on Elm Avenue
-and the dimmed road. The splash takes the navy rim, the coins fx-coin-fly's coin in its plum rim.
+and the dimmed road. The splash takes the navy rim, the dodge's dust and lines a plum one, and the coins
+fx-coin-fly's coin in its plum rim.
 
 fx-heart-loss  32x32  pop (6 frames: 50, 50, 90, 90, 90, 450ms; 820ms)  a small whole heart
                       pops in on a white star, then the big heart (17x15 in its rims, 21x19)
@@ -37,10 +38,14 @@ fx-hop-splash  32x32  splash (5 frames, 70ms)  a small puddle splash as an all-s
                       walker's feet. With splash-word the comic word is the label; with reduced
                       motion the game plays splash and writes "Hop!" centred on x 16, its line
                       bottom 2px above the frame's top row
+fx-dodge       56x56  play (5 frames, 70ms; 350ms)  laid on a small dog's 56x56 frame as it dodges a
+                      hit: a dust puff kicked up at its left foot swells, drifts back and thins,
+                      three speed lines trail on its left and shorten, and DODGE! in the comic
+                      lettering sits centred over its head (ring top on row 0) on frames 0 to 3.
+                      Drawn for a sidestep right; the game mirrors it for a sidestep left
 fx-coin-burst  64x48  play (7 frames, 70ms; 490ms)  an amber pop at (32, 28), then five of
                       fx-coin-fly's coins thrown up and out, spinning, falling back under
-                      gravity; the highest coin's top is row 8. (32, 28) on the contact point.
-                      The game writes "-$2" centred on x 32, its line bottom on frame row 6
+                      gravity; the highest coin's top is row 8. (32, 28) on the contact point
 
 Usage:
   feedback.py preview OUT.png   every frame on the six road colours and the dimmed road
@@ -208,6 +213,40 @@ def worded(g, step):
     return word(g, WORD, 16, 1) if step < WORD_FRAMES else g
 
 
+# ---------- the dodge ----------
+
+# fx-dodge is laid on a 56x56 dog's frame. The dog sidesteps right: its dust kicks up at the left foot and
+# speed lines trail it on the left (the game mirrors the frame for a sidestep left).
+DODGE = 56
+DODGE_WORD = "DODGE!"
+# Per frame: each puff's (x, y, radius), the speed lines' length; the word shows over frames 0 to 3.
+DODGE_PUFFS = (((22, 50, 2), (17, 51, 1.5)),
+               ((20, 49, 3), (14, 50, 2.5), (25, 51, 2)),
+               ((18, 47, 3.5), (11, 49, 3), (24, 50, 2.5)),
+               ((16, 45, 3), (9, 47, 2.5), (22, 48, 2)),
+               ((14, 43, 2), (7, 45, 1.5)))
+DODGE_LINES = (12, 10, 7, 4, 0)
+DODGE_ROWS = (32, 38, 44)
+
+
+def dodge(step, worded=True):
+    """A small dog's sidestep: a dust puff kicked up at its left foot that swells, drifts back and thins out,
+    three speed lines trailing on its left that shorten as it settles, and DODGE! in the comic lettering
+    centred over its head on frames 0 to 3. Light grey and white dust and white lines in a plum rim, as the
+    effects' rule, so they hold on every road."""
+    g = Grid(DODGE, DODGE)
+    for x, y, r in DODGE_PUFFS[step]:
+        g.ell(x, y, r, r * 0.8, "white" if step == 4 else "lgrey", None if step == 4 else "grey")
+    n = DODGE_LINES[step]
+    for k, y in enumerate(DODGE_ROWS):
+        if n:
+            g.rect(14 - n + (2 if k == 1 else 0), y, n - (2 if k == 1 else 0), 1, "white")
+    rim(g)
+    if worded and step < 4:
+        word(g, DODGE_WORD, DODGE // 2, 0)
+    return g
+
+
 # ---------- the coin burst ----------
 
 BURST = (32, 28)
@@ -250,6 +289,7 @@ def sprites():
     yield "fx-hop-splash", [("splash", [hop_splash(i).outlined(False) for i in range(5)], 70),
                             ("splash-word", [worded(hop_splash(i), i).outlined(False) for i in range(5)], 70)]
     yield "fx-coin-burst", [("play", [coin_burst(i).outlined(False) for i in range(7)], 70)]
+    yield "fx-dodge", [("play", [dodge(i).outlined(False) for i in range(5)], 70)]
 
 
 if __name__ == "__main__":

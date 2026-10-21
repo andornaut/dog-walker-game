@@ -1375,6 +1375,11 @@
       "json": "sprites/fx-dizzy.json"
     },
     {
+      "key": "fx-dodge",
+      "png": "sprites/fx-dodge.png",
+      "json": "sprites/fx-dodge.json"
+    },
+    {
       "key": "fx-dust",
       "png": "sprites/fx-dust.png",
       "json": "sprites/fx-dust.json"
