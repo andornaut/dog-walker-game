@@ -65,6 +65,9 @@ DRAWN = {TINY5: {
     # Tiny5's $ is a 3px S that reads as a stray mark at 1x: a 4px S with 2px diagonals, its stem a
     # row above and below it.
     "$": (["..1.", ".111", "11..", "11..", "..11", "111.", ".1.."], 1, 5),
+    # Tiny5's 9 closes its bowl on row 3, so it differs from the 3 only in its top two rows: a 6 turned
+    # round, the bowl two rows deep.
+    "9": ([".1.", "1.1", "1.1", ".11", "..1", "11."], 2, 4),
     # The lower case: x-height rows 3 to 7, ascenders from row 1, descenders on row 8.
     "a": ([".11.", "...1", ".111", "1..1", ".111"], 3, 5),
     "b": (["1...", "1...", "111.", "1..1", "1..1", "1..1", "111."], 1, 5),
