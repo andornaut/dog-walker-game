@@ -106,9 +106,7 @@ export const WORLD = {
           cone: 2,
           cyclist: 1,
           hedge: 1,
-          // CLEANUP (added 2026-10-21): restore the street weights once art draws a lane-sized
-          // ice-cream-truck with a drive tag.
-          iceCreamTruck: 0,
+          iceCreamTruck: 1,
           mailCarrier: 1,
           parkedCar: 1,
         },
@@ -145,9 +143,7 @@ export const WORLD = {
           cone: 1,
           cyclist: 1,
           hedge: 1,
-          // CLEANUP (added 2026-10-21): restore the street weights once art draws a lane-sized
-          // ice-cream-truck with a drive tag.
-          iceCreamTruck: 0,
+          iceCreamTruck: 1,
           mailCarrier: 0,
           parkedCar: 1,
         },
@@ -221,9 +217,7 @@ export const WORLD = {
           cone: 1,
           cyclist: 1,
           hedge: 1,
-          // CLEANUP (added 2026-10-21): restore the street weights once art draws a lane-sized
-          // ice-cream-truck with a drive tag.
-          iceCreamTruck: 0,
+          iceCreamTruck: 1,
           mailCarrier: 1,
           parkedCar: 1,
         },
