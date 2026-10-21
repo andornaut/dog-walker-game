@@ -82,6 +82,10 @@ export const HOME_TEXT = {
   sectionWalker: "Pick a walker",
   sectionWalkerPrompt: "Tap a face",
   shop: {
+    confirmBuy: "Buy",
+    confirmCancel: "Cancel",
+    confirmLeft: "{amount} left after",
+    confirmTitle: "Buy {name}?",
     dogs: "Dogs",
     dogsAllOwned: "Every dog in Toronto is a client!",
     gearNote: "Yours to keep",
