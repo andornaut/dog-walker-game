@@ -594,12 +594,12 @@ export interface HomeText {
     readonly confirmTitle: string;
     readonly dogs: string;
     readonly dogsAllOwned: string;
-    readonly gearNote: string;
     readonly owned: string;
+    // The note right of each list's heading: {owned} of the list's {max} purchases.
+    readonly ownedCount: string;
     readonly slotFirst: string;
     readonly slotLine: string;
     readonly slots: string;
-    readonly slotsOwned: string;
     readonly tabs: { readonly dogs: string; readonly gear: string };
     readonly title: string;
   };

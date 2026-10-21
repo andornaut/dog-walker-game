@@ -15,6 +15,24 @@ type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "
 export type ShopTab = "dogs" | "gear";
 export const SHOP_TABS: readonly ShopTab[] = ["gear", "dogs"];
 
+// The shop's lists, each under its heading: gear, dog slots and dogs.
+export type ShopList = "dogs" | "gear" | "slots";
+
+// The note right of a list's heading: how many of everything the list sells are owned. Dogs
+// count every dog, those owned from the start included.
+export function ownedCountNote(data: ShopData, owned: Owned, list: ShopList): string {
+  const counts: Record<ShopList, { max: number; owned: number }> = {
+    dogs: { max: Object.keys(data.dogs).length, owned: owned.dogs.length },
+    gear: { max: Object.keys(data.shopGear).length, owned: owned.gear.length },
+    slots: { max: data.dogSlots.length, owned: owned.dogSlots },
+  };
+  const { max, owned: have } = counts[list];
+  return fillLine(HOME_TEXT_FIELDS.shop, data.homeText.shop, "ownedCount", {
+    max: String(max),
+    owned: String(have),
+  });
+}
+
 // One thing the shop sells, as its row shows it. price is null once owned. blocked is why it
 // cannot be bought yet (a slot needs the one before it), or null.
 export interface ShopRow {

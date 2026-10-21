@@ -9,7 +9,7 @@ import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
 import { readBitmapFont } from "../tools/fontFile";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -22,6 +22,7 @@ import { messageLine } from "./homeLines";
 import {
   dogRows,
   gearRows,
+  ownedCountNote,
   shopAffordable,
   type ShopRow,
   shopRowId,
@@ -136,6 +137,42 @@ describe("shopAffordable", () => {
     expect(shopAffordable(data, owned, dollars(600))).toBe(true);
     expect(shopAffordable(data, owned, dollars(0))).toBe(false);
     expect(shopAffordable(data, everything, dollars(100_000))).toBe(false);
+  });
+});
+
+// Each list's heading note counts what the list sells that is owned, out of all of it, and
+// sits right of the heading's ink with a gap, beside a scrollbar too.
+describe("ownedCountNote", () => {
+  const everything: Owned = {
+    dogSlots: data.dogSlots.length,
+    dogs: Object.keys(data.dogs) as DogId[],
+    gear: Object.keys(data.shopGear) as Owned["gear"],
+    walkers: [],
+  };
+  const titles = {
+    dogs: data.homeText.shop.dogs,
+    gear: data.homeText.shop.tabs.gear,
+    slots: data.homeText.shop.slots,
+  };
+  const note = (have: number, max: number) =>
+    data.homeText.shop.ownedCount.replace("{owned}", String(have)).replace("{max}", String(max));
+  const cases = [owned, everything].flatMap((have) => [
+    ["dogs", have, have.dogs.length, Object.keys(data.dogs).length] as const,
+    ["gear", have, have.gear.length, Object.keys(data.shopGear).length] as const,
+    ["slots", have, have.dogSlots, data.dogSlots.length] as const,
+  ]);
+  const style = { letterSpacing: 0, scale: 2 };
+
+  it.each(cases)("%s: counts the owned ones out of all of them", (list, have, count, max) => {
+    expect(ownedCountNote(data, have, list)).toBe(note(count, max));
+  });
+
+  it.each(cases)("%s: keeps the note clear of the heading", (list, have) => {
+    const text = ownedCountNote(data, have, list);
+    const titleRight =
+      SHOP_LAYOUT.headingX + fontInk("font-title", style, titles[list].toUpperCase()).right;
+    const noteLeft = shopListFrame(true).headingRight - inkWidth("font-body", style, text);
+    expect(titleRight + 8).toBeLessThanOrEqual(noteLeft);
   });
 });
 

@@ -8,7 +8,6 @@ import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
 import { type HomeAction, messageLine } from "../home/homeLines";
-import { HOME_TEXT_FIELDS } from "../home/homeText";
 import {
   answerPurchase,
   type ConfirmChoice,
@@ -20,6 +19,7 @@ import {
 import {
   dogRows,
   gearRows,
+  ownedCountNote,
   SHOP_ROW_VIEWS,
   SHOP_TABS,
   type ShopRow,
@@ -54,7 +54,6 @@ import {
   scrollToShow,
   stepScroll,
 } from "../input/listScroll";
-import { fillLine } from "../lib/lines";
 import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -777,11 +776,13 @@ export class ShopScene extends Scene {
     }
   }
 
-  // Every gear item with its effect in a few words and its price or Owned.
+  // How many gear items are owned, then every gear item with its effect in a few words and its
+  // price or Owned.
   private drawGear(root: GameObjects.Container, save: SaveDocument): void {
     const text = gameData.homeText;
     const { headingY, rows: spec } = LAYOUT.gear;
-    this.heading(root, headingY, text.shop.tabs.gear, text.shop.gearNote);
+    const note = ownedCountNote(gameData, save.owned, "gear");
+    this.heading(root, headingY, text.shop.tabs.gear, note);
     const rows = gearRows(gameData, save.owned);
     const rects = rowRects(this.frame.rowWidth, spec, rows.length);
     rows.forEach((row, i) => {
@@ -792,16 +793,17 @@ export class ShopScene extends Scene {
     });
   }
 
-  // The dog slots past the first with how many are owned, then the dogs still for sale, or a
-  // line saying every dog is owned.
+  // The dog slots past the first with how many are owned, then how many dogs are owned and the
+  // dogs still for sale, or a line saying every dog is owned.
   private drawDogs(root: GameObjects.Container, save: SaveDocument): void {
     const text = gameData.homeText;
     const { dogHeadingY, dogRows: dogSpec, slotHeadingY, slotRows: slotSpec } = LAYOUT.dogs;
-    const owned = fillLine(HOME_TEXT_FIELDS.shop, text.shop, "slotsOwned", {
-      max: String(gameData.dogSlots.length),
-      owned: String(save.owned.dogSlots),
-    });
-    this.heading(root, slotHeadingY, text.shop.slots, owned);
+    this.heading(
+      root,
+      slotHeadingY,
+      text.shop.slots,
+      ownedCountNote(gameData, save.owned, "slots"),
+    );
     const slots = slotRows(gameData, save.owned);
     rowRects(this.frame.rowWidth, slotSpec, slots.length).forEach((rect, i) => {
       const row = slots[i];
@@ -809,7 +811,7 @@ export class ShopScene extends Scene {
         this.drawRow(root, save, { rect, row }, purchaseArt(row.purchase));
       }
     });
-    this.heading(root, dogHeadingY, text.shop.dogs);
+    this.heading(root, dogHeadingY, text.shop.dogs, ownedCountNote(gameData, save.owned, "dogs"));
     const dogs = dogRows(gameData, save.owned);
     if (dogs.length === 0) {
       this.text(root, { x: LAYOUT.headingX, y: dogSpec.y + 4 }, text.shop.dogsAllOwned, {
