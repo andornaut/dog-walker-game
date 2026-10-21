@@ -19,7 +19,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - A build writes the set's Aseprite sources under `art/` and exports them to `public/art/` (`sprites/<key>.png` and `.json`, `images/<key>.png`, `fonts/<key>.png` and `.fnt`, `sounds/<key>.ogg` and `.m4a`). Each script's docstring names its folders. Exceptions:
   - `appicons.py` writes `art/appicon.aseprite` and `public/icons/`; `share.py` writes `art/share/share-card.aseprite` and `public/og-image.png`.
   - `fonts.py` and `sounds.py` write no sources. `sounds.py preview` takes an output folder, not a PNG, and `sounds.py build` also writes the loop flags in `public/art/manifest.extra.json`.
-  - Extra commands: `backdrops.py gags`, `depths.py compare DIR`, `minis.py compare OUT.png`, `backdrops.py verges` (with `--write`, to `shared/verges.json`), `pixel.py palette` (to `shared/palette.json`), `roadside.py table` (with `--write`, to `shared/roadside.json`) and `screens.py shop-preview OUT.png`.
+  - Extra commands: `backdrops.py camera`, `depths.py compare DIR`, `minis.py compare OUT.png`, `backdrops.py verges` (with `--write`, to `shared/verges.json`), `pixel.py palette` (to `shared/palette.json`), `roadside.py table` (with `--write`, to `shared/roadside.json`) and `screens.py shop-preview OUT.png`.
 - A build overwrites the `.aseprite` files: change the script, not the sources.
 - Each script's docstring holds its assets' sizes, tags, timings and placement coordinates.
 - Game data and layout come from the game's export in `shared/export/`, never from `src/`. Only `scene.py` reads it (`game-data.json` and `layout.json`); `backdrops.py`, `cards.py`, `screens.py`, `share.py` and the skin card scripts take the zones, the layout and the pack's hands and collars from `scene.py`. `pixel.py` and `minis.py` read the depth steps from `shared/depth-steps.json`. Every other script holds its sizes and positions as constants (`ui.py`'s top bar buttons, `screens.py`'s Pet shop at 234,86, `roadside.py`'s sidewalk edge), so a layout change in the game needs the matching change in the script.
@@ -31,7 +31,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - The kebab-case manifest key is the file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`, `public/art/images/<key>.png` or `public/art/fonts/<key>.png` and `.fnt`.
 - A key starts with its kind's prefix, as in `inventory.md` (`dog-`, `fx-`, `ui-`); road objects, moving hazards and `logo` use a plain name.
 - A depth variant appends its step (`dog-koda@50`).
-- Zone keys use the zone's art id, the Toronto neighborhood's id in kebab case: `cabbagetown`, `high-park`, `distillery-district`, `kensington-market`, `the-beaches`, `yonge-street` (easiest to hardest). The Maplewood keys (`snooze-crescent`, `bark-park`, `woof-way`, `sniff-street-shops`, `paws-promenade`, `the-long-way-home`) stay until the game has switched to the Toronto ids, then retire.
+- Zone keys use the zone's art id, the neighborhood's name in kebab case: `cabbagetown`, `high-park`, `distillery-district`, `kensington-market`, `the-beaches`, `yonge-street` (easiest to hardest).
 
 ### Consistency checks
 
@@ -41,7 +41,4 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Remaining for the first build
 
-- **Retire the Maplewood zone keys** (`backdrop-`, `road-`, `road-…-start`, `icon-zone-`, `card-zone-` and the `ui-zone-pips` tags for the six Maplewood ids, and Elm Avenue's `PLACEMENT` table) once the game reads only the Toronto ids
-- **Rebuild the choice cards on the Toronto roads:** `cards.py` and the skin card scripts take their grounds from the Toronto zones, so their next build redraws every card on its neighborhood's road
-
-New art follows the rulebook as it changes.
+Nothing: new art follows the rulebook as it changes.
