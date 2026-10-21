@@ -1,0 +1,22 @@
+{ "frames": {
+   "roadside-dune-grass@88.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 53, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 53, "h": 42 },
+    "sourceSize": { "w": 53, "h": 42 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-dune-grass@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 53, "h": 42 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}

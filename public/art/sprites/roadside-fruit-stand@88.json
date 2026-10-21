@@ -1,0 +1,22 @@
+{ "frames": {
+   "roadside-fruit-stand@88.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 95, "h": 74 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 74 },
+    "sourceSize": { "w": 95, "h": 74 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-fruit-stand@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 95, "h": 74 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}

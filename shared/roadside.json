@@ -14,7 +14,26 @@
     "roadside-urn",
     "roadside-shrub",
     "roadside-topiary",
-    "roadside-well"
+    "roadside-well",
+    "roadside-gas-lamp",
+    "roadside-street-lamp",
+    "roadside-post-ring",
+    "roadside-tree-maple",
+    "roadside-tree-oak",
+    "roadside-tree-pine",
+    "roadside-trail-sign",
+    "roadside-fern",
+    "roadside-barrels",
+    "roadside-fruit-stand",
+    "roadside-clothes-rack",
+    "roadside-lifeguard-chair",
+    "roadside-umbrella",
+    "roadside-umbrella-turquoise",
+    "roadside-muskoka-chair",
+    "roadside-muskoka-chair-red",
+    "roadside-dune-grass",
+    "roadside-transit-stop",
+    "roadside-planter-tree"
   ],
   "zones": {
     "woof-way": {
@@ -57,7 +76,266 @@
           "gapStart": 2,
           "gapStride": 1
         }
-      }
+      },
+      "shadowColour": "3e8948"
+    },
+    "cabbagetown": {
+      "slot": 140,
+      "lots": [
+        []
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-tree-maple",
+            "across": 277,
+            "dz": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "key": "roadside-gas-lamp",
+            "across": 231,
+            "dz": 0
+          }
+        ],
+        [],
+        []
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 1
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 2,
+          "gapStride": 1
+        }
+      },
+      "shadowColour": "357a2f"
+    },
+    "high-park": {
+      "slot": 140,
+      "lots": [
+        []
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-tree-oak",
+            "across": 292,
+            "dz": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "key": "roadside-tree-pine",
+            "across": 268,
+            "dz": 0
+          }
+        ],
+        [],
+        []
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 1
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 2,
+          "gapStride": 1
+        }
+      },
+      "shadowColour": "11301c"
+    },
+    "distillery-district": {
+      "slot": 140,
+      "lots": [
+        []
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-gas-lamp",
+            "across": 231,
+            "dz": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "key": "roadside-barrels",
+            "across": 262,
+            "dz": 0
+          }
+        ],
+        [],
+        []
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 1
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 2,
+          "gapStride": 1
+        }
+      },
+      "shadowColour": "733e39"
+    },
+    "kensington-market": {
+      "slot": 140,
+      "lots": [
+        []
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-tree-maple",
+            "across": 277,
+            "dz": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "key": "roadside-post-ring",
+            "across": 249,
+            "dz": 0
+          }
+        ],
+        [],
+        []
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 1
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 2,
+          "gapStride": 1
+        }
+      },
+      "shadowColour": "26292f"
+    },
+    "the-beaches": {
+      "slot": 140,
+      "lots": [
+        []
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-lifeguard-chair",
+            "across": 256,
+            "dz": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "key": "roadside-dune-grass",
+            "across": 243,
+            "dz": 0
+          }
+        ],
+        [],
+        []
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 1
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 2,
+          "gapStride": 1
+        }
+      },
+      "shadowColour": "c28569"
+    },
+    "yonge-street": {
+      "slot": 140,
+      "lots": [
+        []
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-planter-tree",
+            "across": 259,
+            "dz": 0
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "key": "roadside-transit-stop",
+            "across": 234,
+            "dz": 0
+          }
+        ],
+        [],
+        []
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 1
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 2,
+          "gapStride": 1
+        }
+      },
+      "shadowColour": "8b9bb4"
     }
   }
 }
