@@ -716,12 +716,12 @@ def squirrel(tail=0, shift=0):
     g = edged(Grid())
     t, h = tail, shift
     # the tail, rising from the base behind the body and curling over at the top
-    g.ell(21 + t, 15, 5.5, 9, "ochre", "rust", "tan")
-    g.ell(18 + t, 6.5, 5, 3.5, "ochre", "rust", "tan")
-    g.ell(21 + t, 15.5, 2.5, 6, "tan")
+    g.cel(21 + t, 15, 5.5, 9, "ochre", "rust", "tan")
+    g.cel(18 + t, 6.5, 5, 3.5, "ochre", "rust", "tan")
+    g.cel(21 + t, 15.5, 2.5, 6, "tan")
     # body, sitting up, with a cream belly; hind feet either side
-    g.ell(15 + h, 21.5, 5.5, 6.5, "ochre", "rust", "tan")
-    g.ell(15 + h, 22.5, 3, 4.5, "cream")
+    g.cel(15 + h, 21.5, 5.5, 6.5, "ochre", "rust", "tan")
+    g.cel(15 + h, 22.5, 3, 4.5, "cream")
     for x in (10, 17):
         g.rect(x + h, 27, 4, 2, "rust")
     # paws held together at the chest
@@ -734,11 +734,11 @@ def squirrel_head(g, x, y):
     """The squirrel's head facing the player, centred on (x, y), with its ears and face."""
     g.tri((x - 4, y - 1.5), (x - 3.5, y - 6), (x - 1, y - 3), "ochre")
     g.tri((x + 4, y - 1.5), (x + 3.5, y - 6), (x + 1, y - 3), "ochre")
-    g.ell(x, y, 4.5, 4, "ochre", "rust", "tan")
-    g.ell(x, y + 2, 2.5, 1.5, "cream")
+    g.cel(x, y, 4.5, 4, "ochre", "rust", "tan")
+    g.cel(x, y + 2, 2.5, 1.5, "cream")
     # round eyes, each with a glint a quarter of its size at the top-left, so they read as two bright eyes
     for ex in (x - 2, x + 2):
-        g.ell(ex, y + 0.5, 1.15, 1.15, "ink")
+        g.cel(ex, y + 0.5, 1.15, 1.15, "ink")
         g.rect(ex - 0.9, y - 0.4, 0.95, 0.95, "white")
     g.rect(x - 1, y + 1.5, 2, 1, "plum")
 
@@ -749,18 +749,18 @@ def squirrel_run(gather):
     higher, paws tucked under its chin and the tail flung up in an arch."""
     g = edged(Grid())
     if gather:
-        g.ell(20, 9, 5, 6, "ochre", "rust", "tan")
-        g.ell(20, 9.5, 2.5, 4, "tan")
-        g.ell(15, 19, 5.5, 5, "ochre", "rust", "tan")
-        g.ell(15, 20, 3, 3, "cream")
+        g.cel(20, 9, 5, 6, "ochre", "rust", "tan")
+        g.cel(20, 9.5, 2.5, 4, "tan")
+        g.cel(15, 19, 5.5, 5, "ochre", "rust", "tan")
+        g.cel(15, 20, 3, 3, "cream")
         for x in (11, 17):
             g.rect(x, 24, 3, 2, "rust")
         squirrel_head(g, 15, 14.5)
     else:
-        g.ell(22, 14, 5, 7, "ochre", "rust", "tan")
-        g.ell(22, 14.5, 2.5, 4.5, "tan")
-        g.ell(16, 22, 7, 4.5, "ochre", "rust", "tan")
-        g.ell(16, 23, 3.5, 2.5, "cream")
+        g.cel(22, 14, 5, 7, "ochre", "rust", "tan")
+        g.cel(22, 14.5, 2.5, 4.5, "tan")
+        g.cel(16, 22, 7, 4.5, "ochre", "rust", "tan")
+        g.cel(16, 23, 3.5, 2.5, "cream")
         for x in (8, 21):
             g.rect(x, 26, 3, 3, "rust")
             g.rect(x, 28, 3, 1, "tan")
@@ -861,15 +861,15 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
         return -2 if k > 0 else 0
 
     # the tail, a plume over the back behind the head
-    g.ell(24.5 + tail, 16.5 + b, 2.5, 2.5, "ochre", "rust", "tan")
+    g.cel(24.5 + tail, 16.5 + b, 2.5, 2.5, "ochre", "rust", "tan")
     g.p(24 + tail, 15 + b, "cream")
     # hind paws between the front legs, further off and a shade darker
     for x, k in ((13, bl), (17, br)):
         g.rect(x, 25 + b, 2, 4 + lift(k) - b, "rust")
         g.rect(x, 28 + lift(k), 2, 1, "lgrey")
     # shoulders and the white chest ruff
-    g.ell(16, 22 + b, 8.5, 4.5, "ochre", "rust", "tan")
-    g.ell(16, 22 + b, 4.5, 4, "white", "lgrey")
+    g.cel(16, 22 + b, 8.5, 4.5, "ochre", "rust", "tan")
+    g.cel(16, 22 + b, 4.5, 4, "white", "lgrey")
     # front legs: short, ochre with white socks
     for x, k in ((9, fl), (20, fr)):
         g.rect(x, 24 + b, 3, 4 + lift(k) - b, "ochre")
@@ -883,8 +883,8 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     g.tri((9, 12 + b), (9.5, 7 + b), (12.5, 10.5 + b), "pink")
     g.tri((23, 12 + b + t), (22.5, 7 + b + t), (19.5, 10.5 + b + t), "pink")
     # head: ochre crown, white blaze, cheeks and muzzle, eyes, nose and a happy mouth
-    g.ell(16, 14 + b, 7.5, 5.5, "ochre", "rust", "tan")
-    g.ell(16, 17 + b, 5.5, 2.5, "white", "lgrey")
+    g.cel(16, 14 + b, 7.5, 5.5, "ochre", "rust", "tan")
+    g.cel(16, 17 + b, 5.5, 2.5, "white", "lgrey")
     g.rect(15, 9 + b, 2, 7, "white")
     g.rect(11, 13 + b, 2, 2, "ink")
     g.rect(19, 13 + b, 2, 2, "ink")
