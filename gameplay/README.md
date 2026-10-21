@@ -20,7 +20,7 @@ Gameplay owns the rulebook and the values and content in the data value files (e
 
 - **Design sessions:** start with "design session" and a topic. Claude keeps floated ideas apart from agreed ones, asks the question that unblocks a decision, and on "wrap up" proposes doc changes, writing them once confirmed.
 - **Simulate before tuning:** every economy or difficulty change is compared before and after at the same seed, with `npm run simulate -- --runs 1000 --seed 1 --skill novice,typical,expert`.
-- **Playtest each build:** after each deploy, play `/play/` headless on a phone viewport, with `?seed=N&pack=...&dev=1` for a reproducible run, and report what broke to tech or art.
+- **Playtest what needs eyes:** play the deployed `/play/` headless on a phone viewport, with `?seed=N&pack=...&dev=1` for a reproducible run, and report what broke to tech or art.
 - **Card text:** generated from the effects, so a value-only edit regenerates the card-text snapshot.
 
 ## Targets
@@ -34,10 +34,9 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 | Expert  | 90 to 98%      | 5 to 15%            |
 
 - **Cards:** about 8 cards a walk at typical skill, one a minute; trim minor cards if walks run over
-- **Length:** a neighborhood takes about 2 minutes and a walk about 8
 - **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar, the premium gear item and the highest priced, is the exception: it may shift the finish rate more
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
-- **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item (about $6,925 in all); every gear item pays for itself over a reasonable number of walks
+- **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
 - **Trade-offs:** a strong downside always comes with a matching upside (Rush hour's extra tips come with more obstacles), and the net stays in the window
 - **Walker spread:** every walker lands within the play-style window: agility and perk make a walker feel different, never a lot easier or harder. The skill targets are for the median walker
 
@@ -45,17 +44,12 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 **Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
 
-Rules in the rulebook that the game doesn't have yet (the build order is in [`src/README.md`](../src/README.md)):
+Tuning against the targets, from a fresh baseline:
 
-1. **As-drawn hits:** road sprites drawn at 48px, each obstacle hitting 2 px inside its opaque outline, at its depth, within its own lanes (Screen and controls)
-2. **Grace blink:** the pack blinks during the grace window after a hit (Screen and controls)
-
-Tuning against the targets, after one re-baseline on the shared step loop:
-
-- Big Payday's threshold: rarely earned
-- Card obstacles: three-dog packs against the skunk; other dog, skunk and thief weights to hold about 8 cards a walk
-- Economy: pay, card costs, lucky finds and shop prices are first guesses against the targets above
-- Firing: typical walks with a firing run too rare (3 to 16%), while a novice with one dog finishes too few walks (11 to 26%); measure with the mixed policy
+- Big Payday: its threshold is rarely reached
+- Card obstacles: other dog, skunk and thief weights to hold about 8 cards a walk, including three-dog packs against the skunk
+- Economy: pay, card costs, lucky finds and shop prices
+- Firing: typical walks see a firing too rarely, and a novice with one dog finishes too few walks; measure with the mixed policy
 - Gear: each item within the window
 - Sizes: hearts against the small-dog dodge chance
 - Walkers: agility and each perk within the window
