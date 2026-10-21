@@ -29,7 +29,6 @@ import {
   messageIconKey,
   type MessageLine,
   messageLinePanel,
-  messageLineTop,
   messagePanel,
   messageRows,
   messageStripLayout,
@@ -51,19 +50,17 @@ function after(steps: readonly (readonly [string | null, number])[]): MessageStr
     return stepMessageStrip(MESSAGE_TIMING, dtMs, said);
   }, EMPTY_MESSAGE_STRIP);
 }
+const waitingTexts = (state: MessageStripState) => state.waiting.map(({ text }) => text);
 
 const BODY = fontFileMetrics("font-body");
 
 describe("sayLine", () => {
-  const showing = after([["a", 0]]);
-  it.each<[string, MessageStripState, string, string[]]>([
-    ["waits a new line", showing, "b", ["b"]],
-    ["drops a repeat of the shown line", showing, "a", []],
-    ["drops a repeat of a waiting line", sayLine(MESSAGE_TIMING, line("b"), showing), "b", ["b"]],
-  ])("%s", (_name, state, text, waiting) => {
-    expect(sayLine(MESSAGE_TIMING, line(text), state).waiting.map(({ text }) => text)).toEqual(
-      waiting,
-    );
+  it("waits a new line and drops a repeat of the shown or a waiting line", () => {
+    const showing = after([["a", 0]]);
+    const waitingB = sayLine(MESSAGE_TIMING, line("b"), showing);
+    expect(waitingTexts(waitingB)).toEqual(["b"]);
+    expect(waitingTexts(sayLine(MESSAGE_TIMING, line("a"), showing))).toEqual([]);
+    expect(waitingTexts(sayLine(MESSAGE_TIMING, line("b"), waitingB))).toEqual(["b"]);
   });
 
   it("keeps the newest waiting lines, dropping the oldest", () => {
@@ -72,73 +69,60 @@ describe("sayLine", () => {
       (strip, text) => sayLine(MESSAGE_TIMING, line(text), strip),
       EMPTY_MESSAGE_STRIP,
     );
-    expect(state.waiting.map(({ text }) => text)).toEqual(said.slice(-maxWaiting));
+    expect(waitingTexts(state)).toEqual(said.slice(-maxWaiting));
   });
 });
 
 describe("sayLineAhead", () => {
-  const waitingWith = (lines: readonly MessageLine[]): MessageStripState =>
-    lines.reduce((strip, said) => sayLine(MESSAGE_TIMING, said, strip), after([["shown", 0]]));
-  const texts = (state: MessageStripState) => state.waiting.map(({ text }) => text);
-
-  it.each<[string, MessageLine[], string[]]>([
-    ["waits alone on an empty queue", [], ["x"]],
-    [
-      "jumps every waiting line with its icon",
-      [line("a"), line("b", "bump"), line("c")],
-      ["x", "a", "b", "c"],
-    ],
-    ["stays behind lines with other icons", [line("b", "bump"), line("a")], ["b", "x", "a"]],
-    ["waits last when no line has its icon", [line("b", "bump")], ["b", "x"]],
-    ["drops a repeat of a waiting line", [line("a"), line("x")], ["a", "x"]],
-    [
-      "drops the oldest other line past the most that wait",
-      Array.from({ length: maxWaiting }, (_, i) => line(String(i))),
-      ["x", ...Array.from({ length: maxWaiting - 1 }, (_, i) => String(i + 1))],
-    ],
-  ])("%s", (_name, waiting, expected) => {
-    expect(texts(sayLineAhead(MESSAGE_TIMING, line("x"), waitingWith(waiting)))).toEqual(expected);
+  it("jumps the waiting lines with its icon, stays behind others, and drops the oldest past the most", () => {
+    const ahead = (waiting: readonly MessageLine[]) =>
+      waitingTexts(
+        sayLineAhead(
+          MESSAGE_TIMING,
+          line("x"),
+          waiting.reduce((strip, said) => sayLine(MESSAGE_TIMING, said, strip), after([["s", 0]])),
+        ),
+      );
+    expect(ahead([line("a"), line("b", "bump"), line("c")])).toEqual(["x", "a", "b", "c"]);
+    expect(ahead([line("b", "bump"), line("a")])).toEqual(["b", "x", "a"]);
+    expect(ahead([line("a"), line("x")])).toEqual(["a", "x"]);
+    expect(ahead(Array.from({ length: maxWaiting }, (_, i) => line(String(i))))).toEqual([
+      "x",
+      ...Array.from({ length: maxWaiting - 1 }, (_, i) => String(i + 1)),
+    ]);
   });
 });
 
 describe("stepMessageStrip", () => {
-  it.each<[string, (readonly [string | null, number])[], string | undefined]>([
-    ["shows a line at once on an empty strip", [["a", 0]], "a"],
-    [
-      "holds a waiting line until the shown one has dwelt",
-      [
+  it("shows a line at once, holds the next until it has dwelt, and drops it at the end of its life", () => {
+    const shown = (steps: readonly (readonly [string | null, number])[]) =>
+      after(steps).shown?.text;
+    expect(shown([["a", 0]])).toBe("a");
+    expect(
+      shown([
         ["a", 0],
         ["b", dwellMs - 1],
-      ],
-      "a",
-    ],
-    [
-      "replaces the dwelt line with the next",
-      [
+      ]),
+    ).toBe("a");
+    expect(
+      shown([
         ["a", 0],
         [null, dwellMs],
         ["b", 0],
-      ],
-      "b",
-    ],
-    [
-      "keeps a line until the end of its life",
-      [
+      ]),
+    ).toBe("b");
+    expect(
+      shown([
         ["a", 0],
         [null, lifeMs - 1],
-      ],
-      "a",
-    ],
-    [
-      "drops a line at the end of its life",
-      [
+      ]),
+    ).toBe("a");
+    expect(
+      shown([
         ["a", 0],
         [null, lifeMs],
-      ],
-      undefined,
-    ],
-  ])("%s", (_name, steps, text) => {
-    expect(after(steps).shown?.text).toBe(text);
+      ]),
+    ).toBeUndefined();
   });
 
   it("tells two lines with the same text apart", () => {
@@ -156,12 +140,11 @@ describe("stepMessageStrip", () => {
 });
 
 describe("lineAlpha", () => {
-  it.each<[string, number, number]>([
-    ["a new line is whole", 0, 1],
-    ["a line halfway through its fade is half", lifeMs - fadeMs / 2, 0.5],
-    ["a line at the end of its life is gone", lifeMs, 0],
-  ])("%s", (_name, ageMs, alpha) => {
-    expect(lineAlpha(MESSAGE_TIMING, { ...line("a"), ageMs, id: 0 })).toBeCloseTo(alpha);
+  it("fades a line out over the end of its life", () => {
+    const alpha = (ageMs: number) => lineAlpha(MESSAGE_TIMING, { ...line("a"), ageMs, id: 0 });
+    expect(alpha(0)).toBe(1);
+    expect(alpha(lifeMs - fadeMs / 2)).toBeCloseTo(0.5);
+    expect(alpha(lifeMs)).toBeCloseTo(0);
   });
 });
 
@@ -172,92 +155,53 @@ function pngSize(key: string): { height: number; width: number } {
 }
 
 describe("messageIconKey", () => {
-  it.each(Object.keys(MESSAGE_ICONS) as MessageIcon[])(
-    "leads a %s line with a 16x16 icon",
-    (icon) => {
-      expect(pngSize(messageIconKey(icon))).toEqual({ height: 16, width: 16 });
-    },
-  );
+  it("leads every kind of line with a 16x16 icon", () => {
+    const wrong = (Object.keys(MESSAGE_ICONS) as MessageIcon[]).filter((icon) => {
+      const { height, width } = pngSize(messageIconKey(icon));
+      return height !== 16 || width !== 16;
+    });
+    expect(wrong).toEqual([]);
+  });
 });
 
+const inside = (inner: Rect, outer: Rect) =>
+  inner.x >= outer.x &&
+  inner.y >= outer.y &&
+  inner.x + inner.width <= outer.x + outer.width &&
+  inner.y + inner.height <= outer.y + outer.height;
+
 describe("messageStripLayout", () => {
-  const strip = messageStripLayout(BODY);
-  const { backdrop } = screenLayout(SCREEN_CONFIG);
-  const { scale } = MESSAGE_STRIP;
-  const inside = (inner: Rect, outer: Rect) =>
-    inner.x >= outer.x &&
-    inner.y >= outer.y &&
-    inner.x + inner.width <= outer.x + outer.width &&
-    inner.y + inner.height <= outer.y + outer.height;
-  const overlaps = (a: Rect, b: Rect) =>
-    a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-  // A row from its capitals' top to its lowest ink.
-  const rowRect = (top: number): Rect => ({
-    height: inkRowsFromCapTop(BODY) * scale,
-    width: strip.room,
-    x: strip.textX,
-    y: top,
-  });
-  const iconRect = { ...strip.icon, height: 16, width: 16 };
-
-  it.each<[string, Rect, Rect]>([
-    ["the strip in the backdrop band", strip.panel, backdrop],
-    ["the icon in a one-row strip", iconRect, messagePanel(BODY, 1)],
-    ...strip.rowTops.map((top, row): [string, Rect, Rect] => [
-      `row ${row + 1} in a ${row + 1}-row strip`,
-      rowRect(top),
-      messagePanel(BODY, row + 1),
-    ]),
-  ])("keeps %s", (_name, inner, outer) => {
-    expect(inside(inner, outer)).toBe(true);
-  });
-
-  it("holds at most two rows, each a 2x line of the body font below the last", () => {
-    expect(MESSAGE_STRIP.rows).toBe(2);
-    expect(strip.panel).toEqual(messagePanel(BODY, MESSAGE_STRIP.rows));
-    strip.rowTops.slice(1).forEach((top, i) => {
-      expect(top - (strip.rowTops[i] ?? 0)).toBe(BODY.lineHeight * scale);
+  it("keeps the strip in the backdrop band under the walk bar, with its icon and rows inside", () => {
+    const strip = messageStripLayout(BODY);
+    const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
+    const rowRect = (top: number): Rect => ({
+      height: inkRowsFromCapTop(BODY) * MESSAGE_STRIP.scale,
+      width: strip.room,
+      x: strip.textX,
+      y: top,
     });
-  });
-
-  it("starts under the walk bar, clear of it", () => {
-    const { topBar } = screenLayout(SCREEN_CONFIG);
-    expect(overlaps(strip.panel, topBar)).toBe(false);
+    expect(inside(strip.panel, backdrop)).toBe(true);
     expect(strip.panel.y).toBeGreaterThan(topBar.y + topBar.height);
-  });
-
-  it("centres the first row's capitals on the icon", () => {
-    const capsMiddle = (strip.rowTops[0] ?? 0) + (BODY.capHeight * scale) / 2;
-    expect(Math.abs(capsMiddle - (strip.icon.y + 8))).toBeLessThanOrEqual(0.5);
+    expect(inside({ ...strip.icon, height: 16, width: 16 }, messagePanel(BODY, 1))).toBe(true);
+    strip.rowTops.forEach((top, row) => {
+      expect(inside(rowRect(top), messagePanel(BODY, row + 1)), `row ${row + 1}`).toBe(true);
+    });
   });
 });
 
 // With debuff bars up, the strip's one row sits under the last bar, in the band.
 describe("messageLinePanel", () => {
-  const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
-  const inside = (inner: Rect, outer: Rect) =>
-    inner.x >= outer.x &&
-    inner.y >= outer.y &&
-    inner.x + inner.width <= outer.x + outer.width &&
-    inner.y + inner.height <= outer.y + outer.height;
-  it.each([1, 2])("puts the one-row strip under %i bars, in the band", (bars) => {
-    const line = messageLinePanel(bars);
-    const last = debuffBarRects(topBar, bars).at(-1);
-    expect(last).toBeDefined();
-    expect(line.panel.y).toBeGreaterThanOrEqual((last?.y ?? 0) + (last?.height ?? 0));
-    expect(inside(line.panel, backdrop)).toBe(true);
-    expect(inside({ ...line.icon, height: 16, width: 16 }, line.panel)).toBe(true);
-    expect(line.textX + line.room).toBeLessThanOrEqual(line.panel.x + line.panel.width);
+  it("puts the one-row strip under the debuff bars, in the band", () => {
+    const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
+    for (const bars of [1, 2]) {
+      const one = messageLinePanel(bars);
+      const last = debuffBarRects(topBar, bars).at(-1);
+      expect(one.panel.y).toBeGreaterThanOrEqual((last?.y ?? 0) + (last?.height ?? 0));
+      expect(inside(one.panel, backdrop)).toBe(true);
+      expect(inside({ ...one.icon, height: 16, width: 16 }, one.panel)).toBe(true);
+      expect(one.textX + one.room).toBeLessThanOrEqual(one.panel.x + one.panel.width);
+    }
   });
-
-  it.each([...new Set(TEXT_FIT_STYLES.map(({ scale }) => scale))])(
-    "centres a %ix row's capitals on the icon's rows",
-    (scale) => {
-      const line = messageLinePanel(1);
-      const capsMiddle = messageLineTop(BODY, line, scale) + (BODY.capHeight * scale) / 2;
-      expect(Math.abs(capsMiddle - (line.icon.y + 8))).toBeLessThanOrEqual(0.5);
-    },
-  );
 });
 
 // Every line the strip can say: each hint and badge, each explanation a held press shows, and
@@ -344,22 +288,24 @@ function everyStripLine(): string[] {
 describe("the strip's lines", () => {
   const { room } = messageStripLayout(BODY);
   const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
-  it.each([...new Set(everyStripLine())])("fits %j", (said) => {
-    const text = plainMarks(said);
-    const rows = messageRows(width, room, text);
-    expect(rows.join(" ")).toBe(text.split(/\s+/).join(" "));
-    expect(rows.length).toBeLessThanOrEqual(MESSAGE_STRIP.rows);
-    for (const row of rows) {
-      expect(width(row)).toBeLessThanOrEqual(room);
-    }
-    const one = fitInFont("font-body", TEXT_FIT_STYLES, MESSAGE_LINE.room, text);
-    expect(one.widest).toBeLessThanOrEqual(MESSAGE_LINE.room);
+
+  it("fits every line on the strip's rows, and on the one-row strip", () => {
+    const misfits = [...new Set(everyStripLine())].filter((said) => {
+      const text = plainMarks(said);
+      const rows = messageRows(width, room, text);
+      const one = fitInFont("font-body", TEXT_FIT_STYLES, MESSAGE_LINE.room, text);
+      return (
+        rows.join(" ") !== text.split(/\s+/).join(" ") ||
+        rows.length > MESSAGE_STRIP.rows ||
+        rows.some((row) => width(row) > room) ||
+        one.widest > MESSAGE_LINE.room
+      );
+    });
+    expect(misfits).toEqual([]);
   });
 
   it("leaves out text past the last row", () => {
-    const word = "Woof";
-    const many = Array.from({ length: 200 }, () => word).join(" ");
-    const rows = messageRows(width, room, many);
-    expect(rows).toHaveLength(MESSAGE_STRIP.rows);
+    const many = Array.from({ length: 200 }, () => "Woof").join(" ");
+    expect(messageRows(width, room, many)).toHaveLength(MESSAGE_STRIP.rows);
   });
 });

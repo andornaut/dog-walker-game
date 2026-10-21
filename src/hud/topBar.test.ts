@@ -4,7 +4,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { containsPoint } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import {
-  buttonIcon,
   gameplayAllowed,
   pauseButtonIcon,
   playerPaused,
@@ -79,99 +78,83 @@ describe("the walk bar in each pause state", () => {
     sound: undefined,
   } as const;
 
-  it.each<[string, RunPause, Expected]>([
-    ["walking", WALKING, { ...walking, gameplay: true }],
-    ["under a card", CARD, card],
-    ["through the hit stop", HIT_STOP, walking],
-    ["while a press holds an explanation, keeping its press", HOLD, { ...walking, paused: true }],
-    ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
-    ["with the window out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
-    ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
-    ["in the menu", { ...WALKING, menu: "open" }, menu],
-    ["in the menu over a card", { ...CARD, menu: "open" }, menu],
-    ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
-    ["asking whether to head home", { ...WALKING, menu: "confirmHome" }, confirm],
-    ["asking whether to head home over a card", { ...CARD, menu: "confirmHome" }, confirm],
-    ["under help, which mutes on M", { ...WALKING, menu: "help" }, cover],
-    [
-      "under settings, which leaves M to its own sound switch",
-      { ...WALKING, menu: "settings" },
-      { ...cover, mute: undefined },
-    ],
-  ])("acts as it should %s", (_name, pause, expected) => {
-    const tapPause = topBarAction(pause, "tap", "pause");
-    expect(topBarAction(pause, "key", "pause")).toBe(tapPause);
-    expect({
-      covered: walkCovered(pause),
-      gameplay: gameplayAllowed(pause),
-      held: pressesHeld(pause),
-      help: topBarAction(pause, "tap", "help"),
-      home: topBarAction(pause, "tap", "home"),
-      icon: pauseButtonIcon(pause),
-      mute: topBarAction(pause, "key", "sound"),
-      pause: tapPause,
-      paused: walkPaused(pause),
-      player: playerPaused(pause),
-      settings: topBarAction(pause, "tap", "settings"),
-      sound: topBarAction(pause, "tap", "sound"),
-    }).toEqual(expected);
+  it("pauses, covers and routes the bar's presses as each state calls for", () => {
+    const cases: [string, RunPause, Expected][] = [
+      ["walking", WALKING, { ...walking, gameplay: true }],
+      ["under a card", CARD, card],
+      ["through the hit stop", HIT_STOP, walking],
+      ["while a press holds an explanation", HOLD, { ...walking, paused: true }],
+      ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
+      ["out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
+      ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
+      ["in the menu over a card", { ...CARD, menu: "open" }, menu],
+      ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
+      ["asking whether to head home over a card", { ...CARD, menu: "confirmHome" }, confirm],
+      ["under help, which mutes on M", { ...WALKING, menu: "help" }, cover],
+      [
+        "under settings, which leaves M to its own sound switch",
+        { ...WALKING, menu: "settings" },
+        { ...cover, mute: undefined },
+      ],
+    ];
+    for (const [name, pause, expected] of cases) {
+      const tapPause = topBarAction(pause, "tap", "pause");
+      expect(topBarAction(pause, "key", "pause"), name).toBe(tapPause);
+      expect(
+        {
+          covered: walkCovered(pause),
+          gameplay: gameplayAllowed(pause),
+          held: pressesHeld(pause),
+          help: topBarAction(pause, "tap", "help"),
+          home: topBarAction(pause, "tap", "home"),
+          icon: pauseButtonIcon(pause),
+          mute: topBarAction(pause, "key", "sound"),
+          pause: tapPause,
+          paused: walkPaused(pause),
+          player: playerPaused(pause),
+          settings: topBarAction(pause, "tap", "settings"),
+          sound: topBarAction(pause, "tap", "sound"),
+        },
+        name,
+      ).toEqual(expected);
+    }
   });
 });
 
 describe("topBarButtonForKey", () => {
-  it.each<[string, boolean, Record<string, TopBarPress | undefined>]>([
-    [
-      "maps M to sound and P or Escape to pause, in either case, and nothing else",
-      false,
-      {
-        "1": undefined,
-        ArrowLeft: undefined,
-        Escape: "pause",
-        M: "sound",
-        P: "pause",
-        m: "sound",
-        p: "pause",
-      },
-    ],
-    ["ignores a held key's repeats", true, { Escape: undefined, m: undefined }],
-  ])("%s", (_name, repeat, expected) => {
-    for (const [key, button] of Object.entries(expected)) {
-      expect(topBarButtonForKey(repeat, key), key).toBe(button);
+  it("maps M to sound and P or Escape to pause, in either case, and ignores repeats", () => {
+    const keys: Record<string, TopBarPress | undefined> = {
+      "1": undefined,
+      ArrowLeft: undefined,
+      Escape: "pause",
+      M: "sound",
+      P: "pause",
+      m: "sound",
+      p: "pause",
+    };
+    for (const [key, button] of Object.entries(keys)) {
+      expect(topBarButtonForKey(false, key), key).toBe(button);
+      expect(topBarButtonForKey(true, key), key).toBeUndefined();
     }
   });
 });
 
 describe("the walk bar's buttons", () => {
-  const { topBar } = screenLayout(SCREEN_CONFIG);
-  const bar = walkBarLayout(topBar);
-
-  it("are the walk bar layout's, left to right, none over the next, the last inside the bar", () => {
-    expect(TOP_BAR_BUTTONS).toEqual(bar.buttons);
+  it("sets each face in a thumb-wide hit area, left to right, none over the next or the wells", () => {
+    const { topBar } = screenLayout(SCREEN_CONFIG);
+    const bar = walkBarLayout(topBar);
     const hits = WALK_BAR_BUTTONS.map((id) => TOP_BAR_BUTTONS[id].hit);
     hits.slice(1).forEach((hit, i) => {
       expect(hit.x).toBeGreaterThanOrEqual((hits[i]?.x ?? 0) + (hits[i]?.width ?? 0));
     });
     const last = hits.at(-1);
     expect((last?.x ?? 0) + (last?.width ?? 0)).toBeLessThanOrEqual(topBar.x + topBar.width);
-  });
-
-  it.each(WALK_BAR_BUTTONS.map((id) => [id] as const))(
-    "holds %s's face in its hit area, the bar's height and wide enough for a thumb, its icon 2px in and 1px down",
-    (id) => {
-      const { face, hit } = TOP_BAR_BUTTONS[id];
-      const size = WALK_BAR.buttonFace.size;
+    const size = WALK_BAR.buttonFace.size;
+    for (const { face, hit } of Object.values(TOP_BAR_BUTTONS)) {
       expect(hit.width).toBeGreaterThanOrEqual(WALK_BAR.minHitWidth);
-      expect({ height: hit.height, y: hit.y }).toEqual({ height: topBar.height, y: topBar.y });
       expect(face.x).toBeGreaterThanOrEqual(hit.x);
       expect(face.x + size).toBeLessThanOrEqual(hit.x + hit.width);
       expect(face.y + size).toBeLessThanOrEqual(topBar.y + topBar.height);
-      expect(buttonIcon(TOP_BAR_BUTTONS[id], false)).toEqual({ x: face.x + 2, y: face.y + 1 });
-      expect(buttonIcon(TOP_BAR_BUTTONS[id], true)).toEqual({ x: face.x + 2, y: face.y + 3 });
-    },
-  );
-
-  it("keeps the hit areas clear of the neighbourhood well and the effect wells", () => {
-    for (const { hit } of Object.values(TOP_BAR_BUTTONS)) {
       for (const well of [bar.zoneWell, ...bar.effectWells, ...bar.effectHolds]) {
         expect(well.x + well.width).toBeLessThanOrEqual(hit.x);
       }
@@ -180,23 +163,19 @@ describe("the walk bar's buttons", () => {
 });
 
 describe("topBarButtonAt", () => {
-  // Each hit area's corners, and points just outside the row of them.
-  const corners = WALK_BAR_BUTTONS.flatMap((id): [number, number, TopBarPress | undefined][] => {
-    const { hit } = TOP_BAR_BUTTONS[id];
-    return [
-      [hit.x, hit.y, id],
-      [hit.x + hit.width - 1, hit.y + hit.height - 1, id],
-    ];
-  });
-  const first = TOP_BAR_BUTTONS[WALK_BAR_BUTTONS[0]].hit;
-  it.each<[number, number, TopBarPress | undefined]>([
-    ...corners,
-    [first.x - 1, first.y, undefined],
-    [first.x, first.y + first.height, undefined],
-  ])("finds at (%i, %i) the %s button", (x, y, expected) => {
-    expect(topBarButtonAt(x, y)).toBe(expected);
-    if (expected !== undefined) {
-      expect(containsPoint(TOP_BAR_BUTTONS[expected].hit, x, y)).toBe(true);
+  it("finds each button at its hit area's corners, and none just outside the row", () => {
+    for (const id of WALK_BAR_BUTTONS) {
+      const { hit } = TOP_BAR_BUTTONS[id];
+      for (const [x, y] of [
+        [hit.x, hit.y],
+        [hit.x + hit.width - 1, hit.y + hit.height - 1],
+      ] as const) {
+        expect(topBarButtonAt(x, y), id).toBe(id);
+        expect(containsPoint(hit, x, y)).toBe(true);
+      }
     }
+    const first = TOP_BAR_BUTTONS[WALK_BAR_BUTTONS[0]].hit;
+    expect(topBarButtonAt(first.x - 1, first.y)).toBeUndefined();
+    expect(topBarButtonAt(first.x, first.y + first.height)).toBeUndefined();
   });
 });

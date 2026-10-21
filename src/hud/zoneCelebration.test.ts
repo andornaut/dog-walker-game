@@ -43,17 +43,19 @@ describe("zoneCelebration", () => {
     const data = gameData.walkers[walker];
     return data.unlock === "start" ? "street" : data.zone;
   };
-  it.each<{ expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }>([
-    { expected: "ben", finished: ["street", goal("ben")], owned: ["casey"] },
-    { expected: "ada", finished: ["street", goal("ada")], owned: ["casey"] },
-    { expected: "trista", finished: ["street", goal("trista")], owned: ["casey"] },
-    { expected: null, finished: ["street", goal("ben")], owned: ["casey", "ben"] },
-    { expected: null, finished: ["street"], owned: ["casey"] },
-    { expected: null, finished: [goal("ben")], owned: ["ada", "ben", "casey", "trista"] },
-  ])("finishing $finished owning $owned: $expected joins", ({ expected, finished, owned }) => {
-    const finish = { changes: [], finished, walker: "casey", zone: "Elm Avenue" } as const;
-    const joined = zoneCelebration(gameData, owned, finish);
-    expect(joined.kind === "newWalker" ? joined.walker : null).toBe(expected);
+  it("lets a walker join on finishing their zone only while not owned", () => {
+    for (const { expected, finished, owned } of [
+      { expected: "ben", finished: ["street", goal("ben")], owned: ["casey"] },
+      { expected: "ada", finished: ["street", goal("ada")], owned: ["casey"] },
+      { expected: "trista", finished: ["street", goal("trista")], owned: ["casey"] },
+      { expected: null, finished: ["street", goal("ben")], owned: ["casey", "ben"] },
+      { expected: null, finished: ["street"], owned: ["casey"] },
+      { expected: null, finished: [goal("ben")], owned: ["ada", "ben", "casey", "trista"] },
+    ] satisfies readonly { expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }[]) {
+      const finish = { changes: [], finished, walker: "casey", zone: "Elm Avenue" } as const;
+      const joined = zoneCelebration(gameData, owned, finish);
+      expect(joined.kind === "newWalker" ? joined.walker : null).toBe(expected);
+    }
   });
 
   it("counts the zone's fees and tips, and leaves out bumps and hearts", () => {
@@ -101,39 +103,43 @@ describe("celebrationText", () => {
     ]);
   });
 
-  it.each<WalkerId>(["ben", "ada"])("names %s, with its agility word and perk icon", (walker) => {
-    const shown = celebrationText(gameData, { kind: "newWalker", walker });
-    const { agility, name, perk } = gameData.walkers[walker];
-    expect(shown).toMatchObject({
-      button: text.newWalker.button,
-      greeting: gameData.walkers[walker].greeting,
-      subtitle: text.newWalker.subtitle.replace("{walker}", name),
-      title: text.newWalker.title,
-    });
-    if (shown.kind !== "newWalker") {
-      throw new Error("a new walker's text");
+  it("names a new walker, with its agility word and perk icon", () => {
+    for (const walker of ["ben", "ada"] satisfies readonly WalkerId[]) {
+      const shown = celebrationText(gameData, { kind: "newWalker", walker });
+      const { agility, name, perk } = gameData.walkers[walker];
+      expect(shown).toMatchObject({
+        button: text.newWalker.button,
+        greeting: gameData.walkers[walker].greeting,
+        subtitle: text.newWalker.subtitle.replace("{walker}", name),
+        title: text.newWalker.title,
+      });
+      if (shown.kind !== "newWalker") {
+        throw new Error("a new walker's text");
+      }
+      const word = agilityWord(gameData.homeText, agility);
+      const perkName = gameData.walkerPerks[perk].name;
+      const filled = text.newWalker.info.replace("{agility}", word).replace("{perk}", perkName);
+      expect(shown.info.map((part) => part.text).join("")).toBe(filled);
+      expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
+        { icon: perkIconKey(perk), kind: "icon", text: perkName },
+      ]);
     }
-    const word = agilityWord(gameData.homeText, agility);
-    const perkName = gameData.walkerPerks[perk].name;
-    const filled = text.newWalker.info.replace("{agility}", word).replace("{perk}", perkName);
-    expect(shown.info.map((part) => part.text).join("")).toBe(filled);
-    expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
-      { icon: perkIconKey(perk), kind: "icon", text: perkName },
-    ]);
   });
 });
 
 describe("zoneBannerHeading", () => {
   const places = Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex);
 
-  it.each(places)("names the world and zone %i's place in the walk, from 1", (zoneIndex) => {
-    const heading = zoneBannerHeading(gameData, { zoneIndex });
-    expect(heading).toBe(
-      fillNames(gameData.runText.zoneBanner, {
-        n: String(zoneIndex + 1),
-        world: gameData.world.name,
-      }),
-    );
-    expect(heading).not.toMatch(/\bzone\b/i);
+  it("names the world and each zone's place in the walk, from 1, never the word zone", () => {
+    for (const zoneIndex of places) {
+      const heading = zoneBannerHeading(gameData, { zoneIndex });
+      expect(heading).toBe(
+        fillNames(gameData.runText.zoneBanner, {
+          n: String(zoneIndex + 1),
+          world: gameData.world.name,
+        }),
+      );
+      expect(heading).not.toMatch(/\bzone\b/i);
+    }
   });
 });

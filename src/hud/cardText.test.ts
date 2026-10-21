@@ -73,83 +73,98 @@ const CASES: [string, OptionView | undefined][] = [
   ["Skip", undefined],
   ...OPTIONS.map((option): [string, OptionView] => [`${option.label}: ${option.text}`, option]),
 ];
+const firesOf = (option: OptionView | undefined) =>
+  option === undefined || option.fires.length === 0 ? null : option.fires;
+const bodyWidth = (style: TextFitStyle, line: string) => inkWidth("font-body", style, body(line));
 
-// A text set in a font in the first of styles that fits room, every line within its lines.
-function expectFits(font: string, styles: readonly TextFitStyle[], room: number, text: string) {
-  expect(styles.length).toBeGreaterThan(0);
+// Whether a text set in a font in the first of styles that fits room keeps within its lines
+// and its room.
+function fits(font: string, styles: readonly TextFitStyle[], room: number, text: string) {
   const fitted = fitInFont(font, styles, room, text);
-  expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
-  expect(fitted.widest).toBeLessThanOrEqual(room);
-  return fitted;
+  return (
+    styles.length > 0 && fitted.lines.length <= (fitted.style.lines ?? 1) && fitted.widest <= room
+  );
 }
 
-describe.each(CASES)("the card for %s", (_, option) => {
-  const label = option?.label ?? gameData.runText.card.skip;
-  const fires = option === undefined || option.fires.length === 0 ? null : option.fires;
+// The names of the cards that fitsOn rejects.
+const misfits = (fitsOn: (option: OptionView | undefined) => boolean) =>
+  CASES.filter(([, option]) => !fitsOn(option)).map(([name]) => name);
 
+describe("every card the data can deal", () => {
   it("fits its band label in the body font at 1x, small and enlarged", () => {
-    expect(inkWidth("font-body", ONE, body(label))).toBeLessThanOrEqual(CARD_LAYOUT.band.room);
-    expect(inkWidth("font-body", ONE, body(label))).toBeLessThanOrEqual(
-      CARD_LAYOUT.large.band.room,
-    );
+    const room = Math.min(CARD_LAYOUT.band.room, CARD_LAYOUT.large.band.room);
+    expect(
+      misfits((option) => {
+        const label = option?.label ?? gameData.runText.card.skip;
+        return inkWidth("font-body", ONE, body(label)) <= room;
+      }),
+    ).toEqual([]);
   });
 
   // The effect fits its box, under a path card's paws and over the warning where it shows; the
-  // warning shows where the effect still fits over it.
-  it("fits its firing warning and its effect in the effect box", () => {
-    const width = (style: TextFitStyle, line: string) => inkWidth("font-body", style, body(line));
-    const { box, effect, warning } = smallCardText(gameData, BODY, width, option);
-    // Every option's whole effect shows, a path card's upgrade line included.
-    const full = option?.text ?? gameData.runText.card.skipEffect;
-    expect(effect.lines.join(" ")).toBe(full.split(/\s+/).join(" "));
+  // warning shows where the effect still fits over it. Every option's whole effect shows, a path
+  // card's upgrade line included.
+  it("fits its firing warning and its whole effect in the effect box", () => {
     const { effect: area, warningGap } = CARD_LAYOUT;
-    const room = area.width;
-    for (const fitted of warning === null ? [effect] : [effect, warning]) {
-      expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
-      expect(
-        Math.max(...fitted.lines.map((line) => width(fitted.style, line))),
-      ).toBeLessThanOrEqual(room);
-    }
-    const effectBottom = box.y + inkRowsOfLines(BODY, effect.lines.length) * effect.style.scale;
-    const foot = warning === null ? area.y + area.height : box.warningY - warningGap;
-    expect(effectBottom).toBeLessThanOrEqual(foot);
-    if (warning !== null) {
-      expect(box.warningY + inkRowsOfLines(BODY, warning.lines.length)).toBe(area.y + area.height);
-    }
+    expect(
+      misfits((option) => {
+        const { box, effect, warning } = smallCardText(gameData, BODY, bodyWidth, option);
+        const full = option?.text ?? gameData.runText.card.skipEffect;
+        const fitted = warning === null ? [effect] : [effect, warning];
+        const effectBottom = box.y + inkRowsOfLines(BODY, effect.lines.length) * effect.style.scale;
+        const foot = warning === null ? area.y + area.height : box.warningY - warningGap;
+        return (
+          effect.lines.join(" ") === full.split(/\s+/).join(" ") &&
+          fitted.every(
+            ({ lines, style }) =>
+              lines.length <= (style.lines ?? 1) &&
+              lines.every((line) => bodyWidth(style, line) <= area.width),
+          ) &&
+          effectBottom <= foot &&
+          (warning === null ||
+            box.warningY + inkRowsOfLines(BODY, warning.lines.length) === area.y + area.height)
+        );
+      }),
+    ).toEqual([]);
   });
 
   it("fits its firing warning and its changes in the enlarged card's body", () => {
     const { large } = CARD_LAYOUT;
-    const warning =
-      fires === null
-        ? undefined
-        : expectFits(
-            "font-title",
-            FIRES_FIT.large.styles,
-            FIRES_FIT.large.room,
-            title(firesText(gameData, fires)),
-          );
-    const box = largeBodyBox(TITLE, warning?.lines.length ?? 0);
-    const text = body(largeBodyText(gameData, option));
-    expectFits("font-body", boxStyles(BODY, box.height), large.body.width, text);
+    const { room, styles } = FIRES_FIT.large;
+    expect(
+      misfits((option) => {
+        const fires = firesOf(option);
+        const warning = fires === null ? null : title(firesText(gameData, fires));
+        const lines = warning === null ? 0 : fitInFont("font-title", styles, room, warning).lines;
+        const box = largeBodyBox(TITLE, typeof lines === "number" ? lines : lines.length);
+        const text = body(largeBodyText(gameData, option));
+        return (
+          (warning === null || fits("font-title", styles, room, warning)) &&
+          fits("font-body", boxStyles(BODY, box.height), large.body.width, text)
+        );
+      }),
+    ).toEqual([]);
   });
 
-  it.runIf(hasPlaque(option))(
-    "fits a plaque text in the plaque beside any fires marker, small and enlarged",
-    () => {
-      const texts = hasPlaque(option) ? plaqueTexts(gameData, option) : [];
-      const { badge, fires: marker, large } = CARD_LAYOUT;
-      const small = plaqueRoom(
-        badge.x,
-        badge.width,
-        fires === null ? undefined : marker.x + marker.size,
-      );
-      const largeRight = fires === null ? undefined : large.fires.x + 2 * marker.size;
-      const enlarged = plaqueRoom(large.badge.x, large.badge.width, largeRight);
-      for (const room of [small, enlarged]) {
-        const widths = texts.map((text) => inkWidth("font-title", ONE, title(text)));
-        expect(Math.min(...widths)).toBeLessThanOrEqual(room);
-      }
-    },
-  );
+  it("fits a plaque text in the plaque beside any fires marker, small and enlarged", () => {
+    const { badge, fires: marker, large } = CARD_LAYOUT;
+    expect(
+      misfits((option) => {
+        if (!hasPlaque(option)) {
+          return true;
+        }
+        const fired = firesOf(option) !== null;
+        const small = plaqueRoom(badge.x, badge.width, fired ? marker.x + marker.size : undefined);
+        const enlarged = plaqueRoom(
+          large.badge.x,
+          large.badge.width,
+          fired ? large.fires.x + 2 * marker.size : undefined,
+        );
+        const narrowest = Math.min(
+          ...plaqueTexts(gameData, option).map((text) => inkWidth("font-title", ONE, title(text))),
+        );
+        return narrowest <= Math.min(small, enlarged);
+      }),
+    ).toEqual([]);
+  });
 });

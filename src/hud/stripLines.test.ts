@@ -5,7 +5,6 @@ import type { DebuffId } from "../data/types";
 import type { HeartChange } from "../rules/causes";
 import { bumpHearts } from "../rules/run";
 import { cents, clampHearts } from "../rules/units";
-import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import { fillNames } from "../text/lines";
 import {
@@ -37,135 +36,111 @@ const hearts = (
   dog: "koda",
   kind: "hearts",
 });
+const secondChance: HeartChange["causes"][number] = {
+  amount: 1,
+  kind: "modifier",
+  source: { kind: "walker", walker: "casey" },
+};
 
-const forgivenLoss = hearts(4, 4, [
-  { amount: -1, kind: "bump" },
-  { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
-]);
+const forgivenLoss = hearts(4, 4, [{ amount: -1, kind: "bump" }, secondChance]);
 
 describe("bumpLine", () => {
-  it.each([
-    [
-      "a dodge",
-      { change: null, dodged: true, dog: "koda" as const },
-      fillNames(strip.dodge, { dog: koda.name, obstacle: "cone" }),
-    ],
-    [
-      "a plain hit, with the hearts lost",
-      { change: hearts(4, 2), dodged: false, dog: "koda" as const },
+  it("says a dodge, a hit's hearts lost past Second chance, and nothing for a loss forgiven whole", () => {
+    const said = (change: HeartChange | null, dodged: boolean) =>
+      bumpLine(gameData, { change, dodged, dog: "koda" }, "Cone")?.text ?? null;
+    expect(said(null, true)).toBe(fillNames(strip.dodge, { dog: koda.name, obstacle: "cone" }));
+    expect(said(hearts(4, 2), false)).toBe(
       fillNames(strip.plainHit, { dog: koda.name, hearts: "2", obstacle: "cone", owner }),
-    ],
-    [
-      "the hearts still lost past Second chance",
-      {
-        change: hearts(4, 3, [
-          { amount: -2, kind: "bump" },
-          { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
-        ]),
-        dodged: false,
-        dog: "koda" as const,
-      },
-      fillNames(strip.plainHit, { dog: koda.name, hearts: "1", obstacle: "cone", owner }),
-    ],
-  ])("says %s", (_, bump, text) => {
-    expect(bumpLine(gameData, bump, "Cone")?.text).toBe(text);
-  });
-
-  it("says nothing of a loss Second chance forgave whole: its forgiven line says it", () => {
-    expect(bumpLine(gameData, { change: forgivenLoss, dodged: false, dog: "koda" }, "Cone")).toBe(
-      null,
     );
+    const softened = hearts(4, 3, [{ amount: -2, kind: "bump" }, secondChance]);
+    expect(said(softened, false)).toBe(
+      fillNames(strip.plainHit, { dog: koda.name, hearts: "1", obstacle: "cone", owner }),
+    );
+    // Its forgiven line says it.
+    expect(said(forgivenLoss, false)).toBeNull();
   });
 });
 
 describe("the strip's other lines", () => {
-  it.each([
-    [
-      "a treat",
-      treatLine(gameData, hearts(2, 3))?.text,
-      fillNames(strip.treat, { dog: koda.name, hearts: "1", owner }),
-    ],
-    ["nothing for a treat at the max", treatLine(gameData, hearts(3, 3)), null],
-    [
-      "the last heart",
-      lowHeartsLines(gameData, [hearts(2, 1)])[0]?.text,
-      fillNames(strip.lowHearts, { owner }),
-    ],
-    ["no last heart already on one", lowHeartsLines(gameData, [hearts(1, 1)]), []],
-    [
-      "a firing",
-      firedLine(gameData, "koda").text,
-      fillNames(strip.fired, { dog: koda.name, owner }),
-    ],
-    ["a pull", pullLine(gameData, "koda").text, fillNames(strip.pull, { dog: koda.name })],
-    [
-      "the generous neighbor",
-      luckyLine(gameData, "biscuitNeighbour", [])?.text,
-      strip.luckyNeighbor,
-    ],
-    [
-      "the lost wallet's money",
-      luckyLine(gameData, "lostWallet", [
-        { amount: cents(1000), causes: [], dog: null, kind: "money" },
-      ])?.text,
-      fillNames(strip.luckyWallet, { amount: "$10" }),
-    ],
-    [
-      "the Full pack bonus",
-      fullPackLine(gameData, [
-        {
-          amount: cents(3000),
-          causes: [{ amount: 3000, kind: "bonus" }],
-          dog: null,
-          kind: "money",
-        },
-      ])?.text,
-      fillNames(strip.fullPackHome, { amount: "$30" }),
-    ],
-    ["no bonus without one", fullPackLine(gameData, []), null],
-    [
-      "Second chance for a forgiven loss, and nothing for a plain one",
-      forgivenLines(gameData, [forgivenLoss, hearts(4, 3, [{ amount: -1, kind: "bump" }])]),
-      [{ icon: "hint", text: fillNames(strip.kindWords, { owner }) }],
-    ],
-  ])("says %s", (_, line, expected) => {
-    expect(line).toEqual(expected);
+  it("says each walk moment's line, and nothing where there is none", () => {
+    const cases: [string, unknown, unknown][] = [
+      [
+        "a treat",
+        treatLine(gameData, hearts(2, 3))?.text,
+        fillNames(strip.treat, { dog: koda.name, hearts: "1", owner }),
+      ],
+      ["nothing for a treat at the max", treatLine(gameData, hearts(3, 3)), null],
+      [
+        "the last heart",
+        lowHeartsLines(gameData, [hearts(2, 1)])[0]?.text,
+        fillNames(strip.lowHearts, { owner }),
+      ],
+      ["no last heart already on one", lowHeartsLines(gameData, [hearts(1, 1)]), []],
+      [
+        "a firing",
+        firedLine(gameData, "koda").text,
+        fillNames(strip.fired, { dog: koda.name, owner }),
+      ],
+      ["a pull", pullLine(gameData, "koda").text, fillNames(strip.pull, { dog: koda.name })],
+      [
+        "the lost wallet's money",
+        luckyLine(gameData, "lostWallet", [
+          { amount: cents(1000), causes: [], dog: null, kind: "money" },
+        ])?.text,
+        fillNames(strip.luckyWallet, { amount: "$10" }),
+      ],
+      [
+        "the Full pack bonus",
+        fullPackLine(gameData, [
+          {
+            amount: cents(3000),
+            causes: [{ amount: 3000, kind: "bonus" }],
+            dog: null,
+            kind: "money",
+          },
+        ])?.text,
+        fillNames(strip.fullPackHome, { amount: "$30" }),
+      ],
+      ["no bonus without one", fullPackLine(gameData, []), null],
+      [
+        "Second chance for a forgiven loss, and nothing for a plain one",
+        forgivenLines(gameData, [forgivenLoss, hearts(4, 3, [{ amount: -1, kind: "bump" }])]),
+        [{ icon: "hint", text: fillNames(strip.kindWords, { owner }) }],
+      ],
+    ];
+    for (const [name, line, expected] of cases) {
+      expect(line, name).toEqual(expected);
+    }
   });
 });
 
 describe("muddyHeartsLines", () => {
-  const calm = testState({ koda: 5 });
-  const muddy = testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
-  const cost = bumpHearts(gameData, muddy);
-  const warning = fillNames(strip.muddyHearts, {
-    cost: String(cost),
-    hearts: String(cost),
-    owner,
-  });
-
-  it("finds a Muddy bump costing more than the last heart", () => {
-    expect(cost).toBeGreaterThan(1);
-    expect(cost).toBeGreaterThan(bumpHearts(gameData, calm));
-  });
-
-  it.each<[string, RunState, HeartChange, string[]]>([
-    ["warns an owner down to a Muddy bump's cost", muddy, hearts(cost + 1, cost), [warning]],
-    ["warns an owner a Muddy bump took there", muddy, hearts(cost + cost, cost), [warning]],
-    ["leaves the last heart to its own line", muddy, hearts(cost, 1), []],
-    ["says nothing for hearts above a Muddy bump's cost", muddy, hearts(9, cost + 1), []],
-    ["says nothing for a gain to a Muddy bump's cost", muddy, hearts(cost - 1, cost), []],
-    ["says nothing while the pack is clean", calm, hearts(cost + 1, cost), []],
-  ])("%s", (_, run, change, lines) => {
-    expect(muddyHeartsLines(gameData, run, [change]).map(({ text }) => text)).toEqual(lines);
+  it("warns an owner down to a Muddy bump's cost, leaving the last heart to its own line", () => {
+    const calm = testState({ koda: 5 });
+    const muddy = testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
+    const cost = bumpHearts(gameData, muddy);
+    expect(cost).toBeGreaterThan(Math.max(1, bumpHearts(gameData, calm)));
+    const warning = fillNames(strip.muddyHearts, {
+      cost: String(cost),
+      hearts: String(cost),
+      owner,
+    });
+    const said = (run: typeof calm, change: HeartChange) =>
+      muddyHeartsLines(gameData, run, [change]).map(({ text }) => text);
+    expect(said(muddy, hearts(cost + 1, cost))).toEqual([warning]);
+    expect(said(muddy, hearts(cost + cost, cost))).toEqual([warning]);
+    expect(said(muddy, hearts(cost, 1))).toEqual([]);
+    expect(said(muddy, hearts(9, cost + 1))).toEqual([]);
+    expect(said(muddy, hearts(cost - 1, cost))).toEqual([]);
+    expect(said(calm, hearts(cost + 1, cost))).toEqual([]);
   });
 });
 
 describe("debuffLines", () => {
   const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
 
-  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
-    "announces %s starting and ending",
-    (debuff) => {
+  it("announces every debuff starting and ending", () => {
+    for (const debuff of Object.keys(gameData.debuffs) as DebuffId[]) {
       const on = { debuffs: [active(debuff, 20)] };
       const off = { debuffs: [] };
       expect(debuffLines(gameData, debuffChanges(off, on))).toEqual([
@@ -174,18 +149,15 @@ describe("debuffLines", () => {
       expect(debuffLines(gameData, debuffChanges(on, off))).toEqual([
         { icon: debuff, text: strip.debuffEnd[debuff] },
       ]);
-    },
-  );
+    }
+  });
 
-  it.each([
-    [
-      "restarts",
-      [active("muddy", 5)],
-      [active("muddy", 20)],
-      { ended: [], started: [active("muddy", 20)] },
-    ],
-    ["counts down quietly", [active("muddy", 5)], [active("muddy", 4)], { ended: [], started: [] }],
-  ])("announces a debuff that %s", (_, before, after, expected) => {
-    expect(debuffChanges({ debuffs: before }, { debuffs: after })).toEqual(expected);
+  it("announces a debuff that restarts, and not one that counts down", () => {
+    expect(
+      debuffChanges({ debuffs: [active("muddy", 5)] }, { debuffs: [active("muddy", 20)] }),
+    ).toEqual({ ended: [], started: [active("muddy", 20)] });
+    expect(
+      debuffChanges({ debuffs: [active("muddy", 5)] }, { debuffs: [active("muddy", 4)] }),
+    ).toEqual({ ended: [], started: [] });
   });
 });

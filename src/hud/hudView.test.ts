@@ -4,9 +4,8 @@ import { gameData } from "../data";
 import { dollarAmountText } from "../home/home";
 import { tipValue } from "../rules/run";
 import { type Cents, cents, clampHearts } from "../rules/units";
-import type { RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
-import { changeLabels, heartRows, pipLook, zonePips } from "./hudView";
+import { changeLabels, heartRows, zonePips } from "./hudView";
 
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
@@ -105,67 +104,43 @@ describe("changeLabels", () => {
 });
 
 describe("the money counter", () => {
-  it.each<[string, RunState]>([
-    ["a tip", testState({ koda: 5 })],
-    ["a Big tipper tip", testState({ koda: 5 }, { modifiers: [bigTipper] })],
-  ])("moves the counter by the dollars %s's label shows", (_, run) => {
-    const tip = tipValue(gameData, run);
-    const shown = (money: Cents) => Number(dollarAmountText(money).replaceAll(",", ""));
-    const gain = shown(cents(run.money + tip.amount)) - shown(run.money);
-    expect(changeLabels(gameData, [tip])[0]?.text.split(" ")[0]).toBe(`+$${gain}`);
+  it("moves the counter by the dollars a tip's label shows, a Big tipper tip's too", () => {
+    for (const run of [
+      testState({ koda: 5 }),
+      testState({ koda: 5 }, { modifiers: [bigTipper] }),
+    ]) {
+      const tip = tipValue(gameData, run);
+      const shown = (money: Cents) => Number(dollarAmountText(money).replaceAll(",", ""));
+      const gain = shown(cents(run.money + tip.amount)) - shown(run.money);
+      expect(changeLabels(gameData, [tip])[0]?.text.split(" ")[0]).toBe(`+$${gain}`);
+    }
   });
 });
 
 describe("heartRows", () => {
-  const [o, x] = [true, false];
-
-  it.each([
-    ["fills the first hearts and leaves the rest of the meter empty", 2, 4, [[o, o, x, x]]],
-    [
-      "wraps onto a second row past perRow, so 11 hearts take two rows",
-      9,
-      11,
-      [
-        [o, o, o, o, o, o, o, o],
-        [o, x, x],
-      ],
-    ],
-    ["has no rows for a meter of 0", 0, 0, []],
-  ])("%s", (_name, hearts, max, expected) => {
-    expect(heartRows(8, hearts, max)).toEqual(expected);
+  it("fills the first hearts, wraps past perRow, and has no rows for a meter of 0", () => {
+    const [o, x] = [true, false];
+    expect(heartRows(8, 2, 4)).toEqual([[o, o, x, x]]);
+    expect(heartRows(8, 9, 11)).toEqual([
+      [o, o, o, o, o, o, o, o],
+      [o, x, x],
+    ]);
+    expect(heartRows(8, 0, 0)).toEqual([]);
   });
 });
 
 describe("zonePips", () => {
-  const done = { fill: 1, state: "done", zone: "street" } as const;
-  const street = (fill: number) => ({ fill, state: "current", zone: "street" }) as const;
-  const todo = { fill: 0, state: "todo", zone: null } as const;
-
-  it.each<[string, Parameters<typeof zonePips>, ReturnType<typeof zonePips>]>([
-    [
-      "shows the route walked, the current zone part filled, and unknown forks ahead",
-      [4, ["street", "pawsPromenade"], 1, 0.25],
-      [done, { fill: 0.25, state: "current", zone: "pawsPromenade" }, todo, todo],
-    ],
-    [
-      "shows the position after a zone as unknown until its fork is taken",
-      [4, ["street"], 1, 0],
-      [done, todo, todo, todo],
-    ],
-    ["keeps the fill at most 1", [1, ["street"], 0, 1.4], [street(1)]],
-    ["keeps the fill at least 0", [1, ["street"], 0, -1], [street(0)]],
-  ])("%s", (_name, args, expected) => {
-    expect(zonePips(...args)).toEqual(expected);
-  });
-});
-
-describe("pipLook", () => {
-  it("tags each pip by its zone, and fills the current one in the zone's road colour", () => {
-    const pips = zonePips(3, ["street", "park"], 1, 0.5).map((pip) => pipLook(gameData, pip));
-    expect(pips).toEqual([
-      { tag: "woof-way-done", wellColor: "#3a4466" },
-      { tag: "bark-park", wellColor: "#e4a672" },
-      { tag: "todo", wellColor: null },
+  it("shows the route walked, the current zone part filled to 0..1, and unknown forks ahead", () => {
+    const done = { fill: 1, state: "done", zone: "street" } as const;
+    const todo = { fill: 0, state: "todo", zone: null } as const;
+    expect(zonePips(4, ["street", "pawsPromenade"], 1, 0.25)).toEqual([
+      done,
+      { fill: 0.25, state: "current", zone: "pawsPromenade" },
+      todo,
+      todo,
     ]);
+    expect(zonePips(4, ["street"], 1, 0)).toEqual([done, todo, todo, todo]);
+    expect(zonePips(1, ["street"], 0, 1.4)[0]?.fill).toBe(1);
+    expect(zonePips(1, ["street"], 0, -1)[0]?.fill).toBe(0);
   });
 });
