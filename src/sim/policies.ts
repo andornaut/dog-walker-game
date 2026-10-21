@@ -162,7 +162,7 @@ const POLICIES: Readonly<Record<PolicyId, Policy>> = {
   mixed,
 };
 
-// An encounter or forced stop card's choice. Every policy takes poop bags' Skip when offered.
+// An encounter card's choice. Every policy takes Hall pass's Skip when offered.
 // Only the mixed policy draws from random.
 export function chooseCardOption(
   data: ChoiceData,

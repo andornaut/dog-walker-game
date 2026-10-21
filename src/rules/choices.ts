@@ -98,7 +98,7 @@ export function hasPlaque(option: OptionView | undefined): option is OptionView 
 // The most options a card shows.
 export const MAX_CARD_OPTIONS = 3;
 
-// What a card scene draws. skip is true when poop bags offer a free Skip option; on a card
+// What a card scene draws. skip is true when Hall pass offers a free Skip option; on a card
 // that would then show more than MAX_CARD_OPTIONS, Skip takes the most expensive option's place.
 export interface CardView {
   readonly affected: readonly DogId[];

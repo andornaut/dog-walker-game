@@ -66,7 +66,7 @@ export interface SimConfig {
   readonly walker: WalkerId;
 }
 
-// One encounter or forced stop card and the option the policy took.
+// One encounter card and the option the policy took.
 interface ChoiceRecord {
   readonly cost: Cents;
   // Some enabled option cost money.
@@ -116,7 +116,7 @@ type MoverCounts = Partial<Record<WalkItemKind, ItemCount>>;
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.
   readonly badges: readonly AchievementId[];
-  // Encounter and forced stop cards; upgrade offers are not counted.
+  // Encounter cards; forks are not counted.
   readonly cardsSeen: number;
   readonly choices: readonly ChoiceRecord[];
   // The money banked at the end of the run.

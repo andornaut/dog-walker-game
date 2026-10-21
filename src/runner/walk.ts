@@ -109,7 +109,7 @@ type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
-// hitStop is set while an obstacle hit holds the walk still. tipCredit is the share of a tip
+// hitStop is set while a hit or a firing holds the walk still. tipCredit is the share of a tip
 // owed toward the next tip due: a tipSpawns debuff owes less than a whole tip for each one, so
 // only some come into view.
 export interface Road {
@@ -535,9 +535,9 @@ export function opensACard(
 }
 
 // Each obstacle, minor obstacle and lucky find is drawn first by the zone's weights, so its
-// shape is known when it is placed. Rush hour and the like scale both obstacle counts, and the
-// pack's size and the like scale the tips. Then each obstacle whose look moves comes as a mover at the zone's
-// mover share: one quota per kind, and one per stepper, whose steps are its own.
+// shape is known when it is placed. Rush hour and the like scale both obstacle counts, the tips
+// and the treats. Then each obstacle whose look moves comes as a mover at the zone's mover
+// share: one quota per kind, and one per stepper, whose steps are its own.
 export function spawnQuotas(
   data: WalkData,
   random: Random,
@@ -921,9 +921,8 @@ function frontDog(run: RunState): DogId {
   return front;
 }
 
-// The share of the tips due that come into view while the pack's debuffs change tipSpawns,
-// such as half while Stinky. Other tipSpawns modifiers set the zone's tip count when it is
-// planned.
+// The share of the tips due that come into view while the pack's debuffs change tipSpawns.
+// Other tipSpawns modifiers set the zone's tip count when it is planned.
 function tipSpawnsShare(data: WalkData, run: RunState): number {
   if (run.debuffs.length === 0) {
     return 1;
@@ -954,7 +953,7 @@ export function thinTips<Kind extends string>(
   return { credit: owed, events: kept };
 }
 
-// One frame of walking. Scrolls the road at the zone's speed, brings spawns into view,
+// One fixed step of walking. Scrolls the road at the zone's speed, brings spawns into view,
 // moves the pack, then collides: tips and treats are grabbed, a plain obstacle costs the
 // owner of the dog it lands on a heart unless a small dog dodges it, card obstacles (outside
 // the grace window) become cards for the pack, and lucky finds apply at once. An obstacle the

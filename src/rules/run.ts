@@ -6,7 +6,7 @@ import { modifiedStat, statParts } from "./modifiers";
 import { currentZone } from "./route";
 import { addCents, type Cents, cents, read, roundDollars } from "./units";
 
-// The modifiers the pack's debuffs apply, such as Stinky's on tipSpawns.
+// The modifiers the pack's debuffs apply, such as Stinky's on tipValue.
 export function debuffModifiers(
   data: Pick<GameData, "debuffs">,
   state: Pick<RunState, "debuffs">,

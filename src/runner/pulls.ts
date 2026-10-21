@@ -327,8 +327,8 @@ function steeredAway(
 // One step of the pull clock. pressed is the lane presses applied this step, in order. With
 // no dog straining, the dog nearest the nearest squirrel starts its tell toward it, which
 // draws squirrelPulls pulls. A strain whose target has gone, passed or been reached ends, and
-// steering away from the target cancels it. Once the tell has run, and a darting squirrel or
-// loose dog moves and is off the pack's lane, the dog pulls one lane toward the target, unless
+// steering away from the target cancels it. Once the tell has run, and the squirrel is off the
+// pack's lane (a darting one once it moves), the dog pulls one lane toward it, unless
 // the fairness rule blocks the pull: then it strains on until the lane clears or the strain
 // ends. A target with pulls left starts the tell again. Nothing moves unless the walk is
 // walking with no hit stop.

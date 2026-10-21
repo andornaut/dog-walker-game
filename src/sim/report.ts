@@ -296,8 +296,8 @@ function measured(share: number | null): string {
   return share === null ? "-" : `${(share * 100).toFixed(1)}%`;
 }
 
-// A row's cells as text, in MATRIX_HEADERS order. Player is the hit rate or skill preset;
-// Hit, Bump and Lucky are measured.
+// A row's cells as text, in MATRIX_HEADERS order. Player is the skill preset; Hit, Bump and
+// Lucky are measured.
 export const MATRIX_HEADERS = [
   "Policy",
   "Route",
