@@ -1,15 +1,6 @@
 {
   "sprites": [
     {
-      "key": "accident-spot",
-      "png": "sprites/accident-spot.png",
-      "json": "sprites/accident-spot.json",
-      "anchor": {
-        "feetY": 14,
-        "opaqueWidth": 11
-      }
-    },
-    {
       "key": "ambient-bike",
       "png": "sprites/ambient-bike.png",
       "json": "sprites/ambient-bike.json",
@@ -1780,11 +1771,6 @@
       "json": "sprites/face-walker-trista.json"
     },
     {
-      "key": "fx-accident",
-      "png": "sprites/fx-accident.png",
-      "json": "sprites/fx-accident.json"
-    },
-    {
       "key": "fx-bark",
       "png": "sprites/fx-bark.png",
       "json": "sprites/fx-bark.json"
@@ -1868,11 +1854,6 @@
       "key": "fx-hit-thief",
       "png": "sprites/fx-hit-thief.png",
       "json": "sprites/fx-hit-thief.json"
-    },
-    {
-      "key": "fx-need-met",
-      "png": "sprites/fx-need-met.png",
-      "json": "sprites/fx-need-met.json"
     },
     {
       "key": "fx-new-best",
@@ -5332,186 +5313,6 @@
       }
     },
     {
-      "key": "spot-lamp-post",
-      "png": "sprites/spot-lamp-post.png",
-      "json": "sprites/spot-lamp-post.json",
-      "anchor": {
-        "feetY": 71,
-        "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "spot-lamp-post@50",
-      "png": "sprites/spot-lamp-post@50.png",
-      "json": "sprites/spot-lamp-post@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 13
-      }
-    },
-    {
-      "key": "spot-lamp-post@62",
-      "png": "sprites/spot-lamp-post@62.png",
-      "json": "sprites/spot-lamp-post@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 16
-      }
-    },
-    {
-      "key": "spot-lamp-post@75",
-      "png": "sprites/spot-lamp-post@75.png",
-      "json": "sprites/spot-lamp-post@75.json",
-      "anchor": {
-        "feetY": 53,
-        "opaqueWidth": 19
-      }
-    },
-    {
-      "key": "spot-lamp-post@88",
-      "png": "sprites/spot-lamp-post@88.png",
-      "json": "sprites/spot-lamp-post@88.json",
-      "anchor": {
-        "feetY": 62,
-        "opaqueWidth": 22
-      }
-    },
-    {
-      "key": "spot-stranger",
-      "png": "sprites/spot-stranger.png",
-      "json": "sprites/spot-stranger.json",
-      "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 37
-      }
-    },
-    {
-      "key": "spot-stranger@50",
-      "png": "sprites/spot-stranger@50.png",
-      "json": "sprites/spot-stranger@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "spot-stranger@62",
-      "png": "sprites/spot-stranger@62.png",
-      "json": "sprites/spot-stranger@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 23
-      }
-    },
-    {
-      "key": "spot-stranger@75",
-      "png": "sprites/spot-stranger@75.png",
-      "json": "sprites/spot-stranger@75.json",
-      "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 27
-      }
-    },
-    {
-      "key": "spot-stranger@88",
-      "png": "sprites/spot-stranger@88.png",
-      "json": "sprites/spot-stranger@88.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 32
-      }
-    },
-    {
-      "key": "spot-tree",
-      "png": "sprites/spot-tree.png",
-      "json": "sprites/spot-tree.json",
-      "anchor": {
-        "feetY": 70,
-        "opaqueWidth": 46
-      }
-    },
-    {
-      "key": "spot-tree@50",
-      "png": "sprites/spot-tree@50.png",
-      "json": "sprites/spot-tree@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 22
-      }
-    },
-    {
-      "key": "spot-tree@62",
-      "png": "sprites/spot-tree@62.png",
-      "json": "sprites/spot-tree@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 28
-      }
-    },
-    {
-      "key": "spot-tree@75",
-      "png": "sprites/spot-tree@75.png",
-      "json": "sprites/spot-tree@75.json",
-      "anchor": {
-        "feetY": 53,
-        "opaqueWidth": 34
-      }
-    },
-    {
-      "key": "spot-tree@88",
-      "png": "sprites/spot-tree@88.png",
-      "json": "sprites/spot-tree@88.json",
-      "anchor": {
-        "feetY": 62,
-        "opaqueWidth": 40
-      }
-    },
-    {
-      "key": "spot-water-bowl",
-      "png": "sprites/spot-water-bowl.png",
-      "json": "sprites/spot-water-bowl.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 41
-      }
-    },
-    {
-      "key": "spot-water-bowl@50",
-      "png": "sprites/spot-water-bowl@50.png",
-      "json": "sprites/spot-water-bowl@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 21
-      }
-    },
-    {
-      "key": "spot-water-bowl@62",
-      "png": "sprites/spot-water-bowl@62.png",
-      "json": "sprites/spot-water-bowl@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "spot-water-bowl@75",
-      "png": "sprites/spot-water-bowl@75.png",
-      "json": "sprites/spot-water-bowl@75.json",
-      "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 31
-      }
-    },
-    {
-      "key": "spot-water-bowl@88",
-      "png": "sprites/spot-water-bowl@88.png",
-      "json": "sprites/spot-water-bowl@88.json",
-      "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 36
-      }
-    },
-    {
       "key": "squirrel",
       "png": "sprites/squirrel.png",
       "json": "sprites/squirrel.json",
@@ -6586,10 +6387,6 @@
     {
       "key": "help-lanes",
       "png": "images/help-lanes.png"
-    },
-    {
-      "key": "help-needs",
-      "png": "images/help-needs.png"
     },
     {
       "key": "help-owners",

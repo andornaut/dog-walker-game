@@ -57,10 +57,6 @@ def mini(s):
     return lambda w=32, h=32: Mini(s, w, h)
 
 
-def scale_of(g):
-    return getattr(g, "s", 1)
-
-
 def lit(g):
     """road.rim with road.LIT on the grid that holds the pixels, so a Mini gets the rim at its own size."""
     road.rim(getattr(g, "g", g), LIT)

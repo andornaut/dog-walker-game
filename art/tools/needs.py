@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""Draw the dog needs: the need icons, the pull bubble and its states, the need
-spots on the road, the fulfilment moment and the Regular dog's accident.
+"""Draw the dog needs: the need icons and the pull bubble and its states.
 
 Icons and the bubble carry cream and tan: icon outlines run down the ramp until
 they hold 3:1 on both, so an icon reads on the dog card, the detail card, the
 doghouse wall and inside the bubble. The bubble's cream paper carries Elm Avenue
-and its plum rim the light roads. Effects take the 1px plum rim (navy for
-water); road sprites take road_edge and the lit rim.
+and its plum rim the light roads. Effects take the 1px plum rim.
 
 icon-need-<need>   16x16  normal (1 frame)  regular (a hydrant on a grass tuft), playful (a
                           tennis ball with a bounce), friendly (a waving hand and a small
@@ -39,30 +37,6 @@ ui-fires           16x16  static (1 frame)  a broken heart: the firing moment's 
 fx-pull-fail       16x16  play (4 frames, 90ms)  a disappointed puff: a little cloud huffs out,
                           spreads and sags as it sinks, and breaks into two puffs. Bottom-centre
                           on the dog's centre column, 6px below its top opaque row (as fx-status)
-fx-need-met        48x48  regular, playful, friendly, nosy, thirsty (6 frames, 70ms each)  a
-                          round bubble pops up with the need's icon baked in, swells, hearts and
-                          sparkles fly out, then it bursts into droplets. Bottom-centre on the
-                          dog's feet
-fx-accident        48x48  play (6 frames, 100ms)  surprise lines fan out over the dog, blush lines and a
-                          sweat drop come and stay, and a small pile plops out behind. Laid on the
-                          dog's own 48x48 frame; the game then leaves accident-spot on the road
-accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground decal with no
-                          outline drawn under everything, a fly circling it
-spot-tree          48x72  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
-                          canopy rustles, then a leaf falls
-spot-stranger      48x72  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
-                          up in a wave, breathing (Friendly)
-                          wave (2 frames, 300ms)  the raised hand waves
-spot-lamp-post     48x72  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
-                          crosses the glass (Nosy)
-spot-water-bowl    48x48  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
-                          falls and rings the water (Thirsty)
-                          The spots are drawn in 32px units on a minis.Mini at BIG (1.5x), so a
-                          32x48 drawing is 48x72, its pixel maps stamped pixel for pixel
-spot-<spot>@<step>  every spot redrawn the same way at BIG x each depth step in minis.STEPS (from
-                   shared/depth-steps.json), floor(size x scale + 0.5): the same tags, frames and
-                   durations, a full 1px outline, motion kept at 1px; below 1x the bowl drops its
-                   bone
 
 Usage:
   needs.py preview OUT.png   every frame of every piece on the six road colours
@@ -71,8 +45,7 @@ Usage:
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
-the rim, burst, twinkle and heart helpers in fx.py, piece and layer in hits.py,
-dressed, face_front and the lit rim in road.py, small in minis.py.
+the rim helper in fx.py, piece in hits.py.
 """
 
 import math
@@ -80,17 +53,14 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fx import HEART, SMALL, burst, rim, stamp, star4  # noqa: E402
-from hits import layer, piece  # noqa: E402
-from minis import STEPS, small  # noqa: E402
+from fx import rim, stamp  # noqa: E402
+from hits import piece  # noqa: E402
 from moments import rounded  # noqa: E402
-from pixel import K, Grid, edged, icon_edge, main  # noqa: E402
-import road  # noqa: E402
+from pixel import K, Grid, icon_edge, main  # noqa: E402
 
 # The six road colours: Elm Avenue, Fairview Park, Main Street, The Long Way Home, Willow Crescent
 # and Riverside Path. Cream is also the cards' paper and tan the doghouse wall.
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
-NEEDS = ("regular", "playful", "friendly", "nosy", "thirsty")
 
 
 def bitmap(g, x0, y0, rows, cols, big=None):
@@ -104,13 +74,6 @@ def bitmap(g, x0, y0, rows, cols, big=None):
         for x, ch in enumerate(row):
             if ch in cols:
                 g.p(x0 + x, y0 + y, cols[ch])
-
-
-def lit(g):
-    """road.rim with road.LIT on the grid that holds the pixels, so a Mini's small version gets the rim
-    at its own size."""
-    road.rim(getattr(g, "g", g), road.LIT)
-    return g
 
 
 # ---------- need icons ----------
@@ -347,316 +310,6 @@ def pull_fail(step):
     return g
 
 
-# ---------- the fulfilment moment ----------
-
-MW = 48
-# The round bubble's centre and resting radius in the 48x48 frame; the icon sits in its middle.
-MCX, MCY, MR = 24, 16, 12
-
-
-def round_bubble(g, r, cx=MCX, cy=MCY):
-    """A round cream bubble with the plum rim and a tan lip on its lower right, a glint top left."""
-    g.ell(cx, cy, r + 1, r + 1, "plum")
-    g.ell(cx, cy, r, r, "tan")
-    g.ell(cx - 0.6, cy - 0.6, r - 0.8, r - 0.8, "cream")
-    g.p(cx - r * 0.55, cy - r * 0.6, "white")
-    g.p(cx - r * 0.55 + 1, cy - r * 0.6, "white")
-
-
-def paste(g, px, x0, y0):
-    for y, row in enumerate(px):
-        for x, c in enumerate(row):
-            if c:
-                g.p(x0 + x, y0 + y, c)
-
-
-def need_met(need, step):
-    """The bubble pops up with the icon in it, overshoots and settles; hearts rise from either side and
-    sparkles twinkle round it; then it bursts into droplets while the icon hangs a beat and the hearts
-    drift up."""
-    g = Grid(MW, MW)
-    art = ICONS[need]().outlined()
-    if step == 0:
-        piece(g, lambda p: star4(p, MCX, MCY + 6, 3, "yellow"), size=MW)
-        piece(g, lambda p: round_bubble(p, 4, MCX, MCY + 6), size=MW)
-        return g
-    if step < 4:
-        r = (0, 14, 12, 12)[step]
-        sub = Grid(MW, MW)
-        round_bubble(sub, r)
-        paste(sub, art, MCX - 8, MCY - 8)
-        layer(g, sub)
-    elif step == 4:
-        # the burst: a white star ring where the rim was, the icon still hanging in the middle
-        piece(g, lambda p: [burst(p, MCX, MCY, 15, 11, 10, "white", 9), p.ell(MCX, MCY, 10.5, 10.5, None)],
-              size=MW)
-        paste(g, art, MCX - 8, MCY - 9)
-    else:
-        for k in range(8):
-            a = math.radians(k * 45 + 20)
-            x, y = round(MCX + math.cos(a) * 15), round(MCY + math.sin(a) * 14)
-            piece(g, lambda p: p.rect(x, y, 2 if k % 2 else 1, 2 if k % 2 else 1, "white"), size=MW)
-    # hearts rise from both sides of the bubble from frame 2
-    for i, (x0, delay) in enumerate(((6, 0), (36, 1))):
-        t = step - 2 - delay
-        if t < 0:
-            continue
-        y = 26 - t * 5
-        piece(g, lambda p: stamp(p, SMALL if t == 0 else HEART, x0 + (1 if t == 0 else 0), y), size=MW)
-    # sparkles at three points round the bubble, in turn
-    for i, (x, y) in enumerate(((10, 6), (40, 12), (34, 32))):
-        t = step - 1 - i
-        if 0 <= t < 3:
-            piece(g, lambda p: star4(p, x, y, (1, 2, 1)[t], ("white", "yellow", "white")[t]), size=MW)
-    return g
-
-
-# ---------- the accident ----------
-
-# A small pile seen from the low camera, three tiers and a curl on top: B brown, D dbrown, T tan.
-PILE = ["...TB....", "..TBBD...", "...BD....", ".TBBBBD..", "TBBBBBBD.", "DDDDDDDD."]
-PILE_SMALL = ["..TB..", ".TBBD.", "DDDDD."]
-
-
-# fx-accident's frame: the dog road sprite's (dogs.ROAD_SIZE), so it lays over the dog's own frame.
-ACCIDENT = 48
-# The row the pile's last row sits on: the dogs' feet row in their 48x48 frame.
-ACCIDENT_FEET = 46
-# The sweat drop: c cyan, w white glint, s sky underside.
-ACCIDENT_DROP = [".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."]
-
-
-def accident(step):
-    """Laid over the dog's own frame: surprise lines fan out at the head's top right, then two pink blush strokes on
-    each side of the head and a sweat drop slide in and stay, and a small pile plops out behind the right hind
-    paw, its last row on ACCIDENT_FEET by the dogs' feet."""
-    g = Grid(ACCIDENT, ACCIDENT)
-    if step in (0, 1, 2, 3):
-        def lines(p):
-            # three surprise lines fanning out from the head's top right, growing and then drawing back
-            n = (2, 3, 3, 2)[step]
-            for k in range(n):
-                p.p(38 + k, 9 - k, "white")
-                p.p(41 + k, 12, "white")
-                p.p(35, 8 - k, "white")
-        piece(g, lines, size=ACCIDENT)
-    if step >= 1:
-        lift = 1 if step in (2, 4) else 0
-        for x0 in (4, 32):
-            piece(g, lambda p: [p.p(x0 + d + k, 18 + lift - k, "pink") for d in (0, 4) for k in range(3)],
-                  size=ACCIDENT)
-    if step >= 2:
-        slide = min(step - 2, 2)
-        piece(g, lambda p: bitmap(p, 7, 3 + slide, ACCIDENT_DROP, {"c": "cyan", "w": "white", "s": "sky"}), "navy",
-              size=ACCIDENT)
-    if step >= 3:
-        rows = PILE_SMALL if step == 3 else PILE
-        piece(g, lambda p: bitmap(p, 32, ACCIDENT_FEET + 1 - len(rows), rows, {"B": "brown", "D": "dbrown", "T": "tan"}),
-              size=ACCIDENT)
-    return g
-
-
-def accident_spot(fly):
-    """16x16 ground decal: the pile left on the road, no outline. brown carries Elm Avenue with its tan lit
-    edge, the dbrown base the light roads. A fly circles it: ink with a white wing."""
-    g = Grid(16, 16)
-    bitmap(g, 3, 9, PILE, {"B": "brown", "D": "dbrown", "T": "tan"})
-    g.rect(2, 14, 11, 1, "dbrown")
-    x, y = ((12, 6), (5, 5))[fly]
-    g.p(x, y, "ink")
-    g.p(x, y - 1, "white")
-    return g
-
-
-# ---------- need spots on the road ----------
-
-def tree(rustle=0, leaf=None):
-    """A street tree on a grass patch: a clumped canopy, dgreen lit green at the top left with forest in the
-    lower right, on a brown trunk standing in a mound of grass. rustle shifts the right-hand clumps 1px in
-    the wind; leaf drops a single leaf at that height beside the trunk."""
-    g = edged(Grid(32, 48))
-    # the grass patch at the foot, blades poking up out of it
-    g.ell(16, 43.5, 12, 3.5, "dgreen", "forest", "green")
-    for x, h in ((5, 2), (7, 3), (10, 2), (20, 2), (23, 3), (26, 2)):
-        g.rect(x, 41 - h, 1, h, "green")
-    # the trunk, flaring at the root, lit on the left
-    g.rect(13, 24, 6, 18, "brown")
-    g.rect(17, 24, 2, 18, "dbrown")
-    g.rect(13, 24, 1, 18, "tan")
-    g.rect(11, 39, 10, 3, "brown")
-    g.rect(18, 39, 3, 3, "dbrown")
-    g.rect(14, 30, 2, 2, "dbrown")
-    # the canopy: overlapping clumps, the right-hand ones swaying with the rustle
-    for cx, cy, r, sway in ((16, 13, 10, 0), (8, 17, 6.5, 0), (24, 17, 6.5, 1), (11, 8, 6, 0), (21, 8, 6, 1),
-                            (16, 21, 7, 0), (16, 5, 5, 0)):
-        g.ell(cx + sway * rustle, cy, r, r * 0.9, "dgreen", "forest", "green")
-    for cx, cy, sway in ((10, 9, 0), (16, 5, 0), (20, 10, 1), (7, 16, 0), (14, 15, 0), (23, 16, 1)):
-        g.ell(cx + sway * rustle, cy, 2, 1.6, "green")
-    if leaf is not None:
-        bitmap(g, 22, leaf, ["..g", ".gG", "gG."], {"g": "green", "G": "dgreen"})
-    return lit(g)
-
-
-TREE_IDLE = ((dict(), dict(rustle=1), dict(), dict(leaf=32)), 450)
-# The stranger's hoodie heart redrawn for the full size, 9x8.
-BIG_HEART = [".111.111.", "122111111", "121111113", "111111113", ".1111113.", "..11113..", "...113...", "....1...."]
-STRANGER_IDLE = (tuple(dict(bob=bb) for bb in road.BREATH), road.BREATH_MS)
-STRANGER_WAVE = ((dict(), dict(wave=1)), 300)
-
-
-def stranger_top(wave):
-    """The friendly stranger: curly ginger hair, freckles and a wide smile, a green hoodie with a pink
-    heart on the chest and the right hand up in a wave, fingers spread. wave shifts the raised hand that
-    many pixels."""
-    def top(g, b):
-        g.rect(9, 21 + b, 14, 13, "green")
-        g.rect(20, 21 + b, 3, 13, "dgreen")
-        g.rect(9, 32 + b, 14, 2, "dgreen")
-        g.rect(14, 21 + b, 4, 2, "dgreen")
-        bitmap(g, 12, 25 + b, [".11.11.", "1211111", "1111113", ".11113.", "..113..", "...1..."],
-               {"1": "pink", "2": "white", "3": "mauve"}, BIG_HEART)
-        g.rect(5, 22 + b, 4, 9, "green")
-        g.rect(8, 22 + b, 1, 9, "dgreen")
-        g.rect(5, 31 + b, 4, 3, "skin1")
-        # the raised arm, its hand open with the fingers apart, tipping 1px with the wave
-        w = wave
-        g.rect(23, 17 + b, 4, 5, "green")
-        g.rect(24, 12 + b, 4, 6, "green")
-        g.rect(27, 12 + b, 1, 6, "dgreen")
-        g.rect(26, 17 + b, 1, 5, "dgreen")
-        g.rect(24 + w, 7 + b, 4, 5, "skin1")
-        g.rect(27 + w, 7 + b, 1, 5, "skin2")
-        for x in (24, 26):
-            g.rect(x + w, 4 + b, 1, 3, "skin1")
-        g.rect(28 + w, 5 + b, 1, 2, "skin2")
-        road.face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
-        # curly ginger hair: a round crop with bumps along its top and sides
-        g.cel(16, 7 + b, 8.5, 4.5, "orange", "ochre", "amber")
-        for x, y in ((9, 5), (12, 3), (16, 2.5), (20, 3), (23, 5), (8, 9)):
-            g.cel(x, y + b, 2, 2, "orange", "ochre", "amber")
-        g.p(12, 6 + b, "rust")
-        g.p(17, 5 + b, "rust")
-        g.p(21, 7 + b, "rust")
-        face_front_open(g, 16, 13 + b)
-        for x, y in ((10, 16), (12, 17), (20, 16), (22, 17)):
-            g.p(x, y + b, "skin2")
-    return top
-
-
-def face_front_open(g, cx, y):
-    """road.face_front's eyes over a wide open smile with a pink tongue."""
-    road.face_front(g, cx, y, "neutral")
-    g.rect(cx - 2, y + 4, 4, 2, "dbrown")
-    g.p(cx - 3, y + 3, "dbrown")
-    g.p(cx + 2, y + 3, "dbrown")
-    g.rect(cx - 1, y + 5, 2, 1, "pink")
-
-
-def stranger(wave=0, bob=0):
-    """road.dressed, with the lit rim applied where a Mini keeps its pixels."""
-    return lit(edged(road.person(stranger_top(wave), legs="blue", shoes="white", bob=bob)))
-
-
-def lamp_post(glint=False):
-    """A street lamp: a flared foot, a navy post lit grey down its left, a collar halfway up and a lantern
-    with amber glass under a peaked cap. glint runs a white sheen down the glass."""
-    g = edged(Grid(32, 48))
-    # foot and post
-    g.rect(11, 44, 10, 3, "navy")
-    g.rect(12, 42, 8, 2, "navy")
-    g.rect(13, 39, 6, 3, "navy")
-    g.rect(14, 14, 4, 26, "navy")
-    g.rect(14, 14, 1, 26, "slate")
-    g.rect(12, 27, 8, 2, "navy")
-    g.rect(12, 27, 8, 1, "dslate")
-    # the lantern: a bottom plate, the amber glass between navy bars, a peaked cap with a finial
-    g.rect(11, 12, 10, 2, "navy")
-    g.rect(11, 5, 10, 7, "amber")
-    g.rect(11, 5, 10, 1, "yellow")
-    g.rect(18, 6, 2, 6, "orange")
-    for x in (11, 15, 20):
-        g.rect(x, 5, 1, 7, "navy")
-    g.tri((8.5, 5.5), (23.5, 5.5), (16, 0.5), "navy")
-    g.rect(9, 4, 14, 1, "navy")
-    g.p(15, 0, "navy")
-    g.p(16, 0, "navy")
-    if glint:
-        # as 1px lines, so they stay unbroken drawn larger
-        g.rect(13, 6, 1, 3, "white")
-        g.rect(12, 9, 1, 2, "white")
-        g.rect(17, 6, 1, 5, "white")
-    else:
-        g.p(12, 6, "white")
-        g.rect(16, 6, 1, 2, "yellow")
-    # a tuft at the foot, where the dogs sniff
-    for x, h in ((8, 3), (9, 2), (22, 2), (23, 3)):
-        g.rect(x, 47 - h, 1, h, "green")
-    return lit(g)
-
-
-def water_bowl(drip=0):
-    """A red dog bowl under a tap: a slate standpipe with a brass spout and a red wheel, the bowl wider at
-    its foot with cyan water across its top and a white bone on its side. drip: 0 a bead at the spout,
-    1 the bead stretched to fall, 2 the drop halfway down, 3 a ring on the water."""
-    g = edged(Grid())
-    g.rect(5, 6, 4, 23, "grey")
-    g.rect(5, 6, 1, 23, "lgrey")
-    g.rect(8, 6, 1, 23, "slate")
-    g.rect(4, 27, 6, 2, "slate")
-    g.rect(9, 8, 5, 2, "amber")
-    g.rect(9, 8, 5, 1, "yellow")
-    g.rect(12, 10, 2, 1, "orange")
-    g.rect(5, 4, 4, 2, "red")
-    g.rect(6, 3, 2, 1, "red")
-    # the bowl
-    g.rect(14, 21, 14, 1, "cyan")
-    g.rect(13, 22, 16, 1, "red")
-    g.rect(12, 23, 18, 5, "red")
-    g.rect(12, 23, 1, 5, "pink")
-    g.rect(27, 23, 3, 5, "dred")
-    g.rect(13, 22, 16, 1, "pink")
-    g.rect(15, 21, 3, 1, "white")
-    # the bone turns to noise when redrawn small, so only the bowls at 1x or more wear it
-    if getattr(g, "s", 1) >= 1:
-        bitmap(g, 17, 24, ["ww...ww", ".wwwww.", "ww...ww"], {"w": "white"},
-               ["ww.....ww", ".wwwwwww.", ".wwwwwww.", "ww.....ww"])
-    if drip == 0:
-        g.p(12, 11, "cyan")
-    elif drip == 1:
-        g.rect(12, 11, 1, 2, "cyan")
-    elif drip == 2:
-        g.rect(12, 15, 1, 2, "cyan")
-        g.p(12, 15, "white")
-    else:
-        g.rect(14, 21, 3, 1, "white")
-        g.p(19, 21, "white")
-    return lit(g)
-
-
-BOWL_IDLE = ((0, 1, 2, 3), 350)
-
-
-def shrunk(module, s, draw, q):
-    """draw(**q) at scale s on a Mini. Motion offsets are full-size pixels, so they are divided by s to stay
-    1px in the small version."""
-    return small(module, s, lambda: draw(**{k: v / s if k in MOTION else v for k, v in q.items()}))
-
-
-# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 48x72,
-# the people's size, which the stranger is drawn at too.
-BIG = road.SCALE
-# The pose arguments that move a whole part by pixels.
-MOTION = ("rustle", "wave", "bob")
-# Each spot's drawing function, the module whose Grid it draws on, its scale and its tags as (tag, poses, ms).
-SPOTS = {
-    "spot-tree": (tree, None, BIG, (("idle",) + TREE_IDLE,)),
-    "spot-stranger": (stranger, road, BIG, (("idle",) + STRANGER_IDLE, ("wave",) + STRANGER_WAVE)),
-    "spot-lamp-post": (lamp_post, None, BIG, (("idle", (dict(), dict(glint=True)), 500),)),
-    "spot-water-bowl": (water_bowl, None, BIG,
-                        (("idle", tuple(dict(drip=d) for d in BOWL_IDLE[0]), BOWL_IDLE[1]),)),
-}
-
-
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for need, draw in ICONS.items():
@@ -673,14 +326,6 @@ def sprites():
     yield "ui-fires", [("static", [fires().outlined(False)], 1000),
                        ("pulse", [fires().outlined(False), fires(1).outlined(False)], 400)]
     yield "fx-pull-fail", [("play", [pull_fail(i).outlined(False) for i in range(4)], 90)]
-    yield "fx-need-met", [(need, [need_met(need, i).outlined(False) for i in range(6)], 70) for need in NEEDS]
-    yield "fx-accident", [("play", [accident(i).outlined(False) for i in range(6)], 100)]
-    yield "accident-spot", [("idle", [accident_spot(f).outlined(False) for f in (0, 1)], 500)]
-    for key, (draw, module, scale, tags) in SPOTS.items():
-        mod = module or sys.modules[__name__]
-        for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
-            yield f"{key}{suffix}", [(tag, [shrunk(mod, scale * s, draw, q).outlined() for q in poses], ms)
-                                     for tag, poses, ms in tags]
 
 
 if __name__ == "__main__":
