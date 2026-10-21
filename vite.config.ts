@@ -26,9 +26,16 @@ export default defineConfig({
         play: repoPath("pages/play/index.html"),
         data: repoPath("pages/data/index.html"),
       },
+      // Phaser goes in its own chunk, so a game code change keeps its hashed file name and a new
+      // service worker's precache gets it from the browser's HTTP cache.
+      output: {
+        codeSplitting: {
+          groups: [{ name: "phaser", test: /[\\/]node_modules[\\/]phaser[\\/]/ }],
+        },
+      },
     },
-    // Phaser alone is about 1.4 MB minified, so the 500 kB default always warns.
-    // Set just above it so that growth in game code still warns.
+    // The Phaser chunk alone is about 1.4 MB minified, so the 500 kB default always warns.
+    // Set just above it so that growth in Phaser or game code still warns.
     chunkSizeWarningLimit: 1600,
   },
   // atlasPlugin writes public/art/manifest.json from the art files, then packs the art's images
