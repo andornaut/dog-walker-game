@@ -6,7 +6,7 @@ import type { DogId } from "../data/types";
 import { defined, present } from "../testing/defined";
 import { newPlayerSave, testContext, veteranSave } from "./fixtures";
 import { loadSave, saveContextFrom } from "./load";
-import { SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
+import { createDefaultSave, SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
 
 const stored = (document: unknown) => JSON.stringify(document);
 
@@ -32,8 +32,17 @@ const STARTER_DOGS = (Object.keys(gameData.dogs) as DogId[]).filter(
 const PRE_FORK_ROUTE = ["street", "park", "shops", "homeStretch"];
 
 describe("loadSave", () => {
-  it("gives a new player the free dogs, the default walker and no loadout", () => {
+  it("gives a new player the free dogs, the default walker and the starter dog picked", () => {
     expect(loadSave(testContext, null)).toEqual({ save: newPlayerSave, status: "new" });
+  });
+
+  it.each<[number, DogId[], DogId[]]>([
+    [1, STARTER_DOGS, STARTER_DOGS.slice(0, 1)],
+    [1, ["biscuit", "koda"], ["biscuit"]],
+    [2, ["biscuit", "koda"], ["biscuit", "koda"]],
+  ])("picks a new save's free dogs, as many as its %i slots walk", (dogSlots, freeDogs, picked) => {
+    const defaults = { ...testContext.defaults, dogSlots, freeDogs };
+    expect(createDefaultSave(defaults).lastLoadout).toEqual({ dogs: picked, gear: null });
   });
 
   // A save from when Duchess and Koda were starters: what it owns wins, and loading never
@@ -201,7 +210,7 @@ describe("loadSave", () => {
       PRE_FORK_ROUTE,
     ],
     [
-      "an empty loadout, as a new player has before picking a dog",
+      "an empty loadout, as a stored save keeps it",
       (document) => {
         document.lastLoadout = { dogs: [], gear: null };
       },

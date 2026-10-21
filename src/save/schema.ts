@@ -83,7 +83,7 @@ export const checkpointSchema = v.object({
   zonesFinished: zoneNumber,
 });
 
-// Empty until a new player picks their first dog.
+// A new player's holds the starter dogs, as many as their slots walk.
 const loadoutSchema = v.object({
   dogs: v.pipe(ids, v.maxLength(MAX_RUN_DOGS)),
   gear: v.nullable(contentId),
@@ -254,7 +254,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sfxVolume: 0.8,
 };
 
-// A new player has no loadout until they pick one of the free dogs.
+// A new player starts with the free dogs picked, as many as their slots walk, so the first
+// walk is one tap on Start walk.
 export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
   const zero = toCents(0);
   return {
@@ -262,7 +263,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
     bankCents: zero,
     checkpoint: null,
     helpSeen: false,
-    lastLoadout: { dogs: [], gear: null },
+    lastLoadout: { dogs: defaults.freeDogs.slice(0, defaults.dogSlots), gear: null },
     owned: {
       dogSlots: defaults.dogSlots,
       dogs: [...defaults.freeDogs],

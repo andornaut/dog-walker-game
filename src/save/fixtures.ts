@@ -47,13 +47,13 @@ export const quietCounters = (): RunCounters => ({
   tallies: {},
 });
 
-// A new player: the free dogs, one slot, and no loadout until they pick a dog.
+// A new player: the free dogs, one slot, and the starter dog picked.
 export const newPlayerSave: SaveDocument = {
   achievements: {},
   bankCents: cents(0),
   checkpoint: null,
   helpSeen: false,
-  lastLoadout: { dogs: [], gear: null },
+  lastLoadout: { dogs: ["biscuit"], gear: null },
   owned: {
     dogSlots: 1,
     dogs: ["biscuit"],

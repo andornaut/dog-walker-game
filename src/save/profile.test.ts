@@ -40,7 +40,7 @@ describe("ProfileSession.open", () => {
     );
     expect(session.save.settings.reducedMotion).toBe(true);
     expect(session.save.owned.dogSlots).toBe(1);
-    expect(session.save.lastLoadout.dogs).toEqual([]);
+    expect(session.save.lastLoadout.dogs).toEqual(testContext.defaults.freeDogs.slice(0, 1));
   });
 
   it("keeps a loaded save as stored", async () => {
