@@ -18,7 +18,6 @@ import {
   seamRow,
   type Verge,
   vergeBase,
-  type VergeMark,
   VERGES,
   walkFrom,
 } from "../road/roadside";
@@ -47,13 +46,17 @@ type StripLevels = readonly [PixelImage, PixelImage, PixelImage];
 // the road from near to far ahead of the feet. dotLevel sizes the cells the verge's dots are
 // seeded on, 2^dotLevel road pixels long, at least as long as the row's span, so every cell
 // shows on some row and the dots move down with the road rather than reshuffle. splits caches
-// verge edges by across.
+// verge edges by across, and lineColumns the columns whose share of the road holds a strip
+// line, by the strip's lines.
 interface RasterRow {
   readonly across: Float32Array;
   readonly distance: number;
   readonly dotLevel: number;
   readonly far: number;
+  // The keep below which each kind of verge mark shows on the row (markLimit).
+  readonly leafLimit: number;
   readonly level: 0 | 1 | 2;
+  readonly lineColumns: Map<StripLines, Int16Array>;
   readonly near: number;
   // The farthest across the row shows, at its outer columns.
   readonly reach: number;
@@ -65,6 +68,7 @@ interface RasterRow {
   readonly scale: number;
   readonly span: number;
   readonly splits: Map<number, readonly [number, number]>;
+  readonly tuftLimit: number;
 }
 
 // verges holds each zone's verge before seams, patches and marks, drawn once; marks and
@@ -79,9 +83,9 @@ export interface RoadRaster {
   readonly patches: Map<number, readonly RoughPatch[]>;
   readonly rows: readonly RasterRow[];
   readonly verges: Map<ZoneId, Uint32Array>;
-  // Scratch space drawRoad reuses frame to frame: marks carried to the next row, and the
-  // columns a mark has drawn on in this row.
-  readonly scratch: { carried: [Carried, Carried]; marked: Uint8Array };
+  // Scratch space drawRoad reuses frame to frame: marks carried to the next row, the
+  // columns a mark has drawn on in this row, and the strip rows a row's lines are looked for on.
+  readonly scratch: { carried: [Carried, Carried]; lineRows: Int32Array; marked: Uint8Array };
   readonly view: Rect;
   readonly visibleDistance: number;
 }
@@ -277,7 +281,9 @@ export function roadRaster(
       distance,
       dotLevel: Math.max(0, Math.ceil(Math.log2(span))),
       far: distanceAtY(projection, y),
+      leafLimit: markLimit("leaf", scale, span),
       level: levelFor(span),
+      lineColumns: new Map(),
       near: distanceAtY(projection, y + 1),
       reach: Math.max(0, across[0] ?? 0, across[view.width - 1] ?? 0),
       roadEnd,
@@ -288,6 +294,7 @@ export function roadRaster(
       scale,
       span,
       splits: new Map(),
+      tuftLimit: markLimit("tuft", scale, span),
     });
   }
   return {
@@ -296,7 +303,11 @@ export function roadRaster(
     marks: new Map(),
     patches: new Map(),
     rows,
-    scratch: { carried: [carriedBuffer(), carriedBuffer()], marked: new Uint8Array(view.width) },
+    scratch: {
+      carried: [carriedBuffer(), carriedBuffer()],
+      lineRows: new Int32Array(STRIP.height),
+      marked: new Uint8Array(view.width),
+    },
     verges: new Map(),
     view,
     visibleDistance: projection.visibleDistance,
@@ -316,6 +327,7 @@ function wordOf(rgb: number): number {
 const LEAF_WORDS = LEAF_PIXELS.map((rows) =>
   rows.map((cells) => cells.map(({ color, dx }) => ({ dx, word: wordOf(color) }))),
 );
+const NO_LEAF: readonly { dx: number; word: number }[] = [];
 
 // What each zone's verge draws per frame, looked up once a row: where its sidewalk or paving
 // starts, its seam word, and its dotted bands, each with the colour word every noise byte
@@ -326,9 +338,12 @@ interface VergePlan {
     readonly to: number;
     readonly words: Uint32Array;
   }[];
+  // The least across each kind of mark may lie at (markFrom).
+  readonly leafFrom: number;
   // The lawn's patch word, and its tuft word by each lawn word it falls on; none with no lawn.
   readonly patchWord: number;
   readonly seamWord: number;
+  readonly tuftFrom: number;
   readonly tuftWords: ReadonlyMap<number, number>;
   readonly walkFrom: number;
 }
@@ -346,13 +361,22 @@ function vergePlan(verge: Verge): VergePlan {
         return rgb === null ? 0 : wordOf(rgb);
       }),
     })),
+    leafFrom: markFrom(verge, "leaf"),
     patchWord: lawn === null ? 0 : wordOf(lawn[1]),
     seamWord: wordOf(verge.seamColor),
+    tuftFrom: markFrom(verge, "tuft"),
     tuftWords: new Map(
       lawn === null ? [] : [lawn[0], lawn[1]].map((rgb) => [wordOf(rgb), wordOf(lawn[2])]),
     ),
     walkFrom: walkFrom(verge),
   };
+}
+
+// Each zone's verge, looked up by a Map: a keyed property read by a zone id string that V8
+// has not seen there deoptimizes drawRoad.
+const VERGE_BY_ZONE: ReadonlyMap<string, Verge> = new Map(Object.entries(VERGES));
+function vergeAt(zone: ZoneId): Verge {
+  return VERGE_BY_ZONE.get(zone) ?? VERGES[zone];
 }
 
 const plans = new Map<Verge, VergePlan>();
@@ -402,14 +426,18 @@ function vergeOf(raster: RoadRaster, zone: ZoneId): Uint32Array {
   return pixels;
 }
 
-// The raster's caches grow with the road; past this many entries they start again.
+// The raster's caches grow with the road; past this many entries the oldest goes, so the rows
+// in view stay cached rather than all being made again in one frame.
 const CACHE_LIMIT = 4096;
 
 function cached<T>(cache: Map<number, T>, key: number, make: (key: number) => T): T {
   let value = cache.get(key);
   if (value === undefined) {
     if (cache.size >= CACHE_LIMIT) {
-      cache.clear();
+      const oldest = cache.keys().next();
+      if (oldest.done !== true) {
+        cache.delete(oldest.value);
+      }
     }
     value = make(key);
     cache.set(key, value);
@@ -478,15 +506,22 @@ function markPixel(
 // zone's, then the seams, rough patches and 2-row marks that scroll with the road. On the
 // approach rows the verge shows only where the backdrop's own pixel is the verge's.
 export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array): void {
-  const { centerX, view } = raster;
+  const { centerX, rows, view } = raster;
   const stripLeft = centerX - STRIP.width / 2;
   const { width } = view;
-  let [carried, next] = raster.scratch.carried;
+  const scratch = raster.scratch;
+  let carried = scratch.carried[0];
+  let next = scratch.carried[1];
   carried.count = 0;
-  const { marked } = raster.scratch;
-  raster.rows.forEach((row, y) => {
+  const { marked } = scratch;
+  // Strip rows count down the road from the start strip's far end.
+  const lineStart = frame.scroll - frame.zoneStart - raster.visibleDistance;
+  for (let y = 0; y < rows.length; y++) {
+    const row = rows[y];
+    if (row === undefined) {
+      continue;
+    }
     const z = frame.scroll + row.distance;
-    // Strip rows count down the road from the start strip's far end.
     const along = Math.floor(z - frame.zoneStart - raster.visibleDistance);
     const look =
       frame.transition === null || along >= STRIP.height
@@ -501,43 +536,64 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
       look === frame.transition?.start && stripRow >= START_STRIP_ZONE_ROWS
         ? frame.transition.previous.zone
         : look.zone;
-    const verge = VERGES[vergeZone];
+    const verge = vergeAt(vergeZone);
     const offset = y * width;
     const vergePixels = vergeOf(raster, vergeZone);
-    out.set(vergePixels.subarray(offset, offset + width), offset);
+    const { roadEnd, roadStart, roadX } = row;
+    // The strip covers its columns, so only the verge's either side are copied.
+    for (let i = 0; i < roadStart; i++) {
+      out[offset + i] = vergePixels[offset + i] ?? 0;
+    }
+    for (let i = roadEnd; i < width; i++) {
+      out[offset + i] = vergePixels[offset + i] ?? 0;
+    }
 
     const image = look.strip[row.level];
     const pixels = image.pixels;
-    const rowStart = (stripRow >> row.level) * image.width - stripLeft;
-    const { roadEnd, roadStart, roadX } = row;
+    // Whole, so the strip is indexed with integers.
+    const rowStart = ((stripRow >> row.level) * image.width - stripLeft) | 0;
     for (let i = roadStart; i < roadEnd; i++) {
       out[offset + i] = pixels[rowStart + (roadX[i] ?? 0)] ?? 0;
     }
     if (look.lines !== undefined) {
-      const start = frame.scroll - frame.zoneStart - raster.visibleDistance;
-      const first = Math.floor(start + row.near);
-      const last = Math.max(first, Math.ceil(start + row.far) - 1);
-      drawLines(out, offset, row, look.strip[0], look.lines, stripLeft, first, last);
+      const first = Math.floor(lineStart + row.near);
+      const last = Math.max(first, Math.ceil(lineStart + row.far) - 1);
+      drawLines(
+        out,
+        offset,
+        row,
+        look.strip[0],
+        look.lines,
+        stripLeft,
+        first,
+        last,
+        scratch.lineRows,
+      );
     }
 
     const plan = planOf(verge);
-    if (plan.dots.length > 0) {
+    const { dots } = plan;
+    if (dots.length > 0) {
       // Each dot holds a cell of road at least as long as the row's span, so it moves down
       // with the road rather than reshuffle on rows that cover more road than they show.
       const seed = Math.floor(z) >> row.dotLevel;
-      for (const { from, to, words } of plan.dots) {
-        const [fromLeft, fromRight] = splitAt(row, from);
-        const [toLeft, toRight] = splitAt(row, to);
-        drawDots(out, offset, roadX, seed, words, toLeft, fromLeft);
-        drawDots(out, offset, roadX, seed, words, fromRight, toRight);
+      for (let d = 0; d < dots.length; d++) {
+        const band = dots[d];
+        if (band === undefined) {
+          continue;
+        }
+        const from = splitAt(row, band.from);
+        const to = splitAt(row, band.to);
+        drawDots(out, offset, roadX, seed, band.words, to[0], from[0]);
+        drawDots(out, offset, roadX, seed, band.words, from[1], to[1]);
       }
     }
 
     if (verge.walkTo > plan.walkFrom && seamRow(verge, z, row.span)) {
-      const [innerLeft, innerRight] = splitAt(row, plan.walkFrom);
-      const [walkLeft, walkRight] = splitAt(row, verge.walkTo);
-      out.fill(plan.seamWord, offset + walkLeft, offset + innerLeft);
-      out.fill(plan.seamWord, offset + innerRight, offset + walkRight);
+      const inner = splitAt(row, plan.walkFrom);
+      const walk = splitAt(row, verge.walkTo);
+      out.fill(plan.seamWord, offset + walk[0], offset + inner[0]);
+      out.fill(plan.seamWord, offset + inner[1], offset + walk[1]);
     }
 
     if (verge.lawn === "rough") {
@@ -551,10 +607,8 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     }
     next.count = 0;
     // A kind the row has no room for draws nothing, so its marks are not looked at.
-    const limit = (kind: VergeMark["kind"]) =>
-      row.reach >= markFrom(verge, kind) ? markLimit(kind, row.scale, row.span) : 0;
-    const tuftLimit = limit("tuft");
-    const leafLimit = limit("leaf");
+    const tuftLimit = row.reach >= plan.tuftFrom ? row.tuftLimit : 0;
+    const leafLimit = row.reach >= plan.leafFrom ? row.leafLimit : 0;
     const lastK = tuftLimit > 0 || leafLimit > 0 ? Math.floor(z) : Number.NEGATIVE_INFINITY;
     for (let k = Math.floor(z - row.span) + 1; k <= lastK; k++) {
       const marks = cached(raster.marks, k, marksOnRow);
@@ -571,21 +625,23 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
           break;
         }
         const column = Math.floor(centerX + mark.x * row.scale) - view.x;
-        const [upper = [], lower = []] = LEAF_WORDS[mark.shape] ?? [];
-        for (const { dx, word } of upper) {
+        const shape = LEAF_WORDS[mark.shape];
+        for (const { dx, word } of shape?.[0] ?? NO_LEAF) {
           markPixel(out, marked, row, verge, offset, column + dx, word);
         }
-        for (const { dx, word } of lower) {
+        for (const { dx, word } of shape?.[1] ?? NO_LEAF) {
           carry(next, column + dx, word);
         }
       }
     }
-    [carried, next] = [next, carried];
+    const swap = carried;
+    carried = next;
+    next = swap;
     if (y < raster.approachRows) {
       keepBackdropVerge(frame.approach ?? null, row, vergePixels, offset, out);
     }
     fadeRow(frame.fade, view.x, y, offset, out);
-  });
+  }
 }
 
 // Clears an approach row's verge, for the backdrop under it to show, wherever the backdrop's
@@ -618,46 +674,67 @@ function drawLines(
   stripLeft: number,
   first: number,
   last: number,
+  lineRows: Int32Array,
 ): void {
-  const { pixels, width } = strip;
-  for (let i = row.roadStart; i < row.roadEnd; i++) {
-    const centre = (row.roadX[i] ?? 0) - stripLeft;
-    let from = Math.max(0, (row.roadXFrom[i] ?? 0) - stripLeft);
-    let to = Math.min(width - 1, (row.roadXTo[i] ?? 0) - stripLeft);
-    if (from > to) {
-      from = centre;
-      to = centre;
+  const { height, pixels, width } = strip;
+  const { mask } = lines;
+  // Each strip row's start in the strip, nearest first; a block longer than the strip covers
+  // all of it.
+  const count = Math.min(last - first + 1, height, lineRows.length);
+  for (let n = 0; n < count; n++) {
+    const along = first + n;
+    lineRows[n] = ((((height - 1 - along) % height) + height) % height) * width;
+  }
+  const columns = lineColumnsOf(row, lines, width, stripLeft);
+  for (let c = 0; c < columns.length; c += 3) {
+    const from = columns[c + 1] ?? 0;
+    const to = columns[c + 2] ?? 0;
+    let at = -1;
+    for (let n = 0; n < count && at < 0; n++) {
+      const start = lineRows[n] ?? 0;
+      for (let x = from; x <= to; x++) {
+        if (mask[start + x] === 1) {
+          at = start + x;
+          break;
+        }
+      }
     }
-    let any = false;
-    for (let x = from; x <= to && !any; x++) {
-      any = lines.columns[x] === 1;
-    }
-    if (!any) {
-      continue;
-    }
-    const at = linePixel(lines.mask, strip, { first, from, last, to });
     if (at >= 0) {
-      out[offset + i] = pixels[at] ?? 0;
+      out[offset + (columns[c] ?? 0)] = pixels[at] ?? 0;
     }
   }
 }
 
-// The first line pixel in a block of the strip, from the nearest of its rows, or -1.
-function linePixel(
-  mask: Uint8Array,
-  strip: PixelImage,
-  block: { first: number; from: number; last: number; to: number },
-): number {
-  const { height, width } = strip;
-  for (let along = block.first; along <= block.last; along++) {
-    const stripRow = (((height - 1 - along) % height) + height) % height;
-    for (let x = block.from; x <= block.to; x++) {
-      if (mask[stripRow * width + x] === 1) {
-        return stripRow * width + x;
+// The row's columns whose share of the strip holds a line column, each as its column and the
+// first and last strip columns of its share, flat.
+function lineColumnsOf(
+  row: RasterRow,
+  lines: StripLines,
+  width: number,
+  stripLeft: number,
+): Int16Array {
+  let columns = row.lineColumns.get(lines);
+  if (columns === undefined) {
+    const found: number[] = [];
+    for (let i = row.roadStart; i < row.roadEnd; i++) {
+      const centre = (row.roadX[i] ?? 0) - stripLeft;
+      let from = Math.max(0, (row.roadXFrom[i] ?? 0) - stripLeft);
+      let to = Math.min(width - 1, (row.roadXTo[i] ?? 0) - stripLeft);
+      if (from > to) {
+        from = centre;
+        to = centre;
+      }
+      for (let x = from; x <= to; x++) {
+        if (lines.columns[x] === 1) {
+          found.push(i, from, to);
+          break;
+        }
       }
     }
+    columns = Int16Array.from(found);
+    row.lineColumns.set(lines, columns);
   }
-  return -1;
+  return columns;
 }
 
 // A dotted band's columns from to to (excluded) on a row: each pixel's noise, seeded on its
@@ -707,6 +784,7 @@ function drawPatches(
   out: Uint32Array,
 ): void {
   const { centerX, view } = raster;
+  const { patchWord } = planOf(verge);
   const first = Math.floor((z - PATCH_REACH) / PATCH_BLOCK);
   const last = Math.floor((z + PATCH_REACH) / PATCH_BLOCK);
   for (let block = first; block <= last; block++) {
@@ -720,7 +798,7 @@ function drawPatches(
       const to = Math.ceil(centerX + (patch.x + half) * row.scale - 0.5) - view.x;
       for (let i = Math.max(0, from); i < Math.min(view.width, to); i++) {
         if (markFits(verge, "tuft", row.across[i] ?? -1)) {
-          out[offset + i] = planOf(verge).patchWord;
+          out[offset + i] = patchWord;
         }
       }
     }
