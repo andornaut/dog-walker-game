@@ -257,11 +257,12 @@ def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     the head forward. The white takes the road outline; the orange beak and feet carry it on every road."""
     g = edged(new())
     b, f, t = bob, flap, thrust
-    # legs and webbed feet, the far one a shade darker
+    # legs and webbed feet, the far one a shade darker; the foot swinging forward is 1px off the ground
     for x, step, leg, foot in ((11, fb, "ochre", "rust"), (16, fa, "orange", "ochre")):
-        g.rect(x + step / 2, 24 + b, 2, 4 - b, leg)
-        g.rect(x + step - 1, 28, 3, 1, leg)
-        g.rect(x + step - 1, 29, 4, 1, foot)
+        up = 1 if step > 0 else 0
+        g.rect(x + step / 2, 24 + b, 2, 4 - b - up, leg)
+        g.rect(x + step - 1, 28 - up, 3, 1, leg)
+        g.rect(x + step - 1, 29 - up, 4, 1, foot)
     # the far wing, raised behind the body and clear of the neck, so the neck shows against the road
     g.tri((10, 15 + b), (19, 14 + b), (16, 2 + b + f), "lgrey")
     g.tri((13, 14 + b), (18, 14 + b), (16, 5 + b + f), "grey")
