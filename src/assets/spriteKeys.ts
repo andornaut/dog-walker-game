@@ -95,22 +95,8 @@ export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
   return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
 }
 
-// Road art not drawn yet, and the drawn sprite that stands in for it until its key is in the
-// manifest.
-export const ART_STAND_INS: Readonly<Partial<Record<string, string>>> = {
-  jogger: "social-jogger-dog-owner",
-  "kid-on-bike": "minor-tricycles",
-  stroller: "social-handbag-dog-owner",
-};
-
 // Whether the art manifest has a key.
 export type HasArt = (key: string) => boolean;
-
-// The key to draw for art: its own while it is loaded, else its stand-in once that is.
-export function artOrStandIn(has: HasArt, art: string): string {
-  const standIn = ART_STAND_INS[art];
-  return has(art) || standIn === undefined || !has(standIn) ? art : standIn;
-}
 
 // The pull signals over a dog: the bubble its target's icon sits in, and the mark of a pull
 // blocked by the fairness rule and its burst.

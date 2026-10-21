@@ -3,7 +3,6 @@ import { type GameObjects, Scene } from "phaser";
 import { itemAt } from "../arrays";
 import { SKIP_CARD_ART } from "../assets/cardArt";
 import {
-  artOrStandIn,
   CARD_FRAME_KEY,
   cardFrameTag,
   DIFFICULTY_KEY,
@@ -118,9 +117,7 @@ function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.Bitma
 // The road sprite of whatever opened the card, standing in for an option's illustration: an
 // encounter's.
 function sourceSpriteKey(has: HasArt, source: CardSource): string | undefined {
-  return source.kind === "encounter"
-    ? artOrStandIn(has, encounterSpriteKey(source.encounter))
-    : undefined;
+  return source.kind === "encounter" ? encounterSpriteKey(source.encounter) : undefined;
 }
 
 // The option's illustration, or the Skip card's. A path card's is its zone's preview.

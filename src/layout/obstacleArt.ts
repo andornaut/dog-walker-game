@@ -1,5 +1,4 @@
 import {
-  artOrStandIn,
   encounterSpriteKey,
   type HasArt,
   minorObstacleSpriteKey,
@@ -86,12 +85,12 @@ const part = (key: string, overrides: Partial<Omit<ObstaclePart, "key">> = {}): 
 
 type ObstacleData = Pick<GameData, "minorObstacles">;
 
-// An obstacle's road sprite: its kind's art, or that art's stand-in while it is not drawn.
+// An obstacle's road sprite: its kind's art.
 function roadArt(data: ObstacleData, has: HasArt, kind: EncounterId | MinorObstacleId): string {
   const art = Object.hasOwn(data.minorObstacles, kind)
     ? minorObstacleSpriteKey(kind as MinorObstacleId)
     : encounterSpriteKey(kind as EncounterId);
-  return artOrStandIn(has, art);
+  return art;
 }
 
 // A mover's body sprite: its kind's road art, or the sprite MOVER_SPRITE_KEYS names for that art

@@ -7,8 +7,6 @@ import type { GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
-  ART_STAND_INS,
-  artOrStandIn,
   backdropKey,
   CARD_FRAME_KEY,
   depthVariantKey,
@@ -37,14 +35,6 @@ describe("key names", () => {
     expect(depthVariantKey("dog-koda", 0.625)).toBe("dog-koda@62");
     expect(depthVariantKey("tip", 1)).toBeNull();
     expect(() => depthVariantKey("tip", 0.63)).toThrow("not a depth step");
-  });
-
-  it("draws a stand-in only while its own art is missing and the stand-in is loaded", () => {
-    const [art, standIn] = Object.entries(ART_STAND_INS).find(
-      (entry): entry is [string, string] => entry[1] !== undefined,
-    ) ?? ["", ""];
-    const drawn = (loaded: string[]) => artOrStandIn((key) => loaded.includes(key), art);
-    expect([drawn([art, standIn]), drawn([standIn]), drawn([])]).toEqual([art, standIn, art]);
   });
 
   // A mover plays its movement's tag while it moves and its idle between moves; a stalker drawn
@@ -81,7 +71,7 @@ describe("the art manifest", () => {
       ...(Object.keys(SHOP_GEAR) as GearId[]).map(gearIconKey).filter((key) => !images.has(key)),
       ...[
         ...(Object.keys(MINOR_OBSTACLES) as MinorObstacleId[]).map((id) =>
-          artOrStandIn((key) => spriteKeys.has(key), minorObstacleSpriteKey(id)),
+          minorObstacleSpriteKey(id),
         ),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,

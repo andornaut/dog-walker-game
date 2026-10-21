@@ -10,7 +10,6 @@ import { parseManifest } from "../assets/manifest";
 import {
   AMBIENT_FALLBACKS,
   AMBIENT_VARIANTS,
-  artOrStandIn,
   CARD_FRAME_KEY,
   cardFrameTag,
   depthVariantKey,
@@ -457,7 +456,7 @@ describe("road object art", () => {
         return [];
       }
       const movement = "movement" in entry ? entry.movement : undefined;
-      const shown = artOrStandIn(hasSprite, art);
+      const shown = art;
       return movement === undefined || movement.kind === "still"
         ? []
         : [{ key: MOVER_SPRITE_KEYS[shown] ?? shown, tags: MOVING_TAGS[movement.kind] }];
@@ -476,7 +475,7 @@ describe("road object art", () => {
   // and a mover moving and stopped, at every step it has.
   it("animates every road item's sprite, standing and moving, at every step", () => {
     const items = roadKinds.flatMap(({ art, entry, kind }) => {
-      const arts = [artOrStandIn(hasSprite, art)].filter(hasSprite);
+      const arts = [art].filter(hasSprite);
       const clouds = kind === "skunk" ? [SKUNK_CLOUD_KEY] : [];
       const standing = [...arts, ...arts.map((shown) => `${shown}-owner`), ...clouds]
         .filter(hasSprite)

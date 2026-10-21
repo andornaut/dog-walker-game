@@ -2,7 +2,6 @@ import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
 import {
-  artOrStandIn,
   encounterSpriteKey,
   minorObstacleSpriteKey,
   ROAD_SPRITE_SIZE,
@@ -72,10 +71,9 @@ interface StandFrame {
   readonly tags: readonly string[];
 }
 
-// A box for each minor obstacle and the skunk's cloud whose art and stand-in are missing, from
-// its shape in the data.
+// A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape in
+// the data.
 export function ensureRoadPlaceholders(scene: Scene): void {
-  const has = (key: string) => scene.textures.exists(key);
   const pack = { dogs: [], walker: gameData.defaultWalker };
   const { cell } = walkGeometry(LANE_COUNT, pack, PROJECTION, LAYOUT.road);
   const add = (key: string, lanes: number) =>
@@ -86,9 +84,7 @@ export function ensureRoadPlaceholders(scene: Scene): void {
     });
   for (const [id, obstacle] of Object.entries(gameData.minorObstacles)) {
     const art = minorObstacleSpriteKey(id as MinorObstacleId);
-    if (artOrStandIn(has, art) === art) {
-      add(art, obstacle.shape.lanes);
-    }
+    add(art, obstacle.shape.lanes);
   }
   const skunk = gameData.encounters.skunk;
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
@@ -278,7 +274,7 @@ export class ItemViews {
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (lucky) {
-      parts = [part(artOrStandIn(has, encounterSpriteKey(item.kind as EncounterId)))];
+      parts = [part(encounterSpriteKey(item.kind as EncounterId))];
     } else {
       parts = obstacleParts(gameData, has, item.kind as EncounterId | MinorObstacleId, false).map(
         ({ behind, dx, flat, key }) =>
