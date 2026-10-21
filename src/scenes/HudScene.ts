@@ -65,6 +65,7 @@ import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
 import type { PackSlot, RunState } from "../state/runState";
 import { fillLine } from "../text/lines";
+import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
@@ -112,15 +113,6 @@ const HEART_TAB_MS = 1200;
 const MAX_CARD_HEARTS = 15;
 const HEART_KEY = "ui-heart";
 const CARD_KEY = "ui-dog-card";
-
-// Each debuff bar's colours the game draws with: the fill, the name, and the face drawn while
-// the bar art is missing.
-const DEBUFF_COLORS: Readonly<Record<string, { face: number; fill: number; name: number }>> = {
-  muddy: { face: PALETTE.brown, fill: PALETTE.tan, name: PALETTE.ink },
-  stinky: { face: PALETTE.mauve, fill: PALETTE.pink, name: PALETTE.white },
-  zoomies: { face: PALETTE.blue, fill: PALETTE.cyan, name: PALETTE.ink },
-};
-const DEBUFF_FALLBACK = { face: PALETTE.slate, fill: PALETTE.cream, name: PALETTE.white };
 
 interface CardView {
   card: GameObjects.Sprite;

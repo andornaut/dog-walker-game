@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
+import { gameData } from "../data";
 import {
   BUTTON_COLORS,
   DISABLED_COLORS,
@@ -9,6 +10,7 @@ import {
   type PlateKind,
   selectLook,
 } from "../home/selection";
+import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
 import { NEUTRAL_RAMP, PALETTE } from "./palette";
 
 // WCAG relative luminance and contrast ratio.
@@ -94,4 +96,17 @@ describe("interaction-state colours", () => {
   ])("hold %s at its minimum", (_, foreground, background, minimum) => {
     expect(contrast(foreground, background)).toBeGreaterThanOrEqual(minimum);
   });
+});
+
+describe("debuff bar colours", () => {
+  it.each(Object.keys(gameData.debuffs))("give %s its own colours", (debuff) => {
+    expect(DEBUFF_COLORS[debuff]).toBeDefined();
+  });
+
+  it.each(Object.entries({ ...DEBUFF_COLORS, fallback: DEBUFF_FALLBACK }))(
+    "hold the %s bar's name at 4.5:1 on its face",
+    (_, { face, name }) => {
+      expect(contrast(name, face)).toBeGreaterThanOrEqual(TEXT);
+    },
+  );
 });
