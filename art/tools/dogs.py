@@ -197,8 +197,8 @@ def koda_road(q):
     g.rect(20, 26 + q["br"], 4, 4, "white")
     # a heavy barrel: white flanks, a broad grey saddle, the harness across the shoulders
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 8.5, 6.5, "white", "lgrey")
-    g.ell(bx, 19.5 + o + b, 6, 5.5, "slate", "dslate", "grey")
+    g.cel(bx, 20.5 + o + b, 8.5, 6.5, "white", "lgrey")
+    g.cel(bx, 19.5 + o + b, 6, 5.5, "slate", "dslate", "grey")
     g.rect(bx - 7, 16 + o + b, 14, 2, "orange")
     g.rect(bx - 7, 17 + o + b, 14, 1, "rust")
     g.rect(bx - 2, 20 + o + b, 4, 2, "orange")
@@ -206,7 +206,7 @@ def koda_road(q):
     g.ell(bx, 15 + o + b, 5.5, 1.5, "dslate")
     # the plumed tail curled over the hips: grey on top like the saddle, its white underside in the curl
     tx = 16 + q["tail"]
-    g.ell(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
+    g.cel(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
     g.ell(tx + 0.5, 28.5 + b, 2, 1, "white")
     # a broad head with white cheeks and small ears set wide, their tips rounded
     hx = 16 + ln
@@ -215,7 +215,7 @@ def koda_road(q):
     t = q["twitch"]
     g.tri((hx - 8, 7.5 + o + b), (hx - 6.5, tip), (hx - 3, 5 + o + b), "slate")
     g.tri((hx + 8, 7.5 + o + b + t), (hx + 6.5, tip + t), (hx + 3, 5 + o + b + t), "slate")
-    g.ell(hx, 10 + o + b, 8.5, 6, "slate", "dslate", "grey")
+    g.cel(hx, 10 + o + b, 8.5, 6, "slate", "dslate", "grey")
     g.ell(hx - 7, 12.5 + o + b, 2, 2.2, "white")
     g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
     underside(g)
@@ -642,23 +642,23 @@ def snowball_road(q):
     g.rect(20, 26 + q["br"], 4, 4, "lgrey")
     # a giant fluffy body, its coat bunched into tufts round the edge
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 9, 6.5, "white", "lgrey")
+    g.cel(bx, 20.5 + o + b, 9, 6.5, "white", "lgrey")
     for dx, dy in ((-8, -1), (8, -1), (-7, 3), (7, 3), (-4, 6), (4, 6)):
-        g.ell(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white", "lgrey")
+        g.cel(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white", "lgrey")
     g.rect(bx - 7, 16 + o + b, 14, 1, "sky")
     # the bell hangs from the collar's right end
     g.rect(bx + 5, 17 + o + b, 2, 2, "amber")
     g.p(bx + 6, 18 + o + b, "orange")
     # the plumed tail carried up over the back
     tx = 16 + q["tail"]
-    g.ell(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
+    g.cel(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
     g.ell(tx - 1, 23 + o + b, 2.5, 1.5, "lgrey")
     # a broad round head, its drop ears hanging at the sides, marked a soft badger cream
     hx = 16 + ln
     e, t = -q["ears"] + q["flop"], q["twitch"]
-    g.ell(hx, 9.5 + o + b, 7.5, 6.5, "white", "lgrey")
-    g.ell(hx - 7.5, 11.5 + o + b + e, 2.3, 3.8, "cream", "tan")
-    g.ell(hx + 7.5, 11.5 + o + b + e + t, 2.3, 3.8, "cream", "tan")
+    g.cel(hx, 9.5 + o + b, 7.5, 6.5, "white", "lgrey")
+    g.cel(hx - 7.5, 11.5 + o + b + e, 2.3, 3.8, "cream", "tan")
+    g.cel(hx + 7.5, 11.5 + o + b + e + t, 2.3, 3.8, "cream", "tan")
     underside(g)
     spray(g, q["spray"])
     return g
