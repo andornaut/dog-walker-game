@@ -1,50 +1,82 @@
 { "frames": {
    "minor-scooter 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 56, "h": 35 },
+    "frame": { "x": 0, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
-    "sourceSize": { "w": 56, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
     "duration": 500
    },
    "minor-scooter 1.aseprite": {
-    "frame": { "x": 56, "y": 0, "w": 56, "h": 35 },
+    "frame": { "x": 48, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
-    "sourceSize": { "w": 56, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
     "duration": 500
    },
    "minor-scooter 2.aseprite": {
-    "frame": { "x": 112, "y": 0, "w": 56, "h": 35 },
+    "frame": { "x": 96, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
-    "sourceSize": { "w": 56, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
     "duration": 100
    },
    "minor-scooter 3.aseprite": {
-    "frame": { "x": 168, "y": 0, "w": 56, "h": 35 },
+    "frame": { "x": 144, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
-    "sourceSize": { "w": 56, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
     "duration": 100
    },
    "minor-scooter 4.aseprite": {
-    "frame": { "x": 224, "y": 0, "w": 56, "h": 35 },
+    "frame": { "x": 192, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
-    "sourceSize": { "w": 56, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
     "duration": 100
    },
    "minor-scooter 5.aseprite": {
-    "frame": { "x": 280, "y": 0, "w": 56, "h": 35 },
+    "frame": { "x": 240, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
-    "sourceSize": { "w": 56, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 100
+   },
+   "minor-scooter 6.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 100
+   },
+   "minor-scooter 7.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 100
+   },
+   "minor-scooter 8.aseprite": {
+    "frame": { "x": 384, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 100
+   },
+   "minor-scooter 9.aseprite": {
+    "frame": { "x": 432, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
     "duration": 100
    }
  },
@@ -53,11 +85,12 @@
   "version": "1.2.30-x64",
   "image": "minor-scooter.png",
   "format": "RGBA8888",
-  "size": { "w": 336, "h": 35 },
+  "size": { "w": 480, "h": 72 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "pull-out", "from": 2, "to": 5, "direction": "forward" }
+   { "name": "pull-out", "from": 2, "to": 5, "direction": "forward" },
+   { "name": "ride", "from": 6, "to": 9, "direction": "forward" }
   ]
  }
 }

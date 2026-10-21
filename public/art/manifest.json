@@ -2730,8 +2730,8 @@
       "png": "sprites/minor-scooter.png",
       "json": "sprites/minor-scooter.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 45
+        "feetY": 71,
+        "opaqueWidth": 36
       }
     },
     {
@@ -2739,8 +2739,8 @@
       "png": "sprites/minor-scooter@50.png",
       "json": "sprites/minor-scooter@50.json",
       "anchor": {
-        "feetY": 17,
-        "opaqueWidth": 23
+        "feetY": 35,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2748,8 +2748,8 @@
       "png": "sprites/minor-scooter@62.png",
       "json": "sprites/minor-scooter@62.json",
       "anchor": {
-        "feetY": 21,
-        "opaqueWidth": 29
+        "feetY": 44,
+        "opaqueWidth": 23
       }
     },
     {
@@ -2757,8 +2757,8 @@
       "png": "sprites/minor-scooter@75.png",
       "json": "sprites/minor-scooter@75.json",
       "anchor": {
-        "feetY": 25,
-        "opaqueWidth": 34
+        "feetY": 53,
+        "opaqueWidth": 27
       }
     },
     {
@@ -2766,8 +2766,8 @@
       "png": "sprites/minor-scooter@88.png",
       "json": "sprites/minor-scooter@88.json",
       "anchor": {
-        "feetY": 30,
-        "opaqueWidth": 40
+        "feetY": 62,
+        "opaqueWidth": 32
       }
     },
     {

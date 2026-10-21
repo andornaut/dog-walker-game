@@ -6,10 +6,11 @@ billboards from a low camera: a front elevation, squat, with at most a sliver of
 top surface, and no people, so they read as something to bump rather than a
 pickup or an encounter.
 
-This script does not build: it draws in pixels on a plain Grid at full size,
-and obstacles.span now gives a lane-spanning width in layout units for a 1.4x
-minis.Mini. Zone skins are not drawn in play (the game draws only the base
-looks), so its exports stay as they are, unmaintained.
+It builds the scooter alone, the one of these in play, as a moving road
+obstacle. The others are not drawn in play (the game draws only the base
+looks), so their exports stay as they are, unmaintained: they draw in pixels on
+a plain Grid at full size, and obstacles.span now gives a lane-spanning width in
+layout units for a 1.4x minis.Mini.
 
 Minor 1x1, 40x40, 1 lane (as cone and bin):
 minor-gnome           Willow Crescent  a garden gnome on a grass tuft; it winks
@@ -38,13 +39,17 @@ minor-tricycles       Willow Crescent  a red tricycle from behind, a yellow one 
                                        the streamers flutter
 minor-log             Fairview Park    a fallen log end on, mossy, a toadstool at its foot; a sprout
                                        on top sways
-minor-scooter         Main Street      a sky scooter from behind on its stand; the indicators blink
+minor-scooter         Main Street      48x72, a sky scooter from behind on its stand, laid out on 32x48 and
+                                       drawn at road.SCALE as hazards.cyclist is; the indicators blink
 minor-canoe-rack      Riverside Path   four canoes upturned on a two-bar rack; a rope end swings
 
 The 1x3 skins also have parked-car's pull-out (4 frames, 100ms), drawn pulling
 right: the scooter as the car (tread lines climb the tyre, the right indicator
 blinks), the tricycles' hub pips and the log's face crack turning clockwise, the
-canoe rack lurching 1px right on frames 1 and 2.
+canoe rack lurching 1px right on frames 1 and 2. The scooter also has ride (4
+frames, 100ms): ridden up its lane away from the pack, a rider in a white helmet
+with a sky stripe and a purple jacket on it, the tread climbing the tyre 1px a
+frame and the scooter and rider dipping 1px onto it on frames 1 and 2.
 
 Every sprite has one looping idle, frame 0 the rest pose. Each drawing function
 takes the idle frame's argument and u, one pixel at the drawn size in full-size
@@ -68,6 +73,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, small  # noqa: E402
 from obstacles import PULL_OUT, ROW, SIZE, lit, span, treads  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
+from road import SCALE  # noqa: E402
 
 # The parked car's frame: 1 lane by 3 rows of footprint, drawn at its near edge.
 CAR_W, CAR_H = 56, 35
@@ -531,55 +537,93 @@ def log(sway=0, u=1, roll=None):
     return lit(g)
 
 
-def scooter(blink=False, u=1, roll=None):
-    """A sky scooter from behind on its stand: the handlebar with small mirrors and the leg shield over the
-    seat, the tail light and plate under it, the tyre between the two round side cowls. blink lights the
-    indicators on the cowls. roll (0 to 3) is a pull-out frame, as obstacles.parked_car's: tread lines
-    climb the tyre and the right indicator is lit on frames 0 and 1."""
-    g = frame(CAR_W, CAR_H)
-    # mirrors on stalks, handlebar and the leg shield behind the seat
-    for x in (9, 44):
-        g.rect(x, 1, 4, 3, "lgrey")
-        g.rect(x + 2, 2, 2, 2, "grey")
-    g.rect(11, 4, 1, 3, "dslate")
-    g.rect(45, 4, 1, 3, "dslate")
-    g.rect(10, 6, 37, 2, "dslate")
-    g.rect(10, 6, 37, 1, "slate")
-    g.rect(8, 6, 4, 3, "ink")
-    g.rect(45, 6, 4, 3, "ink")
-    g.rect(19, 8, 19, 4, "sky")
-    g.rect(19, 8, 19, 1, "cyan")
-    g.rect(33, 9, 5, 3, "blue")
-    # tyre and stand
-    g.rect(24, 24, 9, 11, "ink")
-    g.rect(24, 24, 2, 10, "dslate")
-    g.rect(17, 30, 2, 5, "dslate")
-    g.rect(38, 30, 2, 5, "dslate")
-    # side cowls and the body between them
-    g.rect(21, 14, 15, 10, "sky")
-    g.rect(31, 14, 5, 10, "blue")
-    for cx in (15, 42):
-        g.ell(cx, 24, 8, 6.5, "sky", "blue", "cyan")
-    # seat and tail light, plate
-    g.ell(28.5, 13, 11, 2.5, "plum")
-    g.rect(19, 11, 10, 1, "dbrown")
-    g.rect(24, 15, 9, 3, "red")
-    g.rect(24, 15, 9, 1, "pink")
-    g.rect(24, 19, 9, 5, "lgrey")
-    g.rect(26, 21, 5, 1, "grey")
+# The scooter is laid out on 32x48 and drawn at road.SCALE, 48x72, as hazards.cyclist is: a two-wheeler a
+# rider sits on, so the rider is a road person's size.
+SCOOTER_W, SCOOTER_H = 32, 48
+# The ride's 4 frames, each this long: the tyre's tread climbs 1px a frame, as obstacles.DRIVE's.
+SCOOTER_RIDE_MS = 100
+
+
+def scooter(blink=False, u=1, roll=None, rider=False):
+    """A sky scooter from behind: its tyre between the two round side cowls, the tail light and plate under
+    the seat, the leg shield and handlebar with its mirrors over it. Parked (roll None), it stands on its
+    stand and blink lights both indicators on the cowls. roll (0 to 3) is a pull-out or ride frame: tread
+    lines climb the tyre 1px a frame (obstacles.treads) and the stand is up; pulling out, the right
+    indicator is lit on frames 0 and 1. rider seats its rider: a white helmet with a sky stripe, a purple
+    jacket, jeans, the arms out to the grips; riding, the scooter and rider dip 1px onto the tyre on frames
+    1 and 2. u is one pixel at the drawn size, in layout units."""
+    g = frame(SCOOTER_W, SCOOTER_H)
+    px = getattr(g, "g", g)
+    # the tyre first, so the body can dip over it
+    g.rect(14, 38, 4, 9, "ink")
+    g.rect(14, 38, 1, 8, "dslate")
     if roll is not None:
-        treads(g, 26, 24, 7, 11, roll, u)
-    for x in (8, 46):
-        on = blink or (roll is not None and roll < 2 and x > CAR_W / 2)
-        g.rect(x, 21, 3, 3, "yellow" if on else "orange")
+        treads(g, 15, 40, 3, 7, roll, u)
+    else:
+        for x in (10, 21):
+            g.rect(x, 43, 1, 4, "dslate")
+    wheel = [row[:] for row in px.px]
+    px.px = [[None] * px.w for _ in range(px.h)]
+    # mirrors on stalks, the handlebar and its grips, the leg shield behind the seat
+    for x in (6, 23):
+        g.rect(x, 16, 3, 2, "lgrey")
+        g.rect(x + 1, 17, 2, 1, "grey")
+        g.rect(x + 1, 18, 1, 4, "dslate")
+    g.rect(7, 22, 18, 2, "dslate")
+    g.rect(7, 22, 18, 1, "slate")
+    g.rect(6, 22, 3, 2, "ink")
+    g.rect(23, 22, 3, 2, "ink")
+    g.rect(11, 24, 10, 6, "sky")
+    g.rect(11, 24, 10, 1, "cyan")
+    g.rect(18, 25, 3, 5, "blue")
+    # the side cowls and the body between them
+    g.rect(12, 30, 8, 9, "sky")
+    g.rect(17, 30, 3, 9, "blue")
+    for cx in (9.5, 22.5):
+        g.cel(cx, 36.5, 5, 4.5, "sky", "blue", "cyan")
+    # the seat, tail light and plate
+    g.cel(16, 30, 7, 2, "plum", None, "purple")
+    g.rect(13, 33, 6, 2, "red")
+    g.rect(13, 33, 6, 1, "pink")
+    g.rect(13.5, 36, 5, 3, "lgrey")
+    g.rect(14.5, 37, 3, 1, "grey")
+    for x in (5, 25):
+        on = blink or (roll is not None and not rider and roll < 2 and x > SCOOTER_W / 2)
+        g.rect(x, 35, 2, 2, "yellow" if on else "orange")
         if on:
-            g.rect(x, 21, 3, 1, "white")
+            g.rect(x, 35, 2, 1, "white")
+    if rider:
+        # jeans on the seat
+        g.rect(10, 27, 12, 3, "navy")
+        g.rect(19, 27, 3, 3, "ink")
+        # the arms reaching forward to the grips, then the jacket, lit on the left and shaded down the right
+        for x, c in ((7.5, "purple"), (21.5, "plum")):
+            g.rect(x, 17, 3, 5, c)
+        g.rect(6, 21, 3, 2, "dbrown")
+        g.rect(23, 21, 3, 2, "dbrown")
+        g.cel(16, 21, 6.5, 7, "purple", "plum", "mauve")
+        g.rect(9.5, 21, 13, 7, "purple")
+        g.rect(9.5, 21, 1, 7, "mauve")
+        g.rect(19.5, 21, 3, 7, "plum")
+        g.rect(14.5, 13, 3, 2, "skin2")
+        # the helmet from behind, a sky stripe over the crown
+        g.cel(16, 9, 6, 6, "white", "lgrey")
+        g.rect(15, 3, 2, 11, "sky")
+        g.rect(11, 14, 10, 1, "dslate")
+    dip = 1 if rider and roll in (1, 2) else 0
+    body = px.px
+    px.px = [[(body[y - dip][x] if y >= dip else None) or wheel[y][x] for x in range(px.w)] for y in range(px.h)]
     return lit(g)
 
 
 def scooter_pulling(roll, u=1):
-    """scooter's pull-out frame roll."""
+    """scooter's pull-out frame roll, riderless."""
     return scooter(False, u, roll)
+
+
+def scooter_riding(roll, u=1):
+    """scooter's ride frame roll: ridden up its lane, away from the pack."""
+    return scooter(False, u, roll, rider=True)
 
 
 # Each canoe's colour and its light, per rack bar, left then right.
@@ -651,7 +695,7 @@ SKINS = (
 # The motion tags after a skin's idle: key to [(tag, drawing, frame arguments, ms per frame)].
 MOVES = {"minor-canoe-rack": [("pull-out", canoe_rack_pulling, *PULL_OUT)],
          "minor-log": [("pull-out", lambda roll, u=1: log(0, u, roll), *PULL_OUT)],
-         "minor-scooter": [("pull-out", scooter_pulling, *PULL_OUT)],
+         "minor-scooter": [("pull-out", scooter_pulling, *PULL_OUT), ("ride", scooter_riding, range(4), SCOOTER_RIDE_MS)],
          "minor-tricycles": [("pull-out", lambda roll, u=1: tricycles(0, u, roll), *PULL_OUT)]}
 # The zone road colour each skin is checked on.
 ROAD = {"snooze-crescent": "8b9bb4", "bark-park": "e4a672", "sniff-street-shops": "f6757a",
@@ -659,14 +703,15 @@ ROAD = {"snooze-crescent": "8b9bb4", "bark-park": "e4a672", "sniff-street-shops"
 
 
 def sprites():
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every skin at full size, then at every depth
-    step on a minis.Mini."""
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for the scooter at full size, then at every depth step,
+    on a minis.Mini at road.SCALE x the step: idle (2 frames, 500ms), pull-out (4 frames, 100ms) and ride (4
+    frames, SCOOTER_RIDE_MS). The other skins are not in play, so their exports stay as they are."""
     this = sys.modules[__name__]
-    for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
-        for key, draw, args, ms, _, _ in SKINS:
-            yield f"{key}{suffix}", [(tag, [small(this, s, d, a, 1 / s).outlined() if s < 1 else d(a).outlined()
-                                            for a in fargs], fms)
-                                     for tag, d, fargs, fms in [("idle", draw, args, ms), *MOVES.get(key, [])]]
+    key, draw, args, ms, _, _ = next(skin for skin in SKINS if skin[0] == "minor-scooter")
+    for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
+        s = SCALE * step
+        yield f"{key}{suffix}", [(tag, [small(this, s, d, a, 1 / s).outlined() for a in fargs], fms)
+                                 for tag, d, fargs, fms in [("idle", draw, args, ms), *MOVES[key]]]
 
 
 if __name__ == "__main__":
