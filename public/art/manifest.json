@@ -1986,15 +1986,6 @@
       "json": "sprites/fx-treat-pop.json"
     },
     {
-      "key": "gag-ball",
-      "png": "sprites/gag-ball.png",
-      "json": "sprites/gag-ball.json",
-      "anchor": {
-        "feetY": 12,
-        "opaqueWidth": 12
-      }
-    },
-    {
       "key": "gag-cat",
       "png": "sprites/gag-cat.png",
       "json": "sprites/gag-cat.json",
@@ -2010,15 +2001,6 @@
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 35
-      }
-    },
-    {
-      "key": "gag-sprinkler",
-      "png": "sprites/gag-sprinkler.png",
-      "json": "sprites/gag-sprinkler.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 29
       }
     },
     {
@@ -5078,16 +5060,6 @@
       "json": "sprites/ui-dog-card-warn.json"
     },
     {
-      "key": "ui-doghouse",
-      "png": "sprites/ui-doghouse.png",
-      "json": "sprites/ui-doghouse.json"
-    },
-    {
-      "key": "ui-doghouse-warn",
-      "png": "sprites/ui-doghouse-warn.png",
-      "json": "sprites/ui-doghouse-warn.json"
-    },
-    {
       "key": "ui-fired-plate",
       "png": "sprites/ui-fired-plate.png",
       "json": "sprites/ui-fired-plate.json"
@@ -5984,10 +5956,6 @@
       "png": "images/ui-detail-well.png"
     },
     {
-      "key": "ui-dog-band",
-      "png": "images/ui-dog-band.png"
-    },
-    {
       "key": "ui-dog-card-band",
       "png": "images/ui-dog-card-band.png"
     },
@@ -6054,10 +6022,6 @@
     {
       "key": "ui-strip-well",
       "png": "images/ui-strip-well.png"
-    },
-    {
-      "key": "ui-top-bar",
-      "png": "images/ui-top-bar.png"
     },
     {
       "key": "ui-walk-bar",

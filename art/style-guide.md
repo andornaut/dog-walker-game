@@ -8,12 +8,10 @@
 
 ## Layout and sizes
 
-| Band         | Screen rows | Contents                                                                                                                                                                                            |
-| ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Top bar      | 0 to 39     | `ui-top-bar` wells: money 4,8 88×26, treats 96,8 32×26, zone 212,5 144×29; `ui-icon-button` Home 130,10, sound 152,10 and pause 174,10; `ui-strip-well` under the zone well, right aligned at x 356 |
-| Backdrop     | 40 to 213   | `backdrop-<zone>`, 360×174                                                                                                                                                                          |
-| Road         | 214 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180                                                                                                                               |
-| Doghouse row | 466 to 559  | `ui-dog-band` (360×94) at 0,466; three 120×90 `ui-doghouse` slots at x 0, 120 and 240, rows 470 to 559                                                                                              |
+| Band     | Screen rows | Contents                                                              |
+| -------- | ----------- | --------------------------------------------------------------------- |
+| Backdrop | 40 to 213   | `backdrop-<zone>`, 360×174                                            |
+| Road     | 214 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180 |
 
 | Sprite                                                                                                                                                | Frame                      |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
@@ -59,7 +57,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, and `K` names in `art/tool
 | ------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------ |
 | plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, callouts, the zone banner, `normal` tiles and buttons, the cost on `card-cost` |
 | plum on tan                    | 6.49  | Body text on tan                                                                                                         |
-| plum on amber                  | 7.35  | Text on amber: forced-stop band, step number, the `ui-doghouse` card stock                                               |
+| plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                                                             |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                           |
 | darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                      |
 | forest on cream                | 5.39  | Money gained, affordable prices, `ui-payout-label`                                                                       |
@@ -72,7 +70,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, and `K` names in `art/tool
 | white on forest                | 7.80  | Labels on chips                                                                                                          |
 | ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board                                                                              |
 | white on rust                  | 4.99  | Trait chip "Food"                                                                                                        |
-| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`, the FIRED plate on the `empty` `ui-doghouse` card                          |
+| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                                             |
 | white on navy                  | 13.89 | `ui-detail-band` title                                                                                                   |
 | ink on yellow                  | 14.43 | `ui-sticker` `new`                                                                                                       |
 | ink on cyan                    | 11.98 | `ui-sticker` `price`                                                                                                     |
@@ -88,8 +86,8 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, and `K` names in `art/tool
 
 ## UI
 
-- One chrome for every panel, bubble, plate, tile and card frame: a cream face in a 1px ink outer line and a 1px plum inner line, with a tan lip along its bottom and right (`chrome` in `art/tools/ui.py`); `ui-doghouse` takes an amber face and orange lip instead, and `ui-dog-card` a navy face with an ink inner line and lip. Corners are cut 1px (panels, cards), 2px (hints, detail cards) or 3px (quips). A coloured plate (`ui-hit-label`, `ui-fired-plate`) puts its face 4px in, inside a 2px cream band. Tails are cream in an ink line, laid over their bubble's ink row. No plain white boxes.
-- Wood is background only: full-screen backgrounds (dbrown with plum seams), the top bar and `ui-dog-band`. Navy bands (`ui-section`, `ui-detail-band`) head sections and cards; the zone banner's ribbon ends are navy.
+- One chrome for every panel, bubble, plate, tile and card frame: a cream face in a 1px ink outer line and a 1px plum inner line, with a tan lip along its bottom and right (`chrome` in `art/tools/ui.py`); `ui-dog-card` takes a navy face with an ink inner line and lip instead. Corners are cut 1px (panels, cards), 2px (hints, detail cards) or 3px (quips). A coloured plate (`ui-hit-label`, `ui-fired-plate`) puts its face 4px in, inside a 2px cream band. Tails are cream in an ink line, laid over their bubble's ink row. No plain white boxes.
+- Wood is background only: full-screen backgrounds (dbrown with plum seams), `ui-walk-bar` and `ui-dog-card-band`. Navy bands (`ui-section`, `ui-detail-band`) head sections and cards; the zone banner's ribbon ends are navy.
 - No overlay tips over the play area: no tutorial hands, arrows or hint panels drawn over the road. Teaching lives on the help pages and in the message strip.
 - `ui-section` frames each start screen section: `neutral` (ink frame, navy band, cream heading) while nothing in it is chosen, and `complete` (amber border and band, ink text) once something is. Walker, dogs and Pocket follow the same rule. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Help, Home, Logbook, pause, Settings and sound sit on `ui-icon-button`.
 - `ui-sticker` (56×28) is a starburst in an ink outline: `new` (yellow body, amber spikes) on a dog or gear tile that just became affordable, `price` (cyan body, sky spikes) for the next locked item's price, `pop` (4 frames, 70ms, ending on the `new` look) for a badge-earned moment. At most one sticker per screen (`new` wins over `price`), never on the run screen's road or over a choice card. On a tile, its right edge sits 2px right of the tile's (kept 2px inside the screen) and its bottom 4px below the tile's, over the price line, which the tile then leaves out. The word is in `font-title` at 1×, ink, centred on x 28 with its caps in rows 12 to 16, up to 36px wide: "NEW!" or the price as the game formats it. Write the word after `pop` ends; with reduced motion show the last frame.
@@ -149,31 +147,6 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 ## Run screen
 
-### Doghouse slots
-
-CLEANUP (added 2026-10-21): this section and the top bar's row in the layout table retire once the game draws the walk HUD below.
-
-The dog row sits on `ui-dog-band` (360×94), drawn at 0,466 under the slots: the top bar's plum wood with the bar's bottom trim turned over along its top (ink on row 466 against the road, then dbrown and brown), so the bar and the band frame the road alike. The wood shows on rows 469 to 471 and between the cards. An owned slot with no dog shows the band, with the game's dashed tan outline and "Empty" in cream; a slot not bought shows the band alone.
-
-`ui-doghouse` (120×90) is a character file card on the band: the UI chrome (ink and plum lines, amber face, orange lip) from x 1 to 118 and rows 2 to 89, so rows 0 and 1 show the wood and a 1px gap runs down each side. The amber card stock is on no zone's road, curb, sidewalk or verge, so a card never reads as road. A blue header (rows 3 to 20) holds the name plate (110×14: an ink line, an amber face, a solid dred shadow). The dog's photo is backed in its own colour and the owner's in sky, each in an ink frame with a white mat. The dog's colour also rings its emblem badge (its accessory, 8×8) and runs along the foot stripe under a plum rule, ticked in its trim. Card backgrounds and the band never use zone colours; a dog's accent is its own colour. The game draws, in slot pixels:
-
-| Element           | Position                                                                                                  |
-| ----------------- | --------------------------------------------------------------------------------------------------------- |
-| Dog's name        | Centred at (60,6) in `font-title` on the name plate's amber face (x 6 to 113, rows 5 to 16)               |
-| Dog's face        | (6,24), in the dog's photo                                                                                |
-| Owner's face      | (42,24), in the owner's photo                                                                             |
-| Hearts            | From (78,26), rows of five, 8px across and 8px down, in the white hearts box (x 77 to 116, rows 23 to 54) |
-| "n/max" count     | Centred at (98,46) in `font-title` in the hearts box, under its solid rule                                |
-| Status icons      | 16×16 at (78,62) and (98,62), in dashed boxes                                                             |
-| Owner's name      | (6,62) in `font-body` on the ID line, ruled on row 70 (x 4 to 75)                                         |
-| FIRED (fired dog) | Centred at (60,74), white, on the dred plate (built as `ui-fired-plate`) of the grey `empty` card         |
-
-The `empty` card (a fired dog's) is the same card greyed: a slate header, a white name plate, a dark dog photo and a pale owner photo, with no hearts box, ID line, badge or stripe.
-
-At 1 ♥, `ui-doghouse-warn` pulses over the card: a 2px rim inside its outline (`static` with reduced motion).
-
-On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 and 80ms) over the card and under its faces, hearts and text: two red flashes of the header, face and foot stripe inside a plum edge that leave the name plate, photos, hearts box, ID line, quirk icon, status boxes and badge clear, then a 2px and a 1px red rim. It shakes the whole slot 1px right, left, right, then back, one offset per frame. With reduced motion it plays the flash without the shake.
-
 ### Walk HUD
 
 The walk screen's HUD: a 48-row walk bar, a bar per active debuff under it, and 120×58 dog cards on the bottom rows. The backdrop band follows the bar (rows 48 to 221), and the camera has horizonY −50, focal 720, farY 222 and footY 494, 272 road rows. Screen pixels unless a table says slot or bar pixels; text y is the top of the capitals.
@@ -188,7 +161,7 @@ The walk screen's HUD: a 48-row walk bar, a bar per active debuff under it, and 
 
 #### Walk bar
 
-`ui-walk-bar` (360×48) is the top bar's plum wood and trim (dbrown on row 1; brown, dbrown and ink on rows 45 to 47) with two ink wells, the grain kept clear of them and of the effect row (x 102 to 183, rows 21 to 44). Four buttons sit at its right end: Home, Sound, Settings and Pause.
+`ui-walk-bar` (360×48) is plum wood and a trim (dbrown on row 1; brown, dbrown and ink on rows 45 to 47) with two ink wells, the grain kept clear of them and of the effect row (x 102 to 183, rows 21 to 44). Four buttons sit at its right end: Home, Sound, Settings and Pause.
 
 | Element            | Rule                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -228,7 +201,7 @@ The message strip shares the band's flat sky with the bars. With no bar it is a 
 
 #### Dog cards
 
-`ui-dog-card` (120×58) is the doghouse card cut down to its header and one row, in the neutral `ui-section` look so the eye stays on the road: a 2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face from x 1 to 118 and rows 0 to 57, so a 1px gap runs down each side and the card's foot is the screen's bottom row. An ink rule on row 17 splits the header (rows 1 to 16) from the body. The dog's photo is an ink frame (4,19 36×36) round a cream mat round its colour. `ui-dog-card-band` ends the road along the cards' top: two rows of dithered ink shadow cast onto the road (screen rows 496 and 497, a quarter then three quarters of their pixels, clear between them), then the trim, ink, a lit tan line and ink (rows 498 to 500); its wood shows on row 501 above the cards and between them. In slot pixels:
+`ui-dog-card` (120×58) is a file card cut down to its header and one row, in the neutral `ui-section` look so the eye stays on the road: a 2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face from x 1 to 118 and rows 0 to 57, so a 1px gap runs down each side and the card's foot is the screen's bottom row. An ink rule on row 17 splits the header (rows 1 to 16) from the body. The dog's photo is an ink frame (4,19 36×36) round a cream mat round its colour. `ui-dog-card-band` ends the road along the cards' top: two rows of dithered ink shadow cast onto the road (screen rows 496 and 497, a quarter then three quarters of their pixels, clear between them), then the trim, ink, a lit tan line and ink (rows 498 to 500); its wood shows on row 501 above the cards and between them. In slot pixels:
 
 | Element       | Rule                                                                                                                                                                                              |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -262,12 +235,12 @@ A side that lacks room by x 4 or x 356 gives way to the other. A firing keeps `f
 
 | Event          | Shows                                                                                                                                                                                                                                                                                   |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 ♥            | Owner's `worried` face and `ui-doghouse-warn`                                                                                                                                                                                                                                           |
+| 1 ♥            | Owner's `worried` face and `ui-dog-card-warn`                                                                                                                                                                                                                                           |
 | Any hit        | `fx-bump` at the contact point; walker `stumble`, dogs `react`                                                                                                                                                                                                                          |
 | Encounter hit  | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (goose white, other dog pink, puddle sky, skunk mauve, squirrel orange, thief amber); the label at 2× on `ui-hit-label`; caught dogs `shake`                                                                   |
 | Fee payout     | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                                                                                       |
 | Firing         | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2× (an amber starburst behind a cream POOF cloud, and a front door slamming shut beside the face); the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                        |
-| Heart change   | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog beside the "−1" or "+1" label, then `fly` tweened into its doghouse's heart labels band; on a loss the house plays `ui-doghouse` `heart-loss` while the slot shakes                                                               |
+| Heart change   | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog beside the "−1" or "+1" label, then `fly` tweened into its dog card; on a loss the card plays `ui-dog-card` `heart-loss`                                                                                                          |
 | Moving hazard  | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead: the arrow's `pulse` (right, mirrored for left) for a crosser, `down-pulse` for a mover about to come at the pack, `up-pulse` for one about to move off ahead; `ui-warning-wander` over a wanderer before each step |
 | Plain hit      | `fx-bump` at the contact point and the heart change over the dog that touched it; a small dog that dodges plays `fx-dodge` on its frame instead                                                                                                                                         |
 | Puddle, pickup | `fx-splash`, `fx-sparkle`                                                                                                                                                                                                                                                               |

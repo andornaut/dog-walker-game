@@ -10,20 +10,15 @@ outlined with icon_edge); ui-panel, ui-hint
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
-and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-top-bar (360x40), ui-quip (24x24
-nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
-ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48)
-ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
-wood behind the dog slots); the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
+and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-strip-well (24x24
+nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
+ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
+the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
 ui-dog-card-band (360x64, drawn at (0, 496)), ui-lead-tag (27x11, LEAD baked in with
 font-title) and ui-owner-tab (36x36).
-Sprites: ui-doghouse (120x90, one of three dog slots in a row, drawn as a character file card;
-a tag per dog key and `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn
-over the card and under the game's faces, hearts and text, while the game shakes the whole slot
-1px right, left, right, then back to rest, one offset per frame),
-ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
-ui-dog-card (120x58, one of three cards in the walk's card row; a tag per dog key and `empty`,
-then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay as ui-doghouse's),
+Sprites: ui-dog-card (120x58, one of three cards in the walk's card row; a tag per dog key and
+`empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn over the card and under
+the game's faces, hearts and text),
 ui-dog-card-warn (120x58, the low-hearts rim drawn over ui-dog-card; tags pulse, static),
 ui-debuff-bar (360x16, one active debuff's bar under the walk bar; tags muddy, stinky, zoomies),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
@@ -697,11 +692,11 @@ def sticker(body, spikes, scale=1.0, turn=0.0):
     return g
 
 
-# ---------- the doghouse: one dog slot in the dog column, drawn as a character file card ----------
+# ---------- the dogs' colours and the debuff bars ----------
 
 # Each dog's colour: base, shade and dark, from the dog's accessory. It backs the dog's photo, rings
 # its emblem badge and runs along the card's foot stripe. No two dogs share a base. Card
-# backgrounds and the band never use zone colours; a dog's accent is its own colour. Snowball's is
+# backgrounds never use zone colours; a dog's accent is its own colour. Snowball's is
 # his collar's blue, not its sky, which backs every owner's photo; Archie's is rust, for his red
 # merle coat; Pierre's is his show bow's mauve, which holds his black coat's ink line at 3.83:1.
 DOG_COLOURS = {
@@ -712,205 +707,10 @@ DOG_COLOURS = {
     "empty": ("slate", "dslate", "navy"),
 }
 
-# The foot stripe's ticks for a dog whose colour alone would sit too close to another dog's: Zippy's
-# red collar on his dred, Archie's red bandana on his rust, Penny's blue collar on her gold,
-# Snowball's sky collar on his blue and Pierre's white stripe on his mauve.
-TRIMS = {"zippy": "red", "archie": "red", "penny": "blue", "snowball": "sky", "pierre": "white"}
-
-# The 8x8 emblem on each badge, the dog's accessory: a letter is a colour, "." shows the badge's face.
-EMBLEMS = {
-    "duchess": ({"P": "pink", "M": "mauve"}, [  # bow
-        "........", "PP....PP", "PPP..PPP", "PPPMMPPP", "PPPMMPPP", "PPM..MPP", "PM....MP", "........"]),
-    "nugget": ({"R": "red", "D": "dred", "W": "white"}, [  # spotted bandana
-        "D......D", "RRRRRRRR", "RRWRRRWR", ".RRRRRR.", ".RRRWRR.", "..RRRR..", "..DRRD..", "...DD..."]),
-    "zippy": ({"R": "red", "D": "dred", "L": "lgrey", "W": "white", "G": "grey"}, [  # collar and tag
-        "R......R", "RR....RR", ".RRRRRR.", "..DDDD..", "...LL...", "..LWLL..", "..LLLG..", "...GG..."]),
-    "pierre": ({"M": "purple", "P": "mauve", "K": "pink"}, [  # show rosette
-        "..MMMM..", ".MMPPMM.", ".MPKPPM.", ".MPPPPM.", ".MMPPMM.", "..MMMM..", "..M..M..", ".M....M."]),
-    "biscuit": ({"G": "green", "D": "dgreen", "L": "lgrey", "W": "white"}, [  # collar and bone tag
-        "GGGGGGGG", "DDDDDDDD", "...LL...", "WW.LL.WW", ".WWWWWW.", ".WWWWWL.", "WL....LL", "........"]),
-    "archie": ({"R": "red", "D": "dred"}, [  # knotted bandana
-        "RD....DR", ".RD..DR.", "..RDDR..", ".RRRRRR.", ".RRRRRD.", "..RRRD..", "...RD...", "........"]),
-    "snowball": ({"S": "sky", "B": "blue", "Y": "yellow", "A": "amber", "O": "orange", "R": "rust"}, [  # bell
-        "SSSSSSSS", "BBBBBBBB", "...AY...", "..AYYA..", "..AAAO..", ".AAAAOO.", ".OOOOOO.", "...RR..."]),
-    "penny": ({"S": "sky", "B": "blue", "L": "lgrey", "A": "amber", "Y": "yellow", "O": "orange"}, [  # heart tag
-        "SSSSSSSS", "BBBBBBBB", "...LL...", ".AA..AA.", "AYAAAAAO", ".AAAAAO.", "..AAOO..", "...OO..."]),
-    "koda": ({"O": "orange", "R": "rust", "L": "lgrey", "G": "grey"}, [  # harness clip
-        "O......O", "RO....OR", ".RO..OR.", "..LLLG..", "..L..G..", "..LGGG..", "...OO...", "...OR..."]),
-}
-
-# The status icon spots under the hearts box, top-left corners of 16x16 icons, each in a dashed box.
-STATUS_SPOTS = ((78, 62), (98, 62))
-
-# One card in the slot row: three sit side by side, 120px apart. The card covers x 1 to 118 and rows
-# 2 to 89; rows 0 and 1 show ui-dog-band's wood.
-HOUSE_W, HOUSE_H = 120, 90
-CARD = (1, 2, 118, 88)
-# The card stock and its lip: a colour on no zone's road, curb, sidewalk or verge, so the cards
-# never read as part of the road. Plum text holds 7.35:1 on amber.
-CARD_FACE, CARD_LIP = "amber", "orange"
-
-
-def name_plate(g, face):
-    """The name's plate on the header: an ink line round the face (x 6 to 113, rows 5 to 16), with
-    a solid dred shadow 1px right and below, as the yard sign's letters have."""
-    g.rect(6, 5, 110, 14, "dred")
-    g.rect(5, 4, 110, 14, "ink")
-    g.rect(6, 5, 108, 12, face)
-
-
-def doghouse(dog):
-    """120x90, one of three slots in a row: a character file card (x 1 to 118, rows 2 to 89) in the
-    UI chrome on amber stock, with a 1px gap down each side and rows 0 and 1 clear, so
-    ui-dog-band's wood frames it. The game draws, in slot pixels: the dog's name centred at (60, 6) in font-title on the amber name
-    plate (x 6 to 113, rows 5 to 16) in the blue header (rows 3 to 20), the dog face at (6, 24) in
-    the left photo (backed in the dog's colour), the owner face at (42, 24) in the right photo
-    (backed in sky), hearts from (78, 26) in rows of five, 8px across (7px hearts with a 1px gap)
-    and 8px down, on the white hearts box (x 77 to 116, rows 23 to 54) ruled under each row, the
-    n/max count centred at (98, 46) in font-title in the same box under a solid rule, up to two
-    16x16 status icons at (78, 62) and (98, 62) in dashed boxes, the owner's name at (6, 62) in
-    font-body on the ID line (ruled on row 70, x 4 to 75) and the quirk icon (16x16) at (6, 72), one clear row under the rule.
-    The dog's emblem sits in a badge ringed in its colour (x 24 to 35, rows 76 to 87), and its
-    colour runs along the foot stripe (x 38 to 115, rows 82 to 85) under a plum rule on row 81.
-    The empty card (a fired dog's) is grey: a slate header, a white name plate, a dark dog photo, and only a dred plate built as
-    ui-fired-plate (x 40 to 79, rows 68 to 84, the face x 44 to 75, rows 72 to 80) for FIRED in
-    font-title, white (7.34:1), centred on x 60 with its caps in rows 74 to 78."""
-    base, shade, dark = DOG_COLOURS[dog]
-    empty = dog == "empty"
-    face, lip, header, header_sh, plate_face = (
-        ("lgrey", "grey", "slate", "dslate", "white") if empty else (CARD_FACE, CARD_LIP, "blue", "navy", CARD_FACE))
-    g = Grid(HOUSE_W, HOUSE_H)
-    chrome(g, *CARD, r=1, face=face, lip=lip)
-    # the header band, shaded along its foot, filled by the name plate
-    g.rect(3, 3, 114, 17, header)
-    g.rect(3, 19, 114, 1, header_sh)
-    g.rect(3, 20, 114, 1, "plum")
-    name_plate(g, plate_face)
-    # the photos: an ink frame round a white mat, the dog on its colour and the owner on sky, each
-    # with plum mounts on its top corners
-    for x, back in ((4, "dslate" if empty else base), (40, "lgrey" if empty else "sky")):
-        g.rect(x, 22, 36, 36, "ink")
-        g.rect(x + 1, 23, 34, 34, "white")
-        g.rect(x + 2, 24, 32, 32, back)
-        g.rect(x, 22, 3, 1, "plum")
-        g.rect(x + 33, 22, 3, 1, "plum")
-    if empty:
-        fired = plate("dred", "red", "plum", 40, 17)
-        for y, row in enumerate(fired.px):
-            for x, c in enumerate(row):
-                if c:
-                    g.px[68 + y][40 + x] = c
-        return g
-    # the hearts box, ruled under each row of hearts and solid over the count
-    g.rect(76, 22, 42, 34, "plum")
-    g.rect(77, 23, 40, 32, "white")
-    for y in (33, 41):
-        for x in range(78, 116, 2):
-            g.p(x, y, "lgrey")
-    g.rect(77, 43, 40, 1, "lgrey")
-    # the ID line under the owner's name
-    g.rect(4, 70, 72, 1, lip)
-    # the status spots: dashed boxes round each icon
-    for x, y in STATUS_SPOTS:
-        for i in range(0, 18, 3):
-            g.p(x - 1 + i, y - 1, lip)
-            g.p(x - 1 + i, y + 16, lip)
-            g.p(x - 1, y - 1 + i, lip)
-            g.p(x + 16, y - 1 + i, lip)
-    # the emblem badge, ringed in the dog's colour
-    g.rect(24, 76, 12, 12, "ink")
-    g.rect(25, 77, 10, 10, base)
-    g.rect(26, 78, 8, 8, face)
-    colours, rows = EMBLEMS[dog]
-    for y, row in enumerate(rows):
-        for x, c in enumerate(row):
-            if c != ".":
-                g.p(26 + x, 78 + y, colours[c])
-    # the foot stripe in the dog's colour under a plum rule, so a gold or orange stripe still reads
-    # on the amber face, shaded along its foot, with a tick every 12px
-    g.rect(38, 81, 78, 1, "plum")
-    g.rect(38, 82, 78, 4, base)
-    g.rect(38, 85, 78, 1, shade)
-    for x in range(40, 116, 12):
-        g.rect(x, 82, 3, 3, TRIMS.get(dog, dark))
-    return g
-
-
-def card_solid():
-    """The card's silhouette, as a solid(x, y) test."""
-    card = doghouse("empty").px
-
-    def solid(x, y):
-        return 0 <= x < HOUSE_W and 0 <= y < HOUSE_H and card[y][x] is not None
-    return solid
-
 
 def depth(solid, x, y, r):
     """True when every pixel within r of (x, y) is on the card."""
     return all(solid(x + dx, y + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1))
-
-
-def doghouse_warn(step):
-    """120x90, drawn over ui-doghouse: a 2px warning rim inside the card's outline, for an owner at
-    one heart. Steps 0 to 2 run dim to bright; the outer pixel (orange, amber) carries the contrast
-    on the plum wood, the inner one (red or orange) the warning colour."""
-    outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
-    solid = card_solid()
-    g = Grid(HOUSE_W, HOUSE_H)
-    for y in range(HOUSE_H):
-        for x in range(HOUSE_W):
-            if not solid(x, y):
-                continue
-            if not depth(solid, x, y, 1):
-                g.p(x, y, outer)
-            elif not depth(solid, x, y, 2):
-                g.p(x, y, inner)
-    return g
-
-
-# The parts the game draws on, left clear by the heart-loss flash: the name plate and its shadow,
-# the two photos, the hearts box, the owner's name line, the quirk icon, the status boxes and the
-# emblem badge, as x, y, w, h.
-PANELS = ((5, 4, 111, 15), (4, 22, 36, 36), (40, 22, 36, 36), (76, 22, 42, 34), (4, 59, 72, 12), (6, 72, 16, 16),
-          (77, 61, 18, 18), (97, 61, 18, 18), (24, 76, 12, 12))
-# The card's lines the flash keeps as seams: the inner line, the header's shade and the lip.
-SEAMS = ("plum", "navy", CARD_LIP)
-# Each heart-loss frame: the flash's fill and seam colours, or the rim's outer and inner colours.
-HEART_LOSS = (("flash", "red", "dred"), ("flash", "dred", "red"), ("rim", "red", "pink"), ("rim", "red", None))
-
-
-def doghouse_heart_loss(step):
-    """120x90, ui-doghouse's heart-loss frames: an overlay the game draws over the card, under its faces,
-    hearts and text, so it holds for every dog. Frames 0 and 1 flash the card's header, face and foot
-    stripe red inside a plum edge, with its inner line, header shade and lip as seams and the panels
-    left clear; frames 2 and 3 fade to a 2px then 1px red rim inside the outline, like
-    ui-doghouse-warn's."""
-    kind, a, b = HEART_LOSS[step]
-    solid = card_solid()
-    card = doghouse("koda").px
-    seams = {K[c] for c in SEAMS}
-    g = Grid(HOUSE_W, HOUSE_H)
-
-    def panel(x, y):
-        return any(px <= x < px + w and py <= y < py + h for px, py, w, h in PANELS)
-
-    for y in range(HOUSE_H):
-        for x in range(HOUSE_W):
-            if not solid(x, y):
-                continue
-            if not depth(solid, x, y, 1):
-                # the flash redraws the card's edge in plum
-                if kind == "flash":
-                    g.p(x, y, "plum")
-                continue
-            if kind == "flash":
-                if not panel(x, y):
-                    g.p(x, y, b if card[y][x] in seams else a)
-            elif not depth(solid, x, y, 2):
-                g.p(x, y, a)
-            elif b and not depth(solid, x, y, 3):
-                g.p(x, y, b)
-    return g
 
 
 # Each debuff's bar under the walk bar: its face, the empty track, the track's fill and the name's
@@ -946,33 +746,14 @@ def debuff_bar(debuff):
     return g
 
 
-# ---------- the dog band: the wood behind the dog column ----------
+# ---------- wood ----------
 
 def wood(g, top, h):
-    """Plum wood across g from row top, h rows, as the top bar's: h short dbrown grain lines at
-    scattered rows and columns."""
+    """Plum wood across g from row top, h rows: h short dbrown grain lines at scattered rows and
+    columns."""
     g.rect(0, top, g.w, h, "plum")
     for i in range(h):
         g.rect((i * 53) % (g.w - 8), top + 4 + (i * 11) % (h - 9), 4 + (i % 4) * 3, 1, "dbrown")
-
-
-BAND_W, BAND_H = 360, 94
-# The divider's rows from the band's top: the top bar's bottom trim turned over, so the bar and
-# the band frame the road alike, each with its ink line against the road.
-DIVIDER = ("ink", "dbrown", "brown")
-
-
-def dog_band():
-    """360x94, drawn at (0, 466) under the dog slots: plum wood, as the top bar's, with the bar's
-    bottom trim turned over along its top (an ink line on row 0, screen row 466, against the road,
-    then a dbrown and a brown row), on the road's last free rows under the walker's feet and the
-    cards' clear top rows. The wood shows between the cards and behind an owned empty slot's
-    dashed outline."""
-    g = Grid(BAND_W, BAND_H)
-    wood(g, 0, BAND_H)
-    for y, c in enumerate(DIVIDER):
-        g.rect(0, y, BAND_W, 1, c)
-    return g
 
 
 # ---------- selection and feedback ----------
@@ -1219,7 +1000,7 @@ def stitch(horizontal):
     return g
 
 
-# ---------- run screen: top bar, zone progress, quips, zone banner ----------
+# ---------- run screen: the state strip, zone progress, quips, zone banner ----------
 
 def well(g, x, y, w, h):
     """A recessed ink slot in the wood: clipped corners and a dark brown lip below and to the right."""
@@ -1245,39 +1026,6 @@ def strip_well():
     return g
 
 
-def top_bar():
-    """360x40: plum wood with a trim along the bottom and three ink wells, its grain kept 1px clear of
-    each well, in screen pixels:
-    money 4,8 88x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 96,8 32x26
-    (icon-treat at 100,13, the count at 118,18), and zone 212,5 144x29 (the zone name right aligned
-    at 352,10, ui-zone-pips from 271,22). Between the treats and zone wells sit three
-    ui-icon-buttons: Home at 130,10, sound at 152,10 and pause at 174,10. The state strip (ui-strip-well) hangs
-    under the zone well, right aligned at 356."""
-    g = Grid(360, 40)
-    wood(g, 0, 40)
-    g.rect(0, 1, 360, 1, "dbrown")
-    g.rect(0, 37, 360, 1, "brown")
-    g.rect(0, 38, 360, 1, "dbrown")
-    g.rect(0, 39, 360, 1, "ink")
-    # each well sits in plain wood: no grain line touches its edge or lip, and no stub under 3px is left
-    wells = ((4, 8, 88, 26), (96, 8, 32, 26), (212, 5, 144, 29))
-    for x, y, w, h in wells:
-        g.rect(x - 1, y - 1, w + 2, h + 2, "plum")
-    grain = K["dbrown"]
-    for y in range(2, 37):
-        x = 0
-        while x < g.w:
-            n = 0
-            while x + n < g.w and g.px[y][x + n] == grain:
-                n += 1
-            if 0 < n < 3:
-                g.rect(x, y, n, 1, "plum")
-            x += max(n, 1)
-    for x, y, w, h in wells:
-        well(g, x, y, w, h)
-    return g
-
-
 # ---------- the walk HUD: the 48-row walk bar, the debuff bars and the dog cards ----------
 
 WALK_BAR = (360, 48)
@@ -1290,8 +1038,8 @@ EFFECT_WELL = 22
 
 
 def walk_bar():
-    """360x48, ui-walk-bar: plum wood with the top bar's trim (dbrown on row 1; brown, dbrown and
-    ink on rows 45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
+    """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
+    45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
     cash 4,4 95x40, sized for "$888" at 3x after the coin, and neighbourhood 103,4 80x17, which
     ends clear of the Home button's hit at x 184. The game draws the effect wells, the Home, Sound,
     Settings and Pause buttons and every text and icon on it."""
@@ -1381,9 +1129,8 @@ def dog_card_solid():
 
 
 def dog_card_warn(step):
-    """120x58, ui-dog-card-warn: ui-doghouse-warn's 2px rim inside the card's outline, for an owner
-    at one heart; steps 0 to 2 run dim to bright. The outer pixel holds 7.35:1 on the wood and
-    7.49:1 on navy."""
+    """120x58, ui-dog-card-warn: a 2px rim inside the card's outline, for an owner at one heart;
+    steps 0 to 2 run dim to bright. The outer pixel holds 7.35:1 on the wood and 7.49:1 on navy."""
     outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
     solid = dog_card_solid()
     w, h = DOG_CARD
@@ -1673,7 +1420,6 @@ IMAGES = {
     "ui-hint": lambda: to_image(hint().outlined(False)),
     "ui-hint-tail": lambda: to_image(hint_tail().outlined(False)),
     "ui-new-best": new_best,
-    "ui-top-bar": lambda: to_image(top_bar().outlined(False)),
     "ui-strip-well": lambda: to_image(strip_well().outlined(False)),
     "ui-quip": lambda: to_image(quip().outlined(False)),
     "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
@@ -1681,7 +1427,6 @@ IMAGES = {
     "ui-quip-tail-up": lambda: to_image(quip_tail_up().outlined(False)),
     "ui-celebrate-burst": lambda: to_image(celebrate_burst().outlined(False)),
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
-    "ui-dog-band": lambda: to_image(dog_band().outlined(False)),
     "ui-walk-bar": lambda: to_image(walk_bar().outlined(False)),
     "ui-effect-well": lambda: to_image(effect_well().outlined(False)),
     "ui-dog-card-band": lambda: to_image(dog_card_band().outlined(False)),
@@ -1699,15 +1444,11 @@ IMAGES = {
 
 
 def sprites():
-    yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in DOG_COLOURS] + [
-        ("heart-loss", [doghouse_heart_loss(i).outlined(False) for i in range(4)], [60, 60, 80, 80])]
     yield "ui-dog-card", [(dog, [dog_card(dog).outlined(False)], 1000) for dog in DOG_COLOURS] + [
         ("heart-loss", [dog_card_heart_loss(i).outlined(False) for i in range(4)], [60, 60, 80, 80])]
     card_warn = [dog_card_warn(i).outlined(False) for i in (0, 1, 2, 1)]
     yield "ui-dog-card-warn", [("pulse", card_warn, 400), ("static", [card_warn[1]], 1000)]
     yield "ui-debuff-bar", [(d, [debuff_bar(d).outlined(False)], 1000) for d in DEBUFF_LOOKS]
-    warn = [doghouse_warn(i).outlined(False) for i in (0, 1, 2, 1)]
-    yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
@@ -1741,7 +1482,7 @@ def sprites():
 
 
 def preview(out, scale=3, width=380):
-    """Every piece in rows that wrap at width, so the 360px top bar gets a row of its own."""
+    """Every piece in rows that wrap at width, so the 360px walk bar gets a row of its own."""
     pieces = [draw() for draw in IMAGES.values()]
     for _, tags in sprites():
         pieces += [to_image(f) for _, fs, _ in tags for f in fs]

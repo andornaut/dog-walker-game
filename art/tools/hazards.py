@@ -6,7 +6,7 @@ squirrel-dash       48x48   side view facing right, run (4 frames, 80ms): a boun
 loose-dog           48x48   the corgi from other-dog in side view facing right, no owner; run (4 frames,
                             100ms): a gallop, gathered, reaching, airborne and landing, the broken leash
                             trailing up off the back, frayed, a 1px wave travelling down it
-ball-bounce         24x36   the gag-ball ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
+ball-bounce         24x36   a ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
                             contact, with its own ground shadow (the game draws none)
 cyclist             48x72   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
                             legs and a 1px sway
@@ -176,7 +176,7 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
     return g
 
 
-# ---------- ball-bounce: the gag-ball ball, bouncing ----------
+# ---------- ball-bounce: a ball, bouncing ----------
 
 # The bounce, laid out for the 28x42 ball and scaled to each step's frame, floor(24x36 x step + 0.5): the ground
 # row (the ball's outline touches it on contact, and the shadow is centred on it); the ball's bottom height per
@@ -209,8 +209,8 @@ BALL = ball_steps()
 
 def ball_bounce(f, s=1):
     """Frame f of the bounce at scale s: squashed on contact (f == 0), stretched on the frames either side
-    of it, round at the top. Unlike gag-ball it is white with two red stripes rolling across, so it reads
-    on the dark Elm Avenue road as well as the light ones."""
+    of it, round at the top. It is white with two red stripes rolling across, so it reads on the dark Elm
+    Avenue road as well as the light ones."""
     q = BALL[s]
     w, h = q["size"]
     up = q["heights"][f]

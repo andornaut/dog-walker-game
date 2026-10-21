@@ -43,11 +43,11 @@ Usage:
                             public/art/sprites/*.png and *.json with Aseprite
 
 The scenery gags play in the backdrop band, front view at the band's own scale: gag-cat
-(24x24) on the near-left perch and gag-kite (36x40) on the near-right lawn. gag-sprinkler
-(32x24) is not placed: each backdrop draws a static ornament on its spot. gag-kite is a street tree with a red and yellow diamond kite snagged at the top right of
-its crown, its ribboned tail streaming right; flutter (4 frames, 140ms, looping): the kite swings
-1 to 2px on its snag while a wave runs out along the tail. gag-ball (14x14) is the rolling
-ball.
+(24x24) on the near-left perch, idle (4 frames: its tail swinging, a blink on the last; the game
+shows frame 0), and gag-kite (36x40) on the near-right lawn. gag-kite is a street tree with a red
+and yellow diamond kite snagged at the top right of its crown, its ribboned tail streaming right;
+flutter (4 frames, 140ms, looping): the kite swings 1 to 2px on its snag while a wave runs out
+along the tail.
 
 Everything that stands or waits on the road has a looping idle: people and
 walkers breathe (a 1px bob of the head and shoulders).
@@ -1566,7 +1566,7 @@ def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
 
 # ---------- scenery gags (front view, in the backdrop band) ----------
 
-def cat(tail=0, blink=False, alert=False):
+def cat(tail=0, blink=False):
     """A ginger cat sitting on a fence post; the game places its paws on the fence's top rail."""
     g = Grid(24, 24)
     tx = (0, 1, 2, 1)[tail]
@@ -1580,9 +1580,9 @@ def cat(tail=0, blink=False, alert=False):
     g.rect(9, 22, 2, 1, "cream")
     g.rect(13, 22, 2, 1, "cream")
     # head and ears
-    hy = 9 if alert else 10
-    g.tri((6.5, hy - 1), (7.5, hy - 6 - (1 if alert else 0)), (10.5, hy - 3), "ochre")
-    g.tri((17.5, hy - 1), (16.5, hy - 6 - (1 if alert else 0)), (13.5, hy - 3), "ochre")
+    hy = 10
+    g.tri((6.5, hy - 1), (7.5, hy - 6), (10.5, hy - 3), "ochre")
+    g.tri((17.5, hy - 1), (16.5, hy - 6), (13.5, hy - 3), "ochre")
     g.p(8, hy - 3, "pink")
     g.p(15, hy - 3, "pink")
     g.ell(12, hy + 1, 5.5, 4.5, "ochre", "rust", "tan")
@@ -1595,47 +1595,6 @@ def cat(tail=0, blink=False, alert=False):
     g.p(12, hy + 3, "pink")
     g.rect(10, hy + 2, 1, 1, "cream")
     g.rect(13, hy + 2, 1, 1, "cream")
-    if alert:
-        # two surprise lines flicking up off the right ear
-        for x, y in ((19, 4), (21, 6)):
-            g.p(x, y, "white")
-            g.p(x + 1, y - 1, "white")
-    return g
-
-
-def sprinkler(step):
-    """A lawn sprinkler sweeping a fan of water across the grass and back."""
-    g = Grid(32, 24)
-    g.rect(14, 18, 4, 4, "grey")
-    g.rect(13, 21, 6, 2, "slate")
-    g.rect(15, 15, 2, 4, "lgrey")
-    g.rect(0, 22, 13, 1, "dgreen")
-    import math
-    # the arm sweeps across and back within the loop, so it never snaps from one side to the other
-    angle = (-60, 0, 60, 0)[step]
-    for k in range(12):
-        a = math.radians(angle - 90)
-        r = 2 + k * 1.3
-        x = 16 + math.cos(a) * r
-        y = 15 + math.sin(a) * r + (k * k) * 0.06
-        g.p(x, y, "cyan" if k % 3 else "white")
-        g.p(x + 1, y + 1, "sky")
-    for i in range(4):
-        g.p(6 + i * 7 + step, 20 - (i + step) % 3, "cyan")
-    return g
-
-
-def ball(step):
-    """A red and white ball; the game rolls it along the sidewalk."""
-    g = Grid(14, 14)
-    g.ell(7, 7, 5.5, 5.5, "red", "dred", "pink")
-    for k in range(2):
-        x = 2 + (k * 5 + step * 2) % 10
-        for xx in (x, x + 1):
-            for yy in range(2, 12):
-                if g.px[yy][xx]:
-                    g.p(xx, yy, "white" if g.px[yy][xx] != g.px[0][0] else None)
-    g.p(5, 4, "white")
     return g
 
 
@@ -1737,10 +1696,7 @@ def sprites():
                                  BREATH_MS)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
-    yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140]),
-                      ("react", frames([cat(1, alert=True), cat(2, alert=True)]), 200)]
-    yield "gag-sprinkler", [("spray", frames(sprinkler(i) for i in range(4)), 140)]
-    yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
+    yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140])]
     yield "gag-kite", [("flutter", frames(kite_tree(i) for i in range(4)), 140)]
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
