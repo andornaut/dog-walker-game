@@ -42,7 +42,7 @@ export const HOME_TEXT = {
   dogCantAfford: "Save {amount} more for {dog}.",
   dogSlotName: "Dog slot {slot}",
   focus: {
-    dogLocked: "Locked dog. {price}",
+    dogLocked: "{dog}: {kind}. {price}",
     dogOwned: "{dog}: {kind}.",
     gear: "{gear}: {effect}.",
     gearLocked: "{gear}: {effect}. {price}",
