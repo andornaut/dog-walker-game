@@ -4,11 +4,11 @@ exports[`every card's text > matches the snapshot 1`] = `
 {
   "encounters": {
     "biscuitNeighbour: instant": "+1♥ each",
-    "lostWallet: instant": "+$10",
-    "otherDog: Let them sniff": "+1♥ each, −$4",
+    "lostWallet: instant": "+$20",
+    "otherDog: Let them sniff": "+1♥ each, −$8",
     "otherDog: Pull away": "Zoomies: the pack drifts on its own for 20s",
     "puddle: contact": "Muddy: bumps cost 2♥ for 20s",
-    "skunk: Full groom": "−$15",
+    "skunk: Full groom": "−$10",
     "skunk: Hold your nose": "−1♥ each",
     "skunk: Quick rinse": "Stinky: tips pay nothing for 20s",
     "thief: Chase them off": "−1♥ each",
@@ -25,8 +25,8 @@ exports[`every card's text > matches the snapshot 1`] = `
     "bigTipper": "+$1 per tip next neighborhood",
     "goodLeash": "No pulls toward squirrels all walk",
     "raincoats": "No Puddle cards all walk",
-    "rushHour": "Tips +100% next neighborhood, obstacles +50% next neighborhood",
-    "sweetTalker": "The first card each neighborhood costs nothing all walk",
+    "rushHour": "Tips +100% next neighborhood, obstacles +50% next neighborhood, treats +100% next neighborhood",
+    "sweetTalker": "The first card each neighborhood has free cash options all walk",
   },
 }
 `;

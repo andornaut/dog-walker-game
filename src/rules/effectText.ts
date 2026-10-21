@@ -112,8 +112,8 @@ export function modifierText(tuning: LiveTuning, modifier: Modifier): string {
   if (modifier.operation === "add" && modifier.stat === "freeCards") {
     change =
       value === 1
-        ? "the first card each neighborhood costs nothing"
-        : `the first ${value} cards each neighborhood cost nothing`;
+        ? "the first card each neighborhood has free cash options"
+        : `the first ${value} cards each neighborhood have free cash options`;
   } else if (modifier.operation === "add") {
     change =
       modifier.stat === "tipValue"

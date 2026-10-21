@@ -3,9 +3,9 @@
 exports[`a card's text for the dogs it catches > matches the snapshot for the whole pack caught 1`] = `
 {
   "encounters": {
-    "otherDog: Let them sniff": "+1♥ Duchess, +1♥ Koda, +1♥ Nugget, −$4",
+    "otherDog: Let them sniff": "+1♥ Duchess, +1♥ Koda, +1♥ Nugget, −$8",
     "otherDog: Pull away": "Zoomies: the pack drifts on its own for 20s",
-    "skunk: Full groom": "−$15",
+    "skunk: Full groom": "−$10",
     "skunk: Hold your nose": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "skunk: Quick rinse": "Stinky: tips pay nothing for 20s",
     "thief: Chase them off": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
@@ -13,7 +13,7 @@ exports[`a card's text for the dogs it catches > matches the snapshot for the wh
   },
   "forks": {
     "fork: Fairview Park": "Belly rubs: +1♥ for every owner",
-    "fork: Willow Crescent": "Sweet talker: The first card each neighborhood costs nothing",
+    "fork: Willow Crescent": "Sweet talker: First card each neighborhood: cash options free",
   },
 }
 `;
