@@ -65,6 +65,7 @@ import {
   bubbleSpeech,
   type HomeAction,
   packBonusLine,
+  storageNotice,
   type WalkerLine,
   walkerLineKey,
   walkerUnlockedSince,
@@ -1414,13 +1415,13 @@ export class StartScene extends Scene {
       state,
       this.quips,
     );
-    const unsaved = storageState(this) === "unavailable" ? [gameData.homeText.unsaved] : [];
+    const notice = storageNotice(gameData.homeText, storageState(this));
     const probe = this.text(root, 0, 0, "", PALETTE.plum).setVisible(false);
     const measure = (line: string) => {
       setPixelText(probe, line);
       return probe.width;
     };
-    const lines = speechLines(measure, SPEECH_ROOM, SPEECH.lines, [...unsaved, ...speech]);
+    const lines = speechLines(measure, SPEECH_ROOM, SPEECH.lines, [...notice, ...speech]);
     probe.destroy();
     const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.

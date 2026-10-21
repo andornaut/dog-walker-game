@@ -500,12 +500,15 @@ describe("loadSave", () => {
       }
     });
 
-    it("says why a later version was rejected", () => {
+    it.each([1, 10])("loads a save %i versions newer as newer, with a default save", (ahead) => {
       const raw = withChanges((document) => {
-        untyped(document).version = SAVE_VERSION + 1;
+        untyped(document).version = SAVE_VERSION + ahead;
       });
-      const result = loadSave(testContext, raw);
-      expect(result.status === "corrupt" && result.reason).toMatch(/newer than this game/);
+      expect(loadSave(testContext, raw)).toEqual({
+        reason: expect.stringMatching(/newer than this game/),
+        save: newPlayerSave,
+        status: "newer",
+      });
     });
   });
 

@@ -73,7 +73,7 @@ describe("migrateSave", () => {
         [recordingStep(0), recordingStep(2)],
         3,
         { steps: [], version: 0 },
-        { ok: false, reason: "no migration from version 1" },
+        { failure: "invalid", ok: false, reason: "no migration from version 1" },
       ],
     ] satisfies readonly [
       string,
@@ -96,7 +96,11 @@ describe("migrateSave", () => {
       },
     };
     const result = migrateSave([spy], 1, { version: 2 });
-    expect(result).toEqual({ ok: false, reason: expect.stringMatching(/version 2, newer/) });
+    expect(result).toEqual({
+      failure: "newer",
+      ok: false,
+      reason: expect.stringMatching(/version 2, newer/),
+    });
     expect(ran).toEqual([]);
   });
 
@@ -109,7 +113,11 @@ describe("migrateSave", () => {
       ["a string version", { version: "1" }, "the save has no integer version"],
       ["a fractional version", { version: 0.5 }, "the save has no integer version"],
     ]) {
-      expect(migrateSave([recordingStep(0)], 1, document)).toEqual({ ok: false, reason });
+      expect(migrateSave([recordingStep(0)], 1, document)).toEqual({
+        failure: "invalid",
+        ok: false,
+        reason,
+      });
     }
   });
 });

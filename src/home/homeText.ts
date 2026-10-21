@@ -42,6 +42,7 @@ export const HOME_TEXT_FIELDS = {
     zoneMany: ["count"],
     zoneOne: ["count"],
   },
+  newerSave: [],
   noticePackFull: [],
   noticeSoundOff: [],
   noticeSoundOn: [],

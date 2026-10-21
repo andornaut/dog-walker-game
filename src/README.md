@@ -105,6 +105,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - **Scope:** one profile per browser, local only, per origin.
 - **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter will replace it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under `dog-walker-game:save-backup` and the game starts fresh.
+- **Version:** a save from a later version than the running game (after a rollback, or on a stale page) is left as stored: the game plays from a default save in memory, writes nothing for the session, and the home screen asks the player to reload.
 - **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
 
 ## Phone

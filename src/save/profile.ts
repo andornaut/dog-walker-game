@@ -15,8 +15,10 @@ import type { Checkpoint, SaveDocument, Settings } from "./schema";
 import type { SaveStore, StoreLoadResult } from "./storage";
 
 // "unavailable" once storage could not be read or a write failed: play goes on with the save
-// in memory, and the home screen says progress won't be saved.
-export type StorageState = "available" | "unavailable";
+// in memory, and the home screen says progress won't be saved. "newer" when a later version of
+// the game wrote the stored save: play goes on with the save in memory, nothing is written for
+// the session, and the home screen says to reload.
+export type StorageState = "available" | "newer" | "unavailable";
 
 // What the end screen shows beyond the saved stats: the achievements the run earned, whether
 // it beat the best walk, and every change it made, for the earnings breakdown.
@@ -71,7 +73,8 @@ export class ProfileSession {
     newPlayer: (save: SaveDocument) => SaveDocument = (save) => save,
   ): Promise<OpenedProfile> {
     const load = await store.load(context);
-    const state = load.status === "unavailable" ? "unavailable" : "available";
+    const state =
+      load.status === "newer" || load.status === "unavailable" ? load.status : "available";
     const loaded = load.status === "loaded" ? load.save : newPlayer(load.save);
     const session = new ProfileSession(awards, store, loaded, state);
     if (loaded.checkpoint !== null) {
@@ -102,9 +105,13 @@ export class ProfileSession {
     return this.ended;
   }
 
-  // Resolves once this change, and every one before it, has been written or has failed.
+  // Resolves once this change, and every one before it, has been written or has failed. With
+  // a newer version's save stored, the change stays in memory and nothing is written.
   update(change: (save: SaveDocument) => SaveDocument): Promise<void> {
     this.document = change(this.document);
+    if (this.state === "newer") {
+      return this.writes;
+    }
     const document = this.document;
     this.writes = this.writes.then(async () => {
       const result = await this.store.save(document);

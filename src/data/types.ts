@@ -537,6 +537,9 @@ export interface HomeText {
     readonly zoneMany: string;
     readonly zoneOne: string;
   };
+  // Said first in the walker's bubble while a later version of the game holds the save: asks
+  // the player to reload.
+  readonly newerSave: string;
   // What the walker says after a tap that changes nothing: the pack is full, or sound
   // toggled.
   readonly noticePackFull: string;

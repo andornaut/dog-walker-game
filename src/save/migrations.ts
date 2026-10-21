@@ -5,8 +5,11 @@ export interface Migration {
   migrate(document: Record<string, unknown>): Record<string, unknown>;
 }
 
+// "newer" when the document is from a later version than the target, "invalid" for any other
+// document that cannot be migrated.
 type MigrationResult =
-  { document: Record<string, unknown>; ok: true } | { ok: false; reason: string };
+  | { document: Record<string, unknown>; ok: true }
+  | { failure: "invalid" | "newer"; ok: false; reason: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -171,20 +174,24 @@ export function migrateSave(
   document: unknown,
 ): MigrationResult {
   if (!isRecord(document)) {
-    return { ok: false, reason: "the save is not an object" };
+    return { failure: "invalid", ok: false, reason: "the save is not an object" };
   }
   const { version } = document;
   if (typeof version !== "number" || !Number.isSafeInteger(version)) {
-    return { ok: false, reason: "the save has no integer version" };
+    return { failure: "invalid", ok: false, reason: "the save has no integer version" };
   }
   if (version > targetVersion) {
-    return { ok: false, reason: `the save is from version ${version}, newer than this game` };
+    return {
+      failure: "newer",
+      ok: false,
+      reason: `the save is from version ${version}, newer than this game`,
+    };
   }
   let current = document;
   for (let from = version; from < targetVersion; from++) {
     const step = migrations.find((migration) => migration.from === from);
     if (step == null) {
-      return { ok: false, reason: `no migration from version ${from}` };
+      return { failure: "invalid", ok: false, reason: `no migration from version ${from}` };
     }
     current = { ...step.migrate(current), version: from + 1 };
   }

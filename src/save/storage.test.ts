@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
 import { newPlayerSave, testContext, veteranSave } from "./fixtures";
+import { SAVE_VERSION } from "./schema";
 import {
   browserStorage,
   lazyStorage,
@@ -35,6 +36,8 @@ function faultyStorage(entries: Map<string, string>, faults: { read?: boolean; w
   return { calls, storage };
 }
 
+const NEWER_RAW = JSON.stringify({ ...veteranSave(), version: SAVE_VERSION + 1 });
+
 function fakeLocalStorage(entries: Map<string, string>): StorageLike {
   return {
     getItem: (key) => entries.get(key) ?? null,
@@ -57,11 +60,22 @@ describe("saveStore", () => {
     });
   });
 
-  it("backs up a corrupt save and starts fresh", async () => {
-    const entries = new Map([[SAVE_KEY, "{not json"]]);
-    const result = await saveStore(memoryStorage(entries)).load(testContext);
-    expect(result).toEqual({ reason: expect.any(String), save: newPlayerSave, status: "corrupt" });
-    expect(entries.get(SAVE_BACKUP_KEY)).toBe("{not json");
+  // A corrupt save is backed up and replaced by the next write; a later version's save is
+  // neither backed up nor written over for the session.
+  it.each<[string, string, "corrupt" | "newer", string | undefined, string]>([
+    ["a corrupt save", "{not json", "corrupt", "{not json", "saved"],
+    ["a newer version's save", NEWER_RAW, "newer", undefined, "unavailable"],
+  ])("starts %s fresh", async (_name, raw, status, backup, written) => {
+    const entries = new Map([[SAVE_KEY, raw]]);
+    const store = saveStore(memoryStorage(entries));
+    expect(await store.load(testContext)).toEqual({
+      reason: expect.any(String),
+      save: newPlayerSave,
+      status,
+    });
+    expect(entries.get(SAVE_BACKUP_KEY)).toBe(backup);
+    expect((await store.save(veteranSave())).status).toBe(written);
+    expect(entries.get(SAVE_KEY)).toBe(written === "saved" ? JSON.stringify(veteranSave()) : raw);
   });
 
   it("refuses to write an invalid document and keeps the stored one", async () => {

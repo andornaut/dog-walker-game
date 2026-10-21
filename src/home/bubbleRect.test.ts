@@ -41,7 +41,7 @@ describe("bubbleRect", () => {
   });
 });
 
-// Every speech the walker's bubble can say, with and without the unsaved warning first, wraps
+// Every speech the walker's bubble can say, with and without each storage warning first, wraps
 // at 2x in the body font onto the bubble's lines, and the bubble keeps clear of the Pet shop's
 // board inside the screen.
 describe("the walker's speech", () => {
@@ -89,7 +89,11 @@ describe("the walker's speech", () => {
       quip,
     ]),
   );
-  const speeches = [...messages, ...joined].flatMap((parts) => [parts, [text.unsaved, ...parts]]);
+  const speeches = [...messages, ...joined].flatMap((parts) => [
+    parts,
+    [text.newerSave, ...parts],
+    [text.unsaved, ...parts],
+  ]);
   const width = (line: string) => bodyTextWidth(2, plainMarks(line));
 
   it("says every speech inside its bubble, clear of the board", () => {

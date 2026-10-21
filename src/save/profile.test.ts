@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { cents } from "../rules/units";
 import { quietCounters, testAwards, testContext, veteranSave } from "./fixtures";
 import { type Awards, ProfileSession } from "./profile";
-import { DEFAULT_SETTINGS, type SaveDocument } from "./schema";
+import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
 import { memoryStorage, SAVE_KEY, type SaveStorage, saveStore } from "./storage";
 
 const awards: Awards = { data: testAwards.data, now: () => testAwards.now };
@@ -171,16 +171,16 @@ describe("hints", () => {
   });
 });
 
-describe("runs", () => {
-  const result = {
-    counters: quietCounters(),
-    dogs: [{ fired: false, id: "koda" as const, zonesFinished: 4 }],
-    earnedCents: cents(9_500),
-    outcome: "finished" as const,
-    route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],
-    zone: 4,
-  };
+const result = {
+  counters: quietCounters(),
+  dogs: [{ fired: false, id: "koda" as const, zonesFinished: 4 }],
+  earnedCents: cents(9_500),
+  outcome: "finished" as const,
+  route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],
+  zone: 4,
+};
 
+describe("runs", () => {
   it("saves a checkpoint, then banks the finished run and clears it", async () => {
     const { entries, session } = await opened(veteranSave());
     await session.checkpointRun({
@@ -211,5 +211,53 @@ describe("runs", () => {
     expect(session.lastRunEnd?.newBestWalk).toBe(true);
     void session.finishRun({ ...result, earnedCents: cents(100) }, []);
     expect(session.lastRunEnd?.newBestWalk).toBe(false);
+  });
+});
+
+const newerRaw = JSON.stringify({ ...veteranSave(), version: SAVE_VERSION + 1 });
+
+describe("a save from a newer version", () => {
+  async function openedNewer() {
+    const entries = new Map([[SAVE_KEY, newerRaw]]);
+    const storage = memoryStorage(entries);
+    const write = vi.spyOn(storage, "write");
+    const { load, session } = await ProfileSession.open(testContext, awards, saveStore(storage));
+    return { entries, load, session, write };
+  }
+
+  it("plays from a default save in memory and writes nothing on open", async () => {
+    const { entries, load, session, write } = await openedNewer();
+    expect(load.status).toBe("newer");
+    expect(session.storage).toBe("newer");
+    expect(session.save.bankCents).toBe(0);
+    expect(write).not.toHaveBeenCalled();
+    expect(entries.get(SAVE_KEY)).toBe(newerRaw);
+  });
+
+  it.each<[string, (session: ProfileSession) => Promise<void>]>([
+    [
+      "checkpointRun",
+      (session) =>
+        session.checkpointRun({
+          counters: quietCounters(),
+          dogs: result.dogs,
+          earnedCents: cents(500),
+          route: ["street"],
+          zonesFinished: 1,
+        }),
+    ],
+    ["finishRun", (session) => session.finishRun(result, [])],
+    ["markHintShown", (session) => session.markHintShown("tip")],
+    ["purchase", (session) => session.purchase((save) => ({ ...save, bankCents: cents(5) }))],
+    ["setSettings", (session) => session.setSettings({ ...DEFAULT_SETTINGS, muted: true })],
+    ["update", (session) => session.update((save) => ({ ...save, bankCents: cents(5) }))],
+  ])("keeps %s in memory and leaves the stored save untouched", async (_name, change) => {
+    const { entries, session, write } = await openedNewer();
+    const before = session.save;
+    await change(session);
+    expect(session.save).not.toEqual(before);
+    expect(session.storage).toBe("newer");
+    expect(write).not.toHaveBeenCalled();
+    expect(entries.get(SAVE_KEY)).toBe(newerRaw);
   });
 });

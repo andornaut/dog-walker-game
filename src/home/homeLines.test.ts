@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, LiveTuning, WalkerId } from "../data/types";
 import { cents } from "../rules/units";
+import type { StorageState } from "../save/profile";
 import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { fillNames } from "../text/lines";
@@ -13,6 +14,7 @@ import {
   HOW_TO_WALKS,
   messageLine,
   packBonusLine,
+  storageNotice,
   type VisitNews,
   type WalkerLine,
   walkerLineKey,
@@ -161,6 +163,16 @@ describe("bubbleSpeech", () => {
         expected,
       );
     }
+  });
+});
+
+describe("storageNotice", () => {
+  it.each<[StorageState, string[]]>([
+    ["available", []],
+    ["newer", [gameData.homeText.newerSave]],
+    ["unavailable", [gameData.homeText.unsaved]],
+  ])("says for %s storage %j", (state, expected) => {
+    expect(storageNotice(gameData.homeText, state)).toEqual(expected);
   });
 });
 

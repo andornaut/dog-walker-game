@@ -14,9 +14,10 @@ export interface SaveStorage {
 export type StorageLike = Pick<Storage, "getItem" | "setItem">;
 
 // "unavailable" means storage threw: the game plays on with this save in memory and
-// tells the player progress won't be saved.
+// tells the player progress won't be saved. "newer" means a later version of the game wrote
+// the stored save: the game plays on with this save in memory and tells the player to reload.
 export type StoreLoadResult =
-  | { reason: string; save: SaveDocument; status: "corrupt" | "unavailable" }
+  | { reason: string; save: SaveDocument; status: "corrupt" | "newer" | "unavailable" }
   | { save: SaveDocument; status: "loaded" | "new" };
 
 type StoreSaveResult = { reason: string; status: "invalid" | "unavailable" } | { status: "saved" };
@@ -60,13 +61,15 @@ function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-// Once a read fails, or a corrupt save cannot be backed up, the store stops writing for
-// the session, so it never overwrites a save it could not read or keep.
+// Once a read fails, a corrupt save cannot be backed up, or the stored save is from a later
+// version, the store stops writing for the session, so it never overwrites a save it could
+// not read, keep or understand.
 export function saveStore(storage: SaveStorage): SaveStore {
-  let writesBlocked = false;
+  // Why writes are refused for the session, or null while they are allowed.
+  let writesBlocked: string | null = null;
 
   const unavailable = (context: SaveContext, error: unknown): StoreLoadResult => {
-    writesBlocked = true;
+    writesBlocked = "storage was unavailable at load";
     return {
       reason: describe(error),
       save: createDefaultSave(context.defaults),
@@ -83,6 +86,10 @@ export function saveStore(storage: SaveStorage): SaveStore {
         return unavailable(context, error);
       }
       const result = loadSave(context, raw);
+      if (result.status === "newer") {
+        writesBlocked = "a newer version of the game wrote the stored save";
+        return result;
+      }
       if (result.status !== "corrupt") {
         return { save: result.save, status: result.status };
       }
@@ -95,8 +102,8 @@ export function saveStore(storage: SaveStorage): SaveStore {
     },
 
     async save(document) {
-      if (writesBlocked) {
-        return { reason: "storage was unavailable at load", status: "unavailable" };
+      if (writesBlocked !== null) {
+        return { reason: writesBlocked, status: "unavailable" };
       }
       const validated = v.safeParse(saveSchema, document);
       if (!validated.success) {

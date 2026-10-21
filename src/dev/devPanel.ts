@@ -95,7 +95,7 @@ export async function applyPendingSaveEdits(): Promise<void> {
     const context = saveContextFrom(gameData);
     const store = saveStore(browserStorage(globalThis.localStorage));
     const loaded = await store.load(context);
-    if (loaded.status === "unavailable") {
+    if (loaded.status === "newer" || loaded.status === "unavailable") {
       console.warn(`Dev panel: save edits not applied: ${loaded.reason}`);
       return;
     }

@@ -118,7 +118,7 @@ export class BootScene extends Scene {
     }
     // Opened now so the loading walker follows the saved reduced motion setting.
     const profileOpened = openProfile(this).then((load) => {
-      if (load.status === "corrupt" || load.status === "unavailable") {
+      if (load.status === "corrupt" || load.status === "newer" || load.status === "unavailable") {
         console.warn(`The save is ${load.status}, so play starts fresh: ${load.reason}`);
       }
       this.setWalkerMotion(currentSettings(this).reducedMotion);

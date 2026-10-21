@@ -2,6 +2,7 @@ import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
 import { packPlace, packSizeRaise } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import type { Cents } from "../rules/units";
+import type { StorageState } from "../save/profile";
 import { type LastWalk, MAX_RUN_DOGS, type Owned } from "../save/schema";
 import { packOrder } from "../state/pack";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
@@ -122,6 +123,19 @@ export function messageLine(text: HomeText, action: HomeAction): string | null {
     default:
       return action satisfies never;
   }
+}
+
+// The line said first in the walker's bubble for each storage state, or null for none.
+const STORAGE_NOTICES: Readonly<Record<StorageState, "newerSave" | "unsaved" | null>> = {
+  available: null,
+  newer: "newerSave",
+  unavailable: "unsaved",
+};
+
+// What the walker's bubble says first while nothing is saved: why, as zero or one paragraph.
+export function storageNotice(text: HomeText, state: StorageState): string[] {
+  const key = STORAGE_NOTICES[state];
+  return key === null ? [] : [text[key]];
 }
 
 // What the walker's bubble says, as paragraphs that each start on a new line, in priority

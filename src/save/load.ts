@@ -43,9 +43,11 @@ export interface SaveContext {
 }
 
 // "new" when nothing was stored. "corrupt" carries the stored text so the caller can
-// keep it as a backup; its save is a fresh default.
+// keep it as a backup; its save is a fresh default. "newer" is a save from a later version
+// than this game: its save is a fresh default, and the stored save must be left as it is.
 type LoadResult =
   | { raw: string; reason: string; save: SaveDocument; status: "corrupt" }
+  | { reason: string; save: SaveDocument; status: "newer" }
   | { save: SaveDocument; status: "loaded" | "new" };
 
 function keysOf<Id extends string>(record: Readonly<Record<Id, unknown>>): Id[] {
@@ -217,8 +219,9 @@ function corrupt(context: SaveContext, raw: string, reason: string): LoadResult 
   return { raw, reason, save: createDefaultSave(context.defaults), status: "corrupt" };
 }
 
-// Parses, migrates and validates the stored text. Never throws: anything unreadable
-// yields a fresh default save with status "corrupt".
+// Parses, migrates and validates the stored text. Never throws: a save from a later version
+// yields a fresh default save with status "newer", and anything else unreadable one with
+// status "corrupt".
 export function loadSave(context: SaveContext, raw: string | null): LoadResult {
   if (raw === null) {
     return { save: createDefaultSave(context.defaults), status: "new" };
@@ -232,7 +235,9 @@ export function loadSave(context: SaveContext, raw: string | null): LoadResult {
     }
     const migrated = migrateSave(saveMigrations, SAVE_VERSION, parsed);
     if (!migrated.ok) {
-      return corrupt(context, raw, migrated.reason);
+      return migrated.failure === "newer"
+        ? { reason: migrated.reason, save: createDefaultSave(context.defaults), status: "newer" }
+        : corrupt(context, raw, migrated.reason);
     }
     const validated = v.safeParse(saveSchema, migrated.document);
     if (!validated.success) {
