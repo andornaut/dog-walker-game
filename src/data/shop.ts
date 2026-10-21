@@ -14,7 +14,7 @@ export const SHOP_GEAR = {
     effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],
     name: "Lucky collar",
     price: "luckyCollar",
-    short: "+1♥ for every owner",
+    short: "+1♥ max for every owner",
   },
   poopBags: {
     effects: [{ kind: "skipOption" }],

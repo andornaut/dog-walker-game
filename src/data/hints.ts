@@ -52,7 +52,7 @@ export const HINTS = {
     trigger: { kind: "tip" },
   },
   treat: {
-    text: "Treats give that dog's owner +1♥.",
+    text: "A treat gives its dog's owner +1♥.",
     trigger: { kind: "treat" },
   },
 } as const satisfies Record<string, Hint>;

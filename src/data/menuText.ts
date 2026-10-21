@@ -23,7 +23,7 @@ export const MENU_TEXT = {
     newBest: "New best!",
     titles: {
       finished: "What a walk!",
-      noDogs: "The pack went home early",
+      noDogs: "Out of dogs for today",
       wentHome: "Home sweet home",
     },
     total: "Total",

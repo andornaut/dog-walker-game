@@ -8,14 +8,14 @@ export const QUIPS = {
     fired: ["Oh, sweetheart. I have to let you go.", "No hard feelings, dear. You're fired."],
     happier: ["Look at him go! Lovely.", "You're a natural, pet."],
     parting: ["He'll want to say hello to everyone. Let him.", "There's a cookie for you after."],
-    upset: ["Oh well, these things happen.", "Never mind, dear. Tea fixes most things."],
+    upset: ["Oh well, dear. Have a cookie.", "Never mind, dear. Tea fixes most things."],
   },
   biscuit: {
-    fired: ["Last call, friend. You're fired.", "That's the last drop. You're fired."],
-    happier: ["Nice! Fresh-brewed walking, friend.", "Now that's a perfect pour."],
+    fired: ["Last call, friend. I'm cutting you off.", "That's the last drop. You're fired."],
+    happier: ["That walk was a latte fun, friend!", "Now that's a perfect pour."],
     parting: [
       "He sniffs every hedge like a coffee taster.",
-      "He likes his walks like espresso, friend: short and strong.",
+      "He likes his walks like his espresso: strong.",
     ],
     upset: ["Oof. Bit of a bitter blend.", "Not my favorite roast, friend."],
   },
@@ -26,9 +26,9 @@ export const QUIPS = {
     upset: ["She's wilting! I can't bear it!", "My heart! My prize rose, trampled!"],
   },
   koda: {
-    fired: ["No worries, but you're fired.", "This is where we split. You're fired."],
+    fired: ["Time to cool down. You're fired.", "This is where we split. You're fired."],
     happier: ["Good form! Keep it up!", "That's a personal best!"],
-    parting: ["He already did 10K. He's fine.", "Warm-up's done. Go for a personal best!"],
+    parting: ["He already did 10K. He's fine.", "Warm-up's done. Keep that form tight!"],
     upset: ["Eh, bad split. Next lap's yours.", "Just a cramp. Shake it off."],
   },
   nugget: {
@@ -44,7 +44,7 @@ export const QUIPS = {
       "I inspected the leash. Twice. Maybe check it?",
       "She gets lonely. Talk to her, please.",
     ],
-    upset: ["Oh dear, oh dear.", "Was that safe? Was she scared?"],
+    upset: ["Wait, wait. Let me check her again.", "Was that safe? Was she scared?"],
   },
   pierre: {
     fired: ["Disqualified. You are fired.", "Pepe withdraws from your care."],
