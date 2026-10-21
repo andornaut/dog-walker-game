@@ -4,11 +4,12 @@ import { type Cents, cents } from "../rules/units";
 
 // The heart change, dodge and forgiven moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {
-  // The dodge label rises rise pixels and fades over ms.
-  dodge: { ms: 900, rise: 10 },
-  // The forgiven label rises and fades as the dodge label does, while the forgiven heart on the
-  // dog's card blinks empty and back blinks times, blinkMs a step.
-  forgiven: { blinkMs: 120, blinks: 3, ms: 900, rise: 10 },
+  // The dodge label shows for ms: fully opaque for holdMs, so it can be read, then rising rise
+  // pixels and fading out over the rest.
+  dodge: { holdMs: 600, ms: 900, rise: 10 },
+  // The forgiven label shows, rises and fades as the dodge label does, while the forgiven heart
+  // on the dog's card blinks empty and back blinks times, blinkMs a step.
+  forgiven: { blinkMs: 120, blinks: 3, holdMs: 600, ms: 900, rise: 10 },
   // A heart flies into its card over flyMs, peaking peak pixels above its higher end; a
   // dog's later change in one batch starts staggerMs after the one before. The card shakes
   // by shakeDx, one step a frame of its flash.

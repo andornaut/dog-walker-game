@@ -37,6 +37,15 @@ describe("the labels floated over a dog", () => {
     expect(chipLeft(screenWidth, 350, 40)).toBe(screenWidth - 40);
   });
 
+  it.each(["dodge", "forgiven"] as const)(
+    "holds the %s label opaque for most of its time, then fades it before the time is up",
+    (label) => {
+      const { holdMs, ms } = FEEDBACK[label];
+      expect(holdMs).toBeGreaterThan(ms / 2);
+      expect(holdMs).toBeLessThan(ms);
+    },
+  );
+
   // font-title at 2x in capitals, as Phaser sizes it, on a chip 2px wider each side.
   it("fits the dodge and forgiven labels' chips on the screen", () => {
     const { glyphs } = readBitmapFont("font-title");

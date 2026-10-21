@@ -58,14 +58,15 @@ export function playForgiven(
 }
 
 // font-title at 2x on a cream chip, centred on the anchor (moved in to stay on screen) with its
-// line's bottom there, rising and fading out; with reduced motion it fades in place.
+// line's bottom there, held fully opaque for holdMs, then rising and fading out over the rest
+// of ms; with reduced motion it fades in place.
 function floatLabel(
   scene: Scene,
   moment: PackMoment,
   anchor: LabelAnchor,
   text: string,
   color: number,
-  timing: { ms: number; rise: number },
+  timing: { holdMs: number; ms: number; rise: number },
 ): void {
   const label = addPixelText(scene, 0, 0, text, { color, font: "title", scale: TITLE_SCALE });
   const title = pixelFontMetrics(scene, "title");
@@ -84,5 +85,9 @@ function floatLabel(
   const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
   const y = capTop - CHIP_PAD - above;
   const chip = scene.add.container(x, y, [box, label]).setDepth(moment.depth);
-  fadeAway(scene, [chip], { ms: timing.ms, rise: moment.still ? 0 : timing.rise });
+  fadeAway(scene, [chip], {
+    delayMs: timing.holdMs,
+    ms: timing.ms - timing.holdMs,
+    rise: moment.still ? 0 : timing.rise,
+  });
 }
