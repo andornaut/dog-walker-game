@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 """Draw the minor obstacles: things the pack bumps into with no card. Each
-spans whole lanes of the 64px road lanes: an n-lane obstacle is 64n-24 px wide,
-leaving a 12px margin in its cells like the 40x40 road sprites.
+spans whole lanes of the 64px road lanes: an n-lane obstacle is 64n-8 px wide,
+leaving a 4px margin in its outer lanes.
 
 They are billboards seen from a low camera, as roadside objects in OutRun are:
 a front elevation (or a car from straight behind), squat, with at most a sliver
 of top surface and never its length along the road. The game scales each one
 by distance with its base on the road line.
 
-cone                40x40   1 lane, a glint runs down its highlight
-bin                 40x40   1 lane, the lid lifts in a breeze
-hydrant             40x40   the Regular dog's need spot (not an obstacle), a drip off the side cap
-bench               104x30  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-barrier-2           104x30  2 lanes, a striped rail and plank on short legs; lamps blink (Elm Avenue,
+cone                56x56   1 lane, a glint runs down its highlight
+bin                 56x56   1 lane, the lid lifts 1px in a breeze
+hydrant             56x56   the Regular dog's need spot (not an obstacle), a drip off the side cap
+bench               120x42  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
+barrier-2           120x42  2 lanes, a striped rail and plank on short legs; lamps blink (Elm Avenue,
                             Main Street)
-barrier-3           168x30  3 lanes, lamps blink
-hedge               168x30  3 lanes, a low hedge with a rounded, clumped top; leaves rustle at three
+barrier-3           184x42  3 lanes, lamps blink
+hedge               184x42  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
                             spots in turn
-parked-car          56x35   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
+parked-car          56x49   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
                             footprint's near edge; hazards blink. 56 wide, so it centres on its lane
                             with 4px to spare each side. pull-out (4 frames, 100ms): drawn pulling
                             right (the game mirrors it for left), tread lines climb the tyres and the
@@ -25,8 +25,11 @@ parked-car          56x35   1 lane by 3 rows of footprint, a minivan from straig
 
 Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
 frame is one argument to the drawing function, listed in the *_IDLE tuples;
-frame 0 is the rest pose. The drawings are in the full size's pixels; minis.py
-and depths.py run them on a minis.Mini for the depth variants.
+frame 0 is the rest pose. The drawings are in layout pixels, 40 for a 1-lane
+sprite and 30 rows for a lane-spanning one, drawn SCALE (1.4) times bigger on a
+minis.Mini, which keeps 1px lines 1px; the parked car keeps its 56 layout columns
+and draws only its rows SCALE times taller. minis.py and depths.py run them at
+SCALE (or CAR_SCALE) times each depth step for the depth variants.
 
 Usage:
   obstacles.py preview OUT.png   every obstacle on the street colours
@@ -45,14 +48,32 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main, road_edge  # noqa: E402
 from road import LIT, rim  # noqa: E402
 
-# A road sprite's frame and a lane-spanning obstacle's width and height.
+# The drawings are in layout pixels: a 1-lane sprite's frame is SIZE square and a lane-spanning obstacle ROW
+# tall. sprites() draws them SCALE times bigger on a minis.Mini, which keeps 1px lines 1px, so a 1-lane sprite
+# exports at 56x56 and a lane-spanning one 42 rows tall. The parked car keeps its 56 layout columns, a lane
+# less 4px each side, and draws only its rows SCALE times taller (CAR_SCALE).
 SIZE = 40
 ROW = 30
+SCALE = 1.4
+CAR_SCALE = (1, SCALE)
 
 
 def span(lanes):
-    """The width of an obstacle across lanes lanes of 64px, 12px clear of each outer lane edge."""
-    return 64 * lanes - 24
+    """The width in layout pixels of an obstacle across lanes lanes of 64px: 64n-8 drawn, 4px clear of each
+    outer lane edge."""
+    return (64 * lanes - 8) / SCALE
+
+
+def drawn(s, draw, *args, **q):
+    """draw(*args, **q) on a minis.Mini at scale s, or (sx, sy) for its columns and rows."""
+    import minis  # minis imports this module, so it is imported when first used
+
+    return minis.small(sys.modules[__name__], s, draw, *args, **q)
+
+
+def unit(g):
+    """One drawn pixel in g's layout pixels, across and down, so a 1px motion stays 1px at any scale."""
+    return 1 / getattr(g, "s", 1), 1 / getattr(g, "sy", getattr(g, "s", 1))
 
 
 def lit(g):
@@ -93,9 +114,10 @@ def cone(glint=None):
 
 
 def bin_(lift=0):
-    """lift raises the lid and handle (negative is up), showing the dark gap under the lid. The forest
-    body takes a green rim on its top-left edges, the ink wheels and handle a grey one."""
+    """lift raises the lid and handle by that many drawn pixels (negative is up), showing the dark gap under
+    the lid. The forest body takes a green rim on its top-left edges, the ink wheels and handle a grey one."""
     g = edged(Grid(SIZE, SIZE))
+    lift *= unit(g)[1]
     g.rect(12, 33, 4, 4, "ink")
     g.rect(24, 33, 4, 4, "ink")
     # the body tapers to its foot; its right half is in shade
@@ -160,7 +182,8 @@ def bench(leaf=(0, 0), w=span(2)):
     g.rect(2, 16, w - 4, 3, "tan")
     g.rect(2, 19, w - 4, 3, "brown")
     if leaf:
-        x, y = round(w * 0.64) + leaf[0], 15 + leaf[1]
+        ux, uy = unit(g)
+        x, y = round(w * 0.64) + leaf[0] * ux, 15 + leaf[1] * uy
         g.rect(x, y, 4, 1, "amber")
         g.rect(x + 1, y + 1, 4, 1, "orange")
         g.p(x + 5, y + 1, "rust")
@@ -169,14 +192,16 @@ def bench(leaf=(0, 0), w=span(2)):
 
 def hedge(w=span(3), rustle=()):
     """Low and wide, seen side on: a rounded top edge of leaf clumps, no top surface, lit green on its
-    top-left edges. rustle lists the top clumps, by index, that lift 1px and shift 1px right."""
+    top-left edges. rustle lists the top clumps, by index, that lift 1px and shift 1px right, drawn pixels
+    at any scale."""
     g = edged(Grid(w, ROW))
+    u = unit(g)[0]
     g.rect(4, 11, w - 8, 18, "forest")
     g.rect(1, 14, w - 2, 10, "forest")
     g.rect(4, 25, w - 8, 4, "teal")
     # the rounded top: a clump every 10px, alternately higher, lit green on the upper left
-    for i, x in enumerate(range(9, w - 7, 10)):
-        r = 1 if i in rustle else 0
+    for i, x in enumerate(range(9, int(w) - 7, 10)):
+        r = u if i in rustle else 0
         y = 10 - (i % 2) - r
         g.ell(x + r, y + 1, 6, 5.5, "dgreen", "forest", "green")
         if i % 3 == 0:
@@ -185,7 +210,7 @@ def hedge(w=span(3), rustle=()):
     for x in (6, w - 6):
         g.ell(x, 18, 5, 9, "forest")
     # leaf texture lower down, dgreen clumps and teal hollows, spaced irregularly
-    for i, x in enumerate(range(7, w - 7, 9)):
+    for i, x in enumerate(range(7, int(w) - 7, 9)):
         g.ell(x + 2, 16 + (i * 3) % 4, 2.5, 2, "dgreen")
         g.p(x, 21 + (i * 2) % 3, "teal")
     return lit(g)
@@ -213,7 +238,7 @@ def barrier(lanes, f):
             base, stripe = ("lgrey", "rust") if k == stairs - 1 else ("white", "orange")
             y = top + 2 * k
             g.rect(1, y, w - 2, 2, base)
-            for x in range(-10 - 2 * k, w - 1, 20):
+            for x in range(-10 - 2 * k, int(w) - 1, 20):
                 g.rect(max(x, 1), y, min(x + 10, w - 1) - max(x, 1), 2, stripe)
     for i, x in enumerate((7.5, w - 7.5)):
         on = (i == 0) == bool(f)
@@ -267,7 +292,7 @@ def parked_car(hazard=False, roll=None):
     g.rect(3, 25, 1, 4, "grey")
     if roll is not None:
         for x in (5, 42):
-            treads(g, x + 2, 29, 7, 5, roll, 1 / getattr(g, "s", 1))
+            treads(g, x + 2, 29, 7, 5, roll, unit(g)[1])
         if roll < 2:
             g.rect(48, 16, 3, 4, "amber")
             g.rect(48, 16, 3, 1, "yellow")
@@ -298,9 +323,9 @@ PULL_OUT = range(4), 100
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    def idle(draw, spec):
+    def idle(draw, spec, s=SCALE):
         args, ms = spec
-        return [("idle", [draw(a).outlined() for a in args], ms)]
+        return [("idle", [drawn(s, draw, a).outlined() for a in args], ms)]
 
     yield "cone", idle(cone, CONE_IDLE)
     yield "bin", idle(bin_, BIN_IDLE)
@@ -308,10 +333,10 @@ def sprites():
     yield "bench", idle(bench, BENCH_IDLE)
     yield "hedge", idle(lambda r: hedge(rustle=r), HEDGE_IDLE)
     for lanes in (2, 3):
-        yield f"barrier-{lanes}", [("idle", [barrier(lanes, f).outlined() for f in (0, 1)], 500)]
+        yield f"barrier-{lanes}", [("idle", [drawn(SCALE, barrier, lanes, f).outlined() for f in (0, 1)], 500)]
     args, ms = PULL_OUT
-    yield "parked-car", idle(parked_car, PARKED_CAR_IDLE) + [
-        ("pull-out", [parked_car(roll=f).outlined() for f in args], ms)]
+    yield "parked-car", idle(parked_car, PARKED_CAR_IDLE, CAR_SCALE) + [
+        ("pull-out", [drawn(CAR_SCALE, parked_car, roll=f).outlined() for f in args], ms)]
 
 
 if __name__ == "__main__":

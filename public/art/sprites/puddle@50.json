@@ -1,18 +1,18 @@
 { "frames": {
    "puddle@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 52, "h": 20 },
+    "frame": { "x": 0, "y": 0, "w": 60, "h": 28 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 52, "h": 20 },
-    "sourceSize": { "w": 52, "h": 20 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 60, "h": 28 },
+    "sourceSize": { "w": 60, "h": 28 },
     "duration": 500
    },
    "puddle@50 1.aseprite": {
-    "frame": { "x": 52, "y": 0, "w": 52, "h": 20 },
+    "frame": { "x": 60, "y": 0, "w": 60, "h": 28 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 52, "h": 20 },
-    "sourceSize": { "w": 52, "h": 20 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 60, "h": 28 },
+    "sourceSize": { "w": 60, "h": 28 },
     "duration": 500
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "puddle@50.png",
   "format": "RGBA8888",
-  "size": { "w": 104, "h": 20 },
+  "size": { "w": 120, "h": 28 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

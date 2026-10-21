@@ -14,8 +14,10 @@ pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). road.py's people are drawn at
-road.PERSON_SCALE x the step and the stop sign at road.SCALE x the step, as
-road.py draws them. Offsets that move a
+road.SCALE x the step, as road.py draws them at road.SCALE, and so is the stop
+sign. The truck, the construction barrier, the obstacles and the parked car are
+drawn at their full size's scale (road.TRUCK_SCALE, road.CONSTRUCTION_SCALE,
+obstacles.SCALE, obstacles.CAR_SCALE) x the step. Offsets that move a
 part by pixels (a step, a breath, a wag) are snapped to whole pixels at the small
 size.
 
@@ -56,7 +58,7 @@ def dressed(s, top, **q):
 
 
 def obstacle(s, draw, spec):
-    """An obstacles.*_IDLE tag on a Mini."""
+    """An obstacles.*_IDLE tag on a Mini at s, or (sx, sy)."""
     args, ms = spec
     return [("idle", [small(obstacles, s, draw, a).outlined() for a in args], ms)]
 
@@ -64,10 +66,10 @@ def obstacle(s, draw, spec):
 def own(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) at scale s for the road sprites only this file draws
     small, with the tags road.sprites and obstacles.sprites give them. road.py's people are drawn at
-    road.PERSON_SCALE x s and the stop sign at road.SCALE x s, since their drawing functions lay them out that
-    many times smaller than they export."""
+    road.SCALE x s, the stop sign too, since their drawing functions lay them out road.SCALE times smaller than
+    they export."""
     breath, ms = road.BREATH, road.BREATH_MS
-    p = road.PERSON_SCALE * s
+    p = road.SCALE * s
 
     def walk(top, **q):
         return ("walk", [dressed(p, top, lf=-2, **q).outlined(), dressed(p, top, rf=-2, **q).outlined()], 200)
@@ -86,7 +88,7 @@ def own(s):
     yield "photo-op", [("idle", [dressed(p, road.tourist_top(False), bob=b, **tourist).outlined() for b in breath], ms),
                        ("flash", [dressed(p, road.tourist_top(f), **tourist).outlined() for f in (True, False)], 120)]
     # road.stop_sign draws its face, legend and sheen in pixels at the grid's scale
-    yield "stop-sign", [("idle", [small(road, road.SCALE * s, road.stop_sign, c).outlined() for c in (None, None, 18, 24)], 400)]
+    yield "stop-sign", [("idle", [small(road, p, road.stop_sign, c).outlined() for c in (None, None, 18, 24)], 400)]
 
     def kid(wave=False, mood="happy", bob=0):
         return small(road, p, road.kid, wave, mood, **snap(dict(bob=bob), p)).outlined()
@@ -97,16 +99,23 @@ def own(s):
                                      for q in (dict(lf=-2), dict(rf=-2))], 200),
                            ("idle", [small(road, p, road.mail_carrier, **snap(dict(bob=b), p)).outlined()
                                      for b in breath], ms)]
-    yield "ice-cream-truck", [("idle", [small(road, s, road.ice_cream_truck, f).outlined() for f in (0, 1)], 400)]
-    yield "construction", [("idle", [small(road, s, road.construction, f).outlined() for f in (0, 1)], 500)]
+    def times(q):
+        return tuple(v * s for v in q)
+
+    yield "ice-cream-truck", [("idle", [small(road, times(road.TRUCK_SCALE), road.ice_cream_truck, f).outlined()
+                                        for f in (0, 1)], 400)]
+    yield "construction", [("idle", [small(road, times(road.CONSTRUCTION_SCALE), road.construction, f).outlined()
+                                     for f in (0, 1)], 500)]
     yield "puddle", [("idle", [small(road, s, road.puddle, f).outlined(False) for f in (0, 1)], 500)]
-    yield "hedge", obstacle(s, lambda r: obstacles.hedge(rustle=r), obstacles.HEDGE_IDLE)
+    b = obstacles.SCALE * s
+    yield "hedge", obstacle(b, lambda r: obstacles.hedge(rustle=r), obstacles.HEDGE_IDLE)
     for lanes in (2, 3):
-        yield f"barrier-{lanes}", [("idle", [small(obstacles, s, obstacles.barrier, lanes, f).outlined()
+        yield f"barrier-{lanes}", [("idle", [small(obstacles, b, obstacles.barrier, lanes, f).outlined()
                                              for f in (0, 1)], 500)]
     args, ms = obstacles.PULL_OUT
-    yield "parked-car", obstacle(s, obstacles.parked_car, obstacles.PARKED_CAR_IDLE) + [
-        ("pull-out", [small(obstacles, s, obstacles.parked_car, roll=f).outlined() for f in args], ms)]
+    car = times(obstacles.CAR_SCALE)
+    yield "parked-car", obstacle(car, obstacles.parked_car, obstacles.PARKED_CAR_IDLE) + [
+        ("pull-out", [small(obstacles, car, obstacles.parked_car, roll=f).outlined() for f in args], ms)]
 
 
 def hazard(s):

@@ -7,10 +7,11 @@ outline, makes legs blink and freezes 1px bobs. These are redrawn at the small
 size instead: the same drawing functions run on a grid that scales every rect,
 ellipse and triangle before it rasterizes, then the small sprite gets its own
 full outline. Faces are drawn at the small size (small() swaps in face_front,
-squirrel() squirrel_head). Where that still loses a feature (the treat's knobs
-at @75 and @50, the skunk's face), the sprite or the feature is a hand-drawn
-pixel map instead. road.py's sprites are drawn at road.SCALE x the step, as
-road.py draws them at road.SCALE.
+squirrel() squirrel_head). road.py's sprites are drawn at road.SCALE x
+the step and obstacles.py's at obstacles.SCALE x the step, as those files draw
+them at full size. A Mini can also scale its rows by more than its columns
+(small() takes (sx, sy)), for the vehicles that keep their lane's width and
+grow taller.
 
 <key>@<step> keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
@@ -58,19 +59,20 @@ SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))
 
 
 def scaled(v, s):
-    """v at scale s in whole pixels, halves rounding up as the game rounds them."""
-    return math.floor(v * s + 0.5)
+    """v at scale s in whole pixels, halves rounding up as the game rounds them. A scale with no exact binary
+    form (1.4) can land a hair under a half, so the half is taken with a hair to spare."""
+    return math.floor(v * s + 0.5 + 1e-9)
 
 
 class Mini:
-    """A Grid that takes coordinates at full size and draws them s times smaller.
-    No shape shrinks to nothing: a primitive that covers no pixel sets the one at
-    its centre. A single-pixel highlight never paints over a shape that has
-    shrunk to 1px (an eye or a stud would otherwise turn into its own glint)."""
+    """A Grid that takes coordinates at full size and draws them s times smaller (or bigger, above 1). sy, if
+    given, scales the rows instead of s, for a drawing that grows taller than it grows wide. No shape shrinks
+    to nothing: a primitive that covers no pixel sets the one at its centre. A single-pixel highlight never
+    paints over a shape that has shrunk to 1px (an eye or a stud would otherwise turn into its own glint)."""
 
-    def __init__(self, s, w=32, h=32):
-        self.s, self.w, self.h = s, w, h
-        self.g = Grid(scaled(w, s), scaled(h, s))
+    def __init__(self, s, w=32, h=32, sy=None):
+        self.s, self.sy, self.w, self.h = s, s if sy is None else sy, w, h
+        self.g = Grid(scaled(w, s), scaled(h, self.sy))
         self.keep = set()
 
     @property
@@ -80,15 +82,18 @@ class Mini:
     def _edge(self, v):
         return scaled(v, self.s)
 
+    def _edge_y(self, v):
+        return scaled(v, self.sy)
+
     def _set(self, draw, x, y, c, *args):
         before = [row[:] for row in self.g.px]
         draw(*args)
         if before == self.g.px:
-            self.g.p(math.floor(x * self.s), math.floor(y * self.s), c)
+            self.g.p(math.floor(x * self.s), math.floor(y * self.sy), c)
         self.keep = {(xx, yy) for xx, yy in self.keep if self.g.px[yy][xx] == before[yy][xx]}
 
     def p(self, x, y, c):
-        x, y = math.floor((x + 0.5) * self.s), math.floor((y + 0.5) * self.s)
+        x, y = math.floor((x + 0.5) * self.s), math.floor((y + 0.5) * self.sy)
         if (x, y) not in self.keep:
             self.g.p(x, y, c)
 
@@ -111,15 +116,15 @@ class Mini:
         """A rect too thin to cover a pixel's edge-to-edge span takes the pixel at its centre. A 1px line
         (a seam or a shaded edge) does not paint over a shape that shrank to 1px either, and drawn bigger it
         stays 1px wide (see _hug)."""
-        x0, y0, x1, y1 = self._edge(x), self._edge(y), self._edge(x + w), self._edge(y + h)
+        x0, y0, x1, y1 = self._edge(x), self._edge_y(y), self._edge(x + w), self._edge_y(y + h)
         if x1 <= x0:
             x0 = math.floor((x + w / 2) * self.s)
             x1 = x0 + 1
         if y1 <= y0:
-            y0 = math.floor((y + h / 2) * self.s)
+            y0 = math.floor((y + h / 2) * self.sy)
             y1 = y0 + 1
         line, shrunk = w == 1 or h == 1, (w > 1 and x1 - x0 == 1) or (h > 1 and y1 - y0 == 1)
-        if self.s > 1 and h == 1 and y1 - y0 > 1:
+        if self.sy > 1 and h == 1 and y1 - y0 > 1:
             y0 = self._hug(y0, y1, [(xx, None) for xx in range(x0, x1)])
             y1 = y0 + 1
         if self.s > 1 and w == 1 and x1 - x0 > 1:
@@ -137,32 +142,35 @@ class Mini:
 
     def ell(self, cx, cy, rx, ry, c, sh=None, li=None):
         """Under 3px of radius an ellipse grows a 1px nub at each tip, so it is drawn a little squarer."""
-        s = self.s
-        if min(rx, ry) * s < 3:
-            self._set(self.g.blob, cx, cy, c, cx * s, cy * s, rx * s, ry * s, c, sh, li, 3)
+        s, sy = self.s, self.sy
+        if min(rx * s, ry * sy) < 3:
+            self._set(self.g.blob, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li, 3)
         else:
-            self._set(self.g.ell, cx, cy, c, cx * s, cy * s, rx * s, ry * s, c, sh, li)
+            self._set(self.g.ell, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li)
 
     def blob(self, cx, cy, rx, ry, c, sh=None, li=None, power=2.6):
-        s = self.s
-        self._set(self.g.blob, cx, cy, c, cx * s, cy * s, rx * s, ry * s, c, sh, li, power)
+        s, sy = self.s, self.sy
+        self._set(self.g.blob, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li, power)
 
     def tri(self, a, b, c, col):
-        s = self.s
+        s, sy = self.s, self.sy
         mx, my = (a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3
-        self._set(self.g.tri, mx, my, col, *((x * s, y * s) for x, y in (a, b, c)), col)
+        self._set(self.g.tri, mx, my, col, *((x * s, y * sy) for x, y in (a, b, c)), col)
 
     def outlined(self, outline=True):
         return self.g.outlined(outline)
 
 
 def small(module, s, draw, *args, **q):
-    """Run module's draw(*args, **q) with its Grid swapped for a Mini at scale s. Meanwhile road.rim lights
-    the Mini's own grid, so a drawing that ends in rim gets the rim at the small size, and road.face_front
-    (module's too, where it imports it) is face_front at scale s."""
+    """Run module's draw(*args, **q) with its Grid swapped for a Mini at scale s, or (sx, sy) for one that
+    scales its columns by sx and its rows by sy. Meanwhile road.rim lights the Mini's own grid, so a drawing
+    that ends in rim gets the rim at the small size, and road.face_front (module's too, where it imports it)
+    is face_front at scale s."""
     full, full_rim, full_face = module.Grid, road.rim, road.face_front
     faced = [m for m in {road, module} if getattr(m, "face_front", None) is full_face]
-    module.Grid = lambda w=32, h=32: Mini(s, w, h)
+    sx, sy = s if isinstance(s, tuple) else (s, s)
+    s = sx
+    module.Grid = lambda w=32, h=32: Mini(sx, w, h, sy)
     road.rim = lambda g, rims: full_rim(getattr(g, "g", g), rims)
     for m in faced:
         m.face_front = lambda g, cx, y, *a, **k: face_front(s, g, cx, y, *a, **k)
@@ -246,51 +254,10 @@ def tip(s, rx):
     return g
 
 
-# The colour of each letter in a hand-drawn pixel map; "." is empty.
-MAP = {"n": "navy", "d": "dslate", "#": "ink", "W": "white", "l": "lgrey", "p": "pink", "P": "plum",
-       "o": "ochre", "r": "rust", "t": "tan", "c": "cream", "a": "amber", "g": "green", "G": "dgreen",
-       "B": "dbrown"}
-
-
-def paint(g, rows, x=0, y=0):
-    """Draw a pixel map on g with its top-left corner at (x, y)."""
-    for j, row in enumerate(rows):
-        for i, ch in enumerate(row):
-            if ch != ".":
-                g.p(x + i, y + j, MAP[ch])
-
-
-# The bone drawn by hand at the scales where a Mini merges its four knobs into a bar (the 15px @75, 13px @62
-# and 10px @50 treats, at road.SCALE x 0.75, x 0.625 and x 0.5). W is the glint. Each end is two rows taller
-# than the shaft above and below it, its outer corners cut, so the small bone does not read as an H or a bar.
-TREAT = {
-    0.9375: [".Wc.......cc.",
-             "cccc.....cccc",
-             "ccccccccccccc",
-             "ctttttttttttt",
-             ".tt.......tt."],
-    0.78125: [".Wc.....cc.",
-              "ccc.....ccc",
-              "ccccccccccc",
-              "ctttttttttt",
-              ".tt.....tt."],
-    0.625: [".W....c.",
-            "cc....cc",
-            "cccccccc",
-            "cttttttt",
-            ".t....t."],
-}
-
-
 def treat(s, lift):
-    """road.treat redrawn: a bone whose knobs stick out above and below the shaft at both ends, with the road
-    outline. A scale with no map takes road.treat on a Mini."""
-    if s not in TREAT:
-        return shrunk(s, road.treat, lift=lift)
-    g = edged(Grid(scaled(16, s), scaled(16, s)))
-    rows = TREAT[s]
-    paint(g, rows, (g.w - len(rows[0])) // 2, (g.h - len(rows)) // 2 + lift)
-    return g
+    """road.treat on a Mini at scale s: a bone whose knobs stick out above and below the shaft at both ends,
+    with the road outline."""
+    return shrunk(s, road.treat, lift=lift)
 
 
 def wallet(s, glint):
@@ -357,40 +324,27 @@ def squirrel(s, draw, *args, **q):
         road.squirrel_head = full
 
 
-# road.skunk's face by hand where Mini loses it, as (left column, top row, rows): on the 20px @50 skunk
-# (road.SCALE x 0.5) the eyes merge with the blaze, so each eye is a white glint over ink, either side of the
-# 1px blaze.
-SKUNK_FACE = {
-    0.625: (6, 11, ["WnWnW",
-                    "#nWn#"]),
-}
-
-
 def skunk(s, sway):
-    """road.skunk on a Mini at scale s, its face from SKUNK_FACE where it has one."""
-    g = shrunk(s, road.skunk, sway=sway)
-    if s in SKUNK_FACE:
-        x, y, rows = SKUNK_FACE[s]
-        paint(g, rows, x, y)
-    return g
+    """road.skunk on a Mini at scale s."""
+    return shrunk(s, road.skunk, sway=sway)
 
 
 def variants(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s.
-    road.py's sprites are drawn at road.SCALE x s, as road.py draws them at road.SCALE."""
-    p = road.SCALE * s
+    road.py's sprites are drawn at road.SCALE x s and obstacles.py's at obstacles.SCALE x s, as those
+    files draw them at road.SCALE and obstacles.SCALE. The bin's lift and the bench's leaf are in drawn
+    pixels, so they stay 1px here."""
+    p, o = road.SCALE * s, obstacles.SCALE * s
     yield "tip", [("idle", [tip(p, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
     yield "treat", [("idle", [treat(p, lift).outlined() for lift in (0, -1)], 400)]
     frames, ms = obstacles.CONE_IDLE
-    yield "cone", [("idle", [cone(s, gl).outlined() for gl in frames], ms)]
-    # the lid's lift is in full-size pixels, so it is divided by the scale to stay 1px here
+    yield "cone", [("idle", [cone(o, gl).outlined() for gl in frames], ms)]
     frames, ms = obstacles.BIN_IDLE
-    yield "bin", [("idle", [small(obstacles, s, obstacles.bin_, a / s).outlined() for a in frames], ms)]
+    yield "bin", [("idle", [small(obstacles, o, obstacles.bin_, a).outlined() for a in frames], ms)]
     frames, ms = obstacles.HYDRANT_IDLE
-    yield "hydrant", [("idle", [small(obstacles, s, obstacles.hydrant, d).outlined() for d in frames], ms)]
+    yield "hydrant", [("idle", [small(obstacles, o, obstacles.hydrant, d).outlined() for d in frames], ms)]
     frames, ms = obstacles.BENCH_IDLE
-    yield "bench", [("idle", [small(obstacles, s, obstacles.bench, (a[0] / s, a[1] / s) if a else a).outlined()
-                              for a in frames], ms)]
+    yield "bench", [("idle", [small(obstacles, o, obstacles.bench, a).outlined() for a in frames], ms)]
     yield "skunk", [("idle", [skunk(p, v).outlined() for v in (0, 1)], 400)]
     yield "squirrel", [("idle", [squirrel(p, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
                        ("run", [squirrel(p, road.squirrel_run, k).outlined() for k in (False, True)], 120)]

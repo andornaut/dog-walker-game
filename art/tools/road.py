@@ -2,13 +2,14 @@
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
 People (walkers, forced stops, lucky people, the thief and the other dog's owner)
-are 56x84: their drawing functions lay them out on 32x48 and sprites() draws them
-PERSON_SCALE (1.75) times bigger on a scaling grid, never upscaled. The other dog,
-skunk and squirrel are 40x40, the stop sign 40x60 and pickups 20x20, laid out on
-32x32, 32x48 and 16x16 and drawn SCALE (1.25) times bigger. The bark pop is 16x16. The
-ice cream truck (104x55, two lanes, 64n-24 wide), the construction barrier (64x40, one
-whole lane, repeated across the road) and the puddle (104x40) are drawn in their own
-pixels; the skunk's stink haze (104x50) is a ground decal laid out on an 88x40 design
+are 56x84, the other dog, skunk and squirrel 56x56, the stop sign 56x84 and the
+pickups 28x28: their drawing functions lay them out on 32x48, 32x32 and 16x16, and
+sprites() draws them SCALE (1.75) times bigger on a scaling grid, never upscaled.
+The bark pop is 16x16. The ice cream truck (120x77, two lanes, 64n-8 wide) and the
+construction barrier (64x56, one whole lane, repeated across the road) are drawn in
+their own pixels at 104x55 and 64x40 on a grid that scales their columns to the
+lanes and their rows ROW_SCALE (1.4) times; the puddle (120x56) is drawn in its own
+pixels; the skunk's stink haze (120x70) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
 dogs, except in wave; everything coming down the road faces the player.
@@ -94,32 +95,32 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
            blue=("cyan", None), red=("pink", None), dred=("pink", None), mauve=("pink", None), purple=("pink", None))
 
 
-# Road sprites are drawn bigger than their drawing functions lay them out: a person laid out on 32x48 at
-# PERSON_SCALE exports at 56x84, an animal on 32x32 and a pickup on 16x16 at SCALE at 40x40 and 20x20.
-# sprites() runs the functions on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines
-# 1px, so nothing is upscaled; the depth variants (minis.py, depths.py) run them at that scale times each depth
-# step.
-SCALE = 1.25
-PERSON_SCALE = 1.75
+# Road sprites are drawn SCALE times the size their drawing functions lay them out at: a person laid out on
+# 32x48, an animal on 32x32 and a pickup on 16x16 export at 56x84, 56x56 and 28x28. sprites() runs the functions
+# on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines 1px, so nothing is upscaled;
+# the depth variants (minis.py, depths.py) run them at SCALE times each depth step.
+SCALE = 1.75
+# The ice cream truck and the construction barrier are drawn in their own pixels at 104x55 and 64x40, then on
+# a minis.Mini that scales their columns to their lanes (64n-8 across n lanes, a whole lane for the barrier)
+# and their rows ROW_SCALE times.
+ROW_SCALE = 1.4
+TRUCK_SCALE = ((64 * 2 - 8) / 104, ROW_SCALE)
+CONSTRUCTION_SCALE = (1, ROW_SCALE)
 
 
 def drawn(s, draw, *args, **q):
-    """draw(*args, **q) at scale s on a minis.Mini, its numeric keyword arguments (pose offsets) snapped to whole
-    pixels as minis.snap has them."""
+    """draw(*args, **q) at scale s on a minis.Mini, or (sx, sy) for its columns and rows, its numeric keyword
+    arguments (pose offsets) snapped to whole pixels as minis.snap has them at the row scale."""
     import minis  # minis imports this module, so it is imported when first used
 
     pose = {k: v for k, v in q.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
-    return minis.small(sys.modules[__name__], s, draw, *args, **{**q, **minis.snap(pose, s)})
+    sy = s[1] if isinstance(s, tuple) else s
+    return minis.small(sys.modules[__name__], s, draw, *args, **{**q, **minis.snap(pose, sy)})
 
 
 def big(draw, *args, **q):
-    """draw(*args, **q) at SCALE: an animal or a pickup."""
+    """draw(*args, **q) at SCALE: a person, an animal, the stop sign or a pickup."""
     return drawn(SCALE, draw, *args, **q)
-
-
-def tall(draw, *args, **q):
-    """draw(*args, **q) at PERSON_SCALE: a person."""
-    return drawn(PERSON_SCALE, draw, *args, **q)
 
 
 # ---------- the walker (back view) ----------
@@ -751,8 +752,8 @@ def squirrel_run(gather):
     return rim(g, LIT)
 
 
-def puddle(f, w=104, h=40):
-    """The road's 2-lane puddle, 104x40 (64n-24 wide for n = 2); cards draw a 32x16 one. Wide puddles get a
+def puddle(f, w=120, h=56):
+    """The road's 2-lane puddle, 120x56 (64n-8 wide for n = 2); cards draw a 32x16 one. Wide puddles get a
     second lobe."""
     g = Grid(w, h)
     lobes = [(w / 2, h / 2, w / 2 - 2, h / 2 - 2)]
@@ -770,7 +771,7 @@ def puddle(f, w=104, h=40):
 
 
 # The stink haze's puffs as (centre x, centre y, radius across), laid out on an 88x40 design that the sprite
-# stretches to CLOUD_SIZE (2 lanes, 64n-24 wide, by 1.25 x 40 rows). The haze hugs the road: each puff is
+# stretches to CLOUD_SIZE (2 lanes, 64n-8 wide, by 1.75 x 40 rows). The haze hugs the road: each puff is
 # CLOUD_SQUASH as tall as it is wide, so together they make a low, wide bank with a lumpy top, its base on the
 # frame's last row. A swollen puff still stops a pixel short of the frame's top and sides, so no lobe is clipped
 # flat; along the bottom the frame's last row cuts them level, where the haze meets the road.
@@ -778,7 +779,7 @@ CLOUD_PUFFS = [(44, 28, 30), (22, 31, 15), (66, 31, 15), (31, 36, 15), (57, 36, 
                (44, 14, 9), (11, 35, 9), (77, 35, 9), (19, 24, 7), (70, 24, 7)]
 CLOUD_SQUASH = 0.42
 CLOUD_W, CLOUD_H = 88, 40
-CLOUD_SIZE = (104, 50)
+CLOUD_SIZE = (120, 70)
 # Where each stink wisp starts, trailing 6 design rows down.
 CLOUD_WISPS = ((22, 25), (62, 22), (72, 30), (14, 31), (42, 17))
 # The haze's colours: the outer and inner rim, the dithered fill and its darker pixels, and the wisps.
@@ -1136,7 +1137,7 @@ def stop_sign(glint=None):
     """glint is the diagonal x + y = glint (in layout pixels) along which a pink sheen crosses the red face, or
     None. The road outline and the lit rim. The face is drawn in pixels at the grid's scale: an octagon
     18 x scale across, its corners cut in one-pixel stairs, shaded dred along the lower-right edges and
-    the bottom, and the legend in 3x5 letters spread to fill it. An octagon under 16px has no room for the
+    the bottom, and the legend in 3x5 letters 1 or 2px apart, centred. An octagon under 16px has no room for the
     letters, so the legend is a white bar across the face instead, a pixel of red each side."""
     g = edged(Grid(32, 48))
     g.rect(15, 22, 3, 24, "grey")
@@ -1155,7 +1156,7 @@ def stop_sign(glint=None):
         if y > cut:
             px.p(left + d - 1 - c, top + y, "dred")
     if d >= 16:
-        gap = max(1, (d - 14) // 3)
+        gap = max(1, min(2, (d - 14) // 3))
         x0 = left + (d - 12 - 3 * gap) // 2
         y0 = top + (d - 5) // 2
         for i, ch in enumerate("STOP"):
@@ -1243,7 +1244,8 @@ def kid(wave=False, mood="happy", bob=0):
 
 
 def ice_cream_truck(f):
-    """The ice cream truck parked ahead across two lanes, 104x55 (64n-24 wide for n = 2), from straight behind
+    """The ice cream truck parked ahead across two lanes, laid out on 104x55 and drawn at TRUCK_SCALE to 120x77
+    (64n-8 wide for n = 2), from straight behind
     like obstacles.parked_car: a wide box van, squat, with its cone sign on the roof. The rear doors split down
     the middle, each with a window; a pink drip stripe runs across the doors; tall tail lights sit at the outer
     corners, amber blinkers under them; then the plate, the bumper and both rear wheels. f swaps the lit
@@ -1304,7 +1306,7 @@ def ice_cream_truck(f):
 
 
 def construction(f):
-    """One lane's barrier, 64x40, repeated across every lane; f swaps which lamp is lit. A squat front
+    """One lane's barrier, laid out on 64x40 and drawn at CONSTRUCTION_SCALE to 64x56, repeated across every lane; f swaps which lamp is lit. A squat front
     elevation standing on the road line: the board, the lower rail right under it on short legs, the lamps
     and the detour sign. Striped like obstacles.barrier so the stripes hold steady at depth: the board's 5
     stairs of 2 rows are striped 10px orange every 20px, leaning right 2px a stair and stopping at the board's
@@ -1459,14 +1461,14 @@ def sprites():
     # the walkers carry the leash on every road, so their outlines hold 3:1 on the light roads
     for key, draw in {"walker-casey": walker, **WALKERS}.items():
         def pose(**q):
-            return edged(tall(draw, **q))
+            return edged(big(draw, **q))
 
         yield key, [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
                     ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
-                    ("wave", frames(edged(tall(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
-                    ("cheer", [hopped(edged(tall(cheering, key, swing, bob=crouch)).outlined(), hop)
+                    ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
+                    ("cheer", [hopped(edged(big(cheering, key, swing, bob=crouch)).outlined(), hop)
                                for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
     yield "treat", [("idle", frames([big(treat, lift=0), big(treat, lift=-1)]), 400)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
@@ -1478,20 +1480,20 @@ def sprites():
     yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),
                         ("idle", frames(big(corgi, **q) for q in CORGI_IDLE), 300)]
     owner = dict(shoes="dbrown")
-    yield "other-dog-owner", [("walk", frames([tall(dressed, dog_owner_top, lf=-2, **owner),
-                                               tall(dressed, dog_owner_top, rf=-2, **owner)]), 200),
-                              ("idle", frames(tall(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH), BREATH_MS)]
-    yield "thief", [("walk", frames([tall(dressed, thief_top, lf=-2), tall(dressed, thief_top, rf=-2)]), 200),
-                    ("flee", frames(tall(thief_fleeing, k) for k in (-1, 1)), 110),
-                    ("idle", frames(tall(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "other-dog-owner", [("walk", frames([big(dressed, dog_owner_top, lf=-2, **owner),
+                                               big(dressed, dog_owner_top, rf=-2, **owner)]), 200),
+                              ("idle", frames(big(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH), BREATH_MS)]
+    yield "thief", [("walk", frames([big(dressed, thief_top, lf=-2), big(dressed, thief_top, rf=-2)]), 200),
+                    ("flee", frames(big(thief_fleeing, k) for k in (-1, 1)), 110),
+                    ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "biscuit-neighbour", [("wave", frames(tall(dressed, neighbour_top(w), **neighbour) for w in (False, True)), 350),
-                                ("idle", frames(tall(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
+    yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(w), **neighbour) for w in (False, True)), 350),
+                                ("idle", frames(big(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
                                  BREATH_MS)]
     tourist = dict(legs="skin2", shoes="sky")
-    yield "photo-op", [("idle", frames(tall(dressed, tourist_top(False), bob=bb, **tourist) for bb in BREATH), BREATH_MS),
-                       ("flash", frames(tall(dressed, tourist_top(f), **tourist) for f in (True, False)), 120)]
+    yield "photo-op", [("idle", frames(big(dressed, tourist_top(False), bob=bb, **tourist) for bb in BREATH), BREATH_MS),
+                       ("flash", frames(big(dressed, tourist_top(f), **tourist) for f in (True, False)), 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
     yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140]),
@@ -1501,15 +1503,15 @@ def sprites():
     # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
     yield "stop-sign", [("idle", frames(big(stop_sign, c) for c in (None, None, 18, 24)), 400)]
     chatty = dict(legs="brown", shoes="dbrown")
-    yield "chatty-neighbour", [("wave", frames(tall(dressed, chatty_top(w), **chatty) for w in (False, True)), 350),
-                               ("idle", frames(tall(dressed, chatty_top(False), bob=bb, **chatty) for bb in BREATH),
+    yield "chatty-neighbour", [("wave", frames(big(dressed, chatty_top(w), **chatty) for w in (False, True)), 350),
+                               ("idle", frames(big(dressed, chatty_top(False), bob=bb, **chatty) for bb in BREATH),
                                 BREATH_MS)]
-    yield "kid", [("wave", frames([tall(kid, False), tall(kid, True)]), 300), ("sad", frames([tall(kid, False, "sad")]), 1000),
-                  ("idle", frames(tall(kid, bob=bb) for bb in BREATH), BREATH_MS)]
-    yield "ice-cream-truck", [("idle", frames([ice_cream_truck(0), ice_cream_truck(1)]), 400)]
-    yield "construction", [("idle", frames([construction(0), construction(1)]), 500)]
-    yield "mail-carrier", [("walk", frames([tall(mail_carrier, lf=-2), tall(mail_carrier, rf=-2)]), 200),
-                           ("idle", frames(tall(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "kid", [("wave", frames([big(kid, False), big(kid, True)]), 300), ("sad", frames([big(kid, False, "sad")]), 1000),
+                  ("idle", frames(big(kid, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400)]
+    yield "construction", [("idle", frames([drawn(CONSTRUCTION_SCALE, construction, f) for f in (0, 1)]), 500)]
+    yield "mail-carrier", [("walk", frames([big(mail_carrier, lf=-2), big(mail_carrier, rf=-2)]), 200),
+                           ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
 
 
 if __name__ == "__main__":
