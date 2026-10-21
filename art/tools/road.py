@@ -17,7 +17,10 @@ dogs, except in wave; everything coming down the road faces the player, and
 the movers going up it ahead of the pack are seen from behind too: stroller
 (48x72, walk: 4 frames at 160ms, the walkers' stride and pace) is a dad pushing
 a stroller one-handed, a takeaway coffee in his other hand, the stroller
-rolling ahead on his right.
+rolling ahead on his right; jogger (48x72, run: 4 frames at 100ms, a heel
+kicked up behind, sole showing, then that knee passing through, each side in
+turn, the ponytail swinging against the stride) wears an orange racerback
+singlet with a white race bib on its back.
 
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
@@ -1564,6 +1567,90 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
     return rim(g, LIT)
 
 
+# Running: the left heel kicked up behind as the right foot plants, the left knee passing through, the same on
+# the right, each kick 1px higher as the stride pushes off; the ponytail swings against the shoulders. 4 frames
+# at 100ms.
+JOGGER_RUN = [dict(kick="left", bob=-1, tail=1), dict(passing="left"), dict(kick="right", bob=-1, tail=-1),
+              dict(passing="right")]
+JOGGER_RUN_MS = 100
+
+
+def jogger(kick=None, passing=None, bob=0, tail=0):
+    """A jogger running up the road, seen from behind: a black ponytail tied high with a cyan band, an orange
+    racerback singlet with a white race bib pinned to its back, bare arms pumping, navy capri tights and cyan
+    shoes. kick is the side ("left" or "right") whose heel is kicked up behind, sole showing, while the other
+    foot plants; passing is the side whose knee is passing through, its foot just off the ground. The arm on the
+    kicking side is bent forward out of sight, the other swung back. The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
+    b = bob
+    # legs: the kicked one folds up behind, its sole to us at the knee; the passing one lifts its foot a little
+    for x, side in ((11, "left"), (17, "right")):
+        if kick == side:
+            g.rect(x, 33 + b, 4, 4, "navy")
+            g.rect(x + 3, 33 + b, 1, 4, "ink")
+            g.rect(x, 37 + b, 4, 2, "cyan")
+            g.rect(x, 39 + b, 4, 1, "white")
+        else:
+            f = -2 if passing == side else 0
+            g.rect(x, 33 + b, 4, 8 + f - b, "navy")
+            g.rect(x + 3, 33 + b, 1, 8 + f - b, "ink")
+            g.rect(x + 1, 41 + f, 2, 2, "skin1")
+            g.rect(x, 43 + f, 4, 2, "cyan")
+            g.rect(x, 44 + f, 4, 1, "sky")
+    # arms, 3px thin: bent forward on the kicking side, so only the upper arm and elbow show, swung back
+    # and low on the other
+    for x, side in ((6, "left"), (23, "right")):
+        if kick == side:
+            g.rect(x, 22 + b, 3, 5, "skin1")
+            g.rect(x + 2, 22 + b, 1, 5, "skin2")
+        else:
+            g.rect(x, 22 + b, 3, 10, "skin1")
+            g.rect(x + 2, 22 + b, 1, 10, "skin2")
+    # the racerback singlet: bare shoulder blades either side of its back panel, the bib pinned on
+    g.rect(9, 21 + b, 14, 12, "orange")
+    g.rect(20, 21 + b, 3, 12, "rust")
+    g.rect(9, 23 + b, 1, 9, "amber")
+    g.tri((9, 21 + b), (12, 21 + b), (9, 24 + b), "skin1")
+    g.tri((20, 21 + b), (23, 21 + b), (23, 24 + b), "skin2")
+    g.rect(9, 32 + b, 14, 1, "rust")
+    g.rect(12, 25 + b, 8, 6, "white")
+    g.rect(18, 25 + b, 2, 6, "lgrey")
+    g.rect(12, 25 + b, 8, 1, "sky")
+    bib(g, 16, 28.5 + b)
+    # the back of the head, the ears and the nape, then the ponytail tied high, hanging to the shoulders and
+    # swinging
+    g.rect(14, 19 + b, 4, 3, "skin1")
+    g.rect(7, 13 + b, 2, 3, "skin1")
+    g.rect(23, 13 + b, 2, 3, "skin2")
+    g.cel(16, 12.5 + b, 8, 8, "navy", "ink", "dslate")
+    g.cel(16 + tail * 1.5, 15.5 + b, 2.5, 4.5, "navy", "ink", "dslate")
+    g.cel(16 + tail * 3.5, 21 + b, 2, 3.5, "navy", "ink", "dslate")
+    g.rect(14, 10 + b, 4, 2, "cyan")
+    g.rect(17, 10 + b, 1, 2, "sky")
+    return rim(g, LIT)
+
+
+# The bib's number, 3x5 digits drawn in the grid's own pixels, as DOLLAR is.
+BIB = ("111", "001", "010", "100", "100"), ("111", "100", "111", "001", "111")
+
+
+def bib(g, cx, cy):
+    """The race number "75" centred on design point (cx, cy), 1px apart, in ink; under 1.5x the bib is too
+    small for digits and takes a 1px ink bar instead."""
+    s, px = getattr(g, "s", 1), getattr(g, "g", g)
+    sy = getattr(g, "sy", s)
+    if s < 1.5:
+        x0, y0 = math.floor((cx - 2) * s + 0.5), math.floor(cy * sy)
+        px.rect(x0, y0, max(1, math.floor(4 * s + 0.5)), 1, "ink")
+        return
+    x0, y0 = math.floor(cx * s + 0.5) - 3, math.floor(cy * sy + 0.5) - 2
+    for i, digit in enumerate(BIB):
+        for j, row in enumerate(digit):
+            for k, ch in enumerate(row):
+                if ch == "1":
+                    px.p(x0 + i * 4 + k, y0 + j, "ink")
+
+
 # ---------- scenery gags (front view, in the backdrop band) ----------
 
 def cat(tail=0, blink=False, alert=False):
@@ -1760,6 +1847,7 @@ def sprites():
     yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in PERSON_WALK), PERSON_WALK_MS),
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "stroller", [("walk", frames(big(stroller, **q) for q in STROLLER_WALK), STROLLER_WALK_MS)]
+    yield "jogger", [("run", frames(big(jogger, **q) for q in JOGGER_RUN), JOGGER_RUN_MS)]
 
 
 if __name__ == "__main__":

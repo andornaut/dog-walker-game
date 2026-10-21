@@ -8,7 +8,7 @@ minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, biscuit-neighbour, chatty-neighbour,
-kid, mail-carrier, photo-op, stop-sign, stroller, ice-cream-truck, construction, puddle
+kid, mail-carrier, photo-op, stop-sign, stroller, jogger, ice-cream-truck, construction, puddle
 (no outline), hedge, barrier-2, barrier-3, parked-car and delivery-truck. Walkers are the
 pack, always drawn at 1x, and have none.
 
@@ -57,6 +57,11 @@ def dressed(s, top, **q):
     return small(road, s, road.dressed, top, **{k: v for k, v in q.items() if k not in POSE}, **pose)
 
 
+def posed(q, s):
+    """A pose q with its numeric offsets snapped to whole pixels at s, its named choices (a side) as given."""
+    return {**q, **snap({k: v for k, v in q.items() if isinstance(v, (int, float))}, s)}
+
+
 def obstacle(s, draw, spec):
     """An obstacles.*_IDLE tag on a Mini at s, or (sx, sy)."""
     args, ms = spec
@@ -101,6 +106,8 @@ def own(s):
                                      for b in breath], ms)]
     yield "stroller", [("walk", [small(road, p, road.stroller, **snap(q, p)).outlined() for q in road.STROLLER_WALK],
                         road.STROLLER_WALK_MS)]
+    yield "jogger", [("run", [small(road, p, road.jogger, **posed(q, p)).outlined() for q in road.JOGGER_RUN],
+                      road.JOGGER_RUN_MS)]
 
     def times(q):
         return tuple(v * s for v in q)

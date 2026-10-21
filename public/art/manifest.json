@@ -2366,6 +2366,51 @@
       "json": "sprites/icon-sound-panel.json"
     },
     {
+      "key": "jogger",
+      "png": "sprites/jogger.png",
+      "json": "sprites/jogger.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "jogger@50",
+      "png": "sprites/jogger@50.png",
+      "json": "sprites/jogger@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "jogger@62",
+      "png": "sprites/jogger@62.png",
+      "json": "sprites/jogger@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "jogger@75",
+      "png": "sprites/jogger@75.png",
+      "json": "sprites/jogger@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "jogger@88",
+      "png": "sprites/jogger@88.png",
+      "json": "sprites/jogger@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 28
+      }
+    },
+    {
       "key": "kid",
       "png": "sprites/kid.png",
       "json": "sprites/kid.json",
