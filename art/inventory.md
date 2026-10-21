@@ -17,6 +17,7 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`     | core | Keyed by dog                                                                                                                                                                                          |
 | `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                      | core | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                           |
 | `portrait-dog-<name>` | image  | 64×64 |                                                     | core | Dog pick and shop                                                                                                                                                                                     |
+| `portrait-walker-<name>` | image  | 64×64 |                                                     | core | Walker detail card; ada, ben, casey, trista                                                                                                                                                           |
 
 ## Road objects
 

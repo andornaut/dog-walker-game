@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Draw the dog portraits for the dog pick and the shop.
+"""Draw the dog and walker portraits for the start screen's detail card and the shop.
 
-portrait-dog-<name>: 64x64 images in Endesga 32 with an ink outer line
-closed along the bottom edge, cel shaded, on transparency. Each dog sits in a three-quarter front view turned toward the
-viewer's left (into the top-left light), head and shoulders with its front
-paws at the bottom edge. Coats, markings and accessories match the dog's
-road sprite and face in dogs.py.
+portrait-dog-<name> and portrait-walker-<name>: 64x64 images in Endesga 32
+with an ink outer line closed along the bottom edge, cel shaded, on
+transparency, in a three-quarter front view turned toward the viewer's left
+(into the top-left light). Each dog sits, head and shoulders with its front
+paws at the bottom edge; its coat, markings and accessories match its road
+sprite and face in dogs.py. Each walker is a head-and-shoulders bust to the
+bottom edge; their skin, hair, cap, clothes and Trista's tote match their
+road sprite in road.py and face in owners.py.
 
 Usage:
   portraits.py preview OUT.png   every portrait beside its face (at 2x), on the
@@ -26,6 +29,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
+import owners  # noqa: E402
 from pixel import DARKER, K, Grid, edged  # noqa: E402
 
 S = 64
@@ -389,6 +393,170 @@ def koda(g):
     nose(g, 21, 29)
 
 
+# ---------- the walkers: head-and-shoulders busts ----------
+# The face turns toward the viewer's left like the dogs': the features sit left of the head's centre, the far
+# (left) eye is narrower, and only the near (right) ear shows.
+
+def human_eye(g, x, y, w, sclera=False):
+    """An eye 5 tall, w wide, with a shine top-left and a glint bottom-right; sclera sets a white left of the
+    pupil, so the eye reads on dark skin."""
+    g.rect(x, y + 1, w, 4, "ink")
+    g.rect(x + 1, y, w - 2, 5, "ink")
+    g.p(x + 1, y + 1, "white")
+    if w > 3:
+        g.p(x + 1, y + 2, "white")
+    g.p(x + w - 2, y + 3, "white" if w > 3 else "ink")
+    if sclera:
+        g.rect(x - 1, y + 2, 1, 2, "white")
+
+
+def human_face(g, skin_sh, brow, lips="ink", teeth="white", blush="pink", sclera=False, y=0):
+    """Eyes under brows, the nose's shadow on its right, and an open smile under rosy cheeks, turned left."""
+    for x, w in ((20, 3), (32, 4)):
+        human_eye(g, x, 26 + y, w, sclera)
+        g.rect(x, 23 + y, w, 1, brow)
+    g.p(31, 24 + y, brow)
+    g.rect(27, 31 + y, 1, 2, skin_sh)
+    g.rect(25, 33 + y, 3, 1, skin_sh)
+    if blush:
+        g.rect(17, 33 + y, 3, 1, blush)
+        g.rect(34, 33 + y, 4, 1, blush)
+    g.rect(22, 36 + y, 9, 1, lips)
+    g.rect(23, 37 + y, 7, 1, lips)
+    g.rect(24, 38 + y, 5, 1, lips)
+    g.p(21, 35 + y, lips)
+    g.p(31, 35 + y, lips)
+    g.rect(23, 36 + y, 7, 1, teeth)
+
+
+def bust(g, c, sh, li=None, neck=("skin2", "brown"), rx=27):
+    """Shoulders cut by the bottom edge, the near (right) one fuller, and the neck in the head's shadow."""
+    g.cel(32, 62, rx, 16, c, sh, li)
+    g.rect(24, 38, 11, 9, neck[0])
+    g.rect(24, 38, 11, 2, neck[1])
+
+
+def casey(g):
+    """The amber cap with its orange brim over brown hair, the sky hoodie with its blue hood, white drawstrings
+    and kangaroo pocket."""
+    bust(g, "sky", "blue", "cyan")
+    g.rect(18, 58, 26, 6, "blue")
+    g.rect(20, 59, 22, 5, "sky")
+    g.cel(30, 47, 13, 4.5, "blue", "navy")
+    g.rect(24, 44, 11, 3, "skin2")
+    for x in (25, 33):
+        g.rect(x, 49, 1, 7, "white")
+        g.p(x, 56, "lgrey")
+    # brown hair under the cap at the sides, the near ear, then the face
+    g.cel(31, 24, 15, 12, "dbrown", "plum", "brown")
+    g.cel(44, 29, 2.5, 4, "skin1", "skin2")
+    g.p(44, 29, "skin2")
+    g.cel(29, 28, 13, 13, "skin1", "skin2")
+    # the cap's crown, its yellow button, and the brim towards the camera, rust underneath
+    g.cel(31, 15, 15, 10, "amber", "orange", "yellow")
+    g.rect(30, 5, 3, 2, "orange")
+    g.ell(25, 20.5, 17, 3.5, "orange")
+    g.rect(15, 18, 14, 1, "amber")
+    g.rect(13, 22, 26, 1, "rust")
+    g.rect(16, 23, 20, 1, "dbrown")
+    human_face(g, "skin2", "dbrown")
+
+
+def ada(g):
+    """Long black curls falling past her shoulders, lit dslate on the left, a pink clip, caramel skin, pink
+    tee."""
+    # the curls behind her, bunched into bumps along both edges
+    g.cel(30, 27, 20, 19, "navy", "ink", "dslate")
+    g.rect(10, 27, 41, 29, "navy")
+    g.rect(44, 27, 7, 29, "ink")
+    for y in range(24, 56, 6):
+        g.ell(9.5, y, 2.2, 2.6, "navy")
+        g.ell(51, y + 3, 2.2, 2.6, "ink")
+    for x in range(13, 50, 6):
+        g.ell(x, 56, 2.6, 2, "navy" if x < 44 else "ink")
+    for y in (30, 42):
+        g.cel(13.5, y, 2, 4, "dslate")
+        g.cel(47.5, y, 2, 4, "navy")
+    bust(g, "pink", "mauve", neck=("brown", "dbrown"), rx=22)
+    g.rect(24, 49, 11, 1, "mauve")
+    g.ell(30, 28.5, 13, 13, "navy")
+    g.cel(30, 28, 12, 12.5, "brown", "dbrown", "skin2")
+    # curls over the forehead, hanging in bumps along the brow, and locks framing the face
+    g.cel(30, 17, 15, 7.5, "navy", "ink", "dslate")
+    for x, y in ((19, 22), (24, 23), (30, 22), (36, 23), (41, 21)):
+        g.ell(x, y, 2.5, 2, "navy" if x < 38 else "ink")
+    g.cel(21, 14.5, 4, 2, "dslate")
+    g.rect(17, 22, 2, 12, "navy")
+    g.rect(42, 22, 2, 14, "ink")
+    g.cel(41, 13, 3.5, 2.5, "pink", "mauve")
+    human_face(g, "dbrown", "navy", lips="dbrown")
+
+
+def ben(g):
+    """Bald, a shine on the crown, the chin-strap beard along his jaw and under his chin with no moustache, the
+    green tee with its dgreen collar."""
+    bust(g, "green", "dgreen", neck=("plum", "ink"))
+    g.rect(22, 46, 15, 1, "dgreen")
+    g.p(21, 45, "dgreen")
+    g.p(37, 45, "dgreen")
+    g.cel(44, 29, 2.5, 4, "dbrown", "plum")
+    g.rect(44, 28, 1, 3, "plum")
+    g.cel(30, 26, 13.5, 15.5, "dbrown", "plum", power=2.3)
+    g.rect(21, 14, 5, 1, "brown")
+    g.rect(20, 15, 2, 2, "brown")
+    # the beard: down both jaws and round under the chin, the upper lip bare
+    g.rect(17, 29, 2, 7, "ink")
+    g.rect(41, 29, 2, 9, "ink")
+    g.ell(29, 39, 12, 4, "ink")
+    g.rect(20, 34, 18, 4, "dbrown")
+    g.rect(37, 34, 1, 4, "plum")
+    human_face(g, "plum", "ink", teeth="cream", blush=None, sclera=True)
+    g.rect(22, 36, 9, 1, "ink")
+    g.rect(23, 36, 7, 1, "cream")
+
+
+def trista(g):
+    """A dirty blonde bob to the shoulders with amber streaks and a side-swept fringe, round glasses, the green
+    cardigan open over a white blouse, and the apple tote over her right shoulder."""
+    # the bob behind her face, flicking out at the shoulders
+    g.cel(30, 26, 17, 16, "brown", "dbrown", "tan")
+    g.rect(13, 26, 34, 18, "brown")
+    g.rect(41, 26, 6, 18, "dbrown")
+    g.rect(11, 42, 3, 2, "brown")
+    g.rect(46, 42, 3, 2, "dbrown")
+    for x, y, h in ((15, 26, 12), (18, 30, 10)):
+        g.rect(x, y, 1, h, "amber")
+    bust(g, "dgreen", "forest", "green")
+    g.rect(25, 46, 9, 18, "white")
+    g.rect(33, 47, 1, 17, "lgrey")
+    g.tri((21, 45), (30, 46), (25, 52), "white")
+    g.tri((29, 46), (38, 45), (34, 52), "lgrey")
+    for y in (53, 59):
+        g.p(23, y, "amber")
+    g.cel(29, 28, 12.5, 12.5, "skin1", "skin2")
+    # the fringe sweeping down to the left over the brow, streaked amber
+    g.cel(31, 16, 15, 7.5, "brown", "dbrown", "tan")
+    g.tri((14, 16), (38, 19), (16, 26), "brown")
+    g.rect(15, 18, 2, 8, "brown")
+    g.rect(43, 18, 3, 12, "dbrown")
+    for x, y, h in ((20, 11, 4), (26, 9, 5), (33, 10, 4)):
+        g.rect(x, y, 1, h, "amber")
+    human_face(g, "skin2", "dbrown")
+    # round glasses with a bridge, over the eyes
+    for cx, r in ((21.5, 3.5), (34, 4)):
+        for a in range(0, 360, 10):
+            g.p(cx + r * math.cos(math.radians(a)), 28.5 + (r + 0.5) * math.sin(math.radians(a)), "dbrown")
+    g.rect(25, 27, 5, 1, "dbrown")
+    # the canvas tote hangs off her right shoulder by a brown strap, the apple facing out
+    g.rect(15, 45, 1, 6, "brown")
+    g.rect(3, 50, 15, 14, "cream")
+    g.rect(14, 50, 4, 14, "tan")
+    g.cel(9, 57.5, 3, 3, "red", "dred")
+    g.p(8, 56, "white")
+    g.rect(9, 53, 2, 1, "dgreen")
+    g.p(9, 54, "dbrown")
+
+
 PORTRAITS = {
     "duchess": duchess,
     "nugget": nugget,
@@ -399,6 +567,13 @@ PORTRAITS = {
     "snowball": snowball,
     "penny": penny,
     "koda": koda,
+}
+
+WALKERS = {
+    "ada": ada,
+    "ben": ben,
+    "casey": casey,
+    "trista": trista,
 }
 
 
@@ -417,13 +592,23 @@ def image(draw):
     return to_image(g.outlined())
 
 
+def faces():
+    """(happy face, draw) for every dog, then every walker."""
+    for name, draw in PORTRAITS.items():
+        yield dogs.DOGS[name][1]("happy"), draw
+    for name, draw in WALKERS.items():
+        yield owners.WALKERS[f"walker-{name}"]("happy"), draw
+
+
 def preview(out, scale=4):
-    """One row per dog: its happy face at 2x, then the portrait on the dog pick's tile colours."""
-    grounds = [(228, 166, 114), (234, 212, 170), (254, 231, 97), (58, 68, 102)]
+    """One row per dog, then per walker: its happy face at 2x, then the portrait on the dog pick's tile colours
+    and the detail card well's sky."""
+    grounds = [(228, 166, 114), (234, 212, 170), (254, 231, 97), (58, 68, 102), (0, 153, 219)]
     cell = S + 4
-    sheet = Image.new("RGB", (cell * (1 + len(grounds)) * scale, cell * len(PORTRAITS) * scale), (24, 20, 37))
-    for i, (name, draw) in enumerate(PORTRAITS.items()):
-        face = to_image(dogs.DOGS[name][1]("happy").outlined()).resize((S, S), Image.NEAREST)
+    rows = len(PORTRAITS) + len(WALKERS)
+    sheet = Image.new("RGB", (cell * (1 + len(grounds)) * scale, cell * rows * scale), (24, 20, 37))
+    for i, (face_grid, draw) in enumerate(faces()):
+        face = to_image(face_grid.outlined()).resize((S, S), Image.NEAREST)
         im = image(draw)
         for j, tile_im in enumerate([face] + [im] * len(grounds)):
             tile = Image.new("RGB", (S, S), grounds[max(0, j - 1)])
@@ -435,12 +620,13 @@ def preview(out, scale=4):
 def build():
     os.makedirs("art/portraits", exist_ok=True)
     os.makedirs("public/art/images", exist_ok=True)
-    for name, draw in PORTRAITS.items():
-        key = f"portrait-dog-{name}"
+    keys = {**{f"portrait-dog-{n}": d for n, d in PORTRAITS.items()},
+            **{f"portrait-walker-{n}": d for n, d in WALKERS.items()}}
+    for key, draw in keys.items():
         png = f"public/art/images/{key}.png"
         image(draw).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/portraits/{key}.aseprite"], check=True)
-    print("built", ", ".join(f"portrait-dog-{n}" for n in PORTRAITS))
+    print("built", ", ".join(keys))
 
 
 if __name__ == "__main__":
