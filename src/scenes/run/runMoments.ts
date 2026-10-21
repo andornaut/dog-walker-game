@@ -4,6 +4,7 @@ import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger } from "../../data/types";
 import { changeLabels } from "../../hud/hudView";
+import type { MessageLine } from "../../hud/messageStrip";
 import {
   endScreenDelayMs,
   FIRING_EVENT,
@@ -15,6 +16,17 @@ import {
   TREAT_EVENT,
   type TreatCue,
 } from "../../hud/moments";
+import {
+  bumpLine,
+  debuffChanges,
+  debuffLines,
+  firedLine,
+  fullPackLine,
+  lowHeartsLines,
+  luckyLine,
+  pullLine,
+  treatLine,
+} from "../../hud/stripLines";
 import { amountText, type Change, type MoneyChange } from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
 import { hintFor } from "../../rules/hints";
@@ -36,6 +48,7 @@ import {
 import type { RunResult } from "../../save/checkpoint";
 import type { RunState } from "../../state/runState";
 import { hitLabelOf, playHitMoment, playMinorHitLabel } from "../hitMoment";
+import { sayMessage } from "../messageStripView";
 import { playBump, playDodge } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { SCENE_KEYS } from "../sceneKeys";
@@ -138,17 +151,35 @@ export class RunMoments {
     }
   }
 
-  // A tell barks and a blocked strain that ends without a pull bursts over its dog. The
-  // strain, the bubble and the bark pop are drawn with the pack.
+  // A tell barks and says which dog spotted the squirrel; a blocked strain that ends without
+  // a pull bursts over its dog. A landed pull raises its hint. The strain, the bubble and the
+  // bark pop are drawn with the pack.
   pulled(step: PullStep): void {
     if (step.tells.length > 0) {
       soundboardOf(this.scene).play("bark");
       this.hint({ kind: "pull" });
     }
+    for (const tell of step.tells) {
+      this.say(pullLine(gameData, tell.dog, false));
+    }
+    for (const dog of step.failed) {
+      this.say(pullLine(gameData, dog, true));
+    }
+    if (step.pulled.some(({ moved }) => moved)) {
+      this.hint({ kind: "pullLanded" });
+    }
     this.deps.pack.pullFailed(step.failed);
   }
 
-  // Sounds, bursts, labels and hints for what happened in a step, around the pack at pack.
+  // A line on the HUD's message strip, when there is one.
+  say(line: MessageLine | null): void {
+    if (line !== null) {
+      sayMessage(this.scene, line.icon, line.text);
+    }
+  }
+
+  // Sounds, bursts, labels, hints and strip lines for what happened in a step, around the pack
+  // at pack.
   walked(step: WalkStep, pack: { x: number; y: number }): void {
     const sound = soundboardOf(this.scene);
     if (step.tips.length > 0) {
@@ -165,6 +196,7 @@ export class RunMoments {
     }
     // A treat cheers the owner of the dog that grabbed it.
     for (const { change, dog } of step.treats) {
+      this.say(treatLine(gameData, change));
       if (change !== null) {
         this.changes.push(change);
         const cue: TreatCue = { dog, labels: changeLabels(gameData, [change]) };
@@ -172,8 +204,14 @@ export class RunMoments {
       }
     }
     // A bump costs the owner of the dog it landed on; a small dog may dodge it.
+    const zone = currentZoneId(gameData, step.walk.run);
     for (const bump of step.bumps) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
+      const { kind } = bump.item;
+      const obstacle = isMinorObstacle(gameData, kind)
+        ? minorObstacleLook(gameData, zone, kind).name
+        : kind;
+      this.say(bumpLine(gameData, bump, obstacle));
       if (bump.dodged) {
         this.deps.pack
           .sprites([bump.dog])
@@ -186,14 +224,28 @@ export class RunMoments {
       }
       sound.play("bump");
       this.addChanges(bump.change === null ? [] : [bump.change]);
-      this.playBumpLabel(bump.item.kind, step, pack);
+      this.playBumpLabel(kind, step, pack);
       this.hint({ kind: "minorBump" });
+    }
+    lowHeartsLines(
+      gameData,
+      step.bumps.flatMap(({ change }) => (change === null ? [] : [change])),
+    ).forEach((line) => this.say(line));
+    // A contact obstacle, such as a puddle, plays its own hit sound and a splash, with a plain
+    // obstacle's stop.
+    for (const { encounter, outcome } of step.contacts) {
+      sound.play(hitCue(gameData.encounters[encounter].kind, encounter));
+      playEffect(this.scene, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
+      this.deps.pack.stumble(this.deps.still());
+      this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+      this.afterOutcome(outcome);
     }
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
     this.fired(step.fired, step.walk.run);
     for (const { encounter, outcome } of step.instants) {
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
       showInstantPopup(this.scene, encounter, this.deps.still());
+      this.say(luckyLine(gameData, encounter, outcome.moneyChanges));
       this.sayQuips(outcome.quips);
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });
@@ -201,18 +253,19 @@ export class RunMoments {
     for (const hit of step.encounterHits) {
       const { kind } = gameData.encounters[hit.encounter];
       sound.play(hitCue(kind, hit.encounter));
-      if (hit.encounter === "puddle") {
-        playEffect(this.scene, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
-      }
-      if (kind === "obstacle") {
-        this.deps.pack.stumble(this.deps.still());
-      }
+      this.deps.pack.stumble(this.deps.still());
       this.playHit(hit, step, pack);
     }
   }
 
-  // Firings a choice or find brought about.
+  // The debuffs that started and ended between two run states, on the message strip.
+  debuffsChanged(before: RunState, after: RunState): void {
+    debuffLines(gameData, debuffChanges(before, after)).forEach((line) => this.say(line));
+  }
+
+  // Firings a choice or find brought about, and the owners it left on their last heart.
   afterOutcome(outcome: ChoiceOutcome): void {
+    lowHeartsLines(gameData, outcome.heartChanges).forEach((line) => this.say(line));
     this.fired(outcome.fired, outcome.state);
   }
 
@@ -222,6 +275,7 @@ export class RunMoments {
       return;
     }
     soundboardOf(this.scene).play("fired");
+    dogs.forEach((dog) => this.say(firedLine(gameData, dog)));
     dogs.forEach((dog) => this.deps.pack.trotOff(dog, firingSeconds(), this.deps.still()));
     if (run.phase.kind === "ended") {
       this.endMoments.firingSeconds = firingSeconds();
@@ -269,6 +323,7 @@ export class RunMoments {
         : [{ amount: fee.amount, dog: fee.dog, text: amountText("money", fee.amount) }],
     );
     this.scene.events.emit(PAYOUT_EVENT, cues);
+    this.say(fullPackLine(gameData, fees));
     const ms = payoutMs(payoutFlights(cues, run.pack, this.deps.still()));
     if (run.zoneIndex >= walkLength(gameData) - 1) {
       this.endMoments.payoutMs = ms;

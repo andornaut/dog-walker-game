@@ -1,0 +1,148 @@
+import { describe, expect, it } from "vitest";
+
+import { gameData } from "../data";
+import type { DebuffId } from "../data/types";
+import type { HeartChange } from "../rules/causes";
+import { cents, clampHearts } from "../rules/units";
+import { fillNames } from "../text/lines";
+import {
+  bumpLine,
+  debuffChanges,
+  debuffLines,
+  firedLine,
+  fullPackLine,
+  lowHeartsLines,
+  luckyLine,
+  pullLine,
+  treatLine,
+} from "./stripLines";
+
+const { strip } = gameData.runText;
+const koda = gameData.dogs.koda;
+const owner = koda.owner.name;
+
+const hearts = (
+  before: number,
+  after: number,
+  causes: HeartChange["causes"] = [],
+): HeartChange => ({
+  after: clampHearts(9, after),
+  before: clampHearts(9, before),
+  causes,
+  dog: "koda",
+  kind: "hearts",
+});
+
+describe("bumpLine", () => {
+  it.each([
+    [
+      "a dodge",
+      { change: null, dodged: true, dog: "koda" as const },
+      fillNames(strip.dodge, { dog: koda.name, obstacle: "cone" }),
+    ],
+    [
+      "a plain hit, with the hearts lost",
+      { change: hearts(4, 2), dodged: false, dog: "koda" as const },
+      fillNames(strip.plainHit, { dog: koda.name, hearts: "2", obstacle: "cone", owner }),
+    ],
+    [
+      "a loss Kind words forgave",
+      {
+        change: hearts(4, 4, [
+          { amount: -1, kind: "bump" },
+          { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
+        ]),
+        dodged: false,
+        dog: "koda" as const,
+      },
+      fillNames(strip.kindWords, { owner }),
+    ],
+  ])("says %s", (_, bump, text) => {
+    expect(bumpLine(gameData, bump, "Cone")?.text).toBe(text);
+  });
+});
+
+describe("the strip's other lines", () => {
+  it.each([
+    [
+      "a treat",
+      treatLine(gameData, hearts(2, 3))?.text,
+      fillNames(strip.treat, { dog: koda.name, hearts: "1", owner }),
+    ],
+    ["nothing for a treat at the max", treatLine(gameData, hearts(3, 3)), null],
+    [
+      "the last heart",
+      lowHeartsLines(gameData, [hearts(2, 1)])[0]?.text,
+      fillNames(strip.lowHearts, { owner }),
+    ],
+    ["no last heart already on one", lowHeartsLines(gameData, [hearts(1, 1)]), []],
+    [
+      "a firing",
+      firedLine(gameData, "koda").text,
+      fillNames(strip.fired, { dog: koda.name, owner }),
+    ],
+    ["a pull", pullLine(gameData, "koda", false).text, fillNames(strip.pull, { dog: koda.name })],
+    [
+      "a pull cancelled",
+      pullLine(gameData, "koda", true).text,
+      fillNames(strip.pullCancel, { dog: koda.name }),
+    ],
+    [
+      "the generous neighbor",
+      luckyLine(gameData, "biscuitNeighbour", [])?.text,
+      strip.luckyNeighbor,
+    ],
+    [
+      "the lost wallet's money",
+      luckyLine(gameData, "lostWallet", [
+        { amount: cents(1000), causes: [], dog: null, kind: "money" },
+      ])?.text,
+      fillNames(strip.luckyWallet, { amount: "$10" }),
+    ],
+    [
+      "the Full pack bonus",
+      fullPackLine(gameData, [
+        {
+          amount: cents(3000),
+          causes: [{ amount: 3000, kind: "bonus" }],
+          dog: null,
+          kind: "money",
+        },
+      ])?.text,
+      fillNames(strip.fullPackHome, { amount: "$30" }),
+    ],
+    ["no bonus without one", fullPackLine(gameData, []), null],
+  ])("says %s", (_, line, expected) => {
+    expect(line).toEqual(expected);
+  });
+});
+
+describe("debuffLines", () => {
+  const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
+
+  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
+    "announces %s starting and ending",
+    (debuff) => {
+      const on = { debuffs: [active(debuff, 20)] };
+      const off = { debuffs: [] };
+      expect(debuffLines(gameData, debuffChanges(off, on))).toEqual([
+        { icon: debuff, text: fillNames(strip.debuffStart[debuff], { seconds: "20" }) },
+      ]);
+      expect(debuffLines(gameData, debuffChanges(on, off))).toEqual([
+        { icon: debuff, text: strip.debuffEnd[debuff] },
+      ]);
+    },
+  );
+
+  it.each([
+    [
+      "restarts",
+      [active("muddy", 5)],
+      [active("muddy", 20)],
+      { ended: [], started: [active("muddy", 20)] },
+    ],
+    ["counts down quietly", [active("muddy", 5)], [active("muddy", 4)], { ended: [], started: [] }],
+  ])("announces a debuff that %s", (_, before, after, expected) => {
+    expect(debuffChanges({ debuffs: before }, { debuffs: after })).toEqual(expected);
+  });
+});

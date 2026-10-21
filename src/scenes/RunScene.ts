@@ -381,7 +381,11 @@ export class RunScene extends Scene {
   // Takes the session's next state and plays its events, then ends the walk, or previews the
   // badges earned so far and shows the card it opened.
   private apply(step: SessionStep): void {
+    const before = this.session?.walk.run;
     this.session = step.session;
+    if (before !== undefined) {
+      this.world?.moments.debuffsChanged(before, step.session.walk.run);
+    }
     let opened: CardView | undefined;
     let celebration: Celebration | undefined;
     for (const event of step.events) {
@@ -478,6 +482,8 @@ export class RunScene extends Scene {
       }
       case "input":
         recorder.log({ ...event.input, timeMs: event.timeMs });
+        return;
+      case "drifted":
         return;
       case "pulled":
         moments.pulled(event.step);
