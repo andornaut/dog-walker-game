@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard } from "../home/detail";
 import type { Logbook } from "../home/home";
-import { HOME_LAYOUT } from "../home/homeLayout";
+import { CARD_TEXT_ROOM, cardTextRows, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
 import { GREYED } from "../home/selection";
 import { insetRect, type Rect } from "../layout/rect";
@@ -13,7 +13,13 @@ import { fillLine } from "../text/lines";
 import { addDim, drawFramedRect, drawRing, fillRect } from "./draw";
 import { artTextureKey, PADLOCK_KEYS } from "./itemArt";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  type FontRole,
+  pixelFontMetrics,
+  wrapPixelText,
+} from "./pixelText";
 import {
   addCloseButton,
   addLoopingFrame,
@@ -132,8 +138,6 @@ export interface DetailPicture {
   readonly scale: number;
 }
 
-const LINE_GAP = 8;
-
 // The detail card's well: the shown one, or the grey one a locked card's silhouette sits in.
 export const DETAIL_WELL_KEYS = {
   locked: "ui-detail-well-locked",
@@ -185,41 +189,53 @@ export function drawDetailCard(
       content.add(scene.add.image(padlock.x, padlock.y, key).setOrigin(0).setScale(padlock.scale));
     }
   }
-  // The lowest row anything on the card reaches so far.
-  let bottom = well.y + well.size;
-  // Rows of text from (x, y) down, each wrapped at the card's padding; a fitted row tries
-  // one line, its glyphs closer, before it wraps.
+  // Rows of text at the tops the card's layout gives them: each wrapped on the font within its
+  // room, or a fitted row on one line, its glyphs closer, before it wraps.
   type Row = { color: number; fit?: boolean; value: string };
-  const rows = (lines: readonly Row[], x: number, top: number) => {
-    let y = top;
-    for (const row of lines) {
-      const room = CARD.width - x - CARD.pad;
-      const label = text(scene, content, { x, y }, row.value, {
-        color: row.color,
-        ...(row.fit === true ? {} : { maxWidth: room }),
-      });
-      if (row.fit === true) {
-        fitPixelText(label, { room, styles: WRAPPING_TEXT_FIT_STYLES }, x, y);
-      }
-      bottom = Math.max(bottom, label.y + Math.ceil(label.height));
-      y += Math.ceil(label.height) + LINE_GAP;
-    }
+  const style = { color: PALETTE.plum, scale: TEXT_SCALE };
+  const fitted = (row: Row, room: number, x: number, y: number) => {
+    const label = text(scene, content, { x, y }, row.value, { color: row.color });
+    return {
+      label,
+      lines: fitPixelText(label, { room, styles: WRAPPING_TEXT_FIT_STYLES }, x, y).lines,
+    };
   };
-  const { besideX } = CARD;
-  const status = {
+  const lineCount = (row: Row, room: number) => {
+    if (row.fit !== true) {
+      return wrapPixelText(scene, style, room, row.value).length;
+    }
+    const probe = fitted(row, room, 0, 0);
+    probe.label.destroy();
+    return probe.lines.length;
+  };
+  const draw = (rows: readonly Row[], x: number, room: number, tops: readonly number[]) =>
+    rows.forEach((row, i) => {
+      const y = tops[i] ?? 0;
+      if (row.fit === true) {
+        fitted(row, room, x, y);
+      } else {
+        const lines = wrapPixelText(scene, style, room, row.value);
+        text(scene, content, { x, y }, lines.join("\n"), { color: row.color });
+      }
+    });
+  const status: Row = {
     color: card.locked ? PALETTE.darkRed : PALETTE.forest,
     fit: true,
     value: card.status,
   };
-  const plum = card.lines.map((value) => ({ color: PALETTE.plum, value }));
-  if (kind === "gear") {
-    rows([...plum, status], besideX, well.y + 4);
-  } else {
-    const subtitle = { color: PALETTE.darkBrown, value: card.subtitle };
-    rows([subtitle, status], besideX, well.y + 4);
-    rows(plum, CARD.pad, well.y + well.size + CARD.pad);
-  }
-  const rect = centredCard(bottom + CARD.pad);
+  const plum: Row[] = card.lines.map((value) => ({ color: PALETTE.plum, value }));
+  const besideRows: Row[] =
+    kind === "gear"
+      ? [...plum, status]
+      : [{ color: PALETTE.darkBrown, value: card.subtitle }, status];
+  const belowRows = kind === "gear" ? [] : plum;
+  const layout = detailCardLayout(pixelFontMetrics(scene, "body"), {
+    below: belowRows.map((row) => lineCount(row, CARD_TEXT_ROOM.full)),
+    beside: besideRows.map((row) => lineCount(row, CARD_TEXT_ROOM.beside)),
+  });
+  draw(besideRows, CARD.besideX, CARD_TEXT_ROOM.beside, layout.beside);
+  draw(belowRows, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
+  const rect = centredCard(layout.height);
   drawCardFrame(scene, parent, closePressed, rect, card.title, content);
   return rect;
 }
@@ -259,17 +275,22 @@ export function drawLogbookPanel(
           log.totals,
           fillLine(FIELDS, words, "last", { last: log.last }),
         ];
-  let y = CARD.well.y + 4;
-  for (const row of rows) {
-    const label = text(scene, content, { x: CARD.pad, y }, row, {
-      color: PALETTE.plum,
-      maxWidth: CARD.width - CARD.pad * 2,
-    });
-    y += Math.ceil(label.height) + LINE_GAP;
-  }
+  const style = { color: PALETTE.plum, scale: TEXT_SCALE };
+  const lines = rows.map((row) => wrapPixelText(scene, style, CARD_TEXT_ROOM.full, row));
+  const body = pixelFontMetrics(scene, "body");
+  const top = CARD.well.y + CARD.besideDy;
+  const { next, tops } = cardTextRows(
+    body,
+    top,
+    lines.map((row) => row.length),
+  );
+  lines.forEach((row, i) => {
+    text(scene, content, { x: CARD.pad, y: tops[i] ?? 0 }, row.join("\n"), style);
+  });
+  const y = next;
   const { gap, height: buttonHeight, width: buttonWidth } = LOGBOOK_BUTTON;
   const left = (CARD.width - buttonWidth * 2 - gap) / 2;
-  const button = { height: buttonHeight, width: buttonWidth, x: left, y: y + LINE_GAP };
+  const button = { height: buttonHeight, width: buttonWidth, x: left, y: y + CARD.rowGap };
   const badges = { ...button, x: left + buttonWidth + gap };
   const rect = centredCard(button.y + button.height + CARD.pad);
   drawCardFrame(scene, parent, pressed === "close", rect, words.title, content);

@@ -97,13 +97,17 @@ export const HOME_LAYOUT = {
   bandText: { inset: 9, y: 8 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
-  // 6px below the band's top, and the well sits under the band with the subtitle and status
-  // beside it at besideX. A locked card's padlock sits at 2x over the well's top-left corner.
+  // 6px below the band's top, and the well sits under the band. Rows of 2x body text, each
+  // wrapped within the card less pad, rowGap between rows: a detail card's subtitle and status
+  // beside the well from besideX, besideDy under its top. A locked card's padlock sits at 2x
+  // over the well's top-left corner.
   card: {
     band: { height: 22, inset: 6, titleY: 6 },
+    besideDy: 4,
     besideX: 90,
     pad: 12,
     padlock: { scale: 2, x: 8, y: 29 },
+    rowGap: 8,
     well: { picture: 2, size: 68, x: 12, y: 34 },
     width: 300,
   },
@@ -271,6 +275,49 @@ export const SPEECH_ROOM =
 export function speechBubbleHeight(body: FontMetrics, lines: number): number {
   const { padBottom, padTop } = HOME_LAYOUT.speech;
   return padTop + inkRowsOfLines(body, lines) * 2 + padBottom;
+}
+
+// Rows of 2x body text from top down, each lineCounts[i] lines a line of the body font apart,
+// the next row starting a row's lines and the card's rowGap under the one before: each row's
+// capitals' top, the row after the last's, and the last row's lowest ink.
+export function cardTextRows(
+  body: FontMetrics,
+  top: number,
+  lineCounts: readonly number[],
+): { bottom: number; next: number; tops: number[] } {
+  const pitch = body.lineHeight * 2;
+  let y = top;
+  let bottom = top;
+  const tops = lineCounts.map((lines) => {
+    const at = y;
+    bottom = at + inkRowsOfLines(body, lines) * 2;
+    y += Math.max(1, lines) * pitch + HOME_LAYOUT.card.rowGap;
+    return at;
+  });
+  return { bottom, next: y, tops };
+}
+
+// How wide the detail card's rows beside the well and under it, and the logbook's rows, may be.
+export const CARD_TEXT_ROOM = {
+  beside: HOME_LAYOUT.card.width - HOME_LAYOUT.card.besideX - HOME_LAYOUT.card.pad,
+  full: HOME_LAYOUT.card.width - 2 * HOME_LAYOUT.card.pad,
+} as const;
+
+// A detail card's rows beside the well and under it, each as many lines as given, and the
+// card's height: padded under whichever reaches lowest, the well or a row's ink.
+export function detailCardLayout(
+  body: FontMetrics,
+  lineCounts: { below: readonly number[]; beside: readonly number[] },
+): { below: number[]; beside: number[]; height: number } {
+  const { besideDy, pad, well } = HOME_LAYOUT.card;
+  const beside = cardTextRows(body, well.y + besideDy, lineCounts.beside);
+  const below = cardTextRows(body, well.y + well.size + pad, lineCounts.below);
+  const bottoms = [
+    well.y + well.size,
+    beside.bottom,
+    ...(lineCounts.below.length > 0 ? [below.bottom] : []),
+  ];
+  return { below: below.tops, beside: beside.tops, height: Math.max(...bottoms) + pad };
 }
 
 // How wide a dog tile's name and fee may be: from its text column to padRight inside its edge.

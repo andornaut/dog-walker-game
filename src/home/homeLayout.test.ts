@@ -2,19 +2,26 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import type { DogId, GearId, WalkerId } from "../data/types";
 import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
 import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { cents } from "../rules/units";
+import type { Owned } from "../save/schema";
+import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
-import { fillNames } from "../text/lines";
+import { fillNames, wrapWords } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dogFeeText, dollarText } from "./home";
+import { dogFeeText, dogNames, dollarText } from "./home";
 import {
+  CARD_TEXT_ROOM,
+  cardTextRows,
+  detailCardLayout,
   DOG_TILE_TEXT_ROOM,
   dogTileFeeY,
   HOME_LAYOUT,
@@ -28,6 +35,7 @@ import { homeLine } from "./homeText";
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
   HOME_LAYOUT;
 const { pocket } = HOME_LAYOUT;
+const BODY = fontFileMetrics("font-body");
 
 const rows = [
   ["walker", sections.walker, gridRects(walkerTiles, walkerTiles.columns, walkerOrigin)],
@@ -274,5 +282,85 @@ describe("a walker tile's name", () => {
   it.each(Object.values(gameData.walkers).map((walker) => walker.name))("sets %j", (text) => {
     const fitted = fitInFont("font-body", [style], name.room, plainMarks(text));
     expect(fitted.widest).toBeLessThanOrEqual(name.room);
+  });
+});
+
+// A row's lines at 2x as the card wraps them on the body font.
+const cardLines = (room: number, text: string) => {
+  const width = (line: string) => bodyTextWidth(2, plainMarks(line));
+  const lines = wrapWords(width, room, text);
+  expect(Math.max(...lines.map(width))).toBeLessThanOrEqual(room);
+  return lines.length;
+};
+const fitsScreen = (height: number) =>
+  expect(height).toBeLessThanOrEqual(SCREEN_CONFIG.height - 2 * HOME_LAYOUT.gap);
+
+// Every dog's, gear item's and walker's detail card, owned or not and with the largest counts,
+// wraps its rows on the body font and stays on screen.
+describe("a detail card", () => {
+  const dogs = Object.keys(gameData.dogs) as DogId[];
+  const gear = Object.keys(gameData.shopGear) as GearId[];
+  const walkers = Object.keys(gameData.walkers) as WalkerId[];
+  const none: Owned = { dogSlots: 0, dogs: [], gear: [], walkers: [] };
+  const all: Owned = { dogSlots: gameData.dogSlots.length, dogs, gear, walkers };
+  const most = { timesFired: 9999, walks: 9999, zonesFinished: 9999 };
+  const stats = { dogs: Object.fromEntries(dogs.map((dog) => [dog, most])) };
+  const loadout = { dogs: [], gear: gear[0] ?? null };
+  const cards = [none, all].flatMap((owned) => [
+    ...dogs.map((dog) => ["dog", dogDetail(gameData, owned, cents(0), stats, dog)] as const),
+    ...gear.map((item) => ["gear", gearDetail(gameData, owned, cents(0), loadout, item)] as const),
+    ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
+  ]);
+  it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
+    "holds %s's card",
+    (_, kind, card) => {
+      const gearCard = kind === "gear";
+      const beside = gearCard ? [...card.lines, card.status] : [card.subtitle, card.status];
+      const below = gearCard ? [] : card.lines;
+      const layout = detailCardLayout(BODY, {
+        below: below.map((row) => cardLines(CARD_TEXT_ROOM.full, row)),
+        beside: beside.map((row) => cardLines(CARD_TEXT_ROOM.beside, row)),
+      });
+      fitsScreen(layout.height);
+    },
+  );
+});
+
+// The logbook with its longest best walk, totals and last walk stays on screen above its
+// buttons.
+describe("the logbook", () => {
+  const words = gameData.homeText.logbook;
+  const longest = (Object.keys(gameData.dogs) as DogId[]).sort(
+    (a, b) => gameData.dogs[b].name.length - gameData.dogs[a].name.length,
+  );
+  const dogs = dogNames(gameData, longest.slice(0, 3));
+  const zones = fillNames(words.zoneMany, { count: "4" });
+  const longestZone = gameData.world.zones
+    .map(({ name }) => name)
+    .sort((a, b) => b.length - a.length)[0];
+  const owner = Object.values(gameData.dogs)
+    .map(({ owner: { name } }) => name)
+    .sort((a, b) => b.length - a.length)[0];
+  it.each([
+    [words.empty, words.emptyNote],
+    [
+      fillNames(words.best, { best: "$99,999", note: fillNames(words.bestNote, { dogs, zones }) }),
+      fillNames(words.totals, { dogs: "9", fired: "9999", walks: "9999" }),
+      fillNames(words.last, {
+        last: fillNames(words.lastFired, {
+          earned: "+$99,999.",
+          owner: owner ?? "",
+          zone: longestZone ?? "",
+        }),
+      }),
+    ],
+  ])("holds %j", (...rows) => {
+    const { next } = cardTextRows(
+      BODY,
+      HOME_LAYOUT.card.well.y + HOME_LAYOUT.card.besideDy,
+      rows.map((row) => cardLines(CARD_TEXT_ROOM.full, row)),
+    );
+    const { height } = HOME_LAYOUT.logbookButton;
+    fitsScreen(next + HOME_LAYOUT.card.rowGap + height + HOME_LAYOUT.card.pad);
   });
 });
