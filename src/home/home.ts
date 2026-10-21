@@ -7,7 +7,7 @@ import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import { dogsWalked, walksPlayed } from "../save/stats";
 import type { PackDogs } from "../state/runState";
-import { fillLine } from "../text/lines";
+import { fillLine, signedText } from "../text/lines";
 import { HOME_TEXT_FIELDS } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.
@@ -32,7 +32,17 @@ type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
 
 // Money is counted in cents and shown in whole dollars, with thousands separated.
 export function dollarText(amount: Cents): string {
-  return `$${Math.floor(amount / 100).toLocaleString("en-US")}`;
+  return `$${dollarAmountText(amount)}`;
+}
+
+// dollarText without its "$", for a screen that draws the "$" apart.
+export function dollarAmountText(amount: Cents): string {
+  return Math.floor(amount / 100).toLocaleString("en-US");
+}
+
+// A change in money with its sign: "+$240", "−$12".
+export function signedDollarText(amount: number): string {
+  return signedText(amount, dollarText(cents(Math.abs(amount))));
 }
 
 // How many dogs the player's pack may hold: one per dog slot, up to counts.packSizeMax.

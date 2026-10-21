@@ -34,6 +34,7 @@ import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
   dogFeeText,
   dogInfo,
+  dollarAmountText,
   dollarText,
   gearInfo,
   type HomeLoadout,
@@ -1248,7 +1249,7 @@ export class StartScene extends Scene {
       root,
       24 + dollar.width + 2,
       textY.bank,
-      dollarText(save.bankCents).slice(1),
+      dollarAmountText(save.bankCents),
       PALETTE.cream,
       {
         font: "title",

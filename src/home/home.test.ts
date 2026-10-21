@@ -20,6 +20,7 @@ import {
   type BuyResult,
   dogInfo,
   dogNames,
+  dollarAmountText,
   dollarText,
   gearInfo,
   type HomeLoadout,
@@ -31,6 +32,7 @@ import {
   partingSpeech,
   type Purchase,
   purchasePrice,
+  signedDollarText,
   tapDog,
   tapGear,
   wrapWords,
@@ -61,12 +63,22 @@ const owned: Owned = {
 const dollars = (amount: number) => cents(amount * 100);
 const whistlePrice = readTable(TEST_TUNING, "money", "prices", "whistle");
 
-describe("dollarText", () => {
-  it("shows whole dollars with thousands separated", () => {
-    expect(dollarText(dollars(800))).toBe("$800");
-    expect(dollarText(dollars(1800))).toBe("$1,800");
-    expect(dollarText(cents(6_450))).toBe("$64");
-  });
+describe("money text", () => {
+  it.each<[string, (amount: number) => string, number, string]>([
+    ["dollarText", (amount) => dollarText(cents(amount)), dollars(800), "$800"],
+    ["dollarText", (amount) => dollarText(cents(amount)), dollars(1800), "$1,800"],
+    ["dollarText", (amount) => dollarText(cents(amount)), 6_450, "$64"],
+    ["dollarAmountText", (amount) => dollarAmountText(cents(amount)), dollars(1800), "1,800"],
+    ["dollarAmountText", (amount) => dollarAmountText(cents(amount)), 4_299, "42"],
+    ["signedDollarText", signedDollarText, dollars(240), "+$240"],
+    ["signedDollarText", signedDollarText, -dollars(1200), "−$1,200"],
+    ["signedDollarText", signedDollarText, -1_250, "−$12"],
+  ])(
+    "%s shows %i cents as %s, in whole dollars with thousands separated",
+    (_, text, amount, shown) => {
+      expect(text(amount)).toBe(shown);
+    },
+  );
 });
 
 describe("tapDog and tapGear", () => {

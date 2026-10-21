@@ -7,7 +7,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { END_LAYOUT, endPanelLayout } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
-import { dollarText } from "../home/home";
+import { dollarText, signedDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   homecomers,
@@ -23,7 +23,6 @@ import type { Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
-import { cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
@@ -66,11 +65,6 @@ const BADGE_SOUND_AFTER_BEST_MS = 1200;
 // The pack starts returnHome's risePx lower than its spots.
 const RETURN_HOME_SCENE = END_LAYOUT.returnHome;
 const BUTTON: Rect = END_LAYOUT.button;
-
-function signed(amount: number): string {
-  const sign = amount < 0 ? "-" : "+";
-  return `${sign}${dollarText(cents(Math.abs(amount)))}`;
-}
 
 // Money gained in forest and lost in darkRed, each with its sign, on the cream panel.
 function amountColor(amount: number): number {
@@ -152,13 +146,13 @@ export class EndScene extends Scene {
     let y = BREAKDOWN.top;
     for (const line of lines) {
       text(BREAKDOWN.label, y, line.label, PALETTE.plum);
-      text(BREAKDOWN.amountRight, y, signed(line.amount), amountColor(line.amount), 1);
+      text(BREAKDOWN.amountRight, y, signedDollarText(line.amount), amountColor(line.amount), 1);
       y += BREAKDOWN.pitch;
     }
     const ruleWidth = BREAKDOWN.amountRight - BREAKDOWN.label;
     fillRect(g, PALETTE.tan, { height: 1, width: ruleWidth, x: BREAKDOWN.label, y: y + 2 });
     title(BREAKDOWN.label, y + 8, words.total, PALETTE.plum);
-    title(BREAKDOWN.amountRight, y + 8, signed(walk.earnedCents), PALETTE.forest, 1);
+    title(BREAKDOWN.amountRight, y + 8, signedDollarText(walk.earnedCents), PALETTE.forest, 1);
 
     text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
     zonePips(walkLength(gameData), walk).forEach((pip, i) => {

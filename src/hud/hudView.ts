@@ -2,7 +2,6 @@ import { zonePipTag } from "../assets/spriteKeys";
 import type { DogId, GameData, ZoneId } from "../data/types";
 import { type CauseData, causeLabel, causeNames, type Change, changeAmount } from "../rules/causes";
 import { zoneById } from "../rules/route";
-import type { Cents } from "../rules/units";
 
 // A floating label naming a change, over the dog's slot or the bank. amount is the change in
 // hearts or cents, and cause its causes' names without the amount.
@@ -24,11 +23,6 @@ export function changeLabels(data: CauseData, changes: readonly Change[]): Chang
     target: change.kind === "hearts" ? { dog: change.dog, kind: "dog" } : { kind: "bank" },
     text: causeLabel(data, change),
   }));
-}
-
-// Money is counted in cents and shown in whole dollars.
-export function wholeDollars(amount: Cents): string {
-  return `$${Math.floor(amount / 100)}`;
 }
 
 // A meter of max hearts, the first `hearts` of them full, in rows of at most perRow.

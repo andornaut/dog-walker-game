@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { dollarAmountText } from "../home/home";
 import { tipValue } from "../rules/run";
 import { type Cents, cents, clampHearts } from "../rules/units";
 import type { RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
-import { changeLabels, heartRows, pipLook, wholeDollars, zonePips } from "./hudView";
+import { changeLabels, heartRows, pipLook, zonePips } from "./hudView";
 
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
@@ -89,18 +90,13 @@ describe("changeLabels", () => {
   });
 });
 
-describe("wholeDollars", () => {
-  it("drops the cents", () => {
-    expect(wholeDollars(cents(4_299))).toBe("$42");
-    expect(wholeDollars(cents(0))).toBe("$0");
-  });
-
+describe("the money counter", () => {
   it.each<[string, RunState]>([
     ["a tip", testState({ koda: 5 })],
     ["a Big tipper tip", testState({ koda: 5 }, { modifiers: [bigTipper] })],
   ])("moves the counter by the dollars %s's label shows", (_, run) => {
     const tip = tipValue(gameData, run);
-    const shown = (money: Cents) => Number(wholeDollars(money).slice(1));
+    const shown = (money: Cents) => Number(dollarAmountText(money).replaceAll(",", ""));
     const gain = shown(cents(run.money + tip.amount)) - shown(run.money);
     expect(changeLabels(gameData, [tip])[0]?.text.split(" ")[0]).toBe(`+$${gain}`);
   });

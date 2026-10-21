@@ -1,6 +1,6 @@
 import type { GameData, WalkerId } from "../data/types";
 import { earningsKind } from "../home/endView";
-import { dollarText } from "../home/home";
+import { signedDollarText } from "../home/home";
 import type { Change } from "../rules/causes";
 import { type Cents, cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
@@ -91,11 +91,6 @@ function lineParts(line: string, named: Readonly<Record<string, LinePart>>): Lin
   });
 }
 
-// A gain, as "+$240".
-function gainText(amount: Cents): string {
-  return `+${dollarText(amount)}`;
-}
-
 export function celebrationText(
   data: Pick<GameData, "runText" | "walkerPaces" | "walkerStyles" | "walkers">,
   celebration: ZoneCelebration,
@@ -105,8 +100,8 @@ export function celebrationText(
     const words = text.zoneDone;
     const amounts = { fees: celebration.fees, tips: celebration.tips };
     const named: Record<keyof typeof amounts, LinePart> = {
-      fees: { kind: "money", text: gainText(amounts.fees) },
-      tips: { kind: "money", text: gainText(amounts.tips) },
+      fees: { kind: "money", text: signedDollarText(amounts.fees) },
+      tips: { kind: "money", text: signedDollarText(amounts.tips) },
     };
     return {
       earnings: lineParts(words.earnings, named),

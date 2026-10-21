@@ -1,5 +1,6 @@
 import { type Point, type Rect, rectsOverlap } from "../layout/rect";
 import { type Cents, cents } from "../rules/units";
+import { signedText } from "../text/lines";
 
 // The heart change, hop and minor bump moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {
@@ -16,11 +17,9 @@ export const FEEDBACK = {
   moneyTick: { maxMs: 600, msPerDollar: 150 },
 } as const;
 
-const MINUS = "−";
-
 // The number on a heart change's pop: "−1", "+2".
 export function heartPopText(amount: number): string {
-  return `${amount < 0 ? MINUS : "+"}${Math.abs(amount)}`;
+  return signedText(amount, String(Math.abs(amount)));
 }
 
 // What a heart pop covers on its way: its 32x32 frame, its number's chip, and the box its heart

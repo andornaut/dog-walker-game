@@ -11,6 +11,7 @@ import {
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, HintTrigger } from "../data/types";
+import { dollarAmountText } from "../home/home";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount, slotShown } from "../hud/doghouse";
 import {
   dismissHint,
@@ -22,7 +23,7 @@ import {
 } from "../hud/hintQueue";
 import { runHintTriggers } from "../hud/hintTriggers";
 import { centredInLane, hudLanes, stripHintPlace, UP_TAIL } from "../hud/hudLanes";
-import { type ChangeLabel, pipLook, wholeDollars, zonePips } from "../hud/hudView";
+import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import {
   moveStripPress,
   stripItems,
@@ -550,7 +551,7 @@ export class HudScene extends Scene {
     }
     const { run } = view;
     g.clear();
-    this.showMoney(wholeDollars(this.shownMoney(run.money)).slice(1));
+    this.showMoney(dollarAmountText(this.shownMoney(run.money)));
     this.showTreats(`${run.treats}/${read(gameData.tuning, "counts", "treatCarryMax")}`);
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
