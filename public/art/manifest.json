@@ -5933,6 +5933,10 @@
       "png": "images/ui-hint-tail.png"
     },
     {
+      "key": "ui-home-cash-well",
+      "png": "images/ui-home-cash-well.png"
+    },
+    {
       "key": "ui-lead-tag",
       "png": "images/ui-lead-tag.png"
     },

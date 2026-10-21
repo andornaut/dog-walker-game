@@ -139,22 +139,37 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 ### Icon buttons and settings
 
-| Control  | Scene                                | Button                                  | Hit area                                       |
-| -------- | ------------------------------------ | --------------------------------------- | ---------------------------------------------- |
-| Close    | Every full-screen page and overlay   | 28px in from the frame's right, 10 down | 44×44 in the frame's top-right corner          |
-| Help     | Start screen top bar                 | 240,10                                  | 228,0 44×44                                    |
-| Home     | Run top bar                          | 130,10                                  | 118,0 44×44                                    |
-| Logbook  | Start screen top bar, after the bank | 104,10                                  | 92,0 134×44, over the best walk and walk count |
-| Pause    | Run top bar                          | 174,10                                  | 162,0 44×44                                    |
-| Settings | Start screen top bar                 | 328,10                                  | 316,0 44×44                                    |
-| Sound    | Run top bar                          | 152,10                                  | 140,0 44×44                                    |
-| Sound    | Start screen top bar                 | 284,10                                  | 272,0 44×44                                    |
+| Control  | Scene                                               | Button                                  | Hit area                              |
+| -------- | --------------------------------------------------- | --------------------------------------- | ------------------------------------- |
+| Close    | Every full-screen page and overlay                  | 28px in from the frame's right, 10 down | 44×44 in the frame's top-right corner |
+| Help     | Start screen top bar                                | 240,9                                   | 228,0 44×44                           |
+| Home     | Run top bar                                         | 130,10                                  | 118,0 44×44                           |
+| Logbook  | Start screen top bar, the first of its four buttons | 196,9                                   | 184,0 44×44                           |
+| Pause    | Run top bar                                         | 174,10                                  | 162,0 44×44                           |
+| Settings | Start screen top bar                                | 328,9                                   | 316,0 44×44                           |
+| Sound    | Run top bar                                         | 152,10                                  | 140,0 44×44                           |
+| Sound    | Start screen top bar                                | 284,9                                   | 272,0 44×44                           |
 
 - Positions are the `ui-icon-button` face's top-left; the 16×16 icon sits at +2,+1 (+2,+3 pressed). The game's values are in `shared/export/layout.json` (`topBar.buttons`, `scenes.home`).
 - Sound toggles mute, as the M key and the Settings "Sound" switch do.
 - `icon-sound`: `on` is a speaker with two waves, `off` the same speaker with a pink X.
 - Settings: a "Sound" row with a right-aligned `ui-switch` above the Music and Effects sliders. Each row is one tap target at least 44 tall, led by its `-panel` icon (`off` adds a dred X).
 - Sliders: for a track of width w at x and value v, draw `empty` across w, `filled` from x to the knob's right edge, and `ui-slider-knob` at x + round((w − 10) × v / 100), 3px above the track. Muted, both switch to their `-disabled` tags.
+
+### Start screen top bar
+
+The start screen's 40-row top bar: plum on rows 0 to 37 and a 2px dbrown rule on rows 38 and 39, as `screen-home` paints it, with the bank in a well on the left and four icon buttons on the right. Logbook takes the place the walk bar gives Home, so Help, Sound and Settings run in the walk bar's order. No coin: the amber "$" marks the money. The best walk and the walk count live in the Logbook, not on the bar.
+
+| Element   | Rule                                                                                                                                                                                                                                                                                                                                    |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bank well | `ui-home-cash-well` (176×30) at 4,4: ink on x 4 to 178 and rows 4 to 32, its lip on x 179 and row 33, ending 4px before the Logbook hit                                                                                                                                                                                                 |
+| Bank      | `font-title`, "$" amber (9.71:1 on ink) then the amount cream (12.44:1) with its thousands comma, one font advance apart, centred on x 91; the largest of 3×, 2× and 1× that fits 167px (x 8 to 174), capitals at y 11 at 3×, 14 at 2× and 16 at 1×, then the short form in thousands or millions. "$1,234" is 93px at 3× (x 45 to 137) |
+| Logbook   | `ui-icon-button` at 196,9 with `icon-logbook`; hit 184,0 44×44                                                                                                                                                                                                                                                                          |
+| Help      | `ui-icon-button` at 240,9 with `icon-help`; hit 228,0 44×44                                                                                                                                                                                                                                                                             |
+| Sound     | `ui-icon-button` at 284,9 with `icon-sound`; hit 272,0 44×44                                                                                                                                                                                                                                                                            |
+| Settings  | `ui-icon-button` at 328,9 with `icon-settings`; hit 316,0 44×44, the rightmost                                                                                                                                                                                                                                                          |
+
+Each face (rows 9 to 28) is centred on the bar's 38 rows above the rule, as the bank well is.
 
 ## Run screen
 

@@ -15,6 +15,7 @@ and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the r
 nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking
 owner's name plate), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
+the start screen top bar's ui-home-cash-well (176x30, drawn at (4, 4));
 the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
 ui-dog-card-band (360x80, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked in with
 font-title) and ui-owner-tab (36x36).
@@ -1105,6 +1106,21 @@ def walk_bar():
     return g
 
 
+# The start screen top bar's bank well, in screen pixels: the left half of the 38 rows above the
+# bar's rule, ending 4px before the Logbook button's hit at x 184.
+HOME_CASH_WELL = (4, 4, 176, 30)
+
+
+def home_cash_well():
+    """176x30, ui-home-cash-well: the start screen top bar's ink well for the bank, drawn at (4, 4)
+    on the bar's plum, with the walk bar's wells' clipped corners and dbrown lip. The game centres
+    the bank in it."""
+    _, _, w, h = HOME_CASH_WELL
+    g = Grid(w, h)
+    well(g, 0, 0, w, h)
+    return g
+
+
 def effect_well():
     """22x22, ui-effect-well: an ink well for one active effect's 20x20 icon at (1, 1), with the
     walk bar's wells' clipped corners and dbrown lip."""
@@ -1528,6 +1544,7 @@ IMAGES = {
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
     "ui-walk-bar": lambda: to_image(walk_bar().outlined(False)),
     "ui-effect-well": lambda: to_image(effect_well().outlined(False)),
+    "ui-home-cash-well": lambda: to_image(home_cash_well().outlined(False)),
     "ui-dog-card-band": lambda: to_image(dog_card_band().outlined(False)),
     "ui-lead-tag": lead_tag,
     "ui-owner-tab": lambda: to_image(owner_tab().outlined(False)),
