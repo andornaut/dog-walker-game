@@ -76,11 +76,10 @@ describe("stripDevParams", () => {
 
 describe("homeRunSetup", () => {
   it("derives each case", () => {
-    for (const [, dev, disableDev] of [
-      ["keeps dev mode on while home", true, false],
-      ["keeps dev mode off while home", false, false],
-      ["turns dev mode off when disabled", true, true],
-    ] satisfies readonly [string, boolean, boolean][]) {
+    for (const [, dev] of [
+      ["keeps dev mode on while home", true],
+      ["keeps dev mode off while home", false],
+    ] satisfies readonly [string, boolean][]) {
       const overridden: RunSetup<DogId, GearId, WalkerId> = {
         dev,
         gear: "luckyCollar",
@@ -92,8 +91,8 @@ describe("homeRunSetup", () => {
         walker: "trista",
         zone: 2,
       };
-      expect(homeRunSetup(overridden, 9, disableDev)).toEqual({
-        dev: dev && !disableDev,
+      expect(homeRunSetup(overridden, 9)).toEqual({
+        dev,
         seed: 9,
         speed: 1,
         zone: 1,

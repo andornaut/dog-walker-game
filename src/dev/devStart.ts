@@ -42,11 +42,10 @@ export function stripDevParams(href: string, disableDev: boolean): string {
 }
 
 // The setup the next walk takes once the player is home: no overrides, a fresh seed and dev
-// mode as it was, or off when disabled. Overrides apply only to the walk they start.
+// mode as it was. Overrides apply only to the walk they start.
 export function homeRunSetup(
   setup: RunSetup<DogId, GearId, WalkerId>,
   seed: number,
-  disableDev: boolean,
 ): RunSetup<DogId, GearId, WalkerId> {
-  return { dev: disableDev ? false : setup.dev, seed, speed: 1, zone: 1 };
+  return { dev: setup.dev, seed, speed: 1, zone: 1 };
 }

@@ -51,7 +51,7 @@ export function clearRunOverrides(): void {
   const current = pageRunSetup();
   parsed = {
     notices: [],
-    setup: homeRunSetup(current.setup, randomSeed(), false),
+    setup: homeRunSetup(current.setup, randomSeed()),
     warnings: [],
   };
   const href = globalThis.location.href;
