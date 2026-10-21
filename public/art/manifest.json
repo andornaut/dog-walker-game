@@ -3998,7 +3998,7 @@
       "json": "sprites/skunk.json",
       "anchor": {
         "feetY": 51,
-        "opaqueWidth": 39
+        "opaqueWidth": 38
       }
     },
     {
@@ -4052,7 +4052,7 @@
       "json": "sprites/skunk@50.json",
       "anchor": {
         "feetY": 27,
-        "opaqueWidth": 20
+        "opaqueWidth": 19
       }
     },
     {
@@ -4070,7 +4070,7 @@
       "json": "sprites/skunk@75.json",
       "anchor": {
         "feetY": 39,
-        "opaqueWidth": 30
+        "opaqueWidth": 29
       }
     },
     {
@@ -5258,7 +5258,7 @@
       "json": "sprites/thief.json",
       "anchor": {
         "feetY": 79,
-        "opaqueWidth": 45
+        "opaqueWidth": 46
       }
     },
     {
@@ -5267,7 +5267,7 @@
       "json": "sprites/thief@50.json",
       "anchor": {
         "feetY": 41,
-        "opaqueWidth": 24
+        "opaqueWidth": 25
       }
     },
     {
@@ -5285,7 +5285,7 @@
       "json": "sprites/thief@75.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 34
+        "opaqueWidth": 35
       }
     },
     {
@@ -5294,7 +5294,7 @@
       "json": "sprites/thief@88.json",
       "anchor": {
         "feetY": 70,
-        "opaqueWidth": 40
+        "opaqueWidth": 41
       }
     },
     {
