@@ -1,10 +1,13 @@
 import { readFile } from "node:fs/promises";
 
+import { PNG } from "pngjs";
 import { describe, expect, it } from "vitest";
 
+import palette from "../../shared/palette.json";
 import { gameData } from "../data";
 
 const HOME_PAGE = new URL("../../pages/index.html", import.meta.url);
+const SKY_BACKDROP = new URL("../../public/art/images/backdrop-yonge-street.png", import.meta.url);
 
 // The home page is static HTML, so its roster is checked against the data here.
 describe("the home page's roster", () => {
@@ -40,5 +43,19 @@ describe("the home page's roster", () => {
     const first = zones.find(({ id }) => id === firstZone)?.name ?? firstZone;
     expect(html).toContain(`Every walk starts in ${first} and covers`);
     expect(html).toContain(`Walk a pack of dogs through ${name}.`);
+  });
+});
+
+describe("the home page's sky band", () => {
+  it("runs the backdrop's top row on above it, in the palette colour of that name", async () => {
+    const html = await readFile(HOME_PAGE, "utf8");
+    const name = /\.sky\s*\{[^}]*background:\s*var\(--([a-z]+)\)/u.exec(html)?.[1] ?? "";
+    const hex = new RegExp(`--${name}:\\s*#([0-9a-f]{6});`, "u").exec(html)?.[1];
+    const { data } = PNG.sync.read(await readFile(SKY_BACKDROP));
+    const topLeft = [...data.subarray(0, 3)].map((byte) => byte.toString(16).padStart(2, "0"));
+    expect({ hex, name }).toEqual({
+      hex: topLeft.join(""),
+      name: Object.entries(palette).find(([, colour]) => colour.hex === hex)?.[0],
+    });
   });
 });
