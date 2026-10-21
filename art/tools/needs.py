@@ -50,7 +50,7 @@ accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground
                           outline drawn under everything, a fly circling it
 spot-tree          56x84  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
                           canopy rustles, then a leaf falls
-spot-stranger      40x60  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
+spot-stranger      56x84  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
                           up in a wave, breathing (Friendly)
                           wave (2 frames, 300ms)  the raised hand waves
 spot-lamp-post     56x84  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
@@ -58,8 +58,7 @@ spot-lamp-post     56x84  idle (2 frames, 500ms)  a street lamp with an amber la
 spot-water-bowl    56x56  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
                           falls and rings the water (Thirsty)
                           The spots are drawn in 32px units on a minis.Mini at BIG (1.75x), so a
-                          32x48 drawing is 56x84, its pixel maps stamped pixel for pixel; the
-                          stranger, a person, at the people's road.SCALE
+                          32x48 drawing is 56x84, its pixel maps stamped pixel for pixel
 spot-<spot>@<step>  every spot redrawn the same way at BIG x each depth step in minis.STEPS (from
                    shared/depth-steps.json), floor(size x scale + 0.5): the same tags, frames and
                    durations, a full 1px outline, motion kept at 1px; below 1x the bowl drops its
@@ -639,15 +638,15 @@ def shrunk(module, s, draw, q):
     return small(module, s, lambda: draw(**{k: v / s if k in MOTION else v for k, v in q.items()}))
 
 
-# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 56x84.
-# The stranger is a person, drawn at the people's scale, road.SCALE.
+# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 56x84,
+# the people's size, which the stranger is drawn at too.
 BIG = road.OBJECT_SCALE
 # The pose arguments that move a whole part by pixels.
 MOTION = ("rustle", "wave", "bob")
 # Each spot's drawing function, the module whose Grid it draws on, its scale and its tags as (tag, poses, ms).
 SPOTS = {
     "spot-tree": (tree, None, BIG, (("idle",) + TREE_IDLE,)),
-    "spot-stranger": (stranger, road, road.SCALE, (("idle",) + STRANGER_IDLE, ("wave",) + STRANGER_WAVE)),
+    "spot-stranger": (stranger, road, BIG, (("idle",) + STRANGER_IDLE, ("wave",) + STRANGER_WAVE)),
     "spot-lamp-post": (lamp_post, None, BIG, (("idle", (dict(), dict(glint=True)), 500),)),
     "spot-water-bowl": (water_bowl, None, BIG,
                         (("idle", tuple(dict(drip=d) for d in BOWL_IDLE[0]), BOWL_IDLE[1]),)),
