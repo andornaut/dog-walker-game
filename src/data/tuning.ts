@@ -137,6 +137,8 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
+    // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
+    shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.
     smallDodgeChance: 0.25,
   },
@@ -181,6 +183,10 @@ export const TUNING = {
     pullReactionWindow: 0.6,
     // How long a dog strains toward its target, with its bubble, before it pulls.
     pullTell: 1,
+    // A shy hopper's first hop's cue begins once the road between it and the pack's rows is down
+    // to this long of the road's travel: its cue, its hop, pathReactionMargin and a lane move all
+    // fit in it, so it clears the pack's lane before the pack must react.
+    shyHopNearSeconds: 1.6,
     // How long the Stinky debuff lasts, in walking time.
     stinkySeconds: 20,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.

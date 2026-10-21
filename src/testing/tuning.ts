@@ -39,7 +39,7 @@ const PINNED_TUNING: LiveTuning = {
     stinkyTipValue: 0,
   },
   pixels: { ...TUNING.pixels, roadScrollSpeed: 80 },
-  probability: { smallDodgeChance: 0 },
+  probability: { ...TUNING.probability, smallDodgeChance: 0 },
   seconds: {
     ...TUNING.seconds,
     pullReactionWindow: 0.6,

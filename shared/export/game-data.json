@@ -1331,6 +1331,7 @@
       "tapMaxDistance": 10
     },
     "probability": {
+      "shyHopperShare": 0.5,
       "smallDodgeChance": 0.25
     },
     "seconds": {
@@ -1352,6 +1353,7 @@
       "pathReactionMargin": 0.5,
       "pullReactionWindow": 0.6,
       "pullTell": 1,
+      "shyHopNearSeconds": 1.6,
       "stinkySeconds": 20,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
