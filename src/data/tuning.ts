@@ -19,7 +19,7 @@ export const TUNING = {
     maxSlowVehicles: 3,
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 42,
-    minorObstaclesGainPerZone: 3,
+    minorObstaclesGainPerZone: 0,
     obstaclesFirstZone: 18,
     obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.

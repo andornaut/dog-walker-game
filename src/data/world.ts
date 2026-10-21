@@ -275,7 +275,7 @@ export const WORLD = {
     },
     {
       art: "the-long-way-home",
-      density: { luckyFinds: 1, obstacles: 1.2, tips: 1 },
+      density: { luckyFinds: 1, obstacles: 1, tips: 1 },
       difficulty: 5,
       difficultyName: "Hardest",
       fees: 1.5,
