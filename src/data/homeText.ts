@@ -94,6 +94,7 @@ export const HOME_TEXT = {
     title: "Pet shop",
   },
   slotBought: "{slot} is open. Room for one more dog!",
+  startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
   topBar: {
     best: "Best {amount}",

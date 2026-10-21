@@ -57,6 +57,7 @@ export const HOME_TEXT_FIELDS = {
     slotsOwned: ["max", "owned"],
   },
   slotBought: ["slot"],
+  startLoading: [],
   startWalk: [],
   topBar: {
     best: ["amount"],

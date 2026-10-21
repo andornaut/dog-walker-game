@@ -2,7 +2,7 @@ import type { DogId } from "../data/types";
 import type { GridSpec } from "../layout/grid";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { SectionId } from "./sections";
 
@@ -196,6 +196,16 @@ export const HOME_LAYOUT = {
   startButton: START_BUTTON,
   // Start walk's label caps: on the raised face when ready, on the sunk face when not.
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
+  // The pressed face's label while the walk waits for its art: centred on the ready label's
+  // caps, at its size if that fits inside the face less 12px a side, else smaller.
+  startLoading: {
+    room: START_BUTTON.width - 24,
+    styles: [
+      { letterSpacing: 0, scale: 3 },
+      { letterSpacing: 0, scale: 2 },
+      { letterSpacing: -0.5, scale: 2 },
+    ] satisfies TextFitStyle[],
+  },
   // The street name's centre and caps top on screen-home's street sign, clear of the walker's
   // speech bubble.
   streetSign: { x: 327, y: 75 },

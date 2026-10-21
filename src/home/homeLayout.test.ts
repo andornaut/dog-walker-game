@@ -372,3 +372,24 @@ describe("the logbook", () => {
     fitsScreen(next + HOME_LAYOUT.card.rowGap + height + HOME_LAYOUT.card.pad);
   });
 });
+
+// Start walk's loading label fits the pressed face's room on one line in the title font, at
+// the largest of its sizes that does.
+describe("Start walk's loading label", () => {
+  const { room, styles } = HOME_LAYOUT.startLoading;
+
+  it("leaves a margin inside the button", () => {
+    expect(room).toBeLessThan(startButton.width);
+  });
+
+  it("sets its text", () => {
+    const fitted = fitInFont(
+      "font-title",
+      styles,
+      room,
+      plainMarks(gameData.homeText.startLoading),
+    );
+    expect(fitted.lines).toHaveLength(1);
+    expect(fitted.widest).toBeLessThanOrEqual(room);
+  });
+});

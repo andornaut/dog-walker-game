@@ -150,6 +150,7 @@ import {
   type FontRole,
   pixelFontMetrics,
   placePixelText,
+  scalePixelText,
   setPixelText,
 } from "./pixelText";
 import {
@@ -233,6 +234,7 @@ const START_BUTTON: Rect = HOME_LAYOUT.startButton;
 // Start walk's opacity while it waits for the rest of the art to load.
 const WAITING_ALPHA = 0.6;
 const START_LABEL = HOME_LAYOUT.startLabel;
+const START_LOADING = HOME_LAYOUT.startLoading;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
@@ -921,10 +923,12 @@ export class StartScene extends Scene {
     }
     const waiting = this.artWait !== undefined;
     this.artWait = { action, kind };
+    this.render();
     if (!waiting) {
       whenArtReady(this, () => {
         const wait = this.artWait;
         this.artWait = undefined;
+        this.render();
         wait?.action();
       });
     }
@@ -1811,14 +1815,15 @@ export class StartScene extends Scene {
     });
   }
 
-  // Start walk keeps its words and place in every state. Ready, it is primary: the raised
-  // green go button, sinking into its lip when pressed, drawn twice, raised and pressed, and
-  // the frame shows one. Not ready, it is disabled: a flat sunk face that never moves.
+  // Start walk keeps its words and place in every state but one. Ready, it is primary: the
+  // raised green go button, sinking into its lip when pressed, drawn twice, raised and pressed,
+  // and the frame shows one. Not ready, it is disabled: a flat sunk face that never moves.
+  // Pressed while the walk's art loads, its pressed face says so, in words that keep still.
   private drawStartButton(root: GameObjects.Container, ready: boolean): void {
     const { height, width, x, y } = START_BUTTON;
     const container = this.add.container(0, 0);
     root.add(container);
-    const label = gameData.homeText.startWalk;
+    const { startLoading: loadingLabel, startWalk: label } = gameData.homeText;
     const state = buttonState({ available: ready, primary: true });
     const disabled = state === "disabled";
     const variant = (down: boolean) => {
@@ -1840,11 +1845,19 @@ export class StartScene extends Scene {
       }
       const top = disabled ? START_LABEL.notReadyY : START_LABEL.readyY + drop;
       const color = disabled ? PALETTE[DISABLED_COLORS.text] : PALETTE.ink;
-      this.text(group, x + width / 2, y + top, label, color, {
+      const loading = down && this.artWait?.kind === "start";
+      const text = this.text(group, x + width / 2, y + top, loading ? loadingLabel : label, color, {
         font: "title",
         originX: 0.5,
         scale: START_LABEL.scale,
       });
+      if (loading) {
+        // Centred on the ready label's caps, at whichever size fits.
+        const { scale } = fitPixelText(text, START_LOADING, x + width / 2, y + top).style;
+        const { capHeight } = pixelFontMetrics(this, "title");
+        const lower = Math.round(((START_LABEL.scale - scale) * capHeight) / 2);
+        scalePixelText(text, scale, x + width / 2, y + top + lower);
+      }
       return group;
     };
     const up = variant(false);

@@ -591,6 +591,8 @@ export interface HomeText {
     readonly title: string;
   };
   readonly slotBought: string;
+  // Start walk's label while the walk waits for its art to load.
+  readonly startLoading: string;
   readonly startWalk: string;
   // The top bar's best walk and walk count, or what it says before any walk.
   readonly topBar: {
