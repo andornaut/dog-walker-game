@@ -457,7 +457,11 @@ def cross(cv, road, edge, walk, curb="grey", top=FAR_WALK, bend=no_bend):
     """Paint the cross street from row top down to the stub: walk(px, py) paints the sidewalks
     (and the far side's ground above them), road(px, py) the road and edge the road's pixels
     beside a curb. curb None leaves the road without curbs, as the park's paths are. bend(px)
-    raises the far side by that many rows at column px, for a street that curves away."""
+    raises the far side by that many rows at column px, for a street that curves away. The road
+    is one flat colour, road's most common, with no texture: flecks or seams across the far
+    street read as artefacts."""
+    from collections import Counter
+    flat_road = Counter(road(px, py) for py in range(CROSS, STUB) for px in range(W)).most_common(1)[0][0]
     lift = max(bend(px) for px in range(W))
     for py in range(top - lift, STUB):
         for px in range(W):
@@ -477,7 +481,7 @@ def cross(cv, road, edge, walk, curb="grey", top=FAR_WALK, bend=no_bend):
                 elif d >= -1 or py == CROSS - b:
                     c = edge
                 else:
-                    c = road(px, py)
+                    c = flat_road
             cv.fill(px, py, 1, 1, c)
 
 
