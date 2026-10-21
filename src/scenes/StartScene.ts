@@ -43,7 +43,6 @@ import {
   type HomeLoadout,
   logbookOf,
   packCapacity,
-  packOf,
   partingSpeech,
   type Purchase,
   purchasePrice,
@@ -109,6 +108,7 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import type { Cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
+import { packDogsOf } from "../state/pack";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "./draw";
@@ -866,7 +866,7 @@ export class StartScene extends Scene {
   // missing.
   private startWalk(): void {
     const save = this.save();
-    const dogs = packOf(this.loadout);
+    const dogs = packDogsOf(this.loadout.dogs);
     const { walker } = save;
     if (dogs === undefined || walker === null || !startReady(this.sections(save))) {
       this.shakes.set("start", this.time.now);

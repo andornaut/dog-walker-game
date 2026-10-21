@@ -1,5 +1,6 @@
 import type { DogId, GearId, WalkerId } from "../data/types";
-import { type HomeLoadout, packOf } from "../home/home";
+import type { HomeLoadout } from "../home/home";
+import { packDogsOf } from "../state/pack";
 import type { Loadout } from "../state/runState";
 import type { RunSetup } from "./runSetup";
 import { loadoutFor } from "./setupRun";
@@ -25,7 +26,10 @@ export function devRunLoadout(
   firstOwned: DogId,
   setup: RunSetup<DogId, GearId, WalkerId>,
 ): Loadout {
-  return loadoutFor({ dogs: packOf(saved) ?? [firstOwned], gear: saved.gear, walker }, setup);
+  return loadoutFor(
+    { dogs: packDogsOf(saved.dogs) ?? [firstOwned], gear: saved.gear, walker },
+    setup,
+  );
 }
 
 // The URL without its run overrides, and without `dev` too when dev mode is being disabled. The

@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { unionBox } from "../layout/packFormation";
 import { currentZoneId } from "../rules/route";
 import { testState } from "../testing/runState";
 import {
-  boundingBox,
   type Box,
   collideWithPack,
   type DogBox,
@@ -42,7 +42,7 @@ const solid = (box: Box): LanedBox => ({
 const packOf = (walker: Box, dogs: readonly Omit<DogBox, "scale">[]): PackBoxes => ({
   centerX: 0,
   dogs: dogs.map(flat),
-  outline: boundingBox([walker, ...dogs]),
+  outline: unionBox([walker, ...dogs]),
   walker: flat(walker),
 });
 // A one-dog pack 40 wide centred on centreX, its dog over the walker's feet: in lane 2, or

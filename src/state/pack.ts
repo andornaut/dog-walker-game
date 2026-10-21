@@ -46,3 +46,15 @@ export function mapPack(update: (slot: PackSlot) => PackSlot, pack: Pack): Pack 
 export function packFor(toSlot: (dog: DogId) => PackSlot, dogs: PackDogs): Pack {
   return dogs.map(toSlot) as readonly PackSlot[] as Pack;
 }
+
+// The dogs as a pack a walk can start with, or undefined for none or more than three.
+export function packDogsOf(dogs: readonly DogId[]): PackDogs | undefined {
+  const [first, second, third] = dogs;
+  if (first === undefined || dogs.length > 3) {
+    return undefined;
+  }
+  if (second === undefined) {
+    return [first];
+  }
+  return third === undefined ? [first, second] : [first, second, third];
+}

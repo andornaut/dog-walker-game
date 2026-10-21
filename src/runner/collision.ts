@@ -84,16 +84,6 @@ export function itemBox(
   };
 }
 
-// The bounding box of boxes.
-export function boundingBox(boxes: readonly Box[]): Box {
-  return {
-    bottom: Math.max(...boxes.map(({ bottom }) => bottom)),
-    left: Math.min(...boxes.map(({ left }) => left)),
-    right: Math.max(...boxes.map(({ right }) => right)),
-    top: Math.min(...boxes.map(({ top }) => top)),
-  };
-}
-
 // The squared distance from a point to a box, 0 inside it.
 function distanceSquared(box: Box, point: { x: number; y: number }): number {
   const dx = Math.max(box.left - point.x, 0, point.x - box.right);

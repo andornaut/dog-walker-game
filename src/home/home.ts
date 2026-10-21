@@ -7,7 +7,6 @@ import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import { dogsWalked, walksPlayed } from "../save/stats";
-import type { PackDogs } from "../state/runState";
 import { fillLine, signedText } from "../text/lines";
 import { HOME_TEXT_FIELDS } from "./homeText";
 
@@ -160,18 +159,6 @@ export function buy(data: ShopData, purchase: Purchase, save: SaveDocument): Buy
     kind: "bought",
     save: { ...save, bankCents: cents(save.bankCents - cost), owned: bought },
   };
-}
-
-// The picked dogs as a pack a walk can start with, or undefined with none picked.
-export function packOf(loadout: HomeLoadout): PackDogs | undefined {
-  const [first, second, third] = loadout.dogs;
-  if (first === undefined) {
-    return undefined;
-  }
-  if (second === undefined) {
-    return [first];
-  }
-  return third === undefined ? [first, second] : [first, second, third];
 }
 
 // A dog's pay for each zone it walks, before the zone's multiplier, as its tile and the shop
