@@ -17,11 +17,26 @@ const SETTLE_MS = 200;
 
 type DataExportModule = typeof import("./dataExport");
 
-function debounce(run: () => Promise<void>): () => void {
+// Runs run once calls settle for settleMs. Runs never overlap: one that comes due while another
+// is under way starts when that one ends, so the last write is always from the newest sources.
+// run reports its own errors.
+export function whenSettled(settleMs: number, run: () => Promise<void>): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let runs = Promise.resolve();
+  let waiting = false;
+  const queue = () => {
+    if (waiting) {
+      return;
+    }
+    waiting = true;
+    runs = runs.then(() => {
+      waiting = false;
+      return run();
+    });
+  };
   return () => {
     clearTimeout(timer);
-    timer = setTimeout(() => void run(), SETTLE_MS);
+    timer = setTimeout(queue, settleMs);
   };
 }
 
@@ -46,7 +61,7 @@ export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions):
       const fail = (what: string, error: unknown) =>
         logger.warn(`${what} not regenerated: ${String(error)}`, { timestamp: true });
 
-      const writeManifest = debounce(async () => {
+      const writeManifest = whenSettled(SETTLE_MS, async () => {
         try {
           const manifest = await generateArtManifest(nodeArtFiles(artDir));
           if (await writeIfChanged(`${artDir}/${ART_MANIFEST}`, artManifestText(manifest))) {
@@ -56,7 +71,7 @@ export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions):
           fail(`${ART_DIR}/${ART_MANIFEST}`, error);
         }
       });
-      const writeExport = debounce(async () => {
+      const writeExport = whenSettled(SETTLE_MS, async () => {
         try {
           // A fresh runner each time: a runner keeps every module it has evaluated.
           const runner = createServerModuleRunner(server.environments.ssr, { hmr: false });
