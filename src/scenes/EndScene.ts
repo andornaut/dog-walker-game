@@ -17,7 +17,7 @@ import {
   waveOffset,
 } from "../home/returnHome";
 import { pipLook } from "../hud/hudView";
-import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { isConfirmKey } from "../input/keyBindings";
 import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
@@ -215,9 +215,10 @@ export class EndScene extends Scene {
 
     const button = addMenuButton(this, BUTTON, words.backHome, { available: true, primary: true });
     listenButtonTap(this, button, goHome);
-    // Back home is the page's way out, so Escape, P and back take it too.
+    // Back home is the page's way out, so Escape and back take it too. P does not: a player
+    // pausing as the walk ends would skip the page.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (isConfirmKey(event.key) || isPauseKey(event.key)) {
+      if (isConfirmKey(event.key) || event.key === "Escape") {
         goHome();
       }
     });
