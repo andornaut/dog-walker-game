@@ -11,7 +11,7 @@ export const TUNING = {
     loadoutMax: 1,
     // Long reach grabs tips and treats this many lanes beside the pack.
     longReachLanes: 1,
-    luckyEncountersPerZone: 2,
+    luckyEncountersPerZone: 1,
     // At most this many movers are on screen at once, of them at most maxDartMovers darting
     // and maxSlowVehicles in-lane slower than the road.
     maxDartMovers: 3,
@@ -139,7 +139,7 @@ export const TUNING = {
     // One hop of a bouncing ball, which is only drawn.
     ballBounceSeconds: 0.4,
     // After a hit, obstacles are ignored this long; pickups still count.
-    collisionGrace: 1,
+    collisionGrace: 0.7,
     // A still press held this long on the walk HUD's effect icons, debuff bars or dog cards
     // shows what it explains and pauses the walk until it lifts.
     explainHoldSeconds: 0.3,
@@ -161,7 +161,7 @@ export const TUNING = {
     // Each step, hop and dart comes up to this long after its soonest moment, drawn per move.
     moverTimingJitter: 0.3,
     // A mover's cue shows this long before each move.
-    moverWarningSeconds: 1,
+    moverWarningSeconds: 0.8,
     // How long the Muddy debuff lasts, in walking time.
     muddySeconds: 20,
     // Wherever the path changes lanes between two obstacles, the road between them also leaves
