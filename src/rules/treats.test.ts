@@ -8,17 +8,24 @@ import { maxHearts } from "./dogs";
 import { faceMood, treatRecipient } from "./treats";
 
 describe("faceMood", () => {
-  const { faceHappyFrom, faceNeutralFrom } = TEST_TUNING.hearts;
+  const { faceHappyWithin, faceNeutralFrom, maxBySize } = TEST_TUNING.hearts;
+  const data = { tuning: TEST_TUNING };
 
-  it.each([
-    [faceHappyFrom + 1, "happy"],
-    [faceHappyFrom, "happy"],
-    [faceHappyFrom - 1, faceHappyFrom - 1 >= faceNeutralFrom ? "neutral" : "upset"],
-    [faceNeutralFrom, "neutral"],
-    [faceNeutralFrom - 1, "upset"],
-    [0, "upset"],
-  ])("shows %i hearts as %s", (hearts, mood) => {
-    expect(faceMood({ tuning: TEST_TUNING }, hearts)).toBe(mood);
+  // Every size's max, and hearts placed against the happy and neutral edges.
+  it.each(
+    Object.entries(maxBySize).flatMap(([size, max]) => {
+      const happyFrom = max - faceHappyWithin;
+      return [
+        [size, max, max, "happy"],
+        [size, max, happyFrom, "happy"],
+        [size, max, happyFrom - 1, happyFrom - 1 >= faceNeutralFrom ? "neutral" : "upset"],
+        [size, max, faceNeutralFrom, faceNeutralFrom >= happyFrom ? "happy" : "neutral"],
+        [size, max, faceNeutralFrom - 1, "upset"],
+        [size, max, 0, "upset"],
+      ] as const;
+    }),
+  )("shows a %s dog (max %i) at %i hearts as %s", (_, max, hearts, mood) => {
+    expect(faceMood(data, max, hearts)).toBe(mood);
   });
 });
 

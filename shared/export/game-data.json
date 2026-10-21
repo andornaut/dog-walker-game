@@ -1197,7 +1197,7 @@
     },
     "hearts": {
       "bump": 1,
-      "faceHappyFrom": 3,
+      "faceHappyWithin": 1,
       "faceNeutralFrom": 2,
       "kindWordsForgiven": 1,
       "luckyCollarMax": 1,

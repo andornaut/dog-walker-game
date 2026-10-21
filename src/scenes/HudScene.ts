@@ -710,12 +710,13 @@ export class HudScene extends Scene {
       return;
     }
     const dogKey = dogFaceKey(gameData, slot.dog);
+    const max = maxHearts(gameData.tuning, run.modifiers, dog);
     playTag(
       view.dogFace.setTexture(dogKey).setVisible(true),
       dogKey,
-      faceMood(gameData, slot.hearts),
+      faceMood(gameData, max, slot.hearts),
     );
-    const cells = cardHearts(slot.hearts, maxHearts(gameData.tuning, run.modifiers, dog));
+    const cells = cardHearts(slot.hearts, max);
     const heartArt = this.textures.exists(HEART_KEY);
     view.hearts.forEach((sprite, i) => {
       const cell = cells[i];
@@ -900,12 +901,14 @@ export class HudScene extends Scene {
   // give. False when the dog has no card, or the quip would go above its tab under a moment.
   private sayQuip(quip: QuipBubble): boolean {
     const slot = this.slotOf(quip.dog);
-    const packSlot = this.walk().hudView()?.run.pack[slot ?? -1];
+    const run = this.walk().hudView()?.run;
+    const packSlot = run?.pack[slot ?? -1];
     const hearts = packSlot?.status === "walking" ? packSlot.hearts : 0;
     if (slot === undefined || this.owners === undefined) {
       return false;
     }
-    const at = { dog: quip.dog, mood: faceMood(gameData, hearts), slot };
+    const max = maxHearts(gameData.tuning, run?.modifiers ?? [], gameData.dogs[quip.dog]);
+    const at = { dog: quip.dog, mood: faceMood(gameData, max, hearts), slot };
     const shown = this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
     // Heart pops already on their way land at once if the quip went above its tab over them.
     this.hearts?.clearWay();

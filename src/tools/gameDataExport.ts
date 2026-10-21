@@ -137,14 +137,15 @@ export function gameDataExport(data: GameData) {
     debuffs: entries(data.debuffs).map(([id, debuff]) => ({ id, ...debuff })),
     dogs: entries<DogId, GameData["dogs"][DogId]>(data.dogs).map(([id, dog]) => {
       const start = startHearts(tuning, [], dog);
+      const max = maxHearts(tuning, [], dog);
       return {
         id,
         ...dog,
         // Before modifiers: what a dog brings to a walk with no gear or upgrades.
         figures: {
-          maxHearts: maxHearts(tuning, [], dog),
+          maxHearts: max,
           startHearts: start,
-          startMood: faceMood(data, start),
+          startMood: faceMood(data, max, start),
         },
         keys: {
           dogCardTag: dogCardTag(data, id),

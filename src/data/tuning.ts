@@ -37,8 +37,9 @@ export const TUNING = {
   hearts: {
     // The hearts a minor bump costs the owner of the dog that touched it.
     bump: 1,
-    // A face looks happy at this many hearts or more, and upset below faceNeutralFrom.
-    faceHappyFrom: 3,
+    // A face looks happy within faceHappyWithin hearts of its max, else neutral from
+    // faceNeutralFrom hearts, and upset below that.
+    faceHappyWithin: 1,
     faceNeutralFrom: 2,
     // Kind words forgives this many hearts lost in each zone, the first ones lost.
     kindWordsForgiven: 1,

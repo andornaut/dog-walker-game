@@ -117,8 +117,14 @@ function variantSteps(keys: readonly string[]): number[] {
   );
 }
 
-// Every mood a face can show, from no hearts up to well past any maximum.
-const MOODS = [...new Set(Array.from({ length: 21 }, (_, hearts) => faceMood(gameData, hearts)))];
+// Every mood a face can show, at every max up to well past any size's and each hearts up to it.
+const MOODS = [
+  ...new Set(
+    Array.from({ length: 21 }, (_, max) =>
+      Array.from({ length: max + 1 }, (__, hearts) => faceMood(gameData, max, hearts)),
+    ).flat(),
+  ),
+];
 
 // A scene that has loaded exactly the shipped art.
 const loadedScene = {

@@ -6,9 +6,10 @@ import { read } from "./units";
 
 export type FaceMood = "happy" | "neutral" | "upset";
 
-// How an owner or dog looks at a number of hearts.
-export function faceMood(data: Pick<GameData, "tuning">, hearts: number): FaceMood {
-  if (hearts >= read(data.tuning, "hearts", "faceHappyFrom")) {
+// How an owner or dog looks at a number of hearts out of max: happy within faceHappyWithin of
+// max, else neutral from faceNeutralFrom hearts, else upset.
+export function faceMood(data: Pick<GameData, "tuning">, max: number, hearts: number): FaceMood {
+  if (hearts >= max - read(data.tuning, "hearts", "faceHappyWithin")) {
     return "happy";
   }
   return hearts >= read(data.tuning, "hearts", "faceNeutralFrom") ? "neutral" : "upset";
