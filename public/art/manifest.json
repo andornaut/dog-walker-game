@@ -117,7 +117,7 @@
       "json": "sprites/ball-bounce@75.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 16
+        "opaqueWidth": 15
       }
     },
     {
@@ -234,7 +234,7 @@
       "json": "sprites/bench@50.json",
       "anchor": {
         "feetY": 17,
-        "opaqueWidth": 56
+        "opaqueWidth": 54
       }
     },
     {
@@ -243,7 +243,7 @@
       "json": "sprites/bench@62.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 69
+        "opaqueWidth": 68
       }
     },
     {
@@ -279,7 +279,7 @@
       "json": "sprites/bin@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -297,7 +297,7 @@
       "json": "sprites/bin@75.json",
       "anchor": {
         "feetY": 34,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -306,7 +306,7 @@
       "json": "sprites/bin@88.json",
       "anchor": {
         "feetY": 39,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -369,7 +369,7 @@
       "json": "sprites/cafe-patio@50.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 55
+        "opaqueWidth": 54
       }
     },
     {
@@ -387,7 +387,7 @@
       "json": "sprites/cafe-patio@75.json",
       "anchor": {
         "feetY": 43,
-        "opaqueWidth": 82
+        "opaqueWidth": 81
       }
     },
     {
@@ -649,7 +649,7 @@
       "json": "sprites/cone@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -667,7 +667,7 @@
       "json": "sprites/cone@75.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -676,7 +676,7 @@
       "json": "sprites/cone@88.json",
       "anchor": {
         "feetY": 38,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -694,7 +694,7 @@
       "json": "sprites/construction@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 32
+        "opaqueWidth": 30
       }
     },
     {
@@ -703,7 +703,7 @@
       "json": "sprites/construction@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 39
+        "opaqueWidth": 38
       }
     },
     {
@@ -712,7 +712,7 @@
       "json": "sprites/construction@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 47
+        "opaqueWidth": 46
       }
     },
     {
@@ -739,7 +739,7 @@
       "json": "sprites/cyclist@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 21
+        "opaqueWidth": 18
       }
     },
     {
@@ -748,7 +748,7 @@
       "json": "sprites/cyclist@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 25
+        "opaqueWidth": 23
       }
     },
     {
@@ -757,7 +757,7 @@
       "json": "sprites/cyclist@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 30
+        "opaqueWidth": 28
       }
     },
     {
@@ -766,7 +766,7 @@
       "json": "sprites/cyclist@88.json",
       "anchor": {
         "feetY": 62,
-        "opaqueWidth": 35
+        "opaqueWidth": 33
       }
     },
     {
@@ -829,7 +829,7 @@
       "json": "sprites/dog-archie@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 12
+        "opaqueWidth": 11
       }
     },
     {
@@ -838,7 +838,7 @@
       "json": "sprites/dog-archie@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -847,7 +847,7 @@
       "json": "sprites/dog-archie@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 17
       }
     },
     {
@@ -874,7 +874,7 @@
       "json": "sprites/dog-biscuit@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 12
+        "opaqueWidth": 11
       }
     },
     {
@@ -883,7 +883,7 @@
       "json": "sprites/dog-biscuit@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -892,7 +892,7 @@
       "json": "sprites/dog-biscuit@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 17
       }
     },
     {
@@ -919,7 +919,7 @@
       "json": "sprites/dog-duchess@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 12
+        "opaqueWidth": 10
       }
     },
     {
@@ -928,7 +928,7 @@
       "json": "sprites/dog-duchess@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -937,7 +937,7 @@
       "json": "sprites/dog-duchess@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 16
       }
     },
     {
@@ -946,7 +946,7 @@
       "json": "sprites/dog-duchess@88.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 20
+        "opaqueWidth": 19
       }
     },
     {
@@ -964,7 +964,7 @@
       "json": "sprites/dog-koda@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -982,7 +982,7 @@
       "json": "sprites/dog-koda@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -991,7 +991,7 @@
       "json": "sprites/dog-koda@88.json",
       "anchor": {
         "feetY": 41,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -1009,7 +1009,7 @@
       "json": "sprites/dog-nugget@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 12
+        "opaqueWidth": 10
       }
     },
     {
@@ -1018,7 +1018,7 @@
       "json": "sprites/dog-nugget@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -1027,7 +1027,7 @@
       "json": "sprites/dog-nugget@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 16
       }
     },
     {
@@ -1036,7 +1036,7 @@
       "json": "sprites/dog-nugget@88.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 20
+        "opaqueWidth": 19
       }
     },
     {
@@ -1054,7 +1054,7 @@
       "json": "sprites/dog-penny@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -1072,7 +1072,7 @@
       "json": "sprites/dog-penny@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -1081,7 +1081,7 @@
       "json": "sprites/dog-penny@88.json",
       "anchor": {
         "feetY": 41,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -1099,7 +1099,7 @@
       "json": "sprites/dog-pierre@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -1117,7 +1117,7 @@
       "json": "sprites/dog-pierre@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 20
+        "opaqueWidth": 19
       }
     },
     {
@@ -1144,7 +1144,7 @@
       "json": "sprites/dog-snowball@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -1162,7 +1162,7 @@
       "json": "sprites/dog-snowball@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -1171,7 +1171,7 @@
       "json": "sprites/dog-snowball@88.json",
       "anchor": {
         "feetY": 41,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -1189,7 +1189,7 @@
       "json": "sprites/dog-zippy@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 11
+        "opaqueWidth": 10
       }
     },
     {
@@ -1198,7 +1198,7 @@
       "json": "sprites/dog-zippy@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -1207,7 +1207,7 @@
       "json": "sprites/dog-zippy@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 16
+        "opaqueWidth": 15
       }
     },
     {
@@ -1828,7 +1828,7 @@
       "json": "sprites/hydrant@75.json",
       "anchor": {
         "feetY": 34,
-        "opaqueWidth": 28
+        "opaqueWidth": 27
       }
     },
     {
@@ -1855,7 +1855,7 @@
       "json": "sprites/ice-cream-truck@50.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 56
+        "opaqueWidth": 54
       }
     },
     {
@@ -1864,7 +1864,7 @@
       "json": "sprites/ice-cream-truck@62.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 70
+        "opaqueWidth": 68
       }
     },
     {
@@ -1960,7 +1960,7 @@
       "json": "sprites/kid@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -1978,7 +1978,7 @@
       "json": "sprites/kid@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -1987,7 +1987,7 @@
       "json": "sprites/kid@88.json",
       "anchor": {
         "feetY": 61,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -2005,7 +2005,7 @@
       "json": "sprites/lemonade-stand@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 24
+        "opaqueWidth": 21
       }
     },
     {
@@ -2014,7 +2014,7 @@
       "json": "sprites/lemonade-stand@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 28
+        "opaqueWidth": 26
       }
     },
     {
@@ -2023,7 +2023,7 @@
       "json": "sprites/lemonade-stand@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 34
+        "opaqueWidth": 32
       }
     },
     {
@@ -2050,7 +2050,7 @@
       "json": "sprites/loose-dog@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 24
+        "opaqueWidth": 22
       }
     },
     {
@@ -2068,7 +2068,7 @@
       "json": "sprites/loose-dog@75.json",
       "anchor": {
         "feetY": 34,
-        "opaqueWidth": 34
+        "opaqueWidth": 33
       }
     },
     {
@@ -2095,7 +2095,7 @@
       "json": "sprites/lost-wallet@50.json",
       "anchor": {
         "feetY": 11,
-        "opaqueWidth": 10
+        "opaqueWidth": 9
       }
     },
     {
@@ -2113,7 +2113,7 @@
       "json": "sprites/lost-wallet@75.json",
       "anchor": {
         "feetY": 16,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -2140,7 +2140,7 @@
       "json": "sprites/mail-carrier@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -2149,7 +2149,7 @@
       "json": "sprites/mail-carrier@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 24
+        "opaqueWidth": 23
       }
     },
     {
@@ -2158,7 +2158,7 @@
       "json": "sprites/mail-carrier@75.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 29
+        "opaqueWidth": 27
       }
     },
     {
@@ -2167,7 +2167,7 @@
       "json": "sprites/mail-carrier@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 33
+        "opaqueWidth": 32
       }
     },
     {
@@ -2824,7 +2824,7 @@
       "json": "sprites/other-dog-owner@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 19
+        "opaqueWidth": 18
       }
     },
     {
@@ -2842,7 +2842,7 @@
       "json": "sprites/other-dog-owner@75.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 28
+        "opaqueWidth": 27
       }
     },
     {
@@ -2860,7 +2860,7 @@
       "json": "sprites/other-dog@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 17
+        "opaqueWidth": 15
       }
     },
     {
@@ -2869,7 +2869,7 @@
       "json": "sprites/other-dog@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 20
+        "opaqueWidth": 19
       }
     },
     {
@@ -2878,7 +2878,7 @@
       "json": "sprites/other-dog@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 24
+        "opaqueWidth": 23
       }
     },
     {
@@ -2887,7 +2887,7 @@
       "json": "sprites/other-dog@88.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 28
+        "opaqueWidth": 27
       }
     },
     {
@@ -2986,7 +2986,7 @@
       "json": "sprites/parked-car@50.json",
       "anchor": {
         "feetY": 20,
-        "opaqueWidth": 28
+        "opaqueWidth": 26
       }
     },
     {
@@ -3004,7 +3004,7 @@
       "json": "sprites/parked-car@75.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 40
+        "opaqueWidth": 39
       }
     },
     {
@@ -3031,7 +3031,7 @@
       "json": "sprites/petunias@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 56
+        "opaqueWidth": 54
       }
     },
     {
@@ -3040,7 +3040,7 @@
       "json": "sprites/petunias@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 69
+        "opaqueWidth": 68
       }
     },
     {
@@ -3049,7 +3049,7 @@
       "json": "sprites/petunias@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 83
+        "opaqueWidth": 82
       }
     },
     {
@@ -3076,7 +3076,7 @@
       "json": "sprites/photo-op@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 20
       }
     },
     {
@@ -3085,7 +3085,7 @@
       "json": "sprites/photo-op@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -3103,7 +3103,7 @@
       "json": "sprites/photo-op@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 36
+        "opaqueWidth": 35
       }
     },
     {
@@ -3121,7 +3121,7 @@
       "json": "sprites/picnic@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 55
+        "opaqueWidth": 54
       }
     },
     {
@@ -3139,7 +3139,7 @@
       "json": "sprites/picnic@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 82
+        "opaqueWidth": 81
       }
     },
     {
@@ -3175,7 +3175,7 @@
       "json": "sprites/puddle@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 68
+        "opaqueWidth": 67
       }
     },
     {
@@ -3211,7 +3211,7 @@
       "json": "sprites/roadside-bike@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 32
+        "opaqueWidth": 31
       }
     },
     {
@@ -3220,7 +3220,7 @@
       "json": "sprites/roadside-bike@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 41
+        "opaqueWidth": 39
       }
     },
     {
@@ -3229,7 +3229,7 @@
       "json": "sprites/roadside-bike@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 48
+        "opaqueWidth": 47
       }
     },
     {
@@ -3346,7 +3346,7 @@
       "json": "sprites/roadside-flowers@50.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 43
+        "opaqueWidth": 42
       }
     },
     {
@@ -3391,7 +3391,7 @@
       "json": "sprites/roadside-gnome@50.json",
       "anchor": {
         "feetY": 20,
-        "opaqueWidth": 11
+        "opaqueWidth": 10
       }
     },
     {
@@ -3409,7 +3409,7 @@
       "json": "sprites/roadside-gnome@75.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 16
+        "opaqueWidth": 15
       }
     },
     {
@@ -3436,7 +3436,7 @@
       "json": "sprites/roadside-hedge@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 65
+        "opaqueWidth": 63
       }
     },
     {
@@ -3445,7 +3445,7 @@
       "json": "sprites/roadside-hedge@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 80
+        "opaqueWidth": 79
       }
     },
     {
@@ -3454,7 +3454,7 @@
       "json": "sprites/roadside-hedge@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 96
+        "opaqueWidth": 95
       }
     },
     {
@@ -3670,7 +3670,7 @@
       "json": "sprites/roadside-house-tall-grey@50.json",
       "anchor": {
         "feetY": 77,
-        "opaqueWidth": 65
+        "opaqueWidth": 64
       }
     },
     {
@@ -3679,7 +3679,7 @@
       "json": "sprites/roadside-house-tall-grey@62.json",
       "anchor": {
         "feetY": 97,
-        "opaqueWidth": 81
+        "opaqueWidth": 80
       }
     },
     {
@@ -3688,7 +3688,7 @@
       "json": "sprites/roadside-house-tall-grey@75.json",
       "anchor": {
         "feetY": 116,
-        "opaqueWidth": 97
+        "opaqueWidth": 96
       }
     },
     {
@@ -3706,7 +3706,7 @@
       "json": "sprites/roadside-house-tall@50.json",
       "anchor": {
         "feetY": 77,
-        "opaqueWidth": 65
+        "opaqueWidth": 64
       }
     },
     {
@@ -3715,7 +3715,7 @@
       "json": "sprites/roadside-house-tall@62.json",
       "anchor": {
         "feetY": 97,
-        "opaqueWidth": 81
+        "opaqueWidth": 80
       }
     },
     {
@@ -3724,7 +3724,7 @@
       "json": "sprites/roadside-house-tall@75.json",
       "anchor": {
         "feetY": 116,
-        "opaqueWidth": 97
+        "opaqueWidth": 96
       }
     },
     {
@@ -3769,7 +3769,7 @@
       "json": "sprites/roadside-lamp-post@75.json",
       "anchor": {
         "feetY": 112,
-        "opaqueWidth": 24
+        "opaqueWidth": 23
       }
     },
     {
@@ -3796,7 +3796,7 @@
       "json": "sprites/roadside-laundry@50.json",
       "anchor": {
         "feetY": 47,
-        "opaqueWidth": 80
+        "opaqueWidth": 78
       }
     },
     {
@@ -3805,7 +3805,7 @@
       "json": "sprites/roadside-laundry@62.json",
       "anchor": {
         "feetY": 59,
-        "opaqueWidth": 99
+        "opaqueWidth": 98
       }
     },
     {
@@ -3814,7 +3814,7 @@
       "json": "sprites/roadside-laundry@75.json",
       "anchor": {
         "feetY": 71,
-        "opaqueWidth": 119
+        "opaqueWidth": 118
       }
     },
     {
@@ -3841,7 +3841,7 @@
       "json": "sprites/roadside-mailbox@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -3850,7 +3850,7 @@
       "json": "sprites/roadside-mailbox@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 19
+        "opaqueWidth": 18
       }
     },
     {
@@ -3859,7 +3859,7 @@
       "json": "sprites/roadside-mailbox@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -3868,7 +3868,7 @@
       "json": "sprites/roadside-mailbox@88.json",
       "anchor": {
         "feetY": 41,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -3940,7 +3940,7 @@
       "json": "sprites/roadside-tree-blossom@50.json",
       "anchor": {
         "feetY": 77,
-        "opaqueWidth": 53
+        "opaqueWidth": 52
       }
     },
     {
@@ -3976,7 +3976,7 @@
       "json": "sprites/roadside-tree@50.json",
       "anchor": {
         "feetY": 77,
-        "opaqueWidth": 53
+        "opaqueWidth": 52
       }
     },
     {
@@ -4057,7 +4057,7 @@
       "json": "sprites/skunk-cloud@88.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 95
+        "opaqueWidth": 94
       }
     },
     {
@@ -4741,7 +4741,7 @@
       "json": "sprites/spot-lamp-post@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -4750,7 +4750,7 @@
       "json": "sprites/spot-lamp-post@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 18
+        "opaqueWidth": 16
       }
     },
     {
@@ -4759,7 +4759,7 @@
       "json": "sprites/spot-lamp-post@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 20
+        "opaqueWidth": 19
       }
     },
     {
@@ -4786,7 +4786,7 @@
       "json": "sprites/spot-stranger@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -4795,7 +4795,7 @@
       "json": "sprites/spot-stranger@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 24
+        "opaqueWidth": 23
       }
     },
     {
@@ -4804,7 +4804,7 @@
       "json": "sprites/spot-stranger@75.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 29
+        "opaqueWidth": 27
       }
     },
     {
@@ -4813,7 +4813,7 @@
       "json": "sprites/spot-stranger@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 33
+        "opaqueWidth": 32
       }
     },
     {
@@ -4831,7 +4831,7 @@
       "json": "sprites/spot-tree@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 24
+        "opaqueWidth": 22
       }
     },
     {
@@ -4840,7 +4840,7 @@
       "json": "sprites/spot-tree@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 30
+        "opaqueWidth": 28
       }
     },
     {
@@ -4876,7 +4876,7 @@
       "json": "sprites/spot-water-bowl@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -4930,7 +4930,7 @@
       "json": "sprites/squirrel-dash@50.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 23
+        "opaqueWidth": 22
       }
     },
     {
@@ -4948,7 +4948,7 @@
       "json": "sprites/squirrel-dash@75.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 34
+        "opaqueWidth": 33
       }
     },
     {
@@ -4966,7 +4966,7 @@
       "json": "sprites/squirrel@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 15
+        "opaqueWidth": 14
       }
     },
     {
@@ -5236,7 +5236,7 @@
       "json": "sprites/stop-sign@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 15
+        "opaqueWidth": 14
       }
     },
     {
@@ -5254,7 +5254,7 @@
       "json": "sprites/stop-sign@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -5281,7 +5281,7 @@
       "json": "sprites/thief@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 21
+        "opaqueWidth": 20
       }
     },
     {
@@ -5290,7 +5290,7 @@
       "json": "sprites/thief@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -5335,7 +5335,7 @@
       "json": "sprites/tip@62.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 13
+        "opaqueWidth": 12
       }
     },
     {
@@ -5353,7 +5353,7 @@
       "json": "sprites/tip@88.json",
       "anchor": {
         "feetY": 18,
-        "opaqueWidth": 17
+        "opaqueWidth": 16
       }
     },
     {
@@ -5380,7 +5380,7 @@
       "json": "sprites/trash-bins@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 68
+        "opaqueWidth": 67
       }
     },
     {
@@ -5398,7 +5398,7 @@
       "json": "sprites/trash-bins@88.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 94
+        "opaqueWidth": 93
       }
     },
     {
@@ -5416,7 +5416,7 @@
       "json": "sprites/treat@50.json",
       "anchor": {
         "feetY": 8,
-        "opaqueWidth": 12
+        "opaqueWidth": 10
       }
     },
     {
@@ -5434,7 +5434,7 @@
       "json": "sprites/treat@75.json",
       "anchor": {
         "feetY": 12,
-        "opaqueWidth": 16
+        "opaqueWidth": 15
       }
     },
     {
@@ -5443,7 +5443,7 @@
       "json": "sprites/treat@88.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 19
+        "opaqueWidth": 18
       }
     },
     {
