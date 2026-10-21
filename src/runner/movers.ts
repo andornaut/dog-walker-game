@@ -1,4 +1,4 @@
-import type { MovementKind } from "../data/types";
+import type { MoveCount, MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { type Random, randomPick } from "../lib/random";
 import type { RoadItem } from "./roadItems";
@@ -340,24 +340,35 @@ export function stepSpots(shape: StepShape): number {
   return Math.max(Math.abs(shape.lanes), Math.abs(shape.travel));
 }
 
+// Every sequence of times hops, each one of hopShapes(most, sideways).
+export function hopSequences(most: number, sideways: boolean, times: number): StepShape[][] {
+  const shapes = hopShapes(most, sideways);
+  return Array.from({ length: times }).reduce<StepShape[][]>(
+    (sequences) => sequences.flatMap((sequence) => shapes.map((shape) => [...sequence, shape])),
+    [[]],
+  );
+}
+
 // cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
-// away. steps: one of sequences, each step stepSeconds long however many spots it covers; the
-// planner picks whichever keeps the road passable. approach: steps steps toward the pack, each
-// stepSeconds long, the first's cue firstDelaySeconds after the mover is wholly on the road and
-// the second, with no cue, once the first has ended and the road between it and the pack is
-// secondRoadShare of the road's length, each range drawn from per mover.
+// away. steps: one of the sequences as long as its count, drawn per mover from count, each step
+// stepSeconds long however many spots it covers; the planner picks whichever keeps the road
+// passable. approach: steps steps toward the pack, drawn per mover, each stepSeconds long, the
+// first's cue firstDelaySeconds after the mover is wholly on the road and each later one, with no
+// cue, once the step before has ended and the road between it and the pack is secondRoadShare of
+// the road's length, each range drawn from per mover.
 export type MoverMotion =
   | {
       readonly firstDelaySeconds: readonly [number, number];
       readonly kind: "approach";
       readonly secondRoadShare: readonly [number, number];
       readonly stepSeconds: number;
-      readonly steps: number;
+      readonly steps: MoveCount;
     }
   | { readonly kind: "cross"; readonly lanesPerSecond: number; readonly tilt: number }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
+      readonly count: MoveCount;
       readonly kind: "steps";
       readonly sequences: readonly (readonly StepShape[])[];
       readonly stepSeconds: number;
@@ -378,20 +389,39 @@ export interface MoverSpec {
   readonly warningSeconds: number;
 }
 
-// One mover's draws, each from 0 up to 1, made as it is planned: its speed, the delay before
-// each of its moves, and a stalker's second-step road share. EVEN_DRAWS moves it at its kind's
-// speed with no delay, at the near end of a range.
+// One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
+// speed, the delay before each of its moves, and a stalker's later-step road share. EVEN_DRAWS
+// moves it at its kind's speed with no delay, at the near end of a range.
 export interface MoverDraws {
-  readonly delays: readonly [number, number];
+  readonly count: number;
+  readonly delays: readonly [number, number, number];
   readonly share: number;
   readonly speed: number;
 }
 
-const EVEN_DRAWS: MoverDraws = { delays: [0, 0], share: 0, speed: 0.5 };
+const EVEN_DRAWS: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5 };
 
-// Every mover draws the same number of times, whatever it is and wherever it goes.
-export function drawMover(random: Random): MoverDraws {
-  return { delays: [random(), random()], share: random(), speed: random() };
+// The planner's random streams. spawns places every spawn and draws each mover's speed, first two
+// delays and share; movers draws each mover's count and third delay, so those never shift the
+// spawns stream.
+export interface PlannerStreams {
+  readonly movers: Random;
+  readonly spawns: Random;
+}
+
+// Every mover draws the same number of times from each stream, whatever it is and wherever it goes.
+export function drawMover(streams: PlannerStreams): MoverDraws {
+  const { movers, spawns } = streams;
+  const delays = [spawns(), spawns()] as const;
+  const share = spawns();
+  const speed = spawns();
+  return { count: movers(), delays: [...delays, movers()], share, speed };
+}
+
+// The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
+export function drawnCount(range: MoveCount, draw: number): number {
+  const spread = range.max - range.min;
+  return range.min + Math.min(spread, Math.floor(draw * (spread + 1)));
 }
 
 // The factor a mover's speed is multiplied by, from 1 - speedShare to 1 + speedShare.
@@ -599,8 +629,8 @@ function standingPlacements(
   return placements;
 }
 
-// A stepping mover takes each step of a sequence in turn. Its first cue shows once it is
-// wholly on the road, and each later one once the step before has ended, each move up to its
+// A stepping mover takes each step of a sequence as long as its drawn count in turn. Its first
+// cue shows once it is wholly on the road, and each later one once the step before has ended, each move up to its
 // drawn delay later. A step that would start once the mover has reached the pack's rows, at
 // sightLength, never comes, nor any after it; a sequence with no step left has no placement,
 // since a mover always moves. It stands at every spot a step of several spots passes over, as
@@ -615,7 +645,9 @@ function stepsPlacements(
   const warning = spec.warningSeconds * scrollSpeed;
   const length = motion.stepSeconds * scrollSpeed;
   const height = spec.footprint.rows * cellLength;
-  return motion.sequences.flatMap((shapes) => {
+  const count = drawnCount(motion.count, draws.count);
+  const ways = motion.sequences.filter((sequence) => sequence.length === count);
+  return ways.flatMap((shapes) => {
     const spots: StandOffset[] = [{ lane: 0, travel: 0 }];
     const steps: MoverStep[] = [];
     let ready = height + warning;
@@ -657,13 +689,13 @@ const APPROACH_REACHES: readonly (readonly [number, number])[] = [
   [0, 0],
 ];
 
-// A stalker may be at any spot in its lanes, from its start down as many rows as it has steps,
-// and is placed as standing at each of them, so whichever step it chooses on the road keeps
-// the road passable. Its lanes are its start lane and, where there is room, a lane to either
-// side: the wider, the more it can follow the pack, and the planner takes the widest that fits
-// (rank). Its first step's cue comes its drawn delay after it is wholly on the road, and its
-// second step, with no cue, once the first has ended and the road between it and the pack, the
-// tallest pack's rows at sightLength, is down to its drawn share of the road's length.
+// A stalker may be at any spot in its lanes, from its start down as many rows as its drawn count
+// of steps, and is placed as standing at each of them, so whichever step it chooses on the road
+// keeps the road passable. Its lanes are its start lane and, where there is room, a lane to
+// either side: the wider, the more it can follow the pack, and the planner takes the widest that
+// fits (rank). Its first step's cue comes its drawn delay after it is wholly on the road, and each
+// later step, with no cue, once the step before has ended and the road between it and the pack,
+// the tallest pack's rows at sightLength, is down to its drawn share of the road's length.
 function approachPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -673,19 +705,20 @@ function approachPlacements(
   const { cellLength, roadLength, scrollSpeed, sightLength } = geometry;
   const warning = spec.warningSeconds * scrollSpeed;
   const height = spec.footprint.rows * cellLength;
+  const steps = drawnCount(motion.steps, draws.count);
   const pending: ApproachTiming[] = [
     {
       at: height + (within(motion.firstDelaySeconds, draws.delays[0]) * scrollSpeed + warning),
       kind: "after",
     },
-    ...Array.from({ length: motion.steps - 1 }, (): ApproachTiming => ({
+    ...Array.from({ length: steps - 1 }, (): ApproachTiming => ({
       kind: "near",
       travel: sightLength - within(motion.secondRoadShare, draws.share) * roadLength,
     })),
   ];
   return APPROACH_REACHES.flatMap(([left, right], rank) => {
     const spots = Array.from({ length: right - left + 1 }, (_, i) =>
-      Array.from({ length: motion.steps + 1 }, (_unused, row) => ({
+      Array.from({ length: steps + 1 }, (_unused, row) => ({
         lane: left + i,
         travel: row * cellLength,
       })),
@@ -698,7 +731,7 @@ function approachPlacements(
       movement: spec.movement,
       pending,
       reach: { count: right - left + 1, first: lane + left },
-      rows: motion.steps,
+      rows: steps,
       steps: [],
       stopTravel: sightLength,
       warning,
@@ -840,7 +873,7 @@ function standsOf(spot: Spot): MoverStand[] {
 // with the highest rank. onScreen holds the movers already on screen, from an earlier call,
 // and gains each mover placed.
 export function placeMovers<Kind extends string>(
-  random: Random,
+  streams: PlannerStreams,
   geometry: MoverGeometry & { readonly zoneLength: number },
   caps: MoverCaps,
   grid: MoverGrid,
@@ -873,7 +906,7 @@ export function placeMovers<Kind extends string>(
   const dropped: Kind[] = [];
   for (const { count, kind, spec } of quotas) {
     for (let i = 0; i < count; i++) {
-      const placements = moverPlacements(geometry, spec, drawMover(random));
+      const placements = moverPlacements(geometry, spec, drawMover(streams));
       const end = Math.floor(((i + 1) * rows.length) / count);
       const stretch = spotsIn(placements, Math.floor((i * rows.length) / count), end);
       const fitting = stretch.length > 0 ? stretch : spotsIn(placements, end, rows.length);
@@ -883,7 +916,7 @@ export function placeMovers<Kind extends string>(
       }
       const rank = Math.max(...fitting.map(({ placement }) => placement.rank ?? 0));
       const spot = randomPick(
-        random,
+        streams.spawns,
         fitting.filter(({ placement }) => (placement.rank ?? 0) === rank),
       );
       const { placement } = spot;

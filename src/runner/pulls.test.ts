@@ -14,6 +14,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { seededRandom } from "../lib/random";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
+import { plannerStreams } from "../testing/movers";
 import { testPack } from "../testing/packGeometry";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -400,7 +401,7 @@ describe("replay with pulls", () => {
     // As RunScene steps: the moves due now, each logged, then the pulls, then the walk.
     const play = (seed: number, movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
       const setup = { dev: true, seed, speed: 1, zone: 1 };
-      const start = planZone(data, geometry, seededRandom(seed), walkWith(["biscuit", "koda"]));
+      const start = planZone(data, geometry, plannerStreams(seed), walkWith(["biscuit", "koda"]));
       const rolls = seededRandom(seed + 4);
       let log = startInputLog(setup);
       let walk = start;

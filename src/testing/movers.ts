@@ -1,6 +1,13 @@
 import type { GameData, Movement, World, Zone } from "../data/types";
+import { randomStream, seededRandom } from "../lib/random";
+import type { PlannerStreams } from "../runner/movers";
 
 export type HopMovement = Extract<Movement, { kind: "hop" }>;
+
+// The planner's streams for a seed: spawns as one stream seeded with it, movers named from it.
+export function plannerStreams(seed: number): PlannerStreams {
+  return { movers: randomStream(seed, "movers"), spawns: seededRandom(seed) };
+}
 
 // The world with every zone at this mover share.
 export function sharedWorld(world: World, share: number): World {

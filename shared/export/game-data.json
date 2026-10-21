@@ -654,7 +654,10 @@
       "kind": "obstacle",
       "movement": {
         "kind": "approach",
-        "steps": 1
+        "steps": {
+          "max": 1,
+          "min": 1
+        }
       },
       "name": "Skunk",
       "resolution": {
@@ -726,7 +729,10 @@
       "kind": "obstacle",
       "movement": {
         "kind": "approach",
-        "steps": 1
+        "steps": {
+          "max": 1,
+          "min": 1
+        }
       },
       "name": "Thief",
       "resolution": {
@@ -910,7 +916,11 @@
       "id": "bunny",
       "movement": {
         "kind": "hop",
-        "most": 2
+        "most": 2,
+        "times": {
+          "max": 1,
+          "min": 1
+        }
       },
       "name": "Bunny",
       "shape": {
@@ -957,7 +967,10 @@
       "id": "coyote",
       "movement": {
         "kind": "approach",
-        "steps": 2
+        "steps": {
+          "max": 2,
+          "min": 2
+        }
       },
       "name": "Coyote",
       "shape": {
@@ -997,7 +1010,11 @@
       "movement": {
         "kind": "hop",
         "most": 2,
-        "sideways": true
+        "sideways": true,
+        "times": {
+          "max": 1,
+          "min": 1
+        }
       },
       "name": "Ducklings",
       "shape": {
@@ -1106,7 +1123,10 @@
       "id": "mailCarrier",
       "movement": {
         "kind": "step",
-        "steps": 2
+        "steps": {
+          "max": 2,
+          "min": 2
+        }
       },
       "name": "Mail carrier",
       "shape": {
@@ -1120,7 +1140,11 @@
       "movement": {
         "kind": "hop",
         "most": 1,
-        "sideways": true
+        "sideways": true,
+        "times": {
+          "max": 1,
+          "min": 1
+        }
       },
       "name": "Parked car",
       "shape": {
@@ -1146,7 +1170,11 @@
       "id": "raccoon",
       "movement": {
         "kind": "hop",
-        "most": 2
+        "most": 2,
+        "times": {
+          "max": 1,
+          "min": 1
+        }
       },
       "name": "Raccoon",
       "shape": {

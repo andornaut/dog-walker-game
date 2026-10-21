@@ -47,7 +47,7 @@ import { slowestAgility } from "../rules/walkers";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
-import { type HopMovement, hoppingInstead, sharedWorld } from "../testing/movers";
+import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testPack } from "../testing/packGeometry";
 import { activeModifier, heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
@@ -384,7 +384,7 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
 // The spawn planner takes tens of milliseconds a zone, so a loop over the game's road can pass
 // vitest's 5 s default on an oversubscribed machine.
 describe("planZone", { timeout: 15_000 }, () => {
-  const planned = planZone(data, geometry, seededRandom(3), walkWith(["koda"]));
+  const planned = planZone(data, geometry, plannerStreams(3), walkWith(["koda"]));
   const countOf = (category: string) =>
     planned.road.pending.filter((event) => itemCategory(data, event.kind) === category).length;
 
@@ -410,7 +410,7 @@ describe("planZone", { timeout: 15_000 }, () => {
         ...walk.run,
         modifiers: factors.map((factor) => activeModifier(source, factor)),
       };
-      const treats = planZone(live, geometry, seededRandom(3), {
+      const treats = planZone(live, geometry, plannerStreams(3), {
         ...walk,
         run,
       }).road.pending.filter(({ kind }) => kind === "treat");
@@ -429,7 +429,7 @@ describe("planZone", { timeout: 15_000 }, () => {
       const run = inZone(walk.run, zone, 0);
       const allowed = minorObstacleWeights(real, run).map(([kind]) => kind as string);
       for (const seed of [1, 2, 3]) {
-        const kinds = planZone(real, geometry, seededRandom(seed), { ...walk, run })
+        const kinds = planZone(real, geometry, plannerStreams(seed), { ...walk, run })
           .road.pending.filter((event) => event.mover === undefined)
           .map((event) => event.kind as string)
           .filter((kind) => itemCategory(real, kind as WalkItem["kind"]) === "minor");
@@ -479,10 +479,10 @@ describe("planZone", { timeout: 15_000 }, () => {
     for (const { position, zone } of POSITIONS) {
       const zoned = inZone(realRun(REAL), zone, position);
       for (const seed of [1, 2, 3]) {
-        const asked = spawnQuotas(REAL, seededRandom(seed), zoned)
+        const asked = spawnQuotas(REAL, plannerStreams(seed), zoned)
           .filter(({ kind }) => opensACard(REAL, kind))
           .reduce((sum, { count }) => sum + count, 0);
-        const { pending } = planZone(REAL, GAME_ROAD, seededRandom(seed), {
+        const { pending } = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
           road: startRoad(LANE_COUNT),
           run: zoned,
         }).road;
@@ -504,7 +504,7 @@ describe("planZone", { timeout: 15_000 }, () => {
       for (const zoneIndex of [0, WORLD.walkLength - 1]) {
         const zoned = inZone(realRun(base), zone, zoneIndex);
         for (const seed of [1]) {
-          const walk = planZone(base, GAME_ROAD, seededRandom(seed), {
+          const walk = planZone(base, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),
             run: zoned,
           });
@@ -560,7 +560,7 @@ describe("planZone", { timeout: 15_000 }, () => {
       for (const zone of ZONE_IDS) {
         const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
         for (const seed of [1]) {
-          const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
+          const walk = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),
             run: zoned,
           });
@@ -593,7 +593,7 @@ describe("planZone", { timeout: 15_000 }, () => {
       const lanesOf = (kind: WalkItem["kind"], lane: number) =>
         new Set(Array.from({ length: footprintOf(REAL, kind).lanes }, (_, i) => lane + i));
       for (const seed of [1, 2]) {
-        const walk = planZone(REAL, GAME_ROAD, seededRandom(seed), {
+        const walk = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
           road: startRoad(LANE_COUNT),
           run: zoned,
         });
@@ -762,7 +762,7 @@ describe("stepWalk", () => {
   // road from the far edge to the band before the end comes into view too late to reach it.
   it("grabs every treat of a planned zone that reaches the pack", () => {
     // The pack stands in the lane of the lowest treat in view, ignoring obstacles.
-    let walk = planZone(data, geometry, seededRandom(4), walkWith(["koda"]));
+    let walk = planZone(data, geometry, plannerStreams(4), walkWith(["koda"]));
     const toBand = geometry.packBand.top - geometry.roadTop;
     const reaching = walk.road.pending.filter(
       ({ distance, kind }) => kind === "treat" && distance + toBand < zoneLength(data),
@@ -1324,7 +1324,7 @@ describe("hit stop", () => {
 
   it("replays a run with hit stops exactly from its input log", () => {
     const setup = { dev: true, seed: 5, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, seededRandom(5), walkWith(["koda", "duchess"]));
+    const start = planZone(data, geometry, plannerStreams(5), walkWith(["koda", "duchess"]));
     const steps = 60 * 30;
     // As RunScene steps: the moves due now, each logged at the run time it is applied, then the
     // walk. A move every 13 frames, alternating sides, runs into obstacles.
@@ -1372,7 +1372,7 @@ describe("hit stop", () => {
 
   it("replays lane moves, card choices and heading home to the same final state", () => {
     const setup = { dev: true, seed: 1, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, seededRandom(1), walkWith(["koda", "duchess"]));
+    const start = planZone(data, geometry, plannerStreams(1), walkWith(["koda", "duchess"]));
     const homeFrame = 60 * 25;
     // As RunScene steps: the inputs due now, each logged at the run time it is applied, then
     // the walk, then each card it opened, chosen and logged at the run time after the step.
@@ -1640,12 +1640,12 @@ describe("movers", { timeout: 60_000 }, () => {
   const everyMover: Real = { ...REAL, world: sharedWorld(WORLD, 1) };
   // Every stepper and hopper hopping alike, each hop up to 2 spots any way, or sideways only.
   const HOPS: readonly HopMovement[] = [
-    { kind: "hop", most: 2 },
-    { kind: "hop", most: 2, sideways: true },
+    { kind: "hop", most: 2, times: { max: 2, min: 1 } },
+    { kind: "hop", most: 2, sideways: true, times: { max: 2, min: 1 } },
   ];
   const hopping = HOPS.map((hop) => ({
     hop,
-    name: `hops of up to ${hop.most} spots${hop.sideways === true ? ", sideways" : ""}`,
+    name: `1 or 2 hops of up to ${hop.most} spots${hop.sideways === true ? ", sideways" : ""}`,
     tuned: hoppingInstead(everyMover, hop),
   }));
   const worlds = [
@@ -1670,7 +1670,7 @@ describe("movers", { timeout: 60_000 }, () => {
       const steps = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9);
       const fit = road.tallestPackBand + steps * STEP_SECONDS * walkScrollSpeed(tuned, zoned);
       for (const seed of [1]) {
-        const walk = planZone(tuned, road, seededRandom(seed), {
+        const walk = planZone(tuned, road, plannerStreams(seed), {
           road: startRoad(LANE_COUNT),
           run: zoned,
         });
@@ -1733,8 +1733,10 @@ describe("movers", { timeout: 60_000 }, () => {
     for (const { tuned } of [{ name: "every mover", tuned: everyMover }]) {
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), "homeStretch", WORLD.walkLength - 1);
       const plan = (seed: number) =>
-        planZone(tuned, GAME_ROAD, seededRandom(seed), { road: startRoad(LANE_COUNT), run: zoned })
-          .road.pending;
+        planZone(tuned, GAME_ROAD, plannerStreams(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        }).road.pending;
       expect(plan(4)).toEqual(plan(4));
       expect(plan(5)).not.toEqual(plan(4));
     }
@@ -1742,15 +1744,20 @@ describe("movers", { timeout: 60_000 }, () => {
 
   // A hop is one jump of 1 to most spots one way, across, up the road or diagonally up, never
   // down, sideways only when it says so, as long as the tuning's hop; across zones and seeds,
-  // hoppers make hops of every length they can.
-  it("hops each hopper once, any way or sideways only", () => {
+  // hoppers make hops of every length they can, and hop every count of times in their range at
+  // the first zone's pace, the slowest; a later hop that would come once the hopper has reached
+  // the pack's rows never does.
+  it("hops each hopper its drawn count of times, any way or sideways only", () => {
     for (const { hop, tuned } of hopping) {
       const spots = new Set<number>();
-      for (const zone of ZONE_IDS) {
-        const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
+      const times = new Set<number>();
+      for (const [zone, zoneIndex] of ZONE_IDS.flatMap((id) =>
+        [0, WORLD.walkLength - 1].map((index) => [id, index] as const),
+      )) {
+        const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
         const length = hopSeconds(tuned) * walkScrollSpeed(tuned, zoned);
         for (const seed of [1, 2, 3]) {
-          const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
+          const walk = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),
             run: zoned,
           });
@@ -1760,7 +1767,9 @@ describe("movers", { timeout: 60_000 }, () => {
             }
             expect(mover.motion).toBe("steps");
             const steps = mover.motion === "steps" ? mover.steps : [];
-            expect(steps).toHaveLength(1);
+            expect(steps.length).toBeGreaterThanOrEqual(1);
+            expect(steps.length).toBeLessThanOrEqual(hop.times.max);
+            times.add(steps.length);
             for (const { lanes, length: hopLength, travel } of steps) {
               const rows = -travel / GAME_ROAD.cell.length;
               expect(rows).toBeGreaterThanOrEqual(0);
@@ -1775,6 +1784,58 @@ describe("movers", { timeout: 60_000 }, () => {
         }
       }
       expect([...spots].sort()).toEqual(Array.from({ length: hop.most }, (_, i) => i + 1));
+      expect([...times].sort()).toEqual([1, 2]);
+    }
+  });
+
+  // Each stepper, hopper and stalker of the game's data, planned across seeds at the first
+  // zone's pace and the last's with every mover moving: a stalker plans for its drawn count of
+  // steps, each count in its kind's range coming up, and a stepper or hopper moves at least once
+  // and never more than its kind's most.
+  const counted = OBSTACLE_KINDS.flatMap((kind) => {
+    const movement = movementOf(kind);
+    if (movement?.kind === "approach" || movement?.kind === "step") {
+      return [{ kind, range: movement.steps }];
+    }
+    return movement?.kind === "hop" ? [{ kind, range: movement.times }] : [];
+  });
+  let countedPlans: readonly { kind: WalkItem["kind"]; mover: MoverPath }[] | null = null;
+  const plannedMovers = () => {
+    countedPlans ??= ZONE_IDS.flatMap((zone) =>
+      [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
+        [1, 2, 3, 4].flatMap((seed) => {
+          const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
+          const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
+            road: startRoad(LANE_COUNT),
+            run: zoned,
+          });
+          return walk.road.pending.flatMap(({ kind, mover }) =>
+            mover === undefined ? [] : [{ kind, mover }],
+          );
+        }),
+      ),
+    );
+    return countedPlans;
+  };
+  it.each(counted)("moves each $kind within its range of times across seeds", ({ kind, range }) => {
+    const paths = plannedMovers().filter((planned) => planned.kind === kind);
+    expect(paths.length).toBeGreaterThan(0);
+    const stalked = new Set<number>();
+    for (const { mover } of paths) {
+      if (mover.motion === "approach") {
+        expect(mover.rows).toBeGreaterThanOrEqual(range.min);
+        expect(mover.rows).toBeLessThanOrEqual(range.max);
+        expect(mover.pending).toHaveLength(mover.rows);
+        stalked.add(mover.rows);
+      } else if (mover.motion === "steps") {
+        expect(mover.steps.length).toBeGreaterThanOrEqual(1);
+        expect(mover.steps.length).toBeLessThanOrEqual(range.max);
+      }
+    }
+    if (stalked.size > 0) {
+      expect([...stalked].sort()).toEqual(
+        Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i),
+      );
     }
   });
 

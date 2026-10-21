@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { TUNING } from "../data/tuning";
-import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
+import { plannerStreams } from "../testing/movers";
+import { approachOutcomes } from "./approach";
 import {
   drawMover,
+  drawnCount,
   facesLeft,
   hasLeftRoad,
+  hopSequences,
   hopShapes,
   inMotion,
   isWarning,
@@ -14,6 +17,7 @@ import {
   type LaneSpan,
   moveMovers,
   type MoverCaps,
+  type MoverDraws,
   type MoverGeometry,
   type MoverItem,
   type MoverPath,
@@ -377,6 +381,12 @@ describe("sweptLanes", () => {
   });
 });
 
+// A mover's draws at the near end of each range, with the fewest moves (count 0) or the most.
+const FEWEST_AND_MOST: readonly { draws: MoverDraws; times: string }[] = [
+  { draws: { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5 }, times: "the fewest times" },
+  { draws: { count: 0.999999, delays: [0, 0, 0], share: 0, speed: 0.5 }, times: "the most times" },
+];
+
 // Each motion, footprint and tilt the planner meets, as a spec.
 const SPECS: readonly { name: string; spec: MoverSpec }[] = [
   { name: "a dart", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
@@ -397,6 +407,7 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
   {
     name: "a stepper",
     spec: spec({
+      count: { max: 3, min: 2 },
       kind: "steps",
       sequences: [
         [
@@ -407,24 +418,46 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
           { lanes: 0, travel: 1 },
           { lanes: -1, travel: 0 },
         ],
+        [
+          { lanes: 1, travel: 0 },
+          { lanes: 0, travel: -1 },
+          { lanes: -1, travel: 0 },
+        ],
+        [
+          { lanes: 0, travel: 1 },
+          { lanes: -1, travel: 0 },
+          { lanes: 0, travel: 1 },
+        ],
       ],
-      stepSeconds: 0.5,
+      stepSeconds: 0.2,
     }),
   },
   {
     name: "a hopper",
     spec: spec({
+      count: { max: 2, min: 1 },
       kind: "steps",
-      sequences: hopShapes(2, false).map((shape) => [shape]),
+      sequences: [...hopSequences(2, false, 1), ...hopSequences(2, false, 2)],
       stepSeconds: 0.3,
     }),
   },
   {
     name: "a sideways hopper",
     spec: spec({
+      count: { max: 2, min: 1 },
       kind: "steps",
-      sequences: hopShapes(2, true).map((shape) => [shape]),
+      sequences: [...hopSequences(2, true, 1), ...hopSequences(2, true, 2)],
       stepSeconds: 0.3,
+    }),
+  },
+  {
+    name: "a stalker",
+    spec: spec({
+      firstDelaySeconds: [0, 0.5],
+      kind: "approach",
+      secondRoadShare: [0.25, 0.45],
+      stepSeconds: 0.6,
+      steps: { max: 3, min: 2 },
     }),
   },
 ];
@@ -461,17 +494,23 @@ describe("hopShapes", () => {
 describe("moverPlacements", () => {
   // Wherever it is placed, a mover touches the pack only within what its placement blocks: in
   // its lanes, from its row's window for as long as its rows' blocking length.
-  it("keeps every kind of mover within the lanes and rows it blocks", () => {
-    for (const { spec: moving } of SPECS) {
-      const { cellLength, sightLength, window } = geometry;
-      const { lanes: across, rows } = moving.footprint;
-      const placements = moverPlacements(geometry, moving);
-      expect(placements.length).toBeGreaterThan(0);
-      for (const placement of placements) {
-        const blocked = window + (placement.rows - 1) * cellLength;
-        const reach = window + (rows - 1) * cellLength;
+  it.each(
+    SPECS.flatMap(({ name, spec: moving }) =>
+      FEWEST_AND_MOST.map(({ draws, times }) => ({ draws, moving, name, times })),
+    ),
+  )("keeps $name within the lanes and rows it blocks, moving $times", ({ draws, moving }) => {
+    const { cellLength, sightLength, window } = geometry;
+    const { lanes: across, rows } = moving.footprint;
+    const placements = moverPlacements(geometry, moving, draws);
+    expect(placements.length).toBeGreaterThan(0);
+    for (const placement of placements) {
+      const blocked = window + (placement.rows - 1) * cellLength;
+      const reach = window + (rows - 1) * cellLength;
+      const { path } = placement;
+      const outcomes = path.motion === "approach" ? approachOutcomes(path) : [path];
+      for (const outcome of outcomes) {
         for (let since = 0; since < 4000; since += 1) {
-          const place = moverPlace(geometry.laneCount, placement.path, since);
+          const place = moverPlace(geometry.laneCount, outcome, since);
           const lane = laneAt(place.lanePosition);
           const touching =
             place.solid && place.travel >= sightLength && place.travel < sightLength + reach;
@@ -491,12 +530,49 @@ describe("moverPlacements", () => {
     }
   });
 
+  // A stepper, hopper or stalker moves as many times as its drawn count, the fewest or the most
+  // of its range, less any step that would come once it has reached the pack's rows.
+  it.each(
+    SPECS.flatMap(({ name, spec: moving }) =>
+      moving.motion.kind === "steps" || moving.motion.kind === "approach"
+        ? FEWEST_AND_MOST.map(({ draws, times }) => ({ draws, moving, name, times }))
+        : [],
+    ),
+  )("moves $name its drawn count of times, moving $times", ({ draws, moving }) => {
+    const { motion } = moving;
+    const range =
+      motion.kind === "approach" ? motion.steps : motion.kind === "steps" ? motion.count : null;
+    if (range === null) {
+      throw new Error("not a stepping mover");
+    }
+    const count = drawnCount(range, draws.count);
+    expect(count).toBe(draws.count === 0 ? range.min : range.max);
+    const moves = moverPlacements(geometry, moving, draws).flatMap(({ path }) =>
+      (path.motion === "approach" ? approachOutcomes(path) : [path]).map((outcome) =>
+        outcome.motion === "steps" || outcome.motion === "approach" ? outcome.steps.length : 0,
+      ),
+    );
+    expect(Math.max(...moves)).toBe(count);
+    expect(Math.min(...moves)).toBeGreaterThanOrEqual(1);
+  });
+
+  it.each([
+    { draw: 0, range: { max: 3, min: 2 }, want: 2 },
+    { draw: 0.49, range: { max: 3, min: 2 }, want: 2 },
+    { draw: 0.5, range: { max: 3, min: 2 }, want: 3 },
+    { draw: 0.999999, range: { max: 3, min: 2 }, want: 3 },
+    { draw: 0.999999, range: { max: 1, min: 1 }, want: 1 },
+  ])("draws a count of $want from $range.min to $range.max at $draw", ({ draw, range, want }) => {
+    expect(drawnCount(range, draw)).toBe(want);
+  });
+
   // The pack-fit gap keeps room behind a hopper at every spot it hops over, not only where it
   // takes off and lands.
   it("stands a hopper at every spot its hop passes over", () => {
     const placements = moverPlacements(
       geometry,
       spec({
+        count: { max: 1, min: 1 },
         kind: "steps",
         sequences: [[{ lanes: 2, travel: 0 }], [{ lanes: 0, travel: 2 }]],
         stepSeconds: 0.3,
@@ -622,7 +698,7 @@ describe("placeMovers", () => {
   it("places every mover wholly within the zone, within every cap on screen", () => {
     const { grid } = freeGrid();
     const { spawns } = placeMovers(
-      seededRandom(1),
+      plannerStreams(1),
       zoned,
       CAPS,
       grid,
@@ -664,7 +740,7 @@ describe("placeMovers", () => {
   it("blocks the lanes a crosser sweeps with its lead-in, and takes the cells it keeps clear", () => {
     const { blocked, grid, taken } = freeGrid();
     const [moving] = SPECS;
-    const { spawns } = placeMovers(seededRandom(2), zoned, CAPS, grid, [], rows, [
+    const { spawns } = placeMovers(plannerStreams(2), zoned, CAPS, grid, [], rows, [
       {
         count: 1,
         kind: "squirrel",
@@ -687,21 +763,22 @@ describe("placeMovers", () => {
       ["leaves no pack-fit gap for", { packFits: () => false }],
     ] as const) {
       const { grid } = freeGrid();
-      let draws = 0;
-      const counting = () => {
-        draws += 1;
-        return 0;
+      const counted = () => {
+        const draws = { movers: 0, spawns: 0 };
+        const counter = (stream: keyof typeof draws) => () => {
+          draws[stream] += 1;
+          return 0;
+        };
+        return { draws, streams: { movers: counter("movers"), spawns: counter("spawns") } };
       };
-      const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
+      const placing = counted();
+      const placed = placeMovers(placing.streams, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
         { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
       ]);
       expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
-      let own = 0;
-      drawMover(() => {
-        own += 1;
-        return 0;
-      });
-      expect(draws).toBe(own);
+      const own = counted();
+      drawMover(own.streams);
+      expect(placing.draws).toEqual(own.draws);
     }
   });
 
@@ -715,7 +792,7 @@ describe("placeMovers", () => {
     ]) {
       const { blocked, grid } = freeGrid();
       const placed = placeMovers(
-        seededRandom(3),
+        plannerStreams(3),
         zoned,
         CAPS,
         { ...grid, block: (row, ...rest) => !refusal.refused(row) && grid.block(row, ...rest) },

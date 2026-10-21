@@ -1,5 +1,5 @@
 import { itemAt } from "../lib/arrays";
-import { type Random, randomPick } from "../lib/random";
+import { randomPick } from "../lib/random";
 import {
   type LaneSpan,
   type MoverCaps,
@@ -8,6 +8,7 @@ import {
   type MoverStand,
   type OnScreen,
   placeMovers,
+  type PlannerStreams,
 } from "./movers";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
@@ -303,7 +304,7 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // spawn with no room left is skipped too, the same way: a zone never fails to plan for want of
 // room.
 export function planSpawns<Kind extends string>(
-  random: Random,
+  streams: PlannerStreams,
   plan: SpawnPlan<Kind>,
 ): SpawnEvent<Kind>[] {
   const { laneCount, minOpenLanes } = plan;
@@ -568,7 +569,7 @@ export function planSpawns<Kind extends string>(
   const placeMoving = (first: boolean): SpawnQuota<Kind>[] => {
     const quotas = movers.filter((quota) => quota.first === first);
     const { dropped, spawns } = placeMovers(
-      random,
+      streams,
       moverRoad,
       plan.moverCaps,
       moverGrid,
@@ -607,7 +608,7 @@ export function planSpawns<Kind extends string>(
       if (cells.length === 0) {
         continue;
       }
-      const cell = randomPick(random, cells);
+      const cell = randomPick(streams.spawns, cells);
       const covered = laneRun(cell.lane, footprint.lanes);
       for (let row = cell.row; row <= lastRowTaken(cell, footprint, quota.blocksLane); row++) {
         takeCells(row, covered);

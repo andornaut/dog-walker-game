@@ -35,7 +35,7 @@ import {
   walkScrollSpeed,
 } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
-import { hoppingInstead, sharedWorld } from "../testing/movers";
+import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
 import { actBot, type BotRoad, moverHazards, newBot } from "./bot";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
@@ -150,9 +150,12 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     { busy: withoutPulls(SHORT), name: "the game's movers" },
     {
       busy: withoutPulls(
-        hoppingInstead({ ...SHORT, world: sharedWorld(SHORT.world, 1) }, { kind: "hop", most: 2 }),
+        hoppingInstead(
+          { ...SHORT, world: sharedWorld(SHORT.world, 1) },
+          { kind: "hop", most: 2, times: { max: 2, min: 1 } },
+        ),
       ),
-      name: "every mover moving and every stepper and hopper hopping up to 2 spots",
+      name: "every mover moving and every stepper and hopper hopping 1 or 2 times, up to 2 spots",
     },
   ])("avoids every obstacle no pull forces, as an ideal player, with $name", ({ busy }) => {
     const results = [run(busy, 1, IDEAL_SKILL, ["duchess"]), run(busy, 2, IDEAL_SKILL, NO_CHASER)];
@@ -186,7 +189,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 //   a step late; sampled a quarter step apart, wherever the mover would hit a pack standing in a
 //   lane, the bot keeps the pack out of that lane from a step before to a step after; and it
 //   keeps the pack out of no lane the mover never hits.
-describe("a mover's moves and hazards", () => {
+describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   const route = gameData.world.zones.map(({ id }) => id as ZoneId);
   type Moving = Exclude<Movement, { kind: "still" }>;
   const entries: { kind: WalkItemKind; movement: Moving; shape: MoverFootprint }[] = [
@@ -206,8 +209,14 @@ describe("a mover's moves and hazards", () => {
   const movements = new Map(
     entries.map((entry) => [JSON.stringify([entry.movement, entry.shape]), entry]),
   );
-  const LOW: MoverDraws = { delays: [0, 0], share: 0, speed: 0 };
-  const HIGH: MoverDraws = { delays: [0.999999, 0.999999], share: 0.999999, speed: 0.999999 };
+  // Each end of every draw, the count's included: the fewest and the most times it moves.
+  const LOW: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0 };
+  const HIGH: MoverDraws = {
+    count: 0.999999,
+    delays: [0.999999, 0.999999, 0.999999],
+    share: 0.999999,
+    speed: 0.999999,
+  };
   const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
     [LOW, HIGH].flatMap((draws) =>
       [...movements.values()].map((entry) => ({
@@ -230,7 +239,7 @@ describe("a mover's moves and hazards", () => {
       const road: BotRoad = { data: gameData, geometry, speed };
       const { cell, laneCount, roadBottom, roadTop, sightLength, tallestPackBand } = geometry;
       const height = itemHeight(gameData, geometry, mover.kind, true);
-      const spec = moverSpec(gameData, seededRandom(1), mover.shape, mover.movement);
+      const spec = moverSpec(gameData, plannerStreams(1), mover.shape, mover.movement);
       const placements = moverPlacements(
         {
           cellLength: cell.length,

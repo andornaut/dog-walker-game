@@ -3,6 +3,7 @@ import type {
   EncounterId,
   GameData,
   MinorObstacleId,
+  MoveCount,
   Movement,
   ObstacleEncounterId,
   Tuning,
@@ -71,7 +72,7 @@ import { type LaneMotion, type LaneMotionConfig, laneMotionX, stillInLane } from
 import {
   drawnLanes,
   hasLeftRoad,
-  hopShapes,
+  hopSequences,
   isWarning,
   laneAt,
   moveMovers,
@@ -80,6 +81,7 @@ import {
   type MoverMotion,
   moverPlace,
   type MoverSpec,
+  type PlannerStreams,
   type StepShape,
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
@@ -467,6 +469,11 @@ const STEPS: readonly StepShape[] = [
   { lanes: 0, travel: -1 },
 ];
 
+// Every count in a range, fewest first.
+function countsOf(range: MoveCount): number[] {
+  return Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i);
+}
+
 // A hop lasts this long while the tuning names no seconds.moverHopSeconds.
 const DEFAULT_HOP_SECONDS = 0.3;
 
@@ -475,12 +482,14 @@ export function hopSeconds(data: Pick<GameData, "tuning">): Seconds {
   return seconds(tuned.moverHopSeconds ?? DEFAULT_HOP_SECONDS);
 }
 
-// How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, with
-// their mirror image as the other way it may go, and a hopper may make any hop it can: the
-// planner takes whichever keeps the road passable, drawing among those from the zone's seed.
+// How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
+// its most, the first min from the spawns stream and any more from the movers stream; it may take
+// the first steps of them, or of their mirror image, as many as its drawn count. A hopper may make
+// any hops it can, as many as its drawn count. The planner takes whichever way keeps the road
+// passable, drawing among those from the zone's seed.
 export function moverSpec(
   data: Pick<GameData, "tuning">,
-  random: Random,
+  streams: PlannerStreams,
   footprint: MoverFootprint,
   movement: MovingMovement,
 ): MoverSpec {
@@ -510,16 +519,26 @@ export function moverSpec(
     };
   } else if (movement.kind === "hop") {
     motion = {
+      count: movement.times,
       kind: "steps",
-      sequences: hopShapes(movement.most, movement.sideways === true).map((shape) => [shape]),
+      sequences: countsOf(movement.times).flatMap((times) =>
+        hopSequences(movement.most, movement.sideways === true, times),
+      ),
       stepSeconds: hopSeconds(data),
     };
   } else {
-    const steps = Array.from({ length: movement.steps }, () => randomPick(random, STEPS));
+    const { max, min } = movement.steps;
+    const steps = Array.from({ length: max }, (_, i) =>
+      randomPick(i < min ? streams.spawns : streams.movers, STEPS),
+    );
     const mirrored = steps.map(({ lanes, travel }) => ({ lanes: -lanes as -1 | 0 | 1, travel }));
     motion = {
+      count: movement.steps,
       kind: "steps",
-      sequences: [steps, mirrored],
+      sequences: countsOf(movement.steps).flatMap((count) => [
+        steps.slice(0, count),
+        mirrored.slice(0, count),
+      ]),
       stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
     };
   }
@@ -553,9 +572,10 @@ export function opensACard(
 // share: one quota per kind, and one per stepper, whose steps are its own.
 export function spawnQuotas(
   data: WalkData,
-  random: Random,
+  streams: PlannerStreams,
   run: RunState,
 ): SpawnQuota<WalkItemKind>[] {
+  const random = streams.spawns;
   const zone = currentZone(data, run);
   const stats = zoneStats(data.tuning, zone, run.zoneIndex);
   const scaled = (stat: "obstacleSpawns" | "tipSpawns" | "treatSpawns", base: number) =>
@@ -579,7 +599,7 @@ export function spawnQuotas(
     count: moverCount,
     first: opensACard(data, kind),
     kind,
-    mover: moverSpec(data, random, footprintOf(data, kind), movement),
+    mover: moverSpec(data, streams, footprintOf(data, kind), movement),
   });
   const movements = new Map<WalkItemKind, MovingMovement>();
   for (const kind of kinds) {
@@ -627,7 +647,7 @@ export function planZone(
     | "sightLength"
     | "tallestPackBand"
   >,
-  random: Random,
+  streams: PlannerStreams,
   walk: Walk,
 ): Walk {
   const { road, run } = walk;
@@ -647,7 +667,7 @@ export function planZone(
       total: read(data.tuning, "counts", "maxMovers"),
     },
     packLength: geometry.tallestPackBand,
-    quotas: spawnQuotas(data, random, run),
+    quotas: spawnQuotas(data, streams, run),
     reactionSeconds: read(data.tuning, "seconds", "pathReactionMargin"),
     roadLength: geometry.roadBottom - geometry.roadTop,
     scrollSpeed: walkScrollSpeed(data, run),
@@ -655,7 +675,7 @@ export function planZone(
     stepSeconds: STEP_SECONDS,
     zoneLength: length,
   };
-  return { road: { ...road, pending: planSpawns(random, plan) }, run };
+  return { road: { ...road, pending: planSpawns(streams, plan) }, run };
 }
 
 // Steering during a hit stop is dropped, not queued.

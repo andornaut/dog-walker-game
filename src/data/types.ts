@@ -265,26 +265,39 @@ interface Shape {
   readonly rows: 1 | 2 | 3;
 }
 
+// How many times a mover moves: a count from min to max, both included, drawn per mover as it is
+// planned. A fixed count has min equal to max.
+export interface MoveCount {
+  readonly max: number;
+  readonly min: number;
+}
+
 // How an obstacle moves when it comes as a mover, each move after a cue seconds.moverWarningSeconds
 // long, and only while the mover is still ahead of the pack's rows. approach: steps steps toward
 // the pack, each to the spot a lane to either side, a row down or diagonally down that is nearest
 // the pack as the step is chosen, seconds.moverStepSeconds each; the first's cue
-// seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, the
-// second, with no cue of its own, once the first has ended and the road left between it and the
+// seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, each later
+// one, with no cue of its own, once the step before has ended and the road left between it and the
 // pack is multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across the road
 // at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile (tilt 0
 // when absent). inLane: down its lane at factor of the road's speed, above 1 toward the pack, below
-// 1 away. hop: one jump of 1 to most spots one way, lanes to either side or, unless sideways, a row
-// up the road or diagonally up, landing seconds.moverHopSeconds after it leaves. step: steps spots,
-// each a lane to either side or a row toward or away, seconds.moverStepSeconds each. still: it
-// never moves, as with no movement. Each mover's speed varies by up to multipliers.moverSpeedJitter
-// either way, and each step, hop and dart comes up to seconds.moverTimingJitter late.
+// 1 away. hop: times jumps, each of 1 to most spots one way, lanes to either side or, unless
+// sideways, a row up the road or diagonally up, landing seconds.moverHopSeconds after it leaves.
+// step: steps spots, each a lane to either side or a row toward or away, seconds.moverStepSeconds
+// each. still: it never moves, as with no movement. Each mover's speed varies by up to
+// multipliers.moverSpeedJitter either way, and each step, hop and dart comes up to
+// seconds.moverTimingJitter late.
 export type Movement =
-  | { readonly kind: "approach"; readonly steps: 1 | 2 }
+  | { readonly kind: "approach"; readonly steps: MoveCount }
   | { readonly kind: "dart"; readonly tilt?: number }
-  | { readonly kind: "hop"; readonly most: 1 | 2; readonly sideways?: true }
+  | {
+      readonly kind: "hop";
+      readonly most: 1 | 2;
+      readonly sideways?: true;
+      readonly times: MoveCount;
+    }
   | { readonly kind: "inLane"; readonly factor: number }
-  | { readonly kind: "step"; readonly steps: 1 | 2 }
+  | { readonly kind: "step"; readonly steps: MoveCount }
   | { readonly kind: "still" };
 export type MovementKind = Movement["kind"];
 

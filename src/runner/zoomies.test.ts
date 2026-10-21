@@ -8,6 +8,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
+import { plannerStreams } from "../testing/movers";
 import { STEP_SECONDS } from "./fixedStep";
 import { laneControlIn } from "./laneControl";
 import { destinationLane, stillInLane } from "./laneMotion";
@@ -126,7 +127,10 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
         walker: "casey",
       });
       const run: RunState = { ...start, invincible: true, route: [zone] };
-      let walk = planZone(gameData, ROAD, seededRandom(seed), { road: startRoad(LANE_COUNT), run });
+      let walk = planZone(gameData, ROAD, plannerStreams(seed), {
+        road: startRoad(LANE_COUNT),
+        run,
+      });
       const random = seededRandom(seed);
       let seconds = 0;
       let clock = 0;

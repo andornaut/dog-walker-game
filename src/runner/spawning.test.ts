@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../lib/arrays";
-import { seededRandom } from "../lib/random";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
+import { plannerStreams } from "../testing/movers";
 import {
   blockingLength,
   everyLaneReaches,
@@ -257,7 +257,7 @@ describe("packGap and packFitsBetween over wide obstacles", () => {
 
 describe("planSpawns", () => {
   it("spawns exactly the count of each kind, sorted by distance", () => {
-    const events = planSpawns(seededRandom(1), plan);
+    const events = planSpawns(plannerStreams(1), plan);
     expect(countOf("obstacle", events)).toBe(6);
     expect(countOf("tip", events)).toBe(9);
     expect(countOf("treat", events)).toBe(3);
@@ -268,7 +268,7 @@ describe("planSpawns", () => {
   it("puts every spawn on a row and in a lane, one spawn per cell", () => {
     const rows = spawnRowDistances(100, 1000);
     for (const seed of seeds) {
-      const events = planSpawns(seededRandom(seed), plan);
+      const events = planSpawns(plannerStreams(seed), plan);
       const cells = new Set(events.map(({ distance, lane }) => `${distance}:${lane}`));
       expect(cells.size).toBe(events.length);
       for (const { distance, lane } of events) {
@@ -280,8 +280,8 @@ describe("planSpawns", () => {
   });
 
   it("repeats the same plan for the same seed and varies with the seed", () => {
-    expect(planSpawns(seededRandom(9), plan)).toEqual(planSpawns(seededRandom(9), plan));
-    expect(planSpawns(seededRandom(9), plan)).not.toEqual(planSpawns(seededRandom(10), plan));
+    expect(planSpawns(plannerStreams(9), plan)).toEqual(planSpawns(plannerStreams(9), plan));
+    expect(planSpawns(plannerStreams(9), plan)).not.toEqual(planSpawns(plannerStreams(10), plan));
   });
 
   it("never blocks every lane on a row, even when obstacles fill all the room they may", () => {
@@ -293,7 +293,7 @@ describe("planSpawns", () => {
       ],
     };
     for (const seed of seeds) {
-      const events = planSpawns(seededRandom(seed), crowded);
+      const events = planSpawns(plannerStreams(seed), crowded);
       for (const row of spawnRowDistances(100, 1000)) {
         const onRow = events.filter((event) => event.distance === row);
         expect(countOf("obstacle", onRow)).toBe(4);
@@ -309,7 +309,7 @@ describe("planSpawns", () => {
       quotas: [{ blocksLane: true, count: 9 * 3, kind: "obstacle" }],
     };
     for (const seed of seeds.slice(0, 10)) {
-      const open = openLanesByRow(crowded, planSpawns(seededRandom(seed), crowded));
+      const open = openLanesByRow(crowded, planSpawns(plannerStreams(seed), crowded));
       expect(open.every((lanes) => lanes.length === 2)).toBe(true);
     }
   });
@@ -327,7 +327,7 @@ describe("planSpawns", () => {
         quotas: [{ blocksLane: true, count: room + 1, kind: "obstacle" }],
       };
       for (const seed of seeds.slice(0, 10)) {
-        const events = planSpawns(seededRandom(seed), crowded);
+        const events = planSpawns(plannerStreams(seed), crowded);
         expect(countOf("obstacle", events)).toBe(room);
         expect(openLanesByRow(crowded, events).every((lanes) => lanes.length >= minOpenLanes)).toBe(
           true,
@@ -349,7 +349,7 @@ describe("planSpawns", () => {
         unplannable: { ...plan, sightLength: 49 },
       },
     ] satisfies readonly { error: RegExp; name: string; unplannable: SpawnPlan<Kind> }[]) {
-      expect(() => planSpawns(seededRandom(1), unplannable)).toThrow(error);
+      expect(() => planSpawns(plannerStreams(1), unplannable)).toThrow(error);
     }
   });
 
@@ -361,11 +361,11 @@ describe("planSpawns", () => {
         { blocksLane: false, count: 9, kind: "tip" },
       ],
     };
-    const events = planSpawns(seededRandom(1), tooBig);
+    const events = planSpawns(plannerStreams(1), tooBig);
     expect(countOf("obstacle", events)).toBeGreaterThan(0);
     expect(countOf("obstacle", events)).toBeLessThan(40);
     expect(countOf("tip", events)).toBe(9);
-    expect(planSpawns(seededRandom(1), tooBig)).toEqual(events);
+    expect(planSpawns(plannerStreams(1), tooBig)).toEqual(events);
   });
 
   it("skips a bigger obstacle that would leave too few cells for the one-cell spawns", () => {
@@ -378,7 +378,7 @@ describe("planSpawns", () => {
       ],
     };
     for (const seed of seeds.slice(0, 10)) {
-      const events = planSpawns(seededRandom(seed), crowded);
+      const events = planSpawns(plannerStreams(seed), crowded);
       expect(countOf("tip", events)).toBe(30);
       expect(countOf("bench", events)).toBeGreaterThan(0);
       expect(countOf("bench", events)).toBeLessThanOrEqual(7);
@@ -387,7 +387,7 @@ describe("planSpawns", () => {
 
   it("places every obstacle at a tight reach, an open lane within a move of each on the row before", () => {
     for (const seed of seeds) {
-      const events = planSpawns(seededRandom(seed), tight);
+      const events = planSpawns(plannerStreams(seed), tight);
       expect(countOf("obstacle", events)).toBe(27);
       const open = openLanesByRow(tight, events);
       open.slice(1).forEach((lanes, i) => {
@@ -404,7 +404,7 @@ describe("planSpawns", () => {
   it("keeps a footprint on the road, its cells to itself, and two lanes open", () => {
     const kinds = new Set<Kind>();
     for (const seed of seeds) {
-      const events = planSpawns(seededRandom(seed), shaped);
+      const events = planSpawns(plannerStreams(seed), shaped);
       expect(countOf("obstacle", events)).toBe(4);
       expect(countOf("hedge", events)).toBe(3);
       expect(events.filter(blocking).length).toBeGreaterThanOrEqual(13);
@@ -427,7 +427,7 @@ describe("planSpawns", () => {
 
   it("leaves a way through footprints over several lanes and rows, from any lane", () => {
     for (const seed of seeds) {
-      const spans = spansOf(shaped, planSpawns(seededRandom(seed), shaped));
+      const spans = spansOf(shaped, planSpawns(plannerStreams(seed), shaped));
       for (const start of [0, 1, 2, 3, 4]) {
         expect(lanesReachedAtEnd(shaped, spans, start)).not.toEqual([]);
       }
@@ -440,7 +440,7 @@ describe("planSpawns", () => {
       quotas: [{ blocksLane: true, count: 12, footprint: FOOTPRINTS.car, kind: "car" }],
     };
     for (const seed of seeds.slice(0, 10)) {
-      for (const event of planSpawns(seededRandom(seed), cars)) {
+      for (const event of planSpawns(plannerStreams(seed), cars)) {
         expect(event.distance + blockingLength(cars, 3)).toBeLessThanOrEqual(1900 + 70);
       }
     }
@@ -451,7 +451,7 @@ describe("planSpawns", () => {
   // 50px pack, 25px per lane change and the 10px margin; wide ones are two rows apart or more.
   it("spaces obstacles for lane changes between them, for any seed", () => {
     for (const seed of seeds.slice(0, 5)) {
-      const events = planSpawns(seededRandom(seed), reacting).filter(blocking);
+      const events = planSpawns(plannerStreams(seed), reacting).filter(blocking);
       const lanesOf = (event: SpawnEvent<Kind>) =>
         new Set(Array.from({ length: footprintOf(event.kind).lanes }, (_, i) => event.lane + i));
       expect(events.filter((event) => footprintOf(event.kind).lanes > 1).length).toBeGreaterThan(4);
@@ -473,7 +473,7 @@ describe("planSpawns", () => {
   it("spreads each kind over the zone, one per equal stretch of rows", () => {
     // 3 treats over 9 rows: one in rows 100-300, one in 400-600, one in 700-900.
     for (const seed of seeds) {
-      const treats = planSpawns(seededRandom(seed), plan).filter((e) => e.kind === "treat");
+      const treats = planSpawns(plannerStreams(seed), plan).filter((e) => e.kind === "treat");
       expect(treats.map(({ distance }) => Math.floor((distance - 100) / 300))).toEqual([0, 1, 2]);
     }
   });
@@ -534,7 +534,7 @@ describe("laneReach and rowSpacing", () => {
 
   it("plans the spawns on rows that far apart", () => {
     const fast = { ...tight, quotas: plan.quotas, scrollSpeed: 200 };
-    const distances = planSpawns(seededRandom(1), fast).map(({ distance }) => distance);
+    const distances = planSpawns(plannerStreams(1), fast).map(({ distance }) => distance);
     expect(distances.length).toBeGreaterThan(0);
     expect(distances.every((distance) => distance % rowSpacing(fast) === 0)).toBe(true);
   });

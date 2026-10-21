@@ -37,7 +37,8 @@ import { stepZoomies, type ZoomiesData } from "./zoomies";
 export type SessionData = CardData & PullData & WalkData & ZoomiesData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
-// the walk is driven. Each zone is planned from a stream of its own, spawns-<zone index>.
+// the walk is driven. Each zone is planned from streams of its own, spawns-<zone index> and
+// movers-<zone index>.
 export interface RunStreams {
   readonly cards: Random;
   readonly forks: Random;
@@ -237,8 +238,12 @@ function planned(
   geometry: SessionGeometry,
   walk: Walk,
 ): Walk {
-  const spawns = randomStream(streams.seed, `spawns-${walk.run.zoneIndex}`);
-  return planZone(data, geometry(walk.run), spawns, walk);
+  const zone = walk.run.zoneIndex;
+  const planner = {
+    movers: randomStream(streams.seed, `movers-${zone}`),
+    spawns: randomStream(streams.seed, `spawns-${zone}`),
+  };
+  return planZone(data, geometry(walk.run), planner, walk);
 }
 
 // An owner who just fired you holds the walk while their moment plays, as a hit stop does:
