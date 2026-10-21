@@ -26,7 +26,6 @@ export const HOME_TEXT = {
     dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
-    dogSubtitle: "Dog",
     dogTotals: "Walks {walks} · Neighborhoods {zones} · Fired {fired}",
     gearEquipped: "In your Pocket",
     gearOwned: "Yours, tap to pocket it",
@@ -52,7 +51,6 @@ export const HOME_TEXT = {
   },
   gateSign: "High Park",
   gearBought: "{gear} is yours. Pocket it for a walk.",
-  lockedName: "???",
   logbook: {
     badges: "Badges",
     best: "Best {best}, {note}",
