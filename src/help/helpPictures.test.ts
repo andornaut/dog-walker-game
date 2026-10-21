@@ -8,7 +8,7 @@ import { cardRowSpec } from "../layout/cardLayout";
 import { cardHeader, cardRowRects } from "../layout/cardRow";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
-import { forkPaths } from "../rules/route";
+import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
 import { HELP_LAYOUT } from "./helpLayout";
 import { HELP_SCENES, helpPicture, type PictureStrip } from "./helpPictures";
@@ -84,6 +84,15 @@ describe("helpPicture", () => {
       { dog: speaker.dog, text: itemAt(gameData.quips[speaker.dog][speaker.mood], speaker.quip) },
     ]);
   });
+
+  it.each([["pickups"]] satisfies [HelpPictureId][])(
+    "walks %s in a zone that is neither the walk's first nor its last",
+    (id) => {
+      const { firstZone, lastZone } = gameData.world;
+      const zone = currentZoneId(gameData, helpPicture(gameData, id).walk.run);
+      expect([firstZone, lastZone]).not.toContain(zone);
+    },
+  );
 
   it("shows the fork after the first neighborhood, its paths easiest first, each with its pay", () => {
     const { card, walk } = helpPicture(gameData, "zones");

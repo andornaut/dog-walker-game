@@ -37,6 +37,17 @@ export function firstZoneId(data: RouteData): ZoneId {
   return firstZone;
 }
 
+// A zone a walk can take between its first and last: the first in world order that is
+// neither.
+export function middleZoneId(data: RouteData): ZoneId {
+  const { firstZone, lastZone, name, zones } = data.world;
+  const id = zones.find((zone) => zone.id !== firstZone && zone.id !== lastZone)?.id;
+  if (id === undefined || !isZoneId(data, id)) {
+    throw new RangeError(`${name} has no zone between its first and last`);
+  }
+  return id;
+}
+
 // The zone at a route position. Between a zone's end and the fork after it, the position has
 // no zone yet, so it is the last zone walked.
 export function zoneAt(data: RouteData, route: readonly ZoneId[], zoneIndex: number): Zone {

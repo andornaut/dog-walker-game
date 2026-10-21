@@ -15,7 +15,7 @@ import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import type { Change } from "../rules/causes";
 import { cardFor, type CardView, forkCard, MAX_CARD_OPTIONS } from "../rules/choices";
-import { firstZoneId, forkPaths } from "../rules/route";
+import { firstZoneId, forkPaths, middleZoneId } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { addCents, cents, clampHearts, pixels } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";
@@ -128,7 +128,6 @@ export const HELP_SCENES = {
     ],
     // Tips grabbed so far, on top of the starting purse.
     tips: 7,
-    zone: "park",
     zoneFraction: 0.4,
   },
   pulls: {
@@ -241,14 +240,14 @@ function lanes(data: GameData): HelpPicture {
 }
 
 function pickups(data: GameData): HelpPicture {
-  const { dogs, lane, pickups: items, tips, zone, zoneFraction } = HELP_SCENES.pickups;
+  const { dogs, lane, pickups: items, tips, zoneFraction } = HELP_SCENES.pickups;
   const started = startRun(data, dogs);
   const tip = tipValue(data, started).amount;
   // The second neighborhood, the first finished.
   const run: RunState = {
     ...started,
     money: addCents(started.money, cents(tip * tips)),
-    route: [firstZoneId(data), zone],
+    route: [firstZoneId(data), middleZoneId(data)],
     zoneDistance: pixels(zoneLength(data) * zoneFraction),
     zoneIndex: 1,
   };
