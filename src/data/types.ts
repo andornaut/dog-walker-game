@@ -330,9 +330,10 @@ export type Encounter = {
     ))
 );
 
-// An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
-// pack, and locks lane input for seconds.minorStumble, showing hitLabel when it has one. Each
-// zone's weights set how often it appears there, and skins are its looks by zone: the
+// An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
+// bumpHearts modifiers such as Muddy's change it, and never money; a small dog may dodge it.
+// The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
+// Each zone's weights set how often it appears there, and skins are its looks by zone: the
 // obstacles of one shape share one skin per zone. One with a movement comes as a mover at the
 // zone's moverShare.
 export interface MinorObstacle {
