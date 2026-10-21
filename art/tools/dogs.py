@@ -279,8 +279,8 @@ def biscuit_road(q):
     g.rect(19, 25 + q["br"], 3, 3, "white")
     bx = 16 + ln // 2
     # tricolour: a tan coat, the black saddle across the back with tan showing round the rump and hips
-    g.ell(bx, 22 + b, 6.5, 5.5, "ochre", "rust", "tan")
-    g.ell(bx, 20.5 + b, 5, 3.6, "navy", "ink", "dslate")
+    g.cel(bx, 22 + b, 6.5, 5.5, "ochre", "rust", "tan")
+    g.cel(bx, 20.5 + b, 5, 3.6, "navy", "ink", "dslate")
     # tail held up, white tip; flagged, it stands 1px longer
     tx, pk = 16 + q["tail"], 1 if q["perk"] else 0
     g.rect(tx - 1, 26 + b, 2, 3 + pk, "navy")
@@ -293,9 +293,9 @@ def biscuit_road(q):
     hx, n = 16 + ln, q["nose"]
     if n:
         g.ell(hx, 14 + b, 4, 2.5, "ochre")
-    g.ell(hx, 11 + b - n / 2, 5.5 - n / 4, 5 - n * 0.75, "ochre", None, "tan")
-    g.ell(hx - 5, 13 + b - q["ears"] + q["flop"], 2, 4.5, "rust", "dbrown")
-    g.ell(hx + 5, 13 + b - q["ears"] + q["flop"] + q["twitch"], 2, 4.5, "rust", "dbrown")
+    g.cel(hx, 11 + b - n / 2, 5.5 - n / 4, 5 - n * 0.75, "ochre", None, "tan")
+    g.cel(hx - 5, 13 + b - q["ears"] + q["flop"], 2, 4.5, "rust", "dbrown")
+    g.cel(hx + 5, 13 + b - q["ears"] + q["flop"] + q["twitch"], 2, 4.5, "rust", "dbrown")
     scent(g, hx, 5 + b - n, q["scent"])
     spray(g, q["spray"])
     return g
@@ -327,17 +327,17 @@ def duchess_road(q):
     g.rect(12, 27 + q["bl"], 2, 2, "lgrey")
     g.rect(18, 27 + q["br"], 2, 2, "lgrey")
     bx = 16 + ln // 2
-    g.ell(bx, 23.5 + b, 5.5, 4.5, "white", "lgrey")
-    g.ell(bx - 4.5, 25 + b, 1.6, 2, "white", "lgrey")
+    g.cel(bx, 23.5 + b, 5.5, 4.5, "white", "lgrey")
+    g.cel(bx - 4.5, 25 + b, 1.6, 2, "white", "lgrey")
     g.ell(bx + 4.5, 25 + b, 1.6, 2, "lgrey")
     g.ell(bx, 20 + b, 4, 1.2, "lgrey")
     tx = 16 + q["tail"]
-    g.ell(tx, 26.5 + b, 3, 2, "white", "lgrey", "white")
+    g.cel(tx, 26.5 + b, 3, 2, "white", "lgrey", "white")
     g.p(tx + 1, 27 + b, "lgrey")
     hx = 16 + ln
-    g.ell(hx - 4.5, 18 + b - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
+    g.cel(hx - 4.5, 18 + b - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
     g.ell(hx + 4.5, 18 + b - q["ears"] + q["flop"] + q["twitch"], 2.2, 4, "lgrey")
-    g.ell(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
+    g.cel(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
     bow(g, hx, 10 + b)
     underside(g)
     spray(g, q["spray"])
@@ -371,11 +371,11 @@ def nugget_road(q):
         # sitting square: the rump settles into a rounder, wider seat, the hind feet set out at its sides
         g.rect(bx - 7, 27, 2, 2, "skin2")
         g.rect(bx + 5, 27, 2, 2, "skin2")
-        g.ell(bx, 24 + b, 6, 4.5, "skin1", "skin2", "cream")
+        g.cel(bx, 24 + b, 6, 4.5, "skin1", "skin2", "cream")
     else:
         g.rect(12, 27 + q["bl"], 2, 2, "skin2")
         g.rect(18, 27 + q["br"], 2, 2, "skin2")
-        g.ell(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+        g.cel(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
     # the curly tail, coiled on top of the rump: a skin2 ring round the coat, a skin2 dot at its heart
     tx = 16 + q["tail"]
     g.ell(tx, 24.5 + b, 2.3, 1.9, "skin2")
@@ -386,7 +386,7 @@ def nugget_road(q):
     # the head; cocked, it shifts 1px to that side, the ear on that side dropping and the other lifting
     tl = (q["tilt"] > 0) - (q["tilt"] < 0)
     hx = 16 + ln + tl
-    g.ell(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    g.cel(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
     g.ell(hx - 4.8, 12.3 + b - q["ears"] + q["flop"] - tl, 2, 1.7, "navy")
     g.ell(hx + 4.8, 12.3 + b - q["ears"] + q["flop"] + q["twitch"] + tl, 2, 1.7, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
@@ -424,8 +424,8 @@ def zippy_road(q):
     g.rect(12, 26 + q["bl"] + hop, 2, 3, "white")
     g.rect(18, 26 + q["br"] + hop, 2, 3, "white")
     bx = 16 + ln // 2
-    g.ell(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
-    g.ell(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
+    g.cel(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
+    g.cel(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
     tx = 16 + q["tail"]
     # a short upright tail, white with a tan tip, standing clear of the rump
     g.rect(tx - 1, 27 + b, 2, 2, "white")
@@ -433,9 +433,9 @@ def zippy_road(q):
     # reaching, the head stretches forward of the collar on a white neck
     hx, hb = 16 + ln, b + q["reach"]
     if q["reach"]:
-        g.ell(hx, 18 + b + q["reach"] / 2, 3.5, 2 - q["reach"] / 2, "white", "lgrey")
+        g.cel(hx, 18 + b + q["reach"] / 2, 3.5, 2 - q["reach"] / 2, "white", "lgrey")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
-    g.ell(hx, 15 + hb, 5, 4.5, "white", "lgrey")
+    g.cel(hx, 15 + hb, 5, 4.5, "white", "lgrey")
     g.ell(hx + 2, 14 + hb, 2.5, 2, "ochre")
     e = q["ears"] + q["flop"]
     g.tri((hx - 5, 14 + hb), (hx - 4, 10 + hb + e), (hx - 1.5, 12.5 + hb), "ochre")
@@ -569,7 +569,7 @@ def archie_road(q):
     bx = 16 + ln // 2
     g.ell(bx, 21.5 + b, 7, 6, *COAT)
     merle(g, bx, b, ((-3.5, 21, 2, 1.5), (3, 24, 2.2, 1.5), (2.5, 19.6, 1.3, 1)))
-    g.ell(bx, 16.5 + b, 6, 2, "white", "lgrey")
+    g.cel(bx, 16.5 + b, 6, 2, "white", "lgrey")
     # the red bandana's knot at the nape, its two ends flaring down the back
     g.rect(bx - 5, 17 + b, 10, 1, "red")
     g.rect(bx - 1, 16 + b, 2, 2, "dred")
