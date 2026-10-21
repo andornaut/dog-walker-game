@@ -79,7 +79,7 @@ export const UPGRADES = {
   sweetTalker: {
     art: "card-sweet-talker",
     duration: "run",
-    effect: "The first card each neighborhood costs nothing",
+    effect: "First card each neighborhood: cash options free",
     effects: [
       {
         by: "sweetTalkerFreeCards",

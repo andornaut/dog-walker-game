@@ -83,7 +83,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "The reviews are in.",
     conditions: [{ count: 10, kind: "walksWithoutFiring" }],
-    goal: "Finish 10 walks without being fired",
+    goal: "Finish 10 walks with nobody fired",
     id: "fiveStarService",
     name: "Five-Star Service",
   },
