@@ -4,16 +4,16 @@
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-lock, icon-lock-open (the padlock with its shackle lifted, on a
 locked item the bank covers), icon-money, icon-treat (the treat pickup's bone as
-road.treat lays it out at 16x16, for the top bar's treat well), icon-stinky; icon-dog-slot (32x32, a pack
+road.treat lays it out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack
 slot for sale in the shop: a doghouse with a green plus badge, as the shop's item-<gear> art,
-outlined with icon_edge); ui-panel, ui-hint
-(24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
-baked in with font-title); the home screen's ui-detail-card (24x24
+outlined with icon_edge); ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice,
+8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the
+start screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 nine-slice, 8px caps and 2px top and bottom, drawn 24 tall) and
 ui-detail-well (68x68) and ui-detail-well-locked (68x68, neutral grey, for an item not owned); the shop list's
 ui-scroll-track (8x24) and ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
-and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-strip-well (24x24
-nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking
+and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows' ui-strip-well (24x24
+nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice, 8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking
 owner's name plate), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
 the start screen top bar's ui-home-cash-well (70x28, drawn at (5, 5));
@@ -135,8 +135,8 @@ def plate(face, lit, shade, w=24, h=24):
 
 
 # ---------- icons ----------
-# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-sound and icon-music sit on
-# ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
+# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings, icon-sound and
+# icon-music sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
 # amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream: dbrown holds
 # 5.85:1 there, plum 9.42:1 and dred 5.07:1.
 
@@ -145,7 +145,7 @@ NAVY_FACE = ("cream", "tan", "pink")
 CREAM_PANEL = ("dbrown", "plum", "dred")
 
 def pause():
-    """Amber bars, like the Home glyph beside it on the run bar, so the run controls stand apart
+    """Amber bars, like the Home glyph at the other end of the walk bar, so the walk controls stand apart
     from the cream help and sound glyphs."""
     g = Grid(16, 16)
     g.rect(4, 3, 3, 10, "amber")
@@ -168,7 +168,7 @@ def play():
 
 
 def home_icon():
-    """The run bar's Home button, beside pause: a house as tall as the pause bars, amber with
+    """The walk bar's Home button: a house as tall as the pause bars, amber with
     orange on its lower-right edges like them, a chimney on the right slope and a doorway the
     navy face shows through."""
     g = Grid(16, 16)
@@ -211,8 +211,8 @@ def lock():
 
 
 def lock_open():
-    """icon-lock with its shackle lifted: the left leg still in the body, the right leg's end a
-    row clear of it, so a locked item the bank covers reads apart from one it does not by shape.
+    """icon-lock with its shackle lifted: the left leg still in the body, the right leg's end two
+    rows clear of it, so a locked item the bank covers reads apart from one it does not by shape.
     The body is a row shorter than icon-lock's to leave the gap."""
     g = Grid(16, 16)
     g.ell(8, 4.5, 4, 4, "grey", "slate", "lgrey")
@@ -238,7 +238,7 @@ def money():
 
 def treat_icon():
     """The treat pickup's bone as road.treat lays it out at 16x16 (idle frame 0), outlined with icon_edge
-    as the content icons are. Its white holds on the top bar's ink as the road bone holds on the dslate road."""
+    as the content icons are."""
     import road
 
     g = road.treat(lift=0)
@@ -420,7 +420,7 @@ def button(state):
     plum label (9.42:1); go and go-pressed the primary action, one per screen, ink label on green
     (8.41:1); disabled and go-disabled are the same flat ngrey face sunk to the pressed depth with
     no lip or highlight, ndslate label (3.56:1; inactive, so exempt). secondary and
-    secondary-pressed are copies of normal and pressed, kept so frame numbers hold.
+    secondary-pressed are copies of normal and pressed.
     Raised, row 0 is ink, row 1 the highlight, the face runs to row 18, the lip fills rows 19 to
     22 and ink row 23. Sunk, rows 0 and 1 are clear, row 2 is ink and the face fills rows 3 to
     22, 2px lower, so every row from 3 to 18 is plain face and the plate stretches cleanly."""
@@ -628,9 +628,9 @@ def dog_slot():
     return g
 
 
-# ---------- plates: the hit label, the firing plate and the payout tag ----------
+# ---------- plates: the hit label, the fired plate and the payout tag ----------
 
-def hit_label(face="dred", lit="red", shade="plum"):
+def hit_label(face, lit, shade):
     """ui-hit-label's 24x24 nine-slice, 8px corners: a plate (dred for normal, blue for lucky)
     stretched to 176x32. White text holds 7.34:1 on dred and 8.48:1 on blue; the cream band
     carries the dslate road and the ink line the light roads."""
@@ -640,7 +640,7 @@ def hit_label(face="dred", lit="red", shade="plum"):
 def fired_plate(face, lit, shade):
     """ui-fired-plate's 24x24 nine-slice, 8px corners: a plate in the owner's temperament colour
     (blue, purple, dred) with a white stamp line 2px inside the face, its corners cut so it reads
-    as a stamp's rounded border. The game stretches it to 116x28 over the doghouse's name plate."""
+    as a stamp's rounded border. The game stretches it to 116x28 over the dog's card."""
     g = plate(face, lit, shade)
     g.rect(7, 6, 10, 1, "white")
     g.rect(7, 17, 10, 1, "white")
@@ -668,8 +668,8 @@ def payout_label():
 
 # ---------- the dogs' colours and the debuff bars ----------
 
-# Each dog's colour: base, shade and dark, from the dog's accessory. It backs the dog's photo, rings
-# its emblem badge and runs along the card's foot stripe. No two dogs share a base. Card
+# Each dog's colour: base, shade and dark, from the dog's accessory. Its base backs the dog's photo on
+# ui-dog-card. No two dogs share a base. Card
 # backgrounds never use zone colours; a dog's accent is its own colour. Snowball's is
 # his collar's blue, not its sky, which backs every owner's photo; Archie's is rust, for his red
 # merle coat; Pierre's is his show bow's mauve, which holds his black coat's ink line at 3.83:1.
@@ -778,7 +778,7 @@ def tap_burst(step):
 
 
 def dust(step):
-    """16x16, 4 frames: a puff of dust when the walker hops or lands."""
+    """16x16, 4 frames: a puff of dust when a dog joins the pack and hops onto the gate path."""
     g = Grid(16, 16)
     spread, size = (2, 3.5, 5, 6)[step], (2.2, 3, 2.8, 1.8)[step]
     for cx, lift in ((8 - spread, 0), (8, 1), (8 + spread, 0)):
@@ -786,7 +786,7 @@ def dust(step):
     return g
 
 
-# ---------- home screen: afford outline, detail card, step headings ----------
+# ---------- start screen: afford outline, detail card, section frames ----------
 
 # One coin stud, 7x7, lit from the top left: P plum rim, Y yellow, A amber, O orange.
 COIN = ["..PPP..", ".PYYAP.", "PYYAAAP", "PYAAAOP", "PAAAOOP", ".PAOOP.", "..PPP.."]
@@ -795,7 +795,7 @@ COIN = ["..PPP..", ".PYYAP.", "PYYAAAP", "PYAAAOP", "PAAAOOP", ".PAOOP.", "..PPP
 def afford_frame(glint):
     """24x24 nine-slice (8px corners), drawn 2px outside a dog, slot or gear tile the player can
     afford: a plum keyline outside a 1px amber line, with a gold coin stud on each corner. It
-    differs from ui-select (ink, a 2px pulsing yellow band, ink, 3px out, square corners) by
+    differs from ui-select (ink, a 2px band pulsing amber to orange, ink, 1px out) by
     its thin line, its round studs and its deeper gold, and it does not pulse. Amber holds
     4.57:1 on the dark wood, the plum keyline 6.37:1 on the yard's grass and the studs' plum
     rims 6.49:1 on tan tiles. glint runs a flash along the line over two frames: 1 lights the
@@ -931,7 +931,7 @@ STITCH_DASH, STITCH_GAP = 5, 3
 def denim():
     """16x16 seamless tile: the Pocket section's jeans-pocket fill, repeated (TileSprite) over the
     section's tile area. Blue twill: dslate diagonals rising to the right every 4px, and sparse slate
-    flecks of weft between them. Blue holds apart from the band's navy and the dogs section's wood,
+    flecks of weft between them. Blue holds apart from the band's navy and the dogs section's plaid,
     and the tiles' ink edges hold on it."""
     g = Grid(DENIM, DENIM)
     g.rect(0, 0, DENIM, DENIM, "blue")
@@ -1014,7 +1014,7 @@ def stitch(horizontal):
     return g
 
 
-# ---------- run screen: the state strip, zone progress, quips, zone banner ----------
+# ---------- walk screen and card rows: the strip well, zone progress, quips, zone banner ----------
 
 def well(g, x, y, w, h):
     """A recessed ink slot in the wood: clipped corners and a dark brown lip below and to the right."""
@@ -1025,9 +1025,8 @@ def well(g, x, y, w, h):
 
 
 def strip_well():
-    """24x24 nine-slice (8px corners): the state strip's tab hanging under the zone well, plum wood
-    with a flat top (it tucks under the bar) and rounded bottom corners around an ink well that
-    holds the 16x16 state icons (they hold 3:1 on ink). Stretch it to the strip's width."""
+    """24x24 nine-slice (8px corners): the band behind a card row's subtitle, plum wood with a flat top
+    and rounded bottom corners around an ink well. Stretch it to the subtitle's width."""
     g = Grid(24, 24)
     g.rect(0, 0, 24, 22, "plum")
     g.rect(1, 22, 22, 1, "plum")
@@ -1141,7 +1140,7 @@ DOG_CARD_HEART_LOSS = (("white", 1), ("white", 1), ("white", 2), ("white", 4))
 def dog_card(dog):
     """120x74, ui-dog-card: one of three cards in the walk's card row, in the neutral section look: a
     2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face, the header
-    (rows 1 to 16) split from the body by an ink rule on row 17. The game writes the name on the
+    (rows 2 to 16) split from the body by an ink rule on row 17. The game writes the name on the
     header in cream (9.59:1), with no plate. The dog's photo is an ink frame (6,26 36x36) round a
     cream mat round its colour (8,28 32x32), in the body's middle. The owner's photo is an ink frame
     (45,26 24x24) round a white mat round sky (47,28 20x20) for the owner's small face; the game writes
@@ -1280,14 +1279,14 @@ def owner_tab():
 # down) dims.
 ZONE_COLOURS = {
     "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "dbrick",
-    "the-beaches": "cream", "yonge-street": "skin2",
+    "the-beaches": "cream", "yonge-street": "shale",
 }
 # One ramp step up: the inverse of DARKER over Endesga 32 and the neutral greys, for rims that must
 # lighten to hold 3:1 on ink.
 LIGHTER = {v: k for k, v in DARKER.items() if k != v and k not in TORONTO.values()}
 # A Toronto road colour steps up its own ramp, then to the Endesga colour above its top: dbrick to brick
-# to rust.
-LIGHTER.update({K["dbrick"]: K["brick"], K["brick"]: K["rust"]})
+# to rust, shale to ash to slate.
+LIGHTER.update({K["dbrick"]: K["brick"], K["brick"]: K["rust"], K["shale"]: K["ash"], K["ash"]: K["slate"]})
 
 
 def pip_rim(fill):
@@ -1299,11 +1298,10 @@ def pip_rim(fill):
 
 
 def zone_pip(zone=None, done=False):
-    """18x8, one per zone of the chosen route, 3px apart. todo (no zone) is a dashed dbrown rim
-    around the bare well: not yet chosen. <zone> is chosen: a rim in the zone's colour (pip_rim) around a 16x6
-    well at 1,1 in the zone's road shadow. The game fills the current pip's well from the left in
-    the zone's colour (ZONE_COLOURS) as the zone goes by. <zone>-done is the full colour with a
-    tick (white, or plum where white falls under 3:1), so progress never relies on colour alone."""
+    """18x8, one per zone of the route on the end screen, 3px apart. todo (no zone) is a dashed dbrown
+    rim around the bare well: not yet chosen. <zone> is chosen: a rim in the zone's colour (pip_rim)
+    around a 16x6 well at 1,1 in the zone's road shadow. <zone>-done is the full colour with a tick
+    (white, or plum where white falls under 3:1), so progress never relies on colour alone."""
     g = Grid(18, 8)
     if zone is None:
         for x in range(1, 17, 3):
@@ -1326,7 +1324,7 @@ def zone_pip(zone=None, done=False):
 
 
 def quip_tail_down():
-    """8x6, ui-quip-tail turned to point down from a bubble above the doghouse row. Place its top row
+    """8x6, ui-quip-tail turned to point down from a bubble above the owner's tab. Place its top row
     over the bubble's bottom rim so the cream runs through; the tip is at column 5, row 5."""
     return down_tail(5)
 
@@ -1399,7 +1397,8 @@ def quip_name():
 
 
 def quip_tail():
-    """6x8, pointing left at the owner's window in the dog column: cream in an ink line. Place its
+    """6x8, pointing left at the speaking owner's ui-owner-tab (flipped for a bubble on its left): cream in
+    an ink line. Place its
     right column over the bubble's left rim so the cream meets the bubble's plum line."""
     rows = ["....##", "...###", "..####", ".#####", "######", ".#####", "...###", ".....#"]
     g = Grid(6, 8)
@@ -1430,13 +1429,6 @@ def zone_banner():
     for x in range(28, 220, 3):
         g.p(x, 21, "tan")
     return g
-
-
-def chevron(g, x, cy, left, col, sh):
-    """A 3px-thick arrowhead 13px tall with its tip at x, shaded below the middle."""
-    for d in range(-6, 7):
-        px = x + abs(d) if left else x - abs(d) - 2
-        g.rect(px, cy + d, 3, 1, sh if d > 0 else col)
 
 
 def touch_track(g, left, right, y):

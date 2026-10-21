@@ -5,13 +5,13 @@ owner-<dog>: 32x48, chibi, front view, in Endesga 32 with the road outline and
 the lit rim, like the forced-stop people in road.py. Each owner's hair, skin,
 glasses and clothes match their face-owner-<dog> portrait in owners.py, and
 their job shows in a prop held in the left hand. They stand at the gate on the
-home screen before the first walk and wave the pack home on the end screen.
+start screen before the first walk and wave the pack home on the end screen.
 Tags: idle (2 frames at 400ms: they breathe, the body 1px higher on the second
 with the feet planted) and wave (2 frames at 300ms: the right arm raised, the
 hand swinging out and back).
 
 Usage:
-  people.py preview OUT.png   contact sheet of every frame, scaled up
+  people.py preview OUT.png   every frame on the zone roads, scaled up
   people.py build             write art/people/*.aseprite, then export
                               public/art/sprites/*.png and *.json with Aseprite
 

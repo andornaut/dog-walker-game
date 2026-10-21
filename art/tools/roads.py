@@ -5,16 +5,16 @@ road-<zone>        320x64 images, one per zone. They tile vertically with no
                    seam: every pattern repeats in 64 rows (or a divisor of it)
                    and anything drawn near the top or bottom edge wraps.
 road-<zone>-start  320x64 images, one per zone. Rows 20 to 63 are a neutral cross
-                   street in the backdrops' asphalt (CROSSING) and rows 0 to 19
+                   street in dslate asphalt (CROSSING) and rows 0 to 19
                    this zone's strip, so a start strip follows any zone at a
                    fork: the road reads up the screen as the previous zone's
                    strip, the start strip, then this zone's strip.
 
-Each strip keeps its zone's road colour (src/data/world.ts) as the base, so the
-game's shadows (one ramp step darker) still match. The four lane dividers sit
+Each strip keeps its zone's road colour (the game data's roadColor) as the base, so
+the game's shadows (one ramp step darker) still match. The four lane dividers sit
 at x = 64k-1 (2px wide) and share one look per zone, so lane edges stay
-readable at speed; the outer 3 to 7 px of each side is a curb or verge, which an
-outer lane's 56px sprite (4 px in from its 64px lane's edge) overlaps by up to 3 px.
+readable at speed; the outer 5 to 8 px of each side is a curb or verge, which an
+outer lane's 56px sprite (4 px in from its 64px lane's edge) overlaps by up to 4 px.
 
 Usage:
   roads.py preview OUT.png   each zone's road scrolling up: two strips of the zone
@@ -110,19 +110,17 @@ def kensington_lines(g):
             g.rect(x + 2, y + 1, 1, 12, "mauve")
 
 
-# fallen leaves in rust and ochre (amber and orange read as coins): a pointed blade, lit (f) on
+# fallen leaves (never amber or orange, which read as coins): a pointed blade, lit (f) on
 # the upper left of a dark vein (v) that runs on out as the stem and shaded (s) below it, so each
 # reads as a leaf and not a round fleck
-LEAVES = (("ochre", "rust", "dbrown"), ("ochre", "rust", "dbrown"), ("rust", "rust", "dbrown"),
-          ("rust", "dbrown", "plum"))
 _TILTED = ("..fff", ".ffvf", "ffvss", "fvss.", "v....")
 _SMALL = ("..ff", ".fvf", "fvs.", "v...")
 LEAF_SHAPES = (_TILTED, tuple(r[::-1] for r in _TILTED), _SMALL, tuple(r[::-1] for r in _SMALL),
                (".ff.", "fvfs", "fvss", ".vs.", ".v.."))
 
 
-def leaves(g, rnd, n, x0, x1, y0=0, y1=H, tones=LEAVES):
-    """n leaves spaced apart, clear of the lane dividers, each in one of tones."""
+def leaves(g, rnd, n, x0, x1, tones, y0=0, y1=H):
+    """n leaves spaced apart, clear of the lane dividers, each in one of tones (lit, shade, vein)."""
     for x, y in scatter(rnd, n, x0, x1, 18, y0, y1, lambda x, y: (x + 7) % LANE >= 9):
         tone = dict(zip("fsv", rnd.choice(tones)))
         for j, row in enumerate(rnd.choice(LEAF_SHAPES)):
@@ -150,9 +148,7 @@ def beaches_lines(g):
 
 
 # ---------- the six neighborhoods ----------
-# Each strip's base is its zone's road colour, which sets the game's shadow, the leash colours and
-# every road sprite's outline. Yonge Street's shale concrete and the Distillery District's dark road
-# take a coal road shadow and the pink leash.
+# Each strip's base is its zone's road colour, which the game's road shadow steps down from.
 
 def grit(g, rnd, n, cols):
     """Sparse 2px grit spaced apart, 1x2 or 2x1."""
@@ -181,7 +177,7 @@ def cabbagetown_ground(g):
     g.rect(0, 0, W, H, "grey")
     grit(g, rnd, 60, ("slate", "slate", "dslate", "lgrey", "lgrey"))
     cracks(g, rnd, ((43, 12, 10), (100, 40, 12), (160, 62, 9), (224, 50, 14), (286, 30, 8)), "dslate")
-    leaves(g, rnd, 4, 10, W - 10, tones=(("moss", "olive", "dolive"), ("gold", "ochre", "rust")))
+    leaves(g, rnd, 4, 10, W - 10, (("moss", "olive", "dolive"), ("gold", "ochre", "rust")))
     for x0, edge in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "stone")
         g.rect(edge, 0, 1, H, "slate")
@@ -266,7 +262,7 @@ def distillery_lines(g):
 
 def kensington_ground(g):
     """Dark brick flagstones in offset courses between dark laneway gutters: dbrick stones in plum joints,
-    brick and mauve flecks worn into them; shale stones on the outer 4 columns inside a coal seam, an ash
+    brick, walnut and mauve flecks worn into them; shale stones on the outer 4 columns inside a coal seam, an ash
     joint every 16 rows."""
     rnd = random.Random("road-kensington-market")
     g.rect(0, 0, W, H, "dbrick")
@@ -288,8 +284,8 @@ def kensington_ground(g):
 
 
 def beaches_ground(g):
-    """A boardwalk, weathered: some boards driftwood, sand blown in tan drifts along the
-    edge beams, the beams driftwood."""
+    """A boardwalk, weathered: some boards skin1, sand drifted in skin1 along the edge beams, the
+    beams driftwood."""
     rnd = random.Random("road-the-beaches")
     g.rect(0, 0, W, H, "cream")
     boards = range(0, W, 16)
@@ -377,10 +373,10 @@ CROSSING = (20, 64)
 
 
 def crossing(g):
-    """A neutral cross street in the backdrops' asphalt, so a start strip follows any zone. Up
+    """A neutral cross street in dslate asphalt, so a start strip follows any zone. Up
     the road: the near kerb's top (rows 60 to 63) and rounded edge (58, 59), the asphalt with a
     zebra crossing (35 to 48), then the far kerb's shadow (24, 25), face (22, 23) and lit top
-    (20, 21). Every band across the road is 2 rows, each step 3.4:1 or less."""
+    (20, 21). Every kerb band is 2 rows but the near kerb's 4-row top, each step 3.4:1 or less."""
     y0, y1 = CROSSING
     rnd = random.Random("road-crossing")
     g.rect(0, y0, W, y1 - y0, "dslate")

@@ -85,7 +85,7 @@ TITLE = bmfont("font-title")
 
 def text_w(s, sc):
     """The inked width of s at scale sc: the advances, less the trailing gap of the last glyph."""
-    mask, ox, _, adv = TITLE[s[-1]]
+    mask, ox, _, _ = TITLE[s[-1]]
     return sc * (sum(TITLE[ch][3] for ch in s[:-1]) + ox + (mask.width if mask else 0))
 
 
@@ -147,7 +147,6 @@ def pack(view, cx, base):
         if shadow:
             view.shadow(x, feet + 1, f.width)
         view.paste(f, x - f.width // 2, feet - f.getbbox()[3] + 1)
-        return f
 
     ids = ("koda", "biscuit", "duchess")   # big, medium, small: formation order
     dogs = [(f"dog-{d}", sn.side_dx(f"dog-{d}", side), base - row) for d, (side, row) in zip(ids, formation(ids))]

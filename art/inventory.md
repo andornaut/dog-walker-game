@@ -4,7 +4,7 @@ Every art asset the game needs. Keys are the `public/art/manifest.json` keys. Ty
 
 `<zone>` is a zone's art id: cabbagetown, high-park, distillery-district, kensington-market, the-beaches or yonge-street.
 
-Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50`, each floor(size × scale + 0.5) with the same tags, frames and durations (style guide, Depth scaling): every dog, road object, pickup, roadside prop, and ambient sprite but the sky movers.
+Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide, Depth scaling): every dog, road object, pickup, roadside prop, and ambient sprite but the sky movers.
 
 ## People and dogs
 
@@ -99,7 +99,7 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50`, each floor(
 
 ### Ambient
 
-Cosmetic movers drawn by `art/tools/ambient.py`, whose docstring holds their frames and timings. Side views face right and are flipped to go left. The sky movers fly far back across one neighborhood's sky and have no depth variants; the cross street draws the others from `@50`.
+Cosmetic movers drawn by `art/tools/ambient.py` (style guide, Ambient). The cross street draws all but the sky movers from `@50`.
 
 | Key                                                       | Type   | Size                       | Tags                               | Note                                          |
 | --------------------------------------------------------- | ------ | -------------------------- | ---------------------------------- | --------------------------------------------- |
@@ -139,7 +139,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | `fx-fired-pop`                                                          | sprite | 64×64             | `play`                                     | Drawn at 2× behind the fired face                                        |
 | `fx-treat-pop`                                                          | sprite | 24×24             | `play`                                     | Where a given treat lands                                                |
 | `icon-bump`, `icon-fired`, `icon-hint`, `icon-last-heart`, `icon-lucky` | image  | 16×16             |                                            | Message strip lines                                                      |
-| `icon-gear-<gear>`, `icon-upgrade-<upgrade>`                            | image  | 16×16             |                                            | One per gear (4) and upgrade (9) id                                      |
+| `icon-gear-<gear>`, `icon-upgrade-<upgrade>`                            | image  | 16×16             |                                            | One per gear (4) and upgrade (6) id                                      |
 | `icon-gear-<gear>-20`, `icon-upgrade-<upgrade>-20`                      | image  | 20×20             |                                            | The walk bar's effect wells                                              |
 | `icon-money`                                                            | image  | 16×16             |                                            | Also cards, shop and end screen                                          |
 | `icon-muddy`, `icon-stinky`, `icon-zoomies`                             | image  | 16×16             |                                            | The debuffs' icons; each leads its `ui-debuff-bar`                       |
@@ -178,7 +178,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | `card-<encounter>-<option>`   | image  | 75×56   |                                                  | One per option of the encounters and lucky encounters                     |
 | `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | One per upgrade (6), and Poop bags' Skip                                  |
 | `card-cost`                   | image  | 71×13   |                                                  | Cost plaque, at 2× on the large frame                                     |
-| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | `route` for a fork's path cards                                           |
+| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | The game draws `encounter` for an obstacle and `route` for a fork         |
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`                                  | Tap-to-enlarge view                                                       |
 | `card-zone-<zone>`            | image  | 75×56   |                                                  | A fork's path card: the zone's road to a cross street, its scenery beyond |
 

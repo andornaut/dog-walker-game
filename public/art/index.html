@@ -95,7 +95,7 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 @media (max-width: 600px) { .sound { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "key loop" "audio audio"; } }
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 6px; padding: 16px; color: var(--muted); font-size: 14px; }
 .empty code, .meta code { font-family: var(--f-mono); font-size: 13px; color: var(--fg); }
-.palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
+.palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
 .sw { display: grid; gap: 4px; background: none; border: 0; padding: 0; color: var(--muted); font-family: var(--f-mono); font-size: 11px; cursor: pointer; text-align: left; }
 .sw i { display: block; height: 36px; border-radius: 4px; border: 1px solid var(--line); }
 .sw b { color: var(--fg); font-weight: 600; }
@@ -107,7 +107,7 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 <main class="wrap">
   <header>
     <h1>Dog Walker Art</h1>
-    <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it, grouped by key prefix. Sprites play their Aseprite animations. Mocks are design tests, not game assets.</p>
+    <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it, grouped by key prefix. Sprites play their Aseprite animations.</p>
     <div class="counts" id="counts" role="group" aria-label="Show only"></div>
     <p class="error" id="status" hidden></p>
   </header>
@@ -121,25 +121,26 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
       <span class="lbl" id="ground-label">Ground</span>
       <label class="gr" title="Ink"><input type="radio" name="ground" value="#181425"><i style="background:#181425"></i><span class="sr">Ink</span></label>
       <label class="gr" title="Checker"><input type="radio" name="ground" value="checker"><i class="checker"></i><span class="sr">Checker</span></label>
-      <label class="gr" title="Distillery District road"><input type="radio" name="ground" value="#3a4466"><i style="background:#3a4466"></i><span class="sr">Distillery District road</span></label>
+      <label class="gr" title="Cabbagetown road"><input type="radio" name="ground" value="#8b9bb4"><i style="background:#8b9bb4"></i><span class="sr">Cabbagetown road</span></label>
       <label class="gr" title="High Park road"><input type="radio" name="ground" value="#e4a672"><i style="background:#e4a672"></i><span class="sr">High Park road</span></label>
-      <label class="gr" title="Kensington Market road"><input type="radio" name="ground" value="#f6757a"><i style="background:#f6757a"></i><span class="sr">Kensington Market road</span></label>
-      <label class="gr" title="Yonge Street road"><input type="radio" name="ground" value="#c28569"><i style="background:#c28569"></i><span class="sr">Yonge Street road</span></label>
-      <label class="gr" title="High Park undergrowth"><input type="radio" name="ground" value="#1e4d2b"><i style="background:#1e4d2b"></i><span class="sr">High Park undergrowth</span></label>
-      <label class="gr" title="Kensington Market paving"><input type="radio" name="ground" value="#353b45"><i style="background:#353b45"></i><span class="sr">Kensington Market paving</span></label>
-      <label class="gr" title="UI cream"><input type="radio" name="ground" value="#ead4aa"><i style="background:#ead4aa"></i><span class="sr">UI cream</span></label>
+      <label class="gr" title="Distillery District road"><input type="radio" name="ground" value="#3a4466"><i style="background:#3a4466"></i><span class="sr">Distillery District road</span></label>
+      <label class="gr" title="Kensington Market road"><input type="radio" name="ground" value="#5e2620"><i style="background:#5e2620"></i><span class="sr">Kensington Market road</span></label>
+      <label class="gr" title="The Beaches road and UI cream"><input type="radio" name="ground" value="#ead4aa"><i style="background:#ead4aa"></i><span class="sr">The Beaches road and UI cream</span></label>
+      <label class="gr" title="Yonge Street road"><input type="radio" name="ground" value="#353b45"><i style="background:#353b45"></i><span class="sr">Yonge Street road</span></label>
+      <label class="gr" title="High Park verge"><input type="radio" name="ground" value="#1e4d2b"><i style="background:#1e4d2b"></i><span class="sr">High Park verge</span></label>
       <output id="ground-name" aria-hidden="true"></output>
     </div>
   </div>
 
-  <section id="s-palette" aria-labelledby="h-palette"><h2 id="h-palette">Palette <small>Endesga 32</small></h2><div class="palette" id="palette"></div></section>
+  <section id="s-palette" aria-labelledby="h-palette"><h2 id="h-palette">Palette <small>Endesga 32, the Toronto colours and the neutral greys</small></h2><div class="palette" id="palette"></div></section>
 </main>
 
 <script>
 (() => {
 "use strict";
 const BASE = "/art/";
-const PAL = "be4a2f d77643 ead4aa e4a672 b86f50 733e39 3e2731 a22633 e43b44 f77622 feae34 fee761 63c74d 3e8948 265c42 193c3e 124e89 0099db 2ce8f5 ffffff c0cbdc 8b9bb4 5a6988 3a4466 262b44 181425 ff0044 68386c b55088 f6757a e8b796 c28569".split(" ");
+// The house palette in pixel.py order (Endesga 32, the Toronto colours, the neutral greys), as K name and hex.
+const PAL = "rust:be4a2f ochre:d77643 cream:ead4aa tan:e4a672 brown:b86f50 dbrown:733e39 plum:3e2731 dred:a22633 red:e43b44 orange:f77622 amber:feae34 yellow:fee761 green:63c74d dgreen:3e8948 forest:265c42 teal:193c3e blue:124e89 sky:0099db cyan:2ce8f5 white:ffffff lgrey:c0cbdc grey:8b9bb4 slate:5a6988 dslate:3a4466 navy:262b44 ink:181425 hot:ff0044 purple:68386c mauve:b55088 pink:f6757a skin1:e8b796 skin2:c28569 moss:9cb04a olive:6b8a35 dolive:445a26 canopy:357a2f pine:1e4d2b fir:11301c brick:8e3b2b dbrick:5e2620 clay:9a6a4a bark:523a2c walnut:2e2019 driftwood:a99c86 stone:8a857c dstone:625e58 ash:57606a shale:353b45 coal:26292f ttc:da291c turquoise:35c2a6 dturq:1f8a7a lilac:a77bd9 violet:6d4bb0 lime:b2d94a foam:a8e0e6 shallow:58b8c9 lake:2f7fa6 dlake:1d5576 gold:f9c74f peach:ff9e6b haze:cfe3ea azure:3d86e0 cobalt:2654b0 nlgrey:d8d8d8 ngrey:a4a4a4 nslate:727272 ndslate:4a4a4a".split(" ").map(p => p.split(":"));
 const $ = id => document.getElementById(id);
 const el = (tag, props = {}, kids = []) => {
   const { dataset, ...rest } = props;
@@ -154,11 +155,13 @@ const el = (tag, props = {}, kids = []) => {
 const GROUPS = [
   { id: "dogs", title: "Dogs", prefixes: ["dog-"] },
   { id: "faces", title: "Faces", prefixes: ["face-dog-", "face-owner-", "face-walker-"] },
-  { id: "portraits", title: "Portraits", prefixes: ["portrait-dog-"] },
+  { id: "portraits", title: "Portraits", prefixes: ["portrait-"] },
   { id: "walkers", title: "Walkers", prefixes: ["walker-"] },
-  { id: "road", title: "Road", hint: "no prefix: encounters, lucky finds, forced stops, obstacles, pickups" },
+  { id: "owners", title: "Owners", prefixes: ["owner-"] },
+  { id: "road", title: "Road", hint: "no prefix: encounters, lucky finds, forced stops, obstacles, movers, pickups" },
+  { id: "ambient", title: "Ambient", prefixes: ["ambient-"] },
+  { id: "roadside", title: "Roadside", prefixes: ["roadside-"] },
   { id: "effects", title: "Effects", prefixes: ["fx-"] },
-  { id: "gags", title: "Gags", prefixes: ["gag-"] },
   { id: "cards", title: "Cards", prefixes: ["card-"] },
   { id: "ui", title: "UI", prefixes: ["ui-", "icon-", "item-"] },
   { id: "badges", title: "Badges", prefixes: ["badge-"] },
@@ -292,7 +295,7 @@ async function addSound(host, s) {
   ]));
 }
 
-// One section per group, inserted before Mocks, plus its link in the jump list.
+// One section per group, inserted before the palette, plus its link in the jump list.
 for (const g of GROUPS) {
   const hint = g.hint || [...(g.prefixes || []).map(p => p + "*"), ...(g.keys || [])].join(" ");
   $("s-palette").before(el("section", { id: "s-" + g.id }, [
@@ -329,9 +332,9 @@ async function main() {
   applyFilter();
 }
 
-$("palette").replaceChildren(...PAL.map((h, i) => {
-  const b = el("button", { type: "button", className: "sw", title: "Copy #" + h }, [el("i", { style: `background:#${h}` }), el("span", { innerHTML: `<b>${i}</b> #${h}` })]);
-  b.addEventListener("click", async () => { try { await navigator.clipboard.writeText("#" + h); b.lastChild.innerHTML = `<b>${i}</b> copied`; setTimeout(() => { b.lastChild.innerHTML = `<b>${i}</b> #${h}`; }, 900); } catch (e) { /* clipboard unavailable */ } });
+$("palette").replaceChildren(...PAL.map(([name, h]) => {
+  const b = el("button", { type: "button", className: "sw", title: "Copy #" + h }, [el("i", { style: `background:#${h}` }), el("span", { innerHTML: `<b>${name}</b> #${h}` })]);
+  b.addEventListener("click", async () => { try { await navigator.clipboard.writeText("#" + h); b.lastChild.innerHTML = `<b>${name}</b> copied`; setTimeout(() => { b.lastChild.innerHTML = `<b>${name}</b> #${h}`; }, 900); } catch (e) { /* clipboard unavailable */ } });
   return b;
 }));
 $("jn-palette").textContent = String(PAL.length);

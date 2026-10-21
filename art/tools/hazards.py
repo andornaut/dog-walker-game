@@ -28,7 +28,7 @@ The side views face right; the game mirrors squirrel-dash, loose-dog and
 ui-warning-arrow for a crossing to the left, and the coyote for a step to the
 left. Every road sprite takes the road outline rule (pixel.road_edge), so its
 silhouette holds 3:1 on the three light roads and its fill carries the dslate road;
-the coyote also takes road.LIT's rim. The warning cues are outlined in ink.
+squirrel-dash and the coyote also take road.LIT's rim. The warning cues are outlined in ink.
 
 The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn
 road.SCALE (1.5) times bigger on a minis.Mini, which keeps 1px lines 1px;
@@ -40,7 +40,7 @@ squirrel-dash@50, loose-dog@50 (24x24), ball-bounce@75, ball-bounce@50 (18x27,
 times the step; depths.py draws the steps between them.
 
 Usage:
-  hazards.py preview OUT.png   every frame on the four road colours
+  hazards.py preview OUT.png   every frame on the zone roads
   hazards.py build             write art/hazards/*.aseprite and export to
                                public/art/sprites/
 
@@ -53,7 +53,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, ROADS, Grid, edged, main  # noqa: E402
+from pixel import K, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
 from road import LIT, SCALE, SQUIRREL_FUR, face_disc, face_front, lean, rim  # noqa: E402
@@ -189,7 +189,7 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
 
 # ---------- ball-bounce: a ball, bouncing ----------
 
-# The bounce, laid out for the 28x42 ball and scaled to each step's frame, floor(24x36 x step + 0.5): the ground
+# The bounce, laid out on a 28x42 design and scaled to each step's frame, floor(24x36 x step + 0.5): the ground
 # row (the ball's outline touches it on contact, and the shadow is centred on it); the ball's bottom height per
 # frame; its radii when squashed on contact, stretched near the ground and round at the top of the arc; the
 # stripes' width, spacing and step per frame (whole cycles over the 6 frames, so the loop has no jump); and the
@@ -220,8 +220,8 @@ BALL = ball_steps()
 
 def ball_bounce(f, s=1):
     """Frame f of the bounce at scale s: squashed on contact (f == 0), stretched on the frames either side
-    of it, round at the top. It is white with two red stripes rolling across, so it reads on the dark Elm
-    Avenue road as well as the light ones."""
+    of it, round at the top. It is white with two red stripes rolling across, so it reads on the dslate
+    road as well as the light ones."""
     q = BALL[s]
     w, h = q["size"]
     up = q["heights"][f]
@@ -499,7 +499,7 @@ def small(s, q, offsets):
     return dict(q, new=lambda w=32, h=32: Mini(p, w, h))
 
 
-# the squirrel's tail sway is left unsnapped: snapped, it would push the plume out of the 16px frame
+# the squirrel's tail sway is left unsnapped
 SQUIRREL_OFFSETS = ("dy",)
 CORGI_OFFSETS = ("bob", "leash")
 
@@ -533,4 +533,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/hazards", __doc__, grounds=ROADS)
+    main(sys.argv, sprites, "art/hazards", __doc__)

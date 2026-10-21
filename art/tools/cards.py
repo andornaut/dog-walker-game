@@ -9,11 +9,11 @@
     of face or lip either side of it,
     body 6..77 x 76..118, badge spot 6,121, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
-  view: the same layout doubled with 1px detail. Band 4..22 (title in font-title
-  x2, caps from row 9), art window 6,30, 154x116 (illustration at 2x at 8,32),
+  view: the same layout doubled with 1px detail. Band 4..24 (title line from row
+  9), art window 6,30, 154x116 (illustration at 2x at 8,32),
   body 12..154 x 152..234, badge spot 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
-  large frame); the game writes the cost between its rivets.
+  large frame); the game writes the cost centred on its face.
 - card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
   illustrations, one per option, composed from the exported
   sprites. Build the sprites first.
@@ -51,7 +51,7 @@ from pixel import Grid, build as build_sprites  # noqa: E402
 CW, CH = 83, 140
 AW, AH = 75, 56
 # Band colours hold white labels at 7:1 or more; the amber stop band takes plum labels (7.35:1).
-# route goes last, so the frame indices of the older tags stay put.
+# The game draws encounter for an obstacle and route for a fork; the others serve the preview.
 BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amber", "orange"),
          "upgrade": ("forest", "teal"), "route": ("purple", "plum")}
 
@@ -106,7 +106,7 @@ def card_cost():
     large frame). ui.py's chrome with its corners cut 1px: the cream face is x 2 to 67, rows 2
     to 9, over the tan lip. The game writes the cost ($, $$$, the heart change, Free or Need $...)
     centred in font-title, plum (9.42:1), caps in rows 4 to 8. A disabled card's grey copy turns
-    the face lightGrey, where navy holds 8.48:1."""
+    the face nlgrey, where ink holds 12.64:1."""
     return chrome(Grid(71, 13), 0, 0, 71, 13)
 
 
@@ -171,9 +171,6 @@ class Art(sn.Scene):
         self.fill(x - 1, y - 1, 34, 34, "plum")
         self.fill(x, y, 32, 32, "tan")
         self.paste(sn.frame(key, mood), x, y)
-
-    def leash(self, x0, y0, x1, y1):
-        self.line(x0, y0, x1, y1, self.leash_col)
 
     def lead(self, x, y, x1, n=1):
         """A leash from the collar at x,y off the bottom edge at x1. Cards show no walker, since
@@ -283,9 +280,6 @@ def thief_let_go():
     return a
 
 
-# ---------- zone encounters ----------
-
-
 # ---------- lucky encounters ----------
 
 def wallet_keep():
@@ -304,9 +298,6 @@ def neighbour_take():
     for x, y in ((46, 20), (56, 30), (50, 40)):
         a.paste(sn.frame("treat", "idle"), x, y)
     return a
-
-
-# ---------- forced stops ----------
 
 
 # ---------- upgrades and the Skip option ----------
@@ -345,7 +336,7 @@ def rolled_over():
     pads; the far leg of each pair is shaded. The tail wags along the grass at the left, the
     head at the right faces the viewer, eyes shut in happy arcs and mouth open in a grin with
     the tongue out, ears flopped on the grass. 50x36 with its outline; the collar's lower end
-    is at 33,28."""
+    is at 32,28."""
     g = Grid(50, 36)
     # tail, along the grass from the rump, white tipped
     for i, (x, y) in enumerate(((8, 25), (6, 25), (4, 24), (3, 23), (2, 22))):
@@ -860,7 +851,7 @@ def mock_card(kind, key, large=False):
     cost = to_image(card_cost().px)
     im.paste(cost.resize((cost.width * scale, cost.height * scale), Image.NEAREST), (6 * scale, 121 * scale))
     art = ILLUSTRATIONS[key]().img
-    im.paste(art.resize((AW * scale, AH * scale), Image.NEAREST), (5 * scale, 16 * scale))
+    im.paste(art.resize((AW * scale, AH * scale), Image.NEAREST), (4 * scale, 16 * scale))
     bg = Image.new("RGB", im.size, sn.rgb("dbrown"))
     bg.paste(im, (0, 0), im)
     return bg

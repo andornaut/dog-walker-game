@@ -23,20 +23,20 @@ ui-fires           16x16  static (1 frame)  a broken heart: the firing moment's 
                           pulse (2 frames, 400ms)  frame 0 is static; the right half drops 1px
                           Marks a card option that would fire an owner. The game draws it with its
                           top-left at 4,119 on card-frame (8,238 at 2x on card-frame-large): over
-                          the cost plaque's left rivet, centred on the plaque's rows, clear of a
-                          cost up to 40px wide centred between the rivets
+                          the cost plaque's left end, centred on the plaque's rows, clear of a
+                          cost up to 40px wide centred on the plaque
 fx-pull-fail       16x16  play (4 frames, 90ms)  a disappointed puff: a little cloud huffs out,
                           spreads and sags as it sinks, and breaks into two puffs. Bottom-centre
                           on the dog's centre column, 6px below its top opaque row
 
 Usage:
-  needs.py preview OUT.png   every frame of every piece on the six road colours
+  needs.py preview OUT.png   every frame of every piece on the zone roads
   needs.py build             write art/needs/*.aseprite and export them to
                              public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
-the rim helper in fx.py, piece in hits.py.
+the rim and stamp helpers in fx.py, piece in hits.py.
 """
 
 import os
@@ -45,27 +45,23 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import rim, stamp  # noqa: E402
 from hits import piece  # noqa: E402
-from moments import rounded  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
-# The preview roads: dslate, tan, lgrey, skin2, grey and cream. Cream is also the cards' paper and tan the doghouse wall.
-GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 
 
-def bitmap(g, x0, y0, rows, cols, big=None):
-    """Stamp rows of characters; each character maps to a colour in cols, '.' is empty. On a minis.Mini
-    above 1x the map is stamped pixel for pixel from (x0, y0) scaled, so it keeps no gaps: big, a map
-    redrawn for that size, if given, else rows."""
-    s = getattr(g, "s", 1)
-    if s > 1:
-        g, x0, y0, rows = g.g, round(x0 * s), round(y0 * s), big or rows
+def rounded(g, x, y, w, h, col, r=2):
+    """A filled box with its corners clipped by r pixels on a diagonal."""
+    for j in range(h):
+        cut = max(0, r - j, r - (h - 1 - j))
+        g.rect(x + cut, y + j, w - 2 * cut, 1, col)
+
+
+def bitmap(g, x0, y0, rows, cols):
+    """Stamp rows of characters; each character maps to a colour in cols, '.' is empty."""
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
             if ch in cols:
                 g.p(x0 + x, y0 + y, cols[ch])
-
-
-# ---------- need icons ----------
 
 
 # ---------- the pull bubble ----------
@@ -186,4 +182,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/needs", __doc__, grounds=GROUNDS)
+    main(sys.argv, sprites, "art/needs", __doc__)

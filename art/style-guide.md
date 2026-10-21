@@ -1,6 +1,6 @@
 # Art Style Guide
 
-The rules for drawing and placing the art. Each tool's docstring in `art/tools/` holds its assets' exact sizes, tags, timings and coordinates; the game's layout is in `shared/export/layout.json` and `src/`.
+The rules for drawing and placing the art. Exact sizes, tags, timings and coordinates are in each tool's docstring in `art/tools/`.
 
 ## Direction
 
@@ -78,28 +78,26 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, or `K` names for a colour 
 | forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`                             |
 | ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                   |
 | ink on ngrey                   | 7.23  | The silhouette in `ui-detail-well-locked` and on a `disabled` tile                    |
-| ink on nlgrey                  | 12.64 | The goal plate: "???" on a walker, a blocked slot's price                             |
+| ink on nlgrey                  | 12.64 | The goal plate: "???" on a walker, a blocked slot's price, a disabled card's cost     |
 | ink on nslate                  | 3.75  | A disabled picture's silhouette and outline on its art box                            |
-| navy on lightGrey              | 8.48  | The cost on a disabled card's `card-cost`                                             |
+| navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                             |
 | ndslate on ngrey               | 3.56  | Labels on `disabled` tiles and buttons (inactive, exempt)                             |
 | ngrey on darkBrown             | 3.40  | `disabled` tile face on the wood                                                      |
 | plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                          |
 | plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons |
 | plum on tan                    | 6.49  | Body text on tan                                                                      |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                        |
-| navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                             |
-| yellow on navy                 | 11.13 | `ui-scroll-thumb` in `ui-scroll-track`                                                |
 | tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                            |
 | tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                        |
 | `ui-difficulty` on cream       | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim                                |
 | `ui-zone-pips` on ink          | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked                                  |
 | white on darkBrown             | 8.48  | Floating loss on the column, filled page dot                                          |
 | white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                          |
-| white on forest                | 7.80  | Labels on chips                                                                       |
+| white on forest                | 7.80  | The purchase confirmation's title                                                     |
 | white on navy                  | 13.89 | `ui-detail-band` title                                                                |
-| white on rust                  | 4.99  | Trait chip "Food"                                                                     |
 | white over the dimmed road     | 4.5+  | Card subtitle                                                                         |
 | yellow on darkBrown            | 6.79  | Floating gain on the column                                                           |
+| yellow on navy                 | 11.13 | `ui-scroll-thumb` in `ui-scroll-track`                                                |
 
 ## UI
 
@@ -154,7 +152,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 
 ### Choice cards
 
-- Band colour by card type: dred encounter, amber forced stop, blue lucky, forest upgrade, purple route.
+- Band colour by what opened the card: dred for an obstacle's encounter, purple for a fork's route.
 - Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge.
 - The art window is centred on the card's face: `card-frame` 3,15 77×58 with the illustration at 4,16; `card-frame-large` 6,30 154×116 with the illustration at 8,32.
 - A path card (`card-zone-<zone>`) samples its road strip to a cross street and repeats its backdrop's sky and scenery in miniature.
@@ -227,7 +225,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 - 320×64 (`art/tools/roads.py`), tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Cabbagetown grey (slate), High Park tan (brown), Distillery District dslate (navy), Kensington Market dbrick (walnut), The Beaches cream (tan), Yonge Street shale (coal). Every road sprite's light rim holds on dbrick and shale at least as well as on dslate.
 - The four lane dividers sit at x = 64k−1, 2px wide, one look per zone.
-- Curbs and verges stay inside the outer 3 to 7px of the strip, clear of the 8px each side of a 48px sprite in its lane.
+- Curbs and verges stay inside the outer 5 to 8px of the strip, clear of the 8px each side of a 48px sprite in its lane.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The rows from the road's far edge down to about y 214 sample the strip shrunk 4×, so lane dashes and texture along the road repeat every 8 rows or more, lines across the road are at least 2 rows tall and low in contrast, fine detail runs along the road, and small texture is spaced irregularly.
 
@@ -245,7 +243,7 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 - A prop never reads as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for (the fruit stand has no wheels, unlike the hot dog cart; the transit stop has no shelter; the street lamp lights both ways, since a prop is never flipped).
 - Each side has a slot every 140 road px, slot n at z = 140n. With m = n − offset (left 0, right 1), an even m is a lot and an odd m a gap, and k = floor(m / 2); a side takes gap (gapStart + k) mod 6, left gaps starting at 0 and right at 2. The one lot is empty; gap 0 holds the neighborhood's tree or street furniture and gap 3 its own prop, so each side has a prop every 6 slots and over both sides one stands every 420 px.
 - Every frame's inner edge is at across 212 or more, past the sidewalk's outer edge at 208. No prop stands within a zone's start strip.
-- Free-standing props take the road objects' ground shadow in the zone's `shadowColour`, its lawn or paving one ramp step darker.
+- Free-standing props take the road objects' ground shadow in the zone's `shadowColour`, a darker tone of its lawn or paving.
 
 | Neighborhood        | Gap 0         | Gap 3           | Shadow |
 | ------------------- | ------------- | --------------- | ------ |
@@ -262,7 +260,7 @@ People, traffic, lawn animals and sky movers that pass by with no collisions and
 
 ## Backdrops
 
-Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band row y is screen row 48 + y. The band, its approach rows and the camera come from `shared/export/layout.json`. The street ends at a T-junction: rows 139 to 157, the approach, continue the road's projection (in play the road surface scrolls over them), and above them runs a flat cross street (far sidewalk 119 to 122, far curb 123 to 124, road 125 to 133, near sidewalk 134 to 138). The far side faces the camera on ground row 115.
+Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band row y is screen row 48 + y. The band, its approach rows and the camera come from `shared/export/layout.json`. The street ends at a T-junction: the approach rows continue the road's projection (in play the road surface scrolls over them), and above them runs a flat cross street, beyond which the far side faces the camera. The tool's docstring lists the rows.
 
 - Above the far side's front row the scenery goes back in depth, not taller. The debuff bars and the message strip lie over the band's top rows, so the sky above row 45 is one flat colour with no clouds, stars or scenery. Yonge Street is the exception: its skyline rises above row 45, under the bars' and the strip's opaque plates.
 - Darkness varies: The Beaches bright and open, Cabbagetown and the Distillery District in between, Yonge Street an evening downtown, Kensington Market dark all through and High Park darkest, under its canopy.

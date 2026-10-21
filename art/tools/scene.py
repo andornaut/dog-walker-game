@@ -59,11 +59,10 @@ G.update({"0": "111101101101111", "1": "010110010010111", "2": "110001010100111"
           "-": "000000111000000", "/": "001001010100100", ":": "000010000010000", ".": "000000000000010",
           "!": "010010010000010", "?": "110001010000010", "'": "010010000000000", ",": "000000000010100",
           "%": "101001010100101", "×": "000101010101000"})
-HEART5 = "0101011111111110111000100"
 
 
 def glyph(ch):
-    return (5, HEART5) if ch == "♥" else (3, G.get(ch))
+    return 3, G.get(ch)
 
 
 def text_w(s, sc=1):
@@ -161,11 +160,11 @@ class Scene(Canvas):
 
     def bubble(self, x, y, w, lines, col="plum"):
         """A callout in ui.py's chrome, w wide, one 8px row per line: plum text on cream (9.42:1),
-        $ in forest (5.39:1) and ♥ in dred (5.07:1)."""
+        $ in forest (5.39:1)."""
         h = len(lines) * 8 + 7
         self.paste(to_image(chrome(Grid(w, h), 0, 0, w, h).px), x, y)
         for i, ln in enumerate(lines):
-            text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"♥": "dred", "$": "forest"})
+            text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"$": "forest"})
 
     def heart(self, x, y, col, hi=None):
         for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):

@@ -11,6 +11,7 @@ import json
 import math
 import os
 import subprocess
+import sys
 import tempfile
 
 # Endesga 32, by role.
@@ -21,11 +22,7 @@ K = dict(
     grey="8b9bb4", slate="5a6988", dslate="3a4466", navy="262b44", ink="181425", hot="ff0044", purple="68386c",
     mauve="b55088", pink="f6757a", skin1="e8b796", skin2="c28569",
 )
-PALETTE = [
-    "be4a2f", "d77643", "ead4aa", "e4a672", "b86f50", "733e39", "3e2731", "a22633", "e43b44", "f77622", "feae34",
-    "fee761", "63c74d", "3e8948", "265c42", "193c3e", "124e89", "0099db", "2ce8f5", "ffffff", "c0cbdc", "8b9bb4",
-    "5a6988", "3a4466", "262b44", "181425", "ff0044", "68386c", "b55088", "f6757a", "e8b796", "c28569",
-]
+PALETTE = list(K.values())
 DARKER = dict(p.split(":") for p in (
     "be4a2f:733e39 d77643:be4a2f ead4aa:e4a672 e4a672:b86f50 b86f50:733e39 733e39:3e2731 3e2731:181425 "
     "a22633:3e2731 e43b44:a22633 f77622:be4a2f feae34:f77622 fee761:feae34 63c74d:3e8948 3e8948:265c42 "
@@ -63,6 +60,9 @@ DARKER.update(dict(p.split(":") for p in (
 ).split()))
 # The contrast roads: dslate (dark, the Distillery District's), then tan, pink and skin2 (light).
 ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
+# The zone roads, the preview grounds when a set names none: Cabbagetown's grey, High Park's tan, the
+# Distillery District's dslate, Kensington Market's dbrick, The Beaches' cream and Yonge Street's shale.
+ZONE_ROADS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
 
 
 def contrast(a, b):
@@ -197,12 +197,12 @@ def edged(g, edge=road_edge, close=False):
     return g
 
 
-def preview(sprites, out, grounds=("3a4466", "c0cbdc", "c28569"), scale=6, gap=4):
+def preview(sprites, out, grounds=ZONE_ROADS, scale=6, gap=4):
     """Contact sheet: one row per sprite and ground colour, every frame in tag order."""
     from PIL import Image
 
     rows = []
-    for key, tags in sprites:
+    for _, tags in sprites:
         frames = [f for _, fs, _ in tags for f in fs]
         for ground in grounds:
             rows.append((frames, ground))
@@ -261,8 +261,8 @@ def _lua(tags, out):
     # A sprite drawn in the neutral greys or the Toronto colours carries them after Endesga 32 in its
     # palette.
     used = {c for _, fs, _ in tags for f in fs for row in f for c in row if c}
-    colours = (PALETTE + [c for c in NEUTRAL.values() if used & set(NEUTRAL.values())]
-               + [c for c in TORONTO.values() if used & set(TORONTO.values())])
+    colours = (PALETTE + (list(NEUTRAL.values()) if used & set(NEUTRAL.values()) else [])
+               + (list(TORONTO.values()) if used & set(TORONTO.values()) else []))
     palette = "\n".join(
         f"pal:setColor({i}, Color{{ r = {int(c[0:2], 16)}, g = {int(c[2:4], 16)}, b = {int(c[4:6], 16)} }})"
         for i, c in enumerate(colours)
@@ -339,10 +339,10 @@ def depth_envelope(w, h, scales):
     """{scale: (width, height)}: the most art each of a w x h sprite's depth steps (scales) may fill. The
     game sizes a road sprite by its frame's larger side, an integer, and draws it from the smallest step at
     least that size (src/layout/depthScale.ts), so one pixel past a step's side it draws the next larger
-    step scaled down to it. A frame, floor(side x scale + 0.5), can round its shorter side past that: hedge@75
-    is 23 rows where hedge@88's 26 drawn at 127/147 are 22.46, so the hedge would shrink as it approached. So
-    each step's art keeps to the next larger step's art scaled to its own side plus one, rounded down,
-    working from full size down the steps."""
+    step scaled down to it. A frame, floor(side x scale + 0.5), can round its shorter side past that,
+    leaving a step's art taller than the next larger step's art drawn at this step's size, so the sprite
+    would shrink as it approached. So each step's art keeps to the next larger step's art scaled to its own
+    side plus one, rounded down, working from full size down the steps."""
     out, frame, art = {}, (w, h), (w, h)
     for s in sorted(scales, reverse=True):
         fw, fh = math.floor(w * s + 0.5), math.floor(h * s + 0.5)
@@ -490,9 +490,8 @@ def depth_settled(sprites, originals=None):
     draws a ground sprite smoothly, from the smallest step at least its true size scaled down
     (src/layout/depthScale.ts), so the step's frame 0 keeps inside L's opaque rows and columns at this
     step's scale over L's, rounded half up, and it does not shrink when the drawing switches steps (see
-    shortened and narrowed). Its feet row is L's at
-    side / L's side, rounded up, or the frame's bottom row when that is past it, so the feet move less than
-    1px when it switches. The others (status overlays) are drawn at their own step, not from L. The
+    shortened and narrowed). Its feet row is L's at side / L's side, rounded up, or the frame's bottom row
+    when that is past it, so the feet move less than 1px when it switches. The others (status overlays) are drawn at their own step, not from L. The
     full-size sprite is the one in sprites, else in originals ({key: tags}), else the one already exported;
     so is each step, settled larger steps first. A sprite's steps are the ones in sprites and the ones
     already exported."""
@@ -508,7 +507,7 @@ def depth_settled(sprites, originals=None):
         return full[key][0][1][0] if key in full and "@" not in key else _exported(key)
 
     def scale_of(key):
-        base, at, suffix = key.partition("@")
+        _, at, suffix = key.partition("@")
         return scales.get(f"@{suffix}", 1) if at else 1
 
     for key, tags in sorted(sprites, key=lambda kt: -scale_of(kt[0])):
@@ -567,11 +566,9 @@ def build(sprites, src_dir, originals=None):
     print("built", ", ".join(built))
 
 
-def main(argv, sprites, src_dir, doc, grounds=("3a4466", "c0cbdc", "c28569"), originals=None):
+def main(argv, sprites, src_dir, doc, grounds=ZONE_ROADS, originals=None):
     """originals, if given, returns {key: tags} of the full-size sprites whose depth variants sprites draws
     but not their full size (see depth_settled)."""
-    import sys
-
     if len(argv) == 3 and argv[1] == "preview":
         preview(depth_settled(sprites(), originals and originals()), argv[2], grounds)
     elif len(argv) == 2 and argv[1] == "build":
@@ -591,8 +588,6 @@ def palette_table():
 
 
 if __name__ == "__main__":
-    import sys
-
     if sys.argv[1:] == ["palette"]:
         with open(PALETTE_JSON, "w") as f:
             f.write(json.dumps(palette_table(), indent=2) + "\n")

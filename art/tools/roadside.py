@@ -9,7 +9,8 @@ animal on the ground, a coin or a bone, so none reads as an obstacle, an encount
 
 Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the road objects are:
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
-every frame and depth variant is a whole size. Full size, then @88, @75, @62 and @50:
+every full-size frame is a whole size; depth variants round as the game does (minis.scaled). Full
+size, then @88, @75, @62 and @50:
 
 roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades with gold tips
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
@@ -63,7 +64,7 @@ def dk(c):
 
 
 def walls(g, x0, ww, top, base, wall):
-    """A wall from column x0, ww wide, rows top to base, its right 3px a step darker."""
+    """A wall from column x0, ww wide, rows top to base, its right 2 design units a step darker."""
     g.rect(x0, top, ww, base - top, wall)
     g.rect(x0 + ww - 2, top, 2, base - top, dk(wall))
 
@@ -333,8 +334,10 @@ def draw_frame(key, step, f):
     draw(g, f)
     fill = g.g.px
     rows = len(fill)
-    if any(fill[0]) or any(fill[-1]) or any(r[0] or r[-1] for r in fill) or rows != size(key, step)[1]:
+    if any(fill[0]) or any(fill[-1]) or any(r[0] or r[-1] for r in fill):
         sys.exit(f"{key} at {step}: the fill touches the frame's edge")
+    if rows != size(key, step)[1]:
+        sys.exit(f"{key} at {step}: {rows} rows, not the {size(key, step)[1]} its size gives")
     return g.outlined()
 
 
@@ -364,13 +367,11 @@ def gap(*props):
 # z = n * slot; with m = n - offset, an even m is a lot and an odd m a gap, k = m // 2 counts them, and
 # the side takes lots[(lotStart + k * lotStride) % len(lots)] and gaps[(gapStart + k * gapStride) %
 # len(gaps)]. gap() takes each prop as (key, inner edge, dz) and resolves its across from its frame's width;
-# dz is road px from the slot's z, nearer negative.
-# Each table is sparse: an empty lot and six gaps, a prop in
-# gaps 0 and 3, so each side has a prop every 6 slots (840 px), the neighborhood's tree then its own
-# prop (High Park's hot dog stand, the Distillery's love lock heart, Kensington's fruit stand,
-# The Beaches' Leuty). The right side's gapStart of 2 puts its props 3 slots after the left's, so they alternate
-# sides, one every 420 px. Each neighborhood's character comes from its backdrop, verges and road,
-# not from its roadside.
+# dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
+# a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighborhood's tree or
+# street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
+# 3 slots after the left's, so they alternate sides, one every 420 px. Each neighborhood's character
+# comes from its backdrop, verges and road, not from its roadside.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
@@ -390,28 +391,12 @@ PLACEMENT = {
     "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0)),
     "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0)),
 }
-# Each zone's ground shadow under a free-standing prop: its lawn or paving one ramp step darker.
+# Each zone's ground shadow under a free-standing prop: a darker tone of its lawn or paving.
 SHADOWS = {"cabbagetown": "canopy", "high-park": "fir", "distillery-district": "dbrown",
            "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "coal"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 TABLE_JSON = "shared/roadside.json"
-
-
-def placements(zone, side, z0, z1):
-    """Every prop on one side ("left" or "right") of a zone with its z in z0..z1-1, as (z, across, key),
-    from PLACEMENT as the game reads it."""
-    p = PLACEMENT[zone]
-    sd, slot = p["sides"][side], p["slot"]
-    lo = math.floor(z0 / slot) - 2
-    out = []
-    for n in range(lo, math.ceil(z1 / slot) + 2):
-        m = n - sd["offset"]
-        k = m // 2
-        props = (p["lots"][(sd["lotStart"] + k * sd["lotStride"]) % len(p["lots"])] if m % 2 == 0
-                 else p["gaps"][(sd["gapStart"] + k * sd["gapStride"]) % len(p["gaps"])])
-        out += [(n * slot + dz, across, key) for key, across, dz in props]
-    return sorted(q for q in out if z0 <= q[0] < z1)
 
 
 def check_placement():

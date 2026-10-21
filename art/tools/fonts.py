@@ -24,7 +24,7 @@ the capitals get a row more; marks on the baseline or the x-height's middle move
 font-display has A to Z, 0 to 9, ! ? , . ' - + $, space and ♥. Its line is 18px: the capitals'
 outline on rows 2 to 13 and their fill on rows 3 to 12 (base 13), with room above for the $ and
 below for the comma's tail and the shadow. Letters sit 2px apart, which their outlines fill;
-pairs whose shapes leave room (LT, P., TY) kern 2px closer. Lower case is not in the font: set it
+pairs whose shapes leave room (LT, P., T., Y.) kern 2px closer. Lower case is not in the font: set it
 in capitals.
 
 font-comic is the comic words' lettering from fx.py, for the word drawn over a hit burst: flat yellow
@@ -34,11 +34,11 @@ dred shadow 2px down and right, colours baked in (draw untinted). A to Z, ! ? - 
 apart, which their rings fill, with no kerning. A word is its letters' widths, plus 1 between each pair,
 plus 4.
 
-In-art signs (shop boards, the park gate, the lemonade stand) use the same letters and outline at
+In-art signs (shop boards, the High Park gate, the Distillery and TTC signs) use the same letters and outline at
 1x, with a 1px shadow, through sign().
 
 Usage:
-  fonts.py preview OUT.png   a sample of every font, scaled up
+  fonts.py preview OUT.png   a sample of every font but font-comic, scaled up
   fonts.py build             write public/art/fonts/*.png and *.fnt
 
 Run from the repository root.

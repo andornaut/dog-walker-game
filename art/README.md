@@ -23,7 +23,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - A build overwrites the `.aseprite` files: change the script, not the sources.
 - Each script's docstring holds its assets' sizes, tags, timings and placement coordinates.
 - Game data and layout come from the game's export in `shared/export/`, never from `src/`. Only `scene.py` reads it (`game-data.json` and `layout.json`); `backdrops.py`, `cards.py`, `screens.py`, and `share.py` take the zones, the layout and the pack's hands and collars from `scene.py`. `pixel.py` and `minis.py` read the depth steps from `shared/depth-steps.json`. Every other script holds its sizes and positions as constants (`ui.py`'s top bar buttons, `screens.py`'s Pet shop at 234,86, `roadside.py`'s sidewalk edge), so a layout change in the game needs the matching change in the script.
-- Depth variants are redrawn at each step, not downscaled, and keep the full size's tags, frame counts and durations. Sizes scale as `floor(size × scale + 0.5)`, the game's rule.
+- Depth variants are redrawn at each step, not downscaled (style guide, Depth scaling).
 - Regenerate the manifest (`npm run art:manifest`) before committing new or renamed exports. The manifest, the data export, the depth steps, the depth preview and the art checks are described in the Assets bullet of [`src/README.md`](../src/README.md).
 
 ### Naming
@@ -35,7 +35,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ### Consistency checks
 
-- Every export uses only Endesga 32 (plus the neutral greys in disabled and locked UI, as the style guide's palette section says), with alpha 0 or 255, at the frame size in `inventory.md`.
+- Every export uses only the 64-colour house palette (plus the neutral greys in disabled and locked UI, as the style guide's palette section says), with alpha 0 or 255, at the frame size in `inventory.md`.
 - Check proportion, outline and contrast on every zone's road colour in the script's `preview` and the `/art/` gallery, and road objects in a projected 360×560 view (`npm run art:depth-preview -- <key> [zone]`).
 - Run `npm run check:art` and `npm run art:manifest -- --check` before committing.
 

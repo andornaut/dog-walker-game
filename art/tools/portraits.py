@@ -59,7 +59,6 @@ def eye(g, x, y, w=5, iris=None):
     if iris:
         g.rect(x + 1, y + 1, w - 2, 4, iris)
         g.rect(x + 1, y + 2, w - 2, 2, "ink")
-        g.p(x + w - 2, y + 4, "blue")
     g.rect(x + 1, y + 1, 2 if w > 4 else 1, 2, "white")
     g.p(x + w - 2, y + 4, "white" if not iris else "blue")
 
@@ -106,14 +105,6 @@ def pom(g, cx, cy, rx, ry, n=8, c="skin1", sh="brown", li="cream"):
     for x, y in lumps:
         g.cel(x, y, r, r, c, sh if y > cy + ry * 0.5 else None, li)
     g.ell(cx, cy, rx - r, ry - r, c)
-
-
-def stripe(g, y, c, over):
-    """Recolour row y wherever it shows one of the colours in over, so knit stripes stay inside a garment."""
-    over = {K.get(o, o) for o in over}
-    for x in range(S):
-        if g.px[y][x] in over:
-            g.p(x, y, c)
 
 
 # ---------- Duchess: Maltese, small, white, pink bow ----------

@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Draw the road feedback for heart changes, near misses and dodges: the
-broken heart that pops over a dog and arcs into its doghouse, the pink heart
+broken heart that pops over a dog and arcs into its card, the pink heart
 that pops and flies up, and a small dog's dodge.
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
-ink holds on the light roads and the cream doghouse and the white on the dslate
-road and the dimmed road. The dodge's dust and lines take a plum rim.
+ink holds on the light roads and the white on the dslate road, the dimmed road
+and the navy dog card. The dodge's dust and lines take a plum rim.
 
 fx-heart-loss  32x32  pop (6 frames: 50, 50, 90, 90, 90, 450ms; 820ms)  a small whole heart
                       pops in on a white star, then the big heart (17x15 in its rims, 21x19)
                       with impact ticks, settles, cracks down a zigzag in ink, and splits:
-                      the right half 1px right and 1px lower, then 2px lower; the last frame
+                      the left half 1px left, the right half 1px right and 1px lower, then 2px
+                      right and 2px lower; the last frame
                       holds. The big heart's centre is (16, 16), its rims x 6 to 26, rows 7 to 25.
-                      fly (2 frames, 120ms, loops)  the small broken heart (ui-fires' 11x10, rims
-                      15x14, x 9 to 23, rows 9 to 22), the right half bobbing 1px; centred on the
-                      same point (16, 16), for the game to tween in an arc down into the doghouse
+                      fly (2 frames, 120ms, loops)  the small broken heart (ui-fires' split heart:
+                      rims 16x14 with the bob, x 9 to 24, rows 9 to 22), the right half bobbing 1px; centred on the
+                      same point (16, 16), for the game to tween in an arc down into the dog's card
 fx-heart-gain  32x32  pop (5 frames: 50, 50, 90, 90, 450ms; 730ms)  the same pop in pink: a
                       small heart on a white star, the big heart with impact ticks, then
                       sparkles twinkling at its shoulders; the last frame holds
@@ -35,7 +36,7 @@ fx-dodge       48x48  play (5 frames, 70ms; 350ms)  laid on a small dog's 48x48 
                       Drawn for a sidestep right; the game mirrors it for a sidestep left
 
 Usage:
-  feedback.py preview OUT.png   every frame on the six road colours and the dimmed road
+  feedback.py preview OUT.png   every frame on the zone roads and the dimmed roads
   feedback.py build             write art/feedback/*.aseprite and export to
                                 public/art/sprites/
 
@@ -53,12 +54,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 from fx import burst, rim, stamp, star4  # noqa: E402
 from hits import layer, piece  # noqa: E402
 from needs import BROKEN, BROKEN_CRACK  # noqa: E402
-from pixel import DARKER, Grid, main  # noqa: E402
+from pixel import DARKER, ZONE_ROADS, Grid, main  # noqa: E402
 
-# The preview roads (dslate, tan, lgrey, skin2, grey and cream), then each one ramp step darker: the road
-# dimmed under a card.
-ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
-GROUNDS = ROADS + tuple(DARKER[c] for c in ROADS)
+# The zone roads, then each one ramp step darker: the road dimmed under a card.
+GROUNDS = ZONE_ROADS + tuple(DARKER[c] for c in ZONE_ROADS)
 
 # ---------- heart changes ----------
 
@@ -83,7 +82,7 @@ def ringed(g):
     return rim(g, "white")
 
 
-def ticks(step):
+def ticks():
     """Eight short white impact ticks round the big heart, in an ink line, on its first big frame."""
     g = Grid(32, 32)
     for k in range(8):
@@ -120,7 +119,7 @@ def heart_loss(step):
         stamp(h, BIG, x0 - 1, y0, LOSS, lambda x, y: x < BIG_CRACK[y])
         stamp(h, BIG, x0 + drop, y0 + drop, LOSS, lambda x, y: x > BIG_CRACK[y])
     if step == 1:
-        layer(g, ticks(step))
+        layer(g, ticks())
     return layer(g, ringed(h))
 
 
@@ -132,7 +131,7 @@ def heart_gain(step):
     h = Grid(32, 32)
     stamp(h, BIG, *BIG_AT, GAIN)
     if step == 1:
-        layer(g, ticks(step))
+        layer(g, ticks())
     layer(g, ringed(h))
     if step >= 2:
         for (x, y), r in zip(((5, 6), (27, 9), (26, 26)), ((2, 1, 2), (1, 2, 1), (1, 1, 2))[step - 2]):

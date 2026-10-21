@@ -12,7 +12,7 @@ times; the puddle (112x48) is drawn in its own
 pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
-dogs, except in wave; everything coming down the road faces the player:
+dogs, except in wave and cheer; everything coming down the road faces the player:
 jogger (48x72, run: 4 frames at 100ms, a knee driven up, then that foot passing
 down, each side in turn, the ponytail swinging out from behind the head) wears
 an orange racerback singlet with a white race bib on its front; kid-on-bike
@@ -26,7 +26,7 @@ the stroller rolling ahead on his right.
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
 as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
-1, 3, 5 and 3px right of it. At rest (idle frame 0) a 48x72 walker's feet (the outline under the
+1, 3, 4 and 3 design pixels right of it. At rest (idle frame 0) a 48x72 walker's feet (the outline under the
 shoes) are on row 68 (Ada's on row 69), and the hands' top rows 20 above them, their outer columns
 16 left and 16 right of the centre column (x 24). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
 zone celebration: the front view with the hanging arm taken off and both arms raised from the
@@ -37,7 +37,7 @@ front elevation (the ice cream truck a rear one, like obstacles.parked_car),
 with no top surface and its base on the last opaque row.
 
 Usage:
-  road.py preview OUT.png   contact sheet of every frame, scaled up
+  road.py preview OUT.png   every frame on the zone roads, scaled up
   road.py build             write art/road/*.aseprite, then export
                             public/art/sprites/*.png and *.json with Aseprite
 
@@ -112,7 +112,7 @@ def rim(g, rims):
 
 # The lit rim for every road sprite that fails 3:1 on the dslate road, for rim(): navy, ink and dslate take grey
 # (slate opposite), slate lgrey, dark browns skin2, mid browns and ochre tan, greens green, blues cyan, and reds,
-# mauves and purples pink. minis.py lights its hand-drawn maps with it too.
+# mauves and purples pink.
 LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"), slate=("lgrey", None),
            dbrown=("skin2", None), plum=("skin2", None), brown=("tan", None), rust=("tan", None),
            ochre=("tan", None), dgreen=("green", None), forest=("green", None), sky=("cyan", None),
@@ -141,7 +141,7 @@ def drawn(s, draw, *args, **q):
 
 
 def big(draw, *args, **q):
-    """draw(*args, **q) at SCALE: a person, an animal, the stop sign or a pickup."""
+    """draw(*args, **q) at SCALE: a person, an animal or a pickup."""
     return drawn(SCALE, draw, *args, **q)
 
 
@@ -184,7 +184,7 @@ def walker(lf=0, rf=0, bob=0, arms=0):
 # ---------- the other walkers (back view) ----------
 
 def walker_girl(lf=0, rf=0, bob=0, arms=0):
-    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: pink tee, teal shorts.
+    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: pink tee, blue shorts.
     She stands 4px shorter than the adults: her head and body sit lower and her legs are shorter."""
     g = Grid(32, 48)
     b = bob
@@ -458,7 +458,7 @@ def casey_front(wave=0, bob=0):
 
 def ada_front(wave=0, bob=0):
     """Ada facing the camera, 4px shorter than the adults: long black curls framing her face and falling past
-    her shoulders, a pink clip, pink tee, teal shorts."""
+    her shoulders, a pink clip, pink tee, blue shorts."""
     g = Grid(32, 48)
     b = bob
     for x in (12, 17):
@@ -963,7 +963,7 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
 
 
 # The other dog's trot, as dogs.WALK has it: diagonal pairs swap on beats 0 and 2 and the body bobs up
-# on the passing beats. Each beat lasts half the old two-frame step, so the dog keeps its pace.
+# on the passing beats; 4 frames at 100ms.
 CORGI_WALK = [dict(fl=1, fr=-1, bl=-1, br=1), dict(bob=-1), dict(fl=-1, fr=1, bl=1, br=-1), dict(bob=-1)]
 # Standing while its walker chats: the dogs' idle, the tail at -1, 0, +1, 0, the body 1px higher over the middle
 # two beats and the right ear 1px higher on the last frame.
@@ -1339,7 +1339,7 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
     """A dad pushing a stroller up the road, seen from behind as the pack sees it: short ginger hair, a purple
     puffer jacket quilted across, jeans and brown shoes, a takeaway coffee in his left hand. The stroller rolls
     ahead of him on his right, so it stands higher in the frame: a green hood ribbed where it folds, the seat
-    and basket under it, the rear wheels wide and the front ones inside them, his right hand on the
+    and basket under it, the two rear wheels wide apart, his right hand on the
     handlebar. It rolls steadily while he bobs. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     b = bob
@@ -1496,7 +1496,7 @@ def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     tee, sky shorts, red shoes and ochre hair under a red helmet with a white stripe and a dark visor. The
     bike is mauve, its front tyre edge-on under a mudguard with a white reflector, the training wheels
     showing either side behind, streamers trailing from the grips. Shorter than an adult rider: the helmet's
-    top is 7 rows lower than the cyclist's. The road outline and the lit rim."""
+    top is 4 design rows (6px) lower than the cyclist's. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     w = sway
     # the training wheels behind, on their strut, then the front tyre, fork, mudguard and reflector

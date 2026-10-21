@@ -20,7 +20,7 @@ reads on them.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
-  the street's houses at night (backdrops.stats_street's band rows 106 to 133, a
+  the street's houses at night (backdrops.stats_street's rows 90 to 117, from STATS_VIEW_TOP, a
   ramp step darker, the windows lit), and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
@@ -29,9 +29,9 @@ reads on them.
   home to: its gable peeks over the logo, the front door (171,73 18x23) opens
   onto a step (164,96 32x4), and a flagstone path (168,100 24x12) runs down
   behind the panel's top edge. The lawn from y 96 gives the waving owners
-  room either side, feet on y 110. The zone's banded sunset fills the sky
+  room either side, feet on y 110. The banded sunset (SUNSET_SKY) fills the sky
   twice: behind the house down to its lawn, under the striped sun at 300,44,
-  and behind the panel down to the far rooftops (y 450). Then the zone's
+  and behind the panel down to the far rooftops (y 450). Then the street's
   houses with lit windows (from y 370), the yards, the sidewalk and
   Kensington Market's brick road under the button (48,512 264x44). The houses, trees and fences
   stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
@@ -561,50 +561,30 @@ def image_rows(img):
 
 # ---------- screen-stats ----------
 
-# The sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading and in
-# screen-stats' window.
+# The sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading.
 NIGHT_SKY = ("navy", "purple", "mauve")
 # The first backdrop band row screen-stats' window shows, 25 rows over the far side's ground row: the
 # houses' lit walls, their doors and the ground row.
 STATS_VIEW_TOP = bd.BASE - 25
 
 
-def night(img, top=20, horizon=46):
-    """A street after dark: the sky turns to NIGHT_SKY's bands from row top down to horizon, with stars
-    in the top band, everything else a ramp step darker, windows lit."""
+def night(img):
+    """The street after dark: every colour a ramp step darker but the windows, their cyan glass lit
+    yellow and the white beside it amber."""
     px = img.load()
     w, h = img.size
-    skyc = {sn.rgb(c) for c in ("cyan", "sky", "white", "lgrey")}
-    sky, todo = set(), [(x, 0) for x in range(w)]
-    while todo:
-        x, y = todo.pop()
-        if (x, y) in sky or not (0 <= x < w and 0 <= y < 104) or px[x, y] not in skyc:
-            continue
-        sky.add((x, y))
-        todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
     out = img.copy()
     po = out.load()
-    banded = sn.Canvas(w, h)
-    banded.fill(0, 0, w, h, NIGHT_SKY[-1])
-    rows = bd.bands(banded, top, horizon, NIGHT_SKY, w=w)
-    bp = banded.img.load()
     cyan, white = sn.rgb("cyan"), sn.rgb("white")
     for y in range(h):
         for x in range(w):
             c = px[x, y]
-            if (x, y) in sky:
-                po[x, y] = bp[x, max(y, top)]
-            elif c == cyan:
+            if c == cyan:
                 po[x, y] = sn.rgb("yellow")
             elif c == white and any(0 <= x + dx < w and px[x + dx, y] == cyan for dx in (-1, 1)):
                 po[x, y] = sn.rgb("amber")
             else:
                 po[x, y] = sn.rgb(dk("%02x%02x%02x" % c))
-    r = rand(11)
-    for _ in range(40):
-        x, y = int(r() * w), int(r() * 60)
-        if (x, y) in sky and y < rows[0][1] - 2:
-            po[x, y] = sn.rgb("white" if r() < 0.4 else "lgrey")
     return out
 
 
@@ -621,7 +601,7 @@ def stats():
     # a low window onto the street at night, between the photo and the leash hooks, above the tabs: the
     # houses across the street from STATS_VIEW_TOP, their windows lit, down past the far side's ground row
     wx, wy, ww, wh = 140, 16, 100, 28
-    view = night(bd.stats_street().img).crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh))
+    view = night(bd.stats_street().img.crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh)))
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
     cv.fill(wx - 5, wy - 5, ww + 10, wh + 10, "tan")
     cv.fill(wx - 5, wy - 5, ww + 10, 1, "cream")
@@ -758,7 +738,7 @@ def end():
     # The street below, in the sunset's palette: trees, houses with lit windows, yards and the sidewalk.
     # Everything standing is kept within x 8 to 352, so the badges panel never cuts it into slivers.
     strip = clear(W, 150)
-    for cx, top in ((22, 44), (178, 40), (330, 46)):
+    for cx, top in ((28, 44), (178, 40), (330, 46)):
         bd.tree(strip, cx, top, "orange", "rust", r=20)
     # slim houses as on the zone's backdrop, about as tall as they are wide under steep gables, their
     # curtains drawn against the low sun with the lamps lit between them

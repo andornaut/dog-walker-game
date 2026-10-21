@@ -78,13 +78,6 @@ def ring(g, cx, cy, r, col, hi=None):
         g.p(cx - r * 0.5, cy - r * 0.5, hi)
 
 
-def star(g, cx, cy, r, col, sh=None):
-    pts = [(cx + math.cos(math.radians(a - 90)) * (r if i % 2 == 0 else r * 0.45),
-            cy + math.sin(math.radians(a - 90)) * (r if i % 2 == 0 else r * 0.45)) for i, a in enumerate(range(0, 360, 36))]
-    for i in range(10):
-        g.tri((cx, cy), pts[i], pts[(i + 1) % 10], sh if sh and i in (3, 4, 5) else col)
-
-
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 
 

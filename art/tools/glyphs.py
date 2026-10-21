@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Draw the info icons shown beside a dog in the pack picker, the shop and the zone banner, a walker's
-perk icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
+perk icons, the debuff and effect icons, the walk bar's effect wells, the walk's message strip
+icons and a path card's difficulty paws.
 
-16x16 images in Endesga 32 with coloured outlines, on transparency:
+16x16 images in the house palette with coloured outlines, on transparency:
 icon-trait-chaser           a black squirrel
 icon-perk-<perk>            a walker's perk, on walker tiles, the new walker celebration and
-                            the state strip: calm-voice (a sky speech bubble with a white
+                            the message strip: calm-voice (a sky speech bubble with a white
                             wave), kind-words (a pink speech bubble with a red heart), long-reach
                             (an open hand over a green arrow pointing both ways), treat-finder (a
                             magnifying glass over a treat)
@@ -14,28 +15,26 @@ icon-zone-<zone>            cabbagetown (a bay-and-gable house), high-park (a pi
                             kensington-market (a painted house turned shop), the-beaches (the
                             lifeguard station), yonge-street (the CN Tower); each inside a 1px
                             ring for its outline, which holds 3:1 on cream and tan
-icon-muddy                  a dog status beside icon-stinky (ui.py), on cream: a muddy paw
-                            print
+icon-muddy                  a debuff beside icon-stinky (ui.py), on its bar and on cream: a
+                            muddy paw print
 icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
                             off three sky speed lines
-icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a hand under a heart),
+icon-upgrade-<upgrade>      the shop, the cards and the message strip: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
                             (a yellow raincoat), rush-hour (an alarm clock), sweet-talker (a speech
                             bubble with $ and a down arrow)
-icon-gear-<gear>            state strip, on ink: the shop's item art (icons.py) at 16x16
+icon-gear-<gear>            the shop and the message strip: the shop's item art (icons.py) at 16x16
 <key>-20                    each icon-perk-*, icon-upgrade-* and icon-gear-* drawn again at 20x20 for
-                            the walk bar's 22x22 effect wells: the same subject and colours, with a 1px
-                            margin for the outline
+                            the walk bar's 22x22 effect wells: the same subject and colours
 icon-bump, icon-fired,      the walk's message strip, beside its lines, on cream: bump (an amber
 icon-hint, icon-last-heart, impact burst), fired (a pink slip under a dred stamp), hint (a white i
 icon-lucky                  on a sky disc), last-heart (a red heart cracked down from its notch),
                             lucky (a four-leaf clover with a twinkle)
-The upgrade and gear ids are the data ids in kebab case. icon-stinky also reads on ink.
+The upgrade and gear ids are the data ids in kebab case.
 
 Sprite: ui-difficulty (55x10; tags 1 to 5), a zone's difficulty under its name on a fork's path
-card: that many filled paws out of five, 11px apart. A filled paw is amber, a hollow one a tan
-rim around an empty pad, both outlined in plum, so they differ by shape on cream and on the
-card's plum frame.
+card: that many filled paws out of five, 11px apart. A filled paw is amber in a plum outline; a
+hollow one is only a faint tan rim, so the filled paws carry the count on the card's cream body.
 
 Usage:
   glyphs.py preview OUT.png   every icon on the UI's paper, panel, wood and ink colours, then
@@ -114,7 +113,7 @@ def kind_words():
     g.rect(0, 2, 16, 8, "pink")
     g.rect(1, 10, 14, 1, "mauve")
     g.tri((10, 10), (13, 15), (13.5, 10), "pink")
-    heart(g, 4, 2, big=True)
+    heart(g, 4, 2)
     return g
 
 
@@ -144,8 +143,7 @@ def treat_finder():
 # ---------- zones, after their backdrops ----------
 
 class Zone(Grid):
-    """A 16x16 zone picture drawn only inside the 1px ring its outline takes, with icon_edge outlines like
-    the need icons, so a picture that fills its frame is outlined on every side."""
+    """A 16x16 zone picture drawn only inside the 1px ring its outline takes, with icon_edge outlines, so a picture that fills its frame is outlined on every side."""
 
     def __init__(self):
         super().__init__(16, 16)
@@ -248,9 +246,9 @@ def yonge_street():
     return g
 
 
-# ---------- dog statuses, on the doghouse's cream heart board beside icon-stinky ----------
-# Like icon-stinky, each reads on cream by its outline (navy, blue, dbrown and plum hold 5.8:1
-# or more there) and differs from the others by shape: a paw print, stink lines.
+# ---------- debuffs: icon-muddy beside ui.py's icon-stinky ----------
+# Like icon-stinky, icon-muddy reads on cream by its plum outline (9.42:1) and differs from it by
+# shape: a paw print against stink lines.
 
 def drop(g, cx, top, r, fill, sh=None, li=None):
     """A water drop: a point at (cx, top) over a round base of radius r."""
@@ -289,7 +287,7 @@ def muddy():
 
 
 def zoomies():
-    """A paw print dashing right, ZOOMIES: four toes and a pad in amber, lit yellow on their top left
+    """A paw print dashing right: four toes and a pad in amber, lit yellow on their top left
     and shaded orange along their foot, with three sky speed lines streaming off its left."""
     g = Grid(16, 16)
     bitmap(g, 0, 1, ["........yy.yy...",
@@ -313,19 +311,18 @@ def zoomies():
 # into the well, so the silhouette is the fill. Dark ramp colours (dbrown, dred, forest, blue)
 # appear only inside a lighter fill.
 
-HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 BIG_HEART = [".111.111.", "11111111p", "1111111pp", "111111ppp", ".11111pp.", "..111pp..", "...1pp...", "....p...."]
 
 
-def heart(g, x, y, big=False):
-    bitmap(g, x, y, BIG_HEART if big else HEART, {"1": "red", "p": "hot"})
+def heart(g, x, y):
+    bitmap(g, x, y, BIG_HEART, {"1": "red", "p": "hot"})
     g.p(x + 1, y + 1, "pink")
 
 
 def belly_rubs():
     """A hand rubbing below a heart."""
     g = Grid(16, 16)
-    heart(g, 6, 1, big=True)
+    heart(g, 6, 1)
     bitmap(g, 1, 9, ["....ssssss..", "ssssssssssss", "sssssddddd..", "sssssssssss.", "ssssdddd....",
                      "ssssssssss.."], {"s": "skin1", "d": "skin2"})
     return g
@@ -515,7 +512,7 @@ def gear_running_shoes20():
 
 
 def bubble20(g, fill, shade, lit=None):
-    """A 18x12 speech bubble with clipped corners, shaded along its foot and right side, its tail down to
+    """An 18x12 speech bubble with clipped corners, shaded along its foot and right side, its tail down to
     the left."""
     g.rect(2, 1, 16, 12, fill)
     g.rect(1, 2, 18, 10, fill)
@@ -811,7 +808,7 @@ def paw(g, x0, filled):
 
 def difficulty(n):
     """55x10: n filled paws, then hollow ones, out of five. The filled paw's plum outline holds 9.4:1
-    on cream and its amber 7.4:1 on the frame's plum; the hollow tan rim is a faint slot marker."""
+    on cream; the hollow tan rim is a faint slot marker."""
     g = Grid(55, 10)
     for i in range(5):
         paw(g, i * 11, i < n)

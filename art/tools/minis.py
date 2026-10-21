@@ -21,7 +21,7 @@ drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 42x42 at
 at @75, 30x30 at @62 and 24x24 at @50.
 
 Usage:
-  minis.py preview OUT.png   every small frame on the street colours
+  minis.py preview OUT.png   every small frame on the zone roads
   minis.py compare OUT.png   each sprite at 1x, then plain nearest-neighbour and
                              this file's version at each scale it has, at 4x zoom
   minis.py build             write art/minis/*.aseprite and export them to
@@ -292,8 +292,8 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
 
 
 def tip(s, rx):
-    """road.tip, with its road outline and white glint; at 0.5x the coin keeps its face and rim but drops the
-    stamped mark, which turns to noise."""
+    """road.tip, with its road outline and white glint; the coin keeps its face, rim and stamped mark at
+    every step."""
     g = edged(Mini(s, 16, 16))
     if rx < 1.5:
         g.rect(7, 3, 2, 10, "orange")
@@ -301,7 +301,7 @@ def tip(s, rx):
         g.p(7, 4, "white")
         return g
     g.ell(8, 8, rx, 5.5, "amber", "orange", "yellow")
-    if rx > 2 and s > 0.5:
+    if rx > 2:
         g.rect(8, 5, 1, 6, "orange")
         g.p(7, 6, "orange")
         g.p(9, 9, "orange")
@@ -480,4 +480,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "compare":
         compare(sys.argv[2])
     else:
-        main(sys.argv, sprites, "art/minis", __doc__, grounds=("3a4466", "c0cbdc"), originals=originals)
+        main(sys.argv, sprites, "art/minis", __doc__, originals=originals)

@@ -17,10 +17,10 @@ bumpers, dark wheel arches. drive (4 frames at DRIVE_MS): a spoke through each h
 and the body dips 1px onto the wheels on frames 1 and 2. ambient-car is the sedan; the other bodies are
 extra keys. The cyclist rides an amber helmet, a mauve jersey and navy shorts on a red bike; ride
 (4 frames at RIDE_MS): the cranks turn a quarter a frame with the feet on the pedals, a cross of spokes
-turns an eighth, and the back and head sit 1px lower on frames 1 and 3. Its wheels are clear inside, so
+turns a sixteenth, and the back and head sit 1px lower on frames 1 and 3. Its wheels are clear inside, so
 the road shows between the spokes.
 
-The lawn animals are laid out on 32x32 and drawn at ANIMAL_SCALE (1.25), the chase animals' size, each
+The lawn animals are laid out on 32x32 and drawn at ANIMAL_SCALE (1.25), 40x40, each
 idle first so frame 0 is its rest pose on the ground.
 
 ambient-pedestrian        48x72  front view, walking toward the walker; walk 4 x 100ms
@@ -82,7 +82,7 @@ from pixel import DARKER, K, Grid, edged, main  # noqa: E402
 
 DRIVE_MS = 100
 RIDE_MS = 120
-# The lawn animals are laid out on 32x32 and drawn ANIMAL_SCALE times larger, 40x40, the chase animals' size.
+# The lawn animals are laid out on 32x32 and drawn ANIMAL_SCALE times larger, 40x40.
 ANIMAL_SCALE = 1.25
 IDLE_MS = 400
 RUN_MS = 90
@@ -168,10 +168,6 @@ def pedestrians(suffix, step):
 
 
 # ---------- cars: side elevations, laid out in design units and drawn at road.SCALE ----------
-
-def dk(c):
-    return DARKER[K.get(c, c)]
-
 
 def rimmed(g, extra=None):
     """road.rim with road.LIT (and extra) on g's own grid, returning g."""
@@ -298,7 +294,7 @@ def cars(suffix, step):
         yield f"{key}{suffix}", [("drive", [car.draw(s, r) for r in range(4)], DRIVE_MS)]
 
 
-# ---------- the cyclist: side on, laid out on 42x48 and drawn at road.SCALE ----------
+# ---------- the cyclist: side on, laid out on 44x48 and drawn at road.SCALE ----------
 
 # The bike in design units: hubs, the bottom bracket, the seat cluster, the head tube's top and bottom.
 REAR, FRONT, BB, SEAT, HEAD, FORK = (9, 38.5), (33, 38.5), (20, 39), (16, 26), (30, 25), (31, 29)
@@ -354,8 +350,8 @@ class Shift:
 
 def cyclist(s, f):
     """Ride frame f (0 to 3) at scale s: a rider in an amber helmet, a mauve jersey and navy shorts on a red
-    bike, side on, riding right. The cranks turn a quarter a frame with the feet on the pedals, the spokes an
-    eighth (a cross of them, so the loop is seamless), and the rider's back and head sit 1px lower on frames
+    bike, side on, riding right. The cranks turn a quarter a frame with the feet on the pedals, the spokes a
+    sixteenth (a cross of them, so the loop is seamless), and the rider's back and head sit 1px lower on frames
     1 and 3. The spokes go on after the outline, so the road shows between them."""
     w, h = 44, 48
     g = Shift(edged(Mini(s, w, h)), 1)
@@ -406,7 +402,7 @@ def cyclist(s, f):
     g.ell(BB[0], BB[1], 1.5, 1.5, "grey")
     leg(near, "skin1", "white")
     out = rimmed(g.g, dict(navy=("grey", "slate"), purple=("mauve", None))).outlined()
-    # the spokes: a cross through each hub, an eighth of a turn on per frame
+    # the spokes: a cross through each hub, a sixteenth of a turn on per frame
     for cx, cy in (REAR, FRONT):
         cx, cy = (cx + 1) * s, cy * s
         r = (WHEEL - 2) * s

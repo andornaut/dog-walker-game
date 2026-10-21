@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Draw the animal minor obstacles, the Chase, Snatch and Social animals: moving
-minor obstacles and ambient movers (src/assets/spriteKeys.ts). Every sprite
+minor obstacles (src/assets/spriteKeys.ts). Every sprite
 also has its depth variants at every step in minis.STEPS (@88, @75, @62, @50),
 redrawn at the step with the same tags, frames and durations. Everything faces the player except the side views
 (hops and the Social dogs' run, facing right, the game mirroring them for
@@ -37,14 +37,14 @@ sack, as the thief does.
 
 Social, medium dogs (48x48, drawn SOCIAL_ZOOM narrower in it, about 26px wide
 face on): walk (4 frames, 100ms) and idle (4 frames,
-300ms: tail at -1, 0, +1, 0, the right ear 1px higher on the last
-frame), as other-dog has them, and run (4 frames, 100ms): side view facing right
+300ms: tail at -1, 0, +1, 0, the body 1px higher on frames 1 and 2, the
+right ear 1px higher on the last), as other-dog has them, and run (4 frames, 100ms): side view facing right
 in loose-dog's gallop (hazards.CORGI_RUN), without the broken leash.
   social-frisbee-dog  a border collie with a red frisbee
 
 Usage:
   animals.py preview OUT.png   every frame of every sprite and variant on the
-                               road colours
+                               zone roads
   animals.py build             write art/animals/*.aseprite and export to
                                public/art/sprites/
 
@@ -60,12 +60,8 @@ import hazards  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
-from pixel import Grid, build, edged, preview  # noqa: E402
+from pixel import Grid, edged, main  # noqa: E402
 from road import BREATH, BREATH_MS, LIT  # noqa: E402
-
-# The zone roads, for the preview: Cabbagetown, High Park, the Distillery District, Kensington Market,
-# The Beaches and Yonge Street.
-GROUNDS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
 
 
 def lit(g):
@@ -737,13 +733,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    # minis swaps the Grid of the module named animals, so the build runs that module's functions
-    import animals
-
-    argv = sys.argv
-    if len(argv) == 3 and argv[1] == "preview":
-        preview(animals.sprites(), argv[2], GROUNDS)
-    elif len(argv) == 2 and argv[1] == "build":
-        build(animals.sprites(), "art/animals")
-    else:
-        sys.exit(__doc__)
+    main(sys.argv, sprites, "art/animals", __doc__)

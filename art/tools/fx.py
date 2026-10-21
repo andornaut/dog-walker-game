@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Draw the road effects for collisions and pickups, and the new-best burst on
-the end screen. The bumps, debris and fx-sparkle are warm light or small that
+the end screen. The bumps, debris and fx-sparkle are light, warm or small, and
 would fade into the three light roads, so each carries a 1px plum rim (4.4:1 or
 more on those); fx-splash carries a navy one. fx-new-best carries the plum rim
 too, for the cream panel and the sunset sky of screen-end. The pack is always
@@ -30,7 +30,7 @@ counters and the gaps between letters, on a solid dred shadow 2px down and right
 words only, 2 to 7 letters.
 
 Usage:
-  fx.py preview OUT.png   every frame of every effect on the street colours
+  fx.py preview OUT.png   every frame of every effect on the zone roads
   fx.py build             write art/fx/*.aseprite and export to
                           public/art/sprites/
 
@@ -48,7 +48,7 @@ from pixel import Grid, main  # noqa: E402
 
 def rim(g, col="plum"):
     """Ring the shape with a 1px outline in one colour, in place: plum holds 6.5:1 on the tan road,
-    8.3:1 on the pink and 4.4:1 on skin2, and the fill inside it carries the dslate road."""
+    5.0:1 on the pink and 4.4:1 on skin2, and the fill inside it carries the dslate road."""
     edge = [(x, y) for y in range(g.h) for x in range(g.w) if not g.px[y][x] and any(
         0 <= x + dx < g.w and 0 <= y + dy < g.h and g.px[y + dy][x + dx]
         for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))]
@@ -126,9 +126,9 @@ def word(g, text, cx, top, fill="yellow"):
         for j, row in enumerate(LETTERS[ch]):
             letters |= {(x + i, top + 1 + j) for i, c in enumerate(row) if c == "#"}
         x += len(LETTERS[ch][0]) + 1
-    ring = {(x + dx, y + dy) for x, y in letters for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
-    shadow = {(x + d, y + d) for x, y in ring for d in (1, 2)} - ring
-    for pts, col in ((shadow, "dred"), (ring - letters, "ink"), (letters, fill)):
+    halo = {(x + dx, y + dy) for x, y in letters for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    shadow = {(x + d, y + d) for x, y in halo for d in (1, 2)} - halo
+    for pts, col in ((shadow, "dred"), (halo - letters, "ink"), (letters, fill)):
         for x, y in pts:
             g.p(x, y, col)
     return g
@@ -409,4 +409,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/fx", __doc__, grounds=("3a4466", "e4a672", "c0cbdc", "c28569"))
+    main(sys.argv, sprites, "art/fx", __doc__)

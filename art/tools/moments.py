@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Draw the feedback moments at the dog column: the firing moment's plate and
+"""Draw the feedback moments over the dog cards: the firing moment's plate and
 pop, the fee payout's flying coin and amount plate, and the treat's landing pop.
-Effects carry the 1px plum rim, so they hold on the light roads and the cream
-doghouse while their fills carry the dark brown column and the plum top bar.
+Effects carry the 1px plum rim, so they hold on the light roads while their fills
+carry the wood card band, the navy dog card and the plum top bar.
 Plates are ui.py's chrome: a cream band inside ink and plum lines, so they read
-on the column and on every road.
+on the card band and on every road.
 
 ui-fired-plate  24x24  laid-back, fussy, dramatic (1 frame each)  nine-slice, 8px
                        corners: a stamp-like plate in the owner's temperament colour
                        (blue, purple, dred) inside a cream band, with a white stamp line
-                       6px in. Stretched to 116x28 over the doghouse's name plate, with
+                       6px in. Stretched to 116x28 over the dog's card, with
                        "FIRED!" in font-display (62px) centred
 fx-fired-pop    64x64  play (6 frames, 70ms)  drawn at 2x (128x128) centred on the 2x
                        owner face, so its pixels match the face's: an amber impact star, then
@@ -17,15 +17,15 @@ fx-fired-pop    64x64  play (6 frames, 70ms)  drawn at 2x (128x128) centred on t
                        a front door at the left that swings shut and slams; the middle 32x32
                        stays behind the face, and the game holds the last frame
 fx-coin-fly     12x12  spin (4 frames, 80ms)  a coin turning edge-on and back as it flies
-                       from a doghouse to the bank
+                       from a dog card to the bank
 ui-payout-label 24x16  normal (1 frame)  three-slice, 8px caps: a cream price tag with a
                        punched hole in its pointed left cap. Stretched to 60x16 for "+$20"
                        in forest font-title at 2x: caps in rows 3 to 12, ink from x=9
 fx-treat-pop    24x24  play (5 frames, 60ms)  hearts and crumbs bursting where the bone
-                       lands on the dog in the doghouse door
+                       lands on the dog's face on its card
 
 Usage:
-  moments.py preview OUT.png   every frame of every piece on the column and road colours
+  moments.py preview OUT.png   every frame of every piece on the card band, top bar and road colours
   moments.py build             write art/moments/*.aseprite and export to
                                public/art/sprites/
 
@@ -43,15 +43,8 @@ from fx import burst, rim, stamp, star4  # noqa: E402
 from hits import piece  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
-# The dark brown column, the plum top bar and the three light roads, for the preview.
+# The wood card band, the plum top bar and the three light roads, for the preview.
 GROUNDS = ("733e39", "3e2731", "e4a672", "c0cbdc", "c28569")
-
-
-def rounded(g, x, y, w, h, col, r=2):
-    """A filled box with its corners clipped by r pixels on a diagonal."""
-    for j in range(h):
-        cut = max(0, r - j, r - (h - 1 - j))
-        g.rect(x + cut, y + j, w - 2 * cut, 1, col)
 
 
 # ---------- firing moment ----------
@@ -153,8 +146,8 @@ def fired_pop(step):
 # ---------- fee payout ----------
 
 def coin_fly(step):
-    """12x12: the coin turns edge-on and back. Amber holds 4.57:1 on the dark brown column and
-    7.35:1 on the plum top bar; the plum rim carries the light roads and the cream doghouse."""
+    """12x12: the coin turns edge-on and back. Amber holds 4.57:1 on the wood card band and
+    7.35:1 on the plum top bar; the plum rim carries the light roads."""
     g = Grid(12, 12)
     if step == 2:
         g.rect(5, 1, 2, 10, "orange")
@@ -208,7 +201,7 @@ def treat_pop(step):
         y = round(cy + dy * (0.5 + step * 0.3) + step * step * 0.4)
         if 1 <= x < 23 and 1 <= y < 23:
             piece(g, lambda p: p.p(x, y, col), size=24)
-    for i, (x0, vx, delay) in enumerate(((cx - 7, -1, 0), (cx + 3, 1, 0), (cx - 2, 0, 1))):
+    for x0, vx, delay in ((cx - 7, -1, 0), (cx + 3, 1, 0), (cx - 2, 0, 1)):
         t = step - 2 - delay
         if t < 0:
             continue

@@ -15,17 +15,18 @@ are the pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). road.py's people are drawn at
-road.SCALE x the step, as road.py draws them at road.SCALE. The truck, the
-obstacles and the parked car are drawn at their full size's scale
+road.SCALE x the step, as road.py draws them at road.SCALE. The ice cream truck,
+the obstacles, and the parked car, delivery truck and streetcar are drawn at their
+full size's scale
 (road.TRUCK_SCALE, obstacles.SCALE, obstacles.CAR_SCALE) x the step. Offsets that move a
 part by pixels (a step, a breath, a wag) are snapped to whole pixels at the small
 size.
 
 Usage:
-  depths.py preview OUT.png   every frame of every variant on the six road colours
+  depths.py preview OUT.png   every frame of every variant on the zone roads
   depths.py compare DIR       DIR/<key>.png per sprite: each frame at 1x, then per
                               step nearest-neighbour beside the variant, on the
-                              six road colours
+                              zone roads
   depths.py build             write every variant to art/depths/*.aseprite and
                               export to public/art/sprites/
 
@@ -42,11 +43,10 @@ import minis  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
 from minis import SCALES, STEPS, small, snap  # noqa: E402
-from pixel import build, depth_settled, preview  # noqa: E402
+from pixel import ZONE_ROADS, build, depth_settled, preview  # noqa: E402
 
 # The steps hazards.py leaves to this file: it builds SCALES itself.
 BETWEEN = tuple(q for q in STEPS if q not in SCALES)
-GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 # The pose arguments of road.person that move a part by pixels.
 POSE = ("lf", "rf", "bob")
 
@@ -71,7 +71,7 @@ def obstacle(s, draw, spec):
 def own(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) at scale s for the road sprites only this file draws
     small, with the tags road.sprites and obstacles.sprites give them. road.py's people are drawn at
-    road.SCALE x s, the stop sign too, since their drawing functions lay them out road.SCALE times smaller than
+    road.SCALE x s, since their drawing functions lay them out road.SCALE times smaller than
     they export."""
     breath, ms = road.BREATH, road.BREATH_MS
     p = road.SCALE * s
@@ -182,9 +182,9 @@ def compare(out_dir, scale=4, gap=4):
         lines = [[frames]] + [[[minis.nearest(f, s) for f in frames], small_frames] for s, small_frames in found]
         width = max(sum(sum(len(f[0]) + gap for f in block) + 2 * gap for block in line) for line in lines)
         band = sum(len(line[0][0]) + gap for line in lines)
-        img = Image.new("RGB", (width * scale, band * len(GROUNDS) * scale), (24, 20, 37))
+        img = Image.new("RGB", (width * scale, band * len(ZONE_ROADS) * scale), (24, 20, 37))
         y0 = 0
-        for ground in GROUNDS:
+        for ground in ZONE_ROADS:
             for line in lines:
                 x0 = 0
                 for block in line:
@@ -203,7 +203,7 @@ def compare(out_dir, scale=4, gap=4):
 if __name__ == "__main__":
     argv = sys.argv
     if len(argv) == 3 and argv[1] == "preview":
-        preview(depth_settled(sprites(), originals()), argv[2], GROUNDS)
+        preview(depth_settled(sprites(), originals()), argv[2], ZONE_ROADS)
     elif len(argv) == 3 and argv[1] == "compare":
         compare(argv[2])
     elif len(argv) == 2 and argv[1] == "build":

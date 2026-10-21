@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
-"""Draw the goose, a zone encounter on the road. It is a billboard
-like the minor obstacles (obstacles.py), but a side
-view, squat, its base on the last opaque row, 64n-8 px wide for n lanes.
+"""Draw the goose, a zone encounter on the road. It is a billboard like the minor
+obstacles (obstacles.py), but a side view, squat, its base on the last opaque row.
 
 goose               48x48   1 lane, a mover: a white goose, wings up, neck stretched, beak open
                             mid-honk; side view facing right, the game mirrors it for left.
                             run (4 frames, 110ms): a waddle, the feet swap and the body bobs 1px on
-                            the passing frames, the wings flap 1px; idle (4 frames, 300ms): the honk,
+                            the passing frames, the wings flap 3px, raised on the steps and swept down on the
+                            passing frames; idle (4 frames, 300ms): the honk,
                             the neck thrust 1px forward with the beak wide, then the beak shut
 
-The drawings are in the 32px units of a 32x32 road sprite: the sprites draw them on a minis.Mini
-at BIG (1.5x, road.SCALE), so 32 units are 48px. A 1px line stays 1px and motion moves whole pixels.
-The goose also has
-<key>@<step> for each depth step in minis.STEPS (from shared/depth-steps.json), redrawn the same
-way at BIG x the step, floor(size x scale + 0.5), with the original's tags, frames and durations
-and a full outline.
+The drawing is laid out on a 32-unit design grid: the sprites draw it on a minis.Mini at BIG
+(1.5x, road.SCALE), so 32 units are 48px. A 1px line stays 1px and motion moves whole pixels.
+The goose also has <key>@<step> for each depth step in minis.STEPS (from
+shared/depth-steps.json), redrawn the same way at BIG x the step, floor(size x scale + 0.5),
+with the original's tags, frames and durations and a full outline.
 
-All take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark colours,
-so the silhouette holds 3:1 on every road. The drawing functions take new, the grid maker
-(Grid for the 32-unit size, or mini(s)).
+It takes the road outline rule (pixel.road_edge) and road.LIT's rim on its dark colours, so
+the silhouette holds 3:1 on every road. goose() takes new, the grid maker (Grid for the
+32-unit size, or mini(s)).
 
 Usage:
-  encounters.py preview OUT.png   every frame on the road colours
+  encounters.py preview OUT.png   every frame on the zone roads
   encounters.py build             write art/encounters/*.aseprite and export to
                                   public/art/sprites/
 
@@ -35,16 +34,12 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
 from minis import STEPS, Mini  # noqa: E402
-from pixel import ROADS, Grid, edged, main  # noqa: E402
+from pixel import Grid, edged, main  # noqa: E402
 from road import LIT  # noqa: E402
 
-# The drawings are in the 32px units of the old road sprites; the sprites draw them BIG times larger (48px
-# for a 32px unit frame).
+# The drawings are laid out on a 32-unit design grid; the sprites draw them road.SCALE times larger (32 units
+# are 48px).
 BIG = road.SCALE
-
-# Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Cabbagetown's
-# grey and The Beaches' cream.
-GROUNDS = (*ROADS, "8b9bb4", "ead4aa")
 
 
 def mini(s):
@@ -58,22 +53,11 @@ def lit(g):
     return g
 
 
-def heart(g, x, y, col, shade):
-    """A 5x4 heart from (x, y)."""
-    g.rect(x, y, 2, 2, col)
-    g.rect(x + 3, y, 2, 2, col)
-    g.rect(x, y + 1, 5, 1, col)
-    g.rect(x + 1, y + 2, 3, 1, col)
-    g.p(x + 2, y + 3, col)
-    g.p(x + 4, y + 1, shade)
-    g.p(x + 3, y + 2, shade)
-
-
 # ---------- goose ----------
 
 def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     """Side view facing right. fa and fb move the near and far feet along the ground, bob lifts the body
-    (negative is up), flap lifts the wing tips, beak opens it (0 shut, 1 open, 2 wide) and thrust pushes
+    (negative is up), flap moves the wing tips down (negative is up), beak opens it (0 shut, 1 open, 2 wide) and thrust pushes
     the head forward. The white takes the road outline; the orange beak and feet carry it on every road."""
     g = edged(new())
     b, f, t = bob, flap, thrust
@@ -142,4 +126,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/encounters", __doc__, grounds=GROUNDS)
+    main(sys.argv, sprites, "art/encounters", __doc__)

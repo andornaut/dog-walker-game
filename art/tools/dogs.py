@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the dogs in code and build their Aseprite sources and exports.
 
-Each dog gets two sprites in Endesga 32 with coloured outlines:
+Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines and an ink-outlined face:
 
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
   SIZE_CLASS): big 54x54 (Koda the Alaskan Malamute, Snowball the Great Pyrenees, Penny the golden
@@ -12,9 +12,9 @@ Each dog gets two sprites in Endesga 32 with coloured outlines:
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
   frames, 150ms), react (4, 60ms: a startled hop), pull (4, 80ms, leaning right and
   scrabbling; the game mirrors it for left), tell (4, 125ms, the lean before a pull; the
-  game adds the fx-bark pop), idle (4,
+  game adds the fx-bark pop), idle (4, 300ms,
   standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
-  and shake (4, a quick shake-off after an encounter hit, throwing droplets).
+  and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
   A dog with a quirk has its quirk's tags after these (QUIRK_TAGS):
   dog-archie flourish (5 frames, 90ms; Acrobatic: a hop with a twist in the air,
   played when he pulls or meets a playmate); dog-penny lunge (4, 140ms; Nervous: a
@@ -25,13 +25,13 @@ Each dog gets two sprites in Endesga 32 with coloured outlines:
   the nose); dog-nugget pose (3, 220ms; Camera ready: sits square, cocks his head and
   a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a crouch, a spring, a
   stretched leap over motion streaks and a landing on the front paws).
-- face-dog-<name>: the dog column face, a 32x32 frame, the face drawn FACE_SIDE big by size class (big 30,
+- face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE big by size class (big 30,
   medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral, upset, then the
   quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
   a wobbly mouth and a sweat bead), while she is the only dog on the leash.
 
 Usage:
-  dogs.py preview OUT.png   contact sheet of every frame, scaled up
+  dogs.py preview OUT.png   every frame on the zone roads, scaled up
   dogs.py build             write art/dogs/*.aseprite, then export
                             public/art/sprites/*.png and *.json with Aseprite
 
@@ -46,11 +46,10 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, edged, main, road_edge  # noqa: E402
 
-# The road sprites are drawn on a 32-unit design grid and rasterized at ROAD_SIZE, ROAD_SCALE times bigger, on
-# a minis.Mini that keeps 1px lines and single pixels 1px; their depth variants rasterize at ROAD_SCALE x the
-# step. Faces stay 32x32 at 1x.
+# ROAD_SIZE is the medium dogs' frame side. Each dog's 32-unit design is rasterized at road_scale(name)
+# (DOG_SIZE / 32) on a minis.Mini that keeps 1px lines and single pixels 1px; its depth variants at that
+# times the step. Faces stay 32x32 at 1x.
 ROAD_SIZE = 48
-ROAD_SCALE = ROAD_SIZE / 32
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
 # and the body bobs up on the passing beats 1 and 3, the ears lagging 1px behind it.
@@ -101,7 +100,7 @@ SHAKE = [
     dict(lean=-2, tail=2, ears=-1, spray=3.5),
     dict(lean=2, tail=-1, ears=1),
 ]
-# Idle and shake go last so the frame indices of the other tags stay put.
+# Idle and shake follow the first four tags, and a quirk's tags follow them.
 ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
              ("shake", SHAKE, 60)]
 FACE_TAGS = ["happy", "neutral", "upset"]
@@ -764,8 +763,7 @@ def penny_face(mood):
 
 def inlay(g, line, draw):
     """draw on a blank grid the size of g, then lay what it drew over g, ringed in line wherever it meets
-    what g already holds: an inner line two ramp steps darker where a shape crosses the figure, while its
-    open edges take the grid's outline."""
+    what g already holds, while its open edges take the grid's outline."""
     t = Grid(g.w, g.h)
     draw(t)
     gp, tp = g.px, t.px  # in drawn pixels, also on a minis.Mini
@@ -903,7 +901,7 @@ def sparkle(g, cx, cy, size):
 
 def spray(g, d):
     """The shake-off's water: droplets thrown d pixels out from both flanks, rising as they fly. Each is
-    1px of cyan, with a white one on each side, so the road outline rings it and it holds on every road."""
+    1px, cyan or white, so the road outline rings it and it holds on every road."""
     if not d:
         return
     for x, y, c in ((9, 14, "cyan"), (9, 20, "white"), (22, 12, "cyan"), (22, 18, "white"), (21, 23, "cyan")):

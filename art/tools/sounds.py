@@ -14,7 +14,7 @@ sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising t
 sfx-hit-thief      0.60s  coin scatter: seven fading triangle pings between F#6 and E7
 sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 3kHz, three then four
 sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
-sfx-hit-goose      0.50s  honk honk: two nasal square honks with a wobble, the second higher, over a hiss
+sfx-hit-goose      0.48s  honk honk: two nasal square honks with a wobble, the second higher, over a hiss
 sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sparkle A7 F#7 D7 A7
 sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
 music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,

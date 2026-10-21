@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 """Draw the zone backdrops: the neighborhood band between the top bar and the road.
 
-backdrop-<zone>: 360x158 images in Endesga 32, drawn on screen rows 48 to 205.
-The street ends at a T-junction: the bottom rows continue the pseudo-3D road
-below the band (the same projection, so the same road, curb and sidewalk edges
-at the same slope) up to a cross street that runs flat across the band. Beyond it the far side faces the camera: the
-zone's houses, park or shops, the scenery behind them (hills, a second row of houses, a
-town, a river) and the sky. The houses are slim, about as tall as they are wide under a steep
-gable (house with SLIM parts), with trees, hedges and side yards between them. The band, the
-approach and the camera come from the game's layout export. The backdrops draw no static scenery
-on the near corners or the stub's verges, where the game's road begins and its items spawn: only
-the verge's ground.
+backdrop-<zone>: 360x158 images in the house palette, drawn on screen rows 48 to 205. The
+street ends at a T-junction: the bottom rows continue the pseudo-3D road below the band (the
+same projection, so the same road, curb and sidewalk edges at the same slope) up to a cross
+street that runs flat across the band. Beyond it the far side faces the camera: the zone's
+houses, park or shops, the scenery behind them (hills, rooftops, water, a skyline) and the sky.
+The band, the approach and the camera come from the game's layout export. The backdrops draw
+no static scenery on the near corners or the stub's verges, where the game's road begins and
+its items spawn: only the verge's ground.
 
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the
-message strip; the far side's ground row 115 (BASE), the far sidewalk 119 to 122, the far curb
-123 to 124, the cross street 125 to 133 with its centre line on row 129, the near sidewalk 134
-to 138, and the stub from row 139 (STUB, the approach) to the bottom row, 157, which continues
-the game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and
-227, verge outside). The two sidewalks' middles run from (87, 157) to (94, 138) and from
-(273, 157) to (266, 138) (python3 art/tools/backdrops.py camera prints them for the current
-constants).
+message strip (Yonge Street's skyline, moon and stars rise above it); the far side's ground row
+115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street 125 to 133
+with its centre line on row 129, the near curb 134 to 135 (none where the cross street has
+none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach) to the
+bottom row, 157, which continues the game's road (the 320-wide strip on columns 100 to 259,
+lane dividers on 132, 164, 195 and 227, verge outside). The two sidewalks' middles run from
+(87, 157) to (94, 138) and from (273, 157) to (266, 138) (python3 art/tools/backdrops.py camera
+prints them for the current constants).
 
 Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
@@ -45,7 +44,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import scene as sn  # noqa: E402
-from pixel import DARKER, K, Grid  # noqa: E402
+from pixel import DARKER, K  # noqa: E402
 
 # ---------- the band and the camera ----------
 # Everything below is drawn from these, read from the game's layout export. The camera is the
@@ -204,9 +203,8 @@ def ground(cv, lawn="green"):
 
 
 # A house's windows and door: the window frame's offset below the eaves, its width and height,
-# and the door's height. SMALL is the backdrops' house, under a 16-row roof.
+# and the door's height.
 HOUSE = (6, 12, 10, 18)
-SMALL = (4, 10, 8, 13)
 # SLIM is the backdrops' slim house, under a steep 22-row roof: tall windows either side of the door.
 SLIM = (4, 8, 10, 13)
 # The lit left edge of a roof, a ramp step lighter than the roof.
@@ -241,22 +239,6 @@ def house(cv, x, w, wall, roof, door="dred", top=40, base=104, roof_h=26, parts=
     cv.fill(dx, base - door_h, 10, door_h, door)
     cv.fill(dx + 7, base - door_h // 2, 1, 2, "amber")
     cv.fill(dx - 2, base - 2, 14, 2, "lgrey")
-
-
-def far_house(cv, cx, w, base, wall_h, wall, roof, lit=None):
-    """A house further off, centred on column cx and standing on row base: a wall wall_h rows tall,
-    shaded on its right, under a gable that rises a row for each column it narrows, and two small
-    windows, lit when lit is given, with no door or chimney at that distance."""
-    x = cx - w // 2
-    top = base - wall_h
-    cv.fill(x, top, w, wall_h, wall)
-    cv.fill(x + w - 2, top, 2, wall_h, dk(wall))
-    for k in range(w // 2 + 2):
-        cv.fill(x - 1 + k, top - 1 - k, w + 2 - 2 * k, 1, roof)
-    cv.fill(x - 1, top, w + 2, 1, dk(roof))
-    for wx in (x + 3, x + w - 7):
-        cv.fill(wx, top + 3, 4, 4, "plum")
-        cv.fill(wx + 1, top + 4, 2, 2, lit or "cyan")
 
 
 def window(cv, wx, wy, ww, wh, curtains=None, glass="cyan"):
@@ -336,8 +318,8 @@ KS = FOOT - YH
 S0 = (BAR + H - 0.5 - YH) / KS  # scale on the band's bottom row
 VISIBLE = F * KS / (BAR + H - YH) - F   # road in view below the band, to its bottom edge
 Z0 = F / S0 - F                 # the road distance on the band's bottom row
-# half the road, then the outer edges of the curb and the sidewalk, across from the road's centre:
-# the street verge, which Cabbagetown's (TORONTO_VERGES) keeps
+# half the road, then the outer edges of the curb and the sidewalk, across from the road's centre, as
+# Cabbagetown's verge (TORONTO_VERGES)
 ROAD = LAYOUT["regions"]["road"]["width"] // 2
 CURB, WALK = 164, 208
 DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider lines, from the road's centre
@@ -353,11 +335,9 @@ LINE = STUB - 10               # the cross street's centre line
 CORNER = 5                     # the near corners' curb radius, in pixels
 BASE = STUB - 24               # the far side's ground row: the houses stand on it
 # The sky above row CALM, 70 rows over the far side's ground row, is one flat colour with no
-# clouds, stars or scenery: the debuff bars and the message strip lie over it.
+# clouds, stars or scenery: the debuff bars and the message strip lie over it. Yonge Street is the
+# exception: its skyline, moon and stars rise above it.
 CALM = BASE - 70
-PERCH = round(Z0) + 3          # the near-left fence's z: its foot on the bottom row
-PERCH_H = 30                   # the fence's height: its top rail is h 27 to 30
-PERCH_X = (-(WALK + 8), -600)  # the fence, across: from just past the sidewalk out off screen
 
 
 def scale(yc):
@@ -498,18 +478,6 @@ def cross_line(cv, mark, edge=None, dash=(12, 32), bend=no_bend):
             cv.fill(px, y + 1, 1, 1, edge)
 
 
-def ffence(cv, x0, x1, z, col="white", h=PERCH_H, gap=12):
-    """A picket fence facing the camera, across x0..x1 at z."""
-    lo, hi = min(x0, x1), max(x0, x1)
-    x = lo
-    while x < hi:
-        front(cv, x, x + gap * 0.6, z, 0, h, col)
-        front(cv, x + gap * 0.45, x + gap * 0.6, z, 0, h - 2, "lgrey")
-        x += gap
-    front(cv, lo, hi, z, h * 0.5, h * 0.62, "lgrey")
-    front(cv, lo, hi, z, h - 3, h, col)
-
-
 def treeline(cv, row, cols, seed, lo=2, hi=7):
     """Far treetops or rooftops along row, rising lo to hi rows."""
     for x in range(W):
@@ -567,17 +535,6 @@ def tuft(px, py, s, rate=0.03):
     return noise(px, py) < p or noise(px, py - 1) < p
 
 
-def turf(x, z, px, py, lawn="green", stripes=True, patches=()):
-    """A lawn pixel: mown stripes or rough patches (world (x, z, rx, rz) ellipses), then tufts."""
-    s = F / (F + z)
-    c = lawn
-    if stripes and mown(x, s):
-        c = dk(lawn)
-    elif any(((x - qx) / rx) ** 2 + ((z - qz) / rz) ** 2 <= 1 for qx, qz, rx, rz in patches):
-        c = dk(lawn)
-    return dk(c) if tuft(px, py, s) else c
-
-
 def rough(seed, n, x0, x1, z0, z1):
     """n rough patches either side of the street, dropping any that would draw under 6 rows tall."""
     rnd = random.Random(seed)
@@ -590,54 +547,16 @@ def rough(seed, n, x0, x1, z0, z1):
     return out
 
 
-def verge(road, lawn="green", walk="lgrey", seam="grey", curb="grey", stripes=True):
-    """The game's verge beside the road: a curb, a sidewalk with a seam every 32 rows of
-    road, then a lawn (see turf). road(x, z, span, px, py) paints the road."""
-    def paint(x, z, span, px, py):
-        a = abs(x)
-        if a < ROAD:
-            return road(x, z, span, px, py)
-        if a < CURB:
-            return curb
-        if a < WALK:
-            return seam if span < 16 and crosses(z, span, 32) else walk
-        return turf(x, z, px, py, lawn, stripes)
-    return paint
-
-
 def flat(road):
     """A stub road painter as the cross street's: its middle, with no lines across."""
     return lambda px, py: road(0, 0, 99, px, py)
 
 
 def stats_street():
-    """The suburban street screen-stats' window shows: slim houses under steep roofs on a hill."""
+    """The suburban street screen-stats' window shows (screens.STATS_VIEW_TOP down past the far side's
+    ground row): slim houses under steep roofs on a hill."""
     cv = sn.Canvas(W, H)
-    # fair-weather puffs of mixed sizes, spread unevenly above the hill
-    sky(cv, clouds=((8, BASE - 57, 40, 7), (110, BASE - 60, 18, 3), (232, BASE - 56, 30, 5),
-                    (318, BASE - 48, 18, 3)))
-    # the neighbourhood climbs a hill behind the street: a water tower on its crest, a second
-    # row of houses up the slope, showing between and above the near ones
-    crest = hills(cv, BASE - 52, BASE, "dgreen", "green", 1.7, 10)
-    tx = CX + 118
-    for lx in (tx - 6, tx + 5):
-        cv.fill(lx, BASE - 50, 2, 16, "slate")
-    cv.fill(tx - 6, BASE - 43, 13, 1, "slate")
-    cv.fill(tx - 9, BASE - 62, 20, 12, "lgrey")
-    cv.fill(tx + 7, BASE - 62, 4, 12, "grey")
-    cv.fill(tx - 9, BASE - 51, 20, 1, "grey")
-    for k in range(4):
-        cv.fill(tx - 7 + 2 * k, BASE - 63 - k, 16 - 4 * k, 1, "slate")
-    # the second row up the slope, showing between the near roofs and behind the trees
-    for cx, w, wall_c, roof in ((22, 20, "lgrey", "slate"), (90, 18, "skin1", "dred"),
-                                (208, 20, "cream", "dslate"), (332, 18, "white", "purple")):
-        far_house(cv, cx, w, min(BASE - 26, crest[cx] + 16), 12, wall_c, roof)
-
-    def road(x, z, span, px, py):
-        if abs(x) >= ROAD - 3:
-            return "grey"
-        return "slate" if hashed(px, py, 29) else "navy" if hashed(px, py + 3, 31) else "dslate"
-
+    hills(cv, BASE - 52, BASE, "dgreen", "green", 1.7, 10)
     # the houses across the street, one at the end of the street and the outer two cut by the
     # band's edges: slim, under steep roofs, trees and hedges in the gaps between them
     homes = ((0, 44, 22, "lgrey", "slate", "dred", False), (60, 46, 24, "tan", "brown", "dgreen", True),
@@ -661,12 +580,6 @@ def stats_street():
     flowers(cv, CX + 12, CX + 26, FAR_WALK - 3)
     for x in (CX - 134, CX - 46, CX + 128):
         mailbox(cv, x, FAR_WALK)
-    cross(cv, flat(road), "grey", slabs)
-    cross_line(cv, "lgrey")
-    street(cv, verge(road))
-    lanes(cv, "lgrey")
-    ffence(cv, *PERCH_X, PERCH)
-    ornament(cv, "birdbath")
     return cv
 
 
@@ -924,7 +837,7 @@ def cabbagetown():
     for x, y in ((40, 4), (96, 9), (162, 2), (212, 7), (262, 1), (344, 11), (120, 16), (300, 14), (186, 12)):
         if CALM + y < rows[0][1] - 6:
             cv.fill(x, CALM + y, 1, 1, "white")
-    # the old neighborhood behind: brick roofs up a leafy rise, lit windows, a church spire
+    # the old neighborhood behind: brick roofs up a leafy rise, the Necropolis chapel's spire
     hills(cv, BASE - 40, BASE, "canopy", "olive", 3.1, 6)
     roofline(cv, BASE - 28, ((10, 16, 8), (40, 14, 6), (150, 16, 8), (212, 16, 9), (258, 16, 7),
                              (282, 14, 9), (326, 18, 8)), "dbrick", "gold", step=1)
@@ -1044,7 +957,7 @@ def high_park():
 
     yard(cv, BASE - 33, CROSS, lawn)
     treeline(cv, BASE - 20, ("pine", "canopy"), 2.5, 3, 9)
-    # Grenadier Pond on the left, reeds along its near bank, a willow and a cherry in blossom over it
+    # Grenadier Pond on the left, reeds along its near bank, a cherry in blossom over it
     for py in range(BASE - 16, BASE - 1):
         for px in range(0, 118):
             e = ((px + 0.5 - 54) / 60) ** 2 + ((py + 0.5 - (BASE - 8)) / 7.5) ** 2
@@ -1224,7 +1137,7 @@ def distillery():
 
 
 def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE):
-    """A Kensington house turned shop: a steep gable over a painted wall with two upstairs windows,
+    """A Kensington house turned shop: a steep gable over a painted wall,
     a shopfront under it, its glass lake and its awning striped cream."""
     x = cx - w // 2
     top = base - 58
@@ -1438,20 +1351,11 @@ def beaches():
     return cv
 
 
-def tower(cv, x, w, top, base, wall, glass, line="coal"):
-    """A downtown tower: a flat wall in a 1px line, its right side in shade, bands of glass."""
-    cv.fill(x, top, w, base - top, wall)
-    cv.fill(x + w - 3, top, 3, base - top, dk(wall))
-    outline_box(cv, x, top, w, base - top + 1, line)
-    for wy in range(top + 3, base - 2, 4):
-        cv.fill(x + 2, wy, w - 6, 2, glass)
-
-
 def cn_tower(cv, cx, base, top):
     """The tower far off at night, from its antenna's tip on row top to row base, in the far landmarks'
     haze shaded lgrey, in its real proportions: the antenna the top sixth, a red beacon at its tip and
     another halfway down; the SkyPod with its gold windows; a 5-column shaft on to the main pod, 23 wide
-    with a gold window band, two thirds of the way up; then the long shaft tapering out to 15 columns at the foot."""
+    with a gold window band, two thirds of the way up; then the long shaft tapering out to 13 columns at the foot."""
     h = base - top
 
     def row(y, half):
@@ -1743,47 +1647,6 @@ def yonge():
     street(cv, toronto_verge("yonge-street", road))
     lanes(cv, "white", "coal", dash=(14, 32))
     return cv
-
-
-# ---------- the near-right lawn's ornament ----------
-# A static ornament on the near-right lawn (stats_street's): drawn on a
-# grid ORN_W x ORN_H with its ground row ORN_H - 3, outlined two ramp steps darker, its grid's
-# top-left at band ORN_X, ORN_Y, so its art keeps to x 322 to 353 with its feet on row STUB + 16 (155).
-ORN_X, ORN_Y, ORN_W, ORN_H = 320, STUB - 7, 36, 26
-
-
-def _birdbath(g, base):
-    """A white stone bird bath, a sky bird on its rim (stats_street)."""
-    g.rect(11, base - 2, 11, 3, "lgrey")
-    g.rect(19, base - 2, 3, 3, "grey")
-    g.rect(14, 13, 5, base - 15, "lgrey")
-    g.rect(14, 13, 1, base - 15, "white")
-    g.rect(18, 13, 1, base - 15, "grey")
-    g.rect(12, 12, 9, 2, "lgrey")
-    g.ell(16.5, 9, 10, 4, "lgrey")
-    g.ell(19, 10, 6, 2, "grey")
-    g.rect(6, 7, 21, 2, "white")
-    g.rect(24, 7, 3, 2, "lgrey")
-    g.rect(8, 6, 17, 1, "cyan")
-    g.rect(10, 6, 2, 1, "white")
-    g.ell(11, 4, 3, 2, "sky")
-    g.ell(8, 2, 2, 2, "sky")
-    g.p(5, 2, "amber")
-    g.p(8, 1, "ink")
-    g.tri((13, 4), (16, 0), (15, 5), "blue")
-
-
-ORNAMENTS = dict(birdbath=_birdbath)
-
-
-def ornament(cv, kind):
-    """Draw the zone's static ornament on the near-right lawn (see ORNAMENTS)."""
-    g = Grid(ORN_W, ORN_H)
-    ORNAMENTS[kind](g, ORN_H - 3)
-    for y, row in enumerate(g.outlined()):
-        for x, c in enumerate(row):
-            if c:
-                cv.fill(ORN_X + x, ORN_Y + y, 1, 1, c)
 
 
 ZONES = {

@@ -41,7 +41,7 @@ streetcar keep their 56 layout columns and draw only their rows SCALE times tall
 SCALE (or CAR_SCALE) times each depth step for the depth variants.
 
 Usage:
-  obstacles.py preview OUT.png   every obstacle on the street colours
+  obstacles.py preview OUT.png   every obstacle on the zone roads
   obstacles.py build             write art/obstacles/*.aseprite and export to
                                  public/art/sprites/
 
@@ -54,13 +54,14 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, ROADS, Grid, edged, main, road_edge  # noqa: E402
+from pixel import K, Grid, edged, main, road_edge  # noqa: E402
 from road import LIT, rim  # noqa: E402
 
 # The drawings are in layout pixels: a 1-lane sprite's frame is SIZE square and a lane-spanning obstacle ROW
 # tall. sprites() draws them SCALE times bigger on a minis.Mini, which keeps 1px lines 1px, so a 1-lane sprite
-# exports at 48x48 and a lane-spanning one 36 rows tall. The parked car keeps its 56 layout columns, a lane
-# less 4px each side, and draws only its rows SCALE times taller (CAR_SCALE).
+# exports at 48x48 and a lane-spanning one 36 rows tall. The parked car, the delivery truck and the streetcar
+# keep their 56 layout columns, a lane less 4px each side, and draw only their rows SCALE times taller
+# (CAR_SCALE).
 SIZE = 40
 ROW = 30
 SCALE = 1.2
@@ -299,11 +300,12 @@ def treads(g, x, y, w, h, f, u=1, back=False):
 CONE_IDLE = (None, None, 9, 11), 400
 BIN_IDLE = (0, 0, -1, 0), 400
 BENCH_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
-HEDGE_IDLE = ((), (5,), (10,), (15,)), 350
+HEDGE_IDLE = ((), (5,), (10,), (1,)), 350
 PARKED_CAR_IDLE = (False, True), 500
 # The pull-out: 4 frames of parked_car's roll, and their duration in ms.
 PULL_OUT = range(4), 100
-# The drive: 4 frames of parked_car's or delivery_truck's roll with no indicator, and their duration in ms.
+# The drive: 4 frames of parked_car's, delivery_truck's or streetcar's roll with no indicator, and their
+# duration in ms.
 DRIVE = range(4), 100
 # The delivery truck's idle: an exhaust puff on frame 2.
 DELIVERY_IDLE = (False, False, True, False), 400
@@ -564,4 +566,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/obstacles", __doc__, grounds=ROADS)
+    main(sys.argv, sprites, "art/obstacles", __doc__)

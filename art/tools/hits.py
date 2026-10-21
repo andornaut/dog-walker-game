@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Draw the encounter hit moments: a burst over the pack per encounter, the
-screen-edge flash in the encounter's colour and the plate behind the big label. Bursts carry a 1px plum rim so they hold 3:1
-on the three light roads while their fills carry the dslate road. The flash strips pair a light ink with a dark
-fringe for the same reason. The encounters' hits match their road sprites in
-encounters.py. The bursts are laid out on a 64x64 design and drawn 77/64 times
-bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps and
-twinkles keep their pixels. Every burst opens on an impact frame (impact):
+"""Draw the encounter hit moments: a burst over the pack per encounter, the screen-edge
+flash in the encounter's colour and the plate behind the big label. Bursts carry a 1px
+plum rim so they hold 3:1 on the three light roads while their fills carry the dslate
+road. The flash strips pair a light ink with a dark fringe for the same reason. The
+encounters' hits match their road sprites in road.py. The bursts are laid out on a 64x64
+design and drawn 77/64 times bigger on a minis.Mini, so they keep 1px lines 1px; their
+pixel maps and twinkles keep their pixels. Every burst opens on an impact frame (impact):
 an eight-point star in its colour with a white core and white speed lines.
 
 fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
@@ -23,7 +23,7 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           in rows 11 to 20
 
 Usage:
-  hits.py preview OUT.png   every frame of every piece on the four road colours
+  hits.py preview OUT.png   every frame of every piece on the zone roads
   hits.py build             write art/hits/*.aseprite and export to
                             public/art/sprites/
 
@@ -44,7 +44,6 @@ from pixel import Grid, main  # noqa: E402
 BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
 # A sideways wobble with an 8px period: a line rising 2px a frame loops seamlessly in 4 frames.
 WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
-ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
 
 
 # The bursts are laid out on a 64x64 design and drawn BURST_SCALE times bigger, 77x77, on a minis.Mini that
@@ -52,7 +51,7 @@ ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
 # pixel for pixel, at the drawn place of their design position, so they keep their pixels.
 BURST = 64
 BURST_SCALE = 77 / BURST
-# How much bigger frame 0's impact star is than the radius each burst gives it, for punch.
+# How much bigger frame 0's impact star is than its base radius, 16, for punch.
 IMPACT = 1.25
 
 
@@ -73,14 +72,14 @@ def rim(g, col="plum"):
     return g
 
 
-def stamp(g, rows, x0, y0, cols=("red", "pink", "dred"), keep=None):
+def stamp(g, rows, x0, y0, cols=("red", "pink", "dred")):
     """fx.stamp pixel for pixel from the drawn place of (x0, y0)."""
-    fx.stamp(raster(g), rows, *drawn_at(g, x0, y0), cols, keep)
+    fx.stamp(raster(g), rows, *drawn_at(g, x0, y0), cols)
 
 
-def star4(g, cx, cy, r, col, core="white"):
+def star4(g, cx, cy, r, col):
     """fx.star4 on the drawn grid, centred at the drawn place of (cx, cy), its arms r scaled."""
-    fx.star4(raster(g), *drawn_at(g, cx, cy), round(r * getattr(g, "s", 1)), col, core)
+    fx.star4(raster(g), *drawn_at(g, cx, cy), round(r * getattr(g, "s", 1)), col)
 
 
 def dots(g, x0, y0, pts):
@@ -90,15 +89,9 @@ def dots(g, x0, y0, pts):
         raster(g).p(x + dx, y + dy, c)
 
 
-def pixmap(rows, cols, flip=False):
-    """A pixel map's (dx, dy, colour) pixels: each character's colour in cols, "." empty; flip mirrors it."""
-    return [(i, j, cols[ch]) for j, row in enumerate(rows) for i, ch in enumerate(row[::-1] if flip else row)
-            if ch in cols]
-
-
 def burst_frame(draw, step):
     """A burst's frame step: draw(step) laid out on BURST x BURST and drawn BURST_SCALE times bigger."""
-    import minis  # minis imports modules that import this one, so it is imported when first used
+    import minis  # imported when first used, so feedback, moments and needs, which import hits, don't load it
 
     return minis.small(sys.modules[__name__], BURST_SCALE, draw, step)
 
@@ -119,10 +112,10 @@ def piece(dst, draw, col="plum", size=64):
     return layer(dst, rim(g, col))
 
 
-def impact(g, outer, cx=32, cy=32, r=16):
+def impact(g, outer, cx=32, cy=32):
     """Frame 0 of every burst: an eight-point star in the encounter's colour with a white core, IMPACT times
-    r, and a white speed line flying out between each pair of its points."""
-    r *= IMPACT
+    16 in radius, and a white speed line flying out between each pair of its points."""
+    r = 16 * IMPACT
     for k in range(8):
         a = math.radians(k * 45 + 11 - 90 + 22.5)  # between the points, as burst turns them 11 degrees
         (x0, y0), (x1, y1) = (drawn_at(g, cx + math.cos(a) * d, cy + math.sin(a) * d) for d in (r, r * 1.3))
@@ -198,7 +191,7 @@ def hit_skunk(step):
         # wisps curling off the cloud, dithered: alternate pixels pink and plum, so they hold on every road,
         # with a second strand on alternate pixels at the base
         t = step - 2
-        for j, (deg, curl) in enumerate(((200, 1), (330, -1), (60, 1), (140, -1), (265, 1))):
+        for deg, curl in ((200, 1), (330, -1), (60, 1), (140, -1), (265, 1)):
             a = math.radians(deg + step * 5)
             r0 = d + r + 1 + t * 2
             for i in range(6 + t):
@@ -326,7 +319,7 @@ def hit_other_dog(step):
                 piece(g, lambda p: tuft(p, x, y, col, (step + i) % 2))
     if step >= 3:
         t = step - 3
-        for i, (x0, delay) in enumerate(((24, 0), (36, 1), (30, 2))):
+        for x0, delay in ((24, 0), (36, 1), (30, 2)):
             tt = t - delay
             if tt < 0:
                 continue
@@ -349,8 +342,9 @@ FLASH = {"green": ("green", "teal"), "sky": ("cyan", "navy"), "amber": ("amber",
 
 def flash(colour, step):
     """16x64, the left screen edge: solid at x=0, an ordered 4x4 dither that clears inward. Each lit
-    pixel in the sparse inner half with a gap inward of it gets a dark fringe there; the light ink carries the dslate road and the
-    dark fringe the light roads. Later frames recede toward the edge."""
+    pixel in the sparse inner half with a gap inward of it gets a dark fringe there; the light ink carries
+    the dslate road (all but mauve's, 2.0:1) and the dark fringe the light roads. Later frames recede toward
+    the edge."""
     ink, fringe = FLASH[colour]
     width = (16, 11, 7, 4)[step]
     solid = 2 if step < 2 else 1
@@ -374,7 +368,7 @@ def flash(colour, step):
 PLATES = {"normal": ("dred", "red", "plum"), "lucky": ("blue", "sky", "navy")}
 
 
-def label_plate(face="dred", lit="red", shade="plum"):
+def label_plate(face, lit, shade):
     """24x24 nine-slice, 8px corners: ui.py's chrome plate (hit_label)."""
     import ui
 
@@ -399,4 +393,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/hits", __doc__, grounds=ROADS)
+    main(sys.argv, sprites, "art/hits", __doc__)

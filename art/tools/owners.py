@@ -3,7 +3,7 @@
 
 face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with an ink
 outer line closed under the bust, cel shaded, the face flat with a 1px shadow down its near edge. Tags: happy, neutral, upset, fired (angry, shown as the owner
-fires you) and worried (at 1 heart, while their doghouse pulses). Each
+fires you) and worried (at 1 heart, while their dog's card pulses). Each
 owner's job shows in their hair and accessories, and their temperament in
 how far the expressions go.
 

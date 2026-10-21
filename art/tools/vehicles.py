@@ -52,9 +52,6 @@ from road import SCALE, face_disc, face_front  # noqa: E402
 # as road.ice_cream_truck.
 TRUCK_W, TRUCK_H = 56, 50
 TRUCK_SCALE = obstacles.CAR_SCALE
-# The zone roads, for the preview: Cabbagetown, High Park, the Distillery District, Kensington Market,
-# The Beaches and Yonge Street.
-GROUNDS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
 
 
 def raster(g):
@@ -147,7 +144,7 @@ TRUCK_FLIES = (((12, 4), (14, 2)), ((44, 2), (42, 1)))
 
 def truck(draw, f, step):
     """A garbage truck frame f at depth step step on a minis.Mini at TRUCK_SCALE x step, outlined, with its
-    flies on it after the outline: one ink pixel below 0.75x, else a 2x1 ink body under a white wing."""
+    flies on it after the outline: one ink pixel below 0.75x, else a 2x1 ink body under a white and lgrey wing."""
     sx, sy = TRUCK_SCALE[0] * step, TRUCK_SCALE[1] * step
     out = small(sys.modules[__name__], (sx, sy), draw, f).outlined()
     for frames in TRUCK_FLIES:
@@ -308,4 +305,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/vehicles", __doc__, grounds=GROUNDS)
+    main(sys.argv, sprites, "art/vehicles", __doc__)
