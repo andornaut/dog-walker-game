@@ -59,11 +59,6 @@ export const HOME_TEXT_FIELDS = {
   slotBought: ["slot"],
   startLoading: [],
   startWalk: [],
-  topBar: {
-    best: ["amount"],
-    walkMany: ["count"],
-    walkOne: ["count"],
-  },
   unsaved: [],
   walkerInfo: ["agility", "perk", "walker"],
   walkerLocked: ["zone"],

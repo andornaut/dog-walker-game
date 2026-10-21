@@ -594,13 +594,6 @@ export interface HomeText {
   // Start walk's label while the walk waits for its art to load.
   readonly startLoading: string;
   readonly startWalk: string;
-  // The top bar's best walk and walk count, or what it says before any walk.
-  readonly topBar: {
-    readonly best: string;
-    readonly noWalks: string;
-    readonly walkMany: string;
-    readonly walkOne: string;
-  };
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
   // What the bubble says for an owned walker picked or focused: its agility and perk.

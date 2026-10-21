@@ -1535,29 +1535,28 @@
         "y": 166
       },
       "help": {
+        "face": {
+          "x": 240,
+          "y": 9
+        },
         "hit": {
           "height": 44,
           "width": 44,
           "x": 228,
           "y": 0
-        },
-        "icon": {
-          "x": 240,
-          "y": 11
         }
       },
       "logbook": {
+        "face": {
+          "x": 196,
+          "y": 9
+        },
         "hit": {
           "height": 44,
-          "width": 134,
-          "x": 92,
+          "width": 44,
+          "x": 184,
           "y": 0
-        },
-        "icon": {
-          "x": 104,
-          "y": 11
-        },
-        "textX": 130
+        }
       },
       "logbookButton": {
         "gap": 12,
@@ -1569,15 +1568,15 @@
         "y": 146
       },
       "mute": {
+        "face": {
+          "x": 284,
+          "y": 9
+        },
         "hit": {
           "height": 44,
           "width": 44,
           "x": 272,
           "y": 0
-        },
-        "icon": {
-          "x": 284,
-          "y": 11
         }
       },
       "path": {
@@ -1705,15 +1704,15 @@
         }
       },
       "settings": {
+        "face": {
+          "x": 328,
+          "y": 9
+        },
         "hit": {
           "height": 44,
           "width": 44,
           "x": 316,
           "y": 0
-        },
-        "icon": {
-          "x": 328,
-          "y": 11
         }
       },
       "speech": {
@@ -1760,18 +1759,34 @@
       "tileOffset": 24,
       "tileSelectOutset": 1,
       "topBar": {
-        "caps": 10,
-        "coin": {
-          "x": 6,
-          "y": 11
+        "bank": {
+          "capsY": {
+            "1": 16,
+            "2": 14,
+            "3": 11
+          },
+          "ink": {
+            "left": 8,
+            "right": 174
+          },
+          "scales": [
+            3,
+            2,
+            1
+          ]
         },
+        "faceSize": 20,
         "height": 40,
-        "iconSize": 16,
         "mid": 19,
         "rule": 2,
-        "textY": {
-          "bank": 14
-        }
+        "well": {
+          "height": 30,
+          "lip": 1,
+          "width": 176,
+          "x": 4,
+          "y": 4
+        },
+        "wellKey": "ui-home-cash-well"
       },
       "walkerAtGate": {
         "footY": 196,

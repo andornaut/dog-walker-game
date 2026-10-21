@@ -2,7 +2,6 @@ import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
-import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import {
   dogFaceKey,
   dogPortraitKey,
@@ -55,11 +54,11 @@ import {
   tapGear,
 } from "../home/home";
 import {
+  bankFit,
+  bankLeft,
   DOG_TILE_TEXT_ROOM,
   dogTileFeeY,
   HOME_LAYOUT,
-  LOGBOOK_TEXT_FIT,
-  logbookTextTops,
   sectionFill,
   SPEECH_ROOM,
   speechBubbleHeight,
@@ -71,7 +70,7 @@ import {
   walkerLineKey,
   walkerUnlockedSince,
 } from "../home/homeLines";
-import { HOME_TEXT_FIELDS as FIELDS, homeLine } from "../home/homeText";
+import { homeLine } from "../home/homeText";
 import {
   buttonState,
   type ItemTile,
@@ -112,7 +111,6 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
-import { fillLine } from "../text/lines";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import {
@@ -148,6 +146,7 @@ import {
   addPixelText,
   fitPixelText,
   type FontRole,
+  inkSpan,
   pixelFontMetrics,
   placePixelText,
   scalePixelText,
@@ -206,13 +205,13 @@ const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>
 const PORCH_DOG_OFFSET = HOME_LAYOUT.porchDogOffset;
 const TOP_BAR = HOME_LAYOUT.topBar;
 const HELP_BUTTON: Rect = HOME_LAYOUT.help.hit;
-const HELP_ICON = HOME_LAYOUT.help.icon;
+const HELP_FACE = HOME_LAYOUT.help.face;
 const MUTE_BUTTON: Rect = HOME_LAYOUT.mute.hit;
-const MUTE_ICON = HOME_LAYOUT.mute.icon;
+const MUTE_FACE = HOME_LAYOUT.mute.face;
 const SETTINGS_BUTTON: Rect = HOME_LAYOUT.settings.hit;
-const SETTINGS_ICON = HOME_LAYOUT.settings.icon;
+const SETTINGS_FACE = HOME_LAYOUT.settings.face;
 const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
-const LOGBOOK_ICON = HOME_LAYOUT.logbook.icon;
+const LOGBOOK_FACE = HOME_LAYOUT.logbook.face;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
 const POCKET_LINING = HOME_LAYOUT.pocketLining;
@@ -395,11 +394,11 @@ const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 // say when one has just been unlocked. A session's first visit has none to compare with.
 const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 
-// The screen before a walk: the bank, the Logbook and best walk at the top bar's left and
-// help, sound and settings at its right; the walker and pack at the gate beside the Pet
-// shop; the Walker, Dogs and Pocket sections and Start walk. Buying happens only in
-// the shop: tapping the building opens it, and tapping a locked dog, gear item or the Dogs
-// band's padlock opens it on that item. Holding a dog or gear tile opens its detail card.
+// The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound and
+// Settings at its right; the walker and pack at the gate beside the Pet shop; the Walker, Dogs
+// and Pocket sections and Start walk. Buying happens only in the shop: tapping the building
+// opens it, and tapping a locked dog, gear item or the Dogs band's padlock opens it on that
+// item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
 // opens help, S settings, L the logbook and M mutes. Start walk and help wait for boot to load
 // the rest of the art, which it does behind this screen.
@@ -1282,50 +1281,46 @@ export class StartScene extends Scene {
       x: 0,
       y: TOP_BAR.height - TOP_BAR.rule,
     });
-    const { coin, textY } = TOP_BAR;
-    root.add(
-      this.textures.exists(MONEY_ICON_KEY)
-        ? this.add.image(coin.x, coin.y, MONEY_ICON_KEY).setOrigin(0)
-        : this.add.sprite(coin.x, coin.y, "tip").setOrigin(0),
-    );
-    const dollar = this.text(root, 24, textY.bank, "$", PALETTE.amber, { font: "title" });
-    const amountX = 24 + dollar.width + 2;
-    const full = dollarAmountText(save.bankCents);
-    const amount = this.text(root, amountX, textY.bank, full, PALETTE.cream, { font: "title" });
-    // A bank too wide for the space before the Logbook icon shows in thousands or millions.
-    fitText(amount, LOGBOOK_ICON.x - 2 - amountX, [full, shortDollarAmountText(save.bankCents)]);
-    // The best walk and walk count after the Logbook button, inside its hit area.
-    const { bestWalk } = save.stats;
-    const walks = walksPlayed(save.stats);
-    const left = HOME_LAYOUT.logbook.textX;
-    const words = gameData.homeText.topBar;
-    const tops = logbookTextTops(pixelFontMetrics(this, "body"), TEXT_SCALE);
-    const line = (value: string, top: number) =>
-      this.fitOnRow(this.text(root, left, top, value, PALETTE.cream), LOGBOOK_TEXT_FIT, left, top);
-    if (bestWalk === null) {
-      line(words.noWalks, tops.one);
+    // The bank in its well: the "$" and the amount at the largest scale that fits, one font
+    // advance apart and centred across the well, or in thousands or millions past every scale.
+    const { bank, well, wellKey } = TOP_BAR;
+    if (this.textures.exists(wellKey)) {
+      root.add(this.add.image(well.x, well.y, wellKey).setOrigin(0));
     } else {
-      line(
-        fillLine(FIELDS.topBar, words, "best", { amount: dollarText(bestWalk.earnedCents) }),
-        tops.first,
-      );
-      const count = fillLine(FIELDS.topBar, words, walks === 1 ? "walkOne" : "walkMany", {
-        count: String(walks),
-      });
-      line(count, tops.second);
+      const { height, lip, width, x, y } = well;
+      fillRect(g, PALETTE.ink, { height: height - lip, width: width - lip, x, y });
     }
-    this.iconButton(root, "logbook", LOGBOOK_ICON, (x, y) => {
+    const dollar = this.text(root, 0, 0, "$", PALETTE.amber, { font: "title", scale: 1 });
+    const amount = this.text(root, 0, 0, "", PALETTE.cream, { font: "title", scale: 1 });
+    const inkAt1x = (text: string) => {
+      setPixelText(amount, text);
+      const ink = inkSpan(amount);
+      return ink.right - ink.left;
+    };
+    const { scale, text } = bankFit(inkAt1x, [
+      `$${dollarAmountText(save.bankCents)}`,
+      `$${shortDollarAmountText(save.bankCents)}`,
+    ]);
+    setPixelText(amount, text);
+    const whole = inkSpan(amount);
+    const wholeAdvance = amount.width;
+    setPixelText(amount, text.slice(1));
+    const x = bankLeft((whole.right - whole.left) * scale) - whole.left * scale;
+    const top = bank.capsY[scale];
+    scalePixelText(dollar, scale, x, top);
+    scalePixelText(amount, scale, x + (wholeAdvance - amount.width) * scale, top);
+    this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) => {
       const icon = imageIcon(this, "icon-logbook", x, y);
       return icon.length > 0
         ? icon
         : [addPixelText(this, x + 8, y + 4, "L", { color: PALETTE.plum, originX: 0.5 })];
     });
-    this.iconButton(root, "settings", SETTINGS_ICON, (x, y) => {
+    this.iconButton(root, "settings", SETTINGS_FACE, (x, y) => {
       const icon = imageIcon(this, "icon-settings", x, y);
       return icon.length > 0 ? icon : cogIcon(this, x, y);
     });
-    this.iconButton(root, "help", HELP_ICON, (x, y) => imageIcon(this, "icon-help", x, y));
-    this.iconButton(root, "mute", MUTE_ICON, (x, y) => soundIcon(this, !isMuted(this), x, y));
+    this.iconButton(root, "help", HELP_FACE, (x, y) => imageIcon(this, "icon-help", x, y));
+    this.iconButton(root, "mute", MUTE_FACE, (x, y) => soundIcon(this, !isMuted(this), x, y));
   }
 
   // The starter owners waiting at the gate until the first walk; a picked dog has gone to the

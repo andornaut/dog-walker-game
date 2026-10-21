@@ -2,7 +2,7 @@ import type { DogId } from "../data/types";
 import type { GridSpec } from "../layout/grid";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import type { TextFitStyle } from "../layout/textFit";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { SectionId } from "./sections";
 
@@ -11,18 +11,13 @@ import type { SectionId } from "./sections";
 const GAP = 8;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
-// The top bar's content lies above its 2px bottom rule; every control is centred on the
-// middle row of that area. A 16px icon is centred on its rows 7 and 8 (art centre at its
-// y + 8), and text is placed by its capitals: the bank's TOP_BAR_CAPS tall, the Logbook's
-// as tall as the body font draws them, two lines TOP_BAR_LINE_GAP apart.
+// The top bar's content lies above its 2px bottom rule, and each button's 20-row
+// ui-icon-button face is centred on the rows above the rule.
 const TOP_BAR_HEIGHT = 40;
 const TOP_BAR_RULE = 2;
 const TOP_BAR_MID = (TOP_BAR_HEIGHT - TOP_BAR_RULE) / 2;
-const TOP_BAR_ICON = 16;
-const TOP_BAR_CAPS = 10;
-const TOP_BAR_LINE_GAP = 6;
-const TOP_BAR_ICON_Y = TOP_BAR_MID - TOP_BAR_ICON / 2;
-const TOP_BAR_ONE_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS / 2;
+const TOP_BAR_FACE = 20;
+const TOP_BAR_FACE_Y = TOP_BAR_MID - TOP_BAR_FACE / 2;
 
 // The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
 const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
@@ -130,19 +125,15 @@ export const HOME_LAYOUT = {
     { dx: 26, footDy: -12 },
   ],
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
-  // The top bar's controls at its right end: help, sound, then settings.
-  help: { hit: { height: 44, width: 44, x: 228, y: 0 }, icon: { x: 240, y: TOP_BAR_ICON_Y } },
-  // The Logbook button at the bar's left, after the bank; its hit area takes in the best walk
-  // and walk count beside it.
-  logbook: {
-    hit: { height: 44, width: 134, x: 92, y: 0 },
-    icon: { x: 104, y: TOP_BAR_ICON_Y },
-    textX: 130,
-  },
+  // The top bar's four buttons at its right end, left to right: Logbook, Help, Sound and
+  // Settings, as the walk bar orders Help, Sound and Settings. Each is its ui-icon-button face
+  // and its 44x44 hit area from the bar's top.
+  help: { face: { x: 240, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 228, y: 0 } },
+  logbook: { face: { x: 196, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 184, y: 0 } },
   // The logbook card's Stats and Badges buttons, side by side across its padded width.
   logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
-  mute: { hit: { height: 44, width: 44, x: 272, y: 0 }, icon: { x: 284, y: TOP_BAR_ICON_Y } },
+  mute: { face: { x: 284, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 272, y: 0 } },
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -187,7 +178,10 @@ export const HOME_LAYOUT = {
     pocket: POCKET_SECTION,
     walker: WALKER_SECTION,
   },
-  settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: TOP_BAR_ICON_Y } },
+  settings: {
+    face: { x: 328, y: TOP_BAR_FACE_Y },
+    hit: { height: 44, width: 44, x: 316, y: 0 },
+  },
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
   // of 2x body text a line of the font apart, padX in from its sides, the first line's
   // capitals padTop under its top and the last line's lowest ink padBottom over its bottom. It
@@ -213,15 +207,23 @@ export const HOME_LAYOUT = {
   tileOffset: TILE_OFFSET,
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
+  // The top bar: the bank in its well at the left, then the buttons. The well (wellKey) is ink
+  // on its first well.width - lip columns and well.height - lip rows, its lip on the last. The
+  // bank, the title font's "$" and amount one font advance apart, is set at the largest of
+  // bank.scales whose ink fits the columns bank.ink.left to bank.ink.right, centred across them,
+  // its capitals' top at bank.capsY by scale; past every scale, its short form.
   topBar: {
-    caps: TOP_BAR_CAPS,
-    // The coin at the left, the bank text after it, and the Logbook's text lines.
-    coin: { x: 6, y: TOP_BAR_ICON_Y },
+    bank: {
+      capsY: { 1: 16, 2: 14, 3: 11 },
+      ink: { left: 8, right: 174 },
+      scales: [3, 2, 1],
+    },
+    faceSize: TOP_BAR_FACE,
     height: TOP_BAR_HEIGHT,
-    iconSize: TOP_BAR_ICON,
     mid: TOP_BAR_MID,
     rule: TOP_BAR_RULE,
-    textY: { bank: TOP_BAR_ONE_LINE_Y },
+    well: { height: 30, lip: 1, width: 176, x: 4, y: 4 },
+    wellKey: "ui-home-cash-well",
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
@@ -255,22 +257,34 @@ export const HOME_LAYOUT = {
   walkerTiles: GridSpec;
 };
 
-// The Logbook's text after its icon, inside its hit area: the best walk over the walk count, or
-// the one line before any walk, each in the first of TEXT_FIT_STYLES whose ink fits.
-export const LOGBOOK_TEXT_FIT = {
-  room: HOME_LAYOUT.logbook.hit.x + HOME_LAYOUT.logbook.hit.width - HOME_LAYOUT.logbook.textX,
-  styles: TEXT_FIT_STYLES,
-} as const;
+export type BankScale = (typeof HOME_LAYOUT.topBar.bank.scales)[number];
 
-// The capitals' tops of the Logbook's text in the body font at scale, centred on the bar's
-// middle row: one line alone, or the first and second of two.
-export function logbookTextTops(
-  body: FontMetrics,
-  scale: number,
-): { first: number; one: number; second: number } {
-  const caps = body.capHeight * scale;
-  const first = TOP_BAR_MID - caps - TOP_BAR_LINE_GAP / 2;
-  return { first, one: TOP_BAR_MID - caps / 2, second: first + caps + TOP_BAR_LINE_GAP };
+// How wide the bank's ink may be.
+export const BANK_ROOM = HOME_LAYOUT.topBar.bank.ink.right + 1 - HOME_LAYOUT.topBar.bank.ink.left;
+
+// The bank's text and scale: the first of texts (the full amount, then its short form) whose
+// ink, inkWidthAt1x wide at 1x, fits BANK_ROOM at one of the bank's scales, at the largest that
+// fits; else the last text at the smallest scale.
+export function bankFit(
+  inkWidthAt1x: (text: string) => number,
+  texts: readonly string[],
+): { scale: BankScale; text: string } {
+  const { scales } = HOME_LAYOUT.topBar.bank;
+  for (const text of texts) {
+    const width = inkWidthAt1x(text);
+    const scale = scales.find((each) => width * each <= BANK_ROOM);
+    if (scale !== undefined) {
+      return { scale, text };
+    }
+  }
+  return { scale: scales[scales.length - 1] ?? 1, text: texts[texts.length - 1] ?? "" };
+}
+
+// The bank's first ink column for ink inkWidth wide on screen: centred across its ink columns,
+// a half pixel rounded left.
+export function bankLeft(inkWidth: number): number {
+  const { ink } = HOME_LAYOUT.topBar.bank;
+  return Math.floor((ink.left + ink.right) / 2 - (inkWidth - 1) / 2);
 }
 
 // How wide a line of the walker's speech may be, as a label measures it: a bubble that wide

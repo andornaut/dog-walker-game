@@ -96,12 +96,6 @@ export const HOME_TEXT = {
   slotBought: "{slot} is open. Room for one more dog!",
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
-  topBar: {
-    best: "Best {amount}",
-    noWalks: "No walks yet",
-    walkMany: "{count} walks",
-    walkOne: "{count} walk",
-  },
   unsaved: "Progress won't be saved.",
   walkerInfo: "{walker}: {agility}, {perk}.",
   walkerLocked: "Finish {zone} to unlock.",

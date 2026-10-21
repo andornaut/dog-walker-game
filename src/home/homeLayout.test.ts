@@ -11,22 +11,23 @@ import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { fillNames, wrapWords } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { dogDetail, gearDetail, lockedDogDetail, lockedWalkerDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dogFeeText, dogNames, dollarText } from "./home";
+import { dogFeeText, dogNames, dollarAmountText, shortDollarAmountText } from "./home";
 import {
+  BANK_ROOM,
+  bankFit,
+  bankLeft,
   CARD_TEXT_ROOM,
   cardTextRows,
   detailCardLayout,
   DOG_TILE_TEXT_ROOM,
   dogTileFeeY,
   HOME_LAYOUT,
-  LOGBOOK_TEXT_FIT,
-  logbookTextTops,
   pocketLining,
   sectionFill,
 } from "./homeLayout";
@@ -193,53 +194,114 @@ describe("section fills", () => {
 
 describe("top bar", () => {
   const { help, logbook, mute, settings, topBar } = HOME_LAYOUT;
-  const { caps, iconSize, mid, textY } = topBar;
-  const iconCentre = (icon: { y: number }) => icon.y + iconSize / 2;
-  const capsCentre = (y: number) => y + caps / 2;
-  const body = fontFileMetrics("font-body");
-  const logbookCaps = body.capHeight * 2;
-  const logbookLines = logbookTextTops(body, 2);
+  const { bank, faceSize, mid, well } = topBar;
+  const buttons = [
+    ["Logbook", logbook],
+    ["Help", help],
+    ["Sound", mute],
+    ["Settings", settings],
+  ] as const;
+  const hits = buttons.map(([, button]) => button.hit);
+  const wellInk = {
+    bottom: well.y + well.height - well.lip - 1,
+    right: well.x + well.width - well.lip - 1,
+  };
 
   it("puts the middle row at the middle of the area above its rule", () => {
     expect(mid).toBe((topBar.height - topBar.rule) / 2);
   });
 
-  it.each([
-    ["the coin", iconCentre(topBar.coin)],
-    ["the bank text", capsCentre(textY.bank)],
-    ["the logbook icon", iconCentre(logbook.icon)],
-    ["the logbook's two text lines", (logbookLines.first + logbookLines.second + logbookCaps) / 2],
-    ["the logbook's single line", logbookLines.one + logbookCaps / 2],
-    ["the help button", iconCentre(help.icon)],
-    ["the sound button", iconCentre(mute.icon)],
-    ["the settings button", iconCentre(settings.icon)],
-  ])("centres %s on the bar's middle row", (_, centre) => {
-    expect(centre).toBe(mid);
+  it.each(buttons)(
+    "centres %s's face on the bar's middle row and across its hit area",
+    (_, button) => {
+      expect(button.face.y + faceSize / 2).toBe(mid);
+      expect(button.face.x + faceSize / 2).toBe(button.hit.x + button.hit.width / 2);
+    },
+  );
+
+  it.each(buttons)("gives %s a 44x44 hit area from the bar's top", (_, button) => {
+    expect(button.hit).toMatchObject({ height: 44, width: 44, y: 0 });
   });
+
+  it("runs the hit areas side by side, none over another, to the screen's right edge", () => {
+    const ends = hits.map((hit) => hit.x + hit.width);
+    expect(hits.slice(1).map((hit) => hit.x)).toEqual(ends.slice(0, -1));
+    expect(ends.at(-1)).toBe(SCREEN_CONFIG.width);
+  });
+
+  it("centres the bank's well on the bar's middle row and ends it before the first hit area", () => {
+    expect(well.y + well.height / 2).toBe(mid);
+    expect(well.x + well.width).toBeLessThan(logbook.hit.x);
+  });
+
+  it("insets the bank's ink columns inside the well's ink, the same on either side", () => {
+    expect(bank.ink.left - well.x).toBe(wellInk.right - bank.ink.right);
+    expect(bank.ink.left).toBeGreaterThan(well.x);
+  });
+
+  // The title font's capitals at each scale, centred on the well's ink rows, a half pixel at most
+  // lower when their parities differ.
+  const capHeight = fontFileMetrics("font-title").capHeight;
+  it.each(bank.scales.map((scale) => [scale] as const))(
+    "centres the bank's capitals at %ix on the well's ink rows",
+    (scale) => {
+      const top = bank.capsY[scale];
+      const bottom = top + capHeight * scale - 1;
+      expect(top).toBeGreaterThan(well.y);
+      expect(bottom).toBeLessThan(wellInk.bottom);
+      const offCentre = (top + bottom) / 2 - (well.y + wellInk.bottom) / 2;
+      expect(offCentre).toBeGreaterThanOrEqual(0);
+      expect(offCentre).toBeLessThanOrEqual(0.5);
+    },
+  );
 });
 
-// The Logbook's lines, at the largest best walk and walk count, fit its hit area at 2x in the
-// body font, the second line's lowest ink above the bar's rule.
-describe("the top bar's Logbook text", () => {
-  const body = fontFileMetrics("font-body");
-  const { topBar } = HOME_LAYOUT;
-  const words = gameData.homeText.topBar;
-  const most = dollarText(cents(9_999_900));
-  it.each([
-    words.noWalks,
-    fillNames(words.best, { amount: most }),
-    fillNames(words.walkMany, { count: "9999" }),
-    fillNames(words.walkOne, { count: "1" }),
-  ])("sets %j at 2x", (text) => {
-    const { room, styles } = LOGBOOK_TEXT_FIT;
-    const fitted = fitInFont("font-body", styles, room, plainMarks(text));
-    expect(fitted.widest).toBeLessThanOrEqual(room);
-    expect(fitted.style.scale).toBe(2);
+// The bank as the game writes it, measured on the title font at 1x.
+describe("the top bar's bank", () => {
+  const { bank } = HOME_LAYOUT.topBar;
+  const smallest = bank.scales.at(-1);
+  const width = (text: string) => inkWidth("font-title", { letterSpacing: 0, scale: 1 }, text);
+  const texts = (dollars: number) => {
+    const amount = cents(dollars * 100);
+    return [`$${dollarAmountText(amount)}`, `$${shortDollarAmountText(amount)}`];
+  };
+  // From nothing past the most a save can hold, by the scale each takes; every scale is covered.
+  const amounts = [0, 5, 88, 1_234, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409];
+
+  it("covers every scale with the amounts", () => {
+    const taken = new Set(amounts.map((dollars) => bankFit(width, texts(dollars)).scale));
+    expect([...taken].sort()).toEqual([...bank.scales].sort());
   });
 
-  it("keeps the second line's lowest ink above the rule", () => {
-    const { second } = logbookTextTops(body, 2);
-    expect(second + inkRowsFromCapTop(body) * 2).toBeLessThanOrEqual(topBar.height - topBar.rule);
+  it.each(amounts)("sets $%i at the largest scale whose ink fits the bank's room", (dollars) => {
+    const [full = ""] = texts(dollars);
+    const { scale, text } = bankFit(width, texts(dollars));
+    expect(text).toBe(full);
+    expect(scale).toBe(bank.scales.find((each) => width(full) * each <= BANK_ROOM));
+    expect(width(text) * scale).toBeLessThanOrEqual(BANK_ROOM);
+  });
+
+  it.each(amounts)("centres $%i across the bank's ink columns at the scale it takes", (dollars) => {
+    const { scale, text } = bankFit(width, texts(dollars));
+    const ink = width(text) * scale;
+    const left = bankLeft(ink);
+    const right = left + ink - 1;
+    expect(left).toBeGreaterThanOrEqual(bank.ink.left);
+    expect(right).toBeLessThanOrEqual(bank.ink.right);
+    // Centred, a half pixel at most to the left when the widths' parities differ.
+    const offCentre = (bank.ink.left + bank.ink.right) / 2 - (left + right) / 2;
+    expect(offCentre).toBeGreaterThanOrEqual(0);
+    expect(offCentre).toBeLessThanOrEqual(0.5);
+  });
+
+  // A full amount too wide at every scale gives way to its short form, at the largest scale
+  // that fits it, or the smallest past every one.
+  it.each([
+    ["the short form at the largest scale", 10, { scale: bank.scales[0], text: "short" }],
+    ["the short form at the smallest scale", BANK_ROOM + 1, { scale: smallest, text: "short" }],
+  ])("sets an amount too wide at every scale in %s", (_, shortWidth, expected) => {
+    const measure = (text: string) => (text === "full" ? BANK_ROOM + 1 : shortWidth);
+    expect(bankFit(measure, ["full", "short"])).toEqual(expected);
   });
 });
 
