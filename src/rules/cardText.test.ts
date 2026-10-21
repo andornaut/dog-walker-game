@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, EncounterId } from "../data/types";
+import { largeBodyText } from "../hud/cardText";
 import { boxStyles, CARD_LAYOUT } from "../layout/cardLayout";
 import { fillNames } from "../lib/lines";
 import type { CardSource } from "../state/runState";
@@ -117,6 +118,47 @@ describe("a card's text for the dogs it catches", () => {
         expect(fitted.widest).toBeLessThanOrEqual(effect.width);
         expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
       }
+    });
+  });
+
+  describe("with Sweet talker", () => {
+    const sweetTalker = activeModifier(
+      { kind: "upgrade", upgrade: "sweetTalker" },
+      { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
+    );
+    const groom = "Full groom";
+
+    it.each([
+      {
+        cardsThisZone: 0,
+        large: gameData.runText.card.free,
+        modifiers: [sweetTalker],
+        text: gameData.runText.card.free,
+        why: "a waived cost says FREE",
+      },
+      {
+        cardsThisZone: 1,
+        large: `−$${encounterHigh} ${groom}`,
+        modifiers: [sweetTalker],
+        text: `−$${encounterHigh}`,
+        why: "a cost once the zone's free card is used says its price",
+      },
+      {
+        cardsThisZone: 0,
+        large: `−$${encounterHigh} ${groom}`,
+        modifiers: [],
+        text: `−$${encounterHigh}`,
+        why: "a cost without Sweet talker says its price",
+      },
+    ])("$why, on the small and large card", ({ cardsThisZone, large, modifiers, text }) => {
+      const run = testState(
+        { duchess: 5, koda: 5 },
+        { cardsThisZone, modifiers, money: cents(10_000) },
+      );
+      const view = cardFor(gameData, run, encounter("skunk", ["koda"])).options.find(
+        ({ label }) => label === groom,
+      );
+      expect([view?.text, largeBodyText(gameData, view)]).toEqual([text, large]);
     });
   });
 

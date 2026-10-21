@@ -15,11 +15,12 @@ import {
   type Change,
   dollarCauses,
   type HeartChange,
+  type ModifierCause,
   type MoneyChange,
 } from "./causes";
 import { maxHearts } from "./dogs";
 import { debuffLasting, lastingFor, longerLasting } from "./durations";
-import { changeModified, type ModifiedValue, statModified } from "./modified";
+import { changeModified, type ModifiedValue, modifiedValue, statModified } from "./modified";
 import { modifiedStat, statParts } from "./modifiers";
 import { type Cents, cents, clampHearts, read, roundDollars } from "./units";
 
@@ -72,7 +73,7 @@ export function targetDogs(
 // adjustments the freeCards modifier that waived a cost. base and adjustments are signed as
 // changes to the money.
 interface MoneyParts {
-  readonly adjustments: readonly Cause[];
+  readonly adjustments: readonly ModifierCause[];
   readonly amount: Cents;
   readonly base: number;
 }
@@ -121,9 +122,15 @@ export function baseMoneyCost(data: Pick<GameData, "tuning">, effects: readonly 
   );
 }
 
-// A money effect's total after modifiers, unsigned.
-export function moneyAmount(data: RulesData, state: RunState, effect: MoneyEffect): Cents {
-  return moneyParts(data, state, effect).amount;
+// A money effect's total after modifiers, unsigned, and its modified value, such as a cost a
+// free card waived, or null when no modifier changed it.
+export function moneyAmount(
+  data: RulesData,
+  state: RunState,
+  effect: MoneyEffect,
+): { readonly amount: Cents; readonly modified: ModifiedValue | null } {
+  const { adjustments, amount, base } = moneyParts(data, state, effect);
+  return { amount, modified: modifiedValue({ kind: "money" }, base, adjustments) };
 }
 
 // What an option's effects would take from the player. An option costing more than the

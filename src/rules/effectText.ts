@@ -17,6 +17,7 @@ import type {
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames } from "../lib/lines";
+import type { ModifiedValue } from "./modified";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
 
@@ -220,12 +221,16 @@ export function debuffText(tuning: LiveTuning, debuff: Debuff): string {
 type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 
 // What a card's text knows of the walk: the dogs a target reaches, in pack order, and a
-// money effect's total after modifiers.
+// money effect's total after modifiers, unsigned, with its modified value (null when no
+// modifier changed it).
 export interface CardTextContext {
   readonly dogs: (target: Target) => readonly DogId[];
   // Whether the walker's perk, such as Second chance, would forgive the dog's owner's loss.
   readonly forgiven: (dog: DogId) => boolean;
-  readonly money: (effect: MoneyEffect) => Cents;
+  readonly money: (effect: MoneyEffect) => {
+    readonly amount: Cents;
+    readonly modified: ModifiedValue | null;
+  };
   // How long a debuff would last on this walk.
   readonly seconds: (debuff: DebuffId) => number;
 }
@@ -251,6 +256,11 @@ function cardHeartsText(
   return names.length === 0 ? undefined : names.join(", ");
 }
 
+// Whether a modifier, such as Sweet talker, waived a cost to nothing.
+function isWaived(modified: ModifiedValue | null): boolean {
+  return modified !== null && modified.before < 0 && modified.after === 0;
+}
+
 // A phrase for the dogs a card catches, or undefined when the effect reaches none of them.
 function cardPhrase(
   data: CardTextData,
@@ -264,10 +274,14 @@ function cardPhrase(
       const text = cardHeartsText(data, context, effect);
       return text === undefined ? undefined : { text };
     }
-    case "money":
+    case "money": {
+      const { amount, modified } = context.money(effect);
       return {
-        text: `${effect.change === "gain" ? "+" : MINUS}${formatDollars(context.money(effect))}`,
+        text: isWaived(modified)
+          ? data.runText.card.free
+          : `${effect.change === "gain" ? "+" : MINUS}${formatDollars(amount)}`,
       };
+    }
     default:
       return effectPhrase(data, effect);
   }
