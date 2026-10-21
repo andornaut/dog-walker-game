@@ -19,7 +19,7 @@ export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 
 // blocksLane marks kinds the pack must steer around, such as obstacles. Spawns without a
 // footprint take one cell. A mover's spawns block the lanes it sweeps instead; one with no
-// room to move stands still in its footprint instead, if there is room for that.
+// room to move waits for a later row with room, or is dropped, and never stands still.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
@@ -294,12 +294,13 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide or wider have
 // a row between the rows they take. Movers are placed first, by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows
-// back. A mover with no room to move is placed as a standing obstacle, last of all. A mover, or an
-// obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
-// uses no random draw; so is one that would leave fewer free cells than there are one-cell
-// spawns. A free cell can still be one no lane-blocking spawn may take, where the path rule or
-// the pack-fit gap around the movers rules it out, so a one-cell spawn with no room left is
-// skipped too, the same way: a zone never fails to plan for want of room.
+// back. A mover with no room in its stretch, such as one over a cap on screen, waits for a
+// later row with room; it never stands still. A mover, or an obstacle bigger than one cell, that
+// the earlier draws left no room for is skipped, which uses no random draw; so is one that would
+// leave fewer free cells than there are one-cell spawns. A free cell can still be one no
+// lane-blocking spawn may take, where the path rule or the pack-fit gap around the movers rules
+// it out, so a one-cell spawn with no room left is skipped too, the same way: a zone never fails
+// to plan for want of room.
 export function planSpawns<Kind extends string>(
   random: Random,
   plan: SpawnPlan<Kind>,
@@ -560,28 +561,11 @@ export function planSpawns<Kind extends string>(
     window: blockingLength(plan, 1),
     zoneLength: plan.zoneLength,
   };
-  const { skipped, spawns } = placeMovers(
-    random,
-    moverRoad,
-    plan.moverCaps,
-    moverGrid,
-    rows,
-    movers,
-  );
+  const { spawns } = placeMovers(random, moverRoad, plan.moverCaps, moverGrid, rows, movers);
   events.push(...spawns);
-  // A skipped mover stands still instead, after every other spawn, and is skipped in turn
-  // when it has no room.
-  const standing = skipped.map((kind) => {
-    const quota = plan.quotas.find((candidate) => candidate.kind === kind);
-    const footprint = quota?.mover?.footprint ?? SINGLE_CELL;
-    return { blocksLane: true, count: 1, footprint, kind };
-  });
 
   // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
-  const ordered: SpawnQuota<Kind>[] = [
-    ...[...statics].sort((a, b) => area(b) - area(a)),
-    ...standing,
-  ];
+  const ordered: SpawnQuota<Kind>[] = [...statics].sort((a, b) => area(b) - area(a));
   for (const quota of ordered) {
     const footprint = quota.footprint ?? SINGLE_CELL;
     for (let i = 0; i < quota.count; i++) {

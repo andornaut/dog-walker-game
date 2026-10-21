@@ -633,7 +633,7 @@ describe("placeMovers", () => {
     ["blocks", { block: () => false }],
     ["has no room for", { leavesRoom: () => false }],
     ["leaves no pack-fit gap for", { packFits: () => false }],
-  ])("skips a mover the grid %s everywhere, drawing nothing", (_, refusal) => {
+  ])("drops a mover the grid %s everywhere, drawing nothing", (_, refusal) => {
     const { grid } = freeGrid();
     let draws = 0;
     const counting = () => {
@@ -643,7 +643,31 @@ describe("placeMovers", () => {
     const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, rows, [
       { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
     ]);
-    expect(placed).toEqual({ skipped: ["squirrel"], spawns: [] });
+    expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
     expect(draws).toBe(0);
+  });
+
+  // Three movers, one per third of the rows. One with no room in its own third, such as one over
+  // a cap there, comes on at a later row with room, never an earlier one, and is dropped when no
+  // later row has room.
+  it.each([
+    { dropped: 0, name: "the middle third", refused: (row: number) => row >= 13 && row < 26 },
+    { dropped: 2, name: "the last two thirds", refused: (row: number) => row >= 13 },
+  ])("waits for a later row, or drops, a mover with no room in $name", (refusal) => {
+    const { blocked, grid } = freeGrid();
+    const placed = placeMovers(
+      seededRandom(3),
+      zoned,
+      CAPS,
+      { ...grid, block: (row, ...rest) => !refusal.refused(row) && grid.block(row, ...rest) },
+      rows,
+      [{ count: 3, kind: "car", spec: spec({ kind: "ride", speedMultiplier: 2 }) }],
+    );
+    expect(placed.dropped).toHaveLength(refusal.dropped);
+    expect(placed.spawns).toHaveLength(3 - refusal.dropped);
+    blocked.forEach(({ row }, i) => {
+      expect(refusal.refused(row)).toBe(false);
+      expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
+    });
   });
 });

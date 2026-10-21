@@ -619,9 +619,9 @@ export interface MoverSpawn<Kind extends string> {
   readonly mover: MoverPath;
 }
 
-// The movers placed, and the kinds of those skipped, one entry each.
+// The movers placed, and the kinds of those dropped, one entry each.
 export interface PlacedMovers<Kind extends string> {
-  readonly skipped: readonly Kind[];
+  readonly dropped: readonly Kind[];
   readonly spawns: readonly MoverSpawn<Kind>[];
 }
 
@@ -645,9 +645,10 @@ function standsOf(spot: Spot): MoverStand[] {
 
 // Places every mover on rows at the distances given, each quota spread one per equal
 // stretch of the zone as the planner spreads other spawns, each mover wholly on screen
-// within the zone, within the caps on screen. A mover the earlier ones left no
-// room for anywhere is skipped, which uses no random draw, as the planner skips an obstacle it
-// has no room for.
+// within the zone, within the caps on screen. A mover with no room in its stretch, such as one
+// over a cap there, waits: it comes on at a later row with room. One with no room on any later
+// row is dropped, which uses no random draw, as the planner drops an obstacle it has no room
+// for. A mover never stands still in place of moving.
 export function placeMovers<Kind extends string>(
   random: Random,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -679,18 +680,15 @@ export function placeMovers<Kind extends string>(
     );
 
   const spawns: MoverSpawn<Kind>[] = [];
-  const skipped: Kind[] = [];
+  const dropped: Kind[] = [];
   for (const { count, kind, spec } of quotas) {
     const placements = moverPlacements(geometry, spec);
     for (let i = 0; i < count; i++) {
-      const stretch = spotsIn(
-        placements,
-        Math.floor((i * rows.length) / count),
-        Math.floor(((i + 1) * rows.length) / count),
-      );
-      const spots = stretch.length > 0 ? stretch : spotsIn(placements, 0, rows.length);
+      const end = Math.floor(((i + 1) * rows.length) / count);
+      const stretch = spotsIn(placements, Math.floor((i * rows.length) / count), end);
+      const spots = stretch.length > 0 ? stretch : spotsIn(placements, end, rows.length);
       if (spots.length === 0) {
-        skipped.push(kind);
+        dropped.push(kind);
         continue;
       }
       const spot = randomPick(random, spots);
@@ -707,5 +705,5 @@ export function placeMovers<Kind extends string>(
       });
     }
   }
-  return { skipped, spawns };
+  return { dropped, spawns };
 }
