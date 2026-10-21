@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { itemAt } from "../../arrays";
 import {
   artOrStandIn,
+  encounterSpriteKey,
   minorObstacleSpriteKey,
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
@@ -13,13 +14,11 @@ import {
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
+import type { EncounterId, HintTrigger, MinorObstacleId } from "../../data/types";
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
-import { currentZoneId } from "../../rules/route";
-import { encounterLook, skinnedArt } from "../../rules/skins";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { itemCategory, type Walk, type WalkItem, type WalkStep } from "../../runner/walk";
@@ -121,10 +120,9 @@ export class ItemViews {
     const seen = new Set<number>();
     const tags = halted ? STANDING_TAGS.halted : STANDING_TAGS.walking;
     const { roadTop } = screenRoadGeometry(walk.run);
-    const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
       seen.add(item.id);
-      const view = this.views.get(item.id) ?? this.addView(zone, item);
+      const view = this.views.get(item.id) ?? this.addView(item);
       if (item.mover !== undefined) {
         drawMover({ ...item, mover: item.mover }, view, roadTop, halted, still, shadow);
         // The cue's arrow shows only once it is wholly on the road below the juncture.
@@ -239,7 +237,7 @@ export class ItemViews {
 
   // Each item stands once at the near edge of its hit box, however many rows it covers, and a
   // lucky find on its frame's bottom. An obstacle draws obstacleParts, which it collides as.
-  private addView(zone: ZoneId, item: WalkItem): ItemView {
+  private addView(item: WalkItem): ItemView {
     const { scene } = this;
     const has = (key: string) => scene.textures.exists(key);
     const bottom = (shown: Pick<WalkItem, "height" | "y">) => shown.y + shown.height;
@@ -263,8 +261,8 @@ export class ItemViews {
     let parts: ItemPart[];
     if (item.mover !== undefined) {
       const kind = item.kind as EncounterId | MinorObstacleId;
-      const body = moverBodyKey(scene, zone, kind);
-      const drawn = obstacleParts(gameData, has, zone, kind, true);
+      const body = moverBodyKey(scene, kind);
+      const drawn = obstacleParts(gameData, has, kind, true);
       const behind = drawn.find(({ key }) => key === body)?.behind ?? 0;
       parts = [
         part(body, { footY: (shown) => bottom(shown) - behind }),
@@ -280,11 +278,11 @@ export class ItemViews {
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (lucky) {
-      parts = [part(skinnedArt(has, encounterLook(gameData, zone, item.kind as EncounterId)))];
+      parts = [part(artOrStandIn(has, encounterSpriteKey(item.kind as EncounterId)))];
     } else {
-      const kind = item.kind as EncounterId | MinorObstacleId;
-      parts = obstacleParts(gameData, has, zone, kind, false).map(({ behind, dx, flat, key }) =>
-        part(key, { dx, flat, footY: (shown) => bottom(shown) - behind }),
+      parts = obstacleParts(gameData, has, item.kind as EncounterId | MinorObstacleId, false).map(
+        ({ behind, dx, flat, key }) =>
+          part(key, { dx, flat, footY: (shown) => bottom(shown) - behind }),
       );
     }
     const view = { parts };

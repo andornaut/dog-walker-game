@@ -288,33 +288,14 @@ export type Movement =
   | { readonly kind: "still" };
 export type MovementKind = Movement["kind"];
 
-// An obstacle's look in one zone, in place of its base look: the name (an encounter's card
-// title), the road sprite's art key, the hit label, and the prefix replacing card-<kebab id>
-// in each card option's illustration key. A Stink skin may name its spray cloud's art key. A
-// missing hitLabel, cardArtPrefix or cloudArt falls back to the base's, and an art key not yet
-// in the manifest to the base art. A skin never changes what the obstacle does.
-export interface Skin {
-  readonly art: string;
-  readonly cardArtPrefix?: string;
-  readonly cloudArt?: string;
-  readonly hitLabel?: string;
-  readonly name: string;
-}
-
-// Skins by zone id. The keys are strings, not ZoneId: ZoneId comes from the world's data, whose
-// type names the obstacles, so typing their skins by it would be circular. The data tests check
-// each key is a zone's id.
-export type Skins = Readonly<Partial<Record<string, Skin>>>;
-
 // "obstacle": hit by accident. A card obstacle opens a card for the whole pack, with hitLabel
 // shown large as it hits; a contact obstacle applies its effects as it is touched; a pull
 // obstacle does nothing when touched. An obstacle the pack is immune to is harmless. "lucky": a
-// good thing to bump into, applied on contact with no card. skins are its looks by zone. An
-// obstacle with a movement comes as a mover at the zone's moverShare. hitWord is the comic
-// word drawn in font-comic over its hit burst: A to Z, ! ? - and space.
+// good thing to bump into, applied on contact with no card. An obstacle with a movement comes as
+// a mover at the zone's moverShare. hitWord is the comic word drawn in font-comic over its hit
+// burst: A to Z, ! ? - and space.
 export type Encounter = {
   readonly name: string;
-  readonly skins?: Skins;
 } & (
   | { readonly kind: "lucky"; readonly resolution: InstantResolution }
   | ({
@@ -331,15 +312,13 @@ export type Encounter = {
 // An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
 // bumpHearts modifiers such as Muddy's change it, and never money; a small dog may dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
-// Each zone's weights set how often it appears there, and skins are its looks by zone: the
-// obstacles of one shape share one skin per zone. One with a movement comes as a mover at the
-// zone's moverShare.
+// Each zone's weights set how often it appears there. One with a movement comes as a mover at
+// the zone's moverShare.
 export interface MinorObstacle {
   readonly hitLabel?: string;
   readonly movement?: Movement;
   readonly name: string;
   readonly shape: Shape;
-  readonly skins?: Skins;
 }
 
 // How long an upgrade card's effects last: applied at once, through the next zone, or for

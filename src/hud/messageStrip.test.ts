@@ -4,13 +4,12 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { GearId, MinorObstacleId, UpgradeId, WalkerPerkId, ZoneId } from "../data/types";
+import type { GearId, UpgradeId, WalkerPerkId } from "../data/types";
 import { type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
-import { minorObstacleLook } from "../rules/skins";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { testState } from "../testing/runState";
@@ -215,15 +214,8 @@ function everyStripLine(): string[] {
     dog: dog.name,
     owner: dog.owner.name,
   }));
-  const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
   const obstacles = [
-    ...new Set(
-      zones.flatMap((zone) =>
-        (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).map((obstacle) =>
-          minorObstacleLook(gameData, zone, obstacle).name.toLowerCase(),
-        ),
-      ),
-    ),
+    ...new Set(Object.values(gameData.minorObstacles).map(({ name }) => name.toLowerCase())),
   ];
   const amount = "$9,999";
   const muddyCost = bumpHearts(

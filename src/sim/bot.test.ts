@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { currentZoneId } from "../rules/route";
 import { read } from "../rules/units";
 import { approachOutcomes } from "../runner/approach";
 import { hitDog } from "../runner/collision";
@@ -228,10 +227,9 @@ describe("a mover's moves and hazards", () => {
       );
       const geometry = screenRoadGeometry(run);
       const speed = walkScrollSpeed(gameData, run);
-      const road: BotRoad = { data: gameData, geometry, speed, zone: currentZoneId(gameData, run) };
+      const road: BotRoad = { data: gameData, geometry, speed };
       const { cell, laneCount, roadBottom, roadTop, sightLength, tallestPackBand } = geometry;
-      const zone = currentZoneId(gameData, run);
-      const height = itemHeight(gameData, geometry, zone, mover.kind, true);
+      const height = itemHeight(gameData, geometry, mover.kind, true);
       const spec = moverSpec(gameData, seededRandom(1), mover.shape, mover.movement);
       const placements = moverPlacements(
         {
@@ -244,7 +242,7 @@ describe("a mover's moves and hazards", () => {
           sightLength,
           window: blockingLength(
             {
-              cellInset: plannedCellInset(gameData, geometry, zone),
+              cellInset: plannedCellInset(gameData, geometry),
               cellLength: cell.length,
               packLength: tallestPackBand,
             },
@@ -311,7 +309,7 @@ describe("a mover's moves and hazards", () => {
               continue;
             }
             onRoad = true;
-            const box = obstacleHitBox(gameData, geometry, zone, {
+            const box = obstacleHitBox(gameData, geometry, {
               ...item,
               mover: { path: outcome, since: at * speed },
               y,
@@ -380,7 +378,6 @@ describe("a steering bot whose pack drifts", () => {
     data: gameData,
     geometry,
     speed: walkScrollSpeed(gameData, run),
-    zone: currentZoneId(gameData, run),
   };
   const [kind] = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).filter((id) => {
     const { movement, shape } = gameData.minorObstacles[id];
@@ -391,7 +388,7 @@ describe("a steering bot whose pack drifts", () => {
   }
   const start = startRoad(geometry.laneCount);
   const lane = start.control.target;
-  const height = itemHeight(gameData, geometry, currentZoneId(gameData, run), kind, false);
+  const height = itemHeight(gameData, geometry, kind, false);
   const ahead: WalkItem = {
     height,
     id: 1,

@@ -2,11 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import manifestJson from "../../public/art/manifest.json";
 import { parseManifest } from "../assets/manifest";
-import { badgeKey } from "../assets/spriteKeys";
+import { badgeKey, kebabCase } from "../assets/spriteKeys";
 import { maxHearts, startHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { unlockPrice } from "../rules/shop";
-import { baseCardArtPrefix } from "../rules/skins";
 import { read, readTable } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import { PACK_PLACES } from "../testing/packPlaces";
@@ -156,56 +155,14 @@ describe("cards", () => {
   });
 });
 
-describe("obstacle skins", () => {
-  const zoneIds = world.zones.map(({ id }) => id);
-  const minorObstacles = Object.entries(gameData.minorObstacles);
-  const skinned = [...Object.entries(encounters), ...minorObstacles].flatMap(([id, { skins }]) =>
-    Object.entries(skins ?? {}).map(([zone, skin]) => ({ id, skin, zone })),
-  );
-
-  it("keys every skin by a zone's id, with a name and a kebab-case art key", () => {
-    expect(skinned.filter(({ zone }) => !zoneIds.includes(zone))).toEqual([]);
-    for (const { id, skin } of skinned) {
-      expect(skin?.name, id).not.toBe("");
-      expect(skin?.art, id).toMatch(KEBAB_CASE);
-      expect(skin?.cardArtPrefix ?? "card-x", id).toMatch(/^card-[a-z0-9]+(-[a-z0-9]+)*$/);
-      expect(skin?.cloudArt ?? "x", id).toMatch(KEBAB_CASE);
-    }
-  });
-
-  it("names clouds only on Stink skins, skinning only obstacles", () => {
-    const misplaced = skinned.flatMap(({ id, skin }) =>
-      skin?.cloudArt === undefined || id === "skunk" ? [] : [`${id}: cloudArt`],
-    );
-    expect(misplaced).toEqual([]);
-    const kinds = [...Object.entries(encounters), ...minorObstacles].flatMap(([id, { skins }]) =>
-      skins === undefined ? [] : [id],
-    );
-    const allowed = [
-      ...["bench", "bin", "cone", "hedge", "parkedCar"],
-      ...["otherDog", "puddle", "skunk", "squirrel", "thief"],
-    ];
-    expect(kinds.filter((id) => !allowed.includes(id))).toEqual([]);
-  });
-
-  it("gives the minor obstacles of one shape one skin in each zone, and names card art by its encounter", () => {
-    for (const zone of zoneIds) {
-      const byShape = new Map<string, unknown>();
-      for (const [id, { shape, skins }] of minorObstacles) {
-        const skin = skins?.[zone];
-        const key = `${shape.lanes}x${shape.rows}`;
-        if (skin !== undefined) {
-          expect(skin, `${id} in ${zone}`).toEqual(byShape.get(key) ?? skin);
-          byShape.set(key, skin);
-        }
-      }
-    }
+describe("card illustrations", () => {
+  it("names each encounter's option art card-<kebab id>-<option>", () => {
     const misnamed = (Object.entries(encounters) as [EncounterId, Encounter][]).flatMap(
       ([id, { resolution }]) =>
         resolution.kind === "card"
           ? resolution.options
               .map(({ art }) => art)
-              .filter((art) => !art.startsWith(`${baseCardArtPrefix(id)}-`))
+              .filter((art) => !art.startsWith(`card-${kebabCase(id)}-`))
           : [],
     );
     expect(misnamed, "card art not named card-<kebab id>-<option>").toEqual([]);

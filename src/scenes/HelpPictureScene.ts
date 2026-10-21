@@ -82,7 +82,6 @@ export class HelpPictureScene extends Scene {
         onHeadHome: () => undefined,
         picture: view,
         view: picture.card,
-        zone: currentZone(gameData, picture.walk.run).id as CardSceneData["zone"],
       };
       this.scene.launch(SCENE_KEYS.helpCard, data);
       this.whenCreated(SCENE_KEYS.helpCard, (card) =>

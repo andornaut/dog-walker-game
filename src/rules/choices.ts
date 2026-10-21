@@ -35,9 +35,8 @@ import {
   targetDogs,
 } from "./effects";
 import { cardEffectText, type CardTextContext, sentenceList } from "./effectText";
-import { currentZoneId, forkPaths, type PathSide, pathSide, zoneById } from "./route";
+import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
-import { encounterLook } from "./skins";
 import { type Cents, cents, type Hearts } from "./units";
 
 export type ChoiceData = CauseData & Pick<GameData, "dogs" | "tuning" | "world">;
@@ -318,8 +317,7 @@ export function cardFor(data: CardData, state: RunState, source: CardSource): Ca
 
 function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSource): CardView {
   const options = cardContent(data, source);
-  // An encounter's card is titled with its look in the zone.
-  const title = encounterLook(data, currentZoneId(data, state), source.encounter).name;
+  const title = data.encounters[source.encounter].name;
   const affected = affectedBy(state, source);
   const skip =
     data.encounters[source.encounter].kind === "obstacle" && state.skipPass && !state.skipUsed;

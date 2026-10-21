@@ -11,7 +11,6 @@ import type {
 import type { InputEvent } from "../dev/inputLog";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
-import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
@@ -308,7 +307,6 @@ function botRoadOf(data: SimData, walk: Walk): BotRoad & { readonly pack: RunSta
     geometry: screenRoadGeometry(walk.run),
     pack: walk.run.pack,
     speed,
-    zone: currentZoneId(data, walk.run),
   };
 }
 

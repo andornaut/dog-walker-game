@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { decodePng } from "../assets/atlas/atlasBuild";
 import { spriteSource } from "../assets/atlas/atlasLayout";
 import { gameData } from "../data";
-import type { EncounterId, MinorObstacleId, ZoneId } from "../data/types";
+import type { EncounterId, MinorObstacleId } from "../data/types";
 import { OBSTACLE_SILHOUETTES, obstacleParts } from "./obstacleArt";
 
 const MANIFEST = JSON.parse(readFileSync("public/art/manifest.json", "utf8")) as {
@@ -38,7 +38,6 @@ function measured(key: string) {
   return { above: feetY - top, left: left - width / 2, right: right - width / 2 };
 }
 
-const ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
 const KINDS = [
   ...Object.keys(gameData.minorObstacles),
   ...Object.entries(gameData.encounters)
@@ -54,14 +53,12 @@ describe("OBSTACLE_SILHOUETTES", () => {
     }
   });
 
-  // Each obstacle, in every zone, standing and moving, as the art loaded draws it.
+  // Each obstacle, standing and moving, as the art loaded draws it.
   it("holds exactly the obstacle sprites the art draws", () => {
     const drawn = new Set(
-      ZONES.flatMap((zone) =>
-        KINDS.flatMap((kind) =>
-          [false, true].flatMap((moving) =>
-            obstacleParts(gameData, inManifest, zone, kind, moving).map(({ key }) => key),
-          ),
+      KINDS.flatMap((kind) =>
+        [false, true].flatMap((moving) =>
+          obstacleParts(gameData, inManifest, kind, moving).map(({ key }) => key),
         ),
       ),
     );

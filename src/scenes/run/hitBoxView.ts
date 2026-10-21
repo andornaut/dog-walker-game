@@ -2,7 +2,6 @@ import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../../data";
 import { project, screenYAt } from "../../layout/projection";
-import { currentZoneId } from "../../rules/route";
 import { type Box, itemBox, type ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { blocksLane, obstacleHitBox, packBoxes, type Walk } from "../../runner/walk";
@@ -40,12 +39,11 @@ export class HitBoxView {
       this.asDrawn(part);
     }
     graphics.lineStyle(1, PALETTE.red);
-    const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
       if (!blocksLane(gameData, item.kind)) {
         this.onRoad(itemBox(geometry.cell, item));
       } else {
-        this.asDrawn(obstacleHitBox(gameData, geometry, zone, item));
+        this.asDrawn(obstacleHitBox(gameData, geometry, item));
       }
     }
   }

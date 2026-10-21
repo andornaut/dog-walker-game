@@ -47,7 +47,7 @@ import {
 } from "../runner/session";
 import { startRoad, type Walk, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
-import { type Loadout, newRun, type RunState } from "../state/runState";
+import { type Loadout, newRun } from "../state/runState";
 import type { HudSceneData } from "./HudScene";
 import type { HudRun, RunHudView } from "./hudWalk";
 import { onWindowEvent } from "./overlay";
@@ -453,9 +453,9 @@ export class RunScene extends Scene implements HudRun {
     }
     const card = opened;
     if (celebration === undefined) {
-      this.showCard(card, run);
+      this.showCard(card);
     } else {
-      this.celebrate(celebration, () => this.showCard(card, run));
+      this.celebrate(celebration, () => this.showCard(card));
     }
   }
 
@@ -538,7 +538,7 @@ export class RunScene extends Scene implements HudRun {
     }
   }
 
-  private showCard(view: CardView, run: RunState): void {
+  private showCard(view: CardView): void {
     const world = this.world;
     if (world === undefined) {
       return;
@@ -557,8 +557,7 @@ export class RunScene extends Scene implements HudRun {
       this.choose(view, replayed);
       return;
     }
-    const zone = currentZoneId(gameData, run);
-    world.menus.showCard(zone, view, (choice) => this.choose(view, choice));
+    world.menus.showCard(view, (choice) => this.choose(view, choice));
   }
 
   // A choice on a card that is no longer open picks nothing.

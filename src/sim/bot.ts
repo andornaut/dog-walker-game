@@ -1,4 +1,4 @@
-import type { DogId, ZoneId } from "../data/types";
+import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { approachOutcomes } from "../runner/approach";
 import { type LanedBox, levelWithPack, touchesAsDrawn } from "../runner/collision";
@@ -28,12 +28,11 @@ import {
 } from "./lanePlan";
 import type { Skill } from "./skills";
 
-// The walk as the bot reads it in one zone: speed is the scroll speed in pixels per second.
+// The walk as the bot reads it: speed is the scroll speed in pixels per second.
 export interface BotRoad {
   readonly data: WalkData;
   readonly geometry: RoadGeometry;
   readonly speed: number;
-  readonly zone: ZoneId;
 }
 
 // A steering bot's state. clock is the seconds walked this run, hit stops included and cards
@@ -166,14 +165,14 @@ function touchesPackIn(
 }
 
 function scrollContacts(
-  road: Pick<BotRoad, "data" | "zone">,
+  road: Pick<BotRoad, "data">,
   geometry: ContactGeometry,
   item: WalkItem,
   path: NonNullable<WalkItem["mover"]>["path"],
 ): readonly ScrollContact[] {
   const { laneCount, packBand, roadTop } = geometry;
   const { height, kind, laneSpan } = item;
-  const key = `${road.zone} ${kind} ${height} ${laneSpan}`;
+  const key = `${kind} ${height} ${laneSpan}`;
   let byPath = SCROLL_CONTACTS.get(geometry);
   if (byPath === undefined) {
     byPath = new WeakMap();
@@ -200,7 +199,7 @@ function scrollContacts(
     }
     const level = place.solid && levelWithPack(packBand, { height, y });
     const between = Math.abs(place.lanePosition - Math.round(place.lanePosition)) > 1e-9;
-    const box = obstacleHitBox(road.data, geometry, road.zone, {
+    const box = obstacleHitBox(road.data, geometry, {
       ...item,
       mover: { path, since },
       y,

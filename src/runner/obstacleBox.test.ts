@@ -7,7 +7,7 @@ import { spriteSource } from "../assets/atlas/atlasLayout";
 import { depthVariantKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId, EncounterId, MinorObstacleId, WalkerId, ZoneId } from "../data/types";
+import type { DogId, EncounterId, MinorObstacleId, WalkerId } from "../data/types";
 import { type DepthArt, depthDraw } from "../layout/depthScale";
 import { obstacleParts } from "../layout/obstacleArt";
 import { everyPack, PART_INSET } from "../layout/packFormation";
@@ -27,8 +27,6 @@ const ROAD = screenLayout(SCREEN_CONFIG).road;
 const PROJECTION = walkProjection(ROAD_CAMERA, ROAD);
 const GEOMETRY = screenRoadGeometry(testState({ koda: 3 }));
 const { cell, lens } = GEOMETRY;
-const ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
-const [ZONE] = ZONES as [ZoneId];
 
 const KINDS = [
   ...Object.keys(gameData.minorObstacles),
@@ -102,8 +100,8 @@ function depthArts(key: string): DepthArt[] {
 // its centre x across the road, as itemViews and moverView draw each of its sprites: on its feet
 // row through the projection, at depthDraw's art and scale, its position rounded to a pixel.
 function drawnBounds(kind: Kind, moving: boolean, feetY: number, x: number) {
-  const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, kind, moving);
-  const keys = obstacleParts(gameData, (key) => FEET.has(key), ZONE, kind, moving);
+  const parts = obstacleOnRoad(gameData, GEOMETRY, kind, moving);
+  const keys = obstacleParts(gameData, (key) => FEET.has(key), kind, moving);
   const box = { bottom: -Infinity, left: Infinity, right: -Infinity, top: Infinity };
   parts.forEach(({ behind, dx }, i) => {
     const distance = PROJECTION.footY - (feetY - behind);
@@ -144,7 +142,7 @@ describe("drawnObstacleBox", () => {
       const lanes = footprintOf(gameData, kind).lanes;
       const lane = LANE_COUNT - lanes;
       const x = (lane + lanes / 2) * cell.length;
-      const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, kind, moving);
+      const parts = obstacleOnRoad(gameData, GEOMETRY, kind, moving);
       const hit = onScreen(drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }));
       const drawn = drawnBounds(kind, moving, feetY, x);
       const insides = [
@@ -166,22 +164,20 @@ describe("an obstacle's hit length", () => {
   // its drawn hit box does: the box's far edge reaches the band's bottom as the rows' far end does.
   it("covers every obstacle's drawn box leaving the band", () => {
     for (const { kind, moving } of LOOKS) {
-      const height = itemHeight(gameData, GEOMETRY, ZONE, kind, moving);
-      const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, kind, moving);
+      const height = itemHeight(gameData, GEOMETRY, kind, moving);
+      const parts = obstacleOnRoad(gameData, GEOMETRY, kind, moving);
       const bottom = GEOMETRY.packBand.bottom;
       const box = drawnObstacleBox(lens, PART_INSET, parts, { feetY: bottom + height, x: 0 });
       expect(box.top).toBeCloseTo(bottom, 6);
     }
   });
 
-  // The planner's blocking spans hold every obstacle's, in every zone.
-  it("is no longer than the planner gives its rows in any zone", () => {
-    for (const zone of ZONES) {
-      const inset = plannedCellInset(gameData, GEOMETRY, zone);
-      for (const { kind, moving } of LOOKS) {
-        const planned = footprintOf(gameData, kind).rows * cell.length - 2 * inset;
-        expect(itemHeight(gameData, GEOMETRY, zone, kind, moving)).toBeLessThanOrEqual(planned);
-      }
+  // The planner's blocking spans hold every obstacle's.
+  it("is no longer than the planner gives its rows", () => {
+    const inset = plannedCellInset(gameData, GEOMETRY);
+    for (const { kind, moving } of LOOKS) {
+      const planned = footprintOf(gameData, kind).rows * cell.length - 2 * inset;
+      expect(itemHeight(gameData, GEOMETRY, kind, moving)).toBeLessThanOrEqual(planned);
     }
   });
 });
@@ -202,8 +198,8 @@ describe("a pack settled in a lane", () => {
           const pack = packBoxes(geometry, stillInLane(packLane), run);
           for (const { kind, moving } of LOOKS) {
             const lanes = moving ? 1 : footprintOf(gameData, kind).lanes;
-            const parts = obstacleOnRoad(gameData, geometry, ZONE, kind, moving);
-            const height = itemHeight(gameData, geometry, ZONE, kind, moving);
+            const parts = obstacleOnRoad(gameData, geometry, kind, moving);
+            const height = itemHeight(gameData, geometry, kind, moving);
             for (const lane of [packLane - lanes, packLane + 1]) {
               if (lane < 0 || lane + lanes > LANE_COUNT) {
                 continue;
@@ -230,7 +226,7 @@ describe("a pack settled in a lane", () => {
   it("is touched by an obstacle in its own lane level with it", () => {
     const run = testState({ koda: 3 });
     const pack = packBoxes(GEOMETRY, stillInLane(2), run);
-    const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, "cone", false);
+    const parts = obstacleOnRoad(gameData, GEOMETRY, "cone", false);
     const feetY = GEOMETRY.packBand.bottom - 10;
     const box = drawnObstacleBox(lens, PART_INSET, parts, { feetY, x: 2.5 * cell.length });
     const lanes = { left: 2 * cell.length, right: 3 * cell.length };

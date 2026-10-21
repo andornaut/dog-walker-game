@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { unionBox } from "../layout/packFormation";
-import { currentZoneId } from "../rules/route";
 import { testState } from "../testing/runState";
 import {
   type Box,
@@ -210,7 +209,7 @@ describe("a settled pack", () => {
   const levelIn = (lane: number, count: number): WalkItem => {
     const run = runOf(count);
     const geometry = screenRoadGeometry(run);
-    const height = itemHeight(gameData, geometry, currentZoneId(gameData, run), "goose", false);
+    const height = itemHeight(gameData, geometry, "goose", false);
     const feetY = (geometry.packParts.dogs[0]?.top ?? 0) + 20;
     return { height, id: 1, kind: "goose", lane, laneSpan: 1, y: feetY - height };
   };
@@ -219,9 +218,8 @@ describe("a settled pack", () => {
     const geometry = screenRoadGeometry(run);
     const pack = packBoxes(geometry, motion, run);
     const item = levelIn(lane, count);
-    const zone = currentZoneId(gameData, run);
     return [
-      hitDog(pack, obstacleHitBox(gameData, geometry, zone, item)),
+      hitDog(pack, obstacleHitBox(gameData, geometry, item)),
       pickupDog(pack, itemBox(geometry.cell, item)),
     ];
   };
@@ -253,9 +251,8 @@ describe("a settled pack", () => {
   it.each(stalkers)("hits a pack in every lane a standing %s covers, and none beside", (kind) => {
     const run = runOf(3);
     const geometry = screenRoadGeometry(run);
-    const zone = currentZoneId(gameData, run);
     const { lanes } = footprintOf(gameData, kind);
-    const height = itemHeight(gameData, geometry, zone, kind, true);
+    const height = itemHeight(gameData, geometry, kind, true);
     const feetY = (geometry.packParts.dogs[0]?.top ?? 0) + 20;
     const path: MoverPath = {
       burst: 1,
@@ -279,7 +276,7 @@ describe("a settled pack", () => {
       mover: { path, since: 0 },
       y: feetY - height,
     };
-    const box = obstacleHitBox(gameData, geometry, zone, item);
+    const box = obstacleHitBox(gameData, geometry, item);
     const hitIn = (lane: number) => hitDog(packBoxes(geometry, stillInLane(lane), run), box);
     expect(Array.from({ length: lanes }, (_, i) => hitIn(1 + i))).not.toContain(null);
     expect([hitIn(0), hitIn(1 + lanes)]).toEqual([null, null]);

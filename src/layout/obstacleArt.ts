@@ -1,13 +1,13 @@
-import { MOVER_SPRITE_KEYS, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
-import type { EncounterId, GameData, MinorObstacleId, ZoneId } from "../data/types";
 import {
-  encounterLook,
+  artOrStandIn,
+  encounterSpriteKey,
   type HasArt,
-  minorObstacleLook,
-  skinnedArt,
-  skinnedCloudArt,
-  skinnedOwnerArt,
-} from "../rules/skins";
+  minorObstacleSpriteKey,
+  MOVER_SPRITE_KEYS,
+  ROAD_SPRITE_SIZE,
+  SKUNK_CLOUD_KEY,
+} from "../assets/spriteKeys";
+import type { EncounterId, GameData, MinorObstacleId } from "../data/types";
 import type { Silhouette } from "./packFormation";
 
 // What an obstacle draws on the road, which is what it collides as: each of its sprites and that
@@ -84,12 +84,14 @@ const part = (key: string, overrides: Partial<Omit<ObstaclePart, "key">> = {}): 
   ...overrides,
 });
 
-type ObstacleData = Pick<GameData, "encounters" | "minorObstacles">;
+type ObstacleData = Pick<GameData, "minorObstacles">;
 
-function lookOf(data: ObstacleData, zone: ZoneId, kind: EncounterId | MinorObstacleId) {
-  return Object.hasOwn(data.minorObstacles, kind)
-    ? minorObstacleLook(data, zone, kind as MinorObstacleId)
-    : encounterLook(data, zone, kind as EncounterId);
+// An obstacle's road sprite: its kind's art, or that art's stand-in while it is not drawn.
+function roadArt(data: ObstacleData, has: HasArt, kind: EncounterId | MinorObstacleId): string {
+  const art = Object.hasOwn(data.minorObstacles, kind)
+    ? minorObstacleSpriteKey(kind as MinorObstacleId)
+    : encounterSpriteKey(kind as EncounterId);
+  return artOrStandIn(has, art);
 }
 
 // A mover's body sprite: its kind's road art, or the sprite MOVER_SPRITE_KEYS names for that art
@@ -97,39 +99,32 @@ function lookOf(data: ObstacleData, zone: ZoneId, kind: EncounterId | MinorObsta
 export function moverBodyArt(
   data: ObstacleData,
   has: HasArt,
-  zone: ZoneId,
   kind: EncounterId | MinorObstacleId,
 ): string {
-  const art = skinnedArt(has, lookOf(data, zone, kind));
+  const art = roadArt(data, has, kind);
   const sprite = MOVER_SPRITE_KEYS[art];
   return sprite !== undefined && has(sprite) ? sprite : art;
 }
 
-// The sprites an obstacle draws in the zone, standing or moving. Each stands at the near edge of
-// the item's hit box, however many rows it covers. A puddle lies flat under the rest, and a
-// skunk stands just inside the front of its spray cloud, which lies flat too and goes with it
-// when it moves; any other mover draws its body alone. An obstacle wears its skin for the zone,
-// and the other dog's owner stands beside it in the skin's owner art.
+// The sprites an obstacle draws, standing or moving. Each stands at the near edge of the item's
+// hit box, however many rows it covers. A puddle lies flat under the rest, and a skunk stands
+// just inside the front of its spray cloud, which lies flat too and goes with it when it moves;
+// any other mover draws its body alone. The other dog's owner stands beside it.
 export function obstacleParts(
   data: ObstacleData,
   has: HasArt,
-  zone: ZoneId,
   kind: EncounterId | MinorObstacleId,
   moving: boolean,
 ): ObstaclePart[] {
-  const look = lookOf(data, zone, kind);
   if (kind === "skunk") {
-    const body = moving ? moverBodyArt(data, has, zone, kind) : skinnedArt(has, look);
-    return [
-      part(skinnedCloudArt(has, look), { flat: true }),
-      part(body, { behind: SKUNK_IN_CLOUD }),
-    ];
+    const body = moving ? moverBodyArt(data, has, kind) : roadArt(data, has, kind);
+    return [part(SKUNK_CLOUD_KEY, { flat: true }), part(body, { behind: SKUNK_IN_CLOUD })];
   }
   if (moving) {
-    return [part(moverBodyArt(data, has, zone, kind))];
+    return [part(moverBodyArt(data, has, kind))];
   }
-  const art = skinnedArt(has, look);
-  const owner = skinnedOwnerArt(has, look);
+  const art = roadArt(data, has, kind);
+  const owner = `${art}-owner`;
   if (kind === "otherDog" && has(owner)) {
     return [part(art, { dx: OTHER_DOG_DX }), part(owner, { dx: OTHER_DOG_OWNER_DX })];
   }

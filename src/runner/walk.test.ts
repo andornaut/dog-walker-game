@@ -40,7 +40,6 @@ import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { modifiersOf, modifierValue } from "../rules/modifiers";
-import { currentZoneId } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
 import { slowestAgility } from "../rules/walkers";
@@ -223,8 +222,8 @@ const plannedHeight = (
   kind: WalkItem["kind"],
 ): number =>
   blocksLane(tuned, kind)
-    ? footprintOf(tuned, kind).rows * road.cell.length - 2 * plannedCellInset(tuned, road, zone)
-    : itemHeight(tuned, road, zone, kind, false);
+    ? footprintOf(tuned, kind).rows * road.cell.length - 2 * plannedCellInset(tuned, road)
+    : itemHeight(tuned, road, kind, false);
 // A standing spawn's span on the game's road.
 const standingSpan = (
   tuned: Real,
@@ -1670,7 +1669,7 @@ describe("movers", { timeout: 60_000 }, () => {
       },
     };
     const [item] = step(due, 0.05).walk.road.items;
-    const height = itemHeight(data, geometry, currentZoneId(data, due.run), "squirrel", true);
+    const height = itemHeight(data, geometry, "squirrel", true);
     expect(item?.mover?.since).toBeCloseTo(3.5);
     expect(item?.y).toBeCloseTo(40 - height + 450 + 3.5);
   });

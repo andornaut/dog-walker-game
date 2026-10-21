@@ -1,6 +1,5 @@
 import type { Scene } from "phaser";
 
-import type { ZoneId } from "../../data/types";
 import type { HomeNoteLine } from "../../hud/homeQuestion";
 import { playerPaused, type RunPause } from "../../hud/topBar";
 import type { CardView, Choice } from "../../rules/choices";
@@ -92,13 +91,12 @@ export class MenuFlow {
   }
 
   // A fork card's Head home button asks the Home question over it.
-  showCard(zone: ZoneId, view: CardView, onChoose: (choice: Choice) => void): void {
+  showCard(view: CardView, onChoose: (choice: Choice) => void): void {
     soundboardOf(this.scene).play("cardOpen");
     const data: CardSceneData = {
       onChoose,
       onHeadHome: () => this.openPause("homeQuestion"),
       view,
-      zone,
     };
     this.scene.scene.launch(SCENE_KEYS.card, data);
   }

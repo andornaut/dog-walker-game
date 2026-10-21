@@ -103,8 +103,11 @@ export const ART_STAND_INS: Readonly<Partial<Record<string, string>>> = {
   stroller: "social-handbag-dog-owner",
 };
 
+// Whether the art manifest has a key.
+export type HasArt = (key: string) => boolean;
+
 // The key to draw for art: its own while it is loaded, else its stand-in once that is.
-export function artOrStandIn(has: (key: string) => boolean, art: string): string {
+export function artOrStandIn(has: HasArt, art: string): string {
   const standIn = ART_STAND_INS[art];
   return has(art) || standIn === undefined || !has(standIn) ? art : standIn;
 }

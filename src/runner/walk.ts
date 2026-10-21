@@ -7,7 +7,6 @@ import type {
   Movement,
   ObstacleEncounterId,
   Tuning,
-  ZoneId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
@@ -19,7 +18,7 @@ import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
 import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
-import { currentZone, currentZoneId, walkLength } from "../rules/route";
+import { currentZone, walkLength } from "../rules/route";
 import {
   bumpHearts,
   debuffModifiers,
@@ -621,7 +620,7 @@ export function planZone(
   const { road, run } = walk;
   const length = zoneLength(data);
   const plan = {
-    cellInset: plannedCellInset(data, geometry, currentZoneId(data, run)),
+    cellInset: plannedCellInset(data, geometry),
     cellLength: geometry.cell.length,
     laneCount: geometry.laneCount,
     // The slowest walker's lane move sets the row spacing, so every walker fits every gap:
@@ -663,11 +662,10 @@ export function steerWalk(
 
 const PLACED_PARTS = new WeakMap<object, Map<string, readonly PlacedPart[]>>();
 
-// The sprites an obstacle draws in the zone, standing or moving, with their silhouettes.
+// The sprites an obstacle draws, standing or moving, with their silhouettes.
 export function obstacleOnRoad(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell">,
-  zone: ZoneId,
   kind: ObstacleKind,
   moving: boolean,
 ): readonly PlacedPart[] {
@@ -676,17 +674,15 @@ export function obstacleOnRoad(
     byKind = new Map();
     PLACED_PARTS.set(data, byKind);
   }
-  const key = `${geometry.cell.length} ${zone} ${kind} ${moving}`;
+  const key = `${geometry.cell.length} ${kind} ${moving}`;
   let parts = byKind.get(key);
   if (parts === undefined) {
     const { lanes } = footprintOf(data, kind);
-    parts = obstacleParts(data, hasObstacleArt, zone, kind, moving).map(
-      ({ behind, dx, key: art }) => ({
-        behind,
-        dx,
-        silhouette: obstacleSilhouette(geometry.cell.length, lanes, art),
-      }),
-    );
+    parts = obstacleParts(data, hasObstacleArt, kind, moving).map(({ behind, dx, key: art }) => ({
+      behind,
+      dx,
+      silhouette: obstacleSilhouette(geometry.cell.length, lanes, art),
+    }));
     byKind.set(key, parts);
   }
   return parts;
@@ -701,7 +697,6 @@ const EXIT_LENGTHS = new WeakMap<object, Map<number, Map<readonly PlacedPart[], 
 export function itemHeight(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "lens" | "packBand">,
-  zone: ZoneId,
   kind: WalkItemKind,
   moving: boolean,
 ): number {
@@ -709,7 +704,7 @@ export function itemHeight(
     const category = itemCategory(data, kind) as Exclude<ItemCategory, "minor" | "obstacle">;
     return geometry.itemHeights[category];
   }
-  const parts = obstacleOnRoad(data, geometry, zone, kind, moving);
+  const parts = obstacleOnRoad(data, geometry, kind, moving);
   const { bottom } = geometry.packBand;
   let byBottom = EXIT_LENGTHS.get(geometry.lens);
   if (byBottom === undefined) {
@@ -729,14 +724,13 @@ export function itemHeight(
   return length;
 }
 
-// The planner's inset at each end of a footprint row: whatever obstacle of the zone stands in a
+// The planner's inset at each end of a footprint row: whatever obstacle stands in a
 // footprint, standing or moving, its hit length is no more than the footprint's rows less this
 // at each end, so every blocking span it plans covers the obstacle's. Negative where an obstacle
 // is drawn longer than its rows.
 export function plannedCellInset(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "lens" | "packBand">,
-  zone: ZoneId,
 ): number {
   const kinds = [
     ...Object.keys(data.minorObstacles),
@@ -747,8 +741,7 @@ export function plannedCellInset(
     ...kinds.flatMap((kind) =>
       (movementOf(data, kind) === null ? [false] : [false, true]).map(
         (moving) =>
-          itemHeight(data, geometry, zone, kind, moving) -
-          (footprintOf(data, kind).rows - 1) * length,
+          itemHeight(data, geometry, kind, moving) - (footprintOf(data, kind).rows - 1) * length,
       ),
     ),
   );
@@ -895,7 +888,6 @@ function walkItemBox(geometry: Pick<RoadGeometry, "cell" | "laneCount">, item: W
 export function obstacleHitBox(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
-  zone: ZoneId,
   item: WalkItem,
 ): LanedBox {
   if (!blocksLane(data, item.kind)) {
@@ -907,7 +899,7 @@ export function obstacleHitBox(
   const lanes = { left: lane * cell.length, right: (lane + item.laneSpan) * cell.length };
   const { mover } = item;
   const drawn = mover === undefined ? item.laneSpan : drawnLanes(item.laneSpan, mover.path);
-  const parts = obstacleOnRoad(data, geometry, zone, item.kind, mover !== undefined);
+  const parts = obstacleOnRoad(data, geometry, item.kind, mover !== undefined);
   const x = (lane + drawn / 2) * cell.length;
   return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }), lanes };
 }
@@ -1000,9 +992,8 @@ export function stepWalk(
   const due = takeDueSpawns(zoneDistance, road.pending);
   const thinned = thinTips(tipSpawnsShare(data, run), road.tipCredit, due.due);
   let nextItemId = road.nextItemId;
-  const zone = currentZoneId(data, run);
   const arrived = thinned.events.map((event): WalkItem => {
-    const height = itemHeight(data, geometry, zone, event.kind, event.mover !== undefined);
+    const height = itemHeight(data, geometry, event.kind, event.mover !== undefined);
     return {
       height,
       id: nextItemId++,
@@ -1029,7 +1020,7 @@ export function stepWalk(
   // An obstacle hits a part of the pack; a lucky find, as a pickup does, touches its outline.
   const touching = (item: WalkItem) =>
     blocksLane(data, item.kind)
-      ? hitDog(pack, obstacleHitBox(data, geometry, zone, item))
+      ? hitDog(pack, obstacleHitBox(data, geometry, item))
       : pickupDog(pack, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
   // A pull obstacle, such as a squirrel, passes through the pack: touching it does nothing.

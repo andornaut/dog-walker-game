@@ -7,7 +7,6 @@ import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
-import { currentZoneId } from "../rules/route";
 import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
@@ -41,14 +40,13 @@ describe("screenRoadGeometry", () => {
       );
       const run = testState(slots);
       const geometry = screenRoadGeometry(run);
-      const zone = currentZoneId(gameData, run);
-      const height = itemHeight(DATA, geometry, zone, kind, false);
+      const height = itemHeight(DATA, geometry, kind, false);
       const pack = packBoxes(geometry, stillInLane(0), run);
       const hitRows: number[] = [];
       // From where the item spawns until it has scrolled off the road and is dropped.
       for (let y = geometry.roadTop - height; y < geometry.roadBottom; y += SCROLL_STEP) {
         const item = { height, id: 0, kind, lane: 0, laneSpan: 1, y };
-        const obstacle = blocksLane(DATA, kind) ? obstacleHitBox(DATA, geometry, zone, item) : null;
+        const obstacle = blocksLane(DATA, kind) ? obstacleHitBox(DATA, geometry, item) : null;
         const hit =
           obstacle === null
             ? pickupDog(pack, itemBox(geometry.cell, item))

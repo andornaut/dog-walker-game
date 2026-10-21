@@ -4,7 +4,6 @@ import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
 import type { Point, Rect } from "../layout/rect";
-import type { Look } from "../rules/skins";
 import { letterEffect, loadedComicWordWidth } from "./comicWord";
 import { addDisplayText } from "./displayText";
 import { PALETTE } from "./palette";
@@ -61,10 +60,9 @@ const SHAKE = { angle: 12, delayMs: 120, swingMs: 60, swings: 4 };
 // The moment ends this long before the stop, so nothing is left on screen under the card.
 const END_MARGIN_MS = 100;
 
-// The encounter's label in its look for the zone, or its name there for an encounter with
-// none.
-export function hitLabelOf(look: Look): string {
-  return look.hitLabel ?? look.name.toUpperCase();
+// The encounter's hit label, or its name for an encounter with none.
+export function hitLabelOf(encounter: Encounter): string {
+  return ("hitLabel" in encounter ? encounter.hitLabel : undefined) ?? encounter.name.toUpperCase();
 }
 
 // The art of a hit moment: an obstacle's burst is fx-hit-<encounter> with an edge flash in its

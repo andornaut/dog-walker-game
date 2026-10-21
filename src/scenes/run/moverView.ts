@@ -14,7 +14,7 @@ import {
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
+import type { EncounterId, MinorObstacleId } from "../../data/types";
 import { moverBodyArt } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
 import { read } from "../../rules/units";
@@ -90,12 +90,8 @@ function drawWithBody(
 }
 
 // A mover's body sprite (moverBodyArt), of the art loaded.
-export function moverBodyKey(
-  scene: Scene,
-  zone: ZoneId,
-  kind: EncounterId | MinorObstacleId,
-): string {
-  return moverBodyArt(gameData, (key) => scene.textures.exists(key), zone, kind);
+export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId): string {
+  return moverBodyArt(gameData, (key) => scene.textures.exists(key), kind);
 }
 
 // Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at

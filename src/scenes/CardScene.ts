@@ -2,10 +2,16 @@ import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { SKIP_CARD_ART } from "../assets/cardArt";
-import { CARD_FRAME_KEY, cardFrameTag, DIFFICULTY_KEY } from "../assets/spriteKeys";
+import {
+  artOrStandIn,
+  CARD_FRAME_KEY,
+  cardFrameTag,
+  DIFFICULTY_KEY,
+  encounterSpriteKey,
+  type HasArt,
+} from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { ZoneId } from "../data/types";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { DISABLED_COLORS, GREYED } from "../home/selection";
 import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
@@ -34,7 +40,6 @@ import {
   MAX_CARD_OPTIONS,
   type OptionView,
 } from "../rules/choices";
-import { encounterLook, type HasArt, type Look, skinnedArt, skinnedCardArt } from "../rules/skins";
 import type { CardSource } from "../state/runState";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { addDisplayText, hasDisplayFont } from "./displayText";
@@ -68,8 +73,6 @@ export interface CardSceneData {
   // Set to draw the card as a still picture, such as the help's, which takes no input.
   picture?: ScenePicture;
   view: CardView;
-  // The zone the card opened in, which picks an encounter's look.
-  zone: ZoneId;
 }
 
 const CARD = CARD_LAYOUT;
@@ -112,37 +115,17 @@ function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.Bitma
   return label.setX(Math.round(x - label.width / 2));
 }
 
-// The look of the encounter that opened the card in the zone, or null for any other card.
-function sourceLook(zone: ZoneId | undefined, source: CardSource): Look | null {
-  return source.kind === "encounter" && zone !== undefined
-    ? encounterLook(gameData, zone, source.encounter)
-    : null;
-}
-
 // The road sprite of whatever opened the card, standing in for an option's illustration: an
-// encounter's in its look.
-function sourceSpriteKey(
-  has: HasArt,
-  zone: ZoneId | undefined,
-  source: CardSource,
-): string | undefined {
-  const look = sourceLook(zone, source);
-  return look === null ? undefined : skinnedArt(has, look);
+// encounter's.
+function sourceSpriteKey(has: HasArt, source: CardSource): string | undefined {
+  return source.kind === "encounter"
+    ? artOrStandIn(has, encounterSpriteKey(source.encounter))
+    : undefined;
 }
 
-// The option's illustration, an encounter's in its look, or the Skip card's. A path card's is
-// its zone's preview.
-function illustrationKey(
-  has: HasArt,
-  zone: ZoneId | undefined,
-  source: CardSource,
-  option: OptionView | undefined,
-): string {
-  if (option === undefined) {
-    return SKIP_CARD_ART;
-  }
-  const look = sourceLook(zone, source);
-  return look === null ? option.art : skinnedCardArt(has, look, option.art);
+// The option's illustration, or the Skip card's. A path card's is its zone's preview.
+function illustrationKey(option: OptionView | undefined): string {
+  return option?.art ?? SKIP_CARD_ART;
 }
 
 // Up to three cards over the dimmed band and road. The walk bar and dog cards stay in view, and
@@ -163,7 +146,6 @@ export class CardScene extends Scene {
   private presses: TargetPressListener | undefined;
   private refusing = false;
   private view: CardView | undefined;
-  private zone: ZoneId | undefined;
   private readonly hasArt: HasArt = (key) => this.textures.exists(key);
 
   // key names a second card scene, such as the help's picture of one.
@@ -171,7 +153,7 @@ export class CardScene extends Scene {
     super(key);
   }
 
-  create({ onChoose, onHeadHome, picture, view, zone }: CardSceneData): void {
+  create({ onChoose, onHeadHome, picture, view }: CardSceneData): void {
     if (picture !== undefined) {
       showAsPicture(this, picture);
     }
@@ -179,7 +161,6 @@ export class CardScene extends Scene {
     this.chosen = false;
     this.pressed = undefined;
     this.view = view;
-    this.zone = zone;
     this.badges = [];
     this.enlarged = [];
     this.hold = undefined;
@@ -392,7 +373,7 @@ export class CardScene extends Scene {
     this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, this.bandColor(tag), {
       font: this.bandLabelFits("title", label, LARGE.band.room) ? "title" : "body",
     });
-    const art = illustrationKey(this.hasArt, this.zone, view.source, option);
+    const art = illustrationKey(option);
     if (this.textures.exists(art)) {
       this.add
         .image(x + LARGE.art.x, y + LARGE.art.y, art)
@@ -561,15 +542,13 @@ export class CardScene extends Scene {
     });
 
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
-    const illustration = illustrationKey(this.hasArt, this.zone, view.source, entry.option);
+    const illustration = illustrationKey(entry.option);
     if (this.textures.exists(illustration)) {
       const key = grey ? greyTextureKey(this, illustration) : illustration;
       this.add.image(art.x, art.y, key).setOrigin(0).setCrop(0, 0, art.width, art.height);
     } else {
       const spriteKey =
-        entry.option === undefined
-          ? undefined
-          : sourceSpriteKey(this.hasArt, this.zone, view.source);
+        entry.option === undefined ? undefined : sourceSpriteKey(this.hasArt, view.source);
       if (spriteKey !== undefined && this.textures.exists(spriteKey)) {
         const key = grey ? greyTextureKey(this, spriteKey) : spriteKey;
         const sprite = addStandingSprite(

@@ -56,7 +56,6 @@ import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { walkLength } from "../rules/route";
-import { baseCardArtPrefix } from "../rules/skins";
 import { faceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import type { PullPose } from "../runner/pulls";
@@ -333,22 +332,6 @@ describe("card art", () => {
     expect(missing).toEqual([]);
   });
 
-  it("names every option's illustration for a skin's card prefix once any of them is listed", () => {
-    const missing = ENCOUNTERS.flatMap((id) => {
-      const { resolution, skins } = gameData.encounters[id];
-      const arts = resolution.kind === "card" ? resolution.options.map(({ art }) => art) : [];
-      return Object.values(skins ?? {}).flatMap((skin) => {
-        const prefix = skin?.cardArtPrefix;
-        if (prefix === undefined) {
-          return [];
-        }
-        const keys = arts.map((art) => prefix + art.slice(baseCardArtPrefix(id).length));
-        return keys.some((key) => images.has(key)) ? missingImages(keys) : [];
-      });
-    });
-    expect(missing).toEqual([]);
-  });
-
   it("names a card preview for every zone, as a fork's path card shows it", () => {
     const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
     const arts = [zones.slice(0, 3), zones.slice(3)].flatMap((paths) =>
@@ -448,54 +431,6 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // A Stink skin's own cloud, once drawn, plays what skunk-cloud does at every step it has.
-  it("draws every listed skin cloud with skunk-cloud's tags at each of its steps", () => {
-    const skins = ENCOUNTERS.flatMap((id) => Object.values(gameData.encounters[id].skins ?? {}));
-    const pairs = skins.flatMap((skin) => [
-      ...(skin?.cloudArt !== undefined && sprites.has(skin.cloudArt)
-        ? [{ art: skin.cloudArt, bases: [SKUNK_CLOUD_KEY], tags: tagsOf(SKUNK_CLOUD_KEY) }]
-        : []),
-    ]);
-    const missing = pairs.flatMap(({ art, bases, tags }) =>
-      [1, ...variantSteps(bases)].flatMap((step) =>
-        missingTags(depthVariantKey(art, step) ?? art, tags),
-      ),
-    );
-    expect(missing).toEqual([]);
-  });
-
-  // A skin may name art not drawn yet, which falls back to the base; once drawn, it must do
-  // all its base does, and stand with its own owner where its base has one (<art>-owner).
-  it("draws every listed skin's sprite, and owner, with its base's tags at each base step", () => {
-    const pairs = [
-      ...ENCOUNTERS.map((id) => ({
-        base: encounterSpriteKey(id),
-        skins: gameData.encounters[id].skins,
-      })),
-      ...MINOR_OBSTACLES.map((id) => ({
-        base: minorObstacleSpriteKey(id),
-        skins: gameData.minorObstacles[id].skins,
-      })),
-    ].flatMap(({ base, skins }) =>
-      Object.values(skins ?? {}).flatMap((skin) => {
-        if (skin === undefined || !sprites.has(skin.art)) {
-          return [];
-        }
-        const tags = tagsOf(base);
-        const owner = sprites.has(`${base}-owner`)
-          ? [{ art: `${skin.art}-owner`, base: `${base}-owner`, tags: tagsOf(`${base}-owner`) }]
-          : [];
-        return [{ art: skin.art, base, tags }, ...owner];
-      }),
-    );
-    const missing = pairs.flatMap(({ art, base, tags }) =>
-      [1, ...variantSteps([base])].flatMap((step) =>
-        missingTags(depthVariantKey(art, step) ?? art, tags),
-      ),
-    );
-    expect(missing).toEqual([]);
-  });
-
   // Every kind that moves and some zone draws plays one of its movement's tags at each step it
   // has.
   const drawn = (kind: string) =>
@@ -536,21 +471,16 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // Every road item's sprite, standing and as a mover, its own art or a skin's with any owner
-  // and spray cloud beside it, plays a tag it has, of more than one frame where it has one:
-  // standing halted and walking, and a mover moving and stopped, at every step it has.
+  // Every road item's sprite, standing and as a mover, with any owner and spray cloud beside it,
+  // plays a tag it has, of more than one frame where it has one: standing halted and walking,
+  // and a mover moving and stopped, at every step it has.
   it("animates every road item's sprite, standing and moving, at every step", () => {
     const items = roadKinds.flatMap(({ art, entry, kind }) => {
-      const skins = Object.values(entry.skins ?? {});
-      const arts = [
-        artOrStandIn(hasSprite, art),
-        ...skins.flatMap((skin) => (skin === undefined ? [] : [skin.art])),
-      ].filter(hasSprite);
-      const clouds =
-        kind === "skunk" ? [SKUNK_CLOUD_KEY, ...skins.map((skin) => skin?.cloudArt)] : [];
+      const arts = [artOrStandIn(hasSprite, art)].filter(hasSprite);
+      const clouds = kind === "skunk" ? [SKUNK_CLOUD_KEY] : [];
       const standing = [...arts, ...arts.map((shown) => `${shown}-owner`), ...clouds]
-        .filter((key) => key !== undefined && hasSprite(key))
-        .map((key) => ({ key: key as string, kind, movement: null, role: "standing" }));
+        .filter(hasSprite)
+        .map((key) => ({ key, kind, movement: null, role: "standing" }));
       const movement = "movement" in entry ? entry.movement : undefined;
       const movers = arts.map((shown) => {
         const body = MOVER_SPRITE_KEYS[shown];

@@ -54,8 +54,7 @@ import {
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
 import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
-import { currentZoneId, walkLength } from "../../rules/route";
-import { encounterLook, minorObstacleLook } from "../../rules/skins";
+import { walkLength } from "../../rules/route";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
 import type { Random } from "../../runner/random";
@@ -271,13 +270,10 @@ export class RunMoments {
       }
     }
     // A bump costs the owner of the dog it landed on; a small dog may dodge it.
-    const zone = currentZoneId(gameData, step.walk.run);
     for (const bump of step.bumps) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
       const { kind } = bump.item;
-      const obstacle = isMinorObstacle(gameData, kind)
-        ? minorObstacleLook(gameData, zone, kind).name
-        : kind;
+      const obstacle = isMinorObstacle(gameData, kind) ? gameData.minorObstacles[kind].name : kind;
       this.say(bumpLine(gameData, bump, obstacle));
       if (bump.dodged) {
         this.deps.pack
@@ -422,10 +418,9 @@ export class RunMoments {
   }
 
   // The hit moment over the stop, framed by the road and the backdrop band beside it, labelled
-  // with the encounter's look in the zone.
+  // with the encounter's hit label.
   private playHit(hit: EncounterCard, step: WalkStep, pack: { x: number; y: number }): void {
     const { road } = LAYOUT;
-    const look = encounterLook(gameData, currentZoneId(gameData, step.walk.run), hit.encounter);
     playHitMoment(this.scene, {
       caught: this.deps.pack.sprites(hit.affected),
       centre: { x: pack.x, y: pack.y - 20 },
@@ -433,7 +428,7 @@ export class RunMoments {
       encounter: hit.encounter,
       field: hitField(),
       kind: gameData.encounters[hit.encounter].kind,
-      label: hitLabelOf(look),
+      label: hitLabelOf(gameData.encounters[hit.encounter]),
       labelX: road.x + road.width / 2,
       seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
@@ -469,15 +464,13 @@ export class RunMoments {
     }
   }
 
-  // A minor obstacle's hit label in its look for the zone, over the stop; none shows while it
-  // has none.
+  // A minor obstacle's hit label over the stop; none shows while it has none.
   private playBumpLabel(kind: WalkItemKind, step: WalkStep, pack: { x: number; y: number }): void {
     if (!isMinorObstacle(gameData, kind)) {
       return;
     }
-    const zone = currentZoneId(gameData, step.walk.run);
-    const label = minorObstacleLook(gameData, zone, kind).hitLabel;
-    if (label === null) {
+    const label = gameData.minorObstacles[kind].hitLabel;
+    if (label === undefined) {
       return;
     }
     const { road } = LAYOUT;
