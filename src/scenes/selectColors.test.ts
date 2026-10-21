@@ -37,76 +37,82 @@ const selected = selectLook("selected");
 
 describe("interaction-state colours", () => {
   // [what, foreground, background, minimum].
-  it.each<[string, number, number, number]>([
-    ["a normal tile's label", PALETTE[normal.text], PALETTE[normal.face], TEXT],
-    ["a selected tile's label", PALETTE[selected.text], PALETTE[selected.face], TEXT],
-    ["a disabled tile's label", PALETTE[disabled.text], PALETTE[disabled.face], EXEMPT],
-    ...(Object.keys(PLATE_LOOKS) as PlateKind[]).map((kind): [string, number, number, number] => [
-      `a ${kind} plate's text`,
-      PALETTE[PLATE_LOOKS[kind].text],
-      PALETTE[PLATE_LOOKS[kind].face],
-      TEXT,
-    ]),
-    [
-      "a disabled picture's ink outline on its box",
-      greyFor(NEUTRAL_RAMP, GREYED.copyDarker, PALETTE.ink),
-      PALETTE[disabled.box],
-      EXEMPT,
-    ],
-    [
-      "a locked picture's silhouette on a normal box",
-      PALETTE[GREYED.silhouette],
-      PALETTE[normal.box],
-      EXEMPT,
-    ],
-    [
-      "a locked picture's silhouette on a disabled box",
-      PALETTE[GREYED.silhouette],
-      PALETTE[disabled.box],
-      EXEMPT,
-    ],
-    ...(["normal", "primary", "secondary"] as const).map(
-      (state): [string, number, number, number] => [
-        `a ${state} button's label`,
-        PALETTE[BUTTON_COLORS[state].label],
-        PALETTE[BUTTON_COLORS[state].face],
+  it("hold every label, plate, picture and button at its minimum contrast", () => {
+    const pairs: [string, number, number, number][] = [
+      ["a normal tile's label", PALETTE[normal.text], PALETTE[normal.face], TEXT],
+      ["a selected tile's label", PALETTE[selected.text], PALETTE[selected.face], TEXT],
+      ["a disabled tile's label", PALETTE[disabled.text], PALETTE[disabled.face], EXEMPT],
+      ...(Object.keys(PLATE_LOOKS) as PlateKind[]).map((kind): [string, number, number, number] => [
+        `a ${kind} plate's text`,
+        PALETTE[PLATE_LOOKS[kind].text],
+        PALETTE[PLATE_LOOKS[kind].face],
+        TEXT,
+      ]),
+      [
+        "a disabled picture's ink outline on its box",
+        greyFor(NEUTRAL_RAMP, GREYED.copyDarker, PALETTE.ink),
+        PALETTE[disabled.box],
+        EXEMPT,
+      ],
+      [
+        "a locked picture's silhouette on a normal box",
+        PALETTE[GREYED.silhouette],
+        PALETTE[normal.box],
+        EXEMPT,
+      ],
+      [
+        "a locked picture's silhouette on a disabled box",
+        PALETTE[GREYED.silhouette],
+        PALETTE[disabled.box],
+        EXEMPT,
+      ],
+      ...(["normal", "primary", "secondary"] as const).map(
+        (state): [string, number, number, number] => [
+          `a ${state} button's label`,
+          PALETTE[BUTTON_COLORS[state].label],
+          PALETTE[BUTTON_COLORS[state].face],
+          TEXT,
+        ],
+      ),
+      [
+        "a disabled button's label",
+        PALETTE[BUTTON_COLORS.disabled.label],
+        PALETTE[BUTTON_COLORS.disabled.face],
+        EXEMPT,
+      ],
+      [
+        "a muted volume row's label on the panel",
+        PALETTE[DISABLED_COLORS.text],
+        PALETTE.cream,
         TEXT,
       ],
-    ),
-    [
-      "a disabled button's label",
-      PALETTE[BUTTON_COLORS.disabled.label],
-      PALETTE[BUTTON_COLORS.disabled.face],
-      EXEMPT,
-    ],
-    ["a muted volume row's label on the panel", PALETTE[DISABLED_COLORS.text], PALETTE.cream, TEXT],
-    [
-      "a disabled card's effect",
-      PALETTE[DISABLED_COLORS.text],
-      greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
-      TEXT,
-    ],
-    ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
-    [
-      "a disabled card's cost on its plaque",
-      PALETTE[GREYED.plateText],
-      greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
-      TEXT,
-    ],
-  ])("hold %s at its minimum", (_, foreground, background, minimum) => {
-    expect(contrast(foreground, background)).toBeGreaterThanOrEqual(minimum);
+      [
+        "a disabled card's effect",
+        PALETTE[DISABLED_COLORS.text],
+        greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
+        TEXT,
+      ],
+      ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
+      [
+        "a disabled card's cost on its plaque",
+        PALETTE[GREYED.plateText],
+        greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
+        TEXT,
+      ],
+    ];
+    const faint = pairs.filter(
+      ([, foreground, background, minimum]) => contrast(foreground, background) < minimum,
+    );
+    expect(faint.map(([what]) => what)).toEqual([]);
   });
 });
 
 describe("debuff bar colours", () => {
-  it.each(Object.keys(gameData.debuffs))("give %s its own colours", (debuff) => {
-    expect(DEBUFF_COLORS[debuff]).toBeDefined();
+  it("give every debuff its own colours, each bar's name at 4.5:1 on its face", () => {
+    expect(Object.keys(gameData.debuffs).filter((debuff) => !DEBUFF_COLORS[debuff])).toEqual([]);
+    const faint = Object.entries({ ...DEBUFF_COLORS, fallback: DEBUFF_FALLBACK }).filter(
+      ([, { face, name }]) => contrast(name, face) < TEXT,
+    );
+    expect(faint.map(([debuff]) => debuff)).toEqual([]);
   });
-
-  it.each(Object.entries({ ...DEBUFF_COLORS, fallback: DEBUFF_FALLBACK }))(
-    "hold the %s bar's name at 4.5:1 on its face",
-    (_, { face, name }) => {
-      expect(contrast(name, face)).toBeGreaterThanOrEqual(TEXT);
-    },
-  );
 });

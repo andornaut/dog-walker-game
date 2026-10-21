@@ -192,8 +192,6 @@ describe("dog art", () => {
     const tags = [...DOGS.map((dog) => dogCardTag(gameData, dog)), dogCardTag(gameData, null)];
     expect(missingTags("ui-dog-card", [...tags, "heart-loss"])).toEqual([]);
   });
-
-  it.todo("names owner-<dog> with idle and wave through ownerSpriteKey, once return home lands");
 });
 
 describe("walker art", () => {
@@ -203,10 +201,6 @@ describe("walker art", () => {
       ...missingTags(portraitKey, ["happy", "neutral"]),
     ]);
     expect(missing).toEqual([]);
-  });
-
-  it("has the default walker's sprite, which stands in for a walker whose art is missing", () => {
-    expect(sprites.has(gameData.walkers[gameData.defaultWalker].spriteKey)).toBe(true);
   });
 
   it("has the zone celebration's cheer for every walker, its burst, tail and confetti colours", () => {
@@ -229,49 +223,50 @@ describe("Pet shop art", () => {
 });
 
 describe("image art", () => {
-  it.each<[string, () => string[]]>([
-    ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
-    ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
-    ["a padlock for every lock shape", () => Object.values(PADLOCK_KEYS)],
-    ["a detail card well, shown and locked", () => Object.values(DETAIL_WELL_KEYS)],
-    [
-      "an effect icon for every upgrade, gear item and walker perk",
-      () => [
-        ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
-          effectIconKey({ kind: "upgrade", upgrade }),
-        ),
-        ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
-          effectIconKey({ gear, kind: "gear" }),
-        ),
-        ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk) =>
-          effectIconKey({ kind: "perk", perk }),
-        ),
+  it("names a portrait, message icon, padlock, well, effect icon and section fill for each use", () => {
+    const lists: [string, () => string[]][] = [
+      ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
+      ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
+      ["a padlock for every lock shape", () => Object.values(PADLOCK_KEYS)],
+      ["a detail card well, shown and locked", () => Object.values(DETAIL_WELL_KEYS)],
+      [
+        "an effect icon for every upgrade, gear item and walker perk",
+        () => [
+          ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
+            effectIconKey({ kind: "upgrade", upgrade }),
+          ),
+          ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
+            effectIconKey({ gear, kind: "gear" }),
+          ),
+          ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk) =>
+            effectIconKey({ kind: "perk", perk }),
+          ),
+        ],
       ],
-    ],
-    [
-      "a 20x20 walk bar icon for every perk, gear item and upgrade",
-      () =>
-        [
-          ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk): EffectItem => ({
-            kind: "perk",
-            perk,
-          })),
-          ...(Object.keys(gameData.shopGear) as GearId[]).map((gear): EffectItem => ({
-            gear,
-            kind: "gear",
-          })),
-          ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade): EffectItem => ({
-            kind: "upgrade",
-            upgrade,
-          })),
-        ].map(walkBarIconKey),
-    ],
-    [
-      "every section's fill and the Pocket's stitch",
-      () => [...Object.values(HOME_LAYOUT.sectionFillKeys), "ui-stitch-h", "ui-stitch-v"],
-    ],
-  ])("names %s", (_, keys) => {
-    expect(missingImages(keys())).toEqual([]);
+      [
+        "a 20x20 walk bar icon for every perk, gear item and upgrade",
+        () =>
+          [
+            ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk): EffectItem => ({
+              kind: "perk",
+              perk,
+            })),
+            ...(Object.keys(gameData.shopGear) as GearId[]).map((gear): EffectItem => ({
+              gear,
+              kind: "gear",
+            })),
+            ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade): EffectItem => ({
+              kind: "upgrade",
+              upgrade,
+            })),
+          ].map(walkBarIconKey),
+      ],
+      [
+        "every section's fill and the Pocket's stitch",
+        () => [...Object.values(HOME_LAYOUT.sectionFillKeys), "ui-stitch-h", "ui-stitch-v"],
+      ],
+    ];
+    expect(lists.flatMap(([, keys]) => missingImages(keys()))).toEqual([]);
   });
 });
 
@@ -312,13 +307,12 @@ describe("icon art", () => {
     expect(missingTags(ZONE_PIPS_KEY, [...new Set(tags)])).toEqual([]);
   });
 
-  it("tags ui-difficulty with the paws of every zone's difficulty", () => {
+  it("tags ui-difficulty with every zone's paws, and ui-fires, an option's firing marker", () => {
     const tags = gameData.world.zones.map(({ difficulty }) => String(difficulty));
-    expect(missingTags(DIFFICULTY_KEY, ["1", "2", "3", "4", "5", ...tags])).toEqual([]);
-  });
-
-  it("tags ui-fires, the card marker for an option that fires an owner, static and pulse", () => {
-    expect(missingTags("ui-fires", ["static", "pulse"])).toEqual([]);
+    expect([
+      ...missingTags(DIFFICULTY_KEY, ["1", "2", "3", "4", "5", ...tags]),
+      ...missingTags("ui-fires", ["static", "pulse"]),
+    ]).toEqual([]);
   });
 });
 
@@ -369,14 +363,13 @@ describe("card art", () => {
 });
 
 describe("pull art", () => {
-  it("tags the pull bubble with idle and show, and names the blocked mark and squirrel icon", () => {
+  it("tags the pull bubble and fail effect, and names the blocked mark and squirrel icon", () => {
     expect(missingTags(PULL_ART.bubble, ["idle", "show"])).toEqual([]);
     expect(sprites.has(PULL_ART.pullBlocked)).toBe(true);
-    expect(missingImages([SQUIRREL_ICON_KEY])).toEqual([]);
-  });
-
-  it("tags the pull fail effect with play", () => {
-    expect(missingTags(PULL_ART.pullFail, ["play"])).toEqual([]);
+    expect([
+      ...missingImages([SQUIRREL_ICON_KEY]),
+      ...missingTags(PULL_ART.pullFail, ["play"]),
+    ]).toEqual([]);
   });
 });
 
@@ -406,16 +399,14 @@ describe("hit moment art", () => {
     });
     expect(hits).toEqual(expect.arrayContaining(["otherDog", "skunk"]));
     expect(missing).toEqual([]);
+    // fx-bump stands in for a hit moment without its own burst; none goes without.
+    expect(missingTags("fx-bump", ["play"])).toEqual([]);
+    expect(hits.filter((id) => hitBurstKey(loadedScene, lookOf(id)) === "fx-bump")).toEqual([]);
   });
 
   it("flashes the edges for every obstacle, and for no lucky find", () => {
     const flashed = hits.filter((id) => lookOf(id).flash !== null);
     expect(flashed).toEqual(hits.filter((id) => gameData.encounters[id].kind === "obstacle"));
-  });
-
-  it("gives every hit moment its own burst, with fx-bump as the fallback for one without", () => {
-    expect(missingTags("fx-bump", ["play"])).toEqual([]);
-    expect(hits.filter((id) => hitBurstKey(loadedScene, lookOf(id)) === "fx-bump")).toEqual([]);
   });
 });
 
@@ -512,19 +503,20 @@ describe("road object art", () => {
         (table) => ((table as Readonly<Record<string, number>>)[kind] ?? 0) > 0,
       ),
     );
-  it.each(
-    [
-      ...ENCOUNTERS.map((kind) => ({
-        art: encounterSpriteKey(kind),
-        entry: gameData.encounters[kind],
-        kind,
-      })),
-      ...MINOR_OBSTACLES.map((kind) => ({
-        art: minorObstacleSpriteKey(kind),
-        entry: gameData.minorObstacles[kind],
-        kind,
-      })),
-    ].flatMap(({ art, entry, kind }) => {
+  const roadKinds = [
+    ...ENCOUNTERS.map((kind) => ({
+      art: encounterSpriteKey(kind),
+      entry: gameData.encounters[kind],
+      kind,
+    })),
+    ...MINOR_OBSTACLES.map((kind) => ({
+      art: minorObstacleSpriteKey(kind),
+      entry: gameData.minorObstacles[kind],
+      kind,
+    })),
+  ];
+  it("tags every moving kind's sprite with a tag of its movement, at every step", () => {
+    const moving = roadKinds.flatMap(({ art, entry, kind }) => {
       if (!drawn(kind)) {
         return [];
       }
@@ -532,32 +524,22 @@ describe("road object art", () => {
       const shown = artOrStandIn(hasSprite, art);
       return movement === undefined || movement.kind === "still"
         ? []
-        : [{ key: MOVER_SPRITE_KEYS[shown] ?? shown, kind, tags: MOVING_TAGS[movement.kind] }];
-    }),
-  )("tags the moving $kind's sprite with a tag of its movement, at every step", ({ key, tags }) => {
-    const missing = [1, ...variantSteps([key])].flatMap((step) => {
-      const variant = depthVariantKey(key, step) ?? key;
-      return tags.some((tag) => tagsOf(variant).includes(tag)) ? [] : [variant];
+        : [{ key: MOVER_SPRITE_KEYS[shown] ?? shown, tags: MOVING_TAGS[movement.kind] }];
     });
+    const missing = moving.flatMap(({ key, tags }) =>
+      [1, ...variantSteps([key])].flatMap((step) => {
+        const variant = depthVariantKey(key, step) ?? key;
+        return tags.some((tag) => tagsOf(variant).includes(tag)) ? [] : [variant];
+      }),
+    );
     expect(missing).toEqual([]);
   });
 
   // Every road item's sprite, standing and as a mover, its own art or a skin's with any owner
   // and spray cloud beside it, plays a tag it has, of more than one frame where it has one:
   // standing halted and walking, and a mover moving and stopped, at every step it has.
-  it.each(
-    [
-      ...ENCOUNTERS.map((kind) => ({
-        art: encounterSpriteKey(kind),
-        entry: gameData.encounters[kind],
-        kind,
-      })),
-      ...MINOR_OBSTACLES.map((kind) => ({
-        art: minorObstacleSpriteKey(kind),
-        entry: gameData.minorObstacles[kind],
-        kind,
-      })),
-    ].flatMap(({ art, entry, kind }) => {
+  it("animates every road item's sprite, standing and moving, at every step", () => {
+    const items = roadKinds.flatMap(({ art, entry, kind }) => {
       const skins = Object.values(entry.skins ?? {});
       const arts = [
         artOrStandIn(hasSprite, art),
@@ -579,56 +561,55 @@ describe("road object art", () => {
         };
       });
       return movement === undefined ? standing : [...standing, ...movers];
-    }),
-  )("animates the $kind's $key as $role, at every step", (item) => {
-    const unanimated = [1, ...variantSteps([item.key])].flatMap((step) => {
-      const variant = depthVariantKey(item.key, step) ?? item.key;
-      const frames = new Map(
-        animationSpecs(variant, sheetOf(variant)).map((spec) => [
-          spec.key.slice(variant.length + 1),
-          spec.frames.length,
-        ]),
-      );
-      const least = Math.min(2, Math.max(...frames.values()));
-      const has = (tag: string) => frames.has(tag);
-      const { movement } = item;
-      const played =
-        movement === null
-          ? { halted: STANDING_TAGS.halted.find(has), walking: STANDING_TAGS.walking.find(has) }
-          : {
-              moving: moverBodyTag(has, movement, true),
-              stopped: moverBodyTag(has, movement, false),
-            };
-      return Object.entries(played).flatMap(([state, tag]) =>
-        tag !== undefined && (frames.get(tag) ?? 0) >= least ? [] : [`${variant} ${state}: ${tag}`],
-      );
     });
+    const unanimated = items.flatMap((item) =>
+      [1, ...variantSteps([item.key])].flatMap((step) => {
+        const variant = depthVariantKey(item.key, step) ?? item.key;
+        const frames = new Map(
+          animationSpecs(variant, sheetOf(variant)).map((spec) => [
+            spec.key.slice(variant.length + 1),
+            spec.frames.length,
+          ]),
+        );
+        const least = Math.min(2, Math.max(...frames.values()));
+        const has = (tag: string) => frames.has(tag);
+        const { movement } = item;
+        const played =
+          movement === null
+            ? { halted: STANDING_TAGS.halted.find(has), walking: STANDING_TAGS.walking.find(has) }
+            : {
+                moving: moverBodyTag(has, movement, true),
+                stopped: moverBodyTag(has, movement, false),
+              };
+        return Object.entries(played).flatMap(([state, tag]) =>
+          tag !== undefined && (frames.get(tag) ?? 0) >= least
+            ? []
+            : [`${variant} ${state}: ${tag}`],
+        );
+      }),
+    );
     expect(unanimated).toEqual([]);
   });
 
-  it.each(
-    Object.entries(gameData.ambient).flatMap(([zone, movers]) =>
-      movers.map((mover) => ({ ...mover, zone })),
-    ),
-  )(
-    "draws the $zone ambient $key, its variants or a fallback, with its tag at every step",
-    (mover) => {
+  it("draws every zone's ambient movers, their variants or a fallback, with its tag at every step", () => {
+    const movers = Object.values(gameData.ambient).flat();
+    const missing = movers.flatMap((mover) => {
       const fallback = AMBIENT_FALLBACKS[mover.key];
       if (fallback === null && !sprites.has(mover.key)) {
-        return;
+        return [];
       }
       const { key, tag } = sprites.has(mover.key) || fallback == null ? mover : fallback;
       const variants = (AMBIENT_VARIANTS[mover.key] ?? []).filter((variant) =>
         sprites.has(variant),
       );
-      const missing = [key, ...variants].flatMap((art) =>
+      return [key, ...variants].flatMap((art) =>
         [1, ...variantSteps([art])].flatMap((step) =>
           missingTags(depthVariantKey(art, step) ?? art, [tag]),
         ),
       );
-      expect(missing).toEqual([]);
-    },
-  );
+    });
+    expect(missing).toEqual([]);
+  });
 });
 
 describe("depth variants", () => {
