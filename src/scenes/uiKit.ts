@@ -13,6 +13,7 @@ import {
 import { BADGE_OFFSET } from "../layout/badge";
 import { type CloseControl, closeControl } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
+import { TEXT_SCALE } from "../layout/textFit";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
 import { disabledTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
@@ -32,7 +33,7 @@ export function artFits(scene: Scene, key: string, size: { height: number; width
   return frame.width === size.width && frame.height === size.height;
 }
 
-export const TEXT_SCALE = 2;
+export { TEXT_SCALE };
 
 // The UI kit's nine-slice borders, in pixels from each edge.
 const SLICES = {

@@ -4,6 +4,11 @@ import type { Rect } from "../layout/rect";
 
 export type StatsTab = "badges" | "dogs" | "runs";
 
+// The Dogs tab's number columns, left to right after the dog's face and name; each one's
+// heading is menuText.stats.dogColumns[column].
+export type DogColumn = "fired" | "walks" | "zones";
+export const DOG_COLUMNS: readonly DogColumn[] = ["walks", "zones", "fired"];
+
 // The tabs, left to right; each one's label is menuText.stats.tabs[tab].
 export const STATS_TABS: readonly StatsTab[] = ["runs", "dogs", "badges"];
 
@@ -15,8 +20,10 @@ export const STATS_LAYOUT = {
   close: closeControl({ height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
   // The badge tapped open, over the wall.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
-  dogColumns: { fired: 344, walks: 236, zones: 290 },
-  dogRow: { iconX: 14, nameX: 54, pitch: 34, top: PANEL.y + 32 },
+  // The gap between one number column and the next, or the names.
+  dogColumns: { gap: 6 },
+  // Each row's 32x32 face, its top faceTop above the row's text row, and the name beside it.
+  dogRow: { faceSize: 32, faceTop: 12, faceX: 14, nameX: 50, pitch: 34, top: PANEL.y + 32 },
   panel: PANEL,
   rows: { left: 16, pitch: 17, right: 344 },
   // Tabs are 44 game pixels tall (48 CSS pixels on a phone) with 8 between them.
@@ -30,4 +37,17 @@ export const STATS_LAYOUT = {
 export function statsTabRects(): Rect[] {
   const { height, pitch, width, x, y } = STATS_LAYOUT.tab;
   return STATS_TABS.map((_, i) => ({ height, width, x: x + i * pitch, y }));
+}
+
+// Each number column's right edge, its heading and numbers right-aligned on it: the last
+// column's on the rows' right edge, and each one before it its neighbour's width and the gap
+// further left. width is a column's width: its heading's, or its widest number's if wider.
+export function dogColumnRights(width: (column: DogColumn) => number): Record<DogColumn, number> {
+  const rights: Partial<Record<DogColumn, number>> = {};
+  let right: number = STATS_LAYOUT.rows.right;
+  for (const column of [...DOG_COLUMNS].reverse()) {
+    rights[column] = right;
+    right -= width(column) + STATS_LAYOUT.dogColumns.gap;
+  }
+  return rights as Record<DogColumn, number>;
 }

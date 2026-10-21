@@ -1,5 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
+import { dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badgesView";
@@ -7,7 +8,15 @@ import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
-import { STATS_LAYOUT, STATS_TABS, type StatsTab, statsTabRects } from "../home/statsLayout";
+import {
+  DOG_COLUMNS,
+  type DogColumn,
+  dogColumnRights,
+  STATS_LAYOUT,
+  STATS_TABS,
+  type StatsTab,
+  statsTabRects,
+} from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
@@ -17,7 +26,7 @@ import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { addDim, fillRect } from "./draw";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
+import { addPixelText, type FontRole, inkSpan, wrapPixelText } from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { listenTargetPress } from "./targetPress";
@@ -27,6 +36,7 @@ import {
   addSelectTile,
   addTapBurst,
   clearScene,
+  tagFrame,
   TEXT_SCALE,
 } from "./uiKit";
 
@@ -49,7 +59,6 @@ const LEFT = STATS_LAYOUT.rows.left;
 const RIGHT = STATS_LAYOUT.rows.right;
 const PITCH = STATS_LAYOUT.rows.pitch;
 const DOG_ROW = STATS_LAYOUT.dogRow;
-const DOG_COLUMNS = STATS_LAYOUT.dogColumns;
 const WALL = STATS_LAYOUT.wall;
 const WALL_TEXT = STATS_LAYOUT.wallText;
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
@@ -262,24 +271,50 @@ export class StatsScene extends Scene {
     this.rows(y + 20, outcomes);
   }
 
+  // Each dog's face and name, then its numbers right-aligned under their headings, each column
+  // as wide as its heading's or its widest number's ink (dogColumnRights).
   private drawDogs(): void {
     const save = profileSave(this);
     const top = PANEL.y + 10;
     const headings = gameData.menuText.stats.dogColumns;
     this.text(LEFT, top, headings.dog, { font: "title" });
-    for (const key of ["walks", "zones", "fired"] as const) {
-      this.text(DOG_COLUMNS[key], top, headings[key], { originX: 1 });
-    }
+    const columns = DOG_COLUMNS.map((column) => ({
+      column,
+      labels: [this.text(0, top, headings[column], { originX: 1 })],
+    }));
     const lines = this.add.graphics();
     dogRows(gameData, save.owned, save.stats).forEach((row, i) => {
       const y = DOG_ROW.top + 8 + i * DOG_ROW.pitch;
+      const face = dogFaceKey(gameData, row.dog);
+      this.add
+        .image(DOG_ROW.faceX, y + 3 - DOG_ROW.faceTop, face, tagFrame(this, face, "happy"))
+        .setOrigin(0);
       this.text(DOG_ROW.nameX, y + 3, row.name);
-      const values = { fired: row.timesFired, walks: row.walks, zones: row.zonesFinished };
-      for (const key of ["walks", "zones", "fired"] as const) {
-        this.text(DOG_COLUMNS[key], y + 3, String(values[key]), { font: "title", originX: 1 });
+      const values: Record<DogColumn, number> = {
+        fired: row.timesFired,
+        walks: row.walks,
+        zones: row.zonesFinished,
+      };
+      for (const { column, labels } of columns) {
+        labels.push(this.text(0, y + 3, String(values[column]), { font: "title", originX: 1 }));
       }
       fillRect(lines, PALETTE.tan, { height: 1, width: RIGHT - LEFT + 4, x: LEFT - 4, y: y + 24 });
     });
+    const widths = new Map(
+      columns.map(({ column, labels }) => [
+        column,
+        Math.max(
+          ...labels.map((label) => {
+            const ink = inkSpan(label);
+            return Math.ceil(ink.right - ink.left);
+          }),
+        ),
+      ]),
+    );
+    const rights = dogColumnRights((column) => widths.get(column) ?? 0);
+    for (const { column, labels } of columns) {
+      labels.forEach((label) => label.setX(rights[column]));
+    }
   }
 
   // Earned badges in colour with an amber name, locked ones greyed with a cream name; each

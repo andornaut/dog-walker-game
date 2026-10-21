@@ -2098,13 +2098,13 @@
         "y": 140
       },
       "dogColumns": {
-        "fired": 344,
-        "walks": 236,
-        "zones": 290
+        "gap": 6
       },
       "dogRow": {
-        "iconX": 14,
-        "nameX": 54,
+        "faceSize": 32,
+        "faceTop": 12,
+        "faceX": 14,
+        "nameX": 50,
         "pitch": 34,
         "top": 140
       },

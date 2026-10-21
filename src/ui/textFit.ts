@@ -9,6 +9,9 @@ export interface TextFitStyle {
   scale: number;
 }
 
+// The scale menu and HUD text draws at.
+export const TEXT_SCALE = 2;
+
 // Text that may not fit its room at 2x tries 2x with its glyphs a screen pixel closer, then 1x.
 // The body and title fonts leave a font pixel between glyphs, two screen pixels at 2x, so a
 // screen pixel closer keeps one between them.
