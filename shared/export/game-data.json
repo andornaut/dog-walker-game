@@ -911,7 +911,7 @@
         "lanes": 1,
         "rows": 3
       },
-      "spriteKey": "car"
+      "spriteKey": "parked-car"
     },
     {
       "id": "cat",

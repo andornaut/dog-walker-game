@@ -119,7 +119,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
       busy: withoutPulls(
         hoppingInstead({ ...SHORT, world: sharedWorld(SHORT.world, 1) }, { kind: "hop", most: 2 }),
       ),
-      name: "every mover moving and every stepper hopping",
+      name: "every mover moving and every stepper and hopper hopping up to 2 spots",
     },
   ])("avoids every obstacle no pull forces, as an ideal player, with $name", ({ busy }) => {
     const results = [run(busy, 1, IDEAL_SKILL, ["duchess"]), run(busy, 2, IDEAL_SKILL, NO_CHASER)];

@@ -9,7 +9,7 @@ export function sharedWorld(world: World, share: number): World {
   return { ...world, zones: [shared(first), ...rest.map(shared)] };
 }
 
-// The obstacles, minor or not, with every stepping mover hopping instead.
+// The obstacles, minor or not, with every stepping or hopping mover hopping as hop does.
 export function hoppingInstead<Data extends Pick<GameData, "encounters" | "minorObstacles">>(
   data: Data,
   hop: HopMovement,
@@ -18,7 +18,9 @@ export function hoppingInstead<Data extends Pick<GameData, "encounters" | "minor
     Object.fromEntries(
       Object.entries(entries).map(([id, entry]: [string, { movement?: Movement }]) => [
         id,
-        entry.movement?.kind === "step" ? { ...entry, movement: hop } : entry,
+        entry.movement?.kind === "step" || entry.movement?.kind === "hop"
+          ? { ...entry, movement: hop }
+          : entry,
       ]),
     );
   return {

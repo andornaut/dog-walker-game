@@ -75,6 +75,7 @@ const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>>
   barrier2: "barrier-2",
   barrier3: "barrier-3",
   bunny: "chase-rabbit",
+  car: "parked-car",
   cat: "chase-cat",
   ducklings: "chase-ducklings",
   frisbeeDog: "social-frisbee-dog",
@@ -205,7 +206,7 @@ export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
 };
 export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readonly string[]>> = {
   dart: ["flee", "run", "bounce", "walk"],
-  hop: ["hop", "run", "walk"],
+  hop: ["hop", "pull-out", "run", "walk"],
   inLane: ["drive", "ride", "run", "walk", "pull-out"],
   step: ["walk", "run"],
 };

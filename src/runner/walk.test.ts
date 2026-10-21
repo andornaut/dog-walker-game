@@ -1279,7 +1279,7 @@ describe("movers", { timeout: 60_000 }, () => {
   // most the caps of movers on screen, the pack-fit gap wherever the path changes lanes between
   // two obstacles, and each mover moving as its kind does.
   const everyMover: Real = { ...REAL, world: sharedWorld(WORLD, 1) };
-  // Every stepper hopping instead, each hop up to 2 spots any way, or sideways only.
+  // Every stepper and hopper hopping alike, each hop up to 2 spots any way, or sideways only.
   const HOPS: readonly HopMovement[] = [
     { kind: "hop", most: 2 },
     { kind: "hop", most: 2, sideways: true },
