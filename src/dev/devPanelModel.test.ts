@@ -19,6 +19,7 @@ import {
   decodeSaveEdits,
   encodeCheats,
   encodeSaveEdits,
+  hasStagedChanges,
   openPanel,
   type PanelAction,
   type PanelState,
@@ -154,6 +155,93 @@ describe("staged settings", () => {
       { kind: "cancel" },
     ];
     expect(stageAll(cancelled)).toEqual(opened);
+  });
+});
+
+describe("hasStagedChanges", () => {
+  const stageFrom = (applied: Cheats, actions: readonly PanelAction[]) =>
+    actions.reduce((state, action) => stagePanel(action, state), openPanel(applied));
+
+  it.each<{ actions: PanelAction[]; applied: Cheats; enabled: boolean; name: string }>([
+    { actions: [], applied: CHEATS_OFF, enabled: false, name: "cheats off, untouched" },
+    {
+      actions: [{ kind: "switch", on: false }],
+      applied: CHEATS_OFF,
+      enabled: false,
+      name: "cheats off, Cheats off pressed",
+    },
+    {
+      actions: [{ kind: "switch", on: true }],
+      applied: CHEATS_OFF,
+      enabled: true,
+      name: "cheats off, Cheats on pressed",
+    },
+    {
+      actions: [{ kind: "switch", on: true }, { kind: "cancel" }],
+      applied: CHEATS_OFF,
+      enabled: false,
+      name: "cheats off, Cheats on pressed then cancelled",
+    },
+    {
+      actions: [
+        { kind: "switch", on: true },
+        { kind: "switch", on: false },
+      ],
+      applied: CHEATS_OFF,
+      enabled: false,
+      name: "cheats off, Cheats on then off pressed",
+    },
+    { actions: [], applied: ON, enabled: false, name: "cheats on, untouched" },
+    {
+      actions: [{ id: "invincible", kind: "toggle", on: true }],
+      applied: ON,
+      enabled: true,
+      name: "cheats on, a toggle staged",
+    },
+    {
+      actions: [
+        { id: "invincible", kind: "toggle", on: true },
+        { id: "invincible", kind: "toggle", on: false },
+      ],
+      applied: ON,
+      enabled: false,
+      name: "cheats on, a toggle staged then unstaged",
+    },
+    {
+      actions: [{ kind: "speed", speed: "slow" }],
+      applied: ON,
+      enabled: true,
+      name: "cheats on, a speed staged",
+    },
+    {
+      actions: [{ kind: "speed", speed: "normal" }],
+      applied: ON,
+      enabled: false,
+      name: "cheats on, the applied speed staged",
+    },
+    {
+      actions: [{ kind: "start", start: "park" }],
+      applied: ON,
+      enabled: true,
+      name: "cheats on, a walk chosen as the start",
+    },
+    {
+      actions: [{ kind: "switch", on: false }],
+      applied: ON,
+      enabled: true,
+      name: "cheats on, Cheats off pressed",
+    },
+    {
+      actions: [
+        { kind: "start", start: "park" },
+        { kind: "switch", on: false },
+      ],
+      applied: every,
+      enabled: true,
+      name: "cheats on, a walk chosen then Cheats off pressed",
+    },
+  ])("enables Apply and Cancel with $name: $enabled", ({ actions, applied, enabled }) => {
+    expect(hasStagedChanges(stageFrom(applied, actions))).toBe(enabled);
   });
 });
 

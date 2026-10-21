@@ -20,6 +20,7 @@ import {
   DEV_SAVE_EDITS_KEY,
   encodeCheats,
   encodeSaveEdits,
+  hasStagedChanges,
   openPanel,
   type PanelAction,
   type PanelState,
@@ -194,6 +195,9 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     saveCheats.forEach((cheat) => {
       cheat.disabled = !staged.on;
     });
+    const unchanged = !hasStagedChanges(state);
+    cancel.disabled = unchanged;
+    apply.disabled = unchanged;
     const arrow = sheet.hidden === false ? "▾" : "▸";
     barLabel.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
   };
@@ -243,6 +247,8 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     ),
   );
   const saveCheats = SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit)));
+  const cancel = button("Cancel", () => setOpen(false));
+  const apply = button("Apply", () => applyAndGo(state), "dev-button dev-primary");
   const reset = button(
     "Reset save",
     () => {
@@ -274,12 +280,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   sheet.append(
     el("header", { className: "dev-header" }, el("div", { className: "dev-switch" }, on, off)),
     controls,
-    el(
-      "div",
-      { className: "dev-actions" },
-      button("Cancel", () => setOpen(false)),
-      button("Apply", () => applyAndGo(state), "dev-button dev-primary"),
-    ),
+    el("div", { className: "dev-actions" }, cancel, apply),
     el("hr", { className: "dev-divider" }),
     el("h2", { textContent: "Changes your save" }),
     el("div", { className: "dev-save" }, ...saveCheats, reset),

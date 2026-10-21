@@ -275,6 +275,21 @@ export function stagePanel(action: PanelAction, state: PanelState): PanelState {
   }
 }
 
+// Cheats off are equal whatever their other fields hold, since none of them applies.
+function sameCheats(a: Cheats, b: Cheats): boolean {
+  if (!a.on || !b.on) {
+    return a.on === b.on;
+  }
+  return a.hitBoxes === b.hitBoxes && a.invincible === b.invincible && a.speed === b.speed;
+}
+
+// Whether Apply would change anything: the staged cheats differ from the applied ones, or
+// cheats are on with a walk chosen as the start. Apply and Cancel are enabled only then.
+export function hasStagedChanges(state: PanelState): boolean {
+  const { applied, staged, start } = state;
+  return !sameCheats(applied, staged) || (staged.on && start !== START_SCREEN);
+}
+
 // What Apply does: the cheats the tab plays by from now, and the page to load. With cheats
 // off, that is the start screen without `dev`; otherwise the chosen start, keeping `dev`. A
 // neighborhood's walk gets seed. href is the current page.
