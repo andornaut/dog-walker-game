@@ -13,7 +13,7 @@ export const HOME_TEXT = {
   ],
   bubble: {
     afterFiring: "Rough walk. They'll come around.",
-    afterWalk: "Back already? Who's next?",
+    afterWalk: "Nice walk! Who's next?",
     firstVisit: "Morning! Who's walking today? Tap to pick, hold for details.",
     howTo: "Tap to pick, hold for details.",
     newAffordable: "Something new at the Pet shop!",

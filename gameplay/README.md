@@ -57,14 +57,14 @@ Rules in the rulebook that the game doesn't have yet:
 8. **Full pack home:** a bonus per dog when every dog you set out with gets home (A walk)
 9. **Gear:** Fanny pack, Hall pass (one skip per neighborhood), Lucky collar and Running shoes (+0.1 agility) (Home screen and progression)
 10. **Lucky finds:** only the generous neighbor and the lost wallet, with no cards: each bobs and pays on contact (Lucky finds)
-11. **Moving hazards:** cars and cyclists in their lanes, people stepping, animals zooming, at most three movers on screen, and a delivery truck (Moving hazards)
+11. **Moving hazards:** bikes, cars and trucks in their lanes, a parked car pulling out, people stepping, hoppers hopping and animals darting, at most four movers on screen (two darting, two slower than the road) (Moving hazards)
 12. **Pay:** a flat $10 per dog per neighborhood times the pay multiplier, banked at each neighborhood's end, with a firing losing only the current neighborhood's pay for that dog; card money options charged once per card; the same tips for any pack size; a $5 starting purse (Resources, Choice cards)
 13. **Plain hits:** a plain obstacle costs only 1♥ from the touched dog's owner, with a hit stop of about 0.3 seconds (Plain obstacles, Feedback)
 14. **Pulls:** every dog pulls toward squirrels, and only squirrels; a strain of about 1 second, then a one-lane lurch, with no input lock; steering away during the strain cancels the pull; the Squirrel! badge counts pulls that land (Screen and controls, Home screen and progression)
 15. **Road markers:** grab-worthy things bob; no marker on obstacles (Feedback)
 16. **Small dogs dodge:** 1 in 4 plain hits that would land on a small dog miss, with a "Dodge!" label, and a dodge doesn't count as a bump for Clean Paws or Not a Scratch (Screen and controls)
 17. **Treats:** a grab item, +♥ to the dog that touches it, not carried (Pickups)
-18. **Upgrade pool:** six cards: Belly rubs, Big tipper, Good leash, Raincoats, Rush hour and Sweet talker; Big tipper lasts one neighborhood; Good leash stops pulls; Raincoats means puddles don't muddy; Sweet talker makes the first card each neighborhood free and that card uses it up, whichever option is picked (Upgrade cards)
+18. **Upgrade pool:** six cards: Belly rubs, Big tipper, Good leash, Raincoats, Rush hour and Sweet talker; Big tipper lasts one neighborhood; Good leash stops pulls; Raincoats means puddles don't muddy; Sweet talker makes the first card each neighborhood's money options free and that card uses it up, whichever option is picked (Upgrade cards)
 19. **Walkers:** agility and one perk each; Ben, Ada and Trista unlocked by finishing Fairview Park, Riverside Path and The Long Way Home (Walkers)
 
 Tuning against the targets, after one re-baseline on the shared step loop with every item above in:

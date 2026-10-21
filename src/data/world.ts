@@ -107,7 +107,7 @@ export const WORLD = {
           otherDog: 2,
           puddle: 1,
           skunk: 1,
-          squirrel: 2,
+          squirrel: 1,
           thief: 0,
         },
       },

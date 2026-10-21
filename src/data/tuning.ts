@@ -53,7 +53,7 @@ export const TUNING = {
     bigTipperTipBonus: 1,
     encounterHigh: 10,
     encounterLow: 5,
-    fannyPackStart: 10,
+    fannyPackStart: 20,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
     lostWalletKeep: 20,

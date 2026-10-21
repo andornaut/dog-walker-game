@@ -760,7 +760,7 @@
       ],
       "name": "Fanny pack",
       "price": "fannyPack",
-      "short": "Start with extra cash",
+      "short": "Start every walk with +$20",
       "iconKey": "item-fanny-pack"
     },
     {
@@ -809,7 +809,7 @@
   "help": [
     {
       "art": "help-lanes",
-      "body": "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. A tap moves one lane toward that side. Keys: arrows, A/D or H/L. The dogs follow you. Mostly.",
+      "body": "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. A tap moves one lane toward that side. Keys: arrows, A/D or H/L. Some obstacles move: an arrow shows where.",
       "title": "Switch lanes"
     },
     {
@@ -819,12 +819,12 @@
     },
     {
       "art": "help-cards",
-      "body": "Bump a skunk, a thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold a card for details. A puddle opens no card, but makes the pack Muddy. Debuffs wear off on their own.",
+      "body": "Bump a skunk, a thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold anything for details. A puddle opens no card, but makes the pack Muddy. Debuffs wear off on their own.",
       "title": "Some bumps bring cards"
     },
     {
       "art": "help-owners",
-      "body": "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big. A plain bump costs 1♥ from the owner of the dog that touched it, often the leader's, so pick who leads. Small dogs dodge 1 in 4 plain bumps. At 0♥ the owner fires you.",
+      "body": "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big, but big dogs slow your lane changes. A plain bump costs 1♥ from the owner of the dog that touched it. Small dogs dodge 1 in 4 plain bumps. At 0♥ the owner fires you.",
       "title": "Keep owners happy"
     },
     {
@@ -834,7 +834,7 @@
     },
     {
       "art": "help-zones",
-      "body": "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. Each dog's pay is banked as you finish each one. At a fork, each path brings an upgrade, and harder ones pay more. Bring every dog home for the Full pack bonus.",
+      "body": "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. Each dog's pay is banked as you finish each one, and each is busier than the last. At a fork, each path brings an upgrade, and harder ones pay more. Bring every dog home for the Full pack bonus.",
       "title": "Four neighborhoods"
     }
   ],
@@ -1081,7 +1081,7 @@
         "most": 1,
         "sideways": true
       },
-      "name": "Car",
+      "name": "Parked car",
       "shape": {
         "lanes": 1,
         "rows": 3
@@ -1193,7 +1193,7 @@
       "bigTipperTipBonus": 1,
       "encounterHigh": 10,
       "encounterLow": 5,
-      "fannyPackStart": 10,
+      "fannyPackStart": 20,
       "fullPackBonusPerDog": 10,
       "lostWalletKeep": 20,
       "missedTips": 8,
@@ -1550,7 +1550,7 @@
           "otherDog": 2,
           "puddle": 1,
           "skunk": 1,
-          "squirrel": 2,
+          "squirrel": 1,
           "thief": 0
         }
       },

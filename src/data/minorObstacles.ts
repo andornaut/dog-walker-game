@@ -77,7 +77,7 @@ export const MINOR_OBSTACLES = {
   },
   parkedCar: {
     movement: { kind: "hop", most: 1, sideways: true },
-    name: "Car",
+    name: "Parked car",
     shape: { lanes: 1, rows: 3 },
   },
   pigeons: {

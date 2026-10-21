@@ -11,7 +11,7 @@ export const HELP_PAGES = [
     body:
       "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. " +
       "A tap moves one lane toward that side. Keys: arrows, A/D or H/L. " +
-      "The dogs follow you. Mostly.",
+      "Some obstacles move: an arrow shows where.",
     title: "Switch lanes",
   },
   {
@@ -27,15 +27,15 @@ export const HELP_PAGES = [
     body:
       "Bump a skunk, a thief or another dog and the walk pauses for a card. " +
       "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
-      "Hold a card for details. A puddle opens no card, but makes the pack Muddy. " +
+      "Hold anything for details. A puddle opens no card, but makes the pack Muddy. " +
       "Debuffs wear off on their own.",
     title: "Some bumps bring cards",
   },
   {
     art: "help-owners",
     body:
-      "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big. " +
-      "A plain bump costs 1♥ from the owner of the dog that touched it, often the leader's, so pick who leads. " +
+      "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big, but big dogs slow your lane changes. " +
+      "A plain bump costs 1♥ from the owner of the dog that touched it. " +
       "Small dogs dodge 1 in 4 plain bumps. At 0♥ the owner fires you.",
     title: "Keep owners happy",
   },
@@ -51,7 +51,7 @@ export const HELP_PAGES = [
     art: "help-zones",
     body:
       "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. " +
-      "Each dog's pay is banked as you finish each one. " +
+      "Each dog's pay is banked as you finish each one, and each is busier than the last. " +
       "At a fork, each path brings an upgrade, and harder ones pay more. " +
       "Bring every dog home for the Full pack bonus.",
     title: "Four neighborhoods",

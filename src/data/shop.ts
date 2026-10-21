@@ -8,7 +8,7 @@ export const SHOP_GEAR = {
     effects: [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
     name: "Fanny pack",
     price: "fannyPack",
-    short: "Start with extra cash",
+    short: "Start every walk with +$20",
   },
   luckyCollar: {
     effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],

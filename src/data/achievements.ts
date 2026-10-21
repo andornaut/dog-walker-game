@@ -65,14 +65,6 @@ export const ACHIEVEMENTS = [
     shortGoal: "Full pack bonus, 3 dogs",
   },
   {
-    badgeLine: "Phew. Nobody saw that.",
-    conditions: [{ kind: "finishOnLastHeart" }],
-    goal: "Finish a walk with an owner on 1♥",
-    id: "closeShave",
-    name: "Close Shave",
-    shortGoal: "Finish a walk on 1♥",
-  },
-  {
     badgeLine: "Small but mighty.",
     conditions: [{ count: 10, kind: "tally", tally: "dodges" }],
     goal: "Small dogs dodge 10 bumps, across all walks",
@@ -132,6 +124,14 @@ export const ACHIEVEMENTS = [
     goal: "Get fired 10 times",
     id: "youreFired",
     name: "You're Fired!",
+  },
+  {
+    badgeLine: "Phew. Nobody saw that.",
+    conditions: [{ kind: "finishOnLastHeart" }],
+    goal: "Finish a walk with an owner on 1♥",
+    id: "closeShave",
+    name: "Close Shave",
+    shortGoal: "Finish a walk on 1♥",
   },
   {
     badgeLine: "You can smell this badge.",

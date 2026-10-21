@@ -44,7 +44,7 @@ export const HINTS = {
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Squirrels tempt the pack. Steer away!",
+    text: "Squirrels are safe to touch. Others bump!",
     trigger: { kind: "pullLanded" },
   },
   tip: {
