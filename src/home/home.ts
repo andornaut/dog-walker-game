@@ -41,6 +41,19 @@ export function dollarAmountText(amount: Cents): string {
   return Math.floor(amount / 100).toLocaleString("en-US");
 }
 
+// dollarAmountText in thousands ("12k") or millions ("1.2M"), rounded down, for a slot too
+// narrow for the full amount.
+export function shortDollarAmountText(amount: Cents): string {
+  const dollars = Math.floor(amount / 100);
+  if (dollars < 1_000) {
+    return String(dollars);
+  }
+  if (dollars < 1_000_000) {
+    return `${Math.floor(dollars / 1_000)}k`;
+  }
+  return `${Math.floor(dollars / 100_000) / 10}M`;
+}
+
 // A change in money with its sign: "+$240", "−$12".
 export function signedDollarText(amount: number): string {
   return signedText(amount, dollarText(cents(Math.abs(amount))));

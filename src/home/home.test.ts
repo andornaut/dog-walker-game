@@ -31,6 +31,7 @@ import {
   partingSpeech,
   type Purchase,
   purchasePrice,
+  shortDollarAmountText,
   signedDollarText,
   tapDog,
   tapGear,
@@ -73,6 +74,21 @@ describe("money text", () => {
     "%s shows %i cents as %s, in whole dollars with thousands separated",
     (_, text, amount, shown) => {
       expect(text(amount)).toBe(shown);
+    },
+  );
+
+  it.each<[number, string]>([
+    [4_299, "42"],
+    [dollars(999), "999"],
+    [dollars(1_000), "1k"],
+    [dollars(12_345), "12k"],
+    [dollars(999_999), "999k"],
+    [dollars(1_000_000), "1M"],
+    [dollars(1_234_567), "1.2M"],
+  ])(
+    "shortDollarAmountText shows %i cents as %s, in whole dollars, thousands or millions rounded down",
+    (amount, shown) => {
+      expect(shortDollarAmountText(cents(amount))).toBe(shown);
     },
   );
 });

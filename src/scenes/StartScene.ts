@@ -43,6 +43,7 @@ import {
   partingSpeech,
   type Purchase,
   purchasePrice,
+  shortDollarAmountText,
   tapDog,
   tapGear,
 } from "../home/home";
@@ -1209,16 +1210,11 @@ export class StartScene extends Scene {
         : this.add.sprite(coin.x, coin.y, "tip").setOrigin(0),
     );
     const dollar = this.text(root, 24, textY.bank, "$", PALETTE.amber, { font: "title" });
-    this.text(
-      root,
-      24 + dollar.width + 2,
-      textY.bank,
-      dollarAmountText(save.bankCents),
-      PALETTE.cream,
-      {
-        font: "title",
-      },
-    );
+    const amountX = 24 + dollar.width + 2;
+    const full = dollarAmountText(save.bankCents);
+    const amount = this.text(root, amountX, textY.bank, full, PALETTE.cream, { font: "title" });
+    // A bank too wide for the space before the Logbook icon shows in thousands or millions.
+    fitText(amount, LOGBOOK_ICON.x - 2 - amountX, [full, shortDollarAmountText(save.bankCents)]);
     // The best walk and walk count after the Logbook button, inside its hit area.
     const { bestWalk } = save.stats;
     const walks = walksPlayed(save.stats);
