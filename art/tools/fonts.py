@@ -11,7 +11,8 @@
 
 font-body and font-title are SIL Open Font License fonts; the font files and licenses are in
 art/fonts/. Their glyphs are white on transparent so the game tints them. Printable ASCII, the
-middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has.
+middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has; font-body's $ is drawn
+too (DRAWN), as Tiny5's is too thin to read at 1x.
 
 font-display has A to Z, 0 to 9, ! ? , . ' - + $, space and ♥. Its line is 18px: the capitals'
 outline on rows 2 to 13 and their fill on rows 3 to 12 (base 13), with room above for the $ and
@@ -44,6 +45,10 @@ FONTS = {
 }
 CHARS = [chr(c) for c in range(32, 127)] + ["·", "♥"]
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
+# Glyphs drawn in place of a font's own, by font file: rows, then the top row's offset and the advance.
+# Tiny5's $ is a 3px S that reads as a stray mark at 1x: font-body draws a 4px S with 2px diagonals, its
+# stem a row above and below it.
+DRAWN = {"art/fonts/tiny5/Tiny5.ttf": {"$": (["..1.", ".111", "11..", "..11", "111.", ".1.."], 1, 5)}}
 ATLAS_W = 128
 
 # ---------- the sign lettering ----------
@@ -189,7 +194,17 @@ def glyphs(path, size):
     font = ImageFont.truetype(path, size)
     ascent, descent = font.getmetrics()
     out = {}
+    drawn = DRAWN.get(path, {})
     for ch in CHARS:
+        if ch in drawn:
+            rows, top, adv = drawn[ch]
+            im = Image.new("L", (len(rows[0]), len(rows)), 0)
+            for y, row in enumerate(rows):
+                for x, c in enumerate(row):
+                    if c == "1":
+                        im.putpixel((x, y), 255)
+            out[ch] = (im, 0, top, adv)
+            continue
         if ch == "♥":
             im = Image.new("L", (7, 6), 0)
             for y, row in enumerate(HEART):
