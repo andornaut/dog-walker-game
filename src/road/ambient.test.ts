@@ -19,6 +19,7 @@ import {
   HOP,
   newPlace,
   placeAmbient,
+  SKY_ROWS,
   startAmbient,
   stepAmbient,
 } from "./ambient";
@@ -30,6 +31,11 @@ const FRAME_SECONDS = 1 / 60;
 const ZONES = Object.keys(gameData.ambient) as ZoneId[];
 const SPEED = gameData.tuning.pixels.roadScrollSpeed;
 const BAND_ROWS: readonly number[] = Object.values(CROSS_STREET);
+const SKY_ROWS_ALL = Array.from(
+  { length: SKY_ROWS.to - SKY_ROWS.from + 1 },
+  (_, i) => SKY_ROWS.from + i,
+);
+const isSky = ({ mover }: { mover: AmbientMover }) => mover.path === "sky";
 
 function deps(seed: number, drawable: (mover: AmbientMover) => boolean = () => true): AmbientDeps {
   return { drawable, random: randomStream(seed, "ambient"), stage: STAGE };
@@ -42,6 +48,7 @@ function walkThrough(
   seconds: number,
   seed = 1,
   drawable?: (mover: AmbientMover) => boolean,
+  movers: readonly AmbientMover[] = gameData.ambient[zone],
 ): { mover: AmbientMover; place: AmbientPlace; slot: number }[][] {
   const state = startAmbient();
   const using = deps(seed, drawable);
@@ -49,7 +56,7 @@ function walkThrough(
   for (let frame = 0; frame * FRAME_SECONDS < seconds; frame++) {
     const now = frame * FRAME_SECONDS;
     const travelled = now * SPEED;
-    stepAmbient(using, { movers: gameData.ambient[zone], now, travelled, zone }, state);
+    stepAmbient(using, { movers, now, travelled, zone }, state);
     frames.push(
       state.slots.flatMap((slot, index) => {
         const place = newPlace();
@@ -79,11 +86,13 @@ describe("stepAmbient", () => {
       const seen = new Set(shown.map(({ mover }) => mover));
       expect([...seen], zone).toEqual(expect.arrayContaining([...gameData.ambient[zone]]));
 
-      const onRoad = shown.filter(({ place }) =>
-        place.band
-          ? !BAND_ROWS.includes(place.y - LAYOUT.backdrop.y) || place.y >= LAYOUT.approach.y
-          : Math.abs(place.x - centerX) < (roadHalf + ROAD_SPRITE_SIZE / 2) * place.scale,
-      );
+      const onRoad = shown.filter((each) => {
+        const { place } = each;
+        const rows = isSky(each) ? SKY_ROWS_ALL : BAND_ROWS;
+        return place.band
+          ? !rows.includes(place.y - LAYOUT.backdrop.y) || place.y >= LAYOUT.approach.y
+          : Math.abs(place.x - centerX) < (roadHalf + ROAD_SPRITE_SIZE / 2) * place.scale;
+      });
       expect(onRoad, zone).toEqual([]);
 
       // Side views face right in their art, so a mover moving left is mirrored; front and back
@@ -103,7 +112,14 @@ describe("stepAmbient", () => {
       );
       expect(misfaced, zone).toEqual([]);
 
-      const band = shown.filter(({ place }) => place.band).map(({ place }) => place);
+      const sky = shown.filter(isSky).map(({ place }) => place);
+      expect(
+        sky.filter(({ band, scale }) => !band || scale !== 1),
+        zone,
+      ).toEqual([]);
+      const band = shown
+        .filter((each) => each.place.band && !isSky(each))
+        .map(({ place }) => place);
       expect(band.length, zone).toBeGreaterThan(0);
       expect(
         band.filter(({ scale }) => scale >= farEdge),
@@ -123,6 +139,23 @@ describe("stepAmbient", () => {
       walkThrough("street", 60, seed).map((out) => out.map(({ place }) => place));
     expect(places(3)).toEqual(places(3));
     expect(places(4)).not.toEqual(places(3));
+  });
+
+  // A plane built from a cross street car, until a zone's data lists a sky mover: it crosses
+  // the band's top rows both ways at full size, mirrored going left.
+  it("flies a sky mover across the band's top rows both ways at full size", () => {
+    const planes = gameData.ambient.street
+      .filter(({ path }) => path === "crossStreet")
+      .slice(0, 1)
+      .map((car): AmbientMover => ({ ...car, path: "sky" }));
+    expect(planes).toHaveLength(1);
+    const shown = walkThrough("homeStretch", 600, 1, undefined, planes).flat();
+    const wrong = shown.filter(
+      ({ place }) =>
+        !place.band || place.scale !== 1 || !SKY_ROWS_ALL.includes(place.y - LAYOUT.backdrop.y),
+    );
+    expect(wrong).toEqual([]);
+    expect(new Set(shown.map(({ place }) => place.flip))).toEqual(new Set([false, true]));
   });
 
   it("sets out no mover that has no art", () => {

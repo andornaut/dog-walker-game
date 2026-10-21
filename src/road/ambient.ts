@@ -5,8 +5,8 @@ import { CROSS_STREET } from "../layout/sceneryGags";
 import type { Random } from "../lib/random";
 import { noise, type Verge, VERGES, walkFrom } from "./roadside";
 
-// The ambient movers: cars, bikes, people and animals moving across the backdrop's cross
-// street and beside the road, from each zone's table in the data. They are scenery only:
+// The ambient movers: cars, bikes, people, animals and planes moving across the backdrop's
+// cross street and sky and beside the road, from each zone's table in the data. They are scenery only:
 // nothing in the walk reads them, and they draw from a random stream of their own, so a seed
 // plays the same walk with or without them. Their time is the walk's, so they stand still
 // while it is held.
@@ -36,6 +36,9 @@ const OFF_SCREEN = ROAD_SPRITE_SIZE;
 const VERGE_DISTANCE = { dart: { from: 0.55, span: 0.3 }, sit: { from: 0.35, span: 0.45 } };
 // Hop bursts are counted up to this many, which no mover outlives.
 const MAX_BURSTS = 1000;
+// A sky mover's feet row, in band pixels, from..to: with a plane's feet on the 9th of its 10
+// rows, it flies within band rows 0 to 12, the clear sky above the tallest skyline.
+export const SKY_ROWS = { from: 9, to: 12 } as const;
 
 // What the movers are placed against: the backdrop band's top row and width, and the road's
 // projection.
@@ -44,9 +47,9 @@ export interface AmbientStage {
   readonly projection: RoadProjection;
 }
 
-// One mover. direction is the way a mover on the cross street goes (1 right, -1 left), and
-// the side of the road for one beside it (1 right, -1 left). row is a cross street mover's
-// feet row, in band pixels. Beside the road, across is where it walks or stops and outer
+// One mover. direction is the way a mover on the cross street or in the sky goes (1 right,
+// -1 left), and the side of the road for one beside it (1 right, -1 left). row is a cross
+// street or sky mover's feet row, in band pixels. Beside the road, across is where it walks or stops and outer
 // where it starts or leaves, in road pixels from the road's centre line, and z the road
 // distance from the walk's start where it set out. look, in [0, 1), picks among its art's
 // variants, such as a car's body.
@@ -71,7 +74,7 @@ export interface AmbientState {
 
 // Where a mover is drawn: its feet on screen, its scale, how far above its feet it flies at
 // scale 1, whether it is mirrored (art faces right), whether it is moving, and whether it is
-// on the cross street (band) or beside the road.
+// on the cross street or in the sky (band) or beside the road.
 export interface AmbientPlace {
   band: boolean;
   flip: boolean;
@@ -216,6 +219,9 @@ function setOut(
     case "crossWalk":
       slot.row = random() < 0.5 ? CROSS_STREET.nearWalk : CROSS_STREET.farWalk;
       return;
+    case "sky":
+      slot.row = SKY_ROWS.from + Math.floor(random() * (SKY_ROWS.to - SKY_ROWS.from + 1));
+      return;
     case "sidewalkAway":
     case "sidewalkToward":
       slot.across = sidewalkAcross(verge);
@@ -279,7 +285,8 @@ export function gaitTravel(
 }
 
 // Writes where a mover is drawn now into out, or returns false once its path is done: off the
-// screen's side, past the walker's feet, or gone up the road into the cross street.
+// screen's side, past the walker's feet, or gone up the road into the cross street. A sky
+// mover is drawn at full size; a cross street mover at its row's scale.
 export function placeAmbient(
   stage: AmbientStage,
   slot: AmbientSlot,
@@ -295,7 +302,7 @@ export function placeAmbient(
   const { projection } = stage;
   out.lift = 0;
   out.flip = false;
-  if (mover.path === "crossStreet" || mover.path === "crossWalk") {
+  if (mover.path === "crossStreet" || mover.path === "crossWalk" || mover.path === "sky") {
     const { moving, travel } = gaitTravel(mover.gait, mover.speed, slot.seed, seconds);
     const { band } = stage;
     const start = slot.direction === 1 ? -OFF_SCREEN : band.width + OFF_SCREEN;
@@ -306,7 +313,7 @@ export function placeAmbient(
     out.y = band.y + slot.row;
     // The cross street lies beyond the road's far edge, at the scale the road's projection
     // gives its row.
-    out.scale = scaleAtY(projection, out.y);
+    out.scale = mover.path === "sky" ? 1 : scaleAtY(projection, out.y);
     if (mover.gait === "fly") {
       out.lift = travel * FLY_CLIMB;
     }

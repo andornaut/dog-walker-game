@@ -892,17 +892,19 @@ export type GameAchievement = Achievement & { readonly id: AchievementId };
 // - crossWalk: along one of the cross street's sidewalks, either way.
 // - sidewalkAway, sidewalkToward: along a sidewalk beside the road (on the lawn's edge where
 //   there is none), walking away from or toward the walker.
+// - sky: across the backdrop band's top rows, above the skyline, either way, at full size.
 // - verge: on the lawn or paving beside the road. A steady mover darts in from the screen's
 //   side, stops, and darts back out; a hopper or flier starts there and leaves the same way.
-export type AmbientPath = "crossStreet" | "crossWalk" | "sidewalkAway" | "sidewalkToward" | "verge";
+export type AmbientPath =
+  "crossStreet" | "crossWalk" | "sidewalkAway" | "sidewalkToward" | "sky" | "verge";
 
 // How a mover covers its path: steadily, in bursts of one or two hops with a pause between
 // them, or rising as it goes.
 export type AmbientGait = "fly" | "hop" | "steady";
 
 // One kind of ambient mover in a zone: its sprite and the tag it plays while moving, its path
-// and gait, its speed while moving (band pixels a second on the cross street and its
-// sidewalks, road pixels a second beside the road) and how often one sets out, per minute.
+// and gait, its speed while moving (band pixels a second on the cross street, its sidewalks
+// and in the sky, road pixels a second beside the road) and how often one sets out, per minute.
 export interface AmbientMover {
   readonly gait: AmbientGait;
   readonly key: string;

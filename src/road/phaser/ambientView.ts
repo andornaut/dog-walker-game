@@ -30,7 +30,8 @@ const NO_ART: MoverArt = { keys: [], tag: null };
 const BAND_ROW_DEPTH = 1 / 10000;
 
 // The ambient movers' sprites, one per slot, made once and reused. With reduced motion none
-// is shown. A mover on the cross street is drawn at its row's scale over the backdrop;
+// is shown. A mover on the cross street is drawn at its row's scale over the backdrop, and one
+// in the sky at full size;
 // one beside the road stands through the projection like the road's sprites, cut off at the
 // juncture.
 export class AmbientView {
