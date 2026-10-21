@@ -49,6 +49,7 @@
   - `src/pwa/`, `src/dev/`: phone app and dev tools
   - `src/dataPage/`: the `/data/` page
   - `src/headers/`: the build-time security headers
+  - `src/site/`: tests of the site nav's stylesheet, `public/nav.css` (the current page's frame holds still)
   - `src/tools/`: the art manifest, the data export for art's tools and the depth preview
   - `src/crash/`: the crash screen
   - `src/scenes/`, `src/main.ts`: everything that touches Phaser; `src/scenes/run/` holds the walk's views, input, moments, menus and dev hooks
