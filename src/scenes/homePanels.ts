@@ -68,8 +68,16 @@ function addScrim(scene: Scene, parent: GameObjects.Container): void {
 }
 
 const CARD = HOME_LAYOUT.card;
-const DOG_CARD: Rect = HOME_LAYOUT.dogCard;
-const GEAR_CARD_HEIGHT = HOME_LAYOUT.gearCardHeight;
+
+// A card height tall, centred on the screen.
+function centredCard(height: number): Rect {
+  return {
+    height,
+    width: CARD.width,
+    x: (SCREEN.width - CARD.width) / 2,
+    y: Math.round((SCREEN.height - height) / 2),
+  };
+}
 
 // The card's frame, title band and close control; the content goes in a container placed at
 // the card.
@@ -125,10 +133,10 @@ export interface DetailPicture {
 
 const LINE_GAP = 8;
 
-// A held dog's, walker's or gear item's detail card over a dim layer. A dog's or walker's card puts its breed and
-// status beside the portrait and its rows below; a gear card is shorter, with its effect and
-// status beside the icon. Returns the card's rect, so a tap outside it or on its close
-// control closes it.
+// A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
+// shows. A dog's or walker's card puts its breed and status beside the portrait and its rows
+// below; a gear card puts its effect and status beside the icon. Returns the card's rect, so a
+// tap outside it or on its close control closes it.
 export function drawDetailCard(
   scene: Scene,
   parent: GameObjects.Container,
@@ -137,15 +145,8 @@ export function drawDetailCard(
   picture: DetailPicture,
   kind: "dog" | "gear" | "walker",
 ): Rect {
-  const rect =
-    kind !== "gear"
-      ? DOG_CARD
-      : {
-          ...DOG_CARD,
-          height: GEAR_CARD_HEIGHT,
-          y: Math.round((SCREEN.height - GEAR_CARD_HEIGHT) / 2),
-        };
-  const content = drawCardFrame(scene, parent, closePressed, rect, card.title);
+  // The content is laid out first, so the card is as tall as it needs.
+  const content = scene.add.container(0, 0);
   const { well } = CARD;
   if (scene.textures.exists("ui-detail-well")) {
     content.add(scene.add.image(well.x, well.y, "ui-detail-well").setOrigin(0));
@@ -166,38 +167,38 @@ export function drawDetailCard(
   } else if (picture.fallback !== undefined && scene.textures.exists(picture.fallback)) {
     content.add(scene.add.image(well.x + well.size / 2, well.y + well.size / 2, picture.fallback));
   }
-  const besideX = well.x + well.size + 10;
-  const beside = (rows: readonly { color: number; value: string }[], top: number): number => {
+  // The lowest row anything on the card reaches so far.
+  let bottom = well.y + well.size;
+  // Rows of text from (x, y) down, each wrapped at the card's padding; returns the y after.
+  const rows = (lines: readonly { color: number; value: string }[], x: number, top: number) => {
     let y = top;
-    for (const row of rows) {
-      const label = text(scene, content, { x: besideX, y }, row.value, {
+    for (const row of lines) {
+      const label = text(scene, content, { x, y }, row.value, {
         color: row.color,
-        maxWidth: rect.width - besideX - CARD.pad,
+        maxWidth: CARD.width - x - CARD.pad,
       });
+      bottom = Math.max(bottom, label.y + Math.ceil(label.height));
       y += Math.ceil(label.height) + LINE_GAP;
     }
     return y;
   };
+  const besideX = well.x + well.size + 10;
   const status = { color: card.locked ? PALETTE.darkRed : PALETTE.forest, value: card.status };
+  const plum = card.lines.map((value) => ({ color: PALETTE.plum, value }));
   if (kind === "gear") {
-    beside([...card.lines.map((value) => ({ color: PALETTE.plum, value })), status], well.y + 4);
-    return rect;
+    rows([...plum, status], besideX, well.y + 4);
+  } else {
+    const subtitle = { color: PALETTE.darkBrown, value: card.subtitle };
+    const belowStatus = rows([subtitle, status], besideX, well.y + 4);
+    if (picture.badge !== undefined && scene.textures.exists(picture.badge)) {
+      const badge = scene.add.image(besideX, belowStatus, picture.badge).setOrigin(0);
+      content.add(badge);
+      bottom = Math.max(bottom, belowStatus + badge.height);
+    }
+    rows(plum, CARD.pad, well.y + well.size + CARD.pad);
   }
-  const belowStatus = beside(
-    [{ color: PALETTE.darkBrown, value: card.subtitle }, status],
-    well.y + 4,
-  );
-  if (picture.badge !== undefined && scene.textures.exists(picture.badge)) {
-    content.add(scene.add.image(besideX, belowStatus, picture.badge).setOrigin(0));
-  }
-  let y = well.y + well.size + CARD.pad;
-  for (const line of card.lines) {
-    const label = text(scene, content, { x: CARD.pad, y }, line, {
-      color: PALETTE.plum,
-      maxWidth: rect.width - CARD.pad * 2,
-    });
-    y += Math.ceil(label.height) + LINE_GAP;
-  }
+  const rect = centredCard(bottom + CARD.pad);
+  drawCardFrame(scene, parent, closePressed, rect, card.title, content);
   return rect;
 }
 
@@ -248,13 +249,7 @@ export function drawLogbookPanel(
   const left = (CARD.width - buttonWidth * 2 - gap) / 2;
   const button = { height: buttonHeight, width: buttonWidth, x: left, y: y + LINE_GAP };
   const badges = { ...button, x: left + buttonWidth + gap };
-  const height = button.y + button.height + CARD.pad;
-  const rect = {
-    height,
-    width: CARD.width,
-    x: (SCREEN.width - CARD.width) / 2,
-    y: Math.round((SCREEN.height - height) / 2),
-  };
+  const rect = centredCard(button.y + button.height + CARD.pad);
   drawCardFrame(scene, parent, pressed === "close", rect, words.title, content);
   const buttons = [
     [button, words.stats, "stats"],

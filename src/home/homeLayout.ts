@@ -89,17 +89,15 @@ export function pocketLining(section: Rect) {
 export const HOME_LAYOUT = {
   // The band's text sits on section rows 8..17, 9px in from either side.
   bandText: { inset: 9, y: 8 },
-  // The detail card that opens over the screen, in card pixels: the paper starts 2px in, the
-  // band runs across its top 6px in with the title's caps 6px below the band's top, and the
-  // well sits under the band.
+  // The detail card that opens over the screen, centred and as tall as what it shows, in card
+  // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
+  // 6px below the band's top, and the well sits under the band.
   card: {
     band: { height: 22, inset: 6, titleY: 6 },
     pad: 12,
     well: { picture: 2, size: 68, x: 12, y: 34 },
     width: 300,
   },
-  // The dog card's place on screen, and the gear card's height; the gear card is centred.
-  dogCard: { height: 376, width: 300, x: 30, y: 92 },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
@@ -115,7 +113,6 @@ export const HOME_LAYOUT = {
     { dx: 26, footDy: -12 },
   ],
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
-  gearCardHeight: 150,
   // The top bar's controls at its right end: help, sound, then settings.
   help: { hit: { height: 44, width: 44, x: 228, y: 0 }, icon: { x: 240, y: TOP_BAR_ICON_Y } },
   // The Logbook button at the bar's left, after the bank; its hit area takes in the best walk

@@ -1331,12 +1331,6 @@
         },
         "width": 300
       },
-      "dogCard": {
-        "height": 376,
-        "width": 300,
-        "x": 30,
-        "y": 92
-      },
       "dogOrigin": {
         "x": 14,
         "y": 298
@@ -1378,7 +1372,6 @@
         "x": 194,
         "y": 166
       },
-      "gearCardHeight": 150,
       "help": {
         "hit": {
           "height": 44,
