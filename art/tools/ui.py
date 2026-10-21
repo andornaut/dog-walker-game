@@ -1030,18 +1030,18 @@ def strip_well():
 
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash and the neighbourhood with its pips.
-WALK_WELLS = ((4, 4, 95, 40), (103, 4, 80, 17))
-# The row of effect wells under the neighbourhood well, kept plain wood so the wells and the "+n"
-# beside them sit clear of the grain: three 22x22 wells, 23px apart from x 103, on rows 22 to 43.
-EFFECT_ROW = (102, 21, 82, 24)
+WALK_WELLS = ((4, 4, 93, 40), (101, 4, 114, 17))
+# The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
+# the grain: five 22x22 wells, 23px apart from x 101, on rows 22 to 43.
+EFFECT_ROW = (100, 21, 116, 24)
 EFFECT_WELL = 22
 
 
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
     45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,4 95x40, sized for "$888" at 3x after the coin, and neighbourhood 103,4 80x17, which
-    ends clear of the Home button's hit at x 184. The game draws the effect wells, the Home, Sound,
+    cash 4,4 93x40, sized for "$888" at 3x after the coin, and neighbourhood 101,4 114x17, which
+    ends clear of the Home button's hit at x 216. The game draws the effect wells, the Home, Sound,
     Settings and Pause buttons and every text and icon on it."""
     w, h = WALK_BAR
     g = Grid(w, h)
