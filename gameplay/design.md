@@ -187,7 +187,7 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Other dog, thief                                                                                                                                       | Card  | 1 × 1               |
 | Squirrel                                                                                                                                               | Pull  | 1 × 1               |
 | Ball, bin, bunny, cat, cone, cyclist, ducklings, frisbee dog, goose, jogger, kid on a bike, mail carrier, pigeons, raccoon, scooter, seagull, stroller | Plain | 1 × 1               |
-| Car, delivery truck, garbage truck, ice cream truck                                                                                                    | Plain | 1 × 3               |
+| Car, delivery truck, garbage truck, ice cream truck, parked car                                                                                        | Plain | 1 × 3               |
 | Bench                                                                                                                                                  | Plain | 2 × 1               |
 | Hedge                                                                                                                                                  | Plain | 3 × 1               |
 | Construction barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path)                                                                        | Plain | 2 or 3 × 1          |
@@ -196,17 +196,17 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 
 Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share rises from about a quarter in Willow Crescent to about 60% in The Long Way Home, and most neighborhoods' obstacles are mostly kinds that can move. Each move is telegraphed about 1 second ahead, at most four movers are on screen at once (at most two darting animals and two vehicles slower than the road), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
 
-| Group      | How it moves                                                                                        | Who                                                                   |
-| ---------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Animals    | Dart across the whole road, some on a slight tilt up or down the road, or stand still               | Ball, Cat, Frisbee dog, Other dog, Pigeons, Seagull, Squirrel         |
-| Bikes      | In their lane, down the road faster than it scrolls                                                 | Cyclist, Kid on a bike, Scooter                                       |
-| Cars       | In their lane, down the road faster than it scrolls (street neighborhoods)                          | Car                                                                   |
-| Chargers   | In their lane, straight at the pack, fast                                                           | Goose                                                                 |
-| Hoppers    | Stand still, or hop 1 or 2 spots: a lane to either side, or a row up or down                        | Bunny, Ducklings, Raccoon                                             |
-| People     | Stand still, or take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down | Mail carrier, Thief                                                   |
-| Runners    | In their lane, a jogger toward the pack and a stroller ahead of it, slower than the road            | Jogger, Stroller                                                      |
-| Trucks     | Like cars, in their lane, but slower; the garbage and ice cream trucks slower than the road         | Delivery truck, Garbage truck, Ice cream truck (street neighborhoods) |
-| Stationary | Never move                                                                                          | Barriers, benches, bins, cones, hedges, puddles and skunks            |
+| Group      | How it moves                                                                                                                                                      | Who                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Animals    | Dart across the whole road, some on a slight tilt up or down the road, or stand still                                                                             | Ball, Cat, Frisbee dog, Other dog, Pigeons, Seagull, Squirrel         |
+| Bikes      | In their lane, down the road faster than it scrolls                                                                                                               | Cyclist, Kid on a bike, Scooter                                       |
+| Cars       | A driving car keeps its lane, down the road faster than it scrolls; a parked car stands still or pulls out one lane to either side (street neighborhoods)         | Car, Parked car                                                       |
+| Chargers   | In their lane, straight at the pack, fast                                                                                                                         | Goose                                                                 |
+| Hoppers    | Stand still, or jump in one quick hop: the bunny 1 or 2 spots (a lane to either side, or a row up or down), the ducklings 1 or 2 lanes across, the raccoon 1 spot | Bunny, Ducklings, Raccoon                                             |
+| People     | Stand still, or take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down                                                               | Mail carrier, Thief                                                   |
+| Runners    | In their lane, a jogger toward the pack and a stroller ahead of it, slower than the road                                                                          | Jogger, Stroller                                                      |
+| Trucks     | Like cars, in their lane, but slower; the garbage and ice cream trucks slower than the road                                                                       | Delivery truck, Garbage truck, Ice cream truck (street neighborhoods) |
+| Stationary | Never move                                                                                                                                                        | Barriers, benches, bins, cones, hedges, puddles and skunks            |
 
 ### Feedback
 

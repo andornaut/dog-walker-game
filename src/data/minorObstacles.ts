@@ -16,7 +16,12 @@ export const MINOR_OBSTACLES = {
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
-  bunny: { movement: { kind: "step", steps: 2 }, name: "Bunny", shape: { lanes: 1, rows: 1 } },
+  bunny: { movement: { kind: "hop", most: 2 }, name: "Bunny", shape: { lanes: 1, rows: 1 } },
+  car: {
+    movement: { factor: 1.3, kind: "inLane" },
+    name: "Car",
+    shape: { lanes: 1, rows: 3 },
+  },
   cat: { movement: { kind: "dart" }, name: "Cat", shape: { lanes: 1, rows: 1 } },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
   cyclist: {
@@ -30,7 +35,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   ducklings: {
-    movement: { kind: "step", steps: 2 },
+    movement: { kind: "hop", most: 2, sideways: true },
     name: "Ducklings",
     shape: { lanes: 1, rows: 1 },
   },
@@ -71,7 +76,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   parkedCar: {
-    movement: { factor: 1.3, kind: "inLane" },
+    movement: { kind: "hop", most: 1, sideways: true },
     name: "Car",
     shape: { lanes: 1, rows: 3 },
   },
@@ -80,7 +85,7 @@ export const MINOR_OBSTACLES = {
     name: "Pigeons",
     shape: { lanes: 1, rows: 1 },
   },
-  raccoon: { movement: { kind: "step", steps: 1 }, name: "Raccoon", shape: { lanes: 1, rows: 1 } },
+  raccoon: { movement: { kind: "hop", most: 1 }, name: "Raccoon", shape: { lanes: 1, rows: 1 } },
   scooter: {
     movement: { factor: 1.5, kind: "inLane" },
     name: "Scooter",
