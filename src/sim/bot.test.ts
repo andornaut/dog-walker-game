@@ -210,12 +210,13 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     entries.map((entry) => [JSON.stringify([entry.movement, entry.shape]), entry]),
   );
   // Each end of every draw, the count's included: the fewest and the most times it moves.
-  const LOW: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0 };
+  const LOW: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0, start: 0 };
   const HIGH: MoverDraws = {
     count: 0.999999,
     delays: [0.999999, 0.999999, 0.999999],
     share: 0.999999,
     speed: 0.999999,
+    start: 0.999999,
   };
   const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
     [LOW, HIGH].flatMap((draws) =>

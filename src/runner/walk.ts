@@ -499,6 +499,11 @@ export function moverSpec(
     motion = {
       kind: "cross",
       lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond"),
+      reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
+      startRoadShare: [
+        read(tuning, "multipliers", "dartStartRoadShareMin"),
+        read(tuning, "multipliers", "dartStartRoadShareMax"),
+      ],
       tilt: movement.tilt ?? 0,
     };
   } else if (movement.kind === "inLane") {

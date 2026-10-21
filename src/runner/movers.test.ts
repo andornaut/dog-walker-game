@@ -381,20 +381,37 @@ describe("sweptLanes", () => {
   });
 });
 
-// A mover's draws at the near end of each range, with the fewest moves (count 0) or the most.
-const FEWEST_AND_MOST: readonly { draws: MoverDraws; times: string }[] = [
-  { draws: { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5 }, times: "the fewest times" },
-  { draws: { count: 0.999999, delays: [0, 0, 0], share: 0, speed: 0.5 }, times: "the most times" },
+// A mover's draws with no delay at its kind's speed, and the count and a dart's start at the low
+// end of their ranges (the fewest moves, the lowest start) or the high end.
+const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
+  {
+    draws: { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5, start: 0 },
+    end: "the low end",
+  },
+  {
+    draws: { count: 0.999999, delays: [0, 0, 0], share: 0, speed: 0.5, start: 0.999999 },
+    end: "the high end",
+  },
 ];
+
+// A crosser that sets off from 0.1 to 0.9 of the road ahead of the pack, leaving the pack half a
+// second after its cue.
+const cross = (lanesPerSecond: number, tilt: number): MoverSpec["motion"] => ({
+  kind: "cross",
+  lanesPerSecond,
+  reactionSeconds: 0.5,
+  startRoadShare: [0.1, 0.9],
+  tilt,
+});
 
 // Each motion, footprint and tilt the planner meets, as a spec.
 const SPECS: readonly { name: string; spec: MoverSpec }[] = [
-  { name: "a dart", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
+  { name: "a dart", spec: spec(cross(2, 0)) },
   {
     name: "a dart tilted toward the pack",
-    spec: spec({ kind: "cross", lanesPerSecond: 3, tilt: 0.3 }),
+    spec: spec(cross(3, 0.3)),
   },
-  { name: "a dart tilted away", spec: spec({ kind: "cross", lanesPerSecond: 3, tilt: -0.3 }) },
+  { name: "a dart tilted away", spec: spec(cross(3, -0.3)) },
   {
     name: "an in-lane mover faster than the road",
     spec: spec({ kind: "ride", speedMultiplier: 1.6 }),
@@ -496,49 +513,52 @@ describe("moverPlacements", () => {
   // its lanes, from its row's window for as long as its rows' blocking length.
   it.each(
     SPECS.flatMap(({ name, spec: moving }) =>
-      FEWEST_AND_MOST.map(({ draws, times }) => ({ draws, moving, name, times })),
+      DRAW_ENDS.map(({ draws, end }) => ({ draws, end, moving, name })),
     ),
-  )("keeps $name within the lanes and rows it blocks, moving $times", ({ draws, moving }) => {
-    const { cellLength, sightLength, window } = geometry;
-    const { lanes: across, rows } = moving.footprint;
-    const placements = moverPlacements(geometry, moving, draws);
-    expect(placements.length).toBeGreaterThan(0);
-    for (const placement of placements) {
-      const blocked = window + (placement.rows - 1) * cellLength;
-      const reach = window + (rows - 1) * cellLength;
-      const { path } = placement;
-      const outcomes = path.motion === "approach" ? approachOutcomes(path) : [path];
-      for (const outcome of outcomes) {
-        for (let since = 0; since < 4000; since += 1) {
-          const place = moverPlace(geometry.laneCount, outcome, since);
-          const lane = laneAt(place.lanePosition);
-          const touching =
-            place.solid && place.travel >= sightLength && place.travel < sightLength + reach;
-          const onRoad = lane + across > 0 && lane < geometry.laneCount;
-          if (!touching || !onRoad) {
-            continue;
+  )(
+    "keeps $name within the lanes and rows it blocks, at $end of its draws",
+    ({ draws, moving }) => {
+      const { cellLength, sightLength, window } = geometry;
+      const { lanes: across, rows } = moving.footprint;
+      const placements = moverPlacements(geometry, moving, draws);
+      expect(placements.length).toBeGreaterThan(0);
+      for (const placement of placements) {
+        const blocked = window + (placement.rows - 1) * cellLength;
+        const reach = window + (rows - 1) * cellLength;
+        const { path } = placement;
+        const outcomes = path.motion === "approach" ? approachOutcomes(path) : [path];
+        for (const outcome of outcomes) {
+          for (let since = 0; since < 4000; since += 1) {
+            const place = moverPlace(geometry.laneCount, outcome, since);
+            const lane = laneAt(place.lanePosition);
+            const touching =
+              place.solid && place.travel >= sightLength && place.travel < sightLength + reach;
+            const onRoad = lane + across > 0 && lane < geometry.laneCount;
+            if (!touching || !onRoad) {
+              continue;
+            }
+            const scroll = placement.appears + since;
+            expect(scroll).toBeGreaterThanOrEqual(sightLength - 1e-6);
+            expect(scroll).toBeLessThanOrEqual(sightLength + blocked + 1e-6);
+            const first = Math.max(0, lane);
+            const last = Math.min(geometry.laneCount - 1, lane + across - 1);
+            expect(first).toBeGreaterThanOrEqual(placement.lanes.first);
+            expect(last).toBeLessThan(placement.lanes.first + placement.lanes.count);
           }
-          const scroll = placement.appears + since;
-          expect(scroll).toBeGreaterThanOrEqual(sightLength - 1e-6);
-          expect(scroll).toBeLessThanOrEqual(sightLength + blocked + 1e-6);
-          const first = Math.max(0, lane);
-          const last = Math.min(geometry.laneCount - 1, lane + across - 1);
-          expect(first).toBeGreaterThanOrEqual(placement.lanes.first);
-          expect(last).toBeLessThan(placement.lanes.first + placement.lanes.count);
         }
       }
-    }
-  });
+    },
+  );
 
   // A stepper, hopper or stalker moves as many times as its drawn count, the fewest or the most
   // of its range, less any step that would come once it has reached the pack's rows.
   it.each(
     SPECS.flatMap(({ name, spec: moving }) =>
       moving.motion.kind === "steps" || moving.motion.kind === "approach"
-        ? FEWEST_AND_MOST.map(({ draws, times }) => ({ draws, moving, name, times }))
+        ? DRAW_ENDS.map(({ draws, end }) => ({ draws, end, moving, name }))
         : [],
     ),
-  )("moves $name its drawn count of times, moving $times", ({ draws, moving }) => {
+  )("moves $name its drawn count of times, at $end of its draws", ({ draws, moving }) => {
     const { motion } = moving;
     const range =
       motion.kind === "approach" ? motion.steps : motion.kind === "steps" ? motion.count : null;
@@ -583,6 +603,41 @@ describe("moverPlacements", () => {
       expect(stands.map((stand) => stand.lane - lane)).toEqual(sideways ? [0, 1, 2] : [0, 0, 0]);
       expect(new Set(stands.map(({ distance }) => distance)).size).toBe(sideways ? 1 : 3);
     }
+  });
+
+  // At 3 lanes a second, set off as high as its cue allows it has crossed the road before it
+  // reaches the pack's rows; set off as low as the pack's reaction allows, it meets the pack in
+  // the 4 lanes it sweeps while its row is in the window.
+  it.each([
+    { end: "high", lanes: 0, meets: false, start: 0.999999 },
+    { end: "low", lanes: 4, meets: true, start: 0 },
+  ])(
+    "meets the pack with a dart set off $end only if it is still crossing",
+    ({ lanes, meets, start }) => {
+      const draws = { count: 0, delays: [0, 0, 0] as const, share: 0, speed: 0.5, start };
+      const [rightward] = moverPlacements(geometry, spec(cross(3, 0)), draws);
+      expect(rightward?.lanes.count).toBe(lanes);
+      expect(rightward?.leadIn).toBe(meets);
+      expect(rightward?.stands.length).toBe(meets ? 1 : 0);
+    },
+  );
+
+  it("starts a dart no lower than leaves the pack its reaction time, nor higher than shows its cue", () => {
+    const ends = [0, 0.999999].map((start) => {
+      const [placement] = moverPlacements(geometry, spec(cross(3, 0)), {
+        count: 0,
+        delays: [0, 0, 0],
+        share: 0,
+        speed: 0.5,
+        start,
+      });
+      return placement?.path.motion === "cross" ? placement.path.enterTravel : NaN;
+    });
+    const { cellLength, scrollSpeed, sightLength } = geometry;
+    // Half a second of reaction at 100px/s; a 1s cue and a cell must fit above the start.
+    const [low, high] = ends;
+    expect(low).toBeCloseTo(sightLength - 0.5 * scrollSpeed);
+    expect(high).toBeCloseTo(scrollSpeed + cellLength);
   });
 
   it("needs an in-lane mover to move at another speed than the road", () => {
@@ -773,7 +828,7 @@ describe("placeMovers", () => {
       };
       const placing = counted();
       const placed = placeMovers(placing.streams, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
-        { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
+        { count: 1, kind: "squirrel", spec: spec(cross(2, 0)) },
       ]);
       expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
       const own = counted();

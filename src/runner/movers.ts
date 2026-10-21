@@ -349,7 +349,9 @@ export function hopSequences(most: number, sideways: boolean, times: number): St
   );
 }
 
-// cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed.
+// cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed,
+// setting off a share of the road ahead of the pack drawn per mover from startRoadShare, never so
+// low that the pack has less than reactionSeconds after its cue to meet it.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
@@ -365,7 +367,13 @@ export type MoverMotion =
       readonly stepSeconds: number;
       readonly steps: MoveCount;
     }
-  | { readonly kind: "cross"; readonly lanesPerSecond: number; readonly tilt: number }
+  | {
+      readonly kind: "cross";
+      readonly lanesPerSecond: number;
+      readonly reactionSeconds: number;
+      readonly startRoadShare: readonly [number, number];
+      readonly tilt: number;
+    }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
       readonly count: MoveCount;
@@ -375,7 +383,7 @@ export type MoverMotion =
     };
 
 // How much movers of a kind differ: each one's speed by up to speedShare of it either way, and
-// each of its steps, hops or darts up to delaySeconds later than its earliest moment.
+// each of its steps or hops up to delaySeconds later than its earliest moment.
 interface MoverVariation {
   readonly delaySeconds: number;
   readonly speedShare: number;
@@ -390,20 +398,21 @@ export interface MoverSpec {
 }
 
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
-// speed, the delay before each of its moves, and a stalker's later-step road share. EVEN_DRAWS
-// moves it at its kind's speed with no delay, at the near end of a range.
+// speed, the delay before each of its moves, a stalker's later-step road share and where a dart
+// sets off. EVEN_DRAWS moves it at its kind's speed with no delay, at the near end of a range.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
   readonly share: number;
   readonly speed: number;
+  readonly start: number;
 }
 
-const EVEN_DRAWS: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5 };
+const EVEN_DRAWS: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5, start: 0 };
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
-// delays and share; movers draws each mover's count and third delay, so those never shift the
-// spawns stream.
+// delays and share; movers draws each mover's count, third delay and start, so those never shift
+// the spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -415,7 +424,9 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const delays = [spawns(), spawns()] as const;
   const share = spawns();
   const speed = spawns();
-  return { count: movers(), delays: [...delays, movers()], share, speed };
+  const count = movers();
+  const third = movers();
+  return { count, delays: [...delays, third], share, speed, start: movers() };
 }
 
 // The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
@@ -444,80 +455,88 @@ function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): n
   return Math.max(rows, 1 + Math.ceil((needed - window) / cellLength - 1e-9));
 }
 
-const HALF_LANE_STEPS = 2;
-
-// Crossers meet the pack partway across: one placement per side and per half lane crossed
-// by the middle of its contact with the pack, which starts as its row's window does, at the
-// mover's drawn speed and later by its drawn delay. Tilted, its contact lasts window / (1 + tilt),
-// which its rows cover. Each cue appears on the road, a cell down from its top. A crosser that
-// would set off only once it has reached the pack's rows, at sightLength, would never cross, so
-// it has no placement there. A tilted crosser keeps the row after its own clear too, as it
-// drifts along the road against its row.
+// A crosser sets off at its drawn share of the road ahead of the pack, the tallest pack's rows at
+// sightLength, at its drawn speed: one placement per side it enters from, its contact with the
+// pack, if it has one, starting as its row's window does. Its share is no lower than leaves the
+// pack reactionSeconds between its cue ending and its reaching the pack's rows, and no higher
+// than shows its cue wholly on the road; with no share between, it has no placement. Tilted, its
+// contact lasts window / (1 + tilt), which its rows cover. One that has crossed the road by the
+// time it reaches the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps
+// clear every row it is level with as it crosses, and one that meets the pack also the row
+// before its own, as a lead-in.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
   motion: Extract<MoverMotion, { kind: "cross" }>,
   draws: MoverDraws,
 ): MoverPlacement[] {
-  const { cellLength, laneCount, roadLength, scrollSpeed, sightLength, window } = geometry;
+  const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength, window } =
+    geometry;
   const { tilt } = motion;
   if (tilt <= -1) {
     throw new Error("A crosser's tilt must keep it coming down the road");
   }
   const lanesPerPixel = (motion.lanesPerSecond * speedFactor(spec.variation, draws)) / scrollSpeed;
   const warning = spec.warningSeconds * scrollSpeed;
-  const late = (delayOf(spec.variation, draws, 0) * scrollSpeed) / (1 + tilt);
-  const contact = window / (1 + tilt);
-  const keptRows = tilt === 0 ? [-1, 0] : [-1, 0, 1];
-  const placements: MoverPlacement[] = [];
-  for (const direction of [1, -1] as const) {
-    for (let step = 0; step <= laneCount * HALF_LANE_STEPS; step++) {
-      // Moved this far by the middle of its contact, at which its travel is mid-window.
-      const middle = step / HALF_LANE_STEPS / lanesPerPixel - late;
-      const enterTravel = sightLength + window / 2 - (1 + tilt) * middle;
-      const appears = sightLength + contact / 2 - warning - middle;
-      if (appears < cellLength || enterTravel >= sightLength) {
-        continue;
-      }
-      const path: MoverPath = {
-        direction,
-        enterTravel,
-        lanesPerPixel,
-        motion: "cross",
-        movement: spec.movement,
-        tilt,
-        warning,
-      };
-      const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
-      if (lanes.count === 0) {
-        continue;
-      }
-      const across = (laneCount + 0.5) / lanesPerPixel;
-      const passed = (roadLength + cellLength - enterTravel) / (1 + tilt);
-      const rows = rowsCovering(geometry, 1, 1 / (1 + tilt));
-      placements.push({
-        appears,
-        cells: keptRows.flatMap((row) =>
-          Array.from({ length: laneCount }, (_, lane) => ({ lane, row })),
-        ),
-        lane: direction === 1 ? 0 : laneCount - 1,
-        lanes,
-        leadIn: true,
-        path,
-        rows,
-        screen: [appears, appears + warning + Math.min(across, passed)],
-        stands: [
-          {
-            distance: 0,
-            lane: lanes.first,
-            lanes: lanes.count,
-            length: contact - geometry.packLength,
-          },
-        ],
-      });
-    }
+  const lowest = Math.max(
+    motion.startRoadShare[0],
+    (motion.reactionSeconds * scrollSpeed * (1 + tilt)) / sightLength,
+  );
+  const highest = Math.min(motion.startRoadShare[1], 1 - (warning + cellLength) / sightLength);
+  if (highest < lowest) {
+    return [];
   }
-  return placements;
+  const ahead = within([lowest, highest], draws.start) * sightLength;
+  const enterTravel = sightLength - ahead;
+  // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight.
+  const reaches = ahead / (1 + tilt);
+  const moving = Math.min(
+    (laneCount + 0.5) / lanesPerPixel,
+    (roadLength + cellLength - enterTravel) / (1 + tilt),
+  );
+  const appears = sightLength - warning - reaches;
+  const contact = window / (1 + tilt);
+  // The row offset it is level with, moving away from its own as it drifts against the road.
+  const level = (scroll: number) => (-tilt * (scroll - reaches)) / rowSpacing;
+  const firstRow = Math.floor(Math.min(level(0), level(moving)) + 1e-9);
+  const lastRow = Math.ceil(Math.max(level(0), level(moving)) - 1e-9);
+  const rows = rowsCovering(geometry, 1, 1 / (1 + tilt));
+  return ([1, -1] as const).map((direction): MoverPlacement => {
+    const path: MoverPath = {
+      direction,
+      enterTravel,
+      lanesPerPixel,
+      motion: "cross",
+      movement: spec.movement,
+      tilt,
+      warning,
+    };
+    const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
+    const meets = lanes.count > 0;
+    const first = meets ? Math.min(firstRow, -1) : firstRow;
+    return {
+      appears,
+      cells: Array.from({ length: lastRow - first + 1 }, (_, i) =>
+        Array.from({ length: laneCount }, (_unused, lane) => ({ lane, row: first + i })),
+      ).flat(),
+      lane: direction === 1 ? 0 : laneCount - 1,
+      lanes,
+      leadIn: meets,
+      path,
+      rows,
+      screen: [appears, appears + warning + moving],
+      stands: meets
+        ? [
+            {
+              distance: 0,
+              lane: lanes.first,
+              lanes: lanes.count,
+              length: contact - geometry.packLength,
+            },
+          ]
+        : [],
+    };
+  });
 }
 
 // A rider enters as its row reaches the point where riding at its speed brings it to the pack
