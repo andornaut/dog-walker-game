@@ -229,7 +229,8 @@ const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 const FOCUS_OUTSET = 5;
 const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
 
-// The widest line the speech bubble holds, in characters, and how many lines it shows.
+// The walker's speech bubble: its place, padding and most lines. SPEECH_ROOM is its widest
+// line, in pixels.
 const SPEECH = HOME_LAYOUT.speech;
 
 function walkerIds(): WalkerId[] {
