@@ -38,7 +38,12 @@ describe("opensCard", () => {
         "no card for an encounter the pack is immune to",
         "thief",
         ["duchess"],
-        testState({ duchess: 5 }, { immunities: [{ encounter: "thief" }] }),
+        testState(
+          { duchess: 5 },
+          {
+            immunities: [{ encounter: "thief", source: { kind: "upgrade", upgrade: "raincoats" } }],
+          },
+        ),
         false,
       ],
     ] satisfies readonly [string, EncounterId, DogId[], RunState, boolean][]) {

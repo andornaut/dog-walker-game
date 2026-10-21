@@ -1,4 +1,12 @@
-import type { DogId, Effect, GameData, HeartsEffect, MoneyEffect, Target } from "../data/types";
+import type {
+  DebuffId,
+  DogId,
+  Effect,
+  GameData,
+  HeartsEffect,
+  MoneyEffect,
+  Target,
+} from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { heartsOf, mapPack, packDogs, placeInPack } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
@@ -11,7 +19,8 @@ import {
 } from "./causes";
 import { maxHearts } from "./dogs";
 import { debuffLasting, lastingFor, longerLasting } from "./durations";
-import { modifiedStat } from "./modifiers";
+import { changeModified, type ModifiedValue, statModified } from "./modified";
+import { modifiedStat, statParts } from "./modifiers";
 import { type Cents, cents, clampHearts, read, roundDollars } from "./units";
 
 type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
@@ -25,10 +34,17 @@ export interface EffectContext {
   readonly source: EffectSource;
 }
 
-// The state after some effects, and every heart and money change they made, in order.
+// The state after some effects, every heart and money change they made, and every value
+// modifiers changed, each in order.
 interface Applied {
   readonly changes: readonly Change[];
+  readonly modified: readonly ModifiedValue[];
   readonly state: RunState;
+}
+
+// The modified values of changes, leaving out those no modifier changed.
+function changesModified(changes: readonly Change[]): ModifiedValue[] {
+  return changes.flatMap((change) => changeModified(change) ?? []);
 }
 
 export function targetDogs(
@@ -204,7 +220,7 @@ function applyHearts(
       changes.push(result.change);
     }
   }
-  return { changes, state: next };
+  return { changes, modified: changesModified(changes), state: next };
 }
 
 // A card never offers a loss the player cannot afford, so money is not held at $0 here.
@@ -216,10 +232,6 @@ function applyMoney(
 ): Applied {
   const parts = moneyParts(data, state, effect);
   const intended = effect.change === "gain" ? parts.amount : -parts.amount;
-  if (intended === 0) {
-    return { changes: [], state };
-  }
-  const money = cents(state.money + intended);
   const change: MoneyChange = {
     amount: cents(intended),
     causes: dollarCauses([
@@ -229,10 +241,28 @@ function applyMoney(
     dog: null,
     kind: "money",
   };
-  return { changes: [change], state: { ...state, money } };
+  // A cost waived to nothing makes no change, but still names what waived it.
+  const modified = changesModified([change]);
+  if (intended === 0) {
+    return { changes: [], modified, state };
+  }
+  const money = cents(state.money + intended);
+  return { changes: [change], modified, state: { ...state, money } };
 }
 
-const unchanged = (state: RunState): Applied => ({ changes: [], state });
+const unchanged = (state: RunState): Applied => ({ changes: [], modified: [], state });
+
+// How long a debuff applied now lasts, as debuffLasting has it, when debuffSeconds modifiers,
+// such as Calm voice's, change it.
+function debuffSecondsModified(
+  data: RulesData,
+  debuff: DebuffId,
+  state: RunState,
+): ModifiedValue | null {
+  const base = read(data.tuning, "seconds", data.debuffs[debuff].seconds);
+  const parts = statParts(data.tuning, state.modifiers, "debuffSeconds", base);
+  return statModified({ debuff, kind: "debuffSeconds" }, base, parts);
+}
 
 function applyEffect(
   data: RulesData,
@@ -252,7 +282,12 @@ function applyEffect(
         ...state.debuffsGot,
         [effect.debuff]: (state.debuffsGot[effect.debuff] ?? 0) + 1,
       };
-      return unchanged({ ...state, debuffs: [...others, applied], debuffsGot });
+      const modified = debuffSecondsModified(data, effect.debuff, state);
+      return {
+        changes: [],
+        modified: modified === null ? [] : [modified],
+        state: { ...state, debuffs: [...others, applied], debuffsGot },
+      };
     }
     case "hearts":
       return applyHearts(data, context, effect, state);
@@ -263,7 +298,10 @@ function applyEffect(
       const refreshed = held === undefined ? lasting : longerLasting(held, lasting);
       return unchanged({
         ...state,
-        immunities: [...others, { encounter: effect.encounter, ...refreshed }],
+        immunities: [
+          ...others,
+          { encounter: effect.encounter, source: context.source, ...refreshed },
+        ],
       });
     }
     case "modifier":
@@ -277,7 +315,7 @@ function applyEffect(
     case "money":
       return applyMoney(data, context, effect, state);
     case "skipOption":
-      return unchanged({ ...state, skipPass: true });
+      return unchanged({ ...state, skipPass: context.source });
     default:
       return assertNever(effect);
   }
@@ -294,9 +332,13 @@ export function resolveEffects(
   return effects.reduce<Applied>(
     (applied, effect) => {
       const next = applyEffect(data, context, effect, applied.state);
-      return { changes: [...applied.changes, ...next.changes], state: next.state };
+      return {
+        changes: [...applied.changes, ...next.changes],
+        modified: [...applied.modified, ...next.modified],
+        state: next.state,
+      };
     },
-    { changes: [], state },
+    { changes: [], modified: [], state },
   );
 }
 

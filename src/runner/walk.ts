@@ -13,21 +13,29 @@ import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { chance, type Random, randomPick } from "../lib/random";
 import { countBump, countTally } from "../rules/achievements";
-import type { HeartChange, MoneyChange } from "../rules/causes";
+import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
 import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
+import {
+  changeModified,
+  type ModifiedValue,
+  modifiedValue,
+  modifierCause,
+  modifierCausesOf,
+} from "../rules/modified";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import {
-  bumpHearts,
+  bumpParts,
   fireOwnersAtZero,
   fullPackBonus,
   packModifiers,
   payZone,
   tipValue,
 } from "../rules/run";
+import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read, type Seconds, seconds } from "../rules/units";
 import { packAgility, slowestAgility } from "../rules/walkers";
@@ -183,8 +191,17 @@ interface ContactHit {
   outcome: ChoiceOutcome;
 }
 
+// A value modifiers changed on the road, at the item it happened at: a bump's hearts, a tip's
+// pay, a tip or a treat grabbed by reach, an obstacle the pack is immune to, or a value a
+// contact's or a lucky find's effects changed.
+export interface RoadModified {
+  readonly item: WalkItem;
+  readonly value: ModifiedValue;
+}
+
 // bumps, cards, contacts, instants and treats are in the order the pack met them; tips are the
-// money changes of the tips collected; fired the owners a bump left at 0 hearts; zoneEnded is
+// money changes of the tips collected; modified every value modifiers changed, in the order the
+// pack met their items; fired the owners a bump left at 0 hearts; zoneEnded is
 // set on the step that reaches the end of the zone. encounterHits are the card obstacles met
 // this step, which play a hit moment. A hit stop holds the step's cards and zone end back to the
 // step it ends on.
@@ -196,6 +213,7 @@ export interface WalkStep {
   encounterHits: EncounterCard[];
   fired: readonly DogId[];
   instants: InstantFind[];
+  modified: RoadModified[];
   tips: MoneyChange[];
   treats: TreatGrab[];
   walk: Walk;
@@ -777,9 +795,26 @@ function grabTreat(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof
   );
 }
 
-// A minor bump costs the dog's owner the hearts a bump costs now (bumpHearts).
-function bumpDog(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof changeHearts> {
-  return changeHearts(data, [{ amount: -bumpHearts(data, run), kind: "bump" }], dog, run);
+// A minor bump costs the dog's owner the hearts a bump costs now (bumpParts), with the value
+// modifiers changed: hearts.bump's loss, raised by bumpHearts modifiers such as Muddy's, then cut
+// by a forgiving one such as Second chance's. Null for a bump that changed nothing.
+function bumpDog(
+  data: WalkData,
+  dog: DogId,
+  run: RunState,
+): ReturnType<typeof changeHearts> & { readonly modified: ModifiedValue | null } {
+  const parts = bumpParts(data, run);
+  const bumped = changeHearts(data, [{ amount: -parts.value, kind: "bump" }], dog, run);
+  if (bumped.change === null) {
+    return { ...bumped, modified: null };
+  }
+  const raised = modifierCauses(parts.contributions).map((cause) => ({
+    ...cause,
+    amount: -cause.amount,
+  }));
+  const by = [...raised, ...modifierCausesOf(bumped.change)];
+  const base = -read(data.tuning, "hearts", "bump");
+  return { ...bumped, modified: modifiedValue({ dog, kind: "hearts" }, base, by) };
 }
 
 // The pack's place across the road, in road pixels from its left edge: the walker's lane
@@ -993,6 +1028,8 @@ export function stepWalk(
     passing.length === 0 ? solid : solid.filter((item) => !passing.includes(item)),
   );
   // A pickup reached past its lanes, by Long reach, goes to the front dog.
+  // A pickup the pack's outline misses was grabbed by reach alone.
+  const byReach: WalkItem[] = [];
   const pickupsHit = pickups.flatMap((item): { dog: DogId; item: WalkItem }[] => {
     const reach = pickupReach(data, run, item.kind as PickupKind) * geometry.cell.length;
     const box: Box = walkItemBox(geometry, item);
@@ -1001,6 +1038,9 @@ export function stepWalk(
       left: box.left - reach,
       right: box.right + reach,
     });
+    if (reached && reach > 0 && !overlaps(pack.outline, box)) {
+      byReach.push(item);
+    }
     return reached ? [{ dog: pickupDog(pack, box) ?? frontDog(run), item }] : [];
   });
 
@@ -1012,21 +1052,34 @@ export function stepWalk(
   const encounterHits: EncounterCard[] = [];
   const contacts: ContactHit[] = [];
   const instants: InstantFind[] = [];
+  const modified: RoadModified[] = [];
   const tips: MoneyChange[] = [];
   const treats: TreatGrab[] = [];
+  const modifiedAt = (item: WalkItem, values: readonly (ModifiedValue | null)[]) => {
+    for (const value of values) {
+      if (value !== null) {
+        modified.push({ item, value });
+      }
+    }
+  };
   for (const { dog, item } of [...hits, ...pickupsHit]) {
     const { kind } = item;
+    if (isPickup(kind) && byReach.includes(item)) {
+      modifiedAt(item, [reachModified(data, run, kind)]);
+    }
     if (kind === "tip") {
       const pickup = collectTip(data, nextRun);
       nextRun = pickup.run;
       tips.push(pickup.tip);
       collected.push(item);
+      modifiedAt(item, [changeModified(pickup.tip)]);
     } else if (kind === "treat") {
       const recipient = treatRecipient(data, nextRun, dog);
       const grab = grabTreat(data, recipient, countTally("treats", nextRun));
       nextRun = grab.state;
       treats.push({ change: grab.change, dog: recipient, item });
       collected.push(item);
+      modifiedAt(item, [grab.change === null ? null : changeModified(grab.change)]);
     } else if (isMinorObstacle(data, kind)) {
       if (dodges(data, random, dog)) {
         nextRun = countTally("dodges", nextRun);
@@ -1036,9 +1089,18 @@ export function stepWalk(
       const bump = bumpDog(data, dog, countBump(nextRun));
       nextRun = bump.state;
       bumps.push({ change: bump.change, dodged: false, dog, item });
+      modifiedAt(item, [bump.modified]);
     } else {
       const affected = affectedDogs(run);
       if (!opensCard(affected, run, kind)) {
+        const immunity =
+          affected.length === 0
+            ? undefined
+            : run.immunities.find(({ encounter }) => encounter === kind);
+        if (immunity !== undefined) {
+          const by = [modifierCause(-1, immunity.source)];
+          modifiedAt(item, [modifiedValue({ encounter: kind, kind: "immune" }, 1, by)]);
+        }
         continue;
       }
       const { resolution } = data.encounters[kind];
@@ -1046,10 +1108,12 @@ export function stepWalk(
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
         nextRun = outcome.state;
         instants.push({ encounter: kind, outcome });
+        modifiedAt(item, outcome.modified);
       } else if (resolution.kind === "contact") {
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
         nextRun = outcome.state;
         contacts.push({ dog, encounter: kind, item, outcome });
+        modifiedAt(item, outcome.modified);
       } else if (resolution.kind === "card") {
         const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
         if (hitLabel(data.encounters[kind]) !== null) {
@@ -1087,6 +1151,7 @@ export function stepWalk(
     encounterHits,
     fired: firing.fired,
     instants,
+    modified,
     tips,
     treats,
     walk: {
@@ -1194,6 +1259,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     encounterHits: [],
     fired: [],
     instants: [],
+    modified: [],
     tips: [],
     treats: [],
     walk,

@@ -61,8 +61,11 @@ export type ActiveDebuff = Lasting & {
   readonly secondsLeft: number;
 };
 
-// No card opens for the encounter while the immunity lasts.
-type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
+// No card opens for the encounter while the immunity lasts. source is what gave it.
+type ActiveImmunity = Lasting & {
+  readonly encounter: EncounterId;
+  readonly source: EffectSource;
+};
 
 // What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
 // paths are the zones it leads to, left to right, each carrying the upgrade at its index.
@@ -110,9 +113,9 @@ export interface RunState {
   readonly route: readonly ZoneId[];
   // Encounter cards resolved this zone, for the free cards of freeCards modifiers.
   readonly cardsThisZone: number;
-  // Hall pass's free Skip: skipPass offers it on every obstacle card until skipUsed, which
-  // each zone's start clears.
-  readonly skipPass: boolean;
+  // Hall pass's free Skip: skipPass, what gave it, offers it on every obstacle card until
+  // skipUsed, which each zone's start clears. Null without one.
+  readonly skipPass: EffectSource | null;
   readonly skipUsed: boolean;
   // The money the run began with, which a money goal leaves out.
   readonly startMoney: Cents;
@@ -175,7 +178,7 @@ export function newRun(
     pack: packWith([]),
     phase: { kind: "walking" },
     route: [firstZoneId(data)],
-    skipPass: false,
+    skipPass: null,
     skipUsed: false,
     startMoney: cents(0),
     tallies: {},

@@ -30,7 +30,7 @@ export function testState(
     pack: pack as readonly PackSlot[] as Pack,
     phase: { kind: "walking" },
     route: ["street"],
-    skipPass: false,
+    skipPass: null,
     skipUsed: false,
     startMoney: cents(0),
     tallies: {},

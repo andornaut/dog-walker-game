@@ -328,6 +328,7 @@ const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
   road: { ...startRoad(5), items, nextItemId: items.length },
   run: newRun(data, 3, { dogs, gear: null, walker: "casey" }),
 });
+const RAINCOATS = { kind: "upgrade", upgrade: "raincoats" } as const;
 // An item in the middle lane, its bottom just inside the pack's band.
 const atPack = (kind: WalkItem["kind"], id = 0, lane = 2, laneSpan = 1): WalkItem => ({
   height: 12,
@@ -923,7 +924,7 @@ describe("stepWalk", () => {
   describe("a hit that opens no card", () => {
     const raincoats = (walk: Walk): Walk => ({
       ...walk,
-      run: { ...walk.run, immunities: [{ encounter: "puddle" }] },
+      run: { ...walk.run, immunities: [{ encounter: "puddle", source: RAINCOATS }] },
     });
     const scenery: [string, Walk][] = [
       ["a puddle Raincoats keep off", raincoats(walkWith(["koda"], [atPack("puddle")]))],
@@ -1056,6 +1057,150 @@ describe("stepWalk", () => {
       },
     };
     expect(step(carded).walk).toBe(carded);
+  });
+});
+
+describe("stepWalk's modified values", () => {
+  const withTuning = (overrides: (live: typeof tuning) => typeof tuning) => ({
+    ...data,
+    tuning: overrides(tuning),
+  });
+  const forgiving = withTuning((live) => ({
+    ...live,
+    hearts: { ...live.hearts, kindWordsForgiven: TUNING.hearts.kindWordsForgiven },
+  }));
+  const calming = withTuning((live) => ({
+    ...live,
+    multipliers: {
+      ...live.multipliers,
+      calmVoiceDebuffFactor: TUNING.multipliers.calmVoiceDebuffFactor,
+    },
+  }));
+  const reaching = withTuning((live) => ({
+    ...live,
+    counts: { ...live.counts, longReachLanes: TUNING.counts.longReachLanes },
+  }));
+  const walkerWith = (perk: keyof typeof WALKER_PERKS): WalkerId => {
+    const walker = (Object.keys(WALKERS) as WalkerId[]).find((id) => WALKERS[id].perk === perk);
+    if (walker === undefined) {
+      throw new Error(`No walker has ${perk}`);
+    }
+    return walker;
+  };
+  // A lone koda walking with walker, meeting item at the pack.
+  const meeting = (walker: WalkerId, item: WalkItem, run: Partial<Walk["run"]> = {}): Walk => ({
+    road: { ...startRoad(5), items: [item], nextItemId: 1 },
+    run: { ...newRun(data, 3, { dogs: ["koda"], gear: null, walker }), ...run },
+  });
+  const by = (amount: number, source: ModifierSource) => [
+    { amount, kind: "modifier" as const, source },
+  ];
+  const koda = { dog: "koda", kind: "hearts" } as const;
+  const muddy = { debuff: "muddy", kind: "debuff" } as const;
+  const stinky = { debuff: "stinky", kind: "debuff" } as const;
+  const bump = read(tuning, "hearts", "bump");
+  const muddied = bump * read(tuning, "multipliers", "muddyBumpHearts");
+  const tip = read(tuning, "money", "tip");
+  const bonus = read(tuning, "money", "bigTipperTipBonus");
+  const reach = read(reaching.tuning, "counts", "longReachLanes");
+  const muddySeconds = read(tuning, "seconds", DEBUFFS.muddy.seconds);
+  const calmedSeconds = muddySeconds * read(calming.tuning, "multipliers", "calmVoiceDebuffFactor");
+  const bigTipper = { kind: "upgrade", upgrade: "bigTipper" } as const;
+  const debuffed = (debuff: "muddy" | "stinky") => ({
+    debuffs: [{ debuff, secondsLeft: 20, untilZone: 0 }],
+  });
+
+  it.each([
+    [
+      "Muddy raises a bump's loss",
+      data,
+      meeting("casey", atPack("cone"), debuffed("muddy")),
+      [{ after: -muddied, before: -bump, by: by(bump - muddied, muddy), subject: koda }],
+    ],
+    [
+      "Second chance forgives a bump",
+      forgiving,
+      meeting(walkerWith("kindWords"), atPack("cone")),
+      [
+        {
+          after: 0,
+          before: -bump,
+          by: by(bump, { kind: "walker", walker: walkerWith("kindWords") }),
+          subject: koda,
+        },
+      ],
+    ],
+    [
+      "Big tipper raises a tip",
+      data,
+      meeting("casey", atPack("tip"), {
+        modifiers: [
+          activeModifier(bigTipper, {
+            by: "bigTipperTipBonus",
+            operation: "add",
+            stat: "tipValue",
+          }),
+        ],
+      }),
+      [{ after: tip + bonus, before: tip, by: by(bonus, bigTipper), subject: { kind: "money" } }],
+    ],
+    [
+      "Stinky takes a tip's pay",
+      data,
+      meeting("casey", atPack("tip"), debuffed("stinky")),
+      [{ after: 0, before: tip, by: by(-tip, stinky), subject: { kind: "money" } }],
+    ],
+    ...(["tip", "treat"] as const).map(
+      (pickup) =>
+        [
+          `Long reach grabs a ${pickup} a lane over`,
+          reaching,
+          meeting(walkerWith("longReach"), atPack(pickup, 0, 3)),
+          [
+            {
+              after: reach,
+              before: 0,
+              by: by(reach, { kind: "walker", walker: walkerWith("longReach") }),
+              subject: { kind: "reach", pickup },
+            },
+          ],
+        ] as const,
+    ),
+    [
+      "Raincoats keep a puddle off",
+      data,
+      meeting("casey", atPack("puddle"), {
+        immunities: [{ encounter: "puddle", source: RAINCOATS }],
+      }),
+      [
+        {
+          after: 0,
+          before: 1,
+          by: by(-1, RAINCOATS),
+          subject: { encounter: "puddle", kind: "immune" },
+        },
+      ],
+    ],
+    [
+      "Calm voice shortens a puddle's Muddy",
+      calming,
+      meeting(walkerWith("calmVoice"), atPack("puddle")),
+      [
+        {
+          after: calmedSeconds,
+          before: muddySeconds,
+          by: by(calmedSeconds - muddySeconds, { kind: "walker", walker: walkerWith("calmVoice") }),
+          subject: { debuff: "muddy", kind: "debuffSeconds" },
+        },
+      ],
+    ],
+    ["nothing changes a plain bump", data, meeting("casey", atPack("cone")), []],
+  ] as const)("%s", (_, walkData, walk, expected) => {
+    const { modified } = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk);
+    // Each at the step's one item, by its id: the step scrolls it.
+    expect(modified.map(({ item, value }) => ({ id: item.id, value }))).toEqual(
+      expected.map((value) => ({ id: walk.road.items[0]?.id, value })),
+    );
   });
 });
 
@@ -1335,11 +1480,12 @@ describe("finishZone", () => {
 
   it("starts the next zone with Hall pass's Skip and Second chance back and no cards counted", () => {
     const { run } = walkWith(["koda"]);
-    const used = { ...run, cardsThisZone: 2, heartsForgiven: 1, skipPass: true, skipUsed: true };
+    const skipPass = { gear: "poopBags", kind: "gear" } as const;
+    const used = { ...run, cardsThisZone: 2, heartsForgiven: 1, skipPass, skipUsed: true };
     expect(finishZone(data, used).run).toMatchObject({
       cardsThisZone: 0,
       heartsForgiven: 0,
-      skipPass: true,
+      skipPass,
       skipUsed: false,
     });
   });
@@ -1349,11 +1495,14 @@ describe("finishZone", () => {
     const withEffects = {
       ...run,
       debuffs: [{ debuff: "stinky" as const, secondsLeft: 20, untilZone: 0 }],
-      immunities: [{ encounter: "puddle" as const }, { encounter: "thief" as const, untilZone: 0 }],
+      immunities: [
+        { encounter: "puddle" as const, source: RAINCOATS },
+        { encounter: "thief" as const, source: RAINCOATS, untilZone: 0 },
+      ],
     };
     const { run: next } = finishZone(data, withEffects);
     expect(next.debuffs).toEqual([]);
-    expect(next.immunities).toEqual([{ encounter: "puddle" }]);
+    expect(next.immunities).toEqual([{ encounter: "puddle", source: RAINCOATS }]);
   });
 
   it("ends the run, finished, after the last zone, banking its pay and the full pack bonus", () => {

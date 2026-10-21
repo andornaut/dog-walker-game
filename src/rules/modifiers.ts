@@ -29,7 +29,7 @@ export interface Contribution<M extends Modifier> {
   readonly modifier: M;
 }
 
-interface StatParts<M extends Modifier> {
+export interface StatParts<M extends Modifier> {
   // In the order applied; a modifier that changed nothing is left out.
   readonly contributions: readonly Contribution<M>[];
   readonly value: number;

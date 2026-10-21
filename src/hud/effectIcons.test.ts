@@ -12,7 +12,7 @@ describe("effectItems", () => {
       { koda: 5 },
       {
         gear: "luckyCollar",
-        immunities: [{ encounter: "puddle" }],
+        immunities: [{ encounter: "puddle", source: { kind: "upgrade", upgrade: "raincoats" } }],
         modifiers: [
           activeModifier(
             { kind: "upgrade", upgrade: "bigTipper" },

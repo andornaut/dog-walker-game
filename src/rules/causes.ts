@@ -14,9 +14,16 @@ export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
   | { readonly amount: number; readonly kind: "bonus" | "bump" | "pay" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
-  | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
+  | ModifierCause
   // A zone's fee multiplier, with the zone's name.
   | { readonly amount: number; readonly kind: "zone"; readonly zone: string };
+
+// One modifier's share of a change, in the change's unit.
+export interface ModifierCause {
+  readonly amount: number;
+  readonly kind: "modifier";
+  readonly source: ModifierSource;
+}
 
 // A change to one owner's meter.
 export interface HeartChange {
@@ -54,7 +61,9 @@ export function firedByText(data: Pick<GameData, "dogs" | "runText">, dog: DogId
   return fillNames(data.runText.firedBy, { owner: data.dogs[dog].owner.name });
 }
 
-export function modifierCauses(contributions: readonly Contribution<ActiveModifier>[]): Cause[] {
+export function modifierCauses(
+  contributions: readonly Contribution<ActiveModifier>[],
+): ModifierCause[] {
   return contributions.map(({ amount, modifier }) => ({
     amount,
     kind: "modifier",

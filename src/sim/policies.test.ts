@@ -63,7 +63,10 @@ describe("chooseCardOption", () => {
   });
 
   it("takes Hall pass's Skip whenever it is offered", () => {
-    const state = testState({ duchess: 5 }, { money: cents(5000), skipPass: true });
+    const state = testState(
+      { duchess: 5 },
+      { money: cents(5000), skipPass: { gear: "poopBags", kind: "gear" } },
+    );
 
     expect(thiefChoice("alwaysPay", state)).toBe("skip");
   });

@@ -77,7 +77,7 @@ describe("newRun", () => {
         },
         gear: "fannyPack",
       },
-      { expected: { skipPass: true }, gear: "poopBags" },
+      { expected: { skipPass: { gear: "poopBags", kind: "gear" } }, gear: "poopBags" },
     ] satisfies readonly { expected: object; gear: GearId }[]) {
       expect(newRun(data, 3, { dogs: ["koda"], gear, walker: "casey" })).toMatchObject(expected);
     }

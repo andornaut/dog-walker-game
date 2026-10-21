@@ -266,7 +266,7 @@ describe("applyEffects: other kinds", () => {
   it("records an immunity once", () => {
     const raincoats: Effect = { duration: "run", encounter: "puddle", kind: "immune" };
     const state = applyEffects(data, context([]), [raincoats, raincoats], testState({ koda: 5 }));
-    expect(state.immunities).toEqual([{ encounter: "puddle" }]);
+    expect(state.immunities).toEqual([{ encounter: "puddle", source: SKUNK_IGNORE }]);
   });
 
   it("keeps a modifier, with its source, for the rules that read its stat", () => {
@@ -281,9 +281,9 @@ describe("applyEffects: other kinds", () => {
     expect(state.modifiers).toEqual([{ ...bigTipper, source: SKUNK_IGNORE }]);
   });
 
-  it("offers a free Skip", () => {
+  it("offers a free Skip, naming what gave it", () => {
     const skip: Effect = { kind: "skipOption" };
     const state = applyEffects(data, context([]), [skip], testState({ duchess: 5, koda: 5 }));
-    expect(state.skipPass).toBe(true);
+    expect(state.skipPass).toEqual(SKUNK_IGNORE);
   });
 });

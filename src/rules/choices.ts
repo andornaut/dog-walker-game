@@ -35,6 +35,7 @@ import {
   targetDogs,
 } from "./effects";
 import { cardEffectText, type CardTextContext, sentenceList } from "./effectText";
+import { type ModifiedValue, modifierCause } from "./modified";
 import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { type Cents, cents, type Hearts } from "./units";
@@ -81,6 +82,9 @@ export interface OptionView {
   // The option's position in the source's data; pass it to chooseOption.
   readonly index: number;
   readonly label: string;
+  // Every value modifiers change in the option's changes, as the breakdown shows it: its cost
+  // waived, a loss forgiven, a debuff shortened.
+  readonly modified: readonly ModifiedValue[];
   // Set on a fork's path cards only: how long its upgrade lasts, which its plaque shows for a
   // price.
   readonly duration?: UpgradeDuration;
@@ -102,6 +106,8 @@ export const MAX_CARD_OPTIONS = 3;
 // that would then show more than MAX_CARD_OPTIONS, Skip takes the most expensive option's place.
 export interface CardView {
   readonly affected: readonly DogId[];
+  // The Skip option a modifier, such as Hall pass, offers: Skip options from 0 to 1.
+  readonly modified: readonly ModifiedValue[];
   readonly options: readonly OptionView[];
   readonly skip: boolean;
   readonly source: CardSource;
@@ -137,6 +143,8 @@ export interface ChoiceOutcome {
   readonly moneyChanges: readonly MoneyChange[];
   // The total of moneyChanges.
   readonly moneyDelta: Cents;
+  // Every value modifiers changed, in order, such as a loss forgiven or a cost waived.
+  readonly modified: readonly ModifiedValue[];
   readonly quips: readonly QuipCue[];
   readonly state: RunState;
 }
@@ -219,6 +227,7 @@ function outcomeOf(
   return {
     fired: firing.fired,
     heartChanges: applied.changes.filter(isHearts),
+    modified: applied.modified,
     moneyChanges: applied.changes.filter(isMoney),
     moneyDelta: cents(next.money - state.money),
     quips,
@@ -294,6 +303,7 @@ export function forkCard(data: CardData, state: RunState, source: ForkSource): C
       fires: preview.fired,
       index,
       label: zone.name,
+      modified: preview.modified,
       path: {
         difficulty: zone.difficulty,
         difficultyName: zone.difficultyName,
@@ -305,7 +315,14 @@ export function forkCard(data: CardData, state: RunState, source: ForkSource): C
       text: `${data.upgrades[upgrade].name}: ${data.upgrades[upgrade].effect}`,
     };
   });
-  return { affected: [], options, skip: false, source, title: data.runText.card.forkTitle };
+  return {
+    affected: [],
+    modified: [],
+    options,
+    skip: false,
+    source,
+    title: data.runText.card.forkTitle,
+  };
 }
 
 // The card for a source, with each option's text, cost, breakdown and whether the player can
@@ -319,8 +336,11 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
   const options = cardContent(data, source);
   const title = data.encounters[source.encounter].name;
   const affected = affectedBy(state, source);
-  const skip =
-    data.encounters[source.encounter].kind === "obstacle" && state.skipPass && !state.skipUsed;
+  const skipBy =
+    data.encounters[source.encounter].kind === "obstacle" && !state.skipUsed
+      ? state.skipPass
+      : null;
+  const skip = skipBy !== null;
   const views = options.map(({ option, source: effectSource }, index): OptionView => {
     const preview = outcomeOf(
       data,
@@ -346,11 +366,16 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
       fires: preview.fired,
       index,
       label: option.name,
+      modified: preview.modified,
       text: cardEffectText(data, textContext, option.effects),
     };
   });
   return {
     affected,
+    modified:
+      skipBy === null
+        ? []
+        : [{ after: 1, before: 0, by: [modifierCause(1, skipBy)], subject: { kind: "skip" } }],
     options:
       skip && views.length >= MAX_CARD_OPTIONS
         ? withoutMostExpensive(
@@ -474,6 +499,7 @@ export function chooseOption(
     return {
       fired: [],
       heartChanges: [],
+      modified: [],
       moneyChanges: [],
       moneyDelta: cents(0),
       quips: [],
