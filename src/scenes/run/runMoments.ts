@@ -3,6 +3,18 @@ import type { Scene } from "phaser";
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger } from "../../data/types";
+import {
+  type BuffPop,
+  leashPops,
+  NO_SPAWNS,
+  popsOf,
+  type SpawnCounts,
+  spawnPops,
+  stacked,
+  stepValues,
+  walkStartMarks,
+} from "../../hud/buffMarks";
+import { heartPopFrame } from "../../hud/feedback";
 import { changeLabels } from "../../hud/hudView";
 import type { MessageLine } from "../../hud/messageStrip";
 import {
@@ -32,6 +44,7 @@ import {
   pullLine,
   treatLine,
 } from "../../hud/stripLines";
+import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/buffLayout";
 import {
   DOG_REACTIONS,
   dogReaction,
@@ -43,7 +56,7 @@ import {
   whiteFlash,
 } from "../../layout/hitEffects";
 import type { Random } from "../../lib/random";
-import type { Rect } from "../../lib/rect";
+import type { Point, Rect } from "../../lib/rect";
 import {
   amountText,
   type Change,
@@ -72,13 +85,19 @@ import {
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
 import type { RunState } from "../../state/runState";
+import { fillRect } from "../../ui/phaser/draw";
+import { PALETTE } from "../../ui/phaser/palette";
+import { pixelLinePoints } from "../../ui/pixelShapes";
+import { floatStruck, popCharm } from "../buffCharm";
+import { FEEDBACK_ART } from "../feedbackArt";
 import { hitLabelOf, hitLook, playEdgeFlash, playHitMoment, playMinorHitLabel } from "../hitMoment";
 import { sayMessage } from "../messageStripView";
 import { playDodge, playForgiven } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
+import { dogTop } from "../pullSignals";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
-import { playEffect } from "../sprites";
+import { playEffect, playTagOnce } from "../sprites";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
@@ -116,6 +135,8 @@ export const HINT_EVENT = "hint";
 export const QUIPS_EVENT = "quips";
 // AchievementId[] when the walk so far has earned badges, for the message strip.
 export const ACHIEVEMENTS_EVENT = "achievements";
+// An EffectItem whose walk bar well glints as its charm pops.
+export const BUFF_GLINT_EVENT = "buff-glint";
 
 // Raises the first-time hint for event until it has shown once: the HUD says it on the
 // message strip and marks it shown.
@@ -155,7 +176,11 @@ export class RunMoments {
   private readonly deps: RunMomentsDeps;
   // How long the end screen waits for a final firing or payout.
   private endMoments = { firingSeconds: 0, payoutMs: 0 };
+  // The pack's point on the last step walked, for pops away from a dog or an item.
+  private pack: Point | undefined;
   private readonly scene: Scene;
+  // The tips and treats collected while a buff scaled their spawns.
+  private spawns: SpawnCounts = NO_SPAWNS;
   // Where the current zone's changes start in changes.
   private zoneStart = 0;
 
@@ -184,8 +209,8 @@ export class RunMoments {
   }
 
   // The changes' labels, and each loss the walker's perk forgave: its strip line, the forgiven
-  // label over its dog and the forgiven heart flashing back on its card.
-  addChanges(changes: readonly Change[]): void {
+  // label over its dog forgivenAtMs on and the forgiven heart flashing back on its card.
+  addChanges(changes: readonly Change[], forgivenAtMs = 0): void {
     this.changes.push(...changes);
     const labels = changeLabels(gameData, changes);
     if (labels.length > 0) {
@@ -194,16 +219,23 @@ export class RunMoments {
     forgivenLines(gameData, changes).forEach((line) => this.say(line));
     for (const change of changes) {
       if (change.kind === "hearts" && heartsForgiven(change) > 0) {
-        this.forgiven(change);
+        this.forgiven(change, forgivenAtMs);
       }
     }
   }
 
-  private forgiven(change: HeartChange): void {
-    const top = this.deps.pack.dogPoint(change.dog);
-    if (top !== undefined) {
-      const moment = { depth: DEPTH.fx, still: this.deps.still() };
-      playForgiven(this.scene, moment, { popped: changeAmount(change) !== 0, top });
+  private forgiven(change: HeartChange, atMs: number): void {
+    const label = () => {
+      const top = this.deps.pack.dogPoint(change.dog);
+      if (top !== undefined) {
+        const moment = { depth: DEPTH.fx, still: this.deps.still() };
+        playForgiven(this.scene, moment, { popped: changeAmount(change) !== 0, top });
+      }
+    };
+    if (atMs > 0) {
+      this.scene.time.delayedCall(atMs, label);
+    } else {
+      label();
     }
     if (change.after > 0) {
       const cue: ForgivenCue = { dog: change.dog, hearts: change.after };
@@ -227,6 +259,7 @@ export class RunMoments {
       this.hint({ kind: "pullLanded" });
     }
     this.deps.pack.pullFailed(step.failed);
+    this.popBuffs(leashPops(gameData, step.walk.run, step.leashed));
   }
 
   // A line on the HUD's message strip, when there is one.
@@ -239,6 +272,10 @@ export class RunMoments {
   // Sounds, bursts, labels, hints and strip lines for what happened in a step, around the pack
   // at pack.
   walked(step: WalkStep, pack: { x: number; y: number }): void {
+    this.pack = pack;
+    const spawned = spawnPops(gameData, step.walk.run, step.collected, this.spawns);
+    this.spawns = spawned.counts;
+    this.popBuffs(stacked([...popsOf(gameData, stepValues(step)), ...spawned.pops]));
     this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
     if (step.tips.length > 0) {
@@ -276,7 +313,7 @@ export class RunMoments {
       }
       this.playBumpHit(bump, step, pack);
       sound.play("bump");
-      this.addChanges(bump.change === null ? [] : [bump.change]);
+      this.addChanges(bump.change === null ? [] : [bump.change], BUFF_POP.fadeAtMs);
       this.playBumpLabel(kind, step, pack);
       this.hint({ kind: "minorBump" });
     }
@@ -387,6 +424,129 @@ export class RunMoments {
     if (preview.earned.length > 0) {
       this.scene.events.emit(ACHIEVEMENTS_EVENT, preview.earned);
     }
+  }
+
+  // A card choice's values a buff changed, such as a loss forgiven or a debuff shortened: a pop
+  // over the owner's dog, or the pack.
+  chosen(outcome: ChoiceOutcome): void {
+    const values = outcome.modified.map((value) => ({
+      bump: false,
+      dog: value.subject.kind === "hearts" ? value.subject.dog : null,
+      item: null,
+      value,
+    }));
+    this.popBuffs(popsOf(gameData, values));
+  }
+
+  // The walk's start: a strip line for each gear that changes it from the start, its well
+  // glinting, Fanny pack's money rising over the bank, and a line for each heavy dog.
+  walkStarted(run: RunState): void {
+    const marks = walkStartMarks(gameData, run);
+    marks.lines.forEach((line) => this.say(line));
+    if (marks.bank.length > 0) {
+      this.scene.events.emit(CHANGE_LABELS_EVENT, marks.bank);
+    }
+    marks.glints.forEach((item) => this.scene.events.emit(BUFF_GLINT_EVENT, item));
+  }
+
+  // Each buff's pop: its charm, lit, with its well glinting, a chip of the value it struck, a
+  // reach's dotted line, and a forgiven bump's heart turning from loss to gain as its charm
+  // shows beside the walker.
+  private popBuffs(pops: readonly BuffPop[]): void {
+    const still = this.deps.still();
+    for (const pop of pops) {
+      const rect = this.popRect(pop);
+      if (rect === undefined) {
+        continue;
+      }
+      const at = { x: rect.x - pop.index * (CHARM.size + CHARM.gap), y: rect.y };
+      const shownAtMs = pop.forgiven === null ? 0 : BUFF_POP.switchMs;
+      const show = () => {
+        popCharm(this.scene, { depth: DEPTH.fx, shownAtMs, still }, pop.item, at);
+        this.scene.events.emit(BUFF_GLINT_EVENT, pop.item);
+        if (pop.chip !== null) {
+          const anchor = { centreX: at.x + CHARM.size / 2, lineBottom: at.y - BUFF_POP.gap };
+          floatStruck(this.scene, { depth: DEPTH.fx + 1, shownAtMs, still }, anchor, pop.chip);
+        }
+      };
+      if (pop.reach !== null) {
+        this.reachLine(pop.reach);
+      }
+      if (pop.forgiven === null) {
+        show();
+      } else {
+        this.forgivenHeart(pop.forgiven);
+        this.scene.time.delayedCall(shownAtMs, show);
+      }
+    }
+  }
+
+  // The charm's place: beside the walker's head, over its dog, over its item, or over the pack.
+  private popRect(pop: BuffPop): Rect | undefined {
+    const overPack = () =>
+      this.pack === undefined ? undefined : charmOverRect(this.pack.x, this.pack.y - 24);
+    switch (pop.at.kind) {
+      case "walker":
+        return charmByWalkerRect(dogTop(this.deps.pack.walkerSprite()));
+      case "dog": {
+        const top = this.deps.pack.dogPoint(pop.at.dog);
+        return top === undefined ? overPack() : charmOverRect(top.x, top.y);
+      }
+      case "item": {
+        const point = this.deps.items.point(pop.at.item);
+        return point === null ? overPack() : charmOverRect(point.x, point.y);
+      }
+      case "pack":
+        return overPack();
+      default:
+        return pop.at satisfies never;
+    }
+  }
+
+  // Long reach's 1px amber dotted line from its dog, or the pack, to the item it grabbed.
+  private reachLine(reach: NonNullable<BuffPop["reach"]>): void {
+    const from = reach.dog === null ? this.pack : this.deps.pack.dogPoint(reach.dog);
+    const to = this.deps.items.point(reach.item);
+    if (from === undefined || to === null) {
+      return;
+    }
+    const g = this.scene.add.graphics().setDepth(DEPTH.fx);
+    const points = pixelLinePoints(
+      Math.round(from.x),
+      Math.round(from.y),
+      Math.round(to.x),
+      Math.round(to.y),
+    );
+    points.forEach(([x, y], i) => {
+      if (i % 2 === 0) {
+        fillRect(g, PALETTE.amber, { height: 1, width: 1, x, y });
+      }
+    });
+    this.scene.time.delayedCall(BUFF_POP.reachMs, () => g.destroy());
+  }
+
+  // A forgiven bump's heart over its dog: the loss pop (the HUD plays it for a loss forgiven in
+  // part), turning to the gain pop at switchMs.
+  private forgivenHeart(forgiven: NonNullable<BuffPop["forgiven"]>): void {
+    const top = this.deps.pack.dogPoint(forgiven.dog);
+    if (top === undefined) {
+      return;
+    }
+    const frame = heartPopFrame(top);
+    const centre = { x: frame.x + 16, y: frame.y + 16 };
+    const pop = (art: { key: string; pop: string }) => {
+      if (!this.scene.textures.exists(art.key)) {
+        return undefined;
+      }
+      const sprite = this.scene.add.sprite(centre.x, centre.y, art.key).setDepth(DEPTH.fx);
+      playTagOnce(sprite, art.key, art.pop, () => sprite.destroy());
+      return sprite;
+    };
+    const loss = forgiven.whole ? pop(FEEDBACK_ART.heartLoss) : undefined;
+    this.scene.time.delayedCall(BUFF_POP.switchMs, () => {
+      loss?.destroy();
+      pop(FEEDBACK_ART.heartGain);
+    });
   }
 
   // At a zone's end, each dog's pay flies as a coin from its card to the bank while its

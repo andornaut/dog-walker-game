@@ -12,7 +12,7 @@ import { packDogs, placeInPack } from "../state/pack";
 import type { ModifierSource } from "../state/runState";
 import { effectIconKey, type EffectItem, effectLine, effectName } from "./effectIcons";
 import type { ChangeLabel } from "./hudView";
-import { messageIconKey,type MessageLine } from "./messageStrip";
+import { messageIconKey, type MessageLine } from "./messageStrip";
 import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
 
 // What the player sees of a buff changing the game: its charm (the buff's walk bar icon in an
@@ -194,7 +194,7 @@ function placeKey(at: PopAt): string {
 }
 
 // Each pop takes the next index at its place.
-function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
+export function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
   const counts = new Map<string, number>();
   return pops.map((pop) => {
     const key = placeKey(pop.at);

@@ -190,6 +190,10 @@ export class RunScene extends Scene implements HudRun {
     sound.startMusic();
     startWakeLock();
     this.world.banner.show(this.session.walk.run, this.reducedMotion());
+    // The HUD this launches hears the walk's start a frame later.
+    const { moments } = this.world;
+    const started = this.session.walk.run;
+    this.time.delayedCall(0, () => moments.walkStarted(started));
     // The first hints wait for the zone banner to leave: how to steer, the lead dog's
     // pack-size bonus, then the Home button.
     this.time.delayedCall(zoneBannerMs(this.reducedMotion()), () => {
@@ -509,6 +513,7 @@ export class RunScene extends Scene implements HudRun {
         recorder.log({ choice, kind: "card", timeMs });
         world.menus.closeCard();
         moments.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+        moments.chosen(outcome);
         moments.sayQuips(outcome.quips);
         moments.afterOutcome(outcome);
         return;
