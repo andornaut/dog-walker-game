@@ -173,21 +173,7 @@ At 1 ♥, `ui-doghouse-warn` pulses over the card: a 2px rim inside its outline 
 
 On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 and 80ms) over the card and under its faces, hearts and text: two red flashes of the header, face and foot stripe inside a plum edge that leave the name plate, photos, hearts box, ID line, quirk icon, status boxes and badge clear, then a 2px and a 1px red rim. It shakes the whole slot 1px right, left, right, then back, one offset per frame. With reduced motion it plays the flash without the shake.
 
-While a debuff (muddy, stinky or tangled) lasts, every pack dog's card shows it, and the message strip carries its line. The game draws `ui-doghouse-debuff` (120×21, tag = the debuff) at the slot's origin over the card and under the warn and heart-loss overlays, the name, faces and text. It repaints the header band, its shade and the name plate's face, and is clear everywhere else, so the card's lines and the plate's shadow show through; every dog's card shares those rows. Over the status spots the game draws the timer, in slot pixels:
-
-| Debuff  | Band   | Shade  | Plate | Name | Bar fill |
-| ------- | ------ | ------ | ----- | ---- | -------- |
-| Muddy   | brown  | dbrown | tan   | ink  | brown    |
-| Stinky  | mauve  | purple | pink  | plum | pink     |
-| Tangled | dgreen | teal   | green | ink  | green    |
-
-| Element      | Position                                                                                        |
-| ------------ | ----------------------------------------------------------------------------------------------- |
-| Box          | Amber rect at (96,60) 20×20, over the second status spot                                        |
-| Icon         | `icon-<debuff>` (16×16) at (78,62), in the first status spot                                    |
-| Bar frame    | Ink rect at (96,63) 20×7                                                                        |
-| Bar          | Tan rect at (97,64) 18×5, then the bar fill from its left, `round(18 × seconds left / 20)` wide |
-| Seconds left | "12s", plum, `font-body` 1×, centred on x 106, line top 70 (digits on rows 72 to 76)            |
+While a debuff (muddy, stinky or zoomies) lasts, every pack dog's card shows its `icon-<debuff>` in a status spot, and the message strip carries its line.
 
 ### Choice cards
 
@@ -212,9 +198,9 @@ While a debuff (muddy, stinky or tangled) lasts, every pack dog's card shows it,
 | Treat given              | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                                                                                             |
 
 - `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog. Two statuses alternate every second, most recent first.
-- Each status has its own colour family and shape, apart from the leash's pink, dred and plum: soaked cyan drops, spooked white lines and a cyan drop, stinky pink lines, tangled green rope (teal rim) in two interlocked loops, tuckered-out yellow z's (plum rim). `icon-tangled` and `icon-tuckered-out` keep their overlay's colours and rim, which hold on cream, amber and the top bar's ink.
+- Each status has its own colour family and shape, apart from the leash's pink, dred and plum: soaked cyan drops, stinky pink lines.
 - With reduced motion, bursts and stars play and the stumble is skipped.
-- Each message strip line leads with a 16×16 content icon: `icon-bump` (an amber impact burst) for a plain hit, `icon-treat` for a treat, `icon-last-heart` (a red heart cracked from its notch) for an owner's last heart, `icon-fired` (a pink slip under a dred stamp) for a firing, the status's own icon (`icon-muddy`, a muddy paw print; `icon-stinky`; `icon-tangled`) for a debuff's start and end, `icon-lucky` (a four-leaf clover with a twinkle) for a lucky neighbour, `icon-trait-chaser` (the squirrel) for a squirrel pull, and `icon-hint` (a white i on a sky disc) for a first-time hint.
+- Each message strip line leads with a 16×16 content icon: `icon-bump` (an amber impact burst) for a plain hit, `icon-treat` for a treat, `icon-last-heart` (a red heart cracked from its notch) for an owner's last heart, `icon-fired` (a pink slip under a dred stamp) for a firing, the status's own icon (`icon-muddy`, a muddy paw print; `icon-stinky`) for a debuff's start and end, `icon-lucky` (a four-leaf clover with a twinkle) for a lucky neighbour, `icon-trait-chaser` (the squirrel) for a squirrel pull, and `icon-hint` (a white i on a sky disc) for a first-time hint.
 
 #### Comic words
 

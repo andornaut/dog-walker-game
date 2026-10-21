@@ -422,7 +422,7 @@ PILE_SMALL = ["..TB..", ".TBBD.", "DDDDD."]
 ACCIDENT = 48
 # The row the pile's last row sits on: the dogs' feet row in their 48x48 frame.
 ACCIDENT_FEET = 46
-# The sweat drop, as fx-status-spooked's at full size: c cyan, w white glint, s sky underside.
+# The sweat drop: c cyan, w white glint, s sky underside.
 ACCIDENT_DROP = [".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."]
 
 

@@ -20,8 +20,6 @@ a tag per dog key and `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, a
 over the card and under the game's faces, hearts and text, while the game shakes the whole slot
 1px right, left, right, then back to rest, one offset per frame),
 ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
-ui-doghouse-debuff (120x21, a debuffed dog's header and name plate drawn over ui-doghouse; tags
-spooked, stinky, tangled, tuckered-out),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
 ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral),
@@ -908,32 +906,6 @@ def doghouse_heart_loss(step):
     return g
 
 
-# A debuffed dog's header colours: its band, the band's shade and the name plate's face, each from
-# the debuff's overlay and icon. The name is ink on the cyan, green and yellow plates, plum on pink.
-DEBUFF_LOOKS = {
-    "muddy": ("brown", "dbrown", "tan"), "stinky": ("mauve", "purple", "pink"),
-    "tangled": ("dgreen", "teal", "green"),
-}
-# The header rows the debuff overlay covers: the card's top edge down to the plum rule under the band.
-HEADER_H = 21
-
-
-def doghouse_debuff(status):
-    """120x21, ui-doghouse-debuff: drawn over a dog's ui-doghouse card at the slot's origin while a
-    debuff lasts, under the name. It repaints the header band, its shade and the name plate's face in
-    the debuff's colours and is clear everywhere else, so the card's ink and plum lines and the plate's
-    dred shadow show through. Every dog's card shares these rows."""
-    band, shade, plate_face = DEBUFF_LOOKS[status]
-    swap = {K["blue"]: band, K["navy"]: shade, K[CARD_FACE]: plate_face}
-    card = doghouse("koda").px
-    g = Grid(HOUSE_W, HEADER_H)
-    for y in range(HEADER_H):
-        for x in range(HOUSE_W):
-            if card[y][x] in swap:
-                g.p(x, y, swap[card[y][x]])
-    return g
-
-
 # ---------- the dog band: the wood behind the dog column ----------
 
 def wood(g, top, h):
@@ -1490,7 +1462,6 @@ IMAGES = {
 def sprites():
     yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in DOG_COLOURS] + [
         ("heart-loss", [doghouse_heart_loss(i).outlined(False) for i in range(4)], [60, 60, 80, 80])]
-    yield "ui-doghouse-debuff", [(s, [doghouse_debuff(s).outlined(False)], 1000) for s in DEBUFF_LOOKS]
     warn = [doghouse_warn(i).outlined(False) for i in (0, 1, 2, 1)]
     yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]

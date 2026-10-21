@@ -336,7 +336,6 @@ def thief_let_them_run(zone="street", key="thief"):
     a.ground(zone)
     a.put(key, "flee", 54, 59, 1)
     a.put("dog-koda", "react", 22, 58)
-    a.paste(hp.frame("fx-status-spooked", "loop", 0), 14, 10)
     return a
 
 

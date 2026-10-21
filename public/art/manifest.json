@@ -1560,31 +1560,6 @@
       "json": "sprites/fx-status-soaked@88.json"
     },
     {
-      "key": "fx-status-spooked",
-      "png": "sprites/fx-status-spooked.png",
-      "json": "sprites/fx-status-spooked.json"
-    },
-    {
-      "key": "fx-status-spooked@50",
-      "png": "sprites/fx-status-spooked@50.png",
-      "json": "sprites/fx-status-spooked@50.json"
-    },
-    {
-      "key": "fx-status-spooked@62",
-      "png": "sprites/fx-status-spooked@62.png",
-      "json": "sprites/fx-status-spooked@62.json"
-    },
-    {
-      "key": "fx-status-spooked@75",
-      "png": "sprites/fx-status-spooked@75.png",
-      "json": "sprites/fx-status-spooked@75.json"
-    },
-    {
-      "key": "fx-status-spooked@88",
-      "png": "sprites/fx-status-spooked@88.png",
-      "json": "sprites/fx-status-spooked@88.json"
-    },
-    {
       "key": "fx-status-stinky",
       "png": "sprites/fx-status-stinky.png",
       "json": "sprites/fx-status-stinky.json"
@@ -1608,56 +1583,6 @@
       "key": "fx-status-stinky@88",
       "png": "sprites/fx-status-stinky@88.png",
       "json": "sprites/fx-status-stinky@88.json"
-    },
-    {
-      "key": "fx-status-tangled",
-      "png": "sprites/fx-status-tangled.png",
-      "json": "sprites/fx-status-tangled.json"
-    },
-    {
-      "key": "fx-status-tangled@50",
-      "png": "sprites/fx-status-tangled@50.png",
-      "json": "sprites/fx-status-tangled@50.json"
-    },
-    {
-      "key": "fx-status-tangled@62",
-      "png": "sprites/fx-status-tangled@62.png",
-      "json": "sprites/fx-status-tangled@62.json"
-    },
-    {
-      "key": "fx-status-tangled@75",
-      "png": "sprites/fx-status-tangled@75.png",
-      "json": "sprites/fx-status-tangled@75.json"
-    },
-    {
-      "key": "fx-status-tangled@88",
-      "png": "sprites/fx-status-tangled@88.png",
-      "json": "sprites/fx-status-tangled@88.json"
-    },
-    {
-      "key": "fx-status-tuckered-out",
-      "png": "sprites/fx-status-tuckered-out.png",
-      "json": "sprites/fx-status-tuckered-out.json"
-    },
-    {
-      "key": "fx-status-tuckered-out@50",
-      "png": "sprites/fx-status-tuckered-out@50.png",
-      "json": "sprites/fx-status-tuckered-out@50.json"
-    },
-    {
-      "key": "fx-status-tuckered-out@62",
-      "png": "sprites/fx-status-tuckered-out@62.png",
-      "json": "sprites/fx-status-tuckered-out@62.json"
-    },
-    {
-      "key": "fx-status-tuckered-out@75",
-      "png": "sprites/fx-status-tuckered-out@75.png",
-      "json": "sprites/fx-status-tuckered-out@75.json"
-    },
-    {
-      "key": "fx-status-tuckered-out@88",
-      "png": "sprites/fx-status-tuckered-out@88.png",
-      "json": "sprites/fx-status-tuckered-out@88.json"
     },
     {
       "key": "fx-tap",
@@ -5472,11 +5397,6 @@
       "json": "sprites/ui-doghouse.json"
     },
     {
-      "key": "ui-doghouse-debuff",
-      "png": "sprites/ui-doghouse-debuff.png",
-      "json": "sprites/ui-doghouse-debuff.json"
-    },
-    {
       "key": "ui-doghouse-warn",
       "png": "sprites/ui-doghouse-warn.png",
       "json": "sprites/ui-doghouse-warn.json"
@@ -6354,10 +6274,6 @@
       "png": "images/icon-soaked.png"
     },
     {
-      "key": "icon-spooked",
-      "png": "images/icon-spooked.png"
-    },
-    {
       "key": "icon-stinky",
       "png": "images/icon-stinky.png"
     },
@@ -6368,10 +6284,6 @@
     {
       "key": "icon-style-hustle",
       "png": "images/icon-style-hustle.png"
-    },
-    {
-      "key": "icon-tangled",
-      "png": "images/icon-tangled.png"
     },
     {
       "key": "icon-trait-chaser",
@@ -6388,10 +6300,6 @@
     {
       "key": "icon-treat",
       "png": "images/icon-treat.png"
-    },
-    {
-      "key": "icon-tuckered-out",
-      "png": "images/icon-tuckered-out.png"
     },
     {
       "key": "icon-upgrade-belly-rubs",
