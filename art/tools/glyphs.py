@@ -32,6 +32,8 @@ icon-zone-<zone>            snooze-crescent (a crescent moon over a roof), bark-
                             holds 3:1 on cream and tan as the need icons' does
 icon-muddy, icon-soaked     dog statuses beside icon-stinky (ui.py), on cream: a muddy paw
                             print; water drops
+icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
+                            off three sky speed lines
 icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
                             (a yellow raincoat), rush-hour (an alarm clock), second-wind (two
@@ -615,6 +617,26 @@ def muddy():
     return g
 
 
+def zoomies():
+    """A paw print dashing right, ZOOMIES: four toes and a pad in amber, lit yellow on their top left
+    and shaded orange along their foot, with three sky speed lines streaming off its left."""
+    g = Grid(16, 16)
+    bitmap(g, 0, 1, ["........yy.yy...",
+                     "........aa.aa...",
+                     "........ao.ao...",
+                     "......yy....yy..",
+                     ".sss..aa....aa..",
+                     "......ao....ao..",
+                     ".........ya.....",
+                     "..ssss..yaaaa...",
+                     "........aaaaao..",
+                     "........aaaaao..",
+                     ".sss.....oooo...",
+                     "................"],
+           {"a": "amber", "y": "yellow", "o": "orange", "s": "sky"})
+    return g
+
+
 # ---------- the state strip, in the top bar's ink wells (#181425) ----------
 # Every fill that carries a shape holds 3:1 or more on ink; the darker coloured outlines sink
 # into the well, so the silhouette is the fill. Dark ramp colours (dbrown, dred, forest, blue)
@@ -906,6 +928,7 @@ IMAGES = {
     "icon-zone-the-long-way-home": the_long_way_home,
     "icon-muddy": muddy,
     "icon-soaked": soaked,
+    "icon-zoomies": zoomies,
     "icon-upgrade-belly-rubs": belly_rubs,
     "icon-upgrade-big-tipper": big_tipper,
     "icon-upgrade-good-leash": good_leash,

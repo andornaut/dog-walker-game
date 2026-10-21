@@ -1,0 +1,40 @@
+{ "frames": {
+   "ui-debuff-bar 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 360, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 360, "h": 16 },
+    "sourceSize": { "w": 360, "h": 16 },
+    "duration": 1000
+   },
+   "ui-debuff-bar 1.aseprite": {
+    "frame": { "x": 360, "y": 0, "w": 360, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 360, "h": 16 },
+    "sourceSize": { "w": 360, "h": 16 },
+    "duration": 1000
+   },
+   "ui-debuff-bar 2.aseprite": {
+    "frame": { "x": 720, "y": 0, "w": 360, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 360, "h": 16 },
+    "sourceSize": { "w": 360, "h": 16 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-debuff-bar.png",
+  "format": "RGBA8888",
+  "size": { "w": 1080, "h": 16 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "muddy", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "stinky", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "zoomies", "from": 2, "to": 2, "direction": "forward" }
+  ]
+ }
+}

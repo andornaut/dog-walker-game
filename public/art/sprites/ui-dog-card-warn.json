@@ -1,0 +1,55 @@
+{ "frames": {
+   "ui-dog-card-warn 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "sourceSize": { "w": 120, "h": 58 },
+    "duration": 400
+   },
+   "ui-dog-card-warn 1.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 120, "h": 58 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "sourceSize": { "w": 120, "h": 58 },
+    "duration": 400
+   },
+   "ui-dog-card-warn 2.aseprite": {
+    "frame": { "x": 240, "y": 0, "w": 120, "h": 58 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "sourceSize": { "w": 120, "h": 58 },
+    "duration": 400
+   },
+   "ui-dog-card-warn 3.aseprite": {
+    "frame": { "x": 360, "y": 0, "w": 120, "h": 58 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "sourceSize": { "w": 120, "h": 58 },
+    "duration": 400
+   },
+   "ui-dog-card-warn 4.aseprite": {
+    "frame": { "x": 480, "y": 0, "w": 120, "h": 58 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "sourceSize": { "w": 120, "h": 58 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-dog-card-warn.png",
+  "format": "RGBA8888",
+  "size": { "w": 600, "h": 58 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "pulse", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "static", "from": 4, "to": 4, "direction": "forward" }
+  ]
+ }
+}

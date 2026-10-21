@@ -151,6 +151,8 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 ### Doghouse slots
 
+CLEANUP (added 2026-10-21): this section and the top bar's row in the layout table retire once the game draws the walk HUD below.
+
 The dog row sits on `ui-dog-band` (360×94), drawn at 0,466 under the slots: the top bar's plum wood with the bar's bottom trim turned over along its top (ink on row 466 against the road, then dbrown and brown), so the bar and the band frame the road alike. The wood shows on rows 469 to 471 and between the cards. An owned slot with no dog shows the band, with the game's dashed tan outline and "Empty" in cream; a slot not bought shows the band alone.
 
 `ui-doghouse` (120×90) is a character file card on the band: the UI chrome (ink and plum lines, amber face, orange lip) from x 1 to 118 and rows 2 to 89, so rows 0 and 1 show the wood and a 1px gap runs down each side. The amber card stock is on no zone's road, curb, sidewalk or verge, so a card never reads as road. A blue header (rows 3 to 20) holds the name plate (110×14: an ink line, an amber face, a solid dred shadow). The dog's photo is backed in its own colour and the owner's in sky, each in an ink frame with a white mat. The dog's colour also rings its emblem badge (its accessory, 8×8) and runs along the foot stripe under a plum rule, ticked in its trim. Card backgrounds and the band never use zone colours; a dog's accent is its own colour. The game draws, in slot pixels:
@@ -173,7 +175,79 @@ At 1 ♥, `ui-doghouse-warn` pulses over the card: a 2px rim inside its outline 
 
 On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 and 80ms) over the card and under its faces, hearts and text: two red flashes of the header, face and foot stripe inside a plum edge that leave the name plate, photos, hearts box, ID line, quirk icon, status boxes and badge clear, then a 2px and a 1px red rim. It shakes the whole slot 1px right, left, right, then back, one offset per frame. With reduced motion it plays the flash without the shake.
 
-While a debuff (muddy, stinky or zoomies) lasts, every pack dog's card shows its `icon-<debuff>` in a status spot, and the message strip carries its line.
+### Walk HUD
+
+The walk screen's HUD: a 48-row walk bar, a bar per active debuff under it, and 120×58 dog cards on the bottom rows. The backdrop band follows the bar (rows 48 to 221), and the camera has horizonY −50, focal 720, farY 222 and footY 494, 272 road rows. Screen pixels unless a table says slot or bar pixels; text y is the top of the capitals.
+
+| Band          | Screen rows | Contents                                                                                                      |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| Walk bar      | 0 to 47     | `ui-walk-bar` at 0,0                                                                                          |
+| Debuff bars   | 48 to 79    | `ui-debuff-bar` at 0,48, a second at 0,64; none when no debuff lasts                                          |
+| Message strip | 54 to 107   | Over the band's flat sky (rows 48 to 108), moved under the debuff bars                                        |
+| Backdrop      | 48 to 221   | `backdrop-<zone>`, 360×174                                                                                    |
+| Card row      | 498 to 559  | `ui-dog-card-band` (360×62) at 0,498; three `ui-dog-card` slots (120×58) at x 0, 120 and 240, rows 502 to 559 |
+
+#### Walk bar
+
+`ui-walk-bar` (360×48) is the top bar's plum wood and trim (dbrown on row 1; brown, dbrown and ink on rows 45 to 47) with two ink wells, the grain kept clear of them and of the effect row (x 121 to 262, rows 25 to 44).
+
+| Element            | Rule                                                                                                                                                                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cash well          | 4,4 112×40                                                                                                                                                                                                                               |
+| Coin               | `icon-money` at 9,16                                                                                                                                                                                                                     |
+| Cash               | `font-title`, "$" amber (9.71:1 on ink) then the amount cream (12.44:1), from x 29, one font advance apart; the largest of 4×, 3× and 2× that fits 84px (x 29 to 112), its capitals' bottom on row 32 (top 13 at 4×, 18 at 3×, 23 at 2×) |
+| Neighbourhood well | 122,4 140×21                                                                                                                                                                                                                             |
+| Zone icon          | `icon-zone-<zone>` at 126,6                                                                                                                                                                                                              |
+| Name               | `font-title` 1×, cream, at 146,8                                                                                                                                                                                                         |
+| Pips               | `ui-zone-pips` from 146,15, 21px apart, the current zone's progress filled as today                                                                                                                                                      |
+| Effect wells       | `ui-effect-well` (18×18) at 122 + 20i, 26 for i 0 to 6: the walker's perk, the Pocket item, then the upgrades in the order taken; its 16×16 icon at +1,+1                                                                                |
+| Effect hold        | 121 + 20i, 4, 20×44 (rows 4 to 47) per well: holding one shows its line in the message strip                                                                                                                                             |
+| Sound              | `ui-icon-button` at 284,12, icon at +2,+1 (+2,+3 pressed); hit 272,0 44×44                                                                                                                                                               |
+| Pause              | `ui-icon-button` at 328,12; hit 316,0 44×44                                                                                                                                                                                              |
+
+#### Debuff bars
+
+While a debuff (muddy, stinky or zoomies) lasts, a full-width `ui-debuff-bar` (360×16, tag = the debuff) shows it under the walk bar: the first at 0,48, the second at 0,64 under it, in the order they began. Each bar is the debuff's face on rows 0 to 13, its shade on row 14 and an ink line on row 15, with an ink-framed track (x 68 to 355, rows 4 to 10) holding the empty track in the shade. In bar pixels:
+
+| Element | Rule                                                                                                                  |
+| ------- | --------------------------------------------------------------------------------------------------------------------- |
+| Icon    | `icon-<debuff>` at (4,0)                                                                                              |
+| Name    | The debuff's name from its data, in capitals, `font-title` 1×, at (24,5), in the name colour; up to 40px wide         |
+| Fill    | A rect at (69,5), 5 rows tall, `round(286 × seconds left / 20)` wide, in the fill colour; nothing when it rounds to 0 |
+
+| Debuff  | Face  | Shade  | Fill | Name           |
+| ------- | ----- | ------ | ---- | -------------- |
+| Muddy   | brown | dbrown | tan  | ink (4.66:1)   |
+| Stinky  | mauve | purple | pink | white (4.70:1) |
+| Zoomies | sky   | blue   | cyan | ink (5.64:1)   |
+
+The message strip shares the band's flat sky with the bars. With no bar it is as today, 344×44 at 8,54. With n bars it shows its newest line only, in a one-line `ui-panel` 8,(50 + 16n) 344×26 (8,66 with one bar, 8,82 with two, ending on row 107): the icon at +6,+5, the line at 2× (1× when it does not fit 312px) with its capitals centred on the icon's rows.
+
+#### Dog cards
+
+`ui-dog-card` (120×58) is the doghouse card cut down to its header and one row: the chrome (ink and plum lines, amber face, orange lip) from x 1 to 118 and rows 0 to 57, so a 1px gap runs down each side and the card's foot is the screen's bottom row. `ui-dog-card-band` shows on row 501 above the cards and between them. A blue header (rows 1 to 16, a plum rule on row 17) holds the name plate (ink line x 5 to 114, rows 2 to 15; amber face x 6 to 113, rows 3 to 14; a solid dred shadow). The dog's photo is an ink frame (4,19 36×36) round a white mat round its colour. In slot pixels:
+
+| Element       | Rule                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Name          | Centred on x 60, `font-title`, plum: 2× at y 4 when it fits 108px, else 1× at y 6                                      |
+| Dog's face    | 32×32 at (6,21), in the photo                                                                                          |
+| Hearts        | `ui-heart` from (52,24), rows of five, 9px across and 9px down (three rows hold 11), with no n/max count               |
+| LEAD          | `ui-lead-tag` (27×11) at (88,43) on the front dog's card                                                               |
+| FIRED         | On the `empty` card: centred on x 78, white, `font-title` 1× at y 34, on the dred plate (44,28 68×17, face 48,32 60×9) |
+| Owned, no dog | The band shows, with the game's dashed tan outline round x 1 to 118, rows 0 to 57, and "Empty" in cream                |
+
+The `empty` card (a fired dog's) is the same card greyed: a slate header, a white plate, a dark photo and the FIRED plate. At 1 ♥, `ui-dog-card-warn` pulses over the card (`static` with reduced motion). On a heart loss the game draws `ui-dog-card` `heart-loss` (4 frames: 60, 60, 80 and 80ms) over the card and under its face, hearts and text, flashing the header and the amber red while the plate, photo, hearts (51,23 46×27) and LEAD tag (87,42 29×13) stay clear, then a 2px and a 1px red rim; the slot shakes 1px right, left, right, then back, one offset per frame.
+
+#### Owner pop-in
+
+When a dog's hearts change, its owner has a quip, or the dog is fired, `ui-owner-tab` (36×36: an ink frame, a white mat, sky behind the face) pops in on that card's top-right corner at slot (80,−34), so its bottom two rows overlap the card's top edge and header; the owner's face (32×32) at tab +2,+2, in the mood the event calls for. The quip is one line of `font-body` 1×, plum, in `ui-quip` 18 tall and the text's width + 12 wide, its top at tab +4 and the text's capitals at tab +10:
+
+| Side  | When                                     | Bubble x          | Tail                                                         |
+| ----- | ---------------------------------------- | ----------------- | ------------------------------------------------------------ |
+| Right | The pack's centre at x 180 or left of it | tab x + 41        | `ui-quip-tail` at (bubble x − 5, tab y + 9)                  |
+| Left  | The pack's centre right of x 180         | tab x − 5 − width | `ui-quip-tail` mirrored at (bubble x + width − 1, tab y + 9) |
+
+A side that lacks room by x 4 or x 356 gives way to the other. A firing keeps `fx-fired-pop` and the fired face at 2× as today, centred on the tab.
 
 ### Choice cards
 
@@ -200,7 +274,7 @@ While a debuff (muddy, stinky or zoomies) lasts, every pack dog's card shows its
 - `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog. Two statuses alternate every second, most recent first.
 - Each status has its own colour family and shape, apart from the leash's pink, dred and plum: soaked cyan drops, stinky pink lines.
 - With reduced motion, bursts and stars play and the stumble is skipped.
-- Each message strip line leads with a 16×16 content icon: `icon-bump` (an amber impact burst) for a plain hit, `icon-treat` for a treat, `icon-last-heart` (a red heart cracked from its notch) for an owner's last heart, `icon-fired` (a pink slip under a dred stamp) for a firing, the status's own icon (`icon-muddy`, a muddy paw print; `icon-stinky`) for a debuff's start and end, `icon-lucky` (a four-leaf clover with a twinkle) for a lucky neighbour, `icon-trait-chaser` (the squirrel) for a squirrel pull, and `icon-hint` (a white i on a sky disc) for a first-time hint.
+- Each message strip line leads with a 16×16 content icon: `icon-bump` (an amber impact burst) for a plain hit, `icon-treat` for a treat, `icon-last-heart` (a red heart cracked from its notch) for an owner's last heart, `icon-fired` (a pink slip under a dred stamp) for a firing, the debuff's own icon (`icon-muddy`, a muddy paw print; `icon-stinky`; `icon-zoomies`, an amber paw dashing off sky speed lines) for a debuff's start and end, `icon-lucky` (a four-leaf clover with a twinkle) for a lucky neighbour, `icon-trait-chaser` (the squirrel) for a squirrel pull, and `icon-hint` (a white i on a sky disc) for a first-time hint.
 
 #### Comic words
 

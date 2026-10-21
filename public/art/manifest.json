@@ -5837,9 +5837,24 @@
       "json": "sprites/ui-check.json"
     },
     {
+      "key": "ui-debuff-bar",
+      "png": "sprites/ui-debuff-bar.png",
+      "json": "sprites/ui-debuff-bar.json"
+    },
+    {
       "key": "ui-difficulty",
       "png": "sprites/ui-difficulty.png",
       "json": "sprites/ui-difficulty.json"
+    },
+    {
+      "key": "ui-dog-card",
+      "png": "sprites/ui-dog-card.png",
+      "json": "sprites/ui-dog-card.json"
+    },
+    {
+      "key": "ui-dog-card-warn",
+      "png": "sprites/ui-dog-card-warn.png",
+      "json": "sprites/ui-dog-card-warn.json"
     },
     {
       "key": "ui-doghouse",
@@ -6828,6 +6843,10 @@
       "png": "images/icon-zone-woof-way.png"
     },
     {
+      "key": "icon-zoomies",
+      "png": "images/icon-zoomies.png"
+    },
+    {
       "key": "item-fanny-pack",
       "png": "images/item-fanny-pack.png"
     },
@@ -6996,6 +7015,14 @@
       "png": "images/ui-dog-band.png"
     },
     {
+      "key": "ui-dog-card-band",
+      "png": "images/ui-dog-card-band.png"
+    },
+    {
+      "key": "ui-effect-well",
+      "png": "images/ui-effect-well.png"
+    },
+    {
       "key": "ui-hint",
       "png": "images/ui-hint.png"
     },
@@ -7004,12 +7031,20 @@
       "png": "images/ui-hint-tail.png"
     },
     {
+      "key": "ui-lead-tag",
+      "png": "images/ui-lead-tag.png"
+    },
+    {
       "key": "ui-loading-track",
       "png": "images/ui-loading-track.png"
     },
     {
       "key": "ui-new-best",
       "png": "images/ui-new-best.png"
+    },
+    {
+      "key": "ui-owner-tab",
+      "png": "images/ui-owner-tab.png"
     },
     {
       "key": "ui-panel",
@@ -7050,6 +7085,10 @@
     {
       "key": "ui-top-bar",
       "png": "images/ui-top-bar.png"
+    },
+    {
+      "key": "ui-walk-bar",
+      "png": "images/ui-walk-bar.png"
     },
     {
       "key": "ui-zone-banner",
