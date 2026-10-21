@@ -287,7 +287,9 @@ describe("a fired line's bubble", () => {
     expect(fitted.lines.length).toBeLessThanOrEqual(FIRED_LINE.lines);
     expect(fitted.widest).toBeLessThanOrEqual(FIRED_LINE_FIT.room);
     for (const slot of SLOTS) {
-      const top = firingLayout(slot).line.y - firedLineHeight(BODY, fitted.lines.length);
+      const top =
+        firingLayout(screenLayout(SCREEN_CONFIG).walkView, slot).line.y -
+        firedLineHeight(BODY, fitted.lines.length);
       expect(top).toBeGreaterThanOrEqual(lanes.bank.y + lanes.bank.height);
     }
   });
