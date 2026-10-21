@@ -33,6 +33,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "delivery-truck": { above: 53, left: -28, right: 28 },
   goose: { above: 43, left: -22, right: 22 },
   hedge: { above: 32, left: -88, right: 88 },
+  "hot-dog-cart": { above: 65, left: -50, right: 50 },
   "ice-cream-truck": { above: 59, left: -28, right: 28 },
   jogger: { above: 65, left: -17, right: 18 },
   "kid-on-bike": { above: 59, left: -20, right: 20 },
@@ -51,6 +52,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   squirrel: { above: 40, left: -13, right: 18 },
   "squirrel-dash": { above: 40, left: -23, right: 22 },
   "stink-garbage-truck": { above: 59, left: -28, right: 28 },
+  streetcar: { above: 65, left: -28, right: 28 },
   stroller: { above: 63, left: -23, right: 23 },
   thief: { above: 67, left: -19, right: 23 },
 };

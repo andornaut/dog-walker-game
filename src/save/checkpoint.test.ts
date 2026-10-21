@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { DogId } from "../data/types";
+import { gameData } from "../data";
+import type { DogId, WalkerId, ZoneId } from "../data/types";
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import {
@@ -31,6 +32,33 @@ const checkpoint: Checkpoint = {
   zonesFinished: 2,
 };
 
+// A walk from the first zone through every zone that unlocks a walker, to the last zone.
+const WALKERS = Object.entries(gameData.walkers) as [
+  WalkerId,
+  (typeof gameData.walkers)[WalkerId],
+][];
+const { firstZone, lastZone } = gameData.world;
+const ROUTE = [
+  firstZone,
+  ...WALKERS.flatMap(([, walker]) =>
+    walker.unlock === "finishZone" && walker.zone !== firstZone && walker.zone !== lastZone
+      ? [walker.zone]
+      : [],
+  ),
+  lastZone,
+] as ZoneId[];
+
+// The walkers owned once these zones are finished: those walking from the start, and those
+// those zones unlock.
+const unlockedBy = (finished: readonly ZoneId[]) =>
+  WALKERS.filter(
+    ([, walker]) =>
+      walker.unlock === "start" ||
+      (walker.unlock === "finishZone" && finished.includes(walker.zone)),
+  )
+    .map(([id]) => id)
+    .sort();
+
 const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   counters: quietCounters(),
   dogs: [
@@ -39,7 +67,7 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   ],
   earnedCents: cents(6_000),
   outcome: "finished",
-  route: ["street", "park", "pawsPromenade", "homeStretch"],
+  route: ROUTE,
   zone: 4,
   ...changes,
 });
@@ -106,8 +134,11 @@ describe("recordRunEnd", () => {
   it("unlocks the walkers of the zones the run finished", () => {
     const walkers = (changes: Partial<RunResult>) =>
       recordRunEnd(testAwards, newPlayerSave, runResult(changes)).owned.walkers;
-    expect(walkers({ outcome: "wentHome", zone: 3 })).toEqual(["casey", "ben"]);
-    expect(walkers({})).toEqual(["casey", "ada", "ben", "trista"]);
+    expect([...walkers({ outcome: "wentHome", zone: 3 })].sort()).toEqual(
+      unlockedBy(ROUTE.slice(0, 2)),
+    );
+    expect([...walkers({})].sort()).toEqual(unlockedBy(ROUTE));
+    expect(unlockedBy(ROUTE)).toEqual(WALKERS.map(([id]) => id).sort());
   });
 
   it("records heading home mid-zone 3 as 2 zones finished", () => {
@@ -133,7 +164,7 @@ describe("recordRunEnd", () => {
       earnedCents: 100,
       firings: [{ dog: "biscuit", zone: 2 }],
       outcome: "finished",
-      route: ["street", "park", "pawsPromenade", "homeStretch"],
+      route: ROUTE,
       zonesFinished: 1,
     });
     const high = recordRunEnd(testAwards, veteranSave(), runResult({ earnedCents: cents(9_999) }));

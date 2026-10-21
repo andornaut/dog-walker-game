@@ -353,11 +353,11 @@ describe("pullWalk", () => {
 
 describe("replay with pulls", () => {
   it("reproduces a run with pulls from the seed and the input log alone", () => {
-    const setup = { dev: true, seed: 5, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, seededRandom(5), walkWith(["biscuit", "koda"]));
     // As RunScene steps: the moves due now, each logged, then the pulls, then the walk.
-    const play = (movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
-      const rolls = seededRandom(9);
+    const play = (seed: number, movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
+      const setup = { dev: true, seed, speed: 1, zone: 1 };
+      const start = planZone(data, geometry, seededRandom(seed), walkWith(["biscuit", "koda"]));
+      const rolls = seededRandom(seed + 4);
       let log = startInputLog(setup);
       let walk = start;
       let pulls = NO_PULLS;
@@ -379,14 +379,20 @@ describe("replay with pulls", () => {
       }
       return { cards, log, pulled, walk };
     };
-    const recorded = play((frame) =>
-      frame % 151 === 0 ? [Math.floor(frame / 151) % 2 === 0 ? -1 : 1] : [],
-    );
+    const weave = (frame: number): LaneDirection[] =>
+      frame % 151 === 0 ? [Math.floor(frame / 151) % 2 === 0 ? -1 : 1] : [];
+    // The first seed whose walk has a dog pull the pack, however the road is tuned.
+    let seed = 5;
+    let recorded = play(seed, weave);
+    while (!recorded.pulled.some((pull) => pull.moved) && seed < 40) {
+      seed += 1;
+      recorded = play(seed, weave);
+    }
     expect(recorded.pulled.filter((pull) => pull.moved).length).toBeGreaterThanOrEqual(1);
 
     const events = [...replayInputs(recorded.log)];
     let next = 0;
-    const replayed = play((_, timeMs) => {
+    const replayed = play(seed, (_, timeMs) => {
       const due: LaneDirection[] = [];
       for (let event = events[next]; event?.kind === "lane" && event.timeMs <= timeMs;) {
         due.push(event.direction);

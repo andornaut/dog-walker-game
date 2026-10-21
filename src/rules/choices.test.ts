@@ -414,7 +414,8 @@ describe("a fork", () => {
         };
       }),
     );
-    expect(card.options[0]?.art).toBe("card-zone-snooze-crescent");
+    const first = TEST_WORLD.zones.find((zone) => zone.id === "snoozeCrescent");
+    expect(card.options[0]?.art).toBe(`card-zone-${first?.art}`);
   });
 
   it("adds the chosen path's zone to the route, takes its upgrade and walks on, and refuses one it lacks", () => {

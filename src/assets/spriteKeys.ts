@@ -161,7 +161,7 @@ export const ROAD_HIT_SIZE = 40;
 // The skunk stands on its spray cloud, which is its hit box.
 export const SKUNK_CLOUD_KEY = "skunk-cloud";
 
-// Zone art is keyed by the zone's art: backdrop-woof-way, road-woof-way and so on.
+// Zone art is keyed by the zone's art: backdrop-high-park, road-high-park and so on.
 type ZoneArt = Pick<Zone, "art">;
 
 // The 360x150 neighbourhood behind the zone.

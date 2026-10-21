@@ -5,7 +5,8 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { firedByText } from "../rules/causes";
+import { amountText, firedByText } from "../rules/causes";
+import { payFor } from "../rules/run";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -84,7 +85,6 @@ describe("a change label", () => {
           ? resolution.options.map((option) => option.cause ?? option.name)
           : []),
       ]),
-      ...gameData.world.zones.map(({ name }) => name),
     ];
     const firedBy = (Object.keys(gameData.dogs) as DogId[]).map((dog) =>
       firedByText(gameData, dog),
@@ -94,6 +94,10 @@ describe("a change label", () => {
     const hearts = [...sources, ...firedBy].map((name) => `−10♥ ${name}`);
     const money = [
       ...[...sources, gameData.runText.outOfMoney].map((name) => `+$999 ${name}`),
+      // A zone names its pay, which is the pay per dog at its multiplier.
+      ...gameData.world.zones.map(
+        ({ fees, name }) => `${amountText("money", payFor(gameData.tuning) * fees)} ${name}`,
+      ),
       ...modifiers.map((name) => `+$99 tip, ${name}`),
     ];
     const cases = [

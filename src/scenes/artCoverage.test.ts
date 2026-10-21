@@ -303,7 +303,8 @@ describe("icon art", () => {
         ),
       ).flat();
     });
-    expect(tags).toEqual(expect.arrayContaining(["todo", "woof-way", "woof-way-done"]));
+    const drawn = gameData.world.zones.flatMap(({ art }) => [art, `${art}-done`]);
+    expect(tags).toEqual(expect.arrayContaining(["todo", ...drawn]));
     expect(missingTags(ZONE_PIPS_KEY, [...new Set(tags)])).toEqual([]);
   });
 

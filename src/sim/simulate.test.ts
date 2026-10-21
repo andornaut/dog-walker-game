@@ -60,7 +60,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
       runs(3, { policy: "alwaysPay", route, skill: IDEAL_SKILL }).map((result) => result.route);
     for (const route of [...routeOf("left"), ...routeOf("right"), ...routeOf("random")]) {
       expect(route.length).toBeLessThanOrEqual(gameData.world.walkLength);
-      expect(route[0]).toBe("street");
+      expect(route[0]).toBe(gameData.world.firstZone);
       expect(new Set(route).size).toBe(route.length);
     }
     // A fork offers 3 of the 5 zones left after the first zone: the easiest offered is one of the 3
@@ -69,7 +69,9 @@ describe("simulateRun", { timeout: 30_000 }, () => {
       routeOf(route).flatMap((walked) =>
         walked[1] === undefined ? [] : [order.indexOf(walked[1])],
       );
-    const after = order.filter((zone) => zone !== "street").map((zone) => order.indexOf(zone));
+    const after = order
+      .filter((zone) => zone !== gameData.world.firstZone)
+      .map((zone) => order.indexOf(zone));
     for (const pick of firstPick("left")) {
       expect(after.slice(0, 3)).toContain(pick);
     }
