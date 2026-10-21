@@ -580,6 +580,12 @@ export interface HomeText {
   // dog slot row's line, the line of a slot that needs the one before it, and the word on an
   // owned row.
   readonly shop: {
+    // The confirm every purchase asks first: its Buy and Cancel buttons, the {amount} the bank
+    // would keep, and its title with the item's {name}.
+    readonly confirmBuy: string;
+    readonly confirmCancel: string;
+    readonly confirmLeft: string;
+    readonly confirmTitle: string;
     readonly dogs: string;
     readonly dogsAllOwned: string;
     readonly gearNote: string;
