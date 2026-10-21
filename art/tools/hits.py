@@ -5,30 +5,32 @@ and the per-dog status overlays. Bursts carry a 1px rim (plum, navy for water,
 teal for green) so they hold 3:1 on the three light roads while
 their fills carry Elm Avenue. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
-encounters.py.
+encounters.py. The bursts are laid out on a 64x64 design and drawn 90/64 times
+bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps, twinkles
+and comic words keep their pixels.
 
-fx-hit-skunk       64x64  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
+fx-hit-skunk       90x90  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
-fx-hit-puddle      64x64  play (7 frames, 70ms)  splash crown and flying drops
-fx-hit-thief       64x64  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
-fx-hit-squirrel    64x64  play (7 frames, 70ms)  tail-flick sweep, motion lines, leaves
-fx-hit-other-dog   64x64  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
-fx-hit-picnic      64x64  play (8 frames, 70ms)  a poof, sandwiches, an apple and a cheese wedge
+fx-hit-puddle      90x90  play (7 frames, 70ms)  splash crown and flying drops
+fx-hit-thief       90x90  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
+fx-hit-squirrel    90x90  play (7 frames, 70ms)  tail-flick sweep, motion lines, leaves
+fx-hit-other-dog   90x90  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
+fx-hit-picnic      90x90  play (8 frames, 70ms)  a poof, sandwiches, an apple and a cheese wedge
                                                   flying up and falling, crumbs
-fx-hit-goose       64x64  play (8 frames, 70ms)  a white star, sound waves arcing out to both sides,
+fx-hit-goose       90x90  play (8 frames, 70ms)  a white star, sound waves arcing out to both sides,
                                                   feathers seesawing down
-fx-hit-petunias    64x64  play (8 frames, 70ms)  a puff of soil, clods, three whole flowers tumbling,
+fx-hit-petunias    90x90  play (8 frames, 70ms)  a puff of soil, clods, three whole flowers tumbling,
                                                   falling petals
-fx-hit-trash       64x64  play (8 frames, 70ms)  a poof, the bin lid spinning, a can, a banana peel, a
+fx-hit-trash       90x90  play (8 frames, 70ms)  a poof, the bin lid spinning, a can, a banana peel, a
                                                   fish bone and paper flying, flies buzzing round
-fx-hit-cafe        64x64  play (8 frames, 70ms)  a latte splash, the cup flipping up, drops, the foam
+fx-hit-cafe        90x90  play (8 frames, 70ms)  a latte splash, the cup flipping up, drops, the foam
                                                   heart floating up
                    every fx-hit-* also has play-word, after play: the same frames and timing with
                    its comic word over frames 0 to 5 (420ms), centred on the impact star: cafe
                    SPLAT!, goose HONK!, other-dog SNIFF!, petunias SQUISH!, picnic CHOMP!, puddle
                    SPLOSH!, skunk PEE-YEW!, squirrel CHITTER!, thief YOINK!, trash CLANG!. The game
                    plays play-word, and play with reduced motion
-fx-lemonade        64x64  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
+fx-lemonade        90x90  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
                                                   lemonade popping up, lemon slices, twinkles
 ui-hit-flash-green, -sky, -amber, -mauve, -orange, -pink, -white
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
@@ -67,13 +69,68 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fx import HEART, SMALL, burst, rim, stamp, star4, word  # noqa: E402
+from fx import HEART, SMALL, burst, word  # noqa: E402
+import fx  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
 BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
 # A sideways wobble with an 8px period: a line rising 2px a frame loops seamlessly in 4 frames.
 WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
 ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
+
+
+# The bursts are laid out on a 64x64 design and drawn BURST_SCALE times bigger, 90x90, on a minis.Mini that
+# keeps 1px lines 1px (burst_frame). Pixel maps, twinkles, the rim and the comic word go on the drawn grid
+# pixel for pixel, at the drawn place of their design position, so they keep their pixels.
+BURST = 64
+BURST_SCALE = 90 / BURST
+
+
+def raster(g):
+    """The grid that holds g's pixels: a minis.Mini's drawn grid, or g."""
+    return getattr(g, "g", g)
+
+
+def drawn_at(g, x, y):
+    """Where design point (x, y) lands on g's pixels: scaled to the nearest pixel on a minis.Mini, else itself."""
+    s = getattr(g, "s", None)
+    return (round(x * s), round(y * s)) if s else (x, y)
+
+
+def rim(g, col="plum"):
+    """fx.rim on the grid that holds g's pixels, so a burst's rim is 1px at its drawn size."""
+    fx.rim(raster(g), col)
+    return g
+
+
+def stamp(g, rows, x0, y0, cols=("red", "pink", "dred"), keep=None):
+    """fx.stamp pixel for pixel from the drawn place of (x0, y0)."""
+    fx.stamp(raster(g), rows, *drawn_at(g, x0, y0), cols, keep)
+
+
+def star4(g, cx, cy, r, col, core="white"):
+    """fx.star4 on the drawn grid, centred at the drawn place of (cx, cy), its arms r scaled."""
+    fx.star4(raster(g), *drawn_at(g, cx, cy), round(r * getattr(g, "s", 1)), col, core)
+
+
+def dots(g, x0, y0, pts):
+    """(dx, dy, colour) pixels from the drawn place of (x0, y0), pixel for pixel."""
+    x, y = drawn_at(g, x0, y0)
+    for dx, dy, c in pts:
+        raster(g).p(x + dx, y + dy, c)
+
+
+def pixmap(rows, cols, flip=False):
+    """A pixel map's (dx, dy, colour) pixels: each character's colour in cols, "." empty; flip mirrors it."""
+    return [(i, j, cols[ch]) for j, row in enumerate(rows) for i, ch in enumerate(row[::-1] if flip else row)
+            if ch in cols]
+
+
+def burst_frame(draw, step):
+    """A burst's frame step: draw(step) laid out on BURST x BURST and drawn BURST_SCALE times bigger."""
+    import minis  # minis imports modules that import this one, so it is imported when first used
+
+    return minis.small(sys.modules[__name__], BURST_SCALE, draw, step)
 
 
 def layer(dst, src):
@@ -130,33 +187,36 @@ def hit_skunk(step):
         g.ell(cx, cy, pr, pr, "mauve")
     # a purple seam along the lower right of the core and every other lobe, where it lies inside the cloud,
     # so the puffs in front read over the ones behind
-    mass = [row[:] for row in g.px]
+    # the seams, shading, dither, wisps and squiggles are laid on the drawn pixels
+    px, w, h = raster(g), raster(g).w, raster(g).h
+    mass = [row[:] for row in px.px]
     front = [(cx, cy, rk) for k, (cx, cy, rk, _) in enumerate(lobes) if k % 2 == 0] + ([(32, 33, core)] if core else [])
     for cx, cy, pr in front:
-        for deg in range(0, 100, 4):
-            x, y = round(cx + math.cos(math.radians(deg)) * (pr - 0.5)), round(cy + math.sin(math.radians(deg)) * (pr - 0.5))
-            if 2 <= x < 62 and 2 <= y < 62 and all(mass[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)):
-                g.p(x, y, "purple")
+        for deg in range(0, 100, 2):
+            a = math.radians(deg)
+            x, y = drawn_at(g, cx + math.cos(a) * (pr - 0.5), cy + math.sin(a) * (pr - 0.5))
+            if 2 <= x < w - 2 and 2 <= y < h - 2 and all(mass[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)):
+                px.p(x, y, "purple")
     # shade the lower-right edge of every puff, so the lumps read and overlapping lobes read as one mass, and
     # light the mass's upper-left edge pink
-    lit = [row[:] for row in g.px]
-    for y in range(62):
-        for x in range(62):
+    lit = [row[:] for row in px.px]
+    for y in range(h - 2):
+        for x in range(w - 2):
             if lit[y][x] and not (lit[y + 1][x + 1] and lit[y + 2][x + 2]):
-                g.p(x, y, "purple")
+                px.p(x, y, "purple")
             elif lit[y][x] and (x == 0 or y == 0 or not lit[y - 1][x] or not lit[y][x - 1]):
-                g.p(x, y, "pink")
+                px.p(x, y, "pink")
     if 1 <= step < 4:
         g.ell(32 - core * 0.35, 33 - core * 0.4, core * 0.3, core * 0.2, "pink")
         g.ell(32 - core * 0.3, 33 - core * 0.3, core * 0.3, core * 0.2, "mauve")
     rim(g, "plum")
     if step >= 5:
         # clearing: the inside thins to a checker dither, the solid rim and the edge just inside it stay
-        solid = [row[:] for row in g.px]
-        for y in range(2, 62):
-            for x in range(2, 62):
+        solid = [row[:] for row in px.px]
+        for y in range(2, h - 2):
+            for x in range(2, w - 2):
                 if all(solid[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)) and (x + y + step) % 2:
-                    g.p(x, y, None)
+                    px.p(x, y, None)
     if step >= 2:
         # wisps curling off the cloud, dithered: alternate pixels pink and plum, so they hold on every road,
         # with a second strand on alternate pixels at the base
@@ -167,22 +227,23 @@ def hit_skunk(step):
             for i in range(6 + t):
                 b = a + curl * i * 0.1
                 rr = r0 + i * 1.2
-                x, y = round(32 + math.cos(b) * rr), round(33 + math.sin(b) * rr * 0.9)
+                x, y = drawn_at(g, 32 + math.cos(b) * rr, 33 + math.sin(b) * rr * 0.9)
                 for k, (dx, dy) in enumerate(((0, 0), (1, 1)) if i < 3 else ((0, 0),)):
                     xx, yy = x + dx, y + dy
-                    if 1 <= xx < 63 and 1 <= yy < 63 and not g.px[yy][xx] and (k == 0 or i % 2):
-                        g.p(xx, yy, "pink" if (i + k) % 2 == 0 else "plum")
+                    if 1 <= xx < w - 1 and 1 <= yy < h - 1 and not px.px[yy][xx] and (k == 0 or i % 2):
+                        px.p(xx, yy, "pink" if (i + k) % 2 == 0 else "plum")
     if step >= 1:
         # five rising S-lines: 2px a frame up over an 8px wave, the outer ones leaning out
         rise = (0, 0, 4, 8, 12, 15, 18, 20)[step]
         length = (0, 5, 8, 9, 9, 8, 6, 4)[step]
+        sc = getattr(g, "s", 1)
         for j, (x0, y0, lean) in enumerate(((14, 26, -1), (22, 20, -0.5), (32, 17, 0), (42, 20, 0.5), (50, 26, 1))):
-            for t in range(length):
-                y = y0 - rise - t
-                x = x0 + lean * (rise + t) * 0.4 + WAVE[(t + j * 3 + step * 2) % 8]
-                if 1 <= y < 63:
-                    g.p(round(x), y, "pink")
-                    g.p(round(x) + 1, y, "plum")
+            for t in range(round(length * sc)):
+                x, y = drawn_at(g, x0 + lean * (rise + t / sc) * 0.4, y0 - rise)
+                x, y = x + WAVE[(t + j * 3 + step * 2) % 8], y - t
+                if 1 <= y < h - 1:
+                    px.p(x, y, "pink")
+                    px.p(x + 1, y, "plum")
     return g
 
 
@@ -235,9 +296,15 @@ def hit_puddle(step):
 
 def wallet(g, cx, cy, tilt):
     """12x8 brown wallet, its flap seam dbrown, a green bill poking out; tilt shears it by a pixel."""
-    for j in range(8):
-        sx = round(tilt * (j - 4) / 4)
-        g.rect(cx - 6 + sx, cy - 4 + j, 12, 1, "dbrown" if j == 7 else "brown")
+    # each run of rows with the same shear is one rect, so drawn bigger the wallet stays solid
+    j = 0
+    while j < 7:
+        sx, n = round(tilt * (j - 4) / 4), 1
+        while j + n < 7 and round(tilt * (j + n - 4) / 4) == sx:
+            n += 1
+        g.rect(cx - 6 + sx, cy - 4 + j, 12, n, "brown")
+        j += n
+    g.rect(cx - 6 + round(tilt * 3 / 4), cy + 3, 12, 1, "dbrown")
     g.rect(cx - 4 - tilt, cy - 6, 8, 2, "green")
     g.p(cx - 3 - tilt, cy - 6, "yellow")
     g.rect(cx - 6, cy - 1, 12, 1, "dbrown")
@@ -314,10 +381,7 @@ LEAF = ("..111", ".1121", "1121.", "22...")
 
 def leaf(g, x, y, flip, cols):
     """5x4 leaf, its midrib and stem in the darker colour; flip mirrors it, so leaves flutter."""
-    for j, row in enumerate(LEAF):
-        for i, ch in enumerate(row[::-1] if flip else row):
-            if ch != ".":
-                g.p(x + i, y + j, cols[int(ch) - 1])
+    dots(g, x, y, pixmap(LEAF, {"1": cols[0], "2": cols[1]}, flip))
 
 
 def hit_squirrel(step):
@@ -332,10 +396,10 @@ def hit_squirrel(step):
         sweep_from, sweep_to = (0, 120, 150, 190, 250)[step], (0, 160, 230, 300, 330)[step]
         def lines(p):
             for rad, col in ((10, "white"), (15, "white"), (20, "white")):
-                for deg in range(sweep_from, sweep_to, 2):
+                for deg in range(sweep_from, sweep_to):
                     if (deg // 2 + rad) % 7 < 5:
                         a = math.radians(deg)
-                        p.p(round(32 + math.cos(a) * rad), round(40 + math.sin(a) * rad * 0.9), col)
+                        raster(p).p(*drawn_at(p, 32 + math.cos(a) * rad, 40 + math.sin(a) * rad * 0.9), col)
         piece(g, lines)
     if theta is not None:
         piece(g, lambda p: tail(p, theta))
@@ -354,8 +418,7 @@ TUFTS = ("cream", "white", "tan", "lgrey", "brown", "grey")
 
 
 def tuft(g, x, y, col, flip):
-    for i, (dx, dy) in enumerate(((0, 0), (1, 1), (2, 0), (1, 2), (3, -1) if flip else (-1, -1))):
-        g.p(x + dx, y + dy, col)
+    dots(g, x, y, [(dx, dy, col) for dx, dy in ((0, 0), (1, 1), (2, 0), (1, 2), (3, -1) if flip else (-1, -1))])
 
 
 def hit_other_dog(step):
@@ -493,10 +556,7 @@ FEATHER = ("...111", ".12211", "12111.", "2.....")
 
 def feather(g, x, y, flip, cols=("white", "lgrey")):
     """A 6x4 feather, its quill in the second colour; flip mirrors it, so it seesaws as it drifts."""
-    for j, row in enumerate(FEATHER):
-        for i, ch in enumerate(row[::-1] if flip else row):
-            if ch != ".":
-                g.p(x + i, y + j, cols[int(ch) - 1])
+    dots(g, x, y, pixmap(FEATHER, {"1": cols[0], "2": cols[1]}, flip))
 
 
 def hit_goose(step):
@@ -510,15 +570,16 @@ def hit_goose(step):
     poof(g, step, cx, cy, (0, 8, 10))
     if step <= 5:
         def waves(p):
+            # laid on the drawn pixels, 2 wide and 1 tall a step, so the arcs stay unbroken
             for k in range(3):
                 r = 9 + k * 5 + step * 2
                 if r > 28:
                     continue
                 for side in (-1, 1):
-                    for deg in range(-40, 41, 2):
+                    for deg in range(-40, 41):
                         a = math.radians(deg)
-                        x, y = cx + side * math.cos(a) * r, cy + math.sin(a) * r
-                        p.rect(round(x) - (side < 0), round(y), 2, 1, "white")
+                        x, y = drawn_at(p, cx + side * math.cos(a) * r, cy + math.sin(a) * r)
+                        raster(p).rect(x - (side < 0), y, 2, 1, "white")
         piece(g, waves)
     for i, (vx, vy) in enumerate(((-4, -5), (4, -5.5), (-6, -1.5), (6, -2), (-1.5, -6.5), (2, -6.5))):
         t = step - 0.5
@@ -535,8 +596,14 @@ PETALS = (("pink", "mauve"), ("mauve", "purple"), ("white", "lgrey"), ("hot", "d
 def flower(g, x, y, cols, tilt):
     """A petunia pulled up whole: a trumpet of five petals round a yellow throat, two leaves and a stem
     with roots; tilt leans the stem one way or the other as it tumbles."""
-    for j in range(6):
-        g.p(x + round(tilt * j / 3), y + 3 + j, "dgreen")
+    # each run of rows with the same lean is one rect, so drawn bigger the stem stays unbroken
+    j = 0
+    while j < 6:
+        dx, n = round(tilt * j / 3), 1
+        while j + n < 6 and round(tilt * (j + n) / 3) == dx:
+            n += 1
+        g.rect(x + dx, y + 3 + j, 1, n, "dgreen")
+        j += n
     g.rect(x - 2 + tilt, y + 5, 2, 1, "green")
     g.rect(x + 1 + tilt, y + 6, 2, 1, "green")
     g.p(x - 1 + 2 * tilt, y + 9, "brown")
@@ -623,12 +690,9 @@ def fishbone(g, x, y, flip):
 
 
 def fly_bug(g, x, y, flap):
-    """A buzzing fly: an ink body under two white wings that flap."""
-    g.rect(x, y, 2, 2, "ink")
-    g.p(x - 1, y - 1 - flap, "white")
-    g.p(x + 2, y - 1 - flap, "white")
-    g.p(x - 2, y - 1 - flap, "white")
-    g.p(x + 3, y - 1 - flap, "white")
+    """A buzzing fly: an ink body under two white wings that flap, pixel for pixel at any size."""
+    dots(g, x, y, [(0, 0, "ink"), (1, 0, "ink"), (0, 1, "ink"), (1, 1, "ink")]
+         + [(dx, -1 - flap, "white") for dx in (-2, -1, 2, 3)])
 
 
 def hit_trash(step):
@@ -996,8 +1060,12 @@ WORD_FRAMES = 6
 
 
 def worded(g, text, cy, step):
-    """A burst frame with its comic word over it, centred on the impact star, while the word shows."""
-    return word(g, text, 32, cy - 5) if step < WORD_FRAMES else g
+    """A burst frame with its comic word over it, centred on the impact star (design row cy), while the word
+    shows. The word keeps its pixels: 7-row letters, readable at 1x."""
+    if step < WORD_FRAMES:
+        x, y = drawn_at(g, BURST / 2, cy)
+        word(raster(g), text, x, y - 5)
+    return g
 
 
 # A status overlay's frame at full size and at each depth step: 22 x the step, as the game sizes it.
@@ -1012,9 +1080,10 @@ def sizes(key, draw, ms):
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for key, (draw, frames, text, cy) in HITS.items():
-        yield key, [("play", [draw(i).outlined(False) for i in range(frames)], 70),
-                    ("play-word", [worded(draw(i), text, cy, i).outlined(False) for i in range(frames)], 70)]
-    yield "fx-lemonade", [("play", [lemonade_pop(i).outlined(False) for i in range(8)], 70)]
+        yield key, [("play", [burst_frame(draw, i).outlined(False) for i in range(frames)], 70),
+                    ("play-word", [worded(burst_frame(draw, i), text, cy, i).outlined(False) for i in range(frames)],
+                     70)]
+    yield "fx-lemonade", [("play", [burst_frame(lemonade_pop, i).outlined(False) for i in range(8)], 70)]
     for colour in FLASH:
         yield f"ui-hit-flash-{colour}", [("play", [flash(colour, i).outlined(False) for i in range(4)], 70)]
     yield "ui-hit-label", [(tag, [label_plate(*cols).outlined(False)], 1000) for tag, cols in PLATES.items()]
