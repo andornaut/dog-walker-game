@@ -102,6 +102,8 @@ export const TUNING = {
     moverSpeedJitter: 0.15,
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
+    // The share of hearts.packSizeBonus an owner's max gets, by the dog's size.
+    packSizeBonusBySize: { big: 0, medium: 1, small: 1 },
     // Running shoes add this much to the walker's agility.
     runningShoesAgility: 0.1,
     rushHourObstacles: 1.5,
