@@ -472,8 +472,9 @@ export class CardScene extends Scene {
     return marker === undefined ? left + width / 2 : (marker + left + width) / 2;
   }
 
-  // A path card's plaque shows its zone's pay multiplier instead of a cost, and how long its
-  // upgrade lasts.
+  // A plaque shows its option's price, greyed with the card when the player cannot afford it, or
+  // card.free for an option that costs no money. A path card's plaque shows its zone's pay
+  // multiplier instead, and how long its upgrade lasts.
   private costText(entry: Entry): string {
     const option = entry.option;
     const text = gameData.runText.card;
@@ -486,13 +487,9 @@ export class CardScene extends Scene {
         : `${pay} · ${text.upgradeDuration[option.duration]}`;
     }
     if (option === undefined || option.cost === 0) {
-      return gameData.runText.card.free;
+      return text.free;
     }
-    return option.availability.enabled
-      ? `−${formatDollars(option.cost)}`
-      : fillLine(RUN_TEXT_FIELDS.card, gameData.runText.card, "need", {
-          amount: formatDollars(option.cost),
-        });
+    return fillLine(RUN_TEXT_FIELDS.card, text, "need", { amount: formatDollars(option.cost) });
   }
 
   // The forced-stop band is amber, so its label is plum; every other band's is white.
