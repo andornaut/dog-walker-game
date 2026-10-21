@@ -31,12 +31,32 @@ import {
   simulateMatrixInBatches,
 } from "../sim/report";
 import { SKILL_PRESETS } from "../sim/skills";
+import {
+  activeValues,
+  type Cell,
+  clearFilter,
+  type Facet,
+  facetKey,
+  type FacetValue,
+  facetValues,
+  filterRows,
+  type Filters,
+  parseFilters,
+  type Row,
+  serializeFilters,
+  slug,
+  TABLES_KEY,
+  toggleFilter,
+} from "./filters";
 
-type Cell = number | string;
 interface Section {
+  // The headers of the columns a reader can filter the rows by, one row of pills each.
+  readonly facets?: readonly string[];
+  // A row whose first cell is "" continues the row above, and leaves this many cells blank.
+  readonly groupedColumns?: number;
   readonly headers: readonly string[];
   readonly note?: string;
-  readonly rows: readonly (readonly Cell[])[];
+  readonly rows: readonly Row[];
   readonly title: string;
 }
 
@@ -51,11 +71,65 @@ function element<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-function renderSection({ headers, note, rows, title }: Section): HTMLElement {
-  const section = element("section");
-  section.append(element("h2", title));
+function pill(key: string, label: string, pressed: boolean, value: string): HTMLButtonElement {
+  const button = element("button", label);
+  button.type = "button";
+  button.className = "pill";
+  button.dataset.key = key;
+  button.dataset.value = value;
+  button.setAttribute("aria-pressed", String(pressed));
+  return button;
+}
+
+// A labelled row of toggle pills, led by All, which is pressed while none of the others is.
+function pillRow(
+  key: string,
+  label: string,
+  active: ReadonlySet<string>,
+  values: readonly FacetValue[],
+): HTMLElement {
+  const row = element("div");
+  row.className = "pills";
+  row.setAttribute("role", "group");
+  const name = element("span", label);
+  name.className = "pills-label";
+  name.id = `pills-${key}`;
+  row.setAttribute("aria-labelledby", name.id);
+  row.append(
+    name,
+    pill(key, "All", active.size === 0, ""),
+    ...values.map((value) => pill(key, value.label, active.has(value.id), value.id)),
+  );
+  return row;
+}
+
+function renderSection(filters: Filters, shown: boolean, section: Section): HTMLElement {
+  const { groupedColumns = 0, headers, note, title } = section;
+  const facets: Facet[] = (section.facets ?? []).map((header) => ({
+    column: headers.indexOf(header),
+    key: facetKey(header, title),
+  }));
+  const rows = filterRows(facets, filters, groupedColumns, section.rows);
+  const node = element("section");
+  node.id = slug(title);
+  node.hidden = !shown;
+  node.append(element("h2", title));
   if (note !== undefined) {
-    section.append(element("p", note));
+    node.append(element("p", note));
+  }
+  for (const [i, facet] of facets.entries()) {
+    const values = facetValues(facet.column, groupedColumns, section.rows);
+    const active = activeValues(
+      facet.key,
+      values.map((value) => value.id),
+      filters,
+    );
+    node.append(pillRow(facet.key, section.facets?.[i] ?? "", active, values));
+  }
+  if (rows.length < section.rows.length) {
+    const count = element("p", `Showing ${rows.length} of ${section.rows.length} rows.`);
+    count.className = "count";
+    node.append(count);
   }
   const table = element("table");
   const headRow = element("tr");
@@ -76,8 +150,8 @@ function renderSection({ headers, note, rows, title }: Section): HTMLElement {
   const scroll = element("div");
   scroll.className = "scroll";
   scroll.append(table);
-  section.append(scroll);
-  return section;
+  node.append(scroll);
+  return node;
 }
 
 function priceText(data: GameData, item: Unlock): string {
@@ -88,6 +162,7 @@ function dogsSection(data: GameData): Section {
   const { tuning } = data;
   const luckyCollar: readonly Modifier[] = modifiersOf(data.shopGear.luckyCollar.effects);
   return {
+    facets: ["Size"],
     headers: ["Dog", "Breed", "Size", "Owner", "Start ♥", "Max ♥", "With Lucky collar", "Unlock"],
     rows: Object.values(data.dogs).map((dog) => [
       dog.name,
@@ -107,6 +182,8 @@ const QUIP_MOMENTS: readonly QuipMoment[] = ["happier", "upset", "fired", "parti
 
 function quipsSection(data: GameData): Section {
   return {
+    facets: ["Moment"],
+    groupedColumns: 2,
     headers: ["Dog", "Owner", "Moment", "Lines"],
     note: "Parting lines show when the player picks the dog on the home screen.",
     rows: (Object.keys(data.dogs) as DogId[]).flatMap((id) => {
@@ -162,6 +239,8 @@ function encountersSection(data: GameData): Section {
     ]);
   });
   return {
+    facets: ["Kind"],
+    groupedColumns: 2,
     headers: ["Encounter", "Kind", "Option", "Effect", "Art"],
     note: "A lucky find opens no card: it applies on contact, with a popup.",
     rows,
@@ -171,6 +250,7 @@ function encountersSection(data: GameData): Section {
 
 function upgradesSection(data: GameData): Section {
   return {
+    facets: ["Kind"],
     headers: ["Upgrade", "Kind", "Effect", "Art"],
     rows: Object.values(data.upgrades).map((upgrade) => [
       upgrade.name,
@@ -327,6 +407,7 @@ function tuningSection(data: GameData): Section {
     }
   }
   return {
+    facets: ["Group"],
     headers: ["Group", "Key", "Value"],
     note: "Money is in dollars, times in seconds, speeds in pixels per second.",
     rows,
@@ -348,6 +429,7 @@ function simulatedSection(rows: readonly MatrixRow[]): Section {
   const { errorRate, reactionSeconds } = SKILL_PRESETS.typical;
   const total = matrixCells(SIMULATED_MATRIX).length;
   return {
+    facets: ["Policy", "Pack"],
     headers: MATRIX_HEADERS,
     note: [
       `Bots playing whole runs on the live rules and data, ${SIMULATED_RUNS} runs per row`,
@@ -366,6 +448,90 @@ function simulatedSection(rows: readonly MatrixRow[]): Section {
   };
 }
 
+let filters: Filters = parseFilters(globalThis.location.search);
+// Every table, in page order, and the element each renders to.
+let sections: Section[] = [];
+let sectionNodes: HTMLElement[] = [];
+let tablesRow: HTMLElement = element("div");
+
+function sectionShown(section: Section): boolean {
+  const shown = activeValues(
+    TABLES_KEY,
+    sections.map((each) => slug(each.title)),
+    filters,
+  );
+  return shown.size === 0 || shown.has(slug(section.title));
+}
+
+function renderTablesRow(): HTMLElement {
+  const values = sections.map(({ title }) => ({ id: slug(title), label: title }));
+  const active = activeValues(
+    TABLES_KEY,
+    values.map((value) => value.id),
+    filters,
+  );
+  return pillRow(TABLES_KEY, "Tables", active, values);
+}
+
+// Runs update, then focuses the pill that had focus before it, which update replaced.
+function keepingFocus(update: () => void): void {
+  const focused = document.activeElement;
+  const { key, value } = focused instanceof HTMLElement ? focused.dataset : {};
+  update();
+  if (key !== undefined && value !== undefined) {
+    document
+      .querySelector<HTMLElement>(
+        `button.pill[data-key="${CSS.escape(key)}"][data-value="${CSS.escape(value)}"]`,
+      )
+      ?.focus();
+  }
+}
+
+function redraw(): void {
+  keepingFocus(() => {
+    const next = renderTablesRow();
+    tablesRow.replaceWith(next);
+    tablesRow = next;
+    sectionNodes = sectionNodes.map((node, i) => {
+      const section = sections[i];
+      if (section === undefined) {
+        return node;
+      }
+      const replacement = renderSection(filters, sectionShown(section), section);
+      node.replaceWith(replacement);
+      return replacement;
+    });
+  });
+}
+
+function replaceSection(i: number, section: Section): void {
+  sections[i] = section;
+  keepingFocus(() => {
+    const replacement = renderSection(filters, sectionShown(section), section);
+    sectionNodes[i]?.replaceWith(replacement);
+    sectionNodes[i] = replacement;
+  });
+}
+
+function onPillClick(event: MouseEvent): void {
+  const button = event.target instanceof Element ? event.target.closest("button.pill") : null;
+  if (!(button instanceof HTMLElement)) {
+    return;
+  }
+  const { key, value } = button.dataset;
+  if (key === undefined || value === undefined) {
+    return;
+  }
+  filters = value === "" ? clearFilter(key, filters) : toggleFilter(key, value, filters);
+  const { hash, pathname } = globalThis.location;
+  globalThis.history.replaceState(
+    globalThis.history.state,
+    "",
+    `${pathname}${serializeFilters(filters)}${hash}`,
+  );
+  redraw();
+}
+
 let stopSimulation = () => {};
 
 function render(): void {
@@ -374,7 +540,7 @@ function render(): void {
     return;
   }
   const data = gameData;
-  const sections = [
+  sections = [
     dogsSection,
     encountersSection,
     upgradesSection,
@@ -388,13 +554,16 @@ function render(): void {
     achievementsSection,
     helpSection,
     tuningSection,
-  ].map((section) => renderSection(section(data)));
-  let simulated = renderSection(simulatedSection([]));
+  ].map((section) => section(data));
+  sections.push(simulatedSection([]));
+  const simulatedIndex = sections.length - 1;
+  tablesRow = renderTablesRow();
+  sectionNodes = sections.map((section) => renderSection(filters, sectionShown(section), section));
   root.replaceChildren(
     element("h1", "Game data"),
     element("p", "Every table the game reads, with card text generated from the live values."),
-    ...sections,
-    simulated,
+    tablesRow,
+    ...sectionNodes,
   );
   stopSimulation();
   stopSimulation = simulateMatrixInBatches(
@@ -404,13 +573,12 @@ function render(): void {
     10,
     (step) => setTimeout(step, 0),
     (rows) => {
-      const next = renderSection(simulatedSection(rows));
-      simulated.replaceWith(next);
-      simulated = next;
+      replaceSection(simulatedIndex, simulatedSection(rows));
     },
     SIMULATED_MATRIX,
   );
 }
 
+document.getElementById("data")?.addEventListener("click", onPillClick);
 render();
 onGameDataChange(render);

@@ -46,7 +46,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - `src/assets/`: manifest and Aseprite parsing, art keys and depth steps; `atlas/` packs the atlases at build time
 - `src/crash/`: the crash screen
 - `src/data/`: content and tuning
-- `src/dataPage/`: the `/data/` page
+- `src/dataPage/`: the `/data/` page, with filter pills kept in the query string
 - `src/headers/`: the build-time security headers
 - `src/home/`, `src/help/`, `src/hud/`: view models for the home, settings, stats and end screens, the help screen, and the walk bar and pause menu
 - `src/input/`: keys and the touch gesture state machine
@@ -148,4 +148,3 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 In build order:
 
 1. The architecture refactors: break the import cycle `src/data/screen.ts` → `src/runner/walkGeometry.ts` → `src/layout/packFormation.ts` → `src/data/screen.ts` and add a lint rule that fails on a cycle; give the HUD its own interface for the run in place of `HudSource` (a `Pick` of `RunScene`, reached through an `as RunScene` cast); and start `RunScene` from the `RunSceneData` it is passed, in place of reading the loadout through `runLoadout` and the setup from the page.
-2. Filter pills on the data page, kept in the URL.
