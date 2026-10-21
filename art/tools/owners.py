@@ -7,6 +7,10 @@ fires you) and worried (at 1 heart, while their doghouse pulses). Each
 owner's job shows in their hair and accessories, and their temperament in
 how far the expressions go.
 
+face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
+are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
+natively at 20x20, one pixel per feature, and Lefevre's bun is redrawn by hand.
+
 face-walker-<name>: 32x32 portraits for the walker picker. Tags:
 happy, neutral.
 
@@ -23,6 +27,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+import minis  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
 from road import face_disc  # noqa: E402
 
@@ -45,13 +50,15 @@ def base(g, skin, shade, shirt, shirt_sh):
     face_disc(g, 16, 16, 8.5, 9, skin, shade, to=0.25)
 
 
-def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False):
+def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False, glasses=None,
+               lips=None):
     """Eyes, brows and mouth. wide marks the dramatic owners, whose faces go further. brow is the brows'
     colour (feat unless given). whites sets a white beside each pupil, so the eyes read on dark skin.
     Happy closes the eyes into smiling arcs under raised flat brows; neutral is open eyes under flat brows;
     upset slants the brows down to the middle over a frown, angry and sad; fired narrows the eyes under brows
     pinched down hard; worried lifts the brows' inner ends over eyes gone wide, white either side of the
-    pupil, with a small wobbly mouth and a big sweat bead."""
+    pupil, with a small wobbly mouth and a big sweat bead. glasses rings each eye in that colour and lips
+    paints the closed mouth's middle (not while firing)."""
     brow = brow or feat
     for x in (12, 19):
         if mood == "happy":
@@ -128,6 +135,13 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         g.rect(15, 22, 2, 2, "dred")
         g.rect(10, 20, 2, 1, "red")
         g.rect(20, 20, 2, 1, "red")
+    if glasses:
+        for cx in (12, 19):
+            for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)):
+                g.p(cx + dx, 18 + dy, glasses)
+        g.rect(14, 18, 3, 1, glasses)
+    if lips and mood != "fired":
+        g.rect(15, 23, 2, 1, lips)
 
 
 def rosa(mood):
@@ -174,11 +188,7 @@ def pruitt(mood):
     g.cel(23.5, 15, 2, 4, "lgrey", "grey")
     g.p(14, 9, "cream")
     g.p(15, 9, "cream")
-    expression(g, mood)
-    for cx in (12, 19):
-        for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)):
-            g.p(cx + dx, 18 + dy, "slate")
-    g.rect(14, 18, 3, 1, "slate")
+    expression(g, mood, glasses="slate")
     return g
 
 
@@ -195,9 +205,7 @@ def lefevre(mood):
     g.rect(22, 10, 2, 8, "navy")
     g.p(7, 19, "amber")
     g.p(24, 19, "amber")
-    expression(g, mood, feat="dred", lashes=True)
-    if mood != "fired":
-        g.rect(15, 23, 2, 1, "red")
+    expression(g, mood, feat="dred", lashes=True, lips="red")
     return g
 
 
@@ -296,6 +304,132 @@ def jesse(mood):
     g.p(23, 10, "cyan")
     expression(g, mood)
     return g
+
+
+# ---------- the owners' small faces, for the walk's dog cards ----------
+
+SMALL = 20
+
+
+def small_expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False,
+                     glasses=None, lips=None):
+    """expression drawn at 20x20 on a Mini's own pixels, one feature per pixel: eyes at x 7 and 12 on rows 10
+    and 11, brows on row 9 (raised to 8), the mouth on rows 13 and 14. Lashes are left out at this size."""
+    p = g.g.p
+    brow = brow or feat
+    for x, out in ((7, -1), (12, 1)):
+        if mood == "happy":
+            arc = feat if whites else "ink"
+            p(x - 1, 11, arc)
+            p(x, 10, arc)
+            p(x + 1, 11, arc)
+        elif mood == "fired":
+            if whites:
+                p(x + out, 11, "white")
+            p(x, 11, "ink")
+        elif mood == "worried":
+            p(x - out, 10, "white")
+            p(x - out, 11, "white")
+            p(x, 10, "white")
+            p(x, 11, "ink")
+        else:
+            if whites:
+                p(x + out, 10, "white")
+                p(x + out, 11, "white")
+            p(x, 10, "ink")
+            p(x, 11, "ink")
+    brows = {
+        "happy": ((6, 8), (7, 8), (12, 8), (13, 8)),
+        "neutral": ((6, 9), (7, 9), (12, 9), (13, 9)),
+        "upset": ((6, 8), (7, 9), (12, 9), (13, 8)),
+        "fired": ((6, 8), (7, 9), (8, 9), (11, 9), (12, 9), (13, 8)),
+        "worried": ((6, 9), (7, 8), (12, 8), (13, 9)),
+    }[mood]
+    for x, y in brows:
+        p(x, y, brow)
+    if glasses:
+        for x in (7, 12):
+            for dx, dy in ((-1, 10), (-1, 11), (1, 10), (1, 11), (0, 12)):
+                p(x + dx, dy, glasses)
+        p(9, 10, glasses)
+        p(10, 10, glasses)
+    if mood == "happy":
+        p(5, 12, blush)
+        p(14, 12, blush)
+        p(8, 13, feat)
+        p(11, 13, feat)
+        p(9, 14, feat)
+        p(10, 14, feat)
+        if wide:
+            p(9, 13, "white")
+            p(10, 13, "white")
+    elif mood == "neutral":
+        p(9, 14, lips or feat)
+        p(10, 14, lips or feat)
+    elif mood == "upset":
+        p(9, 13, lips or feat)
+        p(10, 13, lips or feat)
+        p(8, 14, feat)
+        p(11, 14, feat)
+        if wide:
+            p(5, 12, "cyan")
+    elif mood == "worried":
+        p(8, 14, feat)
+        p(9, 13, lips or feat)
+        p(10, 14, lips or feat)
+        p(11, 13, feat)
+        p(4, 9, "cyan")
+        p(4, 10, "sky")
+    else:
+        p(9, 13, feat)
+        p(10, 13, feat)
+        p(9, 14, "dred")
+        p(10, 14, "dred")
+        p(5, 12, "red")
+        p(14, 12, "red")
+
+
+LEFEVRE_SMALL_HAIR = (
+    "....................",
+    "........dnni........",
+    ".......dnnnni.......",
+    "........nnni........",
+    ".....ddnnnnnnni.....",
+    "....dnnnnnnnnnni....",
+    "....nnnnnnnnnnni....",
+)
+
+
+def lefevre_small_bun(g):
+    """Her updo's top rows drawn again at 20px: a round bun pinched in above a domed crown, lit dslate on the
+    left and shaded ink on the right, where the scaled bun and crown square off into a top hat."""
+    colours = {"d": "dslate", "n": "navy", "i": "ink"}
+    for y, row in enumerate(LEFEVRE_SMALL_HAIR):
+        for x, c in enumerate(row):
+            g.g.px[y][x] = None
+            if c in colours:
+                g.g.p(x, y, colours[c])
+
+
+# Fixes drawn after the scaled owner, for shapes that do not survive the scale.
+SMALL_FIXES = {"pierre": lefevre_small_bun}
+
+
+def small(dog, mood):
+    """The owner's face at SMALL x SMALL: their drawing's hair, clothes and props scaled by minis.Mini (each
+    shape rasterized at the small size, then the small face's own ink line), the expression drawn natively by
+    small_expression."""
+    global face, expression
+    big_face, big_expression = face, expression
+    face = lambda: edged(minis.Mini(SMALL / 32), "ink", close=True)  # noqa: E731
+    expression = small_expression
+    try:
+        g = OWNERS[dog](mood)
+    finally:
+        face, expression = big_face, big_expression
+    if dog in SMALL_FIXES:
+        SMALL_FIXES[dog](g)
+    return g.g
 
 
 # ---------- the walkers' portraits, for the walker picker ----------
@@ -413,6 +547,7 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for dog, draw in OWNERS.items():
         yield f"face-owner-{dog}", [(m, [draw(m).outlined()], 1000) for m in MOODS]
+        yield f"face-owner-{dog}-{SMALL}", [(m, [small(dog, m).outlined()], 1000) for m in MOODS]
     for key, draw in WALKERS.items():
         yield f"face-{key}", [(m, [draw(m).outlined()], 1000) for m in ("happy", "neutral")]
 

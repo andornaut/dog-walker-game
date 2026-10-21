@@ -1756,9 +1756,19 @@
       "json": "sprites/face-owner-archie.json"
     },
     {
+      "key": "face-owner-archie-20",
+      "png": "sprites/face-owner-archie-20.png",
+      "json": "sprites/face-owner-archie-20.json"
+    },
+    {
       "key": "face-owner-biscuit",
       "png": "sprites/face-owner-biscuit.png",
       "json": "sprites/face-owner-biscuit.json"
+    },
+    {
+      "key": "face-owner-biscuit-20",
+      "png": "sprites/face-owner-biscuit-20.png",
+      "json": "sprites/face-owner-biscuit-20.json"
     },
     {
       "key": "face-owner-duchess",
@@ -1766,9 +1776,19 @@
       "json": "sprites/face-owner-duchess.json"
     },
     {
+      "key": "face-owner-duchess-20",
+      "png": "sprites/face-owner-duchess-20.png",
+      "json": "sprites/face-owner-duchess-20.json"
+    },
+    {
       "key": "face-owner-koda",
       "png": "sprites/face-owner-koda.png",
       "json": "sprites/face-owner-koda.json"
+    },
+    {
+      "key": "face-owner-koda-20",
+      "png": "sprites/face-owner-koda-20.png",
+      "json": "sprites/face-owner-koda-20.json"
     },
     {
       "key": "face-owner-nugget",
@@ -1776,9 +1796,19 @@
       "json": "sprites/face-owner-nugget.json"
     },
     {
+      "key": "face-owner-nugget-20",
+      "png": "sprites/face-owner-nugget-20.png",
+      "json": "sprites/face-owner-nugget-20.json"
+    },
+    {
       "key": "face-owner-penny",
       "png": "sprites/face-owner-penny.png",
       "json": "sprites/face-owner-penny.json"
+    },
+    {
+      "key": "face-owner-penny-20",
+      "png": "sprites/face-owner-penny-20.png",
+      "json": "sprites/face-owner-penny-20.json"
     },
     {
       "key": "face-owner-pierre",
@@ -1786,14 +1816,29 @@
       "json": "sprites/face-owner-pierre.json"
     },
     {
+      "key": "face-owner-pierre-20",
+      "png": "sprites/face-owner-pierre-20.png",
+      "json": "sprites/face-owner-pierre-20.json"
+    },
+    {
       "key": "face-owner-snowball",
       "png": "sprites/face-owner-snowball.png",
       "json": "sprites/face-owner-snowball.json"
     },
     {
+      "key": "face-owner-snowball-20",
+      "png": "sprites/face-owner-snowball-20.png",
+      "json": "sprites/face-owner-snowball-20.json"
+    },
+    {
       "key": "face-owner-zippy",
       "png": "sprites/face-owner-zippy.png",
       "json": "sprites/face-owner-zippy.json"
+    },
+    {
+      "key": "face-owner-zippy-20",
+      "png": "sprites/face-owner-zippy-20.png",
+      "json": "sprites/face-owner-zippy-20.json"
     },
     {
       "key": "face-walker-ada",

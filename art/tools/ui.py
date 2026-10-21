@@ -1138,11 +1138,16 @@ DOG_CARD_FRAME = (1, 0, 118, 74)
 # The photo in the body (the navy on x 3 to 115 and rows 18 to 70): 3 columns of navy to its left, as
 # the owner's column keeps to its right, 8 rows above it and 9 below.
 DOG_PHOTO = (6, 26)
-# The hearts area the heart-loss flash fills, as x, y, w, h: the only part of the card it touches,
-# so the warn rim stays the card's only border.
-DOG_CARD_HEARTS = (44, 35, 46, 18)
-# The empty card's FIRED plate, x and y: under the owner's name, clear of its descenders.
-DOG_CARD_FIRED = (45, 36)
+# The owner's photo, x, y and side: 3 columns right of the dog's and level with its top, an ink frame
+# round a white mat round sky, as ui-owner-tab frames the owner, for the 20x20 face-owner-<dog>-20.
+DOG_CARD_OWNER = (45, 26, 24)
+# The hearts area the heart-loss flash fills, as x, y, w, h: one row of six hearts from (45,55), its
+# foot level with the dog's photo, with a pixel round them. The only part of the card it touches, so
+# the warn rim stays the card's only border.
+DOG_CARD_HEARTS = (44, 54, 55, 9)
+# The empty card's FIRED plate, x, y, w and h: a band across the empty photo, centred on it, the
+# plate's sides on the photo's frame.
+DOG_CARD_FIRED = (6, 35, 36, 17)
 # Each heart-loss frame: the flash's colour and how many of the area's pixels it fills (1 every
 # pixel, 2 a checkerboard, 4 one in four), so it bursts white and dithers away. White keeps the
 # hearts drawn over it readable (red 4.19:1, the grey outlines 2.82:1), where a red or pink flash
@@ -1155,10 +1160,12 @@ def dog_card(dog):
     2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face, the header
     (rows 1 to 16) split from the body by an ink rule on row 17. The game writes the name on the
     header in cream (9.59:1), with no plate. The dog's photo is an ink frame (6,26 36x36) round a
-    cream mat round its colour (8,28 32x32), in the body's middle. The owner's name (tan, 6.61:1), the hearts under it
-    (ui-heart full-dark and empty-dark) and the LEAD tag go on the navy to its right. The empty card
-    (a fired dog's) is dslate in the same frame, with a dslate photo, the owner's name (tan,
-    4.55:1) and a dred plate built as ui-fired-plate (45,36 68x17, its face 49,40 60x9) for FIRED."""
+    cream mat round its colour (8,28 32x32), in the body's middle. The owner's photo is an ink frame
+    (45,26 24x24) round a white mat round sky (47,28 20x20) for the owner's small face; the game writes
+    the owner's name (tan, 6.61:1) beside it and the hearts (ui-heart full-dark and empty-dark) under
+    it, and pins the LEAD tag across the foot of the dog's photo. The empty card (a fired dog's) is
+    dslate in the same frame, with a dslate photo crossed by a dred plate built as ui-fired-plate
+    (6,35 36x17, its face 10,39 28x9) for FIRED, and the owner's photo."""
     empty = dog == "empty"
     face = "dslate" if empty else "navy"
     w, h = DOG_CARD
@@ -1169,12 +1176,17 @@ def dog_card(dog):
     g.rect(x, y, 36, 36, "ink")
     g.rect(x + 1, y + 1, 34, 34, "cream")
     g.rect(x + 2, y + 2, 32, 32, "dslate" if empty else DOG_COLOURS[dog][0])
+    ox, oy, side = DOG_CARD_OWNER
+    g.rect(ox, oy, side, side, "ink")
+    g.rect(ox + 1, oy + 1, side - 2, side - 2, "white")
+    g.rect(ox + 2, oy + 2, side - 4, side - 4, "sky")
     if empty:
-        fired = plate("dred", "red", "plum", 68, 17)
+        fx, fy, fw, fh = DOG_CARD_FIRED
+        fired = plate("dred", "red", "plum", fw, fh)
         for yy, row in enumerate(fired.px):
             for xx, c in enumerate(row):
                 if c:
-                    g.px[DOG_CARD_FIRED[1] + yy][DOG_CARD_FIRED[0] + xx] = c
+                    g.px[fy + yy][fx + xx] = c
     return g
 
 
@@ -1207,7 +1219,7 @@ def dog_card_warn(step):
 
 def dog_card_heart_loss(step):
     """120x74, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
-    hearts and text that fills only the hearts area (44,35 46x18, its corners cut 1px), never the
+    hearts and text that fills only the hearts area (44,54 55x9, its corners cut 1px), never the
     card's edge or header: frames 0 and 1 white (13.89:1 on navy), then white on a checkerboard and
     on one pixel in four, so the flash clears."""
     colour, every = DOG_CARD_HEART_LOSS[step]
