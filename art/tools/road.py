@@ -472,7 +472,7 @@ def ada_front(wave=0, bob=0):
     g.rect(14, 26 + b, 4, 3, "dbrown")
     raised_arm(g, 22, 3, 16 + b, 31 + b, wave, ((3, "brown", "dbrown"), (9, "brown", "dbrown"), (0, "pink", "mauve")))
     # her face, then the curls over her forehead, lit dslate on the left
-    g.ell(16, 20.5 + b, 6.5, 6.5, "brown")
+    face_disc(g, 16, 20.5 + b, 6.5, 6.5, "brown", "dbrown")
     g.rect(10, 18 + b, 1, 4, "navy")
     g.rect(22, 18 + b, 1, 4, "ink")
     g.ell(16, 14.5 + b, 7.5, 3.5, "navy", "ink", "dslate")
@@ -510,7 +510,7 @@ def ben_front(wave=0, bob=0):
     raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "dbrown", "plum"), (8, "dbrown", "plum"), (0, "green", "dgreen")))
     g.rect(8, 12 + b, 2, 3, "dbrown")
     g.rect(22, 12 + b, 2, 3, "plum")
-    g.blob(16, 12 + b, 7, 9, "dbrown", "plum", power=2.15)
+    face_disc(g, 16, 12 + b, 7, 9, "dbrown", "plum")
     g.rect(11, 7 + b, 3, 1, "brown")
     g.p(11, 8 + b, "brown")
     # the beard runs down the jaw and round under the chin, leaving the upper lip bare
