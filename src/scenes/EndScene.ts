@@ -18,7 +18,7 @@ import {
 } from "../home/returnHome";
 import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
-import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
+import { COLLAR_HEIGHTS, leashHand } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { stopWakeLock } from "../pwa";
@@ -277,14 +277,14 @@ export class EndScene extends Scene {
     });
     pack.add(sprites.map(({ sprite }) => sprite));
     pack.add(leashes);
-    dogs.forEach((_, i) => {
+    dogs.forEach((dog, i) => {
       const at = itemAt(scene.dogs, i);
       const hand = leashHand({ dx: at.x - walkerAt.x, footDy: at.y - walkerAt.y });
       drawPixelLine(
         leashes,
         PALETTE.darkRed,
         { x: walkerAt.x + hand.dx, y: walkerAt.y + hand.dy },
-        { x: at.x, y: at.y - COLLAR_HEIGHT },
+        { x: at.x, y: at.y - COLLAR_HEIGHTS[dog] },
       );
     });
 

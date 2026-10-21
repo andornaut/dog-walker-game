@@ -5,7 +5,7 @@ import { gameData } from "../data";
 import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import {
-  COLLAR_HEIGHT,
+  COLLAR_HEIGHTS,
   drawnPackBand,
   PACK_DRAW_SCALE,
   packBand,
@@ -36,7 +36,7 @@ describe("layoutExport", () => {
   });
 
   it.each([
-    ["pack.collarHeight", layout.pack.collarHeight, COLLAR_HEIGHT],
+    ["pack.collarHeights", layout.pack.collarHeights, COLLAR_HEIGHTS],
     ["pack.drawScale", layout.pack.drawScale, PACK_DRAW_SCALE],
     ["pack.walkerHands", layout.pack.walkerHands, WALKER_HANDS],
     ["roadSprites", layout.roadSprites, { drawSize: ROAD_SPRITE_SIZE, hitSize: ROAD_HIT_SIZE }],
@@ -47,7 +47,14 @@ describe("layoutExport", () => {
   it.each(layout.pack.formations.map((formation, i) => [i + 1, formation] as const))(
     "exports a pack of %d's drawn formation and its drawn and hit bands",
     (count, formation) => {
-      expect(formation).toEqual(packPlacements(count, layout.pack.clearance));
+      // A walker whose frame clears by the exported clearance, with dogs standing on their
+      // frames' bottom rows.
+      const dog = { feetY: 48, frameHeight: 48, opaqueWidth: 24 };
+      const drawn = packPlacements(
+        { feetY: layout.pack.clearance },
+        Array.from({ length: count }, () => dog),
+      );
+      expect(formation).toEqual(drawn.map(({ dx, footDy }) => ({ footDy, side: Math.sign(dx) })));
       expect(layout.pack.bands[count - 1]).toEqual({
         drawn: drawnPackBand(count, footY, layout.pack.clearance),
         hit: packBand(count, footY),

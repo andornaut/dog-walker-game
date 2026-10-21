@@ -4,6 +4,7 @@ import { itemAt } from "../arrays";
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
 import { type AssetManifest, assetUrl, parseManifest, type SpriteAsset } from "../assets/manifest";
 import {
+  DOG_FRAME_SIDES,
   dogFaceKey,
   dogSpriteKey,
   encounterSpriteKey,
@@ -64,7 +65,8 @@ function placeholderSizes(): Map<string, Size> {
     [gameData.walkers[gameData.defaultWalker].spriteKey, box(side, tallest, PALETTE.blue)],
   ]);
   for (const dog of Object.keys(gameData.dogs) as DogId[]) {
-    sizes.set(dogSpriteKey(gameData, dog), box(side, side, PALETTE.slate));
+    const dogSide = DOG_FRAME_SIDES[gameData.dogs[dog].size];
+    sizes.set(dogSpriteKey(gameData, dog), box(dogSide, dogSide, PALETTE.slate));
     sizes.set(dogFaceKey(gameData, dog), box(32, 32, PALETTE.slate));
     sizes.set(ownerFaceKey(gameData, dog), box(32, 32, PALETTE.brown));
   }

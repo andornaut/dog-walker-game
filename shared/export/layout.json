@@ -756,40 +756,51 @@
       }
     ],
     "clearance": 72,
-    "collarHeight": 21,
+    "collarHeights": {
+      "archie": 20,
+      "biscuit": 21,
+      "duchess": 17,
+      "koda": 22,
+      "nugget": 17,
+      "penny": 23,
+      "pierre": 21,
+      "snowball": 23,
+      "zippy": 17
+    },
     "drawScale": 1.2,
     "formations": [
       [
         {
-          "dx": 0,
-          "footDy": -72
+          "footDy": -72,
+          "side": 0
         }
       ],
       [
         {
-          "dx": -24,
-          "footDy": -76
+          "footDy": -76,
+          "side": -1
         },
         {
-          "dx": 24,
-          "footDy": -72
+          "footDy": -72,
+          "side": 1
         }
       ],
       [
         {
-          "dx": 0,
-          "footDy": -82
+          "footDy": -82,
+          "side": 0
         },
         {
-          "dx": -24,
-          "footDy": -76
+          "footDy": -76,
+          "side": -1
         },
         {
-          "dx": 24,
-          "footDy": -72
+          "footDy": -72,
+          "side": 1
         }
       ]
     ],
+    "laneHalfWidth": 32,
     "walkerFootY": 464,
     "walkerHands": {
       "heightAboveFeet": 20,

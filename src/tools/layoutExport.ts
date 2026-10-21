@@ -1,7 +1,12 @@
 import shippedManifest from "../../public/art/manifest.json";
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { parseManifest } from "../assets/manifest";
-import { dogSpriteKey, ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import {
+  DOG_FRAME_SIDES,
+  dogSpriteKey,
+  ROAD_HIT_SIZE,
+  ROAD_SPRITE_SIZE,
+} from "../assets/spriteKeys";
 import { LANE_COUNT, ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
@@ -22,13 +27,14 @@ import { gridRects } from "../layout/grid";
 import { laneCenterXs, laneDividerXs } from "../layout/lanes";
 import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
 import {
-  COLLAR_HEIGHT,
+  COLLAR_HEIGHTS,
+  DRAWN_SHAPES,
   drawnPackBand,
   hitPackPlacements,
+  laneHalfWidth,
   PACK_DRAW_SCALE,
   packBand,
   packClearance,
-  packPlacements,
   WALKER_HANDS,
 } from "../layout/packFormation";
 import {
@@ -60,7 +66,7 @@ function packSizes(): number[] {
 }
 
 // The widest packClearance any walker and dogs make, from the art manifest's feet lines:
-// every walker's, and every dog's in its ROAD_SPRITE_SIZE square frame.
+// every walker's, and every dog's in its DOG_FRAME_SIDES square frame.
 export function widestPackClearance(data: Pick<GameData, "dogs" | "walkers">): number {
   const anchors = new Map(
     parseManifest(shippedManifest).sprites.map(({ anchor, key }) => [key, anchor]),
@@ -68,11 +74,11 @@ export function widestPackClearance(data: Pick<GameData, "dogs" | "walkers">): n
   const feetY = (key: string) => anchors.get(key)?.feetY ?? ROAD_SPRITE_SIZE;
   const dogs = (Object.keys(data.dogs) as (keyof GameData["dogs"])[]).map((dog) => ({
     feetY: feetY(dogSpriteKey(data, dog)),
-    frameHeight: ROAD_SPRITE_SIZE,
+    frameHeight: DOG_FRAME_SIDES[data.dogs[dog].size],
   }));
   return Math.max(
     ...Object.values(data.walkers).map((walker) =>
-      packClearance({ feetY: feetY(walker.spriteKey), frameHeight: 0 }, dogs),
+      packClearance({ feetY: feetY(walker.spriteKey) }, dogs),
     ),
   );
 }
@@ -143,10 +149,11 @@ export function layoutExport(
     // The message strip over the band's sky: its panel, the newest line's icon, the text
     // column and its room, and the older lines' capitals tops.
     messageStrip: messageStripLayout(),
-    // The pack as drawn, at the road sprite size: drawScale times its hit layout's spread and
-    // stagger, rounded, with the nearest dog clearance pixels up the screen from the walker's
-    // feet (the walker's frame above its feet, plus the most rows any dog's frame has below
-    // its feet), here the widest any walker and dogs make.
+    // The pack as drawn: drawScale times its hit layout's stagger, rounded, with the nearest
+    // dog clearance pixels up the screen from the walker's feet (the walker's frame above its
+    // feet, plus the most rows any dog's frame has below its feet), here the widest any walker
+    // and dogs make. A side dog walks laneHalfWidth less half its opaque width, rounded down,
+    // across from the walker, and its leash runs to its collar, collarHeights over its feet.
     pack: {
       // By pack size, from 1: the band from the lead dog's head to the walker's feet, as drawn
       // and as hit.
@@ -155,11 +162,14 @@ export function layoutExport(
         hit: packBand(count, walkerFootY(road)),
       })),
       clearance,
-      collarHeight: COLLAR_HEIGHT,
+      collarHeights: COLLAR_HEIGHTS,
       drawScale: PACK_DRAW_SCALE,
-      // By pack size, from 1: each dog's feet from the walker's feet in screen pixels, the
-      // first dog leading.
-      formations: packSizes().map((count) => packPlacements(count, clearance)),
+      // By pack size, from 1: each dog's side of the walker (-1 left, 0 centre, 1 right) and
+      // its feet from the walker's feet in screen pixels, the first dog leading.
+      formations: DRAWN_SHAPES.map((shape) =>
+        shape.map(({ footDy, side }) => ({ footDy: footDy - clearance, side })),
+      ),
+      laneHalfWidth: laneHalfWidth(),
       walkerFootY: walkerFootY(road),
       walkerHands: WALKER_HANDS,
     },

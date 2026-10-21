@@ -77,7 +77,7 @@ import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
-import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
+import { COLLAR_HEIGHTS, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import { type Cents, cents } from "../rules/units";
@@ -1308,13 +1308,13 @@ export class StartScene extends Scene {
     }
 
     const leash = this.graphics(root);
-    dogs.forEach(({ dx, footY: dogFoot }, i) => {
+    dogs.forEach(({ dog, dx, footY: dogFoot }, i) => {
       const hand = leashHand(itemAt(placements, i));
       drawPixelLine(
         leash,
         PALETTE.darkRed,
         { x: x + hand.dx, y: footY + hand.dy },
-        { x: x + dx, y: dogFoot - COLLAR_HEIGHT },
+        { x: x + dx, y: dogFoot - COLLAR_HEIGHTS[dog] },
       );
     });
 

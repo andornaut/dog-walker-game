@@ -6,10 +6,9 @@ import { dogSpriteKey, NEED_ART, ROAD_SPRITE_SIZE } from "../../assets/spriteKey
 import { gameData } from "../../data";
 import type { DogId, NeedId, QuirkId } from "../../data/types";
 import {
-  COLLAR_HEIGHT,
+  COLLAR_HEIGHTS,
   leashHand,
   PACK_DEPTH,
-  packClearance,
   packPlacements,
   tautLeashLine,
 } from "../../layout/packFormation";
@@ -179,15 +178,17 @@ export class PackView {
     }
   }
 
-  // The accident plays on the dog's own frame. Returns where the dog last stood, for its spot.
+  // The accident plays centred on the dog's frame, its bottom on the frame's bottom row, at the
+  // dog's scale, whatever the dog's frame size. Returns where the dog last stood, for its spot.
   accident(dog: DogId): { distance: number; x: number } | undefined {
     const sprite = this.dogSprites.get(dog);
     const feet = this.dogFeet.get(dog);
     if (sprite === undefined || feet === undefined) {
       return undefined;
     }
-    playEffect(this.scene, NEED_ART.accident, "play", sprite, sprite.depth + 1)
-      ?.setOrigin(sprite.originX, sprite.originY)
+    const bottom = sprite.getBottomCenter();
+    playEffect(this.scene, NEED_ART.accident, "play", bottom, sprite.depth + 1)
+      ?.setOrigin(0.5, 1)
       .setScale(sprite.scaleX, sprite.scaleY);
     return feet;
   }
@@ -215,11 +216,10 @@ export class PackView {
     const walkerX = Math.round(laneMotionX(LANE_XS, walk.road.control.motion));
     const footY = PROJECTION.footY;
     const walking = packDogs(walk.run);
-    const clearance = packClearance(
+    const placements = packPlacements(
       spriteMetrics(this.walker.key),
       walking.map((dog) => spriteMetrics(dogSpriteKey(gameData, dog))),
     );
-    const placements = packPlacements(walking.length, clearance);
     const leashColor = colorFromHex(currentZone(gameData, walk.run).leashColor);
     const taut = pulls.strain?.dog ?? null;
     const leashKey = `${walkerX}|${walking.join()}|${leashColor}|${taut}`;
@@ -257,7 +257,7 @@ export class PackView {
       if (redrawLeash) {
         const hand = leashHand(placement);
         const from = { x: walkerX + hand.dx, y: footY + hand.dy };
-        const to = { x, y: dogFoot - Math.round(COLLAR_HEIGHT * drawn.depth) };
+        const to = { x, y: dogFoot - Math.round(COLLAR_HEIGHTS[dog] * drawn.depth) };
         drawPixelLine(leash, leashColor, from, to);
         if (dog === taut) {
           const line = tautLeashLine(from, to);
