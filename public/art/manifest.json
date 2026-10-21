@@ -895,51 +895,6 @@
       }
     },
     {
-      "key": "cafe-patio",
-      "png": "sprites/cafe-patio.png",
-      "json": "sprites/cafe-patio.json",
-      "anchor": {
-        "feetY": 57,
-        "opaqueWidth": 108
-      }
-    },
-    {
-      "key": "cafe-patio@50",
-      "png": "sprites/cafe-patio@50.png",
-      "json": "sprites/cafe-patio@50.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 54
-      }
-    },
-    {
-      "key": "cafe-patio@62",
-      "png": "sprites/cafe-patio@62.png",
-      "json": "sprites/cafe-patio@62.json",
-      "anchor": {
-        "feetY": 36,
-        "opaqueWidth": 68
-      }
-    },
-    {
-      "key": "cafe-patio@75",
-      "png": "sprites/cafe-patio@75.png",
-      "json": "sprites/cafe-patio@75.json",
-      "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 81
-      }
-    },
-    {
-      "key": "cafe-patio@88",
-      "png": "sprites/cafe-patio@88.png",
-      "json": "sprites/cafe-patio@88.json",
-      "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 94
-      }
-    },
-    {
       "key": "card-frame",
       "png": "sprites/card-frame.png",
       "json": "sprites/card-frame.json"
@@ -1172,51 +1127,6 @@
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 25
-      }
-    },
-    {
-      "key": "construction",
-      "png": "sprites/construction.png",
-      "json": "sprites/construction.json",
-      "anchor": {
-        "feetY": 47,
-        "opaqueWidth": 62
-      }
-    },
-    {
-      "key": "construction@50",
-      "png": "sprites/construction@50.png",
-      "json": "sprites/construction@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 30
-      }
-    },
-    {
-      "key": "construction@62",
-      "png": "sprites/construction@62.png",
-      "json": "sprites/construction@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 38
-      }
-    },
-    {
-      "key": "construction@75",
-      "png": "sprites/construction@75.png",
-      "json": "sprites/construction@75.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 46
-      }
-    },
-    {
-      "key": "construction@88",
-      "png": "sprites/construction@88.png",
-      "json": "sprites/construction@88.json",
-      "anchor": {
-        "feetY": 41,
-        "opaqueWidth": 54
       }
     },
     {
@@ -2015,56 +1925,6 @@
       "json": "sprites/fx-splash.json"
     },
     {
-      "key": "fx-status-soaked",
-      "png": "sprites/fx-status-soaked.png",
-      "json": "sprites/fx-status-soaked.json"
-    },
-    {
-      "key": "fx-status-soaked@50",
-      "png": "sprites/fx-status-soaked@50.png",
-      "json": "sprites/fx-status-soaked@50.json"
-    },
-    {
-      "key": "fx-status-soaked@62",
-      "png": "sprites/fx-status-soaked@62.png",
-      "json": "sprites/fx-status-soaked@62.json"
-    },
-    {
-      "key": "fx-status-soaked@75",
-      "png": "sprites/fx-status-soaked@75.png",
-      "json": "sprites/fx-status-soaked@75.json"
-    },
-    {
-      "key": "fx-status-soaked@88",
-      "png": "sprites/fx-status-soaked@88.png",
-      "json": "sprites/fx-status-soaked@88.json"
-    },
-    {
-      "key": "fx-status-stinky",
-      "png": "sprites/fx-status-stinky.png",
-      "json": "sprites/fx-status-stinky.json"
-    },
-    {
-      "key": "fx-status-stinky@50",
-      "png": "sprites/fx-status-stinky@50.png",
-      "json": "sprites/fx-status-stinky@50.json"
-    },
-    {
-      "key": "fx-status-stinky@62",
-      "png": "sprites/fx-status-stinky@62.png",
-      "json": "sprites/fx-status-stinky@62.json"
-    },
-    {
-      "key": "fx-status-stinky@75",
-      "png": "sprites/fx-status-stinky@75.png",
-      "json": "sprites/fx-status-stinky@75.json"
-    },
-    {
-      "key": "fx-status-stinky@88",
-      "png": "sprites/fx-status-stinky@88.png",
-      "json": "sprites/fx-status-stinky@88.json"
-    },
-    {
       "key": "fx-tap",
       "png": "sprites/fx-tap.png",
       "json": "sprites/fx-tap.json"
@@ -2210,51 +2070,6 @@
       }
     },
     {
-      "key": "hydrant",
-      "png": "sprites/hydrant.png",
-      "json": "sprites/hydrant.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 36
-      }
-    },
-    {
-      "key": "hydrant@50",
-      "png": "sprites/hydrant@50.png",
-      "json": "sprites/hydrant@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "hydrant@62",
-      "png": "sprites/hydrant@62.png",
-      "json": "sprites/hydrant@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 23
-      }
-    },
-    {
-      "key": "hydrant@75",
-      "png": "sprites/hydrant@75.png",
-      "json": "sprites/hydrant@75.json",
-      "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 27
-      }
-    },
-    {
-      "key": "hydrant@88",
-      "png": "sprites/hydrant@88.png",
-      "json": "sprites/hydrant@88.json",
-      "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 32
-      }
-    },
-    {
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json",
@@ -2305,11 +2120,6 @@
       "json": "sprites/icon-effects-panel.json"
     },
     {
-      "key": "icon-growl",
-      "png": "sprites/icon-growl.png",
-      "json": "sprites/icon-growl.json"
-    },
-    {
       "key": "icon-motion-panel",
       "png": "sprites/icon-motion-panel.png",
       "json": "sprites/icon-motion-panel.json"
@@ -2323,31 +2133,6 @@
       "key": "icon-music-panel",
       "png": "sprites/icon-music-panel.png",
       "json": "sprites/icon-music-panel.json"
-    },
-    {
-      "key": "icon-need-friendly",
-      "png": "sprites/icon-need-friendly.png",
-      "json": "sprites/icon-need-friendly.json"
-    },
-    {
-      "key": "icon-need-nosy",
-      "png": "sprites/icon-need-nosy.png",
-      "json": "sprites/icon-need-nosy.json"
-    },
-    {
-      "key": "icon-need-playful",
-      "png": "sprites/icon-need-playful.png",
-      "json": "sprites/icon-need-playful.json"
-    },
-    {
-      "key": "icon-need-regular",
-      "png": "sprites/icon-need-regular.png",
-      "json": "sprites/icon-need-regular.json"
-    },
-    {
-      "key": "icon-need-thirsty",
-      "png": "sprites/icon-need-thirsty.png",
-      "json": "sprites/icon-need-thirsty.json"
     },
     {
       "key": "icon-sound",
@@ -4602,10 +4387,6 @@
       "png": "images/icon-settings.png"
     },
     {
-      "key": "icon-soaked",
-      "png": "images/icon-soaked.png"
-    },
-    {
       "key": "icon-stinky",
       "png": "images/icon-stinky.png"
     },
@@ -4658,36 +4439,12 @@
       "png": "images/icon-upgrade-rush-hour-20.png"
     },
     {
-      "key": "icon-upgrade-second-wind",
-      "png": "images/icon-upgrade-second-wind.png"
-    },
-    {
-      "key": "icon-upgrade-second-wind-20",
-      "png": "images/icon-upgrade-second-wind-20.png"
-    },
-    {
-      "key": "icon-upgrade-shortcut",
-      "png": "images/icon-upgrade-shortcut.png"
-    },
-    {
-      "key": "icon-upgrade-shortcut-20",
-      "png": "images/icon-upgrade-shortcut-20.png"
-    },
-    {
       "key": "icon-upgrade-sweet-talker",
       "png": "images/icon-upgrade-sweet-talker.png"
     },
     {
       "key": "icon-upgrade-sweet-talker-20",
       "png": "images/icon-upgrade-sweet-talker-20.png"
-    },
-    {
-      "key": "icon-upgrade-treat-magnet",
-      "png": "images/icon-upgrade-treat-magnet.png"
-    },
-    {
-      "key": "icon-upgrade-treat-magnet-20",
-      "png": "images/icon-upgrade-treat-magnet-20.png"
     },
     {
       "key": "icon-zone-cabbagetown",

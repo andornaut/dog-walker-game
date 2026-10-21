@@ -6,10 +6,9 @@ are 48x72, the other dog, skunk and squirrel 48x48 and the
 pickups 24x24: their drawing functions lay them out on 32x48, 32x32 and 16x16, and
 sprites() draws them SCALE (1.5) times bigger on a scaling grid, never upscaled.
 The bark pop is 16x16. The ice cream truck (56x60, one lane, like
-obstacles.delivery_truck; tags idle, 2 frames at 400ms, and drive, 4 at 100ms) and the
-construction barrier (64x48, one whole lane, repeated across the road) are drawn in
-their own pixels at 56x50 and 64x40 on a grid that keeps their columns and draws
-their rows ROW_SCALE (1.2) times; the puddle (112x48) is drawn in its own
+obstacles.delivery_truck; tags idle, 2 frames at 400ms, and drive, 4 at 100ms) is drawn in
+its own pixels at 56x50 on a grid that keeps its columns and draws its rows ROW_SCALE (1.2)
+times; the puddle (112x48) is drawn in its own
 pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
@@ -125,12 +124,10 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
 # on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines 1px, so nothing is upscaled;
 # the depth variants (minis.py, depths.py) run them at SCALE times each depth step.
 SCALE = 1.5
-# The ice cream truck and the construction barrier are drawn in their own pixels at 56x50 and 64x40, then on
-# a minis.Mini that keeps their columns (56 for the truck, a lane less 4px each side; a whole lane for the
-# barrier) and draws their rows ROW_SCALE times.
+# The ice cream truck is drawn in its own pixels at 56x50, then on a minis.Mini that keeps its 56 columns (a
+# lane less 4px each side) and draws its rows ROW_SCALE times.
 ROW_SCALE = 1.2
 TRUCK_SCALE = (1, ROW_SCALE)
-CONSTRUCTION_SCALE = (1, ROW_SCALE)
 
 
 def drawn(s, draw, *args, **q):
@@ -863,7 +860,7 @@ def skunk_cloud(step, s=1):
     outside, which holds 3:1 on the light roads, and pink inside it, which holds on the dslate road. The seams and
     the wisps' 1px wave are laid on the drawn grid, so they keep their pixels at every step. A puff near the frame's top or sides is
     trimmed so that, swollen, it still stops a pixel short of them. Mauve keeps it apart from the green
-    hedges, and matches fx-hit-skunk and fx-status-stinky."""
+    hedges, and matches fx-hit-skunk."""
     w, h = (math.floor(v * s + 0.5) for v in CLOUD_SIZE)
     sx, sy = w / CLOUD_W, h / CLOUD_H
     g = Grid(w, h)
@@ -1280,34 +1277,6 @@ def ice_cream_truck(f=0, roll=None):
     return g
 
 
-def construction(f):
-    """One lane's barrier, laid out on 64x40 and drawn at CONSTRUCTION_SCALE to 64x56, repeated across every lane; f swaps which lamp is lit. A squat front
-    elevation standing on the road line: the board, the lower rail right under it on short legs, the lamps
-    and the detour sign. Striped like obstacles.barrier so the stripes hold steady at depth: the board's 5
-    stairs of 2 rows are striped 10px orange every 20px, leaning right 2px a stair and stopping at the board's
-    ends, and its bottom stair is the shaded lower edge. The lower rail's squares are 4px wide on even
-    columns, as are the posts. The road outline and the lit rim."""
-    g = edged(Grid(64, 40))
-    for x in (7, 53):
-        g.rect(x, 20, 4, 19, "grey")
-        g.rect(x + 2, 20, 2, 19, "slate")
-    for k, (base, stripe) in enumerate((("white", "orange"),) * 4 + (("lgrey", "rust"),)):
-        y = 20 + 2 * k
-        g.rect(3, y, 58, 2, base)
-        for x in range(12 - 2 * k - 20, 61, 20):
-            g.rect(max(x, 3), y, min(x + 10, 61) - max(x, 3), 2, stripe)
-    g.rect(3, 30, 58, 5, "white")
-    for x in range(4, 60, 8):
-        g.rect(x, 30, 4, 5, "orange")
-    g.ell(9, 16, 3, 3, "amber" if f else "orange", "orange", "yellow" if f else None)
-    g.ell(55, 16, 3, 3, "orange" if f else "amber", "orange", None if f else "yellow")
-    g.rect(22, 8, 20, 10, "amber")
-    g.rect(22, 8, 20, 1, "orange")
-    g.rect(27, 12, 12, 2, "plum")
-    g.tri((24, 13), (29, 9), (29, 17), "plum")
-    return rim(g, LIT)
-
-
 def stair(g, x0, y0, x1, y1, c):
     """A strap running down from layout (x0, y0) to (x1, y1), exclusive: one pixel row per step, each step an
     equal share of the width. Drawn in pixels at the grid's scale, so its steps stay joined at SCALE."""
@@ -1616,7 +1585,6 @@ def sprites():
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
                               ("drive", frames(drawn(TRUCK_SCALE, ice_cream_truck, 0, r) for r in drive), drive_ms)]
-    yield "construction", [("idle", frames([drawn(CONSTRUCTION_SCALE, construction, f) for f in (0, 1)]), 500)]
     yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in PERSON_WALK), PERSON_WALK_MS),
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "stroller", [("walk", frames(big(stroller, **q) for q in STROLLER_WALK), STROLLER_WALK_MS)]

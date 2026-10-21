@@ -10,7 +10,6 @@ by distance with its base on the road line.
 
 cone                48x48   1 lane, a glint runs down its highlight
 bin                 48x48   1 lane, the lid lifts 1px in a breeze
-hydrant             48x48   the Regular dog's need spot (not an obstacle), a drip off the side cap
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
 barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink
 barrier-3           176x36  3 lanes, lamps blink
@@ -143,31 +142,6 @@ def bin_(lift=0):
     g.rect(9, 8 + lift, 22, 1, "green")
     g.rect(20, 9 + lift, 11, 5, "forest")
     g.rect(16, 5 + lift, 8, 3, "ink")
-    return lit(g)
-
-
-def hydrant(drip=0):
-    """drip: 1 a bead under the left cap, 2 the bead stretched to fall, 3 a drop landed beside the base.
-    The red body takes a pink rim on its top-left edges."""
-    g = edged(Grid(SIZE, SIZE))
-    g.rect(11, 33, 18, 4, "dred")
-    g.rect(11, 33, 18, 1, "red")
-    g.rect(14, 14, 12, 19, "red")
-    g.rect(21, 14, 5, 19, "dred")
-    g.rect(15, 14, 2, 19, "pink")
-    g.ell(20, 14, 7.5, 5.5, "red", "dred", "pink")
-    g.rect(18, 5, 4, 4, "dred")
-    g.rect(12, 11, 16, 3, "dred")
-    g.rect(7, 19, 6, 6, "red")
-    g.rect(27, 19, 6, 6, "dred")
-    g.rect(6, 20, 2, 4, "lgrey")
-    g.rect(32, 20, 2, 4, "grey")
-    g.rect(18, 20, 4, 4, "dred")
-    g.rect(19, 21, 2, 2, "lgrey")
-    if drip in (1, 2):
-        g.rect(6, 24, 1, drip, "cyan")
-    elif drip == 3:
-        g.rect(5, 36, 2, 1, "cyan")
     return lit(g)
 
 
@@ -324,7 +298,6 @@ def treads(g, x, y, w, h, f, u=1, back=False):
 # two frames so the motion comes as a short event rather than a constant flicker.
 CONE_IDLE = (None, None, 9, 11), 400
 BIN_IDLE = (0, 0, -1, 0), 400
-HYDRANT_IDLE = (0, 1, 2, 3), 450
 BENCH_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
 HEDGE_IDLE = ((), (5,), (10,), (15,)), 350
 PARKED_CAR_IDLE = (False, True), 500
@@ -574,7 +547,6 @@ def sprites():
 
     yield "cone", idle(cone, CONE_IDLE)
     yield "bin", idle(bin_, BIN_IDLE)
-    yield "hydrant", idle(hydrant, HYDRANT_IDLE)
     yield "bench", idle(bench, BENCH_IDLE)
     yield "hedge", idle(lambda r: hedge(rustle=r), HEDGE_IDLE)
     for lanes in (2, 3):

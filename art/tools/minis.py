@@ -15,7 +15,7 @@ grow taller.
 
 <key>@<step> keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
-lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog,
+lost-wallet, cone, bin, bench, skunk, squirrel, other-dog,
 skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
 drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 42x42 at @88, 36x36
 at @75, 30x30 at @62 and 24x24 at @50.
@@ -401,8 +401,6 @@ def variants(s):
     yield "cone", [("idle", [cone(o, gl).outlined() for gl in frames], ms)]
     frames, ms = obstacles.BIN_IDLE
     yield "bin", [("idle", [small(obstacles, o, obstacles.bin_, a).outlined() for a in frames], ms)]
-    frames, ms = obstacles.HYDRANT_IDLE
-    yield "hydrant", [("idle", [small(obstacles, o, obstacles.hydrant, d).outlined() for d in frames], ms)]
     frames, ms = obstacles.BENCH_IDLE
     yield "bench", [("idle", [small(obstacles, o, obstacles.bench, a).outlined() for a in frames], ms)]
     yield "skunk", [("idle", [skunk(p, **q).outlined() for q in road.SKUNK_IDLE], 300)]

@@ -13,17 +13,15 @@ icon-zone-<zone>            cabbagetown (a bay-and-gable house), high-park (a pi
                             in blossom), distillery-district (a brick warehouse),
                             kensington-market (a painted house turned shop), the-beaches (the
                             lifeguard station), yonge-street (the CN Tower); each inside a 1px
-                            ring for its outline, which holds 3:1 on cream and tan as the need
-                            icons' does
-icon-muddy, icon-soaked     dog statuses beside icon-stinky (ui.py), on cream: a muddy paw
-                            print; water drops
+                            ring for its outline, which holds 3:1 on cream and tan
+icon-muddy                  a dog status beside icon-stinky (ui.py), on cream: a muddy paw
+                            print
 icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
                             off three sky speed lines
 icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
-                            (a yellow raincoat), rush-hour (an alarm clock), second-wind (two
-                            hearts on the wind), shortcut (two chevrons), sweet-talker (a speech
-                            bubble with $ and a down arrow), treat-magnet (a magnet and a bone)
+                            (a yellow raincoat), rush-hour (an alarm clock), sweet-talker (a speech
+                            bubble with $ and a down arrow)
 icon-gear-<gear>            state strip, on ink: the shop's item art (icons.py) at 16x16
 <key>-20                    each icon-perk-*, icon-upgrade-* and icon-gear-* drawn again at 20x20 for
                             the walk bar's 22x22 effect wells: the same subject and colours, with a 1px
@@ -252,25 +250,13 @@ def yonge_street():
 
 # ---------- dog statuses, on the doghouse's cream heart board beside icon-stinky ----------
 # Like icon-stinky, each reads on cream by its outline (navy, blue, dbrown and plum hold 5.8:1
-# or more there) and differs from the others by shape: a paw print, drops, stink lines.
+# or more there) and differs from the others by shape: a paw print, stink lines.
 
 def drop(g, cx, top, r, fill, sh=None, li=None):
     """A water drop: a point at (cx, top) over a round base of radius r."""
     base = top + 2.2 * r
     g.tri((cx, top), (cx - r * 0.93, base - r * 0.4), (cx + r * 0.93, base - r * 0.4), fill)
     g.ell(cx, base, r, r, fill, sh, li)
-
-
-def soaked():
-    """One big drop and two small ones falling beside it."""
-    g = Grid(16, 16)
-    drop(g, 6, 1, 4.6, "sky", "blue", "cyan")
-    g.rect(5, 4, 1, 3, "cyan")
-    g.rect(3, 9, 1, 3, "white")
-    g.p(4, 8, "white")
-    for x, y in ((12, 1), (12, 9)):
-        bitmap(g, x, y, [".s.", ".s.", "sss", "ssb", ".b."], {"s": "sky", "b": "blue"})
-    return g
 
 
 MUDDY = (
@@ -345,18 +331,6 @@ def belly_rubs():
     return g
 
 
-def second_wind():
-    """Two hearts lifted on gusts of wind."""
-    g = Grid(16, 16)
-    heart(g, 8, 2)
-    heart(g, 6, 8)
-    for x, y, w in ((1, 4, 5), (0, 10, 4), (2, 14, 6)):
-        g.rect(x, y, w, 1, "white")
-    g.p(6, 3, "white")
-    g.p(8, 15, "white")
-    return g
-
-
 def big_tipper():
     """A stack of coins with an arrow up."""
     g = Grid(16, 16)
@@ -405,21 +379,6 @@ def raincoats():
     return g
 
 
-def treat_magnet():
-    """A horseshoe magnet pulling a bone."""
-    g = Grid(16, 16)
-    g.ell(10, 6.5, 5, 5, "red", None, "pink")
-    g.ell(10, 6.5, 2, 2, None)
-    g.rect(5, 6, 11, 6, None)
-    g.rect(5, 6, 3, 4, "red")
-    g.rect(12, 6, 3, 4, "red")
-    g.rect(5, 10, 3, 2, "lgrey")
-    g.rect(12, 10, 3, 2, "lgrey")
-    bitmap(g, 0, 12, ["cc...cc", ".ccccc.", "cc...cc"], {"c": "cream"})
-    bitmap(g, 3, 7, ["1.", "..", ".1"], {"1": "lgrey"})
-    return g
-
-
 def sweet_talker():
     """A speech bubble saying money goes down."""
     g = Grid(16, 16)
@@ -429,16 +388,6 @@ def sweet_talker():
     g.tri((3, 10), (3, 15), (7, 10), "white")
     bitmap(g, 3, 3, [".s.", "sss", "s..", "sss", "..s", "sss", ".s."], {"s": "forest"})
     bitmap(g, 8, 3, ["..d..", "..d..", "..d..", "ddddd", ".ddd.", "..d.."], {"d": "dred"})
-    return g
-
-
-def shortcut():
-    """Two chevrons pointing ahead."""
-    g = Grid(16, 16)
-    for x0 in (1, 7):
-        for i in range(6):
-            g.rect(x0 + i, 2 + i, 3, 1, "amber")
-            g.rect(x0 + i, 13 - i, 3, 1, "orange" if i < 5 else "amber")
     return g
 
 
@@ -612,10 +561,6 @@ def treat_finder20():
     return g
 
 
-HEART_20 = [".11...11.", "1111.1111", "111111111", "11111111p", ".111111p.", "..1111p..", "...11p...",
-            "....p...."]
-
-
 def belly_rubs20():
     """A hand, palm up, rubbing below a heart."""
     g = Grid(20, 20)
@@ -623,20 +568,6 @@ def belly_rubs20():
     bitmap(g, 1, 11, ["......sssss.....", "ssssssssssssss..", "sssssssdddddd...", "sssssssssssssss.",
                       "ssssssdddddd....", "ssssssssssssss..", "sssssddddd......", "ssssssssssss...."],
            {"s": "skin1", "d": "skin2"})
-    return g
-
-
-def second_wind20():
-    """Two hearts lifted on gusts of wind."""
-    g = Grid(20, 20)
-    for x, y in ((10, 2), (7, 10)):
-        bitmap(g, x, y, HEART_20, {"1": "red", "p": "hot"})
-        g.p(x + 1, y + 1, "pink")
-    for x, y, w in ((1, 5, 7), (1, 13, 5), (1, 18, 7)):
-        g.rect(x, y, w, 1, "white")
-    g.p(8, 4, "white")
-    g.p(6, 12, "white")
-    g.p(8, 17, "white")
     return g
 
 
@@ -692,16 +623,6 @@ def rush_hour20():
     return g
 
 
-def shortcut20():
-    """Two chevrons pointing ahead."""
-    g = Grid(20, 20)
-    for x0 in (1, 8):
-        for i in range(8):
-            g.rect(x0 + i, 2 + i, 3, 1, "amber")
-            g.rect(x0 + i, 17 - i, 3, 1, "orange" if i < 7 else "amber")
-    return g
-
-
 def sweet_talker20():
     """A speech bubble saying money goes down: a forest $ and a dred arrow down."""
     g = Grid(20, 20)
@@ -710,20 +631,6 @@ def sweet_talker20():
            {"s": "forest"})
     bitmap(g, 10, 3, ["..ddd..", "..ddd..", "..ddd..", "..ddd..", "ddddddd", ".ddddd.", "..ddd..", "...d..."],
            {"d": "dred"})
-    return g
-
-
-def treat_magnet20():
-    """A horseshoe magnet pulling a bone up from the lower left."""
-    g = Grid(20, 20)
-    g.ell(12, 8, 6, 6, "red", None, "pink")
-    g.ell(12, 8, 2.5, 2.5, None)
-    g.rect(6, 8, 14, 7, None)
-    g.rect(6, 8, 3, 5, "red")
-    g.rect(15, 8, 3, 5, "red")
-    g.rect(6, 13, 3, 2, "lgrey")
-    g.rect(15, 13, 3, 2, "lgrey")
-    bitmap(g, 1, 16, ["cc.....cc", ".ccccccc.", "cc.....cc"], {"c": "cream"})
     return g
 
 
@@ -845,17 +752,13 @@ IMAGES = {
     "icon-zone-the-beaches": the_beaches,
     "icon-zone-yonge-street": yonge_street,
     "icon-muddy": muddy,
-    "icon-soaked": soaked,
     "icon-zoomies": zoomies,
     "icon-upgrade-belly-rubs": belly_rubs,
     "icon-upgrade-big-tipper": big_tipper,
     "icon-upgrade-good-leash": good_leash,
     "icon-upgrade-raincoats": raincoats,
     "icon-upgrade-rush-hour": rush_hour,
-    "icon-upgrade-second-wind": second_wind,
-    "icon-upgrade-shortcut": shortcut,
     "icon-upgrade-sweet-talker": sweet_talker,
-    "icon-upgrade-treat-magnet": treat_magnet,
     "icon-gear-fanny-pack": gear_fanny_pack,
     "icon-gear-lucky-collar": gear_lucky_collar,
     "icon-gear-poop-bags": gear_poop_bags,
@@ -869,10 +772,7 @@ IMAGES = {
     "icon-upgrade-good-leash-20": good_leash20,
     "icon-upgrade-raincoats-20": raincoats20,
     "icon-upgrade-rush-hour-20": rush_hour20,
-    "icon-upgrade-second-wind-20": second_wind20,
-    "icon-upgrade-shortcut-20": shortcut20,
     "icon-upgrade-sweet-talker-20": sweet_talker20,
-    "icon-upgrade-treat-magnet-20": treat_magnet20,
     "icon-gear-fanny-pack-20": gear_fanny_pack20,
     "icon-gear-lucky-collar-20": gear_lucky_collar20,
     "icon-gear-poop-bags-20": gear_poop_bags20,

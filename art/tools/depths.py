@@ -8,7 +8,7 @@ minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, biscuit-neighbour, mail-carrier,
-stroller, jogger, kid-on-bike, ice-cream-truck, construction, puddle (no
+stroller, jogger, kid-on-bike, ice-cream-truck, puddle (no
 outline), hedge, hot-dog-cart, barrier-2, barrier-3, parked-car, delivery-truck
 and streetcar. Walkers
 are the pack, always drawn at 1x, and have none.
@@ -16,9 +16,8 @@ are the pack, always drawn at 1x, and have none.
 Every variant keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). road.py's people are drawn at
 road.SCALE x the step, as road.py draws them at road.SCALE. The truck, the
-construction barrier, the obstacles and the parked car are drawn at their
-full size's scale (road.TRUCK_SCALE, road.CONSTRUCTION_SCALE,
-obstacles.SCALE, obstacles.CAR_SCALE) x the step. Offsets that move a
+obstacles and the parked car are drawn at their full size's scale
+(road.TRUCK_SCALE, obstacles.SCALE, obstacles.CAR_SCALE) x the step. Offsets that move a
 part by pixels (a step, a breath, a wag) are snapped to whole pixels at the small
 size.
 
@@ -109,8 +108,6 @@ def own(s):
     yield "ice-cream-truck", [("idle", [small(road, truck, road.ice_cream_truck, f).outlined() for f in (0, 1)], 400),
                               ("drive", [small(road, truck, road.ice_cream_truck, roll=r).outlined() for r in drive],
                                drive_ms)]
-    yield "construction", [("idle", [small(road, times(road.CONSTRUCTION_SCALE), road.construction, f).outlined()
-                                     for f in (0, 1)], 500)]
     yield "puddle", [("idle", [small(road, s, road.puddle, f).outlined(False) for f in (0, 1)], 500)]
     b = obstacles.SCALE * s
     yield "hedge", obstacle(b, lambda r: obstacles.hedge(rustle=r), obstacles.HEDGE_IDLE)

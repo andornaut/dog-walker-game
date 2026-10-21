@@ -4,7 +4,7 @@ Every art asset the game needs. Keys are the `public/art/manifest.json` keys. Ty
 
 `<zone>` is a zone's art id: cabbagetown, high-park, distillery-district, kensington-market, the-beaches or yonge-street.
 
-Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50`, each floor(size × scale + 0.5) with the same tags, frames and durations (style guide, Depth scaling): every dog, road object, pickup, roadside prop, ambient sprite but the sky movers, and `fx-status-<status>`.
+Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50`, each floor(size × scale + 0.5) with the same tags, frames and durations (style guide, Depth scaling): every dog, road object, pickup, roadside prop, and ambient sprite but the sky movers.
 
 ## People and dogs
 
@@ -29,11 +29,9 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50`, each floor(
 | `bench`                          | sprite | 112×36         | `idle`                                           | Minor, 2 lanes                                                                                      |
 | `bin`, `cone`                    | sprite | 48×48          | `idle`                                           | Minor, 1 lane                                                                                       |
 | `biscuit-neighbour`              | sprite | 48×72          | `wave`, `idle`                                   | Lucky; holds a biscuit jar                                                                          |
-| `cafe-patio`                     | sprite | 112×60         | `idle`                                           | Encounter, 2 lanes                                                                                  |
 | `chase-cat`, `chase-rabbit`      | sprite | 38×38          | `idle`, `run`; the rabbit also `hop`             | `ambient-cat`'s and `ambient-rabbit`'s fallbacks                                                    |
 | `chase-ducklings`                | sprite | 38×38          | `idle`, `run`, `hop`                             | The ducklings mover; `hop` crosses the lanes in side view                                           |
 | `chase-pigeons`                  | sprite | 38×38          | `idle`, `run`, `flee`                            | The pigeons mover; `flee` flies off up the road, seen from behind                                   |
-| `construction`                   | sprite | 64×48          | `idle`                                           | Forced stop; one whole lane, repeated across the road                                               |
 | `coyote`                         | sprite | 48×48          | `idle`, `walk`, `step`                           | Mover; steps toward the pack in any direction; three-quarter front, angled right, mirrored for left |
 | `cyclist`                        | sprite | 48×72          | `ride`                                           | Minor; rides down a lane                                                                            |
 | `delivery-truck`                 | sprite | 56×54          | `idle`, `drive`                                  | 1 lane by 3 rows, a box van from behind; `drive` drives down its lane                               |
@@ -83,21 +81,17 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50`, each floor(
 | `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | other-dog, skunk, thief; the comic word is set over it                             |
 | `fx-sparkle`            | sprite | 16×16            | `play`            | Pickup collected                                                                   |
 | `fx-splash`             | sprite | 64×48            | `play`            | Puddle                                                                             |
-| `fx-status-<status>`    | sprite | 19×19            | `loop`            | soaked, stinky; over a dog's head                                                  |
 | `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, green, mauve, orange, pink, sky, white; left edge strip, mirrored for right |
 | `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                                |
 
-## Dog needs
+## Pulls and firing
 
-| Key                | Type   | Size  | Tags                     | Note                                                               |
-| ------------------ | ------ | ----- | ------------------------ | ------------------------------------------------------------------ |
-| `fx-pull-fail`     | sprite | 16×16 | `play`                   | A blocked pull, over the dog's head                                |
-| `hydrant`          | sprite | 48×48 | `idle`                   | Regular spot                                                       |
-| `icon-growl`       | sprite | 16×16 | `normal`                 | The Nervous quirk's strain toward another dog, in `ui-pull-bubble` |
-| `icon-need-<need>` | sprite | 16×16 | `normal`                 | friendly, nosy, playful, regular, thirsty                          |
-| `ui-fires`         | sprite | 16×16 | `static`, `pulse`        | Card option that fires an owner; over the cost plaque's left end   |
-| `ui-pull-blocked`  | sprite | 10×10 | `normal`                 | Over the bubble's top-right corner when a pull is blocked          |
-| `ui-pull-bubble`   | sprite | 32×28 | `idle`, `show`, `urgent` | Over a dog with an urgent need; the game draws the need icon in it |
+| Key               | Type   | Size  | Tags                     | Note                                                             |
+| ----------------- | ------ | ----- | ------------------------ | ---------------------------------------------------------------- |
+| `fx-pull-fail`    | sprite | 16×16 | `play`                   | A blocked pull, over the dog's head                              |
+| `ui-fires`        | sprite | 16×16 | `static`, `pulse`        | Card option that fires an owner; over the cost plaque's left end |
+| `ui-pull-blocked` | sprite | 10×10 | `normal`                 | Over the bubble's top-right corner when a pull is blocked        |
+| `ui-pull-bubble`  | sprite | 32×28 | `idle`, `show`, `urgent` | Over a dog pulling; the game draws its target's icon in it       |
 
 ## Road, backdrop and scenery
 
@@ -152,7 +146,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | `icon-gear-<gear>`, `icon-upgrade-<upgrade>`                            | image  | 16×16             |                                            | One per gear (4) and upgrade (9) id                                      |
 | `icon-gear-<gear>-20`, `icon-upgrade-<upgrade>-20`                      | image  | 20×20             |                                            | The walk bar's effect wells                                              |
 | `icon-money`                                                            | image  | 16×16             |                                            | Also cards, shop and end screen                                          |
-| `icon-muddy`, `icon-soaked`, `icon-stinky`, `icon-zoomies`              | image  | 16×16             |                                            | Status icons; the debuffs' lead their `ui-debuff-bar`                    |
+| `icon-muddy`, `icon-stinky`, `icon-zoomies`                             | image  | 16×16             |                                            | The debuffs' icons; each leads its `ui-debuff-bar`                       |
 | `icon-treat`                                                            | image  | 16×16             |                                            | The treat pickup's bone at icon size                                     |
 | `icon-zone-<zone>`                                                      | image  | 16×16             |                                            |                                                                          |
 | `ui-debuff-bar`                                                         | sprite | 360×16            | `muddy`, `stinky`, `zoomies`               | One active debuff under the walk bar; the game draws icon, name and fill |

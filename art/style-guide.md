@@ -26,9 +26,8 @@ The rules for drawing and placing the art. Each tool's docstring in `art/tools/`
 | Road animals (the other dog, skunk, squirrel, goose, `coyote`, `loose-dog`, `squirrel-dash`) and medium dogs   | 48×48                      |
 | Road people (walkers, the lucky and forced-stop people, the thief, the other dog's owner and the human movers) | 48×72 (kids drawn shorter) |
 | Small effects, icons                                                                                           | 16×16                      |
-| Status overlays (`fx-status-<status>`)                                                                         | 19×19                      |
 
-- Road sprites are 1.2× the game's 40px hit box. Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.5× (depth variants at 1.5× the step): every shape scales, 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. Minor obstacles are laid out in their own pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn at 1.2×; vehicles and the construction barrier keep their columns to their lanes and draw their rows at 1.2×. A 48px sprite leaves 8px of margin each side of its 64px lane. Sizes are in `inventory.md`.
+- Road sprites are 1.2× the game's 40px hit box. Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.5× (depth variants at 1.5× the step): every shape scales, 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. Minor obstacles are laid out in their own pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn at 1.2×; vehicles keep their columns to their lanes and draw their rows at 1.2×. A 48px sprite leaves 8px of margin each side of its 64px lane. Sizes are in `inventory.md`.
 - Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite.
 - Ground decals (the puddle, the skunk cloud) stay low so they read as lying on the road.
 
@@ -55,7 +54,7 @@ The rules for drawing and placing the art. Each tool's docstring in `art/tools/`
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings are a few flat patches. A face seen from the front stays clean: flat skin with a 1px shadow down its near (right) edge beside the eyes, never across the jaw or mouth (`face_disc`).
 - Effects (`fx-`) take a fixed 1px rim: plum, navy for water, teal for green. `fx-bark` keeps a ramp outline; `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` has no rim. Hazard warnings are outlined in ink.
 - Ground decals have no outline and no shadow.
-- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-need-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline. A walker's pace and style icons are animals and objects, never a bow, bone, squirrel, moon, paw or bolt, so they never read as a dog's trait or energy.
+- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline. A walker's pace and style icons are animals and objects, never a bow, bone, squirrel, moon, paw or bolt, so they never read as a dog's trait or energy.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
 ## Contrast
@@ -160,7 +159,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 - The art window is centred on the card's face: `card-frame` 3,15 77×58 with the illustration at 4,16; `card-frame-large` 6,30 154×116 with the illustration at 8,32.
 - A path card (`card-zone-<zone>`) samples its road strip to a cross street and repeats its backdrop's sky and scenery in miniature.
 
-### Hits, moments and statuses
+### Hits and moments
 
 | Event         | Shows                                                                                                                                                                                                             |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -176,7 +175,6 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 | Puddle        | `fx-splash` on the touching dog's feet; `ui-hit-flash-sky`; walker `stumble`; dogs `react`, then `shake`                                                                                                          |
 | Treat given   | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                       |
 
-- `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Each status has its own colour family and shape, apart from the leash's pink, dred and plum.
 - Hit effects draw over every road sprite and the pack. The pack is always drawn at full size, so they have no depth variants.
 - With reduced motion a bump or splash holds its peak frame (`fx-bump` and `fx-bump-big` frame 1, `fx-splash` frame 2); debris, shakes and `react` are skipped, and the white flash is one 120ms blink.
 - Each message strip line leads with a 16×16 content icon (`icon-bump`, `icon-treat`, `icon-last-heart`, `icon-fired`, the debuff's icon, `icon-lucky`, `icon-trait-chaser`, `icon-hint`).

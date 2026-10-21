@@ -148,7 +148,7 @@ class Art(sn.Scene):
                 self.fill(x + k * 6 + (0 if (j % 4) < 2 else 1), y + j, 1, 1, col if j % 3 else sh)
 
     def skunk_stink(self, x, y, n=3):
-        """Stink lines in the skunk's colours (road.CLOUD_INK), as skunk-cloud and fx-status-stinky."""
+        """Stink lines in the skunk's colours (road.CLOUD_INK), as skunk-cloud."""
         self.stink(x, y, n, road.CLOUD_INK["inner"], road.CLOUD_INK["outer"])
 
     def drops(self, pts, col="cyan"):

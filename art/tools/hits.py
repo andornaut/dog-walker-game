@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Draw the encounter hit moments: a burst over the pack per encounter, the
-screen-edge flash in the encounter's colour, the plate behind the big label,
-and the per-dog status overlays. Bursts carry a 1px plum rim so they hold 3:1
+screen-edge flash in the encounter's colour and the plate behind the big label. Bursts carry a 1px plum rim so they hold 3:1
 on the three light roads while their fills carry the dslate road. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
 encounters.py. The bursts are laid out on a 64x64 design and drawn 77/64 times
@@ -22,12 +21,6 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           stretched to 176x32 for every label; white font-title text at 2x,
                           centred, its line top 3px below the plate's top so the 10px caps sit
                           in rows 11 to 20
-fx-status-stinky   19x19  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
-fx-status-soaked   19x19  loop (4 frames, 150ms) cyan drips falling off, navy-rimmed
-                   each status also has @88 (19x19), @75 (17x17), @62 (14x14) and @50
-                   (11x11), the dogs' steps, each drawn in its own pixels, same tags and
-                   timing; bottom-centre on the dog's centre column, a few pixels below the
-                   dog's top opaque row, so the lower rows overlap the head
 
 Usage:
   hits.py preview OUT.png   every frame of every piece on the four road colours
@@ -145,8 +138,7 @@ def impact(g, outer, cx=32, cy=32, r=16):
 
 def hit_skunk(step):
     """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift
-    apart, shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud and
-    fx-status-stinky: the puffs mauve, shaded purple on their lower right and lit pink on their upper left, so
+    apart, shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud: the puffs mauve, shaded purple on their lower right and lit pink on their upper left, so
     the pink carries the dslate road and the plum rim the light roads. Stink squiggles rise out of it, pink with a
     plum side, so they read over the cloud and on every road."""
     g = Grid(64, 64)
@@ -389,70 +381,12 @@ def label_plate(face="dred", lit="red", shade="plum"):
     return ui.hit_label(face, lit, shade)
 
 
-# ---------- dog status overlays ----------
-
-
-def status_stinky(size, step):
-    """Wavy lines rising 2px a frame over an 8px wave, so 4 frames loop with no seam. Pink, each whole
-    squiggle rimmed in plum, so the pink carries the dslate road and the plum the light roads: the skunk's mauve
-    family, as skunk-cloud and fx-hit-skunk. The lines sit
-    1px in from every edge, so the rim closes round them, and wave in step (the middle one a row ahead),
-    so neighbouring rims never close the gap between them."""
-    g = Grid(size, size)
-    lines = {22: ((4, 0), (11, 1), (18, 0)), 19: ((3, 0), (9, 1), (15, 0)), 17: ((3, 0), (8, 1), (13, 0)),
-             14: ((3, 0), (9, 1)), 12: ((2, 0), (8, 1)), 11: ((2, 0), (7, 1)), 10: ((2, 0), (7, 1))}[size]
-    top, bottom = {22: (3, 20), 19: (2, 17), 17: (2, 15), 14: (1, 13), 12: (1, 11), 11: (1, 10), 10: (1, 9)}[size]
-    for x0, ph in lines:
-        for y in range(top, bottom):
-            k = (y + 2 * step + ph) % 8
-            if k == 7:
-                continue
-            g.p(x0 + WAVE[k], y, "pink")
-    return rim(g, "plum")
-
-
-DRIP = {22: (".c..", ".cc.", "cwcc", "cwcs", ".ss."), 19: (".c.", "cwc", "ccs", ".s."), 17: (".c.", "cwc", "ccs", ".s."),
-        14: ("c.", "ws", "s."), 12: ("c.", "ws", "s."), 11: ("c.", "ws", "s."), 10: ("c.", "ws", "s.")}
-
-
-
-def status_soaked(size, step):
-    """Drops form at the top and fall a whole number of pixels a frame, wrapping after 4 frames:
-    cyan with a sky underside and a white glint in a navy rim."""
-    g = Grid(size, size)
-    drops = {22: ((1, 0), (9, 2), (17, 1)), 19: ((1, 0), (8, 2), (15, 1)), 17: ((1, 0), (7, 2), (13, 1)),
-             14: ((1, 0), (6, 2), (11, 1)), 12: ((1, 0), (5, 2), (9, 1)), 11: ((2, 0), (7, 2)),
-             10: ((2, 0), (6, 2))}[size]
-    fall, y0 = {22: (4, 1), 19: (4, 1), 17: (3, 1), 14: (3, 1), 12: (2, 1), 11: (2, 1), 10: (2, 1)}[size]
-    shape = DRIP[size]
-    for x, ph in drops:
-        k = (step + ph) % 4
-        y = y0 + k * fall
-        if k == 0:
-            g.p(x + len(shape[0]) // 2, y + 1, "cyan")
-            continue
-        for j, row in enumerate(shape):
-            for i, ch in enumerate(row):
-                if ch != ".":
-                    g.p(x + i, y + j, {"c": "cyan", "w": "white", "s": "sky"}[ch])
-    return rim(g, "navy")
-
-
 # Each burst: its drawing and its frame count.
 HITS = {
     "fx-hit-skunk": (hit_skunk, 8),
     "fx-hit-thief": (hit_thief, 8),
     "fx-hit-other-dog": (hit_other_dog, 8),
 }
-
-
-# A status overlay's frame at full size and at each depth step: 19 x the step (16 x 1.2, rounded), as the game sizes it.
-STATUS_SIZES = ((19, ""), (17, "@88"), (14, "@75"), (12, "@62"), (10, "@50"))
-
-
-def sizes(key, draw, ms):
-    for size, suffix in STATUS_SIZES:
-        yield f"{key}{suffix}", [("loop", [draw(size, i).outlined(False) for i in range(4)], ms)]
 
 
 def sprites():
@@ -462,8 +396,6 @@ def sprites():
     for colour in FLASH:
         yield f"ui-hit-flash-{colour}", [("play", [flash(colour, i).outlined(False) for i in range(4)], 70)]
     yield "ui-hit-label", [(tag, [label_plate(*cols).outlined(False)], 1000) for tag, cols in PLATES.items()]
-    yield from sizes("fx-status-stinky", status_stinky, 180)
-    yield from sizes("fx-status-soaked", status_soaked, 150)
 
 
 if __name__ == "__main__":

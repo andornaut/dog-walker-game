@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
-"""Draw the dog needs: the need icons and the pull bubble and its states.
+"""Draw the dog needs: the pull bubble and its states, the blocked badge, the firing mark and the
+failed pull's puff.
 
-Icons and the bubble carry cream and tan: icon outlines run down the ramp until
-they hold 3:1 on both, so an icon reads on the dog card, the detail card, the
-doghouse wall and inside the bubble. The bubble's cream paper carries the dslate
-road and its plum rim the light roads. Effects take the 1px plum rim.
+The bubble's cream paper carries the dslate road and its plum rim the light roads. Effects take the 1px plum rim.
 
-icon-need-<need>   16x16  normal (1 frame)  regular (a hydrant on a grass tuft), playful (a
-                          tennis ball with a bounce), friendly (a waving hand and a small
-                          heart), nosy (a dog's nose breathing in scent lines), thirsty (a drop
-                          over a red water bowl)
-icon-growl         16x16  normal (1 frame)  a snarling muzzle baring its fangs, nose wrinkled:
-                          the Nervous quirk's strain toward another dog, drawn in ui-pull-bubble
-                          like a need icon
 ui-pull-bubble     32x28  idle (2 frames, 400ms)  the bubble swells 1px up and out and back
                           show (3 frames, 60ms)  pops in: a dot on the tail, an overshoot, the
                           rest pose
@@ -36,7 +27,7 @@ ui-fires           16x16  static (1 frame)  a broken heart: the firing moment's 
                           cost up to 40px wide centred between the rivets
 fx-pull-fail       16x16  play (4 frames, 90ms)  a disappointed puff: a little cloud huffs out,
                           spreads and sags as it sinks, and breaks into two puffs. Bottom-centre
-                          on the dog's centre column, 6px below its top opaque row (as fx-status)
+                          on the dog's centre column, 6px below its top opaque row
 
 Usage:
   needs.py preview OUT.png   every frame of every piece on the six road colours
@@ -48,7 +39,6 @@ hand edits to them belong in this file instead. Shared tooling is in pixel.py,
 the rim helper in fx.py, piece in hits.py.
 """
 
-import math
 import os
 import sys
 
@@ -56,7 +46,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from fx import rim, stamp  # noqa: E402
 from hits import piece  # noqa: E402
 from moments import rounded  # noqa: E402
-from pixel import K, Grid, icon_edge, main  # noqa: E402
+from pixel import Grid, main  # noqa: E402
 
 # The preview roads: dslate, tan, lgrey, skin2, grey and cream. Cream is also the cards' paper and tan the doghouse wall.
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
@@ -76,135 +66,6 @@ def bitmap(g, x0, y0, rows, cols, big=None):
 
 
 # ---------- need icons ----------
-
-class Icon(Grid):
-    """A 16x16 icon grid with icon_edge outlines; marks are pixels laid over the outline afterwards, for
-    thin lines that an outline would smother."""
-
-    def __init__(self):
-        super().__init__(16, 16)
-        self.edge = icon_edge
-        self.marks = []
-
-    def outlined(self, outline=True):
-        px = super().outlined(outline)
-        for x, y, c in self.marks:
-            px[y][x] = K[c]
-        return px
-
-
-def regular():
-    """A little red hydrant standing in a grass tuft: the hydrant is what reads as a dog's stop."""
-    g = Icon()
-    for x, h in ((2, 3), (3, 4), (4, 2), (11, 2), (12, 4), (13, 3)):
-        g.rect(x, 14 - h, 1, h, "green")
-    g.rect(2, 13, 12, 1, "dgreen")
-    g.rect(5, 12, 6, 2, "dred")
-    g.rect(6, 6, 4, 7, "red")
-    g.rect(9, 6, 1, 7, "dred")
-    g.rect(6, 6, 1, 6, "pink")
-    g.ell(8, 6, 3, 2.5, "red", "dred", "pink")
-    g.rect(7, 2, 2, 2, "dred")
-    g.rect(5, 6, 6, 1, "dred")
-    g.rect(4, 8, 2, 2, "red")
-    g.rect(10, 8, 2, 2, "dred")
-    g.rect(7, 8, 2, 2, "lgrey")
-    g.p(7, 8, "white")
-    return g
-
-
-def playful():
-    """A tennis ball with its white seam, bouncing: two ticks under it on the left."""
-    g = Icon()
-    g.ell(9, 7, 5.5, 5.5, "yellow", "amber", "white")
-    for y in range(2, 13):
-        for x in range(4, 15):
-            if g.px[y][x] and abs(math.hypot(x + 0.5 - 4, y + 0.5 - 12) - 6.2) < 0.55:
-                g.p(x, y, "white")
-            if g.px[y][x] and abs(math.hypot(x + 0.5 - 15, y + 0.5 - 2) - 6.2) < 0.55:
-                g.p(x, y, "white")
-    g.rect(2, 13, 3, 1, "orange")
-    g.rect(1, 11, 2, 1, "orange")
-    return g
-
-
-def friendly():
-    """An open hand raised in a wave, fingers apart, a small heart over its shoulder."""
-    g = Icon()
-    g.rect(4, 8, 6, 6, "skin1")
-    g.rect(9, 8, 1, 6, "skin2")
-    g.rect(4, 13, 6, 1, "skin2")
-    # fingers 1px apart, so the outline shows between them; the middle two are longest
-    for x, top in ((4, 5), (6, 3), (8, 4)):
-        g.rect(x, top, 1, 8 - top, "skin1")
-    g.rect(10, 6, 1, 3, "skin2")
-    # the thumb out to the left, low
-    g.rect(2, 10, 2, 2, "skin1")
-    g.p(2, 9, "skin1")
-    bitmap(g, 10, 1, [".11.11.", "1211111", "1111113", ".11113.", "..113..", "...1..."],
-           {"1": "red", "2": "pink", "3": "dred"})
-    return g
-
-
-def nosy():
-    """A dog's nose from the front, breathing in three wavy scent lines from the upper right. The lines
-    are 1px purple marks with no outline (6.11:1 on cream, 4.22:1 on tan), lying across the icon where
-    Stinky's green lines rise up it."""
-    g = Icon()
-    bitmap(g, 1, 8, [".nnnnnnn.", "nnddnnnnn", "nnnnnnnnn", ".nn#n#nn.", "..nnnnn..", "...nnn..."],
-           {"n": "navy", "d": "slate", "#": "ink"})
-    g.p(3, 9, "lgrey")
-    for x0, y0 in ((8, 1), (10, 4), (9, 7)):
-        for dx, dy in SCENT:
-            if x0 + dx < 16:
-                g.marks.append((x0 + dx, y0 + dy, "purple"))
-    return g
-
-
-# One wavy scent line, 6x2: down, up, up, down, down, up.
-SCENT = ((0, 1), (1, 0), (2, 0), (3, 1), (4, 1), (5, 0))
-
-
-def thirsty():
-    """A water drop falling over a red water bowl."""
-    g = Icon()
-    # the bowl: wider at the foot, a red band with a pink lit side, cyan water across the top
-    g.rect(3, 9, 10, 1, "cyan")
-    g.rect(3, 10, 10, 1, "red")
-    g.rect(2, 11, 12, 3, "red")
-    g.rect(2, 11, 1, 3, "pink")
-    g.rect(12, 11, 2, 3, "dred")
-    g.rect(3, 9, 2, 1, "white")
-    # the drop: a point over a round base, lit at the top left
-    g.tri((8, 0.5), (5.8, 5), (10.2, 5), "sky")
-    g.ell(8, 5, 2.4, 2.4, "sky", "blue", "cyan")
-    g.p(7, 4, "white")
-    return g
-
-
-ICONS = {"regular": regular, "playful": playful, "friendly": friendly, "nosy": nosy, "thirsty": thirsty}
-
-
-def growl():
-    """A golden muzzle snarling from the front: the nose over wrinkles slanting in toward it, the lip curled
-    off pink gums, two fangs down and two up around a plum mouth and a red tongue."""
-    g = Icon()
-    bitmap(g, 1, 1, ["....nnnnnn....",
-                     "...nlnnnnnn...",
-                     "..aan#nn#naa..",
-                     ".aaaannnnaaaa.",
-                     "aaoaaaaaaaaoaa",
-                     "aaaoaaaaaaoaaa",
-                     "apppppppppppPa",
-                     "aWWddddddddWWa",
-                     "adWddddddddWda",
-                     "addddrrrrdddda",
-                     "adWdrrrrrrdWda",
-                     "aWWppppppppWWa",
-                     ".aaaaaaaaaaaa."],
-           {"n": "navy", "#": "ink", "l": "slate", "a": "amber", "o": "orange", "p": "pink", "P": "mauve",
-            "W": "white", "d": "plum", "r": "red"})
-    return g
 
 
 # ---------- the pull bubble ----------
@@ -311,9 +172,6 @@ def pull_fail(step):
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    for need, draw in ICONS.items():
-        yield f"icon-need-{need}", [("normal", [draw().outlined()], 1000)]
-    yield "icon-growl", [("normal", [growl().outlined()], 1000)]
     # idle leads, so frame 0 (the anchor the game measures) is the rest pose
     yield "ui-pull-bubble", [
         ("idle", [bubble().outlined(False), bubble(grow=1).outlined(False)], 400),

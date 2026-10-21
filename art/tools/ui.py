@@ -246,13 +246,13 @@ def treat_icon():
     return g
 
 
-# The stink lines' sideways offset down a line, as in fx-status-stinky (hits.py).
+# The stink lines' sideways offset down a line, as in fx-hit-skunk's squiggles (hits.py).
 STINK_WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
 
 
 def stinky():
     """Three stink lines waving in step out of a small cloud puff, in the skunk's mauve family as
-    fx-status-stinky and skunk-cloud: pink with a plum right side and no outline, so the plum
+    skunk-cloud: pink with a plum right side and no outline, so the plum
     carries the lines on cream (9.42:1) and the pink on the top bar's ink (6.64:1). The puff is
     mauve, shaded purple, in its ramp outline. Returns frame pixels."""
     g = Grid(16, 16)
