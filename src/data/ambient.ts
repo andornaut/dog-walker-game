@@ -96,6 +96,7 @@ export const AMBIENT = {
     PEDESTRIAN_AWAY,
     { ...RABBIT, perMinute: 3 },
     { ...SQUIRREL, perMinute: 3 },
+    { gait: "steady", key: "ambient-balloon", path: "sky", perMinute: 1, speed: 15, tag: "fly" },
   ],
   pawsPromenade: [
     { ...CAR, perMinute: 1 },
@@ -104,6 +105,7 @@ export const AMBIENT = {
     { ...PEDESTRIAN, perMinute: 3 },
     { ...PEDESTRIAN_AWAY, perMinute: 3 },
     RABBIT,
+    { gait: "steady", key: "ambient-turboprop", path: "sky", perMinute: 2, speed: 30, tag: "fly" },
   ],
   shops: [
     { ...CAR, perMinute: 5 },
@@ -111,6 +113,8 @@ export const AMBIENT = {
     { ...BIRD, perMinute: 3 },
     { ...PEDESTRIAN, perMinute: 4 },
     { ...PEDESTRIAN_AWAY, perMinute: 4 },
+    { gait: "steady", key: "ambient-pigeons", path: "sky", perMinute: 2, speed: 60, tag: "fly" },
+    { gait: "steady", key: "ambient-helicopter", path: "sky", perMinute: 1, speed: 36, tag: "fly" },
   ],
   snoozeCrescent: [
     { ...CAR, perMinute: 2 },
@@ -119,6 +123,7 @@ export const AMBIENT = {
     { ...PEDESTRIAN, perMinute: 1 },
     { ...RABBIT, perMinute: 2 },
     { ...SQUIRREL, perMinute: 1 },
+    { gait: "steady", key: "ambient-geese", path: "sky", perMinute: 1.5, speed: 40, tag: "fly" },
   ],
   street: [
     { ...CAR, perMinute: 4 },
