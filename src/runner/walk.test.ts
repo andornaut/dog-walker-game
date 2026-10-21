@@ -518,11 +518,20 @@ describe("planZone", { timeout: 15_000 }, () => {
     }
   });
 
+  // Each zone at the latest place the route can put it, where the road is fastest: the first
+  // zone only starts a walk, the last zone only ends one, and the rest come between.
+  const latestIndex = (zone: ZoneId) =>
+    zone === WORLD.firstZone
+      ? 0
+      : zone === WORLD.lastZone
+        ? WORLD.walkLength - 1
+        : WORLD.walkLength - 2;
+
   it("shows each row of the game's road in time to cross the whole road for it, in every zone, at every pace", () => {
     const acrossRoad = (LANE_COUNT - 1) * slowestLaneMove;
     for (const walker of Object.keys(WALKERS) as WalkerId[]) {
       for (const zone of ZONE_IDS) {
-        const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
+        const zoned = inZone(realRun(REAL, walker), zone, latestIndex(zone));
         const lookAhead = GAME_ROAD.sightLength / walkScrollSpeed(REAL, zoned);
         expect(lookAhead, `${walker} in ${zone}`).toBeGreaterThan(acrossRoad + 1);
       }
