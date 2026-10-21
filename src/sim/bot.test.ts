@@ -24,9 +24,9 @@ import {
   blocksLane,
   itemHeight,
   moverSpec,
+  obstacleHitBox,
   packBoxes,
   plannedCellInset,
-  solidItemBox,
   startRoad,
   steerWalk,
   sweptPackBoxes,
@@ -311,7 +311,7 @@ describe("a mover's moves and hazards", () => {
             continue;
           }
           onRoad = true;
-          const box = solidItemBox(gameData, geometry, zone, {
+          const box = obstacleHitBox(gameData, geometry, zone, {
             ...item,
             mover: { path: outcome, since: at * speed },
             y,

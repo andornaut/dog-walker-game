@@ -11,9 +11,9 @@ import {
   isPullObstacle,
   itemCategory,
   laneMoveSeconds,
+  obstacleHitBox,
   pickupReach,
   type RoadGeometry,
-  solidItemBox,
   steerWalk,
   type Walk,
   type WalkData,
@@ -198,7 +198,7 @@ function scrollContacts(
     }
     const level = place.solid && levelWithPack(packBand, { height, y });
     const between = Math.abs(place.lanePosition - Math.round(place.lanePosition)) > 1e-9;
-    const box = solidItemBox(road.data, geometry, road.zone, {
+    const box = obstacleHitBox(road.data, geometry, road.zone, {
       ...item,
       mover: { path, since },
       y,

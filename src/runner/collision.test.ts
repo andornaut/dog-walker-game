@@ -21,7 +21,7 @@ import {
 import { stillInLane } from "./laneMotion";
 import type { RoadItem } from "./roadItems";
 import { screenRoadGeometry } from "./screenGeometry";
-import { itemHeight, packBoxes, solidItemBox, type WalkItem } from "./walk";
+import { itemHeight, obstacleHitBox, packBoxes, type WalkItem } from "./walk";
 
 type Kind = "obstacle" | "tip";
 
@@ -206,7 +206,7 @@ describe("a settled pack", () => {
     const item = levelIn(lane, count);
     const zone = currentZoneId(gameData, run);
     return [
-      hitDog(pack, solidItemBox(gameData, geometry, zone, item)),
+      hitDog(pack, obstacleHitBox(gameData, geometry, zone, item)),
       pickupDog(pack, itemBox(geometry.cell, item)),
     ];
   };

@@ -895,6 +895,26 @@ describe("stepWalk", () => {
     expect(after.run.phase).toEqual({ kind: "walking" });
   });
 
+  // A lucky find touches the pack's outline as a pickup does, so one reaching a pixel into the
+  // outline's top is found, though it is above every dog's and the walker's rectangle.
+  const LUCKY = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
+    (kind) => ENCOUNTERS[kind].kind === "lucky",
+  );
+  const { outline } = geometry.packParts;
+  it.each(
+    LUCKY.flatMap((kind) => [
+      { found: true, into: 1, kind },
+      { found: false, into: 0, kind },
+    ]),
+  )("finds $kind reaching $into px into the pack's outline: $found", ({ found, into, kind }) => {
+    const parts = [geometry.packParts.walker, ...geometry.packParts.dogs];
+    expect(Math.min(...parts.map(({ top }) => top))).toBeGreaterThan(outline.top + into);
+    const height = geometry.itemHeights.lucky;
+    const item = { ...atPack(kind), height, y: outline.top + into - height };
+    const after = step(inLane(2, walkWith(["koda", "snowball"], [item])), 0);
+    expect(after.walk.road.items.some(({ id }) => id === item.id)).toBe(!found);
+  });
+
   it("ends the zone at its length and goes no further", () => {
     const walk = walkWith(["koda"]);
     const length = zoneLength(data);

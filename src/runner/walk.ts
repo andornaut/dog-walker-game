@@ -12,7 +12,6 @@ import type {
 import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
-import { scaleAt } from "../layout/projection";
 import { countBump, countTally } from "../rules/achievements";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -881,23 +880,22 @@ function walkItemBox(geometry: Pick<RoadGeometry, "cell" | "laneCount">, item: W
   return itemBox(geometry.cell, { ...item, lane: footprintLane(geometry.laneCount, item) });
 }
 
-// The box an obstacle or lucky find hits the pack's parts with, in the lanes of its footprint:
-// an obstacle's as it is drawn (drawnObstacleBox), from its sprites standing on its near edge
-// across from the middle of the lanes it is drawn over, which for a moving mover is one lane
-// wide unless it rides; a lucky find's its footprint box, drawn at the scale of its near edge.
-export function solidItemBox(
+// The box an obstacle hits the pack's parts with, in the lanes of its footprint: as it is drawn
+// (drawnObstacleBox), from its sprites standing on its near edge across from the middle of the
+// lanes it is drawn over, which for a moving mover is one lane wide unless it rides.
+export function obstacleHitBox(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
   zone: ZoneId,
   item: WalkItem,
 ): LanedBox {
+  if (!isObstacle(data, item.kind)) {
+    throw new Error(`${item.kind} is not an obstacle`);
+  }
   const { cell, lens } = geometry;
   const feetY = item.y + item.height;
   const lane = footprintLane(geometry.laneCount, item);
   const lanes = { left: lane * cell.length, right: (lane + item.laneSpan) * cell.length };
-  if (!isObstacle(data, item.kind)) {
-    return { ...walkItemBox(geometry, item), lanes, scale: scaleAt(lens, lens.footY - feetY) };
-  }
   const { mover } = item;
   const drawnLanes =
     mover === undefined ? item.laneSpan : mover.path.motion === "ride" ? mover.path.lanes : 1;
@@ -1020,7 +1018,11 @@ export function stepWalk(
   const solid = stalkersStepped(geometry, control.motion, scrolled.solid);
   // Swept from where the last step left the pack to where this one leaves it.
   const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
-  const touching = (item: WalkItem) => hitDog(pack, solidItemBox(data, geometry, zone, item));
+  // An obstacle hits a part of the pack; a lucky find, as a pickup does, touches its outline.
+  const touching = (item: WalkItem) =>
+    isObstacle(data, item.kind)
+      ? hitDog(pack, obstacleHitBox(data, geometry, zone, item))
+      : pickupDog(pack, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
   // A pull obstacle, such as a squirrel, passes through the pack: touching it does nothing.
   const passing = solid.filter((item) => isPullObstacle(data, item.kind));

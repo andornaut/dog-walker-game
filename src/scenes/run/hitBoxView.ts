@@ -5,7 +5,7 @@ import { project, screenYAt } from "../../layout/projection";
 import { currentZoneId } from "../../rules/route";
 import { type Box, itemBox, type ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import { isPickup, packBoxes, solidItemBox, type Walk } from "../../runner/walk";
+import { blocksLane, obstacleHitBox, packBoxes, type Walk } from "../../runner/walk";
 import { PALETTE } from "../palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
@@ -17,7 +17,7 @@ const NEAREST_DISTANCE = -PROJECTION.focal / 2;
 
 // The dev panel's hit boxes cheat: the pack's outline, which pickups touch, in green, laid on the
 // road through its projection; its parts' hit rectangles, which obstacles hit, in yellow; and
-// every road item's hit box in red, a pickup's laid on the road and anything else's as drawn.
+// every road item's hit box in red, an obstacle's as drawn and anything else's laid on the road.
 export class HitBoxView {
   private readonly graphics: GameObjects.Graphics;
 
@@ -42,10 +42,10 @@ export class HitBoxView {
     graphics.lineStyle(1, PALETTE.red);
     const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
-      if (isPickup(item.kind)) {
+      if (!blocksLane(gameData, item.kind)) {
         this.onRoad(itemBox(geometry.cell, item));
       } else {
-        this.asDrawn(solidItemBox(gameData, geometry, zone, item));
+        this.asDrawn(obstacleHitBox(gameData, geometry, zone, item));
       }
     }
   }

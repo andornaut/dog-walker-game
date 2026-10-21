@@ -12,7 +12,7 @@ import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { screenRoadGeometry } from "./screenGeometry";
-import { isPickup, itemHeight, packBoxes, solidItemBox, type WalkItemKind } from "./walk";
+import { blocksLane, itemHeight, obstacleHitBox, packBoxes, type WalkItemKind } from "./walk";
 import { walkProjection } from "./walkGeometry";
 
 const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
@@ -49,12 +49,14 @@ describe("screenRoadGeometry", () => {
       // From where the item spawns until it has scrolled off the road and is dropped.
       for (let y = geometry.roadTop - height; y < geometry.roadBottom; y += SCROLL_STEP) {
         const item = { height, id: 0, kind, lane: 0, laneSpan: 1, y };
-        const solid = solidItemBox(DATA, geometry, zone, item);
-        const box = itemBox(geometry.cell, item);
-        const hit = isPickup(kind) ? pickupDog(pack, box) : hitDog(pack, solid);
+        const obstacle = blocksLane(DATA, kind) ? obstacleHitBox(DATA, geometry, zone, item) : null;
+        const hit =
+          obstacle === null
+            ? pickupDog(pack, itemBox(geometry.cell, item))
+            : hitDog(pack, obstacle);
         if (hit !== null) {
           // Its far edge as the item views draw it, through the projection.
-          const far = isPickup(kind) ? y : solid.top;
+          const far = obstacle?.top ?? y;
           hitRows.push(screenYAt(PROJECTION, PROJECTION.footY - far));
         }
       }
