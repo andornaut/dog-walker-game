@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   bootProgress,
   byteFraction,
+  LOADING_TRACK,
+  LOADING_WALKER,
+  LOADING_WALKER_SIZE,
   loadingBarWidth,
   loadingWalkerAt,
   stepFraction,
@@ -59,24 +62,30 @@ describe("stepFraction", () => {
 });
 
 describe("loadingWalkerAt", () => {
-  // From the track's first dot to the doghouse, staying on the track past either end.
+  // From the start to the gate, staying on the track past either end.
   it.each([
-    [0, 76],
-    [0.4, 76 + 59],
-    [1, 76 + 148],
-    [-0.5, 76],
-    [1.5, 224],
+    [0, LOADING_WALKER.x],
+    [0.4, LOADING_WALKER.x + Math.round(LOADING_WALKER.travel * 0.4)],
+    [1, LOADING_WALKER.x + LOADING_WALKER.travel],
+    [-0.5, LOADING_WALKER.x],
+    [1.5, LOADING_WALKER.x + LOADING_WALKER.travel],
   ])("walks at %d to x %d", (fraction, x) => {
-    expect(loadingWalkerAt(fraction)).toEqual({ x, y: 332 });
+    expect(loadingWalkerAt(fraction)).toEqual({ x, y: LOADING_WALKER.y });
+  });
+
+  it("ends with its right edge on the track's end", () => {
+    expect(loadingWalkerAt(1).x + LOADING_WALKER_SIZE.width).toBeLessThanOrEqual(
+      LOADING_TRACK.x + LOADING_TRACK.width,
+    );
   });
 });
 
 describe("loadingBarWidth", () => {
-  // The 200px track in whole pixels.
+  // The track in whole pixels.
   it.each([
     [0, 0],
-    [0.333, 67],
-    [1, 200],
+    [0.333, Math.round(LOADING_TRACK.width * 0.333)],
+    [1, LOADING_TRACK.width],
   ])("fills %d as %dpx", (fraction, width) => {
     expect(loadingBarWidth(fraction)).toBe(width);
   });

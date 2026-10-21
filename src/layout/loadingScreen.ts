@@ -7,11 +7,22 @@ export const LOADING_ART = {
   walker: "ui-loading",
 } as const;
 
-export const LOADING_TRACK: Rect = { height: 8, width: 200, x: 80, y: 357 };
+export const LOADING_TRACK: Rect = { height: 8, width: 316, x: 16, y: 456 };
 
-// The walker's top-left at progress 0, and how far right it walks by 1: from the track's
-// first dot to the doghouse.
-export const LOADING_WALKER = { travel: 148, x: 76, y: 332 };
+// ui-loading's frame size, 98x84, with its feet on screen row 460.
+export const LOADING_WALKER_SIZE = { height: 84, width: 98 };
+
+// The status line, if the scene draws one, sits in these rows, which the screen art leaves
+// plain.
+export const LOADING_STATUS_ROWS = { from: 476, to: 500 };
+
+// The walker's top-left at progress 0, and how far right it walks by 1: from the screen's
+// left margin until its right edge meets the track's end at the gate.
+export const LOADING_WALKER = {
+  travel: LOADING_TRACK.x + LOADING_TRACK.width - LOADING_WALKER_SIZE.width - 6,
+  x: 6,
+  y: 379,
+};
 
 // Boot loads every asset over the network, then processes them: each sprite's animations
 // and metrics, the placeholders and the fallback font. Each phase fills its share of the
