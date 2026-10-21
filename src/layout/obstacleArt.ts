@@ -52,7 +52,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "squirrel-dash": { above: 40, left: -23, right: 22 },
   "stink-garbage-truck": { above: 59, left: -28, right: 28 },
   streetcar: { above: 65, left: -28, right: 28 },
-  stroller: { above: 63, left: -23, right: 23 },
+  stroller: { above: 60, left: -24, right: 24 },
   thief: { above: 67, left: -19, right: 23 },
 };
 
