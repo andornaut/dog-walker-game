@@ -118,19 +118,19 @@
     "leaves": false
   },
   "yonge-street": {
-    "curbColor": "white",
+    "curbColor": "stone",
     "curbTo": 164,
     "strips": [],
-    "walkColor": "lgrey",
+    "walkColor": "dstone",
     "walkDots": [
       {
         "colors": [
-          "grey"
+          "shale"
         ],
         "share": 0.015
       }
     ],
-    "seamColor": "grey",
+    "seamColor": "shale",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",

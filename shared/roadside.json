@@ -261,8 +261,8 @@
       "gaps": [
         [
           {
-            "key": "roadside-planter-tree",
-            "across": 259,
+            "key": "roadside-street-lamp",
+            "across": 243,
             "dz": 0
           }
         ],
@@ -294,7 +294,7 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "8b9bb4"
+      "shadowColour": "26292f"
     }
   }
 }

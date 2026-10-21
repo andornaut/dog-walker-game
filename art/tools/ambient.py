@@ -33,6 +33,12 @@ ambient-bike              66x72  the cyclist side on; ride 4 x 120ms
 ambient-cat               40x40  a ginger tabby; idle 2 x 400ms (sat, its tail flicking), run 4 x 90ms (a gallop)
 ambient-rabbit            40x40  a brown cottontail; idle 2 x 400ms (a nose twitch), hop 4 x 110ms
 ambient-bird              40x40  a robin; idle 2 x 400ms (a peck), fly 4 x 90ms (wings up, level, down, level)
+ambient-plane             24x10  a passenger jet far off in Yonge Street's evening sky, at full size only;
+                                 fly 2 x 250ms (only its lights blink)
+
+The plane is a navy silhouette outlined in ink against the slate sky, its underside lit grey by the city,
+amber cabin windows, a steady white strobe on its fin and a wingtip light blinking red then white. It flies
+far back, so it has no depth variants, and it stays smaller than the CN Tower's pod.
 
 Usage:
   ambient.py preview OUT.png   every frame on the road colours
@@ -49,7 +55,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
 from minis import STEPS, Mini, small, snap  # noqa: E402
-from pixel import DARKER, K, edged, main  # noqa: E402
+from pixel import DARKER, K, Grid, edged, main  # noqa: E402
 
 DRIVE_MS = 100
 RIDE_MS = 120
@@ -59,6 +65,7 @@ IDLE_MS = 400
 RUN_MS = 90
 HOP_MS = 110
 FLY_MS = 90
+PLANE_MS = 250
 
 GROUNDS = ("3a4466", "e4a672", "f6757a", "c28569", "8b9bb4", "ead4aa", "c0cbdc")
 
@@ -539,6 +546,25 @@ def animals(suffix, step):
                                     ("fly", [animal(s, d) for d in BIRD_FLY], FLY_MS)]
 
 
+def plane(light):
+    """The jet side on, facing right, its wingtip light in light."""
+    g = Grid(24, 10)
+    for y, x0 in ((1, 3), (2, 3), (3, 3)):
+        g.rect(x0, y, y, 1, "navy")
+    g.rect(3, 4, 16, 1, "navy")
+    g.rect(1, 5, 20, 1, "navy")
+    g.rect(4, 6, 16, 1, "grey")
+    g.rect(9, 7, 5, 1, "navy")
+    g.rect(12, 7, 2, 1, "dslate")
+    g.rect(8, 8, 3, 1, "grey")
+    for x in range(7, 17, 2):
+        g.p(x, 5, "amber")
+    g.p(19, 5, "dslate")
+    g.p(3, 1, "white")
+    g.p(8, 8, light)
+    return g.outlined()
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every ambient sprite at full size, then at every
     depth step."""
@@ -547,6 +573,7 @@ def sprites():
         yield from cars(suffix, step)
         yield from bikes(suffix, step)
         yield from animals(suffix, step)
+    yield "ambient-plane", [("fly", [plane("red"), plane("white")], PLANE_MS)]
 
 
 if __name__ == "__main__":

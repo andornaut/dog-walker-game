@@ -367,6 +367,8 @@ ZONES = {
 # ---------- Toronto ----------
 # Each Toronto neighborhood's strip starts from the Maplewood zone it replaces and keeps that zone's
 # road colour, so the game's shadow, the leash colours and every road sprite's outline hold as before.
+# Yonge Street's is shale concrete instead, darker than The Long Way Home's skin2: its zone takes a
+# coal road shadow and the pink leash, as the Distillery District's dark road does.
 
 def grit(g, rnd, n, cols):
     """Sparse 2px grit spaced apart, 1x2 or 2x1."""
@@ -536,24 +538,32 @@ def beaches_ground(g):
 
 
 def yonge_ground(g):
-    """The Long Way Home's skin2 brick with lgrey granite curbs, their joints in stone every 16 rows."""
+    """Dark concrete: shale slabs a lane wide and 32 rows long, their 2-row expansion joints in coal
+    across the road and 1px along it under the lane lines, sparse ash and coal grit, a few coal cracks;
+    dstone granite gutters, their joints in shale every 16 rows."""
     rnd = random.Random("road-yonge-street")
-    g.rect(0, 0, W, H, "skin2")
-    for row in range(H // 8):
-        y, off = row * 8, 8 if row % 2 else 0
-        g.rect(0, y + 6, W, 2, "brown")
-        for x in range(off - 16, W, 16):
-            g.rect(x + 15, y, 1, 6, "brown")
-            if rnd.random() < 0.10:
-                g.rect(x, y, 15, 6, "clay")
-            g.p(x + rnd.randrange(2, 14), y + rnd.randrange(2, 6), "brown")
+    g.rect(0, 0, W, H, "shale")
+    grit(g, rnd, 50, ("ash", "ash", "coal", "coal", "dslate"))
+    cracks(g, rnd, ((40, 20, 9), (150, 50, 11), (230, 12, 8)), "coal")
+    for y in (14, 46):
+        g.rect(0, y, W, 2, "coal")
+    for x in DIVIDERS:
+        g.rect(x, 0, 1, H, "coal")
     for x0, line in ((0, 5), (W - 5, W - 6)):
-        g.rect(x0, 0, 5, H, "lgrey")
+        g.rect(x0, 0, 5, H, "dstone")
         for y in range(0, H, 16):
-            g.rect(x0, y, 5, 2, "stone")
-        g.rect(line, 0, 1, H, "dbrown")
-    g.rect(0, 0, 1, H, "white")
-    g.rect(W - 1, 0, 1, H, "grey")
+            g.rect(x0, y, 5, 2, "shale")
+        g.rect(line, 0, 1, H, "coal")
+    g.rect(0, 0, 1, H, "stone")
+    g.rect(W - 1, 0, 1, H, "shale")
+
+
+def yonge_lines(g):
+    """White dashes 14 rows long in 32 (11.3:1 on the shale) with a coal edge."""
+    for x in DIVIDERS:
+        for y in (2, 34):
+            g.rect(x, y, 2, 14, "white")
+            g.rect(x + 2, y, 1, 14, "coal")
 
 
 # easiest to hardest, as the fork cards sort them
@@ -563,7 +573,7 @@ TORONTO = {
     "distillery-district": (distillery_ground, distillery_lines),
     "kensington-market": (kensington_ground, shops_lines),
     "the-beaches": (beaches_ground, paws_lines),
-    "yonge-street": (yonge_ground, home_lines),
+    "yonge-street": (yonge_ground, yonge_lines),
 }
 ZONES.update(TORONTO)
 

@@ -1382,11 +1382,11 @@ PLACEMENT = {
     "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
     "kensington-market": sparse(("tree-maple", 220, 0), ("fruit-stand", 216, 0)),
     "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0)),
-    "yonge-street": sparse(("planter-tree", 220, 0), ("transit-stop", 213, 0)),
+    "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0)),
 }
 # Each zone's ground shadow under a free-standing prop: its lawn or paving one ramp step darker.
 SHADOWS = {"cabbagetown": "canopy", "high-park": "fir", "distillery-district": "dbrown",
-           "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "grey"}
+           "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "coal"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 TABLE_JSON = "shared/roadside.json"

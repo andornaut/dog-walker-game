@@ -1034,28 +1034,46 @@ def beaches_view():
 
 
 def yonge_view():
-    paving = flecked("lgrey", "grey", 67)
-    a = ZoneView("yonge-street", flecked("skin2", "clay", 41), paving, "white", (4, 8), curb="white", walk="lgrey",
-                 lawn=paving, edge="plum")
-    a.sky("haze", "white")
-    # the tower, small at this distance: a mast, the pod and a tapering shaft
-    a.fill(18, 0, 1, 4, "grey")
-    a.fill(16, 4, 5, 2, "lgrey")
-    a.fill(16, 5, 5, 1, "dlake")
-    a.fill(17, 6, 3, FAR_Y - 6, "lgrey")
-    a.fill(19, 6, 1, FAR_Y - 6, "grey")
-    for x, w, top, wall_c, glass in ((28, 14, 3, "lake", "foam"), (44, 12, 6, "ash", "haze"),
-                                     (58, 16, 2, "stone", "lake")):
-        bd.tower(a, x, w, top, FAR_Y, wall_c, glass)
-    for x, w, wall_c, board, awn in ((-4, 26, "lgrey", "ttc", "ttc"), (22, 28, "ash", "coal", "lake"),
-                                     (50, 28, "brick", "dlake", "white")):
-        a.fill(x, 10, w, FAR_Y - 10, wall_c)
-        a.fill(x + w - 2, 10, 2, FAR_Y - 10, bd.dk(wall_c))
-        a.fill(x + 2, 11, w - 4, 4, board)
-        for i in range(0, w - 4, 4):
-            a.fill(x + 2 + i, 15, 2, 2, awn)
-            a.fill(x + 4 + i, 15, 2, 2, "white")
-        a.fill(x + 3, 17, w - 8, 4, "cyan")
+    paving = flecked("dstone", "shale", 67)
+    a = ZoneView("yonge-street", flecked("shale", "ash", 41), paving, "amber", (4, 8), curb="stone", walk="dstone",
+                 lawn=paving, edge="coal", walk_fleck="shale")
+    bd.bands(a, 0, FAR_Y, bd.YONGE_SKY, w=AW)
+    for x, y in ((30, 1), (50, 3), (70, 2)):
+        a.fill(x, y, 1, 1, "white")
+    a.fill(61, 2, 3, 3, "haze")
+    a.fill(61, 2, 1, 1, "white")
+    # far off in haze, the CN Tower over everything and the SkyDome by its foot, then the nearer towers: two
+    # in front of the dome, the Royal Bank Plaza's gold, glass, First Canadian Place in white under its red
+    # band and the TD Centre in black, lit windows on each
+    a.fill(6, 0, 1, 3, "lgrey")
+    a.fill(6, 0, 1, 1, "red")
+    a.fill(5, 3, 3, 3, "haze")
+    a.fill(2, 6, 9, 2, "haze")
+    a.fill(2, 7, 9, 1, "gold")
+    a.fill(8, 6, 2, 2, "lgrey")
+    a.fill(5, 8, 3, FAR_Y - 8, "haze")
+    a.fill(7, 8, 1, FAR_Y - 8, "lgrey")
+    for py in range(FAR_Y - 12, FAR_Y):
+        for px in range(10, 38):
+            dx, dy = (px + 0.5 - 24) / 14, (py + 0.5 - (FAR_Y - 4)) / 8
+            if dx * dx + dy * dy <= 1:
+                a.fill(px, py, 1, 1, "lgrey" if px in (27, 31) else "white" if dx + dy < -0.9 else "haze")
+    for x, w, top, wall_c, lit_c in ((10, 9, 13, "coal", "gold"), (22, 12, 14, "dlake", "amber"),
+                                     (36, 8, 6, "gold", "ochre"), (44, 12, 7, "dlake", "gold"),
+                                     (56, 7, 5, "lgrey", "grey"), (63, 12, 8, "coal", "gold")):
+        a.fill(x, top, w, FAR_Y - top, wall_c)
+        a.fill(x + w - 1, top, 1, FAR_Y - top, bd.dk(wall_c))
+        for y in range(top + 2, FAR_Y - 2, 2):
+            for c in range(x + 1, x + w - 2, 2):
+                if wall_c in ("gold", "lgrey") or bd.hashed(c, y, 3):
+                    a.fill(c, y, 1, 1, lit_c)
+    a.fill(57, 5, 5, 1, "ttc")
+    a.fill(64, 9, 1, 1, "green")
+    a.fill(0, FAR_Y - 4, AW, 4, "coal")
+    for x, w, c in ((10, 8, "pink"), (23, 8, "gold"), (44, 10, "turquoise"), (64, 9, "lilac")):
+        a.fill(x, FAR_Y - 4, w, 1, c)
+    for x in range(1, AW, 3):
+        a.fill(x, FAR_Y - 2, 2, 2, "gold")
     a.street()
     return a
 

@@ -156,20 +156,21 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 
 ### Ambient
 
-Cosmetic people, traffic and lawn animals with no collisions, drawn by `art/tools/ambient.py`. Each has `@88`, `@75`, `@62` and `@50` variants with the same tags and timing; the cross street draws from `@50`. Side views face right and are flipped to go left.
+Cosmetic people, traffic, lawn animals and a plane with no collisions, drawn by `art/tools/ambient.py`. Each but the plane has `@88`, `@75`, `@62` and `@50` variants with the same tags and timing; the cross street draws from `@50`. The plane flies far back in Yonge Street's sky and has none. Side views face right and are flipped to go left.
 
-| Key                       | Type   | Size  | `@88`, `@75`, `@62`, `@50` | Tags          | Pri  | Note                                                                                      |
-| ------------------------- | ------ | ----- | -------------------------- | ------------- | ---- | ----------------------------------------------------------------------------------------- |
-| `ambient-bike`            | sprite | 66×72 | 58×63, 50×54, 41×45, 33×36 | `ride`        | core | A cyclist side on, amber helmet, mauve jersey, red bike; 4 × 120ms                        |
-| `ambient-bird`            | sprite | 40×40 | 35×35, 30×30, 25×25, 20×20 | `idle`, `fly` | core | A robin side on; `idle` 2 × 400ms pecks, `fly` 4 × 90ms takes off                         |
-| `ambient-car`             | sprite | 72×42 | 63×37, 54×32, 45×26, 36×21 | `drive`       | core | An orange sedan side on; 4 × 100ms                                                        |
-| `ambient-car-hatchback`   | sprite | 63×42 | 55×37, 47×32, 39×26, 32×21 | `drive`       | core | A red hatchback, as `ambient-car`                                                         |
-| `ambient-car-van`         | sprite | 69×45 | 60×39, 52×34, 43×28, 35×23 | `drive`       | core | A two-tone van, white over green, as `ambient-car`                                        |
-| `ambient-car-wagon`       | sprite | 75×42 | 66×37, 56×32, 47×26, 38×21 | `drive`       | core | A cream station wagon with a wood side panel and a roof rack, as `ambient-car`            |
-| `ambient-cat`             | sprite | 40×40 | 35×35, 30×30, 25×25, 20×20 | `idle`, `run` | core | A ginger tabby side on; `idle` 2 × 400ms sat, `run` 4 × 90ms gallops                      |
-| `ambient-pedestrian`      | sprite | 48×72 | 42×63, 36×54, 30×45, 24×36 | `walk`        | core | A student in a red jacket, sky headphones and jeans, walking toward the walker; 4 × 100ms |
-| `ambient-pedestrian-back` | sprite | 48×72 | 42×63, 36×54, 30×45, 24×36 | `walk`        | core | The student walking away: the green backpack, the ponytail; 4 × 100ms                     |
-| `ambient-rabbit`          | sprite | 40×40 | 35×35, 30×30, 25×25, 20×20 | `idle`, `hop` | core | A brown cottontail side on; `idle` 2 × 400ms, `hop` 4 × 110ms                             |
+| Key                       | Type   | Size  | `@88`, `@75`, `@62`, `@50` | Tags          | Pri  | Note                                                                                                                                                                                                   |
+| ------------------------- | ------ | ----- | -------------------------- | ------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ambient-bike`            | sprite | 66×72 | 58×63, 50×54, 41×45, 33×36 | `ride`        | core | A cyclist side on, amber helmet, mauve jersey, red bike; 4 × 120ms                                                                                                                                     |
+| `ambient-bird`            | sprite | 40×40 | 35×35, 30×30, 25×25, 20×20 | `idle`, `fly` | core | A robin side on; `idle` 2 × 400ms pecks, `fly` 4 × 90ms takes off                                                                                                                                      |
+| `ambient-car`             | sprite | 72×42 | 63×37, 54×32, 45×26, 36×21 | `drive`       | core | An orange sedan side on; 4 × 100ms                                                                                                                                                                     |
+| `ambient-car-hatchback`   | sprite | 63×42 | 55×37, 47×32, 39×26, 32×21 | `drive`       | core | A red hatchback, as `ambient-car`                                                                                                                                                                      |
+| `ambient-car-van`         | sprite | 69×45 | 60×39, 52×34, 43×28, 35×23 | `drive`       | core | A two-tone van, white over green, as `ambient-car`                                                                                                                                                     |
+| `ambient-car-wagon`       | sprite | 75×42 | 66×37, 56×32, 47×26, 38×21 | `drive`       | core | A cream station wagon with a wood side panel and a roof rack, as `ambient-car`                                                                                                                         |
+| `ambient-cat`             | sprite | 40×40 | 35×35, 30×30, 25×25, 20×20 | `idle`, `run` | core | A ginger tabby side on; `idle` 2 × 400ms sat, `run` 4 × 90ms gallops                                                                                                                                   |
+| `ambient-pedestrian`      | sprite | 48×72 | 42×63, 36×54, 30×45, 24×36 | `walk`        | core | A student in a red jacket, sky headphones and jeans, walking toward the walker; 4 × 100ms                                                                                                              |
+| `ambient-pedestrian-back` | sprite | 48×72 | 42×63, 36×54, 30×45, 24×36 | `walk`        | core | The student walking away: the green backpack, the ponytail; 4 × 100ms                                                                                                                                  |
+| `ambient-plane`           | sprite | 24×10 | none                       | `fly`         | core | A passenger jet side on in Yonge Street's evening sky: navy, lit grey underneath, amber windows, a steady white strobe on the fin, the wingtip light red then white; 2 × 250ms, only the lights change |
+| `ambient-rabbit`          | sprite | 40×40 | 35×35, 30×30, 25×25, 20×20 | `idle`, `hop` | core | A brown cottontail side on; `idle` 2 × 400ms, `hop` 4 × 110ms                                                                                                                                          |
 
 ### Roadside props
 

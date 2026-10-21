@@ -1238,9 +1238,9 @@ def paws_promenade():
 
 # ---------- Toronto ----------
 # The six Toronto neighborhoods, each starting from the Maplewood backdrop it replaces and keeping
-# its road colour, cross street and gag spots. Their darkness ranges from the open sand of The
-# Beaches and Yonge Street's pale paving to Kensington Market's dark laneways and High Park's
-# canopy, and each has its own sky.
+# its cross street and gag spots, and its road colour but for Yonge Street's evening concrete. Their
+# darkness ranges from the open sand of The Beaches to Yonge Street's evening, Kensington Market's
+# dark laneways and High Park's canopy, and each has its own sky.
 
 # The game's verge beside each Toronto road, keyed by art id, with colours
 # by K name (shared/verges.json):
@@ -1268,8 +1268,8 @@ TORONTO_VERGES = {
                         walkDots=[dict(colors=["tan"], share=0.05), dict(colors=["white"], share=0.008)],
                         seamColor="skin1", seamEvery=32, walkTo=None, lawn="none",
                         lawnColors=None, leaves=False),
-    "yonge-street": dict(curbColor="white", curbTo=164, strips=[], walkColor="lgrey",
-                         walkDots=[dict(colors=["grey"], share=0.015)], seamColor="grey", seamEvery=32,
+    "yonge-street": dict(curbColor="stone", curbTo=164, strips=[], walkColor="dstone",
+                         walkDots=[dict(colors=["shale"], share=0.015)], seamColor="shale", seamEvery=32,
                          walkTo=None, lawn="none", lawnColors=None, leaves=False),
 }
 
@@ -1958,67 +1958,292 @@ def tower(cv, x, w, top, base, wall, glass, line="coal"):
         cv.fill(x + 2, wy, w - 6, 2, glass)
 
 
-def cn_tower(cv, cx, base):
-    """The tower: a tapering lgrey shaft, the pod a third of the way down, a slim mast to the top."""
-    for y in range(base - 52, base):
-        half = 1 + (y - (base - 52)) // 18
-        cv.fill(cx - half, y, 2 * half + 1, 1, "lgrey")
-        cv.fill(cx + half, y, 1, 1, "grey")
-    cv.fill(cx - 5, base - 54, 11, 4, "lgrey")
-    cv.fill(cx - 5, base - 52, 11, 1, "dlake")
-    cv.fill(cx + 4, base - 54, 2, 4, "grey")
-    cv.fill(cx - 2, base - 58, 5, 4, "lgrey")
-    cv.fill(cx, base - 69, 1, 11, "grey")
+def cn_tower(cv, cx, base, top):
+    """The tower far off at night, from its antenna's tip on row top to row base, in the far landmarks'
+    haze shaded lgrey, in its real proportions: the antenna the top sixth, a red beacon at its tip and
+    another halfway down; the SkyPod with its gold windows; a 5-column shaft on to the main pod, 23 wide
+    with a gold window band, 60% of the way up; then the long shaft tapering out to 15 columns at the foot."""
+    h = base - top
+
+    def row(y, half):
+        cv.fill(cx - half, y, 2 * half + 1, 1, "haze")
+        cv.fill(cx + max(1, half - 2), y, min(3, half), 1, "lgrey")
+
+    mast, sky_pod, pod = top + round(h * 0.09), top + round(h * 0.17), top + round(h * 0.36)
+    cv.fill(cx, top, 1, mast - top, "lgrey")
+    for y in range(mast, sky_pod):
+        row(y, 1)
+    for k, half in enumerate((2, 4, 4, 4, 3)):
+        row(sky_pod + k, half)
+    cv.fill(cx - 3, sky_pod + 2, 7, 1, "gold")
+    for y in range(sky_pod + 5, pod):
+        row(y, 2)
+    for k, half in enumerate((6, 9, 10, 11, 11, 11, 10, 9, 7, 5)):
+        row(pod + k, half)
+    cv.fill(cx - 11, pod + 4, 23, 1, "gold")
+    for x in range(cx - 10, cx + 11, 3):
+        cv.fill(x, pod + 4, 1, 1, "amber")
+    for y in range(pod + 10, base):
+        row(y, 2 + (y - pod - 10) * 5 // (base - pod - 10))
+        cv.fill(cx, y, 1, 1, "lgrey")
+    cv.fill(cx, top, 1, 1, "red")
+    cv.fill(cx, mast - (mast - top) // 2, 1, 1, "red")
+
+
+def mast(cv, cx, top, h):
+    """A rooftop antenna h rows tall from row top, a red light at its tip."""
+    cv.fill(cx, top, 1, h, "ash")
+    cv.fill(cx, top, 1, 1, "red")
+
+
+def scotia(cv, x, w, top):
+    """Scotia Plaza: red granite in brick and dbrick facets, its top stepped down to a chevron notch, a
+    few windows lit."""
+    for k in range(w // 2):
+        cv.fill(x + k, top + abs(w // 4 - k) // 2, 1, BASE - top, "brick")
+        cv.fill(x + w - 1 - k, top + abs(w // 4 - k) // 2, 1, BASE - top, "dbrick")
+    for c in range(x + 2, x + w - 2, 3):
+        cv.fill(c, top + 6, 1, BASE - top - 6, "dbrick")
+    lit(cv, x + 3, x + w - 3, top + 7, BASE, "scotia", 0.15, ("gold", "amber"), (3, 3))
+    cv.fill(x, top, 1, BASE - top, "coal")
+    cv.fill(x + w - 1, top, 1, BASE - top, "coal")
+
+
+def full_moon(cv, cx, cy, r):
+    """A full moon: a haze disc lit white on its upper left, three lgrey seas."""
+    for dy in range(-r, r + 1):
+        for dx in range(-r, r + 1):
+            if dx * dx + dy * dy <= r * (r + 1):
+                cv.fill(cx + dx, cy + dy, 1, 1, "white" if dx + dy < -r else "haze")
+    for dx, dy, w in ((0, -2, 2), (-2, 1, 2), (1, 2, 2)):
+        cv.fill(cx + dx, cy + dy, w, 1, "lgrey")
+
+
+def lit(cv, x0, x1, y0, y1, seed, rate, cols=("gold", "amber", "cream"), step=(3, 3), size=(1, 1)):
+    """Lit windows across columns x0..x1 and rows y0..y1, one window a step, a share rate lit."""
+    rnd = random.Random(f"lit-{seed}")
+    for y in range(y0, y1, step[1]):
+        for x in range(x0, x1, step[0]):
+            if rnd.random() < rate:
+                cv.fill(x, y, size[0], size[1], rnd.choice(cols))
+
+
+def skyline(cv, towers):
+    """The towers behind the front row: silhouettes standing on BASE, each (x, w, top, wall), a lit
+    window in some of every 3 columns and rows."""
+    for k, (x, w, top, wall) in enumerate(towers):
+        cv.fill(x, top, w, BASE - top, wall)
+        lit(cv, x + 2, x + w - 1, top + 3, BASE, f"far-{k}", 0.2, ("gold", "amber"))
+
+
+def skydome(cv, x, w, wall, ry):
+    """The SkyDome far off, in the far landmarks' haze: a dome ry rows tall on row wall, its four panels'
+    seams lgrey arcs nested at its right foot, lit white along its upper left. Its foot stays hidden
+    behind the nearer towers."""
+    rx = w / 2
+
+    def inside(px, py, r):
+        dx, dy = (px + 0.5 - (x + w - r)) / r, (py + 0.5 - wall) / (ry * (r / rx) ** 0.5)
+        return dx * dx + dy * dy <= 1
+
+    for py in range(wall - ry, wall):
+        for px in range(x, x + w):
+            if not inside(px, py, rx):
+                continue
+            c = "white" if not inside(px - 1, py - 1, rx) and px < x + w * 0.6 else "haze"
+            for r in (rx * 0.75, rx * 0.5, rx * 0.25):
+                if inside(px, py, r) and not inside(px - 1, py, r):
+                    c = "lgrey"
+            cv.fill(px, py, 1, 1, c)
+    cv.fill(x, wall, w, 3, "lgrey")
+    for ax in range(x + 3, x + w - 3, 5):
+        cv.fill(ax, wall + 1, 3, 1, "gold")
+
+
+def crown(cv, x, w, top, wall, line="coal", steps=2):
+    """A tower's stepped top: steps rows each 2 columns narrower a side, above row top."""
+    for k in range(1, steps + 1):
+        cv.fill(x + 2 * k, top - k, w - 4 * k, 1, line)
+        cv.fill(x + 2 * k + 1, top - k + 1, w - 4 * k - 2, 1, wall)
+
+
+def royal_bank(cv, x, w, top):
+    """A Royal Bank Plaza tower: gold glass in sawtooth facets, a gold and amber pair lit and ochre
+    in shade every 4 columns, ochre floors every 3 rows."""
+    crown(cv, x, w, top, "gold")
+    cv.fill(x, top, w, BASE - top, "ochre")
+    for c in range(x + 1, x + w - 1):
+        cv.fill(c, top + 1, 1, BASE - top - 1, ("gold", "gold", "amber", "ochre")[(c - x) % 4])
+    for y in range(top + 3, BASE, 3):
+        cv.fill(x + 1, y, w - 2, 1, "ochre")
+    cv.fill(x + w - 3, top + 1, 2, BASE - top - 1, "ochre")
+    outline_box(cv, x, top, w, BASE - top + 1, "coal")
+
+
+def first_canadian(cv, x, w, top):
+    """First Canadian Place: white marble, grey fins every 3 columns, its notched corners in grey,
+    the red BMO band at the top."""
+    crown(cv, x, w, top, "lgrey", steps=1)
+    cv.fill(x, top, w, BASE - top, "lgrey")
+    for c in range(x + 3, x + w - 3, 3):
+        cv.fill(c, top + 5, 1, BASE - top - 5, "grey")
+    cv.fill(x + 1, top + 1, 2, BASE - top - 1, "white")
+    cv.fill(x + w - 3, top + 1, 2, BASE - top - 1, "grey")
+    cv.fill(x + 2, top + 1, w - 4, 3, "ttc")
+    cv.fill(x + w // 2 - 3, top + 2, 6, 1, "white")
+    lit(cv, x + 4, x + w - 4, top + 7, BASE, "fcp", 0.18, ("cream", "gold"), (3, 2))
+    outline_box(cv, x, top, w, BASE - top + 1, "slate")
+
+
+def dominion(cv, x, w, top, seed):
+    """A TD Centre tower: black steel and bronze glass, coal in an ink grid every 3 columns and rows,
+    whole runs of each floor lit, the green logo near the top and an ash edge to the light."""
+    cv.fill(x, top, w, BASE - top, "coal")
+    for c in range(x + 3, x + w - 1, 3):
+        cv.fill(c, top + 1, 1, BASE - top - 1, "ink")
+    rnd = random.Random(f"td-{seed}")
+    for y in range(top + 6, BASE, 3):
+        run = 0
+        for c in range(x + 1, x + w - 2, 3):
+            run = rnd.randrange(2, 6) if run == 0 and rnd.random() < 0.3 else max(0, run - 1)
+            if run:
+                cv.fill(c, y, 2, 1, rnd.choice(("gold", "amber", "cream")))
+    cv.fill(x + 2, top + 2, 3, 3, "green")
+    cv.fill(x + 3, top + 3, 1, 1, "white")
+    outline_box(cv, x, top, w, BASE - top + 1, "ink")
+    cv.fill(x, top, 1, BASE - top, "ash")
+    cv.fill(x, top, w - 1, 1, "ash")
+
+
+def glass_tower(cv, x, w, top, seed, glass="dlake", line="ink"):
+    """A glass tower at night: dark glass, a floor line every 3 rows, its right side in shade, some
+    floors' windows lit."""
+    cv.fill(x, top, w, BASE - top, glass)
+    for y in range(top + 2, BASE, 3):
+        cv.fill(x + 1, y, w - 2, 1, dk(glass))
+    cv.fill(x + w - 3, top, 3, BASE - top, dk(glass))
+    lit(cv, x + 2, x + w - 3, top + 3, BASE, f"glass-{seed}", 0.25, ("gold", "amber", "foam"), (2, 3))
+    outline_box(cv, x, top, w, BASE - top + 1, line)
+    cv.fill(x + 1, top + 1, 1, BASE - top - 1, "lake")
+
+
+def screens(cv, x, w, top):
+    """The Yonge-Dundas tower: shale with a few lit windows over its face of screens, the big WOOF!
+    screen and, under it, the bright ads down to its street level."""
+    cv.fill(x, top, w, BASE - top, "shale")
+    lit(cv, x + 2, x + w - 3, top + 3, BASE - 47, "dundas", 0.3, ("gold", "amber"), (3, 3))
+    outline_box(cv, x, top, w, BASE - top + 1, "ink")
+    sx, sw, sy = x + 4, w - 8, BASE - 47
+    cv.fill(sx, sy, sw, 15, "coal")
+    cv.fill(sx + 1, sy + 1, sw - 2, 13, "dlake")
+    for k in range(sw - 2):
+        cv.fill(sx + 1 + k, sy + 1 + (k * 7) % 13, 1, 1, "lake")
+    word(cv, "WOOF!", x + w / 2, sy + 3, "gold")
+    aw = (sw - 4) // 3
+    for k, (back, bar) in enumerate((("ttc", "white"), ("turquoise", "cyan"), ("hot", "pink"))):
+        ax = sx + k * (aw + 2)
+        cv.fill(ax, BASE - 31, aw, 12, "coal")
+        cv.fill(ax + 1, BASE - 30, aw - 2, 10, back)
+        for j, y in enumerate(range(BASE - 28, BASE - 22, 2)):
+            cv.fill(ax + 3, y, aw - 6 - 4 * (j % 2), 1, bar)
+
+
+def street_level(cv, x, w, seed, sign=None):
+    """A tower's street level, rows BASE - 18 to BASE: a coal front under an ash canopy edge, shop
+    glass in 5-column bays, some lit gold and some dark, and over it a neon sign, (word, colour), on an
+    ink board edged in its colour."""
+    cv.fill(x, BASE - 18, w, 18, "coal")
+    cv.fill(x, BASE - 18, w, 1, "ash")
+    rnd = random.Random(f"street-{seed}")
+    for bx in range(x + 2, x + w - 6, 6):
+        on = rnd.random() < 0.6
+        cv.fill(bx, BASE - 8, 5, 8, "gold" if on else "dlake")
+        cv.fill(bx, BASE - 2, 5, 2, "amber" if on else "navy")
+    if sign:
+        s, col = sign
+        bw = fonts.sign_width(s) + 4
+        bx = round(x + w / 2 - bw / 2)
+        cv.fill(bx, BASE - 17, bw, 9, "ink")
+        outline_box(cv, bx, BASE - 17, bw, 9, col)
+        word(cv, s, x + w / 2, BASE - 17, col)
+
+
+YONGE_SKY = ("slate", "dslate", "purple", "mauve")
 
 
 def yonge():
     cv = sn.Canvas(W, H)
-    # a pale haze over downtown, brighter toward the horizon
-    sky(cv, "haze", "white")
-    birds(cv, ((248, BASE - 64), (262, BASE - 60)))
-    cn_tower(cv, CX - 92, BASE - 10)
-    for x, w, top, wall_c, glass in ((-4, 34, BASE - 62, "ash", "lake"), (34, 26, BASE - 54, "stone", "haze"),
-                                     (CX + 30, 30, BASE - 66, "lake", "foam"), (CX + 64, 24, BASE - 58, "ash", "haze"),
-                                     (CX + 92, 36, BASE - 64, "stone", "lake"), (CX + 132, 30, BASE - 52, "shale", "lake")):
-        tower(cv, x, w, top, BASE - 10, wall_c, glass)
-    # the shops along the street, a big screen over the corner
-    for x, w, top, wall_c, awn, sign, board, letters in (
-            (-4, 66, BASE - 42, "lgrey", "ttc", "SALE", "ttc", "white"),
-            (62, 58, BASE - 36, "clay", "gold", "EAT", "coal", "gold"),
-            (CX - 60, 120, BASE - 44, "ash", "lake", "MUSIC", "coal", "turquoise"),
-            (CX + 60, 60, BASE - 38, "brick", "white", "BOOKS", "dlake", "white"),
-            (CX + 120, 66, BASE - 46, "stone", "turquoise", "SHOES", "violet", "white")):
-        shopfront(cv, x, w, top, BASE, wall_c, awn, sign, board, letters, line="coal")
-    cv.fill(CX - 42, BASE - 66, 84, 22, "coal")
-    cv.fill(CX - 40, BASE - 64, 80, 18, "dlake")
-    for k in range(80):
-        cv.fill(CX - 40 + k, BASE - 64 + (k * 7) % 18, 1, 1, "lake")
-    word(cv, "WOOF!", CX, BASE - 60, "gold")
+    # an evening sky, slate down to dslate and purple, a mauve city glow at the horizon, a full moon
+    # and a few stars
+    sunset(cv, YONGE_SKY, BASE)
+    for x, y in ((8, 6), (62, 2), (108, 9), (150, 4), (196, 11), (232, 3), (288, 22), (318, 4), (352, 12)):
+        cv.fill(x, y, 1, 1, "white")
+    full_moon(cv, 304, 14, 5)
+    # downtown is a wall of towers filling most of the sky, the only sky left in the gaps and over the
+    # top: unlike the other backdrops it rises above row 45, under the debuff bars' and the message
+    # strip's opaque plates. Far back, dark towers in navy and dslate with a few windows lit
+    skyline(cv, ((-2, 16, 30, "navy"), (44, 20, 22, "dslate"), (66, 18, 36, "navy"), (114, 22, 26, "navy"),
+                 (150, 18, 16, "dslate"), (170, 20, 34, "navy"), (196, 16, 24, "dslate"), (214, 14, 12, "navy"),
+                 (228, 18, 30, "navy"),
+                 (268, 16, 40, "dslate"), (300, 18, 30, "navy"), (322, 16, 24, "dslate"), (342, 20, 38, "navy")))
+    for cx, top, h in ((52, 22, 9), (122, 26, 7), (156, 16, 8), (178, 34, 6), (220, 12, 6), (348, 38, 8)):
+        mast(cv, cx, top - h, h)
+    # behind the SkyDome, lit towers; then, far off in a lighter haze, the CN Tower, the tallest thing on
+    # the skyline, its whole shaft clear in a gap down to the far city's lights over its foot, and the
+    # SkyDome large beside it
+    glass_tower(cv, 50, 22, 40, 7)
+    scotia(cv, 76, 24, 28)
+    dominion(cv, 102, 22, 44, 5)
+    glass_tower(cv, 126, 22, 34, 8, "dslate")
+    cn_tower(cv, 30, BASE, 2)
+    skydome(cv, 44, 94, BASE - 26, 20)
+    cv.fill(14, BASE - 5, 32, 5, "coal")
+    lit(cv, 15, 45, BASE - 4, BASE, "lakeshore", 0.35, ("gold", "amber"), (2, 2))
+    # the nearer towers: dark glass left of the CN Tower and up to the SkyDome's lower half; then, down to
+    # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, the TD
+    # Centre's black pair and glass, each with neon over its street level
+    glass_tower(cv, -4, 18, 24, 4)
+    glass_tower(cv, 44, 30, BASE - 30, 5, "dslate")
+    glass_tower(cv, 74, 14, BASE - 40, 6)
+    dominion(cv, 88, 38, BASE - 28, 4)
+    glass_tower(cv, 126, 26, BASE - 34, 1)
+    screens(cv, CX - 28, 56, 48)
+    royal_bank(cv, 210, 20, 36)
+    royal_bank(cv, 230, 14, 58)
+    first_canadian(cv, 246, 22, 14)
+    dominion(cv, 270, 34, 30, 1)
+    dominion(cv, 306, 24, 48, 2)
+    glass_tower(cv, 332, 32, 34, 3)
+    for k, (x, w, sign) in enumerate(((-4, 18, None), (44, 30, None), (74, 14, None),
+                                      (88, 38, ("SHOES", "pink")), (126, 26, ("EAT", "gold")),
+                                      (CX - 28, 56, ("MUSIC", "turquoise")), (210, 20, None), (230, 14, None),
+                                      (246, 22, None), (270, 34, ("BOOKS", "lilac")), (306, 24, None),
+                                      (332, 32, None))):
+        street_level(cv, x, w, k, sign)
     # the subway entrance sign
-    sx = CX - 119
+    sx = 64
     cv.fill(sx, BASE - 4, 2, FAR_WALK - BASE + 4, "coal")
     cv.fill(sx - 9, BASE - 14, 20, 12, "coal")
     cv.fill(sx - 8, BASE - 13, 18, 10, "ttc")
     word(cv, "TTC", sx + 1, BASE - 12, "white")
 
     def paving(px, py):
-        return "grey" if hashed(px, py, 67) else "lgrey"
+        return "shale" if hashed(px, py, 67) else "dstone"
 
     yard(cv, BASE, FAR_WALK, paving)
 
     def road(x, z, span, px, py):
-        a = abs(x)
-        if a >= ROAD - 5:
-            return "lgrey"
-        if span < 6 and crosses(z, span, 8):
-            return "brown"
-        return "clay" if hashed(px, py, 41) else "skin2"
+        if abs(x) >= ROAD - 5:
+            return "dstone"
+        if span < 6 and crosses(z, span, 32):
+            return "coal"
+        return "ash" if hashed(px, py, 41) else "shale"
 
-    cross(cv, flat(road), "lgrey", paving, curb="white")
-    cross_line(cv, "white", "plum", dash=(14, 32))
+    cross(cv, flat(road), "dstone", paving, curb="stone")
+    cross_line(cv, "amber", "coal", dash=(14, 32))
     street(cv, toronto_verge("yonge-street", road))
-    lanes(cv, "white", "plum", dash=(14, 32))
-    ledge(cv, *PERCH_X, PERCH, "stone", "lgrey", "dstone")
+    lanes(cv, "white", "coal", dash=(14, 32))
+    ledge(cv, *PERCH_X, PERCH, "ash", "grey", "shale")
     ornament(cv, "ring")
     return cv
 

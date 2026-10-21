@@ -406,6 +406,15 @@
       }
     },
     {
+      "key": "ambient-plane",
+      "png": "sprites/ambient-plane.png",
+      "json": "sprites/ambient-plane.json",
+      "anchor": {
+        "feetY": 9,
+        "opaqueWidth": 22
+      }
+    },
+    {
       "key": "ambient-rabbit",
       "png": "sprites/ambient-rabbit.png",
       "json": "sprites/ambient-rabbit.json",
