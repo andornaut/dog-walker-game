@@ -219,40 +219,24 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Hedge                                                                           | Minor     | 3 × 1               |
 | Construction barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path) | Minor     | 2 or 3 × 1          |
 
-### Obstacle skins
-
-Each obstacle kind keeps one mechanic and wears a different look in each zone: a skin changes the name (the card title), the road sprite, the card illustration and the hit label, never the effects, the options or who's affected. The hit burst and screen-edge flash stay with the kind (a Stink skin always bursts mauve), so the same colour always means the same mechanic. A big dog still scares off every Snatch skin, and Chasers still pull toward every Chase skin. The zone encounters already have their own looks, and the construction barrier keeps its look everywhere.
-
-| Kind               | Willow Crescent | Fairview Park  | Elm Avenue | Main Street       | Riverside Path  | The Long Way Home |
-| ------------------ | --------------- | -------------- | ---------- | ----------------- | --------------- | ----------------- |
-| Chase (squirrel)   | Cat on a lawn   | Squirrel       | Squirrel   | Pigeon flock      | Ducklings       | Rabbit            |
-| Snatch (thief)     | Raccoon         | Seagull        | Thief      | Thief             | Seagull         | Raccoon           |
-| Social (other dog) | Dog at a gate   | Frisbee dog    | Other dog  | Dog in a handbag  | Jogger's dog    | Other dog         |
-| Splash (puddle)    | Lawn sprinkler  | Mud patch      | Puddle     | Spilled milkshake | Splashy shore   | Puddle            |
-| Stink (skunk)      | Compost heap    | Skunk          | Skunk      | Fish crate        | Seaweed heap    | Garbage truck     |
-| Minor 1 × 1        | Garden gnome    | Molehill       | Cone, bin  | Sandwich board    | Tackle box      | Cone, bin         |
-| Minor 2 × 1        | Kiddie pool     | Picnic blanket | Bench      | Cafe table        | Bench           | Bench             |
-| Minor 3 × 1        | Hedge           | Flower bed     | Hedge      | Flower cart       | Rowboat trailer | Hedge             |
-| Minor 1 × 3        | Tricycle row    | Log            | Parked car | Parked scooter    | Canoe rack      | Parked car        |
-
 ### Moving hazards
 
-About a third of the obstacles move: people and animals of every kind, and some vehicles. How often depends on the zone (the zone's mover share). Each move is telegraphed about 1 second ahead (a cue at the lane edge, or an arrow up or down the lane), at most two movers are on screen at once, and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit.
+Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share rises from few movers in the first neighborhoods to about half in The Long Way Home. Each move is telegraphed about 1 second ahead, at most three movers are on screen at once (at most one darting animal and one slow vehicle), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit.
 
-| Movement | How it moves                                                                           | Who                                                                         |
-| -------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Away     | Down its lane slower than the road, so it lingers in view while the pack catches up    | Dog in a handbag (its owner strolls ahead), Frisbee dog (chasing the throw) |
-| Dart     | Fast, all the way across the road                                                      | Ball (bouncing), Cat, Loose dog, Rabbit, Seagull (swooping), Squirrel       |
-| Hop      | One lane, once, into a lane the path rule keeps passable                               | Ducklings, Parked car (pulling out), Parked scooter, Pigeon flock           |
-| Toward   | Up its lane toward the walker, faster than the road                                    | Cyclist, Garbage truck (slowly), Goose (charging), Jogger's dog             |
-| Wander   | Two or three steps, each telegraphed: a lane to either side, or a burst toward or away | Raccoon, Thief                                                              |
+| Group      | How it moves                                                                                        | Who                                                                          |
+| ---------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Animals    | Zoom across the whole road, some on a slight tilt up or down the road, or stand still               | Ball, Goose, Other dog, Squirrel                                             |
+| Cars       | Always in their lane, some down the road faster than it scrolls and some slower                     | Car (street neighborhoods only), Cyclist                                     |
+| People     | Stand still, or take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down | Thief                                                                        |
+| Trucks     | Like cars, in their lane, but slower                                                                | Delivery truck (to come)                                                     |
+| Stationary | Never move                                                                                          | Area effects, barriers, benches, bins, cones, hedges and the other obstacles |
 
 - Squirrels still draw the Chasers' pull while on screen
-- Stationary kinds never move: area effects (Splash, Stink other than the garbage truck), benches, cones, bins, hedges, flower beds and the like
 
 ### Feedback
 
-- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (half as many tips). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) is visual only and fades after 10 seconds. Debuffs show their own icon and look until they end
+- **Road markers:** things worth grabbing (tips, treats, and lucky finds that open no card) bob gently; obstacles that open a card show a "!" above them; plain obstacles show neither. With reduced motion nothing bobs, and the "!" stays
+- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (half as many tips). Soaked (after Splash through) is visual only and fades after 10 seconds. Debuffs show their own icon and look until they end
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **First visit:** on a brand-new save, the starter's owner waits at the gate in the gate scene until the first walk
