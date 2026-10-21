@@ -152,7 +152,7 @@ export const TUNING = {
     // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 0.7,
     // A still press held this long on the walk HUD's effect icons, debuff bars or dog cards
-    // shows what it explains and pauses the walk until it lifts.
+    // opens a detail card with what it explains, pausing the walk until a tap closes it.
     explainHoldSeconds: 0.3,
     // An owner who fires you holds the walk still this long while their moment plays.
     firingHoldSeconds: 3,
