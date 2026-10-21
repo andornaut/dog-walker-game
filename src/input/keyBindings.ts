@@ -1,4 +1,5 @@
 import type { LaneDirection } from "../layout/lanes";
+import type { GestureAction } from "./gestures";
 
 const LANE_CHANGE_KEYS: Partial<Record<string, LaneDirection>> = {
   a: -1,
@@ -24,6 +25,24 @@ export function cardNumberForKey(cardCount: number, key: string): number | undef
 export function dogSlotForKey(slotCount: number, key: string): number | undefined {
   const slotNumber = cardNumberForKey(slotCount, key);
   return slotNumber === undefined ? undefined : slotNumber - 1;
+}
+
+// During a walk, a lane key moves a lane and a digit key gives that slot a treat, at once on
+// the key going down. A held key's repeats do nothing, so each press acts once.
+export function walkKeyAction(
+  slotCount: number,
+  key: string,
+  repeat: boolean,
+): GestureAction | undefined {
+  if (repeat) {
+    return undefined;
+  }
+  const direction = laneDirectionForKey(key);
+  if (direction !== undefined) {
+    return { direction, kind: "move" };
+  }
+  const slot = dogSlotForKey(slotCount, key);
+  return slot === undefined ? undefined : { kind: "treat", slot };
 }
 
 // Escape or P opens the pause menu, and closes it again. Over any other overlay or card it

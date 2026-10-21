@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { GestureAction } from "./gestures";
 import {
   cardNumberForKey,
   dogSlotForKey,
@@ -7,6 +8,7 @@ import {
   isMuteKey,
   isPauseKey,
   laneDirectionForKey,
+  walkKeyAction,
 } from "./keyBindings";
 
 describe("key bindings", () => {
@@ -80,5 +82,21 @@ describe("key bindings", () => {
     for (const [key, value] of Object.entries(expected)) {
       expect(read(key), JSON.stringify(key)).toBe(value);
     }
+  });
+});
+
+describe("walkKeyAction", () => {
+  // A key going down during a walk with 3 dog slots, first pressed or auto-repeated.
+  it.each<{ action: GestureAction | undefined; key: string; repeat: boolean }>([
+    { action: { direction: -1, kind: "move" }, key: "ArrowLeft", repeat: false },
+    { action: { direction: 1, kind: "move" }, key: "d", repeat: false },
+    { action: { kind: "treat", slot: 1 }, key: "2", repeat: false },
+    { action: undefined, key: "4", repeat: false },
+    { action: undefined, key: "w", repeat: false },
+    { action: undefined, key: "ArrowLeft", repeat: true },
+    { action: undefined, key: "d", repeat: true },
+    { action: undefined, key: "2", repeat: true },
+  ])("acts on $key, repeat $repeat", ({ action, key, repeat }) => {
+    expect(walkKeyAction(3, key, repeat)).toEqual(action);
   });
 });

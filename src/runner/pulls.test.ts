@@ -415,7 +415,7 @@ describe("pullWalk", () => {
 
 describe("gestureAfterPulls", () => {
   const context = {
-    config: { laneCount: 5, tapMaxDistance: 10 },
+    config: { laneCount: 5, swipeStartDistance: 20, tapMaxDistance: 10 },
     layout: {
       dogRow: { height: 90, width: 360, x: 0, y: 470 },
       dogSlots: [],
@@ -432,10 +432,10 @@ describe("gestureAfterPulls", () => {
 
   it("re-anchors a drag at the pointer when a pull moved the pack", () => {
     const reanchored = gestureAfterPulls([moved], dragged);
-    expect(reanchored).toMatchObject({ anchorX: 230, kind: "dragging", steps: 0 });
-    // A lane-width is 56px: dragging back one lane now takes a whole lane-width from 230.
-    expect(pointerMove(context, { x: 200, y: 400 }, reanchored).actions).toEqual([]);
-    expect(pointerMove(context, { x: 174, y: 400 }, reanchored).actions).toEqual([
+    expect(reanchored).toMatchObject({ kind: "dragging", leg: { anchorX: 230, steps: 0 } });
+    // Dragging back one lane now takes the swipe start distance, 20px, from 230.
+    expect(pointerMove(context, { x: 211, y: 400 }, reanchored).actions).toEqual([]);
+    expect(pointerMove(context, { x: 210, y: 400 }, reanchored).actions).toEqual([
       { direction: -1, kind: "move" },
     ]);
   });

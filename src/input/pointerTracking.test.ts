@@ -23,7 +23,7 @@ import {
 } from "./pointerTracking";
 
 // Road y 40-470 with its lanes at x 40-320, five of 56px; the top bar is y 0-40 and the
-// doghouses y 470-560.
+// doghouses y 470-560. A drag's first step is at 20px.
 const screen: ScreenConfig = {
   backdropHeight: 0,
   dogRowHeight: 90,
@@ -37,7 +37,7 @@ const screen: ScreenConfig = {
 const LANES = 5;
 const LANE_WIDTH = 56;
 const context: GestureContext = {
-  config: { laneCount: LANES, tapMaxDistance: 10 },
+  config: { laneCount: LANES, swipeStartDistance: 20, tapMaxDistance: 10 },
   layout: screenLayout(screen),
 };
 const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
@@ -129,7 +129,7 @@ describe("trackPointer", () => {
       actions: [],
       events: [
         { phase: "down", press: first, x: 200 },
-        { phase: "move", press: first, x: 220 },
+        { phase: "move", press: first, x: 210 },
         // The release went to another scene, and so did the same pointer's next down.
         { phase: "move", press: again, x: 330 },
         { phase: "up", press: again, x: 330 },
@@ -141,7 +141,7 @@ describe("trackPointer", () => {
       actions: [left],
       events: [
         { phase: "down", press: first, x: 200 },
-        { phase: "move", press: first, x: 220 },
+        { phase: "move", press: first, x: 210 },
         { phase: "down", press: second, x: 300 },
         { phase: "move", press: second, x: 243 },
         { phase: "up", press: second, x: 243 },

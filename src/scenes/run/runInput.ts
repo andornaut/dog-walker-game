@@ -5,7 +5,7 @@ import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
 import { onStrip, stripItems } from "../../hud/stateStrip";
 import { gameplayAllowed, pressesHeld, type RunPause, topBarButtonAt } from "../../hud/topBar";
 import type { GestureAction, GestureContext } from "../../input/gestures";
-import { dogSlotForKey, laneDirectionForKey } from "../../input/keyBindings";
+import { walkKeyAction } from "../../input/keyBindings";
 import {
   idleTrack,
   type PointerSample,
@@ -42,11 +42,16 @@ export class RunInput {
 
   listen(): void {
     const { input } = this.scene;
-    input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
+    input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event));
     input.on("pointerdown", (pointer: Input.Pointer) => this.onPointer("down", pointer));
     input.on("pointermove", (pointer: Input.Pointer) => this.onPointer("move", pointer));
     input.on("pointerup", (pointer: Input.Pointer) => this.onPointer("up", pointer));
     input.on("pointerupoutside", (pointer: Input.Pointer) => this.onPointer("up", pointer));
+  }
+
+  // The lane moves and treats queued for the next step, which the pack's drawing leads with.
+  queued(): readonly SessionInput[] {
+    return this.pending;
   }
 
   // The lane moves and treats queued since the last step.
@@ -67,16 +72,12 @@ export class RunInput {
     this.pointers = { ...this.pointers, gesture: gestureAfterPulls(pulled, this.pointers.gesture) };
   }
 
-  // M, P and Escape are the top bar's keys, which the HUD handles.
-  private onKey(key: string): void {
-    const direction = laneDirectionForKey(key);
-    if (direction !== undefined) {
-      this.act({ direction, kind: "move" });
-      return;
-    }
-    const slot = dogSlotForKey(SCREEN_CONFIG.dogSlotCount, key);
-    if (slot !== undefined) {
-      this.act({ kind: "treat", slot });
+  // M, P and Escape are the top bar's keys, which the HUD handles. Phaser hands a key down to
+  // this listener as the browser fires it, auto-repeats included.
+  private onKey(event: KeyboardEvent): void {
+    const action = walkKeyAction(SCREEN_CONFIG.dogSlotCount, event.key, event.repeat);
+    if (action !== undefined) {
+      this.act(action);
     }
   }
 
@@ -135,6 +136,7 @@ function gestureContext(): GestureContext {
   return {
     config: {
       laneCount: LANE_COUNT,
+      swipeStartDistance: read(gameData.tuning, "pixels", "swipeStartDistance"),
       tapMaxDistance: read(gameData.tuning, "pixels", "tapMaxDistance"),
     },
     layout: LAYOUT,

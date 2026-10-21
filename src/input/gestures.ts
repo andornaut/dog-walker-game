@@ -2,9 +2,12 @@ import type { LaneDirection } from "../layout/lanes";
 import { containsPoint, type Point } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 
-// tapMaxDistance is in screen pixels. A lane step is the road width over laneCount.
+// Distances are in screen pixels. A lane-width is the road width over laneCount.
+// swipeStartDistance: the travel that takes a drag's first lane step, and the travel back that
+// turns it around.
 export interface GestureConfig {
   laneCount: number;
+  swipeStartDistance: number;
   tapMaxDistance: number;
 }
 
@@ -16,15 +19,25 @@ export interface GestureContext {
 export type GestureAction =
   { direction: LaneDirection; kind: "move" } | { kind: "pause" } | { kind: "treat"; slot: number };
 
+// One leg of a drag: a run of travel one way. Its lane steps count from anchorX: the first at
+// swipeStartDistance and the Nth at N lane-widths. direction is the way its steps
+// go, 0 before the first; steps is how many it has taken; peakX is the furthest x reached
+// that way. Travelling back swipeStartDistance from peakX starts a new leg there.
+export interface DragLeg {
+  anchorX: number;
+  direction: LaneDirection | 0;
+  peakX: number;
+  steps: number;
+}
+
 // start is where the press went down. tapping holds until the press leaves the tap distance
 // or takes a lane step.
 // topBar: a press on the top bar, which only pauses on a tap and never drags.
-// dragging: a press anywhere else. Lane steps count from anchorX, steps is the net number
-// already emitted since the anchor, and x is the latest pointer x.
+// dragging: a press anywhere else, steering by its current leg; x is the latest pointer x.
 export type GestureState =
   | { kind: "idle" }
   | { kind: "topBar"; start: Point; tapping: boolean }
-  | { anchorX: number; kind: "dragging"; start: Point; steps: number; tapping: boolean; x: number };
+  | { kind: "dragging"; leg: DragLeg; start: Point; tapping: boolean; x: number };
 
 export interface GestureResult {
   actions: GestureAction[];
@@ -67,31 +80,56 @@ export function exceedsTapDistance(maxDistance: number, start: Point, end: Point
 }
 
 // Browser touch coordinates are float32 and then scaled to the game, so travel of exactly a
-// lane-width can read about 1e-5px short of it. Travel within this many lanes of a whole
-// lane-width counts as reaching it.
-const LANE_TOLERANCE = 1e-4;
+// lane-width can read about 1e-5px short of it. Travel within this many pixels of a distance
+// counts as reaching it.
+const PIXEL_TOLERANCE = 1e-3;
 
-// Whole lane-widths from the anchor, rounded toward zero so both directions step at the
-// same distance.
-function laneOffset({ config, layout }: GestureContext, anchorX: number, x: number): number {
-  const lanes = ((x - anchorX) * config.laneCount) / layout.road.width;
-  return Math.trunc(lanes + Math.sign(lanes) * LANE_TOLERANCE);
+const legAt = (x: number): DragLeg => ({ anchorX: x, direction: 0, peakX: x, steps: 0 });
+
+// The steps a leg has taken after travel from its anchor: none short of swipeStartDistance,
+// then one per whole lane-width, and always at least one.
+function legSteps({ config, layout }: GestureContext, travel: number): number {
+  const distance = Math.abs(travel) + PIXEL_TOLERANCE;
+  if (distance < config.swipeStartDistance) {
+    return 0;
+  }
+  return Math.max(1, Math.floor((distance * config.laneCount) / layout.road.width));
 }
 
-// One move per lane boundary crossed; the sign is the direction.
-function laneSteps(count: number): GestureAction[] {
-  return Array.from({ length: Math.abs(count) }, () => move(count < 0 ? -1 : 1));
+// The pointer reached x: the leg's new steps, or a new leg from the peak once the pointer
+// has turned back swipeStartDistance.
+function dragTo(
+  context: GestureContext,
+  x: number,
+  leg: DragLeg,
+): { actions: GestureAction[]; leg: DragLeg } {
+  const turnedBack = (leg.peakX - x) * leg.direction + PIXEL_TOLERANCE;
+  if (leg.direction !== 0 && turnedBack >= context.config.swipeStartDistance) {
+    return dragTo(context, x, legAt(leg.peakX));
+  }
+  const travel = x - leg.anchorX;
+  const way: LaneDirection = (leg.direction === 0 ? travel : leg.direction) < 0 ? -1 : 1;
+  const steps = travel * way > 0 ? Math.max(leg.steps, legSteps(context, travel)) : leg.steps;
+  if (steps === 0) {
+    return { actions: [], leg };
+  }
+  const peakX = leg.direction === 0 || (x - leg.peakX) * way > 0 ? x : leg.peakX;
+  return {
+    actions: Array.from({ length: steps - leg.steps }, () => move(way)),
+    leg: { anchorX: leg.anchorX, direction: way, peakX, steps },
+  };
 }
 
 // A press on the doghouses can drag too; it gives a treat only on a tap.
 export function pointerDown(context: GestureContext, point: Point): GestureResult {
   const state: GestureState = containsPoint(context.layout.topBar, point.x, point.y)
     ? { kind: "topBar", start: point, tapping: true }
-    : { anchorX: point.x, kind: "dragging", start: point, steps: 0, tapping: true, x: point.x };
+    : { kind: "dragging", leg: legAt(point.x), start: point, tapping: true, x: point.x };
   return { actions: [], state };
 }
 
-// Vertical travel never steps a lane, and travelling back undoes steps one at a time.
+// A drag steps as soon as it passes a distance, not on release, and goes on stepping as it
+// travels on. Vertical travel never steps a lane.
 export function pointerMove(
   context: GestureContext,
   point: Point,
@@ -105,10 +143,10 @@ export function pointerMove(
   if (state.kind === "topBar") {
     return { actions: [], state: { ...state, tapping } };
   }
-  const steps = laneOffset(context, state.anchorX, point.x);
+  const { actions, leg } = dragTo(context, point.x, state.leg);
   return {
-    actions: laneSteps(steps - state.steps),
-    state: { ...state, steps, tapping: tapping && steps === state.steps, x: point.x },
+    actions,
+    state: { ...state, leg, tapping: tapping && actions.length === 0, x: point.x },
   };
 }
 
@@ -135,8 +173,8 @@ export function pointerUp(
   return { actions: [tapAction(context.layout, moved.start)], state: idleGesture };
 }
 
-// A pull moved the pack: lane steps count again from the pointer's latest position, so the
-// next step is a whole lane-width away.
+// A pull moved the pack: lane steps count again from the pointer's latest position, as a new
+// leg.
 export function reanchorDrag(state: GestureState): GestureState {
-  return state.kind === "dragging" ? { ...state, anchorX: state.x, steps: 0 } : state;
+  return state.kind === "dragging" ? { ...state, leg: legAt(state.x) } : state;
 }

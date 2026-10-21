@@ -62,7 +62,7 @@ import { AccidentSpots } from "./run/accidentSpots";
 import { BackdropView } from "./run/backdropView";
 import { ForcedStopView } from "./run/forcedStopView";
 import { HitBoxView } from "./run/hitBoxView";
-import { blendWalk, stepAlpha } from "./run/interpolate";
+import { blendWalk, leadWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { MenuFlow, type MenuPause } from "./run/menuFlow";
 import { PackView } from "./run/packView";
@@ -588,9 +588,14 @@ export class RunScene extends Scene {
     }
     const { distanceBeforeZone, pulls, timeMs } = session;
     const before = this.stepBefore ?? session.walk;
-    const walk = blendWalk(stepAlpha(this.stepClock.bankedMs, STEP_MS), before, session.walk);
-    const zone = currentZone(gameData, walk.run);
     const halted = !this.walking();
+    const alpha = stepAlpha(this.stepClock.bankedMs, STEP_MS);
+    const laneCount = screenRoadGeometry(session.walk.run).laneCount;
+    const lead = halted
+      ? session.walk
+      : leadWalk(gameData, laneCount, alpha * STEP_SECONDS, world.input.queued(), session.walk);
+    const walk = blendWalk(alpha, before, lead);
+    const zone = currentZone(gameData, walk.run);
     const still = this.reducedMotion();
     world.backdrop.draw(walk, zone, packPoint(walk).x, still);
     world.road.draw(walk, zone, distanceBeforeZone);
