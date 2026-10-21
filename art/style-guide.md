@@ -3,7 +3,7 @@
 ## Direction
 
 - Pixel art: simple, cute, a little retro, refined. Mood: casual, cozy, low-stress.
-- Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings on its road sprite and 32×32 face. Dogs come in three sizes: big dogs (58×58, about 36px wide) and medium dogs (48×48) are drawn at their frame's scale, and small dogs (38×38) are drawn larger inside theirs, about 24px wide, chunky and clear. Faces and portraits keep one frame for every dog, the dog drawn by size but less than on the road (faces 32, 29 and 26px, portraits 64, 58 and 52px), sat on the bottom edge. A dog's coat and accessory read on both its road sprite and its face.
+- Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings on its road sprite and 32×32 face. Dogs come in three sizes: big dogs (54×54, about 34px wide) and medium dogs (48×48) are drawn at their frame's scale, and small dogs (38×38) are drawn larger inside theirs, about 24px wide, chunky and clear. Faces and portraits keep one frame for every dog, the dog drawn by size but less than on the road (faces 30, 29 and 26px, portraits 60, 58 and 52px), sat on the bottom edge. A dog's coat and accessory read on both its road sprite and its face.
 - Everything, UI included, is pixel art at the 360×560 base resolution, scaled up with no smoothing.
 
 ## Layout and sizes
@@ -18,7 +18,7 @@
 | Sprite                                                                                                   | Frame                      |
 | -------------------------------------------------------------------------------------------------------- | -------------------------- |
 | Dog and owner faces                                                                                      | 32×32                      |
-| Big and small dogs on the road                                                                           | 58×58, 38×38               |
+| Big and small dogs on the road                                                                           | 54×54, 38×38               |
 | Road animals: the other dog, skunk, squirrel, goose, `loose-dog` and `squirrel-dash`; medium dogs        | 48×48                      |
 | Road people: walkers, the forced-stop and lucky people, the thief, the other dog's owner and the cyclist | 48×72 (kids drawn shorter) |
 | Owners                                                                                                   | 32×48                      |

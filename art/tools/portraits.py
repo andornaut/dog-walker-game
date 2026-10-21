@@ -617,7 +617,7 @@ def to_image(px):
 
 
 # How much of the 64px well a dog's portrait fills, by size class, sat on the bottom edge.
-PORTRAIT_SIDE = {"big": 64, "medium": 58, "small": 52}
+PORTRAIT_SIDE = {"big": 60, "medium": 58, "small": 52}
 
 
 def image(draw, side=S):

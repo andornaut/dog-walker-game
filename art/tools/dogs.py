@@ -4,7 +4,7 @@
 Each dog gets two sprites in Endesga 32 with coloured outlines:
 
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
-  SIZE_CLASS): big 58x58 (Koda the Alaskan Malamute, Snowball the Great Pyrenees, Penny the golden
+  SIZE_CLASS): big 54x54 (Koda the Alaskan Malamute, Snowball the Great Pyrenees, Penny the golden
   retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Duchess,
   Nugget, Zippy), the small dogs drawn DOG_ZOOM larger so they fill more of their frame. Its drawing
   functions take 32-unit design coordinates and run on a minis.Mini at road_scale(name) (the side / 32),
@@ -25,7 +25,7 @@ Each dog gets two sprites in Endesga 32 with coloured outlines:
   the nose); dog-nugget pose (3, 220ms; Camera ready: sits square, cocks his head and
   a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a crouch, a spring, a
   stretched leap over motion streaks and a landing on the front paws).
-- face-dog-<name>: the dog column face, a 32x32 frame, the face drawn FACE_SIDE big by size class (big 32,
+- face-dog-<name>: the dog column face, a 32x32 frame, the face drawn FACE_SIDE big by size class (big 30,
   medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral, upset, then the
   quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
   a wobbly mouth and a sweat bead), while she is the only dog on the leash.
@@ -748,13 +748,15 @@ def inlay(g, line, draw):
     open edges take the grid's outline."""
     t = Grid(g.w, g.h)
     draw(t)
-    shape = {(x, y) for y in range(g.h) for x in range(g.w) if t.px[y][x]}
+    gp, tp = g.px, t.px  # in drawn pixels, also on a minis.Mini
+    h, w = len(gp), len(gp[0])
+    shape = {(x, y) for y in range(h) for x in range(w) if tp[y][x]}
     ring = {(x + dx, y + dy) for x, y in shape for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))} - shape
     for x, y in ring:
-        if 0 <= x < g.w and 0 <= y < g.h and g.px[y][x]:
-            g.p(x, y, line)
+        if 0 <= x < w and 0 <= y < h and gp[y][x]:
+            gp[y][x] = K.get(line, line)
     for x, y in shape:
-        g.px[y][x] = t.px[y][x]
+        gp[y][x] = tp[y][x]
 
 
 # ---------- shared features ----------
@@ -1011,9 +1013,9 @@ DOGS = {
 }
 
 
-# Each dog's road sprite side, by its size class: big 58, medium ROAD_SIZE (48) and small 38, about 1.2x, 1x
+# Each dog's road sprite side, by its size class: big 54, medium ROAD_SIZE (48) and small 38, about 1.1x, 1x
 # and 0.8x.
-SIZE_CLASS = {"big": 58, "medium": ROAD_SIZE, "small": 38}
+SIZE_CLASS = {"big": 54, "medium": ROAD_SIZE, "small": 38}
 DOG_CLASS = {"koda": "big", "snowball": "big", "penny": "big", "archie": "medium", "biscuit": "medium",
              "pierre": "medium", "duchess": "small", "nugget": "small", "zippy": "small"}
 DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
@@ -1024,7 +1026,7 @@ DOG_ZOOM = {"duchess": 1.3, "nugget": 1.3, "zippy": 1.3}
 
 # How much of its 32px photo a dog's face fills, by size class, sat on the bottom edge: the size difference
 # shows, less than on the road.
-FACE_SIDE = {"big": 32, "medium": 29, "small": 26}
+FACE_SIDE = {"big": 30, "medium": 29, "small": 26}
 
 
 def padded(px, side):
