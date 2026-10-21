@@ -655,14 +655,8 @@ export interface RunText {
   // dog card's status, its owner's hearts now and their max. upgradeStatus: an upgrade icon's
   // status, under its effect.
   readonly explain: {
-    // CLEANUP (added 2026-10-21): debuff, dog and effect were the message strip's explanation
-    // lines and nothing reads them. Remove them with their values in runText.ts and their
-    // entries in src/hud/runText.ts.
-    readonly debuff: string;
     readonly debuffStatus: string;
-    readonly dog: string;
     readonly dogHearts: string;
-    readonly effect: string;
     // A held dog card's row for each source of its owner's extra max hearts: {name} is the
     // gear's name, such as Lucky collar's, or smallPack for the lead dog's pack-size bonus.
     readonly extraHearts: string;
