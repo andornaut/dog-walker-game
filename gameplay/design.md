@@ -92,7 +92,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 ### Choice cards
 
 - Used for encounters and forks. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
-- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1 ♥ Duchess, −1 ♥ Koda", not "−1 ♥ each"). Choices only, no minigames
+- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Duchess, −1♥ Koda", not "−1♥ each"). Choices only, no minigames
 - Every card hits the whole pack. No card opens without a collision, except the fork card
 - A hit that opens a card costs nothing until you choose
 - A money option you can't afford is grayed out, so cash never goes below $0; every card keeps at least one option that costs no money
@@ -228,10 +228,10 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every card obstacle's hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", skunk "SPRAYED!", thief "YOINK!") and the pack shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.3 seconds for a plain obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
-- **Low hearts:** an owner at 1 ♥ looks upset, and their doghouse card shows it
+- **Low hearts:** an owner at 1♥ looks upset, and their doghouse card shows it
 - **Pay banked:** at each neighborhood's end, the celebration shows the pay banked for it
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
-- **Treat grabbed:** the owner smiles and a "+1 ♥" label shows over the dog
+- **Treat grabbed:** the owner smiles and a "+1♥" label shows over the dog
 
 Scenery gags (a cat on a fence, a sprinkler, a kite caught in a tree) play in the backdrop band; they open no card and have no effect.
 

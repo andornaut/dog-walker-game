@@ -59,7 +59,7 @@ Rules in the rulebook that the game doesn't have yet:
 10. **Lucky finds:** only the generous neighbor and the lost wallet, with no cards: each bobs and pays on contact (Lucky finds)
 11. **Moving hazards:** cars and cyclists in their lanes, people stepping, animals zooming, at most three movers on screen, and a delivery truck (Moving hazards)
 12. **Pay:** a flat $10 per dog per neighborhood times the pay multiplier, banked at each neighborhood's end, with a firing losing only the current neighborhood's pay for that dog; card money options charged once per card; the same tips for any pack size; a $5 starting purse (Resources, Choice cards)
-13. **Plain hits:** a plain obstacle costs only 1 ♥ from the touched dog's owner, with a hit stop of about 0.3 seconds (Plain obstacles, Feedback)
+13. **Plain hits:** a plain obstacle costs only 1♥ from the touched dog's owner, with a hit stop of about 0.3 seconds (Plain obstacles, Feedback)
 14. **Pulls:** every dog pulls toward squirrels, and only squirrels; a strain of about 1 second, then a one-lane lurch, with no input lock; steering away during the strain cancels the pull; the Squirrel! badge counts pulls that land (Screen and controls, Home screen and progression)
 15. **Road markers:** grab-worthy things bob; no marker on obstacles (Feedback)
 16. **Small dogs dodge:** 1 in 4 plain hits that would land on a small dog miss, with a "Dodge!" label, and a dodge doesn't count as a bump for Clean Paws or Not a Scratch (Screen and controls)
