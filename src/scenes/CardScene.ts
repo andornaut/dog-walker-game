@@ -7,7 +7,6 @@ import {
   cardFrameTag,
   DIFFICULTY_KEY,
   encounterSpriteKey,
-  type HasArt,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -116,7 +115,7 @@ function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.Bitma
 
 // The road sprite of whatever opened the card, standing in for an option's illustration: an
 // encounter's.
-function sourceSpriteKey(has: HasArt, source: CardSource): string | undefined {
+function sourceSpriteKey(source: CardSource): string | undefined {
   return source.kind === "encounter" ? encounterSpriteKey(source.encounter) : undefined;
 }
 
@@ -143,7 +142,6 @@ export class CardScene extends Scene {
   private presses: TargetPressListener | undefined;
   private refusing = false;
   private view: CardView | undefined;
-  private readonly hasArt: HasArt = (key) => this.textures.exists(key);
 
   // key names a second card scene, such as the help's picture of one.
   constructor(key: string = SCENE_KEYS.card) {
@@ -544,8 +542,7 @@ export class CardScene extends Scene {
       const key = grey ? greyTextureKey(this, illustration) : illustration;
       this.add.image(art.x, art.y, key).setOrigin(0).setCrop(0, 0, art.width, art.height);
     } else {
-      const spriteKey =
-        entry.option === undefined ? undefined : sourceSpriteKey(this.hasArt, view.source);
+      const spriteKey = entry.option === undefined ? undefined : sourceSpriteKey(view.source);
       if (spriteKey !== undefined && this.textures.exists(spriteKey)) {
         const key = grey ? greyTextureKey(this, spriteKey) : spriteKey;
         const sprite = addStandingSprite(
