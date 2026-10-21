@@ -365,7 +365,7 @@ export class CardScene extends Scene {
       fillRect(g, PALETTE.cream, insetRect(4, card));
     }
     const label = bandLabel(entry);
-    this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, this.bandColor(tag), {
+    this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, PALETTE.white, {
       font: this.bandLabelFits("title", label, LARGE.band.room) ? "title" : "body",
     });
     const art = illustrationKey(option);
@@ -483,11 +483,6 @@ export class CardScene extends Scene {
     return ink.right - ink.left <= room;
   }
 
-  // The forced-stop band is amber, so its label is plum; every other band's is white.
-  private bandColor(tag: string): number {
-    return tag === "stop" ? PALETTE.plum : PALETTE.white;
-  }
-
   private centered(
     x: number,
     y: number,
@@ -532,7 +527,7 @@ export class CardScene extends Scene {
       });
     }
 
-    this.centered(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), this.bandColor(tag), {
+    this.centered(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), PALETTE.white, {
       font: bandFont,
     });
 
