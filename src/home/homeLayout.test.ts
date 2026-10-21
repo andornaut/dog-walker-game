@@ -15,7 +15,7 @@ import { BADGE_OFFSET } from "../ui/badge";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { plainMarks } from "../ui/pixelFont";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
 import { dogNames, dollarAmountText, shortDollarAmountText } from "./home";
@@ -98,6 +98,13 @@ describe("home layout", () => {
     it("keep the selected badge inside the section's frame", () => {
       expect(Math.min(...tiles.map((tile) => tile.x)) + BADGE_OFFSET.x).toBeGreaterThanOrEqual(
         inner.left,
+      );
+    });
+    it("keep the selected badge below the band's heading", () => {
+      const { capHeight } = fontFileMetrics("font-title");
+      const headingBottom = section.y + HOME_LAYOUT.bandText.y + capHeight * TEXT_SCALE;
+      expect(Math.min(...tiles.map((tile) => tile.y)) + BADGE_OFFSET.y).toBeGreaterThanOrEqual(
+        headingBottom,
       );
     });
     it("end inside the frame", () => {
