@@ -277,6 +277,37 @@ describe("the fairness rule", () => {
       ]);
     });
 
+    // A stalker in lane 2 overlapping the band, its step a lane either way or straight on due 5px
+    // of scroll on and taking 100px: still to choose, it may step into lane 1 or 3 while it
+    // overlaps the band, as it chooses toward wherever the pack has gone; chosen, it blocks only
+    // the lanes its step takes it through.
+    const stalker = (chosen: boolean): MoverPath => ({
+      burst: 56,
+      lane: 2,
+      length: 100,
+      motion: "approach",
+      movement: "approach",
+      pending: chosen ? [] : [{ at: 545, kind: "after" }],
+      reach: { count: 3, first: 1 },
+      rows: 1,
+      steps: chosen ? [{ at: 545, lanes: 0, length: 100, travel: 0 }] : [],
+      stopTravel: 900,
+      warning: 0,
+    });
+    it.each([
+      { chosen: false, lanes: [false, true, true, true, false] },
+      { chosen: true, lanes: [false, false, true, false, false] },
+    ])("blocks the lanes a stalker may step into, its step chosen: $chosen", (row) => {
+      const stalking = walkWith(
+        ["koda"],
+        [{ ...item("coyote", 0, 2, 568), mover: { path: stalker(row.chosen), since: 540 } }],
+      );
+      const lanes = [0, 1, 2, 3, 4].map((lane) =>
+        laneBlockedWithin(data, banded, 80, 1, lane, stalking),
+      );
+      expect(lanes).toEqual(row.lanes);
+    });
+
     it("leaves a lane open when the mover reaches the pack only after the horizon", () => {
       expect([0, 1, 2, 3, 4].map((lane) => blocked(lane, 0.15))).toEqual([
         false,

@@ -4,6 +4,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { countTally } from "../rules/achievements";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
+import { approachOutcomes } from "./approach";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
 import { laneAt, moverPlace } from "./movers";
@@ -214,7 +215,9 @@ function currentTarget(
 const SWEEP_SAMPLES = 24;
 
 // Whether something the pack must steer around reaches the pack in lane within horizon
-// seconds: an obstacle in the lane, or a mover in it at any moment of its sweep.
+// seconds: an obstacle in the lane, or a mover in it at any moment of its sweep. A stalker with
+// steps still to choose may take any of them, since it chooses each toward where the pack is
+// when its cue begins, which a drift or a pull into lane moves.
 export function laneBlockedWithin(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: PullGeometry,
@@ -237,19 +240,22 @@ export function laneBlockedWithin(
       const end = (bottom - item.y) / speed;
       return inLane && end > 0 && start < horizon;
     }
-    for (let sample = 0; sample <= SWEEP_SAMPLES; sample++) {
-      const scroll = (sample / SWEEP_SAMPLES) * horizon * speed;
-      const place = moverPlace(geometry.laneCount, mover.path, mover.since + scroll);
-      const y = geometry.roadTop - item.height + place.travel;
-      const touches = y + item.height > top && y < bottom;
-      // A mover between lanes touches both: it covers every lane its hit box overlaps.
-      const left = place.lanePosition + inset;
-      const inLane = left < lane + 1 && left + item.laneSpan - 2 * inset > lane;
-      if (place.solid && touches && inLane) {
-        return true;
+    const paths = mover.path.motion === "approach" ? approachOutcomes(mover.path) : [mover.path];
+    return paths.some((path) => {
+      for (let sample = 0; sample <= SWEEP_SAMPLES; sample++) {
+        const scroll = (sample / SWEEP_SAMPLES) * horizon * speed;
+        const place = moverPlace(geometry.laneCount, path, mover.since + scroll);
+        const y = geometry.roadTop - item.height + place.travel;
+        const touches = y + item.height > top && y < bottom;
+        // A mover between lanes touches both: it covers every lane its hit box overlaps.
+        const left = place.lanePosition + inset;
+        const inLane = left < lane + 1 && left + item.laneSpan - 2 * inset > lane;
+        if (place.solid && touches && inLane) {
+          return true;
+        }
       }
-    }
-    return false;
+      return false;
+    });
   });
 }
 
