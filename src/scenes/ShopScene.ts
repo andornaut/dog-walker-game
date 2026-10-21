@@ -26,6 +26,7 @@ import {
 import {
   rowRects,
   SHOP_LAYOUT,
+  SHOP_MESSAGE_FIT,
   shopRowTextRoom,
   shopTabFace,
   shopTabRects,
@@ -391,14 +392,12 @@ export class ShopScene extends Scene {
     parent: GameObjects.Container,
     at: { x: number; y: number },
     value: string,
-    style: { color?: number; font?: FontRole; maxWidth?: number; originX?: number } = {},
+    style: { color?: number; font?: FontRole; originX?: number } = {},
   ): GameObjects.BitmapText {
-    const { maxWidth, ...rest } = style;
     const label = addPixelText(this, at.x, at.y, value, {
       color: PALETTE.plum,
       scale: TEXT_SCALE,
-      ...rest,
-      ...(maxWidth === undefined ? {} : { maxWidth }),
+      ...style,
     });
     parent.add(label);
     return label;
@@ -426,10 +425,11 @@ export class ShopScene extends Scene {
     }
     if (this.message !== null) {
       const { refused, text } = this.message;
-      this.text(root, { x: LAYOUT.headingX, y: LAYOUT.message.y }, text, {
+      const at = { x: LAYOUT.headingX, y: LAYOUT.message.y };
+      const label = this.text(root, at, text, {
         color: refused ? PALETTE.darkRed : PALETTE.forest,
-        maxWidth: ROW.width,
       });
+      fitPixelText(label, SHOP_MESSAGE_FIT, at.x, at.y);
     }
     if (this.detail !== undefined) {
       this.drawDetail(save, this.detail);

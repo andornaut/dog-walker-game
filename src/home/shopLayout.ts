@@ -1,5 +1,6 @@
 import { closeControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { SHOP_TABS } from "./shop";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
@@ -27,6 +28,7 @@ export const SHOP_LAYOUT = {
   // Headings sit on the card at the row's left, a note right-aligned at its right.
   headingRight: ROW_X + ROW_WIDTH,
   headingX: ROW_X,
+  // The last tap's message: one line, its capitals' top at y, under the lists.
   message: { y: 540 },
   panel: PANEL,
   // In a row: the 36x36 art box and the art in it, the padlock over the row's top-left
@@ -45,6 +47,10 @@ export const SHOP_LAYOUT = {
   },
   tab: { drawHeight: 28, drawY: 80, gap: 8, height: 44, width: 162, x: PANEL.x + 10, y: 72 },
 } as const;
+
+// The message on one line across a row's width, in the first of TEXT_FIT_STYLES whose ink fits:
+// a second line would fall below the card.
+export const SHOP_MESSAGE_FIT = { room: ROW_WIDTH, styles: TEXT_FIT_STYLES } as const;
 
 // A tab's hit area; its face is drawHeight tall at drawY inside it.
 export function shopTabRects(): Rect[] {

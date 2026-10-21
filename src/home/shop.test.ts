@@ -8,12 +8,14 @@ import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { fitInFont } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
 import { fillNames } from "../text/lines";
 import { readBitmapFont } from "../tools/fontFile";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { dollarText, type Purchase } from "./home";
+import { messageLine } from "./homeLines";
 import {
   dogRows,
   gearRows,
@@ -26,7 +28,7 @@ import {
   shopTabOf,
   slotRows,
 } from "./shop";
-import { SHOP_LAYOUT, shopRowTextRoom } from "./shopLayout";
+import { SHOP_LAYOUT, SHOP_MESSAGE_FIT, shopRowTextRoom } from "./shopLayout";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
@@ -213,5 +215,35 @@ describe("a shop row's text", () => {
     expect(
       fitInFont("font-body", TEXT_FIT_STYLES, room, plainMarks(text)).widest,
     ).toBeLessThanOrEqual(room);
+  });
+});
+
+// Every message a tap in the shop leaves fits on one line under the lists, its lowest ink inside
+// the card: each blocked row's reason, each priced row's "can't afford" with its whole price
+// short, and each purchase's thanks.
+describe("the shop's message", () => {
+  const everyRow = [
+    ...gearRows(gameData, owned),
+    ...slotRows(gameData, owned),
+    ...dogRows(gameData, owned),
+  ];
+  const messages = everyRow.flatMap((row) => [
+    ...(row.blocked === null ? [] : [row.blocked]),
+    ...(row.price === null
+      ? []
+      : [
+          messageLine(gameData.homeText, { amount: row.price, kind: "cantAfford", name: row.name }),
+        ]),
+    messageLine(gameData.homeText, { kind: "bought", name: row.name, purchase: row.purchase }),
+  ]);
+  const body = fontFileMetrics("font-body");
+  const { panel } = SHOP_LAYOUT;
+
+  it.each([...new Set(messages)])("sets %j on one line inside the card", (text) => {
+    const { room, styles } = SHOP_MESSAGE_FIT;
+    const fitted = fitInFont("font-body", styles, room, plainMarks(text ?? ""));
+    expect(fitted.widest).toBeLessThanOrEqual(room);
+    const inkBottom = SHOP_LAYOUT.message.y + inkRowsFromCapTop(body) * fitted.style.scale;
+    expect(inkBottom).toBeLessThanOrEqual(panel.y + panel.height);
   });
 });
