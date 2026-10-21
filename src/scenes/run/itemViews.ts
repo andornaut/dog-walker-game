@@ -113,7 +113,7 @@ export class ItemViews {
         const drawn = showAtDepth(part.sprite, part.key, placed.scale, part.feet);
         const x = Math.round(placed.x);
         const y = Math.round(placed.y);
-        part.sprite.setPosition(x, y - Math.round(part.lift * placed.scale));
+        part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
         const tag = firstTag(this.scene, drawn.key, itemTags);
         if (tag !== undefined) {
           playTag(part.sprite, drawn.key, tag, still);
