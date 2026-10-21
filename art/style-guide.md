@@ -165,8 +165,7 @@ The dog row sits on `ui-dog-band` (360×94), drawn at 0,466 under the slots: the
 | Hearts            | From (78,26), rows of five, 8px across and 8px down, in the white hearts box (x 77 to 116, rows 23 to 54) |
 | "n/max" count     | Centred at (98,46) in `font-title` in the hearts box, under its solid rule                                |
 | Status icons      | 16×16 at (78,62) and (98,62), in dashed boxes                                                             |
-| Owner's name      | (6,62) in `font-body` on the ID line, ruled on row 70 (x 4 to 75), one clear row above the quirk icon     |
-| Quirk icon        | 16×16 at (6,72), left of the emblem badge (x 24 to 35, rows 76 to 87)                                     |
+| Owner's name      | (6,62) in `font-body` on the ID line, ruled on row 70 (x 4 to 75)                                         |
 | FIRED (fired dog) | Centred at (60,74), white, on the dred plate (built as `ui-fired-plate`) of the grey `empty` card         |
 
 The `empty` card (a fired dog's) is the same card greyed: a slate header, a white name plate, a dark dog photo and a pale owner photo, with no hearts box, ID line, badge or stripe.
@@ -323,7 +322,6 @@ After zones 1 to 3, over the road view (rows 214 to 465) dimmed as under a card,
 | Bubble or plate | `ui-quip` 24,332 312×76; `ui-quip-tail-up` at 176,327, its bottom row over the bubble's top rim                                                               | `ui-panel` 40,380 280×32                                                                         |
 | Text            | The walker's line in `font-body` 2×, centred, wrapped to 296, line tops 336 and 354                                                                           | "+$21 pay · +$26 tips" in `font-body` 2×, centred, line top 387, two spaces each side of the dot |
 | Rule            | Tan dots every 3px on row 375, x 36 to 323                                                                                                                    |                                                                                                  |
-| Pace and style  | Icons at y 383, words in `font-body` 2× at line top 382: pace icon, 4px, word, 10px, "·", 10px, style icon, 4px, word, centred on x 180                       |                                                                                                  |
 | Button          | `ui-button` `go` 48,416 264×44, "WELCOME!" in `font-title` 2×, ink, centred, line top 423                                                                     | None: it moves on after 2 s or at a tap                                                          |
 
 - Confetti: about 60 `fx-confetti-bit`, each a random colour tag starting on a random frame, falling with a sideways sway from x 6 to 348 down the road view to row 458 over 2 s, under the lines, the burst, the walker and the panels. `fx-confetti` bursts at the walker's middle as the new walker lands. With reduced motion there is no confetti, the walker shows `cheer` frame 0 in place, and nothing hops in.

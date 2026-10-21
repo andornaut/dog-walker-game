@@ -7180,18 +7180,6 @@
       "png": "images/icon-dog-slot.png"
     },
     {
-      "key": "icon-energy-calm",
-      "png": "images/icon-energy-calm.png"
-    },
-    {
-      "key": "icon-energy-hyper",
-      "png": "images/icon-energy-hyper.png"
-    },
-    {
-      "key": "icon-energy-steady",
-      "png": "images/icon-energy-steady.png"
-    },
-    {
       "key": "icon-fired",
       "png": "images/icon-fired.png"
     },
@@ -7272,26 +7260,6 @@
       "png": "images/icon-muddy.png"
     },
     {
-      "key": "icon-owner-dramatic",
-      "png": "images/icon-owner-dramatic.png"
-    },
-    {
-      "key": "icon-owner-fussy",
-      "png": "images/icon-owner-fussy.png"
-    },
-    {
-      "key": "icon-owner-laid-back",
-      "png": "images/icon-owner-laid-back.png"
-    },
-    {
-      "key": "icon-pace-fast",
-      "png": "images/icon-pace-fast.png"
-    },
-    {
-      "key": "icon-pace-slow",
-      "png": "images/icon-pace-slow.png"
-    },
-    {
       "key": "icon-pause",
       "png": "images/icon-pause.png"
     },
@@ -7332,42 +7300,6 @@
       "png": "images/icon-play.png"
     },
     {
-      "key": "icon-quirk-archie",
-      "png": "images/icon-quirk-archie.png"
-    },
-    {
-      "key": "icon-quirk-biscuit",
-      "png": "images/icon-quirk-biscuit.png"
-    },
-    {
-      "key": "icon-quirk-duchess",
-      "png": "images/icon-quirk-duchess.png"
-    },
-    {
-      "key": "icon-quirk-koda",
-      "png": "images/icon-quirk-koda.png"
-    },
-    {
-      "key": "icon-quirk-nugget",
-      "png": "images/icon-quirk-nugget.png"
-    },
-    {
-      "key": "icon-quirk-penny",
-      "png": "images/icon-quirk-penny.png"
-    },
-    {
-      "key": "icon-quirk-pierre",
-      "png": "images/icon-quirk-pierre.png"
-    },
-    {
-      "key": "icon-quirk-snowball",
-      "png": "images/icon-quirk-snowball.png"
-    },
-    {
-      "key": "icon-quirk-zippy",
-      "png": "images/icon-quirk-zippy.png"
-    },
-    {
       "key": "icon-settings",
       "png": "images/icon-settings.png"
     },
@@ -7380,24 +7312,8 @@
       "png": "images/icon-stinky.png"
     },
     {
-      "key": "icon-style-charm",
-      "png": "images/icon-style-charm.png"
-    },
-    {
-      "key": "icon-style-hustle",
-      "png": "images/icon-style-hustle.png"
-    },
-    {
       "key": "icon-trait-chaser",
       "png": "images/icon-trait-chaser.png"
-    },
-    {
-      "key": "icon-trait-fancy",
-      "png": "images/icon-trait-fancy.png"
-    },
-    {
-      "key": "icon-trait-food-driven",
-      "png": "images/icon-trait-food-driven.png"
     },
     {
       "key": "icon-treat",
@@ -7518,10 +7434,6 @@
     {
       "key": "item-running-shoes",
       "png": "images/item-running-shoes.png"
-    },
-    {
-      "key": "item-whistle",
-      "png": "images/item-whistle.png"
     },
     {
       "key": "logo",

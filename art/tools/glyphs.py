@@ -1,30 +1,14 @@
 #!/usr/bin/env python3
 """Draw the info icons shown beside a dog in the pack picker, the shop and the zone banner, a walker's
-pace, style and perk icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
+perk icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
 
 16x16 images in Endesga 32 with coloured outlines, on transparency:
-icon-trait-<trait>          fancy (a pink bow), food-driven (a bone), chaser (a squirrel)
-icon-pace-<pace>            a walker's pace, on walker tiles and the detail card: slow (a snail), fast
-                            (a hare bounding, with speed lines)
-icon-style-<style>          a walker's style beside the pace: charm (a red rose with a twinkle),
-                            hustle (a green money bag with a yellow $)
+icon-trait-chaser           a squirrel
 icon-perk-<perk>            a walker's perk, on walker tiles, the new walker celebration and
                             the state strip: calm-voice (a sky speech bubble with a white
                             wave), kind-words (a pink speech bubble with a red heart), long-reach
                             (an open hand over a green arrow pointing both ways), treat-finder (a
                             magnifying glass over a treat)
-icon-quirk-<dog>            each dog's quirk, beside its trait, outlined to hold 3:1 on cream and
-                            tan: archie Acrobatic (a red arrow looping a flip around a paw),
-                            biscuit Scent hound (a beagle in profile sniffing scent lines from a
-                            tip one lane over), duchess Pampered (a treat bone under two hearts),
-                            koda Sled dog (a sled racing right over speed lines), nugget Camera
-                            ready (a camera with a flash star), penny Nervous (a golden dog on stiff
-                            legs, hackles up, trembling), pierre Show dog (a purple prize rosette),
-                            snowball Crowd pleaser (a crowd of three under a heart), zippy Ratter
-                            (a white foreleg stamping on a squirrel's tail)
-icon-energy-<energy>        calm (a sleepy moon), steady (a paw print), hyper (a lightning bolt)
-icon-owner-<temperament>    laid-back (sunglasses and a grin), fussy (a frown and a cross mark),
-                            dramatic (a wail and a tear)
 icon-zone-<zone>            snooze-crescent (a crescent moon over a roof), bark-park (a tree),
                             woof-way (a house), sniff-street-shops (a shopfront),
                             paws-promenade (a railing over a wave), the-long-way-home (a
@@ -64,7 +48,6 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import math
 import os
 import subprocess
 import sys
@@ -74,7 +57,6 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, build as build_sprites, icon_edge  # noqa: E402
 from fx import burst, star4  # noqa: E402
-from needs import SCENT, Icon  # noqa: E402
 from ui import to_image  # noqa: E402
 
 
@@ -87,32 +69,6 @@ def bitmap(g, x0, y0, rows, cols):
 
 
 # ---------- traits ----------
-
-def fancy():
-    g = Grid(16, 16)
-    for s in (-1, 1):
-        g.tri((8, 8), (8 + s * 7, 2.5), (8 + s * 7, 13.5), "pink")
-        g.ell(8 + s * 5, 8, 2.6, 4.6, "pink")
-        g.p(8 + s * 6, 11, "mauve")
-        g.p(8 + s * 5, 12, "mauve")
-        g.p(8 + s * 5, 5, "white" if s < 0 else "pink")
-    g.tri((7, 9), (5, 14), (7.5, 14), "mauve")
-    g.tri((9, 9), (11, 14), (8.5, 14), "mauve")
-    g.ell(8, 8, 2, 2.5, "hot")
-    g.p(7, 7, "pink")
-    return g
-
-
-def food_driven():
-    g = Grid(16, 16)
-    for i in range(11):
-        g.rect(3 + i, 11 - i, 2, 2, "white")
-    for cx, cy in ((2.5, 11.5), (4.5, 13.5), (11.5, 2.5), (13.5, 4.5)):
-        g.ell(cx, cy, 2, 2, "white", "lgrey")
-    for i in range(8):
-        g.p(6 + i, 11 - i, "lgrey")
-    return g
-
 
 def chaser():
     g = Grid(16, 16)
@@ -127,70 +83,6 @@ def chaser():
     g.rect(4, 5, 1, 2, "ink")
     g.p(2, 7, "plum")
     g.rect(4, 14, 2, 1, "rust")
-    return g
-
-
-# ---------- walkers: pace and style, on walker tiles and the detail card ----------
-# Animals and objects with no bow, bone, squirrel, moon, paw or bolt, so they never read as a dog's trait or
-# energy: slow and fast are a snail and a hare, charm a rose and hustle a money bag.
-
-def pace_slow():
-    """A snail creeping right: an amber shell coiled in orange over a yellow foot, its eye stalk up."""
-    g = Grid(16, 16)
-    g.rect(1, 12, 14, 2, "yellow")
-    g.rect(1, 13, 14, 1, "amber")
-    g.ell(13, 10.5, 2, 2.5, "yellow", "amber")
-    g.rect(13, 5, 1, 4, "yellow")
-    g.rect(13, 4, 2, 2, "yellow")
-    g.p(14, 4, "ink")
-    g.ell(6, 7.5, 5, 5, "amber", "orange", "yellow")
-    bitmap(g, 3, 4, ["..ooo..", ".o...o.", "o..o..o", "o.o.o.o", "o..o..o", ".o....o"], {"o": "rust"})
-    g.p(14, 10, "ink")
-    return g
-
-
-def pace_fast():
-    """A hare at full stretch, bounding right: ears laid back, forelegs reaching, hind legs kicked out behind,
-    with speed lines streaming off its back."""
-    g = Grid(16, 16)
-    bitmap(g, 0, 1, ["........ww......",
-                     ".......wppw.....",
-                     ".sss.....wppw...",
-                     "...........wwww.",
-                     "........wwwwwww.",
-                     ".ss..wwwwwwwwkw.",
-                     "...wwwwwwwwwwwp.",
-                     "..wwwwwwwwwwwwl.",
-                     "..wwwwwwwwwwll..",
-                     "...lwwwwwwlll...",
-                     "..ll.......lwww.",
-                     ".ll..........ww."],
-           {"w": "white", "l": "lgrey", "p": "pink", "k": "ink", "s": "sky"})
-    return g
-
-
-def style_charm():
-    """A red rose on a green stem with a leaf, and a twinkle beside the bloom."""
-    g = Grid(16, 16)
-    g.rect(7, 8, 2, 7, "dgreen")
-    g.rect(7, 8, 1, 7, "green")
-    g.ell(4.5, 11.5, 2.5, 1.5, "green", "dgreen")
-    g.ell(7.5, 5, 4.5, 4, "red", "dred", "pink")
-    bitmap(g, 5, 3, ["..d..", ".d.d.", "d.d.d", ".dd.."], {"d": "dred"})
-    star4(g, 13, 3, 2, "yellow")
-    g.p(15, 3, None)
-    return g
-
-
-def style_hustle():
-    """A money bag: a green sack tied at the neck with an amber cord, a yellow $ on its front."""
-    g = Grid(16, 16)
-    g.ell(8, 10.5, 6, 5, "green", "dgreen")
-    g.rect(6, 3, 4, 3, "green")
-    g.tri((4.5, 1), (8, 4.5), (6.5, 1), "green")
-    g.tri((11.5, 1), (8, 4.5), (9.5, 1), "dgreen")
-    g.rect(5, 5, 6, 1, "amber")
-    bitmap(g, 6, 7, [".y.", "yyy", "y..", "yyy", "..y", "yyy", ".y."], {"y": "yellow"})
     return g
 
 
@@ -242,230 +134,6 @@ def treat_finder():
     g.ell(6.5, 6.5, 5.7, 5.7, "lgrey", "grey")
     g.ell(6.5, 6.5, 4.2, 4.2, "cyan", None, "white")
     bitmap(g, 3, 5, ["cc...cc", ".ccccc.", "cc...cc"], {"c": "cream"})
-    return g
-
-
-# ---------- quirks: one per dog, beside its trait ----------
-# On Icon (needs.py), so outlines run down the ramp until they hold 3:1 on cream and tan, and
-# 1px marks go on after the outline.
-
-def acrobatic():
-    """Archie: a red arrow looping a full flip around a paw print."""
-    g = Icon()
-    for y in range(16):
-        for x in range(16):
-            dx, dy = x + 0.5 - 7.5, y + 0.5 - 8.5
-            a = math.degrees(math.atan2(dy, dx))
-            if 5 <= math.hypot(dx, dy) <= 6.8 and not -5 < a < 80:
-                g.p(x, y, "pink" if dx < -1 and dy < -1 and math.hypot(dx, dy) < 5.8 else "red")
-    bitmap(g, 10, 8, ["1111111", ".11112.", "..112..", "...2..."], {"1": "red", "2": "dred"})
-    bitmap(g, 5, 6, ["1.1.1", ".....", ".222.", ".222."], {"1": "skin2", "2": "brown"})
-    return g
-
-
-def scent_hound():
-    """Biscuit: a beagle's head in profile, long ear down, sniffing scent lines that reach sideways from a
-    tip one lane over."""
-    g = Icon()
-    bitmap(g, 6, 1, ["....oooo..",
-                     "...oooooo.",
-                     "..oooeooo.",
-                     ".kkwwoorrr",
-                     ".kkwwworrr",
-                     "..wwwwrrrr",
-                     "...www.rrr",
-                     "......grr.",
-                     ".....ggg..",
-                     "........r."],
-           {"o": "ochre", "w": "white", "r": "rust", "e": "ink", "k": "ink", "g": "green"})
-    g.ell(3, 12.5, 3, 3, "amber", "orange", "yellow")
-    g.rect(3, 11, 1, 3, "orange")
-    for x0, y0 in ((0, 3), (1, 7)):
-        for dx, dy in SCENT:
-            g.marks.append((x0 + dx, y0 + dy, "purple"))
-    return g
-
-
-def pampered():
-    """Duchess: a treat bone under two hearts."""
-    g = Icon()
-    heart(g, 1, 1)
-    heart(g, 8, 3)
-    g.rect(4, 12, 8, 2, "cream")
-    for cx, cy in ((3.5, 11.5), (3.5, 13.5), (12.5, 11.5), (12.5, 13.5)):
-        g.ell(cx, cy, 1.6, 1.6, "cream", "tan")
-    g.rect(4, 13, 8, 1, "tan")
-    g.p(4, 12, "white")
-    return g
-
-
-def sled_dog():
-    """Koda: a dog sled racing right, its driver's handlebar at the back, the runner curling up at the
-    front, speed lines trailing behind."""
-    g = Icon()
-    g.rect(4, 3, 1, 6, "brown")
-    g.rect(4, 3, 3, 1, "brown")
-    g.rect(4, 8, 9, 2, "brown")
-    g.rect(4, 8, 9, 1, "ochre")
-    for x in (5, 8, 11):
-        g.rect(x, 10, 1, 2, "dbrown")
-    g.rect(3, 12, 10, 1, "lgrey")
-    bitmap(g, 12, 7, ["..11", "...1", "...1", "...1", "..1.", "11.."], {"1": "lgrey"})
-    for x, y, w in ((0, 5, 3), (0, 9, 3), (0, 12, 2)):
-        g.rect(x, y, w, 1, "sky")
-    return g
-
-
-def camera_ready():
-    """Nugget: a camera with a flash star at its top right."""
-    g = Icon()
-    g.rect(1, 6, 13, 8, "slate")
-    g.rect(1, 6, 13, 1, "grey")
-    g.rect(3, 4, 4, 2, "slate")
-    g.ell(7.5, 10, 3.3, 3.3, "lgrey", "grey", "white")
-    g.ell(7.5, 10, 1.9, 1.9, "sky", "blue", "cyan")
-    g.p(11, 8, "red")
-    star4(g, 12, 3, 2, "yellow")
-    return g
-
-
-def nervous():
-    """Penny: a golden dog in profile on stiff legs, hackles bristling along her back, ear flat, tail
-    tucked, trembling."""
-    g = Icon()
-    for x in (3, 5, 9, 11):
-        g.rect(x, 11, 1, 4, "amber")
-    g.ell(7.5, 9.5, 5, 2.8, "amber", "orange", "yellow")
-    g.ell(12.5, 6.5, 3, 2.6, "amber", "orange", "yellow")
-    g.rect(14, 7, 2, 2, "amber")
-    g.p(15, 7, "ink")
-    g.ell(11.5, 7.5, 1.2, 2.2, "orange")
-    g.p(13, 6, "ink")
-    g.p(14, 5, "white")
-    for x in (3, 5, 7, 9):
-        g.tri((x - 1, 7.5), (x + 0.5, 4.5), (x + 1.5, 7.5), "ochre")
-    g.rect(2, 10, 2, 2, "orange")
-    g.p(4, 12, "orange")
-    for x, y in ((0, 5), (1, 6), (0, 7), (0, 10), (1, 11), (0, 12)):
-        g.marks.append((x, y, "purple"))
-    return g
-
-
-def show_dog():
-    """Pierre: a purple prize rosette with a gold centre and two ribbon tails."""
-    g = Icon()
-    for x0, slant in ((4, -1), (9, 1)):
-        g.tri((x0, 9), (x0 + 3, 9), (x0 + 1.5 + slant * 2, 15.5), "purple")
-    g.ell(8, 6.5, 6.5, 6.5, "mauve")
-    for i in range(12):
-        a = math.radians(i * 30)
-        g.p(8 + 6.2 * math.cos(a) - 0.5, 6.5 + 6.2 * math.sin(a) - 0.5, None)
-    g.ell(8, 6.5, 4.2, 4.2, "purple")
-    g.ell(8, 6.5, 2.6, 2.6, "amber", "orange", "yellow")
-    return g
-
-
-def crowd_pleaser():
-    """Snowball: a crowd of three under a heart."""
-    g = Icon()
-    for cx, cy, r, skin, hair, shirt in ((2.5, 9, 2.3, "skin1", "dbrown", "sky"),
-                                        (13.5, 9, 2.3, "brown", "plum", "red"),
-                                        (8, 10.5, 2.7, "skin2", "amber", "green")):
-        g.ell(cx, cy + 5, r + 0.6, 2.6, shirt)
-        g.ell(cx, cy, r, r, skin)
-        for y in range(16):
-            for x in range(16):
-                if y + 0.5 < cy - r * 0.35 and math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= r:
-                    g.p(x, y, hair)
-        g.p(cx - 1.5, cy, "ink")
-        g.p(cx + 0.5, cy, "ink")
-    heart(g, 5, 0)
-    return g
-
-
-def ratter():
-    """Zippy: a white foreleg stamping down on a squirrel's bushy tail, pinning it."""
-    g = Icon()
-    g.ell(5, 6, 4.5, 5.5, "ochre", "rust", "tan")
-    g.ell(5.5, 6.5, 2, 3.5, "tan")
-    g.ell(3.5, 2, 2, 1.6, "ochre")
-    g.ell(8.5, 12, 4.5, 2.6, "ochre", "rust")
-    g.ell(14.5, 14, 1.6, 1.6, "ochre", "rust")
-    g.rect(11, 3, 4, 7, "white")
-    g.rect(14, 3, 1, 7, "lgrey")
-    g.ell(12, 11.5, 3.5, 2.5, "white", "lgrey")
-    for x in (11, 13):
-        g.rect(x, 12, 1, 2, "grey")
-    return g
-
-
-# ---------- energy ----------
-
-def calm():
-    g = Grid(16, 16)
-    g.ell(7, 9, 5.5, 5.5, "lgrey", "grey", "white")
-    g.ell(9.5, 7, 4.5, 4.5, None)
-    bitmap(g, 10, 1, ["111", "..1", ".1.", "1..", "111"], {"1": "sky"})
-    return g
-
-
-def steady():
-    g = Grid(16, 16)
-    g.ell(8, 11.5, 3.6, 3, "brown", "dbrown", "ochre")
-    for cx, cy in ((2.5, 7), (6, 4), (10, 4), (13.5, 7)):
-        g.ell(cx, cy, 1.5, 1.8, "brown", "dbrown", "ochre")
-    return g
-
-
-def hyper():
-    g = Grid(16, 16)
-    g.tri((10, 0.5), (3, 9.5), (8.5, 9.5), "yellow")
-    g.tri((7.5, 6.5), (13, 6.5), (5, 15.5), "yellow")
-    g.tri((8.5, 9.5), (13, 6.5), (5, 15.5), "amber")
-    g.p(8, 3, "white")
-    return g
-
-
-# ---------- owner temperaments: one face, three moods ----------
-
-def face():
-    g = Grid(16, 16)
-    g.ell(8, 8.5, 6.5, 6.5, "skin1", "skin2")
-    return g
-
-
-def laid_back():
-    g = face()
-    g.rect(3, 6, 4, 3, "ink")
-    g.rect(9, 6, 4, 3, "ink")
-    g.rect(7, 6, 2, 1, "ink")
-    g.p(4, 6, "slate")
-    g.p(10, 6, "slate")
-    bitmap(g, 5, 10, ["1....1", ".1111."], {"1": "dbrown"})
-    return g
-
-
-def fussy():
-    g = face()
-    bitmap(g, 3, 5, ["11....11", "..1..1.."], {"1": "dbrown"})
-    g.rect(5, 7, 1, 2, "ink")
-    g.rect(10, 7, 1, 2, "ink")
-    bitmap(g, 5, 11, [".111.", "1...1"], {"1": "dbrown"})
-    bitmap(g, 11, 1, ["1.1", ".1.", "1.1"], {"1": "red"})
-    return g
-
-
-def dramatic():
-    g = face()
-    bitmap(g, 3, 4, [".11....11.", "1........1"], {"1": "dbrown"})
-    for x in (4, 10):
-        g.rect(x, 6, 2, 3, "ink")
-        g.p(x, 6, "white")
-    g.ell(8, 12, 1.6, 2, "plum")
-    g.p(8, 13, "red")
-    g.rect(11, 9, 1, 2, "cyan")
-    g.rect(11, 11, 2, 2, "cyan")
-    g.p(11, 11, "white")
     return g
 
 
@@ -1175,32 +843,11 @@ def lucky():
     return g
 
 IMAGES = {
-    "icon-trait-fancy": fancy,
-    "icon-trait-food-driven": food_driven,
     "icon-trait-chaser": chaser,
-    "icon-pace-slow": pace_slow,
-    "icon-pace-fast": pace_fast,
-    "icon-style-charm": style_charm,
-    "icon-style-hustle": style_hustle,
     "icon-perk-calm-voice": calm_voice,
     "icon-perk-kind-words": kind_words,
     "icon-perk-long-reach": long_reach,
     "icon-perk-treat-finder": treat_finder,
-    "icon-quirk-archie": acrobatic,
-    "icon-quirk-biscuit": scent_hound,
-    "icon-quirk-duchess": pampered,
-    "icon-quirk-koda": sled_dog,
-    "icon-quirk-nugget": camera_ready,
-    "icon-quirk-penny": nervous,
-    "icon-quirk-pierre": show_dog,
-    "icon-quirk-snowball": crowd_pleaser,
-    "icon-quirk-zippy": ratter,
-    "icon-energy-calm": calm,
-    "icon-energy-steady": steady,
-    "icon-energy-hyper": hyper,
-    "icon-owner-laid-back": laid_back,
-    "icon-owner-fussy": fussy,
-    "icon-owner-dramatic": dramatic,
     "icon-zone-snooze-crescent": snooze_crescent,
     "icon-zone-bark-park": bark_park,
     "icon-zone-woof-way": woof_way,

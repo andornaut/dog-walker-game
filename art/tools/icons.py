@@ -32,15 +32,6 @@ def fanny_pack(g):
     g.p(22, 17, "lgrey")
 
 
-def whistle(g):
-    g.ell(13, 19, 7, 6, "lgrey", "grey", "white")
-    g.rect(17, 11, 11, 5, "lgrey")
-    g.rect(17, 15, 11, 1, "grey")
-    g.ell(13, 19, 2, 2, "slate")
-    g.rect(4, 8, 2, 8, "red")
-    g.rect(4, 6, 12, 2, "red")
-
-
 def poop_bags(g):
     g.ell(14, 16, 9, 9, "green", "dgreen", "yellow")
     g.ell(14, 16, 3, 3, "forest")
@@ -66,7 +57,6 @@ def lucky_collar(g):
 
 ICONS = {
     "fanny-pack": fanny_pack,
-    "whistle": whistle,
     "poop-bags": poop_bags,
     "running-shoes": running_shoes,
     "lucky-collar": lucky_collar,
