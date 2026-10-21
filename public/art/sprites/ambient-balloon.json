@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-balloon 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 18, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 26 },
+    "sourceSize": { "w": 18, "h": 26 },
+    "duration": 300
+   },
+   "ambient-balloon 1.aseprite": {
+    "frame": { "x": 18, "y": 0, "w": 18, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 26 },
+    "sourceSize": { "w": 18, "h": 26 },
+    "duration": 300
+   },
+   "ambient-balloon 2.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 18, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 26 },
+    "sourceSize": { "w": 18, "h": 26 },
+    "duration": 300
+   },
+   "ambient-balloon 3.aseprite": {
+    "frame": { "x": 54, "y": 0, "w": 18, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 26 },
+    "sourceSize": { "w": 18, "h": 26 },
+    "duration": 300
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-balloon.png",
+  "format": "RGBA8888",
+  "size": { "w": 72, "h": 26 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "fly", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

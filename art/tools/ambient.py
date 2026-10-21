@@ -33,12 +33,33 @@ ambient-bike              66x72  the cyclist side on; ride 4 x 120ms
 ambient-cat               40x40  a ginger tabby; idle 2 x 400ms (sat, its tail flicking), run 4 x 90ms (a gallop)
 ambient-rabbit            40x40  a brown cottontail; idle 2 x 400ms (a nose twitch), hop 4 x 110ms
 ambient-bird              40x40  a robin; idle 2 x 400ms (a peck), fly 4 x 90ms (wings up, level, down, level)
-ambient-plane             24x10  a passenger jet far off in Yonge Street's evening sky, at full size only;
-                                 fly 2 x 250ms (only its lights blink)
+ambient-plane             24x10  a passenger jet far off in Yonge Street's evening sky; fly 2 x 250ms (only its
+                                 lights blink)
+ambient-balloon           18x26  a hot air balloon over High Park; fly 4 x 300ms (a 1px bob, the burner flickers)
+ambient-pigeons           36x15  five pigeons over Kensington Market; fly 4 x 90ms (wingbeats out of phase)
+ambient-helicopter        26x12  a helicopter over Kensington Market; fly 4 x 80ms (rotor blur, a tail beacon)
+ambient-geese             36x18  a V of five Canada geese over Cabbagetown; fly 4 x 140ms (wingbeats)
+ambient-turboprop         32x12  a Porter turboprop over The Beaches; fly 4 x 90ms (propeller blur, a beacon)
 
-The plane is a navy silhouette outlined in ink against the slate sky, its underside lit grey by the city,
-amber cabin windows, a steady white strobe on its fin and a wingtip light blinking red then white. It flies
-far back, so it has no depth variants, and it stays smaller than the CN Tower's pod.
+The sky movers fly far back, so each is at full size only with no depth variants, faces right, and has
+one fly tag. The plane is a navy silhouette outlined in ink against the slate sky, its underside lit grey
+by the city, amber cabin windows, a steady white strobe on its fin and a wingtip light blinking red then
+white; it stays smaller than the CN Tower's pod. The rest carry one ink line round every fill, so they
+read on the azure, dturq, lilac and gold skies:
+- The balloon is a teardrop envelope of curved red and amber gores, lit from the upper left, on two ropes
+  to a wicker basket. It sits 1px lower on frames 2 and 3, and the burner is lit on frames 0 and 2.
+- The pigeons are blue-grey with pale breasts, dark heads and pink beaks, in a loose straggle, each a
+  different step through its wingbeat (up, level, down, level) so the flock shimmers.
+- The helicopter is red with a foam glass bubble at the nose, a tapered tail boom, a tail rotor and skids.
+  The main rotor alternates a long blur and a broken one each frame; the tail beacon is red on frames 0
+  and 1.
+- The geese have brown bodies, cream breasts, black tails and long black necks to black heads with white
+  chinstraps. The leader is at the V's point on the right and each goose is a step behind the one ahead
+  in its wingbeat.
+- The turboprop is a white fuselage with a navy belly, a row of windows and a navy cockpit glass, a swept
+  navy T-tail, the high wing edge on over the cabin, its engine forward of the wing and the gear down for
+  the island airport. The propeller disc alternates two blurs each frame; the beacon is red on frames 0
+  and 1.
 
 Usage:
   ambient.py preview OUT.png   every frame on the road colours
@@ -66,6 +87,11 @@ RUN_MS = 90
 HOP_MS = 110
 FLY_MS = 90
 PLANE_MS = 250
+BALLOON_MS = 300
+PIGEON_MS = 90
+HELICOPTER_MS = 80
+GEESE_MS = 140
+TURBOPROP_MS = 90
 
 GROUNDS = ("3a4466", "e4a672", "f6757a", "c28569", "8b9bb4", "ead4aa", "c0cbdc")
 
@@ -565,6 +591,199 @@ def plane(light):
     return g.outlined()
 
 
+# ---------- the sky movers: full size only, outlined in ink, facing right ----------
+
+def sky_grid(w, h):
+    """A sky mover's grid, with one ink line round every fill."""
+    return edged(Grid(w, h), "ink")
+
+
+BALLOON_GORES = ("red", "amber")
+
+
+def balloon(bob, flame):
+    """The hot air balloon: a teardrop envelope in curved warm gores, lit from the upper left, a skirt, two
+    ropes to a wicker basket, and the burner lit (flame) or idling, bobbed bob rows down."""
+    g = sky_grid(18, 26)
+    cx, cy, r = 9.0, 8.5, 7.5
+    for y in range(1, 19):
+        for x in range(18):
+            px, py = x + 0.5, y + 0.5
+            # A circle down to two rows below its centre, then a straight taper to the skirt.
+            if py <= cy + 2:
+                half = math.sqrt(max(0.0, r * r - (py - cy) ** 2))
+            else:
+                half = math.sqrt(r * r - 4) * (18.5 - py) / (16.5 - cy)
+            if half <= 0 or abs(px - cx) > half:
+                continue
+            u = (px - cx) / half
+            gore = min(6, int((math.asin(max(-1.0, min(1.0, u))) / math.pi + 0.5) * 7))
+            c = K[BALLOON_GORES[gore % 2]]
+            if u > 0.62 or py > 15:
+                c = DARKER[c]
+            g.p(x, y + bob, c)
+    g.p(5, 4 + bob, "white")
+    g.p(6, 3 + bob, "white")
+    g.p(7, 19 + bob, "dbrown")
+    g.p(10, 19 + bob, "dbrown")
+    g.p(7, 20 + bob, "dbrown")
+    g.p(10, 20 + bob, "dbrown")
+    if flame:
+        g.p(8, 19 + bob, "yellow")
+        g.p(9, 19 + bob, "amber")
+    g.rect(7, 21 + bob, 4, 2, "brown")
+    g.rect(7, 22 + bob, 4, 1, "dbrown")
+    g.p(8, 21 + bob, "tan")
+    return g.outlined()
+
+
+def pigeon(g, ox, oy, wing):
+    """One pigeon side on at (ox, oy), facing right: a blue-grey body with a pale breast, a dark head, a
+    slate tail and its wing up, level or down."""
+    g.p(ox, oy + 2, "slate")
+    g.rect(ox + 1, oy + 2, 4, 1, "grey")
+    g.rect(ox + 2, oy + 3, 3, 1, "lgrey")
+    g.p(ox + 5, oy + 1, "dslate")
+    g.p(ox + 5, oy + 2, "purple")
+    g.p(ox + 6, oy + 1, "pink")
+    if wing == "up":
+        g.p(ox + 2, oy + 1, "grey")
+        g.p(ox + 3, oy + 1, "lgrey")
+        g.p(ox + 2, oy, "lgrey")
+    elif wing == "down":
+        g.p(ox + 3, oy + 3, "slate")
+        g.p(ox + 3, oy + 4, "slate")
+    else:
+        g.p(ox + 2, oy + 2, "slate")
+        g.p(ox + 3, oy + 2, "slate")
+
+
+PIGEON_FLOCK = ((1, 7, 1), (9, 2, 3), (12, 9, 2), (20, 4, 0), (27, 8, 2))
+WINGBEAT = ("up", "level", "down", "level")
+
+
+def pigeons(i):
+    """Frame i of the pigeon flock: five birds in a loose straggle, each a different step through its
+    wingbeat."""
+    g = sky_grid(36, 15)
+    for ox, oy, phase in PIGEON_FLOCK:
+        pigeon(g, ox, oy, WINGBEAT[(i + phase) % 4])
+    return g.outlined()
+
+
+def helicopter(rotor, light):
+    """The helicopter side on, facing right: a red cabin with a glass bubble at the nose, a tapered tail
+    boom to a fin and tail rotor, skids, the main rotor a long blur (rotor 0) or a broken one (rotor 1),
+    and its tail beacon red when light."""
+    g = sky_grid(26, 12)
+    if rotor == 0:
+        g.rect(3, 1, 20, 1, "lgrey")
+        g.rect(9, 1, 8, 1, "white")
+    else:
+        g.rect(5, 1, 5, 1, "grey")
+        g.rect(10, 1, 6, 1, "white")
+        g.rect(16, 1, 5, 1, "grey")
+    g.rect(12, 2, 3, 1, "dslate")
+    g.cel(15.5, 5.5, 6, 3, "red", "dred", "pink")
+    g.rect(2, 4, 9, 1, "red")
+    g.rect(4, 5, 7, 1, "dred")
+    g.rect(1, 2, 2, 3, "red")
+    g.p(1, 2, "hot" if light else "dred")
+    g.tri((16, 3), (21.5, 6), (16, 6), "foam")
+    g.p(17, 4, "white")
+    g.rect(16, 6, 6, 1, "shallow")
+    if rotor == 0:
+        g.p(1, 5, "lgrey")
+        g.p(0, 4, "grey")
+    else:
+        g.p(1, 5, "grey")
+        g.p(2, 6, "grey")
+    g.p(12, 9, "dslate")
+    g.p(18, 9, "dslate")
+    g.rect(10, 10, 12, 1, "dslate")
+    g.p(22, 9, "dslate")
+    return g.outlined()
+
+
+def goose(g, ox, oy, wing):
+    """One Canada goose side on at (ox, oy), facing right: a brown body with a pale breast, a black tail,
+    its long black neck stretched out to a black head with a white chinstrap, and its wing up, level or
+    down."""
+    g.p(ox, oy + 2, "ink")
+    g.rect(ox + 1, oy + 2, 4, 1, "brown")
+    g.rect(ox + 2, oy + 3, 3, 1, "cream")
+    g.rect(ox + 5, oy + 2, 2, 1, "navy")
+    g.rect(ox + 7, oy + 1, 2, 1, "navy")
+    g.p(ox + 7, oy + 2, "white")
+    g.p(ox + 9, oy + 1, "navy")
+    if wing == "up":
+        g.rect(ox + 2, oy + 1, 3, 1, "dbrown")
+        g.p(ox + 2, oy, "dbrown")
+    elif wing == "down":
+        g.rect(ox + 2, oy + 3, 2, 1, "dbrown")
+        g.p(ox + 2, oy + 4, "dbrown")
+    else:
+        g.rect(ox + 1, oy + 1, 4, 1, "dbrown")
+
+
+GEESE_V = ((24, 7, 0), (14, 4, 1), (4, 1, 2), (14, 10, 1), (4, 13, 2))
+
+
+def geese(i):
+    """Frame i of the geese: five in a V, the leader at the point on the right and two down each arm,
+    each a step behind the one ahead in its wingbeat."""
+    g = sky_grid(36, 18)
+    for ox, oy, phase in GEESE_V:
+        goose(g, ox, oy, WINGBEAT[(i + phase) % 4])
+    return g.outlined()
+
+
+def turboprop(prop, light):
+    """The turboprop side on, facing right, on approach with its gear down: a long white fuselage with a
+    navy belly, a row of windows and a navy cockpit glass, a swept navy T-tail, the high wing edge on over
+    the cabin with its engine hung forward of it, the propeller a blur disc (prop 0 or 1), and the
+    beacon on its back red when light."""
+    g = sky_grid(32, 12)
+    g.rect(5, 4, 22, 3, "white")
+    g.rect(4, 4, 1, 2, "white")
+    g.rect(27, 5, 1, 2, "white")
+    g.p(28, 6, "white")
+    g.rect(5, 7, 23, 1, "navy")
+    g.rect(26, 5, 2, 1, "navy")
+    for x in range(8, 25, 2):
+        g.p(x, 5, "dslate")
+    g.rect(3, 1, 4, 1, "navy")
+    g.rect(4, 2, 4, 1, "navy")
+    g.rect(5, 3, 5, 1, "navy")
+    g.rect(1, 1, 2, 1, "navy")
+    g.rect(13, 3, 9, 1, "lgrey")
+    g.p(11, 3, "hot" if light else "dred")
+    g.rect(18, 4, 4, 1, "white")
+    g.rect(18, 5, 4, 1, "lgrey")
+    if prop == 0:
+        g.rect(22, 2, 1, 6, "lgrey")
+    else:
+        g.rect(22, 1, 1, 3, "lgrey")
+        g.rect(22, 6, 1, 2, "lgrey")
+    g.p(22, 4, "white")
+    g.p(22, 5, "grey")
+    for x in (18, 25):
+        g.p(x, 8, "dslate")
+        g.p(x, 9, "ink")
+    return g.outlined()
+
+
+def sky_movers():
+    """Yield (key, tags) for the sky movers besides the plane, each at full size only."""
+    yield "ambient-balloon", [("fly", [balloon(b, f) for b, f in ((0, 1), (0, 0), (1, 1), (1, 0))], BALLOON_MS)]
+    yield "ambient-pigeons", [("fly", [pigeons(i) for i in range(4)], PIGEON_MS)]
+    yield "ambient-helicopter", [("fly", [helicopter(r, l) for r, l in ((0, 1), (1, 1), (0, 0), (1, 0))],
+                                  HELICOPTER_MS)]
+    yield "ambient-geese", [("fly", [geese(i) for i in range(4)], GEESE_MS)]
+    yield "ambient-turboprop", [("fly", [turboprop(p, l) for p, l in ((0, 1), (1, 1), (0, 0), (1, 0))],
+                                 TURBOPROP_MS)]
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every ambient sprite at full size, then at every
     depth step."""
@@ -574,6 +793,7 @@ def sprites():
         yield from bikes(suffix, step)
         yield from animals(suffix, step)
     yield "ambient-plane", [("fly", [plane("red"), plane("white")], PLANE_MS)]
+    yield from sky_movers()
 
 
 if __name__ == "__main__":

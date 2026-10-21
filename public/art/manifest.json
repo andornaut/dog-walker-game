@@ -1,6 +1,15 @@
 {
   "sprites": [
     {
+      "key": "ambient-balloon",
+      "png": "sprites/ambient-balloon.png",
+      "json": "sprites/ambient-balloon.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "ambient-bike",
       "png": "sprites/ambient-bike.png",
       "json": "sprites/ambient-bike.json",
@@ -316,6 +325,24 @@
       }
     },
     {
+      "key": "ambient-geese",
+      "png": "sprites/ambient-geese.png",
+      "json": "sprites/ambient-geese.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "ambient-helicopter",
+      "png": "sprites/ambient-helicopter.png",
+      "json": "sprites/ambient-helicopter.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 24
+      }
+    },
+    {
       "key": "ambient-pedestrian",
       "png": "sprites/ambient-pedestrian.png",
       "json": "sprites/ambient-pedestrian.json",
@@ -406,6 +433,15 @@
       }
     },
     {
+      "key": "ambient-pigeons",
+      "png": "sprites/ambient-pigeons.png",
+      "json": "sprites/ambient-pigeons.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 35
+      }
+    },
+    {
       "key": "ambient-plane",
       "png": "sprites/ambient-plane.png",
       "json": "sprites/ambient-plane.json",
@@ -457,6 +493,15 @@
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "ambient-turboprop",
+      "png": "sprites/ambient-turboprop.png",
+      "json": "sprites/ambient-turboprop.json",
+      "anchor": {
+        "feetY": 10,
+        "opaqueWidth": 30
       }
     },
     {
