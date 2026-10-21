@@ -1067,8 +1067,10 @@ WALK_BAR = (360, 48)
 # on one line.
 WALK_WELLS = ((4, 4, 75, 40), (80, 4, 110, 13))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
-# the grain: five 22x22 wells side by side from x 80, each lip against the next well, on rows 22 to 43.
-EFFECT_ROW = (79, 21, 112, 24)
+# the grain: five 22x22 wells side by side from x 80, each lip against the next well, on rows 20 to 41.
+# The neighbourhood well (rows 4 to 16) and the wells split the bar's height evenly: 4 rows above
+# the name well, 3 between, and 3 under the wells to the trim on row 45.
+EFFECT_ROW = (79, 17, 112, 26)
 EFFECT_WELL = 22
 
 
