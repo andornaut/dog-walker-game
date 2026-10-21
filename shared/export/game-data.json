@@ -1312,7 +1312,7 @@
       "firingHoldSeconds": 3,
       "hintStaleSeconds": 5,
       "hitStopSeconds": 1,
-      "laneMove": 0.18,
+      "laneMove": 0.13,
       "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.3,
       "moverStepSeconds": 0.6,

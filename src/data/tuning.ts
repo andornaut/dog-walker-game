@@ -153,7 +153,7 @@ export const TUNING = {
     hintStaleSeconds: 5,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
-    laneMove: 0.18,
+    laneMove: 0.13,
     // Road in view ahead of the walker at the base scroll speed. Read once at load.
     lookAheadSeconds: 3.6,
     // A minor bump holds the road and the pack still this long.
