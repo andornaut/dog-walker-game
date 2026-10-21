@@ -43,7 +43,7 @@ fx-need-met        48x48  regular, playful, friendly, nosy, thirsty (6 frames, 7
                           round bubble pops up with the need's icon baked in, swells, hearts and
                           sparkles fly out, then it bursts into droplets. Bottom-centre on the
                           dog's feet
-fx-accident        48x48  play (6 frames, 100ms)  a "!" pops over the dog, blush lines and a
+fx-accident        48x48  play (6 frames, 100ms)  surprise lines fan out over the dog, blush lines and a
                           sweat drop come and stay, and a small pile plops out behind. Laid on the
                           dog's own 48x48 frame; the game then leaves accident-spot on the road
 accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground decal with no
@@ -427,17 +427,19 @@ ACCIDENT_DROP = [".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."]
 
 
 def accident(step):
-    """Laid over the dog's own frame: a "!" pops up at the head's right, then two pink blush strokes on
+    """Laid over the dog's own frame: surprise lines fan out at the head's top right, then two pink blush strokes on
     each side of the head and a sweat drop slide in and stay, and a small pile plops out behind the right hind
     paw, its last row on ACCIDENT_FEET by the dogs' feet."""
     g = Grid(ACCIDENT, ACCIDENT)
     if step in (0, 1, 2, 3):
-        def mark(p):
-            h = (4, 6, 6, 5)[step]
-            p.rect(40, 11 - h, 3, h, "red")
-            p.rect(40, 12, 3, 3, "red")
-            p.p(40, 11 - h, "pink")
-        piece(g, mark, size=ACCIDENT)
+        def lines(p):
+            # three surprise lines fanning out from the head's top right, growing and then drawing back
+            n = (2, 3, 3, 2)[step]
+            for k in range(n):
+                p.p(38 + k, 9 - k, "white")
+                p.p(41 + k, 12, "white")
+                p.p(35, 8 - k, "white")
+        piece(g, lines, size=ACCIDENT)
     if step >= 1:
         lift = 1 if step in (2, 4) else 0
         for x0 in (4, 32):

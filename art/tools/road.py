@@ -1171,13 +1171,16 @@ WALLET_RIM = dict(LIT, dbrown=("skin2", "brown"), plum=("skin2", "brown"))
 
 
 def bark(big):
-    """The bark pop: a white bubble with a red mark, outlined in plum on every side so it holds on the light roads."""
+    """The bark pop: a white bubble with red sound arcs, one arc and then, popped bigger, a second outside it,
+    outlined in plum on every side so it holds on the light roads."""
     g = edged(Grid(16, 16), lambda c: K["plum"])
     r = 6 if big else 5
     g.ell(8.5, 7, r, r - 0.5, "white", "lgrey")
     g.tri((4, 10), (2, 15), (7, 11), "white")
-    g.rect(8, 3 if big else 4, 2, 5 if big else 4, "red")
-    g.rect(8, 10 if big else 9, 2, 2, "red")
+    for x, top, h in ((7, 5, 3),) + (((10, 4, 5),) if big else ()):
+        g.p(x - 1, top, "red")
+        g.rect(x, top + 1, 1, h, "red")
+        g.p(x - 1, top + h + 1, "red")
     return g
 
 
@@ -1513,8 +1516,10 @@ def cat(tail=0, blink=False, alert=False):
     g.rect(10, hy + 2, 1, 1, "cream")
     g.rect(13, hy + 2, 1, 1, "cream")
     if alert:
-        g.rect(19, 2, 1, 3, "white")
-        g.p(19, 6, "white")
+        # two surprise lines flicking up off the right ear
+        for x, y in ((19, 4), (21, 6)):
+            g.p(x, y, "white")
+            g.p(x + 1, y - 1, "white")
     return g
 
 
