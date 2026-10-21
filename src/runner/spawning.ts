@@ -33,7 +33,8 @@ export interface SpawnQuota<Kind extends string> {
 // overlaps the pack over its hit box's length plus packLength. scrollSpeed (pixels per
 // second), laneMoveSeconds and stepSeconds, the walk's step, set how far the pack can steer
 // between rows. sightLength is the road in view above the pack, so the next row shows before
-// the pack has to steer for it, and roadLength the whole road in view.
+// the pack has to steer for it, and roadLength the whole road in view. reactionSeconds is the
+// time the pack is given to react on top of the lane moves it makes between two spawns.
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -44,6 +45,7 @@ export interface SpawnPlan<Kind extends string> {
   moverCaps: MoverCaps;
   packLength: number;
   quotas: readonly SpawnQuota<Kind>[];
+  reactionSeconds: number;
   roadLength: number;
   scrollSpeed: number;
   sightLength: number;
@@ -105,6 +107,11 @@ function laneMoveLength(plan: SpawnPlan<string>): number {
   return Math.ceil(plan.laneMoveSeconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
 }
 
+// The scroll the reaction margin covers.
+function reactionLength(plan: SpawnPlan<string>): number {
+  return plan.reactionSeconds * plan.scrollSpeed;
+}
+
 // Whole lane moves that fit in a stretch of clear road. The pack starts a move only on a walk
 // step, which can come up to a step into the stretch, so the moves need a step to spare.
 function lanesWithin(plan: SpawnPlan<string>, clearDistance: number): number {
@@ -155,26 +162,47 @@ export interface BlockingPlace {
 }
 
 // The least clear road, from the far edge of the nearer obstacle's hit box to the near edge of
-// the farther one's, across which the path changes lanes between them: the tallest pack's
-// height and a lane move, so the pack visibly fits between them.
-export function packGap(plan: SpawnPlan<string>): number {
-  return plan.packLength + laneMoveLength(plan);
+// the farther one's, across which the path makes changes lane changes between them: the
+// tallest pack's height, the lane moves and the reaction margin, so the pack visibly fits
+// between them.
+export function packGap(plan: SpawnPlan<string>, changes: number): number {
+  return plan.packLength + changes * laneMoveLength(plan) + reactionLength(plan);
 }
 
-// True when the farther spawn blocks a lane beside the nearer one that the nearer leaves open,
-// next to a lane the nearer blocks and the farther leaves open: a pack passing the nearer one
-// in that lane changes lanes between them by stepping in behind it.
-function changesLanesBetween(near: BlockingPlace, far: BlockingPlace): boolean {
+// The most lane changes a pack passing the nearer spawn, in a lane the farther one blocks, makes
+// between them on a way out of that lane that steps in behind the nearer one: from the first
+// lane the nearer one blocks to the nearest lane the farther one leaves open, on either side.
+// The moves before that first lane can be made beside the nearer one. 0 when no way steps in
+// behind it.
+function laneChangesBetween(laneCount: number, near: BlockingPlace, far: BlockingPlace): number {
   const nearMask = laneRun(near.lane, near.lanes);
   const farMask = laneRun(far.lane, far.lanes);
-  const besideNear = farMask & ~nearMask;
-  const behindNear = nearMask & ~farMask;
-  return (besideNear & ((behindNear << 1) | (behindNear >>> 1))) !== 0;
+  let most = 0;
+  for (let lane = 0; lane < laneCount; lane++) {
+    if ((farMask & ~nearMask & (1 << lane)) === 0) {
+      continue;
+    }
+    for (const side of [-1, 1]) {
+      let behind = -1;
+      for (let next = lane + side; next >= 0 && next < laneCount; next += side) {
+        if (behind === -1 && (nearMask & (1 << next)) !== 0) {
+          behind = next;
+        }
+        if ((farMask & (1 << next)) === 0) {
+          if (behind !== -1) {
+            most = Math.max(most, Math.abs(next - behind) + 1);
+          }
+          break;
+        }
+      }
+    }
+  }
+  return most;
 }
 
 // True when the pack fits between two lane-blocking spawns: where the path changes lanes
-// between them and road shows between them, that road is at least packGap long. Spawns side by
-// side, with no road between them, leave no gap to change lanes through.
+// between them and road shows between them, that road is at least the packGap for those lane
+// changes. Spawns side by side, with no road between them, leave no gap to change lanes through.
 export function packFitsBetween(
   plan: SpawnPlan<string>,
   a: BlockingPlace,
@@ -182,7 +210,8 @@ export function packFitsBetween(
 ): boolean {
   const fitsBehind = (near: BlockingPlace, far: BlockingPlace) => {
     const gap = far.distance - near.distance - near.length;
-    return gap <= 0 || gap >= packGap(plan) - ROUNDING || !changesLanesBetween(near, far);
+    const changes = laneChangesBetween(plan.laneCount, near, far);
+    return gap <= 0 || changes === 0 || gap >= packGap(plan, changes) - ROUNDING;
   };
   // Met at once, either may be the nearer one.
   if (a.distance === b.distance) {
@@ -235,6 +264,10 @@ interface Cell {
   row: number;
 }
 
+// Lane-blocking spawns this many lanes wide or wider never take neighbouring rows: a row is left
+// between them.
+const WIDE_LANES = 2;
+
 // Which rows' windows and gaps a lane-blocking spawn rows long, placed on row, overlaps.
 // Rows are spacing apart, so the indexes are counted from distances.
 function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, rows: number) {
@@ -255,7 +288,8 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // next row is within reach without crossing a lane blocked in the gap between them. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
 // last row. Where the path changes lanes between two lane-blocking spawns, packFitsBetween
-// holds, for a mover wherever it stands. Movers are placed first, by placeMovers; a crosser keeps
+// holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide or wider have
+// a row between the rows they take. Movers are placed first, by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows
 // back. A mover with no room to move is placed as a standing obstacle, last of all. A mover, or an
 // obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
@@ -281,6 +315,10 @@ export function planSpawns<Kind extends string>(
   const lanes = laneRun(0, laneCount);
   // The lane-blocking spawns placed so far, and every place each mover stands.
   const placed: BlockingPlace[] = [];
+  // Rows taken by a wide lane-blocking spawn.
+  const wideRows = new Uint8Array(rows.length);
+  const clearOfWide = (first: number, last: number): boolean =>
+    !wideRows.subarray(Math.max(0, first - 1), last + 2).includes(1);
 
   const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
 
@@ -388,6 +426,9 @@ export function planSpawns<Kind extends string>(
     }
     if (!blocksLane) {
       return true;
+    }
+    if (footprint.lanes >= WIDE_LANES && !clearOfWide(cell.row, last)) {
+      return false;
     }
     const place = {
       distance: itemAt(rows, cell.row),
@@ -509,6 +550,9 @@ export function planSpawns<Kind extends string>(
         takeCells(row, covered);
       }
       if (quota.blocksLane) {
+        if (footprint.lanes >= WIDE_LANES) {
+          wideRows.fill(1, cell.row, lastRowTaken(cell, footprint, true) + 1);
+        }
         tryBlock(cell, footprint, true);
         placed.push({
           distance: itemAt(rows, cell.row),

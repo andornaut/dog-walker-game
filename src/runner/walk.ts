@@ -617,6 +617,7 @@ export function planZone(
     },
     packLength: geometry.tallestPackBand,
     quotas: spawnQuotas(data, random, run),
+    reactionSeconds: read(data.tuning, "seconds", "pathReactionMargin"),
     roadLength: geometry.roadBottom - geometry.roadTop,
     scrollSpeed: walkScrollSpeed(data, run),
     sightLength: geometry.sightLength,

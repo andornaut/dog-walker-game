@@ -182,6 +182,9 @@ export const TUNING = {
     needGoneWrong: 20,
     // A need turns urgent after this much walking since it was last met or went wrong.
     needUrgentByEnergy: { calm: 90, hyper: 50, steady: 60 },
+    // Wherever the path changes lanes between two obstacles, the road between them also leaves
+    // the pack this long to react, on top of the pack's height and the lane moves.
+    pathReactionMargin: 0.5,
     // A pull never lands the pack where an obstacle reaches it sooner than the pull's lane
     // move, the dog's input lock, this and a lane move back.
     pullReactionWindow: 0.6,

@@ -146,6 +146,7 @@ export interface Tuning {
     readonly moverWarningSeconds: number;
     readonly needGoneWrong: number;
     readonly needUrgentByEnergy: Table<Energy>;
+    readonly pathReactionMargin: number;
     readonly pullReactionWindow: number;
     readonly pullTell: number;
     readonly statusVisualSeconds: number;

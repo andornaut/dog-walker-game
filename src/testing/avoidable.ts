@@ -1,7 +1,7 @@
-// An independent check that every lane-blocking spawn can be steered around, for tests. It
-// walks the zone a pixel of scroll at a time: the pack may stay in a lane, or take a lane move
-// that lasts laneMoveSeconds and spans both lanes while it lasts, and is caught by any span it
-// overlaps. It shares no code with the spawn planner.
+// Independent checks of the spawn planner, for tests; they share no code with it.
+// lanesReachedAtEnd checks that every lane-blocking spawn can be steered around. It walks the
+// zone a pixel of scroll at a time: the pack may stay in a lane, or take a lane move that lasts
+// laneMoveSeconds and spans both lanes while it lasts, and is caught by any span it overlaps.
 
 // A lane-blocking spawn: lanes lane to lane + laneSpan - 1, overlapping the pack from distance
 // to distance + length (the hit box's length plus the pack's).
@@ -17,6 +17,30 @@ export interface Walkway {
   laneMoveSeconds: number;
   scrollSpeed: number;
   zoneLength: number;
+}
+
+// The most lane changes a pack makes between two lane-blocking spawns, given as the lanes each
+// blocks, when it passes the nearer one in a lane the farther one blocks and gets out of it by
+// stepping in behind the nearer one: from the first lane the nearer one blocks to the nearest
+// lane the farther one leaves open, on either side. 0 when no way out steps in behind it.
+export function laneChangesBehind(
+  laneCount: number,
+  nearLanes: ReadonlySet<number>,
+  farLanes: ReadonlySet<number>,
+): number {
+  const lanes = Array.from({ length: laneCount }, (_, lane) => lane);
+  let most = 0;
+  for (const start of lanes.filter((lane) => farLanes.has(lane) && !nearLanes.has(lane))) {
+    for (const side of [-1, 1]) {
+      const way = lanes.filter((lane) => (lane - start) * side > 0).sort((a, b) => (a - b) * side);
+      const out = way.find((lane) => !farLanes.has(lane));
+      const behind = way.find((lane) => nearLanes.has(lane));
+      if (out !== undefined && behind !== undefined && (out - behind) * side >= 0) {
+        most = Math.max(most, (out - behind) * side + 1);
+      }
+    }
+  }
+  return most;
 }
 
 // The lanes the pack can be in at the end of the zone, starting in startLane.

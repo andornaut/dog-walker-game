@@ -43,7 +43,7 @@ import { tipValue } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { cents, pixels, read, readTable } from "../rules/units";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
-import { type BlockingSpan, lanesReachedAtEnd } from "../testing/avoidable";
+import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
@@ -60,6 +60,7 @@ import {
   headHome,
   itemCategory,
   itemHeight,
+  laneMoveSeconds,
   minorObstacleWeights,
   moverMovement,
   obstacleWeights,
@@ -174,6 +175,25 @@ const FASTEST_WALKER = (Object.keys(WALKERS) as WalkerId[]).reduce((fastest, wal
   const speed = (id: WalkerId) => walkScrollSpeed(REAL, realRun(REAL, id));
   return speed(walker) > speed(fastest) ? walker : fastest;
 });
+// The walkers whose lane move covers the least and the most road: a lane move takes the same
+// time whoever walks, over road that a walker's pace scrolls faster or slower.
+const LANE_MOVE_WALKERS = (() => {
+  const road = (walker: WalkerId) => {
+    const run = realRun(REAL, walker);
+    return laneMoveSeconds(REAL, run) * walkScrollSpeed(REAL, run);
+  };
+  const walkers = (Object.keys(WALKERS) as WalkerId[]).sort((a, b) => road(a) - road(b));
+  return [itemAt(walkers, 0), itemAt(walkers, walkers.length - 1)];
+})();
+// The greatest common divisor: the row spacing, of distances on rows.
+const gcdOf = (values: readonly number[]): number =>
+  values.reduce((a, b) => {
+    let [x, y] = [a, b];
+    while (y !== 0) {
+      [x, y] = [y, x % y];
+    }
+    return x;
+  }, 0);
 // A standing spawn's span on the game's road.
 const standingSpan = (
   tuned: Real,
@@ -316,9 +336,26 @@ describe("planZone", { timeout: 15_000 }, () => {
     expect(countOf("lucky")).toBe(2);
   });
 
+  // Without minor obstacles three lanes wide, which only fit after a row that blocks lanes
+  // beside them, so the planner has room for every obstacle at either pace.
   it("scales the obstacles, tips and need spots by the walker's pace, and nothing else", () => {
+    const narrow = (zone: Zone): Zone => ({
+      ...zone,
+      weights: {
+        ...zone.weights,
+        minorObstacles: Object.fromEntries(
+          Object.entries(zone.weights.minorObstacles).map(([id, weight]) => [
+            id,
+            footprintOf(data, id as MinorObstacleId).lanes > 2 ? 0 : weight,
+          ]),
+        ) as Zone["weights"]["minorObstacles"],
+      },
+    });
+    const [first, ...rest] = data.world.zones;
+    const world: World = { ...data.world, zones: [narrow(first), ...rest.map(narrow)] };
+    const roomy = { ...data, world };
     const paced = {
-      ...data,
+      ...roomy,
       tuning: { ...tuning, multipliers: { ...tuning.multipliers, fastWalkerSpeed: 2 } },
     };
     const counts = (tuned: typeof data) => {
@@ -338,7 +375,7 @@ describe("planZone", { timeout: 15_000 }, () => {
         treat: count("treat"),
       };
     };
-    const base = counts(data);
+    const base = counts(roomy);
     expect(base.needSpot).toBeGreaterThan(0);
     expect(counts(paced)).toEqual({
       lucky: base.lucky,
@@ -477,44 +514,57 @@ describe("planZone", { timeout: 15_000 }, () => {
     }
   });
 
-  // Two standing obstacles, the farther one blocking a lane beside the nearer one next to a lane
-  // only the nearer one blocks: a pack passing the nearer one there changes lanes behind it,
-  // between the two. Road between them is at least the tallest pack and a lane move in whole
-  // walk steps, at the fastest pace in the last zone.
-  it.each(ZONE_IDS)("leaves the pack room to change lanes between obstacles in %s", (zone) => {
-    const zoned = inZone(realRun(REAL, FASTEST_WALKER), zone, WORLD.walkLength - 1);
-    const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
-    const laneMove = steps * STEP_SECONDS * walkScrollSpeed(REAL, zoned);
-    const fit = GAME_ROAD.tallestPackBand + laneMove;
-    const lanesOf = (kind: WalkItem["kind"], lane: number) =>
-      new Set(Array.from({ length: footprintOf(REAL, kind).lanes }, (_, i) => lane + i));
-    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
-      const walk = planZone(REAL, GAME_ROAD, seededRandom(seed), {
-        road: startRoad(LANE_COUNT),
-        run: zoned,
-      });
-      const standing = walk.road.pending.filter(
-        (event) => event.mover === undefined && blocksLane(REAL, event.kind),
-      );
-      for (const near of standing) {
-        const nearLanes = lanesOf(near.kind, near.lane);
-        for (const far of standing.filter(({ distance }) => distance > near.distance)) {
-          const farLanes = lanesOf(far.kind, far.lane);
-          const steppedIn = [...farLanes].some(
-            (beside) =>
-              !nearLanes.has(beside) &&
-              [beside - 1, beside + 1].some((lane) => nearLanes.has(lane) && !farLanes.has(lane)),
-          );
-          const gap = far.distance - near.distance - itemHeight(REAL, GAME_ROAD, near.kind);
-          if (steppedIn && gap > 0) {
-            expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
-              fit - 1e-6,
-            );
+  // Two standing obstacles: a pack passing the nearer one in a lane the farther one blocks, that
+  // gets out of it by stepping in behind the nearer one, changes lanes between the two from the
+  // first lane the nearer one blocks to the nearest lane the farther one leaves open. Road
+  // between them is at least the tallest pack, those lane moves in whole walk steps and the
+  // reaction margin, on every way out. Two obstacles two or more lanes wide have a row between
+  // them. At the road's speed in the last neighbourhood, for the walkers whose lane moves cover
+  // the least and the most road.
+  it.each(LANE_MOVE_WALKERS.flatMap((walker) => ZONE_IDS.map((zone) => ({ walker, zone }))))(
+    "spaces obstacles for the pack to change lanes between them in $zone with $walker",
+    ({ walker, zone }) => {
+      const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
+      const speed = walkScrollSpeed(REAL, zoned);
+      const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
+      const laneMove = steps * STEP_SECONDS * speed;
+      const margin = read(TUNING, "seconds", "pathReactionMargin") * speed;
+      const lanesOf = (kind: WalkItem["kind"], lane: number) =>
+        new Set(Array.from({ length: footprintOf(REAL, kind).lanes }, (_, i) => lane + i));
+      for (const seed of [1, 2, 3, 4, 5, 6]) {
+        const walk = planZone(REAL, GAME_ROAD, seededRandom(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        });
+        const standing = walk.road.pending.filter(
+          (event) => event.mover === undefined && blocksLane(REAL, event.kind),
+        );
+        for (const near of standing) {
+          const nearLanes = lanesOf(near.kind, near.lane);
+          for (const far of standing.filter(({ distance }) => distance > near.distance)) {
+            const changes = laneChangesBehind(LANE_COUNT, nearLanes, lanesOf(far.kind, far.lane));
+            const gap = far.distance - near.distance - itemHeight(REAL, GAME_ROAD, near.kind);
+            if (changes > 0 && gap > 0) {
+              const fit = GAME_ROAD.tallestPackBand + changes * laneMove + margin;
+              expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
+                fit - 1e-6,
+              );
+            }
           }
         }
+        const spacing = gcdOf(walk.road.pending.flatMap((e) => (e.mover ? [] : [e.distance])));
+        const wide = standing.filter(({ kind }) => footprintOf(REAL, kind).lanes >= 2);
+        wide.forEach((near, i) => {
+          for (const far of wide.slice(i + 1)) {
+            const rowsApart = Math.abs(far.distance - near.distance) / spacing;
+            expect(rowsApart, `seed ${seed}: ${near.kind} and ${far.kind}`).toBeGreaterThanOrEqual(
+              2,
+            );
+          }
+        });
       }
-    }
-  });
+    },
+  );
 
   it("draws a forced stop not met yet this run", () => {
     let walk = planned;
