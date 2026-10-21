@@ -3,7 +3,7 @@
 perk icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
 
 16x16 images in Endesga 32 with coloured outlines, on transparency:
-icon-trait-chaser           a squirrel
+icon-trait-chaser           a black squirrel
 icon-perk-<perk>            a walker's perk, on walker tiles, the new walker celebration and
                             the state strip: calm-voice (a sky speech bubble with a white
                             wave), kind-words (a pink speech bubble with a red heart), long-reach
@@ -57,6 +57,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, build as build_sprites, icon_edge  # noqa: E402
 from fx import burst, star4  # noqa: E402
+from road import SQUIRREL_FUR  # noqa: E402
 from ui import to_image  # noqa: E402
 
 
@@ -71,18 +72,22 @@ def bitmap(g, x0, y0, rows, cols):
 # ---------- traits ----------
 
 def chaser():
+    """Toronto's black squirrel in road.SQUIRREL_FUR, side on facing left, its tail up behind it, a white glint
+    over its eye."""
+    f = SQUIRREL_FUR
     g = Grid(16, 16)
-    g.ell(11.5, 6, 3.5, 5.5, "ochre", "rust", "tan")
-    g.ell(11.5, 6.5, 1.5, 3.5, "tan")
-    g.ell(8.5, 9, 1.4, 4, "rust")
-    g.ell(7, 11, 3.5, 3.8, "ochre", "rust", "tan")
-    g.ell(5.5, 12, 1.6, 2.4, "cream")
-    g.ell(5, 6, 3, 2.8, "ochre", "rust", "tan")
-    g.p(6, 3, "ochre")
-    g.p(6, 2, "rust")
-    g.rect(4, 5, 1, 2, "ink")
-    g.p(2, 7, "plum")
-    g.rect(4, 14, 2, 1, "rust")
+    g.ell(11.5, 6, 3.5, 5.5, f["fur"], f["shade"], f["lit"])
+    g.ell(11.5, 6.5, 1.5, 3.5, f["streak"])
+    g.ell(8.5, 9, 1.4, 4, f["shade"])
+    g.ell(7, 11, 3.5, 3.8, f["fur"], f["shade"], f["lit"])
+    g.ell(5.5, 12, 1.6, 2.4, f["belly"])
+    g.ell(5, 6, 3, 2.8, f["fur"], f["shade"], f["lit"])
+    g.p(6, 3, f["fur"])
+    g.p(6, 2, f["shade"])
+    g.p(4, 5, "white")
+    g.p(4, 6, "ink")
+    g.p(2, 7, f["nose"])
+    g.rect(4, 14, 2, 1, f["shade"])
     return g
 
 

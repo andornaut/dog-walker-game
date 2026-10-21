@@ -743,39 +743,49 @@ def skunk(sway=0, blink=False):
     return rim(g, LIT)
 
 
+# Toronto's black squirrel, for every squirrel drawing (squirrel, squirrel_run, hazards.squirrel_dash and
+# the icons): navy fur shaded ink and lit slate, a dslate streak down the tail, a dslate belly and paws held
+# at the chest, navy feet and a grey nose. LIT's rim puts grey on its top-left edges and slate on the rest,
+# so the dark fur and the tail's edge hold on Elm Avenue; the eyes keep their white glints.
+SQUIRREL_FUR = dict(fur="navy", shade="ink", lit="slate", streak="dslate", belly="dslate", paw="dslate",
+                    foot="navy", nose="grey")
+
+
 def squirrel(tail=0, shift=0):
     """The squirrel sitting up facing the player, a front elevation: its bushy tail curls up behind its
     right side, the body sits upright with its paws held at its chest and its hind feet planted. tail
-    swishes the tail's tip 1px right; shift moves the head, body and paws 1px right. The road outline and a
-    tan rim on the fur facing the light."""
+    swishes the tail's tip 1px right; shift moves the head, body and paws 1px right. The road outline and
+    LIT's rim."""
+    f = SQUIRREL_FUR
     g = edged(Grid())
     t, h = tail, shift
     # the tail, rising from the base behind the body and curling over at the top
-    g.cel(21 + t, 15, 5.5, 9, "ochre", "rust", "tan")
-    g.cel(18 + t, 6.5, 5, 3.5, "ochre", "rust", "tan")
-    g.cel(21 + t, 15.5, 2.5, 6, "tan")
-    # body, sitting up, with a cream belly; hind feet either side
-    g.cel(15 + h, 21.5, 5.5, 6.5, "ochre", "rust", "tan")
-    g.cel(15 + h, 22.5, 3, 4.5, "cream")
+    g.cel(21 + t, 15, 5.5, 9, f["fur"], f["shade"], f["lit"])
+    g.cel(18 + t, 6.5, 5, 3.5, f["fur"], f["shade"], f["lit"])
+    g.cel(21 + t, 15.5, 2.5, 6, f["streak"])
+    # body, sitting up, with a lighter belly; hind feet either side
+    g.cel(15 + h, 21.5, 5.5, 6.5, f["fur"], f["shade"], f["lit"])
+    g.cel(15 + h, 22.5, 3, 4.5, f["belly"])
     for x in (10, 17):
-        g.rect(x + h, 27, 4, 2, "rust")
+        g.rect(x + h, 27, 4, 2, f["foot"])
     # paws held together at the chest
-    g.rect(13 + h, 19, 4, 2, "rust")
+    g.rect(13 + h, 19, 4, 2, f["paw"])
     squirrel_head(g, 15 + h, 12.5)
     return rim(g, LIT)
 
 
 def squirrel_head(g, x, y):
     """The squirrel's head facing the player, centred on (x, y), with its ears and face."""
-    g.tri((x - 4, y - 1.5), (x - 3.5, y - 6), (x - 1, y - 3), "ochre")
-    g.tri((x + 4, y - 1.5), (x + 3.5, y - 6), (x + 1, y - 3), "ochre")
-    g.cel(x, y, 4.5, 4, "ochre", "rust", "tan")
-    g.cel(x, y + 2, 2.5, 1.5, "cream")
+    f = SQUIRREL_FUR
+    g.tri((x - 4, y - 1.5), (x - 3.5, y - 6), (x - 1, y - 3), f["fur"])
+    g.tri((x + 4, y - 1.5), (x + 3.5, y - 6), (x + 1, y - 3), f["fur"])
+    g.cel(x, y, 4.5, 4, f["fur"], f["shade"], f["lit"])
+    g.cel(x, y + 2, 2.5, 1.5, f["belly"])
     # round eyes, each with a glint a quarter of its size at the top-left, so they read as two bright eyes
     for ex in (x - 2, x + 2):
         g.cel(ex, y + 0.5, 1.15, 1.15, "ink")
         g.rect(ex - 0.9, y - 0.4, 0.95, 0.95, "white")
-    g.rect(x - 1, y + 1.5, 2, 1, "plum")
+    g.rect(x - 1, y + 1.5, 2, 1, f["nose"])
 
 
 # The squirrel's bound, landing first: (body y, head y, tail (x, y, rx, ry), front paws (left x, right x, y,
@@ -793,18 +803,19 @@ SQUIRREL_BOUND = (
 def squirrel_run(phase):
     """The squirrel bounding down the road at the player, a front elevation, at phase 0 to 3 of
     SQUIRREL_BOUND. Its body spreads wider the lower it is."""
+    f = SQUIRREL_FUR
     g = edged(Grid())
     by, hy, (tx, ty, trx, try_), (lx, rx, py, ph) = SQUIRREL_BOUND[phase]
     low = (by - 19) / 3
-    g.cel(tx, ty, trx, try_, "ochre", "rust", "tan")
-    g.cel(tx, ty + 0.5, 2.5, try_ - 2.5, "tan")
+    g.cel(tx, ty, trx, try_, f["fur"], f["shade"], f["lit"])
+    g.cel(tx, ty + 0.5, 2.5, try_ - 2.5, f["streak"])
     cx = 15 + low
-    g.cel(cx, by, 5.5 + 1.5 * low, 5 - 0.5 * low, "ochre", "rust", "tan")
-    g.cel(cx, by + 1, 3 + 0.5 * low, 3 - 0.5 * low, "cream")
+    g.cel(cx, by, 5.5 + 1.5 * low, 5 - 0.5 * low, f["fur"], f["shade"], f["lit"])
+    g.cel(cx, by + 1, 3 + 0.5 * low, 3 - 0.5 * low, f["belly"])
     for x in (lx, rx):
-        g.rect(x, py, 3, ph, "rust")
+        g.rect(x, py, 3, ph, f["foot"])
         if ph > 2:
-            g.rect(x, py + ph - 1, 3, 1, "tan")
+            g.rect(x, py + ph - 1, 3, 1, f["lit"])
     squirrel_head(g, cx, hy)
     return rim(g, LIT)
 

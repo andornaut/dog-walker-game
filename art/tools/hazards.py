@@ -2,7 +2,8 @@
 """Draw the moving hazards: things that cross the road or come down it, and the
 warning cue shown at the lane edge about a second before one enters.
 
-squirrel-dash       48x48   side view facing right, run (4 frames, 80ms): a bounding gallop, tail streaming
+squirrel-dash       48x48   Toronto's black squirrel, side view facing right, run (4 frames, 80ms): a
+                            bounding gallop, tail streaming
 loose-dog           48x48   the corgi from other-dog in side view facing right, no owner; run (4 frames,
                             100ms): a gallop, gathered, reaching, airborne and landing, the broken leash
                             trailing up off the back, frayed, a 1px wave travelling down it
@@ -55,7 +56,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import LIT, SCALE, face_disc, face_front, lean, rim  # noqa: E402
+from road import LIT, SCALE, SQUIRREL_FUR, face_disc, face_front, lean, rim  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -71,43 +72,46 @@ SQUIRREL_RUN = [
 
 
 def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Grid):
-    """new makes the grid: a Grid at full size, or a minis.Mini for a depth variant."""
+    """Toronto's black squirrel in road.SQUIRREL_FUR, lit by LIT's rim. new makes the grid: a Grid at full size, or
+    a minis.Mini for a depth variant."""
+    f = SQUIRREL_FUR
     g = edged(new())
     tx, ty = tail
     # far legs: a shade darker, a step behind the near ones
-    g.rect(hind[0] + 2, hind[1] - 1, 3, 2, "rust")
-    g.rect(front[0] - 2, front[1] - 1, 2, 2, "rust")
+    g.rect(hind[0] + 2, hind[1] - 1, 3, 2, f["shade"])
+    g.rect(front[0] - 2, front[1] - 1, 2, 2, f["shade"])
     # tail: a big plume streaming back and up from the rump, its tip curling over
-    g.cel(9.5 + tx / 2, 15 + dy + ty / 2, 3.5, 3.5, "ochre", "rust")
-    g.cel(7 + tx, 9 + dy + ty, 4.8, 5.5, "ochre", "rust", "tan")
-    g.cel(7.5 + tx, 10 + dy + ty, 2.5, 3.5, "tan")
-    g.cel(10.5 + tx, 4.5 + dy + ty, 3.5, 2.5, "ochre", "rust", "tan")
+    g.cel(9.5 + tx / 2, 15 + dy + ty / 2, 3.5, 3.5, f["fur"], f["shade"])
+    g.cel(7 + tx, 9 + dy + ty, 4.8, 5.5, f["fur"], f["shade"], f["lit"])
+    g.cel(7.5 + tx, 10 + dy + ty, 2.5, 3.5, f["streak"])
+    g.cel(10.5 + tx, 4.5 + dy + ty, 3.5, 2.5, f["fur"], f["shade"], f["lit"])
     # hind leg: haunch, then a long foot
     hx, hy = hind
     for k in range(6):
         t = k / 5
-        g.rect(round(11 + (hx - 11) * t), round(21 + dy + (hy - 21 - dy) * t), 2, 2, "ochre")
-    g.rect(hx, hy, 3, 2, "ochre")
-    g.rect(hx, hy + 1, 3, 1, "rust")
+        g.rect(round(11 + (hx - 11) * t), round(21 + dy + (hy - 21 - dy) * t), 2, 2, f["fur"])
+    g.rect(hx, hy, 3, 2, f["fur"])
+    g.rect(hx, hy + 1, 3, 1, f["shade"])
     # body
-    g.cel(15, 20 + dy, 6.5 + st, 4.5, "ochre", "rust", "tan")
-    g.cel(11, 20 + dy, 3.5, 4, "ochre", "rust", "tan")
-    g.cel(16.5, 22.5 + dy, 3.5, 1.5, "cream")
+    g.cel(15, 20 + dy, 6.5 + st, 4.5, f["fur"], f["shade"], f["lit"])
+    g.cel(11, 20 + dy, 3.5, 4, f["fur"], f["shade"], f["lit"])
+    g.cel(16.5, 22.5 + dy, 3.5, 1.5, f["belly"])
     # front leg: a thin arm from the chest to the paw
     fx, fy = front
     for k in range(5):
         t = k / 4
-        g.rect(round(20 + (fx - 20) * t), round(22 + dy + (fy - 22 - dy) * t), 2, 2, "ochre")
-    g.rect(fx, fy, 2, 2, "ochre")
-    g.p(fx + 1, fy + 1, "rust")
-    # head: round, a cream cheek, a tufted ear, a big eye and a pink-plum nose
-    g.tri((20, 12 + dy), (21.5, 7.5 + dy), (23.5, 11.5 + dy), "ochre")
-    g.p(21, 10 + dy, "rust")
-    g.cel(24, 15.5 + dy, 5, 4.5, "ochre", "rust", "tan")
-    g.cel(25.5, 18 + dy, 3, 1.5, "cream")
+        g.rect(round(20 + (fx - 20) * t), round(22 + dy + (fy - 22 - dy) * t), 2, 2, f["fur"])
+    g.rect(fx, fy, 2, 2, f["fur"])
+    g.p(fx + 1, fy + 1, f["shade"])
+    # head: round, a lighter cheek, a tufted ear, a big eye with a white glint and a grey nose
+    g.tri((20, 12 + dy), (21.5, 7.5 + dy), (23.5, 11.5 + dy), f["fur"])
+    g.p(21, 10 + dy, f["shade"])
+    g.cel(24, 15.5 + dy, 5, 4.5, f["fur"], f["shade"], f["lit"])
+    g.cel(25.5, 18 + dy, 3, 1.5, f["belly"])
     g.rect(25, 13 + dy, 2, 2, "ink")
     g.p(25, 13 + dy, "white")
-    g.p(29, 15 + dy, "plum")
+    g.p(29, 15 + dy, f["nose"])
+    rim(getattr(g, "g", g), LIT)
     return g
 
 

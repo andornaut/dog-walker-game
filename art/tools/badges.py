@@ -33,6 +33,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, contrast, main  # noqa: E402
+from road import SQUIRREL_FUR  # noqa: E402
 
 RIMS = {"firsts": ("ochre", "rust", "tan"), "mastery": ("lgrey", "grey", "white"),
         "collection": ("amber", "orange", "yellow"), "silly": ("pink", "mauve", "white")}
@@ -365,13 +366,15 @@ def _(g):
 
 @icon("squirrel")
 def _(g):
-    g.ell(20, 13, 4.5, 6, "ochre", "rust", "tan")
-    g.ell(13, 18, 4, 4.5, "ochre", "rust")
-    g.ell(13, 13, 3, 2.5, "ochre", "rust")
-    g.p(11, 10, "ochre")
-    g.p(12, 13, "ink")
-    g.p(14, 10, "ochre")
-    g.ell(13, 20, 2, 2, "cream")
+    """Toronto's black squirrel in road.SQUIRREL_FUR, its tail up behind it, a white glint for its eye."""
+    f = SQUIRREL_FUR
+    g.ell(20, 13, 4.5, 6, f["fur"], f["shade"], f["lit"])
+    g.ell(13, 18, 4, 4.5, f["fur"], f["shade"])
+    g.ell(13, 13, 3, 2.5, f["fur"], f["shade"])
+    g.p(11, 10, f["fur"])
+    g.p(12, 13, "white")
+    g.p(14, 10, f["fur"])
+    g.ell(13, 20, 2, 2, f["belly"])
 
 
 # An open hand reaching down out of a striped sleeve: N and W the sleeve's stripes, H skin, h the gaps
