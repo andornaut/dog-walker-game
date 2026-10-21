@@ -3,8 +3,8 @@ import { type ScreenConfig, screenLayout } from "../layout/screenLayout";
 import { walkerFootY } from "../runner/walkGeometry";
 import { TUNING } from "./tuning";
 
-// The backdrop band's heights: "short" ends it on row 150; "tall" grows it by 64 rows to end on
-// row 214, which tilts the camera so the road's rows shrink 20%. The band's bottom rows,
+// The backdrop band's heights: "short" ends it 110 rows under the walk bar; "tall" grows it by 64
+// rows, which tilts the camera so the road's rows shrink 20%. The band's bottom rows,
 // roadIntoBand, are the approach the backdrop paints. BAND picks one; the camera derives
 // from it.
 const BANDS = {
@@ -16,11 +16,12 @@ const BAND: keyof typeof BANDS = "tall";
 // Internal render resolution: portrait, scaled to the window without smoothing.
 export const SCREEN_CONFIG: ScreenConfig = {
   ...BANDS[BAND],
-  dogRowHeight: 90,
+  dogCardHeight: 58,
+  dogRowHeight: 62,
   dogSlotCount: 3,
   height: 560,
   roadWidth: 320,
-  topBarHeight: 40,
+  topBarHeight: 48,
   width: 360,
 };
 

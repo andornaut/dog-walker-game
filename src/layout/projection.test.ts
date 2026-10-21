@@ -24,11 +24,11 @@ const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
 const bandRow = backdrop.y + backdrop.height - 1;
 
 describe("roadProjection", () => {
-  it("draws the walker's feet at scale 1 on row 464, centred on the screen", () => {
-    expect(projection.footY).toBe(464);
+  it("draws the walker's feet at scale 1 on their row, centred on the screen", () => {
+    expect(projection.footY).toBe(walkerFootY(road));
     expect(projection.centerX).toBe(180);
     expect(scaleAt(projection, 0)).toBe(1);
-    expect(screenYAt(projection, 0)).toBe(464);
+    expect(screenYAt(projection, 0)).toBe(projection.footY);
   });
 
   it("joins the backdrop's bottom row with the road at the far scale, centred", () => {

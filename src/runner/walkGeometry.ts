@@ -5,7 +5,7 @@ import type { Rect } from "../layout/rect";
 import type { RoadGeometry } from "./walk";
 
 // How far the walker's feet stand above the bottom of the road.
-const WALKER_FEET_ABOVE_ROAD_BOTTOM = 6;
+const WALKER_FEET_ABOVE_ROAD_BOTTOM = 4;
 
 // An obstacle's hit box is its footprint less the inset at each end, a cell's spare length
 // beside ROAD_HIT_SIZE, so an n-lane, m-row obstacle is hit 64n-24 by 64m-24 on 64px lanes,

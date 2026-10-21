@@ -5,6 +5,7 @@ import { screenLayout } from "./screenLayout";
 
 const config = {
   backdropHeight: 110,
+  dogCardHeight: 86,
   dogRowHeight: 90,
   dogSlotCount: 3,
   height: 560,
@@ -24,7 +25,7 @@ describe("screenLayout", () => {
       { height: 110, width: 360, x: 0, y: 40 },
     ],
     [
-      "the drawn road across the full width from the band down to the doghouses",
+      "the drawn road across the full width from the band down to the cards",
       layout.roadView,
       { height: 320, width: 360, x: 0, y: 150 },
     ],
@@ -44,18 +45,18 @@ describe("screenLayout", () => {
       { height: 320, width: 320, x: 20, y: 150 },
     ],
     [
-      "the walk view from the band down to the doghouses",
+      "the walk view from the band down to the cards",
       layout.walkView,
       { height: 430, width: 360, x: 0, y: 40 },
     ],
-    ["the doghouse row along the bottom", layout.dogRow, { height: 90, width: 360, x: 0, y: 470 }],
+    ["the card row along the bottom", layout.dogRow, { height: 90, width: 360, x: 0, y: 470 }],
     [
-      "three 120x90 doghouse slots in the row",
+      "three 120x86 cards on the row's bottom rows",
       layout.dogSlots,
       [
-        { height: 90, width: 120, x: 0, y: 470 },
-        { height: 90, width: 120, x: 120, y: 470 },
-        { height: 90, width: 120, x: 240, y: 470 },
+        { height: 86, width: 120, x: 0, y: 474 },
+        { height: 86, width: 120, x: 120, y: 474 },
+        { height: 86, width: 120, x: 240, y: 474 },
       ],
     ],
   ])("places %s", (_, actual, expected) => {

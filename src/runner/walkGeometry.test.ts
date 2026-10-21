@@ -7,7 +7,8 @@ import { screenLayout } from "../layout/screenLayout";
 import { walkerFootY, walkGeometry, walkProjection } from "./walkGeometry";
 
 const road = { height: 600, width: 280, x: 80, y: 40 };
-const flat = { visibleDistance: 594 };
+// A flat road whose far edge in view is the road's top row.
+const flat = { visibleDistance: walkerFootY(road) - road.y };
 
 describe("walkGeometry", () => {
   it("spans the road from the far edge in view to the bottom, the walker just above it", () => {

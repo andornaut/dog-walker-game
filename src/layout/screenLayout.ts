@@ -2,6 +2,7 @@ import type { Rect } from "./rect";
 
 export interface ScreenConfig {
   backdropHeight: number;
+  dogCardHeight: number;
   dogRowHeight: number;
   dogSlotCount: number;
   height: number;
@@ -11,14 +12,15 @@ export interface ScreenConfig {
   width: number;
 }
 
-// Top to bottom, each across the full width: the top bar, the backdrop band, the road and
-// the row of doghouses. roadView is the road as drawn, verges included; road is its lanes,
-// centred in it, which the walk, the lanes and the projection use. approach is the band's
-// bottom rows, where the backdrop paints the road's approach to its cross street: the moving
-// road surface is drawn over them, beside the backdrop's own verges. rasterView is the
+// Top to bottom, each across the full width: the walk bar (topBar), the backdrop band, the road
+// and the row of dog cards. dogSlots are the cards, dogCardHeight tall on the row's bottom
+// rows. roadView is the road as drawn, verges included; road is its lanes, centred in it,
+// which the walk, the lanes and the projection use. approach is the band's bottom rows, where
+// the backdrop paints the road's approach to its cross street: the moving road surface is
+// drawn over them, beside the backdrop's own verges. rasterView is the
 // approach and roadView together, which the road raster draws. walkView is the backdrop band
-// and roadView together, everything between the top bar and the doghouses, which a card or
-// the pause menu dims.
+// and roadView together, everything between the walk bar and the dog cards, which a card or the
+// pause menu dims.
 export interface ScreenLayout {
   approach: Rect;
   backdrop: Rect;
@@ -31,8 +33,8 @@ export interface ScreenLayout {
   walkView: Rect;
 }
 
-// The doghouse row has a fixed number of equal slots, so the slots keep their place however
-// many dogs are left.
+// The card row has a fixed number of equal slots, so the cards keep their place however many
+// dogs are left.
 export function screenLayout(config: ScreenConfig): ScreenLayout {
   const { backdropHeight, dogRowHeight, dogSlotCount, height, roadWidth, width } = config;
   const roadY = config.topBarHeight + backdropHeight;
@@ -46,10 +48,10 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
     backdrop,
     dogRow: { height: dogRowHeight, width, x: 0, y: dogRowY },
     dogSlots: Array.from({ length: dogSlotCount }, (_, i) => ({
-      height: dogRowHeight,
+      height: config.dogCardHeight,
       width: slotWidth,
       x: i * slotWidth,
-      y: dogRowY,
+      y: height - config.dogCardHeight,
     })),
     rasterView: { ...roadView, height: roadView.height + approach.height, y: approach.y },
     road: { ...roadView, width: roadWidth, x: (width - roadWidth) / 2 },
