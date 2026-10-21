@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../../assets/asepriteAnimations";
-import { AMBIENT_FALLBACKS, AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
+import { AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
 import type { AmbientMover, ZoneId } from "../../data/types";
 import type { Random } from "../../lib/random";
 import { clipToRoad, DEPTH, LAYOUT, PROJECTION } from "../../scenes/run/stage";
@@ -16,14 +16,8 @@ import {
   stepAmbient,
 } from "../ambient";
 
-// The sprites a mover may wear, one picked by its slot's look, and the tag they play while
-// moving: the mover's own when the sprites are its art, its fallback's otherwise.
-interface MoverArt {
-  readonly keys: readonly string[];
-  readonly tag: string | null;
-}
-
-const NO_ART: MoverArt = { keys: [], tag: null };
+// The sprites a mover may wear, one picked by its slot's look.
+const NO_ART: readonly string[] = [];
 
 // Band movers lie over the backdrop's approach, nearer rows in front; the rows add at most
 // this much to their depth, so they stay under the road.
@@ -35,7 +29,7 @@ const BAND_ROW_DEPTH = 1 / 10000;
 // one beside the road stands through the projection like the road's sprites, cut off at the
 // juncture.
 export class AmbientView {
-  private readonly arts = new Map<string, MoverArt>();
+  private readonly arts = new Map<string, readonly string[]>();
   private readonly deps: AmbientDeps;
   private frame: AmbientFrame | undefined;
   private readonly place = newPlace();
@@ -49,7 +43,7 @@ export class AmbientView {
       scene.add.sprite(0, 0, "__DEFAULT").setVisible(false),
     );
     this.deps = {
-      drawable: (mover) => this.art(mover).keys.length > 0,
+      drawable: (mover) => this.art(mover).length > 0,
       random,
       stage: { band: LAYOUT.backdrop, projection: PROJECTION },
     };
@@ -78,7 +72,7 @@ export class AmbientView {
     for (const [i, slot] of state.slots.entries()) {
       const sprite = this.sprites[i];
       const art = slot.mover === null ? NO_ART : this.art(slot.mover);
-      const key = art.keys[Math.floor(slot.look * art.keys.length)];
+      const key = art[Math.floor(slot.look * art.length)];
       const shown =
         slot.active &&
         key !== undefined &&
@@ -100,7 +94,7 @@ export class AmbientView {
       } else if (sprite.isCropped) {
         sprite.setCrop();
       }
-      this.animate(sprite, drawn.key, art.tag ?? slot.mover.tag, place.moving && !walk.halted);
+      this.animate(sprite, drawn.key, slot.mover.tag, place.moving && !walk.halted);
     }
   }
 
@@ -117,21 +111,14 @@ export class AmbientView {
     sprite.anims.pause();
   }
 
-  // The mover's own art and its variants that are loaded, else its fallback, else none.
-  private art(mover: AmbientMover): MoverArt {
+  // The mover's own art and its variants that are loaded.
+  private art(mover: AmbientMover): readonly string[] {
     const cached = this.arts.get(mover.key);
     if (cached !== undefined) {
       return cached;
     }
     const has = (key: string) => this.scene.textures.exists(key);
-    const own = [mover.key, ...(AMBIENT_VARIANTS[mover.key] ?? [])].filter(has);
-    const fallback = AMBIENT_FALLBACKS[mover.key];
-    const art =
-      own.length > 0
-        ? { keys: own, tag: null }
-        : fallback != null && has(fallback.key)
-          ? { keys: [fallback.key], tag: fallback.tag }
-          : NO_ART;
+    const art = [mover.key, ...(AMBIENT_VARIANTS[mover.key] ?? [])].filter(has);
     this.arts.set(mover.key, art);
     return art;
   }
