@@ -736,10 +736,10 @@ def depth(solid, x, y, r):
 
 # Each debuff's bar under the walk bar: its face, the empty track, the track's fill and the name's
 # colour. The name holds 4.5:1 or more on the face: ink on brown 4.66:1, white on mauve 4.70:1,
-# ink on sky 5.64:1.
+# ink on green 8.41:1. Zoomies is green so its bar never sits blue on a blue sky.
 DEBUFF_LOOKS = {
     "muddy": ("brown", "dbrown", "tan", "ink"), "stinky": ("mauve", "purple", "pink", "white"),
-    "zoomies": ("sky", "blue", "cyan", "ink"),
+    "zoomies": ("green", "forest", "yellow", "ink"),
 }
 DEBUFF_BAR = (360, 16)
 # The bar's track, in bar pixels: its ink frame, and the run the game fills inside it.
