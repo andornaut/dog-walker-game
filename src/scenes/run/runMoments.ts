@@ -9,6 +9,8 @@ import {
   endScreenDelayMs,
   FIRING_EVENT,
   type FiringCue,
+  FORGIVEN_EVENT,
+  type ForgivenCue,
   PAYOUT_EVENT,
   type PayoutCue,
   payoutFlights,
@@ -21,13 +23,21 @@ import {
   debuffChanges,
   debuffLines,
   firedLine,
+  forgivenLines,
   fullPackLine,
   lowHeartsLines,
   luckyLine,
   pullLine,
   treatLine,
 } from "../../hud/stripLines";
-import { amountText, type Change, type MoneyChange } from "../../rules/causes";
+import {
+  amountText,
+  type Change,
+  changeAmount,
+  type HeartChange,
+  heartsForgiven,
+  type MoneyChange,
+} from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
 import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
@@ -50,7 +60,7 @@ import type { RunResult } from "../../save/checkpoint";
 import type { RunState } from "../../state/runState";
 import { hitLabelOf, playHitMoment, playMinorHitLabel } from "../hitMoment";
 import { sayMessage } from "../messageStripView";
-import { playBump, playDodge } from "../packFeedback";
+import { playBump, playDodge, playForgiven } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
@@ -144,11 +154,31 @@ export class RunMoments {
     return delayMs;
   }
 
+  // The changes' labels, and each loss the walker's perk forgave: its strip line, the forgiven
+  // label over its dog and the forgiven heart flashing back on its card.
   addChanges(changes: readonly Change[]): void {
     this.changes.push(...changes);
     const labels = changeLabels(gameData, changes);
     if (labels.length > 0) {
       this.scene.events.emit(CHANGE_LABELS_EVENT, labels);
+    }
+    forgivenLines(gameData, changes).forEach((line) => this.say(line));
+    for (const change of changes) {
+      if (change.kind === "hearts" && heartsForgiven(change) > 0) {
+        this.forgiven(change);
+      }
+    }
+  }
+
+  private forgiven(change: HeartChange): void {
+    const top = this.deps.pack.dogPoint(change.dog);
+    if (top !== undefined) {
+      const moment = { depth: DEPTH.fx, still: this.deps.still() };
+      playForgiven(this.scene, moment, { popped: changeAmount(change) !== 0, top });
+    }
+    if (change.after > 0) {
+      const cue: ForgivenCue = { dog: change.dog, hearts: change.after };
+      this.scene.events.emit(FORGIVEN_EVENT, cue);
     }
   }
 

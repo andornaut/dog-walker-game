@@ -14,9 +14,11 @@ export interface ChangeLabel {
 }
 
 // One label per change, naming its causes ("−2 ♥, dramatic", "+$2 tip, Big tipper"): a heart
-// change over its dog's slot, a money change over the bank.
+// change over its dog's slot, a money change over the bank. A heart change that nets nothing,
+// a loss forgiven whole, has none: its forgiven moment shows it.
 export function changeLabels(data: CauseData, changes: readonly Change[]): ChangeLabel[] {
-  return changes.map((change): ChangeLabel => ({
+  const shown = changes.filter((change) => change.kind === "money" || changeAmount(change) !== 0);
+  return shown.map((change): ChangeLabel => ({
     amount: changeAmount(change),
     cause: causeNames(data, change).join(", "),
     gain: changeAmount(change) > 0,

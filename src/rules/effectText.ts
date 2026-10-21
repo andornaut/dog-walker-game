@@ -231,12 +231,15 @@ export type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 // money effect's total for the dogs it counts, after modifiers.
 export interface CardTextContext {
   readonly dogs: (target: Target) => readonly DogId[];
+  // Whether the walker's perk, such as Kind words, would forgive the dog's owner's loss.
+  readonly forgiven: (dog: DogId) => boolean;
   readonly money: (effect: MoneyEffect) => Cents;
   // How long a debuff would last on this walk.
   readonly seconds: (debuff: DebuffId) => number;
 }
 
-// Each owner's change by their dog's name: "−1 ♥ Duchess, −1 ♥ Koda".
+// Each owner's change by their dog's name, a loss the walker's perk would forgive saying so:
+// "−1♥ Duchess, forgiven, −1♥ Koda".
 function cardHeartsText(
   data: CardTextData,
   context: CardTextContext,
@@ -245,8 +248,14 @@ function cardHeartsText(
   if (effect.target.kind === "randomOne") {
     return heartsText(effect);
   }
-  const change = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
-  const names = context.dogs(effect.target).map((id) => `${change} ${data.dogs[id].name}`);
+  const hearts = String(Math.abs(effect.amount));
+  const change = `${sign(effect.amount)}${hearts}♥`;
+  const names = context.dogs(effect.target).map((id) => {
+    const dog = data.dogs[id].name;
+    return effect.amount < 0 && context.forgiven(id)
+      ? fillNames(data.runText.card.heartForgiven, { dog, hearts })
+      : `${change} ${dog}`;
+  });
   return names.length === 0 ? undefined : names.join(", ");
 }
 

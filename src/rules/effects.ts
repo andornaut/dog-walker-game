@@ -126,8 +126,9 @@ export function moneyCost(
 }
 
 // Changes one owner's meter by the sum of causes, held within 0 and the dog's max. A loss is
-// cut by the hearts forgivenHearts modifiers, such as Kind words', still forgive this zone. No
-// change is reported when the meter does not move, or for a loss in an invincible run.
+// cut by the hearts forgivenHearts modifiers, such as Kind words', still forgive this zone, and
+// a forgiven loss is reported even when the meter does not move, so its forgiving shows. No
+// other change is reported when the meter does not move, nor a loss in an invincible run.
 export function changeHearts(
   data: Pick<GameData, "dogs" | "tuning">,
   given: readonly [Cause, ...Cause[]],
@@ -138,15 +139,15 @@ export function changeHearts(
   if (before === undefined) {
     return { change: null, state };
   }
+  if (state.invincible === true && given.reduce((sum, cause) => sum + cause.amount, 0) < 0) {
+    return { change: null, state };
+  }
   const forgiven = forgivenCause(data, given, state);
   const causes: Cause[] = forgiven === null ? [...given] : [...given, forgiven];
   const total = causes.reduce((sum, cause) => sum + cause.amount, 0);
-  if (total < 0 && state.invincible === true) {
-    return { change: null, state };
-  }
   const unclamped = before + total;
   const after = clampHearts(maxHearts(data.tuning, state.modifiers, data.dogs[dogId]), unclamped);
-  if (after === before) {
+  if (after === before && forgiven === null) {
     return { change: null, state };
   }
   if (after !== unclamped) {

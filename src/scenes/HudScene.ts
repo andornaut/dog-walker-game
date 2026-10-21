@@ -18,6 +18,7 @@ import { runHintTriggers } from "../hud/hintTriggers";
 import { type HudLanes, hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
+import { FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
 import {
   buttonIcon,
@@ -280,6 +281,7 @@ export class HudScene extends Scene {
     onSceneEvent(this, run.events, CHANGE_LABELS_EVENT, (labels: ChangeLabel[]) =>
       this.floatLabels(labels),
     );
+    onSceneEvent(this, run.events, FORGIVEN_EVENT, (cue: ForgivenCue) => this.forgive(cue));
     onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.sayHint(hint));
     onSceneEvent(this, run.events, MESSAGE_EVENT, ({ icon, text }: MessageLine) =>
       this.messages.say(icon, text),
@@ -771,6 +773,21 @@ export class HudScene extends Scene {
       if (label.target.kind === "dog") {
         this.popOwner(label.target.dog, label.gain ? "happy" : "upset", HEART_TAB_MS);
       }
+    }
+  }
+
+  // The heart a forgiven loss left on its owner's card, the last of their hearts, flashes back.
+  private forgive(cue: ForgivenCue): void {
+    const slot = this.slotOf(cue.dog);
+    const rect = slot === undefined ? undefined : LAYOUT.dogSlots[slot];
+    const run = this.runScene().hudView()?.run;
+    if (rect === undefined || run === undefined) {
+      return;
+    }
+    const max = maxHearts(gameData.tuning, run.modifiers, gameData.dogs[cue.dog]);
+    const cell = cardHearts(cue.hearts, max)[cue.hearts - 1];
+    if (cell !== undefined) {
+      this.hearts?.forgive({ x: rect.x + cell.x, y: rect.y + cell.y });
     }
   }
 

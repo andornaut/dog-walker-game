@@ -80,6 +80,17 @@ export function dollarCauses(causes: readonly Cause[]): Cause[] {
   });
 }
 
+// The hearts of a loss the walker's perk, such as Kind words, forgave: 0 for none.
+export function heartsForgiven(change: HeartChange): number {
+  return change.causes.reduce(
+    (sum, cause) =>
+      cause.kind === "modifier" && cause.source.kind === "walker" && cause.amount > 0
+        ? sum + cause.amount
+        : sum,
+    0,
+  );
+}
+
 export function changeAmount(change: Change): number {
   return change.kind === "hearts" ? change.after - change.before : change.amount;
 }

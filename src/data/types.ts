@@ -614,7 +614,11 @@ export interface RunText {
     readonly forkFees: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
+    // The plaque of an option that costs no money.
     readonly free: string;
+    // A dog's heart loss Kind words would forgive, in an option's text.
+    readonly heartForgiven: string;
+    // A money option's plaque, with its price.
     readonly need: string;
     readonly pickOne: string;
     readonly skip: string;
@@ -639,6 +643,8 @@ export interface RunText {
   };
   readonly fired: string;
   readonly firedBy: string;
+  // Over a dog whose owner's heart loss Kind words forgave.
+  readonly forgiven: string;
   // The end screen's line when every dog set out with got home after the last zone.
   readonly fullPackHome: string;
   // keep is what going home keeps (the walk's money so far), lose the fees the current zone

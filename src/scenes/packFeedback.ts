@@ -2,7 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
-import { FEEDBACK, type LabelAnchor } from "../hud/feedback";
+import { FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
 import { COMIC_WORDS } from "../layout/comicWords";
 import type { Point } from "../layout/rect";
 import { letterEffect } from "./comicWord";
@@ -42,6 +42,20 @@ export function playDodge(scene: Scene, moment: PackMoment, dog: GameObjects.Spr
   const top = dog.getTopCenter();
   const anchor = { centreX: top.x, lineBottom: top.y - 2 };
   floatLabel(scene, moment, anchor, gameData.runText.dodge, PALETTE.plum, FEEDBACK.dodge);
+}
+
+// A loss the walker's perk forgave: the forgiven label rising over the dog, from its top
+// opaque row, or from over the heart pop when part of the loss still costs a heart.
+export function playForgiven(
+  scene: Scene,
+  moment: PackMoment,
+  dog: { readonly popped: boolean; readonly top: Point },
+): void {
+  const { popped, top } = dog;
+  const lineBottom = (popped ? heartPopFrame(top).y : top.y) - 2;
+  const anchor = { centreX: top.x, lineBottom };
+  const { forgiven } = FEEDBACK;
+  floatLabel(scene, moment, anchor, gameData.runText.forgiven, PALETTE.forest, forgiven);
 }
 
 // A plain hit's fx-bump over the dog it landed on.

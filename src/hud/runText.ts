@@ -21,6 +21,7 @@ export const RUN_TEXT_FIELDS = {
   card: {
     fires: ["owners"],
     forkFees: ["fees"],
+    heartForgiven: ["dog", "hearts"],
     need: ["amount"],
   },
   explain: {

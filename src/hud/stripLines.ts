@@ -1,5 +1,5 @@
 import type { DebuffId, DogId, EncounterId, GameData } from "../data/types";
-import { type Change, type HeartChange, type MoneyChange } from "../rules/causes";
+import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
 import { cents } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
@@ -23,15 +23,9 @@ function line<K extends StripKey>(
 
 const ownerOf = (data: StripData, dog: DogId) => data.dogs[dog].owner.name;
 
-// Whether a loss was forgiven in part by the walker's perk, such as Kind words.
-function forgiven(change: HeartChange): boolean {
-  return change.causes.some(
-    (cause) => cause.kind === "modifier" && cause.source.kind === "walker" && cause.amount > 0,
-  );
-}
-
-// A plain obstacle that landed on dog: a dodge, a loss forgiven by Kind words, or the hearts its
-// owner lost. obstacle is the obstacle's name. A bump that cost nothing to say about says nothing.
+// A plain obstacle that landed on dog: a dodge, or the hearts its owner lost. obstacle is the
+// obstacle's name. A bump that cost nothing, such as one Kind words forgave whole, says nothing:
+// forgivenLines says the forgiving.
 export function bumpLine(
   data: StripData,
   bump: { readonly change: HeartChange | null; readonly dodged: boolean; readonly dog: DogId },
@@ -43,18 +37,24 @@ export function bumpLine(
     return { icon: "bump", text: line(data, "dodge", { dog, obstacle: name }) };
   }
   const { change } = bump;
-  if (change === null) {
+  if (change === null || change.after === change.before) {
     return null;
   }
   const owner = ownerOf(data, bump.dog);
-  if (forgiven(change)) {
-    return { icon: "hint", text: line(data, "kindWords", { owner }) };
-  }
   const hearts = String(change.before - change.after);
   return {
     icon: "bump",
     text: line(data, "plainHit", { dog, hearts, obstacle: name, owner }),
   };
+}
+
+// Each owner whose loss the walker's perk, such as Kind words, forgave.
+export function forgivenLines(data: StripData, changes: readonly Change[]): MessageLine[] {
+  return changes.flatMap((change): MessageLine[] =>
+    change.kind === "hearts" && heartsForgiven(change) > 0
+      ? [{ icon: "hint", text: line(data, "kindWords", { owner: ownerOf(data, change.dog) }) }]
+      : [],
+  );
 }
 
 // A treat that raised its owner's hearts; one at their max says nothing.

@@ -2,10 +2,13 @@ import { type Point, type Rect, rectsOverlap } from "../layout/rect";
 import { type Cents, cents } from "../rules/units";
 import { signedText } from "../text/lines";
 
-// The heart change and dodge moments' timings, in ms, and offsets, in pixels.
+// The heart change, dodge and forgiven moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {
   // The dodge label rises rise pixels and fades over ms.
   dodge: { ms: 900, rise: 10 },
+  // The forgiven label rises and fades as the dodge label does, while the forgiven heart on the
+  // dog's card blinks empty and back blinks times, blinkMs a step.
+  forgiven: { blinkMs: 120, blinks: 3, ms: 900, rise: 10 },
   // A heart flies into its card over flyMs, peaking peak pixels above its higher end; a
   // dog's later change in one batch starts staggerMs after the one before. The card shakes
   // by shakeDx, one step a frame of its flash.

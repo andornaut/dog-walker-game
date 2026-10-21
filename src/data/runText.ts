@@ -9,6 +9,7 @@ export const RUN_TEXT = {
     forkSubtitle: "Each path brings an upgrade",
     forkTitle: "Which way?",
     free: "",
+    heartForgiven: "−{hearts}♥ {dog}, forgiven",
     need: "{amount}",
     pickOne: "Pick one",
     skip: "Walk on by",
@@ -25,6 +26,7 @@ export const RUN_TEXT = {
   },
   fired: "FIRED!",
   firedBy: "{owner} fired you!",
+  forgiven: "Forgiven!",
   fullPackHome: "Full pack home! +{amount}",
   homeQuestion: {
     headHome: "Head home",

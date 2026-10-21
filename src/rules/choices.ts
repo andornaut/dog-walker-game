@@ -22,6 +22,7 @@ import {
   type Change,
   firedByText,
   type HeartChange,
+  heartsForgiven,
   type MoneyChange,
 } from "./causes";
 import { debuffLasting } from "./durations";
@@ -307,19 +308,21 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
   const skip =
     data.encounters[source.encounter].kind === "obstacle" && state.skipPass && !state.skipUsed;
   const views = options.map(({ option, source: effectSource }, index): OptionView => {
-    const textContext: CardTextContext = {
-      dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
-      money: (effect) => moneyAmount(data, { affected }, state, effect),
-      seconds: (debuff) =>
-        debuffLasting(data.tuning, data.debuffs[debuff].seconds, state).secondsLeft,
-    };
-    const cost = moneyCost(data, { affected }, state, option.effects);
     const preview = outcomeOf(
       data,
       { affected, random: () => 0, source: effectSource },
       option.effects,
       state,
     );
+    const textContext: CardTextContext = {
+      dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
+      forgiven: (dog) =>
+        preview.heartChanges.some((change) => change.dog === dog && heartsForgiven(change) > 0),
+      money: (effect) => moneyAmount(data, { affected }, state, effect),
+      seconds: (debuff) =>
+        debuffLasting(data.tuning, data.debuffs[debuff].seconds, state).secondsLeft,
+    };
+    const cost = moneyCost(data, { affected }, state, option.effects);
     return {
       art: option.art,
       availability:

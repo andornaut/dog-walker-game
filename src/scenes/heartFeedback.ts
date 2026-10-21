@@ -19,7 +19,7 @@ import { FEEDBACK_ART } from "./feedbackArt";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import type { RunScene } from "./RunScene";
-import { playTagOnce } from "./sprites";
+import { playEffect, playTag, playTagOnce } from "./sprites";
 
 // Over the cards and the HUD's own labels.
 const DEPTH = 60;
@@ -27,6 +27,9 @@ const DEPTH = 60;
 const CHIP_PAD = 2;
 // A dog not on the road pops this far over its card.
 const OVER_CARD = 8;
+// A forgiven heart blinks this empty heart over itself, under the pickup's 16x16 sparkle.
+const FORGIVEN_HEART = { key: "ui-heart", tag: "empty-dark" } as const;
+const SPARKLE = { key: "fx-sparkle", tag: "play" } as const;
 
 // One heart change to show: its label, the top of its dog on the road, its card's sprite
 // and the parts that shake with it, and the band its label lands on.
@@ -84,6 +87,24 @@ export class HeartFeedback {
     } else {
       this.show(pop);
     }
+  }
+
+  // A heart forgiven on its card, its 8x7 cell's top-left at: the heart blinks empty and back
+  // under a sparkle, reduced motion keeping both. Without the heart's art, the sparkle alone.
+  forgive(at: Point): void {
+    playEffect(this.scene, SPARKLE.key, SPARKLE.tag, { x: at.x + 4, y: at.y + 3 }, DEPTH);
+    if (!this.scene.anims.exists(animationKey(FORGIVEN_HEART.key, FORGIVEN_HEART.tag))) {
+      return;
+    }
+    const empty = this.scene.add.sprite(at.x, at.y, FORGIVEN_HEART.key).setOrigin(0);
+    playTag(empty.setDepth(DEPTH), FORGIVEN_HEART.key, FORGIVEN_HEART.tag);
+    const { blinkMs, blinks } = FEEDBACK.forgiven;
+    this.scene.time.addEvent({
+      callback: () => empty.setVisible(!empty.visible),
+      delay: blinkMs,
+      repeat: 2 * blinks - 2,
+    });
+    this.scene.time.delayedCall(blinkMs * (2 * blinks - 1), () => empty.destroy());
   }
 
   // Lands at once every pop whose way crosses what must stay clear, such as a firing moment

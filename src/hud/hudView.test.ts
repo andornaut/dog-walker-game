@@ -70,6 +70,20 @@ describe("changeLabels", () => {
     ]);
   });
 
+  it("labels no heart change that nets nothing, such as a loss forgiven whole", () => {
+    const forgiven = {
+      after: clampHearts(10, 5),
+      before: clampHearts(10, 5),
+      causes: [
+        { amount: -1, kind: "bump" },
+        { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
+      ],
+      dog: "koda",
+      kind: "hearts",
+    } as const;
+    expect(changeLabels(gameData, [forgiven])).toEqual([]);
+  });
+
   it("has no labels without changes, and marks a loss at the bank as no gain", () => {
     expect(changeLabels(gameData, [])).toEqual([]);
     const bump = {

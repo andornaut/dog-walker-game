@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
+import { TUNING } from "../data/tuning";
 import type { DogId, Effect } from "../data/types";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
@@ -89,6 +90,50 @@ describe("resolveEffects: changes and their causes", () => {
     const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
     const { changes } = resolveEffects(data, context([]), [gainOne], testState({ duchess: 6 }));
     expect(changes).toEqual([]);
+  });
+
+  describe("Kind words", () => {
+    const tuning = TUNING;
+    const allowance = read(tuning, "hearts", "kindWordsForgiven");
+    const source = { kind: "walker", walker: "casey" } as const;
+    const kindWords = activeModifier(source, {
+      by: "kindWordsForgiven",
+      operation: "add",
+      stat: "forgivenHearts",
+    });
+    const lose = (amount: 1 | 2): Effect => ({
+      amount: amount === 1 ? -1 : -2,
+      kind: "hearts",
+      target: { kind: "all" },
+    });
+
+    it.each([1, 2] as const)(
+      "forgives up to its allowance of a %i♥ loss, reporting it when nothing is lost",
+      (loss) => {
+        const forgiven = Math.min(loss, allowance);
+        const state = testState({ koda: 5 }, { modifiers: [kindWords] });
+        const applied = resolveEffects({ ...data, tuning }, context([]), [lose(loss)], state);
+        expect(applied.changes).toEqual([
+          {
+            after: 5 - loss + forgiven,
+            before: 5,
+            causes: [
+              { amount: -loss, kind: "effect", source: SKUNK_IGNORE },
+              { amount: forgiven, kind: "modifier", source },
+            ],
+            dog: "koda",
+            kind: "hearts",
+          },
+        ]);
+        expect(applied.state.heartsForgiven).toBe(forgiven);
+      },
+    );
+
+    it("forgives no more once its allowance is used this zone", () => {
+      const used = testState({ koda: 5 }, { heartsForgiven: allowance, modifiers: [kindWords] });
+      const { changes } = resolveEffects({ ...data, tuning }, context([]), [lose(1)], used);
+      expect(changes.map((change) => change.causes.length)).toEqual([1]);
+    });
   });
 
   it("waives a free card's cost, naming Sweet talker, and makes no money change", () => {

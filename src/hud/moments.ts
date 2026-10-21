@@ -6,8 +6,9 @@ import type { ChangeLabel } from "./hudView";
 import { DOG_CARD, OWNER_TAB, WALK_BAR } from "./walkHud";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
-// zone's pay banked, and a treat grabbed.
+// heart forgiven, a zone's pay banked, and a treat grabbed.
 export const FIRING_EVENT = "firing";
+export const FORGIVEN_EVENT = "heart-forgiven";
 export const PAYOUT_EVENT = "payout";
 export const TREAT_EVENT = "treat-grabbed";
 
@@ -16,6 +17,13 @@ export interface FiringCue {
   dog: DogId;
   line: string;
   seconds: number;
+}
+
+// A loss the walker's perk forgave on dog's owner: hearts is what the owner has after it, the
+// last of them the heart forgiven.
+export interface ForgivenCue {
+  dog: DogId;
+  hearts: number;
 }
 
 // One dog's fee, with its change label's text.

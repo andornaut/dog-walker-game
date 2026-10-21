@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, EncounterId } from "../data/types";
+import { CARD_LAYOUT } from "../layout/cardLayout";
 import type { CardSource } from "../state/runState";
-import { testState } from "../testing/runState";
+import { BODY_LINE_HEIGHT } from "../testing/bodyFont";
+import { fitInFont } from "../testing/fontInk";
+import { activeModifier, testState } from "../testing/runState";
+import { fillNames } from "../text/lines";
+import { plainMarks } from "../ui/pixelFont";
 import { cardFor } from "./choices";
-import { cents, dollarsToCents } from "./units";
+import { cents, dollarsToCents, read } from "./units";
 
 const PACK: readonly DogId[] = ["koda", "duchess", "nugget"];
 const state = testState({ duchess: 5, koda: 5, nugget: 5 }, { money: cents(10_000) });
@@ -67,6 +72,48 @@ describe("a card's text for the dogs it catches", () => {
     const view = option(encounter(row.id, row.affected), row.label);
     expect(view.cost).toBe(dollarsToCents(row.dollars));
     expect(view.text).toBe(`−$${row.dollars}`);
+  });
+
+  describe("with Kind words", () => {
+    const kindWords = activeModifier(
+      { kind: "walker", walker: "casey" },
+      { by: "kindWordsForgiven", operation: "add", stat: "forgivenHearts" },
+    );
+    const allowance = read(gameData.tuning, "hearts", "kindWordsForgiven");
+    const forgiven = (dog: DogId) =>
+      fillNames(gameData.runText.card.heartForgiven, { dog: gameData.dogs[dog].name, hearts: "1" });
+
+    it.each([
+      ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["koda"], -1)}`],
+      ["nothing forgiven once Kind words is used", allowance, heartsText(["duchess", "koda"], -1)],
+    ])("says %s", (_, used, text) => {
+      const kind = testState(
+        { duchess: 5, koda: 5 },
+        { heartsForgiven: used, modifiers: [kindWords] },
+      );
+      const source = encounter("thief", ["duchess", "koda"]);
+      const view = cardFor(gameData, kind, source).options.find(
+        ({ label }) => label === "Chase them off",
+      );
+      expect(view?.text).toBe(text);
+    });
+
+    // The small card's effect, in the body font at 2x on the lines its height holds, else 1x.
+    const { effect } = CARD_LAYOUT;
+    const styles = [2, 1].map((scale) => ({
+      letterSpacing: 0,
+      lines: Math.floor(effect.height / (BODY_LINE_HEIGHT * scale)),
+      scale,
+    }));
+
+    it.each(Object.keys(gameData.dogs) as DogId[])(
+      "fits %s's forgiven loss in a card's effect",
+      (dog) => {
+        const fitted = fitInFont("font-body", styles, effect.width, plainMarks(forgiven(dog)));
+        expect(fitted.widest).toBeLessThanOrEqual(effect.width);
+        expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
+      },
+    );
   });
 
   it("matches the snapshot for the whole pack caught", () => {

@@ -10,6 +10,7 @@ import {
   debuffChanges,
   debuffLines,
   firedLine,
+  forgivenLines,
   fullPackLine,
   lowHeartsLines,
   luckyLine,
@@ -33,6 +34,11 @@ const hearts = (
   kind: "hearts",
 });
 
+const forgivenLoss = hearts(4, 4, [
+  { amount: -1, kind: "bump" },
+  { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
+]);
+
 describe("bumpLine", () => {
   it.each([
     [
@@ -46,19 +52,25 @@ describe("bumpLine", () => {
       fillNames(strip.plainHit, { dog: koda.name, hearts: "2", obstacle: "cone", owner }),
     ],
     [
-      "a loss Kind words forgave",
+      "the hearts still lost past Kind words",
       {
-        change: hearts(4, 4, [
-          { amount: -1, kind: "bump" },
+        change: hearts(4, 3, [
+          { amount: -2, kind: "bump" },
           { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
         ]),
         dodged: false,
         dog: "koda" as const,
       },
-      fillNames(strip.kindWords, { owner }),
+      fillNames(strip.plainHit, { dog: koda.name, hearts: "1", obstacle: "cone", owner }),
     ],
   ])("says %s", (_, bump, text) => {
     expect(bumpLine(gameData, bump, "Cone")?.text).toBe(text);
+  });
+
+  it("says nothing of a loss Kind words forgave whole: its forgiven line says it", () => {
+    expect(bumpLine(gameData, { change: forgivenLoss, dodged: false, dog: "koda" }, "Cone")).toBe(
+      null,
+    );
   });
 });
 
@@ -107,6 +119,11 @@ describe("the strip's other lines", () => {
       fillNames(strip.fullPackHome, { amount: "$30" }),
     ],
     ["no bonus without one", fullPackLine(gameData, []), null],
+    [
+      "Kind words for a forgiven loss, and nothing for a plain one",
+      forgivenLines(gameData, [forgivenLoss, hearts(4, 3, [{ amount: -1, kind: "bump" }])]),
+      [{ icon: "hint", text: fillNames(strip.kindWords, { owner }) }],
+    ],
   ])("says %s", (_, line, expected) => {
     expect(line).toEqual(expected);
   });
