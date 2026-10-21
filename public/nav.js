@@ -1,6 +1,6 @@
-// The site navigation bar: Home, Play, Data, the art gallery, the open mocks (/art/mocks/, which
-// lists each page in /art/mocks/index.json), the repository on GitHub and the project's Cloudflare dashboard. Every
-// link is a page on this site, the root of an external site, or this project's dashboard. A page loads it with
+// The site navigation bar: Home, Play, Data, the art gallery, the repository on GitHub and the
+// project's Cloudflare dashboard. Every link is a page on this site, the root of an external
+// site, or this project's dashboard. A page loads it with
 // <link rel="stylesheet" href="/nav.css"> and <script src="/nav.js" defer></script> in its head
 // and adds nothing else. The page links the stylesheet, rather than this script injecting it, so
 // the bar's style blocks the first paint and the CSP's 'self' covers it. On /play/ the bar is one
@@ -23,15 +23,12 @@
   const ul = document.createElement("ul");
   nav.append(ul);
 
-  // within: also current on the pages under href, so Mocks stays marked on each mock.
-  const item = (text, href, within = false) => {
+  const item = (text, href) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.textContent = text;
     a.href = href;
-    const at = norm(href);
-    if (at === here || (within && here.startsWith(at + "/")))
-      a.setAttribute("aria-current", "page");
+    if (norm(href) === here) a.setAttribute("aria-current", "page");
     li.append(a);
     return li;
   };
@@ -41,7 +38,6 @@
     item("Play", "/play/"),
     item("Data", "/data/"),
     item("Gallery", "/art/"),
-    item("Mocks", "/art/mocks/", true),
     item("GitHub", REPO),
     item("Cloudflare", DASHBOARD),
   );
