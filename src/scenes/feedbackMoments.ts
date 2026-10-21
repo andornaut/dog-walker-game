@@ -78,12 +78,12 @@ interface FiredLine {
   text: string;
 }
 
-// The callbacks the HUD gives the moments: floatLabels shows change labels, firingShown runs
-// once a firing moment is on screen, and popOwner pops a dog's owner in on its card, in a mood,
-// for ms.
+// The callbacks the HUD gives the moments: floatLabels shows change labels, popping a heart
+// change's owner in for ownerMs, firingShown runs once a firing moment is on screen, and
+// popOwner pops a dog's owner in on its card, in a mood, for ms.
 export interface HudFeedbackHooks {
   firingShown: () => void;
-  floatLabels: (labels: ChangeLabel[]) => void;
+  floatLabels: (ownerMs: number, labels: ChangeLabel[]) => void;
   popOwner: (dog: DogId, mood: string, ms: number) => void;
 }
 
@@ -546,9 +546,10 @@ export class HudFeedback {
   // A treat grabbed pops over the dog's face on its card, the owner pops in smiling and the
   // heart label floats.
   private playTreat(cue: TreatCue): void {
+    const { smileMs } = MOMENTS.treat;
     const rect = this.slotOf(cue.dog);
     if (rect === undefined) {
-      this.hooks.floatLabels(cue.labels);
+      this.hooks.floatLabels(smileMs, cue.labels);
       return;
     }
     const half = FACE.size / 2;
@@ -556,8 +557,8 @@ export class HudFeedback {
     const at = { x: rect.x + dogFace.x + half, y: rect.y + dogFace.y + half };
     const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
     playEffect(this.scene, key, TREAT_POP.tag, at, DEPTH);
-    this.hooks.popOwner(cue.dog, "happy", MOMENTS.treat.smileMs);
-    this.hooks.floatLabels(cue.labels);
+    this.hooks.popOwner(cue.dog, "happy", smileMs);
+    this.hooks.floatLabels(smileMs, cue.labels);
   }
 
   // A card whose owner is on their last heart wears the warning rim, pulsing (static with

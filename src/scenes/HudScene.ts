@@ -267,7 +267,7 @@ export class HudScene extends Scene {
         this.hearts?.clearWay();
         this.owners?.clearUnder(firingRects());
       },
-      floatLabels: (labels) => this.floatLabels(labels),
+      floatLabels: (ownerMs, labels) => this.floatLabels(ownerMs, labels),
       popOwner: (dog, mood, ms) => this.popOwner(dog, mood, ms),
     });
     this.hearts = new HeartFeedback(this, {
@@ -280,7 +280,7 @@ export class HudScene extends Scene {
       this.sayAchievements(ids),
     );
     onSceneEvent(this, run.events, CHANGE_LABELS_EVENT, (labels: ChangeLabel[]) =>
-      this.floatLabels(labels),
+      this.floatLabels(HEART_TAB_MS, labels),
     );
     onSceneEvent(this, run.events, FORGIVEN_EVENT, (cue: ForgivenCue) => this.forgive(cue));
     onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.sayHint(hint));
@@ -782,8 +782,9 @@ export class HudScene extends Scene {
 
   // Each change shows in its lane and fades out: a money change in the bank lane (one at a
   // time); a heart change pops over its dog and flies into its card (heartFeedback.ts), its
-  // label then fading in place on the card's bottom rows, while its owner pops in on the card.
-  private floatLabels(labels: ChangeLabel[]): void {
+  // label then fading in place on the card's bottom rows, while its owner pops in on the card
+  // for ownerMs.
+  private floatLabels(ownerMs: number, labels: ChangeLabel[]): void {
     const run = this.walk();
     this.bankLabels.push(...labels.filter((label) => label.target.kind === "bank"));
     if (!this.bankShowing) {
@@ -796,7 +797,7 @@ export class HudScene extends Scene {
     pops.forEach((pop) => this.hearts?.play(pop));
     for (const label of labels) {
       if (label.target.kind === "dog") {
-        this.popOwner(label.target.dog, label.gain ? "happy" : "upset", HEART_TAB_MS);
+        this.popOwner(label.target.dog, label.gain ? "happy" : "upset", ownerMs);
       }
     }
   }

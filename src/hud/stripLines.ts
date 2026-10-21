@@ -6,6 +6,7 @@ import { cents } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
 import { fillLine, fillNames } from "../text/lines";
 import type { MessageLine } from "./messageStrip";
+import { MOMENTS } from "./moments";
 import { STRIP_LINE_FIELDS } from "./runText";
 
 // The message strip's lines for what just happened on the road, from the walk's events.
@@ -77,7 +78,9 @@ export function treatLine(data: StripData, change: HeartChange | null): MessageL
 // Each walking owner a change left on their last heart.
 export function lowHeartsLines(data: StripData, changes: readonly Change[]): MessageLine[] {
   return changes.flatMap((change): MessageLine[] =>
-    change.kind === "hearts" && change.after === 1 && change.before > 1
+    change.kind === "hearts" &&
+    change.after === MOMENTS.lowHearts &&
+    change.before > MOMENTS.lowHearts
       ? [{ icon: "lastHeart", text: line(data, "lowHearts", { owner: ownerOf(data, change.dog) }) }]
       : [],
   );
@@ -96,7 +99,7 @@ export function muddyHeartsLines(
   const cost = bumpHearts(data, run);
   return changes.flatMap((change): MessageLine[] =>
     change.kind === "hearts" &&
-    change.after > 1 &&
+    change.after > MOMENTS.lowHearts &&
     change.after <= cost &&
     change.before > change.after
       ? [
