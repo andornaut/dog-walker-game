@@ -5,7 +5,7 @@ import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { END_LAYOUT, endPanelLayout } from "../home/endLayout";
+import { END_LAYOUT, endPanelLayout, QUIP_TEXT_ROOM } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
 import { dollarText, signedDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
@@ -200,9 +200,10 @@ export class EndScene extends Scene {
         ? fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner })
         : owner;
       const name = title(QUIPS.textX, row + 5, header, line.fired ? PALETTE.darkRed : PALETTE.plum);
-      const room = QUIPS.bubble.x + QUIPS.bubble.width - 6 - QUIPS.textX;
-      fitPixelText(name, { room, styles: TEXT_FIT_STYLES }, QUIPS.textX, row + 5);
-      text(QUIPS.textX, row + 22, line.text, PALETTE.plum);
+      const fit = { room: QUIP_TEXT_ROOM, styles: TEXT_FIT_STYLES };
+      fitPixelText(name, fit, QUIPS.textX, row + 5);
+      const quip = text(QUIPS.textX, row + 22, line.text, PALETTE.plum);
+      fitPixelText(quip, fit, QUIPS.textX, row + 22);
     });
 
     if (celebrating) {

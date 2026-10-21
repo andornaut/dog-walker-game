@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { END_LAYOUT, endPanelLayout } from "./endLayout";
+import { fittingTextStyle, TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { bodyTextWidth } from "../testing/bodyFont";
+import { END_LAYOUT, endPanelLayout, QUIP_TEXT_ROOM } from "./endLayout";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
 
@@ -22,5 +25,20 @@ describe("endPanelLayout", () => {
     expect(panel.y + panel.height).toBe(lastBubble + 8);
     expect(panel.height).toBeLessThanOrEqual(most.height);
     expect(panel.y + panel.height).toBeLessThanOrEqual(badges.y);
+  });
+});
+
+// The end screen closes on each owner's fired or happier line, in the body font.
+describe("an owner's closing line", () => {
+  // Glyph advances, letterSpacing font pixels apart, at the style's scale.
+  const width = (text: string) => (style: TextFitStyle) =>
+    bodyTextWidth(style.scale, text) + style.letterSpacing * style.scale * (text.length - 1);
+  const longest = Object.values(gameData.quips)
+    .flatMap(({ fired, happier }) => [...fired, ...happier])
+    .reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
+
+  it("fits the longest line inside its bubble", () => {
+    const style = fittingTextStyle(TEXT_FIT_STYLES, width(longest), QUIP_TEXT_ROOM);
+    expect(width(longest)(style)).toBeLessThanOrEqual(QUIP_TEXT_ROOM);
   });
 });

@@ -53,6 +53,11 @@ export const END_LAYOUT = {
   titleY: PANEL.y + 18,
 } as const;
 
+// How wide an owner's name and closing line may be: from the text column to 6px inside the
+// bubble's right edge.
+export const QUIP_TEXT_ROOM =
+  END_LAYOUT.quips.bubble.x + END_LAYOUT.quips.bubble.width - 6 - END_LAYOUT.quips.textX;
+
 // The breakdown's rule sits 2px under its last line and the 2x total 8px under it; the side
 // column ends with the 16px money icon. The owners' rows start QUIPS_GAP under whichever ends
 // lower, the tan rule 8px over them, and the panel, at most PANEL's height, ends 8px under the
