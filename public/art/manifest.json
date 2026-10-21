@@ -3212,6 +3212,51 @@
       }
     },
     {
+      "key": "roadside-birdbath",
+      "png": "sprites/roadside-birdbath.png",
+      "json": "sprites/roadside-birdbath.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "roadside-birdbath@50",
+      "png": "sprites/roadside-birdbath@50.png",
+      "json": "sprites/roadside-birdbath@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "roadside-birdbath@62",
+      "png": "sprites/roadside-birdbath@62.png",
+      "json": "sprites/roadside-birdbath@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-birdbath@75",
+      "png": "sprites/roadside-birdbath@75.png",
+      "json": "sprites/roadside-birdbath@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-birdbath@88",
+      "png": "sprites/roadside-birdbath@88.png",
+      "json": "sprites/roadside-birdbath@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 38
+      }
+    },
+    {
       "key": "roadside-fence",
       "png": "sprites/roadside-fence.png",
       "json": "sprites/roadside-fence.json",
@@ -3299,6 +3344,51 @@
       "anchor": {
         "feetY": 36,
         "opaqueWidth": 129
+      }
+    },
+    {
+      "key": "roadside-flamingos",
+      "png": "sprites/roadside-flamingos.png",
+      "json": "sprites/roadside-flamingos.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "roadside-flamingos@50",
+      "png": "sprites/roadside-flamingos@50.png",
+      "json": "sprites/roadside-flamingos@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "roadside-flamingos@62",
+      "png": "sprites/roadside-flamingos@62.png",
+      "json": "sprites/roadside-flamingos@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "roadside-flamingos@75",
+      "png": "sprites/roadside-flamingos@75.png",
+      "json": "sprites/roadside-flamingos@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "roadside-flamingos@88",
+      "png": "sprites/roadside-flamingos@88.png",
+      "json": "sprites/roadside-flamingos@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 48
       }
     },
     {
@@ -3797,6 +3887,51 @@
       }
     },
     {
+      "key": "roadside-library",
+      "png": "sprites/roadside-library.png",
+      "json": "sprites/roadside-library.json",
+      "anchor": {
+        "feetY": 95,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-library@50",
+      "png": "sprites/roadside-library@50.png",
+      "json": "sprites/roadside-library@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "roadside-library@62",
+      "png": "sprites/roadside-library@62.png",
+      "json": "sprites/roadside-library@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "roadside-library@75",
+      "png": "sprites/roadside-library@75.png",
+      "json": "sprites/roadside-library@75.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "roadside-library@88",
+      "png": "sprites/roadside-library@88.png",
+      "json": "sprites/roadside-library@88.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 34
+      }
+    },
+    {
       "key": "roadside-mailbox",
       "png": "sprites/roadside-mailbox.png",
       "json": "sprites/roadside-mailbox.json",
@@ -3842,6 +3977,51 @@
       }
     },
     {
+      "key": "roadside-shrub",
+      "png": "sprites/roadside-shrub.png",
+      "json": "sprites/roadside-shrub.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-shrub@50",
+      "png": "sprites/roadside-shrub@50.png",
+      "json": "sprites/roadside-shrub@50.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "roadside-shrub@62",
+      "png": "sprites/roadside-shrub@62.png",
+      "json": "sprites/roadside-shrub@62.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "roadside-shrub@75",
+      "png": "sprites/roadside-shrub@75.png",
+      "json": "sprites/roadside-shrub@75.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "roadside-shrub@88",
+      "png": "sprites/roadside-shrub@88.png",
+      "json": "sprites/roadside-shrub@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 51
+      }
+    },
+    {
       "key": "roadside-sprinkler",
       "png": "sprites/roadside-sprinkler.png",
       "json": "sprites/roadside-sprinkler.json",
@@ -3884,6 +4064,96 @@
       "anchor": {
         "feetY": 36,
         "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-swing",
+      "png": "sprites/roadside-swing.png",
+      "json": "sprites/roadside-swing.json",
+      "anchor": {
+        "feetY": 95,
+        "opaqueWidth": 105
+      }
+    },
+    {
+      "key": "roadside-swing@50",
+      "png": "sprites/roadside-swing@50.png",
+      "json": "sprites/roadside-swing@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "roadside-swing@62",
+      "png": "sprites/roadside-swing@62.png",
+      "json": "sprites/roadside-swing@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-swing@75",
+      "png": "sprites/roadside-swing@75.png",
+      "json": "sprites/roadside-swing@75.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "roadside-swing@88",
+      "png": "sprites/roadside-swing@88.png",
+      "json": "sprites/roadside-swing@88.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-topiary",
+      "png": "sprites/roadside-topiary.png",
+      "json": "sprites/roadside-topiary.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "roadside-topiary@50",
+      "png": "sprites/roadside-topiary@50.png",
+      "json": "sprites/roadside-topiary@50.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "roadside-topiary@62",
+      "png": "sprites/roadside-topiary@62.png",
+      "json": "sprites/roadside-topiary@62.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "roadside-topiary@75",
+      "png": "sprites/roadside-topiary@75.png",
+      "json": "sprites/roadside-topiary@75.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "roadside-topiary@88",
+      "png": "sprites/roadside-topiary@88.png",
+      "json": "sprites/roadside-topiary@88.json",
+      "anchor": {
+        "feetY": 78,
+        "opaqueWidth": 25
       }
     },
     {
@@ -3974,6 +4244,96 @@
       "anchor": {
         "feetY": 136,
         "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-urn",
+      "png": "sprites/roadside-urn.png",
+      "json": "sprites/roadside-urn.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "roadside-urn@50",
+      "png": "sprites/roadside-urn@50.png",
+      "json": "sprites/roadside-urn@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "roadside-urn@62",
+      "png": "sprites/roadside-urn@62.png",
+      "json": "sprites/roadside-urn@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "roadside-urn@75",
+      "png": "sprites/roadside-urn@75.png",
+      "json": "sprites/roadside-urn@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-urn@88",
+      "png": "sprites/roadside-urn@88.png",
+      "json": "sprites/roadside-urn@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-wheelbarrow",
+      "png": "sprites/roadside-wheelbarrow.png",
+      "json": "sprites/roadside-wheelbarrow.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "roadside-wheelbarrow@50",
+      "png": "sprites/roadside-wheelbarrow@50.png",
+      "json": "sprites/roadside-wheelbarrow@50.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "roadside-wheelbarrow@62",
+      "png": "sprites/roadside-wheelbarrow@62.png",
+      "json": "sprites/roadside-wheelbarrow@62.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "roadside-wheelbarrow@75",
+      "png": "sprites/roadside-wheelbarrow@75.png",
+      "json": "sprites/roadside-wheelbarrow@75.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 57
+      }
+    },
+    {
+      "key": "roadside-wheelbarrow@88",
+      "png": "sprites/roadside-wheelbarrow@88.png",
+      "json": "sprites/roadside-wheelbarrow@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 67
       }
     },
     {

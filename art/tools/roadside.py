@@ -10,7 +10,10 @@ encounter or a pickup. The lamp post is a white globe on a green post with a flo
 the navy lantern of the need spot `spot-lamp-post`; the street tree is three round lobes, unlike
 `spot-tree`'s blocky crown; the hedge is bumped and in flower, unlike the obstacle `hedge`; the
 flower border has no box, unlike `petunias`; the gnome wears a blue hat and a red coat, unlike
-`minor-gnome`; the mailbox is blue with a yellow flag, unlike the red hydrant.
+`minor-gnome`; the mailbox is blue with a yellow flag, unlike the red hydrant; the bird bath is a white
+basin on a pedestal, unlike the bowl on the ground of `spot-water-bowl`; the shrub is round and in
+bloom, unlike the obstacle `hedge`; the little library is a box on a post, apart from the bench and the
+bin.
 
 Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the road objects are:
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
@@ -34,8 +37,17 @@ roadside-flowers             90x30    a border of mixed blooms on their stems
 roadside-bike                72x48    a kid's red bike on its stand, side on, streamers
 roadside-sprinkler           78x42    a lawn sprinkler's fan of water; idle 2 frames x 200ms
 roadside-laundry             162x96   a washing line on two T posts: a shirt, a sheet, socks, a dress
+roadside-birdbath            48x66    a white stone bird bath, a sky bird on its rim
+roadside-flamingos           60x66    a pair of pink plastic lawn flamingos on wire legs
+roadside-wheelbarrow         84x54    a red wheelbarrow side on, heaped with flowers
+roadside-library             48x96    a little free library: a red box of books under a slate gable on a post
+roadside-urn                 48x66    a terracotta urn of red geraniums on a stone plinth
+roadside-shrub               66x54    a round hydrangea bush in sky and mauve mopheads
+roadside-topiary             42x90    a pom-pom topiary, three clipped balls, in a white box planter
+roadside-swing               114x96   a swing set: a sky A-frame each end, a red seat and a yellow one
 
-Every prop has one tag, `idle`: one frame of 1000ms, or the sprinkler's two. The ground row is the
+Every prop has one tag, `idle`: one frame of 1000ms, or the sprinkler's two. Every other prop is
+static: one frame, no motion. The ground row is the
 last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no
 light rim (road.LIT), since the props stand on the lawn, never on the road.
 
@@ -424,6 +436,208 @@ def laundry():
     return w, h, draw
 
 
+def bar(g, a, b, c, wide=2):
+    """A straight bar wide design units across from point a to point b, as two triangles."""
+    (x0, y0), (x1, y1) = a, b
+    g.tri((x0, y0), (x0 + wide, y0), (x1 + wide, y1), c)
+    g.tri((x0, y0), (x1, y1), (x1 + wide, y1), c)
+
+
+def birdbath():
+    """A white stone bird bath: a wide basin of water on a waisted pedestal and a square foot, a sky bird
+    perched on its rim."""
+    w, h = 32, 44
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(8, base - 4, 16, 5, "lgrey")
+        g.rect(20, base - 4, 4, 5, "grey")
+        g.rect(11, base - 6, 10, 2, "white")
+        g.rect(13, 22, 6, base - 27, "lgrey")
+        g.rect(13, 22, 2, base - 27, "white")
+        g.rect(17, 22, 2, base - 27, "grey")
+        g.rect(11, 19, 10, 3, "lgrey")
+        g.ell(16, 14, 13, 6, "lgrey")
+        g.ell(19, 16, 9, 3, "grey")
+        g.rect(2, 12, 28, 3, "white")
+        g.rect(26, 12, 4, 3, "lgrey")
+        g.rect(5, 11, 22, 1, "cyan")
+        g.rect(8, 11, 3, 1, "white")
+        # the bird: a round sky body, its head to the left, a dark tail up behind it
+        g.ell(9, 8, 4, 3, "sky")
+        g.ell(10, 9, 3, 1.5, "blue")
+        g.ell(5, 5, 2.5, 2.5, "sky")
+        g.rect(2, 5, 2, 1, "amber")
+        g.rect(5, 4, 1, 1, "ink")
+        g.tri((12, 7), (16, 3), (14, 8), "blue")
+    return w, h, draw
+
+
+def flamingo(g, x, base, rise):
+    """A pink plastic lawn flamingo facing left, its body's front at column x: a round body on two wire
+    legs, an S neck up rise rows and a head with a white beak, its tip ink."""
+    top = base - 15
+    for lx in (x + 6, x + 9):
+        g.rect(lx, top, 1, base - top + 1, "grey")
+    g.ell(x + 7, top - 3, 7, 4, "pink")
+    g.ell(x + 9, top - 2, 4, 2, "mauve")
+    g.tri((x + 12, top - 6), (x + 17, top - 7), (x + 13, top - 1), "pink")
+    g.rect(x + 1, top - rise, 3, rise - 3, "pink")
+    g.rect(x + 3, top - rise - 2, 3, 3, "pink")
+    g.ell(x + 2, top - rise - 3, 3, 2.5, "pink")
+    g.rect(x - 3, top - rise - 3, 3, 2, "white")
+    g.rect(x - 3, top - rise - 2, 1, 2, "ink")
+    g.rect(x + 2, top - rise - 4, 1, 1, "ink")
+
+
+def flamingos():
+    """A pair of pink plastic lawn flamingos, the near one taller."""
+    w, h = 40, 44
+
+    def draw(g, f=0):
+        base = h - 2
+        flamingo(g, 21, base - 2, 12)
+        flamingo(g, 5, base, 18)
+    return w, h, draw
+
+
+def wheelbarrow():
+    """A red wheelbarrow side on, heaped with soil and flowers: its wheel to the left, a leg and a handle to
+    the right."""
+    w, h = 56, 36
+
+    def draw(g, f=0):
+        base = h - 2
+        bar(g, (14, 22), (50, 12), "brown")
+        g.rect(47, 11, 6, 3, "dbrown")
+        g.rect(36, 18, 2, base - 17, "dslate")
+        g.rect(33, base - 1, 6, 2, "dslate")
+        g.ell(26, 12, 17, 5, "dbrown")
+        g.tri((7, 13), (43, 13), (37, 25), "red")
+        g.tri((7, 13), (37, 25), (15, 25), "red")
+        g.tri((43, 13), (37, 25), (36, 13), "dred")
+        g.rect(6, 12, 38, 2, "dred")
+        g.ell(11, base - 7, 7.5, 7.5, "dslate")
+        g.ell(11, base - 7, 4.5, 4.5, "grey")
+        g.rect(10, base - 8, 2, 2, "dslate")
+        for x, y, c in ((12, 6, "yellow"), (17, 4, "white"), (22, 7, "pink"), (27, 3, "red"), (32, 6, "yellow"),
+                        (37, 8, "white"), (15, 9, "red"), (29, 9, "pink")):
+            g.rect(x, y + 3, 1, 3, "forest")
+            g.rect(x - 1, y, 3, 3, c)
+        for x in (10, 20, 25, 34):
+            g.rect(x, 9, 3, 2, "dgreen")
+    return w, h, draw
+
+
+def little_library():
+    """A little free library: a red box under a slate gable on a post, its glass door showing the books."""
+    w, h = 32, 64
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(14, 40, 4, base - 39, "dbrown")
+        g.rect(17, 40, 1, base - 39, "plum")
+        g.rect(10, base - 1, 12, 2, "dbrown")
+        g.rect(8, 38, 16, 3, "brown")
+        g.rect(22, 38, 2, 3, "dbrown")
+        gable(g, 5, 22, 18, "slate")
+        walls(g, 5, 22, 18, 38, "red")
+        g.rect(8, 21, 15, 15, "white")
+        g.rect(9, 22, 13, 13, "navy")
+        g.rect(9, 28, 13, 1, "dslate")
+        for i, (c, top) in enumerate((("yellow", 23), ("green", 24), ("pink", 23), ("sky", 25), ("white", 24),
+                                      ("orange", 29), ("cream", 30), ("green", 29), ("red", 31), ("sky", 30))):
+            x = 10 + (i % 5) * 2 + (i % 5) // 2
+            g.rect(x, top, 2, (28 if i < 5 else 35) - top, c)
+        g.rect(9, 22, 2, 2, "cyan")
+        g.rect(20, 28, 2, 2, "amber")
+    return w, h, draw
+
+
+def urn():
+    """A terracotta urn on a stone plinth, red geraniums over its leaves and leaves trailing over its lip."""
+    w, h = 32, 44
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(8, base - 5, 16, 6, "lgrey")
+        g.rect(20, base - 5, 4, 6, "grey")
+        g.rect(13, base - 10, 6, 5, "ochre")
+        g.rect(17, base - 10, 2, 5, "rust")
+        g.rect(10, base - 12, 12, 2, "ochre")
+        g.rect(19, base - 12, 3, 2, "rust")
+        g.ell(16, 23, 11, 8, "rust")
+        g.ell(15, 22, 10, 7, "ochre")
+        g.ell(16, 11, 11, 6, "dgreen")
+        g.ell(14, 9, 8, 4, "green")
+        for x, y in ((8, 6), (14, 3), (20, 5), (11, 10), (19, 9), (24, 11)):
+            g.rect(x, y, 4, 3, "red")
+            g.rect(x + 1, y, 1, 1, "pink")
+        g.rect(4, 15, 24, 3, "tan")
+        g.rect(23, 15, 5, 3, "ochre")
+        g.rect(4, 17, 24, 1, "rust")
+        g.rect(6, 15, 2, 5, "dgreen")
+        g.rect(24, 15, 2, 4, "dgreen")
+    return w, h, draw
+
+
+def shrub():
+    """A round hydrangea bush, lit on its upper left, dotted with sky and mauve mopheads."""
+    w, h = 44, 36
+
+    def draw(g, f=0):
+        base = h - 2
+        g.ell(22, 20, 19, 15, "dgreen")
+        g.rect(10, base - 3, 24, 4, "dgreen")
+        g.ell(20, 17, 15, 11, "green")
+        g.ell(23, 20, 15, 11, "dgreen")
+        for x, y, c in ((12, 12, "sky"), (22, 8, "mauve"), (31, 13, "sky"), (18, 18, "mauve"), (27, 21, "sky"),
+                        (9, 22, "mauve"), (35, 24, "mauve"), (17, 27, "sky")):
+            g.ell(x, y, 3.5, 3, c)
+            g.rect(x - 2, y - 1, 1, 1, "cyan" if c == "sky" else "pink")
+            g.rect(x + 1, y, 1, 1, "cyan" if c == "sky" else "pink")
+    return w, h, draw
+
+
+def topiary():
+    """A pom-pom topiary: three clipped balls on a stem in a white box planter."""
+    w, h = 28, 60
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(13, 10, 2, base - 20, "dbrown")
+        for cy, r in ((base - 20, 8), (25, 6), (9, 5)):
+            g.ell(14, cy, r + 1, r, "dgreen")
+            g.ell(13, cy - 1, r - 1, r - 2, "green")
+            g.ell(15, cy + 1, r - 2, r - 3, "dgreen")
+        g.rect(6, base - 11, 16, 12, "white")
+        g.rect(19, base - 11, 3, 12, "lgrey")
+        g.rect(5, base - 13, 18, 2, "lgrey")
+        g.rect(9, base - 8, 1, 7, "lgrey")
+        g.rect(18, base - 8, 1, 7, "lgrey")
+    return w, h, draw
+
+
+def swing():
+    """A swing set: a sky A-frame at each end of a top bar, two seats on their ropes, red and yellow."""
+    w, h = 76, 64
+
+    def draw(g, f=0):
+        base = h - 2
+        for x in (10, 64):
+            bar(g, (x, 6), (x - 7, base + 1), "sky")
+            bar(g, (x - 2, 6), (x + 5, base + 1), "sky")
+            g.rect(x - 4, base - 18, 10, 2, "blue")
+        g.rect(5, 4, 66, 3, "sky")
+        g.rect(5, 6, 66, 1, "blue")
+        for x0, c in ((24, "red"), (44, "yellow")):
+            g.rect(x0, 7, 1, 38, "lgrey")
+            g.rect(x0 + 10, 7, 1, 38, "lgrey")
+            g.rect(x0 - 1, 45, 13, 3, c)
+            g.rect(x0 - 1, 47, 13, 1, dk(c))
+    return w, h, draw
+
+
 # The houses' colourways, after backdrop-woof-way's row of houses: wall, roof, door.
 TAN, PINK, SKY, CREAM, GREY = (("tan", "brown", "dgreen"), ("pink", "purple", "white"), ("sky", "navy", "red"),
                                ("cream", "dred", "sky"), ("lgrey", "slate", "dred"))
@@ -449,6 +663,14 @@ PROPS = {
     "roadside-bike": (bike(), (0,), STILL_MS, True),
     "roadside-sprinkler": (sprinkler(), (0, 1), SPRAY_MS, False),
     "roadside-laundry": (laundry(), (0,), STILL_MS, False),
+    "roadside-birdbath": (birdbath(), (0,), STILL_MS, True),
+    "roadside-flamingos": (flamingos(), (0,), STILL_MS, True),
+    "roadside-wheelbarrow": (wheelbarrow(), (0,), STILL_MS, True),
+    "roadside-library": (little_library(), (0,), STILL_MS, True),
+    "roadside-urn": (urn(), (0,), STILL_MS, True),
+    "roadside-shrub": (shrub(), (0,), STILL_MS, True),
+    "roadside-topiary": (topiary(), (0,), STILL_MS, True),
+    "roadside-swing": (swing(), (0,), STILL_MS, False),
 }
 
 
@@ -514,19 +736,21 @@ PLACEMENT = {
     "woof-way": dict(
         slot=140,
         lots=(
-            lot("house-cottage", "fence", ("mailbox", 213, -38), ("flowers", 250, -42)),
-            lot("house-tall", "hedge", ("mailbox", 213, -38), ("gnome", 250, -15)),
+            lot("house-cottage", "fence", ("mailbox", 213, -38), ("flowers", 250, -42), ("birdbath", 262, -16)),
+            lot("house-tall", "hedge", ("mailbox", 213, -38), ("gnome", 250, -15), ("topiary", 296, -12)),
             lot("house-porch", "fence-cat", ("bike", 231, -45)),
             lot("house-cottage-pink", "fence", ("mailbox", 213, -38), ("sprinkler", 275, -15)),
-            lot("house-tall-grey", "fence", ("gnome", 260, -15)),
+            lot("house-tall-grey", "fence", ("gnome", 260, -15), ("flamingos", 296, -18)),
             lot("house-porch-tan", "hedge", ("mailbox", 213, -38), ("flowers", 255, -42)),
         ),
         gaps=(
-            gap(("tree", 213, 0)),
+            gap(("tree", 213, 0), ("shrub", 300, -20)),
             gap(("lamp-post", 213, -12), ("tree-blossom", 245, 12)),
             gap(("laundry", 232, 0)),
             gap(("tree", 220, 0), ("lamp-post", 213, -38)),
-            gap(("tree-blossom", 215, 0)),
+            gap(("tree-blossom", 215, 0), ("urn", 296, -16)),
+            gap(("library", 213, -30), ("shrub", 250, 8)),
+            gap(("wheelbarrow", 213, -36), ("swing", 240, 4)),
         ),
         sides=dict(
             left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=2),
