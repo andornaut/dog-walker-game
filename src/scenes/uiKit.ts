@@ -21,7 +21,6 @@ import { addPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
 
-// Text is drawn at 2x so it reads on a phone; 1x is for incidental marks only.
 // Whether key's art is loaded with frames of this size, so art drawn for another layout is
 // left for the drawn stand-in.
 export function artFits(scene: Scene, key: string, size: { height: number; width: number }) {
@@ -33,6 +32,7 @@ export function artFits(scene: Scene, key: string, size: { height: number; width
   return frame.realWidth === size.width && frame.realHeight === size.height;
 }
 
+// Text is drawn at 2x so it reads on a phone; 1x is for incidental marks only.
 export { TEXT_SCALE };
 
 // The UI kit's nine-slice borders, in pixels from each edge.
@@ -43,8 +43,9 @@ const SLICES = {
   // The detail card a held dog or gear tile opens, and the title band across it.
   "ui-detail-band": { bottom: 2, left: 8, right: 8, top: 2 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
-  // The plate over a hit.
+  // The Pet shop's message plate across the list's top.
   "ui-hint": { bottom: 8, left: 8, right: 8, top: 8 },
+  // The plate over a hit.
   "ui-hit-label": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
   // The owners' speech bubble.
