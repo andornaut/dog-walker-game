@@ -202,7 +202,7 @@
   "hudLanes": {
     "bank": {
       "height": 24,
-      "width": 95,
+      "width": 93,
       "x": 4,
       "y": 106
     },
@@ -2196,68 +2196,68 @@
       {
         "id": "home",
         "face": {
-          "x": 196,
+          "x": 224,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 44,
-          "x": 184,
+          "width": 36,
+          "x": 216,
           "y": 0
         },
         "icon": {
-          "x": 198,
+          "x": 226,
           "y": 13
         }
       },
       {
         "id": "sound",
         "face": {
-          "x": 240,
+          "x": 260,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 44,
-          "x": 228,
+          "width": 36,
+          "x": 252,
           "y": 0
         },
         "icon": {
-          "x": 242,
+          "x": 262,
           "y": 13
         }
       },
       {
         "id": "settings",
         "face": {
-          "x": 284,
+          "x": 296,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 44,
-          "x": 272,
+          "width": 36,
+          "x": 288,
           "y": 0
         },
         "icon": {
-          "x": 286,
+          "x": 298,
           "y": 13
         }
       },
       {
         "id": "pause",
         "face": {
-          "x": 328,
+          "x": 332,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 44,
-          "x": 316,
+          "width": 36,
+          "x": 324,
           "y": 0
         },
         "icon": {
-          "x": 330,
+          "x": 334,
           "y": 13
         }
       }
@@ -2266,56 +2266,70 @@
       {
         "height": 44,
         "width": 23,
-        "x": 102,
+        "x": 100,
         "y": 4
       },
       {
         "height": 44,
         "width": 23,
-        "x": 125,
+        "x": 123,
         "y": 4
       },
       {
         "height": 44,
         "width": 23,
-        "x": 148,
+        "x": 146,
+        "y": 4
+      },
+      {
+        "height": 44,
+        "width": 23,
+        "x": 169,
+        "y": 4
+      },
+      {
+        "height": 44,
+        "width": 24,
+        "x": 192,
         "y": 4
       }
     ],
     "effectWells": [
       {
-        "x": 103,
+        "x": 101,
         "y": 22,
         "height": 22,
         "width": 22
       },
       {
-        "x": 126,
+        "x": 124,
         "y": 22,
         "height": 22,
         "width": 22
       },
       {
-        "x": 149,
+        "x": 147,
+        "y": 22,
+        "height": 22,
+        "width": 22
+      },
+      {
+        "x": 170,
+        "y": 22,
+        "height": 22,
+        "width": 22
+      },
+      {
+        "x": 193,
         "y": 22,
         "height": 22,
         "width": 22
       }
     ],
-    "moreHold": {
-      "height": 44,
-      "width": 13,
-      "x": 171,
-      "y": 4
-    },
-    "moreText": {
-      "x": 177,
-      "y": 30
-    },
     "zoneWell": {
       "height": 17,
-      "width": 80,
-      "x": 103,
+      "width": 114,
+      "x": 101,
       "y": 4
     },
     "debuffBar": {
@@ -2357,24 +2371,24 @@
       },
       "buttons": {
         "home": {
-          "faceX": 196,
-          "hitWidth": 44,
-          "hitX": 184
+          "faceX": 224,
+          "hitWidth": 36,
+          "hitX": 216
         },
         "pause": {
-          "faceX": 328,
-          "hitWidth": 44,
-          "hitX": 316
+          "faceX": 332,
+          "hitWidth": 36,
+          "hitX": 324
         },
         "settings": {
-          "faceX": 284,
-          "hitWidth": 44,
-          "hitX": 272
+          "faceX": 296,
+          "hitWidth": 36,
+          "hitX": 288
         },
         "sound": {
-          "faceX": 240,
-          "hitWidth": 44,
-          "hitX": 228
+          "faceX": 260,
+          "hitWidth": 36,
+          "hitX": 252
         }
       },
       "cash": {
@@ -2389,44 +2403,40 @@
           1
         ],
         "text": {
-          "width": 71,
+          "width": 70,
           "x": 26
         },
         "well": {
           "height": 40,
-          "width": 95,
+          "width": 93,
           "x": 4,
           "y": 4
         }
       },
       "effects": {
-        "count": 3,
         "holdInset": 1,
         "icon": 1,
         "iconSize": 20,
-        "more": {
-          "y": 30
-        },
         "pitch": 23,
         "size": 22,
-        "x": 103,
+        "x": 101,
         "y": 22
       },
       "minHitWidth": 36,
       "zone": {
         "name": {
-          "x": 142,
+          "x": 157,
           "y": 5
         },
         "pips": {
-          "pitch": 19,
-          "x": 105,
+          "pitch": 26,
+          "x": 109,
           "y": 12
         },
         "well": {
           "height": 17,
-          "width": 80,
-          "x": 103,
+          "width": 114,
+          "x": 101,
           "y": 4
         }
       }

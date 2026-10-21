@@ -1,5 +1,7 @@
 import { kebabCase } from "../assets/spriteKeys";
 import type { GameData, GearId, UpgradeId, WalkerId, WalkerPerkId } from "../data/types";
+import { walkLength } from "../rules/route";
+import { read } from "../rules/units";
 import type { RunState } from "../state/runState";
 
 // An effect in force on the walk, shown as an icon in the walk bar's effect wells. Holding one
@@ -52,6 +54,12 @@ export function effectItems(
       .filter((upgrade) => inEffect(data, run, upgrade))
       .map((upgrade): EffectItem => ({ kind: "upgrade", upgrade })),
   ];
+}
+
+// The most effects a walk can have at once: the walker's perk, up to loadoutMax gear in the
+// Pocket, and an upgrade from each fork, one between each two zones.
+export function maxEffects(data: Pick<GameData, "tuning" | "world">): number {
+  return 1 + read(data.tuning, "counts", "loadoutMax") + walkLength(data) - 1;
 }
 
 // The 16x16 icon of a walker's perk.

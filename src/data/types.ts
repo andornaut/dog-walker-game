@@ -620,13 +620,11 @@ export interface RunText {
   readonly dodge: string;
   // What a still press held on the walk HUD shows in the message strip: an effect's name and
   // line, a debuff's name and stake (its {seconds} the seconds it has left), and a dog's size,
-  // hearts and owner. moreEffects is the last effect well's count of the effects past the
-  // wells.
+  // hearts and owner.
   readonly explain: {
     readonly debuff: string;
     readonly dog: string;
     readonly effect: string;
-    readonly moreEffects: string;
   };
   readonly fired: string;
   readonly firedBy: string;

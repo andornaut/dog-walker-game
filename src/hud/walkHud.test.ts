@@ -2,10 +2,14 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { type Point, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { walkLength } from "../rules/route";
+import { read } from "../rules/units";
+import { maxEffects } from "./effectIcons";
 import {
   cardHearts,
   cardNameFit,
@@ -15,8 +19,7 @@ import {
   debuffBarRects,
   debuffFillWidth,
   DOG_CARD,
-  type EffectSlots,
-  effectSlots,
+  EFFECT_WELLS,
   type ExplainShown,
   type ExplainTarget,
   explainTargetAt,
@@ -92,13 +95,15 @@ describe("the walk bar", () => {
     }
   });
 
-  it("lines the effect wells up under the neighbourhood well, each held by its column to the bar's bottom", () => {
+  it("lines a well for every effect under the neighbourhood well, its holds up to the first button", () => {
     const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
-    expect(BAR.effectWells).toHaveLength(WALK_BAR.effects.count);
+    expect(BAR.effectWells).toHaveLength(EFFECT_WELLS);
     for (const hold of BAR.effectHolds) {
       expect(hold.x).toBeGreaterThanOrEqual(BAR.zoneWell.x - WALK_BAR.effects.holdInset);
       expect(hold.x + hold.width).toBeLessThanOrEqual(first.x);
     }
+    const last = BAR.effectHolds.at(-1);
+    expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(first.x);
     for (const well of BAR.effectWells) {
       const { icon, iconSize } = WALK_BAR.effects;
       const art = { height: iconSize, width: iconSize, x: well.x + icon, y: well.y + icon };
@@ -114,23 +119,6 @@ describe("the walk bar", () => {
         expect(next.x).toBe((hold?.x ?? 0) + (hold?.width ?? 0));
       }
     });
-  });
-
-  it("holds +n from the last well's hold to the first button, its text centred in it on the bar", () => {
-    const last = BAR.effectHolds.at(-1);
-    const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
-    const { moreHold, moreText } = BAR;
-    expect(moreHold.x).toBe((last?.x ?? 0) + (last?.width ?? 0));
-    expect(moreHold.x + moreHold.width).toBe(Math.max(moreHold.x, first.x));
-    expect({ height: moreHold.height, y: moreHold.y }).toEqual({
-      height: last?.height,
-      y: last?.y,
-    });
-    expect(Math.abs(moreText.x - (moreHold.x + moreHold.width / 2))).toBeLessThanOrEqual(0.5);
-    expect(moreText.y + TITLE_CAP_ROWS).toBeLessThanOrEqual(topBar.y + topBar.height);
-    for (const well of BAR.effectWells) {
-      expect(overlaps(well, moreHold)).toBe(false);
-    }
   });
 
   it("ends the neighbourhood well before the first button's hit area", () => {
@@ -169,17 +157,29 @@ describe("cashScale", () => {
   );
 });
 
-describe("effectSlots", () => {
-  const upTo = (count: number, from = 0) => Array.from({ length: count }, (_, i) => from + i);
-  it.each<[string, number, EffectSlots]>([
-    ["no effects", 0, { hidden: [], wells: [] }],
-    ["one effect", 1, { hidden: [], wells: [0] }],
-    ["as many effects as wells", WELLS, { hidden: [], wells: upTo(WELLS) }],
-    ["one effect more than the wells", WELLS + 1, { hidden: [WELLS], wells: upTo(WELLS) }],
-    ["three more than the wells", WELLS + 3, { hidden: upTo(3, WELLS), wells: upTo(WELLS) }],
-  ])("shows %s", (_name, count, expected) => {
-    expect(effectSlots(WELLS, count)).toEqual(expected);
-  });
+describe("maxEffects", () => {
+  const walk = { ...gameData.world, walkLength: walkLength(gameData) };
+  it.each<[string, number, number, number]>([
+    [
+      "the game's walk",
+      read(gameData.tuning, "counts", "loadoutMax"),
+      walk.walkLength,
+      EFFECT_WELLS,
+    ],
+    ["a one-zone walk with no Pocket", 0, 1, 1],
+    ["a two-zone walk with a Pocket", 1, 2, 3],
+    ["a four-zone walk with two Pocket items", 2, 4, 6],
+  ])(
+    "counts the perk, the Pocket and a fork's upgrade each for %s",
+    (_name, pocket, zones, expected) => {
+      const tuning = {
+        ...gameData.tuning,
+        counts: { ...gameData.tuning.counts, loadoutMax: pocket },
+      };
+      const world = { ...gameData.world, walkLength: zones };
+      expect(maxEffects({ tuning, world })).toBe(expected);
+    },
+  );
 });
 
 describe("the debuff bars", () => {
@@ -324,19 +324,6 @@ describe("explainTargetAt", () => {
       holdAt(WELLS - 1),
       { effects: [WELLS - 1], kind: "effects" },
     ],
-    [
-      "the last well with more effects than wells",
-      WELLS + 2,
-      holdAt(WELLS - 1),
-      { effects: [WELLS - 1], kind: "effects" },
-    ],
-    [
-      "+n with more effects than wells, where the bar has room for it",
-      WELLS + 2,
-      centre(BAR.moreHold),
-      BAR.moreHold.width > 0 ? { effects: [WELLS, WELLS + 1], kind: "effects" } : undefined,
-    ],
-    ["+n's place with no more effects than wells", WELLS, centre(BAR.moreHold), undefined],
     ["the cash well", 1, centre(WALK_BAR.cash.well), undefined],
     ["a button", 1, button, undefined],
     ["the first debuff bar", 0, centre(bars[0] ?? topBar), { debuff: "muddy", kind: "debuff" }],

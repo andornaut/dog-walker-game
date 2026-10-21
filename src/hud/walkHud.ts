@@ -1,6 +1,8 @@
+import { gameData } from "../data";
 import type { DebuffId, DogId } from "../data/types";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
+import { maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
 // The walk screen's HUD: the walk bar (ui-walk-bar) across the top, a full-width bar per active
@@ -14,46 +16,40 @@ export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
 // this table. buttons: each button's face x and its hit area's x and width, the hit area the
-// bar's full height and at least minHitWidth wide, its face buttonFace.size square on row
-// buttonFace.y. cash: the "$" and the amount from text.x at the largest of scales that fits
-// text.width, their capitals' bottom on capsBottom. zone: the neighbourhood well, the name
-// centred on name.x and the pips from pips, pitch apart. effects: count wells of size at pitch
-// from x along y, each icon iconSize at icon,icon in its well and held from holdInset left of
-// it down to the bar's bottom; "+n", for the effects past the wells, stands on the wood after
-// the last well's hold, its capitals' top on more.y, and holds up to the first button.
+// bar's full height and minHitWidth wide or more (narrower than the 44px square elsewhere, so
+// four fit beside five effect wells), its face buttonFace.size square on row buttonFace.y. cash:
+// the "$" and the amount from text.x at the largest of scales that fits text.width, their
+// capitals' bottom on capsBottom. zone: the neighbourhood well, the name centred on name.x and
+// the pips from pips, pitch apart. effects: a well of size at pitch from x along y for every
+// effect a walk can have (EFFECT_WELLS), each icon iconSize at icon,icon in its well and held
+// from holdInset left of it down to the bar's bottom, the last hold reaching the first button.
 export const WALK_BAR = {
   buttonFace: { size: 20, y: 12 },
   buttons: {
-    home: { faceX: 196, hitWidth: 44, hitX: 184 },
-    pause: { faceX: 328, hitWidth: 44, hitX: 316 },
-    settings: { faceX: 284, hitWidth: 44, hitX: 272 },
-    sound: { faceX: 240, hitWidth: 44, hitX: 228 },
+    home: { faceX: 224, hitWidth: 36, hitX: 216 },
+    pause: { faceX: 332, hitWidth: 36, hitX: 324 },
+    settings: { faceX: 296, hitWidth: 36, hitX: 288 },
+    sound: { faceX: 260, hitWidth: 36, hitX: 252 },
   } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
   cash: {
     capsBottom: 30,
     coin: { x: 8, y: 15 },
     scales: [3, 2, 1],
-    text: { width: 71, x: 26 },
-    well: { height: 40, width: 95, x: 4, y: 4 },
+    text: { width: 70, x: 26 },
+    well: { height: 40, width: 93, x: 4, y: 4 },
   },
-  effects: {
-    count: 3,
-    holdInset: 1,
-    icon: 1,
-    iconSize: 20,
-    more: { y: 30 },
-    pitch: 23,
-    size: 22,
-    x: 103,
-    y: 22,
-  },
+  effects: { holdInset: 1, icon: 1, iconSize: 20, pitch: 23, size: 22, x: 101, y: 22 },
   minHitWidth: 36,
   zone: {
-    name: { x: 142, y: 5 },
-    pips: { pitch: 19, x: 105, y: 12 },
-    well: { height: 17, width: 80, x: 103, y: 4 },
+    name: { x: 157, y: 5 },
+    pips: { pitch: 26, x: 109, y: 12 },
+    well: { height: 17, width: 114, x: 101, y: 4 },
   },
 } as const;
+
+// The most effects a walk can have, one well each: the walker's perk, the Pocket's gear and an
+// upgrade from each fork.
+export const EFFECT_WELLS = maxEffects(gameData);
 
 // The title font's capitals are this many rows tall at 1x.
 export const TITLE_CAP_ROWS = 5;
@@ -70,15 +66,11 @@ export interface WalkBarLayout {
   // the bar, from the neighbourhood well's top to the bar's bottom.
   effectHolds: Rect[];
   effectWells: Rect[];
-  // "+n": the press area after the wells, none wide when the wells reach the first button, and
-  // its text's centre column and capitals' top.
-  moreHold: Rect;
-  moreText: Point;
   zoneWell: Rect;
 }
 
-// The walk bar's parts on screen, for the bar at bar.
-export function walkBarLayout(bar: Rect): WalkBarLayout {
+// The walk bar's parts on screen, for the bar at bar with wells effect wells.
+export function walkBarLayout(bar: Rect, wells = EFFECT_WELLS): WalkBarLayout {
   const { buttonFace, effects, zone } = WALK_BAR;
   const at = (point: Point): Point => ({ x: bar.x + point.x, y: bar.y + point.y });
   const buttons = Object.fromEntries(
@@ -89,31 +81,18 @@ export function walkBarLayout(bar: Rect): WalkBarLayout {
     }),
   ) as Record<WalkBarButtonId, BarButton>;
   const zoneWell = { ...zone.well, ...at(zone.well) };
-  const effectWells = Array.from({ length: effects.count }, (_, i) => ({
+  const effectWells = Array.from({ length: wells }, (_, i) => ({
     ...at({ x: effects.x + i * effects.pitch, y: effects.y }),
     height: effects.size,
     width: effects.size,
   }));
-  const holdHeight = bar.y + bar.height - zoneWell.y;
-  const effectHolds = effectWells.map((well) => ({
-    height: holdHeight,
-    width: effects.pitch,
-    x: well.x - effects.holdInset,
-    y: zoneWell.y,
-  }));
-  const last = effectHolds.at(-1);
-  const moreX = last === undefined ? zoneWell.x : last.x + last.width;
   const firstHit = buttons[WALK_BAR_BUTTONS[0]].hit;
-  const moreWidth = Math.max(0, firstHit.x - moreX);
-  const moreHold = { height: holdHeight, width: moreWidth, x: moreX, y: zoneWell.y };
-  return {
-    buttons,
-    effectHolds,
-    effectWells,
-    moreHold,
-    moreText: { x: moreX + Math.floor(moreWidth / 2), y: bar.y + effects.more.y },
-    zoneWell,
-  };
+  const effectHolds = effectWells.map((well, i) => {
+    const x = well.x - effects.holdInset;
+    const width = i === wells - 1 ? firstHit.x - x : effects.pitch;
+    return { height: bar.y + bar.height - zoneWell.y, width, x, y: zoneWell.y };
+  });
+  return { buttons, effectHolds, effectWells, zoneWell };
 }
 
 // The largest of the cash's scales at which text measuring widthAt1x fits its room, else the
@@ -126,18 +105,6 @@ export function cashScale(widthAt1x: number): number {
 // The top of the cash's capitals at scale, so their bottom row is the same at every scale.
 export function cashTop(scale: number): number {
   return WALK_BAR.cash.capsBottom + 1 - TITLE_CAP_ROWS * scale;
-}
-
-// Which effects the walk bar shows, by their indexes in the walk's list: one in each well, in
-// order, and the rest past the wells behind "+n".
-export interface EffectSlots {
-  hidden: number[];
-  wells: number[];
-}
-
-export function effectSlots(wells: number, effects: number): EffectSlots {
-  const indexes = Array.from({ length: effects }, (_, index) => index);
-  return { hidden: indexes.slice(wells), wells: indexes.slice(0, wells) };
 }
 
 // A debuff bar (ui-debuff-bar, 360x16): its icon, its name up to name.room wide, and the fill
@@ -273,8 +240,7 @@ export function quipPlace(
   };
 }
 
-// What a held press explains: an effect or the effects past the wells (their indexes in the
-// walk's list, one at a time), a debuff, or a dog.
+// What a held press explains: an effect (its index in the walk's list), a debuff, or a dog.
 export type ExplainTarget =
   | { debuff: DebuffId; kind: "debuff" }
   | { dog: DogId; kind: "dog" }
@@ -296,13 +262,9 @@ export function explainTargetAt(
 ): ExplainTarget | undefined {
   const { x, y } = point;
   const bar = walkBarLayout(layout.topBar);
-  const slots = effectSlots(bar.effectWells.length, shown.effects);
-  const well = slots.wells[bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y))];
-  if (well !== undefined) {
+  const well = bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y));
+  if (well >= 0 && well < shown.effects) {
     return { effects: [well], kind: "effects" };
-  }
-  if (slots.hidden.length > 0 && containsPoint(bar.moreHold, x, y)) {
-    return { effects: slots.hidden, kind: "effects" };
   }
   const bars = debuffBarRects(layout.topBar, shown.debuffs.length);
   const debuff = shown.debuffs[bars.findIndex((rect) => containsPoint(rect, x, y))];

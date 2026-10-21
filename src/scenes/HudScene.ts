@@ -18,7 +18,7 @@ import { runHintTriggers } from "../hud/hintTriggers";
 import { hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
-import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "../hud/runText";
+import { STRIP_LINE_FIELDS } from "../hud/runText";
 import {
   buttonIcon,
   pauseButtonIcon,
@@ -39,7 +39,6 @@ import {
   debuffBarRects,
   debuffFillWidth,
   DOG_CARD,
-  effectSlots,
   type ExplainTarget,
   leadSlot,
   slotShown,
@@ -465,25 +464,21 @@ export class HudScene extends Scene {
     scalePixelText(money, scale, x + advance, top);
   }
 
-  // The effect wells: each effect's 20x20 icon in its well, then "+n" on the wood for the
-  // effects past the wells.
+  // The effect wells: each effect's 20x20 icon in its well, in the walk's order.
   private showEffects(effects: readonly EffectItem[]): void {
     this.effectParts.forEach((part) => part.destroy());
     const { icon, iconSize } = WALK_BAR.effects;
-    const slots = effectSlots(BAR.effectWells.length, effects.length);
-    this.effectParts = slots.wells.flatMap((index, i) => {
-      const well = BAR.effectWells[i];
-      const item = effects[index];
-      if (well === undefined || item === undefined) {
+    this.effectParts = BAR.effectWells.flatMap((well, i) => {
+      const item = effects[i];
+      if (item === undefined) {
         return [];
       }
-      const art = this.textures.exists("ui-effect-well");
       const key = walkBarIconKey(item);
       const x = well.x + icon;
       const y = well.y + icon;
       const half = iconSize / 2;
       return [
-        art
+        this.textures.exists("ui-effect-well")
           ? this.add.image(well.x, well.y, "ui-effect-well").setOrigin(0)
           : this.add.rectangle(well.x, well.y, well.width, well.height, PALETTE.ink).setOrigin(0),
         this.textures.exists(key)
@@ -494,16 +489,6 @@ export class HudScene extends Scene {
             }),
       ];
     });
-    if (slots.hidden.length > 0 && BAR.moreHold.width > 0) {
-      const count = String(slots.hidden.length);
-      const more = fillLine(RUN_TEXT_FIELDS.explain, gameData.runText.explain, "moreEffects", {
-        count,
-      });
-      const { x, y } = BAR.moreText;
-      this.effectParts.push(
-        addPixelText(this, x, y, more, { color: PALETTE.cream, font: "title", originX: 0.5 }),
-      );
-    }
   }
 
   // A bar per debuff under the walk bar, in the order they began, rebuilt as they come and go;

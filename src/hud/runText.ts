@@ -28,7 +28,6 @@ export const RUN_TEXT_FIELDS = {
     debuff: ["name", "stake"],
     dog: ["dog", "hearts", "max", "owner", "size"],
     effect: ["effect", "name"],
-    moreEffects: ["count"],
   },
   firedBy: ["owner"],
   fullPackHome: ["amount"],
