@@ -113,7 +113,7 @@ function after(walk: Walk, seconds: number, pulls: Pulls = NO_PULLS) {
   let state = pulls;
   const steps: PullStep[] = [];
   for (let frame = 0; frame < Math.round(seconds * 60); frame++) {
-    const stepped = stepPulls(data, geometry, FRAME, state, walked);
+    const stepped = stepPulls(data, geometry, FRAME, [], state, walked);
     steps.push(stepped);
     state = stepped.pulls;
     walked = stepWalk(data, geometry, seededRandom(1), FRAME, stepped.walk).walk;
@@ -294,14 +294,14 @@ describe("stepPulls holds", () => {
       road: { ...walk.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
     };
     const straining = after(walk, 0.5).pulls;
-    const held = stepPulls(data, geometry, 2, straining, stopped);
+    const held = stepPulls(data, geometry, 2, [], straining, stopped);
     expect(held.pulls).toBe(straining);
     expect(held.pulled).toEqual([]);
     const ended: Walk = {
       ...walk,
       run: { ...walk.run, phase: { kind: "ended", reason: "wentHome" } },
     };
-    expect(stepPulls(data, geometry, 2, straining, ended).pulls).toBe(straining);
+    expect(stepPulls(data, geometry, 2, [], straining, ended).pulls).toBe(straining);
   });
 });
 
@@ -331,11 +331,12 @@ describe("replay with pulls", () => {
       const cards: unknown[] = [];
       for (let frame = 0; frame < 60 * 30; frame++) {
         const timeMs = frame * FRAME * 1000;
-        for (const direction of movesAt(frame, timeMs)) {
+        const moves = movesAt(frame, timeMs);
+        for (const direction of moves) {
           walk = steerWalk(data, 5, direction, walk);
           log = recordInput({ direction, kind: "lane", timeMs }, log);
         }
-        const pullStep = stepPulls(data, geometry, FRAME, pulls, walk);
+        const pullStep = stepPulls(data, geometry, FRAME, moves, pulls, walk);
         pulls = pullStep.pulls;
         pulled.push(...pullStep.pulled);
         const stepped = stepWalk(data, geometry, rolls, FRAME, pullStep.walk);

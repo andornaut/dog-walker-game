@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { LaneDirection } from "../layout/lanes";
 import { cardFor, openCard } from "../rules/choices";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { type CardSource, newRun } from "../state/runState";
 import { STEP_SECONDS } from "./fixedStep";
+import { laneControlIn } from "./laneControl";
+import { stillInLane } from "./laneMotion";
+import { NO_PULLS, type Strain } from "./pulls";
 import {
   chooseCard,
   chooseShownCard,
@@ -17,7 +21,7 @@ import {
   startSession,
   stepSession,
 } from "./session";
-import { type RoadGeometry, startRoad, zoneLength } from "./walk";
+import { type RoadGeometry, startRoad, type WalkItem, zoneLength } from "./walk";
 
 const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
 const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encounter" };
@@ -137,6 +141,72 @@ describe("stepSession", () => {
     expect(fork.session.card).toBeNull();
     expect(fork.session.walk.run.zoneIndex).toBe(1);
     expect(fork.session.walk.road.pending.length).toBeGreaterThan(0);
+  });
+});
+
+describe("a strain in the session", () => {
+  const SQUIRREL_LANE = 2;
+
+  // Koda straining toward a squirrel in the middle lane, the pack still in lane.
+  function straining(lane: number): Session {
+    const session = emptyRoad(started());
+    const squirrel: WalkItem = {
+      height: 12,
+      id: 0,
+      kind: "squirrel",
+      lane: SQUIRREL_LANE,
+      laneSpan: 1,
+      y: 100,
+    };
+    const road = {
+      ...session.walk.road,
+      control: laneControlIn(stillInLane(lane)),
+      items: [squirrel],
+      nextItemId: 1,
+    };
+    const strain: Strain = {
+      blocked: false,
+      direction: lane < SQUIRREL_LANE ? 1 : -1,
+      dog: "koda",
+      fromLane: lane,
+      itemId: squirrel.id,
+      kind: "squirrel",
+      pullsLeft: 1,
+      tellSeconds: 0.5,
+    };
+    return { ...session, pulls: { ...NO_PULLS, strain }, walk: { ...session.walk, road } };
+  }
+
+  // Every press, a key, a tap or a drag's step, reaches the session as a lane input.
+  it.each<[string, number, LaneDirection, boolean]>([
+    ["cancels the pull on a press toward the edge from the left edge lane", 0, -1, true],
+    [
+      "cancels the pull on a press toward the edge from the right edge lane",
+      GEOMETRY.laneCount - 1,
+      1,
+      true,
+    ],
+    ["cancels the pull on a press away from the squirrel from a middle lane", 1, -1, true],
+    ["keeps the pull on a press toward the squirrel from the left edge lane", 0, 1, false],
+    [
+      "keeps the pull on a press toward the squirrel from the right edge lane",
+      GEOMETRY.laneCount - 1,
+      -1,
+      false,
+    ],
+  ])("%s", (_, lane, direction, cancelled) => {
+    const input: SessionInput = { direction, kind: "lane" };
+    const { events, session } = stepSession(
+      gameData,
+      runStreams(1),
+      geometry,
+      STEP_SECONDS,
+      [input],
+      straining(lane),
+    );
+    const failed = events.flatMap((event) => (event.kind === "pulled" ? event.step.failed : []));
+    expect(session.pulls.strain === null).toBe(cancelled);
+    expect(failed).toEqual(cancelled ? ["koda"] : []);
   });
 });
 

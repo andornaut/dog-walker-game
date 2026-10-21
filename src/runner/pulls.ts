@@ -1,3 +1,4 @@
+import { clampIndex } from "../arrays";
 import type { DogId, GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countTally } from "../rules/achievements";
@@ -37,7 +38,7 @@ export type PullTargetKind = "squirrel";
 // tell to go. pullsLeft is the pulls the target still draws. blocked is set while the lane it
 // would pull into has an obstacle too close to react to: the dog strains on, and pulls once
 // the lane clears. fromLane is the pack's lane when the tell started: steering away from it,
-// against direction, cancels the pull.
+// against direction, cancels the pull, as does a press toward the edge from an edge lane.
 export interface Strain {
   readonly blocked: boolean;
   readonly direction: LaneDirection;
@@ -301,17 +302,36 @@ function sideOf(lane: number, target: Target): LaneDirection {
   return target.lanePosition < lane ? -1 : 1;
 }
 
-// One step of the pull clock. With no dog straining, the dog nearest the nearest squirrel
-// starts its tell toward it, which draws squirrelPulls pulls. A strain whose target has
-// gone, passed or been reached ends, and steering away from the target cancels it. Once the tell has run, and a darting
-// squirrel or loose dog moves and is off the pack's lane, the dog pulls one lane toward the
-// target, unless the fairness rule blocks the pull: then it strains on until the lane clears or
-// the strain ends. A target with pulls left starts the tell again. Nothing moves unless the
-// walk is walking with no hit stop.
+// Whether the player steered away from the strain's target: the pack's lane moved away from
+// it, or, in an edge lane, a press toward the edge, which cannot move the pack.
+function steeredAway(
+  laneCount: number,
+  lane: number,
+  pressed: readonly LaneDirection[],
+  strain: Strain,
+): boolean {
+  if ((lane - strain.fromLane) * strain.direction < 0) {
+    return true;
+  }
+  const away = -strain.direction;
+  return pressed.some(
+    (direction) => direction === away && clampIndex(laneCount, lane + direction) === lane,
+  );
+}
+
+// One step of the pull clock. pressed is the lane presses applied this step, in order. With
+// no dog straining, the dog nearest the nearest squirrel starts its tell toward it, which
+// draws squirrelPulls pulls. A strain whose target has gone, passed or been reached ends, and
+// steering away from the target cancels it. Once the tell has run, and a darting squirrel or
+// loose dog moves and is off the pack's lane, the dog pulls one lane toward the target, unless
+// the fairness rule blocks the pull: then it strains on until the lane clears or the strain
+// ends. A target with pulls left starts the tell again. Nothing moves unless the walk is
+// walking with no hit stop.
 export function stepPulls(
   data: PullData,
   geometry: PullGeometry,
   stepSeconds: number,
+  pressed: readonly LaneDirection[],
   pulls: Pulls,
   walk: Walk,
 ): PullStep {
@@ -356,7 +376,7 @@ export function stepPulls(
 
   // Steering away from the target during the strain cancels the pull, and the target's pulls
   // with it.
-  if ((lane - strain.fromLane) * strain.direction < 0) {
+  if (steeredAway(geometry.laneCount, lane, pressed, strain)) {
     const next = { ...pulls, clock, spent: [...spent, strain.itemId], strain: null };
     return { ...NOTHING, failed: [strain.dog], pulls: next, walk };
   }

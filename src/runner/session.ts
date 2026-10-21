@@ -147,16 +147,18 @@ export function stepSession(
     return { events: [], session };
   }
   const events: SessionEvent[] = [];
+  const pressed: LaneDirection[] = [];
   let { walk } = session;
   for (const input of inputs) {
     events.push({ input, kind: "input", timeMs: session.timeMs });
     if (input.kind === "home") {
       return { events, session: { ...session, walk: { ...walk, run: headHome(walk.run) } } };
     }
+    pressed.push(input.direction);
     walk = steerWalk(data, geometry(walk.run).laneCount, input.direction, walk);
   }
   const road = geometry(walk.run);
-  const pulled = stepPulls(data, road, seconds, session.pulls, walk);
+  const pulled = stepPulls(data, road, seconds, pressed, session.pulls, walk);
   events.push({ kind: "pulled", step: pulled });
   const zoomies = stepZoomies(data, road, seconds, session.zoomiesSeconds, pulled.walk);
   if (zoomies.drifted !== null) {
