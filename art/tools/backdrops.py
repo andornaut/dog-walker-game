@@ -1460,14 +1460,14 @@ def cn_tower(cv, cx, base, top):
     """The tower far off at night, from its antenna's tip on row top to row base, in the far landmarks'
     haze shaded lgrey, in its real proportions: the antenna the top sixth, a red beacon at its tip and
     another halfway down; the SkyPod with its gold windows; a 5-column shaft on to the main pod, 23 wide
-    with a gold window band, 60% of the way up; then the long shaft tapering out to 15 columns at the foot."""
+    with a gold window band, two thirds of the way up; then the long shaft tapering out to 15 columns at the foot."""
     h = base - top
 
     def row(y, half):
         cv.fill(cx - half, y, 2 * half + 1, 1, "haze")
         cv.fill(cx + max(1, half - 2), y, min(3, half), 1, "lgrey")
 
-    mast, sky_pod, pod = top + round(h * 0.09), top + round(h * 0.17), top + round(h * 0.36)
+    mast, sky_pod, pod = top + round(h * 0.09), top + round(h * 0.16), top + round(h * 0.33)
     cv.fill(cx, top, 1, mast - top, "lgrey")
     for y in range(mast, sky_pod):
         row(y, 1)
@@ -1701,11 +1701,11 @@ def yonge():
     scotia(cv, 76, 24, 28)
     dominion(cv, 102, 22, 44, 5)
     glass_tower(cv, 126, 22, 34, 8, "dslate")
-    cn_tower(cv, 61, BASE, 2)
-    cv.fill(48, 65, 26, BASE - 65, "coal")
-    outline_box(cv, 48, 65, 26, BASE - 64, "ink")
-    cv.fill(49, 66, 24, 1, "ash")
-    lit(cv, 51, 72, 68, 78, "dome-block", 0.45, ("amber", "ochre"), (3, 3))
+    cn_tower(cv, 61, BASE, 0)
+    cv.fill(48, 71, 26, BASE - 71, "coal")
+    outline_box(cv, 48, 71, 26, BASE - 70, "ink")
+    cv.fill(49, 72, 24, 1, "ash")
+    lit(cv, 51, 72, 74, 80, "dome-block", 0.45, ("amber", "ochre"), (3, 3))
     skydome(cv, 44, 94, BASE - 26, 20)
     # the nearer towers: dark glass on the left and up to the SkyDome's lower half; then, down to
     # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, the TD

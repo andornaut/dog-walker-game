@@ -762,23 +762,33 @@ def yonge_view():
         a.fill(x, y, 1, 1, "white")
     a.fill(61, 2, 3, 3, "haze")
     a.fill(61, 2, 1, 1, "white")
-    # far off in haze, the CN Tower over everything and the SkyDome by its foot, then the nearer towers: two
-    # in front of the dome, the Royal Bank Plaza's gold, glass, First Canadian Place in white under its red
-    # band and the TD Centre in black, lit windows on each
-    a.fill(6, 0, 1, 3, "lgrey")
-    a.fill(6, 0, 1, 1, "red")
-    a.fill(5, 3, 3, 3, "haze")
-    a.fill(2, 6, 9, 2, "haze")
-    a.fill(2, 7, 9, 1, "gold")
-    a.fill(8, 6, 2, 2, "lgrey")
-    a.fill(5, 8, 3, FAR_Y - 8, "haze")
-    a.fill(7, 8, 1, FAR_Y - 8, "lgrey")
+    # far off in haze, the CN Tower over everything, rising from behind the SkyDome past a low dark block,
+    # the dome lined in ink along its top; then the nearer towers: glass where the tower is not, two in
+    # front of the dome, the Royal Bank Plaza's gold, glass, First Canadian Place in white under its red band
+    # and the TD Centre in black, lit windows on each
+    cx = 18
+    a.fill(cx, 0, 1, 3, "lgrey")
+    a.fill(cx, 0, 1, 1, "red")
+    a.fill(cx - 1, 3, 3, 2, "haze")
+    a.fill(cx - 4, 5, 9, 2, "haze")
+    a.fill(cx - 4, 6, 9, 1, "gold")
+    a.fill(cx + 3, 5, 2, 2, "lgrey")
+    a.fill(cx - 1, 7, 3, FAR_Y - 7, "haze")
+    a.fill(cx + 1, 7, 1, FAR_Y - 7, "lgrey")
+    a.fill(14, 11, 8, FAR_Y - 11, "coal")
+    a.fill(14, 11, 8, 1, "ink")
+
+    def dome(px, py):
+        dx, dy = (px + 0.5 - 28) / 13, (py + 0.5 - (FAR_Y - 3)) / 9
+        return dx * dx + dy * dy <= 1
+
     for py in range(FAR_Y - 12, FAR_Y):
-        for px in range(10, 38):
-            dx, dy = (px + 0.5 - 24) / 14, (py + 0.5 - (FAR_Y - 4)) / 8
-            if dx * dx + dy * dy <= 1:
-                a.fill(px, py, 1, 1, "lgrey" if px in (27, 31) else "white" if dx + dy < -0.9 else "haze")
-    for x, w, top, wall_c, lit_c in ((10, 9, 13, "coal", "gold"), (22, 12, 14, "dlake", "amber"),
+        for px in range(14, 43):
+            if dome(px, py):
+                a.fill(px, py, 1, 1, "lgrey" if px in (31, 35) else "white" if px < 26 and not dome(px - 1, py - 1) else "haze")
+            elif dome(px, py + 1) or dome(px - 1, py) or dome(px + 1, py):
+                a.fill(px, py, 1, 1, "ink")
+    for x, w, top, wall_c, lit_c in ((0, 10, 4, "dlake", "gold"), (11, 7, 17, "coal", "gold"), (27, 9, 17, "dlake", "amber"),
                                      (36, 8, 6, "gold", "ochre"), (44, 12, 7, "dlake", "gold"),
                                      (56, 7, 5, "lgrey", "grey"), (63, 12, 8, "coal", "gold")):
         a.fill(x, top, w, FAR_Y - top, wall_c)
