@@ -1219,7 +1219,7 @@
       "maxSlowVehicles": 3,
       "minorObstaclesFirstZone": 42,
       "minorObstaclesGainPerZone": 0,
-      "obstaclesFirstZone": 18,
+      "obstaclesFirstZone": 19,
       "obstaclesGainPerZone": 2,
       "openLanesPerRowMin": 2,
       "packSizeMax": 3,
