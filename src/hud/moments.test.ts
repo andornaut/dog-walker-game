@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { faceMood } from "../rules/treats";
@@ -104,15 +105,42 @@ describe("firingLayout", () => {
   const { dogSlots: cards, walkView: screen } = screenLayout(SCREEN_CONFIG);
   const { popSize } = FIRING_PARTS;
 
+  const whole = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
+  const FACE_HALF = 32;
+  // Each part's rect on screen for card: the 2x face, the plate, the pop and the line's tail
+  // tips (the bubble keeps under the bank's lane, below).
+  const partRects = (card: Rect): Rect[] => {
+    const { face, plate, pop, tail } = firingLayout(screen, card);
+    const faceRect = {
+      height: 2 * FACE_HALF,
+      width: 2 * FACE_HALF,
+      x: face.x - FACE_HALF,
+      y: face.y - FACE_HALF,
+    };
+    const tails = DOWN_TAILS.map(({ height }) => ({ height, width: 0, ...tail }));
+    return [faceRect, plate, { height: popSize, width: popSize, ...pop }, ...tails];
+  };
+
   it.each(cards.map((card, i) => [i, card] as const))(
-    "centres card %i's 2x face on its owner's tab, the 2x pop level with it and whole on screen",
+    "centres card %i's 2x face over its owner's tab, the 2x pop level with it",
     (_i, card) => {
       const { face, pop } = firingLayout(screen, card);
       const tab = ownerTabRect(card);
-      expect(face).toEqual({ x: tab.x + tab.width / 2, y: tab.y + tab.height / 2 });
+      expect(face.x).toBe(tab.x + tab.width / 2);
+      expect(face.y).toBeLessThan(tab.y);
       expect(pop.y + popSize / 2).toBe(face.y);
-      expect(pop.x).toBeGreaterThanOrEqual(screen.x);
-      expect(pop.x + popSize).toBeLessThanOrEqual(screen.x + screen.width);
+    },
+  );
+
+  it.each(cards.map((card, i) => [i, card] as const))(
+    "keeps every part of card %i's moment on screen and above the card",
+    (_i, card) => {
+      for (const rect of partRects(card)) {
+        expect(rect.x).toBeGreaterThanOrEqual(whole.x);
+        expect(rect.x + rect.width).toBeLessThanOrEqual(whole.x + whole.width);
+        expect(rect.y).toBeGreaterThanOrEqual(whole.y);
+        expect(rect.y + rect.height).toBeLessThanOrEqual(card.y);
+      }
     },
   );
 
@@ -133,13 +161,13 @@ describe("firingLayout", () => {
   });
 
   it.each(cards.map((card, i) => [i, card] as const))(
-    "puts card %i's plate on the card under the 2x face, as wide as its name and inside it",
+    "puts card %i's plate under the 2x face, over the card's top and within its sides",
     (_i, card) => {
       const { face, plate } = firingLayout(screen, card);
-      expect(plate.y).toBeGreaterThan(face.y + 32);
+      expect(plate.y).toBeGreaterThanOrEqual(face.y + FACE_HALF);
       expect(plate.x).toBeGreaterThanOrEqual(card.x);
       expect(plate.x + plate.width).toBeLessThanOrEqual(card.x + card.width);
-      expect(plate.y + plate.height).toBeLessThanOrEqual(card.y + card.height);
+      expect(plate.y + plate.height).toBeLessThan(card.y);
     },
   );
 
@@ -148,7 +176,7 @@ describe("firingLayout", () => {
     expect(tail.x).toBe(face.x);
     expect(tail.y).toBe(line.y - 1);
     for (const { height } of DOWN_TAILS) {
-      expect(tail.y + height).toBeLessThanOrEqual(face.y - 32);
+      expect(tail.y + height).toBeLessThanOrEqual(face.y - FACE_HALF);
     }
   });
 });

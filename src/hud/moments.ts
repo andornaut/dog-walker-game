@@ -143,24 +143,31 @@ export function firingTimeline(seconds: number, still: boolean): FiringTimeline 
   return { fadeAtMs, fadeMs: fade, plateMs: intro(plateMs), popMs: intro(popMs), trotMs: holdMs };
 }
 
-// The firing moment's parts, from the card's top-left corner: the owner's face at 2x centred on
-// the owner's tab, the 64x64 pop drawn at 2x (popSize square) from pop, centred on the face
-// (firingLayout keeps it on screen), the plate on the card's body under the face, as wide as
-// the card's name and PLATE_REACH more each side, and the fired line's bubble centred over
-// line, its bottom edge on it, with the 8x6 tail's top row at tail.y over the bubble's rim, its
-// tip at tail.x, LINE_CLEARANCE over the face's top.
+// The firing moment's parts, from the card's top-left corner, all above the card so the card
+// shows its fired look under them: the owner's face at 2x centred over the owner's tab, LIFT
+// higher, the 64x64 pop drawn at 2x (popSize square) from pop, centred on the face
+// (firingLayout keeps it on screen), the plate under the face with its bottom PLATE_GAP over
+// the card's top, as wide as the card's name and PLATE_REACH more each side, and the fired
+// line's bubble centred over line, its bottom edge on it, with the 8x6 tail's top row at tail.y
+// over the bubble's rim, its tip at tail.x, LINE_CLEARANCE over the face's top.
 const PLATE_REACH = 4;
+const PLATE_HEIGHT = 28;
+const PLATE_GAP = 4;
 const FACE_HALF = 32;
+const LIFT = 50;
 const LINE_CLEARANCE = 6;
-const FACE = { x: OWNER_TAB.x + OWNER_TAB.size / 2, y: OWNER_TAB.y + OWNER_TAB.size / 2 };
+const FACE = {
+  x: OWNER_TAB.x + OWNER_TAB.size / 2,
+  y: OWNER_TAB.y + OWNER_TAB.size / 2 - LIFT,
+};
 export const FIRING_PARTS = {
   face: FACE,
   line: { x: FACE.x, y: FACE.y - FACE_HALF - LINE_CLEARANCE },
   plate: {
-    height: 28,
+    height: PLATE_HEIGHT,
     width: DOG_CARD.name.room + 2 * PLATE_REACH,
     x: DOG_CARD.name.x - DOG_CARD.name.room / 2 - PLATE_REACH,
-    y: FACE.y + FACE_HALF + 2,
+    y: -PLATE_HEIGHT - PLATE_GAP,
   },
   // "FIRED!" is centred across the plate, the top of its capitals this far down.
   plateText: { y: 9 },
