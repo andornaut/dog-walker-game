@@ -60,17 +60,17 @@ export const SHOP_LAYOUT = {
     width: ROW_WIDTH,
     x: ROW_X,
   },
-  // Beside a list longer than the view: a thumb in tan with an edge-wide ink edge, thumbWidth
+  // Beside a list longer than the view: a thumb in plum with an edge-wide ink edge, thumbWidth
   // wide, inset from the panel's right edge and at least thumbMin tall, on a trackWidth-wide
-  // track in the panel's line colour, centred under it and as tall as the list area.
+  // tan track, centred under it and as tall as the list area.
   scrollbar: {
     edge: 1,
     edgeColor: "ink",
     inset: 2,
-    thumbColor: "tan",
+    thumbColor: "plum",
     thumbMin: 16,
     thumbWidth: 5,
-    trackColor: "plum",
+    trackColor: "tan",
     trackWidth: 3,
   },
   tab: { drawHeight: 28, drawY: 80, gap: 8, height: 44, width: 160, x: ROW_X, y: 72 },

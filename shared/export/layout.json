@@ -2208,10 +2208,10 @@
         "edge": 1,
         "edgeColor": "ink",
         "inset": 2,
-        "thumbColor": "tan",
+        "thumbColor": "plum",
         "thumbMin": 16,
         "thumbWidth": 5,
-        "trackColor": "plum",
+        "trackColor": "tan",
         "trackWidth": 3
       },
       "tab": {
