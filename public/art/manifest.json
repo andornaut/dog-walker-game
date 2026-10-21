@@ -5620,6 +5620,10 @@
       "png": "images/icon-lock.png"
     },
     {
+      "key": "icon-lock-open",
+      "png": "images/icon-lock-open.png"
+    },
+    {
       "key": "icon-logbook",
       "png": "images/icon-logbook.png"
     },
@@ -5954,6 +5958,10 @@
     {
       "key": "ui-detail-well",
       "png": "images/ui-detail-well.png"
+    },
+    {
+      "key": "ui-detail-well-locked",
+      "png": "images/ui-detail-well-locked.png"
     },
     {
       "key": "ui-dog-card-band",

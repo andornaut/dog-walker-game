@@ -2,14 +2,15 @@
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
-icon-logbook, icon-settings, icon-lock, icon-money, icon-treat (the treat pickup's bone as
+icon-logbook, icon-settings, icon-lock, icon-lock-open (the padlock with its shackle lifted, on a
+locked item the bank covers), icon-money, icon-treat (the treat pickup's bone as
 road.treat lays it out at 16x16, for the top bar's treat well), icon-stinky; icon-dog-slot (32x32, a pack
 slot for sale in the shop: a doghouse with a green plus badge, as the shop's item-<gear> art,
 outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
-ui-detail-well (68x68); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
+ui-detail-well (68x68) and ui-detail-well-locked (68x68, grey, for an item not owned); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
 and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-strip-well (24x24
 nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
@@ -203,6 +204,23 @@ def lock():
     g.rect(3, 7, 10, 1, "yellow")
     g.rect(12, 7, 1, 8, "orange")
     g.rect(7, 9, 2, 4, "dbrown")
+    return g
+
+
+def lock_open():
+    """icon-lock with its shackle lifted: the left leg still in the body, the right leg's end a
+    row clear of it, so a locked item the bank covers reads apart from one it does not by shape.
+    The body is a row shorter than icon-lock's to leave the gap."""
+    g = Grid(16, 16)
+    g.ell(8, 4.5, 4, 4, "grey", "slate", "lgrey")
+    g.ell(8, 5, 2, 2.6, None)
+    g.rect(4, 4, 2, 4, "grey")
+    g.rect(4, 4, 1, 4, "lgrey")
+    g.rect(8, 6, 5, 2, None)
+    g.rect(3, 8, 10, 7, "amber")
+    g.rect(3, 8, 10, 1, "yellow")
+    g.rect(12, 8, 1, 7, "orange")
+    g.rect(7, 10, 2, 3, "dbrown")
     return g
 
 
@@ -883,6 +901,20 @@ def detail_well():
     return g
 
 
+def detail_well_locked():
+    """68x68: ui-detail-well for an item not owned, in the disabled tile's flat greys: ink and slate
+    lines round a grey recess shaded dslate under its top and left edges. The game draws the
+    portrait's navy silhouette at 2,2 (4.93:1 on grey), never the portrait."""
+    g = Grid(68, 68)
+    g.rect(1, 0, 66, 68, "ink")
+    g.rect(0, 1, 68, 66, "ink")
+    g.rect(1, 1, 66, 66, "slate")
+    g.rect(2, 2, 64, 64, "grey")
+    g.rect(2, 2, 64, 1, "dslate")
+    g.rect(2, 2, 1, 64, "dslate")
+    return g
+
+
 SECTION_W, SECTION_H = 24, 32
 SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
 
@@ -1412,6 +1444,7 @@ IMAGES = {
     "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
+    "icon-lock-open": lambda: to_image(lock_open().outlined()),
     "icon-money": lambda: to_image(money().outlined()),
     "icon-treat": lambda: to_image(treat_icon().outlined()),
     "icon-stinky": lambda: to_image(stinky()),
@@ -1435,6 +1468,7 @@ IMAGES = {
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
     "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
     "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
+    "ui-detail-well-locked": lambda: to_image(detail_well_locked().outlined(False)),
     "ui-cork": lambda: to_image(cork().outlined(False)),
     "ui-denim": lambda: to_image(denim().outlined(False)),
     "ui-plaid": lambda: to_image(plaid().outlined(False)),

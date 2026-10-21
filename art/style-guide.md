@@ -60,22 +60,23 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, and `K` names in `art/tool
 | plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                                                             |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                           |
 | darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                      |
-| forest on cream                | 5.39  | Money gained, affordable prices, `ui-payout-label`                                                                       |
-| darkRed on cream               | 5.07  | Money lost, unaffordable prices, full heart, ♥ in help callouts                                                          |
+| forest on cream                | 5.39  | Money gained, a held card's affordable price line, `ui-payout-label`                                                     |
+| darkRed on cream               | 5.07  | Money lost, a held card's unaffordable price or unlock line, full heart, ♥ in help callouts                              |
+| darkRed on lightGrey           | 4.48  | Price on the short plate (2×, so 3:1 applies)                                                                            |
 | cream on darkBrown             | 5.85  | Text on the column or wood                                                                                               |
 | amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                                                |
 | yellow on darkBrown            | 6.79  | Floating gain on the column                                                                                              |
 | white on darkBrown             | 8.48  | Floating loss on the column, filled page dot                                                                             |
 | tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                                               |
 | white on forest                | 7.80  | Labels on chips                                                                                                          |
-| ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board                                                                              |
+| ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                                                      |
 | white on rust                  | 4.99  | Trait chip "Food"                                                                                                        |
 | white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                                             |
 | white on navy                  | 13.89 | `ui-detail-band` title                                                                                                   |
 | ink on yellow                  | 14.43 | `ui-sticker` `new`                                                                                                       |
 | ink on cyan                    | 11.98 | `ui-sticker` `price`                                                                                                     |
-| navy on grey                   | 4.93  | Price on a `disabled` tile                                                                                               |
-| navy on lightGrey              | 8.48  | The cost on a disabled card's `card-cost`                                                                                |
+| navy on grey                   | 4.93  | The navy silhouette in `ui-detail-well-locked`                                                                           |
+| navy on lightGrey              | 8.48  | The cost on a disabled card's `card-cost`, the goal plate, a blocked slot's price                                        |
 | darkSlate on grey              | 3.39  | Labels on `disabled` tiles and buttons (inactive, exempt)                                                                |
 | grey on darkBrown              | 3.01  | `disabled` tile face on the wood                                                                                         |
 | amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                                            |
@@ -106,11 +107,16 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 | -------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------- |
 | normal   | Available, not chosen                                                         | Cream face, ink and plum lines, tan lip (`ui-tile` `normal`, `ui-button` `normal`)         | plum (9.42:1)              |
 | selected | Picked, equipped, toggled on, the open tab or page                            | Gold: ink line, amber band, orange line, yellow face (`ui-tile` `selected`)                | plum (10.92:1)             |
-| disabled | Cannot be chosen now: locked (not owned), the pack full, not available        | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt) |
+| disabled | Cannot be chosen now: not owned and short, the pack full, not available       | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt) |
 | primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board)                | ink (8.41:1)               |
 
 - Art inside a disabled tile (faces, icons, the padlock) draws from its grey copy (`greyTextureKey`, as a disabled card) one ramp step darker (`remapDarker`), on a slate box; a normal tile's box is tan, a selected one's amber.
-- A locked tile (not owned) is disabled whether or not the bank covers it: its art is a flat navy silhouette (`silhouetteTextureKey`) under `icon-lock`, with a cream price plate in an ink line, its price forest (5.39:1) while the bank covers it and darkRed (5.07:1) while not, or a goal plate in plum.
+- A dog, gear item or dog slot for sale is in one of three states, each told apart by the tile's face, the padlock's shape and the plate, never by colour alone. On the start screen an item not owned draws as a flat navy silhouette (`silhouetteTextureKey`) and a dog's name as "???"; in the Pet shop it draws as itself.
+  - **Owned:** a `normal` (or `selected`) tile in full colour, with no padlock and no plate. The start screen shows its name and fee; a shop row shows `ui-check` `tick` and OWNED in forest at its right. An owned dog greyed while the pack is full keeps its art (the grey copy), with no padlock or plate.
+  - **Affordable:** a `normal` tile under `icon-lock-open` at its top-left (dx -2, dy -3), with the buy plate: green face, a yellow top row and a forest bottom row inside a 1px ink line, the price ink (8.41:1). A shop row keeps its art in colour and wears `ui-afford`.
+  - **Short:** a `disabled` tile under `icon-lock`, with the short plate: a lightGrey face in a 1px slate line, the price darkRed (4.48:1 at 2×). A shop row draws its art from the disabled tile's grey copy (`disabledTextureKey`) on a slate box.
+- A walker not owned, and a dog slot that needs the one before it, are short whatever the bank holds: a `disabled` tile, the silhouette and `icon-lock`, and the goal plate (lightGrey in slate, navy text, 8.48:1): "???" on a walker's tile, the price on the slot's row.
+- A held dog or walker not owned opens a locked detail card: the title "???", `ui-detail-well-locked` with the portrait's navy silhouette at 2,2, and the tile's padlock (`icon-lock-open` or `icon-lock`) at 2× over the well's top-left corner (well x - 4, y - 5). Beside the well go "Dog" or "Walker" in darkBrown and the unlock line under it: a dog's price, forest while the bank covers it and darkRed while not, or "Finish <neighborhood> to unlock." in darkRed. It has no breed, owner, hearts, totals, agility or perk rows, so the card ends 12px under the well.
 - The primary green marks a screen's call to action. On the start screen it marks Start walk and the Pet shop board, the one other tappable entry point there, so both read as tappable; Start walk stays the only full-width primary button.
 - A disabled primary (Start walk before a walker and a dog are picked) is `go-disabled`, which matches `disabled`.
 - `secondary` and `secondary-pressed` match `normal` and `pressed`: every button that is not the screen's primary is `normal`.
