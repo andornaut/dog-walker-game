@@ -3,6 +3,7 @@ import type { Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { scrollbarRects, type ScrollbarSpec } from "../ui/scrollbar";
+import { BADGE_STRIP } from "./badgesView";
 
 export type StatsTab = "badges" | "dogs" | "runs";
 
@@ -78,10 +79,20 @@ export const STATS_LAYOUT = {
   // and the next heading sectionGap under the last row's pitch.
   walks: { rowsY: 20, sectionGap: 6, top: PANEL.y + 10 },
   // The badge wall: the heading and the earned count with their capitals at headingY, then one
-  // badge per row from y, each the badge then a text column of up to lines lines at 2x from x
-  // (the name, the goal, then a locked badge's progress across walks).
-  wall: { headingY: PANEL.y + 10, rowHeight: 52, width: 316, x: 16, y: PANEL.y + 30 },
-  wallText: { lineHeight: 16, lines: 3, width: 276, x: 38, y: 4 },
+  // badge per row from y, gap apart, each the badge badgeTop under the row's top then a text
+  // column of up to lines lines at 2x from x (the name, the goal, then a locked badge's
+  // progress across walks), its capitals' top y under the row's top and pad over the row's
+  // bottom. The wall ends foot under its last row.
+  wall: {
+    badgeTop: 2,
+    foot: 16,
+    gap: 8,
+    headingY: PANEL.y + 10,
+    width: 316,
+    x: 16,
+    y: PANEL.y + 30,
+  },
+  wallText: { lineHeight: 16, lines: 3, pad: 4, width: 276, x: 38, y: 4 },
 } as const;
 
 // How wide the open badge's goal and line may be.
@@ -124,9 +135,18 @@ export function dogsBottom(dogs: number): number {
   return dogBlockTop(dogs) - gap + STATS_LAYOUT.scroll.padBottom;
 }
 
-export function badgesBottom(badges: number): number {
-  const { rowHeight, y } = STATS_LAYOUT.wall;
-  return y + badges * rowHeight + STATS_LAYOUT.scroll.padBottom;
+export function badgesBottom(rows: readonly Rect[]): number {
+  const { foot, y } = STATS_LAYOUT.wall;
+  const last = rows.at(-1);
+  return (last === undefined ? y : last.y + last.height) + foot;
+}
+
+// A wall row's height for a badge whose text runs lines lines: as tall as the badge with
+// badgeTop over and under it, or as the text with pad under its last line, whichever is taller.
+export function wallRowHeight(lines: number): number {
+  const { badgeTop } = STATS_LAYOUT.wall;
+  const { lineHeight, pad, y } = STATS_LAYOUT.wallText;
+  return Math.max(BADGE_STRIP.badgeSize + 2 * badgeTop, y + lines * lineHeight + pad);
 }
 
 // The scrollbar's track and thumb for content max pixels taller than the view, scrolled y, or

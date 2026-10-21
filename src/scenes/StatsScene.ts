@@ -10,6 +10,8 @@ import {
   badgeWall,
   earnedText,
   wallCell,
+  wallCellLineCount,
+  type WallCellLines,
   wallRects,
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
@@ -29,6 +31,7 @@ import {
   type StatsTab,
   statsTabRects,
   walksBottom,
+  wallRowHeight,
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
@@ -102,7 +105,6 @@ const PITCH = STATS_LAYOUT.rows.pitch;
 const DOGS = STATS_LAYOUT.dogs;
 const WALL = STATS_LAYOUT.wall;
 const WALL_TEXT = STATS_LAYOUT.wallText;
-const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
 const VIEW: Rect = STATS_LAYOUT.view;
 const SCROLL = STATS_LAYOUT.scroll;
 // A press that travels past the tap distance drags the open tab.
@@ -137,6 +139,8 @@ export class StatsScene extends Scene {
   private scroll: ListScroll = listScroll(0);
   private scrollbar: ScrollbarView | undefined;
   private tab: Tab = "runs";
+  // The badge wall's rows as last drawn, each badge's tap target.
+  private wallRows: Rect[] = [];
 
   constructor() {
     super(SCENE_KEYS.stats);
@@ -271,7 +275,7 @@ export class StatsScene extends Scene {
     }
     // Only the view's part of a badge's row is pressed.
     const onWall = this.tab === "badges" && containsPoint(VIEW, x, y);
-    const badge = onWall ? rectIndexAt(WALL_RECTS, x, y + this.scroll.y) : undefined;
+    const badge = onWall ? rectIndexAt(this.wallRows, x, y + this.scroll.y) : undefined;
     return badge === undefined ? undefined : { badge };
   }
 
@@ -458,18 +462,6 @@ export class StatsScene extends Scene {
     const badges = this.badges();
     this.text(LEFT, WALL.headingY, gameData.menuText.stats.badges, { font: "title" });
     this.text(RIGHT, WALL.headingY, earnedText(gameData, badges), { originX: 1 });
-    badges.forEach((badge, i) => {
-      const rect = WALL_RECTS[i];
-      if (rect !== undefined) {
-        this.drawWallBadge(badge, badgeProgress(gameData, save, badge), rect);
-      }
-    });
-    return badgesBottom(badges.length);
-  }
-
-  private drawWallBadge(badge: BadgeView, progress: string | undefined, rect: Rect): void {
-    const half = BADGE_SIZE / 2;
-    this.content?.add(addBadge(this, badge.art, badge.earned, rect.x + half, rect.y + 2 + half));
     const probe = addPixelText(this, 0, 0, "", { color: PALETTE.plum, scale: TEXT_SCALE });
     probe.setVisible(false);
     const inkWidth = (line: string) => {
@@ -477,8 +469,29 @@ export class StatsScene extends Scene {
       const ink = inkSpan(probe);
       return ink.right - ink.left;
     };
-    const cell = wallCell(WALL_TEXT, inkWidth, badge, progress);
+    const cells = badges.map((badge) =>
+      wallCell(WALL_TEXT, inkWidth, badge, badgeProgress(gameData, save, badge)),
+    );
     probe.destroy();
+    // Each row as tall as its badge or its text, whichever is taller.
+    this.wallRows = wallRects(
+      WALL,
+      cells.map((cell) => wallRowHeight(wallCellLineCount(cell))),
+    );
+    badges.forEach((badge, i) => {
+      const rect = this.wallRows[i];
+      const cell = cells[i];
+      if (rect !== undefined && cell !== undefined) {
+        this.drawWallBadge(badge, cell, rect);
+      }
+    });
+    return badgesBottom(this.wallRows);
+  }
+
+  private drawWallBadge(badge: BadgeView, cell: WallCellLines, rect: Rect): void {
+    const half = BADGE_SIZE / 2;
+    const badgeY = rect.y + WALL.badgeTop + half;
+    this.content?.add(addBadge(this, badge.art, badge.earned, rect.x + half, badgeY));
     const x = rect.x + WALL_TEXT.x;
     let y = rect.y + WALL_TEXT.y;
     const draw = (lines: readonly string[], color: number) => {

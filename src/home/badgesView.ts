@@ -72,7 +72,7 @@ export function badgeProgress(
       });
 }
 
-interface WallCellLines {
+export interface WallCellLines {
   readonly goal: string[];
   readonly name: string[];
   readonly progress: string[];
@@ -129,21 +129,26 @@ export function wallCell(
   return { ...fitted, whole: fitted.whole && drawn.every((line) => inkWidth(line) <= cell.width) };
 }
 
+// How many lines a wall cell draws.
+export function wallCellLineCount(cell: WallCellLines): number {
+  return cell.name.length + cell.goal.length + cell.progress.length;
+}
+
 interface WallSpec {
-  readonly rowHeight: number;
+  readonly gap: number;
   readonly width: number;
   readonly x: number;
   readonly y: number;
 }
 
-// Each badge's tap target, one per row from the top.
-export function wallRects(spec: WallSpec, count: number): Rect[] {
-  return Array.from({ length: count }, (_, i) => ({
-    height: spec.rowHeight,
-    width: spec.width,
-    x: spec.x,
-    y: spec.y + i * spec.rowHeight,
-  }));
+// Each badge's row, also its tap target: one per height in heights from the top, gap apart.
+export function wallRects(spec: WallSpec, heights: readonly number[]): Rect[] {
+  let y = spec.y;
+  return heights.map((height) => {
+    const rect = { height, width: spec.width, x: spec.x, y };
+    y += height + spec.gap;
+    return rect;
+  });
 }
 
 interface StripSlot {

@@ -144,10 +144,15 @@ describe("wallCellLines", () => {
 });
 
 describe("wallRects", () => {
-  it("puts one badge per row from the top", () => {
-    const rects = wallRects({ rowHeight: 52, width: 316, x: 16, y: 138 }, 3);
+  // Each row as tall as its height, gap under the one before; the tap targets are the rows.
+  const spec = { gap: 8, width: 316, x: 16, y: 138 };
+  it.each<[string, number[], number[]]>([
+    ["one row", [36], [138]],
+    ["rows of mixed heights", [36, 56, 40], [138, 182, 246]],
+  ])("lays out %s gap apart from the top", (_, heights, tops) => {
+    const rects = wallRects(spec, heights);
     expect(rects).toEqual(
-      [0, 1, 2].map((i) => ({ height: 52, width: 316, x: 16, y: 138 + i * 52 })),
+      heights.map((height, i) => ({ height, width: spec.width, x: spec.x, y: tops[i] })),
     );
   });
 });

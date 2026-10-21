@@ -9,7 +9,14 @@ import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";
-import { badgeWall } from "./badgesView";
+import {
+  BADGE_STRIP,
+  badgeProgress,
+  badgeWall,
+  wallCell,
+  wallCellLineCount,
+  wallRects,
+} from "./badgesView";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {
   badgesBottom,
@@ -23,6 +30,7 @@ import {
   statsScrollbar,
   statsTabRects,
   walksBottom,
+  wallRowHeight,
 } from "./statsLayout";
 import { overallRows } from "./statsView";
 
@@ -43,13 +51,20 @@ describe("the tabs", () => {
     }
   });
 });
-// A wall cell's last line keeps its lowest ink inside the row.
-describe("a wall badge's text", () => {
-  it("leaves the last line's lowest ink inside the row", () => {
-    const { lineHeight, lines, y } = STATS_LAYOUT.wallText;
-    const lowest = y + (lines - 1) * lineHeight + inkRowsFromCapTop(BODY) * TEXT_SCALE;
-    expect(lowest).toBeLessThanOrEqual(STATS_LAYOUT.wall.rowHeight);
-  });
+// A wall row holds its badge and its text: the badge with room over and under it, and the
+// last line's lowest ink inside the row.
+describe("a wall row", () => {
+  const { badgeTop } = STATS_LAYOUT.wall;
+  const { lineHeight, lines, y } = STATS_LAYOUT.wallText;
+  it.each(Array.from({ length: lines }, (_, i) => [i + 1] as const))(
+    "holds the badge and %i lines of text",
+    (count) => {
+      const height = wallRowHeight(count);
+      const lowest = y + (count - 1) * lineHeight + inkRowsFromCapTop(BODY) * TEXT_SCALE;
+      expect(lowest).toBeLessThan(height);
+      expect(2 * badgeTop + BADGE_STRIP.badgeSize).toBeLessThanOrEqual(height);
+    },
+  );
 });
 
 // The open badge holds its name in the title font, its goal and its line at 2x, the line's
@@ -108,6 +123,15 @@ const walksRows = Object.values(overallRows(gameData, save.stats))
     }
     return { label, value: value.startsWith("$") ? "$9,999" : "9999" };
   });
+// The badge wall's rows with every badge locked and showing the veteran save's progress.
+const bodyInk = (line: string) => inkWidth("font-body", STYLE, line);
+const wallCells = BADGES.map((badge) =>
+  wallCell(wallText, bodyInk, badge, badgeProgress(gameData, save, badge)),
+);
+const wallRows = wallRects(
+  wall,
+  wallCells.map((cell) => wallRowHeight(wallCellLineCount(cell))),
+);
 const dogStatRows = DOG_STATS.map((stat) => ({ label: words.dogColumns[stat], value: "9999" }));
 
 describe("the Walks and Dogs tabs' rows", () => {
@@ -166,7 +190,9 @@ describe("the scrollbar", () => {
 // is in the view; the Walks tab fits without scrolling.
 describe("each tab's scroll", () => {
   const dogCount = Object.keys(gameData.dogs).length;
-  const badgeCount = BADGES.length;
+  const lastRow = wallRows.at(-1) ?? wall;
+  const lastCell = wallCells.at(-1);
+  const lastLines = lastCell === undefined ? 1 : wallCellLineCount(lastCell);
   const { outcomes, overall } = overallRows(gameData, save.stats);
   const walks = [overall.length, outcomes.length];
   const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
@@ -179,7 +205,12 @@ describe("each tab's scroll", () => {
       inkBottom(dogBlockTop(dogCount - 1) + dogs.rowsY + (DOG_STATS.length - 1) * rows.pitch),
       true,
     ],
-    ["Badges", badgesBottom(badgeCount), wall.y + badgeCount * wall.rowHeight, true],
+    [
+      "Badges",
+      badgesBottom(wallRows),
+      inkBottom(lastRow.y + wallText.y + (lastLines - 1) * wallText.lineHeight),
+      true,
+    ],
   ])("%s: brings its last row into view", (_, bottom, lastInk, scrolls) => {
     const max = scrollMax(view, bottom);
     expect(max > 0).toBe(scrolls);

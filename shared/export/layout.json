@@ -2303,8 +2303,10 @@
         "top": 118
       },
       "wall": {
+        "badgeTop": 2,
+        "foot": 16,
+        "gap": 8,
         "headingY": 118,
-        "rowHeight": 52,
         "width": 316,
         "x": 16,
         "y": 138
@@ -2312,6 +2314,7 @@
       "wallText": {
         "lineHeight": 16,
         "lines": 3,
+        "pad": 4,
         "width": 276,
         "x": 38,
         "y": 4
