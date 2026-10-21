@@ -63,7 +63,7 @@ export function smallEffectTexts(
 // first that fits the whole box with the warning left to the fires marker and the enlarged
 // card; else the last text in the box's last style. The effect's top is box.y.
 export function smallCardText(
-  data: Pick<GameData, "dogs" | "runText" | "upgrades">,
+  data: Pick<GameData, "dogs" | "homeText" | "runText" | "upgrades">,
   body: FontMetrics,
   inkWidth: (style: TextFitStyle, line: string) => number,
   option?: OptionView,

@@ -8,7 +8,7 @@ import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import { dogsWalked, walksPlayed } from "../save/stats";
 import { fillLine, signedText } from "../text/lines";
-import { HOME_TEXT_FIELDS } from "./homeText";
+import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.
 export interface HomeLoadout {
@@ -175,8 +175,14 @@ function zoneName(data: Pick<GameData, "world">, route: readonly ZoneId[], zone:
 }
 
 // Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Archie".
-export function dogNames(data: Pick<GameData, "dogs">, dogs: readonly DogId[]): string {
-  return sentenceList(dogs.map((dog) => data.dogs[dog].name));
+export function dogNames(
+  data: Pick<GameData, "dogs" | "homeText">,
+  dogs: readonly DogId[],
+): string {
+  return sentenceList(
+    data.homeText.sentenceList,
+    dogs.map((dog) => data.dogs[dog].name),
+  );
 }
 
 type LogbookData = Pick<GameData, "dogs" | "homeText" | "world">;
@@ -250,12 +256,14 @@ export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
 // What a dog's owner says when the player picks it: their name and one of their parting
 // lines.
 export function partingSpeech(
-  data: Pick<GameData, "dogs" | "quips">,
+  data: Pick<GameData, "dogs" | "homeText" | "quips">,
   random: () => number,
   dog: DogId,
 ): string {
-  const line = quipLine(data, random, { dog, moment: "parting" });
-  return `${data.dogs[dog].owner.name}: ${line}`;
+  return homeLine(data.homeText, "parting", {
+    line: quipLine(data, random, { dog, moment: "parting" }),
+    owner: data.dogs[dog].owner.name,
+  });
 }
 
 type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText">;

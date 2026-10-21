@@ -48,6 +48,7 @@ export const HOME_TEXT_FIELDS = {
   noticeSoundOff: [],
   noticeSoundOn: [],
   packCount: ["count", "max"],
+  parting: ["line", "owner"],
   sectionDogs: [],
   sectionWalker: [],
   sectionWalkerPrompt: [],

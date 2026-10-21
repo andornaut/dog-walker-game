@@ -563,6 +563,8 @@ export interface HomeText {
   readonly noticeSoundOff: string;
   readonly noticeSoundOn: string;
   readonly packCount: string;
+  // What a dog's owner says when the player picks it: their name and a parting line.
+  readonly parting: string;
   // The Pocket section's heading, and its band's note while nothing is pocketed.
   readonly pocket: {
     readonly note: string;
@@ -573,6 +575,12 @@ export interface HomeText {
   readonly sectionDogs: string;
   readonly sectionWalker: string;
   readonly sectionWalkerPrompt: string;
+  // The words that join names in a sentence, as "Jesse, Rosa and Kim": between joins all but
+  // the last two, and beforeLast the last two. The card's firing warning uses them too.
+  readonly sentenceList: {
+    readonly beforeLast: string;
+    readonly between: string;
+  };
   // The Pet shop page: its title, its tabs, the headings over its lists and their notes, a
   // dog slot row's line, the line of a slot that needs the one before it, and the word on an
   // owned row.

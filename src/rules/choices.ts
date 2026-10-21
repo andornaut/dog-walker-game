@@ -259,10 +259,13 @@ function breakdownOf(
 
 // "Fires Jesse": the owners an option would fire, by their dogs.
 export function firesText(
-  data: Pick<GameData, "dogs" | "runText">,
+  data: Pick<GameData, "dogs" | "homeText" | "runText">,
   dogs: readonly DogId[],
 ): string {
-  const owners = sentenceList(dogs.map((dog) => data.dogs[dog].owner.name));
+  const owners = sentenceList(
+    data.homeText.sentenceList,
+    dogs.map((dog) => data.dogs[dog].owner.name),
+  );
   return fillNames(data.runText.card.fires, { owners });
 }
 
