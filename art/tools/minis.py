@@ -260,7 +260,7 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
 
     def drawn(q, up=False, at=p, z=zy):
         # a zoomed dog moves as far in pixels as it would unzoomed, so its hops and spray stay in the frame
-        q = {k: v if k == "glint" or isinstance(v, bool) else v / z for k, v in module.pose(q).items()}
+        q = {k: v if isinstance(v, bool) else v / z for k, v in module.pose(q).items()}
         return small(module, at, draw, snap(q, s * z, up)).outlined()
 
     # zoomed, the feet of the dog standing square stay on their row at s, or, zoomed taller, go one row lower,
@@ -382,7 +382,7 @@ def sprites():
         for name, (draw, _) in dogs.DOGS.items():
             yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.road_scale(name) * s,
                                                             zoom=dogs.DOG_ZOOM.get(name, 1)), ms)
-                                           for tag, poses, ms in dogs.road_tags(name)]
+                                           for tag, poses, ms in dogs.ROAD_TAGS]
 
 
 def originals():

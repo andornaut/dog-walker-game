@@ -699,7 +699,7 @@ def bump():
 
 def fired():
     """A pink slip: a page with two lines of plum text and a folded corner, under a dred stamp
-    lettered in a white line, as ui-fired-plate's dred face."""
+    lettered in a white line, as the empty ui-dog-card's FIRED plate."""
     g = Grid(16, 16)
     g.rect(3, 1, 10, 14, "pink")
     g.rect(3, 1, 10, 1, "white")

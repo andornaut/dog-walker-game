@@ -190,30 +190,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
     "sourceSize": { "w": 19, "h": 19 },
     "duration": 60
-   },
-   "dog-nugget@50 24.aseprite": {
-    "frame": { "x": 456, "y": 0, "w": 19, "h": 19 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
-    "sourceSize": { "w": 19, "h": 19 },
-    "duration": 220
-   },
-   "dog-nugget@50 25.aseprite": {
-    "frame": { "x": 475, "y": 0, "w": 19, "h": 19 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
-    "sourceSize": { "w": 19, "h": 19 },
-    "duration": 220
-   },
-   "dog-nugget@50 26.aseprite": {
-    "frame": { "x": 494, "y": 0, "w": 19, "h": 19 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
-    "sourceSize": { "w": 19, "h": 19 },
-    "duration": 220
    }
  },
  "meta": {
@@ -221,7 +197,7 @@
   "version": "1.2.30-x64",
   "image": "dog-nugget@50.png",
   "format": "RGBA8888",
-  "size": { "w": 513, "h": 19 },
+  "size": { "w": 456, "h": 19 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
@@ -229,8 +205,7 @@
    { "name": "pull", "from": 8, "to": 11, "direction": "forward" },
    { "name": "tell", "from": 12, "to": 15, "direction": "forward" },
    { "name": "idle", "from": 16, "to": 19, "direction": "forward" },
-   { "name": "shake", "from": 20, "to": 23, "direction": "forward" },
-   { "name": "pose", "from": 24, "to": 26, "direction": "forward" }
+   { "name": "shake", "from": 20, "to": 23, "direction": "forward" }
   ]
  }
 }

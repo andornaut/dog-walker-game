@@ -34,7 +34,7 @@ ui-button (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed,
 secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a
 16x16 icon such as pause, help or sound; tags normal, pressed), ui-switch (32x16; tags on, off),
 ui-slider (24x10 three-slice, 4px caps; tags filled, empty, filled-disabled, empty-disabled),
-ui-slider-knob (10x16; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off),
+ui-slider-knob (10x16; tags normal, pressed, disabled), icon-sound (tags on, off),
 icon-sound-panel, icon-music-panel, icon-effects-panel and icon-motion-panel (tags on, off),
 ui-zone-pips (18x8; tags todo, and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile
 (24x24 nine-slice, 4px on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the
@@ -129,8 +129,8 @@ def plate(face, lit, shade, w=24, h=24):
 
 
 # ---------- icons ----------
-# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings, icon-sound and
-# icon-music sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
+# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings and icon-sound
+# sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
 # amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream: dbrown holds
 # 5.85:1 there, plum 9.42:1 and dred 5.07:1.
 
@@ -631,9 +631,9 @@ def dog_slot():
 # ---------- plates: the fired plate and the payout tag (hits.py draws the hit label with plate) ----------
 
 def fired_plate(face, lit, shade):
-    """ui-fired-plate's 24x24 nine-slice, 8px corners: a plate in the owner's temperament colour
-    (blue, purple, dred) with a white stamp line 2px inside the face, its corners cut so it reads
-    as a stamp's rounded border. The game stretches it to 116x28 over the dog's card."""
+    """ui-fired-plate's 24x24 nine-slice, 8px corners: a plate in face with a white stamp line 2px inside
+    the face, its corners cut so it reads as a stamp's rounded border. The game stretches it to 116x28
+    over the dog's card."""
     g = plate(face, lit, shade)
     g.rect(7, 6, 10, 1, "white")
     g.rect(7, 17, 10, 1, "white")
@@ -1561,7 +1561,8 @@ def sprites():
     yield "ui-slider-knob", [(s, [slider_knob(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
     for suffix, ink in (("", NAVY_FACE), ("-panel", CREAM_PANEL)):
         yield f"icon-sound{suffix}", [(t, [speaker(ink, t == "on").outlined(False)], 1000) for t in ("on", "off")]
-        yield f"icon-music{suffix}", [(t, [speaker(ink, t == "on", True).outlined(False)], 1000) for t in ("on", "off")]
+    yield "icon-music-panel", [(t, [speaker(CREAM_PANEL, t == "on", True).outlined(False)], 1000)
+                               for t in ("on", "off")]
     yield "icon-effects-panel", [(t, [effects(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "icon-motion-panel", [(t, [motion(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [

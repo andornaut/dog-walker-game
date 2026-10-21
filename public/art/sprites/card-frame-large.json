@@ -14,30 +14,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 166, "h": 280 },
     "sourceSize": { "w": 166, "h": 280 },
     "duration": 1000
-   },
-   "card-frame-large 2.aseprite": {
-    "frame": { "x": 332, "y": 0, "w": 166, "h": 280 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 166, "h": 280 },
-    "sourceSize": { "w": 166, "h": 280 },
-    "duration": 1000
-   },
-   "card-frame-large 3.aseprite": {
-    "frame": { "x": 498, "y": 0, "w": 166, "h": 280 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 166, "h": 280 },
-    "sourceSize": { "w": 166, "h": 280 },
-    "duration": 1000
-   },
-   "card-frame-large 4.aseprite": {
-    "frame": { "x": 664, "y": 0, "w": 166, "h": 280 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 166, "h": 280 },
-    "sourceSize": { "w": 166, "h": 280 },
-    "duration": 1000
    }
  },
  "meta": {
@@ -45,14 +21,11 @@
   "version": "1.2.30-x64",
   "image": "card-frame-large.png",
   "format": "RGBA8888",
-  "size": { "w": 830, "h": 280 },
+  "size": { "w": 332, "h": 280 },
   "scale": "1",
   "frameTags": [
    { "name": "encounter", "from": 0, "to": 0, "direction": "forward" },
-   { "name": "lucky", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "stop", "from": 2, "to": 2, "direction": "forward" },
-   { "name": "upgrade", "from": 3, "to": 3, "direction": "forward" },
-   { "name": "route", "from": 4, "to": 4, "direction": "forward" }
+   { "name": "route", "from": 1, "to": 1, "direction": "forward" }
   ]
  }
 }

@@ -6,9 +6,8 @@ carry the wood card band, the navy dog card and the plum top bar.
 Plates are ui.py's chrome: a cream band inside ink and plum lines, so they read
 on the card band and on every road.
 
-ui-fired-plate  24x24  laid-back, fussy, dramatic (1 frame each)  nine-slice, 8px
-                       corners: a stamp-like plate in the owner's temperament colour
-                       (blue, purple, dred) inside a cream band, with a white stamp line
+ui-fired-plate  24x24  normal (1 frame)  nine-slice, 8px corners: a stamp-like
+                       blue plate inside a cream band, with a white stamp line
                        6px in. Stretched to 116x28 over the dog's card, with
                        "FIRED!" in font-display (62px) centred
 fx-fired-pop    64x64  play (6 frames, 70ms)  drawn at 2x (128x128) centred on the 2x
@@ -49,10 +48,9 @@ GROUNDS = ("733e39", "3e2731", "e4a672", "c0cbdc", "c28569")
 
 # ---------- firing moment ----------
 
-# Each temperament's plate: face, its lit edge (top and left) and its shaded edge (bottom and right).
-# White text holds 8.48:1 on blue, 8.86:1 on purple and 7.34:1 on dred.
-TEMPERAMENTS = {"laid-back": ("blue", "sky", "navy"), "fussy": ("purple", "mauve", "plum"),
-                "dramatic": ("dred", "red", "plum")}
+# The plate: face, its lit edge (top and left) and its shaded edge (bottom and right). White text holds
+# 8.48:1 on blue.
+FIRED_PLATE = ("blue", "sky", "navy")
 
 
 def fired_plate(face, lit, shade):
@@ -212,7 +210,7 @@ def treat_pop(step):
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    yield "ui-fired-plate", [(t, [fired_plate(*cols).outlined(False)], 1000) for t, cols in TEMPERAMENTS.items()]
+    yield "ui-fired-plate", [("normal", [fired_plate(*FIRED_PLATE).outlined(False)], 1000)]
     yield "fx-fired-pop", [("play", [fired_pop(i).outlined(False) for i in range(6)], 70)]
     yield "fx-coin-fly", [("spin", [coin_fly(i).outlined(False) for i in range(4)], 80)]
     yield "ui-payout-label", [("normal", [payout_label().outlined(False)], 1000)]

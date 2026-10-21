@@ -2080,11 +2080,6 @@
       "json": "sprites/icon-motion-panel.json"
     },
     {
-      "key": "icon-music",
-      "png": "sprites/icon-music.png",
-      "json": "sprites/icon-music.json"
-    },
-    {
       "key": "icon-music-panel",
       "png": "sprites/icon-music-panel.png",
       "json": "sprites/icon-music-panel.json"
@@ -3791,11 +3786,6 @@
       "json": "sprites/ui-hit-flash-sky.json"
     },
     {
-      "key": "ui-hit-flash-white",
-      "png": "sprites/ui-hit-flash-white.png",
-      "json": "sprites/ui-hit-flash-white.json"
-    },
-    {
       "key": "ui-hit-label",
       "png": "sprites/ui-hit-label.png",
       "json": "sprites/ui-hit-label.json"
@@ -4582,11 +4572,6 @@
       "key": "sfx-fired",
       "ogg": "sounds/sfx-fired.ogg",
       "m4a": "sounds/sfx-fired.m4a"
-    },
-    {
-      "key": "sfx-hit-goose",
-      "ogg": "sounds/sfx-hit-goose.ogg",
-      "m4a": "sounds/sfx-hit-goose.m4a"
     },
     {
       "key": "sfx-hit-other-dog",

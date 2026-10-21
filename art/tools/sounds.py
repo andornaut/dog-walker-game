@@ -14,7 +14,6 @@ sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising t
 sfx-hit-thief      0.60s  coin scatter: seven fading triangle pings between F#6 and E7
 sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 3kHz, three then four
 sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
-sfx-hit-goose      0.48s  honk honk: two nasal square honks with a wobble, the second higher, over a hiss
 sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sparkle A7 F#7 D7 A7
 sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
 music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
@@ -194,16 +193,6 @@ EFFECTS = {
         ("pinknoise", 0.08, None, 0.01, dict(vol=0.15, low=1200, high=200, attack=0.01, release=0.8)),
         ("square", 0.18, (700, 1400), 0.22, dict(vol=0.4, duty=35, low=2500, attack=0.01, release=0.6)),
         ("triangle", 0.18, (350, 700), 0.22, dict(vol=0.6, attack=0.01, release=0.6)),
-    ],
-    # A goose's honk is nasal: a narrow pulse with a fast wobble, low-passed so it stays soft.
-    "sfx-hit-goose": [
-        ("square", 0.18, (440, 400), 0.01, dict(vol=0.6, duty=20, low=1800, attack=0.01, release=0.5, shape="h",
-                                                fx=("tremolo", "28", "35"))),
-        ("triangle", 0.18, (220, 200), 0.01, dict(vol=0.5, attack=0.01, release=0.5, shape="h")),
-        ("square", 0.25, (500, 430), 0.23, dict(vol=0.6, duty=20, low=1800, attack=0.01, release=0.6, shape="h",
-                                                fx=("tremolo", "28", "35"))),
-        ("triangle", 0.25, (250, 215), 0.23, dict(vol=0.5, attack=0.01, release=0.6, shape="h")),
-        ("pinknoise", 0.12, None, 0, dict(vol=0.2, low=4000, high=1500, attack=0.01, release=0.8)),
     ],
     "sfx-badge": [
         ("square", 0.08, "D6", 0, dict(vol=0.5, duty=25, low=4000, release=0.4)),

@@ -8,17 +8,17 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide
 
 ## People and dogs
 
-| Key                      | Type   | Size                | Tags                                                | Note                                                                                                                                                                                                                                                                                                 |
-| ------------------------ | ------ | ------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dog-<name>`             | sprite | 54×54, 48×48, 38×38 | `walk`, `react`, `pull`, `tell`, `idle`, `shake`    | big 54: koda (Alaskan Malamute), penny, snowball (Great Pyrenees); medium 48: archie, biscuit (the starter), pierre (Pepe, a miniature poodle); small 38: duchess, nugget, zippy; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
-| `face-dog-<name>`        | sprite | 32×32               | `happy`, `neutral`, `upset`                         | Dog cards and pickers; the face 30, 29 or 26 px by size class, on the bottom edge; penny also `worried`                                                                                                                                                                                              |
-| `face-owner-<name>`      | sprite | 32×32               | `happy`, `neutral`, `upset`, `fired`, `worried`     | Keyed by dog                                                                                                                                                                                                                                                                                         |
-| `face-owner-<name>-20`   | sprite | 20×20               | `happy`, `neutral`, `upset`, `fired`, `worried`     | Keyed by dog; the owner's photo on the walk's dog card, drawn natively at 20×20                                                                                                                                                                                                                      |
-| `face-walker-<name>`     | sprite | 32×32               | `happy`, `neutral`                                  | Walker picker                                                                                                                                                                                                                                                                                        |
-| `owner-<name>`           | sprite | 32×48               | `idle`, `wave`                                      | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                                                                                                                          |
-| `portrait-dog-<name>`    | image  | 64×64               |                                                     | Dog pick and shop; the dog 60, 58 or 52 px by size class, on the bottom edge                                                                                                                                                                                                                         |
-| `portrait-walker-<name>` | image  | 64×64               |                                                     | Walker detail card; ada, ben, casey, trista                                                                                                                                                                                                                                                          |
-| `walker-<name>`          | sprite | 48×72               | `walk`, `react`, `stumble`, `idle`, `wave`, `cheer` | ada, ben, casey, trista; `wave` and `cheer` face the camera; `cheer` is the zone celebration's, drawn at 2×                                                                                                                                                                                          |
+| Key                      | Type   | Size                | Tags                                                | Note                                                                                                                                                                             |
+| ------------------------ | ------ | ------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dog-<name>`             | sprite | 54×54, 48×48, 38×38 | `walk`, `react`, `pull`, `tell`, `idle`, `shake`    | big 54: koda (Alaskan Malamute), penny, snowball (Great Pyrenees); medium 48: archie, biscuit (the starter), pierre (Pepe, a miniature poodle); small 38: duchess, nugget, zippy |
+| `face-dog-<name>`        | sprite | 32×32               | `happy`, `neutral`, `upset`                         | Dog cards and pickers; the face 30, 29 or 26 px by size class, on the bottom edge                                                                                                |
+| `face-owner-<name>`      | sprite | 32×32               | `happy`, `neutral`, `upset`, `fired`, `worried`     | Keyed by dog                                                                                                                                                                     |
+| `face-owner-<name>-20`   | sprite | 20×20               | `happy`, `neutral`, `upset`, `fired`, `worried`     | Keyed by dog; the owner's photo on the walk's dog card, drawn natively at 20×20                                                                                                  |
+| `face-walker-<name>`     | sprite | 32×32               | `happy`, `neutral`                                  | Walker picker                                                                                                                                                                    |
+| `owner-<name>`           | sprite | 32×48               | `idle`, `wave`                                      | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                      |
+| `portrait-dog-<name>`    | image  | 64×64               |                                                     | Dog pick and shop; the dog 60, 58 or 52 px by size class, on the bottom edge                                                                                                     |
+| `portrait-walker-<name>` | image  | 64×64               |                                                     | Walker detail card; ada, ben, casey, trista                                                                                                                                      |
+| `walker-<name>`          | sprite | 48×72               | `walk`, `react`, `stumble`, `idle`, `wave`, `cheer` | ada, ben, casey, trista; `wave` and `cheer` face the camera; `cheer` is the zone celebration's, drawn at 2×                                                                      |
 
 ## Road objects
 
@@ -65,20 +65,20 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide
 
 ## Effects
 
-| Key                     | Type   | Size             | Tags              | Note                                                                               |
-| ----------------------- | ------ | ---------------- | ----------------- | ---------------------------------------------------------------------------------- |
-| `fx-bark`               | sprite | 16×16            | `pop`             | Pull tell                                                                          |
-| `fx-bump`               | sprite | 48×48            | `play`            | Impact star on a plain hit                                                         |
-| `fx-bump-big`           | sprite | 64×64            | `play`            | A mover's hit                                                                      |
-| `fx-debris-<material>`  | sprite | 48×48            | `play`            | Leaves (hedge), litter (bin); over the bump                                        |
-| `fx-dodge`              | sprite | 48×48            | `play`            | A small dog dodges a hit; mirrored for a sidestep left                             |
-| `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`      | Pink heart over a dog on +♥                                                        |
-| `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`      | Broken heart over a dog on −♥                                                      |
-| `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | other-dog, skunk, thief; the comic word is set over it                             |
-| `fx-sparkle`            | sprite | 16×16            | `play`            | Pickup collected                                                                   |
-| `fx-splash`             | sprite | 64×48            | `play`            | Puddle                                                                             |
-| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, green, mauve, orange, pink, sky, white; left edge strip, mirrored for right |
-| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                                |
+| Key                     | Type   | Size             | Tags              | Note                                                                        |
+| ----------------------- | ------ | ---------------- | ----------------- | --------------------------------------------------------------------------- |
+| `fx-bark`               | sprite | 16×16            | `pop`             | Pull tell                                                                   |
+| `fx-bump`               | sprite | 48×48            | `play`            | Impact star on a plain hit                                                  |
+| `fx-bump-big`           | sprite | 64×64            | `play`            | A mover's hit                                                               |
+| `fx-debris-<material>`  | sprite | 48×48            | `play`            | Leaves (hedge), litter (bin); over the bump                                 |
+| `fx-dodge`              | sprite | 48×48            | `play`            | A small dog dodges a hit; mirrored for a sidestep left                      |
+| `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`      | Pink heart over a dog on +♥                                                 |
+| `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`      | Broken heart over a dog on −♥                                               |
+| `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | other-dog, skunk, thief; the comic word is set over it                      |
+| `fx-sparkle`            | sprite | 16×16            | `play`            | Pickup collected                                                            |
+| `fx-splash`             | sprite | 64×48            | `play`            | Puddle                                                                      |
+| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, green, mauve, orange, pink, sky; left edge strip, mirrored for right |
+| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                         |
 
 ## Pulls and firing
 
@@ -150,7 +150,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | `ui-dog-card-band`                                                      | image  | 360×80            |                                            | At 0,480 under the walk's cards                                          |
 | `ui-dog-card-warn`                                                      | sprite | 120×74            | `pulse`, `static`                          | Overlay at 1 ♥                                                           |
 | `ui-effect-well`                                                        | image  | 22×22             |                                            | One active effect's well, holding its 20×20 icon at +1,+1                |
-| `ui-fired-plate`                                                        | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic`           | Stretched to 116×28                                                      |
+| `ui-fired-plate`                                                        | sprite | 24×24 nine-slice  | `normal`                                   | Stretched to 116×28                                                      |
 | `ui-heart`                                                              | sprite | 8×7               | `full`, `empty`, `full-dark`, `empty-dark` | `-dark` on the navy `ui-dog-card`                                        |
 | `ui-home-cash-well`                                                     | image  | 70×28             |                                            | The start screen top bar's bank well, at 5,5                             |
 | `ui-lead-tag`                                                           | image  | 27×11             |                                            | LEAD, pinned across the foot of the front dog's photo                    |
@@ -173,14 +173,14 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 
 ## Choice cards
 
-| Key                           | Type   | Size    | Tags                                             | Note                                                                      |
-| ----------------------------- | ------ | ------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
-| `card-<encounter>-<option>`   | image  | 75×56   |                                                  | One per option of the encounters and lucky encounters                     |
-| `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | One per upgrade (6), and the Walk on by option Hall pass adds             |
-| `card-cost`                   | image  | 71×13   |                                                  | Cost plaque, at 2× on the large frame                                     |
-| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | The game draws `encounter` for an obstacle and `route` for a fork         |
-| `card-frame-large`            | sprite | 166×280 | as `card-frame`                                  | Tap-to-enlarge view                                                       |
-| `card-zone-<zone>`            | image  | 75×56   |                                                  | A fork's path card: the zone's road to a cross street, its scenery beyond |
+| Key                           | Type   | Size    | Tags                 | Note                                                                      |
+| ----------------------------- | ------ | ------- | -------------------- | ------------------------------------------------------------------------- |
+| `card-<encounter>-<option>`   | image  | 75×56   |                      | One per option of the encounters and lucky encounters                     |
+| `card-<upgrade>`, `card-skip` | image  | 75×56   |                      | One per upgrade (6), and the Walk on by option Hall pass adds             |
+| `card-cost`                   | image  | 71×13   |                      | Cost plaque, at 2× on the large frame                                     |
+| `card-frame`                  | sprite | 83×140  | `encounter`, `route` | The game draws `encounter` for an obstacle and `route` for a fork         |
+| `card-frame-large`            | sprite | 166×280 | as `card-frame`      | Tap-to-enlarge view                                                       |
+| `card-zone-<zone>`            | image  | 75×56   |                      | A fork's path card: the zone's road to a cross street, its scenery beyond |
 
 Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-petting-neighbor-take`, her stroking a pack dog under rising hearts, is its popup art.
 
@@ -224,7 +224,7 @@ Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbo
 | `icon-<setting>-panel`                                                                                          | sprite | 16×16             | `on`, `off`                                                                                          | sound, music, effects, motion; Settings rows                            |
 | `icon-close`, `icon-help`, `icon-home`, `icon-lock`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings` | image  | 16×16             |                                                                                                      |                                                                         |
 | `icon-lock-open`                                                                                                | image  | 16×16             |                                                                                                      | `icon-lock` with its shackle lifted                                     |
-| `icon-sound`, `icon-music`                                                                                      | sprite | 16×16             | `on`, `off`                                                                                          |                                                                         |
+| `icon-sound`                                                                                                    | sprite | 16×16             | `on`, `off`                                                                                          |                                                                         |
 | `ui-button`                                                                                                     | sprite | 24×24 nine-slice  | `normal`, `pressed`, `disabled`, `secondary`, `secondary-pressed`, `go`, `go-pressed`, `go-disabled` | Insets 3, 3, 3, 5                                                       |
 | `ui-cork`, `ui-denim`, `ui-plaid`                                                                               | image  | 32×32, 16×16      |                                                                                                      | Seamless section fills (walker, Pocket, dogs), repeated with TileSprite |
 | `ui-icon-button`                                                                                                | sprite | 20×20             | `normal`, `pressed`                                                                                  | Icon at +2,+1 (+2,+3 pressed)                                           |

@@ -190,54 +190,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
     "sourceSize": { "w": 41, "h": 41 },
     "duration": 60
-   },
-   "dog-penny@75 24.aseprite": {
-    "frame": { "x": 984, "y": 0, "w": 41, "h": 41 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
-    "sourceSize": { "w": 41, "h": 41 },
-    "duration": 140
-   },
-   "dog-penny@75 25.aseprite": {
-    "frame": { "x": 1025, "y": 0, "w": 41, "h": 41 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
-    "sourceSize": { "w": 41, "h": 41 },
-    "duration": 140
-   },
-   "dog-penny@75 26.aseprite": {
-    "frame": { "x": 1066, "y": 0, "w": 41, "h": 41 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
-    "sourceSize": { "w": 41, "h": 41 },
-    "duration": 140
-   },
-   "dog-penny@75 27.aseprite": {
-    "frame": { "x": 1107, "y": 0, "w": 41, "h": 41 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
-    "sourceSize": { "w": 41, "h": 41 },
-    "duration": 140
-   },
-   "dog-penny@75 28.aseprite": {
-    "frame": { "x": 1148, "y": 0, "w": 41, "h": 41 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
-    "sourceSize": { "w": 41, "h": 41 },
-    "duration": 500
-   },
-   "dog-penny@75 29.aseprite": {
-    "frame": { "x": 1189, "y": 0, "w": 41, "h": 41 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
-    "sourceSize": { "w": 41, "h": 41 },
-    "duration": 500
    }
  },
  "meta": {
@@ -245,7 +197,7 @@
   "version": "1.2.30-x64",
   "image": "dog-penny@75.png",
   "format": "RGBA8888",
-  "size": { "w": 1230, "h": 41 },
+  "size": { "w": 984, "h": 41 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
@@ -253,9 +205,7 @@
    { "name": "pull", "from": 8, "to": 11, "direction": "forward" },
    { "name": "tell", "from": 12, "to": 15, "direction": "forward" },
    { "name": "idle", "from": 16, "to": 19, "direction": "forward" },
-   { "name": "shake", "from": 20, "to": 23, "direction": "forward" },
-   { "name": "lunge", "from": 24, "to": 27, "direction": "forward" },
-   { "name": "worried", "from": 28, "to": 29, "direction": "forward" }
+   { "name": "shake", "from": 20, "to": 23, "direction": "forward" }
   ]
  }
 }

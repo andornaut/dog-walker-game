@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Draw the choice card frame and compose the card illustrations.
 
-- card-frame: an 83x140 sprite, one frame per card type (tags encounter, lucky,
-  stop, upgrade, and route for a fork's path cards). The game draws the title
+- card-frame: an 83x140 sprite, one frame per card type (tags encounter for an
+  obstacle's card, route for a fork's path cards). The game draws the title
   in the band, the effect text in the body and the cost in the badge. Layout,
   in card pixels:
     band 2..12 (title), art window 3,15 to 79,72 (illustration at 4,16, 75x56), 1px
@@ -51,10 +51,9 @@ from ui import chrome  # noqa: E402
 
 CW, CH = 83, 140
 AW, AH = 75, 56
-# Band colours hold white labels at 7:1 or more; the amber stop band takes plum labels (7.35:1).
-# The game draws encounter for an obstacle and route for a fork; the others serve the preview.
-BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amber", "orange"),
-         "upgrade": ("forest", "teal"), "route": ("purple", "plum")}
+# Band colours hold white labels at 7:1 or more. The game draws encounter for an obstacle and route for a
+# fork.
+BANDS = {"encounter": ("dred", "plum"), "route": ("purple", "plum")}
 
 
 # ---------- the frame ----------
@@ -833,12 +832,8 @@ ILLUSTRATIONS = {
 
 def card_frame_tags():
     """{illustration key: the card-frame tag the game shows it in}, from the game's export: each card
-    face's frame, and lucky (or encounter) for the art an instant encounter shows."""
-    tags = {card["art"]: card["frame"] for card in sn.GAME["cards"]}
-    for e in sn.GAME["encounters"]:
-        if e["resolution"]["kind"] == "instant":
-            tags[e["resolution"]["art"]] = "lucky" if e["kind"] == "lucky" else "encounter"
-    return tags
+    face's frame; any other art shows in encounter."""
+    return {card["art"]: card["frame"] for card in sn.GAME["cards"]}
 
 
 FRAME_TAGS = card_frame_tags()
@@ -872,8 +867,7 @@ def preview(out, scale=3):
     keys = list(ILLUSTRATIONS)
     cols = 10
     rows = (len(keys) + cols - 1) // cols
-    big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-keep"),
-           ("route", "card-zone-cabbagetown"), ("stop", "card-belly-rubs"), ("upgrade", "card-belly-rubs")]
+    big = [("encounter", "card-skunk-rinse"), ("route", "card-zone-cabbagetown")]
     width = max((CW + 6) * cols, (LW + 6) * len(big))
     sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), sn.rgb("ink"))
     for i, key in enumerate(keys):

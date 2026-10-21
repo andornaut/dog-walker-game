@@ -55,7 +55,7 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings are a few flat patches. A face seen from the front stays clean: flat skin with a 1px shadow down its near (right) edge beside the eyes, never across the jaw or mouth (`face_disc`).
 - Effects (`fx-`) take a fixed 1px rim: plum, navy for water (`fx-splash`). `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` and `fx-tap` have no rim. Hazard warnings are outlined in ink.
 - Ground decals have no outline and no shadow.
-- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
+- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
 - A gear item drawn at several sizes (`item-<gear>` at 32, `icon-gear-<gear>` at 16, `icon-gear-<gear>-20` at 20) keeps the same colours at each.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
@@ -85,7 +85,7 @@ Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the ne
 | navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                               |
 | ndslate on ngrey               | 3.56  | Labels on `disabled` tiles and buttons (inactive, exempt), a `locked` badge's emblem    |
 | ngrey on darkBrown             | 3.40  | `disabled` tile face on the wood                                                        |
-| plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                            |
+| plum on amber                  | 7.35  | Text on amber: step number                                                              |
 | plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons   |
 | plum on tan                    | 6.49  | Body text on tan                                                                        |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                          |
@@ -165,7 +165,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 | 1 ♥           | Owner's `worried` face and `ui-dog-card-warn`                                                                                                                                                                     |
 | Encounter hit | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (other dog pink, puddle sky, skunk mauve, squirrel orange, thief amber); the label at 2× on `ui-hit-label`                               |
 | Fee payout    | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                 |
-| Firing        | Owner's `fired` face at 2× on `fx-fired-pop` at 2×; the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                                                                   |
+| Firing        | Owner's `fired` face at 2× on `fx-fired-pop` at 2×; the fired line in `ui-quip`; `ui-fired-plate`                                                                                                                 |
 | Heart change  | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog, then `fly` into its card; on a loss the card plays `heart-loss`                                                                                            |
 | Mover hit     | `fx-bump-big` centred 6px above the struck dog's top opaque row; the dog plays `react` and flashes white twice                                                                                                    |
 | Moving hazard | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead: `pulse` for a crosser, `down-pulse` for a mover coming at the pack, `up-pulse` for one moving off ahead; `ui-warning-wander` over a wanderer |

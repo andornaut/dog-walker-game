@@ -9,23 +9,14 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
   Nugget, Zippy), the big dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
   road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
-  pixel take trail() or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
+  pixel take trail(), so they stay unbroken. Tags: walk (4
   frames, 150ms), react (4, 60ms: a startled hop), pull (4, 80ms, leaning right and scrabbling; the game
   mirrors it for left), tell (4, 125ms, the lean before a pull; the game adds the fx-bark pop), idle (4,
   300ms, standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
-  A dog with a quirk has its quirk's tags after these (QUIRK_TAGS): dog-archie flourish (5 frames, 90ms;
-  Acrobatic: a hop with a twist in the air, played when he pulls or meets a playmate); dog-penny lunge
-  (4, 140ms; Nervous: a stiff-legged strain toward another dog with her hackles up, leaning right like
-  pull, mirrored for left) and worried (2, 500ms; clingy: ears down, glancing back over her shoulder,
-  while she is the only dog on the leash); dog-biscuit sniff (3, 180ms; Scent hound: nose down, tail
-  flagged up and wagging, a puff of scent beside the nose); dog-nugget pose (3, 220ms; Camera ready:
-  sits square, cocks his head and a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a
-  crouch, a spring, a stretched leap over motion streaks and a landing on the front paws).
 - face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
   big by size class (big 30, medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral,
-  upset, then the quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes, a wobbly
-  mouth and a sweat bead), while she is the only dog on the leash.
+  upset.
 
 Usage:
   dogs.py preview OUT.png   every frame on the zone roads, scaled up
@@ -98,93 +89,24 @@ SHAKE = [
     dict(lean=-2, tail=2, ears=-1, spray=3.5),
     dict(lean=2, tail=-1, ears=1),
 ]
-# Idle and shake follow the first four tags, and a quirk's tags follow them.
+# Idle and shake follow the first four tags.
 ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
              ("shake", SHAKE, 60)]
 FACE_TAGS = ["happy", "neutral", "upset"]
-
-# Archie's flourish: he crouches, springs up (hop lifts the whole dog, back legs too), twists left then
-# right in the air with his legs tucked and a swoosh trailing the turn (whirl: the side it trails on), and
-# lands.
-FLOURISH = [
-    dict(bob=1, fl=-1, fr=-1, bl=-1, br=-1, ears=1),
-    dict(hop=-2, fl=1, fr=1, bl=1, br=1, tail=1, ears=-1),
-    dict(hop=-4, fl=-2, fr=-2, bl=-2, br=-2, lean=-3, tail=2, whirl=1),
-    dict(hop=-4, fl=-2, fr=-2, bl=-2, br=-2, lean=3, tail=-2, whirl=-1),
-    dict(hop=-1, fl=1, fr=1, ears=1),
-]
-# Penny's lunge: hackles up, she sets her hind legs and stretches forward and right on stiff front legs, her
-# head reaching out ahead of her body, the tail held still; the last frame eases back 1px, so the loop strains.
-LUNGE = [
-    dict(bob=-1, fl=-1, fr=-1, bl=1, br=1, lean=1, ears=1, hackles=1),
-    dict(bob=-1, fl=-2, fr=-2, bl=1, br=1, lean=2, ears=1, hackles=1, reach=-1),
-    dict(bob=-2, fl=-3, fr=-2, bl=1, br=1, lean=3, ears=1, hackles=1, reach=-2),
-    dict(bob=-1, fl=-2, fr=-2, bl=1, br=1, lean=2, ears=1, hackles=1, reach=-1),
-]
-# Penny alone: ears dropped and the tail tucked still, then a glance back over her left shoulder.
-WORRIED = [
-    dict(ears=-1, tuck=1),
-    dict(ears=-1, tuck=1, lean=-1, glance=-1),
-]
-# Biscuit's sniff: nose down to the road and the tail flagged up, wagging, as a puff of scent rises on
-# one side of the nose, then the other.
-SNIFF = [
-    dict(nose=2, perk=1, tail=-2),
-    dict(nose=2, perk=1, tail=1, scent=-1),
-    dict(nose=2, perk=1, tail=2, scent=1),
-]
-# Nugget's pose: he sits square for the camera, cocks his head, and a sparkle glints over it.
-POSE = [
-    dict(sit=1),
-    dict(sit=1, tilt=-1, glint=1),
-    dict(sit=1, tilt=-1, glint=2),
-]
-# Zippy's pounce: a crouch with the tail going, a spring off the hind legs, a stretched leap with the
-# front paws reaching and motion streaks under him, and a landing on the front paws.
-POUNCE = [
-    dict(bob=1, fl=-1, fr=-1, tail=1, ears=1),
-    dict(hop=-2, reach=-1, fl=-2, fr=-2, bl=1, br=1, tail=-1, ears=1),
-    dict(hop=-3, reach=-1, fl=-3, fr=-3, bl=1, br=1, ears=1, streak=1),
-    dict(hop=-1, reach=-1, fl=-2, fr=-2, bob=1),
-]
-# A quirk's tags go after ROAD_TAGS and its faces after FACE_TAGS, on the dogs that have it.
-QUIRK_TAGS = {"archie": [("flourish", FLOURISH, 90)], "penny": [("lunge", LUNGE, 140), ("worried", WORRIED, 500)],
-              "biscuit": [("sniff", SNIFF, 180)], "nugget": [("pose", POSE, 220)], "zippy": [("pounce", POUNCE, 90)]}
-QUIRK_FACES = {"penny": ["worried"]}
-
-
-def road_tags(name):
-    """dog-<name>'s tags: ROAD_TAGS, then its quirk's."""
-    return ROAD_TAGS + QUIRK_TAGS.get(name, [])
-
-
-def face_tags(name):
-    """face-dog-<name>'s tags: FACE_TAGS, then its quirk's."""
-    return FACE_TAGS + QUIRK_FACES.get(name, [])
 
 
 def pose(q):
     """Every pose key with its default. flop lets both ears lag down behind the head (positive is down), as
     they do on the walk's rising beats; twitch moves the right ear alone (negative is up); spray is how far
-    the shake-off's droplets have flown from the flanks, 0 for none. The quirk keys: hop lifts the whole
-    dog (negative is up); whirl draws a swoosh on the right (positive) or left (negative) flank; hackles
-    raises a ridge of fur along the back; reach moves the head alone (negative is forward); tuck holds the
-    tail in; glance turns the head back over the left (negative) or right shoulder; nose lowers the nose
-    to the road (the head dips forward and shortens); perk flags the tail up; scent puffs scent beside the
-    nose, left (negative) or right; sit sets the hindquarters down; tilt cocks the head left (negative) or
-    right; glint is a sparkle's size over the head; streak draws motion lines under a leap. The small
-    versions round them to whole pixels, so draws read whirl, glance, scent, sit, tilt and streak by their
-    sign."""
-    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, flop=0, lean=0, twitch=0, spray=0, hop=0,
-                     whirl=0, hackles=0, reach=0, tuck=0, glance=0, nose=0, perk=0, scent=0, sit=0, tilt=0, glint=0,
-                     streak=0), **q)
+    the shake-off's droplets have flown from the flanks, 0 for none."""
+    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, flop=0, lean=0, twitch=0, spray=0), **q)
 
 
 # ---------- Koda: Alaskan Malamute, big, heavy, grey and white, blue eyes, orange harness ----------
 
 def koda_road(q):
     g, q = edged(Grid()), pose(q)
-    # o shifts the body down so the big head has headroom to hop and lean
+    # o shifts the body down so the big head has headroom to lean
     b, ln, o = q["bob"], q["lean"], 2
     # legs: thick and white, the front pair tucked under the chest, peeking out at its sides, the back pair
     # under the hips
@@ -266,22 +188,18 @@ def biscuit_road(q):
     # tricolour: a tan coat, the black saddle across the back with tan showing round the rump and hips
     g.cel(bx, 22 + b, 6.5, 5.5, "ochre", "rust", "tan")
     g.cel(bx, 20.5 + b, 5, 3.6, "navy", "ink", "dslate")
-    # tail held up, white tip; flagged, it stands 1px longer
-    tx, pk = 16 + q["tail"], 1 if q["perk"] else 0
-    g.rect(tx - 1, 26 + b, 2, 3 + pk, "navy")
-    g.rect(tx - 1, 29 + b + pk, 2, 1, "white")
+    # tail held up, white tip
+    tx = 16 + q["tail"]
+    g.rect(tx - 1, 26 + b, 2, 3, "navy")
+    g.rect(tx - 1, 29 + b, 2, 1, "white")
     g.ell(bx, 16 + b, 4.5, 1.5, "ink")
     g.rect(bx - 5, 16 + b, 10, 2, "green")
     g.rect(bx - 5, 17 + b, 10, 1, "dgreen")
-    # a round head no wider than the body, the long ears hanging from its sides past the collar; nose down,
-    # the head dips below the shoulders and foreshortens, the ears left hanging long beside it
-    hx, n = 16 + ln, q["nose"]
-    if n:
-        g.ell(hx, 14 + b, 4, 2.5, "ochre")
-    g.cel(hx, 11 + b - n / 2, 5.5 - n / 4, 5 - n * 0.75, "ochre", None, "tan")
+    # a round head no wider than the body, the long ears hanging from its sides past the collar
+    hx = 16 + ln
+    g.cel(hx, 11 + b, 5.5, 5, "ochre", None, "tan")
     g.cel(hx - 5, 13 + b - q["ears"] + q["flop"], 2, 4.5, "rust", "dbrown")
     g.cel(hx + 5, 13 + b - q["ears"] + q["flop"] + q["twitch"], 2, 4.5, "rust", "dbrown")
-    scent(g, hx, 5 + b - n, q["scent"])
     spray(g, q["spray"])
     return g
 
@@ -355,15 +273,9 @@ def nugget_road(q):
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 2, "skin2")
     g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 2, "skin2")
     bx = 16 + ln // 2
-    if q["sit"]:
-        # sitting square: the rump settles into a rounder, wider seat, the hind feet set out at its sides
-        g.rect(bx - 7, 27, 2, 2, "skin2")
-        g.rect(bx + 5, 27, 2, 2, "skin2")
-        g.cel(bx, 24 + b, 6, 4.5, "skin1", "skin2", "cream")
-    else:
-        g.rect(12, 27 + q["bl"], 2, 2, "skin2")
-        g.rect(18, 27 + q["br"], 2, 2, "skin2")
-        g.cel(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    g.rect(12, 27 + q["bl"], 2, 2, "skin2")
+    g.rect(18, 27 + q["br"], 2, 2, "skin2")
+    g.cel(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
     # the curly tail, coiled on top of the rump: a skin2 ring round the coat, a skin2 dot at its heart
     tx = 16 + q["tail"]
     g.ell(tx, 24.5 + b, 2.3, 1.9, "skin2")
@@ -371,14 +283,11 @@ def nugget_road(q):
     g.p(tx, 24.5 + b, "skin2")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.rect(bx - 1, 19 + b, 2, 2, "dred")
-    # the head; cocked, it shifts 1px to that side, the ear on that side dropping and the other lifting
-    tl = (q["tilt"] > 0) - (q["tilt"] < 0)
-    hx = 16 + ln + tl
+    hx = 16 + ln
     g.cel(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
-    g.ell(hx - 4.8, 12.3 + b - q["ears"] + q["flop"] - tl, 2, 1.7, "navy")
-    g.ell(hx + 4.8, 12.3 + b - q["ears"] + q["flop"] + q["twitch"] + tl, 2, 1.7, "navy")
+    g.ell(hx - 4.8, 12.3 + b - q["ears"] + q["flop"], 2, 1.7, "navy")
+    g.ell(hx + 4.8, 12.3 + b - q["ears"] + q["flop"] + q["twitch"], 2, 1.7, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
-    sparkle(g, hx + 8, 9.5 + b, q["glint"])
     spray(g, q["spray"])
     return g
 
@@ -405,12 +314,11 @@ def nugget_face(mood):
 
 def zippy_road(q):
     g, q = edged(Grid()), pose(q)
-    hop = q["hop"]
-    b, ln = q["bob"] + hop, q["lean"]
+    b, ln = q["bob"], q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 3, "white")
     g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 3, "white")
-    g.rect(12, 26 + q["bl"] + hop, 2, 3, "white")
-    g.rect(18, 26 + q["br"] + hop, 2, 3, "white")
+    g.rect(12, 26 + q["bl"], 2, 3, "white")
+    g.rect(18, 26 + q["br"], 2, 3, "white")
     bx = 16 + ln // 2
     g.cel(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
     g.cel(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
@@ -418,10 +326,7 @@ def zippy_road(q):
     # a short upright tail, white with a tan tip, standing clear of the rump
     g.rect(tx - 1, 27 + b, 2, 2, "white")
     g.rect(tx - 1, 28 + b, 2, 1, "ochre")
-    # reaching, the head stretches forward of the collar on a white neck
-    hx, hb = 16 + ln, b + q["reach"]
-    if q["reach"]:
-        g.cel(hx, 18 + b + q["reach"] / 2, 3.5, 2 - q["reach"] / 2, "white", "lgrey")
+    hx, hb = 16 + ln, b
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.cel(hx, 15 + hb, 5, 4.5, "white", "lgrey")
     g.ell(hx + 2, 14 + hb, 2.5, 2, "ochre")
@@ -429,9 +334,6 @@ def zippy_road(q):
     g.tri((hx - 5, 14 + hb), (hx - 4, 10 + hb + e), (hx - 1.5, 12.5 + hb), "ochre")
     t = q["twitch"]
     g.tri((hx + 5, 14 + hb + t), (hx + 4, 10 + hb + e + t), (hx + 1.5, 12.5 + hb + t), "ochre")
-    if q["streak"]:
-        for x in (8, 23):
-            g.rect(x, 25 + hop, 1, 4, "white")
     spray(g, q["spray"])
     return g
 
@@ -546,11 +448,10 @@ EAR = ("dbrown", "plum")
 
 def archie_road(q):
     g, q = edged(Grid()), pose(q)
-    hop = q["hop"]
-    b, ln = q["bob"] + hop, q["lean"]
+    b, ln = q["bob"], q["lean"]
     # white legs with copper points where they meet the coat
-    for x, y, d in ((9 + ln // 2, 17, q["fl"] + b), (21 + ln // 2, 17, q["fr"] + b), (10, 25, q["bl"] + hop),
-                    (19, 25, q["br"] + hop)):
+    for x, y, d in ((9 + ln // 2, 17, q["fl"] + b), (21 + ln // 2, 17, q["fr"] + b), (10, 25, q["bl"]),
+                    (19, 25, q["br"])):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
     # a cinnamon coat in a few liver merle patches, a fluffy white ruff at the nape. As wide as Biscuit,
@@ -578,7 +479,6 @@ def archie_road(q):
     g.ell(hx, 11.5 + b, 5.5, 5, *COAT)
     merle(g, hx, b, ((-2.5, 9.5, 2, 1.6), (2.5, 13, 1.6, 1.3)))
     spray(g, q["spray"])
-    whirl(g, q["whirl"], bx, b)
     return g
 
 
@@ -692,25 +592,17 @@ def penny_road(q):
     gold(g, bx, 20.5 + o + b, 7.5, 6, 2.3)
     g.rect(bx - 6, 16 + o + b, 12, 2, "blue")
     g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
-    if q["hackles"]:
-        hackles(g, bx, 18 + o + b)
     # a thick otter tail laid over the rump in the shade colour, tapering to a blunt tip and swinging from
-    # its root, lit down its left side; tucked, it is clamped short and still
-    tuck = bool(q["tuck"])
-    tx, ty = 16 + (0 if tuck else q["tail"] * 2), (28 if tuck else 31) + b
+    # its root, lit down its left side
+    tx, ty = 16 + q["tail"] * 2, 31 + b
     for (l, r, tl, tr), c in (((13, 19, -1.5, 1.5), GOLD[1]), ((13, 14.5, -1.5, -0.5), GOLD[0])):
         g.tri((l, 22 + b), (r, 22 + b), (tx + tr, ty), c)
         g.tri((l, 22 + b), (tx + tl, ty), (tx + tr, ty), c)
     # a broad skull with short flat drop ears at its sides, in the shade colour
-    hx, hb = 16 + ln, b + q["reach"]
-    if q["reach"]:
-        # the neck stretched out between the collar and the head
-        gold(g, (hx + bx) / 2, 13.5 + o + b + q["reach"] / 2, 5.5, 3 - q["reach"] / 2)
+    hx, hb = 16 + ln, b
     gold(g, hx, 9.5 + o + hb, 6.5, 4.5, 2.8)
     for x, t in ((hx - 6.5, 0), (hx + 6.5, q["twitch"])):
         g.blob(x, 10.5 + o + hb - q["ears"] + q["flop"] + t, 1.8, 2.5, GOLD[1], power=3)
-    if q["glance"]:
-        glance(g, hx, 8.5 + o + hb, -1 if q["glance"] < 0 else 1)
     spray(g, q["spray"])
     return g
 
@@ -770,9 +662,8 @@ def inlay(g, line, draw):
 # ---------- shared features ----------
 
 def droop(mood):
-    """How far the ears sag, in pixels: perked when happy, relaxed when neutral, back when worried, flat when
-    upset."""
-    return {"happy": 0, "neutral": 1, "worried": 2, "upset": 3}[mood]
+    """How far the ears sag, in pixels: perked when happy, relaxed when neutral, flat when upset."""
+    return {"happy": 0, "neutral": 1, "upset": 3}[mood]
 
 
 def puff(g, cx, cy, rx, ry, ring=False):
@@ -789,27 +680,6 @@ def merle(g, cx, b, blots):
     row y + b, with no single-pixel ragging, so the coat reads as a few patches at road scale."""
     for dx, y, rx, ry in blots:
         g.blob(cx + dx, y + b, rx, ry, BLOT[0])
-
-
-def whirl(g, side, bx, b):
-    """Archie's flourish: a white swoosh curving down his right (side > 0) or left flank from shoulder to hip,
-    1px clear of the body at bx, trailing the twist; the road outline rings it."""
-    if not side:
-        return
-    trail(g, [(bx + (dx if side > 0 else -1 - dx), y + b)
-              for dx, y in ((7, 14), (8, 15), (9, 16), (9, 17), (9, 18), (9, 19), (8, 20))], "white")
-
-
-# Penny's hackles from the collar down: r rust spine, o orange fur, y yellow tips lit from the top left.
-# HACKLES is the design grid's; HACKLES_BIG gives the map drawn in the grid's own pixels from each scale up,
-# its spine on the column of the last row's r.
-HACKLES = ["yoroy", ".ory.", "yoroo", ".oro.", ".yro.", "..r.."]
-HACKLES_BIG = (
-    (1.5, ["y.yyroo.o", "yyyoroooo", ".yyoroo..", "yyyorooo.", ".yyoroooo", "..yoroo..", ".yyorooo.", "..yoro...",
-           "...yro...", "...oro...", "....r...."]),
-    (1, ["y.yro.o", "yyoroo.", ".yoroo.", "yyorooo", ".yoro..", "..yro..", "..oro..", "...r..."]),
-)
-HACKLE_INK = {"r": "rust", "o": "orange", "y": "yellow"}
 
 
 def trail(g, pts, c):
@@ -830,57 +700,6 @@ def trail(g, pts, c):
                 g.g.p(ax + round((bx - ax) * t / n), ay + round((by - ay) * t / n), c)
         g.g.p(*here, c)
         last = ((x, y), here)
-
-
-def hackles(g, cx, y):
-    """Penny's raised hackles: a ridge of fur standing up along her spine from the collar, bristling out to
-    a jagged edge, and a tuft standing up past each shoulder. Drawn bigger, the ridge is HACKLES_BIG's map
-    for the scale, in the grid's own pixels."""
-    s = scale_of(g)
-    if s > 1:
-        rows = next(m for least, m in HACKLES_BIG if s >= least)
-        x0, y0 = math.floor((cx - 1 + 0.5) * s) - rows[-1].index("r"), math.floor((y + 0.5) * s)
-        for j, row in enumerate(rows):
-            for i, c in enumerate(row):
-                if c != ".":
-                    g.g.p(x0 + i, y0 + j, HACKLE_INK[c])
-    else:
-        for j, row in enumerate(HACKLES):
-            for i, c in enumerate(row):
-                if c != ".":
-                    g.p(cx - 3 + i, y + j, HACKLE_INK[c])
-    for x, side in ((cx - 8, -1), (cx + 7, 1)):
-        trail(g, ((x, y - 1), (x + side, y - 2)), "orange")
-
-
-def glance(g, hx, hy, side):
-    """Penny looking back over her left (side < 0) or right shoulder: the side of her muzzle and one eye show
-    past the head's edge."""
-    x = hx + side * 5
-    g.ell(x + side, hy + 3, 2, 1.8, "yellow", "amber")
-    g.p(x + side * 2, hy + 2, "ink")
-    g.p(x, hy, "ink")
-    g.p(x - side, hy, "white")
-
-
-def scent(g, hx, y, side):
-    """A sniff of scent: a white puff curling up beside the nose on the left (side < 0) or right, held
-    clear of the head; the road outline rings it."""
-    if not side:
-        return
-    x = hx + (-5 if side < 0 else 2)
-    trail(g, [(x + dx, y + dy) for dx, dy in ((1, 1), (0, 0), (1, -1), (2, -2), (0, -4))], "white")
-
-
-def sparkle(g, cx, cy, size):
-    """Nugget's camera-ready glint: a yellow plus with a white core, arms 1px long at size 1 and 2px at
-    size 2, drawn as lines so the small versions keep its shape."""
-    if not size:
-        return
-    r = 1 if size < 1.5 else 2
-    g.rect(cx - r, cy, 2 * r + 1, 1, "yellow")
-    g.rect(cx, cy - r, 1, 2 * r + 1, "yellow")
-    g.p(cx, cy, "white")
 
 
 def spray(g, d):
@@ -962,25 +781,10 @@ def eyes(g, lx, rx, y, iris=None, mood="happy"):
         g.rect(rx + wide, y - 1, 2, 1, "ink")
         g.p(lx, y + wide, "cyan")
         g.p(lx, y + wide + 1, "sky")
-    elif mood == "worried":
-        # whale eyes: the pupils cut to the left with white beside them, short brows lifted at their inner
-        # ends, and a bead of sweat on the left temple
-        for x in (lx, rx):
-            g.rect(x + wide, y, 1, 2, "white")
-        g.p(lx, y - 2, "ink")
-        g.p(lx + 1, y - 3, "ink")
-        g.p(rx + wide - 1, y - 3, "ink")
-        g.p(rx + wide, y - 2, "ink")
-        g.p(lx - 2, y - 4, "white")
-        g.rect(lx - 3, y - 3, 2, 1, "cyan")
-        g.p(lx - 3, y - 2, "white")
-        g.p(lx - 2, y - 2, "cyan")
-        g.rect(lx - 3, y - 1, 2, 1, "sky")
 
 
 def mouth(g, y, mood):
-    """happy: a wide open grin with the tongue out; neutral: a closed line; worried: a small wobbly line;
-    upset: a deep frown."""
+    """happy: a wide open grin with the tongue out; neutral: a closed line; upset: a deep frown."""
     if mood == "happy":
         g.p(13, y, "ink")
         g.p(18, y, "ink")
@@ -991,9 +795,6 @@ def mouth(g, y, mood):
         g.p(16, y + 3, "mauve")
     elif mood == "neutral":
         g.rect(14, y + 1, 4, 1, "ink")
-    elif mood == "worried":
-        for x, dy in ((14, 1), (15, 0), (16, 1), (17, 0)):
-            g.p(x, y + dy, "ink")
     else:
         g.rect(15, y, 2, 1, "ink")
         g.p(14, y + 1, "ink")
@@ -1062,9 +863,9 @@ def sprites():
     for name, (draw_road, face) in DOGS.items():
         zoom = DOG_ZOOM.get(name, 1)
         yield f"dog-{name}", [(tag, minis.dog_frames(draw_road, poses, road_scale(name), here, zoom), ms)
-                              for tag, poses, ms in road_tags(name)]
+                              for tag, poses, ms in ROAD_TAGS]
         yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[DOG_CLASS[name]])], 1000)
-                                   for m in face_tags(name)]
+                                   for m in FACE_TAGS]
 
 
 if __name__ == "__main__":
