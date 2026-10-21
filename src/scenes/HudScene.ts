@@ -1,4 +1,4 @@
-import { type GameObjects, Scene, TintModes } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
 import { debuffIconKey } from "../assets/iconKeys";
 import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
@@ -6,7 +6,6 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
 import { dollarAmountText } from "../home/home";
-import { extraHearts } from "../hud/buffMarks";
 import {
   effectIconFallback,
   effectIconKey,
@@ -729,26 +728,17 @@ export class HudScene extends Scene {
     }
     const cells = cardHearts(fired ? 0 : slot.hearts, max);
     const heartArt = this.textures.exists(HEART_KEY);
-    // The extra hearts a buff or the small-pack bonus gives, the meter's last cells, are amber.
-    const extra = fired ? 0 : extraHearts(gameData, run, slot.dog).cells;
     view.hearts.forEach((sprite, i) => {
       const cell = cells[i];
       sprite.setVisible(heartArt && cell !== undefined);
       if (cell === undefined) {
         return;
       }
-      const amber = i >= cells.length - extra;
       if (heartArt) {
         sprite.setPosition(rect.x + cell.x, rect.y + cell.y);
         playTag(sprite, HEART_KEY, cell.full ? "full-dark" : "empty-dark");
-        if (amber) {
-          sprite.setTint(PALETTE.amber).setTintMode(TintModes.FILL);
-        } else {
-          sprite.clearTint();
-        }
       } else {
-        const color = amber ? PALETTE.amber : cell.full ? PALETTE.red : PALETTE.grey;
-        drawHeart(g, rect.x + cell.x, rect.y + cell.y, color);
+        drawHeart(g, rect.x + cell.x, rect.y + cell.y, cell.full ? PALETTE.red : PALETTE.grey);
       }
     });
   }

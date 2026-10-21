@@ -2,11 +2,11 @@ import type { DogId, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
-import { isHeavy, maxHearts, packSizeRaise, sizeHearts } from "../rules/dogs";
+import { isHeavy, packSizeRaise } from "../rules/dogs";
 import { formatDollars } from "../rules/effectText";
 import type { ModifiedValue } from "../rules/modified";
 import { standingModified } from "../rules/standing";
-import { cents, read } from "../rules/units";
+import { cents } from "../rules/units";
 import type { WalkItem, WalkStep } from "../runner/walk";
 import { packDogs, placeInPack } from "../state/pack";
 import type { ModifierSource } from "../state/runState";
@@ -381,14 +381,13 @@ export function walkStartMarks(
   };
 }
 
-// A dog's extra max hearts, which its card draws amber, and each source's line for a held
-// card, led by its icon: the lead dog's small-pack bonus, and each buff's, such as Lucky
-// collar's. cells is how many of the meter's last cells are extra.
+// Each source of a dog's extra max hearts as a line for a held card, led by its icon: the lead
+// dog's small-pack bonus, and each buff's, such as Lucky collar's.
 export function extraHearts(
   data: MarkData,
   run: Parameters<typeof standingModified>[1],
   dog: DogId,
-): { cells: number; lines: { iconKey: string; text: string }[] } {
+): { iconKey: string; text: string }[] {
   const owner = data.dogs[dog].owner.name;
   const line = (name: string, hearts: number) =>
     fillLine(RUN_TEXT_FIELDS.explain, data.runText.explain, "extraHearts", {
@@ -404,7 +403,7 @@ export function extraHearts(
     const item = charmItem(data, cause.source);
     return item === null || cause.amount <= 0 ? [] : [{ hearts: cause.amount, item }];
   });
-  const lines = [
+  return [
     ...(bonus > 0
       ? [{ iconKey: messageIconKey("hint"), text: line(data.runText.explain.smallPack, bonus) }]
       : []),
@@ -413,7 +412,4 @@ export function extraHearts(
       text: line(effectName(data, item), hearts),
     })),
   ];
-  const cap = read(data.tuning, "hearts", "maxOwnerHearts");
-  const max = maxHearts(data.tuning, run.modifiers, placeInPack(run, dog), data.dogs[dog]);
-  return { cells: max - Math.min(cap, sizeHearts(data.tuning, data.dogs[dog])), lines };
 }

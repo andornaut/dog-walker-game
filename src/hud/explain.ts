@@ -93,7 +93,7 @@ export function explainLines(
       });
       return [
         { iconKey: messageIconKey("hint"), text: line },
-        ...extraHearts(data, run, target.dog).lines,
+        ...extraHearts(data, run, target.dog),
       ];
     }
     default:
