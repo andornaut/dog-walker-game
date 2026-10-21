@@ -282,7 +282,7 @@ def shrunk(s, draw, **q):
 
 
 class Faceless:
-    """A grid that passes every draw on to g except rects and pixels in the colours drop, so a drawing's
+    """A grid that passes every draw on to g except rects, pixels and ellipses in the colours drop, so a drawing's
     face can be left off and painted at the small size instead."""
 
     def __init__(self, g, drop):
@@ -297,7 +297,8 @@ class Faceless:
             self.g.p(x, y, c)
 
     def ell(self, *args):
-        self.g.ell(*args)
+        if K[args[4]] not in self.drop:
+            self.g.ell(*args)
 
     def tri(self, *args):
         self.g.tri(*args)

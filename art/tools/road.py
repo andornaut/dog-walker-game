@@ -735,10 +735,10 @@ def squirrel_head(g, x, y):
     g.tri((x + 4, y - 1.5), (x + 3.5, y - 6), (x + 1, y - 3), "ochre")
     g.ell(x, y, 4.5, 4, "ochre", "rust", "tan")
     g.ell(x, y + 2, 2.5, 1.5, "cream")
-    g.rect(x - 3, y - 0.5, 2, 2, "ink")
-    g.rect(x + 1, y - 0.5, 2, 2, "ink")
-    g.p(x - 3, y - 0.5, "white")
-    g.p(x + 1, y - 0.5, "white")
+    # round eyes, each with a glint a quarter of its size at the top-left, so they read as two bright eyes
+    for ex in (x - 2, x + 2):
+        g.ell(ex, y + 0.5, 1.15, 1.15, "ink")
+        g.rect(ex - 0.9, y - 0.4, 0.95, 0.95, "white")
     g.rect(x - 1, y + 1.5, 2, 1, "plum")
 
 
