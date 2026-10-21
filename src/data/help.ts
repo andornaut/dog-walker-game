@@ -26,17 +26,16 @@ export const HELP_PAGES = [
     art: "help-cards",
     body:
       "Bump a puddle, skunk, squirrel, thief or another dog and the walk pauses for a card. " +
-      "Each option costs money, hearts or a debuff, and one always costs no money. " +
+      "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
       "Hold a card for details. Muddy and Stinky wear off on their own.",
-    title: "Bumps become cards",
+    title: "Some bumps bring cards",
   },
   {
     art: "help-owners",
     body:
-      "Each owner has a heart meter: 3♥ for a small dog, 4 medium, 5 big. " +
-      "Cones, bins and other plain bumps cost the owner of the dog that touched them, " +
-      "often the dog in front, so pick who leads. Small dogs dodge a few. " +
-      "At 0♥ the owner fires you and the dog trots home.",
+      "Each owner has hearts: 3♥ small, 4 medium, 5 big. " +
+      "A plain bump costs 1♥ from the dog that touched it, often the leader, so pick who leads. " +
+      "Small dogs dodge 1 in 4. At 0♥ the owner fires you.",
     title: "Keep owners happy",
   },
   {
@@ -44,7 +43,7 @@ export const HELP_PAGES = [
     body:
       "Every dog loves squirrels. A bubble and a line to a squirrel mean a dog is straining. " +
       "Steer away and the pull is off; wait and the pack hops one lane toward it. " +
-      "A pull never drags you into an obstacle.",
+      "A pull never drags you into a bump too close to dodge.",
     title: "Watch for pulls",
   },
   {

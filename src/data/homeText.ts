@@ -22,7 +22,7 @@ export const HOME_TEXT = {
   },
   detail: {
     dogFee: "Pay {fee} a neighborhood",
-    dogKind: "{size} · {hearts} ♥",
+    dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
     dogTotals: "Walks {walks} · Neighborhoods {zones} · Fired {fired}",
@@ -44,7 +44,7 @@ export const HOME_TEXT = {
     dogOwned: "{dog}: {kind}, {fee} a neighborhood.",
     gear: "{gear}: {effect}.",
     gearLocked: "{gear}: {effect}. {price}",
-    kind: "{size}, {hearts} ♥",
+    kind: "{size}, {hearts}♥",
     priceBuy: "{price}: tap to buy.",
     priceShort: "{price}: need {amount} more.",
   },

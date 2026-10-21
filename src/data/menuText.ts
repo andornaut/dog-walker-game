@@ -23,8 +23,8 @@ export const MENU_TEXT = {
     newBest: "New best!",
     titles: {
       finished: "What a walk!",
-      noDogs: "Out of dogs",
-      wentHome: "Headed home",
+      noDogs: "The pack went home early",
+      wentHome: "Home sweet home",
     },
     total: "Total",
     zonesWalked: "Neighborhoods walked",

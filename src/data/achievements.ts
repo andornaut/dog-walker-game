@@ -76,10 +76,10 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Everyone's met you now.",
     conditions: [{ count: "all", kind: "dogsFinishedWith" }],
-    goal: "Finish a walk with every dog",
+    goal: "Finish a walk with each of the 9 dogs",
     id: "neighbourhoodFavourite",
     name: "Neighborhood Favorite",
-    shortGoal: "All 9 dogs finish",
+    shortGoal: "Each dog finishes a walk",
   },
   {
     badgeLine: "Maplewood's finest. Ask any dog.",
@@ -108,7 +108,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "So close. Every time.",
     conditions: [{ count: 5, kind: "squirrelsChased" }],
-    goal: "Let the pack chase 5 squirrels",
+    goal: "Let the pack chase 5 squirrels, across all walks",
     id: "squirrel",
     name: "Squirrel!",
   },

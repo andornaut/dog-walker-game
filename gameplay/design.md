@@ -23,6 +23,20 @@ A cozy pixel-art lane runner: you are a dog walker walking a pack of dogs throug
 
 Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run structure, loadout, meta progression), Vampire Survivors (choices along the way), Slay the Spire (choices as cards).
 
+## Voice
+
+- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing (the walk's money is "cash"), ♥ right after its number ("+1♥", "{hearts}♥"), and no em dashes. Walkers: Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
+- **Lengths:** message strip lines and first-time hints at most about 46 characters (26 always fit); the walker's bubble up to 4 lines of about 30, with walker and parting lines at 2; card option names 2 or 3 words; hit labels one or two uppercase words with "!"
+- **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
+- **Jesse** (Koda): laid-back runner, fitness talk (form, personal bests, shake it off)
+- **Kevin** (Nugget): influencer, everything is content (feed, trending, followers)
+- **Kiwi** (Archie): unflappable grandmother, "dear" and "pet", offers cookies and tea
+- **Madame Lefevre** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
+- **Mr. Pruitt** (Zippy): retired accountant, dry, ledgers, receipts and red ink
+- **Rosa** (Duchess): retired florist, theatrical, flower metaphors and exclamation marks
+- **Sam** (Biscuit): easygoing barista, coffee puns, calls you "friend"
+- **Tiffany** (Snowball): wedding planner, everything rides on today, picture perfect or disaster
+
 ## Rules
 
 ### Screen and controls
@@ -51,8 +65,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Cash:** what you carry during the walk. It starts at a $5 purse (more with the Fanny pack) and grows with tips and lucky finds; card options are paid from it. It never goes below $0, and what's left is banked at the end
   - **Tips:** a tip is $1. Tips are the main income: each neighborhood spawns 52 or more, whatever the pack size, and a careful walk grabs about half
   - **Pay:** the steady part. After each neighborhood, each walking dog earns $10, times the neighborhood's pay multiplier. Pay is banked at the end of each neighborhood: at its celebration, or on the end screen after neighborhood 4. A firing loses that dog's pay for the current neighborhood and the Full pack bonus; its earlier pay stays banked
-- **Owner happiness (♥):** one meter per dog, shown as the dog's and owner's faces plus the meter, which never relies on colour alone. The dog's size sets its max (see Dogs). Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
-- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1 ♥, bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
+- **Owner happiness (♥):** one meter per dog, shown as the dog's and owner's faces plus the meter, which never relies on color alone. The dog's size sets its max (see Dogs). Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
+- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1♥, bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
 
 ### A walk
 
@@ -77,7 +91,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 ### Choice cards
 
 - Used for encounters and forks. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
-- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1 ♥ Duchess, −1 ♥ Koda", not "−1 ♥ each"). Choices only, no minigames
+- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Duchess, −1♥ Koda", not "−1♥ each"). Choices only, no minigames
 - Every card hits the whole pack. No card opens without a collision, except the fork card
 - A hit that opens a card costs nothing until you choose
 - A money option you can't afford is grayed out, so cash never goes below $0; every card keeps at least one option that costs no money
@@ -117,12 +131,12 @@ Every dog is a fixed, named character with its own art, a size and one fixed own
 | Dog      | Size   | Breed                | Owner                          | Look                                                                 |
 | -------- | ------ | -------------------- | ------------------------------ | -------------------------------------------------------------------- |
 | Archie   | Medium | Australian Shepherd  | Kiwi, grandmother              | Red merle, one blue eye, red bandana                                 |
-| Biscuit  | Medium | Beagle               | Sam, barista                   | Tricolour, floppy ears, green collar                                 |
+| Biscuit  | Medium | Beagle               | Sam, barista                   | Tricolor, floppy ears, green collar                                  |
 | Duchess  | Small  | Maltese              | Rosa, retired florist          | White coat, pink bow                                                 |
-| Koda     | Big    | Alaskan Malamute     | Jesse, trail runner            | Big and heavy, grey and white, blue eyes, harness                    |
+| Koda     | Big    | Alaskan Malamute     | Jesse, trail runner            | Big and heavy, gray and white, blue eyes, harness                    |
 | Nugget   | Small  | Pug                  | Kevin, pet influencer          | Fawn, black mask, tiny bandana                                       |
-| Penny    | Big    | Golden retriever mix | Gadget, inspector              | Smooth golden coat, blocky head, otter tail, blue collar             |
-| Pepe     | Medium | Miniature poodle     | Madame Lefevre, dog-show judge | Black coat, a white stripe from head to tail tip, show-clip pom-poms |
+| Penny    | Big    | Golden Retriever mix | Gadget, inspector              | Smooth golden coat, blocky head, otter tail, blue collar             |
+| Pepe     | Medium | Miniature Poodle     | Madame Lefevre, dog-show judge | Black coat, a white stripe from head to tail tip, show-clip pom-poms |
 | Snowball | Big    | Great Pyrenees       | Tiffany, wedding planner       | Giant white fluff, collar with a bell                                |
 | Zippy    | Small  | Jack Russell         | Mr. Pruitt, retired accountant | White with tan patches, red collar                                   |
 
@@ -142,25 +156,25 @@ A card obstacle opens a choice card. Card obstacles carry no special marking on 
 
 Each option costs one thing: money, hearts or a debuff. Let them sniff is the one trade, money for hearts.
 
-**Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, every doghouse card's header and name plate take the debuff's colours, its icon shows, and a bar drains over the 20 seconds with the seconds left under it; nothing changes on the road.
+**Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, every doghouse card's header and name plate take the debuff's colors, its icon shows, and a bar drains over the 20 seconds with the seconds left under it; nothing changes on the road.
 
-- **Muddy:** every plain bump costs 2 ♥ instead of 1
+- **Muddy:** every plain bump costs 2♥ instead of 1
 - **Stinky:** half as many tips appear
 
 ### Lucky encounters
 
 Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained.
 
-- **Generous neighbour:** a treat for each dog: +♥ to every owner, the hearts jackpot
+- **Generous neighbor:** a treat for each dog: +♥ to every owner, the hearts jackpot
 - **Lost wallet:** +$$ found money, the money jackpot
 
 ### Plain obstacles
 
-About half of the obstacles are plain: they open no card. A plain hit costs 1 ♥ from the owner of the dog it lands on (see Screen and controls).
+About half of the obstacles are plain: they open no card. A plain hit costs 1♥ from the owner of the dog it lands on (see Screen and controls).
 
 ### Obstacle sizes
 
-Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of it on screen counts as one hit; the whole obstacle is removed and the grace window starts. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans. Wherever the path has to change lanes between two obstacles, the gap between them is at least the whole pack's height plus every lane change the path needs there (crossing a 3-lane obstacle's width takes up to three) plus about half a second to react, so the pack visibly fits and has time to cross. Two obstacles 2 or more lanes wide never sit in neighbouring rows: at least one empty row separates them.
+Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of it on screen counts as one hit; the whole obstacle is removed and the grace window starts. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans. Wherever the path has to change lanes between two obstacles, the gap between them is at least the whole pack's height plus every lane change the path needs there (crossing a 3-lane obstacle's width takes up to three) plus about half a second to react, so the pack visibly fits and has time to cross. Two obstacles 2 or more lanes wide never sit in neighboring rows: at least one empty row separates them.
 
 | Obstacle                                                                        | Kind  | Size (lanes × rows) |
 | ------------------------------------------------------------------------------- | ----- | ------------------- |
@@ -194,7 +208,7 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
   - Fired: "Jesse fired you! Koda heads home."
   - First-time hints (see Teaching)
   - Last heart: "Jesse has 1♥ left!"
-  - Lucky find: "A neighbour shares treats! Everyone +1♥"
+  - Lucky find: "A neighbor shares treats! Everyone +1♥"
   - Plain hit: "Koda hit a cone! Jesse −1♥"
   - Pull: "Koda spotted a squirrel!"
   - Treat: "Biscuit got a treat! Sam +1♥"
@@ -203,12 +217,12 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse card with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the hit or card choice that fired you
 - **First visit:** on a brand-new save, the starter's owner waits at the gate in the gate scene until the first walk
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
-- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "PICKPOCKETED!") and the pack shaking off
+- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "YOINK!") and the pack shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.3 seconds for a plain obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
-- **Low hearts:** an owner at 1 ♥ looks upset, and their doghouse card shows it
+- **Low hearts:** an owner at 1♥ looks upset, and their doghouse card shows it
 - **Pay banked:** at each neighborhood's end, the celebration shows the pay banked for it
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
-- **Treat grabbed:** the owner smiles and a "+1 ♥" label shows over the dog
+- **Treat grabbed:** the owner smiles and a "+1♥" label shows over the dog
 
 Scenery gags (a cat on a fence, a sprinkler, a kite caught in a tree) play in the backdrop band; they open no card and have no effect.
 
@@ -253,11 +267,11 @@ Four walkers. Each has an agility, which sets how fast the pack changes lanes, a
 Everything bought at the Pet shop is permanent; upgrade cards are the walk-only boosts. Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
 
 - **Layout, top to bottom:** the top bar (bank, best walk, walk count and the Logbook button on the left; every control at the top right: help, sound, settings); the gate scene; then three framed sections in order: Walker, Dogs, Pocket (optional); then the Start walk button at the bottom. A section's frame lights up once it's complete; until then its band prompts ("Tap a face"), and the Dogs band shows the pack count with no label ("0/1" or "1/2"). Nothing else sits between the sections
-- **Pet shop:** a building in the gate scene, its sign the same green as Start walk (tappable entry points share one colour); tap it to open the shop, which sells everything you buy: gear, dogs and dog slots. It has two tabs. Gear lists the 4 items under "Yours to keep", each with a short effect line, marking owned ones "Owned". Dogs lists the dogs you don't own yet and the pack slots ("1 of 3 owned", "Walk 2 dogs at once"; a later slot shows "Buy slot 2 first"). Tap an item to buy it, at any time you can pay; anything you can afford in the shop has a gold outline. On the home screen only the Pet shop building gets the gold outline, while anything in it is affordable. Tapping a locked dog or dog slot on the home screen opens the shop at that item
-- **Tile states** (walkers, dogs and Pocket gear alike): Locked (not owned): a grey silhouette with a padlock and a price or goal plate, and no word; Available (owned, not picked): full colour in a plain frame; Picked: full colour in a gold frame with a check; Pack full (owned, not picked, while every slot is filled): greyed in colour, and a tap shows "The pack is full. Tap a picked dog to take it out."
+- **Pet shop:** a building in the gate scene, its sign the same green as Start walk (tappable entry points share one color); tap it to open the shop, which sells everything you buy: gear, dogs and dog slots. It has two tabs. Gear lists the 4 items under "Yours to keep", each with a short effect line, marking owned ones "Owned". Dogs lists the dogs you don't own yet and the dog slots ("1 of 3 owned", "Walk 2 dogs at once"; a later slot shows "Buy slot 2 first"). Tap an item to buy it, at any time you can pay; anything you can afford in the shop has a gold outline. On the home screen only the Pet shop building gets the gold outline, while anything in it is affordable. Tapping a locked dog or dog slot on the home screen opens the shop at that item
+- **Tile states** (walkers, dogs and Pocket gear alike): Locked (not owned): a gray silhouette with a padlock and a price or goal plate, and no word; Available (owned, not picked): full color in a plain frame; Picked: full color in a gold frame with a check; Pack full (owned, not picked, while every slot is filled): grayed in color, and a tap shows "The pack is full. Tap a picked dog to take it out."
 - **Details:** hold any dog or gear item, on the home screen or in the shop, for a detail card: a dog's breed, size and hearts, owner, pay and per-dog stats; a gear item's name and effect
 - **Start button:** the only button below the sections, reading "Start walk" in every state, and not ready until a walker and a dog are picked (the Pocket is optional). Each dog tile shows its pay
-- **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who's walking today? Tap to pick, hold for details."; after each of the first 3 walks "Tap to pick, hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the pet shop."
+- **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who's walking today? Tap to pick, hold for details."; after each of the first 3 walks "Tap to pick, hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the Pet shop!"
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $45 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
 - **Gear and Pocket** (4 items, bought once at the Pet shop): Fanny pack (start the walk with more cash); Hall pass (once per neighborhood, skip one encounter card for free); Lucky collar (every owner has +1 max ♥); Running shoes (+0.1 agility, one agility word up). The Pocket section is a strip of all 4 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. The section's band names the pocketed item, or reads "One per walk" when the Pocket is empty; hold an item for its effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
 - **Walker picker:** choose from the walkers you've unlocked (see Walkers). Walkers, dogs and the Pocket item share one pick toggle: tap to pick, tap the picked one again to unpick it. The walker choice is saved and comes back picked, unless it was unpicked; with no walker picked, the bubble asks "Who's walking? Tap a face." Locked walkers use the Locked tile state with a name plate ("Ben"); tapping one shakes it and the bubble gives the goal, "Finish Fairview Park to unlock Ben."; a picked walker's bubble gives their agility and perk ("Ben: relaxed, Treat finder."); a newly unlocked walker shows the walker's line "New walker!"
@@ -265,22 +279,22 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Owner parting line:** picking a dog shows a line from its owner (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, neighborhoods, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you on Fairview Park.")
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best neighborhood completed (heading home mid-neighborhood doesn't count it). Each dog's roster card shows its walks, neighborhoods finished and times fired
-- **Achievements:** a badge wall on the Stats page, earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting money), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
+- **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting money), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
-| Group      | Badge                 | Goal                                             | Line                          |
-| ---------- | --------------------- | ------------------------------------------------ | ----------------------------- |
-| Firsts     | First Steps           | Finish your first neighborhood                   | Every walk starts somewhere.  |
-| Firsts     | Round Trip            | Finish all 4 neighborhoods of a walk             | Home before the streetlights. |
-| Firsts     | Double Leash          | Walk 2 dogs at once                              | Twice the tails.              |
-| Firsts     | Pack Leader           | Walk 3 dogs at once                              | Twelve paws, one plan.        |
-| Mastery    | Clean Paws            | Finish a neighborhood without a plain hit        | Not a speck on them.          |
-| Mastery    | Not a Scratch         | Finish a walk without a plain hit                | Spotless, start to finish.    |
-| Mastery    | Five-Star Service     | Finish 10 walks without being fired              | The reviews are in.           |
-| Mastery    | Big Payday            | Earn $300 in one walk                            | Treats are on you.            |
-| Collection | Full Kennel           | Own all 9 dogs                                   | Every leash is spoken for.    |
-| Collection | Kitted Out            | Own every gear item                              | A pocket for everything.      |
-| Collection | Neighborhood Favorite | Finish a walk with every dog                     | Everyone's met you now.       |
-| Collection | Top Walker            | Own every dog and all 3 dog slots                | Maplewood's finest.           |
-| Silly      | You're Fired!         | Get fired 10 times                               | They always come back.        |
-| Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                   | You can smell this badge.     |
-| Silly      | Squirrel!             | Let the pack chase 5 squirrels, across all walks | So close. Every time.         |
+| Group      | Badge                 | Goal                                             | Line                                      |
+| ---------- | --------------------- | ------------------------------------------------ | ----------------------------------------- |
+| Firsts     | First Steps           | Finish your first neighborhood                   | Every walk starts somewhere.              |
+| Firsts     | Round Trip            | Finish all 4 neighborhoods of a walk             | Home before the streetlights.             |
+| Firsts     | Double Leash          | Walk 2 dogs at once                              | Twice the tails.                          |
+| Firsts     | Pack Leader           | Walk 3 dogs at once                              | Twelve paws, one plan.                    |
+| Mastery    | Clean Paws            | Finish a neighborhood without a plain bump       | Not a speck on them.                      |
+| Mastery    | Not a Scratch         | Finish a walk without a plain bump               | Spotless, start to finish.                |
+| Mastery    | Five-Star Service     | Finish 10 walks without being fired              | The reviews are in.                       |
+| Mastery    | Big Payday            | Earn $300 in one walk                            | Treats are on you.                        |
+| Collection | Full Kennel           | Own all 9 dogs                                   | Every leash is spoken for.                |
+| Collection | Kitted Out            | Own every gear item                              | A pocket for everything. Well, one thing. |
+| Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs            | Everyone's met you now.                   |
+| Collection | Top Walker            | Own every dog and all 3 dog slots                | Maplewood's finest. Ask any dog.          |
+| Silly      | You're Fired!         | Get fired 10 times                               | They always come back.                    |
+| Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                   | You can smell this badge.                 |
+| Silly      | Squirrel!             | Let the pack chase 5 squirrels, across all walks | So close. Every time.                     |

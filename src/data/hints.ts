@@ -8,7 +8,7 @@ export const HINTS = {
     trigger: { kind: "card" },
   },
   drag: {
-    text: "Drag to steer: one lane per lane-width.",
+    text: "Drag to steer. Drag farther for more lanes.",
     trigger: { kind: "drag" },
   },
   firedOwner: {
@@ -16,7 +16,7 @@ export const HINTS = {
     trigger: { kind: "firedOwner" },
   },
   fork: {
-    text: "Pick a path. Right is harder and pays more.",
+    text: "Pick a path and its upgrade.",
     trigger: { kind: "fork" },
   },
   homeButton: {

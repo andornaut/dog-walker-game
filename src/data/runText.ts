@@ -6,7 +6,7 @@ export const RUN_TEXT = {
   card: {
     fires: "Fires {owners}",
     forkFees: "Pay ×{fees}",
-    forkSubtitle: "Pick the next neighborhood",
+    forkSubtitle: "Where to next?",
     forkTitle: "Which way?",
     free: "Free",
     need: "Need {amount}",
@@ -31,14 +31,14 @@ export const RUN_TEXT = {
     title: "Head home?",
     zonesLeft: "Neighborhoods left: {count}",
   },
-  lowHearts: "1 ♥ left!",
+  lowHearts: "1♥ left!",
   newWalker: {
     button: "Welcome!",
     info: "{agility} · {perk}",
     subtitle: "{walker} joins you!",
     title: "New walker!",
   },
-  outOfMoney: "you're out of money",
+  outOfMoney: "out of cash",
   strip: {
     achievement: "Achievement! {name}",
   },

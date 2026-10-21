@@ -17,14 +17,14 @@ export const WALKER_PERKS = {
     name: "Calm voice",
   },
   kindWords: {
-    effect: "The first ♥ lost in each neighborhood is forgiven",
+    effect: "First ♥ lost each neighborhood is forgiven",
     effects: [
       { by: "kindWordsForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
     ],
     name: "Kind words",
   },
   longReach: {
-    effect: "Grabs tips and treats one lane to either side of the pack",
+    effect: "Grabs tips and treats a lane to each side",
     effects: [
       { by: "longReachLanes", kind: "modifier", operation: "add", stat: "tipReach" },
       { by: "longReachLanes", kind: "modifier", operation: "add", stat: "treatReach" },
