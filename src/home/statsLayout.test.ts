@@ -16,10 +16,35 @@ import {
   type DogColumn,
   dogColumnRights,
   STATS_LAYOUT,
+  STATS_TABS,
+  statsTabRects,
 } from "./statsLayout";
 
 const BODY = fontFileMetrics("font-body");
 const BADGES = badgeWall(gameData, { achievements: {} });
+
+// The tabs span the panel's columns, side by side, over its top; each label fits its tab.
+describe("the tabs", () => {
+  const tabs = statsTabRects();
+  const { panel } = STATS_LAYOUT;
+
+  it("run from the panel's left edge to its right edge, apart and over the panel", () => {
+    expect(tabs[0]?.x).toBe(panel.x);
+    const last = tabs[tabs.length - 1];
+    expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(panel.x + panel.width);
+    tabs.slice(1).forEach((tab, i) => {
+      const left = tabs[i];
+      expect(tab.x).toBeGreaterThan((left?.x ?? 0) + (left?.width ?? 0));
+    });
+    tabs.forEach((tab) => expect(tab.y + tab.height).toBeLessThanOrEqual(panel.y));
+  });
+
+  it.each(STATS_TABS.map((tab, i) => [tab, i] as const))("fits the %s label", (tab, i) => {
+    const label = gameData.menuText.stats.tabs[tab];
+    const style = { letterSpacing: 0, scale: TEXT_SCALE };
+    expect(inkWidth("font-title", style, label.toUpperCase())).toBeLessThan(tabs[i]?.width ?? 0);
+  });
+});
 // A wall cell's last line, at the cell's scale, keeps its lowest ink inside the row.
 describe("a wall badge's text", () => {
   it("leaves the last line's lowest ink inside the row", () => {

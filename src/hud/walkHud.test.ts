@@ -8,6 +8,8 @@ import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import { type Point, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { maxHearts } from "../rules/dogs";
+import { modifiersOf } from "../rules/modifiers";
 import { walkLength } from "../rules/route";
 import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -155,6 +157,30 @@ describe("the walk bar", () => {
         expect(next.x).toBe((hold?.x ?? 0) + (hold?.width ?? 0));
       }
     });
+  });
+
+  it("sits each face in its hit area, evenly apart, the last the cash well's margin from the end", () => {
+    const { size } = WALK_BAR.buttonFace;
+    const faces = WALK_BAR_BUTTONS.map((id) => ({
+      ...BAR.buttons[id].face,
+      height: size,
+      width: size,
+    }));
+    faces.forEach((face, i) => {
+      const id = WALK_BAR_BUTTONS[i];
+      expect(id && inside(face, BAR.buttons[id].hit)).toBe(true);
+    });
+    const pitches = new Set(faces.slice(1).map((face, i) => face.x - (faces[i]?.x ?? 0)));
+    expect(pitches.size).toBe(1);
+    const last = faces.at(-1);
+    const margin = topBar.x + topBar.width - ((last?.x ?? 0) + size);
+    expect(margin).toBe(WALK_BAR.cash.well.x);
+  });
+
+  it("spans the cash well from the neighbourhood well's top to the effect wells' bottom", () => {
+    const { cash, effects, zone } = WALK_BAR;
+    expect(cash.well.y).toBe(zone.well.y);
+    expect(cash.well.y + cash.well.height).toBe(effects.y + effects.size);
   });
 
   it("ends the neighbourhood well before the first button's hit area", () => {
@@ -333,18 +359,37 @@ describe("the dog cards", () => {
     });
   });
 
-  it.each([5, 6, 11])("keeps every heart of %i inside the card and clear of LEAD", (max) => {
-    const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };
-    const card = { ...DOG_CARD.size, x: 0, y: 0 };
-    const hit = cardHearts(max, max)
-      .map((cell) => ({ ...HEART_SIZE, x: cell.x, y: cell.y }))
-      .filter((heart) => overlaps(heart, lead) || !inside(heart, card));
-    expect(hit).toEqual([]);
-  });
+  // The most hearts an owner can have: the biggest dog's, with every gear's raise.
+  const gearModifiers = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
+  const mostHearts = Math.max(
+    ...Object.values(gameData.dogs).map((dog) => maxHearts(gameData.tuning, gearModifiers, dog)),
+  );
+  it.each([DOG_CARD.hearts.perRow, mostHearts])(
+    "keeps every heart of %i inside the card and clear of LEAD",
+    (max) => {
+      const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };
+      const card = { ...DOG_CARD.size, x: 0, y: 0 };
+      const hit = cardHearts(max, max)
+        .map((cell) => ({ ...HEART_SIZE, x: cell.x, y: cell.y }))
+        .filter((heart) => overlaps(heart, lead) || !inside(heart, card));
+      expect(hit).toEqual([]);
+    },
+  );
 
   it("puts a sixth heart under the first", () => {
     const { perRow, pitch, x, y } = DOG_CARD.hearts;
     expect(cardHearts(perRow + 1, perRow + 1)[perRow]).toMatchObject({ x, y: y + pitch });
+  });
+
+  it("ends LEAD on the owner's column's right edge", () => {
+    const { lead, owner } = DOG_CARD;
+    expect(lead.x + pngSize("images/ui-lead-tag.png").width).toBe(owner.x + owner.room);
+  });
+
+  it("centres Empty's capitals in the card's outline", () => {
+    const { empty, size } = DOG_CARD;
+    expect(empty.x).toBe(size.width / 2);
+    expect(empty.y + Math.floor(TITLE_CAP_ROWS / 2)).toBe(Math.floor(size.height / 2));
   });
 
   it("keeps the owner's name inside the card over the hearts", () => {

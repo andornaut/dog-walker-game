@@ -45,7 +45,7 @@ export const SHOP_LAYOUT = {
     width: ROW_WIDTH,
     x: ROW_X,
   },
-  tab: { drawHeight: 28, drawY: 80, gap: 8, height: 44, width: 162, x: PANEL.x + 10, y: 72 },
+  tab: { drawHeight: 28, drawY: 80, gap: 8, height: 44, width: 160, x: ROW_X, y: 72 },
 } as const;
 
 // The message on one line across a row's width, in the first of TEXT_FIT_STYLES whose ink fits:

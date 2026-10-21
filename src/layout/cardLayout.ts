@@ -12,7 +12,7 @@ import type { TextFitStyle } from "./textFit";
 // sit at the effect's top, the effect paws.gap under them. A plaque's text keeps
 // plaquePadX inside the plaque or its part right of the marker.
 export const CARD_LAYOUT = {
-  art: { height: 56, width: 75, x: 5, y: 16 },
+  art: { height: 56, width: 75, x: 4, y: 16 },
   badge: { height: 13, width: 71, x: 6, y: 121 },
   band: { height: 11, room: 77, y: 2 },
   effect: { height: 42, width: 71, x: 6, y: 76 },
@@ -21,7 +21,7 @@ export const CARD_LAYOUT = {
   // The enlarged card's body: a firing warning in the title font at 1x, warningGap over the
   // changes, which take the rest of the body.
   large: {
-    art: { x: 10, y: 32 },
+    art: { x: 8, y: 32 },
     badge: { height: 26, width: 142, x: 12, y: 242 },
     band: { height: 18, room: 154, y: 4 },
     body: { height: 82, width: 142, x: 12, y: 152 },

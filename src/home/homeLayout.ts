@@ -33,6 +33,7 @@ const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
 // one's name put their caps on.
 const WALKER_TILES = { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 } as const;
 const WALKER_BOX = { dx: 3, dy: 4, size: 34 } as const;
+const WALKER_ORIGIN_X = 14;
 const WALKER_TEXT_Y = 28;
 
 // The sections stack from the bar down to Start walk, each SECTION_GAP apart; the Pocket takes
@@ -127,13 +128,14 @@ export const HOME_LAYOUT = {
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
   // The top bar's four buttons at its right end, left to right: Logbook, Help, Sound and
   // Settings, as the walk bar orders Help, Sound and Settings. Each is its ui-icon-button face
-  // and its 44x44 hit area from the bar's top.
-  help: { face: { x: 240, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 228, y: 0 } },
-  logbook: { face: { x: 196, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 184, y: 0 } },
+  // and its 44x44 hit area from the bar's top. The faces are as far apart as the first is from
+  // the bank's well, and the last ends as far from the screen's edge as the well starts.
+  help: { face: { x: 248, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 228, y: 0 } },
+  logbook: { face: { x: 204, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 184, y: 0 } },
   // The logbook card's Stats and Badges buttons, side by side across its padded width.
   logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
-  mute: { face: { x: 284, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 272, y: 0 } },
+  mute: { face: { x: 292, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 272, y: 0 } },
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -144,15 +146,15 @@ export const HOME_LAYOUT = {
     x: 234,
     y: 86,
   },
-  // The Pocket's row of gear cells under its section's band, each drawing its tile 1px inside.
-  // In a tile: the icon box and the art in it, the padlock over its top-left corner, and the
-  // price plate's caps, centred.
+  // The Pocket's row of gear cells under its section's band, in the walker row's columns, each
+  // drawing its tile 1px inside. In a tile: the icon box and the art in it, the padlock over its
+  // top-left corner, and the price plate's caps, centred.
   pocket: {
-    box: { dx: 12, dy: 3, size: 34 },
-    cells: { cellHeight: 44, cellWidth: 60, columns: 5, gapX: 9, gapY: 0 },
-    icon: { dx: 13, dy: 4 },
+    box: { dx: 21, dy: 3, size: 34 },
+    cells: WALKER_TILES,
+    icon: { dx: 22, dy: 4 },
     lock: { dx: -2, dy: -3 },
-    origin: { x: 12, y: POCKET_SECTION.y + POCKET_CELLS_OFFSET },
+    origin: { x: WALKER_ORIGIN_X, y: POCKET_SECTION.y + POCKET_CELLS_OFFSET },
     priceY: 28,
     tileInset: 1,
   },
@@ -179,7 +181,7 @@ export const HOME_LAYOUT = {
     walker: WALKER_SECTION,
   },
   settings: {
-    face: { x: 328, y: TOP_BAR_FACE_Y },
+    face: { x: 336, y: TOP_BAR_FACE_Y },
     hit: { height: 44, width: 44, x: 316, y: 0 },
   },
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
@@ -226,7 +228,7 @@ export const HOME_LAYOUT = {
     wellKey: "ui-home-cash-well",
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
-  walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
+  walkerOrigin: { x: WALKER_ORIGIN_X, y: WALKER_SECTION.y + TILE_OFFSET },
   // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
   // the box at icons.dy (a walker has one perk), and a locked walker's padlock over
   // the tile's top-left corner and its name plate's caps, centred. An owned walker's name, in

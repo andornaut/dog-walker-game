@@ -292,18 +292,6 @@ export class SettingsScene extends Scene {
       originX: 0.5,
       scale: TEXT_SCALE,
     });
-    const separators = this.add.graphics();
-    ROWS.forEach((_, i) => {
-      if (i > 0) {
-        const rect = this.rowRect(i);
-        fillRect(separators, PALETTE.tan, {
-          height: 1,
-          width: rect.width - 8,
-          x: rect.x + 4,
-          y: rect.y,
-        });
-      }
-    });
     const rows = this.add.container(0, 0);
     for (const row of ROWS) {
       if (row.kind === "switch") {
@@ -312,6 +300,9 @@ export class SettingsScene extends Scene {
         this.drawSlider(row, settings);
       }
     }
+    // Over the rows, since a switch row's face covers its top row.
+    const separators = this.add.graphics();
+    this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
     addCloseButton(this, this.add.container(0, 0), SCREEN, this.pressed?.kind === "close");
     if (this.focus !== null) {
       const focused =

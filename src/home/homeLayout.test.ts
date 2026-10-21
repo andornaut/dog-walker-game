@@ -158,6 +158,36 @@ describe("pocket lining", () => {
   });
 });
 
+describe("the Pocket's tiles", () => {
+  const { box, cells, icon, origin, tileInset } = pocket;
+  const gear = Object.keys(gameData.shopGear).length;
+  const tiles = gridRects(cells, gear, origin).map((cell) => insetRect(tileInset, cell));
+
+  it("line up with the walker tiles' columns", () => {
+    const walkers = gridRects(walkerTiles, walkerTiles.columns, walkerOrigin);
+    const columns = gridRects(cells, cells.columns, origin);
+    expect(columns.map((cell) => [cell.x, cell.width])).toEqual(
+      walkers.map((cell) => [cell.x, cell.width]),
+    );
+  });
+
+  it("hold every gear on one row inside the stitch", () => {
+    const { stitchBottom } = HOME_LAYOUT.pocketLining;
+    expect(gear).toBeLessThanOrEqual(cells.columns);
+    for (const tile of tiles) {
+      expect(tile.y + tile.height).toBeLessThanOrEqual(stitchBottom.y);
+    }
+  });
+
+  it("centre the icon box across the tile, the icon inside it", () => {
+    const [tile] = tiles;
+    const width = tile?.width ?? 0;
+    expect(Math.abs(width - box.size - 2 * box.dx)).toBeLessThanOrEqual(1);
+    expect(icon.dx).toBeGreaterThan(box.dx);
+    expect(icon.dy).toBeGreaterThan(box.dy);
+  });
+});
+
 describe("Pet shop", () => {
   const { board, ...shop } = HOME_LAYOUT.petShop;
 
@@ -212,12 +242,22 @@ describe("top bar", () => {
   });
 
   it.each(buttons)(
-    "centres %s's face on the bar's middle row and across its hit area",
+    "centres %s's face on the bar's middle row, inside its hit area",
     (_, button) => {
-      expect(button.face.y + faceSize / 2).toBe(mid);
-      expect(button.face.x + faceSize / 2).toBe(button.hit.x + button.hit.width / 2);
+      const face = { ...button.face, height: faceSize, width: faceSize };
+      expect(face.y + faceSize / 2).toBe(mid);
+      expect(face.x).toBeGreaterThanOrEqual(button.hit.x);
+      expect(face.x + faceSize).toBeLessThanOrEqual(button.hit.x + button.hit.width);
     },
   );
+
+  it("spaces the faces as far apart as the first is from the well, the last the well's margin from the edge", () => {
+    const lefts = buttons.map(([, button]) => button.face.x);
+    const rights = [well.x + well.width, ...lefts.map((x) => x + faceSize)];
+    const gaps = lefts.map((x, i) => x - (rights[i] ?? 0));
+    expect(new Set(gaps).size).toBe(1);
+    expect(SCREEN_CONFIG.width - (rights.at(-1) ?? 0)).toBe(well.x);
+  });
 
   it.each(buttons)("gives %s a 44x44 hit area from the bar's top", (_, button) => {
     expect(button.hit).toMatchObject({ height: 44, width: 44, y: 0 });

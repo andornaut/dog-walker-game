@@ -125,6 +125,7 @@ const DEBUFF_FALLBACK = { face: PALETTE.slate, fill: PALETTE.cream, name: PALETT
 interface CardView {
   card: GameObjects.Sprite;
   dogFace: GameObjects.Sprite;
+  empty: GameObjects.BitmapText;
   fired: GameObjects.BitmapText;
   hearts: GameObjects.Sprite[];
   lead: GameObjects.Image | GameObjects.BitmapText;
@@ -137,8 +138,8 @@ function cardParts(view: CardView | undefined): GameObjects.Components.Transform
   if (view === undefined) {
     return [];
   }
-  const { card, dogFace, fired, hearts, lead, name, owner } = view;
-  return [card, dogFace, name, owner, fired, lead, ...hearts];
+  const { card, dogFace, empty, fired, hearts, lead, name, owner } = view;
+  return [card, dogFace, name, owner, empty, fired, lead, ...hearts];
 }
 
 interface DebuffBarView {
@@ -437,7 +438,7 @@ export class HudScene extends Scene {
         .setVisible(false);
     // The card first, so the face, hearts and labels draw over it.
     const card = sprite(CARD_KEY, { x: 0, y: 0 });
-    const { fired, lead, name, owner } = DOG_CARD;
+    const { empty, fired, lead, name, owner } = DOG_CARD;
     const leadTag = this.textures.exists("ui-lead-tag")
       ? this.add.image(x + lead.x, y + lead.y, "ui-lead-tag").setOrigin(0)
       : addPixelText(this, x + lead.x + 2, y + lead.y + 3, "Lead", {
@@ -447,6 +448,11 @@ export class HudScene extends Scene {
     return {
       card,
       dogFace: sprite("treat", DOG_CARD.dogFace),
+      empty: addPixelText(this, x + empty.x, y + empty.y, "", {
+        color: PALETTE.cream,
+        font: "title",
+        originX: 0.5,
+      }),
       fired: addPixelText(this, x + fired.x, y + fired.y, "", {
         color: PALETTE.white,
         font: "title",
@@ -675,14 +681,16 @@ export class HudScene extends Scene {
       parts.forEach((part) => part.setVisible(false));
       setPixelText(view.name, "");
       setPixelText(view.owner, "");
+      setPixelText(view.fired, "");
       if (slot === null) {
-        setPixelText(view.fired, "");
+        setPixelText(view.empty, "");
         return;
       }
       drawDashedRect(g, PALETTE.tan, { ...rect, width: rect.width - 2, x: rect.x + 1 });
-      setPixelText(view.fired.setTint(PALETTE.cream), "Empty");
+      setPixelText(view.empty, "Empty");
       return;
     }
+    setPixelText(view.empty, "");
     const dog = gameData.dogs[slot.dog];
     const fired = slot.status === "fired";
     const art = artFits(this, CARD_KEY, DOG_CARD.size);
@@ -698,7 +706,7 @@ export class HudScene extends Scene {
     }
     this.fitName(view.name, dog.name, rect);
     setPixelText(view.owner, dog.owner.name);
-    setPixelText(view.fired.setTint(PALETTE.white), fired ? gameData.runText.fired : "");
+    setPixelText(view.fired, fired ? gameData.runText.fired : "");
     if (fired) {
       [view.dogFace, ...view.hearts].forEach((part) => part.setVisible(false));
       return;

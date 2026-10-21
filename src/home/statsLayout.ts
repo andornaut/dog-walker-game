@@ -41,8 +41,9 @@ export const STATS_LAYOUT = {
   dogRow: { faceSize: 32, faceTop: 12, faceX: 12, nameX: 46, pitch: 34, top: PANEL.y + 32 },
   panel: PANEL,
   rows: { left: 16, pitch: 17, right: 344 },
-  // Tabs are 44 game pixels tall (48 CSS pixels on a phone) with 8 between them.
-  tab: { height: 44, pitch: 120, width: 112, x: 4, y: 56 },
+  // Tabs are 44 game pixels tall (48 CSS pixels on a phone), spanning the panel's width with
+  // 7 between them.
+  tab: { height: 44, pitch: 117, width: 110, x: PANEL.x, y: 56 },
   // The badge wall: two columns filled down, each row the badge then a 132-wide text column
   // of three lines at 2x (the name, the goal, then a locked badge's progress across walks).
   wall: { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: PANEL.y + 24 },

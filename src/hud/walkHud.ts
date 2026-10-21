@@ -31,28 +31,28 @@ export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 // holdInset left of the first well up to the first button, each from its well's left edge, down
 // to the bar's bottom.
 export const WALK_BAR = {
-  buttonFace: { size: 20, y: 12 },
+  buttonFace: { size: 20, y: 14 },
   buttons: {
-    help: { faceX: 231, hitWidth: 34, hitX: 224 },
-    home: { faceX: 197, hitWidth: 34, hitX: 190 },
-    pause: { faceX: 333, hitWidth: 34, hitX: 326 },
-    settings: { faceX: 299, hitWidth: 34, hitX: 292 },
-    sound: { faceX: 265, hitWidth: 34, hitX: 258 },
+    help: { faceX: 237, hitWidth: 34, hitX: 224 },
+    home: { faceX: 204, hitWidth: 34, hitX: 190 },
+    pause: { faceX: 336, hitWidth: 34, hitX: 326 },
+    settings: { faceX: 303, hitWidth: 34, hitX: 292 },
+    sound: { faceX: 270, hitWidth: 34, hitX: 258 },
   } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
   cash: {
     capsBottom: 30,
     ink: { left: 4, right: 77 },
     room: 70,
     scales: [3, 2, 1],
-    well: { height: 40, width: 75, x: 4, y: 4 },
+    well: { height: 37, width: 75, x: 4, y: 5 },
   },
   effects: { holdInset: 1, icon: 1, iconSize: 20, pitch: 22, size: 22, x: 80, y: 20 },
   minHitWidth: 34,
   zone: {
-    name: { x: 83, y: 7 },
-    progress: { right: 185, y: 7 },
+    name: { x: 83, y: 8 },
+    progress: { right: 185, y: 8 },
     textGap: 4,
-    well: { height: 13, width: 110, x: 80, y: 4 },
+    well: { height: 12, width: 110, x: 80, y: 5 },
   },
 } as const;
 
@@ -169,14 +169,16 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
 // at the largest of its scales that fits name.room, its top by scale. The owner's name labels
 // the hearts under it on every card with a dog, a fired dog's included, within owner.room.
 // Hearts sit in rows of perRow, pitch apart. The LEAD tag is on the front dog's card, and FIRED
-// is centred on fired.x on a fired dog's.
+// is centred on fired.x on a fired dog's. An owned slot with no dog shows "Empty" centred on
+// empty.x in its outline.
 export const DOG_CARD = {
-  dogFace: { x: 6, y: 28 },
-  fired: { x: 78, y: 42 },
-  hearts: { perRow: 5, pitch: 9, x: 44, y: 36 },
-  lead: { x: 88, y: 51 },
+  dogFace: { x: 8, y: 28 },
+  empty: { x: 60, y: 35 },
+  fired: { x: 79, y: 42 },
+  hearts: { perRow: 5, pitch: 9, x: 45, y: 36 },
+  lead: { x: 86, y: 51 },
   name: { room: 108, tops: { 1: 7, 2: 5 }, x: 60 },
-  owner: { room: 72, x: 44, y: 26 },
+  owner: { room: 68, x: 45, y: 26 },
   size: {
     height: SCREEN_CONFIG.dogCardHeight,
     width: SCREEN_CONFIG.width / SCREEN_CONFIG.dogSlotCount,

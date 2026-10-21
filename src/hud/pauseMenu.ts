@@ -15,18 +15,18 @@ const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
 // The note plate is as wide as the buttons.
 export const PAUSE_NOTE_WIDTH = BUTTON.width;
 // The note is body text at scale, wrapped to the plate's width less padX each side, its first
-// line's capitals pad under the plate's top, a line of the body font apart, and the last line's
-// lowest ink pad over its bottom.
-export const NOTE_PLATE = { gap: 4, pad: 4, padX: 4, scale: 2 } as const;
+// line's capitals padTop under the plate's top, a line of the body font apart, and the last
+// line's lowest ink padBottom over its bottom.
+export const NOTE_PLATE = { gap: 4, padBottom: 4, padTop: 6, padX: 4, scale: 2 } as const;
 
 // The pause menu's own note wraps onto this many lines.
 export const PAUSE_NOTE_LINES = 2;
 
 function notePlateHeight(body: FontMetrics, lines: number): number {
-  const { pad, scale } = NOTE_PLATE;
-  return pad + inkRowsOfLines(body, lines) * scale + pad;
+  const { padBottom, padTop, scale } = NOTE_PLATE;
+  return padTop + inkRowsOfLines(body, lines) * scale + padBottom;
 }
-const BOTTOM = 14;
+const BOTTOM = 17;
 // Each button's hit area reaches this far above and below its face.
 const HIT_REACH = 2;
 
@@ -103,7 +103,7 @@ export function notePartTops(
 ): number[] {
   let lines = 0;
   return lineCounts.map((count) => {
-    const top = plate.y + NOTE_PLATE.pad + lines * body.lineHeight * NOTE_PLATE.scale;
+    const top = plate.y + NOTE_PLATE.padTop + lines * body.lineHeight * NOTE_PLATE.scale;
     lines += count;
     return top;
   });

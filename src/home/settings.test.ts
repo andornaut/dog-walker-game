@@ -82,14 +82,14 @@ describe("settingsLayout", () => {
 
   it("centres the panel on the screen with its rows and title, and closes from the corner", () => {
     const layout = settingsLayout({ height: 560, width: 360 }, kinds);
-    expect(layout.panel).toEqual({ height: 258, width: 248, x: 56, y: 151 });
+    expect(layout.panel).toEqual({ height: 264, width: 248, x: 56, y: 148 });
     expect(layout.rows.map((row) => [row.y, row.height])).toEqual([
-      [189, 62],
-      [251, 44],
-      [295, 44],
-      [339, 62],
+      [186, 62],
+      [248, 44],
+      [292, 44],
+      [336, 62],
     ]);
-    expect(layout.title).toEqual({ x: 180, y: 167 });
+    expect(layout.title).toEqual({ x: 180, y: 164 });
     expect(layout.track.x).toBe(72);
     expect(layout.close.hit).toEqual({ height: 44, width: 44, x: 316, y: 0 });
   });
@@ -106,12 +106,25 @@ describe("settingsLayout", () => {
       expect(labelDy + 10).toBeLessThan(noteDy);
       expect(noteDy + linePitch + 14).toBeLessThanOrEqual(row.height);
       expect(face.dy + face.height).toBeLessThanOrEqual(row.height);
+      expect(face.dx + face.width).toBeLessThanOrEqual(row.width);
       expect(SETTINGS_ROW.labelDx + SETTINGS_ROW.switch.noteWidth).toBeLessThan(face.dx);
     } else {
       const { labelDy } = SETTINGS_ROW.slider;
       expect(labelDy + 10).toBeLessThan(layout.track.dy - 3);
       expect(layout.track.dy + layout.track.height + 3).toBeLessThanOrEqual(row.height);
     }
+  });
+
+  it("rules a separator along the top of every row after the first, inside the row", () => {
+    const layout = settingsLayout({ height: 560, width: 360 }, kinds);
+    const tops = layout.rows.slice(1).map((row) => row.y);
+    expect(layout.separators.map((rule) => rule.y)).toEqual(tops);
+    layout.separators.forEach((rule, i) => {
+      const row = layout.rows[i + 1];
+      expect(rule.height).toBe(1);
+      expect(rule.x).toBeGreaterThan(row?.x ?? Infinity);
+      expect(rule.x + rule.width).toBeLessThan((row?.x ?? 0) + (row?.width ?? 0));
+    });
   });
 });
 

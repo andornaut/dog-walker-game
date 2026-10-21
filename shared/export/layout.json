@@ -127,21 +127,25 @@
     ],
     "parts": {
       "dogFace": {
-        "x": 6,
+        "x": 8,
         "y": 28
       },
+      "empty": {
+        "x": 60,
+        "y": 35
+      },
       "fired": {
-        "x": 78,
+        "x": 79,
         "y": 42
       },
       "hearts": {
         "perRow": 5,
         "pitch": 9,
-        "x": 44,
+        "x": 45,
         "y": 36
       },
       "lead": {
-        "x": 88,
+        "x": 86,
         "y": 51
       },
       "name": {
@@ -153,8 +157,8 @@
         "x": 60
       },
       "owner": {
-        "room": 72,
-        "x": 44,
+        "room": 68,
+        "x": 45,
         "y": 26
       },
       "size": {
@@ -1005,7 +1009,7 @@
       "art": {
         "height": 56,
         "width": 75,
-        "x": 5,
+        "x": 4,
         "y": 16
       },
       "badge": {
@@ -1033,7 +1037,7 @@
       "height": 140,
       "large": {
         "art": {
-          "x": 10,
+          "x": 8,
           "y": 32
         },
         "badge": {
@@ -1536,7 +1540,7 @@
       },
       "help": {
         "face": {
-          "x": 240,
+          "x": 248,
           "y": 9
         },
         "hit": {
@@ -1548,7 +1552,7 @@
       },
       "logbook": {
         "face": {
-          "x": 196,
+          "x": 204,
           "y": 9
         },
         "hit": {
@@ -1569,7 +1573,7 @@
       },
       "mute": {
         "face": {
-          "x": 284,
+          "x": 292,
           "y": 9
         },
         "hit": {
@@ -1597,19 +1601,19 @@
       },
       "pocket": {
         "box": {
-          "dx": 12,
+          "dx": 21,
           "dy": 3,
           "size": 34
         },
         "cells": {
           "cellHeight": 44,
-          "cellWidth": 60,
-          "columns": 5,
-          "gapX": 9,
+          "cellWidth": 77,
+          "columns": 4,
+          "gapX": 8,
           "gapY": 0
         },
         "icon": {
-          "dx": 13,
+          "dx": 22,
           "dy": 4
         },
         "lock": {
@@ -1617,7 +1621,7 @@
           "dy": -3
         },
         "origin": {
-          "x": 12,
+          "x": 14,
           "y": 462
         },
         "priceY": 28,
@@ -1705,7 +1709,7 @@
       },
       "settings": {
         "face": {
-          "x": 328,
+          "x": 336,
           "y": 9
         },
         "hit": {
@@ -1889,26 +1893,26 @@
       "pocketRects": [
         {
           "height": 44,
-          "width": 60,
-          "x": 12,
+          "width": 77,
+          "x": 14,
           "y": 462
         },
         {
           "height": 44,
-          "width": 60,
-          "x": 81,
+          "width": 77,
+          "x": 99,
           "y": 462
         },
         {
           "height": 44,
-          "width": 60,
-          "x": 150,
+          "width": 77,
+          "x": 184,
           "y": 462
         },
         {
           "height": 44,
-          "width": 60,
-          "x": 219,
+          "width": 77,
+          "x": 269,
           "y": 462
         }
       ],
@@ -1969,25 +1973,25 @@
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 163
+          "y": 161
         },
         {
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 211
+          "y": 209
         },
         {
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 259
+          "y": 257
         },
         {
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 307
+          "y": 305
         }
       ],
       "hits": [
@@ -1995,40 +1999,40 @@
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 161
+          "y": 159
         },
         {
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 209
+          "y": 207
         },
         {
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 257
+          "y": 255
         },
         {
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 305
+          "y": 303
         }
       ],
       "notePlate": {
-        "height": 42,
+        "height": 44,
         "width": 200,
         "x": 80,
-        "y": 351
+        "y": 349
       },
       "panel": {
-        "height": 284,
+        "height": 289,
         "width": 232,
         "x": 64,
-        "y": 123
+        "y": 121
       },
-      "titleY": 139
+      "titleY": 137
     },
     "settings": {
       "close": {
@@ -2043,42 +2047,62 @@
       },
       "panel": {
         "width": 248,
-        "height": 258,
+        "height": 264,
         "x": 56,
-        "y": 151
+        "y": 148
       },
       "rows": [
         {
           "height": 62,
           "width": 232,
           "x": 64,
-          "y": 189
+          "y": 186
         },
         {
           "height": 44,
           "width": 232,
           "x": 64,
-          "y": 251
+          "y": 248
         },
         {
           "height": 44,
           "width": 232,
           "x": 64,
-          "y": 295
+          "y": 292
         },
         {
           "height": 62,
           "width": 232,
           "x": 64,
-          "y": 339
+          "y": 336
+        }
+      ],
+      "separators": [
+        {
+          "height": 1,
+          "width": 224,
+          "x": 68,
+          "y": 248
+        },
+        {
+          "height": 1,
+          "width": 224,
+          "x": 68,
+          "y": 292
+        },
+        {
+          "height": 1,
+          "width": 224,
+          "x": 68,
+          "y": 336
         }
       ],
       "title": {
         "x": 180,
-        "y": 167
+        "y": 164
       },
       "track": {
-        "dy": 24,
+        "dy": 26,
         "height": 10,
         "knobWidth": 10,
         "width": 216,
@@ -2157,20 +2181,20 @@
         "drawY": 80,
         "gap": 8,
         "height": 44,
-        "width": 162,
-        "x": 14,
+        "width": 160,
+        "x": 16,
         "y": 72
       },
       "tabRects": [
         {
           "height": 44,
-          "width": 162,
-          "x": 14,
+          "width": 160,
+          "x": 16,
           "y": 72
         },
         {
           "height": 44,
-          "width": 162,
+          "width": 160,
           "x": 184,
           "y": 72
         }
@@ -2227,9 +2251,9 @@
       },
       "tab": {
         "height": 44,
-        "pitch": 120,
-        "width": 112,
-        "x": 4,
+        "pitch": 117,
+        "width": 110,
+        "x": 8,
         "y": 56
       },
       "wall": {
@@ -2251,20 +2275,20 @@
       "tabRects": [
         {
           "height": 44,
-          "width": 112,
-          "x": 4,
+          "width": 110,
+          "x": 8,
           "y": 56
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 124,
+          "width": 110,
+          "x": 125,
           "y": 56
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 244,
+          "width": 110,
+          "x": 242,
           "y": 56
         }
       ]
@@ -2397,8 +2421,8 @@
       {
         "id": "home",
         "face": {
-          "x": 197,
-          "y": 12
+          "x": 204,
+          "y": 14
         },
         "hit": {
           "height": 48,
@@ -2407,15 +2431,15 @@
           "y": 0
         },
         "icon": {
-          "x": 199,
-          "y": 13
+          "x": 206,
+          "y": 15
         }
       },
       {
         "id": "help",
         "face": {
-          "x": 231,
-          "y": 12
+          "x": 237,
+          "y": 14
         },
         "hit": {
           "height": 48,
@@ -2424,15 +2448,15 @@
           "y": 0
         },
         "icon": {
-          "x": 233,
-          "y": 13
+          "x": 239,
+          "y": 15
         }
       },
       {
         "id": "sound",
         "face": {
-          "x": 265,
-          "y": 12
+          "x": 270,
+          "y": 14
         },
         "hit": {
           "height": 48,
@@ -2441,15 +2465,15 @@
           "y": 0
         },
         "icon": {
-          "x": 267,
-          "y": 13
+          "x": 272,
+          "y": 15
         }
       },
       {
         "id": "settings",
         "face": {
-          "x": 299,
-          "y": 12
+          "x": 303,
+          "y": 14
         },
         "hit": {
           "height": 48,
@@ -2458,15 +2482,15 @@
           "y": 0
         },
         "icon": {
-          "x": 301,
-          "y": 13
+          "x": 305,
+          "y": 15
         }
       },
       {
         "id": "pause",
         "face": {
-          "x": 333,
-          "y": 12
+          "x": 336,
+          "y": 14
         },
         "hit": {
           "height": 48,
@@ -2475,41 +2499,41 @@
           "y": 0
         },
         "icon": {
-          "x": 335,
-          "y": 13
+          "x": 338,
+          "y": 15
         }
       }
     ],
     "effectHolds": [
       {
-        "height": 44,
+        "height": 43,
         "width": 23,
         "x": 79,
-        "y": 4
+        "y": 5
       },
       {
-        "height": 44,
+        "height": 43,
         "width": 22,
         "x": 102,
-        "y": 4
+        "y": 5
       },
       {
-        "height": 44,
+        "height": 43,
         "width": 22,
         "x": 124,
-        "y": 4
+        "y": 5
       },
       {
-        "height": 44,
+        "height": 43,
         "width": 22,
         "x": 146,
-        "y": 4
+        "y": 5
       },
       {
-        "height": 44,
+        "height": 43,
         "width": 22,
         "x": 168,
-        "y": 4
+        "y": 5
       }
     ],
     "effectWells": [
@@ -2545,10 +2569,10 @@
       }
     ],
     "zoneWell": {
-      "height": 13,
+      "height": 12,
       "width": 110,
       "x": 80,
-      "y": 4
+      "y": 5
     },
     "debuffBar": {
       "fill": {
@@ -2585,31 +2609,31 @@
     "parts": {
       "buttonFace": {
         "size": 20,
-        "y": 12
+        "y": 14
       },
       "buttons": {
         "help": {
-          "faceX": 231,
+          "faceX": 237,
           "hitWidth": 34,
           "hitX": 224
         },
         "home": {
-          "faceX": 197,
+          "faceX": 204,
           "hitWidth": 34,
           "hitX": 190
         },
         "pause": {
-          "faceX": 333,
+          "faceX": 336,
           "hitWidth": 34,
           "hitX": 326
         },
         "settings": {
-          "faceX": 299,
+          "faceX": 303,
           "hitWidth": 34,
           "hitX": 292
         },
         "sound": {
-          "faceX": 265,
+          "faceX": 270,
           "hitWidth": 34,
           "hitX": 258
         }
@@ -2627,10 +2651,10 @@
           1
         ],
         "well": {
-          "height": 40,
+          "height": 37,
           "width": 75,
           "x": 4,
-          "y": 4
+          "y": 5
         }
       },
       "effects": {
@@ -2646,18 +2670,18 @@
       "zone": {
         "name": {
           "x": 83,
-          "y": 7
+          "y": 8
         },
         "progress": {
           "right": 185,
-          "y": 7
+          "y": 8
         },
         "textGap": 4,
         "well": {
-          "height": 13,
+          "height": 12,
           "width": 110,
           "x": 80,
-          "y": 4
+          "y": 5
         }
       }
     }

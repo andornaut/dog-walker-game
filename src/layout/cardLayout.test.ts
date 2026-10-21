@@ -24,3 +24,15 @@ describe("largeCardRect", () => {
     expect(largeCardRect(area, height)).toEqual(rect);
   });
 });
+
+// The illustration sits across the card's middle, as far from either side; the enlarged card
+// draws it at 2x.
+describe("the card's illustration", () => {
+  const { art, large, width } = CARD_LAYOUT;
+  it.each([
+    ["a card", art.x, art.width, width],
+    ["the enlarged card", large.art.x, art.width * 2, large.width],
+  ])("centres it across %s", (_name, x, artWidth, cardWidth) => {
+    expect(cardWidth - (x + artWidth)).toBe(x);
+  });
+});

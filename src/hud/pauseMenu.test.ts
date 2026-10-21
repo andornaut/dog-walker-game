@@ -38,23 +38,23 @@ const centred = (height: number) => ({
 describe("pauseMenuLayout", () => {
   it("places the panel, title, buttons and a two-line note plate", () => {
     const layout = pauseMenuLayout(BODY, walkView, { buttonCount: 4, noteLines: 2 });
-    const panel = centred(284);
+    const panel = centred(289);
     expect(layout.panel).toEqual(panel);
     expect(layout.titleY).toBe(panel.y + 16);
     expect(layout.buttons.map((button) => button.y - panel.y)).toEqual([40, 88, 136, 184]);
     for (const button of layout.buttons) {
       expect(button).toMatchObject({ height: 40, width: 200, x: panel.x + 16 });
     }
-    expect(layout.notePlate).toEqual({ height: 42, width: 200, x: panel.x + 16, y: panel.y + 228 });
+    expect(layout.notePlate).toEqual({ height: 44, width: 200, x: panel.x + 16, y: panel.y + 228 });
   });
 
   it("puts the Home question's three-line note under its title, over its two answers", () => {
     const layout = homeQuestionLayout(BODY, walkView, { buttonCount: 2, noteLines: 3 });
-    const panel = centred(208);
+    const panel = centred(213);
     expect(layout.panel).toEqual(panel);
     expect(layout.titleY).toBe(panel.y + 16);
-    expect(layout.notePlate).toEqual({ height: 62, width: 200, x: panel.x + 16, y: panel.y + 36 });
-    expect(layout.buttons.map((button) => button.y - panel.y)).toEqual([106, 154]);
+    expect(layout.notePlate).toEqual({ height: 64, width: 200, x: panel.x + 16, y: panel.y + 36 });
+    expect(layout.buttons.map((button) => button.y - panel.y)).toEqual([108, 156]);
   });
 
   it("reaches each hit area 2px above and below its button without overlapping the next", () => {
@@ -72,7 +72,7 @@ describe("pauseMenuLayout", () => {
 
 describe("notePartTops", () => {
   const plate = homeQuestionLayout(BODY, walkView, { buttonCount: 2, noteLines: 4 }).notePlate;
-  const first = plate.y + NOTE_PLATE.pad;
+  const first = plate.y + NOTE_PLATE.padTop;
 
   it.each<[string, number[], number[]]>([
     ["starts a lone part at the plate's padding", [3], [first]],
@@ -111,7 +111,7 @@ describe("the Home question's panel", () => {
 });
 
 // The pause menu's own note wraps at 2x onto the lines its plate is laid out for, in a panel
-// inside the band and road, the last line's lowest ink pad over the plate's bottom.
+// inside the band and road, the last line's lowest ink padBottom over the plate's bottom.
 describe("the pause menu's note", () => {
   it("wraps onto its plate's lines", () => {
     const room = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
@@ -123,7 +123,7 @@ describe("the pause menu's note", () => {
     expect(panel.y + panel.height).toBeLessThanOrEqual(walkView.y + walkView.height);
     const [top = 0] = notePartTops(BODY, notePlate, [PAUSE_NOTE_LINES]);
     const inkBottom = top + inkRowsOfLines(BODY, PAUSE_NOTE_LINES) * NOTE_PLATE.scale;
-    expect(notePlate.y + notePlate.height - inkBottom).toBe(NOTE_PLATE.pad);
+    expect(notePlate.y + notePlate.height - inkBottom).toBe(NOTE_PLATE.padBottom);
   });
 });
 

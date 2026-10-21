@@ -67,6 +67,8 @@ export interface SettingsLayout {
   panel: Rect;
   // The rows, top to bottom.
   rows: Rect[];
+  // A tan rule along the top of every row after the first, SEPARATOR_INSET in from its sides.
+  separators: Rect[];
   title: { x: number; y: number };
   track: SliderTrack & { dy: number; height: number };
 }
@@ -78,7 +80,7 @@ export interface SettingsLayout {
 export const SETTINGS_ROW = {
   height: { slider: 44, switch: 62 },
   labelDx: 26,
-  slider: { iconDy: 3, labelDy: 6 },
+  slider: { iconDy: 5, labelDy: 8 },
   switch: {
     iconDy: 5,
     labelDy: 8,
@@ -88,7 +90,7 @@ export const SETTINGS_ROW = {
     noteLines: 2,
     noteWidth: 156,
     scale: 2,
-    switch: { dx: 188, dy: 23, height: 16, width: 32 },
+    switch: { dx: 192, dy: 23, height: 16, width: 32 },
   },
 } as const;
 
@@ -102,7 +104,8 @@ export const SWITCH_NOTE_FIT = {
 const PANEL = { width: 248 };
 // The rows start under the title; the panel ends this far under the last.
 const ROWS_TOP = 38;
-const PANEL_FOOT = 8;
+const PANEL_FOOT = 14;
+const SEPARATOR_INSET = 4;
 
 // The rows, by kind, on a panel centred on the screen, and the close control in the screen's
 // corner. Settings covers the screen wherever it opens from.
@@ -124,7 +127,13 @@ export function settingsLayout(
     close: closeControl({ height: screen.height, width: screen.width, x: 0, y: 0 }),
     panel: { ...PANEL, height, x, y },
     rows,
+    separators: rows.slice(1).map((row) => ({
+      height: 1,
+      width: row.width - 2 * SEPARATOR_INSET,
+      x: row.x + SEPARATOR_INSET,
+      y: row.y,
+    })),
     title: { x: x + 124, y: y + 16 },
-    track: { dy: 24, height: 10, knobWidth: 10, width: 216, x: x + 16 },
+    track: { dy: 26, height: 10, knobWidth: 10, width: 216, x: x + 16 },
   };
 }
