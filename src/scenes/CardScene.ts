@@ -136,6 +136,8 @@ export class CardScene extends Scene {
   private onChoose: (choice: Choice) => void = () => undefined;
   private badges: (GameObjects.BitmapText | undefined)[] = [];
   private enlarged: GameObjects.GameObject[] = [];
+  // The title, subtitle and their band, hidden with the row while a card is enlarged.
+  private headerParts: GameObjects.GameObject[] = [];
   private hold: HoldPress | undefined;
   // A fork card's Head home button, hidden with the row while a card is enlarged.
   private homeParts: GameObjects.GameObject[] = [];
@@ -163,6 +165,7 @@ export class CardScene extends Scene {
     this.enlarged = [];
     this.hold = undefined;
     this.parts = [];
+    this.headerParts = [];
     this.homeParts = [];
     this.refusing = false;
     const { walkView } = screenLayout(SCREEN_CONFIG);
@@ -181,6 +184,7 @@ export class CardScene extends Scene {
     const header = cardHeader(keys, this.cardRects);
     const centerX = walkView.x + walkView.width / 2;
     const title = { font: "title", scale: 2 } as const;
+    const headerStart = this.children.list.length;
     if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
       snapCentre(
         addDisplayText(this, centerX, header.titleTop, view.title, { color: PALETTE.white }),
@@ -193,6 +197,7 @@ export class CardScene extends Scene {
     // The subtitle and key numbers sit on a dark band over the dimmed road.
     addNineSlice(this, "ui-strip-well", header.band);
     this.centered(centerX, header.subtitleTop, this.subtitle(view), PALETTE.white);
+    this.headerParts = this.children.list.slice(headerStart);
 
     const tag = cardFrameTag(view.source);
     const bandFont = this.bandFont();
@@ -334,8 +339,8 @@ export class CardScene extends Scene {
     }
     this.pressed = undefined;
     this.drawOutline();
-    // The row's edges and Head home would show beside the enlarged card and its charms, so they
-    // hide until the release.
+    // The row's edges, its title, subtitle and band, and Head home would show beside the enlarged
+    // card and its charms, so they hide until the release.
     this.showRow(false);
     const option = entry.option;
     const measured = this.addLargeBody(option, 0, 0);
@@ -437,7 +442,7 @@ export class CardScene extends Scene {
   }
 
   private showRow(visible: boolean): void {
-    [...this.parts.flat(), ...this.homeParts].forEach((part) => {
+    [...this.headerParts, ...this.parts.flat(), ...this.homeParts].forEach((part) => {
       (part as GameObjects.GameObject & { visible: boolean }).visible = visible;
     });
   }
