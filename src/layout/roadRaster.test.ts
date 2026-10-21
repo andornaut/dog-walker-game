@@ -9,6 +9,7 @@ import {
   drawRoad,
   FADE_ROWS,
   fadeCovers,
+  LINE_RUN,
   type PixelImage,
   pixelWord,
   type RoadFrame,
@@ -19,6 +20,7 @@ import {
   START_STRIP_ZONE_ROWS,
   STRIP,
   stripLevels,
+  stripLines,
 } from "./roadRaster";
 import {
   crossesLine,
@@ -301,10 +303,10 @@ describe("the verge beside the road", () => {
         if (y < raster.approachRows) {
           return;
         }
-        const seed = Math.floor(scroll + row.distance) >> row.level;
+        const seed = Math.floor(scroll + row.distance) >> row.dotLevel;
         row.across.forEach((across, i) => {
           if (across >= planterBand.from && across < planterBand.to) {
-            const key = `${row.level}:${row.roadX[i] ?? 0}:${seed}`;
+            const key = `${row.dotLevel}:${row.roadX[i] ?? 0}:${seed}`;
             const word = out[y * view.width + i] ?? 0;
             const before = colors.get(key);
             repeats += before === undefined ? 0 : 1;
@@ -316,6 +318,21 @@ describe("the verge beside the road", () => {
     }
     expect(conflicts).toBe(0);
     expect(repeats).toBeGreaterThan(1000);
+  });
+
+  // A row's dot cell is the same as or one past the cell of the row below it, so no cell is
+  // skipped between rows: each dot shows on some row and moves down with the road.
+  it.each([0, 0.4, 3, 17, 40])("seeds every cell of road on some row at scroll %d", (scroll) => {
+    const cells = raster.rows.map((row) => ({
+      cell: Math.floor(scroll + row.distance) >> row.dotLevel,
+      level: row.dotLevel,
+    }));
+    cells.slice(1).forEach(({ cell, level }, i) => {
+      const above = itemAt(cells, i);
+      if (above.level === level) {
+        expect(above.cell - cell).toBeLessThanOrEqual(1);
+      }
+    });
   });
 
   it("draws each seam across the sidewalk on one far row, however the road has scrolled", () => {
@@ -440,6 +457,88 @@ describe("drawRoad", () => {
     expect(vergeAt(START_STRIP_ZONE_ROWS)).toBe(pixelWord(0x8b9bb4));
   });
 
+  // A strip of one colour with a line down one column over its first rows.
+  const BASE = pixelWord(0x3a4466);
+  const LINE = pixelWord(0xffffff);
+  const lineLook = (column: number, rows: number): RoadLook => {
+    const pixels = new Uint32Array(STRIP.width * STRIP.height).fill(BASE);
+    for (let y = 0; y < rows; y++) {
+      pixels[y * STRIP.width + column] = LINE;
+    }
+    const strip = { ...STRIP, pixels };
+    return { lines: stripLines(strip), strip: stripLevels(strip), zone: "street" };
+  };
+  const showsLine = (out: Uint32Array, y: number) =>
+    out.subarray(y * view.width, (y + 1) * view.width).includes(LINE);
+
+  // A column covers more than a road pixel on the far rows, and a row several strip rows.
+  it.each([1, 37, 100, 161, 250, 318])(
+    "keeps a one-pixel lane line along strip column %d on every row, approach included",
+    (column) => {
+      for (const scroll of [0, 0.4, 3.7, 17]) {
+        const out = draw(frameOf({ current: lineLook(column, STRIP.height), scroll }));
+        const missing = raster.rows.filter((_, y) => !showsLine(out, y)).length;
+        expect(missing, `scroll ${scroll}`).toBe(0);
+      }
+    },
+  );
+
+  it.each([0, 0.4, 3.7, 17, 40])(
+    "shows a dash on every row whose stretch of road it lies on, at scroll %d",
+    (scroll) => {
+      const dash = LINE_RUN + 4;
+      const out = draw(frameOf({ current: lineLook(100, dash), scroll }));
+      const start = scroll - raster.visibleDistance;
+      raster.rows.forEach((row, y) => {
+        const first = Math.floor(start + row.near);
+        const last = Math.max(first, Math.ceil(start + row.far) - 1);
+        const onDash = Array.from({ length: last - first + 1 }, (_, k) => first + k).some(
+          (along) =>
+            STRIP.height - 1 - (((along % STRIP.height) + STRIP.height) % STRIP.height) < dash,
+        );
+        if (onDash) {
+          expect(showsLine(out, y), `row ${view.y + y}`).toBe(true);
+        }
+      });
+    },
+  );
+
+  // The backdrop's own verge on the approach rows, as the raster draws its base.
+  const backdropOf = (zone: ZoneId, recolour?: number) => {
+    const band = new Uint32Array(view.width * raster.approachRows);
+    raster.rows.slice(0, raster.approachRows).forEach((row, y) => {
+      row.across.forEach((across, i) => {
+        const rgb = recolour ?? vergeBase(VERGES[zone], across, row.scale);
+        band[y * view.width + i] = across < 0 ? 0 : pixelWord(rgb);
+      });
+    });
+    return band;
+  };
+  const approachVerge = (out: Uint32Array, band: Uint32Array) =>
+    Array.from(band, (word, i) => (word === 0 ? 0 : (out[i] ?? 0)));
+
+  it.each<ZoneId>(["shops", "street"])(
+    "moves %s's verge detail up the approach where the backdrop shows its verge",
+    (zone) => {
+      const band = backdropOf(zone);
+      const frames = [0, 5, 11, 19, 30].map((scroll) =>
+        approachVerge(
+          draw(frameOf({ approach: band, current: look(zone, 0x3a4466), scroll })),
+          band,
+        ),
+      );
+      const detailed = frames.filter((verge) => verge.some((word, i) => word !== band[i]));
+      expect(detailed.length).toBeGreaterThan(0);
+      expect(new Set(frames.map((verge) => verge.join())).size).toBeGreaterThan(1);
+    },
+  );
+
+  it("leaves the backdrop's own pixels on the approach where it does not show the verge", () => {
+    const band = backdropOf("street", 0x010203);
+    const out = draw(frameOf({ approach: band, current: look("street", 0x3a4466), scroll: 7 }));
+    expect(approachVerge(out, band).every((word) => word === 0)).toBe(true);
+  });
+
   it("dithers the far rows into the band only when the fade is on", () => {
     const band = new Uint32Array(view.width).fill(pixelWord(0xffffff));
     const white = pixelWord(0xffffff);
@@ -493,5 +592,27 @@ describe("shrinkRows", () => {
     const source = image([[5], [6], [7], [8]]);
     const shrunk = shrinkRows(2, source);
     expect([...shrunk.pixels].every((pixel) => source.pixels.includes(pixel))).toBe(true);
+  });
+});
+
+describe("stripLines", () => {
+  // A one-colour strip with a run down column 5 from row from, rows long.
+  const runStrip = (from: number, rows: number): PixelImage => {
+    const pixels = new Uint32Array(STRIP.width * STRIP.height).fill(1);
+    for (let k = 0; k < rows; k++) {
+      pixels[((from + k) % STRIP.height) * STRIP.width + 5] = 2;
+    }
+    return { ...STRIP, pixels };
+  };
+  it.each([
+    { from: 10, line: true, name: "a run as long as a line", rows: LINE_RUN },
+    { from: 10, line: false, name: "a shorter run", rows: LINE_RUN - 1 },
+    { from: STRIP.height - 3, line: true, name: "a run that wraps", rows: LINE_RUN },
+    { from: 0, line: true, name: "a whole column", rows: STRIP.height },
+  ])("marks $name as a line: $line", ({ from, line, rows }) => {
+    const lines = stripLines(runStrip(from, rows));
+    expect(lines.columns[5] === 1).toBe(line);
+    expect(lines.mask[((from + rows - 1) % STRIP.height) * STRIP.width + 5] === 1).toBe(line);
+    expect(lines.columns.reduce((sum, value) => sum + value, 0)).toBe(line ? 1 : 0);
   });
 });

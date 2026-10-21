@@ -14,6 +14,7 @@ import {
   solidStrip,
   STRIP,
   stripLevels,
+  stripLines,
 } from "../../layout/roadRaster";
 import { zoneAt } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
@@ -22,10 +23,10 @@ import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 const ROAD_TEXTURE = "road-projected";
 
-// Each road strip's look and each backdrop's bottom row, read once from their textures and
+// Each road strip's look and each backdrop's approach rows, read once from their textures and
 // kept for the scene's life.
 export class RoadArt {
-  private readonly bandRows = new Map<string, Uint32Array | null>();
+  private readonly approaches = new Map<string, Uint32Array | null>();
   private readonly looks = new Map<string, RoadLook>();
   private readonly scene: Scene;
 
@@ -39,24 +40,42 @@ export class RoadArt {
       const image = this.imagePixels(key);
       const fits = image?.width === STRIP.width && image.height === STRIP.height;
       const strip = fits ? image : solidStrip(colorFromHex(zone.roadColor));
-      look = { strip: stripLevels(strip), zone: zone.id as RoadLook["zone"] };
+      look = {
+        lines: stripLines(strip),
+        strip: stripLevels(strip),
+        zone: zone.id as RoadLook["zone"],
+      };
       this.looks.set(key, look);
     }
     return look;
   }
 
+  // The backdrop's bottom rows, where the road's approach is drawn over it, across the road's
+  // view: the approach rows, then its bottom row, which the far road fades into.
+  approach(zone: Zone): Uint32Array | null {
+    const key = backdropKey(zone);
+    let rows = this.approaches.get(key);
+    if (rows === undefined) {
+      rows = null;
+      const image = this.imagePixels(key);
+      const { approach, rasterView } = LAYOUT;
+      if (image !== null && image.height >= approach.height) {
+        rows = new Uint32Array(rasterView.width * approach.height);
+        for (let y = 0; y < approach.height; y++) {
+          const start = (image.height - approach.height + y) * image.width + rasterView.x;
+          rows.set(image.pixels.subarray(start, start + rasterView.width), y * rasterView.width);
+        }
+      }
+      this.approaches.set(key, rows);
+    }
+    return rows;
+  }
+
   // The backdrop's bottom row across the road, which the far road fades into.
   bandRow(zone: Zone): Uint32Array | null {
-    const key = backdropKey(zone);
-    let row = this.bandRows.get(key);
-    if (row === undefined) {
-      const image = this.imagePixels(key);
-      const { rasterView } = LAYOUT;
-      const start = image === null ? 0 : (image.height - 1) * image.width + rasterView.x;
-      row = image === null ? null : image.pixels.slice(start, start + rasterView.width);
-      this.bandRows.set(key, row);
-    }
-    return row;
+    const rows = this.approach(zone);
+    const { width } = LAYOUT.rasterView;
+    return rows === null ? null : rows.subarray(rows.length - width);
   }
 
   // A loaded image's pixels, read once through a canvas from its frame, which in a build is a
@@ -144,6 +163,7 @@ export class RoadView {
     drawRoad(
       road.raster,
       {
+        approach: this.art.approach(zone),
         current: this.art.look(zone, roadTileKey(zone)),
         fade: fade ? this.art.bandRow(zone) : null,
         scroll,

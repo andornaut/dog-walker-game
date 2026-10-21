@@ -41,17 +41,28 @@ export interface PixelImage {
 export type StripLevels = readonly [PixelImage, PixelImage, PixelImage];
 
 // The road x of each screen column, floored, and how far its centre is from the centre line,
-// or -1 on the strip, which covers columns roadStart to roadEnd (excluded). splits caches
+// or -1 on the strip, which covers columns roadStart to roadEnd (excluded). roadXFrom to
+// roadXTo are the road pixels whose left edges fall in each column, so the columns share the
+// road's pixels out between them, none missed and none twice (none on a row wider than the
+// road, where a pixel covers more than a column). The row covers
+// the road from near to far ahead of the feet. dotLevel sizes the cells the verge's dots are
+// seeded on, 2^dotLevel road pixels long, at least as long as the row's span, so every cell
+// shows on some row and the dots move down with the road rather than reshuffle. splits caches
 // verge edges by across.
 export interface RasterRow {
   readonly across: Float32Array;
   readonly distance: number;
+  readonly dotLevel: number;
+  readonly far: number;
   readonly level: 0 | 1 | 2;
+  readonly near: number;
   // The farthest across the row shows, at its outer columns.
   readonly reach: number;
   readonly roadEnd: number;
   readonly roadStart: number;
   readonly roadX: Int16Array;
+  readonly roadXFrom: Int16Array;
+  readonly roadXTo: Int16Array;
   readonly scale: number;
   readonly span: number;
   readonly splits: Map<number, readonly [number, number]>;
@@ -60,7 +71,8 @@ export interface RasterRow {
 // verges holds each zone's verge before seams, patches and marks, drawn once; marks and
 // patches cache what the road rows and blocks in view hold. The first approachRows rows lie
 // past the far edge of the road in view, on the backdrop's approach to its cross street:
-// they draw only the road surface, leaving the backdrop's verge beside it.
+// they draw the road surface, and the verge's scrolling detail only where the backdrop shows
+// the verge as the raster draws it, leaving its corners, fences and the rest as they are.
 export interface RoadRaster {
   readonly approachRows: number;
   readonly centerX: number;
@@ -75,17 +87,29 @@ export interface RoadRaster {
   readonly visibleDistance: number;
 }
 
-// A zone's look: its strip and the zone whose verge goes beside it.
+// A zone's look: its strip and the zone whose verge goes beside it, and the strip's lines along
+// the road, which every row that covers them keeps (stripLines).
 export interface RoadLook {
+  readonly lines?: StripLines;
   readonly strip: StripLevels;
   readonly zone: ZoneId;
 }
 
+// The pixels of a strip that lie on its lines along the road, such as lane marks: runs at
+// least LINE_RUN rows long, down one column, of a colour other than the strip's commonest.
+// columns marks each column holding any.
+export interface StripLines {
+  readonly columns: Uint8Array;
+  readonly mask: Uint8Array;
+}
+
+// approach, when set, is the backdrop's pixels on the approach rows across the view.
 // zoneStart is the scroll at which the current zone began. While its start strip rolls in, it
 // lies just past the far edge of the road in view at zoneStart, with the previous zone's road
 // on the near side of it. fade, when set, is the backdrop's bottom row across the view, which
 // the far rows dissolve into.
 export interface RoadFrame {
+  readonly approach?: Uint32Array | null;
   readonly current: RoadLook;
   readonly fade: Uint32Array | null;
   readonly scroll: number;
@@ -104,6 +128,8 @@ const PATCH_REACH = ROUGH_PATCH_REACH;
 const PATCH_COLOR = 0x3e8948;
 // Rows covering more than this much road per strip row step down a level.
 const LEVEL_SPAN = 2;
+// A run down a strip column at least this long is a line along the road.
+export const LINE_RUN = 8;
 // The far rows dithered into the band when the fade is on.
 export const FADE_ROWS = 12;
 const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5] as const;
@@ -166,6 +192,45 @@ export function stripLevels(strip: PixelImage): StripLevels {
   return [strip, shrinkRows(2, strip), shrinkRows(4, strip)];
 }
 
+// The strip's lines along the road, wrapping from its last row to its first as it tiles.
+export function stripLines(strip: PixelImage): StripLines {
+  const { height, pixels, width } = strip;
+  const base = mostCommon(pixels);
+  const mask = new Uint8Array(width * height);
+  const columns = new Uint8Array(width);
+  const at = (x: number, y: number) => pixels[(((y % height) + height) % height) * width + x];
+  for (let x = 0; x < width; x++) {
+    // A column of one colour has no run start: it is one line all the way down.
+    const uniform = Array.from({ length: height }, (_, y) => at(x, y)).every(
+      (pixel) => pixel === at(x, 0),
+    );
+    if (uniform && at(x, 0) !== base && height >= LINE_RUN) {
+      for (let y = 0; y < height; y++) {
+        mask[y * width + x] = 1;
+      }
+      columns[x] = 1;
+      continue;
+    }
+    for (let y = 0; y < height; y++) {
+      const pixel = at(x, y);
+      if (pixel === base || at(x, y - 1) === pixel) {
+        continue;
+      }
+      let run = 1;
+      while (run < height && at(x, y + run) === pixel) {
+        run += 1;
+      }
+      if (run >= LINE_RUN) {
+        for (let k = 0; k < run; k++) {
+          mask[((y + k) % height) * width + x] = 1;
+        }
+        columns[x] = 1;
+      }
+    }
+  }
+  return { columns, mask };
+}
+
 // A strip of one colour, for a zone whose art is missing.
 export function solidStrip(rgb: number): PixelImage {
   const pixels = new Uint32Array(STRIP.width * STRIP.height).fill(pixelWord(rgb));
@@ -195,10 +260,14 @@ export function roadRaster(
     const distance = distanceAtY(projection, y + 0.5);
     const span = distance - distanceAtY(projection, y + 1.5);
     const roadX = new Int16Array(view.width);
+    const roadXFrom = new Int16Array(view.width);
+    const roadXTo = new Int16Array(view.width);
     const across = new Float32Array(view.width);
     for (let i = 0; i < view.width; i++) {
       const x = roadXAt(projection, scale, view.x + i + 0.5);
       roadX[i] = Math.floor(x);
+      roadXFrom[i] = Math.ceil(roadXAt(projection, scale, view.x + i));
+      roadXTo[i] = Math.ceil(roadXAt(projection, scale, view.x + i + 1)) - 1;
       const onStrip = x >= left && x < left + STRIP.width;
       across[i] = onStrip ? -1 : Math.abs(x - centerX);
     }
@@ -208,11 +277,16 @@ export function roadRaster(
     rows.push({
       across,
       distance,
+      dotLevel: Math.max(0, Math.ceil(Math.log2(span))),
+      far: distanceAtY(projection, y),
       level: levelFor(span),
+      near: distanceAtY(projection, y + 1),
       reach: Math.max(0, across[0] ?? 0, across[view.width - 1] ?? 0),
       roadEnd,
       roadStart: Math.max(0, roadStart),
       roadX,
+      roadXFrom,
+      roadXTo,
       scale,
       span,
       splits: new Map(),
@@ -398,8 +472,9 @@ function markPixel(
 }
 
 // Draws one frame of the road into out, view.width by view.height, row by row: the strip's
-// columns copied from the row's strip row, the verge copied from the zone's, then the seams,
-// rough patches and 2-row marks that scroll with the road.
+// columns copied from the row's strip row with its lines kept, the verge copied from the
+// zone's, then the seams, rough patches and 2-row marks that scroll with the road. On the
+// approach rows the verge shows only where the backdrop's own pixel is the verge's.
 export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array): void {
   const { centerX, view } = raster;
   const stripLeft = centerX - STRIP.width / 2;
@@ -426,12 +501,8 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
         : look.zone;
     const verge = VERGES[vergeZone];
     const offset = y * width;
-    const approach = y < raster.approachRows;
-    if (approach) {
-      out.fill(0, offset, offset + width);
-    } else {
-      out.set(vergeOf(raster, vergeZone).subarray(offset, offset + width), offset);
-    }
+    const vergePixels = vergeOf(raster, vergeZone);
+    out.set(vergePixels.subarray(offset, offset + width), offset);
 
     const image = look.strip[row.level];
     const pixels = image.pixels;
@@ -440,16 +511,18 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     for (let i = roadStart; i < roadEnd; i++) {
       out[offset + i] = pixels[rowStart + (roadX[i] ?? 0)] ?? 0;
     }
-    if (approach) {
-      fadeRow(frame.fade, view.x, y, offset, out);
-      return;
+    if (look.lines !== undefined) {
+      const start = frame.scroll - frame.zoneStart - raster.visibleDistance;
+      const first = Math.floor(start + row.near);
+      const last = Math.max(first, Math.ceil(start + row.far) - 1);
+      drawLines(out, offset, row, look.strip[0], look.lines, stripLeft, first, last);
     }
 
     const plan = planOf(verge);
     if (plan.dots.length > 0) {
-      // Noise rows step down with the strip's level, so the dots scroll with the road rather
-      // than reshuffle on rows that cover more road than they show.
-      const seed = Math.floor(z) >> row.level;
+      // Each dot holds a cell of road at least as long as the row's span, so it moves down
+      // with the road rather than reshuffle on rows that cover more road than they show.
+      const seed = Math.floor(z) >> row.dotLevel;
       for (const { from, to, words } of plan.dots) {
         const [fromLeft, fromRight] = splitAt(row, from);
         const [toLeft, toRight] = splitAt(row, to);
@@ -506,8 +579,83 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
       }
     }
     [carried, next] = [next, carried];
+    if (y < raster.approachRows) {
+      keepBackdropVerge(frame.approach ?? null, row, vergePixels, offset, out);
+    }
     fadeRow(frame.fade, view.x, y, offset, out);
   });
+}
+
+// Clears an approach row's verge, for the backdrop under it to show, wherever the backdrop's
+// own pixel is not the verge's: its corners and fences stand still, while its sidewalks and
+// lawns carry the verge's moving detail. With no backdrop, the whole verge clears.
+function keepBackdropVerge(
+  approach: Uint32Array | null,
+  row: RasterRow,
+  verge: Uint32Array,
+  offset: number,
+  out: Uint32Array,
+): void {
+  for (let i = 0; i < row.across.length; i++) {
+    const at = offset + i;
+    if ((row.across[i] ?? -1) >= 0 && (approach === null || approach[at] !== verge[at])) {
+      out[at] = 0;
+    }
+  }
+}
+
+// Keeps the strip's lines on a row: a column whose share of the road holds a line pixel on any
+// strip row from first to last (counted down the road, as along) draws it, so a line thinner
+// than a column or shorter than the row's span still shows, and moves with the road.
+function drawLines(
+  out: Uint32Array,
+  offset: number,
+  row: RasterRow,
+  strip: PixelImage,
+  lines: StripLines,
+  stripLeft: number,
+  first: number,
+  last: number,
+): void {
+  const { pixels, width } = strip;
+  for (let i = row.roadStart; i < row.roadEnd; i++) {
+    const centre = (row.roadX[i] ?? 0) - stripLeft;
+    let from = Math.max(0, (row.roadXFrom[i] ?? 0) - stripLeft);
+    let to = Math.min(width - 1, (row.roadXTo[i] ?? 0) - stripLeft);
+    if (from > to) {
+      from = centre;
+      to = centre;
+    }
+    let any = false;
+    for (let x = from; x <= to && !any; x++) {
+      any = lines.columns[x] === 1;
+    }
+    if (!any) {
+      continue;
+    }
+    const at = linePixel(lines.mask, strip, { first, from, last, to });
+    if (at >= 0) {
+      out[offset + i] = pixels[at] ?? 0;
+    }
+  }
+}
+
+// The first line pixel in a block of the strip, from the nearest of its rows, or -1.
+function linePixel(
+  mask: Uint8Array,
+  strip: PixelImage,
+  block: { first: number; from: number; last: number; to: number },
+): number {
+  const { height, width } = strip;
+  for (let along = block.first; along <= block.last; along++) {
+    const stripRow = (((height - 1 - along) % height) + height) % height;
+    for (let x = block.from; x <= block.to; x++) {
+      if (mask[stripRow * width + x] === 1) {
+        return stripRow * width + x;
+      }
+    }
+  }
+  return -1;
 }
 
 // A dotted band's columns from to to (excluded) on a row: each pixel's noise, seeded on its
