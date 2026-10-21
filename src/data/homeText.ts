@@ -74,6 +74,7 @@ export const HOME_TEXT = {
   noticeSoundOff: "Sound off.",
   noticeSoundOn: "Sound on.",
   packCount: "{count}/{max}",
+  parting: "{owner}: {line}",
   pocket: {
     note: "One per walk",
     title: "Pocket",
@@ -81,6 +82,7 @@ export const HOME_TEXT = {
   sectionDogs: "Pick your dogs",
   sectionWalker: "Pick a walker",
   sectionWalkerPrompt: "Tap a face",
+  sentenceList: { beforeLast: " and ", between: ", " },
   shop: {
     confirmBuy: "Buy",
     confirmCancel: "Cancel",
