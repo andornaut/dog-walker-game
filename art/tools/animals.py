@@ -61,12 +61,7 @@ import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
-from road import BREATH, BREATH_MS, LIT  # noqa: E402
-
-
-def lit(g):
-    """road.rim with road.LIT, looked up when called so minis.small's swap applies."""
-    return road.rim(g, LIT)
+from road import BREATH, BREATH_MS, lit  # noqa: E402
 
 
 def eyes(g, xs, y, c="ink"):
@@ -587,73 +582,45 @@ def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
 def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
     """A Social dog galloping across the road in side view, facing right, on hazards.corgi_side's skeleton:
     the same body, hips, shoulders and paw positions per frame (hazards.CORGI_RUN), so it runs in the loose
-    dog's pose, without the broken leash. spec is one of SIDE: the coat (fill, shade, light), the white or
-    cream underside, the leg and sock colours, the ears, the tail and an extra (the frisbee, the harness or
-    the collar)."""
+    dog's pose, without the broken leash. spec is one of SIDE: the coat (fill, shade, light) and its far
+    legs, the white underside, the leg and sock colours, the muzzle, the eye and the frisbee in its mouth."""
     g = edged(Grid())
     b = bob + 1
     coat, under, leg, sock = spec["coat"], spec["under"], spec["leg"], spec["sock"]
-    far = spec.get("far", coat[1])
     for (x, y), (px, py) in (((10, 21 + b), hind), ((20, 21 + b), front)):
-        hazards.limb(g, x, y, px + 3, py - 1, 2, far)
+        hazards.limb(g, x, y, px + 3, py - 1, 2, spec["far"])
         g.rect(px + 3, py, 2, 2, "lgrey")
-    tail = spec["tail"]
-    if tail == "up":
-        g.cel(4, 12 + b, 1.5, 4.5, *coat)
-        g.cel(4, 8.5 + b, 1.3, 1.5, "white")
-    elif tail == "plume":
-        g.cel(4, 19 + b, 4, 2.2, *coat)
-        g.cel(1.5, 19.5 + b, 1.5, 1.4, "white")
-    elif tail == "curl":
-        g.cel(7, 14 + b, 3.5, 3.2, *coat)
-        g.cel(7, 14 + b, 1.5, 1.4, under)
-    else:
-        g.cel(4.5, 14 + b, 1.3, 3.5, *coat)
+    # the plumed tail, white tipped
+    g.cel(4, 19 + b, 4, 2.2, *coat)
+    g.cel(1.5, 19.5 + b, 1.5, 1.4, "white")
     g.cel(14, 19 + b, 9.5, 5, *coat)
-    if spec.get("saddle"):
-        g.cel(12, 16.5 + b, 6, 2.5, spec["saddle"], None)
-    g.cel(15, 22 + b, 7, 2, under, "lgrey" if under == "white" else "tan")
-    g.cel(21, 19 + b, 3, 3.5, under, "lgrey" if under == "white" else "tan")
-    if spec.get("harness"):
-        g.rect(17, 14 + b, 2, 10, "sky")
-        g.rect(17, 14 + b, 1, 10, "cyan")
-        g.rect(9, 14 + b, 8, 1, "sky")
+    g.cel(15, 22 + b, 7, 2, under, "lgrey")
+    g.cel(21, 19 + b, 3, 3.5, under, "lgrey")
     for (x, y), (px, py) in (((7, 21 + b), hind), ((18, 21 + b), front)):
         hazards.limb(g, x, y, px, py - 1, 3, leg)
         g.rect(px, py, 3, 2, sock)
-        g.p(px + 2, py + 1, "lgrey" if sock == "white" else "tan")
-    ears = spec["ears"]
-    if ears in ("prick", "big"):
-        big = ears == "big"
-        g.tri((19.5, 9 + b), (19 if big else 20.5, (0 if big else 2) + b), (24, 7.5 + b), coat[0])
-        g.tri((21, 8 + b), (20.5 if big else 21, (2.5 if big else 4.5) + b), (23, 7.5 + b), "pink")
+        g.p(px + 2, py + 1, "lgrey")
+    # pricked ears
+    g.tri((19.5, 9 + b), (20.5, 2 + b), (24, 7.5 + b), coat[0])
+    g.tri((21, 8 + b), (21, 4.5 + b), (23, 7.5 + b), "pink")
     g.cel(23.5, 12.5 + b, 5, 4.5, *coat)
-    if ears == "flop":
-        g.cel(21, 13.5 + b, 2.2, 4, "dbrown", "plum", "brown")
-    if spec.get("mask"):
-        g.cel(25, 13.5 + b, 3.5, 2.5, "white", "lgrey")
-        g.rect(23, 10 + b, 2, 1, "white")
-    g.cel(27, 14.5 + b, 3, 2, spec["muzzle"], "lgrey" if spec["muzzle"] == "white" else "tan")
+    g.cel(27, 14.5 + b, 3, 2, spec["muzzle"], "lgrey")
     g.rect(29, 13 + b, 1, 2, "ink")
     g.p(28, 13 + b, "ink")
-    eye = spec.get("eye", "ink")
-    g.rect(24, 11 + b, 2, 2, eye)
+    g.rect(24, 11 + b, 2, 2, spec["eye"])
     g.p(24, 11 + b, "white")
-    if eye != "ink":
-        g.p(25, 12 + b, "ink")
+    g.p(25, 12 + b, "ink")
     g.p(27, 16 + b, "dbrown")
-    if spec.get("frisbee"):
-        g.cel(29.5, 17.5 + b, 2.2, 3.5, "red", "dred", "pink")
-        g.rect(29, 16 + b, 1, 3, "dred")
-    if spec.get("collar"):
-        g.rect(19, 13 + b, 2, 5, spec["collar"])
+    # the frisbee in its mouth
+    g.cel(29.5, 17.5 + b, 2.2, 3.5, "red", "dred", "pink")
+    g.rect(29, 16 + b, 1, 3, "dred")
     return lit(g)
 
 
 # Each Social dog's side view, for side_dog.
 SIDE = {
     "social-frisbee-dog": dict(coat=("navy", "ink", "dslate"), far="ink", under="white", leg="navy", sock="white",
-                               ears="prick", tail="plume", muzzle="white", eye="amber", frisbee=True),
+                               muzzle="white", eye="amber"),
 }
 
 

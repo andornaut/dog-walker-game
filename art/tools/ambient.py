@@ -169,12 +169,6 @@ def pedestrians(suffix, step):
 
 # ---------- cars: side elevations, laid out in design units and drawn at road.SCALE ----------
 
-def rimmed(g, extra=None):
-    """road.rim with road.LIT (and extra) on g's own grid, returning g."""
-    road.rim(getattr(g, "g", g), {**road.LIT, **(extra or {})})
-    return g
-
-
 # A hub's spoke a frame, an eighth of a turn clockwise each, as a wheel rolling right turns: |, /, - and \,
 # as offsets from the hub's centre.
 SPOKES = (((0, -2), (0, -1), (0, 1), (0, 2)), ((1, -1), (-1, 1)), ((-2, 0), (-1, 0), (1, 0), (2, 0)),
@@ -261,7 +255,7 @@ class Car:
             rect(cx - TYRE - 1.5, self.cy - TYRE - 1.5 - dip, (TYRE + 1.5) * 2, 1, None)
             g.ell(cx + 2, self.cy + dip, TYRE + 1.5, TYRE + 1.5, "navy")
         g.rect(0, end + 1 + dip, self.w, self.h, None)
-        rimmed(g, dict(navy=("slate", None)))
+        road.lit(g, dict(navy=("slate", None)))
         for cx in self.wheels:
             cx += 2
             g.ell(cx, self.cy, TYRE, TYRE, "ink")
@@ -401,7 +395,7 @@ def cyclist(s, f):
     bar(g, BB, near, 1.5, "lgrey")
     g.ell(BB[0], BB[1], 1.5, 1.5, "grey")
     leg(near, "skin1", "white")
-    out = rimmed(g.g, dict(navy=("grey", "slate"), purple=("mauve", None))).outlined()
+    out = road.lit(g.g, dict(navy=("grey", "slate"), purple=("mauve", None))).outlined()
     # the spokes: a cross through each hub, a sixteenth of a turn on per frame
     for cx, cy in (REAR, FRONT):
         cx, cy = (cx + 1) * s, cy * s
@@ -556,7 +550,7 @@ def animal(s, draw):
     """One frame of a lawn animal at scale s, outlined and rimmed."""
     g = edged(Mini(s, 32, 32))
     draw(g)
-    return rimmed(g).outlined()
+    return road.lit(g).outlined()
 
 
 def animals(suffix, step):
@@ -690,9 +684,9 @@ def helicopter(rotor, light):
 
 
 def goose(g, ox, oy, wing):
-    """One Canada goose side on with its body's back row at (ox + 1, oy), facing right: a dark brown body
-    and darker wing, a black tail, its neck a straight black line out to a black head with a white chinstrap, and its wing
-    up, level or down."""
+    """One Canada goose side on with its body's back row at (ox + 1, oy), facing right: a dark brown body and
+    darker wing, a black tail, its neck a straight black line out to a black head with a white chinstrap, and
+    its wing up, level or down."""
     g.p(ox, oy, "ink")
     g.rect(ox + 1, oy, 5, 1, "dbrown")
     g.rect(ox + 2, oy + 1, 4, 1, "dbrown")

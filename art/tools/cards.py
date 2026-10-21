@@ -45,8 +45,8 @@ import backdrops as bd  # noqa: E402
 import scene as sn  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
-from ui import chrome, to_image  # noqa: E402
-from pixel import Grid, build as build_sprites  # noqa: E402
+from pixel import Grid, build as build_sprites, dk, to_image  # noqa: E402
+from ui import chrome  # noqa: E402
 
 CW, CH = 83, 140
 AW, AH = 75, 56
@@ -397,7 +397,9 @@ def belly_rubs():
     a.grass()
     a.paste(rolled_over(), 12, 10)
     # kicking paws and a wriggling back, drawn as motion arcs
-    kick(a, 15, 13, -1); kick(a, 51, 18, 1); kick(a, 11, 30, -1)
+    kick(a, 15, 13, -1)
+    kick(a, 51, 18, 1)
+    kick(a, 11, 30, -1)
     # the leash runs from the collar off the bottom edge
     a.lead(44, 38, 52)
     a.hearts([(4, 4), (26, 2), (54, 4), (66, 18), (4, 44)])
@@ -497,7 +499,7 @@ MINI = (2, 6, 5, 7)   # a far house's windows and door, as backdrops.house parts
 
 def tufted(lawn="green", rate=0.05):
     def paint(px, py):
-        return bd.dk(lawn) if bd.noise(px, py) < rate or bd.noise(px, py - 1) < rate else lawn
+        return dk(lawn) if bd.noise(px, py) < rate or bd.noise(px, py - 1) < rate else lawn
     return paint
 
 
@@ -625,8 +627,9 @@ def cabbagetown_view():
         a.fill(x, y, 1, 1, "white")
     for x in (14, 61):
         bd.tree(a, x, 10, "canopy", "pine", r=5, base=FAR_Y, girth=2)
-    for x, w, wall_c, roof, curtain, top in ((-21, 28, "brick", "shale", None, 3), (23, 30, "cream", "slate", "gold", 2),
-                                            (69, 28, "brick", "dslate", "gold", 3)):
+    for x, w, wall_c, roof, curtain, top in ((-21, 28, "brick", "shale", None, 3),
+                                             (23, 30, "cream", "slate", "gold", 2),
+                                             (69, 28, "brick", "dslate", "gold", 3)):
         bd.house(a, x, w, wall_c, roof, "forest", top=top, base=FAR_Y, roof_h=9, parts=MINI, curtains=curtain)
         half = w / 2 + 3
         for i in range(1, 9):
@@ -695,7 +698,7 @@ def kensington_view():
         for k in range(w // 2 + 2):
             a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof)
         a.fill(x, 7, w, FAR_Y - 7, wall_c)
-        a.fill(x + w - 2, 7, 2, FAR_Y - 7, bd.dk(wall_c))
+        a.fill(x + w - 2, 7, 2, FAR_Y - 7, dk(wall_c))
         a.fill(x + 3, 9, 4, 3, "lake")
         a.fill(x + w - 8, 9, 4, 3, "lake")
         for i in range(0, w - 2, 4):
@@ -772,14 +775,16 @@ def yonge_view():
     for py in range(FAR_Y - 12, FAR_Y):
         for px in range(14, 43):
             if dome(px, py):
-                a.fill(px, py, 1, 1, "lgrey" if px in (31, 35) else "white" if px < 26 and not dome(px - 1, py - 1) else "haze")
+                lit = px < 26 and not dome(px - 1, py - 1)
+                a.fill(px, py, 1, 1, "lgrey" if px in (31, 35) else "white" if lit else "haze")
             elif dome(px, py + 1) or dome(px - 1, py) or dome(px + 1, py):
                 a.fill(px, py, 1, 1, "ink")
-    for x, w, top, wall_c, lit_c in ((0, 10, 4, "dlake", "gold"), (11, 7, 17, "coal", "gold"), (27, 9, 17, "dlake", "amber"),
-                                     (36, 8, 6, "gold", "ochre"), (44, 12, 7, "dlake", "gold"),
-                                     (56, 7, 5, "lgrey", "grey"), (63, 12, 8, "coal", "gold")):
+    for x, w, top, wall_c, lit_c in ((0, 10, 4, "dlake", "gold"), (11, 7, 17, "coal", "gold"),
+                                     (27, 9, 17, "dlake", "amber"), (36, 8, 6, "gold", "ochre"),
+                                     (44, 12, 7, "dlake", "gold"), (56, 7, 5, "lgrey", "grey"),
+                                     (63, 12, 8, "coal", "gold")):
         a.fill(x, top, w, FAR_Y - top, wall_c)
-        a.fill(x + w - 1, top, 1, FAR_Y - top, bd.dk(wall_c))
+        a.fill(x + w - 1, top, 1, FAR_Y - top, dk(wall_c))
         for y in range(top + 2, FAR_Y - 2, 2):
             for c in range(x + 1, x + w - 2, 2):
                 if wall_c in ("gold", "lgrey") or bd.hashed(c, y, 3):

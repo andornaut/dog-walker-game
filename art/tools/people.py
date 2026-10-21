@@ -267,7 +267,7 @@ def kiwi_top(wave):
         g.cel(16, 7 + b, 7.5, 3, "white", "lgrey")
         for cx in (10.5, 14, 18, 21.5):
             g.cel(cx, 9 + b, 2, 1.6, "white", "lgrey")
-        face_front(g, 16, 13 + b, lips="dbrown")
+        face_front(g, 16, 13 + b)
         cheeks(g, b, "rust")
     return top
 

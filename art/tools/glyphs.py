@@ -53,18 +53,9 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, build as build_sprites, icon_edge  # noqa: E402
+from pixel import K, Grid, bitmap, build as build_sprites, icon_edge, to_image  # noqa: E402
 from fx import burst, star4  # noqa: E402
 from road import SQUIRREL_FUR  # noqa: E402
-from ui import to_image  # noqa: E402
-
-
-def bitmap(g, x0, y0, rows, cols):
-    """Stamp rows of characters; each character maps to a colour in cols, '.' is empty."""
-    for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
-            if ch in cols:
-                g.p(x0 + x, y0 + y, cols[ch])
 
 
 # ---------- traits ----------
@@ -143,7 +134,8 @@ def treat_finder():
 # ---------- zones, after their backdrops ----------
 
 class Zone(Grid):
-    """A 16x16 zone picture drawn only inside the 1px ring its outline takes, with icon_edge outlines, so a picture that fills its frame is outlined on every side."""
+    """A 16x16 zone picture drawn only inside the 1px ring its outline takes, with icon_edge outlines, so a
+    picture that fills its frame is outlined on every side."""
 
     def __init__(self):
         super().__init__(16, 16)
@@ -735,6 +727,7 @@ def lucky():
     g.p(7, 8, "yellow")
     star4(g, 13, 3, 1, "yellow")
     return g
+
 
 IMAGES = {
     "icon-trait-chaser": chaser,

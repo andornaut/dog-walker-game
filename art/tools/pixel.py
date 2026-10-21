@@ -76,6 +76,16 @@ def contrast(a, b):
     return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
 
 
+def dk(c):
+    """The colour one ramp step darker than c, a K name or hex."""
+    return DARKER[K.get(c, c)]
+
+
+def raster(g):
+    """The grid that holds g's pixels: a minis.Mini's drawn grid, or g."""
+    return getattr(g, "g", g)
+
+
 def road_edge(c):
     """A road sprite's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1
     against the three light roads. The fill inside it carries the dslate road."""
@@ -131,13 +141,14 @@ class Grid:
             dx, dy = abs(x + 0.5 - cx - o) / rx, abs(y + 0.5 - cy - o) / ry
             return dx ** power + dy ** power <= 1
 
-        s, l = max(1, 0.13 * (rx + ry)), max(1, 0.06 * (rx + ry))
+        shade_w, light_w = max(1, 0.13 * (rx + ry)), max(1, 0.06 * (rx + ry))
         for y in range(self.h):
             for x in range(self.w):
                 if not inside(x, y):
                     continue
                 lit = (x + 0.5 - cx) / rx + (y + 0.5 - cy) / ry < -0.7
-                self.p(x, y, sh if sh and not inside(x, y, -s) else li if li and lit and not inside(x, y, l) else c)
+                self.p(x, y, sh if sh and not inside(x, y, -shade_w)
+                       else li if li and lit and not inside(x, y, light_w) else c)
 
     def tri(self, a, b, c, col):
         def side(px, py, x1, y1, x2, y2):
@@ -192,9 +203,34 @@ def edged(g, edge=road_edge, close=False):
     if isinstance(edge, str):
         line = K.get(edge, edge)
         edge = lambda c: line  # noqa: E731
-    inner = getattr(g, "g", g)
+    inner = raster(g)
     inner.edge, inner.close = edge, close
     return g
+
+
+# The 7x6 heart the UI, the badges and the fonts' drawn ♥ share.
+HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
+
+
+def bitmap(g, x0, y0, rows, cols, mirror=False):
+    """Stamp a character map at (x0, y0): each character in cols is a colour, any other is left clear;
+    mirror flips it left to right."""
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row[::-1] if mirror else row):
+            if ch in cols:
+                g.p(x0 + x, y0 + y, cols[ch])
+
+
+def to_image(px):
+    """Frame rows of hex colours (None where clear) as an RGBA image."""
+    from PIL import Image
+
+    im = Image.new("RGBA", (len(px[0]), len(px)), (0, 0, 0, 0))
+    for y, row in enumerate(px):
+        for x, c in enumerate(row):
+            if c:
+                im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
+    return im
 
 
 def preview(sprites, out, grounds=ZONE_ROADS, scale=6, gap=4):
@@ -485,16 +521,16 @@ def shortened(tags, rows):
 
 
 def depth_settled(sprites, originals=None):
-    """sprites with each depth variant (<key>@<step>) cut to its step's depth_envelope (see squatted) and, for
-    a ground sprite, held to the next larger step L's frame 0 and seated on a feet row from it. The game
-    draws a ground sprite smoothly, from the smallest step at least its true size scaled down
-    (src/layout/depthScale.ts), so the step's frame 0 keeps inside L's opaque rows and columns at this
-    step's scale over L's, rounded half up, and it does not shrink when the drawing switches steps (see
-    shortened and narrowed). Its feet row is L's at side / L's side, rounded up, or the frame's bottom row
-    when that is past it, so the feet move less than 1px when it switches. The others (status overlays) are drawn at their own step, not from L. The
-    full-size sprite is the one in sprites, else in originals ({key: tags}), else the one already exported;
-    so is each step, settled larger steps first. A sprite's steps are the ones in sprites and the ones
-    already exported."""
+    """sprites with each depth variant (<key>@<step>) cut to its step's depth_envelope (see squatted) and, for a
+    ground sprite, held to the next larger step L's frame 0 and seated on a feet row from it. The game draws a
+    ground sprite smoothly, from the smallest step at least its true size scaled down
+    (src/layout/depthScale.ts), so the step's frame 0 keeps inside L's opaque rows and columns at this step's
+    scale over L's, rounded half up, and it does not shrink when the drawing switches steps (see shortened and
+    narrowed). Its feet row is L's at side / L's side, rounded up, or the frame's bottom row when that is past
+    it, so the feet move less than 1px when it switches. The others (status overlays) are drawn at their own
+    step, not from L. The full-size sprite is the one in sprites, else in originals ({key: tags}), else the one
+    already exported; so is each step, settled larger steps first. A sprite's steps are the ones in sprites and
+    the ones already exported."""
     sprites = list(sprites)
     full = {**(originals or {}), **dict(sprites)}
     scales = depth_scales()

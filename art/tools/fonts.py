@@ -52,14 +52,13 @@ from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import LETTERS, word, word_size  # noqa: E402
-from pixel import Grid, K  # noqa: E402
+from pixel import HEART, Grid, K, to_image  # noqa: E402
 
 FONTS = {
     "font-body": ("Tiny5", "art/fonts/tiny5/Tiny5.ttf", 8),
     "font-title": ("Silkscreen", "art/fonts/silkscreen/Silkscreen-Regular.ttf", 8),
 }
 CHARS = [chr(c) for c in range(32, 127)] + ["·", "♥"]
-HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 TINY5 = "art/fonts/tiny5/Tiny5.ttf"
 # Glyphs drawn in place of a font's own, by font file: rows, then the top row's offset and the advance.
 DRAWN = {TINY5: {
@@ -262,13 +261,7 @@ def comic_glyphs():
     out = {" ": (None, 0, 0, COMIC_SPACE)}
     for ch in LETTERS:
         w, h = word_size(ch)
-        g = word(Grid(w, h), ch, w / 2, 0)
-        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        for y, row in enumerate(g.px):
-            for x, c in enumerate(row):
-                if c:
-                    im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
-        out[ch] = (im, 0, 0, len(LETTERS[ch][0]) + 1)
+        out[ch] = (to_image(word(Grid(w, h), ch, w / 2, 0).px), 0, 0, len(LETTERS[ch][0]) + 1)
     return out
 
 

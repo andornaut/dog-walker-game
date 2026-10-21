@@ -2,8 +2,8 @@
 """Draw the home-screen app icons.
 
 The favicon's dog face on a full-bleed sunburst of rust and ochre rays, in
-Endesga 32 and fully opaque. The master is 36x36: the 30x25 face centred on
-the rays. Each icon scales the master by a whole number with nearest-neighbour
+Endesga 32 and fully opaque. The master is 36x36: the 30x25 face on the rays,
+3 columns in from each side, 5 rows from the top. Each icon scales the master by a whole number with nearest-neighbour
 and extends the rays to its exact size, so every icon pixel is one master pixel.
 
   apple-touch-icon.png    180x180  master x5
@@ -173,7 +173,8 @@ def preview(out, gap=16):
             if abs(d - SAFE * size) < 1:
                 masked.putpixel((x, y), rgb(K["hot"]))
     row = list(imgs.values()) + [masked]
-    small = [im.resize((60, 60), Image.LANCZOS) for im in (imgs["apple-touch-icon"], imgs["icon-192"], imgs["icon-512"])]
+    small = [im.resize((60, 60), Image.LANCZOS)
+             for im in (imgs["apple-touch-icon"], imgs["icon-192"], imgs["icon-512"])]
     width = sum(im.size[0] for im in row) + gap * (len(row) + 1)
     sheet = Image.new("RGB", (width, gap * 3 + 512 + 60), rgb(K["ink"]))
     x = gap

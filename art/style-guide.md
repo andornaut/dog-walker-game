@@ -45,7 +45,7 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 | Stones, dark slates | stone 8a857c, dstone 625e58; ash 57606a, shale 353b45, coal 26292f                     |
 | TTC red             | ttc da291c                                                                             |
 
-- A sprite in the Toronto colours carries them after Endesga 32 (and the neutral greys, when it uses them) in its Aseprite palette. UI rims that lighten (`LIGHTER` in `art/tools/ui.py`) step up the Endesga ramps only. `python3 art/tools/pixel.py palette` writes `shared/palette.json`, which the game's dark ramp reads.
+- A sprite in the Toronto colours carries them after Endesga 32 (and the neutral greys, when it uses them) in its Aseprite palette. UI rims that lighten (`LIGHTER` in `art/tools/ui.py`) step up the Endesga ramps; a Toronto road colour steps up its own ramp, then onto Endesga. `python3 art/tools/pixel.py palette` writes `shared/palette.json`, which the game's dark ramp reads.
 - The neutral greys (`NEUTRAL` in `pixel.py`: nlgrey d8d8d8, ngrey a4a4a4, nslate 727272, ndslate 4a4a4a, ink as their darkest step) are for disabled and locked UI only: Endesga's greys are cool, and disabled UI reads as neutral grey.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
@@ -226,12 +226,12 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Cabbagetown grey (slate), High Park tan (brown), Distillery District dslate (navy), Kensington Market dbrick (walnut), The Beaches cream (tan), Yonge Street shale (coal). Every road sprite's light rim holds on dbrick and shale at least as well as on dslate.
 - The four lane dividers sit at x = 64k−1, 2px wide, one look per zone.
 - Curbs and verges stay inside the outer 5 to 8px of the strip, clear of the 8px each side of a 48px sprite in its lane.
-- Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
+- Every zone has a start strip: a neutral cross street (near curb, asphalt with a zebra, far curb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The rows from the road's far edge down to about y 214 sample the strip shrunk 4×, so lane dashes and texture along the road repeat every 8 rows or more, lines across the road are at least 2 rows tall and low in contrast, fine detail runs along the road, and small texture is spaced irregularly.
 
 ### Verges
 
-The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. They are `TORONTO_VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge.
+The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. They are `VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge.
 
 An ambient person or lawn animal holds 3:1 on its edge pixels (within 1%) on the light verges, the Distillery District's brick and Cabbagetown's lawn, and on 74% or more on High Park's pine and Kensington Market's shale, where the light rim carries it.
 

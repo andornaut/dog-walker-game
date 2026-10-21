@@ -32,7 +32,7 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, contrast, main  # noqa: E402
+from pixel import HEART, K, Grid, bitmap, contrast, main  # noqa: E402
 from road import SQUIRREL_FUR  # noqa: E402
 
 RIMS = {"firsts": ("ochre", "rust", "tan"), "mastery": ("lgrey", "grey", "white"),
@@ -48,16 +48,8 @@ def lum(c):
 
 # A muddy print: a pad under four toes, each toe apart from the others and the pad by a 1px gap, so the
 # print reads as a paw and not as arcs. 9x9.
-PAW = ["..xx.xx..", "..xx.xx..", ".........", "xx.....xx", "xx.xxx.xx", "..xxxxx..", ".xxxxxxx.",
-       ".xxxxxxx.", "..xx.xx.."]
-
-
-def pix(g, x0, y0, rows, legend, mirror=False):
-    """Draw a character map at (x0, y0): each character in legend is a colour, any other is left clear."""
-    for y, row in enumerate(rows):
-        for x, ch in enumerate(row[::-1] if mirror else row):
-            if ch in legend:
-                g.p(x0 + x, y0 + y, legend[ch])
+PAW_PRINT = ["..xx.xx..", "..xx.xx..", ".........", "xx.....xx", "xx.xxx.xx", "..xxxxx..", ".xxxxxxx.",
+             ".xxxxxxx.", "..xx.xx.."]
 
 
 def line(g, a, b, col, w=1):
@@ -76,9 +68,6 @@ def ring(g, cx, cy, r, col, hi=None):
                 g.p(x, y, col)
     if hi:
         g.p(cx - r * 0.5, cy - r * 0.5, hi)
-
-
-HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 
 
 def heart(g, x0, y0, col="red", hi="pink"):
@@ -127,7 +116,8 @@ def _(g):
     a = math.radians(-80)
     px, py = 16 + 6.7 * math.cos(a), 16.5 + 6.7 * math.sin(a)
     t, n = (-math.sin(a), math.cos(a)), (math.cos(a), math.sin(a))
-    g.tri((px + 4.5 * t[0], py + 4.5 * t[1]), (px + 3.8 * n[0], py + 3.8 * n[1]), (px - 3.8 * n[0], py - 3.8 * n[1]), "sky")
+    g.tri((px + 4.5 * t[0], py + 4.5 * t[1]), (px + 3.8 * n[0], py + 3.8 * n[1]),
+          (px - 3.8 * n[0], py - 3.8 * n[1]), "sky")
     g.tri((12, 16.5), (20, 16.5), (16, 12.5), "red")
     g.rect(13, 16, 6, 4, "brown")
     g.rect(15, 17, 2, 3, "plum")
@@ -143,7 +133,7 @@ def _(g):
     """Two dogs' heads side by side, each in its collar."""
     for x0, y0, fur, ears, muzzle, collar in ((5, 9, "ochre", "dbrown", "white", "red"),
                                               (16, 12, "white", "ink", "lgrey", "sky")):
-        pix(g, x0, y0, DOG_FACE, {"F": fur, "E": ears, "M": muzzle, "N": "ink", "I": "ink"})
+        bitmap(g, x0, y0, DOG_FACE, {"F": fur, "E": ears, "M": muzzle, "N": "ink", "I": "ink"})
         g.rect(x0 + 3, y0 + 9, 4, 1, collar)
 
 
@@ -166,10 +156,11 @@ WALKER = [".HHH.", "HHHHH", "HSSSH", "HISIH", ".SSS.", "CCCCC", "CCCCC", "CCCCC"
 @icon("dream-team")
 def _(g):
     """The four walkers shoulder to shoulder, the outer two cheering."""
-    crew = (("ink", "skin2", "red"), ("ochre", "skin1", "sky"), ("dbrown", "brown", "green"), ("yellow", "skin1", "amber"))
+    crew = (("ink", "skin2", "red"), ("ochre", "skin1", "sky"), ("dbrown", "brown", "green"),
+            ("yellow", "skin1", "amber"))
     for i, (hair, skin, shirt) in enumerate(crew):
         x0, y0 = 6 + i * 5, 11 if i in (0, 3) else 10
-        pix(g, x0, y0, WALKER, {"H": hair, "S": skin, "I": "ink", "C": shirt})
+        bitmap(g, x0, y0, WALKER, {"H": hair, "S": skin, "I": "ink", "C": shirt})
     for x, s in ((5, -1), (26, 1)):
         g.rect(x, 12, 1, 4, "skin1")
         g.p(x + s, 11, "skin1")
@@ -207,7 +198,7 @@ STAR = ["..xx..", "..xx..", "xxxxxx", ".xxxx.", ".xxxx.", "xx..xx"]
 def _(g):
     """Five stars, three over two."""
     for x0, y0 in ((6, 9), (13, 8), (20, 9), (9, 17), (17, 17)):
-        pix(g, x0, y0, STAR, {"x": "yellow"})
+        bitmap(g, x0, y0, STAR, {"x": "yellow"})
         g.rect(x0 + 2, y0 + 4, 3, 1, "amber")
 
 
@@ -246,7 +237,7 @@ def _(g):
     heart(g, 7, 10)
     for a, b in (((15, 10), (14, 13)), ((14, 13), (17, 16)), ((17, 16), (15, 19)), ((15, 19), (16, 21))):
         line(g, a, b, "plum")
-    pix(g, 22, 5, ["..c..", ".ccc.", "cwccc", "ccccs", ".css."], {"c": "cyan", "w": "white", "s": "sky"})
+    bitmap(g, 22, 5, ["..c..", ".ccc.", "cwccc", "ccccs", ".css."], {"c": "cyan", "w": "white", "s": "sky"})
 
 
 # A small dog side on, stretched mid-leap: B body, E ear, N nose, I eye.
@@ -259,7 +250,7 @@ def _(g):
     g.tri((16, 15), (11.5, 24.5), (20.5, 24.5), "orange")
     g.rect(13, 19, 6, 2, "white")
     g.rect(10, 24, 12, 2, "rust")
-    pix(g, 10, 7, LEAPER, {"B": "white", "E": "ink", "N": "ink", "I": "ink"})
+    bitmap(g, 10, 7, LEAPER, {"B": "white", "E": "ink", "N": "ink", "I": "ink"})
     for x, y in ((7, 20), (7, 17), (8, 14), (9, 12)):
         g.p(x, y, "sky")
 
@@ -334,7 +325,7 @@ def _(g):
     """Muddy paw prints walking out of a puddle."""
     g.ell(13, 22, 7, 3, "brown", "dbrown")
     for cx, cy in ((12, 15), (21, 11)):
-        for y, row in enumerate(PAW):
+        for y, row in enumerate(PAW_PRINT):
             for x, ch in enumerate(row):
                 if ch == "x":
                     g.p(cx - 4 + x, cy - 4 + y, "dbrown")
@@ -350,7 +341,7 @@ RUNNER = ["...........EEB...", "..........EBBIB..", "T.........BBBBBBN", "TBBBBB
 @icon("zoomies")
 def _(g):
     """A dog at full stretch, speed lines and a dust puff behind it."""
-    pix(g, 9, 10, RUNNER, {"B": "brown", "S": "dbrown", "E": "dbrown", "N": "ink", "I": "ink", "T": "brown"})
+    bitmap(g, 9, 10, RUNNER, {"B": "brown", "S": "dbrown", "E": "dbrown", "N": "ink", "I": "ink", "T": "brown"})
     for y, x0 in ((11, 5), (14, 4), (17, 5)):
         g.rect(x0, y, 4, 1, "sky")
     g.ell(9, 21.5, 2.5, 2, "white", "lgrey")
@@ -379,7 +370,7 @@ GRAB = ["..NWNWNW..", "..NWNWNW..", "..NWNWNW..", "..HHHHHH..", ".HHHHHHHH.", "H
 @icon("yoink")
 def _(g):
     """A thief's hand swooping on a tip coin."""
-    pix(g, 11, 6, GRAB, {"N": "navy", "W": "white", "H": "skin1", "h": "skin2"})
+    bitmap(g, 11, 6, GRAB, {"N": "navy", "W": "white", "H": "skin1", "h": "skin2"})
     g.ell(16, 21.5, 4.5, 4.5, "amber", "orange", "yellow")
     g.rect(16, 19, 1, 5, "dbrown")
     g.p(14, 19, "white")
@@ -393,8 +384,8 @@ SNIFFER = ["..FFFF.....", ".FFFFFF....", "EEFFFIFF...", "EEFFFFFFFNN", "EEEFFFFF
 @icon("sniff-test")
 def _(g):
     """Two dogs' noses meeting, sniff marks above them."""
-    pix(g, 5, 11, SNIFFER, {"F": "ochre", "E": "dbrown", "M": "white", "N": "ink", "I": "ink"})
-    pix(g, 16, 11, SNIFFER, {"F": "white", "E": "ink", "M": "lgrey", "N": "ink", "I": "ink"}, mirror=True)
+    bitmap(g, 5, 11, SNIFFER, {"F": "ochre", "E": "dbrown", "M": "white", "N": "ink", "I": "ink"})
+    bitmap(g, 16, 11, SNIFFER, {"F": "white", "E": "ink", "M": "lgrey", "N": "ink", "I": "ink"}, mirror=True)
     for x, y in ((13, 8), (16, 6), (19, 8)):
         g.rect(x, y, 1, 2, "sky")
         g.p(x + 1, y - 1, "sky")
@@ -407,7 +398,7 @@ BONE = ["xx......xx", "xxx....xxx", ".xxxxxxxx.", ".xxxxxxxx.", "xxx....xxx", "x
 def _(g):
     """A pile of bone treats in their crumbs."""
     for x0, y0 in ((6, 18), (16, 18), (11, 11)):
-        pix(g, x0, y0, BONE, {"x": "ochre"})
+        bitmap(g, x0, y0, BONE, {"x": "ochre"})
         for y, row in enumerate(BONE):
             for x, ch in enumerate(row):
                 if ch == "x" and (y == len(BONE) - 1 or BONE[y + 1][x] != "x"):
@@ -524,9 +515,11 @@ def confetti_bit(col, step):
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for name in BADGES:
-        yield f"badge-{name}", [("earned", [badge(name).outlined()], 1000), ("locked", [badge(name, True).outlined()], 1000)]
+        yield f"badge-{name}", [("earned", [badge(name).outlined()], 1000),
+                                ("locked", [badge(name, True).outlined()], 1000)]
     yield "fx-confetti", [("play", [confetti(i).outlined(False) for i in range(10)], 80)]
-    yield "fx-confetti-bit", [(col, [confetti_bit(col, i).outlined(False) for i in range(4)], 100) for col in BIT_COLOURS]
+    yield "fx-confetti-bit", [(col, [confetti_bit(col, i).outlined(False) for i in range(4)], 100)
+                              for col in BIT_COLOURS]
 
 
 if __name__ == "__main__":

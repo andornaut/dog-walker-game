@@ -13,8 +13,8 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid  # noqa: E402
-from ui import chrome, to_image  # noqa: E402
+from pixel import HEART, K, Grid, to_image  # noqa: E402
+from ui import chrome  # noqa: E402
 
 HEX = {k: tuple(int(v[i:i + 2], 16) for i in (0, 2, 4)) for k, v in K.items()}
 
@@ -28,7 +28,8 @@ class Canvas:
         self.img = Image.new("RGB", (w, h), rgb("ink"))
 
     def fill(self, x, y, w, h, c):
-        x0, y0, x1, y1 = max(0, int(x)), max(0, int(y)), min(self.img.width, int(x + w)), min(self.img.height, int(y + h))
+        x0, y0 = max(0, int(x)), max(0, int(y))
+        x1, y1 = min(self.img.width, int(x + w)), min(self.img.height, int(y + h))
         if x1 > x0 and y1 > y0:
             self.img.paste(rgb(c), (x0, y0, x1, y1))
 
@@ -88,8 +89,13 @@ def text_c(cv, s, mid, y, col, sc=1, acc=None):
 
 # ---------- game data and layout, from the game's export in shared/export/ ----------
 
-GAME = json.load(open("shared/export/game-data.json"))
-LAYOUT = json.load(open("shared/export/layout.json"))
+def read_json(path):
+    with open(path) as f:
+        return json.load(f)
+
+
+GAME = read_json("shared/export/game-data.json")
+LAYOUT = read_json("shared/export/layout.json")
 # {zone id: zone} in the world's order: each zone's name, art key, road shadow and leash colours.
 ZONES = {z["id"]: dict(name=z["name"], art=z["art"], shadow=z["roadShadowColor"].lstrip("#"),
                        leash=z["leashColor"].lstrip("#"))
@@ -102,7 +108,8 @@ PACK = LAYOUT["pack"]
 HANDS = (PACK["walkerHands"]["leftDx"], PACK["walkerHands"]["rightDx"], PACK["walkerHands"]["heightAboveFeet"])
 COLLARS = PACK["collarHeights"]
 COLLAR = max(COLLARS.values())
-MANIFEST = {s["key"]: s.get("anchor", {}) for s in json.load(open("public/art/manifest.json"))["sprites"]}
+# Each sprite's anchor (feetY, opaqueWidth) from the manifest, empty for one the game does not stand on the ground.
+ANCHORS = {s["key"]: s.get("anchor", {}) for s in read_json("public/art/manifest.json")["sprites"]}
 
 
 def collar(key):
@@ -112,7 +119,7 @@ def collar(key):
 
 def side_dx(key, side):
     """A dog's dx off the lane centre on side -1, 0 or 1: half the lane less half its opaque width."""
-    return side * math.floor(PACK["laneHalfWidth"] - MANIFEST[key]["opaqueWidth"] / 2)
+    return side * math.floor(PACK["laneHalfWidth"] - ANCHORS[key]["opaqueWidth"] / 2)
 
 
 # ---------- exported sprites ----------
@@ -124,8 +131,10 @@ def sheet(key):
     """An exported sprite: its sheet, each frame's rectangle and {tag name: tag}."""
     if key not in SHEETS:
         img = Image.open(f"public/art/sprites/{key}.png").convert("RGBA")
-        meta = json.load(open(f"public/art/sprites/{key}.json"))
-        SHEETS[key] = (img, [f["frame"] for f in meta["frames"].values()], {t["name"]: t for t in meta["meta"]["frameTags"]})
+        with open(f"public/art/sprites/{key}.json") as f:
+            meta = json.load(f)
+        SHEETS[key] = (img, [fr["frame"] for fr in meta["frames"].values()],
+                       {t["name"]: t for t in meta["meta"]["frameTags"]})
     return SHEETS[key]
 
 
@@ -167,7 +176,7 @@ class Scene(Canvas):
             text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"$": "forest"})
 
     def heart(self, x, y, col, hi=None):
-        for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
+        for j, r in enumerate(HEART):
             for i, c in enumerate(r):
                 if c == "1":
                     self.fill(x + i, y + j, 1, 1, col)

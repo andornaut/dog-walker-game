@@ -6,29 +6,26 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
   SIZE_CLASS): big 54x54 (Koda the Alaskan Malamute, Snowball the Great Pyrenees, Penny the golden
   retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Duchess,
-  Nugget, Zippy), the big dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down than across). Its drawing
-  functions take 32-unit design coordinates and run on a minis.Mini at road_scale(name) (the side / 32),
-  which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
-  or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
-  frames, 150ms), react (4, 60ms: a startled hop), pull (4, 80ms, leaning right and
-  scrabbling; the game mirrors it for left), tell (4, 125ms, the lean before a pull; the
-  game adds the fx-bark pop), idle (4, 300ms,
-  standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
+  Nugget, Zippy), the big dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
+  than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
+  road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
+  pixel take trail() or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
+  frames, 150ms), react (4, 60ms: a startled hop), pull (4, 80ms, leaning right and scrabbling; the game
+  mirrors it for left), tell (4, 125ms, the lean before a pull; the game adds the fx-bark pop), idle (4,
+  300ms, standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
-  A dog with a quirk has its quirk's tags after these (QUIRK_TAGS):
-  dog-archie flourish (5 frames, 90ms; Acrobatic: a hop with a twist in the air,
-  played when he pulls or meets a playmate); dog-penny lunge (4, 140ms; Nervous: a
-  stiff-legged strain toward another dog with her hackles up, leaning right like
-  pull, mirrored for left) and worried (2, 500ms; clingy: ears down, glancing back
-  over her shoulder, while she is the only dog on the leash); dog-biscuit sniff (3,
-  180ms; Scent hound: nose down, tail flagged up and wagging, a puff of scent beside
-  the nose); dog-nugget pose (3, 220ms; Camera ready: sits square, cocks his head and
-  a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a crouch, a spring, a
-  stretched leap over motion streaks and a landing on the front paws).
-- face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE big by size class (big 30,
-  medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral, upset, then the
-  quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
-  a wobbly mouth and a sweat bead), while she is the only dog on the leash.
+  A dog with a quirk has its quirk's tags after these (QUIRK_TAGS): dog-archie flourish (5 frames, 90ms;
+  Acrobatic: a hop with a twist in the air, played when he pulls or meets a playmate); dog-penny lunge
+  (4, 140ms; Nervous: a stiff-legged strain toward another dog with her hackles up, leaning right like
+  pull, mirrored for left) and worried (2, 500ms; clingy: ears down, glancing back over her shoulder,
+  while she is the only dog on the leash); dog-biscuit sniff (3, 180ms; Scent hound: nose down, tail
+  flagged up and wagging, a puff of scent beside the nose); dog-nugget pose (3, 220ms; Camera ready:
+  sits square, cocks his head and a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a
+  crouch, a spring, a stretched leap over motion streaks and a landing on the front paws).
+- face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
+  big by size class (big 30, medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral,
+  upset, then the quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes, a wobbly
+  mouth and a sweat bead), while she is the only dog on the leash.
 
 Usage:
   dogs.py preview OUT.png   every frame on the zone roads, scaled up
@@ -45,6 +42,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, edged, main, road_edge  # noqa: E402
+from road import rim  # noqa: E402
 
 # ROAD_SIZE is the medium dogs' frame side. Each dog's 32-unit design is rasterized at road_scale(name)
 # (DOG_SIZE / 32) on a minis.Mini that keeps 1px lines and single pixels 1px; its depth variants at that
@@ -219,24 +217,12 @@ def koda_road(q):
     g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
     underside(g)
     spray(g, q["spray"])
-    lit_edge(g, KODA_RIM)
+    rim(g, KODA_RIM)
     return g
 
 
 # Koda's grey coat lit where its silhouette faces up or left, so the dark head and ears hold on the dslate road.
-KODA_RIM = {"slate": "grey", "dslate": "grey"}
-
-
-def lit_edge(g, rims):
-    """On the grid that holds g's pixels (a minis.Mini's drawn grid), each pixel of a colour in rims whose
-    silhouette faces up or left into the light takes rims[colour], a step lighter."""
-    px = getattr(g, "g", g)
-    rims = {K[c]: v for c, v in rims.items()}
-    lit = [(x, y, rims[c]) for y, row in enumerate(px.px) for x, c in enumerate(row) if c in rims
-           and any(not (0 <= x + dx < px.w and 0 <= y + dy < px.h and px.px[y + dy][x + dx])
-                   for dx, dy in ((0, -1), (-1, 0)))]
-    for x, y, c in lit:
-        px.p(x, y, c)
+KODA_RIM = {"slate": ("grey", None), "dslate": ("grey", None)}
 
 
 def koda_face(mood):
@@ -554,6 +540,7 @@ COAT = ("skin2", "brown", "skin1")
 BLOT = ("dbrown",)
 EAR = ("dbrown", "plum")
 
+
 def archie_road(q):
     g, q = edged(Grid()), pose(q)
     hop = q["hop"]
@@ -792,7 +779,6 @@ def puff(g, cx, cy, rx, ry, ring=False):
     if ring:
         g.ell(cx, cy, rx + 1, ry + 1, CURL[1])
     g.ell(cx, cy, rx, ry, CURL[0], CURL[1], CURL[2] if min(rx, ry) >= 3 else None)
-
 
 
 def merle(g, cx, b, blots):
@@ -1061,15 +1047,13 @@ def face_frame(face, mood, side):
     32x32 frame."""
     import minis
 
-    if side == 32:
-        return face(mood).outlined()
     here = sys.modules[__name__]
     return padded(minis.small(here, side / 32, face, mood).outlined(), 32)
 
 
 def road_scale(name):
     """The scale dog-<name>'s 32-unit design is drawn at: its DOG_SIZE over 32."""
-    return DOG_SIZE.get(name, ROAD_SIZE) / 32
+    return DOG_SIZE[name] / 32
 
 
 def sprites():
@@ -1080,7 +1064,8 @@ def sprites():
     for name, (road, face) in DOGS.items():
         yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, road_scale(name), here, DOG_ZOOM.get(name, 1)), ms)
                               for tag, poses, ms in road_tags(name)]
-        yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[DOG_CLASS[name]])], 1000) for m in face_tags(name)]
+        yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[DOG_CLASS[name]])], 1000)
+                                   for m in face_tags(name)]
 
 
 if __name__ == "__main__":

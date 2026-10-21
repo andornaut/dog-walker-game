@@ -13,9 +13,10 @@ cyclist             48x72   front view, riding down a lane at the player; ride (
                             legs and a 1px sway
 coyote              48x48   three-quarter front, angled right, stalking the pack: the back sloping from
                             hunched shoulders to the hips over four thin legs set apart, a low head with
-                            a long pointed snout, big ears forward, tail low; idle (2 frames, 400ms): a breath and an ear
-                            flick; walk (4 frames, 120ms): the creep, a diagonal pair of paws lifting as the
-                            body sinks under a level head; step (4 frames, 80ms): a low lunge for each step
+                            a long pointed snout, big ears forward, tail low; idle (2 frames, 400ms): a
+                            breath and an ear flick; walk (4 frames, 120ms): the creep, a diagonal pair
+                            of paws lifting as the body sinks under a level head; step (4 frames, 80ms):
+                            a low lunge for each step
 ui-warning          16x16   a yellow warning sign with a bold "!", ink outline; pulse (2 frames, 250ms)
 ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms) points right for a
                             crosser, down-pulse (2 frames, 250ms) points down the road for a mover
@@ -56,7 +57,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import LIT, SCALE, SQUIRREL_FUR, face_disc, face_front, lean, rim  # noqa: E402
+from road import SCALE, SQUIRREL_FUR, face_disc, face_front, lean, lit  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -111,7 +112,7 @@ def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Gr
     g.rect(25, 13 + dy, 2, 2, "ink")
     g.p(25, 13 + dy, "white")
     g.p(29, 15 + dy, f["nose"])
-    rim(getattr(g, "g", g), LIT)
+    lit(g)
     return g
 
 
@@ -189,12 +190,12 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
 
 # ---------- ball-bounce: a ball, bouncing ----------
 
-# The bounce, laid out on a 28x42 design and scaled to each step's frame, floor(24x36 x step + 0.5): the ground
-# row (the ball's outline touches it on contact, and the shadow is centred on it); the ball's bottom height per
-# frame; its radii when squashed on contact, stretched near the ground and round at the top of the arc; the
-# stripes' width, spacing and step per frame (whole cycles over the 6 frames, so the loop has no jump); and the
-# shadow's width per frame.
-BALL_LAYOUT = dict(size=(28, 42), ground=40, heights=(0, 11, 15, 17, 15, 11), squash=(10.4, 7), stretch=(7, 10.4),
+# The bounce, laid out on a design 28 wide and scaled to each step's frame, floor(24x36 x step + 0.5): the
+# ball's bottom height per frame; its radii when squashed on contact, stretched near the ground and round at the
+# top of the arc; and the shadow's width per frame. ball_steps adds the ground row, 2 rows above the frame's
+# bottom (the ball's outline touches it on contact, and the shadow is centred on it), and the stripes' width,
+# spacing and step per frame (whole cycles over the 6 frames, so the loop has no jump).
+BALL_LAYOUT = dict(width=28, heights=(0, 11, 15, 17, 15, 11), squash=(10.4, 7), stretch=(7, 10.4),
                    round=(9, 9), shadow=(21, 17, 14, 11, 14, 17))
 BALL_SIZE = (24, 36)
 
@@ -204,7 +205,7 @@ def ball_steps():
     out = {}
     for s in (1, *(v for _, v in minis.STEPS)):
         w, h = (math.floor(v * s + 0.5) for v in BALL_SIZE)
-        k = w / BALL_LAYOUT["size"][0]
+        k = w / BALL_LAYOUT["width"]
         out[s] = dict(size=(w, h), ground=h - 2,
                       heights=tuple(round(v * k) for v in BALL_LAYOUT["heights"]),
                       squash=tuple(v * k for v in BALL_LAYOUT["squash"]),
@@ -418,22 +419,12 @@ def coyote(fl=0, fr=0, bl=0, br=0, bob=0, head=0, ear=0, new=Grid):
     return g
 
 
-def lit(g):
-    """road.rim with road.LIT on the grid that holds the pixels, so a Mini gets the rim at its own size."""
-    rim(getattr(g, "g", g), LIT)
-    return g
-
-
 # ---------- the warning cue (UI, ink outlined) ----------
-
-def ink(c):
-    return K["ink"]
-
 
 def warning(big):
     """A yellow warning triangle with a bold "!", built row by row; big is the pulse frame, 1px larger
     all round."""
-    g = edged(Grid(16, 16), ink)
+    g = edged(Grid(16, 16), "ink")
     top, bottom, slope = (2, 14, 0.55) if big else (3, 13, 0.5)
     for y in range(top, bottom + 1):
         hw = int(1 + (y - top) * slope)
@@ -447,7 +438,7 @@ def warning_arrow(shift, down=False, up=False):
     """A yellow arrow pointing right, down when down is true or up when up is; shift nudges it along its
     direction on the pulse frame. The down arrow is the right one transposed, so its shading lands on the
     right, and the up arrow is the down one flipped."""
-    g = edged(Grid(16, 16), ink)
+    g = edged(Grid(16, 16), "ink")
     s = shift
     g.rect(1 + s, 6, 6, 4, "yellow")
     g.tri((6.5 + s, 1.5), (6.5 + s, 14.5), (13.5 + s, 8), "yellow")
@@ -470,7 +461,7 @@ QUERY = ((5, 2, 6, 3), (4, 3, 2, 3), (10, 3, 3, 5), (8, 7, 3, 2), (7, 8, 3, 3), 
 def warning_wander(lift):
     """A bold yellow "?" in the warning cues' style, ink outlined, amber along each part's bottom; lift raises
     it on the pulse frame."""
-    g = edged(Grid(16, 16), ink)
+    g = edged(Grid(16, 16), "ink")
     for x, y, w, h in QUERY:
         g.rect(x, y - lift, w, h, "yellow")
     for x, y in ((12, 3 - lift), (4, 3 - lift)):

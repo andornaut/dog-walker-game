@@ -40,29 +40,17 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-import road  # noqa: E402
 import obstacles  # noqa: E402
 from minis import STEPS, small  # noqa: E402
 from obstacles import PULL_OUT, treads, unit  # noqa: E402
-from pixel import K, Grid, edged, main  # noqa: E402
-from road import SCALE, face_disc, face_front  # noqa: E402
+from pixel import K, Grid, edged, main, raster  # noqa: E402
+from road import SCALE, face_disc, face_front, lit  # noqa: E402
 
 # The garbage truck is laid out on 56x50 and drawn as obstacles.delivery_truck is, its columns kept (a lane less
 # 4px each side) and its rows TRUCK_SCALE times taller: 56x60, taller than the delivery truck's 54 and as tall
 # as road.ice_cream_truck.
 TRUCK_W, TRUCK_H = 56, 50
 TRUCK_SCALE = obstacles.CAR_SCALE
-
-
-def raster(g):
-    """The grid that holds g's pixels."""
-    return getattr(g, "g", g)
-
-
-def lit(g):
-    """road.rim with road.LIT on the grid that holds the pixels, so a Mini gets the rim at its own size."""
-    road.rim(raster(g), road.LIT)
-    return g
 
 
 def frame(w, h):
@@ -177,7 +165,7 @@ def scooter(blink=False, u=1, roll=None):
     lines climb the tyre 1px a frame (obstacles.treads) and the stand is up; pulling out, the right
     indicator is lit on frames 0 and 1. u is one pixel at the drawn size, in layout units."""
     g = frame(SCOOTER_W, SCOOTER_H)
-    px = getattr(g, "g", g)
+    px = raster(g)
     # the tyre first, so the body lies over it
     g.rect(14, 38, 4, 9, "ink")
     g.rect(14, 38, 1, 8, "dslate")
@@ -234,7 +222,7 @@ def scooter_riding(roll, u=1):
     jacket, brown gloves on the grips. The scooter and rider dip 1px onto the tyre on frames 1 and 2. u is
     one pixel at the drawn size, in layout units."""
     g = frame(SCOOTER_W, SCOOTER_H)
-    px = getattr(g, "g", g)
+    px = raster(g)
     # the tyre first, so the body can dip over it
     g.rect(14, 38, 4, 9, "ink")
     g.rect(14, 38, 1, 8, "dslate")

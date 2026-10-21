@@ -113,7 +113,7 @@ import fonts  # noqa: E402
 import scene as sn  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
-from pixel import DARKER, Grid, K, build as build_sprites, edged  # noqa: E402
+from pixel import Grid, K, build as build_sprites, dk, edged, to_image  # noqa: E402
 from ui import STATES  # noqa: E402
 
 W, H = 360, 560
@@ -127,10 +127,6 @@ BOARD = (3, 0, 114, 22)
 BOARD_RISE = 4
 # ui-pet-shop's glint: the light band's left edge on the board in each frame, then a clean frame.
 GLINT_STEPS = (-6, 16, 38, 60, 82, 104)
-
-
-def dk(c):
-    return DARKER[K.get(c, c)]
 
 
 def rand(seed):
@@ -315,11 +311,11 @@ def home():
     cv.fill(62, 110, 18, 2, "dbrown")
     cv.fill(69, 92, 4, 20, "dbrown")
     cv.fill(69, 92, 1, 20, "brown")
-    for lx, ly, r in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10), (13, 4, 10), (0, 10, 10)):
-        for dy in range(-r, r + 1):
-            for dx in range(-r, r + 1):
-                if dx * dx + dy * dy <= r * r:
-                    lit = (dx + dy) / r
+    for lx, ly, rad in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10), (13, 4, 10), (0, 10, 10)):
+        for dy in range(-rad, rad + 1):
+            for dx in range(-rad, rad + 1):
+                if dx * dx + dy * dy <= rad * rad:
+                    lit = (dx + dy) / rad
                     c = "rust" if lit > 0.55 else "amber" if lit < -0.75 else "orange"
                     cv.fill(71 + lx + dx, 80 + ly + dy, 1, 1, c)
     for x, y in ((58, 70), (66, 66), (74, 68), (56, 80)):
@@ -388,8 +384,8 @@ def home():
 
 # ---------- ui-pet-shop ----------
 
-BONE = ["..cc.......cc..", ".cccc.....cccc.", "ccccccccccccccc", "ccccccccccccccc", ".cccc.....cccc.", "..cc.......cc.."]
-DOOR_PAW = [".#.#.", "#...#", ".###.", ".###."]
+BONE = ["..cc.......cc..", ".cccc.....cccc.", "ccccccccccccccc", "ccccccccccccccc", ".cccc.....cccc.",
+        "..cc.......cc.."]
 
 
 def window_puppy():
@@ -538,7 +534,7 @@ def building(cv, w, h, pressed):
     cv.fill(dx + 2, dy + 2, 1, h - dy - 2, "dslate")
     cv.fill(dx + 6, dy + 6, dw - 12, 14, "sky")
     cv.fill(dx + 6, dy + 6, dw - 12, 1, "cyan")
-    for j, row in enumerate(DOOR_PAW):
+    for j, row in enumerate(PAW):
         for i, c in enumerate(row):
             if c == "#":
                 cv.fill(dx + 13 + i, dy + 11 + j, 1, 1, "cream")
@@ -746,7 +742,7 @@ def end():
              (200, 54, "skin1", "navy", "red"), (260, 50, "cream", "purple", "blue"))
     for k, (x, w, wall, roof, door) in enumerate(homes):
         bd.house(strip, x, w, wall, roof, door, top=104 - w, roof_h=w // 2, parts=bd.SLIM, curtains="orange",
-                 eave=2, rake=bd.LIT.get(roof), dormer=k % 2 == 0)
+                 eave=2, rake=bd.RAKE.get(roof), dormer=k % 2 == 0)
     bd.ground(strip)
     bd.flowers(strip, 50, 96, 110, ("orange", "yellow", "red"))
     bd.flowers(strip, 204, 250, 112, ("orange", "yellow", "red"))
@@ -758,9 +754,9 @@ def end():
         strip.fill(x + 1, y - 1, 1, 1, "rust")
     cv.paste(strip.img, 0, END_STREET)
     # Kensington Market's brick road, its top rows under the button
-    road = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
-    cv.img.paste(road, (0, END_STREET + 150))
-    cv.img.paste(road, (280, END_STREET + 150))
+    tile = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
+    cv.img.paste(tile, (0, END_STREET + 150))
+    cv.img.paste(tile, (280, END_STREET + 150))
     return cv
 
 
@@ -1234,19 +1230,10 @@ def pair(step):
     return px
 
 
-def sprite_image(px):
-    """A sprite frame (rows of hex colours or None) as an RGBA image, for the preview."""
-    img = Image.new("RGBA", (len(px[0]), len(px)), (0, 0, 0, 0))
-    for y, row in enumerate(px):
-        for x, c in enumerate(row):
-            if c:
-                img.putpixel((x, y), sn.rgb(c) + (255,))
-    return img
-
-
 def sprites():
     yield "ui-loading", [("walk", [pair(i) for i in range(len(PAIR_WALK))], PAIR_WALK_MS)]
-    yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000) for tag in ("normal", "pressed")] + [
+    yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000)
+                          for tag in ("normal", "pressed")] + [
         ("glint", [image_rows(pet_shop(glint=g).img) for g in GLINT_STEPS] + [image_rows(pet_shop().img)], 60)]
 
 
@@ -1316,7 +1303,7 @@ def ui(cv, key):
         cv.fill(48, 512, 264, 40, "amber")
     elif key == "screen-loading":
         cv.paste(loading_track().img, *TRACK_AT)
-        frame = sprite_image(pair(0))
+        frame = to_image(pair(0))
         cv.img.paste(frame, (PAIR_AT[0] + round(PAIR_TRAVEL * 0.4), PAIR_AT[1]), frame)
 
 
@@ -1335,14 +1322,15 @@ def preview(out, scale=2):
     # the ui-loading frames, on the night sidewalk
     for i in range(4):
         bg = Image.new("RGBA", (PAIR_W, PAIR_H), sn.rgb("grey") + (255,))
-        bg.alpha_composite(sprite_image(pair(i)))
+        bg.alpha_composite(to_image(pair(i)))
         sheet.paste(bg.resize((PAIR_W * scale, PAIR_H * scale), Image.NEAREST), (x * scale, 0))
         x += PAIR_W + gap
     for i, (key, blocked) in enumerate(shots):
         cv = SCREENS[key]()
         if blocked:
             ui(cv, key)
-        sheet.paste(cv.img.convert("RGB").resize((W * scale, H * scale), Image.NEAREST), (i * (W + gap) * scale, top * scale))
+        sheet.paste(cv.img.convert("RGB").resize((W * scale, H * scale), Image.NEAREST),
+                    (i * (W + gap) * scale, top * scale))
     sheet.save(out)
 
 

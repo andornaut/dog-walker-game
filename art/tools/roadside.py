@@ -47,15 +47,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, Mini, scaled  # noqa: E402
-from pixel import DARKER, K, edged, main  # noqa: E402
+from pixel import K, dk, edged, main  # noqa: E402
 
 SCALE = 1.5
 GROUNDS = (K["green"], K["dgreen"], K["dslate"])
 STILL_MS = 1000
-
-
-def dk(c):
-    return DARKER[K.get(c, c)]
 
 
 # ---------- the props: front elevations, in design units ----------
@@ -241,7 +237,8 @@ def love_lock():
     def span(y, r, tip):
         """The columns the inner heart covers on row y, as (x0, x1), or None."""
         xs = [x for x in range(4, 48)
-              if (x + 0.5 - 17) ** 2 + (y + 0.5 - 18) ** 2 <= r * r or (x + 0.5 - 35) ** 2 + (y + 0.5 - 18) ** 2 <= r * r
+              if (x + 0.5 - 17) ** 2 + (y + 0.5 - 18) ** 2 <= r * r
+              or (x + 0.5 - 35) ** 2 + (y + 0.5 - 18) ** 2 <= r * r
               or (y + 0.5 >= 21 and abs(x + 0.5 - 26) <= (tip - y - 0.5) * (r + 9) / (tip - 21))]
         return (xs[0], xs[-1] + 1) if xs else None
 

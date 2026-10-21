@@ -19,7 +19,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid  # noqa: E402
+from pixel import Grid, to_image  # noqa: E402
 
 
 # ---------- gear ----------
@@ -66,13 +66,7 @@ ICONS = {
 def image(draw):
     g = Grid(32, 32)
     draw(g)
-    px = g.outlined()
-    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    for y, row in enumerate(px):
-        for x, c in enumerate(row):
-            if c:
-                im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
-    return im
+    return to_image(g.outlined())
 
 
 def preview(out, scale=4):

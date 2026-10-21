@@ -45,8 +45,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import rim, stamp  # noqa: E402
 from hits import piece  # noqa: E402
-from pixel import Grid, main  # noqa: E402
-
+from pixel import Grid, bitmap, main  # noqa: E402
 
 
 def rounded(g, x, y, w, h, col, r=2):
@@ -54,14 +53,6 @@ def rounded(g, x, y, w, h, col, r=2):
     for j in range(h):
         cut = max(0, r - j, r - (h - 1 - j))
         g.rect(x + cut, y + j, w - 2 * cut, 1, col)
-
-
-def bitmap(g, x0, y0, rows, cols):
-    """Stamp rows of characters; each character maps to a colour in cols, '.' is empty."""
-    for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
-            if ch in cols:
-                g.p(x0 + x, y0 + y, cols[ch])
 
 
 # ---------- the pull bubble ----------
@@ -154,6 +145,7 @@ def pull_fail(step):
         return g
     if step < 3:
         y, spread = 7 + step, step
+
         def cloud(p):
             for dx, r in ((-2 - spread, 2.4), (2 + spread, 2.4), (0, 3.2)):
                 p.ell(8 + dx, y + (1 if dx else 0), r, r * 0.8, "white", "lgrey")

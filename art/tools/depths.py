@@ -168,17 +168,17 @@ def checked(variants):
 
 
 def compare(out_dir, scale=4, gap=4):
-    """Per sprite with a variant here or in minis.py, a sheet with a band per road colour: each frame at 1x,
+    """Per sprite with a variant here or in minis.py, a sheet with a band per zone road: each frame at 1x,
     then per step a line of nearest-neighbour beside the variant."""
     from PIL import Image
 
+    os.makedirs(out_dir, exist_ok=True)
     full = {**originals(), **minis.originals()}
     ours = {**dict(minis.sprites()), **dict(sprites())}
-    variants = {**full, **ours}
     for key in dict.fromkeys(k.split("@")[0] for k in ours):
         frames = [f for _, fs, _ in full[key] for f in fs]
-        found = [(s, [f for _, fs, _ in variants[f"{key}@{x}"] for f in fs])
-                 for x, s in STEPS if f"{key}@{x}" in variants]
+        found = [(s, [f for _, fs, _ in ours[f"{key}@{x}"] for f in fs])
+                 for x, s in STEPS if f"{key}@{x}" in ours]
         lines = [[frames]] + [[[minis.nearest(f, s) for f in frames], small_frames] for s, small_frames in found]
         width = max(sum(sum(len(f[0]) + gap for f in block) + 2 * gap for block in line) for line in lines)
         band = sum(len(line[0][0]) + gap for line in lines)

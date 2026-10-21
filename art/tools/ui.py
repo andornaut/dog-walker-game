@@ -3,42 +3,45 @@
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-lock, icon-lock-open (the padlock with its shackle lifted, on a
-locked item the bank covers), icon-money, icon-treat (the treat pickup's bone as
-road.treat lays it out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack
-slot for sale in the shop: a doghouse with a green plus badge, as the shop's item-<gear> art,
-outlined with icon_edge); ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice,
-8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the
-start screen's ui-detail-card (24x24
-nine-slice, 8px corners), ui-detail-band (24x22 nine-slice, 8px caps and 2px top and bottom, drawn 24 tall) and
-ui-detail-well (68x68) and ui-detail-well-locked (68x68, neutral grey, for an item not owned); the shop list's
-ui-scroll-track (8x24) and ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
-and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows' ui-strip-well (24x24
-nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice, 8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking
-owner's name plate), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
-ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
-the start screen top bar's ui-home-cash-well (70x28, drawn at (5, 5));
-the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
-ui-dog-card-band (360x80, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked in with
-font-title) and ui-owner-tab (36x36).
+locked item the bank covers), icon-money, icon-treat (the treat pickup's bone as road.treat lays it
+out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
+shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
+ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
+(8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
+(24x24 nine-slice, 8px corners), ui-detail-band (24x22 nine-slice, 8px caps and 2px top and bottom,
+drawn 24 tall) and ui-detail-well (68x68) and ui-detail-well-locked (68x68, neutral grey, for an
+item not owned); the shop list's ui-scroll-track (8x24) and ui-scroll-thumb (6x24, three-slices with
+3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid
+(16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h
+(8x2) and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows'
+ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice,
+8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking owner's name plate),
+ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
+starburst behind the walker in the zone celebration), ui-zone-banner (248x48); the start screen top
+bar's ui-home-cash-well (70x28, drawn at (5, 5)); the walk HUD's ui-walk-bar (360x48),
+ui-effect-well (22x22), ui-dog-card-band (360x80, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
+in with font-title) and ui-owner-tab (36x36).
+
 Sprites: ui-dog-card (120x74, one of three cards in the walk's card row; a tag per dog key and
 `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn over the card and under
-the game's faces, hearts and text),
-ui-dog-card-warn (120x74, the low-hearts rim drawn over ui-dog-card; tags pulse, static),
-ui-debuff-bar (360x16, one active debuff's bar under the walk bar; tags muddy, stinky, zoomies),
-ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
-8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
-ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral),
-fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card), ui-button
-(24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
-secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
-ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
-empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
-disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
-icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo,
-and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile (24x24 nine-slice, 4px
-on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the help screen's one lane-width drag; tags press, drag, release).
-Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py,
-moments.py, scene.py and cards.py draw their plates, callouts and frames with it.
+the game's faces, hearts and text), ui-dog-card-warn (120x74, the low-hearts rim drawn over
+ui-dog-card; tags pulse, static), ui-debuff-bar (360x16, one active debuff's bar under the walk bar;
+tags muddy, stinky, zoomies), ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24
+nine-slice, 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick), ui-section (24x32
+nine-slice, 3px sides and bottom, 24px top; tags complete, neutral), fx-tap and fx-dust (16x16; tag
+play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card),
+ui-button (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
+secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a
+16x16 icon such as pause, help or sound; tags normal, pressed), ui-switch (32x16; tags on, off),
+ui-slider (24x10 three-slice, 4px caps; tags filled, empty, filled-disabled, empty-disabled),
+ui-slider-knob (10x16; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off),
+icon-sound-panel, icon-music-panel, icon-effects-panel and icon-motion-panel (tags on, off),
+ui-zone-pips (18x8; tags todo, and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile
+(24x24 nine-slice, 4px on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the
+help screen's one lane-width drag; tags press, drag, release).
+
+Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py, moments.py,
+scene.py and cards.py draw their plates, callouts and frames with it.
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -57,17 +60,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
-from pixel import DARKER, TORONTO, K, Grid, contrast, edged, icon_edge, build as build_sprites  # noqa: E402
-
-
-def to_image(px):
-    h, w = len(px), len(px[0])
-    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    for y, row in enumerate(px):
-        for x, c in enumerate(row):
-            if c:
-                im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
-    return im
+from pixel import DARKER, HEART, TORONTO, K, Grid, contrast, edged, icon_edge, to_image, build as build_sprites  # noqa: E402
 
 
 # ---------- the chrome: one frame for every panel, bubble, plate and card frame ----------
@@ -143,6 +136,7 @@ def plate(face, lit, shade, w=24, h=24):
 # The speaker, note and effects inks: face, shade on the lower-right edges, and the mute X.
 NAVY_FACE = ("cream", "tan", "pink")
 CREAM_PANEL = ("dbrown", "plum", "dred")
+
 
 def pause():
     """Amber bars, like the Home glyph at the other end of the walk bar, so the walk controls stand apart
@@ -267,7 +261,7 @@ def stinky():
     return px
 
 
-def mute_x(g, y, col="pink"):
+def mute_x(g, y, col):
     """The X that marks a muted icon, 5x5 in 2px strokes from (10, y)."""
     for i in range(4):
         g.rect(10 + i, y + i, 2, 2, col)
@@ -380,15 +374,14 @@ def settings_icon():
 
 def heart(full, dark=False):
     """8x7: a full heart is filled dark red; an empty one is a dark brown outline, so the two
-    differ by fill as well as colour (5:1 or more on the cream and tan slots). dark is for the navy
+    differ by fill as well as colour (5:1 or more on cream). dark is for the navy
     dog card: the full heart red (3.31:1) lit pink and white, the empty one a grey outline (4.93:1)."""
     g = Grid(8, 7)
-    rows = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
-    for y, row in enumerate(rows):
+    for y, row in enumerate(HEART):
         for x, c in enumerate(row):
             if c != "1":
                 continue
-            inside = all(0 <= y + dy < len(rows) and 0 <= x + dx < len(row) and rows[y + dy][x + dx] == "1"
+            inside = all(0 <= y + dy < len(HEART) and 0 <= x + dx < len(row) and HEART[y + dy][x + dx] == "1"
                          for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
             if full:
                 g.p(x, y, "red" if dark else "dred")
@@ -573,8 +566,25 @@ def hint_tail():
     return down_tail(4)
 
 
+def title_glyphs():
+    """font-title's glyphs: (mask, xoffset, yoffset, xadvance) by character."""
+    return fonts.glyphs(*fonts.FONTS["font-title"][1:])[0]
+
+
+def baked(im, text, x, y, col):
+    """im with text baked in, in font-title and colour col, from column x, each glyph's yoffset below row y."""
+    rgba = tuple(int(K[col][i:i + 2], 16) for i in (0, 2, 4)) + (255,)
+    gl = title_glyphs()
+    for ch in text:
+        mask, ox, oy, adv = gl[ch]
+        if mask is not None:
+            im.paste(rgba, (x + ox, y + oy), mask)
+        x += adv
+    return im
+
+
 def new_best():
-    im = Image.new("RGBA", (72, 20), (0, 0, 0, 0))
+    """72x20: the end screen's NEW BEST! ribbon, the words baked in white font-title."""
     g = Grid(72, 20)
     g.tri((0, 4), (8, 4), (4, 10), "dred")
     g.tri((0, 16), (8, 16), (4, 10), "dred")
@@ -585,17 +595,10 @@ def new_best():
     g.rect(6, 2, 60, 15, "red")
     g.rect(6, 2, 60, 1, "pink")
     g.rect(6, 16, 60, 1, "dred")
-    im.paste(to_image(g.outlined()), (0, 0))
-    gl, ascent, _ = fonts.glyphs(*fonts.FONTS["font-title"][1:])
+    im = to_image(g.outlined())
     text = "NEW BEST!"
-    width = sum(gl[ch][3] for ch in text)
-    x = (72 - width) // 2
-    for ch in text:
-        mask, ox, oy, adv = gl[ch]
-        if mask is not None:
-            im.paste((255, 255, 255, 255), (x + ox, 5 + oy - 1), mask)
-        x += adv
-    return im
+    width = sum(title_glyphs()[ch][3] for ch in text)
+    return baked(im, text, (72 - width) // 2, 4, "white")
 
 
 def dog_slot():
@@ -628,14 +631,7 @@ def dog_slot():
     return g
 
 
-# ---------- plates: the hit label, the fired plate and the payout tag ----------
-
-def hit_label(face, lit, shade):
-    """ui-hit-label's 24x24 nine-slice, 8px corners: a plate (dred for normal, blue for lucky)
-    stretched to 176x32. White text holds 7.34:1 on dred and 8.48:1 on blue; the cream band
-    carries the dslate road and the ink line the light roads."""
-    return plate(face, lit, shade)
-
+# ---------- plates: the fired plate and the payout tag (hits.py draws the hit label with plate) ----------
 
 def fired_plate(face, lit, shade):
     """ui-fired-plate's 24x24 nine-slice, 8px corners: a plate in the owner's temperament colour
@@ -682,7 +678,7 @@ DOG_COLOURS = {
 }
 
 
-def depth(solid, x, y, r):
+def interior(solid, x, y, r):
     """True when every pixel within r of (x, y) is on the card."""
     return all(solid(x + dx, y + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1))
 
@@ -741,7 +737,6 @@ def select_frame(glow):
     g.rect(1, 0, 22, 24, "ink")
     g.rect(0, 1, 24, 22, "ink")
     g.rect(1, 1, 22, 22, band)
-    g.rect(2, 1, 20, 22, band)
     g.rect(3, 3, 18, 18, "ink")
     g.rect(4, 4, 16, 16, None)
     for x, y in ((1, 1), (22, 1), (1, 22), (22, 22)):
@@ -868,6 +863,7 @@ def scroll_thumb():
     g.p(1, 1, "white")
     return g
 
+
 def detail_well():
     """68x68: the recessed window on the detail card for a 64x64 portrait (portrait-dog-<name>,
     an owner face or a 32x32 gear icon at 2x), drawn at 2,2. The chrome's ink and plum lines
@@ -924,7 +920,8 @@ def section(state):
     return g
 
 
-DENIM = 16
+# The side of the seamless fabric tiles, ui-denim and ui-plaid.
+FABRIC = 16
 STITCH_DASH, STITCH_GAP = 5, 3
 
 
@@ -933,10 +930,10 @@ def denim():
     section's tile area. Blue twill: dslate diagonals rising to the right every 4px, and sparse slate
     flecks of weft between them. Blue holds apart from the band's navy and the dogs section's plaid,
     and the tiles' ink edges hold on it."""
-    g = Grid(DENIM, DENIM)
-    g.rect(0, 0, DENIM, DENIM, "blue")
-    for y in range(DENIM):
-        for x in range(DENIM):
+    g = Grid(FABRIC, FABRIC)
+    g.rect(0, 0, FABRIC, FABRIC, "blue")
+    for y in range(FABRIC):
+        for x in range(FABRIC):
             d = (x + y) % 4
             if d == 0:
                 g.p(x, y, "dslate")
@@ -989,9 +986,9 @@ def plaid():
     """16x16 seamless tile: the dogs section's dog-blanket tartan, repeated (TileSprite) over its tile
     area. A dred ground crossed each way by a 2px plum band and, halfway between, a 1px plum thread, so a
     plum line runs about every 8px: quiet enough that the dog tiles stay the loudest thing on it."""
-    g = Grid(DENIM, DENIM)
-    for y in range(DENIM):
-        for x in range(DENIM):
+    g = Grid(FABRIC, FABRIC)
+    for y in range(FABRIC):
+        for x in range(FABRIC):
             band = x < 2 or y < 2
             thread = x == 9 or y == 9
             g.p(x, y, "plum" if band or thread else "dred")
@@ -1192,9 +1189,9 @@ def dog_card_warn(step):
         for x in range(w):
             if not solid(x, y):
                 continue
-            if not depth(solid, x, y, 1):
+            if not interior(solid, x, y, 1):
                 g.p(x, y, outer)
-            elif not depth(solid, x, y, 2):
+            elif not interior(solid, x, y, 2):
                 g.p(x, y, inner)
     return g
 
@@ -1251,15 +1248,7 @@ def lead_tag():
     g.rect(0, 1, w, h - 2, "ink")
     g.rect(1, 1, w - 2, h - 2, "yellow")
     g.rect(1, h - 2, w - 2, 1, "amber")
-    im = to_image(g.px)
-    gl, _, _ = fonts.glyphs(*fonts.FONTS["font-title"][1:])
-    x = 3
-    for ch in "LEAD":
-        mask, ox, oy, adv = gl[ch]
-        if mask is not None:
-            im.paste((24, 20, 37, 255), (x + ox, 3 + oy - 4), mask)
-        x += adv
-    return im
+    return baked(to_image(g.px), "LEAD", 3, -1, "ink")
 
 
 def owner_tab():
@@ -1452,13 +1441,10 @@ def touch_glow(g, x, y):
     g.ell(x, y, 4, 4, "yellow", "amber")
 
 
-def touch_speed(g, x, sides):
-    """Speed lines beside a hand whose fingertip is on column x: on the left (-1), the right (1) or both."""
+def touch_speed(g, x):
+    """Speed lines on the left of a hand whose fingertip is on column x."""
     for y, dx in ((16, 0), (20, 3), (24, 0)):
-        if -1 in sides:
-            g.rect(x - 20 - dx, y, 8, 1, "white")
-        if 1 in sides:
-            g.rect(x + 14 + dx, y, 8, 1, "white")
+        g.rect(x - 20 - dx, y, 8, 1, "white")
 
 
 def touch_hand(g, x, y):
@@ -1505,9 +1491,10 @@ def touch_drag(x, y, glow, marks, speed):
         g.ell(x, TOUCH_Y, 5, 5, "yellow" if glow == "ring" else "lgrey")
         g.ell(x, TOUCH_Y, 3.4, 3.4, None)
     if speed:
-        touch_speed(g, x, (-1,))
+        touch_speed(g, x)
     touch_hand(g, x, y)
     return g
+
 
 IMAGES = {
     "icon-pause": lambda: to_image(pause().outlined(False)),

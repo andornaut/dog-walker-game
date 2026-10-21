@@ -29,22 +29,21 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
+import minis  # noqa: E402
 import owners  # noqa: E402
-from pixel import DARKER, K, Grid, edged  # noqa: E402
+from pixel import DARKER, K, Grid, edged, to_image  # noqa: E402
 
 S = 64
 
 
-def dk(c, n=2):
-    c = K.get(c, c)
-    for _ in range(n):
-        c = DARKER[c]
-    return c
+def dk2(c):
+    """The colour two ramp steps darker than c, a K name or hex: a portrait's inner line."""
+    return DARKER[DARKER[K.get(c, c)]]
 
 
 def lined(g, cx, cy, rx, ry, c, sh=None, li=None):
     """An ellipse ringed in its colour two ramp steps darker, for a shape drawn over one of the same coat."""
-    g.ell(cx, cy, rx + 1, ry + 1, dk(c))
+    g.ell(cx, cy, rx + 1, ry + 1, dk2(c))
     g.cel(cx, cy, rx, ry, c, sh, li)
 
 
@@ -98,9 +97,9 @@ def pom(g, cx, cy, rx, ry, n=8, c="skin1", sh="brown", li="cream"):
     r = min(rx, ry) * 0.45
     lumps = [(cx + (rx - r * 0.5) * math.cos(a), cy + (ry - r * 0.5) * math.sin(a))
              for a in (2 * math.pi * (k + 0.5) / n for k in range(n))]
-    g.ell(cx, cy, rx, ry, dk(c))
+    g.ell(cx, cy, rx, ry, dk2(c))
     for x, y in lumps:
-        g.ell(x, y, r + 1, r + 1, dk(c))
+        g.ell(x, y, r + 1, r + 1, dk2(c))
     g.cel(cx, cy, rx - 1, ry - 1, c, sh, li)
     for x, y in lumps:
         g.cel(x, y, r, r, c, sh if y > cy + ry * 0.5 else None, li)
@@ -338,8 +337,8 @@ def penny(g):
     base, shade, light = dogs.GOLD
     # the haunch, and a thick otter tail curled forward round it along the ground, tapering to a blunt tip
     g.cel(46, 53, 13, 10, base, shade, light)
-    dogs.inlay(g, dk(base), lambda t: (t.cel(52, 59.5, 10, 3.5, base, shade, light),
-                                       t.tri((42, 58), (42, 63), (34, 62), base)))
+    dogs.inlay(g, dk2(base), lambda t: (t.cel(52, 59.5, 10, 3.5, base, shade, light),
+                                        t.tri((42, 58), (42, 63), (34, 62), base)))
     # a deep chest on solid legs
     g.cel(31, 51, 15.5, 13, base, shade, light, power=2.4)
     legs(g, (21, 33), 53, base, shade, w=7)
@@ -350,12 +349,12 @@ def penny(g):
     # a broad, blocky head
     g.cel(30, 25, 17, 14, base, shade, light, power=2.6)
     # short flat drop ears set at the top of the skull's sides, hanging no lower than the jaw
-    dogs.inlay(g, dk(shade), lambda t: (t.tri((11, 16), (21, 13), (15, 37), shade),
-                                        t.tri((11, 16), (10, 33), (15, 37), shade)))
-    dogs.inlay(g, dk(shade), lambda t: (t.tri((39, 13), (49, 16), (47, 38), shade),
-                                        t.tri((49, 16), (51, 34), (47, 38), shade)))
+    dogs.inlay(g, dk2(shade), lambda t: (t.tri((11, 16), (21, 13), (15, 37), shade),
+                                         t.tri((11, 16), (10, 33), (15, 37), shade)))
+    dogs.inlay(g, dk2(shade), lambda t: (t.tri((39, 13), (49, 16), (47, 38), shade),
+                                         t.tri((49, 16), (51, 34), (47, 38), shade)))
     # a square muzzle, a shade lighter than the coat, set off from the brow by a clear stop
-    dogs.inlay(g, dk(light), lambda t: t.cel(25, 34, 9, 6.5, light, base, power=3.2))
+    dogs.inlay(g, dk2(light), lambda t: t.cel(25, 34, 9, 6.5, light, base, power=3.2))
     eyes(g, 18, 33, 21)
     nose(g, 21, 29)
 
@@ -606,15 +605,6 @@ WALKERS = {
 }
 
 
-def to_image(px):
-    im = Image.new("RGBA", (len(px[0]), len(px)), (0, 0, 0, 0))
-    for y, row in enumerate(px):
-        for x, c in enumerate(row):
-            if c:
-                im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
-    return im
-
-
 # How much of the 64px well a dog's portrait fills, by size class, sat on the bottom edge.
 PORTRAIT_SIDE = {"big": 60, "medium": 58, "small": 52}
 
@@ -625,19 +615,23 @@ def image(draw, side=S):
         g = edged(Grid(S, S), "ink", close=True)
         draw(g)
         return to_image(g.outlined())
-    import minis
-
     g = edged(minis.Mini(side / S, S, S), "ink", close=True)
     draw(g)
     return to_image(dogs.padded(g.outlined(), S))
 
 
+def portraits():
+    """{key: (draw, side)} for every dog's portrait, then every walker's."""
+    return {**{f"portrait-dog-{n}": (d, PORTRAIT_SIDE[dogs.DOG_CLASS[n]]) for n, d in PORTRAITS.items()},
+            **{f"portrait-walker-{n}": (d, S) for n, d in WALKERS.items()}}
+
+
 def faces():
-    """(happy face, draw) for every dog, then every walker."""
-    for name, draw in PORTRAITS.items():
-        yield dogs.DOGS[name][1]("happy"), draw
-    for name, draw in WALKERS.items():
-        yield owners.WALKERS[f"walker-{name}"]("happy"), draw
+    """The happy face of every dog, then every walker, in portraits() order."""
+    for name in PORTRAITS:
+        yield dogs.DOGS[name][1]("happy")
+    for name in WALKERS:
+        yield owners.WALKERS[f"walker-{name}"]("happy")
 
 
 def preview(out, scale=4):
@@ -647,9 +641,9 @@ def preview(out, scale=4):
     cell = S + 4
     rows = len(PORTRAITS) + len(WALKERS)
     sheet = Image.new("RGB", (cell * (1 + len(grounds)) * scale, cell * rows * scale), (24, 20, 37))
-    for i, (face_grid, draw) in enumerate(faces()):
+    for i, (face_grid, (draw, side)) in enumerate(zip(faces(), portraits().values())):
         face = to_image(face_grid.outlined()).resize((S, S), Image.NEAREST)
-        im = image(draw)
+        im = image(draw, side)
         for j, tile_im in enumerate([face] + [im] * len(grounds)):
             tile = Image.new("RGB", (S, S), grounds[max(0, j - 1)])
             tile.paste(tile_im, (0, 0), tile_im)
@@ -660,8 +654,7 @@ def preview(out, scale=4):
 def build():
     os.makedirs("art/portraits", exist_ok=True)
     os.makedirs("public/art/images", exist_ok=True)
-    keys = {**{f"portrait-dog-{n}": (d, PORTRAIT_SIDE[dogs.DOG_CLASS[n]]) for n, d in PORTRAITS.items()},
-            **{f"portrait-walker-{n}": (d, S) for n, d in WALKERS.items()}}
+    keys = portraits()
     for key, (draw, side) in keys.items():
         png = f"public/art/images/{key}.png"
         image(draw, side).save(png)

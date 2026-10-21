@@ -374,9 +374,9 @@ CROSSING = (20, 64)
 
 def crossing(g):
     """A neutral cross street in dslate asphalt, so a start strip follows any zone. Up
-    the road: the near kerb's top (rows 60 to 63) and rounded edge (58, 59), the asphalt with a
-    zebra crossing (35 to 48), then the far kerb's shadow (24, 25), face (22, 23) and lit top
-    (20, 21). Every kerb band is 2 rows but the near kerb's 4-row top, each step 3.4:1 or less."""
+    the road: the near curb's top (rows 60 to 63) and rounded edge (58, 59), the asphalt with a
+    zebra crossing (35 to 48), then the far curb's shadow (24, 25), face (22, 23) and lit top
+    (20, 21). Every curb band is 2 rows but the near curb's 4-row top, each step 3.4:1 or less."""
     y0, y1 = CROSSING
     rnd = random.Random("road-crossing")
     g.rect(0, y0, W, y1 - y0, "dslate")
@@ -391,7 +391,7 @@ def crossing(g):
     g.rect(0, 24, W, 2, "navy")
     g.rect(0, 58, W, 2, "grey")
     g.rect(0, 60, W, 4, "lgrey")
-    # kerbstone joints at uneven spacing, along the road
+    # curbstone joints at uneven spacing, along the road
     x = rnd.randrange(10, 30)
     while x < W:
         g.rect(x, 60, 1, 4, "grey")
@@ -413,7 +413,7 @@ def images():
         yield f"road-{zone}-start", start(zone)
 
 
-def to_image(g):
+def strip_image(g):
     from PIL import Image
 
     img = Image.new("RGB", (g.w, g.h))
@@ -442,7 +442,7 @@ def preview(out, scale=2, gap=8):
         column = [f"road-{zones[i - 1]}"] * 2 + [f"road-{zone}-start"] + [f"road-{zone}"] * 3
         for j, key in enumerate(column):
             y = col_h - (j + 1) * H
-            tile = to_image(tiles[key]).resize((W * scale, H * scale), Image.NEAREST)
+            tile = strip_image(tiles[key]).resize((W * scale, H * scale), Image.NEAREST)
             sheet.paste(tile, (i * (W + gap) * scale, y * scale))
     sheet.save(out)
 
@@ -454,7 +454,7 @@ def build():
     for key, g in images():
         check(key, g)
         png = f"public/art/images/{key}.png"
-        to_image(g).save(png)
+        strip_image(g).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/roads/{key}.aseprite"], check=True)
         built.append(key)
     print("built", ", ".join(built))

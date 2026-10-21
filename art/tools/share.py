@@ -68,7 +68,8 @@ def formation(dogs):
 
 def bmfont(key):
     """{char: (mask, xoffset, yoffset, xadvance)} from public/art/fonts/<key>.fnt and its atlas."""
-    src = open(f"public/art/fonts/{key}.fnt").read()
+    with open(f"public/art/fonts/{key}.fnt") as f:
+        src = f.read()
     atlas = Image.open(f"public/art/fonts/{key}.png").convert("RGBA").getchannel("A")
     out = {}
     for line in src.splitlines():
@@ -83,7 +84,7 @@ def bmfont(key):
 TITLE = bmfont("font-title")
 
 
-def text_w(s, sc):
+def title_w(s, sc):
     """The inked width of s at scale sc: the advances, less the trailing gap of the last glyph."""
     mask, ox, _, _ = TITLE[s[-1]]
     return sc * (sum(TITLE[ch][3] for ch in s[:-1]) + ox + (mask.width if mask else 0))
@@ -91,7 +92,7 @@ def text_w(s, sc):
 
 def label(cv, s, mid, y, col, rim, sc=2):
     """s in font-title at sc, centred on mid with its cap tops on row y, in col with a 1px rim all round."""
-    pts, x = set(), round(mid - text_w(s, sc) / 2)
+    pts, x = set(), round(mid - title_w(s, sc) / 2)
     top = min(TITLE[ch][2] for ch in s if TITLE[ch][0])
     for ch in s:
         mask, ox, oy, adv = TITLE[ch]

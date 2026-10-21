@@ -54,8 +54,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, edged, main, road_edge  # noqa: E402
-from road import LIT, rim  # noqa: E402
+from pixel import K, Grid, edged, main, raster, road_edge  # noqa: E402
+from road import lit  # noqa: E402
 
 # The drawings are in layout pixels: a 1-lane sprite's frame is SIZE square and a lane-spanning obstacle ROW
 # tall. sprites() draws them SCALE times bigger on a minis.Mini, which keeps 1px lines 1px, so a 1-lane sprite
@@ -86,17 +86,10 @@ def unit(g):
     return 1 / getattr(g, "s", 1), 1 / getattr(g, "sy", getattr(g, "s", 1))
 
 
-def lit(g):
-    """road.rim with road.LIT on the grid that holds the pixels (a minis.Mini draws onto g.g), so the small
-    versions get the rim at their own size."""
-    rim(getattr(g, "g", g), LIT)
-    return g
-
-
-def raster(g):
-    """(the grid holding g's pixels, its scale, the pixel edge of a full-size coordinate on it)."""
+def pixel_edge(g):
+    """The pixel edge of a full-size coordinate on the grid holding g's pixels."""
     s = getattr(g, "s", 1)
-    return getattr(g, "g", g), s, lambda v: math.floor(v * s + 0.5)
+    return lambda v: math.floor(v * s + 0.5)
 
 
 def cone(glint=None):
@@ -108,7 +101,7 @@ def cone(glint=None):
     g.rect(9, 31, 22, 1, "lgrey")
     g.tri((11, 32.5), (29, 32.5), (20, 7.5), "orange")
     g.tri((20, 32.5), (29, 32.5), (20, 7.5), "rust")
-    px, s, edge = raster(g)
+    px, edge = raster(g), pixel_edge(g)
     mid = edge(20)
     cone_px = (K["orange"], K["rust"])
     for top in (15, 24):
@@ -319,7 +312,7 @@ def delivery_truck(puff=False, roll=None):
     right wheel. roll (0 to 3) is a drive frame: tread lines climb the tyres 1px a frame (treads) and the
     body dips 1px onto them on frames 1 and 2. Laid out on 56x45 and drawn at CAR_SCALE, as the parked car."""
     g = edged(Grid(56, 45))
-    px = getattr(g, "g", g)
+    px = raster(g)
     uy = unit(g)[1]
     # wheels first, so the body can dip over them
     for x in (5, 42):
@@ -384,7 +377,7 @@ def lettering(g, cx, y, text, c, bar=None):
     """text in LETTERS centred on layout column cx with its top on layout row y, drawn pixel for pixel on the
     grid holding g's pixels, 1px apart. Where the grid is too small for it to sit inside the layout's 5 rows
     and 4 columns a letter, bar draws a 1px line of that colour across its middle instead, or nothing."""
-    px = getattr(g, "g", g)
+    px = raster(g)
     s, sy = getattr(g, "s", 1), getattr(g, "sy", getattr(g, "s", 1))
     w = 4 * len(text) - 1
     if s < 0.85 or sy * 5 < 5:
@@ -408,7 +401,7 @@ def streetcar(spark=False, roll=None):
     spark lights a cyan spark at the pan head. roll (0 to 3) is a drive frame: tread lines climb the wheels
     1px a frame as it rolls away, and the body and pantograph sway STREETCAR_SWAY over the bogie."""
     g = edged(Grid(56, 55))
-    px = getattr(g, "g", g)
+    px = raster(g)
     uy = unit(g)[1]
     # the bogie and its wheels first, so the body can sway over them
     g.rect(14, 48, 28, 3, "dslate")

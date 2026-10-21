@@ -35,7 +35,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
 from minis import STEPS, Mini  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
-from road import LIT  # noqa: E402
+from road import lit  # noqa: E402
 
 # The drawings are laid out on a 32-unit design grid; the sprites draw them road.SCALE times larger (32 units
 # are 48px).
@@ -47,18 +47,13 @@ def mini(s):
     return lambda w=32, h=32: Mini(s, w, h)
 
 
-def lit(g):
-    """road.rim with road.LIT on the grid that holds the pixels, so a Mini gets the rim at its own size."""
-    road.rim(getattr(g, "g", g), LIT)
-    return g
-
-
 # ---------- goose ----------
 
 def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     """Side view facing right. fa and fb move the near and far feet along the ground, bob lifts the body
-    (negative is up), flap moves the wing tips down (negative is up), beak opens it (0 shut, 1 open, 2 wide) and thrust pushes
-    the head forward. The white takes the road outline; the orange beak and feet carry it on every road."""
+    (negative is up), flap moves the wing tips down (negative is up), beak opens it (0 shut, 1 open, 2 wide) and
+    thrust pushes the head forward. The white takes the road outline; the orange beak and feet carry it on every
+    road."""
     g = edged(new())
     b, f, t = bob, flap, thrust
     # legs and webbed feet, the far one a shade darker; the foot swinging forward is 1px off the ground

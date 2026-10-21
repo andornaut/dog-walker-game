@@ -31,7 +31,6 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import json
 import math
 import os
 import sys
@@ -40,20 +39,12 @@ sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from pixel import K, Grid, edged, main  # noqa: E402
+from pixel import K, Grid, depth_scales, edged, main, raster  # noqa: E402
 
 
-
-def depth_steps():
-    """(suffix, scale) for every depth step below full size in shared/depth-steps.json, the table the game
-    reads, the suffix without its @: ("88", 0.875) and so on."""
-    root = os.path.join(os.path.dirname(__file__), "..", "..")
-    with open(os.path.join(root, "shared", "depth-steps.json")) as f:
-        steps = json.load(f)["steps"]
-    return tuple((q["suffix"].lstrip("@"), q["scale"]) for q in steps if q["scale"] < 1)
-
-
-STEPS = depth_steps()
+# (suffix, scale) for every depth step below full size (pixel.depth_scales), the suffix without its @:
+# ("88", 0.875) and so on.
+STEPS = tuple((suffix.lstrip("@"), scale) for suffix, scale in depth_scales().items())
 # The steps hazards.py builds itself.
 SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))
 
@@ -175,31 +166,29 @@ class Mini:
 
 def small(module, s, draw, *args, **q):
     """Run module's draw(*args, **q) with its Grid swapped for a Mini at scale s, or (sx, sy) for one that
-    scales its columns by sx and its rows by sy. Meanwhile road.rim lights the Mini's own grid, so a drawing
-    that ends in rim gets the rim at the small size, and road.face_front (module's too, where it imports it)
-    is face_front at scale s."""
-    full, full_rim, full_face = module.Grid, road.rim, road.face_front
+    scales its columns by sx and its rows by sy. Meanwhile road.face_front (module's too, where it imports
+    it) is face_front at scale s."""
+    full, full_face = module.Grid, road.face_front
     faced = [m for m in {road, module} if getattr(m, "face_front", None) is full_face]
     sx, sy = s if isinstance(s, tuple) else (s, s)
     s = sx
     module.Grid = lambda w=32, h=32: Mini(sx, w, h, sy)
-    road.rim = lambda g, rims: full_rim(getattr(g, "g", g), rims)
     for m in faced:
         m.face_front = lambda g, cx, y, *a, **k: face_front(s, g, cx, y, *a, **k)
     try:
         return draw(*args, **q)
     finally:
-        module.Grid, road.rim = full, full_rim
+        module.Grid = full
         for m in faced:
             m.face_front = full_face
 
 
-def face_front(s, g, cx, y, mood="happy", eyes="ink", lips="dbrown"):
+def face_front(s, g, cx, y, eyes="ink", lips="dbrown"):
     """road.face_front at scale s on the Mini g, drawn at the small size: scaled, its eyes lose their glint
     and its mouth swells into a dark blot. Each eye is 2 x s square, rounded, at least 1px, centred where it
     is at full size, with its white glint at the top-left when it is 2px. The mouth is 2 x s wide on the row
-    under the mouth's full-size row; from 0.75x a happy or smirking mouth keeps its upturned corners."""
-    px = getattr(g, "g", g)
+    under the mouth's full-size row; from 0.75x it keeps its upturned corners."""
+    px = raster(g)
     n = max(1, scaled(2, s))
     top = math.floor((y + 1) * s + 0.5 - n / 2)
     for x in (cx - 4, cx + 4):
@@ -207,12 +196,11 @@ def face_front(s, g, cx, y, mood="happy", eyes="ink", lips="dbrown"):
         px.rect(x0, top, n, n, eyes)
         if n > 1:
             px.p(x0, top, "white")
-    m = max(1, scaled(3 if mood == "smirk" else 2, s))
-    row, left = math.floor((y + 5.5) * s), math.floor((cx + (0.5 if mood == "smirk" else 0)) * s + 0.5 - m / 2)
+    m = max(1, scaled(2, s))
+    row, left = math.floor((y + 5.5) * s), math.floor(cx * s + 0.5 - m / 2)
     px.rect(left, row, m, 1, lips)
-    if s >= 0.75 and mood in ("happy", "smirk"):
-        if mood == "happy":
-            px.p(left - 1, row - 1, lips)
+    if s >= 0.75:
+        px.p(left - 1, row - 1, lips)
         px.p(left + m, row - 1, lips)
 
 

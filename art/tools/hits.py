@@ -39,7 +39,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import HEART, SMALL, burst  # noqa: E402
 import fx  # noqa: E402
-from pixel import Grid, main  # noqa: E402
+from pixel import Grid, main, raster  # noqa: E402
 
 BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
 # A sideways wobble with an 8px period: a line rising 2px a frame loops seamlessly in 4 frames.
@@ -53,11 +53,6 @@ BURST = 64
 BURST_SCALE = 77 / BURST
 # How much bigger frame 0's impact star is than its base radius, 16, for punch.
 IMPACT = 1.25
-
-
-def raster(g):
-    """The grid that holds g's pixels: a minis.Mini's drawn grid, or g."""
-    return getattr(g, "g", g)
 
 
 def drawn_at(g, x, y):
@@ -130,10 +125,11 @@ def impact(g, outer, cx=32, cy=32):
 # ---------- hit bursts ----------
 
 def hit_skunk(step):
-    """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift
-    apart, shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud: the puffs mauve, shaded purple on their lower right and lit pink on their upper left, so
-    the pink carries the dslate road and the plum rim the light roads. Stink squiggles rise out of it, pink with a
-    plum side, so they read over the cloud and on every road."""
+    """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift apart,
+    shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud: the puffs
+    mauve, shaded purple on their lower right and lit pink on their upper left, so the pink carries the dslate
+    road and the plum rim the light roads. Stink squiggles rise out of it, pink with a plum side, so they read
+    over the cloud and on every road."""
     g = Grid(64, 64)
     if step == 0:
         impact(g, "mauve")
@@ -165,7 +161,8 @@ def hit_skunk(step):
         for deg in range(0, 100, 2):
             a = math.radians(deg)
             x, y = drawn_at(g, cx + math.cos(a) * (pr - 0.5), cy + math.sin(a) * (pr - 0.5))
-            if 2 <= x < w - 2 and 2 <= y < h - 2 and all(mass[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)):
+            if 2 <= x < w - 2 and 2 <= y < h - 2 and all(mass[y + dy][x + dx]
+                                                         for dx in (-2, 0, 2) for dy in (-2, 0, 2)):
                 px.p(x, y, "purple")
     # shade the lower-right edge of every puff, so the lumps read and overlapping lobes read as one mass, and
     # light the mass's upper-left edge pink
@@ -369,10 +366,12 @@ PLATES = {"normal": ("dred", "red", "plum"), "lucky": ("blue", "sky", "navy")}
 
 
 def label_plate(face, lit, shade):
-    """24x24 nine-slice, 8px corners: ui.py's chrome plate (hit_label)."""
+    """ui-hit-label's 24x24 nine-slice, 8px corners: ui.py's chrome plate (dred for normal, blue for lucky),
+    stretched to 176x32. White text holds 7.34:1 on dred and 8.48:1 on blue; the cream band carries the
+    dslate road and the ink line the light roads."""
     import ui
 
-    return ui.hit_label(face, lit, shade)
+    return ui.plate(face, lit, shade)
 
 
 # Each burst: its drawing and its frame count.

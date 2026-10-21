@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Draw the owners' and walkers' faces and build their Aseprite sources and exports.
 
-face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with an ink
-outer line closed under the bust, cel shaded, the face flat with a 1px shadow down its near edge. Tags: happy, neutral, upset, fired (angry, shown as the owner
-fires you) and worried (at 1 heart, while their dog's card pulses). Each
-owner's job shows in their hair and accessories, and their temperament in
-how far the expressions go.
+face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with an ink outer line closed under the
+bust, cel shaded, the face flat with a 1px shadow down its near edge. Tags: happy, neutral, upset,
+fired (angry, shown as the owner fires you) and worried (at 1 heart, while their dog's card pulses).
+Each owner's job shows in their hair and accessories, and their temperament in how far the
+expressions go.
 
 face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
@@ -434,8 +434,8 @@ def small(dog, mood):
 
 # ---------- the walkers' portraits, for the walker picker ----------
 
-def walker_cap(mood):
-    """The cap-and-hoodie walker."""
+def casey(mood):
+    """Casey, the cap-and-hoodie walker."""
     g = face()
     base(g, "skin1", "skin2", "sky", "blue")
     g.ell(16, 28, 4, 2, "blue")
@@ -447,7 +447,7 @@ def walker_cap(mood):
     return g
 
 
-def walker_girl(mood):
+def ada(mood):
     """Ada, 11, mixed race, caramel skin, long black curls falling straight down; pink tee."""
     g = face()
     # black hair falling in ringlets past the shoulders, their ends bunched into bumps along the edges
@@ -475,7 +475,7 @@ def walker_girl(mood):
     return g
 
 
-def walker_man(mood):
+def ben(mood):
     """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; green tee."""
     g = face()
     # the green tee, shaded dgreen on the right, with a dgreen collar, as on his road sprite
@@ -499,8 +499,8 @@ def walker_man(mood):
     return g
 
 
-def walker_teacher(mood):
-    """50, dirty blonde bob to the shoulders, cute: round glasses, green cardigan, white collar."""
+def trista(mood):
+    """Trista, 50, dirty blonde bob to the shoulders, cute: round glasses, green cardigan, white collar."""
     g = face()
     # light brown hair, darker than her skin, with golden amber streaks
     g.cel(16, 14, 10, 10, "brown", "dbrown", "tan")
@@ -514,19 +514,15 @@ def walker_teacher(mood):
     g.cel(11, 11, 3, 2, "brown", "dbrown", "tan")
     for x, y, h in ((10, 8, 2), (14, 6, 3), (18, 7, 2)):
         g.rect(x, y, 1, h, "amber")
-    expression(g, mood)
-    for cx in (12, 19):
-        for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)):
-            g.p(cx + dx, 18 + dy, "dbrown")
-    g.rect(14, 18, 3, 1, "dbrown")
+    expression(g, mood, glasses="dbrown")
     return g
 
 
 WALKERS = {
-    "walker-casey": walker_cap,
-    "walker-ada": walker_girl,
-    "walker-ben": walker_man,
-    "walker-trista": walker_teacher,
+    "walker-casey": casey,
+    "walker-ada": ada,
+    "walker-ben": ben,
+    "walker-trista": trista,
 }
 
 
