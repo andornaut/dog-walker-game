@@ -20,7 +20,7 @@ export const SHOP_GEAR = {
     effects: [{ kind: "skipOption" }],
     name: "Hall pass",
     price: "poopBags",
-    short: "Skip one card a neighborhood",
+    short: "A free Walk on by each neighborhood",
   },
   runningShoes: {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],

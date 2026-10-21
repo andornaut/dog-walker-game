@@ -11,7 +11,7 @@ export const RUN_TEXT = {
     free: "Free",
     need: "Need {amount}",
     pickOne: "Pick one",
-    skip: "Skip",
+    skip: "Walk on by",
     skipEffect: "Hall pass: walk on by, no cost.",
     skipHeld: "Walk on by: nothing happens.",
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Whole walk" },
@@ -43,7 +43,7 @@ export const RUN_TEXT = {
     achievement: "Achievement! {name}",
   },
   zoneDone: {
-    earnings: "{fees} pay  ·  {tips} tips",
+    earnings: "{fees} pay · {tips} tips",
     subtitle: "{zone}",
     title: "Neighborhood done!",
   },

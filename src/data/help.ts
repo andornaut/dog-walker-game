@@ -33,9 +33,9 @@ export const HELP_PAGES = [
   {
     art: "help-owners",
     body:
-      "Each owner has hearts: 3♥ small, 4 medium, 5 big. " +
+      "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big. " +
       "A plain bump costs 1♥ from the owner of the dog that touched it, often the leader's, so pick who leads. " +
-      "Small dogs dodge 1 in 4. At 0♥ the owner fires you.",
+      "Small dogs dodge 1 in 4 plain bumps. At 0♥ the owner fires you.",
     title: "Keep owners happy",
   },
   {

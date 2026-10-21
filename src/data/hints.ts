@@ -44,7 +44,7 @@ export const HINTS = {
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Every dog wants that squirrel!",
+    text: "Squirrel! Chasing costs tips, holding costs ♥.",
     trigger: { encounter: "squirrel", kind: "encounter" },
   },
   tip: {
