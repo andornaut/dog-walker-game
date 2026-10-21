@@ -18,10 +18,10 @@ export const TUNING = {
     maxMovers: 4,
     maxSlowVehicles: 2,
     // Obstacles that open no card, on top of obstaclesFirstZone.
-    minorObstaclesFirstZone: 27,
-    minorObstaclesGainPerZone: 5,
-    obstaclesFirstZone: 23,
-    obstaclesGainPerZone: 5,
+    minorObstaclesFirstZone: 32,
+    minorObstaclesGainPerZone: 6,
+    obstaclesFirstZone: 18,
+    obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
     packSizeMax: 3,
