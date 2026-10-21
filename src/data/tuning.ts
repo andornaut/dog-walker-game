@@ -92,8 +92,9 @@ export const TUNING = {
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
-    // A stalker's second step comes once the road between it and the pack is down to a share
-    // of the road's length drawn per stalker between these.
+    // Each of a stalker's steps after its first comes once the step before has ended and the
+    // road between it and the pack is down to a share of the road's length drawn per stalker
+    // between these.
     approachSecondRoadShareMax: 0.45,
     approachSecondRoadShareMin: 0.25,
     // Each big dog in the pack adds this to the walker's agility.

@@ -655,7 +655,7 @@
       "movement": {
         "kind": "approach",
         "steps": {
-          "max": 1,
+          "max": 2,
           "min": 1
         }
       },
@@ -730,7 +730,7 @@
       "movement": {
         "kind": "approach",
         "steps": {
-          "max": 1,
+          "max": 2,
           "min": 1
         }
       },
@@ -918,7 +918,7 @@
         "kind": "hop",
         "most": 2,
         "times": {
-          "max": 1,
+          "max": 2,
           "min": 1
         }
       },
@@ -968,7 +968,7 @@
       "movement": {
         "kind": "approach",
         "steps": {
-          "max": 2,
+          "max": 3,
           "min": 2
         }
       },
@@ -1012,7 +1012,7 @@
         "most": 2,
         "sideways": true,
         "times": {
-          "max": 1,
+          "max": 2,
           "min": 1
         }
       },
@@ -1124,7 +1124,7 @@
       "movement": {
         "kind": "step",
         "steps": {
-          "max": 2,
+          "max": 3,
           "min": 2
         }
       },
@@ -1172,7 +1172,7 @@
         "kind": "hop",
         "most": 2,
         "times": {
-          "max": 1,
+          "max": 2,
           "min": 1
         }
       },
