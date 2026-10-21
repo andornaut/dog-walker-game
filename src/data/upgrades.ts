@@ -56,7 +56,7 @@ export const UPGRADES = {
   rushHour: {
     art: "card-rush-hour",
     duration: "nextZone",
-    effect: "Twice the tips and more obstacles next neighborhood",
+    effect: "Twice the tips and treats, more obstacles next neighborhood",
     effects: [
       {
         by: "rushHourTips",
@@ -71,6 +71,13 @@ export const UPGRADES = {
         kind: "modifier",
         operation: "multiply",
         stat: "obstacleSpawns",
+      },
+      {
+        by: "rushHourTreats",
+        duration: "nextZone",
+        kind: "modifier",
+        operation: "multiply",
+        stat: "treatSpawns",
       },
     ],
     kind: "tradeOff",

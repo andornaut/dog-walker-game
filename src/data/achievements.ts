@@ -157,11 +157,11 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "So close. Every time.",
-    conditions: [{ count: 5, kind: "tally", tally: "squirrelPulls" }],
-    goal: "Get pulled toward 5 squirrels, across all walks",
+    conditions: [{ count: 15, kind: "tally", tally: "squirrelPulls" }],
+    goal: "Get pulled toward 15 squirrels, across all walks",
     id: "squirrel",
     name: "Squirrel!",
-    shortGoal: "Get pulled by 5 squirrels",
+    shortGoal: "Get pulled by 15 squirrels",
   },
   {
     badgeLine: "They had a getaway scooter.",

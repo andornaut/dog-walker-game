@@ -32,7 +32,7 @@ export const WALKER_PERKS = {
     name: "Long reach",
   },
   treatFinder: {
-    effect: "1.5× as many treats appear",
+    effect: "Twice as many treats appear",
     effects: [
       { by: "treatFinderSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
     ],

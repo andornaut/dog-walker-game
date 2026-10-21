@@ -10,7 +10,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1♥ each, −$4",
+      "text": "+1♥ each, −$8",
       "title": "Other dog"
     },
     {
@@ -36,7 +36,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "−$15",
+      "text": "−$10",
       "title": "Skunk"
     },
     {
@@ -231,7 +231,7 @@
         "id": "rushHour",
         "kind": "upgrade"
       },
-      "text": "Tips +100% next neighborhood, obstacles +50% next neighborhood",
+      "text": "Tips +100% next neighborhood, obstacles +50% next neighborhood, treats +100% next neighborhood",
       "title": "Which way?"
     },
     {
@@ -1191,12 +1191,12 @@
     },
     "money": {
       "bigTipperTipBonus": 1,
-      "encounterHigh": 15,
+      "encounterHigh": 10,
       "encounterLow": 5,
       "fannyPackStart": 10,
       "fullPackBonusPerDog": 10,
-      "lostWalletKeep": 10,
-      "missedTips": 4,
+      "lostWalletKeep": 20,
+      "missedTips": 8,
       "payPerDog": 10,
       "prices": {
         "archie": 150,
@@ -1219,16 +1219,17 @@
       "tip": 1
     },
     "multipliers": {
-      "bigDogAgility": -0.05,
+      "bigDogAgility": -0.1,
       "calmVoiceDebuffFactor": 0.5,
       "goodLeashSquirrelPull": 0,
       "muddyBumpHearts": 2,
       "runningShoesAgility": 0.1,
       "rushHourObstacles": 1.5,
       "rushHourTips": 2,
+      "rushHourTreats": 2,
       "scrollSpeedGainPerZone": 0.15,
       "stinkyTipValue": 0,
-      "treatFinderSpawns": 1.5
+      "treatFinderSpawns": 2
     },
     "pixels": {
       "roadScrollSpeed": 200,
@@ -1332,7 +1333,7 @@
       "id": "rushHour",
       "art": "card-rush-hour",
       "duration": "nextZone",
-      "effect": "Twice the tips and more obstacles next neighborhood",
+      "effect": "Twice the tips and treats, more obstacles next neighborhood",
       "effects": [
         {
           "by": "rushHourTips",
@@ -1347,6 +1348,13 @@
           "kind": "modifier",
           "operation": "multiply",
           "stat": "obstacleSpawns"
+        },
+        {
+          "by": "rushHourTreats",
+          "duration": "nextZone",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "treatSpawns"
         }
       ],
       "kind": "tradeOff",
@@ -1606,7 +1614,7 @@
         },
         "obstacles": {
           "otherDog": 1,
-          "puddle": 2,
+          "puddle": 1,
           "skunk": 1,
           "squirrel": 1,
           "thief": 1

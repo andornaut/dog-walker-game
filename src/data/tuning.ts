@@ -51,13 +51,13 @@ export const TUNING = {
   money: {
     // Added to each tip while Big tipper is on.
     bigTipperTipBonus: 1,
-    encounterHigh: 15,
+    encounterHigh: 10,
     encounterLow: 5,
     fannyPackStart: 10,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
-    lostWalletKeep: 10,
-    missedTips: 4,
+    lostWalletKeep: 20,
+    missedTips: 8,
     // Each walking dog's pay for a zone, before the zone's pay multiplier.
     payPerDog: 10,
     prices: {
@@ -86,7 +86,7 @@ export const TUNING = {
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
     // Each big dog in the pack adds this to the walker's agility.
-    bigDogAgility: -0.05,
+    bigDogAgility: -0.1,
     // How long a debuff lasts while Ada's Calm voice walks.
     calmVoiceDebuffFactor: 0.5,
     goodLeashSquirrelPull: 0,
@@ -96,11 +96,12 @@ export const TUNING = {
     runningShoesAgility: 0.1,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
+    rushHourTreats: 2,
     scrollSpeedGainPerZone: 0.15,
     // What a tip pays while the pack is Stinky.
     stinkyTipValue: 0,
     // How many treats appear while Ben's Treat finder walks.
-    treatFinderSpawns: 1.5,
+    treatFinderSpawns: 2,
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {

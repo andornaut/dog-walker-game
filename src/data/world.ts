@@ -157,7 +157,7 @@ export const WORLD = {
         },
         obstacles: {
           otherDog: 1,
-          puddle: 2,
+          puddle: 1,
           skunk: 1,
           squirrel: 1,
           thief: 1,
