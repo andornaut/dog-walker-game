@@ -18,7 +18,14 @@ import {
 } from "./homeLines";
 
 const data = { ...gameData, tuning: TEST_TUNING };
-const text = data.homeText;
+// The home text, with test lines for every message these tests check.
+const text = {
+  ...data.homeText,
+  dogBought: "{dog} joined.",
+  dogCantAfford: "{amount} short for {dog}.",
+  gearBought: "Got {gear}.",
+  slotBought: "{slot} open.",
+};
 const dollars = (amount: number) => cents(amount * 100);
 const firing = { dog: "koda", zone: 2 } as const;
 
@@ -67,8 +74,6 @@ describe("walkerUnlockedSince", () => {
 });
 
 describe("messageLine", () => {
-  const lines = { ...text, gearBought: "Got {gear}.", slotBought: "{slot} open." };
-
   it("says a focused item, a purchase or what an unaffordable item needs, and nothing after no action", () => {
     const cases: readonly [string, HomeAction, string | null][] = [
       [
@@ -80,7 +85,7 @@ describe("messageLine", () => {
       [
         "announces a bought dog",
         { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
-        "Nugget joins your clients!",
+        "Nugget joined.",
       ],
       [
         "announces bought gear",
@@ -95,11 +100,11 @@ describe("messageLine", () => {
       [
         "says how much more an unaffordable item needs",
         { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
-        "Save $480 more for Nugget.",
+        "$480 short for Nugget.",
       ],
     ];
     for (const [, action, expected] of cases) {
-      expect(messageLine(lines, action)).toBe(expected);
+      expect(messageLine(text, action)).toBe(expected);
     }
   });
 });
@@ -137,14 +142,14 @@ describe("bubbleSpeech", () => {
       {
         action: { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
         dogs: [],
-        expected: ["Nugget joins your clients!", "Ava: Tag me in everything."],
+        expected: ["Nugget joined.", "Ava: Tag me in everything."],
         line: "firstVisit",
         name: "announces a just-bought dog, then lets its owner speak though the dog is not picked",
       },
       {
         action: { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
         dogs: ["koda"],
-        expected: ["Save $480 more for Nugget."],
+        expected: ["$480 short for Nugget."],
         line: "afterWalk",
         name: "puts the last action's message ahead of a picked dog's owner",
       },

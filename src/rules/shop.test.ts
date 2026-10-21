@@ -10,6 +10,6 @@ describe("dog slots", () => {
   it("sells the next slot at its price, and nothing once every slot is owned", () => {
     expect(nextDogSlot(data, 1)).toEqual({ price: 80_000, slot: 2 });
     expect(nextDogSlot(data, 2)).toEqual({ price: 180_000, slot: 3 });
-    expect(nextDogSlot(data, 3)).toBeNull();
+    expect(nextDogSlot(data, DOG_SLOTS.length)).toBeNull();
   });
 });

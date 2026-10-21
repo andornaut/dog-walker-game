@@ -37,7 +37,15 @@ import {
 } from "./home";
 
 const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
-const zoneName = (id: ZoneId) => WORLD.zones.find((zone) => zone.id === id)?.name;
+const zoneName = (id: ZoneId) => WORLD.zones.find((zone) => zone.id === id)?.name ?? "";
+const { logbook } = HOME_TEXT;
+const jesse = DOGS.koda.owner.name;
+// The logbook's last walk lines, for a walk that earned whole dollars.
+const lastEarned = (whole: number) => fillNames(logbook.lastEarned, { amount: `$${whole}` });
+const lastFired = (whole: number, zone: ZoneId) =>
+  fillNames(logbook.lastFired, { earned: lastEarned(whole), owner: jesse, zone: zoneName(zone) });
+const lastHeadedHome = (zone: string) =>
+  fillNames(logbook.lastHeadedHome, { earned: lastEarned(64), zone });
 
 const data = {
   debuffs: DEBUFFS,
@@ -242,8 +250,11 @@ describe("buy", () => {
 describe("dogNames", () => {
   it("joins names for a sentence", () => {
     expect(dogNames(data, [])).toBe("");
-    expect(dogNames(data, ["koda"])).toBe("Koda");
-    expect(dogNames(data, ["koda", "biscuit", "duchess"])).toBe("Koda, Biscuit and Duchess");
+    const { biscuit, duchess, koda } = DOGS;
+    expect(dogNames(data, ["koda"])).toBe(koda.name);
+    expect(dogNames(data, ["koda", "biscuit", "duchess"])).toBe(
+      `${koda.name}, ${biscuit.name} and ${duchess.name}`,
+    );
   });
 });
 
@@ -261,23 +272,23 @@ describe("lastWalkLine", () => {
     const cases: readonly { changes: Partial<LastWalk>; expected: string; name: string }[] = [
       {
         changes: {},
-        expected: `+$64. Headed home from ${zoneName("park")}.`,
+        expected: lastHeadedHome(zoneName("park")),
         name: "names the zone the walk headed home from",
       },
       {
         changes: { firings: [{ dog: "koda", zone: 1 }], outcome: "noDogs" },
-        expected: `+$64. Jesse fired you on ${zoneName("street")}.`,
+        expected: lastFired(64, "street"),
         name: "names the owner who fired you and where",
       },
       {
         changes: { route: ["street"] },
-        expected: `+$64. Headed home from ${WORLD.name}.`,
+        expected: lastHeadedHome(WORLD.name),
         name: "names a zone the walk never picked as the world",
       },
       {
         changes: { outcome: "finished", zonesFinished: 4 },
-        expected: fillNames(HOME_TEXT.logbook.lastFinished, {
-          earned: "+$64.",
+        expected: fillNames(logbook.lastFinished, {
+          earned: lastEarned(64),
           world: WORLD.name,
           zones: "4",
         }),
@@ -299,10 +310,10 @@ describe("logbookOf", () => {
     expect(logbookOf(data, veteranSave().stats)).toEqual({
       best: "$90",
       bestNote: fillNames(HOME_TEXT.logbook.bestNote, {
-        dogs: "Koda and Penny",
+        dogs: `${DOGS.koda.name} and ${DOGS.penny.name}`,
         zones: fillNames(HOME_TEXT.logbook.zoneMany, { count: "4" }),
       }),
-      last: `+$25. Jesse fired you on ${zoneName("park")}.`,
+      last: lastFired(25, "park"),
       totals: fillNames(HOME_TEXT.logbook.totals, { dogs: "7", fired: "1", walks: "5" }),
     });
   });
@@ -310,8 +321,8 @@ describe("logbookOf", () => {
 
 describe("partingSpeech", () => {
   it("names the owner, then one of their parting lines", () => {
-    expect(partingSpeech(data, () => 0, "koda")).toBe(`Jesse: ${QUIPS.koda.parting[0]}`);
-    expect(partingSpeech(data, () => 0.99, "koda")).toBe(`Jesse: ${QUIPS.koda.parting[1]}`);
+    expect(partingSpeech(data, () => 0, "koda")).toBe(`${jesse}: ${QUIPS.koda.parting[0]}`);
+    expect(partingSpeech(data, () => 0.99, "koda")).toBe(`${jesse}: ${QUIPS.koda.parting[1]}`);
   });
 });
 

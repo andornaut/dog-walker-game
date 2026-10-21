@@ -5,19 +5,26 @@ import type { DogId } from "../data/types";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { fillNames } from "../text/lines";
 import { causeLabel, firedByText } from "./causes";
 import { cardFor, firesText } from "./choices";
 import { resolveEffects } from "./effects";
 
 const data = { ...gameData, tuning: TEST_TUNING };
-// Skunk's "Hold your nose", its hearts option, and what it costs each owner.
-const HOLD_YOUR_NOSE = 2;
-const NOSE_EFFECT = (() => {
+// Skunk's hearts option, its name, and what it costs each owner.
+const SKUNK_OPTIONS = (() => {
   const { resolution } = gameData.encounters.skunk;
-  const option = resolution.kind === "card" ? resolution.options[HOLD_YOUR_NOSE] : undefined;
-  const effect = option?.effects.find((candidate) => candidate.kind === "hearts");
+  return resolution.kind === "card" ? resolution.options : [];
+})();
+const HOLD_YOUR_NOSE = SKUNK_OPTIONS.findIndex(({ effects }) =>
+  effects.some((effect) => effect.kind === "hearts"),
+);
+const NOSE_NAME = SKUNK_OPTIONS[HOLD_YOUR_NOSE]?.name;
+const NOSE_EFFECT = (() => {
+  const effect = SKUNK_OPTIONS[HOLD_YOUR_NOSE]?.effects.find(({ kind }) => kind === "hearts");
   return effect?.kind === "hearts" ? -effect.amount : 0;
 })();
+const owner = (dog: DogId) => gameData.dogs[dog].owner.name;
 
 const skunk = (affected: DogId[]): CardSource => ({
   affected,
@@ -39,11 +46,11 @@ describe("an option that would fire an owner", () => {
   });
 
   it("says who fires you in plain words, not as a meter held at 0", () => {
-    const option = cardFor(data, testState({ koda: 1 }), skunk(["koda"])).options.find(
+    const option = cardFor(data, testState({ koda: NOSE_EFFECT }), skunk(["koda"])).options.find(
       ({ index }) => index === HOLD_YOUR_NOSE,
     );
     expect(option?.breakdown.map(({ dog, name, text }) => [dog, text, name])).toEqual([
-      ["koda", "−1♥", "Hold your nose"],
+      ["koda", `−${NOSE_EFFECT}♥`, NOSE_NAME],
       ["koda", "", firedByText(data, "koda")],
     ]);
   });
@@ -51,12 +58,13 @@ describe("an option that would fire an owner", () => {
 
 describe("firesText", () => {
   it("names each fatal option", () => {
-    for (const { dogs, text } of [
-      { dogs: ["koda"], text: "Fires Jesse" },
-      { dogs: ["koda", "duchess"], text: "Fires Jesse and Rosa" },
-      { dogs: ["koda", "duchess", "biscuit"], text: "Fires Jesse, Rosa and Sam" },
+    const [koda, duchess, biscuit] = [owner("koda"), owner("duchess"), owner("biscuit")];
+    for (const { dogs, owners } of [
+      { dogs: ["koda"], owners: koda },
+      { dogs: ["koda", "duchess"], owners: `${koda} and ${duchess}` },
+      { dogs: ["koda", "duchess", "biscuit"], owners: `${koda}, ${duchess} and ${biscuit}` },
     ] as const) {
-      expect(firesText(data, dogs)).toBe(text);
+      expect(firesText(data, dogs)).toBe(fillNames(gameData.runText.card.fires, { owners }));
     }
   });
 });

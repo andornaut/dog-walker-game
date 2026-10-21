@@ -219,9 +219,8 @@ describe("a mover's moves and hazards", () => {
       })),
     ),
   );
-  const placed = new Set<string>();
-
   it("moves ahead of the pack and is read as it hits, every way it moves, at both ends of its draws", () => {
+    const placed = new Set<string>();
     for (const mover of cases) {
       const run = testState(
         { biscuit: 3, duchess: 3, snowball: 3 },
@@ -351,10 +350,7 @@ describe("a mover's moves and hazards", () => {
         }
       }
     }
-  });
-
-  // Every way of moving has somewhere the planner can put it.
-  it("places every way of moving somewhere", () => {
+    // Every way of moving has somewhere the planner can put it.
     expect([...placed].sort()).toEqual(
       [...new Set(entries.map(({ movement }) => JSON.stringify(movement)))].sort(),
     );
