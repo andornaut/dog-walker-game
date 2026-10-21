@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { type DetailCard, dogDetail, walkerDetail } from "../home/detail";
-import { purchasePrice } from "../home/home";
+import { dollarText, purchasePrice } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
 import { cents } from "../rules/units";
@@ -17,6 +17,7 @@ import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/
 
 const OWNED: Owned = { dogSlots: 1, dogs: [], gear: [], walkers: [] };
 const DOGS = Object.keys(gameData.dogs) as DogId[];
+const GEAR = Object.keys(gameData.shopGear) as GearId[];
 const SHOP_DOGS = DOGS.filter((dog) => gameData.dogs[dog].unlock === "shop");
 const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
 
@@ -111,6 +112,13 @@ describe("the text of an item not owned fits", () => {
   it.each(WALKERS)("sets %s's name on its goal plate inside its tile", (walker) => {
     const { name } = gameData.walkers[walker];
     expect(bodyTextWidth(2, name) + 2 * PLATE_PAD).toBeLessThanOrEqual(walkerTiles.cellWidth);
+  });
+
+  it.each(GEAR)("sets %s's price on its plate inside its Pocket tile", (gear) => {
+    const { cells, tileInset } = HOME_LAYOUT.pocket;
+    const cost = purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0);
+    const plate = bodyTextWidth(2, dollarText(cost)) + 2 * PLATE_PAD;
+    expect(plate).toBeLessThanOrEqual(cells.cellWidth - 2 * tileInset);
   });
 
   it.each(forSale)("sets $dog's status on one line at 2x when $state", ({ bank, dog }) => {

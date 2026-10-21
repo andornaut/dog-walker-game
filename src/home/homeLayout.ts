@@ -35,6 +35,8 @@ const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
 const WALKER_TILES = { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 } as const;
 const WALKER_BOX = { dx: 3, dy: 4, size: 34 } as const;
 const WALKER_ORIGIN_X = 14;
+// The Pocket's gear cells: one per gear item on one row, across the walker row's span.
+const POCKET_TILES = { cellHeight: 44, cellWidth: 60, columns: 5, gapX: GAP, gapY: 0 } as const;
 const WALKER_TEXT_Y = 28;
 
 // The sections stack from the bar down to Start walk, each SECTION_GAP apart; the Pocket takes
@@ -159,13 +161,13 @@ export const HOME_LAYOUT = {
     x: 234,
     y: 86,
   },
-  // The Pocket's row of gear cells under its section's band, in the walker row's columns, each
+  // The Pocket's row of gear cells under its section's band, across the walker row's span, each
   // drawing its tile 1px inside. In a tile: the icon box and the art in it, the padlock over its
   // top-left corner, and the price plate's caps, centred.
   pocket: {
-    box: { dx: 21, dy: 3, size: 34 },
-    cells: WALKER_TILES,
-    icon: { dx: 22, dy: 4 },
+    box: { dx: 12, dy: 3, size: 34 },
+    cells: POCKET_TILES,
+    icon: { dx: 13, dy: 4 },
     lock: { dx: -2, dy: -3 },
     origin: { x: WALKER_ORIGIN_X, y: POCKET_SECTION.y + POCKET_CELLS_OFFSET },
     priceY: 28,

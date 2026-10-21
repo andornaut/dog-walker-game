@@ -6,7 +6,7 @@ import type { DogId, GearId, WalkerId } from "../data/types";
 import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
 import { WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { fillNames, wrapWords } from "../lib/lines";
-import { insetRect } from "../lib/rect";
+import { insetRect, type Rect } from "../lib/rect";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -171,12 +171,13 @@ describe("the Pocket's tiles", () => {
   const gear = Object.keys(gameData.shopGear).length;
   const tiles = gridRects(cells, gear, origin).map((cell) => insetRect(tileInset, cell));
 
-  it("line up with the walker tiles' columns", () => {
+  it("span the walker tiles' row", () => {
+    const span = (rects: readonly Rect[]) => [
+      rects[0]?.x,
+      (rects.at(-1)?.x ?? 0) + (rects.at(-1)?.width ?? 0),
+    ];
     const walkers = gridRects(walkerTiles, walkerTiles.columns, walkerOrigin);
-    const columns = gridRects(cells, cells.columns, origin);
-    expect(columns.map((cell) => [cell.x, cell.width])).toEqual(
-      walkers.map((cell) => [cell.x, cell.width]),
-    );
+    expect(span(gridRects(cells, cells.columns, origin))).toEqual(span(walkers));
   });
 
   it("hold every gear on one row inside the stitch", () => {
