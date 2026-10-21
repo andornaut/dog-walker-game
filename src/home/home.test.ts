@@ -276,7 +276,7 @@ describe("logbookOf", () => {
         zones: fillNames(HOME_TEXT.logbook.zoneMany, { count: "4" }),
       }),
       last: `+$25. Jesse fired you on ${zoneName("park")}.`,
-      totals: "Walks 5   Dogs walked 7   Fired 1",
+      totals: fillNames(HOME_TEXT.logbook.totals, { dogs: "7", fired: "1", walks: "5" }),
     });
   });
 });
@@ -293,7 +293,7 @@ describe("dogInfo and gearInfo", () => {
     [
       "describes an owned dog in words, with its size, hearts and pay",
       () => dogInfo(data, owned, cents(0), "koda"),
-      new RegExp(`^${DOGS.koda.name}: ${DOGS.koda.size}, \\d+ ♥, \\$\\d+ a neighborhood\\.$`),
+      new RegExp(`^${DOGS.koda.name}: ${DOGS.koda.size}, \\d+♥, \\$\\d+ a neighborhood\\.$`),
     ],
     [
       "adds a locked dog's price and how much more the bank needs",

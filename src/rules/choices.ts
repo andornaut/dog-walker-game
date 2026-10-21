@@ -26,7 +26,7 @@ import {
 } from "./causes";
 import { debuffLasting } from "./durations";
 import { type EffectContext, moneyAmount, moneyCost, resolveEffects, targetDogs } from "./effects";
-import { cardEffectText, type CardTextContext, effectText, sentenceList } from "./effectText";
+import { cardEffectText, type CardTextContext, sentenceList } from "./effectText";
 import { currentZoneId, forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { encounterLook } from "./skins";
@@ -286,7 +286,7 @@ export function forkCard(data: CardData, state: RunState, source: ForkSource): C
         upgrade,
         zone: id,
       },
-      text: `${data.upgrades[upgrade].name}: ${effectText(data, effects)}`,
+      text: `${data.upgrades[upgrade].name}: ${data.upgrades[upgrade].effect}`,
     };
   });
   return { affected: [], options, skip: false, source, title: data.runText.card.forkTitle };

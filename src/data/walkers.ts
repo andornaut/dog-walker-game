@@ -46,6 +46,7 @@ export const WALKER_PERKS = {
 export const WALKERS = {
   ada: {
     agility: 1.1,
+    greeting: "Tidy lane work. May I walk with you?",
     name: "Ada",
     perk: "calmVoice",
     portraitKey: "face-walker-ada",
@@ -55,6 +56,7 @@ export const WALKERS = {
   },
   ben: {
     agility: 0.9,
+    greeting: "Nice pack! Mind if I tag along?",
     name: "Ben",
     perk: "treatFinder",
     portraitKey: "face-walker-ben",
@@ -64,6 +66,7 @@ export const WALKERS = {
   },
   casey: {
     agility: 1,
+    greeting: "Nice pack! Mind if I walk with you sometime?",
     name: "Casey",
     perk: "kindWords",
     portraitKey: "face-walker-casey",
@@ -72,6 +75,7 @@ export const WALKERS = {
   },
   trista: {
     agility: 1.2,
+    greeting: "Great pace! Race you to the next one?",
     name: "Trista",
     perk: "longReach",
     portraitKey: "face-walker-trista",

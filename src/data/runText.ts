@@ -15,8 +15,6 @@ export const RUN_TEXT = {
     skipEffect: "Hall pass: walk on by, no cost.",
     skipHeld: "Walk on by: nothing happens.",
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Whole walk" },
-    upgradeTitle: "Pick an upgrade",
-    walkerGreeting: "Nice pack! Mind if I walk with you sometime?",
   },
   dodge: "Dodge!",
   fired: "FIRED!",
@@ -31,7 +29,7 @@ export const RUN_TEXT = {
     title: "Head home?",
     zonesLeft: "Neighborhoods left: {count}",
   },
-  lowHearts: "1♥ left!",
+  lowHearts: "{owner} has 1♥ left!",
   newWalker: {
     button: "Welcome!",
     info: "{agility} · {perk}",

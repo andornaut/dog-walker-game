@@ -311,10 +311,12 @@ export interface MinorObstacle {
 // the rest of the run.
 export type UpgradeDuration = "nextZone" | "now" | "run";
 
+// effect is what the upgrade does in a line, as a fork's path card shows it.
 export interface Upgrade {
   // Key of the card's illustration in the art manifest's images.
   readonly art: string;
   readonly duration: UpgradeDuration;
+  readonly effect: string;
   readonly effects: NonEmptyEffects;
   readonly kind: "boost" | "tradeOff";
   readonly name: string;
@@ -348,8 +350,11 @@ export interface WalkerPerk {
 // A walker the player can pick, walking with its agility and the effects of its perk. agility
 // multiplies the pack's lane-change speed. spriteKey and portraitKey are keys into the art
 // manifest.
+// greeting is what the walker says as they join, the first time a walk finishes the zone that
+// unlocks them.
 export type Walker = WalkerUnlock & {
   readonly agility: number;
+  readonly greeting: string;
   readonly name: string;
   readonly perk: WalkerPerkId;
   readonly portraitKey: string;
@@ -562,7 +567,7 @@ export interface HomeText {
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data
 // does not name, the Skip card, and the cost plaque's words. fired is the firing plate's
 // word, homeQuestion is what the top bar's Home button asks, with its two answers, and
-// lowHearts is the chip over a doghouse down to its last heart. A {name} in a line is filled
+// lowHearts is the chip over a doghouse down to its last heart, naming its owner. A {name} in a line is filled
 // by code, and each line may use only the names src/hud/runText.ts lists for it. firedBy
 // names an owner who fires you, and card.fires flags an option that would fire owners.
 export interface RunText {
@@ -581,10 +586,6 @@ export interface RunText {
     readonly skipHeld: string;
     // An upgrade card's plaque, by how long it lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
-    readonly upgradeTitle: string;
-    // What a newly unlocked walker says as they join, the first time a walk finishes the zone
-    // that unlocks them.
-    readonly walkerGreeting: string;
   };
   // Over a small dog that dodged a hit.
   readonly dodge: string;
@@ -733,7 +734,8 @@ export interface MenuText {
 // the player picking their dog on the home screen.
 export type QuipMoment = "fired" | "happier" | "parting" | "upset";
 // One owner's lines, two per moment.
-export type Quips = Readonly<Record<QuipMoment, readonly [string, string]>>;
+// Two or more lines per moment, one drawn at random.
+export type Quips = Readonly<Record<QuipMoment, readonly [string, string, ...string[]]>>;
 
 // What a first-time hint waits for: an encounter, a debuff, or another event happening for
 // the first time.

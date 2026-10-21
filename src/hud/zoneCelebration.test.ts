@@ -105,7 +105,7 @@ describe("celebrationText", () => {
     const { agility, name, perk } = gameData.walkers[walker];
     expect(shown).toMatchObject({
       button: text.newWalker.button,
-      greeting: text.card.walkerGreeting,
+      greeting: gameData.walkers[walker].greeting,
       subtitle: text.newWalker.subtitle.replace("{walker}", name),
       title: text.newWalker.title,
     });

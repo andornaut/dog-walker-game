@@ -49,7 +49,7 @@ describe("dogDetail", () => {
     expect(card.lines).toContain(
       fillNames(data.homeText.detail.dogTotals, { fired: "0", walks: "0", zones: "0" }),
     );
-    expect(card.status).toBe("Price $600, locked");
+    expect(card.status).toBe(fillNames(data.homeText.detail.priceLocked, { price: "$600" }));
     expect(dogDetail(data, owned, dollars(600), noStats, "archie").status).toBe(
       "Price $600, tap to buy",
     );
@@ -77,7 +77,9 @@ describe("gearDetail", () => {
 
   it("shows a locked item's price", () => {
     const card = gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "poopBags");
-    expect(card.status).toMatch(/^Price \$[\d,]+, locked$/);
+    const price = data.homeText.detail.priceLocked.split("{price}");
+    expect(card.status.startsWith(price[0] ?? "")).toBe(true);
+    expect(card.status.endsWith(price[1] ?? "")).toBe(true);
   });
 });
 

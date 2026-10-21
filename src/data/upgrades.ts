@@ -8,6 +8,7 @@ export const UPGRADES = {
   bellyRubs: {
     art: "card-belly-rubs",
     duration: "now",
+    effect: "+1♥ for every owner",
     effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
     kind: "boost",
     name: "Belly rubs",
@@ -15,6 +16,7 @@ export const UPGRADES = {
   bigTipper: {
     art: "card-big-tipper",
     duration: "nextZone",
+    effect: "+$1 per tip next neighborhood",
     effects: [
       {
         by: "bigTipperTipBonus",
@@ -30,6 +32,7 @@ export const UPGRADES = {
   goodLeash: {
     art: "card-good-leash",
     duration: "run",
+    effect: "No squirrel cards or pulls all walk",
     effects: [
       { duration: "run", encounter: "squirrel", kind: "immune" },
       {
@@ -46,6 +49,7 @@ export const UPGRADES = {
   raincoats: {
     art: "card-raincoats",
     duration: "run",
+    effect: "No puddle cards all walk",
     effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
     kind: "boost",
     name: "Raincoats",
@@ -53,6 +57,7 @@ export const UPGRADES = {
   rushHour: {
     art: "card-rush-hour",
     duration: "nextZone",
+    effect: "Twice the tips and more obstacles next neighborhood",
     effects: [
       {
         by: "rushHourTips",
@@ -75,6 +80,7 @@ export const UPGRADES = {
   sweetTalker: {
     art: "card-sweet-talker",
     duration: "run",
+    effect: "The first card each neighborhood costs nothing",
     effects: [
       {
         by: "sweetTalkerFreeCards",

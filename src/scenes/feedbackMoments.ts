@@ -37,6 +37,7 @@ import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
+import { fillNames } from "../text/lines";
 import { addDisplayText } from "./displayText";
 import { drawFramedRect, drawRing } from "./draw";
 import { PALETTE } from "./palette";
@@ -599,7 +600,8 @@ export class HudFeedback {
     if (rect === undefined) {
       return;
     }
-    const text = addPixelText(this.scene, 2, 2, gameData.runText.lowHearts, {
+    const line = fillNames(gameData.runText.lowHearts, { owner: gameData.dogs[dog].owner.name });
+    const text = addPixelText(this.scene, 2, 2, line, {
       color: PALETTE.darkRed,
       scale: 2,
     });

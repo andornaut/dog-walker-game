@@ -119,7 +119,7 @@ export function celebrationText(
   const info = lineParts(words.info, named);
   return {
     button: words.button,
-    greeting: text.card.walkerGreeting,
+    greeting: data.walkers[celebration.walker].greeting,
     info,
     kind: "newWalker",
     subtitle: fillLine(FIELDS.newWalker, words, "subtitle", { walker: name }),
