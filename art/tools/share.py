@@ -46,7 +46,7 @@ VIEW_X = 152
 VIEW_W = W - 1 - VIEW_X
 BAND_TOP = bd.BASE - 46    # the first backdrop row shown, 46 rows over the far side's ground row
 BAND_ROWS = bd.H - BAND_TOP
-STREET = next(z for z, zone in sn.ZONES.items() if zone["art"] == "woof-way")   # Elm Avenue's zone id
+STREET = next(z for z, zone in sn.ZONES.items() if zone["art"] == "distillery-district")   # Elm Avenue's road
 # The pack's formation, as src/layout/packFormation.ts: each dog's (side, distance ahead of the
 # feet), the dogs in formation order. One dog leads; two walk side by side; three walk in a
 # triangle, the lead's row keyed by the three sizes and three bigs' side dogs closer in.

@@ -771,7 +771,7 @@ def end():
         strip.fill(x + 1, y - 1, 1, 1, "rust")
     cv.paste(strip.img, 0, END_STREET)
     # the brick road home, its top rows under the button
-    road = sn.TILES["homeStretch"]
+    road = sn.TILES["yongeStreet"]
     cv.img.paste(road, (0, END_STREET + 150))
     cv.img.paste(road, (280, END_STREET + 150))
     return cv

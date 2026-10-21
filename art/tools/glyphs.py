@@ -236,6 +236,98 @@ def paws_promenade():
     return g
 
 
+def cabbagetown():
+    """A bay-and-gable house: a steep slate gable trimmed in white over brick, a bay of lit windows."""
+    g = Zone()
+    g.tri((1.5, 7.5), (8, 1), (14.5, 7.5), "dslate")
+    for k in range(6):
+        g.p(3 + k, 6 - k, "white")
+        g.p(12 - k, 6 - k, "white")
+    g.rect(2, 7, 12, 8, "brick")
+    g.rect(12, 7, 2, 8, "dbrick")
+    g.rect(2, 7, 6, 8, "clay")
+    for y in (8, 12):
+        g.rect(3, y, 4, 2, "gold")
+    g.rect(10, 10, 2, 5, "forest")
+    g.p(8, 4, "cyan")
+    return g
+
+
+def high_park():
+    """A dark pine on the park's grass, a cherry in blossom behind it."""
+    g = Zone()
+    g.ell(4, 6, 3.5, 3.5, "pink", "mauve")
+    g.p(3, 5, "white")
+    g.rect(9, 12, 2, 3, "bark")
+    for top, half in ((1, 2), (4, 4), (7, 5)):
+        g.tri((10, top), (10 - half, top + 5), (10 + half, top + 5), "pine")
+        g.tri((10, top), (10 - half, top + 5), (10, top + 5), "canopy")
+    g.rect(1, 13, 14, 2, "pine")
+    g.rect(1, 13, 14, 1, "canopy")
+    return g
+
+
+def distillery_district():
+    """A brick warehouse with an arched lit window, its chimney stack beside it."""
+    g = Zone()
+    g.rect(11, 1, 3, 6, "brick")
+    g.rect(13, 1, 1, 6, "dbrick")
+    g.rect(1, 6, 14, 9, "brick")
+    g.rect(13, 6, 2, 9, "dbrick")
+    g.rect(1, 6, 14, 1, "stone")
+    for x in (3, 8):
+        g.rect(x, 9, 3, 4, "gold")
+        g.p(x + 1, 8, "gold")
+    return g
+
+
+def kensington_market():
+    """A painted house turned shop: a turquoise wall under a violet gable, a striped awning."""
+    g = Zone()
+    g.tri((1.5, 6.5), (8, 1), (14.5, 6.5), "violet")
+    g.rect(2, 6, 12, 9, "turquoise")
+    g.rect(12, 6, 2, 9, "dturq")
+    for x in range(2, 14, 4):
+        g.rect(x, 9, 2, 2, "ttc")
+        g.rect(x + 2, 9, 2, 2, "white")
+    g.rect(3, 12, 5, 3, "cyan")
+    g.rect(10, 12, 2, 3, "dbrown")
+    g.rect(6, 7, 4, 1, "white")
+    return g
+
+
+def the_beaches():
+    """The lifeguard station: a white tower under a red roof, over the lake."""
+    g = Zone()
+    g.tri((3.5, 6.5), (8, 2), (12.5, 6.5), "ttc")
+    g.rect(4, 6, 8, 5, "white")
+    g.rect(10, 6, 2, 5, "lgrey")
+    g.rect(6, 7, 3, 2, "dlake")
+    g.rect(8, 0, 1, 2, "coal")
+    g.rect(1, 11, 14, 4, "lake")
+    g.rect(1, 11, 14, 1, "foam")
+    g.rect(2, 13, 3, 1, "shallow")
+    g.rect(9, 14, 4, 1, "shallow")
+    return g
+
+
+def yonge_street():
+    """The CN Tower over downtown blocks."""
+    g = Zone()
+    g.rect(7, 1, 1, 3, "grey")
+    g.rect(6, 4, 3, 2, "lgrey")
+    g.rect(6, 5, 3, 1, "dlake")
+    g.rect(7, 6, 2, 7, "lgrey")
+    g.rect(8, 6, 1, 7, "grey")
+    g.rect(1, 9, 5, 6, "ash")
+    g.rect(10, 8, 5, 7, "lake")
+    for y in (10, 12):
+        g.rect(2, y, 3, 1, "haze")
+        g.rect(11, y - 1, 3, 1, "foam")
+    g.rect(1, 14, 14, 1, "ttc")
+    return g
+
+
 # ---------- dog statuses, on the doghouse's cream heart board beside icon-stinky ----------
 # Like icon-stinky, each reads on cream by its outline (navy, blue, dbrown and plum hold 5.8:1
 # or more there) and differs from the others by shape: a paw print, drops, stink lines.
@@ -830,6 +922,12 @@ IMAGES = {
     "icon-zone-sniff-street-shops": sniff_street_shops,
     "icon-zone-paws-promenade": paws_promenade,
     "icon-zone-the-long-way-home": the_long_way_home,
+    "icon-zone-cabbagetown": cabbagetown,
+    "icon-zone-high-park": high_park,
+    "icon-zone-distillery-district": distillery_district,
+    "icon-zone-kensington-market": kensington_market,
+    "icon-zone-the-beaches": the_beaches,
+    "icon-zone-yonge-street": yonge_street,
     "icon-muddy": muddy,
     "icon-soaked": soaked,
     "icon-zoomies": zoomies,

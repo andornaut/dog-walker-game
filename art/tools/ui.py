@@ -1302,6 +1302,8 @@ def owner_tab():
 ZONE_COLOURS = {
     "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "pink", "the-long-way-home": "skin2",
     "snooze-crescent": "grey", "paws-promenade": "cream",
+    "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "pink",
+    "the-beaches": "cream", "yonge-street": "skin2",
 }
 # One ramp step up: the inverse of DARKER over Endesga 32 and the neutral greys, for rims that must
 # lighten to hold 3:1 on ink.

@@ -231,7 +231,7 @@ def skunk_rinse():
 
 def skunk_ignore():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.put("skunk", "idle", 18, 44)
     a.skunk_stink(30, 6, 2)
     a.put("dog-koda", "walk", 54, 40, 2)
@@ -242,7 +242,7 @@ def skunk_ignore():
 # Chase, Snatch and Social take the zone's ground and the road sprite in the base kind's place, so
 # skin_cards_animals.py draws each encounter skin's cards from these.
 
-def squirrel_hold(zone="park", key="squirrel"):
+def squirrel_hold(zone="highPark", key="squirrel"):
     a = Art()
     a.ground(zone)
     a.put(key, "idle", 60, 37)
@@ -252,7 +252,7 @@ def squirrel_hold(zone="park", key="squirrel"):
     return a
 
 
-def squirrel_chase(zone="park", key="squirrel"):
+def squirrel_chase(zone="highPark", key="squirrel"):
     a = Art()
     a.ground(zone)
     a.put(key, "run", 58, 37, 1)
@@ -269,7 +269,7 @@ def small_puddle(f=0):
 
 def puddle_through():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.paste(small_puddle(), 22, 30)
     a.put("dog-duchess", "react", 38, 44, shadow=False)
     a.drops([(26, 26), (30, 22), (48, 24), (52, 28), (44, 20)])
@@ -278,7 +278,7 @@ def puddle_through():
 
 def puddle_towel():
     a = Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     a.put("dog-duchess", "walk", 37, 48)
     a.fill(26, 26, 22, 9, "pink")
     for x in range(26, 48, 4):
@@ -287,7 +287,7 @@ def puddle_towel():
     return a
 
 
-def other_dog_sniff(zone="park", key="other-dog"):
+def other_dog_sniff(zone="highPark", key="other-dog"):
     a = Art()
     a.ground(zone)
     a.put(key, "walk", 38, 36)
@@ -296,7 +296,7 @@ def other_dog_sniff(zone="park", key="other-dog"):
     return a
 
 
-def other_dog_pull_away(zone="park", key="other-dog"):
+def other_dog_pull_away(zone="highPark", key="other-dog"):
     a = Art()
     a.ground(zone)
     a.put(key, "walk", 56, 36)
@@ -307,7 +307,7 @@ def other_dog_pull_away(zone="park", key="other-dog"):
     return a
 
 
-def thief_chase(zone="street", key="thief"):
+def thief_chase(zone="distilleryDistrict", key="thief"):
     a = Art()
     a.ground(zone)
     a.put(key, "flee", 54, 59, 1)
@@ -317,7 +317,7 @@ def thief_chase(zone="street", key="thief"):
     return a
 
 
-def thief_let_go(zone="street", key="thief"):
+def thief_let_go(zone="distilleryDistrict", key="thief"):
     a = Art()
     a.ground(zone)
     a.put(key, "walk", 52, 58)
@@ -326,7 +326,7 @@ def thief_let_go(zone="street", key="thief"):
     return a
 
 
-def thief_let_them_run(zone="street", key="thief"):
+def thief_let_them_run(zone="distilleryDistrict", key="thief"):
     a = Art()
     a.ground(zone)
     a.put(key, "flee", 54, 59, 1)
@@ -355,7 +355,7 @@ def honk(a, x, y):
 def goose_back_off():
     """Back off slowly: the goose honking at the dog as it backs away, the clock running."""
     a = Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     a.put("goose", "idle", 54, 40, 1, flip=True)
     honk(a, 38, 15)
     c = a.put("dog-koda", "pull", 22, 56, flip=True)
@@ -367,7 +367,7 @@ def goose_back_off():
 def goose_honk_back():
     """Honk back: the dog barking at the goose honking back, hearts lost (two for a chaser)."""
     a = Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     a.put("goose", "idle", 56, 38, 1, flip=True)
     honk(a, 40, 13)
     c = a.put("dog-koda", "react", 24, 57)
@@ -381,7 +381,7 @@ def goose_honk_back():
 
 def wallet_keep():
     a = Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     a.paste(sn.frame("lost-wallet", "idle", 1), 12, 24)
     a.coins([(28, 30), (34, 22), (40, 32)])
     a.face("face-owner-zippy", "upset", 41, 12)
@@ -411,7 +411,7 @@ def clock(a, x, y):
 
 def mail_hold():
     a = Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     a.put("mail-carrier", "walk", 56, 58)
     c = a.put("dog-koda", "react", 26, 50)
     a.lead(26, c, 14)
@@ -421,7 +421,7 @@ def mail_hold():
 
 def mail_wait():
     a = Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     a.put("mail-carrier", "walk", 56, 58, 2)
     c = a.put("dog-koda", "idle", 26, 54)
     a.lead(26, c, 24)
@@ -535,7 +535,7 @@ def belly_rubs():
 
 def good_leash():
     a = Art()
-    a.ground("park")
+    a.ground("highPark")
     a.put("squirrel", "idle", 60, 37)
     c = a.put("dog-koda", "walk", 30, 56, 1)
     a.lead(30, c, 24, 2)
@@ -548,7 +548,7 @@ def good_leash():
 
 def big_tipper():
     a = Art()
-    a.ground("shops")
+    a.ground("kensingtonMarket")
     for k, (x, y) in enumerate(((8, 38), (14, 34), (20, 38), (11, 30), (17, 26), (26, 36), (23, 30))):
         a.paste(sn.frame("tip", "idle", k), x, y)
     a.paste(sn.frame("tip", "idle"), 44, 26)
@@ -559,7 +559,7 @@ def big_tipper():
 
 def rush_hour():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.paste(small_puddle(), 2, 38)
     a.put("skunk", "idle", 59, 55)
     a.put("squirrel", "idle", 36, 52)
@@ -570,7 +570,7 @@ def rush_hour():
 
 def raincoats():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.paste(small_puddle(1), 22, 36)
     a.put("dog-duchess", "walk", 37, 46, shadow=False)
     a.fill(31, 34, 13, 8, "amber")
@@ -597,7 +597,7 @@ def sweet_talker():
 
 def skip():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.put("skunk", "idle", 16, 54)
     a.put("dog-biscuit", "walk", 46, 52, 2)
     disc(a, 58, 13, 7, "green", "dgreen")
@@ -904,6 +904,161 @@ def paws_promenade_view():
     return a
 
 
+# ---------- the Toronto neighborhoods' path cards, after their backdrops ----------
+
+def cabbagetown_view():
+    a = ZoneView("cabbagetown", flecked("grey", "slate", 53), tufted("dgreen"), "white", (2, 6), curb="stone",
+                 lawn=tufted("dgreen"))
+    bd.bands(a, 0, FAR_Y, ("lilac", "pink", "peach", "gold"), w=AW)
+    for dy in range(-4, 5):
+        for dx in range(-4, 5):
+            if dx * dx + dy * dy <= 16 and (dx + 2) ** 2 + (dy - 1) ** 2 > 10:
+                a.fill(10 + dx, 5 + dy, 1, 1, "cream")
+    for x, y in ((24, 2), (40, 4), (56, 1), (70, 6)):
+        a.fill(x, y, 1, 1, "white")
+    for x in (14, 61):
+        bd.tree(a, x, 10, "canopy", "pine", r=5, base=FAR_Y, girth=2)
+    for x, w, wall_c, roof, curtain, top in ((-21, 28, "brick", "shale", None, 3), (23, 30, "cream", "slate", "gold", 2),
+                                            (69, 28, "brick", "dslate", "gold", 3)):
+        bd.house(a, x, w, wall_c, roof, "forest", top=top, base=FAR_Y, roof_h=9, parts=MINI, curtains=curtain)
+        half = w / 2 + 3
+        for i in range(1, 9):
+            inset = round(i * half / 9)
+            left = x - 3 + (w // 2 + 3) - inset
+            a.fill(left, top + i, 1, 1, "white")
+            a.fill(left + 2 * inset - 1, top + i, 1, 1, "white")
+    a.street()
+    bd.iron_fence(a, FAR_Y - 3, 0, 32, h=5)
+    bd.iron_fence(a, FAR_Y - 3, 46, AW, h=5)
+    return a
+
+
+def high_park_view():
+    trail = flecked("tan", "brown", 13, "cream")
+    dark = tufted("pine")
+    a = ZoneView("high-park", trail, dark, "dbrown", (2, 5), curb=None, walk=None, lawn=dark)
+    a.sky("azure", "sky")
+    bd.cloud(a, 54, 5, 16, 3, 2)
+    a.treeline(15, ("fir", "pine"), 0, 2, 6)
+    a.fill(0, 15, AW, FAR_Y - 15, "pine")
+    bd.tree(a, 4, 9, "pink", "mauve", r=6, base=18, girth=2)
+    bd.tree(a, 71, 10, "canopy", "pine", r=5, base=18, girth=2)
+    for x in (11, 62):
+        a.fill(x, 1, 2, FAR_Y - 1, "bark")
+    a.fill(13, 2, 49, 17, "pine")
+    a.fill(13, 2, 49, 1, "canopy")
+    a.fill(13, 18, 49, 1, "fir")
+    bd.word(a, "HIGH", AW / 2, 3, "gold")
+    bd.word(a, "PARK", AW / 2, 10, "gold")
+    a.street()
+    for py in range(19, CROSS_Y):
+        half = 7 + (py - 13) // 2
+        for px in range(round(AW / 2) - half, round(AW / 2) + half):
+            a.fill(px, py, 1, 1, trail(px, py))
+    return a
+
+
+def distillery_view():
+    paving = flecked("brown", "brick", 19)
+    a = ZoneView("distillery-district", flecked("dslate", "slate", 31, "navy"), paving, "lgrey", (3, 4),
+                 curb="stone", walk="brown", lawn=paving, walk_fleck="brick", edge="stone")
+    a.sky("peach", "skin1")
+    a.fill(58, 0, 5, 10, "brick")
+    a.fill(61, 0, 2, 10, "dbrick")
+    for x, w, top, wall_c, trim in ((-6, 26, 5, "brick", "stone"), (20, 36, 1, "brick", "stone"),
+                                    (56, 26, 7, "driftwood", "dstone")):
+        bd.warehouse(a, x, w, top, FAR_Y, wall_c, trim)
+    a.fill(24, 2, 28, 7, "dbrick")
+    a.fill(24, 2, 28, 1, "coal")
+    bd.string_lights(a, 0, 20, 8, 2)
+    bd.string_lights(a, 56, AW, 9, 2)
+    a.street()
+    for x in (6, 64):
+        bd.barrel(a, x, FAR_Y)
+    return a
+
+
+def kensington_view():
+    paving = flecked("shale", "coal", 23)
+    a = ZoneView("kensington-market", flecked("pink", "peach", 41), paving, "white", (3, 6), curb="stone",
+                 walk="shale", lawn=paving, walk_fleck="coal", edge="mauve")
+    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "foam", "cyan", FAR_Y, w=AW)
+    for x, w, wall_c, roof, awn in ((-14, 28, "turquoise", "dslate", "ttc"), (14, 26, "lilac", "violet", "amber"),
+                                    (40, 26, "gold", "brick", "turquoise"), (66, 26, "lime", "dolive", "pink")):
+        for k in range(w // 2 + 2):
+            a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof)
+        a.fill(x, 7, w, FAR_Y - 7, wall_c)
+        a.fill(x + w - 2, 7, 2, FAR_Y - 7, bd.dk(wall_c))
+        a.fill(x + 3, 9, 4, 3, "cyan")
+        a.fill(x + w - 8, 9, 4, 3, "cyan")
+        for i in range(0, w - 2, 4):
+            a.fill(x + 1 + i, 14, 2, 2, awn)
+            a.fill(x + 3 + i, 14, 2, 2, "white")
+        a.fill(x + 3, 17, w - 10, 4, "cyan")
+    for x0 in (0, AW - 5):
+        a.fill(x0, 0, 5, FAR_Y, "coal")
+    bd.bunting(a, 5, 70, 4, 2, ("ttc", "gold", "turquoise", "lilac", "lime"))
+    a.street()
+    return a
+
+
+def beaches_view():
+    sand = flecked("skin1", "tan", 43)
+    a = ZoneView("the-beaches", boards, sand, "dbrown", (4, 9), curb=None, walk="skin1", lawn=sand, walk_fleck="tan")
+    a.sky("gold", "yellow")
+    bd.cloud(a, 6, 5, 16, 2, 4)
+    for py in range(8, 17):
+        for px in range(AW):
+            c = "dlake" if py < 10 else "lake" if py < 14 else "shallow"
+            if bd.hashed(px // 3, py, 9) and py % 2 == 0:
+                c = "foam"
+            a.fill(px, py, 1, 1, c)
+    a.fill(0, 17, AW, FAR_Y - 17, "skin1")
+    a.fill(0, 17, AW, 1, "foam")
+    a.fill(40, 10, 1, 4, "white")
+    a.fill(41, 11, 2, 3, "white")
+    a.fill(38, 14, 7, 1, "white")
+    # the lifeguard station, small at this distance: a white box under a red roof on stilts
+    a.fill(55, 15, 1, 5, "driftwood")
+    a.fill(63, 15, 1, 5, "driftwood")
+    a.fill(54, 9, 11, 6, "white")
+    a.fill(62, 9, 3, 6, "lgrey")
+    a.fill(57, 11, 4, 2, "dlake")
+    for k in range(3):
+        a.fill(53 + k, 8 - k, 13 - 2 * k, 1, "ttc")
+    a.fill(59, 3, 1, 3, "coal")
+    bd.umbrella(a, 16, FAR_Y, "ttc", "white")
+    a.street()
+    return a
+
+
+def yonge_view():
+    paving = flecked("lgrey", "grey", 67)
+    a = ZoneView("yonge-street", flecked("skin2", "clay", 41), paving, "white", (4, 8), curb="white", walk="lgrey",
+                 lawn=paving, edge="plum")
+    a.sky("haze", "white")
+    # the tower, small at this distance: a mast, the pod and a tapering shaft
+    a.fill(18, 0, 1, 4, "grey")
+    a.fill(16, 4, 5, 2, "lgrey")
+    a.fill(16, 5, 5, 1, "dlake")
+    a.fill(17, 6, 3, FAR_Y - 6, "lgrey")
+    a.fill(19, 6, 1, FAR_Y - 6, "grey")
+    for x, w, top, wall_c, glass in ((28, 14, 3, "lake", "foam"), (44, 12, 6, "ash", "haze"),
+                                     (58, 16, 2, "stone", "lake")):
+        bd.tower(a, x, w, top, FAR_Y, wall_c, glass)
+    for x, w, wall_c, board, awn in ((-4, 26, "lgrey", "ttc", "ttc"), (22, 28, "ash", "coal", "lake"),
+                                     (50, 28, "brick", "dlake", "white")):
+        a.fill(x, 10, w, FAR_Y - 10, wall_c)
+        a.fill(x + w - 2, 10, 2, FAR_Y - 10, bd.dk(wall_c))
+        a.fill(x + 2, 11, w - 4, 4, board)
+        for i in range(0, w - 4, 4):
+            a.fill(x + 2 + i, 15, 2, 2, awn)
+            a.fill(x + 4 + i, 15, 2, 2, "white")
+        a.fill(x + 3, 17, w - 8, 4, "cyan")
+    a.street()
+    return a
+
+
 ILLUSTRATIONS = {
     "card-skunk-grooming": skunk_grooming,
     "card-skunk-rinse": skunk_rinse,
@@ -936,6 +1091,12 @@ ILLUSTRATIONS = {
     "card-zone-the-long-way-home": long_way_home_view,
     "card-zone-snooze-crescent": snooze_crescent_view,
     "card-zone-paws-promenade": paws_promenade_view,
+    "card-zone-cabbagetown": cabbagetown_view,
+    "card-zone-high-park": high_park_view,
+    "card-zone-distillery-district": distillery_view,
+    "card-zone-kensington-market": kensington_view,
+    "card-zone-the-beaches": beaches_view,
+    "card-zone-yonge-street": yonge_view,
 }
 
 
