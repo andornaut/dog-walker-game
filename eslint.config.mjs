@@ -8,7 +8,7 @@ import ts from "typescript-eslint";
 import { plugins, sourceRules, toolingRules } from "./eslint.config.base.mjs";
 
 const SOURCE_FILES = ["src/**/*.ts"];
-const PHASER_FILES = ["src/main.ts", "src/scenes/**"];
+const PHASER_FILES = ["src/main.ts", "src/scenes/**", "src/**/phaser/**"];
 const TEST_FILES = ["src/**/*.test.ts"];
 
 // The import boundaries, one row each: the files outside `except` may not import what `forbid`
@@ -18,8 +18,9 @@ const BOUNDARIES = [
   {
     except: PHASER_FILES,
     forbid: {
-      group: ["phaser", "phaser/*", "**/scenes", "**/scenes/*"],
-      message: "Only src/scenes/ and src/main.ts may import Phaser or a scene.",
+      group: ["**/phaser", "**/phaser/*", "**/scenes", "**/scenes/*"],
+      message:
+        "Only src/main.ts, src/scenes/ and phaser/ folders may import Phaser, a scene or a phaser/ folder.",
     },
   },
   {
@@ -32,8 +33,22 @@ const BOUNDARIES = [
 ];
 
 // The bounded contexts: the folders of src/ each context's files may import, besides its own.
-// "folder/module" allows one module of a folder. The kind boundaries above govern src/testing/.
+// "folder/module" allows one module of a folder: each is an import that a later move removes,
+// by moving the module into a context or the importer out of one. The boundaries above govern
+// src/testing/.
 const CONTEXTS = {
+  assets: [
+    "data",
+    "layout/loadingScreen",
+    "layout/pixelShapes",
+    "lib",
+    "rules/assertNever",
+    "runner/statuses",
+    "scenes/palette",
+    "state/runState",
+    "tools/artManifest",
+    "tools/files",
+  ],
   lib: [],
 };
 

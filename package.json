@@ -19,7 +19,7 @@
     "lint": "prettier --check . && eslint --max-warnings 0 . && markdownlint-cli2",
     "format": "prettier --write . && eslint --fix .",
     "test": "vitest run",
-    "check:art": "vitest run src/assets/ src/scenes/artCoverage.test.ts src/atlas/ src/tools/artManifest.test.ts",
+    "check:art": "vitest run src/assets/ src/scenes/artCoverage.test.ts src/tools/artManifest.test.ts",
     "art:unused": "tsx src/assets/unusedArtCli.ts",
     "simulate": "tsx src/sim/cli.ts",
     "export:data": "tsx src/tools/dataExportCli.ts",

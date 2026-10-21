@@ -2,14 +2,14 @@ import { readFile } from "node:fs/promises";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import shippedManifest from "../../public/art/manifest.json";
-import { parseManifest } from "../assets/manifest";
+import shippedManifest from "../../../public/art/manifest.json";
+import { parseManifest } from "../manifest";
 import { type AtlasBuild, buildAtlases, decodePng } from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
 import { BASE_FRAME, parseAtlasManifest } from "./atlasManifest";
 import type { RgbaImage } from "./atlasPixels";
 
-const ART_DIR = new URL("../../public/art/", import.meta.url);
+const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
 
 const manifest = parseManifest(shippedManifest);
