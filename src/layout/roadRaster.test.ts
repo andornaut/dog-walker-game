@@ -24,12 +24,12 @@ import {
 } from "./roadRaster";
 import {
   crossesLine,
-  darkerGreen,
   dotColor,
   dottedBands,
   isLawn,
   mownAt,
   seamRow,
+  type Verge,
   vergeBase,
   VERGES,
   walkFrom,
@@ -71,87 +71,57 @@ const pixelAt = (out: Uint32Array, x: number, y: number) =>
 describe("the verge beside the road", () => {
   // The backdrop's bottom row, which the verge continues.
   const bandRow = itemAt(roadRaster(projection, { ...view, height: 1, y: BAND_BOTTOM_Y }).rows, 0);
-  const [GREEN, DARK_GREEN, FOREST] = [0x63c74d, 0x3e8948, 0x265c42];
-  const [GREY, LIGHT_GREY] = [0x8b9bb4, 0xc0cbdc];
-  const [BROWN, CREAM, TAN, WHITE] = [0xb86f50, 0xead4aa, 0xe4a672, 0xffffff];
-  const FLOWERS = [0xe43b44, 0xfee761, 0xffffff, 0xf77622];
-  const STRIP_MARK = -1;
-  const runsOf = (colors: number[]) => {
-    const result: [number, number, number][] = [];
-    colors.forEach((color, i) => {
-      const last = result.at(-1);
-      if (last !== undefined && last[2] === color) {
-        last[1] = view.x + i;
-      } else {
-        result.push([view.x + i, view.x + i, color]);
-      }
-    });
-    return result;
-  };
-  // The runs either side of the strip, given outward from the road's edge as [columns,
-  // colour], the last running to the screen's edge.
-  const mirrored = (outward: readonly [number, number][]): [number, number, number][] => {
-    const last = view.x + view.width - 1;
-    const left: [number, number, number][] = [];
-    const right: [number, number, number][] = [];
-    let leftEdge = view.x + bandRow.roadStart;
-    let rightEdge = view.x + bandRow.roadEnd - 1;
-    for (const [width, color] of outward) {
-      left.unshift([Math.max(view.x, leftEdge - width), leftEdge - 1, color]);
-      right.push([rightEdge + 1, Math.min(last, rightEdge + width), color]);
-      leftEdge -= width;
-      rightEdge += width;
+  const ZONES = Object.keys(VERGES) as ZoneId[];
+  const zoneWhere = (test: (verge: Verge) => boolean): ZoneId => {
+    const zone = ZONES.find((id) => test(VERGES[id]));
+    if (zone === undefined) {
+      throw new Error("No zone's verge fits");
     }
-    const strip: [number, number, number] = [
-      view.x + bandRow.roadStart,
-      view.x + bandRow.roadEnd - 1,
-      STRIP_MARK,
-    ];
-    return [...left, strip, ...right];
+    return zone;
   };
-  const baseRuns = (zone: ZoneId) =>
-    runsOf(
-      Array.from(bandRow.across, (across) =>
-        across < 0 ? STRIP_MARK : vergeBase(VERGES[zone], across, bandRow.scale),
-      ),
-    );
+  const MOWN = zoneWhere((verge) => verge.lawn === "mown");
+  const ROUGH = zoneWhere((verge) => verge.lawn === "rough");
+  const DOTTED = zoneWhere((verge) => dottedBands(verge).length > 0);
+  const lawnOf = (zone: ZoneId) => {
+    const colors = VERGES[zone].lawnColors;
+    if (colors === null) {
+      throw new Error(`${zone} has no lawn`);
+    }
+    const [base, marks, tufts] = colors;
+    return { base, marks, tufts };
+  };
+  // The colours outward from the road's edge on the right of the band's bottom row, each run
+  // once, without its tufts.
+  const runColors = (zone: ZoneId) =>
+    Array.from(bandRow.across, (across) =>
+      across < 0 ? null : vergeBase(VERGES[zone], across, bandRow.scale),
+    )
+      .slice(bandRow.roadEnd)
+      .filter((color, i, colors) => color !== colors[i - 1]);
+  // The curb, the strips and the sidewalk or paving, as the verge lists them, leaving out any
+  // that end where they start.
+  const bandColors = (verge: Verge) =>
+    [
+      { color: verge.curbColor, from: ROAD_HALF, to: verge.curbTo },
+      ...verge.strips.map((strip, i) => ({
+        color: strip.color,
+        from: verge.strips[i - 1]?.to ?? verge.curbTo,
+        to: strip.to,
+      })),
+      { color: verge.walkColor, from: walkFrom(verge), to: verge.walkTo },
+    ]
+      .filter(({ from, to }) => to > from)
+      .map(({ color }) => color)
+      .filter((color, i, colors) => color !== colors[i - 1]);
 
-  const MOWN_LAWN = mirrored([
-    [2, GREY],
-    [22, LIGHT_GREY],
-    [22, GREEN],
-    [31, DARK_GREEN],
-    [18, GREEN],
-    [Number.POSITIVE_INFINITY, DARK_GREEN],
-  ]);
-
-  // The runs of each backdrop's bottom row beside the road, without its tufts.
-  it.each<{ name: string; runs: [number, number, number][]; zone: ZoneId }>([
-    { name: "street's mown lawn, sidewalk and curb", runs: MOWN_LAWN, zone: "street" },
-    {
-      name: "homeStretch's mown lawn, sidewalk and curb",
-      runs: MOWN_LAWN,
-      zone: "homeStretch",
-    },
-    {
-      name: "park's unmown grass up to the path",
-      runs: mirrored([[Number.POSITIVE_INFINITY, GREEN]]),
-      zone: "park",
-    },
-    {
-      name: "shops' paving, edging, planter and white curb",
-      runs: mirrored([
-        [2, WHITE],
-        [1, BROWN],
-        [6, GREEN],
-        [1, BROWN],
-        [1, TAN],
-        [Number.POSITIVE_INFINITY, CREAM],
-      ]),
-      zone: "shops",
-    },
-  ])("continues $name", ({ runs, zone }) => {
-    expect(baseRuns(zone)).toEqual(runs);
+  it.each(ZONES)("continues %s's curb, strips and paving, then its lawn", (zone) => {
+    const verge = VERGES[zone];
+    const bands = bandColors(verge);
+    const runs = runColors(zone);
+    expect(runs.slice(0, bands.length)).toEqual(bands);
+    const lawn = verge.lawnColors === null ? [] : [verge.lawnColors[0], verge.lawnColors[1]];
+    expect(runs.slice(bands.length).filter((color) => !lawn.includes(color ?? -1))).toEqual([]);
+    expect(runs.length > bands.length).toBe(verge.lawn !== "none");
   });
 
   // The second stripe, 62 wide, from 44 past the sidewalk.
@@ -162,49 +132,44 @@ describe("the verge beside the road", () => {
   ])(
     "mownAt %d past the sidewalk at scale %d is %s: a dark stripe ends where it would draw under 4px wide",
     (past, scale, mown) => {
-      const { walkTo } = VERGES.street;
+      const { walkTo } = VERGES[MOWN];
       expect(mownAt(walkTo, walkTo + past, scale)).toBe(mown);
     },
   );
 
-  it("darkens the lawn only with tufts, and only the lawn", () => {
-    const out = draw(frameOf({ current: look("street", 0x123456), scroll: 300 }));
-    const words = new Map(
-      [GREEN, DARK_GREEN, FOREST, GREY, LIGHT_GREY].map((rgb) => [pixelWord(rgb), rgb]),
-    );
-    let tufts = 0;
+  it("tufts only the lawn, in its tuft colour", () => {
+    const verge = VERGES[MOWN];
+    const { tufts } = lawnOf(MOWN);
+    const out = draw(frameOf({ current: look(MOWN, 0x123456), scroll: 300 }));
+    let tufted = 0;
     raster.rows.forEach((row, y) => {
       row.across.forEach((across, i) => {
         if (across < 0 || y < raster.approachRows) {
           return;
         }
-        const color = words.get(out[y * view.width + i] ?? 0);
-        const base = vergeBase(VERGES.street, across, row.scale);
-        if (color !== base) {
-          tufts += 1;
-          expect(isLawn(VERGES.street, across) || color === GREY).toBe(true);
-          expect([darkerGreen(base), GREY]).toContain(color);
+        const word = out[y * view.width + i] ?? 0;
+        if (word !== pixelWord(vergeBase(verge, across, row.scale))) {
+          tufted += 1;
+          expect(word).toBe(pixelWord(isLawn(verge, across) ? tufts : verge.seamColor));
         }
       });
     });
-    expect(tufts).toBeGreaterThan(20);
+    expect(tufted).toBeGreaterThan(20);
   });
 
   it("thins tufts with distance", () => {
+    const verge = VERGES[MOWN];
+    const tuftWord = pixelWord(lawnOf(MOWN).tufts);
     const tuftShare = (from: number, to: number) => {
       let lawn = 0;
       let marked = 0;
       for (const scroll of [0, 150, 300]) {
-        const out = draw(frameOf({ current: look("street", 0x123456), scroll }));
+        const out = draw(frameOf({ current: look(MOWN, 0x123456), scroll }));
         raster.rows.slice(from, to).forEach((row, j) => {
           row.across.forEach((across, i) => {
-            if (isLawn(VERGES.street, across)) {
+            if (isLawn(verge, across)) {
               lawn += 1;
-              const color = out[(from + j) * view.width + i];
-              marked +=
-                color === pixelWord(darkerGreen(vergeBase(VERGES.street, across, row.scale)))
-                  ? 1
-                  : 0;
+              marked += out[(from + j) * view.width + i] === tuftWord ? 1 : 0;
             }
           });
         });
@@ -216,72 +181,70 @@ describe("the verge beside the road", () => {
     expect(tuftShare(far, far + 40)).toBeLessThan(tuftShare(near - 100, near));
   });
 
-  it("lays rough patches on park's lawn and no stripes", () => {
-    const darkened = [0, 400, 800, 1200].some((scroll) =>
-      draw(frameOf({ current: look("park", 0x123456), scroll })).includes(pixelWord(DARK_GREEN)),
+  it("lays rough patches in the lawn's mark colour on an unmown lawn", () => {
+    const patched = [0, 400, 800, 1200].some((scroll) =>
+      draw(frameOf({ current: look(ROUGH, 0x123456), scroll })).includes(
+        pixelWord(lawnOf(ROUGH).marks),
+      ),
     );
-    expect(darkened).toBe(true);
+    expect(patched).toBe(true);
   });
 
-  it("scatters leaves on homeStretch only", () => {
-    const tones = [0xd77643, 0xbe4a2f, 0x733e39].map(pixelWord);
-    const leaves = (zone: ZoneId) =>
-      [0, 100, 200].some((scroll) =>
-        draw(frameOf({ current: look(zone, 0x123456), scroll })).some((p) => tones.includes(p)),
-      );
-    expect(leaves("homeStretch")).toBe(true);
-    expect(leaves("street")).toBe(false);
+  // A leaf's tones the verge does not draw in otherwise.
+  const ownColors = (verge: Verge) => [
+    verge.curbColor,
+    verge.seamColor,
+    verge.walkColor,
+    ...(verge.lawnColors ?? []),
+    ...[...verge.strips, { color: verge.walkColor, dots: verge.walkDots }].flatMap(
+      ({ color, dots }) => [color, ...dots.flatMap((dot) => dot.colors)],
+    ),
+  ];
+  it.each(ZONES)("scatters leaves on %s only if its verge has them", (zone) => {
+    const own = ownColors(VERGES[zone]);
+    const tones = [0xd77643, 0xbe4a2f, 0x733e39]
+      .filter((tone) => !own.includes(tone))
+      .map(pixelWord);
+    const leaves = [0, 100, 200].some((scroll) =>
+      draw(frameOf({ current: look(zone, 0x123456), scroll })).some((p) => tones.includes(p)),
+    );
+    expect(leaves).toBe(VERGES[zone].leaves);
   });
 
-  const PLANTER_DOTS = [
-    { colors: [DARK_GREEN], share: 0.35 },
-    { colors: FLOWERS, share: 0.1 },
+  const DOTS = [
+    { colors: [0x3e8948], share: 0.35 },
+    { colors: [0xe43b44, 0xfee761, 0xffffff, 0xf77622], share: 0.1 },
   ];
   it.each<[number, number | null]>([
-    [0, DARK_GREEN],
-    [0.349, DARK_GREEN],
+    [0, 0x3e8948],
+    [0.349, 0x3e8948],
     [0.35, 0xe43b44],
     [0.38, 0xfee761],
     [0.41, 0xffffff],
     [0.449, 0xf77622],
     [0.45, null],
     [0.99, null],
-  ])("dotColor picks %d's dot in a planter: %d", (value, color) => {
-    expect(dotColor(PLANTER_DOTS, value)).toBe(color);
+  ])("dotColor picks %d's dot: %d", (value, color) => {
+    expect(dotColor(DOTS, value)).toBe(color);
   });
 
-  // The shops strips: a brown edge, the planter, a brown edge, a tan edging.
-  const [edge, planter, , edging] = VERGES.shops.strips;
-  const planterBand = { from: edge?.to ?? 0, to: planter?.to ?? 0 };
-  const pavingBand = { from: edging?.to ?? 0, to: VERGES.shops.walkTo };
-
-  it.each<[ZoneId, number, { from: number; to: number }[]]>([
-    ["shops", pavingBand.from, [planterBand, pavingBand]],
-    ["street", VERGES.street.curbTo, []],
-  ])("lays %s's paving from %d across, with dots on its bands %j", (zone, from, bands) => {
-    expect(walkFrom(VERGES[zone])).toBe(from);
-    expect(dottedBands(VERGES[zone]).map((band) => ({ from: band.from, to: band.to }))).toEqual(
-      bands,
-    );
-  });
-
-  // The shops verge's dots over the rows below the approach, at a few scrolls: the share of a
-  // band's pixels in each dot's colours, leaving out the paving's seam rows.
-  const shopsFrames = [0, 150, 300].map((scroll) => ({
-    out: draw(frameOf({ current: look("shops", 0x123456), scroll })),
-    scroll,
-  }));
-  it.each([
-    ...(planter?.dots ?? []).map((dot) => ({ ...dot, ...planterBand, name: "the planter" })),
-    ...VERGES.shops.walkDots.map((dot) => ({ ...dot, ...pavingBand, name: "the paving" })),
-  ])("dots shops' $name with $colors on about $share of it", (dot) => {
+  // Every dotted band's dots over the rows below the approach, at a few scrolls: the share of
+  // a band's pixels in each dot's colours, leaving out the paving's seam rows.
+  const dotted = ZONES.flatMap((zone) =>
+    dottedBands(VERGES[zone]).flatMap((band) =>
+      band.dots.map((dot) => ({ ...dot, from: band.from, to: Math.min(band.to, 1e6), zone })),
+    ),
+  );
+  it.each(dotted)("dots $zone from $from across with $colors on about $share of it", (dot) => {
+    const verge = VERGES[dot.zone];
     const words = dot.colors.map(pixelWord);
     const seen = new Set<number>();
     let band = 0;
-    let dotted = 0;
-    for (const { out, scroll } of shopsFrames) {
+    let hits = 0;
+    for (const scroll of [0, 150, 300]) {
+      const out = draw(frameOf({ current: look(dot.zone, 0x123456), scroll }));
       raster.rows.forEach((row, y) => {
-        if (y < raster.approachRows || seamRow(VERGES.shops, scroll + row.distance, row.span)) {
+        if (y < raster.approachRows || seamRow(verge, scroll + row.distance, row.span)) {
           return;
         }
         row.across.forEach((across, i) => {
@@ -289,30 +252,31 @@ describe("the verge beside the road", () => {
             band += 1;
             const word = out[y * view.width + i] ?? 0;
             if (words.includes(word)) {
-              dotted += 1;
+              hits += 1;
               seen.add(word);
             }
           }
         });
       });
     }
-    expect(Math.abs(dotted / band - dot.share)).toBeLessThan(dot.share / 4);
+    expect(Math.abs(hits / band - dot.share)).toBeLessThan(dot.share / 4);
     expect(seen.size).toBe(words.length);
   });
 
   it("ties each dot to its road pixel, so the dots scroll with the road", () => {
+    const band = itemAt(dottedBands(VERGES[DOTTED]), 0);
     const colors = new Map<string, number>();
     let repeats = 0;
     let conflicts = 0;
     for (const scroll of [0, 0.4, 3, 17, 40]) {
-      const out = draw(frameOf({ current: look("shops", 0x123456), scroll }));
+      const out = draw(frameOf({ current: look(DOTTED, 0x123456), scroll }));
       raster.rows.forEach((row, y) => {
-        if (y < raster.approachRows) {
+        if (y < raster.approachRows || seamRow(VERGES[DOTTED], scroll + row.distance, row.span)) {
           return;
         }
         const seed = Math.floor(scroll + row.distance) >> row.dotLevel;
         row.across.forEach((across, i) => {
-          if (across >= planterBand.from && across < planterBand.to) {
+          if (across >= band.from && across < Math.min(band.to, band.from + 40)) {
             const key = `${row.dotLevel}:${row.roadX[i] ?? 0}:${seed}`;
             const word = out[y * view.width + i] ?? 0;
             const before = colors.get(key);
@@ -460,8 +424,8 @@ describe("drawRoad", () => {
       const frame = frameOf({ current: start, scroll, transition: { previous, start }, zoneStart });
       return draw(frame)[(y - view.y) * view.width + curbX];
     };
-    expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(pixelWord(0x8b9bb4));
-    expect(vergeAt(START_STRIP_ZONE_ROWS)).toBe(pixelWord(0x8b9bb4));
+    expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(pixelWord(VERGES.street.curbColor));
+    expect(vergeAt(START_STRIP_ZONE_ROWS)).toBe(pixelWord(VERGES.street.curbColor));
   });
 
   // A strip of one colour with a line down one column over its first rows.

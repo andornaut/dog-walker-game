@@ -5,7 +5,6 @@ import {
   newRoadsidePlaces,
   placeRoadside,
   ROADSIDE,
-  ROADSIDE_SHADOW_COLOR,
   type RoadsideFrame,
   type RoadsideStage,
 } from "../../road/roadsideProps";
@@ -20,7 +19,7 @@ const ROW_DEPTH = 1 / 1000;
 
 // The roadside props' sprites, a fixed pool made once and reused frame to frame: each drawn
 // through the projection from its depth steps like the road's sprites, cut off at the
-// juncture, with the lawn's ground shadow under the free-standing ones. Cosmetic only.
+// juncture, with their zone's ground shadow under the free-standing ones. Cosmetic only.
 export class RoadsideView {
   private readonly frame: RoadsideFrame = {
     current: "",
@@ -57,7 +56,7 @@ export class RoadsideView {
     frame.previousStart = zoneStart - zoneLength(gameData);
     frame.scroll = scroll;
     const count = placeRoadside(this.stage, frame, places);
-    const shadow = this.shadows.frame(ROADSIDE_SHADOW_COLOR);
+    const shadow = this.shadows.frameInColors();
     for (let i = 0; i < sprites.length; i++) {
       const sprite = sprites[i];
       const place = places[i];
@@ -74,8 +73,8 @@ export class RoadsideView {
       const y = Math.round(place.y);
       sprite.setPosition(x, y).setDepth(DEPTH.roadside + y * ROW_DEPTH);
       clipToRoad(sprite);
-      if (place.shadowed) {
-        shadow(place.key, drawn.depth, x, y);
+      if (place.shadow !== null) {
+        shadow(place.shadow, place.key, drawn.depth, x, y);
       }
     }
     this.shadows.hideUnused();

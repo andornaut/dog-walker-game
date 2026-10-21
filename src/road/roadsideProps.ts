@@ -29,23 +29,23 @@ export interface RoadsideSide {
   readonly offset: number;
 }
 
+// shadowColour is the ground shadow under the zone's free-standing props, a hex RGB string: its
+// ground one ramp step darker.
 export interface RoadsideZone {
   readonly gaps: readonly (readonly RoadsideProp[])[];
   readonly lots: readonly (readonly RoadsideProp[])[];
+  readonly shadowColour: string;
   readonly sides: { readonly left: RoadsideSide; readonly right: RoadsideSide };
   readonly slot: number;
 }
 
-// shadowColour is a hex RGB string; shadowed lists the props that take a ground shadow.
-// zones is keyed by a zone's art id.
+// shadowed lists the props that take a ground shadow; zones is keyed by a zone's art id.
 export interface RoadsideTable {
-  readonly shadowColour: string;
   readonly shadowed: readonly string[];
   readonly zones: Readonly<Record<string, RoadsideZone>>;
 }
 
 export const ROADSIDE: RoadsideTable = table;
-export const ROADSIDE_SHADOW_COLOR = Number.parseInt(ROADSIDE.shadowColour, 16);
 
 // The table's sides, each with the sign of its across: the left side is negative.
 export const ROADSIDE_SIDES = [
@@ -129,12 +129,12 @@ export function eachRoadsideProp(
   }
 }
 
-// Where a prop is drawn: its key, its feet on screen, its projected scale, and whether it
-// takes a ground shadow.
+// Where a prop is drawn: its key, its feet on screen, its projected scale, and the colour of
+// its ground shadow, or null for a prop with none.
 export interface RoadsidePlace {
   key: string;
   scale: number;
-  shadowed: boolean;
+  shadow: number | null;
   x: number;
   y: number;
 }
@@ -143,7 +143,7 @@ export function newRoadsidePlaces(): RoadsidePlace[] {
   return Array.from({ length: ROADSIDE_LIMIT }, () => ({
     key: "",
     scale: 1,
-    shadowed: false,
+    shadow: null,
     x: 0,
     y: 0,
   }));
@@ -176,6 +176,7 @@ const placing = {
   origin: 0,
   out: [] as RoadsidePlace[],
   scroll: 0,
+  shadow: 0,
   stage: null as RoadsideStage | null,
 };
 
@@ -194,7 +195,7 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
   }
   place.key = prop.key;
   place.scale = placed.scale;
-  place.shadowed = stage.table.shadowed.includes(prop.key);
+  place.shadow = stage.table.shadowed.includes(prop.key) ? placing.shadow : null;
   place.x = placed.x;
   place.y = placed.y;
   placing.count += 1;
@@ -211,6 +212,7 @@ function placeZone(art: string | null, start: number, from: number, to: number):
   // A zone's z counts from its start strip's near edge, visibleDistance past where it began.
   const origin = start + stage.projection.visibleDistance;
   placing.origin = origin;
+  placing.shadow = Number.parseInt(zone.shadowColour, 16);
   eachRoadsideProp(zone, from - origin, to - origin, placeProp);
 }
 

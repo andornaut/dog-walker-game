@@ -3,7 +3,6 @@ import type { ZoneId } from "../data/types";
 import { distanceAtY, type RoadProjection, roadXAt, rowScale } from "./projection";
 import type { Rect } from "./rect";
 import {
-  darkerGreen,
   dotColor,
   dottedBands,
   LEAF_PIXELS,
@@ -121,11 +120,10 @@ export const STRIP = { height: 64, width: SCREEN_CONFIG.roadWidth } as const;
 // A start strip's far rows are its zone's road; the rest, a cross street, then the previous
 // zone's road below it.
 export const START_STRIP_ZONE_ROWS = 20;
-// Rough patches are drawn in the lawn's darker green, from blocks of road PATCH_BLOCK long
+// Rough patches are drawn in the lawn's mark colour, from blocks of road PATCH_BLOCK long
 // whose patches reach PATCH_REACH either side.
 const PATCH_BLOCK = ROUGH_PATCH_BLOCK;
 const PATCH_REACH = ROUGH_PATCH_REACH;
-const PATCH_COLOR = 0x3e8948;
 // Rows covering more than this much road per strip row step down a level.
 const LEVEL_SPAN = 2;
 // A run down a strip column at least this long is a line along the road.
@@ -315,10 +313,6 @@ function wordOf(rgb: number): number {
   return word;
 }
 
-// The lawn's greens as pixel words, each to the next darker one.
-const GREENS = [0x63c74d, 0x3e8948];
-const darkerWords = new Map(GREENS.map((rgb) => [wordOf(rgb), wordOf(darkerGreen(rgb))]));
-const PATCH_WORD = wordOf(PATCH_COLOR);
 const LEAF_WORDS = LEAF_PIXELS.map((rows) =>
   rows.map((cells) => cells.map(({ color, dx }) => ({ dx, word: wordOf(color) }))),
 );
@@ -332,13 +326,17 @@ interface VergePlan {
     readonly to: number;
     readonly words: Uint32Array;
   }[];
+  // The lawn's patch word, and its tuft word by each lawn word it falls on; none with no lawn.
+  readonly patchWord: number;
   readonly seamWord: number;
+  readonly tuftWords: ReadonlyMap<number, number>;
   readonly walkFrom: number;
 }
 
 const NOISE_STEPS = 256;
 
 function vergePlan(verge: Verge): VergePlan {
+  const lawn = verge.lawnColors;
   return {
     dots: dottedBands(verge).map(({ dots, from, to }) => ({
       from,
@@ -348,7 +346,11 @@ function vergePlan(verge: Verge): VergePlan {
         return rgb === null ? 0 : wordOf(rgb);
       }),
     })),
+    patchWord: lawn === null ? 0 : wordOf(lawn[1]),
     seamWord: wordOf(verge.seamColor),
+    tuftWords: new Map(
+      lawn === null ? [] : [lawn[0], lawn[1]].map((rgb) => [wordOf(rgb), wordOf(lawn[2])]),
+    ),
     walkFrom: walkFrom(verge),
   };
 }
@@ -416,7 +418,7 @@ function cached<T>(cache: Map<number, T>, key: number, make: (key: number) => T)
 }
 
 // The pixels of marks' lower rows, drawn on the row below the one they start on: each one's
-// column and the colour word to draw, or TUFT to darken the lawn.
+// column and the colour word to draw, or TUFT to tuft the lawn.
 const TUFT = -1;
 const CARRIED_MAX = 1024;
 
@@ -443,7 +445,7 @@ function carry(carried: Carried, column: number, word: number): void {
 }
 
 // Draws a mark pixel where the verge takes it and no other mark has drawn on this row, so a
-// tuft darkens the lawn once. word is TUFT, or a leaf's colour word.
+// tuft marks the lawn once. word is TUFT, or a leaf's colour word.
 function markPixel(
   out: Uint32Array,
   marked: Uint8Array,
@@ -465,9 +467,9 @@ function markPixel(
     out[at] = word;
     return;
   }
-  const darker = darkerWords.get(out[at] ?? 0);
-  if (darker !== undefined) {
-    out[at] = darker;
+  const tuft = planOf(verge).tuftWords.get(out[at] ?? 0);
+  if (tuft !== undefined) {
+    out[at] = tuft;
   }
 }
 
@@ -695,7 +697,7 @@ function fadeRow(
   }
 }
 
-// The rough patches on an unmown lawn: each one's chord across this row, in the darker green.
+// The rough patches on an unmown lawn: each one's chord across this row, in its mark colour.
 function drawPatches(
   raster: RoadRaster,
   row: RasterRow,
@@ -718,7 +720,7 @@ function drawPatches(
       const to = Math.ceil(centerX + (patch.x + half) * row.scale - 0.5) - view.x;
       for (let i = Math.max(0, from); i < Math.min(view.width, to); i++) {
         if (markFits(verge, "tuft", row.across[i] ?? -1)) {
-          out[offset + i] = PATCH_WORD;
+          out[offset + i] = planOf(verge).patchWord;
         }
       }
     }

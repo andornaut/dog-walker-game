@@ -46,7 +46,6 @@ import {
   rowScale,
 } from "../layout/projection";
 import type { Rect } from "../layout/rect";
-import { VERGES } from "../layout/roadside";
 import { GAG_KEYS, GAG_SIZES, GAG_Y, KITE_AT, ZONE_GAGS } from "../layout/sceneryGags";
 import { screenLayout } from "../layout/screenLayout";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
@@ -203,8 +202,6 @@ export function layoutExport(
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },
     screen: { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width },
-    // What lies beside the road, across from its centre line in road pixels; null for no limit.
-    verges: VERGES,
     // The walk bar: its buttons left to right, each with its icon's place, its wells and
     // effect wells, and the debuff bars under it, one and two.
     walkBar: {

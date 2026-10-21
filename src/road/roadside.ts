@@ -1,5 +1,8 @@
+import vergeTable from "../../shared/verges.json";
+import { paletteColor } from "../assets/housePalette";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
+import { WORLD } from "../data/world";
 
 // What lies beside the projected road, as art/tools/backdrops.py paints it below the
 // backdrops' streets, so the verge under the band continues the band's bottom row. across is
@@ -9,29 +12,12 @@ import type { ZoneId } from "../data/types";
 // road; mown stripes run along the street and stay put. span is how much road a screen row
 // covers, and scale the row's ground scale.
 
-// Endesga 32 colours.
-const GREEN = 0x63c74d;
-const DARK_GREEN = 0x3e8948;
-const FOREST = 0x265c42;
-const GREY = 0x8b9bb4;
-const SLATE = 0x5a6988;
-const LIGHT_GREY = 0xc0cbdc;
+// Endesga 32 colours of the fallen leaves.
 const OCHRE = 0xd77643;
 const RUST = 0xbe4a2f;
 const DARK_BROWN = 0x733e39;
-const BROWN = 0xb86f50;
-const TAN = 0xe4a672;
-const CREAM = 0xead4aa;
-const WHITE = 0xffffff;
-const RED = 0xe43b44;
-const YELLOW = 0xfee761;
-const ORANGE = 0xf77622;
 
-// Verge distances count out from the road's edge, so they move with the road's width.
 const ROAD_HALF = SCREEN_CONFIG.roadWidth / 2;
-const CURB = ROAD_HALF + 4;
-const WALK = ROAD_HALF + 48;
-const SEAM_EVERY = 32;
 // A row covering more road than SEAM_MAX_SPAN draws no seams, as they would run together.
 const SEAM_MAX_SPAN = 16;
 // Mown stripe widths across the front lawns, outward from the sidewalk, alternating light and
@@ -65,8 +51,11 @@ export interface Verge {
   readonly curbTo: number;
   // Fallen leaves on the sidewalks and lawns.
   readonly leaves: boolean;
-  // Mown stripes on the front lawns, or an unmown lawn with rough patches.
+  // Mown stripes on the front lawns, or an unmown lawn with rough patches. A verge with no lawn
+  // is paved out to the screen's edges: its walkTo is Infinity.
   readonly lawn: "mown" | "rough" | "none";
+  // The lawn's base, its mown stripes or rough patches, and its tufts; null with no lawn.
+  readonly lawnColors: LawnColors | null;
   // The line across the sidewalk or paving, every seamEvery along the road.
   readonly seamColor: number;
   readonly seamEvery: number;
@@ -77,84 +66,89 @@ export interface Verge {
   readonly walkTo: number;
 }
 
-// A grey sidewalk with grey seams, straight off the curb.
-const SIDEWALK = {
-  seamColor: GREY,
-  seamEvery: SEAM_EVERY,
-  strips: [],
-  walkColor: LIGHT_GREY,
-  walkDots: [],
-} as const;
+// A tuft draws its own colour over the lawn's base or its marks, rather than darkening them.
+export type LawnColors = readonly [base: number, marks: number, tufts: number];
 
-export const VERGES: Readonly<Record<ZoneId, Verge>> = {
-  homeStretch: {
-    ...SIDEWALK,
-    curbColor: GREY,
-    curbTo: CURB,
-    lawn: "mown",
-    leaves: true,
-    walkTo: WALK,
-  },
-  park: {
-    ...SIDEWALK,
-    curbColor: GREY,
-    curbTo: ROAD_HALF,
-    lawn: "rough",
-    leaves: false,
-    walkTo: ROAD_HALF,
-  },
-  // A riverside path: paving straight off the road, no curb, then rough lawn.
-  pawsPromenade: {
-    ...SIDEWALK,
-    curbColor: GREY,
-    curbTo: ROAD_HALF,
-    lawn: "rough",
-    leaves: false,
-    walkTo: WALK,
-  },
-  // A white curb, a planter of greens and flowers edged in brown, a tan edging, then cream
-  // paving with tan seams and specks out to the screen's edges.
-  shops: {
-    curbColor: WHITE,
-    curbTo: CURB,
-    lawn: "none",
-    leaves: false,
-    seamColor: TAN,
-    seamEvery: SEAM_EVERY,
-    strips: [
-      { color: BROWN, dots: [], to: ROAD_HALF + 6 },
-      {
-        color: GREEN,
-        dots: [
-          { colors: [DARK_GREEN], share: 0.35 },
-          { colors: [RED, YELLOW, WHITE, ORANGE], share: 0.1 },
-        ],
-        to: ROAD_HALF + 18,
-      },
-      { color: BROWN, dots: [], to: ROAD_HALF + 20 },
-      { color: TAN, dots: [], to: ROAD_HALF + 22 },
-    ],
-    walkColor: CREAM,
-    walkDots: [{ colors: [TAN], share: 0.02 }],
-    walkTo: Number.POSITIVE_INFINITY,
-  },
-  snoozeCrescent: {
-    ...SIDEWALK,
-    curbColor: SLATE,
-    curbTo: CURB,
-    lawn: "mown",
-    leaves: false,
-    walkTo: WALK,
-  },
-  street: {
-    ...SIDEWALK,
-    curbColor: GREY,
-    curbTo: CURB,
-    lawn: "mown",
-    leaves: false,
-    walkTo: WALK,
-  },
-};
+// A verge as art writes it in shared/verges.json (art/tools/backdrops.py verges --write): the
+// same fields with colours by palette name, a null walkTo for paving out to the screen's edges,
+// and lawnColors null with no lawn.
+interface VergeDotsEntry {
+  readonly colors: readonly string[];
+  readonly share: number;
+}
+
+interface VergeEntry {
+  readonly curbColor: string;
+  readonly curbTo: number;
+  readonly lawn: string;
+  readonly lawnColors: readonly string[] | null;
+  readonly leaves: boolean;
+  readonly seamColor: string;
+  readonly seamEvery: number;
+  readonly strips: readonly {
+    readonly color: string;
+    readonly dots: readonly VergeDotsEntry[];
+    readonly to: number;
+  }[];
+  readonly walkColor: string;
+  readonly walkDots: readonly VergeDotsEntry[];
+  readonly walkTo: number | null;
+}
+
+const LAWNS: readonly Verge["lawn"][] = ["mown", "rough", "none"];
+
+function dotsOf(entries: readonly VergeDotsEntry[]): VergeDots[] {
+  return entries.map(({ colors, share }) => ({ colors: colors.map(paletteColor), share }));
+}
+
+// A verge from its entry in shared/verges.json; a lawn kind or colour it does not know throws.
+export function vergeFrom(entry: VergeEntry): Verge {
+  const lawn = LAWNS.find((kind) => kind === entry.lawn);
+  if (lawn === undefined) {
+    throw new Error(`No verge lawn ${entry.lawn}`);
+  }
+  const [base, marks, tufts] = (entry.lawnColors ?? []).map(paletteColor);
+  const hasLawn = lawn !== "none";
+  if (hasLawn !== (base !== undefined && marks !== undefined && tufts !== undefined)) {
+    throw new Error("A verge has lawn colours exactly when it has a lawn");
+  }
+  return {
+    curbColor: paletteColor(entry.curbColor),
+    curbTo: entry.curbTo,
+    lawn,
+    lawnColors: hasLawn ? [base ?? 0, marks ?? 0, tufts ?? 0] : null,
+    leaves: entry.leaves,
+    seamColor: paletteColor(entry.seamColor),
+    seamEvery: entry.seamEvery,
+    strips: entry.strips.map(({ color, dots, to }) => ({
+      color: paletteColor(color),
+      dots: dotsOf(dots),
+      to,
+    })),
+    walkColor: paletteColor(entry.walkColor),
+    walkDots: dotsOf(entry.walkDots),
+    walkTo: entry.walkTo ?? Number.POSITIVE_INFINITY,
+  };
+}
+
+// Each drawn verge by its zone's art id, as art paints it below the backdrops.
+export const VERGES_BY_ART: Readonly<Record<string, Verge>> = Object.fromEntries(
+  Object.entries(vergeTable as Readonly<Record<string, VergeEntry>>).map(([art, entry]) => [
+    art,
+    vergeFrom(entry),
+  ]),
+);
+
+// Each zone's verge: the one drawn for its art.
+export const VERGES: Readonly<Record<ZoneId, Verge>> = Object.fromEntries(
+  WORLD.zones.map((zone) => {
+    const verge = VERGES_BY_ART[zone.art];
+    if (verge === undefined) {
+      throw new Error(`No verge for ${zone.art} in shared/verges.json`);
+    }
+    return [zone.id, verge];
+  }),
+) as Record<ZoneId, Verge>;
 
 // Where the sidewalk or paving starts, across: past the curb and the strips.
 export function walkFrom(verge: Verge): number {
@@ -233,12 +227,8 @@ export function vergeBase(verge: Verge, across: number, scale: number): number {
   if (across < verge.walkTo) {
     return verge.walkColor;
   }
-  return verge.lawn === "mown" && mownAt(verge.walkTo, across, scale) ? DARK_GREEN : GREEN;
-}
-
-// The next darker green, for a tuft or a rough patch on the lawn.
-export function darkerGreen(rgb: number): number {
-  return rgb === GREEN ? DARK_GREEN : FOREST;
+  const [base, marks] = verge.lawnColors ?? [verge.walkColor, verge.walkColor];
+  return verge.lawn === "mown" && mownAt(verge.walkTo, across, scale) ? marks : base;
 }
 
 export function isLawn(verge: Verge, across: number): boolean {

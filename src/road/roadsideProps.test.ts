@@ -9,7 +9,7 @@ import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
-import { VERGES } from "./roadside";
+import { VERGES, walkFrom } from "./roadside";
 import {
   eachRoadsideProp,
   newRoadsidePlaces,
@@ -35,8 +35,8 @@ const PROPS = ZONES.flatMap(([art, zone]) =>
   [...zone.lots, ...zone.gaps].flat().map((prop) => ({ art, ...prop })),
 );
 const KEYS = [...new Set(PROPS.map(({ key }) => key))].sort();
-// A zone whose art has no table, so it places no props.
-const BARE = gameData.world.zones.find(({ art }) => !(art in ROADSIDE.zones))?.art ?? "";
+// An art id with no table, so it places no props.
+const BARE = "no-table";
 
 const widths = new Map<string, number>();
 function frameWidth(key: string): number {
@@ -59,10 +59,14 @@ const SIDES: RoadsideZone["sides"] = {
 };
 const TREE = { across: 270, dz: 0, key: "roadside-tree" };
 const MAILBOX = { across: 231, dz: -38, key: "roadside-mailbox" };
+const SHADOW = "3e8948";
 
 // A table holding ART's zone with these lots and gaps.
 function tableOf(zone: Pick<RoadsideZone, "gaps" | "lots">): RoadsideTable {
-  return { ...ROADSIDE, zones: { [ART]: { sides: SIDES, slot: SLOT, ...zone } } };
+  return {
+    ...ROADSIDE,
+    zones: { [ART]: { shadowColour: SHADOW, sides: SIDES, slot: SLOT, ...zone } },
+  };
 }
 
 const DENSE = tableOf({ gaps: [[TREE, MAILBOX]], lots: [[TREE, MAILBOX], [MAILBOX]] });
@@ -96,7 +100,7 @@ function placed(table: RoadsideTable, at: RoadsideFrame): RoadsidePlace[] {
 }
 
 function zoneOf(table: RoadsideTable): RoadsideZone {
-  return table.zones[ART] ?? { gaps: [], lots: [], sides: SIDES, slot: SLOT };
+  return table.zones[ART] ?? { gaps: [], lots: [], shadowColour: SHADOW, sides: SIDES, slot: SLOT };
 }
 
 // How many props a zone holds over all its lots and gaps.
@@ -157,10 +161,30 @@ describe("the roadside table", () => {
     expect(MANIFEST_KEYS).toContain(key);
   });
 
+  // On a lawn, past the sidewalk; on paving out to the screen's edges, past the curb and strips.
   it.each(PROPS)("stands $key at across $across beyond $art's sidewalk", (prop) => {
     const zone = gameData.world.zones.find(({ art }) => art === prop.art);
-    const walkTo = Object.entries(VERGES).find(([id]) => id === zone?.id)?.[1].walkTo;
-    expect(prop.across - frameWidth(prop.key) / 2).toBeGreaterThan(walkTo ?? Infinity);
+    const verge = zone === undefined ? undefined : VERGES[zone.id as keyof typeof VERGES];
+    const clear =
+      verge === undefined
+        ? Infinity
+        : Number.isFinite(verge.walkTo)
+          ? verge.walkTo
+          : walkFrom(verge);
+    expect(prop.across - frameWidth(prop.key) / 2).toBeGreaterThan(clear);
+  });
+
+  it.each(ZONES)("shades %s's shadowed props in its own colour and the rest in none", (art) => {
+    const zone = ROADSIDE.zones[art];
+    const shadows = new Set<number | null>();
+    for (let scroll = 4000; scroll < 4000 + 12 * (zone?.slot ?? 0); scroll += 70) {
+      for (const place of placed(ROADSIDE, frame({ current: art, scroll }))) {
+        const shadowed = ROADSIDE.shadowed.includes(place.key);
+        expect(place.shadow).toBe(shadowed ? Number.parseInt(zone?.shadowColour ?? "", 16) : null);
+        shadows.add(place.shadow);
+      }
+    }
+    expect(shadows.size).toBeGreaterThan(0);
   });
 });
 
@@ -236,7 +260,6 @@ describe("placeRoadside", () => {
   });
 
   it("places nothing for a zone with no table", () => {
-    expect(BARE).not.toBe("");
     expect(placed(ROADSIDE, frame({ current: BARE }))).toEqual([]);
   });
 

@@ -57,6 +57,7 @@ const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
     const zone = {
       gaps: [[tree]],
       lots: [[tree]],
+      shadowColour: "3e8948",
       sides: { left: { ...side, offset: 0 }, right: { ...side, offset: 1 } },
       slot: 140,
     };
