@@ -50,7 +50,7 @@ import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
-import { hintFor } from "../rules/hints";
+import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone, walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
@@ -787,10 +787,11 @@ export class HudScene extends Scene {
     }
   }
 
-  // A first-time hint on the message strip, marked shown as it is said.
+  // A first-time hint on the message strip, marked shown as it is said. The low-hearts hint
+  // jumps the hints waiting their turn.
   private sayHint(hint: RaisedHint): void {
     markHintShown(this, hint.id);
-    this.messages.say("hint", hint.text);
+    this.messages.say("hint", hint.text, hintJumpsQueue(gameData, hint.id));
   }
 
   // Each badge earned on the way, on the message strip.

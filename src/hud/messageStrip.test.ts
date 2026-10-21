@@ -25,6 +25,7 @@ import {
   messageStripLayout,
   type MessageStripState,
   sayLine,
+  sayLineAhead,
   stepMessageStrip,
 } from "./messageStrip";
 import { STRIP_LINE_FIELDS } from "./runText";
@@ -60,6 +61,31 @@ describe("sayLine", () => {
       EMPTY_MESSAGE_STRIP,
     );
     expect(state.waiting.map(({ text }) => text)).toEqual(said.slice(-maxWaiting));
+  });
+});
+
+describe("sayLineAhead", () => {
+  const waitingWith = (lines: readonly MessageLine[]): MessageStripState =>
+    lines.reduce((strip, said) => sayLine(MESSAGE_TIMING, said, strip), after([["shown", 0]]));
+  const texts = (state: MessageStripState) => state.waiting.map(({ text }) => text);
+
+  it.each<[string, MessageLine[], string[]]>([
+    ["waits alone on an empty queue", [], ["x"]],
+    [
+      "jumps every waiting line with its icon",
+      [line("a"), line("b", "bump"), line("c")],
+      ["x", "a", "b", "c"],
+    ],
+    ["stays behind lines with other icons", [line("b", "bump"), line("a")], ["b", "x", "a"]],
+    ["waits last when no line has its icon", [line("b", "bump")], ["b", "x"]],
+    ["drops a repeat of a waiting line", [line("a"), line("x")], ["a", "x"]],
+    [
+      "drops the oldest other line past the most that wait",
+      Array.from({ length: maxWaiting }, (_, i) => line(String(i))),
+      ["x", ...Array.from({ length: maxWaiting - 1 }, (_, i) => String(i + 1))],
+    ],
+  ])("%s", (_name, waiting, expected) => {
+    expect(texts(sayLineAhead(MESSAGE_TIMING, line("x"), waitingWith(waiting)))).toEqual(expected);
   });
 });
 

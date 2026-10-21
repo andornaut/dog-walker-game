@@ -16,6 +16,7 @@ import {
   messageStripLayout,
   type MessageStripState,
   sayLine,
+  sayLineAhead,
   stepMessageStrip,
 } from "../hud/messageStrip";
 import { PALETTE } from "./palette";
@@ -61,8 +62,10 @@ export class MessageStrip {
   private explaining: readonly ExplainLine[] = [];
   private state: MessageStripState = EMPTY_MESSAGE_STRIP;
 
-  say(icon: MessageIcon, text: string): void {
-    this.state = sayLine(MESSAGE_TIMING, { icon, text }, this.state);
+  // ahead: the line waits ahead of the waiting lines with its icon.
+  say(icon: MessageIcon, text: string, ahead = false): void {
+    const add = ahead ? sayLineAhead : sayLine;
+    this.state = add(MESSAGE_TIMING, { icon, text }, this.state);
   }
 
   // The lines a held press explains, from their first, or none once it lifts.

@@ -7,6 +7,13 @@ function matches(trigger: HintTrigger, event: HintTrigger): boolean {
   return event.kind === trigger.kind;
 }
 
+// The low-hearts hint jumps ahead of every waiting hint, so it shows before the first firing.
+const QUEUE_JUMPING_TRIGGERS: ReadonlySet<HintTrigger["kind"]> = new Set(["firedOwner"]);
+
+export function hintJumpsQueue(data: Pick<GameData, "hints">, id: HintId): boolean {
+  return QUEUE_JUMPING_TRIGGERS.has(data.hints[id].trigger.kind);
+}
+
 // The first-time hint to show for an event: the first in the data whose trigger matches and
 // that has not been shown, or null.
 export function hintFor(

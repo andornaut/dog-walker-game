@@ -2,9 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import { HINTS } from "../data/hints";
 import type { HintId } from "../data/types";
-import { hintFor } from "./hints";
+import { hintFor, hintJumpsQueue } from "./hints";
 
 const data = { hints: HINTS };
+
+describe("hintJumpsQueue", () => {
+  const lowHearts = hintFor(data, [], { kind: "firedOwner" })?.id;
+
+  it.each(Object.keys(HINTS) as HintId[])(
+    "jumps the queue for %s only as the low-hearts hint",
+    (id) => {
+      expect(hintJumpsQueue(data, id)).toBe(id === lowHearts);
+    },
+  );
+});
 
 describe("hintFor", () => {
   it.each<[string, HintId[], Parameters<typeof hintFor>[2], HintId | null]>([

@@ -186,6 +186,28 @@ export function sayLine(
   return { ...state, waiting: [...state.waiting, line].slice(-timing.maxWaiting) };
 }
 
+// Adds a line ahead of every waiting line with its icon, as an urgent hint jumps the hints
+// waiting their turn, unless the same text is already shown or waiting. Past maxWaiting it
+// drops the oldest other waiting line.
+export function sayLineAhead(
+  timing: MessageTiming,
+  line: MessageLine,
+  state: MessageStripState,
+): MessageStripState {
+  const said = sayLine(timing, line, state);
+  if (said === state) {
+    return state;
+  }
+  const others = state.waiting;
+  const at = others.findIndex(({ icon }) => icon === line.icon);
+  const waiting = at < 0 ? [...others, line] : [...others.slice(0, at), line, ...others.slice(at)];
+  if (waiting.length <= timing.maxWaiting) {
+    return { ...state, waiting };
+  }
+  const oldest = waiting[0] === line ? 1 : 0;
+  return { ...state, waiting: waiting.filter((_, i) => i !== oldest) };
+}
+
 // Ages the shown line dtMs, drops it past its life, and shows the next waiting line once the
 // shown one has dwelt.
 export function stepMessageStrip(
