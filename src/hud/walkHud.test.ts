@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -9,6 +7,10 @@ import { type Point, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { walkLength } from "../rules/route";
 import { read } from "../rules/units";
+import { bodyTextWidth } from "../testing/bodyFont";
+import { fontFileMetrics, fontInk } from "../testing/fontInk";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { plainMarks } from "../ui/pixelFont";
 import { maxEffects } from "./effectIcons";
 import {
   cardHearts,
@@ -50,32 +52,9 @@ const inside = (inner: Rect, outer: Rect) =>
 const overlaps = (a: Rect, b: Rect) =>
   a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
-// The title font's glyphs, from its .fnt: each one's left side bearing, inked width and advance.
-const TITLE_FNT = new URL("../../public/art/fonts/font-title.fnt", import.meta.url);
-const TITLE_GLYPHS = new Map(
-  [
-    ...readFileSync(TITLE_FNT, "utf8").matchAll(
-      /<char id="(\d+)"[^>]*\bwidth="(\d+)"[^>]*\bxoffset="(-?\d+)"[^>]*\bxadvance="(\d+)"/g,
-    ),
-  ].map(([, id, width, xOffset, advance]) => [
-    String.fromCodePoint(Number(id)),
-    { advance: Number(advance), width: Number(width), xOffset: Number(xOffset) },
-  ]),
-);
-
 // The columns text inks in the title font at 1x, from its left edge to its last ink.
 function titleWidth(text: string): number {
-  let x = 0;
-  let right = 0;
-  for (const char of text) {
-    const glyph = TITLE_GLYPHS.get(char);
-    if (glyph === undefined) {
-      throw new Error(`font-title has no ${char}`);
-    }
-    right = Math.max(right, x + glyph.xOffset + glyph.width);
-    x += glyph.advance;
-  }
-  return right;
+  return fontInk("font-title", { letterSpacing: 0, scale: 1 }, text).right;
 }
 
 describe("the walk bar", () => {
@@ -304,6 +283,43 @@ describe("the owner's tab and quip", () => {
       expect(place.bubble.x + place.bubble.width + quip.gap).toBe(tab.x);
       expect(place.tail.x).toBe(place.bubble.x + place.bubble.width - quip.tail.overlap);
     }
+  });
+});
+
+// Every owner's quip, at 1x in the body font as the tab's bubble measures it, keeps its bubble
+// on screen beside each card's tab, wherever the pack is.
+describe("an owner's quip bubble", () => {
+  const screen = LAYOUT.walkView;
+  const { quip } = OWNER_TAB;
+  const quips = Object.values(gameData.quips).flatMap((moments) => Object.values(moments).flat());
+  const packs = [screen.x, screen.x + screen.width / 2, screen.x + screen.width - 1];
+  it.each(
+    dogSlots.flatMap((card, slot) =>
+      quips.map((text) => [slot, text, ownerTabRect(card)] as const),
+    ),
+  )("beside card %i's tab, keeps %j on screen", (_slot, text, tab) => {
+    const width = Math.ceil(bodyTextWidth(1, plainMarks(text)));
+    for (const packX of packs) {
+      const { bubble } = quipPlace(screen, packX, tab, width);
+      expect(bubble.x).toBeGreaterThanOrEqual(screen.x + quip.margin);
+      expect(bubble.x + bubble.width).toBeLessThanOrEqual(screen.x + screen.width - quip.margin);
+    }
+  });
+});
+
+// The neighbourhood's name, centred on name.x at 1x in the body font, stays inside the well and
+// over the pips.
+describe("the walk bar's neighbourhood name", () => {
+  const { name, pips } = WALK_BAR.zone;
+  const well = BAR.zoneWell;
+  const body = fontFileMetrics("font-body");
+  it.each(gameData.world.zones.map((zone) => zone.name))("fits %j in the well", (zoneName) => {
+    const ink = fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(zoneName));
+    // Phaser centres the label on its advances, the last glyph's spacing included.
+    const left = Math.round(name.x - bodyTextWidth(1, plainMarks(zoneName)) / 2);
+    expect(left + ink.left).toBeGreaterThan(well.x);
+    expect(left + ink.right).toBeLessThan(well.x + well.width);
+    expect(name.y + inkRowsFromCapTop(body)).toBeLessThanOrEqual(pips.y);
   });
 });
 

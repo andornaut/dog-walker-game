@@ -99,6 +99,9 @@ export const HOME_LAYOUT = {
     width: 300,
   },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
+  // A dog tile's name and its fee or price plate start textX in, the name's capitals nameY and
+  // the fee's feeY down, and keep padRight inside its right edge.
+  dogTile: { feeY: 29, nameY: 4, padRight: 3, textX: 39 },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
   // The dog rows are hit areas 44 tall with no gap.
@@ -220,3 +223,7 @@ export const HOME_LAYOUT = {
   sections: Readonly<Record<SectionId, Rect>>;
   walkerTiles: GridSpec;
 };
+
+// How wide a dog tile's name and fee may be: from its text column to padRight inside its edge.
+export const DOG_TILE_TEXT_ROOM =
+  HOME_LAYOUT.dogTiles.cellWidth - HOME_LAYOUT.dogTile.textX - HOME_LAYOUT.dogTile.padRight;

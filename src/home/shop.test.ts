@@ -2,14 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { maxHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
+import { fitInFont } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
 import { fillNames } from "../text/lines";
-import type { Purchase } from "./home";
+import { readBitmapFont } from "../tools/fontFile";
+import { plainMarks } from "../ui/pixelFont";
+import { dollarText, type Purchase } from "./home";
 import {
   dogRows,
   gearRows,
@@ -22,6 +26,7 @@ import {
   shopTabOf,
   slotRows,
 } from "./shop";
+import { SHOP_LAYOUT, shopRowTextRoom } from "./shopLayout";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
@@ -171,5 +176,42 @@ describe("shopRowId and shopTabOf", () => {
       const ids = rows[shopTabOf(purchase)].map(({ id }) => id);
       expect(ids).toContain(shopRowId(owned, purchase));
     }
+  });
+});
+
+// Every row's name and line, with nothing bought and with every item owned, fit the room the
+// price plate or OWNED leaves them, both measured on the fonts at 2x.
+describe("a shop row's text", () => {
+  // A label's width as Phaser gives it: its glyphs' advances at 2x.
+  const advances = (font: string, text: string) => {
+    const { glyphs } = readBitmapFont(font);
+    return 2 * [...text].reduce((sum, char) => sum + (glyphs.get(char)?.advance ?? 0), 0);
+  };
+  const rightWidth = (row: ShopRow) =>
+    row.price === null
+      ? SHOP_LAYOUT.row.ownedDx + advances("font-title", gameData.homeText.shop.owned.toUpperCase())
+      : advances("font-body", dollarText(row.price)) + 6;
+  const everything: Owned = {
+    dogSlots: gameData.dogSlots.length,
+    dogs: Object.keys(gameData.dogs) as DogId[],
+    gear: Object.keys(gameData.shopGear) as Owned["gear"],
+    walkers: [],
+  };
+  const rows = [owned, everything].flatMap((have) => [
+    ...gearRows(gameData, have),
+    ...slotRows(gameData, have),
+    ...dogRows(gameData, have),
+  ]);
+  it.each(
+    rows.flatMap((row) =>
+      [row.name, row.line]
+        .filter((text) => text !== "")
+        .map((text) => [row.id, text, row] as const),
+    ),
+  )("sets %s's %j beside its price or OWNED", (_id, text, row) => {
+    const room = shopRowTextRoom(rightWidth(row));
+    expect(
+      fitInFont("font-body", TEXT_FIT_STYLES, room, plainMarks(text)).widest,
+    ).toBeLessThanOrEqual(room);
   });
 });

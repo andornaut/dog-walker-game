@@ -6,7 +6,7 @@ import { FEEDBACK, type LabelAnchor } from "../hud/feedback";
 import type { Point } from "../layout/rect";
 import { drawFramedRect } from "./draw";
 import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
+import { addPixelText, pixelFontMetrics } from "./pixelText";
 import { playEffect, playTagOnce } from "./sprites";
 import { fadeAway } from "./uiKit";
 
@@ -15,9 +15,8 @@ const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
 // A plain hit's impact over the dog.
 const BUMP_ART = { key: "fx-bump", tag: "play" } as const;
 
-// font-title at 2x: its capitals start 8 rows into its 24-row line and are 10 rows tall; the
-// chip reaches 2px past them.
-const TITLE = { capHeight: 10, capTop: 8, line: 24 };
+// The label is font-title at 2x; its chip reaches 2px past the capitals.
+const TITLE_SCALE = 2;
 const CHIP_PAD = 2;
 
 interface PackMoment {
@@ -55,16 +54,17 @@ function floatLabel(
   color: number,
   timing: { ms: number; rise: number },
 ): void {
-  const label = addPixelText(scene, 0, 0, text, { color, font: "title", scale: 2 });
+  const label = addPixelText(scene, 0, 0, text, { color, font: "title", scale: TITLE_SCALE });
+  const title = pixelFontMetrics(scene, "title");
   const width = Math.ceil(label.width) + 2 * CHIP_PAD;
   label.setPosition(CHIP_PAD, CHIP_PAD + label.y);
   const box = scene.add.graphics();
   drawFramedRect(
     box,
     { border: PALETTE.plum, fill: PALETTE.cream },
-    { height: TITLE.capHeight + 2 * CHIP_PAD, width, x: 0, y: 0 },
+    { height: title.capHeight * TITLE_SCALE + 2 * CHIP_PAD, width, x: 0, y: 0 },
   );
-  const capTop = anchor.lineBottom - TITLE.line + TITLE.capTop;
+  const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TITLE_SCALE;
   const x = Math.round(anchor.centreX - width / 2);
   const y = capTop - CHIP_PAD;
   const chip = scene.add.container(x, y, [box, label]).setDepth(moment.depth);

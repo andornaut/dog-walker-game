@@ -110,7 +110,7 @@ export class ZoneCelebrationScene extends Scene {
     const title = { color: PALETTE.yellow, font: "title", originX: 0.5 } as const;
     // addDisplayText draws the display font at 1x, so the title is scaled after.
     const big = addDisplayText(this, centerX, 0, text.title, title);
-    const { scale } = fitPixelText(big, { room: titleRoom, styles: titleStyles }, centerX, 0);
+    const { scale } = fitPixelText(big, { room: titleRoom, styles: titleStyles }, centerX, 0).style;
     // A smaller title keeps its line's bottom row, so it stays over the subtitle.
     atLineTop(big, version.titleY + (big.height / scale) * (titleScale - scale));
     const subtitle = { ...title, color: PALETTE.cream, variant: "cream" } as const;

@@ -15,7 +15,7 @@ import {
 } from "../hud/effectIcons";
 import { explainLines } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
-import { hudLanes } from "../hud/hudLanes";
+import { type HudLanes, hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
@@ -64,7 +64,13 @@ import { listenOnePress } from "./onePress";
 import { onSceneEvent } from "./overlay";
 import { OwnerTabs } from "./ownerTabs";
 import { colorFromHex, PALETTE } from "./palette";
-import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
+import {
+  addPixelText,
+  pixelFontMetrics,
+  placePixelText,
+  scalePixelText,
+  setPixelText,
+} from "./pixelText";
 import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,
@@ -82,7 +88,7 @@ import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from ".
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const BAR = walkBarLayout(LAYOUT.topBar);
-const LANES = hudLanes(LAYOUT);
+
 // A pip of ui-zone-pips.
 const PIP = { height: 8, width: 18 };
 const LABEL = { height: 20, ms: 1100 };
@@ -163,6 +169,11 @@ export class HudScene extends Scene {
     super(SCENE_KEYS.hud);
   }
 
+  // The HUD's lanes, under the message strip as tall as the body font draws it.
+  private lanes(): HudLanes {
+    return hudLanes(pixelFontMetrics(this, "body"), LAYOUT);
+  }
+
   create(): void {
     const { dogRow, dogSlots, topBar } = LAYOUT;
     this.drawn = {};
@@ -232,7 +243,7 @@ export class HudScene extends Scene {
     this.hearts = new HeartFeedback(this, {
       clearOf: () => this.feedback?.firingRects() ?? [],
       landed: (label, lane) => this.showHeartLabel(label, lane),
-      quipTop: LANES.ownerTabs.y,
+      quipTop: this.lanes().ownerTabs.y,
       still: () => run.reducedMotion(),
     });
     onSceneEvent(this, run.events, ACHIEVEMENTS_EVENT, (ids: AchievementId[]) =>
@@ -708,7 +719,7 @@ export class HudScene extends Scene {
     if (!this.bankShowing) {
       this.showNextBankLabel();
     }
-    const pops = heartPops({ lanes: LANES.heartLabels, run }, labels, (slot) => {
+    const pops = heartPops({ lanes: this.lanes().heartLabels, run }, labels, (slot) => {
       const view = this.cards[slot];
       return view === undefined ? undefined : { card: view.card, parts: cardParts(view) };
     });
@@ -728,7 +739,7 @@ export class HudScene extends Scene {
     if (label === undefined) {
       return;
     }
-    const lane = LANES.bank;
+    const lane = this.lanes().bank;
     const y = lane.y + lane.height - LABEL.height;
     const rise = this.runScene().reducedMotion() ? 0 : y - lane.y;
     this.showLabel(label, { scale: 2, x: lane.x, y }, rise, lane.width, () =>

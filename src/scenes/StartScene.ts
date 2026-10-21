@@ -47,7 +47,7 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
-import { HOME_LAYOUT, sectionFill } from "../home/homeLayout";
+import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT, sectionFill } from "../home/homeLayout";
 import {
   bubbleSpeech,
   type HomeAction,
@@ -91,6 +91,7 @@ import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHTS, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -126,7 +127,7 @@ import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole } from "./pixelText";
+import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
 import {
   currentSettings,
   isMuted,
@@ -202,6 +203,7 @@ const WALKER_ORIGIN = HOME_LAYOUT.walkerOrigin;
 const WALKER_TILE = HOME_LAYOUT.walkerTile;
 const DOG_TILES = HOME_LAYOUT.dogTiles;
 const DOG_ORIGIN = HOME_LAYOUT.dogOrigin;
+const DOG_TILE = HOME_LAYOUT.dogTile;
 const DOG_TILE_INSET = HOME_LAYOUT.dogTileInset;
 const TILE_SELECT_OUTSET = HOME_LAYOUT.tileSelectOutset;
 const START_BUTTON: Rect = HOME_LAYOUT.startButton;
@@ -1498,18 +1500,22 @@ export class StartScene extends Scene {
       content.add(face);
       view.face = { object: face, y: y + 5 };
 
-      this.text(content, x + 39, y + 4, dog.name, ink);
+      const { feeY, nameY, textX } = DOG_TILE;
+      const fitText = (value: string, top: number) => {
+        const label = this.text(content, x + textX, top, value, ink);
+        fitPixelText(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
+      };
+      fitText(dog.name, y + nameY);
       if (locked) {
         // A locked dog shows its padlock and its price or goal plate in place of its icons
         // and fee.
         addLock(this, content, x - 2, y - 3);
         if (!stickered({ dog: id, kind: "dog" })) {
-          this.lockedPlate(content, tile, { capY: y + 28, originX: 0, x: x + 39 });
+          this.lockedPlate(content, tile, { capY: y + feeY - 1, originX: 0, x: x + textX });
         }
         return;
       }
-      const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) });
-      this.text(content, x + 39, y + 29, fee, ink);
+      fitText(homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) }), y + feeY);
     });
   }
 

@@ -3,10 +3,10 @@ import type { GameObjects, Scene } from "phaser";
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { AchievementId, DogId } from "../data/types";
-import { badgeStrip, badgeWall, celebrationTitle } from "../home/badgesView";
+import { badgeNameFit, badgeStrip, badgeWall, celebrationTitle } from "../home/badgesView";
 import type { Rect } from "../layout/rect";
 import { PALETTE } from "./palette";
-import { addPixelText, wrapPixelText } from "./pixelText";
+import { addPixelText, fitPixelText } from "./pixelText";
 import { playTagOnce } from "./sprites";
 import { addPanel, showTag, tagFrame, TEXT_SCALE } from "./uiKit";
 
@@ -84,7 +84,8 @@ export function addConfetti(
 
 // Badges just earned, side by side in a panel with confetti behind each: they pop in one after
 // another, or with reduced motion are simply there over a still frame of confetti. Each name
-// takes up to nameLines lines.
+// takes up to nameLines lines, its glyphs closer or at 1x where they would not fit
+// (badgeNameFit).
 export function addBadgeCelebration(
   scene: Scene,
   reduced: boolean,
@@ -113,10 +114,15 @@ export function addBadgeCelebration(
     const image = addBadge(scene, badge.art, true, slot.centerX, badgeY);
     if (strip.named) {
       const style = { color: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
-      const name = wrapPixelText(scene, style, slot.width - 4, badge.name);
-      name.slice(0, nameLines).forEach((line, n) => {
-        const y = badgeY + BADGE_SIZE / 2 + 6 + n * NAME_LINE_HEIGHT;
-        addPixelText(scene, slot.centerX, y, line, style).setDepth(1);
+      const probe = addPixelText(scene, 0, 0, badge.name, style).setVisible(false);
+      const name = fitPixelText(probe, badgeNameFit(nameLines, slot), 0, 0);
+      probe.destroy();
+      const { letterSpacing, scale } = name.style;
+      name.lines.forEach((line, n) => {
+        const y = badgeY + BADGE_SIZE / 2 + 6 + (n * NAME_LINE_HEIGHT * scale) / TEXT_SCALE;
+        addPixelText(scene, slot.centerX, y, line, { ...style, scale })
+          .setLetterSpacing(letterSpacing)
+          .setDepth(1);
       });
     }
     if (reduced) {

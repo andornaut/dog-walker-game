@@ -5,7 +5,16 @@ import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { END_LAYOUT, endPanelLayout, QUIP_TEXT_ROOM } from "../home/endLayout";
+import {
+  breakdownLabelRoom,
+  END_BADGE_NAME_LINES,
+  END_LAYOUT,
+  END_TEXT_SCALE,
+  endPanelLayout,
+  grantedQuipLines,
+  QUIP_TEXT_ROOM,
+  SIDE_LABEL_ROOM,
+} from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
 import { dollarText, signedDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
@@ -20,7 +29,7 @@ import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { COLLAR_HEIGHTS, leashHand } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import type { LastWalk } from "../save/schema";
@@ -31,7 +40,7 @@ import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import { onBackPressed } from "./overlay";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText } from "./pixelText";
+import { addPixelText, fitPixelText, inkSpan, pixelFontMetrics } from "./pixelText";
 import {
   currentSettings,
   lastRunEnd,
@@ -123,13 +132,26 @@ export class EndScene extends Scene {
     const lines =
       ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
     const closing = closingLines(gameData, Math.random, walk);
-    const { panel, quipsTop } = endPanelLayout(lines.length, closing.length);
+    const text = (x: number, y: number, value: string, color: number, originX = 0) =>
+      addPixelText(this, x, y, value, { color, originX, scale: END_TEXT_SCALE });
+    const title = (x: number, y: number, value: string, color: number, originX = 0) =>
+      addPixelText(this, x, y, value, { color, font: "title", originX, scale: END_TEXT_SCALE });
+    // A label set in the first of TEXT_FIT_STYLES that fits room.
+    const fitted = (label: GameObjects.BitmapText, room: number, x: number, y: number) =>
+      fitPixelText(label, { room, styles: TEXT_FIT_STYLES }, x, y);
+    const body = pixelFontMetrics(this, "body");
+    // A closing line wraps onto a second line at 2x while the panel has room for it.
+    const quipFit = { room: QUIP_TEXT_ROOM, styles: WRAPPING_TEXT_FIT_STYLES };
+    const wanted = closing.map((line) => {
+      const probe = text(0, 0, line.text, PALETTE.plum);
+      const { lines: shown } = fitPixelText(probe, quipFit, 0, 0);
+      probe.destroy();
+      return shown.length;
+    });
+    const quipLines = grantedQuipLines(body, lines.length, wanted);
+    const { panel, rows } = endPanelLayout(body, lines.length, quipLines);
     addPanel(this, panel);
     const g = this.add.graphics();
-    const text = (x: number, y: number, value: string, color: number, originX = 0) =>
-      addPixelText(this, x, y, value, { color, originX, scale: TEXT_SCALE });
-    const title = (x: number, y: number, value: string, color: number, originX = 0) =>
-      addPixelText(this, x, y, value, { color, font: "title", originX, scale: TEXT_SCALE });
 
     const words = gameData.menuText.end;
     addDisplayText(this, SCREEN_CONFIG.width / 2, TITLE_Y, words.titles[walk.outcome], {
@@ -143,18 +165,28 @@ export class EndScene extends Scene {
       soundboardOf(this).play("newBest");
     }
 
+    // Each label fits the room its amount leaves it.
+    const room = (amount: GameObjects.BitmapText) => {
+      const ink = inkSpan(amount);
+      return breakdownLabelRoom(ink.right - ink.left);
+    };
     let y = BREAKDOWN.top;
     for (const line of lines) {
-      text(BREAKDOWN.label, y, line.label, PALETTE.plum);
-      text(BREAKDOWN.amountRight, y, signedDollarText(line.amount), amountColor(line.amount), 1);
+      const amount = signedDollarText(line.amount);
+      const shown = text(BREAKDOWN.amountRight, y, amount, amountColor(line.amount), 1);
+      fitted(text(BREAKDOWN.label, y, line.label, PALETTE.plum), room(shown), BREAKDOWN.label, y);
       y += BREAKDOWN.pitch;
     }
     const ruleWidth = BREAKDOWN.amountRight - BREAKDOWN.label;
     fillRect(g, PALETTE.tan, { height: 1, width: ruleWidth, x: BREAKDOWN.label, y: y + 2 });
-    title(BREAKDOWN.label, y + 8, words.total, PALETTE.plum);
-    title(BREAKDOWN.amountRight, y + 8, signedDollarText(walk.earnedCents), PALETTE.forest, 1);
+    const totalY = y + 8;
+    const totalText = signedDollarText(walk.earnedCents);
+    const total = title(BREAKDOWN.amountRight, totalY, totalText, PALETTE.forest, 1);
+    const totalLabel = title(BREAKDOWN.label, totalY, words.total, PALETTE.plum);
+    fitted(totalLabel, room(total), BREAKDOWN.label, totalY);
 
-    text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
+    const zonesLabel = text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
+    fitted(zonesLabel, SIDE_LABEL_ROOM, SIDE.x, BREAKDOWN.top);
     zonePips(walkLength(gameData), walk).forEach((pip, i) => {
       const x = SIDE.x + i * SIDE.pipPitch;
       const { tag } = pipLook(gameData, {
@@ -173,16 +205,19 @@ export class EndScene extends Scene {
     });
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
-    text(SIDE.x, SIDE.bankY, words.bank, PALETTE.plum);
+    fitted(text(SIDE.x, SIDE.bankY, words.bank, PALETTE.plum), SIDE_LABEL_ROOM, SIDE.x, SIDE.bankY);
     if (this.textures.exists(MONEY_ICON_KEY)) {
       this.add.image(SIDE.x, SIDE.iconY, MONEY_ICON_KEY).setOrigin(0);
     }
-    title(SIDE.x + 20, SIDE.iconY + 2, dollarText(save.bankCents), PALETTE.plum);
+    const bankX = SIDE.x + SIDE.bankDx;
+    const bank = title(bankX, SIDE.iconY + 2, dollarText(save.bankCents), PALETTE.plum);
+    fitted(bank, SIDE_LABEL_ROOM - SIDE.bankDx, bankX, SIDE.iconY + 2);
 
+    const quipsTop = rows[0]?.top ?? 0;
     fillRect(g, PALETTE.tan, { height: 1, width: 288, x: 36, y: quipsTop - 8 });
     const celebrating = earned.length > 0;
     closing.forEach((line, i) => {
-      const row = quipsTop + i * QUIPS.pitch;
+      const { height, top: row } = itemAt(rows, i);
       const { well } = QUIPS;
       fillRect(g, PALETTE.tan, { height: well.size, width: well.size, x: well.x, y: row + well.y });
       const faceX = QUIPS.face.x;
@@ -194,20 +229,26 @@ export class EndScene extends Scene {
         const face = this.add.sprite(faceX, faceY, key).setOrigin(0);
         showTag(reduced, face, key, line.fired ? "fired" : "happy");
       }
-      this.addBubble({ ...QUIPS.bubble, y: row });
+      const { bubble, nameY, textX, textY } = QUIPS;
+      this.addBubble({ height, width: bubble.width, x: bubble.x, y: row });
       const owner = gameData.dogs[line.dog].owner.name;
       const header = line.fired
         ? fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner })
         : owner;
-      const name = title(QUIPS.textX, row + 5, header, line.fired ? PALETTE.darkRed : PALETTE.plum);
-      const fit = { room: QUIP_TEXT_ROOM, styles: TEXT_FIT_STYLES };
-      fitPixelText(name, fit, QUIPS.textX, row + 5);
-      const quip = text(QUIPS.textX, row + 22, line.text, PALETTE.plum);
-      fitPixelText(quip, fit, QUIPS.textX, row + 22);
+      const name = title(textX, row + nameY, header, line.fired ? PALETTE.darkRed : PALETTE.plum);
+      fitted(name, QUIP_TEXT_ROOM, textX, row + nameY);
+      const quip = text(textX, row + textY, line.text, PALETTE.plum);
+      const wraps = itemAt(quipLines, i) > 1;
+      fitPixelText(
+        quip,
+        wraps ? quipFit : { ...quipFit, styles: TEXT_FIT_STYLES },
+        textX,
+        row + textY,
+      );
     });
 
     if (celebrating) {
-      addBadgeCelebration(this, reduced, 1, BADGES, earned);
+      addBadgeCelebration(this, reduced, END_BADGE_NAME_LINES, BADGES, earned);
       // After a new best's fanfare, so the two do not play over each other.
       this.time.delayedCall(newBest ? BADGE_SOUND_AFTER_BEST_MS : 0, () =>
         soundboardOf(this).play("badge"),

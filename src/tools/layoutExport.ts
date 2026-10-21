@@ -51,6 +51,8 @@ import { screenLayout } from "../layout/screenLayout";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
 import { walkerFootY, walkProjection } from "../runner/walkGeometry";
+import { fontMetrics } from "../ui/fontMetrics";
+import { readBitmapFont } from "./fontFile";
 
 // The screen geometry art's tools read, as shared/export/layout.json, all in screen pixels
 // unless a comment says otherwise. Each block is read from the module the game draws by.
@@ -81,6 +83,7 @@ export function layoutExport(
   const projection = walkProjection(ROAD_CAMERA, road);
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");
   const bandRows = Array.from({ length: approach.height }, (_, i) => approach.y + i);
+  const body = fontMetrics(readBitmapFont("font-body"));
   return {
     camera: {
       ...ROAD_CAMERA,
@@ -106,7 +109,7 @@ export function layoutExport(
     gags: { keys: GAG_KEYS, kite: KITE_AT, sizes: GAG_SIZES, y: GAG_Y, zones: ZONE_GAGS },
     // The walk HUD's transient layers, each kept to its lane: money changes under the message
     // strip, the owners' tabs over the cards' tops, and heart changes by slot.
-    hudLanes: hudLanes(regions),
+    hudLanes: hudLanes(body, regions),
     // The road on each of the band's approach rows, where the moving road draws over the
     // backdrop, down to the band's bottom row; bandRow counts from the band's top.
     join: bandRows.map((row) => ({
@@ -123,7 +126,7 @@ export function layoutExport(
     // icon, the text column and its room, and each row's capitals top; and its one-row panel
     // under one and two debuff bars.
     messageStrip: {
-      ...messageStripLayout(),
+      ...messageStripLayout(body),
       underBars: [1, 2].map((bars) => messageLinePanel(bars)),
     },
     // The pack as drawn and hit. silhouettes: each sprite's opaque pixels over its walk loop,

@@ -30,12 +30,15 @@ export const SHOP_LAYOUT = {
   message: { y: 540 },
   panel: PANEL,
   // In a row: the 36x36 art box and the art in it, the name and line, and the price plate or
-  // OWNED at the right.
+  // OWNED (ownedDx left of the tick's right edge) plateInset inside the right edge, the name
+  // and line keeping textGap clear of it.
   row: {
     art: 2,
     box: { dx: 4, size: 36 },
+    ownedDx: 20,
     plateInset: 6,
     textDx: 46,
+    textGap: 6,
     width: ROW_WIDTH,
     x: ROW_X,
   },
@@ -65,4 +68,11 @@ export function rowRects(
     x,
     y: spec.y + i * spec.pitch,
   }));
+}
+
+// How wide a row's name and line may be beside the price plate or OWNED, rightWidth wide from
+// its left edge to the row's right edge less plateInset.
+export function shopRowTextRoom(rightWidth: number): number {
+  const { plateInset, textDx, textGap, width } = SHOP_LAYOUT.row;
+  return width - plateInset - rightWidth - textGap - textDx;
 }

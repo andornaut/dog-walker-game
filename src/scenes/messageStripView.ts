@@ -4,7 +4,6 @@ import type { ExplainLine } from "../hud/explain";
 import {
   EMPTY_MESSAGE_STRIP,
   lineAlpha,
-  MESSAGE_LINE,
   MESSAGE_STRIP,
   MESSAGE_TIMING,
   type MessageIcon,
@@ -19,8 +18,16 @@ import {
   sayLineAhead,
   stepMessageStrip,
 } from "../hud/messageStrip";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { PALETTE } from "./palette";
-import { addPixelText, type PixelTextStyle, scalePixelText, setPixelText } from "./pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  pixelFontMetrics,
+  type PixelTextStyle,
+  placePixelText,
+  setPixelText,
+} from "./pixelText";
 import { addPanel } from "./uiKit";
 
 // A line said from the run scene, as { icon, text }: the HUD shows it on its message strip.
@@ -31,7 +38,6 @@ export function sayMessage(runScene: Scene, icon: MessageIcon, text: string): vo
   runScene.events.emit(MESSAGE_EVENT, { icon, text });
 }
 
-const LAYOUT = messageStripLayout();
 const TEXT_STYLE: PixelTextStyle = { color: PALETTE.plum, scale: MESSAGE_STRIP.scale };
 
 type Faded = GameObjects.GameObject & { alpha: number };
@@ -128,7 +134,7 @@ export class MessageStrip {
 }
 
 // The line's icon and text: with no debuff bar up, its rows at 2x on a panel as tall as they
-// are; under bars, one row at 2x, or 1x when that is too wide, on the one-row panel.
+// are; under bars, one row fitted by TEXT_FIT_STYLES on the one-row panel.
 function draw(
   scene: Scene,
   depth: number,
@@ -136,22 +142,23 @@ function draw(
   line: ExplainLine & { id: number },
 ): Drawn {
   const parts: Faded[] = [];
+  const body = pixelFontMetrics(scene, "body");
+  const layout = messageStripLayout(body);
   let panel: Faded;
-  let icon = LAYOUT.icon;
+  let icon = layout.icon;
   if (bars === 0) {
-    const rows = wrappedRows(scene, line.text);
-    panel = addPanel(scene, messagePanel(Math.max(1, rows.length)));
+    const rows = wrappedRows(scene, layout.room, line.text);
+    panel = addPanel(scene, messagePanel(body, Math.max(1, rows.length)));
     parts.push(
-      addPixelText(scene, LAYOUT.textX, LAYOUT.rowTops[0] ?? 0, rows.join("\n"), TEXT_STYLE),
+      addPixelText(scene, layout.textX, layout.rowTops[0] ?? 0, rows.join("\n"), TEXT_STYLE),
     );
   } else {
     const one = messageLinePanel(bars);
     panel = addPanel(scene, one.panel);
     icon = one.icon;
     const text = addPixelText(scene, one.textX, 0, line.text, TEXT_STYLE);
-    const scale = MESSAGE_LINE.scales.find((each) => (text.width / text.scaleX) * each <= one.room);
-    const shown = scale ?? MESSAGE_LINE.scales[MESSAGE_LINE.scales.length - 1] ?? 1;
-    scalePixelText(text, shown, one.textX, messageLineTop(one, shown));
+    const { style } = fitPixelText(text, { room: one.room, styles: TEXT_FIT_STYLES }, one.textX, 0);
+    placePixelText(text, one.textX, messageLineTop(body, one, style.scale));
     parts.push(text);
   }
   if (scene.textures.exists(line.iconKey)) {
@@ -163,14 +170,14 @@ function draw(
 }
 
 // The line's rows, measured on the font they are drawn in.
-function wrappedRows(scene: Scene, text: string): string[] {
+function wrappedRows(scene: Scene, room: number, text: string): string[] {
   const probe = addPixelText(scene, 0, 0, "", TEXT_STYLE).setVisible(false);
   const rows = messageRows(
     (row) => {
       setPixelText(probe, row);
       return probe.width;
     },
-    LAYOUT.room,
+    room,
     text,
   );
   probe.destroy();

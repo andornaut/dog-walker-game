@@ -21,10 +21,17 @@ import {
   shopTabOf,
   slotRows,
 } from "../home/shop";
-import { rowRects, SHOP_LAYOUT, shopTabFace, shopTabRects } from "../home/shopLayout";
+import {
+  rowRects,
+  SHOP_LAYOUT,
+  shopRowTextRoom,
+  shopTabFace,
+  shopTabRects,
+} from "../home/shopLayout";
 import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import { cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
@@ -35,7 +42,7 @@ import { addAffordFrame, type DetailPicture, drawDetailCard } from "./homePanels
 import { addLock, addPlate, drawDogSlotFallback, SHOP_ART } from "./itemArt";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole } from "./pixelText";
+import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
@@ -80,6 +87,7 @@ const LAYOUT = SHOP_LAYOUT;
 const PANEL: Rect = LAYOUT.panel;
 const TAB_RECTS: readonly Rect[] = shopTabRects();
 const ROW = LAYOUT.row;
+const OWNED_DX = ROW.ownedDx;
 
 function sameTarget(a: Target, b: Target | undefined): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -588,11 +596,15 @@ export class ShopScene extends Scene {
     const ink = blocked ? PALETTE.darkSlate : PALETTE.plum;
     const mid = rect.y + Math.floor(rect.height / 2);
     const textX = rect.x + ROW.textDx;
+    const right = rect.x + rect.width - ROW.plateInset;
+    const rightLeft = this.drawRowRight(content, look, row, { mid, right });
+    // The name and line fit the room the price plate or Owned leaves them.
+    const fit = { room: shopRowTextRoom(right - rightLeft), styles: TEXT_FIT_STYLES };
     // A row with no second line centres its name.
     const nameY = row.line === "" ? mid - 5 : mid - 15;
-    this.text(content, { x: textX, y: nameY }, row.name, { color: ink });
-    this.drawRowLine(content, row, { blocked, mid, x: textX });
-    this.drawRowRight(content, look, row, { mid, right: rect.x + rect.width - ROW.plateInset });
+    const name = this.text(content, { x: textX, y: nameY }, row.name, { color: ink });
+    fitPixelText(name, fit, textX, nameY);
+    this.drawRowLine(content, row, { blocked, fit, mid, x: textX });
     if (this.focusId === row.id) {
       addSelectFrame(this, holder, rect, reducedMotion);
     } else if (look === "affordable") {
@@ -621,33 +633,40 @@ export class ShopScene extends Scene {
   private drawRowLine(
     parent: GameObjects.Container,
     row: ShopRow,
-    at: { blocked: boolean; mid: number; x: number },
+    at: {
+      blocked: boolean;
+      fit: { room: number; styles: readonly TextFitStyle[] };
+      mid: number;
+      x: number;
+    },
   ): void {
     const color = at.blocked ? PALETTE.darkSlate : PALETTE.darkBrown;
     if (row.line !== "") {
-      this.text(parent, { x: at.x, y: at.mid + 3 }, row.line, { color });
+      const line = this.text(parent, { x: at.x, y: at.mid + 3 }, row.line, { color });
+      fitPixelText(line, at.fit, at.x, at.mid + 3);
     }
   }
 
   // Owned with a tick, or the price on its plate: green when the bank covers it, dark red
-  // when not, navy on grey while blocked.
+  // when not, navy on grey while blocked. Returns the left edge of what it drew.
   private drawRowRight(
     parent: GameObjects.Container,
     look: ReturnType<typeof shopRowLook>,
     row: ShopRow,
     at: { mid: number; right: number },
-  ): void {
+  ): number {
     if (row.price === null) {
       const tick = addTagImage(this, "ui-check", "tick", at.right - 16, at.mid - 8);
       if (tick !== undefined) {
         parent.add(tick);
       }
-      this.text(parent, { x: at.right - 20, y: at.mid - 4 }, gameData.homeText.shop.owned, {
+      const owned = gameData.homeText.shop.owned;
+      const label = this.text(parent, { x: at.right - OWNED_DX, y: at.mid - 4 }, owned, {
         color: PALETTE.forest,
         font: "title",
         originX: 1,
       });
-      return;
+      return at.right - OWNED_DX - Math.ceil(label.width);
     }
     const colors =
       look === "blocked"
@@ -657,13 +676,13 @@ export class ShopScene extends Scene {
             face: PALETTE.cream,
             text: look === "affordable" ? PALETTE.forest : PALETTE.darkRed,
           };
-    addPlate(
+    return addPlate(
       this,
       parent,
       { capY: at.mid - 5, originX: 1, x: at.right },
       dollarText(row.price),
       colors,
-    );
+    ).x;
   }
 
   // A held dog's or gear item's detail card over the shop; any tap closes it.

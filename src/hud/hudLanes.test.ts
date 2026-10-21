@@ -3,13 +3,15 @@ import { describe, expect, it } from "vitest";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { fontFileMetrics } from "../testing/fontInk";
 import { hudLanes } from "./hudLanes";
 import { messageStripLayout } from "./messageStrip";
 import { DOG_CARD, ownerTabRect, WALK_BAR } from "./walkHud";
 
 const layout = screenLayout(SCREEN_CONFIG);
-const lanes = hudLanes(layout);
-const messages = messageStripLayout().panel;
+const BODY = fontFileMetrics("font-body");
+const lanes = hudLanes(BODY, layout);
+const messages = messageStripLayout(BODY).panel;
 
 function overlaps(a: Rect, b: Rect): boolean {
   return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;

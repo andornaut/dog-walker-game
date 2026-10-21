@@ -1182,7 +1182,7 @@
       },
       "quips": {
         "bubble": {
-          "height": 38,
+          "padBottom": 4,
           "width": 244,
           "x": 80
         },
@@ -1190,12 +1190,14 @@
           "x": 37,
           "y": 1
         },
-        "pitch": 40,
+        "gap": 2,
+        "nameY": 5,
         "tail": {
           "x": 75,
           "y": 15
         },
         "textX": 86,
+        "textY": 22,
         "well": {
           "size": 34,
           "x": 36,
@@ -1265,6 +1267,7 @@
         "y": 88
       },
       "side": {
+        "bankDx": 20,
         "bankY": 194,
         "iconY": 212,
         "pipPitch": 21,
@@ -1399,6 +1402,12 @@
       "dogOrigin": {
         "x": 14,
         "y": 298
+      },
+      "dogTile": {
+        "feeY": 29,
+        "nameY": 4,
+        "padRight": 3,
+        "textX": 39
       },
       "dogTileInset": 1,
       "dogTiles": {
@@ -2002,8 +2011,10 @@
           "dx": 4,
           "size": 36
         },
+        "ownedDx": 20,
         "plateInset": 6,
         "textDx": 46,
+        "textGap": 6,
         "width": 328,
         "x": 16
       },

@@ -5,7 +5,7 @@ import type { Rect } from "../layout/rect";
 import { fillRect } from "./draw";
 import { disabledTextureKey, silhouetteTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
+import { addPixelText, pixelFontMetrics } from "./pixelText";
 import { TEXT_SCALE } from "./uiKit";
 
 // The home screen's and the shop's art keys, each with a drawn stand-in below while missing.
@@ -36,8 +36,12 @@ export function addLock(scene: Scene, parent: GameObjects.Container, x: number, 
   }
 }
 
+const PLATE_PAD = 3;
+
 // A price or goal on a small plate: a 1px edge round a face, the text in font-body 2x with
-// its caps at capY. originX places the plate by its left (0), centre (0.5) or right (1).
+// its caps at capY, the plate reaching PLATE_PAD past the capitals above and below, so it is
+// as tall as the font's capitals make it. originX places the plate by its left (0), centre
+// (0.5) or right (1).
 export function addPlate(
   scene: Scene,
   parent: GameObjects.Container,
@@ -46,15 +50,18 @@ export function addPlate(
   colors: { readonly edge: number; readonly face: number; readonly text: number },
 ): Rect {
   const label = addPixelText(scene, 0, at.capY, text, { color: colors.text, scale: TEXT_SCALE });
-  const width = Math.ceil(label.width) + 6;
+  const width = Math.ceil(label.width) + 2 * PLATE_PAD;
+  const height = pixelFontMetrics(scene, "body").capHeight * TEXT_SCALE + 2 * PLATE_PAD;
   const left = Math.round(at.x - at.originX * width);
-  label.setX(left + 3);
+  const top = at.capY - PLATE_PAD;
+  label.setX(left + PLATE_PAD);
   const g = scene.add.graphics();
-  fillRect(g, colors.edge, { height: 16, width: width - 2, x: left + 1, y: at.capY - 3 });
-  fillRect(g, colors.edge, { height: 14, width, x: left, y: at.capY - 2 });
-  fillRect(g, colors.face, { height: 14, width: width - 2, x: left + 1, y: at.capY - 2 });
+  // Square corners cut by a pixel.
+  fillRect(g, colors.edge, { height, width: width - 2, x: left + 1, y: top });
+  fillRect(g, colors.edge, { height: height - 2, width, x: left, y: top + 1 });
+  fillRect(g, colors.face, { height: height - 2, width: width - 2, x: left + 1, y: top + 1 });
   parent.add([g, label]);
-  return { height: 16, width, x: left, y: at.capY - 3 };
+  return { height, width, x: left, y: top };
 }
 
 // A locked item's plate: its price in dark red, or green when the bank covers it; a goal in

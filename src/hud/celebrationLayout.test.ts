@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { fittingTextStyle, type TextFitStyle } from "../layout/textFit";
-import { fontInk } from "../testing/fontInk";
+import { fittingText, type TextFitStyle } from "../layout/textFit";
+import { inkWidth } from "../testing/fontInk";
 import { plainMarks } from "../ui/pixelFont";
 import { CELEBRATION_LAYOUT as LAYOUT } from "./celebrationLayout";
 
@@ -29,13 +29,12 @@ describe("CELEBRATION_LAYOUT", () => {
 // Each version's big line, upper-cased in font-display as addDisplayText draws it.
 describe("the celebration's title", () => {
   const { newWalker, zoneDone } = gameData.runText;
-  const inkWidth = (title: string) => (style: TextFitStyle) => {
-    const ink = fontInk("font-display", style, plainMarks(title).toUpperCase());
-    return ink.right - ink.left;
-  };
+  const width = (style: TextFitStyle, line: string) => inkWidth("font-display", style, line);
 
   it.each([newWalker.title, zoneDone.title])("sets %s inside the title room", (title) => {
-    const style = fittingTextStyle(LAYOUT.titleStyles, inkWidth(title), LAYOUT.titleRoom);
-    expect(inkWidth(title)(style)).toBeLessThanOrEqual(LAYOUT.titleRoom);
+    const shown = plainMarks(title).toUpperCase();
+    const { lines, style } = fittingText(LAYOUT.titleStyles, width, LAYOUT.titleRoom, shown);
+    expect(lines).toEqual([shown]);
+    expect(width(style, shown)).toBeLessThanOrEqual(LAYOUT.titleRoom);
   });
 });

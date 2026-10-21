@@ -1,5 +1,6 @@
 import type { Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
+import type { FontMetrics } from "../ui/fontMetrics";
 import { messageStripLayout } from "./messageStrip";
 import { OWNER_TAB, WALK_BAR } from "./walkHud";
 
@@ -22,10 +23,13 @@ const MARGIN = 4;
 const BANK_HEIGHT = 24;
 const HEART_LABEL_HEIGHT = 24;
 
-export function hudLanes(layout: Pick<ScreenLayout, "dogRow" | "dogSlots" | "topBar">): HudLanes {
+export function hudLanes(
+  body: FontMetrics,
+  layout: Pick<ScreenLayout, "dogRow" | "dogSlots" | "topBar">,
+): HudLanes {
   const { dogRow, dogSlots, topBar } = layout;
-  // The strip at its tallest.
-  const strip = messageStripLayout(topBar).panel;
+  // The strip at its tallest, in the body font.
+  const strip = messageStripLayout(body, topBar).panel;
   const cash = WALK_BAR.cash.well;
   const cardTop = Math.min(...dogSlots.map((slot) => slot.y));
   return {

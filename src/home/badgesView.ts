@@ -1,6 +1,7 @@
 import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementId, GameData } from "../data/types";
 import type { Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { MENU_TEXT_FIELDS } from "./menuText";
@@ -85,6 +86,18 @@ export function badgeStrip(
       centerX: Math.round(layout.x + width * (i + 0.5)),
       width: Math.floor(width),
     })),
+  };
+}
+
+// A badge's name under it in a strip: on up to nameLines lines at 2x, with its glyphs closer,
+// or at 1x, by TEXT_FIT_STYLES, within its slot less 2px each side.
+export function badgeNameFit(
+  nameLines: number,
+  slot: StripSlot,
+): { room: number; styles: TextFitStyle[] } {
+  return {
+    room: slot.width - 4,
+    styles: TEXT_FIT_STYLES.map((style) => ({ ...style, lines: nameLines })),
   };
 }
 

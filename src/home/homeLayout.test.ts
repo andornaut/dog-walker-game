@@ -5,8 +5,13 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { fitInFont } from "../testing/fontInk";
+import { plainMarks } from "../ui/pixelFont";
 import { FEEDBACK } from "./feedback";
-import { HOME_LAYOUT, pocketLining, sectionFill } from "./homeLayout";
+import { dogFeeText } from "./home";
+import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT, pocketLining, sectionFill } from "./homeLayout";
+import { homeLine } from "./homeText";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
   HOME_LAYOUT;
@@ -187,5 +192,14 @@ describe("top bar", () => {
     ["the settings button", iconCentre(settings.icon)],
   ])("centres %s on the bar's middle row", (_, centre) => {
     expect(centre).toBe(mid);
+  });
+});
+
+// Each dog's name and the fee line fit a dog tile's text column, measured on the body font.
+describe("a dog tile's text", () => {
+  const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) });
+  it.each([...Object.values(gameData.dogs).map((dog) => dog.name), fee])("sets %j", (text) => {
+    const fitted = fitInFont("font-body", TEXT_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
+    expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
   });
 });

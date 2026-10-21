@@ -6,13 +6,15 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { bodyTextWidth } from "../testing/bodyFont";
+import { fontFileMetrics } from "../testing/fontInk";
 import { fillLine } from "../text/lines";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import {
   EMPTY_MESSAGE_STRIP,
   lineAlpha,
   MESSAGE_ICONS,
-  MESSAGE_LINE,
   MESSAGE_STRIP,
   MESSAGE_TIMING,
   type MessageIcon,
@@ -41,6 +43,8 @@ function after(steps: readonly (readonly [string | null, number])[]): MessageStr
     return stepMessageStrip(MESSAGE_TIMING, dtMs, said);
   }, EMPTY_MESSAGE_STRIP);
 }
+
+const BODY = fontFileMetrics("font-body");
 
 describe("sayLine", () => {
   const showing = after([["a", 0]]);
@@ -169,7 +173,7 @@ describe("messageIconKey", () => {
 });
 
 describe("messageStripLayout", () => {
-  const strip = messageStripLayout();
+  const strip = messageStripLayout(BODY);
   const { backdrop } = screenLayout(SCREEN_CONFIG);
   const { scale } = MESSAGE_STRIP;
   const inside = (inner: Rect, outer: Rect) =>
@@ -179,9 +183,9 @@ describe("messageStripLayout", () => {
     inner.y + inner.height <= outer.y + outer.height;
   const overlaps = (a: Rect, b: Rect) =>
     a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-  // The body font's capitals are 5 rows at 1x, its lowest ink 2 rows under them.
+  // A row from its capitals' top to its lowest ink.
   const rowRect = (top: number): Rect => ({
-    height: 7 * scale,
+    height: inkRowsFromCapTop(BODY) * scale,
     width: strip.room,
     x: strip.textX,
     y: top,
@@ -190,11 +194,11 @@ describe("messageStripLayout", () => {
 
   it.each<[string, Rect, Rect]>([
     ["the strip in the backdrop band", strip.panel, backdrop],
-    ["the icon in a one-row strip", iconRect, messagePanel(1)],
+    ["the icon in a one-row strip", iconRect, messagePanel(BODY, 1)],
     ...strip.rowTops.map((top, row): [string, Rect, Rect] => [
       `row ${row + 1} in a ${row + 1}-row strip`,
       rowRect(top),
-      messagePanel(row + 1),
+      messagePanel(BODY, row + 1),
     ]),
   ])("keeps %s", (_name, inner, outer) => {
     expect(inside(inner, outer)).toBe(true);
@@ -202,9 +206,9 @@ describe("messageStripLayout", () => {
 
   it("holds at most two rows, each a 2x line of the body font below the last", () => {
     expect(MESSAGE_STRIP.rows).toBe(2);
-    expect(strip.panel).toEqual(messagePanel(MESSAGE_STRIP.rows));
+    expect(strip.panel).toEqual(messagePanel(BODY, MESSAGE_STRIP.rows));
     strip.rowTops.slice(1).forEach((top, i) => {
-      expect(top - (strip.rowTops[i] ?? 0)).toBe(10 * scale);
+      expect(top - (strip.rowTops[i] ?? 0)).toBe(BODY.lineHeight * scale);
     });
   });
 
@@ -215,7 +219,7 @@ describe("messageStripLayout", () => {
   });
 
   it("centres the first row's capitals on the icon", () => {
-    const capsMiddle = (strip.rowTops[0] ?? 0) + (5 * scale) / 2;
+    const capsMiddle = (strip.rowTops[0] ?? 0) + (BODY.capHeight * scale) / 2;
     expect(Math.abs(capsMiddle - (strip.icon.y + 8))).toBeLessThanOrEqual(0.5);
   });
 });
@@ -238,11 +242,11 @@ describe("messageLinePanel", () => {
     expect(line.textX + line.room).toBeLessThanOrEqual(line.panel.x + line.panel.width);
   });
 
-  it.each(MESSAGE_LINE.scales.map((scale) => [scale] as const))(
+  it.each([...new Set(TEXT_FIT_STYLES.map(({ scale }) => scale))])(
     "centres a %ix row's capitals on the icon's rows",
     (scale) => {
       const line = messageLinePanel(1);
-      const capsMiddle = messageLineTop(line, scale) + (5 * scale) / 2;
+      const capsMiddle = messageLineTop(BODY, line, scale) + (BODY.capHeight * scale) / 2;
       expect(Math.abs(capsMiddle - (line.icon.y + 8))).toBeLessThanOrEqual(0.5);
     },
   );
@@ -251,7 +255,7 @@ describe("messageLinePanel", () => {
 // Every hint and badge line wraps at 2x onto the strip's rows, each no wider than its room,
 // and none left out.
 describe("the strip's lines", () => {
-  const { room } = messageStripLayout();
+  const { room } = messageStripLayout(BODY);
   const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
   const longestName = gameData.achievements
     .map(({ name }) => name)

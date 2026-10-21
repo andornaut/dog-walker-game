@@ -36,7 +36,13 @@ function fakeScene(fonts: Readonly<Record<string, string>>): { drawn: Drawn[]; s
     cache: {
       bitmapFont: {
         exists: (key: string) => key in fonts,
-        get: (key: string) => ({ data: { chars: glyphs(fonts[key] ?? "") } }),
+        // Each font's capitals start 4 rows into its line, as font-title's do.
+        get: (key: string) => ({
+          data: {
+            chars: { ...glyphs(fonts[key] ?? ""), [72]: { height: 5, yOffset: 4 } },
+            lineHeight: 12,
+          },
+        }),
       },
     },
   };

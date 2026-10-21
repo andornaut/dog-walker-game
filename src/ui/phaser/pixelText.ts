@@ -1,14 +1,16 @@
 import type { GameObjects, Scene, Types } from "phaser";
 
 import { wrapWords } from "../../lib/lines";
+import { type FontMetrics, fontMetrics } from "../fontMetrics";
 import {
+  GLYPH_HEIGHT,
   glyphAdvance,
   LINE_HEIGHT,
   normalizePixelText,
   pixelFontAtlas,
   plainMarks,
 } from "../pixelFont";
-import { fittingTextStyle, type TextFitStyle } from "../textFit";
+import { type FittedText, fittingText, type TextFitStyle } from "../textFit";
 
 // body: mixed case, for running text, card effects and labels. title: capitals, for
 // titles, numbers, money and buttons. Both are white glyphs, tinted to a palette colour.
@@ -109,9 +111,41 @@ function textFor(key: string, role: FontRole, text: string): string {
 
 const ALIGN = { center: 1, left: 0, right: 2 } as const;
 
-// How far below a line's top each font's capitals start, so y is the top of the capitals
-// as in the mocks, whichever font draws it.
-const CAP_TOP: Readonly<Record<FontRole, number>> = { body: 2, title: 4 };
+// The fallback font's capitals fill its glyphs, from the line's top.
+const FALLBACK_METRICS: FontMetrics = {
+  capHeight: GLYPH_HEIGHT,
+  capTop: 0,
+  inkBottom: GLYPH_HEIGHT,
+  lineHeight: LINE_HEIGHT,
+};
+
+const METRICS = new WeakMap<object, FontMetrics>();
+
+// The rows of the font that draws role, read from the font as loaded: where its capitals start
+// and end, its lowest ink and its line height, in font pixels.
+export function pixelFontMetrics(scene: Scene, role: FontRole): FontMetrics {
+  const key = fontKey(scene, role);
+  if (key === FALLBACK_FONT_KEY) {
+    return FALLBACK_METRICS;
+  }
+  const { data } = scene.cache.bitmapFont.get(key) as {
+    data: Types.GameObjects.BitmapText.BitmapFontData;
+  };
+  const known = METRICS.get(data);
+  if (known !== undefined) {
+    return known;
+  }
+  // Phaser keys a font's glyphs by character code.
+  const glyphs = new Map(
+    Object.entries(data.chars).map(([code, glyph]) => [
+      String.fromCodePoint(Number(code)),
+      { height: glyph.height, yOffset: glyph.yOffset },
+    ]),
+  );
+  const metrics = fontMetrics({ glyphs, lineHeight: data.lineHeight });
+  METRICS.set(data, metrics);
+  return metrics;
+}
 
 // Text placed by its origin, at a whole-pixel position. With originY 0, y is the top of
 // the capitals.
@@ -125,7 +159,8 @@ export function addPixelText(
   const role = style.font ?? "body";
   const key = fontKey(scene, role);
   const scale = style.scale ?? 1;
-  const capTop = key === FALLBACK_FONT_KEY || (style.originY ?? 0) !== 0 ? 0 : CAP_TOP[role];
+  // So y is the top of the capitals, as in the mocks, whichever font draws it.
+  const capTop = (style.originY ?? 0) !== 0 ? 0 : pixelFontMetrics(scene, role).capTop;
   const label = scene.add
     .bitmapText(Math.round(x), Math.round(y - capTop * scale), key, textFor(key, role, text))
     .setScale(scale)
@@ -191,26 +226,29 @@ export function inkSpan(label: GameObjects.BitmapText): { left: number; right: n
   return { left: left * label.scaleX, right: right * label.scaleX };
 }
 
-// Sets the label in the first of styles whose ink is no wider than room, else the last,
-// keeping (x, y) its origin's x and the top of its capitals, and returns that style.
+// Sets the label in the first of styles that fits its text in room, each line's ink no wider
+// than room and wrapped at spaces onto at most the style's lines, else the last style on one
+// line, keeping (x, y) its origin's x and the top of its first line's capitals. Returns the
+// style and the lines.
 export function fitPixelText(
   label: GameObjects.BitmapText,
   fit: { room: number; styles: readonly TextFitStyle[] },
   x: number,
   y: number,
-): TextFitStyle {
-  const apply = (style: TextFitStyle) => {
-    label.setLetterSpacing(style.letterSpacing);
+): FittedText {
+  const text = label.text;
+  const apply = (style: TextFitStyle, lines: string) => {
+    label.setText(lines).setLetterSpacing(style.letterSpacing);
     scalePixelText(label, style.scale, x, y);
     return label;
   };
-  const inkWidth = (style: TextFitStyle) => {
-    const ink = inkSpan(apply(style));
+  const inkWidth = (style: TextFitStyle, line: string) => {
+    const ink = inkSpan(apply(style, line));
     return ink.right - ink.left;
   };
-  const style = fittingTextStyle(fit.styles, inkWidth, fit.room);
-  apply(style);
-  return style;
+  const fitted = fittingText(fit.styles, inkWidth, fit.room, text);
+  apply(fitted.style, fitted.lines.join("\n"));
+  return fitted;
 }
 
 // Sets new text, in the characters the label's font has, only when it changed.

@@ -2,6 +2,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { wrapWords } from "../text/lines";
+import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { DEBUFF_BAR } from "./walkHud";
 
 // The message strip: what just happened, in a ui-panel across the top of the backdrop band's
@@ -32,27 +33,23 @@ export function messageIconKey(icon: MessageIcon): string {
 }
 
 // Screen pixels. The strip starts gap rows under the walk bar. From its top-left
-// corner: the first row's capitals start capsTop down, each further row rowHeight lower (the
-// body font's line at 2x), and the icon is centred on the first row's capitals. Text starts
+// corner: the first row's capitals start capsTop down, each further row a line of the body
+// font at scale lower, and the icon is centred on the first row's capitals. Text starts
 // textX in and ends padRight short of the right edge; the panel ends padBottom under the last
-// row's lowest ink.
+// row's lowest ink. The capitals' and the ink's rows and the line come from the body font's
+// metrics.
 export const MESSAGE_STRIP = {
   capsTop: 10,
   gap: 6,
   icon: { size: 16, x: 6 },
-  padBottom: 6,
+  padBottom: 8,
   padRight: 6,
-  rowHeight: 20,
   rows: 2,
   scale: 2,
   textX: 26,
   width: 344,
   x: 8,
 } as const;
-
-// The body font's capitals are 5 rows tall at 1x, its lowest ink 2 rows under them.
-const CAPS_ROWS = 5;
-const INK_ROWS = 7;
 
 export interface MessageStripLayout {
   icon: Point;
@@ -72,13 +69,18 @@ function stripTop(bar: Rect): number {
   return bar.y + bar.height + MESSAGE_STRIP.gap;
 }
 
-export function messageStripLayout(bar: Rect = WALK_BAR_RECT): MessageStripLayout {
-  const { capsTop, icon, padRight, rowHeight, rows, scale, textX, width, x } = MESSAGE_STRIP;
+export function messageStripLayout(
+  body: FontMetrics,
+  bar: Rect = WALK_BAR_RECT,
+): MessageStripLayout {
+  const { capsTop, icon, padRight, rows, scale, textX, width, x } = MESSAGE_STRIP;
   const y = stripTop(bar);
+  const rowHeight = body.lineHeight * scale;
   const rowTops = Array.from({ length: rows }, (_, row) => y + capsTop + row * rowHeight);
+  const iconTop = Math.floor((body.capHeight * scale - icon.size) / 2);
   return {
-    icon: { x: x + icon.x, y: y + capsTop + Math.floor((CAPS_ROWS * scale - icon.size) / 2) },
-    panel: messagePanel(rows, bar),
+    icon: { x: x + icon.x, y: y + capsTop + iconTop },
+    panel: messagePanel(body, rows, bar),
     room: width - textX - padRight,
     rowTops,
     textX: x + textX,
@@ -86,21 +88,22 @@ export function messageStripLayout(bar: Rect = WALK_BAR_RECT): MessageStripLayou
 }
 
 // The panel holding rows rows of text.
-export function messagePanel(rows: number, bar: Rect = WALK_BAR_RECT): Rect {
-  const { capsTop, padBottom, rowHeight, scale, width, x } = MESSAGE_STRIP;
-  const height = capsTop + (rows - 1) * rowHeight + INK_ROWS * scale + padBottom;
+export function messagePanel(body: FontMetrics, rows: number, bar: Rect = WALK_BAR_RECT): Rect {
+  const { capsTop, padBottom, scale, width, x } = MESSAGE_STRIP;
+  const rowHeight = body.lineHeight * scale;
+  const ink = inkRowsFromCapTop(body) * scale;
+  const height = capsTop + (rows - 1) * rowHeight + ink + padBottom;
   return { height, width, x, y: stripTop(bar) };
 }
 
 // The one-row strip under bars debuff bars: a panel height tall, its top gap rows under the
-// last bar's top, the icon at icon and the text from textX, at the largest of scales whose
-// width fits room, its capitals centred on the icon's rows.
+// last bar's top, the icon at icon and the text from textX, in the first of TEXT_FIT_STYLES
+// whose ink fits room, its capitals centred on the icon's rows.
 export const MESSAGE_LINE = {
   gap: 2,
   height: 26,
   icon: { x: 6, y: 5 },
   room: 312,
-  scales: [2, 1],
   textX: 26,
 } as const;
 
@@ -124,8 +127,8 @@ export function messageLinePanel(bars: number, bar: Rect = WALK_BAR_RECT): Messa
 }
 
 // The top of a one-row line's capitals at scale, centred on its icon's rows.
-export function messageLineTop(line: MessageLinePanel, scale: number): number {
-  return line.icon.y + Math.floor((MESSAGE_STRIP.icon.size - CAPS_ROWS * scale) / 2);
+export function messageLineTop(body: FontMetrics, line: MessageLinePanel, scale: number): number {
+  return line.icon.y + Math.floor((MESSAGE_STRIP.icon.size - body.capHeight * scale) / 2);
 }
 
 // A line's text broken at spaces into rows no wider than room, as width measures them, at

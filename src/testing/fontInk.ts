@@ -1,55 +1,76 @@
-import { readFileSync } from "node:fs";
+import { type FittedText, fittingText, type TextFitStyle } from "../layout/textFit";
+import { readBitmapFont } from "../tools/fontFile";
+import { type FontMetrics, fontMetrics } from "../ui/fontMetrics";
 
-import type { TextFitStyle } from "../layout/textFit";
-
-interface Glyph {
-  readonly advance: number;
-  readonly width: number;
-  readonly xOffset: number;
+// A font's rows, from its .fnt.
+export function fontFileMetrics(font: string): FontMetrics {
+  return fontMetrics(readBitmapFont(font));
 }
 
-const FONTS = new Map<string, ReadonlyMap<string, Glyph>>();
-
-// A font's glyphs, from its .fnt: each one's left side bearing, inked width and advance.
-function fontGlyphs(font: string): ReadonlyMap<string, Glyph> {
-  const known = FONTS.get(font);
-  if (known !== undefined) {
-    return known;
-  }
-  const fnt = new URL(`../../public/art/fonts/${font}.fnt`, import.meta.url);
-  const glyphs = new Map(
-    [
-      ...readFileSync(fnt, "utf8").matchAll(
-        /<char id="(\d+)"[^>]*\bwidth="(\d+)"[^>]*\bxoffset="(-?\d+)"[^>]*\bxadvance="(\d+)"/g,
-      ),
-    ].map(([, id, width, xOffset, advance]) => [
-      String.fromCodePoint(Number(id)),
-      { advance: Number(advance), width: Number(width), xOffset: Number(xOffset) },
-    ]),
-  );
-  FONTS.set(font, glyphs);
-  return glyphs;
+// The screen columns each inked glyph of text covers in a font at a style, from the text's
+// left edge, as Phaser lays it out: the pen moves by each glyph's advance, the pair's kerning
+// and the style's letterSpacing, all in font pixels before the style's scale. A glyph that inks
+// nothing, such as a space, is left out.
+export function glyphSpans(
+  font: string,
+  style: TextFitStyle,
+  text: string,
+): { left: number; right: number }[] {
+  const { glyphs, kernings } = readBitmapFont(font);
+  let x = 0;
+  let previous = "";
+  return [...text].flatMap((char) => {
+    const glyph = glyphs.get(char);
+    if (glyph === undefined) {
+      throw new Error(`${font} has no ${char}`);
+    }
+    x += kernings.get(previous + char) ?? 0;
+    const span = { left: x + glyph.xOffset, right: x + glyph.xOffset + glyph.width };
+    x += glyph.advance + style.letterSpacing;
+    previous = char;
+    const scaled = { left: span.left * style.scale, right: span.right * style.scale };
+    return glyph.width === 0 ? [] : [scaled];
+  });
 }
 
-// The screen columns text inks in a font at a style, from its left edge, as Phaser lays it
-// out; a glyph that inks nothing, such as a space, is left out.
+// The screen columns text inks in a font at a style, from its left edge.
 export function fontInk(
   font: string,
   style: TextFitStyle,
   text: string,
 ): { left: number; right: number } {
-  const glyphs = fontGlyphs(font);
-  let x = 0;
-  const spans = [...text].flatMap((char) => {
-    const glyph = glyphs.get(char);
-    if (glyph === undefined) {
-      throw new Error(`${font} has no ${char}`);
-    }
-    const span = { left: x + glyph.xOffset, right: x + glyph.xOffset + glyph.width };
-    x += glyph.advance + style.letterSpacing;
-    return glyph.width === 0 ? [] : [span];
-  });
-  const left = Math.min(...spans.map((span) => span.left));
-  const right = Math.max(...spans.map((span) => span.right));
-  return { left: left * style.scale, right: right * style.scale };
+  const spans = glyphSpans(font, style, text);
+  if (spans.length === 0) {
+    return { left: 0, right: 0 };
+  }
+  return {
+    left: Math.min(...spans.map((span) => span.left)),
+    right: Math.max(...spans.map((span) => span.right)),
+  };
+}
+
+// The width of the columns text inks in a font at a style.
+export function inkWidth(font: string, style: TextFitStyle, text: string): number {
+  const ink = fontInk(font, style, text);
+  return ink.right - ink.left;
+}
+
+// The narrowest gap in screen pixels between one inked glyph's last column and the next one's
+// first, or Infinity for text with fewer than two inked glyphs. Below 1, they touch or overlap.
+export function narrowestGlyphGap(font: string, style: TextFitStyle, text: string): number {
+  const spans = glyphSpans(font, style, text);
+  return Math.min(Infinity, ...spans.slice(1).map((span, i) => span.left - (spans[i]?.right ?? 0)));
+}
+
+// Text set in a font in the first of styles that fits room, as fitPixelText sets it, with the
+// widest of its lines' ink.
+export function fitInFont(
+  font: string,
+  styles: readonly TextFitStyle[],
+  room: number,
+  text: string,
+): FittedText & { widest: number } {
+  const width = (style: TextFitStyle, line: string) => inkWidth(font, style, line);
+  const fitted = fittingText(styles, width, room, text);
+  return { ...fitted, widest: Math.max(...fitted.lines.map((line) => width(fitted.style, line))) };
 }
