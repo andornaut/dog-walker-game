@@ -10,11 +10,8 @@ import { OWNER_TAB, WALK_BAR } from "./walkHud";
 // and carries hints, badges and the walk's events; the lanes:
 // - bank: a money change, under the message strip at the cash well's columns, one at a time.
 //   It rises from the lane's bottom to its top, never into the strip.
-// - ownerTabs: the row the owners' photo tabs and quips beside them pop into, with the quips'
-//   name plates, over the road's last rows and the cards' tops. A heart change's number keeps
-//   above it. A quip with no room beside its tab goes above it, and one too wide for a line
-//   wraps and grows up, out of the lane; the moments drawn over the lane keep clear of it
-//   (walkHud.ts quipOverLaneBlocked).
+// - ownerTabs: the row the owners' photo tabs pop into, over the road's last rows and the cards'
+//   tops. A heart change's number keeps above it.
 // - heartLabels: a heart change, by slot, on the card's bottom rows.
 export interface HudLanes {
   bank: Rect;
@@ -26,8 +23,6 @@ const MARGIN = 4;
 // A bank label rises up to 4px from the lane's bottom.
 const BANK_HEIGHT = 24;
 const HEART_LABEL_HEIGHT = 24;
-// How far a name plate on a bubble beside its tab reaches above the tab's top.
-const PLATE_RISE = OWNER_TAB.quip.plate.rise - OWNER_TAB.quip.top;
 
 export function hudLanes(
   body: FontMetrics,
@@ -52,10 +47,10 @@ export function hudLanes(
       y: slot.y + slot.height - HEART_LABEL_HEIGHT - 2,
     })),
     ownerTabs: {
-      height: -OWNER_TAB.y + PLATE_RISE,
+      height: -OWNER_TAB.y,
       width: dogRow.width,
       x: dogRow.x,
-      y: cardTop + OWNER_TAB.y - PLATE_RISE,
+      y: cardTop + OWNER_TAB.y,
     },
   };
 }

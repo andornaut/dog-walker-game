@@ -116,8 +116,8 @@ function hitField(): Rect {
   return { ...roadView, height: roadView.y + roadView.height - backdrop.y, y: backdrop.y };
 }
 
-// An owner's line, said beside their dog's card.
-export interface QuipBubble {
+// An owner's line, said on the message strip.
+export interface OwnerQuip {
   dog: DogId;
   text: string;
 }
@@ -129,7 +129,7 @@ export interface RaisedHint {
 }
 
 // Emitted on the run scene's events: ChangeLabel[] whenever money or hearts change, a
-// first-time hint (RaisedHint), and QuipBubble[] when owners react.
+// first-time hint (RaisedHint), and OwnerQuip[] when owners react.
 export const CHANGE_LABELS_EVENT = "change-labels";
 export const HINT_EVENT = "hint";
 export const QUIPS_EVENT = "quips";
@@ -396,16 +396,16 @@ export class RunMoments {
     }
   }
 
-  // Each owner who reacted says one of their lines beside their dog's card; an owner who fired
-  // you says theirs in the firing moment.
+  // Each owner who reacted says one of their lines on the message strip; an owner who fired you
+  // says theirs in the firing moment.
   sayQuips(quips: readonly QuipCue[]): void {
     const random = this.deps.quips;
     const lines = quips.map((cue) => ({ cue, text: quipLine(gameData, random, cue) }));
-    const bubbles = lines.flatMap(({ cue, text }): QuipBubble[] =>
+    const said = lines.flatMap(({ cue, text }): OwnerQuip[] =>
       cue.moment === "fired" ? [] : [{ dog: cue.dog, text }],
     );
-    if (bubbles.length > 0) {
-      this.scene.events.emit(QUIPS_EVENT, bubbles);
+    if (said.length > 0) {
+      this.scene.events.emit(QUIPS_EVENT, said);
     }
     for (const { cue, text } of lines) {
       if (cue.moment === "fired") {

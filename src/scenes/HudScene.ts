@@ -97,7 +97,7 @@ import {
   BUFF_GLINT_EVENT,
   CHANGE_LABELS_EVENT,
   HINT_EVENT,
-  type QuipBubble,
+  type OwnerQuip,
   QUIPS_EVENT,
   type RaisedHint,
 } from "./run/runMoments";
@@ -115,8 +115,7 @@ const LABEL = { ms: 1100 };
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
-// An owner's quip shows this long, and their tab this long on a heart change.
-const QUIP_HOLD_MS = 2600;
+// An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
 // A card holds one row of hearts, as many as the most an owner can have.
 const MAX_CARD_HEARTS = DOG_CARD.hearts.perRow;
@@ -182,8 +181,6 @@ export class HudScene extends Scene {
   private owners: OwnerTabs | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
-  private quips: { quip: QuipBubble; raisedMs: number }[] = [];
-  private quipShowing = false;
   private soundHolder: GameObjects.Container | undefined;
   private picture: HudWalk | undefined;
   private run: HudRun | undefined;
@@ -213,8 +210,6 @@ export class HudScene extends Scene {
     this.effectParts = [];
     this.explained = "";
     this.messages = new MessageStrip();
-    this.quips = [];
-    this.quipShowing = false;
     this.bankLabels = [];
     this.bankShowing = false;
     this.labels = new TimedGroup();
@@ -266,28 +261,18 @@ export class HudScene extends Scene {
     this.cards = dogSlots.map((rect) => this.createCard(rect));
 
     const run = this.walk();
-    // A quip above its tab or wrapped onto two lines reaches above the owners' lane: the
-    // moments drawn over the lane take it away or keep it from showing, and heart pops keep
-    // clear of it.
     const firingRects = () => this.feedback?.firingRects() ?? [];
-    this.owners = new OwnerTabs(this, {
-      clearOf: firingRects,
-      packX: () => run.hudView()?.packX ?? LAYOUT.road.x + LAYOUT.road.width / 2,
-      still: () => run.reducedMotion(),
-    });
+    this.owners = new OwnerTabs(this, { still: () => run.reducedMotion() });
     this.feedback = new HudFeedback(this, run, {
-      firingShown: () => {
-        this.hearts?.clearWay();
-        this.owners?.clearUnder(firingRects());
-      },
+      firingShown: () => this.hearts?.clearWay(),
       floatLabels: (ownerMs, labels) => this.floatLabels(ownerMs, labels),
       popOwner: (dog, mood, ms) => this.popOwner(dog, mood, ms),
     });
     this.hearts = new HeartFeedback(this, {
-      clearOf: () => [...firingRects(), ...(this.owners?.overLaneCovers() ?? [])],
+      clearOf: firingRects,
       landed: (label, lane) => this.showHeartLabel(label, lane),
-      quipTop: this.lanes().ownerTabs.y,
       still: () => run.reducedMotion(),
+      tabTop: this.lanes().ownerTabs.y,
     });
     onSceneEvent(this, run.events, ACHIEVEMENTS_EVENT, (ids: AchievementId[]) =>
       this.sayAchievements(ids),
@@ -301,7 +286,7 @@ export class HudScene extends Scene {
     onSceneEvent(this, run.events, MESSAGE_EVENT, ({ icon, text }: MessageLine) =>
       this.messages.say(icon, text),
     );
-    onSceneEvent(this, run.events, QUIPS_EVENT, (quips: QuipBubble[]) => this.queueQuips(quips));
+    onSceneEvent(this, run.events, QUIPS_EVENT, (quips: OwnerQuip[]) => this.sayQuips(quips));
     if (picture !== undefined) {
       return;
     }
@@ -947,45 +932,23 @@ export class HudScene extends Scene {
     }
   }
 
-  // Owners' quips take turns; one that has waited a whole quip's time is dropped.
-  private queueQuips(quips: readonly QuipBubble[]): void {
-    const now = this.time.now;
-    this.quips.push(...quips.map((quip) => ({ quip, raisedMs: now })));
-    if (!this.quipShowing) {
-      this.sayNextQuip();
-    }
-  }
-
-  private sayNextQuip(): void {
-    const now = this.time.now;
-    this.quips = this.quips.filter(({ raisedMs }) => now - raisedMs <= QUIP_HOLD_MS);
-    const next = this.quips.shift();
-    this.quipShowing = next !== undefined && this.sayQuip(next.quip);
-    if (next !== undefined && !this.quipShowing) {
-      this.sayNextQuip();
-    }
-  }
-
-  // The owner pops in on their dog's card with their quip beside them, in the mood their hearts
-  // give. False when the dog has no card, or the quip would go above its tab under a moment.
-  private sayQuip(quip: QuipBubble): boolean {
-    const slot = this.slotOf(quip.dog);
+  // Each owner's quip on the message strip, led by their face, in the mood their hearts give,
+  // and their name.
+  private sayQuips(quips: readonly OwnerQuip[]): void {
     const run = this.walk().hudView()?.run;
-    const packSlot = run?.pack[slot ?? -1];
-    const hearts = packSlot?.status === "walking" ? packSlot.hearts : 0;
-    if (slot === undefined || run === undefined || this.owners === undefined) {
-      return false;
+    if (run === undefined) {
+      return;
     }
-    const max = maxHearts(
-      gameData.tuning,
-      run.modifiers,
-      placeInPack(run, quip.dog),
-      gameData.dogs[quip.dog],
-    );
-    const at = { dog: quip.dog, mood: faceMood(gameData, max, hearts), slot };
-    const shown = this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
-    // Heart pops already on their way land at once if the quip went above its tab over them.
-    this.hearts?.clearWay();
-    return shown;
+    for (const { dog, text } of quips) {
+      const slot = run.pack.find((candidate) => candidate.dog === dog);
+      const hearts = slot?.status === "walking" ? slot.hearts : 0;
+      const max = maxHearts(
+        gameData.tuning,
+        run.modifiers,
+        placeInPack(run, dog),
+        gameData.dogs[dog],
+      );
+      this.messages.say({ dog, kind: "owner", mood: faceMood(gameData, max, hearts) }, text);
+    }
   }
 }

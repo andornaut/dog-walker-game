@@ -71,36 +71,6 @@
   "dogCards": {
     "ownerTab": {
       "face": 2,
-      "quip": {
-        "above": {
-          "tail": {
-            "height": 6,
-            "width": 8,
-            "x": 13,
-            "y": -5
-          },
-          "top": -22
-        },
-        "capsY": 6,
-        "gap": 5,
-        "height": 18,
-        "margin": 4,
-        "padX": 6,
-        "plate": {
-          "capsY": 3,
-          "height": 12,
-          "inset": 4,
-          "padX": 4,
-          "rise": 9
-        },
-        "tail": {
-          "height": 8,
-          "overlap": 1,
-          "width": 6,
-          "y": 9
-        },
-        "top": 4
-      },
       "size": 36,
       "x": 42,
       "y": -34
@@ -226,10 +196,10 @@
       }
     ],
     "ownerTabs": {
-      "height": 39,
+      "height": 34,
       "width": 360,
       "x": 0,
-      "y": 447
+      "y": 452
     }
   },
   "join": [
@@ -705,6 +675,76 @@
       84
     ],
     "textX": 34,
+    "ownerLead": {
+      "face": 20,
+      "nameGap": 2,
+      "rise": 4,
+      "strip": {
+        "bottom": 91,
+        "frame": {
+          "height": 22,
+          "width": 22,
+          "x": 14,
+          "y": 60
+        },
+        "name": {
+          "x": 25,
+          "y": 84
+        },
+        "room": 306,
+        "textX": 40,
+        "panel": {
+          "height": 45,
+          "width": 344,
+          "x": 8,
+          "y": 54
+        }
+      },
+      "underBars": [
+        {
+          "bottom": 100,
+          "frame": {
+            "height": 22,
+            "width": 22,
+            "x": 14,
+            "y": 69
+          },
+          "name": {
+            "x": 25,
+            "y": 93
+          },
+          "room": 306,
+          "textX": 40,
+          "panel": {
+            "height": 42,
+            "width": 344,
+            "x": 8,
+            "y": 66
+          }
+        },
+        {
+          "bottom": 116,
+          "frame": {
+            "height": 22,
+            "width": 22,
+            "x": 14,
+            "y": 85
+          },
+          "name": {
+            "x": 25,
+            "y": 109
+          },
+          "room": 306,
+          "textX": 40,
+          "panel": {
+            "height": 42,
+            "width": 344,
+            "x": 8,
+            "y": 82
+          }
+        }
+      ]
+    },
     "underBars": [
       {
         "icon": {

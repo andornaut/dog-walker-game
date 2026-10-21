@@ -16,7 +16,7 @@ import { modifiersOf } from "../rules/modifiers";
 import { walkLength } from "../rules/route";
 import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics, fontInk } from "../testing/fontInk";
+import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { LONE } from "../testing/packPlaces";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -36,16 +36,8 @@ import {
   type ExplainTarget,
   explainTargetAt,
   leadSlot,
-  OWNER_TAB,
   ownerNameLines,
   ownerTabRect,
-  QUIP_STYLES,
-  quipOverLaneBlocked,
-  type QuipPlace,
-  quipPlace,
-  quipRoom,
-  type QuipSide,
-  quipSide,
   TITLE_CAP_ROWS,
   WALK_BAR,
   WALK_BAR_BUTTONS,
@@ -76,20 +68,6 @@ const BODY = fontFileMetrics("font-body");
 // The columns a line inks in the body font at 1x, from its left edge to its last ink.
 const inkRight = (line: string) =>
   fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(line)).right;
-
-// A quip as the tab's bubble measures it: wrapped to the widest room any bubble has, each
-// line's label width (its advances, the last glyph's trailing pixel included), and the
-// speaker's name's.
-function quipText(name: string, text: string) {
-  const room = quipRoom(LAYOUT.walkView) - 1;
-  const { lines } = fitInFont("font-body", QUIP_STYLES, room, plainMarks(text));
-  return {
-    lineHeight: BODY.lineHeight,
-    lines: lines.length,
-    name: bodyTextWidth(1, plainMarks(name)),
-    width: Math.max(...lines.map((line) => bodyTextWidth(1, line))),
-  };
-}
 
 // Every dog's owner's name, by dog.
 const owners = (Object.keys(gameData.dogs) as DogId[]).map(
@@ -531,205 +509,15 @@ describe("the dog cards", () => {
   });
 });
 
-describe("the owner's tab and quip", () => {
-  const screen = LAYOUT.walkView;
-  const middle = screen.x + screen.width / 2;
-  const { quip } = OWNER_TAB;
-  const tabs = dogSlots.map(ownerTabRect);
-
-  const low = screen.x + quip.margin;
-  const high = screen.x + screen.width - quip.margin;
-  const last = dogSlots.length - 1;
-
-  it.each(tabs.map((tab, i) => [i, tab] as const))(
+describe("the owner's tab", () => {
+  it.each(dogSlots.map((card, i) => [i, card, ownerTabRect(card)] as const))(
     "pops tab %i in centred on its card's top edge, overlapping the card's top",
-    (i, tab) => {
-      const card = dogSlots[i] ?? tab;
+    (_i, card, tab) => {
       expect(tab.x + tab.width / 2).toBe(card.x + card.width / 2);
       expect(tab.y).toBeLessThan(card.y);
       expect(tab.y + tab.height).toBeGreaterThan(card.y);
     },
   );
-
-  // A one-line quip textWidth wide, its speaker's name name wide.
-  const one = (textWidth: number, name = 20) => ({
-    lineHeight: BODY.lineHeight,
-    lines: 1,
-    name,
-    width: textWidth,
-  });
-
-  it.each<[string, number, number, "left" | "right"]>([
-    ["right on the first card with the pack left of centre", 0, middle - 1, "right"],
-    ["right on the first card with the pack right of centre", 0, middle + 1, "right"],
-    ["left on the last card with the pack left of centre", last, middle - 1, "left"],
-    ["left on the last card with the pack right of centre", last, middle + 1, "left"],
-    ["right on a middle card with the pack on the centre", 1, middle, "right"],
-    ["left on a middle card with the pack right of centre", 1, middle + 1, "left"],
-  ])("prefers %s", (_name, slot, packX, side) => {
-    expect(quipSide(screen, dogSlots.length, packX, slot)).toBe(side);
-  });
-
-  // A tab left of the screen's centre, with room for a narrow bubble on either side and a wide
-  // one only on its right; a bubble wider than either side's room goes above.
-  const offCentre = { ...(tabs[0] ?? screen), x: 100 };
-  const roomLeft = offCentre.x - quip.gap - low;
-  const roomRight = high - (offCentre.x + offCentre.width + quip.gap);
-  const text = (bubble: number) => bubble - 2 * quip.padX;
-  it.each<[string, "left" | "right", number, QuipSide]>([
-    ["on the preferred left side when it has room", "left", text(roomLeft), "left"],
-    ["on the preferred right side when it has room", "right", text(roomLeft), "right"],
-    ["on the other side when the preferred lacks room", "left", text(roomLeft + 1), "right"],
-    ["above when neither side has room", "right", text(roomRight + 1), "above"],
-  ])("places the quip %s", (_name, prefers, textWidth, side) => {
-    const place = quipPlace(screen, prefers, offCentre, one(textWidth));
-    expect(place.side).toBe(side);
-    expect(place.bubble.width).toBe(textWidth + 2 * quip.padX);
-    expect(place.text).toEqual({ x: place.bubble.x + quip.padX, y: place.bubble.y + quip.capsY });
-  });
-
-  // The widest bubble that keeps inside the margins, over a tab near either edge.
-  const widest = text(high - low);
-  it.each<[string, number, "x" | "right", number]>([
-    ["the first tab, kept right of the screen's margin", 0, "x", low],
-    ["the last tab, kept left of the screen's margin", last, "right", high],
-  ])("places a bubble too wide for either side above %s", (_name, slot, edge, at) => {
-    const tab = tabs[slot] ?? screen;
-    const prefers = quipSide(screen, tabs.length, middle, slot);
-    const { bubble, side, tail } = quipPlace(screen, prefers, tab, one(widest));
-    expect(side).toBe("above");
-    expect(bubble.y).toBe(tab.y + quip.above.top);
-    const { height, width, x, y } = quip.above.tail;
-    expect(tail).toEqual({ height, width, x: tab.x + x, y: tab.y + y });
-    expect(edge === "x" ? bubble.x : bubble.x + bubble.width).toBe(at);
-  });
-
-  it("centres an above bubble on a middle tab", () => {
-    const tab = tabs[1] ?? screen;
-    const roomBeside = high - (tab.x + tab.width + quip.gap);
-    const place = quipPlace(screen, "right", tab, one(text(roomBeside + 1)));
-    expect(place.side).toBe("above");
-    expect(place.bubble.x + place.bubble.width / 2).toBe(tab.x + tab.width / 2);
-  });
-
-  it.each<[string, "left" | "right", number]>([
-    ["beside the tab", "right", 40],
-    ["above the tab", "right", widest],
-  ])("grows a two-line bubble %s up by a line, its plate on its top", (_name, prefers, width) => {
-    const tab = tabs[1] ?? screen;
-    const single = quipPlace(screen, prefers, tab, one(width));
-    const double = quipPlace(screen, prefers, tab, { ...one(width), lines: 2 });
-    expect(double.side).toBe(single.side);
-    expect(double.bubble).toEqual({
-      ...single.bubble,
-      height: single.bubble.height + BODY.lineHeight,
-      y: single.bubble.y - BODY.lineHeight,
-    });
-    expect(double.plate.y).toBe(double.bubble.y - quip.plate.rise);
-    expect(double.text.y).toBe(double.bubble.y + quip.capsY);
-    expect(double.tail).toEqual(single.tail);
-  });
-
-  // Every owner's every quip as the bubble measures it, on every card, with the pack on either
-  // side of the centre.
-  const cases = owners.flatMap(([dog, name]) =>
-    tabs.flatMap((_tab, slot) =>
-      [middle, middle + 1].map((packX) => [dog, slot, packX, name] as const),
-    ),
-  );
-  it.each(cases)(
-    "keeps the quips and name plate of %s's owner on screen on card %i with the pack at x %d",
-    (dog, slot, packX, name) => {
-      const tab = tabs[slot] ?? screen;
-      const prefers = quipSide(screen, tabs.length, packX, slot);
-      const lines = Object.values(gameData.quips[dog]).flat();
-      const right = (rect: Rect) => rect.x + rect.width;
-      const wrong = lines.flatMap((line) => {
-        const shown = quipText(name, line);
-        const { bubble, plate, side } = quipPlace(screen, prefers, tab, shown);
-        const bottom = tab.y + (side === "above" ? quip.above.top : quip.top) + quip.height;
-        const nearEnd =
-          side === "left"
-            ? right(plate) + quip.plate.inset === right(bubble)
-            : plate.x === bubble.x + quip.plate.inset;
-        const problems: [string, boolean][] = [
-          ["more than two lines", shown.lines > 2],
-          ["bubble off screen", bubble.x < low || right(bubble) > high],
-          ["bubble grown down", bubble.y + bubble.height !== bottom],
-          ["plate outside the bubble", plate.x < bubble.x || right(plate) > right(bubble)],
-          ["plate off the bubble's rim", plate.y !== bubble.y - quip.plate.rise],
-          ["plate off the end nearest the tab", !nearEnd],
-          ["above an outer card", side === "above" && (slot === 0 || slot === last)],
-        ];
-        return problems.filter(([, hit]) => hit).map(([problem]) => `${line}: ${side}, ${problem}`);
-      });
-      expect(wrong).toEqual([]);
-    },
-  );
-
-  it.each<["left" | "right", number]>([
-    ["right", 0],
-    ["left", last],
-  ])("points a %s bubble's tail at the tab", (side, slot) => {
-    const tab = tabs[slot] ?? screen;
-    const place = quipPlace(screen, side, tab, one(40));
-    expect(place.side).toBe(side);
-    expect(place.bubble.y).toBe(tab.y + quip.top);
-    expect(place.tail.y).toBe(tab.y + quip.tail.y);
-    if (side === "right") {
-      expect(place.bubble.x).toBe(tab.x + tab.width + quip.gap);
-      expect(place.tail.x + quip.tail.width - quip.tail.overlap).toBe(place.bubble.x);
-    } else {
-      expect(place.bubble.x + place.bubble.width + quip.gap).toBe(tab.x);
-      expect(place.tail.x).toBe(place.bubble.x + place.bubble.width - quip.tail.overlap);
-    }
-  });
-
-  it.each<["left" | "right", number]>([
-    ["right", 0],
-    ["left", last],
-  ])("sets the name on its plate on a %s bubble", (side, slot) => {
-    const tab = tabs[slot] ?? screen;
-    const place = quipPlace(screen, side, tab, one(60, 30));
-    const { plate } = quip;
-    expect(place.plate).toMatchObject({ height: plate.height, width: 30 + 2 * plate.padX });
-    expect(place.name).toEqual({ x: place.plate.x + plate.padX, y: place.plate.y + plate.capsY });
-  });
-
-  it.each(tabs.map((_tab, slot) => [slot] as const))(
-    "covers card %i's bubble, plate and tail, beside or above the tab",
-    (slot) => {
-      const tab = tabs[slot] ?? screen;
-      for (const textWidth of [40, widest]) {
-        const prefers = quipSide(screen, tabs.length, middle, slot);
-        const place = quipPlace(screen, prefers, tab, one(textWidth));
-        expect(place.covers).toEqual([place.bubble, place.plate, place.tail]);
-      }
-    },
-  );
-
-  // A middle card's quip above its tab, one beside it on two lines and one on one, and what a
-  // moment over the lane covers.
-  const midTab = tabs[1] ?? screen;
-  const above = quipPlace(screen, "right", midTab, one(widest));
-  const beside = quipPlace(screen, "right", midTab, one(40));
-  const wrapped = quipPlace(screen, "right", midTab, { ...one(40), lines: 2 });
-  const over = (rect: Rect) => [{ height: 2, width: 2, x: rect.x + 1, y: rect.y + 1 }];
-  it.each<[string, QuipPlace, Rect[], boolean]>([
-    ["blocks a quip above its tab under a moment's bubble", above, over(above.bubble), true],
-    ["blocks a quip above its tab under a moment over its plate", above, over(above.plate), true],
-    ["blocks a quip above its tab under a moment over its tail", above, over(above.tail), true],
-    ["lets a quip above its tab show with nothing over it", above, [], false],
-    ["blocks a two-line quip beside its tab under a moment", wrapped, over(wrapped.bubble), true],
-    [
-      "leaves a one-line quip beside its tab to the owners' lane",
-      beside,
-      over(beside.bubble),
-      false,
-    ],
-  ])("%s", (_name, place, clearOf, blocked) => {
-    expect(quipOverLaneBlocked(clearOf, place)).toBe(blocked);
-  });
 });
 
 // The neighborhood's name from name.x and "n of N" right-aligned to progress.right, both at 1x

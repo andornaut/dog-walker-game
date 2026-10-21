@@ -10,7 +10,17 @@ import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
 import { hudLanes } from "../hud/hudLanes";
-import { messageLinePanel, messageStripLayout } from "../hud/messageStrip";
+import {
+  type LeadSlot,
+  lineLeadSlot,
+  messageLinePanel,
+  messagePanel,
+  messageStripLayout,
+  OWNER_LEAD,
+  ownerLeadLayout,
+  ownerLeadPanel,
+  stripLeadSlot,
+} from "../hud/messageStrip";
 import { PAUSE_MENU_ITEMS, PAUSE_NOTE_LINES, pauseMenuLayout } from "../hud/pauseMenu";
 import { buttonIcon, TOP_BAR_BUTTONS, type TopBarButton } from "../hud/topBar";
 import {
@@ -49,7 +59,7 @@ import type { Rect } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
 import { walkProjection } from "../runner/walkGeometry";
-import { fontMetrics } from "../ui/fontMetrics";
+import { type FontMetrics, fontMetrics } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { readBitmapFont } from "./fontFile";
 
@@ -67,6 +77,13 @@ function roadRow(projection: RoadProjection, road: Rect, row: number) {
     row,
     scale: rowScale(projection, row),
   };
+}
+
+// An owner's quip's lead in slot, for a name no wider than its frame, and the panel it grows
+// line's panel to.
+function ownerLead(body: FontMetrics, slot: LeadSlot, line: Rect) {
+  const lead = ownerLeadLayout(body, slot, 0);
+  return { ...lead, panel: ownerLeadPanel(line, lead) };
 }
 
 // A top-bar button with where its unpressed icon sits.
@@ -123,10 +140,19 @@ export function layoutExport(
       width: road.width / LANE_COUNT,
     },
     // The message strip under the walk bar: its panel at its tallest (two rows), the line's
-    // icon, the text column and its room, and each row's capitals top; and its one-row panel
-    // under one and two debuff bars.
+    // icon, the text column and its room, and each row's capitals top; its one-row panel
+    // under one and two debuff bars; and an owner's quip's lead (OWNER_LEAD) for a name no
+    // wider than the frame, on the strip and under one and two bars, with the panels it grows
+    // a one-row line to.
     messageStrip: {
       ...messageStripLayout(body),
+      ownerLead: {
+        ...OWNER_LEAD,
+        strip: ownerLead(body, stripLeadSlot(body), messagePanel(body, 1)),
+        underBars: [1, 2].map((bars) =>
+          ownerLead(body, lineLeadSlot(body, bars), messageLinePanel(bars).panel),
+        ),
+      },
       underBars: [1, 2].map((bars) => messageLinePanel(bars)),
     },
     // The pack as drawn and hit. silhouettes: each sprite's opaque pixels over its walk loop,

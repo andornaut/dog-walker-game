@@ -4,14 +4,14 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { GearId, UpgradeId, WalkerPerkId } from "../data/types";
+import type { DogId, GearId, QuipMoment, UpgradeId, WalkerPerkId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import { fillLine, fillNames } from "../lib/lines";
 import { type Rect } from "../lib/rect";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -19,7 +19,9 @@ import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { type EffectItem, effectLine, effectName } from "./effectIcons";
 import {
   EMPTY_MESSAGE_STRIP,
+  type LeadSlot,
   lineAlpha,
+  lineLeadSlot,
   MESSAGE_ICONS,
   MESSAGE_LINE,
   MESSAGE_STRIP,
@@ -32,9 +34,13 @@ import {
   messageRows,
   messageStripLayout,
   type MessageStripState,
+  OWNER_LEAD,
+  ownerLeadLayout,
+  ownerLeadPanel,
   sayLine,
   sayLineAhead,
   stepMessageStrip,
+  stripLeadSlot,
 } from "./messageStrip";
 import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
 import { debuffBarRects } from "./walkHud";
@@ -300,4 +306,109 @@ describe("the strip's lines", () => {
     const many = Array.from({ length: 200 }, () => "Woof").join(" ");
     expect(messageRows(width, room, many)).toHaveLength(MESSAGE_STRIP.rows);
   });
+});
+
+// Owners' quips on the strip: every owner's name's ink at 1x, and each place a line can be,
+// with the panel a line of its own text would have: the strip on one row and on two, and the
+// one-row strip under the debuff bars.
+const OWNER_NAMES = (Object.keys(gameData.dogs) as DogId[]).map((dog) => {
+  const { name } = gameData.dogs[dog].owner;
+  return [dog, name, inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name)] as const;
+});
+const LEAD_PLACES: readonly (readonly [string, LeadSlot, Rect])[] = [
+  ["the strip's one row", stripLeadSlot(BODY), messagePanel(BODY, 1)],
+  ["the strip's two rows", stripLeadSlot(BODY), messagePanel(BODY, 2)],
+  ...[1, 2].map(
+    (bars) =>
+      [
+        `the one-row strip under ${bars} bars`,
+        lineLeadSlot(BODY, bars),
+        messageLinePanel(bars).panel,
+      ] as const,
+  ),
+];
+// The moments a walk's owners quip on the strip; a firing's quip shows in its own moment.
+const WALK_QUIP_MOMENTS = ["happier", "upset"] as const satisfies readonly QuipMoment[];
+
+describe("an owner's lead", () => {
+  const right = (rect: Rect) => rect.x + rect.width;
+  const iconGap = MESSAGE_STRIP.textX - MESSAGE_STRIP.icon.x - MESSAGE_STRIP.icon.size;
+
+  it.each(
+    LEAD_PLACES.flatMap(([place, slot, panel]) =>
+      OWNER_NAMES.map(([, name, ink]) => [place, name, slot, panel, ink] as const),
+    ),
+  )(
+    "keeps the face and name of %s's owner %s inside the panel, the text clear of them",
+    (_place, _name, slot, base, ink) => {
+      const lead = ownerLeadLayout(BODY, slot, ink);
+      const panel = ownerLeadPanel(base, lead);
+      const name = { height: inkRowsFromCapTop(BODY), width: ink, x: lead.name.x, y: lead.name.y };
+      const column = Math.max(right(lead.frame), right(name));
+      const problems: [string, boolean][] = [
+        ["frame not 1px around the face", lead.frame.width !== OWNER_LEAD.face + 2],
+        ["frame outside the panel", !inside(lead.frame, panel)],
+        ["name outside the panel", !inside(name, panel)],
+        [
+          "name not under the frame",
+          name.y !== lead.frame.y + lead.frame.height + OWNER_LEAD.nameGap,
+        ],
+        [
+          "name off the frame's centre",
+          Math.abs(name.x + ink / 2 - (lead.frame.x + lead.frame.width / 2)) > 0.5,
+        ],
+        ["text not an icon's gap past the lead", lead.textX !== column + iconGap],
+        [
+          "text past the panel's right",
+          lead.textX + lead.room > right(panel) - MESSAGE_STRIP.padRight,
+        ],
+        ["panel outside the band", !inside(panel, screenLayout(SCREEN_CONFIG).backdrop)],
+      ];
+      expect(problems.filter(([, hit]) => hit).map(([problem]) => problem)).toEqual([]);
+    },
+  );
+
+  it.each<[string, LeadSlot, Rect, boolean]>([
+    ["grows the strip's one-row panel", stripLeadSlot(BODY), messagePanel(BODY, 1), true],
+    ["keeps the strip's two-row panel", stripLeadSlot(BODY), messagePanel(BODY, 2), false],
+    ["grows the one-row strip under a bar", lineLeadSlot(BODY, 1), messageLinePanel(1).panel, true],
+    [
+      "grows the one-row strip under two bars",
+      lineLeadSlot(BODY, 2),
+      messageLinePanel(2).panel,
+      true,
+    ],
+  ])("%s to end padBottom under the lead's name", (_name, slot, panel, grows) => {
+    const lead = ownerLeadLayout(BODY, slot, 0);
+    const grown = ownerLeadPanel(panel, lead);
+    const under = lead.bottom + MESSAGE_STRIP.padBottom - panel.y;
+    expect(grown.height > panel.height).toBe(grows);
+    expect(grown.height).toBe(Math.max(panel.height, under));
+    expect({ ...grown, height: 0 }).toEqual({ ...panel, height: 0 });
+  });
+
+  // Every walk quip of every owner wraps at 2x onto the strip's rows beside their lead, none
+  // left out, and fits the one-row strip beside it under the bars in TEXT_FIT_STYLES.
+  const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
+  it.each(OWNER_NAMES)(
+    "fits every walk quip of %s's owner, %s, beside their lead",
+    (dog, _name, ink) => {
+      const strip = ownerLeadLayout(BODY, stripLeadSlot(BODY), ink);
+      const lines = [1, 2].map((bars) => ownerLeadLayout(BODY, lineLeadSlot(BODY, bars), ink));
+      const misfits = WALK_QUIP_MOMENTS.flatMap((moment) => gameData.quips[dog][moment]).filter(
+        (said) => {
+          const text = plainMarks(said);
+          const rows = messageRows(width, strip.room, text);
+          return (
+            rows.join(" ") !== text.split(/\s+/).join(" ") ||
+            rows.some((row) => width(row) > strip.room) ||
+            lines.some(
+              ({ room }) => fitInFont("font-body", TEXT_FIT_STYLES, room, text).widest > room,
+            )
+          );
+        },
+      );
+      expect(misfits).toEqual([]);
+    },
+  );
 });

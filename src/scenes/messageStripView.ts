@@ -1,44 +1,58 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { ownerCardFaceKey } from "../assets/spriteKeys";
+import { gameData } from "../data";
 import type { ExplainLine } from "../hud/explain";
 import {
   EMPTY_MESSAGE_STRIP,
+  isOwnerLead,
   lineAlpha,
+  lineLeadSlot,
   MESSAGE_STRIP,
   MESSAGE_TIMING,
-  type MessageIcon,
   messageIconKey,
+  type MessageLead,
   messageLinePanel,
   messageLineTop,
   messagePanel,
   messageRows,
   messageStripLayout,
   type MessageStripState,
+  type OwnerLead,
+  type OwnerLeadLayout,
+  ownerLeadLayout,
+  ownerLeadPanel,
   sayLine,
   sayLineAhead,
   stepMessageStrip,
+  stripLeadSlot,
 } from "../hud/messageStrip";
+import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
+  inkSpan,
   pixelFontMetrics,
   type PixelTextStyle,
   placePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { firstTag, playTag } from "./sprites";
 import { addPanel } from "./uiKit";
 
 // A line said from the run scene, as { icon, text }: the HUD shows it on its message strip.
 export const MESSAGE_EVENT = "message";
 
 // Says a line on the walk's message strip from the run scene.
-export function sayMessage(runScene: Scene, icon: MessageIcon, text: string): void {
+export function sayMessage(runScene: Scene, icon: MessageLead, text: string): void {
   runScene.events.emit(MESSAGE_EVENT, { icon, text });
 }
 
 const TEXT_STYLE: PixelTextStyle = { color: PALETTE.plum, scale: MESSAGE_STRIP.scale };
+// An owner's name under their face, leading their quip.
+const NAME_STYLE: PixelTextStyle = { color: PALETTE.rust };
 
 type Faded = GameObjects.GameObject & { alpha: number };
 
@@ -50,6 +64,14 @@ interface Drawn {
   panel: Faded;
   parts: Faded[];
   scene: Scene;
+}
+
+// A line as drawn, led by its icon's key or an owner's face and name. id names the line, an
+// explanation's negative.
+interface StripLine {
+  readonly id: number;
+  readonly lead: OwnerLead | string;
+  readonly text: string;
 }
 
 // A held explanation's lines take turns this often.
@@ -68,8 +90,9 @@ export class MessageStrip {
   private explaining: readonly ExplainLine[] = [];
   private state: MessageStripState = EMPTY_MESSAGE_STRIP;
 
-  // ahead: the line waits ahead of the waiting lines with its icon.
-  say(icon: MessageIcon, text: string, ahead = false): void {
+  // icon: what leads the line, an icon or an owner's face and name. ahead: the line waits ahead
+  // of the waiting lines with its icon.
+  say(icon: MessageLead, text: string, ahead = false): void {
     const add = ahead ? sayLineAhead : sayLine;
     this.state = add(MESSAGE_TIMING, { icon, text }, this.state);
   }
@@ -104,13 +127,13 @@ export class MessageStrip {
   }
 
   // The explanation's line due now, else the walk's shown line, aged dtMs.
-  private current(dtMs: number): (ExplainLine & { alpha: number; id: number }) | undefined {
+  private current(dtMs: number): (StripLine & { alpha: number }) | undefined {
     if (this.explaining.length > 0) {
       this.explainMs += dtMs;
       const turn = Math.floor(this.explainMs / EXPLAIN_TURN_MS) % this.explaining.length;
       const line = this.explaining[turn];
       const id = -(this.explainId * EXPLAIN_ID_SPAN + turn) - 1;
-      return line === undefined ? undefined : { ...line, alpha: 1, id };
+      return line === undefined ? undefined : { alpha: 1, id, lead: line.iconKey, text: line.text };
     }
     this.state = stepMessageStrip(MESSAGE_TIMING, dtMs, this.state);
     const { shown } = this.state;
@@ -119,8 +142,8 @@ export class MessageStrip {
     }
     return {
       alpha: lineAlpha(MESSAGE_TIMING, shown),
-      iconKey: messageIconKey(shown.icon),
       id: shown.id,
+      lead: isOwnerLead(shown.icon) ? shown.icon : messageIconKey(shown.icon),
       text: shown.text,
     };
   }
@@ -133,40 +156,69 @@ export class MessageStrip {
   }
 }
 
-// The line's icon and text: with no debuff bar up, its rows at 2x on a panel as tall as they
-// are; under bars, one row fitted by TEXT_FIT_STYLES on the one-row panel.
-function draw(
-  scene: Scene,
-  depth: number,
-  bars: number,
-  line: ExplainLine & { id: number },
-): Drawn {
-  const parts: Faded[] = [];
+// The line's lead and text: with no debuff bar up, its rows at 2x on a panel as tall as they
+// are; under bars, one row fitted by TEXT_FIT_STYLES on the one-row panel. An owner's lead
+// moves the text right, and grows a panel shorter than the lead.
+function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn {
   const body = pixelFontMetrics(scene, "body");
-  const layout = messageStripLayout(body);
-  let panel: Faded;
-  let icon = layout.icon;
-  if (bars === 0) {
-    const rows = wrappedRows(scene, layout.room, line.text);
-    panel = addPanel(scene, messagePanel(body, Math.max(1, rows.length)));
-    parts.push(
-      addPixelText(scene, layout.textX, layout.rowTops[0] ?? 0, rows.join("\n"), TEXT_STYLE),
-    );
-  } else {
-    const one = messageLinePanel(bars);
-    panel = addPanel(scene, one.panel);
-    icon = one.icon;
-    const text = addPixelText(scene, one.textX, 0, line.text, TEXT_STYLE);
-    const { style } = fitPixelText(text, { room: one.room, styles: TEXT_FIT_STYLES }, one.textX, 0);
-    placePixelText(text, one.textX, messageLineTop(body, one, style.scale));
-    parts.push(text);
+  const owner = typeof line.lead === "string" ? undefined : line.lead;
+  const name = owner === undefined ? "" : gameData.dogs[owner.dog].owner.name;
+  const strip = messageStripLayout(body);
+  const one = messageLinePanel(bars);
+  const slot = bars === 0 ? stripLeadSlot(body) : lineLeadSlot(body, bars);
+  const lead =
+    owner === undefined
+      ? undefined
+      : ownerLeadLayout(body, slot, inkWidth(scene, name, NAME_STYLE));
+  const textX = lead?.textX ?? slot.textX;
+  const room = lead?.room ?? slot.room;
+  const rows = bars === 0 ? wrappedRows(scene, room, line.text) : [line.text];
+  const fits = bars === 0 ? messagePanel(body, Math.max(1, rows.length)) : one.panel;
+  const panel: Faded = addPanel(scene, lead === undefined ? fits : ownerLeadPanel(fits, lead));
+  const text = addPixelText(scene, textX, strip.rowTops[0] ?? 0, rows.join("\n"), TEXT_STYLE);
+  if (bars > 0) {
+    const { style } = fitPixelText(text, { room, styles: TEXT_FIT_STYLES }, textX, 0);
+    placePixelText(text, textX, messageLineTop(body, one, style.scale));
   }
-  if (scene.textures.exists(line.iconKey)) {
-    parts.unshift(scene.add.image(icon.x, icon.y, line.iconKey).setOrigin(0));
+  const parts: Faded[] = [text];
+  if (owner !== undefined && lead !== undefined) {
+    parts.unshift(...ownerLead(scene, owner, name, lead));
+  } else if (typeof line.lead === "string" && scene.textures.exists(line.lead)) {
+    const icon = bars === 0 ? strip.icon : one.icon;
+    parts.unshift(scene.add.image(icon.x, icon.y, line.lead).setOrigin(0));
   }
   (panel as Faded & GameObjects.Components.Depth).setDepth(depth);
   parts.forEach((part) => (part as Faded & GameObjects.Components.Depth).setDepth(depth));
   return { bars, id: line.id, panel, parts, scene };
+}
+
+// The owner's 20x20 face in its mood, else neutral, in a 1px ink frame over tan, and their name
+// under it.
+function ownerLead(scene: Scene, owner: OwnerLead, name: string, lead: OwnerLeadLayout): Faded[] {
+  const { frame } = lead;
+  const g = scene.add.graphics();
+  drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.tan }, frame);
+  const parts: Faded[] = [g];
+  const key = ownerCardFaceKey(gameData, owner.dog);
+  if (scene.textures.exists(key)) {
+    const face = scene.add.sprite(frame.x + 1, frame.y + 1, key).setOrigin(0);
+    const tag = firstTag(scene, key, [owner.mood, "neutral"]);
+    if (tag !== undefined) {
+      playTag(face, key, tag);
+    }
+    parts.push(face);
+  }
+  const label = addPixelText(scene, 0, 0, name, NAME_STYLE);
+  placePixelText(label, lead.name.x - inkSpan(label).left, lead.name.y);
+  return [...parts, label];
+}
+
+// The width of the columns text inks in style, measured on the font it is drawn in.
+function inkWidth(scene: Scene, text: string, style: PixelTextStyle): number {
+  const probe = addPixelText(scene, 0, 0, text, style).setVisible(false);
+  const ink = inkSpan(probe);
+  probe.destroy();
+  return ink.right - ink.left;
 }
 
 // The line's rows, measured on the font they are drawn in.

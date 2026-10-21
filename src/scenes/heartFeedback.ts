@@ -56,13 +56,13 @@ interface ActivePop {
   tween: Tweens.Tween | undefined;
 }
 
-// clearOf is what pops keep clear of; landed shows a change's label on its band; quipTop is the
-// top of the quip lane, which the pop's number keeps above.
+// clearOf is what pops keep clear of; landed shows a change's label on its band; tabTop is the
+// top of the owners' tab lane, which the pop's number keeps above.
 interface HeartHooks {
   clearOf: () => readonly Rect[];
   landed: (label: ChangeLabel, lane: Rect) => void;
-  quipTop: number;
   still: () => boolean;
+  tabTop: number;
 }
 
 interface Shake {
@@ -203,7 +203,7 @@ export class HeartFeedback {
       font: "title",
     });
     const width = Math.ceil(text.width);
-    const bottom = this.hooks.quipTop - CHIP_PAD - 1;
+    const bottom = this.hooks.tabTop - CHIP_PAD - 1;
     const at = heartLabelAt({ bottom, screenWidth: SCREEN_CONFIG.width }, frame, width);
     text.setPosition(CHIP_PAD, CHIP_PAD + text.y);
     const box = this.scene.add.graphics();

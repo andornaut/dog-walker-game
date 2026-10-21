@@ -50,8 +50,6 @@ const SLICES = {
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
   // The owners' speech bubble.
   "ui-quip": { bottom: 8, left: 8, right: 8, top: 8 },
-  // The speaking owner's name plate on their bubble: a three-slice, 4px caps.
-  "ui-quip-name": { bottom: 0, left: 4, right: 4, top: 0 },
   // The Pet shop list's scrollbar: vertical three-slices with 3px caps.
   "ui-scroll-thumb": { bottom: 3, left: 0, right: 0, top: 3 },
   "ui-scroll-track": { bottom: 3, left: 0, right: 0, top: 3 },
@@ -564,9 +562,6 @@ export function addTileSprite(
   showTag(reducedMotion, sprite, key, tag);
   return sprite;
 }
-
-// A bubble that has said its piece fades out over this long, as owners' quips do.
-export const BUBBLE_FADE_MS = 400;
 
 // Fades parts out over ms after delayMs, easing in, rising rise pixels as they go (0 fades
 // them in place, as reduced motion does), then destroys them and calls done.

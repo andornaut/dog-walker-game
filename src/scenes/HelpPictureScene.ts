@@ -20,7 +20,7 @@ import { walkerSpriteKey } from "./profileStore";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { PackView } from "./run/packView";
 import { RoadArt, RoadView } from "./run/roadView";
-import { CHANGE_LABELS_EVENT, QUIPS_EVENT } from "./run/runMoments";
+import { CHANGE_LABELS_EVENT } from "./run/runMoments";
 import { ShadowPool } from "./run/shadowPool";
 import { DEPTH, LANE_XS } from "./run/stage";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -147,8 +147,8 @@ export class HelpPictureScene extends Scene {
     }
   }
 
-  // The HUD as a picture of this walk: once it is up, the walk raises the picture's changes and
-  // quips, and after its first update it is held still.
+  // The HUD as a picture of this walk: once it is up, the walk raises the picture's changes,
+  // and after its first update it is held still.
   private showHud(picture: HelpPicture, view: ScenePicture, pack: PackView): void {
     const events = new Events.EventEmitter();
     const { walk } = picture;
@@ -169,9 +169,6 @@ export class HelpPictureScene extends Scene {
     this.whenCreated(SCENE_KEYS.helpHud, (hud) => {
       if (picture.changes.length > 0) {
         events.emit(CHANGE_LABELS_EVENT, changeLabels(gameData, picture.changes));
-      }
-      if (picture.quips.length > 0) {
-        events.emit(QUIPS_EVENT, picture.quips);
       }
       hud.events.once(Scenes.Events.POST_UPDATE, () => freezeScene(hud, STILL_FRAMES));
     });

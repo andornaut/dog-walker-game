@@ -6,7 +6,6 @@ import type { HelpPictureId } from "../data/types";
 import { cardRowSpec } from "../layout/cardLayout";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
-import { itemAt } from "../lib/arrays";
 import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
 import { cardHeader, cardRowRects } from "../ui/cardRow";
@@ -67,22 +66,19 @@ describe("helpPicture", () => {
     expect(card?.options.every((option) => option.availability.enabled)).toBe(true);
   });
 
-  it("shows each owner's hearts by their dog's size, the speaker's less what the bump took", () => {
-    const { fired, speaker } = HELP_SCENES.owners;
-    const { changes, quips, walk } = helpPicture(gameData, "owners");
+  it("shows each owner's hearts by their dog's size, the bumped dog's less what the bump took", () => {
+    const { bumped, fired } = HELP_SCENES.owners;
+    const { changes, walk } = helpPicture(gameData, "owners");
     const hearts = walk.run.pack.map((slot) => (slot.status === "walking" ? slot.hearts : null));
     const expected = walk.run.pack.map(({ dog }) => {
       if (dog === fired) {
         return null;
       }
       const max = gameData.tuning.hearts.maxBySize[gameData.dogs[dog].size];
-      return dog === speaker.dog ? max - speaker.lost : max;
+      return dog === bumped.dog ? max - bumped.lost : max;
     });
     expect(hearts).toEqual(expected);
-    expect(changes).toEqual([expect.objectContaining({ dog: speaker.dog, kind: "hearts" })]);
-    expect(quips).toEqual([
-      { dog: speaker.dog, text: itemAt(gameData.quips[speaker.dog][speaker.mood], speaker.quip) },
-    ]);
+    expect(changes).toEqual([expect.objectContaining({ dog: bumped.dog, kind: "hearts" })]);
   });
 
   it.each([["pickups"]] satisfies [HelpPictureId][])(

@@ -81,8 +81,6 @@ export interface HelpPicture {
     readonly y: number;
   } | null;
   readonly pulls: Pulls;
-  // Owners' quips the HUD shows beside their tabs.
-  readonly quips: readonly { readonly dog: DogId; readonly text: string }[];
   readonly strips: readonly PictureStrip[];
   // Whether the pack has just bumped something: the walker stumbles and the dogs react.
   readonly stumble: boolean;
@@ -109,11 +107,11 @@ export const HELP_SCENES = {
     touch: { frame: 3, fromLane: 1, rise: 120 },
   },
   owners: {
+    // The dog that loses a heart to a bump.
+    bumped: { dog: "biscuit", lost: 1 },
     dogs: ["koda", "biscuit", "duchess"],
     fired: "duchess",
     lane: 1,
-    // The dog that loses a heart to a bump, and its owner's quip.
-    speaker: { dog: "biscuit", lost: 1, mood: "upset", quip: 0 },
   },
   pickups: {
     dogs: ["biscuit"],
@@ -191,7 +189,6 @@ const STILL: Omit<HelpPicture, "strips" | "walk"> = {
   hud: false,
   packMove: null,
   pulls: NO_PULLS,
-  quips: [],
   stumble: false,
   touch: null,
 };
@@ -280,33 +277,28 @@ function cards(data: GameData): HelpPicture {
 }
 
 function owners(data: GameData): HelpPicture {
-  const { dogs, fired, lane, speaker } = HELP_SCENES.owners;
+  const { bumped, dogs, fired, lane } = HELP_SCENES.owners;
   const started = startRun(data, dogs);
   const hearts = (slot: PackSlot | undefined) => (slot?.status === "walking" ? slot.hearts : 0);
-  const before = hearts(started.pack.find((slot) => slot.dog === speaker.dog));
-  const after = clampHearts(before, before - speaker.lost);
+  const before = hearts(started.pack.find((slot) => slot.dog === bumped.dog));
+  const after = clampHearts(before, before - bumped.lost);
   const pack = started.pack.map((slot): PackSlot => {
     if (slot.dog === fired) {
       return { dog: slot.dog, status: "fired", zoneIndex: 0 };
     }
-    return slot.dog === speaker.dog && slot.status === "walking"
-      ? { ...slot, hearts: after }
-      : slot;
+    return slot.dog === bumped.dog && slot.status === "walking" ? { ...slot, hearts: after } : slot;
   }) as unknown as RunState["pack"];
   const change: Change = {
     after,
     before: clampHearts(before, before),
     causes: [{ amount: after - before, kind: "bump" }],
-    dog: speaker.dog,
+    dog: bumped.dog,
     kind: "hearts",
   };
   return {
     ...STILL,
     changes: [change],
     hud: true,
-    quips: [
-      { dog: speaker.dog, text: itemAt(data.quips[speaker.dog][speaker.mood], speaker.quip) },
-    ],
     strips: [{ height: HELP_PICTURE_HEIGHT, screenY: SCREEN_CONFIG.height - HELP_PICTURE_HEIGHT }],
     walk: walkIn({ ...started, pack }, lane, []),
   };
