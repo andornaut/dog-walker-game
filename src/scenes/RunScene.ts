@@ -46,7 +46,7 @@ import {
   startSession,
   stepSession,
 } from "../runner/session";
-import { startRoad, type Walk, zoneLength } from "../runner/walk";
+import { startRoad, type Walk } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun } from "../state/runState";
 import { colorFromHex } from "../ui/phaser/palette";
@@ -306,7 +306,6 @@ export class RunScene extends Scene implements HudRun {
       explaining: this.world?.input.explanation(),
       packX: packPoint(session.walk).x,
       run,
-      zoneFraction: run.zoneDistance / zoneLength(gameData),
     };
   }
 

@@ -24,7 +24,7 @@ import {
   walkUpOffset,
   waveOffset,
 } from "../home/returnHome";
-import { pipLook } from "../hud/hudView";
+import { pipTag } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
@@ -189,11 +189,7 @@ export class EndScene extends Scene {
     fitted(zonesLabel, SIDE_LABEL_ROOM, SIDE.x, BREAKDOWN.top);
     zonePips(walkLength(gameData), walk).forEach((pip, i) => {
       const x = SIDE.x + i * SIDE.pipPitch;
-      const { tag } = pipLook(gameData, {
-        fill: 0,
-        state: pip,
-        zone: walk.route[i] ?? null,
-      });
+      const tag = pipTag(gameData, { state: pip, zone: walk.route[i] ?? null });
       if (addTagImage(this, ZONE_PIPS_KEY, tag, x, SIDE.pipsY) === undefined) {
         fillRect(g, pip === "todo" ? PALETTE.grey : PALETTE.forest, {
           height: 8,

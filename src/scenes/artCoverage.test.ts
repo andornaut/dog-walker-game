@@ -47,14 +47,13 @@ import { helpPicture, TOUCH_DRAG } from "../help/helpPictures";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { effectIconKey, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
-import { pipLook, zonePips } from "../hud/hudView";
+import { type PipState, pipTag } from "../hud/hudView";
 import { MESSAGE_ICONS } from "../hud/messageStrip";
 import { cardOwnerMood } from "../hud/moments";
 import { DOG_REACTIONS, HIT_ART } from "../layout/hitEffects";
 import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
-import { walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import type { PullPose } from "../runner/pulls";
@@ -292,15 +291,10 @@ describe("icon art", () => {
   });
 
   it("tags ui-zone-pips with every route pip, for every zone", () => {
-    const length = walkLength(gameData);
-    const tags = gameData.world.zones.flatMap((zone) => {
-      const route = Array.from({ length }, () => zone.id as ZoneId);
-      return Array.from({ length }, (_, index) =>
-        zonePips(length, route.slice(0, index + 1), index, 0.5).map(
-          (pip) => pipLook(gameData, pip).tag,
-        ),
-      ).flat();
-    });
+    const states: readonly PipState[] = ["current", "done", "todo"];
+    const tags = gameData.world.zones.flatMap((zone) =>
+      states.map((state) => pipTag(gameData, { state, zone: zone.id as ZoneId })),
+    );
     const drawn = gameData.world.zones.flatMap(({ art }) => [art, `${art}-done`]);
     expect(tags).toEqual(expect.arrayContaining(["todo", ...drawn]));
     expect(missingTags(ZONE_PIPS_KEY, [...new Set(tags)])).toEqual([]);

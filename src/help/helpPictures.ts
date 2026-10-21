@@ -89,8 +89,6 @@ export interface HelpPicture {
   // The touch hint's drag frame, its anchor on start.
   readonly touch: { readonly frame: number; readonly start: Point } | null;
   readonly walk: Walk;
-  // How far through its neighborhood the walk is, for the walk bar's pip.
-  readonly zoneFraction: number;
 }
 
 // The pages' choices: who walks, in which lane (from 0, left to right), what is on the road
@@ -196,7 +194,6 @@ const STILL: Omit<HelpPicture, "strips" | "walk"> = {
   quips: [],
   stumble: false,
   touch: null,
-  zoneFraction: 0,
 };
 
 function lanes(data: GameData): HelpPicture {
@@ -261,7 +258,6 @@ function pickups(data: GameData): HelpPicture {
       lane,
       items.map((item, id) => itemAhead(data, run, { ...item, id })),
     ),
-    zoneFraction,
   };
 }
 

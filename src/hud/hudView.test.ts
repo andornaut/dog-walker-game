@@ -5,7 +5,7 @@ import { dollarAmountText } from "../home/home";
 import { tipValue } from "../rules/run";
 import { type Cents, cents, clampHearts } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
-import { changeLabels, heartRows, zonePips } from "./hudView";
+import { changeLabels, heartRows } from "./hudView";
 
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
@@ -47,21 +47,18 @@ describe("changeLabels", () => {
     expect(labels).toEqual([
       {
         amount: -2,
-        cause: gameData.shopGear.luckyCollar.name,
         gain: false,
         target: { dog: "nugget", kind: "dog" },
         text: `−2♥, ${gameData.shopGear.luckyCollar.name}`,
       },
       {
         amount: 1,
-        cause: "treat",
         gain: true,
         target: { dog: "koda", kind: "dog" },
         text: "+1♥ treat",
       },
       {
         amount: 200,
-        cause: "tip, Big tipper",
         gain: true,
         target: { kind: "bank" },
         text: "+$2 tip, Big tipper",
@@ -94,7 +91,6 @@ describe("changeLabels", () => {
     expect(changeLabels(gameData, [bump])).toEqual([
       {
         amount: -1000,
-        cause: "bump",
         gain: false,
         target: { kind: "bank" },
         text: "−$10 bump",
@@ -126,21 +122,5 @@ describe("heartRows", () => {
       [o, x, x],
     ]);
     expect(heartRows(8, 0, 0)).toEqual([]);
-  });
-});
-
-describe("zonePips", () => {
-  it("shows the route walked, the current zone part filled to 0..1, and unknown forks ahead", () => {
-    const done = { fill: 1, state: "done", zone: "street" } as const;
-    const todo = { fill: 0, state: "todo", zone: null } as const;
-    expect(zonePips(4, ["street", "pawsPromenade"], 1, 0.25)).toEqual([
-      done,
-      { fill: 0.25, state: "current", zone: "pawsPromenade" },
-      todo,
-      todo,
-    ]);
-    expect(zonePips(4, ["street"], 1, 0)).toEqual([done, todo, todo, todo]);
-    expect(zonePips(1, ["street"], 0, 1.4)[0]?.fill).toBe(1);
-    expect(zonePips(1, ["street"], 0, -1)[0]?.fill).toBe(0);
   });
 });

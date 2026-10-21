@@ -7,14 +7,13 @@ import type { Point } from "../lib/rect";
 import type { RunState } from "../state/runState";
 import type { PauseSceneData } from "./PauseScene";
 
-// What the HUD draws: the run, the dogs the open card affects, what a held press explains, the
-// pack's centre across the screen, and how far through the zone.
+// What the HUD draws: the run, the dogs the open card affects, what a held press explains and
+// the pack's centre across the screen.
 export interface RunHudView {
   affected: readonly DogId[];
   explaining: ExplainTarget | undefined;
   packX: number;
   run: RunState;
-  zoneFraction: number;
 }
 
 // What the HUD reads of the walk it shows, every frame: what it draws, where each dog is on the

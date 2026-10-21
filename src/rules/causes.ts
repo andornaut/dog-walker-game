@@ -189,10 +189,3 @@ export function causeLabel(data: CauseData, change: Change): string {
     ? `${amount} ${others.join(", ")}`
     : [amount, ...others].join(", ");
 }
-
-// The names the label gives after the amount, as ["dramatic"] or ["tip", "Big tipper"].
-export function causeNames(data: CauseData, change: Change): string[] {
-  const [base, ...rest] = change.causes;
-  const named = base !== undefined && namesBase(change, base) ? change.causes : rest;
-  return named.map((cause) => causeName(data, change, cause));
-}

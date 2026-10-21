@@ -13,7 +13,7 @@ import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
-import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
+import { causeLabel, type Change, changeAmount } from "./causes";
 import { maxHearts } from "./dogs";
 import { changeHearts, resolveEffects } from "./effects";
 import { formatDollars } from "./effectText";
@@ -78,14 +78,13 @@ const bigTipper = activeModifier(
 );
 const bigTipperTip = () => tipValue(data, testState({ koda: 5 }, { modifiers: [bigTipper] }));
 
-describe("causeLabel and causeNames", () => {
+describe("causeLabel", () => {
   it("names each cause", () => {
-    for (const [, change, text, names] of [
+    for (const [, change, text] of [
       [
         "a card option just picked by its amount alone",
         () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
         "−1♥",
-        [],
       ],
       [
         "the max when a gain is cut short there",
@@ -95,13 +94,11 @@ describe("causeLabel and causeNames", () => {
             upgrade: "bellyRubs",
           }),
         "+1♥, at max",
-        ["at max"],
       ],
       [
         "the tip and Big tipper's bonus",
         bigTipperTip,
         `+${tipText} tip, ${UPGRADES.bigTipper.name}`,
-        ["tip", UPGRADES.bigTipper.name],
       ],
       [
         "the zone that changed a pay",
@@ -114,7 +111,6 @@ describe("causeLabel and causeNames", () => {
           return pay;
         },
         `+${formatDollars(cents(2 * lonePay))} pay, ${firstZone.name}`,
-        ["pay", firstZone.name],
       ],
       [
         "a cost by its amount alone",
@@ -125,7 +121,6 @@ describe("causeLabel and causeNames", () => {
             ["duchess", "koda"],
           ),
         `−${formatDollars(read(TEST_TUNING, "money", "encounterLow"))}`,
-        [],
       ],
       [
         "a treat as the base",
@@ -137,7 +132,6 @@ describe("causeLabel and causeNames", () => {
             testState({ koda: 3 }),
           ).change,
         `+${read(TEST_TUNING, "hearts", "treat")}♥ treat`,
-        ["treat"],
       ],
       [
         "an instant encounter as the base",
@@ -149,12 +143,10 @@ describe("causeLabel and causeNames", () => {
             { encounter: "lostWallet", kind: "instant" },
           ),
         `+${formatDollars(read(TEST_TUNING, "money", "lostWalletKeep"))} ${ENCOUNTERS.lostWallet.name}`,
-        [ENCOUNTERS.lostWallet.name],
       ],
-    ] satisfies readonly [string, () => Change | null, string, string[]][]) {
+    ] satisfies readonly [string, () => Change | null, string][]) {
       const made = change();
       expect(made === null ? null : causeLabel(data, made)).toBe(text);
-      expect(made === null ? null : causeNames(data, made)).toEqual(names);
     }
   });
 });

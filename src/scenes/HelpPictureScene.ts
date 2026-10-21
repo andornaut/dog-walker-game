@@ -160,7 +160,6 @@ export class HelpPictureScene extends Scene {
         explaining: undefined,
         packX: laneMotionX(LANE_XS, walk.road.control.motion),
         run: walk.run,
-        zoneFraction: picture.zoneFraction,
       }),
       reducedMotion: () => true,
       runPause: () => WALKING,
