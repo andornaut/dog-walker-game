@@ -76,8 +76,9 @@ export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
 export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   const text = data.homeText;
   const fields = HOME_TEXT_FIELDS.shop;
-  return data.dogSlots.slice(startingDogSlots(data)).map((slot, i) => {
-    const number = startingDogSlots(data) + i + 1;
+  const starting = startingDogSlots(data);
+  return data.dogSlots.slice(starting).map((slot, i) => {
+    const number = starting + i + 1;
     const blocked =
       number > owned.dogSlots + 1
         ? fillLine(fields, text.shop, "slotFirst", { slot: String(number - 1) })
