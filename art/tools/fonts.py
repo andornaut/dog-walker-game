@@ -109,6 +109,9 @@ REPEAT = {TINY5: {
 LOWERED = {TINY5: set(".,;:-+=*~_%·♥")}
 # How many rows lower than the face's ascent the baseline is.
 BASE_DROP = {TINY5: 1}
+# Kerning pairs by font file. Silkscreen's $ inks its right column on two rows only, so a digit
+# after it reads a column further off than the next letter: it moves 1px closer.
+KERNS = {"art/fonts/silkscreen/Silkscreen-Regular.ttf": [("$", d, -1) for d in "0123456789"]}
 ATLAS_W = 128
 
 # ---------- the sign lettering ----------
@@ -385,7 +388,8 @@ def write_font(key, face, size, line_height, base, gl, kerns=()):
 def build():
     for key, (face, path, size) in FONTS.items():
         gl, ascent, descent = glyphs(path, size)
-        write_font(key, face, size, ascent + descent + 1, ascent + BASE_DROP.get(path, 0), gl)
+        write_font(key, face, size, ascent + descent + 1, ascent + BASE_DROP.get(path, 0), gl,
+                   KERNS.get(path, ()))
     for key, fill in DISPLAY.items():
         write_font(key, "Sign", 5 * DISPLAY_SCALE, LINE_HEIGHT, CAP_TOP + 5 * DISPLAY_SCALE,
                    display_glyphs(fill), kernings())
