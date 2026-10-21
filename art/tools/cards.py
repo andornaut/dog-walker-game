@@ -6,11 +6,11 @@
   in the band, the effect text in the body and the cost in the badge. Layout,
   in card pixels:
     band 2..12 (title), art window 4,15 to 79,72 (illustration at 5,16, 75x56),
-    body 6..77 x 76..118, badge 6,121, 71x13.
+    body 6..77 x 76..118, badge spot 6,121, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
   view: the same layout doubled with 1px detail. Band 4..22 (title in font-title
   x2, caps from row 9), art window 8,30, 154x116 (illustration at 2x at 10,32),
-  body 12..154 x 152..234, badge 12,242, 142x26.
+  body 12..154 x 152..234, badge spot 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
   large frame); the game writes the cost between its rivets.
 - card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
@@ -59,8 +59,9 @@ BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amb
 
 def card_frame(kind):
     """ui.py's chrome around the card: the ink and plum lines, the cream face with its tan lip,
-    the band in the card type's colour over its shade line, a recessed art window (an ink line
-    over its top in shadow, plum on the other sides) and the badge socket."""
+    the band in the card type's colour over its shade line and a recessed art window (an ink line
+    over its top in shadow, plum on the other sides). The badge spot stays the cream face: the game
+    lays card-cost there only on an option that costs cash."""
     g = chrome(Grid(CW, CH), 0, 0, CW, CH)
     band, band_sh = BANDS[kind]
     g.rect(2, 2, CW - 4, 11, band)
@@ -72,8 +73,6 @@ def card_frame(kind):
     # divider between the effect text and the badge
     for x in range(8, CW - 8, 3):
         g.p(x, 118, "tan")
-    g.rect(6, 121, 71, 13, "plum")
-    g.rect(6, 121, 71, 1, "ink")
     return g
 
 
@@ -98,13 +97,11 @@ def card_frame_large(kind):
     g.rect(10, 32, 2 * AW, 2 * AH, "tan")
     for x in range(16, LW - 16, 6):
         g.rect(x, 236, 3, 1, "tan")
-    g.rect(12, 242, 142, 26, "plum")
-    g.rect(12, 242, 142, 2, "ink")
     return g
 
 
 def card_cost():
-    """71x13: the cost plaque, laid over the frame's badge socket at 6,121 (12,242 at 2x on the
+    """71x13: the cost plaque, laid over the frame's badge spot at 6,121 (12,242 at 2x on the
     large frame). ui.py's chrome with its corners cut 1px: the cream face is x 2 to 67, rows 2
     to 9, over the tan lip. The game writes the cost ($, $$$, the heart change, Free or Need $...)
     centred in font-title, plum (9.42:1), caps in rows 4 to 8. A disabled card's grey copy turns
