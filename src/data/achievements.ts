@@ -106,6 +106,13 @@ export const ACHIEVEMENTS = [
     name: "Eau de Skunk",
   },
   {
+    badgeLine: "Wipe your paws, please.",
+    conditions: [{ count: 3, debuff: "muddy", kind: "debuffsGot" }],
+    goal: "Get Muddy 3 times in one walk",
+    id: "mudSeason",
+    name: "Mud Season",
+  },
+  {
     badgeLine: "So close. Every time.",
     conditions: [{ count: 5, kind: "squirrelsChased" }],
     goal: "Get pulled toward 5 squirrels, across all walks",
