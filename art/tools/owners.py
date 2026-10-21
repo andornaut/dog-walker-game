@@ -48,7 +48,7 @@ def base(g, skin, shade, shirt, shirt_sh):
 def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False):
     """Eyes, brows and mouth. wide marks the dramatic owners, whose faces go further. brow is the brows'
     colour (feat unless given). whites sets a white beside each pupil, so the eyes read on dark skin.
-    Happy closes the eyes into smiling arcs under arched brows; neutral is open eyes under flat brows;
+    Happy closes the eyes into smiling arcs under raised flat brows; neutral is open eyes under flat brows;
     upset slants the brows down to the middle over a frown, angry and sad; fired narrows the eyes under brows
     pinched down hard; worried lifts the brows' inner ends over eyes gone wide, white either side of the
     pupil, with a small wobbly mouth and a big sweat bead."""
@@ -74,7 +74,8 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         if lashes:
             g.p(x - 1 if x == 12 else x + 1, 16, "ink")
     brows = {
-        "happy": ((11, 14), (12, 13), (13, 14), (18, 14), (19, 13), (20, 14)),
+        # raised and flat, so they never echo the eyes' smiling arcs
+        "happy": ((11, 13), (12, 13), (13, 13), (18, 13), (19, 13), (20, 13)),
         "neutral": ((11, 15), (12, 15), (13, 15), (18, 15), (19, 15), (20, 15)),
         "upset": ((11, 14), (12, 14), (13, 15), (18, 15), (19, 14), (20, 14)),
         "fired": ((11, 13), (12, 14), (13, 15), (18, 15), (19, 14), (20, 13)),
