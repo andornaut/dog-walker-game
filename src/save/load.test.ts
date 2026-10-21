@@ -354,6 +354,33 @@ describe("loadSave", () => {
       },
     ],
     [
+      "a checkpoint's counters, without debuffs and tallies the game no longer has",
+      (document) => {
+        document.checkpoint = {
+          counters: {
+            bumpsByZone: [2, 1],
+            debuffsGot: { retiredDebuff: 1, stinky: 2 },
+            firstZone: 1,
+            lastHeartOwners: 1,
+            startCents: 1_500,
+            tallies: { retiredTally: 4, squirrelPulls: 3 },
+          },
+          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+          earnedCents: 900,
+          zonesFinished: 2,
+        };
+      },
+      (save) => save.checkpoint?.counters,
+      {
+        bumpsByZone: [2, 1],
+        debuffsGot: { stinky: 2 },
+        firstZone: 1,
+        lastHeartOwners: 1,
+        startCents: 1_500,
+        tallies: { squirrelPulls: 3 },
+      },
+    ],
+    [
       "without unknown, removed (pause) or duplicate hints shown",
       (document) => {
         document.shownHints = ["tip", "retiredHint", "pause", "tip", "puddle"];

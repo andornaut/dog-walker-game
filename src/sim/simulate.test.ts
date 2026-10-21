@@ -2,11 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
-import { zoneAt } from "../rules/route";
-import { payFor } from "../rules/run";
-import { roundDollars } from "../rules/units";
 import { packOrder } from "../state/pack";
 import type { PackDogs } from "../state/runState";
+import { defined } from "../testing/defined";
 import { type RunResult, type SimConfig, simulateRun } from "./simulate";
 import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
 
@@ -64,17 +62,13 @@ describe("simulateRun", { timeout: 30_000 }, () => {
       expect(route[0]).toBe(gameData.world.firstZone);
       expect(new Set(route).size).toBe(route.length);
     }
-    // A fork offers 3 of the 5 zones left after the first zone: the easiest offered is one of the 3
-    // easiest left, and the hardest one of the 3 hardest.
+    // A fork offers 3 of the zones left after the first zone: the easiest offered is one of the 3
+    // easiest left, and the hardest one of the 3 hardest. The ideal player reaches the first fork.
     const after = order
       .filter((zone) => zone !== gameData.world.firstZone)
       .map((zone) => order.indexOf(zone));
-    if (left[1] !== undefined) {
-      expect(after.slice(0, 3)).toContain(order.indexOf(left[1]));
-    }
-    if (right[1] !== undefined) {
-      expect(after.slice(-3)).toContain(order.indexOf(right[1]));
-    }
+    expect(after.slice(0, 3)).toContain(order.indexOf(defined(left[1])));
+    expect(after.slice(-3)).toContain(order.indexOf(defined(right[1])));
   });
 
   it("never pays money with the alwaysHearts policy", () => {
@@ -102,6 +96,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
     expect(played()).toEqual(played());
   });
 
+  // What each fee pays is the run rules' own test; this checks the walk pays the dogs it should.
   it("holds each zone's pay for every dog still walking at its end", () => {
     const results = runs(2, { pack: RISKY, policy: "alwaysHearts", skill: SKILL_PRESETS.novice });
 
@@ -111,12 +106,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
           .filter((firing) => firing.zoneIndex <= zone.zoneIndex)
           .map((firing) => firing.dog);
         const walking = packOrder(gameData.dogs, RISKY).filter((dog) => !gone.includes(dog));
-        const { fees } = zoneAt(gameData, result.route, zone.zoneIndex);
-
         expect(zone.fees.map((fee) => fee.dog)).toEqual(walking);
-        expect(zone.fees.map((fee) => fee.amount)).toEqual(
-          walking.map(() => roundDollars(payFor(gameData.tuning) * fees)),
-        );
       }
     }
   });

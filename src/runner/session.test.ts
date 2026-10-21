@@ -69,6 +69,15 @@ describe("runStreams", () => {
     expect(draws(3)).toEqual(draws(3));
     expect(draws(4)).not.toEqual(draws(3));
   });
+
+  // A card's draws never shift the fork offers, so a card tuning change keeps same-seed routes.
+  it("keeps the fork stream apart from the card stream", () => {
+    const [cards, forks] = [take(5, runStreams(3).cards), take(5, runStreams(3).forks)];
+    const drawn = runStreams(3);
+    take(50, drawn.cards);
+    expect(take(5, drawn.forks)).toEqual(forks);
+    expect(forks).not.toEqual(cards);
+  });
 });
 
 describe("stepSession", () => {

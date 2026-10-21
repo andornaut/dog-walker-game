@@ -25,6 +25,12 @@ async function opened(save: SaveDocument | null = null) {
   return { entries, load, session };
 }
 
+// Lets every write already asked for start.
+const settle = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+
 const throwing: SaveStorage = {
   read: () => Promise.reject(new Error("blocked")),
   write: () => Promise.reject(new Error("blocked")),
@@ -93,19 +99,39 @@ describe("achievements away from a run", () => {
   });
 
   it("leaves a save that meets nothing new unwritten", async () => {
-    const { entries } = await opened(veteranSave());
-    expect(entries.get(SAVE_KEY)).toBe(JSON.stringify(veteranSave()));
+    const storage = memoryStorage(new Map([[SAVE_KEY, JSON.stringify(veteranSave())]]));
+    const write = vi.spyOn(storage, "write");
+    await ProfileSession.open(testContext, awards, saveStore(storage));
+    expect(write).not.toHaveBeenCalled();
   });
 });
 
 describe("ProfileSession.update", () => {
-  it("changes the save at once and writes the changes in order", async () => {
-    const { entries, session } = await opened();
+  it("changes the save at once and writes the changes in order, each after the last", async () => {
+    // The first write waits until released, so a second write not chained after it lands first.
+    const written: number[] = [];
+    let release = () => {};
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const storage: SaveStorage = {
+      read: async () => null,
+      write: async (_key, value) => {
+        const { bankCents } = JSON.parse(value) as SaveDocument;
+        if (bankCents === 100) {
+          await held;
+        }
+        written.push(bankCents);
+      },
+    };
+    const { session } = await ProfileSession.open(testContext, awards, saveStore(storage));
     const first = session.update((save) => ({ ...save, bankCents: cents(100) }));
     expect(session.save.bankCents).toBe(100);
     const second = session.update((save) => ({ ...save, bankCents: cents(200) }));
+    await settle();
+    release();
     await Promise.all([first, second]);
-    expect(stored(entries).bankCents).toBe(200);
+    expect(written.slice(-2)).toEqual([100, 200]);
   });
 
   it("reports storage unavailable once a write fails", async () => {
