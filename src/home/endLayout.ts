@@ -57,7 +57,7 @@ export const END_LAYOUT = {
     pipPitch: 21,
     pipsY: PANEL.y + 60,
     right: 320,
-    x: 212,
+    x: 208,
   },
   titleY: PANEL.y + 18,
 } as const;

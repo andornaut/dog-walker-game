@@ -11,8 +11,9 @@ import {
 import { cents } from "../rules/units";
 import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
 import { fillLine } from "../text/lines";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
-import { badgeNameFit, badgeStrip } from "./badgesView";
+import { badgeNameFit, badgeNameTops, badgeStrip, CELEBRATION_PANEL } from "./badgesView";
 import {
   breakdownLabelRoom,
   END_BADGE_NAME_LINES,
@@ -155,8 +156,8 @@ describe("an owner's row heading", () => {
 describe("the side column", () => {
   const words = gameData.menuText.end;
 
-  it.each([words.zonesWalked, words.bank])("sets %j inside the column", (label) => {
-    expectFits("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, label);
+  it.each([words.zonesWalked, words.bank])("sets %j inside the column at 2x", (label) => {
+    expect(expectFits("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, label).style.scale).toBe(2);
   });
 
   it("sets a six-figure bank beside the money icon", () => {
@@ -206,6 +207,30 @@ describe("the end screen's badges", () => {
       expectFits("body", fit.styles, fit.room, name);
     },
   );
+
+  // A strip's names, on the lines its panel gives them, keep their lowest ink inside the
+  // panel's 2px frame: the end screen's strip and the celebration's over the home screen.
+  const panels = [
+    ["the end screen", END_BADGE_NAME_LINES, badges.y, badges.height],
+    ["a celebration", CELEBRATION_PANEL.nameLines, 0, CELEBRATION_PANEL.badgesHeight],
+  ] as const;
+  it.each(
+    panels.flatMap(([where, lines, top, height]) =>
+      counts.flatMap((count) =>
+        names.map((name) => [where, count, name, lines, top, height] as const),
+      ),
+    ),
+  )("in %s with %i badges, keeps %j inside the panel", (_, count, name, lines, top, height) => {
+    const slot = badgeStrip(strip, count).slots[0];
+    if (slot === undefined) {
+      throw new Error("no slot");
+    }
+    const fit = badgeNameFit(lines, slot);
+    const fitted = fittingText(fit.styles, width("body"), fit.room, plainMarks(name));
+    const { scale } = fitted.style;
+    const last = badgeNameTops(BODY, scale, fitted.lines.length, top).at(-1) ?? top;
+    expect(last + inkRowsFromCapTop(BODY) * scale).toBeLessThanOrEqual(top + height - 2);
+  });
 
   it("keeps the panel above the badges", () => {
     expect(most.y + most.height).toBeLessThanOrEqual(badges.y);

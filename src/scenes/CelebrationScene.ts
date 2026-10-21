@@ -3,6 +3,7 @@ import { Scene } from "phaser";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
+import { CELEBRATION_PANEL } from "../home/badgesView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import type { Rect } from "../layout/rect";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
@@ -20,8 +21,7 @@ export interface CelebrationSceneData {
   resume: SceneKey;
 }
 
-// The badges' panel, as tall as the end screen's, then a row of faces when owners cheer.
-const PANEL = { badgesHeight: 118, facesHeight: 44, width: 344, x: 8 };
+const PANEL = CELEBRATION_PANEL;
 const FACES = { pitch: 44, size: 32, top: 4 };
 // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone, 12 under the panel.
 const BUTTON = { gap: 12, height: 44, width: 264, x: 48 };
@@ -41,7 +41,7 @@ export class CelebrationScene extends Scene {
     const height = PANEL.badgesHeight + (cheering.length > 0 ? PANEL.facesHeight : 0);
     const top = Math.round((SCREEN_CONFIG.height - height - BUTTON.gap - BUTTON.height) / 2);
     const panel: Rect = { height, width: PANEL.width, x: PANEL.x, y: top };
-    addBadgeCelebration(this, reduced, 2, panel, achievements);
+    addBadgeCelebration(this, reduced, PANEL.nameLines, panel, achievements);
     soundboardOf(this).play("badge");
     const left = SCREEN_CONFIG.width / 2 - ((cheering.length - 1) * FACES.pitch + FACES.size) / 2;
     const facesY = top + PANEL.badgesHeight + FACES.top;

@@ -3,16 +3,22 @@ import type { GameObjects, Scene } from "phaser";
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { AchievementId, DogId } from "../data/types";
-import { badgeNameFit, badgeStrip, badgeWall, celebrationTitle } from "../home/badgesView";
+import {
+  BADGE_STRIP,
+  badgeNameFit,
+  badgeNameTops,
+  badgeStrip,
+  badgeWall,
+  celebrationTitle,
+} from "../home/badgesView";
 import type { Rect } from "../layout/rect";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText } from "./pixelText";
+import { addPixelText, fitPixelText, pixelFontMetrics } from "./pixelText";
 import { playTagOnce } from "./sprites";
 import { addPanel, showTag, tagFrame, TEXT_SCALE } from "./uiKit";
 
-export const BADGE_SIZE = 32;
+export const BADGE_SIZE = BADGE_STRIP.badgeSize;
 const BURST_TAG = "play";
-const NAME_LINE_HEIGHT = 16;
 const POP = { delayMs: 140, durationMs: 320 } as const;
 
 type Placed = GameObjects.Graphics | GameObjects.Image;
@@ -95,15 +101,17 @@ export function addBadgeCelebration(
 ): void {
   addPanel(scene, rect);
   const center = rect.x + rect.width / 2;
-  addPixelText(scene, center, rect.y + 10, celebrationTitle(gameData, ids.length), {
+  addPixelText(scene, center, rect.y + BADGE_STRIP.titleY, celebrationTitle(gameData, ids.length), {
     color: PALETTE.plum,
     font: "title",
     originX: 0.5,
     scale: TEXT_SCALE,
   });
   const badges = badgeWall(gameData, { achievements: {} }).filter(({ id }) => ids.includes(id));
-  const strip = badgeStrip({ maxNamed: 3, width: rect.width - 8, x: rect.x + 4 }, badges.length);
-  const badgeY = rect.y + 34 + BADGE_SIZE / 2;
+  const { maxNamed } = BADGE_STRIP;
+  const strip = badgeStrip({ maxNamed, width: rect.width - 8, x: rect.x + 4 }, badges.length);
+  const badgeY = rect.y + BADGE_STRIP.badgeTop + BADGE_SIZE / 2;
+  const body = pixelFontMetrics(scene, "body");
   badges.forEach((badge, i) => {
     const slot = strip.slots[i];
     if (slot === undefined) {
@@ -118,9 +126,9 @@ export function addBadgeCelebration(
       const name = fitPixelText(probe, badgeNameFit(nameLines, slot), 0, 0);
       probe.destroy();
       const { letterSpacing, scale } = name.style;
+      const tops = badgeNameTops(body, scale, name.lines.length, rect.y);
       name.lines.forEach((line, n) => {
-        const y = badgeY + BADGE_SIZE / 2 + 6 + (n * NAME_LINE_HEIGHT * scale) / TEXT_SCALE;
-        addPixelText(scene, slot.centerX, y, line, { ...style, scale })
+        addPixelText(scene, slot.centerX, tops[n] ?? 0, line, { ...style, scale })
           .setLetterSpacing(letterSpacing)
           .setDepth(1);
       });
