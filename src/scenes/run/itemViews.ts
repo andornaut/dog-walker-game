@@ -22,12 +22,7 @@ import { currentZoneId } from "../../rules/route";
 import { encounterLook, skinnedArt } from "../../rules/skins";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import {
-  itemCategory,
-  type Walk,
-  type WalkItem,
-  type WalkStep,
-} from "../../runner/walk";
+import { itemCategory, type Walk, type WalkItem, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
