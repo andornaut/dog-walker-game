@@ -4099,20 +4099,20 @@
       "png": "images/icon-gear-fanny-pack-20.png"
     },
     {
+      "key": "icon-gear-hall-pass",
+      "png": "images/icon-gear-hall-pass.png"
+    },
+    {
+      "key": "icon-gear-hall-pass-20",
+      "png": "images/icon-gear-hall-pass-20.png"
+    },
+    {
       "key": "icon-gear-lucky-collar",
       "png": "images/icon-gear-lucky-collar.png"
     },
     {
       "key": "icon-gear-lucky-collar-20",
       "png": "images/icon-gear-lucky-collar-20.png"
-    },
-    {
-      "key": "icon-gear-poop-bags",
-      "png": "images/icon-gear-poop-bags.png"
-    },
-    {
-      "key": "icon-gear-poop-bags-20",
-      "png": "images/icon-gear-poop-bags-20.png"
     },
     {
       "key": "icon-gear-running-shoes",
@@ -4299,12 +4299,12 @@
       "png": "images/item-fanny-pack.png"
     },
     {
-      "key": "item-lucky-collar",
-      "png": "images/item-lucky-collar.png"
+      "key": "item-hall-pass",
+      "png": "images/item-hall-pass.png"
     },
     {
-      "key": "item-poop-bags",
-      "png": "images/item-poop-bags.png"
+      "key": "item-lucky-collar",
+      "png": "images/item-lucky-collar.png"
     },
     {
       "key": "item-running-shoes",

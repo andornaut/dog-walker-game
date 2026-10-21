@@ -2,7 +2,7 @@
 """Draw the shop's gear icons.
 
 item-<id>: 32x32 images in Endesga 32 with coloured outlines, on transparency.
-The ids are the shop's data ids in kebab case: item-poop-bags is the Hall pass, a
+The ids are the shop's data ids in kebab case: item-hall-pass is the Hall pass, a
 cream pass card on a lanyard.
 
 Usage:
@@ -76,7 +76,7 @@ def lucky_collar(g):
 
 ICONS = {
     "fanny-pack": fanny_pack,
-    "poop-bags": hall_pass,
+    "hall-pass": hall_pass,
     "running-shoes": running_shoes,
     "lucky-collar": lucky_collar,
 }
