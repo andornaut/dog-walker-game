@@ -35,8 +35,7 @@ empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pre
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
 icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo,
 and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile (24x24 nine-slice, 4px
-on every side; tags normal, selected, disabled), ui-sticker (56x28; tags new, price, pop),
-ui-touch-drag (104x40, the help screen's one lane-width drag; tags press, drag, release).
+on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the help screen's one lane-width drag; tags press, drag, release).
 Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py,
 moments.py, scene.py and cards.py draw their plates, callouts and frames with it.
 
@@ -663,53 +662,6 @@ def payout_label():
     g.rect(5, 7, 2, 2, None)
     for x, y in ((4, 6), (7, 6), (4, 9), (7, 9)):
         g.p(x, y, "cream")
-    return g
-
-
-# ---------- stickers ----------
-
-STICKER_W, STICKER_H = 56, 28
-# Each look's body and spike colours: new for a tile that just became affordable, price for the
-# next locked tile's price. Ink text holds 14.43:1 on yellow and 11.98:1 on cyan.
-STICKERS = {"new": ("yellow", "amber"), "price": ("cyan", "sky")}
-
-
-def sticker(body, spikes, scale=1.0, turn=0.0):
-    """56x28: a starburst sticker, a squared oval body (a superellipse, 20x7 half axes) ringed by
-    14 spikes 5px long, spaced evenly round its edge, in an ink outline. The game writes one short
-    word on the body in font-title, ink, centred on x 28 with its caps in rows 12 to 16, up to
-    36px wide. scale and turn (a fraction of a spike) draw the pop's frames."""
-    import math
-
-    a, b, n, spike = 20 * scale, 7 * scale, 14, 5 * scale
-    cx, cy = STICKER_W / 2, STICKER_H / 2
-    # the edge's arc length at each parametric angle, so the spikes fall evenly round it
-    steps = 720
-    edge = [(math.copysign(a * abs(math.cos(t)) ** 0.5, math.cos(t)),
-             math.copysign(b * abs(math.sin(t)) ** 0.5, math.sin(t)))
-            for t in (2 * math.pi * i / steps for i in range(steps + 1))]
-    arc = [0.0]
-    for (x0, y0), (x1, y1) in zip(edge, edge[1:]):
-        arc.append(arc[-1] + math.hypot(x1 - x0, y1 - y0))
-    g = Grid(STICKER_W, STICKER_H)
-    for y in range(STICKER_H):
-        for x in range(STICKER_W):
-            dx, dy = x + 0.5 - cx, y + 0.5 - cy
-            r = ((abs(dx) / a) ** 4 + (abs(dy) / b) ** 4) ** 0.25
-            if r <= 1:
-                g.p(x, y, body)
-                continue
-            phi = math.atan2(math.copysign((abs(dy) / b) ** 2, dy), math.copysign((abs(dx) / a) ** 2, dx))
-            t = (arc[round(phi % (2 * math.pi) / (2 * math.pi) * steps)] / arc[-1] * n + turn) % 1
-            beyond = math.hypot(dx, dy) * (1 - 1 / r)
-            if beyond <= spike * (1 - abs(2 * t - 1)):
-                g.p(x, y, spikes)
-    fill = [row[:] for row in g.px]
-    for y in range(STICKER_H):
-        for x in range(STICKER_W):
-            if not fill[y][x] and any(0 <= x + dx < STICKER_W and 0 <= y + dy < STICKER_H and fill[y + dy][x + dx]
-                                      for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))):
-                g.p(x, y, "ink")
     return g
 
 
@@ -1362,8 +1314,8 @@ CELEBRATE_BURST = (148, 132)
 
 
 def celebrate_burst():
-    """148x132: the starburst behind the cheering walker in the zone celebration, ui-sticker's look as a
-    round burst: a yellow body (an ellipse with 62x54 half axes) ringed by 18 amber spikes 10px long, in a
+    """148x132: the starburst behind the cheering walker in the zone celebration, a round
+    burst: a yellow body (an ellipse with 62x54 half axes) ringed by 18 amber spikes 10px long, in a
     1px ink outline, with a white glint along the body's upper left. No text goes on it."""
     import math
 
@@ -1615,10 +1567,6 @@ def sprites():
         for zone in ZONE_COLOURS for suffix in ("", "-done")]
     yield "ui-touch-drag", [(tag, [touch_drag(*f).outlined() for f in frames], TOUCH_MS)
                             for tag, frames in TOUCH_FRAMES.items()]
-    pop = [sticker(*STICKERS["new"], scale, turn).outlined(False)
-           for scale, turn in ((0.45, 0.5), (0.85, 0.25), (1.06, 0), (1, 0))]
-    yield "ui-sticker", [(t, [sticker(*cols).outlined(False)], 1000) for t, cols in STICKERS.items()] + [
-        ("pop", pop, 70)]
 
 
 def preview(out, scale=3, width=380):

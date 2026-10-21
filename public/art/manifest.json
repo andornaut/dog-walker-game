@@ -6730,11 +6730,6 @@
       "json": "sprites/ui-slider-knob.json"
     },
     {
-      "key": "ui-sticker",
-      "png": "sprites/ui-sticker.png",
-      "json": "sprites/ui-sticker.json"
-    },
-    {
       "key": "ui-switch",
       "png": "sprites/ui-switch.png",
       "json": "sprites/ui-switch.json"
