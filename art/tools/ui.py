@@ -9,9 +9,8 @@ shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outline
 ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
 (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
 (24x24 nine-slice, 8px corners), ui-detail-band (24x22 nine-slice, 8px caps and 2px top and bottom,
-drawn 24 tall) and ui-detail-well (68x68) and ui-detail-well-locked (68x68, neutral grey, for an
-item not owned); the shop list's ui-scroll-track (8x24) and ui-scroll-thumb (6x24, three-slices with
-3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid
+drawn 24 tall) and ui-detail-well (68x68); the shop list's ui-scroll-track (8x24) and
+ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid
 (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h
 (8x2) and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows'
 ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice,
@@ -872,20 +871,6 @@ def detail_well():
     return g
 
 
-def detail_well_locked():
-    """68x68: ui-detail-well for an item not owned, in the disabled tile's neutral greys: ink and
-    nslate lines round an ngrey recess shaded ndslate under its top and left edges. The game draws
-    the portrait's ink silhouette at 2,2 (7.23:1 on ngrey), never the portrait."""
-    g = Grid(68, 68)
-    g.rect(1, 0, 66, 68, "ink")
-    g.rect(0, 1, 68, 66, "ink")
-    g.rect(1, 1, 66, 66, "nslate")
-    g.rect(2, 2, 64, 64, "ngrey")
-    g.rect(2, 2, 64, 1, "ndslate")
-    g.rect(2, 2, 1, 64, "ndslate")
-    return g
-
-
 SECTION_W, SECTION_H = 24, 32
 SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
 
@@ -1526,7 +1511,6 @@ IMAGES = {
     "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
     "ui-scroll-thumb": lambda: to_image(scroll_thumb().outlined(False)),
     "ui-scroll-track": lambda: to_image(scroll_track().outlined(False)),
-    "ui-detail-well-locked": lambda: to_image(detail_well_locked().outlined(False)),
     "ui-cork": lambda: to_image(cork().outlined(False)),
     "ui-denim": lambda: to_image(denim().outlined(False)),
     "ui-plaid": lambda: to_image(plaid().outlined(False)),
