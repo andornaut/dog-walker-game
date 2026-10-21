@@ -8,10 +8,10 @@ import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types"
 import { dollarAmountText } from "../home/home";
 import {
   effectIconFallback,
-  effectIconKey,
   type EffectItem,
   effectItems,
   effectItemsKey,
+  walkBarIconKey,
 } from "../hud/effectIcons";
 import { explainLines } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
@@ -465,56 +465,45 @@ export class HudScene extends Scene {
     scalePixelText(money, scale, x + advance, top);
   }
 
-  // The effect wells: each effect's icon in its well, and "+n" in the last well for the effects
-  // past the wells.
+  // The effect wells: each effect's 20x20 icon in its well, then "+n" on the wood for the
+  // effects past the wells.
   private showEffects(effects: readonly EffectItem[]): void {
     this.effectParts.forEach((part) => part.destroy());
-    const wells = BAR.effectWells;
-    const { icon } = WALK_BAR.effects;
-    this.effectParts = effectSlots(wells.length, effects.length).flatMap((slot, i) => {
-      const well = wells[i];
-      if (well === undefined) {
+    const { icon, iconSize } = WALK_BAR.effects;
+    const slots = effectSlots(BAR.effectWells.length, effects.length);
+    this.effectParts = slots.wells.flatMap((index, i) => {
+      const well = BAR.effectWells[i];
+      const item = effects[index];
+      if (well === undefined || item === undefined) {
         return [];
       }
-      const parts: GameObjects.GameObject[] = [];
-      if (this.textures.exists("ui-effect-well")) {
-        parts.push(this.add.image(well.x, well.y, "ui-effect-well").setOrigin(0));
-      } else {
-        parts.push(
-          this.add.rectangle(well.x, well.y, well.width, well.height, PALETTE.ink).setOrigin(0),
-        );
-      }
-      if (slot.kind === "more") {
-        const count = String(slot.hidden.length);
-        const more = fillLine(RUN_TEXT_FIELDS.explain, gameData.runText.explain, "moreEffects", {
-          count,
-        });
-        parts.push(
-          addPixelText(this, well.x + 8, well.y + 6, more, {
-            color: PALETTE.cream,
-            font: "title",
-            originX: 0.5,
-          }),
-        );
-        return parts;
-      }
-      const item = effects[slot.index];
-      if (item === undefined) {
-        return parts;
-      }
-      const key = effectIconKey(item);
+      const art = this.textures.exists("ui-effect-well");
+      const key = walkBarIconKey(item);
       const x = well.x + icon;
       const y = well.y + icon;
-      parts.push(
+      const half = iconSize / 2;
+      return [
+        art
+          ? this.add.image(well.x, well.y, "ui-effect-well").setOrigin(0)
+          : this.add.rectangle(well.x, well.y, well.width, well.height, PALETTE.ink).setOrigin(0),
         this.textures.exists(key)
           ? this.add.image(x, y, key).setOrigin(0)
-          : addPixelText(this, x + 8, y + 5, effectIconFallback(gameData, item), {
+          : addPixelText(this, x + half, y + half - 2, effectIconFallback(gameData, item), {
               color: PALETTE.cream,
               originX: 0.5,
             }),
-      );
-      return parts;
+      ];
     });
+    if (slots.hidden.length > 0 && BAR.moreHold.width > 0) {
+      const count = String(slots.hidden.length);
+      const more = fillLine(RUN_TEXT_FIELDS.explain, gameData.runText.explain, "moreEffects", {
+        count,
+      });
+      const { x, y } = BAR.moreText;
+      this.effectParts.push(
+        addPixelText(this, x, y, more, { color: PALETTE.cream, font: "title", originX: 0.5 }),
+      );
+    }
   }
 
   // A bar per debuff under the walk bar, in the order they began, rebuilt as they come and go;

@@ -42,7 +42,7 @@ import type {
 } from "../data/types";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
-import { effectIconKey } from "../hud/effectIcons";
+import { effectIconKey, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
 import { pipLook, zonePips } from "../hud/hudView";
 import { MESSAGE_ICONS } from "../hud/messageStrip";
 import { SCALE_STEPS } from "../layout/projection";
@@ -205,6 +205,24 @@ describe("image art", () => {
           effectIconKey({ kind: "perk", perk }),
         ),
       ],
+    ],
+    [
+      "a 20x20 walk bar icon for every perk, gear item and upgrade",
+      () =>
+        [
+          ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk): EffectItem => ({
+            kind: "perk",
+            perk,
+          })),
+          ...(Object.keys(gameData.shopGear) as GearId[]).map((gear): EffectItem => ({
+            gear,
+            kind: "gear",
+          })),
+          ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade): EffectItem => ({
+            kind: "upgrade",
+            upgrade,
+          })),
+        ].map(walkBarIconKey),
     ],
     [
       "every section's fill and the Pocket's stitch",

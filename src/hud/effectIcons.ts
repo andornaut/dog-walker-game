@@ -115,6 +115,11 @@ export function effectLine(
   }
 }
 
+// The 20x20 icon each item shows in the walk bar's effect wells: its 16x16 key and -20.
+export function walkBarIconKey(item: EffectItem): string {
+  return `${effectIconKey(item)}-20`;
+}
+
 export function effectItemsKey(items: readonly EffectItem[]): string {
   return items.map(effectIconKey).join();
 }

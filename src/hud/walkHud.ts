@@ -8,18 +8,27 @@ import { heartRows } from "./hudView";
 // screen pixels from the bar's top-left corner, the debuff bar's or the card's; text y is the
 // top of the capitals.
 
-// The walk bar's buttons, left to right, at the bar's right end, each a 44px-square hit area
-// round its 20x20 face.
+// The walk bar's buttons, left to right.
 export const WALK_BAR_BUTTONS = ["home", "sound", "settings", "pause"] as const;
 export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 
-// cash: the "$" and the amount from text.x at the largest of scales that fits text.width, their
-// capitals' bottom on capsBottom. zone: the neighbourhood well ends gap pixels before the first
-// button's hit area; the name is centred on name.x and the pips start at pips, pitch apart.
-// effects: wells of size at pitch along y from the neighbourhood well's x, as many as end
-// within it.
+// The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
+// this table. buttons: each button's face x and its hit area's x and width, the hit area the
+// bar's full height and at least minHitWidth wide, its face buttonFace.size square on row
+// buttonFace.y. cash: the "$" and the amount from text.x at the largest of scales that fits
+// text.width, their capitals' bottom on capsBottom. zone: the neighbourhood well, the name
+// centred on name.x and the pips from pips, pitch apart. effects: count wells of size at pitch
+// from x along y, each icon iconSize at icon,icon in its well and held from holdInset left of
+// it down to the bar's bottom; "+n", for the effects past the wells, stands on the wood after
+// the last well's hold, its capitals' top on more.y, and holds up to the first button.
 export const WALK_BAR = {
-  button: { face: 20, hit: 44, top: 12 },
+  buttonFace: { size: 20, y: 12 },
+  buttons: {
+    home: { faceX: 196, hitWidth: 44, hitX: 184 },
+    pause: { faceX: 328, hitWidth: 44, hitX: 316 },
+    settings: { faceX: 284, hitWidth: 44, hitX: 272 },
+    sound: { faceX: 240, hitWidth: 44, hitX: 228 },
+  } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
   cash: {
     capsBottom: 30,
     coin: { x: 8, y: 15 },
@@ -27,12 +36,22 @@ export const WALK_BAR = {
     text: { width: 71, x: 26 },
     well: { height: 40, width: 95, x: 4, y: 4 },
   },
-  effects: { icon: 1, pitch: 20, size: 18, y: 26 },
+  effects: {
+    count: 3,
+    holdInset: 1,
+    icon: 1,
+    iconSize: 20,
+    more: { y: 30 },
+    pitch: 23,
+    size: 22,
+    x: 103,
+    y: 22,
+  },
+  minHitWidth: 36,
   zone: {
-    gap: 1,
-    name: { x: 142, y: 8 },
-    pips: { pitch: 19, x: 105, y: 15 },
-    well: { height: 21, x: 103, y: 4 },
+    name: { x: 142, y: 5 },
+    pips: { pitch: 19, x: 105, y: 12 },
+    well: { height: 17, width: 80, x: 103, y: 4 },
   },
 } as const;
 
@@ -51,44 +70,48 @@ export interface WalkBarLayout {
   // the bar, from the neighbourhood well's top to the bar's bottom.
   effectHolds: Rect[];
   effectWells: Rect[];
+  // "+n": the press area after the wells, none wide when the wells reach the first button, and
+  // its text's centre column and capitals' top.
+  moreHold: Rect;
+  moreText: Point;
   zoneWell: Rect;
 }
 
+// The walk bar's parts on screen, for the bar at bar.
 export function walkBarLayout(bar: Rect): WalkBarLayout {
-  const { button, effects, zone } = WALK_BAR;
-  const count = WALK_BAR_BUTTONS.length;
+  const { buttonFace, effects, zone } = WALK_BAR;
+  const at = (point: Point): Point => ({ x: bar.x + point.x, y: bar.y + point.y });
   const buttons = Object.fromEntries(
-    WALK_BAR_BUTTONS.map((id, i) => {
-      const x = bar.x + bar.width - button.hit * (count - i);
-      const inset = (button.hit - button.face) / 2;
-      const hit = { height: button.hit, width: button.hit, x, y: bar.y };
-      return [id, { face: { x: x + inset, y: bar.y + button.top }, hit }];
+    WALK_BAR_BUTTONS.map((id) => {
+      const { faceX, hitWidth, hitX } = WALK_BAR.buttons[id];
+      const hit = { height: bar.height, width: hitWidth, x: bar.x + hitX, y: bar.y };
+      return [id, { face: at({ x: faceX, y: buttonFace.y }), hit }];
     }),
   ) as Record<WalkBarButtonId, BarButton>;
-  const firstHit = buttons[WALK_BAR_BUTTONS[0]].hit;
-  const zoneWell = {
-    ...zone.well,
-    width: firstHit.x - zone.gap - zone.well.x,
-    y: bar.y + zone.well.y,
-  };
-  const right = zoneWell.x + zoneWell.width;
-  const wellCount = Math.floor((right - zoneWell.x - effects.size) / effects.pitch) + 1;
-  const effectWells = Array.from({ length: Math.max(0, wellCount) }, (_, i) => ({
+  const zoneWell = { ...zone.well, ...at(zone.well) };
+  const effectWells = Array.from({ length: effects.count }, (_, i) => ({
+    ...at({ x: effects.x + i * effects.pitch, y: effects.y }),
     height: effects.size,
     width: effects.size,
-    x: zoneWell.x + i * effects.pitch,
-    y: bar.y + effects.y,
   }));
-  const gutter = (effects.pitch - effects.size) / 2;
+  const holdHeight = bar.y + bar.height - zoneWell.y;
+  const effectHolds = effectWells.map((well) => ({
+    height: holdHeight,
+    width: effects.pitch,
+    x: well.x - effects.holdInset,
+    y: zoneWell.y,
+  }));
+  const last = effectHolds.at(-1);
+  const moreX = last === undefined ? zoneWell.x : last.x + last.width;
+  const firstHit = buttons[WALK_BAR_BUTTONS[0]].hit;
+  const moreWidth = Math.max(0, firstHit.x - moreX);
+  const moreHold = { height: holdHeight, width: moreWidth, x: moreX, y: zoneWell.y };
   return {
     buttons,
-    effectHolds: effectWells.map((well) => ({
-      height: bar.y + bar.height - zoneWell.y,
-      width: effects.pitch,
-      x: well.x - gutter,
-      y: zoneWell.y,
-    })),
+    effectHolds,
     effectWells,
+    moreHold,
+    moreText: { x: moreX + Math.floor(moreWidth / 2), y: bar.y + effects.more.y },
     zoneWell,
   };
 }
@@ -105,20 +128,16 @@ export function cashTop(scale: number): number {
   return WALK_BAR.cash.capsBottom + 1 - TITLE_CAP_ROWS * scale;
 }
 
-// What an effect well shows: one of the effects, by its index in the walk's list, or "+n" for
-// the effects past the wells, hidden lists their indexes.
-export type EffectSlot = { index: number; kind: "effect" } | { hidden: number[]; kind: "more" };
+// Which effects the walk bar shows, by their indexes in the walk's list: one in each well, in
+// order, and the rest past the wells behind "+n".
+export interface EffectSlots {
+  hidden: number[];
+  wells: number[];
+}
 
-// With more effects than wells, the last well holds "+n" for the rest.
-export function effectSlots(wells: number, effects: number): EffectSlot[] {
-  if (effects <= wells) {
-    return Array.from({ length: effects }, (_, index) => ({ index, kind: "effect" }));
-  }
-  const shown = Math.max(0, wells - 1);
-  return [
-    ...Array.from({ length: shown }, (_, index): EffectSlot => ({ index, kind: "effect" })),
-    { hidden: Array.from({ length: effects - shown }, (_, i) => shown + i), kind: "more" },
-  ];
+export function effectSlots(wells: number, effects: number): EffectSlots {
+  const indexes = Array.from({ length: effects }, (_, index) => index);
+  return { hidden: indexes.slice(wells), wells: indexes.slice(0, wells) };
 }
 
 // A debuff bar (ui-debuff-bar, 360x16): its icon, its name up to name.room wide, and the fill
@@ -278,12 +297,12 @@ export function explainTargetAt(
   const { x, y } = point;
   const bar = walkBarLayout(layout.topBar);
   const slots = effectSlots(bar.effectWells.length, shown.effects);
-  const well = bar.effectHolds.findIndex(
-    (rect, i) => i < slots.length && containsPoint(rect, x, y),
-  );
-  const slot = slots[well];
-  if (slot !== undefined) {
-    return { effects: slot.kind === "effect" ? [slot.index] : slot.hidden, kind: "effects" };
+  const well = slots.wells[bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y))];
+  if (well !== undefined) {
+    return { effects: [well], kind: "effects" };
+  }
+  if (slots.hidden.length > 0 && containsPoint(bar.moreHold, x, y)) {
+    return { effects: slots.hidden, kind: "effects" };
   }
   const bars = debuffBarRects(layout.topBar, shown.debuffs.length);
   const debuff = shown.debuffs[bars.findIndex((rect) => containsPoint(rect, x, y))];

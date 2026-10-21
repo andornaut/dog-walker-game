@@ -19,7 +19,7 @@ import {
   walkCovered,
   walkPaused,
 } from "./topBar";
-import { WALK_BAR_BUTTONS, walkBarLayout } from "./walkHud";
+import { WALK_BAR, WALK_BAR_BUTTONS, walkBarLayout } from "./walkHud";
 
 const WALKING: RunPause = {
   card: false,
@@ -136,24 +136,26 @@ describe("the walk bar's buttons", () => {
   const { topBar } = screenLayout(SCREEN_CONFIG);
   const bar = walkBarLayout(topBar);
 
-  it("are the walk bar layout's, left to right, the last ending on the bar's right edge", () => {
+  it("are the walk bar layout's, left to right, none over the next, the last inside the bar", () => {
     expect(TOP_BAR_BUTTONS).toEqual(bar.buttons);
     const hits = WALK_BAR_BUTTONS.map((id) => TOP_BAR_BUTTONS[id].hit);
     hits.slice(1).forEach((hit, i) => {
-      expect(hit.x).toBe((hits[i]?.x ?? 0) + (hits[i]?.width ?? 0));
+      expect(hit.x).toBeGreaterThanOrEqual((hits[i]?.x ?? 0) + (hits[i]?.width ?? 0));
     });
     const last = hits.at(-1);
-    expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(topBar.x + topBar.width);
+    expect((last?.x ?? 0) + (last?.width ?? 0)).toBeLessThanOrEqual(topBar.x + topBar.width);
   });
 
   it.each(WALK_BAR_BUTTONS.map((id) => [id] as const))(
-    "centres %s's face in its 44px hit area on the bar, its icon 2px in and 1px down",
+    "holds %s's face in its hit area, the bar's height and wide enough for a thumb, its icon 2px in and 1px down",
     (id) => {
       const { face, hit } = TOP_BAR_BUTTONS[id];
-      expect([hit.width, hit.height]).toEqual([44, 44]);
-      expect(hit.y).toBe(topBar.y);
-      expect(face.x - hit.x).toBe((hit.width - 20) / 2);
-      expect(face.y + 20).toBeLessThanOrEqual(topBar.y + topBar.height);
+      const size = WALK_BAR.buttonFace.size;
+      expect(hit.width).toBeGreaterThanOrEqual(WALK_BAR.minHitWidth);
+      expect({ height: hit.height, y: hit.y }).toEqual({ height: topBar.height, y: topBar.y });
+      expect(face.x).toBeGreaterThanOrEqual(hit.x);
+      expect(face.x + size).toBeLessThanOrEqual(hit.x + hit.width);
+      expect(face.y + size).toBeLessThanOrEqual(topBar.y + topBar.height);
       expect(buttonIcon(TOP_BAR_BUTTONS[id], false)).toEqual({ x: face.x + 2, y: face.y + 1 });
       expect(buttonIcon(TOP_BAR_BUTTONS[id], true)).toEqual({ x: face.x + 2, y: face.y + 3 });
     },

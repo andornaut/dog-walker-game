@@ -15,7 +15,7 @@ import {
   debuffBarRects,
   debuffFillWidth,
   DOG_CARD,
-  type EffectSlot,
+  type EffectSlots,
   effectSlots,
   type ExplainShown,
   type ExplainTarget,
@@ -92,11 +92,18 @@ describe("the walk bar", () => {
     }
   });
 
-  it("fills the neighbourhood well's width with effect wells, each held by its column to the bar's bottom", () => {
-    const right = BAR.zoneWell.x + BAR.zoneWell.width;
-    const last = BAR.effectWells.at(-1);
-    expect((last?.x ?? 0) + (last?.width ?? 0)).toBeLessThanOrEqual(right);
-    expect((last?.x ?? 0) + WALK_BAR.effects.pitch + WALK_BAR.effects.size).toBeGreaterThan(right);
+  it("lines the effect wells up under the neighbourhood well, each held by its column to the bar's bottom", () => {
+    const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
+    expect(BAR.effectWells).toHaveLength(WALK_BAR.effects.count);
+    for (const hold of BAR.effectHolds) {
+      expect(hold.x).toBeGreaterThanOrEqual(BAR.zoneWell.x - WALK_BAR.effects.holdInset);
+      expect(hold.x + hold.width).toBeLessThanOrEqual(first.x);
+    }
+    for (const well of BAR.effectWells) {
+      const { icon, iconSize } = WALK_BAR.effects;
+      const art = { height: iconSize, width: iconSize, x: well.x + icon, y: well.y + icon };
+      expect(inside(art, well)).toBe(true);
+    }
     BAR.effectWells.forEach((well, i) => {
       const hold = BAR.effectHolds[i];
       expect(hold).toBeDefined();
@@ -109,9 +116,26 @@ describe("the walk bar", () => {
     });
   });
 
+  it("holds +n from the last well's hold to the first button, its text centred in it on the bar", () => {
+    const last = BAR.effectHolds.at(-1);
+    const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
+    const { moreHold, moreText } = BAR;
+    expect(moreHold.x).toBe((last?.x ?? 0) + (last?.width ?? 0));
+    expect(moreHold.x + moreHold.width).toBe(Math.max(moreHold.x, first.x));
+    expect({ height: moreHold.height, y: moreHold.y }).toEqual({
+      height: last?.height,
+      y: last?.y,
+    });
+    expect(Math.abs(moreText.x - (moreHold.x + moreHold.width / 2))).toBeLessThanOrEqual(0.5);
+    expect(moreText.y + TITLE_CAP_ROWS).toBeLessThanOrEqual(topBar.y + topBar.height);
+    for (const well of BAR.effectWells) {
+      expect(overlaps(well, moreHold)).toBe(false);
+    }
+  });
+
   it("ends the neighbourhood well before the first button's hit area", () => {
     const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
-    expect(BAR.zoneWell.x + BAR.zoneWell.width).toBe(first.x - WALK_BAR.zone.gap);
+    expect(BAR.zoneWell.x + BAR.zoneWell.width).toBeLessThanOrEqual(first.x);
   });
 });
 
@@ -146,28 +170,13 @@ describe("cashScale", () => {
 });
 
 describe("effectSlots", () => {
-  const effect = (index: number): EffectSlot => ({ index, kind: "effect" });
-  const many = WELLS + 3;
-  it.each<[string, number, EffectSlot[]]>([
-    ["no effects", 0, []],
-    ["one effect", 1, [effect(0)]],
-    ["as many effects as wells", WELLS, Array.from({ length: WELLS }, (_, i) => effect(i))],
-    [
-      "one effect more than the wells",
-      WELLS + 1,
-      [
-        ...Array.from({ length: WELLS - 1 }, (_, i) => effect(i)),
-        { hidden: [WELLS - 1, WELLS], kind: "more" },
-      ],
-    ],
-    [
-      "many more effects than the wells",
-      many,
-      [
-        ...Array.from({ length: WELLS - 1 }, (_, i) => effect(i)),
-        { hidden: Array.from({ length: many - WELLS + 1 }, (_, i) => WELLS - 1 + i), kind: "more" },
-      ],
-    ],
+  const upTo = (count: number, from = 0) => Array.from({ length: count }, (_, i) => from + i);
+  it.each<[string, number, EffectSlots]>([
+    ["no effects", 0, { hidden: [], wells: [] }],
+    ["one effect", 1, { hidden: [], wells: [0] }],
+    ["as many effects as wells", WELLS, { hidden: [], wells: upTo(WELLS) }],
+    ["one effect more than the wells", WELLS + 1, { hidden: [WELLS], wells: upTo(WELLS) }],
+    ["three more than the wells", WELLS + 3, { hidden: upTo(3, WELLS), wells: upTo(WELLS) }],
   ])("shows %s", (_name, count, expected) => {
     expect(effectSlots(WELLS, count)).toEqual(expected);
   });
@@ -316,11 +325,18 @@ describe("explainTargetAt", () => {
       { effects: [WELLS - 1], kind: "effects" },
     ],
     [
-      "+n with more effects than wells",
+      "the last well with more effects than wells",
       WELLS + 2,
       holdAt(WELLS - 1),
-      { effects: [WELLS - 1, WELLS, WELLS + 1], kind: "effects" },
+      { effects: [WELLS - 1], kind: "effects" },
     ],
+    [
+      "+n with more effects than wells, where the bar has room for it",
+      WELLS + 2,
+      centre(BAR.moreHold),
+      BAR.moreHold.width > 0 ? { effects: [WELLS, WELLS + 1], kind: "effects" } : undefined,
+    ],
+    ["+n's place with no more effects than wells", WELLS, centre(BAR.moreHold), undefined],
     ["the cash well", 1, centre(WALK_BAR.cash.well), undefined],
     ["a button", 1, button, undefined],
     ["the first debuff bar", 0, centre(bars[0] ?? topBar), { debuff: "muddy", kind: "debuff" }],

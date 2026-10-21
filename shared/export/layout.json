@@ -2200,7 +2200,7 @@
           "y": 12
         },
         "hit": {
-          "height": 44,
+          "height": 48,
           "width": 44,
           "x": 184,
           "y": 0
@@ -2217,7 +2217,7 @@
           "y": 12
         },
         "hit": {
-          "height": 44,
+          "height": 48,
           "width": 44,
           "x": 228,
           "y": 0
@@ -2234,7 +2234,7 @@
           "y": 12
         },
         "hit": {
-          "height": 44,
+          "height": 48,
           "width": 44,
           "x": 272,
           "y": 0
@@ -2251,7 +2251,7 @@
           "y": 12
         },
         "hit": {
-          "height": 44,
+          "height": 48,
           "width": 44,
           "x": 316,
           "y": 0
@@ -2265,60 +2265,58 @@
     "effectHolds": [
       {
         "height": 44,
-        "width": 20,
+        "width": 23,
         "x": 102,
         "y": 4
       },
       {
         "height": 44,
-        "width": 20,
-        "x": 122,
+        "width": 23,
+        "x": 125,
         "y": 4
       },
       {
         "height": 44,
-        "width": 20,
-        "x": 142,
-        "y": 4
-      },
-      {
-        "height": 44,
-        "width": 20,
-        "x": 162,
+        "width": 23,
+        "x": 148,
         "y": 4
       }
     ],
     "effectWells": [
       {
-        "height": 18,
-        "width": 18,
         "x": 103,
-        "y": 26
+        "y": 22,
+        "height": 22,
+        "width": 22
       },
       {
-        "height": 18,
-        "width": 18,
-        "x": 123,
-        "y": 26
+        "x": 126,
+        "y": 22,
+        "height": 22,
+        "width": 22
       },
       {
-        "height": 18,
-        "width": 18,
-        "x": 143,
-        "y": 26
-      },
-      {
-        "height": 18,
-        "width": 18,
-        "x": 163,
-        "y": 26
+        "x": 149,
+        "y": 22,
+        "height": 22,
+        "width": 22
       }
     ],
+    "moreHold": {
+      "height": 44,
+      "width": 13,
+      "x": 171,
+      "y": 4
+    },
+    "moreText": {
+      "x": 177,
+      "y": 30
+    },
     "zoneWell": {
-      "height": 21,
+      "height": 17,
+      "width": 80,
       "x": 103,
-      "y": 4,
-      "width": 80
+      "y": 4
     },
     "debuffBar": {
       "fill": {
@@ -2353,10 +2351,31 @@
       }
     ],
     "parts": {
-      "button": {
-        "face": 20,
-        "hit": 44,
-        "top": 12
+      "buttonFace": {
+        "size": 20,
+        "y": 12
+      },
+      "buttons": {
+        "home": {
+          "faceX": 196,
+          "hitWidth": 44,
+          "hitX": 184
+        },
+        "pause": {
+          "faceX": 328,
+          "hitWidth": 44,
+          "hitX": 316
+        },
+        "settings": {
+          "faceX": 284,
+          "hitWidth": 44,
+          "hitX": 272
+        },
+        "sound": {
+          "faceX": 240,
+          "hitWidth": 44,
+          "hitX": 228
+        }
       },
       "cash": {
         "capsBottom": 30,
@@ -2381,24 +2400,32 @@
         }
       },
       "effects": {
+        "count": 3,
+        "holdInset": 1,
         "icon": 1,
-        "pitch": 20,
-        "size": 18,
-        "y": 26
+        "iconSize": 20,
+        "more": {
+          "y": 30
+        },
+        "pitch": 23,
+        "size": 22,
+        "x": 103,
+        "y": 22
       },
+      "minHitWidth": 36,
       "zone": {
-        "gap": 1,
         "name": {
           "x": 142,
-          "y": 8
+          "y": 5
         },
         "pips": {
           "pitch": 19,
           "x": 105,
-          "y": 15
+          "y": 12
         },
         "well": {
-          "height": 21,
+          "height": 17,
+          "width": 80,
           "x": 103,
           "y": 4
         }
