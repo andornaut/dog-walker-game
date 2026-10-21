@@ -15,7 +15,7 @@ and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the r
 nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking
 owner's name plate), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
-the start screen top bar's ui-home-cash-well (176x30, drawn at (4, 4));
+the start screen top bar's ui-home-cash-well (70x28, drawn at (5, 5));
 the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
 ui-dog-card-band (360x80, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked in with
 font-title) and ui-owner-tab (36x36).
@@ -1072,7 +1072,9 @@ WALK_WELLS = ((5, 5, 70, 37), (80, 5, 110, 12))
 # Between the trim lines (row 1 and row 45) the neighbourhood well (rows 5 to 16) and the wells
 # split the height evenly, 3 wood rows above the name well, 3 between and 3 under the wells, and
 # the cash well spans the same rows 5 to 41. Across the bar the cash well, the neighbourhood column
-# (x 80 to 189) and the buttons' faces (x 195 to 354) sit 5 columns apart and 5 from each edge.
+# (x 80 to 189) sit 5 columns from the screen's edge and 5 apart. The five buttons' hits, 34 wide,
+# fill x 190 to 359 at a 34 pitch, each face centred in its hit (faces at 197 + 34i), so 7 columns
+# lie before Home's face and after Pause's.
 EFFECT_ROW = (79, 17, 112, 26)
 EFFECT_WELL = 22
 
@@ -1108,15 +1110,16 @@ def walk_bar():
     return g
 
 
-# The start screen top bar's bank well, in screen pixels: the left half of the 38 rows above the
-# bar's rule, ending 4px before the Logbook button's hit at x 184.
-HOME_CASH_WELL = (4, 4, 176, 30)
+# The start screen top bar's bank well, in screen pixels: the walk bar's cash well's width and
+# left edge, 5 rows from the bar's top and from its rule.
+HOME_CASH_WELL = (5, 5, 70, 28)
 
 
 def home_cash_well():
-    """176x30, ui-home-cash-well: the start screen top bar's ink well for the bank, drawn at (4, 4)
-    on the bar's plum, with the walk bar's wells' clipped corners and dbrown lip. The game centres
-    the bank in it."""
+    """70x28, ui-home-cash-well: the start screen top bar's ink well for the bank, drawn at (5, 5)
+    on the bar's plum, as wide as the walk bar's cash well and as far from the edge, with its
+    clipped corners and dbrown lip, plain plum between it and the buttons. The game centres the
+    bank in it."""
     _, _, w, h = HOME_CASH_WELL
     g = Grid(w, h)
     well(g, 0, 0, w, h)
