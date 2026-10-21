@@ -54,12 +54,9 @@ export function firedByText(data: Pick<GameData, "dogs" | "runText">, dog: DogId
   return fillNames(data.runText.firedBy, { owner: data.dogs[dog].owner.name });
 }
 
-export function modifierCauses(
-  contributions: readonly Contribution<ActiveModifier>[],
-  scale = 1,
-): Cause[] {
+export function modifierCauses(contributions: readonly Contribution<ActiveModifier>[]): Cause[] {
   return contributions.map(({ amount, modifier }) => ({
-    amount: amount * scale,
+    amount,
     kind: "modifier",
     source: modifier.source,
   }));
