@@ -238,7 +238,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       el("legend", { textContent: SPEED_LABEL }),
       ...speeds.map(({ label }) => label),
     ),
-    el("h2", { textContent: "Saved to progress" }),
+    el("h2", { textContent: "Changes your save" }),
     el(
       "div",
       { className: "dev-buttons" },
