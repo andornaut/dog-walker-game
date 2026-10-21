@@ -17,7 +17,7 @@ petunias            120x56  2 lanes, a raised flower bed of petunias with a blue
                             idle (4 frames, 450ms): the flowers sway 1px right, back, left
 trash-bins          120x56  2 lanes, two metal bins on their sides spilling a banana peel, a can,
                             paper and a pizza box, their lid on the ground with a ginger cat sitting on
-                            it; idle (4 frames, 300ms): the cat's tail sways, as road.cat's
+                            it; idle (4 frames, 350ms): the cat's tail sways, as road.cat's
 cafe-patio          120x70  2 lanes, a striped awning on two poles over two bistro tables and two
                             cooing patrons, a toppled cup with a foam heart in its spill on the left
                             table and a cup on a saucer on the right; idle (4 frames, 350ms): a steam
@@ -427,7 +427,7 @@ def trash_bins(tail=0, new=Grid, w=88):
 
 
 # road.cat's tail swing, a loop
-TRASH_IDLE = (0, 1, 2, 1), 300
+TRASH_IDLE = (0, 1, 2, 1), 350
 
 
 # ---------- café patio ----------
