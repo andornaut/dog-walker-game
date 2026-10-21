@@ -1343,7 +1343,7 @@
       "laneMove": 0.13,
       "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.3,
-      "moverStepSeconds": 0.6,
+      "moverStepSeconds": 0.4,
       "moverTimingJitter": 0.3,
       "moverWarningSeconds": 0.8,
       "muddySeconds": 20,
