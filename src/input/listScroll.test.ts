@@ -5,6 +5,7 @@ import {
   isDragging,
   type ListScroll,
   listScroll,
+  pageKeyScroll,
   pressScroll,
   releaseScroll,
   resizeScroll,
@@ -38,8 +39,16 @@ describe("a list's scroll", () => {
     ["moves by the wheel times its scale", (s) => wheelScroll(RULE, 100, s), 50],
     ["stops the wheel at the top", (s) => wheelScroll(RULE, -1000, s), 0],
     ["keeps a shrunk list inside it", (s) => resizeScroll(40, scrollTo(150, s)), 40],
+    ["goes to the bottom on End", (s) => pageKeyScroll(60, "End", s) ?? s, MAX],
+    ["goes to the top on Home", (s) => pageKeyScroll(60, "Home", scrollTo(120, s)) ?? s, 0],
+    ["moves a page down on PageDown", (s) => pageKeyScroll(60, "PageDown", s) ?? s, 60],
+    ["moves a page up on PageUp", (s) => pageKeyScroll(60, "PageUp", scrollTo(100, s)) ?? s, 40],
   ])("%s", (_, act, y) => {
     expect(act(listScroll(MAX)).y).toBe(y);
+  });
+
+  it("leaves every other key to the scene", () => {
+    expect(pageKeyScroll(60, "ArrowDown", listScroll(MAX))).toBeUndefined();
   });
 
   it.each<[string, number, number]>([

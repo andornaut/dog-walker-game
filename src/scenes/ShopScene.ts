@@ -43,21 +43,15 @@ import {
 import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import {
-  dragScroll,
-  isDragging,
   LIST_FLING,
   type ListScroll,
   listScroll,
-  pressScroll,
-  releaseScroll,
+  pageKeyScroll,
   resizeScroll,
-  scrollBy,
   scrollMax,
   type ScrollRule,
-  scrollTo,
   scrollToShow,
   stepScroll,
-  wheelScroll,
 } from "../input/listScroll";
 import { fillLine } from "../lib/lines";
 import { containsPoint, type Rect } from "../lib/rect";
@@ -85,11 +79,17 @@ import {
   plateColors,
   SHOP_ART,
 } from "./itemArt";
-import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirmView";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
+import {
+  addScrollbar,
+  listenListScroll,
+  maskToRect,
+  placeScrollbar,
+  type ScrollbarView,
+} from "./scrollView";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
@@ -139,10 +139,6 @@ const ROW = LAYOUT.row;
 const OWNED_DX = ROW.ownedDx;
 const LIST: Rect = LAYOUT.list.rect;
 const PLATE: Rect = LAYOUT.message.plate;
-// The scrollbar as drawn: the art's thumb, or the fallback's graphics.
-type ScrollbarView =
-  | { readonly kind: "art"; readonly thumb: GameObjects.NineSlice }
-  | { readonly graphics: GameObjects.Graphics; readonly kind: "fallback" };
 // A press that travels past the tap distance drags the list.
 const SCROLL_RULE: ScrollRule = {
   ...LIST_FLING,
@@ -319,39 +315,22 @@ export class ShopScene extends Scene {
   // A finger or mouse that lands on the list drags it once it passes the tap distance: the
   // press under way taps nothing and holds nothing. The wheel moves the list too.
   private listenScroll(): void {
-    listenOnePress(this, {
-      down: (pointer) => {
-        if (this.isListOpen() && containsPoint(LIST, pointer.x, pointer.y)) {
-          this.scroll = pressScroll(pointer.y, this.time.now, this.scroll);
-        }
+    listenListScroll(this, {
+      active: () => this.isListOpen(),
+      onDragStart: () => {
+        this.presses?.cancel();
+        this.hold = undefined;
+        this.pressed = undefined;
+        this.render();
       },
-      move: (pointer) => {
-        const was = isDragging(this.scroll);
-        this.scroll = dragScroll(SCROLL_RULE, pointer.y, this.time.now, this.scroll);
-        if (!isDragging(this.scroll)) {
-          return;
-        }
-        if (!was) {
-          this.presses?.cancel();
-          this.hold = undefined;
-          this.pressed = undefined;
-          this.render();
-        }
-        this.placeList();
+      place: () => this.placeList(),
+      rule: SCROLL_RULE,
+      scroll: () => this.scroll,
+      setScroll: (scroll) => {
+        this.scroll = scroll;
       },
-      up: () => {
-        const { reducedMotion } = currentSettings(this);
-        this.scroll = releaseScroll(SCROLL_RULE, reducedMotion, this.time.now, this.scroll);
-      },
+      view: LIST,
     });
-    this.input.on(
-      "wheel",
-      (_pointer: Input.Pointer, _over: unknown, _dx: number, deltaY: number) => {
-        if (this.isListOpen()) {
-          this.moveList(wheelScroll(SCROLL_RULE, deltaY, this.scroll));
-        }
-      },
-    );
   }
 
   // Nothing covers the list: no detail card or confirm is open.
@@ -367,36 +346,7 @@ export class ShopScene extends Scene {
   // The list at its scroll, and the scrollbar's thumb beside it.
   private placeList(): void {
     this.list?.setY(-this.scroll.y);
-    const view = this.scrollbar;
-    const bar = shopScrollbar(this.scroll.max, this.scroll.y);
-    if (view === undefined || bar === null) {
-      return;
-    }
-    if (view.kind === "art") {
-      view.thumb.setPosition(bar.thumb.x, bar.thumb.y).setSize(bar.thumb.width, bar.thumb.height);
-      return;
-    }
-    view.graphics.clear();
-    fillRect(view.graphics, PALETTE.navy, bar.track);
-    fillRect(view.graphics, PALETTE.yellow, bar.thumb);
-  }
-
-  // Beside a list longer than its view: ui-scroll-track with ui-scroll-thumb in it, or a navy
-  // track and a yellow thumb while the art is missing. placeList moves the thumb.
-  private addScrollbar(root: GameObjects.Container): ScrollbarView | undefined {
-    const bar = shopScrollbar(this.scroll.max, this.scroll.y);
-    if (bar === null) {
-      return undefined;
-    }
-    const track = addNineSlice(this, "ui-scroll-track", bar.track);
-    const thumb = addNineSlice(this, "ui-scroll-thumb", bar.thumb);
-    if (track !== undefined && thumb !== undefined) {
-      root.add([track, thumb]);
-      return { kind: "art", thumb };
-    }
-    track?.destroy();
-    thumb?.destroy();
-    return { graphics: this.graphics(root), kind: "fallback" };
+    placeScrollbar(shopScrollbar(this.scroll.max, this.scroll.y), this.scrollbar);
   }
 
   // The framed row, with its frame, brought into view.
@@ -460,16 +410,9 @@ export class ShopScene extends Scene {
       this.showFocus();
       return;
     }
-    const page = LIST.height - LAYOUT.list.pageOverlap;
-    const pages: Readonly<Record<string, () => ListScroll>> = {
-      End: () => scrollTo(this.scroll.max, this.scroll),
-      Home: () => scrollTo(0, this.scroll),
-      PageDown: () => scrollBy(page, this.scroll),
-      PageUp: () => scrollBy(-page, this.scroll),
-    };
-    const paged = pages[key];
+    const paged = pageKeyScroll(LIST.height - LAYOUT.list.pageOverlap, key, this.scroll);
     if (paged !== undefined) {
-      this.moveList(paged());
+      this.moveList(paged);
       return;
     }
     if (isConfirmKey(key) && this.focusId !== null) {
@@ -705,7 +648,7 @@ export class ShopScene extends Scene {
     const list = this.add.container(0, 0);
     root.add(list);
     this.list = list;
-    this.maskList(list);
+    maskToRect(this, LIST_MASK_KEY, LIST, list);
     if (this.tab === "gear") {
       this.drawGear(list, save);
     } else {
@@ -713,7 +656,7 @@ export class ShopScene extends Scene {
     }
     // A bought dog leaves its list, so the list may now be shorter.
     this.scroll = resizeScroll(scrollMax(LIST, this.listBottom(save)), this.scroll);
-    this.scrollbar = this.addScrollbar(root);
+    this.scrollbar = addScrollbar(this, root, shopScrollbar(this.scroll.max, this.scroll.y));
     this.placeList();
     if (this.message !== null) {
       this.drawMessage(root, this.message);
@@ -743,24 +686,6 @@ export class ShopScene extends Scene {
   }
 
   // Clips list to the list area. Without WebGL there are no filters and the list is not clipped.
-  private maskList(list: GameObjects.Container): void {
-    if (!this.textures.exists(LIST_MASK_KEY)) {
-      const mask = this.textures.createCanvas(
-        LIST_MASK_KEY,
-        SCREEN_CONFIG.width,
-        SCREEN_CONFIG.height,
-      );
-      const context = mask?.getContext();
-      if (mask === null || context === undefined) {
-        return;
-      }
-      context.fillStyle = "#ffffff";
-      context.fillRect(LIST.x, LIST.y, LIST.width, LIST.height);
-      mask.refresh();
-    }
-    list.enableFilters().filters?.internal.addMask(LIST_MASK_KEY);
-  }
-
   // The message on the ui-hint plate across the list's top, in one line fitted to the plate.
   private drawMessage(
     root: GameObjects.Container,

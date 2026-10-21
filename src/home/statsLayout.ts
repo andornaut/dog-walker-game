@@ -2,18 +2,30 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { scrollbarRects, type ScrollbarSpec } from "../ui/scrollbar";
 
 export type StatsTab = "badges" | "dogs" | "runs";
 
-// The Dogs tab's number columns, left to right after the dog's face and name; each one's
-// heading is menuText.stats.dogColumns[column].
-export type DogColumn = "fired" | "walks" | "zones";
-export const DOG_COLUMNS: readonly DogColumn[] = ["walks", "zones", "fired"];
+// The Dogs tab's rows under each dog's face and name, top to bottom; each one's label is
+// menuText.stats.dogColumns[stat].
+export type DogStat = "fired" | "walks" | "zones";
+export const DOG_STATS: readonly DogStat[] = ["walks", "zones", "fired"];
 
 // The tabs, left to right; each one's label is menuText.stats.tabs[tab].
 export const STATS_TABS: readonly StatsTab[] = ["runs", "dogs", "badges"];
 
 const PANEL = { height: 444, width: 344, x: 8, y: 108 };
+// The panel's cream inside its 2px frame, where every tab's content scrolls, clipped to it.
+const VIEW = { height: PANEL.height - 4, width: PANEL.width - 4, x: PANEL.x + 2, y: PANEL.y + 2 };
+const PITCH = 17;
+// Beside content taller than the view: the track at the view's right edge, as tall as the view.
+const SCROLLBAR: ScrollbarSpec = {
+  thumbInset: 1,
+  thumbMin: 16,
+  thumbWidth: 5,
+  trackWidth: 7,
+  x: PANEL.x + PANEL.width - 9,
+};
 
 // The Stats page's geometry.
 export const STATS_LAYOUT = {
@@ -35,20 +47,41 @@ export const STATS_LAYOUT = {
     textRight: 16,
     x: 16,
   },
-  // The gap between one number column and the next, or the names.
-  dogColumns: { gap: 4 },
-  // Each row's 32x32 face, its top faceTop above the row's text row, and the name beside it.
-  dogRow: { faceSize: 32, faceTop: 12, faceX: 12, nameX: 46, pitch: 34, top: PANEL.y + 32 },
+  // The Dogs tab: a block per dog from top, each its 32x32 face at the rows' left, the name in
+  // the title font nameDx right of the face's left with its capitals nameY under the block's
+  // top, then a row per DOG_STATS from rowsY, and gap under the last before the next block.
+  // A 1px tan rule runs ruleAbove over each block after the first, ruleDx past the rows' ends.
+  dogs: {
+    faceSize: 32,
+    gap: 12,
+    nameDx: 40,
+    nameY: 12,
+    rowsY: 38,
+    ruleAbove: 6,
+    ruleDx: 4,
+    top: PANEL.y + 10,
+  },
   panel: PANEL,
-  rows: { left: 16, pitch: 17, right: 344 },
+  // Label and value rows: the label's left edge at left and the value's right edge at right,
+  // clear of the scrollbar, pitch apart.
+  rows: { left: 16, pitch: PITCH, right: 332 },
+  // Content scrolled to its end keeps padBottom of cream under its last row. A page key moves
+  // it the view's height less pageOverlap; an arrow key moves it keyStep.
+  scroll: { keyStep: 2 * PITCH, padBottom: 8, pageOverlap: 48 },
+  scrollbar: SCROLLBAR,
   // Tabs are 44 game pixels tall (48 CSS pixels on a phone), spanning the panel's width with
   // gap between them, the panel's margin from the screen's edge; widths, left to right, share
   // the odd pixel with the middle tab.
   tab: { gap: 8, height: 44, widths: [109, 110, 109], x: PANEL.x, y: 56 },
-  // The badge wall: two columns filled down, each row the badge then a 132-wide text column
-  // of three lines at 2x (the name, the goal, then a locked badge's progress across walks).
-  wall: { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: PANEL.y + 24 },
-  wallText: { lineHeight: 16, lines: 3, scale: 2, width: 132, x: 36, y: 4 },
+  view: VIEW,
+  // The Walks tab: each section's heading with its capitals at top, its rows rowsY under it,
+  // and the next heading sectionGap under the last row's pitch.
+  walks: { rowsY: 20, sectionGap: 6, top: PANEL.y + 10 },
+  // The badge wall: the heading and the earned count with their capitals at headingY, then one
+  // badge per row from y, each the badge then a text column of up to lines lines at 2x from x
+  // (the name, the goal, then a locked badge's progress across walks).
+  wall: { headingY: PANEL.y + 10, rowHeight: 52, width: 316, x: 16, y: PANEL.y + 30 },
+  wallText: { lineHeight: 16, lines: 3, width: 276, x: 38, y: 4 },
 } as const;
 
 // How wide the open badge's goal and line may be.
@@ -72,15 +105,32 @@ export function statsTabRects(): Rect[] {
   });
 }
 
-// Each number column's right edge, its heading and numbers right-aligned on it: the last
-// column's on the rows' right edge, and each one before it its neighbour's width and the gap
-// further left. width is a column's width: its heading's, or its widest number's if wider.
-export function dogColumnRights(width: (column: DogColumn) => number): Record<DogColumn, number> {
-  const rights: Partial<Record<DogColumn, number>> = {};
-  let right: number = STATS_LAYOUT.rows.right;
-  for (const column of [...DOG_COLUMNS].reverse()) {
-    rights[column] = right;
-    right -= width(column) + STATS_LAYOUT.dogColumns.gap;
-  }
-  return rights as Record<DogColumn, number>;
+// The top of the index'th dog's block.
+export function dogBlockTop(index: number): number {
+  const { gap, rowsY, top } = STATS_LAYOUT.dogs;
+  return top + index * (rowsY + DOG_STATS.length * PITCH + gap);
+}
+
+// The bottom of each tab's content as laid out, scrolled to its top: the Walks tab with
+// sections of rows, the Dogs tab with dogs blocks and the Badges tab with badges rows.
+export function walksBottom(sections: readonly number[]): number {
+  const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
+  const height = sections.reduce((sum, rows) => sum + rowsY + rows * PITCH + sectionGap, 0);
+  return top + height - sectionGap + STATS_LAYOUT.scroll.padBottom;
+}
+
+export function dogsBottom(dogs: number): number {
+  const { gap } = STATS_LAYOUT.dogs;
+  return dogBlockTop(dogs) - gap + STATS_LAYOUT.scroll.padBottom;
+}
+
+export function badgesBottom(badges: number): number {
+  const { rowHeight, y } = STATS_LAYOUT.wall;
+  return y + badges * rowHeight + STATS_LAYOUT.scroll.padBottom;
+}
+
+// The scrollbar's track and thumb for content max pixels taller than the view, scrolled y, or
+// null for content that fits.
+export function statsScrollbar(max: number, y: number): { thumb: Rect; track: Rect } | null {
+  return scrollbarRects(SCROLLBAR, VIEW, max, y);
 }

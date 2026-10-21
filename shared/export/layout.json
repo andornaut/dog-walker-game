@@ -2247,16 +2247,15 @@
         "textRight": 16,
         "x": 16
       },
-      "dogColumns": {
-        "gap": 4
-      },
-      "dogRow": {
+      "dogs": {
         "faceSize": 32,
-        "faceTop": 12,
-        "faceX": 12,
-        "nameX": 46,
-        "pitch": 34,
-        "top": 140
+        "gap": 12,
+        "nameDx": 40,
+        "nameY": 12,
+        "rowsY": 38,
+        "ruleAbove": 6,
+        "ruleDx": 4,
+        "top": 118
       },
       "panel": {
         "height": 444,
@@ -2267,7 +2266,19 @@
       "rows": {
         "left": 16,
         "pitch": 17,
-        "right": 344
+        "right": 332
+      },
+      "scroll": {
+        "keyStep": 34,
+        "padBottom": 8,
+        "pageOverlap": 48
+      },
+      "scrollbar": {
+        "thumbInset": 1,
+        "thumbMin": 16,
+        "thumbWidth": 5,
+        "trackWidth": 7,
+        "x": 343
       },
       "tab": {
         "gap": 8,
@@ -2280,20 +2291,29 @@
         "x": 8,
         "y": 56
       },
+      "view": {
+        "height": 440,
+        "width": 340,
+        "x": 10,
+        "y": 110
+      },
+      "walks": {
+        "rowsY": 20,
+        "sectionGap": 6,
+        "top": 118
+      },
       "wall": {
-        "columnGap": 8,
-        "columnWidth": 168,
+        "headingY": 118,
         "rowHeight": 52,
-        "rows": 8,
-        "x": 8,
-        "y": 132
+        "width": 316,
+        "x": 16,
+        "y": 138
       },
       "wallText": {
         "lineHeight": 16,
         "lines": 3,
-        "scale": 2,
-        "width": 132,
-        "x": 36,
+        "width": 276,
+        "x": 38,
         "y": 4
       },
       "tabRects": [

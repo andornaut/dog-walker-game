@@ -15,20 +15,36 @@ import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
+  badgesBottom,
   DETAIL_TEXT_WIDTH,
   detailLineY,
-  DOG_COLUMNS,
-  type DogColumn,
-  dogColumnRights,
+  DOG_STATS,
+  dogBlockTop,
+  dogsBottom,
+  type DogStat,
   STATS_LAYOUT,
   STATS_TABS,
+  statsScrollbar,
   type StatsTab,
   statsTabRects,
+  walksBottom,
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
+import {
+  LIST_FLING,
+  type ListScroll,
+  listScroll,
+  pageKeyScroll,
+  resizeScroll,
+  scrollBy,
+  scrollMax,
+  type ScrollRule,
+  stepScroll,
+} from "../input/listScroll";
 import { fillLine } from "../lib/lines";
 import { containsPoint, type Rect } from "../lib/rect";
+import { read } from "../rules/units";
 import { closeControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
@@ -39,16 +55,21 @@ import {
   type FontRole,
   inkSpan,
   pixelFontMetrics,
-  scalePixelText,
   setPixelText,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
-import type { TextFitStyle } from "../ui/textFit";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
-import { listenTargetPress } from "./targetPress";
+import {
+  addScrollbar,
+  listenListScroll,
+  maskToRect,
+  placeScrollbar,
+  type ScrollbarView,
+} from "./scrollView";
+import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
   addPanel,
@@ -77,10 +98,19 @@ const PANEL: Rect = STATS_LAYOUT.panel;
 const LEFT = STATS_LAYOUT.rows.left;
 const RIGHT = STATS_LAYOUT.rows.right;
 const PITCH = STATS_LAYOUT.rows.pitch;
-const DOG_ROW = STATS_LAYOUT.dogRow;
+const DOGS = STATS_LAYOUT.dogs;
 const WALL = STATS_LAYOUT.wall;
 const WALL_TEXT = STATS_LAYOUT.wallText;
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
+const VIEW: Rect = STATS_LAYOUT.view;
+const SCROLL = STATS_LAYOUT.scroll;
+// A press that travels past the tap distance drags the open tab.
+const SCROLL_RULE: ScrollRule = {
+  ...LIST_FLING,
+  dragSlopPx: read(gameData.tuning, "pixels", "tapMaxDistance"),
+};
+// A screen-sized texture, white over the view: the mask that clips each tab's content to it.
+const VIEW_MASK_KEY = "stats-view-mask";
 const DETAIL: Rect = STATS_LAYOUT.detail;
 const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 const DETAIL_TEXT = STATS_LAYOUT.detailText;
@@ -88,14 +118,23 @@ const DETAIL_TEXT = STATS_LAYOUT.detailText;
 const DETAIL_BADGE_SCALE = 2;
 const FIELDS = MENU_TEXT_FIELDS.stats;
 
-// The Stats page behind the logbook, in three tabs: overall figures and walks by outcome;
-// each dog's walks, zones and firings; and the badge wall, where tapping a badge opens its
-// name, goal and line.
+// The Stats page behind the logbook, in three tabs on the cream panel: overall figures and
+// walks by outcome; a block per dog with its walks, zones and firings; and the badge wall, a
+// badge per row, where tapping a badge opens its name, goal and line. A tab taller than the
+// panel scrolls in it by a drag, the wheel, the arrow keys or the page keys, with a scrollbar
+// at the panel's right edge; a drag taps nothing.
 export class StatsScene extends Scene {
   private burst = false;
+  // The open tab's content, clipped to the view and moved up by the scroll.
+  private content: GameObjects.Container | undefined;
+  // Where text() adds its text: the content while the open tab draws.
+  private drawingInto: GameObjects.Container | undefined;
   private detail: number | undefined;
   private pressed: Target | undefined;
+  private presses: TargetPressListener | undefined;
   private resumeKey: SceneKey | undefined;
+  private scroll: ListScroll = listScroll(0);
+  private scrollbar: ScrollbarView | undefined;
   private tab: Tab = "runs";
 
   constructor() {
@@ -106,11 +145,12 @@ export class StatsScene extends Scene {
     this.resumeKey = data?.resume;
     this.pressed = undefined;
     this.detail = undefined;
+    this.scroll = listScroll(0);
     this.tab = data?.tab ?? "runs";
     this.render();
 
     // A pressed tab dips, then opens. With a badge's detail open, a tap anywhere closes it.
-    listenTargetPress<Press>(this, {
+    this.presses = listenTargetPress<Press>(this, {
       dipMs: (target) => (typeof target === "object" && "tab" in target ? FEEDBACK.pressDipMs : 0),
       onDown: (pointer) => addTapBurst(this, pointer.x, pointer.y),
       onPressed: (target) => {
@@ -124,7 +164,7 @@ export class StatsScene extends Scene {
           this.close();
           return;
         } else if ("tab" in target) {
-          this.tab = TABS[target.tab] ?? this.tab;
+          this.openTab(TABS[target.tab] ?? this.tab);
         } else {
           this.detail = target.badge;
           this.burst = true;
@@ -134,6 +174,21 @@ export class StatsScene extends Scene {
       same: sameTarget,
       targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : "dismiss"),
     });
+    listenListScroll(this, {
+      active: () => this.detail === undefined,
+      onDragStart: () => {
+        this.presses?.cancel();
+        this.pressed = undefined;
+        this.render();
+      },
+      place: () => this.placeContent(),
+      rule: SCROLL_RULE,
+      scroll: () => this.scroll,
+      setScroll: (scroll) => {
+        this.scroll = scroll;
+      },
+      view: VIEW,
+    });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (!menuKeyActs(event.repeat, event.key)) {
         return;
@@ -142,8 +197,18 @@ export class StatsScene extends Scene {
         this.back();
         return;
       }
+      if (this.detail !== undefined) {
+        return;
+      }
       const direction = focusDirectionForKey(event.key);
-      if (this.detail === undefined && (direction === "left" || direction === "right")) {
+      const paged = pageKeyScroll(VIEW.height - SCROLL.pageOverlap, event.key, this.scroll);
+      if (paged !== undefined || direction === "up" || direction === "down") {
+        const step = direction === "up" ? -SCROLL.keyStep : SCROLL.keyStep;
+        this.scroll = paged ?? scrollBy(step, this.scroll);
+        this.placeContent();
+        return;
+      }
+      if (direction === "left" || direction === "right") {
         const index = TABS.indexOf(this.tab);
         const next = Math.min(
           TABS.length - 1,
@@ -173,6 +238,28 @@ export class StatsScene extends Scene {
     this.render();
   }
 
+  override update(_time: number, deltaMs: number): void {
+    const flung = stepScroll(SCROLL_RULE, deltaMs, this.scroll);
+    if (flung !== this.scroll) {
+      this.scroll = flung;
+      this.placeContent();
+    }
+  }
+
+  // The open tab's content at its scroll, and the scrollbar's thumb beside it.
+  private placeContent(): void {
+    this.content?.setY(-this.scroll.y);
+    placeScrollbar(statsScrollbar(this.scroll.max, this.scroll.y), this.scrollbar);
+  }
+
+  // Another tab opens at its top.
+  private openTab(tab: Tab): void {
+    if (tab !== this.tab) {
+      this.scroll = listScroll(0);
+    }
+    this.tab = tab;
+  }
+
   private targetAt(x: number, y: number): Target | undefined {
     if (containsPoint(CLOSE.hit, x, y)) {
       return "close";
@@ -181,7 +268,9 @@ export class StatsScene extends Scene {
     if (tab !== undefined) {
       return { tab };
     }
-    const badge = this.tab === "badges" ? rectIndexAt(WALL_RECTS, x, y) : undefined;
+    // Only the view's part of a badge's row is pressed.
+    const onWall = this.tab === "badges" && containsPoint(VIEW, x, y);
+    const badge = onWall ? rectIndexAt(WALL_RECTS, x, y + this.scroll.y) : undefined;
     return badge === undefined ? undefined : { badge };
   }
 
@@ -191,7 +280,7 @@ export class StatsScene extends Scene {
     this.render();
     this.time.delayedCall(FEEDBACK.pressDipMs, () => {
       this.pressed = undefined;
-      this.tab = TABS[index] ?? this.tab;
+      this.openTab(TABS[index] ?? this.tab);
       this.render();
     });
   }
@@ -200,26 +289,29 @@ export class StatsScene extends Scene {
     closeOverlay(this.resumeKey, this);
   }
 
+  // Text at 2x, in the open tab's content when there is one.
   private text(
     x: number,
     y: number,
     value: string,
     options: { color?: number; font?: FontRole; originX?: number } = {},
   ): GameObjects.BitmapText {
-    return addPixelText(this, x, y, value, {
+    const label = addPixelText(this, x, y, value, {
       color: options.color ?? PALETTE.plum,
       font: options.font ?? "body",
       originX: options.originX ?? 0,
       scale: TEXT_SCALE,
     });
+    this.drawingInto?.add(label);
+    return label;
   }
 
-  private rows(y: number, rows: readonly StatsRow[]): number {
+  // Each row's label at the left and its value right-aligned at the right, from y.
+  private rows(y: number, rows: readonly StatsRow[]): void {
     rows.forEach(({ label, value }, i) => {
       this.text(LEFT, y + i * PITCH, label, { color: PALETTE.darkBrown });
       this.text(RIGHT, y + i * PITCH, value, { originX: 1 });
     });
-    return y + rows.length * PITCH;
   }
 
   private render(): void {
@@ -234,6 +326,8 @@ export class StatsScene extends Scene {
         y: 0,
       });
     }
+    this.content = undefined;
+    this.drawingInto = undefined;
     const words = gameData.menuText.stats;
     this.text(12, 14, words.title, { color: PALETTE.cream, font: "title" });
     addCloseButton(this, this.add.container(0, 0), CLOSE, this.pressed === "close");
@@ -265,134 +359,136 @@ export class StatsScene extends Scene {
         }),
       );
     });
-    switch (this.tab) {
-      case "runs":
-        addPanel(this, PANEL);
-        this.drawRuns();
-        break;
-      case "dogs":
-        addPanel(this, PANEL);
-        this.drawDogs();
-        break;
-      case "badges":
-        this.drawBadges();
-        break;
-      default:
-        this.tab satisfies never;
+    addPanel(this, PANEL);
+    const root = this.add.container(0, 0);
+    const content = this.add.container(0, 0);
+    root.add(content);
+    maskToRect(this, VIEW_MASK_KEY, VIEW, content);
+    this.content = content;
+    this.drawingInto = content;
+    const bottom = this.drawTab();
+    this.drawingInto = undefined;
+    this.scroll = resizeScroll(scrollMax(VIEW, bottom), this.scroll);
+    this.scrollbar = addScrollbar(this, root, statsScrollbar(this.scroll.max, this.scroll.y));
+    this.placeContent();
+    const open = this.detail === undefined ? undefined : this.badges()[this.detail];
+    if (open !== undefined) {
+      this.drawDetail(open);
     }
   }
 
-  private drawRuns(): void {
+  // The open tab's content, laid out from its top; returns its bottom.
+  private drawTab(): number {
+    switch (this.tab) {
+      case "runs":
+        return this.drawRuns();
+      case "dogs":
+        return this.drawDogs();
+      case "badges":
+        return this.drawBadges();
+      default:
+        return this.tab satisfies never;
+    }
+  }
+
+  private badges(): BadgeView[] {
+    return badgeWall(gameData, profileSave(this));
+  }
+
+  private drawRuns(): number {
     const { stats } = profileSave(this);
     const { outcomes, overall } = overallRows(gameData, stats);
     const words = gameData.menuText.stats;
-    let y = PANEL.y + 10;
-    this.text(LEFT, y, words.sections.overall, { font: "title" });
-    y = this.rows(y + 20, overall) + 6;
-    this.text(LEFT, y, words.sections.runs, { font: "title" });
-    this.rows(y + 20, outcomes);
+    const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
+    const sections = [
+      { heading: words.sections.overall, rows: overall },
+      { heading: words.sections.runs, rows: outcomes },
+    ];
+    let y = top;
+    for (const { heading, rows } of sections) {
+      this.text(LEFT, y, heading, { font: "title" });
+      this.rows(y + rowsY, rows);
+      y += rowsY + rows.length * PITCH + sectionGap;
+    }
+    return walksBottom(sections.map(({ rows }) => rows.length));
   }
 
-  // Each dog's face and name, then its numbers right-aligned under their headings, each column
-  // as wide as its heading's or its widest number's ink (dogColumnRights).
-  private drawDogs(): void {
+  // A block per dog: its face and name, then its walks, neighborhoods and firings, one per
+  // row, with a rule between blocks.
+  private drawDogs(): number {
     const save = profileSave(this);
-    const top = PANEL.y + 10;
-    const headings = gameData.menuText.stats.dogColumns;
-    this.text(LEFT, top, headings.dog, { font: "title" });
-    const columns = DOG_COLUMNS.map((column) => ({
-      column,
-      labels: [this.text(0, top, headings[column], { originX: 1 })],
-    }));
+    const labels = gameData.menuText.stats.dogColumns;
     const lines = this.add.graphics();
-    dogRows(gameData, save.owned, save.stats).forEach((row, i) => {
-      const y = DOG_ROW.top + 8 + i * DOG_ROW.pitch;
+    this.content?.add(lines);
+    const dogs = dogRows(gameData, save.owned, save.stats);
+    dogs.forEach((row, i) => {
+      const top = dogBlockTop(i);
+      if (i > 0) {
+        fillRect(lines, PALETTE.tan, {
+          height: 1,
+          width: RIGHT - LEFT + 2 * DOGS.ruleDx,
+          x: LEFT - DOGS.ruleDx,
+          y: top - DOGS.ruleAbove,
+        });
+      }
       const face = dogFaceKey(gameData, row.dog);
-      this.add
-        .image(DOG_ROW.faceX, y + 3 - DOG_ROW.faceTop, face, tagFrame(this, face, "happy"))
-        .setOrigin(0);
-      this.text(DOG_ROW.nameX, y + 3, row.name);
-      const values: Record<DogColumn, number> = {
+      this.content?.add(
+        this.add.image(LEFT, top, face, tagFrame(this, face, "happy")).setOrigin(0),
+      );
+      this.text(LEFT + DOGS.nameDx, top + DOGS.nameY, row.name, { font: "title" });
+      const values: Record<DogStat, number> = {
         fired: row.timesFired,
         walks: row.walks,
         zones: row.zonesFinished,
       };
-      for (const { column, labels } of columns) {
-        labels.push(this.text(0, y + 3, String(values[column]), { font: "title", originX: 1 }));
-      }
-      fillRect(lines, PALETTE.tan, { height: 1, width: RIGHT - LEFT + 4, x: LEFT - 4, y: y + 24 });
+      this.rows(
+        top + DOGS.rowsY,
+        DOG_STATS.map((stat) => ({ label: labels[stat], value: String(values[stat]) })),
+      );
     });
-    const widths = new Map(
-      columns.map(({ column, labels }) => [
-        column,
-        Math.max(
-          ...labels.map((label) => {
-            const ink = inkSpan(label);
-            return Math.ceil(ink.right - ink.left);
-          }),
-        ),
-      ]),
-    );
-    const rights = dogColumnRights((column) => widths.get(column) ?? 0);
-    for (const { column, labels } of columns) {
-      labels.forEach((label) => label.setX(rights[column]));
-    }
+    return dogsBottom(dogs.length);
   }
 
-  // Earned badges in colour with an amber name, locked ones greyed with a cream name; each
-  // with its goal, or its short goal where the full one does not fit under the name, and a
-  // locked one that counts across walks with its progress.
-  private drawBadges(): void {
+  // The heading and the earned count, then a badge per row: earned ones in colour with a
+  // green name, locked ones greyed; each with its goal, or its short goal where the full one
+  // does not fit, and a locked one that counts across walks with its progress.
+  private drawBadges(): number {
     const save = profileSave(this);
-    const badges = badgeWall(gameData, save);
-    this.text(12, PANEL.y + 4, gameData.menuText.stats.badges, {
-      color: PALETTE.cream,
-      font: "title",
-    });
-    this.text(SCREEN_CONFIG.width - 12, PANEL.y + 4, earnedText(gameData, badges), {
-      color: PALETTE.cream,
-      originX: 1,
-    });
+    const badges = this.badges();
+    this.text(LEFT, WALL.headingY, gameData.menuText.stats.badges, { font: "title" });
+    this.text(RIGHT, WALL.headingY, earnedText(gameData, badges), { originX: 1 });
     badges.forEach((badge, i) => {
       const rect = WALL_RECTS[i];
       if (rect !== undefined) {
         this.drawWallBadge(badge, badgeProgress(gameData, save, badge), rect);
       }
     });
-    const open = this.detail === undefined ? undefined : badges[this.detail];
-    if (open !== undefined) {
-      this.drawDetail(open);
-    }
+    return badgesBottom(badges.length);
   }
 
   private drawWallBadge(badge: BadgeView, progress: string | undefined, rect: Rect): void {
     const half = BADGE_SIZE / 2;
-    addBadge(this, badge.art, badge.earned, rect.x + half, rect.y + 2 + half);
-    const x = rect.x + WALL_TEXT.x;
-    const probe = this.text(0, 0, "").setVisible(false);
-    const inkWidth = (style: TextFitStyle, line: string) => {
+    this.content?.add(addBadge(this, badge.art, badge.earned, rect.x + half, rect.y + 2 + half));
+    const probe = addPixelText(this, 0, 0, "", { color: PALETTE.plum, scale: TEXT_SCALE });
+    probe.setVisible(false);
+    const inkWidth = (line: string) => {
       setPixelText(probe, line);
-      probe.setLetterSpacing(style.letterSpacing);
-      scalePixelText(probe, style.scale, 0, 0);
       const ink = inkSpan(probe);
       return ink.right - ink.left;
     };
     const cell = wallCell(WALL_TEXT, inkWidth, badge, progress);
     probe.destroy();
-    const { style } = cell;
-    const lineHeight = (WALL_TEXT.lineHeight * style.scale) / WALL_TEXT.scale;
+    const x = rect.x + WALL_TEXT.x;
     let y = rect.y + WALL_TEXT.y;
     const draw = (lines: readonly string[], color: number) => {
       for (const line of lines) {
-        addPixelText(this, x, y, line, { color, scale: style.scale }).setLetterSpacing(
-          style.letterSpacing,
-        );
-        y += lineHeight;
+        this.text(x, y, line, { color });
+        y += WALL_TEXT.lineHeight;
       }
     };
-    draw(cell.name, badge.earned ? PALETTE.amber : PALETTE.cream);
-    draw(cell.goal, PALETTE.lightGrey);
-    draw(cell.progress, PALETTE.cream);
+    draw(cell.name, badge.earned ? PALETTE.forest : PALETTE.plum);
+    draw(cell.goal, PALETTE.darkBrown);
+    draw(cell.progress, PALETTE.plum);
   }
 
   // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts

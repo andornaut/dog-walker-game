@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { AchievementCondition, DogId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
-import { fillNames } from "../lib/lines";
+import { fillNames, wrapWords } from "../lib/lines";
 import { newPlayerSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
-import type { TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import {
   badgeProgress,
   badgeStrip,
@@ -100,55 +100,55 @@ describe("badgeProgress", () => {
 
 describe("wallCell", () => {
   const { wallText } = STATS_LAYOUT;
-  const bodyInk = (style: TextFitStyle, line: string) => inkWidth("font-body", style, line);
+  const style = { letterSpacing: 0, scale: TEXT_SCALE };
+  const bodyInk = (line: string) => inkWidth("font-body", style, line);
+  const fitsTwoLines = (text: string) =>
+    wrapWords(bodyInk, wallText.width, text).length <= wallText.lines - 1;
   // The widest progress a badge shows: its count over its count.
   const progressFor = (id: string) => {
     const condition = COUNTED_BADGES.find((badge) => badge.id === id)?.condition;
     return condition === undefined ? undefined : progressText(needOf(condition), needOf(condition));
   };
 
-  it("fits every badge's name, a whole goal and any progress in its wall cell at 2x", () => {
-    const offenders = badgeWall(gameData, newPlayerSave).filter((badge) => {
+  it.each(badgeWall(gameData, newPlayerSave).map((badge) => [badge.name, badge] as const))(
+    "fits %s's name, goal and any progress in its row at 2x",
+    (_, badge) => {
       const progress = progressFor(badge.id);
       const cell = wallCell(wallText, bodyInk, badge, progress);
-      const lines = Math.floor((wallText.lines * wallText.scale) / cell.style.scale);
       const drawn = [...cell.name, ...cell.goal, ...cell.progress];
-      // A whole goal, with the progress on its own line or ending the goal's last line.
-      const goal = [...cell.goal, ...cell.progress].join(" ");
-      const whole = [badge.goal, badge.shortGoal].flatMap((text) =>
-        progress === undefined ? [text] : [`${text} ${progress}`],
+      expect(cell.whole).toBe(true);
+      expect(drawn.length).toBeLessThanOrEqual(wallText.lines);
+      expect(Math.max(...drawn.map(bodyInk))).toBeLessThanOrEqual(wallText.width);
+      // A whole goal and any progress: the full goal wherever it fits in two lines.
+      const goals = fitsTwoLines(badge.goal) ? [badge.goal] : [badge.goal, badge.shortGoal];
+      const shown = goals.map((goal) => [goal, ...(progress === undefined ? [] : [progress])]);
+      expect(shown.map((words) => words.join(" "))).toContain(
+        [...cell.goal, ...cell.progress].join(" "),
       );
-      return (
-        !cell.whole ||
-        cell.style.scale !== wallText.scale ||
-        drawn.length > lines ||
-        drawn.some((line) => bodyInk(cell.style, line) > wallText.width) ||
-        !whole.includes(goal)
-      );
-    });
-    expect(offenders.map(({ name }) => name)).toEqual([]);
-  });
+    },
+  );
 });
 
 describe("wallCellLines", () => {
-  it("puts the progress on a line of its own when it fits, else ending the goal's last line", () => {
-    const badge = { goal: "Goal", name: "Name", shortGoal: "Goal" };
-    const drawn = (lines: number) => {
-      const cell = wallCellLines(lines, (text) => [text], badge, "1/2");
-      return [...cell.name, ...cell.goal, ...cell.progress];
-    };
-    expect(drawn(3)).toEqual(["Name", "Goal", "1/2"]);
-    expect(drawn(2)).toEqual(["Name", "Goal 1/2"]);
+  // Lines of at most 8 characters.
+  const wrap = (text: string) => wrapWords((line) => line.length, 8, text);
+  const badge = { name: "Name", shortGoal: "Short" };
+  it.each<[string, string, string[]]>([
+    ["puts the progress on a line of its own when it fits", "Goal", ["Name", "Goal", "1/2"]],
+    ["else ends the goal's last line with it", "Long goal", ["Name", "Long", "goal 1/2"]],
+    ["else shows the short goal", "A much longer goal", ["Name", "Short", "1/2"]],
+  ])("%s", (_, goal, lines) => {
+    const cell = wallCellLines(3, wrap, { ...badge, goal }, "1/2");
+    expect([...cell.name, ...cell.goal, ...cell.progress]).toEqual(lines);
   });
 });
 
 describe("wallRects", () => {
-  it("fills each column down before the next", () => {
-    const spec = { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: 212 };
-    const rects = wallRects(spec, 15);
-    expect(rects[0]).toEqual({ height: 52, width: 168, x: 8, y: 212 });
-    expect(rects[7]).toEqual({ height: 52, width: 168, x: 8, y: 212 + 7 * 52 });
-    expect(rects[8]).toEqual({ height: 52, width: 168, x: 184, y: 212 });
+  it("puts one badge per row from the top", () => {
+    const rects = wallRects({ rowHeight: 52, width: 316, x: 16, y: 138 }, 3);
+    expect(rects).toEqual(
+      [0, 1, 2].map((i) => ({ height: 52, width: 316, x: 16, y: 138 + i * 52 })),
+    );
   });
 });
 

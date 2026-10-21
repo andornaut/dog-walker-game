@@ -78,6 +78,27 @@ export function wheelScroll(rule: ScrollRule, deltaY: number, scroll: ListScroll
   return scrollBy(deltaY * rule.wheelScale, scroll);
 }
 
+// The list moved by a page key: Home and End to its ends, PageUp and PageDown by page. undefined
+// for any other key.
+export function pageKeyScroll(
+  page: number,
+  key: string,
+  scroll: ListScroll,
+): ListScroll | undefined {
+  switch (key) {
+    case "End":
+      return scrollTo(scroll.max, scroll);
+    case "Home":
+      return scrollTo(0, scroll);
+    case "PageDown":
+      return scrollBy(page, scroll);
+    case "PageUp":
+      return scrollBy(-page, scroll);
+    default:
+      return undefined;
+  }
+}
+
 // The least move that brings rect, laid out with the list at its top, inside the view.
 export function scrollToShow(
   view: { height: number; y: number },

@@ -1,6 +1,7 @@
 import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { scrollbarRects } from "../ui/scrollbar";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { SHOP_TABS } from "./shop";
 
@@ -88,26 +89,9 @@ export function shopListBottom(
   return spec.y + (Math.max(1, count) - 1) * spec.pitch + spec.height + SHOP_LAYOUT.list.padBottom;
 }
 
-// The scrollbar's track and thumb for a list max pixels taller than its view, scrolled y, or
-// null for a list that fits. The thumb is as tall a share of the track's inside as the view is
-// of the list.
+// The shop list's scrollbar (scrollbarRects), or null for a list that fits.
 export function shopScrollbar(max: number, y: number): { thumb: Rect; track: Rect } | null {
-  if (max <= 0) {
-    return null;
-  }
-  const { thumbInset, thumbMin, thumbWidth, trackWidth, x } = SHOP_LAYOUT.scrollbar;
-  const inner = LIST.height - 2 * thumbInset;
-  const height = Math.max(thumbMin, Math.round((inner * LIST.height) / (LIST.height + max)));
-  const share = Math.min(1, Math.max(0, y / max));
-  return {
-    thumb: {
-      height,
-      width: thumbWidth,
-      x: x + thumbInset,
-      y: LIST.y + thumbInset + Math.round((inner - height) * share),
-    },
-    track: { height: LIST.height, width: trackWidth, x, y: LIST.y },
-  };
+  return scrollbarRects(SHOP_LAYOUT.scrollbar, LIST, max, y);
 }
 
 // A tab's hit area; its face is drawHeight tall at drawY inside it.
