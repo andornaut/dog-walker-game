@@ -4011,8 +4011,8 @@
       "png": "sprites/skunk.png",
       "json": "sprites/skunk.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 33
+        "feetY": 45,
+        "opaqueWidth": 34
       }
     },
     {
@@ -4066,7 +4066,7 @@
       "json": "sprites/skunk@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 17
+        "opaqueWidth": 18
       }
     },
     {
@@ -4075,7 +4075,7 @@
       "json": "sprites/skunk@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 21
+        "opaqueWidth": 22
       }
     },
     {
@@ -4083,8 +4083,8 @@
       "png": "sprites/skunk@75.png",
       "json": "sprites/skunk@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 25
+        "feetY": 35,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4092,8 +4092,8 @@
       "png": "sprites/skunk@88.png",
       "json": "sprites/skunk@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 29
+        "feetY": 40,
+        "opaqueWidth": 30
       }
     },
     {

@@ -699,32 +699,35 @@ SKUNK_IDLE = (dict(sway=0), dict(sway=1), dict(sway=0, blink=True), dict(sway=-1
 def skunk(sway=0, blink=False):
     """The skunk facing the player at its own eye level, a squat front elevation: its tail fans up behind
     its right shoulder with a white stripe curving along its inner edge, and sways 1px either way; blink
-    shuts its eyes to ink lines. The head is in front
-    of the body, the white blaze running up from the nose between the ears, front paws on the road. The road
-    outline and a grey rim on the dark fur so it holds on Elm Avenue."""
+    shuts its eyes to ink lines. An ink line parts the head from the body and the body from the tail. The
+    head is in front of the body: a white blaze runs up from a white muzzle between the ears, and the eyes
+    are ink with a white glint. Front paws on the road. The road outline and a grey rim on the dark fur so it
+    holds on Elm Avenue."""
     g = edged(Grid())
     s = sway
     # the tail: a plume up behind the right shoulder, a white crescent along its upper left
     g.ell(20 + s, 11, 8, 8.5, "navy", "ink", "dslate")
     g.ell(20 + s, 11, 6, 6.5, "white", "lgrey")
     g.ell(22 + s, 13, 5, 5.5, "navy", "ink")
-    # body, low and wide, lit on its upper left so it reads as a body and not a shadow under the head
+    # body, low and wide, lit on its upper left, an ink line parting it from the tail
+    g.ell(16, 24, 9.5, 5.8, "ink")
     g.ell(16, 24, 8.5, 4.8, "navy", "ink", "dslate")
-    # head: a dslate edge parts it from the body; pink-lined ears, the blaze, white-ringed eyes
+    # the neck: an ink line round the head
+    g.ell(14, 19, 7.5, 6.5, "ink")
+    # head: ears, the blaze down to the muzzle, eyes with glints
     for x, top, inner in ((9, 10, 11), (19, 18, 17)):
         g.tri((x, 17), (top, 11), (2 * inner - x, 15), "dslate")
-        g.p(inner, 14, "pink")
     g.ell(14, 19, 6.5, 5.5, "dslate")
     g.ell(14, 19.5, 5.5, 4.5, "navy", None, "dslate")
-    g.rect(13, 13, 2, 8, "white")
-    g.rect(14, 14, 1, 7, "lgrey")
+    g.rect(13, 13, 2, 7, "white")
+    g.ell(14, 21.5, 2.8, 1.8, "white", "lgrey")
+    g.rect(13, 20, 2, 1, "pink")
     for x in (10, 16):
         if blink:
-            g.rect(x, 19, 2, 1, "ink")
+            g.rect(x, 18, 2, 1, "ink")
             continue
-        g.rect(x, 18, 2, 2, "white")
-        g.rect(x + (1 if x < 13 else 0), 18, 1, 2, "ink")
-    g.rect(13, 21, 2, 1, "pink")
+        g.rect(x, 17, 2, 2, "ink")
+        g.p(x, 17, "white")
     # front paws, set apart from the body by their dslate tops
     for x in (10, 16):
         g.rect(x, 27, 3, 2, "ink")
@@ -828,16 +831,16 @@ CLOUD_W, CLOUD_H = 88, 40
 CLOUD_SIZE = (112, 60)
 # Where each stink wisp starts, trailing 6 design rows down.
 CLOUD_WISPS = ((22, 25), (62, 22), (72, 30), (14, 31), (42, 17))
-# The haze's colours: the outer and inner rim, the dithered fill and its darker pixels, and the wisps.
+# The haze's colours: the outer and inner rim, the fill, the seams between lobes, and the wisps.
 CLOUD_INK = dict(outer="plum", inner="pink", fill="mauve", dark="purple", wisp="purple")
 
 
 def skunk_cloud(step, s=1):
-    """The stink haze under the skunk at depth step s (CLOUD_SIZE at 1), low and wide on the road: puffs with a
-    solid rim and a 2x2-dithered mauve fill, so the road shows through. The puffs swell in turn by a whole
-    pixel; the base stays on the last row. The rim is two pixels at every size: plum outside, which holds 3:1
-    on the light roads, and pink inside it, which holds on Elm Avenue. The dither and the wisps' 1px wave are
-    laid on the drawn grid, so they keep their pixels at every step. A puff near the frame's top or sides is
+    """The stink haze under the skunk at depth step s (CLOUD_SIZE at 1), low and wide on the road: flat mauve
+    lobes, a purple seam where one meets the next, with no dither, so it holds on the dark roads. The puffs
+    swell in turn by a whole pixel; the base stays on the last row. The rim is two pixels at every size: plum
+    outside, which holds 3:1 on the light roads, and pink inside it, which holds on Elm Avenue. The seams and
+    the wisps' 1px wave are laid on the drawn grid, so they keep their pixels at every step. A puff near the frame's top or sides is
     trimmed so that, swollen, it still stops a pixel short of them. Mauve keeps it apart from the green
     hedges, and matches fx-hit-skunk and fx-status-stinky."""
     w, h = (math.floor(v * s + 0.5) for v in CLOUD_SIZE)
@@ -850,8 +853,11 @@ def skunk_cloud(step, s=1):
         r = min(r * sx, cx - 1.6, w - cx - 1.6, (cy - 1.6) / k)
         puffs.append((cx, cy, r + (1 if (i + step) % 4 == 0 else 0)))
     # how far inside the nearest puff each pixel is, in pixels across
-    depth = [[max(r - ((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / k) ** 2) ** 0.5 for cx, cy, r in puffs)
-              for x in range(w)] for y in range(h)]
+    def depth_of(puff, x, y):
+        cx, cy, r = puff
+        return r - ((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / k) ** 2) ** 0.5
+
+    depth = [[max(depth_of(p, x, y) for p in puffs) for x in range(w)] for y in range(h)]
 
     def inside(x, y):
         return 0 <= x < w and 0 <= y < h and depth[y][x] >= 0
@@ -861,6 +867,9 @@ def skunk_cloud(step, s=1):
 
     outer = {(x, y) for y in range(h) for x in range(w)
              if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
+    # each pixel belongs to the puff it is deepest inside; where two lobes meet, the later one's edge is a
+    # purple seam, so the haze reads as flat lobes
+    owner = [[max(range(len(puffs)), key=lambda i: depth_of(puffs[i], x, y)) for x in range(w)] for y in range(h)]
     for y in range(h):
         for x in range(w):
             if not inside(x, y):
@@ -869,8 +878,10 @@ def skunk_cloud(step, s=1):
                 g.p(x, y, CLOUD_INK["outer"])
             elif beside(x, y, lambda a, b: (a, b) in outer):
                 g.p(x, y, CLOUD_INK["inner"])
-            elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
-                g.p(x, y, CLOUD_INK["fill"] if (x + y) % 8 else CLOUD_INK["dark"])
+            elif beside(x, y, lambda a, b: inside(a, b) and owner[b][a] < owner[y][x]):
+                g.p(x, y, CLOUD_INK["dark"])
+            else:
+                g.p(x, y, CLOUD_INK["fill"])
     for x0, y0 in CLOUD_WISPS:
         for j in range(max(1, math.floor(6 * sy + 0.5))):
             g.p(math.floor(x0 * sx) + (j + step) % 3 - 1, math.floor(y0 * sy) + j, CLOUD_INK["wisp"])
