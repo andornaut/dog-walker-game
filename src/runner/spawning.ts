@@ -134,6 +134,46 @@ export function laneReach(plan: SpawnPlan<string>): LaneReach {
   };
 }
 
+// A lane-blocking spawn standing on the road: the distance of its hit box's near edge, its
+// leftmost lane, and how many lanes and rows it covers.
+export interface BlockingPlace {
+  distance: number;
+  lane: number;
+  lanes: number;
+  rows: number;
+}
+
+// The least clear road, from the far edge of the nearer obstacle's hit box to the near edge of
+// the farther one's, across which the path changes lanes between them: the tallest pack's
+// height and a lane move, so the pack visibly fits between them.
+export function packGap(plan: SpawnPlan<string>): number {
+  return plan.packLength + laneMoveLength(plan);
+}
+
+// True when the farther spawn blocks a lane beside the nearer one that the nearer leaves open,
+// next to a lane the nearer blocks and the farther leaves open: a pack passing the nearer one
+// in that lane changes lanes between them by stepping in behind it.
+function changesLanesBetween(near: BlockingPlace, far: BlockingPlace): boolean {
+  const nearMask = laneRun(near.lane, near.lanes);
+  const farMask = laneRun(far.lane, far.lanes);
+  const besideNear = farMask & ~nearMask;
+  const behindNear = nearMask & ~farMask;
+  return (besideNear & ((behindNear << 1) | (behindNear >>> 1))) !== 0;
+}
+
+// True when the pack fits between two lane-blocking spawns: where the path changes lanes
+// between them and road shows between them, that road is at least packGap long. Spawns side by
+// side, with no road between them, leave no gap to change lanes through.
+export function packFitsBetween(
+  plan: SpawnPlan<string>,
+  a: BlockingPlace,
+  b: BlockingPlace,
+): boolean {
+  const [near, far] = a.distance <= b.distance ? [a, b] : [b, a];
+  const gap = far.distance - near.distance - hitLength(plan, near.rows);
+  return gap <= 0 || gap >= packGap(plan) - ROUNDING || !changesLanesBetween(near, far);
+}
+
 // A set of lanes as a bit mask: bit n set means lane n is in it.
 export function laneMask(lanes: readonly number[]): number {
   return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
@@ -197,7 +237,8 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // from any lane at the zone's start, and from every open lane of each row, an open lane of the
 // next row is within reach without crossing a lane blocked in the gap between them. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
-// last row. Movers are placed first, by placeMovers; a crosser keeps the row before its own
+// last row. Where the path changes lanes between two lane-blocking spawns, packFitsBetween
+// holds. Movers are placed first, by placeMovers; a crosser keeps the row before its own
 // clear as a lead-in, so the pack steers into its row from two rows back. A mover, or an
 // obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
 // uses no random draw; so is one that would leave fewer free cells than there are one-cell
@@ -220,6 +261,8 @@ export function planSpawns<Kind extends string>(
   const gapBefore = new Int32Array(rows.length);
   const events: SpawnEvent<Kind>[] = [];
   const lanes = laneRun(0, laneCount);
+  // The lane-blocking spawns placed so far, other than movers.
+  const placed: BlockingPlace[] = [];
 
   const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
 
@@ -325,7 +368,14 @@ export function planSpawns<Kind extends string>(
     if (footprint.lanes * footprint.rows > 1 && !leavesRoom(cells)) {
       return false;
     }
-    return !blocksLane || tryBlock(cell, footprint, false);
+    if (!blocksLane) {
+      return true;
+    }
+    const place = { distance: itemAt(rows, cell.row), lane: cell.lane, ...footprint };
+    return (
+      placed.every((other) => packFitsBetween(plan, place, other)) &&
+      tryBlock(cell, footprint, false)
+    );
   };
 
   const freeCells = (
@@ -409,6 +459,7 @@ export function planSpawns<Kind extends string>(
       }
       if (quota.blocksLane) {
         tryBlock(cell, footprint, true);
+        placed.push({ distance: itemAt(rows, cell.row), lane: cell.lane, ...footprint });
       }
       events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
     }

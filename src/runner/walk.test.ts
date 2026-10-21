@@ -47,6 +47,7 @@ import { type BlockingSpan, lanesReachedAtEnd } from "../testing/avoidable";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
+import { STEP_SECONDS } from "./fixedStep";
 import { isSteeringLocked } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
@@ -453,6 +454,45 @@ describe("planZone", { timeout: 15_000 }, () => {
         for (const start of LANES) {
           const reached = lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start);
           expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
+        }
+      }
+    }
+  });
+
+  // Two standing obstacles, the farther one blocking a lane beside the nearer one next to a lane
+  // only the nearer one blocks: a pack passing the nearer one there changes lanes behind it,
+  // between the two. Road between them is at least the tallest pack and a lane move in whole
+  // walk steps, at the fastest pace in the last zone.
+  it.each(ZONE_IDS)("leaves the pack room to change lanes between obstacles in %s", (zone) => {
+    const zoned = inZone(realRun(REAL, FASTEST_WALKER), zone, WORLD.walkLength - 1);
+    const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
+    const laneMove = steps * STEP_SECONDS * walkScrollSpeed(REAL, zoned);
+    const fit = GAME_ROAD.tallestPackBand + laneMove;
+    const lanesOf = (kind: WalkItem["kind"], lane: number) =>
+      new Set(Array.from({ length: footprintOf(REAL, kind).lanes }, (_, i) => lane + i));
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      const walk = planZone(REAL, GAME_ROAD, seededRandom(seed), {
+        road: startRoad(LANE_COUNT),
+        run: zoned,
+      });
+      const standing = walk.road.pending.filter(
+        (event) => event.mover === undefined && blocksLane(REAL, event.kind),
+      );
+      for (const near of standing) {
+        const nearLanes = lanesOf(near.kind, near.lane);
+        for (const far of standing.filter(({ distance }) => distance > near.distance)) {
+          const farLanes = lanesOf(far.kind, far.lane);
+          const steppedIn = [...farLanes].some(
+            (beside) =>
+              !nearLanes.has(beside) &&
+              [beside - 1, beside + 1].some((lane) => nearLanes.has(lane) && !farLanes.has(lane)),
+          );
+          const gap = far.distance - near.distance - itemHeight(REAL, GAME_ROAD, near.kind);
+          if (steppedIn && gap > 0) {
+            expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
+              fit - 1e-6,
+            );
+          }
         }
       }
     }

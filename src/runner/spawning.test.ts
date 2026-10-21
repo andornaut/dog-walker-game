@@ -11,6 +11,8 @@ import {
   laneMask,
   type LaneReach,
   laneReach,
+  packFitsBetween,
+  packGap,
   planSpawns,
   rowSpacing,
   type SpawnEvent,
@@ -130,6 +132,40 @@ describe("hitLength and blockingLength", () => {
     expect(hitLength(plan, 1)).toBe(20);
     expect(hitLength(plan, 3)).toBe(80);
     expect(blockingLength(plan, 2)).toBe(80);
+  });
+});
+
+describe("packFitsBetween", () => {
+  // A car three rows long in lane 1; road starts showing behind it at its hit box's far edge.
+  const car = { distance: 0, lane: 1, lanes: 1, rows: 3 };
+  const behind = hitLength(plan, car.rows);
+  it.each<{ far: { distance: number; lane: number; lanes: number }; fits: boolean; name: string }>([
+    {
+      far: { distance: behind + packGap(plan) - 1, lane: 2, lanes: 1 },
+      fits: false,
+      name: "a pack gap less a pixel beside it",
+    },
+    {
+      far: { distance: behind + packGap(plan), lane: 2, lanes: 1 },
+      fits: true,
+      name: "a pack gap beside it",
+    },
+    {
+      far: { distance: behind, lane: 2, lanes: 1 },
+      fits: true,
+      name: "touching it, with no road between",
+    },
+    { far: { distance: behind + 1, lane: 3, lanes: 1 }, fits: true, name: "a lane away" },
+    { far: { distance: behind + 1, lane: 1, lanes: 1 }, fits: true, name: "in its lane" },
+    {
+      far: { distance: behind + 1, lane: 1, lanes: 2 },
+      fits: true,
+      name: "over its lane and the one beside",
+    },
+  ])("with an obstacle $name, fits: $fits", ({ far, fits }) => {
+    const other = { ...far, rows: 1 };
+    expect(packFitsBetween(plan, car, other)).toBe(fits);
+    expect(packFitsBetween(plan, other, car)).toBe(fits);
   });
 });
 
