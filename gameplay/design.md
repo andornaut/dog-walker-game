@@ -76,14 +76,14 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Forks:** the road meets a cross street; after neighborhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighborhood you haven't walked this walk other than The Long Way Home, sorted easiest on the left to hardest on the right. The fork after neighborhood 3 leads only to The Long Way Home, so it shows one path (with its upgrade) plus Head home. Each path card shows the neighborhood's name, difficulty and pay multiplier, and the one upgrade card it carries. Picking a path picks the next neighborhood and its upgrade at once. A Head home button under the paths ends the walk there, with the same give-up line as the Home question
 - **Neighborhoods** (6, each walk visits 4 with no repeats):
 
-| Neighborhood      | Difficulty | Pay   | Encounter mix                                                     |
-| ----------------- | ---------- | ----- | ----------------------------------------------------------------- |
-| Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, few movers, the mail carrier  |
-| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, joggers; no thieves, no cars      |
-| Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones; some movers. Always the first   |
-| Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers     |
-| Riverside Path    | Hard       | ×1.25 | A riverside path: puddles, cyclists, other dogs, more lucky finds |
-| The Long Way Home | Hardest    | ×1.5  | Everything, densest and fastest, the most movers. Always the last |
+| Neighborhood      | Difficulty | Pay   | Encounter mix                                                           |
+| ----------------- | ---------- | ----- | ----------------------------------------------------------------------- |
+| Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, few movers, the mail carrier        |
+| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, joggers; no thieves, no cars            |
+| Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones; some movers. Always the first         |
+| Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers           |
+| Riverside Path    | Hard       | ×1.25 | A riverside path: puddles, geese, ducklings, cyclists, more lucky finds |
+| The Long Way Home | Hardest    | ×1.5  | Everything, densest and fastest, the most movers. Always the last       |
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Full pack home:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Full pack bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
