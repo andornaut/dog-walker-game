@@ -221,6 +221,18 @@ export function ownerLeadPanel(panel: Rect, lead: OwnerLeadLayout): Rect {
   return { ...panel, height: Math.max(panel.height, height) };
 }
 
+// Every panel a line can take under bars debuff bars: with none, the strip on each count of
+// its rows; under bars, the one-row strip; and each of those grown to an owner's lead.
+export function linePanels(body: FontMetrics, bars: number, bar: Rect = WALK_BAR_RECT): Rect[] {
+  const plain =
+    bars === 0
+      ? Array.from({ length: MESSAGE_STRIP.rows }, (_, row) => messagePanel(body, row + 1, bar))
+      : [messageLinePanel(bars, bar).panel];
+  const slot = bars === 0 ? stripLeadSlot(body, bar) : lineLeadSlot(body, bars, bar);
+  const lead = ownerLeadLayout(body, slot, 0);
+  return [...plain, ...plain.map((panel) => ownerLeadPanel(panel, lead))];
+}
+
 // A line's text broken at spaces into rows no wider than room, as width measures them, at
 // most MESSAGE_STRIP.rows of them: text past the last row is left out.
 export function messageRows(width: (row: string) => number, room: number, text: string): string[] {

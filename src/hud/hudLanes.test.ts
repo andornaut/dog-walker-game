@@ -17,7 +17,16 @@ import {
   changeLabelRoom,
   hudLanes,
 } from "./hudLanes";
-import { messageStripLayout } from "./messageStrip";
+import {
+  lineLeadSlot,
+  MESSAGE_STRIP,
+  messageLinePanel,
+  messagePanel,
+  messageStripLayout,
+  ownerLeadLayout,
+  ownerLeadPanel,
+  stripLeadSlot,
+} from "./messageStrip";
 import { DOG_CARD, ownerTabRect } from "./walkHud";
 
 const layout = screenLayout(SCREEN_CONFIG);
@@ -64,6 +73,32 @@ describe("hudLanes", () => {
       expect(tab.y).toBeGreaterThanOrEqual(lanes.ownerTabs.y);
       expect(tab.y + tab.height).toBeGreaterThan(lanes.ownerTabs.y + lanes.ownerTabs.height - 1);
     }
+  });
+});
+
+// Each line the strip can show under each count of debuff bars, one bar per debuff at most: with
+// none, a line on each count of the strip's rows; under bars, the one-row line; each plain or led
+// by an owner's face and name.
+const BAR_COUNTS = Array.from({ length: Object.keys(gameData.debuffs).length + 1 }, (_, i) => i);
+const STRIP_LINES = BAR_COUNTS.flatMap((bars) => {
+  const plain: [string, Rect][] =
+    bars === 0
+      ? Array.from({ length: MESSAGE_STRIP.rows }, (_, row) => [
+          `${row + 1}-row line`,
+          messagePanel(BODY, row + 1),
+        ])
+      : [["one-row line", messageLinePanel(bars).panel]];
+  const slot = bars === 0 ? stripLeadSlot(BODY) : lineLeadSlot(BODY, bars);
+  const lead = ownerLeadLayout(BODY, slot, 0);
+  return plain.flatMap(([kind, panel]) => [
+    [bars, kind, panel] as const,
+    [bars, `owner's ${kind}`, ownerLeadPanel(panel, lead)] as const,
+  ]);
+});
+
+describe("the bank lane", () => {
+  it.each(STRIP_LINES)("starts under the strip's %i-bar %s", (_bars, _kind, panel) => {
+    expect(panel.y + panel.height).toBeLessThanOrEqual(lanes.bank.y);
   });
 });
 

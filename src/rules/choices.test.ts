@@ -165,31 +165,56 @@ describe("hasPlaque", () => {
 });
 
 describe("applyInstantEncounter", () => {
-  it("pays a lost wallet at once, with no quip when no owner's hearts changed", () => {
+  it("pays a lost wallet at once", () => {
     const state = testState({ koda: 5, snowball: 3 });
     const outcome = applyInstantEncounter(data, () => 0, state, "lostWallet", ["koda", "snowball"]);
     const keep = read(TEST_TUNING, "money", "lostWalletKeep");
     expect(outcome.moneyDelta).toBe(keep);
     expect(heartsByDog(outcome.state)).toEqual(heartsByDog(state));
-    expect(outcome.quips).toEqual([]);
     expect(outcome.moneyChanges[0]?.causes).toEqual([
       { amount: keep, kind: "effect", source: { encounter: "lostWallet", kind: "instant" } },
     ]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
-  it("gives the friendly neighbor's hearts to every owner, with a happier line", () => {
+  it("gives the friendly neighbor's hearts to every owner", () => {
     const state = testState({ duchess: 3, koda: 3 });
     const outcome = applyInstantEncounter(data, () => 0, state, "pettingNeighbor", [
       "duchess",
       "koda",
     ]);
     expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "koda"]);
-    expect(outcome.quips).toEqual([
-      { dog: "duchess", moment: "happier" },
-      { dog: "koda", moment: "happier" },
-    ]);
   });
+
+  // Each lucky find, caught by the whole pack, below max, with an owner at max and with an owner
+  // fired: each owner it raised a heart for says one happier line, and no other owner says one.
+  // Found money is the walker's, so no owner gains it.
+  const luckyFinds = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
+    (id) => ENCOUNTERS[id].kind === "lucky",
+  );
+  const low = testState({ duchess: 1, koda: 1, snowball: 1 });
+  const kodaFull = startHearts(TEST_TUNING, [], placeInPack(low, "koda"), DOGS.koda);
+  const packs: [string, RunState][] = [
+    ["below max", low],
+    ["Koda's owner at max", testState({ duchess: 1, koda: kodaFull, snowball: 1 })],
+    ["Snowball's owner fired", testState({ duchess: 1, koda: 1, snowball: "fired" })],
+  ];
+  it.each(luckyFinds.flatMap((id) => packs.map(([pack, state]) => [id, pack, state] as const)))(
+    "has %s quip from exactly the owners it raised, %s",
+    (id, _pack, state) => {
+      const { resolution } = ENCOUNTERS[id];
+      const effects = resolution.kind === "instant" ? resolution.effects : [];
+      const hearts = effects.some((effect) => effect.kind === "hearts");
+      const walking = Object.entries(heartsByDog(state)) as [DogId, number][];
+      const raised = walking.filter(
+        ([dog, now]) =>
+          hearts && now < startHearts(TEST_TUNING, [], placeInPack(state, dog), DOGS[dog]),
+      );
+      const caught = walking.map(([dog]) => dog);
+      const outcome = applyInstantEncounter(data, () => 0, state, id, caught);
+      expect(outcome.quips).toEqual(raised.map(([dog]) => ({ dog, moment: "happier" })));
+    },
+  );
 
   it("refuses an encounter with no effects on contact", () => {
     expect(() =>
