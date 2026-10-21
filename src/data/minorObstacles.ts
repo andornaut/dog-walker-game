@@ -7,11 +7,11 @@ import type { MinorObstacle } from "./types";
 export const MINOR_OBSTACLES = {
   ball: { movement: { kind: "dart" }, name: "Ball", shape: { lanes: 1, rows: 1 } },
   barrier2: {
-    name: "Construction barrier",
+    name: "Barrier",
     shape: { lanes: 2, rows: 1 },
   },
   barrier3: {
-    name: "Construction barrier",
+    name: "Barrier",
     shape: { lanes: 3, rows: 1 },
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },

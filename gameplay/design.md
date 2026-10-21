@@ -190,7 +190,7 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Car, delivery truck, garbage truck, ice cream truck, parked car                                                                                        | Plain | 1 × 3               |
 | Bench                                                                                                                                                  | Plain | 2 × 1               |
 | Hedge                                                                                                                                                  | Plain | 3 × 1               |
-| Construction barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path)                                                                        | Plain | 2 or 3 × 1          |
+| Barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path)                                                                                     | Plain | 2 or 3 × 1          |
 
 ### Moving hazards
 
