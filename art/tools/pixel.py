@@ -61,7 +61,7 @@ DARKER.update(dict(p.split(":") for p in (
     "58b8c9:2f7fa6 2f7fa6:1d5576 1d5576:262b44 f9c74f:feae34 ff9e6b:f77622 cfe3ea:c0cbdc "
     "3d86e0:2654b0 2654b0:124e89"
 ).split()))
-# The road colours: Elm Avenue (dark), then Fairview Park, Main Street and The Long Way Home (light).
+# The contrast roads: dslate (dark, the Distillery District's), then tan, pink and skin2 (light).
 ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
 
 
@@ -78,7 +78,7 @@ def contrast(a, b):
 
 def road_edge(c):
     """A road sprite's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1
-    against the three light roads. The fill inside it carries Elm Avenue."""
+    against the three light roads. The fill inside it carries the dslate road."""
     out = DARKER[DARKER[c]]
     while DARKER[out] != out and any(contrast(out, r) < 3 for r in ROADS[1:]):
         out = DARKER[out]

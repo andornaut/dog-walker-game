@@ -1,29 +1,18 @@
 #!/usr/bin/env python3
-"""Draw the zone skins of the Stink area encounter, which reskins the skunk and its
-haze. A skin changes the look only: each keeps its base kind's footprint, tags, frame
-counts, timings and anchor (the base on the last opaque row of frame 0).
-
-Stink, a 2x2 area (2 lanes, 2 rows): a source sprite that stands in a stink haze,
-as road.skunk stands in road.skunk_cloud. The source has the road outline and
+"""Draw the garbage truck, the garbageTruck minor obstacle. It has the road outline and
 road.LIT's rim; idle (2 frames, 400ms).
 
-stink-garbage-truck 56x60   The Long Way Home: a rear-loader garbage truck from behind, its hopper
-                            open on bags and a banana peel, the beacon blinking, two flies;
-                            skunk-cloud. Laid out on 56x50 and drawn as obstacles.delivery_truck is
+stink-garbage-truck 56x60   a rear-loader garbage truck from behind, its hopper
+                            open on bags and a banana peel, the beacon blinking, two flies.
+                            Laid out on 56x50 and drawn as obstacles.delivery_truck is
                             (56 columns, rows 1.2x), so it centres on a lane with 4px to spare, taller
                             than the delivery truck (56x54) and as tall as the ice cream truck.
                             drive (4 frames, 100ms): reversing down the lane at the pack, tread
                             lines fall down the tyres, the body dips 1px onto them on frames 1
                             and 2, the beacon blinks
 
-stink-fish-crate-cloud      104x50, loop (4 frames, 220ms) like skunk-cloud: the same puffs, rim
-                            and dither, one step down the mauve ramp: fill purple with plum
-                            pixels, plum wisps. Main Street's road is pink and its shadow mauve,
-                            so skunk-cloud's mauve fill would vanish into it.
-
-The hazes are drawn in pixels at their own size (haze). Every key also has <key>@<step> for each
-depth step in minis.STEPS (the haze at the step), floor(size x scale + 0.5), with the original's
-tags, frames and durations.
+Every key also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5),
+with the original's tags, frames and durations.
 
 Usage:
   skins_areas.py preview OUT.png   every frame on the zone roads
@@ -41,7 +30,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
 import obstacles  # noqa: E402
-from minis import STEPS, scaled, small  # noqa: E402
+from minis import STEPS, small  # noqa: E402
 from obstacles import treads, unit  # noqa: E402
 from pixel import K, Grid, edged, main  # noqa: E402
 
@@ -50,11 +39,9 @@ from pixel import K, Grid, edged, main  # noqa: E402
 # as road.ice_cream_truck.
 TRUCK_W, TRUCK_H = 56, 50
 TRUCK_SCALE = obstacles.CAR_SCALE
-# The stink haze's frame at full size: 2 lanes wide, skunk-cloud's 40 rows x 1.25.
-HAZE_W, HAZE_H = 104, 50
-# The zone roads, for the preview: Willow Crescent, Fairview Park, Main Street, Riverside Path and The
-# Long Way Home.
-GROUNDS = ("8b9bb4", "e4a672", "f6757a", "ead4aa", "c28569")
+# The zone roads, for the preview: Cabbagetown, High Park, the Distillery District, Kensington Market,
+# The Beaches and Yonge Street.
+GROUNDS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
 
 
 def raster(g):
@@ -72,7 +59,7 @@ def lit(g):
 
 
 def garbage_truck(f, roll=None):
-    """The Long Way Home's stink: a rear-loader garbage truck from straight behind, a lane wide and taller
+    """A rear-loader garbage truck from straight behind, a lane wide and taller
     than obstacles.delivery_truck, laid out on TRUCK_W x TRUCK_H and drawn at TRUCK_SCALE as it is: a green
     packer body with a rounded top, ribbed in forest with a white stripe, its hopper open on a bag, a sack, a
     can and a banana peel under the grey packer blade, grab bars either side, red tail lights, the bumper
@@ -159,51 +146,6 @@ def truck(draw, f, step):
     return out
 
 
-# ---------- the haze ----------
-
-def haze(w, h, step, ink):
-    """road.skunk_cloud's haze at w x h: its puffs placed by their share of the frame, the rim, the 2x2
-    dither on every other row and the wisps, in the colours ink (road.CLOUD_INK's keys). A puff near the
-    frame's top or sides is trimmed so that, swollen, it still stops a pixel short of them; the last row
-    cuts the haze level, where it meets the road (as minis.skunk_cloud)."""
-    sx, sy = w / road.CLOUD_W, h / road.CLOUD_H
-    k = road.CLOUD_SQUASH * sy / sx
-    g = Grid(w, h)
-    puffs = []
-    for i, (cx, cy, r) in enumerate(road.CLOUD_PUFFS):
-        cx, cy = cx * sx, cy * sy
-        r = min(r * sx, cx - 1.6, w - cx - 1.6, (cy - 1.6) / k)
-        puffs.append((cx, cy, r + (1 if (i + step) % 4 == 0 else 0)))
-    depth = [[max(r - ((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / k) ** 2) ** 0.5 for cx, cy, r in puffs)
-              for x in range(w)] for y in range(h)]
-
-    def inside(x, y):
-        return 0 <= x < w and 0 <= y < h and depth[y][x] >= 0
-
-    def beside(x, y, test):
-        return any(test(x + dx, y + dy) for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
-
-    outer = {(x, y) for y in range(h) for x in range(w) if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
-    for y in range(h):
-        for x in range(w):
-            if not inside(x, y):
-                continue
-            if (x, y) in outer:
-                g.p(x, y, ink["outer"])
-            elif beside(x, y, lambda a, b: (a, b) in outer):
-                g.p(x, y, ink["inner"])
-            elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
-                g.p(x, y, ink["fill"] if (x + y) % 8 else ink["dark"])
-    for x0, y0 in road.CLOUD_WISPS:
-        for j in range(scaled(6, sy)):
-            g.p(x0 * sx + (j + step) % 3 - 1, y0 * sy + j, ink["wisp"])
-    return g
-
-
-# skunk-cloud's colours one step down the mauve ramp, for Main Street's pink road.
-FISH_HAZE = dict(outer="plum", inner="pink", fill="purple", dark="plum", wisp="plum")
-
-
 # ---------- build ----------
 
 
@@ -212,9 +154,6 @@ def sprites():
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         yield f"stink-garbage-truck{suffix}", [("idle", [truck(garbage_truck, f, step) for f in (0, 1)], 400),
                                                ("drive", [truck(truck_driving, f, step) for f in range(4)], 100)]
-        hw, hh = scaled(HAZE_W, step), scaled(HAZE_H, step)
-        yield f"stink-fish-crate-cloud{suffix}", [
-            ("loop", [haze(hw, hh, i, FISH_HAZE).outlined(False) for i in range(4)], 220)]
 
 
 if __name__ == "__main__":

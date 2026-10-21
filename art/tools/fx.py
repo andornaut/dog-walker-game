@@ -47,8 +47,8 @@ from pixel import Grid, main  # noqa: E402
 
 
 def rim(g, col="plum"):
-    """Ring the shape with a 1px outline in one colour, in place: plum holds 6.5:1 on Fairview Park,
-    8.3:1 on the shops and 4.4:1 on The Long Way Home, and the fill inside it carries Elm Avenue."""
+    """Ring the shape with a 1px outline in one colour, in place: plum holds 6.5:1 on the tan road,
+    8.3:1 on the pink and 4.4:1 on skin2, and the fill inside it carries the dslate road."""
     edge = [(x, y) for y in range(g.h) for x in range(g.w) if not g.px[y][x] and any(
         0 <= x + dx < g.w and 0 <= y + dy < g.h and g.px[y + dy][x + dx]
         for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))]

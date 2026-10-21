@@ -2,7 +2,7 @@
 """Draw the encounter hit moments: a burst over the pack per encounter, the
 screen-edge flash in the encounter's colour, the plate behind the big label,
 and the per-dog status overlays. Bursts carry a 1px plum rim so they hold 3:1
-on the three light roads while their fills carry Elm Avenue. The flash strips pair a light ink with a dark
+on the three light roads while their fills carry the dslate road. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
 encounters.py. The bursts are laid out on a 64x64 design and drawn 77/64 times
 bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps and
@@ -147,7 +147,7 @@ def hit_skunk(step):
     """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift
     apart, shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud and
     fx-status-stinky: the puffs mauve, shaded purple on their lower right and lit pink on their upper left, so
-    the pink carries Elm Avenue and the plum rim the light roads. Stink squiggles rise out of it, pink with a
+    the pink carries the dslate road and the plum rim the light roads. Stink squiggles rise out of it, pink with a
     plum side, so they read over the cloud and on every road."""
     g = Grid(64, 64)
     if step == 0:
@@ -357,7 +357,7 @@ FLASH = {"green": ("green", "teal"), "sky": ("cyan", "navy"), "amber": ("amber",
 
 def flash(colour, step):
     """16x64, the left screen edge: solid at x=0, an ordered 4x4 dither that clears inward. Each lit
-    pixel in the sparse inner half with a gap inward of it gets a dark fringe there; the light ink carries Elm Avenue and the
+    pixel in the sparse inner half with a gap inward of it gets a dark fringe there; the light ink carries the dslate road and the
     dark fringe the light roads. Later frames recede toward the edge."""
     ink, fringe = FLASH[colour]
     width = (16, 11, 7, 4)[step]
@@ -394,7 +394,7 @@ def label_plate(face="dred", lit="red", shade="plum"):
 
 def status_stinky(size, step):
     """Wavy lines rising 2px a frame over an 8px wave, so 4 frames loop with no seam. Pink, each whole
-    squiggle rimmed in plum, so the pink carries Elm Avenue and the plum the light roads: the skunk's mauve
+    squiggle rimmed in plum, so the pink carries the dslate road and the plum the light roads: the skunk's mauve
     family, as skunk-cloud and fx-hit-skunk. The lines sit
     1px in from every edge, so the rim closes round them, and wave in step (the middle one a row ahead),
     so neighbouring rims never close the gap between them."""

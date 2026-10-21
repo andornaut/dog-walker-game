@@ -102,102 +102,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
     "sourceSize": { "w": 18, "h": 8 },
     "duration": 1000
-   },
-   "ui-zone-pips 13.aseprite": {
-    "frame": { "x": 234, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 14.aseprite": {
-    "frame": { "x": 252, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 15.aseprite": {
-    "frame": { "x": 270, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 16.aseprite": {
-    "frame": { "x": 288, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 17.aseprite": {
-    "frame": { "x": 306, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 18.aseprite": {
-    "frame": { "x": 324, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 19.aseprite": {
-    "frame": { "x": 342, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 20.aseprite": {
-    "frame": { "x": 360, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 21.aseprite": {
-    "frame": { "x": 378, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 22.aseprite": {
-    "frame": { "x": 396, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 23.aseprite": {
-    "frame": { "x": 414, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 24.aseprite": {
-    "frame": { "x": 432, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
    }
  },
  "meta": {
@@ -205,34 +109,22 @@
   "version": "1.2.30-x64",
   "image": "ui-zone-pips.png",
   "format": "RGBA8888",
-  "size": { "w": 450, "h": 8 },
+  "size": { "w": 234, "h": 8 },
   "scale": "1",
   "frameTags": [
    { "name": "todo", "from": 0, "to": 0, "direction": "forward" },
-   { "name": "woof-way", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "woof-way-done", "from": 2, "to": 2, "direction": "forward" },
-   { "name": "bark-park", "from": 3, "to": 3, "direction": "forward" },
-   { "name": "bark-park-done", "from": 4, "to": 4, "direction": "forward" },
-   { "name": "sniff-street-shops", "from": 5, "to": 5, "direction": "forward" },
-   { "name": "sniff-street-shops-done", "from": 6, "to": 6, "direction": "forward" },
-   { "name": "the-long-way-home", "from": 7, "to": 7, "direction": "forward" },
-   { "name": "the-long-way-home-done", "from": 8, "to": 8, "direction": "forward" },
-   { "name": "snooze-crescent", "from": 9, "to": 9, "direction": "forward" },
-   { "name": "snooze-crescent-done", "from": 10, "to": 10, "direction": "forward" },
-   { "name": "paws-promenade", "from": 11, "to": 11, "direction": "forward" },
-   { "name": "paws-promenade-done", "from": 12, "to": 12, "direction": "forward" },
-   { "name": "cabbagetown", "from": 13, "to": 13, "direction": "forward" },
-   { "name": "cabbagetown-done", "from": 14, "to": 14, "direction": "forward" },
-   { "name": "high-park", "from": 15, "to": 15, "direction": "forward" },
-   { "name": "high-park-done", "from": 16, "to": 16, "direction": "forward" },
-   { "name": "distillery-district", "from": 17, "to": 17, "direction": "forward" },
-   { "name": "distillery-district-done", "from": 18, "to": 18, "direction": "forward" },
-   { "name": "kensington-market", "from": 19, "to": 19, "direction": "forward" },
-   { "name": "kensington-market-done", "from": 20, "to": 20, "direction": "forward" },
-   { "name": "the-beaches", "from": 21, "to": 21, "direction": "forward" },
-   { "name": "the-beaches-done", "from": 22, "to": 22, "direction": "forward" },
-   { "name": "yonge-street", "from": 23, "to": 23, "direction": "forward" },
-   { "name": "yonge-street-done", "from": 24, "to": 24, "direction": "forward" }
+   { "name": "cabbagetown", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "cabbagetown-done", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "high-park", "from": 3, "to": 3, "direction": "forward" },
+   { "name": "high-park-done", "from": 4, "to": 4, "direction": "forward" },
+   { "name": "distillery-district", "from": 5, "to": 5, "direction": "forward" },
+   { "name": "distillery-district-done", "from": 6, "to": 6, "direction": "forward" },
+   { "name": "kensington-market", "from": 7, "to": 7, "direction": "forward" },
+   { "name": "kensington-market-done", "from": 8, "to": 8, "direction": "forward" },
+   { "name": "the-beaches", "from": 9, "to": 9, "direction": "forward" },
+   { "name": "the-beaches-done", "from": 10, "to": 10, "direction": "forward" },
+   { "name": "yonge-street", "from": 11, "to": 11, "direction": "forward" },
+   { "name": "yonge-street-done", "from": 12, "to": 12, "direction": "forward" }
   ]
  }
 }

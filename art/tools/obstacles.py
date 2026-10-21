@@ -12,9 +12,8 @@ cone                48x48   1 lane, a glint runs down its highlight
 bin                 48x48   1 lane, the lid lifts 1px in a breeze
 hydrant             48x48   the Regular dog's need spot (not an obstacle), a drip off the side cap
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink (Willow
-                            Crescent, Elm Avenue, Main Street and Riverside Path)
-barrier-3           176x36  3 lanes, lamps blink (the same zones)
+barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink
+barrier-3           176x36  3 lanes, lamps blink
 hedge               176x36  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
                             spots in turn
 parked-car          56x42   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
@@ -104,7 +103,7 @@ def cone(glint=None):
     """glint is the row of the highlight that flashes white, or None. The two reflective bands are cut
     into the drawn cone, so a depth variant keeps both whole at its own size."""
     g = edged(Grid(SIZE, SIZE))
-    # squat: a wide base plate, grey, not dslate, which is Elm Avenue's road colour
+    # squat: a wide base plate, grey, not dslate, which is the Distillery District's road colour
     g.rect(9, 31, 22, 5, "grey")
     g.rect(9, 31, 22, 1, "lgrey")
     g.tri((11, 32.5), (29, 32.5), (20, 7.5), "orange")
@@ -261,7 +260,7 @@ def parked_car(hazard=False, roll=None, blink=True):
     """A minivan from straight behind, wide and low: the roof edge, the rear window, the tailgate with its
     tail lights and plate, the bumper and both rear wheels under it, mirrors poking out at the sides. Its
     hazard lights, the outer end of each tail light, are lit when hazard is true. Cyan lights the top and
-    left edges, so the sky body holds on Elm Avenue. roll (0 to 3) is a pull-out or drive frame: tread
+    left edges, so the sky body holds on the dslate road. roll (0 to 3) is a pull-out or drive frame: tread
     lines climb the tyres 1px a frame (treads), and, when blink is true (pull-out), the right indicator is
     lit on frames 0 and 1."""
     g = edged(Grid(56, 35))

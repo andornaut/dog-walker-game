@@ -237,7 +237,7 @@ def money():
 
 def treat_icon():
     """The treat pickup's bone as road.treat lays it out at 16x16 (idle frame 0), outlined with icon_edge
-    as the content icons are. Its white holds on the top bar's ink as the road bone holds on Elm Avenue."""
+    as the content icons are. Its white holds on the top bar's ink as the road bone holds on the dslate road."""
     import road
 
     g = road.treat(lift=0)
@@ -632,7 +632,7 @@ def dog_slot():
 def hit_label(face="dred", lit="red", shade="plum"):
     """ui-hit-label's 24x24 nine-slice, 8px corners: a plate (dred for normal, blue for lucky)
     stretched to 176x32. White text holds 7.34:1 on dred and 8.48:1 on blue; the cream band
-    carries Elm Avenue and the ink line the light roads."""
+    carries the dslate road and the ink line the light roads."""
     return plate(face, lit, shade)
 
 
@@ -1252,8 +1252,6 @@ def owner_tab():
 # Each zone's colour on its pip: its road colour, which the zone's road shadow (one ramp step
 # down) dims.
 ZONE_COLOURS = {
-    "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "pink", "the-long-way-home": "skin2",
-    "snooze-crescent": "grey", "paws-promenade": "cream",
     "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "dbrick",
     "the-beaches": "cream", "yonge-street": "skin2",
 }
@@ -1384,8 +1382,8 @@ def quip_tail():
 def zone_banner():
     """248x48: a cream board in the chrome on navy ribbon ends, shown over the road between
     zones. The game writes two lines in font-title, plum, centred on x=124: the world and zone
-    number ("MAPLEWOOD, ZONE 2") with its caps in rows 11 to 15, and the zone name at x2
-    ("FAIRVIEW PARK", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
+    number ("TORONTO, NEIGHBORHOOD 2") with its caps in rows 11 to 15, and the zone name at x2
+    ("KENSINGTON MARKET", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
     g = Grid(248, 48)
     ribbon = Grid(248, 48)
     for x0 in (0, 220):

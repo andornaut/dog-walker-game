@@ -3,8 +3,8 @@
 
 Icons and the bubble carry cream and tan: icon outlines run down the ramp until
 they hold 3:1 on both, so an icon reads on the dog card, the detail card, the
-doghouse wall and inside the bubble. The bubble's cream paper carries Elm Avenue
-and its plum rim the light roads. Effects take the 1px plum rim.
+doghouse wall and inside the bubble. The bubble's cream paper carries the dslate
+road and its plum rim the light roads. Effects take the 1px plum rim.
 
 icon-need-<need>   16x16  normal (1 frame)  regular (a hydrant on a grass tuft), playful (a
                           tennis ball with a bounce), friendly (a waving hand and a small
@@ -58,8 +58,7 @@ from hits import piece  # noqa: E402
 from moments import rounded  # noqa: E402
 from pixel import K, Grid, icon_edge, main  # noqa: E402
 
-# The six road colours: Elm Avenue, Fairview Park, Main Street, The Long Way Home, Willow Crescent
-# and Riverside Path. Cream is also the cards' paper and tan the doghouse wall.
+# The preview roads: dslate, tan, lgrey, skin2, grey and cream. Cream is also the cards' paper and tan the doghouse wall.
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 
 
@@ -261,7 +260,7 @@ def ticks(g, out):
 
 
 def blocked():
-    """10x10: the plum rim, a white ring that carries Elm Avenue, a red face and a white X."""
+    """10x10: the plum rim, a white ring that carries the dslate road, a red face and a white X."""
     g = Grid(10, 10)
     g.ell(5, 5, 5, 5, "plum")
     g.ell(5, 5, 4, 4, "white")

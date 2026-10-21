@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Draw the Chase, Snatch and Social animals and the Social dogs' owners, the
-moving road obstacles that were the per-zone looks of squirrel, thief and
-other-dog. Every sprite also has its depth variants at every step in
+"""Draw the Chase, Snatch and Social animals and the Social dogs' owners: moving
+minor obstacles, ambient movers and stand-ins (src/assets/spriteKeys.ts). Every sprite also has its depth variants at every step in
 minis.STEPS (@88, @75, @62, @50), redrawn at the step with the same tags,
 frames and durations. Everything faces the player except the side views
 (hops and the Social dogs' run, facing right, the game mirroring them for
@@ -45,12 +44,9 @@ in loose-dog's gallop (hazards.CORGI_RUN), without the broken leash; the owner's
 walk (4 frames, 100ms, road.PERSON_WALK) and idle (2 frames, 400ms).
   social-frisbee-dog        a border collie with a red frisbee
   social-frisbee-dog-owner  backwards cap, green tee, shorts
-  social-jogger-dog         a husky in a running harness
-  social-jogger-dog-owner   a jogger: headband, tank top, shorts
-
-The gate dog and the handbag dog (social-gate-dog, social-handbag-dog and their
-owners) are not in play: their drawings stay here, unbuilt, and their exports
-stay at the old 40px and 56x84 scale.
+  social-jogger-dog-owner   a jogger: headband, tank top, shorts; the jogger's stand-in
+  social-handbag-dog-owner  a shopper; not built, its export stays at the old
+                            56x84 scale
 
 Usage:
   skins_animals.py preview OUT.png   every frame of every sprite and variant on
@@ -60,8 +56,6 @@ Usage:
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
-skin_cards_animals.py composes the encounter cards from the exports, so rebuild
-it after this.
 """
 
 import os
@@ -75,9 +69,9 @@ from minis import STEPS, snap  # noqa: E402
 from pixel import Grid, build, edged, preview  # noqa: E402
 from road import BREATH, BREATH_MS, LIT, SCALE  # noqa: E402
 
-# The zone road colours: Willow Crescent, Fairview Park, Elm Avenue, Main Street, Riverside Path and The Long
-# Way Home.
-GROUNDS = ("8b9bb4", "e4a672", "3a4466", "f6757a", "ead4aa", "c28569")
+# The zone roads, for the preview: Cabbagetown, High Park, the Distillery District, Kensington Market,
+# The Beaches and Yonge Street.
+GROUNDS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
 
 
 def lit(g):
@@ -556,40 +550,6 @@ def seagull_fleeing(wings, bob=0):
 
 # ---------- Social (reskins other-dog and other-dog-owner) ----------
 
-def gate_dog(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
-    """A beagle behind a white picket gate, facing the player: its tan head with a white blaze and long brown
-    ears over the top rail, its white front paws on the picket tips and its tail wagging behind. A reaching
-    paw (fl, fr) lifts 1px; bob raises the dog; tail moves the tail sideways and twitch the right ear."""
-    g = edged(Grid())
-    b = bob
-    g.ell(24.5 + tail, 12 + b, 1.8, 3.5, "tan", "brown", "cream")
-    g.p(24 + tail, 9 + b, "white")
-    g.ell(16, 19 + b, 8, 4.5, "tan", "brown", "cream")
-    g.ell(16, 18 + b, 3.5, 3, "white", "lgrey")
-    # the gate: two rails behind five pointed pickets
-    for y in (21, 26):
-        g.rect(3, y, 26, 2, "lgrey")
-        g.rect(3, y + 1, 26, 1, "grey")
-    for x in (4, 9, 14, 19, 24):
-        g.rect(x, 19, 4, 11, "white")
-        g.rect(x + 3, 19, 1, 11, "lgrey")
-        g.tri((x, 19), (x + 4, 19), (x + 2, 16.5), "white")
-    g.p(26, 24, "amber")
-    for x, k in ((9, fl), (20, fr)):
-        g.rect(x, 16 + b - (1 if k > 0 else 0), 3, 2, "tan")
-        g.rect(x, 17 + b - (1 if k > 0 else 0), 3, 1, "white")
-        g.p(x + 2, 16 + b - (1 if k > 0 else 0), "brown")
-    t = twitch
-    g.ell(8.5, 12.5 + b, 2.3, 4.5, "dbrown", "plum", "brown")
-    g.ell(23.5, 12.5 + b + t, 2.3, 4.5, "dbrown", "plum", "brown")
-    g.ell(16, 10.5 + b, 6.5, 5, "tan", "brown", "cream")
-    g.rect(15, 5 + b, 2, 6, "white")
-    g.ell(16, 13.5 + b, 3.5, 2.2, "white", "lgrey")
-    eyes(g, (11, 19), 9 + b)
-    g.rect(15, 12 + b, 2, 1, "ink")
-    g.rect(15, 14 + b, 2, 1, "pink")
-    return lit(g)
-
 
 def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     """A border collie trotting at the player with a red frisbee gripped at the side of its mouth: black coat,
@@ -630,112 +590,6 @@ def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     g.cel(10.6, 19.6 + b, 1.6, 1.3, "red")
     g.p(14, 18 + b, "dbrown")
     return lit(g)
-
-
-def handbag_dog(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
-    """A chihuahua peeking out of a purple handbag set down on the road: the bag's gold handle arching behind
-    it, its fawn apple head, huge pink-lined ears, big eyes, front paws over the bag's rim and its tail out of
-    the bag's right side. A reaching paw (fl, fr) lifts 1px; bob raises the dog 1px; tail moves the tail
-    sideways and twitch the right ear."""
-    g = edged(Grid())
-    b = bob
-    g.ell(16, 18, 8.5, 11, "amber")
-    g.ell(16, 18, 7.5, 10, None)
-    g.ell(25.5 + tail, 15 + b, 1.5, 2.5, "tan", "brown", "cream")
-    g.ell(16, 18 + b, 5, 3.5, "tan", "brown", "cream")
-    # the bag: quilted purple, a mauve top edge, a gold clasp
-    g.rect(6, 19, 20, 10, "purple")
-    g.rect(6, 19, 20, 1, "mauve")
-    g.rect(6, 19, 1, 9, "mauve")
-    g.rect(6, 28, 20, 1, "plum")
-    g.rect(25, 20, 1, 8, "plum")
-    for x in (11, 16, 21):
-        g.rect(x, 21, 1, 6, "plum")
-    g.rect(15, 21, 3, 2, "amber")
-    g.p(16, 23, "yellow")
-    for x, k in ((10, fl), (19, fr)):
-        g.rect(x, 18 + b - (1 if k > 0 else 0), 3, 2, "cream")
-    t = twitch
-    g.tri((10, 12 + b), (4, 3 + b), (14, 7 + b), "tan")
-    g.tri((22, 12 + b + t), (28, 3 + b + t), (18, 7 + b + t), "tan")
-    g.tri((9.5, 10 + b), (6, 5 + b), (12.5, 8 + b), "pink")
-    g.tri((22.5, 10 + b + t), (26, 5 + b + t), (19.5, 8 + b + t), "pink")
-    g.ell(16, 12 + b, 6, 5, "tan", "brown", "cream")
-    g.ell(16, 15 + b, 3, 2, "cream")
-    eyes(g, (11, 19), 10 + b)
-    g.p(12, 11 + b, "ink")
-    g.p(20, 11 + b, "ink")
-    g.rect(15, 14 + b, 2, 1, "ink")
-    g.rect(13, 17 + b, 6, 1, "sky")
-    g.p(16, 18 + b, "amber")
-    return lit(g)
-
-
-def husky(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
-    """A husky trotting at the player in a sky running harness: grey cap and saddle, a white mask with dark
-    brows, pricked ears, blue eyes, white chest and legs, the curled tail over its back. Leg offsets, bob, tail
-    and twitch as road.corgi has them."""
-    g = edged(Grid())
-    b = bob
-
-    def lift(k):
-        return -2 if k > 0 else 0
-
-    g.cel(24.5 + tail, 14.5 + b, 3, 3, "grey", "slate", "lgrey")
-    g.cel(24.5 + tail, 14.5 + b, 1.5, 1.5, "white")
-    for x, k in ((13, bl), (17, br)):
-        g.rect(x, 24 + b, 2, 5 + lift(k) - b, "lgrey")
-        g.rect(x, 28 + lift(k), 2, 1, "grey")
-    g.cel(16, 22 + b, 8.5, 4.5, "grey", "slate", "lgrey")
-    g.cel(16, 22.5 + b, 4.5, 4, "white", "lgrey")
-    # the harness: a chest strap and a band round the shoulders
-    g.rect(8, 20 + b, 16, 2, "sky")
-    g.rect(8, 20 + b, 16, 1, "cyan")
-    g.rect(15, 22 + b, 2, 3, "sky")
-    for x, k in ((9, fl), (20, fr)):
-        g.rect(x, 23 + b, 3, 4 + lift(k) - b, "white")
-        g.rect(x + 2, 23 + b, 1, 4 + lift(k) - b, "lgrey")
-        g.rect(x, 27 + lift(k), 3, 2, "white")
-        g.p(x + 2, 28 + lift(k), "lgrey")
-    t = twitch
-    g.tri((8, 13 + b), (9, 4 + b), (14, 9 + b), "slate")
-    g.tri((24, 13 + b + t), (23, 4 + b + t), (18, 9 + b + t), "slate")
-    g.tri((10, 11 + b), (10, 7 + b), (12.5, 9.5 + b), "pink")
-    g.tri((22, 11 + b + t), (22, 7 + b + t), (19.5, 9.5 + b + t), "pink")
-    g.cel(16, 13.5 + b, 7.5, 5.5, "slate", "dslate", "grey")
-    g.cel(16, 15.5 + b, 6, 3.5, "white", "lgrey")
-    g.rect(15, 9 + b, 2, 4, "white")
-    g.rect(11, 11 + b, 2, 1, "white")
-    g.rect(19, 11 + b, 2, 1, "white")
-    eyes(g, (11, 19), 13 + b, "sky")
-    g.rect(15, 16 + b, 2, 1, "ink")
-    g.rect(15, 18 + b, 2, 1, "pink")
-    return lit(g)
-
-
-def gardener_top(g, b):
-    """The gate dog's owner: a straw sun hat, a green apron over a white tee, amber gardening gloves."""
-    g.rect(9, 21 + b, 14, 13, "white")
-    g.rect(20, 21 + b, 3, 13, "lgrey")
-    g.rect(11, 23 + b, 10, 11, "green")
-    g.rect(18, 23 + b, 3, 11, "dgreen")
-    g.rect(12, 28 + b, 5, 3, "dgreen")
-    g.rect(11, 21 + b, 1, 2, "dgreen")
-    g.rect(20, 21 + b, 1, 2, "dgreen")
-    for x in (5, 23):
-        g.rect(x, 22 + b, 4, 8, "white")
-        g.rect(x + 3, 22 + b, 1, 8, "lgrey")
-        g.rect(x, 30 + b, 4, 3, "amber")
-        g.rect(x + 3, 30 + b, 1, 3, "orange")
-    g.ell(16, 12.5 + b, 8, 8, "skin1", "skin2")
-    g.rect(8, 9 + b, 2, 7, "ochre")
-    g.rect(22, 9 + b, 2, 7, "ochre")
-    road.face_front(g, 16, 13 + b)
-    g.p(10, 16 + b, "pink")
-    g.p(22, 16 + b, "pink")
-    g.ell(16, 8 + b, 13, 2.5, "cream", "tan")
-    g.ell(16, 5.5 + b, 6.5, 3.5, "cream", "tan")
-    g.rect(10, 7 + b, 12, 1, "red")
 
 
 def frisbee_top(g, b):
@@ -889,33 +743,22 @@ def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
 
 # Each Social dog's side view, for side_dog.
 SIDE = {
-    "social-gate-dog": dict(coat=("tan", "brown", "cream"), saddle="dbrown", under="white", leg="tan", sock="white",
-                            ears="flop", tail="up", muzzle="white", collar="red"),
     "social-frisbee-dog": dict(coat=("navy", "ink", "dslate"), far="ink", under="white", leg="navy", sock="white",
                                ears="prick", tail="plume", muzzle="white", eye="amber", frisbee=True),
-    "social-handbag-dog": dict(coat=("tan", "brown", "cream"), under="cream", leg="tan", sock="cream",
-                               ears="big", tail="thin", muzzle="cream", collar="sky"),
-    "social-jogger-dog": dict(coat=("grey", "slate", "lgrey"), under="white", leg="white", sock="white",
-                              ears="prick", tail="curl", muzzle="white", mask=True, eye="sky", harness=True),
 }
 
 
-# Each owner: (top, legs, shoes). The gate and handbag dogs' owners are drawn for their old exports only (see
-# sprites()).
+# Each owner: (top, legs, shoes). The handbag dog's owner is drawn for its old export only (see BUILT).
 OWNERS = {
-    "social-gate-dog": (gardener_top, "blue", "dgreen"),
     "social-frisbee-dog": (frisbee_top, "skin2", "white"),
     "social-handbag-dog": (shopper_top, "ink", "red"),
     "social-jogger-dog": (jogger_top, "skin1", "white"),
 }
 DOGS = {
-    "social-gate-dog": gate_dog,
     "social-frisbee-dog": collie,
-    "social-handbag-dog": handbag_dog,
-    "social-jogger-dog": husky,
 }
-# The keys the game draws, which build() writes; the gate and handbag dogs and their owners are not in play,
-# so their exports stay as they are, at the old 40px and 56x84 scale.
+# The owners build() writes, as <key>-owner. social-handbag-dog-owner, the stroller's stand-in, is not built:
+# its export stays at the old 56x84 scale.
 BUILT = ("social-frisbee-dog", "social-jogger-dog")
 
 # Each Chase animal's frame side: the 32-unit design drawn at side / 32. The cat and the rabbit sit at the
@@ -926,7 +769,7 @@ CHASE_SIDE = 38
 # as a medium dog, and a 32x48 seagull a head shorter.
 SNATCH_SIDE = {"snatch-raccoon": 38, "snatch-seagull": 32}
 # The Social dogs are medium dogs, 48x48 like the pack's, drawn SOCIAL_ZOOM narrower in that frame (as
-# dogs.DOG_ZOOM draws the big dogs), so the collie and the husky are about 26px wide face on.
+# dogs.DOG_ZOOM draws the big dogs), so the collie is about 26px wide face on.
 SOCIAL_SIDE = 48
 SOCIAL_ZOOM = 0.82
 
@@ -986,12 +829,12 @@ def skins(step):
                     ("flee", [drawn(t, flee, **q) for q in flees], FLEE_MS),
                     ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS)]
     d, p = SOCIAL_SIDE / 32 * step, SCALE * step
-    for key in BUILT:
-        draw = DOGS[key]
-        run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
+    run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
+    for key, draw in DOGS.items():
         yield key, [("walk", [zoomed(d, draw, **q) for q in road.CORGI_WALK], 100),
                     ("idle", [zoomed(d, draw, **q) for q in road.CORGI_IDLE], 300),
                     ("run", [zoomed(d, side_dog, SIDE[key], **q) for q in run], 100)]
+    for key in BUILT:
         top, legs, shoes = OWNERS[key]
         yield f"{key}-owner", [("walk", [dressed(p, top, legs, shoes, **q) for q in road.PERSON_WALK],
                                 road.PERSON_WALK_MS),

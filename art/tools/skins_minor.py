@@ -1,37 +1,24 @@
 #!/usr/bin/env python3
-"""Draw the zone skins of the minor obstacles: each zone's own look for a minor
-obstacle kind, with the base kind's size, footprint, anchor, idle tag and depth
-variants (obstacles.py draws the base kinds). Like the base kinds they are
-billboards from a low camera: a front elevation, squat, with at most a sliver of
-top surface, and no people, so they read as something to bump rather than a
-pickup or an encounter.
+"""Draw the scooter, the scooter minor obstacle, and the tricycles, the kid-on-bike stand-in, with
+parked-car's size, footprint, anchor, idle tag and depth variants (obstacles.py draws the base
+kinds). Like the base kinds they are billboards from a low camera: a front elevation, squat, with
+at most a sliver of top surface.
 
-It builds the scooter alone, the one of these in play, as a moving road
-obstacle. The others are not drawn in play (the game draws only the base
-looks), so their exports stay as they are, unmaintained: they draw in pixels on
-a plain Grid at full size.
+It builds the scooter alone. The tricycles' export stays as it is, unmaintained: it draws in
+pixels on a plain Grid at full size.
 
-Minor 1x1, 40x40, 1 lane (as cone and bin):
-minor-sandwich-board  Main Street      an A-frame chalkboard with a cup and menu lines; a chalk star
-                                       twinkles
+1x3, 56x35, 1 lane by 3 rows of footprint, drawn at the footprint's near edge (as parked-car):
+minor-tricycles  a red tricycle from behind, a yellow one in the row behind it; the streamers
+                 flutter
+minor-scooter    48x72, a sky scooter from behind on its stand, laid out on 32x48 and drawn at
+                 road.SCALE as hazards.cyclist is; the indicators blink
 
-Minor 1x3, 56x35, 1 lane by 3 rows of footprint, drawn at the footprint's near
-edge (as parked-car):
-minor-tricycles       Willow Crescent  a red tricycle from behind, a yellow one in the row behind it;
-                                       the streamers flutter
-minor-log             Fairview Park    a fallen log end on, mossy, a toadstool at its foot; a sprout
-                                       on top sways
-minor-scooter         Main Street      48x72, a sky scooter from behind on its stand, laid out on 32x48 and
-                                       drawn at road.SCALE as hazards.cyclist is; the indicators blink
-
-The 1x3 skins also have parked-car's pull-out (4 frames, 100ms), drawn pulling
-right: the scooter as the car (tread lines climb the tyre, the right indicator
-blinks), the tricycles' hub pips and the log's face crack turning clockwise. The
-scooter also has ride (4 frames, 100ms): ridden down its lane at the pack,
-facing the player as hazards.cyclist does, a rider in an open white helmet with
-a sky stripe and a purple jacket on it behind the leg shield and headlight, the
-tread falling down the tyre 1px a frame and the scooter and rider dipping 1px
-onto it on frames 1 and 2.
+Both also have parked-car's pull-out (4 frames, 100ms), drawn pulling right: the scooter as the
+car (tread lines climb the tyre, the right indicator blinks) and the tricycles' hub pips turning
+clockwise. The scooter also has ride (4 frames, 100ms): ridden down its lane at the pack, facing
+the player as hazards.cyclist does, a rider in an open white helmet with a sky stripe and a purple
+jacket on it behind the leg shield and headlight, the tread falling down the tyre 1px a frame and
+the scooter and rider dipping 1px onto it on frames 1 and 2.
 
 Every sprite has one looping idle, frame 0 the rest pose. Each drawing function
 takes the idle frame's argument and u, one pixel at the drawn size in full-size
@@ -40,7 +27,7 @@ every depth variant. sprites() yields each full size, then each at every depth
 step (minis.STEPS) drawn on a minis.Mini with its own outline.
 
 Usage:
-  skins_minor.py preview OUT.png   every frame on the four zone road colours
+  skins_minor.py preview OUT.png   every frame on the zone road colours
   skins_minor.py build             write art/skins_minor/*.aseprite and export to
                                    public/art/sprites/
 
@@ -53,15 +40,15 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, small  # noqa: E402
-from obstacles import PULL_OUT, SIZE, lit, treads  # noqa: E402
+from obstacles import PULL_OUT, lit, treads  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
 from road import SCALE, face_disc, face_front  # noqa: E402
 
 # The parked car's frame: 1 lane by 3 rows of footprint, drawn at its near edge.
 CAR_W, CAR_H = 56, 35
-# The road colours of the zones these skins belong to: Willow Crescent, Fairview Park, Main Street and
-# Riverside Path.
-GROUNDS = ("8b9bb4", "e4a672", "f6757a", "ead4aa")
+# The zone roads, for the preview: Cabbagetown, High Park, the Distillery District, Kensington Market,
+# The Beaches and Yonge Street.
+GROUNDS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
 
 
 def frame(w, h):
@@ -69,41 +56,6 @@ def frame(w, h):
 
 
 # ---------- minor 1x1 ----------
-
-
-def sandwich_board(star=0, u=1):
-    """An A-frame chalkboard from the front: the back board's legs splay out behind; the face has a
-    coffee cup and menu lines in chalk. star swells the chalk star to a cross."""
-    g = frame(SIZE, SIZE)
-    # the back board's legs, splayed out behind
-    g.tri((7, 36), (10, 36), (16, 7), "plum")
-    g.tri((30, 36), (33, 36), (24, 7), "plum")
-    # the front board: a frame narrowing to the hinge at the top, on two feet
-    g.tri((10, 34), (30, 34), (14, 6), "dbrown")
-    g.tri((30, 34), (26, 6), (14, 6), "dbrown")
-    g.tri((10, 34), (12, 34), (15, 6), "brown")
-    g.rect(14, 6, 12, 1, "brown")
-    g.rect(11, 34, 3, 2, "dbrown")
-    g.rect(26, 34, 3, 2, "dbrown")
-    g.rect(16, 4, 8, 2, "brown")
-    # chalkboard face
-    g.tri((13, 32), (27, 32), (16, 8), "teal")
-    g.tri((27, 32), (24, 8), (16, 8), "teal")
-    # cup and steam
-    g.rect(16, 13, 6, 5, "white")
-    g.rect(22, 14, 2, 2, "white")
-    g.rect(17, 14, 4, 1, "lgrey")
-    g.rect(15, 18, 8, 1, "white")
-    g.p(18, 11, "white")
-    g.p(19, 10, "white")
-    # menu lines
-    for y, w, c in ((21, 9, "yellow"), (24, 7, "white"), (27, 9, "pink"), (30, 6, "white")):
-        g.rect(15, y, w, 1, c)
-    g.p(24, 10, "yellow")
-    if star:
-        g.rect(23, 10, 3, 1, "yellow")
-        g.rect(24, 9, 1, 3, "yellow")
-    return g
 
 
 # ---------- minor 1x3 ----------
@@ -152,38 +104,6 @@ def tricycles(flutter=0, u=1, roll=None):
     g.rect(24, 15, 5, 1, "slate")
     for x, c in ((11, "pink"), (13, "cyan"), (42, "cyan"), (44, "pink")):
         g.rect(x + (flutter * u if x < 28 else -flutter * u), 17, 1, 5, c)
-    return lit(g)
-
-
-def log(sway=0, u=1, roll=None):
-    """A fallen log end on: bark round a pale cut face with growth rings, moss on top, a toadstool at its
-    foot. A sprout on top sways 1px with sway. roll (0 to 3) is a pull-out frame, the log rolling right:
-    the crack in its cut face turns a quarter a frame, clockwise."""
-    g = frame(CAR_W, CAR_H)
-    # twig stubs either side
-    g.rect(3, 15, 6, 3, "dbrown")
-    g.rect(47, 22, 6, 3, "dbrown")
-    g.ell(28, 20, 22, 14, "dbrown")
-    g.ell(28, 20, 22, 14, "dbrown", "plum")
-    g.ell(28, 20, 18, 11, "skin1")
-    g.ell(28, 20, 14, 8.5, "tan")
-    g.ell(28, 20, 11, 6.5, "skin1")
-    g.ell(28, 20, 7, 4, "tan")
-    g.ell(28, 20, 3.5, 2, "ochre")
-    g.rect(*((28, 11, 1, 5), (36, 20, 6, 1), (28, 25, 1, 5), (14, 20, 6, 1))[roll or 0], "ochre")
-    # moss along the top
-    g.ell(20, 7, 8, 2.5, "green", None, None)
-    g.ell(33, 6.5, 7, 2, "dgreen")
-    g.ell(32, 6, 5, 1.5, "green")
-    # sprout
-    g.rect(26, 2, 1, 4, "dgreen")
-    g.rect(24 + sway * u, 1, 2, 2, "green")
-    g.rect(27 + sway * u, 2, 2, 1, "green")
-    # toadstool
-    g.rect(45, 29, 2, 5, "cream")
-    g.ell(46, 28.5, 4, 2.5, "red")
-    g.p(44, 28, "white")
-    g.p(47, 27, "white")
     return lit(g)
 
 
@@ -307,21 +227,15 @@ def scooter_riding(roll, u=1):
     return lit(g)
 
 
-# Each sprite: (key, drawing, idle frame arguments, ms per frame, base kind, zone). Most hold the rest
+# Each sprite: (key, drawing, idle frame arguments, ms per frame, base kind). The tricycles hold the rest
 # pose for two frames so the motion comes as a short event rather than a constant flicker.
 SKINS = (
-    ("minor-sandwich-board", sandwich_board, (0, 0, 1, 0), 400, "cone", "sniff-street-shops"),
-    ("minor-tricycles", tricycles, (0, 0, 1, 0), 400, "parked-car", "snooze-crescent"),
-    ("minor-log", log, (0, 0, 1, 0), 450, "parked-car", "bark-park"),
-    ("minor-scooter", scooter, (False, True), 500, "parked-car", "sniff-street-shops"),
+    ("minor-tricycles", tricycles, (0, 0, 1, 0), 400, "parked-car"),
+    ("minor-scooter", scooter, (False, True), 500, "parked-car"),
 )
 # The motion tags after a skin's idle: key to [(tag, drawing, frame arguments, ms per frame)].
-MOVES = {"minor-log": [("pull-out", lambda roll, u=1: log(0, u, roll), *PULL_OUT)],
-         "minor-scooter": [("pull-out", scooter_pulling, *PULL_OUT), ("ride", scooter_riding, range(4), SCOOTER_RIDE_MS)],
+MOVES = {"minor-scooter": [("pull-out", scooter_pulling, *PULL_OUT), ("ride", scooter_riding, range(4), SCOOTER_RIDE_MS)],
          "minor-tricycles": [("pull-out", lambda roll, u=1: tricycles(0, u, roll), *PULL_OUT)]}
-# The zone road colour each skin is checked on.
-ROAD = {"snooze-crescent": "8b9bb4", "bark-park": "e4a672", "sniff-street-shops": "f6757a",
-        "paws-promenade": "ead4aa"}
 
 
 def sprites():
@@ -329,7 +243,7 @@ def sprites():
     on a minis.Mini at road.SCALE x the step: idle (2 frames, 500ms), pull-out (4 frames, 100ms) and ride (4
     frames, SCOOTER_RIDE_MS). The other skins are not in play, so their exports stay as they are."""
     this = sys.modules[__name__]
-    key, draw, args, ms, _, _ = next(skin for skin in SKINS if skin[0] == "minor-scooter")
+    key, draw, args, ms, _ = next(skin for skin in SKINS if skin[0] == "minor-scooter")
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         s = SCALE * step
         yield f"{key}{suffix}", [(tag, [small(this, s, d, a, 1 / s).outlined() for a in fargs], fms)

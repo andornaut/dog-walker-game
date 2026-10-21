@@ -224,7 +224,7 @@ def koda_road(q):
     return g
 
 
-# Koda's grey coat lit where its silhouette faces up or left, so the dark head and ears hold on Elm Avenue.
+# Koda's grey coat lit where its silhouette faces up or left, so the dark head and ears hold on the dslate road.
 KODA_RIM = {"slate": "grey", "dslate": "grey"}
 
 
@@ -476,7 +476,7 @@ STRIPE = ("white", "lgrey")
 
 
 def pierre_edge(c):
-    """Pierre's outline: grey round the black coat, which has no fill that holds against Elm Avenue's road,
+    """Pierre's outline: grey round the black coat, which has no fill that holds against the dslate road,
     and the road outline round everything else."""
     return K["grey"] if c in {K[n] for n in CURL + SHAVED} else road_edge(c)
 

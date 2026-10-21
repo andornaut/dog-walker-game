@@ -10,21 +10,21 @@ stands), and works as a header on any other screen.
 screen-<name>: 360x560 backgrounds in Endesga 32, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
-- screen-home: morning on Elm Avenue, in Maplewood. The bar strip, then the gate
+- screen-home: morning on a suburban street. The bar strip, then the gate
   scene (y 40 to 196: street, curb, sidewalk, fence with the open gate, front
   path, yard sign), then the porch deck from y 198 under the walker, dog and
   gear steps and Start walk. The street sign's board (300,72 54x11, a 52x9
   forest face) sits at the right edge, clear of the walker's speech bubble;
-  the game prints "Elm Avenue" on it in font-body, white, centred at 327,75 (48px
+  the game prints homeText.gateSign on it in font-body, white, centred at 327,75 (48px
   wide in capitals). The yard's right lot is left for ui-pet-shop.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
-  Elm Avenue's houses at night (backdrop-woof-way's band rows 106 to 133, a
+  the street's houses at night (backdrops.stats_street's band rows 106 to 133, a
   ramp step darker, the windows lit), and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
-- screen-end: sunset on The Long Way Home. Between the logo (116,40) and the
+- screen-end: a street at sunset. Between the logo (116,40) and the
   summary panel (24,112 to 336,412), the front of the house the pack comes
   home to: its gable peeks over the logo, the front door (171,73 18x23) opens
   onto a step (164,96 32x4), and a flagstone path (168,100 24x12) runs down
@@ -32,8 +32,8 @@ reads on them.
   room either side, feet on y 110. The zone's banded sunset fills the sky
   twice: behind the house down to its lawn, under the striped sun at 300,44,
   and behind the panel down to the far rooftops (y 450). Then the zone's
-  houses with lit windows (from y 370), the yards, the sidewalk and the
-  brick road under the button (48,512 264x44). The houses, trees and fences
+  houses with lit windows (from y 370), the yards, the sidewalk and
+  Kensington Market's brick road under the button (48,512 264x44). The houses, trees and fences
   stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
   margins show only sky, lawn and sidewalk.
 - screen-loading: a Toronto street at night, shown while the game loads, seen
@@ -281,7 +281,7 @@ def home():
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
-    # Elm Avenue, Maplewood's street past the gate: asphalt, a dashed centre line, a manhole and a storm drain
+    # the street past the gate: asphalt, a dashed centre line, a manhole and a storm drain
     cv.fill(0, 40, W, 52, "dslate")
     for _ in range(260):
         cv.fill(int(r() * W), 40 + int(r() * 52), 1, 1, "slate" if r() < 0.6 else "navy")
@@ -570,7 +570,7 @@ STATS_VIEW_TOP = bd.BASE - 25
 
 
 def night(img, top=20, horizon=46):
-    """Elm Avenue after dark: the sky turns to NIGHT_SKY's bands from row top down to horizon, with stars
+    """A street after dark: the sky turns to NIGHT_SKY's bands from row top down to horizon, with stars
     in the top band, everything else a ramp step darker, windows lit."""
     px = img.load()
     w, h = img.size
@@ -618,10 +618,10 @@ def stats():
     cv.fill(0, 548, W, 1, "brown")
     cv.fill(0, 549, W, 10, "plum")
     cv.fill(0, 559, W, 1, "ink")
-    # a low window onto Elm Avenue at night, between the photo and the leash hooks, above the tabs: the
+    # a low window onto the street at night, between the photo and the leash hooks, above the tabs: the
     # houses across the street from STATS_VIEW_TOP, their windows lit, down past the far side's ground row
     wx, wy, ww, wh = 140, 16, 100, 28
-    view = night(bd.woof_way().img).crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh))
+    view = night(bd.stats_street().img).crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh))
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
     cv.fill(wx - 5, wy - 5, ww + 10, wh + 10, "tan")
     cv.fill(wx - 5, wy - 5, ww + 10, 1, "cream")
@@ -679,16 +679,16 @@ def stats():
 
 # ---------- screen-end ----------
 
-END_STREET = 370  # top of The Long Way Home strip on screen-end
+END_STREET = 370  # top of the street strip on screen-end
 
 
 def end():
     cv = sn.Canvas(W, H)
-    # The Long Way Home's banded sunset, twice: behind the house down to its lawn, with the striped sun low
+    # The banded sunset, twice: behind the house down to its lawn, with the striped sun low
     # in the west, and behind the panel down to the far rooftops of the street below
-    cv.fill(0, 0, W, 520, bd.LONG_WAY_SKY[-1])
-    bd.bands(cv, 0, 96, bd.LONG_WAY_SKY)
-    bd.bands(cv, 112, END_STREET + 80, bd.LONG_WAY_SKY)
+    cv.fill(0, 0, W, 520, bd.SUNSET_SKY[-1])
+    bd.bands(cv, 0, 96, bd.SUNSET_SKY)
+    bd.bands(cv, 112, END_STREET + 80, bd.SUNSET_SKY)
     bd.sun(cv, 300, 44, 22, "yellow")
     # two birds heading home
     for bx, by in ((84, 50), (100, 42)):
@@ -755,7 +755,7 @@ def end():
                 for dx in range(-w // 2, w // 2 + 1):
                     if dx * dx + dy * dy <= (w // 2) ** 2:
                         cv.fill(x + w // 2 + dx, top + dy, 1, 1, "amber")
-    # The Long Way Home, in the zone backdrop's palette: trees, houses with lit windows, yards and the sidewalk.
+    # The street below, in the sunset's palette: trees, houses with lit windows, yards and the sidewalk.
     # Everything standing is kept within x 8 to 352, so the badges panel never cuts it into slivers.
     strip = clear(W, 150)
     for cx, top in ((22, 44), (178, 40), (330, 46)):
@@ -777,8 +777,8 @@ def end():
         strip.fill(x, y, 3, 2, "orange")
         strip.fill(x + 1, y - 1, 1, 1, "rust")
     cv.paste(strip.img, 0, END_STREET)
-    # the brick road home, its top rows under the button
-    road = sn.TILES["homeStretch"]
+    # Kensington Market's brick road, its top rows under the button
+    road = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
     cv.img.paste(road, (0, END_STREET + 150))
     cv.img.paste(road, (280, END_STREET + 150))
     return cv
@@ -1237,7 +1237,7 @@ def pair_design(near=0, far=0, lift=None, bob=0, front=0, hind=0, dbob=0, wag=0,
 
 def pair(step):
     """PAIR_W x PAIR_H, one frame of the walk: pair_design at PAIR_SCALE, outlined, then the leash sagging 1px
-    wide from Casey's hand to Biscuit's collar, over the outline: plum, as on Willow Crescent's grey road, since
+    wide from Casey's hand to Biscuit's collar, over the outline: plum, as on Cabbagetown's grey road, since
     the night sidewalk is grey (4.84:1)."""
     q = PAIR_WALK[step]
     g = minis.small(sys.modules[__name__], PAIR_SCALE, pair_design, **q)
@@ -1290,7 +1290,7 @@ def ui(cv, key):
             panel(x, 10, 20, 20, "tan")
         for x in (8, 332):
             panel(x, 46, 20, 20, "tan")
-        sn.text_c(cv, "ELM AVENUE", 327, 75, "white")
+        sn.text_c(cv, "HIGH PARK", 327, 75, "white")
         panel(130, 46, 100, 34, "white")
         cv.paste(pet_shop().img, *PET_SHOP_AT)
         panel(194, 166, 18, 18)

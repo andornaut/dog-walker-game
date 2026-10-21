@@ -9,11 +9,12 @@ icon-perk-<perk>            a walker's perk, on walker tiles, the new walker cel
                             wave), kind-words (a pink speech bubble with a red heart), long-reach
                             (an open hand over a green arrow pointing both ways), treat-finder (a
                             magnifying glass over a treat)
-icon-zone-<zone>            snooze-crescent (a crescent moon over a roof), bark-park (a tree),
-                            woof-way (a house), sniff-street-shops (a shopfront),
-                            paws-promenade (a railing over a wave), the-long-way-home (a
-                            sunset over a path); each inside a 1px ring for its outline, which
-                            holds 3:1 on cream and tan as the need icons' does
+icon-zone-<zone>            cabbagetown (a bay-and-gable house), high-park (a pine and a cherry
+                            in blossom), distillery-district (a brick warehouse),
+                            kensington-market (a painted house turned shop), the-beaches (the
+                            lifeguard station), yonge-street (the CN Tower); each inside a 1px
+                            ring for its outline, which holds 3:1 on cream and tan as the need
+                            icons' does
 icon-muddy, icon-soaked     dog statuses beside icon-stinky (ui.py), on cream: a muddy paw
                             print; water drops
 icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
@@ -155,90 +156,6 @@ class Zone(Grid):
     def p(self, x, y, c):
         if 1 <= int(x) <= 14 and 1 <= int(y) <= 14:
             super().p(x, y, c)
-
-
-def woof_way():
-    g = Zone()
-    g.tri((0.5, 7.5), (8, 1), (15.5, 7.5), "red")
-    g.rect(1, 7, 14, 1, "dred")
-    g.rect(2, 8, 12, 7, "cream")
-    g.rect(13, 8, 1, 7, "tan")
-    g.rect(4, 10, 3, 5, "sky")
-    g.p(6, 12, "amber")
-    g.rect(9, 9, 3, 3, "cyan")
-    g.rect(9, 9, 3, 1, "white")
-    return g
-
-
-def bark_park():
-    g = Zone()
-    g.rect(7, 9, 2, 5, "dbrown")
-    g.ell(8, 6.5, 6.5, 5.5, "green", "dgreen")
-    g.p(4, 4, "yellow")
-    g.p(5, 3, "yellow")
-    g.p(5, 7, "dgreen")
-    g.p(10, 4, "dgreen")
-    g.rect(1, 13, 14, 2, "dgreen")
-    g.rect(1, 13, 14, 1, "green")
-    return g
-
-
-def sniff_street_shops():
-    g = Zone()
-    g.rect(1, 2, 14, 13, "rust")
-    g.rect(14, 2, 1, 13, "dbrown")
-    for x in range(1, 15, 4):
-        g.rect(x, 4, 2, 3, "red")
-        g.rect(x + 2, 4, 2, 3, "white")
-    g.rect(1, 7, 14, 1, "dred")
-    g.rect(2, 9, 7, 5, "cyan")
-    g.p(3, 10, "white")
-    g.rect(10, 9, 3, 6, "dbrown")
-    g.p(12, 12, "amber")
-    g.rect(1, 2, 14, 1, "ochre")
-    return g
-
-
-def the_long_way_home():
-    g = Zone()
-    g.ell(8, 9, 5, 5, "amber", "orange", "yellow")
-    for x, y in ((8, 1), (2, 5), (14, 5), (1, 9), (14, 9)):
-        g.p(x, y, "amber")
-    g.ell(8, 16, 9, 6, "green", "dgreen")
-    g.tri((7.5, 10), (8.5, 10), (12, 16), "tan")
-    g.tri((7.5, 10), (4, 16), (12, 16), "tan")
-    return g
-
-
-def snooze_crescent():
-    g = Zone()
-    g.ell(11, 5, 4.5, 4.5, "yellow")
-    g.ell(13.5, 3.5, 3.6, 3.6, None)
-    g.p(2, 2, "white")
-    g.p(14, 9, "white")
-    g.tri((0.5, 11.5), (6, 5.5), (11.5, 11.5), "purple")
-    g.rect(1, 11, 10, 1, "plum")
-    g.rect(2, 12, 8, 3, "lgrey")
-    g.rect(9, 12, 1, 3, "grey")
-    g.rect(4, 12, 3, 2, "amber")
-    g.p(4, 12, "yellow")
-    return g
-
-
-def paws_promenade():
-    g = Zone()
-    g.rect(0, 1, 16, 2, "ochre")
-    g.rect(0, 1, 16, 1, "tan")
-    g.rect(0, 5, 16, 1, "ochre")
-    for x in (2, 12):
-        g.rect(x, 3, 2, 5, "brown")
-    g.rect(0, 7, 16, 2, "brown")
-    g.rect(0, 7, 16, 1, "tan")
-    g.rect(0, 10, 16, 6, "sky")
-    bitmap(g, 0, 10, ["..cc......cc....", ".c..c....c..c...", "c....cccc....ccc"], {"c": "cyan"})
-    g.rect(0, 14, 16, 1, "blue")
-    g.p(6, 13, "white")
-    return g
 
 
 def cabbagetown():
@@ -921,12 +838,6 @@ IMAGES = {
     "icon-perk-kind-words": kind_words,
     "icon-perk-long-reach": long_reach,
     "icon-perk-treat-finder": treat_finder,
-    "icon-zone-snooze-crescent": snooze_crescent,
-    "icon-zone-bark-park": bark_park,
-    "icon-zone-woof-way": woof_way,
-    "icon-zone-sniff-street-shops": sniff_street_shops,
-    "icon-zone-paws-promenade": paws_promenade,
-    "icon-zone-the-long-way-home": the_long_way_home,
     "icon-zone-cabbagetown": cabbagetown,
     "icon-zone-high-park": high_park,
     "icon-zone-distillery-district": distillery_district,

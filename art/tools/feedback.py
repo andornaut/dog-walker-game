@@ -5,8 +5,8 @@ that pops and flies up, and a small dog's dodge.
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
-ink holds on the light roads and the cream doghouse and the white on Elm Avenue
-and the dimmed road. The dodge's dust and lines take a plum rim.
+ink holds on the light roads and the cream doghouse and the white on the dslate
+road and the dimmed road. The dodge's dust and lines take a plum rim.
 
 fx-heart-loss  32x32  pop (6 frames: 50, 50, 90, 90, 90, 450ms; 820ms)  a small whole heart
                       pops in on a white star, then the big heart (17x15 in its rims, 21x19)
@@ -55,8 +55,8 @@ from hits import layer, piece  # noqa: E402
 from needs import BROKEN, BROKEN_CRACK  # noqa: E402
 from pixel import DARKER, Grid, main  # noqa: E402
 
-# The six road colours (Elm Avenue, Fairview Park, Main Street, The Long Way Home, Willow Crescent,
-# Riverside Path), then each one ramp step darker: the road dimmed under a card.
+# The preview roads (dslate, tan, lgrey, skin2, grey and cream), then each one ramp step darker: the road
+# dimmed under a card.
 ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 GROUNDS = ROADS + tuple(DARKER[c] for c in ROADS)
 

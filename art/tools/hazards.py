@@ -27,7 +27,7 @@ ui-warning-wander   16x16   a bold yellow "?", ink outline, over a wanderer befo
 The side views face right; the game mirrors squirrel-dash, loose-dog and
 ui-warning-arrow for a crossing to the left, and the coyote for a step to the
 left. Every road sprite takes the road outline rule (pixel.road_edge), so its
-silhouette holds 3:1 on the three light roads and its fill carries Elm Avenue;
+silhouette holds 3:1 on the three light roads and its fill carries the dslate road;
 the coyote also takes road.LIT's rim. The warning cues are outlined in ink.
 
 The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn

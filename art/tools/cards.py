@@ -242,49 +242,10 @@ def skunk_ignore():
 # Chase, Snatch and Social take the zone's ground and the road sprite in the base kind's place, so
 # skin_cards_animals.py draws each encounter skin's cards from these.
 
-def squirrel_hold(zone="park", key="squirrel"):
-    a = Art()
-    a.ground(zone)
-    a.put(key, "idle", 60, 37)
-    c = a.put("dog-koda", "pull", 30, 54)
-    # held back: the leash runs taut out of frame, behind the lunge
-    a.lead(30, c, 14)
-    return a
-
-
-def squirrel_chase(zone="park", key="squirrel"):
-    a = Art()
-    a.ground(zone)
-    a.put(key, "run", 58, 37, 1)
-    a.put("dog-koda", "pull", 38, 56, 1)
-    a.coins([(0, 20), (8, 28), (0, 36)])
-    a.sparkle(26, 34, "yellow")
-    return a
-
 
 def small_puddle(f=0):
     """Cards show a 32x16 puddle; the road's is two lanes wide."""
     return to_image(road.puddle(f, 32, 16).outlined(False))
-
-
-def puddle_through():
-    a = Art()
-    a.ground("street")
-    a.paste(small_puddle(), 22, 30)
-    a.put("dog-duchess", "react", 38, 44, shadow=False)
-    a.drops([(26, 26), (30, 22), (48, 24), (52, 28), (44, 20)])
-    return a
-
-
-def puddle_towel():
-    a = Art()
-    a.ground("homeStretch")
-    a.put("dog-duchess", "walk", 37, 48)
-    a.fill(26, 26, 22, 9, "pink")
-    for x in range(26, 48, 4):
-        a.fill(x, 26, 2, 9, "white")
-    a.fill(26, 34, 22, 1, "mauve")
-    return a
 
 
 def other_dog_sniff(zone="park", key="other-dog"):
@@ -326,55 +287,7 @@ def thief_let_go(zone="street", key="thief"):
     return a
 
 
-def thief_let_them_run(zone="street", key="thief"):
-    a = Art()
-    a.ground(zone)
-    a.put(key, "flee", 54, 59, 1)
-    a.put("dog-koda", "react", 22, 58)
-    return a
-
-
 # ---------- zone encounters ----------
-
-def broken_hearts(a, pts):
-    """Hearts broken in two down the middle, the right half dropped a pixel: a heart lost."""
-    for x, y in pts:
-        for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
-            for i, c in enumerate(r):
-                if c == "1":
-                    right = i > 3
-                    a.fill(x + i + right, y + j + right, 1, 1, "pink" if (i, j) == (1, 1) else "red")
-
-
-def honk(a, x, y):
-    """Three short lines fanning left from a beak at x, y."""
-    for dy, dx in ((-3, -1), (0, 0), (3, -1)):
-        a.fill(x - 4 + dx, y + dy, 3, 1, "white")
-
-
-def goose_back_off():
-    """Back off slowly: the goose honking at the dog as it backs away, the clock running."""
-    a = Art()
-    a.ground("homeStretch")
-    a.put("goose", "idle", 54, 40, 1, flip=True)
-    honk(a, 38, 15)
-    c = a.put("dog-koda", "pull", 22, 56, flip=True)
-    a.lead(22, c, 34)
-    clock(a, 10, 9)
-    return a
-
-
-def goose_honk_back():
-    """Honk back: the dog barking at the goose honking back, hearts lost (two for a chaser)."""
-    a = Art()
-    a.ground("homeStretch")
-    a.put("goose", "idle", 56, 38, 1, flip=True)
-    honk(a, 40, 13)
-    c = a.put("dog-koda", "react", 24, 57)
-    a.lead(24, c, 20)
-    a.paste(sn.frame("fx-bark", "pop", 1), 22, 2)
-    broken_hearts(a, [(2, 4), (10, 10)])
-    return a
 
 
 # ---------- lucky encounters ----------
@@ -398,35 +311,6 @@ def neighbour_take():
 
 
 # ---------- forced stops ----------
-
-def clock(a, x, y):
-    for dx in range(-4, 5):
-        for dy in range(-4, 5):
-            d = dx * dx + dy * dy
-            if d <= 16:
-                a.fill(x + dx, y + dy, 1, 1, "white" if d < 12 else "plum")
-    a.fill(x, y - 3, 1, 4, "plum")
-    a.fill(x, y, 3, 1, "plum")
-
-
-def mail_hold():
-    a = Art()
-    a.ground("homeStretch")
-    a.put("mail-carrier", "walk", 56, 58)
-    c = a.put("dog-koda", "react", 26, 50)
-    a.lead(26, c, 14)
-    a.paste(sn.frame("fx-bark", "pop", 1), 36, 2)
-    return a
-
-
-def mail_wait():
-    a = Art()
-    a.ground("homeStretch")
-    a.put("mail-carrier", "walk", 56, 58, 2)
-    c = a.put("dog-koda", "idle", 26, 54)
-    a.lead(26, c, 24)
-    clock(a, 10, 10)
-    return a
 
 
 # ---------- upgrades and the Skip option ----------
@@ -639,14 +523,6 @@ def flecked(base, fleck, n=23, second=None):
     return paint
 
 
-def leafy(paint, rate=0.06):
-    """paint, strewn with fallen leaves in orange, rust and ochre."""
-    def leaves(px, py):
-        n = bd.noise(px + 7, py * 3)
-        return ("orange", "rust", "ochre")[int(n * 300) % 3] if n < rate else paint(px, py)
-    return leaves
-
-
 def boards(px, py):
     """The promenade's boards across the cross street, a seam every 5 columns."""
     return "tan" if px % 5 == 0 else flecked("cream", "tan", 27)(px, py)
@@ -746,162 +622,6 @@ class ZoneView(Art):
             s = SPREAD * (py + 0.5 - HORIZON) / bd.ROAD
             for x in roads.DIVIDERS:
                 self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, self.lane)
-
-
-def woof_way_view():
-    a = ZoneView("woof-way", flecked("dslate", "slate", 29, "navy"), tufted(), "lgrey", (3, 6))
-    a.sky("cyan", "sky")
-    bd.cloud(a, 1, 7, 18, 3, 0)
-    bd.cloud(a, 54, 5, 14, 2, 1)
-    # the house at the end of the street, its neighbours cut by the edges, a tree in each gap
-    for x in (14, 61):
-        bd.tree(a, x, 9, r=5, base=FAR_Y, girth=2)
-    for x, w, wall_c, roof, door, top in ((-21, 28, "pink", "purple", "white", 4),
-                                          (23, 30, "sky", "navy", "red", 3),
-                                          (69, 28, "cream", "dred", "sky", 4)):
-        bd.house(a, x, w, wall_c, roof, door, top=top, base=FAR_Y, roof_h=8, parts=MINI)
-    a.street()
-    bd.fence(a, FAR_Y - 3, 0, 32, h=4)
-    bd.fence(a, FAR_Y - 3, 46, AW, h=4)
-    return a
-
-
-def bark_park_view():
-    trail = flecked("tan", "brown", 13, "cream")
-    a = ZoneView("bark-park", trail, tufted(), "dbrown", (2, 5), curb=None, walk=None)
-    a.sky("cyan", "sky")
-    bd.cloud(a, 56, 4, 16, 3, 2)
-    a.treeline(15, ("dgreen", "green"), 0, 2, 5)
-    bd.tree(a, 3, 9, r=6, base=18, girth=2)
-    bd.tree(a, 72, 10, r=5, base=18, girth=2)
-    # the park gate at the end of the path: its sign on two lines between two posts
-    for x in (11, 62):
-        a.fill(x, 1, 2, FAR_Y - 1, "dbrown")
-    a.fill(13, 2, 49, 17, "dgreen")
-    a.fill(13, 2, 49, 1, "green")
-    a.fill(13, 18, 49, 1, "forest")
-    bd.word(a, "FAIRVIEW", AW / 2, 3, "yellow")
-    bd.word(a, "PARK", AW / 2, 10, "yellow")
-    a.street()
-    # the path on through the gate from under its sign, widening to the cross trail
-    for py in range(19, CROSS_Y):
-        half = 7 + (py - 13) // 2
-        for px in range(round(AW / 2) - half, round(AW / 2) + half):
-            a.fill(px, py, 1, 1, trail(px, py))
-    return a
-
-
-def shops_view():
-    paving = flecked("cream", "tan", 29)
-    a = ZoneView("sniff-street-shops", flecked("pink", "skin1", 19), paving, "white", (3, 6), curb="white",
-                 walk="cream", lawn=paving, walk_fleck="tan")
-    # the backdrop's sunburst of sky and cyan rays, from the end of the street
-    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "sky", "cyan", FAR_Y, w=AW)
-    # three of the backdrop's colour-blocked shopfronts, the toy shop at the end of the street:
-    # a sign board, a striped awning, the shop window and the door, inside a plum line
-    for (x, w, top), (wall_c, awn, sign, board, letters) in zip(
-            ((-36, 44, 4), (11, 54, 2), (68, 40, 4)),
-            (("sky", "amber", "PETS", "navy", "yellow"), ("yellow", "red", "TOYS", "blue", "white"),
-             ("green", "pink", "ICE", "forest", "white"))):
-        a.fill(x, top, w, FAR_Y - top, wall_c)
-        a.fill(x + w - 2, top, 2, FAR_Y - top, bd.dk(wall_c))
-        bd.outline_box(a, x, top, w, FAR_Y - top + 1, "plum")
-        a.fill(x + 2, 5, w - 4, 8, board)
-        bd.word(a, sign, x + w / 2, 5, letters)
-        for i in range(0, w - 4, 6):
-            a.fill(x + 2 + i, 13, 3, 2, awn)
-            a.fill(x + 5 + i, 13, 3, 2, "white")
-        a.fill(x + 2, 15, w - 4, 1, bd.dk(awn))
-        a.fill(x + 4, 16, w - 20, 5, "plum")
-        a.fill(x + 5, 17, w - 22, 4, "cyan")
-        a.fill(x + 6, 18, 3, 1, "white")
-        a.fill(x + w - 13, 16, 7, 5, "plum")
-        a.fill(x + w - 12, 17, 5, 4, "dbrown")
-    a.street()
-    for x0, x1 in ((0, 18), (57, 75)):
-        bd.bunting(a, x0, x1, 2, 3, ("red", "yellow", "sky", "pink"))
-    return a
-
-
-def long_way_home_view():
-    lawn = leafy(tufted())
-    a = ZoneView("the-long-way-home", flecked("skin2", "skin1", 31), lawn, "white", (4, 8), edge="plum", lawn=lawn)
-    # the backdrop's banded sunset and its striped sun, setting at the end of the street behind
-    # the trees past the back yards
-    bd.bands(a, 0, 17, bd.LONG_WAY_SKY, w=AW)
-    bd.sun(a, 37, 15, 11, "yellow", low=14)
-    a.treeline(17, ("rust", "orange"), 4, 1, 4)
-    bd.tree(a, 23, 11, "rust", "dbrown", r=4, base=FAR_Y, girth=2)
-    # porch houses either side of the sunset
-    for x, w, wall_c, roof, door in ((-12, 28, "white", "dred", "dgreen"), (59, 28, "skin1", "navy", "red")):
-        bd.house(a, x, w, wall_c, roof, door, top=3, base=FAR_Y, roof_h=8, parts=MINI)
-        a.fill(x + 2, FAR_Y - 7, w - 4, 1, "brown")
-        a.fill(x + 3, FAR_Y - 6, 1, 6, "brown")
-        a.fill(x + w - 4, FAR_Y - 6, 1, 6, "brown")
-    a.street()
-    bd.fence(a, FAR_Y - 3, 26, 52, h=4)
-    return a
-
-
-def snooze_crescent_view():
-    a = ZoneView("snooze-crescent", flecked("grey", "slate", 23), tufted(), "white", (2, 6))
-    # the backdrop's banded dusk sky, a crescent moon and the first stars
-    bd.bands(a, 0, FAR_Y, bd.SNOOZE_SKY, w=AW)
-    for dy in range(-4, 5):
-        for dx in range(-4, 5):
-            if dx * dx + dy * dy <= 16 and (dx + 2) ** 2 + (dy - 1) ** 2 > 10:
-                a.fill(64 + dx, 5 + dy, 1, 1, "cream")
-    for x, y in ((6, 2), (20, 5), (33, 1), (48, 3), (56, 8), (72, 1)):
-        a.fill(x, y, 1, 1, "white")
-    # quiet houses, curtains drawn, dark trees between them
-    for x in (14, 61):
-        bd.tree(a, x, 11, "dgreen", "forest", r=5, base=FAR_Y, girth=2)
-    for x, w, wall_c, roof, door, curtain, top in ((-21, 28, "lgrey", "purple", "navy", "pink", 6),
-                                                   (23, 30, "cream", "navy", "dred", "tan", 5),
-                                                   (69, 28, "sky", "dslate", "white", "pink", 6)):
-        bd.house(a, x, w, wall_c, roof, door, top=top, base=FAR_Y, roof_h=8, parts=MINI, curtains=curtain)
-    a.street()
-    bd.fence(a, FAR_Y - 3, 0, 32, h=4)
-    bd.fence(a, FAR_Y - 3, 46, AW, h=4)
-    bd.fence_cat(a, 50, FAR_Y - 3, "orange", "amber")
-    return a
-
-
-def paws_promenade_view():
-    a = ZoneView("paws-promenade", boards, flecked("lgrey", "grey", 29), "dbrown", (4, 9), curb=None)
-    a.sky("cyan", "sky")
-    bd.cloud(a, 40, 4, 20, 3, 4)
-    # the far bank's trees and the river, with ducks and a rowboat
-    for cx, top, r in ((6, 6, 5), (30, 5, 6), (66, 7, 4)):
-        bd.tree(a, cx, top, "dgreen", "forest", r=r, base=10, girth=2)
-    a.fill(0, 9, AW, 1, "green")
-    a.fill(0, 10, AW, 1, "grey")
-    for py in range(11, 17):
-        for px in range(AW):
-            c = "blue" if py < 13 else "sky"
-            if bd.hashed(px // 3, py, 9) and py % 2 == 0:
-                c = "cyan" if py > 13 else "sky"
-            a.fill(px, py, 1, 1, "white" if bd.hashed(px, py, 41) else c)
-    for x in (10, 16):
-        a.fill(x, 14, 4, 1, "white")
-        a.fill(x + 2, 13, 2, 1, "white")
-        a.fill(x + 4, 13, 1, 1, "amber")
-    a.fill(46, 13, 12, 2, "brown")
-    a.fill(47, 15, 10, 1, "dbrown")
-    a.fill(51, 12, 2, 1, "red")
-    # the embankment wall, the railing over the water and the promenade's lamps
-    a.fill(0, 17, AW, 1, "lgrey")
-    a.fill(0, 18, AW, 3, "grey")
-    a.street()
-    for x in range(1, AW, 6):
-        a.fill(x, FAR_Y - 4, 1, 5, "lgrey")
-    a.fill(0, FAR_Y - 4, AW, 1, "lgrey")
-    a.fill(0, FAR_Y - 2, AW, 1, "lgrey")
-    for x in (24, 54):
-        a.fill(x, FAR_Y - 12, 1, 13, "dslate")
-        a.fill(x - 1, FAR_Y - 15, 3, 3, "navy")
-        a.fill(x, FAR_Y - 14, 1, 1, "yellow")
-    return a
 
 
 # ---------- the Toronto neighborhoods' path cards, after their backdrops ----------
@@ -1082,21 +802,12 @@ ILLUSTRATIONS = {
     "card-skunk-grooming": skunk_grooming,
     "card-skunk-rinse": skunk_rinse,
     "card-skunk-ignore": skunk_ignore,
-    "card-squirrel-hold": squirrel_hold,
-    "card-squirrel-chase": squirrel_chase,
-    "card-puddle-through": puddle_through,
-    "card-puddle-towel": puddle_towel,
     "card-other-dog-sniff": other_dog_sniff,
     "card-other-dog-pull-away": other_dog_pull_away,
     "card-thief-chase": thief_chase,
     "card-thief-let-go": thief_let_go,
-    "card-thief-let-them-run": thief_let_them_run,
-    "card-goose-back-off": goose_back_off,
-    "card-goose-honk-back": goose_honk_back,
     "card-lost-wallet-keep": wallet_keep,
     "card-biscuit-neighbour-take": neighbour_take,
-    "card-mail-carrier-hold": mail_hold,
-    "card-mail-carrier-wait": mail_wait,
     "card-belly-rubs": belly_rubs,
     "card-good-leash": good_leash,
     "card-big-tipper": big_tipper,
@@ -1104,12 +815,6 @@ ILLUSTRATIONS = {
     "card-raincoats": raincoats,
     "card-sweet-talker": sweet_talker,
     "card-skip": skip,
-    "card-zone-woof-way": woof_way_view,
-    "card-zone-bark-park": bark_park_view,
-    "card-zone-sniff-street-shops": shops_view,
-    "card-zone-the-long-way-home": long_way_home_view,
-    "card-zone-snooze-crescent": snooze_crescent_view,
-    "card-zone-paws-promenade": paws_promenade_view,
     "card-zone-cabbagetown": cabbagetown_view,
     "card-zone-high-park": high_park_view,
     "card-zone-distillery-district": distillery_view,
@@ -1161,7 +866,7 @@ def preview(out, scale=3):
     cols = 10
     rows = (len(keys) + cols - 1) // cols
     big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-keep"),
-           ("route", "card-zone-woof-way"), ("stop", "card-mail-carrier-wait"), ("upgrade", "card-belly-rubs")]
+           ("route", "card-zone-cabbagetown"), ("stop", "card-belly-rubs"), ("upgrade", "card-belly-rubs")]
     width = max((CW + 6) * cols, (LW + 6) * len(big))
     sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), sn.rgb("ink"))
     for i, key in enumerate(keys):

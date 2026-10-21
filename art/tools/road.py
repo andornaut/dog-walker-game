@@ -98,7 +98,7 @@ def face_disc(g, cx, cy, rx, ry, skin, shade, to=0.35):
 
 
 def rim(g, rims):
-    """Light a dark figure's silhouette so it holds on Elm Avenue: an edge pixel of a colour in rims takes
+    """Light a dark figure's silhouette so it holds on the dslate road: an edge pixel of a colour in rims takes
     rims[colour] = (lit, shade), lit where the edge faces up or left into the light and shade where it
     faces right or down. A shade of None leaves that side dark."""
     rims = {K[c]: v for c, v in rims.items()}
@@ -118,7 +118,7 @@ def rim(g, rims):
     return g
 
 
-# The lit rim for every road sprite that fails 3:1 on Elm Avenue, for rim(): navy, ink and dslate take grey
+# The lit rim for every road sprite that fails 3:1 on the dslate road, for rim(): navy, ink and dslate take grey
 # (slate opposite), slate lgrey, dark browns skin2, mid browns and ochre tan, greens green, blues cyan, and reds,
 # mauves and purples pink. minis.py lights its hand-drawn maps with it too.
 LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"), slate=("lgrey", None),
@@ -710,7 +710,7 @@ def skunk(sway=0, blink=False):
     shuts its eyes to ink lines. An ink line parts the head from the body and the body from the tail. The
     head is in front of the body: a white blaze runs up from a white muzzle between the ears, and the eyes
     are ink with a white glint. Front paws on the road. The road outline and a grey rim on the dark fur so it
-    holds on Elm Avenue."""
+    holds on the dslate road."""
     g = edged(Grid())
     s = sway
     # the tail: a plume up behind the right shoulder, a white crescent along its upper left
@@ -746,7 +746,7 @@ def skunk(sway=0, blink=False):
 # Toronto's black squirrel, for every squirrel drawing (squirrel, squirrel_run, hazards.squirrel_dash and
 # the icons): navy fur shaded ink and lit slate, a dslate streak down the tail, a dslate belly and paws held
 # at the chest, navy feet and a grey nose. LIT's rim puts grey on its top-left edges and slate on the rest,
-# so the dark fur and the tail's edge hold on Elm Avenue; the eyes keep their white glints.
+# so the dark fur and the tail's edge hold on the dslate road; the eyes keep their white glints.
 SQUIRREL_FUR = dict(fur="navy", shade="ink", lit="slate", streak="dslate", belly="dslate", paw="dslate",
                     foot="navy", nose="grey")
 
@@ -867,7 +867,7 @@ def skunk_cloud(step, s=1):
     """The stink haze under the skunk at depth step s (CLOUD_SIZE at 1), low and wide on the road: flat mauve
     lobes, a purple seam where one meets the next, with no dither, so it holds on the dark roads. The puffs
     swell in turn by a whole pixel; the base stays on the last row. The rim is two pixels at every size: plum
-    outside, which holds 3:1 on the light roads, and pink inside it, which holds on Elm Avenue. The seams and
+    outside, which holds 3:1 on the light roads, and pink inside it, which holds on the dslate road. The seams and
     the wisps' 1px wave are laid on the drawn grid, so they keep their pixels at every step. A puff near the frame's top or sides is
     trimmed so that, swollen, it still stops a pixel short of them. Mauve keeps it apart from the green
     hedges, and matches fx-hit-skunk and fx-status-stinky."""
@@ -1139,7 +1139,7 @@ WALLET_BILLS = ((2, 5, 3.5), (9, 5, 2.5), (5.5, 5, 1))
 def wallet(glint):
     """The lost wallet, a jackpot filling most of its frame, with the road outline: three green bills stick
     up out of it at staggered heights, each framed in forest with a dgreen seal, over a wide dark leather
-    wallet. Its leather takes a light rim so it holds on Elm Avenue: the flap's top edge catches the light in
+    wallet. Its leather takes a light rim so it holds on the dslate road: the flap's top edge catches the light in
     tan, the left edge skin2, and brown runs down the right and along the bottom. glint twinkles a white
     sparkle at its top right."""
     g = edged(Grid(16, 16))
@@ -1356,7 +1356,7 @@ def mail_top(g, b):
 
 def mail_carrier(**q):
     """The mail carrier facing the player, with a light rim on the dark skin, brim and trousers so they hold
-    on Elm Avenue, and the road outline for the light roads."""
+    on the dslate road, and the road outline for the light roads."""
     g = edged(person(mail_top, legs="navy", shoes="ink", **q))
     return rim(g, dict(dbrown=("skin2", "brown"), plum=("skin2", "brown"), navy=("grey", "slate"),
                        ink=("grey", "slate"), sky=("cyan", None), blue=("sky", None)))

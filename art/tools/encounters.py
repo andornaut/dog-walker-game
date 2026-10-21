@@ -47,8 +47,8 @@ from road import LIT  # noqa: E402
 BIG = road.SCALE
 TWO_LANES = (64 * 2 - 16) / BIG
 
-# Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Willow Crescent
-# and Riverside Path.
+# Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Cabbagetown's
+# grey and The Beaches' cream.
 GROUNDS = (*ROADS, "8b9bb4", "ead4aa")
 
 
