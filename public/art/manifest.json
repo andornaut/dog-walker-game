@@ -5251,6 +5251,11 @@
       "fnt": "fonts/font-body.fnt"
     },
     {
+      "key": "font-comic",
+      "png": "fonts/font-comic.png",
+      "fnt": "fonts/font-comic.fnt"
+    },
+    {
       "key": "font-display",
       "png": "fonts/font-display.png",
       "fnt": "fonts/font-display.fnt"

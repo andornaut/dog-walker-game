@@ -8,6 +8,7 @@
   capitals 5 rows tall drawn at 2x (10px caps), each in a 1px ink outline on a solid dred shadow 2px
   down and right. The colours are baked in: yellow letters in font-display, cream in
   font-display-cream, a red heart in both. Draw them untinted.
+- font-comic: the comic words' lettering from fx.py, for the word over a hit burst. Draw it untinted.
 
 font-body and font-title are SIL Open Font License fonts; the font files and licenses are in
 art/fonts/. Their glyphs are white on transparent so the game tints them. Printable ASCII, the
@@ -26,6 +27,13 @@ below for the comma's tail and the shadow. Letters sit 2px apart, which their ou
 pairs whose shapes leave room (LT, P., TY) kern 2px closer. Lower case is not in the font: set it
 in capitals.
 
+font-comic is the comic words' lettering from fx.py, for the word drawn over a hit burst: flat yellow
+capitals 7 rows tall with 2px stems in a 1px ink ring that fills the gaps between letters, on a solid
+dred shadow 2px down and right, colours baked in (draw untinted). A to Z, ! ? - and space. Its line is
+11px: the ring on rows 0 to 8, the fill on rows 1 to 7 (base 8), the shadow to row 10. Letters sit 1px
+apart, which their rings fill, with no kerning. A word is its letters' widths, plus 1 between each pair,
+plus 4.
+
 In-art signs (shop boards, the park gate, the lemonade stand) use the same letters and outline at
 1x, with a 1px shadow, through sign().
 
@@ -43,7 +51,8 @@ from xml.sax.saxutils import quoteattr
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K  # noqa: E402
+from fx import LETTERS, word, word_size  # noqa: E402
+from pixel import Grid, K  # noqa: E402
 
 FONTS = {
     "font-body": ("Tiny5", "art/fonts/tiny5/Tiny5.ttf", 8),
@@ -233,6 +242,36 @@ def display_glyphs(fill):
     return out
 
 
+# ---------- the comic lettering ----------
+
+# font-comic: fx.py's comic words as a font, for the words the game draws over a burst. Each glyph is
+# one letter as fx.word draws it alone: its ring from the image's column 0, the letter from column 1,
+# the dred shadow to the right and below. The advance is the letter's width plus 1, so the next glyph's
+# ring lands on the 1px gap and the two rings merge. Glyphs drawn left to right, each over the last,
+# give fx.word's pixels exactly: a glyph's shadow that reaches the next letter falls under that
+# letter's ring and fill.
+COMIC = "font-comic"
+COMIC_LINE = 11
+# The letters' fill runs from row 1 to row 7.
+COMIC_BASE = 8
+COMIC_SPACE = 4
+
+
+def comic_glyphs():
+    """font-comic's glyphs: (RGBA image, xoffset, yoffset, xadvance) by character."""
+    out = {" ": (None, 0, 0, COMIC_SPACE)}
+    for ch in LETTERS:
+        w, h = word_size(ch)
+        g = word(Grid(w, h), ch, w / 2, 0)
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        for y, row in enumerate(g.px):
+            for x, c in enumerate(row):
+                if c:
+                    im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
+        out[ch] = (im, 0, 0, len(LETTERS[ch][0]) + 1)
+    return out
+
+
 def kernings():
     return [(a, b, -DISPLAY_SCALE) for a in SIGN for b in SIGN if kerned(a, b)]
 
@@ -354,7 +393,8 @@ def build():
     for key, fill in DISPLAY.items():
         write_font(key, "Sign", 5 * DISPLAY_SCALE, LINE_HEIGHT, CAP_TOP + 5 * DISPLAY_SCALE,
                    display_glyphs(fill), kernings())
-    print("built", ", ".join([*FONTS, *DISPLAY]))
+    write_font(COMIC, "Comic", 7, COMIC_LINE, COMIC_BASE, comic_glyphs())
+    print("built", ", ".join([*FONTS, *DISPLAY, COMIC]))
 
 
 def preview(out, scale=3):
