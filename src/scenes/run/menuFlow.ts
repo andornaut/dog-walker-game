@@ -43,9 +43,12 @@ export class MenuFlow {
   private pauseOverlay: PauseOverlay | undefined;
   private readonly scene: Scene;
 
+  // A walk starts unheld, as held does. The scene's clock keeps its paused flag across a
+  // restart, where its tweens reset theirs, so the flag is reset here.
   constructor(scene: Scene, host: MenuFlowHost) {
     this.scene = scene;
     this.host = host;
+    scene.time.paused = false;
   }
 
   // The card open over the walk, if any.
