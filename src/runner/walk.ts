@@ -224,7 +224,7 @@ export function itemCategory(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): ItemCategory {
-  if (kind === "tip" || kind === "treat") {
+  if (isPickup(kind)) {
     return kind;
   }
   return isMinorObstacle(data, kind) ? "minor" : data.encounters[kind].kind;
@@ -235,7 +235,7 @@ export function footprintOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): Footprint {
-  if (kind === "tip" || kind === "treat") {
+  if (isPickup(kind)) {
     return SINGLE_CELL;
   }
   if (isMinorObstacle(data, kind)) {
@@ -245,11 +245,13 @@ export function footprintOf(
   return encounter.kind === "obstacle" ? encounter.shape : SINGLE_CELL;
 }
 
-// What the pack steers around: obstacles, minor or not.
+type ObstacleKind = EncounterId | MinorObstacleId;
+
+// What the pack steers around: obstacles, minor or not, which hit as they are drawn.
 export function blocksLane(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
-): boolean {
+): kind is ObstacleKind {
   const category = itemCategory(data, kind);
   return category === "minor" || category === "obstacle";
 }
@@ -433,7 +435,7 @@ function movementOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): MovingMovement | null {
-  if (!isObstacle(data, kind)) {
+  if (!blocksLane(data, kind)) {
     return null;
   }
   const entry = isMinorObstacle(data, kind) ? data.minorObstacles[kind] : data.encounters[kind];
@@ -658,17 +660,6 @@ export function steerWalk(
   return { ...walk, road: { ...walk.road, control } };
 }
 
-type ObstacleKind = EncounterId | MinorObstacleId;
-
-// Whether a kind is an obstacle, which hits as it is drawn.
-function isObstacle(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): kind is ObstacleKind {
-  const category = itemCategory(data, kind);
-  return category === "minor" || category === "obstacle";
-}
-
 const PLACED_PARTS = new WeakMap<object, Map<string, readonly PlacedPart[]>>();
 
 // The sprites an obstacle draws in the zone, standing or moving, with their silhouettes.
@@ -712,7 +703,7 @@ export function itemHeight(
   kind: WalkItemKind,
   moving: boolean,
 ): number {
-  if (!isObstacle(data, kind)) {
+  if (!blocksLane(data, kind)) {
     const category = itemCategory(data, kind) as Exclude<ItemCategory, "minor" | "obstacle">;
     return geometry.itemHeights[category];
   }
@@ -741,7 +732,7 @@ export function plannedCellInset(
 ): number {
   const kinds = [
     ...Object.keys(data.minorObstacles),
-    ...Object.keys(data.encounters).filter((kind) => isObstacle(data, kind as EncounterId)),
+    ...Object.keys(data.encounters).filter((kind) => blocksLane(data, kind as EncounterId)),
   ] as ObstacleKind[];
   const { length } = geometry.cell;
   const over = Math.max(
@@ -907,7 +898,7 @@ export function obstacleHitBox(
   zone: ZoneId,
   item: WalkItem,
 ): LanedBox {
-  if (!isObstacle(data, item.kind)) {
+  if (!blocksLane(data, item.kind)) {
     throw new Error(`${item.kind} is not an obstacle`);
   }
   const { cell, lens } = geometry;
@@ -1038,7 +1029,7 @@ export function stepWalk(
   const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
   // An obstacle hits a part of the pack; a lucky find, as a pickup does, touches its outline.
   const touching = (item: WalkItem) =>
-    isObstacle(data, item.kind)
+    blocksLane(data, item.kind)
       ? hitDog(pack, obstacleHitBox(data, geometry, zone, item))
       : pickupDog(pack, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
@@ -1237,10 +1228,7 @@ function collisionRules(data: WalkData, run: RunState): CollisionRules<WalkItem>
     graced: (item) => blocksLane(data, item.kind),
     invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
     startsInvulnerability: ({ kind }) =>
-      kind === "tip" ||
-      kind === "treat" ||
-      isMinorObstacle(data, kind) ||
-      opensFor(run, kind as EncounterId),
+      isPickup(kind) || isMinorObstacle(data, kind) || opensFor(run, kind as EncounterId),
   };
 }
 
