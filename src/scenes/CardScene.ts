@@ -185,6 +185,8 @@ export class CardScene extends Scene {
     const centerX = walkView.x + walkView.width / 2;
     const title = { font: "title", scale: 2 } as const;
     const headerStart = this.children.list.length;
+    // The title, subtitle and key numbers sit on a dark band over the dimmed road.
+    addNineSlice(this, "ui-strip-well", header.band);
     if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
       snapCentre(
         addDisplayText(this, centerX, header.titleTop, view.title, { color: PALETTE.white }),
@@ -194,8 +196,6 @@ export class CardScene extends Scene {
       this.centered(centerX + 1, header.titleTop + 1, view.title, PALETTE.ink, title);
       this.centered(centerX, header.titleTop, view.title, PALETTE.white, title);
     }
-    // The subtitle and key numbers sit on a dark band over the dimmed road.
-    addNineSlice(this, "ui-strip-well", header.band);
     this.centered(centerX, header.subtitleTop, this.subtitle(view), PALETTE.white);
     this.headerParts = this.children.list.slice(headerStart);
 

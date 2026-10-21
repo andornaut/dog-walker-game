@@ -29,29 +29,33 @@ describe("cardRowRects", () => {
 });
 
 describe("cardHeader", () => {
-  // Capitals are 5 rows at 1x and 10 at 2x, with the title's 1px shadow and the body font's
-  // 2-row descenders under them. The band's ink well runs from its second row to 6 rows above
-  // its bottom.
+  // Capitals are 5 rows at 1x, with the body font's 2-row descenders under them. The title's
+  // lettering is 10-row capitals at 2x; the fork's display font draws it, outline and shadow
+  // included, from a row above the capitals' top to 12 rows below it. The band's ink well runs
+  // from its second row to 6 rows above its bottom.
   const inkTop = (band: Rect) => band.y + 1;
   const inkBottom = (band: Rect) => bottom(band) - 6;
+  const titleInk = (titleTop: number) => ({ bottom: titleTop + 12, top: titleTop - 1 });
 
-  it("stacks the header over any count of cards, with and without key numbers", () => {
-    for (const [count, keys] of [1, 2, 3].flatMap((count) =>
-      [false, true].map((keys) => [count, keys] as const),
-    )) {
+  const HEADERS = [1, 2, 3].flatMap((count) => [false, true].map((keys) => ({ count, keys })));
+
+  it.each(HEADERS)(
+    "stacks the header over $count cards (key numbers $keys) on a band behind the title",
+    ({ count, keys }) => {
       const cards = cardRowRects(spec, count, area);
       const { band, keyTop, subtitleTop, titleTop } = cardHeader(keys, cards);
       const top = itemAt(cards, 0).y;
       expect(band.x).toBe(itemAt(cards, 0).x);
       expect(right(band)).toBe(right(itemAt(cards, count - 1)));
-      expect(titleTop + 10 + 1).toBeLessThan(band.y);
-      expect(subtitleTop).toBeGreaterThan(inkTop(band));
+      const title = titleInk(titleTop);
+      expect(title.top).toBeGreaterThanOrEqual(inkTop(band));
+      expect(title.bottom).toBeLessThan(subtitleTop);
       expect(bottom(band)).toBeLessThan(top);
       const lastRow = keys ? keyTop + 5 : subtitleTop + 5 + 2;
       expect(lastRow).toBeLessThanOrEqual(inkBottom(band) + 1);
       if (keys) {
         expect(keyTop).toBeGreaterThan(subtitleTop + 5 + 2);
       }
-    }
-  });
+    },
+  );
 });
