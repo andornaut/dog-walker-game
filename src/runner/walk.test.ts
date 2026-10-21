@@ -5,17 +5,21 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
+import { HOME_TEXT } from "../data/homeText";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { RUN_TEXT } from "../data/runText";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type {
+  DogId,
   Effect,
   EncounterId,
+  GearId,
   MinorObstacleId,
   Movement,
   ObstacleEncounterId,
+  Size,
   WalkerId,
   World,
   Zone,
@@ -114,6 +118,7 @@ const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
   encounters: ENCOUNTERS,
+  homeText: HOME_TEXT,
   minorObstacles: MINOR_OBSTACLES,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
@@ -862,28 +867,55 @@ describe("stepWalk", () => {
     }
   });
 
-  it("dodges a hit on a small dog only at the dodge chance", () => {
-    for (const [, draw, dodged] of [
-      ["dodges a hit on a small dog at the dodge chance", 0, true],
-      ["takes the hit on a small dog above the dodge chance", 0.99, false],
-    ] satisfies readonly [string, number, boolean][]) {
-      // The game's dodge chance, which the test tuning pins to 0.
-      const dodging = { ...data, tuning: { ...tuning, probability: TUNING.probability } };
-      const walk = walkWith(["duchess"], [atPack("cone")]);
-      const { bumps, walk: after } = stepWalk(dodging, geometry, () => draw, 0.01, walk);
-      expect(bumps.map((bump) => bump.dodged)).toEqual([dodged]);
-      expect(bumps[0]?.change === null).toBe(dodged);
-      expect(after.run.bumpsByZone).toEqual(dodged ? [] : [1]);
-      expect(after.road.hitStop === null).toBe(dodged);
-    }
-  });
+  // Each size's chance to dodge a plain hit, without and with the Dog whistle in the Pocket, at
+  // the game's chances, which the test tuning pins to 0: a small dog's own chance, plus the
+  // whistle's for the sizes it names.
+  const { probability } = TUNING;
+  const [whistle] = SHOP_GEAR.dogWhistle.effects;
+  const whistleSizes: readonly Size[] = whistle.sizes;
+  const dodgeCases = (["big", "medium", "small"] as const).flatMap((size) =>
+    ([null, "dogWhistle"] as const).map((gear: GearId | null) => ({
+      chance:
+        (size === "small" ? probability.smallDodgeChance : 0) +
+        (gear !== null && whistleSizes.includes(size) ? probability[whistle.chance] : 0),
+      gear,
+      size,
+    })),
+  );
 
-  it("never dodges a hit on a bigger dog", () => {
-    const walk = walkWith(["koda"], [atPack("cone")]);
-    expect(stepWalk(data, geometry, () => 0, 0.01, walk).bumps.map((bump) => bump.dodged)).toEqual([
-      false,
-    ]);
-  });
+  it.each(dodgeCases)(
+    "dodges a hit on a $size dog with gear $gear at $chance",
+    ({ chance, gear, size }) => {
+      const dodging = { ...data, tuning: { ...tuning, probability } };
+      const dog = (Object.keys(DOGS) as DogId[]).find((id) => DOGS[id].size === size) ?? "koda";
+      const walk: Walk = {
+        road: { ...startRoad(5), items: [atPack("cone")], nextItemId: 1 },
+        run: newRun(dodging, 3, { dogs: [dog], gear, walker: "casey" }),
+      };
+      // Each draw just under the chance, and at it; a dog with no chance draws nothing.
+      const stepAt = (draw: number) => {
+        let draws = 0;
+        const random = () => {
+          draws += 1;
+          return draw;
+        };
+        const stepped = stepWalk(dodging, geometry, random, 0.01, walk);
+        return { draws, stepped };
+      };
+      const under = stepAt(Math.max(0, chance - 1e-9));
+      const at = stepAt(chance);
+      const dodged = chance > 0;
+      expect(under.draws).toBe(dodged ? 1 : 0);
+      expect(under.stepped.bumps.map((bump) => [bump.dodged, bump.change === null])).toEqual([
+        [dodged, dodged],
+      ]);
+      expect(under.stepped.walk.run.bumpsByZone).toEqual(dodged ? [] : [1]);
+      expect(under.stepped.walk.road.hitStop === null).toBe(dodged);
+      // Only a small dog's dodge counts toward the dodges tally.
+      expect(under.stepped.walk.run.tallies.dodges ?? 0).toBe(dodged && size === "small" ? 1 : 0);
+      expect(at.stepped.bumps.map((bump) => bump.dodged)).toEqual([false]);
+    },
+  );
 
   it("counts only a plain hit as a bump in the zone, not a card obstacle or a lucky find", () => {
     const walk = walkWith(["koda"], [atPack("cone")]);

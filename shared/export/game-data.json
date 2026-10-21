@@ -774,6 +774,23 @@
   ],
   "gear": [
     {
+      "id": "dogWhistle",
+      "effects": [
+        {
+          "chance": "dogWhistleDodgeChance",
+          "kind": "dodge",
+          "sizes": [
+            "medium",
+            "big"
+          ]
+        }
+      ],
+      "name": "Dog whistle",
+      "price": "dogWhistle",
+      "short": "Big dogs dodge too",
+      "iconKey": "item-dog-whistle"
+    },
+    {
       "id": "fannyPack",
       "effects": [
         {
@@ -1292,6 +1309,7 @@
         "archie": 400,
         "dogSlot2": 1000,
         "dogSlot3": 2500,
+        "dogWhistle": 800,
         "duchess": 200,
         "fannyPack": 300,
         "hallPass": 700,
@@ -1333,6 +1351,7 @@
       "tapMaxDistance": 10
     },
     "probability": {
+      "dogWhistleDodgeChance": 0.125,
       "shyHopperShare": 0.5,
       "smallDodgeChance": 0.25
     },

@@ -54,6 +54,7 @@ export type MoneyKey = NumberKeys<LiveTuning["money"]>;
 export type MultiplierKey = NumberKeys<LiveTuning["multipliers"]>;
 export type SecondsKey = NumberKeys<LiveTuning["seconds"]>;
 export type PriceKey = keyof LiveTuning["money"]["prices"];
+export type ProbabilityKey = NumberKeys<LiveTuning["probability"]>;
 
 type Table<Key extends PropertyKey> = Readonly<Record<Key, number>>;
 type OpenGroup = Readonly<Record<string, number | Table<string>>>;
@@ -203,13 +204,27 @@ interface ImmuneEffect {
 
 export type ModifierEffect = Modifier & { readonly kind: "modifier" };
 
+// A plain hit that would land on a dog of one of sizes misses it at chance, costing nothing, as
+// a small dog's dodge does, for the rest of the walk. It adds to a small dog's own chance.
+export interface DodgeEffect {
+  readonly chance: ProbabilityKey;
+  readonly kind: "dodge";
+  readonly sizes: readonly [Size, ...Size[]];
+}
+
 // A free Skip on every obstacle card until it is taken, once per walk.
 interface SkipOptionEffect {
   readonly kind: "skipOption";
 }
 
 export type Effect =
-  DebuffEffect | HeartsEffect | ImmuneEffect | ModifierEffect | MoneyEffect | SkipOptionEffect;
+  | DebuffEffect
+  | DodgeEffect
+  | HeartsEffect
+  | ImmuneEffect
+  | ModifierEffect
+  | MoneyEffect
+  | SkipOptionEffect;
 
 export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
@@ -332,7 +347,8 @@ export type Encounter = {
 );
 
 // An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
-// bumpHearts modifiers such as Muddy's change it, and never money; a small dog may dodge it.
+// bumpHearts modifiers such as Muddy's change it, and never money; the dog it lands on may
+// dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
 // Each zone's weights set how often it appears there. One with a movement comes as a mover at
 // the zone's moverShare.
@@ -515,6 +531,9 @@ export interface HomeText {
     readonly walkerStatus: string;
     readonly walkerSubtitle: string;
   };
+  // A dodge effect's text, as a gear item's detail card shows it: the {sizes} of dogs it
+  // reaches, joined as a sentence lists them, and its chance as one in {dodgeIn}.
+  readonly dodgeEffect: string;
   readonly dogBought: string;
   readonly dogCantAfford: string;
   // A dog slot's name in the purchase line.
@@ -645,9 +664,9 @@ export interface RunText {
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
   };
   // The comic words drawn in font-comic (A to Z, ! ? - and space): bark in place of a dog's
-  // bark, dodge over a small dog that dodged a hit.
+  // bark, dodge over a dog that dodged a hit.
   readonly comicWords: { readonly bark: string; readonly dodge: string };
-  // Over a small dog that dodged a hit, with reduced motion or while fx-dodge is missing.
+  // Over a dog that dodged a hit, with reduced motion or while fx-dodge is missing.
   readonly dodge: string;
   // The walk's lines on the detail card a still press held on the walk HUD opens, which shows a
   // dog card and a gear or walker-perk icon as the home screen's Details do. debuffStatus: a

@@ -1591,19 +1591,19 @@
       },
       "pocket": {
         "box": {
-          "dx": 21,
+          "dx": 12,
           "dy": 3,
           "size": 34
         },
         "cells": {
           "cellHeight": 44,
-          "cellWidth": 77,
-          "columns": 4,
+          "cellWidth": 60,
+          "columns": 5,
           "gapX": 8,
           "gapY": 0
         },
         "icon": {
-          "dx": 22,
+          "dx": 13,
           "dy": 4
         },
         "lock": {
@@ -1890,26 +1890,32 @@
       "pocketRects": [
         {
           "height": 44,
-          "width": 77,
+          "width": 60,
           "x": 14,
           "y": 462
         },
         {
           "height": 44,
-          "width": 77,
-          "x": 99,
+          "width": 60,
+          "x": 82,
           "y": 462
         },
         {
           "height": 44,
-          "width": 77,
-          "x": 184,
+          "width": 60,
+          "x": 150,
           "y": 462
         },
         {
           "height": 44,
-          "width": 77,
-          "x": 269,
+          "width": 60,
+          "x": 218,
+          "y": 462
+        },
+        {
+          "height": 44,
+          "width": 60,
+          "x": 286,
           "y": 462
         }
       ],

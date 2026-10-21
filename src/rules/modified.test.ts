@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
+import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
@@ -51,6 +52,7 @@ const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
   encounters: ENCOUNTERS,
+  homeText: HOME_TEXT,
   quips: QUIPS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,

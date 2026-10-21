@@ -299,7 +299,7 @@ export class RunMoments {
         this.scene.events.emit(TREAT_EVENT, cue);
       }
     }
-    // A bump costs the owner of the dog it landed on; a small dog may dodge it.
+    // A bump costs the owner of the dog it landed on; the dog may dodge it.
     for (const bump of step.bumps) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
       const { kind } = bump.item;

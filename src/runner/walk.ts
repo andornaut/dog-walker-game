@@ -101,6 +101,7 @@ export type WalkData = Pick<
   | "debuffs"
   | "dogs"
   | "encounters"
+  | "homeText"
   | "minorObstacles"
   | "runText"
   | "shopGear"
@@ -167,8 +168,8 @@ interface InstantFind {
 }
 
 // A minor obstacle the pack bumped: the dog it landed on, and the hearts its owner lost, or
-// null with none to lose. A small dog it would land on dodges it at
-// probability.smallDodgeChance, and loses nothing.
+// null with none to lose. The dog it would land on dodges it at its dodgeChance, and loses
+// nothing.
 export interface MinorBump {
   change: HeartChange | null;
   dodged: boolean;
@@ -1006,12 +1007,31 @@ export function obstacleHitBox(
   return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }), lanes };
 }
 
-// Whether a small dog dodges the hit landing on it, at probability.smallDodgeChance.
-function dodges(data: Pick<GameData, "dogs" | "tuning">, random: Random, dog: DogId): boolean {
-  return (
-    data.dogs[dog].size === "small" &&
-    chance(random, read(data.tuning, "probability", "smallDodgeChance"))
-  );
+// The chance a plain hit landing on the dog misses it: probability.smallDodgeChance for a small
+// dog, plus the chance of each dodge effect in play whose sizes hold the dog's, at most 1.
+export function dodgeChance(
+  data: Pick<GameData, "dogs" | "tuning">,
+  run: Pick<RunState, "dodges">,
+  dog: DogId,
+): number {
+  const { size } = data.dogs[dog];
+  const own = size === "small" ? read(data.tuning, "probability", "smallDodgeChance") : 0;
+  const added = run.dodges
+    .filter(({ sizes }) => sizes.includes(size))
+    .reduce((sum, dodge) => sum + read(data.tuning, "probability", dodge.chance), 0);
+  return Math.min(1, own + added);
+}
+
+// Whether the dog dodges the hit landing on it, at its dodgeChance. A dog with no chance draws
+// nothing from random.
+function dodges(
+  data: Pick<GameData, "dogs" | "tuning">,
+  random: Random,
+  run: Pick<RunState, "dodges">,
+  dog: DogId,
+): boolean {
+  const odds = dodgeChance(data, run, dog);
+  return odds > 0 && chance(random, odds);
 }
 
 // The front dog, the first walking dog in formation order.
@@ -1025,7 +1045,7 @@ function frontDog(run: RunState): DogId {
 
 // One fixed step of walking. Scrolls the road at the zone's speed, brings spawns into view,
 // moves the pack, then collides: tips and treats are grabbed, a plain obstacle costs the
-// owner of the dog it lands on a heart unless a small dog dodges it, card obstacles (outside
+// owner of the dog it lands on a heart unless the dog dodges it, card obstacles (outside
 // the grace window) become cards for the pack, and lucky finds apply at once. An obstacle the
 // pack is immune to is harmless: it is removed, and nothing else happens. A plain hit or an
 // obstacle with a hit moment starts a hit stop, and the steps it lasts hold everything still.
@@ -1157,8 +1177,11 @@ export function stepWalk(
       collected.push(item);
       modifiedAt(item, [grab.change === null ? null : changeModified(grab.change)]);
     } else if (isMinorObstacle(data, kind)) {
-      if (dodges(data, random, dog)) {
-        nextRun = countTally("dodges", nextRun);
+      if (dodges(data, random, nextRun, dog)) {
+        // The dodges tally, toward Dodge Ball, counts only small dogs' dodges.
+        if (data.dogs[dog].size === "small") {
+          nextRun = countTally("dodges", nextRun);
+        }
         bumps.push({ change: null, dodged: true, dog, item });
         continue;
       }

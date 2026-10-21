@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { gameData } from "../data";
+import type { GearId } from "../data/types";
 import { cents } from "../rules/units";
 import { quietCounters, testAwards, testContext, veteranSave } from "./fixtures";
 import { type Awards, ProfileSession } from "./profile";
@@ -92,7 +94,7 @@ describe("achievements away from a run", () => {
 
   it("awards and celebrates an ownership achievement bought on the home screen", async () => {
     const { session } = await opened(veteranSave());
-    const allGear = ["fannyPack", "hallPass", "luckyCollar", "runningShoes"] as const;
+    const allGear = Object.keys(gameData.shopGear) as GearId[];
     await session.purchase((save) => ({ ...save, owned: { ...save.owned, gear: [...allGear] } }));
     expect(session.save.achievements.kittedOut).toBe(testAwards.now);
     expect(session.takeCelebrations()).toEqual(["kittedOut"]);

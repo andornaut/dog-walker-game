@@ -21,6 +21,7 @@ export function testState(
     cardsThisZone: 0,
     debuffs: [],
     debuffsGot: {},
+    dodges: [],
     firstZone: 0,
     gear: null,
     heartsForgiven: 0,

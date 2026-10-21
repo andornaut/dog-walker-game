@@ -40,7 +40,7 @@ import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { type Cents, cents, type Hearts } from "./units";
 
-export type ChoiceData = CauseData & Pick<GameData, "dogs" | "tuning" | "world">;
+export type ChoiceData = CauseData & Pick<GameData, "dogs" | "homeText" | "tuning" | "world">;
 
 // What a card's view needs: ChoiceData, the upgrades a fork's paths carry, and the fork's
 // title.

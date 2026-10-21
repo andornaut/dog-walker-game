@@ -72,6 +72,7 @@ export const TUNING = {
       // The second and third dog slots; every player starts with one.
       dogSlot2: 1000,
       dogSlot3: 2500,
+      dogWhistle: 800,
       duchess: 200,
       fannyPack: 300,
       hallPass: 700,
@@ -137,6 +138,9 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
+    // With the Dog whistle, a hit that would land on a medium or big dog misses it this often,
+    // costing nothing.
+    dogWhistleDodgeChance: 0.125,
     // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.

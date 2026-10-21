@@ -296,6 +296,13 @@ function applyEffect(
         state: { ...state, debuffs: [...others, applied], debuffsGot },
       };
     }
+    case "dodge": {
+      const { chance, sizes } = effect;
+      return unchanged({
+        ...state,
+        dodges: [...state.dodges, { chance, sizes, source: context.source }],
+      });
+    }
     case "hearts":
       return applyHearts(data, context, effect, state);
     case "immune": {

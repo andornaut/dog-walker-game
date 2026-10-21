@@ -3,16 +3,21 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
+import { HOME_TEXT } from "../data/homeText";
+import { TUNING } from "../data/tuning";
 import type { Effect, MoneyKey, MultiplierKey } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
+import { fillNames } from "../lib/lines";
 import { TEST_TUNING } from "../testing/tuning";
-import { capitalize, effectText, formatDollars } from "./effectText";
+import { capitalize, effectText, formatDollars, sentenceList, SIZE_NAMES } from "./effectText";
 import { cents, read } from "./units";
 
+// The game's chances, which the test tuning pins to 0, so a dodge reads as one in so many.
 const data = {
   debuffs: DEBUFFS,
   encounters: ENCOUNTERS,
-  tuning: TEST_TUNING,
+  homeText: HOME_TEXT,
+  tuning: { ...TEST_TUNING, probability: TUNING.probability },
 };
 
 const dollars = (key: MoneyKey) => formatDollars(read(TEST_TUNING, "money", key));
@@ -33,6 +38,16 @@ describe("effectText", () => {
         `+${dollars("lostWalletKeep")}`,
       ],
       ["hearts each", [{ amount: -2, kind: "hearts", target: { kind: "affected" } }], "−2♥ each"],
+      [
+        "a dodge for the sizes it names, as one in so many",
+        [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "big"] }],
+        capitalize(
+          fillNames(HOME_TEXT.dodgeEffect, {
+            dodgeIn: String(Math.round(1 / TUNING.probability.dogWhistleDodgeChance)),
+            sizes: sentenceList(HOME_TEXT.sentenceList, [SIZE_NAMES.medium, SIZE_NAMES.big]),
+          }),
+        ),
+      ],
       [
         "one random owner",
         [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],

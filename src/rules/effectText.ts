@@ -1,6 +1,7 @@
 import type {
   Debuff,
   DebuffId,
+  DodgeEffect,
   DogId,
   Duration,
   Effect,
@@ -15,13 +16,14 @@ import type {
   Stat,
   Target,
 } from "../data/types";
+import { homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
 import { fillNames } from "../lib/lines";
 import type { ModifiedValue } from "./modified";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
 
-type TextData = Pick<GameData, "debuffs" | "encounters" | "tuning">;
+type TextData = Pick<GameData, "debuffs" | "encounters" | "homeText" | "tuning">;
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
   big: "big",
@@ -78,6 +80,16 @@ function moneyText(data: TextData, effect: MoneyEffect): string {
   const amount = read(data.tuning, "money", effect.amount);
   const signText = effect.change === "gain" ? "+" : MINUS;
   return `${signText}${formatDollars(amount)}`;
+}
+
+// "medium and big dogs dodge 1 in 8", lower case.
+function dodgeText(data: TextData, effect: DodgeEffect): string {
+  const sizes = sentenceList(
+    data.homeText.sentenceList,
+    effect.sizes.map((size) => SIZE_NAMES[size]),
+  );
+  const dodgeIn = String(Math.round(1 / read(data.tuning, "probability", effect.chance)));
+  return homeLine(data.homeText, "dodgeEffect", { dodgeIn, sizes });
 }
 
 function heartsText(effect: HeartsEffect): string {
@@ -156,6 +168,8 @@ function effectPhrase(data: TextData, effect: Effect): Phrase {
           read(data.tuning, "seconds", data.debuffs[effect.debuff].seconds),
         ),
       };
+    case "dodge":
+      return { text: dodgeText(data, effect) };
     case "hearts":
       return { text: heartsText(effect) };
     case "immune":

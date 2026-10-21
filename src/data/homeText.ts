@@ -37,6 +37,7 @@ export const HOME_TEXT = {
     walkerStatus: "Your walker",
     walkerSubtitle: "Walker",
   },
+  dodgeEffect: "{sizes} dogs dodge 1 in {dodgeIn}",
   dogBought: "{dog} joins your clients!",
   dogCantAfford: "Save {amount} more for {dog}.",
   dogSlotName: "Dog slot {slot}",

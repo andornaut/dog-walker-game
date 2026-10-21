@@ -25,7 +25,7 @@ interface PackMoment {
   still: boolean;
 }
 
-// A small dog's dodge: fx-dodge's play tag laid on the dog's frame at its top-left with the
+// A dog's dodge: fx-dodge's play tag laid on the dog's frame at its top-left with the
 // dodge word over its first frames, or, with reduced motion or while that art is missing, the
 // dodge label rising over the dog.
 export function playDodge(scene: Scene, moment: PackMoment, dog: GameObjects.Sprite): void {

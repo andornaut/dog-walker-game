@@ -15,6 +15,7 @@ export const HOME_TEXT_FIELDS = {
     walkerAgility: ["agility"],
     walkerPerk: ["effect", "perk"],
   },
+  dodgeEffect: ["dodgeIn", "sizes"],
   dogBought: ["dog"],
   dogCantAfford: ["amount", "dog"],
   dogSlotName: ["slot"],

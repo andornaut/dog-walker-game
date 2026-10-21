@@ -1,5 +1,6 @@
 import type {
   DebuffId,
+  DodgeEffect,
   DogId,
   Effect,
   EncounterId,
@@ -55,6 +56,9 @@ export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonl
 // lasts through.
 export type ActiveModifier = Lasting & Modifier & { readonly source: ModifierSource };
 
+// A dodge effect in play for the rest of the walk, with what it came from.
+export type ActiveDodge = Omit<DodgeEffect, "kind"> & { readonly source: EffectSource };
+
 // secondsLeft is the walking time the debuff has left.
 export type ActiveDebuff = Lasting & {
   readonly debuff: DebuffId;
@@ -95,6 +99,8 @@ export interface RunState {
   readonly debuffsGot: Readonly<Partial<Record<DebuffId, number>>>;
   // Each debuff at most once: applying one the pack has refreshes it.
   readonly debuffs: readonly ActiveDebuff[];
+  // The dodges effects such as the Dog whistle's gave, which last the walk.
+  readonly dodges: readonly ActiveDodge[];
   // The zone index the run began in. A dev start skips the zones before it, which count
   // toward no achievement.
   readonly firstZone: number;
@@ -169,6 +175,7 @@ export function newRun(
     cardsThisZone: 0,
     debuffs: [],
     debuffsGot: {},
+    dodges: [],
     firstZone: 0,
     gear: loadout.gear,
     heartsForgiven: 0,
