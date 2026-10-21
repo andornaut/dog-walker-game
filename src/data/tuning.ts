@@ -107,7 +107,7 @@ export const TUNING = {
   pixels: {
     roadScrollSpeed: 200,
     // Road distance between rows of spawns; a row is all spawns at one distance.
-    spawnRowSpacing: 160,
+    spawnRowSpacing: 213,
     // A drag takes its first lane step at this much horizontal travel, and its Nth at N
     // lane-widths; travelling back this far from its furthest point turns it around.
     swipeStartDistance: 24,
