@@ -1,6 +1,6 @@
 // The dev panel: plain HTML under the game canvas. A thin bar that opens a sheet of cheats for
-// a person testing the game: the switch, start and toggles are staged until Apply, and the save
-// cheats act at once. The game reaches it only through DevPanelHost, so this module needs no
+// a person testing the game. The top section (the switch, start and toggles) is staged until
+// Apply; the save cheats below it act at once. The game reaches it only through DevPanelHost, so this module needs no
 // Phaser.
 import "./devPanel.css";
 
@@ -191,6 +191,9 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     speeds.forEach(({ id, radio }) => {
       radio.checked = staged.speed === id;
     });
+    saveCheats.forEach((cheat) => {
+      cheat.disabled = !staged.on;
+    });
     const arrow = sheet.hidden === false ? "▾" : "▸";
     barLabel.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
   };
@@ -238,13 +241,8 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       el("legend", { textContent: SPEED_LABEL }),
       ...speeds.map(({ label }) => label),
     ),
-    el("h2", { textContent: "Changes your save" }),
-    el(
-      "div",
-      { className: "dev-buttons" },
-      ...SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit))),
-    ),
   );
+  const saveCheats = SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit)));
   const reset = button(
     "Reset save",
     () => {
@@ -276,13 +274,15 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   sheet.append(
     el("header", { className: "dev-header" }, el("div", { className: "dev-switch" }, on, off)),
     controls,
-    el("div", { className: "dev-footer" }, reset),
     el(
       "div",
       { className: "dev-actions" },
-      button("Apply", () => applyAndGo(state), "dev-button dev-primary"),
       button("Cancel", () => setOpen(false)),
+      button("Apply", () => applyAndGo(state), "dev-button dev-primary"),
     ),
+    el("hr", { className: "dev-divider" }),
+    el("h2", { textContent: "Changes your save" }),
+    el("div", { className: "dev-save" }, ...saveCheats, reset),
   );
   container.append(bar, sheet);
   setOpen(sessionRead(DEV_PANEL_OPEN_KEY) === "1");

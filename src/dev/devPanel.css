@@ -202,21 +202,33 @@
   color: var(--dev-warn);
 }
 
-.dev-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.dev-footer {
-  padding-top: 12px;
-  border-top: 1px solid var(--dev-line);
-}
-
 .dev-actions {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 8px;
+}
+
+.dev-divider {
+  margin: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--dev-line);
+}
+
+/* One row of equal buttons, narrow enough for a 360px screen. */
+.dev-save {
+  display: flex;
+  gap: 6px;
+}
+
+.dev-save .dev-button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 4px;
+  white-space: nowrap;
+}
+
+.dev-save .dev-button:disabled {
+  opacity: 0.4;
 }
 
 .dev-actions .dev-primary {
