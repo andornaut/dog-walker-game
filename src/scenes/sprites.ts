@@ -17,6 +17,10 @@ interface SpriteMetrics {
   opaqueWidth: number;
 }
 
+// Phaser's Animations.Events.ANIMATION_STOP, named here so this module imports Phaser's types
+// only.
+const ANIMATION_STOP = "animationstop";
+
 const measured = new Map<string, SpriteMetrics>();
 const tops = new Map<string, number>();
 let scanCanvas: HTMLCanvasElement | undefined;
@@ -172,6 +176,14 @@ export function addStandingSprite(
     .setOrigin(0.5, feetY / frameHeight);
 }
 
+// Drops the completion a sprite's playTagOnce waits on: a play that interrupts it, or a stop,
+// means it never completes, and a later completion of the same tag is another play's.
+const pendingOnce = new WeakMap<GameObjects.Sprite, () => void>();
+
+function dropPendingOnce(sprite: GameObjects.Sprite): void {
+  pendingOnce.get(sprite)?.();
+}
+
 // Plays one of the sprite's Aseprite tags, if it has it; a placeholder has none. still shows
 // the tag's first frame instead, for reduced motion.
 export function playTag(sprite: GameObjects.Sprite, key: string, tag: string, still = false): void {
@@ -182,12 +194,14 @@ export function playTag(sprite: GameObjects.Sprite, key: string, tag: string, st
   const current = sprite.anims.currentAnim?.key === animation;
   if (still) {
     if (!current || sprite.anims.isPlaying) {
+      dropPendingOnce(sprite);
       sprite.play(animation);
       sprite.anims.pause(sprite.anims.currentAnim?.frames[0]);
     }
     return;
   }
   if (!current) {
+    dropPendingOnce(sprite);
     sprite.play(animation);
   } else if (sprite.anims.isPaused) {
     sprite.anims.resume();
@@ -195,6 +209,7 @@ export function playTag(sprite: GameObjects.Sprite, key: string, tag: string, st
 }
 
 // Plays a tag once, then calls done; done is called at once when the sprite lacks the tag.
+// Another play of the sprite through playTag or playTagOnce, or a stop, cancels done.
 export function playTagOnce(
   sprite: GameObjects.Sprite,
   key: string,
@@ -206,8 +221,21 @@ export function playTagOnce(
     done();
     return;
   }
+  dropPendingOnce(sprite);
   sprite.play({ key: animation, repeat: 0 });
-  sprite.once(`animationcomplete-${animation}`, done);
+  const complete = `animationcomplete-${animation}`;
+  const drop = () => {
+    sprite.off(complete, finish);
+    sprite.off(ANIMATION_STOP, drop);
+    pendingOnce.delete(sprite);
+  };
+  const finish = () => {
+    drop();
+    done();
+  };
+  sprite.once(complete, finish);
+  sprite.once(ANIMATION_STOP, drop);
+  pendingOnce.set(sprite, drop);
 }
 
 // A one-shot effect, such as a burst, at a point: it plays its tag once and is destroyed.
