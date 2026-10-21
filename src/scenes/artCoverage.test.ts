@@ -63,7 +63,7 @@ import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { walkLength } from "../rules/route";
-import { baseCardArtPrefix, obstacleLook } from "../rules/skins";
+import { baseCardArtPrefix } from "../rules/skins";
 import { faceMood } from "../rules/treats";
 import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
@@ -537,25 +537,30 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // Every look that moves, in every zone, plays one of its movement's tags at each step it has.
-  it("tags every moving look's sprite with a tag of its movement, at every step it has", () => {
-    const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
-    const missing = [...ENCOUNTERS, ...MINOR_OBSTACLES].flatMap((kind) =>
-      zones.flatMap((zone) => {
-        const look = obstacleLook(gameData, zone, kind);
-        if (look.movement === null || look.movement.kind === "still") {
-          return [];
-        }
-        const art = sprites.has(look.art) ? look.art : look.baseArt;
-        const key = MOVER_SPRITE_KEYS[art] ?? art;
-        const tags = MOVING_TAGS[look.movement.kind];
-        return [1, ...variantSteps([key])].flatMap((step) => {
-          const drawn = depthVariantKey(key, step) ?? key;
-          const has = tagsOf(drawn);
-          return tags.some((tag) => has.includes(tag)) ? [] : [`${drawn} (${zone} ${kind})`];
-        });
-      }),
-    );
+  // Every kind that moves plays one of its movement's tags at each step it has.
+  it.each(
+    [
+      ...ENCOUNTERS.map((kind) => ({
+        art: encounterSpriteKey(kind),
+        entry: gameData.encounters[kind],
+        kind,
+      })),
+      ...MINOR_OBSTACLES.map((kind) => ({
+        art: minorObstacleSpriteKey(kind),
+        entry: gameData.minorObstacles[kind],
+        kind,
+      })),
+    ].flatMap(({ art, entry, kind }) => {
+      const movement = "movement" in entry ? entry.movement : undefined;
+      return movement === undefined || movement.kind === "still"
+        ? []
+        : [{ key: MOVER_SPRITE_KEYS[art] ?? art, kind, tags: MOVING_TAGS[movement.kind] }];
+    }),
+  )("tags the moving $kind's sprite with a tag of its movement, at every step", ({ key, tags }) => {
+    const missing = [1, ...variantSteps([key])].flatMap((step) => {
+      const drawn = depthVariantKey(key, step) ?? key;
+      return tags.some((tag) => tagsOf(drawn).includes(tag)) ? [] : [drawn];
+    });
     expect(missing).toEqual([]);
   });
 });

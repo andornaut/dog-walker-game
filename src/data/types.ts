@@ -90,6 +90,9 @@ type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 export interface Tuning {
   readonly counts: OpenGroup & {
     readonly dartLanesPerSecond: number;
+    readonly maxDartMovers: number;
+    readonly maxMovers: number;
+    readonly maxSlowVehicles: number;
     readonly minorObstaclesFirstZone: number;
     readonly minorObstaclesGainPerZone: number;
     readonly needSpotsPerZone: number;
@@ -366,14 +369,12 @@ export type MovementKind = Movement["kind"];
 // a skin whose encounter gives a status may name the status overlay's art key, drawn while the
 // status it gave lasts. A missing hitLabel, cardArtPrefix, cloudArt or statusArt falls back to
 // the base's, and an art key not yet in the manifest to the base art. movement is how the look
-// moves when it comes as a mover, at the zone's moverShare; a skin without one never moves,
-// whatever the base's. A skin never changes what the obstacle does on contact.
+// A skin never changes what the obstacle does.
 export interface Skin {
   readonly art: string;
   readonly cardArtPrefix?: string;
   readonly cloudArt?: string;
   readonly hitLabel?: string;
-  readonly movement?: Movement;
   readonly name: string;
   readonly statusArt?: string;
 }
@@ -387,8 +388,8 @@ export type Skins = Readonly<Partial<Record<string, Skin>>>;
 // a good thing to bump into, a card or instant. A lucky card with a hitLabel shows it as the
 // pack meets it, before its card. Nothing happens when no dog is affected, when the pack is
 // immune, or when noCardWhen holds. A messy encounter's card costs a show dog's owner
-// hearts.showDogMessyHearts more wherever it costs them hearts. skins are its looks by zone,
-// and an obstacle's movement is its base look's, in zones without a skin.
+// hearts.showDogMessyHearts more wherever it costs them hearts. skins are its looks by zone.
+// An obstacle with a movement comes as a mover at the zone's moverShare.
 export type Encounter = {
   readonly affects: AffectRule;
   readonly messy?: true;
@@ -410,8 +411,8 @@ export type Encounter = {
 // An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
 // pack, and locks lane input for seconds.minorStumble, showing hitLabel when it has one. Each
 // zone's weights set how often it appears there, and skins are its looks by zone: the
-// obstacles of one shape share one skin per zone. movement is its base look's, as an
-// encounter's.
+// obstacles of one shape share one skin per zone. One with a movement comes as a mover at the
+// zone's moverShare.
 export interface MinorObstacle {
   readonly hitLabel?: string;
   readonly movement?: Movement;

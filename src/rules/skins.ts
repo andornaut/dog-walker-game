@@ -4,14 +4,7 @@ import {
   minorObstacleSpriteKey,
   SKUNK_CLOUD_KEY,
 } from "../assets/spriteKeys";
-import type {
-  EncounterId,
-  GameData,
-  MinorObstacleId,
-  Movement,
-  Skins,
-  ZoneId,
-} from "../data/types";
+import type { EncounterId, GameData, MinorObstacleId, Skins, ZoneId } from "../data/types";
 
 // Whether the art manifest has a key, so a skin's art can fall back while it is missing.
 export type HasArt = (key: string) => boolean;
@@ -20,8 +13,7 @@ export type HasArt = (key: string) => boolean;
 // neither the skin nor its base has one), the prefix of its card illustrations, and a skin's
 // own spray cloud and status overlay (null for the base's). art, cardArtPrefix, cloudArt and
 // statusArt are the skin's even while its art is missing: the skinned* functions pick the
-// keys to draw. movement is the skin's, or the base's in a zone without a skin; null when the
-// look never moves.
+// keys to draw.
 export interface Look {
   readonly art: string;
   readonly baseArt: string;
@@ -30,7 +22,6 @@ export interface Look {
   readonly cloudArt: string | null;
   readonly statusArt: string | null;
   readonly hitLabel: string | null;
-  readonly movement: Movement | null;
   readonly name: string;
 }
 
@@ -38,7 +29,6 @@ interface BaseLook {
   readonly art: string;
   readonly cardArtPrefix: string;
   readonly hitLabel: string | null;
-  readonly movement: Movement | undefined;
   readonly name: string;
   readonly skins: Skins | undefined;
 }
@@ -58,7 +48,6 @@ function skinFor(zone: ZoneId, base: BaseLook): Look {
     cardArtPrefix: skin?.cardArtPrefix ?? base.cardArtPrefix,
     cloudArt: skin?.cloudArt ?? null,
     hitLabel: skin?.hitLabel ?? base.hitLabel,
-    movement: (skin === undefined ? base.movement : skin.movement) ?? null,
     name: skin?.name ?? base.name,
     statusArt: skin?.statusArt ?? null,
   };
@@ -75,7 +64,6 @@ export function encounterLook(
     art: encounterSpriteKey(encounter),
     cardArtPrefix: baseCardArtPrefix(encounter),
     hitLabel: "hitLabel" in entry ? (entry.hitLabel ?? null) : null,
-    movement: "movement" in entry ? entry.movement : undefined,
     name: entry.name,
     skins: entry.skins,
   });
@@ -92,21 +80,9 @@ export function minorObstacleLook(
     art: minorObstacleSpriteKey(obstacle),
     cardArtPrefix: "",
     hitLabel: entry.hitLabel ?? null,
-    movement: "movement" in entry ? entry.movement : undefined,
     name: entry.name,
     skins: entry.skins,
   });
-}
-
-// The look of an obstacle, minor or not, in a zone.
-export function obstacleLook(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  zone: ZoneId,
-  kind: EncounterId | MinorObstacleId,
-): Look {
-  return Object.hasOwn(data.minorObstacles, kind)
-    ? minorObstacleLook(data, zone, kind as MinorObstacleId)
-    : encounterLook(data, zone, kind as EncounterId);
 }
 
 // The road sprite key to draw: the skin's art, or the base art while the skin's is missing.

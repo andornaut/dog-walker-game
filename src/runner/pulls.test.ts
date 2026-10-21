@@ -170,7 +170,6 @@ describe("what a dog pulls toward", () => {
       lanesPerPixel: 0.001,
       motion: "cross",
       movement: "dart",
-      mover: "squirrel",
       tilt: 0,
       warning: 80,
     };
@@ -253,7 +252,6 @@ describe("a nervous dog", () => {
       lanesPerPixel: 0.001,
       motion: "cross",
       movement: "dart",
-      mover: "other-dog",
       tilt: 0,
       warning: 80,
     };
@@ -351,7 +349,6 @@ describe("the fairness rule", () => {
       lanesPerPixel: 2.5 / 32,
       motion: "cross",
       movement: "dart",
-      mover: "ball-bounce",
       tilt: 0,
       warning: 50,
     };

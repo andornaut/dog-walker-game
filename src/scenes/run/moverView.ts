@@ -15,7 +15,7 @@ import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
-import { obstacleLook, skinnedArt } from "../../rules/skins";
+import { encounterLook, minorObstacleLook, skinnedArt } from "../../rules/skins";
 import { read } from "../../rules/units";
 import { inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
 import { firstTag, playTag, showAtDepth } from "../sprites";
@@ -31,15 +31,18 @@ const CUE = { inset: 10, size: 16, top: 20, wander: { x: -8, y: -18 } };
 // The ball carries its own shadow, bouncing on the road.
 const BALL_KEY = "ball-bounce";
 
-// A mover's body sprite: its look's art in the zone, or the base art while the skin's is
-// missing, or the sprite MOVER_SPRITE_KEYS names for that art once it is loaded.
+// A mover's body sprite: its kind's road art, or the sprite MOVER_SPRITE_KEYS names for that art
+// once it is loaded.
 export function moverBodyKey(
   scene: Scene,
   zone: ZoneId,
   kind: EncounterId | MinorObstacleId,
 ): string {
   const has = (key: string) => scene.textures.exists(key);
-  const art = skinnedArt(has, obstacleLook(gameData, zone, kind));
+  const look = Object.hasOwn(gameData.minorObstacles, kind)
+    ? minorObstacleLook(gameData, zone, kind as MinorObstacleId)
+    : encounterLook(gameData, zone, kind as EncounterId);
+  const art = skinnedArt(has, look);
   const sprite = MOVER_SPRITE_KEYS[art];
   return sprite !== undefined && has(sprite) ? sprite : art;
 }

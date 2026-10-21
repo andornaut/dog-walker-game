@@ -6,7 +6,7 @@ import type { RoadItem } from "./roadItems";
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover
 // keeps step with the road: it freezes when the road does, and a replay of the same scroll
 // puts it in the same place. A lane position is fractional: lane i spans i - 0.5 to i + 0.5.
-// A mover is an obstacle in a look that moves: it meets the pack as its kind does.
+// A mover is an obstacle of a kind that moves: it meets the pack as its kind does.
 
 // One step of a stepping mover. at is the scroll since it spawned when the step starts, and
 // its cue shows for the path's warning before that; the step lasts length of scroll, moves
@@ -19,8 +19,7 @@ export interface MoverStep {
   readonly travel: number;
 }
 
-// A planned mover. mover is its look's art key, which names it in its sprites and the sim's
-// report, and warning the scroll each cue shows for before its move.
+// A planned mover. warning is the scroll each cue shows for before its move.
 // cross (dart): its cue is at its row on the edge it enters from, and it sets off when its row
 // has travelled enterTravel down the road, coming down the road at 1 + tilt of the road's speed
 // as it crosses.
@@ -28,7 +27,6 @@ export interface MoverStep {
 // down them at speedMultiplier of the road's speed.
 // steps (step): it stands on the road from its spawn and takes each step in turn.
 export type MoverPath = {
-  readonly mover: string;
   readonly movement: MovementKind;
   readonly warning: number;
 } & (
@@ -279,7 +277,6 @@ export type MoverMotion =
 export interface MoverSpec {
   readonly footprint: MoverFootprint;
   readonly motion: MoverMotion;
-  readonly mover: string;
   readonly movement: MovementKind;
   readonly warningSeconds: number;
 }
@@ -328,7 +325,6 @@ function crossPlacements(
         lanesPerPixel,
         motion: "cross",
         movement: spec.movement,
-        mover: spec.mover,
         tilt,
         warning,
       };
@@ -394,7 +390,6 @@ function ridePlacements(
       lanes: across,
       motion: "ride",
       movement: spec.movement,
-      mover: spec.mover,
       speedMultiplier,
       warning,
     },
@@ -454,7 +449,6 @@ function stepsPlacements(
           lane: start,
           motion: "steps",
           movement: spec.movement,
-          mover: spec.mover,
           steps,
           warning,
         },
@@ -484,23 +478,55 @@ export function moverPlacements(geometry: MoverGeometry, spec: MoverSpec): Mover
   }
 }
 
-// At most this many movers are on screen at once.
-export const MOVERS_ON_SCREEN_MAX = 2;
+// How many movers may be on screen at once: in all, darting, and in-lane slower than the road
+// (the slow vehicles).
+export interface MoverCaps {
+  readonly darts: number;
+  readonly slowVehicles: number;
+  readonly total: number;
+}
 
-// True when a mover on screen over [start, end) keeps within the limit alongside the
-// intervals of the movers already planned: at no moment are more than the limit on screen.
+// A mover on screen over [start, end), and the caps it counts toward.
+export interface OnScreen {
+  readonly dart: boolean;
+  readonly interval: readonly [number, number];
+  readonly slowVehicle: boolean;
+}
+
+export function onScreenOf(path: MoverPath, interval: readonly [number, number]): OnScreen {
+  return {
+    dart: path.motion === "cross",
+    interval,
+    slowVehicle: path.motion === "ride" && path.speedMultiplier < 1,
+  };
+}
+
+// True when a mover keeps within every cap alongside the movers already planned: at no moment
+// are more on screen than a cap allows, of the movers that cap counts.
 export function screenHasRoom(
-  planned: readonly (readonly [number, number])[],
-  interval: readonly [number, number],
+  caps: MoverCaps,
+  planned: readonly OnScreen[],
+  mover: OnScreen,
 ): boolean {
-  const [start, end] = interval;
-  const overlapping = planned.filter(([from, to]) => from < end && start < to);
+  const [start, end] = mover.interval;
+  const overlapping = planned.filter(({ interval: [from, to] }) => from < end && start < to);
   // The count on screen is highest at the start of one of the intervals.
-  const moments = [start, ...overlapping.map(([from]) => from).filter((from) => from > start)];
-  return moments.every(
-    (moment) =>
-      overlapping.filter(([from, to]) => from <= moment && moment < to).length <
-      MOVERS_ON_SCREEN_MAX,
+  const moments = [
+    start,
+    ...overlapping.map(({ interval: [from] }) => from).filter((from) => from > start),
+  ];
+  const within = (cap: number, counted: (other: OnScreen) => boolean) =>
+    !counted(mover) ||
+    moments.every(
+      (moment) =>
+        overlapping.filter(
+          (other) => counted(other) && other.interval[0] <= moment && moment < other.interval[1],
+        ).length < cap,
+    );
+  return (
+    within(caps.total, () => true) &&
+    within(caps.darts, (other) => other.dart) &&
+    within(caps.slowVehicles, (other) => other.slowVehicle)
   );
 }
 
@@ -558,24 +584,25 @@ function standsOf(spot: Spot): MoverStand[] {
 
 // Places every mover on rows at the distances given, each quota spread one per equal
 // stretch of the zone as the planner spreads other spawns, each mover wholly on screen
-// within the zone, no more than MOVERS_ON_SCREEN_MAX at once. A mover the earlier ones left no
+// within the zone, within the caps on screen. A mover the earlier ones left no
 // room for anywhere is skipped, which uses no random draw, as the planner skips an obstacle it
 // has no room for.
 export function placeMovers<Kind extends string>(
   random: Random,
   geometry: MoverGeometry & { readonly zoneLength: number },
+  caps: MoverCaps,
   grid: MoverGrid,
   rows: readonly number[],
   quotas: readonly MoverQuota<Kind>[],
 ): PlacedMovers<Kind> {
-  const onScreen: (readonly [number, number])[] = [];
+  const onScreen: OnScreen[] = [];
   const fits = (spot: Spot) => {
     const [start, end] = screenOf(spot);
     const { placement } = spot;
     return (
       start >= 0 &&
       end <= geometry.zoneLength &&
-      screenHasRoom(onScreen, [start, end]) &&
+      screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end])) &&
       placement.cells.every(({ lane, row }) => grid.isFree(lane, spot.row + row)) &&
       grid.leavesRoom(placement.cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
@@ -610,7 +637,7 @@ export function placeMovers<Kind extends string>(
       placement.cells.forEach(({ lane, row }) => grid.take(lane, spot.row + row));
       grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, true);
       grid.stand(standsOf(spot));
-      onScreen.push(screenOf(spot));
+      onScreen.push(onScreenOf(placement.path, screenOf(spot)));
       spawns.push({
         distance: spot.distance + placement.appears,
         kind,

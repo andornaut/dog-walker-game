@@ -1,6 +1,7 @@
 import { itemAt } from "../arrays";
 import {
   type LaneSpan,
+  type MoverCaps,
   type MoverPath,
   type MoverSpec,
   type MoverStand,
@@ -40,6 +41,7 @@ export interface SpawnPlan<Kind extends string> {
   laneMoveSeconds: number;
   minOpenLanes: number;
   minSpacing: number;
+  moverCaps: MoverCaps;
   packLength: number;
   quotas: readonly SpawnQuota<Kind>[];
   roadLength: number;
@@ -449,7 +451,14 @@ export function planSpawns<Kind extends string>(
     window: blockingLength(plan, 1),
     zoneLength: plan.zoneLength,
   };
-  const { skipped, spawns } = placeMovers(random, moverRoad, moverGrid, rows, movers);
+  const { skipped, spawns } = placeMovers(
+    random,
+    moverRoad,
+    plan.moverCaps,
+    moverGrid,
+    rows,
+    movers,
+  );
   events.push(...spawns);
   // A skipped mover stands still instead, after every other spawn, and is skipped in turn
   // when it has no room.

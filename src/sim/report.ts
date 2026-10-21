@@ -8,7 +8,6 @@ import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } f
 import {
   DEFAULT_RATES,
   type ItemCount,
-  moverKindOf,
   type RunResult,
   type SimData,
   type SimPlayer,
@@ -77,7 +76,7 @@ export interface MatrixRow {
   readonly meanTips: number;
   readonly meanZones: number;
   readonly moneyShare: number;
-  readonly moverHitShares: Readonly<Partial<Record<string, number | null>>>;
+  readonly moverHitShares: Readonly<Partial<Record<WalkItemKind, number | null>>>;
   readonly p10: number;
   readonly p50: number;
   readonly p90: number;
@@ -241,8 +240,8 @@ export function summarizeCell(
     })),
     ...Object.entries(result.movers).map(([mover, count]) => ({
       count,
-      kind: moverKindOf(mover),
-      mover,
+      kind: mover as WalkItemKind,
+      mover: mover as WalkItemKind,
     })),
   ]);
   const countsOf = (keep: (entry: (typeof counted)[number]) => boolean) =>
@@ -403,10 +402,21 @@ export function formatKindTable(
   rows: readonly MatrixRow[],
 ): string {
   const kinds = obstacleKinds(data);
-  // Every mover any row met, by kind and look.
-  const movers = [...new Set(rows.flatMap((row) => Object.keys(row.moverHitShares)))].sort();
+  // Every kind any row met as a mover, after the kinds standing still.
+  const movers = [
+    ...new Set(rows.flatMap((row) => Object.keys(row.moverHitShares) as WalkItemKind[])),
+  ].sort();
   return textTable(
-    ["Policy", "Route", "Player", "Gear", "Pack", "Walker", ...kinds, ...movers],
+    [
+      "Policy",
+      "Route",
+      "Player",
+      "Gear",
+      "Pack",
+      "Walker",
+      ...kinds,
+      ...movers.map((kind) => `moving ${kind}`),
+    ],
     rows.map((row) => [
       row.policy,
       row.route,

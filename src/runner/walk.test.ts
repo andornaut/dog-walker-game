@@ -17,6 +17,7 @@ import { TUNING } from "../data/tuning";
 import type {
   EncounterId,
   MinorObstacleId,
+  Movement,
   ObstacleEncounterId,
   WalkerId,
   World,
@@ -39,7 +40,6 @@ import { screenLayout } from "../layout/screenLayout";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
-import { obstacleLook } from "../rules/skins";
 import { giveTreat } from "../rules/treats";
 import { cents, pixels, read, readTable } from "../rules/units";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
@@ -50,7 +50,7 @@ import { TEST_WORLD } from "../testing/world";
 import { STEP_SECONDS } from "./fixedStep";
 import { isSteeringLocked } from "./laneControl";
 import { stillInLane } from "./laneMotion";
-import { hasLeftRoad, laneAt, type MoverPath, moverPlace, MOVERS_ON_SCREEN_MAX } from "./movers";
+import { hasLeftRoad, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
 import { seededRandom } from "./random";
 import {
   type AreaContact,
@@ -61,7 +61,7 @@ import {
   itemCategory,
   itemHeight,
   minorObstacleWeights,
-  moverLook,
+  moverMovement,
   obstacleWeights,
   pickWeighted,
   planZone,
@@ -225,11 +225,24 @@ function onScreen(distance: number, mover: MoverPath): readonly [number, number]
   }
   return [distance, distance + since];
 }
-// No more than the cap of movers on screen at the start of any of them, where the count peaks.
-function expectCapOnScreen(screens: readonly (readonly [number, number])[]): void {
-  for (const [start] of screens) {
-    const atOnce = screens.filter(([from, to]) => from <= start && start < to).length;
-    expect(atOnce).toBeLessThanOrEqual(MOVERS_ON_SCREEN_MAX);
+// No more movers on screen than each cap of the game's allows, of those it counts, at the start
+// of any of them, where the counts peak.
+function expectCapsOnScreen(movers: readonly { distance: number; mover: MoverPath }[]): void {
+  const screens = movers.map(({ distance, mover }) => onScreenOf(mover, onScreen(distance, mover)));
+  const caps: [number, (screen: (typeof screens)[number]) => boolean][] = [
+    [read(TUNING, "counts", "maxMovers"), () => true],
+    [read(TUNING, "counts", "maxDartMovers"), (screen) => screen.dart],
+    [read(TUNING, "counts", "maxSlowVehicles"), (screen) => screen.slowVehicle],
+  ];
+  for (const {
+    interval: [start],
+  } of screens) {
+    for (const [cap, counted] of caps) {
+      const atOnce = screens.filter(
+        (screen) => counted(screen) && screen.interval[0] <= start && start < screen.interval[1],
+      ).length;
+      expect(atOnce).toBeLessThanOrEqual(cap);
+    }
   }
 }
 const geometry: RoadGeometry = {
@@ -279,7 +292,6 @@ const crossing: MoverPath = {
   lanesPerPixel: 2.5 / 32,
   motion: "cross",
   movement: "dart",
-  mover: "squirrel",
   tilt: 0,
   warning: 50,
 };
@@ -1191,8 +1203,7 @@ describe("pickWeighted", () => {
 
 describe("movers", { timeout: 60_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
-  // The rulebook's obstacles that never move: Splash, Stink (but for the garbage truck), and
-  // the benches, bins, cones, hedges and flower beds, in every zone.
+  // The rulebook's obstacles that never move: Splash, Stink, benches, bins, cones and hedges.
   const NEVER_MOVE: readonly WalkItem["kind"][] = [
     "bench",
     "bin",
@@ -1201,37 +1212,30 @@ describe("movers", { timeout: 60_000 }, () => {
     "puddle",
     "skunk",
   ];
-  const GARBAGE_TRUCK = "stink-garbage-truck";
-  const lookIn = (zone: ZoneId, kind: WalkItem["kind"]) =>
-    obstacleLook(REAL, zone, kind as ObstacleEncounterId | MinorObstacleId);
-  const moves = (zone: ZoneId, kind: WalkItem["kind"]) => {
-    const { movement } = lookIn(zone, kind);
-    return movement !== null && movement.kind !== "still";
+  const movementOf = (kind: WalkItem["kind"]) => {
+    const entry = Object.hasOwn(MINOR_OBSTACLES, kind)
+      ? REAL.minorObstacles[kind as MinorObstacleId]
+      : REAL.encounters[kind as ObstacleEncounterId];
+    const movement = ("movement" in entry ? entry.movement : undefined) as Movement | undefined;
+    return movement === undefined || movement.kind === "still" ? null : movement;
   };
 
-  it.each(ZONE_IDS.flatMap((zone) => NEVER_MOVE.map((kind) => ({ kind, zone }))))(
-    "never moves the $kind in $zone",
-    ({ kind, zone }) => {
-      expect(moves(zone, kind) && lookIn(zone, kind).art !== GARBAGE_TRUCK).toBe(false);
-    },
-  );
+  it.each(NEVER_MOVE)("never moves the %s", (kind) => {
+    expect(movementOf(kind)).toBeNull();
+  });
 
-  it.each(ZONE_IDS.flatMap((zone) => OBSTACLE_KINDS.map((kind) => ({ kind, zone }))))(
-    "moves the $kind in $zone at the share only when its look has a movement",
-    ({ kind, zone }) => {
-      let draws = 0;
-      const counted = (value: number) => () => {
-        draws += 1;
-        return value;
-      };
-      const look = moverLook(REAL, counted(0), zone, 1, kind);
-      expect(look !== null).toBe(moves(zone, kind));
-      expect(moverLook(REAL, counted(0.99), zone, 0.5, kind)).toBeNull();
-      const before = draws;
-      expect(moverLook(REAL, counted(0), zone, 0, kind)).toBeNull();
-      expect(draws).toBe(before);
-    },
-  );
+  it.each(OBSTACLE_KINDS)("moves the %s at the share only when it has a movement", (kind) => {
+    let draws = 0;
+    const counted = (value: number) => () => {
+      draws += 1;
+      return value;
+    };
+    expect(moverMovement(REAL, counted(0), 1, kind)).toEqual(movementOf(kind));
+    expect(moverMovement(REAL, counted(0.99), 0.5, kind)).toBeNull();
+    const before = draws;
+    expect(moverMovement(REAL, counted(0), 0, kind)).toBeNull();
+    expect(draws).toBe(before);
+  });
 
   it.each(["tip", "treat", "photoOp", "fireHydrant"] as const)(
     "never moves a %s, drawing nothing",
@@ -1239,32 +1243,27 @@ describe("movers", { timeout: 60_000 }, () => {
       const never = () => {
         throw new Error("drew");
       };
-      for (const zone of ZONE_IDS) {
-        expect(moverLook(REAL, never, zone, 1, kind)).toBeNull();
-      }
+      expect(moverMovement(REAL, never, 1, kind)).toBeNull();
     },
   );
 
   // Movement values the planner can build: a dart is one cell, its tilt keeps it coming down
   // the road, and an in-lane mover moves at another speed than the road.
-  it.each(ZONE_IDS.flatMap((zone) => OBSTACLE_KINDS.map((kind) => ({ kind, zone }))))(
-    "gives the $kind in $zone a movement the planner can build",
-    ({ kind, zone }) => {
-      const { movement } = lookIn(zone, kind);
-      if (movement?.kind === "dart") {
-        expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
-        expect(Math.abs(movement.tilt ?? 0)).toBeLessThan(1);
-      } else if (movement?.kind === "inLane") {
-        expect(movement.factor).toBeGreaterThan(0);
-        expect(movement.factor).not.toBe(1);
-      }
-    },
-  );
+  it.each(OBSTACLE_KINDS)("gives the %s a movement the planner can build", (kind) => {
+    const movement = movementOf(kind);
+    if (movement?.kind === "dart") {
+      expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
+      expect(Math.abs(movement.tilt ?? 0)).toBeLessThan(1);
+    } else if (movement?.kind === "inLane") {
+      expect(movement.factor).toBeGreaterThan(0);
+      expect(movement.factor).not.toBe(1);
+    }
+  });
 
   // Every zone at the fastest pace in the last zone, at the zones' shares and with every
   // obstacle that can move moving: a way past every lane-blocking spawn from every lane, at
-  // most the cap of movers on screen, the pack-fit gap wherever the path changes lanes between
-  // two obstacles, and each mover moving as its look does.
+  // most the caps of movers on screen, the pack-fit gap wherever the path changes lanes between
+  // two obstacles, and each mover moving as its kind does.
   const worlds = [
     { name: "the zones' shares", world: WORLD },
     { name: "a share of 1", world: sharedWorld(WORLD, 1) },
@@ -1291,9 +1290,9 @@ describe("movers", { timeout: 60_000 }, () => {
           mover === undefined ? [] : [{ distance, kind, mover }],
         );
         for (const { kind, mover } of movers) {
-          expect(mover.movement).toBe(lookIn(zone, kind).movement?.kind);
+          expect(mover.movement).toBe(movementOf(kind)?.kind);
         }
-        expectCapOnScreen(movers.map(({ distance, mover }) => onScreen(distance, mover)));
+        expectCapsOnScreen(movers);
         // Each obstacle's contact with the pack: its hit box's extent and its lanes.
         const contacts = blocking.map((event) => {
           if (event.mover === undefined) {
@@ -1378,13 +1377,13 @@ describe("movers", { timeout: 60_000 }, () => {
     {
       dogs: ["duchess"],
       encounter: "otherDog",
-      item: moverAt("otherDog", { ...crossing, mover: "other-dog" }, 82),
+      item: moverAt("otherDog", crossing, 82),
       name: "a loose dog",
     },
     {
       dogs: ["koda"],
       encounter: "goose",
-      item: moverAt("goose", { ...crossing, mover: "goose" }, 82),
+      item: moverAt("goose", crossing, 82),
       name: "a goose, big dog or not",
     },
   ])("opens the $encounter card on contact with $name", ({ dogs, encounter, item }) => {
@@ -1393,14 +1392,13 @@ describe("movers", { timeout: 60_000 }, () => {
   });
 
   it("bumps the pack like a minor obstacle on contact with a ball or an in-lane cyclist", () => {
-    const ball = { ...crossing, mover: "ball-bounce" } as const;
+    const ball = crossing;
     expect(step(walkWith(["koda"], [moverAt("ball", ball, 82)])).bumps).toHaveLength(1);
     const cyclist: MoverPath = {
       lane: 2,
       lanes: 1,
       motion: "ride",
       movement: "inLane",
-      mover: "cyclist",
       speedMultiplier: 2,
       warning: 50,
     };

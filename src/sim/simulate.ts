@@ -156,17 +156,8 @@ export interface HitCounts {
 // comparable when the tuning changes.
 const AFTER_PULL_REACTION_SECONDS = 0.6;
 
-// Movers are counted by moverKey: the kind they meet the pack as, and their look.
-export type MoverCounts = Record<string, ItemCount>;
-
-export function moverKey(kind: WalkItemKind, look: string): string {
-  return `${kind}:${look}`;
-}
-
-// The kind a mover's key counts it as.
-export function moverKindOf(key: string): WalkItemKind {
-  return key.slice(0, key.indexOf(":")) as WalkItemKind;
-}
+// Movers are counted by the kind they meet the pack as.
+export type MoverCounts = Partial<Record<WalkItemKind, ItemCount>>;
 
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.
@@ -204,7 +195,7 @@ type ZoneEvent =
       readonly distance: number;
       readonly item: WalkItemKind;
       readonly kind: "item";
-      readonly mover: string | undefined;
+      readonly moving: boolean;
     }
   | { readonly distance: number; readonly kind: "stop"; readonly stop: ForcedStopId };
 
@@ -214,7 +205,7 @@ function zoneEvents(walk: Walk): ZoneEvent[] {
     distance: spawn.distance,
     item: spawn.kind,
     kind: "item",
-    mover: spawn.mover === undefined ? undefined : moverKey(spawn.kind, spawn.mover.mover),
+    moving: spawn.mover !== undefined,
   }));
   if (forcedStopAhead !== null) {
     events.push({ distance: forcedStopAhead.distance, kind: "stop", stop: forcedStopAhead.stop });
@@ -248,11 +239,10 @@ interface Tally {
 function countItem(
   tally: Tally,
   touched: boolean,
-  item: { readonly kind: WalkItemKind; readonly mover: string | undefined },
+  item: { readonly kind: WalkItemKind; readonly moving: boolean },
 ): void {
-  const counts: Partial<Record<string, ItemCount>> =
-    item.mover === undefined ? tally.items : tally.movers;
-  const key = item.mover ?? item.kind;
+  const counts: Partial<Record<string, ItemCount>> = item.moving ? tally.movers : tally.items;
+  const key = item.kind;
   const count = counts[key] ?? { met: 0, touched: 0 };
   count.met += 1;
   count.touched += touched ? 1 : 0;
@@ -355,7 +345,7 @@ function playZoneByRates(
       });
     } else if (event.item === "tip") {
       const collected = chance(random, rates.tipRate);
-      countItem(tally, collected, { kind: event.item, mover: event.mover });
+      countItem(tally, collected, { kind: event.item, moving: event.moving });
       if (collected) {
         const pickup = collect(data, "tip", tally.run);
         tally.tips = addCents(tally.tips, pickup.tip?.amount ?? cents(0));
@@ -363,14 +353,14 @@ function playZoneByRates(
       }
     } else if (event.item === "treat") {
       const collected = chance(random, rates.treatRate);
-      countItem(tally, collected, { kind: event.item, mover: event.mover });
+      countItem(tally, collected, { kind: event.item, moving: event.moving });
       if (collected) {
         tally.run = collect(data, "treat", tally.run).run;
       }
     } else if (isNeedSpot(data, event.item)) {
       // Needs do not fill here: a spot is steered into at the lucky rate, and meets the need.
       const collected = chance(random, rates.luckyRate);
-      countItem(tally, collected, { kind: event.item, mover: event.mover });
+      countItem(tally, collected, { kind: event.item, moving: event.moving });
       if (collected) {
         const met = meetNeedAt(data, random, event.item, tally.run);
         tally.run = met.run;
@@ -386,21 +376,21 @@ function playZoneByRates(
     } else if (isMinorObstacle(data, event.item)) {
       // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
       const hit = event.distance >= graceUntil && chance(random, rates.hitRate);
-      countItem(tally, hit, { kind: event.item, mover: event.mover });
+      countItem(tally, hit, { kind: event.item, moving: event.moving });
       if (hit) {
         graceUntil = event.distance + graceDistance;
         tally.run = minorBump(data, countBump(tally.run)).state;
       }
     } else if (data.encounters[event.item].kind === "lucky") {
       const collected = chance(random, rates.luckyRate);
-      countItem(tally, collected, { kind: event.item, mover: event.mover });
+      countItem(tally, collected, { kind: event.item, moving: event.moving });
       if (collected) {
         meet(data, random, config, tally, "lucky", event.item);
       }
     } else {
       // A hit that opens no card is scenery: it starts no grace window.
       const hit = event.distance >= graceUntil && chance(random, rates.hitRate);
-      countItem(tally, hit, { kind: event.item, mover: event.mover });
+      countItem(tally, hit, { kind: event.item, moving: event.moving });
       if (hit && meet(data, random, config, tally, "obstacle", event.item)) {
         graceUntil = event.distance + graceDistance;
       }
@@ -456,12 +446,12 @@ function countLeaving(
     let touched: boolean;
     if (mover === undefined) {
       touched = item.y + travel < geometry.roadBottom;
-      countItem(tally, touched, { kind: item.kind, mover: undefined });
+      countItem(tally, touched, { kind: item.kind, moving: false });
     } else {
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
       const y = geometry.roadTop - item.height + place.travel;
       touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
-      countItem(tally, touched, { kind: item.kind, mover: moverKey(item.kind, mover.path.mover) });
+      countItem(tally, touched, { kind: item.kind, moving: true });
     }
     if (touched && blocksLane(data, item.kind)) {
       const inFromLane =

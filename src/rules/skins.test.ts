@@ -26,7 +26,6 @@ const CAT: Skin = {
   art: "cat-on-a-lawn",
   cardArtPrefix: "card-cat-on-a-lawn",
   hitLabel: "MEOW!",
-  movement: { kind: "dart", tilt: 0.1 },
   name: "Cat on a lawn",
 };
 // A skin that names only what it must, so the rest falls back to the base.
@@ -46,20 +45,13 @@ const data: Pick<GameData, "encounters" | "minorObstacles"> = {
   },
 };
 
-const base = (
-  art: string,
-  prefix: string,
-  hitLabel: string | null,
-  name: string,
-  movement: Look["movement"] = null,
-): Look => ({
+const base = (art: string, prefix: string, hitLabel: string | null, name: string): Look => ({
   art,
   baseArt: art,
   baseCardArtPrefix: prefix,
   cardArtPrefix: prefix,
   cloudArt: null,
   hitLabel,
-  movement,
   name,
   statusArt: null,
 });
@@ -68,7 +60,6 @@ const squirrelBase = base(
   baseCardArtPrefix("squirrel"),
   squirrel.hitLabel,
   squirrel.name,
-  squirrel.movement,
 );
 
 describe("encounterLook and minorObstacleLook", () => {
@@ -84,7 +75,7 @@ describe("encounterLook and minorObstacleLook", () => {
       squirrelBase,
     ],
     [
-      "a skin without a hit label or card prefix keeps the base's, and without a movement stands still",
+      "a skin without a hit label or card prefix keeps the base's",
       () => encounterLook(data, skinnedZone, "thief"),
       {
         ...base(
@@ -94,7 +85,6 @@ describe("encounterLook and minorObstacleLook", () => {
           thief.name,
         ),
         ...RACCOON,
-        movement: null,
       },
     ],
     [

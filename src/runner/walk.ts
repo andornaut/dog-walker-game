@@ -4,10 +4,10 @@ import type {
   ForcedStopId,
   GameData,
   MinorObstacleId,
+  Movement,
   NeedSpotId,
   ObstacleEncounterId,
   QuirkId,
-  ZoneId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countBump, countDebuffZones } from "../rules/achievements";
@@ -18,7 +18,6 @@ import { affectedDogs, hitLabel, hoppingDogs, opensCard } from "../rules/encount
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import { debuffModifiers, minorBump, packModifiers, payZoneFees, tipValue } from "../rules/run";
-import { type Look, obstacleLook } from "../rules/skins";
 import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
@@ -425,24 +424,31 @@ export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, 
   return last[0];
 }
 
-// The look a drawn spawn moves in: an obstacle, minor or not, whose look in the zone has a
-// movement comes as a mover at a chance of share. Other spawns never move and draw nothing, as
-// does any spawn at a share of 0.
-export function moverLook(
+// The movement a drawn spawn moves with: an obstacle, minor or not, with a movement comes as a
+// mover at a chance of share. Other spawns never move and draw nothing, as does any spawn at a
+// share of 0.
+export function moverMovement(
   data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   random: Random,
-  zone: ZoneId,
   share: number,
   kind: WalkItemKind,
-): Look | null {
+): MovingMovement | null {
   const category = itemCategory(data, kind);
   if ((category !== "minor" && category !== "obstacle") || share <= 0) {
     return null;
   }
-  const look = obstacleLook(data, zone, kind as EncounterId | MinorObstacleId);
-  const moves = look.movement !== null && look.movement.kind !== "still";
-  return moves && chance(random, share) ? look : null;
+  const entry = isMinorObstacle(data, kind)
+    ? data.minorObstacles[kind]
+    : data.encounters[kind as EncounterId];
+  const movement = "movement" in entry ? entry.movement : undefined;
+  if (movement === undefined || movement.kind === "still") {
+    return null;
+  }
+  return chance(random, share) ? movement : null;
 }
+
+// A movement that moves.
+type MovingMovement = Exclude<Movement, { kind: "still" }>;
 
 // A step: a lane to either side, or a row toward the pack or away.
 const STEPS: readonly StepShape[] = [
@@ -452,20 +458,16 @@ const STEPS: readonly StepShape[] = [
   { lanes: 0, travel: -1 },
 ];
 
-// How a look moves, by its movement and the tuning. A stepper's steps are drawn here, with
+// How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, with
 // their mirror image as the other way it may go: the planner takes whichever keeps the road
 // passable.
 export function moverSpec(
   data: Pick<GameData, "tuning">,
   random: Random,
   footprint: MoverFootprint,
-  look: Look,
+  movement: MovingMovement,
 ): MoverSpec {
   const { tuning } = data;
-  const { movement } = look;
-  if (movement === null || movement.kind === "still") {
-    throw new Error(`${look.name} does not move`);
-  }
   let motion: MoverMotion;
   if (movement.kind === "dart") {
     motion = {
@@ -488,7 +490,6 @@ export function moverSpec(
     footprint,
     motion,
     movement: movement.kind,
-    mover: look.art,
     warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),
   };
 }
@@ -546,28 +547,28 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
   const movers = new Map<WalkItemKind, number>();
   const steppers: SpawnQuota<WalkItemKind>[] = [];
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
-  const moverQuota = (kind: WalkItemKind, look: Look, moverCount: number) => ({
+  const moverQuota = (kind: WalkItemKind, movement: MovingMovement, moverCount: number) => ({
     blocksLane: true,
     count: moverCount,
     kind,
-    mover: moverSpec(data, random, footprintOf(data, kind), look),
+    mover: moverSpec(data, random, footprintOf(data, kind), movement),
   });
-  const looks = new Map<WalkItemKind, Look>();
+  const movements = new Map<WalkItemKind, MovingMovement>();
   for (const kind of kinds) {
-    const look = moverLook(data, random, zone.id as ZoneId, zone.moverShare, kind);
-    if (look === null) {
+    const movement = moverMovement(data, random, zone.moverShare, kind);
+    if (movement === null) {
       count(quotas, kind);
-    } else if (look.movement?.kind === "step") {
-      steppers.push(moverQuota(kind, look, 1));
+    } else if (movement.kind === "step") {
+      steppers.push(moverQuota(kind, movement, 1));
     } else {
-      looks.set(kind, look);
+      movements.set(kind, movement);
       count(movers, kind);
     }
   }
   return [
     ...[...movers].flatMap(([kind, moverCount]) => {
-      const look = looks.get(kind);
-      return look === undefined ? [] : [moverQuota(kind, look, moverCount)];
+      const movement = movements.get(kind);
+      return movement === undefined ? [] : [moverQuota(kind, movement, moverCount)];
     }),
     ...steppers,
     ...[...quotas].map(([kind, kindCount]) => ({
@@ -609,6 +610,11 @@ export function planZone(
     laneMoveSeconds: read(data.tuning, "seconds", "laneMove"),
     minOpenLanes: read(data.tuning, "counts", "openLanesPerRowMin"),
     minSpacing: read(data.tuning, "pixels", "spawnRowSpacing"),
+    moverCaps: {
+      darts: read(data.tuning, "counts", "maxDartMovers"),
+      slowVehicles: read(data.tuning, "counts", "maxSlowVehicles"),
+      total: read(data.tuning, "counts", "maxMovers"),
+    },
     packLength: geometry.tallestPackBand,
     quotas: spawnQuotas(data, random, run),
     roadLength: geometry.roadBottom - geometry.roadTop,

@@ -33,6 +33,7 @@ const plan: SpawnPlan<Kind> = {
   laneMoveSeconds: 0.1,
   minOpenLanes: 1,
   minSpacing: 100,
+  moverCaps: { darts: 1, slowVehicles: 1, total: 3 },
   packLength: 30,
   quotas: [
     { blocksLane: true, count: 6, kind: "obstacle" },

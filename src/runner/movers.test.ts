@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { TUNING } from "../data/tuning";
+import { read } from "../rules/units";
 import {
   hasLeftRoad,
   inMotion,
@@ -7,15 +9,17 @@ import {
   laneAt,
   type LaneSpan,
   moveMovers,
+  type MoverCaps,
   type MoverGeometry,
   type MoverItem,
   type MoverPath,
   moverPlace,
   moverPlacements,
-  MOVERS_ON_SCREEN_MAX,
   type MoverSpec,
   type MoverTell,
   moverTell,
+  type OnScreen,
+  onScreenOf,
   placeMovers,
   screenHasRoom,
   sweptLanes,
@@ -38,7 +42,6 @@ const crosser = (direction: 1 | -1, tilt = 0): MoverPath => ({
   lanesPerPixel: 0.02,
   motion: "cross",
   movement: "dart",
-  mover: "squirrel",
   tilt,
   warning: 100,
 });
@@ -47,7 +50,6 @@ const rider = (speedMultiplier: number): MoverPath => ({
   lanes: 1,
   motion: "ride",
   movement: "inLane",
-  mover: "cyclist",
   speedMultiplier,
   warning: 100,
 });
@@ -56,18 +58,22 @@ const stepper: MoverPath = {
   lane: 2,
   motion: "steps",
   movement: "step",
-  mover: "thief",
   steps: [
     { at: 100, lanes: 1, length: 50, travel: 0 },
     { at: 300, lanes: 0, length: 50, travel: 50 },
   ],
   warning: 100,
 };
+// The game's caps on movers on screen.
+const CAPS: MoverCaps = {
+  darts: read(TUNING, "counts", "maxDartMovers"),
+  slowVehicles: read(TUNING, "counts", "maxSlowVehicles"),
+  total: read(TUNING, "counts", "maxMovers"),
+};
 const spec = (motion: MoverSpec["motion"], lanes = 1, rows = 1): MoverSpec => ({
   footprint: { lanes, rows },
   motion,
   movement: motion.kind === "cross" ? "dart" : motion.kind === "ride" ? "inLane" : "step",
-  mover: "mover",
   warningSeconds: 1,
 });
 
@@ -362,29 +368,73 @@ describe("moverPlacements", () => {
 });
 
 describe("screenHasRoom", () => {
-  // Intervals already planned, the one asked about, and whether it fits under the cap.
-  const full = Array.from({ length: MOVERS_ON_SCREEN_MAX }, () => [0, 10] as const);
-  it.each<{
-    interval: readonly [number, number];
-    name: string;
-    planned: readonly (readonly [number, number])[];
-    room: boolean;
-  }>([
-    { interval: [0, 10], name: "an empty screen", planned: [], room: true },
-    { interval: [10, 20], name: "after a full screen", planned: full, room: true },
-    { interval: [9, 20], name: "overlapping a full screen", planned: full, room: false },
+  // A mover on screen over [0, 10): darting, a slow vehicle, or neither.
+  const dart: OnScreen = onScreenOf(crosser(1), [0, 10]);
+  const slow: OnScreen = onScreenOf(rider(0.5), [0, 10]);
+  const other: OnScreen = onScreenOf(rider(2), [0, 10]);
+  const times = (count: number, mover: OnScreen) => Array.from({ length: count }, () => mover);
+  const later = (mover: OnScreen): OnScreen => ({ ...mover, interval: [10, 20] });
+  it.each<{ mover: OnScreen; name: string; planned: readonly OnScreen[]; room: boolean }>([
+    { mover: other, name: "a mover on an empty screen", planned: [], room: true },
     {
-      interval: [0, 30],
-      name: "around movers one after another",
-      planned: [
-        [0, 10],
-        [10, 20],
-        [20, 30],
-      ],
+      mover: other,
+      name: "a mover beside one fewer than the cap",
+      planned: times(CAPS.total - 1, other),
       room: true,
     },
-  ])("is $room for $name", ({ interval, planned, room }) => {
-    expect(screenHasRoom(planned, interval)).toBe(room);
+    {
+      mover: other,
+      name: "a mover beside a full screen",
+      planned: times(CAPS.total, other),
+      room: false,
+    },
+    {
+      mover: later(other),
+      name: "a mover after a full screen",
+      planned: times(CAPS.total, other),
+      room: true,
+    },
+    {
+      mover: dart,
+      name: "a dart beside the darts' cap",
+      planned: times(CAPS.darts, dart),
+      room: false,
+    },
+    {
+      mover: dart,
+      name: "a dart beside one fewer than the darts' cap",
+      planned: times(CAPS.darts - 1, dart),
+      room: true,
+    },
+    {
+      mover: other,
+      name: "another mover beside the darts' cap",
+      planned: times(CAPS.darts, dart),
+      room: true,
+    },
+    {
+      mover: slow,
+      name: "a slow vehicle beside the slow vehicles' cap",
+      planned: times(CAPS.slowVehicles, slow),
+      room: false,
+    },
+    {
+      mover: dart,
+      name: "a dart beside the slow vehicles' cap",
+      planned: times(CAPS.slowVehicles, slow),
+      room: true,
+    },
+    {
+      mover: { ...other, interval: [0, 30] },
+      name: "a mover around a full screen's worth one after another",
+      planned: Array.from({ length: CAPS.total }, (_, i) => ({
+        ...other,
+        interval: [10 * i, 10 * i + 10],
+      })),
+      room: true,
+    },
+  ])("is $room for $name", ({ mover, planned, room }) => {
+    expect(screenHasRoom(CAPS, planned, mover)).toBe(room);
   });
 });
 
@@ -415,11 +465,12 @@ describe("placeMovers", () => {
     };
   };
 
-  it(`places every mover wholly within the zone, at most ${MOVERS_ON_SCREEN_MAX} on screen at once`, () => {
+  it("places every mover wholly within the zone, within every cap on screen", () => {
     const { grid } = freeGrid();
     const { spawns } = placeMovers(
       seededRandom(1),
       zoned,
+      CAPS,
       grid,
       rows,
       SPECS.map(({ spec: moving }, i) => ({ count: 2, kind: `kind${i}`, spec: moving })),
@@ -433,21 +484,32 @@ describe("placeMovers", () => {
           break;
         }
       }
-      return [distance, distance + scroll] as const;
+      return onScreenOf(mover, [distance, distance + scroll]);
     });
-    for (const [start, end] of intervals) {
+    const caps: [number, (mover: OnScreen) => boolean][] = [
+      [CAPS.total, () => true],
+      [CAPS.darts, (mover) => mover.dart],
+      [CAPS.slowVehicles, (mover) => mover.slowVehicle],
+    ];
+    for (const {
+      interval: [start, end],
+    } of intervals) {
       expect(start).toBeGreaterThanOrEqual(0);
       // Sampled a whole pixel of scroll at a time, so the end may be a pixel late.
       expect(end).toBeLessThanOrEqual(zoned.zoneLength + 1);
-      const atOnce = intervals.filter(([from, to]) => from <= start && start < to).length;
-      expect(atOnce).toBeLessThanOrEqual(MOVERS_ON_SCREEN_MAX);
+      for (const [cap, counted] of caps) {
+        const atOnce = intervals.filter(
+          (mover) => counted(mover) && mover.interval[0] <= start && start < mover.interval[1],
+        ).length;
+        expect(atOnce).toBeLessThanOrEqual(cap);
+      }
     }
   });
 
   it("blocks the lanes a crosser sweeps with its lead-in, and takes the cells it keeps clear", () => {
     const { blocked, grid, taken } = freeGrid();
     const [moving] = SPECS;
-    const { spawns } = placeMovers(seededRandom(2), zoned, grid, rows, [
+    const { spawns } = placeMovers(seededRandom(2), zoned, CAPS, grid, rows, [
       {
         count: 1,
         kind: "squirrel",
@@ -474,7 +536,7 @@ describe("placeMovers", () => {
       draws += 1;
       return 0;
     };
-    const placed = placeMovers(counting, zoned, { ...grid, ...refusal }, rows, [
+    const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, rows, [
       { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
     ]);
     expect(placed).toEqual({ skipped: ["squirrel"], spawns: [] });
