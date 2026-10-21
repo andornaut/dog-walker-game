@@ -850,8 +850,7 @@ export class HudScene extends Scene {
 
   // A hint's bubble, centred in the hint lane with its bottom on the lane's, its tail pointing
   // at the road; the strip's hint hangs under the strip, its tail pointing up at the icons.
-  // The drag hint also shows the touch picture over the road. A hint raised under a card or a
-  // menu draws in that overlay, over its dim.
+  // A hint raised under a card or a menu draws in that overlay, over its dim.
   private drawHint(scene: Scene, hint: RaisedHint): GameObjects.GameObject[] {
     const { road } = LAYOUT;
     const lane = LANES.hint;
@@ -877,11 +876,6 @@ export class HudScene extends Scene {
     } else if (scene.textures.exists("ui-hint-tail")) {
       parts.push(
         scene.add.image(road.x + road.width / 2, y + height - 1, "ui-hint-tail").setOrigin(0.5, 0),
-      );
-    }
-    if (hint.id === "drag" && scene.textures.exists("ui-touch-hint")) {
-      parts.push(
-        scene.add.image(road.x + road.width / 2, road.y + road.height / 2, "ui-touch-hint"),
       );
     }
     text.setDepth(1);

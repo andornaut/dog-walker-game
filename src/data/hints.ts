@@ -15,10 +15,6 @@ export const HINTS = {
     text: "Every card shows what happens. Hold one for details.",
     trigger: { kind: "card" },
   },
-  drag: {
-    text: "Drag to steer. Each lane-width you drag moves one lane.",
-    trigger: { kind: "drag" },
-  },
   firedOwner: {
     text: "At 0♥ an owner fires you. Their fees from earlier zones stay yours.",
     trigger: { kind: "firedOwner" },

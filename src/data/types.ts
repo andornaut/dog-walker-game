@@ -882,7 +882,6 @@ export type HintTrigger =
         | "accident"
         | "areaEffect"
         | "card"
-        | "drag"
         | "firedOwner"
         | "forcedStop"
         | "fork"

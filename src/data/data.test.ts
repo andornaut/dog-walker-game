@@ -499,7 +499,6 @@ describe("hints", () => {
       "debuff",
       "debuff",
       "debuff",
-      "drag",
       "encounter",
       "encounter",
       "encounter",
