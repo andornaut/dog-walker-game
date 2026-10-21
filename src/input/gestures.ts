@@ -1,5 +1,5 @@
 import type { LaneDirection } from "../layout/lanes";
-import { containsPoint, type Point } from "../layout/rect";
+import { containsPoint, type Point, type Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 
 // Distances are in screen pixels. A lane-width is the road width over laneCount.
@@ -11,12 +11,15 @@ export interface GestureConfig {
   tapMaxDistance: number;
 }
 
+// quietTaps: where a tap does nothing, as on the walk bar, though a drag that starts there
+// still steers.
 export interface GestureContext {
   config: GestureConfig;
   layout: Pick<ScreenLayout, "road" | "topBar">;
+  quietTaps?: readonly Rect[];
 }
 
-export type GestureAction = { direction: LaneDirection; kind: "move" } | { kind: "pause" };
+export type GestureAction = { direction: LaneDirection; kind: "move" };
 
 // One leg of a drag: a run of travel one way. Its lane steps count from anchorX: the first at
 // swipeStartDistance and the Nth at N lane-widths. direction is the way its steps
@@ -31,7 +34,7 @@ export interface DragLeg {
 
 // start is where the press went down. tapping holds until the press leaves the tap distance
 // or takes a lane step.
-// topBar: a press on the top bar, which only pauses on a tap and never drags.
+// topBar: a press on the walk bar, which never drags and whose tap does nothing.
 // dragging: a press anywhere else, steering by its current leg; x is the latest pointer x.
 export type GestureState =
   | { kind: "idle" }
@@ -112,7 +115,7 @@ function dragTo(
   };
 }
 
-// A press on the doghouses drags and taps like one anywhere on the walk.
+// A press on the dog cards drags and taps like one anywhere on the walk.
 export function pointerDown(context: GestureContext, point: Point): GestureResult {
   const state: GestureState = containsPoint(context.layout.topBar, point.x, point.y)
     ? { kind: "topBar", start: point, tapping: true }
@@ -142,13 +145,14 @@ export function pointerMove(
   };
 }
 
-// A tap on the top bar pauses; anywhere else, the doghouse cards included, it steers toward
-// the tapped half of the road: the cards take no taps of their own.
-function tapAction(layout: GestureContext["layout"], { x, y }: Point): GestureAction[] {
-  if (containsPoint(layout.topBar, x, y)) {
-    return [{ kind: "pause" }];
+// A tap on the walk bar or a quiet rect does nothing; anywhere else, the dog cards included, it
+// steers toward the tapped half of the road: the cards take no taps of their own.
+function tapAction(context: GestureContext, { x, y }: Point): GestureAction[] {
+  const quiet = [context.layout.topBar, ...(context.quietTaps ?? [])];
+  if (quiet.some((rect) => containsPoint(rect, x, y))) {
+    return [];
   }
-  return [move(tapDirection(layout, x))];
+  return [move(tapDirection(context.layout, x))];
 }
 
 // A tap acts on release, once it can no longer turn into a drag.
@@ -161,5 +165,5 @@ export function pointerUp(
   if (moved.kind === "idle" || !moved.tapping) {
     return { actions, state: idleGesture };
   }
-  return { actions: tapAction(context.layout, moved.start), state: idleGesture };
+  return { actions: tapAction(context, moved.start), state: idleGesture };
 }

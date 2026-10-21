@@ -15,9 +15,11 @@ import {
 } from "./gestures";
 
 // Road y 40-470 with its lanes at x 40-320, so five lanes are 56px wide and the centre is
-// x 180; doghouses x 0-120, 120-240 and 240-360 at y 470-560. A drag's first step is at 20px.
+// x 180; dog cards x 0-120, 120-240 and 240-360 at y 470-560. A drag's first step is at 20px.
+// A quiet rect, as a debuff bar is, at y 40-56.
 const screen: ScreenConfig = {
   backdropHeight: 0,
+  dogCardHeight: 90,
   dogRowHeight: 90,
   dogSlotCount: 3,
   height: 560,
@@ -27,9 +29,11 @@ const screen: ScreenConfig = {
   width: 360,
 };
 const layout = screenLayout(screen);
+const QUIET = { height: 16, width: 360, x: 0, y: 40 };
 const context: GestureContext = {
   config: { laneCount: 5, swipeStartDistance: 20, tapMaxDistance: 10 },
   layout,
+  quietTaps: [QUIET],
 };
 
 type Step = ["down" | "move" | "up", number, number];
@@ -65,7 +69,6 @@ const drag = (fromX: number, ...xs: number[]): Step[] => [
 ];
 const left: GestureAction = { direction: -1, kind: "move" };
 const right: GestureAction = { direction: 1, kind: "move" };
-const pause: GestureAction = { kind: "pause" };
 
 describe("pointer sequences", () => {
   // The actions each step emits, from the press to the release.
@@ -103,7 +106,7 @@ describe("pointer sequences", () => {
     { expected: [[], [left]], name: "taps on release, not on press", steps: tap(150, 300) },
     {
       expected: [[], [], []],
-      name: "never drags from the top bar, nor pauses once past the tap distance",
+      name: "never drags from the walk bar",
       steps: [
         ["down", 100, 20],
         ["move", 300, 25],
@@ -164,7 +167,7 @@ describe("pointer sequences", () => {
     },
     {
       expected: [right],
-      name: "drags from a doghouse press once it reaches the swipe start distance",
+      name: "drags from a card press once it reaches the swipe start distance",
       steps: [
         ["down", 40, 500],
         ["move", 60, 500],
@@ -173,18 +176,32 @@ describe("pointer sequences", () => {
     },
     {
       expected: [],
-      name: "does nothing for a doghouse press that leaves the tap distance short of a step",
+      name: "does nothing for a card press that leaves the tap distance short of a step",
       steps: [
         ["down", 40, 500],
         ["move", 59, 500],
         ["up", 59, 500],
       ],
     },
-    { expected: [pause], name: "pauses on a tap anywhere across the top bar", steps: tap(300, 5) },
-    { expected: [left], name: "steers on a tap on the doghouses' left half", steps: tap(100, 500) },
+    {
+      expected: [],
+      name: "does nothing on a tap anywhere across the walk bar",
+      steps: tap(300, 5),
+    },
+    { expected: [], name: "does nothing on a tap on a quiet rect", steps: tap(100, 48) },
     {
       expected: [right],
-      name: "steers on a tap on the doghouses' right half",
+      name: "steers on a drag that starts on a quiet rect",
+      steps: [
+        ["down", 100, 48],
+        ["move", 120, 48],
+        ["up", 120, 48],
+      ],
+    },
+    { expected: [left], name: "steers on a tap on the cards' left half", steps: tap(100, 500) },
+    {
+      expected: [right],
+      name: "steers on a tap on the cards' right half",
       steps: tap(260, 500),
     },
   ])("$name", ({ expected, steps }) => {
@@ -235,8 +252,9 @@ describe("tap regions", () => {
   // A tap on each side of a boundary between the screen's regions.
   it.each<[string, [number, number], GestureAction[], [number, number], GestureAction[]]>([
     ["the road's halves at x 180", [177, 300], [left], [180, 300], [right]],
-    ["nothing between the road and the doghouses at y 470", [60, 468], [left], [60, 470], [left]],
-    ["the top bar and the road at y 40", [60, 38], [pause], [60, 40], [left]],
+    ["nothing between the road and the cards at y 470", [60, 468], [left], [60, 470], [left]],
+    ["the walk bar and a quiet rect at y 40", [60, 38], [], [60, 40], []],
+    ["a quiet rect and the road at y 56", [60, 55], [], [60, 56], [left]],
   ])("splits %s", (_name, [beforeX, beforeY], beforeActions, [afterX, afterY], afterActions) => {
     expect([all(tap(beforeX, beforeY)), all(tap(afterX, afterY))]).toEqual([
       beforeActions,
@@ -346,14 +364,14 @@ describe("drags over time", () => {
   });
 });
 
-describe("doghouse row routing", () => {
+describe("card row routing", () => {
   const { dogRow, dogSlots, road } = layout;
   const rowY = dogRow.y + dogRow.height / 2;
   const roadMid = road.x + road.width / 2;
   const houses = dogSlots.map((rect, slot) => ({ slot, x: rect.x + rect.width / 2 }));
 
   it.each(houses.flatMap((house) => [-1, 1].map((way) => ({ ...house, way }))))(
-    "a drag starting on doghouse $slot steers $way lane",
+    "a drag starting on card $slot steers $way lane",
     ({ way, x }) => {
       const end = x + way * context.config.swipeStartDistance;
       const steps: Step[] = [
@@ -365,7 +383,7 @@ describe("doghouse row routing", () => {
     },
   );
 
-  it.each(houses)("a tap on doghouse $slot steers by the road's halves", ({ x }) => {
+  it.each(houses)("a tap on card $slot steers by the road's halves", ({ x }) => {
     expect(all(tap(x, rowY))).toEqual([x < roadMid ? left : right]);
   });
 });

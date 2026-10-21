@@ -13,19 +13,24 @@ import {
 } from "../runner/laneControl";
 import { destinationLane, stillInLane } from "../runner/laneMotion";
 import { chance, type Random, randomInt, randomPick, seededRandom } from "../runner/random";
-import type { GestureAction, GestureContext } from "./gestures";
+import type { GestureAction } from "./gestures";
 import {
+  type ExplainChange,
+  explaining,
   idleTrack,
   type PointerPhase,
   type PointerTrack,
   type Press,
+  tickTrack,
+  type TrackContext,
   trackPointer,
 } from "./pointerTracking";
 
 // Road y 40-470 with its lanes at x 40-320, five of 56px; the top bar is y 0-40 and the
-// doghouses y 470-560. A drag's first step is at 20px.
+// dog cards y 470-560. A drag's first step is at 20px.
 const screen: ScreenConfig = {
   backdropHeight: 0,
+  dogCardHeight: 90,
   dogRowHeight: 90,
   dogSlotCount: 3,
   height: 560,
@@ -36,8 +41,11 @@ const screen: ScreenConfig = {
 };
 const LANES = 5;
 const LANE_WIDTH = 56;
-const context: GestureContext = {
+// Nothing explains itself here; the hold-to-explain tests below give a context that does.
+const context: TrackContext<string> = {
   config: { laneCount: LANES, swipeStartDistance: 20, tapMaxDistance: 10 },
+  explainAt: () => undefined,
+  hold: { holdMs: 300, slopPx: 20 },
   layout: screenLayout(screen),
 };
 const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
@@ -54,8 +62,8 @@ interface Event {
 // Feeds the events in order; returns every action and the last track.
 function feed(
   events: readonly Event[],
-  track: PointerTrack = idleTrack,
-): { actions: GestureAction[]; track: PointerTrack } {
+  track: PointerTrack<string> = idleTrack,
+): { actions: GestureAction[]; track: PointerTrack<string> } {
   const actions: GestureAction[] = [];
   let current = track;
   for (const event of events) {
@@ -63,7 +71,7 @@ function feed(
     const result = trackPointer(
       context,
       held,
-      { onButton, phase, point: { x, y }, press },
+      { onButton, phase, point: { x, y }, press, timeMs: 0 },
       current,
     );
     actions.push(...result.actions);
@@ -203,7 +211,7 @@ describe("trackPointer fuzz", () => {
     // The pointers physically down, by id, with their press.
     down: Map<number, Press & { x: number; y: number }>;
     time: number;
-    track: PointerTrack;
+    track: PointerTrack<string>;
   }
 
   const roadX = (random: Random) => 40 + random() * 280;
@@ -235,6 +243,7 @@ describe("trackPointer fuzz", () => {
       phase,
       point: { x: press.x, y: press.y },
       press,
+      timeMs: world.time,
     };
     const driver = world.track.press;
     const result = trackPointer(context, world.held, sample, world.track);
@@ -447,5 +456,172 @@ describe("trackPointer fuzz", () => {
       );
       expect(actions).toEqual([x < 180 ? left : right]);
     }
+  });
+});
+
+// A press on the walk bar (y < 40) or a debuff bar (y 40 to 55) or a card (y 470 on) is on
+// something that explains itself; a tap on a debuff bar does nothing, as on the walk bar.
+describe("hold to explain", () => {
+  const explainContext: TrackContext<string> = {
+    ...context,
+    explainAt: ({ y }) => (y < 40 ? "icon" : y < 56 ? "bar" : y >= 470 ? "card" : undefined),
+    quietTaps: [{ height: 16, width: 360, x: 0, y: 40 }],
+  };
+  const { holdMs } = explainContext.hold;
+  // A pointer event at a time, or a frame's tick. held: a card or a menu takes the press.
+  type PointerStep = {
+    at: number;
+    held?: boolean;
+    id?: number;
+    kind: PointerPhase;
+    x: number;
+    y: number;
+  };
+  type Step = PointerStep | { at: number; kind: "tick" };
+
+  function play(steps: readonly Step[]): {
+    actions: GestureAction[];
+    explained: ExplainChange<string>[];
+  } {
+    const actions: GestureAction[] = [];
+    const explained: ExplainChange<string>[] = [];
+    let track: PointerTrack<string> = idleTrack;
+    for (const step of steps) {
+      if (step.kind === "tick") {
+        const ticked = tickTrack(step.at, track);
+        track = ticked.track;
+        explained.push(...(ticked.explain === undefined ? [] : [ticked.explain]));
+        continue;
+      }
+      const press = finger(0, step.id ?? 1);
+      const sample = { onButton: false, phase: step.kind, point: step, press, timeMs: step.at };
+      const result = trackPointer(explainContext, step.held ?? false, sample, track);
+      track = result.track;
+      actions.push(...result.actions);
+      explained.push(...(result.explain === undefined ? [] : [result.explain]));
+    }
+    expect(explaining(track)).toBe(false);
+    return { actions, explained };
+  }
+
+  const at = (kind: PointerPhase, ms: number, x: number, y: number, id = 1): PointerStep => ({
+    at: ms,
+    id,
+    kind,
+    x,
+    y,
+  });
+  const tick = (ms: number): Step => ({ at: ms, kind: "tick" });
+  const start = (target: string): ExplainChange<string> => ({ kind: "start", target });
+  const end: ExplainChange<string> = { kind: "end" };
+  const card = 500;
+  const icon = 20;
+  const bar = 48;
+  const road = 300;
+
+  it.each<[string, Step[], GestureAction[], ExplainChange<string>[]]>([
+    [
+      "explains a card held still, until its release, which taps nothing",
+      [at("down", 0, 100, card), tick(holdMs - 1), tick(holdMs), at("up", holdMs + 100, 100, card)],
+      [],
+      [start("card"), end],
+    ],
+    [
+      "explains a card held within the slop, past the tap distance",
+      [at("down", 0, 100, card), at("move", 50, 115, card), tick(holdMs), at("up", 400, 115, card)],
+      [],
+      [start("card"), end],
+    ],
+    ["steers on a tap on a card", [at("down", 0, 100, card), at("up", 50, 101, card)], [left], []],
+    [
+      "steers on a drag from a card past the swipe distance, and never explains it",
+      [at("down", 0, 100, card), at("move", 50, 125, card), tick(holdMs), at("up", 400, 125, card)],
+      [right],
+      [],
+    ],
+    [
+      "neither steers nor explains while it explains, until the release",
+      [
+        at("down", 0, 100, card),
+        tick(holdMs),
+        at("move", 350, 200, card),
+        at("up", 400, 200, card),
+      ],
+      [],
+      [start("card"), end],
+    ],
+    [
+      "holds, never taps, on a release past the hold time before a frame ticks",
+      [at("down", 0, 100, card), at("up", holdMs, 100, card)],
+      [],
+      [],
+    ],
+    [
+      "explains an effect icon held still",
+      [at("down", 0, 100, icon), tick(holdMs), at("up", 400, 100, icon)],
+      [],
+      [start("icon"), end],
+    ],
+    [
+      "does nothing on a tap on an effect icon",
+      [at("down", 0, 100, icon), at("up", 50, 100, icon)],
+      [],
+      [],
+    ],
+    [
+      "never steers from the walk bar, nor explains past the slop",
+      [at("down", 0, 100, icon), at("move", 50, 200, icon), tick(holdMs), at("up", 400, 200, icon)],
+      [],
+      [],
+    ],
+    [
+      "explains a debuff bar held still",
+      [at("down", 0, 100, bar), tick(holdMs), at("up", 400, 100, bar)],
+      [],
+      [start("bar"), end],
+    ],
+    [
+      "does nothing on a tap on a debuff bar",
+      [at("down", 0, 100, bar), at("up", 50, 100, bar)],
+      [],
+      [],
+    ],
+    [
+      "steers on a drag from a debuff bar",
+      [at("down", 0, 100, bar), at("move", 50, 125, bar), at("up", 100, 125, bar)],
+      [right],
+      [],
+    ],
+    [
+      "never explains the road, however long the press",
+      [at("down", 0, 100, road), tick(10 * holdMs), at("up", 10 * holdMs, 100, road)],
+      [left],
+      [],
+    ],
+    [
+      "ends the explanation when a card or a menu takes the press",
+      [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), held: true }],
+      [],
+      [start("card"), end],
+    ],
+    [
+      "ends the explanation when the press is cancelled",
+      [at("down", 0, 100, card), tick(holdMs), at("cancel", 400, 100, card)],
+      [],
+      [start("card"), end],
+    ],
+    [
+      "ends the explanation when another finger presses",
+      [
+        at("down", 0, 100, card),
+        tick(holdMs),
+        at("down", 400, 100, road, 2),
+        at("up", 450, 100, road, 2),
+      ],
+      [left],
+      [start("card"), end],
+    ],
+  ])("%s", (_name, steps, actions, explained) => {
+    expect(play(steps)).toEqual({ actions, explained });
   });
 });
