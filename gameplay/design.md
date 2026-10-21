@@ -226,7 +226,7 @@ Each obstacle has one look everywhere. Some kinds can move, and every one that c
   - Treat: "Biscuit got a treat! Sam +1♥"
 - **Road markers:** things worth grabbing (tips, treats and lucky finds) bob gently; obstacles carry no marker. With reduced motion nothing bobs
 - **Effect icons:** upgrades in effect, the walker's perk and the Pocket item show as small icons under the neighborhood's name. Hold one to see what it does
-- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse card with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the hit or card choice that fired you
+- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse card with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the hit or card choice that fired you, and the walk holds still for about 3 seconds while it plays
 - **First visit:** on a brand-new save, the starter's owner waits at the gate in the gate scene until the first walk. A new save starts with Casey and Biscuit picked, so the first walk is one tap on Start walk
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every card obstacle's hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", skunk "SPRAYED!", thief "YOINK!") and the pack shaking off

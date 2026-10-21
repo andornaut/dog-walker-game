@@ -1268,7 +1268,7 @@
       "ballBounceSeconds": 0.4,
       "collisionGrace": 1,
       "explainHoldSeconds": 0.3,
-      "firingHoldSeconds": 2,
+      "firingHoldSeconds": 3,
       "hintStaleSeconds": 5,
       "hitStopSeconds": 1,
       "laneMove": 0.18,

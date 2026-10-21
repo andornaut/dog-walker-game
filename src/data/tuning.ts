@@ -140,7 +140,7 @@ export const TUNING = {
     // shows what it explains and pauses the walk until it lifts.
     explainHoldSeconds: 0.3,
     // An owner who fires you holds the walk still this long while their moment plays.
-    firingHoldSeconds: 2,
+    firingHoldSeconds: 3,
     // A first-time hint still waiting this long after its trigger is dropped unshown, to show
     // the next time it triggers. Time under a card or the pause menu does not count for a hint
     // raised while walking.
