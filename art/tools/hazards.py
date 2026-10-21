@@ -48,7 +48,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import SCALE, face_front, lean  # noqa: E402
+from road import SCALE, face_disc, face_front, lean  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -276,7 +276,7 @@ def cyclist(lf=36, rf=41):
         g.rect(x, 26, 3, 3, "ink")
         g.rect(x, 25, 3, 2, "skin1")
     # head: face, then a cyan helmet with vents and a dark visor
-    g.ell(16, 13.5, 7.5, 6.5, "skin1", "skin2")
+    face_disc(g, 16, 13.5, 7.5, 6.5, "skin1", "skin2")
     face_front(g, 16, 13)
     g.ell(16, 7.5, 9, 5, "cyan", "sky", "white")
     g.rect(7, 10, 18, 2, "cyan")

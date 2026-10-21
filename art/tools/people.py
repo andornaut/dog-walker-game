@@ -25,7 +25,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import edged, main  # noqa: E402
-from road import BREATH, BREATH_MS, LIT, face_front, person, rim  # noqa: E402
+from road import BREATH, BREATH_MS, LIT, face_disc, face_front, person, rim  # noqa: E402
 
 WAVES = ("up", "out")
 WAVE_MS = 300
@@ -63,8 +63,8 @@ def torso(g, b, shirt, shade, h=13):
     g.rect(20, 21 + b, 3, h, shade)
 
 
-def head(g, b, skin, shade, lit=None):
-    g.ell(16, 12.5 + b, 8, 8, skin, shade, lit)
+def head(g, b, skin, shade):
+    face_disc(g, 16, 12.5 + b, 8, 8, skin, shade)
 
 
 def cheeks(g, b, c="pink"):

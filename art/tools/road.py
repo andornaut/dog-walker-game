@@ -65,6 +65,21 @@ def face_front(g, cx, y, mood="happy", eyes="ink", lips="dbrown"):
         g.rect(cx - 1, y + 5, 2, 1, lips)
 
 
+def face_disc(g, cx, cy, rx, ry, skin, shade, to=0.35):
+    """A face seen from the front, kept clean as the portraits are: flat skin, with a 1px shadow down its
+    near (right) edge from the top to `to` of the radius below the centre, beside the eyes, never across the
+    jaw or mouth. Drawn on a minis.Mini, the shadow is 1px of the grid's own pixels."""
+    g.ell(cx, cy, rx, ry, skin)
+    px, s = getattr(g, "g", g), getattr(g, "s", 1)
+    sy = getattr(g, "sy", s)
+    fill = K.get(skin, skin)
+    for y in range(max(0, math.floor((cy - ry) * sy)), min(px.h, math.floor((cy + ry * to) * sy) + 1)):
+        xs = [x for x in range(px.w) if px.px[y][x] == fill
+              and ((x + 0.5 - cx * s) / (rx * s)) ** 2 + ((y + 0.5 - cy * sy) / (ry * sy)) ** 2 <= 1]
+        if xs:
+            px.p(max(xs), y, shade)
+
+
 def rim(g, rims):
     """Light a dark figure's silhouette so it holds on Elm Avenue: an edge pixel of a colour in rims takes
     rims[colour] = (lit, shade), lit where the edge faces up or left into the light and shade where it
@@ -418,7 +433,7 @@ def casey_front(wave=0, bob=0):
     g.ell(16, 11 + b, 8.5, 6, "dbrown", "plum", "brown")
     g.rect(7, 13 + b, 2, 3, "skin1")
     g.rect(23, 13 + b, 2, 3, "skin1")
-    g.ell(16, 14 + b, 7.5, 6.5, "skin1", "skin2")
+    face_disc(g, 16, 14 + b, 7.5, 6.5, "skin1", "skin2")
     g.ell(16, 8 + b, 8.5, 5, "amber", "orange", "yellow")
     g.rect(7, 10 + b, 18, 2, "orange")
     g.rect(7, 11 + b, 18, 1, "rust")
@@ -553,7 +568,7 @@ def trista_front(wave=0, bob=0):
     g.p(25, 19 + b, "dbrown")
     g.rect(7, 19 + b, 2, 1, "brown")
     g.rect(23, 19 + b, 2, 1, "dbrown")
-    g.ell(16, 14.5 + b, 6.5, 6.5, "skin1", "skin2")
+    face_disc(g, 16, 14.5 + b, 6.5, 6.5, "skin1", "skin2")
     g.rect(14, 19 + b, 4, 2, "skin2")
     g.ell(17, 8.5 + b, 8, 3.5, "brown", "dbrown", "tan")
     g.tri((8, 8 + b), (19, 9 + b), (9, 13.5 + b), "brown")
@@ -937,7 +952,7 @@ def thief_top(g, b):
     g.rect(24, 18 + b, 3, 1, "dbrown")
     g.rect(24, 21 + b, 3, 1, "dbrown")
     g.rect(26, 22 + b, 1, 2, "dbrown")
-    g.ell(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")
+    face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
     g.ell(16, 7.5 + b, 8.5, 5, "navy", "ink", "dslate")
     g.rect(8, 9 + b, 17, 2, "dslate")
     g.rect(8, 12 + b, 17, 3, "ink")
@@ -1023,7 +1038,7 @@ def neighbour_top(wave):
         g.rect(10, 22 + b, 9, 2, "red")
         g.rect(10, 23 + b, 9, 1, "dred")
         g.rect(13, 21 + b, 3, 1, "red")
-        g.ell(16, 12.5 + b, 8, 8, "skin1", "skin2")
+        face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
         g.ell(16, 7.5 + b, 9, 5, "lgrey", "grey", "white")
         g.ell(16, 3 + b, 3.5, 2.5, "lgrey", "grey", "white")
         g.rect(8, 9 + b, 2, 6, "lgrey")
@@ -1052,7 +1067,7 @@ def tourist_top(flash):
         g.ell(16.5, 27 + b, 2, 2, "lgrey")
         g.p(16, 26 + b, "white")
         g.rect(18, 23 + b, 2, 1, "dslate")
-        g.ell(16, 13.5 + b, 8, 8, "skin2", "brown", "skin1")
+        face_disc(g, 16, 13.5 + b, 8, 8, "skin2", "brown")
         g.rect(9, 12 + b, 6, 3, "ink")
         g.rect(17, 12 + b, 6, 3, "ink")
         g.rect(15, 12 + b, 2, 1, "ink")
@@ -1117,7 +1132,7 @@ def dog_owner_top(g, b):
     g.rect(5, 31 + b, 4, 3, "skin1")
     g.rect(23, 22 + b, 4, 8, "amber")
     g.rect(24, 30 + b, 4, 3, "skin1")
-    g.ell(16, 12.5 + b, 8, 8, "skin1", "skin2")
+    face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
     g.ell(16, 8.5 + b, 9, 5, "dbrown", "plum", "brown")
     g.rect(7, 9 + b, 3, 9, "dbrown")
     g.rect(22, 9 + b, 3, 9, "dbrown")
@@ -1200,7 +1215,7 @@ def chatty_top(wave):
         g.rect(16, 28 + b, 2, 1, "dred")
         g.rect(10, 27 + b, 2, 3, "skin2")
         g.p(10, 27 + b, "skin1")
-        g.ell(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")
+        face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
         g.ell(16, 7 + b, 7, 3.5, "lgrey", "grey", "white")
         g.rect(8, 9 + b, 2, 5, "lgrey")
         g.rect(22, 9 + b, 2, 5, "lgrey")
@@ -1229,7 +1244,7 @@ def kid(wave=False, mood="happy", bob=0):
     else:
         g.rect(22, 29 + b, 3, 6, "yellow")
         g.rect(22, 35 + b, 3, 2, "skin1")
-    g.ell(16, 20.5 + b, 7.5, 7.5, "skin1", "skin2")
+    face_disc(g, 16, 20.5 + b, 7.5, 7.5, "skin1", "skin2")
     g.ell(16, 15.5 + b, 8, 4, "red", "dred", "pink")
     g.rect(16, 17 + b, 9, 2, "red")
     g.rect(8, 18 + b, 2, 4, "ochre")
@@ -1363,7 +1378,7 @@ def mail_top(g, b):
     g.ell(24, 30 + b, 5, 4.5, "brown", "dbrown", "tan")
     g.rect(22, 27 + b, 4, 3, "white")
     stair(g, 10, 22 + b, 20, 27 + b, "dbrown")
-    g.ell(16, 12.5 + b, 8, 8, "dbrown", "plum")
+    face_disc(g, 16, 12.5 + b, 8, 8, "dbrown", "plum")
     g.ell(16, 7 + b, 8.5, 3.5, "sky", "blue", "cyan")
     g.rect(8, 9 + b, 17, 2, "navy")
     g.rect(15, 5 + b, 2, 2, "amber")

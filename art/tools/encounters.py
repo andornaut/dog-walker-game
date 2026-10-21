@@ -211,7 +211,7 @@ def picnic(chew=0, new=Grid, w=88, crown=0):
     g.rect(cx + 4, 16, 3, 8, "purple")
     g.rect(cx - 7, 16, 1, 7, "pink")
     puff = 1 if chew == 2 else 0
-    g.ell(cx, 9 + crown / 2, 8, 8 - crown / 2, "skin1", "skin2")
+    road.face_disc(g, cx, 9 + crown / 2, 8, 8 - crown / 2, "skin1", "skin2")
     if puff:
         g.rect(cx - 9, 10, 1, 3, "skin1")
         g.rect(cx + 8, 10, 1, 3, "skin2")
@@ -317,7 +317,7 @@ def petunias(sway=0, new=Grid, w=88):
     g = edged(new(w, 32))
     # the gardener, behind the hedge
     cx = 66 + d
-    g.ell(cx, 10.5, 7, 6.5, "skin1", "skin2")
+    road.face_disc(g, cx, 10.5, 7, 6.5, "skin1", "skin2")
     g.ell(cx, 3, 10, 1.6, "tan", "brown", "cream")
     g.ell(cx, 3, 4.5, 1.5, "tan", "brown", "cream")
     g.rect(cx - 5, 2, 10, 1, "green")
