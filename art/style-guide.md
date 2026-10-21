@@ -473,27 +473,9 @@ Where row 157 meets the road, left side (the right mirrors it):
 | The Beaches         | Sand to 97                        | 98..101 | 102 (boards) |
 | Yonge Street        | Paving to 97                      | 98..101 | 102          |
 
-Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 142 to 143, x 0 to 72), the near-right lawn's kite spot (x 284 to 319, rows 117 to 157), and both sidewalks.
+The approach rows carry no static scenery. The near corners and the stub's verges, either side of the road below the cross street, show only their ground (lawn, paving, sidewalk and curb, as the verge paints them): the game's road begins there and its items spawn over them, so no perch, ornament, tree, lamp, bench, sign or other prop stands there. Everything static stands at or beyond the cross street.
 
-Scenery gags are sprites the game places on those spots, drawn front view at the band's own scale, in `art/tools/road.py`. They loop, open no card and have no effect.
-
-| Key        | Spot            | Top-left (band px) | Note                                                                                                                                                                                                 |
-| ---------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gag-cat`  | Near-left perch | x 0 to 48, row 119 | Paws on the top rail, row 142                                                                                                                                                                        |
-| `gag-kite` | Near-right lawn | 284, 117           | A street tree with a diamond kite snagged in its crown. Its crown rises over the cross street, rows 117 to 133; its foot's outline is on row 155. Every zone takes it, Main Street's paving included |
-
-- One sprite for every zone: the kite's tree is drawn into it, since the Distillery District, Kensington Market, The Beaches and Yonge Street have no lawn tree there. Its crown is green with a forest outline, and the kite red and yellow with a plum outline, so both hold on every zone's ground and far side.
-
-Beside the kite's tree each backdrop draws a static ornament on the near-right lawn, from x 322 to 353 with its feet on row 155 and its outline two ramp steps darker (`ornament` in `art/tools/backdrops.py`). It has no frames to play, so nothing beside the road moves but the gags. On the approach rows the game's road raster shows the backdrop's own pixels wherever they differ from its verge, so the ornament stays in place while the lawn scrolls.
-
-| Neighborhood        | Ornament                                                         |
-| ------------------- | ---------------------------------------------------------------- |
-| Cabbagetown         | Three cabbages in a bed of dark soil                             |
-| Distillery District | An oak whisky barrel on its end, a tin cup on its head           |
-| High Park           | A round flower bed edged in stones                               |
-| Kensington Market   | Stacked crates of apples, oranges and limes                      |
-| The Beaches         | A turquoise Muskoka chair                                        |
-| Yonge Street        | A Toronto bike post, its ring on a post, a red bike locked to it |
+The scenery gags (`gag-cat`, `gag-kite`, in `art/tools/road.py`) have no spot on the Toronto backdrops and are unused.
 
 ## Skies
 

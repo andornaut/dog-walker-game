@@ -150,9 +150,9 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 | ------------------- | ------ | ------- | --------- | ---- | ----------------------------------------------------------------------------- |
 | `road-<zone>`       | image  | 320×64  |           | core | Every zone, Toronto and Maplewood                                             |
 | `road-<zone>-start` | image  | 320×64  |           | core | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19 |
-| `backdrop-<zone>`   | image  | 360×158 |           | core | Every zone; screen rows 48 to 205                                             |
-| `gag-cat`           | sprite | 24×24   | `idle`    | core | On a fence                                                                    |
-| `gag-kite`          | sprite | 36×40   | `flutter` | core | A kite caught in a street tree, on the near-right lawn                        |
+| `backdrop-<zone>`   | image  | 360×158 |           | core | Every zone; screen rows 48 to 205; nothing static on the approach rows        |
+| `gag-cat`           | sprite | 24×24   | `idle`    | core | Unused: the approach rows carry no scenery                                    |
+| `gag-kite`          | sprite | 36×40   | `flutter` | core | Unused: the approach rows carry no scenery                                    |
 
 ### Ambient
 

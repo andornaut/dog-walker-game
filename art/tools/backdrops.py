@@ -13,7 +13,9 @@ a kite caught in a tree) are separate sprites the game places in this band, on t
 either side of the street. Beside the kite's tree each zone draws its own static ornament on the
 near-right lawn (ORNAMENTS): a bird bath on Elm Avenue, a flower bed in Fairview Park, a pot of
 flowers on Main Street's paving, pumpkins on The Long Way Home, a gnome and a toadstool on Willow
-Crescent and a rowboat planter on Riverside Path.
+Crescent and a rowboat planter on Riverside Path. The Toronto backdrops draw no static scenery
+on the near corners or the stub's verges, where the game's road begins and its items spawn: only
+the verge's ground.
 
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the
 message strip; the far side's ground row 115 (BASE), the far sidewalk 119 to 122, the far curb
@@ -1322,25 +1324,6 @@ def write_verges():
     with open(VERGES_JSON, "w") as f:
         f.write(json.dumps(TORONTO_VERGES, indent=2) + "\n")
 
-def ledge(cv, x0, x1, z, face, top, joint):
-    """A low wall facing the camera at the near-left corner, its top a ledge to perch on."""
-    lo, hi = min(x0, x1), max(x0, x1)
-    front(cv, lo, hi, z, 0, PERCH_H - 2, face)
-    front(cv, lo, hi, z, PERCH_H - 6, PERCH_H, top)
-    for x in range(int(lo), int(hi), 30):
-        front(cv, x, x + 2, z, 0, PERCH_H - 6, joint)
-
-
-def iron_perch(cv, x0, x1, z):
-    """A wrought-iron fence facing the camera: coal bars under a flat top rail to perch on."""
-    lo, hi = min(x0, x1), max(x0, x1)
-    for x in range(int(lo), int(hi), 10):
-        front(cv, x, x + 3, z, 0, PERCH_H, "coal")
-    front(cv, lo, hi, z, PERCH_H - 4, PERCH_H, "coal")
-    front(cv, lo, hi, z, PERCH_H - 2, PERCH_H, "ash")
-    front(cv, lo, hi, z, 6, 9, "coal")
-
-
 def iron_fence(cv, y, x0, x1, col="coal", h=9):
     """A wrought-iron front fence whose bars end on row y + 3: a bar every 3 columns under a top
     rail, every other bar topped with a spear."""
@@ -1467,8 +1450,6 @@ def cabbagetown():
     cross_line(cv, "white", dash=(8, 32), bend=crescent_bend)
     street(cv, toronto_verge("cabbagetown", road))
     lanes(cv, "white", "slate", dash=(8, 32))
-    iron_perch(cv, *PERCH_X, PERCH)
-    ornament(cv, "cabbages")
     return cv
 
 
@@ -1607,8 +1588,6 @@ def high_park():
     rough_patches = rough("high-park-lawn", 10, ROAD + 30, ROAD + 460, Z0 + 10, Z0 + 90)
     street(cv, toronto_verge("high-park", trail, rough_patches))
     lanes(cv, "dbrown", dash=(7, 16))
-    rail(cv, *PERCH_X, PERCH)
-    ornament(cv, "bed")
     return cv
 
 
@@ -1725,8 +1704,6 @@ def distillery():
     cross_line(cv, "lgrey", "stone", dash=(6, 8))
     street(cv, toronto_verge("distillery-district", road))
     lanes(cv, "lgrey", "stone", dash=(6, 8))
-    ledge(cv, *PERCH_X, PERCH, "dbrick", "stone", "walnut")
-    ornament(cv, "barrel")
     return cv
 
 
@@ -1839,8 +1816,6 @@ def kensington():
     cross_line(cv, "white", "mauve")
     street(cv, toronto_verge("kensington-market", road))
     lanes(cv, "white", "mauve")
-    ledge(cv, *PERCH_X, PERCH, "coal", "ash", "shale")
-    ornament(cv, "crates")
     return cv
 
 
@@ -1944,8 +1919,6 @@ def beaches():
     cross_line(cv, "dbrown", dash=(10, 32))
     street(cv, toronto_verge("the-beaches", boards))
     lanes(cv, "dbrown", dash=(10, 32))
-    fence_rail(cv, *PERCH_X, PERCH, "driftwood")
-    ornament(cv, "chair")
     return cv
 
 
@@ -2243,8 +2216,6 @@ def yonge():
     cross_line(cv, "amber", "coal", dash=(14, 32))
     street(cv, toronto_verge("yonge-street", road))
     lanes(cv, "white", "coal", dash=(14, 32))
-    ledge(cv, *PERCH_X, PERCH, "ash", "grey", "shale")
-    ornament(cv, "ring")
     return cv
 
 
@@ -2353,72 +2324,7 @@ def _boat(g, base):
         g.rect(x, y, 2, 2, c)
 
 
-def _barrel(g, base):
-    """An oak whisky barrel on its end, two coal hoops, a tin cup on its head (Distillery District)."""
-    g.ell(16, base - 9, 9, 10, "clay")
-    g.rect(8, base - 17, 17, 16, "clay")
-    g.rect(21, base - 17, 4, 16, "bark")
-    g.rect(9, base - 17, 2, 16, "tan")
-    for y in (base - 14, base - 5):
-        g.rect(8, y, 17, 2, "coal")
-    g.ell(16, base - 18, 8, 2, "bark")
-    g.rect(22, base - 22, 4, 4, "lgrey")
-    g.rect(25, base - 22, 1, 4, "grey")
-
-
-def _cabbages(g, base):
-    """Three cabbages in a front-yard bed of dark soil, the neighborhood's namesake (Cabbagetown)."""
-    g.ell(17, base - 1, 15, 2.5, "dbrown")
-    for x, y, r in ((8, base - 5, 5), (26, base - 5, 5), (17, base - 8, 6)):
-        g.ell(x, y, r + 1.5, r, "green", sh="dgreen")
-        g.ell(x - 0.5, y - 0.5, r - 1.5, r - 2, "lime")
-        g.rect(int(x), int(y - r + 2), 1, r, "moss")
-        g.p(int(x - 2), int(y - 1), "moss")
-        g.p(int(x + 2), int(y), "moss")
-
-
-def _crates(g, base):
-    """Two stacked crates of fruit on the paving, apples and oranges (Kensington Market)."""
-    for x, y, w, fruit in ((4, base - 8, 16, ("red", "ttc")), (16, base - 8, 16, ("orange", "amber")),
-                           (9, base - 17, 16, ("lime", "moss"))):
-        g.rect(x, y, w, 9, "clay")
-        g.rect(x, y, w, 1, "tan")
-        g.rect(x + w - 2, y, 2, 9, "bark")
-        g.rect(x, y + 4, w, 1, "bark")
-        for k in range(w // 3):
-            g.ell(x + 2 + k * 3, y - 1, 1.6, 1.6, fruit[k % 2])
-
-
-def _chair(g, base):
-    """A turquoise Muskoka chair side on, its slatted back raked (The Beaches)."""
-    g.tri((6, 2), (10, 2), (19, 18), "turquoise")
-    g.tri((6, 2), (19, 18), (15, 18), "turquoise")
-    g.rect(8, 15, 22, 3, "turquoise")
-    g.rect(8, 17, 22, 1, "dturq")
-    g.rect(20, 10, 12, 2, "turquoise")
-    g.rect(28, 12, 2, base - 11, "dturq")
-    g.rect(10, 18, 2, base - 17, "dturq")
-    g.rect(22, 18, 2, base - 17, "dturq")
-    g.rect(7, 4, 2, 2, "foam")
-
-
-def _ring(g, base):
-    """A Toronto bike post: a ring on a post, a red bike locked to it (Yonge Street)."""
-    g.rect(17, 6, 3, base - 5, "coal")
-    g.ell(18.5, 10, 6, 6, "coal")
-    g.ell(18.5, 10, 4, 4, None)
-    g.rect(18, 6, 1, base - 5, "ash")
-    for cx in (8, 28):
-        g.ell(cx, base - 5, 5, 5, "coal")
-        g.ell(cx, base - 5, 3.6, 3.6, None)
-    g.tri((8, base - 5), (16, base - 13), (22, base - 6), "ttc")
-    g.tri((16, base - 13), (26, base - 13), (22, base - 6), "ttc")
-    g.rect(14, base - 15, 5, 2, "coal")
-    g.rect(25, base - 16, 2, 4, "coal")
-
-
-ORNAMENTS = dict(birdbath=_birdbath, bed=_bed, pot=_pot, pumpkins=_pumpkins, gnome=_gnome, boat=_boat,
-                 barrel=_barrel, cabbages=_cabbages, crates=_crates, chair=_chair, ring=_ring)
+ORNAMENTS = dict(birdbath=_birdbath, bed=_bed, pot=_pot, pumpkins=_pumpkins, gnome=_gnome, boat=_boat)
 
 
 def ornament(cv, kind):
