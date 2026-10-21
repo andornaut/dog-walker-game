@@ -1845,8 +1845,8 @@
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json",
       "anchor": {
-        "feetY": 65,
-        "opaqueWidth": 110
+        "feetY": 59,
+        "opaqueWidth": 56
       }
     },
     {
@@ -1854,8 +1854,8 @@
       "png": "sprites/ice-cream-truck@50.png",
       "json": "sprites/ice-cream-truck@50.json",
       "anchor": {
-        "feetY": 32,
-        "opaqueWidth": 54
+        "feetY": 29,
+        "opaqueWidth": 28
       }
     },
     {
@@ -1863,8 +1863,8 @@
       "png": "sprites/ice-cream-truck@62.png",
       "json": "sprites/ice-cream-truck@62.json",
       "anchor": {
-        "feetY": 40,
-        "opaqueWidth": 68
+        "feetY": 37,
+        "opaqueWidth": 35
       }
     },
     {
@@ -1872,8 +1872,8 @@
       "png": "sprites/ice-cream-truck@75.png",
       "json": "sprites/ice-cream-truck@75.json",
       "anchor": {
-        "feetY": 49,
-        "opaqueWidth": 82
+        "feetY": 44,
+        "opaqueWidth": 42
       }
     },
     {
@@ -1881,8 +1881,8 @@
       "png": "sprites/ice-cream-truck@88.png",
       "json": "sprites/ice-cream-truck@88.json",
       "anchor": {
-        "feetY": 57,
-        "opaqueWidth": 96
+        "feetY": 52,
+        "opaqueWidth": 49
       }
     },
     {

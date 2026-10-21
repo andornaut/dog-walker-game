@@ -5,10 +5,11 @@ People (walkers, forced stops, lucky people, the thief and the other dog's owner
 are 48x72, the other dog, skunk and squirrel 48x48, the stop sign 48x72 and the
 pickups 24x24: their drawing functions lay them out on 32x48, 32x32 and 16x16, and
 sprites() draws them SCALE (1.5) times bigger on a scaling grid, never upscaled.
-The bark pop is 16x16. The ice cream truck (112x66, two lanes, 64n-16 wide) and the
+The bark pop is 16x16. The ice cream truck (56x60, one lane, like
+obstacles.delivery_truck; tags idle, 2 frames at 400ms, and drive, 4 at 100ms) and the
 construction barrier (64x48, one whole lane, repeated across the road) are drawn in
-their own pixels at 104x55 and 64x40 on a grid that scales their columns to the
-lanes and their rows ROW_SCALE (1.2) times; the puddle (112x48) is drawn in its own
+their own pixels at 56x50 and 64x40 on a grid that keeps their columns and draws
+their rows ROW_SCALE (1.2) times; the puddle (112x48) is drawn in its own
 pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
@@ -122,11 +123,11 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
 # on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines 1px, so nothing is upscaled;
 # the depth variants (minis.py, depths.py) run them at SCALE times each depth step.
 SCALE = 1.5
-# The ice cream truck and the construction barrier are drawn in their own pixels at 104x55 and 64x40, then on
-# a minis.Mini that scales their columns to their lanes (64n-16 across n lanes, a whole lane for the barrier)
-# and their rows ROW_SCALE times.
+# The ice cream truck and the construction barrier are drawn in their own pixels at 56x50 and 64x40, then on
+# a minis.Mini that keeps their columns (56 for the truck, a lane less 4px each side; a whole lane for the
+# barrier) and draws their rows ROW_SCALE times.
 ROW_SCALE = 1.2
-TRUCK_SCALE = ((64 * 2 - 16) / 104, ROW_SCALE)
+TRUCK_SCALE = (1, ROW_SCALE)
 CONSTRUCTION_SCALE = (1, ROW_SCALE)
 
 
@@ -1306,66 +1307,87 @@ def kid(wave=False, mood="happy", bob=0):
     return rim(g, LIT)
 
 
-def ice_cream_truck(f):
-    """The ice cream truck parked ahead across two lanes, laid out on 104x55 and drawn at TRUCK_SCALE to 120x77
-    (64n-8 wide for n = 2), from straight behind
-    like obstacles.parked_car: a wide box van, squat, with its cone sign on the roof. The rear doors split down
-    the middle, each with a window; a pink drip stripe runs across the doors; tall tail lights sit at the outer
-    corners, amber blinkers under them; then the plate, the bumper and both rear wheels. f swaps the lit
-    blinker and the music note. Drawn in its own pixels, symmetric about the seam on columns 51 and 52. The
-    road outline and the lit rim."""
-    g = edged(Grid(104, 55))
-    for x in (10, 77):
-        g.rect(x, 44, 17, 10, "ink")
-        g.rect(x, 44, 3, 9, "dslate")
-    # roof edge, then the box body: lit along the top and the left, shaded on the right
-    g.rect(6, 12, 92, 3, "lgrey")
-    g.rect(6, 12, 92, 1, "white")
-    g.rect(3, 15, 98, 27, "white")
-    g.rect(95, 15, 6, 27, "lgrey")
-    g.p(3, 15, None)
-    g.p(100, 15, None)
+# The ice cream truck's drive: 4 frames of ice_cream_truck's roll, and their duration in ms.
+TRUCK_DRIVE = range(4), 100
+
+
+def ice_cream_truck(f=0, roll=None):
+    """The ice cream truck from straight behind, a lane wide like obstacles.delivery_truck, laid out on 56x50
+    and drawn at TRUCK_SCALE to 56x60: a white box van lit along its top and left, its cone sign on the roof.
+    The rear doors split down the middle, each with a window; a pink drip stripe runs across them; tall red
+    tail lights sit at the outer corners, amber blinkers under them; then the plate, the bumper and both rear
+    wheels. A mirror pokes out on the left and the serving hatch's striped awning on the right. f swaps the
+    lit blinker and the music note. roll (0 to 3) is a drive frame: tread lines climb the tyres, the body dips
+    1px onto them on frames 1 and 2, the cone sign rocks on its post the other way, and a note floats up beside
+    it. The road outline and the lit rim."""
+    import obstacles  # obstacles imports this module
+
+    g = edged(Grid(56, 50))
+    px = getattr(g, "g", g)
+    uy = obstacles.unit(g)[1]
+    for x in (5, 42):
+        g.rect(x, 39, 9, 10, "ink")
+        g.rect(x, 39, 2, 9, "dslate")
+        if roll is not None:
+            obstacles.treads(g, x + 2, 42, 7, 7, roll, uy)
+    wheels = [row[:] for row in px.px]
+    px.px = [[None] * px.w for _ in range(px.h)]
+    dip = 1 if roll in (1, 2) else 0
+    rock = -dip if roll is not None else 0
+    # the cone sign on its post: a waffle cone under a pink scoop with a cherry
+    g.rect(27, 9 + rock, 2, 3 - rock, "lgrey")
+    g.tri((23, 6 + rock), (33, 6 + rock), (28, 11.5 + rock), "tan")
+    for x, y in ((25, 7), (29, 7), (27, 9)):
+        g.p(x, y + rock, "brown")
+    g.ell(28, 5 + rock, 5.5, 3.2, "pink", "mauve", "white")
+    g.rect(28, 1 + rock, 2, 2, "red")
+    # the music note: left of the sign at rest (f 0) or right (f 1); driving, it floats up a row a frame
+    nx, ny = (12, 4) if f == 0 else (41, 3)
+    if roll is not None:
+        nx, ny = (12, 5 - roll) if roll < 2 else (41, 7 - roll)
+    g.rect(nx + 2, ny, 1, 6, "plum")
+    g.rect(nx + 2, ny, 3, 1, "plum")
+    g.rect(nx, ny + 5, 2, 2, "plum")
+    # the roof edge, then the box: lit along the top and the left, shaded down the right
+    g.rect(5, 12, 46, 2, "lgrey")
+    g.rect(5, 12, 46, 1, "white")
+    g.rect(3, 14, 50, 25, "white")
+    g.rect(49, 14, 4, 25, "lgrey")
+    # a mirror on the left, the serving hatch's awning on the right, striped pink and white
+    g.rect(0, 18, 3, 5, "dslate")
+    g.rect(0, 18, 3, 1, "slate")
+    for k in range(4):
+        g.rect(53, 15 + k * 2, 2, 2, "pink" if k % 2 == 0 else "white")
     # the rear doors: a seam down the middle, a window in each, handles by the seam
-    g.rect(51, 16, 2, 25, "lgrey")
-    for x in (19, 58):
-        g.rect(x, 17, 27, 11, "navy")
-        g.rect(x, 17, 27, 1, "slate")
-        g.tri((x + 4, 27), (x + 11, 18), (x + 16, 18), "slate")
-    g.rect(47, 30, 2, 4, "grey")
-    g.rect(55, 30, 2, 4, "grey")
-    # the drip stripe: a pink band with drips hanging from it, every 7 columns
-    g.rect(3, 32, 98, 4, "pink")
-    g.rect(3, 35, 98, 1, "mauve")
-    for x in range(12, 92, 7):
-        g.rect(x, 36, 2, 1 + (x // 7) % 2, "pink")
-    # tail lights up the outer corners, blinkers under them
-    for x in (4, 94):
-        g.rect(x, 16, 6, 15, "red")
-        g.rect(x, 16, 6, 1, "pink")
-        g.rect(x + 5, 17, 1, 14, "dred")
-    g.rect(4, 37, 6, 4, "yellow" if f else "amber")
-    g.rect(94, 37, 6, 4, "amber" if f else "yellow")
-    g.rect(44, 36, 16, 6, "cream")
-    g.rect(46, 38, 12, 1, "tan")
-    # bumper across the full width
-    g.rect(2, 42, 100, 4, "dslate")
-    g.rect(2, 42, 100, 1, "slate")
-    g.rect(2, 42, 1, 4, "grey")
-    # cone sign on the roof
-    g.tri((47, 6), (57, 6), (52, 15), "tan")
-    g.p(49, 8, "brown")
-    g.p(53, 9, "brown")
-    g.p(51, 11, "brown")
-    g.ell(52, 5, 5, 3.5, "pink", "mauve", "white")
-    if f:
-        g.rect(73, 2, 1, 7, "plum")
-        g.rect(73, 2, 3, 1, "plum")
-        g.rect(71, 8, 2, 2, "plum")
-    else:
-        g.rect(30, 3, 1, 7, "plum")
-        g.rect(30, 3, 3, 1, "plum")
-        g.rect(28, 9, 2, 2, "plum")
-    return rim(g, LIT)
+    g.rect(27, 15, 2, 23, "lgrey")
+    for x in (9, 31):
+        g.rect(x, 16, 16, 9, "navy")
+        g.rect(x, 16, 16, 1, "slate")
+        g.tri((x + 3, 24), (x + 8, 17), (x + 11, 17), "slate")
+    g.rect(24, 27, 2, 3, "grey")
+    g.rect(30, 27, 2, 3, "grey")
+    # the drip stripe: a pink band with drips hanging from it
+    g.rect(3, 30, 50, 3, "pink")
+    g.rect(3, 32, 50, 1, "mauve")
+    for x in range(6, 50, 5):
+        g.rect(x, 33, 1, 1 + (x // 5) % 2, "pink")
+    # tail lights up the outer corners, blinkers under them, the plate between
+    for x in (4, 48):
+        g.rect(x, 15, 4, 14, "red")
+        g.rect(x, 15, 4, 1, "pink")
+        g.rect(x + 3, 16, 1, 13, "dred")
+    g.rect(4, 34, 4, 3, "yellow" if f else "amber")
+    g.rect(48, 34, 4, 3, "amber" if f else "yellow")
+    g.rect(22, 34, 12, 4, "cream")
+    g.rect(24, 35, 8, 1, "tan")
+    # the bumper step across the full width
+    g.rect(1, 38, 54, 3, "dslate")
+    g.rect(1, 38, 54, 1, "slate")
+    g.rect(1, 38, 1, 3, "grey")
+    body = px.px
+    px.px = [[(body[y - dip][x] if y >= dip else None) or wheels[y][x] for x in range(px.w)] for y in range(px.h)]
+    rim(px, LIT)
+    return g
 
 
 def construction(f):
@@ -1630,7 +1652,9 @@ def sprites():
                                 BREATH_MS)]
     yield "kid", [("wave", frames([big(kid, False), big(kid, True)]), 300), ("sad", frames([big(kid, False, "sad")]), 1000),
                   ("idle", frames(big(kid, bob=bb) for bb in BREATH), BREATH_MS)]
-    yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400)]
+    drive, drive_ms = TRUCK_DRIVE
+    yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
+                              ("drive", frames(drawn(TRUCK_SCALE, ice_cream_truck, 0, r) for r in drive), drive_ms)]
     yield "construction", [("idle", frames([drawn(CONSTRUCTION_SCALE, construction, f) for f in (0, 1)]), 500)]
     yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in PERSON_WALK), PERSON_WALK_MS),
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]

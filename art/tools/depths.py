@@ -102,8 +102,11 @@ def own(s):
     def times(q):
         return tuple(v * s for v in q)
 
-    yield "ice-cream-truck", [("idle", [small(road, times(road.TRUCK_SCALE), road.ice_cream_truck, f).outlined()
-                                        for f in (0, 1)], 400)]
+    truck = times(road.TRUCK_SCALE)
+    drive, drive_ms = road.TRUCK_DRIVE
+    yield "ice-cream-truck", [("idle", [small(road, truck, road.ice_cream_truck, f).outlined() for f in (0, 1)], 400),
+                              ("drive", [small(road, truck, road.ice_cream_truck, roll=r).outlined() for r in drive],
+                               drive_ms)]
     yield "construction", [("idle", [small(road, times(road.CONSTRUCTION_SCALE), road.construction, f).outlined()
                                      for f in (0, 1)], 500)]
     yield "puddle", [("idle", [small(road, s, road.puddle, f).outlined(False) for f in (0, 1)], 500)]
