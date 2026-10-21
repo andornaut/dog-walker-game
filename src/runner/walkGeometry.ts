@@ -9,10 +9,8 @@ import {
 } from "../layout/packFormation";
 import { type RoadCamera, type RoadProjection, roadProjection } from "../layout/projection";
 import type { Rect } from "../layout/rect";
+import { walkerFootY } from "../layout/screenLayout";
 import type { RoadGeometry } from "./walk";
-
-// How far the walker's feet stand above the bottom of the road.
-const WALKER_FEET_ABOVE_ROAD_BOTTOM = 4;
 
 // A pickup's or lucky find's hit box is its lanes less the inset at each side, a cell's spare
 // width beside ROAD_HIT_SIZE, so one lane hits 40px wide on 64px lanes, whatever size it is
@@ -28,10 +26,6 @@ const ITEM_HEIGHTS: RoadGeometry["itemHeights"] = {
   tip: 15,
   treat: 15,
 };
-
-export function walkerFootY(road: Rect): number {
-  return road.y + road.height - WALKER_FEET_ABOVE_ROAD_BOTTOM;
-}
 
 // The pseudo-3D projection of the road the walker stands on.
 export function walkProjection(camera: RoadCamera, road: Rect): RoadProjection {

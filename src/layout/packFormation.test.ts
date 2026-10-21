@@ -15,7 +15,7 @@ import {
   DOG_SILHOUETTES,
   everyPack,
   formationOrder,
-  laneHalfWidth,
+  LANE_HALF_WIDTH,
   leashHand,
   PACK_FEET,
   PACK_SLOTS,
@@ -200,7 +200,7 @@ describe("packPlacements", () => {
         for (const { foot, key, x } of drawnPack(lane, "casey", dogs).slice(0, -1)) {
           const distance = distanceAtY(PROJECTION, foot);
           const edge = (side: number) =>
-            project(PROJECTION, { distance, x: walkerX + side * laneHalfWidth() }).x;
+            project(PROJECTION, { distance, x: walkerX + side * LANE_HALF_WIDTH }).x;
           const art = artOf(key);
           if (
             x - art.width / 2 + art.left < Math.floor(edge(-1)) ||
@@ -271,8 +271,8 @@ describe("the pack's outline", () => {
         expect(box.bottom, name).toBeCloseTo(drawn.bottom, 9);
         expect(Math.abs(box.left - drawn.left), name).toBeLessThanOrEqual(rounding);
         expect(Math.abs(box.right - drawn.right), name).toBeLessThanOrEqual(rounding);
-        expect(box.left, name).toBeGreaterThanOrEqual(-laneHalfWidth());
-        expect(box.right, name).toBeLessThanOrEqual(laneHalfWidth());
+        expect(box.left, name).toBeGreaterThanOrEqual(-LANE_HALF_WIDTH);
+        expect(box.right, name).toBeLessThanOrEqual(LANE_HALF_WIDTH);
       }
     }
   });

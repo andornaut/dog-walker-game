@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../arrays";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
-import { walkerFootY } from "../runner/walkGeometry";
 import { roadProjection, rowScale } from "./projection";
 import {
   drawRoad,
@@ -34,7 +33,7 @@ import {
   VERGES,
   walkFrom,
 } from "./roadside";
-import { screenLayout } from "./screenLayout";
+import { screenLayout, walkerFootY } from "./screenLayout";
 
 const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
 // The road's far row, nearest row and middle row, and the backdrop's bottom row above the far

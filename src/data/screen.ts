@@ -1,6 +1,5 @@
 import { roadCameraFor } from "../layout/projection";
-import { type ScreenConfig, screenLayout } from "../layout/screenLayout";
-import { walkerFootY } from "../runner/walkGeometry";
+import { type ScreenConfig, screenLayout, walkerFootY } from "../layout/screenLayout";
 import { TUNING } from "./tuning";
 
 // The backdrop band's heights: "short" ends it 110 rows under the walk bar; "tall" grows it by 48

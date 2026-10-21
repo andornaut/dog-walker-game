@@ -7,15 +7,15 @@ import { TUNING } from "../data/tuning";
 import {
   COLLAR_HEIGHTS,
   DOG_SILHOUETTES,
-  laneHalfWidth,
+  LANE_HALF_WIDTH,
   PACK_FEET,
   PACK_SLOTS,
   PART_INSET,
   WALKER_HANDS,
   WALKER_SILHOUETTES,
 } from "../layout/packFormation";
-import { screenLayout } from "../layout/screenLayout";
-import { walkerFootY, walkProjection } from "../runner/walkGeometry";
+import { screenLayout, walkerFootY } from "../layout/screenLayout";
+import { walkProjection } from "../runner/walkGeometry";
 import { layoutExport } from "./layoutExport";
 
 const layout = layoutExport(gameData);
@@ -41,7 +41,7 @@ describe("layoutExport", () => {
     const drawn: [string, unknown, unknown][] = [
       ["pack.collarHeights", layout.pack.collarHeights, COLLAR_HEIGHTS],
       ["pack.feet", layout.pack.feet, PACK_FEET],
-      ["pack.laneHalfWidth", layout.pack.laneHalfWidth, laneHalfWidth()],
+      ["pack.laneHalfWidth", layout.pack.laneHalfWidth, LANE_HALF_WIDTH],
       [
         "pack.silhouettes",
         layout.pack.silhouettes,

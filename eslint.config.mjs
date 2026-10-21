@@ -2,6 +2,7 @@ import { readdirSync } from "node:fs";
 
 import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
+import { createNodeResolver, importX } from "eslint-plugin-import-x";
 import globals from "globals";
 import ts from "typescript-eslint";
 
@@ -181,6 +182,17 @@ export default defineConfig(
     rules: sourceRules,
   },
   ...boundaryConfigs(),
+  // No import cycles: a module in a cycle can run before what it imports has loaded. Type-only
+  // imports are erased at build time, so they never form one.
+  {
+    files: SOURCE_FILES,
+    plugins: { "import-x": importX },
+    rules: { "import-x/no-cycle": "error" },
+    settings: {
+      "import-x/extensions": [".ts"],
+      "import-x/resolver-next": [createNodeResolver({ extensions: [".ts", ".js"] })],
+    },
+  },
   // Config files: they produce what ships rather than being it.
   {
     files: ["*.ts", "*.js", "*.mjs"],

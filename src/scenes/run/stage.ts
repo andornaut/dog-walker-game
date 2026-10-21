@@ -4,11 +4,11 @@ import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
 import { laneCenterXs } from "../../layout/lanes";
 import { rowsAboveJuncture } from "../../layout/roadClip";
-import { screenLayout } from "../../layout/screenLayout";
+import { screenLayout, walkerFootY } from "../../layout/screenLayout";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
 import type { Walk } from "../../runner/walk";
-import { walkerFootY, walkProjection } from "../../runner/walkGeometry";
+import { walkProjection } from "../../runner/walkGeometry";
 
 // The walk's fixed screen geometry and draw order, shared by the run scene's views.
 

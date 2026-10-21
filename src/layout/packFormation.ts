@@ -43,11 +43,8 @@ export function dogHalfWidth(dog: Silhouette): number {
 }
 
 // Half a lane's width at the walker's feet: the pack's box stays inside it, so a pack settled in
-// a lane never touches anything in the lane beside it. A function, since the screen config is
-// not yet loaded while this module loads in an import cycle.
-export function laneHalfWidth(): number {
-  return SCREEN_CONFIG.roadWidth / LANE_COUNT / 2;
-}
+// a lane never touches anything in the lane beside it.
+export const LANE_HALF_WIDTH = SCREEN_CONFIG.roadWidth / LANE_COUNT / 2;
 
 // Where a dog walks, in screen pixels from the walker's feet: dx across from the walker's lane
 // centre as drawn on the dog's feet row (negative to the left), and footDy up the screen
@@ -140,7 +137,7 @@ export interface PackDog {
 // half its opaque width, rounded in, so it is drawn inside its lane.
 export function sideDx(projection: Lens, footDy: number, dog: Silhouette): number {
   const width = dog.right - dog.left;
-  return Math.floor(laneHalfWidth() * rowScale(projection, footDy) - Math.ceil(width / 2));
+  return Math.floor(LANE_HALF_WIDTH * rowScale(projection, footDy) - Math.ceil(width / 2));
 }
 
 // Where each dog walks, the dogs in formation order and no more than the largest formation

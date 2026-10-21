@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
-import { walkerFootY } from "../runner/walkGeometry";
 import { PACK_DEPTH } from "./packFormation";
 import {
   columnSpan,
@@ -16,7 +15,7 @@ import {
   screenYAt,
   snapScale,
 } from "./projection";
-import { screenLayout } from "./screenLayout";
+import { screenLayout, walkerFootY } from "./screenLayout";
 
 const { backdrop, road } = screenLayout(SCREEN_CONFIG);
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);

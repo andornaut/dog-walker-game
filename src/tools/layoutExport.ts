@@ -31,7 +31,7 @@ import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScr
 import {
   COLLAR_HEIGHTS,
   DOG_SILHOUETTES,
-  laneHalfWidth,
+  LANE_HALF_WIDTH,
   PACK_FEET,
   PACK_SLOTS,
   PART_INSET,
@@ -46,10 +46,10 @@ import {
   rowScale,
 } from "../layout/projection";
 import type { Rect } from "../layout/rect";
-import { screenLayout } from "../layout/screenLayout";
+import { screenLayout, walkerFootY } from "../layout/screenLayout";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
-import { walkerFootY, walkProjection } from "../runner/walkGeometry";
+import { walkProjection } from "../runner/walkGeometry";
 import { fontMetrics } from "../ui/fontMetrics";
 import { readBitmapFont } from "./fontFile";
 
@@ -142,7 +142,7 @@ export function layoutExport(
     pack: {
       collarHeights: COLLAR_HEIGHTS,
       feet: PACK_FEET,
-      laneHalfWidth: laneHalfWidth(),
+      laneHalfWidth: LANE_HALF_WIDTH,
       partInset: PART_INSET,
       silhouettes: { dogs: DOG_SILHOUETTES, walkers: WALKER_SILHOUETTES },
       slots: PACK_SLOTS,

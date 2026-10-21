@@ -1,5 +1,8 @@
 import type { Rect } from "./rect";
 
+// How far the walker's feet stand above the bottom of the road.
+const WALKER_FEET_ABOVE_ROAD_BOTTOM = 4;
+
 export interface ScreenConfig {
   backdropHeight: number;
   dogCardHeight: number;
@@ -59,4 +62,9 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
     topBar: { height: config.topBarHeight, width, x: 0, y: 0 },
     walkView: { ...roadView, height: dogRowY - backdrop.y, y: backdrop.y },
   };
+}
+
+// The screen row the walker's feet stand on.
+export function walkerFootY(road: Rect): number {
+  return road.y + road.height - WALKER_FEET_ABOVE_ROAD_BOTTOM;
 }
