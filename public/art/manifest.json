@@ -6635,10 +6635,6 @@
       "png": "images/ui-top-bar.png"
     },
     {
-      "key": "ui-touch-hint",
-      "png": "images/ui-touch-hint.png"
-    },
-    {
       "key": "ui-zone-banner",
       "png": "images/ui-zone-banner.png"
     }

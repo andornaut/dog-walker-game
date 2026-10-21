@@ -29,7 +29,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import DARKER, K, Grid  # noqa: E402
-from ui import ZONE_COLOURS, chrome, to_image  # noqa: E402
+from ui import ZONE_COLOURS, chrome, to_image, touch_hint  # noqa: E402
 
 W, H = 344, 236
 HEX = {k: tuple(int(v[i:i + 2], 16) for i in (0, 2, 4)) for k, v in K.items()}
@@ -505,10 +505,10 @@ class Scene(Canvas):
                     self.paste(src.resize(size, Image.NEAREST), x + xs[1][i], y + ys[1][j])
 
     def drag(self, x0, x1, y):
-        """ui-touch-hint's drag, laid out for one drag: the fingertip pressed at x1 on the two-way
+        """The touch hint's drag (ui.touch_hint), laid out for one drag: the fingertip pressed at x1 on the two-way
         track, the hand below it, and the touch marks it left fading back to x0, where it began.
-        Pieces are cropped from the 96x36 export, whose fingertip glow is centred at 48,6."""
-        hint = image("ui-touch-hint")
+        Pieces are cropped from its 96x36 drawing, whose fingertip glow is centred at 48,6."""
+        hint = to_image(touch_hint().outlined())
         ox, oy = x1 - 48, y - 6
         # the track: the hint's arrowheads (its outer 22 columns) either side of the drag, joined
         # by its plain middle column
@@ -522,9 +522,9 @@ class Scene(Canvas):
         self.finger(x1, y)
 
     def finger(self, x, y):
-        """ui-touch-hint's fingertip pressed at x, y: its glow, then the hand below, both cropped
+        """The touch hint's fingertip pressed at x, y: its glow, then the hand below, both cropped
         clear of the track."""
-        hint = image("ui-touch-hint")
+        hint = to_image(touch_hint().outlined())
         self.paste(hint.crop((44, 1, 52, 10)), x - 4, y - 5)
         self.paste(hint.crop((39, 10, 59, 35)), x - 9, y + 4)
 

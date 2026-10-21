@@ -12,8 +12,8 @@ nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the walker section's ui-cork (16x16 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
 and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
-ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48),
-ui-touch-hint (96x36) and ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
+ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48)
+and ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
 wood behind the dog slots).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row, drawn as a character file card;
 a tag per dog key and `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn
@@ -1162,7 +1162,7 @@ def stitch(horizontal):
     return g
 
 
-# ---------- run screen: top bar, zone progress, quips, zone banner, touch hint ----------
+# ---------- run screen: top bar, zone progress, quips, zone banner ----------
 
 def well(g, x, y, w, h):
     """A recessed ink slot in the wood: clipped corners and a dark brown lip below and to the right."""
@@ -1351,8 +1351,8 @@ def chevron(g, x, cy, left, col, sh):
 
 def touch_hint():
     """96x36: a fingertip pressed on a two-way track, with fading touch marks either side and
-    speed lines, for the first-run lane hint. The game writes "drag to switch lanes" in font-body
-    under it."""
+    speed lines. Not exported: help.py crops it for the help pages' drag illustrations. The game
+    shows no overlay tips over the play area."""
     g = Grid(96, 36)
     # the track: a line between two arrowheads
     g.rect(9, 5, 78, 2, "amber")
@@ -1413,7 +1413,6 @@ IMAGES = {
     "ui-quip-tail-up": lambda: to_image(quip_tail_up().outlined(False)),
     "ui-celebrate-burst": lambda: to_image(celebrate_burst().outlined(False)),
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
-    "ui-touch-hint": lambda: to_image(touch_hint().outlined()),
     "ui-dog-band": lambda: to_image(dog_band().outlined(False)),
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
     "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
