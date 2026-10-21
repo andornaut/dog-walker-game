@@ -1,7 +1,7 @@
 import type { DogId, Effect, GameData, HeartsEffect, MoneyEffect, Target } from "../data/types";
+import { assertNever } from "../lib/assertNever";
 import { heartsOf, mapPack, packDogs, placeInPack } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
-import { assertNever } from "./assertNever";
 import {
   type Cause,
   type Change,

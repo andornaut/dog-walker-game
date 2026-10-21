@@ -1,4 +1,4 @@
-import type { Point, Rect } from "./rect";
+import type { Point, Rect } from "../lib/rect";
 
 // The loading screen's art, placed as art/tools/screens.py draws it, in screen pixels.
 export const LOADING_ART = {

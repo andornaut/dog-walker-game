@@ -1,11 +1,11 @@
 import type { GameData } from "../data/types";
 import { dollarText } from "../home/home";
+import { fillLine } from "../lib/lines";
 import { currentZone, walkLength } from "../rules/route";
 import { payZone } from "../rules/run";
 import { cents } from "../rules/units";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
-import { fillLine } from "../text/lines";
 import { RUN_TEXT_FIELDS } from "./runText";
 
 // One line of the Home question's note, by what it says: lose (drawn red) or zonesLeft.

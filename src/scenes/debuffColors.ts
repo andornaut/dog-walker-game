@@ -1,4 +1,4 @@
-import { PALETTE } from "./palette";
+import { PALETTE } from "../ui/phaser/palette";
 
 // Each debuff bar's colours the game draws with: the fill, the name, and the face drawn while
 // the bar art is missing. The name holds 4.5:1 on the face.

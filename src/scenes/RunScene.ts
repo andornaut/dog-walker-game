@@ -23,6 +23,7 @@ import { type ExplainShown } from "../hud/walkHud";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { AmbientView } from "../road/phaser/ambientView";
+import { BackdropView } from "../road/phaser/backdropView";
 import type { CardView, Choice } from "../rules/choices";
 import { currentZone, currentZoneId, zoneAt } from "../rules/route";
 import {
@@ -48,10 +49,10 @@ import {
 import { startRoad, type Walk, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun } from "../state/runState";
+import { colorFromHex } from "../ui/phaser/palette";
 import type { HudSceneData } from "./HudScene";
 import type { HudRun, RunHudView } from "./hudWalk";
 import { onWindowEvent } from "./overlay";
-import { colorFromHex } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import {
   applySound,
@@ -63,7 +64,6 @@ import {
   type Settings,
   walkerSpriteKey,
 } from "./profileStore";
-import { BackdropView } from "./run/backdropView";
 import { HitBoxView } from "./run/hitBoxView";
 import { blendWalk, leadWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";

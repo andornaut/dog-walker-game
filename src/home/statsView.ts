@@ -1,7 +1,7 @@
 import type { DogId, GameData } from "../data/types";
+import { fillLine } from "../lib/lines";
 import type { DogStats, Owned, SaveStats } from "../save/schema";
 import { statsPage, ZERO_DOG_STATS } from "../save/stats";
-import { fillLine } from "../text/lines";
 import { dollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";
 

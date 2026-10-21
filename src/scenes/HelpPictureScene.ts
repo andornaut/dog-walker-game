@@ -8,14 +8,14 @@ import { type HelpPicture, helpPicture, TOUCH_DRAG } from "../help/helpPictures"
 import { changeLabels } from "../hud/hudView";
 import type { RunPause } from "../hud/topBar";
 import { DOG_REACTIONS } from "../layout/hitEffects";
-import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import type { Rect } from "../lib/rect";
 import { currentZone } from "../rules/route";
 import { laneMotionX } from "../runner/laneMotion";
+import { colorFromHex, PALETTE } from "../ui/phaser/palette";
 import type { CardSceneData } from "./CardScene";
 import type { HudSceneData } from "./HudScene";
 import type { HudWalk } from "./hudWalk";
-import { colorFromHex, PALETTE } from "./palette";
 import { walkerSpriteKey } from "./profileStore";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { PackView } from "./run/packView";

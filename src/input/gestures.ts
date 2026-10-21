@@ -1,6 +1,6 @@
 import type { LaneDirection } from "../layout/lanes";
-import { containsPoint, type Point, type Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
+import { containsPoint, type Point, type Rect } from "../lib/rect";
 
 // Distances are in screen pixels. A lane-width is the road width over laneCount.
 // swipeStartDistance: the travel that takes a drag's first lane step, and the travel back that

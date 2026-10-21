@@ -5,10 +5,10 @@ import { gameData } from "../../data";
 import type { DogId } from "../../data/types";
 import type { DepthDraw } from "../../layout/depthScale";
 import { PACK_DEPTH, tautLeashLine } from "../../layout/packFormation";
-import { drawPixelLine } from "../../scenes/draw";
-import { PALETTE } from "../../scenes/palette";
 import type { Shadow } from "../../scenes/run/stage";
 import { addStandingSprite, playTag, showAtDepth } from "../../scenes/sprites";
+import { drawPixelLine } from "../../ui/phaser/draw";
+import { PALETTE } from "../../ui/phaser/palette";
 import { type Feet, type LeashLine, leashLine, packLayers, type StandingDog } from "../packDraw";
 
 // The leashes' colour off the road, at the start screen's gate and on the end screen's walk

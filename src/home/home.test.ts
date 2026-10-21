@@ -9,11 +9,11 @@ import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
+import { fillNames } from "../lib/lines";
 import { cents, readTable } from "../rules/units";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import type { LastWalk, Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import { fillNames } from "../text/lines";
 import {
   buy,
   type BuyResult,

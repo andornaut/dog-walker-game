@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
+import { itemAt } from "../lib/arrays";
 import { packOrder } from "../state/pack";
 import type { PackDogs } from "../state/runState";
 import { defined } from "../testing/defined";

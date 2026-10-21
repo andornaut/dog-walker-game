@@ -1,11 +1,11 @@
 import type { GameData, WalkerId, ZoneId } from "../data/types";
 import { earningsKind } from "../home/endView";
 import { signedDollarText } from "../home/home";
+import { fillLine, fillNames } from "../lib/lines";
 import type { Change } from "../rules/causes";
 import { type Cents, cents } from "../rules/units";
 import { agilityWord, newWalkers } from "../rules/walkers";
 import type { RunState } from "../state/runState";
-import { fillLine, fillNames } from "../text/lines";
 import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
 

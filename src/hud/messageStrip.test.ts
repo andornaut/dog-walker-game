@@ -5,17 +5,17 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { GearId, UpgradeId, WalkerPerkId } from "../data/types";
-import { type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { fillLine, fillNames } from "../lib/lines";
+import { type Rect } from "../lib/rect";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { testState } from "../testing/runState";
-import { fillLine, fillNames } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { type EffectItem, effectLine, effectName } from "./effectIcons";
 import {
   EMPTY_MESSAGE_STRIP,

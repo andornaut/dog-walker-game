@@ -1,6 +1,5 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../arrays";
 import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import { ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
@@ -27,20 +26,21 @@ import {
 } from "../home/returnHome";
 import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
-import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
+import { itemAt } from "../lib/arrays";
+import { fillLine } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 import { PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import type { LastWalk } from "../save/schema";
-import { fillLine } from "../text/lines";
+import { addDisplayText } from "../ui/phaser/displayText";
+import { drawShadow, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText, fitPixelText, inkSpan, pixelFontMetrics } from "../ui/phaser/pixelText";
+import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
-import { addDisplayText } from "./displayText";
-import { drawShadow, fillRect } from "./draw";
 import { onBackPressed } from "./overlay";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
-import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, inkSpan, pixelFontMetrics } from "./pixelText";
 import {
   currentSettings,
   lastRunEnd,

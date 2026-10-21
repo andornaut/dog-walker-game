@@ -1,5 +1,5 @@
-import { itemAt } from "../arrays";
 import { type LaneDirection, moveLane } from "../layout/lanes";
+import { itemAt } from "../lib/arrays";
 
 // moveDuration is in seconds, the time one lane change takes.
 export interface LaneMotionConfig {

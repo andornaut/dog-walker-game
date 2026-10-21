@@ -6,21 +6,21 @@ import type { DetailCard } from "../home/detail";
 import type { Logbook } from "../home/home";
 import { CARD_TEXT_ROOM, cardTextRows, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
-import { GREYED } from "../home/selection";
-import { closeControl } from "../layout/closeControl";
-import { insetRect, type Rect } from "../layout/rect";
-import { WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
-import { fillLine } from "../text/lines";
-import { addDim, drawFramedRect, drawRing, fillRect } from "./draw";
-import { artTextureKey, PADLOCK_KEYS } from "./itemArt";
-import { PALETTE } from "./palette";
+import { fillLine } from "../lib/lines";
+import { insetRect, type Rect } from "../lib/rect";
+import { closeControl } from "../ui/closeControl";
+import { addDim, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
   type FontRole,
   pixelFontMetrics,
   wrapPixelText,
-} from "./pixelText";
+} from "../ui/phaser/pixelText";
+import { GREYED } from "../ui/selection";
+import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { artTextureKey, PADLOCK_KEYS } from "./itemArt";
 import {
   addCloseButton,
   addLoopingFrame,

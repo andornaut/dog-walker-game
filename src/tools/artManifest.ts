@@ -15,7 +15,7 @@ import {
 } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
 import { standsOnGround } from "../assets/spriteKeys";
-import { opaqueBoundsOfRgba } from "../ui/pixelShapes";
+import { opaqueBoundsOfRgba } from "../lib/opaqueBounds";
 import { jsonText } from "./files";
 
 // public/art/manifest.json, derived from the files under public/art/. A key is its file's

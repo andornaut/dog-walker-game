@@ -1,10 +1,10 @@
 import { debuffIconKey } from "../assets/iconKeys";
 import type { GameData } from "../data/types";
+import { fillLine, fillNames } from "../lib/lines";
 import { maxHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { placeInPack } from "../state/pack";
 import type { RunState } from "../state/runState";
-import { fillLine, fillNames } from "../text/lines";
 import { effectIconKey, effectItems, effectLine, effectName } from "./effectIcons";
 import { messageIconKey } from "./messageStrip";
 import { RUN_TEXT_FIELDS } from "./runText";

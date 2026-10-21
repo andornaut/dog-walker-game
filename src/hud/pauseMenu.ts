@@ -1,4 +1,4 @@
-import type { Rect } from "../layout/rect";
+import type { Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
 
 // The menu's buttons, top to bottom; each one's label is menuText.pause[item].

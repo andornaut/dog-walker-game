@@ -4,7 +4,6 @@ import { backdropKey, roadStartKey, roadTileKey } from "../../assets/spriteKeys"
 import { gameData } from "../../data";
 import type { Zone } from "../../data/types";
 import { DEV_ROAD_FADE_KEY } from "../../dev/devOverlay";
-import type { Rect } from "../../layout/rect";
 import {
   drawRoad,
   type PixelImage,
@@ -16,9 +15,10 @@ import {
   stripLevels,
   stripLines,
 } from "../../layout/roadRaster";
+import type { Rect } from "../../lib/rect";
 import { zoneAt } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
-import { colorFromHex } from "../palette";
+import { colorFromHex } from "../../ui/phaser/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 const ROAD_TEXTURE = "road-projected";

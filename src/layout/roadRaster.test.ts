@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
+import { itemAt } from "../lib/arrays";
+import {
+  crossesLine,
+  dotColor,
+  dottedBands,
+  isLawn,
+  mownAt,
+  seamRow,
+  type Verge,
+  vergeBase,
+  VERGES,
+  walkFrom,
+} from "../road/roadside";
 import { roadProjection, rowScale } from "./projection";
 import {
   drawRoad,
@@ -21,18 +33,6 @@ import {
   stripLevels,
   stripLines,
 } from "./roadRaster";
-import {
-  crossesLine,
-  dotColor,
-  dottedBands,
-  isLawn,
-  mownAt,
-  seamRow,
-  type Verge,
-  vergeBase,
-  VERGES,
-  walkFrom,
-} from "./roadside";
 import { screenLayout, walkerFootY } from "./screenLayout";
 
 const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);

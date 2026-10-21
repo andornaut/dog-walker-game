@@ -1,7 +1,7 @@
+import type { Rect } from "../lib/rect";
+import { cardRowRects, type CardRowSpec } from "../ui/cardRow";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
-import { cardRowRects, type CardRowSpec } from "./cardRow";
-import type { Rect } from "./rect";
-import type { TextFitStyle } from "./textFit";
+import type { TextFitStyle } from "../ui/textFit";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
 // on the road, and the enlarged card a hold opens, card-frame-large, centred in the dimmed band

@@ -1,6 +1,6 @@
-import { type Point, type Rect, rectsOverlap } from "../layout/rect";
+import { signedText } from "../lib/lines";
+import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
-import { signedText } from "../text/lines";
 
 // The heart change, dodge and forgiven moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {

@@ -11,9 +11,9 @@ import {
   badgeWall,
   celebrationTitle,
 } from "../home/badgesView";
-import type { Rect } from "../layout/rect";
-import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, pixelFontMetrics } from "./pixelText";
+import type { Rect } from "../lib/rect";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText, fitPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { playTagOnce } from "./sprites";
 import { addPanel, showTag, tagFrame, TEXT_SCALE } from "./uiKit";
 

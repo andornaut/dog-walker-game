@@ -1,7 +1,7 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { wrapWords } from "../text/lines";
+import { wrapWords } from "../lib/lines";
+import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { DEBUFF_BAR } from "./walkHud";
 

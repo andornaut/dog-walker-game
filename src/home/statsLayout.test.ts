@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { TEXT_SCALE } from "../layout/textFit";
+import { fillLine, wrapWords } from "../lib/lines";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
-import { fillLine, wrapWords } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { TEXT_SCALE } from "../ui/textFit";
 import { badgeWall } from "./badgesView";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {

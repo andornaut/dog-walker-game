@@ -1,9 +1,9 @@
 import type { DogId } from "../data/types";
-import type { GridSpec } from "../layout/grid";
 import type { PackPlacement } from "../layout/packFormation";
-import type { Rect } from "../layout/rect";
-import type { TextFitStyle } from "../layout/textFit";
+import type { Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import type { GridSpec } from "../ui/grid";
+import type { TextFitStyle } from "../ui/textFit";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on

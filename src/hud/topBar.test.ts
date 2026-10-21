@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
-import { containsPoint } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { containsPoint } from "../lib/rect";
 import {
   gameplayAllowed,
   pauseButtonIcon,

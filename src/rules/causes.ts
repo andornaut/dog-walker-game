@@ -1,7 +1,7 @@
 import type { CardOption, DogId, GameData } from "../data/types";
+import { assertNever } from "../lib/assertNever";
+import { fillNames } from "../lib/lines";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
-import { fillNames } from "../text/lines";
-import { assertNever } from "./assertNever";
 import { sign } from "./effectText";
 import type { Contribution } from "./modifiers";
 import { type Cents, type Hearts, roundDollars } from "./units";

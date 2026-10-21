@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { fittingText, type TextFitStyle } from "../layout/textFit";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { plainMarks } from "../ui/pixelFont";
+import { fittingText, type TextFitStyle } from "../ui/textFit";
 import { CELEBRATION_LAYOUT as LAYOUT, GREETING_FIT, greetingLineTops } from "./celebrationLayout";
 
 // Each version's big line, upper-cased in font-display as addDisplayText draws it.

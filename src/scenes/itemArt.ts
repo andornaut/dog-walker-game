@@ -1,12 +1,12 @@
 import type { GameObjects, Scene } from "phaser";
 
-import type { ArtLook, Padlock } from "../home/interaction";
-import { PLATE_LOOKS, type PlateKind } from "../home/selection";
-import type { Rect } from "../layout/rect";
-import { fillRect } from "./draw";
+import type { Rect } from "../lib/rect";
+import type { ArtLook, Padlock } from "../ui/interaction";
+import { fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
+import { PLATE_LOOKS, type PlateKind } from "../ui/selection";
 import { disabledTextureKey, silhouetteTextureKey } from "./greyTextures";
-import { PALETTE } from "./palette";
-import { addPixelText, pixelFontMetrics } from "./pixelText";
 import { TEXT_SCALE } from "./uiKit";
 
 // The home screen's and the shop's art keys, each with a drawn stand-in below while missing.

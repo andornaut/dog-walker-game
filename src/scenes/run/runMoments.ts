@@ -42,7 +42,8 @@ import {
   tipSide,
   whiteFlash,
 } from "../../layout/hitEffects";
-import type { Rect } from "../../layout/rect";
+import type { Random } from "../../lib/random";
+import type { Rect } from "../../lib/rect";
 import {
   amountText,
   type Change,
@@ -57,7 +58,6 @@ import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
-import type { Random } from "../../runner/random";
 import {
   type EncounterCard,
   isMinorObstacle,

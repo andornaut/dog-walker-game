@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { shadowTexture } from "../draw";
+import { shadowTexture } from "../../ui/phaser/draw";
 import { spriteMetrics } from "../sprites";
 import { DEPTH, type Shadow } from "./stage";
 

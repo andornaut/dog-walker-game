@@ -1,7 +1,6 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
-import { distanceAtY, type RoadProjection, roadXAt, rowScale } from "./projection";
-import type { Rect } from "./rect";
+import type { Rect } from "../lib/rect";
 import {
   dotColor,
   dottedBands,
@@ -22,7 +21,8 @@ import {
   type VergeMark,
   VERGES,
   walkFrom,
-} from "./roadside";
+} from "../road/roadside";
+import { distanceAtY, type RoadProjection, roadXAt, rowScale } from "./projection";
 
 // The projected road drawn a screen row at a time into a pixel buffer: every row samples one
 // row of the zone's road strip, stretched across by the row's scale, with the verge either

@@ -1,6 +1,5 @@
 import { Scene } from "phaser";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { HomeNoteLine } from "../hud/homeQuestion";
@@ -16,16 +15,17 @@ import {
 } from "../hud/pauseMenu";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
-import { rectIndexAt } from "../layout/grid";
-import { insetRect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { fillRect } from "./draw";
+import { itemAt } from "../lib/arrays";
+import { insetRect } from "../lib/rect";
+import { rectIndexAt } from "../ui/grid";
+import { fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
+import { addRampDim } from "../ui/phaser/rampDim";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
-import { PALETTE } from "./palette";
-import { addPixelText, pixelFontMetrics, wrapPixelText } from "./pixelText";
-import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";

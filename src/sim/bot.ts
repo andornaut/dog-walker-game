@@ -1,11 +1,11 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { chance, type Random } from "../lib/random";
 import { approachOutcomes } from "../runner/approach";
 import { type LanedBox, levelWithPack, touchesAsDrawn } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
 import type { PullEvent, Pulls } from "../runner/pulls";
-import { chance, type Random } from "../runner/random";
 import {
   isPullObstacle,
   itemCategory,

@@ -1,20 +1,20 @@
 import { Scene, Scenes } from "phaser";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import type { HelpPictureId } from "../data/types";
 import { helpBody } from "../help/helpBody";
 import { helpActionForKey, helpActionForPointer } from "../help/helpInput";
-import { dotRects, HELP_LAYOUT, helpActionAt, type Point } from "../help/helpLayout";
+import { dotRects, HELP_LAYOUT, helpActionAt } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { closeHelp } from "../help/helpSeen";
-import { insetRect, type Rect } from "../layout/rect";
-import { addFilledRect } from "./draw";
+import { itemAt } from "../lib/arrays";
+import { insetRect, type Point, type Rect } from "../lib/rect";
+import { addFilledRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText } from "../ui/phaser/pixelText";
 import type { HelpPictureData } from "./HelpPictureScene";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss } from "./overlay";
-import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
 import { updateProfile } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { addCloseButton, addMenuButton, addTapBurst, clearScene, TEXT_SCALE } from "./uiKit";

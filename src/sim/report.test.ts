@@ -23,7 +23,7 @@ vi.mock("./simulate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./simulate")>();
   const { cents } = await import("../rules/units");
   const { newRun } = await import("../state/runState");
-  const { seededRandom } = await import("../runner/random");
+  const { seededRandom } = await import("../lib/random");
   const { SKILL_PRESETS } = await import("./skills");
   const simulateRun: typeof actual.simulateRun = (data, seed, config) => {
     const random = seededRandom(seed);

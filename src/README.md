@@ -41,7 +41,7 @@ The player-facing rules (controls, layout, movers, pulls, feedback) are in `game
 
 ### Source layout
 
-Each context keeps its pure code at its root and the code that imports Phaser in a `phaser/` subfolder. A moved module leaves a one-line re-export at its old path until its importers move to the new one.
+Each context keeps its pure code at its root and the code that imports Phaser in a `phaser/` subfolder.
 
 - `src/assets/`: manifest and Aseprite parsing, art keys and depth steps; `atlas/` packs the atlases at build time
 - `src/audio/`: sound cues, the music and effects mix, and the sound format

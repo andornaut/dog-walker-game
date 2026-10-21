@@ -1,8 +1,8 @@
 import { laneDirectionForKey } from "../input/keyBindings";
-import { type CloseControl, pageCloseControl } from "../layout/closeControl";
-import type { Rect } from "../layout/rect";
-import { textFitStylesOnLines } from "../layout/textFit";
+import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
+import { type CloseControl, pageCloseControl } from "../ui/closeControl";
+import { textFitStylesOnLines } from "../ui/textFit";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
 export const VOLUME_STEPS = 20;

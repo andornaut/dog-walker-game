@@ -1,10 +1,10 @@
 import type { GameData } from "../data/types";
 import { boxStyles, CARD_LAYOUT, cardEffectBox, FIRES_FIT } from "../layout/cardLayout";
-import { type FittedText, fittingText, type TextFitStyle } from "../layout/textFit";
+import { fillLine } from "../lib/lines";
 import { firesText, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
-import { fillLine } from "../text/lines";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 import { RUN_TEXT_FIELDS } from "./runText";
 
 // What a card's plaque may say, longest first: the first that fits its room is shown. A path

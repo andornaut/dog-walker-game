@@ -1,9 +1,16 @@
 import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
-import { itemAt } from "../arrays";
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
 import { loadsFirst } from "../assets/atlas/atlasLayout";
 import { type AssetManifest, assetUrl, parseManifest, type SpriteAsset } from "../assets/manifest";
+import {
+  addAtlasTextures,
+  ART_BASE_URL,
+  atlasPageBytes,
+  loadManifest,
+  MANIFEST_CACHE_KEY,
+  queueManifestArt,
+} from "../assets/phaser/manifestArt";
 import {
   DOG_FRAME_SIDES,
   dogFaceKey,
@@ -26,20 +33,13 @@ import {
   loadingWalkerAt,
   stepFraction,
 } from "../layout/loadingScreen";
+import { itemAt } from "../lib/arrays";
 import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
+import { addFilledRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { registerFallbackPixelFont } from "../ui/phaser/pixelText";
 import { markArtReady } from "./artReady";
-import { addFilledRect } from "./draw";
 import { onLoadProgress } from "./loadProgress";
-import {
-  addAtlasTextures,
-  ART_BASE_URL,
-  atlasPageBytes,
-  loadManifest,
-  MANIFEST_CACHE_KEY,
-  queueManifestArt,
-} from "./manifestArt";
-import { PALETTE } from "./palette";
-import { registerFallbackPixelFont } from "./pixelText";
 import { currentSettings, openProfile, profileSave, walkerInUse } from "./profileStore";
 import { nextRunStart } from "./run/runRecorder";
 import { runSceneData } from "./run/runStart";

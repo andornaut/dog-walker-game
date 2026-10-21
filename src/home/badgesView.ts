@@ -1,11 +1,11 @@
 import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementId, GameData } from "../data/types";
-import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, type TextFitStyle, textFitStylesOnLines } from "../layout/textFit";
+import { fillLine, wrapWords } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 import { achievementProgress } from "../rules/achievements";
 import type { SaveDocument } from "../save/schema";
-import { fillLine, wrapWords } from "../text/lines";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES, type TextFitStyle, textFitStylesOnLines } from "../ui/textFit";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
 export interface BadgeView {

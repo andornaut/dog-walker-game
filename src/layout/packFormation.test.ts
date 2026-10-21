@@ -2,13 +2,13 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { decodePng } from "../assets/atlas/atlasBuild";
 import { spriteSource } from "../assets/atlas/atlasLayout";
 import { dogSpriteKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
+import { itemAt } from "../lib/arrays";
 import { laneCenterXs } from "./lanes";
 import {
   COLLAR_HEIGHTS,

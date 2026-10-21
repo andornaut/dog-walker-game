@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { dollarText } from "../home/home";
 import { screenLayout } from "../layout/screenLayout";
+import { itemAt } from "../lib/arrays";
+import { fillNames, wrapWords } from "../lib/lines";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics } from "../testing/fontInk";
-import { fillNames, wrapWords } from "../text/lines";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import {
   homeQuestionLayout,

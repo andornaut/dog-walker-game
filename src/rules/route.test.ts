@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { WORLD } from "../data/world";
-import { seededRandom } from "../runner/random";
+import { seededRandom } from "../lib/random";
 import {
   currentZone,
   defaultRoute,

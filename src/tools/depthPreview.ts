@@ -1,4 +1,4 @@
-import { blankImage, type RgbaImage } from "../atlas/atlasPixels";
+import { blankImage, type RgbaImage } from "../assets/atlas/atlasPixels";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { project, type RoadProjection } from "../layout/projection";
 import type { Rect } from "../lib/rect";

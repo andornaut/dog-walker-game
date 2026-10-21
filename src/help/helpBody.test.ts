@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { placeholders } from "../text/lines";
+import { placeholders } from "../lib/lines";
 import { HELP_BODY_FIELDS, helpBody, helpBodyValues } from "./helpBody";
 
 const { debuffs, tuning } = gameData;

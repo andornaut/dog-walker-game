@@ -39,17 +39,22 @@ import {
 } from "../hud/moments";
 import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
-import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { fillNames } from "../lib/lines";
+import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
-import { fillNames } from "../text/lines";
-import { addDisplayText } from "./displayText";
-import { drawFramedRect, drawRing } from "./draw";
+import { addDisplayText } from "../ui/phaser/displayText";
+import { drawFramedRect, drawRing } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import {
+  addPixelText,
+  fitPixelText,
+  pixelFontMetrics,
+  placePixelText,
+} from "../ui/phaser/pixelText";
 import type { HudWalk } from "./hudWalk";
 import { onSceneEvent } from "./overlay";
-import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, pixelFontMetrics, placePixelText } from "./pixelText";
 import { firstTag, playEffect, playTag } from "./sprites";
 import { addPanel, artFits, tagFrame } from "./uiKit";
 

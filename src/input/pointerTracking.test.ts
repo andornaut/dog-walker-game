@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { clampIndex } from "../arrays";
 import { type ScreenConfig, screenLayout } from "../layout/screenLayout";
+import { clampIndex } from "../lib/arrays";
+import { chance, type Random, randomInt, randomPick, seededRandom } from "../lib/random";
 import {
   advanceLaneControl,
   isSteeringLocked,
@@ -12,7 +13,6 @@ import {
   steerLane,
 } from "../runner/laneControl";
 import { destinationLane, stillInLane } from "../runner/laneMotion";
-import { chance, type Random, randomInt, randomPick, seededRandom } from "../runner/random";
 import type { GestureAction } from "./gestures";
 import {
   type ExplainChange,

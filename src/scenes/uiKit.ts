@@ -2,22 +2,22 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
-import { buttonState, type InteractionInput, type TileState } from "../home/interaction";
+import { containsPoint, insetRect, type Rect } from "../lib/rect";
+import { BADGE_OFFSET } from "../ui/badge";
+import type { CloseControl } from "../ui/closeControl";
+import { buttonState, type InteractionInput, type TileState } from "../ui/interaction";
+import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText } from "../ui/phaser/pixelText";
 import {
   BUTTON_COLORS,
   type ButtonLook,
   DISABLED_COLORS,
   type SelectLook,
   selectLook,
-} from "../home/selection";
-import { BADGE_OFFSET } from "../layout/badge";
-import type { CloseControl } from "../layout/closeControl";
-import { containsPoint, insetRect, type Rect } from "../layout/rect";
-import { TEXT_SCALE } from "../layout/textFit";
-import { drawFramedRect, drawRing, fillRect } from "./draw";
+} from "../ui/selection";
+import { TEXT_SCALE } from "../ui/textFit";
 import { disabledTextureKey } from "./greyTextures";
-import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
 

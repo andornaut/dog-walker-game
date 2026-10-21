@@ -4,10 +4,8 @@ import {
   disabledTextureKey as greyCopyKey,
   silhouetteTextureKey as flatCopyKey,
 } from "../assets/phaser/greyTextures";
-import { GREYED } from "../home/selection";
-import { PALETTE } from "./palette";
-
-export { greyTextureKey } from "../assets/phaser/greyTextures";
+import { PALETTE } from "../ui/phaser/palette";
+import { GREYED } from "../ui/selection";
 
 // The grey copy of a disabled tile's art, GREYED.copyDarker steps down the neutral ramp.
 export function disabledTextureKey(scene: Scene, key: string): string {

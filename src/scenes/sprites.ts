@@ -5,8 +5,8 @@ import type { SpriteAnchor } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
 import { depthVariantKey, ROAD_SPRITE_SIZE, standsOnGround } from "../assets/spriteKeys";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
-import { opaqueBoundsOfRgba, type PixelBounds } from "../layout/pixelShapes";
 import { SCALE_STEPS } from "../layout/projection";
+import { opaqueBoundsOfRgba, type PixelBounds } from "../lib/opaqueBounds";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
 // opaqueWidth how wide its drawn pixels are; both from its first frame.

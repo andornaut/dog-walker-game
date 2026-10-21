@@ -1,7 +1,7 @@
-import { itemAt } from "../arrays";
 import { DOGS } from "../data/dogs";
 import type { GameData, GearId, WalkerId } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
+import { itemAt } from "../lib/arrays";
 import { itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";

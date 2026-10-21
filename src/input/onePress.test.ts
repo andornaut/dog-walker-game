@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { chance, randomInt, seededRandom } from "../runner/random";
+import { chance, randomInt, seededRandom } from "../lib/random";
 import { followOnePress, type OnePressStep } from "./onePress";
 import type { PointerPhase } from "./pointerTracking";
 

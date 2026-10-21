@@ -1,13 +1,13 @@
 import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
+import { fillLine } from "../lib/lines";
 import { isHeavy, sizeHearts } from "../rules/dogs";
 import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
-import { fillLine } from "../text/lines";
+import type { Padlock } from "../ui/interaction";
 import { dogFeeText, dollarText, type HomeLoadout, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
-import type { Padlock } from "./interaction";
 import { walkerDetailLines, walkerLockedLine } from "./walkers";
 
 type DetailData = Pick<

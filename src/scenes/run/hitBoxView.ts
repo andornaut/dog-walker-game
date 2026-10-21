@@ -5,7 +5,7 @@ import { project, screenYAt } from "../../layout/projection";
 import { type Box, itemBox, type ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { blocksLane, obstacleHitBox, packBoxes, type Walk } from "../../runner/walk";
-import { PALETTE } from "../palette";
+import { PALETTE } from "../../ui/phaser/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 // Over every road sprite and burst, under the popups and banners.

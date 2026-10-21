@@ -14,11 +14,16 @@ import {
   quipRoom,
   quipSide,
 } from "../hud/walkHud";
-import { type Rect, rectsOverlap } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { drawFramedRect } from "./draw";
-import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, pixelFontMetrics, placePixelText } from "./pixelText";
+import { type Rect, rectsOverlap } from "../lib/rect";
+import { drawFramedRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import {
+  addPixelText,
+  fitPixelText,
+  pixelFontMetrics,
+  placePixelText,
+} from "../ui/phaser/pixelText";
 import { firstTag, playTag } from "./sprites";
 import { addNineSlice, addPanel, BUBBLE_FADE_MS, fadeAway } from "./uiKit";
 

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { closeFace } from "../layout/closeControl";
-import { type Rect } from "../layout/rect";
+import { wrapWords } from "../lib/lines";
+import { type Rect } from "../lib/rect";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
-import { wrapWords } from "../text/lines";
+import { closeFace } from "../ui/closeControl";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { helpBody } from "./helpBody";
 import {

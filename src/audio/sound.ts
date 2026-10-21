@@ -3,7 +3,7 @@
 
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
-import { assertNever } from "../rules/assertNever";
+import { assertNever } from "../lib/assertNever";
 
 export type BaseCue =
   "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";

@@ -1,6 +1,5 @@
 import type { GameObjects, Scene, Tweens } from "phaser";
 
-import { itemAt } from "../../arrays";
 import { SQUIRREL_ICON_KEY } from "../../assets/iconKeys";
 import { dogSpriteKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
@@ -8,6 +7,7 @@ import type { DogId } from "../../data/types";
 import { GRACE_BLINK, graceAlpha } from "../../layout/graceBlink";
 import { formationOrder, packDogOf, packPlacements } from "../../layout/packFormation";
 import { distanceAtY, project } from "../../layout/projection";
+import { itemAt } from "../../lib/arrays";
 import type { StandingDog } from "../../pack/packDraw";
 import { type Figure, PackFigures } from "../../pack/phaser/packFigures";
 import { currentZone } from "../../rules/route";
@@ -16,9 +16,9 @@ import { laneMotionX } from "../../runner/laneMotion";
 import { pullPose, type Pulls } from "../../runner/pulls";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
+import { colorFromHex } from "../../ui/phaser/palette";
 import { playBarkWord } from "../comicWord";
 import { trotOffRoad } from "../feedbackMoments";
-import { colorFromHex } from "../palette";
 import { type DogSignal, dogTop, iconArt, playPullFail, PullSignals } from "../pullSignals";
 import { playEffect, playTag, playTagOnce, spriteMetrics } from "../sprites";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";

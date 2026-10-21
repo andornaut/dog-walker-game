@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DebuffId } from "../data/types";
+import { fillNames } from "../lib/lines";
 import type { HeartChange } from "../rules/causes";
 import { bumpHearts } from "../rules/run";
 import { cents, clampHearts } from "../rules/units";
 import { testState } from "../testing/runState";
-import { fillNames } from "../text/lines";
 import {
   bumpLine,
   debuffChanges,

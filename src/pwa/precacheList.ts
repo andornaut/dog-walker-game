@@ -1,5 +1,5 @@
+import { ATLAS_MANIFEST_PATH, parseAtlasManifest } from "../assets/atlas/atlasManifest";
 import { assetUrl, parseManifest } from "../assets/manifest";
-import { ATLAS_MANIFEST_PATH, parseAtlasManifest } from "../atlas/atlasManifest";
 import type { SoundFormat } from "../audio/soundFormat";
 import { isHashedAssetUrl } from "./cachePolicy";
 

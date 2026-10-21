@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, LiveTuning, WalkerId } from "../data/types";
+import { fillNames } from "../lib/lines";
 import { cents } from "../rules/units";
 import type { StorageState } from "../save/profile";
 import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import { fillNames } from "../text/lines";
 import type { HomeLoadout } from "./home";
 import {
   bubbleSpeech,

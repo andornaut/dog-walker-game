@@ -18,8 +18,7 @@ import {
   sayLineAhead,
   stepMessageStrip,
 } from "../hud/messageStrip";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
-import { PALETTE } from "./palette";
+import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
@@ -27,7 +26,8 @@ import {
   type PixelTextStyle,
   placePixelText,
   setPixelText,
-} from "./pixelText";
+} from "../ui/phaser/pixelText";
+import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { addPanel } from "./uiKit";
 
 // A line said from the run scene, as { icon, text }: the HUD shows it on its message strip.

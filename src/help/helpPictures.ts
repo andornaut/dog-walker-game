@@ -1,4 +1,3 @@
-import { itemAt } from "../arrays";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type {
   DogId,
@@ -9,10 +8,10 @@ import type {
   UpgradeId,
 } from "../data/types";
 import { cardRowSpec } from "../layout/cardLayout";
-import { cardHeader, cardRowRects } from "../layout/cardRow";
 import { laneCenterXs } from "../layout/lanes";
-import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { itemAt } from "../lib/arrays";
+import type { Point, Rect } from "../lib/rect";
 import type { Change } from "../rules/causes";
 import { cardFor, type CardView, forkCard, MAX_CARD_OPTIONS } from "../rules/choices";
 import { firstZoneId, forkPaths, middleZoneId } from "../rules/route";
@@ -39,6 +38,7 @@ import {
   type PackSlot,
   type RunState,
 } from "../state/runState";
+import { cardHeader, cardRowRects } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
 
 // Each help page's picture: a still moment of the walk screen, drawn by the game's own road,

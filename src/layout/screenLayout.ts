@@ -1,4 +1,4 @@
-import type { Rect } from "./rect";
+import type { Rect } from "../lib/rect";
 
 // How far the walker's feet stand above the bottom of the road.
 const WALKER_FEET_ABOVE_ROAD_BOTTOM = 4;

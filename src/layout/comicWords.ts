@@ -1,5 +1,5 @@
 import type { EncounterId } from "../data/types";
-import type { Point } from "./rect";
+import type { Point } from "../lib/rect";
 
 // Where the comic words, drawn in font-comic, sit on the effects they letter, in the effect
 // frame's pixels from its top-left. A word's place is its ring's top-left.

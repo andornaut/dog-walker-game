@@ -41,7 +41,6 @@ const CONTEXTS = {
   assets: [
     "data",
     "layout/loadingScreen",
-    "layout/pixelShapes",
     "lib",
     "state/runState",
     "tools/artManifest",

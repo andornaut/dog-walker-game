@@ -1,7 +1,7 @@
 import type { Plugin } from "vite";
 
+import { ATLAS_MANIFEST_PATH } from "../assets/atlas/atlasManifest";
 import { assetUrl } from "../assets/manifest";
-import { ATLAS_MANIFEST_PATH } from "../atlas/atlasManifest";
 import { ART_BASE_URL, ART_MANIFEST_URL, cacheKeyFor } from "./cachePolicy";
 import {
   artManifestUrls,

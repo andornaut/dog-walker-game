@@ -1,8 +1,8 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
-import { type TextFitStyle, textFitStylesOnLines } from "../layout/textFit";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { type TextFitStyle, textFitStylesOnLines } from "../ui/textFit";
 
 const SCREEN_WIDTH = SCREEN_CONFIG.width;
 const CENTER_X = SCREEN_WIDTH / 2;

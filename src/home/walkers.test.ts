@@ -4,8 +4,8 @@ import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import { agilityWord } from "../rules/walkers";
 import { newPlayerSave } from "../save/fixtures";
+import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";
 import { homeLine } from "./homeText";
-import { type ItemTile, itemTileLook, type TileState } from "./interaction";
 import { tapWalker, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
 
 const save = {

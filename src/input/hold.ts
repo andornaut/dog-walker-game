@@ -1,4 +1,4 @@
-import type { Point } from "../layout/rect";
+import type { Point } from "../lib/rect";
 import { exceedsTapDistance } from "./gestures";
 
 // A press held holdMs without moving more than slopPx holds instead of tapping. A rule with

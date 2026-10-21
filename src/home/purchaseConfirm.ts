@@ -1,8 +1,8 @@
 import type { GameData } from "../data/types";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { fillLine } from "../lib/lines";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
-import { fillLine } from "../text/lines";
 import { buy, type BuyResult, dollarText, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
 

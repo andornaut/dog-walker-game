@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId, ZoneId } from "../data/types";
+import { fillNames } from "../lib/lines";
 import type { Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
 import { agilityWord } from "../rules/walkers";
-import { fillNames } from "../text/lines";
 import { perkIconKey } from "./effectIcons";
 import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
 

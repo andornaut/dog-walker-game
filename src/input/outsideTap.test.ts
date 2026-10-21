@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Point, Rect } from "../layout/rect";
+import type { Point, Rect } from "../lib/rect";
 import {
   isOutside,
   type OutsideArea,

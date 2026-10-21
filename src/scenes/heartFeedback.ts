@@ -13,12 +13,12 @@ import {
 } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl, curvePoint } from "../hud/moments";
-import type { Point, Rect } from "../layout/rect";
-import { drawFramedRect } from "./draw";
+import type { Point, Rect } from "../lib/rect";
+import { drawFramedRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText } from "../ui/phaser/pixelText";
 import { FEEDBACK_ART } from "./feedbackArt";
 import type { HudWalk } from "./hudWalk";
-import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
 import { playEffect, playTag, playTagOnce } from "./sprites";
 
 // Over the cards and the HUD's own labels.

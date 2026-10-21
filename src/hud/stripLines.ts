@@ -1,10 +1,10 @@
 import type { DebuffId, DogId, EncounterId, GameData } from "../data/types";
+import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
 import { cents } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
-import { fillLine, fillNames } from "../text/lines";
 import type { MessageLine } from "./messageStrip";
 import { MOMENTS } from "./moments";
 import { STRIP_LINE_FIELDS } from "./runText";

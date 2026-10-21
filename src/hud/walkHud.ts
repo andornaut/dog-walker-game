@@ -1,11 +1,11 @@
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId, GameData } from "../data/types";
-import { containsPoint, type Point, type Rect, rectsOverlap } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
-import type { TextFitStyle } from "../layout/textFit";
+import { fillNames } from "../lib/lines";
+import { containsPoint, type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { walkLength } from "../rules/route";
-import { fillNames } from "../text/lines";
+import type { TextFitStyle } from "../ui/textFit";
 import { maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 

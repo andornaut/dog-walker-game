@@ -1,7 +1,7 @@
-import type { Point, Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { messageStripLayout } from "./messageStrip";
 import { OWNER_TAB, WALK_BAR } from "./walkHud";
 

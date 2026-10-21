@@ -8,8 +8,8 @@ import {
   tallestPackLength,
 } from "../layout/packFormation";
 import { type RoadCamera, type RoadProjection, roadProjection } from "../layout/projection";
-import type { Rect } from "../layout/rect";
 import { walkerFootY } from "../layout/screenLayout";
+import type { Rect } from "../lib/rect";
 import type { RoadGeometry } from "./walk";
 
 // A pickup's or lucky find's hit box is its lanes less the inset at each side, a cell's spare

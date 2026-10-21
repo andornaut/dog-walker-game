@@ -1,7 +1,7 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../arrays";
 import { SKIP_CARD_ART } from "../assets/cardArt";
+import { greyTextureKey } from "../assets/phaser/greyTextures";
 import {
   CARD_FRAME_KEY,
   cardFrameTag,
@@ -10,8 +10,6 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { PLAIN_ITEM, tileState } from "../home/interaction";
-import { DISABLED_COLORS, GREYED } from "../home/selection";
 import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
@@ -26,10 +24,9 @@ import {
   largeCardRect,
   plaqueRoom,
 } from "../layout/cardLayout";
-import { cardHeader, cardRowRects } from "../layout/cardRow";
-import { rectIndexAt } from "../layout/grid";
-import { insetRect, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { itemAt } from "../lib/arrays";
+import { insetRect, type Rect } from "../lib/rect";
 import {
   type CardView,
   type Choice,
@@ -39,11 +36,13 @@ import {
   type OptionView,
 } from "../rules/choices";
 import type { CardSource } from "../state/runState";
+import { cardHeader, cardRowRects } from "../ui/cardRow";
 import { inkRowsOfLines } from "../ui/fontMetrics";
-import { addDisplayText, hasDisplayFont } from "./displayText";
-import { drawRing, fillRect } from "./draw";
-import { greyTextureKey } from "./greyTextures";
-import { PALETTE } from "./palette";
+import { rectIndexAt } from "../ui/grid";
+import { PLAIN_ITEM, tileState } from "../ui/interaction";
+import { addDisplayText, hasDisplayFont } from "../ui/phaser/displayText";
+import { drawRing, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
@@ -54,9 +53,10 @@ import {
   pixelFontMetrics,
   setFittedText,
   setPixelText,
-} from "./pixelText";
+} from "../ui/phaser/pixelText";
+import { addRampDim } from "../ui/phaser/rampDim";
+import { DISABLED_COLORS, GREYED } from "../ui/selection";
 import { currentSettings } from "./profileStore";
-import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { addStandingSprite, playTag } from "./sprites";

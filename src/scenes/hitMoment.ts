@@ -3,10 +3,10 @@ import type { GameObjects, Scene } from "phaser";
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
-import type { Point, Rect } from "../layout/rect";
+import type { Point, Rect } from "../lib/rect";
+import { addDisplayText } from "../ui/phaser/displayText";
+import { PALETTE } from "../ui/phaser/palette";
 import { letterEffect, loadedComicWordWidth } from "./comicWord";
-import { addDisplayText } from "./displayText";
-import { PALETTE } from "./palette";
 import { playEffect } from "./sprites";
 import { addNineSlice, tagFrame } from "./uiKit";
 

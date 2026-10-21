@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { fillLine } from "../lib/lines";
+import { cents } from "../rules/units";
+import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { plainMarks } from "../ui/pixelFont";
 import {
   fittingText,
   TEXT_FIT_STYLES,
   type TextFitStyle,
   WRAPPING_TEXT_FIT_STYLES,
-} from "../layout/textFit";
-import { cents } from "../rules/units";
-import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
-import { fillLine } from "../text/lines";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { plainMarks } from "../ui/pixelFont";
+} from "../ui/textFit";
 import { badgeNameFit, badgeNameTops, badgeStrip, CELEBRATION_PANEL } from "./badgesView";
 import {
   breakdownLabelRoom,

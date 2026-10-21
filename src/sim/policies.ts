@@ -1,6 +1,6 @@
+import { chance, type Random } from "../lib/random";
 import { type CardView, type Choice, type ChoiceData, chooseOption } from "../rules/choices";
 import type { Cents } from "../rules/units";
-import { chance, type Random } from "../runner/random";
 import type { RunState } from "../state/runState";
 
 // heartsUnlessLow: take hearts unless an owner whose meter falls would end at LOW_HEARTS or

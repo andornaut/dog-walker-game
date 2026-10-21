@@ -1,5 +1,5 @@
-import { clampIndex } from "../arrays";
-import type { Rect } from "./rect";
+import { clampIndex } from "../lib/arrays";
+import type { Rect } from "../lib/rect";
 
 export type LaneDirection = -1 | 1;
 

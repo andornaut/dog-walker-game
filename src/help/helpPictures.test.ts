@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
 import { cardRowSpec } from "../layout/cardLayout";
-import { cardHeader, cardRowRects } from "../layout/cardRow";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
+import { itemAt } from "../lib/arrays";
 import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
+import { cardHeader, cardRowRects } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
 import { HELP_SCENES, helpPicture, type PictureStrip } from "./helpPictures";
 

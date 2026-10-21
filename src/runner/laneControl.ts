@@ -1,5 +1,5 @@
-import { clampIndex } from "../arrays";
 import type { LaneDirection } from "../layout/lanes";
+import { clampIndex } from "../lib/arrays";
 import {
   destinationLane,
   type LaneMotion,

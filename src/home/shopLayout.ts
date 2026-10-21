@@ -1,7 +1,7 @@
-import { closeControl } from "../layout/closeControl";
-import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
+import type { Rect } from "../lib/rect";
+import { closeControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { SHOP_TABS } from "./shop";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:

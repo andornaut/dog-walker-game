@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { type PictureStrip, stripViewports } from "../help/helpPictures";
-import type { Rect } from "../layout/rect";
+import type { Rect } from "../lib/rect";
 
 // A scene drawn as a still picture of the screen inside frame: a camera per strip shows its
 // screen rows, top to bottom. A scene shown this way takes no input.

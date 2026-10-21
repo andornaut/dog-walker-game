@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { approachOutcomes } from "../runner/approach";
 import { hitDog } from "../runner/collision";
@@ -16,7 +17,6 @@ import {
   moverPlacements,
 } from "../runner/movers";
 import { NO_PULLS } from "../runner/pulls";
-import { seededRandom } from "../runner/random";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import { blockingLength } from "../runner/spawning";
 import {

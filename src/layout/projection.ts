@@ -1,5 +1,5 @@
 import { DEPTH_STEPS } from "../assets/depthSteps";
-import type { Rect } from "./rect";
+import type { Rect } from "../lib/rect";
 
 // The pseudo-3D road. Game logic keeps the flat road: x is a point's screen x at the pack
 // (a lane's centre), and distance is how far ahead of the walker's feet it is, in road

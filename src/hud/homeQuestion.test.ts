@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { dollarText } from "../home/home";
+import { fillNames } from "../lib/lines";
 import { currentZone, defaultRoute, walkLength } from "../rules/route";
 import { cents, read, roundDollars } from "../rules/units";
 import { testState } from "../testing/runState";
-import { fillNames } from "../text/lines";
 import { homeQuestionNote } from "./homeQuestion";
 
 type Slots = Readonly<Partial<Record<DogId, number | "fired">>>;

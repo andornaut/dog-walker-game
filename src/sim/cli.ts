@@ -4,9 +4,9 @@ import { writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import type { GearId, WalkerId } from "../data/types";
+import { itemAt } from "../lib/arrays";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,

@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
-import type { Rect } from "../layout/rect";
+import { wrapWords } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics } from "../testing/fontInk";
-import { wrapWords } from "../text/lines";
 import { plainMarks } from "../ui/pixelFont";
 import { bubbleRect, speechLines } from "./bubbleRect";
 import { dogInfo, gearInfo, type Purchase } from "./home";

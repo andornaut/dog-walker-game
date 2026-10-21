@@ -11,6 +11,7 @@ import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
+import { seededRandom } from "../lib/random";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { testPack } from "../testing/packGeometry";
@@ -29,7 +30,6 @@ import {
   pullWalk,
   stepPulls,
 } from "./pulls";
-import { seededRandom } from "./random";
 import {
   planZone,
   type RoadGeometry,

@@ -5,10 +5,10 @@ import type { EncounterId } from "../../data/types";
 import { zoneBannerHeading } from "../../hud/zoneCelebration";
 import { currentZone } from "../../rules/route";
 import type { RunState } from "../../state/runState";
-import { addDisplayText } from "../displayText";
-import { fillRect } from "../draw";
-import { PALETTE } from "../palette";
-import { addPixelText } from "../pixelText";
+import { addDisplayText } from "../../ui/phaser/displayText";
+import { fillRect } from "../../ui/phaser/draw";
+import { PALETTE } from "../../ui/phaser/palette";
+import { addPixelText } from "../../ui/phaser/pixelText";
 import { fadeAway } from "../uiKit";
 import { DEPTH, LAYOUT } from "./stage";
 

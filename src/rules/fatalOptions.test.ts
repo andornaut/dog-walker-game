@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { fillNames } from "../lib/lines";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { fillNames } from "../text/lines";
 import { causeLabel, firedByText } from "./causes";
 import { cardFor, firesText } from "./choices";
 import { resolveEffects } from "./effects";

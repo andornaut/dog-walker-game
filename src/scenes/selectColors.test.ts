@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
 import { gameData } from "../data";
+import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
   BUTTON_COLORS,
   DISABLED_COLORS,
@@ -9,9 +10,8 @@ import {
   PLATE_LOOKS,
   type PlateKind,
   selectLook,
-} from "../home/selection";
+} from "../ui/selection";
 import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
-import { NEUTRAL_RAMP, PALETTE } from "./palette";
 
 // WCAG relative luminance and contrast ratio.
 function luminance(color: number): number {

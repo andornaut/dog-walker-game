@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { type Random, seededRandom } from "../lib/random";
 import { cardFor } from "../rules/choices";
 import { cents } from "../rules/units";
-import { type Random, seededRandom } from "../runner/random";
 import type { CardSource, RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import {

@@ -1,5 +1,5 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import type { Rect } from "../layout/rect";
+import type { Rect } from "../lib/rect";
 import { HOME_LAYOUT } from "./homeLayout";
 import type { ConfirmChoice } from "./purchaseConfirm";
 

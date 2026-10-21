@@ -1,5 +1,5 @@
-import { itemAt } from "../arrays";
 import type { GameData, Zone, ZoneId } from "../data/types";
+import { itemAt } from "../lib/arrays";
 import type { RunState } from "../state/runState";
 
 export type RouteData = Pick<GameData, "world">;

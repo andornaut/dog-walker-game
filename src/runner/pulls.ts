@@ -1,6 +1,6 @@
-import { clampIndex } from "../arrays";
 import type { DogId, GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { clampIndex } from "../lib/arrays";
 import { countTally } from "../rules/achievements";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { TUNING } from "../data/tuning";
+import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import {
   drawMover,
@@ -28,7 +29,6 @@ import {
   stepSpots,
   sweptLanes,
 } from "./movers";
-import { seededRandom } from "./random";
 
 // 100px/s: a 1s warning is 100px, and a crosser at 2 lanes a second crosses 0.02 lanes a pixel.
 const geometry: MoverGeometry = {

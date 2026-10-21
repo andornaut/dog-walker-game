@@ -9,7 +9,6 @@ import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
-import { type ArtLook, PLAIN_ITEM, tileState } from "../home/interaction";
 import {
   answerPurchase,
   type ConfirmChoice,
@@ -18,7 +17,6 @@ import {
   type PendingPurchase,
   requestPurchase,
 } from "../home/purchaseConfirm";
-import { GREYED, type PlateKind } from "../home/selection";
 import {
   dogRows,
   gearRows,
@@ -61,13 +59,23 @@ import {
   stepScroll,
   wheelScroll,
 } from "../input/listScroll";
-import { containsPoint, type Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { fillLine } from "../lib/lines";
+import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
-import { fillLine } from "../text/lines";
+import { type ArtLook, PLAIN_ITEM, tileState } from "../ui/interaction";
+import { drawFramedRect, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import {
+  addPixelText,
+  fitPixelText,
+  type FontRole,
+  pixelFontMetrics,
+  placePixelText,
+} from "../ui/phaser/pixelText";
+import { GREYED, type PlateKind } from "../ui/selection";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { drawFramedRect, fillRect } from "./draw";
 import { addAffordFrame, type DetailPicture, drawDetailCard } from "./homePanels";
 import {
   addLock,
@@ -79,14 +87,6 @@ import {
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
-import { PALETTE } from "./palette";
-import {
-  addPixelText,
-  fitPixelText,
-  type FontRole,
-  pixelFontMetrics,
-  placePixelText,
-} from "./pixelText";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirmView";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";

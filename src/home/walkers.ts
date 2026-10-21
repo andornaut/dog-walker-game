@@ -1,11 +1,11 @@
 import type { GameData, WalkerId } from "../data/types";
+import { fillLine } from "../lib/lines";
 import { cents } from "../rules/units";
 import { agilityWord, walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
-import { fillLine } from "../text/lines";
+import { type ItemTile, itemTile } from "../ui/interaction";
 import { togglePick } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
-import { type ItemTile, itemTile } from "./interaction";
 
 type WalkerText = Pick<GameData, "homeText" | "walkerPerks" | "walkers" | "world">;
 

@@ -15,8 +15,8 @@ import type {
   Stat,
   Target,
 } from "../data/types";
-import { fillNames } from "../text/lines";
-import { assertNever } from "./assertNever";
+import { assertNever } from "../lib/assertNever";
+import { fillNames } from "../lib/lines";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
 

@@ -11,9 +11,9 @@ import type {
   UpgradeId,
   ZoneId,
 } from "../data/types";
+import { fillNames } from "../lib/lines";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
-import { fillNames } from "../text/lines";
 import { countOptionTally } from "./achievements";
 import {
   amountText,

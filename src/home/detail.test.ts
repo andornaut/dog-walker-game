@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
+import { fillNames } from "../lib/lines";
 import { sizeHearts } from "../rules/dogs";
 import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import { fillNames } from "../text/lines";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { dogFeeText } from "./home";
 import { homeLine } from "./homeText";

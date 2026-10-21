@@ -1,4 +1,5 @@
-import { itemAt } from "../arrays";
+import { itemAt } from "../lib/arrays";
+import { type Random, randomPick } from "../lib/random";
 import {
   type LaneSpan,
   type MoverCaps,
@@ -8,7 +9,6 @@ import {
   type OnScreen,
   placeMovers,
 } from "./movers";
-import { type Random, randomPick } from "./random";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
 export interface Footprint {

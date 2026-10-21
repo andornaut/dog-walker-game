@@ -1,7 +1,7 @@
 import type { DebuffId, GameData, HelpPage } from "../data/types";
+import { fillNames } from "../lib/lines";
 import { formatDollars } from "../rules/effectText";
 import { read, readTable } from "../rules/units";
-import { fillNames } from "../text/lines";
 
 // The {name}s a help page's body may use, each filled from the game data when the page shows,
 // so a tuning change never leaves a stale number.

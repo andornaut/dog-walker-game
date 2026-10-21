@@ -1,5 +1,5 @@
 import type { MinorObstacleId } from "../data/types";
-import type { Point } from "./rect";
+import type { Point } from "../lib/rect";
 
 // The cues of a plain obstacle's hit, a mover's hit and a contact obstacle's splash, all over
 // the road at its fx depth. They are cosmetic: nothing here reads or changes the walk.

@@ -1,11 +1,9 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import { closeTopOnBar, pageCloseControl } from "../layout/closeControl";
-import { rectIndexAt } from "../layout/grid";
-import { containsPoint, type Point, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { containsPoint, type Point, type Rect } from "../lib/rect";
+import { closeTopOnBar, pageCloseControl } from "../ui/closeControl";
+import { rectIndexAt } from "../ui/grid";
 import type { HelpAction } from "./helpPaging";
-
-export type { Point } from "../layout/rect";
 
 const { height, width } = SCREEN_CONFIG;
 const TOP_BAR = screenLayout(SCREEN_CONFIG).topBar;

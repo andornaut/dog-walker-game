@@ -1,4 +1,4 @@
-import type { Point } from "../layout/rect";
+import type { Point } from "../lib/rect";
 
 // A press on the page beside the game's canvas (the margins of a wide screen, below a short
 // one) counts as a tap outside an open overlay too, by the same tap rule. Only the bare page

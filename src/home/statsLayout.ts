@@ -1,6 +1,6 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import { pageCloseControl } from "../layout/closeControl";
-import type { Rect } from "../layout/rect";
+import type { Rect } from "../lib/rect";
+import { pageCloseControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
 
 export type StatsTab = "badges" | "dogs" | "runs";

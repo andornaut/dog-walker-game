@@ -11,7 +11,7 @@ import {
   screenArea,
 } from "../input/outsideTap";
 import { gamePoint, onBarePage } from "../input/pageTap";
-import type { Rect } from "../layout/rect";
+import type { Rect } from "../lib/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { read } from "../rules/units";
 import { listenOnePress } from "./onePress";

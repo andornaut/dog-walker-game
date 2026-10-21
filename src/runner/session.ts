@@ -1,5 +1,6 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { type Random, randomStream } from "../lib/random";
 import type { MoneyChange } from "../rules/causes";
 import {
   type CardData,
@@ -15,7 +16,6 @@ import { read } from "../rules/units";
 import type { CardSource, RunState } from "../state/runState";
 import { holdForFiring } from "./firingStop";
 import { NO_PULLS, type PullData, type Pulls, type PullStep, stepPulls } from "./pulls";
-import { type Random, randomStream } from "./random";
 import {
   finishZone,
   headHome,

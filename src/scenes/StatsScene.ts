@@ -13,7 +13,6 @@ import {
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
-import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   DETAIL_TEXT_WIDTH,
@@ -28,15 +27,13 @@ import {
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { closeControl } from "../layout/closeControl";
-import { rectIndexAt } from "../layout/grid";
-import { containsPoint, type Rect } from "../layout/rect";
-import type { TextFitStyle } from "../layout/textFit";
-import { fillLine } from "../text/lines";
-import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
-import { addDim, fillRect } from "./draw";
-import { closeOverlay, listenDismiss } from "./overlay";
-import { PALETTE } from "./palette";
+import { fillLine } from "../lib/lines";
+import { containsPoint, type Rect } from "../lib/rect";
+import { closeControl } from "../ui/closeControl";
+import { rectIndexAt } from "../ui/grid";
+import { PLAIN_ITEM, tileState } from "../ui/interaction";
+import { addDim, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   type FontRole,
@@ -45,7 +42,10 @@ import {
   scalePixelText,
   setPixelText,
   wrapPixelText,
-} from "./pixelText";
+} from "../ui/phaser/pixelText";
+import type { TextFitStyle } from "../ui/textFit";
+import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
+import { closeOverlay, listenDismiss } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { listenTargetPress } from "./targetPress";

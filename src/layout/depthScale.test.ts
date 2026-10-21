@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
-import { itemAt } from "../arrays";
 import { DEPTH_STEPS, splitDepthKey, stepSize } from "../assets/depthSteps";
 import { parseManifest } from "../assets/manifest";
 import { depthVariantKey, dogSpriteKey, standsOnGround } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
+import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";

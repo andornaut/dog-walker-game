@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
@@ -36,6 +35,8 @@ import {
 import type { LaneDirection } from "../layout/lanes";
 import type { PackSprites } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
+import { itemAt } from "../lib/arrays";
+import { seededRandom } from "../lib/random";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
@@ -56,7 +57,6 @@ import { approachOutcomes } from "./approach";
 import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
-import { seededRandom } from "./random";
 import {
   blocksLane,
   collectTip,

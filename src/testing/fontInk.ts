@@ -1,6 +1,6 @@
-import { type FittedText, fittingText, type TextFitStyle } from "../layout/textFit";
 import { readBitmapFont } from "../tools/fontFile";
 import { type FontMetrics, fontMetrics } from "../ui/fontMetrics";
+import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 
 // A font's rows, from its .fnt.
 export function fontFileMetrics(font: string): FontMetrics {

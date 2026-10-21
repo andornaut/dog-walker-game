@@ -9,13 +9,13 @@ import type {
   ZoneId,
 } from "../data/types";
 import type { InputEvent } from "../dev/inputLog";
+import { type Random, randomStream } from "../lib/random";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
 import { hasLeftRoad, moverPlace } from "../runner/movers";
-import { type Random, randomStream } from "../runner/random";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseCard,

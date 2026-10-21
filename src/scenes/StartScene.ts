@@ -1,6 +1,5 @@
 import { type GameObjects, Scene, type Time } from "phaser";
 
-import { itemAt } from "../arrays";
 import {
   dogFaceKey,
   dogPortraitKey,
@@ -70,13 +69,6 @@ import {
   walkerLineKey,
   walkerUnlockedSince,
 } from "../home/homeLines";
-import {
-  buttonState,
-  type ItemTile,
-  itemTile,
-  itemTileLook,
-  type TileState,
-} from "../home/interaction";
 import { porchOwners } from "../home/porch";
 import {
   homeSections,
@@ -86,7 +78,6 @@ import {
   type SectionState,
   startReady,
 } from "../home/sections";
-import { DISABLED_COLORS, type SelectLook } from "../home/selection";
 import { shopAffordable, type ShopTab } from "../home/shop";
 import type { StatsTab } from "../home/statsLayout";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
@@ -100,20 +91,40 @@ import { downTail } from "../hud/moments";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
-import { closeControl } from "../layout/closeControl";
-import { gridRects, rectIndexAt } from "../layout/grid";
 import type { PackPlacement } from "../layout/packFormation";
-import { containsPoint, insetRect, type Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { itemAt } from "../lib/arrays";
+import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { addFigure, PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import type { Cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
 import { packDogsOf } from "../state/pack";
+import { closeControl } from "../ui/closeControl";
+import { gridRects, rectIndexAt } from "../ui/grid";
+import {
+  buttonState,
+  type ItemTile,
+  itemTile,
+  itemTileLook,
+  type TileState,
+} from "../ui/interaction";
+import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import {
+  addPixelText,
+  fitPixelText,
+  type FontRole,
+  inkSpan,
+  pixelFontMetrics,
+  placePixelText,
+  scalePixelText,
+  setPixelText,
+} from "../ui/phaser/pixelText";
+import { DISABLED_COLORS, type SelectLook } from "../ui/selection";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import {
@@ -134,17 +145,6 @@ import {
 import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
-import { PALETTE } from "./palette";
-import {
-  addPixelText,
-  fitPixelText,
-  type FontRole,
-  inkSpan,
-  pixelFontMetrics,
-  placePixelText,
-  scalePixelText,
-  setPixelText,
-} from "./pixelText";
 import {
   currentSettings,
   isMuted,

@@ -7,13 +7,13 @@ import type { DogId, GearId, WalkerId } from "../data/types";
 import { type DetailCard, lockedDogDetail, lockedWalkerDetail } from "../home/detail";
 import { dogInfo, dogKindText, purchasePrice } from "../home/home";
 import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT } from "../home/homeLayout";
-import { type ItemLook, itemTile, itemTileLook } from "../home/interaction";
 import { walkerTile } from "../home/walkers";
-import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
 import { cents } from "../rules/units";
 import { agilityWord } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { fontInk } from "../testing/fontInk";
+import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
+import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 
 const OWNED: Owned = { dogSlots: 1, dogs: [], gear: [], walkers: [] };
 const DOGS = Object.keys(gameData.dogs) as DogId[];

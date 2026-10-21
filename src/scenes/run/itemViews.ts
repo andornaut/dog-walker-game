@@ -1,6 +1,5 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../../arrays";
 import {
   encounterSpriteKey,
   minorObstacleSpriteKey,
@@ -17,12 +16,13 @@ import type { EncounterId, HintTrigger, MinorObstacleId } from "../../data/types
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
+import { itemAt } from "../../lib/arrays";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { itemCategory, type Walk, type WalkItem, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
-import { PALETTE } from "../palette";
+import { PALETTE } from "../../ui/phaser/palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";

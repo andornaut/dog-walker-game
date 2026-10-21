@@ -1,14 +1,11 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { MenuText } from "../data/types";
 import { FEEDBACK } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
-import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
-import { DISABLED_COLORS } from "../home/selection";
 import {
   knobX,
   SETTINGS_ROW,
@@ -24,15 +21,18 @@ import {
   volumeSteps,
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { closeFace } from "../layout/closeControl";
-import { containsPoint, insetRect, type Rect } from "../layout/rect";
+import { itemAt } from "../lib/arrays";
+import { fillLine } from "../lib/lines";
+import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
-import { fillLine } from "../text/lines";
-import { drawFocusRing, fillRect } from "./draw";
+import { closeFace } from "../ui/closeControl";
+import { PLAIN_ITEM, tileState } from "../ui/interaction";
+import { drawFocusRing, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
+import { DISABLED_COLORS } from "../ui/selection";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss } from "./overlay";
-import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";

@@ -1,13 +1,13 @@
 import type { DogId, GameData, GearId } from "../data/types";
+import { fillLine } from "../lib/lines";
 import { capitalize } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { fillLine } from "../text/lines";
+import type { ItemLook } from "../ui/interaction";
 import { isAffordable, purchases } from "./afford";
 import { dogKindText, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
-import type { ItemLook } from "./interaction";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
 

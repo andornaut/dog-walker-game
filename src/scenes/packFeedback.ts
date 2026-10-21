@@ -5,11 +5,11 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { chipLeft, FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
 import { COMIC_WORDS } from "../layout/comicWords";
-import type { Point } from "../layout/rect";
+import type { Point } from "../lib/rect";
+import { drawFramedRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
+import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { letterEffect } from "./comicWord";
-import { drawFramedRect } from "./draw";
-import { PALETTE } from "./palette";
-import { addPixelText, pixelFontMetrics } from "./pixelText";
 import { playTagOnce } from "./sprites";
 import { fadeAway } from "./uiKit";
 

@@ -1,6 +1,6 @@
 import type { MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { type Random, randomPick } from "./random";
+import { type Random, randomPick } from "../lib/random";
 import type { RoadItem } from "./roadItems";
 
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover

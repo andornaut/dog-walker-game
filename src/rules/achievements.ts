@@ -8,9 +8,9 @@ import type {
   TallyId,
   Threshold,
 } from "../data/types";
+import { assertNever } from "../lib/assertNever";
 import type { SaveDocument } from "../save/schema";
 import type { RunState } from "../state/runState";
-import { assertNever } from "./assertNever";
 import { walkLength } from "./route";
 import { type Cents, dollarsToCents } from "./units";
 

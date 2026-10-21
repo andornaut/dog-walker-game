@@ -1,4 +1,4 @@
-import type { FieldTable } from "../text/lines";
+import type { FieldTable } from "../lib/lines";
 
 // The message strip's single lines, filled with fillLine(STRIP_LINE_FIELDS,
 // gameData.runText.strip, key, fields); its debuff lines are filled by debuff id.

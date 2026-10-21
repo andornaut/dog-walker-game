@@ -3,11 +3,11 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { fillNames } from "../lib/lines";
 import { cents } from "../rules/units";
 import { newPlayerSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import { fillNames } from "../text/lines";
 import { dollarText, type Purchase, purchasePrice } from "./home";
 import { answerPurchase, confirmLines, keyAnswer, requestPurchase } from "./purchaseConfirm";
 import { dogRows, gearRows, slotRows } from "./shop";

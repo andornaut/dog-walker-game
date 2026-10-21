@@ -1,7 +1,7 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import { isMuteKey, isPauseKey } from "../input/keyBindings";
-import { containsPoint, type Point } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { containsPoint, type Point } from "../lib/rect";
 import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
 // The walk bar's buttons (walkHud.ts), left to right. A press in a button's hit area is that

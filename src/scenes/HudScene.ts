@@ -56,8 +56,9 @@ import {
   walkBarLayout,
   zoneProgressText,
 } from "../hud/walkHud";
-import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
+import { fillLine } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
@@ -66,17 +67,8 @@ import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
 import { placeInPack } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
-import { fillLine } from "../text/lines";
-import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
-import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
-import { HudFeedback } from "./feedbackMoments";
-import { HeartFeedback, heartPops } from "./heartFeedback";
-import type { HudRun, HudWalk, RunHudView } from "./hudWalk";
-import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
-import { listenOnePress } from "./onePress";
-import { onSceneEvent } from "./overlay";
-import { OwnerTabs } from "./ownerTabs";
-import { PALETTE } from "./palette";
+import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "../ui/phaser/draw";
+import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
@@ -85,7 +77,15 @@ import {
   placePixelText,
   scalePixelText,
   setPixelText,
-} from "./pixelText";
+} from "../ui/phaser/pixelText";
+import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
+import { HudFeedback } from "./feedbackMoments";
+import { HeartFeedback, heartPops } from "./heartFeedback";
+import type { HudRun, HudWalk, RunHudView } from "./hudWalk";
+import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
+import { listenOnePress } from "./onePress";
+import { onSceneEvent } from "./overlay";
+import { OwnerTabs } from "./ownerTabs";
 import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,

@@ -1,4 +1,3 @@
-import { itemAt } from "../arrays";
 import type {
   DogId,
   EncounterId,
@@ -11,6 +10,8 @@ import type {
 import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
+import { itemAt } from "../lib/arrays";
+import { chance, type Random, randomPick } from "../lib/random";
 import { countBump, countTally } from "../rules/achievements";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -75,7 +76,6 @@ import {
   type StepShape,
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
-import { chance, type Random, randomPick } from "./random";
 import {
   type Footprint,
   planSpawns,

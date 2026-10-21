@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Point } from "../layout/rect";
+import type { Point } from "../lib/rect";
 import { helpActionForKey, helpActionForPointer } from "./helpInput";
 import type { HelpAction } from "./helpPaging";
 

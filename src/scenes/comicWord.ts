@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { COMIC_WORDS, type ComicGlyph, comicWordWidth } from "../layout/comicWords";
-import type { Point } from "../layout/rect";
+import type { Point } from "../lib/rect";
 
 // font-comic: the comic words' lettering, colours baked in, so drawn untinted.
 const COMIC_FONT = "font-comic";

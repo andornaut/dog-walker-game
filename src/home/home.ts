@@ -1,4 +1,5 @@
 import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
+import { fillLine, signedText } from "../lib/lines";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
 import { effectClause, sentenceList, SIZE_NAMES } from "../rules/effectText";
@@ -7,7 +8,6 @@ import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import { dogsWalked, walksPlayed } from "../save/stats";
-import { fillLine, signedText } from "../text/lines";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import bodyFont from "../../public/art/fonts/font-body.fnt?raw";
 import titleFont from "../../public/art/fonts/font-title.fnt?raw";
-import { plainMarks } from "../text/pixelFont";
+import { plainMarks } from "../ui/pixelFont";
 import { gameData } from "./index";
 
 // The characters a bitmap font file has a glyph for.

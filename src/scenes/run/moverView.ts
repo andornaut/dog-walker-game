@@ -1,6 +1,5 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../../arrays";
 import { animationKey } from "../../assets/asepriteAnimations";
 import {
   IDLE_TAG,
@@ -17,6 +16,7 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, MinorObstacleId } from "../../data/types";
 import { moverBodyArt } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
+import { itemAt } from "../../lib/arrays";
 import { read } from "../../rules/units";
 import {
   drawnLanes,

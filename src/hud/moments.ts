@@ -1,11 +1,11 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GameData } from "../data/types";
-import type { Point, Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import type { Point, Rect } from "../lib/rect";
 import { type FaceMood, faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
 import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import type { ChangeLabel } from "./hudView";
 import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
 

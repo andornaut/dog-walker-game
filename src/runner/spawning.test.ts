@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
+import { itemAt } from "../lib/arrays";
+import { seededRandom } from "../lib/random";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
-import { seededRandom } from "./random";
 import {
   blockingLength,
   everyLaneReaches,

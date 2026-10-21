@@ -3,13 +3,13 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, EncounterId, UpgradeId, ZoneId } from "../data/types";
 import { boxStyles, CARD_LAYOUT, FIRES_FIT, largeBodyBox, plaqueRoom } from "../layout/cardLayout";
-import type { TextFitStyle } from "../layout/textFit";
 import { cardFor, firesText, hasPlaque, type OptionView } from "../rules/choices";
 import { cents } from "../rules/units";
 import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { testState } from "../testing/runState";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import type { TextFitStyle } from "../ui/textFit";
 import { largeBodyText, plaqueTexts, smallCardText } from "./cardText";
 
 const BODY = fontFileMetrics("font-body");

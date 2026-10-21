@@ -1,7 +1,7 @@
 // The dev panel's logic, free of the DOM: the cheats, the save edits and the session keys it
 // shares with the game.
 import type { DogId, GameData, GearId, WalkerId, ZoneId } from "../data/types";
-import { assertNever } from "../rules/assertNever";
+import { assertNever } from "../lib/assertNever";
 import { firstZoneId, type RouteData } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import {

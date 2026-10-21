@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { AchievementCondition, DogId } from "../data/types";
-import type { TextFitStyle } from "../layout/textFit";
-import { assertNever } from "../rules/assertNever";
+import { assertNever } from "../lib/assertNever";
+import { fillNames } from "../lib/lines";
 import { newPlayerSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
-import { fillNames } from "../text/lines";
+import type { TextFitStyle } from "../ui/textFit";
 import {
   badgeProgress,
   badgeStrip,

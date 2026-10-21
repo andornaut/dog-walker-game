@@ -1,5 +1,5 @@
-import type { Rect } from "../layout/rect";
-import { wrapWords } from "../text/lines";
+import { wrapWords } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 
 // The walker's speech bubble: centred on x at the given top, moved left when it is tall enough
 // to reach the Pet shop's board so it ends clear of it by clearance, and kept margin from the
