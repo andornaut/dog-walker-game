@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import shippedManifest from "../../public/art/manifest.json";
+import { parseManifest } from "../assets/manifest";
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
@@ -20,6 +22,7 @@ import {
   newPlace,
   placeAmbient,
   SKY_ROWS,
+  skyRows,
   startAmbient,
   stepAmbient,
 } from "./ambient";
@@ -31,10 +34,11 @@ const FRAME_SECONDS = 1 / 60;
 const ZONES = Object.keys(gameData.ambient) as ZoneId[];
 const SPEED = gameData.tuning.pixels.roadScrollSpeed;
 const BAND_ROWS: readonly number[] = Object.values(CROSS_STREET);
-const SKY_ROWS_ALL = Array.from(
-  { length: SKY_ROWS.to - SKY_ROWS.from + 1 },
-  (_, i) => SKY_ROWS.from + i,
-);
+// Every feet row a sky mover can fly on.
+function skyRowsOf(mover: AmbientMover): number[] {
+  const { from, to } = skyRows(mover);
+  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+}
 const isSky = ({ mover }: { mover: AmbientMover }) => mover.path === "sky";
 
 function deps(seed: number, drawable: (mover: AmbientMover) => boolean = () => true): AmbientDeps {
@@ -88,7 +92,7 @@ describe("stepAmbient", () => {
 
       const onRoad = shown.filter((each) => {
         const { place } = each;
-        const rows = isSky(each) ? SKY_ROWS_ALL : BAND_ROWS;
+        const rows = isSky(each) ? skyRowsOf(each.mover) : BAND_ROWS;
         return place.band
           ? !rows.includes(place.y - LAYOUT.backdrop.y) || place.y >= LAYOUT.approach.y
           : Math.abs(place.x - centerX) < (roadHalf + ROAD_SPRITE_SIZE / 2) * place.scale;
@@ -141,20 +145,28 @@ describe("stepAmbient", () => {
     expect(places(4)).not.toEqual(places(3));
   });
 
-  // A plane built from a cross street car, until a zone's data lists a sky mover: it crosses
-  // the band's top rows both ways at full size, mirrored going left.
-  it("flies a sky mover across the band's top rows both ways at full size", () => {
+  // A plane built from a cross street car: it crosses the band's top rows both ways at full
+  // size, mirrored going left, its feet on its own rows or, without them, SKY_ROWS.
+  it.each([
+    { name: "SKY_ROWS", rows: undefined },
+    { name: "its own rows", rows: { from: 26, to: 40 } },
+  ])("flies a sky mover across $name both ways at full size", ({ rows }) => {
     const planes = gameData.ambient.street
       .filter(({ path }) => path === "crossStreet")
       .slice(0, 1)
-      .map((car): AmbientMover => ({ ...car, path: "sky" }));
+      .map((car): AmbientMover => ({ ...car, path: "sky", ...(rows && { rows }) }));
     expect(planes).toHaveLength(1);
+    const allowed = rows ?? SKY_ROWS;
     const shown = walkThrough("homeStretch", 600, 1, undefined, planes).flat();
     const wrong = shown.filter(
       ({ place }) =>
-        !place.band || place.scale !== 1 || !SKY_ROWS_ALL.includes(place.y - LAYOUT.backdrop.y),
+        !place.band ||
+        place.scale !== 1 ||
+        place.y - LAYOUT.backdrop.y < allowed.from ||
+        place.y - LAYOUT.backdrop.y > allowed.to,
     );
     expect(wrong).toEqual([]);
+    expect(new Set(shown.map(({ place }) => place.y)).size).toBeGreaterThan(1);
     expect(new Set(shown.map(({ place }) => place.flip))).toEqual(new Set([false, true]));
   });
 
@@ -215,5 +227,31 @@ describe("gaitTravel", () => {
     const bursts = burstHops(1);
     expect(bursts.length).toBeGreaterThan(5);
     expect(bursts.filter((hops) => hops !== 1 && hops !== 2)).toEqual([]);
+  });
+});
+
+describe("sky movers", () => {
+  const sprites = new Map(parseManifest(shippedManifest).sprites.map((each) => [each.key, each]));
+  const sheets = import.meta.glob<{
+    frames: Record<string, { sourceSize: { h: number; w: number } }>;
+  }>("../../public/art/sprites/*.json", { eager: true, import: "default" });
+  const sky = ZONES.flatMap((zone) =>
+    gameData.ambient[zone]
+      .filter((mover) => mover.path === "sky")
+      .flatMap((mover) => skyRowsOf(mover).map((row) => ({ key: mover.key, row, zone }))),
+  );
+
+  // The sprite's top row stays at or below the band's top edge, and its bottom row inside the
+  // band, at every feet row it can fly on.
+  it.each(sky)("draws $zone's $key inside the band with its feet on row $row", ({ key, row }) => {
+    const entry = sprites.get(key);
+    const sheet = entry === undefined ? undefined : sheets[`../../public/art/${entry.json}`];
+    const frame = sheet === undefined ? undefined : Object.values(sheet.frames)[0];
+    expect(entry?.anchor, key).toBeDefined();
+    expect(frame, key).toBeDefined();
+    const feetY = entry?.anchor?.feetY ?? 0;
+    const height = frame?.sourceSize.h ?? 0;
+    expect(row - feetY).toBeGreaterThanOrEqual(0);
+    expect(row - feetY + height).toBeLessThanOrEqual(LAYOUT.backdrop.height);
   });
 });

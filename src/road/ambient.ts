@@ -36,9 +36,15 @@ const OFF_SCREEN = ROAD_SPRITE_SIZE;
 const VERGE_DISTANCE = { dart: { from: 0.55, span: 0.3 }, sit: { from: 0.35, span: 0.45 } };
 // Hop bursts are counted up to this many, which no mover outlives.
 const MAX_BURSTS = 1000;
-// A sky mover's feet row, in band pixels, from..to: with a plane's feet on the 9th of its 10
-// rows, it flies within band rows 0 to 12, the clear sky above the tallest skyline.
+// A sky mover's feet row, in band pixels, from..to, when its data gives no rows: with a plane's
+// feet on the 9th of its 10 rows, it flies within band rows 0 to 12, the clear sky above the
+// tallest skyline.
 export const SKY_ROWS = { from: 9, to: 12 } as const;
+
+// The rows a sky mover's feet row is drawn from: its own, or SKY_ROWS.
+export function skyRows(mover: AmbientMover): { readonly from: number; readonly to: number } {
+  return mover.rows ?? SKY_ROWS;
+}
 
 // What the movers are placed against: the backdrop band's top row and width, and the road's
 // projection.
@@ -219,9 +225,11 @@ function setOut(
     case "crossWalk":
       slot.row = random() < 0.5 ? CROSS_STREET.nearWalk : CROSS_STREET.farWalk;
       return;
-    case "sky":
-      slot.row = SKY_ROWS.from + Math.floor(random() * (SKY_ROWS.to - SKY_ROWS.from + 1));
+    case "sky": {
+      const { from, to } = skyRows(mover);
+      slot.row = from + Math.floor(random() * (to - from + 1));
       return;
+    }
     case "sidewalkAway":
     case "sidewalkToward":
       slot.across = sidewalkAcross(verge);
