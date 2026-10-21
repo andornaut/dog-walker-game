@@ -6,8 +6,10 @@ The street ends at a T-junction: the bottom rows continue the pseudo-3D road
 below the band (the same projection, so the same road, curb and sidewalk edges
 at the same slope) up to a cross street that runs flat across the band. Beyond it the far side faces the camera: the
 zone's houses, park or shops, the scenery behind them (hills, a second row of houses, a
-town, a river) and the sky. The band, the approach and the camera come from the game's
-layout export. The scenery gags (cat on a perch, sprinkler, a kite caught in a tree) are separate
+town, a river) and the sky. The houses are slim, about as tall as they are wide under a steep
+gable (house with SLIM parts), with trees, hedges and side yards between them. The band, the
+approach and the camera come from the game's layout export. The scenery gags (cat on a perch,
+sprinkler, a kite caught in a tree) are separate
 sprites the game places in this band, on the near corners either side of the street.
 
 Rows, in band rows (0 to 173): the sky is one flat colour above row 61 (CALM), under the
@@ -112,12 +114,15 @@ def sunset(cv, cols, bottom):
 
 def hills(cv, top, bottom, col, edge, seed, amp=8):
     """Far rolling hills: a silhouette of col from about row top (up to amp rows lower) down
-    to row bottom, edge on its top row."""
+    to row bottom, edge on its top row. Returns the top row of each column."""
+    tops = []
     for x in range(W):
         t = 0.5 + 0.5 * math.sin(x * 0.017 + seed) * math.cos(x * 0.006 + seed * 1.7)
         y = top + round(amp * t)
         cv.fill(x, y, 1, bottom - y, col)
         cv.fill(x, y, 1, 1, edge)
+        tops.append(y)
+    return tops
 
 
 def block(cv, x, w, top, base, wall, line="plum", win="cyan"):
@@ -132,13 +137,14 @@ def block(cv, x, w, top, base, wall, line="plum", win="cyan"):
             cv.fill(wx + 1, wy + 1, 2, 3, win)
 
 
-def roofline(cv, base, roofs, col, lit=None):
+def roofline(cv, base, roofs, col, lit=None, step=2):
     """Far houses as one silhouette of col standing on row base: (x, w, wall rows) each under a
-    gable a quarter as tall as it is wide, with a lit window of lit in the wall when lit is given."""
+    gable that narrows step columns a side per row (2, a quarter as tall as the house is wide; 1, a
+    steep one half as tall), with a lit window of lit in the wall when lit is given."""
     for x, w, wall_h in roofs:
         cv.fill(x, base - wall_h, w, wall_h, col)
-        for k in range(w // 4 + 1):
-            cv.fill(x - 1 + 2 * k, base - wall_h - 1 - k, w + 2 - 4 * k, 1, col)
+        for k in range(w // (2 * step) + 1):
+            cv.fill(x - 1 + step * k, base - wall_h - 1 - k, w + 2 - 2 * step * k, 1, col)
         if lit:
             cv.fill(x + w // 2 - 1, base - wall_h + 2, 2, 2, lit)
 
@@ -212,38 +218,85 @@ def ground(cv, lawn="green"):
 # and the door's height. SMALL is the backdrops' house, under a 16-row roof.
 HOUSE = (6, 12, 10, 18)
 SMALL = (4, 10, 8, 13)
+# SLIM is the backdrops' slim house, under a steep 22-row roof: tall windows either side of the door.
+SLIM = (4, 8, 10, 13)
+# The lit left edge of a roof, a ramp step lighter than the roof.
+LIT = dict(slate="grey", dslate="slate", navy="dslate", purple="mauve", dred="red", brown="tan")
 
 
-def house(cv, x, w, wall, roof, door="dred", top=40, base=104, roof_h=26, parts=HOUSE, curtains=None):
-    """A house facing the camera, standing on row base: a gable roof roof_h rows tall from top.
-    curtains, a colour, draws the windows' curtains closed, lamplight in the gap between them."""
+def house(cv, x, w, wall, roof, door="dred", top=40, base=104, roof_h=26, parts=HOUSE, curtains=None,
+          eave=3, rake=None, dormer=False):
+    """A house facing the camera, standing on row base: a gable roof roof_h rows tall from top, its
+    eaves eave pixels past the walls. curtains, a colour, draws the windows' curtains closed,
+    lamplight in the gap between them. rake, a colour, lights the roof's left edge, which faces the
+    top-left light. dormer puts a dormer window in the roof's middle."""
     wall_y = top + roof_h
     off, ww, wh, door_h = parts
     cv.fill(x, wall_y, w, base - wall_y, wall)
     cv.fill(x + w - 3, wall_y, 3, base - wall_y, dk(wall))
+    half = w / 2 + eave
     for i in range(roof_h):
-        inset = round(i * (w / 2 + 3) / roof_h)
-        cv.fill(x - 3 + (w // 2 + 3) - inset, top + i, inset * 2, 1, roof)
-    cv.fill(x - 3, wall_y - 1, w + 6, 2, dk(roof))
+        inset = round(i * half / roof_h)
+        left = x - eave + (w // 2 + eave) - inset
+        cv.fill(left, top + i, inset * 2, 1, roof)
+        if rake and inset:
+            cv.fill(left, top + i, 1, 1, rake)
+    cv.fill(x - eave, wall_y - 1, w + 2 * eave, 2, dk(roof))
     cv.fill(x + w - 14, top + round(roof_h * 0.15), 6, round(roof_h * 0.46), "brown")
     cv.fill(x + w - 15, top + round(roof_h * 0.08), 8, 2, "dbrown")
+    if dormer:
+        dormer_window(cv, x + w // 2, top + round(roof_h * 0.42), wall_y - 2, wall, roof, curtains)
     for wx in (x + ww // 2, x + w - ww - ww // 2):
-        cv.fill(wx, wall_y + off, ww, wh, "plum")
-        if curtains:
-            cv.fill(wx + 1, wall_y + off + 1, ww - 2, wh - 2, curtains)
-            cv.fill(wx + 1, wall_y + off + 1, ww - 2, 1, dk(curtains))
-            cv.fill(wx + ww // 2 - 1, wall_y + off + 2, 2, wh - 3, "yellow")
-            cv.fill(wx + 2, wall_y + off + 2, 1, wh - 3, dk(curtains))
-            cv.fill(wx + ww - 3, wall_y + off + 2, 1, wh - 3, dk(curtains))
-        else:
-            cv.fill(wx + 1, wall_y + off + 1, ww - 2, wh - 2, "cyan")
-            cv.fill(wx + ww // 2, wall_y + off + 1, 1, wh - 2, "white")
-            cv.fill(wx + 1, wall_y + off + wh // 2, ww - 2, 1, "white")
-        cv.fill(wx - 1, wall_y + off + wh, ww + 2, 2, "white")
+        window(cv, wx, wall_y + off, ww, wh, curtains)
     dx = x + w // 2 - 5
     cv.fill(dx, base - door_h, 10, door_h, door)
     cv.fill(dx + 7, base - door_h // 2, 1, 2, "amber")
     cv.fill(dx - 2, base - 2, 14, 2, "lgrey")
+
+
+def far_house(cv, cx, w, base, wall_h, wall, roof, lit=None):
+    """A house further off, centred on column cx and standing on row base: a wall wall_h rows tall,
+    shaded on its right, under a gable that rises a row for each column it narrows, and two small
+    windows, lit when lit is given, with no door or chimney at that distance."""
+    x = cx - w // 2
+    top = base - wall_h
+    cv.fill(x, top, w, wall_h, wall)
+    cv.fill(x + w - 2, top, 2, wall_h, dk(wall))
+    for k in range(w // 2 + 2):
+        cv.fill(x - 1 + k, top - 1 - k, w + 2 - 2 * k, 1, roof)
+    cv.fill(x - 1, top, w + 2, 1, dk(roof))
+    for wx in (x + 3, x + w - 7):
+        cv.fill(wx, top + 3, 4, 4, "plum")
+        cv.fill(wx + 1, top + 4, 2, 2, lit or "cyan")
+
+
+def window(cv, wx, wy, ww, wh, curtains=None):
+    """A window in a plum frame on a white sill: cyan glass with white glazing bars, or curtains
+    drawn closed with lamplight between them."""
+    cv.fill(wx, wy, ww, wh, "plum")
+    if curtains:
+        cv.fill(wx + 1, wy + 1, ww - 2, wh - 2, curtains)
+        cv.fill(wx + 1, wy + 1, ww - 2, 1, dk(curtains))
+        cv.fill(wx + ww // 2 - 1, wy + 2, 2, wh - 3, "yellow")
+        cv.fill(wx + 2, wy + 2, 1, wh - 3, dk(curtains))
+        cv.fill(wx + ww - 3, wy + 2, 1, wh - 3, dk(curtains))
+    else:
+        cv.fill(wx + 1, wy + 1, ww - 2, wh - 2, "cyan")
+        cv.fill(wx + ww // 2, wy + 1, 1, wh - 2, "white")
+        cv.fill(wx + 1, wy + wh // 2, ww - 2, 1, "white")
+    cv.fill(wx - 1, wy + wh, ww + 2, 2, "white")
+
+
+def dormer_window(cv, cx, top, bottom, wall, roof, curtains=None):
+    """A dormer centred on column cx, its cap from row top and its front down to row bottom: a
+    small gable of roof over a wall front holding one window."""
+    fx, fw = cx - 5, 10
+    front_y = top + 4
+    cv.fill(fx, front_y, fw, bottom - front_y, wall)
+    cv.fill(fx + fw - 2, front_y, 2, bottom - front_y, dk(wall))
+    for k in range(5):
+        cv.fill(cx - 1 - k - (1 if k == 4 else 0), top + k, 2 + 2 * k + (2 if k == 4 else 0), 1, roof if k < 4 else dk(roof))
+    window(cv, fx + 2, front_y + 1, 6, bottom - front_y - 3, curtains)
 
 
 def tree(cv, cx, top, leaf="green", shade="dgreen", trunk="dbrown", r=16, base=104, girth=6):
@@ -577,11 +630,11 @@ def flat(road):
 def woof_way():
     cv = hp.Canvas(W, H)
     # fair-weather puffs of mixed sizes, spread unevenly above the hill
-    sky(cv, clouds=((8, BASE - 50, 40, 7), (110, BASE - 58, 18, 3), (232, BASE - 56, 30, 5),
+    sky(cv, clouds=((8, BASE - 57, 40, 7), (110, BASE - 60, 18, 3), (232, BASE - 56, 30, 5),
                     (318, BASE - 48, 18, 3)))
     # the neighbourhood climbs a hill behind the street: a water tower on its crest, a second
     # row of houses up the slope, showing between and above the near ones
-    hills(cv, BASE - 52, BASE, "dgreen", "green", 1.7, 10)
+    crest = hills(cv, BASE - 52, BASE, "dgreen", "green", 1.7, 10)
     tx = CX + 118
     for lx in (tx - 6, tx + 5):
         cv.fill(lx, BASE - 50, 2, 16, "slate")
@@ -591,31 +644,35 @@ def woof_way():
     cv.fill(tx - 9, BASE - 51, 20, 1, "grey")
     for k in range(4):
         cv.fill(tx - 7 + 2 * k, BASE - 63 - k, 16 - 4 * k, 1, "slate")
-    for x, wall_c, roof in ((14, "lgrey", "slate"), (102, "skin1", "dred"), (188, "cream", "dslate"),
-                            (274, "tan", "brown")):
-        house(cv, x, 40, wall_c, roof, "plum", top=BASE - 46, base=BASE - 20, roof_h=10,
-              parts=(2, 6, 5, 7))
+    # the second row up the slope, showing between the near roofs and behind the trees
+    for cx, w, wall_c, roof in ((22, 20, "lgrey", "slate"), (90, 18, "skin1", "dred"),
+                                (208, 20, "cream", "dslate"), (332, 18, "white", "purple")):
+        far_house(cv, cx, w, min(BASE - 26, crest[cx] + 16), 12, wall_c, roof)
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 3:
             return "grey"
         return "slate" if hashed(px, py, 29) else "navy" if hashed(px, py + 3, 31) else "dslate"
 
-    # the houses across the street, the middle one at the end of the street, a tree in each gap
-    homes = ((CX - 207, 62, "tan", "brown", "dgreen"), (CX - 119, 60, "pink", "purple", "white"),
-             (CX - 31, 62, "sky", "navy", "red"), (CX + 57, 60, "cream", "dred", "sky"),
-             (CX + 143, 62, "lgrey", "slate", "dred"))
-    for x, w, *_ in homes[1:]:
-        tree(cv, x - 13, BASE - 28, r=11, base=BASE, girth=4)
-    for x, w, wall_c, roof, door in homes:
-        house(cv, x, w, wall_c, roof, door, top=BASE - 38, base=BASE, roof_h=16, parts=SMALL)
+    # the houses across the street, one at the end of the street and the outer two cut by the
+    # band's edges: slim, under steep roofs, trees and hedges in the gaps between them
+    homes = ((0, 44, 22, "lgrey", "slate", "dred", False), (60, 46, 24, "tan", "brown", "dgreen", True),
+             (120, 44, 22, "pink", "purple", "white", False), (180, 48, 24, "sky", "navy", "red", True),
+             (240, 44, 22, "cream", "dred", "sky", False), (300, 46, 24, "skin1", "dslate", "forest", True),
+             (360, 44, 22, "white", "brown", "blue", False))
+    for cx, r in ((30, 11), (150, 12), (270, 10)):
+        tree(cv, cx, BASE - 19 - 2 * r, r=r, base=BASE, girth=4)
+    for cx, w, wall_h, wall_c, roof, door, dormer in homes:
+        house(cv, cx - w // 2, w, wall_c, roof, door, top=BASE - 46, base=BASE, roof_h=46 - wall_h,
+              parts=SLIM, eave=2, rake=LIT.get(roof), dormer=dormer)
     yard(cv, BASE, FAR_WALK, grass())
-    for x, w, *_ in homes:
-        path(cv, x + w // 2 - 6, BASE, FAR_WALK)
-        fence(cv, FAR_WALK - 4, max(0, x - 4), x + w // 2 - 10, h=9)
-        fence(cv, FAR_WALK - 4, x + w // 2 + 10, x + w + 6, h=9)
-    bush(cv, CX - 68, FAR_WALK - 4, lobes=SHRUB)
-    bush(cv, CX + 113, FAR_WALK - 4, "green", SHRUB)
+    for cx, w, *_ in homes:
+        x = cx - w // 2
+        path(cv, cx - 6, BASE, FAR_WALK)
+        fence(cv, FAR_WALK - 4, max(0, x - 6), cx - 10, h=9)
+        fence(cv, FAR_WALK - 4, cx + 10, x + w + 6, h=9)
+    for cx in (90, 210, 330):
+        bush(cv, cx - 5, BASE - 3, "dgreen", SHRUB)
     flowers(cv, CX - 24, CX - 10, FAR_WALK - 4)
     flowers(cv, CX + 12, CX + 26, FAR_WALK - 3)
     for x in (CX - 134, CX - 46, CX + 128):
@@ -920,13 +977,16 @@ def long_way_home():
             return "dbrown" if a < ROAD - 5 else "brown"
         return "skin1" if hashed(px, py, 31) else "skin2"
 
-    # the porch houses across the street either side of the sunset, orange trees beside them
+    # the porch houses across the street either side of the sunset, orange trees beside them and
+    # shrubs in their side yards
     for cx, top, r in ((8, BASE - 30, 15), (352, BASE - 28, 15), (CX - 46, BASE - 20, 9)):
         tree(cv, cx, top, "rust", "dbrown", r=r, base=BASE, girth=4 if r < 12 else 6)
-    for x, w, wall_c, roof, door in ((CX - 150, 76, "white", "dred", "dgreen"),
-                                     (CX + 72, 78, "skin1", "navy", "red")):
+    for x, w, wall_c, roof, door in ((CX - 141, 58, "white", "dred", "dgreen"),
+                                     (CX + 81, 60, "skin1", "navy", "red")):
         porch_house(cv, x, w, wall_c, roof, door)
         path(cv, x + w // 2 - 6, BASE, FAR_WALK)
+    for x in (24, CX + 145):
+        bush(cv, x, BASE - 3, "dgreen", SHRUB)
     fence(cv, FAR_WALK - 4, 0, 26, h=9)
     fence(cv, FAR_WALK - 4, CX - 34, CX + 68, h=9)
     flowers(cv, CX - 146, CX - 120, FAR_WALK - 4, ("orange", "yellow", "red"))
@@ -940,9 +1000,10 @@ def long_way_home():
     return cv
 
 
-def porch_house(cv, x, w, wall_c, roof, door, top=BASE - 42):
-    """A house with a porch along its front under its windows, a lamp lit by the door."""
-    house(cv, x, w, wall_c, roof, door, top=top, base=BASE, roof_h=16, parts=SMALL[:3] + (10,))
+def porch_house(cv, x, w, wall_c, roof, door, top=BASE - 48):
+    """A slim house with a porch along its front under its windows, a lamp lit by the door."""
+    house(cv, x, w, wall_c, roof, door, top=top, base=BASE, roof_h=22, parts=SLIM[:2] + (8, 10), eave=2,
+          rake=LIT.get(roof), dormer=True)
     cv.fill(x + 4, BASE - 12, w - 8, 2, "brown")
     cv.fill(x + 6, BASE - 10, 2, 9, "brown")
     cv.fill(x + w - 8, BASE - 10, 2, 9, "brown")
@@ -987,40 +1048,46 @@ def snooze_crescent():
             cv.fill(x, CALM + y, 1, 1, "white")
     # the crescent's far houses up the hill behind, dark against the glow, a few windows lit,
     # and the church spire over them
-    hills(cv, BASE - 34, BASE, "dslate", "slate", 3.1, 6)
-    sx = 58
-    cv.fill(sx - 4, BASE - 44, 9, 20, "navy")
+    hills(cv, BASE - 40, BASE, "dslate", "slate", 3.1, 6)
+    roofline(cv, BASE - 28, ((10, 16, 8), (40, 14, 6), (136, 16, 8), (212, 16, 9), (258, 16, 7),
+                             (282, 14, 9), (326, 18, 8)), "navy", "amber", step=1)
+    sx = 104
+    cv.fill(sx - 4, BASE - 50, 9, 26, "navy")
     for k in range(14):
-        cv.fill(sx - 4 + k // 3, BASE - 45 - k, 9 - 2 * (k // 3), 1, "navy")
-    cv.fill(sx - 1, BASE - 40, 3, 4, "amber")
-    roofline(cv, BASE - 22, ((4, 30, 8), (96, 34, 9), (150, 28, 7), (210, 36, 9), (262, 30, 8),
-                             (318, 40, 9)), "navy", "amber")
+        cv.fill(sx - 4 + k // 3, BASE - 51 - k, 9 - 2 * (k // 3), 1, "navy")
+    cv.fill(sx - 1, BASE - 46, 3, 4, "amber")
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 3:
             return road_c["gutter"]
         return road_c["fleck"] if hashed(px, py, 23) else road_c["road"]
 
-    # quiet houses round the crescent, curtains drawn, dark trees between them
-    homes = ((CX - 196, 64, "skin1", "dslate", "dgreen", "mauve"),
-             (CX - 110, 62, "lgrey", "purple", "navy", "pink"),
-             (CX - 31, 62, "cream", "navy", "dred", "tan"),
-             (CX + 50, 62, "sky", "dslate", "white", "pink"),
-             (CX + 134, 64, "skin1", "purple", "dgreen", "mauve"))
-    for x, w, *_ in homes[1:]:
-        tree(cv, x - 10, BASE - 26, "dgreen", "forest", r=10, base=BASE, girth=4)
-    for x, w, wall_c, roof, door, curtain in homes:
-        house(cv, x, w, wall_c, roof, door, top=BASE - 36, base=BASE, roof_h=15, parts=SMALL,
-              curtains=curtain)
-    yard(cv, BASE, FAR_WALK, grass())
-    for x, w, *_ in homes:
-        path(cv, x + w // 2 - 6, BASE, FAR_WALK)
-        fence(cv, FAR_WALK - 4, max(0, x - 4), x + w // 2 - 10, h=9)
-        fence(cv, FAR_WALK - 4, x + w // 2 + 10, x + w + 6, h=9)
-    top = FAR_WALK - 9
-    fence_cat(cv, CX - 76, top)
-    fence_cat(cv, CX + 26, top, "orange", "amber")
-    fence_cat(cv, CX + 160, top, "dslate", "slate")
+    # quiet houses round the crescent, rising toward its middle with the far side, curtains drawn,
+    # a dark tree in each gap
+    homes = ((-6, 44, "lgrey", "purple", "navy", "pink"), (56, 44, "skin1", "slate", "dgreen", "mauve"),
+             (118, 46, "lgrey", "purple", "navy", "pink"), (180, 48, "cream", "navy", "dred", "tan"),
+             (242, 46, "sky", "slate", "white", "pink"), (304, 44, "skin1", "purple", "dgreen", "mauve"),
+             (366, 44, "cream", "slate", "dred", "tan"))
+    for k in range(len(homes) - 1):
+        cx = (homes[k][0] + homes[k + 1][0]) // 2
+        lift = crescent_bend(cx)
+        tree(cv, cx, BASE - 30 - lift, "dgreen", "forest", r=10, base=BASE - lift, girth=4)
+    for k, (cx, w, wall_c, roof, door, curtain) in enumerate(homes):
+        lift = crescent_bend(cx)
+        house(cv, cx - w // 2, w, wall_c, roof, door, top=BASE - 44 - lift, base=BASE - lift, roof_h=20,
+              parts=SLIM, curtains=curtain, eave=2, rake=LIT.get(roof), dormer=k % 3 == 1)
+    lawn = grass()
+    yard(cv, BASE, FAR_WALK, lawn)
+    for px in range(W):
+        for py in range(BASE - crescent_bend(px), BASE):
+            cv.fill(px, py, 1, 1, lawn(px, py))
+    for cx, w, *_ in homes:
+        x, lift = cx - w // 2, crescent_bend(cx)
+        path(cv, cx - 6, BASE - lift, FAR_WALK)
+        fence(cv, FAR_WALK - 4 - crescent_bend(x - 3), max(0, x - 6), cx - 10, h=9)
+        fence(cv, FAR_WALK - 4 - crescent_bend(x + w - 3), cx + 10, x + w + 6, h=9)
+    for x, col, lit in ((CX - 76, "plum", "purple"), (CX + 26, "orange", "amber"), (CX + 160, "dslate", "slate")):
+        fence_cat(cv, x, FAR_WALK - 9 - crescent_bend(x + 3), col, lit)
     bush(cv, CX - 150, FAR_WALK - 4, "dgreen", SHRUB)
     mailbox(cv, CX - 40, FAR_WALK, "blue")
     cross(cv, flat(road), road_c["gutter"], slabs, bend=crescent_bend)
@@ -1058,13 +1125,17 @@ def paws_promenade():
     sky(cv, clouds=((14, BASE - 52, 36, 6), (CX - 20, BASE - 58, 24, 4), (CX + 96, BASE - 50, 48, 7)))
     # the far bank: hills, a village and trees along a grassy bank, a stone edge and the river
     hills(cv, BASE - 46, BASE - 30, "dgreen", "green", 5.0, 6)
-    for x, w, wall_c, roof in ((34, 18, "cream", "dred"), (58, 14, "skin1", "slate"), (210, 16, "lgrey", "red"),
-                               (232, 20, "cream", "navy"), (300, 14, "tan", "dred")):
-        cv.fill(x, BASE - 38, w, 8, wall_c)
-        cv.fill(x + w - 2, BASE - 38, 2, 8, dk(wall_c))
-        for k in range(w // 4 + 1):
-            cv.fill(x - 1 + 2 * k, BASE - 39 - k, w + 2 - 4 * k, 1, roof)
-        cv.fill(x + w // 2 - 1, BASE - 36, 3, 3, "sky")
+    # the village: slim houses in clusters, each gable rising a row for each column it narrows
+    for x, w, wall_h, wall_c, roof in ((32, 12, 10, "cream", "dred"), (46, 10, 8, "skin1", "slate"),
+                                       (58, 12, 11, "lgrey", "red"), (206, 10, 9, "lgrey", "red"),
+                                       (218, 12, 11, "cream", "navy"), (232, 10, 8, "tan", "dred"),
+                                       (244, 12, 10, "skin1", "slate"), (298, 12, 10, "tan", "dred"),
+                                       (312, 10, 8, "cream", "navy")):
+        cv.fill(x, BASE - 30 - wall_h, w, wall_h, wall_c)
+        cv.fill(x + w - 2, BASE - 30 - wall_h, 2, wall_h, dk(wall_c))
+        for k in range(w // 2 + 2):
+            cv.fill(x - 1 + k, BASE - 31 - wall_h - k, w + 2 - 2 * k, 1, roof)
+        cv.fill(x + w // 2 - 2, BASE - 27 - wall_h, 2, 3, "sky")
     cv.fill(136, BASE - 52, 6, 22, "lgrey")
     cv.fill(140, BASE - 52, 2, 22, "grey")
     for k in range(6):

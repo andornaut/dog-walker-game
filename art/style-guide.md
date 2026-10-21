@@ -359,6 +359,8 @@ Above the far side's front row the scenery goes back in depth, not taller: hills
 | Riverside Path    | A wider river with a dinghy; on the far bank hills, a village and a spire            |
 | The Long Way Home | Dbrown hills the sun sets behind; birds in the pink band                             |
 
+Houses on the far side are slim, about as tall as they are wide: Elm Avenue's are 44 to 48 wide and 46 rows from the step to the ridge, a 22- to 24-row wall under a 22- to 24-row roof. The gable rises about a row for each column it narrows, past 2px eaves. Light comes from the top left: the roof's left edge is a ramp step lighter, the wall's right 3 columns a step darker. Each has a chimney, and some a dormer. Trees, hedges and side yards fill the gaps, and the end houses run off the band's edges so the street carries on. Houses further back are smaller (18 to 20 wide, a 12-row wall, two small windows, no door or chimney) and show between the near roofs. Willow Crescent's houses rise with its far side toward the middle.
+
 Where row 213 meets the road, left side (the right mirrors it):
 
 | Zone              | Edge                           | Curb    | Road from  |
