@@ -1,7 +1,7 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { MONEY_ICON_KEY, statusIconKey } from "../assets/iconKeys";
-import { dogCardTag, dogFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
+import { statusIconKey } from "../assets/iconKeys";
+import { dogCardTag, dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
@@ -16,7 +16,7 @@ import {
 import { explainLines } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
 import { type HudLanes, hudLanes } from "../hud/hudLanes";
-import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
+import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
 import { FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
@@ -34,6 +34,7 @@ import {
 import {
   cardHearts,
   cardNameFit,
+  cashLeft,
   cashScale,
   cashTop,
   DEBUFF_BAR,
@@ -46,13 +47,14 @@ import {
   WALK_BAR,
   WALK_BAR_BUTTONS,
   walkBarLayout,
+  zoneProgressText,
 } from "../hud/walkHud";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
-import { currentZone, walkLength } from "../rules/route";
+import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
 import type { PackSlot, RunState } from "../state/runState";
@@ -64,9 +66,10 @@ import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
 import { onSceneEvent } from "./overlay";
 import { OwnerTabs } from "./ownerTabs";
-import { colorFromHex, PALETTE } from "./palette";
+import { PALETTE } from "./palette";
 import {
   addPixelText,
+  inkSpan,
   pixelFontMetrics,
   placePixelText,
   scalePixelText,
@@ -91,8 +94,6 @@ import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from ".
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const BAR = walkBarLayout(LAYOUT.topBar);
 
-// A pip of ui-zone-pips.
-const PIP = { height: 8, width: 18 };
 const LABEL = { height: 20, ms: 1100 };
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
@@ -173,12 +174,12 @@ export class HudScene extends Scene {
   private owners: OwnerTabs | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
-  private pips: GameObjects.Sprite[] = [];
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
   private soundHolder: GameObjects.Container | undefined;
   private source: HudSource | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
+  private zoneProgress: GameObjects.BitmapText | undefined;
 
   // key names a second HUD, such as the help's picture of one.
   constructor(key: string = SCENE_KEYS.hud) {
@@ -225,6 +226,10 @@ export class HudScene extends Scene {
     // A container holds the icon's place in the draw order while it is swapped.
     this.soundHolder = this.add.container(0, 0);
     this.showSoundIcon(isMuted(this));
+    const help = buttonIcon(TOP_BAR_BUTTONS.help, false);
+    if (imageIcon(this, "icon-help", help.x, help.y).length === 0) {
+      addPixelText(this, help.x + 8, help.y + 4, "?", { color: PALETTE.cream, originX: 0.5 });
+    }
     const settings = buttonIcon(TOP_BAR_BUTTONS.settings, false);
     if (imageIcon(this, "icon-settings", settings.x, settings.y).length === 0) {
       cogIcon(this, settings.x, settings.y);
@@ -233,20 +238,18 @@ export class HudScene extends Scene {
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
 
-    const { cash, zone } = WALK_BAR;
-    this.add.image(topBar.x + cash.coin.x, topBar.y + cash.coin.y, MONEY_ICON_KEY).setOrigin(0);
+    const { zone } = WALK_BAR;
     const title = { font: "title" } as const;
     this.dollar = addPixelText(this, 0, 0, "$", { color: PALETTE.amber, ...title });
     this.money = addPixelText(this, 0, 0, "", { color: PALETTE.cream, ...title });
-    this.zoneLabel = addPixelText(this, zone.name.x, topBar.y + zone.name.y, "", {
+    this.zoneLabel = addPixelText(this, topBar.x + zone.name.x, topBar.y + zone.name.y, "", {
       color: PALETTE.cream,
-      originX: 0.5,
     });
-    this.pips = Array.from({ length: walkLength(gameData) }, (_, i) =>
-      this.add
-        .sprite(zone.pips.x + i * zone.pips.pitch, topBar.y + zone.pips.y, ZONE_PIPS_KEY)
-        .setOrigin(0),
-    );
+    const progressRight = topBar.x + zone.progress.right + 1;
+    this.zoneProgress = addPixelText(this, progressRight, topBar.y + zone.progress.y, "", {
+      color: PALETTE.grey,
+      originX: 1,
+    });
     this.dynamic = this.add.graphics();
     this.debuffFills = this.add.graphics().setDepth(1);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
@@ -337,8 +340,11 @@ export class HudScene extends Scene {
       case "openMenu":
         run.openPause();
         break;
+      case "openHelp":
+        run.openFromBar("help");
+        break;
       case "openSettings":
-        run.openSettings();
+        run.openFromBar("settings");
         break;
       case "resume":
         run.closePause();
@@ -470,7 +476,6 @@ export class HudScene extends Scene {
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
       effects: effectItemsKey(effects),
-      fill: Math.round(view.zoneFraction * PIP.width),
       modifiers: view.run.modifiers,
       money: this.shownMoney(view.run.money),
       muted: isMuted(this),
@@ -506,12 +511,14 @@ export class HudScene extends Scene {
     }
     setPixelText(money, `$${amount}`);
     scalePixelText(money, 1, 0, 0);
-    const whole = money.width;
+    const whole = inkSpan(money);
+    const wholeAdvance = money.width;
     setPixelText(money, amount);
     scalePixelText(money, 1, 0, 0);
-    const scale = cashScale(whole);
-    const advance = (whole - money.width) * scale;
-    const { x } = WALK_BAR.cash.text;
+    const scale = cashScale(whole.right - whole.left);
+    const advance = (wholeAdvance - money.width) * scale;
+    const left = LAYOUT.topBar.x + cashLeft((whole.right - whole.left) * scale);
+    const x = left - whole.left * scale;
     const top = LAYOUT.topBar.y + cashTop(scale);
     scalePixelText(dollar, scale, x, top);
     scalePixelText(money, scale, x + advance, top);
@@ -629,29 +636,9 @@ export class HudScene extends Scene {
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);
     }
-    const { pips } = WALK_BAR.zone;
-    const shownPips = zonePips(walkLength(gameData), run.route, run.zoneIndex, view.zoneFraction);
-    shownPips.forEach((zonePip, i) => {
-      const at = { ...PIP, x: pips.x + i * pips.pitch, y: LAYOUT.topBar.y + pips.y };
-      const pip = this.pips[i];
-      const { tag, wellColor } = pipLook(gameData, zonePip);
-      if (pip !== undefined && this.textures.exists(ZONE_PIPS_KEY)) {
-        playTag(pip, ZONE_PIPS_KEY, tag);
-      } else {
-        fillRect(g, zonePip.state === "done" ? PALETTE.green : PALETTE.brown, at);
-      }
-      // The current pip's well, inside its 1px rim, fills as the zone goes by.
-      if (zonePip.state === "current" && wellColor !== null) {
-        const width = Math.round(zonePip.fill * (PIP.width - 2));
-        fillRect(g, colorFromHex(wellColor), {
-          height: PIP.height - 2,
-          width,
-          x: at.x + 1,
-          y: at.y + 1,
-        });
-      }
-    });
-
+    if (this.zoneProgress !== undefined) {
+      setPixelText(this.zoneProgress, zoneProgressText(gameData, run.zoneIndex));
+    }
     const ownedSlots = profileSave(this).owned.dogSlots;
     const lead = leadSlot(run.pack.map((slot) => slot.status === "walking"));
     LAYOUT.dogSlots.forEach((rect, i) => {

@@ -52,4 +52,5 @@ export const RUN_TEXT_FIELDS = {
     earnings: ["fees", "tips"],
     subtitle: ["zone"],
   },
+  zoneProgress: ["n", "total"],
 } as const satisfies FieldTable;

@@ -3,7 +3,7 @@ import type { Point, Rect } from "../layout/rect";
 import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
 import type { ChangeLabel } from "./hudView";
-import { DOG_CARD, OWNER_TAB, WALK_BAR } from "./walkHud";
+import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
 // heart forgiven, a zone's pay banked, and a treat grabbed.
@@ -53,10 +53,14 @@ export const MOMENTS = {
   treat: { smileMs: 900 },
 } as const;
 
-// The walk bar's coin's centre, where coins land.
-const COIN_HALF = 8;
+// Where coins land: the middle of the cash, at its largest scale.
+const LARGEST_CASH = WALK_BAR.cash.scales[0];
+const { ink } = WALK_BAR.cash;
 export const TOP_BAR_POINTS = {
-  bank: { x: WALK_BAR.cash.coin.x + COIN_HALF, y: WALK_BAR.cash.coin.y + COIN_HALF },
+  bank: {
+    x: Math.floor((ink.left + ink.right) / 2),
+    y: Math.floor(cashTop(LARGEST_CASH) + (TITLE_CAP_ROWS * LARGEST_CASH) / 2),
+  },
 } as const;
 
 // An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the

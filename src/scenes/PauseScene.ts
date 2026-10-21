@@ -20,6 +20,7 @@ import { rectIndexAt } from "../layout/grid";
 import { insetRect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { fillRect } from "./draw";
+import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
@@ -31,9 +32,12 @@ import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton, TEXT_SCALE } from "./uiKit";
 
-// The settings opened at once over the menu, from the walk bar: "alone" resumes the walk when
-// they close, "over" shows the menu again.
-export type PauseSettings = "alone" | "over";
+// Help or the settings, opened at once over the menu from the walk bar: alone, closing it
+// resumes the walk; opened over the menu or the question, closing it shows the menu again.
+export interface PauseOverlay {
+  readonly alone: boolean;
+  readonly open: "help" | "settings";
+}
 
 // menu is the pause menu; homeQuestion asks whether to head home, for the walk bar's Home
 // button, its note saying what going home keeps and gives up.
@@ -41,8 +45,7 @@ export type PauseSceneData = {
   onHeadHome: () => void;
   onResume: () => void;
 } & (
-  | { mode: "homeQuestion"; note: readonly HomeNoteLine[] }
-  | { mode: "menu"; settings?: PauseSettings }
+  { mode: "homeQuestion"; note: readonly HomeNoteLine[] } | { mode: "menu"; overlay?: PauseOverlay }
 );
 
 // The Home question's note lines' colours, by what they say.
@@ -155,12 +158,14 @@ export class PauseScene extends Scene {
         this.entries[number - 1]?.press();
       }
     });
-    if (data.mode === "menu" && data.settings !== undefined) {
-      if (data.settings === "alone") {
-        this.game.events.once(SETTINGS_CLOSED_EVENT, onResume);
-        this.events.once("shutdown", () => this.game.events.off(SETTINGS_CLOSED_EVENT, onResume));
+    const overlay = data.mode === "menu" ? data.overlay : undefined;
+    if (overlay !== undefined) {
+      const closed = overlay.open === "help" ? HELP_CLOSED_EVENT : SETTINGS_CLOSED_EVENT;
+      if (overlay.alone) {
+        this.game.events.once(closed, onResume);
+        this.events.once("shutdown", () => this.game.events.off(closed, onResume));
       }
-      this.openSettings();
+      presses[overlay.open]();
     }
   }
 

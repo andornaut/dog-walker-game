@@ -5,10 +5,11 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
+import { dollarAmountText } from "../home/home";
 import { type Point, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { walkLength } from "../rules/route";
-import { read } from "../rules/units";
+import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics, fontInk } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -17,6 +18,7 @@ import { maxEffects } from "./effectIcons";
 import {
   cardHearts,
   cardNameFit,
+  cashLeft,
   cashScale,
   cashTop,
   DEBUFF_BAR,
@@ -41,6 +43,8 @@ import {
   WALK_BAR,
   WALK_BAR_BUTTONS,
   walkBarLayout,
+  zoneNameRoom,
+  zoneProgressText,
 } from "./walkHud";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -102,13 +106,22 @@ function titleWidth(text: string): number {
 }
 
 describe("the walk bar", () => {
-  it("keeps its wells, effect wells and buttons inside the bar, none over another", () => {
+  it("keeps its wells, effect wells, holds and buttons inside the bar on screen, none over another", () => {
+    const screen = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
+    expect(inside(topBar, screen)).toBe(true);
+    const hits = WALK_BAR_BUTTONS.map((id) => BAR.buttons[id].hit);
     const parts = [
       WALK_BAR.cash.well,
       BAR.zoneWell,
       ...BAR.effectWells,
-      ...WALK_BAR_BUTTONS.map((id) => BAR.buttons[id].hit),
+      ...BAR.effectHolds,
+      ...hits,
     ];
+    for (const hold of BAR.effectHolds) {
+      for (const hit of hits) {
+        expect(overlaps(hold, hit)).toBe(false);
+      }
+    }
     for (const part of parts) {
       expect(inside(part, topBar)).toBe(true);
     }
@@ -151,7 +164,7 @@ describe("the walk bar", () => {
 });
 
 describe("cashScale", () => {
-  const { scales, text } = WALK_BAR.cash;
+  const { room, scales } = WALK_BAR.cash;
   const [largest = 1] = scales;
   const smallest = scales.at(-1) ?? 1;
   // Amounts as the game writes them, the thousands comma included.
@@ -160,14 +173,41 @@ describe("cashScale", () => {
     (cash) => {
       const width = titleWidth(cash);
       const scale = cashScale(width);
-      const fits = scales.filter((each) => width * each <= text.width);
+      const fits = scales.filter((each) => width * each <= room);
       expect(scale).toBe(fits[0] ?? smallest);
+    },
+  );
+
+  // The most cash a walk could plausibly reach, from the tuning: the purse and the Fanny pack,
+  // a full pack's pay in every zone at the dearest zone's fees, every tip at Big tipper's value,
+  // every lucky find a kept wallet, and the Full pack bonus.
+  const money = (key: Parameters<typeof read<"money">>[2]) => read(gameData.tuning, "money", key);
+  const count = (key: Parameters<typeof read<"counts">>[2]) => read(gameData.tuning, "counts", key);
+  const zones = walkLength(gameData);
+  const dearest = Math.max(...gameData.world.zones.map((zone) => zone.fees));
+  const tipValue = money("tip") + money("bigTipperTipBonus");
+  const perZone = (zone: number) =>
+    count("packSizeMax") * money("payPerDog") * dearest +
+    (count("tipsFirstZone") + count("tipsGainPerZone") * zone) * tipValue +
+    count("luckyEncountersPerZone") * money("lostWalletKeep");
+  const plausible = cents(
+    money("startPurse") +
+      money("fannyPackStart") +
+      Array.from({ length: zones }, (_, zone) => perZone(zone)).reduce((a, b) => a + b, 0) +
+      count("packSizeMax") * money("fullPackBonusPerDog"),
+  );
+  const amounts = [...[0, 9, 99, 999].map((dollars) => cents(dollars * 100)), plausible];
+  it.each(amounts.map((amount) => `$${dollarAmountText(amount)}`))(
+    "fits %s in the cash's room at the scale it takes",
+    (cash) => {
+      const width = titleWidth(cash);
+      expect(width * cashScale(width)).toBeLessThanOrEqual(room);
     },
   );
 
   it("sets the largest scale for a small amount and the smallest past every room", () => {
     expect(cashScale(titleWidth("$0"))).toBe(largest);
-    expect(cashScale(text.width + 1)).toBe(smallest);
+    expect(cashScale(room + 1)).toBe(smallest);
   });
 
   it.each(scales.map((scale) => [scale] as const))(
@@ -178,6 +218,28 @@ describe("cashScale", () => {
       expect(cashTop(scale)).toBeGreaterThan(WALK_BAR.cash.well.y);
     },
   );
+
+  // Amounts as the game writes them, by the scale each takes; every scale is covered.
+  const ranged = [0, 5, 88, 888, 1_234, 99_999, 1_000_000, 123_456_789].map(
+    (dollars) => `$${dollarAmountText(cents(dollars * 100))}`,
+  );
+  it("covers every scale with the ranged amounts", () => {
+    const taken = new Set(ranged.map((cash) => cashScale(titleWidth(cash))));
+    expect([...taken].sort()).toEqual([...scales].sort());
+  });
+
+  it.each(ranged)("centres %s across the well's ink at the scale it takes", (cash) => {
+    const { ink } = WALK_BAR.cash;
+    const inkWidth = titleWidth(cash) * cashScale(titleWidth(cash));
+    const left = cashLeft(inkWidth);
+    const right = left + inkWidth - 1;
+    expect(left).toBeGreaterThanOrEqual(ink.left);
+    expect(right).toBeLessThanOrEqual(ink.right);
+    // Centred, a half pixel at most to the left when the widths' parities differ.
+    const offCentre = (ink.left + ink.right) / 2 - (left + right) / 2;
+    expect(offCentre).toBeGreaterThanOrEqual(0);
+    expect(offCentre).toBeLessThanOrEqual(0.5);
+  });
 });
 
 describe("maxEffects", () => {
@@ -513,19 +575,44 @@ describe("the owner's tab and quip", () => {
   });
 });
 
-// The neighbourhood's name, centred on name.x at 1x in the body font, stays inside the well and
-// over the pips.
-describe("the walk bar's neighbourhood name", () => {
-  const { name, pips } = WALK_BAR.zone;
+// The neighbourhood's name from name.x and "n of N" right-aligned to progress.right, both at 1x
+// in the body font, stay in the well and apart, for every zone beside the widest count.
+describe("the walk bar's neighbourhood name and count", () => {
+  const { name, progress, textGap } = WALK_BAR.zone;
   const well = BAR.zoneWell;
   const body = fontFileMetrics("font-body");
-  it.each(gameData.world.zones.map((zone) => zone.name))("fits %j in the well", (zoneName) => {
-    const ink = fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(zoneName));
-    // Phaser centres the label on its advances, the last glyph's spacing included.
-    const left = Math.round(name.x - bodyTextWidth(1, plainMarks(zoneName)) / 2);
-    expect(left + ink.left).toBeGreaterThan(well.x);
-    expect(left + ink.right).toBeLessThan(well.x + well.width);
-    expect(name.y + inkRowsFromCapTop(body)).toBeLessThanOrEqual(pips.y);
+  const inkOf = (text: string) =>
+    fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(text));
+  const counts = Array.from({ length: walkLength(gameData) }, (_, i) =>
+    zoneProgressText(gameData, i),
+  );
+  const widest = counts.reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
+  const progressInk = inkOf(widest);
+  // Phaser right-aligns the label on its advances, the last glyph's spacing included.
+  const progressLeft = progress.right + 1 - bodyTextWidth(1, plainMarks(widest));
+
+  it("keeps the widest count inside the well's right edge", () => {
+    expect(progressLeft + progressInk.left).toBeGreaterThan(well.x);
+    expect(progressLeft + progressInk.right).toBeLessThan(well.x + well.width);
+  });
+
+  it.each(gameData.world.zones.map((zone) => zone.name))(
+    "fits %j beside the widest count",
+    (zoneName) => {
+      const ink = inkOf(zoneName);
+      expect(name.x + ink.left).toBeGreaterThan(well.x);
+      expect(name.x + ink.right + textGap).toBeLessThanOrEqual(progressLeft + progressInk.left);
+      expect(bodyTextWidth(1, plainMarks(zoneName))).toBeLessThanOrEqual(
+        zoneNameRoom(bodyTextWidth(1, plainMarks(widest))),
+      );
+    },
+  );
+
+  it("keeps both texts' rows inside the well", () => {
+    for (const y of [name.y, progress.y]) {
+      expect(y).toBeGreaterThan(well.y);
+      expect(y + inkRowsFromCapTop(body)).toBeLessThanOrEqual(well.y + well.height);
+    }
   });
 });
 

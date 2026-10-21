@@ -1,9 +1,11 @@
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DebuffId, DogId } from "../data/types";
+import type { DebuffId, DogId, GameData } from "../data/types";
 import { containsPoint, type Point, type Rect, rectsOverlap } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 import type { TextFitStyle } from "../layout/textFit";
+import { walkLength } from "../rules/route";
+import { fillNames } from "../text/lines";
 import { maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
@@ -13,41 +15,61 @@ import { heartRows } from "./hudView";
 // top of the capitals.
 
 // The walk bar's buttons, left to right.
-export const WALK_BAR_BUTTONS = ["home", "sound", "settings", "pause"] as const;
+export const WALK_BAR_BUTTONS = ["home", "help", "sound", "settings", "pause"] as const;
 export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
 // this table. buttons: each button's face x and its hit area's x and width, the hit area the
 // bar's full height and minHitWidth wide or more (narrower than the 44px square elsewhere, so
-// four fit beside five effect wells), its face buttonFace.size square on row buttonFace.y. cash:
-// the "$" and the amount from text.x at the largest of scales that fits text.width, their
-// capitals' bottom on capsBottom. zone: the neighbourhood well, the name centred on name.x and
-// the pips from pips, pitch apart. effects: a well of size at pitch from x along y for every
-// effect a walk can have (EFFECT_WELLS), each icon iconSize at icon,icon in its well and held
-// from holdInset left of it down to the bar's bottom, the last hold reaching the first button.
+// five fit beside five effect wells), its face buttonFace.size square on row buttonFace.y. cash:
+// the "$" and the amount at the largest of scales whose ink fits room, centred across the well's
+// ink columns (ink.left to ink.right), their capitals' bottom on capsBottom. zone: the
+// neighbourhood well on one text line, the name from name.x and "n of N" right-aligned to end on
+// column progress.right, at least textGap apart.
+// effects: a well of size at pitch from x along y for every effect a walk can have
+// (EFFECT_WELLS), each icon iconSize at icon,icon in its well; the holds run side by side from
+// holdInset left of the first well up to the first button, each from its well's left edge, down
+// to the bar's bottom.
 export const WALK_BAR = {
   buttonFace: { size: 20, y: 12 },
   buttons: {
-    home: { faceX: 224, hitWidth: 36, hitX: 216 },
-    pause: { faceX: 332, hitWidth: 36, hitX: 324 },
-    settings: { faceX: 296, hitWidth: 36, hitX: 288 },
-    sound: { faceX: 260, hitWidth: 36, hitX: 252 },
+    help: { faceX: 231, hitWidth: 34, hitX: 224 },
+    home: { faceX: 197, hitWidth: 34, hitX: 190 },
+    pause: { faceX: 333, hitWidth: 34, hitX: 326 },
+    settings: { faceX: 299, hitWidth: 34, hitX: 292 },
+    sound: { faceX: 265, hitWidth: 34, hitX: 258 },
   } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
   cash: {
     capsBottom: 30,
-    coin: { x: 8, y: 15 },
+    ink: { left: 4, right: 77 },
+    room: 70,
     scales: [3, 2, 1],
-    text: { width: 70, x: 26 },
-    well: { height: 40, width: 93, x: 4, y: 4 },
+    well: { height: 40, width: 75, x: 4, y: 4 },
   },
-  effects: { holdInset: 1, icon: 1, iconSize: 20, pitch: 23, size: 22, x: 101, y: 22 },
-  minHitWidth: 36,
+  effects: { holdInset: 1, icon: 1, iconSize: 20, pitch: 22, size: 22, x: 80, y: 20 },
+  minHitWidth: 34,
   zone: {
-    name: { x: 157, y: 5 },
-    pips: { pitch: 26, x: 109, y: 12 },
-    well: { height: 17, width: 114, x: 101, y: 4 },
+    name: { x: 83, y: 7 },
+    progress: { right: 185, y: 7 },
+    textGap: 4,
+    well: { height: 13, width: 110, x: 80, y: 4 },
   },
 } as const;
+
+// The walk's place beside the neighbourhood's name: the zone at zoneIndex's number of the walk's.
+export function zoneProgressText(
+  data: Pick<GameData, "runText" | "world">,
+  zoneIndex: number,
+): string {
+  const total = String(walkLength(data));
+  return fillNames(data.runText.zoneProgress, { n: String(zoneIndex + 1), total });
+}
+
+// The widest the neighbourhood's name may be beside "n of N" progressWidth wide.
+export function zoneNameRoom(progressWidth: number): number {
+  const { name, progress, textGap } = WALK_BAR.zone;
+  return progress.right + 1 - name.x - textGap - progressWidth;
+}
 
 // The most effects a walk can have, one well each: the walker's perk, the Pocket's gear and an
 // upgrade from each fork.
@@ -89,19 +111,28 @@ export function walkBarLayout(bar: Rect, wells = EFFECT_WELLS): WalkBarLayout {
     width: effects.size,
   }));
   const firstHit = buttons[WALK_BAR_BUTTONS[0]].hit;
-  const effectHolds = effectWells.map((well, i) => {
-    const x = well.x - effects.holdInset;
-    const width = i === wells - 1 ? firstHit.x - x : effects.pitch;
-    return { height: bar.y + bar.height - zoneWell.y, width, x, y: zoneWell.y };
-  });
+  const starts = effectWells.map((well, i) => (i === 0 ? well.x - effects.holdInset : well.x));
+  const effectHolds = starts.map((x, i) => ({
+    height: bar.y + bar.height - zoneWell.y,
+    width: (starts[i + 1] ?? firstHit.x) - x,
+    x,
+    y: zoneWell.y,
+  }));
   return { buttons, effectHolds, effectWells, zoneWell };
 }
 
 // The largest of the cash's scales at which text measuring widthAt1x fits its room, else the
 // smallest.
 export function cashScale(widthAt1x: number): number {
-  const { scales, text } = WALK_BAR.cash;
-  return scales.find((scale) => widthAt1x * scale <= text.width) ?? scales[scales.length - 1] ?? 1;
+  const { room, scales } = WALK_BAR.cash;
+  return scales.find((scale) => widthAt1x * scale <= room) ?? scales[scales.length - 1] ?? 1;
+}
+
+// The cash's first ink column for ink inkWidth wide on screen: centred across the well's ink,
+// a half pixel rounded left.
+export function cashLeft(inkWidth: number): number {
+  const { ink } = WALK_BAR.cash;
+  return Math.floor((ink.left + ink.right) / 2 - (inkWidth - 1) / 2);
 }
 
 // The top of the cash's capitals at scale, so their bottom row is the same at every scale.

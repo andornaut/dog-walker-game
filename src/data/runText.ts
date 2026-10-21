@@ -75,4 +75,5 @@ export const RUN_TEXT = {
     subtitle: "{zone}",
     title: "Neighborhood done!",
   },
+  zoneProgress: "{n} of {total}",
 } as const satisfies RunText;

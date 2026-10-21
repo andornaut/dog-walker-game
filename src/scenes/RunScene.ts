@@ -562,9 +562,9 @@ export class RunScene extends Scene {
     this.world?.menus.openPause(mode);
   }
 
-  // The walk bar's Settings button.
-  openSettings(): void {
-    this.world?.menus.openSettings();
+  // The walk bar's Help and Settings buttons.
+  openFromBar(open: "help" | "settings"): void {
+    this.world?.menus.openFromBar(open);
   }
 
   closePause(): void {

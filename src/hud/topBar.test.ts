@@ -44,11 +44,12 @@ describe("the walk bar in each pause state", () => {
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
     player: boolean;
-    // What a tap on Home, a tap or key on pause, the M key, and a tap on sound and on Settings
+    // What a tap on Home, a tap or key on pause, the M key, and a tap on sound, Help and Settings
     // do.
     home: TopBarAction | undefined;
     pause: TopBarAction | undefined;
     mute: TopBarAction | undefined;
+    help: TopBarAction | undefined;
     settings: TopBarAction | undefined;
     sound: TopBarAction | undefined;
   }
@@ -57,6 +58,7 @@ describe("the walk bar in each pause state", () => {
     covered: false,
     gameplay: false,
     held: false,
+    help: "openHelp",
     home: "confirmHome",
     icon: "icon-pause",
     mute: "mute",
@@ -69,7 +71,13 @@ describe("the walk bar in each pause state", () => {
   const card = { ...walking, covered: true, held: true, paused: true } as const;
   const menu = { ...card, icon: "icon-play", pause: "resume", player: true } as const;
   const confirm = { ...menu, home: undefined } as const;
-  const cover = { ...confirm, pause: undefined, settings: undefined, sound: undefined } as const;
+  const cover = {
+    ...confirm,
+    help: undefined,
+    pause: undefined,
+    settings: undefined,
+    sound: undefined,
+  } as const;
 
   it.each<[string, RunPause, Expected]>([
     ["walking", WALKING, { ...walking, gameplay: true }],
@@ -97,6 +105,7 @@ describe("the walk bar in each pause state", () => {
       covered: walkCovered(pause),
       gameplay: gameplayAllowed(pause),
       held: pressesHeld(pause),
+      help: topBarAction(pause, "tap", "help"),
       home: topBarAction(pause, "tap", "home"),
       icon: pauseButtonIcon(pause),
       mute: topBarAction(pause, "key", "sound"),

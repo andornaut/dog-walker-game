@@ -77,11 +77,12 @@ export function gameplayAllowed(pause: RunPause): boolean {
   return !walkPaused(pause) && !pause.hitStop;
 }
 
-export type TopBarAction = "confirmHome" | "mute" | "openMenu" | "openSettings" | "resume";
+export type TopBarAction =
+  "confirmHome" | "mute" | "openHelp" | "openMenu" | "openSettings" | "resume";
 
 // What a walk-bar button does, pressed by a tap or by its key. Every button works whenever the
 // bar is in view: Home asks whether to head home, from the pause menu too, sound and M mute or
-// unmute, Settings opens the settings, and pause opens the menu, or resumes while the menu or
+// unmute, Help and Settings open help and the settings, and pause opens the menu, or resumes while the menu or
 // the question is up. Help and settings cover the bar, so a tap there is theirs, and so are P
 // and Escape, which close them. M still mutes under help; settings flips its own sound switch
 // on M.
@@ -99,6 +100,8 @@ export function topBarAction(
       return pause.menu === "confirmHome" ? undefined : "confirmHome";
     case "sound":
       return "mute";
+    case "help":
+      return "openHelp";
     case "settings":
       return "openSettings";
     case "pause":

@@ -262,7 +262,7 @@
   "hudLanes": {
     "bank": {
       "height": 24,
-      "width": 93,
+      "width": 75,
       "x": 4,
       "y": 108
     },
@@ -2329,68 +2329,85 @@
       {
         "id": "home",
         "face": {
-          "x": 224,
+          "x": 197,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 36,
-          "x": 216,
+          "width": 34,
+          "x": 190,
           "y": 0
         },
         "icon": {
-          "x": 226,
+          "x": 199,
+          "y": 13
+        }
+      },
+      {
+        "id": "help",
+        "face": {
+          "x": 231,
+          "y": 12
+        },
+        "hit": {
+          "height": 48,
+          "width": 34,
+          "x": 224,
+          "y": 0
+        },
+        "icon": {
+          "x": 233,
           "y": 13
         }
       },
       {
         "id": "sound",
         "face": {
-          "x": 260,
+          "x": 265,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 36,
-          "x": 252,
+          "width": 34,
+          "x": 258,
           "y": 0
         },
         "icon": {
-          "x": 262,
+          "x": 267,
           "y": 13
         }
       },
       {
         "id": "settings",
         "face": {
-          "x": 296,
+          "x": 299,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 36,
-          "x": 288,
+          "width": 34,
+          "x": 292,
           "y": 0
         },
         "icon": {
-          "x": 298,
+          "x": 301,
           "y": 13
         }
       },
       {
         "id": "pause",
         "face": {
-          "x": 332,
+          "x": 333,
           "y": 12
         },
         "hit": {
           "height": 48,
-          "width": 36,
-          "x": 324,
+          "width": 34,
+          "x": 326,
           "y": 0
         },
         "icon": {
-          "x": 334,
+          "x": 335,
           "y": 13
         }
       }
@@ -2399,70 +2416,70 @@
       {
         "height": 44,
         "width": 23,
-        "x": 100,
+        "x": 79,
         "y": 4
       },
       {
         "height": 44,
-        "width": 23,
-        "x": 123,
+        "width": 22,
+        "x": 102,
         "y": 4
       },
       {
         "height": 44,
-        "width": 23,
+        "width": 22,
+        "x": 124,
+        "y": 4
+      },
+      {
+        "height": 44,
+        "width": 22,
         "x": 146,
         "y": 4
       },
       {
         "height": 44,
-        "width": 23,
-        "x": 169,
-        "y": 4
-      },
-      {
-        "height": 44,
-        "width": 24,
-        "x": 192,
+        "width": 22,
+        "x": 168,
         "y": 4
       }
     ],
     "effectWells": [
       {
-        "x": 101,
-        "y": 22,
+        "x": 80,
+        "y": 20,
+        "height": 22,
+        "width": 22
+      },
+      {
+        "x": 102,
+        "y": 20,
         "height": 22,
         "width": 22
       },
       {
         "x": 124,
-        "y": 22,
+        "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 147,
-        "y": 22,
+        "x": 146,
+        "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 170,
-        "y": 22,
-        "height": 22,
-        "width": 22
-      },
-      {
-        "x": 193,
-        "y": 22,
+        "x": 168,
+        "y": 20,
         "height": 22,
         "width": 22
       }
     ],
     "zoneWell": {
-      "height": 17,
-      "width": 114,
-      "x": 101,
+      "height": 13,
+      "width": 110,
+      "x": 80,
       "y": 4
     },
     "debuffBar": {
@@ -2503,45 +2520,47 @@
         "y": 12
       },
       "buttons": {
+        "help": {
+          "faceX": 231,
+          "hitWidth": 34,
+          "hitX": 224
+        },
         "home": {
-          "faceX": 224,
-          "hitWidth": 36,
-          "hitX": 216
+          "faceX": 197,
+          "hitWidth": 34,
+          "hitX": 190
         },
         "pause": {
-          "faceX": 332,
-          "hitWidth": 36,
-          "hitX": 324
+          "faceX": 333,
+          "hitWidth": 34,
+          "hitX": 326
         },
         "settings": {
-          "faceX": 296,
-          "hitWidth": 36,
-          "hitX": 288
+          "faceX": 299,
+          "hitWidth": 34,
+          "hitX": 292
         },
         "sound": {
-          "faceX": 260,
-          "hitWidth": 36,
-          "hitX": 252
+          "faceX": 265,
+          "hitWidth": 34,
+          "hitX": 258
         }
       },
       "cash": {
         "capsBottom": 30,
-        "coin": {
-          "x": 8,
-          "y": 15
+        "ink": {
+          "left": 4,
+          "right": 77
         },
+        "room": 70,
         "scales": [
           3,
           2,
           1
         ],
-        "text": {
-          "width": 70,
-          "x": 26
-        },
         "well": {
           "height": 40,
-          "width": 93,
+          "width": 75,
           "x": 4,
           "y": 4
         }
@@ -2550,26 +2569,26 @@
         "holdInset": 1,
         "icon": 1,
         "iconSize": 20,
-        "pitch": 23,
+        "pitch": 22,
         "size": 22,
-        "x": 101,
-        "y": 22
+        "x": 80,
+        "y": 20
       },
-      "minHitWidth": 36,
+      "minHitWidth": 34,
       "zone": {
         "name": {
-          "x": 157,
-          "y": 5
+          "x": 83,
+          "y": 7
         },
-        "pips": {
-          "pitch": 26,
-          "x": 109,
-          "y": 12
+        "progress": {
+          "right": 185,
+          "y": 7
         },
+        "textGap": 4,
         "well": {
-          "height": 17,
-          "width": 114,
-          "x": 101,
+          "height": 13,
+          "width": 110,
+          "x": 80,
           "y": 4
         }
       }
