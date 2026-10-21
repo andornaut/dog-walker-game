@@ -3,7 +3,7 @@
 out: every depth step (minis.STEPS, from shared/depth-steps.json) for the road
 sprites that have no variants elsewhere, and the steps in BETWEEN (those
 hazards.py does not build) for hazards.py's squirrel-dash, loose-dog,
-ball-bounce and cyclist. Each runs the sprite's own drawing function on a
+ball-bounce, cyclist and coyote. Each runs the sprite's own drawing function on a
 minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 

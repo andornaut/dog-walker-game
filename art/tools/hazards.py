@@ -10,6 +10,10 @@ ball-bounce         24x36   a ball bouncing across lanes; bounce (6 frames, 70ms
                             contact, with its own ground shadow (the game draws none)
 cyclist             48x72   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
                             legs and a 1px sway
+coyote              48x48   three-quarter front, angled right, stalking the pack: shoulders hunched over a
+                            low head, ears forward, tail low; idle (2 frames, 400ms): a breath and an ear
+                            flick; walk (4 frames, 120ms): the creep, a diagonal pair of paws lifting as the
+                            body sinks under a level head; step (4 frames, 80ms): a low lunge for each step
 ui-warning          16x16   a yellow warning sign with a bold "!", ink outline; pulse (2 frames, 250ms)
 ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms) points right for a
                             crosser, down-pulse (2 frames, 250ms) points down the road for a mover
@@ -19,16 +23,18 @@ ui-warning-wander   16x16   a bold yellow "?", ink outline, over a wanderer befo
                             (2 frames, 250ms) pops it 1px up on frame 2
 
 The side views face right; the game mirrors squirrel-dash, loose-dog and
-ui-warning-arrow for a crossing to the left. Every road sprite takes the road
-outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
-roads and its fill carries Elm Avenue. The warning cues are outlined in ink.
+ui-warning-arrow for a crossing to the left, and the coyote for a step to the
+left. Every road sprite takes the road outline rule (pixel.road_edge), so its
+silhouette holds 3:1 on the three light roads and its fill carries Elm Avenue;
+the coyote also takes road.LIT's rim. The warning cues are outlined in ink.
 
 The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn
 road.SCALE (1.5) times bigger on a minis.Mini, which keeps 1px lines 1px;
 the ball is drawn at each size from BALL. Depth variants, redrawn at their own
 size with a full outline (see minis.py): squirrel-dash@75, loose-dog@75 (36x36),
 squirrel-dash@50, loose-dog@50 (24x24), ball-bounce@75, ball-bounce@50 (18x27,
-12x18) and cyclist@75, cyclist@50 (36x54, 24x36), each on a Mini at SCALE
+12x18), cyclist@75, cyclist@50 (36x54, 24x36) and coyote@75, coyote@50 (36x36,
+24x24), each on a Mini at SCALE
 times the step; depths.py draws the steps between them.
 
 Usage:
@@ -48,7 +54,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import SCALE, face_disc, face_front, lean  # noqa: E402
+from road import LIT, SCALE, face_disc, face_front, lean, rim  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -319,6 +325,90 @@ def cyclist_at(s, lf=36, rf=41, sway=0):
     return g
 
 
+# ---------- coyote: three-quarter front view, stalking the pack, angled right ----------
+
+# The stalk, one dict per frame: each paw's lift off the road (fl, fr the far and near front paws, bl, br the
+# far and near hind ones), the body's offset (negative is up) and the head's. A slow creep: one diagonal pair
+# lifts while the body sinks to slink under it, then the other, the head held level.
+COYOTE_WALK = [dict(fr=2, bl=1, bob=1, head=-1), dict(), dict(fl=2, br=1, bob=1, head=-1), dict()]
+# Crouched and watching: a breath (the body 1px up) and the near ear flicking back.
+COYOTE_IDLE = [dict(), dict(bob=-1, ear=1)]
+# A quick low lunge for each step, never rising off its crouch: a sink onto the haunches, the push with the
+# front paws up and the ears pinned back, the reach with the head thrust lower still, and the landing.
+COYOTE_STEP = [dict(bob=1, head=1), dict(fl=2, fr=2, head=1, ear=1), dict(fl=1, fr=2, bob=1, head=2, ear=1),
+               dict(bl=1, br=1, bob=1)]
+COYOTE_OFFSETS = ("fl", "fr", "bl", "br", "bob", "head", "ear")
+# How far the coyote's body stands above its layout, on long legs, so it stands near a big dog's height.
+COYOTE_RISE = 2.5
+
+
+def coyote(fl=0, fr=0, bl=0, br=0, bob=0, head=0, ear=0, new=Grid):
+    """A lean tawny coyote creeping at the pack, three-quarter front and angled right: the head held low in
+    front, under the hunched shoulders, big ears pricked forward and narrowed yellow eyes; the body runs
+    back to the left, tucked at the waist, to the haunches, the bushy tail hangs low with a black tip, and
+    the legs are long and thin, the hind ones bent at the hock. A dark saddle down the back, a cream
+    muzzle, throat and chest, a dark stripe down the front of the near foreleg. new makes the grid, as for
+    squirrel_dash."""
+    g = edged(new())
+    # the body stands RISE above the rows it is laid out on, on legs that long
+    b, h = bob - COYOTE_RISE, bob + head - COYOTE_RISE
+
+    def leg(x, top, lift, col, shade, foot=29):
+        """A 2-wide leg from top down to its paw on row foot - 1, lifted lift px, shade down its right side."""
+        g.rect(x, top, 2, foot - lift - top, col)
+        g.rect(x + 1, top, 1, foot - lift - top, shade)
+        g.rect(x, foot - 1 - lift, 3, 1, col)
+        g.p(x + 2, foot - 1 - lift, shade)
+
+    # the tail, hanging low off the rump behind the hind legs, a black tip
+    g.cel(6.5, 20 + b, 2.5, 4.5, "brown", "dbrown", "tan")
+    g.cel(6, 24.5 + b, 2, 2.2, "brown", "dbrown")
+    g.cel(6, 26.5 + b, 1.8, 2, "brown", "dbrown")
+    # far legs, plain brown, a shade darker than the near ones: the hind under the haunch, the front under
+    # the shoulder
+    leg(13.5, 20 + b, bl, "brown", "brown", 28)
+    leg(17.5, 21 + b, fl, "brown", "brown")
+    # haunch and body, tucked at the waist, the dark saddle along the back
+    g.cel(10.5, 18.5 + b, 3.5, 4, "brown", "dbrown")
+    g.cel(14.5, 17.5 + b, 5.5, 3.2, "brown", "dbrown")
+    g.cel(14, 16.3 + b, 4.5, 1.2, "dbrown")
+    # the near hind leg: the shank from the haunch back to the hock, then straight down
+    g.rect(10, 21 + b, 2, 2, "tan")
+    g.p(11, 22 + b, "brown")
+    leg(9, 23 + b, br, "tan", "brown", 28)
+    # the hunched shoulders, peaking over the head
+    g.cel(18.5, 15.5 + b, 4, 4.5, "brown", "dbrown", "tan")
+    # the cream throat and chest, then the near foreleg, thin, a dark stripe down its front
+    g.cel(22, 23 + b, 2.8, 3, "cream", "tan")
+    leg(23, 24 + b, fr, "tan", "brown")
+    g.rect(23, 25 + b, 1, 2 - fr, "dbrown")
+    # ears, big and pricked forward; the near one flicks back
+    g.tri((19, 17.5 + h), (20.5, 11.5 + h), (22.5, 16 + h), "brown")
+    g.tri((20, 16.5 + h), (20.8, 13.5 + h), (22, 16 + h), "cream")
+    g.tri((24, 16 + h), (27.5 - ear, 11.5 + h + ear), (27.5, 17.5 + h), "brown")
+    g.tri((25, 16.5 + h), (27 - ear, 13.5 + h + ear), (26.8, 17 + h), "cream")
+    # head: held low, the long muzzle pointing at the pack and right, cream cheeks, the nose
+    g.cel(23, 19 + h, 4.5, 3.5, "brown", "dbrown", "tan")
+    g.cel(25, 22 + h, 3, 2, "cream", "tan")
+    g.p(25.5, 23.5 + h, "dbrown")
+    # narrowed yellow eyes under a dark brow
+    for x in (20.5, 24.5):
+        g.rect(x, 18.5 + h, 2, 1, "amber")
+        g.p(x + (1 if x > 22 else 0), 18.5 + h, "ink")
+        g.rect(x - 0.5, 17.5 + h, 2.5, 1, "dbrown")
+    lit(g)
+    # the black nose and tail tip go on after the rim, which would light their edges grey
+    g.rect(25.5, 21 + h, 2, 1, "ink")
+    g.cel(6, 28.5 + b, 1.4, 1.2, "ink")
+    return g
+
+
+def lit(g):
+    """road.rim with road.LIT on the grid that holds the pixels, so a Mini gets the rim at its own size."""
+    rim(getattr(g, "g", g), LIT)
+    return g
+
+
 # ---------- the warning cue (UI, ink outlined) ----------
 
 def ink(c):
@@ -408,6 +498,9 @@ def steps(suffix, s):
                                   100)]
     yield f"ball-bounce{suffix}", [("bounce", [ball_bounce(f, s) for f in range(6)], 70)]
     yield f"cyclist{suffix}", [("ride", [cyclist_at(s, **q).outlined() for q in CYCLIST_RIDE], 90)]
+    yield f"coyote{suffix}", [(tag, [coyote(**small(s, q, COYOTE_OFFSETS)).outlined() for q in poses], ms)
+                              for tag, poses, ms in (("idle", COYOTE_IDLE, 400), ("walk", COYOTE_WALK, 120),
+                                                     ("step", COYOTE_STEP, 80))]
 
 
 def sprites():

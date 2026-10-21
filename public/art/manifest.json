@@ -1166,6 +1166,51 @@
       }
     },
     {
+      "key": "coyote",
+      "png": "sprites/coyote.png",
+      "json": "sprites/coyote.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "coyote@50",
+      "png": "sprites/coyote@50.png",
+      "json": "sprites/coyote@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "coyote@62",
+      "png": "sprites/coyote@62.png",
+      "json": "sprites/coyote@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "coyote@75",
+      "png": "sprites/coyote@75.png",
+      "json": "sprites/coyote@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "coyote@88",
+      "png": "sprites/coyote@88.png",
+      "json": "sprites/coyote@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "cyclist",
       "png": "sprites/cyclist.png",
       "json": "sprites/cyclist.json",
