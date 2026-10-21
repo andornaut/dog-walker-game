@@ -6,14 +6,9 @@ They are road sprites in the OutRun manner: front elevations (the bike side on),
 centre on their road row, scaled with the road camera and drawn back to front with the road objects.
 Every prop's inner edge lies beyond the sidewalk, so none stands on a lane or a sidewalk, and none
 is a person, a live animal on the ground, a coin or a bone, so none reads as an obstacle, an
-encounter or a pickup. The lamp post is a white globe on a green post with a flower basket, unlike
-the navy lantern of the need spot `spot-lamp-post`; the street tree is three round lobes, unlike
-`spot-tree`'s blocky crown; the hedge is bumped and in flower, unlike the obstacle `hedge`; the
-flower border has no box, unlike `petunias`; the gnome wears a blue hat and a red coat, unlike
-`minor-gnome`; the mailbox is blue with a yellow flag, unlike the red hydrant; the bird bath is a white
-basin on a pedestal, unlike the bowl on the ground of `spot-water-bowl`; the shrub is round and in
-bloom, unlike the obstacle `hedge`; the little library is a box on a post, apart from the bench and the
-bin.
+encounter or a pickup. The hedge is bumped and in flower, unlike the obstacle `hedge`; the mailbox
+is blue with a yellow flag, unlike the red hydrant; the shrub is round and in bloom, unlike the
+obstacle `hedge`; the little library is a box on a post, apart from the bench and the bin.
 
 Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the road objects are:
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
