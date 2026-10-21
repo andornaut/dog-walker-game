@@ -63,6 +63,7 @@ export const newPlayerSave: SaveDocument = {
   settings: { musicVolume: 0.6, muted: false, reducedMotion: false, sfxVolume: 0.8 },
   shownHints: [],
   stats: {
+    bestCentsByPackSize: {},
     bestWalk: null,
     bestZoneFinished: 0,
     dogs: {},
@@ -100,6 +101,7 @@ export function veteranSave(): SaveDocument {
     settings: { musicVolume: 0.25, muted: true, reducedMotion: true, sfxVolume: 0.5 },
     shownHints: ["card", "tip"],
     stats: {
+      bestCentsByPackSize: { 2: cents(9_000) },
       bestWalk: { dogs: ["koda", "penny"], earnedCents: cents(9_000), zonesFinished: 4 },
       bestZoneFinished: 4,
       dogs: {

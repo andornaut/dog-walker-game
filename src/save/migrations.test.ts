@@ -142,6 +142,33 @@ describe("saveMigrations", () => {
     expect(parsed.output).toEqual(veteranSave());
   });
 
+  const fromVersion4 = (document: Record<string, unknown>) =>
+    migrateSave(saveMigrations, 5, { ...document, version: 4 });
+  const walk = (dogs: string[], earnedCents: number) => ({ dogs, earnedCents, zonesFinished: 4 });
+
+  it.each<[string, Record<string, unknown>, Record<string, unknown>]>([
+    [
+      "seeds the best for the best walk's pack size",
+      { stats: { bestWalk: walk(["koda", "penny"], 9_000) } },
+      {
+        stats: { bestCentsByPackSize: { 2: 9_000 }, bestWalk: walk(["koda", "penny"], 9_000) },
+      },
+    ],
+    [
+      "seeds no best before the first walk",
+      { stats: { bestWalk: null } },
+      { stats: { bestCentsByPackSize: {}, bestWalk: null } },
+    ],
+    [
+      "seeds no best for a best walk whose dogs were all dropped",
+      { stats: { bestWalk: walk([], 500) } },
+      { stats: { bestCentsByPackSize: {}, bestWalk: walk([], 500) } },
+    ],
+    ["leaves stats of the wrong shape for the schema", { stats: "best" }, { stats: "best" }],
+  ])("from version 4 %s", (_, document, expected) => {
+    expect(fromVersion4(document)).toEqual({ document: { ...expected, version: 5 }, ok: true });
+  });
+
   it("has one step per version, ending at the current version", () => {
     const froms = saveMigrations.map((migration) => migration.from);
     const expected = froms.map((_, index) => SAVE_VERSION - froms.length + index);

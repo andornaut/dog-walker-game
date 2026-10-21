@@ -97,6 +97,10 @@ export function saveContextFrom(data: SaveData): SaveContext {
 }
 
 const KNOWN_TALLIES: ReadonlySet<TallyId> = new Set(TALLY_IDS);
+// The pack sizes a run can take, as the stored keys of the bests by pack size.
+const PACK_SIZES: ReadonlySet<string> = new Set(
+  Array.from({ length: MAX_RUN_DOGS }, (_, index) => String(index + 1)),
+);
 
 function isKnown<Id extends string>(known: ReadonlySet<Id>, id: string): id is Id {
   return (known as ReadonlySet<string>).has(id);
@@ -134,7 +138,7 @@ function clamp(min: number, max: number, value: number): number {
 
 // Drops ids the game no longer has, and loadout picks the player does not own. The free dogs
 // and walkers are always owned, and a walker not owned becomes the default. Dog slots are clamped to 1 to
-// MAX_RUN_DOGS and volumes to 0 to 1. A
+// MAX_RUN_DOGS and volumes to 0 to 1, and a best for a pack size outside them is dropped. A
 // loadout keeps at most one dog per slot, and may be empty.
 export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { defaults, known } = context;
@@ -182,6 +186,9 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
     shownHints: keepKnown(known.hints, save.shownHints),
     stats: {
       ...stats,
+      bestCentsByPackSize: Object.fromEntries(
+        Object.entries(stats.bestCentsByPackSize).filter(([size]) => PACK_SIZES.has(size)),
+      ),
       bestWalk: stats.bestWalk === null ? null : keepKnownWalk(known, stats.bestWalk),
       dogs: keepKnownEntries(known.dogs, stats.dogs),
       dogsFinishedWith: keepKnown(known.dogs, stats.dogsFinishedWith),

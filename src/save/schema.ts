@@ -11,10 +11,10 @@ import type {
 } from "../data/types";
 import type { RunCounters } from "../rules/achievements";
 import { PRE_FORK_ROUTE } from "../rules/route";
-import { cents as toCents } from "../rules/units";
+import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 // Every tally the save keeps; a stored key outside it is dropped on load.
 export const TALLY_IDS = [
@@ -111,6 +111,9 @@ const lastWalkSchema = v.object({
 });
 
 const statsSchema = v.object({
+  // The most one walk banked for each pack size, keyed by its number of dogs; a size not yet
+  // walked has none. Pack sizes outside 1 to MAX_RUN_DOGS are dropped on load.
+  bestCentsByPackSize: v.optional(v.record(v.string(), cents), {}),
   // The walk that banked the most; null until the first run ends.
   bestWalk: v.nullable(walkSchema),
   // The most zones one run finished. Heading home mid-zone does not count that zone.
@@ -213,8 +216,9 @@ export interface LastWalk extends Walk {
 
 export interface SaveStats extends Omit<
   StoredStats,
-  "bestWalk" | "dogs" | "dogsFinishedWith" | "lastWalk" | "runs" | "tallies"
+  "bestCentsByPackSize" | "bestWalk" | "dogs" | "dogsFinishedWith" | "lastWalk" | "runs" | "tallies"
 > {
+  bestCentsByPackSize: Record<number, Cents>;
   bestWalk: Walk | null;
   dogs: Partial<Record<DogId, DogStats>>;
   dogsFinishedWith: DogId[];
@@ -273,6 +277,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
     settings: { ...DEFAULT_SETTINGS },
     shownHints: [],
     stats: {
+      bestCentsByPackSize: {},
       bestWalk: null,
       bestZoneFinished: 0,
       dogs: {},

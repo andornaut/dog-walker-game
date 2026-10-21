@@ -254,12 +254,40 @@ describe("achievements at banking", () => {
 });
 
 describe("isNewBestWalk", () => {
-  // veteranSave's best walk earned 9,000.
-  it.each<[string, SaveDocument, number, boolean]>([
-    ["a first walk", newPlayerSave, 0, true],
-    ["a walk that beats the best", veteranSave(), 9_001, true],
-    ["not a tie", veteranSave(), 9_000, false],
-  ])("flags %s", (_, save, earned, best) => {
-    expect(isNewBestWalk(save.stats, cents(earned))).toBe(best);
+  // veteranSave's best walk, with 2 dogs, earned 9,000; it has walked no other pack size.
+  it.each<[string, SaveDocument, number, number, boolean]>([
+    ["a first walk", newPlayerSave, 1, 0, true],
+    ["a walk that beats the best with as many dogs", veteranSave(), 2, 9_001, true],
+    ["not a tie", veteranSave(), 2, 9_000, false],
+    ["a first walk with another number of dogs, below the best", veteranSave(), 1, 100, true],
+    ["a first walk with another number of dogs, above the best", veteranSave(), 3, 9_999, true],
+  ])("flags %s", (_, save, packSize, earned, best) => {
+    expect(isNewBestWalk(save.stats, packSize, cents(earned))).toBe(best);
+  });
+});
+
+describe("bests by pack size", () => {
+  // runResult walks 2 dogs; veteranSave's best for 2 dogs is 9,000.
+  it.each<[string, Partial<RunResult>, Record<number, number>]>([
+    ["keeps the best for its size when not beaten", { earnedCents: cents(100) }, { 2: 9_000 }],
+    ["raises the best for its size when beaten", { earnedCents: cents(9_999) }, { 2: 9_999 }],
+    [
+      "adds a best for a size walked the first time",
+      { dogs: [{ fired: false, id: "koda", zonesFinished: 4 }], earnedCents: cents(100) },
+      { 1: 100, 2: 9_000 },
+    ],
+  ])("%s", (_, changes, bests) => {
+    const { stats } = recordRunEnd(testAwards, veteranSave(), runResult(changes));
+    expect(stats.bestCentsByPackSize).toEqual(bests);
+  });
+
+  it("keeps the logbook's best walk across pack sizes", () => {
+    const solo = runResult({
+      dogs: [{ fired: false, id: "koda", zonesFinished: 4 }],
+      earnedCents: cents(100),
+    });
+    expect(recordRunEnd(testAwards, veteranSave(), solo).stats.bestWalk).toEqual(
+      veteranSave().stats.bestWalk,
+    );
   });
 });

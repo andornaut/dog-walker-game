@@ -504,6 +504,19 @@ describe("loadSave", () => {
       expect(save.owned.dogSlots).toBe(clamped);
     });
   });
+
+  describe("bests by pack size", () => {
+    it.each<[string, Record<string, number>, Record<number, number>]>([
+      ["keeps every size a run can take", { 1: 100, 2: 200, 3: 300 }, { 1: 100, 2: 200, 3: 300 }],
+      ["drops a size above the most dogs a run takes", { 2: 200, 4: 400 }, { 2: 200 }],
+      ["drops a size that is no number of dogs", { 0: 1, 2: 200, two: 2 }, { 2: 200 }],
+    ])("%s", (_, bests, kept) => {
+      const save = loaded((document) => {
+        document.stats.bestCentsByPackSize = bests;
+      });
+      expect(save.stats.bestCentsByPackSize).toEqual(kept);
+    });
+  });
 });
 
 describe("saveContextFrom", () => {

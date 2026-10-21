@@ -37,8 +37,19 @@ function addTallies(
   return sum;
 }
 
-// Whether a run banking earnedCents would be the best walk yet; the end screen flags it.
-export function isNewBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: Cents): boolean {
+// Whether a walk of packSize dogs banking earnedCents beats every walk yet with that many
+// dogs; the end screen flags it.
+export function isNewBestWalk(
+  stats: Pick<SaveStats, "bestCentsByPackSize">,
+  packSize: number,
+  earnedCents: Cents,
+): boolean {
+  const best = stats.bestCentsByPackSize[packSize];
+  return best === undefined || earnedCents > best;
+}
+
+// Whether a run banking earnedCents beats the best walk the logbook shows, whatever its dogs.
+function beatsBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: Cents): boolean {
   return stats.bestWalk === null || earnedCents > stats.bestWalk.earnedCents;
 }
 
@@ -98,7 +109,10 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     },
     stats: {
       ...stats,
-      bestWalk: isNewBestWalk(stats, earnedCents)
+      bestCentsByPackSize: isNewBestWalk(stats, walkDogs.length, earnedCents)
+        ? { ...stats.bestCentsByPackSize, [walkDogs.length]: earnedCents }
+        : stats.bestCentsByPackSize,
+      bestWalk: beatsBestWalk(stats, earnedCents)
         ? { dogs: walkDogs, earnedCents, zonesFinished }
         : stats.bestWalk,
       bestZoneFinished,

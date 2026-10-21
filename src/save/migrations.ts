@@ -120,6 +120,30 @@ function tallySquirrelPulls(document: Record<string, unknown>): Record<string, u
   );
 }
 
+// Version 4 kept one best walk; version 5 also keeps the best for each pack size, seeded with
+// the best walk's own: its number of dogs and what it banked.
+function seedPackSizeBests(document: Record<string, unknown>): Record<string, unknown> {
+  return updateFields(
+    [
+      [
+        "stats",
+        (stats) => {
+          if (!isRecord(stats)) {
+            return stats;
+          }
+          const best = stats.bestWalk;
+          const seeded =
+            isRecord(best) && Array.isArray(best.dogs) && best.dogs.length > 0
+              ? { [String(best.dogs.length)]: best.earnedCents }
+              : {};
+          return { ...stats, bestCentsByPackSize: seeded };
+        },
+      ],
+    ],
+    document,
+  );
+}
+
 // One entry per version step, in order. A renamed dog or gear id needs one. Each step keeps
 // its own copy of what it renames, so a later rename adds a step rather than editing this one.
 export const saveMigrations: readonly Migration[] = [
@@ -136,6 +160,7 @@ export const saveMigrations: readonly Migration[] = [
   },
   { from: 2, migrate: unlockWalkers },
   { from: 3, migrate: tallySquirrelPulls },
+  { from: 4, migrate: seedPackSizeBests },
 ];
 
 // Runs each migration from the document's version up to targetVersion, in order. A

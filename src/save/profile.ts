@@ -153,7 +153,7 @@ export class ProfileSession {
 
   finishRun(result: RunResult, changes: readonly Change[]): Promise<void> {
     const before = this.document;
-    const newBestWalk = isNewBestWalk(before.stats, result.earnedCents);
+    const newBestWalk = isNewBestWalk(before.stats, result.dogs.length, result.earnedCents);
     const written = this.update((save) => recordRunEnd(this.awardContext(), save, result));
     this.ended = {
       achievements: earnedSince(this.awards.data, before, this.document),
