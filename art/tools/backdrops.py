@@ -641,10 +641,6 @@ def crescent_bend(px):
     return round(5 * max(0.0, 1 - ((px + 0.5 - CX) / (W / 2)) ** 2))
 
 
-# The warm sunset's sky bands, top to horizon, under screen-end's striped sun.
-SUNSET_SKY = ("pink", "orange", "amber", "yellow")
-
-
 # ---------- the six neighborhoods ----------
 # The six Toronto neighborhoods, sharing the cross street. Their
 # darkness ranges from the open sand of The Beaches to Yonge Street's evening, Kensington Market's

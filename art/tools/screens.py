@@ -10,13 +10,19 @@ stands), and works as a header on any other screen.
 screen-<name>: 360x560 backgrounds in the house palette, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
-- screen-home: morning on a suburban street. The bar strip, then the gate
-  scene (y 40 to 196: street, curb, sidewalk, fence with the open gate, front
-  path, yard sign), then the porch deck from y 198 under the walker, dogs and
-  Pocket sections and Start walk. The street sign's board (300,72 54x11, a 52x9
-  forest face) sits at the right edge, clear of the walker's speech bubble; the
-  game prints homeText.gateSign on it in font-body, white, centred at 327,75.
-  The yard's right lot is left for ui-pet-shop.
+- screen-home: a summer morning on a Cabbagetown street. The bar strip, then the
+  gate scene (y 40 to 196). Across the street (FAR_BASE 74): a cyan sky over a
+  haze band, the CN Tower far back over the laneway at the right (FAR_CN), a
+  row of small bay-and-gables in brick, dbrick, cream and clay with canopy
+  trees between them, their front yards behind an iron fence. Then the far
+  sidewalk, the street (rows 82 to 91), the curb and our sidewalk with a maple
+  in summer leaf in its planter, then the iron fence on a stone kerb, open at
+  the gate between two brick piers (152 and 202), the front path, the yard sign
+  and the porch deck from y 198 under the walker, dogs and Pocket sections and
+  Start walk. The street sign's board (300,72 54x11, a 52x9 forest face) sits
+  at the right edge, clear of the walker's speech bubble; the game prints
+  homeText.gateSign on it in font-body, white, centred at 327,75. The yard's
+  right lot is left for ui-pet-shop.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
@@ -24,18 +30,22 @@ reads on them.
   ramp step darker, the windows lit), and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
-- screen-end: a street at sunset. Between the logo (116,8) and the
-  summary panel (24,112 to 336,412), the front of the house the pack comes
-  home to: the logo stands on its roof, the front door (171,73 18x23) opens
-  onto a step (164,96 32x4), and a flagstone path (168,100 24x12) runs down
-  behind the panel's top edge. The lawn from y 96 gives the waving owners
-  room either side, feet on y 110. The banded sunset (SUNSET_SKY) fills the sky
-  twice: behind the house down to its lawn, under the striped sun at 300,44,
-  and behind the panel down to the far rooftops (y 450). Then the street's
-  houses with lit windows (from y 370), the yards, the sidewalk and
-  Kensington Market's brick road under the button (48,512 264x44). The houses, trees and fences
-  stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
-  margins show only sky, lawn and sidewalk.
+- screen-end: a Cabbagetown street at dusk. Between the logo (116,8) and the
+  summary panel (24,112 to 336,412), the front of the brick cottage the pack
+  comes home to: the logo stands on its slate roof's ridge (row 38), a steep
+  centre gable trimmed in white rises behind it, two lit sash windows flank
+  the front door (171,73 18x23) under its lit transom, which opens onto a step
+  (164,96 32x4), and a flagstone path (168,100 24x12) runs down behind the
+  panel's top edge. Bay-and-gables stand either side, their lamps lit behind
+  orange curtains, and the CN Tower rises lit over the right ones (END_CN). The
+  lawn from y 96 gives the waving owners room either side, feet on y 110.
+  Cabbagetown's dusk bands (DUSK_SKY) fill the sky twice: behind the house down
+  to its lawn, and behind the panel down to the far rooftops and towers in
+  mauve (y 450). Then the street's bay-and-gables and canopy trees (from y
+  370), iron fences, the yards, the sidewalk with two heritage lamps and
+  Kensington Market's brick road under the button (48,512 264x44). The houses,
+  trees and fences stay within x 8 to 352, so beside the badges panel (8,416
+  344x92) the margins show only sky, lawn and sidewalk.
 - screen-loading: a Toronto street at night, shown while the game loads, seen
   from the road. NIGHT_SKY's bands fill the sky down to SKY_FOOT (356), stars,
   a crescent moon at the top left and the logo drawn in at 2x (256x60 at
@@ -271,26 +281,95 @@ def logo():
 
 # ---------- screen-home ----------
 
+FAR_BASE = 74  # the far side's ground row on screen-home: its houses stand on it, their front yards under it
+# The far side's bay-and-gables: (left, width, wall, trim, door, bay on the left).
+FAR_HOMES = ((-8, 30, "brick", "white", "forest", True), (24, 30, "cream", "stone", "ttc", False),
+             (56, 30, "dbrick", "driftwood", "navy", True), (88, 30, "brick", "white", "ttc", False),
+             (120, 30, "clay", "stone", "forest", True), (152, 30, "brick", "driftwood", "navy", False),
+             (184, 30, "dbrick", "white", "forest", True), (216, 30, "brick", "stone", "ttc", False),
+             (248, 30, "cream", "white", "navy", True), (280, 30, "brick", "stone", "forest", False))
+FAR_CN = (340, 89, 36)  # the CN Tower's centre column, foot and mast tip on screen-home, over the laneway
+
+
+def far_gable(cv, x, w, wall, trim, door, bay_left, base=FAR_BASE):
+    """A small Cabbagetown bay-and-gable across the street, w wide on row base, 34 rows tall: a steep front
+    gable edged in a coal roof and a trim bargeboard over an arched attic window, a two-storey bay on one
+    half (three windows a storey, cyan glass in daylight) and the door with its transom on the other,
+    on a stone stoop."""
+    top, gable_h = base - 34, 14
+    cx, half = x + w // 2, w // 2 + 2
+    for i in range(gable_h):
+        inset = round(i * half / gable_h)
+        cv.fill(cx - inset, top + i, 2 * inset, 1, wall)
+        cv.fill(cx - inset - 1, top + i, 1, 1, "coal")
+        cv.fill(cx + inset, top + i, 1, 1, "coal")
+        if inset > 2:
+            cv.fill(cx - inset, top + i, 1, 1, trim)
+            cv.fill(cx + inset - 1, top + i, 1, 1, trim)
+    cv.fill(x - 2, top + gable_h - 1, w + 4, 1, "coal")
+    cv.fill(cx - 2, top + 6, 3, 5, trim)
+    cv.fill(cx - 1, top + 7, 1, 4, "cyan")
+    wy = top + gable_h
+    cv.fill(x, wy, w, base - wy, wall)
+    cv.fill(x + w - 2, wy, 2, base - wy, dk(wall))
+    bw = w // 2
+    bx = x + 1 if bay_left else x + w - 1 - bw
+    cv.fill(bx, wy + 1, bw, base - wy - 1, dk(wall))
+    cv.fill(bx + 2, wy + 1, bw - 4, base - wy - 1, wall)
+    cv.fill(bx - 1, wy, bw + 2, 1, trim)
+    cv.fill(bx - 1, wy + 10, bw + 2, 1, trim)
+    for sy in (wy + 3, wy + 12):
+        for wx in (bx + 1, bx + bw // 2 - 1, bx + bw - 3):
+            cv.fill(wx, sy, 2, 5, "cyan")
+            cv.fill(wx, sy, 2, 1, trim)
+    dc = x + w - 1 - bw // 2 - 1 if bay_left else x + bw // 2
+    cv.fill(dc - 2, wy + 3, 4, 5, "cyan")
+    cv.fill(dc - 2, wy + 3, 4, 1, trim)
+    cv.fill(dc - 3, base - 10, 6, 10, trim)
+    cv.fill(dc - 2, base - 9, 4, 2, "cyan")
+    cv.fill(dc - 2, base - 7, 4, 7, door)
+    cv.fill(dc - 3, base, 6, 2, "stone")
+    cv.fill(dc - 4, base + 2, 8, 1, "dstone")
+
+
 def home():
     cv = sn.Canvas(W, H)
     r = rand(7)
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
-    # the street past the gate: asphalt, a dashed centre line, a manhole and a storm drain
-    cv.fill(0, 40, W, 52, "dslate")
-    for _ in range(260):
-        cv.fill(int(r() * W), 40 + int(r() * 52), 1, 1, "slate" if r() < 0.6 else "navy")
-    for x in range(4, W, 28):
-        cv.fill(x, 65, 14, 2, "lgrey")
-    for dy in range(-4, 5):
-        for dx in range(-8, 9):
-            if (dx / 8.5) ** 2 + (dy / 4.5) ** 2 <= 1:
-                inner = (dx / 6) ** 2 + (dy / 3) ** 2 <= 1
-                cv.fill(250 + dx, 78 + dy, 1, 1, "slate" if inner and (dx + dy) % 3 == 0 else "navy")
-    cv.fill(52, 87, 18, 5, "navy")
+    # across the street: a summer sky, the CN Tower far back over the laneway at the right, a row of
+    # Cabbagetown bay-and-gables with canopy trees between them, their front yards behind an iron fence
+    cv.fill(0, 40, W, FAR_BASE - 40, "cyan")
+    cv.fill(0, 56, W, FAR_BASE - 56, "haze")
+    for i in range(0, W, 5):
+        cv.fill(i, 56 - (i // 5) % 2, 5, 1, "haze")
+    cn_tower(cv, *FAR_CN, lit=False)
+    for k in range(len(FAR_HOMES)):
+        tx = FAR_HOMES[k][0] + FAR_HOMES[k][1] + 1
+        bd.tree(cv, tx, FAR_BASE - 20, "canopy", "pine", "bark", r=8, base=FAR_BASE, girth=2)
+    bd.tree(cv, 322, FAR_BASE - 8, "canopy", "pine", "bark", r=7, base=FAR_BASE, girth=2)
+    for x, w, wall, trim, door, bay_left in FAR_HOMES:
+        far_gable(cv, x, w, wall, trim, door, bay_left)
+    cv.fill(0, FAR_BASE, W, 3, "dgreen")
+    iron_fence(cv, 0, W, FAR_BASE + 3, [(x + (w - w // 2 // 2 - 6 if bay else w // 2 // 2 - 4),
+                                        x + (w - w // 2 // 2 + 2 if bay else w // 2 // 2 + 4))
+                                       for x, w, _, _, _, bay in FAR_HOMES])
+    # the far sidewalk and curb, then the street: asphalt, a manhole and a storm drain
+    cv.fill(0, FAR_BASE + 3, W, 4, "lgrey")
+    for x in range(10, W, 24):
+        cv.fill(x, FAR_BASE + 3, 1, 4, "grey")
+    cv.fill(0, FAR_BASE + 7, W, 1, "grey")
+    cv.fill(0, FAR_BASE + 8, W, 92 - FAR_BASE - 8, "dslate")
+    for _ in range(90):
+        cv.fill(int(r() * W), FAR_BASE + 8 + int(r() * (92 - FAR_BASE - 8)), 1, 1, "slate" if r() < 0.6 else "navy")
+    for dy in range(-2, 3):
+        for dx in range(-6, 7):
+            if (dx / 6.5) ** 2 + (dy / 2.5) ** 2 <= 1:
+                cv.fill(250 + dx, 87 + dy, 1, 1, "slate" if (dx + dy) % 3 == 0 and abs(dx) < 5 else "navy")
+    cv.fill(52, 88, 18, 4, "navy")
     for x in range(54, 70, 3):
-        cv.fill(x, 88, 1, 3, "ink")
+        cv.fill(x, 89, 1, 3, "ink")
     # the curb and the sidewalk
     cv.fill(0, 92, W, 4, "grey")
     cv.fill(0, 92, W, 1, "lgrey")
@@ -300,7 +379,8 @@ def home():
     cv.fill(98, 104, 3, 1, "grey")
     cv.fill(100, 105, 2, 1, "grey")
     cv.fill(270, 116, 4, 1, "grey")
-    # a maple in a sidewalk planter: its shadow, the trunk, then a lumpy crown in autumn colours, lit from the top left
+    # a maple in a sidewalk planter in summer leaf: its shadow, the trunk, then a lumpy canopy crown, lit
+    # moss from the top left and shaded pine
     for dy in range(-6, 7):
         for dx in range(-24, 25):
             if (dx / 24) ** 2 + (dy / 6.5) ** 2 <= 1:
@@ -309,17 +389,17 @@ def home():
     cv.fill(60, 108, 22, 14, "dbrown")
     cv.fill(61, 109, 20, 12, "brown")
     cv.fill(62, 110, 18, 2, "dbrown")
-    cv.fill(69, 92, 4, 20, "dbrown")
-    cv.fill(69, 92, 1, 20, "brown")
+    cv.fill(69, 92, 4, 20, "bark")
+    cv.fill(69, 92, 1, 20, "clay")
     for lx, ly, rad in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10), (13, 4, 10), (0, 10, 10)):
         for dy in range(-rad, rad + 1):
             for dx in range(-rad, rad + 1):
                 if dx * dx + dy * dy <= rad * rad:
                     lit = (dx + dy) / rad
-                    c = "rust" if lit > 0.55 else "amber" if lit < -0.75 else "orange"
+                    c = "pine" if lit > 0.55 else "moss" if lit < -0.75 else "canopy"
                     cv.fill(71 + lx + dx, 80 + ly + dy, 1, 1, c)
     for x, y in ((58, 70), (66, 66), (74, 68), (56, 80)):
-        cv.fill(x, y, 1, 1, "yellow")
+        cv.fill(x, y, 1, 1, "lime")
     # the street sign at the right edge, under the sound toggle and clear of the walker's speech
     # bubble (x 70 to 290, rows 46 to 112); the game prints the name centred at 327,75 in white,
     # which holds 7.8:1 on forest green
@@ -344,21 +424,20 @@ def home():
         cv.fill(180 + (4 if (y // 8) % 2 else -6), y + 1, 1, 7, "brown")
     cv.fill(163, 126, 1, 70, "dgreen")
     cv.fill(196, 126, 1, 70, "dgreen")
-    # the picket fence with the gate open, and its posts
-    for x in range(2, W, 6):
-        if 158 < x < 200:
-            continue
-        cv.fill(x, 124, 4, 14, "white")
-        cv.fill(x + 3, 125, 1, 13, "lgrey")
-        cv.fill(x + 1, 123, 2, 1, "white")
-        cv.fill(x, 138, 4, 1, "dgreen")
-    cv.fill(0, 128, 158, 2, "lgrey")
-    cv.fill(202, 128, 158, 2, "lgrey")
-    for px in (154, 202):
-        cv.fill(px, 120, 5, 20, "lgrey")
-        cv.fill(px, 120, 5, 1, "white")
-        cv.fill(px + 4, 121, 1, 19, "grey")
-        cv.fill(px, 140, 5, 1, "dgreen")
+    # the iron fence on a stone kerb, open at the gate between two brick piers with stone caps
+    cv.fill(0, 135, 156, 3, "stone")
+    cv.fill(204, 135, W - 204, 3, "stone")
+    cv.fill(0, 137, 156, 1, "dstone")
+    cv.fill(204, 137, W - 204, 1, "dstone")
+    iron_fence(cv, 1, W, 136, [(155, 205)])
+    for px in (152, 202):
+        cv.fill(px, 118, 6, 22, "brick")
+        cv.fill(px + 4, 118, 2, 22, "dbrick")
+        for y in range(121, 138, 4):
+            cv.fill(px, y, 6, 1, "dbrick")
+        cv.fill(px - 1, 116, 8, 2, "stone")
+        cv.fill(px - 1, 116, 8, 1, "lgrey")
+        cv.fill(px, 140, 6, 1, "dgreen")
     # the yard sign: blank board (the logo goes over it) on two posts
     for px in (16, 120):
         cv.fill(px, 172, 3, 22, "dbrown")
@@ -372,9 +451,6 @@ def home():
     cv.fill(250, 176, 5, 5, "red")
     cv.fill(250, 176, 2, 2, "pink")
     cv.fill(254, 179, 1, 2, "dred")
-    for x, y, c in ((120, 50, "orange"), (210, 84, "rust"), (30, 104, "orange"), (140, 112, "rust"),
-                    (236, 100, "orange"), (240, 160, "orange"), (270, 150, "rust"), (344, 86, "orange")):
-        leaf(cv, x, y, c)
     # the porch: a step nosing, then the deck under the panels
     cv.fill(0, 196, W, 1, "tan")
     cv.fill(0, 197, W, 1, "brown")
@@ -656,49 +732,65 @@ def stats():
 # ---------- screen-end ----------
 
 END_STREET = 370  # top of the street strip on screen-end
+# Cabbagetown's dusk, top to horizon, as its backdrop: lilac over pink and peach to a gold glow.
+DUSK_SKY = ("lilac", "pink", "peach", "gold")
+END_CN = (306, 96, 4)  # the CN Tower's centre column, foot and mast tip on screen-end
 
 
 def end():
     cv = sn.Canvas(W, H)
-    # The banded sunset, twice: behind the house down to its lawn, with the striped sun low
-    # in the west, and behind the panel down to the far rooftops of the street below
-    cv.fill(0, 0, W, 520, bd.SUNSET_SKY[-1])
-    bd.bands(cv, 0, 96, bd.SUNSET_SKY)
-    bd.bands(cv, 112, END_STREET + 80, bd.SUNSET_SKY)
-    bd.sun(cv, 300, 44, 22, "yellow")
-    # two birds heading home
+    # Cabbagetown's dusk, twice: behind the house down to its lawn, and behind the panel down to the far
+    # rooftops of the street below; the CN Tower lit over the roofs at the right
+    cv.fill(0, 0, W, 520, DUSK_SKY[-1])
+    bd.bands(cv, 0, 96, DUSK_SKY)
+    bd.bands(cv, 112, END_STREET + 80, DUSK_SKY)
+    for x, y in ((40, 6), (92, 14), (262, 4), (348, 20), (20, 30)):
+        cv.fill(x, y, 1, 1, "white")
+    cn_tower(cv, *END_CN)
+    # two gulls heading home
     for bx, by in ((84, 50), (100, 42)):
         cv.fill(bx, by, 2, 1, "plum")
         cv.fill(bx + 2, by + 1, 1, 1, "plum")
         cv.fill(bx + 3, by, 2, 1, "plum")
-    # the house the pack comes home to, between the logo and the panel: the logo stands on its dred roof like a
-    # sign; the sun to the right stays clear.
+    # the neighbours either side: bay-and-gables with their lamps lit behind the curtains
+    for cx, wall, roof, door in ((6, "brick", "dslate", "navy"), (60, "dbrick", "shale", "forest"),
+                                 (300, "brick", "shale", "ttc"), (354, "dbrick", "dslate", "forest")):
+        bd.bay_gable(cv, cx, 46, wall, roof, door, 96, trim="cream", curtains="orange")
+    # the house the pack comes home to, between the logo and the panel: a brick Cabbagetown cottage whose
+    # slate roof's ridge the logo stands on like a sign, a steep centre gable trimmed in white over the door
+    for i in range(12):
+        cv.fill(122 - i, 38 + i, 116 + 2 * i, 1, "shale")
+        cv.fill(122 - i, 38 + i, 2, 1, "ash")
+    cv.fill(108, 49, 144, 2, "coal")
+    cv.fill(124, 51, 112, 45, "brick")
+    cv.fill(233, 51, 3, 45, "dbrick")
+    for y in range(55, 96, 5):
+        for x in range(124 + (y // 5 % 2) * 6, 233, 12):
+            cv.fill(x, y, 1, 1, "dbrick")
     for i in range(30):
-        half = round(4 + i * 58 / 29)
-        cv.fill(180 - half, 18 + i, 2 * half, 1, "dred")
-        cv.fill(180 - half, 18 + i, 2, 1, "red")
-    cv.fill(116, 47, 128, 2, "plum")
-    cv.fill(124, 49, 112, 47, "cream")
-    cv.fill(233, 49, 3, 47, "tan")
-    for y in range(54, 96, 6):
-        cv.fill(124, y, 109, 1, "tan")
-    # two lit windows with white sills, under the logo
-    for wx in (132, 208):
-        cv.fill(wx, 73, 20, 15, "plum")
-        cv.fill(wx + 1, 74, 18, 13, "yellow")
-        cv.fill(wx + 10, 74, 1, 13, "amber")
-        cv.fill(wx + 1, 80, 18, 1, "amber")
-        cv.fill(wx - 1, 88, 22, 2, "white")
-    # the front door in a white frame, a porch light beside it, and the step
-    cv.fill(169, 71, 22, 25, "white")
+        half = 2 + i * 22 // 29
+        cv.fill(180 - half, 24 + i, 2 * half, 1, "brick")
+        cv.fill(180 - half - 1, 24 + i, 2, 1, "white")
+        cv.fill(180 + half - 1, 24 + i, 2, 1, "white")
+    cv.fill(158, 54, 44, 1, "white")
+    lit_window(cv, 178, 40, 5, 10, "stone", True, arch=True)
+    # two tall sash windows lit gold under stone lintels
+    for wx in (134, 208):
+        cv.fill(wx - 2, 58, 22, 3, "stone")
+        lit_window(cv, wx, 62, 18, 24, "white", True)
+    # the front door in a stone surround under its lit transom, a porch light beside it, and the step
+    cv.fill(167, 63, 26, 33, "stone")
+    cv.fill(169, 65, 22, 31, "white")
+    cv.fill(171, 66, 18, 6, "gold")
+    cv.fill(179, 66, 2, 6, "white")
     cv.fill(171, 73, 18, 23, "dgreen")
     for py in (75, 85):
         cv.fill(173, py, 6, 8, "forest")
         cv.fill(181, py, 6, 8, "forest")
     cv.fill(186, 83, 2, 2, "amber")
-    cv.fill(194, 74, 4, 2, "plum")
-    cv.fill(195, 76, 2, 3, "yellow")
-    # the lawn, flower beds along the wall and a hedge on each side
+    cv.fill(196, 70, 4, 2, "coal")
+    cv.fill(197, 72, 2, 3, "yellow")
+    # the lawn, flower beds along the wall and a low hedge either side of the house
     cv.fill(0, 96, W, 16, "green")
     for i in range(30):
         cv.fill((i * 41) % W, 98 + (i * 7) % 13, 1, 2, "dgreen")
@@ -706,10 +798,10 @@ def end():
         cv.fill(x0, 92, x1 - x0, 4, "dbrown")
         cv.fill(x0, 92, x1 - x0, 1, "plum")
         bd.flowers(cv, x0 + 2, x1 - 2, 90, ("orange", "yellow", "red", "pink"))
-    for x in list(range(-4, 112, 22)) + list(range(246, W, 22)):
-        bd.bush(cv, x, 93, "dgreen")
-    cv.fill(164, 96, 32, 4, "lgrey")
-    cv.fill(164, 99, 32, 1, "grey")
+    for x in (90, 104, 240, 254):
+        bd.bush(cv, x, 93, "dgreen", bd.SHRUB)
+    cv.fill(164, 96, 32, 4, "stone")
+    cv.fill(164, 99, 32, 1, "dstone")
     # the front path: tan flagstones from the step down behind the panel
     cv.fill(168, 100, 24, 12, "tan")
     cv.fill(168, 106, 24, 1, "brown")
@@ -717,41 +809,34 @@ def end():
     cv.fill(184, 107, 1, 5, "brown")
     cv.fill(167, 100, 1, 12, "dgreen")
     cv.fill(192, 100, 1, 12, "dgreen")
-    # the rest of the street, far off: amber rooftops and trees against the low sun
-    for x, w, h, kind in ((8, 22, 22, "roof"), (28, 20, 30, "tree"), (50, 40, 18, "roof"), (92, 24, 28, "tree"),
-                          (118, 36, 20, "roof"), (156, 20, 28, "tree"), (178, 44, 16, "roof"), (224, 24, 32, "tree"),
-                          (250, 38, 22, "roof"), (290, 22, 26, "tree"), (314, 38, 18, "roof")):
+    # the rest of the city, far off: rooftops and towers in mauve against the glow
+    bd.roofline(cv, END_STREET + 110, ((8, 22, 30), (50, 40, 26), (118, 36, 28), (178, 44, 24), (250, 38, 30),
+                                       (314, 38, 26)), "mauve")
+    r = rand(17)
+    for x, w, h in ((30, 14, 56), (96, 18, 70), (160, 12, 50), (226, 16, 64), (292, 14, 58)):
         top = END_STREET + 80 - h
-        cv.fill(x, top, w, h + 30, "amber")
-        if kind == "roof":
-            for j in range(w // 4):
-                cv.fill(x + 2 * j, top - j, w - 4 * j, 1, "amber")
-        else:
-            for dy in range(-w // 2, w // 2 + 1):
-                for dx in range(-w // 2, w // 2 + 1):
-                    if dx * dx + dy * dy <= (w // 2) ** 2:
-                        cv.fill(x + w // 2 + dx, top + dy, 1, 1, "amber")
-    # The street below, in the sunset's palette: trees, houses with lit windows, yards and the sidewalk.
-    # Everything standing is kept within x 8 to 352, so the badges panel never cuts it into slivers.
+        cv.fill(x, top, w, h + 30, "mauve")
+        cv.fill(x + 3, top - 3, w - 6, 3, "mauve")
+        for wy in range(top + 4, END_STREET + 60, 5):
+            for wx in range(x + 3, x + w - 3, 4):
+                if r() < 0.3:
+                    cv.fill(wx, wy, 2, 1, "gold")
+    # The street below at dusk: Cabbagetown's bay-and-gables, lamps lit behind their curtains, canopy trees,
+    # iron fences, the yards and the sidewalk with its heritage lamps. Everything standing is kept within x 8
+    # to 352, so the badges panel never cuts it into slivers.
     strip = clear(W, 150)
-    for cx, top in ((28, 44), (178, 40), (330, 46)):
-        bd.tree(strip, cx, top, "orange", "rust", r=20)
-    # slim houses as on the zone's backdrop, about as tall as they are wide under steep gables, their
-    # curtains drawn against the low sun with the lamps lit between them
-    homes = ((46, 54, "white", "dred", "dgreen"), (106, 50, "tan", "brown", "dred"),
-             (200, 54, "skin1", "navy", "red"), (260, 50, "cream", "purple", "blue"))
-    for k, (x, w, wall, roof, door) in enumerate(homes):
-        bd.house(strip, x, w, wall, roof, door, top=104 - w, roof_h=w // 2, parts=bd.SLIM, curtains="orange",
-                 eave=2, rake=bd.RAKE.get(roof), dormer=k % 2 == 0)
+    for cx, top in ((28, 50), (180, 46), (330, 52)):
+        bd.tree(strip, cx, top, "canopy", "pine", "bark", r=16)
+    for cx, wall, roof, door in ((60, "brick", "shale", "forest"), (114, "cream", "slate", "ttc"),
+                                 (246, "dbrick", "dslate", "navy"), (300, "brick", "shale", "ttc")):
+        bd.bay_gable(strip, cx, 46, wall, roof, door, 104, trim="white", curtains="orange")
     bd.ground(strip)
-    bd.flowers(strip, 50, 96, 110, ("orange", "yellow", "red"))
-    bd.flowers(strip, 204, 250, 112, ("orange", "yellow", "red"))
-    bd.fence(strip, 104, 8, 42)
-    bd.fence(strip, 104, 160, 196)
-    bd.fence(strip, 104, 314, 352)
-    for x, y in ((20, 120), (100, 116), (176, 122), (260, 118), (330, 122)):
-        strip.fill(x, y, 3, 2, "orange")
-        strip.fill(x + 1, y - 1, 1, 1, "rust")
+    bd.flowers(strip, 40, 84, 110, ("orange", "yellow", "red"))
+    bd.flowers(strip, 226, 270, 112, ("orange", "yellow", "red"))
+    for x0, x1 in ((8, 52), (72, 106), (126, 236), (258, 292), (312, 352)):
+        bd.iron_fence(strip, 120, x0, x1)
+    for x in (150, 210):
+        bd.gas_lamp(strip, x, 144)
     cv.paste(strip.img, 0, END_STREET)
     # Kensington Market's brick road, its top rows under the button
     tile = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
@@ -843,7 +928,7 @@ def tower_block(cv, x, w, top, wall, seed):
                 cv.fill(wx, wy, 2, 1, "gold")
 
 
-def cn_tower(cv, cx, foot, tip):
+def cn_tower(cv, cx, foot, tip, lit=True):
     """The CN Tower lit for the night: a tapering haze shaft in its floodlight, shaded on the right, the
     main pod at 62% of its height with a ring of gold windows, the SkyPod above it, then the mast, a red
     beacon at its tip."""
@@ -865,13 +950,13 @@ def cn_tower(cv, cx, foot, tip):
     cv.fill(cx - 10, pod + 2, 21, 2, "haze")
     cv.fill(cx - 11, pod - 2, 23, 4, "dlake")
     for wx in range(cx - 10, cx + 11, 2):
-        cv.fill(wx, pod - 1, 1, 2, "gold")
+        cv.fill(wx, pod - 1, 1, 2, "gold" if lit else "foam")
     cv.fill(cx - 10, pod - 4, 21, 2, "haze")
     cv.fill(cx - 7, pod - 6, 15, 2, "lgrey")
     cv.fill(cx - 4, pod - 8, 9, 2, "lgrey")
     # the SkyPod
     cv.fill(cx - 3, sky_pod - 1, 7, 3, "lgrey")
-    cv.fill(cx - 2, sky_pod, 5, 1, "gold")
+    cv.fill(cx - 2, sky_pod, 5, 1, "gold" if lit else "foam")
     # the mast, a beacon at its tip and one partway up
     cv.fill(cx, tip, 1, mast - tip, "lgrey")
     cv.fill(cx - 1, tip, 3, 1, "ttc")
