@@ -19,12 +19,14 @@ const FNT = `<?xml version="1.0"?>
 describe("parseBitmapFont", () => {
   const font = parseBitmapFont(FNT);
 
-  it.each([
-    [" ", { advance: 2, height: 0, width: 0, xOffset: 0, yOffset: 0 }],
-    ["H", { advance: 5, height: 6, width: 4, xOffset: 0, yOffset: 2 }],
-    ["g", { advance: 4, height: 6, width: 3, xOffset: -1, yOffset: 4 }],
-  ])("reads %j's box and advance", (char, glyph) => {
-    expect(font.glyphs.get(char)).toEqual(glyph);
+  it("reads each glyph's box and advance", () => {
+    for (const [char, glyph] of [
+      [" ", { advance: 2, height: 0, width: 0, xOffset: 0, yOffset: 0 }],
+      ["H", { advance: 5, height: 6, width: 4, xOffset: 0, yOffset: 2 }],
+      ["g", { advance: 4, height: 6, width: 3, xOffset: -1, yOffset: 4 }],
+    ] as const) {
+      expect(font.glyphs.get(char)).toEqual(glyph);
+    }
   });
 
   it("reads the line height and the kerned pairs", () => {
@@ -43,11 +45,13 @@ describe("fontMetrics", () => {
 
 describe("inkRowsOfLines", () => {
   const metrics = fontMetrics(parseBitmapFont(FNT));
-  it.each([
-    [0, 8],
-    [1, 8],
-    [3, 2 * 11 + 8],
-  ])("spans %i lines' capitals to their lowest ink in %i rows", (lines, rows) => {
-    expect(inkRowsOfLines(metrics, lines)).toBe(rows);
+  it("spans lines' capitals to their lowest ink", () => {
+    for (const [lines, rows] of [
+      [0, 8],
+      [1, 8],
+      [3, 2 * 11 + 8],
+    ] as const) {
+      expect(inkRowsOfLines(metrics, lines)).toBe(rows);
+    }
   });
 });

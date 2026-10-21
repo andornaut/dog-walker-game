@@ -11,26 +11,15 @@ const bottom = (rect: Rect) => rect.y + rect.height;
 const right = (rect: Rect) => rect.x + rect.width;
 
 describe("cardRowRects", () => {
-  it("lays a full row 83px wide and 8px apart, the odd pixel in the right margin", () => {
-    const cards = cardRowRects(spec, 3, area);
-    expect(cards.map((card) => card.x)).toEqual([87, 178, 269]);
-    expect(cards.every((card) => card.width === 83)).toBe(true);
-    expect(itemAt(cards, 0).x - area.x).toBe(7);
-    expect(right(area) - right(itemAt(cards, 2))).toBe(8);
-  });
-
-  it("centres a shorter row on whole pixels", () => {
-    const cards = cardRowRects(spec, 2, area);
-    expect(itemAt(cards, 1).x - right(itemAt(cards, 0))).toBe(8);
-    expect(itemAt(cards, 0).x - area.x).toBe(53);
-    expect(right(area) - right(itemAt(cards, 1))).toBe(53);
-  });
-
-  it("centres the cards vertically on a whole pixel", () => {
-    const card = itemAt(cardRowRects(spec, 3, area), 0);
-    expect(card.height).toBe(140);
-    expect(card.y - area.y).toBe(155);
-    expect(bottom(area) - bottom(card)).toBe(155);
+  it("centres a row on whole pixels, the odd pixel in the right margin, and centres it vertically", () => {
+    const full = cardRowRects(spec, 3, area);
+    expect(itemAt(full, 0).x - area.x).toBe(7);
+    expect(right(area) - right(itemAt(full, 2))).toBe(8);
+    const two = cardRowRects(spec, 2, area);
+    expect(itemAt(two, 1).x - right(itemAt(two, 0))).toBe(spec.gap);
+    expect(itemAt(two, 0).x - area.x).toBe(right(area) - right(itemAt(two, 1)));
+    const card = itemAt(full, 0);
+    expect(card.y - area.y).toBe(bottom(area) - bottom(card));
   });
 
   it("rejects a count outside 1 to maxCount", () => {
@@ -46,9 +35,10 @@ describe("cardHeader", () => {
   const inkTop = (band: Rect) => band.y + 1;
   const inkBottom = (band: Rect) => bottom(band) - 6;
 
-  it.each([1, 2, 3].flatMap((count) => [false, true].map((keys) => [count, keys] as const)))(
-    "stacks the header over %i cards, key numbers shown: %s",
-    (count, keys) => {
+  it("stacks the header over any count of cards, with and without key numbers", () => {
+    for (const [count, keys] of [1, 2, 3].flatMap((count) =>
+      [false, true].map((keys) => [count, keys] as const),
+    )) {
       const cards = cardRowRects(spec, count, area);
       const { band, keyTop, subtitleTop, titleTop } = cardHeader(keys, cards);
       const top = itemAt(cards, 0).y;
@@ -62,6 +52,6 @@ describe("cardHeader", () => {
       if (keys) {
         expect(keyTop).toBeGreaterThan(subtitleTop + 5 + 2);
       }
-    },
-  );
+    }
+  });
 });

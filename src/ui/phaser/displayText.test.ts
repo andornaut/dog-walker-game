@@ -52,25 +52,27 @@ function fakeScene(fonts: Readonly<Record<string, string>>): { drawn: Drawn[]; s
 const DISPLAY_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?,.'-$+♥";
 
 describe("addDisplayText", () => {
-  it.each([
-    {
-      expected: { font: "font-display", text: "WHICH WAY?", tint: undefined, y: 7 },
-      fonts: { "font-display": DISPLAY_GLYPHS, "font-title": "" },
-      name: "draws upper case, untinted, in the display font",
-    },
-    {
-      expected: { font: "font-title", text: "WHICH WAY?", tint: 0x123456, y: 2 },
-      fonts: { "font-title": "" },
-      name: "falls back to the title font while the display font is missing",
-    },
-    {
-      expected: { font: "font-title", text: "WHICH WAY?", tint: 0x123456, y: 2 },
-      fonts: { "font-display": "ABC", "font-title": "" },
-      name: "falls back when the display font lacks a character",
-    },
-  ])("$name", ({ expected, fonts }) => {
-    const { drawn, scene } = fakeScene(fonts);
-    addDisplayText(scene, 0, 10, "Which way?", { color: 0x123456, font: "title", scale: 2 });
-    expect(drawn).toEqual([expected]);
+  it("draws upper case in the display font, else in the tinted title font", () => {
+    for (const { expected, fonts } of [
+      {
+        expected: { font: "font-display", text: "WHICH WAY?", tint: undefined, y: 7 },
+        fonts: { "font-display": DISPLAY_GLYPHS, "font-title": "" },
+        name: "draws upper case, untinted, in the display font",
+      },
+      {
+        expected: { font: "font-title", text: "WHICH WAY?", tint: 0x123456, y: 2 },
+        fonts: { "font-title": "" },
+        name: "falls back to the title font while the display font is missing",
+      },
+      {
+        expected: { font: "font-title", text: "WHICH WAY?", tint: 0x123456, y: 2 },
+        fonts: { "font-display": "ABC", "font-title": "" },
+        name: "falls back when the display font lacks a character",
+      },
+    ]) {
+      const { drawn, scene } = fakeScene(fonts);
+      addDisplayText(scene, 0, 10, "Which way?", { color: 0x123456, font: "title", scale: 2 });
+      expect(drawn).toEqual([expected]);
+    }
   });
 });
