@@ -6,11 +6,18 @@ import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
-import { fitInFont } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { FEEDBACK } from "./feedback";
 import { dogFeeText } from "./home";
-import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT, pocketLining, sectionFill } from "./homeLayout";
+import {
+  DOG_TILE_TEXT_ROOM,
+  dogTileFeeY,
+  HOME_LAYOUT,
+  pocketLining,
+  sectionFill,
+} from "./homeLayout";
 import { homeLine } from "./homeText";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
@@ -197,6 +204,16 @@ describe("top bar", () => {
 
 // Each dog's name and the fee line fit a dog tile's text column, measured on the body font.
 describe("a dog tile's text", () => {
+  const body = fontFileMetrics("font-body");
+  const ink = inkRowsFromCapTop(body) * 2;
+
+  it("keeps the name over the fee and the fee inside the tile, in the body font's rows", () => {
+    const { dogTile, dogTileInset, dogTiles } = HOME_LAYOUT;
+    const feeY = dogTileFeeY(body);
+    expect(feeY + ink).toBe(dogTiles.cellHeight - 2 * dogTileInset - dogTile.feeFoot);
+    expect(dogTile.nameY + ink).toBeLessThan(feeY);
+  });
+
   const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) });
   it.each([...Object.values(gameData.dogs).map((dog) => dog.name), fee])("sets %j", (text) => {
     const fitted = fitInFont("font-body", TEXT_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));

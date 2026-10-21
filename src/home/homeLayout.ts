@@ -2,6 +2,7 @@ import type { DogId } from "../data/types";
 import type { GridSpec } from "../layout/grid";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
+import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -99,9 +100,10 @@ export const HOME_LAYOUT = {
     width: 300,
   },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
-  // A dog tile's name and its fee or price plate start textX in, the name's capitals nameY and
-  // the fee's feeY down, and keep padRight inside its right edge.
-  dogTile: { feeY: 29, nameY: 4, padRight: 3, textX: 39 },
+  // A dog tile's name and its fee or price plate start textX in, the name's capitals nameY
+  // down, the fee's lowest ink feeFoot above the tile's bottom (dogTileFeeY), and keep padRight
+  // inside its right edge.
+  dogTile: { feeFoot: 1, nameY: 4, padRight: 3, textX: 39 },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
   // The dog rows are hit areas 44 tall with no gap.
@@ -227,3 +229,10 @@ export const HOME_LAYOUT = {
 // How wide a dog tile's name and fee may be: from its text column to padRight inside its edge.
 export const DOG_TILE_TEXT_ROOM =
   HOME_LAYOUT.dogTiles.cellWidth - HOME_LAYOUT.dogTile.textX - HOME_LAYOUT.dogTile.padRight;
+
+// The top of a dog tile's fee's capitals, from the drawn tile's top, with its 2x body text's
+// lowest ink feeFoot above the tile's bottom.
+export function dogTileFeeY(body: FontMetrics): number {
+  const height = HOME_LAYOUT.dogTiles.cellHeight - 2 * HOME_LAYOUT.dogTileInset;
+  return height - HOME_LAYOUT.dogTile.feeFoot - inkRowsFromCapTop(body) * 2;
+}

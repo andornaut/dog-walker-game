@@ -1404,7 +1404,7 @@
         "y": 298
       },
       "dogTile": {
-        "feeY": 29,
+        "feeFoot": 1,
         "nameY": 4,
         "padRight": 3,
         "textX": 39

@@ -47,7 +47,7 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
-import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT, sectionFill } from "../home/homeLayout";
+import { DOG_TILE_TEXT_ROOM, dogTileFeeY, HOME_LAYOUT, sectionFill } from "../home/homeLayout";
 import {
   bubbleSpeech,
   type HomeAction,
@@ -127,7 +127,7 @@ import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
+import { addPixelText, fitPixelText, type FontRole, pixelFontMetrics } from "./pixelText";
 import {
   currentSettings,
   isMuted,
@@ -1500,7 +1500,8 @@ export class StartScene extends Scene {
       content.add(face);
       view.face = { object: face, y: y + 5 };
 
-      const { feeY, nameY, textX } = DOG_TILE;
+      const { nameY, textX } = DOG_TILE;
+      const feeY = dogTileFeeY(pixelFontMetrics(this, "body"));
       const fitText = (value: string, top: number) => {
         const label = this.text(content, x + textX, top, value, ink);
         fitPixelText(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
