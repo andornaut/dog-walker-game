@@ -22,7 +22,7 @@ export const QUIPS = {
   duchess: {
     fired: ["Consider yourself pruned!", "A catastrophe in full bloom!"],
     happier: ["Divine! She's simply blossoming!", "Oh, I could weep with joy!"],
-    parting: ["Delicate as an orchid. Guard her!", "Keep her bow straight!"],
+    parting: ["She's delicate. Guard her!", "Keep her bow straight!"],
     upset: ["She's wilting! I can't bear it!", "My heart! My prize rose, trampled!"],
   },
   koda: {
@@ -55,7 +55,7 @@ export const QUIPS = {
   snowball: {
     fired: ["Off the guest list! Now!", "Ugh! The day is canceled!"],
     happier: ["Picture perfect!", "Everything is going to plan!"],
-    parting: ["No mud, no fuss. Big day!", "She's the flower dog at two!"],
+    parting: ["No mud, no fuss. Big day!", "Flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],
   },
   zippy: {
