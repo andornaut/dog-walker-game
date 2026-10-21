@@ -92,7 +92,7 @@
       "title": "Thief"
     },
     {
-      "art": "card-zone-snooze-crescent",
+      "art": "card-zone-cabbagetown",
       "frame": "route",
       "id": "snoozeCrescent",
       "index": null,
@@ -105,7 +105,7 @@
       "title": "Which way?"
     },
     {
-      "art": "card-zone-bark-park",
+      "art": "card-zone-high-park",
       "frame": "route",
       "id": "park",
       "index": null,
@@ -118,7 +118,7 @@
       "title": "Which way?"
     },
     {
-      "art": "card-zone-woof-way",
+      "art": "card-zone-distillery-district",
       "frame": "route",
       "id": "street",
       "index": null,
@@ -131,7 +131,7 @@
       "title": "Which way?"
     },
     {
-      "art": "card-zone-sniff-street-shops",
+      "art": "card-zone-kensington-market",
       "frame": "route",
       "id": "shops",
       "index": null,
@@ -144,7 +144,7 @@
       "title": "Which way?"
     },
     {
-      "art": "card-zone-paws-promenade",
+      "art": "card-zone-the-beaches",
       "frame": "route",
       "id": "pawsPromenade",
       "index": null,
@@ -157,7 +157,7 @@
       "title": "Which way?"
     },
     {
-      "art": "card-zone-the-long-way-home",
+      "art": "card-zone-yonge-street",
       "frame": "route",
       "id": "homeStretch",
       "index": null,
@@ -1487,7 +1487,7 @@
   },
   "zones": [
     {
-      "art": "snooze-crescent",
+      "art": "cabbagetown",
       "density": {
         "luckyFinds": 1,
         "obstacles": 0.8,
@@ -1548,15 +1548,15 @@
         }
       },
       "keys": {
-        "backdrop": "backdrop-snooze-crescent",
-        "card": "card-zone-snooze-crescent",
-        "icon": "icon-zone-snooze-crescent",
-        "road": "road-snooze-crescent",
-        "roadStart": "road-snooze-crescent-start"
+        "backdrop": "backdrop-cabbagetown",
+        "card": "card-zone-cabbagetown",
+        "icon": "icon-zone-cabbagetown",
+        "road": "road-cabbagetown",
+        "roadStart": "road-cabbagetown-start"
       }
     },
     {
-      "art": "bark-park",
+      "art": "high-park",
       "density": {
         "luckyFinds": 1.25,
         "obstacles": 1,
@@ -1617,15 +1617,15 @@
         }
       },
       "keys": {
-        "backdrop": "backdrop-bark-park",
-        "card": "card-zone-bark-park",
-        "icon": "icon-zone-bark-park",
-        "road": "road-bark-park",
-        "roadStart": "road-bark-park-start"
+        "backdrop": "backdrop-high-park",
+        "card": "card-zone-high-park",
+        "icon": "icon-zone-high-park",
+        "road": "road-high-park",
+        "roadStart": "road-high-park-start"
       }
     },
     {
-      "art": "woof-way",
+      "art": "distillery-district",
       "density": {
         "luckyFinds": 1,
         "obstacles": 1,
@@ -1686,15 +1686,15 @@
         }
       },
       "keys": {
-        "backdrop": "backdrop-woof-way",
-        "card": "card-zone-woof-way",
-        "icon": "icon-zone-woof-way",
-        "road": "road-woof-way",
-        "roadStart": "road-woof-way-start"
+        "backdrop": "backdrop-distillery-district",
+        "card": "card-zone-distillery-district",
+        "icon": "icon-zone-distillery-district",
+        "road": "road-distillery-district",
+        "roadStart": "road-distillery-district-start"
       }
     },
     {
-      "art": "sniff-street-shops",
+      "art": "kensington-market",
       "density": {
         "luckyFinds": 1,
         "obstacles": 1,
@@ -1755,15 +1755,15 @@
         }
       },
       "keys": {
-        "backdrop": "backdrop-sniff-street-shops",
-        "card": "card-zone-sniff-street-shops",
-        "icon": "icon-zone-sniff-street-shops",
-        "road": "road-sniff-street-shops",
-        "roadStart": "road-sniff-street-shops-start"
+        "backdrop": "backdrop-kensington-market",
+        "card": "card-zone-kensington-market",
+        "icon": "icon-zone-kensington-market",
+        "road": "road-kensington-market",
+        "roadStart": "road-kensington-market-start"
       }
     },
     {
-      "art": "paws-promenade",
+      "art": "the-beaches",
       "density": {
         "luckyFinds": 1.25,
         "obstacles": 1,
@@ -1824,15 +1824,15 @@
         }
       },
       "keys": {
-        "backdrop": "backdrop-paws-promenade",
-        "card": "card-zone-paws-promenade",
-        "icon": "icon-zone-paws-promenade",
-        "road": "road-paws-promenade",
-        "roadStart": "road-paws-promenade-start"
+        "backdrop": "backdrop-the-beaches",
+        "card": "card-zone-the-beaches",
+        "icon": "icon-zone-the-beaches",
+        "road": "road-the-beaches",
+        "roadStart": "road-the-beaches-start"
       }
     },
     {
-      "art": "the-long-way-home",
+      "art": "yonge-street",
       "density": {
         "luckyFinds": 1,
         "obstacles": 1,
@@ -1893,11 +1893,11 @@
         }
       },
       "keys": {
-        "backdrop": "backdrop-the-long-way-home",
-        "card": "card-zone-the-long-way-home",
-        "icon": "icon-zone-the-long-way-home",
-        "road": "road-the-long-way-home",
-        "roadStart": "road-the-long-way-home-start"
+        "backdrop": "backdrop-yonge-street",
+        "card": "card-zone-yonge-street",
+        "icon": "icon-zone-yonge-street",
+        "road": "road-yonge-street",
+        "roadStart": "road-yonge-street-start"
       }
     }
   ]

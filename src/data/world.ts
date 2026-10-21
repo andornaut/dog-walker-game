@@ -9,7 +9,7 @@ export const WORLD = {
   walkLength: 4,
   zones: [
     {
-      art: "snooze-crescent",
+      art: "cabbagetown",
       density: { luckyFinds: 1, obstacles: 0.8, tips: 1 },
       difficulty: 1,
       difficultyName: "Easiest",
@@ -64,7 +64,7 @@ export const WORLD = {
       },
     },
     {
-      art: "bark-park",
+      art: "high-park",
       density: { luckyFinds: 1.25, obstacles: 1, tips: 1 },
       difficulty: 2,
       difficultyName: "Easy",
@@ -119,7 +119,7 @@ export const WORLD = {
       },
     },
     {
-      art: "woof-way",
+      art: "distillery-district",
       density: { luckyFinds: 1, obstacles: 1, tips: 1 },
       difficulty: 3,
       difficultyName: "Normal",
@@ -174,7 +174,7 @@ export const WORLD = {
       },
     },
     {
-      art: "sniff-street-shops",
+      art: "kensington-market",
       density: { luckyFinds: 1, obstacles: 1, tips: 1.2 },
       difficulty: 4,
       difficultyName: "Hard",
@@ -229,7 +229,7 @@ export const WORLD = {
       },
     },
     {
-      art: "paws-promenade",
+      art: "the-beaches",
       density: { luckyFinds: 1.25, obstacles: 1, tips: 1 },
       difficulty: 4,
       difficultyName: "Hard",
@@ -284,7 +284,7 @@ export const WORLD = {
       },
     },
     {
-      art: "the-long-way-home",
+      art: "yonge-street",
       density: { luckyFinds: 1, obstacles: 1, tips: 1 },
       difficulty: 5,
       difficultyName: "Hardest",
