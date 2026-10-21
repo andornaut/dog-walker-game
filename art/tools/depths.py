@@ -87,8 +87,10 @@ def own(s):
                     ("idle", [dressed(p, road.thief_top, bob=b).outlined() for b in breath], ms)]
     neighbour = dict(legs="purple", shoes="dbrown")
     yield "biscuit-neighbour", [
-        ("wave", [dressed(p, road.neighbour_top(w), **neighbour).outlined() for w in (False, True)], 350),
-        ("idle", [dressed(p, road.neighbour_top(False), bob=b, **neighbour).outlined() for b in breath], ms)]
+        ("wave", [dressed(p, road.neighbour_top(True, k), bob=road.NEIGHBOUR_CROUCH, **neighbour).outlined()
+                  for k in (0, 1)], 350),
+        ("idle", [dressed(p, road.neighbour_top(False, k), bob=b, **neighbour).outlined()
+                  for k, b in enumerate(breath)], ms)]
     yield "mail-carrier", [("walk", [small(road, p, road.mail_carrier, **snap(q, p)).outlined()
                                      for q in road.PERSON_WALK], road.PERSON_WALK_MS),
                            ("idle", [small(road, p, road.mail_carrier, **snap(dict(bob=b), p)).outlined()

@@ -292,11 +292,16 @@ def wallet_keep():
 
 
 def neighbour_take():
+    """The friendly neighbour crouched beside a pack dog, her hand stroking its back, hearts rising from
+    the dog. Her floating heart sits above the art window, so it is left out here."""
     a = Art()
     a.grass()
-    a.put("biscuit-neighbour", "wave", 24, 60)
-    for x, y in ((46, 20), (56, 30), (50, 40)):
-        a.paste(sn.frame("treat", "idle"), x, y)
+    a.put("dog-biscuit", "idle", 49, 57)
+    her = sn.frame("biscuit-neighbour", "wave", 1)
+    her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
+    a.shadow(22, 66, her.width)
+    a.paste(her, -2, 66 - her.height)
+    a.hearts([(44, 3), (57, 9), (66, 2), (64, 19)])
     return a
 
 

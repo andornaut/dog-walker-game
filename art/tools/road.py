@@ -1094,30 +1094,68 @@ def thief_fleeing(stride):
     return rim(g, LIT)
 
 
-def neighbour_top(wave):
+# The neighbour's hearts, widest first: red, shaded dred down the right, lit pink and white at the top of the
+# left lobe. heart_px picks the widest that fits the grid's scale, so the heart stays a clean bitmap at every
+# depth step instead of a blur of scaled curves.
+HEARTS = (
+    (".111...111.", "1wh11.11111", "1h111111111", "11111111d1d", ".1111111dd.", "..11111dd..", "...111dd...",
+     "....1dd....", ".....d....."),
+    (".111.111.", "1wh111111", "1h111111d", "1111111dd", ".11111dd.", "..111dd..", "...1dd...", "....d...."),
+    (".11.11.", "1wh1111", "1h1111d", ".1111d.", "..11d..", "...d..."),
+    (".1.1.", "1h11d", ".11d.", "..d.."),
+)
+HEART_INK = {"1": "red", "d": "dred", "h": "pink", "w": "white"}
+
+
+def heart_px(g, cx, top, width, smaller=0):
+    """A heart from HEARTS centred on design column cx with its top on design row top: the widest no wider
+    than width design pixels at the grid's scale (the smallest at least), then smaller steps down."""
+    s, px = getattr(g, "s", 1), getattr(g, "g", g)
+    sy = getattr(g, "sy", s)
+    fit = [k for k, h in enumerate(HEARTS) if len(h[0]) <= width * s + 0.5] or [len(HEARTS) - 1]
+    bitmap = HEARTS[min(fit[0] + smaller, len(HEARTS) - 1)]
+    x0 = math.floor(cx * s + 0.5) - len(bitmap[0]) // 2
+    y0 = math.floor(top * sy + 0.5)
+    for j, row in enumerate(bitmap):
+        for i, ch in enumerate(row):
+            if ch in HEART_INK:
+                px.p(x0 + i, y0 + j, HEART_INK[ch])
+
+
+# The neighbour's crouch to pet a dog: her body this many design rows lower, her legs that much shorter.
+NEIGHBOUR_CROUCH = 3
+
+
+def neighbour_top(pet, beat):
+    """The friendly neighbour, a grey-haired dog lover in a mauve cardigan open over a cream top with a big red
+    heart on it, a red heart floating at her top right. pet crouches her (with person's bob=NEIGHBOUR_CROUCH)
+    and reaches her left arm (screen right) out and down, the open hand patting: beat 1 lowers it a row and
+    shrinks the floating heart a step, so it beats. Standing, beat 1 lifts the floating heart a row, so it
+    bobs against her breath."""
     def top(g, b):
+        # the cardigan, open down the front over the cream top, and the big heart on it
         g.rect(9, 21 + b, 14, 13, "mauve")
         g.rect(20, 21 + b, 3, 13, "purple")
-        g.rect(15, 21 + b, 2, 13, "pink")
+        g.rect(12, 21 + b, 8, 13, "cream")
+        g.rect(19, 21 + b, 1, 13, "tan")
+        g.rect(12, 21 + b, 1, 13, "pink")
+        heart_px(g, 16, 24.5 + b, 7)
+        # her right arm (screen left) hanging, the hand at her side
         g.rect(5, 22 + b, 4, 9, "mauve")
         g.rect(5, 31 + b, 4, 3, "skin1")
-        if wave:
-            g.rect(23, 12 + b, 4, 10, "mauve")
-            g.rect(23, 9 + b, 4, 3, "skin1")
+        if pet:
+            # the left arm (screen right) reaching out and down to a dog at her side, the hand open, palm down
+            d = beat
+            for k in range(6):
+                g.rect(22 + k, 22 + b + k * 1.4, 4, 4, "mauve")
+            g.rect(25, 26 + b, 1, 3, "purple")
+            g.rect(26, 30 + b + d, 4, 3, "skin1")
+            g.rect(26, 32 + b + d, 4, 1, "skin2")
+            for x in (26, 28):
+                g.rect(x, 33 + b + d, 1, 1, "skin1")
         else:
             g.rect(23, 22 + b, 4, 9, "mauve")
             g.rect(23, 31 + b, 4, 3, "skin1")
-        # a glass biscuit jar held at the chest: a round body with a glint down its lit side, chocolate-chip
-        # biscuits stacked inside, a narrow neck and a red lid with a knob
-        g.cel(14.5, 29 + b, 5.5, 5, "lgrey", "grey", "white")
-        for x, y in ((12.5, 31), (16.5, 31), (14.5, 27.5)):
-            g.cel(x, y + b, 2, 1.5, "tan", "brown")
-            g.p(x - 1, y + b - 1, "dbrown")
-            g.p(x + 0.5, y + b - 0.5, "dbrown")
-        g.rect(10, 26 + b, 1, 4, "white")
-        g.rect(10, 22 + b, 9, 2, "red")
-        g.rect(10, 23 + b, 9, 1, "dred")
-        g.rect(13, 21 + b, 3, 1, "red")
         face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
         g.cel(16, 7.5 + b, 9, 5, "lgrey", "grey", "white")
         g.cel(16, 3 + b, 3.5, 2.5, "lgrey", "grey", "white")
@@ -1128,6 +1166,8 @@ def neighbour_top(wave):
         g.rect(18, 12 + b, 5, 1, "dslate")
         g.p(10, 15 + b, "pink")
         g.p(22, 15 + b, "pink")
+        # the floating heart, clear of her hair at the top right, on the frame's rows whatever her pose
+        heart_px(g, 27.5, 1 if pet else 2 - beat, 7.5, smaller=beat if pet else 0)
     return top
 
 
@@ -1589,10 +1629,10 @@ def sprites():
                     ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(w), **neighbour)
-                                                for w in (False, True)), 350),
-                                ("idle", frames(big(dressed, neighbour_top(False), bob=bb, **neighbour)
-                                                for bb in BREATH), BREATH_MS)]
+    yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
+                                                    **neighbour) for k in (0, 1)), 350),
+                                ("idle", frames(big(dressed, neighbour_top(False, k), bob=bb, **neighbour)
+                                                for k, bb in enumerate(BREATH)), BREATH_MS)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),

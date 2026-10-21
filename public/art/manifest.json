@@ -855,7 +855,7 @@
       "json": "sprites/biscuit-neighbour.json",
       "anchor": {
         "feetY": 68,
-        "opaqueWidth": 35
+        "opaqueWidth": 41
       }
     },
     {
@@ -864,7 +864,7 @@
       "json": "sprites/biscuit-neighbour@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 21
       }
     },
     {
@@ -873,7 +873,7 @@
       "json": "sprites/biscuit-neighbour@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 22
+        "opaqueWidth": 26
       }
     },
     {
@@ -882,7 +882,7 @@
       "json": "sprites/biscuit-neighbour@75.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 26
+        "opaqueWidth": 31
       }
     },
     {
@@ -891,7 +891,7 @@
       "json": "sprites/biscuit-neighbour@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 30
+        "opaqueWidth": 36
       }
     },
     {
