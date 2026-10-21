@@ -95,7 +95,7 @@ PAW = (".x.x.", "x...x", ".xxx.", ".xxx.")
 
 def high_park_lines(g):
     for x in DIVIDERS:
-        for y in range(4, H, 16):
+        for y in range(4, H, 32):
             # dbrown holds 4:1 on the tan path; plum caps the bottom
             g.rect(x, y, 2, 7, "dbrown")
             g.rect(x, y + 7, 2, 1, "plum")
@@ -103,7 +103,7 @@ def high_park_lines(g):
 
 def kensington_lines(g):
     for x in DIVIDERS:
-        for y in (8, 40):
+        for y in (8,):
             # white dashes (11.8:1 on Kensington Market's dbrick) with a mauve
             # edge on the right
             g.rect(x, y, 2, 12, "white")
@@ -132,7 +132,7 @@ def leaves(g, rnd, n, x0, x1, tones, y0=0, y1=H):
 def cabbagetown_lines(g):
     rnd = random.Random("road-cabbagetown-lines")
     for x in DIVIDERS:
-        for y in (10, 42):
+        for y in (10,):
             # faded white (2.8:1 on the grey) with a slate edge, chipped where the paint wore
             g.rect(x, y, 2, 12, "white")
             g.rect(x + 2, y + 1, 1, 12, "slate")
@@ -142,8 +142,8 @@ def cabbagetown_lines(g):
 
 def beaches_lines(g):
     for x in DIVIDERS:
-        for y in (6, 38):
-            # dbrown (5.9:1 on the boards), 20 rows in 32: a longer rhythm than High Park's
+        for y in (6,):
+            # dbrown (5.9:1 on the boards), 20 rows in 64: a longer rhythm than High Park's
             g.rect(x, y, 2, 20, "dbrown")
 
 
@@ -253,9 +253,10 @@ def distillery_ground(g):
 
 
 def distillery_lines(g):
-    """A row of pale granite setts on each lane line: lgrey, 6 rows on and 2 off, a stone edge."""
+    """A run of three pale granite setts on each lane line every 64 rows: lgrey, 6 rows on and 2 off, a stone
+    edge."""
     for x in DIVIDERS:
-        for y in range(0, H, 8):
+        for y in range(0, 24, 8):
             g.rect(x, y, 2, 6, "lgrey")
             g.rect(x + 1, y, 1, 6, "stone")
 
@@ -339,9 +340,9 @@ def yonge_ground(g):
 
 
 def yonge_lines(g):
-    """White dashes 14 rows long in 32 (11.3:1 on the shale) with a coal edge."""
+    """White dashes 14 rows long in 64 (11.3:1 on the shale) with a coal edge."""
     for x in DIVIDERS:
-        for y in (2, 34):
+        for y in (2,):
             g.rect(x, y, 2, 14, "white")
             g.rect(x + 2, y, 1, 14, "coal")
 

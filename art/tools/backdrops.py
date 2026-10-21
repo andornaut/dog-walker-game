@@ -866,9 +866,9 @@ def cabbagetown():
     for x in (CX - 150, CX - 30, CX + 92):
         gas_lamp(cv, x, FAR_WALK + 1 - crescent_bend(x))
     cross(cv, flat(road), "stone", slabs, bend=crescent_bend)
-    cross_line(cv, "white", dash=(8, 32), bend=crescent_bend)
+    cross_line(cv, "white", dash=(8, 64), bend=crescent_bend)
     street(cv, verge("cabbagetown", road))
-    lanes(cv, "white", "slate", dash=(8, 32))
+    lanes(cv, "white", "slate", dash=(12, 64))
     return cv
 
 
@@ -1001,10 +1001,10 @@ def high_park():
         for px in range(CX - half + 1, CX + half - 1):
             cv.fill(px, py, 1, 1, trail(0, 0, 99, px, py))
     cross(cv, lambda px, py: "brown" if hashed(px, py, 13) else "tan", "bark", lawn, curb=None, top=CROSS)
-    cross_line(cv, "dbrown", dash=(7, 16))
+    cross_line(cv, "dbrown", dash=(7, 32))
     rough_patches = rough("high-park-lawn", 10, ROAD + 30, ROAD + 460, Z0 + 10, Z0 + 90)
     street(cv, verge("high-park", trail, rough_patches))
-    lanes(cv, "dbrown", dash=(7, 16))
+    lanes(cv, "dbrown", dash=(7, 32))
     return cv
 
 
@@ -1117,9 +1117,9 @@ def distillery():
         return "slate" if hashed(px, py, 31) else "dslate"
 
     cross(cv, lambda px, py: "slate" if hashed(px, py, 31) else "dslate", "navy", paving, curb="stone")
-    cross_line(cv, "lgrey", "stone", dash=(6, 8))
+    cross_line(cv, "lgrey", "stone", dash=(22, 64))
     street(cv, verge("distillery-district", road))
-    lanes(cv, "lgrey", "stone", dash=(6, 8))
+    lanes(cv, "lgrey", "stone", dash=(22, 64))
     return cv
 
 
@@ -1229,9 +1229,9 @@ def kensington():
         return "brick" if hashed(px, py, 61) else "dbrick"
 
     cross(cv, flat(road), "coal", paving, curb="stone")
-    cross_line(cv, "white", "mauve")
+    cross_line(cv, "white", "mauve", dash=(12, 64))
     street(cv, verge("kensington-market", road))
-    lanes(cv, "white", "mauve")
+    lanes(cv, "white", "mauve", dash=(12, 64))
     return cv
 
 
@@ -1332,9 +1332,9 @@ def beaches():
         return "tan" if hashed(px, py, 27) else "cream"
 
     cross(cv, cross_boards, "tan", sand, curb=None)
-    cross_line(cv, "dbrown", dash=(10, 32))
+    cross_line(cv, "dbrown", dash=(10, 64))
     street(cv, verge("the-beaches", boards))
-    lanes(cv, "dbrown", dash=(10, 32))
+    lanes(cv, "dbrown", dash=(20, 64))
     return cv
 
 
@@ -1626,9 +1626,9 @@ def yonge():
         return "ash" if hashed(px, py, 41) else "shale"
 
     cross(cv, flat(road), "dstone", paving, curb="stone")
-    cross_line(cv, "amber", "coal", dash=(14, 32))
+    cross_line(cv, "amber", "coal", dash=(14, 64))
     street(cv, verge("yonge-street", road))
-    lanes(cv, "white", "coal", dash=(14, 32))
+    lanes(cv, "white", "coal", dash=(14, 64))
     return cv
 
 
