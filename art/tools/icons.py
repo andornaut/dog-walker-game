@@ -26,7 +26,7 @@ from pixel import Grid, to_image  # noqa: E402
 # ---------- gear ----------
 
 def fanny_pack(g):
-    g.rect(2, 12, 28, 2, "dbrown")
+    g.rect(2, 12, 28, 2, "brown")
     g.rect(25, 11, 4, 4, "lgrey")
     g.ell(15, 19, 9.5, 6.5, "amber", "orange", "yellow")
     g.rect(8, 17, 15, 1, "orange")

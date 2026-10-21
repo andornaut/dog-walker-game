@@ -309,6 +309,9 @@ def biscuit_face(mood):
 def duchess_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
+    # the front paws peek out under the coat beside the chest, below the ears, stepping as the others' do
+    g.rect(9 + ln // 2, 21.5 + q["fl"] + b, 2, 2, "lgrey")
+    g.rect(20.5 + ln // 2, 21.5 + q["fr"] + b, 2, 2, "lgrey")
     g.rect(12, 27 + q["bl"], 2, 2, "lgrey")
     g.rect(18, 27 + q["br"], 2, 2, "lgrey")
     bx = 16 + ln // 2

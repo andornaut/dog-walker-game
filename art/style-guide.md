@@ -56,6 +56,7 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 - Effects (`fx-`) take a fixed 1px rim: plum, navy for water (`fx-splash`). `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` and `fx-tap` have no rim. Hazard warnings are outlined in ink.
 - Ground decals have no outline and no shadow.
 - Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
+- A gear item drawn at several sizes (`item-<gear>` at 32, `icon-gear-<gear>` at 16, `icon-gear-<gear>-20` at 20) keeps the same colours at each.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
 ## Contrast
@@ -206,7 +207,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 - Animation names are Aseprite tag names. New tags go after existing ones so frame indices hold. Motion is in whole pixels.
 - Walkers are seen from behind: `walk` 4, `react` 2, `stumble` 4 and `idle` 2 frames, no gear variants. `wave` and `cheer` face the camera.
 - Road people and walking animals take the walkers' stride in `walk`: 4 frames (100ms; `stroller` 160ms like the walkers, `coyote` 120ms), a foot lifted, both feet 1px up as the body passes 1px higher, the other foot lifted, passing again.
-- Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap, the body bobs on the passing frames with the ears lagging 1px, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
+- Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap (all four paws show, a long coat's front paws peeking out beside the chest), the body bobs on the passing frames with the ears lagging 1px, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
 - Every road sprite that stands or waits, depth variants included, loops an `idle` with frame 0 the rest pose. Reduced motion shows frame 0.
 
 | Idle      | Frames | Timing       | Motion                                                                                                                |
