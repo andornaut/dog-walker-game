@@ -39,12 +39,14 @@ const screen: ScreenConfig = {
 };
 const LANES = 5;
 const LANE_WIDTH = 56;
-// Nothing explains itself here; the hold-to-explain tests below give a context that does.
+// Nothing explains itself here; the hold-to-explain tests below give a context that does. Every
+// tap moves the pack, which lands a press on the road's left half (x < 180) with a step left.
 const context: TrackContext<string> = {
-  config: { laneCount: LANES, swipeStartDistance: 20, tapMaxDistance: 10 },
+  config: { laneCount: LANES, swipeStartDistance: 20 },
   explainAt: () => undefined,
   hold: { holdMs: 300, slopPx: 20 },
   layout: screenLayout(screen),
+  stepMoves: () => true,
 };
 const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
 
@@ -57,13 +59,10 @@ interface Event {
   y?: number;
 }
 
-// Feeds the events in order; returns every action and the last track.
-function feed(
-  events: readonly Event[],
-  track: PointerTrack<string> = idleTrack,
-): { actions: GestureAction[]; track: PointerTrack<string> } {
+// Feeds the events in order from idle; returns every action and the last track.
+function feed(events: readonly Event[]): { actions: GestureAction[]; track: PointerTrack<string> } {
   const actions: GestureAction[] = [];
-  let current = track;
+  let current: PointerTrack<string> = idleTrack;
   for (const event of events) {
     const { held = false, onButton = false, phase, press, x, y = 400 } = event;
     const result = trackPointer(
@@ -103,7 +102,7 @@ describe("trackPointer", () => {
         tracking: false,
       },
       {
-        actions: [],
+        actions: [right],
         events: [
           { phase: "down", press: first, x: 200 },
           { held: true, phase: "move", press: first, x: 210 },
@@ -113,16 +112,16 @@ describe("trackPointer", () => {
         tracking: false,
       },
       {
-        actions: [],
+        actions: [left],
         events: [
           { phase: "down", press: first, x: 100 },
           { phase: "cancel", press: first, x: 100 },
         ],
-        name: "ends a cancelled press without a tap",
+        name: "ends a cancelled press, keeping the tap it landed with",
         tracking: false,
       },
       {
-        actions: [],
+        actions: [right],
         events: [
           { phase: "down", press: first, x: 300 },
           { phase: "move", press: first, x: 290 },
@@ -132,7 +131,7 @@ describe("trackPointer", () => {
         tracking: false,
       },
       {
-        actions: [],
+        actions: [right],
         events: [
           { phase: "down", press: first, x: 200 },
           { phase: "move", press: first, x: 210 },
@@ -144,7 +143,7 @@ describe("trackPointer", () => {
         tracking: false,
       },
       {
-        actions: [left],
+        actions: [right, right, left, left],
         events: [
           { phase: "down", press: first, x: 200 },
           { phase: "move", press: first, x: 210 },
@@ -177,7 +176,7 @@ describe("trackPointer", () => {
         tracking: true,
       },
       {
-        actions: [right, right],
+        actions: [left, right, right],
         events: [
           { phase: "down", press: first, x: 40, y: 300 },
           { phase: "down", press: second, x: 200 },
@@ -230,6 +229,15 @@ describe("trackPointer fuzz", () => {
     }
   }
 
+  // A tap moves the pack only when a lane step would, as the walk tells the gestures.
+  const worldContext = (world: World): TrackContext<string> => ({
+    ...context,
+    stepMoves: (direction) =>
+      !world.held &&
+      !world.hitStop &&
+      steerLane(laneConfig, direction, world.control).target !== world.control.target,
+  });
+
   const same = (a: Press | undefined, b: Press | undefined) =>
     a?.id === b?.id && a?.downTime === b?.downTime;
 
@@ -251,14 +259,15 @@ describe("trackPointer fuzz", () => {
       timeMs: world.time,
     };
     const driver = world.track.press;
-    const result = trackPointer(context, world.held, sample, world.track);
+    const result = trackPointer(worldContext(world), world.held, sample, world.track);
     world.track = result.track;
     if (phase === "down" && on !== "button" && !world.held) {
       world.latest = { downTime: press.downTime, id };
     }
-    // Only the latest press acts, and only the press already driving it.
+    // Only the latest press acts: the press already driving it, or one that lands to drive it
+    // with its tap.
     if (result.actions.length > 0) {
-      expect(same(driver, press)).toBe(true);
+      expect(same(phase === "down" ? world.track.press : driver, press)).toBe(true);
     }
     if (world.track.press !== undefined) {
       expect(same(world.track.press, world.latest)).toBe(true);
@@ -437,7 +446,7 @@ describe("trackPointer fuzz", () => {
     }
   });
 
-  it("taps from any state that allows gameplay", () => {
+  it("taps one lane toward the pressed half from any state that allows gameplay", () => {
     for (let seed = 1; seed <= 300; seed += 1) {
       const random = seededRandom(seed);
       const world = newWorld(random);
@@ -445,22 +454,27 @@ describe("trackPointer fuzz", () => {
         randomStep(world, random);
       }
       liftAll(world, random);
-      const press = { downTime: world.time + 1, id: randomInt(random, 0, 2) };
+      const id = randomInt(random, 0, 2);
       const x = roadX(random);
-      const { actions } = feed(
-        [
-          { phase: "down", press, x },
-          { phase: "up", press, x: x + 3 },
-        ],
-        world.track,
-      );
-      expect(actions).toEqual([x < 180 ? left : right]);
+      const before = destinationLane(world.control.motion);
+      world.time += 1;
+      world.down.set(id, { downTime: world.time, id, x, y: 300 });
+      send(world, "down", id);
+      const press = world.down.get(id);
+      if (press === undefined) {
+        throw new Error("the press went down");
+      }
+      press.x += 3;
+      send(world, "up", id);
+      const after = advanceLaneControl(laneConfig, 5, world.control);
+      expect(destinationLane(after.motion)).toBe(clampIndex(LANES, before + (x < 180 ? -1 : 1)));
     }
   });
 });
 
 // A press on the walk bar (y < 40) or a debuff bar (y 40 to 55) or a card (y 470 on) is on
-// something that explains itself; a tap on a debuff bar does nothing, as on the walk bar.
+// something that explains itself; a tap on a debuff bar does nothing, as on the walk bar. A
+// press at x 100 lands on the left half, so a press on a card or the road taps left.
 describe("hold to explain", () => {
   const explainContext: TrackContext<string> = {
     ...context,
@@ -522,14 +536,14 @@ describe("hold to explain", () => {
   it("holds to explain by its rules", () => {
     for (const [, steps, actions, explained] of [
       [
-        "explains a card held still, until its release, which taps nothing",
+        "explains a card held still, after its tap, until its release",
         [
           at("down", 0, 100, card),
           tick(holdMs - 1),
           tick(holdMs),
           at("up", holdMs + 100, 100, card),
         ],
-        [],
+        [left],
         [start("card"), end],
       ],
       [
@@ -540,7 +554,7 @@ describe("hold to explain", () => {
           tick(holdMs),
           at("up", 400, 115, card),
         ],
-        [],
+        [left],
         [start("card"), end],
       ],
       [
@@ -557,7 +571,7 @@ describe("hold to explain", () => {
           tick(holdMs),
           at("up", 400, 125, card),
         ],
-        [right],
+        [left, right, right],
         [],
       ],
       [
@@ -568,13 +582,13 @@ describe("hold to explain", () => {
           at("move", 350, 200, card),
           at("up", 400, 200, card),
         ],
-        [],
+        [left],
         [start("card"), end],
       ],
       [
-        "holds, never taps, on a release past the hold time before a frame ticks",
-        [at("down", 0, 100, card), at("up", holdMs, 100, card)],
-        [],
+        "holds, stepping nothing more, on a release past the hold time before a frame ticks",
+        [at("down", 0, 100, card), at("move", 50, 115, card), at("up", holdMs, 125, card)],
+        [left],
         [],
       ],
       [
@@ -627,13 +641,13 @@ describe("hold to explain", () => {
       [
         "ends the explanation when a card or a menu takes the press",
         [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), held: true }],
-        [],
+        [left],
         [start("card"), end],
       ],
       [
         "ends the explanation when the press is cancelled",
         [at("down", 0, 100, card), tick(holdMs), at("cancel", 400, 100, card)],
-        [],
+        [left],
         [start("card"), end],
       ],
       [
@@ -644,7 +658,7 @@ describe("hold to explain", () => {
           at("down", 400, 100, road, 2),
           at("up", 450, 100, road, 2),
         ],
-        [left],
+        [left, left],
         [start("card"), end],
       ],
     ] satisfies readonly [string, Step[], GestureAction[], ExplainChange<string>[]][]) {

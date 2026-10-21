@@ -31,10 +31,13 @@ const screen: ScreenConfig = {
 const layout = screenLayout(screen);
 const QUIET = { height: 16, width: 360, x: 0, y: 40 };
 const context: GestureContext = {
-  config: { laneCount: 5, swipeStartDistance: 20, tapMaxDistance: 10 },
+  config: { laneCount: 5, swipeStartDistance: 20 },
   layout,
   quietTaps: [QUIET],
+  stepMoves: () => true,
 };
+// Taps that move nothing, as while steering is dropped, so a drag's own steps show alone.
+const dragOnly: GestureContext = { ...context, stepMoves: () => false };
 
 type Step = ["down" | "move" | "up", number, number];
 
@@ -103,7 +106,6 @@ describe("pointer sequences", () => {
       name: "chains turns within one press",
       steps: drag(150, 175, 150, 175),
     },
-    { expected: [[], [left]], name: "taps on release, not on press", steps: tap(150, 300) },
     {
       expected: [[], [], []],
       name: "never drags from the walk bar",
@@ -117,14 +119,15 @@ describe("pointer sequences", () => {
 
   it("emits each step's moves as the drag reaches them, from the press to the release", () => {
     for (const { expected, name, steps } of perStep) {
-      expect(play(steps), name).toEqual(expected);
+      expect(play(steps, dragOnly), name).toEqual(expected);
     }
   });
 
-  // Every action the sequence emits, in order.
+  // Every action the sequence emits, in order. A press on the road's left half taps left as it
+  // lands, and its drag's first step right takes that tap back too.
   const sequences: { expected: GestureAction[]; name: string; steps: Step[] }[] = [
     {
-      expected: [],
+      expected: [left],
       name: "ignores vertical travel",
       steps: [
         ["down", 150, 100],
@@ -134,7 +137,7 @@ describe("pointer sequences", () => {
       ],
     },
     {
-      expected: [right],
+      expected: [left, right, right],
       name: "steps by horizontal travel alone during a diagonal drag",
       steps: [
         ["down", 150, 100],
@@ -142,49 +145,17 @@ describe("pointer sequences", () => {
       ],
     },
     {
-      expected: [left],
-      name: "is a tap up to the tap distance",
-      steps: [
-        ["down", 150, 300],
-        ["move", 156, 308],
-        ["up", 156, 308],
-      ],
-    },
-    {
-      expected: [],
-      name: "is nothing past the tap distance short of the swipe start distance",
-      steps: [
-        ["down", 150, 300],
-        ["move", 156, 309],
-        ["up", 156, 309],
-      ],
-    },
-    {
-      expected: [],
-      name: "stays cancelled after drifting back within the tap distance",
-      steps: [...drag(150, 165), ["up", 150, 300]],
-    },
-    {
-      expected: [right, left],
-      name: "does not also tap after a drag that came back to where it started",
+      expected: [left, right, right, left],
+      name: "takes the tap back on a drag that came back to where it started",
       steps: [...drag(150, 210), ["up", 150, 300]],
     },
     {
-      expected: [right],
+      expected: [left, right, right],
       name: "drags from a card press once it reaches the swipe start distance",
       steps: [
         ["down", 40, 500],
         ["move", 60, 500],
         ["up", 60, 500],
-      ],
-    },
-    {
-      expected: [],
-      name: "does nothing for a card press that leaves the tap distance short of a step",
-      steps: [
-        ["down", 40, 500],
-        ["move", 59, 500],
-        ["up", 59, 500],
       ],
     },
     {
@@ -218,17 +189,84 @@ describe("pointer sequences", () => {
 
   it("derives the later steps from the road width, so a wider road needs a longer drag", () => {
     // Lanes x 0-360, so five lanes are 72px wide.
-    const wide = { ...context, layout: screenLayout({ ...screen, roadWidth: 360 }) };
+    const wide = { ...dragOnly, layout: screenLayout({ ...screen, roadWidth: 360 }) };
     const steps = drag(150, 170, 262, 294);
-    expect(play(steps)).toEqual([[], [right], [right], []]);
+    expect(play(steps, dragOnly)).toEqual([[], [right], [right], []]);
     expect(play(steps, wide)).toEqual([[], [right], [], [right]]);
+  });
+});
+
+describe("taps as the press lands", () => {
+  // Steering moves nothing to the right, as at the road's right edge.
+  const rightEdge: GestureContext = { ...context, stepMoves: (direction) => direction === -1 };
+
+  // The actions each step emits. Presses at x 250 are on the road's right half; the drag's first
+  // step is at 20px, its second at two lane-widths (112px).
+  const rows: {
+    context?: GestureContext;
+    expected: GestureAction[][];
+    name: string;
+    steps: Step[];
+  }[] = [
+    {
+      expected: [[right]],
+      name: "steers right as a press lands on the right half",
+      steps: drag(250),
+    },
+    { expected: [[left]], name: "steers left as a press lands on the left half", steps: drag(150) },
+    {
+      expected: [[right], [], [right]],
+      name: "counts the tap as the first step of a drag the same way",
+      steps: drag(250, 270, 362),
+    },
+    {
+      expected: [[right], [left, left]],
+      name: "takes the tap back on a drag the other way, then steps it",
+      steps: drag(250, 230),
+    },
+    {
+      expected: [[right], [], [left]],
+      name: "turns around on a drag back from its furthest point, as a drag does",
+      steps: drag(250, 270, 250),
+    },
+    {
+      expected: [[right], [], []],
+      name: "counts a drag short of the first step once, as its tap",
+      steps: [...drag(250, 265), ["up", 265, 300]],
+    },
+    {
+      context: rightEdge,
+      expected: [[], [left]],
+      name: "takes nothing back for a tap that moved nothing",
+      steps: drag(250, 230),
+    },
+    {
+      expected: [[], [], []],
+      name: "never steers on a press on the walk bar",
+      steps: [
+        ["down", 250, 20],
+        ["move", 300, 25],
+        ["up", 300, 25],
+      ],
+    },
+    {
+      expected: [[], [right]],
+      name: "never taps on a quiet rect, though its drag steers",
+      steps: drag(250, 270).map(([kind, x]): Step => [kind, x, 48]),
+    },
+  ];
+
+  it("acts on the press, and lets its drag correct it", () => {
+    for (const row of rows) {
+      expect(play(row.steps, row.context), row.name).toEqual(row.expected);
+    }
   });
 });
 
 describe("swipe start distance", () => {
   const startingAt = (swipeStartDistance: number): GestureContext => ({
-    ...context,
-    config: { ...context.config, swipeStartDistance },
+    ...dragOnly,
+    config: { ...dragOnly.config, swipeStartDistance },
   });
 
   // The steps a press emits after travelling right from x 100, by the configured distance.
@@ -299,10 +337,13 @@ describe("drag symmetry", () => {
     for (const anchorX of anchors) {
       for (const [widths, lanes] of cases) {
         const lanesBy = (sign: number) =>
-          all([
-            ...drag(anchorX, anchorX + sign * widths * 56),
-            ["up", anchorX + sign * widths * 56, 300],
-          ]);
+          all(
+            [
+              ...drag(anchorX, anchorX + sign * widths * 56),
+              ["up", anchorX + sign * widths * 56, 300],
+            ],
+            dragOnly,
+          );
         expect(lanesBy(1)).toEqual(Array<GestureAction>(lanes).fill(right));
         expect(lanesBy(-1)).toEqual(Array<GestureAction>(lanes).fill(left));
       }
@@ -313,7 +354,7 @@ describe("drag symmetry", () => {
   // 1e-5px low, so a drag of exactly two lane-widths left reads as 111.99999px.
   it("steps whole lane-widths either way despite float error in the pointer position", () => {
     const anchorX = 289.99999060997595;
-    const lanesTo = (x: number) => all([...drag(anchorX, x), ["up", x, 300]]);
+    const lanesTo = (x: number) => all([...drag(anchorX, x), ["up", x, 300]], dragOnly);
     expect(lanesTo(178)).toEqual([left, left]);
     expect(lanesTo(402.00000939002405)).toEqual([right, right]);
   });
@@ -326,14 +367,14 @@ describe("drags over time", () => {
   type Sample = [seconds: number, x: number];
 
   function steerBy(samples: readonly Sample[]): LaneMotion[] {
-    let gesture = pointerDown(context, { x: 150, y: 300 }).state;
+    let gesture = pointerDown(dragOnly, { x: 150, y: 300 }).state;
     let control = laneControlIn(stillInLane(2));
     let time = 0;
     const motions: LaneMotion[] = [];
     for (const [seconds, x] of samples) {
       control = advanceLaneControl(laneConfig, seconds - time, control);
       time = seconds;
-      const result = pointerMove(context, { x, y: 300 }, gesture);
+      const result = pointerMove(dragOnly, { x, y: 300 }, gesture);
       gesture = result.state;
       control = result.actions.reduce(
         (current, action) =>

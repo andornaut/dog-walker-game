@@ -20,9 +20,11 @@ import {
   type TrackContext,
   trackPointer,
 } from "../../input/pointerTracking";
+import type { LaneDirection } from "../../layout/lanes";
 import { read } from "../../rules/units";
 import type { SessionInput } from "../../runner/session";
-import type { Walk } from "../../runner/walk";
+import { steerWalk, type Walk } from "../../runner/walk";
+import { leadWalk } from "./interpolate";
 import { LAYOUT } from "./stage";
 
 // What the walk's input reads of the run. explainShown: what the HUD shows that a held press
@@ -118,35 +120,53 @@ export class RunInput {
       timeMs: this.scene.game.loop.time,
     };
     const shown = this.host.explainShown();
-    const result = trackPointer(trackContext(shown), held, sample, this.pointers);
+    const stepMoves = (direction: LaneDirection) => this.stepMoves(direction);
+    const result = trackPointer(trackContext(shown, stepMoves), held, sample, this.pointers);
     this.pointers = result.track;
     this.explain(result.explain);
     result.actions.forEach((action) => this.act(action));
   }
 
-  // Lane moves wait for the next simulation step, where they are logged.
-  private act(action: GestureAction): void {
+  // The walk that takes live lane moves now, if any does.
+  private steerable(): Walk | undefined {
     const walk = this.host.walk();
     if (walk === undefined || walk.run.phase.kind !== "walking") {
-      return;
+      return undefined;
     }
     if (!gameplayAllowed(this.host.runPause()) || this.host.replaying()) {
-      return;
+      return undefined;
     }
-    this.pending = [...this.pending, { direction: action.direction, kind: "lane" }];
+    return walk;
+  }
+
+  // Lane moves wait for the next simulation step, where they are logged.
+  private act(action: GestureAction): void {
+    if (this.steerable() !== undefined) {
+      this.pending = [...this.pending, { direction: action.direction, kind: "lane" }];
+    }
+  }
+
+  // Whether a lane move that way, after the ones queued, would move the pack's target lane.
+  private stepMoves(direction: LaneDirection): boolean {
+    const walk = this.steerable();
+    if (walk === undefined) {
+      return false;
+    }
+    const queued = leadWalk(gameData, LANE_COUNT, 0, this.pending, walk);
+    const stepped = steerWalk(gameData, LANE_COUNT, direction, queued);
+    return stepped.road.control.target !== queued.road.control.target;
   }
 }
 
 // A tap on a debuff bar does nothing, and a press on anything that explains itself holds to
 // explain once still for explainHoldSeconds within swipeStartDistance, the drag's first step.
-function trackContext(shown: ExplainShown): TrackContext<ExplainTarget> {
+function trackContext(
+  shown: ExplainShown,
+  stepMoves: (direction: LaneDirection) => boolean,
+): TrackContext<ExplainTarget> {
   const swipeStartDistance = read(gameData.tuning, "pixels", "swipeStartDistance");
   return {
-    config: {
-      laneCount: LANE_COUNT,
-      swipeStartDistance,
-      tapMaxDistance: read(gameData.tuning, "pixels", "tapMaxDistance"),
-    },
+    config: { laneCount: LANE_COUNT, swipeStartDistance },
     explainAt: (point) => explainTargetAt(LAYOUT, shown, point),
     hold: {
       holdMs: read(gameData.tuning, "seconds", "explainHoldSeconds") * 1000,
@@ -154,5 +174,6 @@ function trackContext(shown: ExplainShown): TrackContext<ExplainTarget> {
     },
     layout: LAYOUT,
     quietTaps: debuffBarRects(LAYOUT.topBar, shown.debuffs.length),
+    stepMoves,
   };
 }

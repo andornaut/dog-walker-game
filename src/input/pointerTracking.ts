@@ -95,7 +95,8 @@ function result<Target>(
 // stop is no hold: its lane moves are dropped where they act, and the drag goes on. A press on
 // an element that explains itself holds to explain once it has stayed within the hold's slop
 // for its time (tickTrack); one that moves past it, or takes a lane step, steers as any drag
-// does. While it explains, it moves and taps nothing, and its release ends it.
+// does. Its tap steers as the press lands all the same, as on a dog card. While it explains, it
+// moves nothing, and its release ends it.
 export function trackPointer<Target>(
   context: TrackContext<Target>,
   held: boolean,
@@ -116,7 +117,8 @@ export function trackPointer<Target>(
       target === undefined
         ? undefined
         : { press: startHold(context.hold, point, sample.timeMs), target };
-    return result(track, [], { gesture: pointerDown(context, point).state, hold, press });
+    const { actions, state } = pointerDown(context, point);
+    return result(track, actions, { gesture: state, hold, press });
   }
   if (!samePress(current.press, press)) {
     return result(track, [], current);
@@ -128,14 +130,14 @@ export function trackPointer<Target>(
     return result(track, [], phase === "up" ? idleTrack : current);
   }
   if (phase === "move") {
-    const { actions, state } = pointerMove(context, point, current.gesture);
+    const { actions, state, stepped } = pointerMove(context, point, current.gesture);
     return result(track, actions, {
       gesture: state,
-      hold: steered(current.hold, point, actions.length > 0),
+      hold: steered(current.hold, point, stepped),
       press,
     });
   }
-  // A hold whose time came up between frames is a hold, never also a tap.
+  // A hold whose time came up between frames is a hold, and its release steps nothing.
   const { hold } = current;
   if (hold !== undefined && releaseHold(hold.press, sample.timeMs) === "hold") {
     return result(track, [], idleTrack);

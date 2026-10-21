@@ -8,15 +8,16 @@ import { containsPoint, type Point, type Rect } from "../lib/rect";
 interface GestureConfig {
   laneCount: number;
   swipeStartDistance: number;
-  tapMaxDistance: number;
 }
 
 // quietTaps: where a tap does nothing, as on the walk bar, though a drag that starts there
-// still steers.
+// still steers. stepMoves: whether a lane step that way would move the pack now; false at the
+// road's edge, or while steering is dropped.
 export interface GestureContext {
   config: GestureConfig;
   layout: Pick<ScreenLayout, "road" | "topBar">;
   quietTaps?: readonly Rect[];
+  stepMoves: (direction: LaneDirection) => boolean;
 }
 
 export type GestureAction = { direction: LaneDirection; kind: "move" };
@@ -32,18 +33,19 @@ interface DragLeg {
   steps: number;
 }
 
-// start is where the press went down. tapping holds until the press leaves the tap distance
-// or takes a lane step.
 // topBar: a press on the walk bar, which never drags and whose tap does nothing.
-// dragging: a press anywhere else, steering by its current leg; x is the latest pointer x.
+// dragging: a press anywhere else, steering by its current leg. tap: the way the press's tap
+// moved the pack, until the drag's first step takes it over; 0 when it moved nothing.
 export type GestureState =
   | { kind: "idle" }
-  | { kind: "topBar"; start: Point; tapping: boolean }
-  | { kind: "dragging"; leg: DragLeg; start: Point; tapping: boolean; x: number };
+  | { kind: "topBar" }
+  | { kind: "dragging"; leg: DragLeg; tap: LaneDirection | 0 };
 
+// stepped: the drag took a lane step, counting one its tap had already taken.
 export interface GestureResult {
   actions: GestureAction[];
   state: GestureState;
+  stepped: boolean;
 }
 
 export const idleGesture: GestureState = { kind: "idle" };
@@ -115,55 +117,67 @@ function dragTo(
   };
 }
 
-// A press on the dog cards drags and taps like one anywhere on the walk.
+// A tap on the walk bar or a quiet rect does nothing; anywhere else, the dog cards included, it
+// steers toward the pressed half of the road: the cards take no taps of their own.
+function tapAt(context: GestureContext, { x, y }: Point): LaneDirection | 0 {
+  const quiet = [context.layout.topBar, ...(context.quietTaps ?? [])];
+  if (quiet.some((rect) => containsPoint(rect, x, y))) {
+    return 0;
+  }
+  const direction = tapDirection(context.layout, x);
+  return context.stepMoves(direction) ? direction : 0;
+}
+
+// A tap acts as the press lands, so every press that never steps a drag counts as one. A press
+// on the dog cards drags and taps like one anywhere on the walk.
 export function pointerDown(context: GestureContext, point: Point): GestureResult {
-  const state: GestureState = containsPoint(context.layout.topBar, point.x, point.y)
-    ? { kind: "topBar", start: point, tapping: true }
-    : { kind: "dragging", leg: legAt(point.x), start: point, tapping: true, x: point.x };
-  return { actions: [], state };
+  if (containsPoint(context.layout.topBar, point.x, point.y)) {
+    return { actions: [], state: { kind: "topBar" }, stepped: false };
+  }
+  const tap = tapAt(context, point);
+  return {
+    actions: tap === 0 ? [] : [move(tap)],
+    state: { kind: "dragging", leg: legAt(point.x), tap },
+    stepped: false,
+  };
+}
+
+// The drag's first steps, given the way its tap moved the pack: the tap was the first step
+// that way, and a first step the other way takes the tap back too, so the pack ends where the
+// drag alone would put it.
+function afterTap(tap: LaneDirection | 0, actions: GestureAction[]): GestureAction[] {
+  const [first] = actions;
+  if (tap === 0 || first === undefined) {
+    return actions;
+  }
+  return first.direction === tap ? actions.slice(1) : [first, ...actions];
 }
 
 // A drag steps as soon as it passes a distance, not on release, and goes on stepping as it
-// travels on. Vertical travel never steps a lane.
+// travels on, relative to where the press landed. Vertical travel never steps a lane.
 export function pointerMove(
   context: GestureContext,
   point: Point,
   state: GestureState,
 ): GestureResult {
-  if (state.kind === "idle") {
-    return { actions: [], state };
-  }
-  const tapping =
-    state.tapping && !exceedsTapDistance(context.config.tapMaxDistance, state.start, point);
-  if (state.kind === "topBar") {
-    return { actions: [], state: { ...state, tapping } };
+  if (state.kind !== "dragging") {
+    return { actions: [], state, stepped: false };
   }
   const { actions, leg } = dragTo(context, point.x, state.leg);
+  const stepped = actions.length > 0;
   return {
-    actions,
-    state: { ...state, leg, tapping: tapping && actions.length === 0, x: point.x },
+    actions: stepped ? afterTap(state.tap, actions) : [],
+    state: { kind: "dragging", leg, tap: stepped ? 0 : state.tap },
+    stepped,
   };
 }
 
-// A tap on the walk bar or a quiet rect does nothing; anywhere else, the dog cards included, it
-// steers toward the tapped half of the road: the cards take no taps of their own.
-function tapAction(context: GestureContext, { x, y }: Point): GestureAction[] {
-  const quiet = [context.layout.topBar, ...(context.quietTaps ?? [])];
-  if (quiet.some((rect) => containsPoint(rect, x, y))) {
-    return [];
-  }
-  return [move(tapDirection(context.layout, x))];
-}
-
-// A tap acts on release, once it can no longer turn into a drag.
+// The release steps any travel since the last move, and ends the press.
 export function pointerUp(
   context: GestureContext,
   point: Point,
   state: GestureState,
 ): GestureResult {
-  const { actions, state: moved } = pointerMove(context, point, state);
-  if (moved.kind === "idle" || !moved.tapping) {
-    return { actions, state: idleGesture };
-  }
-  return { actions: tapAction(context, moved.start), state: idleGesture };
+  const moved = pointerMove(context, point, state);
+  return { ...moved, state: idleGesture };
 }
