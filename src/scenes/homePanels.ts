@@ -121,8 +121,6 @@ function drawCardFrame(
 
 // What a detail card shows in its well: a dog's or walker's portrait or a gear item's icon.
 export interface DetailPicture {
-  // A dog's 16x16 quirk icon, drawn beside the portrait under the status where the art has it.
-  readonly badge?: string;
   // Drawn centred in the well at 1x while key has no texture, such as a walker's face before
   // its portrait is drawn.
   readonly fallback?: string;
@@ -169,7 +167,7 @@ export function drawDetailCard(
   }
   // The lowest row anything on the card reaches so far.
   let bottom = well.y + well.size;
-  // Rows of text from (x, y) down, each wrapped at the card's padding; returns the y after.
+  // Rows of text from (x, y) down, each wrapped at the card's padding.
   const rows = (lines: readonly { color: number; value: string }[], x: number, top: number) => {
     let y = top;
     for (const row of lines) {
@@ -180,7 +178,6 @@ export function drawDetailCard(
       bottom = Math.max(bottom, label.y + Math.ceil(label.height));
       y += Math.ceil(label.height) + LINE_GAP;
     }
-    return y;
   };
   const besideX = well.x + well.size + 10;
   const status = { color: card.locked ? PALETTE.darkRed : PALETTE.forest, value: card.status };
@@ -189,12 +186,7 @@ export function drawDetailCard(
     rows([...plum, status], besideX, well.y + 4);
   } else {
     const subtitle = { color: PALETTE.darkBrown, value: card.subtitle };
-    const belowStatus = rows([subtitle, status], besideX, well.y + 4);
-    if (picture.badge !== undefined && scene.textures.exists(picture.badge)) {
-      const badge = scene.add.image(besideX, belowStatus, picture.badge).setOrigin(0);
-      content.add(badge);
-      bottom = Math.max(bottom, belowStatus + badge.height);
-    }
+    rows([subtitle, status], besideX, well.y + 4);
     rows(plum, CARD.pad, well.y + well.size + CARD.pad);
   }
   const rect = centredCard(bottom + CARD.pad);
