@@ -2,10 +2,10 @@ import type { MoverPath, MoverStep, StepShape } from "./movers";
 
 // A stalker steps toward the pack while it is still ahead of it. Its first step is chosen as its
 // cue begins; a later step has no cue of its own and is chosen as it starts. Each is chosen from
-// where the pack is then: of the spots a step away, a lane to either side,
-// a row down or diagonally down, the one nearest the pack, within the lanes and rows the planner
-// left it; the first of them in APPROACH_STEPS on a tie. Never a row up. A step that would start
-// once the stalker has reached the pack's rows, and every step after it, is dropped instead.
+// where the pack is then: of the spots a step away, a lane to either side, a row down or diagonally
+// down, the one nearest the pack, within the lanes and rows the planner left it; the first of them
+// in APPROACH_STEPS on a tie. Never a row up. A step that would start once the stalker has reached
+// the pack's rows, and every step after it, is dropped instead.
 
 export type ApproachPath = Extract<MoverPath, { motion: "approach" }>;
 

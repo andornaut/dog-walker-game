@@ -32,14 +32,14 @@ export interface SpawnQuota<Kind extends string> {
   mover?: MoverSpec;
 }
 
-// Distances are scroll distances in pixels from the start of the zone. A spawn's footprint
-// is cellLength per row, and its hit box is planned as the footprint less cellInset at each end,
-// which is negative where obstacles are drawn longer than a row; it overlaps the pack over its
-// hit box's length plus packLength. scrollSpeed (pixels per
-// second), laneMoveSeconds and stepSeconds, the walk's step, set how far the pack can steer
-// between rows. sightLength is the road in view above the pack, so the next row shows before
-// the pack has to steer for it, and roadLength the whole road in view. reactionSeconds is the
-// time the pack is given to react on top of the lane moves it makes between two spawns.
+// Distances are scroll distances in pixels from the start of the zone. A spawn's footprint is
+// cellLength per row, and its hit box is planned as the footprint less cellInset at each end, which
+// is negative where obstacles are drawn longer than a row; it overlaps the pack over its hit box's
+// length plus packLength. scrollSpeed (pixels per second), laneMoveSeconds and stepSeconds, the
+// walk's step, set how far the pack can steer between rows. sightLength is the road in view above
+// the pack, so the next row shows before the pack has to steer for it, and roadLength the whole
+// road in view. reactionSeconds is the time the pack is given to react on top of the lane moves it
+// makes between two spawns.
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -280,30 +280,28 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
   return { lastGap, lastRow };
 }
 
-// Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart. Each kind's
-// spawns are spread over equal stretches of the zone, one per stretch, so no kind bunches up;
-// kinds with bigger footprints are placed first. Lane-blocking spawns only take cells that
-// keep every hit avoidable: each row's window and the gap after it keep minOpenLanes open, and
-// from any lane at the zone's start, and from every open lane of each row, an open lane of the
-// next row is within reach without crossing a lane blocked in the gap between them, or else,
-// after rows with no lane-blocking spawn, which the pack steers across, from an earlier row with
-// the lane moves that fit in all the road between less the reaction margin; those rows then stay
-// clear of lane-blocking spawns. A spawn more
-// than one row long blocks every window and gap it overlaps, and must end within the zone's
-// last row. Where the path changes lanes between two lane-blocking spawns, packFitsBetween
-// holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide or wider have
-// a row between the rows they take. The quotas marked first are placed first, their movers then
-// the rest; then the other movers; then the other spawns. Movers are placed by placeMovers; a
-// crosser keeps
-// the row before its own clear as a lead-in, so the pack steers into its row from two rows
-// back. A mover with no room in its stretch, such as one over a cap on screen, waits for a
-// later row with room; only one marked first stands still in its footprint when no row has room
-// for it to move. A mover, or an obstacle bigger than one cell, that the earlier draws left no
-// room for is skipped, which uses no random draw; so is one that would
-// leave fewer free cells than there are one-cell spawns. A free cell can still be one no
-// lane-blocking spawn may take, where the path rule or the pack-fit gap around the movers rules
-// it out, so a one-cell spawn with no room left is skipped too, the same way: a zone never fails
-// to plan for want of room.
+// Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart. Each kind's spawns
+// are spread over equal stretches of the zone, one per stretch, so no kind bunches up; kinds with
+// bigger footprints are placed first. Lane-blocking spawns only take cells that keep every hit
+// avoidable: each row's window and the gap after it keep minOpenLanes open, and from any lane at
+// the zone's start, and from every open lane of each row, an open lane of the next row is within
+// reach without crossing a lane blocked in the gap between them, or else, after rows with no
+// lane-blocking spawn, which the pack steers across, from an earlier row with the lane moves that
+// fit in all the road between less the reaction margin; those rows then stay clear of lane-blocking
+// spawns. A spawn more than one row long blocks every window and gap it overlaps, and must end
+// within the zone's last row. Where the path changes lanes between two lane-blocking spawns,
+// packFitsBetween holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide
+// or wider have a row between the rows they take. The quotas marked first are placed first, their
+// movers then the rest; then the other movers; then the other spawns. Movers are placed by
+// placeMovers; a crosser keeps the row before its own clear as a lead-in, so the pack steers into
+// its row from two rows back. A mover with no room in its stretch, such as one over a cap on
+// screen, waits for a later row with room; only one marked first stands still in its footprint when
+// no row has room for it to move. A mover, or an obstacle bigger than one cell, that the earlier
+// draws left no room for is skipped, which uses no random draw; so is one that would leave fewer
+// free cells than there are one-cell spawns. A free cell can still be one no lane-blocking spawn
+// may take, where the path rule or the pack-fit gap around the movers rules it out, so a one-cell
+// spawn with no room left is skipped too, the same way: a zone never fails to plan for want of
+// room.
 export function planSpawns<Kind extends string>(
   random: Random,
   plan: SpawnPlan<Kind>,

@@ -97,10 +97,9 @@ export interface ItemCount {
 
 type ItemCounts = Partial<Record<WalkItemKind, ItemCount>>;
 
-// Obstacle hits, minor ones and movers included, and those of them that came while a pull's
-// move, AFTER_PULL_REACTION_SECONDS and a lane move back had not
-// yet passed, from something not in the lane the pull moved the pack out of: hits the pull
-// left the player no time to avoid.
+// Obstacle hits, minor ones and movers included, and those of them that came while a pull's move,
+// AFTER_PULL_REACTION_SECONDS and a lane move back had not yet passed, from something not in the
+// lane the pull moved the pack out of: hits the pull left the player no time to avoid.
 interface HitCounts {
   afterPull: number;
   all: number;

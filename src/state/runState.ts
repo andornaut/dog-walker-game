@@ -133,9 +133,9 @@ export interface Loadout {
   readonly walker: WalkerId;
 }
 
-// A run's opening state, in the world's first zone: the walker's effects and the gear's
-// applied, then each owner's starting hearts, full for the pack's size and the starting money. Throws for a dog listed
-// twice or more dogs than the player has slots.
+// A run's opening state, in the world's first zone: the walker's effects and the gear's applied,
+// then each owner's starting hearts, full for the pack's size, and the starting money. Throws for a
+// dog listed twice or more dogs than the player has slots.
 export function newRun(
   data: Pick<
     GameData,
