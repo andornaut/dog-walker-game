@@ -174,7 +174,7 @@ Good things to bump into on purpose. None opens a card: each bobs on the road an
 
 ### Plain obstacles
 
-Plain obstacles open no card. A plain hit costs 1♥ from the owner of the dog it lands on (see Screen and controls).
+Plain obstacles open no card. A plain hit costs 1♥ from the owner of the dog it lands on (see Screen and controls). No collision ever costs money: a collision costs hearts, makes the pack Muddy (a puddle) or opens a card, and money is lost only through a card option you pick.
 
 ### Obstacle sizes
 
