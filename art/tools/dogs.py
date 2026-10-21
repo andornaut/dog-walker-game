@@ -3,8 +3,11 @@
 
 Each dog gets two sprites in Endesga 32 with coloured outlines:
 
-- dog-<name>: the road sprite, 48x48 (ROAD_SIZE; DOG_SIZE sets each dog's), seen from above and behind. Its drawing
-  functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.5),
+- dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
+  SIZE_CLASS): big 58x58 (Koda the Alaskan Malamute, Snowball the Great Pyrenees, Penny the golden
+  retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Duchess,
+  Nugget, Zippy), the small dogs drawn DOG_ZOOM larger so they fill more of their frame. Its drawing
+  functions take 32-unit design coordinates and run on a minis.Mini at road_scale(name) (the side / 32),
   which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
   frames), react (2), pull (2, leaning right; the game mirrors it for left),
@@ -21,7 +24,8 @@ Each dog gets two sprites in Endesga 32 with coloured outlines:
   the nose); dog-nugget pose (3, 220ms; Camera ready: sits square, cocks his head and
   a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a crouch, a spring, a
   stretched leap over motion streaks and a landing on the front paws).
-- face-dog-<name>: the dog column face, 32x32 at 1x. Tags: happy, neutral, upset, then the
+- face-dog-<name>: the dog column face, a 32x32 frame, the face drawn FACE_SIDE big by size class (big 32,
+  medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral, upset, then the
   quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
   a wobbly mouth and a sweat bead), while she is the only dog on the leash.
 
@@ -81,7 +85,7 @@ IDLE = [
 SHAKE = [
     dict(lean=-2, tail=1, ears=-1),
     dict(lean=2, tail=-2, ears=1, twitch=-1, spray=2),
-    dict(lean=-2, tail=2, ears=-1, spray=4),
+    dict(lean=-2, tail=2, ears=-1, spray=3.5),
     dict(lean=2, tail=-1, ears=1),
 ]
 # Idle and shake go last so the frame indices of the other tags stay put.
@@ -130,7 +134,7 @@ POSE = [
 POUNCE = [
     dict(bob=1, fl=-1, fr=-1, tail=1, ears=1),
     dict(hop=-2, reach=-1, fl=-2, fr=-2, bl=1, br=1, tail=-1, ears=1),
-    dict(hop=-4, reach=-2, fl=-3, fr=-3, bl=1, br=1, ears=1, streak=1),
+    dict(hop=-3, reach=-1, fl=-3, fr=-3, bl=1, br=1, ears=1, streak=1),
     dict(hop=-1, reach=-1, fl=-2, fr=-2, bob=1),
 ]
 # A quirk's tags go after ROAD_TAGS and its faces after FACE_TAGS, on the dogs that have it.
@@ -166,40 +170,40 @@ def pose(q):
                      streak=0), **q)
 
 
-# ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
+# ---------- Koda: Alaskan Malamute, big, heavy, grey and white, blue eyes, orange harness ----------
 
 def koda_road(q):
     g, q = edged(Grid()), pose(q)
     # o shifts the body down so the big head has headroom to hop and lean
     b, ln, o = q["bob"], q["lean"], 2
-    # legs: white, front pair beside the shoulders, back pair under the hips
-    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
-    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
-    g.rect(9, 26 + q["bl"], 3, 4, "white")
-    g.rect(20, 26 + q["br"], 3, 4, "white")
-    # body: white flanks, grey saddle, harness
+    # legs: thick and white, front pair beside the shoulders, back pair under the hips
+    g.rect(6 + ln // 2, 15 + o + q["fl"] + b, 4, 4, "white")
+    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 4, 4, "white")
+    g.rect(8, 26 + q["bl"], 4, 4, "white")
+    g.rect(20, 26 + q["br"], 4, 4, "white")
+    # a heavy barrel: white flanks, a broad grey saddle, the harness across the shoulders
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 7.5, 6, "white", "lgrey")
-    g.ell(bx, 19.5 + o + b, 5, 5, "slate", "dslate", "grey")
-    g.rect(bx - 6, 16 + o + b, 12, 2, "orange")
-    g.rect(bx - 6, 17 + o + b, 12, 1, "rust")
+    g.ell(bx, 20.5 + o + b, 8.5, 6.5, "white", "lgrey")
+    g.ell(bx, 19.5 + o + b, 6, 5.5, "slate", "dslate", "grey")
+    g.rect(bx - 7, 16 + o + b, 14, 2, "orange")
+    g.rect(bx - 7, 17 + o + b, 14, 1, "rust")
     g.rect(bx - 2, 20 + o + b, 4, 2, "orange")
     g.rect(bx - 1, 21 + o + b, 2, 1, "slate")
-    g.ell(bx, 15 + o + b, 5, 1.5, "dslate")
-    # the tail curled over the hips: grey on top like the saddle, its white underside showing in the curl
+    g.ell(bx, 15 + o + b, 5.5, 1.5, "dslate")
+    # the plumed tail curled over the hips: grey on top like the saddle, its white underside in the curl
     tx = 16 + q["tail"]
-    g.ell(tx, 28 + b, 3.5, 2, "slate", "dslate", "grey")
-    g.ell(tx + 0.5, 28.5 + b, 1.8, 0.9, "white")
-    # big head with white cheeks and upright ears
+    g.ell(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
+    g.ell(tx + 0.5, 28.5 + b, 2, 1, "white")
+    # a broad head with white cheeks and small ears set wide, their tips rounded
     hx = 16 + ln
     e = q["ears"] + q["flop"]
-    tip = max(1, 1 + o + b + e)
+    tip = max(2, 2.5 + o + b + e)
     t = q["twitch"]
-    g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "slate")
-    g.tri((hx + 7, 7 + o + b + t), (hx + 6, tip + t), (hx + 2, 4.5 + o + b + t), "slate")
-    g.ell(hx, 9.5 + o + b, 8, 6, "slate", "dslate", "grey")
-    g.ell(hx - 6.5, 12 + o + b, 2, 2.2, "white")
-    g.ell(hx + 6.5, 12 + o + b, 2, 2.2, "white", "lgrey")
+    g.tri((hx - 8, 7.5 + o + b), (hx - 6.5, tip), (hx - 3, 5 + o + b), "slate")
+    g.tri((hx + 8, 7.5 + o + b + t), (hx + 6.5, tip + t), (hx + 3, 5 + o + b + t), "slate")
+    g.ell(hx, 10 + o + b, 8.5, 6, "slate", "dslate", "grey")
+    g.ell(hx - 7, 12.5 + o + b, 2, 2.2, "white")
+    g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
     underside(g)
     spray(g, q["spray"])
     return g
@@ -208,12 +212,13 @@ def koda_road(q):
 def koda_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
-    g.tri((7, 11), (8 - d, 1 + d), (13.5, 6 + d / 2), "slate")
-    g.tri((25, 11), (24 + d, 1 + d), (18.5, 6 + d / 2), "slate")
-    g.tri((8.5, 8.5), (9 - d, 4 + d), (12, 6.5 + d / 2), "pink")
-    g.tri((23.5, 8.5), (23 + d, 4 + d), (20, 6.5 + d / 2), "pink")
-    g.cel(16, 28, 7, 3.5, "lgrey", "grey", "white")
-    g.cel(16, 16, 10, 8.5, "slate", "dslate", "grey")
+    # a Malamute's ears: small, set wide on the broad skull, their tips rounded
+    g.tri((5.5, 11), (7 - d, 3 + d), (12.5, 7 + d / 2), "slate")
+    g.tri((26.5, 11), (25 + d, 3 + d), (19.5, 7 + d / 2), "slate")
+    g.tri((7.5, 9), (8 - d, 5.5 + d), (11, 7.5 + d / 2), "pink")
+    g.tri((24.5, 9), (24 + d, 5.5 + d), (21, 7.5 + d / 2), "pink")
+    g.cel(16, 28, 7.5, 3.5, "lgrey", "grey", "white")
+    g.cel(16, 16, 11, 8.5, "slate", "dslate", "grey")
     # white mask: brows, cheeks and muzzle
     g.cel(16, 20.5, 8, 5, "lgrey", "grey", "white")
     g.rect(15, 8, 2, 7, "lgrey")
@@ -352,7 +357,7 @@ def nugget_road(q):
     g.ell(hx - 4.8, 12.3 + b - q["ears"] + q["flop"] - tl, 2, 1.7, "navy")
     g.ell(hx + 4.8, 12.3 + b - q["ears"] + q["flop"] + q["twitch"] + tl, 2, 1.7, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
-    sparkle(g, hx + 9, 6 + b, q["glint"])
+    sparkle(g, hx + 8, 9.5 + b, q["glint"])
     spray(g, q["spray"])
     return g
 
@@ -429,7 +434,7 @@ def zippy_face(mood):
     return g
 
 
-# ---------- Pierre (Pepe): standard poodle, medium, black with a white stripe, show-clip pom-poms ----------
+# ---------- Pierre (Pepe): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
 
 # Pierre's coat: the curls (fill, shade, light), the shaved skin and the white stripe (fill, shade).
 CURL = ("navy", "ink", "dslate")
@@ -446,39 +451,41 @@ def pierre_edge(c):
 def pierre_road(q):
     g, q = edged(Grid(), pierre_edge), pose(q)
     b, ln = q["bob"], q["lean"]
+    # a miniature poodle: compact, the head and mane sat D units lower over short legs than a standard's
+    D = 1
     # shaved legs, each with a pom-pom bracelet at the paw
     for x, d in ((10 + ln // 2, q["fl"]), (22 + ln // 2, q["fr"])):
-        g.rect(x - 1, 19 + d + b, 2, 2, SHAVED[0])
-        puff(g, x, 22 + d + b, 1.8, 1.6)
+        g.rect(x - 1, 19 + D + d + b, 2, 1, SHAVED[0])
+        puff(g, x, 22 + D + d + b, 1.8, 1.6)
     for x, d in ((12, q["bl"]), (20, q["br"])):
-        g.rect(x - 1, 25 + d, 2, 3, SHAVED[0])
+        g.rect(x - 1, 26 + d, 2, 2, SHAVED[0])
         puff(g, x, 28.5 + d, 2, 1.6)
     # shaved hindquarters behind a curly mane over the shoulders
     bx = 16 + ln // 2
-    g.ell(bx, 23.5 + b, 3.5, 4, *SHAVED)
-    puff(g, bx, 18.5 + b, 5, 3.2)
+    g.ell(bx, 24 + b, 3.8, 3.5, *SHAVED)
+    puff(g, bx, 18.5 + D + b, 5, 3.2)
     # a thin tail held up with a pom-pom on the end
     tx = 16 + q["tail"]
     g.rect(tx, 25 + b, 1, 2, SHAVED[0])
     puff(g, tx + 0.5, 28 + b, 2, 1.8)
     # ear puffs hanging behind a round topknot
     hx = 16 + ln
-    puff(g, hx - 5, 14.5 + b - q["ears"] + q["flop"], 2, 3.5, ring=True)
-    puff(g, hx + 5, 14.5 + b - q["ears"] + q["flop"] + q["twitch"], 2, 3.5, ring=True)
-    puff(g, hx, 10.5 + b, 4, 3.8, ring=True)
+    puff(g, hx - 5, 14.5 + D + b - q["ears"] + q["flop"], 2, 3.5, ring=True)
+    puff(g, hx + 5, 14.5 + D + b - q["ears"] + q["flop"] + q["twitch"], 2, 3.5, ring=True)
+    puff(g, hx, 10.5 + D + b, 4, 3.8, ring=True)
     # the white stripe from the top of the topknot down the neck, the mane and the back to the tail's tip;
     # leaning, the head moves further than the body, so the neck steps it across halfway
-    g.rect(hx - 1, 7 + b, 2, 7, STRIPE[0])
-    g.rect((hx + bx) // 2 - 1, 13 + b, 2, 3, STRIPE[0])
-    g.rect(bx - 1, 15 + b, 2, 10, STRIPE[0])
-    g.rect(bx, 15 + b, 1, 10, STRIPE[1])
+    g.rect(hx - 1, 7 + D + b, 2, 7, STRIPE[0])
+    g.rect((hx + bx) // 2 - 1, 13 + D + b, 2, 2, STRIPE[0])
+    g.rect(bx - 1, 15 + D + b, 2, 10 - D, STRIPE[0])
+    g.rect(bx, 15 + D + b, 1, 10 - D, STRIPE[1])
     g.rect(tx, 25 + b, 1, 2, STRIPE[0])
     g.ell(tx + 0.5, 28.8 + b, 1.2, 1, STRIPE[0])
     # a small mauve show bow tied in purple, pinned to the topknot's top right
-    g.rect(hx, 5 + b, 2, 3, "mauve")
-    g.rect(hx + 3, 5 + b, 2, 3, "mauve")
-    g.p(hx + 2, 6 + b, "purple")
-    g.p(hx, 5 + b, "pink")
+    g.rect(hx, 5 + D + b, 2, 3, "mauve")
+    g.rect(hx + 3, 5 + D + b, 2, 3, "mauve")
+    g.p(hx + 2, 6 + D + b, "purple")
+    g.p(hx, 5 + D + b, "pink")
     despeckle(g, CURL + SHAVED)
     spray(g, q["spray"])
     return g
@@ -591,35 +598,34 @@ def archie_face(mood):
     return g
 
 
-# ---------- Snowball: Samoyed, big, fluffy white, collar with a bell ----------
+# ---------- Snowball: Great Pyrenees, big, giant white fluff, collar with a bell ----------
 
 def snowball_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
-    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
-    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
-    g.rect(9, 26 + q["bl"], 3, 4, "lgrey")
-    g.rect(20, 26 + q["br"], 3, 4, "lgrey")
+    g.rect(6 + ln // 2, 15 + o + q["fl"] + b, 4, 4, "white")
+    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 4, 4, "white")
+    g.rect(8, 26 + q["bl"], 4, 4, "lgrey")
+    g.rect(20, 26 + q["br"], 4, 4, "lgrey")
+    # a giant fluffy body, its coat bunched into tufts round the edge
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 8, 6, "white", "lgrey")
-    for dx, dy in ((-7, 0), (7, 0), (-5, 4), (5, 4)):
-        g.ell(bx + dx, 20.5 + o + b + dy, 2, 2, "white", "lgrey")
-    g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
+    g.ell(bx, 20.5 + o + b, 9, 6.5, "white", "lgrey")
+    for dx, dy in ((-8, -1), (8, -1), (-7, 3), (7, 3), (-4, 6), (4, 6)):
+        g.ell(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white", "lgrey")
+    g.rect(bx - 7, 16 + o + b, 14, 1, "sky")
     # the bell hangs from the collar's right end
     g.rect(bx + 5, 17 + o + b, 2, 2, "amber")
     g.p(bx + 6, 18 + o + b, "orange")
+    # the plumed tail carried up over the back
     tx = 16 + q["tail"]
     g.ell(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
     g.ell(tx - 1, 23 + o + b, 2.5, 1.5, "lgrey")
+    # a broad round head, its drop ears hanging at the sides, marked a soft badger cream
     hx = 16 + ln
-    e = q["ears"] + q["flop"]
-    tip = max(1, 1 + o + b + e)
-    t = q["twitch"]
-    g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "white")
-    g.tri((hx + 7, 7 + o + b + t), (hx + 6, tip + t), (hx + 2, 4.5 + o + b + t), "lgrey")
-    g.ell(hx, 9.5 + o + b, 8, 6, "white", "lgrey")
-    g.ell(hx - 7, 12 + o + b, 2, 2.2, "white")
-    g.ell(hx + 7, 12 + o + b, 2, 2.2, "lgrey")
+    e, t = -q["ears"] + q["flop"], q["twitch"]
+    g.ell(hx, 9.5 + o + b, 7.5, 6.5, "white", "lgrey")
+    g.ell(hx - 7.5, 11.5 + o + b + e, 2.3, 3.8, "cream", "tan")
+    g.ell(hx + 7.5, 11.5 + o + b + e + t, 2.3, 3.8, "cream", "tan")
     underside(g)
     spray(g, q["spray"])
     return g
@@ -628,14 +634,14 @@ def snowball_road(q):
 def snowball_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
-    g.tri((7, 11), (8 - d, 1 + d), (13.5, 6 + d / 2), "white")
-    g.tri((25, 11), (24 + d, 1 + d), (18.5, 6 + d / 2), "lgrey")
-    g.tri((8.5, 8.5), (9 - d, 4 + d), (12, 6.5 + d / 2), "pink")
-    g.tri((23.5, 8.5), (23 + d, 4 + d), (20, 6.5 + d / 2), "pink")
-    g.cel(16, 28, 8, 3.5, "white", "lgrey")
-    g.cel(16, 16, 10, 8.5, "white", "lgrey")
-    for x in (5.5, 26.5):
-        g.cel(x, 20, 2.5, 3, "white", "lgrey")
+    g.cel(16, 28, 9, 3.5, "white", "lgrey")
+    # a Great Pyrenees' broad head in a thick ruff, its drop ears hanging flat at the sides, marked badger
+    # cream; they swing out and sag as the dog loses heart
+    for x in (5, 27):
+        g.cel(x, 21, 2.8, 3.2, "white", "lgrey")
+    g.cel(16, 15.5, 10, 8.5, "white", "lgrey")
+    for sgn in (-1, 1):
+        inlay(g, "tan", lambda t, sgn=sgn: t.cel(16 + sgn * (9 + d / 2), 14 + d, 2.6, 5, "cream", "tan"))
     g.rect(9, 26, 14, 1, "sky")
     g.cel(16, 28, 2, 2, "amber", "orange", "yellow")
     g.p(16, 29, "orange")
@@ -865,7 +871,7 @@ def spray(g, d):
     1px of cyan, with a white one on each side, so the road outline rings it and it holds on every road."""
     if not d:
         return
-    for x, y, c in ((7, 14, "cyan"), (6, 20, "white"), (25, 12, "cyan"), (25, 18, "white"), (24, 23, "cyan")):
+    for x, y, c in ((9, 14, "cyan"), (9, 20, "white"), (22, 12, "cyan"), (22, 18, "white"), (21, 23, "cyan")):
         side = -1 if x < 16 else 1
         g.p(x + side * d, y - d / 2, c)
 
@@ -992,8 +998,38 @@ DOGS = {
 }
 
 
-# Each dog's road sprite side, by its size class: every dog is drawn at the medium ROAD_SIZE for now.
-DOG_SIZE = {name: ROAD_SIZE for name in DOGS}
+# Each dog's road sprite side, by its size class: big 58, medium ROAD_SIZE (48) and small 38, about 1.2x, 1x
+# and 0.8x.
+SIZE_CLASS = {"big": 58, "medium": ROAD_SIZE, "small": 38}
+DOG_CLASS = {"koda": "big", "snowball": "big", "penny": "big", "archie": "medium", "biscuit": "medium",
+             "pierre": "medium", "duchess": "small", "nugget": "small", "zippy": "small"}
+DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
+# How much bigger a dog is drawn inside its frame: the small dogs fill more of theirs, about 24px wide at
+# full size.
+DOG_ZOOM = {"duchess": 1.3, "nugget": 1.3, "zippy": 1.3}
+
+
+# How much of its 32px photo a dog's face fills, by size class, sat on the bottom edge: the size difference
+# shows, less than on the road.
+FACE_SIDE = {"big": 32, "medium": 29, "small": 26}
+
+
+def padded(px, side):
+    """Frame rows px set in a side x side frame, centred across and on its bottom edge."""
+    h, w = len(px), len(px[0])
+    left = (side - w) // 2
+    return [[None] * side for _ in range(side - h)] + [[None] * left + row + [None] * (side - w - left) for row in px]
+
+
+def face_frame(face, mood, side):
+    """face(mood)'s outlined rows, drawn at side over 32 of its 32-unit design and set on the bottom edge of a
+    32x32 frame."""
+    import minis
+
+    if side == 32:
+        return face(mood).outlined()
+    here = sys.modules[__name__]
+    return padded(minis.small(here, side / 32, face, mood).outlined(), 32)
 
 
 def road_scale(name):
@@ -1007,9 +1043,9 @@ def sprites():
 
     here = sys.modules[__name__]
     for name, (road, face) in DOGS.items():
-        yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, road_scale(name), here), ms)
+        yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, road_scale(name), here, DOG_ZOOM.get(name, 1)), ms)
                               for tag, poses, ms in road_tags(name)]
-        yield f"face-dog-{name}", [(m, [face(m).outlined()], 1000) for m in face_tags(name)]
+        yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[DOG_CLASS[name]])], 1000) for m in face_tags(name)]
 
 
 if __name__ == "__main__":

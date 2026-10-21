@@ -206,7 +206,7 @@ def zippy(g):
     nose(g, 21, 28)
 
 
-# ---------- Pierre (Pepe): standard poodle, medium, black with a white stripe, show-clip pom-poms ----------
+# ---------- Pierre (Pepe): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
 
 # Pierre's coat, as in dogs.py: the curls (fill, shade, light), the shaved skin and the white stripe.
 CURL = ("navy", "ink", "dslate")
@@ -311,7 +311,7 @@ def archie(g):
     g.rect(21, 30, 2, 1, "dbrown")
 
 
-# ---------- Snowball: Samoyed, big, fluffy white, collar with a bell ----------
+# ---------- Snowball: Great Pyrenees, big, giant white fluff, collar with a bell ----------
 
 def snowball(g):
     g.cel(46, 52, 13, 11, "white", "lgrey")
@@ -327,12 +327,10 @@ def snowball(g):
     g.rect(18, 44, 26, 1, "blue")
     g.cel(31, 47.5, 3.5, 3.5, "amber", "orange", "yellow")
     g.rect(30, 48, 3, 1, "orange")
-    # upright ears with pink insides
-    g.tri((13, 19), (15, 3), (25, 12), "white")
-    g.tri((16, 15), (16, 7), (22, 12), "pink")
-    g.tri((45, 18), (44, 2), (35, 11), "lgrey")
-    g.tri((43, 14), (43, 6), (38, 11), "pink")
+    # a Great Pyrenees' broad head, its drop ears hanging flat at the sides, marked badger cream
     g.cel(30, 26, 18, 15, "white", "lgrey")
+    dogs.inlay(g, "tan", lambda t: t.cel(13.5, 28, 5, 10, "cream", "tan", power=2.4))
+    dogs.inlay(g, "tan", lambda t: t.cel(46.5, 27, 5.5, 11, "cream", "tan", power=2.4))
     g.cel(26, 33, 9, 6, "white", "lgrey")
     eyes(g, 18, 33, 21)
     nose(g, 21, 28)
@@ -366,7 +364,7 @@ def penny(g):
     nose(g, 21, 29)
 
 
-# ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
+# ---------- Koda: Alaskan Malamute, big, heavy, grey and white, blue eyes, orange harness ----------
 
 def koda(g):
     g.cel(46, 52, 13, 11, "slate", "dslate", "grey")
@@ -378,12 +376,12 @@ def koda(g):
     g.rect(28, 43, 4, 10, "orange")
     g.rect(31, 43, 1, 10, "rust")
     g.rect(28, 47, 4, 2, "slate")
-    # upright ears with pink insides
-    g.tri((12, 20), (14, 3), (25, 12), "slate")
-    g.tri((15, 16), (15, 7), (22, 12), "pink")
-    g.tri((46, 19), (45, 2), (35, 11), "slate")
-    g.tri((44, 15), (44, 6), (38, 11), "pink")
-    g.cel(30, 26, 18, 15, "slate", "dslate", "grey")
+    # a Malamute's ears: small, set wide on the broad skull, their tips rounded, pink inside
+    g.tri((10, 21), (13, 6), (24, 13), "slate")
+    g.tri((13.5, 17), (14, 10), (21, 13), "pink")
+    g.tri((48, 20), (46, 5), (36, 12), "slate")
+    g.tri((45, 16), (44.5, 9), (39, 12), "pink")
+    g.cel(30, 26, 19, 15, "slate", "dslate", "grey")
     # white mask: brows, cheeks and muzzle
     g.cel(27, 33, 13, 8, "lgrey", "grey", "white")
     g.rect(27, 13, 3, 12, "lgrey")
@@ -618,10 +616,21 @@ def to_image(px):
     return im
 
 
-def image(draw):
-    g = edged(Grid(S, S), "ink", close=True)
+# How much of the 64px well a dog's portrait fills, by size class, sat on the bottom edge.
+PORTRAIT_SIDE = {"big": 64, "medium": 58, "small": 52}
+
+
+def image(draw, side=S):
+    """draw's portrait, drawn at side over S of its design, sat on the bottom edge of an S x S image."""
+    if side == S:
+        g = edged(Grid(S, S), "ink", close=True)
+        draw(g)
+        return to_image(g.outlined())
+    import minis
+
+    g = edged(minis.Mini(side / S, S, S), "ink", close=True)
     draw(g)
-    return to_image(g.outlined())
+    return to_image(dogs.padded(g.outlined(), S))
 
 
 def faces():
@@ -652,11 +661,11 @@ def preview(out, scale=4):
 def build():
     os.makedirs("art/portraits", exist_ok=True)
     os.makedirs("public/art/images", exist_ok=True)
-    keys = {**{f"portrait-dog-{n}": d for n, d in PORTRAITS.items()},
-            **{f"portrait-walker-{n}": d for n, d in WALKERS.items()}}
-    for key, draw in keys.items():
+    keys = {**{f"portrait-dog-{n}": (d, PORTRAIT_SIDE[dogs.DOG_CLASS[n]]) for n, d in PORTRAITS.items()},
+            **{f"portrait-walker-{n}": (d, S) for n, d in WALKERS.items()}}
+    for key, (draw, side) in keys.items():
         png = f"public/art/images/{key}.png"
-        image(draw).save(png)
+        image(draw, side).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/portraits/{key}.aseprite"], check=True)
     print("built", ", ".join(keys))
 

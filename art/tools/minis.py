@@ -232,13 +232,37 @@ def snap(q, s, up=False):
     return out
 
 
-def dog_frames(draw, poses, s, module=dogs):
-    """module's draw(q) at scale s of the design grid for each pose in a tag: dogs.ROAD_SCALE for the full
-    size, times the step for a depth variant. Where two poses round to the same frame (a 2px lean and a 3px
-    one are both 1px at the smallest step), the bigger of the two rounds up instead, so the tag still
-    moves."""
+# The design point a zoomed dog grows about: its centre column and its feet row.
+DOG_ANCHOR = (16, 29.5)
+
+
+def zoomed(f, s, zoom):
+    """Frame f, drawn at s x zoom, cut to the frame side(32, s) about DOG_ANCHOR, so the dog fills more of its
+    frame with its feet a row below where they would be at s."""
+    side_ = side(32, s)
+    ax, ay = DOG_ANCHOR
+    left = math.floor(ax * s * zoom + 0.5) - math.floor(ax * s + 0.5)
+    # the feet go one row lower than at s, onto the frame's spare bottom rows, for headroom
+    top = math.floor(ay * s * zoom + 0.5) - math.floor(ay * s + 0.5) - 1
+    lost = sum(1 for y, row in enumerate(f) for x, c in enumerate(row)
+               if c and not (left <= x < left + side_ and top <= y < top + side_))
+    if lost:
+        print(f"zoomed: {lost} pixels fall outside the {side_}px frame")
+    return [row[left:left + side_] for row in f[top:top + side_]]
+
+
+def dog_frames(draw, poses, s, module=dogs, zoom=1):
+    """module's draw(q) at scale s of the design grid for each pose in a tag: dogs.road_scale for the full
+    size, times the step for a depth variant. zoom draws the dog that much bigger in the same frame (see
+    zoomed), for a small dog that fills more of its frame. Where two poses round to the same frame (a 2px
+    lean and a 3px one are both 1px at the smallest step), the bigger of the two rounds up instead, so the
+    tag still moves."""
     def frame(q, up=False):
-        return small(module, s, draw, snap(module.pose(q), s, up)).outlined()
+        p = s * zoom
+        # a zoomed dog moves as far in pixels as it would unzoomed, so its hops and spray stay in the frame
+        q = {k: v if k == "glint" or isinstance(v, bool) else v / zoom for k, v in module.pose(q).items()}
+        f = small(module, p, draw, snap(q, p, up)).outlined()
+        return zoomed(f, s, zoom) if zoom != 1 else f
 
     frames = [frame(q) for q in poses]
     for i in range(1, len(frames)):
@@ -379,7 +403,8 @@ def sprites():
             yield f"{key}@{suffix}", tags
     for suffix, s in STEPS:
         for name, (draw, _) in dogs.DOGS.items():
-            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.road_scale(name) * s), ms)
+            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.road_scale(name) * s,
+                                                            zoom=dogs.DOG_ZOOM.get(name, 1)), ms)
                                            for tag, poses, ms in dogs.road_tags(name)]
 
 
