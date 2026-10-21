@@ -134,14 +134,14 @@ def pack(view, cx, base):
         view.paste(f, x - f.width // 2, feet - f.getbbox()[3] + 1)
         return f
 
-    dogs = [(k, dx, base - d) for k, (dx, d) in zip(("dog-koda", "dog-biscuit", "dog-duchess"), hp.FORMATIONS[3])]
+    dogs = [(k, hp.side_dx(k, side), base - d) for k, (side, d) in zip(("dog-koda", "dog-biscuit", "dog-duchess"), hp.FORMATIONS[3])]
     for k, dx, feet in sorted(dogs, key=lambda d: d[2]):
         stand(k, cx + dx, feet)
     walker = hp.frame("walker-casey", "walk")
     view.shadow(cx, base + 1, walker.width)
-    for _, dx, feet in dogs:
+    for key, dx, feet in dogs:
         hand = hp.HANDS[0] if dx < 0 else hp.HANDS[1]
-        view.line(cx + hand, base - hp.HANDS[2], cx + dx, feet - hp.COLLAR, view.leash_col)
+        view.line(cx + hand, base - hp.HANDS[2], cx + dx, feet - hp.collar(key), view.leash_col)
     stand("walker-casey", cx, base, shadow=False)
 
 

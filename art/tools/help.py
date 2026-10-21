@@ -238,13 +238,26 @@ VERGES = {z: {**SIDEWALK, **v, "curbColor": hexed(v["curbColor"]),
 MOWN = (44, 62, 36, 70, 50, 58, 40, 66)   # stripe widths out from the sidewalk, light then dark
 SEAM_MAX_SPAN = 16
 STEPS = {step["scale"]: step["suffix"] for step in LAYOUT["depthSteps"]}
-# The pack, as src/layout/packFormation.ts: each dog's (dx across, distance ahead of the feet) by
-# pack size, the first dog leading; the walker's hands (left dx, right dx, height above the
-# feet) and the collar's height above a dog's feet.
+# The pack, as src/layout/packFormation.ts: each dog's (side, distance ahead of the feet) by pack
+# size, the first dog leading, a side dog standing sideDx(its opaque width) off the lane centre;
+# the walker's hands (left dx, right dx, height above the feet) and each dog's collar height above
+# its feet (COLLAR, the highest, for a dog with none listed).
 PACK = LAYOUT["pack"]
-FORMATIONS = {n + 1: [(p["dx"], -p["footDy"]) for p in f] for n, f in enumerate(PACK["formations"])}
+FORMATIONS = {n + 1: [(p["side"], -p["footDy"]) for p in f] for n, f in enumerate(PACK["formations"])}
 HANDS = (PACK["walkerHands"]["leftDx"], PACK["walkerHands"]["rightDx"], PACK["walkerHands"]["heightAboveFeet"])
-COLLAR = PACK["collarHeight"]
+COLLARS = PACK["collarHeights"]
+COLLAR = max(COLLARS.values())
+MANIFEST = {s["key"]: s.get("anchor", {}) for s in json.load(open("public/art/manifest.json"))["sprites"]}
+
+
+def collar(key):
+    """A dog's collar height above its feet, at full size."""
+    return COLLARS.get(key.removeprefix("dog-"), COLLAR)
+
+
+def side_dx(key, side):
+    """A dog's dx off the lane centre on side -1, 0 or 1: half the lane less half its opaque width."""
+    return side * math.floor(PACK["laneHalfWidth"] - MANIFEST[key]["opaqueWidth"] / 2)
 TOP_BAR = LAYOUT["topBar"]
 DOGHOUSE = LAYOUT["doghouse"]["parts"]
 CARD = LAYOUT["scenes"]["cards"]
@@ -401,7 +414,7 @@ class Scene(Canvas):
 
     def pack(self, cx, dogs=("dog-koda", "dog-biscuit", "dog-duchess"), lead_tag="walk"):
         """The walker at the feet in lane centre cx and the dogs ahead of her in the game's
-        formation, far ones first, with a leash from her hand to each collar (COLLAR over a dog's
+        formation, far ones first, with a leash from her hand to each collar (collar(key) over a dog's
         feet, its last opaque row; the hands HANDS[2] over the walker's). The leashes run under
         the walker, who hides the part behind her, and over the dogs and their shadows. Returns
         where each stands: image column, row and scale."""
@@ -409,7 +422,8 @@ class Scene(Canvas):
             f = depth_frame(key, tag, s)
             return round(sy) - f.height + f.getbbox()[3] - 1
 
-        items = [(k, dx, d, lead_tag if i == 0 else "walk") for i, (k, (dx, d)) in enumerate(zip(dogs, FORMATIONS[len(dogs)]))]
+        items = [(k, side_dx(k, side), d, lead_tag if i == 0 else "walk")
+                 for i, (k, (side, d)) in enumerate(zip(dogs, FORMATIONS[len(dogs)]))]
         placed = {k: self.stand(k, tag, cx + dx, d) for k, dx, d, tag in sorted(items, key=lambda it: -it[2])}
         sx, sy, _ = self.at(cx, 0)
         walker = frame("walker-casey", "walk")
@@ -418,7 +432,7 @@ class Scene(Canvas):
         for k, dx, _, tag in items:
             x, y, s = placed[k]
             hand = HANDS[0] if dx < 0 else HANDS[1]
-            self.line(cx + hand, hands, round(x), round(feet(k, tag, y, s) - COLLAR * s), self.leash_col)
+            self.line(cx + hand, hands, round(x), round(feet(k, tag, y, s) - collar(k) * s), self.leash_col)
         placed["walker-casey"] = self.stand("walker-casey", "walk", cx, 0, shadow=False)
         return placed
 
