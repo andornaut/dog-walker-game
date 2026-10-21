@@ -73,7 +73,7 @@ export const HOME_TEXT = {
   noticePackFull: "The pack is full. Tap a picked dog to take it out.",
   noticeSoundOff: "Sound off.",
   noticeSoundOn: "Sound on.",
-  packBonus: "small pack: lead +{hearts}",
+  packBonus: "lead +{hearts}",
   packCount: "{count}/{max}",
   parting: "{owner}: {line}",
   pocket: {
