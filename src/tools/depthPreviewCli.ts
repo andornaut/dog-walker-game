@@ -151,7 +151,7 @@ async function zoneLayers(zone: Zone): Promise<{ over: RgbaImage; under: RgbaIma
   const look: RoadLook = { strip: stripLevels(strip), zone: zone.id as RoadLook["zone"] };
   const raster = roadRaster(projection, rasterView);
   const pixels = new Uint32Array(rasterView.width * rasterView.height);
-  const frame = { current: look, fade: null, scroll: 0, transition: null, zoneStart: 0 };
+  const frame = { current: look, scroll: 0, transition: null, zoneStart: 0 };
   drawRoad(raster, frame, pixels);
   const drawn: RgbaImage = {
     data: new Uint8Array(pixels.buffer),

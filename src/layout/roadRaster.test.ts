@@ -18,8 +18,6 @@ import {
 import { roadProjection, rowScale } from "./projection";
 import {
   drawRoad,
-  FADE_ROWS,
-  fadeCovers,
   LINE_RUN,
   type PixelImage,
   pixelWord,
@@ -53,7 +51,6 @@ const look = (zone: ZoneId, rgb: number): RoadLook => ({
 });
 const frameOf = (overrides: Partial<RoadFrame>): RoadFrame => ({
   current: look("street", 0x3a4466),
-  fade: null,
   scroll: 0,
   transition: null,
   zoneStart: 0,
@@ -507,28 +504,6 @@ describe("drawRoad", () => {
     const band = backdropOf("street", 0x010203);
     const out = draw(frameOf({ approach: band, current: look("street", 0x3a4466), scroll: 7 }));
     expect(approachVerge(out, band).every((word) => word === 0)).toBe(true);
-  });
-
-  it("dithers the far rows into the band only when the fade is on", () => {
-    const band = new Uint32Array(view.width).fill(pixelWord(0xffffff));
-    const white = pixelWord(0xffffff);
-    const count = (out: Uint32Array, y: number) =>
-      out
-        .subarray((y - view.y) * view.width, (y - view.y + 1) * view.width)
-        .filter((p) => p === white).length;
-    const faded = draw(frameOf({ fade: band }));
-    expect(count(faded, view.y)).toBeGreaterThan(count(faded, view.y + FADE_ROWS - 1));
-    expect(count(faded, view.y + FADE_ROWS)).toBe(0);
-    expect(count(draw(frameOf({})), view.y)).toBe(0);
-  });
-});
-
-describe("fadeCovers", () => {
-  it("covers most of the farthest row and little of the last faded row", () => {
-    const covered = (row: number) =>
-      Array.from({ length: 16 }, (_, x) => fadeCovers(x, row)).filter(Boolean).length;
-    expect(covered(0)).toBeGreaterThan(12);
-    expect(covered(FADE_ROWS - 1)).toBeLessThan(4);
   });
 });
 

@@ -3,7 +3,6 @@ import { type Scene, type Textures, WEBGL } from "phaser";
 import { backdropKey, roadStartKey, roadTileKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { Zone } from "../../data/types";
-import { DEV_ROAD_FADE_KEY } from "../../dev/devOverlay";
 import {
   drawRoad,
   type PixelImage,
@@ -23,11 +22,10 @@ import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 const ROAD_TEXTURE = "road-projected";
 
-// Each road strip's look and each backdrop's approach rows and bottom row, read once from
-// their textures and kept for the scene's life.
+// Each road strip's look and each backdrop's approach rows, read once from their textures and
+// kept for the scene's life.
 export class RoadArt {
   private readonly approaches = new Map<string, Uint32Array | null>();
-  private readonly bandRows = new Map<string, Uint32Array | null>();
   private readonly looks = new Map<string, RoadLook>();
   private readonly scene: Scene;
 
@@ -58,17 +56,9 @@ export class RoadArt {
     let rows = this.approaches.get(key);
     if (rows === undefined) {
       rows = this.approachRows(key);
-      const bottom = rows?.subarray(rows.length - LAYOUT.rasterView.width);
-      this.bandRows.set(key, bottom === undefined ? null : bottom.slice());
       this.approaches.set(key, rows);
     }
     return rows;
-  }
-
-  // The backdrop's bottom row across the road, which the far road fades into.
-  bandRow(zone: Zone): Uint32Array | null {
-    this.approach(zone);
-    return this.bandRows.get(backdropKey(zone)) ?? null;
   }
 
   private approachRows(key: string): Uint32Array | null {
@@ -149,8 +139,7 @@ export class RoadView {
     }
     const { textures } = this.scene;
     const scroll = zoneStart + walk.run.zoneDistance;
-    const fade = this.scene.registry.get(DEV_ROAD_FADE_KEY) === true;
-    const drawn = `${scroll}|${zone.id}|${fade}`;
+    const drawn = `${scroll}|${zone.id}`;
     if (drawn === this.drawn) {
       return;
     }
@@ -172,7 +161,6 @@ export class RoadView {
       {
         approach: this.art.approach(zone),
         current: this.art.look(zone, roadTileKey(zone)),
-        fade: fade ? this.art.bandRow(zone) : null,
         scroll,
         transition,
         zoneStart,

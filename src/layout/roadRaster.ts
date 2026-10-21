@@ -109,12 +109,10 @@ interface StripLines {
 // approach, when set, is the backdrop's pixels on the approach rows across the view.
 // zoneStart is the scroll at which the current zone began. While its start strip rolls in, it
 // lies just past the far edge of the road in view at zoneStart, with the previous zone's road
-// on the near side of it. fade, when set, is the backdrop's bottom row across the view, which
-// the far rows dissolve into.
+// on the near side of it.
 export interface RoadFrame {
   readonly approach?: Uint32Array | null;
   readonly current: RoadLook;
-  readonly fade: Uint32Array | null;
   readonly scroll: number;
   readonly transition: { readonly previous: RoadLook; readonly start: RoadLook } | null;
   readonly zoneStart: number;
@@ -132,9 +130,6 @@ const PATCH_REACH = ROUGH_PATCH_REACH;
 const LEVEL_SPAN = 2;
 // A run down a strip column at least this long is a line along the road.
 export const LINE_RUN = 8;
-// The far rows dithered into the band when the fade is on.
-export const FADE_ROWS = 12;
-const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5] as const;
 
 // A palette colour as a pixel word: opaque, in ImageData byte order on any platform.
 export function pixelWord(rgb: number): number {
@@ -640,7 +635,6 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     if (y < raster.approachRows) {
       keepBackdropVerge(frame.approach ?? null, row, vergePixels, offset, out);
     }
-    fadeRow(frame.fade, view.x, y, offset, out);
   }
 }
 
@@ -756,24 +750,6 @@ function drawDots(
   }
 }
 
-// The far rows' drawn pixels dithered into the band's bottom row, when the fade is on.
-function fadeRow(
-  fade: Uint32Array | null,
-  x: number,
-  y: number,
-  offset: number,
-  out: Uint32Array,
-): void {
-  if (fade === null || y >= FADE_ROWS) {
-    return;
-  }
-  for (let i = 0; i < fade.length; i++) {
-    if (out[offset + i] !== 0 && fadeCovers(x + i, y)) {
-      out[offset + i] = fade[i] ?? 0;
-    }
-  }
-}
-
 // The rough patches on an unmown lawn: each one's chord across this row, in its mark colour.
 function drawPatches(
   raster: RoadRaster,
@@ -803,11 +779,4 @@ function drawPatches(
       }
     }
   }
-}
-
-// Ordered dither: the share of a far row given over to the band grows toward the band.
-export function fadeCovers(x: number, row: number): boolean {
-  const share = (FADE_ROWS - row - 0.5) / FADE_ROWS;
-  const threshold = ((BAYER_4[(row & 3) * 4 + (x & 3)] ?? 0) + 0.5) / 16;
-  return threshold < share;
 }
