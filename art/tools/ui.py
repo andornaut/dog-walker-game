@@ -1217,7 +1217,8 @@ def strip_well():
 
 
 def top_bar():
-    """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
+    """360x40: plum wood with a trim along the bottom and three ink wells, its grain kept 1px clear of
+    each well, in screen pixels:
     money 4,8 88x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 96,8 32x26
     (icon-treat at 100,13, the count at 118,18), and zone 212,5 144x29 (the zone name right aligned
     at 352,10, ui-zone-pips from 271,22). Between the treats and zone wells sit three
@@ -1229,9 +1230,22 @@ def top_bar():
     g.rect(0, 37, 360, 1, "brown")
     g.rect(0, 38, 360, 1, "dbrown")
     g.rect(0, 39, 360, 1, "ink")
-    well(g, 4, 8, 88, 26)
-    well(g, 96, 8, 32, 26)
-    well(g, 212, 5, 144, 29)
+    # each well sits in plain wood: no grain line touches its edge or lip, and no stub under 3px is left
+    wells = ((4, 8, 88, 26), (96, 8, 32, 26), (212, 5, 144, 29))
+    for x, y, w, h in wells:
+        g.rect(x - 1, y - 1, w + 2, h + 2, "plum")
+    grain = K["dbrown"]
+    for y in range(2, 37):
+        x = 0
+        while x < g.w:
+            n = 0
+            while x + n < g.w and g.px[y][x + n] == grain:
+                n += 1
+            if 0 < n < 3:
+                g.rect(x, y, n, 1, "plum")
+            x += max(n, 1)
+    for x, y, w, h in wells:
+        well(g, x, y, w, h)
     return g
 
 
