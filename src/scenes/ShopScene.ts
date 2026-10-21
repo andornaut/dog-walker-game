@@ -617,20 +617,16 @@ export class ShopScene extends Scene {
     parent.add(this.add.image(at.x, at.y, shown, tagFrame(this, key, "happy")).setOrigin(0));
   }
 
-  // A dog row's trait and temperament icons and its fee; any other row's line in words.
+  // A row's line in words under its name: a dog's fee, a gear item's effect, a slot's note.
   private drawRowLine(
     parent: GameObjects.Container,
     row: ShopRow,
     at: { blocked: boolean; mid: number; x: number },
   ): void {
     const color = at.blocked ? PALETTE.darkSlate : PALETTE.darkBrown;
-    if (row.purchase.kind !== "dog") {
-      if (row.line !== "") {
-        this.text(parent, { x: at.x, y: at.mid + 3 }, row.line, { color });
-      }
-      return;
+    if (row.line !== "") {
+      this.text(parent, { x: at.x, y: at.mid + 3 }, row.line, { color });
     }
-    this.text(parent, { x: at.x - ROW.textDx + ROW.feeDx, y: at.mid + 4 }, row.line, { color });
   }
 
   // Owned with a tick, or the price on its plate: green when the bank covers it, dark red

@@ -29,14 +29,11 @@ export const SHOP_LAYOUT = {
   headingX: ROW_X,
   message: { y: 540 },
   panel: PANEL,
-  // In a row: the 36x36 art box and the art in it, the name and line, the trait and
-  // temperament icons with the fee after them, and the price plate or OWNED at the right.
+  // In a row: the 36x36 art box and the art in it, the name and line, and the price plate or
+  // OWNED at the right.
   row: {
     art: 2,
     box: { dx: 4, size: 36 },
-    feeDx: 83,
-    iconDx: 45,
-    iconPitch: 18,
     plateInset: 6,
     textDx: 46,
     width: ROW_WIDTH,
