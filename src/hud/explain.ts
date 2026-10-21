@@ -5,6 +5,7 @@ import { maxHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { placeInPack } from "../state/pack";
 import type { RunState } from "../state/runState";
+import { extraHearts } from "./buffMarks";
 import { effectIconKey, effectItems, effectLine, effectName } from "./effectIcons";
 import { messageIconKey } from "./messageStrip";
 import { RUN_TEXT_FIELDS } from "./runText";
@@ -12,7 +13,15 @@ import type { ExplainTarget } from "./walkHud";
 
 type ExplainData = Pick<
   GameData,
-  "debuffs" | "dogs" | "runText" | "shopGear" | "tuning" | "upgrades" | "walkerPerks" | "walkers"
+  | "debuffs"
+  | "dogs"
+  | "runText"
+  | "shopGear"
+  | "tuning"
+  | "upgrades"
+  | "walkerPerks"
+  | "walkers"
+  | "world"
 >;
 
 // A line the message strip shows while a press holds an element: its 16x16 icon and text.
@@ -25,12 +34,21 @@ const FIELDS = RUN_TEXT_FIELDS.explain;
 
 // What target explains, from the data and the walk as it stands: one line per effect (the
 // effects past the wells take turns), a debuff's stake with its seconds left, or a dog's size,
-// hearts and owner. None for what the walk no longer has.
+// hearts and owner, then where its owner's extra max hearts come from. None for what the walk
+// no longer has.
 export function explainLines(
   data: ExplainData,
   run: Pick<
     RunState,
-    "debuffs" | "gear" | "immunities" | "modifiers" | "pack" | "upgradesPicked" | "walker"
+    | "debuffs"
+    | "gear"
+    | "immunities"
+    | "modifiers"
+    | "pack"
+    | "route"
+    | "upgradesPicked"
+    | "walker"
+    | "zoneIndex"
   >,
   target: ExplainTarget,
 ): ExplainLine[] {
@@ -73,7 +91,10 @@ export function explainLines(
         owner: dog.owner.name,
         size: capitalize(SIZE_NAMES[dog.size]),
       });
-      return [{ iconKey: messageIconKey("hint"), text: line }];
+      return [
+        { iconKey: messageIconKey("hint"), text: line },
+        ...extraHearts(data, run, target.dog).lines,
+      ];
     }
     default:
       return target satisfies never;

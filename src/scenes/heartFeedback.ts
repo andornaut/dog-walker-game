@@ -13,8 +13,8 @@ import {
 } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl, curvePoint } from "../hud/moments";
-import type { Point, Rect } from "../lib/rect";
-import { drawFramedRect } from "../ui/phaser/draw";
+import { insetRect, type Point, type Rect } from "../lib/rect";
+import { drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
 import { FEEDBACK_ART } from "./feedbackArt";
@@ -31,6 +31,9 @@ const OVER_CARD = 8;
 // A forgiven heart blinks this empty heart over itself, under the pickup's 16x16 sparkle.
 const FORGIVEN_HEART = { key: "ui-heart", tag: "empty-dark" } as const;
 const SPARKLE = { key: "fx-sparkle", tag: "play" } as const;
+// A heart cell on a card, and the forgiving perk's icon, size square, gap right of it.
+const HEART_CELL = { height: 7, width: 8 } as const;
+const FORGIVEN_PERK = { gap: 2, size: 16 } as const;
 
 // One heart change to show: its label, the top of its dog on the road, its card's sprite
 // and the parts that shake with it, and the band its label lands on.
@@ -97,8 +100,25 @@ export class HeartFeedback {
   }
 
   // A heart forgiven on its card, its 8x7 cell's top-left at: the heart blinks empty and back
-  // under a sparkle, reduced motion keeping both. Without the heart's art, the sparkle alone.
-  forgive(at: Point): void {
+  // under a sparkle, reduced motion keeping both, in a 1px amber ring with the forgiving perk's
+  // 16x16 icon (perkKey) to its right. Without the heart's art, the sparkle, ring and icon.
+  forgive(at: Point, perkKey: string): void {
+    const { blinkMs, blinks } = FEEDBACK.forgiven;
+    const markMs = blinkMs * (2 * blinks - 1);
+    const ring = this.scene.add.graphics().setDepth(DEPTH);
+    drawRing(ring, PALETTE.amber, insetRect(-1, { ...HEART_CELL, ...at }), 1);
+    const marks: GameObjects.GameObject[] = [ring];
+    if (this.scene.textures.exists(perkKey)) {
+      const { gap, size } = FORGIVEN_PERK;
+      const y = at.y + Math.floor((HEART_CELL.height - size) / 2);
+      marks.push(
+        this.scene.add
+          .image(at.x + HEART_CELL.width + gap, y, perkKey)
+          .setOrigin(0)
+          .setDepth(DEPTH),
+      );
+    }
+    this.group.after(this.scene, markMs, () => marks.forEach((mark) => mark.destroy()));
     const sparkle = playEffect(
       this.scene,
       SPARKLE.key,
@@ -115,9 +135,8 @@ export class HeartFeedback {
     const empty = this.scene.add.sprite(at.x, at.y, FORGIVEN_HEART.key).setOrigin(0);
     playTag(empty.setDepth(DEPTH), FORGIVEN_HEART.key, FORGIVEN_HEART.tag);
     this.group.animate(empty);
-    const { blinkMs, blinks } = FEEDBACK.forgiven;
     this.group.every(this.scene, blinkMs, 2 * blinks - 2, () => empty.setVisible(!empty.visible));
-    this.group.after(this.scene, blinkMs * (2 * blinks - 1), () => empty.destroy());
+    this.group.after(this.scene, markMs, () => empty.destroy());
   }
 
   // Lands at once every pop whose way crosses what must stay clear, such as a firing moment

@@ -1,4 +1,4 @@
-import { type GameObjects, Scene } from "phaser";
+import { type GameObjects, Scene, TintModes } from "phaser";
 
 import { debuffIconKey } from "../assets/iconKeys";
 import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
@@ -6,11 +6,14 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
 import { dollarAmountText } from "../home/home";
+import { extraHearts } from "../hud/buffMarks";
 import {
   effectIconFallback,
+  effectIconKey,
   type EffectItem,
   effectItems,
   effectItemsKey,
+  perkIconKey,
   walkBarIconKey,
 } from "../hud/effectIcons";
 import { explainLines } from "../hud/explain";
@@ -65,7 +68,7 @@ import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
-import type { Cents } from "../rules/units";
+import { type Cents, read } from "../rules/units";
 import { placeInPack } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "../ui/phaser/draw";
@@ -79,6 +82,7 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
+import { glintWell } from "./buffCharm";
 import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
@@ -90,6 +94,7 @@ import { OwnerTabs } from "./ownerTabs";
 import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,
+  BUFF_GLINT_EVENT,
   CHANGE_LABELS_EVENT,
   HINT_EVENT,
   type QuipBubble,
@@ -291,6 +296,7 @@ export class HudScene extends Scene {
       this.floatLabels(HEART_TAB_MS, labels),
     );
     onSceneEvent(this, run.events, FORGIVEN_EVENT, (cue: ForgivenCue) => this.forgive(cue));
+    onSceneEvent(this, run.events, BUFF_GLINT_EVENT, (item: EffectItem) => this.glint(item));
     onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.sayHint(hint));
     onSceneEvent(this, run.events, MESSAGE_EVENT, ({ icon, text }: MessageLine) =>
       this.messages.say(icon, text),
@@ -594,8 +600,13 @@ export class HudScene extends Scene {
       if (active === undefined) {
         continue;
       }
-      const full = debuffLasting(gameData.tuning, gameData.debuffs[bar.debuff].seconds, run);
-      const width = debuffFillWidth(active.secondsLeft, full.secondsLeft);
+      // A debuff a buff shortened, such as by Calm voice, starts part way down its bar.
+      const { seconds } = gameData.debuffs[bar.debuff];
+      const full = Math.max(
+        read(gameData.tuning, "seconds", seconds),
+        debuffLasting(gameData.tuning, seconds, run).secondsLeft,
+      );
+      const width = debuffFillWidth(active.secondsLeft, full);
       const colors = DEBUFF_COLORS[bar.debuff] ?? DEBUFF_FALLBACK;
       if (width > 0) {
         fillRect(g, colors.fill, {
@@ -733,17 +744,26 @@ export class HudScene extends Scene {
     }
     const cells = cardHearts(fired ? 0 : slot.hearts, max);
     const heartArt = this.textures.exists(HEART_KEY);
+    // The extra hearts a buff or the small-pack bonus gives, the meter's last cells, are amber.
+    const extra = fired ? 0 : extraHearts(gameData, run, slot.dog).cells;
     view.hearts.forEach((sprite, i) => {
       const cell = cells[i];
       sprite.setVisible(heartArt && cell !== undefined);
       if (cell === undefined) {
         return;
       }
+      const amber = i >= cells.length - extra;
       if (heartArt) {
         sprite.setPosition(rect.x + cell.x, rect.y + cell.y);
         playTag(sprite, HEART_KEY, cell.full ? "full-dark" : "empty-dark");
+        if (amber) {
+          sprite.setTint(PALETTE.amber).setTintMode(TintModes.FILL);
+        } else {
+          sprite.clearTint();
+        }
       } else {
-        drawHeart(g, rect.x + cell.x, rect.y + cell.y, cell.full ? PALETTE.red : PALETTE.grey);
+        const color = amber ? PALETTE.amber : cell.full ? PALETTE.red : PALETTE.grey;
+        drawHeart(g, rect.x + cell.x, rect.y + cell.y, color);
       }
     });
   }
@@ -829,7 +849,24 @@ export class HudScene extends Scene {
     );
     const cell = cardHearts(cue.hearts, max)[cue.hearts - 1];
     if (cell !== undefined) {
-      this.hearts?.forgive({ x: rect.x + cell.x, y: rect.y + cell.y });
+      const perk = perkIconKey(gameData.walkers[run.walker].perk);
+      this.hearts?.forgive({ x: rect.x + cell.x, y: rect.y + cell.y }, perk);
+    }
+  }
+
+  // The well of a buff that just changed the walk glints, as its charm pops.
+  private glint(item: EffectItem): void {
+    const run = this.walk().hudView()?.run;
+    if (run === undefined) {
+      return;
+    }
+    const key = effectIconKey(item);
+    const well =
+      BAR.effectWells[
+        effectItems(gameData, run).findIndex((shown) => effectIconKey(shown) === key)
+      ];
+    if (well !== undefined) {
+      glintWell(this, this.labels, well, 1);
     }
   }
 
