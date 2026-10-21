@@ -4,9 +4,9 @@
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, silly pink), each with its own emblem for its goal: no
 two share a motif, so each reads apart from the rest at 1x on the badge wall.
-Tags: earned (in colour) and locked (a dark slate ring, a grey face, the emblem
-as a two-tone dark slate silhouette, a small padlock), dark enough that it never
-reads as silver. Where an emblem's edge holds under 3:1 against the cream and tan
+Tags: earned (in colour) and locked (in the neutral greys of locked UI: an
+ndslate ring, an ngrey face, the emblem as a two-tone ink and ndslate silhouette,
+a small padlock), dark enough that it never reads as silver. Where an emblem's edge holds under 3:1 against the cream and tan
 face, the face beside it takes a 1px keyline: plum (9.42:1 on cream, 6.49:1 on
 tan), teal for green (eau-de-skunk).
 fx-confetti: 64x64, the burst behind a badge as it is earned (tag play, 10
@@ -441,18 +441,19 @@ def badge(name, locked=False):
     for x, y in keyline:
         g.p(x, y, KEYLINES.get(name, "plum"))
     if locked:
-        # The ring darkens to slate and the face to grey, so a locked badge never reads as silver; the icon
-        # becomes a two-tone silhouette (dark lines stay darker) so its goal still reads on the grey face.
-        ring_to = {K[rim]: K["dslate"], K[rim_sh]: K["navy"], K[rim_li]: K["slate"]}
+        # In the neutral greys, as locked UI is: the ring darkens to ndslate and the face to ngrey, so a locked
+        # badge never reads as silver; the icon becomes a two-tone silhouette (dark lines in ink, the rest
+        # ndslate, 3.56:1 on ngrey) so its goal still reads on the grey face. The padlock keeps its colours.
+        ring_to = {K[rim]: K["ndslate"], K[rim_sh]: K["ink"], K[rim_li]: K["nslate"]}
         for y in range(32):
             for x in range(32):
                 c = g.px[y][x]
                 if not c:
                     continue
                 if (x, y) in icon_px | keyline:
-                    g.px[y][x] = K["navy"] if lum(c) < 90 else K["dslate"]
+                    g.px[y][x] = K["ink"] if lum(c) < 90 else K["ndslate"]
                 else:
-                    g.px[y][x] = K["grey"] if disc.px[y][x] else ring_to[c]
+                    g.px[y][x] = K["ngrey"] if disc.px[y][x] else ring_to[c]
         g.rect(20, 22, 8, 7, "amber")
         g.rect(20, 22, 8, 1, "yellow")
         g.rect(21, 18, 1, 4, "lgrey")
