@@ -1,3 +1,4 @@
+import { focusDirectionForKey } from "../home/focus";
 import type { LaneDirection } from "../layout/lanes";
 import type { GestureAction } from "./gestures";
 
@@ -45,4 +46,11 @@ export function isMuteKey(key: string): boolean {
 // Enter or Space presses the screen's main button.
 export function isConfirmKey(key: string): boolean {
   return key === "Enter" || key === " ";
+}
+
+// Whether a key going down acts on a menu or page: a held arrow's auto-repeat keeps moving the
+// focus, and any other held key acts once per press, so a key held from the screen before
+// cannot press a button on this one.
+export function menuKeyActs(repeat: boolean, key: string): boolean {
+  return !repeat || focusDirectionForKey(key) !== undefined;
 }

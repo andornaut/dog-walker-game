@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { CELEBRATION_PANEL } from "../home/badgesView";
-import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import type { Rect } from "../layout/rect";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { closeOverlay, listenDismiss } from "./overlay";
@@ -62,7 +62,10 @@ export class CelebrationScene extends Scene {
     const close = () => closeOverlay(resume, this);
     listenButtonTap(this, button, close);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (isConfirmKey(event.key) || isPauseKey(event.key)) {
+      if (
+        menuKeyActs(event.repeat, event.key) &&
+        (isConfirmKey(event.key) || isPauseKey(event.key))
+      ) {
         close();
       }
     });

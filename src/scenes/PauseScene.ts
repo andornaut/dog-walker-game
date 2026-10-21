@@ -14,7 +14,7 @@ import {
   type PauseMenuItem,
   pauseMenuLayout,
 } from "../hud/pauseMenu";
-import { cardNumberForKey } from "../input/keyBindings";
+import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
 import { rectIndexAt } from "../layout/grid";
 import { insetRect } from "../layout/rect";
@@ -156,7 +156,7 @@ export class PauseScene extends Scene {
     listenOutsideTap(this, () => ({ covered, dim: walkView }), onResume);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
-      if (number !== undefined) {
+      if (number !== undefined && menuKeyActs(event.repeat, event.key)) {
         this.entries[number - 1]?.press();
       }
     });

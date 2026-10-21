@@ -7,6 +7,7 @@ import {
   isMuteKey,
   isPauseKey,
   laneDirectionForKey,
+  menuKeyActs,
   walkKeyAction,
 } from "./keyBindings";
 
@@ -95,5 +96,20 @@ describe("walkKeyAction", () => {
     ] satisfies readonly { action: GestureAction | undefined; key: string; repeat: boolean }[]) {
       expect(walkKeyAction(key, repeat)).toEqual(action);
     }
+  });
+});
+
+describe("menuKeyActs", () => {
+  // A key going down on a menu or page, first pressed or auto-repeated.
+  it.each([
+    { acts: true, key: "Enter", repeat: false },
+    { acts: true, key: "1", repeat: false },
+    { acts: true, key: "ArrowDown", repeat: true },
+    { acts: true, key: "ArrowLeft", repeat: true },
+    { acts: false, key: "Enter", repeat: true },
+    { acts: false, key: "Escape", repeat: true },
+    { acts: false, key: "1", repeat: true },
+  ])("$key, repeat $repeat: acts $acts", ({ acts, key, repeat }) => {
+    expect(menuKeyActs(repeat, key)).toBe(acts);
   });
 });

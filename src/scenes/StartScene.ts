@@ -97,7 +97,7 @@ import {
 } from "../hud/effectIcons";
 import { downTail } from "../hud/moments";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
-import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
+import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -530,10 +530,9 @@ export class StartScene extends Scene {
         this.closeOverlay();
       }
     });
-    // A held arrow keeps moving the focus; any other key's auto-repeat does nothing, so an Enter
-    // held from the end screen cannot start a walk.
+    // A held key acts once, so an Enter held from the end screen cannot start a walk.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (!event.repeat || focusDirectionForKey(event.key) !== undefined) {
+      if (menuKeyActs(event.repeat, event.key)) {
         this.onKey(event.key);
       }
     });

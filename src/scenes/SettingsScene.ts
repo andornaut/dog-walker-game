@@ -23,7 +23,7 @@ import {
   volumeStepForKey,
   volumeSteps,
 } from "../home/settings";
-import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
+import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { closeFace } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import type { Settings } from "../save/schema";
@@ -183,7 +183,11 @@ export class SettingsScene extends Scene {
     // The screen around the panel and its 1px rim closes, as the close control does.
     const { close, panel } = this.layout;
     listenDismiss(this, [insetRect(-1, panel), close.hit], () => this.close());
-    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      if (menuKeyActs(event.repeat, event.key)) {
+        this.onKey(event.key);
+      }
+    });
   }
 
   private onKey(key: string): void {

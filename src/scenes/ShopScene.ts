@@ -43,7 +43,7 @@ import {
   shopTabRects,
 } from "../home/shopLayout";
 import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
-import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import {
   dragScroll,
   isDragging,
@@ -288,7 +288,11 @@ export class ShopScene extends Scene {
       }
     });
     this.listenScroll();
-    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      if (menuKeyActs(event.repeat, event.key)) {
+        this.onKey(event.key);
+      }
+    });
     // The top bar and the margins around the card close the shop, card and all, or cancel an
     // open confirm; back cancels the confirm or closes an open card first, as Escape does.
     listenDismiss(

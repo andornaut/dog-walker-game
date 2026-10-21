@@ -14,7 +14,7 @@ import {
   type LinePart,
   type ZoneCelebration,
 } from "../hud/zoneCelebration";
-import { cardNumberForKey, isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { cardNumberForKey, isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
 import { PHONE_EVENTS } from "../pwa";
 import { addConfetti } from "./badges";
@@ -88,6 +88,9 @@ export class ZoneCelebrationScene extends Scene {
       data.onDone();
     };
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      if (!menuKeyActs(event.repeat, event.key)) {
+        return;
+      }
       if (isPauseKey(event.key)) {
         data.openPause();
       } else if (isConfirmKey(event.key) || cardNumberForKey(1, event.key) !== undefined) {

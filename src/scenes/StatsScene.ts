@@ -27,7 +27,7 @@ import {
   statsTabRects,
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
-import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { closeControl } from "../layout/closeControl";
 import { rectIndexAt } from "../layout/grid";
 import { containsPoint, type Rect } from "../layout/rect";
@@ -135,6 +135,9 @@ export class StatsScene extends Scene {
       targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : "dismiss"),
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      if (!menuKeyActs(event.repeat, event.key)) {
+        return;
+      }
       if (isPauseKey(event.key) || isConfirmKey(event.key)) {
         this.back();
         return;

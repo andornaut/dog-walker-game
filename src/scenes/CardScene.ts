@@ -10,7 +10,7 @@ import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { DISABLED_COLORS, GREYED } from "../home/selection";
 import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
-import { cardNumberForKey } from "../input/keyBindings";
+import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
 import {
   boxStyles,
@@ -270,7 +270,7 @@ export class CardScene extends Scene {
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
-      if (number !== undefined) {
+      if (number !== undefined && menuKeyActs(event.repeat, event.key)) {
         this.choose(number - 1);
       }
     });
