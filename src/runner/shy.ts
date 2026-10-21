@@ -1,11 +1,12 @@
 import { laneAt, type MoverPath, type MoverStep, type StepShape } from "./movers";
 
-// A shy hopper hops away from the pack as the pack draws near. Each hop is chosen as its cue
-// begins, from where the pack is then: of the hops it may make, within the lanes and rows the
-// planner left it, those that end no nearer the pack's centre across the road and in neither the
-// pack's lane nor a lane it is moving into; of them, the one that ends farthest from the pack,
-// the first of them in its shapes on a tie. With none, it makes no more hops. A hop that would
-// start once the hopper has reached the pack's rows, and every hop after it, is dropped instead.
+// A shy hopper hops away from the pack as the pack draws near. Its first hop is chosen as its cue
+// begins, and each later one, with no cue, as it starts, from where the pack is then: of the hops
+// it may make, within the lanes and rows the planner left it, those that end no nearer the pack's
+// centre across the road and in neither the pack's lane nor a lane it is moving into; of them,
+// the one that ends farthest from the pack, the first of them in its shapes on a tie. With none,
+// it makes no more hops. A hop that would start once the hopper has reached the pack's rows, and
+// every hop after it, is dropped instead.
 
 export type ShyPath = Extract<MoverPath, { motion: "shy" }>;
 
@@ -17,11 +18,14 @@ function hopped(path: ShyPath): { readonly lanes: number; readonly rows: number 
   };
 }
 
-// The scroll since it spawned at which its next pending hop is chosen, as its cue begins, or
-// null with none.
+// The scroll since it spawned at which its next pending hop is chosen: the first as its cue
+// begins, a later one as it starts. null with none.
 export function nextShyChoiceAt(path: ShyPath): number | null {
   const [at] = path.pending;
-  return at === undefined ? null : at - path.warning;
+  if (at === undefined) {
+    return null;
+  }
+  return path.steps.length === 0 ? at - path.warning : at;
 }
 
 // The hops it may make next: those that keep it within its lanes and rows. None once its next
@@ -57,6 +61,7 @@ export function takeHop(path: ShyPath, shape: StepShape | null): ShyPath {
     lanes: shape.lanes,
     length: path.length,
     travel: shape.travel * path.burst,
+    ...(path.steps.length > 0 ? { uncued: true } : {}),
   };
   return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
 }

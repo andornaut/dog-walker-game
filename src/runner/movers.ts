@@ -688,8 +688,9 @@ function standingPlacements(
 }
 
 // A stepping mover takes each step of a sequence as long as its drawn count in turn. Its first
-// cue shows once it is wholly on the road, and each later one once the step before has ended, each move up to its
-// drawn delay later. A step that would start once the mover has reached the pack's rows, at
+// step's cue shows once it is wholly on the road; each later step, with no cue, starts as the
+// step before ends. Each move comes up to its drawn delay later, so later moves pause a random
+// gap between them. A step that would start once the mover has reached the pack's rows, at
 // sightLength, never comes, nor any after it; a sequence with no step left has no placement,
 // since a mover always moves. It stands at every spot a step of several spots passes over, as
 // it does at each step's ends.
@@ -705,7 +706,7 @@ function stepsPlacements(
   const height = spec.footprint.rows * cellLength;
   const count = drawnCount(motion.count, draws.count);
   if (motion.shy !== undefined && draws.shy < motion.shy.share) {
-    return shyPlacements(geometry, spec, motion.shy, motion.stepSeconds, count);
+    return shyPlacements(geometry, spec, motion.shy, motion.stepSeconds, count, draws);
   }
   const ways = motion.sequences.filter((sequence) => sequence.length === count);
   return ways.flatMap((shapes) => {
@@ -725,8 +726,14 @@ function stepsPlacements(
           travel: last.travel + (shape.travel * cellLength * spot) / spotCount,
         });
       }
-      steps.push({ at, lanes: shape.lanes, length, travel: shape.travel * cellLength });
-      ready = at + length + warning;
+      steps.push({
+        at,
+        lanes: shape.lanes,
+        length,
+        travel: shape.travel * cellLength,
+        ...(steps.length > 0 ? { uncued: true } : {}),
+      });
+      ready = at + length;
     }
     if (steps.length === 0) {
       return [];
@@ -805,20 +812,30 @@ function approachPlacements(
 // passable. Its lanes are its start lane and, where there is room, a lane to either side, the
 // widest that fits (rank). Its first hop's cue begins as its row comes within nearSeconds of the
 // road's travel of the tallest pack's rows at sightLength, but no sooner than it is wholly on the
-// road, and each later one's as the hop before ends; it makes as many hops as its drawn count.
+// road, and each later hop, with no cue, starts as the hop before ends, up to its drawn delay
+// later; it makes as many hops as its drawn count.
 function shyPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
   shy: ShyHops,
   hopSeconds: number,
   count: number,
+  draws: MoverDraws,
 ): MoverPlacement[] {
   const { cellLength, scrollSpeed, sightLength } = geometry;
   const warning = spec.warningSeconds * scrollSpeed;
   const length = hopSeconds * scrollSpeed;
   const height = spec.footprint.rows * cellLength;
   const first = Math.max(height, sightLength - shy.nearSeconds * scrollSpeed) + warning;
-  const pending = Array.from({ length: count }, (_, i) => first + i * (length + warning));
+  const pending: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const before = pending.at(-1);
+    pending.push(
+      before === undefined
+        ? first
+        : before + length + delayOf(spec.variation, draws, i) * scrollSpeed,
+    );
+  }
   return REACHES.flatMap(([left, right], rank) => {
     const spots = Array.from({ length: right - left + 1 }, (_, i) =>
       Array.from({ length: shy.rise + 1 }, (_unused, row) => ({

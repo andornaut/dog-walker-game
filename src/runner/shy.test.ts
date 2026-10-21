@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { hopShapes, laneAt, type StepShape } from "./movers";
-import { awayHop, type PackPlace, shyChoices, shyOutcomes, type ShyPath, takeHop } from "./shy";
+import {
+  awayHop,
+  nextShyChoiceAt,
+  type PackPlace,
+  shyChoices,
+  shyOutcomes,
+  type ShyPath,
+  takeHop,
+} from "./shy";
 
 const CELL = 50;
 const LANES = 5;
@@ -85,11 +93,23 @@ describe("shy paths", () => {
     }
   });
 
-  // Each hop is cued: it starts at its pending scroll, and the hop after waits on it.
-  it("takes each hop at its pending scroll, and stops when it has none to take", () => {
+  // Each hop starts at its pending scroll. Only the first is cued, so it is chosen as its cue
+  // begins; a later one, with no cue, is chosen as it starts.
+  it("takes each hop at its pending scroll, cueing the first only, and stops with none to take", () => {
+    expect(nextShyChoiceAt(path)).toBe(200 - path.warning);
     const first = takeHop(path, { lanes: 1, travel: 0 });
     expect(first.steps).toEqual([{ at: 200, lanes: 1, length: 30, travel: 0 }]);
     expect(first.pending).toEqual([330]);
+    expect(nextShyChoiceAt(first)).toBe(330);
+    const second = takeHop(first, { lanes: 0, travel: -1 });
+    expect(second.steps.at(-1)).toEqual({
+      at: 330,
+      lanes: 0,
+      length: 30,
+      travel: -CELL,
+      uncued: true,
+    });
+    expect(nextShyChoiceAt(second)).toBeNull();
     expect(takeHop(first, null).pending).toEqual([]);
   });
 

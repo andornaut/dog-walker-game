@@ -936,10 +936,10 @@ function stalkersStepped(
   });
 }
 
-// Each shy hopper whose next hop is due to be chosen, as its cue begins, chooses that hop away
-// from the pack where it is now (shy.ts): the pack's centre, across from where its lane motion
-// has it and half way down its band, with the lanes it is in or moving into, and the hopper's
-// centre as the hop starts.
+// Each shy hopper whose next hop is due to be chosen, as its cue begins or, with no cue, as it
+// starts, chooses that hop away from the pack where it is now (shy.ts): the pack's centre, across
+// from where its lane motion has it and half way down its band, with the lanes it is in or moving
+// into, and the hopper's centre as the hop starts.
 function shyHopped(
   geometry: Pick<RoadGeometry, "cell" | "laneCount" | "packBand" | "roadTop">,
   motion: LaneMotion,
@@ -958,7 +958,7 @@ function shyHopped(
     }
     let path: ShyPath = mover.path;
     for (let choice = nextShyChoiceAt(path); choice !== null && mover.since >= choice;) {
-      const place = moverPlace(laneCount, path, choice + path.warning);
+      const place = moverPlace(laneCount, path, path.pending[0] ?? choice);
       const centre = {
         x: (place.lanePosition + item.laneSpan / 2) * cell.length,
         y: roadTop - item.height / 2 + place.travel,

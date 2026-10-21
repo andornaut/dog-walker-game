@@ -600,6 +600,56 @@ describe("moverPlacements", () => {
     expect(Math.min(...moves)).toBeGreaterThanOrEqual(shy ? 0 : 1);
   });
 
+  // A stepper's or hopper's moves run back to back, and only the first has a cue: the wander mark
+  // shows before the first move and never during a later one. A shy hopper's pending hops are
+  // spaced the same way.
+  it.each(
+    SPECS.flatMap(({ name, spec: moving }) =>
+      moving.motion.kind === "steps"
+        ? [0, 0.999999].map((shy) => ({
+            draws: {
+              count: 0.999999,
+              delays: [0, 0, 0] as const,
+              share: 0,
+              shy,
+              speed: 0.5,
+              start: 0,
+            },
+            moving,
+            name,
+            way: shy === 0 ? "shy if its kind can be" : "never shy",
+          }))
+        : [],
+    ),
+  )("runs $name's most moves back to back, cueing the first only, $way", ({ draws, moving }) => {
+    const placements = moverPlacements(geometry, moving, draws);
+    const length =
+      (moving.motion.kind === "steps" ? moving.motion.stepSeconds : 0) * geometry.scrollSpeed;
+    let checked = 0;
+    for (const { path } of placements) {
+      if (path.motion === "shy") {
+        path.pending.slice(1).forEach((at, i) => {
+          expect(at - (path.pending[i] ?? 0)).toBeCloseTo(length);
+          checked += 1;
+        });
+      } else if (path.motion === "steps") {
+        const [first] = path.steps;
+        expect(first?.uncued).toBeUndefined();
+        expect(moverTell(path, (first?.at ?? 0) - 1)).toEqual({ kind: "wander" });
+        path.steps.slice(1).forEach((step, i) => {
+          const before = path.steps[i];
+          expect(step.at).toBeCloseTo((before?.at ?? 0) + (before?.length ?? 0));
+          expect(step.uncued).toBe(true);
+          for (let since = before?.at ?? 0; since < step.at + step.length; since += 1) {
+            expect(moverTell(path, since)).toBeNull();
+          }
+          checked += 1;
+        });
+      }
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+
   it.each([
     { draw: 0, range: { max: 3, min: 2 }, want: 2 },
     { draw: 0.49, range: { max: 3, min: 2 }, want: 2 },

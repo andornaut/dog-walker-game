@@ -272,8 +272,9 @@ export interface MoveCount {
   readonly min: number;
 }
 
-// How an obstacle moves when it comes as a mover, each move after a cue seconds.moverWarningSeconds
-// long, and only while the mover is still ahead of the pack's rows. approach: steps steps toward
+// How an obstacle moves when it comes as a mover, its first move after a cue
+// seconds.moverWarningSeconds long and each later one with no cue, and only while the mover is
+// still ahead of the pack's rows. A stepper's or hopper's later moves run back to back. approach: steps steps toward
 // the pack, each to the spot a lane to either side, a row down or diagonally down that is nearest
 // the pack as the step is chosen, seconds.moverStepSeconds each; the first's cue
 // seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, each later
