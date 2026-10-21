@@ -1,7 +1,8 @@
 import type { Rect } from "../lib/rect";
-import { cardRowRects, type CardRowSpec } from "../ui/cardRow";
+import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { TextFitStyle } from "../ui/textFit";
+import { charmRowHeight } from "./buffLayout";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
 // on the road, and the enlarged card a hold opens, card-frame-large, centred in the dimmed band
@@ -17,6 +18,8 @@ export const CARD_LAYOUT = {
   band: { height: 11, room: 77, y: 2 },
   effect: { height: 42, width: 71, x: 6, y: 76 },
   fires: { size: 16, x: 4, y: 119 },
+  // A fork card's Head home button, centred under the paths, gap rows below their charm row.
+  forkHome: { gap: 6, height: 44, width: 160 },
   height: 140,
   // The enlarged card's body: a firing warning in the title font at 1x, warningGap over the
   // changes, which take the rest of the body.
@@ -108,20 +111,47 @@ export function largeCardHeight(contentHeight: number): number {
   return height - Math.max(0, body.height - Math.ceil(contentHeight));
 }
 
-// The enlarged card's rect, height tall, centred in area on whole pixels.
+// The enlarged card's rect, height tall, centred in area on whole pixels with its charm row
+// under it, reserved whether or not the option has a charm.
 export function largeCardRect(area: Rect, height: number = CARD_LAYOUT.large.height): Rect {
   const { width } = CARD_LAYOUT.large;
   return {
     height,
     width,
     x: area.x + Math.floor((area.width - width) / 2),
-    y: area.y + Math.floor((area.height - height) / 2),
+    y: area.y + Math.floor((area.height - (height + charmRowHeight(2))) / 2),
   };
 }
 
-// The cards' rects for each count from 1 to maxCount, centred on the road.
-export function cardRows(maxCount: number, road: Rect): Rect[][] {
-  return Array.from({ length: maxCount }, (_, i) =>
-    cardRowRects(cardRowSpec(maxCount), i + 1, road),
-  );
+// The card row's block: its header's title titleRise over the cards, the cards, then their
+// charm row, reserved whether or not a card has a charm, so the row keeps its place.
+export const CARD_ROW_BLOCK_HEIGHT = CARD_HEADER.titleRise + CARD_LAYOUT.height + charmRowHeight(1);
+
+// The cards' top in walkView: the block sits with the rows over it and under it 1:2.
+export function cardRowTop(walkView: Rect): number {
+  const free = walkView.height - CARD_ROW_BLOCK_HEIGHT;
+  return walkView.y + Math.round(free / 3) + CARD_HEADER.titleRise;
+}
+
+// A row of count cards, maxCount at most, centred across walkView with their top at
+// cardRowTop.
+export function cardRowIn(walkView: Rect, maxCount: number, count: number): Rect[] {
+  const area = { ...walkView, height: CARD_LAYOUT.height, y: cardRowTop(walkView) };
+  return cardRowRects(cardRowSpec(maxCount), count, area);
+}
+
+// The cards' rects for each count from 1 to maxCount in walkView.
+export function cardRows(maxCount: number, walkView: Rect): Rect[][] {
+  return Array.from({ length: maxCount }, (_, i) => cardRowIn(walkView, maxCount, i + 1));
+}
+
+// A fork card's Head home button, centred on centreX, gap rows under its paths' charm row.
+export function forkHomeRect(cards: Rect, centreX: number): Rect {
+  const { gap, height, width } = CARD_LAYOUT.forkHome;
+  return {
+    height,
+    width,
+    x: Math.round(centreX - width / 2),
+    y: cards.y + cards.height + charmRowHeight(1) + gap,
+  };
 }

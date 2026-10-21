@@ -95,7 +95,7 @@ export function layoutExport(
   data: Pick<GameData, "dogs" | "help" | "menuText" | "shopGear" | "walkers" | "tuning">,
 ) {
   const regions = screenLayout(SCREEN_CONFIG);
-  const { approach, backdrop, road, roadView, walkView } = regions;
+  const { approach, backdrop, road, walkView } = regions;
   const projection = walkProjection(ROAD_CAMERA, road);
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");
   const bandRows = Array.from({ length: approach.height }, (_, i) => approach.y + i);
@@ -185,7 +185,7 @@ export function layoutExport(
         ...CARD_LAYOUT,
         largeRect: largeCardRect(walkView),
         // By count of cards, from 1.
-        rows: cardRows(MAX_CARD_OPTIONS, roadView),
+        rows: cardRows(MAX_CARD_OPTIONS, walkView),
       },
       celebration: CELEBRATION_LAYOUT,
       end: END_LAYOUT,

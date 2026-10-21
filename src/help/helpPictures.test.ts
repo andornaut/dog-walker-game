@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
-import { cardRowSpec } from "../layout/cardLayout";
+import { cardRowIn } from "../layout/cardLayout";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
-import { cardHeader, cardRowRects } from "../ui/cardRow";
+import { cardHeader } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
 import { HELP_SCENES, helpPicture, type PictureStrip } from "./helpPictures";
 
@@ -47,7 +47,7 @@ describe("helpPicture", () => {
     const uncut = cards.flatMap((id) => {
       const { card, strips } = helpPicture(gameData, id);
       const count = card?.options.length ?? 0;
-      const rects = cardRowRects(cardRowSpec(count), count, SCREEN.roadView);
+      const rects = cardRowIn(SCREEN.walkView, count, count);
       const { titleTop } = cardHeader(false, rects);
       const bottoms = rects.map((rect) => rect.y + rect.height - 1);
       return [titleTop, ...bottoms]

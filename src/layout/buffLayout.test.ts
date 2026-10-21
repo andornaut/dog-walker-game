@@ -1,14 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { insetRect, type Rect } from "../lib/rect";
-import { BUFF_POP, cardCharmAt, CHARM, charmByWalkerRect, strikeGeometry } from "./buffLayout";
-import { CARD_LAYOUT } from "./cardLayout";
-
-const inside = (outer: Rect, inner: Rect) =>
-  inner.x >= outer.x &&
-  inner.y >= outer.y &&
-  inner.x + inner.width <= outer.x + outer.width &&
-  inner.y + inner.height <= outer.y + outer.height;
+import { BUFF_POP, charmByWalkerRect, strikeGeometry } from "./buffLayout";
 
 describe("strikeGeometry", () => {
   // The title font's capitals take rows 4 to 8 of its line, the body font's rows 2 to 7.
@@ -28,20 +20,7 @@ describe("strikeGeometry", () => {
   );
 });
 
-describe("the charm on a card", () => {
-  const ring = (rect: Rect) => insetRect(-CHARM.ring, rect);
-  it.each([
-    { card: CARD_LAYOUT, name: "small", scale: 1 },
-    { card: CARD_LAYOUT.large, name: "enlarged", scale: 2 },
-  ])("stays inside the $name card, lit and stacked", ({ card, scale }) => {
-    const bounds = { height: card.height, width: card.width, x: 0, y: 0 };
-    for (const index of [0, 1]) {
-      const at = cardCharmAt({ x: 0, y: 0 }, scale, index);
-      const size = CHARM.size * scale;
-      expect(inside(bounds, ring({ height: size, width: size, ...at }))).toBe(true);
-    }
-  });
-
+describe("charmByWalkerRect", () => {
   it("sits beside the walker's head, left of the walker's centre", () => {
     const rect = charmByWalkerRect({ x: 100, y: 200 });
     expect(rect.x + rect.width / 2).toBe(100 + BUFF_POP.walker.dx);

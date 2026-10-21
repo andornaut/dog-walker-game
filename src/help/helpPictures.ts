@@ -7,7 +7,7 @@ import type {
   MinorObstacleId,
   UpgradeId,
 } from "../data/types";
-import { cardRowSpec } from "../layout/cardLayout";
+import { cardRowIn } from "../layout/cardLayout";
 import { laneCenterXs } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
@@ -38,7 +38,7 @@ import {
   type PackSlot,
   type RunState,
 } from "../state/runState";
-import { cardHeader, cardRowRects } from "../ui/cardRow";
+import { cardHeader } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
 
 // Each help page's picture: a still moment of the walk screen, drawn by the game's own road,
@@ -143,7 +143,7 @@ function roadStrip(height: number): PictureStrip {
 
 // The card scene's three-card row, its title cardTitleInset rows into the strip.
 function cardStrip(): PictureStrip {
-  const rows = cardRowRects(cardRowSpec(MAX_CARD_OPTIONS), MAX_CARD_OPTIONS, SCREEN.roadView);
+  const rows = cardRowIn(SCREEN.walkView, MAX_CARD_OPTIONS, MAX_CARD_OPTIONS);
   const { titleTop } = cardHeader(false, rows);
   return { height: HELP_PICTURE_HEIGHT, screenY: titleTop - HELP_SCENES.cardTitleInset };
 }

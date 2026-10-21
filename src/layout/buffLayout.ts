@@ -3,17 +3,17 @@ import type { FontMetrics } from "../ui/fontMetrics";
 
 // The buff charm: the walk bar's ui-effect-well, size square, holding the buff's 20x20 icon at
 // icon,icon, the same on a card, the road and the bar. Lit, it wears a ring-wide amber ring
-// around the well. fx-sparkle plays centred at sparkle from its top-left. On a card option it
-// sits at card, in card pixels (the art window's top-right, inset 1px), and on the enlarged
-// card at large, drawn at large.scale; a second charm stacks gap left of the first.
+// around the well. fx-sparkle plays centred at sparkle from its top-left. Under a card option,
+// small or enlarged, the lit charms sit in a row centred on the card, their rings under rows
+// below it and gap apart, drawn at the card's scale (2 on the enlarged card); a second charm
+// stacks gap left of the first over the road.
 export const CHARM = {
-  card: { x: 58, y: 15 },
   gap: 2,
   icon: 1,
-  large: { scale: 2, x: 116, y: 30 },
   ring: 1,
   size: 22,
   sparkle: { x: 19, y: 3 },
+  under: 8,
 } as const;
 
 // A pop over the road: the charm appears lit, centred on its dog's or item's column with its
@@ -40,11 +40,25 @@ export const BUFF_POP = {
 // font pixel at the text's scale.
 export const STRIKE = { gap: 4, past: 1 } as const;
 
-// The charm's top-left at scale for a card at cardX, cardY: the enlarged card's at 2x, else
-// the small card's; the index-th charm stacks left of the one before it.
-export function cardCharmAt(card: Point, scale: number, index: number): Point {
-  const place = scale === 1 ? CHARM.card : CHARM.large;
-  return { x: card.x + place.x - index * (CHARM.size + CHARM.gap) * scale, y: card.y + place.y };
+// A lit charm's side at scale: the well and its ring each side.
+export function charmRingSize(scale: number): number {
+  return (CHARM.size + 2 * CHARM.ring) * scale;
+}
+
+// The rows a card's charm row takes under the card at scale: the gap, then a lit charm.
+export function charmRowHeight(scale: number): number {
+  return CHARM.under + charmRingSize(scale);
+}
+
+// The wells' top-lefts for count charms under card, drawn at scale: their rings under rows
+// below the card, gap apart, centred on the card as a row, the odd pixel to the right.
+export function cardCharmsAt(card: Rect, scale: number, count: number): Point[] {
+  const ring = charmRingSize(scale);
+  const step = ring + CHARM.gap * scale;
+  const total = count * ring + (count - 1) * CHARM.gap * scale;
+  const left = card.x + Math.floor((card.width - total) / 2) + CHARM.ring * scale;
+  const top = card.y + card.height + CHARM.under + CHARM.ring * scale;
+  return Array.from({ length: count }, (_, i) => ({ x: left + i * step, y: top }));
 }
 
 // The charm's rect over the road: centred on centreX with its bottom gap rows over top.

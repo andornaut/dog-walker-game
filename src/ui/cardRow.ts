@@ -12,7 +12,7 @@ export interface CardRowSpec {
 // number key has been pressed, each card's 1x key number centred over it. The band's ink well
 // runs from its second row to 6 rows above its bottom, and the band ends a row above the
 // cards.
-const CARD_HEADER = {
+export const CARD_HEADER = {
   bandRise: 25,
   keyRise: 13,
   keysHeight: 24,

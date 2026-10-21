@@ -15,12 +15,13 @@ import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
-import { cardCharmAt } from "../layout/buffLayout";
+import { cardCharmsAt } from "../layout/buffLayout";
 import {
   boxStyles,
   CARD_LAYOUT,
-  cardRowSpec,
+  cardRowIn,
   FIRES_FIT,
+  forkHomeRect,
   largeBodyBox,
   largeCardHeight,
   largeCardRect,
@@ -38,7 +39,7 @@ import {
   type OptionView,
 } from "../rules/choices";
 import type { CardSource } from "../state/runState";
-import { cardHeader, cardRowRects } from "../ui/cardRow";
+import { cardHeader } from "../ui/cardRow";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { rectIndexAt } from "../ui/grid";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
@@ -77,7 +78,6 @@ export interface CardSceneData {
 }
 
 const CARD = CARD_LAYOUT;
-const CARD_ROW = cardRowSpec(MAX_CARD_OPTIONS);
 // Card-pixel positions of the frame's parts.
 const BAND = CARD_LAYOUT.band;
 const ART: Rect = CARD_LAYOUT.art;
@@ -96,8 +96,6 @@ const LARGE_BODY_GAP = 4;
 // Marks an option that would fire an owner, over the plaque's left rivet: card-frame
 // pixels, and card-frame-large pixels where it is drawn at 2x.
 const FIRES_KEY = "ui-fires";
-// A fork card's Head home button, centred under the paths, gap rows below them.
-const FORK_HOME = { gap: 6, height: 44, width: 160 };
 
 interface Entry {
   choice: Choice;
@@ -139,6 +137,8 @@ export class CardScene extends Scene {
   private badges: (GameObjects.BitmapText | undefined)[] = [];
   private enlarged: GameObjects.GameObject[] = [];
   private hold: HoldPress | undefined;
+  // A fork card's Head home button, hidden with the row while a card is enlarged.
+  private homeParts: GameObjects.GameObject[] = [];
   private outline: GameObjects.Graphics | undefined;
   private parts: GameObjects.GameObject[][] = [];
   private pressed: number | undefined;
@@ -163,8 +163,9 @@ export class CardScene extends Scene {
     this.enlarged = [];
     this.hold = undefined;
     this.parts = [];
+    this.homeParts = [];
     this.refusing = false;
-    const { roadView: road, walkView } = screenLayout(SCREEN_CONFIG);
+    const { walkView } = screenLayout(SCREEN_CONFIG);
     addRampDim(this, walkView);
 
     this.entries = [
@@ -175,10 +176,10 @@ export class CardScene extends Scene {
       })),
       ...(view.skip ? [{ choice: "skip" as const, enabled: true }] : []),
     ];
-    this.cardRects = cardRowRects(CARD_ROW, this.entries.length, road);
+    this.cardRects = cardRowIn(walkView, MAX_CARD_OPTIONS, this.entries.length);
     const keys = picture === undefined && keyNumbersShown();
     const header = cardHeader(keys, this.cardRects);
-    const centerX = road.x + road.width / 2;
+    const centerX = walkView.x + walkView.width / 2;
     const title = { font: "title", scale: 2 } as const;
     if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
       snapCentre(
@@ -209,15 +210,11 @@ export class CardScene extends Scene {
     });
     this.outline = this.add.graphics();
     if (view.source.kind === "fork") {
-      const row = itemAt(this.cardRects, 0);
-      const rect = {
-        height: FORK_HOME.height,
-        width: FORK_HOME.width,
-        x: Math.round(centerX - FORK_HOME.width / 2),
-        y: row.y + row.height + FORK_HOME.gap,
-      };
+      const rect = forkHomeRect(itemAt(this.cardRects, 0), centerX);
       const label = gameData.runText.homeQuestion.headHome;
+      const before = this.children.list.length;
       const button = addMenuButton(this, rect, label, { available: true, primary: false });
+      this.homeParts = this.children.list.slice(before);
       if (picture === undefined) {
         listenButtonTap(this, button, onHeadHome);
       }
@@ -337,7 +334,8 @@ export class CardScene extends Scene {
     }
     this.pressed = undefined;
     this.drawOutline();
-    // The row's edges would show beside the enlarged card, so it hides until the release.
+    // The row's edges and Head home would show beside the enlarged card and its charms, so they
+    // hide until the release.
     this.showRow(false);
     const option = entry.option;
     const measured = this.addLargeBody(option, 0, 0);
@@ -380,7 +378,7 @@ export class CardScene extends Scene {
         .setCrop(0, 0, ART.width, ART.height);
     }
     const marks = optionMarks(gameData, view, option);
-    this.addCharms(marks, { x, y }, 2);
+    this.addCharms(marks, { height, width: LARGE.width, x, y }, 2);
     this.addLargeBody(option, x + LARGE.body.x, y + LARGE.body.y);
     const badge = { ...LARGE.badge, x: x + LARGE.badge.x, y: y + LARGE.badge.y + shift };
     const plaque = hasPlaque(option) || marks.plaque !== null;
@@ -439,7 +437,7 @@ export class CardScene extends Scene {
   }
 
   private showRow(visible: boolean): void {
-    this.parts.flat().forEach((part) => {
+    [...this.parts.flat(), ...this.homeParts].forEach((part) => {
       (part as GameObjects.GameObject & { visible: boolean }).visible = visible;
     });
   }
@@ -484,10 +482,11 @@ export class CardScene extends Scene {
     return snapCentre(label, center);
   }
 
-  // The lit charm of each buff on the option, at the art window's top-right, at scale.
-  private addCharms(marks: OptionMarks, card: { x: number; y: number }, scale: number): void {
+  // The lit charm of each buff on the option, in a row centred under its card, at scale.
+  private addCharms(marks: OptionMarks, card: Rect, scale: number): void {
+    const wells = cardCharmsAt(card, scale, marks.charms.length);
     marks.charms.forEach((item, i) => {
-      addCharm(this, item, cardCharmAt(card, scale, i), { lit: true, scale });
+      addCharm(this, item, itemAt(wells, i), { lit: true, scale });
     });
   }
 
@@ -623,7 +622,7 @@ export class CardScene extends Scene {
     }
 
     const marks = optionMarks(gameData, view, entry.option);
-    this.addCharms(marks, { x, y }, 1);
+    this.addCharms(marks, rect, 1);
 
     // A path card shows its zone's difficulty as paws, then in words.
     const path = entry.option?.path;
