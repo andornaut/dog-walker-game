@@ -338,9 +338,11 @@ def nugget_road(q):
         g.rect(12, 27 + q["bl"], 2, 2, "skin2")
         g.rect(18, 27 + q["br"], 2, 2, "skin2")
         g.ell(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    # the curly tail, coiled on top of the rump: a skin2 ring round the coat, a skin2 dot at its heart
     tx = 16 + q["tail"]
-    g.ell(tx, 26 + b, 2, 1.6, "skin1", "skin2")
-    g.p(tx, 26 + b, "skin2")
+    g.ell(tx, 24.5 + b, 2.3, 1.9, "skin2")
+    g.ell(tx - 0.2, 24.3 + b, 1.4, 1.1, "skin1")
+    g.p(tx, 24.5 + b, "skin2")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.rect(bx - 1, 19 + b, 2, 2, "dred")
     # the head; cocked, it shifts 1px to that side, the ear on that side dropping and the other lifting
