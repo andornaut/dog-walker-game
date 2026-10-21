@@ -570,9 +570,9 @@
       "json": "sprites/badge-mud-season.json"
     },
     {
-      "key": "badge-neighbourhood-favourite",
-      "png": "sprites/badge-neighbourhood-favourite.png",
-      "json": "sprites/badge-neighbourhood-favourite.json"
+      "key": "badge-neighborhood-favorite",
+      "png": "sprites/badge-neighborhood-favorite.png",
+      "json": "sprites/badge-neighborhood-favorite.json"
     },
     {
       "key": "badge-not-a-scratch",

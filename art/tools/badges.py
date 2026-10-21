@@ -278,7 +278,7 @@ def _(g):
     g.rect(18, 19, 3, 1, "orange")
 
 
-@icon("neighbourhood-favourite")
+@icon("neighborhood-favorite")
 def _(g):
     g.ell(16, 16, 7, 7, "yellow", "amber")
     g.rect(13, 13, 1, 2, "plum")
@@ -415,7 +415,7 @@ BADGES = {
     "round-trip": "firsts",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
     "five-star-service": "mastery", "not-a-scratch": "mastery",
-    "full-kennel": "collection", "kitted-out": "collection", "neighbourhood-favourite": "collection",
+    "full-kennel": "collection", "kitted-out": "collection", "neighborhood-favorite": "collection",
     "top-walker": "collection",
     "close-shave": "silly", "eau-de-skunk": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
     "squirrel": "silly", "yoink": "silly", "youre-fired": "silly", "zoomies": "silly",
