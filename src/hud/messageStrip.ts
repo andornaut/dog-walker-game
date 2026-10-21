@@ -1,10 +1,12 @@
 import type { Point, Rect } from "../layout/rect";
+import { wrapWords } from "../text/lines";
+import { STRIP_TAB_BOTTOM } from "./stateStrip";
 
-// The message strip: what just happened, in a ui-panel over the flat sky at the top of the
-// backdrop band, clear of the cross street and the far road. The newest line is body text at
-// 2x led by its 16x16 icon; up to OLDER_LINES lines before it sit above it at 1x, without
-// icons, fainter the older they are. A line arrives as newest, steps up as newer ones arrive,
-// and fades out at the end of its life. The strip shows while it has a line.
+// The message strip: what just happened, in a ui-panel across the top of the backdrop band,
+// under the state strip's tab and clear of the cross street and the far road. It shows one
+// line, body text at 2x led by its 16x16 icon, wrapped onto up to MESSAGE_STRIP.rows rows; the
+// panel is as tall as the rows it holds. A line waits its turn, shows, and fades out at the
+// end of its life. The strip shows while it has a line.
 
 // What a line is about, and the icon that leads it.
 export const MESSAGE_ICONS = {
@@ -23,50 +25,64 @@ export function messageIconKey(icon: MessageIcon): string {
   return MESSAGE_ICONS[icon];
 }
 
-// Screen pixels. The icon, the newest line's capitals and the older lines' capitals are
-// placed from the strip's top-left corner; text starts textX in and ends padRight short of the
-// strip's right edge. Older lines share the newest line's text column.
+// Screen pixels. The strip starts gap rows under the state strip's tab. From its top-left
+// corner: the first row's capitals start capsTop down, each further row rowHeight lower (the
+// body font's line at 2x), and the icon is centred on the first row's capitals. Text starts
+// textX in and ends padRight short of the right edge; the panel ends padBottom under the last
+// row's lowest ink.
 export const MESSAGE_STRIP = {
-  height: 44,
-  icon: { size: 16, x: 6, y: 22 },
-  olderCapsTops: [14, 6],
+  capsTop: 10,
+  gap: 2,
+  icon: { size: 16, x: 6 },
+  padBottom: 6,
   padRight: 6,
+  rowHeight: 20,
+  rows: 2,
+  scale: 2,
   textX: 26,
   width: 344,
   x: 8,
-  y: 46,
 } as const;
 
-export const OLDER_LINES = MESSAGE_STRIP.olderCapsTops.length;
-
-// The body font's capitals are 5 rows tall at 1x.
+// The body font's capitals are 5 rows tall at 1x, its lowest ink 2 rows under them.
 const CAPS_ROWS = 5;
+const INK_ROWS = 7;
 
 export interface MessageStripLayout {
   icon: Point;
-  // The top of each older line's capitals, the line just before the newest first.
-  olderTops: number[];
+  // The panel at its tallest, holding MESSAGE_STRIP.rows rows.
   panel: Rect;
-  // How wide a line's text may be, in screen pixels.
+  // How wide a row's text may be, in screen pixels.
   room: number;
+  // The top of each row's capitals.
+  rowTops: number[];
   textX: number;
 }
 
 export function messageStripLayout(): MessageStripLayout {
-  const { height, icon, olderCapsTops, padRight, textX, width, x, y } = MESSAGE_STRIP;
+  const { capsTop, gap, icon, padRight, rowHeight, rows, scale, textX, width, x } = MESSAGE_STRIP;
+  const y = STRIP_TAB_BOTTOM + gap;
+  const rowTops = Array.from({ length: rows }, (_, row) => y + capsTop + row * rowHeight);
   return {
-    icon: { x: x + icon.x, y: y + icon.y },
-    olderTops: olderCapsTops.map((top) => y + top),
-    panel: { height, width, x, y },
+    icon: { x: x + icon.x, y: y + capsTop + Math.floor((CAPS_ROWS * scale - icon.size) / 2) },
+    panel: messagePanel(rows),
     room: width - textX - padRight,
+    rowTops,
     textX: x + textX,
   };
 }
 
-// The top of the newest line's capitals at scale, centred on the icon's rows.
-export function newestCapsTop(layout: MessageStripLayout, scale: number): number {
-  const { size } = MESSAGE_STRIP.icon;
-  return layout.icon.y + Math.floor((size - CAPS_ROWS * scale) / 2);
+// The panel holding rows rows of text.
+export function messagePanel(rows: number): Rect {
+  const { capsTop, gap, padBottom, rowHeight, scale, width, x } = MESSAGE_STRIP;
+  const height = capsTop + (rows - 1) * rowHeight + INK_ROWS * scale + padBottom;
+  return { height, width, x, y: STRIP_TAB_BOTTOM + gap };
+}
+
+// A line's text broken at spaces into rows no wider than room, as width measures them, at
+// most MESSAGE_STRIP.rows of them: text past the last row is left out.
+export function messageRows(width: (row: string) => number, room: number, text: string): string[] {
+  return wrapWords(width, room, text).slice(0, MESSAGE_STRIP.rows);
 }
 
 export interface MessageLine {
@@ -75,24 +91,24 @@ export interface MessageLine {
 }
 
 // A line on the strip: id tells lines with the same text apart, and ageMs counts from when it
-// became the newest.
+// showed.
 export interface ShownLine extends MessageLine {
   readonly ageMs: number;
   readonly id: number;
 }
 
-// lines: newest first. waiting: lines said but not yet shown, oldest first.
+// shown: the line on the strip, if any. waiting: lines said but not yet shown, oldest first.
 export interface MessageStripState {
-  readonly lines: readonly ShownLine[];
   readonly nextId: number;
+  readonly shown: ShownLine | null;
   readonly waiting: readonly MessageLine[];
 }
 
-export const EMPTY_MESSAGE_STRIP: MessageStripState = { lines: [], nextId: 0, waiting: [] };
+export const EMPTY_MESSAGE_STRIP: MessageStripState = { nextId: 0, shown: null, waiting: [] };
 
-// dwellMs: the least a line stays newest before a waiting line takes its place. lifeMs: how
-// long a line lives from when it became newest, its last fadeMs fading out. maxWaiting: lines
-// said faster than they can show beyond this many drop the oldest waiting one.
+// dwellMs: the least a line shows before a waiting line takes its place. lifeMs: how long a
+// line lives from when it showed, its last fadeMs fading out. maxWaiting: lines said faster
+// than they can show beyond this many drop the oldest waiting one.
 export interface MessageTiming {
   readonly dwellMs: number;
   readonly fadeMs: number;
@@ -107,46 +123,38 @@ export const MESSAGE_TIMING: MessageTiming = {
   maxWaiting: 6,
 };
 
-// How opaque each older line is at its fullest, the line just before the newest first.
-export const OLDER_ALPHAS: readonly number[] = [0.7, 0.4];
-
-// Adds a line to wait its turn, unless the same text is already newest or waiting.
+// Adds a line to wait its turn, unless the same text is already shown or waiting.
 export function sayLine(
   timing: MessageTiming,
   line: MessageLine,
   state: MessageStripState,
 ): MessageStripState {
   const repeated =
-    state.lines[0]?.text === line.text || state.waiting.some(({ text }) => text === line.text);
+    state.shown?.text === line.text || state.waiting.some(({ text }) => text === line.text);
   if (repeated) {
     return state;
   }
   return { ...state, waiting: [...state.waiting, line].slice(-timing.maxWaiting) };
 }
 
-// Ages the lines dtMs, drops those past their life, and makes the next waiting line the newest
-// once the newest has dwelt, keeping the newest and OLDER_LINES older ones.
+// Ages the shown line dtMs, drops it past its life, and shows the next waiting line once the
+// shown one has dwelt.
 export function stepMessageStrip(
   timing: MessageTiming,
   dtMs: number,
   state: MessageStripState,
 ): MessageStripState {
-  let lines = state.lines
-    .map((line) => ({ ...line, ageMs: line.ageMs + dtMs }))
-    .filter((line) => line.ageMs < timing.lifeMs);
+  const aged = state.shown === null ? null : { ...state.shown, ageMs: state.shown.ageMs + dtMs };
+  const shown = aged !== null && aged.ageMs < timing.lifeMs ? aged : null;
   const [next, ...waiting] = state.waiting;
-  const newest = lines[0];
-  if (next === undefined || (newest !== undefined && newest.ageMs < timing.dwellMs)) {
-    return { ...state, lines };
+  if (next === undefined || (shown !== null && shown.ageMs < timing.dwellMs)) {
+    return { ...state, shown };
   }
-  lines = [{ ...next, ageMs: 0, id: state.nextId }, ...lines].slice(0, OLDER_LINES + 1);
-  return { lines, nextId: state.nextId + 1, waiting };
+  return { nextId: state.nextId + 1, shown: { ...next, ageMs: 0, id: state.nextId }, waiting };
 }
 
-// How opaque the line at index (0 the newest) is: its place's alpha, fading out over the last
-// fadeMs of its life.
-export function lineAlpha(timing: MessageTiming, index: number, line: ShownLine): number {
-  const place = index === 0 ? 1 : (OLDER_ALPHAS[index - 1] ?? 0);
+// How opaque the shown line is: whole, fading out over the last fadeMs of its life.
+export function lineAlpha(timing: MessageTiming, line: ShownLine): number {
   const left = (timing.lifeMs - line.ageMs) / timing.fadeMs;
-  return place * Math.min(1, Math.max(0, left));
+  return Math.min(1, Math.max(0, left));
 }

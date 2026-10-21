@@ -146,8 +146,8 @@ export function layoutExport(
       dividers: laneDividerXs(LANE_COUNT, road),
       width: road.width / LANE_COUNT,
     },
-    // The message strip over the band's sky: its panel, the newest line's icon, the text
-    // column and its room, and the older lines' capitals tops.
+    // The message strip under the state strip's tab: its panel at its tallest (two rows), the
+    // line's icon, the text column and its room, and each row's capitals top.
     messageStrip: messageStripLayout(),
     // The pack as drawn: drawScale times its hit layout's stagger, rounded, with the nearest
     // dog clearance pixels up the screen from the walker's feet (the walker's frame above its

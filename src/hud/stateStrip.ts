@@ -172,6 +172,10 @@ export const STRIP = {
   y: 40,
 };
 
+// The bottom of the strip's tab, whatever it holds.
+export const STRIP_TAB_BOTTOM =
+  STRIP.y + STRIP.inset.top + STRIP.icon + 2 * STRIP.padding + STRIP.inset.bottom;
+
 export interface StripLayout {
   hit: Rect;
   icons: Point[];

@@ -1,12 +1,13 @@
 import type { Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
-import { MESSAGE_STRIP } from "./messageStrip";
+import { messageStripLayout } from "./messageStrip";
 import { TOP_BAR } from "./topBar";
 
 // Each transient layer of the walk's HUD keeps to its own lane, so none covers another, the
 // road or the pack, which walks just above the doghouses. The message strip (messageStrip.ts)
-// tops the backdrop band and carries hints, badges and the walk's events; the lanes below it:
+// runs across the top of the backdrop band, under the state strip's tab, and carries hints,
+// badges and the walk's events; the lanes below it, under its tallest panel:
 // - bank: a money change, under the message strip at the money well's columns, one at a
 //   time. It rises from the lane's bottom to its top, never into the strip.
 // - stripBubble: the state strip's descriptions, right-aligned with its top on the lane's
@@ -29,11 +30,13 @@ const HEART_LABEL_HEIGHT = 24;
 
 export function hudLanes(layout: Pick<ScreenLayout, "backdrop" | "dogRow" | "dogSlots">): HudLanes {
   const { backdrop, dogRow, dogSlots } = layout;
+  // The strip at its tallest.
+  const strip = messageStripLayout().panel;
   const bank = {
     height: BANK_HEIGHT,
     width: TOP_BAR.money.width,
     x: TOP_BAR.money.x,
-    y: MESSAGE_STRIP.y + MESSAGE_STRIP.height + 2,
+    y: strip.y + strip.height + 2,
   };
   const bubbleTop = bank.y + bank.height + 2;
   return {
