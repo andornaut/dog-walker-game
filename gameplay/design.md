@@ -220,7 +220,7 @@ Each walker has one **perk**:
 
 ### Home screen and progression
 
-Everything bought at the Pet shop is permanent; upgrade cards are the walk-only boosts. Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
+Everything bought at the Pet shop is permanent; upgrade cards are the walk-only boosts. Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md). A save from a newer version of the game is left untouched for the session, and the walker's bubble on the home screen says to reload.
 
 - **Layout, top to bottom:** the top bar (the bank centered, with Logbook, Help, Sound and Settings on the right); the gate scene; then three framed sections in order: Walker, Dogs, Pocket (optional); then the Start walk button at the bottom. A section's frame lights up once it's complete; until then its band prompts, and the Dogs band shows the pack count with no label ("1/2"). Nothing else sits between the sections
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to High Park under its sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker. On a brand-new save, the starter's owner waits at the gate until the first walk, and Casey and Biscuit start picked, so the first walk is one tap on Start walk
