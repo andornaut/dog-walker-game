@@ -14,7 +14,7 @@ export const COMIC_WORDS = {
     frames: 6,
     ringAboveStar: 5,
     // By encounter, as fx-hit-<encounter> draws its star.
-    starRows: { otherDog: 46, puddle: 48, skunk: 38, squirrel: 38, thief: 48 } as Readonly<
+    starRows: { otherDog: 46, skunk: 38, thief: 48 } as Readonly<
       Partial<Record<EncounterId, number>>
     >,
   },

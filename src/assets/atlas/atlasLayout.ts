@@ -25,12 +25,12 @@ export type AtlasGroup = (typeof ATLAS_GROUPS)[number];
 
 const LOADING_KEYS: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
 const GROUP_PREFIXES: readonly (readonly [AtlasGroup, readonly string[]])[] = [
-  ["cards", ["card-", "help-"]],
+  ["cards", ["card-"]],
   ["ui", ["badge-", "face-", "icon-", "item-", "logo", "portrait-", "screen-", "ui-"]],
 ];
 
-// boot is the loading screen; ui the home screen, menus, HUD and icons; cards the cards and
-// help pages; run everything on the road.
+// boot is the loading screen; ui the home screen, menus, HUD and icons; cards the choice cards;
+// run everything on the road.
 export function atlasGroupOf(key: string): AtlasGroup {
   if (LOADING_KEYS.has(key)) {
     return "boot";

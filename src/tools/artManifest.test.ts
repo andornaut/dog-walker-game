@@ -59,7 +59,7 @@ describe("generateArtManifest", () => {
       memoryArt({
         "fonts/font-body.fnt": FONT,
         "fonts/font-body.png": "",
-        "images/help-lanes.png": "",
+        "images/card-skip.png": "",
         "manifest.extra.json": JSON.stringify({ sounds: { "music-walk": { loop: true } } }),
         "sounds/music-walk.m4a": "",
         "sounds/music-walk.ogg": "",
@@ -73,7 +73,7 @@ describe("generateArtManifest", () => {
     );
     expect(manifest).toEqual({
       fonts: [{ fnt: "fonts/font-body.fnt", key: "font-body", png: "fonts/font-body.png" }],
-      images: [{ key: "help-lanes", png: "images/help-lanes.png" }],
+      images: [{ key: "card-skip", png: "images/card-skip.png" }],
       sounds: [
         {
           key: "music-walk",

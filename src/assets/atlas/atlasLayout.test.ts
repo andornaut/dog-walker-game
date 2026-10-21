@@ -25,7 +25,6 @@ describe("atlasGroupOf", () => {
   it.each<[string, string]>([
     ...Object.values(LOADING_ART).map((key): [string, string] => [key, "boot"]),
     ["card-skip", "cards"],
-    ["help-lanes", "cards"],
     ["screen-home", "ui"],
     ["icon-lock", "ui"],
     ["logo", "ui"],

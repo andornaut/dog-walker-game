@@ -25,12 +25,11 @@ const bursts = (Object.keys(gameData.encounters) as EncounterId[]).filter((id) =
   sprites.has(`fx-hit-${kebabCase(id)}`),
 );
 
-// Art's measured place (the ring's top-left) and size of each word on its 77x77 burst frame.
+// Art's measured place (the ring's top-left) and size of each word on its 77x77 burst frame,
+// for each burst the manifest has.
 const ART_PLACES: Readonly<Partial<Record<EncounterId, [number, number, number]>>> = {
   otherDog: [21, 41, 34],
-  puddle: [17, 43, 42],
   skunk: [22, 33, 32],
-  squirrel: [22, 33, 33],
   thief: [20, 43, 35],
 };
 
@@ -43,8 +42,8 @@ describe("font-comic", () => {
 });
 
 describe("the burst words", () => {
-  it("letter a burst for every encounter that has one", () => {
-    expect(bursts).toEqual(Object.keys(ART_PLACES));
+  it("star the burst of every encounter the manifest has one for, and no other", () => {
+    expect(Object.keys(COMIC_WORDS.burst.starRows).sort()).toEqual([...bursts].sort());
   });
 
   it.each(bursts)("give %s a word font-comic draws as wide as art's", (id) => {
