@@ -1192,7 +1192,7 @@
       "maxMovers": 6,
       "maxSlowVehicles": 3,
       "minorObstaclesFirstZone": 42,
-      "minorObstaclesGainPerZone": 8,
+      "minorObstaclesGainPerZone": 3,
       "obstaclesFirstZone": 18,
       "obstaclesGainPerZone": 4,
       "openLanesPerRowMin": 2,
