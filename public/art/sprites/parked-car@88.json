@@ -46,6 +46,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 43 },
     "sourceSize": { "w": 49, "h": 43 },
     "duration": 100
+   },
+   "parked-car@88 6.aseprite": {
+    "frame": { "x": 294, "y": 0, "w": 49, "h": 43 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 43 },
+    "sourceSize": { "w": 49, "h": 43 },
+    "duration": 100
+   },
+   "parked-car@88 7.aseprite": {
+    "frame": { "x": 343, "y": 0, "w": 49, "h": 43 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 43 },
+    "sourceSize": { "w": 49, "h": 43 },
+    "duration": 100
+   },
+   "parked-car@88 8.aseprite": {
+    "frame": { "x": 392, "y": 0, "w": 49, "h": 43 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 43 },
+    "sourceSize": { "w": 49, "h": 43 },
+    "duration": 100
+   },
+   "parked-car@88 9.aseprite": {
+    "frame": { "x": 441, "y": 0, "w": 49, "h": 43 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 43 },
+    "sourceSize": { "w": 49, "h": 43 },
+    "duration": 100
    }
  },
  "meta": {
@@ -53,11 +85,12 @@
   "version": "1.2.30-x64",
   "image": "parked-car@88.png",
   "format": "RGBA8888",
-  "size": { "w": 294, "h": 43 },
+  "size": { "w": 490, "h": 43 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "pull-out", "from": 2, "to": 5, "direction": "forward" }
+   { "name": "pull-out", "from": 2, "to": 5, "direction": "forward" },
+   { "name": "drive", "from": 6, "to": 9, "direction": "forward" }
   ]
  }
 }

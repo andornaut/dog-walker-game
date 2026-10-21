@@ -21,14 +21,19 @@ parked-car          56x49   1 lane by 3 rows of footprint, a minivan from straig
                             footprint's near edge; hazards blink. 56 wide, so it centres on its lane
                             with 4px to spare each side. pull-out (4 frames, 100ms): drawn pulling
                             right (the game mirrors it for left), tread lines climb the tyres and the
-                            right indicator blinks amber
+                            right indicator blinks amber; drive (4 frames, 100ms): driving down its
+                            lane, the same tread roll with no indicator
+delivery-truck      56x63   1 lane by 3 rows of footprint, a brown box van from straight behind with a tan
+                            roller door, drawn at the footprint's near edge; idle (4 frames,
+                            400ms): an exhaust puff on frame 2. drive (4 frames, 100ms): tread lines
+                            climb the tyres and the body dips 1px onto them on frames 1 and 2
 
 Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
 frame is one argument to the drawing function, listed in the *_IDLE tuples;
 frame 0 is the rest pose. The drawings are in layout pixels, 40 for a 1-lane
 sprite and 30 rows for a lane-spanning one, drawn SCALE (1.4) times bigger on a
-minis.Mini, which keeps 1px lines 1px; the parked car keeps its 56 layout columns
-and draws only its rows SCALE times taller. minis.py and depths.py run them at
+minis.Mini, which keeps 1px lines 1px; the parked car and the delivery truck keep
+their 56 layout columns and draw only their rows SCALE times taller. minis.py and depths.py run them at
 SCALE (or CAR_SCALE) times each depth step for the depth variants.
 
 Usage:
@@ -246,12 +251,13 @@ def barrier(lanes, f):
     return g
 
 
-def parked_car(hazard=False, roll=None):
+def parked_car(hazard=False, roll=None, blink=True):
     """A minivan from straight behind, wide and low: the roof edge, the rear window, the tailgate with its
     tail lights and plate, the bumper and both rear wheels under it, mirrors poking out at the sides. Its
     hazard lights, the outer end of each tail light, are lit when hazard is true. Cyan lights the top and
-    left edges, so the sky body holds on Elm Avenue. roll (0 to 3) is a pull-out frame: tread lines climb
-    the tyres 1px a frame (treads), and the right indicator is lit on frames 0 and 1."""
+    left edges, so the sky body holds on Elm Avenue. roll (0 to 3) is a pull-out or drive frame: tread
+    lines climb the tyres 1px a frame (treads), and, when blink is true (pull-out), the right indicator is
+    lit on frames 0 and 1."""
     g = edged(Grid(56, 35))
     # rear wheels, under the body at either side
     for x in (5, 42):
@@ -293,7 +299,7 @@ def parked_car(hazard=False, roll=None):
     if roll is not None:
         for x in (5, 42):
             treads(g, x + 2, 29, 7, 5, roll, unit(g)[1])
-        if roll < 2:
+        if blink and roll < 2:
             g.rect(48, 16, 3, 4, "amber")
             g.rect(48, 16, 3, 1, "yellow")
     return g
@@ -319,6 +325,69 @@ HEDGE_IDLE = ((), (5,), (10,), (15,)), 350
 PARKED_CAR_IDLE = (False, True), 500
 # The pull-out: 4 frames of parked_car's roll, and their duration in ms.
 PULL_OUT = range(4), 100
+# The drive: 4 frames of parked_car's or delivery_truck's roll with no indicator, and their duration in ms.
+DRIVE = range(4), 100
+# The delivery truck's idle: an exhaust puff on frame 2.
+DELIVERY_IDLE = (False, False, True, False), 400
+
+
+def delivery_truck(puff=False, roll=None):
+    """A box van from straight behind, a lane wide and taller than the parked car: a brown box lit tan along
+    its top and left edges with mirrors at its sides and amber marker lights on the roof, a tan roller door
+    ribbed in brown with a white shipping label on it, red tail lights low at the outer corners, the bumper
+    step and both rear wheels. puff blows a grey exhaust puff out beside the
+    right wheel. roll (0 to 3) is a drive frame: tread lines climb the tyres 1px a frame (treads) and the
+    body dips 1px onto them on frames 1 and 2. Laid out on 56x45 and drawn at CAR_SCALE, as the parked car."""
+    g = edged(Grid(56, 45))
+    px = getattr(g, "g", g)
+    uy = unit(g)[1]
+    # wheels first, so the body can dip over them
+    for x in (5, 42):
+        g.rect(x, 34, 9, 10, "ink")
+        g.rect(x, 34, 2, 9, "dslate")
+        if roll is not None:
+            treads(g, x + 2, 37, 7, 7, roll, uy)
+    if puff:
+        g.ell(52, 40, 2.5, 2, "lgrey", "grey")
+        g.p(54, 37, "lgrey")
+    wheels = [row[:] for row in px.px]
+    px.px = [[None] * px.w for _ in range(px.h)]
+    # the box: lit along the top and the left, shaded down the right; mirrors poke out at its sides
+    g.rect(4, 1, 48, 32, "brown")
+    g.rect(4, 1, 48, 1, "tan")
+    g.rect(4, 1, 1, 32, "tan")
+    g.rect(48, 2, 4, 31, "dbrown")
+    for x in (1, 52):
+        g.rect(x, 7, 3, 5, "dslate")
+        g.rect(x, 7, 3, 1, "slate")
+    # amber marker lights along the roof
+    for x in (18, 27, 36):
+        g.rect(x, 2, 3, 1, "amber")
+    # the roller door, its slats, its handle and a parcel label taped across
+    g.rect(10, 5, 36, 26, "tan")
+    for y in range(8, 31, 3):
+        g.rect(10, y, 36, 1, "brown")
+    g.rect(43, 5, 3, 26, "brown")
+    g.rect(25, 27, 6, 2, "grey")
+    g.rect(25, 27, 6, 1, "lgrey")
+    g.rect(21, 11, 13, 9, "white")
+    g.rect(21, 19, 13, 1, "lgrey")
+    g.rect(23, 13, 6, 1, "slate")
+    g.rect(23, 15, 9, 1, "slate")
+    g.rect(23, 17, 4, 1, "red")
+    # tail lights low at the outer corners
+    for x in (5, 47):
+        g.rect(x, 21, 4, 8, "red")
+        g.rect(x, 21, 4, 1, "pink")
+        g.rect(x, 28, 4, 1, "dred")
+    # the bumper step across the full width
+    g.rect(1, 32, 54, 3, "dslate")
+    g.rect(1, 32, 54, 1, "slate")
+    g.rect(1, 32, 1, 3, "grey")
+    dip = 1 if roll in (1, 2) else 0
+    body = px.px
+    px.px = [[(body[y - dip][x] if y >= dip else None) or wheels[y][x] for x in range(px.w)] for y in range(px.h)]
+    return lit(g)
 
 
 def sprites():
@@ -335,8 +404,12 @@ def sprites():
     for lanes in (2, 3):
         yield f"barrier-{lanes}", [("idle", [drawn(SCALE, barrier, lanes, f).outlined() for f in (0, 1)], 500)]
     args, ms = PULL_OUT
+    drive, drive_ms = DRIVE
     yield "parked-car", idle(parked_car, PARKED_CAR_IDLE, CAR_SCALE) + [
-        ("pull-out", [drawn(CAR_SCALE, parked_car, roll=f).outlined() for f in args], ms)]
+        ("pull-out", [drawn(CAR_SCALE, parked_car, roll=f).outlined() for f in args], ms),
+        ("drive", [drawn(CAR_SCALE, parked_car, roll=f, blink=False).outlined() for f in drive], drive_ms)]
+    yield "delivery-truck", idle(delivery_truck, DELIVERY_IDLE, CAR_SCALE) + [
+        ("drive", [drawn(CAR_SCALE, delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
 
 
 if __name__ == "__main__":

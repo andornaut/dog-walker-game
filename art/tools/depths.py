@@ -9,7 +9,7 @@ full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, biscuit-neighbour, chatty-neighbour,
 kid, mail-carrier, photo-op, stop-sign, ice-cream-truck, construction, puddle
-(no outline), hedge, barrier-2, barrier-3 and parked-car. Walkers are the
+(no outline), hedge, barrier-2, barrier-3, parked-car and delivery-truck. Walkers are the
 pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
@@ -114,8 +114,13 @@ def own(s):
                                              for f in (0, 1)], 500)]
     args, ms = obstacles.PULL_OUT
     car = times(obstacles.CAR_SCALE)
+    drive, drive_ms = obstacles.DRIVE
     yield "parked-car", obstacle(car, obstacles.parked_car, obstacles.PARKED_CAR_IDLE) + [
-        ("pull-out", [small(obstacles, car, obstacles.parked_car, roll=f).outlined() for f in args], ms)]
+        ("pull-out", [small(obstacles, car, obstacles.parked_car, roll=f).outlined() for f in args], ms),
+        ("drive", [small(obstacles, car, obstacles.parked_car, roll=f, blink=False).outlined() for f in drive],
+         drive_ms)]
+    yield "delivery-truck", obstacle(car, obstacles.delivery_truck, obstacles.DELIVERY_IDLE) + [
+        ("drive", [small(obstacles, car, obstacles.delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
 
 
 def hazard(s):
