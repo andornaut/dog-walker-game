@@ -13,7 +13,7 @@ fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thin
                                                   and stink squiggles
 fx-hit-thief       77x77  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
 fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
-ui-hit-flash-green, -sky, -amber, -mauve, -orange, -pink
+ui-hit-flash-sky, -amber, -mauve, -orange, -pink
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
                           4x4 ordered dither to clear by x=15; tiles vertically, the
                           game mirrors it for the right edge
@@ -335,7 +335,7 @@ def hit_other_dog(step):
 
 # Each strip's ink, its dark fringe and, where the ink holds under 3:1 on the dark roads, a light rim one
 # step up its ramp (mauve's pink, 3.52:1 on dslate).
-FLASH = {"green": ("green", "teal", None), "sky": ("cyan", "navy", None), "amber": ("amber", "plum", None),
+FLASH = {"sky": ("cyan", "navy", None), "amber": ("amber", "plum", None),
          "mauve": ("mauve", "plum", "pink"), "orange": ("orange", "plum", None), "pink": ("pink", "plum", None)}
 
 
