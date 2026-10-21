@@ -54,8 +54,8 @@ describe("stepZoomies", () => {
     ["toward its heading", 2, 1, 3],
     ["back toward its heading", 2, -1, 1],
     ["to the right before the pack has moved", 2, undefined, 3],
-    ["nowhere at the right edge", LANE_COUNT - 1, 1, LANE_COUNT - 1],
-    ["nowhere at the left edge", 0, -1, 0],
+    ["back from the right edge", LANE_COUNT - 1, 1, LANE_COUNT - 2],
+    ["back from the left edge", 0, -1, 1],
   ])("drifts the pack %s", (_, lane, heading, expected) => {
     expect(afterDrift(walkIn(lane, heading))).toBe(expected);
   });
@@ -87,11 +87,23 @@ describe("stepZoomies", () => {
     y: ROAD.packBand.top - 60,
   });
 
-  it.each<[string, WalkItem[], number]>([
-    ["the other way from an obstacle it can't react to", [coneIn(3, 0)], 1],
-    ["nowhere with both lanes blocked", [coneIn(3, 0), coneIn(1, 1)], 2],
-  ])("drifts %s", (_, items, expected) => {
-    expect(afterDrift(walkIn(2, 1, items))).toBe(expected);
+  it.each<[string, number, WalkItem[], number]>([
+    ["the other way from an obstacle it can't react to", 2, [coneIn(3, 0)], 1],
+    ["nowhere with both lanes blocked", 2, [coneIn(3, 0), coneIn(1, 1)], 2],
+    [
+      "nowhere at the edge with the lane back blocked",
+      LANE_COUNT - 1,
+      [coneIn(LANE_COUNT - 2, 0)],
+      LANE_COUNT - 1,
+    ],
+  ])("drifts %s", (_, lane, items, expected) => {
+    expect(afterDrift(walkIn(lane, 1, items))).toBe(expected);
+  });
+
+  it("keeps drifting the other way after turning at the edge", () => {
+    const first = stepZoomies(gameData, ROAD, EVERY, 0, walkIn(LANE_COUNT - 1, 1));
+    expect(first.drifted).toBe(-1);
+    expect(stepZoomies(gameData, ROAD, EVERY, 0, first.walk).drifted).toBe(-1);
   });
 });
 

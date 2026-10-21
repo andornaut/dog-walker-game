@@ -8,8 +8,9 @@ import { laneMotionConfig, type Walk, walkScrollSpeed } from "./walk";
 // While the pack has the Zoomies, every seconds.zoomiesDriftSeconds of walking it drifts one
 // lane in the direction it last moved, toward the right before it has moved. Steering still
 // works. A drift never moves the pack into an obstacle it can't react to, by the pulls' rule:
-// with that lane blocked it drifts the other way, and with both blocked it stays. At the road's
-// edge it stays. The walk's own state and the seed decide every drift, so a replay drifts alike.
+// with that lane blocked, or past the road's edge, it turns and drifts the other way, and with
+// both closed it stays. The walk's own state and the seed decide every drift, so a replay
+// drifts alike.
 
 export type ZoomiesData = Pick<
   GameData,
@@ -37,9 +38,6 @@ function driftDirection(
 ): LaneDirection | null {
   const { control } = walk.road;
   const heading = control.heading ?? 1;
-  if (control.target + heading < 0 || control.target + heading >= geometry.laneCount) {
-    return null;
-  }
   const speed = walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
   const horizon = pullHorizon(data, walk);
   const open = (direction: LaneDirection) => {
