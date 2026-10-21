@@ -656,7 +656,7 @@ def snowball_road(q):
     # a broad round head, its drop ears hanging at the sides, marked a soft badger cream
     hx = 16 + ln
     e, t = -q["ears"] + q["flop"], q["twitch"]
-    g.cel(hx, 9.5 + o + b, 7.5, 6.5, "white", "lgrey")
+    g.cel(hx, 9.5 + o + b, 7.5, 6.5, "white", "lgrey", power=2.6)
     g.cel(hx - 7.5, 11.5 + o + b + e, 2.3, 3.8, "cream", "tan")
     g.cel(hx + 7.5, 11.5 + o + b + e + t, 2.3, 3.8, "cream", "tan")
     underside(g)
