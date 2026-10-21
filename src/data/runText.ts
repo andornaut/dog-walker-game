@@ -8,7 +8,6 @@ export const RUN_TEXT = {
     forkFees: "Pay ×{fees}",
     forkSubtitle: "Each path brings an upgrade",
     forkTitle: "Which way?",
-    free: "",
     heartForgiven: "♥ {dog}'s safe!",
     need: "{amount}",
     pickOne: "Pick one",

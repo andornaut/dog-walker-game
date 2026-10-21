@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import type { DogId, EncounterId, UpgradeId, ZoneId } from "../data/types";
 import { boxStyles, CARD_LAYOUT, FIRES_FIT, largeBodyBox, plaqueRoom } from "../layout/cardLayout";
 import type { TextFitStyle } from "../layout/textFit";
-import { cardFor, firesText, type OptionView } from "../rules/choices";
+import { cardFor, firesText, hasPlaque, type OptionView } from "../rules/choices";
 import { cents } from "../rules/units";
 import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { testState } from "../testing/runState";
@@ -134,20 +134,22 @@ describe.each(CASES)("the card for %s", (_, option) => {
     expectFits("font-body", boxStyles(BODY, box.height), large.body.width, text);
   });
 
-  it("fits a plaque text in the plaque beside any fires marker, small and enlarged", () => {
-    const { badge, fires: marker, large } = CARD_LAYOUT;
-    const small = plaqueRoom(
-      badge.x,
-      badge.width,
-      fires === null ? undefined : marker.x + marker.size,
-    );
-    const largeRight = fires === null ? undefined : large.fires.x + 2 * marker.size;
-    const enlarged = plaqueRoom(large.badge.x, large.badge.width, largeRight);
-    for (const room of [small, enlarged]) {
-      const widths = plaqueTexts(gameData, option).map((text) =>
-        inkWidth("font-title", ONE, title(text)),
+  it.runIf(hasPlaque(option))(
+    "fits a plaque text in the plaque beside any fires marker, small and enlarged",
+    () => {
+      const texts = hasPlaque(option) ? plaqueTexts(gameData, option) : [];
+      const { badge, fires: marker, large } = CARD_LAYOUT;
+      const small = plaqueRoom(
+        badge.x,
+        badge.width,
+        fires === null ? undefined : marker.x + marker.size,
       );
-      expect(Math.min(...widths)).toBeLessThanOrEqual(room);
-    }
-  });
+      const largeRight = fires === null ? undefined : large.fires.x + 2 * marker.size;
+      const enlarged = plaqueRoom(large.badge.x, large.badge.width, largeRight);
+      for (const room of [small, enlarged]) {
+        const widths = texts.map((text) => inkWidth("font-title", ONE, title(text)));
+        expect(Math.min(...widths)).toBeLessThanOrEqual(room);
+      }
+    },
+  );
 });

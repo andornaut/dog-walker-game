@@ -30,6 +30,7 @@ import {
   type CardView,
   type Choice,
   firesText,
+  hasPlaque,
   MAX_CARD_OPTIONS,
   type OptionView,
 } from "../rules/choices";
@@ -400,7 +401,10 @@ export class CardScene extends Scene {
     }
     this.addLargeBody(option, x + LARGE.body.x, y + LARGE.body.y);
     const badge = { ...LARGE.badge, x: x + LARGE.badge.x, y: y + LARGE.badge.y + shift };
-    if (this.textures.exists(COST_KEY)) {
+    const plaque = hasPlaque(option);
+    if (!plaque) {
+      // A free option's foot stays plain.
+    } else if (this.textures.exists(COST_KEY)) {
       this.add.image(badge.x, badge.y, COST_KEY).setOrigin(0).setScale(2);
     } else {
       fillRect(g, PALETTE.cream, badge);
@@ -409,7 +413,9 @@ export class CardScene extends Scene {
       option !== undefined && option.fires.length > 0
         ? this.addFiresMarker(x + LARGE.fires.x, y + LARGE.fires.y + shift, 2, false)
         : undefined;
-    this.addPlaqueText(badge, marker, 9, PALETTE.plum, entry);
+    if (plaque) {
+      this.addPlaqueText(badge, marker, 9, PALETTE.plum, option);
+    }
     this.enlarged = this.children.list.slice(before);
   }
 
@@ -472,12 +478,12 @@ export class CardScene extends Scene {
     marker: number | undefined,
     capsY: number,
     color: number,
-    entry: Entry,
+    option: OptionView,
   ): GameObjects.BitmapText {
     const center =
       marker === undefined ? badge.x + badge.width / 2 : (marker + badge.x + badge.width) / 2;
     const room = plaqueRoom(badge.x, badge.width, marker);
-    const texts = plaqueTexts(gameData, entry.option);
+    const texts = plaqueTexts(gameData, option);
     const label = this.centered(center, badge.y + capsY, texts[0] ?? "", color, { font: "title" });
     for (const text of texts) {
       setPixelText(label, text);
@@ -620,7 +626,11 @@ export class CardScene extends Scene {
     snapCentre(effect, centreX);
 
     const badge = { ...BADGE, x: x + BADGE.x, y: y + BADGE.y };
-    if (this.textures.exists(COST_KEY)) {
+    const option = entry.option;
+    const plaque = hasPlaque(option);
+    if (!plaque) {
+      // A free option's foot stays plain.
+    } else if (this.textures.exists(COST_KEY)) {
       const key = grey ? greyTextureKey(this, COST_KEY) : COST_KEY;
       this.add.image(badge.x, badge.y, key).setOrigin(0);
     } else {
@@ -631,7 +641,15 @@ export class CardScene extends Scene {
         ? this.addFiresMarker(x + CARD.fires.x, y + CARD.fires.y, 1, grey)
         : undefined;
     this.badges.push(
-      this.addPlaqueText(badge, marker, 4, grey ? PALETTE[GREYED.plateText] : PALETTE.plum, entry),
+      plaque
+        ? this.addPlaqueText(
+            badge,
+            marker,
+            4,
+            grey ? PALETTE[GREYED.plateText] : PALETTE.plum,
+            option,
+          )
+        : undefined,
     );
   }
 

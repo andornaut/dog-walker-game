@@ -617,8 +617,6 @@ export interface RunText {
     readonly forkFees: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
-    // The plaque of an option that costs no money.
-    readonly free: string;
     // In an option's text, in place of a dog's heart loss Second chance would forgive; it may
     // name the loss as {hearts}.
     readonly heartForgiven: string;

@@ -83,6 +83,12 @@ export interface OptionView {
   readonly text: string;
 }
 
+// Whether a card shows a plaque at its foot: an option that costs cash shows its price there,
+// and a fork's path card its zone's pay. A free option and the Skip card have none.
+export function hasPlaque(option: OptionView | undefined): option is OptionView {
+  return option !== undefined && (option.path !== undefined || option.cost > 0);
+}
+
 // The most options a card shows.
 export const MAX_CARD_OPTIONS = 3;
 

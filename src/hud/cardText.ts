@@ -10,19 +10,16 @@ import { RUN_TEXT_FIELDS } from "./runText";
 // What a card's plaque may say, longest first: the first that fits its room is shown. A path
 // card's plaque shows its zone's pay multiplier instead of a cost, then how long its upgrade
 // lasts, or the pay alone where both do not fit; another option's, its price, greyed with the
-// card when the player cannot afford it; Skip's and a free option's, Free.
-export function plaqueTexts(data: Pick<GameData, "runText">, option?: OptionView): string[] {
+// card when the player cannot afford it. A free option and Skip show no plaque.
+export function plaqueTexts(data: Pick<GameData, "runText">, option: OptionView): string[] {
   const text = data.runText.card;
-  if (option?.path !== undefined) {
+  if (option.path !== undefined) {
     const pay = fillLine(RUN_TEXT_FIELDS.card, text, "forkFees", {
       fees: String(option.path.fees),
     });
     return option.duration === undefined
       ? [pay]
       : [`${pay} · ${text.upgradeDuration[option.duration]}`, pay];
-  }
-  if (option === undefined || option.cost === 0) {
-    return [text.free];
   }
   return [fillLine(RUN_TEXT_FIELDS.card, text, "need", { amount: formatDollars(option.cost) })];
 }

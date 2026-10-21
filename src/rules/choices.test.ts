@@ -18,6 +18,7 @@ import {
   cardFor,
   type Choice,
   chooseOption,
+  hasPlaque,
   offerFork,
   offerUpgrades,
   openCard,
@@ -134,6 +135,34 @@ describe("cardFor", () => {
   it("refuses an instant encounter, which opens no card", () => {
     const state = testState({ koda: 5 });
     expect(() => cardFor(data, state, encounter("lostWallet", ["koda"]))).toThrow("opens no card");
+  });
+});
+
+describe("hasPlaque", () => {
+  const pack: DogId[] = ["duchess", "koda", "pierre"];
+  const state = testState({ duchess: 5, koda: 5, pierre: 5 }, { money: cents(1_000_000) });
+  const rows = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+    const { resolution } = ENCOUNTERS[id];
+    return resolution.kind === "card"
+      ? resolution.options.map(({ effects, name }, index) => ({
+          id,
+          index,
+          name,
+          pays: effects.some((effect) => effect.kind === "money" && effect.change === "lose"),
+        }))
+      : [];
+  });
+
+  it.each(rows)("gives $id's $name a plaque exactly when it costs cash ($pays)", (row) => {
+    const card = cardFor(data, state, encounter(row.id, pack));
+    expect(hasPlaque(card.options[row.index])).toBe(row.pays);
+  });
+
+  it("gives the Skip card no plaque and a fork's path card one, for its zone's pay", () => {
+    const fork: CardSource = { kind: "fork", paths: ["shops"], upgrades: ["bigTipper"] };
+    const afterZone = testState({ koda: 4 }, { route: ["street"], zoneIndex: 1 });
+    expect(hasPlaque(undefined)).toBe(false);
+    expect(hasPlaque(cardFor(data, openCard(fork, afterZone), fork).options[0])).toBe(true);
   });
 });
 
