@@ -611,6 +611,15 @@ describe("stepWalk", () => {
     expect(step(full).treats.map(({ change }) => change)).toEqual([null]);
   });
 
+  it.each<[string, (walk: Walk) => Walk]>([
+    ["below their max", (walk) => withHearts(1, walk)],
+    ["at their max, as every walk starts", (walk) => walk],
+  ])("counts a treat grabbed with every owner %s in the treats tally", (_, hearts) => {
+    const walk = hearts(walkWith(["koda", "biscuit"], [atPack("treat")]));
+    const before = walk.run.tallies.treats ?? 0;
+    expect(step(walk).walk.run.tallies.treats).toBe(before + 1);
+  });
+
   it("gives a treat the front dog grabs at its owner's max to the hurt owner behind", () => {
     const walk = walkWith(["koda", "biscuit"], [atPack("treat")]);
     const hurt: Walk = {
