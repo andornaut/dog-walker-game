@@ -10,10 +10,12 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { type OptionMarks, optionMarks, type Struck } from "../hud/buffMarks";
 import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
+import { cardCharmAt } from "../layout/buffLayout";
 import {
   boxStyles,
   CARD_LAYOUT,
@@ -56,6 +58,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { DISABLED_COLORS, GREYED } from "../ui/selection";
+import { addCharm, addStruck, struckWidth } from "./buffCharm";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
@@ -376,9 +379,11 @@ export class CardScene extends Scene {
         .setScale(2)
         .setCrop(0, 0, ART.width, ART.height);
     }
+    const marks = optionMarks(gameData, view, option);
+    this.addCharms(marks, { x, y }, 2);
     this.addLargeBody(option, x + LARGE.body.x, y + LARGE.body.y);
     const badge = { ...LARGE.badge, x: x + LARGE.badge.x, y: y + LARGE.badge.y + shift };
-    const plaque = hasPlaque(option);
+    const plaque = hasPlaque(option) || marks.plaque !== null;
     if (!plaque) {
       // A free option's foot stays plain.
     } else if (this.textures.exists(COST_KEY)) {
@@ -390,7 +395,9 @@ export class CardScene extends Scene {
       option !== undefined && option.fires.length > 0
         ? this.addFiresMarker(x + LARGE.fires.x, y + LARGE.fires.y + shift, 2, false)
         : undefined;
-    if (plaque) {
+    if (marks.plaque !== null) {
+      this.addPlaqueStruck(badge, marker, 9, marks.plaque);
+    } else if (hasPlaque(option)) {
       this.addPlaqueText(badge, marker, 9, PALETTE.plum, option);
     }
     this.enlarged = this.children.list.slice(before);
@@ -403,8 +410,8 @@ export class CardScene extends Scene {
     option: OptionView | undefined,
     x: number,
     top: number,
-  ): { height: number; parts: GameObjects.BitmapText[] } {
-    const parts: GameObjects.BitmapText[] = [];
+  ): { height: number; parts: GameObjects.GameObject[] } {
+    const parts: GameObjects.GameObject[] = [];
     let fireLines = 0;
     if (option !== undefined && option.fires.length > 0) {
       const warning = addPixelText(this, x, top, firesText(gameData, option.fires), {
@@ -415,6 +422,11 @@ export class CardScene extends Scene {
       parts.push(warning);
     }
     const box = largeBodyBox(pixelFontMetrics(this, "title"), fireLines);
+    const forgiven =
+      this.view === undefined ? null : optionMarks(gameData, this.view, option).forgiven;
+    if (forgiven !== null) {
+      return this.addForgiven(forgiven, { align: "left", x }, top + box.top, 2);
+    }
     const body = addPixelText(this, x, top + box.top, largeBodyText(gameData, option), {
       color: PALETTE.plum,
       scale: 2,
@@ -470,6 +482,54 @@ export class CardScene extends Scene {
       }
     }
     return snapCentre(label, center);
+  }
+
+  // The lit charm of each buff on the option, at the art window's top-right, at scale.
+  private addCharms(marks: OptionMarks, card: { x: number; y: number }, scale: number): void {
+    marks.charms.forEach((item, i) => {
+      addCharm(this, item, cardCharmAt(card, scale, i), { lit: true, scale });
+    });
+  }
+
+  // A plaque's struck price and what the buff made it, in the title font, centred as
+  // addPlaqueText centres its text, capsY under the plaque's top.
+  private addPlaqueStruck(
+    badge: Rect,
+    marker: number | undefined,
+    capsY: number,
+    struck: Struck,
+  ): void {
+    const center =
+      marker === undefined ? badge.x + badge.width / 2 : (marker + badge.x + badge.width) / 2;
+    const style = { font: "title", scale: 1 } as const;
+    const width = struckWidth(this, struck, style);
+    addStruck(this, struck, { x: Math.round(center - width / 2), y: badge.y + capsY }, style);
+  }
+
+  // A forgiven loss in place of the effect text: each owner's loss struck, then the hearts it
+  // leaves them, a row each in the body font at scale, and the forgiving perk's name under
+  // them, centred on x or from it. Returns its parts and the height their ink takes.
+  private addForgiven(
+    forgiven: NonNullable<OptionMarks["forgiven"]>,
+    at: { align: "centre" | "left"; x: number },
+    top: number,
+    scale: number,
+  ): { height: number; parts: GameObjects.GameObject[] } {
+    const metrics = pixelFontMetrics(this, "body");
+    const row = metrics.lineHeight * scale;
+    const style = { font: "body", scale } as const;
+    const parts = forgiven.rows.flatMap((struck, i) => {
+      const width = struckWidth(this, struck, style);
+      const x = at.align === "centre" ? Math.round(at.x - width / 2) : at.x;
+      return addStruck(this, struck, { x, y: top + i * row }, style).parts;
+    });
+    const nameTop = top + forgiven.rows.length * row;
+    const name =
+      at.align === "centre"
+        ? this.centered(at.x, nameTop, forgiven.name, PALETTE.plum, { scale })
+        : addPixelText(this, at.x, nameTop, forgiven.name, { color: PALETTE.plum, scale });
+    const lines = forgiven.rows.length + 1;
+    return { height: inkRowsOfLines(metrics, lines) * scale, parts: [...parts, name] };
   }
 
   // Whether label inks no wider than room in role's font at 1x, which has its every glyph.
@@ -562,6 +622,9 @@ export class CardScene extends Scene {
       }
     }
 
+    const marks = optionMarks(gameData, view, entry.option);
+    this.addCharms(marks, { x, y }, 1);
+
     // A path card shows its zone's difficulty as paws, then in words.
     const path = entry.option?.path;
     const centreX = x + EFFECT.x + EFFECT.width / 2;
@@ -589,14 +652,18 @@ export class CardScene extends Scene {
       setFittedText(warning, shown.warning, centreX, y + shown.box.warningY);
       snapCentre(warning, centreX);
     }
-    const effectColor = grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum;
-    const effect = this.centered(centreX, 0, "", effectColor);
-    setFittedText(effect, shown.effect, centreX, y + shown.box.y);
-    snapCentre(effect, centreX);
+    if (marks.forgiven === null) {
+      const effectColor = grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum;
+      const effect = this.centered(centreX, 0, "", effectColor);
+      setFittedText(effect, shown.effect, centreX, y + shown.box.y);
+      snapCentre(effect, centreX);
+    } else {
+      this.addForgiven(marks.forgiven, { align: "centre", x: centreX }, y + shown.box.y, 1);
+    }
 
     const badge = { ...BADGE, x: x + BADGE.x, y: y + BADGE.y };
     const option = entry.option;
-    const plaque = hasPlaque(option);
+    const plaque = hasPlaque(option) || marks.plaque !== null;
     if (!plaque) {
       // A free option's foot stays plain.
     } else if (this.textures.exists(COST_KEY)) {
@@ -609,8 +676,13 @@ export class CardScene extends Scene {
       fires.length > 0
         ? this.addFiresMarker(x + CARD.fires.x, y + CARD.fires.y, 1, grey)
         : undefined;
+    if (marks.plaque !== null) {
+      this.addPlaqueStruck(badge, marker, 4, marks.plaque);
+      this.badges.push(undefined);
+      return;
+    }
     this.badges.push(
-      plaque
+      hasPlaque(option)
         ? this.addPlaqueText(
             badge,
             marker,
