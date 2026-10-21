@@ -54,10 +54,10 @@ import { onWindowEvent } from "./overlay";
 import { colorFromHex } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import {
+  applySound,
   checkpointRun,
   currentSettings,
   finishRun,
-  isMuted,
   onSettingsChanged,
   profileSave,
   type Settings,
@@ -171,10 +171,10 @@ export class RunScene extends Scene implements HudRun {
 
     this.settings = currentSettings(this);
     const sound = soundboardOf(this);
-    this.applyVolumes();
+    applySound(this, this.settings);
+    // Kept for reduced motion: setSettings applies each change's volumes and mute itself.
     onSettingsChanged(this, (settings) => {
       this.settings = settings;
-      this.applyVolumes();
     });
 
     this.world = this.createWorld(
@@ -205,14 +205,6 @@ export class RunScene extends Scene implements HudRun {
     if (isPhoneSideways()) {
       this.openPause();
     }
-  }
-
-  // The settings' volumes, or silence while muted.
-  private applyVolumes(): void {
-    const settings = this.settings ?? currentSettings(this);
-    const sound = soundboardOf(this);
-    sound.setVolumes({ music: settings.musicVolume, sfx: settings.sfxVolume });
-    sound.setMuted(isMuted(this));
   }
 
   private resetState(): void {

@@ -30,7 +30,8 @@ function session(scene: Scene): ProfileSession {
   return opened;
 }
 
-function applySound(scene: Scene, settings: Settings): void {
+// The settings' volumes, or silence while muted.
+export function applySound(scene: Scene, settings: Settings): void {
   const soundboard = soundboardOf(scene);
   soundboard.setVolumes(soundVolumes(settings));
   soundboard.setMuted(settings.muted);
