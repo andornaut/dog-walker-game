@@ -244,12 +244,32 @@ describe("newlyEarned", () => {
     expect(newlyEarned(gameData, earned, newPlayerSave, run)).toEqual([]);
   });
 
-  it("needs every condition: Top Walker wants all dogs and all slots", () => {
-    const allDogs = withOwned({ dogs: ALL_DOGS });
-    expect(newlyEarned(gameData, newPlayerSave, allDogs, null)).toEqual(["fullKennel"]);
-    expect(
-      newlyEarned(gameData, newPlayerSave, withOwned({ dogSlots: 3, dogs: ALL_DOGS }), null),
-    ).toEqual(["fullKennel", "topWalker"]);
+  const ALL_SLOTS = gameData.dogSlots.length;
+  it.each<[string, Partial<SaveDocument["owned"]>, boolean]>([
+    [
+      "all dogs and slots, a gear item short",
+      { dogSlots: ALL_SLOTS, dogs: ALL_DOGS, gear: ALL_GEAR.slice(1) },
+      false,
+    ],
+    [
+      "all dogs and gear, a slot short",
+      { dogSlots: ALL_SLOTS - 1, dogs: ALL_DOGS, gear: ALL_GEAR },
+      false,
+    ],
+    [
+      "all slots and gear, a dog short",
+      { dogSlots: ALL_SLOTS, dogs: ALL_DOGS.slice(1), gear: ALL_GEAR },
+      false,
+    ],
+    [
+      "every dog, slot and gear item",
+      { dogSlots: ALL_SLOTS, dogs: ALL_DOGS, gear: ALL_GEAR },
+      true,
+    ],
+  ])("needs every condition: Top Walker with %s earned %s", (_, owned, earned) => {
+    expect(newlyEarned(gameData, newPlayerSave, withOwned(owned), null).includes("topWalker")).toBe(
+      earned,
+    );
   });
 });
 
