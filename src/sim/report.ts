@@ -93,10 +93,8 @@ const PACKS: readonly NamedPack[] = [
   namedByDogs(["duchess"]),
   namedByDogs(["biscuit"]),
   namedByDogs(["koda"]),
-  // Nervous, walked alone, so never clingy: that takes firings.
   namedByDogs(["penny"]),
   namedByDogs(["koda", "biscuit"]),
-  // Camera ready and show dog, the quirks no other pack walks.
   namedByDogs(["nugget", "pierre"]),
   namedByDogs(["duchess", "biscuit", "koda"]),
   { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
@@ -165,7 +163,6 @@ function simPlayer(player: MatrixPlayer): SimPlayer {
 export function simulateCellRun(
   data: SimData,
   seed: number,
-  matrix: Matrix,
   cell: MatrixCell,
   run: number,
 ): RunResult {
@@ -183,11 +180,10 @@ export function simulateCell(
   data: SimData,
   seed: number,
   runsPerCell: number,
-  matrix: Matrix,
   cell: MatrixCell,
 ): MatrixRow {
   const results = Array.from({ length: runsPerCell }, (_, run) =>
-    simulateCellRun(data, seed, matrix, cell, run),
+    simulateCellRun(data, seed, cell, run),
   );
   return summarizeCell(data, cell, results);
 }
@@ -291,7 +287,7 @@ export function simulateMatrix(
   runsPerCell: number,
   matrix: Matrix,
 ): MatrixRow[] {
-  return matrixCells(matrix).map((cell) => simulateCell(data, seed, runsPerCell, matrix, cell));
+  return matrixCells(matrix).map((cell) => simulateCell(data, seed, runsPerCell, cell));
 }
 
 function dollars(cents: number): string {
@@ -443,7 +439,7 @@ export function simulateMatrixInBatches(
     const cell = itemAt(cells, rows.length);
     const end = Math.min(runsPerCell, results.length + runsPerBatch);
     for (let run = results.length; run < end; run++) {
-      results.push(simulateCellRun(data, seed, matrix, cell, run));
+      results.push(simulateCellRun(data, seed, cell, run));
     }
     if (results.length === runsPerCell) {
       rows.push(summarizeCell(data, cell, results));

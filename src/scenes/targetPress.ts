@@ -45,7 +45,10 @@ export function listenTargetPress<T>(
       press = undefined;
       if (release.kind === "tap" && release.delayMs > 0) {
         scene.time.delayedCall(release.delayMs, () => {
-          handlers.onPressed(undefined);
+          // A press that landed during the dip keeps showing pressed.
+          if (press === undefined) {
+            handlers.onPressed(undefined);
+          }
           handlers.onTap(release.target);
         });
         return;

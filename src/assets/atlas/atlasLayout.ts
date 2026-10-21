@@ -294,10 +294,12 @@ export function layoutAtlases(
   for (const group of ATLAS_GROUPS) {
     const members = textures.filter((texture) => atlasGroupOf(texture.key) === group);
     layout.skipped.push(...members.filter((t) => !fits(t, maxSize)).map(({ key }) => key));
-    const { pages, width } = packGroup(
-      members.filter((texture) => fits(texture, maxSize)),
-      maxSize,
-    );
+    const packed = members.filter((texture) => fits(texture, maxSize));
+    const { pages, width } = packGroup(packed, maxSize);
+    // A group no page width can hold is skipped whole.
+    if (pages.length === 0) {
+      layout.skipped.push(...packed.map(({ key }) => key));
+    }
     pages.forEach(({ height, placed }, index) => {
       const page = layout.pages.length;
       const blits: Blit[] = [];

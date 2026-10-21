@@ -162,7 +162,7 @@ function parseArgs(args: readonly string[]): Options {
 
 function runJob({ cells, matrix, runs, seed }: Job): MatrixRow[] {
   const all = matrixCells(matrix);
-  return cells.map((index) => simulateCell(gameData, seed, runs, matrix, itemAt(all, index)));
+  return cells.map((index) => simulateCell(gameData, seed, runs, itemAt(all, index)));
 }
 
 function runInWorker(job: Job): Promise<MatrixRow[]> {

@@ -1,7 +1,7 @@
 import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
 import { quipLine } from "../rules/choices";
 import { maxHearts } from "../rules/dogs";
-import { effectClause, SIZE_NAMES } from "../rules/effectText";
+import { effectClause, sentenceList, SIZE_NAMES } from "../rules/effectText";
 import { payFor } from "../rules/run";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
@@ -189,12 +189,7 @@ function zoneName(data: Pick<GameData, "world">, route: readonly ZoneId[], zone:
 
 // Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Archie".
 export function dogNames(data: Pick<GameData, "dogs">, dogs: readonly DogId[]): string {
-  const names = dogs.map((dog) => data.dogs[dog].name);
-  const last = names.pop();
-  if (last === undefined) {
-    return "";
-  }
-  return names.length === 0 ? last : `${names.join(", ")} and ${last}`;
+  return sentenceList(dogs.map((dog) => data.dogs[dog].name));
 }
 
 type LogbookData = Pick<GameData, "dogs" | "homeText" | "world">;
