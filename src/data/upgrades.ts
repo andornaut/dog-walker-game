@@ -16,7 +16,7 @@ export const UPGRADES = {
   bigTipper: {
     art: "card-big-tipper",
     duration: "nextZone",
-    effect: "+$1 per tip next neighborhood",
+    effect: "+$1 per tip",
     effects: [
       {
         by: "bigTipperTipBonus",
@@ -32,7 +32,7 @@ export const UPGRADES = {
   goodLeash: {
     art: "card-good-leash",
     duration: "run",
-    effect: "No pulls toward squirrels all walk",
+    effect: "No squirrel pulls",
     effects: [
       {
         by: "goodLeashSquirrelPull",
@@ -48,7 +48,7 @@ export const UPGRADES = {
   raincoats: {
     art: "card-raincoats",
     duration: "run",
-    effect: "Puddles don't muddy the pack all walk",
+    effect: "Puddles don't muddy you",
     effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
     kind: "boost",
     name: "Raincoats",
@@ -56,7 +56,7 @@ export const UPGRADES = {
   rushHour: {
     art: "card-rush-hour",
     duration: "nextZone",
-    effect: "Twice the tips and treats, more obstacles next neighborhood",
+    effect: "Tips, treats ×2, more bumps",
     effects: [
       {
         by: "rushHourTips",
@@ -86,7 +86,7 @@ export const UPGRADES = {
   sweetTalker: {
     art: "card-sweet-talker",
     duration: "run",
-    effect: "First card each neighborhood: cash options free",
+    effect: "First card: cash options free",
     effects: [
       {
         by: "sweetTalkerFreeCards",
