@@ -47,7 +47,7 @@ export const HOME_TEXT = {
     best: "Best {best}, {note}",
     bestNote: "{zones} with {dogs}",
     empty: "No walks yet.",
-    emptyNote: "Three clients are waiting on the porch.",
+    emptyNote: "Your first client is waiting on the porch.",
     last: "Last {last}",
     lastEarned: "+{amount}.",
     lastFinished: "{earned} Walked {zones} zones of {world}.",
