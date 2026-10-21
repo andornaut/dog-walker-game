@@ -1536,8 +1536,8 @@ def skyline(cv, towers):
 
 def skydome(cv, x, w, wall, ry):
     """The SkyDome far off, in the far landmarks' haze: a dome ry rows tall on row wall, its four panels'
-    seams lgrey arcs nested at its right foot, lit white along its upper left. Its foot stays hidden
-    behind the nearer towers."""
+    seams lgrey arcs nested at its right foot, lit white along its upper left, an ink line along its top
+    arc so it reads apart from light scenery behind it. Its foot stays hidden behind the nearer towers."""
     rx = w / 2
 
     def inside(px, py, r):
@@ -1553,6 +1553,14 @@ def skydome(cv, x, w, wall, ry):
                 if inside(px, py, r) and not inside(px - 1, py, r):
                     c = "lgrey"
             cv.fill(px, py, 1, 1, c)
+    for px in range(x, x + w):
+        rim = next((py for py in range(wall - ry, wall) if inside(px, py, rx)), None)
+        if rim is not None:
+            cv.fill(px, rim - 1, 1, 1, "ink")
+            if px > x and not inside(px - 1, rim, rx):
+                cv.fill(px - 1, rim, 1, 1, "ink")
+            if px < x + w - 1 and not inside(px + 1, rim, rx):
+                cv.fill(px + 1, rim, 1, 1, "ink")
     cv.fill(x, wall, w, 3, "lgrey")
     for ax in range(x + 3, x + w - 3, 5):
         cv.fill(ax, wall + 1, 3, 1, "gold")
@@ -1686,18 +1694,20 @@ def yonge():
                  (268, 16, 40, "dslate"), (300, 18, 30, "navy"), (322, 16, 24, "dslate"), (342, 20, 38, "navy")))
     for cx, top, h in ((52, 22, 9), (122, 26, 7), (156, 16, 8), (178, 34, 6), (220, 12, 6), (348, 38, 8)):
         mast(cv, cx, top - h, h)
-    # behind the SkyDome, lit towers; then, far off in a lighter haze, the CN Tower, the tallest thing on
-    # the skyline, its whole shaft clear in a gap down to the far city's lights over its foot, and the
-    # SkyDome large beside it
-    glass_tower(cv, 50, 22, 40, 7)
+    # behind the SkyDome, lit towers and, far off in a lighter haze, the CN Tower, the tallest thing on
+    # the skyline, its slender shaft rising from behind the dome's left flank; a low dark block between
+    # the shaft and the dome keeps the two light shapes apart; then the SkyDome, large, in front
+    glass_tower(cv, 14, 30, 40, 7)
     scotia(cv, 76, 24, 28)
     dominion(cv, 102, 22, 44, 5)
     glass_tower(cv, 126, 22, 34, 8, "dslate")
-    cn_tower(cv, 30, BASE, 2)
+    cn_tower(cv, 61, BASE, 2)
+    cv.fill(48, 65, 26, BASE - 65, "coal")
+    outline_box(cv, 48, 65, 26, BASE - 64, "ink")
+    cv.fill(49, 66, 24, 1, "ash")
+    lit(cv, 51, 72, 68, 78, "dome-block", 0.45, ("amber", "ochre"), (3, 3))
     skydome(cv, 44, 94, BASE - 26, 20)
-    cv.fill(14, BASE - 5, 32, 5, "coal")
-    lit(cv, 15, 45, BASE - 4, BASE, "lakeshore", 0.35, ("gold", "amber"), (2, 2))
-    # the nearer towers: dark glass left of the CN Tower and up to the SkyDome's lower half; then, down to
+    # the nearer towers: dark glass on the left and up to the SkyDome's lower half; then, down to
     # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, the TD
     # Centre's black pair and glass, each with neon over its street level
     glass_tower(cv, -4, 18, 24, 4)
@@ -1712,7 +1722,7 @@ def yonge():
     dominion(cv, 270, 34, 30, 1)
     dominion(cv, 306, 24, 48, 2)
     glass_tower(cv, 332, 32, 34, 3)
-    for k, (x, w, sign) in enumerate(((-4, 18, None), (44, 30, None), (74, 14, None),
+    for k, (x, w, sign) in enumerate(((-4, 18, None), (14, 30, None), (44, 30, None), (74, 14, None),
                                       (88, 38, ("SHOES", "pink")), (126, 26, ("EAT", "gold")),
                                       (CX - 28, 56, ("MUSIC", "turquoise")), (210, 20, None), (230, 14, None),
                                       (246, 22, None), (270, 34, ("BOOKS", "lilac")), (306, 24, None),
