@@ -2,34 +2,34 @@
 """Draw the zone encounters on the road: the picnic, the goose, the prize
 petunias, trash day, the café patio and the lemonade stand. Each is a billboard
 like the minor obstacles (obstacles.py): a front elevation (the goose a side
-view), squat, its base on the last opaque row, 64n-24 px wide for n lanes.
+view), squat, its base on the last opaque row, 64n-8 px wide for n lanes.
 
-picnic              104x40  2 lanes, a gingham blanket, a basket, sandwiches on a plate and a
+picnic              120x56  2 lanes, a gingham blanket, a basket, sandwiches on a plate and a
                             picnicker sitting cross-legged mid-bite; idle (4 frames, 400ms): a bite
                             (the sandwich 1px lower), then a chew (the cheeks puff out 1px)
-goose               40x40   1 lane, a mover: a white goose, wings up, neck stretched, beak open
+goose               56x56   1 lane, a mover: a white goose, wings up, neck stretched, beak open
                             mid-honk; side view facing right, the game mirrors it for left.
                             run (4 frames, 110ms): a waddle, the feet swap and the body bobs 1px on
                             the passing frames, the wings flap 1px; idle (4 frames, 300ms): the honk,
                             the neck thrust 1px forward with the beak wide, then the beak shut
-petunias            104x40  2 lanes, a raised flower bed of petunias with a blue "1st prize" rosette
+petunias            120x56  2 lanes, a raised flower bed of petunias with a blue "1st prize" rosette
                             on a stake, a hedge behind and a scandalised gardener peeking over it;
                             idle (4 frames, 450ms): the flowers sway 1px right, back, left
-trash-bins          104x40  2 lanes, two metal bins on their sides spilling a banana peel, a can,
+trash-bins          120x56  2 lanes, two metal bins on their sides spilling a banana peel, a can,
                             paper and a pizza box, their lid on the ground with a ginger cat sitting on
                             it; idle (4 frames, 300ms): the cat's tail sways, as road.cat's
-cafe-patio          104x50  2 lanes, a striped awning on two poles over two bistro tables and two
+cafe-patio          120x70  2 lanes, a striped awning on two poles over two bistro tables and two
                             cooing patrons, a toppled cup with a foam heart in its spill on the left
                             table and a cup on a saucer on the right; idle (4 frames, 350ms): a steam
                             curl rises off the cup 1px a frame
-lemonade-stand      40x60   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
+lemonade-stand      56x84   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
                             ("LEMON ADE") and on the front ("50c" with a lemon, a drop beside a coin), a pitcher and
                             cups on the counter; idle (4 frames, 400ms): the kid breathes, and the
                             pitcher glints on the third frame
 
 The drawings are in the 32px units of a 32x32 road sprite: the sprites draw them on a minis.Mini
-at BIG (1.25x), a 2-lane one TWO_LANES units wide, so 32 units are 40px and a 2-lane encounter
-is 104px wide. A 1px line stays 1px and motion moves whole pixels. Every encounter also has
+at BIG (1.75x), a 2-lane one TWO_LANES units wide, so 32 units are 56px and a 2-lane encounter
+is 120px wide. A 1px line stays 1px and motion moves whole pixels. Every encounter also has
 <key>@<step> for each depth step in minis.STEPS (from shared/depth-steps.json), redrawn the same
 way at BIG x the step, floor(size x scale + 0.5), with the original's tags, frames and durations
 and a full outline. Sign letters are 3x5 pixels at 1x or more; smaller, they are scribbles.
@@ -57,10 +57,10 @@ from minis import STEPS, Mini, small  # noqa: E402
 from pixel import ROADS, Grid, edged, main  # noqa: E402
 from road import LIT  # noqa: E402
 
-# The drawings are in the 32px units of the old road sprites; the sprites draw them BIG times larger (40px
-# for a 32px unit frame), and a 2-lane one TWO_LANES units wide, so it is 104px (64n-24 for n lanes).
-BIG = 1.25
-TWO_LANES = (64 * 2 - 24) / BIG
+# The drawings are in the 32px units of the old road sprites; the sprites draw them BIG times larger (56px
+# for a 32px unit frame), and a 2-lane one TWO_LANES units wide, so it is 120px (64n-8 for n lanes).
+BIG = 1.75
+TWO_LANES = (64 * 2 - 8) / BIG
 
 # Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Willow Crescent
 # and Riverside Path.
@@ -167,9 +167,9 @@ def gingham(g, x0, y0, w, h, inset):
 def picnic(chew=0, new=Grid, w=88, crown=0):
     """The picnicker sits cross-legged on the right of the blanket, a sandwich at the mouth with a bite out
     of it. chew 1 is the bite (the sandwich 1px lower), 2 the chew (the cheeks puffed 1px wider). w is the
-    width in drawing units: the plate and apple move left by half of what it is short of 88, the
-    picnicker by all of it. crown lowers the top of the head and hair by that many units, their bottoms
-    kept (see PICNIC_CROWN)."""
+    width in drawing units: the picnicker sits centred 18 units in from the right edge and the plate moves
+    left by half of what w is short of 88; the apple shows only where the picnicker's legs leave it room. crown lowers the top of the head and hair by that many units, their
+    bottoms kept (see PICNIC_CROWN)."""
     d = w - 88
     g = edged(new(w, 32))
     # the blanket: a sliver of its top, wider at the front, then its hem
@@ -197,11 +197,12 @@ def picnic(chew=0, new=Grid, w=88, crown=0):
         g.tri((x0 + 1.5, 25), (x1 - 1.5, 25), (apex, 19.5), "cream")
         g.rect(x0 + 2, 22, round(x1 - x0 - 4), 1, "green")
         g.rect(x0 + 2, 23, round(x1 - x0 - 4), 1, "red")
-    # an apple
-    g.ell(50 + m, 24, 2.5, 2.5, "red", "dred", "pink")
-    g.p(50 + m, 21, "dbrown")
     # the picnicker: crossed legs, body, arms up to the sandwich, head
-    cx = 66 + d
+    cx = w - 18
+    # an apple, where it clears the picnicker's legs
+    if 50 + m + 2.5 < cx - 13:
+        g.ell(50 + m, 24, 2.5, 2.5, "red", "dred", "pink")
+        g.p(50 + m, 21, "dbrown")
     g.ell(cx, 25.5, 13, 3.5, "blue", "navy", "sky")
     g.rect(cx - 2, 23, 4, 2, "navy")
     g.rect(cx - 15, 25, 4, 3, "white")
@@ -455,7 +456,8 @@ def cafe_patio(steam=0, new=Grid, w=88):
     """The awning hangs from a pole at each end over the two tables; the left patron's cup lies toppled in
     its spill with a foam heart floating in it, the right one's stands on a saucer. steam is the curl's
     step: it rises 1px a frame over a 4-row wave. w is the width in drawing units: the right pole, patron
-    and table move left by what it is short of 88, and the awning's ten stripes narrow to fit."""
+    and table move left by what it is short of 88, the awning's ten stripes narrow to fit and the tables
+    narrow so a gap stays between them."""
     d = w - 88
     g = edged(new(w, 40))
     for x in (3, 83 + d):
@@ -475,10 +477,11 @@ def cafe_patio(steam=0, new=Grid, w=88):
     g.rect(2, 3, 2, 4, "dgreen")
     g.rect(84 + d, 3, 2, 4, "dgreen")
     # the tables: a white top edge, a grey rim, a slate pedestal on a dslate foot
+    half = min(11, round((40 + d) / 2) - 1)
     for cx in (24, 64 + d):
-        g.rect(cx - 11, 30, 22, 1, "white")
-        g.rect(cx - 11, 31, 22, 1, "lgrey")
-        g.rect(cx - 10, 32, 20, 1, "grey")
+        g.rect(cx - half, 30, 2 * half, 1, "white")
+        g.rect(cx - half, 31, 2 * half, 1, "lgrey")
+        g.rect(cx - half + 1, 32, 2 * half - 2, 1, "grey")
         g.rect(cx - 1, 33, 3, 4, "slate")
         g.rect(cx - 5, 36, 11, 2, "dslate")
         g.rect(cx - 5, 36, 11, 1, "slate")
