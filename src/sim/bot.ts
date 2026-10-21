@@ -63,8 +63,8 @@ export const SAME_MOMENT = 1e-9;
 const MISTIME_SECONDS = 0.25;
 // The soonest a mistake is noticed, so a bot with no reaction delay still takes a frame.
 const NOTICE_SECONDS = 1 / 60;
-// Hazards are widened a walk step at each end: a lane change starts on the first step at or
-// after it is due, so a planned miss never turns into a hit.
+// Hazards, standing or moving, are widened a walk step at each end: a lane change starts on the
+// first step at or after it is due, up to a step late, so a planned miss never turns into a hit.
 const MARGIN_SECONDS = STEP_SECONDS;
 // How far apart the planner's waiting times are, besides the ends of hazards.
 const GRID_SECONDS = 0.1;
@@ -189,6 +189,16 @@ export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): L
   return contacts;
 }
 
+// The hazards a mover makes, one per lane it is in while it overlaps the pack's band, each
+// widened a walk step at each end as a standing obstacle's is.
+export function moverHazards(road: BotRoad, horizon: number, item: WalkItem): LaneHazard[] {
+  return moverContacts(road, horizon, item).map(({ from, lane, to }) => ({
+    from: from - MARGIN_SECONDS,
+    lanes: 1 << lane,
+    to: to + MARGIN_SECONDS,
+  }));
+}
+
 // The lanes an item covers, as a lane mask.
 export function itemLanes(item: Pick<WalkItem, "lane" | "laneSpan">): number {
   return ((1 << item.laneSpan) - 1) << item.lane;
@@ -272,9 +282,7 @@ function botView(
       continue;
     }
     if (item.mover !== undefined) {
-      for (const contact of moverContacts(road, horizon, item)) {
-        hazards.push({ from: contact.from, lanes: 1 << contact.lane, to: contact.to });
-      }
+      hazards.push(...moverHazards(road, horizon, item));
       continue;
     }
     const { end, start } = contactWindow(geometry.packBand, speed, item.y, item.height);
