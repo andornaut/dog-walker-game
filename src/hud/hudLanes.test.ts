@@ -78,31 +78,39 @@ describe("the bank lane", () => {
   });
 });
 
-// Every cause a change label names, alone after the largest amounts and after a tip, fits its
-// lane on a chip inside the lane, the text's ink padded inside the chip.
+// Every cause a change label names, after the largest amounts, fits its lane on a chip inside
+// the lane, the text's ink padded inside the chip.
 describe("a change label", () => {
-  const names = [
+  const modifiers = [
     ...Object.values(gameData.debuffs).map(({ name }) => name),
+    ...Object.values(gameData.shopGear).map(({ name }) => name),
+    ...Object.values(gameData.upgrades).map(({ name }) => name),
+    ...Object.values(gameData.walkerPerks).map(({ name }) => name),
+  ];
+  const sources = [
+    ...modifiers,
     ...Object.values(gameData.encounters).flatMap(({ name, resolution }) => [
       name,
       ...(resolution.kind === "card"
         ? resolution.options.map((option) => option.cause ?? option.name)
         : []),
     ]),
-    ...Object.values(gameData.shopGear).map(({ name }) => name),
-    ...Object.values(gameData.upgrades).map(({ name }) => name),
-    ...Object.values(gameData.walkerPerks).map(({ name }) => name),
     ...gameData.world.zones.map(({ name }) => name),
-    ...(Object.keys(gameData.dogs) as DogId[]).map((dog) => firedByText(gameData, dog)),
-    gameData.runText.outOfMoney,
   ];
-  const texts = [
-    ...new Set(names.flatMap((name) => [`−10♥ ${name}`, `+$999 ${name}`, `+$99 tip, ${name}`])),
+  const firedBy = (Object.keys(gameData.dogs) as DogId[]).map((dog) => firedByText(gameData, dog));
+  // A heart change names any source or the owner who fires you, over its card; a money change
+  // names any source or running out of money, or a tip and what changed it, at the bank.
+  const hearts = [...sources, ...firedBy].map((name) => `−10♥ ${name}`);
+  const money = [
+    ...[...sources, gameData.runText.outOfMoney].map((name) => `+$999 ${name}`),
+    ...modifiers.map((name) => `+$99 tip, ${name}`),
   ];
-  const cases = texts.flatMap((text) => [
-    ["bank", text, lanes.bank, "bottom"] as const,
-    ["heart", text, lanes.heartLabels[0] ?? lanes.bank, "middle"] as const,
-  ]);
+  const cases = [
+    ...[...new Set(hearts)].map(
+      (text) => ["heart", text, lanes.heartLabels[0] ?? lanes.bank, "middle"] as const,
+    ),
+    ...[...new Set(money)].map((text) => ["bank", text, lanes.bank, "bottom"] as const),
+  ];
   it.each(cases)("in the %s lane, sets %j", (_, text, lane, anchor) => {
     const room = changeLabelRoom(lane.width);
     const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
