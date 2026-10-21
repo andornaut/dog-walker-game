@@ -232,18 +232,21 @@ def snap(q, s, up=False):
     return out
 
 
-# The design point a zoomed dog grows about: its centre column and its feet row.
-DOG_ANCHOR = (16, 29.5)
+# The design column a zoomed dog grows about: its centre.
+DOG_AXIS = 16
 
 
-def zoomed(f, s, zoom):
-    """Frame f, drawn at s x zoom, cut to the frame side(32, s) about DOG_ANCHOR, so the dog fills more of its
-    frame with its feet a row below where they would be at s."""
+def bottom(f):
+    """The last row of frame f with an opaque pixel."""
+    return max(y for y, row in enumerate(f) if any(row))
+
+
+def zoomed(f, s, zoom, top):
+    """Frame f, drawn at s x zoom ((across, down), or one factor for both), cut to the frame side(32, s) about
+    DOG_AXIS from row top, so the dog fills more of its frame."""
+    zx = zoom[0] if isinstance(zoom, tuple) else zoom
     side_ = side(32, s)
-    ax, ay = DOG_ANCHOR
-    left = math.floor(ax * s * zoom + 0.5) - math.floor(ax * s + 0.5)
-    # the feet go one row lower than at s, onto the frame's spare bottom rows, for headroom
-    top = math.floor(ay * s * zoom + 0.5) - math.floor(ay * s + 0.5) - 1
+    left = math.floor(DOG_AXIS * s * zx + 0.5) - math.floor(DOG_AXIS * s + 0.5)
     lost = sum(1 for y, row in enumerate(f) for x, c in enumerate(row)
                if c and not (left <= x < left + side_ and top <= y < top + side_))
     if lost:
@@ -253,16 +256,25 @@ def zoomed(f, s, zoom):
 
 def dog_frames(draw, poses, s, module=dogs, zoom=1):
     """module's draw(q) at scale s of the design grid for each pose in a tag: dogs.road_scale for the full
-    size, times the step for a depth variant. zoom draws the dog that much bigger in the same frame (see
-    zoomed), for a small dog that fills more of its frame. Where two poses round to the same frame (a 2px
-    lean and a 3px one are both 1px at the smallest step), the bigger of the two rounds up instead, so the
-    tag still moves."""
-    def frame(q, up=False):
-        p = s * zoom
+    size, times the step for a depth variant. zoom draws the dog that much bigger in the same frame, across
+    and down ((zx, zy), or one factor for both; see zoomed), for a small dog that fills more of its frame.
+    Where two poses round to the same frame (a 2px lean and a 3px one are both 1px at the smallest step), the
+    bigger of the two rounds up instead, so the tag still moves."""
+    zx, zy = zoom if isinstance(zoom, tuple) else (zoom, zoom)
+    p = (s * zx, s * zy) if zx != zy else s * zx
+
+    def drawn(q, up=False, at=p, z=zy):
         # a zoomed dog moves as far in pixels as it would unzoomed, so its hops and spray stay in the frame
-        q = {k: v if k == "glint" or isinstance(v, bool) else v / zoom for k, v in module.pose(q).items()}
-        f = small(module, p, draw, snap(q, p, up)).outlined()
-        return zoomed(f, s, zoom) if zoom != 1 else f
+        q = {k: v if k == "glint" or isinstance(v, bool) else v / z for k, v in module.pose(q).items()}
+        return small(module, at, draw, snap(q, s * z, up)).outlined()
+
+    # zoomed, the feet of the dog standing square go one row lower than at s, onto the frame's spare bottom
+    # rows, for headroom
+    top = zoom != 1 and bottom(drawn({})) - bottom(drawn({}, at=s, z=1)) - 1
+
+    def frame(q, up=False):
+        f = drawn(q, up)
+        return zoomed(f, s, zoom, top) if zoom != 1 else f
 
     frames = [frame(q) for q in poses]
     for i in range(1, len(frames)):

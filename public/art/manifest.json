@@ -910,7 +910,7 @@
       "json": "sprites/dog-duchess.json",
       "anchor": {
         "feetY": 36,
-        "opaqueWidth": 23
+        "opaqueWidth": 20
       }
     },
     {
@@ -919,7 +919,7 @@
       "json": "sprites/dog-duchess@50.json",
       "anchor": {
         "feetY": 18,
-        "opaqueWidth": 11
+        "opaqueWidth": 10
       }
     },
     {
@@ -928,7 +928,7 @@
       "json": "sprites/dog-duchess@62.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -937,7 +937,7 @@
       "json": "sprites/dog-duchess@75.json",
       "anchor": {
         "feetY": 28,
-        "opaqueWidth": 17
+        "opaqueWidth": 15
       }
     },
     {
@@ -946,7 +946,7 @@
       "json": "sprites/dog-duchess@88.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -1000,7 +1000,7 @@
       "json": "sprites/dog-nugget.json",
       "anchor": {
         "feetY": 36,
-        "opaqueWidth": 23
+        "opaqueWidth": 20
       }
     },
     {
@@ -1009,7 +1009,7 @@
       "json": "sprites/dog-nugget@50.json",
       "anchor": {
         "feetY": 18,
-        "opaqueWidth": 11
+        "opaqueWidth": 10
       }
     },
     {
@@ -1018,7 +1018,7 @@
       "json": "sprites/dog-nugget@62.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -1027,7 +1027,7 @@
       "json": "sprites/dog-nugget@75.json",
       "anchor": {
         "feetY": 28,
-        "opaqueWidth": 17
+        "opaqueWidth": 15
       }
     },
     {
@@ -1036,7 +1036,7 @@
       "json": "sprites/dog-nugget@88.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -1180,7 +1180,7 @@
       "json": "sprites/dog-zippy.json",
       "anchor": {
         "feetY": 36,
-        "opaqueWidth": 21
+        "opaqueWidth": 19
       }
     },
     {
@@ -1198,7 +1198,7 @@
       "json": "sprites/dog-zippy@62.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 13
+        "opaqueWidth": 12
       }
     },
     {
@@ -1216,7 +1216,7 @@
       "json": "sprites/dog-zippy@88.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 18
+        "opaqueWidth": 17
       }
     },
     {
