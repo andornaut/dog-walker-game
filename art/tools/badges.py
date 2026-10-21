@@ -411,11 +411,11 @@ def _(g):
 BADGES = {
     "double-leash": "firsts", "dream-team": "firsts", "first-steps": "firsts", "pack-leader": "firsts",
     "round-trip": "firsts",
-    "big-payday": "mastery", "clean-paws": "mastery", "close-shave": "mastery", "dodge-ball": "mastery",
-    "everybody-home": "mastery", "five-star-service": "mastery", "not-a-scratch": "mastery",
+    "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
+    "five-star-service": "mastery", "not-a-scratch": "mastery",
     "full-kennel": "collection", "kitted-out": "collection", "neighbourhood-favourite": "collection",
     "top-walker": "collection",
-    "eau-de-skunk": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
+    "close-shave": "silly", "eau-de-skunk": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
     "squirrel": "silly", "yoink": "silly", "youre-fired": "silly", "zoomies": "silly",
 }
 
