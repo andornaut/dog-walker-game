@@ -58,7 +58,7 @@ export const CELEBRATION_LAYOUT = {
     button: { height: 44, width: 264, x: 48, y: 416 },
     // The walker's line, wrapped, one line top per line.
     greeting: { lineTops: [336, 354], maxWidth: 296 },
-    // The pace and style row: each icon, iconGap, its word; itemGap between the rest.
+    // The agility and perk row: an icon, iconGap, its word; itemGap between the rest.
     info: { iconGap: 4, iconY: 383, itemGap: 10, y: 382 },
     // Tan dots every step pixels along a row of the bubble.
     rule: { fromX: 36, step: 3, toX: 323, y: 375 },

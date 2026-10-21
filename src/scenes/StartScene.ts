@@ -594,7 +594,7 @@ export class StartScene extends Scene {
   }
 
   // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
-  // walker's pace and style or goal, as a tap says them.
+  // walker's agility and perk or goal, as a tap says them.
   private focusAction(target: Target | undefined): HomeAction {
     const { bankCents, owned } = this.save();
     if (target?.kind === "dog") {
@@ -766,7 +766,7 @@ export class StartScene extends Scene {
         return;
       case "walker": {
         // A locked walker shakes and says its goal; nothing else changes. An owned one is
-        // picked and says its pace and style.
+        // picked and says its agility and perk, or unpicked when it was the picked one.
         const save = this.save();
         const tap = tapWalker(gameData, save.owned, save.walker, target.walker);
         if (tap.kind === "locked") {
@@ -1595,8 +1595,8 @@ export class StartScene extends Scene {
 
   // One tile per walker, in the shared tile states: the saved one is picked, and picking
   // another replaces it, so the walker choice is never full. An owned walker shows its
-  // portrait with its pace icon over its style icon; a locked one its silhouette, the
-  // padlock and its name plate.
+  // portrait with its perk icon beside it; a locked one its silhouette, the padlock and its
+  // name plate.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();

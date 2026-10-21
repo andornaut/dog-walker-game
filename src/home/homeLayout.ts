@@ -198,9 +198,9 @@ export const HOME_LAYOUT = {
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
-  // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
-  // icon right of the box, and a locked walker's padlock over the tile's top-left corner and
-  // its name plate's caps, centred. The tiles sit 7px inside
+  // A walker tile: the portrait's box and the portrait in it, the walker's effect icons (its
+  // perk) right of the box, one under another at icons.dy, and a locked walker's padlock over
+  // the tile's top-left corner and its name plate's caps, centred. The tiles sit 7px inside
   // the section's inner frame edge, leaving the selected badge's overhang on screen.
   walkerTile: {
     box: { dx: 3, dy: 4, size: 34 },

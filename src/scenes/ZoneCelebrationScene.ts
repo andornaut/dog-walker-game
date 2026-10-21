@@ -50,7 +50,7 @@ function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
 
 // Between zones, over the paused walk: the walker cheers on a starburst under the zone's name
 // and earnings, and moves on after ZONE_DONE_MS or a tap; or a newly unlocked walker hops in,
-// greets the pack in a bubble with their pace and style, and waits for Welcome! (key 1).
+// greets the pack in a bubble with their agility and perk, and waits for Welcome! (key 1).
 // Confetti falls in both, unless motion is reduced.
 export class ZoneCelebrationScene extends Scene {
   private done = false;
@@ -169,7 +169,7 @@ export class ZoneCelebrationScene extends Scene {
   }
 
   // The walker's line in a speech bubble whose tail points up at them, a dotted rule, and
-  // their pace and style under it.
+  // their agility and perk under it.
   private addBubble(text: NewWalkerText): void {
     const { centerX, newWalker } = LAYOUT;
     const { bubble, greeting, rule, tail } = newWalker;
@@ -191,7 +191,8 @@ export class ZoneCelebrationScene extends Scene {
     this.addInfo(text.info);
   }
 
-  // The pace and style row, centred: each icon, then its word; the gaps from the layout.
+  // The agility and perk row, centred: each word after its icon, if it has one; the gaps from
+  // the layout.
   private addInfo(parts: readonly LinePart[]): void {
     const { centerX, newWalker } = LAYOUT;
     const { iconGap, iconY, itemGap, y } = newWalker.info;

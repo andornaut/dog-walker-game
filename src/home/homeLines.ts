@@ -61,7 +61,7 @@ export function packCountLine(
 }
 
 // The player's last action on the home screen, for the message it leaves in the walker's
-// bubble. Picking a dog or gear item leaves none; picking a walker leaves its pace and style.
+// bubble. Picking a dog or gear item leaves none; picking a walker leaves its agility and perk.
 export type HomeAction =
   | { readonly kind: "none" }
   | { readonly kind: "bought"; readonly name: string; readonly purchase: Purchase }

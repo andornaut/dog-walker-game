@@ -72,7 +72,7 @@ export type CelebrationText =
   | {
       readonly button: string;
       readonly greeting: string;
-      // The walker's pace and style, each after its icon.
+      // The walker's agility in a word and their perk after its icon.
       readonly info: readonly LinePart[];
       readonly kind: "newWalker";
       readonly subtitle: string;
