@@ -9,8 +9,11 @@ zone's houses, park or shops, the scenery behind them (hills, a second row of ho
 town, a river) and the sky. The houses are slim, about as tall as they are wide under a steep
 gable (house with SLIM parts), with trees, hedges and side yards between them. The band, the
 approach and the camera come from the game's layout export. The scenery gags (cat on a perch,
-sprinkler, a kite caught in a tree) are separate
-sprites the game places in this band, on the near corners either side of the street.
+a kite caught in a tree) are separate sprites the game places in this band, on the near corners
+either side of the street. Beside the kite's tree each zone draws its own static ornament on the
+near-right lawn (ORNAMENTS): a bird bath on Elm Avenue, a flower bed in Fairview Park, a pot of
+flowers on Main Street's paving, pumpkins on The Long Way Home, a gnome and a toadstool on Willow
+Crescent and a rowboat planter on Riverside Path.
 
 Rows, in band rows (0 to 173): the sky is one flat colour above row 61 (CALM), under the
 message strip; the far side's ground row 131 (BASE), the far sidewalk 135 to 138, the far curb
@@ -19,8 +22,9 @@ to 154, and the stub from row 155 (STUB, the approach) to the bottom row, 173, w
 the game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and
 227, verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
 the current constants): the near-left perch's top rail on rows 158 to 159, x 0 to 72; the
-near-right lawn, x 284 to 359 on rows 155 to 173 (the kite's tree at x 284 to 319, its sprite's
-top row 133; the sprinkler at x 322 to 353, its sprite's top row 150); and the two sidewalks, whose middles run from (87, 173) to (94, 154) and from
+near-right lawn's kite spot, x 284 to 319 (its sprite's top row 133, its foot's outline on row
+171), with the ornament beside it at x 322 to 353, its feet on row 171; and the two sidewalks,
+whose middles run from (87, 173) to (94, 154) and from
 (273, 173) to (266, 154).
 
 Usage:
@@ -44,7 +48,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import help as hp  # noqa: E402
-from pixel import DARKER, K  # noqa: E402
+from pixel import DARKER, K, Grid  # noqa: E402
 
 # ---------- the band and the camera ----------
 # Everything below is drawn from these, read from the game's layout export. The camera is the
@@ -682,6 +686,7 @@ def woof_way():
     street(cv, verge(road))
     lanes(cv, "lgrey")
     ffence(cv, *PERCH_X, PERCH)
+    ornament(cv, "birdbath")
     return cv
 
 
@@ -769,6 +774,7 @@ def bark_park():
     street(cv, paint)
     lanes(cv, "dbrown", dash=(7, 16))
     rail(cv, *PERCH_X, PERCH)
+    ornament(cv, "bed")
     return cv
 
 
@@ -897,6 +903,7 @@ def shops():
     street(cv, paint)
     lanes(cv, "white", "mauve")
     planter_wall(cv, *PERCH_X, PERCH)
+    ornament(cv, "pot")
     return cv
 
 
@@ -997,6 +1004,7 @@ def long_way_home():
     lanes(cv, "white", "plum", dash=(14, 32))
     fallen(cv, random.Random("home-leaves"), 80)
     ffence(cv, *PERCH_X, PERCH)
+    ornament(cv, "pumpkins")
     return cv
 
 
@@ -1095,6 +1103,7 @@ def snooze_crescent():
     street(cv, verge(road))
     lanes(cv, road_c["mark"], dash=(8, 32))
     ffence(cv, *PERCH_X, PERCH)
+    ornament(cv, "gnome")
     return cv
 
 
@@ -1230,7 +1239,126 @@ def paws_promenade():
     street(cv, paint)
     lanes(cv, road_c["mark"], dash=(10, 32))
     fence_rail(cv, *PERCH_X, PERCH)
+    ornament(cv, "boat")
     return cv
+
+
+# ---------- the near-right lawn's ornament ----------
+# A static ornament each zone draws on its near-right lawn, beside the kite's tree: drawn on a
+# grid ORN_W x ORN_H with its ground row ORN_H - 3, outlined two ramp steps darker, its grid's
+# top-left at band ORN_X, ORN_Y, so its art keeps to x 322 to 353 with its feet on row 171.
+ORN_X, ORN_Y, ORN_W, ORN_H = 320, 148, 36, 26
+
+
+def _birdbath(g, base):
+    """A white stone bird bath, a sky bird on its rim (Elm Avenue)."""
+    g.rect(11, base - 2, 11, 3, "lgrey")
+    g.rect(19, base - 2, 3, 3, "grey")
+    g.rect(14, 13, 5, base - 15, "lgrey")
+    g.rect(14, 13, 1, base - 15, "white")
+    g.rect(18, 13, 1, base - 15, "grey")
+    g.rect(12, 12, 9, 2, "lgrey")
+    g.ell(16.5, 9, 10, 4, "lgrey")
+    g.ell(19, 10, 6, 2, "grey")
+    g.rect(6, 7, 21, 2, "white")
+    g.rect(24, 7, 3, 2, "lgrey")
+    g.rect(8, 6, 17, 1, "cyan")
+    g.rect(10, 6, 2, 1, "white")
+    g.ell(11, 4, 3, 2, "sky")
+    g.ell(8, 2, 2, 2, "sky")
+    g.p(5, 2, "amber")
+    g.p(8, 1, "ink")
+    g.tri((13, 4), (16, 0), (15, 5), "blue")
+
+
+def _bed(g, base):
+    """A round flower bed edged in stones (Fairview Park)."""
+    g.ell(17, base - 4, 14, 4, "dbrown")
+    for x in range(4, 31, 4):
+        g.rect(x, base - 1, 3, 2, "lgrey")
+        g.p(x + 2, base, "grey")
+    for x, y in ((8, base - 7), (14, base - 9), (21, base - 9), (27, base - 6), (11, base - 4), (24, base - 4)):
+        g.ell(x, y, 3, 2.5, "dgreen")
+        g.ell(x - 0.5, y - 0.5, 2, 1.5, "green")
+    for x, y, c in ((7, base - 10, "red"), (13, base - 12, "yellow"), (19, base - 12, "white"), (24, base - 10, "pink"),
+                    (29, base - 8, "red"), (10, base - 6, "white"), (17, base - 7, "red"), (22, base - 6, "yellow")):
+        g.rect(x, y, 2, 2, c)
+
+
+def _pot(g, base):
+    """A terracotta pot of flowers, its lip lit on the left (Main Street's paving)."""
+    g.tri((10, 13), (25, 13), (22, base + 1), "ochre")
+    g.tri((10, 13), (22, base + 1), (13, base + 1), "ochre")
+    g.tri((25, 13), (22, base + 1), (21, 13), "rust")
+    g.rect(8, 11, 19, 3, "ochre")
+    g.rect(8, 11, 3, 3, "tan")
+    g.rect(24, 11, 3, 3, "rust")
+    g.ell(17.5, 7, 9, 5, "dgreen")
+    g.ell(16, 6, 6, 3, "green")
+    for x, y, c in ((11, 4, "red"), (16, 2, "yellow"), (21, 4, "red"), (13, 8, "pink"), (19, 7, "yellow"),
+                    (24, 8, "pink")):
+        g.rect(x, y, 2, 2, c)
+
+
+def _pumpkins(g, base):
+    """Two pumpkins on the lawn, a big orange one and a small amber one (The Long Way Home)."""
+    g.ell(14, base - 5, 9, 6, "orange")
+    g.ell(12, base - 6, 5, 4, "amber")
+    g.ell(14, base - 5, 2.5, 6, "orange")
+    for x in (9, 18):
+        g.rect(x, base - 9, 1, 8, "rust")
+    g.rect(13, base - 13, 3, 3, "dgreen")
+    g.rect(15, base - 14, 3, 1, "forest")
+    g.ell(26, base - 3, 5, 4, "amber")
+    g.ell(25, base - 4, 2.5, 2, "yellow")
+    g.rect(26, base - 6, 1, 6, "orange")
+    g.rect(25, base - 8, 2, 2, "brown")
+    g.ell(20, base - 1, 3, 1.5, "dgreen")
+
+
+def _gnome(g, base):
+    """A garden gnome in a blue hat and red coat beside a red toadstool (Willow Crescent)."""
+    g.rect(11, base - 8, 10, 8, "red")
+    g.rect(18, base - 8, 3, 8, "dred")
+    g.rect(11, base, 4, 1, "dbrown")
+    g.rect(17, base, 4, 1, "dbrown")
+    g.tri((10, 9), (22, 9), (15, 0), "blue")
+    g.rect(12, 9, 8, 3, "skin1")
+    g.tri((11, 11), (21, 11), (16, 18), "white")
+    g.rect(15, 10, 2, 2, "pink")
+    g.rect(27, base - 5, 2, 6, "white")
+    g.ell(28, base - 5, 4, 2.5, "red")
+    g.rect(26, base - 7, 1, 1, "white")
+    g.rect(29, base - 6, 1, 1, "white")
+
+
+def _boat(g, base):
+    """A little white rowboat turned planter, its bow to the left, full of flowers (Riverside Path)."""
+    g.tri((3, base - 10), (32, base - 7), (28, base + 1), "white")
+    g.tri((3, base - 10), (28, base + 1), (11, base + 1), "white")
+    g.tri((3, base - 10), (32, base - 7), (32, base - 5), "sky")
+    g.tri((3, base - 10), (32, base - 5), (5, base - 8), "sky")
+    g.rect(9, base - 2, 20, 1, "red")
+    g.rect(26, base - 4, 3, 5, "lgrey")
+    for x, y in ((9, base - 11), (15, base - 12), (21, base - 12), (27, base - 10)):
+        g.ell(x, y, 4, 3, "dgreen")
+        g.ell(x - 1, y - 1, 2.5, 1.5, "green")
+    for x, y, c in ((7, base - 13, "red"), (12, base - 15, "yellow"), (18, base - 15, "pink"), (23, base - 14, "white"),
+                    (28, base - 12, "red"), (15, base - 11, "white"), (21, base - 10, "yellow")):
+        g.rect(x, y, 2, 2, c)
+
+
+ORNAMENTS = dict(birdbath=_birdbath, bed=_bed, pot=_pot, pumpkins=_pumpkins, gnome=_gnome, boat=_boat)
+
+
+def ornament(cv, kind):
+    """Draw the zone's static ornament on the near-right lawn (see ORNAMENTS)."""
+    g = Grid(ORN_W, ORN_H)
+    ORNAMENTS[kind](g, ORN_H - 3)
+    for y, row in enumerate(g.outlined()):
+        for x, c in enumerate(row):
+            if c:
+                cv.fill(ORN_X + x, ORN_Y + y, 1, 1, c)
 
 
 # leaves on the sidewalks and lawns: a lit half (f) and a shaded half (v), in rust and ochre

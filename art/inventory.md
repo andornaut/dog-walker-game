@@ -166,7 +166,7 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 | `gag-ball`          | sprite | 14×14   | `roll`          | core | The ball in `card-play-date-play`, and the game's sidewalk gag until it places `gag-kite`   |
 | `gag-cat`           | sprite | 24×24   | `idle`, `react` | core | On a fence                                                                                  |
 | `gag-kite`          | sprite | 36×40   | `flutter`       | core | A kite caught in a street tree, on the near-right lawn                                      |
-| `gag-sprinkler`     | sprite | 32×24   | `spray`         | core |                                                                                             |
+| `gag-sprinkler`     | sprite | 32×24   | `spray`         | core | Not placed: each backdrop draws a static ornament on its spot                               |
 
 ### Roadside props
 

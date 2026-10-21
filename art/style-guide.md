@@ -363,17 +363,27 @@ Where row 213 meets the road, left side (the right mirrors it):
 | Riverside Path    | Paving 76 to 99                | none    | 100        |
 | The Long Way Home | Sidewalk 76 to 97              | 98..99  | 100        |
 
-Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 158 to 159, x 0 to 72), the near-right lawn (x 284 to 359, rows 155 to 173), and both sidewalks.
+Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 158 to 159, x 0 to 72), the near-right lawn's kite spot (x 284 to 319, rows 133 to 173), and both sidewalks.
 
 Scenery gags are sprites the game places on those spots, drawn front view at the band's own scale, in `art/tools/road.py`. They loop, open no card and have no effect.
 
-| Key             | Spot            | Top-left (band px) | Note                                                                                                                                                                                                 |
-| --------------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gag-cat`       | Near-left perch | x 0 to 48, row 135 | Paws on the top rail, row 158                                                                                                                                                                        |
-| `gag-kite`      | Near-right lawn | 284, 133           | A street tree with a diamond kite snagged in its crown. Its crown rises over the cross street, rows 133 to 149; its foot's outline is on row 171. Every zone takes it, Main Street's paving included |
-| `gag-sprinkler` | Near-right lawn | 322, 150           | Not on Main Street, which is paved                                                                                                                                                                   |
+| Key        | Spot            | Top-left (band px) | Note                                                                                                                                                                                                 |
+| ---------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gag-cat`  | Near-left perch | x 0 to 48, row 135 | Paws on the top rail, row 158                                                                                                                                                                        |
+| `gag-kite` | Near-right lawn | 284, 133           | A street tree with a diamond kite snagged in its crown. Its crown rises over the cross street, rows 133 to 149; its foot's outline is on row 171. Every zone takes it, Main Street's paving included |
 
 - One sprite for every zone: the kite's tree is drawn into it, since Main Street has no tree and Riverside Path's stand across the river. Its crown is green with a forest outline, and the kite red and yellow with a plum outline, so both hold on every zone's ground and far side.
+
+Beside the kite's tree each backdrop draws a static ornament on the near-right lawn, from x 322 to 353 with its feet on row 171 and its outline two ramp steps darker (`ornament` in `art/tools/backdrops.py`). It has no frames to play, so nothing beside the road moves but the gags. On the approach rows the game's road raster shows the backdrop's own pixels wherever they differ from its verge, so the ornament stays in place while the lawn scrolls.
+
+| Zone              | Ornament                                                   |
+| ----------------- | ---------------------------------------------------------- |
+| Willow Crescent   | A garden gnome in a blue hat and red coat, a red toadstool |
+| Fairview Park     | A round flower bed edged in stones                         |
+| Elm Avenue        | A white stone bird bath, a sky bird on its rim             |
+| Main Street       | A terracotta pot of flowers on the paving                  |
+| Riverside Path    | A white rowboat turned planter, full of flowers            |
+| The Long Way Home | Two pumpkins, orange and amber                             |
 
 ## Skies
 

@@ -34,8 +34,8 @@ Usage:
                             public/art/sprites/*.png and *.json with Aseprite
 
 The scenery gags play in the backdrop band, front view at the band's own scale: gag-cat
-(24x24) on the near-left perch, gag-sprinkler (32x24) and gag-kite (36x40) on the near-right
-lawn. gag-kite is a street tree with a red and yellow diamond kite snagged at the top right of
+(24x24) on the near-left perch and gag-kite (36x40) on the near-right lawn. gag-sprinkler
+(32x24) is not placed: each backdrop draws a static ornament on its spot. gag-kite is a street tree with a red and yellow diamond kite snagged at the top right of
 its crown, its ribboned tail streaming right; flutter (4 frames, 140ms, looping): the kite swings
 1 to 2px on its snag while a wave runs out along the tail. gag-ball (14x14), the rolling ball,
 stays for the play-date card's art.
