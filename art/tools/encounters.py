@@ -262,9 +262,9 @@ def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
         g.rect(x + step / 2, 24 + b, 2, 4 - b, leg)
         g.rect(x + step - 1, 28, 3, 1, leg)
         g.rect(x + step - 1, 29, 4, 1, foot)
-    # the far wing, raised behind the body
-    g.tri((12, 15 + b), (21, 14 + b), (19, 2 + b + f), "lgrey")
-    g.tri((15, 14 + b), (20, 14 + b), (19, 5 + b + f), "grey")
+    # the far wing, raised behind the body and clear of the neck, so the neck shows against the road
+    g.tri((10, 15 + b), (19, 14 + b), (16, 2 + b + f), "lgrey")
+    g.tri((13, 14 + b), (18, 14 + b), (16, 5 + b + f), "grey")
     # tail and body
     g.tri((2, 12 + b), (6, 20 + b), (9, 15 + b), "white")
     g.ell(14, 19.5 + b, 9.5, 5.5, "white", "lgrey")
