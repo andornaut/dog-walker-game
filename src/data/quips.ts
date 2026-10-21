@@ -49,7 +49,7 @@ export const QUIPS = {
   pierre: {
     fired: ["Disqualified. You are fired.", "Pepe withdraws. Adieu."],
     happier: ["Acceptable. Barely.", "Seven out of ten. C'est bien."],
-    parting: ["No puddles. I will check his paws.", "Posture, please. I deduct for slouching."],
+    parting: ["No puddles. I will check his paws.", "Posture! I deduct for slouching."],
     upset: ["Non. Points deducted.", "That would never place at a show."],
   },
   snowball: {
