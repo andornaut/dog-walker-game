@@ -1,5 +1,5 @@
 import type { DogId, Effect, GameData, HeartsEffect, MoneyEffect, Target } from "../data/types";
-import { heartsOf, mapPack, packDogs } from "../state/pack";
+import { heartsOf, mapPack, packDogs, placeInPack } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
 import {
@@ -161,7 +161,7 @@ export function changeHearts(
   const total = causes.reduce((sum, cause) => sum + cause.amount, 0);
   const unclamped = before + total;
   const after = clampHearts(
-    maxHearts(data.tuning, state.modifiers, state.pack.length, data.dogs[dogId]),
+    maxHearts(data.tuning, state.modifiers, placeInPack(state, dogId), data.dogs[dogId]),
     unclamped,
   );
   if (after === before && forgiven === null) {

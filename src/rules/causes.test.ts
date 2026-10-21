@@ -8,6 +8,7 @@ import { SHOP_GEAR } from "../data/shop";
 import type { DogId, Effect, ZoneId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import type { EffectSource, RunState } from "../state/runState";
+import { LONE } from "../testing/packPlaces";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -69,7 +70,7 @@ const towel: Effect = {
 };
 const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
 // A lone dog's owner's max.
-const maxOf = (dog: DogId) => maxHearts(TEST_TUNING, [], 1, DOGS[dog]);
+const maxOf = (dog: DogId) => maxHearts(TEST_TUNING, [], LONE, DOGS[dog]);
 const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },

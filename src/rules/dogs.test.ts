@@ -2,12 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import { TUNING as REAL_TUNING } from "../data/tuning";
-import type { Modifier, PackSize } from "../data/types";
+import type { Modifier } from "../data/types";
+import { PACK_PLACES, placeName } from "../testing/packPlaces";
 import { TEST_TUNING } from "../testing/tuning";
-import { maxHearts, packSizeBonus, packSizeRaise, sizeHearts, startHearts } from "./dogs";
+import {
+  maxHearts,
+  packPlace,
+  packSizeBonus,
+  packSizeRaise,
+  sizeHearts,
+  startHearts,
+} from "./dogs";
 import { zoneStats } from "./zones";
 
-const PACK_SIZES: readonly PackSize[] = [1, 2, 3];
+const PLACES = PACK_PLACES.map((place) => [placeName(place), place] as const);
 
 describe("dog stats", () => {
   it("starts every owner full, with or without a raised max, in a pack of any size", () => {
@@ -15,36 +23,44 @@ describe("dog stats", () => {
       ["with no gear", []],
       ["with a raised max", [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }]],
     ] satisfies readonly [string, readonly Modifier[]][]) {
-      for (const packSize of PACK_SIZES) {
+      for (const place of PACK_PLACES) {
         for (const dog of Object.values(DOGS)) {
-          expect(startHearts(TEST_TUNING, modifiers, packSize, dog)).toBe(
-            maxHearts(TEST_TUNING, modifiers, packSize, dog),
+          expect(startHearts(TEST_TUNING, modifiers, place, dog)).toBe(
+            maxHearts(TEST_TUNING, modifiers, place, dog),
           );
         }
       }
     }
   });
 
-  it.each(PACK_SIZES)("adds a pack of %i's bonus to every owner's max, under the cap", (size) => {
+  it.each(PLACES)("adds the pack's bonus to the lead's owner's max only, %s", (_name, place) => {
     const { hearts } = TEST_TUNING;
-    const bonus = hearts.packSizeBonus[size];
-    expect(packSizeBonus(TEST_TUNING, size)).toBe(bonus);
+    const bonus = place.lead ? hearts.packSizeBonus[place.size] : 0;
+    expect(packSizeBonus(TEST_TUNING, place)).toBe(bonus);
     for (const dog of Object.values(DOGS)) {
       const max = Math.min(hearts.maxOwnerHearts, sizeHearts(TEST_TUNING, dog) + bonus);
-      expect(maxHearts(TEST_TUNING, [], size, dog)).toBe(max);
-      expect(packSizeRaise(TEST_TUNING, [], size, dog)).toBe(max - sizeHearts(TEST_TUNING, dog));
+      expect(maxHearts(TEST_TUNING, [], place, dog)).toBe(max);
+      expect(packSizeRaise(TEST_TUNING, [], place, dog)).toBe(max - sizeHearts(TEST_TUNING, dog));
     }
   });
 
-  it.each(PACK_SIZES)("holds every owner's max to the cap walking %i, gear and all", (size) => {
+  it.each(PLACES)("holds every owner's max to the cap, gear and all, %s", (_name, place) => {
     const collar: readonly Modifier[] = [
       { by: "luckyCollarMax", operation: "add", stat: "maxHearts" },
     ];
     for (const dog of Object.values(DOGS)) {
-      expect(maxHearts(REAL_TUNING, collar, size, dog)).toBeLessThanOrEqual(
+      expect(maxHearts(REAL_TUNING, collar, place, dog)).toBeLessThanOrEqual(
         REAL_TUNING.hearts.maxOwnerHearts,
       );
     }
+  });
+
+  it.each([
+    [["koda"], "koda", { lead: true, size: 1 }],
+    [["koda", "duchess"], "koda", { lead: true, size: 2 }],
+    [["koda", "duchess"], "duchess", { lead: false, size: 2 }],
+  ] as const)("places a dog in the pack %j: %s", (order, dog, place) => {
+    expect(packPlace(order, dog)).toEqual(place);
   });
 });
 

@@ -1,15 +1,28 @@
-import type { Dog, LiveTuning, Modifier, PackSize } from "../data/types";
+import type { Dog, DogId, LiveTuning, Modifier, PackSize } from "../data/types";
 import { modifiedStat } from "./modifiers";
 import { clampHearts, type Hearts, read, readTable } from "./units";
+
+// A dog's place in the pack a walk set out with, for the pack-size bonus: how many dogs the
+// pack has, and whether the dog leads it.
+export interface PackPlace {
+  readonly lead: boolean;
+  readonly size: PackSize;
+}
+
+// The place of dog in a pack of 1 to 3 dogs in pack order (packOrder), its lead first.
+export function packPlace(order: readonly DogId[], dog: DogId): PackPlace {
+  return { lead: order[0] === dog, size: order.length as PackSize };
+}
 
 // The hearts a dog's size gives its owner's meter, before the pack's size and any modifiers.
 export function sizeHearts(tuning: LiveTuning, dog: Pick<Dog, "size">): number {
   return readTable(tuning, "hearts", "maxBySize", dog.size);
 }
 
-// The hearts a walk of packSize dogs adds to every owner's max, before the cap.
-export function packSizeBonus(tuning: LiveTuning, packSize: PackSize): number {
-  return readTable(tuning, "hearts", "packSizeBonus", packSize);
+// The hearts a dog's place adds to its owner's max, before the cap: hearts.packSizeBonus for
+// the pack's size to the lead dog's owner, and none to any other.
+export function packSizeBonus(tuning: LiveTuning, place: PackPlace): number {
+  return place.lead ? readTable(tuning, "hearts", "packSizeBonus", place.size) : 0;
 }
 
 // A max of base hearts after the maxHearts modifiers, held to hearts.maxOwnerHearts.
@@ -20,27 +33,26 @@ function cappedMax(tuning: LiveTuning, modifiers: readonly Modifier[], base: num
   );
 }
 
-// The cap on this dog's owner's meter on a walk that set out with packSize dogs: by its size
-// plus its pack-size bonus, then maxHearts modifiers, then held to hearts.maxOwnerHearts.
+// The cap on this dog's owner's meter at its place in the pack the walk set out with: by its
+// size plus its pack-size bonus, then maxHearts modifiers, then held to hearts.maxOwnerHearts.
 export function maxHearts(
   tuning: LiveTuning,
   modifiers: readonly Modifier[],
-  packSize: PackSize,
+  place: PackPlace,
   dog: Pick<Dog, "size">,
 ): number {
-  return cappedMax(tuning, modifiers, sizeHearts(tuning, dog) + packSizeBonus(tuning, packSize));
+  return cappedMax(tuning, modifiers, sizeHearts(tuning, dog) + packSizeBonus(tuning, place));
 }
 
 // How many hearts the pack-size bonus raises this dog's owner's max by, once capped.
 export function packSizeRaise(
   tuning: LiveTuning,
   modifiers: readonly Modifier[],
-  packSize: PackSize,
+  place: PackPlace,
   dog: Pick<Dog, "size">,
 ): number {
   return (
-    maxHearts(tuning, modifiers, packSize, dog) -
-    cappedMax(tuning, modifiers, sizeHearts(tuning, dog))
+    maxHearts(tuning, modifiers, place, dog) - cappedMax(tuning, modifiers, sizeHearts(tuning, dog))
   );
 }
 
@@ -48,10 +60,10 @@ export function packSizeRaise(
 export function startHearts(
   tuning: LiveTuning,
   modifiers: readonly Modifier[],
-  packSize: PackSize,
+  place: PackPlace,
   dog: Pick<Dog, "size">,
 ): Hearts {
-  const max = maxHearts(tuning, modifiers, packSize, dog);
+  const max = maxHearts(tuning, modifiers, place, dog);
   return clampHearts(max, max);
 }
 

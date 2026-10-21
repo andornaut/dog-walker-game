@@ -9,6 +9,7 @@ import { unlockPrice } from "../rules/shop";
 import { baseCardArtPrefix } from "../rules/skins";
 import { read, readTable } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
+import { PACK_PLACES } from "../testing/packPlaces";
 import { gameData } from ".";
 import { SCREEN_CONFIG } from "./screen";
 import type {
@@ -75,12 +76,10 @@ describe("hearts", () => {
 
   it("starts every owner full and above 0 with any gear, and raises the max with size", () => {
     for (const set of gearModifierSets) {
-      for (const packSize of [1, 2, 3] as const) {
+      for (const place of PACK_PLACES) {
         for (const dog of dogList) {
-          expect(startHearts(tuning, set, packSize, dog)).toBe(
-            maxHearts(tuning, set, packSize, dog),
-          );
-          expect(startHearts(tuning, set, packSize, dog)).toBeGreaterThan(0);
+          expect(startHearts(tuning, set, place, dog)).toBe(maxHearts(tuning, set, place, dog));
+          expect(startHearts(tuning, set, place, dog)).toBeGreaterThan(0);
         }
       }
     }

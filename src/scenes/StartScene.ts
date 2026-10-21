@@ -1092,7 +1092,7 @@ export class StartScene extends Scene {
     }
   }
 
-  // The Dogs band's pack-size bonus (packBonusLine), when the pack's size raises a picked dog's
+  // The Dogs band's pack-size bonus (packBonusLine), when the pack's size raises its lead dog's
   // owner's max: its line in ink and then a full heart, ending HOME_LAYOUT.bonus.countGap left of
   // the pack count's left edge, or of the band's text inset with no count.
   private drawPackBonus(

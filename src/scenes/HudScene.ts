@@ -64,6 +64,7 @@ import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
+import { placeInPack } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import { fillLine } from "../text/lines";
 import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
@@ -703,7 +704,7 @@ export class HudScene extends Scene {
     this.fitName(view.name, dog.name, rect);
     this.showOwnerName(view.owner, dog.owner.name, rect);
     setPixelText(view.fired, fired ? gameData.runText.fired : "");
-    const max = maxHearts(gameData.tuning, run.modifiers, run.pack.length, dog);
+    const max = maxHearts(gameData.tuning, run.modifiers, placeInPack(run, slot.dog), dog);
     const ownerKey = ownerCardFaceKey(gameData, slot.dog);
     playTag(
       view.ownerFace.setTexture(ownerKey).setVisible(true),
@@ -810,7 +811,12 @@ export class HudScene extends Scene {
     if (rect === undefined || run === undefined) {
       return;
     }
-    const max = maxHearts(gameData.tuning, run.modifiers, run.pack.length, gameData.dogs[cue.dog]);
+    const max = maxHearts(
+      gameData.tuning,
+      run.modifiers,
+      placeInPack(run, cue.dog),
+      gameData.dogs[cue.dog],
+    );
     const cell = cardHearts(cue.hearts, max)[cue.hearts - 1];
     if (cell !== undefined) {
       this.hearts?.forgive({ x: rect.x + cell.x, y: rect.y + cell.y });
@@ -923,7 +929,12 @@ export class HudScene extends Scene {
     if (slot === undefined || run === undefined || this.owners === undefined) {
       return false;
     }
-    const max = maxHearts(gameData.tuning, run.modifiers, run.pack.length, gameData.dogs[quip.dog]);
+    const max = maxHearts(
+      gameData.tuning,
+      run.modifiers,
+      placeInPack(run, quip.dog),
+      gameData.dogs[quip.dog],
+    );
     const at = { dog: quip.dog, mood: faceMood(gameData, max, hearts), slot };
     const shown = this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
     // Heart pops already on their way land at once if the quip went above its tab over them.

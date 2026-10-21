@@ -11,7 +11,7 @@ import type {
   WalkerId,
   ZoneId,
 } from "../data/types";
-import { startHearts } from "../rules/dogs";
+import { packPlace, startHearts } from "../rules/dogs";
 import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
 import { modifiedStat } from "../rules/modifiers";
@@ -150,14 +150,15 @@ export function newRun(
   if (loadout.dogs.length > dogSlots) {
     throw new Error(`A pack of ${loadout.dogs.length} needs that many dog slots, not ${dogSlots}`);
   }
+  const order = packOrder(data.dogs, loadout.dogs);
   const packWith = (modifiers: readonly Modifier[]) =>
     packFor(
       (dog) => ({
         dog,
-        hearts: startHearts(data.tuning, modifiers, loadout.dogs.length, data.dogs[dog]),
+        hearts: startHearts(data.tuning, modifiers, packPlace(order, dog), data.dogs[dog]),
         status: "walking",
       }),
-      packOrder(data.dogs, loadout.dogs),
+      order,
     );
   const { walker } = loadout;
   const empty: RunState = {

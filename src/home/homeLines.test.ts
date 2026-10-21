@@ -173,19 +173,14 @@ describe("packBonusLine", () => {
   };
   const line = (raise: number) =>
     raise > 0 ? fillNames(data.homeText.packBonus, { hearts: String(raise) }) : null;
+  // Koda is big, so leads any pack it is in.
   it.each<[string, LiveTuning, readonly DogId[], string | null]>([
     ["no dog picked", TEST_TUNING, [], null],
     ["a lone dog", TEST_TUNING, ["koda"], line(hearts.packSizeBonus[1])],
-    ["a pair", TEST_TUNING, ["koda", "duchess"], line(hearts.packSizeBonus[2])],
+    ["a pair", TEST_TUNING, ["duchess", "koda"], line(hearts.packSizeBonus[2])],
     ["a full pack", TEST_TUNING, ["koda", "duchess", "pierre"], line(hearts.packSizeBonus[3])],
-    ["a lone dog already at the cap", capped, ["koda"], null],
-    [
-      "a pair with one dog under the cap",
-      capped,
-      ["koda", "duchess"],
-      line(Math.min(hearts.packSizeBonus[2], hearts.maxBySize.big - hearts.maxBySize.small)),
-    ],
-  ])("shows the most a picked owner's max rises for %s", (_name, tuning, dogs, expected) => {
+    ["a lead already at the cap", capped, ["duchess", "koda"], null],
+  ])("shows how far the lead's owner's max rises for %s", (_name, tuning, dogs, expected) => {
     expect(packBonusLine({ ...data, tuning }, { dogs, gear: null })).toBe(expected);
   });
 });

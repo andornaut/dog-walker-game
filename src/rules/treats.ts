@@ -1,14 +1,18 @@
 import type { DogId, GameData } from "../data/types";
-import { heartsOf, packDogs } from "../state/pack";
+import { heartsOf, packDogs, placeInPack } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { maxHearts } from "./dogs";
 import { read } from "./units";
 
 export type FaceMood = "happy" | "neutral" | "upset";
 
-// How an owner or dog looks at a number of hearts out of max: upset below faceNeutralFrom,
-// neutral at faceNeutralFrom or more than faceHappyWithin below max, and happy otherwise.
+// How an owner or dog looks at a number of hearts out of max: happy at max, whatever the max;
+// below it, upset below faceNeutralFrom, neutral at faceNeutralFrom or more than faceHappyWithin
+// below max, and happy otherwise.
 export function faceMood(data: Pick<GameData, "tuning">, max: number, hearts: number): FaceMood {
+  if (hearts >= max) {
+    return "happy";
+  }
   const neutralFrom = read(data.tuning, "hearts", "faceNeutralFrom");
   if (hearts < neutralFrom) {
     return "upset";
@@ -26,7 +30,7 @@ export function treatRecipient(
   touched: DogId,
 ): DogId {
   const below = (dog: DogId, hearts: number) =>
-    hearts < maxHearts(data.tuning, run.modifiers, run.pack.length, data.dogs[dog]);
+    hearts < maxHearts(data.tuning, run.modifiers, placeInPack(run, dog), data.dogs[dog]);
   const own = heartsOf(run, touched);
   if (own !== undefined && below(touched, own)) {
     return touched;

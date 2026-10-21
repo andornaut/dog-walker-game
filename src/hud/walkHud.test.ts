@@ -17,6 +17,7 @@ import { walkLength } from "../rules/route";
 import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics, fontInk } from "../testing/fontInk";
+import { LONE } from "../testing/packPlaces";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { maxEffects } from "./effectIcons";
@@ -362,10 +363,12 @@ describe("the dog cards", () => {
     });
   });
 
-  // The most hearts an owner can have: the biggest dog's, walked alone, with every gear's raise.
+  // The most hearts an owner can have: any dog's, walked alone, with every gear's raise.
   const gearModifiers = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
   const mostHearts = Math.max(
-    ...Object.values(gameData.dogs).map((dog) => maxHearts(gameData.tuning, gearModifiers, 1, dog)),
+    ...Object.values(gameData.dogs).map((dog) =>
+      maxHearts(gameData.tuning, gearModifiers, LONE, dog),
+    ),
   );
   const card = { ...DOG_CARD.size, x: 0, y: 0 };
   const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };

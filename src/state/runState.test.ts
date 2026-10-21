@@ -4,13 +4,14 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, GearId, PackSize } from "../data/types";
-import { packSizeBonus, sizeHearts, startHearts } from "../rules/dogs";
+import type { DogId, GearId } from "../data/types";
+import { packPlace, sizeHearts, startHearts } from "../rules/dogs";
 import { read } from "../rules/units";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
+import { packOrder } from "./pack";
 import { newRun } from "./runState";
 
 const data = {
@@ -26,7 +27,10 @@ const data = {
 // Each dog's owner at their starting hearts: full.
 const startsOf = (dogs: readonly DogId[]) =>
   Object.fromEntries(
-    dogs.map((dog) => [dog, startHearts(data.tuning, [], dogs.length as PackSize, DOGS[dog])]),
+    dogs.map((dog) => [
+      dog,
+      startHearts(data.tuning, [], packPlace(packOrder(DOGS, dogs), dog), DOGS[dog]),
+    ]),
   );
 
 describe("newRun", () => {
@@ -40,21 +44,27 @@ describe("newRun", () => {
     expect(state.zoneIndex).toBe(0);
   });
 
+  // Each pack, as picked, with its lead: the biggest dog, ties in roster order.
   it.each([
-    [["koda"], 1],
-    [["koda", "pierre"], 2],
-    [["duchess", "koda", "pierre"], 3],
-  ] as const)("adds the pack-size bonus to every owner's max walking %j", (dogs, size) => {
-    const state = newRun(data, 3, { dogs, gear: null, walker: "casey" });
-    expect(heartsByDog(state)).toEqual(
-      Object.fromEntries(
-        dogs.map((dog) => [
-          dog,
-          sizeHearts(TEST_TUNING, DOGS[dog]) + packSizeBonus(TEST_TUNING, size),
-        ]),
-      ),
-    );
-  });
+    [["koda"], "koda"],
+    [["pierre", "koda"], "koda"],
+    [["duchess", "pierre"], "pierre"],
+    [["duchess", "koda", "pierre"], "koda"],
+  ] as const)(
+    "adds the pack-size bonus to the lead's owner's max only, walking %j",
+    (dogs, lead) => {
+      const state = newRun(data, 3, { dogs, gear: null, walker: "casey" });
+      const { packSizeBonus } = TEST_TUNING.hearts;
+      expect(heartsByDog(state)).toEqual(
+        Object.fromEntries(
+          dogs.map((dog) => [
+            dog,
+            sizeHearts(TEST_TUNING, DOGS[dog]) + (dog === lead ? packSizeBonus[dogs.length] : 0),
+          ]),
+        ),
+      );
+    },
+  );
 
   it("starts with what the gear gives", () => {
     const fannyPackPurse =

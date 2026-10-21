@@ -1,4 +1,5 @@
 import type { DogId, GameData, Size } from "../data/types";
+import { type PackPlace, packPlace } from "../rules/dogs";
 import type { Hearts } from "../rules/units";
 import type { Pack, PackDogs, PackSlot, RunState } from "./runState";
 
@@ -57,4 +58,12 @@ export function packDogsOf(dogs: readonly DogId[]): PackDogs | undefined {
     return [first];
   }
   return third === undefined ? [first, second] : [first, second, third];
+}
+
+// A dog's place in the pack the walk set out with, fired dogs included, for its owner's max.
+export function placeInPack(state: Pick<RunState, "pack">, dog: DogId): PackPlace {
+  return packPlace(
+    state.pack.map((slot) => slot.dog),
+    dog,
+  );
 }

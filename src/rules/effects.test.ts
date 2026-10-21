@@ -6,6 +6,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { TUNING } from "../data/tuning";
 import type { DogId, Effect } from "../data/types";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
+import { LONE } from "../testing/packPlaces";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { maxHearts } from "./dogs";
@@ -68,7 +69,7 @@ describe("applyEffects: hearts", () => {
 describe("resolveEffects: changes and their causes", () => {
   it("reports the base and the cap, summing to the change", () => {
     const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
-    const max = maxHearts(TEST_TUNING, [], 1, DOGS.nugget);
+    const max = maxHearts(TEST_TUNING, [], LONE, DOGS.nugget);
     const { changes } = resolveEffects(
       data,
       context([]),
@@ -91,7 +92,7 @@ describe("resolveEffects: changes and their causes", () => {
 
   it("reports no change for an owner whose meter does not move", () => {
     const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
-    const full = testState({ duchess: maxHearts(TEST_TUNING, [], 1, DOGS.duchess) });
+    const full = testState({ duchess: maxHearts(TEST_TUNING, [], LONE, DOGS.duchess) });
     const { changes } = resolveEffects(data, context([]), [gainOne], full);
     expect(changes).toEqual([]);
   });
@@ -105,6 +106,8 @@ describe("resolveEffects: changes and their causes", () => {
       operation: "add",
       stat: "forgivenHearts",
     });
+    // Koda's owner walking Koda alone, at full hearts.
+    const full = maxHearts(tuning, [], LONE, DOGS.koda);
     const lose = (amount: 1 | 2): Effect => ({
       amount: amount === 1 ? -1 : -2,
       kind: "hearts",
@@ -114,12 +117,12 @@ describe("resolveEffects: changes and their causes", () => {
     it("forgives up to its allowance of a loss, reporting it when nothing is lost", () => {
       for (const loss of [1, 2] as const) {
         const forgiven = Math.min(loss, allowance);
-        const state = testState({ koda: 5 }, { modifiers: [kindWords] });
+        const state = testState({ koda: full }, { modifiers: [kindWords] });
         const applied = resolveEffects({ ...data, tuning }, context([]), [lose(loss)], state);
         expect(applied.changes).toEqual([
           {
-            after: 5 - loss + forgiven,
-            before: 5,
+            after: full - loss + forgiven,
+            before: full,
             causes: [
               { amount: -loss, kind: "effect", source: SKUNK_IGNORE },
               { amount: forgiven, kind: "modifier", source },
@@ -133,7 +136,7 @@ describe("resolveEffects: changes and their causes", () => {
     });
 
     it("forgives no more once its allowance is used this zone", () => {
-      const used = testState({ koda: 5 }, { heartsForgiven: allowance, modifiers: [kindWords] });
+      const used = testState({ koda: full }, { heartsForgiven: allowance, modifiers: [kindWords] });
       const { changes } = resolveEffects({ ...data, tuning }, context([]), [lose(1)], used);
       expect(changes.map((change) => change.causes.length)).toEqual([1]);
     });

@@ -161,7 +161,7 @@ function priceText(data: GameData, item: Unlock): string {
 
 const PACK_SIZES: readonly PackSize[] = [1, 2, 3];
 
-// A value for each pack size, walking 1, 2 and 3 dogs.
+// A value for each pack size, leading 1, 2 and 3 dogs.
 function byPackSize(value: (size: PackSize) => number): string {
   return PACK_SIZES.map(value).join(" / ");
 }
@@ -177,7 +177,7 @@ function dogsSection(data: GameData): Section {
       "Size",
       "Owner",
       "♥ by size",
-      "Max ♥ walking 1 / 2 / 3",
+      "Max ♥ leading 1 / 2 / 3",
       "With Lucky collar",
       "Unlock",
     ],
@@ -187,8 +187,8 @@ function dogsSection(data: GameData): Section {
       capitalize(SIZE_NAMES[dog.size]),
       `${dog.owner.name}, ${dog.owner.role}`,
       sizeHearts(tuning, dog),
-      byPackSize((size) => maxHearts(tuning, [], size, dog)),
-      byPackSize((size) => maxHearts(tuning, luckyCollar, size, dog)),
+      byPackSize((size) => maxHearts(tuning, [], { lead: true, size }, dog)),
+      byPackSize((size) => maxHearts(tuning, luckyCollar, { lead: true, size }, dog)),
       priceText(data, dog),
     ]),
     title: "Dogs",

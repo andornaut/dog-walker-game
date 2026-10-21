@@ -1,8 +1,9 @@
-import type { DogId, GameData, HomeText, PackSize, WalkerId } from "../data/types";
-import { packSizeRaise } from "../rules/dogs";
+import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
+import { packPlace, packSizeRaise } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import type { Cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
+import { packOrder } from "../state/pack";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
 import { homeLine } from "./homeText";
 
@@ -62,22 +63,19 @@ export function packCountLine(
   });
 }
 
-// The Dogs band's pack-size bonus: the most hearts the pack's size raises a picked dog's
-// owner's max by, with the gear picked, or null when it raises none or no dog is picked.
+// The Dogs band's pack-size bonus: the hearts the pack's size raises its lead dog's owner's max
+// by, with the gear picked, or null when it raises none or no dog is picked.
 export function packBonusLine(
   data: Pick<GameData, "dogs" | "homeText" | "shopGear" | "tuning">,
   loadout: HomeLoadout,
 ): string | null {
-  const size = loadout.dogs.length;
-  if (size < 1 || size > 3) {
+  const order = packOrder(data.dogs, loadout.dogs);
+  const [lead] = order;
+  if (lead === undefined || order.length > 3) {
     return null;
   }
   const modifiers = loadout.gear === null ? [] : modifiersOf(data.shopGear[loadout.gear].effects);
-  const raise = Math.max(
-    ...loadout.dogs.map((dog) =>
-      packSizeRaise(data.tuning, modifiers, size as PackSize, data.dogs[dog]),
-    ),
-  );
+  const raise = packSizeRaise(data.tuning, modifiers, packPlace(order, lead), data.dogs[lead]);
   return raise > 0 ? homeLine(data.homeText, "packBonus", { hearts: String(raise) }) : null;
 }
 

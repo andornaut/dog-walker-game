@@ -8,6 +8,7 @@ import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import type { CardOption, DogId, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
+import { placeInPack } from "../state/pack";
 import { type CardSource, newRun, type RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -366,7 +367,8 @@ describe("Lucky collar", () => {
       walker: "casey",
     });
     const { luckyCollarMax } = TEST_TUNING.hearts;
-    const collared = (dog: DogId) => startHearts(TEST_TUNING, [], 2, DOGS[dog]) + luckyCollarMax;
+    const collared = (dog: DogId) =>
+      startHearts(TEST_TUNING, [], placeInPack(state, dog), DOGS[dog]) + luckyCollarMax;
     expect(heartsByDog(state)).toEqual({
       duchess: collared("duchess"),
       pierre: collared("pierre"),

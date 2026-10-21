@@ -10,6 +10,7 @@ import { cents, clampHearts } from "../rules/units";
 import type { Pack } from "../state/runState";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { PACK_PLACES } from "../testing/packPlaces";
 import { fillNames } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -215,15 +216,14 @@ describe("lowHeartDogs and newlyLow", () => {
 });
 
 describe("cardOwnerMood", () => {
-  // Every max a dog can have, in a pack of any size, with no gear and with every gear's raise.
+  // Every max a dog can have, at any place in a pack, with no gear and with every gear's raise.
   const gear = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
-  const packSizes = [1, 2, 3] as const;
   const maxes = [
     ...new Set(
       Object.values(gameData.dogs).flatMap((dog) =>
-        packSizes.flatMap((packSize) => [
-          maxHearts(gameData.tuning, [], packSize, dog),
-          maxHearts(gameData.tuning, gear, packSize, dog),
+        PACK_PLACES.flatMap((place) => [
+          maxHearts(gameData.tuning, [], place, dog),
+          maxHearts(gameData.tuning, gear, place, dog),
         ]),
       ),
     ),
@@ -237,6 +237,15 @@ describe("cardOwnerMood", () => {
     (max, hearts) => {
       const mood = cardOwnerMood(gameData, max, walking("koda", hearts));
       expect(mood).toBe(hearts === MOMENTS.lowHearts ? "worried" : faceMood(gameData, max, hearts));
+    },
+  );
+
+  it.each(Array.from({ length: gameData.tuning.hearts.maxOwnerHearts }, (_, i) => i + 1))(
+    "shows a full owner (max %i) happy, or worried when full is the last heart",
+    (max) => {
+      expect(cardOwnerMood(gameData, max, walking("koda", max))).toBe(
+        max === MOMENTS.lowHearts ? "worried" : "happy",
+      );
     },
   );
 

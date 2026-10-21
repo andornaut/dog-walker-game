@@ -2,6 +2,7 @@ import { debuffIconKey } from "../assets/iconKeys";
 import type { GameData } from "../data/types";
 import { maxHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
+import { placeInPack } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { fillLine, fillNames } from "../text/lines";
 import { effectIconKey, effectItems, effectLine, effectName } from "./effectIcons";
@@ -68,7 +69,7 @@ export function explainLines(
       const line = fillLine(FIELDS, text, "dog", {
         dog: dog.name,
         hearts: String(slot.status === "walking" ? slot.hearts : 0),
-        max: String(maxHearts(data.tuning, run.modifiers, run.pack.length, dog)),
+        max: String(maxHearts(data.tuning, run.modifiers, placeInPack(run, target.dog), dog)),
         owner: dog.owner.name,
         size: capitalize(SIZE_NAMES[dog.size]),
       });
