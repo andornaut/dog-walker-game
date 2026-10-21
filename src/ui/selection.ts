@@ -46,8 +46,8 @@ const LOOKS: Readonly<Record<TileState, Omit<SelectLook, "state">>> = {
 // and its label.
 export const DISABLED_COLORS = { edge: GREYED.edge, face: GREYED.face, text: GREYED.text } as const;
 
-// A button's look: its interaction state, or secondary, the tan button a card's own
-// controls wear in place of normal.
+// A button's look: its interaction state, or secondary, the cream button a card's own
+// controls wear in place of normal, with ui-button's secondary tags.
 export type ButtonLook = ButtonState | "secondary";
 
 // How ui-button colours each look: its face, the lip under a raised one, and the label.
@@ -56,7 +56,7 @@ export const BUTTON_COLORS = {
   disabled: { face: DISABLED_COLORS.face, label: DISABLED_COLORS.text, lip: null },
   normal: { face: "cream", label: "plum", lip: "tan" },
   primary: { face: "green", label: "ink", lip: "forest" },
-  secondary: { face: "tan", label: "plum", lip: "brown" },
+  secondary: { face: "cream", label: "plum", lip: "tan" },
 } as const satisfies Record<ButtonLook, { face: string; label: string; lip: string | null }>;
 
 // The plate a price or goal sits on: buy while the bank covers the price, short while it
