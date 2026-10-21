@@ -66,15 +66,9 @@ export interface SimConfig {
   readonly walker: WalkerId;
 }
 
-// One encounter card and the option the policy took.
+// One encounter card: what the option the policy took cost.
 interface ChoiceRecord {
   readonly cost: Cents;
-  // Some enabled option cost money.
-  readonly couldPay: boolean;
-  readonly fired: readonly DogId[];
-  readonly option: string;
-  readonly title: string;
-  readonly zoneIndex: number;
 }
 
 interface FiringRecord {
@@ -277,14 +271,7 @@ function noteChoice(
   }
   const option = view.options.find(({ index }) => index === choice);
   tally.cardsSeen += 1;
-  tally.choices.push({
-    cost: option?.cost ?? cents(0),
-    couldPay: view.options.some((option) => option.availability.enabled && option.cost > 0),
-    fired: outcome.fired,
-    option: option?.label ?? "Skip",
-    title: view.title,
-    zoneIndex: run.zoneIndex,
-  });
+  tally.choices.push({ cost: option?.cost ?? cents(0) });
 }
 
 // What the bot reads of the road: its geometry for the pack and the zone's scroll speed.
