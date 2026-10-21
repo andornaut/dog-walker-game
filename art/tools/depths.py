@@ -9,8 +9,8 @@ full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, biscuit-neighbour, mail-carrier,
 stroller, jogger, kid-on-bike, ice-cream-truck, construction, puddle (no
-outline), hedge, barrier-2, barrier-3, parked-car, delivery-truck and
-streetcar. Walkers
+outline), hedge, hot-dog-cart, barrier-2, barrier-3, parked-car, delivery-truck
+and streetcar. Walkers
 are the pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
@@ -114,6 +114,7 @@ def own(s):
     yield "puddle", [("idle", [small(road, s, road.puddle, f).outlined(False) for f in (0, 1)], 500)]
     b = obstacles.SCALE * s
     yield "hedge", obstacle(b, lambda r: obstacles.hedge(rustle=r), obstacles.HEDGE_IDLE)
+    yield "hot-dog-cart", obstacle(b, lambda f: obstacles.hot_dog_cart(steam=f), obstacles.HOT_DOG_CART_IDLE)
     for lanes in (2, 3):
         yield f"barrier-{lanes}", [("idle", [small(obstacles, b, obstacles.barrier, lanes, f).outlined()
                                              for f in (0, 1)], 500)]

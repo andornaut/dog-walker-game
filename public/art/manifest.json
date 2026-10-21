@@ -2129,6 +2129,51 @@
       }
     },
     {
+      "key": "hot-dog-cart",
+      "png": "sprites/hot-dog-cart.png",
+      "json": "sprites/hot-dog-cart.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "hot-dog-cart@50",
+      "png": "sprites/hot-dog-cart@50.png",
+      "json": "sprites/hot-dog-cart@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "hot-dog-cart@62",
+      "png": "sprites/hot-dog-cart@62.png",
+      "json": "sprites/hot-dog-cart@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "hot-dog-cart@75",
+      "png": "sprites/hot-dog-cart@75.png",
+      "json": "sprites/hot-dog-cart@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "hot-dog-cart@88",
+      "png": "sprites/hot-dog-cart@88.png",
+      "json": "sprites/hot-dog-cart@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 88
+      }
+    },
+    {
       "key": "hydrant",
       "png": "sprites/hydrant.png",
       "json": "sprites/hydrant.json",

@@ -1,0 +1,30 @@
+{ "frames": {
+   "hot-dog-cart 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 112, "h": 66 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 66 },
+    "sourceSize": { "w": 112, "h": 66 },
+    "duration": 500
+   },
+   "hot-dog-cart 1.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 112, "h": 66 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 66 },
+    "sourceSize": { "w": 112, "h": 66 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "hot-dog-cart.png",
+  "format": "RGBA8888",
+  "size": { "w": 224, "h": 66 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

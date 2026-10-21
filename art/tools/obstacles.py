@@ -27,6 +27,8 @@ delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from 
                             roller door, drawn at the footprint's near edge; idle (4 frames,
                             400ms): an exhaust puff on frame 2. drive (4 frames, 100ms): tread lines
                             climb the tyres and the body dips 1px onto them on frames 1 and 2
+hot-dog-cart        112x66  2 lanes, a stainless street meat cart side on under a striped umbrella;
+                            idle (2 frames, 500ms): steam rising off the steam table
 streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity from behind, its pantograph
                             on the roof, drawn at the footprint's near edge; idle (4 frames, 400ms): a
                             spark at the pan head on frame 2. drive (4 frames, 100ms): tread lines climb
@@ -494,6 +496,77 @@ def streetcar(spark=False, roll=None):
     return lit(g)
 
 
+# The hot dog cart's idle: steam off the steam table, rising a drawn pixel and swapping sides on frame 1.
+HOT_DOG_CART_IDLE = (0, 1), 500
+
+
+def hot_dog_cart(steam=0, w=span(2)):
+    """A Toronto street meat cart side on, two lanes wide, laid out on span(2) x 55 and drawn at SCALE to
+    112x66: a stainless box on two wheels under a red and yellow striped umbrella with a scalloped valance,
+    lit on its left and shaded on its right; ketchup, mustard and relish bottles and a stack of buns on the
+    counter at the left, the steam table's lids at the right with steam curling off them, and a hot dog
+    with a mustard zigzag on the box's side. steam (0 or 1) lifts the steam 1 drawn pixel and swaps its
+    wisps."""
+    g = edged(Grid(w, 55))
+    ux, uy = unit(g)
+    c = w / 2
+    # the wheels, behind the box: ink tyres, grey hubs
+    for x in (19, w - 19):
+        g.cel(x, 48, 6, 6.5, "ink", None, "dslate")
+        g.cel(x, 48, 2, 2, "grey", None, "lgrey")
+    # the umbrella: six wedges from the finial, red and yellow, the right three in shade
+    left, right, base = 8, w - 8, 15
+    for i in range(6):
+        x0, x1 = left + (right - left) * i / 6, left + (right - left) * (i + 1) / 6
+        lit_ = i < 3
+        col = ("red" if lit_ else "dred") if i % 2 == 0 else ("yellow" if lit_ else "amber")
+        g.tri((x0, base), (x1, base), (c, 2), col)
+    # the valance: a scallop under each wedge
+    for i in range(6):
+        x0 = left + (right - left) * i / 6
+        col = ("red" if i < 3 else "dred") if i % 2 == 0 else ("yellow" if i < 3 else "amber")
+        g.cel(x0 + (right - left) / 12, base, (right - left) / 12, 2.5, col)
+    g.rect(c - 1, 0, 2, 2, "grey")
+    g.p(c - 1, 0, "lgrey")
+    # the pole down to the counter
+    g.rect(c - 1, 17, 2, 11, "slate")
+    g.rect(c - 1, 17, 1, 11, "grey")
+    # on the counter, left: ketchup, mustard and relish bottles, their nozzles white, and a stack of buns
+    for x, col, sh in ((12, "red", "dred"), (17, "yellow", "amber"), (22, "green", "dgreen")):
+        g.rect(x, 21, 4, 7, col)
+        g.rect(x + 3, 21, 1, 7, sh)
+        g.rect(x + 1, 19, 2, 2, "white")
+        g.p(x + 1.5, 18, "white")
+    for k in range(3):
+        g.cel(32, 26.5 - 2.2 * k, 4, 1.6, "tan", "ochre", "cream")
+    # on the counter, right: the steam table's two lids
+    for x in (w - 33, w - 20):
+        g.cel(x, 27, 6, 3.5, "lgrey", "grey", "white")
+    # the steam: a puff clear of each lid, drifting to one side, with a wisp trailing up off it
+    lift = steam * uy
+    for i, x in enumerate((w - 33, w - 20)):
+        dx = (1 if (i + steam) % 2 else -1) * ux
+        g.cel(x + dx, 20.5 - lift, 2.2, 1.4, "lgrey", None, "white")
+        g.rect(x + 2 * dx + (1 if dx > 0 else -1), 18 - lift, 1, 1.5, "white")
+    # the counter's lip, then the stainless box: lit along its top and left, shaded down its right
+    g.rect(6, 28, w - 12, 2, "white")
+    g.rect(6, 29, w - 12, 1, "lgrey")
+    g.rect(9, 30, w - 18, 15, "lgrey")
+    g.rect(9, 30, 1, 15, "white")
+    g.rect(w - 14, 30, 5, 15, "grey")
+    g.rect(9, 30, w - 18, 1, "grey")
+    for x in (round(w * 0.3), round(w * 0.7)):
+        g.rect(x, 31, 1, 13, "grey")
+    # the hot dog on the side: the bun's back, the sausage poking out of it under a mustard zigzag, the bun's front
+    g.cel(c, 37, 11, 3, "tan", "ochre", "cream")
+    g.cel(c, 37.5, 14, 1.8, "red", "dred", "pink")
+    for k, x in enumerate(range(round(c - 9), round(c + 9), 3)):
+        g.rect(x, 37 - k % 2, 2, 1, "yellow")
+    g.cel(c, 40, 11.5, 1.8, "tan", "ochre")
+    g.rect(9, 44, w - 18, 1, "slate")
+    return lit(g)
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def idle(draw, spec, s=SCALE):
@@ -514,6 +587,7 @@ def sprites():
         ("drive", [drawn(CAR_SCALE, parked_car, roll=f, blink=False).outlined() for f in drive], drive_ms)]
     yield "delivery-truck", idle(delivery_truck, DELIVERY_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
+    yield "hot-dog-cart", idle(lambda f: hot_dog_cart(steam=f), HOT_DOG_CART_IDLE)
     yield "streetcar", idle(streetcar, STREETCAR_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, streetcar, roll=f).outlined() for f in drive], drive_ms)]
 
