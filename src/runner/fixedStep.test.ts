@@ -30,8 +30,10 @@ describe("frameSteps", () => {
     expect(frameSteps(LIMITS, 5000, startStepClock)).toMatchObject({ frameMs: 0, steps: 0 });
   });
 
-  it.each([60, 30, 20, 10, 5])("keeps to 60 steps a second at %i FPS", (fps) => {
-    expect(stepsOver(framesAt(fps, 10))).toBe(600);
+  it("keeps to 60 steps a second at any frame rate", () => {
+    for (const fps of [60, 30, 20, 10, 5]) {
+      expect(stepsOver(framesAt(fps, 10))).toBe(600);
+    }
   });
 
   it("keeps to real time over uneven frames", () => {
@@ -44,12 +46,14 @@ describe("frameSteps", () => {
     expect(frame.clock.bankedMs).toBeCloseTo(0);
   });
 
-  it.each([
-    [0.5, 30],
-    [1, 60],
-    [3, 180],
-  ])("runs at time scale %d %i steps over a second at 60 FPS", (timeScale, expected) => {
-    expect(stepsOver(framesAt(60, 1), { ...LIMITS, timeScale })).toBe(expected);
+  it("runs time-scaled steps over a second at 60 FPS", () => {
+    for (const [timeScale, expected] of [
+      [0.5, 30],
+      [1, 60],
+      [3, 180],
+    ] as const) {
+      expect(stepsOver(framesAt(60, 1), { ...LIMITS, timeScale })).toBe(expected);
+    }
   });
 
   it("carries what is left of a step into the next frame", () => {

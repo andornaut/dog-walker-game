@@ -22,13 +22,20 @@ const moving = (from: number, to: number, elapsed = 0): MovingLaneMotion => ({
 });
 
 describe("startMove", () => {
-  it.each<{ direction: 1 | -1; expected: LaneMotion; lane: number; name: string }>([
-    { direction: 1, expected: moving(2, 3), lane: 2, name: "starts a move right" },
-    { direction: -1, expected: moving(2, 1), lane: 2, name: "starts a move left" },
-    { direction: -1, expected: stillInLane(0), lane: 0, name: "stays still off the left edge" },
-    { direction: 1, expected: stillInLane(4), lane: 4, name: "stays still off the right edge" },
-  ])("$name", ({ direction, expected, lane }) => {
-    expect(startMove(config, direction, lane)).toEqual(expected);
+  it("starts a move a lane either way, and stays still off either edge", () => {
+    for (const { direction, expected, lane } of [
+      { direction: 1, expected: moving(2, 3), lane: 2, name: "starts a move right" },
+      { direction: -1, expected: moving(2, 1), lane: 2, name: "starts a move left" },
+      { direction: -1, expected: stillInLane(0), lane: 0, name: "stays still off the left edge" },
+      { direction: 1, expected: stillInLane(4), lane: 4, name: "stays still off the right edge" },
+    ] satisfies readonly {
+      direction: 1 | -1;
+      expected: LaneMotion;
+      lane: number;
+      name: string;
+    }[]) {
+      expect(startMove(config, direction, lane)).toEqual(expected);
+    }
   });
 
   it("changes lane at once when the move takes no time", () => {

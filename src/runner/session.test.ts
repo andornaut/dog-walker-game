@@ -72,22 +72,24 @@ describe("runStreams", () => {
 });
 
 describe("stepSession", () => {
-  it.each<{ name: string; session: () => Session }>([
-    {
-      name: "a card is open",
-      session: () => {
-        const session = started();
-        return { ...session, card: cardFor(gameData, session.walk.run, STOP) };
+  it("does nothing while a card is open or the walk has ended", () => {
+    for (const { session } of [
+      {
+        name: "a card is open",
+        session: () => {
+          const session = started();
+          return { ...session, card: cardFor(gameData, session.walk.run, STOP) };
+        },
       },
-    },
-    { name: "the walk has ended", session: () => headHomeSession(started()).session },
-  ])("does nothing while $name", ({ session }) => {
-    const before = session();
-    const lane: SessionInput = { direction: 1, kind: "lane" };
-    expect(stepSession(gameData, runStreams(1), geometry, 1, [lane], before)).toEqual({
-      events: [],
-      session: before,
-    });
+      { name: "the walk has ended", session: () => headHomeSession(started()).session },
+    ] satisfies readonly { name: string; session: () => Session }[]) {
+      const before = session();
+      const lane: SessionInput = { direction: 1, kind: "lane" };
+      expect(stepSession(gameData, runStreams(1), geometry, 1, [lane], before)).toEqual({
+        events: [],
+        session: before,
+      });
+    }
   });
 
   it("heads home before the step, after the inputs before it and without those after it", () => {
@@ -185,35 +187,37 @@ describe("a strain in the session", () => {
   }
 
   // Every press, a key, a tap or a drag's step, reaches the session as a lane input.
-  it.each<[string, number, LaneDirection, boolean]>([
-    ["cancels the pull on a press toward the edge from the left edge lane", 0, -1, true],
-    [
-      "cancels the pull on a press toward the edge from the right edge lane",
-      GEOMETRY.laneCount - 1,
-      1,
-      true,
-    ],
-    ["cancels the pull on a press away from the squirrel from a middle lane", 1, -1, true],
-    ["keeps the pull on a press toward the squirrel from the left edge lane", 0, 1, false],
-    [
-      "keeps the pull on a press toward the squirrel from the right edge lane",
-      GEOMETRY.laneCount - 1,
-      -1,
-      false,
-    ],
-  ])("%s", (_, lane, direction, cancelled) => {
-    const input: SessionInput = { direction, kind: "lane" };
-    const { events, session } = stepSession(
-      gameData,
-      runStreams(1),
-      geometry,
-      STEP_SECONDS,
-      [input],
-      straining(lane),
-    );
-    const failed = events.flatMap((event) => (event.kind === "pulled" ? event.step.failed : []));
-    expect(session.pulls.strain === null).toBe(cancelled);
-    expect(failed).toEqual(cancelled ? ["koda"] : []);
+  it("cancels a pull on a press away from the squirrel, and keeps it on one toward it", () => {
+    for (const [, lane, direction, cancelled] of [
+      ["cancels the pull on a press toward the edge from the left edge lane", 0, -1, true],
+      [
+        "cancels the pull on a press toward the edge from the right edge lane",
+        GEOMETRY.laneCount - 1,
+        1,
+        true,
+      ],
+      ["cancels the pull on a press away from the squirrel from a middle lane", 1, -1, true],
+      ["keeps the pull on a press toward the squirrel from the left edge lane", 0, 1, false],
+      [
+        "keeps the pull on a press toward the squirrel from the right edge lane",
+        GEOMETRY.laneCount - 1,
+        -1,
+        false,
+      ],
+    ] satisfies readonly [string, number, LaneDirection, boolean][]) {
+      const input: SessionInput = { direction, kind: "lane" };
+      const { events, session } = stepSession(
+        gameData,
+        runStreams(1),
+        geometry,
+        STEP_SECONDS,
+        [input],
+        straining(lane),
+      );
+      const failed = events.flatMap((event) => (event.kind === "pulled" ? event.step.failed : []));
+      expect(session.pulls.strain === null).toBe(cancelled);
+      expect(failed).toEqual(cancelled ? ["koda"] : []);
+    }
   });
 });
 
@@ -362,9 +366,8 @@ describe("a firing's hold", () => {
   const HOLDS = [FIRING_SECONDS, 1.5, 4.5];
   const cases = CAUSES.flatMap((cause) => HOLDS.map((seconds) => ({ ...cause, seconds })));
 
-  it.each(cases)(
-    "holds the road and the pack still after $cause for a $seconds s hold, as long as the moment plays",
-    ({ data: base, fire, seconds }) => {
+  it("holds the road and the pack still after any cause of a firing, for as long as the moment plays", () => {
+    for (const { data: base, fire, seconds } of cases) {
       const data = holding(base, seconds);
       const fired = fire(data, lastHeart());
       expect(firedIn(fired.events)).toEqual(["koda"]);
@@ -397,8 +400,8 @@ describe("a firing's hold", () => {
         const ends = [timeline.fadeAtMs + timeline.fadeMs, timeline.trotMs];
         ends.forEach((end) => expect(Math.abs(end - heldMs)).toBeLessThanOrEqual(STEP_MS));
       }
-    },
-  );
+    }
+  });
 });
 
 describe("chooseShownCard", () => {
@@ -414,12 +417,14 @@ describe("chooseShownCard", () => {
     throw new Error("The skunk card did not open");
   }
 
-  it.each([
-    ["no card is open", { ...skunk, card: null }],
-    ["the next card is open", shown(STOP)],
-  ])("picks nothing when %s", (_, session) => {
-    const step = chooseShownCard(gameData, runStreams(1), geometry, view, 0, session);
-    expect(step).toEqual({ events: [], session });
+  it("picks nothing when no card, or the next card, is open", () => {
+    for (const [, session] of [
+      ["no card is open", { ...skunk, card: null }],
+      ["the next card is open", shown(STOP)],
+    ] as const) {
+      const step = chooseShownCard(gameData, runStreams(1), geometry, view, 0, session);
+      expect(step).toEqual({ events: [], session });
+    }
   });
 
   it("chooses on the card it shows", () => {
@@ -464,49 +469,51 @@ describe("quick lane changes across a row", () => {
   // A tap every other step, as quick as a thumb taps, until the pack is taps lanes over, then
   // steps until the row has passed: every tip in a lane it passes is collected, and a cone in a
   // lane it passes is hit.
-  it.each<[string, WalkerId, PackDogs, "cone" | "tip", number, number[]]>([
-    [
-      "three dogs across tips in three lanes",
-      "casey",
-      ["koda", "biscuit", "zippy"],
-      "tip",
-      3,
-      [1, 2, 3],
-    ],
-    ["two dogs across tips in two lanes", "ada", ["duchess", "snowball"], "tip", 2, [1, 2]],
-    ["one dog across tips in two lanes", "trista", ["nugget"], "tip", 2, [1, 2]],
-    [
-      "three dogs past a cone two lanes back",
-      "casey",
-      ["koda", "biscuit", "zippy"],
-      "cone",
-      3,
-      [1],
-    ],
-    ["one dog past a cone a lane back", "trista", ["nugget"], "cone", 2, [1]],
-  ])("meets the row in every lane it passes: %s", (_, walker, dogs, kind, taps, lanes) => {
-    let session = crossing(walker, dogs, kind, lanes);
-    const met: number[] = [];
-    const right: SessionInput = { direction: 1, kind: "lane" };
-    for (let frame = 0; frame < 90; frame++) {
-      const inputs = frame % 2 === 0 && frame < taps * 2 ? [right] : [];
-      const { events, session: next } = stepSession(
-        gameData,
-        runStreams(1),
-        screenRoadGeometry,
-        STEP_SECONDS,
-        inputs,
-        session,
-      );
-      for (const event of events) {
-        if (event.kind === "walked") {
-          const { bumps, collected } = event.step;
-          met.push(...[...collected, ...bumps.map(({ item }) => item)].map(({ lane }) => lane));
+  it("meets the row in every lane it passes", () => {
+    for (const [, walker, dogs, kind, taps, lanes] of [
+      [
+        "three dogs across tips in three lanes",
+        "casey",
+        ["koda", "biscuit", "zippy"],
+        "tip",
+        3,
+        [1, 2, 3],
+      ],
+      ["two dogs across tips in two lanes", "ada", ["duchess", "snowball"], "tip", 2, [1, 2]],
+      ["one dog across tips in two lanes", "trista", ["nugget"], "tip", 2, [1, 2]],
+      [
+        "three dogs past a cone two lanes back",
+        "casey",
+        ["koda", "biscuit", "zippy"],
+        "cone",
+        3,
+        [1],
+      ],
+      ["one dog past a cone a lane back", "trista", ["nugget"], "cone", 2, [1]],
+    ] satisfies readonly [string, WalkerId, PackDogs, "cone" | "tip", number, number[]][]) {
+      let session = crossing(walker, dogs, kind, lanes);
+      const met: number[] = [];
+      const right: SessionInput = { direction: 1, kind: "lane" };
+      for (let frame = 0; frame < 90; frame++) {
+        const inputs = frame % 2 === 0 && frame < taps * 2 ? [right] : [];
+        const { events, session: next } = stepSession(
+          gameData,
+          runStreams(1),
+          screenRoadGeometry,
+          STEP_SECONDS,
+          inputs,
+          session,
+        );
+        for (const event of events) {
+          if (event.kind === "walked") {
+            const { bumps, collected } = event.step;
+            met.push(...[...collected, ...bumps.map(({ item }) => item)].map(({ lane }) => lane));
+          }
         }
+        session = next;
       }
-      session = next;
+      expect(met).toEqual(lanes);
+      expect(session.walk.road.control.motion).toEqual({ kind: "still", lane: taps });
     }
-    expect(met).toEqual(lanes);
-    expect(session.walk.road.control.motion).toEqual({ kind: "still", lane: taps });
   });
 });

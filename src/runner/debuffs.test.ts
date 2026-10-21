@@ -53,32 +53,43 @@ function secondsOf(debuff: DebuffId): number {
 }
 
 describe("debuff durations", () => {
-  it.each(DEBUFF_IDS)("%s lasts its data's seconds", (debuff) => {
-    const run = withDebuffs(testState(PACK, { zoneIndex: 1 }), [debuff]);
-    expect(held(run, debuff)).toEqual({ debuff, secondsLeft: secondsOf(debuff), untilZone: 1 });
+  it("lasts each debuff its data's seconds", () => {
+    for (const debuff of DEBUFF_IDS) {
+      const run = withDebuffs(testState(PACK, { zoneIndex: 1 }), [debuff]);
+      expect(held(run, debuff)).toEqual({ debuff, secondsLeft: secondsOf(debuff), untilZone: 1 });
+    }
   });
 
-  it.each(DEBUFF_IDS)("%s counts down while walking and ends when its time runs out", (debuff) => {
-    const seconds = secondsOf(debuff);
-    const start = walkOf(withDebuffs(testState(PACK), [debuff]));
-    const halfway = walkFor(seconds / 2, start);
-    expect(held(halfway.run, debuff)?.secondsLeft).toBeCloseTo(seconds / 2, 5);
-    expect(held(walkFor(seconds / 2 + STEP, halfway).run, debuff)).toBeUndefined();
+  it("counts each debuff down while walking and ends it when its time runs out", () => {
+    for (const debuff of DEBUFF_IDS) {
+      const seconds = secondsOf(debuff);
+      const start = walkOf(withDebuffs(testState(PACK), [debuff]));
+      const halfway = walkFor(seconds / 2, start);
+      expect(held(halfway.run, debuff)?.secondsLeft).toBeCloseTo(seconds / 2, 5);
+      expect(held(walkFor(seconds / 2 + STEP, halfway).run, debuff)).toBeUndefined();
+    }
   });
 
-  it.each(DEBUFF_IDS)("%s holds its time during a hit stop", (debuff) => {
-    const start = walkOf(withDebuffs(testState(PACK), [debuff]));
-    const stopped: Walk = {
-      ...start,
-      road: { ...start.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
-    };
-    expect(held(walkFor(0.5, stopped).run, debuff)).toEqual(held(start.run, debuff));
+  it("holds each debuff's time during a hit stop", () => {
+    for (const debuff of DEBUFF_IDS) {
+      const start = walkOf(withDebuffs(testState(PACK), [debuff]));
+      const stopped: Walk = {
+        ...start,
+        road: {
+          ...start.road,
+          hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false },
+        },
+      };
+      expect(held(walkFor(0.5, stopped).run, debuff)).toEqual(held(start.run, debuff));
+    }
   });
 
-  it.each(DEBUFF_IDS)("%s applied again starts its time over", (debuff) => {
-    const worn = walkFor(1, walkOf(withDebuffs(testState(PACK), [debuff])));
-    const refreshed = withDebuffs(worn.run, [debuff]);
-    expect(refreshed.debuffs.filter((active) => active.debuff === debuff)).toHaveLength(1);
-    expect(held(refreshed, debuff)?.secondsLeft).toBe(secondsOf(debuff));
+  it("starts a debuff's time over when it is applied again", () => {
+    for (const debuff of DEBUFF_IDS) {
+      const worn = walkFor(1, walkOf(withDebuffs(testState(PACK), [debuff])));
+      const refreshed = withDebuffs(worn.run, [debuff]);
+      expect(refreshed.debuffs.filter((active) => active.debuff === debuff)).toHaveLength(1);
+      expect(held(refreshed, debuff)?.secondsLeft).toBe(secondsOf(debuff));
+    }
   });
 });

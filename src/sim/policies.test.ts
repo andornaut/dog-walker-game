@@ -42,15 +42,17 @@ function thiefChoice(policy: PolicyId, state: RunState, random: Random = NO_DRAW
 }
 
 describe("chooseCardOption", () => {
-  it.each([
-    ["heartsUnlessLow", SAFE, HEARTS],
-    ["heartsUnlessLow", LOW, PAY],
-    ["alwaysHearts", LOW, HEARTS],
-    ["alwaysPay", SAFE, PAY],
-  ] as const)("%s at %i hearts takes option %i", (policy, hearts, expected) => {
-    const state = testState({ duchess: hearts }, { money: cents(5000) });
+  it("takes each policy's option at safe and low hearts", () => {
+    for (const [policy, hearts, expected] of [
+      ["heartsUnlessLow", SAFE, HEARTS],
+      ["heartsUnlessLow", LOW, PAY],
+      ["alwaysHearts", LOW, HEARTS],
+      ["alwaysPay", SAFE, PAY],
+    ] as const) {
+      const state = testState({ duchess: hearts }, { money: cents(5000) });
 
-    expect(thiefChoice(policy, state)).toBe(expected);
+      expect(thiefChoice(policy, state)).toBe(expected);
+    }
   });
 
   it("takes hearts when no money option is affordable", () => {

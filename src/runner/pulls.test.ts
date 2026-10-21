@@ -162,14 +162,18 @@ describe("what a dog pulls toward", () => {
     expect(after(walk, 1.2).walk.road.control.target).toBe(3);
   });
 
-  it.each(Object.keys(DOGS) as (keyof typeof DOGS)[])("has %s strain toward a squirrel", (dog) => {
-    expect(after(walkWith([dog], [item("squirrel", 0, 4)]), 0.5).tells).toEqual([
-      { direction: 1, dog, kind: "squirrel" },
-    ]);
+  it("has every dog strain toward a squirrel", () => {
+    for (const dog of Object.keys(DOGS) as (keyof typeof DOGS)[]) {
+      expect(after(walkWith([dog], [item("squirrel", 0, 4)]), 0.5).tells).toEqual([
+        { direction: 1, dog, kind: "squirrel" },
+      ]);
+    }
   });
 
-  it.each(["treat", "otherDog", "tip"] as const)("never strains toward a %s", (kind) => {
-    expect(after(walkWith(["biscuit"], [item(kind, 0, 4)]), 2).tells).toEqual([]);
+  it("never strains toward anything but a squirrel", () => {
+    for (const kind of ["treat", "otherDog", "tip"] as const) {
+      expect(after(walkWith(["biscuit"], [item(kind, 0, 4)]), 2).tells).toEqual([]);
+    }
   });
 
   it("never pulls without a target: no random pulls", () => {

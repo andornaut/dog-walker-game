@@ -34,9 +34,8 @@ const CASES = [...new Set(KINDS)].flatMap((kind) =>
 );
 
 describe("screenRoadGeometry", () => {
-  it.each(CASES)(
-    "hits %s only while its far edge is drawn in view, not below a pack of %i",
-    (kind, dogs) => {
+  it("hits every item only while its far edge is drawn in view, not below any pack", () => {
+    for (const [kind, dogs] of CASES) {
       const slots = Object.fromEntries(
         (Object.keys(gameData.dogs) as DogId[]).slice(0, dogs).map((dog) => [dog, 3]),
       );
@@ -63,8 +62,8 @@ describe("screenRoadGeometry", () => {
       expect(hitRows.length).toBeGreaterThan(0);
       expect(Math.max(...hitRows)).toBeLessThan(ROAD_VIEW_BOTTOM);
       expect(Math.max(...hitRows)).toBeLessThanOrEqual(PROJECTION.footY);
-    },
-  );
+    }
+  });
 
   it("is the run's own pack's, one per walker and dogs", () => {
     const run = testState({ duchess: 3, koda: 3 });

@@ -36,41 +36,45 @@ const choose = (path: ApproachPath, pack: { x: number; y: number }) =>
 describe("a stalker's step", () => {
   // Wherever the pack is, the step nearest it, never up the road: beside or behind it, the
   // stalker steps across, the left on a tie.
-  it.each([
-    { lanes: 0, name: "below", rows: 3, want: { lanes: 0, travel: 1 } },
-    { lanes: -2, name: "below and left", rows: 3, want: { lanes: -1, travel: 1 } },
-    { lanes: 2, name: "below and right", rows: 3, want: { lanes: 1, travel: 1 } },
-    { lanes: -2, name: "to the left", rows: 0, want: { lanes: -1, travel: 0 } },
-    { lanes: 2, name: "to the right", rows: 0, want: { lanes: 1, travel: 0 } },
-    { lanes: -2, name: "above and left", rows: -3, want: { lanes: -1, travel: 0 } },
-    { lanes: 0, name: "above", rows: -3, want: { lanes: -1, travel: 0 } },
-    { lanes: 2, name: "above and right", rows: -3, want: { lanes: 1, travel: 0 } },
-  ])("steps toward a pack $name", ({ lanes, rows, want }) => {
-    expect(choose(stalker(), packAt(lanes, rows))).toEqual(want);
+  it("steps toward a pack in reach", () => {
+    for (const { lanes, rows, want } of [
+      { lanes: 0, name: "below", rows: 3, want: { lanes: 0, travel: 1 } },
+      { lanes: -2, name: "below and left", rows: 3, want: { lanes: -1, travel: 1 } },
+      { lanes: 2, name: "below and right", rows: 3, want: { lanes: 1, travel: 1 } },
+      { lanes: -2, name: "to the left", rows: 0, want: { lanes: -1, travel: 0 } },
+      { lanes: 2, name: "to the right", rows: 0, want: { lanes: 1, travel: 0 } },
+      { lanes: -2, name: "above and left", rows: -3, want: { lanes: -1, travel: 0 } },
+      { lanes: 0, name: "above", rows: -3, want: { lanes: -1, travel: 0 } },
+      { lanes: 2, name: "above and right", rows: -3, want: { lanes: 1, travel: 0 } },
+    ]) {
+      expect(choose(stalker(), packAt(lanes, rows))).toEqual(want);
+    }
   });
 
   // A step outside the lanes and rows the planner left it falls back to the nearest one left.
-  it.each([
-    {
-      name: "with only its own lane",
-      path: stalker({ reach: { count: 1, first: 2 } }),
-      want: { lanes: 0, travel: 1 },
-    },
-    {
-      name: "with no lane to the left",
-      path: stalker({ reach: { count: 2, first: 2 } }),
-      want: { lanes: 0, travel: 1 },
-    },
-    {
-      name: "with its row down taken",
-      path: stalker({
-        pending: [{ kind: "near", travel: 400 }],
-        steps: [{ at: 100, lanes: 0, length: 100, travel: CELL }],
-      }),
-      want: { lanes: -1, travel: 0 },
-    },
-  ])("falls back $name", ({ path, want }) => {
-    expect(choose(path, packAt(-2, 3))).toEqual(want);
+  it("falls back when it cannot step toward the pack", () => {
+    for (const { path, want } of [
+      {
+        name: "with only its own lane",
+        path: stalker({ reach: { count: 1, first: 2 } }),
+        want: { lanes: 0, travel: 1 },
+      },
+      {
+        name: "with no lane to the left",
+        path: stalker({ reach: { count: 2, first: 2 } }),
+        want: { lanes: 0, travel: 1 },
+      },
+      {
+        name: "with its row down taken",
+        path: stalker({
+          pending: [{ kind: "near", travel: 400 }],
+          steps: [{ at: 100, lanes: 0, length: 100, travel: CELL }],
+        }),
+        want: { lanes: -1, travel: 0 },
+      },
+    ]) {
+      expect(choose(path, packAt(-2, 3))).toEqual(want);
+    }
   });
 
   // Once its step would start at or past the pack's rows, it takes no step, nor any later one.
@@ -87,25 +91,27 @@ describe("a stalker's step", () => {
 
   // Its second step waits until it is near the pack and its first step has ended. It has no
   // cue of its own: it is chosen as it starts, and only the first step shows the wander mark.
-  it.each([
-    { name: "near the pack", near: 450, want: 450 - CELL },
-    { name: "right after its first step", near: 100, want: 200 },
-  ])("takes its second step $name, with no cue", ({ near, want }) => {
-    const path = stalker({
-      pending: [
-        { at: 100, kind: "after" },
-        { kind: "near", travel: near },
-      ],
-      rows: 2,
-    });
-    expect(nextChoiceAt(path)).toBe(100 - path.warning);
-    const first = takeStep(path, { lanes: 0, travel: 1 });
-    expect(nextChoiceAt(first)).toBe(want);
-    const second = takeStep(first, { lanes: 1, travel: 1 });
-    expect(second.steps.map(({ at }) => at)).toEqual([100, want]);
-    const cued = (since: number) => moverTell(second, since)?.kind ?? null;
-    expect(cued(100 - path.warning)).toBe("wander");
-    expect(cued(want - 1)).toBeNull();
+  it("takes its second step with no cue", () => {
+    for (const { near, want } of [
+      { name: "near the pack", near: 450, want: 450 - CELL },
+      { name: "right after its first step", near: 100, want: 200 },
+    ]) {
+      const path = stalker({
+        pending: [
+          { at: 100, kind: "after" },
+          { kind: "near", travel: near },
+        ],
+        rows: 2,
+      });
+      expect(nextChoiceAt(path)).toBe(100 - path.warning);
+      const first = takeStep(path, { lanes: 0, travel: 1 });
+      expect(nextChoiceAt(first)).toBe(want);
+      const second = takeStep(first, { lanes: 1, travel: 1 });
+      expect(second.steps.map(({ at }) => at)).toEqual([100, want]);
+      const cued = (since: number) => moverTell(second, since)?.kind ?? null;
+      expect(cued(100 - path.warning)).toBe("wander");
+      expect(cued(want - 1)).toBeNull();
+    }
   });
 
   // Every way it may choose its steps stays within its lanes and rows, never steps up, and

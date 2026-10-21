@@ -91,9 +91,11 @@ describe("steering symmetry", () => {
     return advance(1, control).motion;
   };
 
-  it.each([1, 2, 3])("ends %i steers left or right as many lanes over", (times) => {
-    expect(steerTimes(1, times, still(1))).toEqual(stillInLane(1 + times));
-    expect(steerTimes(-1, times, still(3))).toEqual(stillInLane(3 - times));
+  it("ends any number of steers left or right as many lanes over", () => {
+    for (const times of [1, 2, 3]) {
+      expect(steerTimes(1, times, still(1))).toEqual(stillInLane(1 + times));
+      expect(steerTimes(-1, times, still(3))).toEqual(stillInLane(3 - times));
+    }
   });
 });
 

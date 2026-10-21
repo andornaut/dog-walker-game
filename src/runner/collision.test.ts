@@ -67,25 +67,29 @@ const item = (id: number, kind: Kind, lane: number, y: number, laneSpan = 1): Ro
 
 describe("overlaps", () => {
   const a: Box = { bottom: 10, left: 0, right: 10, top: 0 };
-  it.each<[string, Box, boolean]>([
-    ["sharing area", { bottom: 15, left: 5, right: 15, top: 5 }, true],
-    ["only meeting at an edge", { bottom: 10, left: 10, right: 20, top: 0 }, false],
-    ["apart", { bottom: 10, left: 11, right: 20, top: 0 }, false],
-  ])("boxes %s: %s", (_, b, expected) => {
-    expect(overlaps(a, b)).toBe(expected);
-    expect(overlaps(b, a)).toBe(expected);
+  it("overlaps boxes that share a pixel, and not boxes that only touch", () => {
+    for (const [, b, expected] of [
+      ["sharing area", { bottom: 15, left: 5, right: 15, top: 5 }, true],
+      ["only meeting at an edge", { bottom: 10, left: 10, right: 20, top: 0 }, false],
+      ["apart", { bottom: 10, left: 11, right: 20, top: 0 }, false],
+    ] satisfies readonly [string, Box, boolean][]) {
+      expect(overlaps(a, b)).toBe(expected);
+      expect(overlaps(b, a)).toBe(expected);
+    }
   });
 });
 
 describe("a one-dog pack", () => {
   // The item's box spans y to y + 32; the pack's, 560 to 600.
-  it.each([
-    { touches: false, where: "ending on the box's top", y: 528 },
-    { touches: true, where: "reaching into the box", y: 529 },
-    { touches: true, where: "starting just above the box's bottom", y: 599 },
-    { touches: false, where: "starting on the box's bottom", y: 600 },
-  ])("touches an item in the pack's lane $where: $touches", ({ touches, y }) => {
-    expect(still(item(1, "tip", 2, y))).toBe(touches ? "koda" : null);
+  it("touches an item in the pack's lane only while their boxes overlap", () => {
+    for (const { touches, y } of [
+      { touches: false, where: "ending on the box's top", y: 528 },
+      { touches: true, where: "reaching into the box", y: 529 },
+      { touches: true, where: "starting just above the box's bottom", y: 599 },
+      { touches: false, where: "starting on the box's bottom", y: 600 },
+    ]) {
+      expect(still(item(1, "tip", 2, y))).toBe(touches ? "koda" : null);
+    }
   });
 
   it("touches an item spanning several lanes in any of them", () => {
@@ -115,44 +119,52 @@ const chevron = packOf({ bottom: 100, left: -10, right: 10, top: 50 }, [
 const GAP: Box = { bottom: 48, left: -8, right: 8, top: 26 };
 
 describe("hitDog", () => {
-  it.each<[string, Box, DogId | null]>([
-    [
-      "on the dog whose rectangle it touches",
-      { bottom: 30, left: 20, right: 40, top: 10 },
-      "zippy",
-    ],
-    ["on the lead when it touches the lead", { bottom: -10, left: -5, right: 5, top: -30 }, "koda"],
-    [
-      "on the front dog when it touches only the walker",
-      { bottom: 120, left: -5, right: 5, top: 90 },
-      "koda",
-    ],
-    [
-      "on the nearest of the dogs it touches",
-      { bottom: 35, left: -40, right: 40, top: 15 },
-      "koda",
-    ],
-    [
-      "on the nearer side dog when it touches both and not the lead",
-      { bottom: 38, left: -28, right: 14, top: 22 },
-      "biscuit",
-    ],
-    ["on nothing in the gap between the parts", GAP, null],
-    ["on nothing outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
-  ])("lands an obstacle %s", (_, box, dog) => {
-    expect(hitDog(chevron, solid(box))).toBe(dog);
+  it("lands an obstacle on the dog it reaches first", () => {
+    for (const [, box, dog] of [
+      [
+        "on the dog whose rectangle it touches",
+        { bottom: 30, left: 20, right: 40, top: 10 },
+        "zippy",
+      ],
+      [
+        "on the lead when it touches the lead",
+        { bottom: -10, left: -5, right: 5, top: -30 },
+        "koda",
+      ],
+      [
+        "on the front dog when it touches only the walker",
+        { bottom: 120, left: -5, right: 5, top: 90 },
+        "koda",
+      ],
+      [
+        "on the nearest of the dogs it touches",
+        { bottom: 35, left: -40, right: 40, top: 15 },
+        "koda",
+      ],
+      [
+        "on the nearer side dog when it touches both and not the lead",
+        { bottom: 38, left: -28, right: 14, top: 22 },
+        "biscuit",
+      ],
+      ["on nothing in the gap between the parts", GAP, null],
+      ["on nothing outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
+    ] satisfies readonly [string, Box, DogId | null][]) {
+      expect(hitDog(chevron, solid(box))).toBe(dog);
+    }
   });
 
   // Zippy's rectangle runs 12 to 30 across; the box reaches 20 to 40, its lanes 25 on.
-  it.each<[string, number, DogId | null]>([
-    ["on a dog its lanes reach", 15, "zippy"],
-    ["on no dog only the box's spill past its lanes reaches", 30, null],
-  ])("lands an obstacle %s", (_, laneLeft, dog) => {
-    const box = {
-      ...solid({ bottom: 30, left: 20, right: 40, top: 10 }),
-      lanes: { left: laneLeft, right: 60 },
-    };
-    expect(hitDog(chevron, box)).toBe(dog);
+  it("lands an obstacle only on a dog its lanes reach, not past them", () => {
+    for (const [, laneLeft, dog] of [
+      ["on a dog its lanes reach", 15, "zippy"],
+      ["on no dog only the box's spill past its lanes reaches", 30, null],
+    ] satisfies readonly [string, number, DogId | null][]) {
+      const box = {
+        ...solid({ bottom: 30, left: 20, right: 40, top: 10 }),
+        lanes: { left: laneLeft, right: 60 },
+      };
+      expect(hitDog(chevron, box)).toBe(dog);
+    }
   });
 
   it("lands on no dog when the pack has none", () => {
@@ -162,22 +174,24 @@ describe("hitDog", () => {
 });
 
 describe("pickupDog", () => {
-  it.each<[string, Box, DogId | null]>([
-    ["to the dog nearest the contact", { bottom: 30, left: 20, right: 40, top: 10 }, "zippy"],
-    ["to the dog nearest the contact in the gap between the parts", GAP, "biscuit"],
-    [
-      "to the front dog when the walker is nearest",
-      { bottom: 120, left: -5, right: 5, top: 90 },
-      "koda",
-    ],
-    [
-      "to the dog whose rectangle holds the contact",
-      { bottom: 10, left: -1, right: 1, top: -10 },
-      "koda",
-    ],
-    ["to no dog outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
-  ])("gives a pickup %s", (_, box, dog) => {
-    expect(pickupDog(chevron, box)).toBe(dog);
+  it("gives a pickup to the dog it reaches first", () => {
+    for (const [, box, dog] of [
+      ["to the dog nearest the contact", { bottom: 30, left: 20, right: 40, top: 10 }, "zippy"],
+      ["to the dog nearest the contact in the gap between the parts", GAP, "biscuit"],
+      [
+        "to the front dog when the walker is nearest",
+        { bottom: 120, left: -5, right: 5, top: 90 },
+        "koda",
+      ],
+      [
+        "to the dog whose rectangle holds the contact",
+        { bottom: 10, left: -1, right: 1, top: -10 },
+        "koda",
+      ],
+      ["to no dog outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
+    ] satisfies readonly [string, Box, DogId | null][]) {
+      expect(pickupDog(chevron, box)).toBe(dog);
+    }
   });
 
   it("gives no dog a pickup when the pack has none", () => {
@@ -211,16 +225,20 @@ describe("a settled pack", () => {
     ];
   };
 
-  it.each([1, 2, 3])("never touches anything in the lane beside, for %i dogs", (count) => {
-    expect(contact(count, stillInLane(2), 1)).toEqual([null, null]);
-    expect(contact(count, stillInLane(2), 3)).toEqual([null, null]);
-    expect(contact(count, stillInLane(2), 2)).not.toContain(null);
+  it("never touches anything in the lane beside, for any pack size", () => {
+    for (const count of [1, 2, 3]) {
+      expect(contact(count, stillInLane(2), 1)).toEqual([null, null]);
+      expect(contact(count, stillInLane(2), 3)).toEqual([null, null]);
+      expect(contact(count, stillInLane(2), 2)).not.toContain(null);
+    }
   });
 
-  it.each([1, 2, 3])("touches both lanes halfway through a lane change, for %i dogs", (count) => {
-    const motion = { duration: 1, elapsed: 0.5, from: 2, kind: "moving", to: 3 } as const;
-    expect(contact(count, motion, 2)).not.toContain(null);
-    expect(contact(count, motion, 3)).not.toContain(null);
+  it("touches both lanes halfway through a lane change, for any pack size", () => {
+    for (const count of [1, 2, 3]) {
+      const motion = { duration: 1, elapsed: 0.5, from: 2, kind: "moving", to: 3 } as const;
+      expect(contact(count, motion, 2)).not.toContain(null);
+      expect(contact(count, motion, 3)).not.toContain(null);
+    }
   });
 });
 

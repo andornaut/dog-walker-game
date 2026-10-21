@@ -45,15 +45,14 @@ const held = (debuffs: readonly DebuffId[]) =>
   debuffs.map((debuff) => ({ debuff, secondsLeft: 20, untilZone: 0 }));
 
 describe("startStatuses", () => {
-  it.each(OPTION_ROWS)(
-    "puts $encounter's $name debuffs on every dog the card affected",
-    ({ choice, debuffs, encounter }) => {
+  it("puts each option's debuffs on every dog the card affected", () => {
+    for (const { choice, debuffs, encounter } of OPTION_ROWS) {
       const marks = startStatuses(data, card(encounter, PAIR), at, choice, []);
       expect(marks.map(({ dog, status }) => `${dog}:${status}`)).toEqual(
         debuffs.flatMap((debuff) => PAIR.map((dog) => `${dog}:${debuff}`)),
       );
-    },
-  );
+    }
+  });
 
   it("restarts a dog's status in place and drops marks from earlier zones", () => {
     const earlier: StatusMark[] = [
@@ -87,16 +86,15 @@ describe("activeStatuses", () => {
     ]);
   });
 
-  it.each(Object.keys(DEBUFFS) as DogStatusId[])(
-    "shows %s only while the pack has the debuff",
-    (debuff) => {
+  it("shows each status only while the pack has its debuff", () => {
+    for (const debuff of Object.keys(DEBUFFS) as DogStatusId[]) {
       const mark: StatusMark = { dog: "koda", startMs: 0, status: debuff, zoneIndex: 0 };
       expect(activeStatuses(testState({ koda: 5 }), [mark])).toEqual([]);
       expect(activeStatuses(testState({ koda: 5 }, { debuffs: held([debuff]) }), [mark])).toEqual([
         mark,
       ]);
-    },
-  );
+    }
+  });
 
   it("ends every status with its zone, and shows none on a fired dog", () => {
     const debuffs = held(["muddy", "stinky"]);

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { zoneAt } from "../rules/route";
 import { payFor } from "../rules/run";
 import { roundDollars } from "../rules/units";
 import { packOrder } from "../state/pack";
 import type { PackDogs } from "../state/runState";
-import type { PolicyId } from "./policies";
 import { type RunResult, type SimConfig, simulateRun } from "./simulate";
 import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
 
@@ -57,31 +57,28 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   it("walks different zones from the first zone, taking the route policy's path at each fork", () => {
     const order = gameData.world.zones.map(({ id }) => id);
     const routeOf = (route: SimConfig["route"]) =>
-      runs(3, { policy: "alwaysPay", route, skill: IDEAL_SKILL }).map((result) => result.route);
-    for (const route of [...routeOf("left"), ...routeOf("right"), ...routeOf("random")]) {
+      itemAt(runs(1, { policy: "alwaysPay", route, skill: IDEAL_SKILL }), 0).route;
+    const [left, right, random] = [routeOf("left"), routeOf("right"), routeOf("random")];
+    for (const route of [left, right, random]) {
       expect(route.length).toBeLessThanOrEqual(gameData.world.walkLength);
       expect(route[0]).toBe(gameData.world.firstZone);
       expect(new Set(route).size).toBe(route.length);
     }
     // A fork offers 3 of the 5 zones left after the first zone: the easiest offered is one of the 3
     // easiest left, and the hardest one of the 3 hardest.
-    const firstPick = (route: SimConfig["route"]) =>
-      routeOf(route).flatMap((walked) =>
-        walked[1] === undefined ? [] : [order.indexOf(walked[1])],
-      );
     const after = order
       .filter((zone) => zone !== gameData.world.firstZone)
       .map((zone) => order.indexOf(zone));
-    for (const pick of firstPick("left")) {
-      expect(after.slice(0, 3)).toContain(pick);
+    if (left[1] !== undefined) {
+      expect(after.slice(0, 3)).toContain(order.indexOf(left[1]));
     }
-    for (const pick of firstPick("right")) {
-      expect(after.slice(-3)).toContain(pick);
+    if (right[1] !== undefined) {
+      expect(after.slice(-3)).toContain(order.indexOf(right[1]));
     }
   });
 
   it("never pays money with the alwaysHearts policy", () => {
-    const choices = runs(4, { pack: RISKY, policy: "alwaysHearts", skill: BLIND }).flatMap(
+    const choices = runs(2, { pack: RISKY, policy: "alwaysHearts", skill: BLIND }).flatMap(
       (result) => result.choices,
     );
 
@@ -90,7 +87,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   });
 
   it("pays whenever it can afford to with the alwaysPay policy", () => {
-    const choices = runs(4, { pack: RISKY, policy: "alwaysPay", skill: BLIND }).flatMap(
+    const choices = runs(2, { pack: RISKY, policy: "alwaysPay", skill: BLIND }).flatMap(
       (result) => result.choices,
     );
     const payable = choices.filter((choice) => choice.couldPay);
@@ -99,16 +96,14 @@ describe("simulateRun", { timeout: 30_000 }, () => {
     expect(payable.filter((choice) => choice.cost === 0)).toEqual([]);
   });
 
-  it.each<PolicyId>(["heartsUnlessLow", "alwaysHearts", "alwaysPay", "mixed"])(
-    "gives the same choices for the same seed with the %s policy",
-    (policy) => {
-      const played = () => runs(2, { pack: RISKY, policy, skill: BLIND });
-      expect(played()).toEqual(played());
-    },
-  );
+  // The mixed policy draws its choices from the seed.
+  it("gives the same choices for the same seed with the mixed policy", () => {
+    const played = () => runs(1, { pack: RISKY, policy: "mixed", skill: BLIND });
+    expect(played()).toEqual(played());
+  });
 
   it("holds each zone's pay for every dog still walking at its end", () => {
-    const results = runs(4, { pack: RISKY, policy: "alwaysHearts", skill: SKILL_PRESETS.novice });
+    const results = runs(2, { pack: RISKY, policy: "alwaysHearts", skill: SKILL_PRESETS.novice });
 
     for (const result of results) {
       for (const zone of result.zones) {

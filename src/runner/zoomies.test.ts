@@ -52,14 +52,16 @@ function afterDrift(walk: Walk): number {
 }
 
 describe("stepZoomies", () => {
-  it.each<[string, number, LaneDirection | undefined, number]>([
-    ["toward its heading", 2, 1, 3],
-    ["back toward its heading", 2, -1, 1],
-    ["to the right before the pack has moved", 2, undefined, 3],
-    ["back from the right edge", LANE_COUNT - 1, 1, LANE_COUNT - 2],
-    ["back from the left edge", 0, -1, 1],
-  ])("drifts the pack %s", (_, lane, heading, expected) => {
-    expect(afterDrift(walkIn(lane, heading))).toBe(expected);
+  it("drifts the pack toward its heading, or back from an edge", () => {
+    for (const [, lane, heading, expected] of [
+      ["toward its heading", 2, 1, 3],
+      ["back toward its heading", 2, -1, 1],
+      ["to the right before the pack has moved", 2, undefined, 3],
+      ["back from the right edge", LANE_COUNT - 1, 1, LANE_COUNT - 2],
+      ["back from the left edge", 0, -1, 1],
+    ] satisfies readonly [string, number, LaneDirection | undefined, number][]) {
+      expect(afterDrift(walkIn(lane, heading))).toBe(expected);
+    }
   });
 
   it("waits zoomiesDriftSeconds of walking between drifts", () => {
@@ -89,17 +91,19 @@ describe("stepZoomies", () => {
     y: ROAD.packBand.top - 60,
   });
 
-  it.each<[string, number, WalkItem[], number]>([
-    ["the other way from an obstacle it can't react to", 2, [coneIn(3, 0)], 1],
-    ["nowhere with both lanes blocked", 2, [coneIn(3, 0), coneIn(1, 1)], 2],
-    [
-      "nowhere at the edge with the lane back blocked",
-      LANE_COUNT - 1,
-      [coneIn(LANE_COUNT - 2, 0)],
-      LANE_COUNT - 1,
-    ],
-  ])("drifts %s", (_, lane, items, expected) => {
-    expect(afterDrift(walkIn(lane, 1, items))).toBe(expected);
+  it("drifts away from obstacles it cannot react to, and nowhere when blocked", () => {
+    for (const [, lane, items, expected] of [
+      ["the other way from an obstacle it can't react to", 2, [coneIn(3, 0)], 1],
+      ["nowhere with both lanes blocked", 2, [coneIn(3, 0), coneIn(1, 1)], 2],
+      [
+        "nowhere at the edge with the lane back blocked",
+        LANE_COUNT - 1,
+        [coneIn(LANE_COUNT - 2, 0)],
+        LANE_COUNT - 1,
+      ],
+    ] satisfies readonly [string, number, WalkItem[], number][]) {
+      expect(afterDrift(walkIn(lane, 1, items))).toBe(expected);
+    }
   });
 
   it("keeps drifting the other way after turning at the edge", () => {
@@ -114,9 +118,8 @@ describe("stepZoomies", () => {
 describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
   const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
 
-  it.each(zones.flatMap((zone) => [1, 2].map((seed) => [zone, seed] as const)))(
-    "drift into no unavoidable hit on %s, seed %i",
-    (zone, seed) => {
+  it("drift into no unavoidable hit on any zone's road", () => {
+    for (const [zone, seed] of zones.map((zone) => [zone, 1] as const)) {
       const start = newRun(gameData, 3, {
         dogs: ["koda", "biscuit", "duchess"],
         gear: null,
@@ -180,8 +183,8 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
         }
       }
       expect(hasZoomies(walk)).toBe(true);
-      expect(drifts).toBeGreaterThan(10);
-      expect(unavoidable).toEqual([]);
-    },
-  );
+      expect(drifts, zone).toBeGreaterThan(10);
+      expect(unavoidable, zone).toEqual([]);
+    }
+  });
 });

@@ -16,9 +16,8 @@ describe("hitStopLength", () => {
 });
 
 describe("startHitStop", () => {
-  it.each([false, true])(
-    "holds the step's cards and zone end, marked firing %s, and starts no stop for no length",
-    (firing) => {
+  it("holds the step's cards and zone end, marked firing or not, and starts no stop for no length", () => {
+    for (const firing of [false, true]) {
       expect(startHitStop(firing, 0, { cards: [CARD], zoneEnded: false })).toBeNull();
       expect(startHitStop(firing, 1, { cards: [CARD], zoneEnded: true })).toEqual({
         cards: [CARD],
@@ -26,8 +25,8 @@ describe("startHitStop", () => {
         seconds: 1,
         zoneEnded: true,
       });
-    },
-  );
+    }
+  });
 });
 
 describe("tickHitStop", () => {

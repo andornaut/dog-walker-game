@@ -163,19 +163,18 @@ describe("simulateMatrix", () => {
     expect(simulateMatrix(gameData, 5, 3, SMALL).at(-1)).toEqual(alone);
   });
 
-  it.each([
-    { case: "a renamed dog", dogs: [A], otherDogs: [A], otherName: "Renamed", same: true },
-    { case: "different dogs", dogs: [A], otherDogs: [B], otherName: undefined, same: false },
-    {
-      case: "the same dogs in another order",
-      dogs: [A, B],
-      otherDogs: [B, A],
-      otherName: undefined,
-      same: false,
-    },
-  ])(
-    "seeds a pack from its dog ids, not its names: $case",
-    ({ dogs, otherDogs, otherName, same }) => {
+  it("seeds a pack from its dog ids, not its names", () => {
+    for (const { dogs, otherDogs, otherName, same } of [
+      { case: "a renamed dog", dogs: [A], otherDogs: [A], otherName: "Renamed", same: true },
+      { case: "different dogs", dogs: [A], otherDogs: [B], otherName: undefined, same: false },
+      {
+        case: "the same dogs in another order",
+        dogs: [A, B],
+        otherDogs: [B, A],
+        otherName: undefined,
+        same: false,
+      },
+    ]) {
       const pack = (ids: readonly DogId[], rename?: string): NamedPack => ({
         dogs: ids as PackDogs,
         name: ids.map((id) => rename ?? DOGS[id].name).join(" + "),
@@ -189,8 +188,8 @@ describe("simulateMatrix", () => {
       const expected = expect(rows(pack(otherDogs, otherName)));
 
       (same ? expected : expected.not).toEqual(rows(pack(dogs)));
-    },
-  );
+    }
+  });
 
   it("measures each share over every run's items that reached the pack", () => {
     const [row] = simulateMatrix(gameData, 3, 2, SMALL);
@@ -203,12 +202,11 @@ describe("simulateMatrix", () => {
     expect(row?.meanTips).toBe(6);
   });
 
-  it.each([
-    { expected: 0, preset: "typical" },
-    { expected: 1, preset: "novice" },
-  ] as const)(
-    "gives the share of walks with a firing, $expected for a $preset player",
-    ({ expected, preset }) => {
+  it("gives the share of walks with a firing for each preset player", () => {
+    for (const { expected, preset } of [
+      { expected: 0, preset: "typical" },
+      { expected: 1, preset: "novice" },
+    ] as const) {
       const [row] = simulateMatrix(gameData, 3, 4, {
         ...SMALL,
         players: [{ kind: "skill", preset }],
@@ -216,8 +214,8 @@ describe("simulateMatrix", () => {
 
       expect(row?.firedShare).toBe(expected);
       expect(row?.meanFirings).toBe(expected * 2);
-    },
-  );
+    }
+  });
 
   it("formats a header line and one line per row", () => {
     const rows = simulateMatrix(gameData, 3, 2, SMALL);

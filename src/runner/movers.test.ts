@@ -99,141 +99,150 @@ const spec = (motion: MoverSpec["motion"], lanes = 1, rows = 1): MoverSpec => ({
 });
 
 describe("moverPlace", () => {
-  it.each<{ name: string; path: MoverPath; since: number; want: ReturnType<typeof moverPlace> }>([
-    {
-      name: "a crosser's cue on its row at the edge it enters from",
-      path: crosser(1),
-      since: 40,
-      want: { lanePosition: -0.5, solid: false, travel: 240 },
-    },
-    {
-      name: "a crosser from the right, at its cue",
-      path: crosser(-1),
-      since: 0,
-      want: { lanePosition: 4.5, solid: false, travel: 200 },
-    },
-    {
-      name: "a crosser running across, keeping step with the road",
-      path: crosser(1),
-      since: 150,
-      want: { lanePosition: 0.5, solid: true, travel: 350 },
-    },
-    {
-      name: "a crosser tilted toward the pack, gaining on the road",
-      path: crosser(1, 0.5),
-      since: 200,
-      want: { lanePosition: 1.5, solid: true, travel: 450 },
-    },
-    {
-      name: "a crosser tilted away, falling behind the road",
-      path: crosser(1, -0.5),
-      since: 200,
-      want: { lanePosition: 1.5, solid: true, travel: 350 },
-    },
-    {
-      name: "a rider at the top of its lane during its cue",
-      path: rider(2),
-      since: 50,
-      want: { lanePosition: 3, solid: false, travel: 0 },
-    },
-    {
-      name: "a rider faster than the road",
-      path: rider(2),
-      since: 150,
-      want: { lanePosition: 3, solid: true, travel: 100 },
-    },
-    {
-      name: "a rider slower than the road",
-      path: rider(0.5),
-      since: 300,
-      want: { lanePosition: 3, solid: true, travel: 100 },
-    },
-    {
-      name: "a stepper standing before its first step",
-      path: stepper,
-      since: 90,
-      want: { lanePosition: 2, solid: true, travel: 90 },
-    },
-    {
-      name: "a stepper halfway through a step sideways",
-      path: stepper,
-      since: 125,
-      want: { lanePosition: 2.5, solid: true, travel: 125 },
-    },
-    {
-      name: "a stepper after both steps",
-      path: stepper,
-      since: 400,
-      want: { lanePosition: 3, solid: true, travel: 450 },
-    },
-    {
-      name: "a hopper over the lane between, halfway through a two-lane hop",
-      path: hopper,
-      since: 115,
-      want: { lanePosition: 2, solid: true, travel: 115 },
-    },
-    {
-      name: "a hopper landed",
-      path: hopper,
-      since: 130,
-      want: { lanePosition: 1, solid: true, travel: 130 },
-    },
-  ])("places $name", ({ path, since, want }) => {
-    expect(moverPlace(5, path, since)).toEqual(want);
+  it("places each kind of mover along its path", () => {
+    for (const { path, since, want } of [
+      {
+        name: "a crosser's cue on its row at the edge it enters from",
+        path: crosser(1),
+        since: 40,
+        want: { lanePosition: -0.5, solid: false, travel: 240 },
+      },
+      {
+        name: "a crosser from the right, at its cue",
+        path: crosser(-1),
+        since: 0,
+        want: { lanePosition: 4.5, solid: false, travel: 200 },
+      },
+      {
+        name: "a crosser running across, keeping step with the road",
+        path: crosser(1),
+        since: 150,
+        want: { lanePosition: 0.5, solid: true, travel: 350 },
+      },
+      {
+        name: "a crosser tilted toward the pack, gaining on the road",
+        path: crosser(1, 0.5),
+        since: 200,
+        want: { lanePosition: 1.5, solid: true, travel: 450 },
+      },
+      {
+        name: "a crosser tilted away, falling behind the road",
+        path: crosser(1, -0.5),
+        since: 200,
+        want: { lanePosition: 1.5, solid: true, travel: 350 },
+      },
+      {
+        name: "a rider at the top of its lane during its cue",
+        path: rider(2),
+        since: 50,
+        want: { lanePosition: 3, solid: false, travel: 0 },
+      },
+      {
+        name: "a rider faster than the road",
+        path: rider(2),
+        since: 150,
+        want: { lanePosition: 3, solid: true, travel: 100 },
+      },
+      {
+        name: "a rider slower than the road",
+        path: rider(0.5),
+        since: 300,
+        want: { lanePosition: 3, solid: true, travel: 100 },
+      },
+      {
+        name: "a stepper standing before its first step",
+        path: stepper,
+        since: 90,
+        want: { lanePosition: 2, solid: true, travel: 90 },
+      },
+      {
+        name: "a stepper halfway through a step sideways",
+        path: stepper,
+        since: 125,
+        want: { lanePosition: 2.5, solid: true, travel: 125 },
+      },
+      {
+        name: "a stepper after both steps",
+        path: stepper,
+        since: 400,
+        want: { lanePosition: 3, solid: true, travel: 450 },
+      },
+      {
+        name: "a hopper over the lane between, halfway through a two-lane hop",
+        path: hopper,
+        since: 115,
+        want: { lanePosition: 2, solid: true, travel: 115 },
+      },
+      {
+        name: "a hopper landed",
+        path: hopper,
+        since: 130,
+        want: { lanePosition: 1, solid: true, travel: 130 },
+      },
+    ] satisfies readonly {
+      name: string;
+      path: MoverPath;
+      since: number;
+      want: ReturnType<typeof moverPlace>;
+    }[]) {
+      expect(moverPlace(5, path, since)).toEqual(want);
+    }
   });
 });
 
 describe("moverTell and inMotion", () => {
-  it.each<{
-    moving: boolean;
-    name: string;
-    path: MoverPath;
-    since: number;
-    tell: MoverTell | null;
-  }>([
-    {
-      moving: false,
-      name: "a crosser's cue",
-      path: crosser(-1),
-      since: 50,
-      tell: { direction: -1, kind: "across" },
-    },
-    { moving: true, name: "a crosser on its way", path: crosser(1), since: 100, tell: null },
-    {
-      moving: false,
-      name: "a rider faster than the road, before it enters",
-      path: rider(2),
-      since: 0,
-      tell: { kind: "down" },
-    },
-    {
-      moving: false,
-      name: "a rider slower than the road, before it enters",
-      path: rider(0.5),
-      since: 99,
-      tell: { kind: "up" },
-    },
-    { moving: true, name: "a rider on its way", path: rider(0.5), since: 100, tell: null },
-    {
-      moving: false,
-      name: "a stepper before its first step",
-      path: stepper,
-      since: 0,
-      tell: { kind: "wander" },
-    },
-    { moving: true, name: "a stepper stepping", path: stepper, since: 120, tell: null },
-    { moving: false, name: "a stepper between steps", path: stepper, since: 160, tell: null },
-    {
-      moving: false,
-      name: "a stepper before its second step",
-      path: stepper,
-      since: 250,
-      tell: { kind: "wander" },
-    },
-    { moving: false, name: "a stepper done stepping", path: stepper, since: 400, tell: null },
-  ])("cues $name", ({ moving, path, since, tell }) => {
-    expect(moverTell(path, since)).toEqual(tell);
-    expect(inMotion(path, since)).toBe(moving);
+  it("cues each kind of mover by its tell and motion", () => {
+    for (const { moving, path, since, tell } of [
+      {
+        moving: false,
+        name: "a crosser's cue",
+        path: crosser(-1),
+        since: 50,
+        tell: { direction: -1, kind: "across" },
+      },
+      { moving: true, name: "a crosser on its way", path: crosser(1), since: 100, tell: null },
+      {
+        moving: false,
+        name: "a rider faster than the road, before it enters",
+        path: rider(2),
+        since: 0,
+        tell: { kind: "down" },
+      },
+      {
+        moving: false,
+        name: "a rider slower than the road, before it enters",
+        path: rider(0.5),
+        since: 99,
+        tell: { kind: "up" },
+      },
+      { moving: true, name: "a rider on its way", path: rider(0.5), since: 100, tell: null },
+      {
+        moving: false,
+        name: "a stepper before its first step",
+        path: stepper,
+        since: 0,
+        tell: { kind: "wander" },
+      },
+      { moving: true, name: "a stepper stepping", path: stepper, since: 120, tell: null },
+      { moving: false, name: "a stepper between steps", path: stepper, since: 160, tell: null },
+      {
+        moving: false,
+        name: "a stepper before its second step",
+        path: stepper,
+        since: 250,
+        tell: { kind: "wander" },
+      },
+      { moving: false, name: "a stepper done stepping", path: stepper, since: 400, tell: null },
+    ] satisfies readonly {
+      moving: boolean;
+      name: string;
+      path: MoverPath;
+      since: number;
+      tell: MoverTell | null;
+    }[]) {
+      expect(moverTell(path, since)).toEqual(tell);
+      expect(inMotion(path, since)).toBe(moving);
+    }
   });
 });
 
@@ -247,18 +256,25 @@ describe("facesLeft", () => {
       { at: 300, lanes: 1, length: 50, travel: 0 },
     ],
   };
-  it.each<{ left: boolean; name: string; path: MoverPath; since: number }>([
-    { left: false, name: "a crosser running right", path: crosser(1), since: 150 },
-    { left: true, name: "a crosser running left", path: crosser(-1), since: 150 },
-    { left: false, name: "a rider", path: rider(2), since: 150 },
-    { left: false, name: "a hopper before its hop left", path: hopper, since: 90 },
-    { left: true, name: "a hopper as it hops left", path: hopper, since: 100 },
-    { left: true, name: "a hopper landed left", path: hopper, since: 200 },
-    { left: false, name: "a stepper stepping right", path: stepper, since: 125 },
-    { left: true, name: "a stepper stepping a row after a step left", path: wanderer, since: 225 },
-    { left: false, name: "a stepper stepping back right", path: wanderer, since: 300 },
-  ])("is $left for $name", ({ left, path, since }) => {
-    expect(facesLeft(path, since)).toBe(left);
+  it("faces left only while moving left", () => {
+    for (const { left, path, since } of [
+      { left: false, name: "a crosser running right", path: crosser(1), since: 150 },
+      { left: true, name: "a crosser running left", path: crosser(-1), since: 150 },
+      { left: false, name: "a rider", path: rider(2), since: 150 },
+      { left: false, name: "a hopper before its hop left", path: hopper, since: 90 },
+      { left: true, name: "a hopper as it hops left", path: hopper, since: 100 },
+      { left: true, name: "a hopper landed left", path: hopper, since: 200 },
+      { left: false, name: "a stepper stepping right", path: stepper, since: 125 },
+      {
+        left: true,
+        name: "a stepper stepping a row after a step left",
+        path: wanderer,
+        since: 225,
+      },
+      { left: false, name: "a stepper stepping back right", path: wanderer, since: 300 },
+    ] satisfies readonly { left: boolean; name: string; path: MoverPath; since: number }[]) {
+      expect(facesLeft(path, since)).toBe(left);
+    }
   });
 });
 
@@ -311,45 +327,53 @@ describe("moveMovers", () => {
 });
 
 describe("sweptLanes", () => {
-  it.each<{ from: number; name: string; path: MoverPath; to: number; want: LaneSpan }>([
-    {
-      from: 300,
-      name: "a crosser entering",
-      path: crosser(1),
-      to: 400,
-      want: { count: 3, first: 0 },
-    },
-    {
-      from: 350,
-      name: "a crosser from the right",
-      path: crosser(-1),
-      to: 450,
-      want: { count: 3, first: 2 },
-    },
-    {
-      from: 500,
-      name: "a crosser leaving",
-      path: crosser(1),
-      to: 700,
-      want: { count: 1, first: 4 },
-    },
-    {
-      from: 100,
-      name: "a crosser not yet moving",
-      path: crosser(1),
-      to: 300,
-      want: { count: 0, first: 0 },
-    },
-    {
-      from: 300,
-      name: "a crosser tilted toward the pack",
-      path: crosser(1, 1),
-      to: 500,
-      want: { count: 3, first: 0 },
-    },
-    { from: 0, name: "a rider", path: rider(2), to: 1000, want: { count: 1, first: 3 } },
-  ])("is every lane $name touches, clipped to the road", ({ from, path, to, want }) => {
-    expect(sweptLanes(5, path, from, to)).toEqual(want);
+  it("sweeps every lane a mover touches, clipped to the road", () => {
+    for (const { from, path, to, want } of [
+      {
+        from: 300,
+        name: "a crosser entering",
+        path: crosser(1),
+        to: 400,
+        want: { count: 3, first: 0 },
+      },
+      {
+        from: 350,
+        name: "a crosser from the right",
+        path: crosser(-1),
+        to: 450,
+        want: { count: 3, first: 2 },
+      },
+      {
+        from: 500,
+        name: "a crosser leaving",
+        path: crosser(1),
+        to: 700,
+        want: { count: 1, first: 4 },
+      },
+      {
+        from: 100,
+        name: "a crosser not yet moving",
+        path: crosser(1),
+        to: 300,
+        want: { count: 0, first: 0 },
+      },
+      {
+        from: 300,
+        name: "a crosser tilted toward the pack",
+        path: crosser(1, 1),
+        to: 500,
+        want: { count: 3, first: 0 },
+      },
+      { from: 0, name: "a rider", path: rider(2), to: 1000, want: { count: 1, first: 3 } },
+    ] satisfies readonly {
+      from: number;
+      name: string;
+      path: MoverPath;
+      to: number;
+      want: LaneSpan;
+    }[]) {
+      expect(sweptLanes(5, path, from, to)).toEqual(want);
+    }
   });
 });
 
@@ -408,26 +432,28 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
 describe("hopShapes", () => {
   // A hop goes a lane to either side or, unless sideways, a row up the road or diagonally up:
   // never down toward the pack.
-  it.each([
-    { most: 1, sideways: false },
-    { most: 2, sideways: false },
-    { most: 2, sideways: true },
-  ])("hops 1 to $most spots one way, up too unless sideways is $sideways", (hop) => {
-    const shapes = hopShapes(hop.most, hop.sideways);
-    expect(shapes.every(({ travel }) => travel <= 0)).toBe(true);
-    expect(shapes.some(({ travel }) => travel < 0)).toBe(!hop.sideways);
-    expect(shapes.some(({ lanes, travel }) => lanes !== 0 && travel !== 0)).toBe(!hop.sideways);
-    expect(
-      shapes.every(
-        ({ lanes, travel }) => lanes === 0 || travel === 0 || Math.abs(lanes) === -travel,
-      ),
-    ).toBe(true);
-    expect([...new Set(shapes.map(stepSpots))].sort()).toEqual(
-      Array.from({ length: hop.most }, (_, i) => i + 1),
-    );
-    // Each hop across has its mirror image, so the planner can send it either way.
-    for (const { lanes, travel } of shapes) {
-      expect(shapes).toContainEqual({ lanes: lanes === 0 ? 0 : -lanes, travel });
+  it("hops 1 to its most spots one way, up too unless sideways", () => {
+    for (const hop of [
+      { most: 1, sideways: false },
+      { most: 2, sideways: false },
+      { most: 2, sideways: true },
+    ]) {
+      const shapes = hopShapes(hop.most, hop.sideways);
+      expect(shapes.every(({ travel }) => travel <= 0)).toBe(true);
+      expect(shapes.some(({ travel }) => travel < 0)).toBe(!hop.sideways);
+      expect(shapes.some(({ lanes, travel }) => lanes !== 0 && travel !== 0)).toBe(!hop.sideways);
+      expect(
+        shapes.every(
+          ({ lanes, travel }) => lanes === 0 || travel === 0 || Math.abs(lanes) === -travel,
+        ),
+      ).toBe(true);
+      expect([...new Set(shapes.map(stepSpots))].sort()).toEqual(
+        Array.from({ length: hop.most }, (_, i) => i + 1),
+      );
+      // Each hop across has its mirror image, so the planner can send it either way.
+      for (const { lanes, travel } of shapes) {
+        expect(shapes).toContainEqual({ lanes: lanes === 0 ? 0 : -lanes, travel });
+      }
     }
   });
 });
@@ -435,30 +461,32 @@ describe("hopShapes", () => {
 describe("moverPlacements", () => {
   // Wherever it is placed, a mover touches the pack only within what its placement blocks: in
   // its lanes, from its row's window for as long as its rows' blocking length.
-  it.each(SPECS)("keeps $name within the lanes and rows it blocks", ({ spec: moving }) => {
-    const { cellLength, sightLength, window } = geometry;
-    const { lanes: across, rows } = moving.footprint;
-    const placements = moverPlacements(geometry, moving);
-    expect(placements.length).toBeGreaterThan(0);
-    for (const placement of placements) {
-      const blocked = window + (placement.rows - 1) * cellLength;
-      const reach = window + (rows - 1) * cellLength;
-      for (let since = 0; since < 4000; since += 1) {
-        const place = moverPlace(geometry.laneCount, placement.path, since);
-        const lane = laneAt(place.lanePosition);
-        const touching =
-          place.solid && place.travel >= sightLength && place.travel < sightLength + reach;
-        const onRoad = lane + across > 0 && lane < geometry.laneCount;
-        if (!touching || !onRoad) {
-          continue;
+  it("keeps every kind of mover within the lanes and rows it blocks", () => {
+    for (const { spec: moving } of SPECS) {
+      const { cellLength, sightLength, window } = geometry;
+      const { lanes: across, rows } = moving.footprint;
+      const placements = moverPlacements(geometry, moving);
+      expect(placements.length).toBeGreaterThan(0);
+      for (const placement of placements) {
+        const blocked = window + (placement.rows - 1) * cellLength;
+        const reach = window + (rows - 1) * cellLength;
+        for (let since = 0; since < 4000; since += 1) {
+          const place = moverPlace(geometry.laneCount, placement.path, since);
+          const lane = laneAt(place.lanePosition);
+          const touching =
+            place.solid && place.travel >= sightLength && place.travel < sightLength + reach;
+          const onRoad = lane + across > 0 && lane < geometry.laneCount;
+          if (!touching || !onRoad) {
+            continue;
+          }
+          const scroll = placement.appears + since;
+          expect(scroll).toBeGreaterThanOrEqual(sightLength - 1e-6);
+          expect(scroll).toBeLessThanOrEqual(sightLength + blocked + 1e-6);
+          const first = Math.max(0, lane);
+          const last = Math.min(geometry.laneCount - 1, lane + across - 1);
+          expect(first).toBeGreaterThanOrEqual(placement.lanes.first);
+          expect(last).toBeLessThan(placement.lanes.first + placement.lanes.count);
         }
-        const scroll = placement.appears + since;
-        expect(scroll).toBeGreaterThanOrEqual(sightLength - 1e-6);
-        expect(scroll).toBeLessThanOrEqual(sightLength + blocked + 1e-6);
-        const first = Math.max(0, lane);
-        const last = Math.min(geometry.laneCount - 1, lane + across - 1);
-        expect(first).toBeGreaterThanOrEqual(placement.lanes.first);
-        expect(last).toBeLessThan(placement.lanes.first + placement.lanes.count);
       }
     }
   });
@@ -493,67 +521,74 @@ describe("screenHasRoom", () => {
   const other: OnScreen = onScreenOf(rider(2), [0, 10]);
   const times = (count: number, mover: OnScreen) => Array.from({ length: count }, () => mover);
   const later = (mover: OnScreen): OnScreen => ({ ...mover, interval: [10, 20] });
-  it.each<{ mover: OnScreen; name: string; planned: readonly OnScreen[]; room: boolean }>([
-    { mover: other, name: "a mover on an empty screen", planned: [], room: true },
-    {
-      mover: other,
-      name: "a mover beside one fewer than the cap",
-      planned: times(CAPS.total - 1, other),
-      room: true,
-    },
-    {
-      mover: other,
-      name: "a mover beside a full screen",
-      planned: times(CAPS.total, other),
-      room: false,
-    },
-    {
-      mover: later(other),
-      name: "a mover after a full screen",
-      planned: times(CAPS.total, other),
-      room: true,
-    },
-    {
-      mover: dart,
-      name: "a dart beside the darts' cap",
-      planned: times(CAPS.darts, dart),
-      room: false,
-    },
-    {
-      mover: dart,
-      name: "a dart beside one fewer than the darts' cap",
-      planned: times(CAPS.darts - 1, dart),
-      room: true,
-    },
-    {
-      mover: other,
-      name: "another mover beside the darts' cap",
-      planned: times(CAPS.darts, dart),
-      room: true,
-    },
-    {
-      mover: slow,
-      name: "a slow vehicle beside the slow vehicles' cap",
-      planned: times(CAPS.slowVehicles, slow),
-      room: false,
-    },
-    {
-      mover: dart,
-      name: "a dart beside the slow vehicles' cap",
-      planned: times(CAPS.slowVehicles, slow),
-      room: true,
-    },
-    {
-      mover: { ...other, interval: [0, 30] },
-      name: "a mover around a full screen's worth one after another",
-      planned: Array.from({ length: CAPS.total }, (_, i) => ({
-        ...other,
-        interval: [10 * i, 10 * i + 10],
-      })),
-      room: true,
-    },
-  ])("is $room for $name", ({ mover, planned, room }) => {
-    expect(screenHasRoom(CAPS, planned, mover)).toBe(room);
+  it("has room for a mover only under every cap", () => {
+    for (const { mover, planned, room } of [
+      { mover: other, name: "a mover on an empty screen", planned: [], room: true },
+      {
+        mover: other,
+        name: "a mover beside one fewer than the cap",
+        planned: times(CAPS.total - 1, other),
+        room: true,
+      },
+      {
+        mover: other,
+        name: "a mover beside a full screen",
+        planned: times(CAPS.total, other),
+        room: false,
+      },
+      {
+        mover: later(other),
+        name: "a mover after a full screen",
+        planned: times(CAPS.total, other),
+        room: true,
+      },
+      {
+        mover: dart,
+        name: "a dart beside the darts' cap",
+        planned: times(CAPS.darts, dart),
+        room: false,
+      },
+      {
+        mover: dart,
+        name: "a dart beside one fewer than the darts' cap",
+        planned: times(CAPS.darts - 1, dart),
+        room: true,
+      },
+      {
+        mover: other,
+        name: "another mover beside the darts' cap",
+        planned: times(CAPS.darts, dart),
+        room: true,
+      },
+      {
+        mover: slow,
+        name: "a slow vehicle beside the slow vehicles' cap",
+        planned: times(CAPS.slowVehicles, slow),
+        room: false,
+      },
+      {
+        mover: dart,
+        name: "a dart beside the slow vehicles' cap",
+        planned: times(CAPS.slowVehicles, slow),
+        room: true,
+      },
+      {
+        mover: { ...other, interval: [0, 30] },
+        name: "a mover around a full screen's worth one after another",
+        planned: Array.from({ length: CAPS.total }, (_, i) => ({
+          ...other,
+          interval: [10 * i, 10 * i + 10],
+        })),
+        room: true,
+      },
+    ] satisfies readonly {
+      mover: OnScreen;
+      name: string;
+      planned: readonly OnScreen[];
+      room: boolean;
+    }[]) {
+      expect(screenHasRoom(CAPS, planned, mover)).toBe(room);
+    }
   });
 });
 
@@ -645,51 +680,55 @@ describe("placeMovers", () => {
     );
   });
 
-  it.each([
-    ["blocks", { block: () => false }],
-    ["has no room for", { leavesRoom: () => false }],
-    ["leaves no pack-fit gap for", { packFits: () => false }],
-  ])("drops a mover the grid %s everywhere, drawing only its own draws", (_, refusal) => {
-    const { grid } = freeGrid();
-    let draws = 0;
-    const counting = () => {
-      draws += 1;
-      return 0;
-    };
-    const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
-      { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
-    ]);
-    expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
-    let own = 0;
-    drawMover(() => {
-      own += 1;
-      return 0;
-    });
-    expect(draws).toBe(own);
+  it("drops a mover the grid refuses everywhere, drawing only its own draws", () => {
+    for (const [, refusal] of [
+      ["blocks", { block: () => false }],
+      ["has no room for", { leavesRoom: () => false }],
+      ["leaves no pack-fit gap for", { packFits: () => false }],
+    ] as const) {
+      const { grid } = freeGrid();
+      let draws = 0;
+      const counting = () => {
+        draws += 1;
+        return 0;
+      };
+      const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
+        { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
+      ]);
+      expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
+      let own = 0;
+      drawMover(() => {
+        own += 1;
+        return 0;
+      });
+      expect(draws).toBe(own);
+    }
   });
 
   // Three movers, one per third of the rows. One with no room in its own third, such as one over
   // a cap there, comes on at a later row with room, never an earlier one, and is dropped when no
   // later row has room.
-  it.each([
-    { dropped: 0, name: "the middle third", refused: (row: number) => row >= 13 && row < 26 },
-    { dropped: 2, name: "the last two thirds", refused: (row: number) => row >= 13 },
-  ])("waits for a later row, or drops, a mover with no room in $name", (refusal) => {
-    const { blocked, grid } = freeGrid();
-    const placed = placeMovers(
-      seededRandom(3),
-      zoned,
-      CAPS,
-      { ...grid, block: (row, ...rest) => !refusal.refused(row) && grid.block(row, ...rest) },
-      [],
-      rows,
-      [{ count: 3, kind: "car", spec: spec({ kind: "ride", speedMultiplier: 2 }) }],
-    );
-    expect(placed.dropped).toHaveLength(refusal.dropped);
-    expect(placed.spawns).toHaveLength(3 - refusal.dropped);
-    blocked.forEach(({ row }, i) => {
-      expect(refusal.refused(row)).toBe(false);
-      expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
-    });
+  it("waits for a later row, or drops, a mover with no room in part of the zone", () => {
+    for (const refusal of [
+      { dropped: 0, name: "the middle third", refused: (row: number) => row >= 13 && row < 26 },
+      { dropped: 2, name: "the last two thirds", refused: (row: number) => row >= 13 },
+    ]) {
+      const { blocked, grid } = freeGrid();
+      const placed = placeMovers(
+        seededRandom(3),
+        zoned,
+        CAPS,
+        { ...grid, block: (row, ...rest) => !refusal.refused(row) && grid.block(row, ...rest) },
+        [],
+        rows,
+        [{ count: 3, kind: "car", spec: spec({ kind: "ride", speedMultiplier: 2 }) }],
+      );
+      expect(placed.dropped).toHaveLength(refusal.dropped);
+      expect(placed.spawns).toHaveLength(3 - refusal.dropped);
+      blocked.forEach(({ row }, i) => {
+        expect(refusal.refused(row)).toBe(false);
+        expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
+      });
+    }
   });
 });
