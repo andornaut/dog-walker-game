@@ -2,7 +2,7 @@ import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
 import { packPlace, packSizeRaise } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import type { Cents } from "../rules/units";
-import type { LastWalk, Owned } from "../save/schema";
+import { type LastWalk, MAX_RUN_DOGS, type Owned } from "../save/schema";
 import { packOrder } from "../state/pack";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
 import { homeLine } from "./homeText";
@@ -71,7 +71,7 @@ export function packBonusLine(
 ): string | null {
   const order = packOrder(data.dogs, loadout.dogs);
   const [lead] = order;
-  if (lead === undefined || order.length > 3) {
+  if (lead === undefined || order.length > MAX_RUN_DOGS) {
     return null;
   }
   const modifiers = loadout.gear === null ? [] : modifiersOf(data.shopGear[loadout.gear].effects);
