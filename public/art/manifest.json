@@ -2945,6 +2945,51 @@
       }
     },
     {
+      "key": "roadside-barrels",
+      "png": "sprites/roadside-barrels.png",
+      "json": "sprites/roadside-barrels.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-barrels@50",
+      "png": "sprites/roadside-barrels@50.png",
+      "json": "sprites/roadside-barrels@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "roadside-barrels@62",
+      "png": "sprites/roadside-barrels@62.png",
+      "json": "sprites/roadside-barrels@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-barrels@75",
+      "png": "sprites/roadside-barrels@75.png",
+      "json": "sprites/roadside-barrels@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 51
+      }
+    },
+    {
+      "key": "roadside-barrels@88",
+      "png": "sprites/roadside-barrels@88.png",
+      "json": "sprites/roadside-barrels@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 60
+      }
+    },
+    {
       "key": "roadside-bike",
       "png": "sprites/roadside-bike.png",
       "json": "sprites/roadside-bike.json",
@@ -3032,6 +3077,141 @@
       "anchor": {
         "feetY": 57,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "roadside-clothes-rack",
+      "png": "sprites/roadside-clothes-rack.png",
+      "json": "sprites/roadside-clothes-rack.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 89
+      }
+    },
+    {
+      "key": "roadside-clothes-rack@50",
+      "png": "sprites/roadside-clothes-rack@50.png",
+      "json": "sprites/roadside-clothes-rack@50.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "roadside-clothes-rack@62",
+      "png": "sprites/roadside-clothes-rack@62.png",
+      "json": "sprites/roadside-clothes-rack@62.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "roadside-clothes-rack@75",
+      "png": "sprites/roadside-clothes-rack@75.png",
+      "json": "sprites/roadside-clothes-rack@75.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 67
+      }
+    },
+    {
+      "key": "roadside-clothes-rack@88",
+      "png": "sprites/roadside-clothes-rack@88.png",
+      "json": "sprites/roadside-clothes-rack@88.json",
+      "anchor": {
+        "feetY": 73,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "roadside-dune-fence",
+      "png": "sprites/roadside-dune-fence.png",
+      "json": "sprites/roadside-dune-fence.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 146
+      }
+    },
+    {
+      "key": "roadside-dune-fence@50",
+      "png": "sprites/roadside-dune-fence@50.png",
+      "json": "sprites/roadside-dune-fence@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "roadside-dune-fence@62",
+      "png": "sprites/roadside-dune-fence@62.png",
+      "json": "sprites/roadside-dune-fence@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 92
+      }
+    },
+    {
+      "key": "roadside-dune-fence@75",
+      "png": "sprites/roadside-dune-fence@75.png",
+      "json": "sprites/roadside-dune-fence@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "roadside-dune-fence@88",
+      "png": "sprites/roadside-dune-fence@88.png",
+      "json": "sprites/roadside-dune-fence@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 128
+      }
+    },
+    {
+      "key": "roadside-dune-grass",
+      "png": "sprites/roadside-dune-grass.png",
+      "json": "sprites/roadside-dune-grass.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 51
+      }
+    },
+    {
+      "key": "roadside-dune-grass@50",
+      "png": "sprites/roadside-dune-grass@50.png",
+      "json": "sprites/roadside-dune-grass@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-dune-grass@62",
+      "png": "sprites/roadside-dune-grass@62.png",
+      "json": "sprites/roadside-dune-grass@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-dune-grass@75",
+      "png": "sprites/roadside-dune-grass@75.png",
+      "json": "sprites/roadside-dune-grass@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-dune-grass@88",
+      "png": "sprites/roadside-dune-grass@88.png",
+      "json": "sprites/roadside-dune-grass@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 45
       }
     },
     {
@@ -3125,6 +3305,51 @@
       }
     },
     {
+      "key": "roadside-fern",
+      "png": "sprites/roadside-fern.png",
+      "json": "sprites/roadside-fern.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "roadside-fern@50",
+      "png": "sprites/roadside-fern@50.png",
+      "json": "sprites/roadside-fern@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "roadside-fern@62",
+      "png": "sprites/roadside-fern@62.png",
+      "json": "sprites/roadside-fern@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "roadside-fern@75",
+      "png": "sprites/roadside-fern@75.png",
+      "json": "sprites/roadside-fern@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "roadside-fern@88",
+      "png": "sprites/roadside-fern@88.png",
+      "json": "sprites/roadside-fern@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 54
+      }
+    },
+    {
       "key": "roadside-flamingos",
       "png": "sprites/roadside-flamingos.png",
       "json": "sprites/roadside-flamingos.json",
@@ -3215,6 +3440,96 @@
       }
     },
     {
+      "key": "roadside-fruit-stand",
+      "png": "sprites/roadside-fruit-stand.png",
+      "json": "sprites/roadside-fruit-stand.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@50",
+      "png": "sprites/roadside-fruit-stand@50.png",
+      "json": "sprites/roadside-fruit-stand@50.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@62",
+      "png": "sprites/roadside-fruit-stand@62.png",
+      "json": "sprites/roadside-fruit-stand@62.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@75",
+      "png": "sprites/roadside-fruit-stand@75.png",
+      "json": "sprites/roadside-fruit-stand@75.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@88",
+      "png": "sprites/roadside-fruit-stand@88.png",
+      "json": "sprites/roadside-fruit-stand@88.json",
+      "anchor": {
+        "feetY": 73,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-gas-lamp",
+      "png": "sprites/roadside-gas-lamp.png",
+      "json": "sprites/roadside-gas-lamp.json",
+      "anchor": {
+        "feetY": 149,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "roadside-gas-lamp@50",
+      "png": "sprites/roadside-gas-lamp@50.png",
+      "json": "sprites/roadside-gas-lamp@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "roadside-gas-lamp@62",
+      "png": "sprites/roadside-gas-lamp@62.png",
+      "json": "sprites/roadside-gas-lamp@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "roadside-gas-lamp@75",
+      "png": "sprites/roadside-gas-lamp@75.png",
+      "json": "sprites/roadside-gas-lamp@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "roadside-gas-lamp@88",
+      "png": "sprites/roadside-gas-lamp@88.png",
+      "json": "sprites/roadside-gas-lamp@88.json",
+      "anchor": {
+        "feetY": 130,
+        "opaqueWidth": 21
+      }
+    },
+    {
       "key": "roadside-gnome",
       "png": "sprites/roadside-gnome.png",
       "json": "sprites/roadside-gnome.json",
@@ -3302,6 +3617,186 @@
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 111
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable",
+      "png": "sprites/roadside-house-bay-gable.png",
+      "json": "sprites/roadside-house-bay-gable.json",
+      "anchor": {
+        "feetY": 141,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-cream",
+      "png": "sprites/roadside-house-bay-gable-cream.png",
+      "json": "sprites/roadside-house-bay-gable-cream.json",
+      "anchor": {
+        "feetY": 141,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-cream@50",
+      "png": "sprites/roadside-house-bay-gable-cream@50.png",
+      "json": "sprites/roadside-house-bay-gable-cream@50.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-cream@62",
+      "png": "sprites/roadside-house-bay-gable-cream@62.png",
+      "json": "sprites/roadside-house-bay-gable-cream@62.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-cream@75",
+      "png": "sprites/roadside-house-bay-gable-cream@75.png",
+      "json": "sprites/roadside-house-bay-gable-cream@75.json",
+      "anchor": {
+        "feetY": 107,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-cream@88",
+      "png": "sprites/roadside-house-bay-gable-cream@88.png",
+      "json": "sprites/roadside-house-bay-gable-cream@88.json",
+      "anchor": {
+        "feetY": 124,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-dark",
+      "png": "sprites/roadside-house-bay-gable-dark.png",
+      "json": "sprites/roadside-house-bay-gable-dark.json",
+      "anchor": {
+        "feetY": 141,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-dark@50",
+      "png": "sprites/roadside-house-bay-gable-dark@50.png",
+      "json": "sprites/roadside-house-bay-gable-dark@50.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-dark@62",
+      "png": "sprites/roadside-house-bay-gable-dark@62.png",
+      "json": "sprites/roadside-house-bay-gable-dark@62.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-dark@75",
+      "png": "sprites/roadside-house-bay-gable-dark@75.png",
+      "json": "sprites/roadside-house-bay-gable-dark@75.json",
+      "anchor": {
+        "feetY": 107,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable-dark@88",
+      "png": "sprites/roadside-house-bay-gable-dark@88.png",
+      "json": "sprites/roadside-house-bay-gable-dark@88.json",
+      "anchor": {
+        "feetY": 124,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable@50",
+      "png": "sprites/roadside-house-bay-gable@50.png",
+      "json": "sprites/roadside-house-bay-gable@50.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable@62",
+      "png": "sprites/roadside-house-bay-gable@62.png",
+      "json": "sprites/roadside-house-bay-gable@62.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable@75",
+      "png": "sprites/roadside-house-bay-gable@75.png",
+      "json": "sprites/roadside-house-bay-gable@75.json",
+      "anchor": {
+        "feetY": 107,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "roadside-house-bay-gable@88",
+      "png": "sprites/roadside-house-bay-gable@88.png",
+      "json": "sprites/roadside-house-bay-gable@88.json",
+      "anchor": {
+        "feetY": 124,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "roadside-house-beach",
+      "png": "sprites/roadside-house-beach.png",
+      "json": "sprites/roadside-house-beach.json",
+      "anchor": {
+        "feetY": 117,
+        "opaqueWidth": 114
+      }
+    },
+    {
+      "key": "roadside-house-beach@50",
+      "png": "sprites/roadside-house-beach@50.png",
+      "json": "sprites/roadside-house-beach@50.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 57
+      }
+    },
+    {
+      "key": "roadside-house-beach@62",
+      "png": "sprites/roadside-house-beach@62.png",
+      "json": "sprites/roadside-house-beach@62.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 71
+      }
+    },
+    {
+      "key": "roadside-house-beach@75",
+      "png": "sprites/roadside-house-beach@75.png",
+      "json": "sprites/roadside-house-beach@75.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-house-beach@88",
+      "png": "sprites/roadside-house-beach@88.png",
+      "json": "sprites/roadside-house-beach@88.json",
+      "anchor": {
+        "feetY": 103,
+        "opaqueWidth": 100
       }
     },
     {
@@ -3575,6 +4070,51 @@
       }
     },
     {
+      "key": "roadside-iron-fence",
+      "png": "sprites/roadside-iron-fence.png",
+      "json": "sprites/roadside-iron-fence.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 146
+      }
+    },
+    {
+      "key": "roadside-iron-fence@50",
+      "png": "sprites/roadside-iron-fence@50.png",
+      "json": "sprites/roadside-iron-fence@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "roadside-iron-fence@62",
+      "png": "sprites/roadside-iron-fence@62.png",
+      "json": "sprites/roadside-iron-fence@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 92
+      }
+    },
+    {
+      "key": "roadside-iron-fence@75",
+      "png": "sprites/roadside-iron-fence@75.png",
+      "json": "sprites/roadside-iron-fence@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "roadside-iron-fence@88",
+      "png": "sprites/roadside-iron-fence@88.png",
+      "json": "sprites/roadside-iron-fence@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 128
+      }
+    },
+    {
       "key": "roadside-lamp-post",
       "png": "sprites/roadside-lamp-post.png",
       "json": "sprites/roadside-lamp-post.json",
@@ -3710,6 +4250,51 @@
       }
     },
     {
+      "key": "roadside-lifeguard-chair",
+      "png": "sprites/roadside-lifeguard-chair.png",
+      "json": "sprites/roadside-lifeguard-chair.json",
+      "anchor": {
+        "feetY": 149,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "roadside-lifeguard-chair@50",
+      "png": "sprites/roadside-lifeguard-chair@50.png",
+      "json": "sprites/roadside-lifeguard-chair@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "roadside-lifeguard-chair@62",
+      "png": "sprites/roadside-lifeguard-chair@62.png",
+      "json": "sprites/roadside-lifeguard-chair@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "roadside-lifeguard-chair@75",
+      "png": "sprites/roadside-lifeguard-chair@75.png",
+      "json": "sprites/roadside-lifeguard-chair@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "roadside-lifeguard-chair@88",
+      "png": "sprites/roadside-lifeguard-chair@88.png",
+      "json": "sprites/roadside-lifeguard-chair@88.json",
+      "anchor": {
+        "feetY": 130,
+        "opaqueWidth": 52
+      }
+    },
+    {
       "key": "roadside-mailbox",
       "png": "sprites/roadside-mailbox.png",
       "json": "sprites/roadside-mailbox.json",
@@ -3752,6 +4337,321 @@
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "roadside-market-house-lilac",
+      "png": "sprites/roadside-market-house-lilac.png",
+      "json": "sprites/roadside-market-house-lilac.json",
+      "anchor": {
+        "feetY": 147,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "roadside-market-house-lilac@50",
+      "png": "sprites/roadside-market-house-lilac@50.png",
+      "json": "sprites/roadside-market-house-lilac@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-market-house-lilac@62",
+      "png": "sprites/roadside-market-house-lilac@62.png",
+      "json": "sprites/roadside-market-house-lilac@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-market-house-lilac@75",
+      "png": "sprites/roadside-market-house-lilac@75.png",
+      "json": "sprites/roadside-market-house-lilac@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "roadside-market-house-lilac@88",
+      "png": "sprites/roadside-market-house-lilac@88.png",
+      "json": "sprites/roadside-market-house-lilac@88.json",
+      "anchor": {
+        "feetY": 129,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "roadside-market-house-lime",
+      "png": "sprites/roadside-market-house-lime.png",
+      "json": "sprites/roadside-market-house-lime.json",
+      "anchor": {
+        "feetY": 147,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "roadside-market-house-lime@50",
+      "png": "sprites/roadside-market-house-lime@50.png",
+      "json": "sprites/roadside-market-house-lime@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-market-house-lime@62",
+      "png": "sprites/roadside-market-house-lime@62.png",
+      "json": "sprites/roadside-market-house-lime@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-market-house-lime@75",
+      "png": "sprites/roadside-market-house-lime@75.png",
+      "json": "sprites/roadside-market-house-lime@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "roadside-market-house-lime@88",
+      "png": "sprites/roadside-market-house-lime@88.png",
+      "json": "sprites/roadside-market-house-lime@88.json",
+      "anchor": {
+        "feetY": 129,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "roadside-market-house-turquoise",
+      "png": "sprites/roadside-market-house-turquoise.png",
+      "json": "sprites/roadside-market-house-turquoise.json",
+      "anchor": {
+        "feetY": 147,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "roadside-market-house-turquoise@50",
+      "png": "sprites/roadside-market-house-turquoise@50.png",
+      "json": "sprites/roadside-market-house-turquoise@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-market-house-turquoise@62",
+      "png": "sprites/roadside-market-house-turquoise@62.png",
+      "json": "sprites/roadside-market-house-turquoise@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-market-house-turquoise@75",
+      "png": "sprites/roadside-market-house-turquoise@75.png",
+      "json": "sprites/roadside-market-house-turquoise@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "roadside-market-house-turquoise@88",
+      "png": "sprites/roadside-market-house-turquoise@88.png",
+      "json": "sprites/roadside-market-house-turquoise@88.json",
+      "anchor": {
+        "feetY": 129,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair",
+      "png": "sprites/roadside-muskoka-chair.png",
+      "json": "sprites/roadside-muskoka-chair.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair-red",
+      "png": "sprites/roadside-muskoka-chair-red.png",
+      "json": "sprites/roadside-muskoka-chair-red.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair-red@50",
+      "png": "sprites/roadside-muskoka-chair-red@50.png",
+      "json": "sprites/roadside-muskoka-chair-red@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair-red@62",
+      "png": "sprites/roadside-muskoka-chair-red@62.png",
+      "json": "sprites/roadside-muskoka-chair-red@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair-red@75",
+      "png": "sprites/roadside-muskoka-chair-red@75.png",
+      "json": "sprites/roadside-muskoka-chair-red@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair-red@88",
+      "png": "sprites/roadside-muskoka-chair-red@88.png",
+      "json": "sprites/roadside-muskoka-chair-red@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair@50",
+      "png": "sprites/roadside-muskoka-chair@50.png",
+      "json": "sprites/roadside-muskoka-chair@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair@62",
+      "png": "sprites/roadside-muskoka-chair@62.png",
+      "json": "sprites/roadside-muskoka-chair@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair@75",
+      "png": "sprites/roadside-muskoka-chair@75.png",
+      "json": "sprites/roadside-muskoka-chair@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-muskoka-chair@88",
+      "png": "sprites/roadside-muskoka-chair@88.png",
+      "json": "sprites/roadside-muskoka-chair@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "roadside-planter-tree",
+      "png": "sprites/roadside-planter-tree.png",
+      "json": "sprites/roadside-planter-tree.json",
+      "anchor": {
+        "feetY": 149,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-planter-tree@50",
+      "png": "sprites/roadside-planter-tree@50.png",
+      "json": "sprites/roadside-planter-tree@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "roadside-planter-tree@62",
+      "png": "sprites/roadside-planter-tree@62.png",
+      "json": "sprites/roadside-planter-tree@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "roadside-planter-tree@75",
+      "png": "sprites/roadside-planter-tree@75.png",
+      "json": "sprites/roadside-planter-tree@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "roadside-planter-tree@88",
+      "png": "sprites/roadside-planter-tree@88.png",
+      "json": "sprites/roadside-planter-tree@88.json",
+      "anchor": {
+        "feetY": 130,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-post-ring",
+      "png": "sprites/roadside-post-ring.png",
+      "json": "sprites/roadside-post-ring.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "roadside-post-ring@50",
+      "png": "sprites/roadside-post-ring@50.png",
+      "json": "sprites/roadside-post-ring@50.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "roadside-post-ring@62",
+      "png": "sprites/roadside-post-ring@62.png",
+      "json": "sprites/roadside-post-ring@62.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-post-ring@75",
+      "png": "sprites/roadside-post-ring@75.png",
+      "json": "sprites/roadside-post-ring@75.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 51
+      }
+    },
+    {
+      "key": "roadside-post-ring@88",
+      "png": "sprites/roadside-post-ring@88.png",
+      "json": "sprites/roadside-post-ring@88.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 59
       }
     },
     {
@@ -3845,6 +4745,141 @@
       }
     },
     {
+      "key": "roadside-storefront",
+      "png": "sprites/roadside-storefront.png",
+      "json": "sprites/roadside-storefront.json",
+      "anchor": {
+        "feetY": 147,
+        "opaqueWidth": 116
+      }
+    },
+    {
+      "key": "roadside-storefront-red",
+      "png": "sprites/roadside-storefront-red.png",
+      "json": "sprites/roadside-storefront-red.json",
+      "anchor": {
+        "feetY": 147,
+        "opaqueWidth": 116
+      }
+    },
+    {
+      "key": "roadside-storefront-red@50",
+      "png": "sprites/roadside-storefront-red@50.png",
+      "json": "sprites/roadside-storefront-red@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-storefront-red@62",
+      "png": "sprites/roadside-storefront-red@62.png",
+      "json": "sprites/roadside-storefront-red@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 73
+      }
+    },
+    {
+      "key": "roadside-storefront-red@75",
+      "png": "sprites/roadside-storefront-red@75.png",
+      "json": "sprites/roadside-storefront-red@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "roadside-storefront-red@88",
+      "png": "sprites/roadside-storefront-red@88.png",
+      "json": "sprites/roadside-storefront-red@88.json",
+      "anchor": {
+        "feetY": 129,
+        "opaqueWidth": 101
+      }
+    },
+    {
+      "key": "roadside-storefront@50",
+      "png": "sprites/roadside-storefront@50.png",
+      "json": "sprites/roadside-storefront@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-storefront@62",
+      "png": "sprites/roadside-storefront@62.png",
+      "json": "sprites/roadside-storefront@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 73
+      }
+    },
+    {
+      "key": "roadside-storefront@75",
+      "png": "sprites/roadside-storefront@75.png",
+      "json": "sprites/roadside-storefront@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "roadside-storefront@88",
+      "png": "sprites/roadside-storefront@88.png",
+      "json": "sprites/roadside-storefront@88.json",
+      "anchor": {
+        "feetY": 129,
+        "opaqueWidth": 101
+      }
+    },
+    {
+      "key": "roadside-street-lamp",
+      "png": "sprites/roadside-street-lamp.png",
+      "json": "sprites/roadside-street-lamp.json",
+      "anchor": {
+        "feetY": 179,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-street-lamp@50",
+      "png": "sprites/roadside-street-lamp@50.png",
+      "json": "sprites/roadside-street-lamp@50.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-street-lamp@62",
+      "png": "sprites/roadside-street-lamp@62.png",
+      "json": "sprites/roadside-street-lamp@62.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-street-lamp@75",
+      "png": "sprites/roadside-street-lamp@75.png",
+      "json": "sprites/roadside-street-lamp@75.json",
+      "anchor": {
+        "feetY": 134,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-street-lamp@88",
+      "png": "sprites/roadside-street-lamp@88.png",
+      "json": "sprites/roadside-street-lamp@88.json",
+      "anchor": {
+        "feetY": 157,
+        "opaqueWidth": 46
+      }
+    },
+    {
       "key": "roadside-swing",
       "png": "sprites/roadside-swing.png",
       "json": "sprites/roadside-swing.json",
@@ -3935,6 +4970,96 @@
       }
     },
     {
+      "key": "roadside-trail-sign",
+      "png": "sprites/roadside-trail-sign.png",
+      "json": "sprites/roadside-trail-sign.json",
+      "anchor": {
+        "feetY": 107,
+        "opaqueWidth": 60
+      }
+    },
+    {
+      "key": "roadside-trail-sign@50",
+      "png": "sprites/roadside-trail-sign@50.png",
+      "json": "sprites/roadside-trail-sign@50.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "roadside-trail-sign@62",
+      "png": "sprites/roadside-trail-sign@62.png",
+      "json": "sprites/roadside-trail-sign@62.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "roadside-trail-sign@75",
+      "png": "sprites/roadside-trail-sign@75.png",
+      "json": "sprites/roadside-trail-sign@75.json",
+      "anchor": {
+        "feetY": 80,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "roadside-trail-sign@88",
+      "png": "sprites/roadside-trail-sign@88.png",
+      "json": "sprites/roadside-trail-sign@88.json",
+      "anchor": {
+        "feetY": 94,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-transit-stop",
+      "png": "sprites/roadside-transit-stop.png",
+      "json": "sprites/roadside-transit-stop.json",
+      "anchor": {
+        "feetY": 149,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "roadside-transit-stop@50",
+      "png": "sprites/roadside-transit-stop@50.png",
+      "json": "sprites/roadside-transit-stop@50.json",
+      "anchor": {
+        "feetY": 74,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "roadside-transit-stop@62",
+      "png": "sprites/roadside-transit-stop@62.png",
+      "json": "sprites/roadside-transit-stop@62.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "roadside-transit-stop@75",
+      "png": "sprites/roadside-transit-stop@75.png",
+      "json": "sprites/roadside-transit-stop@75.json",
+      "anchor": {
+        "feetY": 112,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "roadside-transit-stop@88",
+      "png": "sprites/roadside-transit-stop@88.png",
+      "json": "sprites/roadside-transit-stop@88.json",
+      "anchor": {
+        "feetY": 130,
+        "opaqueWidth": 28
+      }
+    },
+    {
       "key": "roadside-tree",
       "png": "sprites/roadside-tree.png",
       "json": "sprites/roadside-tree.json",
@@ -3989,6 +5114,141 @@
       }
     },
     {
+      "key": "roadside-tree-maple",
+      "png": "sprites/roadside-tree-maple.png",
+      "json": "sprites/roadside-tree-maple.json",
+      "anchor": {
+        "feetY": 155,
+        "opaqueWidth": 104
+      }
+    },
+    {
+      "key": "roadside-tree-maple@50",
+      "png": "sprites/roadside-tree-maple@50.png",
+      "json": "sprites/roadside-tree-maple@50.json",
+      "anchor": {
+        "feetY": 77,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "roadside-tree-maple@62",
+      "png": "sprites/roadside-tree-maple@62.png",
+      "json": "sprites/roadside-tree-maple@62.json",
+      "anchor": {
+        "feetY": 97,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-tree-maple@75",
+      "png": "sprites/roadside-tree-maple@75.png",
+      "json": "sprites/roadside-tree-maple@75.json",
+      "anchor": {
+        "feetY": 116,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "roadside-tree-maple@88",
+      "png": "sprites/roadside-tree-maple@88.png",
+      "json": "sprites/roadside-tree-maple@88.json",
+      "anchor": {
+        "feetY": 136,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-tree-oak",
+      "png": "sprites/roadside-tree-oak.png",
+      "json": "sprites/roadside-tree-oak.json",
+      "anchor": {
+        "feetY": 173,
+        "opaqueWidth": 134
+      }
+    },
+    {
+      "key": "roadside-tree-oak@50",
+      "png": "sprites/roadside-tree-oak@50.png",
+      "json": "sprites/roadside-tree-oak@50.json",
+      "anchor": {
+        "feetY": 86,
+        "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "roadside-tree-oak@62",
+      "png": "sprites/roadside-tree-oak@62.png",
+      "json": "sprites/roadside-tree-oak@62.json",
+      "anchor": {
+        "feetY": 108,
+        "opaqueWidth": 83
+      }
+    },
+    {
+      "key": "roadside-tree-oak@75",
+      "png": "sprites/roadside-tree-oak@75.png",
+      "json": "sprites/roadside-tree-oak@75.json",
+      "anchor": {
+        "feetY": 130,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "roadside-tree-oak@88",
+      "png": "sprites/roadside-tree-oak@88.png",
+      "json": "sprites/roadside-tree-oak@88.json",
+      "anchor": {
+        "feetY": 151,
+        "opaqueWidth": 117
+      }
+    },
+    {
+      "key": "roadside-tree-pine",
+      "png": "sprites/roadside-tree-pine.png",
+      "json": "sprites/roadside-tree-pine.json",
+      "anchor": {
+        "feetY": 185,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "roadside-tree-pine@50",
+      "png": "sprites/roadside-tree-pine@50.png",
+      "json": "sprites/roadside-tree-pine@50.json",
+      "anchor": {
+        "feetY": 92,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "roadside-tree-pine@62",
+      "png": "sprites/roadside-tree-pine@62.png",
+      "json": "sprites/roadside-tree-pine@62.json",
+      "anchor": {
+        "feetY": 115,
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "roadside-tree-pine@75",
+      "png": "sprites/roadside-tree-pine@75.png",
+      "json": "sprites/roadside-tree-pine@75.json",
+      "anchor": {
+        "feetY": 139,
+        "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "roadside-tree-pine@88",
+      "png": "sprites/roadside-tree-pine@88.png",
+      "json": "sprites/roadside-tree-pine@88.json",
+      "anchor": {
+        "feetY": 162,
+        "opaqueWidth": 77
+      }
+    },
+    {
       "key": "roadside-tree@50",
       "png": "sprites/roadside-tree@50.png",
       "json": "sprites/roadside-tree@50.json",
@@ -4022,6 +5282,96 @@
       "anchor": {
         "feetY": 136,
         "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-umbrella",
+      "png": "sprites/roadside-umbrella.png",
+      "json": "sprites/roadside-umbrella.json",
+      "anchor": {
+        "feetY": 107,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-umbrella-turquoise",
+      "png": "sprites/roadside-umbrella-turquoise.png",
+      "json": "sprites/roadside-umbrella-turquoise.json",
+      "anchor": {
+        "feetY": 107,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-umbrella-turquoise@50",
+      "png": "sprites/roadside-umbrella-turquoise@50.png",
+      "json": "sprites/roadside-umbrella-turquoise@50.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "roadside-umbrella-turquoise@62",
+      "png": "sprites/roadside-umbrella-turquoise@62.png",
+      "json": "sprites/roadside-umbrella-turquoise@62.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-umbrella-turquoise@75",
+      "png": "sprites/roadside-umbrella-turquoise@75.png",
+      "json": "sprites/roadside-umbrella-turquoise@75.json",
+      "anchor": {
+        "feetY": 80,
+        "opaqueWidth": 64
+      }
+    },
+    {
+      "key": "roadside-umbrella-turquoise@88",
+      "png": "sprites/roadside-umbrella-turquoise@88.png",
+      "json": "sprites/roadside-umbrella-turquoise@88.json",
+      "anchor": {
+        "feetY": 94,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "roadside-umbrella@50",
+      "png": "sprites/roadside-umbrella@50.png",
+      "json": "sprites/roadside-umbrella@50.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "roadside-umbrella@62",
+      "png": "sprites/roadside-umbrella@62.png",
+      "json": "sprites/roadside-umbrella@62.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-umbrella@75",
+      "png": "sprites/roadside-umbrella@75.png",
+      "json": "sprites/roadside-umbrella@75.json",
+      "anchor": {
+        "feetY": 80,
+        "opaqueWidth": 64
+      }
+    },
+    {
+      "key": "roadside-umbrella@88",
+      "png": "sprites/roadside-umbrella@88.png",
+      "json": "sprites/roadside-umbrella@88.json",
+      "anchor": {
+        "feetY": 94,
+        "opaqueWidth": 75
       }
     },
     {
@@ -4067,6 +5417,96 @@
       "anchor": {
         "feetY": 57,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-warehouse",
+      "png": "sprites/roadside-warehouse.png",
+      "json": "sprites/roadside-warehouse.json",
+      "anchor": {
+        "feetY": 137,
+        "opaqueWidth": 122
+      }
+    },
+    {
+      "key": "roadside-warehouse-stone",
+      "png": "sprites/roadside-warehouse-stone.png",
+      "json": "sprites/roadside-warehouse-stone.json",
+      "anchor": {
+        "feetY": 137,
+        "opaqueWidth": 122
+      }
+    },
+    {
+      "key": "roadside-warehouse-stone@50",
+      "png": "sprites/roadside-warehouse-stone@50.png",
+      "json": "sprites/roadside-warehouse-stone@50.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-warehouse-stone@62",
+      "png": "sprites/roadside-warehouse-stone@62.png",
+      "json": "sprites/roadside-warehouse-stone@62.json",
+      "anchor": {
+        "feetY": 85,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "roadside-warehouse-stone@75",
+      "png": "sprites/roadside-warehouse-stone@75.png",
+      "json": "sprites/roadside-warehouse-stone@75.json",
+      "anchor": {
+        "feetY": 103,
+        "opaqueWidth": 92
+      }
+    },
+    {
+      "key": "roadside-warehouse-stone@88",
+      "png": "sprites/roadside-warehouse-stone@88.png",
+      "json": "sprites/roadside-warehouse-stone@88.json",
+      "anchor": {
+        "feetY": 120,
+        "opaqueWidth": 107
+      }
+    },
+    {
+      "key": "roadside-warehouse@50",
+      "png": "sprites/roadside-warehouse@50.png",
+      "json": "sprites/roadside-warehouse@50.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-warehouse@62",
+      "png": "sprites/roadside-warehouse@62.png",
+      "json": "sprites/roadside-warehouse@62.json",
+      "anchor": {
+        "feetY": 85,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "roadside-warehouse@75",
+      "png": "sprites/roadside-warehouse@75.png",
+      "json": "sprites/roadside-warehouse@75.json",
+      "anchor": {
+        "feetY": 103,
+        "opaqueWidth": 92
+      }
+    },
+    {
+      "key": "roadside-warehouse@88",
+      "png": "sprites/roadside-warehouse@88.png",
+      "json": "sprites/roadside-warehouse@88.json",
+      "anchor": {
+        "feetY": 120,
+        "opaqueWidth": 107
       }
     },
     {
@@ -5317,6 +6757,22 @@
       "png": "images/backdrop-bark-park.png"
     },
     {
+      "key": "backdrop-cabbagetown",
+      "png": "images/backdrop-cabbagetown.png"
+    },
+    {
+      "key": "backdrop-distillery-district",
+      "png": "images/backdrop-distillery-district.png"
+    },
+    {
+      "key": "backdrop-high-park",
+      "png": "images/backdrop-high-park.png"
+    },
+    {
+      "key": "backdrop-kensington-market",
+      "png": "images/backdrop-kensington-market.png"
+    },
+    {
       "key": "backdrop-paws-promenade",
       "png": "images/backdrop-paws-promenade.png"
     },
@@ -5329,12 +6785,20 @@
       "png": "images/backdrop-snooze-crescent.png"
     },
     {
+      "key": "backdrop-the-beaches",
+      "png": "images/backdrop-the-beaches.png"
+    },
+    {
       "key": "backdrop-the-long-way-home",
       "png": "images/backdrop-the-long-way-home.png"
     },
     {
       "key": "backdrop-woof-way",
       "png": "images/backdrop-woof-way.png"
+    },
+    {
+      "key": "backdrop-yonge-street",
+      "png": "images/backdrop-yonge-street.png"
     },
     {
       "key": "card-belly-rubs",
@@ -5545,6 +7009,22 @@
       "png": "images/card-zone-bark-park.png"
     },
     {
+      "key": "card-zone-cabbagetown",
+      "png": "images/card-zone-cabbagetown.png"
+    },
+    {
+      "key": "card-zone-distillery-district",
+      "png": "images/card-zone-distillery-district.png"
+    },
+    {
+      "key": "card-zone-high-park",
+      "png": "images/card-zone-high-park.png"
+    },
+    {
+      "key": "card-zone-kensington-market",
+      "png": "images/card-zone-kensington-market.png"
+    },
+    {
       "key": "card-zone-paws-promenade",
       "png": "images/card-zone-paws-promenade.png"
     },
@@ -5557,12 +7037,20 @@
       "png": "images/card-zone-snooze-crescent.png"
     },
     {
+      "key": "card-zone-the-beaches",
+      "png": "images/card-zone-the-beaches.png"
+    },
+    {
       "key": "card-zone-the-long-way-home",
       "png": "images/card-zone-the-long-way-home.png"
     },
     {
       "key": "card-zone-woof-way",
       "png": "images/card-zone-woof-way.png"
+    },
+    {
+      "key": "card-zone-yonge-street",
+      "png": "images/card-zone-yonge-street.png"
     },
     {
       "key": "icon-bump",
@@ -5789,6 +7277,22 @@
       "png": "images/icon-zone-bark-park.png"
     },
     {
+      "key": "icon-zone-cabbagetown",
+      "png": "images/icon-zone-cabbagetown.png"
+    },
+    {
+      "key": "icon-zone-distillery-district",
+      "png": "images/icon-zone-distillery-district.png"
+    },
+    {
+      "key": "icon-zone-high-park",
+      "png": "images/icon-zone-high-park.png"
+    },
+    {
+      "key": "icon-zone-kensington-market",
+      "png": "images/icon-zone-kensington-market.png"
+    },
+    {
       "key": "icon-zone-paws-promenade",
       "png": "images/icon-zone-paws-promenade.png"
     },
@@ -5801,12 +7305,20 @@
       "png": "images/icon-zone-snooze-crescent.png"
     },
     {
+      "key": "icon-zone-the-beaches",
+      "png": "images/icon-zone-the-beaches.png"
+    },
+    {
       "key": "icon-zone-the-long-way-home",
       "png": "images/icon-zone-the-long-way-home.png"
     },
     {
       "key": "icon-zone-woof-way",
       "png": "images/icon-zone-woof-way.png"
+    },
+    {
+      "key": "icon-zone-yonge-street",
+      "png": "images/icon-zone-yonge-street.png"
     },
     {
       "key": "icon-zoomies",
@@ -5893,6 +7405,38 @@
       "png": "images/road-bark-park-start.png"
     },
     {
+      "key": "road-cabbagetown",
+      "png": "images/road-cabbagetown.png"
+    },
+    {
+      "key": "road-cabbagetown-start",
+      "png": "images/road-cabbagetown-start.png"
+    },
+    {
+      "key": "road-distillery-district",
+      "png": "images/road-distillery-district.png"
+    },
+    {
+      "key": "road-distillery-district-start",
+      "png": "images/road-distillery-district-start.png"
+    },
+    {
+      "key": "road-high-park",
+      "png": "images/road-high-park.png"
+    },
+    {
+      "key": "road-high-park-start",
+      "png": "images/road-high-park-start.png"
+    },
+    {
+      "key": "road-kensington-market",
+      "png": "images/road-kensington-market.png"
+    },
+    {
+      "key": "road-kensington-market-start",
+      "png": "images/road-kensington-market-start.png"
+    },
+    {
       "key": "road-paws-promenade",
       "png": "images/road-paws-promenade.png"
     },
@@ -5917,6 +7461,14 @@
       "png": "images/road-snooze-crescent-start.png"
     },
     {
+      "key": "road-the-beaches",
+      "png": "images/road-the-beaches.png"
+    },
+    {
+      "key": "road-the-beaches-start",
+      "png": "images/road-the-beaches-start.png"
+    },
+    {
       "key": "road-the-long-way-home",
       "png": "images/road-the-long-way-home.png"
     },
@@ -5931,6 +7483,14 @@
     {
       "key": "road-woof-way-start",
       "png": "images/road-woof-way-start.png"
+    },
+    {
+      "key": "road-yonge-street",
+      "png": "images/road-yonge-street.png"
+    },
+    {
+      "key": "road-yonge-street-start",
+      "png": "images/road-yonge-street-start.png"
     },
     {
       "key": "screen-end",

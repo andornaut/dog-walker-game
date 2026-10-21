@@ -32,14 +32,26 @@ Zone skins are not drawn in play, the moving ones aside, which are drawn to the 
 
 ## Palette and outlines
 
-- [Endesga 32](https://lospec.com/palette-list/endesga-32) only, each pixel opaque or fully transparent. Colour names are the `K` names in `art/tools/pixel.py`.
+- A 64-colour house palette, each pixel opaque or fully transparent: [Endesga 32](https://lospec.com/palette-list/endesga-32) and the 32 Toronto colours (`TORONTO` in `art/tools/pixel.py`; `PALETTE64` is both). Colour names are the `K` names in `art/tools/pixel.py`. The Toronto colours fill gaps in Endesga 32 for the Toronto neighborhoods' scenery, roads, verges and skies, each ramp ending on an Endesga colour (`DARKER`):
+
+| Group               | Colours, light to dark down each ramp                                                  |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| Brick, warm browns  | brick 8e3b2b, dbrick 5e2620; clay 9a6a4a, bark 523a2c, walnut 2e2019; driftwood a99c86 |
+| Greens              | moss 9cb04a, olive 6b8a35, dolive 445a26; canopy 357a2f, pine 1e4d2b, fir 11301c       |
+| Kensington brights  | lilac a77bd9, violet 6d4bb0; lime b2d94a; turquoise 35c2a6, dturq 1f8a7a               |
+| Lake blues          | foam a8e0e6, shallow 58b8c9, lake 2f7fa6, dlake 1d5576                                 |
+| Skies               | azure 3d86e0, cobalt 2654b0; gold f9c74f; haze cfe3ea; peach ff9e6b                    |
+| Stones, dark slates | stone 8a857c, dstone 625e58; ash 57606a, shale 353b45, coal 26292f                     |
+| TTC red             | ttc da291c                                                                             |
+
+- A sprite or image in the Toronto colours carries them after Endesga 32 (and the neutral greys, when it uses them) in its Aseprite palette. UI rims that lighten (`LIGHTER` in `art/tools/ui.py`) step up the Endesga ramps only. `python3 art/tools/pixel.py palette` writes `shared/palette.json`, every colour by name with its hex and its one-step-darker colour, which the game's dark ramp reads.
 - One extension, the neutral greys (`NEUTRAL` in `art/tools/pixel.py`), for disabled and locked UI only (a disabled tile, button, slider or knob, the grey copy of art inside one, a locked item's well and plates): nlgrey d8d8d8, ngrey a4a4a4, nslate 727272 and ndslate 4a4a4a, the neutral counterparts of lgrey, grey, slate and dslate, with ink 181425 as their darkest step. Endesga's own greys are cool, and disabled UI reads as neutral grey, not blue. A sprite that uses them carries them after Endesga 32 in its Aseprite palette.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
-- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the light roads in `ROADS` (`art/tools/pixel.py`: Fairview Park tan, Main Street pink, The Long Way Home skin2), and the fill carries Elm Avenue (dslate, the first entry). A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Elm Avenue. A sprite that is dark all over, such as Pepe's black coat, takes a grey outline (3.39:1 on Elm Avenue) instead of the rim. Willow Crescent (grey) and Riverside Path (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged. A white coat on the road is white, not light grey, and its lower-right silhouette steps one ramp colour darker (white to lgrey, lgrey to grey), so it keeps its mass on the light roads.
+- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the light roads in `ROADS` (`art/tools/pixel.py`: High Park tan, Kensington Market pink, Yonge Street skin2), and the fill carries the Distillery District (dslate, the first entry). A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on the Distillery District's dslate. A sprite that is dark all over, such as Pepe's black coat, takes a grey outline (3.39:1 on dslate) instead of the rim. Cabbagetown (grey) and The Beaches (cream) are lighter than Yonge Street, so `road_edge` outlines hold 3:1 on them unchanged. A white coat on the road is white, not light grey, and its lower-right silhouette steps one ramp colour darker (white to lgrey, lgrey to grey), so it keeps its mass on the light roads.
 - Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them (a head over its body) stay two ramp steps darker.
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings such as merle are a few flat patches. A person's face seen from the front, on the road, standing or in a `face-`, stays clean: flat skin with a 1px shadow down its near (right) edge beside the eyes, never across the jaw or mouth (`face_disc` in `art/tools/road.py`).
-- Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` keeps a ramp outline, `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim (ink for the light roads, white for Elm Avenue and the dimmed road), and `fx-dust` (light grey dust) has no rim. Comic words take the sign logo's ink ring and dred shadow. Hazard warnings are outlined in ink.
+- Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` keeps a ramp outline, `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim (ink for the light roads, white for the Distillery District's dslate and the dimmed road), and `fx-dust` (light grey dust) has no rim. Comic words take the sign logo's ink ring and dred shadow. Hazard warnings are outlined in ink.
 - Ground decals (puddles) have no outline and no shadow.
 - Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons, such as `icon-gear-*`, `icon-need-*`, `icon-pace-*`, `icon-style-*`, `icon-trait-*` and `icon-zone-*`, are outlined with `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline. A walker's pace and style icons are animals and objects (a snail, a hare, a rose, a money bag), never a bow, bone, squirrel, moon, paw or bolt, so they never read as a dog's trait or energy.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
@@ -48,7 +60,7 @@ Zone skins are not drawn in play, the moving ones aside, which are drawn to the 
 
 - Text holds 4.5:1 against what it sits on (3:1 at 2× and larger); essential icons and marks hold 3:1. Inactive controls are exempt.
 - A state never relies on colour alone: it also changes shape (a tick, a hollow heart, a filled pip).
-- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Elm Avenue; dred on Fairview Park (3.49:1) and Riverside Path (5.07:1); plum on Willow Crescent (4.84:1), Main Street (5.03:1) and The Long Way Home (4.45:1). It is drawn over the dogs and their shadows and under the walker, who hides the part behind her, here and in every composite (help pages, cards, the og-image).
+- The leash is a 1px line the game draws from the walker's hand to each collar: pink on the Distillery District; dred on High Park (3.49:1) and The Beaches (5.07:1); plum on Cabbagetown (4.84:1), Kensington Market (5.03:1) and Yonge Street (4.45:1). It is drawn over the dogs and their shadows and under the walker, who hides the part behind her, here and in every composite (help pages, cards, the og-image).
 
 ### UI colour pairs
 
@@ -101,7 +113,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, and `K` names in `art/tool
 - Comic lettering: `font-comic`, the comic words' letters (see Comic words) for the word drawn over a hit burst, colours baked in, drawn untinted. A to Z, ! ? - and space. Its line is 11px: the ink ring on rows 0 to 8, the yellow fill on rows 1 to 7 (base 8), the dred shadow to row 10. Each glyph is one letter alone, its ring from the glyph's column 0; the advance is the letter's width plus 1, so the next ring lands on the 1px gap and merges, with no kerning. Glyphs drawn left to right, each over the last, give the baked words' pixels exactly. A word is its letters' widths, plus 1 between each pair, plus 4 (ring and shadow) wide.
 - `ui-pet-shop` (120×108) stands on the gate scene's right lot at 234,86, its step on the yard's bottom row (193); its hit area is its frame. Its PET SHOP board (237,86 114×22, the full width of the parapet) is built and coloured as `ui-button` `go` (green face, yellow highlight, forest lip, ink line), with the sign letters' shapes at 2× filled ink (8.41:1). `pressed` dips as `ui-button` does: the front sinks 2px onto a step 1px shallower, and the board's lip and highlight give way to face, as `go-pressed`. `glint` sweeps a 6px light band (white, yellow edges) up and across the raised board in 6 frames, then ends on a clean frame; the game plays it every few seconds while idle, with a bob of at most 2px so the board stays clear of the street sign's plate. When something in the shop is affordable, `ui-afford` goes 2px outside it (232,84 124×112), as on a tile. The street sign's plate (300,72 54×11) holds the street name in `font-body` at 1×, white, centred at 327,75: "Elm Avenue" is 46px wide, "ELM AVENUE" 48px, inside the 52px face.
 - Each start screen section has its own fill over the same tile area (section x+3, y+24, width-6, height-27), repeated with TileSprite under the tiles: the walker section is a corkboard (`ui-cork`: brown with dbrown and ochre granules scattered over a 32px tile, so they show no grid), the dogs section a dog blanket (`ui-plaid`: a quiet dred check, a plum band and a plum thread each way, a plum line about every 8px) and the Pocket denim.
-- The loading screen is the gate scene's street at night, seen from the road: the logo at 2× in the navy band, Elm Avenue's backdrop across the street two ramp steps darker with its windows lit, the yard one step darker (the picket fence with the open gate, `ui-pet-shop`'s building with its board and window lit), and the sidewalk where `ui-loading` walks Casey and Biscuit at the road sprites' size over `ui-loading-track`'s paw prints from the Pet shop to the gate. The night sidewalk is grey, so the leash is plum (4.84:1) and the prints dslate (3.39:1). The street below stays plain from the curb to row 500.
+- The loading screen is the gate scene's street at night, seen from the road: the logo at 2× in the navy band, Elm Avenue's backdrop (`backdrop-woof-way`) across the street two ramp steps darker with its windows lit, the yard one step darker (the picket fence with the open gate, `ui-pet-shop`'s building with its board and window lit), and the sidewalk where `ui-loading` walks Casey and Biscuit at the road sprites' size over `ui-loading-track`'s paw prints from the Pet shop to the gate. The night sidewalk is grey, so the leash is plum (4.84:1) and the prints dslate (3.39:1). The street below stays plain from the curb to row 500.
 - The Pocket section is a jeans pocket: inside its `ui-section` frame and under the band, the tile area (section x+3, y+24, width-6, height-27) is `ui-denim` (blue twill, dslate diagonals and slate flecks, apart from the navy band and the other sections' fills), ringed by a tan stitch line on a navy shadow: `ui-stitch-h` along the top (section x+5, y+25) and bottom (x+5, y+height-6), width-10 long, and `ui-stitch-v` down the left (x+5) and right (x+width-7) from y+25, height-29 long. Fill first, then the side stitches, then the top and bottom ones, then the tiles. Each piece repeats with TileSprite from its own top-left, so every run starts on a dash.
 
 ### Interaction states
@@ -365,19 +377,35 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 ## Road strips
 
 - 320×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
-- The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Willow Crescent grey (slate), Fairview Park tan (brown), Elm Avenue dslate (navy), Main Street pink (mauve), Riverside Path cream (tan), The Long Way Home skin2 (brown).
-- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Willow Crescent; dbrown on Fairview Park; white dashes 12 rows long in 32 with a mauve edge on Main Street; dbrown dashes 20 rows long in 32 on Riverside Path; white outlined in plum on The Long Way Home.
+- The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Each Toronto neighborhood keeps the road colour of the Maplewood zone it replaced, so the shadows, the leash colours and every road sprite's outline hold unchanged. Base (shadow): Cabbagetown grey (slate), High Park tan (brown), Distillery District dslate (navy), Kensington Market pink (mauve), The Beaches cream (tan), Yonge Street skin2 (brown).
+- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Cabbagetown; dbrown on High Park; a line of lgrey granite setts with a stone edge, 6 rows on and 2 off, on the Distillery District; white dashes 12 rows long in 32 with a mauve edge on Kensington Market; dbrown dashes 20 rows long in 32 on The Beaches; white outlined in plum on Yonge Street.
+- Surfaces (`art/tools/roads.py`): Cabbagetown, pale asphalt with stone granite gutters and a few fallen leaves; High Park, the dirt trail with bark-brown needles between wobbling pine edges with fir blades; the Distillery District, dslate cobbles in courses 8 rows deep with navy joints and brick gutters; Kensington Market, pink flagstones half a lane wide in offset courses between dark shale gutters; The Beaches, a cream boardwalk with driftwood edge beams and sand drifted along them; Yonge Street, skin2 brick between lgrey granite curbs.
 - Curbs and verges stay inside the outer 3 to 7px of the strip, clear of the 8px each side of a 48px sprite in its 64px lane.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The camera has its horizon at y −66 and the walker's feet at y 478; the road's far edge meets the backdrop at y 206 at scale 0.5. Its ratio r derives from speed (the visible distance is 3.6 s × `roadScrollSpeed`, 720 road px at 200 px/s, so r is 0.694). The rows from the far edge down to about y 214 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
 
+### Verges
+
+The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. The Toronto verges are `TORONTO_VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge. `lawnColors` are the lawn's base, its mown stripes or rough patches, and its 2-row tufts, which draw their own colour; null where there is no lawn. `walkTo` null runs the paving out to the screen's edge. `shadow` is a free-standing prop's ground shadow.
+
+| Neighborhood        | Curb (to)       | Sidewalk or paving (to)                                         | Lawn                                     | Shadow |
+| ------------------- | --------------- | --------------------------------------------------------------- | ---------------------------------------- | ------ |
+| Cabbagetown         | stone (164)     | lgrey, grey seams every 32 (208)                                | mown: dgreen, canopy stripes, pine tufts | canopy |
+| Distillery District | stone (164)     | brown brick, brick seams every 16, brick and rust dots (on out) | none                                     | dbrown |
+| High Park           | none            | none                                                            | rough: pine, fir patches, fir tufts      | fir    |
+| Kensington Market   | stone (162)     | a coal strip to 166, then shale, coal and ash dots (on out)     | none                                     | coal   |
+| The Beaches         | driftwood (164) | skin1 sand, tan and white dots (on out)                         | none                                     | skin2  |
+| Yonge Street        | white (164)     | lgrey, grey seams every 32, sparse grey dots (on out)           | none                                     | grey   |
+
+An ambient person or lawn animal holds 3:1 on all of its edge pixels, or within 1%, on the light verges, the Distillery District's brown brick and Cabbagetown's lawn (the cyclist 59% or more), and on 74% or more on High Park's pine and Kensington Market's shale, where the light rim carries it as on the dslate road.
+
 ## Roadside
 
-The verges stay clean: bare lawn beyond the sidewalks, with the odd street tree. The backdrop carries the static scenery at the top of the road. `art/tools/roadside.py` draws the roadside props (houses, fences, trees and yard props) and holds the per-zone placement table (`PLACEMENT`, keyed by zone art id; `python3 art/tools/roadside.py table` prints it as JSON and `table --write` writes it to `shared/roadside.json`, which the game reads). Only Elm Avenue (`woof-way`) has a table, and it places only trees; the other props are drawn but not placed.
+The verges stay clean: bare lawn beyond the sidewalks, with the odd street tree. The backdrop carries the static scenery at the top of the road. `art/tools/roadside.py` draws the roadside props (houses, fences, trees and yard props) and holds the per-zone placement table (`PLACEMENT`, keyed by zone art id; `python3 art/tools/roadside.py table` prints it as JSON and `table --write` writes it to `shared/roadside.json`, which the game reads). Elm Avenue (`woof-way`) and every Toronto neighborhood (keyed by its art id, such as `high-park`) have a table, and each places only the odd prop; the other props are drawn but not placed. `build` writes `shared/roadside.json` too.
 
 - Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms. The placement table places static props only, one frame with no motion, so the verges never pull the eye from the road; the sprinkler is not placed.
 - Houses follow the backdrops' slim houses: about as tall as they are wide (the two-storey house a little taller), under a steep gable that rises a row for each column it narrows, past 2px eaves in a 2px band a step darker than the roof. Light comes from the top left: the roof's left edge is a ramp step lighter and the wall's right 3 columns a step darker. Each has a chimney; the porch houses have a dormer, its cap's right edge a step darker so it stands out of the roof.
-- They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket, the street tree three round lobes, the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box, the gnome a blue hat and red coat, the mailbox blue with a yellow flag (the hydrant is red), the bird bath a white basin on a pedestal, the shrub round and in bloom, and the little library a box on a post (the bench and the bin stand on the ground).
+- They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket, the street tree three round lobes, the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box, the gnome a blue hat and red coat, the mailbox blue with a yellow flag (the hydrant is red), the bird bath a white basin on a pedestal, the shrub round and in bloom, and the little library a box on a post (the bench and the bin stand on the ground). In Toronto the bike post's bike is locked to its ring, side on, with no rider (the cyclist rides); the fruit stand is a tiered stand of crates under a striped awning on two posts, with no wheels (the hot dog cart rolls); the transit stop is a pole with a red and white sign and a timetable box, with no shelter; the street lamp lights both ways, since a prop is never flipped.
 
 ### Placement
 
@@ -387,12 +415,22 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 - The one lot is empty. Gap 0 holds `tree` and gap 3 `tree-blossom`, each at across 277 (inner edge 220), dz 0; the other four gaps are empty. So each side has a tree every 6 slots (840 px), alternating plain and blossom, and the right side's trees fall 3 slots after the left's, so the trees alternate sides, one every 420 px: about 2.4 trees per 1000 px of road over both sides, and always one in view.
 - At no k do the two sides take the same lot or gap that holds props.
 - Every frame's inner edge is at across 212 or more, past the sidewalk's outer edge at 208, so on screen a prop stays outside the sidewalk on its own row and every row above it.
+- Every Toronto neighborhood has a table in Elm Avenue's shape, its character coming from its backdrop, verges and road: the empty lot and six gaps, gap 0 holding the neighborhood's tree and gap 3 its own prop, the rest empty, with the same sides. So each side has a prop every 6 slots, and over both sides one stands every 420 px, always one in view.
+
+| Neighborhood        | Gap 0: key `roadside-…`, inner edge, dz | Gap 3                 |
+| ------------------- | --------------------------------------- | --------------------- |
+| Cabbagetown         | `tree-maple` 220, 0                     | `gas-lamp` 213, 0     |
+| Distillery District | `gas-lamp` 213, 0                       | `barrels` 220, 0      |
+| High Park           | `tree-oak` 220, 0                       | `tree-pine` 220, 0    |
+| Kensington Market   | `tree-maple` 220, 0                     | `post-ring` 213, 0    |
+| The Beaches         | `lifeguard-chair` 220, 0                | `dune-grass` 213, 0   |
+| Yonge Street        | `planter-tree` 220, 0                   | `transit-stop` 213, 0 |
 
 ### Drawing
 
 - A prop d road px ahead of the feet draws at the road camera's scale s, at x = 180 − across × s on the left and 180 + across × s on the right, its feet on the row of d, from the smallest of its steps at least its projected size, as the road objects.
-- Draw order: depth `DEPTH.sprite` + feet row, so back to front with the road objects; over the backdrop, cropped at the juncture (row 126), so a far prop shows in full from the cross street; and under the doghouses.
-- Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary, wishing well) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in dgreen, the lawn one ramp step darker. Houses, fences, the hedge, the flower border, the washing line and the swing set take none.
+- Draw order: props draw in their own depth band, back to front by feet row, below the road sprites and the ambient movers; over the backdrop, cropped at the juncture (row 126), so a far prop shows in full from the cross street; and under the doghouses.
+- Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary, wishing well) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in the zone's `shadowColour` from the table, its lawn or paving one ramp step darker: dgreen on Elm Avenue, canopy on Cabbagetown, fir in High Park, dbrown on the Distillery District, coal on Kensington Market, skin2 on The Beaches and grey on Yonge Street. The Toronto street furniture (lamps, the bike post, trees, ferns, the trail sign, barrels, the fruit stand, the clothes rack, chairs, umbrellas, dune grass, the transit stop) takes it too. Houses, fences, the hedge, the flower border, the washing line and the swing set take none.
 - With 20px of verge at the pack, a prop leaves the screen's side once its inner edge does, at about s 0.85; houses never show whole. No prop stands within the 64 rows of a zone's start strip, so the cross street stays clear.
 
 ## Ambient
@@ -410,27 +448,31 @@ Backdrops are 360×158 on screen rows 48 to 205; band row y is screen row 48 + y
 
 Above the far side's front row the scenery goes back in depth, not taller: hills, a second row of houses, the town, the park's meadow or the river's far bank, then the sky. The debuff bars and the message strip lie over the band's top rows, so the sky above row 45 (70 rows over the ground row) is one flat colour with no clouds, stars, rays or scenery, and clouds, the moon, birds and the tallest scenery stay below it.
 
-| Zone              | Depth behind the front row                                                           |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| Willow Crescent   | Dark far houses up a slate hill, a few windows lit, and a church spire               |
-| Fairview Park     | Wooded hills, a far tree line and a meadow with a bandstand; a kite in the sky       |
-| Elm Avenue        | A green hill with a second row of houses up its slope and a water tower on its crest |
-| Main Street       | The town's blocks and a clock tower over the toy shop                                |
-| Riverside Path    | A wider river with a dinghy; on the far bank hills, a village and a spire            |
-| The Long Way Home | Dbrown hills the sun sets behind; birds in the pink band                             |
+The six Toronto backdrops (`backdrop-<id>`), each started from the Maplewood backdrop it replaced:
 
-Houses on the far side are slim, about as tall as they are wide: Elm Avenue's are 44 to 48 wide and 46 rows from the step to the ridge, a 22- to 24-row wall under a 22- to 24-row roof. The gable rises about a row for each column it narrows, past 2px eaves. Light comes from the top left: the roof's left edge is a ramp step lighter, the wall's right 3 columns a step darker. Each has a chimney, and some a dormer. Trees, hedges and side yards fill the gaps, and the end houses run off the band's edges so the street carries on. Houses further back are smaller (18 to 20 wide, a 12-row wall, two small windows, no door or chimney) and show between the near roofs. Willow Crescent's houses rise with its far side toward the middle.
+| Neighborhood        | Front row                                                                                 | Depth behind it                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Cabbagetown         | Brick bay-and-gable houses round the crescent, white bargeboards, iron fences, gas lamps  | Dbrick roofs up a leafy rise, windows lit gold, a church spire               |
+| Distillery District | Brick warehouses and a limestone mill, arched windows lit gold, the DISTILLERY sign       | The chimney stack and a water tower; string lights between the buildings     |
+| High Park           | The park gate (HIGH PARK on a pine board), black lanterns, the trail on through it        | Grenadier Pond with reeds, a cherry in blossom, dense pine and canopy groves |
+| Kensington Market   | Painted Victorians turned shops (FRUIT, CHEESE, VINTAGE, SPICES, COFFEE), bunting, crates | Back-lane rooftops; shaded laneway walls at both ends of the street          |
+| The Beaches         | Sand with umbrellas, a volleyball net and the white lifeguard station under its red roof  | Lake Ontario to the horizon: dark far water, shallows, foam lines, sails     |
+| Yonge Street        | Shops with lit signs (SALE, EAT, MUSIC, BOOKS, SHOES), the TTC sign, a big screen         | Downtown towers and the CN Tower                                             |
+
+Darkness varies between them: The Beaches and Yonge Street are bright and open, Cabbagetown and the Distillery District in between, Kensington Market dark either side of its road and High Park darkest, under its canopy.
+
+Houses on the far side are slim, about as tall as they are wide: Cabbagetown's are 44 to 48 wide and 50 rows from the step to the ridge, a 28-row wall under a 22-row roof. The gable rises about a row for each column it narrows, past 2px eaves. Light comes from the top left: the roof's left edge is a ramp step lighter, the wall's right 3 columns a step darker. Each has a chimney, and some a dormer. Trees, hedges and side yards fill the gaps, and the end houses run off the band's edges so the street carries on. Houses further back are smaller (18 to 20 wide, a 12-row wall, two small windows, no door or chimney) and show between the near roofs. Willow Crescent's houses rise with its far side toward the middle.
 
 Where row 157 meets the road, left side (the right mirrors it):
 
-| Zone              | Edge                           | Curb    | Road from  |
-| ----------------- | ------------------------------ | ------- | ---------- |
-| Willow Crescent   | Sidewalk 76 to 97              | 98..99  | 100        |
-| Fairview Park     | Grass to 99                    | none    | 100 (path) |
-| Elm Avenue        | Sidewalk 76 to 97              | 98..101 | 102        |
-| Main Street       | Paving to 89, planter 90 to 97 | 98..101 | 102        |
-| Riverside Path    | Paving 76 to 99                | none    | 100        |
-| The Long Way Home | Sidewalk 76 to 97              | 98..99  | 100        |
+| Neighborhood        | Edge                              | Curb    | Road from    |
+| ------------------- | --------------------------------- | ------- | ------------ |
+| Cabbagetown         | Sidewalk 76 to 97                 | 98..101 | 102          |
+| Distillery District | Brick paving to 97                | 98..101 | 102          |
+| High Park           | Undergrowth to 99                 | none    | 100 (path)   |
+| Kensington Market   | Shale paving to 95, coal 96 to 97 | 98..99  | 100          |
+| The Beaches         | Sand to 97                        | 98..101 | 102 (boards) |
+| Yonge Street        | Paving to 97                      | 98..101 | 102          |
 
 Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 142 to 143, x 0 to 72), the near-right lawn's kite spot (x 284 to 319, rows 117 to 157), and both sidewalks.
 
@@ -441,33 +483,44 @@ Scenery gags are sprites the game places on those spots, drawn front view at the
 | `gag-cat`  | Near-left perch | x 0 to 48, row 119 | Paws on the top rail, row 142                                                                                                                                                                        |
 | `gag-kite` | Near-right lawn | 284, 117           | A street tree with a diamond kite snagged in its crown. Its crown rises over the cross street, rows 117 to 133; its foot's outline is on row 155. Every zone takes it, Main Street's paving included |
 
-- One sprite for every zone: the kite's tree is drawn into it, since Main Street has no tree and Riverside Path's stand across the river. Its crown is green with a forest outline, and the kite red and yellow with a plum outline, so both hold on every zone's ground and far side.
+- One sprite for every zone: the kite's tree is drawn into it, since the Distillery District, Kensington Market, The Beaches and Yonge Street have no lawn tree there. Its crown is green with a forest outline, and the kite red and yellow with a plum outline, so both hold on every zone's ground and far side.
 
 Beside the kite's tree each backdrop draws a static ornament on the near-right lawn, from x 322 to 353 with its feet on row 155 and its outline two ramp steps darker (`ornament` in `art/tools/backdrops.py`). It has no frames to play, so nothing beside the road moves but the gags. On the approach rows the game's road raster shows the backdrop's own pixels wherever they differ from its verge, so the ornament stays in place while the lawn scrolls.
 
-| Zone              | Ornament                                                   |
-| ----------------- | ---------------------------------------------------------- |
-| Willow Crescent   | A garden gnome in a blue hat and red coat, a red toadstool |
-| Fairview Park     | A round flower bed edged in stones                         |
-| Elm Avenue        | A white stone bird bath, a sky bird on its rim             |
-| Main Street       | A terracotta pot of flowers on the paving                  |
-| Riverside Path    | A white rowboat turned planter, full of flowers            |
-| The Long Way Home | Two pumpkins, orange and amber                             |
+| Neighborhood        | Ornament                                                         |
+| ------------------- | ---------------------------------------------------------------- |
+| Cabbagetown         | A terracotta pot of flowers                                      |
+| Distillery District | An oak whisky barrel on its end, a tin cup on its head           |
+| High Park           | A round flower bed edged in stones                               |
+| Kensington Market   | Stacked crates of apples, oranges and limes                      |
+| The Beaches         | A turquoise Muskoka chair                                        |
+| Yonge Street        | A Toronto bike post, its ring on a post, a red bike locked to it |
 
 ## Skies
 
-- Daytime skies (Fairview Park, Riverside Path, Elm Avenue) stay cyan over sky with clouds: flat cyan down to row 45, then sky. Main Street's sky is a sunburst: flat rays of sky and cyan, seven of each, from the end of the street (`sunburst` in `art/tools/backdrops.py`), ending on an arc below row 45 with flat cyan beyond it, and a cloud either side; its zone card repeats it with five of each.
+- Each Toronto neighborhood has its own sky, flat above the calm rows (`CALM`, 70 rows over the far side's ground row) under the debuff bars and the message strip. Their ink edges hold 3:1 or more on every one: from 4.88:1 on High Park's azure to 13.58:1 on Yonge Street's haze.
+
+| Neighborhood        | Sky, flat colour then lower sky                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Cabbagetown         | Dusk bands: lilac, pink, peach, gold; a crescent moon and the first stars                                                   |
+| Distillery District | Warm evening: peach over skin1, gulls                                                                                       |
+| High Park           | Deep clear blue: azure over sky, white clouds                                                                               |
+| Kensington Market   | A sunburst: flat rays of foam and cyan, seven of each, from the end of the street (`sunburst`), cyan beyond its arc; clouds |
+| The Beaches         | Late afternoon: gold over yellow, small clouds and gulls                                                                    |
+| Yonge Street        | Pale haze: haze over white, two gulls                                                                                       |
+
+- A zone card repeats its backdrop's sky, bands and sun included.
 - Sunset and night skies are hard-edged horizontal bands of flat colour (`bands` in `art/tools/backdrops.py`), each 0.7 times the height of the band above it, so they shrink toward the horizon. On a backdrop the bands run from row 45 to the far side's ground row and the top band also fills the rows above (`sunset`); stars sit in the top band below row 45. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.
 - The sun is a flat yellow disc (`sun`) whose visible lower half is cut by horizontal gaps that widen toward the horizon as the bars between them thin; the bands show through the gaps. It sits over the orange band, so the gaps hold against the yellow.
 - Bands, top to horizon:
 
-| Sky                    | Bands                       | Extras                 | Where                                                                     |
-| ---------------------- | --------------------------- | ---------------------- | ------------------------------------------------------------------------- |
-| The Long Way Home      | pink, orange, amber, yellow | Striped sun            | `backdrop-the-long-way-home`, `card-zone-the-long-way-home`, `screen-end` |
-| Willow Crescent (dusk) | purple, mauve, pink, skin1  | Crescent moon, stars   | `backdrop-snooze-crescent`, `card-zone-snooze-crescent`                   |
-| Elm Avenue at night    | navy, purple, mauve         | Stars in the navy band | `screen-loading`                                                          |
+| Sky                 | Bands                       | Extras                 | Where                                           |
+| ------------------- | --------------------------- | ---------------------- | ----------------------------------------------- |
+| Cabbagetown (dusk)  | lilac, pink, peach, gold    | Crescent moon, stars   | `backdrop-cabbagetown`, `card-zone-cabbagetown` |
+| Elm Avenue at night | navy, purple, mauve         | Stars in the navy band | `screen-loading`                                |
+| The Long Way Home   | pink, orange, amber, yellow | Striped sun            | `screen-end`                                    |
 
-- A zone card's sky repeats its backdrop's bands and sun. Scenery standing against a band never shares its colour: The Long Way Home's backdrop trees are rust and dbrown against the orange band.
+- Scenery standing against a band never shares its colour: Cabbagetown's far roofs and spire are dbrick against the peach and gold bands.
 - Bands belong to skies only: never on sprites, UI or the road.
 
 ## Sound
