@@ -42,6 +42,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
+import glyphs  # noqa: E402
 import scene as sn  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
@@ -474,17 +475,16 @@ def sweet_talker():
 
 
 def skip():
+    """Walk on by: the skunk waits at the left while Duchess and Biscuit trot on past it up the street,
+    lgrey speed lines at their heels, and the Hall pass held up over them (glyphs.py's 20x20 icon)."""
     a = Art()
     a.ground("street")
-    a.put("skunk", "idle", 16, 54)
-    a.put("dog-biscuit", "walk", 46, 52, 2)
-    disc(a, 58, 13, 7, "green", "dgreen")
-    disc(a, 58, 13, 2, "forest")
-    a.fill(62, 17, 8, 4, "green")
-    a.fill(68, 17, 2, 4, "dgreen")
-    sn.text(a, "SKIP", 4, 4, "white", 2)
-    for y in (40, 44, 48):
-        a.fill(28, y, 8, 1, "lgrey")
+    a.put("skunk", "idle", 13, 49)
+    a.put("dog-duchess", "walk", 41, 55, 1)
+    a.put("dog-biscuit", "walk", 62, 49, 2)
+    for x, y, h in ((33, 47, 6), (49, 48, 5), (55, 43, 5), (70, 42, 4)):
+        a.fill(x, y, 1, h, "lgrey")
+    a.paste(glyphs.image(glyphs.gear_hall_pass20), 30, 1)
     return a
 
 

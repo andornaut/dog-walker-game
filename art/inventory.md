@@ -176,7 +176,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | Key                           | Type   | Size    | Tags                                             | Note                                                                      |
 | ----------------------------- | ------ | ------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
 | `card-<encounter>-<option>`   | image  | 75×56   |                                                  | One per option of the encounters and lucky encounters                     |
-| `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | One per upgrade (6), and the Skip option Hall pass adds                   |
+| `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | One per upgrade (6), and the Walk on by option Hall pass adds             |
 | `card-cost`                   | image  | 71×13   |                                                  | Cost plaque, at 2× on the large frame                                     |
 | `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | The game draws `encounter` for an obstacle and `route` for a fork         |
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`                                  | Tap-to-enlarge view                                                       |

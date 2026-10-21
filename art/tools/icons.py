@@ -2,7 +2,8 @@
 """Draw the shop's gear icons.
 
 item-<id>: 32x32 images in Endesga 32 with coloured outlines, on transparency.
-The ids are the shop's data ids in kebab case.
+The ids are the shop's data ids in kebab case: item-poop-bags is the Hall pass, a
+cream pass card on a lanyard.
 
 Usage:
   icons.py preview OUT.png   every icon on the shop's slot colours, scaled up
@@ -32,11 +33,29 @@ def fanny_pack(g):
     g.p(22, 17, "lgrey")
 
 
-def poop_bags(g):
-    g.ell(14, 16, 9, 9, "green", "dgreen", "yellow")
-    g.ell(14, 16, 3, 3, "forest")
-    g.tri((20, 21), (29, 27), (22, 28), "green")
-    g.rect(22, 22, 4, 4, "green")
+def hall_pass(g):
+    """The Hall pass: a cream pass card on a sky lanyard, its clip through a slot punched in the red
+    header band, a dred paw stamp on the left and brown lines of print on the right."""
+    for i in range(9):
+        g.p(7 + i, i, "sky")
+        g.p(8 + i, i, "blue")
+        g.p(24 - i, i, "sky")
+        g.p(23 - i, i, "blue")
+    g.rect(3, 12, 26, 17, "cream")
+    g.rect(3, 12, 26, 5, "red")
+    g.rect(3, 12, 26, 1, "pink")
+    g.rect(28, 12, 1, 17, "tan")
+    g.rect(3, 28, 26, 1, "tan")
+    g.rect(28, 12, 1, 5, "dred")
+    g.rect(13, 13, 6, 2, None)
+    g.rect(14, 8, 4, 2, "lgrey")
+    g.rect(15, 10, 2, 5, "lgrey")
+    g.p(17, 9, "grey")
+    for x, y in ((6, 20), (9, 18), (13, 18), (16, 20)):
+        g.rect(x, y, 2, 2, "dred")
+    g.ell(11.5, 24.5, 4, 2.6, "dred")
+    for y, w in ((20, 7), (23, 7), (26, 5)):
+        g.rect(20, y, w, 1, "brown")
 
 
 def running_shoes(g):
@@ -57,7 +76,7 @@ def lucky_collar(g):
 
 ICONS = {
     "fanny-pack": fanny_pack,
-    "poop-bags": poop_bags,
+    "poop-bags": hall_pass,
     "running-shoes": running_shoes,
     "lucky-collar": lucky_collar,
 }

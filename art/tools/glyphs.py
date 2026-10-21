@@ -405,12 +405,26 @@ def gear_fanny_pack():
     return g
 
 
-def gear_poop_bags():
+def gear_hall_pass():
     g = Grid(16, 16)
-    g.ell(7, 7.5, 6, 6, "green", "dgreen", "yellow")
-    g.ell(7, 7.5, 2, 2, "forest")
-    g.tri((10, 10), (15.5, 14), (11, 15), "green")
-    g.rect(11, 11, 2, 2, "green")
+    g.p(3, 0, "sky")
+    g.p(4, 1, "sky")
+    g.p(5, 2, "sky")
+    g.p(12, 0, "sky")
+    g.p(11, 1, "sky")
+    g.p(10, 2, "sky")
+    g.rect(1, 5, 14, 10, "cream")
+    g.rect(1, 5, 14, 3, "red")
+    g.rect(14, 5, 1, 10, "tan")
+    g.rect(1, 14, 14, 1, "tan")
+    g.rect(14, 5, 1, 3, "dred")
+    g.rect(6, 3, 4, 2, "lgrey")
+    g.rect(7, 5, 2, 2, "lgrey")
+    for x, y in ((2, 10), (4, 9), (6, 10)):
+        g.p(x, y, "dred")
+    g.rect(3, 11, 3, 2, "dred")
+    g.rect(9, 10, 4, 1, "brown")
+    g.rect(9, 12, 4, 1, "brown")
     return g
 
 
@@ -635,13 +649,28 @@ def gear_fanny_pack20():
     return g
 
 
-def gear_poop_bags20():
-    """The roll of poop bags: a green roll lit yellow round a forest core, a bag pulled off to the right."""
+def gear_hall_pass20():
+    """The Hall pass: a cream pass card on a sky lanyard, clipped through its red header band, a dred
+    paw stamp on the left and brown lines of print on the right."""
     g = Grid(20, 20)
-    g.ell(8.5, 9, 7, 7, "green", "dgreen", "yellow")
-    g.ell(8.5, 9, 2.5, 2.5, "forest")
-    g.tri((12, 12), (18.5, 17.5), (13, 18.5), "green")
-    g.rect(13, 13, 3, 3, "green")
+    for i in range(5):
+        g.p(4 + i, i, "sky")
+        g.p(15 - i, i, "sky")
+    g.rect(2, 7, 16, 11, "cream")
+    g.rect(2, 7, 16, 3, "red")
+    g.rect(2, 7, 16, 1, "pink")
+    g.rect(17, 7, 1, 11, "tan")
+    g.rect(2, 17, 16, 1, "tan")
+    g.rect(17, 7, 1, 3, "dred")
+    g.rect(8, 4, 4, 2, "lgrey")
+    g.rect(9, 6, 2, 3, "lgrey")
+    for x, y in ((3, 12), (5, 11), (7, 11), (9, 12)):
+        g.p(x, y, "dred")
+    g.rect(4, 13, 5, 3, "dred")
+    g.rect(4, 15, 1, 1, "cream")
+    g.rect(8, 15, 1, 1, "cream")
+    g.rect(11, 12, 5, 1, "brown")
+    g.rect(11, 14, 5, 1, "brown")
     return g
 
 
@@ -749,7 +778,7 @@ IMAGES = {
     "icon-upgrade-sweet-talker": sweet_talker,
     "icon-gear-fanny-pack": gear_fanny_pack,
     "icon-gear-lucky-collar": gear_lucky_collar,
-    "icon-gear-poop-bags": gear_poop_bags,
+    "icon-gear-poop-bags": gear_hall_pass,
     "icon-gear-running-shoes": gear_running_shoes,
     "icon-perk-calm-voice-20": calm_voice20,
     "icon-perk-kind-words-20": kind_words20,
@@ -763,7 +792,7 @@ IMAGES = {
     "icon-upgrade-sweet-talker-20": sweet_talker20,
     "icon-gear-fanny-pack-20": gear_fanny_pack20,
     "icon-gear-lucky-collar-20": gear_lucky_collar20,
-    "icon-gear-poop-bags-20": gear_poop_bags20,
+    "icon-gear-poop-bags-20": gear_hall_pass20,
     "icon-gear-running-shoes-20": gear_running_shoes20,
     "icon-bump": bump,
     "icon-fired": fired,
