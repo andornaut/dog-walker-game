@@ -164,10 +164,10 @@ def walker(lf=0, rf=0, bob=0, arms=0):
     g.ell(16, 22.5 + b, 6, 2.5, "blue", "navy")
     # head: hair, ears, cap and a ponytail
     g.rect(14, 19 + b, 4, 3, "skin1")
-    g.ell(16, 12.5 + b, 8.5, 8.5, "dbrown", "plum", "brown")
+    g.cel(16, 12.5 + b, 8.5, 8.5, "dbrown", "plum", "brown")
     g.rect(7, 13 + b, 2, 3, "skin1")
     g.rect(23, 13 + b, 2, 3, "skin1")
-    g.ell(16, 8 + b, 8.5, 5, "amber", "orange", "yellow")
+    g.cel(16, 8 + b, 8.5, 5, "amber", "orange", "yellow")
     g.rect(8, 10 + b, 17, 2, "orange")
     g.rect(15, 10 + b, 2, 2, "dbrown")
     g.ell(16, 17 + b, 2.5, 4, "dbrown", "plum")
@@ -246,7 +246,7 @@ def walker_man(lf=0, rf=0, bob=0, arms=0):
     # bald head, the beard showing along the jaw, a shine on the crown
     g.rect(8, 12 + b, 2, 3, "dbrown")
     g.rect(22, 12 + b, 2, 3, "plum")
-    g.blob(16, 12 + b, 7, 9, "dbrown", "plum", power=2.15)
+    g.cel(16, 12 + b, 7, 9, "dbrown", "plum", power=2.15)
     g.rect(11, 7 + b, 3, 1, "brown")
     g.p(11, 8 + b, "brown")
     # a light rim along the edges facing the light, a dimmer one opposite, so he holds on the dark road
@@ -281,7 +281,7 @@ def walker_teacher(lf=0, rf=0, bob=0, arms=0):
     g.p(27, 26 + b, "dgreen")
     # a dirty blonde bob to the shoulders, flicking out at the ends: light brown, darker than her skin,
     # with golden amber streaks where the light catches it
-    g.ell(16, 12.5 + b, 9, 9, "brown", "dbrown", "tan")
+    g.cel(16, 12.5 + b, 9, 9, "brown", "dbrown", "tan")
     g.rect(8, 14 + b, 17, 5, "brown")
     g.rect(22, 14 + b, 3, 5, "dbrown")
     g.ell(16, 19 + b, 9, 2.5, "brown", "dbrown")

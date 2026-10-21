@@ -153,6 +153,10 @@ class Mini:
         else:
             self._set(self.g.ell, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li)
 
+    def cel(self, cx, cy, rx, ry, c, sh=None, li=None, power=2):
+        s, sy = self.s, self.sy
+        self._set(self.g.cel, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li, power)
+
     def blob(self, cx, cy, rx, ry, c, sh=None, li=None, power=2.6):
         s, sy = self.s, self.sy
         self._set(self.g.blob, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li, power)
