@@ -47,7 +47,13 @@ import {
   tapGear,
 } from "../home/home";
 import { HOME_LAYOUT, sectionFill } from "../home/homeLayout";
-import { bubbleSpeech, type HomeAction, type WalkerLine, walkerLineKey } from "../home/homeLines";
+import {
+  bubbleSpeech,
+  type HomeAction,
+  type WalkerLine,
+  walkerLineKey,
+  walkerUnlockedSince,
+} from "../home/homeLines";
 import { HOME_TEXT_FIELDS as FIELDS, homeLine } from "../home/homeText";
 import {
   buttonState,
@@ -357,6 +363,9 @@ interface TileView {
 // The bank the last time the home screen was shown this session, so the walker can say
 // when something new became affordable.
 const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
+// The walkers owned the last time the home screen was shown this session, so the walker can
+// say when one has just been unlocked. A session's first visit has none to compare with.
+const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 
 // The screen before a walk: the bank, the Logbook and best walk at the top bar's left and
 // help, sound and settings at its right; the walker and pack at the gate beside the Pet
@@ -424,11 +433,12 @@ export class StartScene extends Scene {
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
     const before = bankAtLastVisit(remembered, bankCents, stats.lastWalk);
     this.visitBank = before;
-    this.walkerLine = walkerLineKey(
-      stats.lastWalk,
-      newlyAffordable(gameData, owned, before, bankCents),
-      walksPlayed(stats),
-    );
+    const walkersBefore = this.registry.get(LAST_VISIT_WALKERS_KEY) as WalkerId[] | undefined;
+    const news = {
+      affordable: newlyAffordable(gameData, owned, before, bankCents),
+      walker: walkerUnlockedSince(walkersBefore, owned.walkers),
+    };
+    this.walkerLine = walkerLineKey(stats.lastWalk, news, walksPlayed(stats));
     stopWakeLock();
     setRunOverride(this, null);
     clearRunOverrides();
@@ -973,6 +983,7 @@ export class StartScene extends Scene {
     this.gateDogs = [];
     const save = this.save();
     this.registry.set(LAST_VISIT_BANK_KEY, save.bankCents);
+    this.registry.set(LAST_VISIT_WALKERS_KEY, [...save.owned.walkers]);
     const g = this.graphics(root);
     this.drawTopBar(root, g, save);
     this.drawPetShop(root, save);

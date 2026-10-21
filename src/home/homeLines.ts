@@ -1,4 +1,4 @@
-import type { DogId, GameData, HomeText } from "../data/types";
+import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
 import type { Cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
@@ -9,24 +9,43 @@ export type WalkerLine = keyof HomeText["bubble"];
 // After each of this many first walks, the walker says how to use the screen.
 export const HOW_TO_WALKS = 3;
 
-// The walker's own line, in priority order: a player who has never walked; the last walk
-// had a firing; something became affordable since the last visit; back from one of the
-// first few walks, how to use the screen; back from a later walk.
+// What changed since the last visit: something became affordable, a walker was unlocked.
+export interface VisitNews {
+  readonly affordable: boolean;
+  readonly walker: boolean;
+}
+
+// The walker's own line, in priority order: a player who has never walked; a walker unlocked
+// since the last visit; the last walk had a firing; something became affordable since the
+// last visit; back from one of the first few walks, how to use the screen; back from a later
+// walk.
 export function walkerLineKey(
   lastWalk: Pick<LastWalk, "firings"> | null,
-  newAffordable: boolean,
+  news: VisitNews,
   walks: number,
 ): WalkerLine {
   if (lastWalk === null) {
     return "firstVisit";
   }
+  if (news.walker) {
+    return "newWalker";
+  }
   if (lastWalk.firings.length > 0) {
     return "afterFiring";
   }
-  if (newAffordable) {
+  if (news.affordable) {
     return "newAffordable";
   }
   return walks <= HOW_TO_WALKS ? "howTo" : "afterWalk";
+}
+
+// Whether a walker is owned now that was not at the last visit. With no last visit to compare
+// with (a session's first), there is none.
+export function walkerUnlockedSince(
+  remembered: readonly WalkerId[] | undefined,
+  owned: readonly WalkerId[],
+): boolean {
+  return remembered !== undefined && owned.some((id) => !remembered.includes(id));
 }
 
 // The Dogs band's pack count: the dogs picked and the pack's capacity.

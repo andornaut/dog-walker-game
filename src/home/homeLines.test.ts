@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId } from "../data/types";
+import type { DogId, WalkerId } from "../data/types";
 import { cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
@@ -12,8 +12,10 @@ import {
   HOW_TO_WALKS,
   messageLine,
   packCountLine,
+  type VisitNews,
   type WalkerLine,
   walkerLineKey,
+  walkerUnlockedSince,
 } from "./homeLines";
 import { homeLine } from "./homeText";
 
@@ -26,17 +28,31 @@ describe("walkerLineKey", () => {
   const later = HOW_TO_WALKS + 1;
   const fired = { firings: [firing] };
   const kept = { firings: [] };
+  const both = { affordable: true, walker: true };
+  const affordable = { affordable: true, walker: false };
+  const none = { affordable: false, walker: false };
 
-  it.each<[string, Pick<LastWalk, "firings"> | null, boolean, number, WalkerLine]>([
-    ["greets a player who has never walked, whatever else holds", null, true, 0, "firstVisit"],
-    ["puts a firing ahead of something new to buy", fired, true, 1, "afterFiring"],
-    ["puts a firing ahead of the how-to", fired, false, 1, "afterFiring"],
-    ["puts something new to buy ahead of the how-to", kept, true, 1, "newAffordable"],
-    ["says how to use the screen after the first walk", kept, false, 1, "howTo"],
-    ["says how to use the screen up to the last how-to walk", kept, false, HOW_TO_WALKS, "howTo"],
-    ["welcomes back after the how-to walks", kept, false, later, "afterWalk"],
-  ])("%s", (_name, lastWalk, newAffordable, walks, expected) => {
-    expect(walkerLineKey(lastWalk, newAffordable, walks)).toBe(expected);
+  it.each<[string, Pick<LastWalk, "firings"> | null, VisitNews, number, WalkerLine]>([
+    ["greets a player who has never walked, whatever else holds", null, both, 0, "firstVisit"],
+    ["puts a new walker ahead of a firing", fired, both, 1, "newWalker"],
+    ["puts a firing ahead of something new to buy", fired, affordable, 1, "afterFiring"],
+    ["puts a firing ahead of the how-to", fired, none, 1, "afterFiring"],
+    ["puts something new to buy ahead of the how-to", kept, affordable, 1, "newAffordable"],
+    ["says how to use the screen after the first walk", kept, none, 1, "howTo"],
+    ["says how to use the screen up to the last how-to walk", kept, none, HOW_TO_WALKS, "howTo"],
+    ["welcomes back after the how-to walks", kept, none, later, "afterWalk"],
+  ])("%s", (_name, lastWalk, news, walks, expected) => {
+    expect(walkerLineKey(lastWalk, news, walks)).toBe(expected);
+  });
+});
+
+describe("walkerUnlockedSince", () => {
+  it.each<[string, WalkerId[] | undefined, WalkerId[], boolean]>([
+    ["finds a walker owned now and not at the last visit", ["casey"], ["casey", "ben"], true],
+    ["finds none when the walkers are unchanged", ["casey", "ben"], ["casey", "ben"], false],
+    ["finds none with no last visit to compare with", undefined, ["casey", "ben"], false],
+  ])("%s", (_name, remembered, owned, expected) => {
+    expect(walkerUnlockedSince(remembered, owned)).toBe(expected);
   });
 });
 
