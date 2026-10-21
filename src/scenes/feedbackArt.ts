@@ -1,5 +1,4 @@
-// The art the heart change, hop splash and minor bump moments play. A moment whose art is
-// missing plays without it.
+// The art the heart change moments play. A moment whose art is missing plays without it.
 export const FEEDBACK_ART = {
   // The card's flash over its hearts as a lost heart lands, played on a second card over it.
   cardLoss: { key: "ui-dog-card", tag: "heart-loss" },
