@@ -29,42 +29,44 @@ export const DEV_CHEATS_KEY = "dog-walker-game:dev-cheats";
 // the game loads the save, so the page being left cannot write its save over them.
 export const DEV_SAVE_EDITS_KEY = "dog-walker-game:dev-save-edits";
 
-// Every cheat is off unless `on` is too.
+// The walk's movement speed under the speed cheat.
+export type Speed = "fast" | "normal" | "slow";
+
+// Every cheat is off, and the speed normal, unless `on` is true.
 export interface Cheats {
-  readonly fastForward: boolean;
   readonly hitBoxes: boolean;
   readonly invincible: boolean;
   readonly on: boolean;
-  readonly slowMotion: boolean;
+  readonly speed: Speed;
 }
 
-type CheatToggle = Exclude<keyof Cheats, "on">;
+type CheatToggle = "hitBoxes" | "invincible";
 
 export const CHEATS_OFF: Cheats = {
-  fastForward: false,
   hitBoxes: false,
   invincible: false,
   on: false,
-  slowMotion: false,
+  speed: "normal",
 };
 
 // The panel's toggles, in its order.
 export const CHEAT_TOGGLES: readonly { readonly id: CheatToggle; readonly label: string }[] = [
   { id: "invincible", label: "Invincible owners" },
-  { id: "hitBoxes", label: "Hit boxes" },
-  { id: "slowMotion", label: "Slow motion" },
-  { id: "fastForward", label: "Fast forward" },
+  { id: "hitBoxes", label: "Show hit boxes" },
 ];
 
-// The walk's time scale under each speed cheat.
-export const SLOW_MOTION_SCALE = 0.5;
-const FAST_FORWARD_SCALE = 3;
+export const SPEED_LABEL = "Movement speed";
 
-// The speed cheats exclude each other: turning one on turns the other off.
-const EXCLUDES: Readonly<Partial<Record<CheatToggle, CheatToggle>>> = {
-  fastForward: "slowMotion",
-  slowMotion: "fastForward",
-};
+// The speed choices, in the panel's order, with the walk's time scale at each.
+export const SPEEDS: readonly {
+  readonly id: Speed;
+  readonly label: string;
+  readonly scale: number;
+}[] = [
+  { id: "slow", label: "Slow", scale: 0.5 },
+  { id: "normal", label: "Normal", scale: 1 },
+  { id: "fast", label: "Fast", scale: 3 },
+];
 
 export function cheatActive(cheats: Cheats, id: CheatToggle): boolean {
   return cheats.on && cheats[id];
@@ -72,11 +74,12 @@ export function cheatActive(cheats: Cheats, id: CheatToggle): boolean {
 
 // With cheats off, every toggle stays off.
 export function setCheat(id: CheatToggle, on: boolean, cheats: Cheats): Cheats {
-  if (!cheats.on) {
-    return cheats;
-  }
-  const excluded = EXCLUDES[id];
-  return { ...cheats, [id]: on, ...(on && excluded !== undefined ? { [excluded]: false } : {}) };
+  return cheats.on ? { ...cheats, [id]: on } : cheats;
+}
+
+// With cheats off, the speed stays normal.
+export function setSpeed(speed: Speed, cheats: Cheats): Cheats {
+  return cheats.on ? { ...cheats, speed } : cheats;
 }
 
 export function cheatsOn(cheats: Cheats): Cheats {
@@ -84,25 +87,25 @@ export function cheatsOn(cheats: Cheats): Cheats {
 }
 
 export function timeScaleOf(cheats: Cheats): number {
-  if (cheatActive(cheats, "slowMotion")) {
-    return SLOW_MOTION_SCALE;
-  }
-  return cheatActive(cheats, "fastForward") ? FAST_FORWARD_SCALE : 1;
+  const speed = cheats.on ? cheats.speed : "normal";
+  return SPEEDS.find(({ id }) => id === speed)?.scale ?? 1;
 }
 
-function isCheats(value: unknown): value is Cheats {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  const fields = value as Record<string, unknown>;
-  return (Object.keys(CHEATS_OFF) as (keyof Cheats)[]).every(
-    (key) => typeof fields[key] === "boolean",
-  );
+function isSpeed(value: unknown): value is Speed {
+  return SPEEDS.some(({ id }) => id === value);
 }
 
-// Anything but a whole Cheats is every cheat off.
+// Anything without the three switches is every cheat off; a missing or unknown speed is
+// normal.
 export function cheatsFrom(value: unknown): Cheats {
-  return isCheats(value) ? value : CHEATS_OFF;
+  if (typeof value !== "object" || value === null) {
+    return CHEATS_OFF;
+  }
+  const { hitBoxes, invincible, on, speed } = value as Record<string, unknown>;
+  if (typeof hitBoxes !== "boolean" || typeof invincible !== "boolean" || typeof on !== "boolean") {
+    return CHEATS_OFF;
+  }
+  return { hitBoxes, invincible, on, speed: isSpeed(speed) ? speed : "normal" };
 }
 
 export function encodeCheats(cheats: Cheats): string {
@@ -244,6 +247,7 @@ export interface PanelState {
 
 export type PanelAction =
   | { readonly kind: "cancel" }
+  | { readonly kind: "speed"; readonly speed: Speed }
   | { readonly kind: "start"; readonly start: StartTarget }
   | { readonly kind: "switch"; readonly on: boolean }
   | { readonly kind: "toggle"; readonly id: CheatToggle; readonly on: boolean };
@@ -258,6 +262,8 @@ export function stagePanel(action: PanelAction, state: PanelState): PanelState {
   switch (action.kind) {
     case "cancel":
       return openPanel(state.applied);
+    case "speed":
+      return { ...state, staged: setSpeed(action.speed, state.staged) };
     case "start":
       return { ...state, start: action.start };
     case "switch":

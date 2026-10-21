@@ -26,7 +26,9 @@ import {
   SAVE_CHEATS,
   type SaveEdit,
   setCheat,
-  SLOW_MOTION_SCALE,
+  setSpeed,
+  SPEED_LABEL,
+  SPEEDS,
   stagePanel,
   START_SCREEN,
   startChoices,
@@ -38,27 +40,31 @@ import { parseRunSetup } from "./runSetup";
 
 const context = saveContextFrom(gameData);
 const ON = cheatsOn(CHEATS_OFF);
-const every = CHEAT_TOGGLES.reduce((cheats, { id }) => setCheat(id, true, cheats), ON);
+const every = CHEAT_TOGGLES.reduce(
+  (cheats, { id }) => setCheat(id, true, cheats),
+  setSpeed("fast", ON),
+);
 
 // A label of a few words, with no helper text.
 const SHORT_LABEL = /^[+$\w,]+( \w+){0,2}$/;
 
 describe("the cheat list", () => {
-  it("has one toggle for each cheat, each labelled in a few words", () => {
+  it("has one toggle for each switch cheat and one speed choice, each labelled in a few words", () => {
     const ids = CHEAT_TOGGLES.map(({ id }) => id);
-    const cheats = Object.keys(CHEATS_OFF).filter((key) => key !== "on");
-    expect([...ids].sort()).toEqual(cheats.sort());
-    const labels = [...CHEAT_TOGGLES, ...SAVE_CHEATS].map(({ label }) => label);
-    expect(labels.filter((label) => !SHORT_LABEL.test(label))).toEqual([]);
+    const switches = Object.keys(CHEATS_OFF).filter((key) => key !== "on" && key !== "speed");
+    expect([...ids].sort()).toEqual(switches.sort());
+    expect(SPEEDS.map(({ id }) => id)).toContain(CHEATS_OFF.speed);
+    const labels = [...CHEAT_TOGGLES, ...SAVE_CHEATS, ...SPEEDS].map(({ label }) => label);
+    expect([...labels, SPEED_LABEL].filter((label) => !SHORT_LABEL.test(label))).toEqual([]);
   });
 });
 
-describe("setCheat", () => {
-  it("turns a cheat on only with cheats on, and slow motion and fast forward off each other", () => {
+describe("setCheat and setSpeed", () => {
+  it("change a cheat only with cheats on, and hold one speed at a time", () => {
     expect(setCheat("invincible", true, ON)).toEqual({ ...ON, invincible: true });
     expect(setCheat("invincible", true, CHEATS_OFF)).toBe(CHEATS_OFF);
-    const cheats = setCheat("fastForward", true, setCheat("slowMotion", true, ON));
-    expect([cheats.fastForward, cheats.slowMotion]).toEqual([true, false]);
+    expect(setSpeed("slow", CHEATS_OFF)).toBe(CHEATS_OFF);
+    expect(setSpeed("fast", setSpeed("slow", ON)).speed).toBe("fast");
   });
 });
 
@@ -73,9 +79,16 @@ describe("cheats off", () => {
     expect(decodeCheats(encodeCheats(every))).toEqual(every);
   });
 
-  it("runs time at the cheat's scale only with cheats on", () => {
-    expect(timeScaleOf(setCheat("slowMotion", true, ON))).toBe(SLOW_MOTION_SCALE);
-    expect(timeScaleOf({ ...CHEATS_OFF, slowMotion: true })).toBe(1);
+  it.each([
+    ["an unknown speed", { ...every, speed: "warp" }],
+    ["the two speed toggles", { fastForward: true, hitBoxes: true, invincible: true, on: true }],
+  ])("decodes %s as normal speed, keeping the other cheats", (_, stored) => {
+    expect(decodeCheats(JSON.stringify(stored))).toEqual({ ...every, speed: "normal" });
+  });
+
+  it.each(SPEEDS)("runs time at the $id speed's scale only with cheats on", ({ id, scale }) => {
+    expect(timeScaleOf(setSpeed(id, ON))).toBe(scale);
+    expect(timeScaleOf({ ...CHEATS_OFF, speed: id })).toBe(1);
   });
 });
 
@@ -133,7 +146,9 @@ describe("staged settings", () => {
       staged: applied,
       start: "park",
     });
+    expect(stageAll([{ kind: "speed", speed: "slow" }]).staged).toEqual(setSpeed("slow", applied));
     const cancelled: PanelAction[] = [
+      { kind: "speed", speed: "fast" },
       { kind: "switch", on: false },
       { kind: "start", start: "park" },
       { kind: "cancel" },
@@ -145,7 +160,7 @@ describe("staged settings", () => {
 describe("Apply", () => {
   const limits = runSetupLimitsFor(gameData);
   const href = "https://example.test/play/?dev=1&seed=5&zone=3&lang=fr";
-  const staged = setCheat("slowMotion", true, ON);
+  const staged = setSpeed("slow", ON);
   const applyFrom = (cheats: Cheats, start: PanelState["start"]) =>
     applyPanel(gameData, href, 7, { applied: CHEATS_OFF, staged: cheats, start });
 

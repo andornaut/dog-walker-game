@@ -157,7 +157,25 @@
   min-height: 32px;
 }
 
-.dev-sheet input[type="checkbox"] {
+/* A labelled row of radio choices. */
+.dev-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.dev-choice > legend {
+  float: left;
+  margin-right: 4px;
+  padding: 0;
+}
+
+.dev-sheet input[type="checkbox"],
+.dev-sheet input[type="radio"] {
   width: 18px;
   height: 18px;
   margin: 0;

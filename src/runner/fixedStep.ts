@@ -3,8 +3,8 @@
 // every whole step that fits, so a slow frame runs more steps and the walk keeps to real time.
 // A frame longer than maxFrameMs banks only maxFrameMs: after a stall the walk does not lurch
 // ahead, and a device too slow to run the steps cannot fall further and further behind.
-// timeScale multiplies the time each frame banks (1 when absent): the dev panel's slow motion
-// and fast forward.
+// timeScale multiplies the time each frame banks (1 when absent): the dev panel's movement
+// speed.
 export interface FixedStepLimits {
   readonly maxFrameMs: number;
   readonly stepMs: number;

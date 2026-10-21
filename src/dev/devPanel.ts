@@ -26,6 +26,8 @@ import {
   RESET_SAVE,
   SAVE_CHEATS,
   type SaveEdit,
+  SPEED_LABEL,
+  SPEEDS,
   stagePanel,
   startChoices,
   type StartTarget,
@@ -186,6 +188,9 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     toggles.forEach(({ box, id }) => {
       box.checked = staged[id];
     });
+    speeds.forEach(({ id, radio }) => {
+      radio.checked = staged.speed === id;
+    });
     const arrow = sheet.hidden === false ? "▾" : "▸";
     barLabel.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
   };
@@ -212,11 +217,27 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     box.addEventListener("change", () => stage({ id, kind: "toggle", on: box.checked }));
     return { box, id, label: el("label", { className: "dev-check" }, box, label) };
   });
+  // A radio group: arrow keys move the choice, and a screen reader names the group.
+  const speeds = SPEEDS.map(({ id, label }) => {
+    const radio = el("input", { name: "dev-speed", type: "radio", value: id });
+    radio.addEventListener("change", () => {
+      if (radio.checked) {
+        stage({ kind: "speed", speed: id });
+      }
+    });
+    return { id, label: el("label", { className: "dev-check" }, radio, label), radio };
+  });
   const controls = el(
     "fieldset",
     { className: "dev-cheats" },
     el("label", { className: "dev-row" }, el("span", { textContent: "Start at" }), select),
     ...toggles.map(({ label }) => label),
+    el(
+      "fieldset",
+      { className: "dev-choice" },
+      el("legend", { textContent: SPEED_LABEL }),
+      ...speeds.map(({ label }) => label),
+    ),
     el("h2", { textContent: "Saved to progress" }),
     el(
       "div",
