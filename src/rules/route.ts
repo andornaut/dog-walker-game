@@ -84,7 +84,7 @@ export function forkPaths(
   route: readonly ZoneId[],
 ): ZoneId[] {
   const last = data.world.lastZone as ZoneId;
-  if (route.length >= data.world.walkLength - 1) {
+  if (route.length >= walkLength(data) - 1) {
     return [last];
   }
   const pool = unwalkedZones(data, route).filter((zone) => zone !== last);
