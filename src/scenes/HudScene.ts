@@ -703,7 +703,7 @@ export class HudScene extends Scene {
     this.fitName(view.name, dog.name, rect);
     this.showOwnerName(view.owner, dog.owner.name, rect);
     setPixelText(view.fired, fired ? gameData.runText.fired : "");
-    const max = maxHearts(gameData.tuning, run.modifiers, dog);
+    const max = maxHearts(gameData.tuning, run.modifiers, run.pack.length, dog);
     const ownerKey = ownerCardFaceKey(gameData, slot.dog);
     playTag(
       view.ownerFace.setTexture(ownerKey).setVisible(true),
@@ -810,7 +810,7 @@ export class HudScene extends Scene {
     if (rect === undefined || run === undefined) {
       return;
     }
-    const max = maxHearts(gameData.tuning, run.modifiers, gameData.dogs[cue.dog]);
+    const max = maxHearts(gameData.tuning, run.modifiers, run.pack.length, gameData.dogs[cue.dog]);
     const cell = cardHearts(cue.hearts, max)[cue.hearts - 1];
     if (cell !== undefined) {
       this.hearts?.forgive({ x: rect.x + cell.x, y: rect.y + cell.y });
@@ -920,10 +920,10 @@ export class HudScene extends Scene {
     const run = this.walk().hudView()?.run;
     const packSlot = run?.pack[slot ?? -1];
     const hearts = packSlot?.status === "walking" ? packSlot.hearts : 0;
-    if (slot === undefined || this.owners === undefined) {
+    if (slot === undefined || run === undefined || this.owners === undefined) {
       return false;
     }
-    const max = maxHearts(gameData.tuning, run?.modifiers ?? [], gameData.dogs[quip.dog]);
+    const max = maxHearts(gameData.tuning, run.modifiers, run.pack.length, gameData.dogs[quip.dog]);
     const at = { dog: quip.dog, mood: faceMood(gameData, max, hearts), slot };
     const shown = this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
     // Heart pops already on their way land at once if the quip went above its tab over them.

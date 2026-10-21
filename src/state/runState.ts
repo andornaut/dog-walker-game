@@ -134,7 +134,7 @@ export interface Loadout {
 }
 
 // A run's opening state, in the world's first zone: the walker's effects and the gear's
-// applied, then each owner's starting hearts and the starting money. Throws for a dog listed
+// applied, then each owner's starting hearts, full for the pack's size and the starting money. Throws for a dog listed
 // twice or more dogs than the player has slots.
 export function newRun(
   data: Pick<
@@ -154,7 +154,7 @@ export function newRun(
     packFor(
       (dog) => ({
         dog,
-        hearts: startHearts(data.tuning, modifiers, data.dogs[dog]),
+        hearts: startHearts(data.tuning, modifiers, loadout.dogs.length, data.dogs[dog]),
         status: "walking",
       }),
       packOrder(data.dogs, loadout.dogs),

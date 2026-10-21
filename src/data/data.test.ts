@@ -75,9 +75,13 @@ describe("hearts", () => {
 
   it("starts every owner full and above 0 with any gear, and raises the max with size", () => {
     for (const set of gearModifierSets) {
-      for (const dog of dogList) {
-        expect(startHearts(tuning, set, dog)).toBe(maxHearts(tuning, set, dog));
-        expect(startHearts(tuning, set, dog)).toBeGreaterThan(0);
+      for (const packSize of [1, 2, 3] as const) {
+        for (const dog of dogList) {
+          expect(startHearts(tuning, set, packSize, dog)).toBe(
+            maxHearts(tuning, set, packSize, dog),
+          );
+          expect(startHearts(tuning, set, packSize, dog)).toBeGreaterThan(0);
+        }
       }
     }
     const max = SIZES.map((size) => readTable(tuning, "hearts", "maxBySize", size));

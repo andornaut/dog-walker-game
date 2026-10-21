@@ -13,6 +13,8 @@ import type { WORLD } from "./world";
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
   "biscuitNeighbour" | "lostWallet" | "otherDog" | "puddle" | "skunk" | "squirrel" | "thief";
+// How many dogs a walk sets out with.
+export type PackSize = 1 | 2 | 3;
 export type Size = "big" | "medium" | "small";
 // Lifetime counts the save keeps across walks for the badges: small dogs' dodges, landed
 // squirrel pulls, treats grabbed, and the card options that name one as their tally.
@@ -76,6 +78,8 @@ export interface Tuning {
   };
   readonly hearts: OpenGroup & {
     readonly maxBySize: Table<Size>;
+    readonly maxOwnerHearts: number;
+    readonly packSizeBonus: Table<PackSize>;
     readonly treat: number;
   };
   readonly money: OpenGroup & {
@@ -562,6 +566,9 @@ export interface HomeText {
   readonly noticePackFull: string;
   readonly noticeSoundOff: string;
   readonly noticeSoundOn: string;
+  // The Dogs section's band, before a heart: the most hearts the chosen pack's size raises a
+  // picked dog's owner's max by.
+  readonly packBonus: string;
   readonly packCount: string;
   // What a dog's owner says when the player picks it: their name and a parting line.
   readonly parting: string;

@@ -8,6 +8,7 @@ import type { DogId, Effect } from "../data/types";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { maxHearts } from "./dogs";
 import { applyEffects, type EffectContext, moneyCost, resolveEffects, targetDogs } from "./effects";
 import { cents, read } from "./units";
 
@@ -67,7 +68,7 @@ describe("applyEffects: hearts", () => {
 describe("resolveEffects: changes and their causes", () => {
   it("reports the base and the cap, summing to the change", () => {
     const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
-    const max = TEST_TUNING.hearts.maxBySize[DOGS.nugget.size];
+    const max = maxHearts(TEST_TUNING, [], 1, DOGS.nugget);
     const { changes } = resolveEffects(
       data,
       context([]),
@@ -90,7 +91,8 @@ describe("resolveEffects: changes and their causes", () => {
 
   it("reports no change for an owner whose meter does not move", () => {
     const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
-    const { changes } = resolveEffects(data, context([]), [gainOne], testState({ duchess: 6 }));
+    const full = testState({ duchess: maxHearts(TEST_TUNING, [], 1, DOGS.duchess) });
+    const { changes } = resolveEffects(data, context([]), [gainOne], full);
     expect(changes).toEqual([]);
   });
 

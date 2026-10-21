@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
-import { maxHearts } from "../rules/dogs";
+import { sizeHearts } from "../rules/dogs";
 import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
@@ -38,7 +38,7 @@ describe("dogDetail", () => {
     expect(card.subtitle).toBe(dog.breed);
     expect(card.lines).toEqual([
       fillNames(text.dogKind, {
-        hearts: String(maxHearts(data.tuning, [], dog)),
+        hearts: String(sizeHearts(data.tuning, dog)),
         size: capitalize(SIZE_NAMES[dog.size]),
       }),
       text.dogHeavy,

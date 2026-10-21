@@ -26,7 +26,7 @@ export function treatRecipient(
   touched: DogId,
 ): DogId {
   const below = (dog: DogId, hearts: number) =>
-    hearts < maxHearts(data.tuning, run.modifiers, data.dogs[dog]);
+    hearts < maxHearts(data.tuning, run.modifiers, run.pack.length, data.dogs[dog]);
   const own = heartsOf(run, touched);
   if (own !== undefined && below(touched, own)) {
     return touched;

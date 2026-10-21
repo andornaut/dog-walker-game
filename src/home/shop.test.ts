@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { scrollMax } from "../input/listScroll";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
-import { maxHearts } from "../rules/dogs";
+import { sizeHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
@@ -113,7 +113,7 @@ describe("gearRows and dogRows", () => {
     const row = dogRows(data, owned).find(({ id }) => id === `dog:${dog}`);
     const { size } = data.dogs[dog];
     const kind = fillNames(data.homeText.focus.kind, {
-      hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
+      hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
       size: SIZE_NAMES[size],
     });
     expect(row?.line).toBe(capitalize(kind));

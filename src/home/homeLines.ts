@@ -1,4 +1,6 @@
-import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
+import type { DogId, GameData, HomeText, PackSize, WalkerId } from "../data/types";
+import { packSizeRaise } from "../rules/dogs";
+import { modifiersOf } from "../rules/modifiers";
 import type { Cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
@@ -58,6 +60,25 @@ export function packCountLine(
     count: String(loadout.dogs.length),
     max: String(packCapacity(data, owned)),
   });
+}
+
+// The Dogs band's pack-size bonus: the most hearts the pack's size raises a picked dog's
+// owner's max by, with the gear picked, or null when it raises none or no dog is picked.
+export function packBonusLine(
+  data: Pick<GameData, "dogs" | "homeText" | "shopGear" | "tuning">,
+  loadout: HomeLoadout,
+): string | null {
+  const size = loadout.dogs.length;
+  if (size < 1 || size > 3) {
+    return null;
+  }
+  const modifiers = loadout.gear === null ? [] : modifiersOf(data.shopGear[loadout.gear].effects);
+  const raise = Math.max(
+    ...loadout.dogs.map((dog) =>
+      packSizeRaise(data.tuning, modifiers, size as PackSize, data.dogs[dog]),
+    ),
+  );
+  return raise > 0 ? homeLine(data.homeText, "packBonus", { hearts: String(raise) }) : null;
 }
 
 // The player's last action on the home screen, for the message it leaves in the walker's

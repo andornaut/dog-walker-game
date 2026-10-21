@@ -92,6 +92,10 @@ export function pocketLining(section: Rect) {
 export const HOME_LAYOUT = {
   // The band's text sits on section rows 8..17, 9px in from either side.
   bandText: { inset: 9, y: 8 },
+  // The Dogs band's pack-size bonus, its ink ending countGap left of the pack count's left edge:
+  // its line, gap, then ui-heart's full frame at scale, inked over its first heartInk columns,
+  // with its top rise above the text's capitals.
+  bonus: { countGap: 14, gap: 4, heartInk: 7, rise: 1, scale: 2 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
   // 7px below the band's top, and the well sits under the band. Rows of 2x body text, each

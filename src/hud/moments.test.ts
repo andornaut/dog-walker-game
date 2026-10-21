@@ -215,14 +215,17 @@ describe("lowHeartDogs and newlyLow", () => {
 });
 
 describe("cardOwnerMood", () => {
-  // Every max a dog can have, with no gear and with every gear's raise.
+  // Every max a dog can have, in a pack of any size, with no gear and with every gear's raise.
   const gear = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
+  const packSizes = [1, 2, 3] as const;
   const maxes = [
     ...new Set(
-      Object.values(gameData.dogs).flatMap((dog) => [
-        maxHearts(gameData.tuning, [], dog),
-        maxHearts(gameData.tuning, gear, dog),
-      ]),
+      Object.values(gameData.dogs).flatMap((dog) =>
+        packSizes.flatMap((packSize) => [
+          maxHearts(gameData.tuning, [], packSize, dog),
+          maxHearts(gameData.tuning, gear, packSize, dog),
+        ]),
+      ),
     ),
   ];
   const cases = maxes.flatMap((max) =>

@@ -366,7 +366,7 @@ describe("Lucky collar", () => {
       walker: "casey",
     });
     const { luckyCollarMax } = TEST_TUNING.hearts;
-    const collared = (dog: DogId) => startHearts(TEST_TUNING, [], DOGS[dog]) + luckyCollarMax;
+    const collared = (dog: DogId) => startHearts(TEST_TUNING, [], 2, DOGS[dog]) + luckyCollarMax;
     expect(heartsByDog(state)).toEqual({
       duchess: collared("duchess"),
       pierre: collared("pierre"),

@@ -27,7 +27,7 @@ import type {
   UpgradeId,
   WalkerId,
 } from "../data/types";
-import { maxHearts, startHearts } from "../rules/dogs";
+import { sizeHearts } from "../rules/dogs";
 import { effectText } from "../rules/effectText";
 import { faceMood } from "../rules/treats";
 import type { CardSource } from "../state/runState";
@@ -137,16 +137,15 @@ export function gameDataExport(data: GameData) {
     cards: cardFaces(data),
     debuffs: entries(data.debuffs).map(([id, debuff]) => ({ id, ...debuff })),
     dogs: entries<DogId, GameData["dogs"][DogId]>(data.dogs).map(([id, dog]) => {
-      const start = startHearts(tuning, [], dog);
-      const max = maxHearts(tuning, [], dog);
+      const hearts = sizeHearts(tuning, dog);
       return {
         id,
         ...dog,
-        // Before modifiers: what a dog brings to a walk with no gear or upgrades.
+        // Before the pack-size bonus and modifiers: what a dog's size brings to a walk.
         figures: {
-          maxHearts: max,
-          startHearts: start,
-          startMood: faceMood(data, max, start),
+          maxHearts: hearts,
+          startHearts: hearts,
+          startMood: faceMood(data, hearts, hearts),
         },
         keys: {
           dogCardTag: dogCardTag(data, id),

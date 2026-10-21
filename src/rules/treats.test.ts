@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DOGS } from "../data/dogs";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
-import type { DogId, Modifier, Size } from "../data/types";
+import type { DogId, Modifier, PackSize, Size } from "../data/types";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { maxHearts } from "./dogs";
@@ -30,15 +30,19 @@ describe("faceMood", () => {
     return max - hearts <= faceHappyWithin ? "happy" : "neutral";
   };
 
-  // Every size, with and without the Lucky collar, at every hearts from its max down to 0.
+  // Every size, with and without the Lucky collar, in a pack of every size, at every hearts
+  // from its max down to 0.
   it("shows each dog's mood by its hearts below its max", () => {
+    const packSizes: readonly PackSize[] = [1, 2, 3];
     const wrong = (Object.keys(TUNING.hearts.maxBySize) as Size[]).flatMap((size) =>
-      GEAR.flatMap(([gear, modifiers]) => {
-        const max = maxHearts(TUNING, modifiers, { size });
-        return Array.from({ length: max + 1 }, (_, below) => max - below)
-          .filter((hearts) => faceMood(data, max, hearts) !== expected(max, hearts))
-          .map((hearts) => `${size}${gear} at ${hearts}`);
-      }),
+      GEAR.flatMap(([gear, modifiers]) =>
+        packSizes.flatMap((packSize) => {
+          const max = maxHearts(TUNING, modifiers, packSize, { size });
+          return Array.from({ length: max + 1 }, (_, below) => max - below)
+            .filter((hearts) => faceMood(data, max, hearts) !== expected(max, hearts))
+            .map((hearts) => `${size}${gear} walking ${packSize} at ${hearts}`);
+        }),
+      ),
     );
     expect(wrong).toEqual([]);
   });
@@ -48,7 +52,7 @@ describe("treatRecipient", () => {
   const data = { dogs: DOGS, tuning: TEST_TUNING };
   const ofSize = (size: Size) =>
     (Object.keys(DOGS) as DogId[]).filter((dog) => DOGS[dog].size === size);
-  const max = (dog: DogId) => maxHearts(TEST_TUNING, [], DOGS[dog]);
+  const max = (packSize: PackSize, dog: DogId) => maxHearts(TEST_TUNING, [], packSize, DOGS[dog]);
   const [first, second, third] = ofSize("medium") as [DogId, DogId, DogId];
   const [small] = ofSize("small") as [DogId];
   const [big] = ofSize("big") as [DogId];
@@ -109,7 +113,9 @@ describe("treatRecipient", () => {
   it("gives the treat to its own owner, else the neediest owner below their max", () => {
     for (const [name, pack, touched, expected] of cases) {
       const run = testState(
-        Object.fromEntries(pack.map(([dog, below]) => [dog, max(dog) - below])),
+        Object.fromEntries(
+          pack.map(([dog, below]) => [dog, max(pack.length as PackSize, dog) - below]),
+        ),
       );
       expect(treatRecipient(data, run, touched), name).toBe(expected);
     }

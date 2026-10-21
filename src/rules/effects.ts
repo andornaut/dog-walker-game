@@ -160,7 +160,10 @@ export function changeHearts(
   const causes: Cause[] = forgiven === null ? [...given] : [...given, forgiven];
   const total = causes.reduce((sum, cause) => sum + cause.amount, 0);
   const unclamped = before + total;
-  const after = clampHearts(maxHearts(data.tuning, state.modifiers, data.dogs[dogId]), unclamped);
+  const after = clampHearts(
+    maxHearts(data.tuning, state.modifiers, state.pack.length, data.dogs[dogId]),
+    unclamped,
+  );
   if (after === before && forgiven === null) {
     return { change: null, state };
   }

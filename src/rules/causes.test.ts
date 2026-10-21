@@ -13,10 +13,11 @@ import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
 import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
+import { maxHearts } from "./dogs";
 import { changeHearts, resolveEffects } from "./effects";
 import { formatDollars } from "./effectText";
 import { payZone, tipValue } from "./run";
-import { cents, read, readTable } from "./units";
+import { cents, read } from "./units";
 
 const data = {
   debuffs: DEBUFFS,
@@ -67,7 +68,8 @@ const towel: Effect = {
   kind: "money",
 };
 const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
-const maxOf = (dog: DogId) => readTable(TEST_TUNING, "hearts", "maxBySize", DOGS[dog].size);
+// A lone dog's owner's max.
+const maxOf = (dog: DogId) => maxHearts(TEST_TUNING, [], 1, DOGS[dog]);
 const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },

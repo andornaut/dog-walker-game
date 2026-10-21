@@ -7,13 +7,14 @@ import type {
   GameData,
   HintTrigger,
   Modifier,
+  PackSize,
   QuipMoment,
   Unlock,
   WalkerId,
   Zone,
 } from "../data/types";
 import { achievementConditionText } from "../rules/achievements";
-import { maxHearts, startHearts } from "../rules/dogs";
+import { maxHearts, sizeHearts } from "../rules/dogs";
 import { capitalize, debuffText, effectText, formatDollars, SIZE_NAMES } from "../rules/effectText";
 import { modifiersOf } from "../rules/modifiers";
 import { firstZoneId, walkLength, zoneById } from "../rules/route";
@@ -158,20 +159,36 @@ function priceText(data: GameData, item: Unlock): string {
   return item.unlock === "start" ? "Start" : formatDollars(unlockPrice(data.tuning, item));
 }
 
+const PACK_SIZES: readonly PackSize[] = [1, 2, 3];
+
+// A value for each pack size, walking 1, 2 and 3 dogs.
+function byPackSize(value: (size: PackSize) => number): string {
+  return PACK_SIZES.map(value).join(" / ");
+}
+
 function dogsSection(data: GameData): Section {
   const { tuning } = data;
   const luckyCollar: readonly Modifier[] = modifiersOf(data.shopGear.luckyCollar.effects);
   return {
     facets: ["Size"],
-    headers: ["Dog", "Breed", "Size", "Owner", "Start ♥", "Max ♥", "With Lucky collar", "Unlock"],
+    headers: [
+      "Dog",
+      "Breed",
+      "Size",
+      "Owner",
+      "♥ by size",
+      "Max ♥ walking 1 / 2 / 3",
+      "With Lucky collar",
+      "Unlock",
+    ],
     rows: Object.values(data.dogs).map((dog) => [
       dog.name,
       dog.breed,
       capitalize(SIZE_NAMES[dog.size]),
       `${dog.owner.name}, ${dog.owner.role}`,
-      startHearts(tuning, [], dog),
-      maxHearts(tuning, [], dog),
-      `${startHearts(tuning, luckyCollar, dog)} / ${maxHearts(tuning, luckyCollar, dog)}`,
+      sizeHearts(tuning, dog),
+      byPackSize((size) => maxHearts(tuning, [], size, dog)),
+      byPackSize((size) => maxHearts(tuning, luckyCollar, size, dog)),
       priceText(data, dog),
     ]),
     title: "Dogs",

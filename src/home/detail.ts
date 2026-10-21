@@ -1,5 +1,5 @@
 import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
-import { isHeavy, maxHearts } from "../rules/dogs";
+import { isHeavy, sizeHearts } from "../rules/dogs";
 import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
@@ -65,7 +65,7 @@ export function dogDetail(
   return {
     lines: [
       fillLine(FIELDS, text, "dogKind", {
-        hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
+        hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
       }),
       ...(isHeavy(data.dogs[dog]) ? [text.dogHeavy] : []),

@@ -64,6 +64,7 @@ import {
 import {
   bubbleSpeech,
   type HomeAction,
+  packBonusLine,
   type WalkerLine,
   walkerLineKey,
   walkerUnlockedSince,
@@ -163,7 +164,7 @@ import {
   type ShopClosed,
   type ShopSceneData,
 } from "./ShopScene";
-import { playEffect, spriteMetrics } from "./sprites";
+import { playEffect, playTag, spriteMetrics } from "./sprites";
 import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
@@ -366,6 +367,9 @@ interface TileView {
   // The Pet shop's normal face, which the glint covers.
   shopNormal?: GameObjects.Image;
 }
+
+// The heart after the Dogs band's pack-size bonus.
+const HEART_KEY = "ui-heart";
 
 // The bank the last time the home screen was shown this session, so the walker can say
 // when something new became affordable.
@@ -1040,7 +1044,10 @@ export class StartScene extends Scene {
     this.drawPackAtGate(root, g, save);
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
-      this.drawSection(root, SECTION_RECTS[id], sections[id]);
+      const note = this.drawSection(root, SECTION_RECTS[id], sections[id]);
+      if (id === "dogs") {
+        this.drawPackBonus(root, SECTION_RECTS[id], note);
+      }
     }
     this.drawSectionFills(root);
     this.drawWalkerPicker(root, save);
@@ -1085,10 +1092,41 @@ export class StartScene extends Scene {
     }
   }
 
+  // The Dogs band's pack-size bonus (packBonusLine), when the pack's size raises a picked dog's
+  // owner's max: its line in ink and then a full heart, ending HOME_LAYOUT.bonus.countGap left of
+  // the pack count's left edge, or of the band's text inset with no count.
+  private drawPackBonus(
+    root: GameObjects.Container,
+    rect: Rect,
+    note: GameObjects.BitmapText | null,
+  ): void {
+    const line = packBonusLine(gameData, this.loadout);
+    if (line === null) {
+      return;
+    }
+    const { countGap, gap, heartInk, rise, scale } = HOME_LAYOUT.bonus;
+    const y = rect.y + BAND_TEXT.y;
+    const countLeft = note === null ? rect.x + rect.width - BAND_TEXT.inset : note.x - note.width;
+    const heartLeft = countLeft - countGap - heartInk * scale;
+    if (this.textures.exists(HEART_KEY)) {
+      const heart = this.add
+        .sprite(heartLeft, y - rise, HEART_KEY)
+        .setOrigin(0)
+        .setScale(scale);
+      playTag(heart, HEART_KEY, "full");
+      root.add(heart);
+    }
+    this.text(root, heartLeft - gap, y, line, PALETTE.ink, { font: "title", originX: 1 });
+  }
+
   // A section's ui-section frame and band by its state, with the heading on the band's left
   // and its note on the right: ink on the lit (complete) band, cream and amber on the dark
-  // (neutral) one.
-  private drawSection(root: GameObjects.Container, rect: Rect, section: Section): void {
+  // (neutral) one. Returns the note's label, or null with none.
+  private drawSection(
+    root: GameObjects.Container,
+    rect: Rect,
+    section: Section,
+  ): GameObjects.BitmapText | null {
     const frame = addNineSlice(this, "ui-section", rect, section.state);
     if (frame === undefined) {
       this.drawSectionFrame(root, rect, section.state);
@@ -1108,12 +1146,13 @@ export class StartScene extends Scene {
       },
     );
     const right = rect.x + rect.width - BAND_TEXT.inset;
-    if (section.note !== "") {
-      this.text(root, right, y, section.note, lit ? PALETTE.ink : PALETTE.amber, {
-        font: "title",
-        originX: 1,
-      });
+    if (section.note === "") {
+      return null;
     }
+    return this.text(root, right, y, section.note, lit ? PALETTE.ink : PALETTE.amber, {
+      font: "title",
+      originX: 1,
+    });
   }
 
   // The ui-section art drawn in code while it is missing: complete is an ink outline round a

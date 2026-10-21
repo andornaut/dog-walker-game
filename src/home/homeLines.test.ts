@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, WalkerId } from "../data/types";
+import type { DogId, LiveTuning, WalkerId } from "../data/types";
 import { cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
+import { fillNames } from "../text/lines";
 import type { HomeLoadout } from "./home";
 import {
   bubbleSpeech,
   type HomeAction,
   HOW_TO_WALKS,
   messageLine,
+  packBonusLine,
   type VisitNews,
   type WalkerLine,
   walkerLineKey,
@@ -159,5 +161,31 @@ describe("bubbleSpeech", () => {
         expected,
       );
     }
+  });
+});
+
+describe("packBonusLine", () => {
+  const { hearts } = TEST_TUNING;
+  // The pinned tuning with the owner cap at a big dog's own max, so no big dog's max can rise.
+  const capped: LiveTuning = {
+    ...TEST_TUNING,
+    hearts: { ...hearts, maxOwnerHearts: hearts.maxBySize.big },
+  };
+  const line = (raise: number) =>
+    raise > 0 ? fillNames(data.homeText.packBonus, { hearts: String(raise) }) : null;
+  it.each<[string, LiveTuning, readonly DogId[], string | null]>([
+    ["no dog picked", TEST_TUNING, [], null],
+    ["a lone dog", TEST_TUNING, ["koda"], line(hearts.packSizeBonus[1])],
+    ["a pair", TEST_TUNING, ["koda", "duchess"], line(hearts.packSizeBonus[2])],
+    ["a full pack", TEST_TUNING, ["koda", "duchess", "pierre"], line(hearts.packSizeBonus[3])],
+    ["a lone dog already at the cap", capped, ["koda"], null],
+    [
+      "a pair with one dog under the cap",
+      capped,
+      ["koda", "duchess"],
+      line(Math.min(hearts.packSizeBonus[2], hearts.maxBySize.big - hearts.maxBySize.small)),
+    ],
+  ])("shows the most a picked owner's max rises for %s", (_name, tuning, dogs, expected) => {
+    expect(packBonusLine({ ...data, tuning }, { dogs, gear: null })).toBe(expected);
   });
 });

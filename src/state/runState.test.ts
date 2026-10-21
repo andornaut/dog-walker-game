@@ -4,8 +4,8 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, GearId } from "../data/types";
-import { startHearts } from "../rules/dogs";
+import type { DogId, GearId, PackSize } from "../data/types";
+import { packSizeBonus, sizeHearts, startHearts } from "../rules/dogs";
 import { read } from "../rules/units";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -25,7 +25,9 @@ const data = {
 
 // Each dog's owner at their starting hearts: full.
 const startsOf = (dogs: readonly DogId[]) =>
-  Object.fromEntries(dogs.map((dog) => [dog, startHearts(data.tuning, [], DOGS[dog])]));
+  Object.fromEntries(
+    dogs.map((dog) => [dog, startHearts(data.tuning, [], dogs.length as PackSize, DOGS[dog])]),
+  );
 
 describe("newRun", () => {
   it("starts each owner at full hearts, walking, with the starting purse", () => {
@@ -36,6 +38,22 @@ describe("newRun", () => {
     expect(state.startMoney).toBe(state.money);
     expect(state.phase).toEqual({ kind: "walking" });
     expect(state.zoneIndex).toBe(0);
+  });
+
+  it.each([
+    [["koda"], 1],
+    [["koda", "pierre"], 2],
+    [["duchess", "koda", "pierre"], 3],
+  ] as const)("adds the pack-size bonus to every owner's max walking %j", (dogs, size) => {
+    const state = newRun(data, 3, { dogs, gear: null, walker: "casey" });
+    expect(heartsByDog(state)).toEqual(
+      Object.fromEntries(
+        dogs.map((dog) => [
+          dog,
+          sizeHearts(TEST_TUNING, DOGS[dog]) + packSizeBonus(TEST_TUNING, size),
+        ]),
+      ),
+    );
   });
 
   it("starts with what the gear gives", () => {

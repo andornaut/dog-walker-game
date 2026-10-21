@@ -1,6 +1,6 @@
 import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
 import { quipLine } from "../rules/choices";
-import { maxHearts } from "../rules/dogs";
+import { sizeHearts } from "../rules/dogs";
 import { effectClause, sentenceList, SIZE_NAMES } from "../rules/effectText";
 import { payFor } from "../rules/run";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
@@ -284,7 +284,7 @@ export function dogKindText(
   dog: DogId,
 ): string {
   return fillLine(FOCUS_FIELDS, data.homeText.focus, "kind", {
-    hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
+    hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
     size: SIZE_NAMES[data.dogs[dog].size],
   });
 }

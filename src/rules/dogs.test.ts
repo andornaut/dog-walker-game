@@ -1,22 +1,49 @@
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
-import type { Modifier } from "../data/types";
+import { TUNING as REAL_TUNING } from "../data/tuning";
+import type { Modifier, PackSize } from "../data/types";
 import { TEST_TUNING } from "../testing/tuning";
-import { maxHearts, startHearts } from "./dogs";
+import { maxHearts, packSizeBonus, packSizeRaise, sizeHearts, startHearts } from "./dogs";
 import { zoneStats } from "./zones";
 
+const PACK_SIZES: readonly PackSize[] = [1, 2, 3];
+
 describe("dog stats", () => {
-  it("starts every owner full, with or without a raised max", () => {
+  it("starts every owner full, with or without a raised max, in a pack of any size", () => {
     for (const [, modifiers] of [
       ["with no gear", []],
       ["with a raised max", [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }]],
     ] satisfies readonly [string, readonly Modifier[]][]) {
-      for (const dog of Object.values(DOGS)) {
-        expect(startHearts(TEST_TUNING, modifiers, dog)).toBe(
-          maxHearts(TEST_TUNING, modifiers, dog),
-        );
+      for (const packSize of PACK_SIZES) {
+        for (const dog of Object.values(DOGS)) {
+          expect(startHearts(TEST_TUNING, modifiers, packSize, dog)).toBe(
+            maxHearts(TEST_TUNING, modifiers, packSize, dog),
+          );
+        }
       }
+    }
+  });
+
+  it.each(PACK_SIZES)("adds a pack of %i's bonus to every owner's max, under the cap", (size) => {
+    const { hearts } = TEST_TUNING;
+    const bonus = hearts.packSizeBonus[size];
+    expect(packSizeBonus(TEST_TUNING, size)).toBe(bonus);
+    for (const dog of Object.values(DOGS)) {
+      const max = Math.min(hearts.maxOwnerHearts, sizeHearts(TEST_TUNING, dog) + bonus);
+      expect(maxHearts(TEST_TUNING, [], size, dog)).toBe(max);
+      expect(packSizeRaise(TEST_TUNING, [], size, dog)).toBe(max - sizeHearts(TEST_TUNING, dog));
+    }
+  });
+
+  it.each(PACK_SIZES)("holds every owner's max to the cap walking %i, gear and all", (size) => {
+    const collar: readonly Modifier[] = [
+      { by: "luckyCollarMax", operation: "add", stat: "maxHearts" },
+    ];
+    for (const dog of Object.values(DOGS)) {
+      expect(maxHearts(REAL_TUNING, collar, size, dog)).toBeLessThanOrEqual(
+        REAL_TUNING.hearts.maxOwnerHearts,
+      );
     }
   });
 });

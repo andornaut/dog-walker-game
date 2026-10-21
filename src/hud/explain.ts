@@ -68,7 +68,7 @@ export function explainLines(
       const line = fillLine(FIELDS, text, "dog", {
         dog: dog.name,
         hearts: String(slot.status === "walking" ? slot.hearts : 0),
-        max: String(maxHearts(data.tuning, run.modifiers, dog)),
+        max: String(maxHearts(data.tuning, run.modifiers, run.pack.length, dog)),
         owner: dog.owner.name,
         size: capitalize(SIZE_NAMES[dog.size]),
       });
