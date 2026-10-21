@@ -21,7 +21,7 @@ export const TUNING = {
     minorObstaclesFirstZone: 42,
     minorObstaclesGainPerZone: 0,
     obstaclesFirstZone: 18,
-    obstaclesGainPerZone: 4,
+    obstaclesGainPerZone: 2,
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
     packSizeMax: 3,

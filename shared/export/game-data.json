@@ -1194,7 +1194,7 @@
       "minorObstaclesFirstZone": 42,
       "minorObstaclesGainPerZone": 0,
       "obstaclesFirstZone": 18,
-      "obstaclesGainPerZone": 4,
+      "obstaclesGainPerZone": 2,
       "openLanesPerRowMin": 2,
       "packSizeMax": 3,
       "packSizeMin": 1,
