@@ -61,6 +61,7 @@ import {
   onSettingsChanged,
   profileSave,
   type Settings,
+  walkerSpriteKey,
 } from "./profileStore";
 import { BackdropView } from "./run/backdropView";
 import { HitBoxView } from "./run/hitBoxView";
@@ -80,14 +81,13 @@ import { LAYOUT, packPoint } from "./run/stage";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 
-// How the walk starts, from runSceneData: its setup, the loadout and dog slots it walks with, the
-// walker's sprite key, and the inputs that drive it when it replays a log.
+// How the walk starts, from runSceneData: its setup, the loadout and dog slots it walks with, and
+// the inputs that drive it when it replays a log.
 export interface RunSceneData {
   dogSlots: number;
   loadout: Loadout;
   replay: readonly InputEvent[] | undefined;
   setup: RunSetup;
-  walkerSprite: string;
 }
 
 // Steps of 1/60 s. A frame catches up at most a second of steps (60), which covers a frame held
@@ -226,14 +226,18 @@ export class RunScene extends Scene implements HudRun {
   // roadside props, then the pack.
   private createWorld(
     run: Pick<RunWorld, "random" | "recorder" | "setup" | "streams">,
-    picked: Pick<RunSceneData, "loadout" | "walkerSprite">,
+    picked: Pick<RunSceneData, "loadout">,
   ): RunWorld {
     const { random, recorder } = run;
     const backdrop = new BackdropView(this);
     const ambient = new AmbientView(this, random.ambient);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const roadside = new RoadsideView(this);
-    const pack = new PackView(this, picked.loadout.dogs, picked.walkerSprite);
+    const pack = new PackView(
+      this,
+      picked.loadout.dogs,
+      walkerSpriteKey(this, picked.loadout.walker),
+    );
     const items = new ItemViews(this, (event) => showHint(this, event));
     const still = () => this.reducedMotion();
     return {

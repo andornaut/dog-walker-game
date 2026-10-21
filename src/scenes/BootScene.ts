@@ -40,13 +40,7 @@ import {
 } from "./manifestArt";
 import { PALETTE } from "./palette";
 import { registerFallbackPixelFont } from "./pixelText";
-import {
-  currentSettings,
-  openProfile,
-  profileSave,
-  walkerInUse,
-  walkerSpriteKey,
-} from "./profileStore";
+import { currentSettings, openProfile, profileSave, walkerInUse } from "./profileStore";
 import { nextRunStart } from "./run/runRecorder";
 import { runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -284,7 +278,7 @@ export class BootScene extends Scene {
     const { lastLoadout, owned } = profileSave(this);
     const walker = walkerInUse(profileSave(this));
     const loadout = devRunLoadout(lastLoadout, walker, itemAt(owned.dogs, 0), pageRunSetup().setup);
-    const pick = { dogSlots: owned.dogSlots, loadout, walkerSprite: walkerSpriteKey(this, walker) };
+    const pick = { dogSlots: owned.dogSlots, loadout };
     startWakeLock();
     this.scene.start(SCENE_KEYS.run, runSceneData(nextRunStart(), pick));
   }

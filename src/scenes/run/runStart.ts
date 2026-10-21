@@ -20,11 +20,10 @@ export function runRandom(seed: number): RunRandom {
   };
 }
 
-// What a walk's starter picked: the loadout, the dog slots owned and the walker's sprite key.
+// What a walk's starter picked: the loadout and the dog slots owned.
 export interface RunPick {
   dogSlots: number;
   loadout: Loadout;
-  walkerSprite: string;
 }
 
 // The walk a pick starts: start's setup, with its pack, gear and walker over the pick and a slot
@@ -37,6 +36,5 @@ export function runSceneData(start: RunStart, pick: RunPick): RunSceneData {
     loadout: loadoutFor(pick.loadout, setup as Parameters<typeof loadoutFor>[1]),
     replay,
     setup,
-    walkerSprite: pick.walkerSprite,
   };
 }

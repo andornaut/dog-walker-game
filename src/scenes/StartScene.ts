@@ -874,7 +874,6 @@ export class StartScene extends Scene {
     const pick: RunPick = {
       dogSlots: save.owned.dogSlots,
       loadout: { dogs, gear: this.loadout.gear, walker },
-      walkerSprite: walkerSpriteKey(this, walker),
     };
     const go = () => {
       startWakeLock();
