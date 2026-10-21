@@ -12,7 +12,6 @@ import {
 import type { GestureAction } from "../../input/gestures";
 import { walkKeyAction } from "../../input/keyBindings";
 import {
-  type ExplainChange,
   idleTrack,
   type PointerSample,
   type PointerTrack,
@@ -38,9 +37,8 @@ interface RunInputHost {
 }
 
 // Keys, the press driving the walk's gestures, the lane moves they queue for the next
-// simulation step, and the HUD element a still press holds to explain.
+// simulation step, and the explanation a still press on a HUD element opens.
 export class RunInput {
-  private explained: ExplainTarget | undefined;
   private readonly host: RunInputHost;
   private pending: SessionInput[] = [];
   private pointers: PointerTrack<ExplainTarget> = idleTrack;
@@ -73,28 +71,20 @@ export class RunInput {
   }
 
   // A press under way when a card or the menu opens, or the page loses focus, is dropped:
-  // its release may never arrive. An explanation it held up ends.
+  // its release may never arrive. An open explanation closes with it.
   dropPress(): void {
     this.pointers = idleTrack;
-    this.explained = undefined;
   }
 
-  // What a held press explains, while it does; the walk stays paused until it lifts.
+  // The explanation a hold opened, while it is open; the walk stays paused until a tap closes
+  // it.
   explanation(): ExplainTarget | undefined {
-    return this.explained;
+    return this.pointers.open;
   }
 
-  // Each frame: a press held still on an element long enough starts its explanation.
+  // Each frame: a press held still on an element long enough opens its explanation.
   tick(nowMs: number): void {
-    const { explain, track } = tickTrack(nowMs, this.pointers);
-    this.pointers = track;
-    this.explain(explain);
-  }
-
-  private explain(change: ExplainChange<ExplainTarget> | undefined): void {
-    if (change !== undefined) {
-      this.explained = change.kind === "start" ? change.target : undefined;
-    }
+    this.pointers = tickTrack(this.context(), nowMs, this.pointers);
   }
 
   // M, P and Escape are the walk bar's keys, which the HUD handles. Phaser hands a key down to
@@ -119,12 +109,14 @@ export class RunInput {
       press: { downTime: pointer.downTime, id: pointer.id },
       timeMs: this.scene.game.loop.time,
     };
-    const shown = this.host.explainShown();
-    const stepMoves = (direction: LaneDirection) => this.stepMoves(direction);
-    const result = trackPointer(trackContext(shown, stepMoves), held, sample, this.pointers);
+    const result = trackPointer(this.context(), held, sample, this.pointers);
     this.pointers = result.track;
-    this.explain(result.explain);
     result.actions.forEach((action) => this.act(action));
+  }
+
+  private context(): TrackContext<ExplainTarget> {
+    const stepMoves = (direction: LaneDirection) => this.stepMoves(direction);
+    return trackContext(this.host.explainShown(), stepMoves);
   }
 
   // The walk that takes live lane moves now, if any does.
@@ -158,8 +150,9 @@ export class RunInput {
   }
 }
 
-// A tap on a debuff bar does nothing, and a press on anything that explains itself holds to
-// explain once still for explainHoldSeconds within swipeStartDistance, the drag's first step.
+// A tap on a debuff bar does nothing, and a press on anything that explains itself opens its
+// explanation once still for explainHoldSeconds within swipeStartDistance, the drag's first
+// step.
 function trackContext(
   shown: ExplainShown,
   stepMoves: (direction: LaneDirection) => boolean,

@@ -30,6 +30,7 @@ export const RUN_TEXT_FIELDS = {
   explain: {
     debuff: ["name", "stake"],
     dog: ["dog", "hearts", "max", "owner", "size"],
+    dogHearts: ["hearts", "max"],
     effect: ["effect", "name"],
     extraHearts: ["hearts", "name", "owner"],
   },

@@ -1,5 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
+import type { DetailPicture } from "../home/detail";
 import type { ConfirmChoice, ConfirmLines } from "../home/purchaseConfirm";
 import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
 import type { Rect } from "../lib/rect";
@@ -7,7 +8,7 @@ import { addDim, drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
-import { DETAIL_WELL_KEY, type DetailPicture } from "./homePanels";
+import { DETAIL_WELL_KEY } from "./homePanels";
 import { addMenuButton, addNineSlice, type SliceKey, TEXT_SCALE } from "./uiKit";
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys

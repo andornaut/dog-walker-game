@@ -4,11 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId, GearId, QuipMoment, UpgradeId, WalkerPerkId } from "../data/types";
+import type { DogId, QuipMoment } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import { fillLine, fillNames } from "../lib/lines";
 import { type Rect } from "../lib/rect";
-import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
@@ -16,7 +15,6 @@ import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
-import { type EffectItem, effectLine, effectName } from "./effectIcons";
 import {
   EMPTY_MESSAGE_STRIP,
   type LeadSlot,
@@ -42,7 +40,7 @@ import {
   stepMessageStrip,
   stripLeadSlot,
 } from "./messageStrip";
-import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
+import { STRIP_LINE_FIELDS } from "./runText";
 import { debuffBarRects } from "./walkHud";
 
 const { dwellMs, fadeMs, lifeMs, maxWaiting } = MESSAGE_TIMING;
@@ -209,11 +207,11 @@ describe("messageLinePanel", () => {
   });
 });
 
-// Every line the strip can say: each hint and badge, each explanation a held press shows, and
-// each of the walk's lines for every dog, owner and obstacle as each neighborhood names it, with
-// two-digit counts and the largest amounts.
+// Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
+// owner and obstacle as each neighborhood names it, with two-digit counts and the largest
+// amounts.
 function everyStripLine(): string[] {
-  const { explain, strip } = gameData.runText;
+  const { strip } = gameData.runText;
   const line = (key: keyof typeof STRIP_LINE_FIELDS, fields: Record<string, string>) =>
     fillLine(STRIP_LINE_FIELDS, strip, key, fields as never);
   const dogs = Object.values(gameData.dogs).map((dog) => ({
@@ -228,39 +226,9 @@ function everyStripLine(): string[] {
     gameData,
     testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
   );
-  const items: EffectItem[] = [
-    ...(Object.keys(gameData.shopGear) as GearId[]).map(
-      (gear) => ({ gear, kind: "gear" }) as const,
-    ),
-    ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map(
-      (perk) => ({ kind: "perk", perk }) as const,
-    ),
-    ...(Object.keys(gameData.upgrades) as UpgradeId[]).map(
-      (upgrade) => ({ kind: "upgrade", upgrade }) as const,
-    ),
-  ];
-  const fields = RUN_TEXT_FIELDS.explain;
   return [
     ...Object.values(gameData.hints).map(({ text }) => text),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
-    ...items.map((item) =>
-      fillLine(fields, explain, "effect", {
-        effect: effectLine(gameData, item),
-        name: effectName(gameData, item),
-      }),
-    ),
-    ...Object.values(gameData.debuffs).map(({ name, stake }) =>
-      fillLine(fields, explain, "debuff", { name, stake: fillNames(stake, { seconds: "99" }) }),
-    ),
-    ...Object.values(gameData.dogs).map((dog) =>
-      fillLine(fields, explain, "dog", {
-        dog: dog.name,
-        hearts: "10",
-        max: "10",
-        owner: dog.owner.name,
-        size: capitalize(SIZE_NAMES[dog.size]),
-      }),
-    ),
     ...Object.values(strip.debuffStart).map((start) => fillNames(start, { seconds: "99" })),
     ...Object.values(strip.debuffEnd),
     strip.luckyNeighbor,

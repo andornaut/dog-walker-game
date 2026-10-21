@@ -12,7 +12,7 @@ import { packDogs, placeInPack } from "../state/pack";
 import type { ModifierSource } from "../state/runState";
 import { effectIconKey, type EffectItem, effectLine, effectName } from "./effectIcons";
 import type { ChangeLabel } from "./hudView";
-import { messageIconKey, type MessageLine } from "./messageStrip";
+import type { MessageLine } from "./messageStrip";
 import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
 
 // What the player sees of a buff changing the game: its charm (the buff's walk bar icon in an
@@ -381,13 +381,13 @@ export function walkStartMarks(
   };
 }
 
-// Each source of a dog's extra max hearts as a line for a held card, led by its icon: the lead
-// dog's small-pack bonus, and each buff's, such as Lucky collar's.
+// Each source of a dog's extra max hearts as a row of its held card's detail: the lead dog's
+// small-pack bonus, and each buff's, such as Lucky collar's.
 export function extraHearts(
   data: MarkData,
   run: Parameters<typeof standingModified>[1],
   dog: DogId,
-): { iconKey: string; text: string }[] {
+): string[] {
   const owner = data.dogs[dog].owner.name;
   const line = (name: string, hearts: number) =>
     fillLine(RUN_TEXT_FIELDS.explain, data.runText.explain, "extraHearts", {
@@ -404,12 +404,7 @@ export function extraHearts(
     return item === null || cause.amount <= 0 ? [] : [{ hearts: cause.amount, item }];
   });
   return [
-    ...(bonus > 0
-      ? [{ iconKey: messageIconKey("hint"), text: line(data.runText.explain.smallPack, bonus) }]
-      : []),
-    ...buffs.map(({ hearts, item }) => ({
-      iconKey: effectIconKey(item),
-      text: line(effectName(data, item), hearts),
-    })),
+    ...(bonus > 0 ? [line(data.runText.explain.smallPack, bonus)] : []),
+    ...buffs.map(({ hearts, item }) => line(effectName(data, item), hearts)),
   ];
 }

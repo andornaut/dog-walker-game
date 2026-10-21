@@ -257,7 +257,7 @@ export function ownerTabRect(card: Pick<Rect, "x" | "y">): Rect {
 export type ExplainTarget =
   | { debuff: DebuffId; kind: "debuff" }
   | { dog: DogId; kind: "dog" }
-  | { effects: number[]; kind: "effects" };
+  | { effect: number; kind: "effect" };
 
 // What the HUD shows, for finding what a press explains: the walk's effects, its debuffs in
 // the order they began, and each card's dog, if any.
@@ -277,7 +277,7 @@ export function explainTargetAt(
   const bar = walkBarLayout(layout.topBar);
   const well = bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y));
   if (well >= 0 && well < shown.effects) {
-    return { effects: [well], kind: "effects" };
+    return { effect: well, kind: "effect" };
   }
   const bars = debuffBarRects(layout.topBar, shown.debuffs.length);
   const debuff = shown.debuffs[bars.findIndex((rect) => containsPoint(rect, x, y))];

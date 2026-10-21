@@ -3,7 +3,7 @@ import { type GameObjects, type Input, Scene } from "phaser";
 import { dogFaceKey, dogPortraitKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { dogDetail, gearDetail } from "../home/detail";
+import { type DetailPicture, dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
@@ -70,7 +70,7 @@ import {
 import { GREYED, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { type DetailPicture, drawDetailCard } from "./homePanels";
+import { drawDetailCard } from "./homePanels";
 import {
   addLock,
   addPlate,

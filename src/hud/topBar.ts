@@ -37,7 +37,7 @@ export function topBarButtonForKey(repeat: boolean, key: string): TopBarPress | 
 
 // What holds the walk still. card: a card or the zone celebration, which can sit under the
 // pause menu or the Home button's question, as the hit stop can. hold: a press held on the HUD
-// shows what it explains. Help and settings cover the whole screen, walk bar included. page:
+// opened the detail card that explains it. Help and settings cover the whole screen, walk bar included. page:
 // the tab is hidden or the window has lost focus.
 export interface RunPause {
   card: boolean;
@@ -48,21 +48,22 @@ export interface RunPause {
 }
 
 // Whether the walk is paused: no scroll, timers, needs or pulls, and the session does not step.
-// Every overlay over the walk, a press held to explain, and the page out of view or focus pause
-// it. A hit stop is part of the walk and steps on.
+// Every overlay over the walk, an explanation's detail card, and the page out of view or focus
+// pause it. A hit stop is part of the walk and steps on.
 export function walkPaused(pause: Omit<RunPause, "hitStop">): boolean {
   return pause.card || pause.hold || pause.menu !== "closed" || pause.page !== "shown";
 }
 
 // Whether the player paused the walk: the pause menu and what opens from it, or the Home
-// question. The music ducks and the walk's timers stop; a card, the celebration or a held
-// explanation pauses the walk without either.
+// question. The music ducks and the walk's timers stop; a card, the celebration or an
+// explanation's detail card pauses the walk without either.
 export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
   return pause.menu !== "closed";
 }
 
 // Whether the walk drops its presses: a card or a menu over the walk takes every press. A hit
-// stop covers nothing, and a held explanation keeps its press, whose release resumes the walk.
+// stop covers nothing, and an explanation's detail card takes its presses itself: the walk's
+// input closes it on the next tap.
 export function pressesHeld(pause: RunPause): boolean {
   return pause.card || pause.menu !== "closed";
 }
@@ -80,12 +81,15 @@ export type TopBarAction =
 // unmute, Help and Settings open help and the settings, and pause opens the menu, or resumes while the menu or
 // the question is up. Help and settings cover the bar, so a tap there is theirs, and so are P
 // and Escape, which close them. M still mutes under help; settings flips its own sound switch
-// on M.
+// on M. A tap while an explanation's detail card is up only closes it, so it presses no button.
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",
   button: TopBarPress,
 ): TopBarAction | undefined {
+  if (pause.hold && via === "tap") {
+    return undefined;
+  }
   if (pause.menu === "help" || pause.menu === "settings") {
     const mutes = pause.menu === "help" && via === "key" && button === "sound";
     return mutes ? "mute" : undefined;

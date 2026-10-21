@@ -29,24 +29,23 @@ export interface PointerSample {
   readonly timeMs: number;
 }
 
-// A press on an element that explains itself: a hold candidate until it moves or lifts, and
-// explaining once the hold has fired.
-export interface Holding<Target> {
-  readonly press: HoldPress;
-  readonly target: Target;
-}
-
 // The press driving the gesture; undefined exactly while the gesture is idle. hold: the press
-// went down on an element that explains itself.
+// went down on an element that explains itself, a hold candidate until it moves or lifts.
+// open: the explanation a hold opened, which stays open after its press lifts. closing: a press
+// that went down while it was open, whose release closes it.
 export interface PointerTrack<Target> {
+  readonly closing: Press | undefined;
   readonly gesture: GestureState;
-  readonly hold: Holding<Target> | undefined;
+  readonly hold: HoldPress | undefined;
+  readonly open: Target | undefined;
   readonly press: Press | undefined;
 }
 
 export const idleTrack: PointerTrack<never> = {
+  closing: undefined,
   gesture: idleGesture,
   hold: undefined,
+  open: undefined,
   press: undefined,
 };
 
@@ -56,18 +55,9 @@ export interface TrackContext<Target> extends GestureContext {
   hold: HoldRule;
 }
 
-// explain: an explanation starts with its target, or the one showing ends.
-export type ExplainChange<Target> = { kind: "end" } | { kind: "start"; target: Target };
-
 interface PointerResult<Target> {
   actions: GestureAction[];
-  explain: ExplainChange<Target> | undefined;
   track: PointerTrack<Target>;
-}
-
-// Whether the track's press is holding an explanation up.
-export function explaining<Target>(track: PointerTrack<Target>): boolean {
-  return track.hold?.press.state === "held";
 }
 
 const samePress = (a: Press | undefined, b: Press): boolean =>
@@ -79,23 +69,39 @@ function endedUnseen<Target>(press: Press, track: PointerTrack<Target>): Pointer
   return track.press?.id === press.id && !samePress(track.press, press) ? idleTrack : track;
 }
 
-// The explanation ends whenever the track that held it up stops holding it.
-function result<Target>(
-  before: PointerTrack<Target>,
-  actions: GestureAction[],
+// The explanation of what the hold went down on, if it still explains something, opened with
+// every press dropped, so neither the press that opened it nor any finger still down steers.
+function opened<Target>(context: TrackContext<Target>, hold: HoldPress): PointerTrack<Target> {
+  return { ...idleTrack, open: context.explainAt(hold.start) };
+}
+
+// While an explanation is open, every press is its: a press that goes down there, on a walk-bar
+// button too, closes it when it lifts and does nothing else, and the press that opened it
+// lifts without closing it.
+function whileOpen<Target>(
+  sample: PointerSample,
   track: PointerTrack<Target>,
-): PointerResult<Target> {
-  const ended = explaining(before) && !explaining(track);
-  return { actions, explain: ended ? { kind: "end" } : undefined, track };
+): PointerTrack<Target> {
+  const { phase, press } = sample;
+  if (phase === "down") {
+    return { ...track, closing: press };
+  }
+  if (!samePress(track.closing, press)) {
+    return track;
+  }
+  if (phase === "up") {
+    return idleTrack;
+  }
+  return phase === "cancel" ? { ...track, closing: undefined } : track;
 }
 
 // The latest press drives the gestures, so a finger resting on the screen never holds the
 // steering from the one that lands after it. A press on a walk-bar button is the HUD's and
-// drives none. held: a card or a menu takes every press, and the one under way is dropped. A hit
-// stop is no hold: its lane moves are dropped where they act, and the drag goes on. A press on
-// an element that explains itself holds to explain once it has stayed within the hold's slop
-// for its time (tickTrack); one that moves past it, or takes a lane step, steers as any drag
-// does. While it explains, it moves and taps nothing, and its release ends it.
+// drives none. held: a card or a menu takes every press, and the one under way is dropped, along
+// with an open explanation. A hit stop is no hold: its lane moves are dropped where they act, and
+// the drag goes on. A press on an element that explains itself opens its explanation once it has
+// stayed within the hold's slop for its time (tickTrack), or lifts after that time before a frame
+// ticks; one that moves past the slop, or takes a lane step, steers as any drag does.
 export function trackPointer<Target>(
   context: TrackContext<Target>,
   held: boolean,
@@ -103,76 +109,67 @@ export function trackPointer<Target>(
   track: PointerTrack<Target>,
 ): PointerResult<Target> {
   const { phase, point, press } = sample;
-  const current = endedUnseen(press, track);
   if (held) {
-    return result(track, [], idleTrack);
+    return { actions: [], track: idleTrack };
   }
+  if (track.open !== undefined) {
+    return { actions: [], track: whileOpen(sample, track) };
+  }
+  const current = endedUnseen(press, track);
   if (phase === "down") {
     if (sample.onButton) {
-      return result(track, [], current);
+      return { actions: [], track: current };
     }
-    const target = context.explainAt(point);
     const hold =
-      target === undefined
+      context.explainAt(point) === undefined
         ? undefined
-        : { press: startHold(context.hold, point, sample.timeMs), target };
+        : startHold(context.hold, point, sample.timeMs);
     const { actions, state } = pointerDown(context, point);
-    return result(track, actions, { gesture: state, hold, press });
+    return { actions, track: { ...idleTrack, gesture: state, hold, press } };
   }
   if (!samePress(current.press, press)) {
-    return result(track, [], current);
+    return { actions: [], track: current };
   }
   if (phase === "cancel") {
-    return result(track, [], idleTrack);
-  }
-  if (explaining(current)) {
-    return result(track, [], phase === "up" ? idleTrack : current);
+    return { actions: [], track: idleTrack };
   }
   if (phase === "move") {
     const { actions, state, stepped } = pointerMove(context, point, current.gesture);
-    return result(track, actions, {
-      gesture: state,
-      hold: steered(current.hold, point, stepped),
-      press,
-    });
+    return {
+      actions,
+      track: { ...current, gesture: state, hold: steered(current.hold, point, stepped) },
+    };
   }
-  // A hold whose time came up between frames is a hold, and its release steps nothing.
+  // A hold whose time came up between frames opens, and its release steps nothing.
   const { hold } = current;
-  if (hold !== undefined && releaseHold(hold.press, sample.timeMs) === "hold") {
-    return result(track, [], idleTrack);
+  if (hold !== undefined && releaseHold(hold, sample.timeMs) === "hold") {
+    return { actions: [], track: opened(context, hold) };
   }
-  return result(track, pointerUp(context, point, current.gesture).actions, idleTrack);
+  return { actions: pointerUp(context, point, current.gesture).actions, track: idleTrack };
 }
 
 // A hold candidate that moved past its slop, or whose drag took a lane step, steers instead.
-function steered<Target>(
-  hold: Holding<Target> | undefined,
+function steered(
+  hold: HoldPress | undefined,
   point: Point,
   stepped: boolean,
-): Holding<Target> | undefined {
+): HoldPress | undefined {
   if (hold === undefined) {
     return undefined;
   }
-  const press = moveHold(hold.press, point);
-  return stepped || press.state === "moved" ? undefined : { ...hold, press };
+  const press = moveHold(hold, point);
+  return stepped || press.state === "moved" ? undefined : press;
 }
 
-// Each frame: a hold candidate that has stayed still for the hold's time starts explaining its
-// target.
+// Each frame: a hold candidate that has stayed still for the hold's time opens its explanation.
 export function tickTrack<Target>(
+  context: TrackContext<Target>,
   nowMs: number,
   track: PointerTrack<Target>,
-): { explain: ExplainChange<Target> | undefined; track: PointerTrack<Target> } {
+): PointerTrack<Target> {
   const { hold } = track;
-  if (hold === undefined) {
-    return { explain: undefined, track };
+  if (hold === undefined || !tickHold(hold, nowMs).fire) {
+    return track;
   }
-  const { fire, press } = tickHold(hold.press, nowMs);
-  if (!fire) {
-    return { explain: undefined, track };
-  }
-  return {
-    explain: { kind: "start", target: hold.target },
-    track: { ...track, hold: { ...hold, press } },
-  };
+  return opened(context, hold);
 }

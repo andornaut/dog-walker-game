@@ -34,6 +34,18 @@ export interface DetailCard {
   readonly title: string;
 }
 
+// What a detail card shows in its well: a dog's or walker's portrait, or a gear item's,
+// effect's or debuff's icon.
+export interface DetailPicture {
+  // Drawn centred in the well at 1x while key has no texture, such as a walker's face before
+  // its portrait is drawn.
+  readonly fallback?: string;
+  readonly key: string;
+  // Drawn at this whole-number scale: 1 for a 64x64 portrait, 2 for a 32x32 icon, 4 for a
+  // 16x16 icon.
+  readonly scale: number;
+}
+
 const FIELDS = HOME_TEXT_FIELDS.detail;
 
 // What buying it would take, or null when it is already owned.
@@ -86,7 +98,7 @@ export function gearDetail(
   data: DetailData,
   owned: Owned,
   bank: Cents,
-  loadout: HomeLoadout,
+  loadout: Pick<HomeLoadout, "gear">,
   gear: GearId,
 ): DetailCard {
   const item = data.shopGear[gear];

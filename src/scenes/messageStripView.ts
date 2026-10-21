@@ -2,7 +2,6 @@ import type { GameObjects, Scene } from "phaser";
 
 import { ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { ExplainLine } from "../hud/explain";
 import {
   EMPTY_MESSAGE_STRIP,
   isOwnerLead,
@@ -56,8 +55,7 @@ const NAME_STYLE: PixelTextStyle = { color: PALETTE.rust };
 
 type Faded = GameObjects.GameObject & { alpha: number };
 
-// What is drawn: id names the line (an explanation's are negative), and bars the debuff bars
-// it was placed under.
+// What is drawn: id names the line, and bars the debuff bars it was placed under.
 interface Drawn {
   bars: number;
   id: number;
@@ -66,28 +64,18 @@ interface Drawn {
   scene: Scene;
 }
 
-// A line as drawn, led by its icon's key or an owner's face and name. id names the line, an
-// explanation's negative.
+// A line as drawn, led by its icon's key or an owner's face and name. id names the line.
 interface StripLine {
   readonly id: number;
   readonly lead: OwnerLead | string;
   readonly text: string;
 }
 
-// A held explanation's lines take turns this often.
-const EXPLAIN_TURN_MS = MESSAGE_TIMING.dwellMs;
-// Each explanation numbers its lines apart from the last one's, past any turn it reaches.
-const EXPLAIN_ID_SPAN = 1000;
-
 // The message strip (see hud/messageStrip.ts) as drawn. It draws in whichever scene it is
 // given each frame: the HUD while the walk shows, or the card or pause menu over its dim.
-// depth puts it under the HUD's other parts there, or over the overlay's. While a press holds
-// an element up, its explanation takes the strip, whole, and the walk's lines wait.
+// depth puts it under the HUD's other parts there, or over the overlay's.
 export class MessageStrip {
   private drawn: Drawn | undefined;
-  private explainId = 0;
-  private explainMs = 0;
-  private explaining: readonly ExplainLine[] = [];
   private state: MessageStripState = EMPTY_MESSAGE_STRIP;
 
   // icon: what leads the line, an icon or an owner's face and name. ahead: the line waits ahead
@@ -95,13 +83,6 @@ export class MessageStrip {
   say(icon: MessageLead, text: string, ahead = false): void {
     const add = ahead ? sayLineAhead : sayLine;
     this.state = add(MESSAGE_TIMING, { icon, text }, this.state);
-  }
-
-  // The lines a held press explains, from their first, or none once it lifts.
-  explain(lines: readonly ExplainLine[]): void {
-    this.explainId += 1;
-    this.explainMs = 0;
-    this.explaining = lines;
   }
 
   update(dtMs: number, scene: Scene, depth: number, bars: number): void {
@@ -126,15 +107,8 @@ export class MessageStrip {
     }
   }
 
-  // The explanation's line due now, else the walk's shown line, aged dtMs.
+  // The walk's shown line, aged dtMs.
   private current(dtMs: number): (StripLine & { alpha: number }) | undefined {
-    if (this.explaining.length > 0) {
-      this.explainMs += dtMs;
-      const turn = Math.floor(this.explainMs / EXPLAIN_TURN_MS) % this.explaining.length;
-      const line = this.explaining[turn];
-      const id = -(this.explainId * EXPLAIN_ID_SPAN + turn) - 1;
-      return line === undefined ? undefined : { alpha: 1, id, lead: line.iconKey, text: line.text };
-    }
     this.state = stepMessageStrip(MESSAGE_TIMING, dtMs, this.state);
     const { shown } = this.state;
     if (shown === null) {

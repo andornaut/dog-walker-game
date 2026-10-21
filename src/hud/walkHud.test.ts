@@ -569,14 +569,14 @@ describe("explainTargetAt", () => {
   const bars = debuffBarRects(topBar, debuffs.length);
   const button = centre(BAR.buttons[WALK_BAR_BUTTONS[0]].hit);
   it.each<[string, number, Point, ExplainTarget | undefined]>([
-    ["the first effect", 1, holdAt(0), { effects: [0], kind: "effects" }],
+    ["the first effect", 1, holdAt(0), { effect: 0, kind: "effect" }],
     ["the neighborhood well's column over an effect", 1, centre(BAR.zoneWell), undefined],
     ["an empty well", 1, holdAt(1), undefined],
     [
       "the last well with as many effects as wells",
       WELLS,
       holdAt(WELLS - 1),
-      { effects: [WELLS - 1], kind: "effects" },
+      { effect: WELLS - 1, kind: "effect" },
     ],
     ["the cash well", 1, centre(WALK_BAR.cash.well), undefined],
     ["a button", 1, button, undefined],

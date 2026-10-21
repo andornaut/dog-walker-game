@@ -2,7 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DetailCard } from "../home/detail";
+import type { DetailCard, DetailPicture } from "../home/detail";
 import type { Logbook } from "../home/home";
 import { CARD_TEXT_ROOM, cardTextRows, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
@@ -125,16 +125,6 @@ function drawCardFrame(
   });
   addCloseButton(scene, parent, closeControl(rect), closePressed);
   return content;
-}
-
-// What a detail card shows in its well: a dog's or walker's portrait or a gear item's icon.
-export interface DetailPicture {
-  // Drawn centred in the well at 1x while key has no texture, such as a walker's face before
-  // its portrait is drawn.
-  readonly fallback?: string;
-  readonly key: string;
-  // Drawn at this whole-number scale: 1 for a 64x64 portrait, 2 for a 32x32 icon.
-  readonly scale: number;
 }
 
 // The detail card's well the picture sits in.

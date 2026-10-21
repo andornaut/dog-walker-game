@@ -15,7 +15,7 @@ import {
   perkIconKey,
   walkBarIconKey,
 } from "../hud/effectIcons";
-import { explainLines } from "../hud/explain";
+import { explainDetail } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
 import {
   CHANGE_LABEL_STYLES,
@@ -85,6 +85,7 @@ import { glintWell } from "./buffCharm";
 import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
+import { drawDetailCard } from "./homePanels";
 import type { HudRun, HudWalk, RunHudView } from "./hudWalk";
 import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
@@ -114,6 +115,8 @@ const LABEL = { ms: 1100 };
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
+// An explanation's detail card draws over every other part of the HUD.
+const DETAIL_DEPTH = 2000;
 // An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
 // A card holds one row of hearts, as many as the most an owner can have.
@@ -166,6 +169,7 @@ export class HudScene extends Scene {
   private cards: CardView[] = [];
   private debuffBars: DebuffBarView[] = [];
   private debuffFills: GameObjects.Graphics | undefined;
+  private detailLayer: GameObjects.Container | undefined;
   private dollar: GameObjects.BitmapText | undefined;
   private drawn: Record<string, unknown> = {};
   private dynamic: GameObjects.Graphics | undefined;
@@ -258,6 +262,7 @@ export class HudScene extends Scene {
     this.dynamic = this.add.graphics();
     this.debuffFills = this.add.graphics().setDepth(1);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
+    this.detailLayer = this.add.container(0, 0).setDepth(DETAIL_DEPTH);
 
     const run = this.walk();
     const firingRects = () => this.feedback?.firingRects() ?? [];
@@ -481,7 +486,9 @@ export class HudScene extends Scene {
     this.showDebuffBars(view.run);
     const overlay = this.overlayScene();
     const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
-    this.messages.update(held ? 0 : delta, overlay, depth, this.debuffBars.length);
+    // The strip's lines wait under an explanation's detail card.
+    const aged = held || pause.hold ? 0 : delta;
+    this.messages.update(aged, overlay, depth, this.debuffBars.length);
     const effects = effectItems(gameData, view.run);
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
@@ -628,15 +635,24 @@ export class HudScene extends Scene {
     return { debuff, parts, rect };
   }
 
-  // What a held press explains, on the message strip until it lifts.
+  // The detail card of what a held press explains, the home screen's, over the HUD while it is
+  // open. The walk is paused under it, so it is drawn once as it opens.
   private showExplanation(view: RunHudView): void {
     const target: ExplainTarget | undefined = view.explaining;
     const key = target === undefined ? "" : JSON.stringify(target);
-    if (key === this.explained) {
+    const layer = this.detailLayer;
+    if (key === this.explained || layer === undefined) {
       return;
     }
     this.explained = key;
-    this.messages.explain(target === undefined ? [] : explainLines(gameData, view.run, target));
+    layer.removeAll(true);
+    const detail =
+      target === undefined
+        ? undefined
+        : explainDetail(gameData, profileSave(this), view.run, target);
+    if (detail !== undefined) {
+      drawDetailCard(this, layer, false, detail.card, detail.picture, detail.kind);
+    }
   }
 
   private redraw(view: RunHudView): void {

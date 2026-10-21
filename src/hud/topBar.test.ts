@@ -41,10 +41,10 @@ describe("the walk bar in each pause state", () => {
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
     player: boolean;
-    // What a tap on Home, a tap or key on pause, the M key, and a tap on sound, Help and Settings
-    // do.
+    // What a tap on Home, a tap on pause, P, the M key, and a tap on sound, Help and Settings do.
     home: TopBarAction | undefined;
     pause: TopBarAction | undefined;
+    pauseKey: TopBarAction | undefined;
     mute: TopBarAction | undefined;
     help: TopBarAction | undefined;
     settings: TopBarAction | undefined;
@@ -59,18 +59,36 @@ describe("the walk bar in each pause state", () => {
     icon: "icon-pause",
     mute: "mute",
     pause: "openMenu",
+    pauseKey: "openMenu",
     paused: false,
     player: false,
     settings: "openSettings",
     sound: "mute",
   } as const;
   const card = { ...walking, held: true, paused: true } as const;
-  const menu = { ...card, icon: "icon-play", pause: "resume", player: true } as const;
+  const menu = {
+    ...card,
+    icon: "icon-play",
+    pause: "resume",
+    pauseKey: "resume",
+    player: true,
+  } as const;
   const confirm = { ...menu, home: undefined } as const;
   const cover = {
     ...confirm,
     help: undefined,
     pause: undefined,
+    pauseKey: undefined,
+    settings: undefined,
+    sound: undefined,
+  } as const;
+  // An explanation's detail card takes every tap on the bar to close it; the keys act.
+  const detail = {
+    ...walking,
+    help: undefined,
+    home: undefined,
+    pause: undefined,
+    paused: true,
     settings: undefined,
     sound: undefined,
   } as const;
@@ -80,7 +98,7 @@ describe("the walk bar in each pause state", () => {
       ["walking", WALKING, { ...walking, gameplay: true }],
       ["under a card", CARD, card],
       ["through the hit stop", HIT_STOP, walking],
-      ["while a press holds an explanation", HOLD, { ...walking, paused: true }],
+      ["under an explanation's detail card", HOLD, detail],
       ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
       ["out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
       ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
@@ -95,8 +113,6 @@ describe("the walk bar in each pause state", () => {
       ],
     ];
     for (const [name, pause, expected] of cases) {
-      const tapPause = topBarAction(pause, "tap", "pause");
-      expect(topBarAction(pause, "key", "pause"), name).toBe(tapPause);
       expect(
         {
           gameplay: gameplayAllowed(pause),
@@ -105,7 +121,8 @@ describe("the walk bar in each pause state", () => {
           home: topBarAction(pause, "tap", "home"),
           icon: pauseButtonIcon(pause),
           mute: topBarAction(pause, "key", "sound"),
-          pause: tapPause,
+          pause: topBarAction(pause, "tap", "pause"),
+          pauseKey: topBarAction(pause, "key", "pause"),
           paused: walkPaused(pause),
           player: playerPaused(pause),
           settings: topBarAction(pause, "tap", "settings"),

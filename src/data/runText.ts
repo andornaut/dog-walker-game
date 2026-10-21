@@ -21,10 +21,14 @@ export const RUN_TEXT = {
   dodge: "Dodge!",
   explain: {
     debuff: "{name}: {stake}",
+    // PLACEHOLDER: gameplay writes debuffStatus, dogHearts and upgradeStatus.
+    debuffStatus: "Wears off on its own",
     dog: "{dog}: {size}, {hearts}/{max}♥, owner {owner}",
+    dogHearts: "{hearts}/{max}♥ now",
     effect: "{name}: {effect}",
     extraHearts: "{name}: +{hearts}♥ max for {owner}",
     smallPack: "Small pack",
+    upgradeStatus: "Picked at a fork",
   },
   fired: "FIRED!",
   firedBy: "{owner} fired you!",

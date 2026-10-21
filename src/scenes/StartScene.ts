@@ -15,7 +15,13 @@ import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
 import { bubbleLines, bubbleRect, bubbleSize, ownerColumn, ownerPlace } from "../home/bubbleRect";
-import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "../home/detail";
+import {
+  type DetailCard,
+  type DetailPicture,
+  dogDetail,
+  gearDetail,
+  walkerDetail,
+} from "../home/detail";
 import {
   badgePopOffset,
   bobOffset,
@@ -119,13 +125,7 @@ import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import {
-  addAffordFrame,
-  type DetailPicture,
-  drawDetailCard,
-  drawLogbookPanel,
-  type LogbookPress,
-} from "./homePanels";
+import { addAffordFrame, drawDetailCard, drawLogbookPanel, type LogbookPress } from "./homePanels";
 import {
   addLock,
   addPlate,

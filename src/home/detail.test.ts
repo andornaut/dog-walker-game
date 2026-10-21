@@ -63,25 +63,19 @@ describe("dogDetail", () => {
 
 describe("gearDetail", () => {
   it("gives the effect, and whether it is equipped", () => {
-    const card = gearDetail(
-      data,
-      owned,
-      dollars(0),
-      { dogs: [], gear: "luckyCollar" },
-      "luckyCollar",
-    );
+    const card = gearDetail(data, owned, dollars(0), { gear: "luckyCollar" }, "luckyCollar");
     expect(card.title).toBe(data.shopGear.luckyCollar.name);
     expect(card.lines.join(" ").toLowerCase()).toContain(
       effectText(data, data.shopGear.luckyCollar.effects).toLowerCase(),
     );
     expect(card.status).toBe(data.homeText.detail.gearEquipped);
-    expect(
-      gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "luckyCollar").status,
-    ).toBe(data.homeText.detail.gearOwned);
+    expect(gearDetail(data, owned, dollars(0), { gear: null }, "luckyCollar").status).toBe(
+      data.homeText.detail.gearOwned,
+    );
   });
 
   it("shows a locked item's price", () => {
-    const card = gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "hallPass");
+    const card = gearDetail(data, owned, dollars(0), { gear: null }, "hallPass");
     const price = data.homeText.detail.priceLocked.split("{price}");
     expect(card.status.startsWith(price[0] ?? "")).toBe(true);
     expect(card.status.endsWith(price[1] ?? "")).toBe(true);
