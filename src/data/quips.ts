@@ -15,7 +15,7 @@ export const QUIPS = {
   },
   biscuit: {
     fired: [
-      "Last call, friend. I'm cutting you off.",
+      "Sorry, friend. You've been decaffeinated.",
       "That's the last drop, friend. Closing time.",
     ],
     happier: ["This walk is a latte fun, friend!", "Now that's a perfect pour."],
@@ -46,7 +46,7 @@ export const QUIPS = {
   penny: {
     fired: [
       "Oh no, oh no. Sorry, but you're fired.",
-      "So sorry! Here's a tissue. I checked twice.",
+      "So sorry! I double-checked. Here's a tissue.",
     ],
     happier: ["Phew! Good, good.", "Oh, what a relief. Thank you!"],
     parting: [
@@ -57,12 +57,15 @@ export const QUIPS = {
   },
   pierre: {
     fired: ["Disqualified. You are fired.", "Pepe withdraws from your care."],
-    happier: ["Acceptable. Barely.", "Seven out of ten. Très bien."],
+    happier: ["Acceptable. Barely.", "Seven out of ten. C'est bien."],
     parting: ["No puddles. I will check his paws.", "Posture, please. I deduct for slouching."],
     upset: ["Non. Points deducted.", "That would never place at a show."],
   },
   snowball: {
-    fired: ["You've ruined everything! Off the guest list!", "The day is canceled. So are you!"],
+    fired: [
+      "You've ruined everything! Off the guest list!",
+      "The day is canceled! I need a new walker!",
+    ],
     happier: ["Picture perfect!", "Everything is going to plan!"],
     parting: ["No mud, no fuss. The whole day depends on it!", "She's the flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],

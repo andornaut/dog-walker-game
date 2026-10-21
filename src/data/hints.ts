@@ -20,7 +20,7 @@ export const HINTS = {
     trigger: { kind: "fork" },
   },
   homeButton: {
-    text: "Home ends the walk. Banked pay stays banked.",
+    text: "Head home ends the walk. Banked pay stays.",
     trigger: { kind: "homeButton" },
   },
   luckyFind: {

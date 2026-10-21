@@ -25,7 +25,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 ## Voice
 
-- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing, and no em dashes. Walkers: Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
+- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing (the walk's money is "cash"), ♥ right after its number ("+1♥", "{hearts}♥"), and no em dashes. Plain ASCII only, apart from ♥, · and the characters `src/text/pixelFont.ts` maps (−, × and curly quotes): the pixel font has no other glyphs. Walkers: Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
 - **Lengths:** message strip lines and first-time hints at most about 46 characters (26 always fit); the walker's bubble up to 4 lines of about 30, with walker and parting lines at 2; card option names 2 or 3 words; hit labels one or two uppercase words with "!"
 - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
 - **Jesse** (Koda): laid-back runner, fitness talk (form, personal bests, shake it off)
@@ -86,7 +86,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Full pack home:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Full pack bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
-- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Full pack bonus, card costs, starting money), neighborhoods walked and the bank; a new-best ribbon when it beats the best walk; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
+- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Full pack bonus, card costs, starting cash), neighborhoods walked and the bank; a new-best ribbon when it beats the best walk; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
 
@@ -283,7 +283,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Owner parting line:** picking a dog shows a line from its owner (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, neighborhoods, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you on Fairview Park.")
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best neighborhood completed (heading home mid-neighborhood doesn't count it). Each dog's roster card shows its walks, neighborhoods finished and times fired
-- **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting money), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
+- **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting cash), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
 | Group      | Badge                 | Goal                                            | Line                                      |
 | ---------- | --------------------- | ----------------------------------------------- | ----------------------------------------- |
