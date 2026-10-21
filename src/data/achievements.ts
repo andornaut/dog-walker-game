@@ -78,7 +78,7 @@ export const ACHIEVEMENTS = [
     goal: "Finish 10 walks with nobody fired",
     id: "fiveStarService",
     name: "Five-Star Service",
-    shortGoal: "10 walks, no firing",
+    shortGoal: "10 calm walks",
   },
   {
     badgeLine: "Treats are on you.",

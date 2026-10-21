@@ -117,13 +117,14 @@ describe("wallCell", () => {
   };
 
   it.each(badgeWall(gameData, newPlayerSave).map((badge) => [badge.name, badge] as const))(
-    "fits %s's name, a whole goal and any progress in its wall cell, on the body font",
+    "fits %s's name, a whole goal and any progress in its wall cell at 2x, on the body font",
     (_, badge) => {
       const progress = progressFor(badge.id);
       const cell = wallCell(wallText, bodyInk, badge, progress);
       const lines = Math.floor((wallText.lines * wallText.scale) / cell.style.scale);
       const drawn = [...cell.name, ...cell.goal, ...cell.progress];
       expect(cell.whole).toBe(true);
+      expect(cell.style.scale).toBe(wallText.scale);
       expect(drawn.length).toBeLessThanOrEqual(lines);
       expect(drawn.every((line) => bodyInk(cell.style, line) <= wallText.width)).toBe(true);
       // A whole goal, with the progress on its own line or ending the goal's last line.
