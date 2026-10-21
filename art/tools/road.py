@@ -690,14 +690,16 @@ def tip(rx):
 
 # ---------- encounters (facing the player) ----------
 
-# The skunk's idle: the tail sways right, back, blinking, then left.
+# The skunk's idle: the tail sways right, back, blinking, then left. Its walk, the step toward the pack: a
+# front paw lifts 1px, left then right, with the tail swaying against it.
 SKUNK_IDLE = (dict(sway=0), dict(sway=1), dict(sway=0, blink=True), dict(sway=-1))
+SKUNK_WALK = (dict(sway=1, paw_l=-1), dict(sway=0), dict(sway=-1, paw_r=-1), dict(sway=0))
 
 
-def skunk(sway=0, blink=False):
+def skunk(sway=0, blink=False, paw_l=0, paw_r=0):
     """The skunk facing the player at its own eye level, a squat front elevation: its tail fans up behind
     its right shoulder with a white stripe curving along its inner edge, and sways 1px either way; blink
-    shuts its eyes to ink lines. An ink line parts the head from the body and the body from the tail. The
+    shuts its eyes to ink lines; paw_l and paw_r move the left and right front paws down (up when negative). An ink line parts the head from the body and the body from the tail. The
     head is in front of the body: a white blaze runs up from a white muzzle between the ears, and the eyes
     are ink with a white glint. Front paws on the road. The road outline and a grey rim on the dark fur so it
     holds on the dslate road."""
@@ -727,9 +729,10 @@ def skunk(sway=0, blink=False):
         g.rect(x, 17, 2, 2, "ink")
         g.p(x, 17, "white")
     # front paws, set apart from the body by their dslate tops
-    for x in (10, 16):
-        g.rect(x, 27, 3, 2, "ink")
-        g.rect(x, 27, 3, 1, "dslate")
+    for x, dy in ((10, paw_l), (16, paw_r)):
+        y = 27 + dy
+        g.rect(x, y, 3, 2, "ink")
+        g.rect(x, y, 3, 1, "dslate")
     return rim(g, LIT)
 
 
@@ -1562,7 +1565,8 @@ def sprites():
                                for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
     yield "treat", [("idle", frames(big(treat, **q) for q in TREAT_IDLE), 400)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
-    yield "skunk", [("idle", frames(big(skunk, **q) for q in SKUNK_IDLE), 300)]
+    yield "skunk", [("idle", frames(big(skunk, **q) for q in SKUNK_IDLE), 300),
+                    ("walk", frames(big(skunk, **q) for q in SKUNK_WALK), PERSON_WALK_MS)]
     yield "squirrel", [("idle", frames([big(squirrel, tail=0), big(squirrel, tail=1)]), 300),
                        ("run", frames(big(squirrel_run, k) for k in range(4)), 60)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]

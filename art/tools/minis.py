@@ -384,9 +384,9 @@ def squirrel(s, draw, *args, **q):
         road.squirrel_head = full
 
 
-def skunk(s, sway=0, blink=False):
+def skunk(s, sway=0, blink=False, paw_l=0, paw_r=0):
     """road.skunk on a Mini at scale s."""
-    return shrunk(s, road.skunk, sway=sway, blink=blink)
+    return shrunk(s, road.skunk, sway=sway, blink=blink, paw_l=paw_l, paw_r=paw_r)
 
 
 def variants(s):
@@ -403,7 +403,8 @@ def variants(s):
     yield "bin", [("idle", [small(obstacles, o, obstacles.bin_, a).outlined() for a in frames], ms)]
     frames, ms = obstacles.BENCH_IDLE
     yield "bench", [("idle", [small(obstacles, o, obstacles.bench, a).outlined() for a in frames], ms)]
-    yield "skunk", [("idle", [skunk(p, **q).outlined() for q in road.SKUNK_IDLE], 300)]
+    yield "skunk", [("idle", [skunk(p, **q).outlined() for q in road.SKUNK_IDLE], 300),
+                    ("walk", [skunk(p, **q).outlined() for q in road.SKUNK_WALK], road.PERSON_WALK_MS)]
     yield "squirrel", [("idle", [squirrel(p, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
                        ("run", [squirrel(p, road.squirrel_run, k).outlined() for k in range(4)], 60)]
     yield "other-dog", [("walk", [shrunk(p, road.corgi, **q).outlined() for q in road.CORGI_WALK], 100),
