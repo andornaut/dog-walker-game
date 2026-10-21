@@ -16,7 +16,7 @@ import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
-import { dogDetail, gearDetail, lockedDogDetail, lockedWalkerDetail, walkerDetail } from "./detail";
+import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
 import { dogNames, dollarAmountText, shortDollarAmountText } from "./home";
 import {
@@ -348,8 +348,8 @@ describe("the top bar's bank", () => {
   });
 });
 
-// An owned dog's name sits centred on its face, a locked dog's "???" over its price plate, and
-// each fits the tile's text column, measured on the body font.
+// An owned dog's name sits centred on its face, a locked dog's over its price plate, and each
+// fits the tile's text column, measured on the body font.
 describe("a dog tile's text", () => {
   const body = fontFileMetrics("font-body");
   const ink = inkRowsFromCapTop(body) * 2;
@@ -368,11 +368,7 @@ describe("a dog tile's text", () => {
     expect(dogTile.lockedNameY + ink).toBeLessThan(plateY);
   });
 
-  const names = [
-    ...Object.values(gameData.dogs).map((dog) => dog.name),
-    gameData.homeText.lockedName,
-  ];
-  it.each(names)("sets %j", (text) => {
+  it.each(Object.values(gameData.dogs).map((dog) => dog.name))("sets %j", (text) => {
     const fitted = fitInFont("font-body", TEXT_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
     expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
   });
@@ -411,8 +407,8 @@ const cardLines = (room: number, text: string) => {
 const fitsScreen = (height: number) =>
   expect(height).toBeLessThanOrEqual(SCREEN_CONFIG.height - 2 * HOME_LAYOUT.gap);
 
-// Every dog's, gear item's and walker's detail card, owned, for sale or locked, with the largest
-// counts, wraps its rows on the body font and stays on screen.
+// Every dog's, gear item's and walker's detail card, owned or not, with the largest counts, wraps
+// its rows on the body font and stays on screen.
 describe("a detail card", () => {
   const dogs = Object.keys(gameData.dogs) as DogId[];
   const gear = Object.keys(gameData.shopGear) as GearId[];
@@ -426,14 +422,6 @@ describe("a detail card", () => {
     ...dogs.map((dog) => ["dog", dogDetail(gameData, owned, cents(0), stats, dog)] as const),
     ...gear.map((item) => ["gear", gearDetail(gameData, owned, cents(0), loadout, item)] as const),
     ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
-    ...dogs.flatMap((dog) => {
-      const card = lockedDogDetail(gameData, owned, cents(0), dog);
-      return card === null ? [] : [["dog", card] as const];
-    }),
-    ...walkers.flatMap((walker) => {
-      const card = lockedWalkerDetail(gameData, owned, walker);
-      return card === null ? [] : [["walker", card] as const];
-    }),
   ]);
   it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
     "holds %s's card",

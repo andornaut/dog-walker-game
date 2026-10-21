@@ -6,7 +6,7 @@ import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { PLATE_LOOKS, type PlateKind } from "../ui/selection";
-import { disabledTextureKey, silhouetteTextureKey } from "./greyTextures";
+import { disabledTextureKey } from "./greyTextures";
 import { TEXT_SCALE } from "./uiKit";
 
 // The home screen's and the shop's art keys, each with a drawn stand-in below while missing.
@@ -21,19 +21,9 @@ export const PADLOCK_KEYS: Readonly<Record<Padlock, string>> = {
   open: "icon-lock-open",
 };
 
-// A picture's texture as its look shows it: the art itself, its grey copy, or its flat
-// silhouette.
+// A picture's texture as its look shows it: the art itself or its grey copy.
 export function artTextureKey(scene: Scene, look: ArtLook, key: string): string {
-  switch (look) {
-    case "full":
-      return key;
-    case "grey":
-      return disabledTextureKey(scene, key);
-    case "silhouette":
-      return silhouetteTextureKey(scene, key);
-    default:
-      return look satisfies never;
-  }
+  return look === "grey" ? disabledTextureKey(scene, key) : key;
 }
 
 // The padlock over an item's top-left corner, or nothing while the art is missing.

@@ -100,14 +100,12 @@ export const HOME_LAYOUT = {
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
   // 7px below the band's top, and the well sits under the band. Rows of 2x body text, each
   // wrapped within the card less pad, rowGap between rows: a detail card's subtitle and status
-  // beside the well from besideX, besideDy under its top. A locked card's padlock sits at 2x
-  // over the well's top-left corner.
+  // beside the well from besideX, besideDy under its top.
   card: {
     band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,
     besideX: 90,
     pad: 12,
-    padlock: { scale: 2, x: 8, y: 31 },
     rowGap: 8,
     well: { picture: 2, size: 68, x: 12, y: 36 },
     width: 300,
@@ -116,7 +114,7 @@ export const HOME_LAYOUT = {
   // A dog tile's face sits face.dx and face.dy inside the drawn tile, on a box 1px wider each
   // side. Its name and a locked dog's price plate start textX in and keep padRight inside its
   // right edge. An owned dog's name has its capitals centred on the face (dogTileNameY); a
-  // locked dog's "???" has its capitals lockedNameY down, and its plate's lowest ink sits
+  // locked dog's name has its capitals lockedNameY down, and its plate's lowest ink sits
   // plateFoot above the tile's bottom (dogTilePlateY). A locked dog's padlock sits over the
   // tile's top-left corner.
   dogTile: {

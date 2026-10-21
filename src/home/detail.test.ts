@@ -97,7 +97,6 @@ describe("walkerDetail", () => {
       expect(walkerDetail(data, walkerOwned([walker]), walker)).toEqual({
         lines: walkerDetailLines(data, walker),
         locked: false,
-        padlock: null,
         status: data.homeText.detail.walkerStatus,
         subtitle: data.homeText.detail.walkerSubtitle,
         title: data.walkers[walker].name,

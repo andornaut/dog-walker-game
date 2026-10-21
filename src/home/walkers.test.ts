@@ -25,8 +25,8 @@ describe("walkerTile", () => {
     const cases: readonly [WalkerId, ItemTile, TileState][] = [
       ["ben", { kind: "picked" }, "selected"],
       ["casey", { kind: "available" }, "normal"],
-      ["ada", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
-      ["trista", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
+      ["ada", { goal: gameData.walkers.ada.name, kind: "goal" }, "disabled"],
+      ["trista", { goal: gameData.walkers.trista.name, kind: "goal" }, "disabled"],
     ];
     for (const [walker, tile, state] of cases) {
       expect(walkerTile(gameData, save, walker)).toEqual(tile);

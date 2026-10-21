@@ -12,7 +12,6 @@ import type { ButtonState, TileState } from "./interaction";
 // - plateFace: a short or goal plate's face.
 // - plateText, shortPrice: the text on a goal plate or a disabled card's cost plaque, and a
 //   short price on its plate.
-// - silhouette: a locked item's flat copy of its art.
 // - text: a disabled tile's label.
 export const GREYED = {
   box: "neutralSlate",
@@ -22,7 +21,6 @@ export const GREYED = {
   plateFace: "neutralLightGrey",
   plateText: "ink",
   shortPrice: "darkRed",
-  silhouette: "ink",
   text: "neutralDarkSlate",
 } as const;
 

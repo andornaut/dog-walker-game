@@ -289,16 +289,15 @@ export function dogKindText(
   });
 }
 
-// A dog in words for the home screen's info line, so its tile's icons never stand alone: an
-// owned dog's name and size; a locked dog's price alone, as its tile names nothing.
+// A dog in words for the home screen's info line, so its tile's icons never stand alone: its
+// name and size, and its price while not owned.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
   const text = data.homeText.focus;
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
-  if (cost === null) {
-    const kind = dogKindText(data, dog);
-    return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: data.dogs[dog].name, kind });
-  }
-  return fillLine(FOCUS_FIELDS, text, "dogLocked", { price: priceInfo(text, bank, cost) });
+  const fields = { dog: data.dogs[dog].name, kind: dogKindText(data, dog) };
+  return cost === null
+    ? fillLine(FOCUS_FIELDS, text, "dogOwned", fields)
+    : fillLine(FOCUS_FIELDS, text, "dogLocked", { ...fields, price: priceInfo(text, bank, cost) });
 }
 
 // A gear item and what it does, with its price while locked.

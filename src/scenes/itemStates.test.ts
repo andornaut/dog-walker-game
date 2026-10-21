@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
-import { type DetailCard, lockedDogDetail, lockedWalkerDetail } from "../home/detail";
-import { dogInfo, dogKindText, purchasePrice } from "../home/home";
-import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT } from "../home/homeLayout";
+import { type DetailCard, dogDetail, walkerDetail } from "../home/detail";
+import { purchasePrice } from "../home/home";
+import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
 import { cents } from "../rules/units";
-import { agilityWord } from "../rules/walkers";
 import type { Owned } from "../save/schema";
+import { bodyTextWidth } from "../testing/bodyFont";
 import { fontInk } from "../testing/fontInk";
 import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
 import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
@@ -19,16 +19,15 @@ const OWNED: Owned = { dogSlots: 1, dogs: [], gear: [], walkers: [] };
 const DOGS = Object.keys(gameData.dogs) as DogId[];
 const SHOP_DOGS = DOGS.filter((dog) => gameData.dogs[dog].unlock === "shop");
 const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
-const TEXT = gameData.homeText;
 
 type StateName = "affordable" | "locked" | "owned" | "short";
 
 // What each state shows on the start screen, from the shop states' table.
 const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
-  affordable: { art: "silhouette", padlock: "open", plate: "buy", state: "normal" },
-  locked: { art: "silhouette", padlock: "closed", plate: "goal", state: "disabled" },
+  affordable: { art: "full", padlock: "open", plate: "buy", state: "normal" },
+  locked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
   owned: { art: "full", padlock: null, plate: null, state: "normal" },
-  short: { art: "silhouette", padlock: "closed", plate: "short", state: "disabled" },
+  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
 };
 
 const dogPrice = (dog: DogId) => purchasePrice(gameData, OWNED, { dog, kind: "dog" }) ?? cents(0);
@@ -84,99 +83,43 @@ describe("a start screen tile's state", () => {
   });
 });
 
-// Every word that names or describes a dog, from the data.
-function dogWords(dog: DogId): string[] {
-  const { breed, name, owner } = gameData.dogs[dog];
-  return [name, breed, owner.name, owner.role, dogKindText(gameData, dog), "♥"];
-}
+const ZERO_STATS = { dogs: {} };
 
-// Every word that names or describes a walker, from the data.
-function walkerWords(walker: WalkerId): string[] {
-  const { agility, name, perk } = gameData.walkers[walker];
-  const perkData = gameData.walkerPerks[perk];
-  return [name, perkData.name, perkData.effect, agilityWord(TEXT, agility)];
-}
-
-const cardText = (card: DetailCard) =>
-  [card.title, card.subtitle, card.status, ...card.lines].join("\n");
-
-const lockedDogCards = SHOP_DOGS.flatMap((dog) =>
+// Every dog for sale with the bank at its price (affordable) or a cent short.
+const forSale = SHOP_DOGS.flatMap((dog) =>
   (["affordable", "short"] as const).map((state) => {
     const price = dogPrice(dog);
-    const bank = cents(state === "short" ? price - 1 : price);
-    return { bank, dog, state };
+    return { bank: cents(state === "short" ? price - 1 : price), dog, state };
   }),
 );
-
-describe("a locked hold card", () => {
-  it("hides every locked dog and walker behind the locked name, and shows its own card once owned", () => {
-    for (const { bank, dog, state } of lockedDogCards) {
-      const card = lockedDogDetail(gameData, OWNED, bank, dog);
-      expect(card, dog).toMatchObject({
-        lines: [],
-        locked: state === "short",
-        padlock: state === "short" ? "closed" : "open",
-        subtitle: TEXT.detail.dogSubtitle,
-        title: TEXT.lockedName,
-      });
-      const shown = `${cardText(card as DetailCard)}\n${dogInfo(gameData, OWNED, bank, dog)}`;
-      expect(
-        dogWords(dog).filter((word) => shown.includes(word)),
-        dog,
-      ).toEqual([]);
-    }
-    for (const walker of WALKERS) {
-      const card = lockedWalkerDetail(gameData, OWNED, walker);
-      expect(card, walker).toMatchObject({
-        lines: [],
-        locked: true,
-        padlock: "closed",
-        subtitle: TEXT.detail.walkerSubtitle,
-        title: TEXT.lockedName,
-      });
-      const shown = cardText(card as DetailCard);
-      expect(
-        walkerWords(walker).filter((word) => shown.includes(word)),
-        walker,
-      ).toEqual([]);
-    }
-    const ownedDogs = DOGS.filter((dog) =>
-      lockedDogDetail(gameData, { ...OWNED, dogs: [dog] }, cents(0), dog),
-    );
-    const ownedWalkers = WALKERS.filter((walker) =>
-      lockedWalkerDetail(gameData, { ...OWNED, walkers: [walker] }, walker),
-    );
-    expect([...ownedDogs, ...ownedWalkers]).toEqual([]);
-  });
-});
 
 // The width text inks in font-body in a style.
 const inkWidth = (style: TextFitStyle, text: string) => {
   const ink = fontInk("font-body", style, text);
   return ink.right - ink.left;
 };
-const AT_2X: TextFitStyle = { letterSpacing: 0, scale: 2 };
 
-describe("the locked text fits", () => {
-  it("sets the locked name, subtitles, price and unlock lines in their room", () => {
-    const { card, walkerTiles } = HOME_LAYOUT;
-    const besideRoom = card.width - card.besideX - card.pad;
-    const status = (shown: DetailCard | null) =>
-      fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, shown?.status ?? "");
-    const offenders = [
-      ...(inkWidth(AT_2X, TEXT.lockedName) <= DOG_TILE_TEXT_ROOM ? [] : ["dog tile name"]),
-      ...(inkWidth(AT_2X, TEXT.lockedName) + 6 <= walkerTiles.cellWidth ? [] : ["walker plate"]),
-      ...[TEXT.detail.dogSubtitle, TEXT.detail.walkerSubtitle].filter(
-        (subtitle) => inkWidth(AT_2X, subtitle) > besideRoom,
-      ),
-      ...lockedDogCards.flatMap(({ bank, dog, state }) => {
-        const fitted = status(lockedDogDetail(gameData, OWNED, bank, dog));
-        return fitted.style.scale === 2 && fitted.lines.length === 1 ? [] : [`${dog} ${state}`];
-      }),
-      ...WALKERS.filter(
-        (walker) => status(lockedWalkerDetail(gameData, OWNED, walker)).style.scale !== 2,
-      ),
-    ];
-    expect(offenders).toEqual([]);
+// A plate is its text's width at 2x and 3px of face either side.
+const PLATE_PAD = 3;
+
+describe("the text of an item not owned fits", () => {
+  const { card, walkerTiles } = HOME_LAYOUT;
+  const besideRoom = card.width - card.besideX - card.pad;
+  const fitted = (status: string) =>
+    fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, status);
+
+  it.each(WALKERS)("sets %s's name on its goal plate inside its tile", (walker) => {
+    const { name } = gameData.walkers[walker];
+    expect(bodyTextWidth(2, name) + 2 * PLATE_PAD).toBeLessThanOrEqual(walkerTiles.cellWidth);
+  });
+
+  it.each(forSale)("sets $dog's status on one line at 2x when $state", ({ bank, dog }) => {
+    const shown: DetailCard = dogDetail(gameData, OWNED, bank, ZERO_STATS, dog);
+    const { lines, style } = fitted(shown.status);
+    expect({ lines: lines.length, scale: style.scale }).toEqual({ lines: 1, scale: 2 });
+  });
+
+  it.each(WALKERS)("sets %s's goal at 2x", (walker) => {
+    expect(fitted(walkerDetail(gameData, OWNED, walker).status).style.scale).toBe(2);
   });
 });

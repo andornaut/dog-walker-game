@@ -15,7 +15,7 @@ function goalZone(data: Pick<GameData, "walkers" | "world">, walker: WalkerId): 
   return data.world.zones.find(({ id }) => id === goal)?.name ?? "";
 }
 
-// What unlocks a walker not owned, naming its goal's zone and not the walker.
+// What unlocks a walker not owned, naming its goal's zone.
 export function walkerLockedLine(
   data: Pick<GameData, "homeText" | "walkers" | "world">,
   walker: WalkerId,
@@ -35,10 +35,10 @@ export function walkerOrder(data: Pick<GameData, "walkers" | "world">): WalkerId
 }
 
 // A walker's tile on the home screen: the walker in use is picked, another owned one is
-// available, and one not owned shows the locked name on its plate; a tap on it says the goal.
+// available, and one not owned shows its name on the goal plate; a tap on it says the goal.
 // Picking a walker replaces the one in use, so the choice is never full.
 export function walkerTile(
-  data: Pick<GameData, "homeText">,
+  data: Pick<GameData, "walkers">,
   save: Pick<SaveDocument, "owned" | "walker">,
   walker: WalkerId,
 ): ItemTile {
@@ -46,7 +46,7 @@ export function walkerTile(
   return itemTile({
     bank: cents(0),
     capacity: 1,
-    goal: owned ? null : data.homeText.lockedName,
+    goal: owned ? null : data.walkers[walker].name,
     picked: save.walker === walker,
     pickedCount: 1,
     price: null,

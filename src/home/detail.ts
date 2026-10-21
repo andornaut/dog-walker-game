@@ -5,7 +5,6 @@ import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
-import type { Padlock } from "../ui/interaction";
 import { dogFeeText, dollarText, type HomeLoadout, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
 import { walkerDetailLines, walkerLockedLine } from "./walkers";
@@ -24,14 +23,12 @@ type DetailData = Pick<
   | "world"
 >;
 
-// What a held dog or gear tile's detail card says: a title, a line under it, rows of
-// text, and a status row (the fee or price, owned or equipped). locked is true while the
-// item costs more than the bank holds. padlock is set on a locked card, which shows the
-// locked well with the picture's silhouette and that padlock over it.
+// What a held dog, walker or gear tile's detail card says, owned or not: a title, a line under
+// it, rows of text, and a status row (the fee or price, owned or equipped, or the goal). locked
+// is true while the item costs more than the bank holds, or the walker is not owned.
 export interface DetailCard {
   readonly lines: readonly string[];
   readonly locked: boolean;
-  readonly padlock: Padlock | null;
   readonly status: string;
   readonly subtitle: string;
   readonly title: string;
@@ -78,7 +75,6 @@ export function dogDetail(
       }),
     ],
     locked: cost !== null && cost > bank,
-    padlock: null,
     status: priceLine(text, cost, bank) ?? text.dogStatus,
     subtitle: breed,
     title: name,
@@ -100,7 +96,6 @@ export function gearDetail(
   return {
     lines: [`${capitalize(effectText(data, item.effects))}.`],
     locked: cost !== null && cost > bank,
-    padlock: null,
     status: priceLine(text, cost, bank) ?? status,
     subtitle: text.gearSubtitle,
     title: item.name,
@@ -120,56 +115,8 @@ export function walkerDetail(
   return {
     lines: walkerDetailLines(data, walker),
     locked: !has,
-    padlock: null,
     status: has ? text.detail.walkerStatus : walkerLockedLine(data, walker),
     subtitle: text.detail.walkerSubtitle,
     title: name,
-  };
-}
-
-// A held dog not owned, as the start screen's hold card shows it: the locked name, "Dog",
-// and its price, with the open padlock while the bank covers it; nothing that names or
-// describes the dog. Null for an owned dog.
-export function lockedDogDetail(
-  data: DetailData,
-  owned: Owned,
-  bank: Cents,
-  dog: DogId,
-): DetailCard | null {
-  const cost = purchasePrice(data, owned, { dog, kind: "dog" });
-  if (cost === null) {
-    return null;
-  }
-  const text = data.homeText;
-  const short = cost > bank;
-  return {
-    lines: [],
-    locked: short,
-    padlock: short ? "closed" : "open",
-    status: priceLine(text.detail, cost, bank) ?? "",
-    subtitle: text.detail.dogSubtitle,
-    title: text.lockedName,
-  };
-}
-
-// A held walker not owned, as the start screen's hold card shows it: the locked name,
-// "Walker", the closed padlock and the goal that unlocks it; nothing that names or describes
-// the walker. Null for an owned walker.
-export function lockedWalkerDetail(
-  data: DetailData,
-  owned: Pick<Owned, "walkers">,
-  walker: WalkerId,
-): DetailCard | null {
-  if (owned.walkers.includes(walker)) {
-    return null;
-  }
-  const text = data.homeText;
-  return {
-    lines: [],
-    locked: true,
-    padlock: "closed",
-    status: walkerLockedLine(data, walker),
-    subtitle: text.detail.walkerSubtitle,
-    title: text.lockedName,
   };
 }

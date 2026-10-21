@@ -1417,11 +1417,6 @@
         "besideDy": 4,
         "besideX": 90,
         "pad": 12,
-        "padlock": {
-          "scale": 2,
-          "x": 8,
-          "y": 31
-        },
         "rowGap": 8,
         "well": {
           "picture": 2,

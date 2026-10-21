@@ -51,7 +51,7 @@ export function tileState(input: Omit<InteractionInput, "primary">): TileState {
 // with room. picked: in the pack or the Pocket. packFull: owned and unpicked while every slot
 // of a pack of 2 or more is filled; with 1 slot, or in the Pocket, a tap swaps the choice
 // instead. locked: not owned, with its price, green when the bank covers it. goal: not owned
-// and unlocked by a goal rather than a price.
+// and unlocked by a goal rather than a price, with goal on its plate.
 export type ItemTile =
   | { readonly kind: "available" }
   | { readonly kind: "goal"; readonly goal: string }
@@ -63,7 +63,8 @@ export interface ItemTileInput {
   readonly bank: Cents;
   // How many the choice holds: the pack's slots, or 1 for the Pocket.
   readonly capacity: number;
-  // The goal that unlocks it, or null for one sold or owned.
+  // The text on the goal plate of one a goal unlocks (a walker's name), or null for one sold
+  // or owned.
   readonly goal: string | null;
   readonly picked: boolean;
   readonly pickedCount: number;
@@ -85,8 +86,8 @@ export function itemTile(input: ItemTileInput): ItemTile {
   return capacity > 1 && pickedCount >= capacity ? { kind: "packFull" } : { kind: "available" };
 }
 
-// How an item's art shows: in full colour, as its grey copy, or as its flat silhouette.
-export type ArtLook = "full" | "grey" | "silhouette";
+// How an item's art shows: in full colour or as its grey copy.
+export type ArtLook = "full" | "grey";
 
 // The padlock over an item not owned: open while the bank covers its price, closed otherwise.
 export type Padlock = "closed" | "open";
@@ -103,9 +104,10 @@ export interface ItemLook {
 const OWNED_LOOK = { art: "full", padlock: null, plate: null } as const;
 
 // An item tile on the home screen. An owned item shows in full colour with no padlock or
-// plate, greyed while the pack is full. One not owned shows its silhouette: on a normal tile
-// with the open padlock and the buy plate while the bank covers it; on a disabled tile with
-// the closed padlock and the short plate when not, or the goal plate when a goal unlocks it.
+// plate, greyed while the pack is full. One not owned shows its own art, as the shop does: in
+// full colour on a normal tile with the open padlock and the buy plate while the bank covers
+// it; greyed on a disabled tile with the closed padlock and the short plate when not, or the
+// goal plate when a goal unlocks it.
 export function itemTileLook(tile: ItemTile): ItemLook {
   switch (tile.kind) {
     case "available":
@@ -116,10 +118,10 @@ export function itemTileLook(tile: ItemTile): ItemLook {
       return { ...OWNED_LOOK, art: "grey", state: "disabled" };
     case "locked":
       return tile.affordable
-        ? { art: "silhouette", padlock: "open", plate: "buy", state: "normal" }
-        : { art: "silhouette", padlock: "closed", plate: "short", state: "disabled" };
+        ? { art: "full", padlock: "open", plate: "buy", state: "normal" }
+        : { art: "grey", padlock: "closed", plate: "short", state: "disabled" };
     case "goal":
-      return { art: "silhouette", padlock: "closed", plate: "goal", state: "disabled" };
+      return { art: "grey", padlock: "closed", plate: "goal", state: "disabled" };
     default:
       return tile satisfies never;
   }

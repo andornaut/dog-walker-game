@@ -18,9 +18,7 @@ import {
   pixelFontMetrics,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
-import { GREYED } from "../ui/selection";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
-import { artTextureKey, PADLOCK_KEYS } from "./itemArt";
 import {
   addCloseButton,
   addLoopingFrame,
@@ -139,11 +137,8 @@ export interface DetailPicture {
   readonly scale: number;
 }
 
-// The detail card's well: the shown one, or the grey one a locked card's silhouette sits in.
-export const DETAIL_WELL_KEYS = {
-  locked: "ui-detail-well-locked",
-  shown: "ui-detail-well",
-} as const;
+// The detail card's well the picture sits in.
+export const DETAIL_WELL_KEY = "ui-detail-well";
 
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
 // shows. A dog's or walker's card puts its breed and status beside the portrait and its rows
@@ -159,36 +154,26 @@ export function drawDetailCard(
 ): Rect {
   // The content is laid out first, so the card is as tall as it needs.
   const content = scene.add.container(0, 0);
-  const { padlock, well } = CARD;
-  const locked = card.padlock !== null;
-  const wellKey = DETAIL_WELL_KEYS[locked ? "locked" : "shown"];
-  if (scene.textures.exists(wellKey)) {
-    content.add(scene.add.image(well.x, well.y, wellKey).setOrigin(0));
+  const { well } = CARD;
+  if (scene.textures.exists(DETAIL_WELL_KEY)) {
+    content.add(scene.add.image(well.x, well.y, DETAIL_WELL_KEY).setOrigin(0));
   } else {
     const g = scene.add.graphics();
     drawFramedRect(
       g,
-      { border: PALETTE.plum, fill: locked ? PALETTE[GREYED.face] : PALETTE.grey },
+      { border: PALETTE.plum, fill: PALETTE.grey },
       { height: well.size, width: well.size, x: well.x, y: well.y },
     );
     content.add(g);
   }
-  // A locked card's picture is its silhouette.
-  const shown = (key: string) => artTextureKey(scene, locked ? "silhouette" : "full", key);
   if (scene.textures.exists(picture.key)) {
     const inner = { x: well.x + well.picture, y: well.y + well.picture };
     content.add(
-      scene.add.image(inner.x, inner.y, shown(picture.key)).setOrigin(0).setScale(picture.scale),
+      scene.add.image(inner.x, inner.y, picture.key).setOrigin(0).setScale(picture.scale),
     );
   } else if (picture.fallback !== undefined && scene.textures.exists(picture.fallback)) {
     const centre = { x: well.x + well.size / 2, y: well.y + well.size / 2 };
-    content.add(scene.add.image(centre.x, centre.y, shown(picture.fallback)));
-  }
-  if (card.padlock !== null) {
-    const key = PADLOCK_KEYS[card.padlock];
-    if (scene.textures.exists(key)) {
-      content.add(scene.add.image(padlock.x, padlock.y, key).setOrigin(0).setScale(padlock.scale));
-    }
+    content.add(scene.add.image(centre.x, centre.y, picture.fallback));
   }
   // Rows of text at the tops the card's layout gives them: each wrapped on the font within its
   // room, or a fitted row on one line, its glyphs closer, before it wraps.

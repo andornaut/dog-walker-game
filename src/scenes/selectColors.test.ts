@@ -54,18 +54,6 @@ describe("interaction-state colours", () => {
         PALETTE[disabled.box],
         EXEMPT,
       ],
-      [
-        "a locked picture's silhouette on a normal box",
-        PALETTE[GREYED.silhouette],
-        PALETTE[normal.box],
-        EXEMPT,
-      ],
-      [
-        "a locked picture's silhouette on a disabled box",
-        PALETTE[GREYED.silhouette],
-        PALETTE[disabled.box],
-        EXEMPT,
-      ],
       ...(["normal", "primary", "secondary"] as const).map(
         (state): [string, number, number, number] => [
           `a ${state} button's label`,

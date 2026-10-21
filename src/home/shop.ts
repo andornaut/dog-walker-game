@@ -43,10 +43,11 @@ export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
 // Everything a row's look sets. Owned shows its art in full colour with no padlock or plate.
 // Affordable keeps the full-colour art with the open padlock and the buy plate. Short is a
 // disabled row with the grey copy of its art, the closed padlock and the short plate. Blocked
-// is a disabled row with its silhouette, the closed padlock and its price on the goal plate.
+// is a disabled row with the grey copy of its art, the closed padlock and its price on the
+// goal plate.
 export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
   affordable: { art: "full", padlock: "open", plate: "buy", state: "normal" },
-  blocked: { art: "silhouette", padlock: "closed", plate: "goal", state: "disabled" },
+  blocked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
   owned: { art: "full", padlock: null, plate: null, state: "normal" },
   short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
 };

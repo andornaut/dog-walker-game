@@ -7,7 +7,7 @@ import { addDim, drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
-import { DETAIL_WELL_KEYS, type DetailPicture } from "./homePanels";
+import { DETAIL_WELL_KEY, type DetailPicture } from "./homePanels";
 import { addMenuButton, addNineSlice, type SliceKey, TEXT_SCALE } from "./uiKit";
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
@@ -81,8 +81,8 @@ export function drawPurchaseConfirm(
   };
   centred(LAYOUT.title, lines.title, PALETTE.white);
   const { well } = LAYOUT;
-  if (scene.textures.exists(DETAIL_WELL_KEYS.shown)) {
-    layer.add(scene.add.image(well.x, well.y, DETAIL_WELL_KEYS.shown).setOrigin(0));
+  if (scene.textures.exists(DETAIL_WELL_KEY)) {
+    layer.add(scene.add.image(well.x, well.y, DETAIL_WELL_KEY).setOrigin(0));
   } else {
     const g = scene.add.graphics();
     drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.grey }, well);

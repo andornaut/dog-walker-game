@@ -19,7 +19,7 @@ export const HOME_TEXT_FIELDS = {
   dogCantAfford: ["amount", "dog"],
   dogSlotName: ["slot"],
   focus: {
-    dogLocked: ["price"],
+    dogLocked: ["dog", "kind", "price"],
     dogOwned: ["dog", "kind"],
     gear: ["effect", "gear"],
     gearLocked: ["effect", "gear", "price"],
