@@ -2,7 +2,7 @@
 """Draw the owners' and walkers' faces and build their Aseprite sources and exports.
 
 face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with an ink
-outer line closed under the bust, cel shaded. Tags: happy, neutral, upset, fired (angry, shown as the owner
+outer line closed under the bust, cel shaded, the face flat with a 1px shadow down its near edge. Tags: happy, neutral, upset, fired (angry, shown as the owner
 fires you) and worried (at 1 heart, while their doghouse pulses). Each
 owner's job shows in their hair and accessories, and their temperament in
 how far the expressions go.
@@ -24,6 +24,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import Grid, edged, main  # noqa: E402
+from road import face_disc  # noqa: E402
 
 MOODS = ["happy", "neutral", "upset", "fired", "worried"]
 
@@ -40,7 +41,8 @@ def base(g, skin, shade, shirt, shirt_sh):
     g.rect(13, 24, 6, 4, shade)
     g.cel(7.5, 17, 1.5, 2, skin, shade)
     g.cel(24.5, 17, 1.5, 2, skin, shade)
-    g.cel(16, 16, 8.5, 9, skin, shade)
+    # the face stays clean: flat skin, a 1px shadow down its near (right) edge beside the eyes
+    face_disc(g, 16, 16, 8.5, 9, skin, shade, to=0.25)
 
 
 def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False):
