@@ -1224,7 +1224,7 @@ def sprites():
 
 # ---------- placement ----------
 # Road px: across from the road's centre line, z along the road. The sidewalk ends at across 208
-# (layout.json verges.street.walkTo). Each prop's across is its frame's centre, set from its inner edge.
+# (the street verge's walkTo, backdrops.WALK). Each prop's across is its frame's centre, set from its inner edge.
 
 def at_inner(key, inner):
     """The across of a prop's centre, in whole road px, whose frame's inner edge is at inner or beyond."""

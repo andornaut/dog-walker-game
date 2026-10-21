@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Draw the site's link-preview image.
 
-share-card: a 300x157 picture in Endesga 32, fully opaque, scaled 4x with
+share-card: a 300x157 picture in the house palette, fully opaque, scaled 4x with
 nearest-neighbour to 1200x628, then padded with 1px of ink (its border colour)
 above and below to the 1200x630 Open Graph size. Dark wood boards on the left carry
-the logo and the tagline in font-title at 2x; on the right, a window onto Elm
-Avenue: the backdrop's houses and cross street, the road widening below them, and
+the logo and the tagline in font-title at 2x; on the right, a window onto
+Cabbagetown: the backdrop's houses and cross street, the road widening below them, and
 Casey walking Koda, Biscuit and Duchess up the middle in the
 game's pack formation, the leashes running behind Casey to her hands.
 
-Built from public/art/images/ (logo, backdrop-woof-way, road-woof-way), the
+Built from public/art/images/ (logo, backdrop-cabbagetown, road-cabbagetown), the
 walker and dog sprites in public/art/sprites/ and the font-title BMFont in
 public/art/fonts/, so build those first (screens.py, backdrops.py, roads.py,
 road.py, dogs.py, fonts.py). It is not a game asset, so it is written to public/,
@@ -33,7 +33,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import scene as sn  # noqa: E402
-from pixel import PALETTE  # noqa: E402
+from pixel import PALETTE64  # noqa: E402
 from screens import planks  # noqa: E402
 
 W, H = 300, 157
@@ -41,12 +41,12 @@ SCALE = 4
 OUT_W, OUT_H = 1200, 630
 TAGLINE = ("A COZY", "PIXEL-ART", "DOG-WALKING", "LANE RUNNER")
 
-# The window onto Elm Avenue: its left edge, and the backdrop rows it shows above the road
+# The window onto Cabbagetown: its left edge, and the backdrop rows it shows above the road
 VIEW_X = 152
 VIEW_W = W - 1 - VIEW_X
 BAND_TOP = bd.BASE - 46    # the first backdrop row shown, 46 rows over the far side's ground row
 BAND_ROWS = bd.H - BAND_TOP
-STREET = "street"   # the Distillery District's zone id
+STREET = "snoozeCrescent"   # Cabbagetown's zone id
 # The pack's formation, as src/layout/packFormation.ts: each dog's (side, distance ahead of the
 # feet), the dogs in formation order. One dog leads; two walk side by side; three walk in a
 # triangle, the lead's row keyed by the three sizes and three bigs' side dogs closer in.
@@ -111,7 +111,7 @@ def label(cv, s, mid, y, col, rim, sc=2):
         cv.fill(px, py, 1, 1, col)
 
 
-# ---------- the window onto Elm Avenue ----------
+# ---------- the window onto Cabbagetown ----------
 
 def street_view():
     """VIEW_W x (H - 2): the backdrop's street around its vanishing point, then the road strip
@@ -119,7 +119,7 @@ def street_view():
     cx = VIEW_W // 2
     view = sn.Scene(VIEW_W, H - 2)
     view.shade, view.leash_col = sn.ZONES[STREET]["shadow"], sn.ZONES[STREET]["leash"]
-    band = sn.image("backdrop-woof-way").convert("RGB")
+    band = sn.image(f"backdrop-{sn.ZONES[STREET]['art']}").convert("RGB")
     left = bd.CX - cx
     view.img.paste(band.crop((left, BAND_TOP, left + VIEW_W, bd.H)), (0, 0))
     # below the band the street keeps receding: the ground scale climbs from the band's bottom row
@@ -191,7 +191,7 @@ def card():
 
 
 def check(img):
-    pal = {sn.rgb(c) for c in PALETTE}
+    pal = {sn.rgb(c) for c in PALETTE64}
     bad = {c for c in img.getdata() if c not in pal}
     if bad:
         sys.exit(f"off-palette colours: {sorted(bad)[:8]}")

@@ -354,9 +354,10 @@ KS = FOOT - YH
 S0 = (BAR + H - 0.5 - YH) / KS  # scale on the band's bottom row
 VISIBLE = F * KS / (BAR + H - YH) - F   # road in view below the band, to its bottom edge
 Z0 = F / S0 - F                 # the road distance on the band's bottom row
-# half the road, its curb and its sidewalk, as the game draws Elm Avenue's verge
+# half the road, then the outer edges of the curb and the sidewalk, across from the road's centre:
+# the street verge, which Cabbagetown's (TORONTO_VERGES) keeps
 ROAD = LAYOUT["regions"]["road"]["width"] // 2
-CURB, WALK = LAYOUT["verges"]["street"]["curbTo"], LAYOUT["verges"]["street"]["walkTo"]
+CURB, WALK = 164, 208
 DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider lines, from the road's centre
 # The cross street, in band rows from the far side down: the far sidewalk, the far curb, the
 # road, the near curb and the near sidewalk, which the street's stub (rows STUB to the bottom)
@@ -1241,36 +1242,35 @@ def paws_promenade():
 # Beaches and Yonge Street's pale paving to Kensington Market's dark laneways and High Park's
 # canopy, and each has its own sky.
 
-# The game's verge beside each Toronto road, keyed by art id, in the layout export's shape with colours
+# The game's verge beside each Toronto road, keyed by art id, with colours
 # by K name (shared/verges.json):
 # the curb to curbTo, the strips (each to its to), the sidewalk or paving with a seam every
 # seamEvery to walkTo (None: paving on out, with no lawn), then the lawn, mown or rough. lawnColors
 # are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
-# colour rather than darkening the pixel under them; None where there is no lawn. shadow is the colour
-# of the ground shadow under a free-standing roadside prop: the ground one ramp step darker.
+# colour rather than darkening the pixel under them; None where there is no lawn.
 TORONTO_VERGES = {
-    "cabbagetown": dict(curbColor="stone", curbTo=164, strips=[], walkColor="lgrey", walkDots=[],
-                        seamColor="grey", seamEvery=32, walkTo=208, lawn="mown",
-                        lawnColors=("dgreen", "canopy", "pine"), leaves=False, shadow="canopy"),
+    "cabbagetown": dict(curbColor="stone", curbTo=CURB, strips=[], walkColor="lgrey", walkDots=[],
+                        seamColor="grey", seamEvery=32, walkTo=WALK, lawn="mown",
+                        lawnColors=("dgreen", "canopy", "pine"), leaves=False),
     "high-park": dict(curbColor="pine", curbTo=160, strips=[], walkColor="pine", walkDots=[],
                       seamColor="pine", seamEvery=32, walkTo=160, lawn="rough",
-                      lawnColors=("pine", "fir", "fir"), leaves=False, shadow="fir"),
+                      lawnColors=("pine", "fir", "fir"), leaves=False),
     "distillery-district": dict(curbColor="stone", curbTo=164, strips=[], walkColor="brown",
                                 walkDots=[dict(colors=["brick"], share=0.05), dict(colors=["rust"], share=0.02)],
                                 seamColor="brick", seamEvery=16, walkTo=None, lawn="none",
-                                lawnColors=None, leaves=False, shadow="dbrown"),
+                                lawnColors=None, leaves=False),
     "kensington-market": dict(curbColor="stone", curbTo=162, strips=[dict(color="coal", dots=[], to=166)],
                               walkColor="shale", walkDots=[dict(colors=["coal"], share=0.06),
                                                            dict(colors=["ash"], share=0.02)],
                               seamColor="coal", seamEvery=32, walkTo=None, lawn="none",
-                              lawnColors=None, leaves=False, shadow="coal"),
+                              lawnColors=None, leaves=False),
     "the-beaches": dict(curbColor="driftwood", curbTo=164, strips=[], walkColor="skin1",
                         walkDots=[dict(colors=["tan"], share=0.05), dict(colors=["white"], share=0.008)],
                         seamColor="skin1", seamEvery=32, walkTo=None, lawn="none",
-                        lawnColors=None, leaves=False, shadow="skin2"),
+                        lawnColors=None, leaves=False),
     "yonge-street": dict(curbColor="white", curbTo=164, strips=[], walkColor="lgrey",
                          walkDots=[dict(colors=["grey"], share=0.015)], seamColor="grey", seamEvery=32,
-                         walkTo=None, lawn="none", lawnColors=None, leaves=False, shadow="grey"),
+                         walkTo=None, lawn="none", lawnColors=None, leaves=False),
 }
 
 

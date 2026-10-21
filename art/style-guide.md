@@ -388,7 +388,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 ### Verges
 
-The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. The Toronto verges are `TORONTO_VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge. `lawnColors` are the lawn's base, its mown stripes or rough patches, and its 2-row tufts, which draw their own colour; null where there is no lawn. `walkTo` null runs the paving out to the screen's edge. `shadow` is a free-standing prop's ground shadow.
+The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. The Toronto verges are `TORONTO_VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge. `lawnColors` are the lawn's base, its mown stripes or rough patches, and its 2-row tufts, which draw their own colour; null where there is no lawn. `walkTo` null runs the paving out to the screen's edge.
 
 | Neighborhood        | Curb (to)       | Sidewalk or paving (to)                                         | Lawn                                     | Shadow |
 | ------------------- | --------------- | --------------------------------------------------------------- | ---------------------------------------- | ------ |

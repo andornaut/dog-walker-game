@@ -14,8 +14,7 @@
       "canopy",
       "pine"
     ],
-    "leaves": false,
-    "shadow": "canopy"
+    "leaves": false
   },
   "high-park": {
     "curbColor": "pine",
@@ -32,8 +31,7 @@
       "fir",
       "fir"
     ],
-    "leaves": false,
-    "shadow": "fir"
+    "leaves": false
   },
   "distillery-district": {
     "curbColor": "stone",
@@ -59,8 +57,7 @@
     "walkTo": null,
     "lawn": "none",
     "lawnColors": null,
-    "leaves": false,
-    "shadow": "dbrown"
+    "leaves": false
   },
   "kensington-market": {
     "curbColor": "stone",
@@ -92,8 +89,7 @@
     "walkTo": null,
     "lawn": "none",
     "lawnColors": null,
-    "leaves": false,
-    "shadow": "coal"
+    "leaves": false
   },
   "the-beaches": {
     "curbColor": "driftwood",
@@ -119,8 +115,7 @@
     "walkTo": null,
     "lawn": "none",
     "lawnColors": null,
-    "leaves": false,
-    "shadow": "skin2"
+    "leaves": false
   },
   "yonge-street": {
     "curbColor": "white",
@@ -140,7 +135,6 @@
     "walkTo": null,
     "lawn": "none",
     "lawnColors": null,
-    "leaves": false,
-    "shadow": "grey"
+    "leaves": false
   }
 }
