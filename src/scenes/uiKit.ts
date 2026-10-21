@@ -1,4 +1,4 @@
-import type { GameObjects, Scene } from "phaser";
+import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
@@ -575,8 +575,8 @@ export function fadeAway(
   parts: readonly GameObjects.GameObject[],
   timing: { delayMs?: number; ms: number; rise: number },
   done: () => void = () => undefined,
-): void {
-  scene.tweens.add({
+): Tweens.Tween {
+  return scene.tweens.add({
     alpha: 0,
     delay: timing.delayMs ?? 0,
     duration: timing.ms,

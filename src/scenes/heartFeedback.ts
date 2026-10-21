@@ -20,6 +20,7 @@ import { addPixelText } from "../ui/phaser/pixelText";
 import { FEEDBACK_ART } from "./feedbackArt";
 import type { HudWalk } from "./hudWalk";
 import { playEffect, playTag, playTagOnce } from "./sprites";
+import { TimedGroup } from "./timedGroup";
 
 // Over the cards and the HUD's own labels.
 const DEPTH = 60;
@@ -69,9 +70,11 @@ interface Shake {
 // Every heart change, whatever its cause: the heart pops over the dog on the road with its
 // number beside it, then flies down into its card's bottom rows, where the change's label
 // shows; a lost heart flashes its card's hearts and shakes the card as it lands. Reduced
-// motion keeps the pop and the flash, and drops the flight and the shake.
+// motion keeps the pop and the flash, and drops the flight and the shake. Everything it plays
+// holds while hold says so.
 export class HeartFeedback {
   private readonly active = new Set<ActivePop>();
+  private readonly group = new TimedGroup();
   private readonly hooks: HeartHooks;
   private readonly scene: Scene;
   private readonly shakes = new Map<number, Shake>();
@@ -81,9 +84,13 @@ export class HeartFeedback {
     this.scene = scene;
   }
 
+  hold(paused: boolean): void {
+    this.group.hold(paused);
+  }
+
   play(pop: HeartPop): void {
     if (pop.delayMs > 0) {
-      this.scene.time.delayedCall(pop.delayMs, () => this.show(pop));
+      this.group.after(this.scene, pop.delayMs, () => this.show(pop));
     } else {
       this.show(pop);
     }
@@ -92,19 +99,25 @@ export class HeartFeedback {
   // A heart forgiven on its card, its 8x7 cell's top-left at: the heart blinks empty and back
   // under a sparkle, reduced motion keeping both. Without the heart's art, the sparkle alone.
   forgive(at: Point): void {
-    playEffect(this.scene, SPARKLE.key, SPARKLE.tag, { x: at.x + 4, y: at.y + 3 }, DEPTH);
+    const sparkle = playEffect(
+      this.scene,
+      SPARKLE.key,
+      SPARKLE.tag,
+      { x: at.x + 4, y: at.y + 3 },
+      DEPTH,
+    );
+    if (sparkle !== undefined) {
+      this.group.animate(sparkle);
+    }
     if (!this.scene.anims.exists(animationKey(FORGIVEN_HEART.key, FORGIVEN_HEART.tag))) {
       return;
     }
     const empty = this.scene.add.sprite(at.x, at.y, FORGIVEN_HEART.key).setOrigin(0);
     playTag(empty.setDepth(DEPTH), FORGIVEN_HEART.key, FORGIVEN_HEART.tag);
+    this.group.animate(empty);
     const { blinkMs, blinks } = FEEDBACK.forgiven;
-    this.scene.time.addEvent({
-      callback: () => empty.setVisible(!empty.visible),
-      delay: blinkMs,
-      repeat: 2 * blinks - 2,
-    });
-    this.scene.time.delayedCall(blinkMs * (2 * blinks - 1), () => empty.destroy());
+    this.group.every(this.scene, blinkMs, 2 * blinks - 2, () => empty.setVisible(!empty.visible));
+    this.group.after(this.scene, blinkMs * (2 * blinks - 1), () => empty.destroy());
   }
 
   // Lands at once every pop whose way crosses what must stay clear, such as a firing moment
@@ -155,6 +168,7 @@ export class HeartFeedback {
       }
       active.tween = this.fly(heart, art, { from: centre, to }, () => this.finish(active));
     });
+    this.group.animate(heart);
   }
 
   private finish(active: ActivePop): void {
@@ -192,11 +206,11 @@ export class HeartFeedback {
     path: { from: Point; to: Point },
     done: () => void,
   ): Tweens.Tween {
-    heart.play(animationKey(art.key, art.fly));
+    this.group.animate(heart.play(animationKey(art.key, art.fly)));
     const { from, to } = path;
     const control = arcControl(from, to, FEEDBACK.heart.peak);
     const progress = { t: 0 };
-    return this.scene.tweens.add({
+    return this.group.tween(this.scene, {
       duration: FEEDBACK.heart.flyMs,
       ease: "Sine.easeIn",
       onComplete: () => {
@@ -247,6 +261,7 @@ export class HeartFeedback {
       }
       flash.destroy();
     });
+    this.group.animate(flash);
   }
 
   // A shake already under way on the slot keeps its resting places, so shakes never drift.

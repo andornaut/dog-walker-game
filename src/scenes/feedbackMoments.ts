@@ -1,4 +1,4 @@
-import type { Animations, GameObjects, Scene, Time, Tweens, Types } from "phaser";
+import type { Animations, GameObjects, Scene, Tweens, Types } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { ownerFaceKey } from "../assets/spriteKeys";
@@ -56,6 +56,7 @@ import {
 import type { HudWalk } from "./hudWalk";
 import { onSceneEvent } from "./overlay";
 import { firstTag, playEffect, playTag } from "./sprites";
+import { TimedGroup } from "./timedGroup";
 import { addPanel, artFits, tagFrame } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -96,24 +97,6 @@ interface HudFeedbackHooks {
 interface SlotWarning {
   parts: GameObjects.GameObject[];
   pulse: Tweens.Tween | undefined;
-}
-
-// Tweens and timers that stop and start together.
-class TimedGroup {
-  paused = false;
-  readonly timers = new Set<Time.TimerEvent>();
-  readonly tweens = new Set<Tweens.Tween>();
-
-  hold(paused: boolean): void {
-    if (paused === this.paused) {
-      return;
-    }
-    this.paused = paused;
-    this.tweens.forEach((tween) => (paused ? tween.pause() : tween.resume()));
-    this.timers.forEach((timer) => {
-      timer.paused = paused;
-    });
-  }
 }
 
 // The HUD's part of the in-run feedback moments: the firing moment over the card, the
@@ -191,22 +174,11 @@ export class HudFeedback {
     config: Types.Tweens.TweenBuilderConfig,
     group: TimedGroup = this.moments,
   ): Tweens.Tween {
-    const tween = this.scene.tweens.add(config);
-    group.tweens.add(tween);
-    tween.once("complete", () => group.tweens.delete(tween));
-    if (group.paused) {
-      tween.pause();
-    }
-    return tween;
+    return group.tween(this.scene, config);
   }
 
   private after(ms: number, callback: () => void, group: TimedGroup = this.moments): void {
-    const timer = this.scene.time.delayedCall(ms, () => {
-      group.timers.delete(timer);
-      callback();
-    });
-    group.timers.add(timer);
-    timer.paused = group.paused;
+    group.after(this.scene, ms, callback);
   }
 
   // Fades parts out over ms after delay, then destroys them.

@@ -29,6 +29,7 @@ import { STRIP_LINE_FIELDS } from "../hud/runText";
 import {
   buttonIcon,
   pauseButtonIcon,
+  playerPaused,
   type RunPause,
   TOP_BAR_BUTTONS,
   topBarAction,
@@ -99,6 +100,7 @@ import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
+import { TimedGroup } from "./timedGroup";
 import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -152,7 +154,9 @@ export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } 
 // kept in view while cards are up. It reads the run every frame and redraws what changed, and
 // shows the run's change labels, first-time hints, owners' pop-ins and what a held press
 // explains. It keeps running while the walk is paused, so the bar's buttons and their
-// keys work in every state; its animations run on too, being the bar's and not the walk's.
+// keys work in every state; its animations run on too, being the bar's and not the walk's,
+// except the walk's moments: while the player has paused, heart pops, change labels and the
+// message strip's ageing hold.
 export class HudScene extends Scene {
   private bankLabels: ChangeLabel[] = [];
   private bankShowing = false;
@@ -166,6 +170,8 @@ export class HudScene extends Scene {
   private explained = "";
   private feedback: HudFeedback | undefined;
   private hearts: HeartFeedback | undefined;
+  // The change labels on screen.
+  private labels = new TimedGroup();
   private messages = new MessageStrip();
   private money: GameObjects.BitmapText | undefined;
   private owners: OwnerTabs | undefined;
@@ -206,6 +212,7 @@ export class HudScene extends Scene {
     this.quipShowing = false;
     this.bankLabels = [];
     this.bankShowing = false;
+    this.labels = new TimedGroup();
     const g = this.add.graphics();
     // The card band ends on the screen's bottom row, its top rows (the shadow and the trim)
     // over the road's last rows.
@@ -473,7 +480,10 @@ export class HudScene extends Scene {
       return;
     }
     const pause = run.runPause();
+    const held = playerPaused(pause);
     this.feedback?.update(view.run, pause);
+    this.hearts?.hold(held);
+    this.labels.hold(held);
     if (this.picture === undefined) {
       this.raiseHints(runHintTriggers(view.run));
     }
@@ -481,7 +491,7 @@ export class HudScene extends Scene {
     this.showDebuffBars(view.run);
     const overlay = this.overlayScene();
     const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
-    this.messages.update(delta, overlay, depth, this.debuffBars.length);
+    this.messages.update(held ? 0 : delta, overlay, depth, this.debuffBars.length);
     const effects = effectItems(gameData, view.run);
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
@@ -863,7 +873,7 @@ export class HudScene extends Scene {
     drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, place.chip);
     text.setDepth(1);
     const rise = at.rise ? place.chip.y - at.lane.y : 0;
-    fadeAway(this, [chip, text], { ms: LABEL.ms, rise }, done);
+    this.labels.join(fadeAway(this, [chip, text], { ms: LABEL.ms, rise }, done));
   }
 
   // The first-time hints the run's state raises, each said on the message strip once.
