@@ -5,10 +5,18 @@ import { beforeAll, describe, expect, it } from "vitest";
 import shippedManifest from "../../../public/art/manifest.json";
 import { sheetFromRows } from "../../testing/sheetImage";
 import { parseManifest } from "../manifest";
-import { type AtlasBuild, buildAtlases, compactFrames, decodePng, trimsFrames } from "./atlasBuild";
+import {
+  type AtlasBuild,
+  buildAtlases,
+  compactFrames,
+  decodePng,
+  encodePng,
+  trimsFrames,
+} from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
 import { BASE_FRAME, parseAtlasManifest } from "./atlasManifest";
 import type { RgbaImage } from "./atlasPixels";
+import { COLOR_TYPE_INDEXED } from "./indexedPng";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
@@ -70,12 +78,19 @@ function sameRect(
 describe("the shipped art's atlases", () => {
   let build: AtlasBuild;
   let pages: RgbaImage[];
+  // Each page's pixels as they went to the encoder, in page order.
+  const drawn: RgbaImage[] = [];
   // Each key's source PNG, decoded, and each sprite's Aseprite sheet.
   const sources = new Map<string, RgbaImage>();
   const sheets = new Map<string, Sheet>();
   // Packing every page is the slow part, so it runs once, with room to spare on a loaded machine.
   beforeAll(async () => {
-    build = await buildAtlases(readArt);
+    build = await buildAtlases(readArt, {
+      encode: (page) => {
+        drawn.push(page);
+        return encodePng(page);
+      },
+    });
     pages = build.manifest.pages.map(({ png }) =>
       decodePng(build.pngs.get(png) ?? new Uint8Array()),
     );
@@ -96,6 +111,24 @@ describe("the shipped art's atlases", () => {
     for (const { height, width } of build.manifest.pages) {
       expect(Math.max(width, height)).toBeLessThanOrEqual(ATLAS_MAX_SIZE);
     }
+  });
+
+  // Byte 25 of a PNG is IHDR's colour type.
+  it("writes every page as an indexed PNG that decodes to the pixels drawn", () => {
+    const misfits = build.manifest.pages
+      .map(({ png }, index) => ({ bytes: build.pngs.get(png), drawn: drawn[index], png }))
+      .filter(({ bytes, drawn: rgba }) => {
+        const decoded = bytes === undefined ? undefined : decodePng(bytes);
+        return (
+          bytes?.[25] !== COLOR_TYPE_INDEXED ||
+          rgba === undefined ||
+          decoded === undefined ||
+          decoded.width !== rgba.width ||
+          Buffer.compare(decoded.data, rgba.data) !== 0
+        );
+      })
+      .map(({ png }) => png);
+    expect(misfits).toEqual([]);
   });
 
   it("writes a manifest the runtime parses", () => {

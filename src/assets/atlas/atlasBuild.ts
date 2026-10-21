@@ -15,6 +15,7 @@ import {
 } from "./atlasLayout";
 import type { AtlasManifest } from "./atlasManifest";
 import { blankImage, blitExtruded, opaqueRect, type RgbaImage } from "./atlasPixels";
+import { encodeIndexedPng } from "./indexedPng";
 
 export interface AtlasBuild {
   manifest: AtlasManifest;
@@ -29,9 +30,15 @@ export function decodePng(bytes: Uint8Array): RgbaImage {
   return { data: new Uint8Array(data), height, width };
 }
 
-// Pixel art's flat runs compress best unfiltered and with zlib's default strategy: about half
-// the size of pngjs's adaptive filters and run-length strategy.
-export function encodePng({ data, height, width }: RgbaImage): Uint8Array {
+// image as a lossless PNG: indexed when it has at most MAX_PALETTE colours, as every atlas page
+// does, else RGBA. Pixel art's flat runs compress best unfiltered and with zlib's default
+// strategy: about half the size of pngjs's adaptive filters and run-length strategy.
+export function encodePng(image: RgbaImage): Uint8Array {
+  const indexed = encodeIndexedPng(image);
+  if (indexed !== undefined) {
+    return indexed;
+  }
+  const { data, height, width } = image;
   const png = new PNG({ height, width });
   png.data = Buffer.from(data);
   return PNG.sync.write(png, { colorType: 6, deflateLevel: 9, deflateStrategy: 0, filterType: 0 });
@@ -80,6 +87,8 @@ export function compactFrames(
 // decoded by their paths.
 export interface AtlasInputs {
   decoded?: ReadonlyMap<string, RgbaImage>;
+  // How each page's pixels become its PNG: encodePng unless given.
+  encode?: (page: RgbaImage) => Uint8Array;
   manifest?: AssetManifest;
 }
 
@@ -143,7 +152,7 @@ export async function buildAtlases(
   };
   for (const page of layout.pages) {
     const { group, height, png, width } = page;
-    const bytes = encodePng(drawPage(images, page));
+    const bytes = (inputs.encode ?? encodePng)(drawPage(images, page));
     build.pngs.set(png, bytes);
     build.manifest.pages.push({ bytes: bytes.length, group, height, png, width });
   }
