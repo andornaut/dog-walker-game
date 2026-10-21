@@ -37,7 +37,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 - **Length:** a neighborhood takes about 2 minutes and a walk about 8
 - **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar, the premium gear item and the highest priced, is the exception: it may shift the finish rate more
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
-- **Progression:** each extra dog raises a walk's earnings; about 50 walks (about $8,000) buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
+- **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item (about $6,925 in all); every gear item pays for itself over a reasonable number of walks
 - **Trade-offs:** a strong downside always comes with a matching upside (Rush hour's extra tips come with more obstacles), and the net stays in the window
 - **Walker spread:** every walker lands within the play-style window: agility and perk make a walker feel different, never a lot easier or harder. The skill targets are for the median walker
 
@@ -55,7 +55,7 @@ Tuning against the targets, after one re-baseline on the shared step loop:
 - Big Payday's threshold: rarely earned
 - Card obstacles: three-dog packs against the skunk; other dog, skunk and thief weights to hold about 8 cards a walk
 - Economy: pay, card costs, lucky finds and shop prices are first guesses against the targets above
-- Firing: walks with a firing run too rare (typical 12%, expert 2%) and card policies differ too much; measure with the mixed policy
+- Firing: typical walks with a firing run too rare (3 to 16%), while a novice with one dog finishes too few walks (11 to 26%); measure with the mixed policy
 - Gear: each item within the window
 - Sizes: hearts against the small-dog dodge chance
 - Walkers: agility and each perk within the window
