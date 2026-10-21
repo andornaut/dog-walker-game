@@ -35,7 +35,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 - **Cards:** about 8 cards a walk at typical skill, one a minute; trim minor cards if walks run over
 - **Length:** a neighborhood takes about 2 minutes and a walk about 8
-- **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar is the exception: the premium gear item, priced highest, it may shift the finish rate more
+- **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar, the premium gear item and the highest priced, is the exception: it may shift the finish rate more
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
 - **Progression:** each extra dog raises a walk's earnings; about 50 walks (about $8,000) buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
 - **Trade-offs:** a strong downside always comes with a matching upside (Rush hour's extra tips come with more obstacles), and the net stays in the window
@@ -45,32 +45,15 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 **Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
 
-Rules in the rulebook that the game doesn't have yet:
+Rules in the rulebook that the game doesn't have yet (the build order is in [`src/README.md`](../src/README.md)):
 
-1. **Card obstacles:** three only (other dog, skunk, thief), each hitting the whole pack, with each option costing one thing and two options on the thief; a puddle opens no card, costs no heart and makes the pack Muddy; a squirrel opens no card and does nothing on contact; the mail carrier is a person and the ice cream truck a slow vehicle, both plain (Encounters, Moving hazards)
-2. **Debuffs:** Muddy, Stinky and Zoomies, each shown as a full-width colored bar under the top bar; Stinky tips pay $0 with a gray "+$0 Stinky" label; Zoomies drifts the pack one lane about once a second in the direction it last moved, never into an obstacle it can't react to (Encounters)
-3. **Difficulty names:** one scale, Easiest, Easy, Normal, Hard, Hardest (A walk)
-4. **Doghouse cards and top bar:** layout A: slim cards in pack order with a LEAD tag and the owner's photo tab on events; a one-row top bar with cash, progress, effect icons, and Home, Sound, Settings and Pause (Screen and controls)
-5. **Dogs by size only:** size sets hearts (3, 4, 5, starting full), small dogs dodge 1 in 4 plain hits, each big dog slows lane changes by 0.1 agility (never below Relaxed), and a plain hit lands on the dog that touched the obstacle, the front dog on a head-on hit; each dog has its own price (Dogs, Screen and controls)
-6. **Effect icons:** upgrades, the perk and the Pocket item as icons under the neighborhood's name, with no taps; holding them shows every active effect's line, which pauses the walk (Feedback)
-7. **Forks:** each path carries one upgrade card, and picking the path picks it; a Head home button under the paths; The Long Way Home always neighborhood 4, the only path from the third fork (A walk, Upgrade cards)
-8. **Full pack home:** a bonus per dog when every dog you set out with gets home (A walk)
-9. **Gear:** Fanny pack, Hall pass (one skip per neighborhood), Lucky collar and Running shoes (+0.1 agility) (Home screen and progression)
-10. **Lucky finds:** only the generous neighbor and the lost wallet, with no cards: each bobs and pays on contact (Lucky finds)
-11. **Moving hazards:** bikes, cars and trucks in their lanes, a parked car pulling out, people stepping, hoppers hopping and animals darting, at most four movers on screen (two darting, two slower than the road) (Moving hazards)
-12. **Pay:** a flat $10 per dog per neighborhood times the pay multiplier, banked at each neighborhood's end, with a firing losing only the current neighborhood's pay for that dog; card money options charged once per card; the same tips for any pack size; a $5 starting purse (Resources, Choice cards)
-13. **Plain hits:** a plain obstacle costs only 1♥ from the touched dog's owner, with a hit stop of about 0.3 seconds (Plain obstacles, Feedback)
-14. **Pulls:** every dog pulls toward squirrels, and only squirrels; a strain of about 1 second, then a one-lane lurch, with no input lock; steering away during the strain cancels the pull; the Squirrel! badge counts pulls that land (Screen and controls, Home screen and progression)
-15. **Road markers:** grab-worthy things bob; no marker on obstacles (Feedback)
-16. **Small dogs dodge:** 1 in 4 plain hits that would land on a small dog miss, with a "Dodge!" label, and a dodge doesn't count as a bump for Clean Paws or Not a Scratch (Screen and controls)
-17. **Treats:** a grab item, +♥ to the dog that touches it, not carried (Pickups)
-18. **Upgrade pool:** six cards: Belly rubs, Big tipper, Good leash, Raincoats, Rush hour and Sweet talker; Big tipper lasts one neighborhood; Good leash stops pulls; Raincoats means puddles don't muddy; Sweet talker makes the first card each neighborhood's money options free and that card uses it up, whichever option is picked (Upgrade cards)
-19. **Walkers:** agility and one perk each; Ben, Ada and Trista unlocked by finishing Fairview Park, Riverside Path and The Long Way Home (Walkers)
+1. **As-drawn hits:** road sprites drawn at 48px, each obstacle hitting 2 px inside its opaque outline, at its depth, within its own lanes (Screen and controls)
+2. **Grace blink:** the pack blinks during the grace window after a hit (Screen and controls)
 
-Tuning against the targets, after one re-baseline on the shared step loop with every item above in:
+Tuning against the targets, after one re-baseline on the shared step loop:
 
-- Area effects: three-dog packs against skunks; other dog, skunk and thief weights to hold about 8 cards a walk
 - Big Payday's threshold: rarely earned
+- Card obstacles: three-dog packs against the skunk; other dog, skunk and thief weights to hold about 8 cards a walk
 - Economy: pay, card costs, lucky finds and shop prices are first guesses against the targets above
 - Firing: walks with a firing run too rare (typical 12%, expert 2%) and card policies differ too much; measure with the mixed policy
 - Gear: each item within the window
