@@ -164,7 +164,7 @@ export const TUNING = {
     // Each step, hop and dart comes up to this long after its soonest moment, drawn per move.
     moverTimingJitter: 0.3,
     // A mover's cue shows this long before each move.
-    moverWarningSeconds: 0.8,
+    moverWarningSeconds: 0.6,
     // How long the Muddy debuff lasts, in walking time.
     muddySeconds: 20,
     // Wherever the path changes lanes between two obstacles, the road between them also leaves

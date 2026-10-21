@@ -1345,7 +1345,7 @@
       "minorHitStopSeconds": 0.3,
       "moverStepSeconds": 0.4,
       "moverTimingJitter": 0.3,
-      "moverWarningSeconds": 0.8,
+      "moverWarningSeconds": 0.6,
       "muddySeconds": 20,
       "pathReactionMargin": 0.5,
       "pullReactionWindow": 0.6,
