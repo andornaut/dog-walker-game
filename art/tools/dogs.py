@@ -189,9 +189,10 @@ def koda_road(q):
     g, q = edged(Grid()), pose(q)
     # o shifts the body down so the big head has headroom to hop and lean
     b, ln, o = q["bob"], q["lean"], 2
-    # legs: thick and white, front pair beside the shoulders, back pair under the hips
-    g.rect(6 + ln // 2, 15 + o + q["fl"] + b, 4, 4, "white")
-    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 4, 4, "white")
+    # legs: thick and white, the front pair tucked under the chest, peeking out at its sides, the back pair
+    # under the hips
+    g.rect(8 + ln // 2, 16 + o + q["fl"] + b, 3, 4, "white")
+    g.rect(21 + ln // 2, 16 + o + q["fr"] + b, 3, 4, "white")
     g.rect(8, 26 + q["bl"], 4, 4, "white")
     g.rect(20, 26 + q["br"], 4, 4, "white")
     # a heavy barrel: white flanks, a broad grey saddle, the harness across the shoulders
@@ -219,7 +220,24 @@ def koda_road(q):
     g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
     underside(g)
     spray(g, q["spray"])
+    lit_edge(g, KODA_RIM)
     return g
+
+
+# Koda's grey coat lit where its silhouette faces up or left, so the dark head and ears hold on Elm Avenue.
+KODA_RIM = {"slate": "grey", "dslate": "grey"}
+
+
+def lit_edge(g, rims):
+    """On the grid that holds g's pixels (a minis.Mini's drawn grid), each pixel of a colour in rims whose
+    silhouette faces up or left into the light takes rims[colour], a step lighter."""
+    px = getattr(g, "g", g)
+    rims = {K[c]: v for c, v in rims.items()}
+    lit = [(x, y, rims[c]) for y, row in enumerate(px.px) for x, c in enumerate(row) if c in rims
+           and any(not (0 <= x + dx < px.w and 0 <= y + dy < px.h and px.px[y + dy][x + dx])
+                   for dx, dy in ((0, -1), (-1, 0)))]
+    for x, y, c in lit:
+        px.p(x, y, c)
 
 
 def koda_face(mood):
@@ -237,10 +255,12 @@ def koda_face(mood):
     g.rect(15, 8, 2, 7, "lgrey")
     g.rect(10, 12, 3, 1, "white")
     g.rect(19, 12, 3, 1, "white")
-    # harness
-    g.rect(9, 27, 14, 2, "orange")
-    g.rect(9, 28, 14, 1, "rust")
-    g.rect(15, 26, 2, 3, "orange")
+    # a Y-front harness: a strap down from each shoulder to a ring on the chest, one down from it
+    for i in range(4):
+        g.rect(9 + i * 1.5, 25 + i, 2, 1, "orange")
+        g.rect(21 - i * 1.5, 25 + i, 2, 1, "orange")
+    g.rect(15, 29, 2, 3, "orange")
+    g.rect(15, 28, 2, 2, "grey")
     eyes(g, 10, 19, 14, iris="sky", mood=mood)
     g.rect(14, 18, 4, 2, "ink")
     g.p(14, 18, "slate")
@@ -1022,7 +1042,7 @@ DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
 # How much bigger a dog is drawn inside its frame, across and down. The big dogs are drawn narrower, Koda
 # and Snowball about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
 # (Zippy 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
-DOG_ZOOM = {"koda": (0.84, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
+DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
             "nugget": (1.09, 1.27), "zippy": (1.17, 1.27)}
 
 

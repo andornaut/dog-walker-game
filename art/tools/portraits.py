@@ -221,6 +221,11 @@ def pierre(g):
         g.rect(x + 3, 50, 1, 10, SHAVED[1])
         pom(g, x + 2, 60.5, 4.5, 3, 5, *CURL)
     pom(g, 31, 48, 14, 9, 10, *CURL)
+    # the white stripe running on from the topknot along the top of the back to the rump, shaded under it
+    for x in range(41, 57):
+        y = round(56 - 7 * math.sqrt(max(0, 1 - ((x + 0.5 - 48) / 9) ** 2))) + 1
+        g.rect(x, y, 1, 2, "white")
+        g.p(x, y + 2, "lgrey")
     # long fluffy ears hanging from under the topknot
     pom(g, 16, 35, 6, 11, 6, *CURL)
     pom(g, 45, 35, 6, 11, 6, *CURL)
@@ -370,12 +375,15 @@ def koda(g):
     g.cel(46, 52, 13, 11, "slate", "dslate", "grey")
     g.cel(31, 51, 15, 13, "lgrey", "grey", "white")
     legs(g, (22, 33), 53, "lgrey", "grey", w=6)
-    # harness: a strap across the chest and one down the middle
-    g.rect(16, 43, 32, 3, "orange")
-    g.rect(16, 45, 32, 1, "rust")
-    g.rect(28, 43, 4, 10, "orange")
-    g.rect(31, 43, 1, 10, "rust")
-    g.rect(28, 47, 4, 2, "slate")
+    # a Y-front harness: a strap down from each shoulder to a ring on the chest, one down from it
+    for i in range(9):
+        g.rect(18 + i * 1.3, 40 + i, 3, 2, "orange")
+        g.rect(42 - i * 1.3, 40 + i, 3, 2, "orange")
+        g.p(18 + i * 1.3, 41 + i, "rust")
+        g.p(44 - i * 1.3, 41 + i, "rust")
+    g.rect(28, 49, 4, 7, "orange")
+    g.rect(31, 49, 1, 7, "rust")
+    g.cel(30, 49, 2.5, 2.5, "grey", "slate", "lgrey")
     # a Malamute's ears: small, set wide on the broad skull, their tips rounded, pink inside
     g.tri((10, 21), (13, 6), (24, 13), "slate")
     g.tri((13.5, 17), (14, 10), (21, 13), "pink")
