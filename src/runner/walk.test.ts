@@ -79,7 +79,6 @@ import {
   startRoad,
   steerWalk,
   stepWalk,
-  thinTips,
   type Walk,
   type WalkItem,
   walkScrollSpeed,
@@ -1390,31 +1389,6 @@ describe("headHome", () => {
     const home = headHome(banked);
     expect(home.money).toBe(banked.money);
     expect(home.phase).toEqual({ kind: "ended", reason: "wentHome" });
-  });
-});
-
-describe("thinTips", () => {
-  const tips = (count: number) =>
-    Array.from({ length: count }, (_, lane) => ({ distance: 0, kind: "tip", lane }));
-
-  it("keeps each tip share's tips, rounding error and all", () => {
-    for (const [, share, kept] of [
-      ["every tip at a whole share", 1, 4],
-      ["every second tip at half", 0.5, 2],
-      ["every tenth tip at a tenth, rounding error and all", 0.1, 1],
-      ["no tip at none", 0, 0],
-    ] satisfies readonly [string, number, number][]) {
-      expect(thinTips(share, 0, tips(share === 0.1 ? 10 : 4)).events).toHaveLength(kept);
-    }
-  });
-
-  it("carries a part-owed tip to the next step, and always keeps other spawns", () => {
-    const first = thinTips(0.5, 0, [
-      { distance: 0, kind: "tip", lane: 0 },
-      { distance: 0, kind: "cone", lane: 1 },
-    ]);
-    expect(first.events.map(({ kind }) => kind)).toEqual(["cone"]);
-    expect(thinTips(0.5, first.credit, tips(1)).events).toHaveLength(1);
   });
 });
 

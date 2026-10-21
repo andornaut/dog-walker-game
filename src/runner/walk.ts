@@ -22,7 +22,6 @@ import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import {
   bumpHearts,
-  debuffModifiers,
   fireOwnersAtZero,
   fullPackBonus,
   packModifiers,
@@ -109,9 +108,7 @@ type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
-// hitStop is set while a hit or a firing holds the walk still. tipCredit is the share of a tip
-// owed toward the next tip due: a tipSpawns debuff owes less than a whole tip for each one, so
-// only some come into view.
+// hitStop is set while a hit or a firing holds the walk still.
 export interface Road {
   control: LaneControl;
   hitStop: HitStop | null;
@@ -120,7 +117,6 @@ export interface Road {
   nextItemId: number;
   pending: readonly SpawnEvent<WalkItemKind>[];
   speedFactor: number;
-  tipCredit: number;
 }
 
 export interface Walk {
@@ -386,7 +382,6 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
     nextItemId: 0,
     pending: [],
     speedFactor,
-    tipCredit: 0,
   };
 }
 
@@ -642,7 +637,7 @@ export function planZone(
     stepSeconds: STEP_SECONDS,
     zoneLength: length,
   };
-  return { road: { ...road, pending: planSpawns(random, plan), tipCredit: 0 }, run };
+  return { road: { ...road, pending: planSpawns(random, plan) }, run };
 }
 
 // Steering during a hit stop is dropped, not queued.
@@ -921,38 +916,6 @@ function frontDog(run: RunState): DogId {
   return front;
 }
 
-// The share of the tips due that come into view while the pack's debuffs change tipSpawns.
-// Other tipSpawns modifiers set the zone's tip count when it is planned.
-function tipSpawnsShare(data: WalkData, run: RunState): number {
-  if (run.debuffs.length === 0) {
-    return 1;
-  }
-  return modifiedStat(data.tuning, debuffModifiers(data, run), "tipSpawns", 1);
-}
-
-// Each due tip adds share to the credit, and comes into view only once a whole tip is owed.
-// Other spawns always come into view.
-export function thinTips<Kind extends string>(
-  share: number,
-  credit: number,
-  events: readonly SpawnEvent<Kind>[],
-): { readonly credit: number; readonly events: SpawnEvent<Kind>[] } {
-  let owed = credit;
-  const kept = events.filter((event) => {
-    if (event.kind !== "tip") {
-      return true;
-    }
-    owed += share;
-    // A whole tip less a rounding error, so a share such as 0.1 still adds up to one.
-    if (owed < 1 - 1e-9) {
-      return false;
-    }
-    owed -= 1;
-    return true;
-  });
-  return { credit: owed, events: kept };
-}
-
 // One fixed step of walking. Scrolls the road at the zone's speed, brings spawns into view,
 // moves the pack, then collides: tips and treats are grabbed, a plain obstacle costs the
 // owner of the dog it lands on a heart unless a small dog dodges it, card obstacles (outside
@@ -989,9 +952,8 @@ export function stepWalk(
   const travel = zoneDistance - run.zoneDistance;
 
   const due = takeDueSpawns(zoneDistance, road.pending);
-  const thinned = thinTips(tipSpawnsShare(data, run), road.tipCredit, due.due);
   let nextItemId = road.nextItemId;
-  const arrived = thinned.events.map((event): WalkItem => {
+  const arrived = due.due.map((event): WalkItem => {
     const height = itemHeight(data, geometry, event.kind, event.mover !== undefined);
     return {
       height,
@@ -1143,7 +1105,6 @@ export function stepWalk(
         ],
         nextItemId,
         pending: due.pending,
-        tipCredit: thinned.credit,
       },
       run: nextRun,
     },
