@@ -655,16 +655,22 @@ def hopped(rows, hop):
 
 # ---------- pickups ----------
 
-def treat(lift=0):
-    """A bone, outlined in plum so it holds on the light roads; its cream carries Elm Avenue."""
+# The treat's idle: it bobs up and down while a glint runs along the shaft (its column), then rests unlit.
+TREAT_IDLE = (dict(lift=0, glint=5), dict(lift=-1, glint=8), dict(lift=-1, glint=11), dict(lift=0, glint=None))
+
+
+def treat(lift=0, glint=5):
+    """A bone, outlined in plum so it holds on the light roads; its cream carries Elm Avenue. glint is the
+    column of the white glint on the shaft's top (None for none)."""
     g = edged(Grid(16, 16))
     y = 6 + lift
     g.rect(4, y, 8, 3, "cream")
     for cx, cy in ((3.5, y + 0.5), (3.5, y + 2.5), (12.5, y + 0.5), (12.5, y + 2.5)):
         g.ell(cx, cy, 1.8, 1.8, "cream", "tan")
     g.rect(4, y + 2, 8, 1, "tan")
-    g.p(5, y, "white")
     g.p(3, y - 1, "white")
+    if glint is not None:
+        g.p(glint, y, "white")
     return g
 
 
@@ -1585,7 +1591,7 @@ def sprites():
                     ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
                     ("cheer", [hopped(edged(big(cheering, key, swing, bob=crouch)).outlined(), hop)
                                for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
-    yield "treat", [("idle", frames([big(treat, lift=0), big(treat, lift=-1)]), 400)]
+    yield "treat", [("idle", frames(big(treat, **q) for q in TREAT_IDLE), 200)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames(big(skunk, **q) for q in SKUNK_IDLE), 300)]
     yield "squirrel", [("idle", frames([big(squirrel, tail=0), big(squirrel, tail=1)]), 300),

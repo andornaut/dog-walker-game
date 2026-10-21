@@ -290,10 +290,10 @@ def tip(s, rx):
     return g
 
 
-def treat(s, lift):
+def treat(s, lift=0, glint=5):
     """road.treat on a Mini at scale s: a bone whose knobs stick out above and below the shaft at both ends,
     with the road outline."""
-    return shrunk(s, road.treat, lift=lift)
+    return small(road, s, road.treat, glint=glint, **snap(dict(lift=lift), s))
 
 
 def wallet(s, glint):
@@ -377,7 +377,7 @@ def variants(s):
     pixels, so they stay 1px here."""
     p, o = road.SCALE * s, obstacles.SCALE * s
     yield "tip", [("idle", [tip(p, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
-    yield "treat", [("idle", [treat(p, lift).outlined() for lift in (0, -1)], 400)]
+    yield "treat", [("idle", [treat(p, **q).outlined() for q in road.TREAT_IDLE], 200)]
     frames, ms = obstacles.CONE_IDLE
     yield "cone", [("idle", [cone(o, gl).outlined() for gl in frames], ms)]
     frames, ms = obstacles.BIN_IDLE
