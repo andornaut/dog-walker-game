@@ -95,7 +95,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Duchess, −1♥ Koda", not "−1♥ each"). Choices only, no minigames
 - Every card hits the whole pack. No card opens without a collision, except the fork card
 - A hit that opens a card costs nothing until you choose
-- A money option you can't afford is grayed out, so cash never goes below $0; every card keeps at least one option that costs no money, and its price plate reads "No cash"
+- A money option shows its price on its plate ("$10"), grayed out when you can't afford it, so cash never goes below $0; every card keeps at least one option that costs no money, and its plate is blank
+- An option whose heart Kind words would forgive says so on the card before you pick ("−1♥ Koda, forgiven")
 - An option that would fire an owner says so ("Fires Jesse")
 - A debuff option states its stake on the card ("Pull away → Zoomies: the pack drifts on its own for 20s", "Quick rinse → Stinky: tips pay nothing for 20s")
 - A fork's path card shows its pay multiplier ("Pay ×1.25") and its upgrade's duration (Now, Next neighborhood, Rest of walk) where other cards show a price
@@ -210,6 +211,7 @@ Each obstacle has one look everywhere. Some kinds can move, and every one that c
 
 ### Feedback
 
+- **Forgiven heart:** whenever Kind words forgives a heart, from a bump or a card choice, a "Forgiven!" label floats over the dog (like "Dodge!") and the heart on its doghouse card flashes back with a sparkle, alongside the strip line "Kind words! Jesse lets it go."
 - **Message strip:** a strip over the clouds at the top of the backdrop band tells what just happened, newest line big with its icon, older lines fading. Lines (in the text data):
   - Debuff ends: "All clean again." · "The pack smells fine again." · "The zoomies wore off."
   - Debuff starts: "Muddy paws! Bumps cost 2♥ for 20s." · "Stinky pack! Tips pay nothing for 20s." · "Zoomies! The pack won't sit still for 20s."
