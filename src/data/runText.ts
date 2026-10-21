@@ -64,6 +64,7 @@ export const RUN_TEXT = {
     lowHearts: "{owner} has 1♥ left!",
     luckyNeighbor: "A neighbor shares treats! Everyone +1♥",
     luckyWallet: "Found a wallet! +{amount}",
+    muddyHearts: "{owner} has {hearts}♥ left! Muddy bumps cost {cost}♥.",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",
     pull: "{dog} spotted a squirrel!",
     treat: "{dog} got a treat! {owner} +{hearts}♥",

@@ -10,6 +10,7 @@ export const STRIP_LINE_FIELDS = {
   kindWords: ["owner"],
   lowHearts: ["owner"],
   luckyWallet: ["amount"],
+  muddyHearts: ["cost", "hearts", "owner"],
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],
   treat: ["dog", "hearts", "owner"],

@@ -7,8 +7,10 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { bumpHearts } from "../rules/run";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics } from "../testing/fontInk";
+import { testState } from "../testing/runState";
 import { fillLine } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import {
@@ -260,12 +262,27 @@ describe("the strip's lines", () => {
   const longestName = gameData.achievements
     .map(({ name }) => name)
     .reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
+  const longestOwner = Object.values(gameData.dogs)
+    .map(({ owner }) => owner.name)
+    .reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
+  const muddyCost = bumpHearts(
+    gameData,
+    testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
+  );
   it.each([
     ...Object.entries(gameData.hints).map(([id, { text }]) => [`the ${id} hint`, text] as const),
     [
       "the longest achievement",
       fillLine(STRIP_LINE_FIELDS, gameData.runText.strip, "achievement", {
         name: longestName,
+      }),
+    ] as const,
+    [
+      "the Muddy warning for the longest owner",
+      fillLine(STRIP_LINE_FIELDS, gameData.runText.strip, "muddyHearts", {
+        cost: String(muddyCost),
+        hearts: String(muddyCost),
+        owner: longestOwner,
       }),
     ] as const,
   ])("fits %s at 2x", (_name, text) => {

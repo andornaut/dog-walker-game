@@ -691,6 +691,8 @@ export interface RunText {
     readonly lowHearts: string;
     readonly luckyNeighbor: string;
     readonly luckyWallet: string;
+    // While Muddy, an owner left one Muddy bump from firing you, above their last heart.
+    readonly muddyHearts: string;
     readonly plainHit: string;
     readonly pull: string;
     readonly treat: string;

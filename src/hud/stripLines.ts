@@ -1,6 +1,7 @@
 import type { DebuffId, DogId, EncounterId, GameData } from "../data/types";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
+import { bumpHearts } from "../rules/run";
 import { cents } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
 import { fillLine, fillNames } from "../text/lines";
@@ -78,6 +79,36 @@ export function lowHeartsLines(data: StripData, changes: readonly Change[]): Mes
   return changes.flatMap((change): MessageLine[] =>
     change.kind === "hearts" && change.after === 1 && change.before > 1
       ? [{ icon: "lastHeart", text: line(data, "lowHearts", { owner: ownerOf(data, change.dog) }) }]
+      : [],
+  );
+}
+
+// While the pack is Muddy, each walking owner a change left above their last heart but within
+// one bump of firing you: down to the hearts a Muddy bump costs. The last heart has its own line.
+export function muddyHeartsLines(
+  data: StripData & Pick<GameData, "debuffs" | "tuning">,
+  run: Pick<RunState, "debuffs" | "modifiers">,
+  changes: readonly Change[],
+): MessageLine[] {
+  if (!run.debuffs.some(({ debuff }) => debuff === "muddy")) {
+    return [];
+  }
+  const cost = bumpHearts(data, run);
+  return changes.flatMap((change): MessageLine[] =>
+    change.kind === "hearts" &&
+    change.after > 1 &&
+    change.after <= cost &&
+    change.before > change.after
+      ? [
+          {
+            icon: "lastHeart",
+            text: line(data, "muddyHearts", {
+              cost: String(cost),
+              hearts: String(change.after),
+              owner: ownerOf(data, change.dog),
+            }),
+          },
+        ]
       : [],
   );
 }

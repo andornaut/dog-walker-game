@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DebuffId } from "../data/types";
 import type { HeartChange } from "../rules/causes";
+import { bumpHearts } from "../rules/run";
 import { cents, clampHearts } from "../rules/units";
+import type { RunState } from "../state/runState";
+import { testState } from "../testing/runState";
 import { fillNames } from "../text/lines";
 import {
   bumpLine,
@@ -14,6 +17,7 @@ import {
   fullPackLine,
   lowHeartsLines,
   luckyLine,
+  muddyHeartsLines,
   pullLine,
   treatLine,
 } from "./stripLines";
@@ -126,6 +130,33 @@ describe("the strip's other lines", () => {
     ],
   ])("says %s", (_, line, expected) => {
     expect(line).toEqual(expected);
+  });
+});
+
+describe("muddyHeartsLines", () => {
+  const calm = testState({ koda: 5 });
+  const muddy = testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
+  const cost = bumpHearts(gameData, muddy);
+  const warning = fillNames(strip.muddyHearts, {
+    cost: String(cost),
+    hearts: String(cost),
+    owner,
+  });
+
+  it("finds a Muddy bump costing more than the last heart", () => {
+    expect(cost).toBeGreaterThan(1);
+    expect(cost).toBeGreaterThan(bumpHearts(gameData, calm));
+  });
+
+  it.each<[string, RunState, HeartChange, string[]]>([
+    ["warns an owner down to a Muddy bump's cost", muddy, hearts(cost + 1, cost), [warning]],
+    ["warns an owner a Muddy bump took there", muddy, hearts(cost + cost, cost), [warning]],
+    ["leaves the last heart to its own line", muddy, hearts(cost, 1), []],
+    ["says nothing for hearts above a Muddy bump's cost", muddy, hearts(9, cost + 1), []],
+    ["says nothing for a gain to a Muddy bump's cost", muddy, hearts(cost - 1, cost), []],
+    ["says nothing while the pack is clean", calm, hearts(cost + 1, cost), []],
+  ])("%s", (_, run, change, lines) => {
+    expect(muddyHeartsLines(gameData, run, [change]).map(({ text }) => text)).toEqual(lines);
   });
 });
 

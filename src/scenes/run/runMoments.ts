@@ -27,6 +27,7 @@ import {
   fullPackLine,
   lowHeartsLines,
   luckyLine,
+  muddyHeartsLines,
   pullLine,
   treatLine,
 } from "../../hud/stripLines";
@@ -256,10 +257,10 @@ export class RunMoments {
       this.playBumpLabel(kind, step, pack);
       this.hint({ kind: "minorBump" });
     }
-    lowHeartsLines(
-      gameData,
+    this.sayLowHearts(
+      step.walk.run,
       step.bumps.flatMap(({ change }) => (change === null ? [] : [change])),
-    ).forEach((line) => this.say(line));
+    );
     // A contact obstacle, such as a puddle, plays its own hit sound and a splash, with a plain
     // obstacle's stop.
     for (const { encounter, outcome } of step.contacts) {
@@ -294,8 +295,16 @@ export class RunMoments {
 
   // Firings a choice or find brought about, and the owners it left on their last heart.
   afterOutcome(outcome: ChoiceOutcome): void {
-    lowHeartsLines(gameData, outcome.heartChanges).forEach((line) => this.say(line));
+    this.sayLowHearts(outcome.state, outcome.heartChanges);
     this.fired(outcome.fired, outcome.state);
+  }
+
+  // The owners changes left on their last heart, and while run is Muddy, those left one
+  // Muddy bump from firing you.
+  private sayLowHearts(run: RunState, changes: readonly Change[]): void {
+    [...lowHeartsLines(gameData, changes), ...muddyHeartsLines(gameData, run, changes)].forEach(
+      (line) => this.say(line),
+    );
   }
 
   // Each owner who fired you has their dog trot off the road, with their fired line.

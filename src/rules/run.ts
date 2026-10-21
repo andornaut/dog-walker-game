@@ -2,7 +2,7 @@ import type { DogId, GameData, LiveTuning } from "../data/types";
 import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
 import { dollarCauses, modifierCauses, type MoneyChange } from "./causes";
-import { statParts } from "./modifiers";
+import { modifiedStat, statParts } from "./modifiers";
 import { currentZone } from "./route";
 import { addCents, type Cents, cents, read, roundDollars } from "./units";
 
@@ -27,6 +27,20 @@ export function packModifiers(
   return state.debuffs.length === 0
     ? state.modifiers
     : [...state.modifiers, ...debuffModifiers(data, state)];
+}
+
+// The hearts a minor bump costs its dog's owner now: hearts.bump, changed by bumpHearts
+// modifiers such as Muddy's.
+export function bumpHearts(
+  data: Pick<GameData, "debuffs" | "tuning">,
+  state: Pick<RunState, "debuffs" | "modifiers">,
+): number {
+  return modifiedStat(
+    data.tuning,
+    packModifiers(data, state),
+    "bumpHearts",
+    read(data.tuning, "hearts", "bump"),
+  );
 }
 
 // What one tip pickup pays now, with its causes: money.tip, then upgrades and debuffs apply.

@@ -19,6 +19,7 @@ import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import {
+  bumpHearts,
   debuffModifiers,
   fireOwnersAtZero,
   fullPackBonus,
@@ -669,20 +670,13 @@ export function grabTreat(
   );
 }
 
-// A minor bump costs the dog's owner hearts.bump, changed by bumpHearts modifiers such as
-// Muddy's.
+// A minor bump costs the dog's owner the hearts a bump costs now (bumpHearts).
 export function bumpDog(
   data: WalkData,
   dog: DogId,
   run: RunState,
 ): ReturnType<typeof changeHearts> {
-  const hearts = modifiedStat(
-    data.tuning,
-    packModifiers(data, run),
-    "bumpHearts",
-    read(data.tuning, "hearts", "bump"),
-  );
-  return changeHearts(data, [{ amount: -hearts, kind: "bump" }], dog, run);
+  return changeHearts(data, [{ amount: -bumpHearts(data, run), kind: "bump" }], dog, run);
 }
 
 // The pack's place across the road, in road pixels from its left edge: the walker's lane
