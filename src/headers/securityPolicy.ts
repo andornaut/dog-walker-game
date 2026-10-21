@@ -107,8 +107,8 @@ export const PAGE_RULES: readonly PageRule[] = [
   { comment: "The game data tables.", directives: {}, path: "/data/*" },
   {
     comment:
-      "The art gallery and mocks. style-src-attr: run-screen-color-test.html writes a style " +
-      "attribute per palette colour through innerHTML.",
+      "The art gallery and mocks. style-src-attr: the gallery's ground swatches and palette " +
+      "chips carry style attributes.",
     directives: { ...GOOGLE_FONTS, "style-src-attr": ["'unsafe-inline'"] },
     path: "/art/*",
   },
