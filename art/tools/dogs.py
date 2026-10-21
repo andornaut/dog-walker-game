@@ -542,7 +542,7 @@ def pierre_face(mood):
     g.rect(15, 3, 2, 11, STRIPE[0])
     g.rect(16, 4, 1, 10, STRIPE[1])
     bow(g, 16, 4, big=True, colours=("mauve", "purple"))
-    eyes(g, 12, 19, 15, mood=mood)
+    eyes(g, 11, 19, 14, iris="brown", mood=mood)
     g.rect(15, 19, 2, 2, "ink")
     mouth(g, 22, mood)
     return g
