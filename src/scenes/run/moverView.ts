@@ -1,4 +1,4 @@
-import type { Scene } from "phaser";
+import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
 import {
@@ -20,7 +20,7 @@ import { read } from "../../rules/units";
 import { inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemView } from "./itemViews";
-import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
 // down from the far end of the road for an in-lane mover, and the arrow a sign's width beside
@@ -30,6 +30,16 @@ const CUE = { inset: 10, size: 16, top: 20, wander: { x: -8, y: -18 } };
 
 // The ball carries its own shadow, bouncing on the road.
 const BALL_KEY = "ball-bounce";
+
+// How far a sprite's top lies above the juncture, or 0 when it lies wholly below it.
+function aboveJuncture(sprite: GameObjects.Sprite): number {
+  return Math.max(0, JUNCTURE_Y - (sprite.y - sprite.originY * sprite.displayHeight));
+}
+
+// Shows a cue only while it lies wholly below the juncture, as the road shows past it.
+function showBelowJuncture(sprite: GameObjects.Sprite): void {
+  sprite.setVisible(sprite.visible && aboveJuncture(sprite) === 0);
+}
 
 // A mover's body sprite: its kind's road art, or the sprite MOVER_SPRITE_KEYS names for that art
 // once it is loaded.
@@ -47,7 +57,9 @@ export function moverBodyKey(
   return sprite !== undefined && has(sprite) ? sprite : art;
 }
 
-// A mover stands on the road through the projection while it is solid, sized by showAtDepth,
+// Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at
+// the juncture; a cue shows only once wholly below it. A mover stands on the road through the
+// projection while it is solid, sized by showAtDepth,
 // a crosser mirrored when it runs left, playing its movement's first tag that its sprite has
 // while it moves and its idle tag otherwise. Before a dart or in-lane move only its cue shows,
 // at 1x: a sign at the road's edge on its row with the arrow pointing across, or a sign at the
@@ -121,6 +133,7 @@ export function drawMover(
           Math.round((top.x ?? 0) + CUE.wander.x),
           Math.round((top.y ?? 0) + CUE.wander.y),
         );
+      showBelowJuncture(wander.sprite);
       playTag(wander.sprite, wander.key, WARNING_TAG, still);
     }
     return;
@@ -134,9 +147,15 @@ export function drawMover(
       : { distance: PROJECTION.footY - (roadTop + CUE.top), x: laneX },
   );
   const x = Math.round(cueAt.x);
-  const y = Math.round(cueAt.y);
+  let y = Math.round(cueAt.y);
   if (cue !== undefined) {
     cue.sprite.setPosition(x, y);
+    // An in-lane mover's sign stands at the top of its lanes in view, below the juncture.
+    if (!across) {
+      y += Math.ceil(aboveJuncture(cue.sprite));
+      cue.sprite.setY(y);
+    }
+    showBelowJuncture(cue.sprite);
     playTag(cue.sprite, WARNING_KEY, WARNING_TAG, still);
   }
   if (arrow === undefined) {
@@ -144,9 +163,11 @@ export function drawMover(
   }
   if (across) {
     arrow.sprite.setPosition(x + tell.direction * CUE.size, y).setFlipX(tell.direction === -1);
+    showBelowJuncture(arrow.sprite);
     playTag(arrow.sprite, WARNING_ARROW_KEY, WARNING_TAG, still);
   } else {
     arrow.sprite.setPosition(x, y + CUE.size).setFlipX(false);
+    showBelowJuncture(arrow.sprite);
     playTag(
       arrow.sprite,
       WARNING_ARROW_KEY,
