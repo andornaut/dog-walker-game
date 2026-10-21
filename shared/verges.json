@@ -9,7 +9,11 @@
     "seamEvery": 32,
     "walkTo": 208,
     "lawn": "mown",
-    "lawnColors": ["dgreen", "canopy", "pine"],
+    "lawnColors": [
+      "dgreen",
+      "canopy",
+      "pine"
+    ],
     "leaves": false,
     "shadow": "canopy"
   },
@@ -23,7 +27,11 @@
     "seamEvery": 32,
     "walkTo": 160,
     "lawn": "rough",
-    "lawnColors": ["pine", "fir", "fir"],
+    "lawnColors": [
+      "pine",
+      "fir",
+      "fir"
+    ],
     "leaves": false,
     "shadow": "fir"
   },
@@ -34,11 +42,15 @@
     "walkColor": "brown",
     "walkDots": [
       {
-        "colors": ["brick"],
+        "colors": [
+          "brick"
+        ],
         "share": 0.05
       },
       {
-        "colors": ["rust"],
+        "colors": [
+          "rust"
+        ],
         "share": 0.02
       }
     ],
@@ -63,11 +75,15 @@
     "walkColor": "shale",
     "walkDots": [
       {
-        "colors": ["coal"],
+        "colors": [
+          "coal"
+        ],
         "share": 0.06
       },
       {
-        "colors": ["ash"],
+        "colors": [
+          "ash"
+        ],
         "share": 0.02
       }
     ],
@@ -86,11 +102,15 @@
     "walkColor": "skin1",
     "walkDots": [
       {
-        "colors": ["tan"],
+        "colors": [
+          "tan"
+        ],
         "share": 0.05
       },
       {
-        "colors": ["white"],
+        "colors": [
+          "white"
+        ],
         "share": 0.008
       }
     ],
@@ -109,7 +129,9 @@
     "walkColor": "lgrey",
     "walkDots": [
       {
-        "colors": ["grey"],
+        "colors": [
+          "grey"
+        ],
         "share": 0.015
       }
     ],

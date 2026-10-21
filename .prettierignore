@@ -11,3 +11,5 @@ shared/export/
 out/
 .claude/
 shared/roadside.json
+shared/verges.json
+shared/palette.json
