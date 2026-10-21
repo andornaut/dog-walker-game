@@ -215,8 +215,8 @@ export const HOME_LAYOUT = {
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
-  // A walker tile: the portrait's box and the portrait in it, the walker's effect icons (its
-  // perk) right of the box, one under another at icons.dy, and a locked walker's padlock over
+  // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
+  // the box at icons.dy (a walker has one perk), and a locked walker's padlock over
   // the tile's top-left corner and its name plate's caps, centred. An owned walker's name, in
   // the 1x body font with its ink at most name.room wide, is centred at name.x between the
   // box's right edge and the tile's last column, its caps on the plate's row. The tiles sit
@@ -224,7 +224,7 @@ export const HOME_LAYOUT = {
   walkerTile: {
     box: WALKER_BOX,
     face: { dx: 4, dy: 5 },
-    icons: { dx: 46, dy: [5, 23] },
+    icons: { dx: 46, dy: [5] },
     lock: { dx: -2, dy: -3 },
     name: {
       capY: WALKER_TEXT_Y,
