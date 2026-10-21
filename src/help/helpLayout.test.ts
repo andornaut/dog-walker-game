@@ -4,9 +4,10 @@ import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { closeFace } from "../layout/closeControl";
 import { type Rect } from "../layout/rect";
-import { BODY_LINE_HEIGHT, bodyTextWidth } from "../testing/bodyFont";
-import { fontInk } from "../testing/fontInk";
+import { bodyTextWidth } from "../testing/bodyFont";
+import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { wrapWords } from "../text/lines";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { helpBody } from "./helpBody";
 import {
   CLOSE_HIT_RECT,
@@ -108,6 +109,8 @@ describe("helpActionAt", () => {
   });
 });
 
+const BODY = fontFileMetrics("font-body");
+
 describe("help pages", () => {
   const { lineHeight, maxLines, scale, width, y } = HELP_LAYOUT.body;
   const dotsTop = Math.min(...dotRects(gameData.help.length).map((dot) => dot.y));
@@ -118,8 +121,8 @@ describe("help pages", () => {
     const lines = wrapWords((line) => bodyTextWidth(scale, line), width, body);
     expect(lines.every((line) => bodyTextWidth(scale, line) <= width)).toBe(true);
     expect(lines.length).toBeLessThanOrEqual(maxLines);
-    const bottom = y + (maxLines - 1) * lineHeight + BODY_LINE_HEIGHT * scale;
-    expect(bottom).toBeLessThanOrEqual(dotsTop);
+    const inkBottom = y + (maxLines - 1) * lineHeight + inkRowsFromCapTop(BODY) * scale;
+    expect(inkBottom).toBeLessThanOrEqual(dotsTop);
   });
 
   it.each(pages)("fits page %i's title, %s, across the screen", (_, title) => {

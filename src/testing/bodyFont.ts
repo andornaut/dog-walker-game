@@ -6,6 +6,3 @@ export function bodyTextWidth(scale: number, line: string): number {
   const { glyphs } = readBitmapFont("font-body");
   return scale * [...line].reduce((sum, char) => sum + (glyphs.get(char)?.advance ?? 0), 0);
 }
-
-// The body font's line height in font pixels, from its .fnt: one line's box before scaling.
-export const BODY_LINE_HEIGHT = readBitmapFont("font-body").lineHeight;
