@@ -218,7 +218,7 @@ def money():
 
 def treat_icon():
     """The treat pickup's bone as road.treat lays it out at 16x16 (idle frame 0), outlined with icon_edge
-    as the content icons are. Its cream holds 12.44:1 on the top bar's ink."""
+    as the content icons are. Its white holds on the top bar's ink as the road bone holds on Elm Avenue."""
     import road
 
     g = road.treat(lift=0)

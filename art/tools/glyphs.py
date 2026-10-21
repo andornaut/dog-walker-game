@@ -98,13 +98,11 @@ def fancy():
 def food_driven():
     g = Grid(16, 16)
     for i in range(11):
-        g.rect(3 + i, 11 - i, 2, 2, "cream")
+        g.rect(3 + i, 11 - i, 2, 2, "white")
     for cx, cy in ((2.5, 11.5), (4.5, 13.5), (11.5, 2.5), (13.5, 4.5)):
-        g.ell(cx, cy, 2, 2, "cream", "tan")
+        g.ell(cx, cy, 2, 2, "white", "lgrey")
     for i in range(8):
-        g.p(6 + i, 11 - i, "tan")
-    g.p(10, 3, "white")
-    g.p(11, 2, "white")
+        g.p(6 + i, 11 - i, "lgrey")
     return g
 
 

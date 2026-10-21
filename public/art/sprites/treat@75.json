@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 200
+    "duration": 400
    },
    "treat@75 1.aseprite": {
     "frame": { "x": 18, "y": 0, "w": 18, "h": 18 },
@@ -13,23 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 200
-   },
-   "treat@75 2.aseprite": {
-    "frame": { "x": 36, "y": 0, "w": 18, "h": 18 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
-    "sourceSize": { "w": 18, "h": 18 },
-    "duration": 200
-   },
-   "treat@75 3.aseprite": {
-    "frame": { "x": 54, "y": 0, "w": 18, "h": 18 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
-    "sourceSize": { "w": 18, "h": 18 },
-    "duration": 200
+    "duration": 400
    }
  },
  "meta": {
@@ -37,10 +21,10 @@
   "version": "1.2.30-x64",
   "image": "treat@75.png",
   "format": "RGBA8888",
-  "size": { "w": 72, "h": 18 },
+  "size": { "w": 36, "h": 18 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
   ]
  }
 }
