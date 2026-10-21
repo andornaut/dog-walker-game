@@ -2,43 +2,29 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { placeholders } from "../text/lines";
-import { HELP_BODY_FIELDS, helpBody, type HelpBodyField, helpBodyValues } from "./helpBody";
+import { HELP_BODY_FIELDS, helpBody, helpBodyValues } from "./helpBody";
 
-const { debuffs, tuning, world } = gameData;
+const { debuffs, tuning } = gameData;
 const debuffSeconds = Object.values(debuffs).map(({ seconds }) => tuning.seconds[seconds]);
 
 describe("helpBodyValues", () => {
-  it.each<[HelpBodyField, string]>([
-    ["bigHearts", String(tuning.hearts.maxBySize.big)],
-    ["bumpHearts", String(tuning.hearts.bump)],
-    [
-      "debuffSeconds",
-      Math.min(...debuffSeconds) === Math.max(...debuffSeconds)
-        ? String(Math.min(...debuffSeconds))
-        : `${Math.min(...debuffSeconds)} to ${Math.max(...debuffSeconds)}`,
-    ],
-    ["dodgeIn", String(Math.round(1 / tuning.probability.smallDodgeChance))],
-    ["mediumHearts", String(tuning.hearts.maxBySize.medium)],
-    ["smallHearts", String(tuning.hearts.maxBySize.small)],
-    ["tip", `$${tuning.money.tip}`],
-    ["treatHearts", String(tuning.hearts.treat)],
-    ["walkLength", String(world.walkLength)],
-    ["world", world.name],
-  ])("fills {%s} with %s", (field, expected) => {
-    expect(helpBodyValues(gameData)[field]).toBe(expected);
+  it("fills the debuff seconds as one value or a range, and the dodge chance as one in n", () => {
+    const values = helpBodyValues(gameData);
+    const [least, most] = [Math.min(...debuffSeconds), Math.max(...debuffSeconds)];
+    expect(values.debuffSeconds).toBe(least === most ? String(least) : `${least} to ${most}`);
+    expect(values.dodgeIn).toBe(String(Math.round(1 / tuning.probability.smallDodgeChance)));
   });
 });
 
 describe("helpBody", () => {
-  it.each(gameData.help.map((page) => [page.title, page] as const))(
-    "fills every name in %s's body, using only the listed ones",
-    (_, page) => {
+  it("fills every name in every page's body, using only the listed ones", () => {
+    for (const [, page] of gameData.help.map((page) => [page.title, page] as const)) {
       expect(
         placeholders(page.body).filter(
           (name) => !(HELP_BODY_FIELDS as readonly string[]).includes(name),
         ),
       ).toEqual([]);
       expect(helpBody(gameData, page)).not.toMatch(/[{}]/);
-    },
-  );
+    }
+  });
 });

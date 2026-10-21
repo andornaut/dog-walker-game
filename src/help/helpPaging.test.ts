@@ -14,48 +14,59 @@ const show = (page: number): HelpOutcome => ({ kind: "show", page });
 const close: HelpOutcome = { kind: "close" };
 
 describe("applyHelpAction", () => {
-  it.each<[string, number, HelpAction, number, HelpOutcome]>([
-    ["turns one page with next", PAGES, { kind: "next" }, 2, show(3)],
-    ["turns one page with previous", PAGES, { kind: "previous" }, 2, show(1)],
-    ["holds next at the last page, never closing", PAGES, { kind: "next" }, LAST, show(LAST)],
-    ["holds previous at the first page", PAGES, { kind: "previous" }, 0, show(0)],
-    ["advances like next until the last page", PAGES, { kind: "advance" }, 0, show(1)],
-    ["closes on advance from the last page", PAGES, { kind: "advance" }, LAST, close],
-    ["jumps to a page", PAGES, { kind: "goTo", page: 4 }, 0, show(4)],
-    ["jumps to a page held in range", PAGES, { kind: "goTo", page: 9 }, 0, show(LAST)],
-    ["closes from any page", PAGES, { kind: "close" }, 3, close],
-    ["closes on advance past a shrunken page count", 3, { kind: "advance" }, 5, close],
-    [
-      "turns back from the new last page past a shrunken page count",
-      3,
-      { kind: "previous" },
-      5,
-      show(1),
-    ],
-  ])("%s", (_name, pages, action, page, expected) => {
-    expect(applyHelpAction(pages, action, page)).toEqual(expected);
+  it("turns, holds at the ends, jumps, advances and closes, past a shrunken page count too", () => {
+    const cases: readonly [string, number, HelpAction, number, HelpOutcome][] = [
+      ["turns one page with next", PAGES, { kind: "next" }, 2, show(3)],
+      ["turns one page with previous", PAGES, { kind: "previous" }, 2, show(1)],
+      ["holds next at the last page, never closing", PAGES, { kind: "next" }, LAST, show(LAST)],
+      ["holds previous at the first page", PAGES, { kind: "previous" }, 0, show(0)],
+      ["advances like next until the last page", PAGES, { kind: "advance" }, 0, show(1)],
+      ["closes on advance from the last page", PAGES, { kind: "advance" }, LAST, close],
+      ["jumps to a page", PAGES, { kind: "goTo", page: 4 }, 0, show(4)],
+      ["jumps to a page held in range", PAGES, { kind: "goTo", page: 9 }, 0, show(LAST)],
+      ["closes from any page", PAGES, { kind: "close" }, 3, close],
+      ["closes on advance past a shrunken page count", 3, { kind: "advance" }, 5, close],
+      [
+        "turns back from the new last page past a shrunken page count",
+        3,
+        { kind: "previous" },
+        5,
+        show(1),
+      ],
+    ];
+    for (const [, pages, action, page, expected] of cases) {
+      expect(applyHelpAction(pages, action, page)).toEqual(expected);
+    }
   });
 });
 
 describe("helpButtons", () => {
-  it.each<[string, number, number, ReturnType<typeof helpButtons>]>([
-    ["disables Previous on the first page", PAGES, 0, { next: "next", previousEnabled: false }],
-    ["enables Previous past the first page", PAGES, 1, { next: "next", previousEnabled: true }],
-    [
-      "labels Next Next before the last page",
-      PAGES,
-      LAST - 1,
-      { next: "next", previousEnabled: true },
-    ],
-    ["labels Next Got it on the last page", PAGES, LAST, { next: "gotIt", previousEnabled: true }],
-    [
-      "treats a page past a shrunken page count as the new last page",
-      3,
-      5,
-      { next: "gotIt", previousEnabled: true },
-    ],
-  ])("%s", (_name, pages, page, expected) => {
-    expect(helpButtons(pages, page)).toEqual(expected);
+  it("enables Previous past the first page and labels Next Got it on the last", () => {
+    const cases: readonly [string, number, number, ReturnType<typeof helpButtons>][] = [
+      ["disables Previous on the first page", PAGES, 0, { next: "next", previousEnabled: false }],
+      ["enables Previous past the first page", PAGES, 1, { next: "next", previousEnabled: true }],
+      [
+        "labels Next Next before the last page",
+        PAGES,
+        LAST - 1,
+        { next: "next", previousEnabled: true },
+      ],
+      [
+        "labels Next Got it on the last page",
+        PAGES,
+        LAST,
+        { next: "gotIt", previousEnabled: true },
+      ],
+      [
+        "treats a page past a shrunken page count as the new last page",
+        3,
+        5,
+        { next: "gotIt", previousEnabled: true },
+      ],
+    ];
+    for (const [, pages, page, expected] of cases) {
+      expect(helpButtons(pages, page)).toEqual(expected);
+    }
   });
 });
 

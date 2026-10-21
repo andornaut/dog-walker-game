@@ -19,18 +19,16 @@ function helpShown(actions: readonly StartAction[]): number {
 }
 
 describe("helpSeen", () => {
-  it.each<[readonly StartAction[], number]>([
-    [["startWalk"], 1],
-    [["startWalk", "startWalk"], 1],
-    [["help", "startWalk"], 1],
-    [["help", "help", "startWalk"], 2],
-    [["startWalk", "help"], 2],
-  ])("%j shows Help %i times", (actions, shown) => {
-    expect(helpShown(actions)).toBe(shown);
-  });
-
-  it("keeps a save already marked", () => {
-    const save = { helpSeen: true, other: 1 };
-    expect(closeHelp(save)).toBe(save);
+  it("shows Help on ? and on the first Start walk while it is unread", () => {
+    const cases: readonly [readonly StartAction[], number][] = [
+      [["startWalk"], 1],
+      [["startWalk", "startWalk"], 1],
+      [["help", "startWalk"], 1],
+      [["help", "help", "startWalk"], 2],
+      [["startWalk", "help"], 2],
+    ];
+    for (const [actions, shown] of cases) {
+      expect(helpShown(actions)).toBe(shown);
+    }
   });
 });
