@@ -2420,6 +2420,51 @@
       }
     },
     {
+      "key": "kid-on-bike",
+      "png": "sprites/kid-on-bike.png",
+      "json": "sprites/kid-on-bike.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "kid-on-bike@50",
+      "png": "sprites/kid-on-bike@50.png",
+      "json": "sprites/kid-on-bike@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "kid-on-bike@62",
+      "png": "sprites/kid-on-bike@62.png",
+      "json": "sprites/kid-on-bike@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "kid-on-bike@75",
+      "png": "sprites/kid-on-bike@75.png",
+      "json": "sprites/kid-on-bike@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "kid-on-bike@88",
+      "png": "sprites/kid-on-bike@88.png",
+      "json": "sprites/kid-on-bike@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "kid@50",
       "png": "sprites/kid@50.png",
       "json": "sprites/kid@50.json",

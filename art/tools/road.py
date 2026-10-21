@@ -20,7 +20,9 @@ a stroller one-handed, a takeaway coffee in his other hand, the stroller
 rolling ahead on his right; jogger (48x72, run: 4 frames at 100ms, a heel
 kicked up behind, sole showing, then that knee passing through, each side in
 turn, the ponytail swinging against the stride) wears an orange racerback
-singlet with a white race bib on its back.
+singlet with a white race bib on its back; kid-on-bike (48x72, ride: 4 frames
+at 100ms, the pedals going round, a 1px sway and the streamers fluttering) is
+the kid in a red helmet on a mauve bike with training wheels.
 
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
@@ -1651,6 +1653,68 @@ def bib(g, cx, cy):
                     px.p(x0 + i * 4 + k, y0 + j, "ink")
 
 
+# Pedalling: each foot's lift above the bottom of the pedal's turn (the pedals go round), the kid's sway over
+# the bars and the streamers' flutter, the column each 2-row piece of a streamer swings out by from its grip.
+# 4 frames at 100ms.
+KID_BIKE_RIDE = [dict(lf=-5, rf=0, sway=-1, flutter=(0, 1, 1)), dict(lf=-3, rf=-2, flutter=(0, 0, 1)),
+                 dict(lf=0, rf=-5, sway=1, flutter=(0, 1, 2)), dict(lf=-2, rf=-3, flutter=(0, 1, 0))]
+KID_BIKE_RIDE_MS = 100
+
+
+def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
+    """The kid riding a little bike up the road, seen from behind, the kid's look (yellow tee, sky shorts,
+    red shoes, ochre hair) under a red helmet with a white stripe. The bike is mauve, on training wheels,
+    with a red reflector under the saddle and streamers trailing from the grips. Shorter than an adult rider:
+    the helmet's top is 7 rows lower than the cyclist's. The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
+    w = sway
+    # the bike: training wheels on a strut, the rear tyre edge-on, the stays, the mudguard and reflector
+    for x in (9.5, 22.5):
+        g.blob(x, 43, 1.5, 2.5, "ink")
+    g.rect(10, 41, 13, 1, "grey")
+    g.blob(16, 40.5, 2, 4.5, "ink")
+    for x in (13, 18):
+        g.rect(x, 33, 1, 8, "mauve")
+    g.rect(14, 34, 4, 2, "lgrey")
+    g.rect(15, 36, 2, 2, "red")
+    # legs either side of the wheel, pedalling, shoes on the pedals
+    for x, f in ((10, lf), (19, rf)):
+        g.rect(x, 31, 3, 11 + f, "skin1")
+        g.rect(x + 2, 31, 1, 11 + f, "skin2")
+        g.rect(x - (1 if x < 16 else 0), 42 + f, 4, 2, "red")
+        g.rect(x - (1 if x < 16 else 0), 43 + f, 4, 1, "dred")
+    # shorts on the saddle
+    g.rect(11, 29, 10, 4, "sky")
+    g.rect(18, 29, 3, 4, "blue")
+    # the handlebar's ends and grips, wider than the kid, the streamers trailing from them
+    g.rect(6, 25, 20, 1, "grey")
+    for x, c in ((5, "pink"), (6, "cyan"), (7, "yellow"), (24, "yellow"), (25, "cyan"), (26, "pink")):
+        side = -1 if x < 16 else 1
+        for k, dx in enumerate(flutter):
+            g.rect(x + side * dx, 27 + 2 * k, 1, 2, c)
+    g.rect(5, 24, 3, 3, "ink")
+    g.rect(24, 24, 3, 3, "ink")
+    # the tee, leaning to the bars, its sleeves and the arms reaching out to the grips
+    for x in (8, 21):
+        g.rect(x + w, 21, 3, 3, "yellow")
+        g.rect(x + w + (-1 if x < 16 else 0), 23, 4, 2, "skin1")
+    g.rect(11 + w, 20, 10, 10, "yellow")
+    g.rect(18 + w, 20, 3, 10, "amber")
+    g.rect(11 + w, 20, 1, 9, "white")
+    g.p(11 + w, 20, None)
+    g.p(20 + w, 20, None)
+    # head: the nape, ears, the hair under the helmet, then the helmet, a white stripe over its crown and
+    # its rim shaded
+    g.rect(14 + w, 18, 4, 3, "skin1")
+    g.rect(9 + w, 15, 2, 3, "skin1")
+    g.rect(21 + w, 15, 2, 3, "skin2")
+    g.cel(16 + w, 16.5, 5.5, 3, "ochre", "rust", "tan")
+    g.cel(16 + w, 12.5, 7, 5.5, "red", "dred", "pink", power=2.2)
+    g.rect(15.5 + w, 7, 1, 8, "white")
+    g.rect(9 + w, 15, 14, 1, "dred")
+    return rim(g, LIT)
+
+
 # ---------- scenery gags (front view, in the backdrop band) ----------
 
 def cat(tail=0, blink=False, alert=False):
@@ -1848,6 +1912,7 @@ def sprites():
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "stroller", [("walk", frames(big(stroller, **q) for q in STROLLER_WALK), STROLLER_WALK_MS)]
     yield "jogger", [("run", frames(big(jogger, **q) for q in JOGGER_RUN), JOGGER_RUN_MS)]
+    yield "kid-on-bike", [("ride", frames(big(kid_on_bike, **q) for q in KID_BIKE_RIDE), KID_BIKE_RIDE_MS)]
 
 
 if __name__ == "__main__":
