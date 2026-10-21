@@ -47,9 +47,21 @@ VIEW_W = W - 1 - VIEW_X
 BAND_TOP = bd.BASE - 46    # the first backdrop row shown, 46 rows over the far side's ground row
 BAND_ROWS = bd.H - BAND_TOP
 STREET = next(z for z, zone in sn.ZONES.items() if zone["art"] == "woof-way")   # Elm Avenue's zone id
-# The pack's formations, as src/layout/packFormation.ts: each dog's (side, distance ahead of the
-# feet) by pack size, the first dog leading.
-FORMATIONS = {n + 1: [(p["side"], -p["footDy"]) for p in f] for n, f in enumerate(sn.PACK["formations"])}
+# The pack's formation, as src/layout/packFormation.ts: each dog's (side, distance ahead of the
+# feet), the dogs in formation order. One dog leads; two walk side by side; three walk in a
+# triangle, the lead's row keyed by the three sizes and three bigs' side dogs closer in.
+SIDES = {"lead": 0, "left": -1, "right": 1}
+SIZES = {d["id"]: d["size"] for d in sn.GAME["dogs"]}
+
+
+def formation(dogs):
+    feet = sn.PACK["feet"]
+    sizes = [SIZES[d] for d in dogs]
+    rows = [feet["lead"][sizes[0]]] if len(sizes) == 1 else [
+        feet["sideOfThreeBigs"] if sizes == ["big"] * 3 else feet["side"][s] for s in sizes[-2:]]
+    if len(sizes) == 3:
+        rows = [feet["trioLead"][" ".join(sizes)]] + rows
+    return [(SIDES[slot], -row) for slot, row in zip(sn.PACK["slots"][len(dogs) - 1], rows)]
 
 
 # ---------- font-title, read from its BMFont export ----------
@@ -137,7 +149,8 @@ def pack(view, cx, base):
         view.paste(f, x - f.width // 2, feet - f.getbbox()[3] + 1)
         return f
 
-    dogs = [(k, sn.side_dx(k, side), base - d) for k, (side, d) in zip(("dog-koda", "dog-biscuit", "dog-duchess"), FORMATIONS[3])]
+    ids = ("koda", "biscuit", "duchess")   # big, medium, small: formation order
+    dogs = [(f"dog-{d}", sn.side_dx(f"dog-{d}", side), base - row) for d, (side, row) in zip(ids, formation(ids))]
     for k, dx, feet in sorted(dogs, key=lambda d: d[2]):
         stand(k, cx + dx, feet)
     walker = sn.frame("walker-casey", "walk")
