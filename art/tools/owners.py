@@ -11,8 +11,7 @@ face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
 natively at 20x20, one pixel per feature, and Lefevre's bun is redrawn by hand.
 
-face-walker-<name>: 32x32 portraits for the walker picker. Tags:
-happy, neutral.
+face-walker-<name>: 32x32 portraits for the walker picker. Tags: happy, neutral.
 
 Usage:
   owners.py preview OUT.png   contact sheet of every frame, scaled up

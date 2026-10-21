@@ -60,7 +60,7 @@ import hazards  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
-from pixel import Grid, edged, main  # noqa: E402
+from pixel import Grid, edged, main, scale_of  # noqa: E402
 from road import BREATH, BREATH_MS, lit  # noqa: E402
 
 
@@ -172,7 +172,7 @@ def pigeons(peck=False, wings=None, lift=(0, 0, 0)):
     """Three pigeons, two behind and one in front; peck has the front one peck, wings (see pigeon) spreads
     the back right one's against the others', and lift raises each by its pixels."""
     g = edged(Grid())
-    u = 1 / getattr(g, "s", 1)
+    u = 1 / scale_of(g)
     for (x, y), flip, up in zip(FLOCK, (1, -1, 1), lift):
         pigeon(g, x, y - up * u, peck=peck and x == 16, wings=None if wings is None else wings * flip)
     return lit(g)
@@ -210,7 +210,7 @@ def pigeons_fleeing(wings, rise):
     """The flock flying off up the road, seen from behind: wings for all three, the middle one's against
     the others', and rise lifting each by its pixels."""
     g = edged(Grid())
-    u = 1 / getattr(g, "s", 1)
+    u = 1 / scale_of(g)
     for (x, y), flip, up in zip(FLYERS, (1, -1, 1), rise):
         pigeon_back(g, x, y - up * u, wings * flip)
     return lit(g)
@@ -245,7 +245,7 @@ def ducklings(peep=False, wing=0, step=0, lift=(0, 0, 0)):
     """Three ducklings, one in front; peep opens the front one's bill, wing and step (the back right one's
     the other foot) make the waddle, and lift raises each by its pixels."""
     g = edged(Grid())
-    u = 1 / getattr(g, "s", 1)
+    u = 1 / scale_of(g)
     for (x, y), flip, up in zip(BROOD, (1, -1, 1), lift):
         duckling(g, x, y - up * u, peep=peep and x == 16, wing=wing, step=step * flip)
     return lit(g)
@@ -265,7 +265,7 @@ def duckling_side(g, cx, by, phase):
     crouch = phase == 0
     if phase != 2:
         g.rect(cx - 1, by - 1, 3, 1, "orange")
-        g.rect(cx, by - 2 + (0 if up else 0), 1, 1 + (1 if up else 0) - (1 if crouch else 0), "orange")
+        g.rect(cx, by - 2, 1, 1 + (1 if up else 0) - (1 if crouch else 0), "orange")
     else:
         g.rect(cx - 1, y - 2, 3, 1, "orange")
     g.tri((cx - 4.5, y - 7), (cx - 2.5, y - 4), (cx - 5.5, y - 5), "yellow")

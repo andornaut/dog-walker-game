@@ -41,12 +41,12 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, edged, main, road_edge  # noqa: E402
+from pixel import Grid, K, edged, main, raster, road_edge, scale_of  # noqa: E402
 from road import rim  # noqa: E402
 
 # ROAD_SIZE is the medium dogs' frame side. Each dog's 32-unit design is rasterized at road_scale(name)
 # (DOG_SIZE / 32) on a minis.Mini that keeps 1px lines and single pixels 1px; its depth variants at that
-# times the step. Faces stay 32x32 at 1x.
+# times the step. Faces are 32x32 frames, the face drawn at FACE_SIDE / 32.
 ROAD_SIZE = 48
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
@@ -452,16 +452,16 @@ def zippy_face(mood):
     return g
 
 
-# ---------- Pierre (Pepe): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
+# ---------- Pepe (key pierre): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
 
-# Pierre's coat: the curls (fill, shade, light), the shaved skin and the white stripe (fill, shade).
+# Pepe's coat: the curls (fill, shade, light), the shaved skin and the white stripe (fill, shade).
 CURL = ("navy", "ink", "dslate")
 SHAVED = ("slate", "dslate", "grey")
 STRIPE = ("white", "lgrey")
 
 
 def pierre_edge(c):
-    """Pierre's outline: grey round the black coat, which has no fill that holds against the dslate road,
+    """Pepe's outline: grey round the black coat, which has no fill that holds against the dslate road,
     and the road outline round everything else."""
     return K["grey"] if c in {K[n] for n in CURL + SHAVED} else road_edge(c)
 
@@ -773,7 +773,7 @@ def droop(mood):
 
 
 def puff(g, cx, cy, rx, ry, ring=False):
-    """A clipped poodle pom-pom in Pierre's curls (CURL), shaded on its lower right, with a highlight only
+    """A clipped poodle pom-pom in Pepe's curls (CURL), shaded on its lower right, with a highlight only
     on a puff big enough to hold one as a shape, so the coat carries no single-pixel texture. ring sets it
     apart from the puffs it is drawn over with a 1px ring in the shade."""
     if ring:
@@ -807,11 +807,6 @@ HACKLES_BIG = (
     (1, ["y.yro.o", "yyoroo.", ".yoroo.", "yyorooo", ".yoro..", "..yro..", "..oro..", "...r..."]),
 )
 HACKLE_INK = {"r": "rust", "o": "orange", "y": "yellow"}
-
-
-def scale_of(g):
-    """The scale g draws the design grid at: a minis.Mini's s, 1 for a plain Grid."""
-    return getattr(g, "s", 1)
 
 
 def trail(g, pts, c):
@@ -904,7 +899,7 @@ def underside(g):
     below it or to its right. The coat keeps its colour, and its shade sits a step darker,
     so a white dog keeps its mass on the light roads. Works on the grid a small version
     draws to as well."""
-    px = getattr(g, "g", g).px
+    px = raster(g).px
     h, w = len(px), len(px[0])
     edge = [(x, y) for y in range(h) for x in range(w) if px[y][x] in UNDERSIDE and (
         y + 1 >= h or x + 1 >= w or not px[y + 1][x] or not px[y][x + 1])]
@@ -916,7 +911,7 @@ def despeckle(g, colours):
     """Fill every lone pixel of the given coat colours, one that none of its four opaque neighbours shares,
     with its neighbours' most common colour, so overlapping puffs leave no single-pixel texture to shimmer at
     road scale. Works on the grid a small version draws to as well."""
-    px = getattr(g, "g", g).px
+    px = raster(g).px
     h, w = len(px), len(px[0])
     coat = {K[c] for c in colours}
     lone = []
@@ -930,7 +925,7 @@ def despeckle(g, colours):
 
 
 def bow(g, cx, y, big=False, colours=("pink", "mauve")):
-    """A bow: Duchess's is pink, Pierre's show ribbon mauve tied in purple. The knot and folds take the
+    """A bow: Duchess's is pink, Pepe's show ribbon mauve tied in purple. The knot and folds take the
     second colour."""
     c, knot = colours
     w = 4 if big else 3
@@ -1061,8 +1056,9 @@ def sprites():
     import minis
 
     here = sys.modules[__name__]
-    for name, (road, face) in DOGS.items():
-        yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, road_scale(name), here, DOG_ZOOM.get(name, 1)), ms)
+    for name, (draw_road, face) in DOGS.items():
+        zoom = DOG_ZOOM.get(name, 1)
+        yield f"dog-{name}", [(tag, minis.dog_frames(draw_road, poses, road_scale(name), here, zoom), ms)
                               for tag, poses, ms in road_tags(name)]
         yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[DOG_CLASS[name]])], 1000)
                                    for m in face_tags(name)]

@@ -7,11 +7,11 @@
   in card pixels:
     band 2..12 (title), art window 3,15 to 79,72 (illustration at 4,16, 75x56), 1px
     of face or lip either side of it,
-    body 6..77 x 76..118, badge spot 6,121, 71x13 (plain face; card-cost goes there on a paid option).
+    body 6..76 x 76..117, badge spot 6,121, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
   view: the same layout doubled with 1px detail. Band 4..24 (title line from row
   9), art window 6,30, 154x116 (illustration at 2x at 8,32),
-  body 12..154 x 152..234, badge spot 12,242, 142x26.
+  body 12..153 x 152..233, badge spot 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
   large frame); the game writes the cost centred on its face.
 - card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
@@ -492,7 +492,7 @@ def skip():
 # and lawn beside it.
 FAR_Y, WALK_Y, CURB_Y, CROSS_Y, LINE_Y, STUB_Y = 21, 22, 25, 26, 29, 33
 HORIZON, SPREAD = 12.0, 0.75
-FOCAL = 16       # a stub row samples strip row FOCAL / scale: 1.5 rows apart near, 5 far
+FOCAL = 16       # a stub row samples strip row FOCAL / scale: about 2 rows apart near, 7 far
 DASH = 5.0       # a stub divider's dashes repeat every 1 / DASH of log(row centre - HORIZON)
 MINI = (2, 6, 5, 7)   # a far house's windows and door, as backdrops.house parts
 

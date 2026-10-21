@@ -48,7 +48,7 @@ Usage:
   ui.py build             write art/ui/*.aseprite and export to
                           public/art/images/ and public/art/sprites/
 
-Run from the repository root, after fonts.py build. A build overwrites the
+Run from the repository root. A build overwrites the
 .aseprite sources, so hand edits to them belong in this file instead.
 """
 
@@ -60,6 +60,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
+import hits  # noqa: E402
 from pixel import DARKER, HEART, TORONTO, K, Grid, contrast, edged, icon_edge, to_image, build as build_sprites  # noqa: E402
 
 
@@ -240,14 +241,10 @@ def treat_icon():
     return g
 
 
-# The stink lines' sideways offset down a line, as in fx-hit-skunk's squiggles (hits.py).
-STINK_WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
-
-
 def stinky():
     """Three stink lines waving in step out of a small cloud puff, in the skunk's mauve family as
     skunk-cloud: pink with a plum right side and no outline, so the plum
-    carries the lines on cream (9.42:1) and the pink on the top bar's ink (6.64:1). The puff is
+    carries the lines on cream (9.42:1) and the pink on its mauve debuff bar. The puff is
     mauve, shaded purple, in its ramp outline. Returns frame pixels."""
     g = Grid(16, 16)
     for cx, cy, rx, ry in ((4, 12.5, 3, 2.3), (12, 12.5, 3, 2.3), (8, 11, 3.5, 3)):
@@ -256,7 +253,7 @@ def stinky():
     px = g.outlined()
     for x0, top in ((2, 1), (7, 0), (12, 1)):
         for y in range(top, 9):
-            x = x0 + STINK_WAVE[(y + 6) % 8]
+            x = x0 + hits.WAVE[(y + 6) % 8]
             px[y][x], px[y][x + 1] = K["pink"], K["plum"]
     return px
 
@@ -664,17 +661,13 @@ def payout_label():
 
 # ---------- the dogs' colours and the debuff bars ----------
 
-# Each dog's colour: base, shade and dark, from the dog's accessory. Its base backs the dog's photo on
-# ui-dog-card. No two dogs share a base. Card
-# backgrounds never use zone colours; a dog's accent is its own colour. Snowball's is
-# his collar's blue, not its sky, which backs every owner's photo; Archie's is rust, for his red
-# merle coat; Pierre's is his show bow's mauve, which holds his black coat's ink line at 3.83:1.
+# Each dog's colour, from its accessory, behind its photo on ui-dog-card (the empty card's is dslate). No two
+# dogs share one, and none is a zone colour. Snowball's is his collar's blue, not its sky, which backs every
+# owner's photo; Archie's is rust, for his red merle coat; Pepe's is his show bow's mauve, which holds his
+# black coat's ink line at 3.83:1.
 DOG_COLOURS = {
-    "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
-    "pierre": ("mauve", "purple", "plum"), "biscuit": ("green", "dgreen", "forest"),
-    "archie": ("rust", "dbrown", "plum"), "snowball": ("blue", "navy", "ink"),
-    "penny": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
-    "empty": ("slate", "dslate", "navy"),
+    "duchess": "pink", "nugget": "red", "zippy": "dred", "pierre": "mauve", "biscuit": "green", "archie": "rust",
+    "snowball": "blue", "penny": "amber", "koda": "orange", "empty": "dslate",
 }
 
 
@@ -788,7 +781,7 @@ COIN = ["..PPP..", ".PYYAP.", "PYYAAAP", "PYAAAOP", "PAAAOOP", ".PAOOP.", "..PPP
 
 
 def afford_frame(glint):
-    """24x24 nine-slice (8px corners), drawn 2px outside a dog, slot or gear tile the player can
+    """24x24 nine-slice (8px corners), drawn 2px outside the Pet shop building or a shop row the player can
     afford: a plum keyline outside a 1px amber line, with a gold coin stud on each corner. It
     differs from ui-select (ink, a 2px band pulsing amber to orange, ink, 1px out) by
     its thin line, its round studs and its deeper gold, and it does not pulse. Amber holds
@@ -1154,7 +1147,7 @@ def dog_card(dog):
     x, y = DOG_PHOTO
     g.rect(x, y, 36, 36, "ink")
     g.rect(x + 1, y + 1, 34, 34, "cream")
-    g.rect(x + 2, y + 2, 32, 32, "dslate" if empty else DOG_COLOURS[dog][0])
+    g.rect(x + 2, y + 2, 32, 32, DOG_COLOURS[dog])
     ox, oy, side = DOG_CARD_OWNER
     g.rect(ox, oy, side, side, "ink")
     g.rect(ox + 1, oy + 1, side - 2, side - 2, "white")

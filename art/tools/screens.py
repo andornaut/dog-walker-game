@@ -7,16 +7,16 @@ shadow), with the leash and a paw print. It is the board of the yard
 sign on the home screen (at 6,146, left of the gate path, where the pack never
 stands), and works as a header on any other screen.
 
-screen-<name>: 360x560 backgrounds in Endesga 32, one per screen. Where panels
+screen-<name>: 360x560 backgrounds in the house palette, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
 - screen-home: morning on a suburban street. The bar strip, then the gate
   scene (y 40 to 196: street, curb, sidewalk, fence with the open gate, front
-  path, yard sign), then the porch deck from y 198 under the walker, dog and
-  gear steps and Start walk. The street sign's board (300,72 54x11, a 52x9
-  forest face) sits at the right edge, clear of the walker's speech bubble;
-  the game prints homeText.gateSign on it in font-body, white, centred at 327,75 (48px
-  wide in capitals). The yard's right lot is left for ui-pet-shop.
+  path, yard sign), then the porch deck from y 198 under the walker, dogs and
+  Pocket sections and Start walk. The street sign's board (300,72 54x11, a 52x9
+  forest face) sits at the right edge, clear of the walker's speech bubble; the
+  game prints homeText.gateSign on it in font-body, white, centred at 327,75.
+  The yard's right lot is left for ui-pet-shop.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
@@ -24,9 +24,9 @@ reads on them.
   ramp step darker, the windows lit), and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
-- screen-end: a street at sunset. Between the logo (116,40) and the
+- screen-end: a street at sunset. Between the logo (116,8) and the
   summary panel (24,112 to 336,412), the front of the house the pack comes
-  home to: its gable peeks over the logo, the front door (171,73 18x23) opens
+  home to: the logo stands on its roof, the front door (171,73 18x23) opens
   onto a step (164,96 32x4), and a flagstone path (168,100 24x12) runs down
   behind the panel's top edge. The lawn from y 96 gives the waving owners
   room either side, feet on y 110. The banded sunset (SUNSET_SKY) fills the sky
@@ -77,8 +77,8 @@ ui-loading-track: a 316x8 image, the sidewalk being walked: Biscuit's paw
 prints in dslate, staggered on two rows from Casey's heel to the Pet shop's door.
 The game draws it at TRACK_AT (16,456).
 ui-loading: a 98x84 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
-on, walking right on a plum leash, at the road sprites' size (Casey as tall as
-her 56x84 walker, Biscuit as his 56x56 dog), cel shaded with the road outline,
+on, walking right on a plum leash, at 1.75x, larger than on the road (Casey 84
+rows tall, Biscuit 56), cel shaded with the road outline,
 Casey's face flat skin. Frames 0 and 2 plant the feet apart, 1 and 3 pass
 with the body 1px higher, a foot lifted, and Biscuit's diagonal pairs swap.
 The game draws it at PAIR_AT (6,379) plus round(228 * progress) to the right,
@@ -671,8 +671,8 @@ def end():
         cv.fill(bx, by, 2, 1, "plum")
         cv.fill(bx + 2, by + 1, 1, 1, "plum")
         cv.fill(bx + 3, by, 2, 1, "plum")
-    # the house the pack comes home to, between the logo and the panel. Its dred gable peeks over the logo,
-    # which hangs on the front like a sign; the sun to the right stays clear.
+    # the house the pack comes home to, between the logo and the panel: the logo stands on its dred roof like a
+    # sign; the sun to the right stays clear.
     for i in range(30):
         half = round(4 + i * 58 / 29)
         cv.fill(180 - half, 18 + i, 2 * half, 1, "dred")
@@ -1097,9 +1097,8 @@ SCREENS = {
 }
 
 
-# ui-loading is drawn on a PAIR_DESIGN design grid at PAIR_SCALE, the road people's 1.75, on a minis.Mini that
-# keeps 1px lines and single pixels 1px, so Casey stands as tall as her 56x84 road sprite and Biscuit as his
-# 56x56 one.
+# ui-loading is drawn on a PAIR_DESIGN design grid at PAIR_SCALE on a minis.Mini that keeps 1px lines and
+# single pixels 1px, so Casey stands 84 rows tall and Biscuit 56.
 PAIR_DESIGN = (56, 48)
 PAIR_SCALE = 1.75
 # The pair's stride, one dict per frame: Casey's near and far feet (forward of the hip, in design px) and which
@@ -1291,7 +1290,7 @@ def ui(cv, key):
             sn.text(cv, "THE GOAL", x + 36, y + 20, "lgrey", 2)
             sn.text(cv, "SECOND LINE", x + 36, y + 36, "lgrey", 2)
     elif key == "screen-end":
-        cv.paste(logo().img, 116, 40)
+        cv.paste(logo().img, 116, 8)
         for x, foot in ((116, 110), (144, 110), (216, 110)):
             figure(x, foot, 16, 40, "skin1")
         figure(180, 110, 16, 40, "sky")

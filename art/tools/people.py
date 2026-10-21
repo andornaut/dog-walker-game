@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import edged, main  # noqa: E402
 from road import BREATH, BREATH_MS, LIT, face_disc, face_front, person, rim  # noqa: E402
 
-WAVES = ("up", "out")
+OWNER_WAVE = ("up", "out")
 WAVE_MS = 300
 
 
@@ -394,7 +394,7 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for dog in OWNERS:
         yield f"owner-{dog}", [("idle", [owner(dog, bob=bb).outlined() for bb in BREATH], BREATH_MS),
-                               ("wave", [owner(dog, w).outlined() for w in WAVES], WAVE_MS)]
+                               ("wave", [owner(dog, w).outlined() for w in OWNER_WAVE], WAVE_MS)]
 
 
 if __name__ == "__main__":

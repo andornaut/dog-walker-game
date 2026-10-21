@@ -15,7 +15,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Method
 
-- `art/tools/<set>.py` draws every asset except the hand-drawn favicons. Run `python3 art/tools/<set>.py build` (or `preview OUT.png`) from the repository root. Shared drawing tools are in `pixel.py`, and for pictures composed from exported art in `scene.py`; neither has commands.
+- `art/tools/<set>.py` draws every asset except the hand-drawn favicons and the home page's canvas grabs (`home-road`, `home-start`). Run `python3 art/tools/<set>.py build` (or `preview OUT.png`) from the repository root. Shared drawing tools are in `pixel.py` (whose only command is `palette`), and for pictures composed from exported art in `scene.py`.
 - A build writes the set's Aseprite sources under `art/` and exports them to `public/art/` (`sprites/<key>.png` and `.json`, `images/<key>.png`, `fonts/<key>.png` and `.fnt`, `sounds/<key>.ogg` and `.m4a`). Each script's docstring names its folders. Exceptions:
   - `appicons.py` writes `art/appicon.aseprite` and `public/icons/`; `share.py` writes `art/share/share-card.aseprite` and `public/og-image.png`.
   - `fonts.py` and `sounds.py` write no sources. `sounds.py preview` takes an output folder, not a PNG, and `sounds.py build` also writes the loop flags in `public/art/manifest.extra.json`.
@@ -24,7 +24,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - Each script's docstring holds its assets' sizes, tags, timings and placement coordinates.
 - Game data and layout come from the game's export in `shared/export/`, never from `src/`. Only `scene.py` reads it (`game-data.json` and `layout.json`); `backdrops.py`, `cards.py`, `screens.py`, and `share.py` take the zones, the layout and the pack's hands and collars from `scene.py`. `pixel.py` reads the depth steps from `shared/depth-steps.json`. Every other script holds its sizes and positions as constants (`ui.py`'s top bar buttons, `screens.py`'s Pet shop at 234,86, `roadside.py`'s sidewalk edge), so a layout change in the game needs the matching change in the script.
 - Depth variants are redrawn at each step, not downscaled (style guide, Depth scaling).
-- Regenerate the manifest (`npm run art:manifest`) before committing new or renamed exports. The manifest, the data export, the depth steps, the depth preview and the art checks are described in the Assets bullet of [`src/README.md`](../src/README.md).
+- Regenerate the manifest (`npm run art:manifest`) before committing new or renamed exports. The manifest, the data export, the depth steps, the depth preview and the art checks are described under Assets in [`src/README.md`](../src/README.md).
 
 ### Naming
 

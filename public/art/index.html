@@ -94,7 +94,7 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 .sound .loop { grid-area: loop; font-family: var(--f-mono); font-size: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 600; border-radius: 4px; padding: 2px 8px; }
 @media (max-width: 600px) { .sound { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "key loop" "audio audio"; } }
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 6px; padding: 16px; color: var(--muted); font-size: 14px; }
-.empty code, .meta code { font-family: var(--f-mono); font-size: 13px; color: var(--fg); }
+.empty code { font-family: var(--f-mono); font-size: 13px; color: var(--fg); }
 .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
 .sw { display: grid; gap: 4px; background: none; border: 0; padding: 0; color: var(--muted); font-family: var(--f-mono); font-size: 11px; cursor: pointer; text-align: left; }
 .sw i { display: block; height: 36px; border-radius: 4px; border: 1px solid var(--line); }
@@ -184,6 +184,7 @@ try { Object.assign(prefs, JSON.parse(localStorage.getItem("dwg-art-gallery") ||
 const savePrefs = () => { try { localStorage.setItem("dwg-art-gallery", JSON.stringify(prefs)); } catch (e) { /* storage unavailable */ } };
 const groundInputs = [...document.querySelectorAll('input[name="ground"]')];
 if (!groundInputs.some(i => i.value === prefs.ground)) prefs.ground = groundInputs[0].value;
+if (![...$("zoom").options].some(o => Number(o.value) === prefs.zoom)) prefs.zoom = 3;
 $("zoom").value = String(prefs.zoom);
 groundInputs.forEach(i => { i.checked = i.value === prefs.ground; });
 const showGroundName = () => { $("ground-name").textContent = groundInputs.find(i => i.checked).parentElement.title; };
@@ -236,7 +237,7 @@ async function addSprite(host, s) {
   });
   const strip = el("div", { className: "strip", title: "Every frame in export order" });
   frames.forEach(f => {
-    const c = el("canvas"); sizeCanvas(c, f.w, f.h); scaled.push({ canvas: c, w: f.w, h: f.h, frame: f, img });
+    const c = el("canvas"); sizeCanvas(c, f.w, f.h); scaled.push({ canvas: c, w: f.w, h: f.h });
     c.getContext("2d").drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
     strip.append(c);
   });
@@ -250,7 +251,7 @@ async function addSprite(host, s) {
 
 async function addImage(host, s) {
   const img = await loadImage(BASE + s.png);
-  const c = el("canvas"); sizeCanvas(c, img.width, img.height); scaled.push({ canvas: c, w: img.width, h: img.height, img });
+  const c = el("canvas"); sizeCanvas(c, img.width, img.height); scaled.push({ canvas: c, w: img.width, h: img.height });
   c.getContext("2d").drawImage(img, 0, 0);
   const view = makeView(); view.append(c);
   host.append(el("article", { className: "card", dataset: { key: s.key, kind: "images" } }, [view, el("div", { className: "meta" }, [
@@ -271,7 +272,7 @@ async function addFont(host, s) {
   const c = el("canvas"); const W = Math.max(1, width), H = lineH * lines.length;
   sizeCanvas(c, W, H);
   const draw = ctx => { lines.forEach((l, row) => { let x = 0; for (const ch of l) { const g = chars.get(ch.codePointAt(0)); if (!g) continue; ctx.drawImage(img, g.x, g.y, g.w, g.h, x + g.ox, row * lineH + g.oy, g.w, g.h); x += g.adv; } }); };
-  draw(c.getContext("2d")); scaled.push({ canvas: c, w: W, h: H, redraw: draw });
+  draw(c.getContext("2d")); scaled.push({ canvas: c, w: W, h: H });
   const missing = [...new Set(lines.join(""))].filter(ch => ch !== " " && !chars.has(ch.codePointAt(0)));
   const view = makeView(); view.append(c);
   host.append(el("article", { className: "card", dataset: { key: s.key, kind: "fonts" } }, [view, el("div", { className: "meta" }, [
@@ -378,7 +379,7 @@ function applyFilter() {
     const ofKind = !kind || (g.list ? kind === g.list : kind === "sprites" || kind === "images");
     $("s-" + g.id).hidden = $("j-" + g.id).hidden = !ofKind || ((!!q || (!!kind && !g.list)) && !shown);
   }
-  for (const id of ["palette"]) $("s-" + id).hidden = $("j-" + id).hidden = !!kind && kind !== id;
+  $("s-palette").hidden = $("j-palette").hidden = !!kind && kind !== "palette";
 }
 markPills(); applyFilter();
 $("filter").addEventListener("input", applyFilter);

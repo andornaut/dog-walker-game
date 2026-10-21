@@ -168,7 +168,7 @@ def dune_grass():
 
 
 def transit_stop():
-    """A TTC stop pole: a coal pole, a red and white stop sign at the top, a timetable box."""
+    """A TTC stop pole: a coal pole, its red and white TTC sign at the top, a timetable box."""
     w, h = 28, 100
 
     def draw(g, f=0):

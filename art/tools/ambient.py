@@ -64,7 +64,7 @@ rope, a skid or a rotor blur, is drawn past the outline so the ink does not thic
   its bottom; the belly beacon is red on frames 0 and 1.
 
 Usage:
-  ambient.py preview OUT.png   every frame on the road colours
+  ambient.py preview OUT.png   every frame on the zone roads
   ambient.py build             write art/ambient/*.aseprite and export to public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so hand edits to them belong
@@ -94,8 +94,6 @@ PIGEON_MS = 90
 HELICOPTER_MS = 80
 GEESE_MS = 140
 TURBOPROP_MS = 90
-
-GROUNDS = ("3a4466", "e4a672", "f6757a", "c28569", "8b9bb4", "ead4aa", "c0cbdc")
 
 
 # ---------- the pedestrian, laid out on 32x48 as road.person's tops are ----------
@@ -417,7 +415,7 @@ def bikes(suffix, step):
 
 
 # ---------- lawn animals: side on, facing right, laid out on 32x32 ----------
-# Each stands on row 30; frame 0 of its idle is the rest pose the game measures its feet from.
+# Each stands on row 30 (the sitting cat on 31); frame 0 of its idle is the rest pose the game measures its feet from.
 
 def ginger_cat(pose):
     """A ginger tabby side on. pose is (body dy, back arch, near and far front feet, near and far back feet,
@@ -766,4 +764,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/ambient", __doc__, grounds=GROUNDS)
+    main(sys.argv, sprites, "art/ambient", __doc__)

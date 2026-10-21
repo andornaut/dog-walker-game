@@ -214,7 +214,8 @@ def high_park_ground(g):
                     wp(g, x + k, y + j, "brown")
     for y in range(H):
         for side, seed in ((0, 1.1), (1, 2.7)):
-            w = wave(y, seed, 6, 1.6)
+            # the undergrowth and its bark edge keep to the outer 8 columns, clear of a sprite's margin
+            w = min(7, wave(y, seed, 6, 1.6))
             x0 = 0 if side == 0 else W - w
             g.rect(x0, y, w, 1, "pine")
             g.p(w if side == 0 else W - w - 1, y, "bark")

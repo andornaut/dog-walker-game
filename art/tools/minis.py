@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from pixel import K, Grid, depth_scales, edged, main, raster  # noqa: E402
+from pixel import K, Grid, depth_scales, main, raster  # noqa: E402
 
 
 # (suffix, scale) for every depth step below full size (pixel.depth_scales), the suffix without its @:
@@ -279,30 +279,6 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
     return frames
 
 
-def tip(s, rx):
-    """road.tip, with its road outline and white glint; the coin keeps its face, rim and stamped mark at
-    every step."""
-    g = edged(Mini(s, 16, 16))
-    if rx < 1.5:
-        g.rect(7, 3, 2, 10, "orange")
-        g.rect(7, 3, 1, 10, "amber")
-        g.p(7, 4, "white")
-        return g
-    g.ell(8, 8, rx, 5.5, "amber", "orange", "yellow")
-    if rx > 2:
-        g.rect(8, 5, 1, 6, "orange")
-        g.p(7, 6, "orange")
-        g.p(9, 9, "orange")
-    g.p(round(8 - rx * 0.55), 5, "white")
-    return g
-
-
-def treat(s, lift=0):
-    """road.treat on a Mini at scale s: a bone whose knobs stick out above and below the shaft at both ends,
-    with the road outline."""
-    return small(road, s, road.treat, **snap(dict(lift=lift), s))
-
-
 def wallet(s, glint):
     """road.wallet on a Mini at scale s, with the road outline and road.WALLET_RIM."""
     return small(road, s, road.wallet, glint)
@@ -372,27 +348,22 @@ def squirrel(s, draw, *args, **q):
         road.squirrel_head = full
 
 
-def skunk(s, sway=0, blink=False, paw_l=0, paw_r=0):
-    """road.skunk on a Mini at scale s."""
-    return shrunk(s, road.skunk, sway=sway, blink=blink, paw_l=paw_l, paw_r=paw_r)
-
-
 def variants(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s.
     road.py's sprites are drawn at road.SCALE x s and obstacles.py's at obstacles.SCALE x s, as those
     files draw them at road.SCALE and obstacles.SCALE. The bin's lift and the bench's leaf are in drawn
     pixels, so they stay 1px here."""
     p, o = road.SCALE * s, obstacles.SCALE * s
-    yield "tip", [("idle", [tip(p, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
-    yield "treat", [("idle", [treat(p, **q).outlined() for q in road.TREAT_IDLE], 400)]
+    yield "tip", [("idle", [small(road, p, road.tip, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
+    yield "treat", [("idle", [shrunk(p, road.treat, **q).outlined() for q in road.TREAT_IDLE], 400)]
     frames, ms = obstacles.CONE_IDLE
     yield "cone", [("idle", [cone(o, gl).outlined() for gl in frames], ms)]
     frames, ms = obstacles.BIN_IDLE
     yield "bin", [("idle", [small(obstacles, o, obstacles.bin_, a).outlined() for a in frames], ms)]
     frames, ms = obstacles.BENCH_IDLE
     yield "bench", [("idle", [small(obstacles, o, obstacles.bench, a).outlined() for a in frames], ms)]
-    yield "skunk", [("idle", [skunk(p, **q).outlined() for q in road.SKUNK_IDLE], 300),
-                    ("walk", [skunk(p, **q).outlined() for q in road.SKUNK_WALK], road.PERSON_WALK_MS)]
+    yield "skunk", [("idle", [shrunk(p, road.skunk, **q).outlined() for q in road.SKUNK_IDLE], 300),
+                    ("walk", [shrunk(p, road.skunk, **q).outlined() for q in road.SKUNK_WALK], road.PERSON_WALK_MS)]
     yield "squirrel", [("idle", [squirrel(p, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
                        ("run", [squirrel(p, road.squirrel_run, k).outlined() for k in range(4)], 60)]
     yield "other-dog", [("walk", [shrunk(p, road.corgi, **q).outlined() for q in road.CORGI_WALK], 100),

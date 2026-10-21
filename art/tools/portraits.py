@@ -130,7 +130,7 @@ def duchess(g):
 
 
 def bow(g, cx, y, colours=("pink", "mauve")):
-    """Duchess's pink bow, or Pierre's mauve show ribbon tied in purple: the knot and folds take the second colour."""
+    """Duchess's pink bow, or Pepe's mauve show ribbon tied in purple: the knot and folds take the second colour."""
     c, knot = colours
     g.tri((cx - 1, y + 2), (cx - 9, y - 2), (cx - 8, y + 7), c)
     g.tri((cx + 1, y + 2), (cx + 9, y - 2), (cx + 8, y + 7), c)
@@ -196,35 +196,33 @@ def zippy(g):
     nose(g, 21, 28)
 
 
-# ---------- Pierre (Pepe): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
+# ---------- Pepe (key pierre): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
 
-# Pierre's coat, as in dogs.py: the curls (fill, shade, light), the shaved skin and the white stripe.
-CURL = ("navy", "ink", "dslate")
-SHAVED = ("slate", "dslate", "grey")
+# Pepe's coat is dogs.CURL and dogs.SHAVED.
 
 
 def pierre(g):
     # shaved legs with pom-pom bracelets, a curly mane over the chest
-    g.cel(48, 56, 9, 7, *CURL)
+    g.cel(48, 56, 9, 7, *dogs.CURL)
     for x in (24, 35):
-        g.rect(x, 50, 4, 10, SHAVED[0])
-        g.rect(x + 3, 50, 1, 10, SHAVED[1])
-        pom(g, x + 2, 60.5, 4.5, 3, 5, *CURL)
-    pom(g, 31, 48, 14, 9, 10, *CURL)
+        g.rect(x, 50, 4, 10, dogs.SHAVED[0])
+        g.rect(x + 3, 50, 1, 10, dogs.SHAVED[1])
+        pom(g, x + 2, 60.5, 4.5, 3, 5, *dogs.CURL)
+    pom(g, 31, 48, 14, 9, 10, *dogs.CURL)
     # the white stripe running on from the topknot along the top of the back to the rump, shaded under it
     for x in range(41, 57):
         y = round(56 - 7 * math.sqrt(max(0, 1 - ((x + 0.5 - 48) / 9) ** 2))) + 1
         g.rect(x, y, 1, 2, "white")
         g.p(x, y + 2, "lgrey")
     # long fluffy ears hanging from under the topknot
-    pom(g, 16, 35, 6, 11, 6, *CURL)
-    pom(g, 45, 35, 6, 11, 6, *CURL)
+    pom(g, 16, 35, 6, 11, 6, *dogs.CURL)
+    pom(g, 45, 35, 6, 11, 6, *dogs.CURL)
     # the smooth shaved face, ringed a step darker than the curls and set off from them by the shadow it
     # casts down and right, under a smaller topknot whose scalloped edge overlaps the brow
     g.ell(31.5, 31.5, 11, 10.5, "ink")
     g.ell(29.5, 27, 11.5, 10.5, "navy")
-    g.cel(29.5, 27, 10.5, 9.5, *SHAVED)
-    pom(g, 30, 12, 12, 8, 9, *CURL)
+    g.cel(29.5, 27, 10.5, 9.5, *dogs.SHAVED)
+    pom(g, 30, 12, 12, 8, 9, *dogs.CURL)
     # the white stripe from the brow up over the topknot, shaded down its right side, under the show bow
     g.rect(28, 5, 4, 15, "white")
     g.rect(31, 6, 1, 14, "lgrey")

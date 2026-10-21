@@ -39,7 +39,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import HEART, SMALL, burst  # noqa: E402
 import fx  # noqa: E402
-from pixel import Grid, main, raster  # noqa: E402
+from pixel import Grid, main, raster, scale_of  # noqa: E402
 
 BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
 # A sideways wobble with an 8px period: a line rising 2px a frame loops seamlessly in 4 frames.
@@ -74,7 +74,7 @@ def stamp(g, rows, x0, y0, cols=("red", "pink", "dred")):
 
 def star4(g, cx, cy, r, col):
     """fx.star4 on the drawn grid, centred at the drawn place of (cx, cy), its arms r scaled."""
-    fx.star4(raster(g), *drawn_at(g, cx, cy), round(r * getattr(g, "s", 1)), col)
+    fx.star4(raster(g), *drawn_at(g, cx, cy), round(r * scale_of(g)), col)
 
 
 def dots(g, x0, y0, pts):
@@ -203,7 +203,7 @@ def hit_skunk(step):
         # five rising S-lines: 2px a frame up over an 8px wave, the outer ones leaning out
         rise = (0, 0, 4, 8, 12, 15, 18, 20)[step]
         length = (0, 5, 8, 9, 9, 8, 6, 4)[step]
-        sc = getattr(g, "s", 1)
+        sc = scale_of(g)
         for j, (x0, y0, lean) in enumerate(((14, 26, -1), (22, 20, -0.5), (32, 17, 0), (42, 20, 0.5), (50, 26, 1))):
             for t in range(round(length * sc)):
                 x, y = drawn_at(g, x0 + lean * (rise + t / sc) * 0.4, y0 - rise)

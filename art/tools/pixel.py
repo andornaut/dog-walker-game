@@ -86,6 +86,11 @@ def raster(g):
     return getattr(g, "g", g)
 
 
+def scale_of(g):
+    """The scale g draws the design grid at: a minis.Mini's s, 1 for a plain Grid."""
+    return getattr(g, "s", 1)
+
+
 def road_edge(c):
     """A road sprite's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1
     against the three light roads. The fill inside it carries the dslate road."""
@@ -208,7 +213,7 @@ def edged(g, edge=road_edge, close=False):
     return g
 
 
-# The 7x6 heart the UI, the badges and the fonts' drawn ♥ share.
+# The 7x6 heart the UI, the badges, the fonts' drawn ♥ and scene.py's callout hearts share.
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 
 

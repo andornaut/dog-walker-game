@@ -282,9 +282,10 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for each sprite at full size, then at every depth
     step: the garbage truck on a minis.Mini at TRUCK_SCALE x the step, the scooter at road.SCALE x the step."""
     this = sys.modules[__name__]
+    drive, drive_ms = obstacles.DRIVE
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         yield f"stink-garbage-truck{suffix}", [("idle", [truck(garbage_truck, f, step) for f in (0, 1)], 400),
-                                               ("drive", [truck(truck_driving, f, step) for f in range(4)], 100)]
+                                               ("drive", [truck(truck_driving, f, step) for f in drive], drive_ms)]
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         s = SCALE * step
         yield f"minor-scooter{suffix}", [(tag, [small(this, s, d, a, 1 / s).outlined() for a in fargs], fms)

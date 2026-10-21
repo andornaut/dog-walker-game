@@ -54,7 +54,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import DARKER, K, Grid, edged, main, raster  # noqa: E402
+from pixel import DARKER, Grid, K, edged, main, raster, scale_of  # noqa: E402
 
 
 def face_front(g, cx, y, eyes="ink", lips="dbrown"):
@@ -73,7 +73,7 @@ def face_disc(g, cx, cy, rx, ry, skin, shade, to=0.35):
     near (right) edge from the top to `to` of the radius below the centre, beside the eyes, never across the
     jaw or mouth. Drawn on a minis.Mini, the shadow is 1px of the grid's own pixels."""
     g.ell(cx, cy, rx, ry, skin)
-    px, s = getattr(g, "g", g), getattr(g, "s", 1)
+    px, s = raster(g), scale_of(g)
     sy = getattr(g, "sy", s)
     fill = K.get(skin, skin)
     for y in range(max(0, math.floor((cy - ry) * sy)), min(px.h, math.floor((cy + ry * to) * sy) + 1)):
@@ -352,7 +352,7 @@ PERSON_WALK_MS = 100
 def lean(g, k):
     """Shear a person about its feet: the head moves k layout pixels sideways (k x the grid's height / 48
     pixels), the shoes stay put."""
-    g = getattr(g, "g", g)
+    g = raster(g)
     f = g.h / 48
     out = Grid(g.w, g.h)
     out.edge = g.edge
@@ -400,7 +400,7 @@ def front_eyes(g, cx, y):
 def eye_boxes(g, cx, y):
     """(left column, top row, size) in pixels of each eye face_front draws at (cx, y): 2px at 1x, and on a
     minis.Mini the eyes minis.face_front draws at its scale."""
-    s = getattr(g, "s", 1)
+    s = scale_of(g)
     n = max(1, math.floor(2 * s + 0.5))
     top = math.floor((y + 1) * s + 0.5 - n / 2)
     return [(math.floor(x * s + 0.5 - n / 2), top, n) for x in (cx - 4, cx + 4)]
@@ -410,7 +410,7 @@ def glasses(g, cx, y, c):
     """Round glasses on the eyes face_front draws at (cx, y): a ring 1px out from each eye with its corners
     cut, and a bridge between them along the eyes' top row. Drawn in pixels round the eyes, so they fit
     them at any scale."""
-    px = getattr(g, "g", g)
+    px = raster(g)
     (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y)
     for x0 in (lx, rx):
         px.rect(x0 - 1, top, 1, n, c)
@@ -632,7 +632,7 @@ def cheering(key, swing, bob=0):
     lift = raised_arm
 
     def both(g, x, w, top, bottom, _swing, parts):
-        inner, s = getattr(g, "g", g), getattr(g, "s", 1)
+        inner, s = raster(g), scale_of(g)
         for x0, x1, y0, y1 in rects:
             for yy in range(math.floor((y0 + bob) * s), math.ceil((y1 + bob) * s)):
                 for xx in range(math.floor(x0 * s), math.floor(x1 * s)):
@@ -677,8 +677,8 @@ def treat(lift=0):
 
 
 def tip(rx):
-    """A coin spinning: rx is its half-width as it turns. Outlined in plum so it holds on the light roads,
-    with a white glint on its lit edge."""
+    """A coin spinning: rx is its half-width as it turns, with the road outline and a white glint on its lit
+    edge."""
     g = edged(Grid(16, 16))
     if rx < 1.5:
         g.rect(7, 3, 2, 10, "orange")
@@ -996,8 +996,8 @@ def stripes(g, x, y0, y1, w, b):
     """Layout rows y0 to y1 - 1 of the thief's stripes, from x, w wide: white where (row - b) % 4 < 2, else
     ink. Drawn in pixels at the grid's scale, every stripe pair 4 x scale rows tall (white the shorter half),
     so drawn bigger the stripes stay even instead of breaking up into 1px rows."""
-    s = getattr(g, "s", 1)
-    px = getattr(g, "g", g)
+    s = scale_of(g)
+    px = raster(g)
 
     def e(v):
         return math.floor(v * s + 0.5)
@@ -1037,7 +1037,7 @@ DOLLAR = (".#.", ".##", "#..", ".#.", "..#", "##.", ".#.")
 
 def dollar(g, cx, cy, c):
     """DOLLAR centred on design point (cx, cy)."""
-    s, px = getattr(g, "s", 1), getattr(g, "g", g)
+    s, px = scale_of(g), raster(g)
     sy = getattr(g, "sy", s)
     x0, y0 = math.floor((cx + 0.5) * s) - 1, math.floor((cy + 0.5) * sy) - 3
     for j, row in enumerate(DOLLAR):
@@ -1142,7 +1142,7 @@ def wallet(glint):
     tan, the left edge skin2, and brown runs down the right and along the bottom. glint twinkles a white
     sparkle at its top right."""
     g = edged(Grid(16, 16))
-    u = 1 / getattr(g, "s", 1)
+    u = 1 / scale_of(g)
     for x, w, top in WALLET_BILLS:
         g.rect(x, top, w, 8 - top, "forest")
         g.rect(x + u, top + u, w - 2 * u, 8 - top, "green")
@@ -1153,8 +1153,8 @@ def wallet(glint):
     g.rect(12, 10, 2, 2, "amber")
     if glint:
         # a 3x3 cross centred on layout pixel (14, 1), drawn in pixels so it stays a cross at any scale
-        s = getattr(g, "s", 1)
-        px, cx, cy = getattr(g, "g", g), math.floor(14.5 * s), math.floor(1.5 * s)
+        s = scale_of(g)
+        px, cx, cy = raster(g), math.floor(14.5 * s), math.floor(1.5 * s)
         px.rect(cx - 1, cy, 3, 1, "white")
         px.rect(cx, cy - 1, 1, 3, "white")
     return rim(g, WALLET_RIM)
@@ -1219,7 +1219,7 @@ def ice_cream_truck(f=0, roll=None):
     import obstacles  # obstacles imports this module
 
     g = edged(Grid(56, 50))
-    px = getattr(g, "g", g)
+    px = raster(g)
     uy = obstacles.unit(g)[1]
     for x in (5, 42):
         g.rect(x, 39, 9, 10, "ink")
@@ -1289,8 +1289,8 @@ def ice_cream_truck(f=0, roll=None):
 def stair(g, x0, y0, x1, y1, c):
     """A strap running down from layout (x0, y0) to (x1, y1), exclusive: one pixel row per step, each step an
     equal share of the width. Drawn in pixels at the grid's scale, so its steps stay joined at SCALE."""
-    s = getattr(g, "s", 1)
-    px = getattr(g, "g", g)
+    s = scale_of(g)
+    px = raster(g)
 
     def e(v):
         return math.floor(v * s + 0.5)
@@ -1335,13 +1335,13 @@ def mail_carrier(**q):
 
 # ---------- road movers going the pack's way (back view) ----------
 
-# Pushing the stroller: the walkers' stride with the arms held on the grips, a 1px bob as he passes over each
-# foot; 4 frames at 160ms, the walkers' pace.
-STROLLER_WALK = [dict(lf=-2), dict(lf=-1, rf=-1, bob=-1), dict(rf=-2), dict(lf=-1, rf=-1, bob=-1)]
+# Pushing the stroller: the road people's stride, a 1px bob as he passes over each foot; 4 frames at 160ms,
+# the walkers' pace.
+STROLLER_WALK = PERSON_WALK
 STROLLER_WALK_MS = 160
 
 
-def stroller(lf=0, rf=0, bob=0, arms=0):
+def stroller(lf=0, rf=0, bob=0):
     """A dad pushing a stroller up the road, seen from behind as the pack sees it: short ginger hair, a purple
     puffer jacket quilted across, jeans and brown shoes, a takeaway coffee in his left hand. The stroller rolls
     ahead of him on his right, so it stands higher in the frame: a green hood ribbed where it folds, the seat
@@ -1372,12 +1372,12 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 43 + f, 4, 2, "brown")
         g.rect(x, 44 + f, 4, 1, "dbrown")
     # the left arm swings and holds the coffee; the right reaches out to the handlebar
-    g.rect(1, 22 + b - arms, 4, 9, "purple")
-    g.rect(4, 22 + b - arms, 1, 9, "plum")
-    g.rect(1, 29 + b - arms, 4, 1, "white")
-    g.rect(1, 30 + b - arms, 4, 5, "cream")
-    g.rect(4, 30 + b - arms, 1, 5, "tan")
-    g.rect(1, 32 + b - arms, 4, 1, "brown")
+    g.rect(1, 22 + b, 4, 9, "purple")
+    g.rect(4, 22 + b, 1, 9, "plum")
+    g.rect(1, 29 + b, 4, 1, "white")
+    g.rect(1, 30 + b, 4, 5, "cream")
+    g.rect(4, 30 + b, 1, 5, "tan")
+    g.rect(1, 32 + b, 4, 1, "brown")
     g.rect(19, 22 + b, 3, 4, "purple")
     g.rect(19, 25 + b, 3, 1, "plum")
     g.rect(19, 26 + b, 2, 2, "skin1")
@@ -1475,7 +1475,7 @@ BIB = ("111", "001", "010", "100", "100"), ("111", "100", "111", "001", "111")
 def bib(g, cx, cy):
     """The race number "75" centred on design point (cx, cy), 1px apart, in ink; under 1.5x the bib is too
     small for digits and takes a 1px ink bar instead."""
-    s, px = getattr(g, "s", 1), getattr(g, "g", g)
+    s, px = scale_of(g), raster(g)
     sy = getattr(g, "sy", s)
     if s < 1.5:
         x0, y0 = math.floor((cx - 2) * s + 0.5), math.floor(cy * sy)

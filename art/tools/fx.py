@@ -57,14 +57,14 @@ def rim(g, col="plum"):
     return g
 
 
-def star4(g, cx, cy, r, col, core="white"):
-    """A four-point twinkle: a plus with arms r long and a lit centre."""
+def star4(g, cx, cy, r, col):
+    """A four-point twinkle: a plus with arms r long and a white centre."""
     for k in range(-r, r + 1):
         g.p(cx + k, cy, col)
         g.p(cx, cy + k, col)
     if r >= 3:
         g.rect(cx - 1, cy - 1, 3, 3, col)
-    g.p(cx, cy, core)
+    g.p(cx, cy, "white")
 
 
 def burst(g, cx, cy, r_out, r_in, points, col, turn=0.0):
@@ -332,7 +332,7 @@ def debris_litter(step):
 def sparkle(step):
     g = Grid(16, 16)
     r = (2, 5, 3, 1)[step]
-    star4(g, 8, 8, r, ("white", "yellow", "amber", "yellow")[step], "white")
+    star4(g, 8, 8, r, ("white", "yellow", "amber", "yellow")[step])
     if step in (1, 2):
         for dx, dy in ((-5, -5), (5, -4), (-4, 5), (5, 5)):
             g.p(8 + dx * (step / 1.5), 8 + dy * (step / 1.5), "white" if step == 1 else "yellow")

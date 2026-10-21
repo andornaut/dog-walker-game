@@ -44,7 +44,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import scene as sn  # noqa: E402
-from pixel import K, dk  # noqa: E402
+from pixel import dk  # noqa: E402
 
 # ---------- the band and the camera ----------
 # Everything below is drawn from these, read from the game's layout export. The camera is the
@@ -198,7 +198,7 @@ def ground(cv, lawn="green"):
 # A house's windows and door: the window frame's offset below the eaves, its width and height,
 # and the door's height.
 HOUSE = (6, 12, 10, 18)
-# SLIM is the backdrops' slim house, under a steep 22-row roof: tall windows either side of the door.
+# SLIM is the slim house's windows and door: tall windows either side of the door.
 SLIM = (4, 8, 10, 13)
 # The lit left edge of a roof, a ramp step lighter than the roof.
 RAKE = dict(slate="grey", dslate="slate", navy="dslate", purple="mauve", dred="red", brown="tan")
@@ -339,22 +339,10 @@ def scale(yc):
     return (BAR + yc - YH) / KS
 
 
-def at(x, z, h=0):
-    """Screen position of the world point x across, z along, h up."""
+def at(x, z):
+    """Band position of the ground point x across, z along, and its scale."""
     s = F / (F + z)
-    return CX + x * s, YH + KS * s - BAR - h * s, s
-
-
-def poly(cv, pts, c):
-    from PIL import ImageDraw
-
-    xy = [(round(at(*p)[0] - 0.5), round(at(*p)[1] - 0.5)) for p in pts]
-    ImageDraw.Draw(cv.img).polygon(xy, fill=sn.rgb(K.get(c, c)))
-
-
-def front(cv, x0, x1, z, h0, h1, c):
-    """A patch on a wall that faces the camera."""
-    poly(cv, [(x0, z, h0), (x1, z, h0), (x1, z, h1), (x0, z, h1)], c)
+    return CX + x * s, YH + KS * s - BAR, s
 
 
 def noise(x, y):
@@ -768,7 +756,7 @@ def bay_gable(cv, cx, w, wall, roof, door, base, trim="white", curtains=None):
     bay window on its left half, a door on its right."""
     x = cx - w // 2
     top, roof_h = base - 50, 22
-    house(cv, x, w, wall, roof, door, top=top, base=base, roof_h=roof_h, parts=(4, 8, 10, 13), eave=2,
+    house(cv, x, w, wall, roof, door, top=top, base=base, roof_h=roof_h, parts=SLIM, eave=2,
           curtains=curtains)
     half = w / 2 + 2
     for i in range(1, roof_h):

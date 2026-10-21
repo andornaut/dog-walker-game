@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Draw the info icons shown beside a dog in the pack picker, the shop and the zone banner, a walker's
-perk icons, the debuff and effect icons, the walk bar's effect wells, the walk's message strip
-icons and a path card's difficulty paws.
+"""Draw the pull squirrel, the zone icons, a walker's perk icons, the debuff and effect icons, the
+walk bar's effect wells, the walk's message strip icons and a path card's difficulty paws.
 
 16x16 images in the house palette with coloured outlines, on transparency:
-icon-trait-chaser           a black squirrel
+icon-trait-chaser           a black squirrel, in the pull bubble and on the message strip
 icon-perk-<perk>            a walker's perk, on walker tiles, the new walker celebration and
                             the message strip: calm-voice (a sky speech bubble with a white
                             wave), kind-words (a pink speech bubble with a red heart), long-reach
@@ -80,7 +79,7 @@ def chaser():
     return g
 
 
-# ---------- walkers: perks, on walker tiles, the new walker celebration and the state strip ----------
+# ---------- walkers: perks, on walker tiles, the new walker celebration and the message strip ----------
 # Each holds its silhouette on cream and on the strip's ink. The two voice perks are speech bubbles told
 # apart by colour and mark: calm voice a sky bubble with a wave, kind words a pink one with a heart.
 
@@ -298,10 +297,10 @@ def zoomies():
     return g
 
 
-# ---------- the state strip, in the top bar's ink wells (#181425) ----------
-# Every fill that carries a shape holds 3:1 or more on ink; the darker coloured outlines sink
-# into the well, so the silhouette is the fill. Dark ramp colours (dbrown, dred, forest, blue)
-# appear only inside a lighter fill.
+# ---------- upgrades: the shop, the cards and the message strip ----------
+# Every fill that carries a shape also holds 3:1 or more on ink, where the 20x20 copies sit in the walk
+# bar's wells and their darker outlines sink, so the silhouette is the fill. Dark ramp colours (dbrown,
+# dred, forest, blue) appear only inside a lighter fill.
 
 BIG_HEART = [".111.111.", "11111111p", "1111111pp", "111111ppp", ".11111pp.", "..111pp..", "...1pp...", "....p...."]
 
@@ -436,9 +435,8 @@ def gear_lucky_collar():
 
 
 # ---------- the walk bar's effect wells: each perk, gear and upgrade icon drawn again at 20x20 ----------
-# The same subject, colours and silhouette as its 16x16 icon, redrawn with a 1px margin for the
-# outline and the room spent on detail. Like the state strip's, every fill that carries a shape holds
-# 3:1 or more on the well's ink.
+# The same subject, colours and silhouette as its 16x16 icon, redrawn with the room spent on detail.
+# Like the 16x16 icons', every fill that carries a shape holds 3:1 or more on the well's ink.
 
 BIG_HEART_20 = [".111...111.", "11111.11111", "11111111111", "1111111111p", ".11111111p.", "..111111p..",
                 "...1111p...", "....11p....", ".....p....."]

@@ -49,12 +49,12 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 - The neutral greys (`NEUTRAL` in `pixel.py`: nlgrey d8d8d8, ngrey a4a4a4, nslate 727272, ndslate 4a4a4a, ink as their darkest step) are for disabled and locked UI only: Endesga's greys are cool, and disabled UI reads as neutral grey.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
-- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the light roads in `ROADS` (`pixel.py`: tan, pink, skin2), and the fill carries the dslate road (the Distillery District's). A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky; `rim` and `LIT` in `art/tools/road.py`) so it holds 3:1 on dslate, Kensington Market's dbrick and Yonge Street's shale. A sprite dark all over, such as Pepe's black coat, takes a grey outline instead. Cabbagetown's grey and The Beaches' cream are lighter than skin2, so `road_edge` holds on them unchanged. A white coat on the road is white, not light grey, its lower-right silhouette one ramp step darker.
+- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the light roads in `ROADS` (`pixel.py`: tan, pink and skin2, after the dslate road), and the fill carries the dslate road (the Distillery District's). A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky; `rim` and `LIT` in `art/tools/road.py`) so it holds 3:1 on dslate, Kensington Market's dbrick and Yonge Street's shale. A sprite dark all over, such as Pepe's black coat, takes a grey outline instead. Cabbagetown's grey and The Beaches' cream are lighter than skin2, so `road_edge` holds on them unchanged. A white coat on the road is white, not light grey, its lower-right silhouette one ramp step darker.
 - Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them stay two ramp steps darker.
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings are a few flat patches. A face seen from the front stays clean: flat skin with a 1px shadow down its near (right) edge beside the eyes, never across the jaw or mouth (`face_disc`).
-- Effects (`fx-`) take a fixed 1px rim: plum, navy for water, teal for green. `fx-bark` keeps a ramp outline; `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` has no rim. Hazard warnings are outlined in ink.
+- Effects (`fx-`) take a fixed 1px rim: plum, navy for water (`fx-splash`). `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` and `fx-tap` have no rim. Hazard warnings are outlined in ink.
 - Ground decals have no outline and no shadow.
-- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline. A walker's pace and style icons are animals and objects, never a bow, bone, squirrel, moon, paw or bolt, so they never read as a dog's trait or energy.
+- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
 ## Contrast
@@ -65,13 +65,13 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 
 ### UI colour pairs
 
-Names are `PALETTE` names in `src/scenes/palette.ts`, or `K` names for a colour it leaves out; ratios are WCAG.
+Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the neutral greys and any colour it leaves out; ratios are WCAG.
 
 | Pair                           | Ratio | Use                                                                                   |
 | ------------------------------ | ----- | ------------------------------------------------------------------------------------- |
 | amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                             |
 | amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                         |
-| cream on darkBrown             | 5.85  | Text on the column or wood                                                            |
+| cream on darkBrown             | 5.85  | Text on the wood                                                                      |
 | darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                   |
 | darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                          |
 | darkRed on nlgrey              | 5.15  | Price on the short plate                                                              |
@@ -91,12 +91,11 @@ Names are `PALETTE` names in `src/scenes/palette.ts`, or `K` names for a colour 
 | tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                        |
 | `ui-difficulty` on cream       | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim                                |
 | `ui-zone-pips` on ink          | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked                                  |
-| white on darkBrown             | 8.48  | Floating loss on the column, filled page dot                                          |
+| white on darkBrown             | 8.48  | Filled page dot                                                                       |
 | white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                          |
 | white on forest                | 7.80  | The purchase confirmation's title                                                     |
 | white on navy                  | 13.89 | `ui-detail-band` title                                                                |
 | white over the dimmed road     | 4.5+  | Card subtitle                                                                         |
-| yellow on darkBrown            | 6.79  | Floating gain on the column                                                           |
 | yellow on navy                 | 11.13 | `ui-scroll-thumb` in `ui-scroll-track`                                                |
 
 ## UI
@@ -137,7 +136,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 ### Icon buttons and top bars
 
-- Each `ui-icon-button` face holds its 16×16 icon at +2,+1 (+2,+3 pressed), centred in a hit of at least 34×44. Positions are `topBar.buttons` and `scenes.home` in `shared/export/layout.json`.
+- Each `ui-icon-button` face holds its 16×16 icon at +2,+1 (+2,+3 pressed), centred in a hit of at least 34×44. Positions are `walkBar.buttons` and `scenes.home` in `shared/export/layout.json`.
 - `icon-sound`: `on` is a speaker with two waves, `off` the same speaker with a pink X. Settings rows lead with their `-panel` icon (`off` adds a dred X).
 - The start screen's top bar (plum rows 0 to 37, a dbrown rule on 38 and 39) and the walk bar (`ui-walk-bar`, 360×48) show the bank in an ink well with no coin: an amber "$" (9.71:1 on ink) then the amount in cream (12.44:1). Their icon buttons line up: the start screen's Logbook, Help, Sound and Settings sit over the walk bar's Help, Sound, Settings and Pause.
 
@@ -145,7 +144,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece's drawing in `art/tools/ui.py`.
 
-- The walk bar is plum wood with an ink cash well, a neighbourhood well (the zone's name in cream `font-body`, "n of N" right-aligned in grey) and five `ui-effect-well`s holding the effects' `-20` icons. The 16×16 icon keys stay for the message strip, the shop and the cards.
+- The walk bar is plum wood with an ink cash well, a neighborhood well (the zone's name in cream `font-body`, "n of N" right-aligned in grey) and five `ui-effect-well`s holding the effects' `-20` icons. The 16×16 icon keys stay for the message strip, the shop and the cards.
 - A `ui-debuff-bar` (360×16) per active debuff sits under the walk bar, its face, shade and fill in the debuff's colours: muddy brown, dbrown and tan with an ink name (4.66:1); stinky mauve, purple and pink with a white name (4.70:1); zoomies green, forest and yellow with an ink name (8.41:1).
 - `ui-dog-card` (120×74) is a file card in the neutral `ui-section` look so the eye stays on the road: a navy face, the dog's photo and the owner's photo (`face-owner-<dog>-20`) with the owner's name in tan and hearts as `ui-heart` `full-dark` and `empty-dark`. The `empty` card (a fired dog's) is the same frame in dslate with the FIRED plate across the photo. `ui-dog-card-warn` pulses at 1 ♥ (`static` with reduced motion); `heart-loss` fills only the hearts area, never the card's edge, so `ui-dog-card-warn` stays the card's only border.
 - `ui-owner-tab` pops in centred on a card's top edge when its dog's hearts change, its owner quips or the dog is fired; the quip goes in `ui-quip` beside it (or above, when neither side has room), named by `ui-quip-name`.
@@ -162,7 +161,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 | Event         | Shows                                                                                                                                                                                                             |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 ♥           | Owner's `worried` face and `ui-dog-card-warn`                                                                                                                                                                     |
-| Encounter hit | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (goose white, other dog pink, puddle sky, skunk mauve, squirrel orange, thief amber); the label at 2× on `ui-hit-label`                  |
+| Encounter hit | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (other dog pink, puddle sky, skunk mauve, squirrel orange, thief amber); the label at 2× on `ui-hit-label`                               |
 | Fee payout    | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                 |
 | Firing        | Owner's `fired` face at 2× on `fx-fired-pop` at 2×; the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                                                                   |
 | Heart change  | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog, then `fly` into its card; on a loss the card plays `heart-loss`                                                                                            |
@@ -185,7 +184,7 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the sign logo: 
 
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane at the pack faces the player (`cyclist`, `jogger`, `kid-on-bike`, `minor-scooter`'s `ride`); anything going up a lane ahead of the pack, or slower than the road, is seen from behind (`stroller`, `ice-cream-truck`, `streetcar`). `coyote` steps toward the pack in any direction, so it is three-quarter front, angled right and mirrored for left.
 - `squirrel`, `squirrel-dash`, `icon-trait-chaser` and `badge-squirrel` are Toronto's black squirrel (`SQUIRREL_FUR` in `art/tools/road.py`), lit by `LIT`'s rim.
-- `pull-out` and every `drive` and `ride` are 4 frames at 100ms, tread lines rolling 1px a frame; `pull-out` is drawn pulling right with the right indicator blinking, mirrored for left.
+- `pull-out` and every `drive` are 4 frames at 100ms and every `ride` 4 frames at 90 to 120ms, tread lines rolling 1px a frame; `pull-out` is drawn pulling right with the right indicator blinking, mirrored for left.
 - The warning cues are yellow, ink outlined, 16×16, 2 frames at 250ms.
 
 ### Zone celebration
@@ -204,7 +203,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 
 - Animation names are Aseprite tag names. New tags go after existing ones so frame indices hold. Motion is in whole pixels.
 - Walkers are seen from behind: `walk` 4, `react` 2, `stumble` 4 and `idle` 2 frames, no gear variants. `wave` and `cheer` face the camera.
-- Road people and walking animals take the walkers' stride in `walk`: 4 frames at 100ms, a foot lifted, both feet 1px up as the body passes 1px higher, the other foot lifted, passing again.
+- Road people and walking animals take the walkers' stride in `walk`: 4 frames (100ms; `stroller` 160ms like the walkers, `coyote` 120ms), a foot lifted, both feet 1px up as the body passes 1px higher, the other foot lifted, passing again.
 - Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap, the body bobs on the passing frames with the ears lagging 1px, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
 - Every road sprite that stands or waits, depth variants included, loops an `idle` with frame 0 the rest pose. Reduced motion shows frame 0.
 
@@ -241,7 +240,7 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 
 - Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5×. They are front elevations, never flipped, outlined with `road_edge` and no light rim, with one static `idle` frame, so the verges never pull the eye from the road.
 - A prop never reads as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for (the fruit stand has no wheels, unlike the hot dog cart; the transit stop has no shelter; the street lamp lights both ways, since a prop is never flipped).
-- Each side has a slot every 140 road px, slot n at z = 140n. With m = n − offset (left 0, right 1), an even m is a lot and an odd m a gap, and k = floor(m / 2); a side takes gap (gapStart + k) mod 6, left gaps starting at 0 and right at 2. The one lot is empty; gap 0 holds the neighborhood's tree or street furniture and gap 3 its own prop, so each side has a prop every 6 slots and over both sides one stands every 420 px.
+- Each side has a slot every 140 road px, slot n at z = 140n. With m = n − offset (left 0, right 1), an even m is a lot and an odd m a gap, and k = floor(m / 2); a side takes gap (gapStart + k) mod 6, left gaps starting at 0 and right at 2. Every lot is empty; gap 0 holds the neighborhood's tree or street furniture and gap 3 its own prop, so each side has a prop every 6 slots and over both sides one stands every 420 px.
 - Every frame's inner edge is at across 212 or more, past the sidewalk's outer edge at 208. No prop stands within a zone's start strip.
 - Free-standing props take the road objects' ground shadow in the zone's `shadowColour`, a darker tone of its lawn or paving.
 
@@ -271,16 +270,16 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 
 - Each neighborhood has its own sky, flat above `CALM` (70 rows over the far side's ground row) but for Yonge Street's towers. Ink edges hold 3:1 or more on every sky.
 
-| Sky                                | Bands or colours                                                    | Where                                             |
-| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------- |
-| Cabbagetown (dusk)                 | lilac, pink, peach, gold bands; a crescent moon and the first stars | `backdrop-cabbagetown`, `card-zone-cabbagetown`   |
-| Distillery District (warm evening) | peach over skin1, gulls                                             | `backdrop-distillery-district`                    |
-| High Park (deep clear blue)        | azure over sky, white clouds                                        | `backdrop-high-park`                              |
-| Kensington Market (deep sunburst)  | flat rays of lake and dturq from the end of the street (`sunburst`) | `backdrop-kensington-market`                      |
-| Sunset                             | pink, orange, amber, yellow bands; a striped sun (`SUNSET_SKY`)     | `screen-end`                                      |
-| The Beaches (late afternoon)       | gold over yellow, small clouds and gulls                            | `backdrop-the-beaches`                            |
-| Toronto at night                   | navy, purple, mauve bands; a crescent moon, stars in the navy band  | `screen-loading`                                  |
-| Yonge Street (evening)             | slate, dslate, purple, mauve bands; a full moon and stars           | `backdrop-yonge-street`, `card-zone-yonge-street` |
+| Sky                                | Bands or colours                                                    | Where                          |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------ |
+| Cabbagetown (dusk)                 | lilac, pink, peach, gold bands; a crescent moon and the first stars | `backdrop-cabbagetown`         |
+| Distillery District (warm evening) | peach over skin1, gulls                                             | `backdrop-distillery-district` |
+| High Park (deep clear blue)        | azure over sky, white clouds                                        | `backdrop-high-park`           |
+| Kensington Market (deep sunburst)  | flat rays of lake and dturq from the end of the street (`sunburst`) | `backdrop-kensington-market`   |
+| Sunset                             | pink, orange, amber, yellow bands; a striped sun (`SUNSET_SKY`)     | `screen-end`                   |
+| The Beaches (late afternoon)       | gold over yellow, small clouds and gulls                            | `backdrop-the-beaches`         |
+| Toronto at night                   | navy, purple, mauve bands; a crescent moon, stars in the navy band  | `screen-loading`               |
+| Yonge Street (evening)             | slate, dslate, purple, mauve bands; a full moon and stars           | `backdrop-yonge-street`        |
 
 - A zone card repeats its backdrop's sky, bands and sun included.
 - Banded skies are hard-edged horizontal bands of flat colour (`bands`), each 0.7 times the height of the band above it. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.

@@ -54,7 +54,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, edged, main  # noqa: E402
+from pixel import Grid, K, edged, main, raster, scale_of  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
 from road import SCALE, SQUIRREL_FUR, face_disc, face_front, lean, lit  # noqa: E402
@@ -148,7 +148,7 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
     # the broken leash: up off the collar and trailing well clear of the back, waving, frayed at the end
     # the leash is 1px wide and unbroken at any scale: its points are placed on the drawn grid and joined there
     w1, w2, w3 = leash
-    sc, px = getattr(g, "s", 1), getattr(g, "g", g)
+    sc, px = scale_of(g), raster(g)
     pts = [(math.floor((x + 0.5) * sc), math.floor((y + b + 0.5) * sc))
            for x, y in ((19, 13), (15, 7), (10, 5 + w1), (6, 4 + w2), (3, 5 + w3))]
     for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
@@ -280,7 +280,7 @@ def cyclist(lf=36, rf=41):
         g.rect(x - 1 if x < 16 else x, foot, 4, 2, "white")
         g.rect(x - 1 if x < 16 else x, foot + 1, 4, 1, "lgrey")
         g.rect(x + (2 if x < 16 else -1), foot + 2, 2, 1, "grey")
-    # jersey: bright lime with a white chest band, leaning over the bars
+    # jersey: bright green with a white chest band, leaning over the bars
     g.rect(9, 20, 14, 10, "green")
     g.rect(20, 20, 3, 10, "dgreen")
     g.rect(9, 24, 14, 2, "white")

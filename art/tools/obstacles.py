@@ -54,7 +54,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, edged, main, raster, road_edge  # noqa: E402
+from pixel import Grid, K, edged, main, raster, road_edge, scale_of  # noqa: E402
 from road import lit  # noqa: E402
 
 # The drawings are in layout pixels: a 1-lane sprite's frame is SIZE square and a lane-spanning obstacle ROW
@@ -83,12 +83,12 @@ def drawn(s, draw, *args, **q):
 
 def unit(g):
     """One drawn pixel in g's layout pixels, across and down, so a 1px motion stays 1px at any scale."""
-    return 1 / getattr(g, "s", 1), 1 / getattr(g, "sy", getattr(g, "s", 1))
+    return 1 / scale_of(g), 1 / getattr(g, "sy", scale_of(g))
 
 
 def pixel_edge(g):
     """The pixel edge of a full-size coordinate on the grid holding g's pixels."""
-    s = getattr(g, "s", 1)
+    s = scale_of(g)
     return lambda v: math.floor(v * s + 0.5)
 
 
@@ -378,7 +378,7 @@ def lettering(g, cx, y, text, c, bar=None):
     grid holding g's pixels, 1px apart. Where the grid is too small for it to sit inside the layout's 5 rows
     and 4 columns a letter, bar draws a 1px line of that colour across its middle instead, or nothing."""
     px = raster(g)
-    s, sy = getattr(g, "s", 1), getattr(g, "sy", getattr(g, "s", 1))
+    s, sy = scale_of(g), getattr(g, "sy", scale_of(g))
     w = 4 * len(text) - 1
     if s < 0.85 or sy * 5 < 5:
         if bar:

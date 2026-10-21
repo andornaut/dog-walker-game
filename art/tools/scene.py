@@ -44,7 +44,7 @@ class Canvas:
             self.fill(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n), 1, 1, c)
 
 
-# ---------- pixel font (3x5, with a 5-wide heart) ----------
+# ---------- pixel font (3x5) ----------
 
 G = dict(
     A="010101111101101", B="110101110101110", C="011100100100011", D="110101101101110", E="111100110100111",
@@ -62,25 +62,22 @@ G.update({"0": "111101101101111", "1": "010110010010111", "2": "110001010100111"
           "%": "101001010100101", "×": "000101010101000"})
 
 
-def glyph(ch):
-    return 3, G.get(ch)
-
-
 def text_w(s, sc=1):
-    return max(0, sum((glyph(ch)[0] + 1) * sc for ch in s) - sc)
+    """The width of s in the 3x5 font at scale sc: 3 columns a glyph, 1 between."""
+    return max(0, 4 * sc * len(s) - sc)
 
 
 def text(cv, s, x, y, col, sc=1, acc=None):
     acc = acc or {}
     cx = x
     for ch in s:
-        w, bits = glyph(ch)
+        bits = G.get(ch)
         if bits:
             for r in range(5):
-                for k in range(w):
-                    if bits[r * w + k] == "1":
+                for k in range(3):
+                    if bits[r * 3 + k] == "1":
                         cv.fill(cx + k * sc, y + r * sc, sc, sc, acc.get(ch, col))
-        cx += (w + 1) * sc
+        cx += 4 * sc
 
 
 def text_c(cv, s, mid, y, col, sc=1, acc=None):
