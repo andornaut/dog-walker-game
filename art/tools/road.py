@@ -1137,22 +1137,30 @@ def tourist_top(flash):
     return top
 
 
+# The bills sticking out of the wallet, back to front: left edge, width and top row.
+WALLET_BILLS = ((2, 5, 3.5), (9, 5, 2.5), (5.5, 5, 1))
+
+
 def wallet(glint):
-    """The lost wallet, with the road outline. Its dark leather takes a light rim so it holds on Elm Avenue: the
-    flap's top edge catches the light in tan, the left edge skin2, and brown runs down the right and along
-    the bottom."""
+    """The lost wallet, a jackpot filling most of its frame, with the road outline: three green bills stick
+    up out of it at staggered heights, each framed in forest with a dgreen seal, over a wide dark leather
+    wallet. Its leather takes a light rim so it holds on Elm Avenue: the flap's top edge catches the light in
+    tan, the left edge skin2, and brown runs down the right and along the bottom. glint twinkles a white
+    sparkle at its top right."""
     g = edged(Grid(16, 16))
-    g.rect(5, 4, 7, 4, "green")
-    g.rect(5, 4, 7, 1, "dgreen")
-    g.rect(8, 5, 2, 2, "dgreen")
-    g.rect(3, 6, 10, 7, "dbrown")
-    g.rect(3, 6, 10, 1, "tan")
-    g.rect(3, 9, 10, 1, "plum")
-    g.rect(11, 9, 2, 2, "amber")
+    u = 1 / getattr(g, "s", 1)
+    for x, w, top in WALLET_BILLS:
+        g.rect(x, top, w, 8 - top, "forest")
+        g.rect(x + u, top + u, w - 2 * u, 8 - top, "green")
+        g.ell(x + w / 2, top + 2.5, 1, 1.2, "dgreen")
+    g.rect(1.5, 7, 13, 7.5, "dbrown")
+    g.rect(1.5, 7, 13, 1, "tan")
+    g.rect(1.5, 10.5, 13, 1, "plum")
+    g.rect(12, 10, 2, 2, "amber")
     if glint:
-        # a 3x3 cross centred on layout pixel (13, 3), drawn in pixels so it stays a cross at any scale
+        # a 3x3 cross centred on layout pixel (14, 1), drawn in pixels so it stays a cross at any scale
         s = getattr(g, "s", 1)
-        px, cx, cy = getattr(g, "g", g), math.floor(13.5 * s), math.floor(3.5 * s)
+        px, cx, cy = getattr(g, "g", g), math.floor(14.5 * s), math.floor(1.5 * s)
         px.rect(cx - 1, cy, 3, 1, "white")
         px.rect(cx, cy - 1, 1, 3, "white")
     return rim(g, WALLET_RIM)

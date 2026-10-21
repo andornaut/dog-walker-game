@@ -2055,8 +2055,8 @@
       "png": "sprites/lost-wallet.png",
       "json": "sprites/lost-wallet.json",
       "anchor": {
-        "feetY": 20,
-        "opaqueWidth": 17
+        "feetY": 22,
+        "opaqueWidth": 22
       }
     },
     {
@@ -2065,7 +2065,7 @@
       "json": "sprites/lost-wallet@50.json",
       "anchor": {
         "feetY": 11,
-        "opaqueWidth": 9
+        "opaqueWidth": 10
       }
     },
     {
@@ -2074,7 +2074,7 @@
       "json": "sprites/lost-wallet@62.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 11
+        "opaqueWidth": 13
       }
     },
     {
@@ -2082,8 +2082,8 @@
       "png": "sprites/lost-wallet@75.png",
       "json": "sprites/lost-wallet@75.json",
       "anchor": {
-        "feetY": 16,
-        "opaqueWidth": 13
+        "feetY": 17,
+        "opaqueWidth": 16
       }
     },
     {
@@ -2091,8 +2091,8 @@
       "png": "sprites/lost-wallet@88.png",
       "json": "sprites/lost-wallet@88.json",
       "anchor": {
-        "feetY": 18,
-        "opaqueWidth": 15
+        "feetY": 20,
+        "opaqueWidth": 19
       }
     },
     {
