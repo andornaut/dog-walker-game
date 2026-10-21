@@ -397,17 +397,18 @@ def rush_hour():
 # The gear, after its 32x32 item art in icons.py.
 
 def gear_dog_whistle():
+    """The dog whistle without its sound lines, which blur together at 16x16."""
     g = Grid(16, 16)
-    g.ell(3.5, 3.5, 3, 3.2, "mauve", "purple")
-    g.ell(3.5, 3.5, 1.4, 1.6, None)
-    g.ell(8, 10.5, 5, 4.5, "lgrey", "grey", "white")
-    g.rect(9, 5, 6, 3, "lgrey")
-    g.rect(9, 5, 6, 1, "white")
-    g.rect(14, 5, 1, 3, "grey")
-    g.rect(10, 6, 3, 1, "dslate")
-    g.rect(6, 10, 2, 2, "slate")
-    for x, y in ((11, 2), (14, 3)):
-        g.p(x, y, "cyan")
+    g.ell(6.5, 11, 5.5, 4.8, "lgrey", "grey", "white")
+    g.rect(6, 7, 10, 4, "lgrey")
+    g.rect(6, 7, 10, 1, "white")
+    g.rect(6, 10, 10, 1, "grey")
+    g.rect(15, 7, 1, 4, "grey")
+    g.rect(7, 7, 3, 1, None)
+    g.rect(7, 8, 3, 1, "dslate")
+    for x, y in ((4, 10), (6, 10), (3, 11), (7, 11)):
+        g.p(x, y, "dred")
+    g.rect(4, 12, 3, 2, "dred")
     return g
 
 
@@ -654,20 +655,20 @@ def sweet_talker20():
 
 
 def gear_dog_whistle20():
-    """The dog whistle: a silver whistle with its mouthpiece up and right, an ink slot, a purple
-    lanyard loop (mauve, so it holds on the walk bar's navy) on its left end and cyan sound marks
-    off the slot."""
+    """The dog whistle: a silver sports whistle side on with an ink slot, a dred paw on the barrel and
+    three cyan sound lines fanning up from the slot."""
     g = Grid(20, 20)
-    g.ell(4.5, 4.5, 3.6, 4, "mauve", "purple")
-    g.ell(4.5, 4.5, 1.8, 2.2, None)
-    g.ell(10, 13, 6, 5.5, "lgrey", "grey", "white")
-    g.rect(11, 6, 7, 4, "lgrey")
-    g.rect(11, 6, 7, 1, "white")
-    g.rect(17, 6, 1, 4, "grey")
-    g.rect(11, 9, 7, 1, "grey")
-    g.rect(12, 7, 4, 1, "dslate")
-    g.rect(8, 12, 3, 3, "slate")
-    for x, y in ((12, 3), (12, 2), (15, 3), (16, 2), (19, 4), (19, 5)):
+    g.ell(8, 13.5, 7, 6, "lgrey", "grey", "white")
+    g.rect(8, 8, 12, 5, "lgrey")
+    g.rect(8, 8, 12, 1, "white")
+    g.rect(8, 12, 12, 1, "grey")
+    g.rect(19, 8, 1, 5, "grey")
+    g.rect(9, 8, 4, 1, None)
+    g.rect(9, 9, 4, 1, "dslate")
+    for x, y in ((5, 12), (7, 12), (4, 13), (8, 13)):
+        g.p(x, y, "dred")
+    g.rect(5, 14, 3, 3, "dred")
+    for x, y in ((10, 3), (10, 4), (10, 5), (5, 4), (6, 5), (14, 5), (15, 4)):
         g.p(x, y, "cyan")
     return g
 

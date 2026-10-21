@@ -75,21 +75,20 @@ def lucky_collar(g):
 
 
 def dog_whistle(g):
-    """The dog whistle: a silver sports whistle lit white along its top, its mouthpiece reaching up
-    and right with an ink slot, a grey ring on its left end looped through a mauve lanyard, and two
-    cyan sound marks off the slot."""
-    g.ell(7, 6.5, 5, 5.5, "mauve", "purple", "pink")
-    g.ell(7, 6.5, 3, 3.5, None)
-    g.ell(9, 13, 3, 3, "grey")
-    g.ell(9, 13, 1.5, 1.5, None)
-    g.ell(16, 19, 8.5, 7, "lgrey", "grey", "white")
-    g.rect(18, 10, 10, 6, "lgrey")
-    g.rect(18, 15, 10, 1, "grey")
-    g.rect(18, 10, 10, 1, "white")
-    g.rect(27, 10, 1, 6, "grey")
-    g.rect(20, 12, 5, 2, "dslate")
-    g.ell(14, 20, 2.6, 2.6, "slate")
-    for x, y in ((21, 5), (21, 6), (25, 6), (26, 5), (29, 8), (30, 8)):
+    """The dog whistle: a silver sports whistle side on, lit white along its top, its mouthpiece
+    running right with an ink slot on top, a dred paw stamped on the barrel, and three cyan sound
+    lines fanning up from the slot."""
+    g.ell(13, 20, 9, 8, "lgrey", "grey", "white")
+    g.rect(13, 12, 17, 7, "lgrey")
+    g.rect(13, 12, 17, 1, "white")
+    g.rect(13, 18, 17, 1, "grey")
+    g.rect(29, 12, 1, 7, "grey")
+    g.rect(15, 12, 5, 3, None)
+    g.rect(15, 14, 5, 1, "dslate")
+    for x, y in ((10, 17), (12, 17), (9, 18), (13, 18)):
+        g.p(x, y, "dred")
+    g.rect(10, 19, 3, 3, "dred")
+    for x, y in ((16, 9), (16, 8), (16, 7), (20, 9), (21, 8), (22, 7), (12, 9), (11, 8), (10, 7)):
         g.p(x, y, "cyan")
 
 
