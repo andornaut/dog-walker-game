@@ -688,9 +688,14 @@ def tip(rx):
 
 # ---------- encounters (facing the player) ----------
 
-def skunk(sway=0):
+# The skunk's idle: the tail sways right, back, blinking, then left.
+SKUNK_IDLE = (dict(sway=0), dict(sway=1), dict(sway=0, blink=True), dict(sway=-1))
+
+
+def skunk(sway=0, blink=False):
     """The skunk facing the player at its own eye level, a squat front elevation: its tail fans up behind
-    its right shoulder with a white stripe curving along its inner edge, and sways 1px; the head is in front
+    its right shoulder with a white stripe curving along its inner edge, and sways 1px either way; blink
+    shuts its eyes to ink lines. The head is in front
     of the body, the white blaze running up from the nose between the ears, front paws on the road. The road
     outline and a grey rim on the dark fur so it holds on Elm Avenue."""
     g = edged(Grid())
@@ -710,6 +715,9 @@ def skunk(sway=0):
     g.rect(13, 13, 2, 8, "white")
     g.rect(14, 14, 1, 7, "lgrey")
     for x in (10, 16):
+        if blink:
+            g.rect(x, 19, 2, 1, "ink")
+            continue
         g.rect(x, 18, 2, 2, "white")
         g.rect(x + (1 if x < 13 else 0), 18, 1, 2, "ink")
     g.rect(13, 21, 2, 1, "pink")
@@ -755,28 +763,34 @@ def squirrel_head(g, x, y):
     g.rect(x - 1, y + 1.5, 2, 1, "plum")
 
 
-def squirrel_run(gather):
-    """The squirrel bounding down the road at the player, a front elevation. Stretched (gather False), it
-    lands low and wide, front paws planted apart, tail streaming up behind; gathered, it is airborne 3px
-    higher, paws tucked under its chin and the tail flung up in an arch."""
+# The squirrel's bound, landing first: (body y, head y, tail (x, y, rx, ry), front paws (left x, right x, y,
+# height)). It lands stretched low and wide with its tail streaming up behind, crouches to push off with its
+# tail swinging over, flies gathered 3px higher with its paws tucked under its chin and its tail arched, then
+# reaches down for the next landing.
+SQUIRREL_BOUND = (
+    (22, 18.5, (22, 14, 5, 7), (8, 21, 26, 3)),
+    (21, 17.5, (21.5, 11.5, 5, 6.5), (9, 20, 25.5, 3)),
+    (19, 14.5, (20, 9, 5, 6), (11, 17, 24, 2)),
+    (20.5, 16, (21, 11, 5, 6.5), (9.5, 19.5, 25, 3)),
+)
+
+
+def squirrel_run(phase):
+    """The squirrel bounding down the road at the player, a front elevation, at phase 0 to 3 of
+    SQUIRREL_BOUND. Its body spreads wider the lower it is."""
     g = edged(Grid())
-    if gather:
-        g.cel(20, 9, 5, 6, "ochre", "rust", "tan")
-        g.cel(20, 9.5, 2.5, 4, "tan")
-        g.cel(15, 19, 5.5, 5, "ochre", "rust", "tan")
-        g.cel(15, 20, 3, 3, "cream")
-        for x in (11, 17):
-            g.rect(x, 24, 3, 2, "rust")
-        squirrel_head(g, 15, 14.5)
-    else:
-        g.cel(22, 14, 5, 7, "ochre", "rust", "tan")
-        g.cel(22, 14.5, 2.5, 4.5, "tan")
-        g.cel(16, 22, 7, 4.5, "ochre", "rust", "tan")
-        g.cel(16, 23, 3.5, 2.5, "cream")
-        for x in (8, 21):
-            g.rect(x, 26, 3, 3, "rust")
-            g.rect(x, 28, 3, 1, "tan")
-        squirrel_head(g, 16, 18.5)
+    by, hy, (tx, ty, trx, try_), (lx, rx, py, ph) = SQUIRREL_BOUND[phase]
+    low = (by - 19) / 3
+    g.cel(tx, ty, trx, try_, "ochre", "rust", "tan")
+    g.cel(tx, ty + 0.5, 2.5, try_ - 2.5, "tan")
+    cx = 15 + low
+    g.cel(cx, by, 5.5 + 1.5 * low, 5 - 0.5 * low, "ochre", "rust", "tan")
+    g.cel(cx, by + 1, 3 + 0.5 * low, 3 - 0.5 * low, "cream")
+    for x in (lx, rx):
+        g.rect(x, py, 3, ph, "rust")
+        if ph > 2:
+            g.rect(x, py + ph - 1, 3, 1, "tan")
+    squirrel_head(g, cx, hy)
     return rim(g, LIT)
 
 
@@ -1573,9 +1587,9 @@ def sprites():
                                for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
     yield "treat", [("idle", frames([big(treat, lift=0), big(treat, lift=-1)]), 400)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
-    yield "skunk", [("idle", frames([big(skunk, sway=0), big(skunk, sway=1)]), 400)]
+    yield "skunk", [("idle", frames(big(skunk, **q) for q in SKUNK_IDLE), 300)]
     yield "squirrel", [("idle", frames([big(squirrel, tail=0), big(squirrel, tail=1)]), 300),
-                       ("run", frames(big(squirrel_run, k) for k in (False, True)), 120)]
+                       ("run", frames(big(squirrel_run, k) for k in range(4)), 60)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
     yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
     yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),

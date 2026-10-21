@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 400
+    "duration": 300
    },
    "skunk@75 1.aseprite": {
     "frame": { "x": 36, "y": 0, "w": 36, "h": 36 },
@@ -13,7 +13,23 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 400
+    "duration": 300
+   },
+   "skunk@75 2.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 300
+   },
+   "skunk@75 3.aseprite": {
+    "frame": { "x": 108, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 300
    }
  },
  "meta": {
@@ -21,10 +37,10 @@
   "version": "1.2.30-x64",
   "image": "skunk@75.png",
   "format": "RGBA8888",
-  "size": { "w": 72, "h": 36 },
+  "size": { "w": 144, "h": 36 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
   ]
  }
 }

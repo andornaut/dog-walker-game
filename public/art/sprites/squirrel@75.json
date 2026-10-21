@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 120
+    "duration": 60
    },
    "squirrel@75 3.aseprite": {
     "frame": { "x": 108, "y": 0, "w": 36, "h": 36 },
@@ -29,7 +29,23 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 120
+    "duration": 60
+   },
+   "squirrel@75 4.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 60
+   },
+   "squirrel@75 5.aseprite": {
+    "frame": { "x": 180, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 60
    }
  },
  "meta": {
@@ -37,11 +53,11 @@
   "version": "1.2.30-x64",
   "image": "squirrel@75.png",
   "format": "RGBA8888",
-  "size": { "w": 144, "h": 36 },
+  "size": { "w": 216, "h": 36 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "run", "from": 2, "to": 3, "direction": "forward" }
+   { "name": "run", "from": 2, "to": 5, "direction": "forward" }
   ]
  }
 }
