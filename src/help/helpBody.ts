@@ -10,7 +10,9 @@ export const HELP_BODY_FIELDS = [
   "bumpHearts",
   "debuffSeconds",
   "dodgeIn",
+  "loneBonus",
   "mediumHearts",
+  "pairBonus",
   "smallHearts",
   "tip",
   "treatHearts",
@@ -21,7 +23,8 @@ export const HELP_BODY_FIELDS = [
 export type HelpBodyField = (typeof HELP_BODY_FIELDS)[number];
 
 // Each field's text. debuffSeconds is the debuffs' length, or their shortest to longest when
-// they differ; dodgeIn is the small dogs' dodge chance as one in so many.
+// they differ; dodgeIn is the small dogs' dodge chance as one in so many; loneBonus and pairBonus
+// are the lead owner's extra hearts walking one dog and walking two.
 export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, string>> {
   const { tuning, world } = data;
   const hearts = (size: "big" | "medium" | "small") =>
@@ -36,7 +39,9 @@ export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, s
     bumpHearts: String(read(tuning, "hearts", "bump")),
     debuffSeconds: shortest === longest ? String(shortest) : `${shortest} to ${longest}`,
     dodgeIn: String(Math.round(1 / read(tuning, "probability", "smallDodgeChance"))),
+    loneBonus: String(readTable(tuning, "hearts", "packSizeBonus", 1)),
     mediumHearts: hearts("medium"),
+    pairBonus: String(readTable(tuning, "hearts", "packSizeBonus", 2)),
     smallHearts: hearts("small"),
     tip: formatDollars(read(tuning, "money", "tip")),
     treatHearts: String(read(tuning, "hearts", "treat")),
