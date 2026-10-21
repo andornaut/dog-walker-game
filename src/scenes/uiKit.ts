@@ -539,8 +539,8 @@ export function addSelectTile(
   return tile;
 }
 
-// A picture's texture on a tile in state: a disabled tile's is its grey copy a ramp step
-// darker.
+// A picture's texture on a tile in state: a disabled tile's is its grey copy, GREYED.copyDarker
+// ramp steps darker.
 export function tileTextureKey(scene: Scene, state: TileState, key: string): string {
   return state === "disabled" ? disabledTextureKey(scene, key) : key;
 }

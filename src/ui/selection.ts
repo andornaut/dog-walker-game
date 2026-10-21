@@ -6,7 +6,7 @@ import type { ButtonState, TileState } from "./interaction";
 // - box: the box behind a disabled tile's picture.
 // - copyDarker: a disabled tile's grey copy of its art moves each colour to the colour of
 //   NEUTRAL_RAMP nearest its brightness, as a disabled card's does, then this many steps
-//   down the ramp.
+//   down the ramp. 0 keeps a dark portrait readable on its box.
 // - edge: the line round a disabled face drawn in code and round a short or goal plate.
 // - face: a disabled tile's face drawn in code.
 // - plateFace: a short or goal plate's face.
@@ -15,7 +15,7 @@ import type { ButtonState, TileState } from "./interaction";
 // - text: a disabled tile's label.
 export const GREYED = {
   box: "neutralSlate",
-  copyDarker: 1,
+  copyDarker: 0,
   edge: "neutralSlate",
   face: "neutralGrey",
   plateFace: "neutralLightGrey",
