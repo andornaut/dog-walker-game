@@ -1241,30 +1241,15 @@ def gap(*props):
 # the side takes lots[(lotStart + k * lotStride) % len(lots)] and gaps[(gapStart + k * gapStride) %
 # len(gaps)]. gap() takes each prop as (key, inner edge, dz) and resolves its across from its frame's width;
 # dz is road px from the slot's z, nearer negative.
-# The verges stay mostly bare lawn: a lot is empty and one gap in three holds a single street tree, so each
-# side has a tree every 6 slots (840 px). The right side's gapStart of 2 puts its trees 3 slots after the
-# left's, so the trees alternate sides, one every 420 px, and one is always in view.
-PLACEMENT = {
-    "woof-way": dict(
-        slot=140,
-        lots=((),),
-        gaps=(
-            gap(("tree", 220, 0)), (), (),
-            gap(("tree-blossom", 220, 0)), (), (),
-        ),
-        sides=dict(
-            left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
-            right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
-        ),
-    ),
-}
-
-
-# The Toronto neighborhoods' tables, keyed by neighborhood id, in Elm Avenue's shape: an empty lot and
-# six gaps, a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px), the neighborhood's
-# tree then its own prop, and the right side's fall 3 slots after the left's. Each neighborhood's
-# character comes from its backdrop, verges and road, not from its roadside.
-SIDES = PLACEMENT["woof-way"]["sides"]
+# Each table is sparse: an empty lot and six gaps, a prop in
+# gaps 0 and 3, so each side has a prop every 6 slots (840 px), the neighborhood's tree then its own
+# prop. The right side's gapStart of 2 puts its props 3 slots after the left's, so they alternate
+# sides, one every 420 px. Each neighborhood's character comes from its backdrop, verges and road,
+# not from its roadside.
+SIDES = dict(
+    left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
+    right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
+)
 
 
 def sparse(tree, own):
@@ -1272,16 +1257,16 @@ def sparse(tree, own):
     return dict(slot=140, lots=((),), gaps=(gap(tree), (), (), gap(own), (), ()), sides=SIDES)
 
 
-PLACEMENT.update({
+PLACEMENT = {
     "cabbagetown": sparse(("tree-maple", 220, 0), ("gas-lamp", 213, 0)),
     "high-park": sparse(("tree-oak", 220, 0), ("tree-pine", 220, 0)),
     "distillery-district": sparse(("gas-lamp", 213, 0), ("barrels", 220, 0)),
     "kensington-market": sparse(("tree-maple", 220, 0), ("post-ring", 213, 0)),
     "the-beaches": sparse(("lifeguard-chair", 220, 0), ("dune-grass", 213, 0)),
     "yonge-street": sparse(("planter-tree", 220, 0), ("transit-stop", 213, 0)),
-})
+}
 # Each zone's ground shadow under a free-standing prop: its lawn or paving one ramp step darker.
-SHADOWS = {"woof-way": "dgreen", "cabbagetown": "canopy", "high-park": "fir", "distillery-district": "dbrown",
+SHADOWS = {"cabbagetown": "canopy", "high-park": "fir", "distillery-district": "dbrown",
            "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "grey"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])

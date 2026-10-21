@@ -36,49 +36,6 @@
     "roadside-planter-tree"
   ],
   "zones": {
-    "woof-way": {
-      "slot": 140,
-      "lots": [
-        []
-      ],
-      "gaps": [
-        [
-          {
-            "key": "roadside-tree",
-            "across": 277,
-            "dz": 0
-          }
-        ],
-        [],
-        [],
-        [
-          {
-            "key": "roadside-tree-blossom",
-            "across": 277,
-            "dz": 0
-          }
-        ],
-        [],
-        []
-      ],
-      "sides": {
-        "left": {
-          "offset": 0,
-          "lotStart": 0,
-          "lotStride": 1,
-          "gapStart": 0,
-          "gapStride": 1
-        },
-        "right": {
-          "offset": 1,
-          "lotStart": 0,
-          "lotStride": 1,
-          "gapStart": 2,
-          "gapStride": 1
-        }
-      },
-      "shadowColour": "3e8948"
-    },
     "cabbagetown": {
       "slot": 140,
       "lots": [
