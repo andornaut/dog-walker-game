@@ -10,25 +10,27 @@ const fallback: Loadout = { dogs: ["biscuit"], gear: "luckyCollar", walker: "cas
 const setup: RunSetup<DogId, GearId, WalkerId> = { dev: false, seed: 1, speed: 1, zone: 1 };
 
 describe("loadoutFor", () => {
-  it.each<[string, Partial<RunSetup<DogId, GearId, WalkerId>>, Loadout]>([
-    ["keeps the fallback when the setup overrides nothing", {}, fallback],
-    ["takes a pack of one from the setup", { pack: ["koda"] }, { ...fallback, dogs: ["koda"] }],
-    [
-      "takes a pack of three from the setup",
-      { pack: ["koda", "archie", "zippy"] },
-      { ...fallback, dogs: ["koda", "archie", "zippy"] },
-    ],
-    ["takes the setup's gear", { gear: "luckyCollar" }, { ...fallback, gear: "luckyCollar" }],
-    ["takes the setup's lack of gear", { gear: null }, { ...fallback, gear: null }],
-    ["takes the setup's walker", { walker: "ada" }, { ...fallback, walker: "ada" }],
-    ["keeps the fallback pack for an empty pack", { pack: [] }, fallback],
-    [
-      "keeps the fallback pack for a pack too big for a run",
-      { pack: ["koda", "archie", "zippy", "penny"] },
-      fallback,
-    ],
-  ])("%s", (_name, overrides, expected) => {
-    expect(loadoutFor(fallback, { ...setup, ...overrides })).toEqual(expected);
+  it("sets up the run from the setup", () => {
+    for (const [, overrides, expected] of [
+      ["keeps the fallback when the setup overrides nothing", {}, fallback],
+      ["takes a pack of one from the setup", { pack: ["koda"] }, { ...fallback, dogs: ["koda"] }],
+      [
+        "takes a pack of three from the setup",
+        { pack: ["koda", "archie", "zippy"] },
+        { ...fallback, dogs: ["koda", "archie", "zippy"] },
+      ],
+      ["takes the setup's gear", { gear: "luckyCollar" }, { ...fallback, gear: "luckyCollar" }],
+      ["takes the setup's lack of gear", { gear: null }, { ...fallback, gear: null }],
+      ["takes the setup's walker", { walker: "ada" }, { ...fallback, walker: "ada" }],
+      ["keeps the fallback pack for an empty pack", { pack: [] }, fallback],
+      [
+        "keeps the fallback pack for a pack too big for a run",
+        { pack: ["koda", "archie", "zippy", "penny"] },
+        fallback,
+      ],
+    ] satisfies readonly [string, Partial<RunSetup<DogId, GearId, WalkerId>>, Loadout][]) {
+      expect(loadoutFor(fallback, { ...setup, ...overrides })).toEqual(expected);
+    }
   });
 });
 

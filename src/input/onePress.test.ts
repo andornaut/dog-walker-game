@@ -30,19 +30,21 @@ describe("followOnePress", () => {
   // Pointer 1 is followed; ownerDown says whether it is still on the screen.
   const step = (handle: boolean, owner: number | undefined): OnePressStep => ({ handle, owner });
 
-  it.each<[string, boolean, PointerPhase, number, OnePressStep]>([
-    [
-      "hands a cancel to the followed press, then frees it",
-      true,
-      "cancel",
-      1,
-      step(true, undefined),
-    ],
-    ["frees the scene from a press whose release it never saw", false, "down", 2, step(true, 2)],
-    ["keeps another press out while the followed one is down", true, "down", 2, step(false, 1)],
-    ["takes a new press of the followed pointer as a fresh one", true, "down", 1, step(true, 1)],
-  ])("%s", (_name, ownerDown, phase, id, expected) => {
-    expect(followOnePress(ownerDown, phase, id, 1)).toEqual(expected);
+  it("acts once per press", () => {
+    for (const [, ownerDown, phase, id, expected] of [
+      [
+        "hands a cancel to the followed press, then frees it",
+        true,
+        "cancel",
+        1,
+        step(true, undefined),
+      ],
+      ["frees the scene from a press whose release it never saw", false, "down", 2, step(true, 2)],
+      ["keeps another press out while the followed one is down", true, "down", 2, step(false, 1)],
+      ["takes a new press of the followed pointer as a fresh one", true, "down", 1, step(true, 1)],
+    ] satisfies readonly [string, boolean, PointerPhase, number, OnePressStep][]) {
+      expect(followOnePress(ownerDown, phase, id, 1)).toEqual(expected);
+    }
   });
 });
 

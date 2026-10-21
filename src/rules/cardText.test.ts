@@ -36,41 +36,45 @@ function option(source: CardSource, label: string) {
 }
 
 describe("a card's text for the dogs it catches", () => {
-  it.each([
-    {
-      affected: ["duchess", "koda"],
-      id: "thief",
-      label: "Chase them off",
-      text: heartsText(["duchess", "koda"], -1),
-      why: "names each dog it reaches, in pack order",
-    },
-    {
-      affected: ["koda", "duchess"],
-      id: "skunk",
-      label: "Full groom",
-      text: `−$${encounterHigh}`,
-      why: "charges a cost once, whatever the pack",
-    },
-    {
-      affected: ["koda"],
-      id: "thief",
-      label: "Let them go",
-      text: `−$${thiefLetGo}`,
-      why: "keeps a cost charged once for the pack",
-    },
-  ] as const)("$why", ({ affected, id, label, text }) => {
-    expect(option(encounter(id, affected), label).text).toBe(text);
+  it("words each option's effects as its card shows them", () => {
+    for (const { affected, id, label, text } of [
+      {
+        affected: ["duchess", "koda"],
+        id: "thief",
+        label: "Chase them off",
+        text: heartsText(["duchess", "koda"], -1),
+        why: "names each dog it reaches, in pack order",
+      },
+      {
+        affected: ["koda", "duchess"],
+        id: "skunk",
+        label: "Full groom",
+        text: `−$${encounterHigh}`,
+        why: "charges a cost once, whatever the pack",
+      },
+      {
+        affected: ["koda"],
+        id: "thief",
+        label: "Let them go",
+        text: `−$${thiefLetGo}`,
+        why: "keeps a cost charged once for the pack",
+      },
+    ] as const) {
+      expect(option(encounter(id, affected), label).text).toBe(text);
+    }
   });
 
-  it.each([
-    { affected: ["koda"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
-    { affected: PACK, dollars: encounterHigh, id: "skunk", label: "Full groom" },
-    { affected: PACK, dollars: thiefLetGo, id: "thief", label: "Let them go" },
-    { affected: ["koda"], dollars: thiefLetGo, id: "thief", label: "Let them go" },
-  ] as const)("agrees with the cost plaque: $label for $affected.length", (row) => {
-    const view = option(encounter(row.id, row.affected), row.label);
-    expect(view.cost).toBe(dollarsToCents(row.dollars));
-    expect(view.text).toBe(`−$${row.dollars}`);
+  it("agrees with the cost plaque for every pack size", () => {
+    for (const row of [
+      { affected: ["koda"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
+      { affected: PACK, dollars: encounterHigh, id: "skunk", label: "Full groom" },
+      { affected: PACK, dollars: thiefLetGo, id: "thief", label: "Let them go" },
+      { affected: ["koda"], dollars: thiefLetGo, id: "thief", label: "Let them go" },
+    ] as const) {
+      const view = option(encounter(row.id, row.affected), row.label);
+      expect(view.cost).toBe(dollarsToCents(row.dollars));
+      expect(view.text).toBe(`−$${row.dollars}`);
+    }
   });
 
   describe("with Second chance", () => {
@@ -82,37 +86,38 @@ describe("a card's text for the dogs it catches", () => {
     const forgiven = (dog: DogId) =>
       fillNames(gameData.runText.card.heartForgiven, { dog: gameData.dogs[dog].name, hearts: "1" });
 
-    it.each([
-      ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["koda"], -1)}`],
-      [
-        "nothing forgiven once Second chance is used",
-        allowance,
-        heartsText(["duchess", "koda"], -1),
-      ],
-    ])("says %s", (_, used, text) => {
-      const kind = testState(
-        { duchess: 5, koda: 5 },
-        { heartsForgiven: used, modifiers: [kindWords] },
-      );
-      const source = encounter("thief", ["duchess", "koda"]);
-      const view = cardFor(gameData, kind, source).options.find(
-        ({ label }) => label === "Chase them off",
-      );
-      expect(view?.text).toBe(text);
+    it("says each effect's line", () => {
+      for (const [, used, text] of [
+        ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["koda"], -1)}`],
+        [
+          "nothing forgiven once Second chance is used",
+          allowance,
+          heartsText(["duchess", "koda"], -1),
+        ],
+      ] as const) {
+        const kind = testState(
+          { duchess: 5, koda: 5 },
+          { heartsForgiven: used, modifiers: [kindWords] },
+        );
+        const source = encounter("thief", ["duchess", "koda"]);
+        const view = cardFor(gameData, kind, source).options.find(
+          ({ label }) => label === "Chase them off",
+        );
+        expect(view?.text).toBe(text);
+      }
     });
 
     // The small card's effect, in the body font at 2x on the lines its height holds, else 1x.
     const { effect } = CARD_LAYOUT;
     const styles = boxStyles(fontFileMetrics("font-body"), effect.height);
 
-    it.each(Object.keys(gameData.dogs) as DogId[])(
-      "fits %s's forgiven loss in a card's effect",
-      (dog) => {
+    it("fits every forgiven loss in a card's effect", () => {
+      for (const dog of Object.keys(gameData.dogs) as DogId[]) {
         const fitted = fitInFont("font-body", styles, effect.width, plainMarks(forgiven(dog)));
         expect(fitted.widest).toBeLessThanOrEqual(effect.width);
         expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
-      },
-    );
+      }
+    });
   });
 
   it("matches the snapshot for the whole pack caught", () => {

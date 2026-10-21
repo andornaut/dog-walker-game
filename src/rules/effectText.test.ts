@@ -20,88 +20,92 @@ const percent = (key: MultiplierKey) =>
   Math.round((read(TEST_TUNING, "multipliers", key) - 1) * 100);
 
 describe("effectText", () => {
-  it.each<[string, readonly Effect[], string]>([
-    [
-      "money once",
-      [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
-      `−${dollars("thiefLetGo")}`,
-    ],
-    [
-      "a gain once",
-      [{ amount: "lostWalletKeep", change: "gain", kind: "money" }],
-      `+${dollars("lostWalletKeep")}`,
-    ],
-    ["hearts each", [{ amount: -2, kind: "hearts", target: { kind: "affected" } }], "−2♥ each"],
-    [
-      "one random owner",
-      [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],
-      "−1♥ to one random owner",
-    ],
-    [
-      "several effects, naming a debuff",
+  it("writes each effect's text", () => {
+    for (const [, effects, text] of [
       [
-        { amount: "encounterLow", change: "lose", kind: "money" },
-        { debuff: "stinky", kind: "debuff" },
+        "money once",
+        [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
+        `−${dollars("thiefLetGo")}`,
       ],
-      `−${dollars("encounterLow")}, ${DEBUFFS.stinky.name}: ${DEBUFFS.stinky.stake.replace(
-        "{seconds}",
-        String(read(TEST_TUNING, "seconds", DEBUFFS.stinky.seconds)),
-      )}`,
-    ],
-    [
-      "a multiplier as a percentage with its duration",
       [
-        {
-          by: "rushHourTips",
-          duration: "nextZone",
-          kind: "modifier",
-          operation: "multiply",
-          stat: "tipSpawns",
-        },
+        "a gain once",
+        [{ amount: "lostWalletKeep", change: "gain", kind: "money" }],
+        `+${dollars("lostWalletKeep")}`,
       ],
-      `Tips +${percent("rushHourTips")}% next neighborhood`,
-    ],
-    [
-      "an immunity as the cards it stops",
-      [{ duration: "run", encounter: "thief", kind: "immune" }],
-      `No ${ENCOUNTERS.thief.name} cards all walk`,
-    ],
-    [
-      "a contact obstacle's immunity as its own line",
-      [{ duration: "run", encounter: "puddle", kind: "immune" }],
-      `${capitalize(ENCOUNTERS.puddle.resolution.immuneText)} all walk`,
-    ],
-    [
-      "a duration every phrase shares once, at the end",
-      UPGRADES.rushHour.effects,
-      `Tips +${percent("rushHourTips")}%, obstacles +${percent("rushHourObstacles")}%, ` +
-        `treats +${percent("rushHourTreats")}% next neighborhood`,
-    ],
-    [
-      "starting cash",
-      [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
-      `Starting cash +${dollars("fannyPackStart")}`,
-    ],
-    ["a free Walk on by", [{ kind: "skipOption" }], "A free Walk on by each neighborhood"],
-    [
-      "free cards as cash options free",
-      [{ by: "sweetTalkerFreeCards", kind: "modifier", operation: "add", stat: "freeCards" }],
-      read(TEST_TUNING, "counts", "sweetTalkerFreeCards") === 1
-        ? "First card's cash options free each neighborhood"
-        : `First ${read(TEST_TUNING, "counts", "sweetTalkerFreeCards")} cards' cash options free each neighborhood`,
-    ],
-    ["no effects as nothing", [], "Nothing"],
-  ])("writes %s", (_, effects, text) => {
-    expect(effectText(data, effects)).toBe(text);
+      ["hearts each", [{ amount: -2, kind: "hearts", target: { kind: "affected" } }], "−2♥ each"],
+      [
+        "one random owner",
+        [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],
+        "−1♥ to one random owner",
+      ],
+      [
+        "several effects, naming a debuff",
+        [
+          { amount: "encounterLow", change: "lose", kind: "money" },
+          { debuff: "stinky", kind: "debuff" },
+        ],
+        `−${dollars("encounterLow")}, ${DEBUFFS.stinky.name}: ${DEBUFFS.stinky.stake.replace(
+          "{seconds}",
+          String(read(TEST_TUNING, "seconds", DEBUFFS.stinky.seconds)),
+        )}`,
+      ],
+      [
+        "a multiplier as a percentage with its duration",
+        [
+          {
+            by: "rushHourTips",
+            duration: "nextZone",
+            kind: "modifier",
+            operation: "multiply",
+            stat: "tipSpawns",
+          },
+        ],
+        `Tips +${percent("rushHourTips")}% next neighborhood`,
+      ],
+      [
+        "an immunity as the cards it stops",
+        [{ duration: "run", encounter: "thief", kind: "immune" }],
+        `No ${ENCOUNTERS.thief.name} cards all walk`,
+      ],
+      [
+        "a contact obstacle's immunity as its own line",
+        [{ duration: "run", encounter: "puddle", kind: "immune" }],
+        `${capitalize(ENCOUNTERS.puddle.resolution.immuneText)} all walk`,
+      ],
+      [
+        "a duration every phrase shares once, at the end",
+        UPGRADES.rushHour.effects,
+        `Tips +${percent("rushHourTips")}%, obstacles +${percent("rushHourObstacles")}%, ` +
+          `treats +${percent("rushHourTreats")}% next neighborhood`,
+      ],
+      [
+        "starting cash",
+        [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
+        `Starting cash +${dollars("fannyPackStart")}`,
+      ],
+      ["a free Walk on by", [{ kind: "skipOption" }], "A free Walk on by each neighborhood"],
+      [
+        "free cards as cash options free",
+        [{ by: "sweetTalkerFreeCards", kind: "modifier", operation: "add", stat: "freeCards" }],
+        read(TEST_TUNING, "counts", "sweetTalkerFreeCards") === 1
+          ? "First card's cash options free each neighborhood"
+          : `First ${read(TEST_TUNING, "counts", "sweetTalkerFreeCards")} cards' cash options free each neighborhood`,
+      ],
+      ["no effects as nothing", [], "Nothing"],
+    ] satisfies readonly [string, readonly Effect[], string][]) {
+      expect(effectText(data, effects)).toBe(text);
+    }
   });
 });
 
 describe("formatDollars", () => {
-  it.each([
-    [500, "$5"],
-    [150, "$1.50"],
-  ])("shows %i cents as %s", (amount, text) => {
-    expect(formatDollars(cents(amount))).toBe(text);
+  it("shows cents as dollars", () => {
+    for (const [amount, text] of [
+      [500, "$5"],
+      [150, "$1.50"],
+    ] as const) {
+      expect(formatDollars(cents(amount))).toBe(text);
+    }
   });
 });
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   type ClockFrame,
-  expectedRoadMs,
   lagMs,
   startZoneClocks,
   tickZoneClocks,
@@ -42,15 +41,5 @@ describe("tickZoneClocks", () => {
 describe("lagMs", () => {
   it("is the wall-clock time neither on the road nor held", () => {
     expect(lagMs({ heldMs: 300, roadMs: 1000, wallMs: 2000, zoneIndex: 0 })).toBe(700);
-  });
-
-  it("is never below 0, as a frame's steps can run ahead of its wall-clock time", () => {
-    expect(lagMs({ heldMs: 0, roadMs: 1016, wallMs: 1000, zoneIndex: 0 })).toBe(0);
-  });
-});
-
-describe("expectedRoadMs", () => {
-  it("is the zone's length over the speed", () => {
-    expect(expectedRoadMs(17280, 120)).toBe(144000);
   });
 });

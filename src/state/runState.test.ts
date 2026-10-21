@@ -37,17 +37,19 @@ describe("newRun", () => {
     expect(state.zoneIndex).toBe(0);
   });
 
-  it.each<{ expected: object; gear: GearId }>([
-    {
-      expected: {
-        money:
-          read(TEST_TUNING, "money", "startPurse") + read(TEST_TUNING, "money", "fannyPackStart"),
+  it("starts with what the gear gives", () => {
+    for (const { expected, gear } of [
+      {
+        expected: {
+          money:
+            read(TEST_TUNING, "money", "startPurse") + read(TEST_TUNING, "money", "fannyPackStart"),
+        },
+        gear: "fannyPack",
       },
-      gear: "fannyPack",
-    },
-    { expected: { skipPass: true }, gear: "poopBags" },
-  ])("starts with what the $gear gives", ({ expected, gear }) => {
-    expect(newRun(data, 3, { dogs: ["koda"], gear, walker: "casey" })).toMatchObject(expected);
+      { expected: { skipPass: true }, gear: "poopBags" },
+    ] satisfies readonly { expected: object; gear: GearId }[]) {
+      expect(newRun(data, 3, { dogs: ["koda"], gear, walker: "casey" })).toMatchObject(expected);
+    }
   });
 
   it("applies the walker's perk, then the gear, for the whole run", () => {

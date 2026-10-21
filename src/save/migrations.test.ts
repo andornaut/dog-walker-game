@@ -45,37 +45,45 @@ describe("migrateSave", () => {
     expect(parsed.output).toEqual(veteranSave());
   });
 
-  it.each<[string, Migration[], number, Record<string, unknown>, ReturnType<typeof migrateSave>]>([
-    [
-      "runs every step in version order, whatever order the registry lists them in",
-      [recordingStep(2), recordingStep(0), recordingStep(1)],
-      3,
-      { steps: [], version: 0 },
-      { document: { steps: [0, 1, 2], version: 3 }, ok: true },
-    ],
-    [
-      "starts from the document's own version",
-      [recordingStep(0), recordingStep(1), recordingStep(2)],
-      3,
-      { steps: [], version: 2 },
-      { document: { steps: [2], version: 3 }, ok: true },
-    ],
-    [
-      "leaves a document at the target version as it is",
-      [recordingStep(0)],
-      1,
-      { steps: [], version: 1 },
-      { document: { steps: [], version: 1 }, ok: true },
-    ],
-    [
-      "rejects a document when a step is missing",
-      [recordingStep(0), recordingStep(2)],
-      3,
-      { steps: [], version: 0 },
-      { ok: false, reason: "no migration from version 1" },
-    ],
-  ])("%s", (_, registry, target, document, expected) => {
-    expect(migrateSave(registry, target, document)).toEqual(expected);
+  it("migrates each case", () => {
+    for (const [, registry, target, document, expected] of [
+      [
+        "runs every step in version order, whatever order the registry lists them in",
+        [recordingStep(2), recordingStep(0), recordingStep(1)],
+        3,
+        { steps: [], version: 0 },
+        { document: { steps: [0, 1, 2], version: 3 }, ok: true },
+      ],
+      [
+        "starts from the document's own version",
+        [recordingStep(0), recordingStep(1), recordingStep(2)],
+        3,
+        { steps: [], version: 2 },
+        { document: { steps: [2], version: 3 }, ok: true },
+      ],
+      [
+        "leaves a document at the target version as it is",
+        [recordingStep(0)],
+        1,
+        { steps: [], version: 1 },
+        { document: { steps: [], version: 1 }, ok: true },
+      ],
+      [
+        "rejects a document when a step is missing",
+        [recordingStep(0), recordingStep(2)],
+        3,
+        { steps: [], version: 0 },
+        { ok: false, reason: "no migration from version 1" },
+      ],
+    ] satisfies readonly [
+      string,
+      Migration[],
+      number,
+      Record<string, unknown>,
+      ReturnType<typeof migrateSave>,
+    ][]) {
+      expect(migrateSave(registry, target, document)).toEqual(expected);
+    }
   });
 
   it("rejects a document from a later version without running any step", () => {
@@ -92,15 +100,17 @@ describe("migrateSave", () => {
     expect(ran).toEqual([]);
   });
 
-  it.each([
-    ["null", null, "the save is not an object"],
-    ["an array", [1], "the save is not an object"],
-    ["a string", "save", "the save is not an object"],
-    ["no version", { bankCents: 0 }, "the save has no integer version"],
-    ["a string version", { version: "1" }, "the save has no integer version"],
-    ["a fractional version", { version: 0.5 }, "the save has no integer version"],
-  ])("rejects %s", (_, document, reason) => {
-    expect(migrateSave([recordingStep(0)], 1, document)).toEqual({ ok: false, reason });
+  it("rejects each document it cannot migrate", () => {
+    for (const [, document, reason] of [
+      ["null", null, "the save is not an object"],
+      ["an array", [1], "the save is not an object"],
+      ["a string", "save", "the save is not an object"],
+      ["no version", { bankCents: 0 }, "the save has no integer version"],
+      ["a string version", { version: "1" }, "the save has no integer version"],
+      ["a fractional version", { version: 0.5 }, "the save has no integer version"],
+    ]) {
+      expect(migrateSave([recordingStep(0)], 1, document)).toEqual({ ok: false, reason });
+    }
   });
 });
 
@@ -108,25 +118,27 @@ describe("saveMigrations", () => {
   const fromVersion3 = (document: Record<string, unknown>) =>
     migrateSave(saveMigrations, 4, { ...document, version: 3 });
 
-  it.each<[string, Record<string, unknown>, Record<string, unknown>]>([
-    [
-      "moves the lifetime squirrel chases into the tallies",
-      { stats: { squirrelsChased: 4, timesFired: 1 } },
-      { stats: { tallies: { squirrelPulls: 4 }, timesFired: 1 } },
-    ],
-    [
-      "moves a checkpoint's run squirrel chases into its tallies",
-      { checkpoint: { counters: { bumpsByZone: [1], squirrelChases: 2 } } },
-      { checkpoint: { counters: { bumpsByZone: [1], tallies: { squirrelPulls: 2 } } } },
-    ],
-    [
-      "keeps a checkpoint with no counters",
-      { checkpoint: { counters: null } },
-      { checkpoint: { counters: null } },
-    ],
-    ["keeps a save with no checkpoint", { checkpoint: null }, { checkpoint: null }],
-  ])("from version 3 %s", (_, document, expected) => {
-    expect(fromVersion3(document)).toEqual({ document: { ...expected, version: 4 }, ok: true });
+  it("migrates each version 3 case", () => {
+    for (const [, document, expected] of [
+      [
+        "moves the lifetime squirrel chases into the tallies",
+        { stats: { squirrelsChased: 4, timesFired: 1 } },
+        { stats: { tallies: { squirrelPulls: 4 }, timesFired: 1 } },
+      ],
+      [
+        "moves a checkpoint's run squirrel chases into its tallies",
+        { checkpoint: { counters: { bumpsByZone: [1], squirrelChases: 2 } } },
+        { checkpoint: { counters: { bumpsByZone: [1], tallies: { squirrelPulls: 2 } } } },
+      ],
+      [
+        "keeps a checkpoint with no counters",
+        { checkpoint: { counters: null } },
+        { checkpoint: { counters: null } },
+      ],
+      ["keeps a save with no checkpoint", { checkpoint: null }, { checkpoint: null }],
+    ] satisfies readonly [string, Record<string, unknown>, Record<string, unknown>][]) {
+      expect(fromVersion3(document)).toEqual({ document: { ...expected, version: 4 }, ok: true });
+    }
   });
 
   it("loads a version 3 veteran with its squirrel chases as squirrel pulls", () => {
@@ -146,27 +158,29 @@ describe("saveMigrations", () => {
     migrateSave(saveMigrations, 5, { ...document, version: 4 });
   const walk = (dogs: string[], earnedCents: number) => ({ dogs, earnedCents, zonesFinished: 4 });
 
-  it.each<[string, Record<string, unknown>, Record<string, unknown>]>([
-    [
-      "seeds the best for the best walk's pack size",
-      { stats: { bestWalk: walk(["koda", "penny"], 9_000) } },
-      {
-        stats: { bestCentsByPackSize: { 2: 9_000 }, bestWalk: walk(["koda", "penny"], 9_000) },
-      },
-    ],
-    [
-      "seeds no best before the first walk",
-      { stats: { bestWalk: null } },
-      { stats: { bestCentsByPackSize: {}, bestWalk: null } },
-    ],
-    [
-      "seeds no best for a best walk whose dogs were all dropped",
-      { stats: { bestWalk: walk([], 500) } },
-      { stats: { bestCentsByPackSize: {}, bestWalk: walk([], 500) } },
-    ],
-    ["leaves stats of the wrong shape for the schema", { stats: "best" }, { stats: "best" }],
-  ])("from version 4 %s", (_, document, expected) => {
-    expect(fromVersion4(document)).toEqual({ document: { ...expected, version: 5 }, ok: true });
+  it("migrates each version 4 case", () => {
+    for (const [, document, expected] of [
+      [
+        "seeds the best for the best walk's pack size",
+        { stats: { bestWalk: walk(["koda", "penny"], 9_000) } },
+        {
+          stats: { bestCentsByPackSize: { 2: 9_000 }, bestWalk: walk(["koda", "penny"], 9_000) },
+        },
+      ],
+      [
+        "seeds no best before the first walk",
+        { stats: { bestWalk: null } },
+        { stats: { bestCentsByPackSize: {}, bestWalk: null } },
+      ],
+      [
+        "seeds no best for a best walk whose dogs were all dropped",
+        { stats: { bestWalk: walk([], 500) } },
+        { stats: { bestCentsByPackSize: {}, bestWalk: walk([], 500) } },
+      ],
+      ["leaves stats of the wrong shape for the schema", { stats: "best" }, { stats: "best" }],
+    ] satisfies readonly [string, Record<string, unknown>, Record<string, unknown>][]) {
+      expect(fromVersion4(document)).toEqual({ document: { ...expected, version: 5 }, ok: true });
+    }
   });
 
   it("has one step per version, ending at the current version", () => {
@@ -268,18 +282,20 @@ function versionTwoSave(walker: string, bestZoneFinished: number): Record<string
 }
 
 describe("the version 2 to 3 migration", () => {
-  it.each<[string, string, number, string[]]>([
-    ["keeps the walker in use unlocked", "trista", 0, ["casey", "trista"]],
-    ["unlocks the walkers the best walk already earned", "casey", 2, ["casey", "ada", "ben"]],
-    ["lists each walker once", "ben", 1, ["casey", "ben"]],
-  ])("%s", (_, walker, best, walkers) => {
-    const result = loadSave(
-      saveContextFrom(gameData),
-      JSON.stringify(versionTwoSave(walker, best)),
-    );
-    expect(result.status).toBe("loaded");
-    expect(result.save.owned.walkers).toEqual(walkers);
-    expect(result.save.walker).toBe(walker);
+  it("migrates each case", () => {
+    for (const [, walker, best, walkers] of [
+      ["keeps the walker in use unlocked", "trista", 0, ["casey", "trista"]],
+      ["unlocks the walkers the best walk already earned", "casey", 2, ["casey", "ada", "ben"]],
+      ["lists each walker once", "ben", 1, ["casey", "ben"]],
+    ] satisfies readonly [string, string, number, string[]][]) {
+      const result = loadSave(
+        saveContextFrom(gameData),
+        JSON.stringify(versionTwoSave(walker, best)),
+      );
+      expect(result.status).toBe("loaded");
+      expect(result.save.owned.walkers).toEqual(walkers);
+      expect(result.save.walker).toBe(walker);
+    }
   });
 
   it("leaves an owned field of the wrong shape for the schema to reject", () => {

@@ -76,93 +76,97 @@ const bigTipper = activeModifier(
 const bigTipperTip = () => tipValue(data, testState({ koda: 5 }, { modifiers: [bigTipper] }));
 
 describe("causeLabel and causeNames", () => {
-  it.each<[string, () => Change | null, string, string[]]>([
-    [
-      "a card option just picked by its amount alone",
-      () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
-      "−1♥",
-      [],
-    ],
-    [
-      "the max when a gain is cut short there",
-      () =>
-        resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], {
-          kind: "upgrade",
-          upgrade: "bellyRubs",
-        }),
-      "+1♥, at max",
-      ["at max"],
-    ],
-    [
-      "the tip and Big tipper's bonus",
-      bigTipperTip,
-      `+${tipText} tip, ${UPGRADES.bigTipper.name}`,
-      ["tip", UPGRADES.bigTipper.name],
-    ],
-    [
-      "the zone that changed a pay",
-      () => {
-        const run = testState({ duchess: 5 }, { route: [firstZone.id as ZoneId] });
-        const [pay] = payZone({ ...data, world: doublePay }, run).changes;
-        if (pay === undefined) {
-          throw new Error("Expected a pay");
-        }
-        return pay;
-      },
-      `+${formatDollars(cents(2 * lonePay))} pay, ${firstZone.name}`,
-      ["pay", firstZone.name],
-    ],
-    [
-      "a cost by its amount alone",
-      () =>
-        resolved(
-          towel,
-          testState({ duchess: 5, koda: 5 }, { cardsThisZone: 1, modifiers: [sweetTalker] }),
-          ["duchess", "koda"],
-        ),
-      `−${formatDollars(read(TEST_TUNING, "money", "encounterLow"))}`,
-      [],
-    ],
-    [
-      "a treat as the base",
-      () =>
-        changeHearts(
-          data,
-          [{ amount: read(TEST_TUNING, "hearts", "treat"), kind: "treat" }],
-          "koda",
-          testState({ koda: 3 }),
-        ).change,
-      `+${read(TEST_TUNING, "hearts", "treat")}♥ treat`,
-      ["treat"],
-    ],
-    [
-      "an instant encounter as the base",
-      () =>
-        resolved(
-          { amount: "lostWalletKeep", change: "gain", kind: "money" },
-          testState({ koda: 5 }),
-          [],
-          { encounter: "lostWallet", kind: "instant" },
-        ),
-      `+${formatDollars(read(TEST_TUNING, "money", "lostWalletKeep"))} ${ENCOUNTERS.lostWallet.name}`,
-      [ENCOUNTERS.lostWallet.name],
-    ],
-  ])("names %s", (_, change, text, names) => {
-    const made = change();
-    expect(made === null ? null : causeLabel(data, made)).toBe(text);
-    expect(made === null ? null : causeNames(data, made)).toEqual(names);
+  it("names each cause", () => {
+    for (const [, change, text, names] of [
+      [
+        "a card option just picked by its amount alone",
+        () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
+        "−1♥",
+        [],
+      ],
+      [
+        "the max when a gain is cut short there",
+        () =>
+          resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], {
+            kind: "upgrade",
+            upgrade: "bellyRubs",
+          }),
+        "+1♥, at max",
+        ["at max"],
+      ],
+      [
+        "the tip and Big tipper's bonus",
+        bigTipperTip,
+        `+${tipText} tip, ${UPGRADES.bigTipper.name}`,
+        ["tip", UPGRADES.bigTipper.name],
+      ],
+      [
+        "the zone that changed a pay",
+        () => {
+          const run = testState({ duchess: 5 }, { route: [firstZone.id as ZoneId] });
+          const [pay] = payZone({ ...data, world: doublePay }, run).changes;
+          if (pay === undefined) {
+            throw new Error("Expected a pay");
+          }
+          return pay;
+        },
+        `+${formatDollars(cents(2 * lonePay))} pay, ${firstZone.name}`,
+        ["pay", firstZone.name],
+      ],
+      [
+        "a cost by its amount alone",
+        () =>
+          resolved(
+            towel,
+            testState({ duchess: 5, koda: 5 }, { cardsThisZone: 1, modifiers: [sweetTalker] }),
+            ["duchess", "koda"],
+          ),
+        `−${formatDollars(read(TEST_TUNING, "money", "encounterLow"))}`,
+        [],
+      ],
+      [
+        "a treat as the base",
+        () =>
+          changeHearts(
+            data,
+            [{ amount: read(TEST_TUNING, "hearts", "treat"), kind: "treat" }],
+            "koda",
+            testState({ koda: 3 }),
+          ).change,
+        `+${read(TEST_TUNING, "hearts", "treat")}♥ treat`,
+        ["treat"],
+      ],
+      [
+        "an instant encounter as the base",
+        () =>
+          resolved(
+            { amount: "lostWalletKeep", change: "gain", kind: "money" },
+            testState({ koda: 5 }),
+            [],
+            { encounter: "lostWallet", kind: "instant" },
+          ),
+        `+${formatDollars(read(TEST_TUNING, "money", "lostWalletKeep"))} ${ENCOUNTERS.lostWallet.name}`,
+        [ENCOUNTERS.lostWallet.name],
+      ],
+    ] satisfies readonly [string, () => Change | null, string, string[]][]) {
+      const made = change();
+      expect(made === null ? null : causeLabel(data, made)).toBe(text);
+      expect(made === null ? null : causeNames(data, made)).toEqual(names);
+    }
   });
 });
 
 describe("change causes", () => {
-  it.each<[string, () => Change]>([
-    ["a tip with Big tipper's bonus", bigTipperTip],
-    [
-      "hearts capped",
-      () => resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], skunkIgnore),
-    ],
-  ])("add up to the change: %s", (_, change) => {
-    const made = change();
-    expect(made.causes.reduce((total, { amount }) => total + amount, 0)).toBe(changeAmount(made));
+  it("add up to the change", () => {
+    for (const [, change] of [
+      ["a tip with Big tipper's bonus", bigTipperTip],
+      [
+        "hearts capped",
+        () => resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], skunkIgnore),
+      ],
+    ] satisfies readonly [string, () => Change][]) {
+      const made = change();
+      expect(made.causes.reduce((total, { amount }) => total + amount, 0)).toBe(changeAmount(made));
+    }
   });
 });

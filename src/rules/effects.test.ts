@@ -32,33 +32,35 @@ describe("applyEffects: hearts", () => {
   );
   type Slots = Parameters<typeof testState>[0];
 
-  it.each<[string, DogId[], Effect, Slots, Slots, ActiveModifier[]?]>([
-    ["never below 0", ["duchess"], loseTwo, { duchess: 1 }, { duchess: 0 }],
-    [
-      "never above the dog's max, which depends on its size",
-      [],
-      gainOne,
-      { duchess: 6, koda: 9, pierre: 8 },
-      { duchess: 6, koda: 10, pierre: 8 },
-    ],
-    [
-      "the same amount to every owner",
-      ["koda", "nugget"],
-      loseTwo,
-      { koda: 5, nugget: 5 },
-      { koda: 3, nugget: 3 },
-    ],
-    [
-      "the max raised by a maxHearts modifier",
-      [],
-      gainOne,
-      { duchess: 6 },
-      { duchess: 7 },
-      [luckyCollar],
-    ],
-  ])("applies %s", (_, affected, effect, slots, expected, modifiers = []) => {
-    const state = testState(slots, { modifiers });
-    expect(heartsByDog(applyEffects(data, context(affected), [effect], state))).toEqual(expected);
+  it("applies hearts within 0 and the max, the same to every owner", () => {
+    for (const [, affected, effect, slots, expected, modifiers = []] of [
+      ["never below 0", ["duchess"], loseTwo, { duchess: 1 }, { duchess: 0 }],
+      [
+        "never above the dog's max, which depends on its size",
+        [],
+        gainOne,
+        { duchess: 6, koda: 9, pierre: 8 },
+        { duchess: 6, koda: 10, pierre: 8 },
+      ],
+      [
+        "the same amount to every owner",
+        ["koda", "nugget"],
+        loseTwo,
+        { koda: 5, nugget: 5 },
+        { koda: 3, nugget: 3 },
+      ],
+      [
+        "the max raised by a maxHearts modifier",
+        [],
+        gainOne,
+        { duchess: 6 },
+        { duchess: 7 },
+        [luckyCollar],
+      ],
+    ] satisfies readonly [string, DogId[], Effect, Slots, Slots, ActiveModifier[]?][]) {
+      const state = testState(slots, { modifiers });
+      expect(heartsByDog(applyEffects(data, context(affected), [effect], state))).toEqual(expected);
+    }
   });
 });
 
@@ -107,9 +109,8 @@ describe("resolveEffects: changes and their causes", () => {
       target: { kind: "all" },
     });
 
-    it.each([1, 2] as const)(
-      "forgives up to its allowance of a %i♥ loss, reporting it when nothing is lost",
-      (loss) => {
+    it("forgives up to its allowance of a loss, reporting it when nothing is lost", () => {
+      for (const loss of [1, 2] as const) {
         const forgiven = Math.min(loss, allowance);
         const state = testState({ koda: 5 }, { modifiers: [kindWords] });
         const applied = resolveEffects({ ...data, tuning }, context([]), [lose(loss)], state);
@@ -126,8 +127,8 @@ describe("resolveEffects: changes and their causes", () => {
           },
         ]);
         expect(applied.state.heartsForgiven).toBe(forgiven);
-      },
-    );
+      }
+    });
 
     it("forgives no more once its allowance is used this zone", () => {
       const used = testState({ koda: 5 }, { heartsForgiven: allowance, modifiers: [kindWords] });
@@ -154,25 +155,29 @@ describe("targetDogs", () => {
   const randomOne = { kind: "randomOne" } as const;
   type Options = { affected?: DogId[]; random?: number; state?: RunState };
 
-  it.each<[string, Parameters<typeof targetDogs>[3], DogId[], Options?]>([
-    ["all, leaving out a fired owner's dog", { kind: "all" }, ["duchess", "nugget"]],
-    [
-      "affected, leaving out a fired owner's dog",
-      { kind: "affected" },
-      [],
-      { affected: ["pierre"] },
-    ],
-    ["one random dog, low draw", randomOne, ["duchess"]],
-    ["one random dog, high draw", randomOne, ["nugget"], { random: 0.99 }],
-    ["no random dog when all are fired", randomOne, [], { state: testState({ koda: "fired" }) }],
-  ])("picks %s", (_, target, expected, { affected = [], random = 0, state = pack } = {}) => {
-    const picked = targetDogs(
-      data,
-      context(affected, () => random),
-      state,
-      target,
-    );
-    expect(picked).toEqual(expected);
+  it("picks the targeted dogs, leaving out fired owners", () => {
+    const cases: [string, Parameters<typeof targetDogs>[3], DogId[], Options?][] = [
+      ["all, leaving out a fired owner's dog", { kind: "all" }, ["duchess", "nugget"]],
+      [
+        "affected, leaving out a fired owner's dog",
+        { kind: "affected" },
+        [],
+        { affected: ["pierre"] },
+      ],
+      ["one random dog, low draw", randomOne, ["duchess"]],
+      ["one random dog, high draw", randomOne, ["nugget"], { random: 0.99 }],
+      ["no random dog when all are fired", randomOne, [], { state: testState({ koda: "fired" }) }],
+    ];
+    for (const [name, target, expected, options] of cases) {
+      const { affected = [], random = 0, state = pack } = options ?? {};
+      const picked = targetDogs(
+        data,
+        context(affected, () => random),
+        state,
+        target,
+      );
+      expect(picked, name).toEqual(expected);
+    }
   });
 });
 
@@ -196,27 +201,29 @@ describe("moneyCost and applyEffects: money", () => {
   const low = read(TEST_TUNING, "money", "encounterLow");
   const letGoCost = read(TEST_TUNING, "money", "thiefLetGo");
 
-  it.each<[string, DogId[], Effect, RunState, number]>([
-    [
-      "a cost once, whatever the pack",
-      both,
-      towel,
-      testState({ duchess: 5, koda: 5, nugget: 5 }),
-      low,
-    ],
-    ["another cost once too", both, letGo, testState({ duchess: 5, koda: 5 }), letGoCost],
-    [
-      "nothing on the zone's first card with Sweet talker",
-      both,
-      towel,
-      talked({ duchess: 5, koda: 5 }),
-      0,
-    ],
-    ["a flat cost free too on that card", ["duchess"], letGo, talked({ duchess: 5 }), 0],
-    ["in full on the zone's next card", both, towel, talked({ duchess: 5, koda: 5 }, 1), low],
-    ["nothing for a gain", [], gain, testState({ duchess: 5, koda: 5 }), 0],
-  ])("charges %s", (_, affected, effect, state, cost) => {
-    expect(moneyCost(data, context(affected), state, [effect])).toBe(cost);
+  it("charges a cost once, nothing on the zone's first card with Sweet talker", () => {
+    for (const [, affected, effect, state, cost] of [
+      [
+        "a cost once, whatever the pack",
+        both,
+        towel,
+        testState({ duchess: 5, koda: 5, nugget: 5 }),
+        low,
+      ],
+      ["another cost once too", both, letGo, testState({ duchess: 5, koda: 5 }), letGoCost],
+      [
+        "nothing on the zone's first card with Sweet talker",
+        both,
+        towel,
+        talked({ duchess: 5, koda: 5 }),
+        0,
+      ],
+      ["a flat cost free too on that card", ["duchess"], letGo, talked({ duchess: 5 }), 0],
+      ["in full on the zone's next card", both, towel, talked({ duchess: 5, koda: 5 }, 1), low],
+      ["nothing for a gain", [], gain, testState({ duchess: 5, koda: 5 }), 0],
+    ] satisfies readonly [string, DogId[], Effect, RunState, number][]) {
+      expect(moneyCost(data, context(affected), state, [effect])).toBe(cost);
+    }
   });
 
   it("adds gains and subtracts costs", () => {

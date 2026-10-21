@@ -14,8 +14,10 @@ function effectDuration(effect: Effect): UpgradeDuration {
 }
 
 describe("an upgrade's duration", () => {
-  it.each(Object.entries(gameData.upgrades))("agrees with the effects of %s", (_, upgrade) => {
-    expect(new Set(upgrade.effects.map(effectDuration))).toEqual(new Set([upgrade.duration]));
+  it("agrees with the effects of every upgrade", () => {
+    for (const [, upgrade] of Object.entries(gameData.upgrades)) {
+      expect(new Set(upgrade.effects.map(effectDuration))).toEqual(new Set([upgrade.duration]));
+    }
   });
 
   it("is on each fork path card, for the upgrade it carries", () => {

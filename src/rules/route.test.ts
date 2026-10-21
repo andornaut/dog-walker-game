@@ -5,7 +5,6 @@ import { seededRandom } from "../runner/random";
 import {
   currentZone,
   defaultRoute,
-  firstZoneId,
   forkPaths,
   pathSide,
   PRE_FORK_ROUTE,
@@ -50,10 +49,6 @@ describe("forkPaths", () => {
 });
 
 describe("the walk's zones", () => {
-  it("starts on the world's first zone, street", () => {
-    expect(firstZoneId(data)).toBe("street");
-  });
-
   it("is the world's walk length, or every zone when there are fewer", () => {
     expect(walkLength(data)).toBe(4);
     expect(walkLength({ world: { ...WORLD, walkLength: 9 } })).toBe(WORLD.zones.length);

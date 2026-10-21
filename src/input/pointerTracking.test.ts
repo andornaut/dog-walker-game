@@ -92,110 +92,117 @@ describe("trackPointer", () => {
 
   // Every action the events emit, and whether a press is still tracked after the last; the fuzz
   // below holds that an untracked press leaves the gesture idle.
-  it.each<{ actions: GestureAction[]; events: Event[]; name: string; tracking: boolean }>([
-    {
-      actions: [right],
-      events: [
-        { phase: "down", press: first, x: 200 },
-        { phase: "move", press: first, x: 257 },
-        { phase: "up", press: first, x: 257 },
-      ],
-      name: "drives the gestures from a press it saw go down",
-      tracking: false,
-    },
-    {
-      actions: [],
-      events: [
-        { phase: "down", press: first, x: 200 },
-        { held: true, phase: "move", press: first, x: 210 },
-        { phase: "move", press: first, x: 300 },
-      ],
-      name: "drops the press under way while a card or the menu holds the walk",
-      tracking: false,
-    },
-    {
-      actions: [],
-      events: [
-        { phase: "down", press: first, x: 100 },
-        { phase: "cancel", press: first, x: 100 },
-      ],
-      name: "ends a cancelled press without a tap",
-      tracking: false,
-    },
-    {
-      actions: [],
-      events: [
-        { phase: "down", press: first, x: 300 },
-        { phase: "move", press: first, x: 290 },
-        { phase: "cancel", press: first, x: 0 },
-      ],
-      name: "ends a cancelled press without steps from where it was cancelled",
-      tracking: false,
-    },
-    {
-      actions: [],
-      events: [
-        { phase: "down", press: first, x: 200 },
-        { phase: "move", press: first, x: 210 },
-        // The release went to another scene, and so did the same pointer's next down.
-        { phase: "move", press: again, x: 330 },
-        { phase: "up", press: again, x: 330 },
-      ],
-      name: "ignores a press whose down it never saw, rather than steering it from a stale anchor",
-      tracking: false,
-    },
-    {
-      actions: [left],
-      events: [
-        { phase: "down", press: first, x: 200 },
-        { phase: "move", press: first, x: 210 },
-        { phase: "down", press: second, x: 300 },
-        { phase: "move", press: second, x: 243 },
-        { phase: "up", press: second, x: 243 },
-      ],
-      name: "lets a new press take over from one whose release was lost",
-      tracking: false,
-    },
-    {
-      actions: [],
-      events: [
-        { onButton: true, phase: "down", press: first, x: 190, y: 20 },
-        { phase: "move", press: first, x: 300, y: 300 },
-        { phase: "up", press: first, x: 300, y: 300 },
-      ],
-      name: "gives a press on a top-bar button no gesture",
-      tracking: false,
-    },
-    {
-      actions: [right],
-      events: [
-        { phase: "down", press: first, x: 200 },
-        { onButton: true, phase: "down", press: second, x: 190, y: 20 },
-        { phase: "up", press: second, x: 190, y: 20 },
-        { phase: "move", press: first, x: 257 },
-      ],
-      name: "keeps a drag by another pointer while a top-bar button is pressed",
-      tracking: true,
-    },
-    {
-      actions: [right, right],
-      events: [
-        { phase: "down", press: first, x: 40, y: 300 },
-        { phase: "down", press: second, x: 200 },
-        { phase: "move", press: first, x: 140, y: 300 },
-        { phase: "move", press: second, x: 257 },
-        { phase: "up", press: first, x: 140, y: 300 },
-        { phase: "move", press: second, x: 313 },
-      ],
-      name: "steers by the latest finger, ignoring one that rests on the screen",
-      tracking: true,
-    },
-  ])("$name", ({ actions, events, tracking }) => {
-    const result = feed(events);
-    expect({ actions: result.actions, tracking: result.track.press !== undefined }).toEqual({
-      actions,
-      tracking,
-    });
+  it("tracks each pointer sequence", () => {
+    for (const { actions, events, tracking } of [
+      {
+        actions: [right],
+        events: [
+          { phase: "down", press: first, x: 200 },
+          { phase: "move", press: first, x: 257 },
+          { phase: "up", press: first, x: 257 },
+        ],
+        name: "drives the gestures from a press it saw go down",
+        tracking: false,
+      },
+      {
+        actions: [],
+        events: [
+          { phase: "down", press: first, x: 200 },
+          { held: true, phase: "move", press: first, x: 210 },
+          { phase: "move", press: first, x: 300 },
+        ],
+        name: "drops the press under way while a card or the menu holds the walk",
+        tracking: false,
+      },
+      {
+        actions: [],
+        events: [
+          { phase: "down", press: first, x: 100 },
+          { phase: "cancel", press: first, x: 100 },
+        ],
+        name: "ends a cancelled press without a tap",
+        tracking: false,
+      },
+      {
+        actions: [],
+        events: [
+          { phase: "down", press: first, x: 300 },
+          { phase: "move", press: first, x: 290 },
+          { phase: "cancel", press: first, x: 0 },
+        ],
+        name: "ends a cancelled press without steps from where it was cancelled",
+        tracking: false,
+      },
+      {
+        actions: [],
+        events: [
+          { phase: "down", press: first, x: 200 },
+          { phase: "move", press: first, x: 210 },
+          // The release went to another scene, and so did the same pointer's next down.
+          { phase: "move", press: again, x: 330 },
+          { phase: "up", press: again, x: 330 },
+        ],
+        name: "ignores a press whose down it never saw, rather than steering it from a stale anchor",
+        tracking: false,
+      },
+      {
+        actions: [left],
+        events: [
+          { phase: "down", press: first, x: 200 },
+          { phase: "move", press: first, x: 210 },
+          { phase: "down", press: second, x: 300 },
+          { phase: "move", press: second, x: 243 },
+          { phase: "up", press: second, x: 243 },
+        ],
+        name: "lets a new press take over from one whose release was lost",
+        tracking: false,
+      },
+      {
+        actions: [],
+        events: [
+          { onButton: true, phase: "down", press: first, x: 190, y: 20 },
+          { phase: "move", press: first, x: 300, y: 300 },
+          { phase: "up", press: first, x: 300, y: 300 },
+        ],
+        name: "gives a press on a top-bar button no gesture",
+        tracking: false,
+      },
+      {
+        actions: [right],
+        events: [
+          { phase: "down", press: first, x: 200 },
+          { onButton: true, phase: "down", press: second, x: 190, y: 20 },
+          { phase: "up", press: second, x: 190, y: 20 },
+          { phase: "move", press: first, x: 257 },
+        ],
+        name: "keeps a drag by another pointer while a top-bar button is pressed",
+        tracking: true,
+      },
+      {
+        actions: [right, right],
+        events: [
+          { phase: "down", press: first, x: 40, y: 300 },
+          { phase: "down", press: second, x: 200 },
+          { phase: "move", press: first, x: 140, y: 300 },
+          { phase: "move", press: second, x: 257 },
+          { phase: "up", press: first, x: 140, y: 300 },
+          { phase: "move", press: second, x: 313 },
+        ],
+        name: "steers by the latest finger, ignoring one that rests on the screen",
+        tracking: true,
+      },
+    ] satisfies readonly {
+      actions: GestureAction[];
+      events: Event[];
+      name: string;
+      tracking: boolean;
+    }[]) {
+      const result = feed(events);
+      expect({ actions: result.actions, tracking: result.track.press !== undefined }).toEqual({
+        actions,
+        tracking,
+      });
+    }
   });
 });
 
@@ -519,109 +526,136 @@ describe("hold to explain", () => {
   const bar = 48;
   const road = 300;
 
-  it.each<[string, Step[], GestureAction[], ExplainChange<string>[]]>([
-    [
-      "explains a card held still, until its release, which taps nothing",
-      [at("down", 0, 100, card), tick(holdMs - 1), tick(holdMs), at("up", holdMs + 100, 100, card)],
-      [],
-      [start("card"), end],
-    ],
-    [
-      "explains a card held within the slop, past the tap distance",
-      [at("down", 0, 100, card), at("move", 50, 115, card), tick(holdMs), at("up", 400, 115, card)],
-      [],
-      [start("card"), end],
-    ],
-    ["steers on a tap on a card", [at("down", 0, 100, card), at("up", 50, 101, card)], [left], []],
-    [
-      "steers on a drag from a card past the swipe distance, and never explains it",
-      [at("down", 0, 100, card), at("move", 50, 125, card), tick(holdMs), at("up", 400, 125, card)],
-      [right],
-      [],
-    ],
-    [
-      "neither steers nor explains while it explains, until the release",
+  it("holds to explain by its rules", () => {
+    for (const [, steps, actions, explained] of [
       [
-        at("down", 0, 100, card),
-        tick(holdMs),
-        at("move", 350, 200, card),
-        at("up", 400, 200, card),
+        "explains a card held still, until its release, which taps nothing",
+        [
+          at("down", 0, 100, card),
+          tick(holdMs - 1),
+          tick(holdMs),
+          at("up", holdMs + 100, 100, card),
+        ],
+        [],
+        [start("card"), end],
       ],
-      [],
-      [start("card"), end],
-    ],
-    [
-      "holds, never taps, on a release past the hold time before a frame ticks",
-      [at("down", 0, 100, card), at("up", holdMs, 100, card)],
-      [],
-      [],
-    ],
-    [
-      "explains an effect icon held still",
-      [at("down", 0, 100, icon), tick(holdMs), at("up", 400, 100, icon)],
-      [],
-      [start("icon"), end],
-    ],
-    [
-      "does nothing on a tap on an effect icon",
-      [at("down", 0, 100, icon), at("up", 50, 100, icon)],
-      [],
-      [],
-    ],
-    [
-      "never steers from the walk bar, nor explains past the slop",
-      [at("down", 0, 100, icon), at("move", 50, 200, icon), tick(holdMs), at("up", 400, 200, icon)],
-      [],
-      [],
-    ],
-    [
-      "explains a debuff bar held still",
-      [at("down", 0, 100, bar), tick(holdMs), at("up", 400, 100, bar)],
-      [],
-      [start("bar"), end],
-    ],
-    [
-      "does nothing on a tap on a debuff bar",
-      [at("down", 0, 100, bar), at("up", 50, 100, bar)],
-      [],
-      [],
-    ],
-    [
-      "steers on a drag from a debuff bar",
-      [at("down", 0, 100, bar), at("move", 50, 125, bar), at("up", 100, 125, bar)],
-      [right],
-      [],
-    ],
-    [
-      "never explains the road, however long the press",
-      [at("down", 0, 100, road), tick(10 * holdMs), at("up", 10 * holdMs, 100, road)],
-      [left],
-      [],
-    ],
-    [
-      "ends the explanation when a card or a menu takes the press",
-      [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), held: true }],
-      [],
-      [start("card"), end],
-    ],
-    [
-      "ends the explanation when the press is cancelled",
-      [at("down", 0, 100, card), tick(holdMs), at("cancel", 400, 100, card)],
-      [],
-      [start("card"), end],
-    ],
-    [
-      "ends the explanation when another finger presses",
       [
-        at("down", 0, 100, card),
-        tick(holdMs),
-        at("down", 400, 100, road, 2),
-        at("up", 450, 100, road, 2),
+        "explains a card held within the slop, past the tap distance",
+        [
+          at("down", 0, 100, card),
+          at("move", 50, 115, card),
+          tick(holdMs),
+          at("up", 400, 115, card),
+        ],
+        [],
+        [start("card"), end],
       ],
-      [left],
-      [start("card"), end],
-    ],
-  ])("%s", (_name, steps, actions, explained) => {
-    expect(play(steps)).toEqual({ actions, explained });
+      [
+        "steers on a tap on a card",
+        [at("down", 0, 100, card), at("up", 50, 101, card)],
+        [left],
+        [],
+      ],
+      [
+        "steers on a drag from a card past the swipe distance, and never explains it",
+        [
+          at("down", 0, 100, card),
+          at("move", 50, 125, card),
+          tick(holdMs),
+          at("up", 400, 125, card),
+        ],
+        [right],
+        [],
+      ],
+      [
+        "neither steers nor explains while it explains, until the release",
+        [
+          at("down", 0, 100, card),
+          tick(holdMs),
+          at("move", 350, 200, card),
+          at("up", 400, 200, card),
+        ],
+        [],
+        [start("card"), end],
+      ],
+      [
+        "holds, never taps, on a release past the hold time before a frame ticks",
+        [at("down", 0, 100, card), at("up", holdMs, 100, card)],
+        [],
+        [],
+      ],
+      [
+        "explains an effect icon held still",
+        [at("down", 0, 100, icon), tick(holdMs), at("up", 400, 100, icon)],
+        [],
+        [start("icon"), end],
+      ],
+      [
+        "does nothing on a tap on an effect icon",
+        [at("down", 0, 100, icon), at("up", 50, 100, icon)],
+        [],
+        [],
+      ],
+      [
+        "never steers from the walk bar, nor explains past the slop",
+        [
+          at("down", 0, 100, icon),
+          at("move", 50, 200, icon),
+          tick(holdMs),
+          at("up", 400, 200, icon),
+        ],
+        [],
+        [],
+      ],
+      [
+        "explains a debuff bar held still",
+        [at("down", 0, 100, bar), tick(holdMs), at("up", 400, 100, bar)],
+        [],
+        [start("bar"), end],
+      ],
+      [
+        "does nothing on a tap on a debuff bar",
+        [at("down", 0, 100, bar), at("up", 50, 100, bar)],
+        [],
+        [],
+      ],
+      [
+        "steers on a drag from a debuff bar",
+        [at("down", 0, 100, bar), at("move", 50, 125, bar), at("up", 100, 125, bar)],
+        [right],
+        [],
+      ],
+      [
+        "never explains the road, however long the press",
+        [at("down", 0, 100, road), tick(10 * holdMs), at("up", 10 * holdMs, 100, road)],
+        [left],
+        [],
+      ],
+      [
+        "ends the explanation when a card or a menu takes the press",
+        [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), held: true }],
+        [],
+        [start("card"), end],
+      ],
+      [
+        "ends the explanation when the press is cancelled",
+        [at("down", 0, 100, card), tick(holdMs), at("cancel", 400, 100, card)],
+        [],
+        [start("card"), end],
+      ],
+      [
+        "ends the explanation when another finger presses",
+        [
+          at("down", 0, 100, card),
+          tick(holdMs),
+          at("down", 400, 100, road, 2),
+          at("up", 450, 100, road, 2),
+        ],
+        [left],
+        [start("card"), end],
+      ],
+    ] satisfies readonly [string, Step[], GestureAction[], ExplainChange<string>[]][]) {
+      expect(play(steps)).toEqual({ actions, explained });
+    }
   });
 });

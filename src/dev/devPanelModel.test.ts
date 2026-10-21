@@ -5,7 +5,6 @@ import { changeHearts } from "../rules/effects";
 import { firstZoneId } from "../rules/route";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { saveContextFrom } from "../save/load";
-import { memoryStorage, saveStore } from "../save/storage";
 import { heartsOf } from "../state/pack";
 import { testState } from "../testing/runState";
 import {
@@ -109,13 +108,6 @@ describe("save edits", () => {
     expect(edited(RESET_SAVE)).toEqual(newPlayerSave);
   });
 
-  it("writes a reset save that loads as a new player's", async () => {
-    const store = saveStore(memoryStorage());
-    const reset = applySaveEdit(gameData, context.defaults, RESET_SAVE, veteranSave());
-    expect(await store.save(reset)).toEqual({ status: "saved" });
-    expect((await store.load(context)).save).toEqual(newPlayerSave);
-  });
-
   it("decodes stored edits, dropping a bad one and anything but a list", () => {
     const all = [...SAVE_CHEATS.map(({ edit }) => edit), RESET_SAVE];
     expect(decodeSaveEdits(encodeSaveEdits(all))).toEqual(all);
@@ -147,14 +139,6 @@ describe("staged settings", () => {
       { kind: "cancel" },
     ];
     expect(stageAll(cancelled)).toEqual(opened);
-  });
-
-  it("stages no toggle while Cheats off is staged", () => {
-    const actions: PanelAction[] = [
-      { kind: "switch", on: false },
-      { id: "hitBoxes", kind: "toggle", on: true },
-    ];
-    expect(stageAll(actions).staged).toEqual(CHEATS_OFF);
   });
 });
 

@@ -21,28 +21,30 @@ describe("tipValue", () => {
   const tip = read(TEST_TUNING, "money", "tip");
   const three = { duchess: 5, koda: 5, nugget: 5 };
 
-  it.each<[string, RunState, number]>([
-    ["a solo walk money.tip", testState({ koda: 5 }), tip],
-    ["a pack of three money.tip too", testState(three), tip],
-    [
-      "Big tipper money.tip and its bonus",
-      testState(three, { modifiers: [bigTipper] }),
-      tip + read(TEST_TUNING, "money", "bigTipperTipBonus"),
-    ],
-    [
-      "Stinky money.tip times stinkyTipValue",
-      testState(three, stinky),
-      tip * read(TEST_TUNING, "multipliers", "stinkyTipValue"),
-    ],
-    [
-      "Stinky with Big tipper money.tip times stinkyTipValue too",
-      testState(three, { ...stinky, modifiers: [bigTipper] }),
-      (tip + read(TEST_TUNING, "money", "bigTipperTipBonus")) *
-        read(TEST_TUNING, "multipliers", "stinkyTipValue"),
-    ],
-    ["nothing with no dogs left", testState({ koda: "fired" }), 0],
-  ])("pays %s", (_, state, amount) => {
-    expect(tipValue(data, state).amount).toBe(amount);
+  it("pays tips by their modifiers", () => {
+    for (const [, state, amount] of [
+      ["a solo walk money.tip", testState({ koda: 5 }), tip],
+      ["a pack of three money.tip too", testState(three), tip],
+      [
+        "Big tipper money.tip and its bonus",
+        testState(three, { modifiers: [bigTipper] }),
+        tip + read(TEST_TUNING, "money", "bigTipperTipBonus"),
+      ],
+      [
+        "Stinky money.tip times stinkyTipValue",
+        testState(three, stinky),
+        tip * read(TEST_TUNING, "multipliers", "stinkyTipValue"),
+      ],
+      [
+        "Stinky with Big tipper money.tip times stinkyTipValue too",
+        testState(three, { ...stinky, modifiers: [bigTipper] }),
+        (tip + read(TEST_TUNING, "money", "bigTipperTipBonus")) *
+          read(TEST_TUNING, "multipliers", "stinkyTipValue"),
+      ],
+      ["nothing with no dogs left", testState({ koda: "fired" }), 0],
+    ] satisfies readonly [string, RunState, number][]) {
+      expect(tipValue(data, state).amount).toBe(amount);
+    }
   });
 
   it("gives the tip and each modifier as causes", () => {
@@ -62,30 +64,31 @@ describe("tipValue", () => {
 describe("payZone", () => {
   const pay = read(TEST_TUNING, "money", "payPerDog");
 
-  it.each<[string, RunState, readonly ("duchess" | "koda" | "zippy")[]]>([
-    ["a lone dog", testState({ duchess: 5 }), ["duchess"]],
-    [
-      "two dogs walking of three",
-      testState({ duchess: 5, koda: "fired", zippy: 3 }),
-      ["duchess", "zippy"],
-    ],
-    ["three dogs", testState({ duchess: 5, koda: 5, zippy: 3 }), ["duchess", "koda", "zippy"]],
-  ])("banks each walking dog's pay: %s", (_, run, walking) => {
-    const { changes, state } = payZone(data, run);
-    expect(state.money).toBe(run.money + pay * walking.length);
-    expect(changes).toEqual(
-      walking.map((dog) => ({
-        amount: pay,
-        causes: [{ amount: pay, kind: "pay" }],
-        dog,
-        kind: "money",
-      })),
-    );
+  it("banks each walking dog's pay", () => {
+    for (const [, run, walking] of [
+      ["a lone dog", testState({ duchess: 5 }), ["duchess"]],
+      [
+        "two dogs walking of three",
+        testState({ duchess: 5, koda: "fired", zippy: 3 }),
+        ["duchess", "zippy"],
+      ],
+      ["three dogs", testState({ duchess: 5, koda: 5, zippy: 3 }), ["duchess", "koda", "zippy"]],
+    ] satisfies readonly [string, RunState, readonly ("duchess" | "koda" | "zippy")[]][]) {
+      const { changes, state } = payZone(data, run);
+      expect(state.money).toBe(run.money + pay * walking.length);
+      expect(changes).toEqual(
+        walking.map((dog) => ({
+          amount: pay,
+          causes: [{ amount: pay, kind: "pay" }],
+          dog,
+          kind: "money",
+        })),
+      );
+    }
   });
 
-  it.each([1.5, 1.25])(
-    "multiplies the pay by a zone multiplier of %d, rounded to the dollar, naming the zone",
-    (multiplier) => {
+  it("multiplies the pay by the zone multiplier, rounded to the dollar, naming the zone", () => {
+    for (const multiplier of [1.5, 1.25]) {
       const [first, ...rest] = TEST_WORLD.zones;
       const world = {
         ...TEST_WORLD,
@@ -103,24 +106,26 @@ describe("payZone", () => {
         dog: "duchess",
         kind: "money",
       });
-    },
-  );
+    }
+  });
 });
 
 describe("fullPackBonus", () => {
   const perDog = read(TEST_TUNING, "money", "fullPackBonusPerDog");
 
-  it.each<[string, RunState, number]>([
-    [
-      "pays the bonus per dog when every dog is still walking",
-      testState({ duchess: 5, zippy: 3 }),
-      2,
-    ],
-    ["pays nothing once an owner has fired you", testState({ duchess: 5, zippy: "fired" }), 0],
-  ])("%s", (_, run, dogs) => {
-    const { changes, state } = fullPackBonus(data, run);
-    expect(state.money).toBe(run.money + perDog * dogs);
-    expect(changes.map(({ amount }) => amount)).toEqual(dogs === 0 ? [] : [perDog * dogs]);
+  it("ends the run by its rules", () => {
+    for (const [, run, dogs] of [
+      [
+        "pays the bonus per dog when every dog is still walking",
+        testState({ duchess: 5, zippy: 3 }),
+        2,
+      ],
+      ["pays nothing once an owner has fired you", testState({ duchess: 5, zippy: "fired" }), 0],
+    ] satisfies readonly [string, RunState, number][]) {
+      const { changes, state } = fullPackBonus(data, run);
+      expect(state.money).toBe(run.money + perDog * dogs);
+      expect(changes.map(({ amount }) => amount)).toEqual(dogs === 0 ? [] : [perDog * dogs]);
+    }
   });
 });
 

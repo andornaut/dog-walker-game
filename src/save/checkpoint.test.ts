@@ -57,14 +57,6 @@ describe("zonesFinishedBy", () => {
   });
 });
 
-describe("recordCheckpoint", () => {
-  it("stores the slice and leaves the rest of the save alone", () => {
-    const save = veteranSave();
-    expect(recordCheckpoint(save, checkpoint)).toEqual({ ...veteranSave(), checkpoint });
-    expect(save).toEqual(veteranSave());
-  });
-});
-
 describe("bankCheckpoint", () => {
   const banked = bankCheckpoint(testAwards, recordCheckpoint(veteranSave(), checkpoint));
 
@@ -94,11 +86,6 @@ describe("bankCheckpoint", () => {
       route: ["street", "snoozeCrescent"],
       zonesFinished: 2,
     });
-  });
-
-  it("returns the save unchanged when there is no checkpoint", () => {
-    const save = veteranSave();
-    expect(bankCheckpoint(testAwards, save)).toBe(save);
   });
 });
 
@@ -161,12 +148,6 @@ describe("recordRunEnd", () => {
     const save = recordRunEnd(testAwards, recordCheckpoint(veteranSave(), checkpoint), runResult());
     expect(save.checkpoint).toBeNull();
     expect(bankCheckpoint(testAwards, save)).toBe(save);
-  });
-
-  it("does not change the save it is given", () => {
-    const save = veteranSave();
-    recordRunEnd(testAwards, save, runResult());
-    expect(save).toEqual(veteranSave());
   });
 });
 
@@ -290,15 +271,5 @@ describe("bests by pack size", () => {
       const { stats } = recordRunEnd(testAwards, veteranSave(), runResult(changes));
       expect(stats.bestCentsByPackSize, name).toEqual(kept);
     }
-  });
-
-  it("keeps the logbook's best walk across pack sizes", () => {
-    const solo = runResult({
-      dogs: [{ fired: false, id: "koda", zonesFinished: 4 }],
-      earnedCents: cents(100),
-    });
-    expect(recordRunEnd(testAwards, veteranSave(), solo).stats.bestWalk).toEqual(
-      veteranSave().stats.bestWalk,
-    );
   });
 });

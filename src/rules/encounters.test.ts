@@ -10,33 +10,39 @@ const pack = testState({ duchess: 5, koda: 5, pierre: 5 });
 const everyDog: DogId[] = ["duchess", "koda", "pierre"];
 
 describe("affectedDogs", () => {
-  it.each<[string, RunState, DogId[]]>([
-    ["every walking dog", pack, everyDog],
-    ["no fired dog", testState({ duchess: 5, koda: "fired", pierre: 5 }), ["duchess", "pierre"]],
-  ])("is %s", (_, state, affected) => {
-    expect(affectedDogs(state)).toEqual(affected);
+  it("classifies each encounter", () => {
+    for (const [, state, affected] of [
+      ["every walking dog", pack, everyDog],
+      ["no fired dog", testState({ duchess: 5, koda: "fired", pierre: 5 }), ["duchess", "pierre"]],
+    ] satisfies readonly [string, RunState, DogId[]][]) {
+      expect(affectedDogs(state)).toEqual(affected);
+    }
   });
 });
 
 describe("hitLabel", () => {
-  it.each(Object.keys(ENCOUNTERS) as EncounterId[])("labels %s from its data", (id) => {
-    const encounter = ENCOUNTERS[id];
-    expect(hitLabel(encounter)).toBe("hitLabel" in encounter ? encounter.hitLabel : null);
+  it("labels each encounter from its data", () => {
+    for (const id of Object.keys(ENCOUNTERS) as EncounterId[]) {
+      const encounter = ENCOUNTERS[id];
+      expect(hitLabel(encounter)).toBe("hitLabel" in encounter ? encounter.hitLabel : null);
+    }
   });
 });
 
 describe("opensCard", () => {
-  it.each<[string, EncounterId, DogId[], RunState, boolean]>([
-    ["no card with no dog affected", "squirrel", [], pack, false],
-    ["a thief card for the pack", "thief", everyDog, pack, true],
-    [
-      "no card for an encounter the pack is immune to",
-      "thief",
-      ["duchess"],
-      testState({ duchess: 5 }, { immunities: [{ encounter: "thief" }] }),
-      false,
-    ],
-  ])("opens %s", (_, id, affected, state, opens) => {
-    expect(opensCard(affected, state, id)).toBe(opens);
+  it("opens each encounter's card or applies it", () => {
+    for (const [, id, affected, state, opens] of [
+      ["no card with no dog affected", "squirrel", [], pack, false],
+      ["a thief card for the pack", "thief", everyDog, pack, true],
+      [
+        "no card for an encounter the pack is immune to",
+        "thief",
+        ["duchess"],
+        testState({ duchess: 5 }, { immunities: [{ encounter: "thief" }] }),
+        false,
+      ],
+    ] satisfies readonly [string, EncounterId, DogId[], RunState, boolean][]) {
+      expect(opensCard(affected, state, id)).toBe(opens);
+    }
   });
 });

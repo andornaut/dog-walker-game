@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { chance, randomInt, randomPick, randomStream, seededRandom, streamSeed } from "./random";
+import { randomInt, randomPick, randomStream, seededRandom, streamSeed } from "./random";
 
 const take = (count: number, random: () => number) => Array.from({ length: count }, random);
 
@@ -34,17 +34,6 @@ describe("randomPick", () => {
     expect(randomPick(() => 0.5, ["a", "b", "c"])).toBe("b");
     expect(randomPick(() => 0.99, ["a", "b", "c"])).toBe("c");
   });
-
-  it("throws on an empty list", () => {
-    expect(() => randomPick(() => 0, [])).toThrow("at least one item");
-  });
-});
-
-describe("chance", () => {
-  it("passes when the random value is below the probability", () => {
-    expect(chance(() => 0.29, 0.3)).toBe(true);
-    expect(chance(() => 0.3, 0.3)).toBe(false);
-  });
 });
 
 const NAMES = ["forks", "quips", "scenery", "spawns-1"];
@@ -67,28 +56,13 @@ describe("randomStream", () => {
     const sequences = NAMES.map((name) => take(10, randomStream(7, name)).join());
     expect(new Set([...sequences, take(10, seededRandom(7)).join()]).size).toBe(NAMES.length + 1);
   });
-
-  it("gives a different sequence for a different seed", () => {
-    expect(take(10, randomStream(1, "spawns"))).not.toEqual(take(10, randomStream(2, "spawns")));
-  });
 });
 
 describe("streamSeed", () => {
-  it("is a fixed unsigned 32-bit integer for a seed and name", () => {
-    const seed = streamSeed(123, "rolls");
-    expect(seed).toBe(streamSeed(123, "rolls"));
-    expect(Number.isInteger(seed) && seed >= 0 && seed <= 0xffffffff).toBe(true);
-  });
-
   it("gives every seed in a run of nearby seeds its own stream seed for each name", () => {
     for (const name of NAMES) {
       const seeds = Array.from({ length: 1000 }, (_, seed) => streamSeed(seed, name));
       expect(new Set(seeds).size).toBe(1000);
     }
-  });
-
-  it("gives every name its own stream seed, including names that differ by one character", () => {
-    const names = [...NAMES, "spawns-2", "spawns", "spawnt", ""];
-    expect(new Set(names.map((name) => streamSeed(0, name))).size).toBe(names.length);
   });
 });

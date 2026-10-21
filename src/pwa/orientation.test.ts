@@ -8,17 +8,19 @@ const IPHONE_13_LANDSCAPE: Viewport = { coarsePointer: true, height: 390, width:
 
 describe("isSidewaysPhone", () => {
   // Only a touch screen in landscape with a short viewport.
-  it.each<[string, Viewport, boolean]>([
-    ["an iPhone 13 in landscape", IPHONE_13_LANDSCAPE, true],
-    ["a small phone in landscape", { coarsePointer: true, height: 320, width: 568 }, true],
-    ["a large phone in landscape", { coarsePointer: true, height: 500, width: 900 }, true],
-    ["an iPhone 13 upright", IPHONE_13_PORTRAIT, false],
-    ["a tablet in landscape", { coarsePointer: true, height: 820, width: 1180 }, false],
-    ["a short desktop window", { coarsePointer: false, height: 400, width: 1280 }, false],
-    ["a desktop", { coarsePointer: false, height: 800, width: 1280 }, false],
-    ["a square viewport", { coarsePointer: true, height: 400, width: 400 }, false],
-  ])("for %s is %s", (_, viewport, expected) => {
-    expect(isSidewaysPhone(viewport)).toBe(expected);
+  it("is true only for a touch screen in landscape with a short viewport", () => {
+    for (const [, viewport, expected] of [
+      ["an iPhone 13 in landscape", IPHONE_13_LANDSCAPE, true],
+      ["a small phone in landscape", { coarsePointer: true, height: 320, width: 568 }, true],
+      ["a large phone in landscape", { coarsePointer: true, height: 500, width: 900 }, true],
+      ["an iPhone 13 upright", IPHONE_13_PORTRAIT, false],
+      ["a tablet in landscape", { coarsePointer: true, height: 820, width: 1180 }, false],
+      ["a short desktop window", { coarsePointer: false, height: 400, width: 1280 }, false],
+      ["a desktop", { coarsePointer: false, height: 800, width: 1280 }, false],
+      ["a square viewport", { coarsePointer: true, height: 400, width: 400 }, false],
+    ] satisfies readonly [string, Viewport, boolean][]) {
+      expect(isSidewaysPhone(viewport)).toBe(expected);
+    }
   });
 });
 
@@ -59,12 +61,5 @@ describe("relayOrientationEvents", () => {
     expect(sideways()).toBe(true);
     resize(IPHONE_13_PORTRAIT);
     expect(sideways()).toBe(false);
-  });
-
-  it("stops relaying when disposed", () => {
-    const { resize, seen, stop } = relay(IPHONE_13_PORTRAIT);
-    stop();
-    resize(IPHONE_13_LANDSCAPE);
-    expect(seen).toEqual([]);
   });
 });

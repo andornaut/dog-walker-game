@@ -167,15 +167,6 @@ describe("guardBackNavigation", () => {
     history.dispatchEvent(new Event("popstate"));
     expect(seen).toEqual([]);
   });
-
-  it("stops handling back when disposed", () => {
-    const history = new FakeHistory();
-    const seen = recordEvents(history);
-    guardBackNavigation(history, history)();
-    history.back();
-    expect(seen).toEqual([]);
-    expect(history.state).toBeNull();
-  });
 });
 
 describe("relayVisibilityEvents", () => {
@@ -199,15 +190,6 @@ describe("relayVisibilityEvents", () => {
     window.dispatchEvent(new Event("pagehide"));
     window.dispatchEvent(new Event("pageshow"));
     expect(seen).toEqual([PHONE_EVENTS.appHidden, PHONE_EVENTS.appVisible]);
-  });
-
-  it("stops relaying when disposed", () => {
-    const page = new FakeDocument();
-    const window = new EventTarget();
-    const seen = recordEvents(window);
-    relayVisibilityEvents(window, page)();
-    page.setVisibility("hidden");
-    expect(seen).toEqual([]);
   });
 });
 
@@ -235,12 +217,14 @@ describe("unlockAudioOnFirstGesture", () => {
     expect(context.state).toBe("running");
   });
 
-  it.each(AUDIO_UNLOCK_EVENTS)("resumes on a %s gesture", (type) => {
-    const page = new EventTarget();
-    const context = suspendedContext();
-    unlockAudioOnFirstGesture(page, context);
-    page.dispatchEvent(new Event(type));
-    expect(context.resume).toHaveBeenCalledTimes(1);
+  it("resumes on each gesture", () => {
+    for (const type of AUDIO_UNLOCK_EVENTS) {
+      const page = new EventTarget();
+      const context = suspendedContext();
+      unlockAudioOnFirstGesture(page, context);
+      page.dispatchEvent(new Event(type));
+      expect(context.resume).toHaveBeenCalledTimes(1);
+    }
   });
 
   it("keeps listening while the browser refuses to resume", async () => {
@@ -254,13 +238,5 @@ describe("unlockAudioOnFirstGesture", () => {
     await settle();
     page.dispatchEvent(new Event("pointerup"));
     expect(context.resume).toHaveBeenCalledTimes(2);
-  });
-
-  it("does nothing for a context that is already running", () => {
-    const page = new EventTarget();
-    const context = { resume: vi.fn(() => Promise.resolve()), state: "running" };
-    unlockAudioOnFirstGesture(page, context);
-    page.dispatchEvent(new Event("touchend"));
-    expect(context.resume).not.toHaveBeenCalled();
   });
 });

@@ -95,10 +95,12 @@ describe("runResultOf", () => {
     });
   });
 
-  it.each<[string, RunState]>([
-    ["a run that headed home", { ...midRun, phase: { kind: "ended", reason: "wentHome" } }],
-    ["a run that has not ended", midRun],
-  ])("ends %s as heading home, in the zone it was in", (_, run) => {
-    expect(runResultOf(data, run)).toMatchObject({ outcome: "wentHome", zone: 3 });
+  it("ends each slice as heading home, in the zone it was in", () => {
+    for (const [, run] of [
+      ["a run that headed home", { ...midRun, phase: { kind: "ended", reason: "wentHome" } }],
+      ["a run that has not ended", midRun],
+    ] satisfies readonly [string, RunState][]) {
+      expect(runResultOf(data, run)).toMatchObject({ outcome: "wentHome", zone: 3 });
+    }
   });
 });

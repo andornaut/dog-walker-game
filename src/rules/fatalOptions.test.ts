@@ -26,14 +26,16 @@ const skunk = (affected: DogId[]): CardSource => ({
 });
 
 describe("an option that would fire an owner", () => {
-  it.each([
-    { fires: ["koda"], hearts: NOSE_EFFECT, why: "a meter landing on 0" },
-    { fires: [], hearts: NOSE_EFFECT + 1, why: "a meter left above 0" },
-  ])("is flagged for $why", ({ fires, hearts }) => {
-    const option = cardFor(data, testState({ koda: hearts }), skunk(["koda"])).options.find(
-      ({ index }) => index === HOLD_YOUR_NOSE,
-    );
-    expect(option?.fires).toEqual(fires);
+  it("flags each option that can fire an owner", () => {
+    for (const { fires, hearts } of [
+      { fires: ["koda"], hearts: NOSE_EFFECT, why: "a meter landing on 0" },
+      { fires: [], hearts: NOSE_EFFECT + 1, why: "a meter left above 0" },
+    ]) {
+      const option = cardFor(data, testState({ koda: hearts }), skunk(["koda"])).options.find(
+        ({ index }) => index === HOLD_YOUR_NOSE,
+      );
+      expect(option?.fires).toEqual(fires);
+    }
   });
 
   it("says who fires you in plain words, not as a meter held at 0", () => {
@@ -48,12 +50,14 @@ describe("an option that would fire an owner", () => {
 });
 
 describe("firesText", () => {
-  it.each([
-    { dogs: ["koda"], text: "Fires Jesse" },
-    { dogs: ["koda", "duchess"], text: "Fires Jesse and Rosa" },
-    { dogs: ["koda", "duchess", "biscuit"], text: "Fires Jesse, Rosa and Sam" },
-  ] as const)("names $text", ({ dogs, text }) => {
-    expect(firesText(data, dogs)).toBe(text);
+  it("names each fatal option", () => {
+    for (const { dogs, text } of [
+      { dogs: ["koda"], text: "Fires Jesse" },
+      { dogs: ["koda", "duchess"], text: "Fires Jesse and Rosa" },
+      { dogs: ["koda", "duchess", "biscuit"], text: "Fires Jesse, Rosa and Sam" },
+    ] as const) {
+      expect(firesText(data, dogs)).toBe(text);
+    }
   });
 });
 

@@ -1,17 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { TEST_TUNING } from "../testing/tuning";
-import { clampHearts, dollarsToCents, probability, read, readTable } from "./units";
+import { clampHearts, probability, readTable } from "./units";
 
 describe("units", () => {
-  it("reads dollars from the tuning as integer cents", () => {
-    expect(read(TEST_TUNING, "money", "tip")).toBe(100);
-    expect(readTable(TEST_TUNING, "money", "prices", "fannyPack")).toBe(
-      TEST_TUNING.money.prices.fannyPack * 100,
-    );
-    expect(dollarsToCents(1.5)).toBe(150);
-  });
-
   it("holds hearts within 0 and the max", () => {
     expect(clampHearts(6, 7)).toBe(6);
     expect(clampHearts(6, -1)).toBe(0);

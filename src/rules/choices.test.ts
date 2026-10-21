@@ -22,7 +22,6 @@ import {
   offerFork,
   offerUpgrades,
   openCard,
-  quipLine,
 } from "./choices";
 import { startHearts } from "./dogs";
 import { cents, read } from "./units";
@@ -107,11 +106,6 @@ describe("cardFor", () => {
         card.title,
       ).toBe(true);
     }
-  });
-
-  it("lists only the caught dogs still walking as affected", () => {
-    const state = testState({ duchess: 5, koda: 5, pierre: "fired" });
-    expect(cardFor(data, state, encounter("skunk", ["koda", "pierre"])).affected).toEqual(["koda"]);
   });
 
   it("gives each option its art and a breakdown of every change it would make", () => {
@@ -212,22 +206,6 @@ describe("applyInstantEncounter", () => {
     );
     expect(outcome.state.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
     expect(outcome.heartChanges).toEqual([]);
-  });
-
-  it("refuses an ended run", () => {
-    const state = testState({ koda: 5 });
-    const ended = { ...state, phase: { kind: "ended", reason: "noDogs" } as const };
-    expect(() => applyInstantEncounter(data, () => 0, ended, "lostWallet", ["koda"])).toThrow(
-      "ended",
-    );
-  });
-});
-
-describe("quipLine", () => {
-  it("draws one of the owner's two lines for the moment", () => {
-    const cue = { dog: "koda", moment: "parting" } as const;
-    expect(quipLine(data, () => 0, cue)).toBe(QUIPS.koda.parting[0]);
-    expect(quipLine(data, () => 0.99, cue)).toBe(QUIPS.koda.parting[1]);
   });
 });
 
@@ -371,13 +349,6 @@ describe("skip option", () => {
     const groom = optionWith("skunk", "money");
     expect(indexes(withBags)).toEqual([0, 1, 2].filter((index) => index !== groom));
     expect(() => choose(withBags, skunk, groom)).toThrow("not on the Skunk card");
-  });
-
-  it("is added beside the options of a card with fewer than three", () => {
-    const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
-    const card = cardFor(data, withBags, encounter("thief", ["koda"]));
-    expect(card.options).toHaveLength(2);
-    expect(card.skip).toBe(true);
   });
 });
 

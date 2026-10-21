@@ -63,42 +63,44 @@ const otherDogBase = base(
 );
 
 describe("encounterLook and minorObstacleLook", () => {
-  it.each<[string, () => Look, Look]>([
-    [
-      "the other dog in its skinned zone wears the whole skin",
-      () => encounterLook(data, skinnedZone, "otherDog"),
-      { ...otherDogBase, ...CAT },
-    ],
-    [
-      "the other dog in another zone keeps its base look",
-      () => encounterLook(data, plainZone, "otherDog"),
-      otherDogBase,
-    ],
-    [
-      "a skin without a hit label or card prefix keeps the base's",
-      () => encounterLook(data, skinnedZone, "thief"),
-      {
-        ...base(
-          encounterSpriteKey("thief"),
-          baseCardArtPrefix("thief"),
-          thief.hitLabel,
-          thief.name,
-        ),
-        ...RACCOON,
-      },
-    ],
-    [
-      "a skinned minor obstacle takes the skin's hit label",
-      () => minorObstacleLook(data, skinnedZone, "cone"),
-      { ...base(minorObstacleSpriteKey("cone"), "", null, cone.name), ...GNOME },
-    ],
-    [
-      "a minor obstacle with no hit label anywhere has none",
-      () => minorObstacleLook(data, skinnedZone, "barrier2"),
-      base(minorObstacleSpriteKey("barrier2"), "", null, barrier2.name),
-    ],
-  ])("%s", (_, look, expected) => {
-    expect(look()).toEqual(expected);
+  it("resolves each skin case", () => {
+    for (const [, look, expected] of [
+      [
+        "the other dog in its skinned zone wears the whole skin",
+        () => encounterLook(data, skinnedZone, "otherDog"),
+        { ...otherDogBase, ...CAT },
+      ],
+      [
+        "the other dog in another zone keeps its base look",
+        () => encounterLook(data, plainZone, "otherDog"),
+        otherDogBase,
+      ],
+      [
+        "a skin without a hit label or card prefix keeps the base's",
+        () => encounterLook(data, skinnedZone, "thief"),
+        {
+          ...base(
+            encounterSpriteKey("thief"),
+            baseCardArtPrefix("thief"),
+            thief.hitLabel,
+            thief.name,
+          ),
+          ...RACCOON,
+        },
+      ],
+      [
+        "a skinned minor obstacle takes the skin's hit label",
+        () => minorObstacleLook(data, skinnedZone, "cone"),
+        { ...base(minorObstacleSpriteKey("cone"), "", null, cone.name), ...GNOME },
+      ],
+      [
+        "a minor obstacle with no hit label anywhere has none",
+        () => minorObstacleLook(data, skinnedZone, "barrier2"),
+        base(minorObstacleSpriteKey("barrier2"), "", null, barrier2.name),
+      ],
+    ] satisfies readonly [string, () => Look, Look][]) {
+      expect(look()).toEqual(expected);
+    }
   });
 });
 
@@ -110,45 +112,47 @@ describe("the skinned art keys", () => {
   const all = () => true;
   const none = () => false;
 
-  it.each<[string, () => string, string]>([
-    ["draws the skin's art once the manifest has it", () => skinnedArt(all, cat), CAT.art],
-    ["draws the base art while the skin's is missing", () => skinnedArt(none, cat), cat.baseArt],
-    [
-      "puts the skin's prefix on an option's illustration once the manifest has it",
-      () => skinnedCardArt(all, cat, hold.art),
-      `${CAT.cardArtPrefix ?? ""}${holdSuffix}`,
-    ],
-    [
-      "keeps the option's own illustration while the skin's is missing",
-      () => skinnedCardArt(none, cat, hold.art),
-      hold.art,
-    ],
-    [
-      "keeps the option's own illustration with no skin",
-      () => skinnedCardArt(all, plain, hold.art),
-      hold.art,
-    ],
-    [
-      "stands the skin's own owner beside it once the manifest has it",
-      () => skinnedOwnerArt(all, cat),
-      `${CAT.art}-owner`,
-    ],
-    [
-      "stands a skin with its own cloud in it once the manifest has it",
-      () => skinnedCloudArt(all, { ...cat, cloudArt: "stink-fish-crate-cloud" }),
-      "stink-fish-crate-cloud",
-    ],
-    [
-      "stands a skin in skunk-cloud while its cloud is missing or it names none",
-      () => [skinnedCloudArt(none, { ...cat, cloudArt: "x" }), skinnedCloudArt(all, cat)].join(),
-      [SKUNK_CLOUD_KEY, SKUNK_CLOUD_KEY].join(),
-    ],
-    [
-      "stands the base's owner beside a skin whose owner is missing",
-      () => skinnedOwnerArt((key) => key === CAT.art, cat),
-      `${cat.baseArt}-owner`,
-    ],
-  ])("%s", (_, key, expected) => {
-    expect(key()).toBe(expected);
+  it("resolves each skin case", () => {
+    for (const [, key, expected] of [
+      ["draws the skin's art once the manifest has it", () => skinnedArt(all, cat), CAT.art],
+      ["draws the base art while the skin's is missing", () => skinnedArt(none, cat), cat.baseArt],
+      [
+        "puts the skin's prefix on an option's illustration once the manifest has it",
+        () => skinnedCardArt(all, cat, hold.art),
+        `${CAT.cardArtPrefix ?? ""}${holdSuffix}`,
+      ],
+      [
+        "keeps the option's own illustration while the skin's is missing",
+        () => skinnedCardArt(none, cat, hold.art),
+        hold.art,
+      ],
+      [
+        "keeps the option's own illustration with no skin",
+        () => skinnedCardArt(all, plain, hold.art),
+        hold.art,
+      ],
+      [
+        "stands the skin's own owner beside it once the manifest has it",
+        () => skinnedOwnerArt(all, cat),
+        `${CAT.art}-owner`,
+      ],
+      [
+        "stands a skin with its own cloud in it once the manifest has it",
+        () => skinnedCloudArt(all, { ...cat, cloudArt: "stink-fish-crate-cloud" }),
+        "stink-fish-crate-cloud",
+      ],
+      [
+        "stands a skin in skunk-cloud while its cloud is missing or it names none",
+        () => [skinnedCloudArt(none, { ...cat, cloudArt: "x" }), skinnedCloudArt(all, cat)].join(),
+        [SKUNK_CLOUD_KEY, SKUNK_CLOUD_KEY].join(),
+      ],
+      [
+        "stands the base's owner beside a skin whose owner is missing",
+        () => skinnedOwnerArt((key) => key === CAT.art, cat),
+        `${cat.baseArt}-owner`,
+      ],
+    ] satisfies readonly [string, () => string, string][]) {
+      expect(key()).toBe(expected);
+    }
   });
 });

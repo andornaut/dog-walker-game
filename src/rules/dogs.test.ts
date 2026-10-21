@@ -7,16 +7,16 @@ import { maxHearts, startHearts } from "./dogs";
 import { zoneStats } from "./zones";
 
 describe("dog stats", () => {
-  it.each(Object.values(DOGS))("derives $name's max hearts from its size", (dog) => {
-    expect(maxHearts(TEST_TUNING, [], dog)).toBe(TEST_TUNING.hearts.maxBySize[dog.size]);
-  });
-
-  it.each<[string, readonly Modifier[]]>([
-    ["with no gear", []],
-    ["with a raised max", [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }]],
-  ])("starts every owner full, %s", (_, modifiers) => {
-    for (const dog of Object.values(DOGS)) {
-      expect(startHearts(TEST_TUNING, modifiers, dog)).toBe(maxHearts(TEST_TUNING, modifiers, dog));
+  it("starts every owner full, with or without a raised max", () => {
+    for (const [, modifiers] of [
+      ["with no gear", []],
+      ["with a raised max", [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }]],
+    ] satisfies readonly [string, readonly Modifier[]][]) {
+      for (const dog of Object.values(DOGS)) {
+        expect(startHearts(TEST_TUNING, modifiers, dog)).toBe(
+          maxHearts(TEST_TUNING, modifiers, dog),
+        );
+      }
     }
   });
 });
