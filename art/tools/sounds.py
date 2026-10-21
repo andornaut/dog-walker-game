@@ -316,7 +316,7 @@ def encode(wav, out_dir, key):
     loop = key.startswith("music-")
     subprocess.run([*common, "-c:a", "libvorbis", "-q:a", "3" if loop else "2", f"{out_dir}/{key}.ogg"],
                    check=True)
-    subprocess.run([*common, "-c:a", "aac", "-b:a", "160k" if loop else "96k", f"{out_dir}/{key}.m4a"],
+    subprocess.run([*common, "-c:a", "aac", "-b:a", "64k" if loop else "96k", f"{out_dir}/{key}.m4a"],
                    check=True)
 
 
