@@ -535,6 +535,35 @@ def soaked():
     return g
 
 
+MUDDY = (
+    "................",
+    "................",
+    ".....lb..lb.....",
+    ".....bd..bd.....",
+    ".....bd..bd.....",
+    "..lb........lb..",
+    "..bd........bd..",
+    "..bd........bd..",
+    "......lbbb......",
+    ".....lbbbbd.....",
+    "....lbbbbbbd....",
+    "....bbbbbbbd....",
+    ".....bdbbdd.....",
+    "......d..d......",
+    "......d..d......",
+    ".........d......",
+)
+
+
+def muddy():
+    """A muddy paw print, MUDDY: four toes and a pad in brown, lit tan on their top left and shaded
+    dbrown on the right, in a plum line, with two drips of mud running off the pad."""
+    g = Grid(16, 16)
+    g.edge = lambda c: K["plum"]
+    bitmap(g, 0, 0, list(MUDDY), {"b": "brown", "d": "dbrown", "l": "tan"})
+    return g
+
+
 def spooked():
     """A dog's face gone wide-eyed, long ears hanging, with fright lines and a sweat drop as in
     fx-status-spooked (hits.py): the white lines rimmed in plum, the cyan drop in navy, so both
@@ -892,6 +921,7 @@ IMAGES = {
     "icon-zone-sniff-street-shops": sniff_street_shops,
     "icon-zone-paws-promenade": paws_promenade,
     "icon-zone-the-long-way-home": the_long_way_home,
+    "icon-muddy": muddy,
     "icon-soaked": soaked,
     "icon-spooked": spooked,
     "icon-tangled": tangled,

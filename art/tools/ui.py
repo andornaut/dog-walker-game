@@ -911,8 +911,8 @@ def doghouse_heart_loss(step):
 # A debuffed dog's header colours: its band, the band's shade and the name plate's face, each from
 # the debuff's overlay and icon. The name is ink on the cyan, green and yellow plates, plum on pink.
 DEBUFF_LOOKS = {
-    "spooked": ("sky", "blue", "cyan"), "stinky": ("mauve", "purple", "pink"),
-    "tangled": ("dgreen", "teal", "green"), "tuckered-out": ("purple", "plum", "yellow"),
+    "muddy": ("brown", "dbrown", "tan"), "stinky": ("mauve", "purple", "pink"),
+    "tangled": ("dgreen", "teal", "green"),
 }
 # The header rows the debuff overlay covers: the card's top edge down to the plum rule under the band.
 HEADER_H = 21
