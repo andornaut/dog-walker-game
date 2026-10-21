@@ -6,7 +6,10 @@ import { DEPTH, type Shadow } from "./stage";
 
 // Shadow images, reused frame to frame: the first `used` are in use this frame.
 export class ShadowPool {
+  private color = 0;
   private readonly images: GameObjects.Image[] = [];
+  private readonly placer: Shadow = (key, depth, x, footY) =>
+    this.place(this.color, key, depth, x, footY);
   private readonly scene: Scene;
   private used = 0;
 
@@ -17,11 +20,14 @@ export class ShadowPool {
   // The shadow placer for a frame drawn in color. Call hideUnused once the frame is drawn.
   frame(color: number): Shadow {
     this.used = 0;
-    return (key, depth, x, footY) => this.place(color, key, depth, x, footY);
+    this.color = color;
+    return this.placer;
   }
 
   hideUnused(): void {
-    this.images.slice(this.used).forEach((image) => image.setVisible(false));
+    for (let i = this.used; i < this.images.length; i++) {
+      this.images[i]?.setVisible(false);
+    }
   }
 
   // A shadow under a sprite, centred on its x a pixel above its feet. It is sized from the

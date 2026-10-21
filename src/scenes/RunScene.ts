@@ -23,7 +23,7 @@ import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { AmbientView } from "../road/phaser/ambientView";
 import type { CardView, Choice } from "../rules/choices";
-import { currentZone, currentZoneId } from "../rules/route";
+import { currentZone, currentZoneId, zoneAt } from "../rules/route";
 import {
   type FixedStepLimits,
   frameSteps,
@@ -66,6 +66,7 @@ import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { MenuFlow, type MenuPause } from "./run/menuFlow";
 import { PackView } from "./run/packView";
 import { ZoneBanner, zoneBannerMs } from "./run/roadBanners";
+import { RoadsideView } from "./run/roadsideView";
 import { RoadArt, RoadView } from "./run/roadView";
 import { RunInput } from "./run/runInput";
 import { RunMoments, showHint } from "./run/runMoments";
@@ -125,6 +126,7 @@ interface RunWorld {
   random: RunRandom;
   recorder: RunRecorder;
   road: RoadView;
+  roadside: RoadsideView;
   setup: RunSetup;
   shadows: ShadowPool;
   streams: RunStreams;
@@ -220,8 +222,8 @@ export class RunScene extends Scene {
     this.zoneClocks = startZoneClocks(0);
   }
 
-  // The views are made in draw order: the backdrop and its ambient movers, the road, then the
-  // pack.
+  // The views are made in draw order: the backdrop and its ambient movers, the road and its
+  // roadside props, then the pack.
   private createWorld(
     run: Pick<RunWorld, "random" | "recorder" | "setup" | "streams">,
     picked: { loadout: Loadout; walkerSprite: string },
@@ -230,6 +232,7 @@ export class RunScene extends Scene {
     const backdrop = new BackdropView(this, random.scenery);
     const ambient = new AmbientView(this, random.ambient);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
+    const roadside = new RoadsideView(this);
     const pack = new PackView(this, picked.loadout.dogs, picked.walkerSprite);
     const still = () => this.reducedMotion();
     return {
@@ -259,6 +262,7 @@ export class RunScene extends Scene {
       moments: new RunMoments(this, { pack, quips: random.quips, still }),
       pack,
       road,
+      roadside,
       shadows: new ShadowPool(this),
     };
   }
@@ -630,6 +634,13 @@ export class RunScene extends Scene {
       travelled: distanceBeforeZone + walk.run.zoneDistance,
     });
     world.road.draw(walk, zone, distanceBeforeZone);
+    const { route, zoneIndex } = walk.run;
+    world.roadside.draw(
+      zone.art,
+      zoneIndex === 0 ? null : zoneAt(gameData, route, zoneIndex - 1).art,
+      distanceBeforeZone,
+      distanceBeforeZone + walk.run.zoneDistance,
+    );
     const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
     world.items.draw(walk, halted, still, shadow);
     world.pack.draw(walk, {

@@ -54,6 +54,7 @@ const CONTEXTS = {
     "assets",
     "data",
     "layout/projection",
+    "layout/roadRaster",
     "layout/sceneryGags",
     "layout/screenLayout",
     "lib",

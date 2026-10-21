@@ -29,6 +29,9 @@ export const DEPTH = {
   gag: -1,
   popup: 3000,
   road: 0,
+  // Roadside props lie under every road sprite and ambient mover, so nothing on the road, the
+  // sidewalks or the lawns is ever hidden behind one; nearer rows in front.
+  roadside: 4,
   shadow: 3,
   sprite: 10,
 };

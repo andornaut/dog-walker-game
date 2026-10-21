@@ -1,0 +1,260 @@
+{
+  "shadowColour": "3e8948",
+  "shadowed": [
+    "roadside-mailbox",
+    "roadside-tree",
+    "roadside-tree-blossom",
+    "roadside-lamp-post",
+    "roadside-gnome",
+    "roadside-bike",
+    "roadside-birdbath",
+    "roadside-flamingos",
+    "roadside-wheelbarrow",
+    "roadside-library",
+    "roadside-urn",
+    "roadside-shrub",
+    "roadside-topiary",
+    "roadside-well"
+  ],
+  "zones": {
+    "woof-way": {
+      "slot": 140,
+      "lots": [
+        [
+          {
+            "key": "roadside-house-cottage",
+            "across": 280,
+            "dz": 0
+          },
+          {
+            "key": "roadside-fence",
+            "across": 299,
+            "dz": -32
+          },
+          {
+            "key": "roadside-mailbox",
+            "across": 231,
+            "dz": -38
+          },
+          {
+            "key": "roadside-flowers",
+            "across": 295,
+            "dz": -42
+          },
+          {
+            "key": "roadside-birdbath",
+            "across": 286,
+            "dz": -16
+          }
+        ],
+        [
+          {
+            "key": "roadside-house-tall",
+            "across": 277,
+            "dz": 0
+          },
+          {
+            "key": "roadside-hedge",
+            "across": 290,
+            "dz": -32
+          },
+          {
+            "key": "roadside-mailbox",
+            "across": 231,
+            "dz": -38
+          },
+          {
+            "key": "roadside-gnome",
+            "across": 265,
+            "dz": -15
+          },
+          {
+            "key": "roadside-topiary",
+            "across": 317,
+            "dz": -12
+          }
+        ],
+        [
+          {
+            "key": "roadside-house-porch",
+            "across": 283,
+            "dz": 0
+          },
+          {
+            "key": "roadside-fence-cat",
+            "across": 299,
+            "dz": -32
+          },
+          {
+            "key": "roadside-bike",
+            "across": 267,
+            "dz": -45
+          }
+        ],
+        [
+          {
+            "key": "roadside-house-cottage-pink",
+            "across": 280,
+            "dz": 0
+          },
+          {
+            "key": "roadside-fence",
+            "across": 299,
+            "dz": -32
+          },
+          {
+            "key": "roadside-mailbox",
+            "across": 231,
+            "dz": -38
+          },
+          {
+            "key": "roadside-well",
+            "across": 305,
+            "dz": -15
+          }
+        ],
+        [
+          {
+            "key": "roadside-house-tall-grey",
+            "across": 277,
+            "dz": 0
+          },
+          {
+            "key": "roadside-fence",
+            "across": 299,
+            "dz": -32
+          },
+          {
+            "key": "roadside-gnome",
+            "across": 275,
+            "dz": -15
+          },
+          {
+            "key": "roadside-flamingos",
+            "across": 326,
+            "dz": -18
+          }
+        ],
+        [
+          {
+            "key": "roadside-house-porch-tan",
+            "across": 283,
+            "dz": 0
+          },
+          {
+            "key": "roadside-hedge",
+            "across": 290,
+            "dz": -32
+          },
+          {
+            "key": "roadside-mailbox",
+            "across": 231,
+            "dz": -38
+          },
+          {
+            "key": "roadside-flowers",
+            "across": 300,
+            "dz": -42
+          }
+        ]
+      ],
+      "gaps": [
+        [
+          {
+            "key": "roadside-tree",
+            "across": 270,
+            "dz": 0
+          },
+          {
+            "key": "roadside-shrub",
+            "across": 333,
+            "dz": -20
+          }
+        ],
+        [
+          {
+            "key": "roadside-lamp-post",
+            "across": 231,
+            "dz": -12
+          },
+          {
+            "key": "roadside-tree-blossom",
+            "across": 302,
+            "dz": 12
+          }
+        ],
+        [
+          {
+            "key": "roadside-laundry",
+            "across": 313,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-tree",
+            "across": 277,
+            "dz": 0
+          },
+          {
+            "key": "roadside-lamp-post",
+            "across": 231,
+            "dz": -38
+          }
+        ],
+        [
+          {
+            "key": "roadside-tree-blossom",
+            "across": 272,
+            "dz": 0
+          },
+          {
+            "key": "roadside-urn",
+            "across": 320,
+            "dz": -16
+          }
+        ],
+        [
+          {
+            "key": "roadside-library",
+            "across": 237,
+            "dz": -30
+          },
+          {
+            "key": "roadside-shrub",
+            "across": 283,
+            "dz": 8
+          }
+        ],
+        [
+          {
+            "key": "roadside-wheelbarrow",
+            "across": 255,
+            "dz": -36
+          },
+          {
+            "key": "roadside-swing",
+            "across": 297,
+            "dz": 4
+          }
+        ]
+      ],
+      "sides": {
+        "left": {
+          "offset": 0,
+          "lotStart": 0,
+          "lotStride": 1,
+          "gapStart": 0,
+          "gapStride": 2
+        },
+        "right": {
+          "offset": 1,
+          "lotStart": 3,
+          "lotStride": 5,
+          "gapStart": 1,
+          "gapStride": 3
+        }
+      }
+    }
+  }
+}
