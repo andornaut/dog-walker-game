@@ -2,7 +2,6 @@ import { type Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
 import type { AchievementId, HintId, WalkerId } from "../data/types";
-import { packOf } from "../home/home";
 import { soundVolumes } from "../home/settings";
 import type { Change } from "../rules/causes";
 import type { RunResult } from "../save/checkpoint";
@@ -15,7 +14,6 @@ import {
   type Settings,
 } from "../save/schema";
 import { browserStorage, lazyStorage, saveStore, type StoreLoadResult } from "../save/storage";
-import type { Loadout } from "../state/runState";
 import { soundboardOf } from "./soundboard";
 
 export type { Settings } from "../save/schema";
@@ -170,42 +168,4 @@ export function walkerInUse(save: Pick<SaveDocument, "walker">): WalkerId {
 export function walkerSpriteKey(scene: Scene, walker: WalkerId): string {
   const own = gameData.walkers[walker].spriteKey;
   return scene.textures.exists(own) ? own : gameData.walkers[gameData.defaultWalker].spriteKey;
-}
-
-export interface RunLoadout {
-  dogSlots: number;
-  loadout: Loadout;
-  walker: WalkerId;
-  walkerSprite: string;
-}
-
-// A dev link's run setup replaces the saved loadout for runs until the home screen shows,
-// without touching the save. The home screen clears it with null.
-const RUN_OVERRIDE_KEY = "runOverride";
-
-export function setRunOverride(scene: Scene, loadout: Loadout | null): void {
-  scene.registry.set(RUN_OVERRIDE_KEY, loadout);
-}
-
-function runOverride(scene: Scene): Loadout | null {
-  return (scene.registry.get(RUN_OVERRIDE_KEY) as Loadout | null | undefined) ?? null;
-}
-
-// What the next run takes, for newRun: the saved last loadout, slots and walker, or a dev
-// link's loadout with the slots it needs. Throws with no dog picked; the home screen starts
-// a walk only once one is.
-export function runLoadout(scene: Scene): RunLoadout {
-  const { lastLoadout, owned } = session(scene).save;
-  const walker = walkerInUse(session(scene).save);
-  const override = runOverride(scene);
-  const dogs = override?.dogs ?? packOf(lastLoadout);
-  if (dogs === undefined) {
-    throw new Error("A run needs at least one dog in the last loadout");
-  }
-  return {
-    dogSlots: Math.max(owned.dogSlots, dogs.length),
-    loadout: { dogs, gear: override === null ? lastLoadout.gear : override.gear, walker },
-    walker,
-    walkerSprite: walkerSpriteKey(scene, walker),
-  };
 }

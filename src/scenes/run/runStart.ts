@@ -1,11 +1,10 @@
-import type { Scene } from "phaser";
-
 import type { DogId } from "../../data/types";
 import type { RunSetup } from "../../dev/runSetup";
 import { loadoutFor } from "../../dev/setupRun";
 import { type Random, randomStream } from "../../runner/random";
 import type { Loadout } from "../../state/runState";
-import { profileSave, runLoadout, walkerInUse, walkerSpriteKey } from "../profileStore";
+import type { RunSceneData } from "../RunScene";
+import type { RunStart } from "./runRecorder";
 
 // The streams only the run's views draw from, each named from the setup's seed beside the
 // session's own (runStreams).
@@ -21,32 +20,23 @@ export function runRandom(seed: number): RunRandom {
   };
 }
 
-// The saved pick with the setup's pack, gear and walker over it; a setup pack walks without a
-// saved pick, with the saved walker.
-export function pickedLoadout(
-  scene: Scene,
-  setup: RunSetup,
-): { dogSlots: number; loadout: Loadout; walkerSprite: string } {
+// What a walk's starter picked: the loadout, the dog slots owned and the walker's sprite key.
+export interface RunPick {
+  dogSlots: number;
+  loadout: Loadout;
+  walkerSprite: string;
+}
+
+// The walk a pick starts: start's setup, with its pack, gear and walker over the pick and a slot
+// for each dog its pack names.
+export function runSceneData(start: RunStart, pick: RunPick): RunSceneData {
+  const { replay, setup } = start;
   const typed = setup as RunSetup<DogId, never>;
-  try {
-    const picked = runLoadout(scene);
-    return {
-      dogSlots: Math.max(picked.dogSlots, typed.pack?.length ?? 0),
-      loadout: loadoutFor(picked.loadout, setup as Parameters<typeof loadoutFor>[1]),
-      walkerSprite: picked.walkerSprite,
-    };
-  } catch (error) {
-    const [first, ...rest] = typed.pack ?? [];
-    if (first === undefined) {
-      throw error;
-    }
-    const dogs = [first, ...rest.slice(0, 2)] as unknown as Loadout["dogs"];
-    const fallback = { dogs, gear: null, walker: walkerInUse(profileSave(scene)) };
-    const loadout = loadoutFor(fallback, setup as Parameters<typeof loadoutFor>[1]);
-    return {
-      dogSlots: dogs.length,
-      loadout,
-      walkerSprite: walkerSpriteKey(scene, loadout.walker),
-    };
-  }
+  return {
+    dogSlots: Math.max(pick.dogSlots, pick.loadout.dogs.length, typed.pack?.length ?? 0),
+    loadout: loadoutFor(pick.loadout, setup as Parameters<typeof loadoutFor>[1]),
+    replay,
+    setup,
+    walkerSprite: pick.walkerSprite,
+  };
 }

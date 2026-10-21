@@ -44,11 +44,11 @@ import {
   currentSettings,
   openProfile,
   profileSave,
-  setRunOverride,
   walkerInUse,
   walkerSpriteKey,
 } from "./profileStore";
-import type { RunSceneData } from "./RunScene";
+import { nextRunStart } from "./run/runRecorder";
+import { runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
 import { ensurePlaceholder, measureSprite, playTag } from "./sprites";
 
@@ -284,9 +284,8 @@ export class BootScene extends Scene {
     const { lastLoadout, owned } = profileSave(this);
     const walker = walkerInUse(profileSave(this));
     const loadout = devRunLoadout(lastLoadout, walker, itemAt(owned.dogs, 0), pageRunSetup().setup);
-    setRunOverride(this, loadout);
-    const data: RunSceneData = { loadout, walkerSprite: walkerSpriteKey(this, walker) };
+    const pick = { dogSlots: owned.dogSlots, loadout, walkerSprite: walkerSpriteKey(this, walker) };
     startWakeLock();
-    this.scene.start(SCENE_KEYS.run, data);
+    this.scene.start(SCENE_KEYS.run, runSceneData(nextRunStart(), pick));
   }
 }

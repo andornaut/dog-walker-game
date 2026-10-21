@@ -21,26 +21,35 @@ import { expectedRoadMs, type ZoneClocks } from "../../dev/zoneClock";
 import type { SessionInput } from "../../runner/session";
 import { type Walk, walkScrollSpeed, zoneLength } from "../../runner/walk";
 
+// How a run starts: its setup, and the inputs that drive it when it replays a log.
+export interface RunStart {
+  replay: readonly InputEvent[] | undefined;
+  setup: RunSetup;
+}
+
+// A replay log waiting in the session starts the next run from its setup and drives its inputs;
+// otherwise the page's URL sets the run up. Reading the log clears it.
+export function nextRunStart(): RunStart {
+  const raw = sessionRead(DEV_REPLAY_KEY);
+  if (raw !== null) {
+    sessionRemove(DEV_REPLAY_KEY);
+    const decoded = decodeInputLog(runSetupLimitsFor(gameData), raw);
+    if (decoded.ok) {
+      return { replay: [...replayInputs(decoded.log)], setup: decoded.log.setup };
+    }
+    console.warn("Replay log rejected:", decoded.errors.join("; "));
+  }
+  return { replay: undefined, setup: pageRunSetup().setup };
+}
+
 // The run's dev hooks: the input log it records, the replay that drives it, and the state the
 // dev overlay shows.
 export class RunRecorder {
   private inputLog: InputLog | undefined;
-  private replay: { events: InputEvent[]; next: number } | undefined;
+  private readonly replay: { events: readonly InputEvent[]; next: number } | undefined;
 
-  // A replay log waiting in the session starts the run from its setup and drives its inputs;
-  // otherwise the page's URL sets the run up.
-  setup(): RunSetup {
-    const raw = sessionRead(DEV_REPLAY_KEY);
-    if (raw !== null) {
-      sessionRemove(DEV_REPLAY_KEY);
-      const decoded = decodeInputLog(runSetupLimitsFor(gameData), raw);
-      if (decoded.ok) {
-        this.replay = { events: [...replayInputs(decoded.log)], next: 0 };
-        return decoded.log.setup;
-      }
-      console.warn("Replay log rejected:", decoded.errors.join("; "));
-    }
-    return pageRunSetup().setup;
+  constructor(replay: readonly InputEvent[] | undefined) {
+    this.replay = replay === undefined ? undefined : { events: replay, next: 0 };
   }
 
   start(setup: RunSetup): void {

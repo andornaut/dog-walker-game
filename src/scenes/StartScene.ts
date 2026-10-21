@@ -148,14 +148,14 @@ import {
   currentSettings,
   isMuted,
   profileSave,
-  setRunOverride,
   storageState,
   takeCelebrations,
   toggleMuted,
   updateProfile,
   walkerSpriteKey,
 } from "./profileStore";
-import type { RunSceneData } from "./RunScene";
+import { nextRunStart } from "./run/runRecorder";
+import { type RunPick, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
 import {
@@ -447,7 +447,6 @@ export class StartScene extends Scene {
     };
     this.walkerLine = walkerLineKey(stats.lastWalk, news, walksPlayed(stats));
     stopWakeLock();
-    setRunOverride(this, null);
     clearRunOverrides();
 
     this.drawGate();
@@ -872,13 +871,14 @@ export class StartScene extends Scene {
       this.afterArt("start", () => this.startWalk());
       return;
     }
-    const data: RunSceneData = {
+    const pick: RunPick = {
+      dogSlots: save.owned.dogSlots,
       loadout: { dogs, gear: this.loadout.gear, walker },
       walkerSprite: walkerSpriteKey(this, walker),
     };
     const go = () => {
       startWakeLock();
-      this.scene.start(SCENE_KEYS.run, data);
+      this.scene.start(SCENE_KEYS.run, runSceneData(nextRunStart(), pick));
     };
     if (!startWalkOpensHelp(save)) {
       go();

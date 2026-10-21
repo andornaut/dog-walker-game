@@ -11,6 +11,7 @@ import {
   timeScaleOf,
   withCheats,
 } from "../dev/devPanelModel";
+import type { InputEvent } from "../dev/inputLog";
 import type { RunSetup } from "../dev/runSetup";
 import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
@@ -73,16 +74,19 @@ import { RoadArt, RoadView } from "./run/roadView";
 import { RunInput } from "./run/runInput";
 import { RunMoments, showHint } from "./run/runMoments";
 import { emitDevState, RunRecorder } from "./run/runRecorder";
-import { pickedLoadout, type RunRandom, runRandom } from "./run/runStart";
+import { type RunRandom, runRandom } from "./run/runStart";
 import { ShadowPool } from "./run/shadowPool";
 import { LAYOUT, packPoint } from "./run/stage";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 
-// StartScene's pick; the run reads its loadout through runLoadout instead.
+// How the walk starts, from runSceneData: its setup, the loadout and dog slots it walks with, the
+// walker's sprite key, and the inputs that drive it when it replays a log.
 export interface RunSceneData {
+  dogSlots: number;
   loadout: Loadout;
-  // The chosen walker's sprite key.
+  replay: readonly InputEvent[] | undefined;
+  setup: RunSetup;
   walkerSprite: string;
 }
 
@@ -145,20 +149,19 @@ export class RunScene extends Scene implements HudRun {
     super(SCENE_KEYS.run);
   }
 
-  create(): void {
+  create(data: RunSceneData): void {
     this.resetState();
     ensureRoadPlaceholders(this);
 
-    const recorder = new RunRecorder();
-    const setup = recorder.setup();
-    const picked = pickedLoadout(this, setup);
-    const run = withSetupStart(setup, newRun(gameData, picked.dogSlots, picked.loadout));
+    const { setup } = data;
+    const recorder = new RunRecorder(data.replay);
+    const run = withSetupStart(setup, newRun(gameData, data.dogSlots, data.loadout));
     // The log names the pack, gear and walker walked and a later start's route, so its replay
     // does not read the saved loadout. Each fork's path is a card choice in its events.
     recorder.start({
       ...setup,
-      gear: picked.loadout.gear,
-      pack: picked.loadout.dogs,
+      gear: data.loadout.gear,
+      pack: data.loadout.dogs,
       walker: run.walker,
       ...(setup.zone === 1 ? {} : { route: run.route }),
     });
@@ -176,7 +179,7 @@ export class RunScene extends Scene implements HudRun {
 
     this.world = this.createWorld(
       { random: runRandom(setup.seed), recorder, setup, streams },
-      picked,
+      data,
     );
     this.world.input.listen();
     this.listen();
@@ -223,7 +226,7 @@ export class RunScene extends Scene implements HudRun {
   // roadside props, then the pack.
   private createWorld(
     run: Pick<RunWorld, "random" | "recorder" | "setup" | "streams">,
-    picked: { loadout: Loadout; walkerSprite: string },
+    picked: Pick<RunSceneData, "loadout" | "walkerSprite">,
   ): RunWorld {
     const { random, recorder } = run;
     const backdrop = new BackdropView(this);
