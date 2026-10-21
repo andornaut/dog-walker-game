@@ -165,12 +165,12 @@ Good things to bump into on purpose. None opens a card: each bobs on the road an
 Each obstacle has one look everywhere. Some kinds can move (each kind's movement is in the data), and every one that can always moves. A mover moves only while it is still ahead of the pack: once it reaches the pack's rows it makes no more moves, and nothing ever moves back up the road toward a pack that has passed it. Every movement has some randomness: each mover's speed varies by up to about 15% either way, and the moment of each step, hop or dart varies too, so no two movers of a kind move alike. Each move is telegraphed about 0.8 seconds ahead (except a coyote's second step). At most six movers are on screen at once (at most three darting and three in-lane movers slower than the road). A mover with no room on screen waits to come on; a card obstacle with no room stands still in its place instead, so no card is ever skipped. A mover's hit is its standing obstacle's hit.
 
 - **Darts:** cross the whole road, some on a slight tilt up or down the road (animals, such as the cat, the other dog and the squirrel)
-- **Hops:** quick hops at random to a lane on either side, a row up the road, or diagonally up, never down toward the pack, 1 or 2 spots at a time; some hop only sideways (the ducklings, and the parked car pulling out one lane)
+- **Hops:** quick hops at random to a lane on either side, a row up the road, or diagonally up, never down toward the pack, 1 or 2 spots at a time; some hop only sideways (the ducklings, and the parked car pulling out one lane). The bunny, the ducklings and the raccoon each hop once or twice; the parked car pulls out once
 - **In-lane:** keep their lane and move down the road at their own speed, faster than it scrolls (bikes, cars, the jogger, the charging goose) or slower (the stroller, the garbage and ice cream trucks, the streetcar)
-- **Stalkers:** step toward the pack while still ahead of it: a lane to either side, a row down, or diagonally down, whichever brings it closest. The thief and the skunk each step once, a little after coming on screen; the coyote twice, once a little after it comes on and again right after, the second step with no cue of its own (in the faster neighborhoods it often reaches the pack first, so steps only once)
-- **Steps:** two slow steps, each in any direction: a lane to either side, or a row up or down (the mail carrier)
+- **Stalkers:** step toward the pack while still ahead of it: a lane to either side, a row down, or diagonally down, whichever brings it closest. The thief and the skunk each step once or twice, the first a little after coming on screen; the coyote two or three times, once a little after it comes on and then right after, each step after the first with no cue of its own (in the faster neighborhoods it often reaches the pack first, so steps fewer times)
+- **Steps:** two or three slow steps, each in any direction: a lane to either side, or a row up or down (the mail carrier)
 
-Barriers, benches, bins, cones, hedges and puddles never move.
+Each mover draws how many times it moves when it comes on, within its kind's range, so two of a kind can move different numbers of times. Barriers, benches, bins, cones, hedges and puddles never move.
 
 ### Feedback
 
