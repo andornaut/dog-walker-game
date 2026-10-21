@@ -79,6 +79,14 @@ export const AMBIENT = {
     PEDESTRIAN_AWAY,
     { ...RABBIT, perMinute: 2 },
     { ...SQUIRREL, perMinute: 3 },
+    {
+      gait: "steady",
+      key: "ambient-plane",
+      path: "sky",
+      perMinute: 2,
+      speed: 30,
+      tag: "fly",
+    },
   ],
   park: [
     { ...CAR, perMinute: 1 },
