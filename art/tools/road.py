@@ -903,9 +903,9 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
 # The other dog's trot, as dogs.WALK has it: diagonal pairs swap on beats 0 and 2 and the body bobs up
 # on the passing beats. Each beat lasts half the old two-frame step, so the dog keeps its pace.
 CORGI_WALK = [dict(fl=1, fr=-1, bl=-1, br=1), dict(bob=-1), dict(fl=-1, fr=1, bl=1, br=-1), dict(bob=-1)]
-# Standing while its walker chats: the dogs' idle, the tail at -1, 0, +1, 0 and the right ear 1px higher on the
-# last frame.
-CORGI_IDLE = [dict(tail=-1), dict(), dict(tail=1), dict(twitch=-1)]
+# Standing while its walker chats: the dogs' idle, the tail at -1, 0, +1, 0, the body 1px higher over the middle
+# two beats and the right ear 1px higher on the last frame.
+CORGI_IDLE = [dict(tail=-1), dict(bob=-1), dict(tail=1, bob=-1), dict(twitch=-1)]
 
 
 def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0):
