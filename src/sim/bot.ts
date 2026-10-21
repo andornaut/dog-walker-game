@@ -132,11 +132,12 @@ const SCROLL_CONTACTS = new WeakMap<object, Map<string, readonly ScrollContact[]
 
 function scrollContacts(
   geometry: Pick<RoadGeometry, "laneCount" | "packBand" | "roadTop">,
-  height: number,
+  item: Pick<WalkItem, "height" | "laneSpan">,
   path: NonNullable<WalkItem["mover"]>["path"],
 ): readonly ScrollContact[] {
   const { laneCount, packBand, roadTop } = geometry;
-  const key = `${packBand.top} ${packBand.bottom} ${height}`;
+  const { height, laneSpan } = item;
+  const key = `${packBand.top} ${packBand.bottom} ${height} ${laneSpan}`;
   let byBand = SCROLL_CONTACTS.get(path);
   if (byBand === undefined) {
     byBand = new Map();
@@ -147,23 +148,29 @@ function scrollContacts(
     return known;
   }
   const contacts: ScrollContact[] = [];
-  let touchedBefore = false;
+  // The contact under way in each lane of the mover's span, by its offset in the span.
+  const current: (ScrollContact | null)[] = Array.from({ length: laneSpan }, () => null);
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
     const y = roadTop - height + place.travel;
     if (hasLeftRoad(laneCount, place) || y + height > packBand.bottom) {
       break;
     }
-    const lane = laneAt(place.lanePosition);
-    const touching =
-      place.moving && levelWithPack(packBand, { height, y }) && lane >= 0 && lane < laneCount;
-    const last = contacts.at(-1);
-    if (touching && touchedBefore && last?.lane === lane) {
-      last.to = since;
-    } else if (touching) {
-      contacts.push({ from: since, lane, to: since });
+    const level = place.solid && levelWithPack(packBand, { height, y });
+    for (let offset = 0; offset < laneSpan; offset++) {
+      const lane = laneAt(place.lanePosition) + offset;
+      const touching = level && lane >= 0 && lane < laneCount;
+      const last = current[offset];
+      if (touching && last?.lane === lane) {
+        last.to = since;
+      } else if (touching) {
+        const contact = { from: since, lane, to: since };
+        contacts.push(contact);
+        current[offset] = contact;
+      } else {
+        current[offset] = null;
+      }
     }
-    touchedBefore = touching;
   }
   byBand.set(key, contacts);
   return contacts;
@@ -178,7 +185,7 @@ export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): L
     return [];
   }
   const contacts: LaneContact[] = [];
-  for (const { from, lane, to } of scrollContacts(road.geometry, item.height, mover.path)) {
+  for (const { from, lane, to } of scrollContacts(road.geometry, item, mover.path)) {
     const start = (from - MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
     const end = (to + MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
     if (end > 0 && start < horizon) {

@@ -31,7 +31,7 @@ import { giveTreat } from "../rules/treats";
 import { addCents, type Cents, cents, read } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
-import { hasLeftRoad, isMoverObstacle, type MoverKind, moverPlace } from "../runner/movers";
+import { hasLeftRoad, moverPlace } from "../runner/movers";
 import { isNeedSpot, meetNeedAt, type NeedMoment } from "../runner/needs";
 import { chance, type Random, randomStream, seededRandom } from "../runner/random";
 import { screenRoadGeometry } from "../runner/screenGeometry";
@@ -156,7 +156,17 @@ export interface HitCounts {
 // comparable when the tuning changes.
 const AFTER_PULL_REACTION_SECONDS = 0.6;
 
-export type MoverCounts = Partial<Record<MoverKind, ItemCount>>;
+// Movers are counted by moverKey: the kind they meet the pack as, and their look.
+export type MoverCounts = Record<string, ItemCount>;
+
+export function moverKey(kind: WalkItemKind, look: string): string {
+  return `${kind}:${look}`;
+}
+
+// The kind a mover's key counts it as.
+export function moverKindOf(key: string): WalkItemKind {
+  return key.slice(0, key.indexOf(":")) as WalkItemKind;
+}
 
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.
@@ -194,7 +204,7 @@ type ZoneEvent =
       readonly distance: number;
       readonly item: WalkItemKind;
       readonly kind: "item";
-      readonly mover: MoverKind | undefined;
+      readonly mover: string | undefined;
     }
   | { readonly distance: number; readonly kind: "stop"; readonly stop: ForcedStopId };
 
@@ -204,7 +214,7 @@ function zoneEvents(walk: Walk): ZoneEvent[] {
     distance: spawn.distance,
     item: spawn.kind,
     kind: "item",
-    mover: spawn.mover?.mover,
+    mover: spawn.mover === undefined ? undefined : moverKey(spawn.kind, spawn.mover.mover),
   }));
   if (forcedStopAhead !== null) {
     events.push({ distance: forcedStopAhead.distance, kind: "stop", stop: forcedStopAhead.stop });
@@ -238,7 +248,7 @@ interface Tally {
 function countItem(
   tally: Tally,
   touched: boolean,
-  item: { readonly kind: WalkItemKind; readonly mover: MoverKind | undefined },
+  item: { readonly kind: WalkItemKind; readonly mover: string | undefined },
 ): void {
   const counts: Partial<Record<string, ItemCount>> =
     item.mover === undefined ? tally.items : tally.movers;
@@ -373,7 +383,7 @@ function playZoneByRates(
           met.card === null ? [] : [met.card],
         );
       }
-    } else if (isMinorObstacle(data, event.item) || isMoverObstacle(event.item)) {
+    } else if (isMinorObstacle(data, event.item)) {
       // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
       const hit = event.distance >= graceUntil && chance(random, rates.hitRate);
       countItem(tally, hit, { kind: event.item, mover: event.mover });
@@ -451,7 +461,7 @@ function countLeaving(
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
       const y = geometry.roadTop - item.height + place.travel;
       touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
-      countItem(tally, touched, { kind: item.kind, mover: mover.path.mover });
+      countItem(tally, touched, { kind: item.kind, mover: moverKey(item.kind, mover.path.mover) });
     }
     if (touched && blocksLane(data, item.kind)) {
       const inFromLane =

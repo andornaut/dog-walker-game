@@ -151,7 +151,7 @@ function targetOf(
       itemId: item.id,
       kind,
       lanePosition: place.lanePosition,
-      ready: place.moving,
+      ready: place.solid,
       y: item.y,
     };
   }
@@ -257,7 +257,8 @@ export function laneBlockedWithin(
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + scroll);
       const y = geometry.roadTop - item.height + place.travel;
       const touches = y + item.height > top && y < bottom;
-      if (place.moving && touches && laneAt(place.lanePosition) === lane) {
+      const first = laneAt(place.lanePosition);
+      if (place.solid && touches && lane >= first && lane < first + item.laneSpan) {
         return true;
       }
     }

@@ -4,12 +4,12 @@ import { itemAt } from "../../arrays";
 import {
   encounterSpriteKey,
   minorObstacleSpriteKey,
-  MOVER_SPRITES,
   needSpotSpriteKey,
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
   WARNING_ARROW_KEY,
   WARNING_KEY,
+  WARNING_WANDER_KEY,
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
@@ -23,7 +23,6 @@ import {
   skinnedCloudArt,
   skinnedOwnerArt,
 } from "../../rules/skins";
-import { isMoverObstacle } from "../../runner/movers";
 import { isNeedSpot } from "../../runner/needs";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
@@ -181,10 +180,8 @@ export class ItemViews {
     const flat = { flat: true } as const;
     let parts: ItemPart[];
     if (item.mover !== undefined) {
-      const body = moverBodyKey(scene, zone, item.mover.path.mover);
-      parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY)];
-    } else if (isMoverObstacle(item.kind)) {
-      parts = [part(MOVER_SPRITES[item.kind].key)];
+      const body = moverBodyKey(scene, zone, item.kind as EncounterId | MinorObstacleId);
+      parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY), part(WARNING_WANDER_KEY)];
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (isNeedSpot(gameData, item.kind)) {

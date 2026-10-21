@@ -260,10 +260,6 @@ describe("cards", () => {
     expect(countBy(kinds, "lucky")).toBe(4);
   });
 
-  it("sends the goose across slower than a loose dog", () => {
-    expect(tuning.counts.gooseLanesPerSecond).toBeLessThan(tuning.counts.looseDogLanesPerSecond);
-  });
-
   it("applies the biscuit neighbour and photo op at once, with only gains", () => {
     const instant = Object.entries(encounters).flatMap(([id, encounter]) =>
       encounter.resolution.kind === "instant" ? [id] : [],

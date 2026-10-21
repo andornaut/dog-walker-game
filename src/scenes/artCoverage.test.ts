@@ -27,7 +27,8 @@ import {
   encounterSpriteKey,
   kebabCase,
   minorObstacleSpriteKey,
-  MOVER_SPRITES,
+  MOVER_SPRITE_KEYS,
+  MOVING_TAGS,
   NEED_ART,
   needSpotSpriteKey,
   ownerFaceKey,
@@ -62,9 +63,8 @@ import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { walkLength } from "../rules/route";
-import { baseCardArtPrefix } from "../rules/skins";
+import { baseCardArtPrefix, obstacleLook } from "../rules/skins";
 import { faceMood } from "../rules/treats";
-import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
 import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
@@ -506,31 +506,23 @@ describe("road object art", () => {
   });
 
   // A skin may name art not drawn yet, which falls back to the base; once drawn, it must do
-  // all its base does, and stand with its own owner where its base has one (<art>-owner). A
-  // kind that also comes as a mover (the squirrel, the loose other dog) moves as its skin, so
-  // the skin plays the mover's tags too.
-  it("draws every listed skin's sprite, and owner, with its base's and mover's tags at each base step", () => {
-    const moverTags = (id: string) =>
-      Object.entries(MOVER_CONTACTS).flatMap(([mover, contact]) =>
-        contact === id ? [MOVER_SPRITES[mover as MoverKind].tag] : [],
-      );
+  // all its base does, and stand with its own owner where its base has one (<art>-owner).
+  it("draws every listed skin's sprite, and owner, with its base's tags at each base step", () => {
     const pairs = [
       ...ENCOUNTERS.map((id) => ({
         base: encounterSpriteKey(id),
-        id: id as string,
         skins: gameData.encounters[id].skins,
       })),
       ...MINOR_OBSTACLES.map((id) => ({
         base: minorObstacleSpriteKey(id),
-        id: id as string,
         skins: gameData.minorObstacles[id].skins,
       })),
-    ].flatMap(({ base, id, skins }) =>
+    ].flatMap(({ base, skins }) =>
       Object.values(skins ?? {}).flatMap((skin) => {
         if (skin === undefined || !sprites.has(skin.art)) {
           return [];
         }
-        const tags = [...new Set([...tagsOf(base), ...moverTags(id)])];
+        const tags = tagsOf(base);
         const owner = sprites.has(`${base}-owner`)
           ? [{ art: `${skin.art}-owner`, base: `${base}-owner`, tags: tagsOf(`${base}-owner`) }]
           : [];
@@ -545,13 +537,25 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  it("tags every mover's sprite with its moving tag and any idle tag, at every step it has", () => {
-    const missing = Object.values(MOVER_SPRITES).flatMap((sprite) => {
-      const tags = "idle" in sprite ? [sprite.tag, sprite.idle] : [sprite.tag];
-      return [1, ...variantSteps([sprite.key])].flatMap((step) =>
-        missingTags(depthVariantKey(sprite.key, step) ?? sprite.key, tags),
-      );
-    });
+  // Every look that moves, in every zone, plays one of its movement's tags at each step it has.
+  it("tags every moving look's sprite with a tag of its movement, at every step it has", () => {
+    const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
+    const missing = [...ENCOUNTERS, ...MINOR_OBSTACLES].flatMap((kind) =>
+      zones.flatMap((zone) => {
+        const look = obstacleLook(gameData, zone, kind);
+        if (look.movement === null || look.movement.kind === "still") {
+          return [];
+        }
+        const art = sprites.has(look.art) ? look.art : look.baseArt;
+        const key = MOVER_SPRITE_KEYS[art] ?? art;
+        const tags = MOVING_TAGS[look.movement.kind];
+        return [1, ...variantSteps([key])].flatMap((step) => {
+          const drawn = depthVariantKey(key, step) ?? key;
+          const has = tagsOf(drawn);
+          return tags.some((tag) => has.includes(tag)) ? [] : [`${drawn} (${zone} ${kind})`];
+        });
+      }),
+    );
     expect(missing).toEqual([]);
   });
 });

@@ -1347,6 +1347,9 @@
       },
       "hitLabel": "HONK!",
       "kind": "obstacle",
+      "movement": {
+        "kind": "dart"
+      },
       "name": "Angry goose",
       "resolution": {
         "kind": "card",
@@ -1497,6 +1500,9 @@
       },
       "hitLabel": "NEW FRIEND!",
       "kind": "obstacle",
+      "movement": {
+        "kind": "dart"
+      },
       "name": "Other dog",
       "resolution": {
         "kind": "card",
@@ -1856,6 +1862,10 @@
           "art": "stink-garbage-truck",
           "cardArtPrefix": "card-stink-garbage-truck",
           "hitLabel": "PEE-YEW!",
+          "movement": {
+            "factor": 0.6,
+            "kind": "inLane"
+          },
           "name": "Garbage truck"
         },
         "pawsPromenade": {
@@ -1888,6 +1898,9 @@
       },
       "hitLabel": "SQUIRREL!",
       "kind": "obstacle",
+      "movement": {
+        "kind": "dart"
+      },
       "name": "Squirrel",
       "resolution": {
         "kind": "card",
@@ -1931,6 +1944,9 @@
           "art": "chase-rabbit",
           "cardArtPrefix": "card-chase-rabbit",
           "hitLabel": "BOING!",
+          "movement": {
+            "kind": "dart"
+          },
           "name": "Rabbit"
         },
         "pawsPromenade": {
@@ -1949,6 +1965,9 @@
           "art": "chase-cat",
           "cardArtPrefix": "card-chase-cat",
           "hitLabel": "HISS!",
+          "movement": {
+            "kind": "dart"
+          },
           "name": "Cat on a lawn"
         }
       },
@@ -1961,6 +1980,10 @@
       },
       "hitLabel": "PICKPOCKETED!",
       "kind": "obstacle",
+      "movement": {
+        "kind": "step",
+        "steps": 2
+      },
       "name": "Thief",
       "noCardWhen": {
         "kind": "packHasSize",
@@ -2014,24 +2037,38 @@
           "art": "snatch-raccoon",
           "cardArtPrefix": "card-snatch-raccoon",
           "hitLabel": "SNATCHED!",
+          "movement": {
+            "kind": "dart"
+          },
           "name": "Raccoon"
         },
         "park": {
           "art": "snatch-seagull",
           "cardArtPrefix": "card-snatch-seagull",
           "hitLabel": "SNATCHED!",
+          "movement": {
+            "kind": "dart",
+            "tilt": -0.2
+          },
           "name": "Seagull"
         },
         "pawsPromenade": {
           "art": "snatch-seagull",
           "cardArtPrefix": "card-snatch-seagull",
           "hitLabel": "SNATCHED!",
+          "movement": {
+            "kind": "dart",
+            "tilt": -0.2
+          },
           "name": "Seagull"
         },
         "snoozeCrescent": {
           "art": "snatch-raccoon",
           "cardArtPrefix": "card-snatch-raccoon",
           "hitLabel": "SNATCHED!",
+          "movement": {
+            "kind": "dart"
+          },
           "name": "Raccoon"
         }
       },
@@ -2468,6 +2505,18 @@
   ],
   "minorObstacles": [
     {
+      "id": "ball",
+      "movement": {
+        "kind": "dart"
+      },
+      "name": "Ball",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "ball-bounce"
+    },
+    {
       "id": "barrier2",
       "name": "Construction barrier",
       "shape": {
@@ -2563,6 +2612,19 @@
       "spriteKey": "cone"
     },
     {
+      "id": "cyclist",
+      "movement": {
+        "factor": 1.6,
+        "kind": "inLane"
+      },
+      "name": "Cyclist",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "cyclist"
+    },
+    {
       "id": "hedge",
       "name": "Hedge",
       "shape": {
@@ -2587,6 +2649,10 @@
     },
     {
       "id": "parkedCar",
+      "movement": {
+        "factor": 1.3,
+        "kind": "inLane"
+      },
       "name": "Parked car",
       "shape": {
         "lanes": 1,
@@ -2603,6 +2669,10 @@
         },
         "shops": {
           "art": "minor-scooter",
+          "movement": {
+            "factor": 1.4,
+            "kind": "inLane"
+          },
           "name": "Parked scooter"
         },
         "snoozeCrescent": {
@@ -2989,11 +3059,9 @@
   ],
   "tuning": {
     "counts": {
-      "ballLanesPerSecond": 2.5,
       "biscuitNeighbourTreatsPerDog": 1,
-      "gooseLanesPerSecond": 1.5,
+      "dartLanesPerSecond": 3,
       "loadoutMax": 1,
-      "looseDogLanesPerSecond": 2,
       "luckyEncountersPerZone": 2,
       "minorObstaclesFirstZone": 22,
       "minorObstaclesGainPerZone": 4,
@@ -3005,7 +3073,6 @@
       "packSizeMin": 1,
       "poopBagsSkipsPerRun": 1,
       "scentHoundLanes": 1,
-      "squirrelDartLanesPerSecond": 4,
       "tipsFirstZone": 52,
       "tipsGainPerZone": 7,
       "treatCarryMax": 3,
@@ -3073,7 +3140,6 @@
       "cameraReadyTip": 2,
       "charmerTipSpawns": 0.85,
       "crowdPleaserStrangerWeight": 2,
-      "cyclistSpeedMultiplier": 1.6,
       "fastWalkerFees": 1.1,
       "fastWalkerSpeed": 1.1,
       "goodLeashSquirrelPull": 0,
@@ -3128,6 +3194,7 @@
       "lookAheadSeconds": 4.5,
       "minorHitStopSeconds": 0.6,
       "minorStumble": 0.3,
+      "moverStepSeconds": 0.6,
       "moverWarningSeconds": 1,
       "needGoneWrong": 20,
       "needUrgentByEnergy": {
@@ -3366,7 +3433,7 @@
       "fees": 0.7,
       "id": "snoozeCrescent",
       "leashColor": "#3e2731",
-      "moverShare": 0,
+      "moverShare": 0.1,
       "name": "Willow Crescent",
       "roadColor": "#8b9bb4",
       "roadShadowColor": "#5a6988",
@@ -3387,11 +3454,13 @@
           "photoOp": 1
         },
         "minorObstacles": {
+          "ball": 1,
           "barrier2": 1,
           "barrier3": 1,
           "bench": 1,
           "bin": 1,
           "cone": 1,
+          "cyclist": 1,
           "hedge": 1,
           "parkedCar": 1
         },
@@ -3436,7 +3505,7 @@
       "fees": 0.8,
       "id": "park",
       "leashColor": "#a22633",
-      "moverShare": 0.15,
+      "moverShare": 0.3,
       "name": "Fairview Park",
       "roadColor": "#e4a672",
       "roadShadowColor": "#b86f50",
@@ -3457,11 +3526,13 @@
           "photoOp": 1
         },
         "minorObstacles": {
+          "ball": 1,
           "barrier2": 0,
           "barrier3": 0,
           "bench": 1,
           "bin": 1,
           "cone": 1,
+          "cyclist": 0,
           "hedge": 1,
           "parkedCar": 1
         },
@@ -3506,7 +3577,7 @@
       "fees": 1,
       "id": "street",
       "leashColor": "#f6757a",
-      "moverShare": 0.05,
+      "moverShare": 0.2,
       "name": "Elm Avenue",
       "roadColor": "#3a4466",
       "roadShadowColor": "#262b44",
@@ -3527,11 +3598,13 @@
           "photoOp": 1
         },
         "minorObstacles": {
+          "ball": 1,
           "barrier2": 1,
           "barrier3": 1,
           "bench": 1,
           "bin": 1,
           "cone": 2,
+          "cyclist": 1,
           "hedge": 1,
           "parkedCar": 1
         },
@@ -3576,7 +3649,7 @@
       "fees": 1.25,
       "id": "shops",
       "leashColor": "#3e2731",
-      "moverShare": 0.25,
+      "moverShare": 0.4,
       "name": "Main Street",
       "roadColor": "#f6757a",
       "roadShadowColor": "#b55088",
@@ -3597,11 +3670,13 @@
           "photoOp": 1
         },
         "minorObstacles": {
+          "ball": 1,
           "barrier2": 1,
           "barrier3": 1,
           "bench": 2,
           "bin": 1,
           "cone": 1,
+          "cyclist": 1,
           "hedge": 1,
           "parkedCar": 1
         },
@@ -3646,7 +3721,7 @@
       "fees": 1.25,
       "id": "pawsPromenade",
       "leashColor": "#a22633",
-      "moverShare": 0.15,
+      "moverShare": 0.35,
       "name": "Riverside Path",
       "roadColor": "#ead4aa",
       "roadShadowColor": "#e4a672",
@@ -3667,11 +3742,13 @@
           "photoOp": 1
         },
         "minorObstacles": {
+          "ball": 1,
           "barrier2": 1,
           "barrier3": 1,
           "bench": 1,
           "bin": 1,
           "cone": 1,
+          "cyclist": 1,
           "hedge": 1,
           "parkedCar": 1
         },
@@ -3716,7 +3793,7 @@
       "fees": 1.5,
       "id": "homeStretch",
       "leashColor": "#3e2731",
-      "moverShare": 0.3,
+      "moverShare": 0.5,
       "name": "The Long Way Home",
       "roadColor": "#c28569",
       "roadShadowColor": "#b86f50",
@@ -3737,11 +3814,13 @@
           "photoOp": 1
         },
         "minorObstacles": {
+          "ball": 1,
           "barrier2": 0,
           "barrier3": 0,
           "bench": 1,
           "bin": 1,
           "cone": 1,
+          "cyclist": 1,
           "hedge": 1,
           "parkedCar": 1
         },

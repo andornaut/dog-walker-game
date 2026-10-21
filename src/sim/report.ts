@@ -2,13 +2,13 @@ import { itemAt } from "../arrays";
 import { DOGS } from "../data/dogs";
 import type { GameData, GearId, WalkerId } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
-import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
-import { ALWAYS_MOVERS, itemCategory, type WalkItemKind } from "../runner/walk";
+import { itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
 import {
   DEFAULT_RATES,
   type ItemCount,
+  moverKindOf,
   type RunResult,
   type SimData,
   type SimPlayer,
@@ -77,7 +77,7 @@ export interface MatrixRow {
   readonly meanTips: number;
   readonly meanZones: number;
   readonly moneyShare: number;
-  readonly moverHitShares: Readonly<Partial<Record<MoverKind, number | null>>>;
+  readonly moverHitShares: Readonly<Partial<Record<string, number | null>>>;
   readonly p10: number;
   readonly p50: number;
   readonly p90: number;
@@ -203,17 +203,6 @@ export function simulateCell(
   return summarizeCell(data, cell, results);
 }
 
-const MOVER_KINDS = Object.keys(MOVER_CONTACTS) as MoverKind[];
-
-// Column names for the movers, apart from the obstacles that stand still.
-const MOVER_COLUMNS: Readonly<Record<MoverKind, string>> = {
-  ball: "ball",
-  cyclist: "cyclist",
-  goose: "goose",
-  looseDog: "looseDog",
-  squirrel: "dartingSquirrel",
-};
-
 // Every obstacle kind that can stand still, those that open a card first, then the minor ones.
 export function obstacleKinds(
   data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
@@ -224,7 +213,7 @@ export function obstacleKinds(
   ] as WalkItemKind[];
   return kinds.filter((kind) => {
     const category = itemCategory(data, kind);
-    return ALWAYS_MOVERS[kind] === undefined && (category === "obstacle" || category === "minor");
+    return category === "obstacle" || category === "minor";
   });
 }
 
@@ -252,8 +241,8 @@ export function summarizeCell(
     })),
     ...Object.entries(result.movers).map(([mover, count]) => ({
       count,
-      kind: MOVER_CONTACTS[mover as MoverKind],
-      mover: mover as MoverKind,
+      kind: moverKindOf(mover),
+      mover,
     })),
   ]);
   const countsOf = (keep: (entry: (typeof counted)[number]) => boolean) =>
@@ -290,7 +279,9 @@ export function summarizeCell(
         ? 0
         : choices.filter((choice) => choice.cost > 0).length / choices.length,
     moverHitShares: Object.fromEntries(
-      MOVER_KINDS.map((mover) => [mover, touchedShare(countsOf((entry) => entry.mover === mover))]),
+      [...new Set(results.flatMap((result) => Object.keys(result.movers)))]
+        .sort()
+        .map((mover) => [mover, touchedShare(countsOf((entry) => entry.mover === mover))]),
     ),
     p10: percentile(earnings, 0.1),
     p50: percentile(earnings, 0.5),
@@ -412,17 +403,10 @@ export function formatKindTable(
   rows: readonly MatrixRow[],
 ): string {
   const kinds = obstacleKinds(data);
+  // Every mover any row met, by kind and look.
+  const movers = [...new Set(rows.flatMap((row) => Object.keys(row.moverHitShares)))].sort();
   return textTable(
-    [
-      "Policy",
-      "Route",
-      "Player",
-      "Gear",
-      "Pack",
-      "Walker",
-      ...kinds,
-      ...MOVER_KINDS.map((mover) => MOVER_COLUMNS[mover]),
-    ],
+    ["Policy", "Route", "Player", "Gear", "Pack", "Walker", ...kinds, ...movers],
     rows.map((row) => [
       row.policy,
       row.route,
@@ -431,7 +415,7 @@ export function formatKindTable(
       row.pack,
       row.walker,
       ...kinds.map((kind) => measured(row.kindHitShares[kind] ?? null)),
-      ...MOVER_KINDS.map((mover) => measured(row.moverHitShares[mover] ?? null)),
+      ...movers.map((mover) => measured(row.moverHitShares[mover] ?? null)),
     ]),
   );
 }

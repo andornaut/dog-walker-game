@@ -2,52 +2,55 @@ import type { Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
 import {
-  MOVER_SPRITES,
+  IDLE_TAG,
+  MOVER_SPRITE_KEYS,
+  MOVING_TAGS,
   WARNING_ARROW_KEY,
   WARNING_DOWN_TAG,
   WARNING_KEY,
   WARNING_TAG,
+  WARNING_UP_TAG,
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import type { ZoneId } from "../../data/types";
+import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
-import { encounterLook } from "../../rules/skins";
+import { obstacleLook, skinnedArt } from "../../rules/skins";
 import { read } from "../../rules/units";
-import {
-  isMoverObstacle,
-  MOVER_CONTACTS,
-  type MoverKind,
-  type MoverOnRoad,
-  moverPlace,
-} from "../../runner/movers";
-import { playTag, showAtDepth } from "../sprites";
+import { inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
+import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemView } from "./itemViews";
 import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
-// down from the far end of the road for a cyclist, and the arrow a sign's width beside it or
-// below it on screen.
-const CUE = { inset: 10, size: 16, top: 20 };
+// down from the far end of the road for an in-lane mover, and the arrow a sign's width beside
+// it or below it on screen. The wander mark's top-left corner is at wander from the top
+// centre of the stepper's art.
+const CUE = { inset: 10, size: 16, top: 20, wander: { x: -8, y: -18 } };
 
-// A mover's body sprite: for a mover that opens an encounter, the encounter's skin in the zone
-// once its art is loaded, else the mover's own sprite.
-export function moverBodyKey(scene: Scene, zone: ZoneId, mover: MoverKind): string {
-  const { key } = MOVER_SPRITES[mover];
-  const contact = MOVER_CONTACTS[mover];
-  if (isMoverObstacle(contact)) {
-    return key;
-  }
-  const look = encounterLook(gameData, zone, contact);
-  return look.art !== look.baseArt && scene.textures.exists(look.art) ? look.art : key;
+// The ball carries its own shadow, bouncing on the road.
+const BALL_KEY = "ball-bounce";
+
+// A mover's body sprite: its look's art in the zone, or the base art while the skin's is
+// missing, or the sprite MOVER_SPRITE_KEYS names for that art once it is loaded.
+export function moverBodyKey(
+  scene: Scene,
+  zone: ZoneId,
+  kind: EncounterId | MinorObstacleId,
+): string {
+  const has = (key: string) => scene.textures.exists(key);
+  const art = skinnedArt(has, obstacleLook(gameData, zone, kind));
+  const sprite = MOVER_SPRITE_KEYS[art];
+  return sprite !== undefined && has(sprite) ? sprite : art;
 }
 
-// A mover stands on the road through the projection once it moves, sized by showAtDepth, a
-// crosser mirrored when it runs left. Until then only its cue shows, at 1x: a sign at the
-// road's edge on its row with the arrow pointing across, or a cyclist's sign at the top of
-// its lane with the arrow pointing down. The ball carries its own shadow. A mover with an idle
-// tag, the goose, also stands at the edge during its cue, playing it then and while halted. A
-// mover in an encounter's skin plays the mover's tags on the skin's sprite.
+// A mover stands on the road through the projection while it is solid, sized by showAtDepth,
+// a crosser mirrored when it runs left, playing its movement's first tag that its sprite has
+// while it moves and its idle tag otherwise. Before a dart or in-lane move only its cue shows,
+// at 1x: a sign at the road's edge on its row with the arrow pointing across, or a sign at the
+// top of its lanes with the arrow pointing down or up. A crosser with an idle tag also stands
+// at the edge during its cue. A stepper stands on the road throughout, with the wander mark over
+// it before each step.
 export function drawMover(
   mover: MoverOnRoad,
   view: ItemView,
@@ -58,21 +61,28 @@ export function drawMover(
   shadow: Shadow,
 ): void {
   const { road } = LAYOUT;
-  const { path } = mover;
-  const [body, cue, arrow] = view.parts;
-  const place = moverPlace(LANE_COUNT, path, mover.since);
-  const laneX = itemAt(LANE_XS, 0) + (place.lanePosition * road.width) / LANE_COUNT;
+  const { path, since } = mover;
+  const [body, cue, arrow, wander] = view.parts;
+  const place = moverPlace(LANE_COUNT, path, since);
+  const span = path.motion === "ride" ? path.lanes : 1;
+  const laneX =
+    itemAt(LANE_XS, 0) + ((place.lanePosition + (span - 1) / 2) * road.width) / LANE_COUNT;
   const leftward = path.motion === "cross" && path.direction === -1;
-  const sprite = MOVER_SPRITES[path.mover];
-  const idle = "idle" in sprite ? sprite.idle : undefined;
+  const tell = moverTell(path, since);
+  const moving = inMotion(path, since);
   if (body !== undefined) {
-    const shown = place.moving || idle !== undefined;
+    const scene = body.sprite.scene;
+    const idle = firstTag(scene, body.key, [IDLE_TAG]);
+    const shown = place.solid || (path.motion === "cross" && idle !== undefined);
     body.sprite.setVisible(shown);
     if (shown) {
       const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
-      const { key } = body;
-      const tag = idle !== undefined && (halted || !place.moving) ? idle : sprite.tag;
-      const drawn = showAtDepth(body.sprite, key, placed.scale);
+      const drawn = showAtDepth(body.sprite, body.key, placed.scale);
+      const movingTag =
+        path.movement === "still"
+          ? undefined
+          : firstTag(scene, drawn.key, MOVING_TAGS[path.movement]);
+      const tag = moving && !halted ? (movingTag ?? idle) : (idle ?? movingTag);
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       body.sprite
@@ -80,38 +90,65 @@ export function drawMover(
         .setDepth(DEPTH.sprite + placed.y)
         .setFlipX(leftward);
       clipToRoad(body.sprite);
-      playTag(body.sprite, drawn.key, tag, still);
+      if (tag !== undefined) {
+        playTag(body.sprite, drawn.key, tag, still);
+      }
       const cycle = body.sprite.anims.currentAnim?.duration;
-      if (path.mover !== "ball") {
-        shadow(key, drawn.depth, x, y);
+      if (body.key !== BALL_KEY) {
+        shadow(body.key, drawn.depth, x, y);
       } else if (cycle !== undefined) {
         const bounce = read(gameData.tuning, "seconds", "ballBounceSeconds");
         body.sprite.anims.timeScale = cycle / (bounce * 1000);
       }
     }
   }
+  const signed = tell !== null && tell.kind !== "wander";
+  cue?.sprite.setVisible(signed).setDepth(DEPTH.fx);
+  arrow?.sprite.setVisible(signed).setDepth(DEPTH.fx);
+  wander?.sprite.setVisible(tell?.kind === "wander").setDepth(DEPTH.fx);
+  if (tell === null) {
+    return;
+  }
+  if (tell.kind === "wander") {
+    if (wander !== undefined && body !== undefined) {
+      const top = body.sprite.getTopCenter();
+      wander.sprite
+        .setOrigin(0, 0)
+        .setPosition(
+          Math.round((top.x ?? 0) + CUE.wander.x),
+          Math.round((top.y ?? 0) + CUE.wander.y),
+        );
+      playTag(wander.sprite, wander.key, WARNING_TAG, still);
+    }
+    return;
+  }
+  const across = tell.kind === "across";
   const edgeX = leftward ? road.x + road.width - CUE.inset : road.x + CUE.inset;
   const cueAt = project(
     PROJECTION,
-    path.motion === "cross"
+    across
       ? { distance: PROJECTION.footY - footY, x: edgeX }
       : { distance: PROJECTION.footY - (roadTop + CUE.top), x: laneX },
   );
   const x = Math.round(cueAt.x);
   const y = Math.round(cueAt.y);
-  cue?.sprite.setVisible(!place.moving).setPosition(x, y).setDepth(DEPTH.fx);
-  arrow?.sprite.setVisible(!place.moving).setDepth(DEPTH.fx).setFlipX(leftward);
-  if (place.moving) {
-    return;
-  }
   if (cue !== undefined) {
+    cue.sprite.setPosition(x, y);
     playTag(cue.sprite, WARNING_KEY, WARNING_TAG, still);
   }
-  if (arrow !== undefined && path.motion === "cross") {
-    arrow.sprite.setPosition(x + path.direction * CUE.size, y);
+  if (arrow === undefined) {
+    return;
+  }
+  if (across) {
+    arrow.sprite.setPosition(x + tell.direction * CUE.size, y).setFlipX(tell.direction === -1);
     playTag(arrow.sprite, WARNING_ARROW_KEY, WARNING_TAG, still);
-  } else if (arrow !== undefined) {
-    arrow.sprite.setPosition(x, y + CUE.size);
-    playTag(arrow.sprite, WARNING_ARROW_KEY, WARNING_DOWN_TAG, still);
+  } else {
+    arrow.sprite.setPosition(x, y + CUE.size).setFlipX(false);
+    playTag(
+      arrow.sprite,
+      WARNING_ARROW_KEY,
+      tell.kind === "down" ? WARNING_DOWN_TAG : WARNING_UP_TAG,
+      still,
+    );
   }
 }

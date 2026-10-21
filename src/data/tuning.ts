@@ -6,13 +6,10 @@ import type { Tuning } from "./types";
 export const TUNING = {
   // Plain counts.
   counts: {
-    // A ball bounces across the road this many lanes a second.
-    ballLanesPerSecond: 2.5,
     biscuitNeighbourTreatsPerDog: 1,
-    // A goose waddles across the road this many lanes a second, slower than a loose dog.
-    gooseLanesPerSecond: 1.5,
+    // A darting mover crosses the road this many lanes a second.
+    dartLanesPerSecond: 3,
     loadoutMax: 1,
-    looseDogLanesPerSecond: 2,
     luckyEncountersPerZone: 2,
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 22,
@@ -28,7 +25,6 @@ export const TUNING = {
     poopBagsSkipsPerRun: 1,
     // A scent hound in the pack picks up tips this many lanes beside the pack.
     scentHoundLanes: 1,
-    squirrelDartLanesPerSecond: 4,
     tipsFirstZone: 52,
     tipsGainPerZone: 7,
     treatCarryMax: 3,
@@ -103,8 +99,6 @@ export const TUNING = {
     charmerTipSpawns: 0.85,
     // How much more often stranger spots are drawn while a crowd pleaser walks.
     crowdPleaserStrangerWeight: 2,
-    // A cyclist rides down its lane this much faster than the road scrolls; above 1.
-    cyclistSpeedMultiplier: 1.6,
     // A fast walker's fees, and the factor on its road speed, zone length and spawns.
     fastWalkerFees: 1.1,
     fastWalkerSpeed: 1.1,
@@ -172,7 +166,9 @@ export const TUNING = {
     minorHitStopSeconds: 0.6,
     // Then lane input stays locked this long.
     minorStumble: 0.3,
-    // A mover's cue shows this long before it moves.
+    // Each step of a stepping mover takes this long.
+    moverStepSeconds: 0.6,
+    // A mover's cue shows this long before each move.
     moverWarningSeconds: 1,
     // An urgent need left this long goes wrong, then starts again.
     needGoneWrong: 20,

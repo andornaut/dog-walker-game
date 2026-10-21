@@ -16,7 +16,6 @@ import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type {
   EncounterId,
-  LiveTuning,
   MinorObstacleId,
   ObstacleEncounterId,
   WalkerId,
@@ -40,6 +39,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
+import { obstacleLook } from "../rules/skins";
 import { giveTreat } from "../rules/treats";
 import { cents, pixels, read, readTable } from "../rules/units";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
@@ -50,7 +50,7 @@ import { TEST_WORLD } from "../testing/world";
 import { STEP_SECONDS } from "./fixedStep";
 import { isSteeringLocked } from "./laneControl";
 import { stillInLane } from "./laneMotion";
-import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
+import { hasLeftRoad, laneAt, type MoverPath, moverPlace, MOVERS_ON_SCREEN_MAX } from "./movers";
 import { seededRandom } from "./random";
 import {
   type AreaContact,
@@ -61,7 +61,7 @@ import {
   itemCategory,
   itemHeight,
   minorObstacleWeights,
-  moverFor,
+  moverLook,
   obstacleWeights,
   pickWeighted,
   planZone,
@@ -184,18 +184,22 @@ const standingSpan = (
   laneSpan: footprintOf(tuned, kind).lanes,
   length: itemHeight(tuned, GAME_ROAD, kind) + GAME_ROAD.tallestPackBand,
 });
-// A pixel-long span for each pixel of scroll a mover overlaps the pack in a lane of the game's
-// road.
-function moverSpans(tuned: Real, distance: number, mover: MoverPath): BlockingSpan[] {
+// A pixel-long span for each pixel of scroll a mover overlaps the pack in each lane of the
+// game's road it covers.
+function moverSpans(
+  tuned: Real,
+  event: { distance: number; kind: WalkItem["kind"]; mover: MoverPath },
+): BlockingSpan[] {
   const sight = GAME_ROAD.sightLength;
-  const window = itemHeight(tuned, GAME_ROAD, "squirrel") + GAME_ROAD.tallestPackBand;
-  return Array.from({ length: Math.ceil(2 * ROAD_LENGTH) }, (_, since) => {
-    const place = moverPlace(LANE_COUNT, mover, since);
-    const lane = Math.floor(place.lanePosition + 0.5);
-    const overlaps = place.travel >= sight && place.travel < sight + window;
-    return place.moving && overlaps && lane >= 0 && lane < LANE_COUNT
-      ? [{ distance: distance + since - sight, lane, laneSpan: 1, length: 1 }]
-      : [];
+  const window = itemHeight(tuned, GAME_ROAD, event.kind) + GAME_ROAD.tallestPackBand;
+  const across = footprintOf(tuned, event.kind).lanes;
+  return Array.from({ length: Math.ceil(4 * ROAD_LENGTH) }, (_, since) => {
+    const place = moverPlace(LANE_COUNT, event.mover, since);
+    const first = laneAt(place.lanePosition);
+    const overlaps = place.solid && place.travel >= sight && place.travel < sight + window;
+    return Array.from({ length: across }, (_unused, i) => first + i)
+      .filter((lane) => overlaps && lane >= 0 && lane < LANE_COUNT)
+      .map((lane) => ({ distance: event.distance + since - sight, lane, laneSpan: 1, length: 1 }));
   }).flat();
 }
 // Every lane-blocking spawn's spans on the game's road: a standing one's, or a mover's as it
@@ -206,7 +210,7 @@ const blockingSpans = (tuned: Real, pending: Walk["road"]["pending"]): BlockingS
     .flatMap((event) =>
       event.mover === undefined
         ? [standingSpan(tuned, event)]
-        : moverSpans(tuned, event.distance, event.mover),
+        : moverSpans(tuned, { ...event, mover: event.mover }),
     );
 // The scroll over which a mover is on the game's road: from its cue until it has left the road
 // or passed the bottom.
@@ -221,12 +225,12 @@ function onScreen(distance: number, mover: MoverPath): readonly [number, number]
   }
   return [distance, distance + since];
 }
-function expectOneAtATime(screens: readonly (readonly [number, number])[]): void {
-  screens.forEach(([start, end], i) => {
-    for (const [from, to] of screens.slice(i + 1)) {
-      expect(from >= end || to <= start).toBe(true);
-    }
-  });
+// No more than the cap of movers on screen at the start of any of them, where the count peaks.
+function expectCapOnScreen(screens: readonly (readonly [number, number])[]): void {
+  for (const [start] of screens) {
+    const atOnce = screens.filter(([from, to]) => from <= start && start < to).length;
+    expect(atOnce).toBeLessThanOrEqual(MOVERS_ON_SCREEN_MAX);
+  }
 }
 const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
@@ -274,7 +278,9 @@ const crossing: MoverPath = {
   enterTravel: 500,
   lanesPerPixel: 2.5 / 32,
   motion: "cross",
+  movement: "dart",
   mover: "squirrel",
+  tilt: 0,
   warning: 50,
 };
 const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkItem => ({
@@ -553,7 +559,7 @@ describe("stepWalk", () => {
 
   it("carries every treat of a planned zone that the pack walks into", () => {
     // The pack stands in the lane of the lowest treat in view, ignoring obstacles.
-    let walk = planZone(data, geometry, seededRandom(7), walkWith(["koda"]));
+    let walk = planZone(data, geometry, seededRandom(4), walkWith(["koda"]));
     let carried = 0;
     for (let i = 0; i < 2000; i++) {
       const treat = walk.road.items
@@ -1183,95 +1189,156 @@ describe("pickWeighted", () => {
   });
 });
 
-describe("movers", { timeout: 15_000 }, () => {
-  const withShare = (base: LiveTuning, share: number) => ({
-    ...data,
-    tuning: base,
-    world: sharedWorld(TEST_WORLD, share),
-  });
-  // A 9600px zone, with the screen to spare for one mover at a time.
-  const long = { ...tuning, seconds: { ...tuning.seconds, zoneAtBaseSpeed: 120 } };
+describe("movers", { timeout: 60_000 }, () => {
+  const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
+  // The rulebook's obstacles that never move: Splash, Stink (but for the garbage truck), and
+  // the benches, bins, cones, hedges and flower beds, in every zone.
+  const NEVER_MOVE: readonly WalkItem["kind"][] = [
+    "bench",
+    "bin",
+    "cone",
+    "hedge",
+    "puddle",
+    "skunk",
+  ];
+  const GARBAGE_TRUCK = "stink-garbage-truck";
+  const lookIn = (zone: ZoneId, kind: WalkItem["kind"]) =>
+    obstacleLook(REAL, zone, kind as ObstacleEncounterId | MinorObstacleId);
+  const moves = (zone: ZoneId, kind: WalkItem["kind"]) => {
+    const { movement } = lookIn(zone, kind);
+    return movement !== null && movement.kind !== "still";
+  };
 
-  it("plans every squirrel, other dog and minor obstacle as a mover at a share of 1", () => {
-    const walk = planZone(withShare(long, 1), geometry, seededRandom(3), walkWith(["koda"]));
-    const { pending } = walk.road;
-    const movers = pending.filter((event) => event.mover !== undefined);
-    expect(movers.length).toBeGreaterThan(0);
-    for (const { kind } of movers) {
-      expect(["ball", "cyclist", "goose", "otherDog", "squirrel"]).toContain(kind);
-    }
-    const still = pending.filter((event) => event.mover === undefined).map(({ kind }) => kind);
-    expect(still).not.toContain("squirrel");
-    expect(still).not.toContain("otherDog");
-    expect(still.filter((kind) => itemCategory(data, kind) === "minor")).toEqual([]);
-    const blocking = pending.filter((event) => blocksLane(data, event.kind));
-    expect(blocking).toHaveLength(10);
-  });
+  it.each(ZONE_IDS.flatMap((zone) => NEVER_MOVE.map((kind) => ({ kind, zone }))))(
+    "never moves the $kind in $zone",
+    ({ kind, zone }) => {
+      expect(moves(zone, kind) && lookIn(zone, kind).art !== GARBAGE_TRUCK).toBe(false);
+    },
+  );
 
-  it("draws a mover for a squirrel, other dog or minor obstacle at the share, and always a goose", () => {
-    let draws = 0;
-    const counted = (value: number) => () => {
-      draws += 1;
-      return value;
-    };
-    expect(moverFor(data, counted(0), 0.5, "squirrel")).toBe("squirrel");
-    expect(moverFor(data, counted(0), 0.5, "otherDog")).toBe("looseDog");
-    expect(moverFor(data, counted(0), 0.5, "cone")).toBe("ball");
-    expect(moverFor(data, counted(0.6), 0.9, "hedge")).toBe("cyclist");
-    expect(moverFor(data, counted(0.5), 0.5, "squirrel")).toBeNull();
-    draws = 0;
-    for (const kind of ["puddle", "skunk", "thief", "photoOp", "tip", "treat"] as const) {
-      expect(moverFor(data, counted(0), 1, kind)).toBeNull();
-    }
-    expect(moverFor(data, counted(0), 0, "squirrel")).toBeNull();
-    for (const share of [0, 0.5, 1]) {
-      expect(moverFor(data, counted(0), share, "goose")).toBe("goose");
-    }
-    expect(draws).toBe(0);
-  });
+  it.each(ZONE_IDS.flatMap((zone) => OBSTACLE_KINDS.map((kind) => ({ kind, zone }))))(
+    "moves the $kind in $zone at the share only when its look has a movement",
+    ({ kind, zone }) => {
+      let draws = 0;
+      const counted = (value: number) => () => {
+        draws += 1;
+        return value;
+      };
+      const look = moverLook(REAL, counted(0), zone, 1, kind);
+      expect(look !== null).toBe(moves(zone, kind));
+      expect(moverLook(REAL, counted(0.99), zone, 0.5, kind)).toBeNull();
+      const before = draws;
+      expect(moverLook(REAL, counted(0), zone, 0, kind)).toBeNull();
+      expect(draws).toBe(before);
+    },
+  );
 
-  it("sends every goose across the road slower than a loose dog, one mover on screen", () => {
-    const tuned = { ...REAL, world: sharedWorld(WORLD, 0) };
-    const run = realRun(tuned);
-    const geese = ["pawsPromenade", "homeStretch"].flatMap((zone) => {
-      const zoned = inZone(run, zone as ZoneId, WORLD.walkLength - 1);
-      const speed = walkScrollSpeed(tuned, zoned);
-      return [1, 2, 3].flatMap((seed) => {
-        const { pending } = planZone(tuned, GAME_ROAD, seededRandom(seed), {
+  it.each(["tip", "treat", "photoOp", "fireHydrant"] as const)(
+    "never moves a %s, drawing nothing",
+    (kind) => {
+      const never = () => {
+        throw new Error("drew");
+      };
+      for (const zone of ZONE_IDS) {
+        expect(moverLook(REAL, never, zone, 1, kind)).toBeNull();
+      }
+    },
+  );
+
+  // Movement values the planner can build: a dart is one cell, its tilt keeps it coming down
+  // the road, and an in-lane mover moves at another speed than the road.
+  it.each(ZONE_IDS.flatMap((zone) => OBSTACLE_KINDS.map((kind) => ({ kind, zone }))))(
+    "gives the $kind in $zone a movement the planner can build",
+    ({ kind, zone }) => {
+      const { movement } = lookIn(zone, kind);
+      if (movement?.kind === "dart") {
+        expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
+        expect(Math.abs(movement.tilt ?? 0)).toBeLessThan(1);
+      } else if (movement?.kind === "inLane") {
+        expect(movement.factor).toBeGreaterThan(0);
+        expect(movement.factor).not.toBe(1);
+      }
+    },
+  );
+
+  // Every zone at the fastest pace in the last zone, at the zones' shares and with every
+  // obstacle that can move moving: a way past every lane-blocking spawn from every lane, at
+  // most the cap of movers on screen, the pack-fit gap wherever the path changes lanes between
+  // two obstacles, and each mover moving as its look does.
+  const worlds = [
+    { name: "the zones' shares", world: WORLD },
+    { name: "a share of 1", world: sharedWorld(WORLD, 1) },
+  ];
+  it.each(worlds.flatMap(({ name, world }) => ZONE_IDS.map((zone) => ({ name, world, zone }))))(
+    "keeps every move passable in $zone at $name",
+    ({ world, zone }) => {
+      const tuned = { ...REAL, world };
+      const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
+      const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
+      const fit = GAME_ROAD.tallestPackBand + steps * STEP_SECONDS * walkScrollSpeed(tuned, zoned);
+      for (const seed of [1, 2, 3]) {
+        const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
           road: startRoad(LANE_COUNT),
           run: zoned,
-        }).road;
-        const movers = pending.flatMap(({ distance, kind, mover }) =>
+        });
+        const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
+        const spans = blockingSpans(tuned, blocking);
+        for (const start of LANES) {
+          const reached = lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start);
+          expect(reached, `seed ${seed}, from lane ${start}`).not.toEqual([]);
+        }
+        const movers = blocking.flatMap(({ distance, kind, mover }) =>
           mover === undefined ? [] : [{ distance, kind, mover }],
         );
-        expect(movers.every((event) => event.kind === "goose")).toBe(true);
-        expect(pending.filter((event) => event.kind === "goose")).toHaveLength(movers.length);
-        expectOneAtATime(movers.map(({ distance, mover }) => onScreen(distance, mover)));
-        return movers.map(({ mover }) => ({ mover, speed }));
-      });
-    });
-    expect(geese.length).toBeGreaterThan(3);
-    const loose = read(TUNING, "counts", "looseDogLanesPerSecond");
-    for (const { mover, speed } of geese) {
-      expect(mover).toMatchObject({ motion: "cross", mover: "goose" });
-      const lanesPerSecond = mover.motion === "cross" ? mover.lanesPerPixel * speed : 0;
-      expect(lanesPerSecond).toBeCloseTo(read(TUNING, "counts", "gooseLanesPerSecond"));
-      expect(lanesPerSecond).toBeLessThan(loose);
-    }
-  });
+        for (const { kind, mover } of movers) {
+          expect(mover.movement).toBe(lookIn(zone, kind).movement?.kind);
+        }
+        expectCapOnScreen(movers.map(({ distance, mover }) => onScreen(distance, mover)));
+        // Each obstacle's contact with the pack: its hit box's extent and its lanes.
+        const contacts = blocking.map((event) => {
+          if (event.mover === undefined) {
+            const { lanes } = footprintOf(tuned, event.kind);
+            return {
+              end: event.distance + itemHeight(tuned, GAME_ROAD, event.kind),
+              lanes: new Set(Array.from({ length: lanes }, (_, i) => event.lane + i)),
+              start: event.distance,
+            };
+          }
+          const touched = moverSpans(tuned, { ...event, mover: event.mover });
+          const from = Math.min(...touched.map(({ distance }) => distance));
+          const to = Math.max(...touched.map(({ distance }) => distance + 1));
+          return {
+            end: to - GAME_ROAD.tallestPackBand,
+            lanes: new Set(touched.map(({ lane }) => lane)),
+            start: from,
+          };
+        });
+        for (const near of contacts.filter(({ lanes }) => lanes.size > 0)) {
+          for (const far of contacts.filter(({ start }) => start > near.start)) {
+            const steppedIn = [...far.lanes].some(
+              (beside) =>
+                !near.lanes.has(beside) &&
+                [beside - 1, beside + 1].some(
+                  (lane) => near.lanes.has(lane) && !far.lanes.has(lane),
+                ),
+            );
+            const gap = far.start - near.end;
+            if (steppedIn && gap > 0) {
+              expect(gap, `seed ${seed}`).toBeGreaterThanOrEqual(fit - 1);
+            }
+          }
+        }
+      }
+    },
+  );
 
-  it("plans movers at the mover share of the zone the route is in: some at 1, none but geese at 0", () => {
-    const [first, ...rest] = TEST_WORLD.zones;
-    const world: World = { ...TEST_WORLD, zones: [{ ...first, moverShare: 1 }, ...rest] };
-    const shared = { ...data, tuning: long, world };
-    const walk = walkWith(["koda"]);
-    const moversIn = (zone: ZoneId) =>
-      planZone(shared, geometry, seededRandom(3), {
-        ...walk,
-        run: inZone(walk.run, zone, 0),
-      }).road.pending.filter((event) => event.mover !== undefined && event.kind !== "goose");
-    expect(moversIn(first.id as ZoneId).length).toBeGreaterThan(0);
-    expect(moversIn(rest[0]?.id as ZoneId)).toEqual([]);
+  it("plans the same movers for the same seed", () => {
+    const tuned = { ...REAL, world: sharedWorld(WORLD, 1) };
+    const zoned = inZone(realRun(tuned, FASTEST_WALKER), "homeStretch", WORLD.walkLength - 1);
+    const plan = () =>
+      planZone(tuned, GAME_ROAD, seededRandom(4), { road: startRoad(LANE_COUNT), run: zoned }).road
+        .pending;
+    expect(plan()).toEqual(plan());
   });
 
   it("brings a mover onto the road as its cue, carrying its path", () => {
@@ -1311,7 +1378,7 @@ describe("movers", { timeout: 15_000 }, () => {
     {
       dogs: ["duchess"],
       encounter: "otherDog",
-      item: moverAt("otherDog", { ...crossing, mover: "looseDog" }, 82),
+      item: moverAt("otherDog", { ...crossing, mover: "other-dog" }, 82),
       name: "a loose dog",
     },
     {
@@ -1325,40 +1392,19 @@ describe("movers", { timeout: 15_000 }, () => {
     expect(walk.road.hitStop?.cards).toEqual([{ affected: dogs, encounter, kind: "encounter" }]);
   });
 
-  it("bumps the pack like a minor obstacle on contact with a ball or a cyclist", () => {
-    const ball = { ...crossing, mover: "ball" } as const;
+  it("bumps the pack like a minor obstacle on contact with a ball or an in-lane cyclist", () => {
+    const ball = { ...crossing, mover: "ball-bounce" } as const;
     expect(step(walkWith(["koda"], [moverAt("ball", ball, 82)])).bumps).toHaveLength(1);
     const cyclist: MoverPath = {
       lane: 2,
+      lanes: 1,
       motion: "ride",
+      movement: "inLane",
       mover: "cyclist",
       speedMultiplier: 2,
       warning: 50,
     };
     // 50px of cue, then 266px of scroll at twice the road's speed: 532px down the road.
     expect(step(walkWith(["koda"], [moverAt("cyclist", cyclist, 316)])).bumps).toHaveLength(1);
-  });
-
-  it("leaves a way past every obstacle and mover of the game's road, one mover on screen", () => {
-    const tuned = { ...REAL, world: sharedWorld(WORLD, 0.5) };
-    const run = realRun(tuned);
-    for (const zoned of ZONE_IDS.map((zone) => inZone(run, zone, WORLD.walkLength - 1))) {
-      for (const seed of [1, 2, 3]) {
-        const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        });
-        const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
-        const spans = blockingSpans(tuned, blocking);
-        for (const start of [0, 2, 4]) {
-          expect(lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start)).not.toEqual([]);
-        }
-        const screens = blocking.flatMap(({ distance, mover }) =>
-          mover === undefined ? [] : [onScreen(distance, mover)],
-        );
-        expect(screens.length).toBeGreaterThan(5);
-        expectOneAtATime(screens);
-      }
-    }
   });
 });

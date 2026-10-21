@@ -51,11 +51,12 @@ export const ENCOUNTERS = {
     },
     shape: { lanes: 2, rows: 1 },
   },
-  // Always a mover: it waddles across the road, and a big dog does not scare it off.
+  // A big dog does not scare it off.
   goose: {
     affects: { kind: "all" },
     hitLabel: "HONK!",
     kind: "obstacle",
+    movement: { kind: "dart" },
     name: "Angry goose",
     resolution: {
       kind: "card",
@@ -138,6 +139,7 @@ export const ENCOUNTERS = {
     affects: { kind: "all" },
     hitLabel: "NEW FRIEND!",
     kind: "obstacle",
+    movement: { kind: "dart" },
     name: "Other dog",
     resolution: {
       kind: "card",
@@ -362,6 +364,7 @@ export const ENCOUNTERS = {
         art: "stink-garbage-truck",
         cardArtPrefix: "card-stink-garbage-truck",
         hitLabel: "PEE-YEW!",
+        movement: { factor: 0.6, kind: "inLane" },
         name: "Garbage truck",
       },
       pawsPromenade: {
@@ -389,6 +392,7 @@ export const ENCOUNTERS = {
     affects: { kind: "trait", trait: "chaser" },
     hitLabel: "SQUIRREL!",
     kind: "obstacle",
+    movement: { kind: "dart" },
     name: "Squirrel",
     resolution: {
       kind: "card",
@@ -419,6 +423,7 @@ export const ENCOUNTERS = {
         art: "chase-rabbit",
         cardArtPrefix: "card-chase-rabbit",
         hitLabel: "BOING!",
+        movement: { kind: "dart" },
         name: "Rabbit",
       },
       pawsPromenade: {
@@ -437,6 +442,7 @@ export const ENCOUNTERS = {
         art: "chase-cat",
         cardArtPrefix: "card-chase-cat",
         hitLabel: "HISS!",
+        movement: { kind: "dart" },
         name: "Cat on a lawn",
       },
     },
@@ -445,6 +451,7 @@ export const ENCOUNTERS = {
     affects: { kind: "all" },
     hitLabel: "PICKPOCKETED!",
     kind: "obstacle",
+    movement: { kind: "step", steps: 2 },
     name: "Thief",
     noCardWhen: { kind: "packHasSize", size: "big" },
     resolution: {
@@ -473,24 +480,28 @@ export const ENCOUNTERS = {
         art: "snatch-raccoon",
         cardArtPrefix: "card-snatch-raccoon",
         hitLabel: "SNATCHED!",
+        movement: { kind: "dart" },
         name: "Raccoon",
       },
       park: {
         art: "snatch-seagull",
         cardArtPrefix: "card-snatch-seagull",
         hitLabel: "SNATCHED!",
+        movement: { kind: "dart", tilt: -0.2 },
         name: "Seagull",
       },
       pawsPromenade: {
         art: "snatch-seagull",
         cardArtPrefix: "card-snatch-seagull",
         hitLabel: "SNATCHED!",
+        movement: { kind: "dart", tilt: -0.2 },
         name: "Seagull",
       },
       snoozeCrescent: {
         art: "snatch-raccoon",
         cardArtPrefix: "card-snatch-raccoon",
         hitLabel: "SNATCHED!",
+        movement: { kind: "dart" },
         name: "Raccoon",
       },
     },

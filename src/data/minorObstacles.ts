@@ -11,7 +11,11 @@ const SKINS_1X1 = {
 const SKINS_1X3 = {
   park: { art: "minor-log", name: "Log" },
   pawsPromenade: { art: "minor-canoe-rack", name: "Canoe rack" },
-  shops: { art: "minor-scooter", name: "Parked scooter" },
+  shops: {
+    art: "minor-scooter",
+    movement: { factor: 1.4, kind: "inLane" },
+    name: "Parked scooter",
+  },
   snoozeCrescent: { art: "minor-tricycles", name: "Tricycle row" },
 } as const satisfies Skins;
 const SKINS_2X1 = {
@@ -26,8 +30,10 @@ const SKINS_3X1 = {
 } as const satisfies Skins;
 
 // Obstacles that open no card. Shapes are lanes across by rows along the road; each zone
-// weighs how often they appear there, in world.ts.
+// weighs how often they appear there, in world.ts. A ball or cyclist comes as a mover at the
+// zone's mover share, like any obstacle with a movement, and stands still otherwise.
 export const MINOR_OBSTACLES = {
+  ball: { movement: { kind: "dart" }, name: "Ball", shape: { lanes: 1, rows: 1 } },
   barrier2: {
     name: "Construction barrier",
     shape: { lanes: 2, rows: 1 },
@@ -39,6 +45,16 @@ export const MINOR_OBSTACLES = {
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 }, skins: SKINS_2X1 },
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 }, skins: SKINS_1X1 },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 }, skins: SKINS_1X1 },
+  cyclist: {
+    movement: { factor: 1.6, kind: "inLane" },
+    name: "Cyclist",
+    shape: { lanes: 1, rows: 1 },
+  },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 }, skins: SKINS_3X1 },
-  parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 }, skins: SKINS_1X3 },
+  parkedCar: {
+    movement: { factor: 1.3, kind: "inLane" },
+    name: "Parked car",
+    shape: { lanes: 1, rows: 3 },
+    skins: SKINS_1X3,
+  },
 } as const satisfies Record<string, MinorObstacle>;

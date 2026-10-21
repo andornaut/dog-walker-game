@@ -89,9 +89,7 @@ type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 // The values the rules read by name; each group may hold more keys for cards to name.
 export interface Tuning {
   readonly counts: OpenGroup & {
-    readonly ballLanesPerSecond: number;
-    readonly gooseLanesPerSecond: number;
-    readonly looseDogLanesPerSecond: number;
+    readonly dartLanesPerSecond: number;
     readonly minorObstaclesFirstZone: number;
     readonly minorObstaclesGainPerZone: number;
     readonly needSpotsPerZone: number;
@@ -100,7 +98,6 @@ export interface Tuning {
     readonly packSizeMax: number;
     readonly packSizeMin: number;
     readonly scentHoundLanes: number;
-    readonly squirrelDartLanesPerSecond: number;
     readonly tipsFirstZone: number;
     readonly tipsGainPerZone: number;
     readonly treatCarryMax: number;
@@ -124,7 +121,6 @@ export interface Tuning {
   };
   readonly multipliers: OpenGroup & {
     readonly crowdPleaserStrangerWeight: number;
-    readonly cyclistSpeedMultiplier: number;
     readonly heartsByTemperament: Table<Temperament>;
     readonly nervousAloneUrgency: number;
     readonly scrollSpeedGainPerZone: number;
@@ -143,6 +139,7 @@ export interface Tuning {
     readonly lookAheadSeconds: number;
     readonly minorHitStopSeconds: number;
     readonly minorStumble: number;
+    readonly moverStepSeconds: number;
     readonly moverWarningSeconds: number;
     readonly needGoneWrong: number;
     readonly needUrgentByEnergy: Table<Energy>;
@@ -350,18 +347,33 @@ export interface Shape {
   readonly rows: 1 | 2 | 3;
 }
 
+// How an obstacle moves when it comes as a mover, each move after a cue
+// seconds.moverWarningSeconds long. dart: across the road at counts.dartLanesPerSecond, coming
+// down it at 1 + tilt of the road's speed meanwhile (tilt 0 when absent). inLane: down its lane
+// at factor of the road's speed, above 1 toward the pack, below 1 away. step: steps spots, each
+// a lane to either side or a row toward or away, seconds.moverStepSeconds each. still: it never
+// moves, as with no movement.
+export type Movement =
+  | { readonly kind: "dart"; readonly tilt?: number }
+  | { readonly kind: "inLane"; readonly factor: number }
+  | { readonly kind: "step"; readonly steps: 1 | 2 }
+  | { readonly kind: "still" };
+export type MovementKind = Movement["kind"];
+
 // An obstacle's look in one zone, in place of its base look: the name (an encounter's card
 // title), the road sprite's art key, the hit label, and the prefix replacing card-<kebab id>
 // in each card option's illustration key. A Stink skin may name its spray cloud's art key, and
 // a skin whose encounter gives a status may name the status overlay's art key, drawn while the
 // status it gave lasts. A missing hitLabel, cardArtPrefix, cloudArt or statusArt falls back to
-// the base's, and an art key not yet in the manifest to the base art. A skin never changes what
-// the obstacle does.
+// the base's, and an art key not yet in the manifest to the base art. movement is how the look
+// moves when it comes as a mover, at the zone's moverShare; a skin without one never moves,
+// whatever the base's. A skin never changes what the obstacle does on contact.
 export interface Skin {
   readonly art: string;
   readonly cardArtPrefix?: string;
   readonly cloudArt?: string;
   readonly hitLabel?: string;
+  readonly movement?: Movement;
   readonly name: string;
   readonly statusArt?: string;
 }
@@ -375,7 +387,8 @@ export type Skins = Readonly<Partial<Record<string, Skin>>>;
 // a good thing to bump into, a card or instant. A lucky card with a hitLabel shows it as the
 // pack meets it, before its card. Nothing happens when no dog is affected, when the pack is
 // immune, or when noCardWhen holds. A messy encounter's card costs a show dog's owner
-// hearts.showDogMessyHearts more wherever it costs them hearts. skins are its looks by zone.
+// hearts.showDogMessyHearts more wherever it costs them hearts. skins are its looks by zone,
+// and an obstacle's movement is its base look's, in zones without a skin.
 export type Encounter = {
   readonly affects: AffectRule;
   readonly messy?: true;
@@ -388,6 +401,7 @@ export type Encounter = {
   | {
       readonly hitLabel: string;
       readonly kind: "obstacle";
+      readonly movement?: Movement;
       readonly resolution: CardResolution;
       readonly shape: Shape;
     }
@@ -396,9 +410,11 @@ export type Encounter = {
 // An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
 // pack, and locks lane input for seconds.minorStumble, showing hitLabel when it has one. Each
 // zone's weights set how often it appears there, and skins are its looks by zone: the
-// obstacles of one shape share one skin per zone.
+// obstacles of one shape share one skin per zone. movement is its base look's, as an
+// encounter's.
 export interface MinorObstacle {
   readonly hitLabel?: string;
+  readonly movement?: Movement;
   readonly name: string;
   readonly shape: Shape;
   readonly skins?: Skins;
@@ -529,8 +545,8 @@ export interface Zone {
   readonly id: string;
   // Hex colours from the art palette. The leash stands out against the zone's road.
   readonly leashColor: string;
-  // The share of the zone's squirrels, other dogs and minor obstacles that come as movers (a
-  // darting squirrel, a loose dog, or a ball or cyclist), from 0 to 1.
+  // The share of the zone's obstacles, minor or not, whose look has a movement that come as
+  // movers, from 0 to 1.
   readonly moverShare: number;
   readonly name: string;
   readonly roadColor: string;

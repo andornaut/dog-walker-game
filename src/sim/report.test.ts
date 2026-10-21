@@ -43,7 +43,7 @@ vi.mock("./simulate", async (importOriginal) => {
       inputs: [],
       items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
       moneyShare: 0,
-      movers: { ball: { met: 2, touched: 1 } },
+      movers: { "ball:ball-bounce": { met: 2, touched: 1 } },
       pullsMoved: 0,
       route: [],
       run: newRun(data, config.pack.length, {
@@ -195,7 +195,7 @@ describe("simulateMatrix", () => {
 
     expect(row?.kindHitShares.cone).toBe(0.25);
     expect(row?.kindHitShares.hedge).toBeNull();
-    expect(row?.moverHitShares.ball).toBe(0.5);
+    expect(row?.moverHitShares["ball:ball-bounce"]).toBe(0.5);
     expect(row?.bumpShare).toBe(2 / 6);
     expect(row?.hitShare).toBeNull();
     expect(row?.meanTips).toBe(6);

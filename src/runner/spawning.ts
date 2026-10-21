@@ -1,5 +1,11 @@
 import { itemAt } from "../arrays";
-import { type LaneSpan, type MoverPath, type MoverSpec, placeMovers } from "./movers";
+import {
+  type LaneSpan,
+  type MoverPath,
+  type MoverSpec,
+  type MoverStand,
+  placeMovers,
+} from "./movers";
 import { type Random, randomPick } from "./random";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
@@ -11,7 +17,8 @@ export interface Footprint {
 export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 
 // blocksLane marks kinds the pack must steer around, such as obstacles. Spawns without a
-// footprint take one cell. A mover's spawns block the lanes it sweeps instead.
+// footprint take one cell. A mover's spawns block the lanes it sweeps instead; one with no
+// room to move stands still in its footprint instead, if there is room for that.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
@@ -238,8 +245,9 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // next row is within reach without crossing a lane blocked in the gap between them. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
 // last row. Where the path changes lanes between two lane-blocking spawns, packFitsBetween
-// holds. Movers are placed first, by placeMovers; a crosser keeps the row before its own
-// clear as a lead-in, so the pack steers into its row from two rows back. A mover, or an
+// holds, for a mover wherever it stands. Movers are placed first, by placeMovers; a crosser keeps
+// the row before its own clear as a lead-in, so the pack steers into its row from two rows
+// back. A mover with no room to move is placed as a standing obstacle, last of all. A mover, or an
 // obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
 // uses no random draw; so is one that would leave fewer free cells than there are one-cell
 // spawns. A plan that cannot fit its one-cell spawns that way is a data error and throws.
@@ -261,7 +269,7 @@ export function planSpawns<Kind extends string>(
   const gapBefore = new Int32Array(rows.length);
   const events: SpawnEvent<Kind>[] = [];
   const lanes = laneRun(0, laneCount);
-  // The lane-blocking spawns placed so far, other than movers.
+  // The lane-blocking spawns placed so far, and every place each mover stands.
   const placed: BlockingPlace[] = [];
 
   const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
@@ -399,7 +407,7 @@ export function planSpawns<Kind extends string>(
     mover === undefined ? [] : [{ count, kind, spec: mover }],
   );
   const moverGrid = {
-    block: (row: number, span: LaneSpan, leadIn: boolean, keep: boolean) => {
+    block: (row: number, span: LaneSpan, rowsBlocked: number, leadIn: boolean, keep: boolean) => {
       // A lead-in needs a row before it to steer from.
       if (leadIn && row < 2) {
         return false;
@@ -407,7 +415,11 @@ export function planSpawns<Kind extends string>(
       if (leadIn) {
         leadIns.add(row - 1);
       }
-      const ok = tryBlock({ lane: span.first, row }, { lanes: span.count, rows: 1 }, keep);
+      const ok = tryBlock(
+        { lane: span.first, row },
+        { lanes: span.count, rows: rowsBlocked },
+        keep,
+      );
       if (leadIn && !(ok && keep)) {
         leadIns.delete(row - 1);
       }
@@ -416,6 +428,11 @@ export function planSpawns<Kind extends string>(
     isFree: (lane: number, row: number) => ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
     leavesRoom: (cells: readonly Cell[]) =>
       leavesRoom(cells.filter(({ row }) => row >= 0 && row < rows.length).length),
+    packFits: (stands: readonly MoverStand[]) =>
+      stands.every((stand) => placed.every((other) => packFitsBetween(plan, stand, other))),
+    stand: (stands: readonly MoverStand[]) => {
+      placed.push(...stands);
+    },
     take: (lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
         takeCells(row, laneRun(lane, 1));
@@ -432,10 +449,21 @@ export function planSpawns<Kind extends string>(
     window: blockingLength(plan, 1),
     zoneLength: plan.zoneLength,
   };
-  events.push(...placeMovers(random, moverRoad, moverGrid, rows, movers));
+  const { skipped, spawns } = placeMovers(random, moverRoad, moverGrid, rows, movers);
+  events.push(...spawns);
+  // A skipped mover stands still instead, after every other spawn, and is skipped in turn
+  // when it has no room.
+  const standing = skipped.map((kind) => {
+    const quota = plan.quotas.find((candidate) => candidate.kind === kind);
+    const footprint = quota?.mover?.footprint ?? SINGLE_CELL;
+    return { blocksLane: true, count: 1, footprint, kind, skippable: true };
+  });
 
   // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
-  const ordered = [...statics].sort((a, b) => area(b) - area(a));
+  const ordered = [
+    ...[...statics].sort((a, b) => area(b) - area(a)),
+    ...standing,
+  ] as (SpawnQuota<Kind> & { skippable?: boolean })[];
   for (const quota of ordered) {
     const footprint = quota.footprint ?? SINGLE_CELL;
     for (let i = 0; i < quota.count; i++) {
@@ -446,7 +474,7 @@ export function planSpawns<Kind extends string>(
         Math.floor(((i + 1) * rows.length) / quota.count),
       );
       const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
-      if (cells.length === 0 && area(quota) > 1) {
+      if (cells.length === 0 && (area(quota) > 1 || quota.skippable === true)) {
         continue;
       }
       if (cells.length === 0) {

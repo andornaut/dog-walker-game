@@ -7,7 +7,6 @@ import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { touchesPack } from "./collision";
-import { MOVER_CONTACTS } from "./movers";
 import { itemHeight, type WalkItemKind } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 
@@ -22,7 +21,6 @@ const KINDS: readonly WalkItemKind[] = [
   ...(Object.keys(ENCOUNTERS) as WalkItemKind[]),
   ...(Object.keys(MINOR_OBSTACLES) as WalkItemKind[]),
   ...(Object.keys(NEED_SPOTS) as WalkItemKind[]),
-  ...Object.values(MOVER_CONTACTS),
   "tip",
   "treat",
 ];

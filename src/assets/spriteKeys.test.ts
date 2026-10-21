@@ -24,7 +24,6 @@ import {
   gearIconKey,
   kebabCase,
   minorObstacleSpriteKey,
-  MOVER_SPRITES,
   ownerFaceKey,
   roadStartKey,
   roadTileKey,
@@ -34,6 +33,8 @@ import {
   WARNING_DOWN_TAG,
   WARNING_KEY,
   WARNING_TAG,
+  WARNING_UP_TAG,
+  WARNING_WANDER_KEY,
   zoneIconKey,
   zonePipTag,
 } from "./spriteKeys";
@@ -156,21 +157,19 @@ describe("the art manifest", () => {
     expect(keys().filter((key) => !set.has(key))).toEqual([]);
   });
 
-  it("tags every mover's sprite with its moving tag, and the cue's sign and arrow", () => {
+  it.each([
+    [WARNING_KEY, WARNING_TAG],
+    [WARNING_ARROW_KEY, WARNING_TAG],
+    [WARNING_ARROW_KEY, WARNING_DOWN_TAG],
+    [WARNING_ARROW_KEY, WARNING_UP_TAG],
+    [WARNING_WANDER_KEY, WARNING_TAG],
+  ])("tags the mover cue %s with %s", (key, tag) => {
     const sheets = import.meta.glob<unknown>("../../public/art/sprites/*.json", {
       eager: true,
       import: "default",
     });
-    const hasTag = (key: string, tag: string) =>
-      animationSpecs(key, sheets[`../../public/art/sprites/${key}.json`]).some(
-        (spec) => spec.key === animationKey(key, tag),
-      );
-    for (const { key, tag } of Object.values(MOVER_SPRITES)) {
-      expect(hasTag(key, tag), key).toBe(true);
-    }
-    expect(hasTag(WARNING_KEY, WARNING_TAG)).toBe(true);
-    expect(hasTag(WARNING_ARROW_KEY, WARNING_TAG)).toBe(true);
-    expect(hasTag(WARNING_ARROW_KEY, WARNING_DOWN_TAG)).toBe(true);
+    const specs = animationSpecs(key, sheets[`../../public/art/sprites/${key}.json`]);
+    expect(specs.map((spec) => spec.key)).toContain(animationKey(key, tag));
   });
 
   it("gives every zone its own art", () => {

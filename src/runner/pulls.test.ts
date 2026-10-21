@@ -169,7 +169,9 @@ describe("what a dog pulls toward", () => {
       enterTravel: 200,
       lanesPerPixel: 0.001,
       motion: "cross",
+      movement: "dart",
       mover: "squirrel",
+      tilt: 0,
       warning: 80,
     };
     const walk = walkWith(
@@ -250,7 +252,9 @@ describe("a nervous dog", () => {
       enterTravel: 200,
       lanesPerPixel: 0.001,
       motion: "cross",
-      mover: "looseDog",
+      movement: "dart",
+      mover: "other-dog",
+      tilt: 0,
       warning: 80,
     };
     const looseDog = { ...item("otherDog", 0, 4), mover: { path: loose, since: 0 } };
@@ -346,7 +350,9 @@ describe("the fairness rule", () => {
       enterTravel: 500,
       lanesPerPixel: 2.5 / 32,
       motion: "cross",
-      mover: "ball",
+      movement: "dart",
+      mover: "ball-bounce",
+      tilt: 0,
       warning: 50,
     };
     const walk = walkWith(

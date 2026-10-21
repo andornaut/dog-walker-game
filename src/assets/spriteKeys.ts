@@ -6,10 +6,10 @@ import type {
   GameData,
   GearId,
   MinorObstacleId,
+  MovementKind,
   NeedSpotId,
   Zone,
 } from "../data/types";
-import type { MoverKind } from "../runner/movers";
 import type { CardSource } from "../state/runState";
 import { depthStepOfScale } from "./depthSteps";
 
@@ -97,6 +97,7 @@ export function doghouseTag(data: Pick<GameData, "dogs">, dog: DogId | null): st
 
 // Minor obstacles whose sprite key is not their id in kebab case.
 const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>> = {
+  ball: "ball-bounce",
   barrier2: "barrier-2",
   barrier3: "barrier-3",
 };
@@ -210,24 +211,28 @@ export function zonePipTag(zone: ZoneArt | null, done: boolean): string {
   return done ? `${zone.art}-done` : zone.art;
 }
 
-// Each mover's road sprite and the tag it plays while moving. Crossers face right. A mover with
-// an idle tag also stands at the road's edge during its cue, and plays it there and whenever
-// the walk is halted.
-export const MOVER_SPRITES = {
-  ball: { key: "ball-bounce", tag: "bounce" },
-  cyclist: { key: "cyclist", tag: "ride" },
-  goose: { idle: "idle", key: "goose", tag: "run" },
-  looseDog: { key: "loose-dog", tag: "run" },
-  squirrel: { key: "squirrel-dash", tag: "run" },
-} as const satisfies Readonly<
-  Record<MoverKind, { readonly idle?: string; readonly key: string; readonly tag: string }>
->;
+// A mover plays its look's art, or the sprite named here for it, and the first of its
+// movement's tags that the sprite has while it moves; without any, its idle tag.
+export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
+  "other-dog": "loose-dog",
+  squirrel: "squirrel-dash",
+};
+export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readonly string[]>> = {
+  dart: ["run", "flee", "bounce", "walk"],
+  inLane: ["drive", "pull-out", "ride", "run", "walk"],
+  step: ["walk", "run"],
+};
+export const IDLE_TAG = "idle";
 
 // A mover's cue: the sign at the lane edge and the arrow pointing the way it will go, which
-// faces right. Both play WARNING_TAG; the arrow plays WARNING_DOWN_TAG to point down a lane.
+// faces right. Both play WARNING_TAG; the arrow plays WARNING_DOWN_TAG or WARNING_UP_TAG to
+// point down or up a lane. A stepping mover's cue is WARNING_WANDER_KEY over its head, playing
+// WARNING_TAG.
 export const WARNING_KEY = "ui-warning";
 export const WARNING_ARROW_KEY = "ui-warning-arrow";
+export const WARNING_WANDER_KEY = "ui-warning-wander";
 export const WARNING_TAG = "pulse";
 export const WARNING_DOWN_TAG = "down-pulse";
+export const WARNING_UP_TAG = "up-pulse";
 
 const GROUND_UI_KEYS: ReadonlySet<string> = new Set([WARNING_KEY, WARNING_ARROW_KEY]);
