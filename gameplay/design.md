@@ -43,10 +43,10 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 - Web, phone browser first. Touch and keyboard; mouse is not planned
 - Portrait, ¾ top-down view, 5 lanes of 64px (the road spans x 20 to 340 at the pack); road sprites are drawn at 48px with 40px hit boxes
-- Layout: 360×560. From the top: the top bar (money, neighborhood progress with the effect icons beside it, a Home button, a sound button and pause; mute is also in Settings and on the M key); a backdrop band showing the current neighborhood, with the message strip over its clouds; the road across the full width, scrolling all the way to the top of its area; and a row of doghouse cards along the bottom, one per dog slot. Cards and the pause menu dim the walk view (the backdrop band and the road) while the walk is paused; the top bar and doghouse cards stay lit
-- **Doghouse cards:** each shows its dog's hearts and active debuffs. They are information only and take no taps
+- Layout: 360×560. From the top: the top bar, one row 48 tall (big cash; the neighborhood's name and progress pips, with the effect icons under the pips; Sound and Pause; mute is also in Settings and on the M key); the debuff bar, when one is active; a backdrop band showing the current neighborhood, with the message strip over its clouds; the road across the full width, scrolling all the way to the top of its area; and a row of doghouse cards along the bottom, one per dog slot. Cards and the pause menu dim the walk view (the backdrop band and the road) while the walk is paused; the top bar and doghouse cards stay lit
+- **Doghouse cards:** slim cards (120×58) in pack order, front dog first: a name header, the dog's face and its hearts, and a LEAD tag on the front dog. The owner pops in as a photo tab with their quip when something happens to them (a heart change, a quip, the firing moment). They are information only and take no taps
 - **Auto-pause:** the walk pauses whenever something takes the player's attention: the pause menu, Settings and Help, the Home question, a card, the neighborhood celebration, a held effect icon, and the tab being hidden or the window losing focus. Coming back to a hidden tab shows the pause menu, so the walk resumes only on Resume. Hints and achievement toasts don't pause: they show in the message strip
-- **Home button:** a house icon in the top bar pauses the walk and asks "Head home?", showing only what heading home gives up: "You give up $10 in pay for Elm Avenue and the Full pack bonus." (in red), plus "Neighborhoods left: 2" when any are left after this one. Keep walking is the default (key 1); Head home is key 2. Head home (here or in the pause menu) ends the walk (see A walk); the current neighborhood pays nothing
+- **Head home:** the pause menu's Head home and the fork card's Head home ask "Head home?", showing only what heading home gives up: "You give up $10 in pay for Elm Avenue and the Full pack bonus." (in red), plus "Neighborhoods left: 2" when any are left after this one. Keep walking is the default (key 1); Head home is key 2. Head home ends the walk (see A walk); the current neighborhood pays nothing
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 3.6 seconds of road are visible ahead. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. The first lane step comes after a short drag (about a third of a lane-width), and each further lane-width of travel adds one more, all relative to where the drag started, so the thumb never covers the walker. Dragging back turns the drag around. The pack moves lane by lane toward the target at the walker's lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A drag shorter than the first lane step counts as a tap
@@ -140,7 +140,7 @@ Every dog is a fixed, named character with its own art, a size and one fixed own
 | Snowball | Big    | Great Pyrenees       | Tiffany, wedding planner       | Giant white fluff, collar with a bell                                |
 | Zippy    | Small  | Jack Russell         | Mr. Pruitt, retired accountant | White with tan patches, red collar                                   |
 
-Three dogs come in each size. Size shows at a glance: on the road, big dogs are drawn 1.2× and small dogs 0.8× the size of medium ones, in every animation, with small dogs drawn chunky so they still read; portraits and doghouse faces differ less, about 1.1× and 0.9×. Hit boxes don't change. Each owner has a name and quips in their own voice. Each dog's data is in [`src/data/dogs.ts`](../src/data/dogs.ts).
+Three dogs come in each size. Size shows at a glance: on the road, medium dogs are drawn 48 px, big dogs 54 px and small dogs about 38 px, in every animation, with small dogs drawn chunky so they still read; portraits and doghouse faces differ less, about 1.1× and 0.9×. Hit boxes don't change. Each owner has a name and quips in their own voice. Each dog's data is in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
 ### Encounters
 
@@ -148,18 +148,19 @@ A card obstacle opens a choice card. Card obstacles carry no special marking on 
 
 | Encounter | Options                                                                     |
 | --------- | --------------------------------------------------------------------------- |
-| Other dog | Let them sniff → −$ (missed tips), +♥ each · Pull away → −♥ each            |
+| Other dog | Let them sniff → −$ (missed tips), +♥ each · Pull away → _Zoomies_          |
 | Puddle    | Towel off → −$ · Splash through → _Muddy_                                   |
 | Skunk     | Full groom → −$$ · Quick rinse → _Stinky_ · Hold your nose → −♥ each        |
 | Squirrel  | Let them chase → −$ (dropped tips) · Hold tight → −♥ each                   |
 | Thief     | Let them go → −$$ (stolen tips) · Chase them off → −♥ each (dogs worked up) |
 
-Each option costs one thing: money, hearts or a debuff. Let them sniff is the one trade, money for hearts.
+Each option costs one thing: money, hearts or a debuff. Let them sniff is the one trade, money for hearts. Each debuff comes from the card it fits: Muddy from the puddle, Stinky from the skunk, Zoomies from the other dog.
 
-**Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, every doghouse card's header and name plate take the debuff's colors, its icon shows, and a bar drains over the 20 seconds with the seconds left under it; nothing changes on the road.
+**Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's color runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over the 20 seconds; two active debuffs stack as two bars. Each debuff has its own color. Nothing changes on the road.
 
 - **Muddy:** every plain bump costs 2 ♥ instead of 1
 - **Stinky:** half as many tips appear
+- **Zoomies:** each lane change carries the pack two lanes instead of one, stopping at the road's edge
 
 ### Lucky encounters
 
@@ -202,8 +203,8 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
 ### Feedback
 
 - **Message strip:** a strip over the clouds at the top of the backdrop band tells what just happened, newest line big with its icon, older lines fading. Lines (in the text data):
-  - Debuff ends: "All clean again." · "The pack smells fine again."
-  - Debuff starts: "Muddy paws! Bumps cost 2♥ for 20s." · "Stinky pack! Half the tips for 20s."
+  - Debuff ends: "All clean again." · "The pack smells fine again." · "The zoomies wore off."
+  - Debuff starts: "Muddy paws! Bumps cost 2♥ for 20s." · "Stinky pack! Half the tips for 20s." · "Zoomies! Every move goes two lanes for 20s."
   - Effect starts: the effect line of an upgrade, the walker's perk or the Pocket item
   - Fired: "Jesse fired you! Koda heads home."
   - First-time hints (see Teaching)
@@ -213,7 +214,7 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
   - Pull: "Koda spotted a squirrel!"
   - Treat: "Biscuit got a treat! Sam +1♥"
 - **Road markers:** things worth grabbing (tips, treats and lucky finds) bob gently; obstacles carry no marker. With reduced motion nothing bobs
-- **Effect icons:** upgrades in effect, the walker's perk and the Pocket item show as small icons beside the neighborhood progress in the top bar. Hold one to see its effect line; the walk pauses while it's held and resumes on release
+- **Effect icons:** upgrades in effect, the walker's perk and the Pocket item show as small icons under the neighborhood's progress pips. Holding anywhere on the icons shows every active effect's line; the walk pauses while they're held and resumes on release
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse card with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the hit or card choice that fired you
 - **First visit:** on a brand-new save, the starter's owner waits at the gate in the gate scene until the first walk
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause

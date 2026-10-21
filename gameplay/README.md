@@ -48,9 +48,9 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 Rules in the rulebook that the game doesn't have yet:
 
 1. **Card obstacles:** five only (other dog, puddle, skunk, squirrel, thief), each hitting the whole pack, with each option costing one thing and two options on the thief; the mail carrier is a person and the ice cream truck a slow vehicle, both plain (Encounters, Moving hazards)
-2. **Debuffs:** Muddy and Stinky only (Encounters)
+2. **Debuffs:** Muddy, Stinky and Zoomies, each shown as a full-width colored bar under the top bar (Encounters)
 3. **Difficulty names:** one scale, Easiest, Easy, Normal, Hard, Hardest (A walk)
-4. **Doghouse cards:** hearts and active debuffs, no taps (Screen and controls)
+4. **Doghouse cards and top bar:** layout A: slim cards in pack order with a LEAD tag and the owner's photo tab on events; a one-row top bar with cash, progress, effect icons, Sound and Pause, and no Home button (Screen and controls)
 5. **Dogs by size only:** size sets hearts (3, 4, 5, starting full), small dogs dodge 1 in 4 plain hits, each big dog slows lane changes by 0.05 agility (never below Relaxed), and a plain hit lands on the dog that touched the obstacle, the front dog on a head-on hit; each dog has its own price (Dogs, Screen and controls)
 6. **Effect icons:** upgrades, the perk and the Pocket item as icons beside the neighborhood progress, with no taps; hold one to see its line, which pauses the walk (Feedback)
 7. **Forks:** each path carries one upgrade card, and picking the path picks it; a Head home button under the paths; The Long Way Home always neighborhood 4, the only path from the third fork (A walk, Upgrade cards)
