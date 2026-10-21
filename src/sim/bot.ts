@@ -138,9 +138,11 @@ const SCROLL_CONTACTS = new WeakMap<
 
 // Whether a hit box touches the pack in lane, as the walk's collision has it: one of the pack's
 // hit rectangles touches it as drawn, placed at the lane's centre, or, for a box between lanes,
-// anywhere on the road within half a lane of it. A box as narrow as a cat's can pass between a
-// pack standing in either of two lanes and still meet it changing lanes, which the plan counts
-// as in both.
+// anywhere on the road within half a lane of it on the box's side of each lane edge. A box as
+// narrow as a cat's can pass between a pack standing in either of two lanes and still meet it
+// changing lanes, which the plan counts as in both, so the half lane each side of an edge counts
+// for the lane on the box's side of it alone: the lane beyond stays clear for a pack that stands
+// there while the box passes.
 function touchesPackIn(
   geometry: ContactGeometry,
   between: boolean,
@@ -149,8 +151,10 @@ function touchesPackIn(
 ): boolean {
   const { cell, laneCount } = geometry;
   const x = (lane + 0.5) * cell.length;
-  const left = between && lane > 0 ? cell.length / 2 : 0;
-  const right = between && lane < laneCount - 1 ? cell.length / 2 : 0;
+  const centre = (box.lanes.left + box.lanes.right) / 2;
+  const left = between && lane > 0 && centre >= lane * cell.length ? cell.length / 2 : 0;
+  const right =
+    between && lane < laneCount - 1 && centre < (lane + 1) * cell.length ? cell.length / 2 : 0;
   const { dogs, walker } = geometry.packParts;
   return [...dogs, walker].some((part) =>
     touchesAsDrawn(
