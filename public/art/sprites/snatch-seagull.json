@@ -1,50 +1,82 @@
 { "frames": {
    "snatch-seagull 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 56, "h": 84 },
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 84 },
-    "sourceSize": { "w": 56, "h": 84 },
-    "duration": 200
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 100
    },
    "snatch-seagull 1.aseprite": {
-    "frame": { "x": 56, "y": 0, "w": 56, "h": 84 },
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 84 },
-    "sourceSize": { "w": 56, "h": 84 },
-    "duration": 200
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 100
    },
    "snatch-seagull 2.aseprite": {
-    "frame": { "x": 112, "y": 0, "w": 56, "h": 84 },
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 84 },
-    "sourceSize": { "w": 56, "h": 84 },
-    "duration": 110
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 100
    },
    "snatch-seagull 3.aseprite": {
-    "frame": { "x": 168, "y": 0, "w": 56, "h": 84 },
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 84 },
-    "sourceSize": { "w": 56, "h": 84 },
-    "duration": 110
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 100
    },
    "snatch-seagull 4.aseprite": {
-    "frame": { "x": 224, "y": 0, "w": 56, "h": 84 },
+    "frame": { "x": 128, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 84 },
-    "sourceSize": { "w": 56, "h": 84 },
-    "duration": 400
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 90
    },
    "snatch-seagull 5.aseprite": {
-    "frame": { "x": 280, "y": 0, "w": 56, "h": 84 },
+    "frame": { "x": 160, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 84 },
-    "sourceSize": { "w": 56, "h": 84 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 90
+   },
+   "snatch-seagull 6.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 90
+   },
+   "snatch-seagull 7.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 90
+   },
+   "snatch-seagull 8.aseprite": {
+    "frame": { "x": 256, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 400
+   },
+   "snatch-seagull 9.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
     "duration": 400
    }
  },
@@ -53,12 +85,12 @@
   "version": "1.2.30-x64",
   "image": "snatch-seagull.png",
   "format": "RGBA8888",
-  "size": { "w": 336, "h": 84 },
+  "size": { "w": 320, "h": 48 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "flee", "from": 2, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 5, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "flee", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "idle", "from": 8, "to": 9, "direction": "forward" }
   ]
  }
 }

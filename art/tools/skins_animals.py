@@ -1,59 +1,67 @@
 #!/usr/bin/env python3
-"""Draw the per-zone looks of the Chase, Snatch and Social encounters: the same
-mechanics as squirrel, thief and other-dog (with its owner), a different
-animal or person per zone. Each skin has its base kind's frame size, tags,
-frame counts, durations and anchor (the feet on the frame's bottom rows), and
-the same depth variants at every step in minis.STEPS (@88, @75, @62, @50).
+"""Draw the Chase, Snatch and Social animals and the Social dogs' owners, the
+moving road obstacles that were the per-zone looks of squirrel, thief and
+other-dog. Every sprite also has its depth variants at every step in
+minis.STEPS (@88, @75, @62, @50), redrawn at the step with the same tags,
+frames and durations. Everything faces the player except the side views
+(hops and the Social dogs' run, facing right, the game mirroring them for
+left) and the flees, which go off up the road, seen from behind. Road outline
+(road_edge) and road.LIT's rim on dark fills, cel shading as the dogs have it
+(Grid.cel), as road.py has them.
 
-This script does not build: it imports road.PERSON_SCALE, which road.py no
-longer has. Zone skins are not drawn in play (the game draws only the base
-looks), so its exports stay as they are, unmaintained.
+Each animal is laid out on 32x32 (the Snatch animals on 32x48) and drawn on a
+minis.Mini at its frame side / 32, sized against the pack (dogs.py: big 54,
+medium 48, small 38); the owners are laid out on 32x48 and drawn at road.SCALE,
+48x72, as road.py draws its people.
 
-Like road.py's encounters, every skin is laid out on 32x32 (animals) or 32x48
-(people and the Snatch animals) and drawn bigger on a minis.Mini: the animals
-road.SCALE (1.25) times, exporting at 40x40 (35/30/25/20 at the steps), the
-people and the Snatch animals road.PERSON_SCALE (1.75) times, exporting at
-56x84 (49x74, 42x63, 35x53, 28x42). Everything faces the player
-except flee, which runs off up the road, seen from behind. Road outline
-(road_edge) and road.LIT's rim on dark fills, as road.py has them.
+Chase, 38x38 (the small dogs' frame): idle (2 frames, 300ms: frame 1 a small
+motion), run (4 frames, 80ms: down the road at the player).
+  chase-cat          a tuxedo cat sitting, smaller than a medium dog; idle swishes its tail,
+                     run bounds as the squirrel does: lands stretched, pushes off, flies
+                     gathered, reaches down
+  chase-pigeons      three pigeons; idle pecks, run flutters and hops; flee (4 frames, 80ms):
+                     the flock flying off up the road from behind, wings beating up, out, down, out
+  chase-ducklings    three ducklings; idle peeps, run waddles; hop (4 frames, 100ms): the brood
+                     in a line in side view, crouch, take-off, airborne, landing, each a frame
+                     behind the one ahead
+  chase-rabbit       a white rabbit; idle twitches, run bounds; hop (4 frames, 100ms): side view,
+                     crouched with its ears back, leaping stretched, airborne 8 units up, landing
+                     on its front paws
 
-Chase (reskins squirrel, 40x40): idle (2 frames, 300ms: frame 1 a small
-motion), run (2 frames, 120ms: stretched, then gathered and 2 to 3px higher).
-  chase-cat          Willow Crescent    a tuxedo cat sitting on a grass tuft
-  chase-pigeons      Main Street        three pigeons; idle pecks, run flutters
-  chase-ducklings    Riverside Path     three ducklings; idle peeps, run waddles
-  chase-rabbit       The Long Way Home  a white rabbit; idle twitches, run hops
+Snatch, the thief's tags: walk (4 frames, 100ms, road.PERSON_WALK: a foot lifted,
+passing 1px higher, the other foot), flee (4 frames, 90ms: from behind, see FLEE
+and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a tan loot
+sack, as the thief does.
+  snatch-raccoon     38x57, standing about as tall as a medium dog, the sack at its chest; flee
+                     runs, the ringed tail swinging against the stride
+  snatch-seagull     32x48, a head shorter, the sack in its beak; flee flies, the wings beating
+                     up, level, down, level
 
-Snatch (reskins thief, 56x84): walk (2 frames, 200ms: a foot lifted 2px),
-flee (2 frames, 110ms: from behind), idle (2 frames, 400ms: breathing). Each
-carries a tan loot sack, as the thief does.
-  snatch-raccoon     Willow Crescent, The Long Way Home  standing, sack held at the chest
-  snatch-seagull     Fairview Park, Riverside Path       the sack in its beak; flees flying
+Social, medium dogs (48x48, drawn SOCIAL_ZOOM narrower in it, about 26px wide
+face on) and their owners (48x72): the dog's walk (4 frames, 100ms) and idle (4
+frames, 300ms: tail at -1, 0, +1, 0, the right ear 1px higher on the last
+frame), as other-dog has them, and run (4 frames, 100ms): side view facing right
+in loose-dog's gallop (hazards.CORGI_RUN), without the broken leash; the owner's
+walk (4 frames, 100ms, road.PERSON_WALK) and idle (2 frames, 400ms).
+  social-frisbee-dog        a border collie with a red frisbee
+  social-frisbee-dog-owner  backwards cap, green tee, shorts
+  social-jogger-dog         a husky in a running harness
+  social-jogger-dog-owner   a jogger: headband, tank top, shorts
 
-Social (reskins other-dog, 40x40, and other-dog-owner, 56x84): the dog's walk
-(4 frames, 100ms) and idle (4 frames, 300ms: tail at -1, 0, +1, 0, the right
-ear 1px higher on the last frame), the owner's walk (2 frames, 200ms) and idle
-(2 frames, 400ms), as the other dog and its walker have them. The game draws
-the dog left of its owner. The dog also runs as the zone's loose dog: run (4
-frames, 100ms), side view facing right in loose-dog's gallop (hazards.CORGI_RUN),
-without the broken leash, drawn in the dog's own 40x40 frame.
-  social-gate-dog           Willow Crescent  a beagle with its paws on a picket gate
-  social-gate-dog-owner                      a gardener: straw hat, green apron, gloves
-  social-frisbee-dog        Fairview Park    a border collie with a red frisbee
-  social-frisbee-dog-owner                   backwards cap, green tee, shorts
-  social-handbag-dog        Main Street      a chihuahua in a purple handbag
-  social-handbag-dog-owner                   a shopper: sunglasses, sky coat, shopping bag
-  social-jogger-dog         Riverside Path   a husky in a running harness
-  social-jogger-dog-owner                    a jogger: headband, tank top, shorts
+The gate dog and the handbag dog (social-gate-dog, social-handbag-dog and their
+owners) are not in play: their drawings stay here, unbuilt, and their exports
+stay at the old 40px and 56x84 scale.
 
 Usage:
-  skins_animals.py preview OUT.png   every frame of every skin and variant on
+  skins_animals.py preview OUT.png   every frame of every sprite and variant on
                                      the road colours
   skins_animals.py build             write art/skins-animals/*.aseprite and export
                                      to public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
+skin_cards_animals.py composes the encounter cards from the exports, so rebuild
+it after this.
 """
 
 import os
@@ -65,7 +73,7 @@ import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
 from pixel import Grid, build, edged, preview  # noqa: E402
-from road import BREATH, BREATH_MS, LIT, PERSON_SCALE, SCALE  # noqa: E402
+from road import BREATH, BREATH_MS, LIT, SCALE  # noqa: E402
 
 # The zone road colours: Willow Crescent, Fairview Park, Elm Avenue, Main Street, Riverside Path and The Long
 # Way Home.
@@ -86,45 +94,52 @@ def eyes(g, xs, y, c="ink"):
 
 # ---------- Chase (reskins squirrel) ----------
 
-def cat(tail=0, run=None):
-    """A tuxedo cat facing the player: black coat, white bib, muzzle and paws, green eyes, its tail curling up
-    its right side with a white tip. Sitting (run None) on a grass tuft, tail swishing 1px right at 1; run
-    False is the bound's stretch, low and wide with the front paws apart, True the gather, airborne 3px
-    higher with the paws tucked and the tail flung up."""
+def paw(g, x, y, h, c, sh, leg=None):
+    """A 3-unit paw from row y, h rows tall, its lower-right pixel shaded; leg, if given, the 2 rows of leg
+    above it."""
+    if leg:
+        g.rect(x, y - 2, 3, 2, leg)
+    g.rect(x, y, 3, h, c)
+    g.p(x + 2, y + h - 1, sh)
+
+
+def cat(tail=0):
+    """A tuxedo cat sitting facing the player, its paws on rows 28 and 29: black coat, white bib, muzzle and
+    paws, green eyes, its tail curling up its right side with a white tip. tail swishes the tail 1px
+    right."""
     g = edged(Grid())
-    if run is None:
-        # the lawn: a patch of grass under the cat, blades standing up along its back edge
-        g.ell(16, 27.5, 12, 2, "green", "dgreen")
-        for x in (5, 8, 23, 26):
-            g.rect(x, 25, 1, 2, "green")
-        g.ell(23 + tail, 21, 2, 6, "navy", "ink", "dslate")
-        g.ell(22 + tail, 14.5, 2, 2, "white", "lgrey")
-        g.ell(15, 21.5, 6, 6.5, "navy", "ink", "dslate")
-        g.ell(15, 24, 3, 3.5, "white", "lgrey")
-        for x in (11, 16):
-            g.rect(x, 27, 3, 2, "white")
-            g.p(x + 2, 28, "lgrey")
-        head = 13
-    elif not run:
-        g.ell(23, 13, 2, 6, "navy", "ink", "dslate")
-        g.ell(23, 7.5, 2, 2, "white", "lgrey")
-        g.ell(16, 22, 7.5, 4.5, "navy", "ink", "dslate")
-        g.ell(16, 23.5, 3.5, 2.5, "white", "lgrey")
-        for x in (8, 21):
-            g.rect(x, 23, 3, 3, "navy")
-            g.rect(x, 26, 3, 3, "white")
-            g.p(x + 2, 28, "lgrey")
-        head = 17
-    else:
-        g.ell(21, 9, 2, 5, "navy", "ink", "dslate")
-        g.ell(20, 4.5, 2, 2, "white", "lgrey")
-        g.ell(15, 19, 5.5, 5, "navy", "ink", "dslate")
-        g.ell(15, 20, 3, 3, "white", "lgrey")
-        for x in (11, 17):
-            g.rect(x, 24, 3, 2, "white")
-        head = 13.5
-    cx = 15 if run is None or run else 16
-    cat_head(g, cx, head)
+    g.cel(23 + tail, 22, 2, 6, "navy", "ink", "dslate")
+    g.cel(22.5 + tail, 15.5, 2, 2, "white", "lgrey")
+    g.cel(15, 23, 6, 6.5, "navy", "ink", "dslate")
+    g.cel(15, 25, 3, 3.5, "white", "lgrey")
+    for x in (11, 16):
+        paw(g, x, 28, 2, "white", "lgrey")
+    cat_head(g, 15, 14)
+    return lit(g)
+
+
+# The cat's bound at the player, landing first, as road.SQUIRREL_BOUND: body (x, y, rx, ry), head y, front paws
+# (left x, right x, top row, rows), tail (x, y, ry). It lands stretched low and wide, pushes off, flies
+# gathered 4 units higher with its paws tucked and its tail flung up, then reaches down for the next landing.
+CAT_BOUND = (
+    ((16, 23, 7.5, 4.5), 18, (8, 21, 27, 3), (23, 14, 6)),
+    ((16, 22, 7, 4.8), 17, (9, 20, 26.5, 3), (22.5, 12, 6)),
+    ((15.5, 19.5, 5.5, 5), 14, (11, 17, 24, 2), (21, 9.5, 5)),
+    ((16, 21, 6.5, 4.8), 15.5, (9.5, 19.5, 25.5, 3), (22, 11.5, 5.5)),
+)
+
+
+def cat_run(phase):
+    """The cat bounding down the road at the player, a front elevation, at phase 0 to 3 of CAT_BOUND."""
+    g = edged(Grid())
+    (bx, by, brx, bry), hy, (lx, rx, py, ph), (tx, ty, tr) = CAT_BOUND[phase]
+    g.cel(tx, ty, 2, tr, "navy", "ink", "dslate")
+    g.cel(tx - 0.5, ty - tr + 1.5, 2, 2, "white", "lgrey")
+    g.cel(bx, by, brx, bry, "navy", "ink", "dslate")
+    g.cel(bx, by + 1.5, brx / 2, bry / 2 + 0.5, "white", "lgrey")
+    for x in (lx, rx):
+        paw(g, x, py, ph, "white", "lgrey", "navy")
+    cat_head(g, bx - 0.5 if phase == 2 else bx, hy)
     return lit(g)
 
 
@@ -132,30 +147,30 @@ def cat_head(g, x, y):
     """The cat's head facing the player, centred on (x, y): pointed ears with pink insides, a white muzzle,
     green eyes and a pink nose."""
     g.tri((x - 6, y), (x - 5, y - 6.5), (x - 1.5, y - 3.5), "navy")
-    g.tri((x + 6, y), (x + 5, y - 6.5), (x + 1.5, y - 3.5), "navy")
+    g.tri((x + 6, y), (x + 5, y - 6.5), (x + 1.5, y - 3.5), "dslate")
     g.p(x - 4.5, y - 3.5, "pink")
     g.p(x + 3.5, y - 3.5, "pink")
-    g.ell(x, y, 6, 4.8, "navy", "ink", "dslate")
-    g.ell(x, y + 2.5, 2.5, 1.6, "white", "lgrey")
+    g.cel(x, y, 6, 4.8, "navy", "ink", "dslate")
+    g.cel(x, y + 2.5, 2.5, 1.6, "white", "lgrey")
     for ex in (x - 4.5, x + 1.5):
         g.rect(ex, y - 1.5, 3, 2, "green")
         g.rect(ex + 1, y - 1.5, 1, 2, "ink")
     g.p(x - 0.5, y + 1.5, "pink")
 
 
-def pigeon(g, cx, by, peck=False, wings=0):
+def pigeon(g, cx, by, peck=False, wings=None):
     """A pigeon facing the player with its feet on row by - 1: a round grey body, the green and mauve neck
-    sheen, a small head. peck lowers the head to the ground; wings 1 raises both wings, -1 holds them out and
-    down."""
-    if wings:
+    sheen, a small head. peck lowers the head to the ground; wings, from -1 (out and down) to 1 (raised),
+    spreads both wings, None keeps them folded."""
+    if wings is not None:
         for side in (-1, 1):
-            tip = (cx + side * 8, by - 13 if wings > 0 else by - 4)
+            tip = (cx + side * 8, by - 8.5 - 4.5 * wings)
             g.tri((cx + side * 2, by - 7), (cx + side * 2, by - 3), tip, "lgrey")
-            g.tri((cx + side * 5, by - 7 if wings > 0 else by - 5), (cx + side * 5, by - 4), tip, "grey")
-            g.p(tip[0] - side, tip[1] + (1 if wings > 0 else -1), "dslate")
+            g.tri((cx + side * 5, by - 6 - wings), (cx + side * 5, by - 4), tip, "grey")
+            g.p(tip[0] - side, tip[1] + (1 if wings > 0 else -1 if wings < 0 else 0), "dslate")
     for x in (cx - 2, cx + 1):
         g.p(x, by - 1, "pink")
-    g.ell(cx, by - 4, 5, 3.5, "grey", "slate", "lgrey")
+    g.cel(cx, by - 4, 5, 3.5, "grey", "slate", "lgrey")
     for side in (-1, 1):
         g.rect(cx + (3 if side > 0 else -4), by - 5, 1, 1, "dslate")
         g.rect(cx + (3 if side > 0 else -4), by - 3, 1, 1, "dslate")
@@ -163,20 +178,62 @@ def pigeon(g, cx, by, peck=False, wings=0):
     g.rect(cx - 2, by - 7, 4, 1, "green")
     g.p(cx - 2, by - 7, "mauve")
     g.p(cx + 1, by - 7, "mauve")
-    g.ell(cx, hy, 2.2, 2.2, "grey", "slate", "lgrey")
+    g.cel(cx, hy, 2.2, 2.2, "grey", "slate", "lgrey")
     g.p(cx - 2, hy - 0.5, "orange")
     g.p(cx + 1, hy - 0.5, "orange")
     g.p(cx - 0.5, hy + 1.5, "dslate")
     g.p(cx - 0.5, hy + 0.5, "white")
 
 
-def pigeons(peck=False, wings=0, lift=0):
-    """Three pigeons, two behind and one in front; peck has the front one peck, wings and lift (pixels up)
-    take the flock into a flutter."""
+# The flock's spots: (x, feet row), the two behind, then the one in front.
+FLOCK = ((8, 21), (24, 22), (16, 29))
+
+
+def pigeons(peck=False, wings=None, lift=(0, 0, 0)):
+    """Three pigeons, two behind and one in front; peck has the front one peck, wings (see pigeon) spreads
+    the back right one's against the others', and lift raises each by its pixels."""
     g = edged(Grid())
-    pigeon(g, 8, 21 - lift, wings=wings)
-    pigeon(g, 24, 22 - lift, wings=-wings)
-    pigeon(g, 16, 29 - lift, peck=peck, wings=wings)
+    u = 1 / getattr(g, "s", 1)
+    for (x, y), flip, up in zip(FLOCK, (1, -1, 1), lift):
+        pigeon(g, x, y - up * u, peck=peck and x == 16, wings=None if wings is None else wings * flip)
+    return lit(g)
+
+
+# The flock's flutter down the road, each frame (wings, lift per pigeon): wings beat down as the flock hops,
+# the front pigeon a beat behind the two at the back.
+PIGEONS_RUN = ((-1, (0, 0, 1)), (0, (2, 2, 0)), (1, (3, 3, 2)), (0, (1, 1, 3)))
+
+
+def pigeon_back(g, cx, cy, wings):
+    """A pigeon flying away up the road, seen from behind, its body centred on (cx, cy): a grey back with
+    the dark tail fan under it, the head over it and both wings spread, their tips at wings (-1 raised to
+    1 swept down) with dark bars."""
+    for side in (-1, 1):
+        tip = (cx + side * 8, cy - 1 + 5 * wings)
+        g.tri((cx + side * 1.5, cy - 2), (cx + side * 1.5, cy + 1.5), tip, "lgrey")
+        g.tri((cx + side * 4, cy - 1.5 + wings), (cx + side * 4, cy + 1 + wings), tip, "grey")
+        g.p(tip[0] - side, tip[1], "dslate")
+    g.tri((cx - 2.5, cy + 2), (cx + 2.5, cy + 2), (cx, cy + 5.5), "dslate")
+    g.rect(cx - 2, cy + 4, 4, 1, "ink")
+    g.cel(cx, cy, 3, 3.5, "grey", "slate", "lgrey")
+    g.rect(cx - 1, cy - 2.5, 2, 1, "green")
+    g.cel(cx, cy - 4, 2, 2, "grey", "slate", "lgrey")
+
+
+# The flock taking off up the road, seen from behind: each frame (wings, rise per pigeon), the wings beating
+# up, out, down and out while the three climb and fall a pixel or two against each other.
+PIGEONS_FLEE = ((-1, (0, 1, 0)), (0, (1, 2, 1)), (1, (2, 2, 3)), (0, (1, 1, 2)))
+# Where each pigeon flies: its body's centre, the two ahead higher up.
+FLYERS = ((9, 13), (23, 11), (16, 22))
+
+
+def pigeons_fleeing(wings, rise):
+    """The flock flying off up the road, seen from behind: wings for all three, the middle one's against
+    the others', and rise lifting each by its pixels."""
+    g = edged(Grid())
+    u = 1 / getattr(g, "s", 1)
+    for (x, y), flip, up in zip(FLYERS, (1, -1, 1), rise):
+        pigeon_back(g, x, y - up * u, wings * flip)
     return lit(g)
 
 
@@ -186,13 +243,13 @@ def duckling(g, cx, by, peep=False, wing=0, step=0):
     right)."""
     for x, side in ((cx - 2, -1), (cx + 1, 1)):
         g.rect(x, by - 1 - (1 if step == side else 0), 2, 1, "orange")
-    g.ell(cx, by - 4, 4, 3.3, "yellow", "amber")
+    g.cel(cx, by - 4, 4, 3.3, "yellow", "amber")
     for side in (-1, 1):
         if wing:
             g.tri((cx + side * 3, by - 6), (cx + side * 3, by - 3), (cx + side * 6, by - 8), "yellow")
         else:
             g.rect(cx + (3 if side > 0 else -4), by - 5, 1, 2, "amber")
-    g.ell(cx, by - 9, 3, 2.8, "yellow", "amber")
+    g.cel(cx, by - 9, 3, 2.8, "yellow", "amber")
     g.p(cx, by - 12.5, "yellow")
     g.p(cx - 2, by - 10, "ink")
     g.p(cx + 1, by - 10, "ink")
@@ -201,50 +258,88 @@ def duckling(g, cx, by, peep=False, wing=0, step=0):
         g.rect(cx - 1, by - 8, 2, 1, "rust")
 
 
-def ducklings(peep=False, wing=0, step=0, lift=0):
-    """Three ducklings in a line, one in front; peep opens the front one's bill, wing, step and lift (pixels up)
-    make the waddle-run."""
+# The ducklings' spots, as FLOCK.
+BROOD = ((8, 22), (24, 23), (16, 29))
+
+
+def ducklings(peep=False, wing=0, step=0, lift=(0, 0, 0)):
+    """Three ducklings, one in front; peep opens the front one's bill, wing and step (the back right one's
+    the other foot) make the waddle, and lift raises each by its pixels."""
     g = edged(Grid())
-    duckling(g, 8, 22 - lift, wing=wing, step=step)
-    duckling(g, 24, 23 - lift, wing=wing, step=-step)
-    duckling(g, 16, 29 - lift, peep=peep, wing=wing, step=step)
+    u = 1 / getattr(g, "s", 1)
+    for (x, y), flip, up in zip(BROOD, (1, -1, 1), lift):
+        duckling(g, x, y - up * u, peep=peep and x == 16, wing=wing, step=step * flip)
     return lit(g)
 
 
-def rabbit(twitch=0, run=None):
-    """A white rabbit facing the player: long ears with pink insides, a round head with pink nose, sitting
-    with its big hind feet either side. twitch raises the right ear 1px and the nose; run False is
-    the hop's stretch, low and long with the ears laid back, True the gather, 3px up with the ears raised."""
-    g = edged(Grid())
-    if run is None:
-        hx, hy, ear = 16, 14.5, 3
-        g.ell(16, 22, 6.5, 6, "white", "lgrey")
-        for x in (8, 20):
-            g.rect(x, 27, 5, 2, "white")
-            g.rect(x, 28, 5, 1, "lgrey")
-        for x in (12.5, 17.5):
-            g.ell(x, 26, 2.2, 2.6, "lgrey")
-            g.ell(x - 0.3, 25.8, 1.5, 2, "white")
-    elif not run:
-        hx, hy, ear = 16, 18.5, 6
-        g.ell(16, 23, 8, 4.5, "white", "lgrey")
-        for x in (8, 21):
-            g.rect(x, 26, 3, 3, "white")
-            g.p(x + 2, 28, "lgrey")
+# The waddle-run down the road: a foot lifted with the wings out, both feet down as the brood bobs up a pixel,
+# the other foot lifted, down again.
+DUCKLINGS_RUN = (dict(step=-1, wing=1), dict(lift=(1, 1, 1)), dict(step=1, wing=1), dict(lift=(1, 1, 1)))
+
+
+def duckling_side(g, cx, by, phase):
+    """A duckling in side view facing right, its feet on row by - 1, at phase 0 to 3 of a hop: crouched, taking
+    off stretched up with its wing out, in the air 3 units up with its feet tucked, landing with its wing
+    out."""
+    up, wing = ((0, 0), (1, 1), (3, 0), (1, 1))[phase]
+    y = by - up
+    crouch = phase == 0
+    if phase != 2:
+        g.rect(cx - 1, by - 1, 3, 1, "orange")
+        g.rect(cx, by - 2 + (0 if up else 0), 1, 1 + (1 if up else 0) - (1 if crouch else 0), "orange")
     else:
-        hx, hy, ear = 16, 12.5, 2
-        g.ell(16, 19, 6, 5, "white", "lgrey")
-        for x in (11, 18):
-            g.rect(x, 23, 3, 2, "white")
-            g.p(x + 2, 24, "lgrey")
+        g.rect(cx - 1, y - 2, 3, 1, "orange")
+    g.tri((cx - 4.5, y - 7), (cx - 2.5, y - 4), (cx - 5.5, y - 5), "yellow")
+    g.cel(cx, y - 4 + (0.5 if crouch else 0), 4.5, 3.3 - (0.5 if crouch else 0), "yellow", "amber")
+    if wing:
+        g.tri((cx - 2, y - 6), (cx + 1, y - 5), (cx - 4, y - 9), "yellow")
+        g.p(cx - 2, y - 6, "amber")
+    else:
+        g.rect(cx - 2, y - 5, 3, 1, "amber")
+    hy = y - 9 + (1 if crouch else 0)
+    g.cel(cx + 2, hy, 3, 2.8, "yellow", "amber")
+    g.p(cx + 1.5, hy - 3.5, "yellow")
+    g.p(cx + 3, hy - 1, "ink")
+    g.rect(cx + 5, hy, 2, 1, "orange")
+
+
+def ducklings_hop(phase):
+    """The brood hopping across the road in side view, facing right, in a line: the leader at phase, each
+    behind it a frame later."""
+    g = edged(Grid())
+    for k, (x, y) in enumerate(((5.5, 26), (14.5, 27), (24, 28))):
+        duckling_side(g, x, y, (phase - (2 - k)) % 4)
+    return lit(g)
+
+
+def rabbit(twitch=0, bound=None):
+    """A white rabbit facing the player: long ears with pink insides, a round head with a pink nose. Sitting
+    (bound None), its big hind feet either side on rows 28 and 29, twitch raising the right ear 1px and
+    the nose; bound is a frame of RABBIT_BOUND, the run at the player."""
+    g = edged(Grid())
+    if bound is None:
+        hx, hy, ear = 16, 15.5, 3
+        g.cel(16, 23, 6.5, 6, "white", "lgrey")
+        for x in (8, 19):
+            g.rect(x, 28, 5, 2, "white")
+            g.rect(x, 29, 5, 1, "lgrey")
+        for x in (12.5, 17.5):
+            g.cel(x, 27, 2.2, 2.6, "white", "lgrey")
+    else:
+        (bx, by, brx, bry), hy, ear, (lx, rx, py, ph) = RABBIT_BOUND[bound]
+        hx = 16
+        g.cel(bx, by, brx, bry, "white", "lgrey")
+        for x in (lx, rx):
+            paw(g, x, py, ph, "white", "lgrey")
     t = twitch
     for x, up in ((hx - 3.5, 0), (hx + 3.5, t)):
-        g.ell(x, hy - 3 - ear - up, 2, 5.5, "white", "lgrey")
+        g.cel(x, hy - 3 - ear - up, 2, 5.5, "white", "lgrey")
         g.rect(x - 0.5, hy - 5 - ear - up, 1, 6, "pink")
-    g.ell(hx, hy + 4.5, 4.5, 1.6, "lgrey")
-    g.ell(hx, hy, 5.5, 4.5, "white", "lgrey")
+    g.cel(hx, hy + 4.5, 4.5, 1.6, "lgrey")
+    g.cel(hx, hy, 5.5, 4.5, "white", "lgrey")
     for x in (hx - 4, hx + 2):
         g.rect(x, hy - 1, 2, 2, "ink")
+        g.p(x + (0 if x < hx else 1), hy - 1, "white")
         g.p(x + (0 if x < hx else 1), hy + 1.5, "pink")
     g.p(hx - 0.5, hy + 1.5 - t, "pink")
     g.p(hx - 1.5, hy + 2.5, "lgrey")
@@ -252,11 +347,75 @@ def rabbit(twitch=0, run=None):
     return lit(g)
 
 
+# The rabbit's bound at the player, as CAT_BOUND: body (x, y, rx, ry), head y, ears (units above the head),
+# front paws (left x, right x, top row, rows). It lands low and long with its ears laid back, pushes off,
+# flies gathered with its ears up, then reaches down.
+RABBIT_BOUND = (
+    ((16, 24, 8, 4.5), 19.5, 2, (8, 21, 27, 3)),
+    ((16, 23, 7.5, 4.8), 18.5, 3, (9, 20, 26.5, 3)),
+    ((16, 20, 6, 5), 14, 5, (11, 18, 24, 2)),
+    ((16, 22, 7, 4.8), 16.5, 4, (9.5, 19.5, 25.5, 3)),
+)
+
+
+def ear(g, base, tip, c, inner=None):
+    """A long ear from the middle of its base to its tip: a quad 3 units wide at the base and 2 at the tip,
+    a 1-unit inner stripe down its middle."""
+    (bx, by), (tx, ty) = base, tip
+    dx, dy = tx - bx, ty - by
+    n = (dx * dx + dy * dy) ** 0.5 or 1
+    nx, ny = -dy / n, dx / n
+    a, b = (bx + nx * 1.5, by + ny * 1.5), (bx - nx * 1.5, by - ny * 1.5)
+    c2, d = (tx - nx, ty - ny), (tx + nx, ty + ny)
+    g.tri(a, b, c2, c)
+    g.tri(a, c2, d, c)
+    if inner:
+        g.tri((bx + nx * 0.5, by + ny * 0.5), (bx - nx * 0.5, by - ny * 0.5), (tx - dx * 0.2, ty - dy * 0.2), inner)
+
+
+# The hop across the lanes, side view facing right, 4 frames: body (x, y, rx, ry), haunch (x, y, r), head
+# (x, y), ear tip (x, y), hind foot (x, top row, length) and front paws (x, top row, rows). It crouches with
+# its ears back, leaps stretched forward and up with the hind legs pushing off, flies 8 units up gathered with
+# its ears raised, then lands on its front paws with the hind feet swinging up behind.
+RABBIT_HOP = (
+    ((14, 24.5, 7, 4.5), (10, 25, 4.5), (21, 20.5), (12, 14), (5, 28, 7), (19.5, 27, 3)),
+    ((16, 19, 8, 4), (11, 20, 4), (24, 13.5), (15, 6), (1, 25, 6), (24.5, 19, 2)),
+    ((15, 15, 7.5, 4.5), (10.5, 16, 4.5), (22.5, 10), (18, 1.5), (7, 19.5, 6), (19.5, 18, 2)),
+    ((16, 21, 7.5, 4.5), (10.5, 19, 4.5), (23, 18), (16, 10), (3, 18, 6), (21.5, 23, 6)),
+)
+
+
+def rabbit_hop(phase):
+    """The white rabbit hopping across the road in side view, facing right, at phase 0 to 3 of RABBIT_HOP: the
+    far ear, front paw and hind foot a shade darker behind the near ones, a white puff of tail and a pink
+    nose. The game mirrors it for a hop to the left."""
+    g = edged(Grid())
+    body, (hx, hy, hr), (dx, dy), (tx, ty), (fx, fy, fl), (px, py, ph) = RABBIT_HOP[phase]
+    ear(g, (dx - 3, dy - 2.5), (tx - 2, ty + 1), "lgrey")
+    g.rect(px - 1.5, py, 3, ph, "lgrey")
+    g.rect(fx - 1, fy - 0.5, fl, 2, "lgrey")
+    g.cel(hx - hr + 0.5, hy - 1.5, 2.2, 2.2, "white", "lgrey")
+    g.cel(*body, "white", "lgrey")
+    # the hind leg from the haunch down to the foot
+    g.tri((hx - 2.5, hy), (hx + 1.5, hy + 2), (fx + fl / 2, fy + 1), "white")
+    g.cel(hx, hy, hr, hr, "white", "lgrey")
+    g.rect(fx, fy, fl, 2, "white")
+    g.rect(fx, fy + 1, fl, 1, "lgrey")
+    paw(g, px, py, ph, "white", "lgrey")
+    g.cel(dx, dy, 4.5, 3.8, "white", "lgrey")
+    g.cel(dx + 2.5, dy + 1.5, 2.2, 1.6, "white", "lgrey")
+    ear(g, (dx - 1.5, dy - 2.5), (tx, ty), "white", "pink")
+    g.rect(dx + 0.5, dy - 1.5, 2, 2, "ink")
+    g.p(dx + 0.5, dy - 1.5, "white")
+    g.p(dx + 4.5, dy + 0.5, "pink")
+    return lit(g)
+
+
 # ---------- Snatch (reskins thief) ----------
 
 def sack(g, x, y):
     """The tan loot sack centred on (x, y), its neck gathered at the top, as the thief's."""
-    g.ell(x, y, 4, 4, "tan", "brown", "cream")
+    g.cel(x, y, 4, 4, "tan", "brown", "cream")
     g.tri((x - 2.5, y - 2.5), (x + 2.5, y - 2.5), (x, y - 6), "tan")
     g.rect(x - 1, y - 5, 2, 1, "brown")
     g.rect(x - 2, y - 4, 4, 1, "dbrown")
@@ -273,13 +432,13 @@ def raccoon(lf=0, rf=0, bob=0):
     b = bob
     # the ringed tail, from behind the right hip up its side
     for i, (x, y) in enumerate(((24, 39), (26, 35), (27, 31), (26.5, 27))):
-        g.ell(x, y + b, 2.6, 2.4, "dslate" if i % 2 else "lgrey", None)
-    g.ell(26, 24 + b, 2, 1.8, "ink")
+        g.cel(x, y + b, 2.6, 2.4, "dslate" if i % 2 else "lgrey", "ink" if i % 2 else "grey")
+    g.cel(26, 24 + b, 2, 1.8, "ink")
     for x, f in ((11, lf), (17, rf)):
         g.rect(x, 37 + b, 4, 6 + f - b, "dslate")
         g.rect(x - 1, 43 + f, 5, 2, "ink")
-    g.ell(16, 32 + b, 8, 7.5, "slate", "dslate", "grey")
-    g.ell(16, 33.5 + b, 4.5, 5, "lgrey", "grey")
+    g.cel(16, 32 + b, 8, 7.5, "slate", "dslate", "grey")
+    g.cel(16, 33.5 + b, 4.5, 5, "lgrey", "grey")
     sack(g, 16, 31 + b)
     for x in (10, 19):
         g.rect(x, 30 + b, 3, 2, "ink")
@@ -287,27 +446,32 @@ def raccoon(lf=0, rf=0, bob=0):
     for x, tip in ((9, 10), (23, 22)):
         g.tri((x, 17 + b), (tip, 9.5 + b), (16 + (-3 if x < 16 else 3), 13 + b), "slate")
         g.p(tip, 11 + b, "lgrey")
-    g.ell(16, 18.5 + b, 8.5, 6.5, "slate", "dslate", "grey")
+    g.cel(16, 18.5 + b, 8.5, 6.5, "slate", "dslate", "grey")
     g.rect(9, 15 + b, 5, 1, "white")
     g.rect(18, 15 + b, 5, 1, "white")
     g.rect(8, 17 + b, 16, 3, "ink")
     g.rect(15, 15 + b, 2, 4, "grey")
     g.rect(11, 18 + b, 2, 1, "white")
     g.rect(19, 18 + b, 2, 1, "white")
-    g.ell(16, 21.5 + b, 3.5, 2.5, "white", "lgrey")
+    g.cel(16, 21.5 + b, 3.5, 2.5, "white", "lgrey")
     g.rect(15, 20 + b, 2, 1, "ink")
     g.rect(15, 23 + b, 3, 1, "dbrown")
     g.p(18, 22 + b, "dbrown")
     return lit(g)
 
 
-def raccoon_fleeing(stride):
+# A run up the road, seen from behind, 4 frames: the stride (-1 the left knee up, 1 the right, 0 passing with
+# both feet down) and the body's lift, highest off the pushing foot.
+FLEE = [dict(stride=-1, bob=-2), dict(stride=0, bob=-1), dict(stride=1, bob=-2), dict(stride=0, bob=-1)]
+FLEE_MS = 90
+
+
+def raccoon_fleeing(stride, bob=-1):
     """The raccoon running off up the road, seen from behind: the lifted leg short, the other planted, the
     ringed tail swinging down its back against the stride and the loot sack bouncing over its right
-    shoulder."""
+    shoulder. stride 0 is the passing frame, both feet down and the arms at its sides; bob lifts it."""
     g = edged(Grid(32, 48))
-    s = stride
-    b = -1
+    s, b = stride, bob
     for x, lift in ((11, s < 0), (17, s > 0)):
         if lift:
             g.rect(x, 36 + b, 4, 4, "dslate")
@@ -316,18 +480,19 @@ def raccoon_fleeing(stride):
             g.rect(x, 36 + b, 4, 7 - b, "dslate")
             g.rect(x - 1, 43, 5, 2, "ink")
     for x, back in ((7, s < 0), (25, s > 0)):
-        g.rect(x - 1, (31 if back else 25) + b, 3, 4, "dslate")
-        g.rect(x - 1, (35 if back else 29) + b, 3, 2, "ink")
-    g.ell(16, 31 + b, 8, 7.5, "slate", "dslate", "grey")
+        y = 28 if s == 0 else 31 if back else 25
+        g.rect(x - 1, y + b, 3, 4, "dslate")
+        g.rect(x - 1, y + 4 + b, 3, 2, "ink")
+    g.cel(16, 31 + b, 8, 7.5, "slate", "dslate", "grey")
     k = b + (1 if s > 0 else 0)
     sack(g, 22, 27 + k)
     # the tail down the back, swinging against the stride
     for i, y in enumerate((30, 34, 38)):
-        g.ell(16 - s * (1 + i), y + b, 2.6, 2.4, "dslate" if i % 2 else "lgrey", None)
-    g.ell(16 - s * 4, 41.5 + b, 2, 1.8, "ink")
+        g.cel(16 - s * (1 + i), y + b, 2.6, 2.4, "dslate" if i % 2 else "lgrey", "ink" if i % 2 else "grey")
+    g.cel(16 - s * 4, 41.5 + b, 2, 1.8, "ink")
     for x, tip in ((9, 10), (23, 22)):
         g.tri((x, 17 + b), (tip, 9.5 + b), (16 + (-3 if x < 16 else 3), 13 + b), "slate")
-    g.ell(16, 18.5 + b, 8.5, 6.5, "slate", "dslate", "grey")
+    g.cel(16, 18.5 + b, 8.5, 6.5, "slate", "dslate", "grey")
     g.rect(8, 18 + b, 2, 2, "ink")
     g.rect(22, 18 + b, 2, 2, "ink")
     return lit(g)
@@ -345,11 +510,11 @@ def seagull(lf=0, rf=0, bob=0):
         g.rect(x - 1, 44 + f, 3, 1, "mauve")
     for side in (-1, 1):
         x = 16 + side * 7
-        g.ell(x, 30 + b, 3, 7, "grey", "slate", "lgrey")
+        g.cel(x, 30 + b, 3, 7, "grey", "slate", "lgrey")
         g.tri((x - 2, 34 + b), (x + 2, 34 + b), (x + side * 1, 40 + b), "ink")
         g.p(x, 35 + b, "white")
-    g.ell(16, 30 + b, 6.5, 7.5, "white", "lgrey")
-    g.ell(16, 17 + b, 6, 5.5, "white", "lgrey")
+    g.cel(16, 30 + b, 6.5, 7.5, "white", "lgrey")
+    g.cel(16, 17 + b, 6, 5.5, "white", "lgrey")
     # a fierce brow over each yellow eye
     for x, side in ((12, -1), (19, 1)):
         g.rect(x, 16 + b, 2, 2, "yellow")
@@ -362,24 +527,30 @@ def seagull(lf=0, rf=0, bob=0):
     return lit(g)
 
 
-def seagull_fleeing(stride):
+# The seagull's wingbeat flying off: wings -1 raised, 0 level, 1 swept down; it climbs a pixel
+# on the downstroke.
+SEAGULL_FLEE = [dict(wings=-1), dict(wings=0), dict(wings=1, bob=-1), dict(wings=0, bob=-1)]
+
+
+def seagull_fleeing(wings, bob=0):
     """The seagull flying off up the road, seen from behind: grey back, white head and tail, wings spread with
-    black tips, raised (stride -1) or swept down (1), the sack dangling under it and its feet tucked."""
+    black tips at wings (-1 raised, 0 level, 1 swept down), the sack dangling under it and its feet
+    tucked."""
     g = edged(Grid(32, 48))
-    up = stride < 0
-    y0 = 20
+    a = wings
+    y0 = 20 + bob
     for side in (-1, 1):
         root_hi, root_lo = (16 + side * 4, y0 + 4), (16 + side * 4, y0 + 9)
-        tip = (16 + side * 15, y0 - 8 if up else y0 + 14)
+        tip = (16 + side * 15, y0 + 3 + 11 * a)
         g.tri(root_hi, root_lo, tip, "grey")
-        g.tri(root_hi, (16 + side * 9, y0 + (0 if up else 8)), tip, "lgrey")
-        g.tri((16 + side * 12, y0 + (-4 if up else 10)), (16 + side * 13, y0 + (-2 if up else 13)), tip, "ink")
+        g.tri(root_hi, (16 + side * 9, y0 + 4 + 4 * a), tip, "lgrey")
+        g.tri((16 + side * 12, y0 + 3 + 7 * a), (16 + side * 13, y0 + 5.5 + 7.5 * a), tip, "ink")
     sack(g, 16, y0 + 18)
     g.rect(14, y0 + 13, 1, 2, "pink")
     g.rect(17, y0 + 13, 1, 2, "pink")
-    g.ell(16, y0 + 7, 5, 6, "grey", "slate", "lgrey")
+    g.cel(16, y0 + 7, 5, 6, "grey", "slate", "lgrey")
     g.tri((13, y0 + 11), (19, y0 + 11), (16, y0 + 15), "white")
-    g.ell(16, y0 - 1, 4.5, 4, "white", "lgrey")
+    g.cel(16, y0 - 1, 4.5, 4, "white", "lgrey")
     return lit(g)
 
 
@@ -430,13 +601,13 @@ def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     def lift(k):
         return -2 if k > 0 else 0
 
-    g.ell(24.5 + tail, 15.5 + b, 2.5, 3, "navy", "ink", "dslate")
+    g.cel(24.5 + tail, 15.5 + b, 2.5, 3, "navy", "ink", "dslate")
     g.p(25 + tail, 13 + b, "white")
     for x, k in ((13, bl), (17, br)):
         g.rect(x, 24 + b, 2, 5 + lift(k) - b, "navy")
         g.rect(x, 28 + lift(k), 2, 1, "lgrey")
-    g.ell(16, 22 + b, 8, 4.5, "navy", "ink", "dslate")
-    g.ell(16, 22 + b, 4.5, 4, "white", "lgrey")
+    g.cel(16, 22 + b, 8, 4.5, "navy", "ink", "dslate")
+    g.cel(16, 22 + b, 4.5, 4, "white", "lgrey")
     for x, k in ((9, fl), (20, fr)):
         g.rect(x, 23 + b, 3, 4 + lift(k) - b, "navy")
         g.rect(x, 26 + lift(k), 3, 3, "white")
@@ -446,17 +617,17 @@ def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     g.tri((24, 13 + b + t), (23, 5.5 + b + t), (18.5, 9.5 + b + t), "navy")
     g.tri((8, 7 + b), (9, 5.5 + b), (11, 6.5 + b), "white")
     g.tri((24, 7 + b + t), (23, 5.5 + b + t), (21, 6.5 + b + t), "white")
-    g.ell(16, 13.5 + b, 7, 5.5, "navy", "ink", "dslate")
+    g.cel(16, 13.5 + b, 7, 5.5, "navy", "ink", "dslate")
     g.rect(15, 8 + b, 2, 7, "white")
-    g.ell(16, 16.5 + b, 4.5, 2.5, "white", "lgrey")
+    g.cel(16, 16.5 + b, 4.5, 2.5, "white", "lgrey")
     eyes(g, (11, 19), 12 + b, "amber")
     g.p(12, 13 + b, "ink")
     g.p(20, 13 + b, "ink")
     g.rect(15, 15 + b, 2, 1, "ink")
     # the frisbee, gripped by its rim at the side of the mouth: a red disc with a dark inner ring
-    g.ell(11, 20 + b, 4.5, 4, "red", "dred", "pink")
-    g.ell(11, 20 + b, 2.6, 2.2, "dred")
-    g.ell(10.6, 19.6 + b, 1.6, 1.3, "red")
+    g.cel(11, 20 + b, 4.5, 4, "red", "dred", "pink")
+    g.cel(11, 20 + b, 2.6, 2.2, "dred")
+    g.cel(10.6, 19.6 + b, 1.6, 1.3, "red")
     g.p(14, 18 + b, "dbrown")
     return lit(g)
 
@@ -510,13 +681,13 @@ def husky(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     def lift(k):
         return -2 if k > 0 else 0
 
-    g.ell(24.5 + tail, 14.5 + b, 3, 3, "grey", "slate", "lgrey")
-    g.ell(24.5 + tail, 14.5 + b, 1.5, 1.5, "white")
+    g.cel(24.5 + tail, 14.5 + b, 3, 3, "grey", "slate", "lgrey")
+    g.cel(24.5 + tail, 14.5 + b, 1.5, 1.5, "white")
     for x, k in ((13, bl), (17, br)):
         g.rect(x, 24 + b, 2, 5 + lift(k) - b, "lgrey")
         g.rect(x, 28 + lift(k), 2, 1, "grey")
-    g.ell(16, 22 + b, 8.5, 4.5, "grey", "slate", "lgrey")
-    g.ell(16, 22.5 + b, 4.5, 4, "white", "lgrey")
+    g.cel(16, 22 + b, 8.5, 4.5, "grey", "slate", "lgrey")
+    g.cel(16, 22.5 + b, 4.5, 4, "white", "lgrey")
     # the harness: a chest strap and a band round the shoulders
     g.rect(8, 20 + b, 16, 2, "sky")
     g.rect(8, 20 + b, 16, 1, "cyan")
@@ -531,8 +702,8 @@ def husky(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     g.tri((24, 13 + b + t), (23, 4 + b + t), (18, 9 + b + t), "slate")
     g.tri((10, 11 + b), (10, 7 + b), (12.5, 9.5 + b), "pink")
     g.tri((22, 11 + b + t), (22, 7 + b + t), (19.5, 9.5 + b + t), "pink")
-    g.ell(16, 13.5 + b, 7.5, 5.5, "slate", "dslate", "grey")
-    g.ell(16, 15.5 + b, 6, 3.5, "white", "lgrey")
+    g.cel(16, 13.5 + b, 7.5, 5.5, "slate", "dslate", "grey")
+    g.cel(16, 15.5 + b, 6, 3.5, "white", "lgrey")
     g.rect(15, 9 + b, 2, 4, "white")
     g.rect(11, 11 + b, 2, 1, "white")
     g.rect(19, 11 + b, 2, 1, "white")
@@ -580,10 +751,10 @@ def frisbee_top(g, b):
     g.rect(23, 22 + b, 4, 5, "green")
     g.rect(23, 27 + b, 4, 6, "skin2")
     g.rect(23, 31 + b, 4, 2, "skin1")
-    g.ell(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")
+    road.face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
     g.rect(8, 9 + b, 2, 5, "dbrown")
     g.rect(22, 9 + b, 2, 5, "dbrown")
-    g.ell(16, 7.5 + b, 8.5, 4.5, "red", "dred", "pink")
+    g.cel(16, 7.5 + b, 8.5, 4.5, "red", "dred", "pink")
     g.rect(8, 9 + b, 17, 1, "dred")
     # the cap on backwards: the strap's gap and its button over the forehead
     g.rect(14, 8 + b, 4, 2, "dbrown")
@@ -636,9 +807,9 @@ def jogger_top(g, b):
         g.rect(x + (4 if x > 16 else 1), 21 + b, 1, 10, "skin2")
         g.rect(x + 1, 28 + b, 4, 2, "red")
         g.rect(x + 1, 30 + b, 4, 2, "skin1")
-    g.ell(16, 12.5 + b, 8, 8, "skin1", "skin2")
-    g.ell(16, 8 + b, 8.5, 4.5, "dbrown", "plum", "brown")
-    g.ell(16, 2.5 + b, 3, 2.5, "dbrown", "plum", "brown")
+    road.face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
+    g.cel(16, 8 + b, 8.5, 4.5, "dbrown", "plum", "brown")
+    g.cel(16, 2.5 + b, 3, 2.5, "dbrown", "plum", "brown")
     g.rect(7, 9 + b, 2, 6, "dbrown")
     g.rect(23, 9 + b, 2, 6, "dbrown")
     g.rect(8, 9 + b, 16, 2, "red")
@@ -665,21 +836,21 @@ def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
         g.rect(px + 3, py, 2, 2, "lgrey")
     tail = spec["tail"]
     if tail == "up":
-        g.ell(4, 12 + b, 1.5, 4.5, *coat)
-        g.ell(4, 8.5 + b, 1.3, 1.5, "white")
+        g.cel(4, 12 + b, 1.5, 4.5, *coat)
+        g.cel(4, 8.5 + b, 1.3, 1.5, "white")
     elif tail == "plume":
-        g.ell(4, 19 + b, 4, 2.2, *coat)
-        g.ell(1.5, 19.5 + b, 1.5, 1.4, "white")
+        g.cel(4, 19 + b, 4, 2.2, *coat)
+        g.cel(1.5, 19.5 + b, 1.5, 1.4, "white")
     elif tail == "curl":
-        g.ell(7, 14 + b, 3.5, 3.2, *coat)
-        g.ell(7, 14 + b, 1.5, 1.4, under)
+        g.cel(7, 14 + b, 3.5, 3.2, *coat)
+        g.cel(7, 14 + b, 1.5, 1.4, under)
     else:
-        g.ell(4.5, 14 + b, 1.3, 3.5, *coat)
-    g.ell(14, 19 + b, 9.5, 5, *coat)
+        g.cel(4.5, 14 + b, 1.3, 3.5, *coat)
+    g.cel(14, 19 + b, 9.5, 5, *coat)
     if spec.get("saddle"):
-        g.ell(12, 16.5 + b, 6, 2.5, spec["saddle"], None)
-    g.ell(15, 22 + b, 7, 2, under, "lgrey" if under == "white" else "tan")
-    g.ell(21, 19 + b, 3, 3.5, under, "lgrey" if under == "white" else "tan")
+        g.cel(12, 16.5 + b, 6, 2.5, spec["saddle"], None)
+    g.cel(15, 22 + b, 7, 2, under, "lgrey" if under == "white" else "tan")
+    g.cel(21, 19 + b, 3, 3.5, under, "lgrey" if under == "white" else "tan")
     if spec.get("harness"):
         g.rect(17, 14 + b, 2, 10, "sky")
         g.rect(17, 14 + b, 1, 10, "cyan")
@@ -693,13 +864,13 @@ def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
         big = ears == "big"
         g.tri((19.5, 9 + b), (19 if big else 20.5, (0 if big else 2) + b), (24, 7.5 + b), coat[0])
         g.tri((21, 8 + b), (20.5 if big else 21, (2.5 if big else 4.5) + b), (23, 7.5 + b), "pink")
-    g.ell(23.5, 12.5 + b, 5, 4.5, *coat)
+    g.cel(23.5, 12.5 + b, 5, 4.5, *coat)
     if ears == "flop":
-        g.ell(21, 13.5 + b, 2.2, 4, "dbrown", "plum", "brown")
+        g.cel(21, 13.5 + b, 2.2, 4, "dbrown", "plum", "brown")
     if spec.get("mask"):
-        g.ell(25, 13.5 + b, 3.5, 2.5, "white", "lgrey")
+        g.cel(25, 13.5 + b, 3.5, 2.5, "white", "lgrey")
         g.rect(23, 10 + b, 2, 1, "white")
-    g.ell(27, 14.5 + b, 3, 2, spec["muzzle"], "lgrey" if spec["muzzle"] == "white" else "tan")
+    g.cel(27, 14.5 + b, 3, 2, spec["muzzle"], "lgrey" if spec["muzzle"] == "white" else "tan")
     g.rect(29, 13 + b, 1, 2, "ink")
     g.p(28, 13 + b, "ink")
     eye = spec.get("eye", "ink")
@@ -709,7 +880,7 @@ def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
         g.p(25, 12 + b, "ink")
     g.p(27, 16 + b, "dbrown")
     if spec.get("frisbee"):
-        g.ell(29.5, 17.5 + b, 2.2, 3.5, "red", "dred", "pink")
+        g.cel(29.5, 17.5 + b, 2.2, 3.5, "red", "dred", "pink")
         g.rect(29, 16 + b, 1, 3, "dred")
     if spec.get("collar"):
         g.rect(19, 13 + b, 2, 5, spec["collar"])
@@ -729,7 +900,8 @@ SIDE = {
 }
 
 
-# Each owner: (top, legs, shoes).
+# Each owner: (top, legs, shoes). The gate and handbag dogs' owners are drawn for their old exports only (see
+# sprites()).
 OWNERS = {
     "social-gate-dog": (gardener_top, "blue", "dgreen"),
     "social-frisbee-dog": (frisbee_top, "skin2", "white"),
@@ -742,26 +914,54 @@ DOGS = {
     "social-handbag-dog": handbag_dog,
     "social-jogger-dog": husky,
 }
-# The Chase skins: (draw, idle poses, run poses), each a dict of keyword arguments.
+# The keys the game draws, which build() writes; the gate and handbag dogs and their owners are not in play,
+# so their exports stay as they are, at the old 40px and 56x84 scale.
+BUILT = ("social-frisbee-dog", "social-jogger-dog")
+
+# Each Chase animal's frame side: the 32-unit design drawn at side / 32. The cat and the rabbit sit at the
+# small dogs' 38, smaller than a medium dog (48); the pigeons and the ducklings are a flock of three birds a
+# third of a dog's width each, in the same frame.
+CHASE_SIDE = 38
+# Each Snatch animal's frame: its 32x48 design drawn at side / 32, so a 38x57 raccoon standing about as tall
+# as a medium dog, and a 32x48 seagull a head shorter.
+SNATCH_SIDE = {"snatch-raccoon": 38, "snatch-seagull": 32}
+# The Social dogs are medium dogs, 48x48 like the pack's, drawn SOCIAL_ZOOM narrower in that frame (as
+# dogs.DOG_ZOOM draws the big dogs), so the collie and the husky are about 26px wide face on.
+SOCIAL_SIDE = 48
+SOCIAL_ZOOM = 0.82
+
+# The Chase skins: (draw, idle poses, run (draw, poses), extra tags [(tag, draw, poses, ms)]), each pose a dict
+# of keyword arguments.
 CHASE = {
-    "chase-cat": (cat, [dict(), dict(tail=1)], [dict(run=False), dict(run=True)]),
-    "chase-pigeons": (pigeons, [dict(), dict(peck=True)], [dict(wings=-1), dict(wings=1, lift=3)]),
-    "chase-ducklings": (ducklings, [dict(), dict(peep=True)], [dict(step=-1, wing=1), dict(step=1, lift=2)]),
-    "chase-rabbit": (rabbit, [dict(), dict(twitch=1)], [dict(run=False), dict(run=True)]),
+    "chase-cat": (cat, [dict(), dict(tail=1)], (cat_run, [dict(phase=k) for k in range(4)]), []),
+    "chase-pigeons": (pigeons, [dict(), dict(peck=True)],
+                      (pigeons, [dict(wings=w, lift=up) for w, up in PIGEONS_RUN]),
+                      [("flee", pigeons_fleeing, [dict(wings=w, rise=up) for w, up in PIGEONS_FLEE], 80)]),
+    "chase-ducklings": (ducklings, [dict(), dict(peep=True)], (ducklings, list(DUCKLINGS_RUN)),
+                        [("hop", ducklings_hop, [dict(phase=k) for k in range(4)], 100)]),
+    "chase-rabbit": (rabbit, [dict(), dict(twitch=1)], (rabbit, [dict(bound=k) for k in range(4)]),
+                     [("hop", rabbit_hop, [dict(phase=k) for k in range(4)], 100)]),
 }
+CHASE_IDLE_MS, CHASE_RUN_MS = 300, 80
 SNATCH = {
-    "snatch-raccoon": (raccoon, raccoon_fleeing),
-    "snatch-seagull": (seagull, seagull_fleeing),
+    "snatch-raccoon": (raccoon, raccoon_fleeing, FLEE),
+    "snatch-seagull": (seagull, seagull_fleeing, SEAGULL_FLEE),
 }
 # The pose arguments that move a part by pixels, snapped to whole pixels at each scale.
-POSE = ("lf", "rf", "bob", "fl", "fr", "bl", "br", "tail", "twitch", "lift")
+POSE = ("lf", "rf", "bob", "fl", "fr", "bl", "br", "tail", "twitch")
 
 
 def drawn(s, draw, *args, **q):
-    """draw(*args, **q) on a minis.Mini at scale s, its pixel offsets snapped to whole pixels there."""
-    pose = snap({k: v for k, v in q.items() if k in POSE}, s)
+    """draw(*args, **q) on a minis.Mini at scale s, or (sx, sy), its pixel offsets snapped to whole pixels
+    there."""
+    pose = snap({k: v for k, v in q.items() if k in POSE}, s[1] if isinstance(s, tuple) else s)
     rest = {k: v for k, v in q.items() if k not in POSE}
     return minis.small(sys.modules[__name__], s, draw, *args, **rest, **pose).outlined()
+
+
+def zoomed(s, draw, *args, **q):
+    """A Social dog's frame: draw at s, SOCIAL_ZOOM narrower, set in the side(32, s) frame about its centre."""
+    return minis.zoomed(drawn((s * SOCIAL_ZOOM, s), draw, *args, **q), s, (SOCIAL_ZOOM, 1), 0)
 
 
 def dressed(s, top, legs, shoes, **q):
@@ -772,56 +972,35 @@ def dressed(s, top, legs, shoes, **q):
 
 
 def skins(step):
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every skin at depth step step (1 at full size),
-    laid out at 32 units: the animals drawn at road.SCALE x step, the people and the Snatch animals at
-    road.PERSON_SCALE x step."""
-    s, t = SCALE * step, PERSON_SCALE * step
-    for key, (draw, idle, run) in CHASE.items():
-        yield key, [("idle", [drawn(s, draw, **q) for q in idle], 300),
-                    ("run", [drawn(s, draw, **q) for q in run], 120)]
-    for key, (draw, flee) in SNATCH.items():
-        yield key, [("walk", [drawn(t, draw, lf=-2), drawn(t, draw, rf=-2)], 200),
-                    ("flee", [drawn(t, flee, k) for k in (-1, 1)], 110),
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every built skin at depth step step (1 at full
+    size): each animal at its frame side / 32 x step, the owners at road.SCALE x step, as road.py draws its
+    people."""
+    c = CHASE_SIDE / 32 * step
+    for key, (draw, idle, (run, runs), extra) in CHASE.items():
+        yield key, [("idle", [drawn(c, draw, **q) for q in idle], CHASE_IDLE_MS),
+                    ("run", [drawn(c, run, **q) for q in runs], CHASE_RUN_MS),
+                    *((tag, [drawn(c, d, **q) for q in qs], ms) for tag, d, qs, ms in extra)]
+    for key, (draw, flee, flees) in SNATCH.items():
+        t = SNATCH_SIDE[key] / 32 * step
+        yield key, [("walk", [drawn(t, draw, **q) for q in road.PERSON_WALK], road.PERSON_WALK_MS),
+                    ("flee", [drawn(t, flee, **q) for q in flees], FLEE_MS),
                     ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS)]
-    for key, draw in DOGS.items():
+    d, p = SOCIAL_SIDE / 32 * step, SCALE * step
+    for key in BUILT:
+        draw = DOGS[key]
         run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
-        yield key, [("walk", [drawn(s, draw, **q) for q in road.CORGI_WALK], 100),
-                    ("idle", [drawn(s, draw, **q) for q in road.CORGI_IDLE], 300),
-                    ("run", [drawn(s, side_dog, SIDE[key], **q) for q in run], 100)]
+        yield key, [("walk", [zoomed(d, draw, **q) for q in road.CORGI_WALK], 100),
+                    ("idle", [zoomed(d, draw, **q) for q in road.CORGI_IDLE], 300),
+                    ("run", [zoomed(d, side_dog, SIDE[key], **q) for q in run], 100)]
         top, legs, shoes = OWNERS[key]
-        yield f"{key}-owner", [("walk", [dressed(t, top, legs, shoes, **q) for q in (dict(lf=-2), dict(rf=-2))], 200),
-                               ("idle", [dressed(t, top, legs, shoes, bob=bb) for bb in BREATH], BREATH_MS)]
-
-
-def base(key):
-    """The road.py kind a skin reskins."""
-    if key.startswith("chase-"):
-        return "squirrel"
-    if key.startswith("snatch-"):
-        return "thief"
-    return "other-dog-owner" if key.endswith("-owner") else "other-dog"
+        yield f"{key}-owner", [("walk", [dressed(p, top, legs, shoes, **q) for q in road.PERSON_WALK],
+                                road.PERSON_WALK_MS),
+                               ("idle", [dressed(p, top, legs, shoes, bob=bb) for bb in BREATH], BREATH_MS)]
 
 
 def sprites():
-    """Every skin at full size, then at each depth step, after checking each keeps its base kind's frame size,
-    tags, frame counts and durations; a Social dog has loose-dog's run after other-dog's tags."""
-    kinds = dict(road.sprites())
-    kinds["other-dog"] = kinds["other-dog"] + dict(hazards.sprites())["loose-dog"]
-    out = list(skins(1)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS for key, tags in skins(step)]
-    full = dict(out)
-    for key, tags in out:
-        name, _, suffix = key.partition("@")
-        want = kinds[base(name)]
-        got = [(tag, len(fs), ms) for tag, fs, ms in tags]
-        if got != [(tag, len(fs), ms) for tag, fs, ms in want]:
-            sys.exit(f"{key}: tags {got} differ from {base(name)}'s")
-        size = (len(tags[0][1][0][0]), len(tags[0][1][0]))
-        ref = full[name][0][1][0] if suffix else want[0][1][0]
-        step = dict(STEPS)[suffix] if suffix else 1
-        expect = (minis.scaled(len(ref[0]), step), minis.scaled(len(ref), step))
-        if size != expect:
-            sys.exit(f"{key}: {size[0]}x{size[1]}, not {expect[0]}x{expect[1]}")
-    return out
+    """Every built skin at full size, then at each depth step."""
+    return list(skins(1)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS for key, tags in skins(step)]
 
 
 if __name__ == "__main__":

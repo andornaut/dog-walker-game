@@ -1,50 +1,82 @@
 { "frames": {
    "snatch-raccoon@88 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "frame": { "x": 0, "y": 0, "w": 33, "h": 50 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
-    "sourceSize": { "w": 49, "h": 74 },
-    "duration": 200
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
    },
    "snatch-raccoon@88 1.aseprite": {
-    "frame": { "x": 49, "y": 0, "w": 49, "h": 74 },
+    "frame": { "x": 33, "y": 0, "w": 33, "h": 50 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
-    "sourceSize": { "w": 49, "h": 74 },
-    "duration": 200
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
    },
    "snatch-raccoon@88 2.aseprite": {
-    "frame": { "x": 98, "y": 0, "w": 49, "h": 74 },
+    "frame": { "x": 66, "y": 0, "w": 33, "h": 50 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
-    "sourceSize": { "w": 49, "h": 74 },
-    "duration": 110
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
    },
    "snatch-raccoon@88 3.aseprite": {
-    "frame": { "x": 147, "y": 0, "w": 49, "h": 74 },
+    "frame": { "x": 99, "y": 0, "w": 33, "h": 50 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
-    "sourceSize": { "w": 49, "h": 74 },
-    "duration": 110
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
    },
    "snatch-raccoon@88 4.aseprite": {
-    "frame": { "x": 196, "y": 0, "w": 49, "h": 74 },
+    "frame": { "x": 132, "y": 0, "w": 33, "h": 50 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
-    "sourceSize": { "w": 49, "h": 74 },
-    "duration": 400
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 90
    },
    "snatch-raccoon@88 5.aseprite": {
-    "frame": { "x": 245, "y": 0, "w": 49, "h": 74 },
+    "frame": { "x": 165, "y": 0, "w": 33, "h": 50 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
-    "sourceSize": { "w": 49, "h": 74 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 90
+   },
+   "snatch-raccoon@88 6.aseprite": {
+    "frame": { "x": 198, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 90
+   },
+   "snatch-raccoon@88 7.aseprite": {
+    "frame": { "x": 231, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 90
+   },
+   "snatch-raccoon@88 8.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 400
+   },
+   "snatch-raccoon@88 9.aseprite": {
+    "frame": { "x": 297, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
     "duration": 400
    }
  },
@@ -53,12 +85,12 @@
   "version": "1.2.30-x64",
   "image": "snatch-raccoon@88.png",
   "format": "RGBA8888",
-  "size": { "w": 294, "h": 74 },
+  "size": { "w": 330, "h": 50 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "flee", "from": 2, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 5, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "flee", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "idle", "from": 8, "to": 9, "direction": "forward" }
   ]
  }
 }

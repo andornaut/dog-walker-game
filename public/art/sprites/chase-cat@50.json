@@ -1,35 +1,51 @@
 { "frames": {
    "chase-cat@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 20, "h": 20 },
+    "frame": { "x": 0, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 20 },
-    "sourceSize": { "w": 20, "h": 20 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
     "duration": 300
    },
    "chase-cat@50 1.aseprite": {
-    "frame": { "x": 20, "y": 0, "w": 20, "h": 20 },
+    "frame": { "x": 19, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 20 },
-    "sourceSize": { "w": 20, "h": 20 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
     "duration": 300
    },
    "chase-cat@50 2.aseprite": {
-    "frame": { "x": 40, "y": 0, "w": 20, "h": 20 },
+    "frame": { "x": 38, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 20 },
-    "sourceSize": { "w": 20, "h": 20 },
-    "duration": 120
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
+    "duration": 80
    },
    "chase-cat@50 3.aseprite": {
-    "frame": { "x": 60, "y": 0, "w": 20, "h": 20 },
+    "frame": { "x": 57, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 20 },
-    "sourceSize": { "w": 20, "h": 20 },
-    "duration": 120
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
+    "duration": 80
+   },
+   "chase-cat@50 4.aseprite": {
+    "frame": { "x": 76, "y": 0, "w": 19, "h": 19 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
+    "duration": 80
+   },
+   "chase-cat@50 5.aseprite": {
+    "frame": { "x": 95, "y": 0, "w": 19, "h": 19 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
+    "duration": 80
    }
  },
  "meta": {
@@ -37,11 +53,11 @@
   "version": "1.2.30-x64",
   "image": "chase-cat@50.png",
   "format": "RGBA8888",
-  "size": { "w": 80, "h": 20 },
+  "size": { "w": 114, "h": 19 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "run", "from": 2, "to": 3, "direction": "forward" }
+   { "name": "run", "from": 2, "to": 5, "direction": "forward" }
   ]
  }
 }
