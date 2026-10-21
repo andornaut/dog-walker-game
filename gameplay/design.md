@@ -42,7 +42,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 ### Screen and controls
 
 - Web, phone browser first. Touch and keyboard; mouse is not planned
-- Portrait, ¾ top-down view, 5 lanes of 64px (the road spans x 20 to 340 at the pack); road sprites are drawn at 48px with 40px hit boxes
+- Portrait, ¾ top-down view, 5 lanes of 64px (the road spans x 20 to 340 at the pack); road sprites are drawn at 48px, and each obstacle hits as drawn: 2 px inside its opaque outline, at its depth, within its own lanes
 - Layout: 360×560. From the top: the top bar, one row 48 tall (big cash; the neighborhood's name with its place in the walk in gray beside it ("2 of 4"), with the effect icons under it; then Home, Sound, Settings and Pause, left to right; mute is also in Settings and on the M key); the debuff bar, when one is active; a backdrop band showing the current neighborhood, with the message strip over its clouds; the road across the full width, scrolling all the way to the top of its area; and a row of doghouse cards along the bottom, one per dog slot. Cards and the pause menu dim the walk view (the backdrop band and the road) while the walk is paused; the top bar and doghouse cards stay lit
 - **Doghouse cards:** slim cards (120×58) in pack order (the front dog, then the left and right dogs): a name header, the dog's face and its hearts, and a LEAD tag on the front dog. The owner pops in as a photo tab when something happens to them (a heart change, the firing moment), with a quip after a card choice, a lucky find or the firing. Tapping or dragging on them steers like anywhere on the road; a still hold on one shows its dog's size, hearts and owner
 - **Hold to explain:** during a walk, holding anything that explains itself (an effect icon, a debuff bar, a dog card) shows its explanation and pauses the walk; releasing resumes it
@@ -56,7 +56,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - Taps on the top bar never move the pack; taps and drags on the doghouse row steer. Pause offers Resume, Help, Settings and Head home
 - The walker is at the bottom, the dogs close ahead in the same lane on visible leashes, every dog readable. Hazards hit through one rectangle per dog and one for the walker, each a few pixels inside its sprite; leashes can't be hit. A plain hit lands on the dog whose rectangle touched: if only the walker's did, on the front dog; if several dogs' did, on the one nearest the contact. Card obstacles hit the whole pack. Pickups (tips, treats and lucky finds) collect anywhere in the pack's whole outline, leashes included. Lane changes sweep the pack, so a fast move across several lanes can't skip a hazard or a pickup. Obstacle rows leave room for the pack's full length. The game sets the pack's formation by size, never the player: the biggest dog leads in front (drawn behind the side dogs) and is the front dog for head-on hits, tips and treats, the next biggest walks on the left and the smallest on the right; ties go by roster order (Archie, Biscuit, Duchess, Koda, Nugget, Penny, Pepe, Snowball, Zippy). Two dogs walk side by side out front, a little less far forward than a 3-dog lead, the bigger on the left as the front dog. One dog walks centred in the lead spot. The pack stays inside its lane: no dog's hit box reaches into the next lane, so a pack fully in a lane never touches an obstacle in the lane beside it. A treat goes to the dog nearest where it touched, or the front dog if only the walker or a leash touched it. A small dog dodges 1 in 4 of the plain hits that would land on it, with a "Dodge!" label over it; the hit then costs nothing and doesn't count as a bump (Clean Paws, Not a Scratch)
 - Spawning always leaves a reachable path, so every hit is avoidable
-- A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count.
+- A hit obstacle is removed at once, and obstacles are ignored for a short grace window (about 1 second), during which the pack blinks; pickups still count.
 - Scroll speed and obstacle density rise gently each neighborhood
 - **Pulls:** every dog pulls toward squirrels, and the pull is a squirrel's only cost: touching one does nothing. A dog pulls the pack one lane only toward a squirrel you can see, and one dog strains at a time, the one nearest the squirrel side to side. The dog strains for about 1 second, with a bubble over it, an arrow and a line to the squirrel, and a taut leash; then the pack lurches one lane toward the squirrel, unless you steer away during the strain, which cancels the pull; in an edge lane, pressing toward the edge counts as steering away. The strip announces the strain ("Koda spotted a squirrel!") as its cue; a cancel is quiet. A pull never moves the pack into an obstacle it can't react to: if the target lane has an obstacle too close, the dog strains but doesn't pull
 
@@ -96,7 +96,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - Every card hits the whole pack. No card opens without a collision, except the fork card
 - A hit that opens a card costs nothing until you choose
 - A money option shows its price on its plate ("$10"), grayed out when you can't afford it, so cash never goes below $0; every card keeps at least one option that costs no money, and its plate is blank
-- An option whose heart Kind words would forgive says so on the card before you pick ("−1♥ Koda, forgiven")
+- An option whose heart Second chance would forgive says so on the card before you pick (its "−1♥ Koda" reads "♥ Koda's safe!")
 - An option that would fire an owner says so ("Fires Jesse")
 - A debuff option states its stake on the card ("Pull away → Zoomies: the pack drifts on its own for 20s", "Quick rinse → Stinky: tips pay nothing for 20s")
 - A fork's path card shows its pay multiplier ("Pay ×1.25") and its upgrade's duration (Now, Next neighborhood, Rest of walk) where other cards show a price
@@ -212,7 +212,7 @@ Each obstacle has one look everywhere. Some kinds can move, and every one that c
 
 ### Feedback
 
-- **Forgiven heart:** whenever Kind words forgives a heart, from a bump or a card choice, a "Forgiven!" label floats over the dog (like "Dodge!") and the heart on its doghouse card flashes back with a sparkle, alongside the strip line "Kind words! Jesse lets it go."
+- **Forgiven heart:** whenever Second chance forgives a heart, from a bump or a card choice, a "♥ Oopsie! All good" label floats over the dog (like "Dodge!") and the heart on its doghouse card flashes back with a sparkle, alongside the strip line "Second chance! Jesse lets it go."
 - **Message strip:** a strip over the clouds at the top of the backdrop band tells what just happened, newest line big with its icon, older lines fading. Lines (in the text data):
   - Debuff ends: "All clean again." · "The pack smells fine again." · "The zoomies wore off."
   - Debuff starts: "Muddy paws! Bumps cost 2♥ for 20s." · "Stinky pack! Tips pay nothing for 20s." · "Zoomies! The pack won't sit still for 20s."
@@ -264,12 +264,12 @@ Effects without "now" or "next neighborhood" last the rest of the walk.
 
 Four walkers. Each has an agility, which sets how fast the pack changes lanes, and one perk. Walkers' agility spreads from 0.9× to 1.2× the base lane-change speed, and Running shoes add 0.1, so Trista wearing them reaches 1.3 (each big dog in the pack takes 0.1 off, never below Relaxed). Players see it as a word: Relaxed (0.9), Steady (1.0), Quick (1.1), Nimble (1.2), Lightning (1.3, reached only with Running shoes); the slowest walker's lane move sets the row spacing, so the low end stays near 1. Every walker walks the same road at the same speed. You start with Casey; each other walker unlocks the first time you finish a named neighborhood.
 
-| Walker | Agility | Perk         | Effect                                                                                             | Unlock                   |
-| ------ | ------- | ------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| Casey  | Steady  | Kind words   | The first ♥ lost in each neighborhood is forgiven (one heart, including one of a Muddy bump's two) | Start                    |
-| Ben    | Relaxed | Treat finder | Twice as many treats appear                                                                        | Finish Fairview Park     |
-| Ada    | Quick   | Calm voice   | Debuffs last half as long (10 seconds)                                                             | Finish Riverside Path    |
-| Trista | Nimble  | Long reach   | Grabs tips and treats one lane to either side (front dog)                                          | Finish The Long Way Home |
+| Walker | Agility | Perk          | Effect                                                                                             | Unlock                   |
+| ------ | ------- | ------------- | -------------------------------------------------------------------------------------------------- | ------------------------ |
+| Casey  | Steady  | Second chance | The first ♥ lost in each neighborhood is forgiven (one heart, including one of a Muddy bump's two) | Start                    |
+| Ben    | Relaxed | Treat finder  | Twice as many treats appear                                                                        | Finish Fairview Park     |
+| Ada    | Quick   | Calm voice    | Debuffs last half as long (10 seconds)                                                             | Finish Riverside Path    |
+| Trista | Nimble  | Long reach    | Grabs tips and treats one lane to either side (front dog)                                          | Finish The Long Way Home |
 
 - A newly unlocked walker joins you in the Neighborhood celebration
 - A walker's effects stack with the Pocket item and upgrade cards

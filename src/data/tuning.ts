@@ -41,7 +41,7 @@ export const TUNING = {
     // faceHappyWithin hearts below its max, and happy otherwise.
     faceHappyWithin: 1,
     faceNeutralFrom: 2,
-    // Kind words forgives this many hearts lost in each zone, the first ones lost.
+    // Second chance forgives this many hearts lost in each zone, the first ones lost.
     kindWordsForgiven: 1,
     luckyCollarMax: 1,
     maxBySize: { big: 5, medium: 4, small: 3 },

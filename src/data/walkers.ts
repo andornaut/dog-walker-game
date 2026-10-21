@@ -21,7 +21,7 @@ export const WALKER_PERKS = {
     effects: [
       { by: "kindWordsForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
     ],
-    name: "Kind words",
+    name: "Second chance",
   },
   longReach: {
     effect: "Grabs tips and treats a lane to each side",
