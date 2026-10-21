@@ -18,7 +18,7 @@ export const MINOR_OBSTACLES = {
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   bunny: { movement: { kind: "hop", most: 2 }, name: "Bunny", shape: { lanes: 1, rows: 1 } },
   car: {
-    movement: { factor: 1.3, kind: "inLane" },
+    movement: { factor: 1.7, kind: "inLane" },
     name: "Car",
     shape: { lanes: 1, rows: 3 },
   },
