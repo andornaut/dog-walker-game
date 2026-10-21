@@ -40,6 +40,8 @@ export function drawFocusRing(graphics: GameObjects.Graphics, outset: number, re
   drawRing(graphics, PALETTE.cyan, insetRect(-outset, rect), 2);
 }
 
+const SHADOW_RADIUS_Y = 2.5;
+
 // A solid pixel ellipse under a sprite, centred on its x about a pixel above its feet.
 export function drawShadow(
   graphics: GameObjects.Graphics,
@@ -53,13 +55,11 @@ export function drawShadow(
     Math.round(x),
     Math.round(footY) - 1,
     shadowRadiusX(spriteWidth),
-    2.5,
+    SHADOW_RADIUS_Y,
   )) {
     graphics.fillRect(span.x, span.y, span.width, 1);
   }
 }
-
-const SHADOW_RADIUS_Y = 2.5;
 
 // The shadow drawShadow draws, made once per colour, drawn sprite width and depth scale as a
 // texture: scale flattens it as the sprite shrinks with distance. Radii are kept to half
