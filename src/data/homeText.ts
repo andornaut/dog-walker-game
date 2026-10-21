@@ -70,6 +70,7 @@ export const HOME_TEXT = {
     zoneMany: "{count} neighborhoods",
     zoneOne: "{count} neighborhood",
   },
+  newerSave: "Newer save found. Reload.",
   noticePackFull: "The pack is full. Tap a picked dog to take it out.",
   noticeSoundOff: "Sound off.",
   noticeSoundOn: "Sound on.",
