@@ -7,13 +7,13 @@ import { addDisplayText } from "../displayText";
 import { PALETTE } from "../palette";
 import { JUNCTURE_Y } from "./stage";
 
-// Screen pixels between a sprite's top and the bottom of the "!" mark, at 1x.
+// Screen pixels between a sprite's top and the bottom of the "!" mark.
 const MARK_GAP = 1;
-// Rows under the capitals in the display font's line, at 1x.
+// Rows under the capitals in the display font's line.
 const MARK_DESCENT = 2;
 
 // A "!" in the display font over a sprite that opens a card. It follows the sprite's top centre
-// and scales with it, and ignores reduced motion.
+// in whole pixels, drawn at 1x however far away the sprite is, and ignores reduced motion.
 export class CardMark {
   private readonly label: GameObjects.BitmapText;
 
@@ -31,12 +31,10 @@ export class CardMark {
   }
 
   place(sprite: GameObjects.Sprite): void {
-    const scale = sprite.scaleX;
     const top = sprite.getTopCenter();
     this.label
       .setVisible(sprite.visible && top.y >= JUNCTURE_Y)
-      .setScale(scale)
-      .setPosition(Math.round(top.x), Math.round(top.y - MARK_GAP * scale + MARK_DESCENT * scale))
+      .setPosition(Math.round(top.x), Math.round(top.y - MARK_GAP + MARK_DESCENT))
       .setDepth(sprite.depth + 1);
   }
 }

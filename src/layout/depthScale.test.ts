@@ -12,7 +12,7 @@ import { dogDepthStep, STATUS_OVERLAY_LIFT, statusOverlayLift } from "../runner/
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";
-import { SCALE_STEPS, scaleAt, snapScale } from "./projection";
+import { SCALE_STEPS, scaleAt } from "./projection";
 import { screenLayout } from "./screenLayout";
 
 const manifest = parseManifest(shippedManifest);
@@ -75,22 +75,19 @@ function stepSets(keys: readonly string[]): DepthArt[][] {
 }
 
 const projection = walkProjection(ROAD_CAMERA, screenLayout(SCREEN_CONFIG).road);
-// The road's projected scales, far edge to just past the walker's feet, a road pixel apart.
-const approach = Array.from({ length: Math.ceil(projection.visibleDistance) + 12 }, (_, i) =>
-  scaleAt(projection, projection.visibleDistance - i),
+// A slow approach: the road's projected scales from the far edge to just past the walker's
+// feet, a quarter road pixel apart.
+const approach = Array.from({ length: 4 * (Math.ceil(projection.visibleDistance) + 12) }, (_, i) =>
+  scaleAt(projection, projection.visibleDistance - i / 4),
 );
+// Floating-point rounding in a drawn size, far below a pixel.
+const ROUNDING = 1e-9;
 // Shipped road sprites, small and large, flat and standing.
 const STANDING = ["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge"];
-const KEYS = [...STANDING, "skunk-cloud", "puddle"];
-// Every shipped road sprite with a depth variant.
-const STEPPED = [
-  ...new Set(
-    manifest.sprites
-      .map(({ key }) => splitDepthKey(key))
-      .filter(({ step }) => step.scale < 1)
-      .map(({ base }) => base),
-  ),
-].filter((key) => sprites.has(key) && standsOnGround(key));
+// Every standing sprite in the manifest, each with its depth variants.
+const ROAD_SPRITES = manifest.sprites
+  .map(({ key }) => key)
+  .filter((key) => splitDepthKey(key).base === key && standsOnGround(key));
 // Every set of steps a sprite may have, whichever sprites ship with them.
 const STEP_SETS = [[], [0.75], [0.5], [0.75, 0.5], [0.875, 0.75, 0.625, 0.5]].flatMap((steps) =>
   [16, 88].map((width) => syntheticArts(`w${width}`, width, steps)),
@@ -132,71 +129,55 @@ describe("depthDraw", () => {
   const cone32 = syntheticArts("cone", 32, [0.75, 0.5]);
   const everyCone = withEveryStep(artsOf("cone"));
   const cloud88 = syntheticArts("cloud", 88, [0.5]);
-  // The fixed scale a step without its own art draws its 1x at: the step's size over its side.
-  const fixedScale = (arts: readonly DepthArt[], step: number) => {
-    const full = itemAt(arts, 0);
-    const fullSide = Math.max(full.width, full.height);
-    return stepSize(fullSide, step) / fullSide;
-  };
   it.each([
-    { arts: artsOf("cone"), key: "cone@75", name: "a hand-drawn step", projected: 0.75, scale: 1 },
-    { arts: artsOf("cone"), key: "cone@50", name: "a hand-drawn step", projected: 0.5, scale: 1 },
-    { arts: everyCone, key: "cone@75", name: "the nearest step", projected: 0.8, scale: 1 },
-    { arts: everyCone, key: "cone@62", name: "the nearest step", projected: 0.6, scale: 1 },
-    { arts: everyCone, key: "cone@88", name: "the in-between step", projected: 0.875, scale: 1 },
-    { arts: cone32, key: "cone@75", name: "a hand-drawn step, snapped", projected: 0.7, scale: 1 },
-    {
-      arts: cone32,
-      key: "cone",
-      name: "a missing step from the 1x, at a fixed scale",
-      projected: 0.9,
-      scale: fixedScale(cone32, 0.875),
-    },
-    {
-      arts: cloud88,
-      key: "cloud",
-      name: "a missing step from the 1x, at a fixed scale",
-      projected: 0.6,
-      scale: fixedScale(cloud88, 0.625),
-    },
-  ])("draws $name at $projected as $key", ({ arts, key, projected, scale }) => {
-    expect(depthDraw(arts, projected)).toMatchObject({ key, scale });
+    { arts: artsOf("cone"), key: "cone@75", name: "its own step", projected: 0.75, scale: 1 },
+    { arts: artsOf("cone"), key: "cone@50", name: "its own step", projected: 0.5, scale: 1 },
+    { arts: everyCone, key: "cone@75", name: "the next larger step", projected: 0.7 },
+    { arts: everyCone, key: "cone@62", name: "the next larger step", projected: 0.6 },
+    { arts: everyCone, key: "cone@88", name: "the next larger step", projected: 0.8 },
+    { arts: cone32, key: "cone", name: "the next larger art", projected: 0.9 },
+    { arts: cone32, key: "cone@75", name: "the next larger art", projected: 0.6 },
+    { arts: cloud88, key: "cloud", name: "the next larger art", projected: 0.6 },
+  ])("draws $projected from $name, $key, scaled down", ({ arts, key, projected, scale }) => {
+    const drawn = depthDraw(arts, projected);
+    expect(drawn.key).toBe(key);
+    if (scale === undefined) {
+      expect(drawn.scale).toBeLessThan(1);
+    } else {
+      expect(drawn.scale).toBe(scale);
+    }
   });
 
-  // Between two steps' boundaries the drawn sprite does not change at all, so no frame
-  // resamples it; a sprite with every step's art always draws at scale 1.
+  // Over a slow approach the drawn frame grows with the projection and never shrinks: on both
+  // axes it is at least the 1x's size at the projected scale, capped at 1, and within a pixel
+  // of it on one.
   it.each([
-    { name: "the sizing cases", sets: [...stepSets(KEYS), ...STEP_SETS] },
-    { name: "every shipped sprite with depth variants", sets: STEPPED.map(artsOf) },
-  ])("draws only the depth steps, growing a step at a time as it approaches: $name", ({ sets }) => {
-    for (const arts of sets) {
-      const full = itemAt(arts, 0);
-      const fullSide = Math.max(full.width, full.height);
-      const order = (stepKey: string) => arts.findIndex((step) => step.key === stepKey);
-      const complete = arts.length === DEPTH_STEPS.length;
-      const drawnAt = approach.map((projected) => depthDraw(arts, projected));
-      drawnAt.forEach((drawn, i) => {
-        const step = snapScale(Math.min(1, itemAt(approach, i)));
-        expect(drawn.depth, drawn.key).toBe(stepSize(fullSide, step) / fullSide);
-        if (complete) {
-          expect(drawn.scale, drawn.key).toBe(1);
-        }
-        if (i > 0) {
-          const last = itemAt(drawnAt, i - 1);
-          expect(order(drawn.key), `${last.key} to ${drawn.key}`).toBeLessThanOrEqual(
-            order(last.key),
-          );
-        }
-      });
-      expect(new Set(drawnAt.map((drawn) => drawn.depth)).size).toBeLessThanOrEqual(
-        SCALE_STEPS.length,
-      );
+    ...ROAD_SPRITES.map((key) => ({ arts: artsOf(key), key })),
+    ...STEP_SETS.map((arts) => ({ arts, key: arts.map((art) => art.key).join(" ") })),
+  ])("grows in proportion with distance and never shrinks: $key", ({ arts }) => {
+    const full = itemAt(arts, 0);
+    let last = { height: 0, width: 0 };
+    for (const projected of approach) {
+      const drawn = depthDraw(arts, projected);
+      const art = arts.find((step) => step.key === drawn.key) ?? full;
+      const size = { height: art.height * drawn.scale, width: art.width * drawn.scale };
+      const depth = Math.min(1, projected);
+      const over = {
+        height: size.height - full.height * depth,
+        width: size.width - full.width * depth,
+      };
+      expect(drawn.scale, drawn.key).toBeLessThanOrEqual(1);
+      expect(Math.min(over.height, over.width), drawn.key).toBeGreaterThan(-ROUNDING);
+      expect(Math.min(over.height, over.width), drawn.key).toBeLessThan(1);
+      expect(size.width + ROUNDING, `${drawn.key} at ${projected}`).toBeGreaterThan(last.width);
+      expect(size.height + ROUNDING, `${drawn.key} at ${projected}`).toBeGreaterThan(last.height);
+      last = size;
     }
   });
 
   it.each([
     { name: "the sizing cases", sets: stepSets(STANDING) },
-    { name: "every shipped sprite with depth variants", sets: STEPPED.map(artsOf) },
+    { name: "every shipped road sprite", sets: ROAD_SPRITES.map(artsOf) },
   ])("stands each step on its own feet line: $name", ({ sets }) => {
     for (const arts of sets) {
       for (const projected of approach) {
