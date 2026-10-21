@@ -1,4 +1,4 @@
-import type { GameObjects, Scene } from "phaser";
+import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { itemAt } from "../../arrays";
 import { SQUIRREL_ICON_KEY } from "../../assets/iconKeys";
@@ -56,9 +56,11 @@ export class PackView {
   private drawnLeash = "";
   private readonly leash: GameObjects.Graphics;
   // Fired dogs trotting off the road, drawn by their trot and not with the pack.
-  private readonly leaving = new Set<DogId>();
+  private readonly leaving = new Map<DogId, Tweens.Tween>();
   private pose: "idle" | "walk" = "walk";
   private readonly pullSignals: PullSignals;
+  // Sprites playing a one-off reaction, which the pack's pose waits for.
+  private readonly reacting = new Set<GameObjects.Sprite>();
   private readonly scene: Scene;
   private readonly walker: { key: string; sprite: GameObjects.Sprite };
 
@@ -93,19 +95,33 @@ export class PackView {
     return dogs.flatMap((dog) => this.dogSprites.get(dog) ?? []);
   }
 
-  // The walker stumbles and the dogs hop; reduced motion skips it.
+  // The walker stumbles and the dogs hop, then each takes the pose the pack has by then;
+  // reduced motion skips it.
   stumble(still: boolean): void {
     if (still) {
       return;
     }
     const { walker } = this;
-    playTagOnce(walker.sprite, walker.key, "stumble", () =>
-      playTag(walker.sprite, walker.key, "walk"),
+    this.react(walker.sprite, walker.key, "stumble", () =>
+      playTag(walker.sprite, walker.key, this.pose),
     );
     for (const [dog, sprite] of this.dogSprites) {
       const key = dogSpriteKey(gameData, dog);
-      playTagOnce(sprite, key, "react", () => playTag(sprite, key, "walk"));
+      this.react(sprite, key, "react", () => {
+        this.dogTags.delete(dog);
+        if (this.leaving.has(dog)) {
+          playTag(sprite, key, "walk");
+        }
+      });
     }
+  }
+
+  private react(sprite: GameObjects.Sprite, key: string, tag: string, done: () => void): void {
+    this.reacting.add(sprite);
+    playTagOnce(sprite, key, tag, () => {
+      this.reacting.delete(sprite);
+      done();
+    });
   }
 
   // A blocked strain that ended without a pull bursts over its dog.
@@ -118,18 +134,35 @@ export class PackView {
     }
   }
 
-  // The fired dog trots off the road over the firing's hold.
-  trotOff(dog: DogId, seconds: number, still: boolean): void {
+  // The fired dog trots off the road over ms, the firing's hold.
+  trotOff(dog: DogId, ms: number, still: boolean): void {
     const sprite = this.dogSprites.get(dog);
     if (sprite === undefined || !sprite.visible) {
       return;
     }
-    this.leaving.add(dog);
-    const trot = { road: LAYOUT.roadView, seconds, still };
-    trotOffRoad(this.scene, trot, sprite, () => {
+    const trot = { ms, road: LAYOUT.roadView, still };
+    const tween = trotOffRoad(this.scene, trot, sprite, () => {
       this.leaving.delete(dog);
       sprite.setVisible(false);
     });
+    this.leaving.set(dog, tween);
+  }
+
+  // The fired dogs' trots stop while the walk is paused, so each ends with its hold.
+  holdTrots(paused: boolean): void {
+    for (const [dog, tween] of this.leaving) {
+      if (paused === tween.isPaused()) {
+        continue;
+      }
+      const sprite = this.dogSprites.get(dog);
+      if (paused) {
+        tween.pause();
+        sprite?.anims.pause();
+      } else {
+        tween.resume();
+        sprite?.anims.resume();
+      }
+    }
   }
 
   // The walker stands on the feet line at scale 1; each dog's feet stand its place in the
@@ -192,7 +225,7 @@ export class PackView {
     // The leashes run from the walker's hands up the road to the dogs: under the walker, whose
     // body hides the part behind it, and over the dogs ahead.
     leash.setDepth(DEPTH.sprite + footY - 0.5);
-    if (posed) {
+    if (posed && !this.reacting.has(walker.sprite)) {
       playTag(walker.sprite, walker.key, pose, still && halted);
     }
     shadow(walker.key, 1, walkerX, footY);
@@ -234,7 +267,7 @@ export class PackView {
     const pull = pullPose(gameData, frame.pulls, dog);
     const tag = pull?.tag ?? pose;
     const shown = this.dogTags.get(dog);
-    if (tag !== shown) {
+    if (tag !== shown && !this.reacting.has(sprite)) {
       playTag(sprite, key, tag, pull === null ? still && halted : still);
       this.dogTags.set(dog, tag);
     }

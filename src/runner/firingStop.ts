@@ -21,7 +21,7 @@ export function holdForFiring(
   if (fired.length === 0) {
     return { queued, stop: current };
   }
-  const stop = startHitStop(Math.max(seconds, current?.seconds ?? 0), {
+  const stop = startHitStop(true, Math.max(seconds, current?.seconds ?? 0), {
     cards: [...(current?.cards ?? []), ...queued.cards],
     zoneEnded: (current?.zoneEnded ?? false) || queued.zoneEnded,
   });

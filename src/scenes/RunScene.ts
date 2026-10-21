@@ -136,6 +136,9 @@ interface RunWorld {
 // at a fixed rate and stops while walkPaused says so; the scene draws it, feeds it input and
 // plays its events.
 export class RunScene extends Scene {
+  // The ambient movers' clock: the walk's simulated time less its firings' holds, in which
+  // they stand still.
+  private ambientMs = 0;
   private readonly roadArt = new RoadArt(this);
   private session: Session | undefined;
   private settings: Settings | undefined;
@@ -215,6 +218,7 @@ export class RunScene extends Scene {
   }
 
   private resetState(): void {
+    this.ambientMs = 0;
     this.session = undefined;
     this.stepBefore = undefined;
     this.stepClock = startStepClock;
@@ -351,13 +355,18 @@ export class RunScene extends Scene {
     let stoppedMs = 0;
     for (let step = 0; step < frame.steps && this.walking(); step++) {
       this.stepBefore = this.session?.walk;
-      if (this.session?.walk.road.hitStop == null) {
+      const stop = this.session?.walk.road.hitStop;
+      if (stop == null) {
         roadMs += STEP_MS;
       } else {
         stoppedMs += STEP_MS;
       }
+      if (stop?.firing !== true) {
+        this.ambientMs += STEP_MS;
+      }
       this.simulate();
     }
+    this.world?.pack.holdTrots(walkPaused(this.runPause()));
     const { frameMs } = frame;
     const zoneIndex = session.walk.run.zoneIndex;
     const clockFrame = { frameMs, halted, roadMs, stoppedMs, zoneIndex };
@@ -607,7 +616,8 @@ export class RunScene extends Scene {
     );
   }
 
-  // While a card or the pause menu holds the walk, the road's sprites stand still.
+  // While a card or the pause menu holds the walk, or a firing holds it in its stop, the road's
+  // sprites, the pack and the ambient movers stand still.
   private draw(): void {
     const session = this.session;
     const world = this.world;
@@ -625,11 +635,12 @@ export class RunScene extends Scene {
     const walk = blendWalk(alpha, before, lead);
     const zone = currentZone(gameData, walk.run);
     const still = this.reducedMotion();
+    const held = halted || session.walk.road.hitStop?.firing === true;
     world.backdrop.draw(zone);
     const zoneId = currentZoneId(gameData, walk.run);
     world.ambient.draw(gameData.ambient[zoneId], zoneId, {
-      halted,
-      now: (session.timeMs + (halted ? 0 : alpha * STEP_MS)) / 1000,
+      halted: held,
+      now: (this.ambientMs + (held ? 0 : alpha * STEP_MS)) / 1000,
       still,
       travelled: distanceBeforeZone + walk.run.zoneDistance,
     });
@@ -642,9 +653,9 @@ export class RunScene extends Scene {
       distanceBeforeZone + walk.run.zoneDistance,
     );
     const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
-    world.items.draw(walk, halted, still, shadow);
+    world.items.draw(walk, held, still, shadow);
     world.pack.draw(walk, {
-      halted,
+      halted: held,
       itemPoint: (id) => world.items.point(id),
       pulls,
       shadow,

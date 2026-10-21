@@ -16,20 +16,24 @@ describe("hitStopLength", () => {
 });
 
 describe("startHitStop", () => {
-  it("holds the step's cards and zone end, and starts no stop for no length", () => {
-    expect(startHitStop(0, { cards: [CARD], zoneEnded: false })).toBeNull();
-    expect(startHitStop(1, { cards: [CARD], zoneEnded: true })).toEqual({
-      cards: [CARD],
-      seconds: 1,
-      zoneEnded: true,
-    });
-  });
+  it.each([false, true])(
+    "holds the step's cards and zone end, marked firing %s, and starts no stop for no length",
+    (firing) => {
+      expect(startHitStop(firing, 0, { cards: [CARD], zoneEnded: false })).toBeNull();
+      expect(startHitStop(firing, 1, { cards: [CARD], zoneEnded: true })).toEqual({
+        cards: [CARD],
+        firing,
+        seconds: 1,
+        zoneEnded: true,
+      });
+    },
+  );
 });
 
 describe("tickHitStop", () => {
   // Ticks a stop at 60 steps a second, counting the steps until it lets go.
   const stepsHeld = (seconds: number) => {
-    let stop: HitStop | null = startHitStop(seconds, { cards: [CARD], zoneEnded: false });
+    let stop: HitStop | null = startHitStop(false, seconds, { cards: [CARD], zoneEnded: false });
     let steps = 0;
     while (stop !== null) {
       const ticked = tickHitStop(1 / 60, stop);
@@ -50,7 +54,7 @@ describe("tickHitStop", () => {
   });
 
   it("keeps what it holds until it lets go", () => {
-    const stop: HitStop = { cards: [CARD], seconds: 0.5, zoneEnded: true };
+    const stop: HitStop = { cards: [CARD], firing: false, seconds: 0.5, zoneEnded: true };
     expect(tickHitStop(0.2, stop)).toEqual({ stop: { ...stop, seconds: 0.3 } });
     expect(tickHitStop(0.5, stop)).toEqual({ released: { cards: [CARD], zoneEnded: true } });
   });

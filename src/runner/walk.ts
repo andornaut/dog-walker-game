@@ -974,6 +974,7 @@ export function stepWalk(
       ? { ...firing.state, phase: { kind: "ended", reason: "noDogs" } }
       : firing.state;
   const hitStop = startHitStop(
+    false,
     hitStopLength(
       {
         encounter: read(data.tuning, "seconds", "hitStopSeconds"),

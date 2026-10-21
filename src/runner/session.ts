@@ -168,7 +168,10 @@ export function stepSession(
   walk = step.walk;
   const distance = session.distanceBeforeZone + walk.run.zoneDistance;
   events.push({ distance, kind: "walked", step });
-  const fired = [...step.fired, ...step.instants.flatMap(({ outcome }) => outcome.fired)];
+  const fired = [
+    ...step.fired,
+    ...[...step.contacts, ...step.instants].flatMap(({ outcome }) => outcome.fired),
+  ];
   const walked: Session = {
     ...session,
     pulls: pulled.pulls,

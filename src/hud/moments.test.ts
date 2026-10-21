@@ -25,7 +25,7 @@ import {
   firedLineX,
   FIRING_PARTS,
   firingLayout,
-  firingShowMs,
+  firingTimeline,
   LOW_CHIP,
   LOW_CHIP_FIT,
   lowChipPlace,
@@ -54,10 +54,44 @@ const fee = (dog: PayoutCue["dog"], amount: number): PayoutCue => ({
   text: `+$${amount / 100} fee`,
 });
 
-describe("firingShowMs", () => {
-  it("ends the face and plate just before the stop, never below zero", () => {
-    expect(firingShowMs(1)).toBe(1000 - MOMENTS.firingEndMarginMs);
-    expect(firingShowMs(0)).toBe(0);
+describe("firingTimeline", () => {
+  const { fadeMs, plateMs, popMs } = MOMENTS.firing;
+  const holds = [0, (fadeMs + popMs) / 2000, 2, 3, 4.5];
+  const cases = holds.flatMap((seconds) => [false, true].map((still) => ({ seconds, still })));
+
+  it.each(cases)(
+    "ends every part with a $seconds s hold, reduced motion $still",
+    ({ seconds, still }) => {
+      const timeline = firingTimeline(seconds, still);
+      const ends = {
+        face: timeline.fadeAtMs + timeline.fadeMs,
+        line: timeline.fadeAtMs + timeline.fadeMs,
+        plate: timeline.fadeAtMs + timeline.fadeMs,
+        trot: timeline.trotMs,
+      };
+      const holdMs = seconds * 1000;
+      expect(ends).toEqual({ face: holdMs, line: holdMs, plate: holdMs, trot: holdMs });
+      expect(Math.max(timeline.popMs, timeline.plateMs)).toBeLessThanOrEqual(timeline.fadeAtMs);
+    },
+  );
+
+  it.each([
+    { name: "plays in full in a long hold", seconds: 3, still: false, want: [popMs, plateMs] },
+    {
+      name: "sets the face and plate in place with reduced motion",
+      seconds: 3,
+      still: true,
+      want: [0, 0],
+    },
+    {
+      name: "plays no intro in a hold no longer than its fade",
+      seconds: fadeMs / 1000,
+      still: false,
+      want: [0, 0],
+    },
+  ])("pops the face and drops the plate: $name", ({ seconds, still, want }) => {
+    const { plateMs: plate, popMs: pop } = firingTimeline(seconds, still);
+    expect([pop, plate]).toEqual(want);
   });
 });
 

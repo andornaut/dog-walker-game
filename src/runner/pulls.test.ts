@@ -294,7 +294,7 @@ describe("stepPulls holds", () => {
     const walk = walkWith(["koda"], [item("squirrel", 0, 0)]);
     const stopped: Walk = {
       ...walk,
-      road: { ...walk.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
+      road: { ...walk.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
     };
     const straining = after(walk, 0.5).pulls;
     const held = stepPulls(data, geometry, 2, [], straining, stopped);
@@ -314,7 +314,7 @@ describe("pullWalk", () => {
     expect(pullWalk(data, 5, 1, walk).walk.road.control.target).toBe(3);
     const stopped: Walk = {
       ...walk,
-      road: { ...walk.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
+      road: { ...walk.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
     };
     expect(pullWalk(data, 5, 1, stopped)).toEqual({ moved: false, walk: stopped });
   });

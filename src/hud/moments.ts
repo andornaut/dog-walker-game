@@ -42,9 +42,9 @@ export interface TreatCue {
 }
 
 export const MOMENTS = {
-  // The firing moment's face, plate and line are gone this long before its stop ends, so a
-  // held card opens on a clear screen.
-  firingEndMarginMs: 100,
+  // The firing moment: the owner's face pops in over popMs and the "FIRED!" plate drops in over
+  // plateMs as the hold starts, and the face, pop, plate and fired line fade out over fadeMs.
+  firing: { fadeMs: 150, plateMs: 120, popMs: 160 },
   // The one-off cue when an owner drops to lowHearts.
   lowCueMs: 1500,
   lowHearts: 1,
@@ -119,9 +119,27 @@ export function firedLineX(
     .sort((a, b) => Math.abs(a - centred) - Math.abs(b - centred))[0];
 }
 
-// How long the firing's face and plate show within a stop of seconds.
-export function firingShowMs(seconds: number): number {
-  return Math.max(0, seconds * 1000 - MOMENTS.firingEndMarginMs);
+// When the firing moment's parts play over a hold of seconds, in ms from the firing. The face
+// pops in and the plate drops in as the hold starts; the face, pop, plate and fired line stay
+// up and fade out to end with the hold (fadeAtMs + fadeMs); the fired dog trots off the road,
+// or fades with reduced motion, over the whole hold (trotMs). A hold too short for every part
+// shortens the pop and the drop first, then the fade. Reduced motion sets the face and plate
+// in place at once and keeps the hold's length.
+export interface FiringTimeline {
+  readonly fadeAtMs: number;
+  readonly fadeMs: number;
+  readonly plateMs: number;
+  readonly popMs: number;
+  readonly trotMs: number;
+}
+
+export function firingTimeline(seconds: number, still: boolean): FiringTimeline {
+  const { fadeMs, plateMs, popMs } = MOMENTS.firing;
+  const holdMs = Math.max(0, seconds * 1000);
+  const fade = Math.min(fadeMs, holdMs);
+  const fadeAtMs = holdMs - fade;
+  const intro = (ms: number) => (still ? 0 : Math.min(ms, fadeAtMs));
+  return { fadeAtMs, fadeMs: fade, plateMs: intro(plateMs), popMs: intro(popMs), trotMs: holdMs };
 }
 
 // The firing moment's parts, from the card's top-left corner: the owner's face at 2x centred on

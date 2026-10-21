@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
+import { firingTimeline } from "../hud/moments";
 import type { LaneDirection } from "../layout/lanes";
 import { cardFor, openCard } from "../rules/choices";
 import { clampHearts, pixels, read } from "../rules/units";
@@ -19,8 +20,10 @@ import {
   headHomeSession,
   runStreams,
   type Session,
+  type SessionData,
   type SessionEvent,
   type SessionInput,
+  type SessionStep,
   startSession,
   stepSession,
 } from "./session";
@@ -249,6 +252,7 @@ describe("a firing in the walk", () => {
     expect(kinds(chosen.events)).toEqual(["chosen"]);
     expect(chosen.session.walk.road.hitStop).toEqual({
       cards: [STOP],
+      firing: true,
       seconds: FIRING_SECONDS,
       zoneEnded: true,
     });
@@ -266,6 +270,134 @@ describe("a firing in the walk", () => {
     expect(released.session.card?.source).toEqual(STOP);
     expect(released.session.zoneEndPending).toBe(true);
   });
+});
+
+describe("a firing's hold", () => {
+  const STEP_MS = STEP_SECONDS * 1000;
+  const streams = runStreams(1);
+  // The walk with nothing to come, Koda's owner on their last heart and the walker's
+  // forgiveness used, so Koda's next lost heart fires you while Biscuit walks on.
+  const lastHeart = (): Session => {
+    const session = emptyRoad(started());
+    const run = {
+      ...session.walk.run,
+      heartsForgiven: 1,
+      pack: mapPack(
+        (slot) => (slot.dog === "koda" ? { ...slot, hearts: clampHearts(10, 1) } : slot),
+        session.walk.run.pack,
+      ),
+    };
+    return { ...session, walk: { ...session.walk, run } };
+  };
+  // kind in the pack's lane, its bottom just inside the pack's band, met head-on by Koda.
+  const meeting = (kind: WalkItem["kind"], session: Session): Session => {
+    const item: WalkItem = { height: 12, id: 0, kind, lane: 2, laneSpan: 1, y: 560 };
+    const road = { ...session.walk.road, items: [item], nextItemId: 1 };
+    return { ...session, walk: { ...session.walk, road } };
+  };
+  // The data with encounter costing the dogs it meets a heart.
+  const costing = (encounter: "biscuitNeighbour" | "puddle"): SessionData => {
+    const effects = [{ amount: -1, kind: "hearts", target: { kind: "affected" } }] as const;
+    const shown = gameData.encounters[encounter];
+    return {
+      ...gameData,
+      encounters: {
+        ...gameData.encounters,
+        [encounter]: { ...shown, resolution: { ...shown.resolution, effects } },
+      },
+    };
+  };
+  const holding = (data: SessionData, seconds: number): SessionData => ({
+    ...data,
+    tuning: { ...data.tuning, seconds: { ...data.tuning.seconds, firingHoldSeconds: seconds } },
+  });
+  const walkOn = (data: SessionData, session: Session, inputs: SessionInput[] = []) =>
+    stepSession(data, streams, geometry, STEP_SECONDS, inputs, session);
+  const firedIn = (events: readonly SessionEvent[]) =>
+    events.flatMap((event) => {
+      if (event.kind === "chosen") {
+        return event.outcome.fired;
+      }
+      if (event.kind !== "walked") {
+        return [];
+      }
+      const { contacts, fired, instants } = event.step;
+      return [...fired, ...[...contacts, ...instants].flatMap(({ outcome }) => outcome.fired)];
+    });
+  // The skunk card open on Koda, chosen on its option that costs a heart.
+  const chooseHoldNose = (data: SessionData, session: Session): SessionStep => {
+    const run = openCard(SKUNK, session.walk.run);
+    const { resolution } = gameData.encounters.skunk;
+    const option =
+      resolution.kind === "card"
+        ? resolution.options.findIndex((o) => o.effects.some(({ kind }) => kind === "hearts"))
+        : -1;
+    const open = { ...session, card: cardFor(data, run, SKUNK), walk: { ...session.walk, run } };
+    return chooseCard(data, streams, geometry, option, open);
+  };
+
+  const CAUSES: {
+    cause: string;
+    data: SessionData;
+    fire: (data: SessionData, session: Session) => SessionStep;
+  }[] = [
+    { cause: "a card's choice", data: gameData, fire: chooseHoldNose },
+    {
+      cause: "a contact obstacle",
+      data: costing("puddle"),
+      fire: (data, session) => walkOn(data, meeting("puddle", session)),
+    },
+    {
+      cause: "a lucky find",
+      data: costing("biscuitNeighbour"),
+      fire: (data, session) => walkOn(data, meeting("biscuitNeighbour", session)),
+    },
+    {
+      cause: "a plain obstacle's bump",
+      data: gameData,
+      fire: (data, session) => walkOn(data, meeting("cone", session)),
+    },
+  ];
+  const HOLDS = [FIRING_SECONDS, 1.5, 4.5];
+  const cases = CAUSES.flatMap((cause) => HOLDS.map((seconds) => ({ ...cause, seconds })));
+
+  it.each(cases)(
+    "holds the road and the pack still after $cause for a $seconds s hold, as long as the moment plays",
+    ({ data: base, fire, seconds }) => {
+      const data = holding(base, seconds);
+      const fired = fire(data, lastHeart());
+      expect(firedIn(fired.events)).toEqual(["koda"]);
+      expect(fired.session.walk.road.hitStop?.firing).toBe(true);
+
+      // Every step of the hold, a lane press included, leaves the run, the road, the pulls and
+      // the zoomies as they were.
+      const press: SessionInput = { direction: 1, kind: "lane" };
+      let session = fired.session;
+      let heldMs = 0;
+      while (session.walk.road.hitStop !== null) {
+        const next = walkOn(data, session, [press]).session;
+        expect(next.walk.run).toEqual(session.walk.run);
+        expect({ ...next.walk.road, hitStop: null }).toEqual({
+          ...session.walk.road,
+          hitStop: null,
+        });
+        expect([next.pulls, next.zoomiesSeconds]).toEqual([session.pulls, session.zoomiesSeconds]);
+        session = next;
+        heldMs += STEP_MS;
+      }
+      expect(Math.abs(heldMs - seconds * 1000)).toBeLessThanOrEqual(STEP_MS);
+      expect(walkOn(data, session).session.walk.run.zoneDistance).toBeGreaterThan(
+        session.walk.run.zoneDistance,
+      );
+
+      // The face, pop, plate and fired line fade out, and the dog trots off, as the hold ends.
+      for (const still of [false, true]) {
+        const timeline = firingTimeline(read(data.tuning, "seconds", "firingHoldSeconds"), still);
+        const ends = [timeline.fadeAtMs + timeline.fadeMs, timeline.trotMs];
+        ends.forEach((end) => expect(Math.abs(end - heldMs)).toBeLessThanOrEqual(STEP_MS));
+      }
+    },
+  );
 });
 
 describe("chooseShownCard", () => {

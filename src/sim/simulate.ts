@@ -370,7 +370,7 @@ function playBySkill(
           const pulledFrom =
             afterPull !== null && bot.clock <= afterPull.until ? afterPull.fromLane : null;
           countLeaving(data, tally, road.geometry, pulledFrom, pulledWalk, event.step.walk);
-          for (const { outcome } of event.step.instants) {
+          for (const { outcome } of [...event.step.contacts, ...event.step.instants]) {
             recordFirings(tally, pulledWalk.run, outcome);
           }
           for (const dog of event.step.fired) {

@@ -10,7 +10,7 @@ const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encoun
 const NOTHING = { cards: [], zoneEnded: false };
 
 describe("holdForFiring", () => {
-  const RUNNING: HitStop = { cards: [SKUNK], seconds: 0.4, zoneEnded: true };
+  const RUNNING: HitStop = { cards: [SKUNK], firing: false, seconds: 0.4, zoneEnded: true };
 
   it.each<{
     expected: FiringHold;
@@ -34,21 +34,30 @@ describe("holdForFiring", () => {
       seconds: 0,
     },
     {
-      expected: { queued: NOTHING, stop: { cards: [STOP], seconds: 1, zoneEnded: true } },
+      expected: {
+        queued: NOTHING,
+        stop: { cards: [STOP], firing: true, seconds: 1, zoneEnded: true },
+      },
       fired: ["koda"],
       name: "holds the queued cards and the zone end for the firing's length",
       running: null,
       seconds: 1,
     },
     {
-      expected: { queued: NOTHING, stop: { cards: [SKUNK, STOP], seconds: 1, zoneEnded: true } },
+      expected: {
+        queued: NOTHING,
+        stop: { cards: [SKUNK, STOP], firing: true, seconds: 1, zoneEnded: true },
+      },
       fired: ["koda"],
       name: "keeps a longer firing over a running stop, holding what both hold",
       running: RUNNING,
       seconds: 1,
     },
     {
-      expected: { queued: NOTHING, stop: { cards: [SKUNK, STOP], seconds: 1.5, zoneEnded: true } },
+      expected: {
+        queued: NOTHING,
+        stop: { cards: [SKUNK, STOP], firing: true, seconds: 1.5, zoneEnded: true },
+      },
       fired: ["koda"],
       name: "keeps a longer running stop over the firing",
       running: { ...RUNNING, seconds: 1.5 },

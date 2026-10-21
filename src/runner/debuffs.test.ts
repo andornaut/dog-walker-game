@@ -70,7 +70,7 @@ describe("debuff durations", () => {
     const start = walkOf(withDebuffs(testState(PACK), [debuff]));
     const stopped: Walk = {
       ...start,
-      road: { ...start.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
+      road: { ...start.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
     };
     expect(held(walkFor(0.5, stopped).run, debuff)).toEqual(held(start.run, debuff));
   });

@@ -151,7 +151,10 @@ describe("leadWalk", () => {
     const stopped = walk(0, [], still);
     const held = {
       ...stopped,
-      road: { ...stopped.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
+      road: {
+        ...stopped.road,
+        hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false },
+      },
     };
     expect(leadWalk(gameData, 5, 0.01, [right], held)).toBe(held);
   });

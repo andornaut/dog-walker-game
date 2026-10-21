@@ -7,8 +7,11 @@ export interface HeldStep {
   readonly zoneEnded: boolean;
 }
 
-// The walk held still after a hit that plays a moment, for seconds more of simulated time.
+// The walk held still after a hit that plays a moment, or while an owner who fired you has
+// their moment, for seconds more of simulated time. A firing's stop draws the whole walk
+// standing still, as a card does.
 export interface HitStop extends HeldStep {
+  readonly firing: boolean;
   readonly seconds: number;
 }
 
@@ -29,8 +32,8 @@ export function hitStopLength(
   return Math.max(hits.encounters > 0 ? lengths.encounter : 0, hits.minors > 0 ? lengths.minor : 0);
 }
 
-export function startHitStop(seconds: number, held: HeldStep): HitStop | null {
-  return seconds > SECONDS_EPSILON ? { ...held, seconds } : null;
+export function startHitStop(firing: boolean, seconds: number, held: HeldStep): HitStop | null {
+  return seconds > SECONDS_EPSILON ? { ...held, firing, seconds } : null;
 }
 
 // One step spent in a stop: the stop with that much less left, or, once nothing is left,

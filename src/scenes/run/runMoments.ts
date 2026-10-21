@@ -9,6 +9,7 @@ import {
   endScreenDelayMs,
   FIRING_EVENT,
   type FiringCue,
+  firingTimeline,
   FORGIVEN_EVENT,
   type ForgivenCue,
   PAYOUT_EVENT,
@@ -268,6 +269,7 @@ export class RunMoments {
       playEffect(this.scene, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
       this.deps.pack.stumble(this.deps.still());
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+      this.sayQuips(outcome.quips);
       this.afterOutcome(outcome);
     }
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
@@ -307,14 +309,17 @@ export class RunMoments {
     );
   }
 
-  // Each owner who fired you has their dog trot off the road, with their fired line.
+  // Each owner who fired you has their dog trot off the road over the firing's hold, with
+  // their fired line.
   private fired(dogs: readonly DogId[], run: RunState): void {
     if (dogs.length === 0) {
       return;
     }
     soundboardOf(this.scene).play("fired");
     dogs.forEach((dog) => this.say(firedLine(gameData, dog)));
-    dogs.forEach((dog) => this.deps.pack.trotOff(dog, firingSeconds(), this.deps.still()));
+    const still = this.deps.still();
+    const { trotMs } = firingTimeline(firingSeconds(), still);
+    dogs.forEach((dog) => this.deps.pack.trotOff(dog, trotMs, still));
     if (run.phase.kind === "ended") {
       this.endMoments.firingSeconds = firingSeconds();
     }

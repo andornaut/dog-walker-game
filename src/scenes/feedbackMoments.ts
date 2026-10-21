@@ -19,7 +19,7 @@ import {
   FIRING_PARTS,
   type FiringCue,
   firingLayout,
-  firingShowMs,
+  firingTimeline,
   LOW_CHIP,
   LOW_CHIP_FIT,
   lowChipPlace,
@@ -37,7 +37,7 @@ import {
   type TreatCue,
   trotOffX,
 } from "../hud/moments";
-import { playerPaused, type RunPause } from "../hud/topBar";
+import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
 import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -57,9 +57,9 @@ const LAYOUT = screenLayout(SCREEN_CONFIG);
 const DEPTH = 50;
 // The owner's 32x32 face is drawn at 2x. The pop shows no face on its first frame, the face
 // at 1x on its second and at 2x from its third.
-const FACE = { fadeMs: 150, popMs: 160, scale: 2, size: 32 };
+const FACE = { scale: 2, size: 32 };
 const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
-const PLATE = { corner: 8, dropIn: 8, dropMs: 120, key: "ui-fired-plate" };
+const PLATE = { corner: 8, dropIn: 8, key: "ui-fired-plate" };
 // Each fired line's bubble takes its own depth pair over the moments, panel then text, so two
 // lines up at once never interleave. The tail is 8px wide.
 const LINE_DEPTH = DEPTH + 2;
@@ -92,10 +92,29 @@ interface SlotWarning {
   pulse: Tweens.Tween | undefined;
 }
 
+// Tweens and timers that stop and start together.
+class TimedGroup {
+  paused = false;
+  readonly timers = new Set<Time.TimerEvent>();
+  readonly tweens = new Set<Tweens.Tween>();
+
+  hold(paused: boolean): void {
+    if (paused === this.paused) {
+      return;
+    }
+    this.paused = paused;
+    this.tweens.forEach((tween) => (paused ? tween.pause() : tween.resume()));
+    this.timers.forEach((timer) => {
+      timer.paused = paused;
+    });
+  }
+}
+
 // The HUD's part of the in-run feedback moments: the firing moment over the card, the
 // low-hearts warning on a card, the zone's fees flying to the bank and a treat thrown to its
 // dog. Moments that play out over time stop with the pause menu, as the walk does, while
-// the HUD keeps running under it.
+// the HUD keeps running under it. The firing moment stops whenever the walk does, so it plays
+// out over its hold however the hold is paused.
 export class HudFeedback {
   private cardUp = false;
   private inFlight = 0;
@@ -115,12 +134,11 @@ export class HudFeedback {
   private low: DogId[] = [];
   private lowShown = "";
   private moneyTick: MoneyTick | undefined;
-  private paused = false;
+  private readonly firing = new TimedGroup();
   private readonly hooks: HudFeedbackHooks;
+  private readonly moments = new TimedGroup();
   private readonly run: Pick<RunScene, "events" | "hudView" | "reducedMotion">;
   private readonly scene: Scene;
-  private readonly timers = new Set<Time.TimerEvent>();
-  private readonly tweens = new Set<Tweens.Tween>();
   private readonly warnings: SlotWarning[] = LAYOUT.dogSlots.map(() => ({
     parts: [],
     pulse: undefined,
@@ -148,7 +166,8 @@ export class HudFeedback {
   }
 
   update(run: RunState, pause: RunPause): void {
-    this.holdWhilePaused(playerPaused(pause));
+    this.moments.hold(playerPaused(pause));
+    this.firing.hold(walkPaused(pause));
     this.cardUp = pause.card;
     if (this.cardUp) {
       this.clearPayoutLabels();
@@ -170,45 +189,45 @@ export class HudFeedback {
     return tickShown(now, this.moneyTick);
   }
 
-  private holdWhilePaused(paused: boolean): void {
-    if (paused === this.paused) {
-      return;
-    }
-    this.paused = paused;
-    this.tweens.forEach((tween) => (paused ? tween.pause() : tween.resume()));
-    this.timers.forEach((timer) => {
-      timer.paused = paused;
-    });
-  }
-
-  private tween(config: Types.Tweens.TweenBuilderConfig): Tweens.Tween {
+  private tween(
+    config: Types.Tweens.TweenBuilderConfig,
+    group: TimedGroup = this.moments,
+  ): Tweens.Tween {
     const tween = this.scene.tweens.add(config);
-    this.tweens.add(tween);
-    tween.once("complete", () => this.tweens.delete(tween));
-    if (this.paused) {
+    group.tweens.add(tween);
+    tween.once("complete", () => group.tweens.delete(tween));
+    if (group.paused) {
       tween.pause();
     }
     return tween;
   }
 
-  private after(ms: number, callback: () => void): void {
+  private after(ms: number, callback: () => void, group: TimedGroup = this.moments): void {
     const timer = this.scene.time.delayedCall(ms, () => {
-      this.timers.delete(timer);
+      group.timers.delete(timer);
       callback();
     });
-    this.timers.add(timer);
-    timer.paused = this.paused;
+    group.timers.add(timer);
+    timer.paused = group.paused;
   }
 
   // Fades parts out over ms after delay, then destroys them.
-  private fadeOut(parts: GameObjects.GameObject[], delay: number, ms: number): void {
-    this.tween({
-      alpha: 0,
-      delay,
-      duration: ms,
-      onComplete: () => parts.forEach((part) => part.destroy()),
-      targets: parts,
-    });
+  private fadeOut(
+    parts: GameObjects.GameObject[],
+    delay: number,
+    ms: number,
+    group: TimedGroup = this.moments,
+  ): void {
+    this.tween(
+      {
+        alpha: 0,
+        delay,
+        duration: ms,
+        onComplete: () => parts.forEach((part) => part.destroy()),
+        targets: parts,
+      },
+      group,
+    );
   }
 
   // Moves target along a curve over ms, then calls done.
@@ -237,9 +256,10 @@ export class HudFeedback {
   }
 
   // The owner's fired face pops up at 2x on their tab's place over the card in front of the
-  // pop, the plate drops in in their temperament's colour, and their fired line shows in a bubble pointing
-  // at the face. The face, pop, plate and line are gone just before the hold ends, and heart
-  // pops in their way land at once. Reduced motion keeps the pop and sets the rest in place.
+  // pop, the plate drops in in their temperament's colour, and their fired line shows in a
+  // bubble pointing at the face. The face, pop, plate and line stay up for the hold and fade
+  // out as it ends (firingTimeline), and heart pops in their way land at once. Reduced motion
+  // keeps the pop and sets the rest in place.
   private playFiring(cue: FiringCue): void {
     const rect = this.slotOf(cue.dog);
     if (rect === undefined) {
@@ -247,7 +267,7 @@ export class HudFeedback {
     }
     const still = this.run.reducedMotion();
     const layout = firingLayout(LAYOUT.walkView, rect);
-    const showMs = firingShowMs(cue.seconds);
+    const timeline = firingTimeline(cue.seconds, still);
     const pop = this.addPop(layout.pop);
     const face = this.addFace(cue.dog, layout.face);
     const plate = this.addPlate(layout.plate);
@@ -255,7 +275,10 @@ export class HudFeedback {
       pop?.anims.pause(pop.anims.currentAnim?.frames.at(-1));
     } else if (pop === undefined) {
       face.setScale(0);
-      this.tween({ duration: FACE.popMs, ease: "Back.easeOut", scale: 1, targets: face });
+      this.tween(
+        { duration: timeline.popMs, ease: "Back.easeOut", scale: 1, targets: face },
+        this.firing,
+      );
     } else {
       face.setVisible(false);
       pop.on("animationupdate", (_: Animations.Animation, frame: Animations.AnimationFrame) => {
@@ -264,13 +287,16 @@ export class HudFeedback {
     }
     if (!still) {
       plate.setY(layout.plate.y - PLATE.dropIn).setAlpha(0);
-      this.tween({
-        alpha: 1,
-        duration: PLATE.dropMs,
-        ease: "Back.easeOut",
-        targets: plate,
-        y: layout.plate.y,
-      });
+      this.tween(
+        {
+          alpha: 1,
+          duration: timeline.plateMs,
+          ease: "Back.easeOut",
+          targets: plate,
+          y: layout.plate.y,
+        },
+        this.firing,
+      );
     }
     const half = (FACE.size * FACE.scale) / 2;
     const covered = [
@@ -279,16 +305,19 @@ export class HudFeedback {
     ];
     covered.forEach((part) => this.firingParts.add(part));
     const shown = pop === undefined ? [face, plate] : [pop, face, plate];
-    const fadeDelay = Math.max(0, showMs - FACE.fadeMs);
-    const fadeMs = Math.min(showMs, FACE.fadeMs);
-    this.fadeOut(shown, fadeDelay, fadeMs);
+    const { fadeAtMs, fadeMs } = timeline;
+    this.fadeOut(shown, fadeAtMs, fadeMs, this.firing);
     const line = { at: layout.line, tail: layout.tail, text: cue.line };
     this.linesWaiting.push(line);
     this.showWaitingLines();
-    this.after(fadeDelay, () => {
-      covered.forEach((part) => this.firingParts.delete(part));
-      this.closeLine(line, fadeMs);
-    });
+    this.after(
+      fadeAtMs,
+      () => {
+        covered.forEach((part) => this.firingParts.delete(part));
+        this.closeLine(line, fadeMs);
+      },
+      this.firing,
+    );
     this.hooks.firingShown();
   }
 
@@ -299,16 +328,19 @@ export class HudFeedback {
     if (entry === undefined) {
       return;
     }
-    this.tween({
-      alpha: 0,
-      duration: ms,
-      onComplete: () => {
-        entry.parts.forEach((part) => part.destroy());
-        this.lines = this.lines.filter((shown) => shown !== entry);
-        this.showWaitingLines();
+    this.tween(
+      {
+        alpha: 0,
+        duration: ms,
+        onComplete: () => {
+          entry.parts.forEach((part) => part.destroy());
+          this.lines = this.lines.filter((shown) => shown !== entry);
+          this.showWaitingLines();
+        },
+        targets: entry.parts,
       },
-      targets: entry.parts,
-    });
+      this.firing,
+    );
   }
 
   // Opens each waiting fired line that has room beside the bubbles up, in turn; the rest wait
@@ -611,17 +643,17 @@ export class HudFeedback {
   }
 }
 
-// A fired dog trots off the road by its nearer edge over seconds, off the side of the screen.
-// Reduced motion fades it out where it stands.
+// A fired dog trots off the road by its nearer edge over ms, off the side of the screen.
+// Reduced motion fades it out where it stands. Returns the tween, so the walk can hold it.
 export function trotOffRoad(
   scene: Scene,
-  trot: { road: Rect; seconds: number; still: boolean },
+  trot: { ms: number; road: Rect; still: boolean },
   sprite: GameObjects.Sprite,
   done: () => void,
-): void {
-  const duration = trot.seconds * 1000;
+): Tweens.Tween {
+  const duration = trot.ms;
   if (trot.still) {
-    scene.tweens.add({
+    return scene.tweens.add({
       alpha: 0,
       duration,
       onComplete: () => {
@@ -630,12 +662,11 @@ export function trotOffRoad(
       },
       targets: sprite,
     });
-    return;
   }
   const toX = trotOffX(trot.road, sprite.displayWidth / 2, sprite.x);
   playTag(sprite, sprite.texture.key, "walk");
   sprite.setFlipX(toX < sprite.x);
-  scene.tweens.add({
+  return scene.tweens.add({
     duration,
     onComplete: () => {
       sprite.setFlipX(false);
