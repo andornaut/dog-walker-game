@@ -184,25 +184,20 @@ def bark_park_lines(g):
 def shops_ground(g):
     rnd = random.Random("road-sniff-street-shops")
     g.rect(0, 0, W, H, "pink")
-    # pavers half a lane wide: 2-row mauve joints every 16 rows (low contrast, so they do not blink)
-    # and staggered 1px joints along the road, on the lane dividers in the unstaggered rows; a few
-    # skin1 pavers, never side by side
-    tinted = False
-    for row in range(H // 16):
-        y, off = row * 16, 16 if row % 2 else 0
-        g.rect(0, y + 14, W, 2, "mauve")
-        for x in range(off - 32, W, 32):
-            g.rect(x + 31, y, 1, 14, "mauve")
-            tinted = not tinted and rnd.random() < 0.07
-            if tinted:
-                g.rect(x, y, 31, 14, "skin1")
-    specks(g, rnd, 20, "skin1", 6, W - 6)
-    specks(g, rnd, 16, "mauve", 6, W - 6)
-    # cream gutter stones on the outer 4 columns, a mauve seam on the road side and a 2-row
+    # square pavers half a lane on a side in a plain grid (not The Long Way Home's running bond), their joints
+    # light skin1 (low contrast, and apart from the mauve the game shades with): 2 rows across the road, 1px
+    # along it on the lane dividers and halfway between them
+    for y in range(0, H, 32):
+        g.rect(0, y + 30, W, 2, "skin1")
+    for x in range(31, W, 32):
+        g.rect(x, 0, 1, H, "skin1")
+    specks(g, rnd, 24, "skin1", 6, W - 6)
+    specks(g, rnd, 10, "red", 6, W - 6)
+    # cream gutter stones on the outer 4 columns, a tan seam on the road side and a 2-row
     # tan joint every 16 rows
     for x0, inner in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "cream")
-        g.rect(inner, 0, 1, H, "mauve")
+        g.rect(inner, 0, 1, H, "tan")
         for y in range(0, H, 16):
             g.rect(x0, y, 4, 2, "tan")
 
@@ -238,11 +233,9 @@ def home_ground(g):
         g.rect(0, y + 6, W, 2, "brown")
         for x in range(off - 16, W, 16):
             g.rect(x + 15, y, 1, 6, "brown")
-            r = rnd.random()
-            if r < 0.1:
-                g.rect(x, y, 15, 6, "skin1")
-            elif r < 0.16:
-                g.rect(x, y, 15, 6, "tan")
+            # a few bricks a shade darker, never lighter, so coins and treats stay the brightest things here
+            if rnd.random() < 0.12:
+                g.rect(x, y, 15, 6, "brown")
             g.p(x + rnd.randrange(2, 14), y + rnd.randrange(2, 6), "brown")
     # soldier-course edges: bricks set on end along both sides, 6 rows plus a 2-row joint
     for x0, line in ((0, 6), (W - 6, W - 7)):
@@ -274,22 +267,7 @@ def home_lines(g):
             g.rect(x, y + 14, 2, 1, "plum")
 
 
-# ---------- Willow Crescent: worn pale asphalt, concrete gutters, a few chalk doodles ----------
-
-# chalk doodles: a crescent moon and a "Zz". Every stroke across the road is 2 rows tall, so
-# the projection keeps it
-MOON = ("..yy", ".yyy", "yyy.", "yy..", "yy..", "yy..", "yy..", "yyy.", ".yyy", "..yy")
-BIG_Z = ("zzzzzz", "zzzzzz", "...zz.", "..zz..", ".zz...", "zz....", "zzzzzz", "zzzzzz")
-SMALL_Z = ("zzzz", "zzzz", ".zz.", "zz..", "zzzz", "zzzz")
-
-
-def stamp(g, x0, y0, rows, col):
-    """Draw every non-'.' character of rows in col, wrapping top to bottom."""
-    for j, row in enumerate(rows):
-        for k, ch in enumerate(row):
-            if ch != ".":
-                wp(g, x0 + k, y0 + j, col)
-
+# ---------- Willow Crescent: worn pale asphalt, concrete gutters, sealed cracks and leaf litter ----------
 
 def snooze_ground(g):
     rnd = random.Random("road-snooze-crescent")
@@ -302,19 +280,15 @@ def snooze_ground(g):
         else:
             wrect(g, x, y, 2, 1, col)
     # sealed cracks running along the road, kept inside lanes
-    for x, y, steps in ((43, 12, 10), (224, 50, 14), (286, 30, 8)):
+    for x, y, steps in ((43, 12, 10), (100, 40, 12), (160, 62, 9), (224, 50, 14), (286, 30, 8)):
         for _ in range(steps):
             wp(g, x, y, "dslate")
             if rnd.random() < 0.25:
                 x += rnd.choice((-1, 1))
                 wp(g, x, y, "dslate")
             y -= 1
-    stamp(g, 25, 6, MOON, "yellow")
-    for x, y, col in ((208, 36, "white"), (82, 54, "lgrey")):
-        stamp(g, x, y, BIG_Z, col)
-        stamp(g, x + 8, y + 2, SMALL_Z, col)
-    # a little leaf litter from the street trees, green so it reads apart from The Long Way Home
-    leaves(g, rnd, 4, 10, W - 10, tones=(("green", "dgreen", "forest"),))
+    # leaf litter from the street trees, green so it reads apart from The Long Way Home
+    leaves(g, rnd, 7, 10, W - 10, tones=(("green", "dgreen", "forest"),))
     # pale concrete gutters, with 2-row expansion joints every 16 rows
     for x0, edge in ((0, 3), (W - 3, W - 4)):
         g.rect(x0, 0, 3, H, "lgrey")
