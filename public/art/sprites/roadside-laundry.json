@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-laundry.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 135, "h": 80 },
+    "frame": { "x": 0, "y": 0, "w": 189, "h": 112 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 135, "h": 80 },
-    "sourceSize": { "w": 135, "h": 80 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 189, "h": 112 },
+    "sourceSize": { "w": 189, "h": 112 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-laundry.png",
   "format": "RGBA8888",
-  "size": { "w": 135, "h": 80 },
+  "size": { "w": 189, "h": 112 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

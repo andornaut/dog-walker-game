@@ -1,18 +1,18 @@
 { "frames": {
    "roadside-sprinkler@88 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 57, "h": 31 },
+    "frame": { "x": 0, "y": 0, "w": 80, "h": 43 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 57, "h": 31 },
-    "sourceSize": { "w": 57, "h": 31 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 80, "h": 43 },
+    "sourceSize": { "w": 80, "h": 43 },
     "duration": 200
    },
    "roadside-sprinkler@88 1.aseprite": {
-    "frame": { "x": 57, "y": 0, "w": 57, "h": 31 },
+    "frame": { "x": 80, "y": 0, "w": 80, "h": 43 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 57, "h": 31 },
-    "sourceSize": { "w": 57, "h": 31 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 80, "h": 43 },
+    "sourceSize": { "w": 80, "h": 43 },
     "duration": 200
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-sprinkler@88.png",
   "format": "RGBA8888",
-  "size": { "w": 114, "h": 31 },
+  "size": { "w": 160, "h": 43 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-mailbox@50.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 15, "h": 20 },
+    "frame": { "x": 0, "y": 0, "w": 21, "h": 28 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 15, "h": 20 },
-    "sourceSize": { "w": 15, "h": 20 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 21, "h": 28 },
+    "sourceSize": { "w": 21, "h": 28 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-mailbox@50.png",
   "format": "RGBA8888",
-  "size": { "w": 15, "h": 20 },
+  "size": { "w": 21, "h": 28 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

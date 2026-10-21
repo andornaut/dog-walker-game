@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-tree.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 95, "h": 130 },
+    "frame": { "x": 0, "y": 0, "w": 133, "h": 182 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 130 },
-    "sourceSize": { "w": 95, "h": 130 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 133, "h": 182 },
+    "sourceSize": { "w": 133, "h": 182 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-tree.png",
   "format": "RGBA8888",
-  "size": { "w": 95, "h": 130 },
+  "size": { "w": 133, "h": 182 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

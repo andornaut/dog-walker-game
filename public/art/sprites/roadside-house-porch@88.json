@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-house-porch@88.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 123, "h": 88 },
+    "frame": { "x": 0, "y": 0, "w": 172, "h": 123 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 123, "h": 88 },
-    "sourceSize": { "w": 123, "h": 88 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 172, "h": 123 },
+    "sourceSize": { "w": 172, "h": 123 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-house-porch@88.png",
   "format": "RGBA8888",
-  "size": { "w": 123, "h": 88 },
+  "size": { "w": 172, "h": 123 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

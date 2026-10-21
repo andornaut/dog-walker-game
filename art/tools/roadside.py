@@ -12,28 +12,28 @@ the navy lantern of the need spot `spot-lamp-post`; the street tree is three rou
 flower border has no box, unlike `petunias`; the gnome wears a blue hat and a red coat, unlike
 `minor-gnome`; the mailbox is blue with a yellow flag, unlike the red hydrant.
 
-Each is laid out on a design grid and drawn SCALE (1.25) times larger, as the road sprites are:
+Each is laid out on a design grid and drawn SCALE (1.75) times larger, as the road objects are:
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
 every frame and depth variant is a whole size. Full size, then @88, @75, @62 and @50:
 
-roadside-house-cottage       120x110  a tan cottage under a brown gable, green door
-roadside-house-cottage-pink  120x110  a pink cottage under a purple gable, white door
-roadside-house-tall          110x130  a cream two-storey house under a dred gable, sky door
-roadside-house-tall-grey     110x130  a light grey two-storey house under a slate gable, dred door
-roadside-house-porch         140x100  a sky bungalow under a navy hipped roof, red porch awning
-roadside-house-porch-tan     140x100  a tan bungalow under a brown hipped roof
-roadside-fence               125x35   a white picket fence
-roadside-fence-cat           125x50   the fence with a plum cat sitting on the pickets
-roadside-hedge               110x40   a bumpy front hedge with white flowers
-roadside-mailbox             30x40    a blue mailbox on a post, its yellow flag up
-roadside-tree                95x130   a round street tree in three lobes
-roadside-tree-blossom        95x130   the tree in pink blossom
-roadside-lamp-post           30x125   a white globe lamp on a forest post with a flower basket
-roadside-gnome               25x35    a garden gnome in a blue hat and red coat
-roadside-flowers             75x25    a border of mixed blooms on their stems
-roadside-bike                60x40    a kid's red bike on its stand, side on, streamers
-roadside-sprinkler           65x35    a lawn sprinkler's fan of water; idle 2 frames x 200ms
-roadside-laundry             135x80   a washing line on two T posts: a shirt, a sheet, socks, a dress
+roadside-house-cottage       168x154  a tan cottage under a brown gable, green door
+roadside-house-cottage-pink  168x154  a pink cottage under a purple gable, white door
+roadside-house-tall          154x182  a cream two-storey house under a dred gable, sky door
+roadside-house-tall-grey     154x182  a light grey two-storey house under a slate gable, dred door
+roadside-house-porch         196x140  a sky bungalow under a navy hipped roof, red porch awning
+roadside-house-porch-tan     196x140  a tan bungalow under a brown hipped roof
+roadside-fence               175x49   a white picket fence
+roadside-fence-cat           175x70   the fence with a plum cat sitting on the pickets
+roadside-hedge               154x56   a bumpy front hedge with white flowers
+roadside-mailbox             42x56    a blue mailbox on a post, its yellow flag up
+roadside-tree                133x182  a round street tree in three lobes
+roadside-tree-blossom        133x182  the tree in pink blossom
+roadside-lamp-post           42x175   a white globe lamp on a forest post with a flower basket
+roadside-gnome               35x49    a garden gnome in a blue hat and red coat
+roadside-flowers             105x35   a border of mixed blooms on their stems
+roadside-bike                84x56    a kid's red bike on its stand, side on, streamers
+roadside-sprinkler           91x49    a lawn sprinkler's fan of water; idle 2 frames x 200ms
+roadside-laundry             189x112  a washing line on two T posts: a shirt, a sheet, socks, a dress
 
 Every prop has one tag, `idle`: one frame of 1000ms, or the sprinkler's two. The ground row is the
 last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no
@@ -60,7 +60,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, Mini, scaled  # noqa: E402
 from pixel import DARKER, K, edged, main  # noqa: E402
 
-SCALE = 1.25
+SCALE = 1.75
 GROUNDS = (K["green"], K["dgreen"], K["dslate"])
 STILL_MS = 1000
 SPRAY_MS = 200
@@ -462,38 +462,40 @@ def at_inner(key, inner):
 
 
 def lot(house, front, *extras):
-    """A lot: the house at its slot, the fence or hedge in front, then (key, across, dz) extras."""
+    """A lot: the house at its slot, the fence or hedge in front, then (key, inner edge, dz) extras."""
     return ((f"roadside-{house}", at_inner(f"roadside-{house}", HOUSE_IN), 0),
             (f"roadside-{front}", at_inner(f"roadside-{front}", FRONT_IN), FRONT_DZ),
-            *((f"roadside-{k}", a, dz) for k, a, dz in extras))
+            *gap(*extras))
 
 
 def gap(*props):
-    return tuple((f"roadside-{k}", a, dz) for k, a, dz in props)
+    """(key, inner edge, dz) props, each placed with its frame's inner edge there."""
+    return tuple((f"roadside-{k}", at_inner(f"roadside-{k}", inner), dz) for k, inner, dz in props)
 
 
 # Per zone, by art id. slot: road px along z between one side's slots. Slot n on a side stands at
 # z = n * slot; with m = n - offset, an even m is a lot and an odd m a gap, k = m // 2 counts them, and
 # the side takes lots[(lotStart + k * lotStride) % len(lots)] and gaps[(gapStart + k * gapStride) %
-# len(gaps)]. The right side's offset of one slot puts a gap across from every lot. Each prop is (key,
-# across, dz): dz is road px from the slot's z, nearer negative.
+# len(gaps)]. The right side's offset of one slot puts a gap across from every lot. Each extra prop is (key,
+# inner edge, dz), its across resolved from its frame's width: dz is road px from the slot's z, nearer
+# negative.
 PLACEMENT = {
     "woof-way": dict(
         slot=140,
         lots=(
-            lot("house-cottage", "fence", ("mailbox", 228, -38), ("flowers", 288, -42)),
-            lot("house-tall", "hedge", ("mailbox", 228, -38), ("gnome", 263, -15)),
-            lot("house-porch", "fence-cat", ("bike", 261, -45)),
-            lot("house-cottage-pink", "fence", ("mailbox", 228, -38), ("sprinkler", 308, -15)),
-            lot("house-tall-grey", "fence", ("gnome", 273, -15)),
-            lot("house-porch-tan", "hedge", ("mailbox", 228, -38), ("flowers", 293, -42)),
+            lot("house-cottage", "fence", ("mailbox", 213, -38), ("flowers", 250, -42)),
+            lot("house-tall", "hedge", ("mailbox", 213, -38), ("gnome", 250, -15)),
+            lot("house-porch", "fence-cat", ("bike", 231, -45)),
+            lot("house-cottage-pink", "fence", ("mailbox", 213, -38), ("sprinkler", 275, -15)),
+            lot("house-tall-grey", "fence", ("gnome", 260, -15)),
+            lot("house-porch-tan", "hedge", ("mailbox", 213, -38), ("flowers", 255, -42)),
         ),
         gaps=(
-            gap(("tree", 261, 0)),
-            gap(("lamp-post", 228, -12), ("tree-blossom", 293, 12)),
-            gap(("laundry", 300, 0)),
-            gap(("tree", 268, 0), ("lamp-post", 228, -38)),
-            gap(("tree-blossom", 263, 0)),
+            gap(("tree", 213, 0)),
+            gap(("lamp-post", 213, -12), ("tree-blossom", 245, 12)),
+            gap(("laundry", 232, 0)),
+            gap(("tree", 220, 0), ("lamp-post", 213, -38)),
+            gap(("tree-blossom", 215, 0)),
         ),
         sides=dict(
             left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=2),
