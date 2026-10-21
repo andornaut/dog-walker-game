@@ -1401,6 +1401,13 @@
         "inset": 9,
         "y": 8
       },
+      "bonus": {
+        "countGap": 14,
+        "gap": 4,
+        "heartInk": 7,
+        "rise": 1,
+        "scale": 2
+      },
       "card": {
         "band": {
           "height": 24,

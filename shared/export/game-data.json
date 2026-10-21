@@ -366,7 +366,7 @@
       "figures": {
         "maxHearts": 2,
         "startHearts": 2,
-        "startMood": "neutral"
+        "startMood": "happy"
       },
       "keys": {
         "dogCardTag": "duchess",
@@ -420,7 +420,7 @@
       "figures": {
         "maxHearts": 2,
         "startHearts": 2,
-        "startMood": "neutral"
+        "startMood": "happy"
       },
       "keys": {
         "dogCardTag": "nugget",
@@ -528,7 +528,7 @@
       "figures": {
         "maxHearts": 2,
         "startHearts": 2,
-        "startMood": "neutral"
+        "startMood": "happy"
       },
       "keys": {
         "dogCardTag": "zippy",
@@ -1240,6 +1240,12 @@
         "big": 4,
         "medium": 3,
         "small": 2
+      },
+      "maxOwnerHearts": 6,
+      "packSizeBonus": {
+        "1": 2,
+        "2": 1,
+        "3": 0
       },
       "treat": 1
     },
