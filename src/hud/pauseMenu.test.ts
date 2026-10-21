@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
@@ -9,6 +7,7 @@ import { dollarText } from "../home/home";
 import { screenLayout } from "../layout/screenLayout";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
+import { bodyTextWidth } from "../testing/bodyFont";
 import { fillNames, wrapWords } from "../text/lines";
 import {
   homeQuestionLayout,
@@ -80,15 +79,8 @@ describe("notePartTops", () => {
   });
 });
 
-// The body font's advances, from its .fnt, measure a line at the note's scale.
-const BODY_FNT = new URL("../../public/art/fonts/font-body.fnt", import.meta.url);
-const BODY_ADVANCES = new Map(
-  [...readFileSync(BODY_FNT, "utf8").matchAll(/<char id="(\d+)"[^>]*\bxadvance="(\d+)"/g)].map(
-    ([, id, advance]) => [String.fromCodePoint(Number(id)), Number(advance)],
-  ),
-);
-const bodyWidth = (line: string) =>
-  NOTE_PLATE.scale * [...line].reduce((sum, char) => sum + (BODY_ADVANCES.get(char) ?? 0), 0);
+// A line's width at the note's scale.
+const bodyWidth = (line: string) => bodyTextWidth(NOTE_PLATE.scale, line);
 
 describe("the Home question's panel", () => {
   it("fits its longest note in the band and road, with no zone done and the most money", () => {

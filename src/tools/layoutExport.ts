@@ -11,6 +11,7 @@ import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
 import { DOGHOUSE } from "../hud/doghouse";
 import { hudLanes } from "../hud/hudLanes";
+import { messageStripLayout } from "../hud/messageStrip";
 import { PAUSE_MENU_ITEMS, pauseMenuLayout } from "../hud/pauseMenu";
 import { STRIP } from "../hud/stateStrip";
 import { buttonIcon, TOP_BAR, TOP_BAR_BUTTONS, type TopBarButton } from "../hud/topBar";
@@ -99,10 +100,9 @@ export function layoutExport(
       slots: regions.dogSlots,
     },
     gags: { keys: GAG_KEYS, sizes: GAG_SIZES, y: GAG_Y, zones: ZONE_GAGS },
-    // The walk HUD's transient layers, each kept to its lane: money changes under the bank,
-    // the achievement toast, the first-time hint, the state strip's bubble (which shares the
-    // hint's rows and never shows with it), owners' quips over the doghouse roofs, and heart
-    // changes by slot.
+    // The walk HUD's transient layers, each kept to its lane: money changes under the message
+    // strip, the state strip's bubble, owners' quips over the doghouse roofs, and heart changes
+    // by slot.
     hudLanes: hudLanes(regions),
     // The road on each of the band's approach rows, where the moving road draws over the
     // backdrop, down to the band's bottom row; bandRow counts from the band's top.
@@ -116,6 +116,9 @@ export function layoutExport(
       dividers: laneDividerXs(LANE_COUNT, road),
       width: road.width / LANE_COUNT,
     },
+    // The message strip over the band's sky: its panel, the newest line's icon, the text
+    // column and its room, and the older lines' capitals tops.
+    messageStrip: messageStripLayout(),
     // The pack as drawn, at the road sprite size: drawScale times its hit layout, rounded.
     pack: {
       // By pack size, from 1: the band from the lead dog's head to the walker's feet, as drawn

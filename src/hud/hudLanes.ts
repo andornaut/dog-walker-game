@@ -1,36 +1,30 @@
-import type { Point, Rect } from "../layout/rect";
+import type { Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
+import { MESSAGE_STRIP } from "./messageStrip";
 import { TOP_BAR } from "./topBar";
 
 // Each transient layer of the walk's HUD keeps to its own lane, so none covers another, the
-// road's far end or the pack, which walks just above the doghouses:
-// - bank: a money change, under the top bar's money well and as wide as it, one at a time. It
-//   rises from the lane's bottom to its top, never into the top bar.
-// - toast: an achievement banner, left-aligned under the bank lane, clear of the state strip
-//   on the right.
-// - hint: a first-time hint, centred with its bottom on the lane's bottom. One taller than the
-//   lane rises into the toast's rows, so a hint and a toast take turns.
+// road or the pack, which walks just above the doghouses. The message strip (messageStrip.ts)
+// tops the backdrop band and carries hints, badges and the walk's events; the lanes below it:
+// - bank: a money change, under the message strip at the money well's columns, one at a
+//   time. It rises from the lane's bottom to its top, never into the strip.
 // - stripBubble: the state strip's descriptions, right-aligned with its top on the lane's
-//   top, growing down as far as its rows need. It shares the hint's rows: the two never show
-//   together.
+//   top, growing down as far as its rows need, within the band.
 // - quip: an owner's line, one row over the doghouses' roofs and name plates, centred over the
 //   speaker's face and kept on screen. It leaves the owners' faces uncovered.
 // - heartLabels: a heart change, by slot, on the doghouse's bottom band under the faces.
 export interface HudLanes {
   bank: Rect;
   heartLabels: Rect[];
-  hint: Rect;
   quip: Rect;
   stripBubble: Rect;
-  toast: Rect;
 }
 
 const MARGIN = 4;
 // A bank label is 20px tall and rises 4px.
 const BANK_HEIGHT = 24;
-const TOAST = { height: 44, width: 240 };
-const HINT_SIDE = 8;
+const BUBBLE_SIDE = 8;
 const HEART_LABEL_HEIGHT = 24;
 
 export function hudLanes(layout: Pick<ScreenLayout, "backdrop" | "dogRow" | "dogSlots">): HudLanes {
@@ -39,11 +33,9 @@ export function hudLanes(layout: Pick<ScreenLayout, "backdrop" | "dogRow" | "dog
     height: BANK_HEIGHT,
     width: TOP_BAR.money.width,
     x: TOP_BAR.money.x,
-    y: backdrop.y,
+    y: MESSAGE_STRIP.y + MESSAGE_STRIP.height + 2,
   };
-  const toast = { ...TOAST, x: MARGIN, y: bank.y + bank.height + 2 };
-  const lowTop = toast.y + toast.height + 2;
-  const low = { height: backdrop.y + backdrop.height - MARGIN - lowTop, y: lowTop };
+  const bubbleTop = bank.y + bank.height + 2;
   return {
     bank,
     heartLabels: dogSlots.map((slot) => ({
@@ -52,35 +44,14 @@ export function hudLanes(layout: Pick<ScreenLayout, "backdrop" | "dogRow" | "dog
       x: slot.x + MARGIN / 2,
       y: slot.y + slot.height - HEART_LABEL_HEIGHT - 2,
     })),
-    hint: { ...low, width: backdrop.width - 2 * HINT_SIDE, x: HINT_SIDE },
     quip: { height: DOGHOUSE.ownerFace.y, width: dogRow.width, x: dogRow.x, y: dogRow.y },
-    stripBubble: { ...low, width: backdrop.width - HINT_SIDE - MARGIN, x: HINT_SIDE },
-    toast,
+    stripBubble: {
+      height: backdrop.y + backdrop.height - MARGIN - bubbleTop,
+      width: backdrop.width - BUBBLE_SIDE - MARGIN,
+      x: BUBBLE_SIDE,
+      y: bubbleTop,
+    },
   };
-}
-
-// The 8x6 up tail, its tip in column tipX of its top row.
-export const UP_TAIL = { height: 6, key: "ui-quip-tail-up", tipX: 3, width: 8 } as const;
-
-// A hint about the state strip hangs under the strip's tab, right-aligned in lane, the up
-// tail's top row 1px under the tab and its tip under the icons' centre, its bottom row over
-// the bubble's top rim. tail is the tail's top-left corner.
-export function stripHintPlace(
-  lane: Rect,
-  strip: { tab: Rect; well: Rect },
-  size: { height: number; width: number },
-): { bubble: Rect; tail: Point } {
-  const { tab, well } = strip;
-  const tail = {
-    x: Math.round(well.x + well.width / 2) - UP_TAIL.tipX,
-    y: tab.y + tab.height + 1,
-  };
-  const bubble = {
-    ...size,
-    x: lane.x + lane.width - size.width,
-    y: tail.y + UP_TAIL.height - 1,
-  };
-  return { bubble, tail };
 }
 
 // The x of a bubble width wide centred on centerX, kept inside lane.

@@ -19,6 +19,9 @@ export const RUN_TEXT_FIELDS = {
     info: ["pace", "style"],
     subtitle: ["walker"],
   },
+  strip: {
+    achievement: ["name"],
+  },
   zoneDone: {
     earnings: ["fees", "tips"],
     subtitle: ["zone"],

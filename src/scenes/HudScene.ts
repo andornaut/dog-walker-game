@@ -13,21 +13,14 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, HintTrigger } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount, slotShown } from "../hud/doghouse";
-import {
-  dismissHint,
-  EMPTY_HINT_QUEUE,
-  hintAlpha,
-  type HintQueue,
-  type RaisedHint,
-  stepHintQueue,
-} from "../hud/hintQueue";
 import { runHintTriggers } from "../hud/hintTriggers";
-import { centredInLane, hudLanes, stripHintPlace, UP_TAIL } from "../hud/hudLanes";
+import { centredInLane, hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
+import type { MessageLine } from "../hud/messageStrip";
+import { RUN_TEXT_FIELDS } from "../hud/runText";
 import {
   moveStripPress,
   stripItems,
-  stripLayout,
   type StripPress,
   stripTapAllowed,
   stripTapped,
@@ -63,10 +56,11 @@ import { type Cents, read } from "../rules/units";
 import { isNervousAlone } from "../runner/needs";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
-import { AchievementToasts } from "./achievementToast";
+import { fillLine } from "../text/lines";
 import { drawDashedRect, drawFramedRect, drawHeart, drawRing, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
+import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
 import { onSceneEvent } from "./overlay";
 import { colorFromHex, PALETTE } from "./palette";
@@ -86,9 +80,11 @@ import {
   HINT_EVENT,
   type QuipBubble,
   QUIPS_EVENT,
+  type RaisedHint,
 } from "./run/runMoments";
 import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
+import { soundboardOf } from "./soundboard";
 import { firstTag, playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
 import { addPanel, artFits, BUBBLE_FADE_MS, fadeAway, soundIcon } from "./uiKit";
@@ -106,7 +102,9 @@ const PIP = {
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const LANES = hudLanes(LAYOUT);
 const LABEL = { height: 20, ms: 1100 };
-const HINT = { holdMs: 4500, padding: 6 };
+// The message strip draws under the HUD's other parts, and over a card's or the pause menu's
+// parts when it draws there.
+const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
 // An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x. It
 // draws over the doghouses and their heart-loss flash (depth 0), under the HUD's moments.
 const QUIP = { depth: 30, holdMs: 2600, padding: 4 };
@@ -145,9 +143,6 @@ export class HudScene extends Scene {
   private feedback: HudFeedback | undefined;
   // The affected doghouses' frames, over the house art.
   private frames: GameObjects.Graphics | undefined;
-  private hints: HintQueue = EMPTY_HINT_QUEUE;
-  private hintParts: GameObjects.GameObject[] = [];
-  private hintRaised: RaisedHint[] = [];
   private hearts: HeartFeedback | undefined;
   private dollar: GameObjects.BitmapText | undefined;
   private money: GameObjects.BitmapText | undefined;
@@ -156,14 +151,12 @@ export class HudScene extends Scene {
   private pips: GameObjects.Sprite[] = [];
   private bankLabels: ChangeLabel[] = [];
   private bankShowing = false;
+  private messages = new MessageStrip();
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
   private slots: SlotView[] = [];
   private soundHolder: GameObjects.Container | undefined;
   private strip: StateStripView | undefined;
-  private toasts: AchievementToasts | undefined;
-  // Badges earned while a hint, card or menu shows, which wait for it to close.
-  private toastsWaiting: AchievementId[] = [];
   private treats: GameObjects.BitmapText | undefined;
   private zoneIcon: GameObjects.Image | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
@@ -175,14 +168,11 @@ export class HudScene extends Scene {
   create(): void {
     const { dogRow, dogSlots, topBar } = LAYOUT;
     this.drawn = {};
-    this.hints = EMPTY_HINT_QUEUE;
-    this.hintParts = [];
-    this.hintRaised = [];
+    this.messages = new MessageStrip();
     this.quips = [];
     this.quipShowing = false;
     this.bankLabels = [];
     this.bankShowing = false;
-    this.toastsWaiting = [];
     const g = this.add.graphics();
     // The band under the doghouses ends on the screen's bottom row, its top rows (the divider)
     // over the road's last rows.
@@ -237,14 +227,10 @@ export class HudScene extends Scene {
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
     this.frames = this.add.graphics();
-    // Opening the strip's bubble closes the hint, and a hint opening closes the bubble. The
-    // walk pauses while the bubble is open.
+    // The walk pauses while the strip's bubble is open.
     this.strip = new StateStripView(this, LANES.stripBubble, {
       onClose: () => this.runScene().setStripBubble(false),
-      onOpen: () => {
-        this.hints = dismissHint(this.hints);
-        this.runScene().setStripBubble(true);
-      },
+      onOpen: () => this.runScene().setStripBubble(true),
       tappable: () => stripTapAllowed(this.runScene().runPause()),
     });
 
@@ -259,14 +245,16 @@ export class HudScene extends Scene {
       quipTop: LANES.quip.y,
       still: () => run.reducedMotion(),
     });
-    this.toasts = new AchievementToasts(this, LANES.toast, () => run.reducedMotion());
     onSceneEvent(this, run.events, ACHIEVEMENTS_EVENT, (ids: AchievementId[]) =>
-      this.toastsWaiting.push(...ids),
+      this.sayAchievements(ids),
     );
     onSceneEvent(this, run.events, CHANGE_LABELS_EVENT, (labels: ChangeLabel[]) =>
       this.floatLabels(labels),
     );
-    onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.hintRaised.push(hint));
+    onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.sayHint(hint));
+    onSceneEvent(this, run.events, MESSAGE_EVENT, ({ icon, text }: MessageLine) =>
+      this.messages.say(icon, text),
+    );
     onSceneEvent(this, run.events, QUIPS_EVENT, (quips: QuipBubble[]) => this.queueQuips(quips));
 
     // A button acts on the press, as the walk's gestures never see it. A press on the strip
@@ -475,14 +463,10 @@ export class HudScene extends Scene {
     if (walkCovered(pause)) {
       this.strip?.closeBubble();
     }
-    this.stepHints(delta, walkCovered(pause), runHintTriggers(gameData, view.run, items.length));
-    // A tall hint rises into the toast's rows and a card or a menu dims them, so a badge's
-    // toast waits for both to close.
-    const toastRoom = this.hints.shown === null && !walkCovered(pause);
-    if (toastRoom && this.toastsWaiting.length > 0) {
-      this.toasts?.show(this.toastsWaiting);
-      this.toastsWaiting = [];
-    }
+    this.raiseHints(runHintTriggers(gameData, view.run, items.length));
+    const overlay = this.overlayScene();
+    const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
+    this.messages.update(delta, overlay, depth);
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
       affected: view.affected.join(),
@@ -786,86 +770,37 @@ export class HudScene extends Scene {
     fadeAway(this, [chip, text], { ms: LABEL.ms, rise }, done);
   }
 
-  // Steps the hint queue (see hintQueue.ts) a frame: hints RunScene raised and those the run's
-  // state raises join it, a card or the pause menu holds it, and the strip's open bubble keeps
-  // a new hint from starting, as a toast does. A hint is marked shown when it starts.
-  private stepHints(delta: number, held: boolean, triggers: readonly HintTrigger[]): void {
-    const shown = triggers.length === 0 ? [] : [...shownHints(this)];
+  // The first-time hints the run's state raises, each said on the message strip once.
+  private raiseHints(triggers: readonly HintTrigger[]): void {
+    if (triggers.length === 0) {
+      return;
+    }
+    const shown = [...shownHints(this)];
     for (const trigger of triggers) {
       const hint = hintFor(gameData, shown, trigger);
       if (hint !== null) {
-        this.hintRaised.push(hint);
-      }
-    }
-    const before = this.hints.shown;
-    const timing = {
-      fadeMs: BUBBLE_FADE_MS,
-      holdMs: HINT.holdMs,
-      staleMs: read(gameData.tuning, "seconds", "hintStaleSeconds") * 1000,
-    };
-    const tick = {
-      blocked: (this.strip?.isOpen() ?? false) || (this.toasts?.isShowing() ?? false),
-      dtMs: delta,
-      held,
-      raised: this.hintRaised,
-    };
-    this.hints = stepHintQueue(timing, tick, this.hints);
-    this.hintRaised = [];
-    const now = this.hints.shown;
-    if (now?.id !== before?.id || (now !== null && this.hintParts.length === 0)) {
-      this.hintParts.forEach((part) => part.destroy());
-      this.hintParts = [];
-      if (now !== null) {
-        markHintShown(this, now.id);
-        this.strip?.closeBubble();
-        this.hintParts = this.drawHint(held ? this.overlayScene() : this, now);
-      }
-    }
-    if (now === null && this.hintParts.length > 0) {
-      this.hintParts.forEach((part) => part.destroy());
-      this.hintParts = [];
-    }
-    if (now !== null) {
-      const alpha = hintAlpha(timing, now);
-      for (const part of this.hintParts) {
-        (part as GameObjects.GameObject & { alpha: number }).alpha = alpha;
+        this.sayHint(hint);
+        shown.push(hint.id);
       }
     }
   }
 
-  // A hint's bubble, centred in the hint lane with its bottom on the lane's, its tail pointing
-  // at the road; the strip's hint hangs under the strip, its tail pointing up at the icons.
-  // A hint raised under a card or a menu draws in that overlay, over its dim.
-  private drawHint(scene: Scene, hint: RaisedHint): GameObjects.GameObject[] {
-    const { road } = LAYOUT;
-    const lane = LANES.hint;
-    const style = { color: PALETTE.plum, scale: 2 };
-    const lines = wrapPixelText(scene, style, lane.width - 2 * HINT.padding, hint.text);
-    const text = addPixelText(scene, 0, 0, lines.join("\n"), style);
-    const width = Math.ceil(text.width) + 2 * HINT.padding;
-    const height = Math.ceil(text.height) + 2 * HINT.padding;
-    const run = this.runScene().hudView()?.run;
-    const strip =
-      hint.id === "strip" && run !== undefined
-        ? stripLayout(SCREEN_CONFIG.width, stripItems(gameData, run).length)
-        : undefined;
-    const under = strip === undefined ? undefined : stripHintPlace(lane, strip, { height, width });
-    const x = under?.bubble.x ?? centredInLane(lane, lane.x + lane.width / 2, width);
-    const y = under?.bubble.y ?? lane.y + lane.height - height;
-    placePixelText(text, x + HINT.padding, y + HINT.padding);
-    const parts: GameObjects.GameObject[] = [addPanel(scene, { height, width, x, y }, "ui-hint")];
-    if (under !== undefined) {
-      if (scene.textures.exists(UP_TAIL.key)) {
-        parts.push(scene.add.image(under.tail.x, under.tail.y, UP_TAIL.key).setOrigin(0));
-      }
-    } else if (scene.textures.exists("ui-hint-tail")) {
-      parts.push(
-        scene.add.image(road.x + road.width / 2, y + height - 1, "ui-hint-tail").setOrigin(0.5, 0),
-      );
+  // A first-time hint on the message strip, marked shown as it is said.
+  private sayHint(hint: RaisedHint): void {
+    markHintShown(this, hint.id);
+    this.messages.say("hint", hint.text);
+  }
+
+  // Each badge earned on the way, on the message strip.
+  private sayAchievements(ids: readonly AchievementId[]): void {
+    for (const id of ids) {
+      const achievement = gameData.achievements.find((candidate) => candidate.id === id);
+      const text = fillLine(RUN_TEXT_FIELDS.strip, gameData.runText.strip, "achievement", {
+        name: achievement?.name ?? id,
+      });
+      soundboardOf(this).play("badge");
+      this.messages.say("achievement", text);
     }
-    text.setDepth(1);
-    parts.push(text);
-    return parts;
   }
 
   // Owners' lines share the quip lane, so they take turns; one that has waited a whole quip's

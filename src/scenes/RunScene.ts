@@ -177,8 +177,11 @@ export class RunScene extends Scene {
     sound.startMusic();
     startWakeLock();
     this.world.banner.show(this.session.walk.run, this.reducedMotion());
-    // The first hint waits for the zone banner to leave.
+    // The first hints wait for the zone banner to leave: how to steer, then the Home button.
     this.time.delayedCall(zoneBannerMs(this.reducedMotion()), () => {
+      if (this.sys.game.device.input.touch) {
+        showHint(this, { kind: "drag" });
+      }
       showHint(this, { kind: "homeButton" });
     });
     this.draw();

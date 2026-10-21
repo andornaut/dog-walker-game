@@ -2,7 +2,7 @@ import type { Scene } from "phaser";
 
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
-import type { DebuffId, DogId, HintTrigger } from "../../data/types";
+import type { DebuffId, DogId, HintId, HintTrigger } from "../../data/types";
 import { changeLabels } from "../../hud/hudView";
 import {
   endScreenDelayMs,
@@ -57,16 +57,22 @@ export interface QuipBubble {
   text: string;
 }
 
+// A first-time hint raised for the HUD to say on the message strip.
+export interface RaisedHint {
+  readonly id: HintId;
+  readonly text: string;
+}
+
 // Emitted on the run scene's events: ChangeLabel[] whenever money or hearts change, a
-// first-time hint's text, and QuipBubble[] when owners react.
+// first-time hint (RaisedHint), and QuipBubble[] when owners react.
 export const CHANGE_LABELS_EVENT = "change-labels";
 export const HINT_EVENT = "hint";
 export const QUIPS_EVENT = "quips";
-// AchievementId[] when the walk so far has earned badges, for a toast.
+// AchievementId[] when the walk so far has earned badges, for the message strip.
 export const ACHIEVEMENTS_EVENT = "achievements";
 
-// Raises the first-time hint for event until it has shown once: the HUD queues it and marks
-// it shown when it starts.
+// Raises the first-time hint for event until it has shown once: the HUD says it on the
+// message strip and marks it shown.
 export function showHint(scene: Scene, event: HintTrigger): void {
   const hint = hintFor(gameData, [...shownHints(scene)], event);
   if (hint !== null) {
@@ -95,7 +101,7 @@ export interface RunMomentsDeps {
 }
 
 // What the walk's events look and sound like: sounds, bursts, hit moments, labels, quips,
-// hints and badge toasts, and the HUD's feedback moments they cue. It keeps the money and
+// hints and badge lines, and the HUD's feedback moments they cue. It keeps the money and
 // heart changes the run banks, and what the end screen waits for.
 export class RunMoments {
   private achievements: AchievementPreview = NOTHING_PREVIEWED;
@@ -293,8 +299,8 @@ export class RunMoments {
     }
   }
 
-  // Badges the walk so far would earn on heading home toast in the HUD; nothing is awarded
-  // until the walk is banked.
+  // Badges the walk so far would earn on heading home show on the HUD's message strip; nothing
+  // is awarded until the walk is banked.
   previewAchievements(run: RunState): void {
     const earned = (result: RunResult) => earnedIfBanked(this.scene, result);
     const preview = previewAchievements(gameData, earned, this.achievements, run);

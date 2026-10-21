@@ -39,6 +39,9 @@ export const RUN_TEXT = {
     title: "New walker!",
   },
   outOfMoney: "you're out of money",
+  strip: {
+    achievement: "Achievement! {name}",
+  },
   zoneDone: {
     earnings: "{fees} fees  ·  {tips} tips",
     subtitle: "{zone}",

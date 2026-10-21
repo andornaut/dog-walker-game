@@ -757,6 +757,10 @@ export interface RunText {
     readonly subtitle: string;
     readonly title: string;
   };
+  // The message strip's lines: achievement names a badge earned on the way.
+  readonly strip: {
+    readonly achievement: string;
+  };
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;
   // The zone celebration after any other zone but the last: its headline, as newWalker's,
@@ -882,6 +886,7 @@ export type HintTrigger =
         | "accident"
         | "areaEffect"
         | "card"
+        | "drag"
         | "firedOwner"
         | "forcedStop"
         | "fork"

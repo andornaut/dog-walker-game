@@ -42,7 +42,7 @@ const SLICES = {
   // The detail card a held dog or gear tile opens, and the three-slice title band across it.
   "ui-detail-band": { bottom: 0, left: 8, right: 8, top: 0 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
-  // The run's hint bubble, the strip's bubble and the plate over a hit.
+  // The state strip's bubble and the plate over a hit.
   "ui-hint": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-hit-label": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
@@ -561,8 +561,7 @@ export function addTileSprite(
   return sprite;
 }
 
-// A bubble or banner that has said its piece fades out over this long: hints, owners' quips
-// and badge toasts alike.
+// A bubble that has said its piece fades out over this long, as owners' quips do.
 export const BUBBLE_FADE_MS = 400;
 
 // Fades parts out over ms after delayMs, easing in, rising rise pixels as they go (0 fades

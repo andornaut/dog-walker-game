@@ -213,7 +213,7 @@
       "height": 24,
       "width": 88,
       "x": 4,
-      "y": 40
+      "y": 92
     },
     "heartLabels": [
       {
@@ -235,12 +235,6 @@
         "y": 534
       }
     ],
-    "hint": {
-      "height": 98,
-      "y": 112,
-      "width": 344,
-      "x": 8
-    },
     "quip": {
       "height": 24,
       "width": 360,
@@ -248,16 +242,10 @@
       "y": 470
     },
     "stripBubble": {
-      "height": 98,
-      "y": 112,
+      "height": 92,
       "width": 348,
-      "x": 8
-    },
-    "toast": {
-      "height": 44,
-      "width": 240,
-      "x": 4,
-      "y": 66
+      "x": 8,
+      "y": 118
     }
   },
   "join": [
@@ -715,6 +703,24 @@
       276
     ],
     "width": 64
+  },
+  "messageStrip": {
+    "icon": {
+      "x": 14,
+      "y": 68
+    },
+    "olderTops": [
+      60,
+      52
+    ],
+    "panel": {
+      "height": 44,
+      "width": 344,
+      "x": 8,
+      "y": 46
+    },
+    "room": 312,
+    "textX": 34
   },
   "pack": {
     "bands": [

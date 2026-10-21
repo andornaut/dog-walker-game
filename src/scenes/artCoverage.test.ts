@@ -58,6 +58,7 @@ import type {
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { pipLook, zonePips } from "../hud/hudView";
+import { MESSAGE_ICONS } from "../hud/messageStrip";
 import { stripIconKey } from "../hud/stateStrip";
 import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
@@ -244,6 +245,7 @@ describe("Pet shop art", () => {
 describe("image art", () => {
   it.each<[string, () => string[]]>([
     ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
+    ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
     [
       "a strip icon for every debuff, upgrade and gear item",
       () => [

@@ -15,10 +15,10 @@ export function earnedIfBanked(
   return earnedSince(context.data, save, recordRunEnd(context, save, result));
 }
 
-// A walk's mid-run toasts preview what heading home at that moment would earn, each badge once
+// A walk's mid-run badge lines preview what heading home at that moment would earn, each badge once
 // a walk, leaving out money goals, which are checked only on the total the walk banks. They
 // award nothing: the run's end (or its checkpoint, banked on the next launch)
-// does, and the end screen celebrates every badge the walk earned, toasted or not. facts is
+// does, and the end screen celebrates every badge the walk earned, announced or not. facts is
 // what the last look was taken at.
 export interface AchievementPreview {
   readonly facts: string;

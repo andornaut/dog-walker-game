@@ -1,6 +1,7 @@
 import type { Hint } from "./types";
 
-// First-time hints: one line each, shown the first time its trigger happens and never again.
+// First-time hints: one line each on the walk's message strip, shown the first time its
+// trigger happens and never again.
 
 export const HINTS = {
   accident: {
@@ -12,11 +13,15 @@ export const HINTS = {
     trigger: { kind: "areaEffect" },
   },
   card: {
-    text: "Every card shows what happens. Hold one for details.",
+    text: "Hold a card for details.",
     trigger: { kind: "card" },
   },
+  drag: {
+    text: "Drag left or right to steer.",
+    trigger: { kind: "drag" },
+  },
   firedOwner: {
-    text: "At 0♥ an owner fires you. Their fees from earlier zones stay yours.",
+    text: "At 0♥ an owner quits. Their pay is lost.",
     trigger: { kind: "firedOwner" },
   },
   forcedStop: {
@@ -24,19 +29,19 @@ export const HINTS = {
     trigger: { kind: "forcedStop" },
   },
   fork: {
-    text: "Pick the next zone. Right is harder, and pays more.",
+    text: "Pick a path and its upgrade.",
     trigger: { kind: "fork" },
   },
   homeButton: {
-    text: "Home ends the walk. You keep earlier zones' fees.",
+    text: "Home banks your cash now.",
     trigger: { kind: "homeButton" },
   },
   luckyFind: {
-    text: "Some bumps are lucky. Aim for them!",
+    text: "Bobbing things are good. Grab!",
     trigger: { kind: "luckyFind" },
   },
   minorBump: {
-    text: "Cones and bins cost a few tips and a stumble. No card.",
+    text: "A bump costs that dog's owner 1♥.",
     trigger: { kind: "minorBump" },
   },
   needSpot: {
@@ -48,15 +53,15 @@ export const HINTS = {
     trigger: { kind: "needUrgent" },
   },
   puddle: {
-    text: "Puddles soak all but small dogs. Fancy owners mind most.",
+    text: "Puddle! Towel off or splash.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {
-    text: "A bubble and a dotted line mean a pull. Drag back.",
+    text: "Steer away to stop a pull.",
     trigger: { kind: "pull" },
   },
   skunk: {
-    text: "A skunk's cloud catches every dog.",
+    text: "Skunk! Pick how to clean up.",
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   spooked: {
@@ -64,7 +69,7 @@ export const HINTS = {
     trigger: { debuff: "spooked", kind: "debuff" },
   },
   squirrel: {
-    text: "Chasers want that squirrel. Hold tight or let them chase.",
+    text: "Squirrel! Chase or hold tight.",
     trigger: { encounter: "squirrel", kind: "encounter" },
   },
   stinky: {
@@ -80,11 +85,11 @@ export const HINTS = {
     trigger: { debuff: "tangled", kind: "debuff" },
   },
   tip: {
-    text: "Each tip is $1. Smaller packs see a few more.",
+    text: "Tips are $1 each.",
     trigger: { kind: "tip" },
   },
   treat: {
-    text: "Tap a doghouse to give its owner a treat.",
+    text: "A treat gives its dog's owner 1♥.",
     trigger: { kind: "treat" },
   },
   tuckeredOut: {

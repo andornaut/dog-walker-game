@@ -4,11 +4,13 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
-import { centredInLane, hudLanes, stripHintPlace, UP_TAIL } from "./hudLanes";
-import { stripLayout } from "./stateStrip";
+import { centredInLane, hudLanes } from "./hudLanes";
+import { messageStripLayout } from "./messageStrip";
+import { TOP_BAR } from "./topBar";
 
 const layout = screenLayout(SCREEN_CONFIG);
 const lanes = hudLanes(layout);
+const messages = messageStripLayout().panel;
 
 function overlaps(a: Rect, b: Rect): boolean {
   return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
@@ -28,13 +30,12 @@ const slotPairs = layout.dogSlots.flatMap((slot, i): [string, Rect, Rect][] => {
 describe("hudLanes", () => {
   it.each<[string, Rect, Rect]>([
     ["the bank and the top bar", lanes.bank, layout.topBar],
-    ["the bank and the toast", lanes.bank, lanes.toast],
-    ["the bank and the hint", lanes.bank, lanes.hint],
+    ["the bank and the message strip", lanes.bank, messages],
+    ["the bank and the strip bubble", lanes.bank, lanes.stripBubble],
     ["the bank and the road", lanes.bank, layout.roadView],
-    ["the toast and the hint", lanes.toast, lanes.hint],
-    ["the toast and the strip bubble", lanes.toast, lanes.stripBubble],
-    ["the toast and the road", lanes.toast, layout.roadView],
-    ["the hint and the road", lanes.hint, layout.roadView],
+    ["the message strip and the top bar", messages, layout.topBar],
+    ["the message strip and the strip bubble", messages, lanes.stripBubble],
+    ["the message strip and the road", messages, layout.roadView],
     ["the strip bubble and the road", lanes.stripBubble, layout.roadView],
     ["the quip and the road", lanes.quip, layout.roadView],
     ...slotPairs,
@@ -44,14 +45,7 @@ describe("hudLanes", () => {
 
   it("keeps every lane on screen, with one heart label per slot", () => {
     expect(lanes.heartLabels).toHaveLength(layout.dogSlots.length);
-    const all = [
-      lanes.bank,
-      lanes.toast,
-      lanes.hint,
-      lanes.stripBubble,
-      lanes.quip,
-      ...lanes.heartLabels,
-    ];
+    const all = [lanes.bank, messages, lanes.stripBubble, lanes.quip, ...lanes.heartLabels];
     for (const lane of all) {
       expect(Math.min(lane.x, lane.y)).toBeGreaterThanOrEqual(0);
       expect(lane.x + lane.width).toBeLessThanOrEqual(SCREEN_CONFIG.width);
@@ -61,15 +55,10 @@ describe("hudLanes", () => {
 });
 
 describe("the bank lane", () => {
-  it("sits under the money well, as wide as it", () => {
-    expect([lanes.bank.x, lanes.bank.x + lanes.bank.width]).toEqual([4, 92]);
-    expect(lanes.bank.y).toBe(layout.topBar.y + layout.topBar.height);
-  });
-
-  it("keeps the toast left-aligned at x 4, clear of the widest state strip", () => {
-    const strip = stripLayout(SCREEN_CONFIG.width, 5);
-    expect(lanes.toast.x).toBe(4);
-    expect(lanes.toast.x + lanes.toast.width).toBeLessThanOrEqual(strip?.tab.x ?? 0);
+  it("sits under the message strip, at the money well's columns", () => {
+    expect(lanes.bank.x).toBe(TOP_BAR.money.x);
+    expect(lanes.bank.width).toBe(TOP_BAR.money.width);
+    expect(lanes.bank.y).toBeGreaterThan(messages.y + messages.height);
   });
 });
 
@@ -82,27 +71,5 @@ describe("centredInLane", () => {
     [180, 400, 0],
   ])("centres on %i a bubble %i wide at x %i", (centerX, width, x) => {
     expect(centredInLane(lane, centerX, width)).toBe(x);
-  });
-});
-
-describe("stripHintPlace", () => {
-  // Strips of one to five icons, under a narrow and a full-width hint.
-  const cases = [1, 3, 5].flatMap((count) =>
-    [120, lanes.hint.width].map((width) => [count, width] as const),
-  );
-
-  it.each(cases)("points up at a strip of %i icons from a hint %i wide", (count, width) => {
-    const strip = stripLayout(SCREEN_CONFIG.width, count);
-    if (strip === undefined) {
-      throw new Error("no strip");
-    }
-    const { bubble, tail } = stripHintPlace(lanes.hint, strip, { height: 40, width });
-    expect(tail.x + UP_TAIL.tipX).toBe(Math.round(strip.well.x + strip.well.width / 2));
-    expect(tail.y).toBeGreaterThan(strip.tab.y + strip.tab.height);
-    expect(bubble.y).toBe(tail.y + UP_TAIL.height - 1);
-    expect(bubble.x).toBeGreaterThanOrEqual(lanes.hint.x);
-    expect(bubble.x + bubble.width).toBe(lanes.hint.x + lanes.hint.width);
-    expect(tail.x).toBeGreaterThanOrEqual(bubble.x + 4);
-    expect(tail.x + UP_TAIL.width).toBeLessThanOrEqual(bubble.x + bubble.width - 4);
   });
 });
