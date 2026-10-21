@@ -1270,7 +1270,6 @@ SHADOWS = {"cabbagetown": "canopy", "high-park": "fir", "distillery-district": "
            "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "grey"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
-SHADOW_COLOUR = "dgreen"
 TABLE_JSON = "shared/roadside.json"
 
 
@@ -1311,7 +1310,7 @@ def check_placement():
 
 
 def table():
-    """The placement table as JSON, with the shadowed keys and the shadow colour."""
+    """The placement table as JSON, with the shadowed keys."""
     check_placement()
     out = {}
     for zone, p in PLACEMENT.items():
@@ -1319,7 +1318,7 @@ def table():
             return [{"key": k, "across": a, "dz": dz} for k, a, dz in group]
         out[zone] = {"slot": p["slot"], "lots": [props(g) for g in p["lots"]], "gaps": [props(g) for g in p["gaps"]],
                      "sides": p["sides"], "shadowColour": K[SHADOWS[zone]]}
-    return {"shadowColour": K[SHADOW_COLOUR], "shadowed": list(SHADOWED), "zones": out}
+    return {"shadowed": list(SHADOWED), "zones": out}
 
 
 def write_table():
