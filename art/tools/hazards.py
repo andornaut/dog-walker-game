@@ -71,10 +71,10 @@ def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Gr
     g.rect(hind[0] + 2, hind[1] - 1, 3, 2, "rust")
     g.rect(front[0] - 2, front[1] - 1, 2, 2, "rust")
     # tail: a big plume streaming back and up from the rump, its tip curling over
-    g.ell(9.5 + tx / 2, 15 + dy + ty / 2, 3.5, 3.5, "ochre", "rust")
-    g.ell(7 + tx, 9 + dy + ty, 4.8, 5.5, "ochre", "rust", "tan")
-    g.ell(7.5 + tx, 10 + dy + ty, 2.5, 3.5, "tan")
-    g.ell(10.5 + tx, 4.5 + dy + ty, 3.5, 2.5, "ochre", "rust", "tan")
+    g.cel(9.5 + tx / 2, 15 + dy + ty / 2, 3.5, 3.5, "ochre", "rust")
+    g.cel(7 + tx, 9 + dy + ty, 4.8, 5.5, "ochre", "rust", "tan")
+    g.cel(7.5 + tx, 10 + dy + ty, 2.5, 3.5, "tan")
+    g.cel(10.5 + tx, 4.5 + dy + ty, 3.5, 2.5, "ochre", "rust", "tan")
     # hind leg: haunch, then a long foot
     hx, hy = hind
     for k in range(6):
@@ -83,9 +83,9 @@ def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Gr
     g.rect(hx, hy, 3, 2, "ochre")
     g.rect(hx, hy + 1, 3, 1, "rust")
     # body
-    g.ell(15, 20 + dy, 6.5 + st, 4.5, "ochre", "rust", "tan")
-    g.ell(11, 20 + dy, 3.5, 4, "ochre", "rust", "tan")
-    g.ell(16.5, 22.5 + dy, 3.5, 1.5, "cream")
+    g.cel(15, 20 + dy, 6.5 + st, 4.5, "ochre", "rust", "tan")
+    g.cel(11, 20 + dy, 3.5, 4, "ochre", "rust", "tan")
+    g.cel(16.5, 22.5 + dy, 3.5, 1.5, "cream")
     # front leg: a thin arm from the chest to the paw
     fx, fy = front
     for k in range(5):
@@ -96,8 +96,8 @@ def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Gr
     # head: round, a cream cheek, a tufted ear, a big eye and a pink-plum nose
     g.tri((20, 12 + dy), (21.5, 7.5 + dy), (23.5, 11.5 + dy), "ochre")
     g.p(21, 10 + dy, "rust")
-    g.ell(24, 15.5 + dy, 5, 4.5, "ochre", "rust", "tan")
-    g.ell(25.5, 18 + dy, 3, 1.5, "cream")
+    g.cel(24, 15.5 + dy, 5, 4.5, "ochre", "rust", "tan")
+    g.cel(25.5, 18 + dy, 3, 1.5, "cream")
     g.rect(25, 13 + dy, 2, 2, "ink")
     g.p(25, 13 + dy, "white")
     g.p(29, 15 + dy, "plum")
@@ -147,12 +147,12 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
     px.p(ex - 1, ey - 1, "red")
     px.p(ex - 1, ey + 1, "red")
     # stub tail: a fluffy tuft at the rump
-    g.ell(4.5, 16 + b, 2.5, 2, "ochre", "rust", "tan")
+    g.cel(4.5, 16 + b, 2.5, 2, "ochre", "rust", "tan")
     # body: long and low, white underneath
-    g.ell(14, 19 + b, 9.5, 5, "ochre", "rust", "tan")
-    g.ell(15, 22 + b, 7, 2, "white", "lgrey")
+    g.cel(14, 19 + b, 9.5, 5, "ochre", "rust", "tan")
+    g.cel(15, 22 + b, 7, 2, "white", "lgrey")
     # chest ruff
-    g.ell(21, 19 + b, 3, 3.5, "white", "lgrey")
+    g.cel(21, 19 + b, 3, 3.5, "white", "lgrey")
     # near legs: short, ochre with white socks
     for (x, y), (px, py) in (((7, 21 + b), hind), ((18, 21 + b), front)):
         limb(g, x, y, px, py - 1, 3, "ochre")
@@ -163,8 +163,8 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
     g.tri((24, 8 + b), (26.5, 2 + b), (28, 9 + b), "ochre")
     g.tri((21, 8 + b), (21, 4.5 + b), (23, 7.5 + b), "pink")
     g.tri((25.5, 7 + b), (26.5, 4 + b), (27, 7.5 + b), "pink")
-    g.ell(23.5, 12.5 + b, 5, 4.5, "ochre", "rust", "tan")
-    g.ell(27, 14.5 + b, 3, 2, "white", "lgrey")
+    g.cel(23.5, 12.5 + b, 5, 4.5, "ochre", "rust", "tan")
+    g.cel(27, 14.5 + b, 3, 2, "white", "lgrey")
     g.rect(29, 13 + b, 1, 2, "ink")
     g.p(28, 13 + b, "ink")
     g.rect(24, 11 + b, 2, 2, "ink")

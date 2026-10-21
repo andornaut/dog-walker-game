@@ -267,7 +267,7 @@ def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     g.tri((13, 14 + b), (18, 14 + b), (16, 5 + b + f), "grey")
     # tail and body
     g.tri((2, 12 + b), (6, 20 + b), (9, 15 + b), "white")
-    g.ell(14, 19.5 + b, 9.5, 5.5, "white", "lgrey")
+    g.cel(14, 19.5 + b, 9.5, 5.5, "white", "lgrey")
     g.rect(8, 23 + b, 12, 1, "lgrey")
     # the near wing, spread up and back, its feather tips stepped in grey
     g.tri((7, 17 + b), (18, 16 + b), (5, 3 + b + f), "white")
@@ -278,7 +278,7 @@ def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     # the neck stretched forward and up to the head
     for k in range(6):
         g.rect(18 + k + t * k / 5, 15 - k * 1.2 + b, 4, 3, "white")
-    g.ell(24.5 + t, 7.5 + b, 3.5, 3, "white", "lgrey")
+    g.cel(24.5 + t, 7.5 + b, 3.5, 3, "white", "lgrey")
     # the beak: an orange knob, upper mandible and, opened, the lower one with the mouth between
     hx = 26 + min(t, 1)
     g.rect(hx, 5 + b, 2, 1, "orange")

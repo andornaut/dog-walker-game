@@ -270,7 +270,7 @@ def biscuit(g):
 # ---------- Archie: Australian Shepherd, medium, red merle, one blue eye, red bandana ----------
 
 def archie(g):
-    coat, (blot, _), (ear, tip) = dogs.COAT, dogs.BLOT, dogs.EAR
+    coat, (blot,), (ear, tip) = dogs.COAT, dogs.BLOT, dogs.EAR
     # merle haunch and bobtail behind, a white ruff down the chest in front
     g.cel(45, 54, 12, 9, *coat)
     g.cel(53, 46, 3.5, 3, *coat)
