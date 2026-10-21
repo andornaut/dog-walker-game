@@ -81,12 +81,18 @@ describe("money text", () => {
     [4_299, "42"],
     [dollars(999), "999"],
     [dollars(1_000), "1k"],
+    [dollars(1_234), "1.2k"],
     [dollars(12_345), "12k"],
     [dollars(999_999), "999k"],
     [dollars(1_000_000), "1M"],
     [dollars(1_234_567), "1.2M"],
+    [dollars(123_456_789), "123M"],
+    [dollars(1_234_567_890), "1.2B"],
+    [dollars(12_345_678_901), "12B"],
+    [dollars(123_456_789_012), "123B"],
+    [Number.MAX_SAFE_INTEGER, "90T"],
   ])(
-    "shortDollarAmountText shows %i cents as %s, in whole dollars, thousands or millions rounded down",
+    "shortDollarAmountText shows %i cents as %s, at most three digits rounded down",
     (amount, shown) => {
       expect(shortDollarAmountText(cents(amount))).toBe(shown);
     },

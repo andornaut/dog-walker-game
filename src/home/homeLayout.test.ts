@@ -299,8 +299,10 @@ describe("the top bar's bank", () => {
     const amount = cents(dollars * 100);
     return [`$${dollarAmountText(amount)}`, `$${shortDollarAmountText(amount)}`];
   };
-  // From nothing to the tens of millions; every scale and both forms are covered.
-  const amounts = [0, 5, 88, 888, 1_234, 12_345, 99_999, 1_000_000, 12_345_678];
+  // From nothing to the most a save can hold; every scale and both forms are covered.
+  const amounts = [
+    0, 5, 88, 888, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
+  ];
 
   it("covers every scale and both forms with the amounts", () => {
     const fits = amounts.map((dollars) => bankFit(width, texts(dollars)));

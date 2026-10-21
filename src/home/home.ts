@@ -41,17 +41,21 @@ export function dollarAmountText(amount: Cents): string {
   return Math.floor(amount / 100).toLocaleString("en-US");
 }
 
-// dollarAmountText in thousands ("12k") or millions ("1.2M"), rounded down, for a slot too
-// narrow for the full amount.
+// The short form's units, each a thousand times the one before it, from a thousand.
+const SHORT_UNITS = ["k", "M", "B", "T"] as const;
+
+// dollarAmountText at most three digits long, rounded down, for a slot too narrow for the full
+// amount: whole dollars under a thousand, else in the largest unit it reaches, with one decimal
+// under ten of it ("1.2k", "12k", "123M", "1.2B").
 export function shortDollarAmountText(amount: Cents): string {
   const dollars = Math.floor(amount / 100);
-  if (dollars < 1_000) {
+  const place = SHORT_UNITS.filter((_, i) => dollars >= 1_000 ** (i + 1)).length - 1;
+  const unit = SHORT_UNITS[place];
+  if (unit === undefined) {
     return String(dollars);
   }
-  if (dollars < 1_000_000) {
-    return `${Math.floor(dollars / 1_000)}k`;
-  }
-  return `${Math.floor(dollars / 100_000) / 10}M`;
+  const tenths = Math.floor(dollars / (1_000 ** (place + 1) / 10));
+  return tenths < 100 ? `${tenths / 10}${unit}` : `${Math.floor(tenths / 10)}${unit}`;
 }
 
 // A change in money with its sign: "+$240", "−$12".

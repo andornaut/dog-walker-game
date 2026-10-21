@@ -1282,7 +1282,7 @@ export class StartScene extends Scene {
       y: TOP_BAR.height - TOP_BAR.rule,
     });
     // The bank in its well: the "$" and the amount at the largest scale that fits, one font
-    // advance apart and centred across the well, or in thousands or millions past every scale.
+    // advance apart and centred across the well, or in its short form past every scale.
     const { bank, well, wellKey } = TOP_BAR;
     if (this.textures.exists(wellKey)) {
       root.add(this.add.image(well.x, well.y, wellKey).setOrigin(0));
