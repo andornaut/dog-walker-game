@@ -109,10 +109,20 @@ export const HOME_LAYOUT = {
     width: 300,
   },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
-  // A dog tile's name and its fee or price plate start textX in, the name's capitals nameY
-  // down, the fee's lowest ink feeFoot above the tile's bottom (dogTileFeeY), and keep padRight
-  // inside its right edge; a locked dog's padlock sits over the tile's top-left corner.
-  dogTile: { feeFoot: 1, lock: { dx: -2, dy: -3 }, nameY: 4, padRight: 3, textX: 39 },
+  // A dog tile's face sits face.dx and face.dy inside the drawn tile, on a box 1px wider each
+  // side. Its name and a locked dog's price plate start textX in and keep padRight inside its
+  // right edge. An owned dog's name has its capitals centred on the face (dogTileNameY); a
+  // locked dog's "???" has its capitals lockedNameY down, and its plate's lowest ink sits
+  // plateFoot above the tile's bottom (dogTilePlateY). A locked dog's padlock sits over the
+  // tile's top-left corner.
+  dogTile: {
+    face: { dx: 4, dy: 5, size: 32 },
+    lock: { dx: -2, dy: -3 },
+    lockedNameY: 4,
+    padRight: 3,
+    plateFoot: 1,
+    textX: 39,
+  },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
   // The dog rows are hit areas 44 tall with no gap.
@@ -348,13 +358,20 @@ export function detailCardLayout(
   return { below: below.tops, beside: beside.tops, height: Math.max(...bottoms) + pad };
 }
 
-// How wide a dog tile's name and fee may be: from its text column to padRight inside its edge.
+// How wide a dog tile's name may be: from its text column to padRight inside its edge.
 export const DOG_TILE_TEXT_ROOM =
   HOME_LAYOUT.dogTiles.cellWidth - HOME_LAYOUT.dogTile.textX - HOME_LAYOUT.dogTile.padRight;
 
-// The top of a dog tile's fee's capitals, from the drawn tile's top, with its 2x body text's
-// lowest ink feeFoot above the tile's bottom.
-export function dogTileFeeY(body: FontMetrics): number {
+// The top of an owned dog's name's capitals, from the drawn tile's top, so its 2x body
+// capitals are centred on the face's middle row.
+export function dogTileNameY(body: FontMetrics): number {
+  const { face } = HOME_LAYOUT.dogTile;
+  return face.dy + face.size / 2 - body.capHeight;
+}
+
+// The top of a locked dog tile's price plate's capitals, from the drawn tile's top, with its
+// 2x body text's lowest ink plateFoot above the tile's bottom.
+export function dogTilePlateY(body: FontMetrics): number {
   const height = HOME_LAYOUT.dogTiles.cellHeight - 2 * HOME_LAYOUT.dogTileInset;
-  return height - HOME_LAYOUT.dogTile.feeFoot - inkRowsFromCapTop(body) * 2;
+  return height - HOME_LAYOUT.dogTile.plateFoot - inkRowsFromCapTop(body) * 2;
 }

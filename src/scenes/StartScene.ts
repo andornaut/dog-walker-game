@@ -36,7 +36,6 @@ import {
 } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
-  dogFeeText,
   dogInfo,
   dollarAmountText,
   dollarText,
@@ -56,7 +55,8 @@ import {
   bankFit,
   bankLeft,
   DOG_TILE_TEXT_ROOM,
-  dogTileFeeY,
+  dogTileNameY,
+  dogTilePlateY,
   HOME_LAYOUT,
   sectionFill,
   SPEECH_ROOM,
@@ -69,7 +69,6 @@ import {
   walkerLineKey,
   walkerUnlockedSince,
 } from "../home/homeLines";
-import { homeLine } from "../home/homeText";
 import {
   buttonState,
   type ItemTile,
@@ -1512,15 +1511,16 @@ export class StartScene extends Scene {
         tile: true,
       });
       const ink = PALETTE[look.text];
+      const { face: faceBox, lock: dogLock, lockedNameY, textX } = DOG_TILE;
       fillRect(this.graphics(content), PALETTE[look.box], {
-        height: 34,
-        width: 34,
-        x: x + 3,
-        y: y + 4,
+        height: faceBox.size + 2,
+        width: faceBox.size + 2,
+        x: x + faceBox.dx - 1,
+        y: y + faceBox.dy - 1,
       });
       const faceKey = dogFaceKey(gameData, id);
       const faceTag = padlock === null ? "happy" : "neutral";
-      const faceAt = { x: x + 4, y: y + 5 };
+      const faceAt = { x: x + faceBox.dx, y: y + faceBox.dy };
       const face =
         art === "silhouette"
           ? this.add
@@ -1533,22 +1533,23 @@ export class StartScene extends Scene {
               .setOrigin(0)
           : addTileSprite(this, state, reduced, faceKey, faceTag, faceAt);
       content.add(face);
-      view.face = { object: face, y: y + 5 };
+      view.face = { object: face, y: faceAt.y };
 
-      const { lock: dogLock, nameY, textX } = DOG_TILE;
-      const feeY = dogTileFeeY(pixelFontMetrics(this, "body"));
+      const body = pixelFontMetrics(this, "body");
       const fitText = (value: string, top: number) => {
         const label = this.text(content, x + textX, top, value, ink);
         this.fitOnRow(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
       };
-      fitText(padlock === null ? dog.name : gameData.homeText.lockedName, y + nameY);
-      if (padlock !== null) {
-        // A locked dog shows its padlock and its price plate in place of its icons and fee.
-        addLock(this, content, padlock, { x: x + dogLock.dx, y: y + dogLock.dy });
-        this.lockedPlate(content, tile, { capY: y + feeY - 1, originX: 0, x: x + textX });
+      if (padlock === null) {
+        // Every dog earns the same pay, so an owned tile names the dog alone; its card says the pay.
+        fitText(dog.name, y + dogTileNameY(body));
         return;
       }
-      fitText(homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) }), y + feeY);
+      // A locked dog shows "???", its padlock and its price plate.
+      fitText(gameData.homeText.lockedName, y + lockedNameY);
+      addLock(this, content, padlock, { x: x + dogLock.dx, y: y + dogLock.dy });
+      const plateY = dogTilePlateY(body);
+      this.lockedPlate(content, tile, { capY: y + plateY - 1, originX: 0, x: x + textX });
     });
   }
 

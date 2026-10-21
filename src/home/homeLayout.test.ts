@@ -18,7 +18,7 @@ import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { dogDetail, gearDetail, lockedDogDetail, lockedWalkerDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dogFeeText, dogNames, dollarAmountText, shortDollarAmountText } from "./home";
+import { dogNames, dollarAmountText, shortDollarAmountText } from "./home";
 import {
   BANK_ROOM,
   bankFit,
@@ -27,12 +27,12 @@ import {
   cardTextRows,
   detailCardLayout,
   DOG_TILE_TEXT_ROOM,
-  dogTileFeeY,
+  dogTileNameY,
+  dogTilePlateY,
   HOME_LAYOUT,
   pocketLining,
   sectionFill,
 } from "./homeLayout";
-import { homeLine } from "./homeText";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
   HOME_LAYOUT;
@@ -348,20 +348,31 @@ describe("the top bar's bank", () => {
   });
 });
 
-// Each dog's name and the fee line fit a dog tile's text column, measured on the body font.
+// An owned dog's name sits centred on its face, a locked dog's "???" over its price plate, and
+// each fits the tile's text column, measured on the body font.
 describe("a dog tile's text", () => {
   const body = fontFileMetrics("font-body");
   const ink = inkRowsFromCapTop(body) * 2;
+  const { dogTile, dogTileInset, dogTiles } = HOME_LAYOUT;
+  const tileHeight = dogTiles.cellHeight - 2 * dogTileInset;
 
-  it("keeps the name over the fee and the fee inside the tile, in the body font's rows", () => {
-    const { dogTile, dogTileInset, dogTiles } = HOME_LAYOUT;
-    const feeY = dogTileFeeY(body);
-    expect(feeY + ink).toBe(dogTiles.cellHeight - 2 * dogTileInset - dogTile.feeFoot);
-    expect(dogTile.nameY + ink).toBeLessThan(feeY);
+  it("centres an owned dog's capitals on the face's middle row, its ink inside the tile", () => {
+    const nameY = dogTileNameY(body);
+    expect(nameY + body.capHeight).toBe(dogTile.face.dy + dogTile.face.size / 2);
+    expect(nameY + ink).toBeLessThanOrEqual(tileHeight);
   });
 
-  const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) });
-  it.each([...Object.values(gameData.dogs).map((dog) => dog.name), fee])("sets %j", (text) => {
+  it("keeps a locked dog's name over its plate and the plate inside the tile", () => {
+    const plateY = dogTilePlateY(body);
+    expect(plateY + ink).toBe(tileHeight - dogTile.plateFoot);
+    expect(dogTile.lockedNameY + ink).toBeLessThan(plateY);
+  });
+
+  const names = [
+    ...Object.values(gameData.dogs).map((dog) => dog.name),
+    gameData.homeText.lockedName,
+  ];
+  it.each(names)("sets %j", (text) => {
     const fitted = fitInFont("font-body", TEXT_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
     expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
   });
