@@ -19,9 +19,9 @@ export interface LanePrize {
   readonly value: number;
 }
 
-// A dog's pull seen coming: at at, the pack is pulled one lane toward direction, or inward
-// from the edge lane. The plan changes lanes no sooner than that move ends, nor than
-// reactSeconds after the pull.
+// A dog's pull seen coming: at at, the pack is pulled one lane toward direction, held on the
+// road. The plan changes lanes no sooner than that move ends, nor than reactSeconds after the
+// pull.
 export interface LanePull {
   readonly at: number;
   readonly direction: LaneDirection;
@@ -152,11 +152,8 @@ export function planLanes(
   ]);
   const count = times.length;
   const pullAt = (time: number) => coming.find((pull) => Math.abs(pull.at - time) <= SAME_TIME);
-  // A pull toward the road edge from the edge lane turns inward.
-  const pulledTo = (pull: LanePull, lane: number) => {
-    const to = lane + pull.direction;
-    return to < 0 || to >= laneCount ? clampIndex(laneCount, lane - pull.direction) : to;
-  };
+  // A pull toward the road edge from the edge lane leaves the pack where it is.
+  const pulledTo = (pull: LanePull, lane: number) => clampIndex(laneCount, lane + pull.direction);
   // A lane change started at time would still be under way when a pull comes.
   const pullDuring = (time: number) =>
     coming.some((pull) => pull.at > time + SAME_TIME && pull.at < time + moveStep);
