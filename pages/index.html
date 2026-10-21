@@ -6,14 +6,14 @@
     <title>Dog Walker</title>
     <meta
       name="description"
-      content="A cozy pixel-art lane runner. Walk a pack of dogs through Maplewood, and every bump in the road turns into a choice."
+      content="A cozy pixel-art lane runner. Walk a pack of dogs through Toronto, and every bump in the road turns into a choice."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://dogwalker.tristamittermayer.com/" />
     <meta property="og:title" content="Dog Walker" />
     <meta
       property="og:description"
-      content="A cozy pixel-art lane runner. Walk a pack of dogs through Maplewood, and every bump in the road turns into a choice."
+      content="A cozy pixel-art lane runner. Walk a pack of dogs through Toronto, and every bump in the road turns into a choice."
     />
     <meta property="og:image" content="https://dogwalker.tristamittermayer.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -22,7 +22,7 @@
     <meta name="twitter:title" content="Dog Walker" />
     <meta
       name="twitter:description"
-      content="A cozy pixel-art lane runner. Walk a pack of dogs through Maplewood, and every bump in the road turns into a choice."
+      content="A cozy pixel-art lane runner. Walk a pack of dogs through Toronto, and every bump in the road turns into a choice."
     />
     <meta name="twitter:image" content="https://dogwalker.tristamittermayer.com/og-image.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png" />
@@ -37,19 +37,19 @@
     <link rel="stylesheet" href="/nav.css" />
     <script src="/nav.js" defer></script>
     <style>
-      /* Project home: the logo on The Long Way Home's banded sky, the pitch and Play, then five
+      /* Project home: the logo on Yonge Street's hazy sky, the pitch and Play, then five
          highlights, each a cream chrome card with a navy band, game art at an integer scale and a
-         line or two. Colours are Endesga 32. */
+         line or two. Colours are from the house palette. */
       :root {
         --amber: #feae34;
         --cream: #ead4aa;
         --dred: #a22633;
         --forest: #265c42;
         --green: #63c74d;
+        --haze: #cfe3ea;
         --ink: #181425;
         --muted: #8b9bb4;
         --navy: #262b44;
-        --pink: #f6757a;
         --plum: #3e2731;
         --tan: #e4a672;
         --yellow: #fee761;
@@ -81,7 +81,7 @@
         padding-left: max(16px, env(safe-area-inset-left, 0px));
         padding-right: max(16px, env(safe-area-inset-right, 0px));
       }
-      /* The sky band: its pink top band runs on above the backdrop, which sits at its foot. The
+      /* The sky band: its hazy top band runs on above the backdrop, which sits at its foot. The
          band is the backdrop's width, so on a 360px phone its margins pull it over the gutters.
          The highlights centre the same way. */
       .sky {
@@ -91,7 +91,7 @@
         width: var(--w);
         margin-inline: calc((100% - var(--w)) / 2);
         padding: 28px 0 138px;
-        background: var(--pink) url("/art/images/backdrop-the-long-way-home.png") no-repeat center
+        background: var(--haze) url("/art/images/backdrop-yonge-street.png") no-repeat center
           bottom / 360px 110px;
       }
       h1 {
@@ -321,7 +321,7 @@
 
       <div class="intro">
         <p class="pitch">
-          Walk a pack of dogs through Maplewood. Every bump in the road turns into a choice.
+          Walk a pack of dogs through Toronto. Every bump in the road turns into a choice.
         </p>
         <p class="sub">
           A cozy pixel-art lane runner for your phone. Four zones a walk, about 8 minutes.
@@ -337,7 +337,7 @@
           src="/art/site/home-road.png"
           width="360"
           height="560"
-          alt="Elm Avenue: the walker and three dogs heading up the road, a tip coin in the next lane, and Koda pulling the pack toward a squirrel; the dogs' doghouses along the bottom"
+          alt="High Park: the walker and three dogs heading up the road, a tip coin in the next lane, and Koda pulling the pack toward a squirrel; the dogs' doghouses along the bottom"
         />
         <p>
           The road moves: cars and trucks drive down their lanes, people step out and animals dart
@@ -391,36 +391,41 @@
 
       <section class="hl" aria-labelledby="h-zones">
         <h2 id="h-zones">Pick your path</h2>
-        <ol class="zones" aria-label="Maplewood's six zones, easiest first">
+        <ol class="zones" aria-label="Toronto's six neighbourhoods, easiest first">
           <li>
-            <img src="/art/images/icon-zone-snooze-crescent.png" width="32" height="32" alt="" />
-            <span><b>Willow Crescent</b>Easiest</span>
+            <img src="/art/images/icon-zone-cabbagetown.png" width="32" height="32" alt="" />
+            <span><b>Cabbagetown</b>Easiest</span>
           </li>
           <li>
-            <img src="/art/images/icon-zone-bark-park.png" width="32" height="32" alt="" />
-            <span><b>Fairview Park</b>Easy</span>
+            <img src="/art/images/icon-zone-high-park.png" width="32" height="32" alt="" />
+            <span><b>High Park</b>Easy</span>
           </li>
           <li>
-            <img src="/art/images/icon-zone-woof-way.png" width="32" height="32" alt="" />
-            <span><b>Elm Avenue</b>Normal</span>
+            <img
+              src="/art/images/icon-zone-distillery-district.png"
+              width="32"
+              height="32"
+              alt=""
+            />
+            <span><b>Distillery District</b>Normal</span>
           </li>
           <li>
-            <img src="/art/images/icon-zone-sniff-street-shops.png" width="32" height="32" alt="" />
-            <span><b>Main Street</b>Busy</span>
+            <img src="/art/images/icon-zone-kensington-market.png" width="32" height="32" alt="" />
+            <span><b>Kensington Market</b>Hard</span>
           </li>
           <li>
-            <img src="/art/images/icon-zone-paws-promenade.png" width="32" height="32" alt="" />
-            <span><b>Riverside Path</b>Medium-hard</span>
+            <img src="/art/images/icon-zone-the-beaches.png" width="32" height="32" alt="" />
+            <span><b>The Beaches</b>Hard</span>
           </li>
           <li>
-            <img src="/art/images/icon-zone-the-long-way-home.png" width="32" height="32" alt="" />
-            <span><b>The Long Way Home</b>Hard</span>
+            <img src="/art/images/icon-zone-yonge-street.png" width="32" height="32" alt="" />
+            <span><b>Yonge Street</b>Hardest</span>
           </li>
         </ol>
         <p>
-          Every walk starts on Elm Avenue and covers four of Maplewood's six zones. Each zone ends
-          with a celebration and an upgrade card, then the road forks: easiest on the left, hardest
-          and best paid on the right.
+          Every walk starts in High Park and covers four of Toronto's six neighbourhoods. Each one
+          ends with a celebration and an upgrade card, then the road forks: easiest on the left,
+          hardest and best paid on the right.
         </p>
       </section>
 
