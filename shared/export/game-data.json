@@ -712,8 +712,8 @@
       "hitWord": "YOINK!",
       "kind": "obstacle",
       "movement": {
-        "kind": "step",
-        "steps": 2
+        "kind": "approach",
+        "steps": 1
       },
       "name": "Thief",
       "resolution": {
@@ -939,6 +939,19 @@
         "rows": 1
       },
       "spriteKey": "cone"
+    },
+    {
+      "id": "coyote",
+      "movement": {
+        "kind": "approach",
+        "steps": 2
+      },
+      "name": "Coyote",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "coyote"
     },
     {
       "id": "cyclist",
@@ -1225,9 +1238,12 @@
       "tip": 1
     },
     "multipliers": {
+      "approachSecondRoadShareMax": 0.45,
+      "approachSecondRoadShareMin": 0.25,
       "bigDogAgility": -0.1,
       "calmVoiceDebuffFactor": 0.5,
       "goodLeashSquirrelPull": 0,
+      "moverSpeedJitter": 0.15,
       "muddyBumpHearts": 2,
       "runningShoesAgility": 0.1,
       "rushHourObstacles": 1.5,
@@ -1247,6 +1263,8 @@
       "smallDodgeChance": 0.25
     },
     "seconds": {
+      "approachFirstDelayMax": 0.5,
+      "approachFirstDelayMin": 0,
       "ballBounceSeconds": 0.4,
       "collisionGrace": 1,
       "explainHoldSeconds": 0.3,
@@ -1257,6 +1275,7 @@
       "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.3,
       "moverStepSeconds": 0.6,
+      "moverTimingJitter": 0.3,
       "moverWarningSeconds": 1,
       "muddySeconds": 20,
       "pathReactionMargin": 0.5,
@@ -1468,6 +1487,7 @@
           "car": 0,
           "cat": 2,
           "cone": 1,
+          "coyote": 1,
           "cyclist": 1,
           "deliveryTruck": 0,
           "ducklings": 0,
@@ -1534,6 +1554,7 @@
           "car": 0,
           "cat": 0,
           "cone": 1,
+          "coyote": 1,
           "cyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 1,
@@ -1600,6 +1621,7 @@
           "car": 1,
           "cat": 1,
           "cone": 2,
+          "coyote": 0,
           "cyclist": 2,
           "deliveryTruck": 1,
           "ducklings": 0,
@@ -1666,6 +1688,7 @@
           "car": 1,
           "cat": 1,
           "cone": 1,
+          "coyote": 0,
           "cyclist": 2,
           "deliveryTruck": 2,
           "ducklings": 0,
@@ -1732,6 +1755,7 @@
           "car": 0,
           "cat": 0,
           "cone": 1,
+          "coyote": 1,
           "cyclist": 2,
           "deliveryTruck": 0,
           "ducklings": 2,
@@ -1798,6 +1822,7 @@
           "car": 2,
           "cat": 2,
           "cone": 1,
+          "coyote": 1,
           "cyclist": 2,
           "deliveryTruck": 1,
           "ducklings": 1,

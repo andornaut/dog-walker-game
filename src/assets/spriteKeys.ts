@@ -93,7 +93,6 @@ export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
 // Road art not drawn yet, and the drawn sprite that stands in for it until its key is in the
 // manifest.
 export const ART_STAND_INS: Readonly<Partial<Record<string, string>>> = {
-  coyote: "chase-cat",
   jogger: "social-jogger-dog-owner",
   "kid-on-bike": "minor-tricycles",
   stroller: "social-handbag-dog-owner",
@@ -205,7 +204,7 @@ export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
   squirrel: "squirrel-dash",
 };
 export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readonly string[]>> = {
-  approach: ["walk", "run"],
+  approach: ["step", "walk", "run"],
   dart: ["flee", "run", "bounce", "walk"],
   hop: ["hop", "pull-out", "run", "walk"],
   inLane: ["drive", "ride", "run", "walk", "pull-out"],
@@ -223,16 +222,18 @@ export const STANDING_TAGS = {
 
 // The tag a mover's body plays, of those has says its sprite has: while it moves, its
 // movement's first tag, else its idle; otherwise its idle, else that movement tag; and
-// failing both, what a standing item would play.
+// failing both, what a standing item would play. A stalker drawn with a step (a lunge) for its
+// steps stalks between them, playing walk.
 export function moverBodyTag(
   has: (tag: string) => boolean,
   movement: MovementKind,
   moving: boolean,
 ): string | undefined {
   const motion = movement === "still" ? [] : MOVING_TAGS[movement];
+  const stalking = movement === "approach" && has("step") ? ["walk"] : [];
   const tags = moving
     ? [...motion, IDLE_TAG, ...STANDING_TAGS.walking]
-    : [IDLE_TAG, ...motion, ...STANDING_TAGS.halted];
+    : [...stalking, IDLE_TAG, ...motion, ...STANDING_TAGS.halted];
   return tags.find(has);
 }
 

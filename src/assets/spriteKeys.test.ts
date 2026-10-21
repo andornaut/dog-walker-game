@@ -23,6 +23,7 @@ import {
   gearIconKey,
   kebabCase,
   minorObstacleSpriteKey,
+  moverBodyTag,
   ownerFaceKey,
   roadStartKey,
   roadTileKey,
@@ -102,6 +103,26 @@ describe("artOrStandIn", () => {
   it("draws art with no stand-in as itself", () => {
     expect(artOrStandIn(() => false, "cone")).toBe("cone");
   });
+});
+
+// A mover plays its movement's tag while it moves and its idle between moves; a stalker drawn
+// with a lunge (step) lunges on each step and stalks (walk) between them, and one drawn without
+// steps on walk and stands idle between.
+describe("moverBodyTag", () => {
+  it.each([
+    { movement: "approach", moving: true, tags: ["idle", "walk", "step"], want: "step" },
+    { movement: "approach", moving: false, tags: ["idle", "walk", "step"], want: "walk" },
+    { movement: "approach", moving: true, tags: ["idle", "walk", "flee"], want: "walk" },
+    { movement: "approach", moving: false, tags: ["idle", "walk", "flee"], want: "idle" },
+    { movement: "hop", moving: true, tags: ["idle", "hop"], want: "hop" },
+    { movement: "hop", moving: false, tags: ["idle", "hop"], want: "idle" },
+  ] as const)(
+    "plays $want for a $movement mover drawn with $tags, moving $moving",
+    ({ movement, moving, tags, want }) => {
+      const has = (tag: string) => (tags as readonly string[]).includes(tag);
+      expect(moverBodyTag(has, movement, moving)).toBe(want);
+    },
+  );
 });
 
 describe("standsOnGround", () => {
