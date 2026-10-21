@@ -14,7 +14,7 @@ fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thin
                                                   and stink squiggles
 fx-hit-puddle      77x77  play (7 frames, 70ms)  splash crown and flying drops
 fx-hit-thief       77x77  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
-fx-hit-squirrel    77x77  play (7 frames, 70ms)  tail-flick sweep, motion lines, leaves
+fx-hit-squirrel    77x77  play (7 frames, 70ms)  the squirrel bolting across, speed lines, leaves
 fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
 fx-hit-picnic      77x77  play (8 frames, 70ms)  a poof, sandwiches, an apple and a cheese wedge
                                                   flying up and falling, crumbs
@@ -29,7 +29,7 @@ fx-hit-cafe        77x77  play (8 frames, 70ms)  a latte splash, the cup flippin
                    every fx-hit-* also has play-word, after play: the same frames and timing with
                    its comic word over frames 0 to 5 (420ms), centred on the impact star: cafe
                    SPLAT!, goose HONK!, other-dog SNIFF!, petunias SQUISH!, picnic CHOMP!, puddle
-                   SPLOSH!, skunk PEE-YEW!, squirrel CHITTER!, thief YOINK!, trash CLANG!. The game
+                   SPLOSH!, skunk PHEW!, squirrel CHIRP!, thief YOINK!, trash CLANG!. The game
                    plays play-word, and play with reduced motion
 fx-lemonade        77x77  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
                                                   lemonade popping up, lemon slices, twinkles
@@ -358,29 +358,6 @@ def hit_thief(step):
     return g
 
 
-# the squirrel's colours: orange fur, ochre shade, a tan light and stripe
-TAIL = ("orange", "ochre", "tan")
-
-
-def tail(g, theta, cx=32, cy=40, rad=14):
-    """A bushy plume along an arc starting at angle theta, curling in at the tip: thin at the base,
-    then an even width with fur bumps on both sides and a tan stripe along its inner side."""
-    pts, ang, rr = [], theta, rad
-    for i in range(14):
-        a = math.radians(ang)
-        r = min(4.5, 1.5 + i * 0.6)
-        x, y = cx + math.cos(a) * rr, cy + math.sin(a) * rr
-        pts.append((x, y, r, a))
-        g.ell(x, y, r, r, *TAIL)
-        if i > 3 and i % 2 == 0:
-            side = 1 if i % 4 == 0 else -1
-            g.ell(x + math.cos(a) * r * 0.8 * side, y + math.sin(a) * r * 0.8 * side, 2, 2, *TAIL)
-        ang += 8 + max(0, i - 9) * 4
-        rr -= max(0, i - 9) * 0.8
-    for x, y, r, a in pts[4:-2]:
-        g.ell(x - math.cos(a) * 1.5, y - math.sin(a) * 1.5, 1.2, 1.2, "tan")
-
-
 LEAVES = (("green", "dgreen"), ("orange", "rust"), ("amber", "ochre"), ("green", "dgreen"),
           ("orange", "rust"), ("amber", "ochre"), ("green", "forest"))
 LEAF = ("..111", ".1121", "1121.", "22...")
@@ -391,25 +368,21 @@ def leaf(g, x, y, flip, cols):
     dots(g, x, y, pixmap(LEAF, {"1": cols[0], "2": cols[1]}, flip))
 
 
+# Where the squirrel dashes across its burst, frames 1 to 4: the drawn top-left of its squirrel-dash frame.
+SQUIRREL_DASH = ((4, 16), (12, 14), (20, 13), (28, 15))
+# The squirrel's size in its burst, as a depth step of squirrel-dash: a little under its 48px road size.
+SQUIRREL_HIT_STEP = 0.94
+
+
 def hit_squirrel(step):
-    """The tail flicks across from left to right with arced motion lines behind it, and knocks a
-    spray of leaves outward that flutter down."""
+    """The squirrel itself bolts across the burst left to right in squirrel-dash's gallop, white speed lines
+    streaming behind it, and knocks a spray of leaves outward that flutter down behind it."""
+    import hazards  # hazards imports modules that import this one, so it is imported when first used
+
     g = Grid(64, 64)
     if step == 0:
         impact(g, "orange")
         return rim(g)
-    theta = (0, 150, 205, 265, None, None, None)[step]
-    if step <= 4:
-        sweep_from, sweep_to = (0, 120, 150, 190, 250)[step], (0, 160, 230, 300, 330)[step]
-        def lines(p):
-            for rad, col in ((10, "white"), (15, "white"), (20, "white")):
-                for deg in range(sweep_from, sweep_to):
-                    if (deg // 2 + rad) % 7 < 5:
-                        a = math.radians(deg)
-                        raster(p).p(*drawn_at(p, 32 + math.cos(a) * rad, 40 + math.sin(a) * rad * 0.9), col)
-        piece(g, lines)
-    if theta is not None:
-        piece(g, lambda p: tail(p, theta))
     if step >= 2:
         t = step - 1
         for i, cols in enumerate(LEAVES):
@@ -418,6 +391,20 @@ def hit_squirrel(step):
             y = 33 + math.sin(a) * (6 + t * 4) + t * t * 0.9
             if 1 <= x < 58 and 1 <= y < 59:
                 piece(g, lambda p: leaf(p, x, y, (step + i) % 2, cols))
+    if step <= 4:
+        x0, y0 = SQUIRREL_DASH[step - 1]
+
+        def lines(p):
+            for k, dy in enumerate((16, 22, 28)):
+                for x in range(max(1, x0 - 12 + 3 * k), x0 + 6):
+                    if (x + k) % 6 < 4:
+                        p.p(x, y0 + dy, "white")
+        piece(g, lambda p: lines(raster(p)))
+        q = hazards.small(SQUIRREL_HIT_STEP, hazards.SQUIRREL_RUN[step - 1], hazards.SQUIRREL_OFFSETS)
+        for j, row in enumerate(hazards.squirrel_dash(**q).outlined()):
+            for i, c in enumerate(row):
+                if c:
+                    raster(g).px[y0 + j][x0 + i] = c
     return g
 
 
@@ -922,10 +909,10 @@ def status_soaked(size, step, look=""):
 
 # Each burst: its drawing, its frame count, its comic word and the row its impact star is centred on.
 HITS = {
-    "fx-hit-skunk": (hit_skunk, 8, "PEE-YEW!", 32),
+    "fx-hit-skunk": (hit_skunk, 8, "PHEW!", 32),
     "fx-hit-puddle": (hit_puddle, 7, "SPLOSH!", 40),
     "fx-hit-thief": (hit_thief, 8, "YOINK!", 40),
-    "fx-hit-squirrel": (hit_squirrel, 7, "CHITTER!", 32),
+    "fx-hit-squirrel": (hit_squirrel, 7, "CHIRP!", 32),
     "fx-hit-other-dog": (hit_other_dog, 8, "SNIFF!", 38),
     "fx-hit-picnic": (hit_picnic, 8, "CHOMP!", 40),
     "fx-hit-goose": (hit_goose, 8, "HONK!", 36),

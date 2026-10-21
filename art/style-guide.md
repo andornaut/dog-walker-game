@@ -206,21 +206,21 @@ While a debuff (muddy, stinky or zoomies) lasts, every pack dog's card shows its
 
 One word per moment, built like the sign logo: flat yellow letters 7 rows tall with 2px stems, a 1px ink ring that also fills the counters and the gaps between letters, and a solid dred shadow 2px down and right. Display words only, 2 to 7 letters, readable at 1×.
 
-| Effect             | Word     | Where it is                                                |
-| ------------------ | -------- | ---------------------------------------------------------- |
-| `fx-bark-word`     | WOOF!    | Its own 32×16 key, `pop` (4 frames, 60, 60, 140 and 140ms) |
-| `fx-dodge`         | DODGE!   | `play`, over frames 0 to 3                                 |
-| `fx-hop-splash`    | HOP!     | `splash-word`, over frames 0 to 3                          |
-| `fx-hit-cafe`      | SPLAT!   | `play-word`                                                |
-| `fx-hit-goose`     | HONK!    | `play-word`                                                |
-| `fx-hit-other-dog` | SNIFF!   | `play-word`                                                |
-| `fx-hit-petunias`  | SQUISH!  | `play-word`                                                |
-| `fx-hit-picnic`    | CHOMP!   | `play-word`                                                |
-| `fx-hit-puddle`    | SPLOSH!  | `play-word`                                                |
-| `fx-hit-skunk`     | PEE-YEW! | `play-word`                                                |
-| `fx-hit-squirrel`  | CHITTER! | `play-word`                                                |
-| `fx-hit-thief`     | YOINK!   | `play-word`                                                |
-| `fx-hit-trash`     | CLANG!   | `play-word`                                                |
+| Effect             | Word    | Where it is                                                |
+| ------------------ | ------- | ---------------------------------------------------------- |
+| `fx-bark-word`     | WOOF!   | Its own 32×16 key, `pop` (4 frames, 60, 60, 140 and 140ms) |
+| `fx-dodge`         | DODGE!  | `play`, over frames 0 to 3                                 |
+| `fx-hop-splash`    | HOP!    | `splash-word`, over frames 0 to 3                          |
+| `fx-hit-cafe`      | SPLAT!  | `play-word`                                                |
+| `fx-hit-goose`     | HONK!   | `play-word`                                                |
+| `fx-hit-other-dog` | SNIFF!  | `play-word`                                                |
+| `fx-hit-petunias`  | SQUISH! | `play-word`                                                |
+| `fx-hit-picnic`    | CHOMP!  | `play-word`                                                |
+| `fx-hit-puddle`    | SPLOSH! | `play-word`                                                |
+| `fx-hit-skunk`     | PHEW!   | `play-word`                                                |
+| `fx-hit-squirrel`  | CHIRP!  | `play-word`                                                |
+| `fx-hit-thief`     | YOINK!  | `play-word`                                                |
+| `fx-hit-trash`     | CLANG!  | `play-word`                                                |
 
 - Every `fx-hit-*` and `fx-lemonade` opens on an impact frame: an eight-point star in the encounter's colour with a white core, a white speed line flying out between each pair of points.
 - `play-word` follows `play` on every `fx-hit-*`: the same frames and timing, with the word centred on the impact star on frames 0 to 5 (420ms).
