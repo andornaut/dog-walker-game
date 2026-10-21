@@ -216,7 +216,7 @@ export class PullSignals {
 export function dogTop(sprite: GameObjects.Sprite): { x: number; y: number } {
   const { displayOriginX, displayOriginY, frame, scaleX, scaleY, x, y } = sprite;
   return {
-    x: Math.round(x + (frame.width / 2 - displayOriginX) * scaleX),
+    x: Math.round(x + (frame.realWidth / 2 - displayOriginX) * scaleX),
     y: Math.round(y + (spriteTopY(sprite.scene, sprite.texture.key) - displayOriginY) * scaleY),
   };
 }

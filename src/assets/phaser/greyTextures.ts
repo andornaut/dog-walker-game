@@ -8,7 +8,7 @@ import { remapToSilhouette } from "../silhouette";
 // A copy of a texture with remap applied to its pixels, made once and kept under
 // key-suffix, with the same frames. Returns the original key when the copy cannot be made.
 // Only the region the texture's frames cover is copied, since in a build its source is a
-// shared atlas page.
+// shared atlas page. A trimmed frame keeps its trim.
 function remappedTextureKey(
   scene: Scene,
   suffix: string,
@@ -40,7 +40,11 @@ function remappedTextureKey(
   context.putImageData(pixels, 0, 0);
   for (const name of texture.getFrameNames()) {
     const frame = texture.get(name);
-    copy.add(name, 0, frame.cutX - left, frame.cutY - top, frame.cutWidth, frame.cutHeight);
+    const { cutHeight, cutWidth, cutX, cutY, realHeight, realWidth } = frame;
+    const added = copy.add(name, 0, cutX - left, cutY - top, cutWidth, cutHeight);
+    if (cutWidth !== realWidth || cutHeight !== realHeight) {
+      added?.setTrim(realWidth, realHeight, frame.x, frame.y, cutWidth, cutHeight);
+    }
   }
   copy.refresh();
   return copyKey;

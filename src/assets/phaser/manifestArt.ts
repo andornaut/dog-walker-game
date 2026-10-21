@@ -1,9 +1,10 @@
-import type { Loader, Scene } from "phaser";
+import type { Loader, Scene, Textures } from "phaser";
 
 import { itemAt } from "../../lib/arrays";
 import {
   asepriteSheetOf,
   ATLAS_MANIFEST_PATH,
+  type AtlasFrame,
   type AtlasManifest,
   atlasPageKey,
   type AtlasTexture,
@@ -120,6 +121,20 @@ export function queueManifestArt(
   }
 }
 
+// Adds a frame to a texture whose source is an atlas page, at its rect there. A trimmed frame
+// draws its rect at its offset in the whole frame, and has the whole frame's size, so origins,
+// flips and crops measure the whole frame as they do untrimmed.
+export function addAtlasFrame(
+  texture: Textures.Texture,
+  name: string,
+  { h, trim, w, x, y }: AtlasFrame,
+): void {
+  const frame = texture.add(name, 0, x, y, w, h);
+  if (trim !== undefined) {
+    frame?.setTrim(trim.w, trim.h, trim.x, trim.y, w, h);
+  }
+}
+
 // A texture keyed as the art manifest keys it, whose frames are rects of a loaded atlas page.
 // It shares the page's source, so the page uploads to the GPU once, and code that names the
 // key and its frames works as it does with the key's own files. A sprite also gets its
@@ -134,14 +149,13 @@ function addAtlasTexture(scene: Scene, atlased: AtlasTexture): void {
   if (atlased.tags !== undefined) {
     // An Aseprite sheet's base frame is its whole PNG. No code draws it, so the first frame
     // stands in.
-    const { h, w, x, y } = itemAt(frames, 0);
-    texture.add(BASE_FRAME, 0, x, y, w, h);
+    addAtlasFrame(texture, BASE_FRAME, itemAt(frames, 0));
     if (!scene.cache.json.exists(key)) {
       scene.cache.json.add(key, asepriteSheetOf(atlased));
     }
   }
-  for (const { h, name, w, x, y } of frames) {
-    texture.add(name, 0, x, y, w, h);
+  for (const frame of frames) {
+    addAtlasFrame(texture, frame.name, frame);
   }
 }
 

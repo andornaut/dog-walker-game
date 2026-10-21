@@ -9,11 +9,22 @@ export const ATLAS_DIR = "atlas";
 // Phaser's name for the frame that covers a whole image. An atlased image has only this frame.
 export const BASE_FRAME = "__BASE";
 
+// A trimmed frame's full size, and where its packed rect sits in it: Phaser's sourceSize and
+// spriteSourceSize.
+export interface FrameTrim {
+  h: number;
+  w: number;
+  x: number;
+  y: number;
+}
+
 export interface AtlasFrame {
   // Milliseconds, from the Aseprite export. Images have none.
   duration?: number;
   h: number;
   name: string;
+  // Present when the rect holds only the frame's opaque pixels.
+  trim?: FrameTrim;
   w: number;
   x: number;
   y: number;
@@ -57,6 +68,7 @@ const atlasManifestSchema = record({
             duration: v.exactOptional(v.number()),
             h: size,
             name: v.string(),
+            trim: v.exactOptional(record({ h: size, w: size, x: count, y: count })),
             w: size,
             x: count,
             y: count,

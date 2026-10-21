@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
+import { sheetFromRows } from "../../testing/sheetImage";
 import { parseManifest } from "../manifest";
-import { type AtlasBuild, buildAtlases, decodePng } from "./atlasBuild";
+import { type AtlasBuild, buildAtlases, compactFrames, decodePng, trimsFrames } from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
 import { BASE_FRAME, parseAtlasManifest } from "./atlasManifest";
 import type { RgbaImage } from "./atlasPixels";
@@ -15,8 +16,30 @@ const readArt = async (path: string) => new Uint8Array(await readFile(new URL(pa
 const manifest = parseManifest(shippedManifest);
 
 interface Sheet {
-  frames: Record<string, { duration: number; frame: { x: number; y: number } }>;
+  frames: Record<
+    string,
+    { duration: number; frame: { h: number; w: number; x: number; y: number } }
+  >;
   meta: { frameTags?: unknown[] };
+}
+
+// Whether every pixel of the width x height rect at (x, y) in image is clear, except those in
+// the rect keep.
+function clearOutside(
+  image: RgbaImage,
+  { h, w, x, y }: { h: number; w: number; x: number; y: number },
+  keep: { h: number; w: number; x: number; y: number },
+): boolean {
+  for (let row = y; row < y + h; row++) {
+    for (let column = x; column < x + w; column++) {
+      const kept =
+        column >= keep.x && column < keep.x + keep.w && row >= keep.y && row < keep.y + keep.h;
+      if (!kept && image.data[(row * image.width + column) * 4 + 3] !== 0) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 // Whether the width x height rect at (ax, ay) in a holds the same bytes as the one at (bx, by)
@@ -95,18 +118,119 @@ describe("the shipped art's atlases", () => {
     expect(textures.size).toBe(manifest.images.length + manifest.sprites.length);
   });
 
+  // A trimmed frame's rect holds its pixels at its trim offset, and the rest of the whole frame
+  // is clear.
   it("copies each image and frame pixel for pixel", () => {
     const differing: string[] = [];
     for (const { frames, key, page } of build.manifest.textures) {
       const source = sources.get(key);
       const atlas = pages[page];
-      for (const { h, name, w, x, y } of frames) {
-        const from = sheets.get(key)?.frames[name]?.frame ?? { x: 0, y: 0 };
-        if (!source || !atlas || !sameRect(atlas, x, y, source, from.x, from.y, w, h)) {
+      for (const { h, name, trim, w, x, y } of frames) {
+        const whole = sheets.get(key)?.frames[name]?.frame ?? { h, w, x: 0, y: 0 };
+        const kept = { h, w, x: whole.x + (trim?.x ?? 0), y: whole.y + (trim?.y ?? 0) };
+        const same =
+          source !== undefined &&
+          atlas !== undefined &&
+          sameRect(atlas, x, y, source, kept.x, kept.y, w, h) &&
+          clearOutside(source, whole, kept);
+        if (!same) {
           differing.push(`${key} ${name}`);
         }
       }
     }
     expect(differing).toEqual([]);
+  });
+
+  it("trims only road sprites' frames, to their whole frame's size", () => {
+    const misfits = build.manifest.textures.flatMap(({ frames, key }) =>
+      frames
+        .filter(({ name, trim }) => {
+          const whole = sheets.get(key)?.frames[name]?.frame;
+          return (
+            trim !== undefined && (!trimsFrames(key) || trim.w !== whole?.w || trim.h !== whole.h)
+          );
+        })
+        .map(({ name }) => `${key} ${name}`),
+    );
+    expect(misfits).toEqual([]);
+  });
+});
+
+describe("compactFrames", () => {
+  // 6x5 frames: two pixels in the middle, the same two a column to the right, the same two at
+  // the right edge, where the extruded border repeats them, and a clear frame.
+  const middle = ["......", "..ab..", "..cd..", "......", "......"];
+  const shifted = ["......", "...ab.", "...cd.", "......", "......"];
+  const edge = ["......", "....ab", "....cd", "......", "......"];
+  const clear = ["......", "......", "......", "......", "......"];
+  type Rect4 = [x: number, y: number, width: number, height: number];
+  const rect = ([x, y, width, height]: Rect4) => ({ height, width, x, y });
+  const whole = (frame: number): Rect4 => [frame * 6, 0, 6, 5];
+
+  // Each frame's packed from rect, the bounds its border is read in, and its trim as
+  // [x, y, whole width, whole height].
+  it.each<{
+    expected: { bounds?: Rect4; from: Rect4; trim?: Rect4 }[];
+    frames: string[][];
+    name: string;
+    trim: boolean;
+  }>([
+    {
+      expected: [{ from: whole(0) }],
+      frames: [middle],
+      name: "keeps a frame whole without trim",
+      trim: false,
+    },
+    {
+      expected: [{ bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] }],
+      frames: [middle],
+      name: "trims a frame to its opaque pixels, recording where they sit",
+      trim: true,
+    },
+    {
+      expected: [{ bounds: whole(0), from: [0, 0, 1, 1], trim: [0, 0, 6, 5] }],
+      frames: [clear],
+      name: "trims a clear frame to its top-left pixel",
+      trim: true,
+    },
+    {
+      expected: [
+        { bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] },
+        { bounds: whole(0), from: [2, 1, 2, 2], trim: [3, 1, 6, 5] },
+      ],
+      frames: [middle, shifted],
+      name: "shares one rect between trimmed frames with the same pixels, each at its own offset",
+      trim: true,
+    },
+    {
+      expected: [
+        { bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] },
+        { bounds: whole(1), from: [10, 1, 2, 2], trim: [4, 1, 6, 5] },
+      ],
+      frames: [middle, edge],
+      name: "keeps apart frames whose extruded borders differ",
+      trim: true,
+    },
+    {
+      expected: [{ from: whole(0) }, { from: whole(0) }],
+      frames: [middle, middle],
+      name: "shares one rect between whole frames with the same pixels",
+      trim: false,
+    },
+  ])("$name", ({ expected, frames, trim }) => {
+    const { image, texture } = sheetFromRows("dog-koda", frames);
+    const compacted = compactFrames(image, trim, texture).frames.map(
+      ({ bounds, from, trim: offset }) => ({ bounds, from, trim: offset }),
+    );
+    expect(compacted).toEqual(
+      expected.map(({ bounds, from, trim: offset }) => ({
+        bounds: bounds === undefined ? undefined : rect(bounds),
+        from: rect(from),
+        trim:
+          offset === undefined
+            ? undefined
+            : { h: offset[3], w: offset[2], x: offset[0], y: offset[1] },
+      })),
+    );
   });
 });

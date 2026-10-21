@@ -1,15 +1,20 @@
+import { createHash } from "node:crypto";
+
 import { PNG } from "pngjs";
 
 import { type AssetManifest, parseManifest } from "../manifest";
 import {
+  atlasGroupOf,
   EXTRUDE,
   imageSource,
   layoutAtlases,
+  type PageLayout,
+  type SourceFrame,
   type SourceTexture,
   spriteSource,
 } from "./atlasLayout";
 import type { AtlasManifest } from "./atlasManifest";
-import { blankImage, blitExtruded, type RgbaImage } from "./atlasPixels";
+import { blankImage, blitExtruded, opaqueRect, type RgbaImage } from "./atlasPixels";
 
 export interface AtlasBuild {
   manifest: AtlasManifest;
@@ -30,6 +35,45 @@ export function encodePng({ data, height, width }: RgbaImage): Uint8Array {
   const png = new PNG({ height, width });
   png.data = Buffer.from(data);
   return PNG.sync.write(png, { colorType: 6, deflateLevel: 9, deflateStrategy: 0, filterType: 0 });
+}
+
+// Whether a sprite's frames pack only their opaque pixels: the road's do. UI art and cards stay
+// whole, as do images, since a tile sprite and a nine-slice draw a frame's packed rect as the
+// whole frame, and the road reads a backdrop's pixels from its packed rect.
+export const trimsFrames = (key: string): boolean => atlasGroupOf(key) === "run";
+
+// A sprite's frames as the atlas packs them. With trim, each frame keeps only the rect that
+// holds its opaque pixels (a clear frame, its top-left pixel) and records where that sits in
+// the whole frame. A frame whose packed pixels, extruded border included, match an earlier
+// frame's reads that frame's rect, so the two share one rect on the page.
+export function compactFrames(
+  image: RgbaImage,
+  trim: boolean,
+  texture: SourceTexture,
+): SourceTexture {
+  const firsts = new Map<string, Pick<SourceFrame, "bounds" | "from">>();
+  const frames = texture.frames.map(({ from: whole, ...frame }): SourceFrame => {
+    const from = trim
+      ? (opaqueRect(image, whole) ?? { height: 1, width: 1, x: whole.x, y: whole.y })
+      : whole;
+    const trimmed = from.width !== whole.width || from.height !== whole.height;
+    const cell = blankImage(from.width + 2 * EXTRUDE, from.height + 2 * EXTRUDE);
+    blitExtruded(image, from, EXTRUDE, cell, { x: EXTRUDE, y: EXTRUDE }, whole);
+    const id = createHash("sha256")
+      .update(`${from.width}x${from.height}`)
+      .update(cell.data)
+      .digest("hex");
+    const first = firsts.get(id) ?? { from, ...(trimmed ? { bounds: whole } : {}) };
+    firsts.set(id, first);
+    return {
+      ...frame,
+      ...first,
+      ...(trimmed
+        ? { trim: { h: whole.height, w: whole.width, x: from.x - whole.x, y: from.y - whole.y } }
+        : {}),
+    };
+  });
+  return { ...texture, frames };
 }
 
 // What a caller has already read: the art manifest, else read from manifest.json, and PNGs
@@ -76,7 +120,8 @@ export async function buildAtlases(
     ),
     ...manifest.sprites.map(({ json, key, png }) =>
       sourceOf(key, async () => {
-        const [sheet, { height, width }] = await Promise.all([readArt(json), readPng(png)]);
+        const [sheet, image] = await Promise.all([readArt(json), readPng(png)]);
+        const { height, width } = image;
         const source = spriteSource(key, png, JSON.parse(decoder.decode(sheet)));
         const outside = source.frames.find(
           ({ from }) => from.x + from.width > width || from.y + from.height > height,
@@ -84,7 +129,7 @@ export async function buildAtlases(
         if (outside !== undefined) {
           throw new Error(`frame "${outside.name}" reaches outside its ${width}x${height} PNG`);
         }
-        return source;
+        return compactFrames(image, trimsFrames(key), source);
       }),
     ),
   ]);
@@ -96,17 +141,26 @@ export async function buildAtlases(
     pngs: new Map(),
     warnings,
   };
-  for (const { blits, group, height, png, width } of layout.pages) {
-    const page = blankImage(width, height);
-    for (const { at, from, png: sourcePng } of blits) {
-      const source = images.get(sourcePng);
-      if (source !== undefined) {
-        blitExtruded(source, from, EXTRUDE, page, at);
-      }
-    }
-    const bytes = encodePng(page);
+  for (const page of layout.pages) {
+    const { group, height, png, width } = page;
+    const bytes = encodePng(drawPage(images, page));
     build.pngs.set(png, bytes);
     build.manifest.pages.push({ bytes: bytes.length, group, height, png, width });
   }
   return build;
+}
+
+// A page's pixels, each blit copied from its source PNG in images, by path.
+export function drawPage(
+  images: ReadonlyMap<string, RgbaImage>,
+  { blits, height, width }: PageLayout,
+): RgbaImage {
+  const page = blankImage(width, height);
+  for (const { at, bounds, from, png } of blits) {
+    const source = images.get(png);
+    if (source !== undefined) {
+      blitExtruded(source, from, EXTRUDE, page, at, bounds);
+    }
+  }
+  return page;
 }

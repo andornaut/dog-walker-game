@@ -4,7 +4,13 @@ import { LOADING_ART } from "../../layout/loadingScreen";
 import { itemAt } from "../../lib/arrays";
 import type { Point, Rect } from "../../lib/rect";
 import { isPlainObject, parseOrThrow, record } from "../jsonSchema";
-import { ATLAS_DIR, type AtlasFrame, type AtlasTexture, BASE_FRAME } from "./atlasManifest";
+import {
+  ATLAS_DIR,
+  type AtlasFrame,
+  type AtlasTexture,
+  BASE_FRAME,
+  type FrameTrim,
+} from "./atlasManifest";
 
 // Mobile GPUs guarantee textures up to 2048 pixels a side.
 export const ATLAS_MAX_SIZE = 2048;
@@ -35,11 +41,15 @@ export function atlasGroupOf(key: string): AtlasGroup {
   return match?.[0] ?? "run";
 }
 
-// A frame of a source PNG, by its rect there.
+// A frame of a source PNG, by the rect of it that is packed. A trimmed frame's rect holds only
+// its opaque pixels: bounds is then the whole frame it was cut from, and trim where it sits in
+// it. Frames of a texture with the same from rect share one rect on the page.
 export interface SourceFrame {
+  bounds?: Rect;
   duration?: number;
   from: Rect;
   name: string;
+  trim?: FrameTrim;
 }
 
 // A manifest image or sprite, read from its source PNG. Only a sprite has tags.
@@ -50,9 +60,11 @@ export interface SourceTexture {
   tags?: unknown[];
 }
 
-// A frame copied from a source PNG to the top-left corner at on a page.
+// A frame copied from a source PNG to the top-left corner at on a page, its extruded border
+// read inside bounds.
 export interface Blit {
   at: Point;
+  bounds: Rect;
   from: Rect;
   png: string;
 }
@@ -100,8 +112,8 @@ const asepriteSheet = record({
   meta: record({ frameTags: v.optional(v.array(v.unknown(), "must be an array"), []) }),
 });
 
-// A sprite's frames from its Aseprite "hash" export, in export order. Throws on a rotated or
-// trimmed frame, whose placement in the sheet the packer does not reproduce.
+// A sprite's frames from its Aseprite "hash" export, in export order. Throws on a frame the
+// export rotated or trimmed, whose placement the packer does not read: it trims frames itself.
 export function spriteSource(key: string, png: string, json: unknown): SourceTexture {
   const { frames, meta } = parseOrThrow(`${key} sheet`, asepriteSheet, json);
   return {
@@ -123,9 +135,33 @@ interface Shelf {
   y: number;
 }
 
+// A texture as packed: the first of its frames with each distinct from rect, which get a rect
+// on the page each, and for every frame the index of its rect among them.
+interface Packable {
+  firsts: SourceFrame[];
+  slots: number[];
+  texture: SourceTexture;
+}
+
+function packable(texture: SourceTexture): Packable {
+  const index = new Map<string, number>();
+  const firsts: SourceFrame[] = [];
+  const slots = texture.frames.map((frame) => {
+    const { height, width, x, y } = frame.from;
+    const id = `${x},${y},${width},${height}`;
+    let slot = index.get(id);
+    if (slot === undefined) {
+      slot = firsts.push(frame) - 1;
+      index.set(id, slot);
+    }
+    return slot;
+  });
+  return { firsts, slots, texture };
+}
+
 interface PackedPage {
   height: number;
-  placed: { at: Point[]; texture: SourceTexture }[];
+  placed: { at: Point[]; item: Packable }[];
 }
 
 // Each frame's top-left on a shelf of rows width wide, or undefined when they overflow
@@ -159,26 +195,26 @@ function placeOnShelf(
 // Shelf packs the textures, tallest first, onto pages width wide, keeping each texture's
 // frames on one page. Undefined when a texture does not fit on an empty page.
 function packShelves(
-  textures: readonly SourceTexture[],
+  items: readonly Packable[],
   width: number,
   maxSize: number,
 ): PackedPage[] | undefined {
   const pages: PackedPage[] = [];
   let page: PackedPage = { height: 0, placed: [] };
   let shelf: Shelf = { height: 0, x: 0, y: 0 };
-  for (const texture of textures) {
-    let placed = placeOnShelf(shelf, texture.frames, width, maxSize);
+  for (const item of items) {
+    let placed = placeOnShelf(shelf, item.firsts, width, maxSize);
     if (placed === undefined && page.placed.length > 0) {
       pages.push(page);
       page = { height: 0, placed: [] };
       shelf = { height: 0, x: 0, y: 0 };
-      placed = placeOnShelf(shelf, texture.frames, width, maxSize);
+      placed = placeOnShelf(shelf, item.firsts, width, maxSize);
     }
     if (placed === undefined) {
       return undefined;
     }
     ({ shelf } = placed);
-    page.placed.push({ at: placed.at, texture });
+    page.placed.push({ at: placed.at, item });
     page.height = Math.max(page.height, shelf.y + shelf.height);
   }
   if (page.placed.length > 0) {
@@ -196,9 +232,9 @@ function packGroup(
   textures: readonly SourceTexture[],
   maxSize: number,
 ): { pages: PackedPage[]; width: number } {
-  const sorted = [...textures].sort(
-    (a, b) => tallestFrame(b) - tallestFrame(a) || (a.key < b.key ? -1 : 1),
-  );
+  const sorted = [...textures]
+    .sort((a, b) => tallestFrame(b) - tallestFrame(a) || (a.key < b.key ? -1 : 1))
+    .map(packable);
   let best: { area: number; pages: PackedPage[]; width: number } | undefined;
   const widths = [...PAGE_WIDTHS.filter((candidate) => candidate < maxSize), maxSize];
   for (const width of widths) {
@@ -222,8 +258,8 @@ function fits(texture: SourceTexture, maxSize: number): boolean {
 }
 
 // Packs the textures into pages of at most maxSize a side, by group in ATLAS_GROUPS order, and
-// maps every frame to its rect on its page. Frames keep their size: nothing is trimmed, so
-// anchors measured in frame pixels still hold.
+// maps every frame to its rect on its page. A trimmed frame keeps its trim, which places its
+// rect in the whole frame, so anchors measured in frame pixels still hold.
 export function layoutAtlases(
   textures: readonly SourceTexture[],
   maxSize: number = ATLAS_MAX_SIZE,
@@ -239,12 +275,22 @@ export function layoutAtlases(
     pages.forEach(({ height, placed }, index) => {
       const page = layout.pages.length;
       const blits: Blit[] = [];
-      for (const { at, texture } of placed) {
-        const frames = texture.frames.map(({ duration, from, name }, i): AtlasFrame => {
-          const to = itemAt(at, i);
-          blits.push({ at: to, from, png: texture.png });
-          const rect = { h: from.height, name, w: from.width, x: to.x, y: to.y };
-          return duration === undefined ? rect : { ...rect, duration };
+      for (const { at, item } of placed) {
+        const { firsts, slots, texture } = item;
+        firsts.forEach(({ bounds, from }, i) => {
+          blits.push({ at: itemAt(at, i), bounds: bounds ?? from, from, png: texture.png });
+        });
+        const frames = texture.frames.map(({ duration, from, name, trim }, i): AtlasFrame => {
+          const to = itemAt(at, itemAt(slots, i));
+          return {
+            ...(duration === undefined ? {} : { duration }),
+            h: from.height,
+            name,
+            ...(trim === undefined ? {} : { trim }),
+            w: from.width,
+            x: to.x,
+            y: to.y,
+          };
         });
         const { key, tags } = texture;
         layout.textures.push(

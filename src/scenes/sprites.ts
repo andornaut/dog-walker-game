@@ -21,11 +21,12 @@ const measured = new Map<string, SpriteMetrics>();
 const tops = new Map<string, number>();
 let scanCanvas: HTMLCanvasElement | undefined;
 
-// The opaque bounds of a loaded sprite's first frame, from one read of its pixels.
+// The opaque bounds of a loaded sprite's first frame, from one read of its pixels, in the
+// whole frame: a trimmed frame's pixels are drawn at their offset in it.
 function firstFrameBounds(scene: Scene, key: string): PixelBounds | undefined {
   const texture = scene.textures.get(key);
   const frame = texture.get(texture.getFrameNames()[0] ?? "__BASE");
-  const { height, width } = frame;
+  const { cutHeight, cutWidth, cutX, cutY, realHeight: height, realWidth: width } = frame;
   scanCanvas ??= document.createElement("canvas");
   scanCanvas.width = width;
   scanCanvas.height = height;
@@ -35,7 +36,7 @@ function firstFrameBounds(scene: Scene, key: string): PixelBounds | undefined {
   }
   context.clearRect(0, 0, width, height);
   const image = frame.source.image as CanvasImageSource;
-  context.drawImage(image, frame.cutX, frame.cutY, width, height, 0, 0, width, height);
+  context.drawImage(image, cutX, cutY, cutWidth, cutHeight, frame.x, frame.y, cutWidth, cutHeight);
   return opaqueBoundsOfRgba(width, height, context.getImageData(0, 0, width, height).data);
 }
 
@@ -45,7 +46,7 @@ function firstFrameBounds(scene: Scene, key: string): PixelBounds | undefined {
 export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | undefined): void {
   const texture = scene.textures.get(key);
   const frame = texture.get(texture.getFrameNames()[0] ?? "__BASE");
-  const { height, width } = frame;
+  const { realHeight: height, realWidth: width } = frame;
   if (anchor !== undefined) {
     measured.set(key, { ...anchor, frameHeight: height, frameWidth: width });
     return;

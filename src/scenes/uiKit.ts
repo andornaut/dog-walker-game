@@ -30,7 +30,7 @@ export function artFits(scene: Scene, key: string, size: { height: number; width
   }
   const texture = scene.textures.get(key);
   const frame = texture.get(texture.getFrameNames()[0]);
-  return frame.width === size.width && frame.height === size.height;
+  return frame.realWidth === size.width && frame.realHeight === size.height;
 }
 
 export { TEXT_SCALE };

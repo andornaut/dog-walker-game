@@ -69,7 +69,7 @@ describe("spriteSource", () => {
     {
       error: 'dog-koda frame "a 0" is rotated or trimmed',
       json: { frames: { "a 0": { ...frame(0, 80), trimmed: true } }, meta: {} },
-      name: "a trimmed frame, whose offset the atlas would lose",
+      name: "a frame the export trimmed, whose offset the packer does not read",
     },
     {
       error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
@@ -153,11 +153,30 @@ describe("layoutAtlases", () => {
       frames.forEach(({ x, y }, i) => {
         expect(pages[page]?.blits).toContainEqual({
           at: { x, y },
+          bounds: source?.frames[i]?.from,
           from: source?.frames[i]?.from,
           png: source?.png,
         });
       });
     }
+  });
+
+  it("packs frames with the same from rect once, each keeping its own trim", () => {
+    const from = { height: 20, width: 10, x: 4, y: 6 };
+    const bounds = { height: 32, width: 32, x: 0, y: 0 };
+    const frames = [
+      { bounds, from, name: "a", trim: { h: 32, w: 32, x: 4, y: 6 } },
+      { bounds, from, name: "b", trim: { h: 32, w: 32, x: 9, y: 2 } },
+      { from: { height: 32, width: 32, x: 32, y: 0 }, name: "c" },
+    ];
+    const layout = layoutAtlases([{ frames, key: "dog-koda", png: "sprites/dog-koda.png" }]);
+    const mapped = layout.textures[0]?.frames ?? [];
+    expect(mapped.map(({ trim }) => trim)).toEqual(frames.map(({ trim }) => trim));
+    expect([mapped[1]?.x, mapped[1]?.y]).toEqual([mapped[0]?.x, mapped[0]?.y]);
+    expect(layout.pages[0]?.blits.map(({ bounds: read, from: copied }) => [read, copied])).toEqual([
+      [bounds, from],
+      [frames[2]?.from, frames[2]?.from],
+    ]);
   });
 
   it("starts a new page when one is full, keeping each texture's frames on one page", () => {
