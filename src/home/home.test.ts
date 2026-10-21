@@ -35,7 +35,6 @@ import {
   signedDollarText,
   tapDog,
   tapGear,
-  wrapWords,
 } from "./home";
 
 const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
@@ -278,31 +277,10 @@ describe("logbookOf", () => {
   });
 });
 
-describe("wrapWords", () => {
-  it.each<[string, number, string, string[]]>([
-    [
-      "breaks between words, keeping each line within the width",
-      12,
-      "He already did 10K. He's fine.",
-      ["He already", "did 10K.", "He's fine."],
-    ],
-    [
-      "gives a word longer than the width a line of its own",
-      4,
-      "a supercalifragilistic b",
-      ["a", "supercalifragilistic", "b"],
-    ],
-  ])("%s", (_name, width, text, expected) => {
-    expect(wrapWords(width, text)).toEqual(expected);
-  });
-});
-
 describe("partingSpeech", () => {
   it("names the owner, then one of their parting lines", () => {
-    expect(partingSpeech(data, () => 0, 80, "koda")).toEqual([`Jesse: ${QUIPS.koda.parting[0]}`]);
-    expect(partingSpeech(data, () => 0.99, 80, "koda")).toEqual([
-      `Jesse: ${QUIPS.koda.parting[1]}`,
-    ]);
+    expect(partingSpeech(data, () => 0, "koda")).toBe(`Jesse: ${QUIPS.koda.parting[0]}`);
+    expect(partingSpeech(data, () => 0.99, "koda")).toBe(`Jesse: ${QUIPS.koda.parting[1]}`);
   });
 });
 

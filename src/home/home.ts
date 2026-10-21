@@ -247,31 +247,15 @@ export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
   };
 }
 
-// Splits text into lines of at most maxChars, breaking between words; a longer word gets a
-// line of its own.
-export function wrapWords(maxChars: number, text: string): string[] {
-  const lines: string[] = [];
-  for (const word of text.split(/\s+/).filter((part) => part !== "")) {
-    const last = lines.at(-1);
-    if (last !== undefined && last.length + 1 + word.length <= maxChars) {
-      lines[lines.length - 1] = `${last} ${word}`;
-    } else {
-      lines.push(word);
-    }
-  }
-  return lines;
-}
-
 // What a dog's owner says when the player picks it: their name and one of their parting
-// lines, wrapped to the speech bubble.
+// lines.
 export function partingSpeech(
   data: Pick<GameData, "dogs" | "quips">,
   random: () => number,
-  maxChars: number,
   dog: DogId,
-): string[] {
+): string {
   const line = quipLine(data, random, { dog, moment: "parting" });
-  return wrapWords(maxChars, `${data.dogs[dog].owner.name}: ${line}`);
+  return `${data.dogs[dog].owner.name}: ${line}`;
 }
 
 type InfoData = ShopData &

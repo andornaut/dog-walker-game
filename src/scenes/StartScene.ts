@@ -46,7 +46,6 @@ import {
   purchasePrice,
   tapDog,
   tapGear,
-  wrapWords,
 } from "../home/home";
 import { HOME_LAYOUT, sectionFill } from "../home/homeLayout";
 import { bubbleSpeech, type HomeAction, type WalkerLine, walkerLineKey } from "../home/homeLines";
@@ -85,7 +84,7 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
-import { fillLine } from "../text/lines";
+import { fillLine, wrapWords } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import {
   drawFocusRing,
@@ -726,7 +725,7 @@ export class StartScene extends Scene {
 
   // A dog's owner says a parting line when it is picked or bought; it is drawn once a visit.
   private drawQuip(dog: DogId): void {
-    this.quips.set(dog, partingSpeech(gameData, Math.random, Infinity, dog).join(" "));
+    this.quips.set(dog, partingSpeech(gameData, Math.random, dog));
   }
 
   // A tap's result, such as the selected state, shows once its press has dipped.
@@ -1374,7 +1373,7 @@ export class StartScene extends Scene {
     );
     const unsaved = storageState(this) === "unavailable" ? [gameData.homeText.unsaved] : [];
     const lines = [...unsaved, ...speech]
-      .flatMap((part) => wrapWords(SPEECH_CHARS, part))
+      .flatMap((part) => wrapWords((line) => line.length, SPEECH_CHARS, part))
       .slice(0, SPEECH_LINES);
     const top = GATE.y + 6;
     // The bubble goes under the words, which set its size.

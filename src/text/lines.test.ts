@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { RUN_TEXT_FIELDS } from "../hud/runText";
-import { type FieldTable, fillLine, strayNames } from "./lines";
+import { type FieldTable, fillLine, strayNames, wrapWords } from "./lines";
 
 describe("the game's text", () => {
   it.each<[string, FieldTable, object]>([
@@ -38,5 +38,27 @@ describe("fillLine", () => {
     expect(fillLine(table, { line: "{owner}, {owner}!" }, "line", { owner: "Rosa" })).toBe(
       "Rosa, Rosa!",
     );
+  });
+});
+
+describe("wrapWords", () => {
+  const chars = (line: string) => line.length;
+
+  it.each<[string, number, string, string[]]>([
+    [
+      "breaks between words, keeping each line within the width",
+      12,
+      "He already did 10K. He's fine.",
+      ["He already", "did 10K.", "He's fine."],
+    ],
+    [
+      "gives a word longer than the width a line of its own",
+      4,
+      "a supercalifragilistic b",
+      ["a", "supercalifragilistic", "b"],
+    ],
+    ["keeps text within the width on one line", Infinity, "one  two\nthree", ["one two three"]],
+  ])("%s", (_name, width, text, expected) => {
+    expect(wrapWords(chars, width, text)).toEqual(expected);
   });
 });
