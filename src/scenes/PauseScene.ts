@@ -26,17 +26,24 @@ import { PALETTE } from "./palette";
 import { addPixelText, wrapPixelText } from "./pixelText";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
-import type { SettingsSceneData } from "./SettingsScene";
+import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton, TEXT_SCALE } from "./uiKit";
 
-// menu is the pause menu; homeQuestion asks whether to head home, for the top bar's Home
+// The settings opened at once over the menu, from the walk bar: "alone" resumes the walk when
+// they close, "over" shows the menu again.
+export type PauseSettings = "alone" | "over";
+
+// menu is the pause menu; homeQuestion asks whether to head home, for the walk bar's Home
 // button, its note saying what going home keeps and gives up.
 export type PauseSceneData = {
   onHeadHome: () => void;
   onResume: () => void;
-} & ({ mode: "homeQuestion"; note: readonly HomeNoteLine[] } | { mode: "menu" });
+} & (
+  | { mode: "homeQuestion"; note: readonly HomeNoteLine[] }
+  | { mode: "menu"; settings?: PauseSettings }
+);
 
 // The Home question's note lines' colours, by what they say.
 const NOTE_COLORS: Readonly<Record<HomeNoteLine["kind"], number>> = {
@@ -139,7 +146,7 @@ export class PauseScene extends Scene {
       targetAt: (x, y) => rectIndexAt(layout.hits, x, y),
     });
     // The dimmed band and road around the panel resume, as Resume and Keep walking do. The top
-    // bar and doghouses are not dimmed and keep their own taps.
+    // bar and dog cards are not dimmed and keep their own taps.
     const covered = [insetRect(-1, panel), ...layout.hits];
     listenOutsideTap(this, () => ({ covered, dim: walkView }), onResume);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
@@ -148,6 +155,13 @@ export class PauseScene extends Scene {
         this.entries[number - 1]?.press();
       }
     });
+    if (data.mode === "menu" && data.settings !== undefined) {
+      if (data.settings === "alone") {
+        this.game.events.once(SETTINGS_CLOSED_EVENT, onResume);
+        this.events.once("shutdown", () => this.game.events.off(SETTINGS_CLOSED_EVENT, onResume));
+      }
+      this.openSettings();
+    }
   }
 
   private showPressed(): void {

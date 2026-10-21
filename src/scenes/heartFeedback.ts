@@ -21,19 +21,19 @@ import { addPixelText } from "./pixelText";
 import type { RunScene } from "./RunScene";
 import { playTagOnce } from "./sprites";
 
-// Over the doghouses and the HUD's own labels.
+// Over the cards and the HUD's own labels.
 const DEPTH = 60;
 // The number's chip reaches this far past its 5-row capitals on every side.
 const CHIP_PAD = 2;
-// A dog not on the road pops this far over its doghouse.
-const OVER_HOUSE = 8;
+// A dog not on the road pops this far over its card.
+const OVER_CARD = 8;
 
-// One heart change to show: its label, the top of its dog on the road, its doghouse's house
-// sprite and the parts that shake with it, and the band its label lands on.
+// One heart change to show: its label, the top of its dog on the road, its card's sprite
+// and the parts that shake with it, and the band its label lands on.
 export interface HeartPop {
+  card: GameObjects.Sprite;
   delayMs: number;
   dogTop: Point;
-  house: GameObjects.Sprite;
   label: ChangeLabel;
   lane: Rect;
   parts: readonly GameObjects.Components.Transform[];
@@ -64,9 +64,9 @@ interface Shake {
 }
 
 // Every heart change, whatever its cause: the heart pops over the dog on the road with its
-// number beside it, then flies down into its doghouse's bottom band, where the change's label
-// shows; a lost heart flashes its doghouse red and shakes it as it lands. Reduced motion keeps
-// the pop and the flash, and drops the flight and the shake.
+// number beside it, then flies down into its card's bottom rows, where the change's label
+// shows; a lost heart flashes its card's hearts and shakes the card as it lands. Reduced
+// motion keeps the pop and the flash, and drops the flight and the shake.
 export class HeartFeedback {
   private readonly active = new Set<ActivePop>();
   private readonly hooks: HeartHooks;
@@ -164,7 +164,7 @@ export class HeartFeedback {
     return { chip, rect };
   }
 
-  // The fly tag's small heart, from the pop's centre down into the doghouse's bottom band.
+  // The fly tag's small heart, from the pop's centre down into the card's bottom rows.
   private fly(
     heart: GameObjects.Sprite,
     art: { fly: string; key: string },
@@ -191,7 +191,7 @@ export class HeartFeedback {
     });
   }
 
-  // The label shows on the band; a lost heart flashes the doghouse, shaking it with motion.
+  // The label shows on the card; a lost heart flashes the card's hearts, shaking it with motion.
   private land(loss: boolean, pop: HeartPop): void {
     this.hooks.landed(pop.label, pop.lane);
     if (loss) {
@@ -199,18 +199,18 @@ export class HeartFeedback {
     }
   }
 
-  // ui-doghouse's heart-loss tag on a second house sprite over the house, under the faces,
-  // hearts and text; the slot shakes one step a frame.
+  // ui-dog-card's heart-loss tag on a second card sprite over the card, flashing its hearts
+  // area under its face, hearts and text; the slot shakes one step a frame.
   private flash(pop: HeartPop): void {
-    const { key, tag } = FEEDBACK_ART.doghouseLoss;
+    const { key, tag } = FEEDBACK_ART.cardLoss;
     if (!this.scene.anims.exists(animationKey(key, tag))) {
       return;
     }
-    const { house } = pop;
-    const flash = this.scene.add.sprite(house.x, house.y, key).setOrigin(0).setDepth(house.depth);
-    // Straight over the house in the draw order, under the labels and chips added since it.
+    const { card } = pop;
+    const flash = this.scene.add.sprite(card.x, card.y, key).setOrigin(0).setDepth(card.depth);
+    // Straight over the card in the draw order, under the labels and chips added since it.
     const { children } = this.scene;
-    children.moveTo(flash, children.getIndex(house) + 1);
+    children.moveTo(flash, children.getIndex(card) + 1);
     const parts = [...pop.parts, flash];
     const still = this.hooks.still();
     const shake = still ? undefined : this.startShake(pop.slot, parts);
@@ -249,14 +249,14 @@ export class HeartFeedback {
   }
 }
 
-// A pop for each heart change among labels, over its dog on the road, else over its doghouse;
+// A pop for each heart change among labels, over its dog on the road, else over its card;
 // a dog's later changes in one batch wait their turn.
 export function heartPops(
   hud: { lanes: readonly Rect[]; run: Pick<RunScene, "dogPoint" | "hudView"> },
   labels: readonly ChangeLabel[],
   slotOf: (
     slot: number,
-  ) => { house: GameObjects.Sprite; parts: GameObjects.Components.Transform[] } | undefined,
+  ) => { card: GameObjects.Sprite; parts: GameObjects.Components.Transform[] } | undefined,
 ): HeartPop[] {
   const pack = hud.run.hudView()?.run.pack ?? [];
   const shown = new Map<DogId, number>();
@@ -273,12 +273,12 @@ export function heartPops(
     }
     const before = shown.get(dog) ?? 0;
     shown.set(dog, before + 1);
-    const over = { x: lane.x + Math.round(lane.width / 2), y: view.house.y - OVER_HOUSE };
+    const over = { x: lane.x + Math.round(lane.width / 2), y: view.card.y - OVER_CARD };
     return [
       {
+        card: view.card,
         delayMs: before * FEEDBACK.heart.staggerMs,
         dogTop: hud.run.dogPoint(dog) ?? over,
-        house: view.house,
         label,
         lane,
         parts: view.parts,

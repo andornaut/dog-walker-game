@@ -1,12 +1,15 @@
+import { SCREEN_CONFIG } from "../data/screen";
 import type { Point, Rect } from "../layout/rect";
+import { screenLayout } from "../layout/screenLayout";
 import { wrapWords } from "../text/lines";
-import { STRIP_TAB_BOTTOM } from "./stateStrip";
+import { DEBUFF_BAR } from "./walkHud";
 
-// The message strip: what just happened, in a ui-panel across the top of the backdrop band,
-// under the state strip's tab and clear of the cross street and the far road. It shows one
+// The message strip: what just happened, in a ui-panel across the top of the backdrop band's
+// flat sky, under the walk bar and clear of the cross street and the far road. It shows one
 // line, body text at 2x led by its 16x16 icon, wrapped onto up to MESSAGE_STRIP.rows rows; the
-// panel is as tall as the rows it holds. A line waits its turn, shows, and fades out at the
-// end of its life. The strip shows while it has a line.
+// panel is as tall as the rows it holds. While debuff bars are up it moves under them and shows
+// the line on one row (messageLinePanel). A line waits its turn, shows, and fades out at the end
+// of its life. The strip shows while it has a line.
 
 // What a line is about, and the icon that leads it.
 export const MESSAGE_ICONS = {
@@ -28,14 +31,14 @@ export function messageIconKey(icon: MessageIcon): string {
   return MESSAGE_ICONS[icon];
 }
 
-// Screen pixels. The strip starts gap rows under the state strip's tab. From its top-left
+// Screen pixels. The strip starts gap rows under the walk bar. From its top-left
 // corner: the first row's capitals start capsTop down, each further row rowHeight lower (the
 // body font's line at 2x), and the icon is centred on the first row's capitals. Text starts
 // textX in and ends padRight short of the right edge; the panel ends padBottom under the last
 // row's lowest ink.
 export const MESSAGE_STRIP = {
   capsTop: 10,
-  gap: 2,
+  gap: 6,
   icon: { size: 16, x: 6 },
   padBottom: 6,
   padRight: 6,
@@ -62,13 +65,20 @@ export interface MessageStripLayout {
   textX: number;
 }
 
-export function messageStripLayout(): MessageStripLayout {
-  const { capsTop, gap, icon, padRight, rowHeight, rows, scale, textX, width, x } = MESSAGE_STRIP;
-  const y = STRIP_TAB_BOTTOM + gap;
+// The walk bar the strip hangs under.
+const WALK_BAR_RECT = screenLayout(SCREEN_CONFIG).topBar;
+
+function stripTop(bar: Rect): number {
+  return bar.y + bar.height + MESSAGE_STRIP.gap;
+}
+
+export function messageStripLayout(bar: Rect = WALK_BAR_RECT): MessageStripLayout {
+  const { capsTop, icon, padRight, rowHeight, rows, scale, textX, width, x } = MESSAGE_STRIP;
+  const y = stripTop(bar);
   const rowTops = Array.from({ length: rows }, (_, row) => y + capsTop + row * rowHeight);
   return {
     icon: { x: x + icon.x, y: y + capsTop + Math.floor((CAPS_ROWS * scale - icon.size) / 2) },
-    panel: messagePanel(rows),
+    panel: messagePanel(rows, bar),
     room: width - textX - padRight,
     rowTops,
     textX: x + textX,
@@ -76,10 +86,46 @@ export function messageStripLayout(): MessageStripLayout {
 }
 
 // The panel holding rows rows of text.
-export function messagePanel(rows: number): Rect {
-  const { capsTop, gap, padBottom, rowHeight, scale, width, x } = MESSAGE_STRIP;
+export function messagePanel(rows: number, bar: Rect = WALK_BAR_RECT): Rect {
+  const { capsTop, padBottom, rowHeight, scale, width, x } = MESSAGE_STRIP;
   const height = capsTop + (rows - 1) * rowHeight + INK_ROWS * scale + padBottom;
-  return { height, width, x, y: STRIP_TAB_BOTTOM + gap };
+  return { height, width, x, y: stripTop(bar) };
+}
+
+// The one-row strip under bars debuff bars: a panel height tall, its top gap rows under the
+// last bar's top, the icon at icon and the text from textX, at the largest of scales whose
+// width fits room, its capitals centred on the icon's rows.
+export const MESSAGE_LINE = {
+  gap: 2,
+  height: 26,
+  icon: { x: 6, y: 5 },
+  room: 312,
+  scales: [2, 1],
+  textX: 26,
+} as const;
+
+export interface MessageLinePanel {
+  icon: Point;
+  panel: Rect;
+  room: number;
+  textX: number;
+}
+
+export function messageLinePanel(bars: number, bar: Rect = WALK_BAR_RECT): MessageLinePanel {
+  const { gap, height, icon, room, textX } = MESSAGE_LINE;
+  const { width, x } = MESSAGE_STRIP;
+  const y = bar.y + bar.height + gap + bars * DEBUFF_BAR.height;
+  return {
+    icon: { x: x + icon.x, y: y + icon.y },
+    panel: { height, width, x, y },
+    room,
+    textX: x + textX,
+  };
+}
+
+// The top of a one-row line's capitals at scale, centred on its icon's rows.
+export function messageLineTop(line: MessageLinePanel, scale: number): number {
+  return line.icon.y + Math.floor((MESSAGE_STRIP.icon.size - CAPS_ROWS * scale) / 2);
 }
 
 // A line's text broken at spaces into rows no wider than room, as width measures them, at

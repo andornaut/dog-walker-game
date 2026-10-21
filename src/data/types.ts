@@ -115,7 +115,7 @@ export interface Owner {
 
 export type Dog = Unlock & {
   // The name in the dog's art keys: dog-<art> and its depth variants, face-dog-<art>,
-  // portrait-dog-<art>, face-owner-<art>, owner-<art> and the <art> tag of ui-doghouse.
+  // portrait-dog-<art>, face-owner-<art>, owner-<art> and the <art> tag of ui-dog-card.
   readonly art: string;
   readonly breed: string;
   readonly look: string;
@@ -585,8 +585,8 @@ export interface HomeText {
 
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data
 // does not name, the Skip card, and the cost plaque's words. fired is the firing plate's
-// word, homeQuestion is what the top bar's Home button asks, with its two answers, and
-// lowHearts is the chip over a doghouse down to its last heart, naming its owner. A {name} in a line is filled
+// word, homeQuestion is what the walk bar's Home button asks, with its two answers, and
+// lowHearts is the chip over a dog card down to its last heart, naming its owner. A {name} in a line is filled
 // by code, and each line may use only the names src/hud/runText.ts lists for it. firedBy
 // names an owner who fires you, and card.fires flags an option that would fire owners.
 export interface RunText {
@@ -608,6 +608,16 @@ export interface RunText {
   };
   // Over a small dog that dodged a hit.
   readonly dodge: string;
+  // What a still press held on the walk HUD shows in the message strip: an effect's name and
+  // line, a debuff's name and stake (its {seconds} the seconds it has left), and a dog's size,
+  // hearts and owner. moreEffects is the last effect well's count of the effects past the
+  // wells.
+  readonly explain: {
+    readonly debuff: string;
+    readonly dog: string;
+    readonly effect: string;
+    readonly moreEffects: string;
+  };
   readonly fired: string;
   readonly firedBy: string;
   // The end screen's line when every dog set out with got home after the last zone.

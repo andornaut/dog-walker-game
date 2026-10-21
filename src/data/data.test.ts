@@ -309,7 +309,7 @@ describe("run, world and walkers", () => {
     }
   });
 
-  it("fits the largest pack in the doghouse row", () => {
+  it("fits the largest pack in the card row", () => {
     expect(tuning.counts.packSizeMin).toBeGreaterThanOrEqual(1);
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
   });

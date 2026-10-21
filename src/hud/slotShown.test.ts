@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { slotShown } from "./doghouse";
+import { slotShown } from "./walkHud";
 
 describe("slotShown", () => {
   it.each([

@@ -70,8 +70,13 @@ import { shopAffordable, type ShopTab } from "../home/shop";
 import type { StatsTab } from "../home/statsLayout";
 import { homeSticker, sameItem, type Sticker, type TileItem } from "../home/sticker";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
+import {
+  EFFECT_ICON_SIZE,
+  effectIconFallback,
+  effectIconKey,
+  walkerEffectItems,
+} from "../hud/effectIcons";
 import { downTail } from "../hud/moments";
-import { STRIP, stripIconFallback, stripIconKey, walkerStripItems } from "../hud/stateStrip";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
@@ -1628,16 +1633,16 @@ export class StartScene extends Scene {
         this.lockedPlate(content, tile, plateAt);
         return;
       }
-      walkerStripItems(gameData, id).forEach((item, n) => {
+      walkerEffectItems(gameData, id).forEach((item, n) => {
         const iconAt = { x: x + icons.dx, y: y + itemAt(icons.dy, n) };
-        const key = stripIconKey(item);
+        const key = effectIconKey(item);
         if (this.textures.exists(key)) {
           const shown = tileTextureKey(this, state, key);
           content.add(this.add.image(iconAt.x, iconAt.y, shown).setOrigin(0));
           return;
         }
-        const half = STRIP.icon / 2;
-        const letter = stripIconFallback(gameData, item);
+        const half = EFFECT_ICON_SIZE / 2;
+        const letter = effectIconFallback(gameData, item);
         this.text(content, iconAt.x + half, iconAt.y + half, letter, PALETTE[look.text], {
           originX: 0.5,
           originY: 0.5,

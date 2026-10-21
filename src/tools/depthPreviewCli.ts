@@ -138,7 +138,7 @@ function hexColor(hex: string): number {
 
 // The zone's road as the run screen draws it, in the two layers road sprites go between:
 // under them the road, and over them the backdrop band, the road's approach rows over the
-// band, and the doghouse row.
+// band, and the card row.
 async function zoneLayers(zone: Zone): Promise<{ over: RgbaImage; under: RgbaImage }> {
   const under = blankImage(SCREEN_CONFIG.width, viewHeight);
   fill(DOG_ROW, { height: viewHeight, width: SCREEN_CONFIG.width, x: 0, y: 0 }, under);

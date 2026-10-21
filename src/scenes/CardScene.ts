@@ -124,7 +124,7 @@ function illustrationKey(
   return look === null ? option.art : skinnedCardArt(has, look, option.art);
 }
 
-// Up to three cards over the dimmed band and road. The top bar and doghouses stay in view, and
+// Up to three cards over the dimmed band and road. The walk bar and dog cards stay in view, and
 // the HUD marks the dogs the card affects. A disabled option is drawn in greys.
 export class CardScene extends Scene {
   private cardRects: Rect[] = [];

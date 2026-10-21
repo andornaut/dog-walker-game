@@ -3,10 +3,9 @@ import { describe, expect, it } from "vitest";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { DOGHOUSE } from "./doghouse";
-import { centredInLane, hudLanes } from "./hudLanes";
+import { hudLanes } from "./hudLanes";
 import { messageStripLayout } from "./messageStrip";
-import { TOP_BAR } from "./topBar";
+import { DOG_CARD, ownerTabRect, WALK_BAR } from "./walkHud";
 
 const layout = screenLayout(SCREEN_CONFIG);
 const lanes = hudLanes(layout);
@@ -17,27 +16,23 @@ function overlaps(a: Rect, b: Rect): boolean {
 }
 
 const slotPairs = layout.dogSlots.flatMap((slot, i): [string, Rect, Rect][] => {
-  const face = { height: 32, width: 32, x: slot.x + DOGHOUSE.ownerFace.x, y: slot.y + 24 };
+  const header = { height: DOG_CARD.dogFace.y, width: slot.width, x: slot.x, y: slot.y };
   const label = lanes.heartLabels[i] ?? slot;
   return [
-    [`the quip and owner face ${i}`, lanes.quip, face],
-    [`heart label ${i} and its owner face`, label, face],
-    [`heart label ${i} and the quip`, label, lanes.quip],
+    [`heart label ${i} and the owners' tabs`, label, lanes.ownerTabs],
     [`heart label ${i} and the road`, label, layout.roadView],
+    [`heart label ${i} and the card's header`, label, header],
   ];
 });
 
 describe("hudLanes", () => {
   it.each<[string, Rect, Rect]>([
-    ["the bank and the top bar", lanes.bank, layout.topBar],
+    ["the bank and the walk bar", lanes.bank, layout.topBar],
     ["the bank and the message strip", lanes.bank, messages],
-    ["the bank and the strip bubble", lanes.bank, lanes.stripBubble],
     ["the bank and the road", lanes.bank, layout.roadView],
-    ["the message strip and the top bar", messages, layout.topBar],
-    ["the message strip and the strip bubble", messages, lanes.stripBubble],
+    ["the message strip and the walk bar", messages, layout.topBar],
     ["the message strip and the road", messages, layout.roadView],
-    ["the strip bubble and the road", lanes.stripBubble, layout.roadView],
-    ["the quip and the road", lanes.quip, layout.roadView],
+    ["the owners' tabs and the message strip", lanes.ownerTabs, messages],
     ...slotPairs,
   ])("keeps %s apart", (_, a, b) => {
     expect(overlaps(a, b)).toBe(false);
@@ -45,31 +40,27 @@ describe("hudLanes", () => {
 
   it("keeps every lane on screen, with one heart label per slot", () => {
     expect(lanes.heartLabels).toHaveLength(layout.dogSlots.length);
-    const all = [lanes.bank, messages, lanes.stripBubble, lanes.quip, ...lanes.heartLabels];
-    for (const lane of all) {
+    for (const lane of [lanes.bank, messages, lanes.ownerTabs, ...lanes.heartLabels]) {
       expect(Math.min(lane.x, lane.y)).toBeGreaterThanOrEqual(0);
       expect(lane.x + lane.width).toBeLessThanOrEqual(SCREEN_CONFIG.width);
       expect(lane.y + lane.height).toBeLessThanOrEqual(SCREEN_CONFIG.height);
     }
   });
+
+  it.each(layout.dogSlots.map((slot, i) => [i, slot] as const))(
+    "holds card %i's owner tab in the owners' lane",
+    (_i, slot) => {
+      const tab = ownerTabRect(slot);
+      expect(tab.y).toBeGreaterThanOrEqual(lanes.ownerTabs.y);
+      expect(tab.y + tab.height).toBeGreaterThan(lanes.ownerTabs.y + lanes.ownerTabs.height - 1);
+    },
+  );
 });
 
 describe("the bank lane", () => {
-  it("sits under the message strip, at the money well's columns", () => {
-    expect(lanes.bank.x).toBe(TOP_BAR.money.x);
-    expect(lanes.bank.width).toBe(TOP_BAR.money.width);
+  it("sits under the message strip, at the cash well's columns", () => {
+    expect(lanes.bank.x).toBe(layout.topBar.x + WALK_BAR.cash.well.x);
+    expect(lanes.bank.width).toBe(WALK_BAR.cash.well.width);
     expect(lanes.bank.y).toBeGreaterThan(messages.y + messages.height);
-  });
-});
-
-describe("centredInLane", () => {
-  const lane = { height: 24, width: 360, x: 0, y: 470 };
-  it.each([
-    [180, 100, 130],
-    [10, 100, 0],
-    [350, 100, 260],
-    [180, 400, 0],
-  ])("centres on %i a bubble %i wide at x %i", (centerX, width, x) => {
-    expect(centredInLane(lane, centerX, width)).toBe(x);
   });
 });

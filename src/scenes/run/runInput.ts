@@ -3,12 +3,21 @@ import type { Input, Scene } from "phaser";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
 import { gameplayAllowed, pressesHeld, type RunPause, topBarButtonAt } from "../../hud/topBar";
-import type { GestureAction, GestureContext } from "../../input/gestures";
+import {
+  debuffBarRects,
+  type ExplainShown,
+  type ExplainTarget,
+  explainTargetAt,
+} from "../../hud/walkHud";
+import type { GestureAction } from "../../input/gestures";
 import { walkKeyAction } from "../../input/keyBindings";
 import {
+  type ExplainChange,
   idleTrack,
   type PointerSample,
   type PointerTrack,
+  tickTrack,
+  type TrackContext,
   trackPointer,
 } from "../../input/pointerTracking";
 import { read } from "../../rules/units";
@@ -16,21 +25,23 @@ import type { SessionInput } from "../../runner/session";
 import type { Walk } from "../../runner/walk";
 import { LAYOUT } from "./stage";
 
-// What the walk's input reads of the run, and the pause it opens.
+// What the walk's input reads of the run. explainShown: what the HUD shows that a held press
+// can explain.
 export interface RunInputHost {
-  openPause: () => void;
+  explainShown: () => ExplainShown;
   // Whether a replay drives the run, which then takes no live lane moves or treats.
   replaying: () => boolean;
   runPause: () => RunPause;
   walk: () => Walk | undefined;
 }
 
-// Keys, the press driving the walk's gestures, and the lane moves and treats they queue for
-// the next simulation step.
+// Keys, the press driving the walk's gestures, the lane moves and treats they queue for the
+// next simulation step, and the HUD element a still press holds to explain.
 export class RunInput {
+  private explained: ExplainTarget | undefined;
   private readonly host: RunInputHost;
   private pending: SessionInput[] = [];
-  private pointers: PointerTrack = idleTrack;
+  private pointers: PointerTrack<ExplainTarget> = idleTrack;
   private readonly scene: Scene;
 
   constructor(scene: Scene, host: RunInputHost) {
@@ -60,12 +71,31 @@ export class RunInput {
   }
 
   // A press under way when a card or the menu opens, or the page loses focus, is dropped:
-  // its release may never arrive.
+  // its release may never arrive. An explanation it held up ends.
   dropPress(): void {
     this.pointers = idleTrack;
+    this.explained = undefined;
   }
 
-  // M, P and Escape are the top bar's keys, which the HUD handles. Phaser hands a key down to
+  // What a held press explains, while it does; the walk stays paused until it lifts.
+  explanation(): ExplainTarget | undefined {
+    return this.explained;
+  }
+
+  // Each frame: a press held still on an element long enough starts its explanation.
+  tick(nowMs: number): void {
+    const { explain, track } = tickTrack(nowMs, this.pointers);
+    this.pointers = track;
+    this.explain(explain);
+  }
+
+  private explain(change: ExplainChange<ExplainTarget> | undefined): void {
+    if (change !== undefined) {
+      this.explained = change.kind === "start" ? change.target : undefined;
+    }
+  }
+
+  // M, P and Escape are the walk bar's keys, which the HUD handles. Phaser hands a key down to
   // this listener as the browser fires it, auto-repeats included.
   private onKey(event: KeyboardEvent): void {
     const action = walkKeyAction(event.key, event.repeat);
@@ -85,9 +115,12 @@ export class RunInput {
       phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
       point: { x: pointer.x, y: pointer.y },
       press: { downTime: pointer.downTime, id: pointer.id },
+      timeMs: this.scene.game.loop.time,
     };
-    const result = trackPointer(gestureContext(), held, sample, this.pointers);
+    const shown = this.host.explainShown();
+    const result = trackPointer(trackContext(shown), held, sample, this.pointers);
     this.pointers = result.track;
+    this.explain(result.explain);
     result.actions.forEach((action) => this.act(action));
   }
 
@@ -97,31 +130,29 @@ export class RunInput {
     if (walk === undefined || walk.run.phase.kind !== "walking") {
       return;
     }
-    if (action.kind !== "pause" && !gameplayAllowed(this.host.runPause())) {
+    if (!gameplayAllowed(this.host.runPause()) || this.host.replaying()) {
       return;
     }
-    switch (action.kind) {
-      case "move":
-        if (!this.host.replaying()) {
-          this.pending.push({ direction: action.direction, kind: "lane" });
-        }
-        return;
-      case "pause":
-        this.host.openPause();
-        return;
-      default:
-        action satisfies never;
-    }
+    this.pending = [...this.pending, { direction: action.direction, kind: "lane" }];
   }
 }
 
-function gestureContext(): GestureContext {
+// A tap on a debuff bar does nothing, and a press on anything that explains itself holds to
+// explain once still for explainHoldSeconds within swipeStartDistance, the drag's first step.
+function trackContext(shown: ExplainShown): TrackContext<ExplainTarget> {
+  const swipeStartDistance = read(gameData.tuning, "pixels", "swipeStartDistance");
   return {
     config: {
       laneCount: LANE_COUNT,
-      swipeStartDistance: read(gameData.tuning, "pixels", "swipeStartDistance"),
+      swipeStartDistance,
       tapMaxDistance: read(gameData.tuning, "pixels", "tapMaxDistance"),
     },
+    explainAt: (point) => explainTargetAt(LAYOUT, shown, point),
+    hold: {
+      holdMs: read(gameData.tuning, "seconds", "explainHoldSeconds") * 1000,
+      slopPx: swipeStartDistance,
+    },
     layout: LAYOUT,
+    quietTaps: debuffBarRects(LAYOUT.topBar, shown.debuffs.length),
   };
 }

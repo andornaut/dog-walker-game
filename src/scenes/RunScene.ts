@@ -14,9 +14,11 @@ import {
 import type { RunSetup } from "../dev/runSetup";
 import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
+import { effectItems } from "../hud/effectIcons";
 import { cardHintTriggers } from "../hud/hintTriggers";
 import { homeQuestionNote } from "../hud/homeQuestion";
 import { type RunPause, walkPaused } from "../hud/topBar";
+import { type ExplainShown, type ExplainTarget } from "../hud/walkHud";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import type { CardView, Choice } from "../rules/choices";
@@ -41,7 +43,6 @@ import {
   startSession,
   stepSession,
 } from "../runner/session";
-import { activeStatuses, type StatusMark } from "../runner/statuses";
 import { startRoad, type Walk, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
@@ -81,12 +82,13 @@ export interface RunSceneData {
   walkerSprite: string;
 }
 
-// What the HUD draws: the run, the dogs the open card affects, the dogs' statuses, newest
-// first, and how far through the zone.
+// What the HUD draws: the run, the dogs the open card affects, what a held press explains, the
+// pack's centre across the screen, and how far through the zone.
 export interface RunHudView {
   affected: readonly DogId[];
+  explaining: ExplainTarget | undefined;
+  packX: number;
   run: RunState;
-  statuses: readonly StatusMark[];
   zoneFraction: number;
 }
 
@@ -98,6 +100,9 @@ const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 
 // Before the walk's menus exist, nothing is open over it.
 const NO_MENU_PAUSE: MenuPause = { card: false, menu: "closed", page: "shown" };
+
+// Before the walk starts, the HUD shows nothing to explain.
+const NOTHING_SHOWN: ExplainShown = { debuffs: [], dogs: [], effects: 0 };
 
 // The zone celebration due once a zone's fee coins have landed, delayMs from its end.
 interface Celebration {
@@ -229,7 +234,7 @@ export class RunScene extends Scene {
       banner: new ZoneBanner(this),
       hitBoxes: new HitBoxView(this),
       input: new RunInput(this, {
-        openPause: () => this.openPause(),
+        explainShown: () => this.explainShown(),
         replaying: () => recorder.replaying(),
         runPause: () => this.runPause(),
         walk: () => this.session?.walk,
@@ -290,9 +295,24 @@ export class RunScene extends Scene {
     const { run } = session.walk;
     return {
       affected: this.world?.menus.card()?.affected ?? [],
+      explaining: this.world?.input.explanation(),
+      packX: packPoint(session.walk).x,
       run,
-      statuses: statusesOf(session),
       zoneFraction: run.zoneDistance / zoneLength(gameData),
+    };
+  }
+
+  // What the HUD shows that a held press can explain: the walk's effects, its debuffs in the
+  // order they began, and each card's dog.
+  private explainShown(): ExplainShown {
+    const run = this.session?.walk.run;
+    if (run === undefined) {
+      return NOTHING_SHOWN;
+    }
+    return {
+      debuffs: run.debuffs.map(({ debuff }) => debuff),
+      dogs: LAYOUT.dogSlots.map((_, i) => run.pack[i]?.dog),
+      effects: effectItems(gameData, run).length,
     };
   }
 
@@ -311,6 +331,7 @@ export class RunScene extends Scene {
     if (session === undefined) {
       return;
     }
+    this.world?.input.tick(this.game.loop.time);
     const timeScale = timeScaleOf(this.applyCheats());
     this.time.timeScale = timeScale;
     this.tweens.timeScale = timeScale;
@@ -361,7 +382,7 @@ export class RunScene extends Scene {
       session.card === null &&
       session.walk.run.phase.kind === "walking" &&
       this.world !== undefined &&
-      !walkPaused(this.world.menus.pause())
+      !walkPaused(this.runPause())
     );
   }
 
@@ -528,11 +549,17 @@ export class RunScene extends Scene {
   // What holds the walk still, for the walk's steps, the HUD's top bar, and lane moves.
   runPause(): RunPause {
     const hitStop = this.session?.walk.road.hitStop != null;
-    return { ...(this.world?.menus.pause() ?? NO_MENU_PAUSE), hitStop };
+    const hold = this.world?.input.explanation() !== undefined;
+    return { ...(this.world?.menus.pause() ?? NO_MENU_PAUSE), hitStop, hold };
   }
 
   openPause(mode: PauseSceneData["mode"] = "menu"): void {
     this.world?.menus.openPause(mode);
+  }
+
+  // The walk bar's Settings button.
+  openSettings(): void {
+    this.world?.menus.openSettings();
   }
 
   closePause(): void {
@@ -589,7 +616,7 @@ export class RunScene extends Scene {
     const walk = blendWalk(alpha, before, lead);
     const zone = currentZone(gameData, walk.run);
     const still = this.reducedMotion();
-    world.backdrop.draw(walk, zone, packPoint(walk).x, still);
+    world.backdrop.draw(zone);
     world.road.draw(walk, zone, distanceBeforeZone);
     const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
     world.items.draw(walk, halted, still, shadow);
@@ -604,8 +631,4 @@ export class RunScene extends Scene {
     world.hitBoxes.draw(walk, cheatActive(cheats, "hitBoxes"));
     world.shadows.hideUnused();
   }
-}
-
-function statusesOf(session: Session): StatusMark[] {
-  return activeStatuses(session.walk.run, session.statusMarks);
 }

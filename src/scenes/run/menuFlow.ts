@@ -6,7 +6,7 @@ import { playerPaused, type RunPause } from "../../hud/topBar";
 import type { CardView, Choice } from "../../rules/choices";
 import type { CardSceneData } from "../CardScene";
 import { openOverlay } from "../overlay";
-import type { PauseSceneData } from "../PauseScene";
+import type { PauseSceneData, PauseSettings } from "../PauseScene";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
 import type { ZoneCelebrationSceneData } from "../ZoneCelebrationScene";
@@ -22,8 +22,9 @@ export interface MenuFlowHost {
   over: () => boolean;
 }
 
-// Everything that pauses the walk but the hit stop, which the session holds.
-export type MenuPause = Omit<RunPause, "hitStop">;
+// Everything that pauses the walk but the hit stop, which the session holds, and a press held to
+// explain, which the input holds.
+export type MenuPause = Omit<RunPause, "hitStop" | "hold">;
 
 // What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the
 // Home button's question, and the page out of view or focus. pause()
@@ -38,6 +39,8 @@ export class MenuFlow {
   private readonly host: MenuFlowHost;
   private pauseMode: PauseSceneData["mode"] = "menu";
   private pauseOpen = false;
+  // The settings the walk bar's Settings button opens with the menu, once.
+  private pauseSettings: PauseSettings | undefined;
   private readonly scene: Scene;
 
   constructor(scene: Scene, host: MenuFlowHost) {
@@ -157,6 +160,22 @@ export class MenuFlow {
     scene.scene.launch(SCENE_KEYS.pause, this.pauseData());
   }
 
+  // The walk bar's Settings button: the settings over the pause menu. Opened from the walk,
+  // closing them resumes it; opened over the menu or the question, closing them shows the menu.
+  openSettings(): void {
+    if (this.host.over()) {
+      return;
+    }
+    if (this.pauseOpen) {
+      this.pauseMode = "menu";
+      this.pauseSettings = "over";
+      this.scene.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
+      return;
+    }
+    this.pauseSettings = "alone";
+    this.openPause("menu");
+  }
+
   closePause(): void {
     if (!this.pauseOpen) {
       return;
@@ -200,8 +219,13 @@ export class MenuFlow {
       },
       onResume: () => this.closePause(),
     };
-    return this.pauseMode === "homeQuestion"
-      ? { ...answers, mode: "homeQuestion", note: this.host.homeNote() }
-      : { ...answers, mode: "menu" };
+    const settings = this.pauseSettings;
+    this.pauseSettings = undefined;
+    if (this.pauseMode === "homeQuestion") {
+      return { ...answers, mode: "homeQuestion", note: this.host.homeNote() };
+    }
+    return settings === undefined
+      ? { ...answers, mode: "menu" }
+      : { ...answers, mode: "menu", settings };
   }
 }

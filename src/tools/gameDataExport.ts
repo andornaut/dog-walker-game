@@ -3,8 +3,8 @@ import {
   backdropKey,
   cardFrameTag,
   cardZoneKey,
+  dogCardTag,
   dogFaceKey,
-  doghouseTag,
   dogPortraitKey,
   dogSpriteKey,
   encounterSpriteKey,
@@ -147,7 +147,7 @@ export function gameDataExport(data: GameData) {
           startMood: faceMood(data, start),
         },
         keys: {
-          doghouseTag: doghouseTag(data, id),
+          dogCardTag: dogCardTag(data, id),
           face: dogFaceKey(data, id),
           ownerFace: ownerFaceKey(data, id),
           portrait: dogPortraitKey(data, id),

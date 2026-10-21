@@ -1,44 +1,39 @@
 import { describe, expect, it } from "vitest";
 
-import { fittingTextStyle, TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
-import { fontInk } from "../testing/fontInk";
+import { SCREEN_CONFIG } from "../data/screen";
+import { containsPoint } from "../layout/rect";
+import { screenLayout } from "../layout/screenLayout";
 import {
   buttonIcon,
-  DOLLAR_GAP,
   gameplayAllowed,
-  HOME_BUTTON,
-  MONEY_WELL,
-  moneyTop,
-  PAUSE_BUTTON,
   pauseButtonIcon,
   playerPaused,
   pressesHeld,
   type RunPause,
-  SOUND_BUTTON,
-  TOP_BAR,
   TOP_BAR_BUTTONS,
   type TopBarAction,
   topBarAction,
-  type TopBarButton,
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
   walkCovered,
   walkPaused,
-  WELL_INSET,
 } from "./topBar";
+import { WALK_BAR_BUTTONS, walkBarLayout } from "./walkHud";
 
 const WALKING: RunPause = {
   card: false,
   hitStop: false,
+  hold: false,
   menu: "closed",
   page: "shown",
 };
 // A card and the zone celebration hold the walk alike.
 const CARD: RunPause = { ...WALKING, card: true };
 const HIT_STOP: RunPause = { ...WALKING, hitStop: true };
+const HOLD: RunPause = { ...WALKING, hold: true };
 
-describe("the top bar in each pause state", () => {
+describe("the walk bar in each pause state", () => {
   interface Expected {
     // The pause button's icon, and whether lane moves act.
     icon: "icon-pause" | "icon-play";
@@ -49,10 +44,12 @@ describe("the top bar in each pause state", () => {
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
     player: boolean;
-    // What a tap on Home, a tap or key on pause, the M key and a tap on sound do.
+    // What a tap on Home, a tap or key on pause, the M key, and a tap on sound and on Settings
+    // do.
     home: TopBarAction | undefined;
     pause: TopBarAction | undefined;
     mute: TopBarAction | undefined;
+    settings: TopBarAction | undefined;
     sound: TopBarAction | undefined;
   }
 
@@ -66,17 +63,19 @@ describe("the top bar in each pause state", () => {
     pause: "openMenu",
     paused: false,
     player: false,
+    settings: "openSettings",
     sound: "mute",
   } as const;
   const card = { ...walking, covered: true, held: true, paused: true } as const;
   const menu = { ...card, icon: "icon-play", pause: "resume", player: true } as const;
   const confirm = { ...menu, home: undefined } as const;
-  const cover = { ...confirm, pause: undefined, sound: undefined } as const;
+  const cover = { ...confirm, pause: undefined, settings: undefined, sound: undefined } as const;
 
   it.each<[string, RunPause, Expected]>([
     ["walking", WALKING, { ...walking, gameplay: true }],
     ["under a card", CARD, card],
     ["through the hit stop", HIT_STOP, walking],
+    ["while a press holds an explanation, keeping its press", HOLD, { ...walking, paused: true }],
     ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
     ["with the window out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
     ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
@@ -104,6 +103,7 @@ describe("the top bar in each pause state", () => {
       pause: tapPause,
       paused: walkPaused(pause),
       player: playerPaused(pause),
+      settings: topBarAction(pause, "tap", "settings"),
       sound: topBarAction(pause, "tap", "sound"),
     }).toEqual(expected);
   });
@@ -132,77 +132,60 @@ describe("topBarButtonForKey", () => {
   });
 });
 
-describe("the top bar's buttons", () => {
-  // Each 20x20 face, 2px from the next, its icon at +2,+1, and its 44px-square hit area centred
-  // on it from the top of the bar.
-  it.each<[TopBarPress, TopBarButton, number]>([
-    ["home", HOME_BUTTON, 130],
-    ["sound", SOUND_BUTTON, 152],
-    ["pause", PAUSE_BUTTON, 174],
-  ])("puts %s's face at x %i", (press, button, x) => {
-    expect(TOP_BAR_BUTTONS[press]).toBe(button);
-    expect(button).toEqual({
-      face: { x, y: 10 },
-      hit: { height: 44, width: 44, x: x - 12, y: 0 },
+describe("the walk bar's buttons", () => {
+  const { topBar } = screenLayout(SCREEN_CONFIG);
+  const bar = walkBarLayout(topBar);
+
+  it("are the walk bar layout's, left to right, the last ending on the bar's right edge", () => {
+    expect(TOP_BAR_BUTTONS).toEqual(bar.buttons);
+    const hits = WALK_BAR_BUTTONS.map((id) => TOP_BAR_BUTTONS[id].hit);
+    hits.slice(1).forEach((hit, i) => {
+      expect(hit.x).toBe((hits[i]?.x ?? 0) + (hits[i]?.width ?? 0));
     });
-    expect(buttonIcon(button, false)).toEqual({ x: x + 2, y: 11 });
-    expect(buttonIcon(button, true)).toEqual({ x: x + 2, y: 13 });
+    const last = hits.at(-1);
+    expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(topBar.x + topBar.width);
   });
 
-  it("keeps the faces and the hit areas clear of the zone well", () => {
-    for (const { face, hit } of Object.values(TOP_BAR_BUTTONS)) {
-      expect(face.x + 20).toBeLessThan(TOP_BAR.zone.x);
-      expect(hit.x + hit.width).toBeLessThanOrEqual(TOP_BAR.zone.x);
+  it.each(WALK_BAR_BUTTONS.map((id) => [id] as const))(
+    "centres %s's face in its 44px hit area on the bar, its icon 2px in and 1px down",
+    (id) => {
+      const { face, hit } = TOP_BAR_BUTTONS[id];
+      expect([hit.width, hit.height]).toEqual([44, 44]);
+      expect(hit.y).toBe(topBar.y);
+      expect(face.x - hit.x).toBe((hit.width - 20) / 2);
+      expect(face.y + 20).toBeLessThanOrEqual(topBar.y + topBar.height);
+      expect(buttonIcon(TOP_BAR_BUTTONS[id], false)).toEqual({ x: face.x + 2, y: face.y + 1 });
+      expect(buttonIcon(TOP_BAR_BUTTONS[id], true)).toEqual({ x: face.x + 2, y: face.y + 3 });
+    },
+  );
+
+  it("keeps the hit areas clear of the neighbourhood well and the effect wells", () => {
+    for (const { hit } of Object.values(TOP_BAR_BUTTONS)) {
+      for (const well of [bar.zoneWell, ...bar.effectWells, ...bar.effectHolds]) {
+        expect(well.x + well.width).toBeLessThanOrEqual(hit.x);
+      }
     }
   });
 });
 
 describe("topBarButtonAt", () => {
-  // The outer corners of the hit areas, which reach 4px into the band, points just outside
-  // them, and the overlaps, where the nearer face centre (140, 162 or 184) wins.
+  // Each hit area's corners, and points just outside the row of them.
+  const corners = WALK_BAR_BUTTONS.flatMap((id): [number, number, TopBarPress | undefined][] => {
+    const { hit } = TOP_BAR_BUTTONS[id];
+    return [
+      [hit.x, hit.y, id],
+      [hit.x + hit.width - 1, hit.y + hit.height - 1, id],
+    ];
+  });
+  const first = TOP_BAR_BUTTONS[WALK_BAR_BUTTONS[0]].hit;
   it.each<[number, number, TopBarPress | undefined]>([
-    [118, 0, "home"],
-    [118, 43, "home"],
-    [150, 20, "home"],
-    [152, 20, "sound"],
-    [162, 43, "sound"],
-    [172, 20, "sound"],
-    [174, 20, "pause"],
-    [205, 43, "pause"],
-    [140, 44, undefined],
-    [117, 20, undefined],
-    [206, 20, undefined],
-    [300, 20, undefined],
+    ...corners,
+    [first.x - 1, first.y, undefined],
+    [first.x, first.y + first.height, undefined],
   ])("finds at (%i, %i) the %s button", (x, y, expected) => {
     expect(topBarButtonAt(x, y)).toBe(expected);
-  });
-});
-
-// The screen columns text inks in the title font at a style.
-const titleInk = (style: TextFitStyle, text: string) => fontInk("font-title", style, text);
-
-describe("the money well", () => {
-  const dollarRight = MONEY_WELL.dollarX + titleInk({ letterSpacing: 0, scale: 2 }, "$").right;
-  const room = TOP_BAR.money.x + TOP_BAR.money.width - WELL_INSET - (dollarRight + DOLLAR_GAP);
-  const inkWidth = (amount: string) => (style: TextFitStyle) => {
-    const ink = titleInk(style, amount);
-    return ink.right - ink.left;
-  };
-
-  it.each<[string, TextFitStyle]>([
-    ["0", { letterSpacing: 0, scale: 2 }],
-    ["9999", { letterSpacing: 0, scale: 2 }],
-    ["49695", { letterSpacing: -1, scale: 2 }],
-    ["999999", { letterSpacing: 0, scale: 1 }],
-  ])("sets $%s at %o, inside the well", (amount, expected) => {
-    const style = fittingTextStyle(TEXT_FIT_STYLES, inkWidth(amount), room);
-    expect(style).toEqual(expected);
-    expect(inkWidth(amount)(style)).toBeLessThanOrEqual(room);
-  });
-
-  it.each([1, 2])("keeps the amount's capitals' bottom row on the $'s at %ix", (scale) => {
-    expect(moneyTop(scale) + MONEY_WELL.capRows * scale).toBe(
-      MONEY_WELL.top + MONEY_WELL.capRows * 2,
-    );
+    if (expected !== undefined) {
+      expect(containsPoint(TOP_BAR_BUTTONS[expected].hit, x, y)).toBe(true);
+    }
   });
 });

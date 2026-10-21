@@ -5,8 +5,8 @@ import type { Change } from "../rules/causes";
 import { type Cents, cents } from "../rules/units";
 import { agilityWord, newWalkers } from "../rules/walkers";
 import { fillLine } from "../text/lines";
+import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
-import { perkIconKey } from "./stateStrip";
 
 // What plays between a zone's fee coins and the upgrade card, after every zone but the last:
 // the walker that zone unlocks for the first time joins, or else the walker in use cheers over

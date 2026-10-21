@@ -5,7 +5,6 @@ import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
-import { DOGHOUSE } from "../hud/doghouse";
 import { type MoneyTick, retarget, tickShown } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import {
@@ -33,6 +32,7 @@ import {
   trotOffX,
 } from "../hud/moments";
 import { playerPaused, type RunPause } from "../hud/topBar";
+import { DOG_CARD } from "../hud/walkHud";
 import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { type Cents, cents } from "../rules/units";
@@ -47,7 +47,7 @@ import { firstTag, playEffect, playTag } from "./sprites";
 import { addPanel, artFits, tagFrame } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
-// Over the doghouses, labels and quips the HUD draws.
+// Over the cards, labels and owners' tabs the HUD draws.
 const DEPTH = 50;
 // The owner's 32x32 face is drawn at 2x. The pop shows no face on its first frame, the face
 // at 1x on its second and at 2x from its third.
@@ -74,11 +74,13 @@ interface FiredLine {
   text: string;
 }
 
-// The callbacks the HUD gives the moments: floatLabels shows change labels, and firingShown
-// runs once a firing moment is on screen.
+// The callbacks the HUD gives the moments: floatLabels shows change labels, firingShown runs
+// once a firing moment is on screen, and popOwner pops a dog's owner in on its card, in a mood,
+// for ms.
 export interface HudFeedbackHooks {
   firingShown: () => void;
   floatLabels: (labels: ChangeLabel[]) => void;
+  popOwner: (dog: DogId, mood: string, ms: number) => void;
 }
 
 interface SlotWarning {
@@ -86,9 +88,9 @@ interface SlotWarning {
   pulse: Tweens.Tween | undefined;
 }
 
-// The HUD's part of the in-run feedback moments: the firing moment over the doghouse, the
-// low-hearts warning on a doghouse, the zone's fees flying to the bank and a treat thrown to
-// its dog. Moments that play out over time stop with the pause menu, as the walk does, while
+// The HUD's part of the in-run feedback moments: the firing moment over the card, the
+// low-hearts warning on a card, the zone's fees flying to the bank and a treat thrown to its
+// dog. Moments that play out over time stop with the pause menu, as the walk does, while
 // the HUD keeps running under it.
 export class HudFeedback {
   private cardUp = false;
@@ -226,8 +228,8 @@ export class HudFeedback {
     return LAYOUT.dogSlots[index];
   }
 
-  // The owner's fired face pops up at 2x over the doghouse in front of the pop, the plate
-  // drops in in their temperament's colour, and their fired line shows in a bubble pointing
+  // The owner's fired face pops up at 2x on their tab's place over the card in front of the
+  // pop, the plate drops in in their temperament's colour, and their fired line shows in a bubble pointing
   // at the face. The face, pop, plate and line are gone just before the hold ends, and heart
   // pops in their way land at once. Reduced motion keeps the pop and sets the rest in place.
   private playFiring(cue: FiringCue): void {
@@ -418,9 +420,9 @@ export class HudFeedback {
     return true;
   }
 
-  // Each paid dog's coin flies from its roof to the bank while its amount rises from the
-  // roof, and the counter counts each fee as it lands. Reduced motion flies nothing: the
-  // amounts show and fade on the roofs and the counter shows the fees at once.
+  // Each paid dog's coin flies from its card's header to the bank while its amount rises from
+  // the card, and the counter counts each fee as it lands. Reduced motion flies nothing: the
+  // amounts show and fade over the cards and the counter shows the fees at once.
   private playPayout(cues: PayoutCue[]): void {
     const pack = this.run.hudView()?.run.pack;
     if (pack === undefined) {
@@ -501,8 +503,8 @@ export class HudFeedback {
     return this.scene.add.rectangle(at.x, at.y, 10, 10, PALETTE.amber).setDepth(DEPTH + 1);
   }
 
-  // A treat grabbed pops over the dog's face on its doghouse, the owner smiles and the heart
-  // label floats.
+  // A treat grabbed pops over the dog's face on its card, the owner pops in smiling and the
+  // heart label floats.
   private playTreat(cue: TreatCue): void {
     const rect = this.slotOf(cue.dog);
     if (rect === undefined) {
@@ -510,32 +512,18 @@ export class HudFeedback {
       return;
     }
     const half = FACE.size / 2;
-    const at = { x: rect.x + DOGHOUSE.dogFace.x + half, y: rect.y + DOGHOUSE.dogFace.y + half };
+    const { dogFace } = DOG_CARD;
+    const at = { x: rect.x + dogFace.x + half, y: rect.y + dogFace.y + half };
     const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
     playEffect(this.scene, key, TREAT_POP.tag, at, DEPTH);
-    this.smile(cue.dog, rect);
+    this.hooks.popOwner(cue.dog, "happy", MOMENTS.treat.smileMs);
     this.hooks.floatLabels(cue.labels);
   }
 
-  // The owner's happy face over their window for a moment.
-  private smile(dog: DogId, rect: Rect): void {
-    const key = ownerFaceKey(gameData, dog);
-    if (!this.scene.anims.exists(animationKey(key, "happy"))) {
-      return;
-    }
-    const { x, y } = DOGHOUSE.ownerFace;
-    const face = this.scene.add
-      .sprite(rect.x + x, rect.y + y, key)
-      .setOrigin(0)
-      .setDepth(DEPTH);
-    playTag(face, key, "happy");
-    this.after(MOMENTS.treat.smileMs, () => face.destroy());
-  }
-
-  // A doghouse whose owner is on their last heart wears the warning rim, pulsing (static with
-  // reduced motion), and the owner looks worried; without the art, a drawn rim and the warning
-  // sign, so the warning never relies on colour alone. Dropping to the last heart also floats
-  // a one-off "1 ♥ left!" beside the doghouse.
+  // A card whose owner is on their last heart wears the warning rim, pulsing (static with
+  // reduced motion); without the art, a drawn rim and the warning sign, so the warning never
+  // relies on colour alone. Dropping to the last heart also pops the owner in, worried, and
+  // floats a one-off "1 ♥ left!" over the card.
   private showLowHearts(run: RunState): void {
     const low = lowHeartDogs(run.pack);
     const still = this.run.reducedMotion();
@@ -564,8 +552,8 @@ export class HudFeedback {
     if (dog === undefined) {
       return;
     }
-    const key = "ui-doghouse-warn";
-    if (artFits(this.scene, key, DOGHOUSE.size)) {
+    const key = "ui-dog-card-warn";
+    if (artFits(this.scene, key, DOG_CARD.size)) {
       const rim = this.scene.add.sprite(rect.x, rect.y, key).setOrigin(0);
       playTag(rim, key, still ? "static" : "pulse");
       warning.parts.push(rim);
@@ -586,13 +574,6 @@ export class HudFeedback {
         });
       }
     }
-    const face = ownerFaceKey(gameData, dog);
-    if (this.scene.anims.exists(animationKey(face, "worried"))) {
-      const { x, y } = DOGHOUSE.ownerFace;
-      const worried = this.scene.add.sprite(rect.x + x, rect.y + y, face).setOrigin(0);
-      playTag(worried, face, "worried");
-      warning.parts.push(worried);
-    }
   }
 
   private cueLow(dog: DogId, still: boolean): void {
@@ -600,6 +581,7 @@ export class HudFeedback {
     if (rect === undefined) {
       return;
     }
+    this.hooks.popOwner(dog, "worried", MOMENTS.lowCueMs);
     const line = fillNames(gameData.runText.lowHearts, { owner: gameData.dogs[dog].owner.name });
     const text = addPixelText(this.scene, 2, 2, line, {
       color: PALETTE.darkRed,

@@ -42,7 +42,7 @@ const SLICES = {
   // The detail card a held dog or gear tile opens, and the three-slice title band across it.
   "ui-detail-band": { bottom: 0, left: 8, right: 8, top: 0 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
-  // The state strip's bubble and the plate over a hit.
+  // The plate over a hit.
   "ui-hint": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-hit-label": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
@@ -53,7 +53,7 @@ const SLICES = {
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },
   // A three-slice: 4px caps and a middle that stretches.
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
-  // The state strip's tab.
+  // The band behind a choice card row's subtitle.
   "ui-strip-well": { bottom: 8, left: 8, right: 8, top: 8 },
   // A walker, dog or gear tile's face, tagged by its interaction state.
   "ui-tile": { bottom: 4, left: 4, right: 4, top: 4 },

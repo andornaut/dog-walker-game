@@ -6,8 +6,8 @@ import { signedText } from "../text/lines";
 export const FEEDBACK = {
   // The dodge label rises rise pixels and fades over ms.
   dodge: { ms: 900, rise: 10 },
-  // A heart flies into its doghouse over flyMs, peaking peak pixels above its higher end; a
-  // dog's later change in one batch starts staggerMs after the one before. The doghouse shakes
+  // A heart flies into its card over flyMs, peaking peak pixels above its higher end; a
+  // dog's later change in one batch starts staggerMs after the one before. The card shakes
   // by shakeDx, one step a frame of its flash.
   heart: { flyMs: 360, peak: 10, shakeDx: [1, -1, 1, 0], staggerMs: 1200 },
   // The money counter counts to a new amount at msPerDollar a dollar, taking at most maxMs.
@@ -20,7 +20,7 @@ export function heartPopText(amount: number): string {
 }
 
 // What a heart pop covers on its way: its 32x32 frame, its number's chip, and the box its heart
-// flies through to land at to, its doghouse band's top centre (the arc peaks peak pixels
+// flies through to land at to, its card's label band's top centre (the arc peaks peak pixels
 // above the frame's centre).
 export function heartPopCovers(pop: { chip: Rect; frame: Point; to: Point }, peak: number): Rect[] {
   const { chip, frame, to } = pop;

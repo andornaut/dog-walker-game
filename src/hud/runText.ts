@@ -24,6 +24,12 @@ export const RUN_TEXT_FIELDS = {
     forkFees: ["fees"],
     need: ["amount"],
   },
+  explain: {
+    debuff: ["name", "stake"],
+    dog: ["dog", "hearts", "max", "owner", "size"],
+    effect: ["effect", "name"],
+    moreEffects: ["count"],
+  },
   firedBy: ["owner"],
   fullPackHome: ["amount"],
   homeQuestion: {

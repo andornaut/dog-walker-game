@@ -58,7 +58,7 @@ import type { PackView } from "./packView";
 import { showInstantPopup } from "./roadBanners";
 import { DEPTH, firingSeconds, LAYOUT } from "./stage";
 
-// An owner's line, said beside their doghouse.
+// An owner's line, said beside their dog's card.
 export interface QuipBubble {
   dog: DogId;
   text: string;
@@ -282,7 +282,7 @@ export class RunMoments {
     }
   }
 
-  // Each owner who reacted says one of their lines beside their doghouse; an owner who fired
+  // Each owner who reacted says one of their lines beside their dog's card; an owner who fired
   // you says theirs in the firing moment.
   sayQuips(quips: readonly QuipCue[]): void {
     const random = this.deps.quips;
@@ -312,8 +312,8 @@ export class RunMoments {
     }
   }
 
-  // At a zone's end, each dog's pay flies as a coin from its doghouse to the bank while its
-  // amount rises over the doghouse. Returns the zone's changes, for its celebration, and how
+  // At a zone's end, each dog's pay flies as a coin from its card to the bank while its
+  // amount rises over the card. Returns the zone's changes, for its celebration, and how
   // long the coins take to land.
   payOut(fees: readonly MoneyChange[], run: RunState): ZonePayout {
     this.changes.push(...fees);

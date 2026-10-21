@@ -5,7 +5,7 @@ import type { WalkerId, ZoneId } from "../data/types";
 import type { Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
 import { agilityWord } from "../rules/walkers";
-import { perkIconKey } from "./stateStrip";
+import { perkIconKey } from "./effectIcons";
 import { celebrationText, zoneCelebration } from "./zoneCelebration";
 
 function money(kind: "bump" | "pay" | "tip", amount: number): MoneyChange {

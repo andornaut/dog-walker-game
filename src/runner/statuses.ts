@@ -4,7 +4,7 @@ import { encounterLook } from "../rules/skins";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 
-// What a dog shows as an icon on its doghouse slot: each debuff, shown on the dogs the card
+// What a dog shows as a status: each debuff, shown on the dogs the card
 // that applied it affected.
 export type DogStatusId = DebuffId;
 
@@ -82,7 +82,7 @@ export function activeStatuses(
     .sort((a, b) => b.startMs - a.startMs);
 }
 
-// A dog's active statuses, newest first. The doghouse slot shows as many as it has room for.
+// A dog's active statuses, newest first.
 export function statusesOf(active: readonly StatusMark[], dog: DogId): DogStatusId[] {
   return active.filter((mark) => mark.dog === dog).map((mark) => mark.status);
 }

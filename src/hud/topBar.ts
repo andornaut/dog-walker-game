@@ -1,76 +1,27 @@
+import { SCREEN_CONFIG } from "../data/screen";
 import { isMuteKey, isPauseKey } from "../input/keyBindings";
-import { containsPoint, type Point, type Rect } from "../layout/rect";
+import { containsPoint, type Point } from "../layout/rect";
+import { screenLayout } from "../layout/screenLayout";
+import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
-// The run's top bar, as ui-top-bar draws it: the money and zone wells. The zone's name is
-// right-aligned at zone.nameRight.
-export const TOP_BAR = {
-  money: { height: 26, width: 88, x: 4, y: 8 },
-  zone: { height: 29, nameRight: 352, width: 144, x: 212, y: 5 },
-} as const;
+// The walk bar's buttons (walkHud.ts), left to right. A press in a button's hit area is that
+// button's and never a road gesture. "sound" toggles mute, as the M key and the Settings switch
+// do.
+export type TopBarButton = BarButton;
+export type TopBarPress = WalkBarButtonId;
 
-// Text in a well keeps this many pixels clear of the well's edges, and 2px of ink separate the
-// money's "$" from its amount.
-export const WELL_INSET = 2;
-export const DOLLAR_GAP = 2;
-
-// The money well's "$" at 2x from dollarX, the top of its capitals at top. The amount's
-// capitals, capRows font pixels tall, end on the same row as the "$"'s at any scale.
-export const MONEY_WELL = { capRows: 5, dollarX: TOP_BAR.money.x + 22, top: TOP_BAR.money.y + 7 };
-
-// The amount's capitals' top at scale.
-export function moneyTop(scale: number): number {
-  return MONEY_WELL.top + MONEY_WELL.capRows * (2 - scale);
-}
-
-// A top-bar button: its 20x20 face, and a 44px-square hit area so a thumb finds it. The faces
-// sit 2px apart, so neighbouring hit areas overlap, and a press where they do is the button
-// whose face centre is nearer. A press in any of them is that button's and never a road
-// gesture. Pause's ends at x=206, clear of the zone well and the effect icons.
-export interface TopBarButton {
-  face: Point;
-  hit: Rect;
-}
-
-const FACE = 20;
-const HIT = 44;
-
-function topBarButton(x: number, y: number): TopBarButton {
-  const inset = (HIT - FACE) / 2;
-  return { face: { x, y }, hit: { height: HIT, width: HIT, x: x - inset, y: 0 } };
-}
-
-export const HOME_BUTTON = topBarButton(130, 10);
-export const SOUND_BUTTON = topBarButton(152, 10);
-export const PAUSE_BUTTON = topBarButton(174, 10);
-
-// "sound" toggles mute, as the M key and the Settings switch do.
-export type TopBarPress = "home" | "pause" | "sound";
-
-export const TOP_BAR_BUTTONS: Readonly<Record<TopBarPress, TopBarButton>> = {
-  home: HOME_BUTTON,
-  pause: PAUSE_BUTTON,
-  sound: SOUND_BUTTON,
-};
+export const TOP_BAR_BUTTONS: Readonly<Record<TopBarPress, TopBarButton>> = walkBarLayout(
+  screenLayout(SCREEN_CONFIG).topBar,
+).buttons;
 
 // The icon sits on the button's face, 2px lower while pressed.
 export function buttonIcon(button: TopBarButton, pressed: boolean): Point {
   return { x: button.face.x + 2, y: button.face.y + (pressed ? 3 : 1) };
 }
 
-// The button a press at (x, y) lands on, if any: of the hit areas holding it, the one whose
-// face centre is nearest across.
+// The button a press at (x, y) lands on, if any.
 export function topBarButtonAt(x: number, y: number): TopBarPress | undefined {
-  let found: { distance: number; press: TopBarPress } | undefined;
-  for (const [press, button] of Object.entries(TOP_BAR_BUTTONS) as [TopBarPress, TopBarButton][]) {
-    if (!containsPoint(button.hit, x, y)) {
-      continue;
-    }
-    const distance = Math.abs(x - (button.face.x + FACE / 2));
-    if (found === undefined || distance < found.distance) {
-      found = { distance, press };
-    }
-  }
-  return found?.press;
+  return WALK_BAR_BUTTONS.find((press) => containsPoint(TOP_BAR_BUTTONS[press].hit, x, y));
 }
 
 // M mutes, and P and Escape are the pause button's. A held key's repeats press nothing.
@@ -85,26 +36,27 @@ export function topBarButtonForKey(repeat: boolean, key: string): TopBarPress | 
 }
 
 // What holds the walk still. card: a card or the zone celebration, which can sit under the
-// pause menu or the Home button's question, as the hit stop can. Help and settings, opened from
-// the menu, cover the whole screen, top bar included. page: the tab is hidden or the window has
-// lost focus.
+// pause menu or the Home button's question, as the hit stop can. hold: a press held on the HUD
+// shows what it explains. Help and settings cover the whole screen, walk bar included. page:
+// the tab is hidden or the window has lost focus.
 export interface RunPause {
   card: boolean;
   hitStop: boolean;
+  hold: boolean;
   menu: "closed" | "confirmHome" | "help" | "open" | "settings";
   page: "blurred" | "hidden" | "shown";
 }
 
 // Whether the walk is paused: no scroll, timers, needs or pulls, and the session does not step.
-// Every overlay over the walk, and the page out of view or focus, pauses it. A hit stop is part
-// of the walk and steps on.
+// Every overlay over the walk, a press held to explain, and the page out of view or focus pause
+// it. A hit stop is part of the walk and steps on.
 export function walkPaused(pause: Omit<RunPause, "hitStop">): boolean {
-  return pause.card || pause.menu !== "closed" || pause.page !== "shown";
+  return pause.card || pause.hold || pause.menu !== "closed" || pause.page !== "shown";
 }
 
 // Whether the player paused the walk: the pause menu and what opens from it, or the Home
-// question. The music ducks and the walk's timers stop; a card or the celebration pauses the
-// walk without either.
+// question. The music ducks and the walk's timers stop; a card, the celebration or a held
+// explanation pauses the walk without either.
 export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
   return pause.menu !== "closed";
 }
@@ -114,7 +66,8 @@ export function walkCovered(pause: RunPause): boolean {
   return pause.card || pause.menu !== "closed";
 }
 
-// Whether the walk drops its presses: under a card or a menu.
+// Whether the walk drops its presses: under a card or a menu. A held explanation keeps its
+// press, whose release resumes the walk.
 export function pressesHeld(pause: RunPause): boolean {
   return walkCovered(pause);
 }
@@ -124,13 +77,14 @@ export function gameplayAllowed(pause: RunPause): boolean {
   return !walkPaused(pause) && !pause.hitStop;
 }
 
-export type TopBarAction = "confirmHome" | "mute" | "openMenu" | "resume";
+export type TopBarAction = "confirmHome" | "mute" | "openMenu" | "openSettings" | "resume";
 
-// What a top-bar button does, pressed by a tap or by its key. Every button works whenever the
-// bar is in view: Home asks whether to head home, from the pause menu too, sound and M mute
-// or unmute, and pause opens the menu, or resumes while the menu or the question is up. Help
-// and settings cover the bar, so a tap there is theirs, and so are P and Escape, which close
-// them. M still mutes under help; settings flips its own sound switch on M.
+// What a walk-bar button does, pressed by a tap or by its key. Every button works whenever the
+// bar is in view: Home asks whether to head home, from the pause menu too, sound and M mute or
+// unmute, Settings opens the settings, and pause opens the menu, or resumes while the menu or
+// the question is up. Help and settings cover the bar, so a tap there is theirs, and so are P
+// and Escape, which close them. M still mutes under help; settings flips its own sound switch
+// on M.
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",
@@ -140,13 +94,18 @@ export function topBarAction(
     const mutes = pause.menu === "help" && via === "key" && button === "sound";
     return mutes ? "mute" : undefined;
   }
-  if (button === "home") {
-    return pause.menu === "confirmHome" ? undefined : "confirmHome";
+  switch (button) {
+    case "home":
+      return pause.menu === "confirmHome" ? undefined : "confirmHome";
+    case "sound":
+      return "mute";
+    case "settings":
+      return "openSettings";
+    case "pause":
+      return pause.menu === "closed" ? "openMenu" : "resume";
+    default:
+      return button satisfies never;
   }
-  if (button === "sound") {
-    return "mute";
-  }
-  return pause.menu === "closed" ? "openMenu" : "resume";
 }
 
 // The pause button shows play while the walk is paused by the menu or the question, since a

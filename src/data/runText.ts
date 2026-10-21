@@ -17,6 +17,12 @@ export const RUN_TEXT = {
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Whole walk" },
   },
   dodge: "Dodge!",
+  explain: {
+    debuff: "{name}: {stake}",
+    dog: "{dog}: {size}, {hearts}/{max}♥, owner {owner}",
+    effect: "{name}: {effect}",
+    moreEffects: "+{count}",
+  },
   fired: "FIRED!",
   firedBy: "{owner} fired you!",
   fullPackHome: "Full pack home! +{amount}",

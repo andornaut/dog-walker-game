@@ -2,8 +2,8 @@ import type { DogId } from "../data/types";
 import type { Point, Rect } from "../layout/rect";
 import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
-import { DOGHOUSE } from "./doghouse";
 import type { ChangeLabel } from "./hudView";
+import { DOG_CARD, OWNER_TAB, WALK_BAR } from "./walkHud";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
 // zone's pay banked, and a treat grabbed.
@@ -37,16 +37,19 @@ export const MOMENTS = {
   // The one-off cue when an owner drops to lowHearts.
   lowCueMs: 1500,
   lowHearts: 1,
-  // Each fee's coin leaves its doghouse's roof staggerMs after the slot above's, bowing bow
+  // Each fee's coin leaves its card's header staggerMs after the slot before's, bowing bow
   // pixels right of the straight line, and takes flightMs to reach the bank; the amount rises
-  // from the roof and fades over chipMs.
+  // from the header and fades over chipMs.
   payout: { bow: 48, chipMs: 900, flightMs: 650, roof: { x: 60, y: 10 }, staggerMs: 200 },
   // The owner smiles this long over a treat grabbed.
   treat: { smileMs: 900 },
 } as const;
 
-// The top bar's money icon's centre, where coins land.
-export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 } } as const;
+// The walk bar's coin's centre, where coins land.
+const COIN_HALF = 8;
+export const TOP_BAR_POINTS = {
+  bank: { x: WALK_BAR.cash.coin.x + COIN_HALF, y: WALK_BAR.cash.coin.y + COIN_HALF },
+} as const;
 
 // An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the
 // bubble's bottom rim, and tipX is the column it points from.
@@ -72,7 +75,7 @@ export function bubbleX(screenWidth: number, centreX: number, width: number): nu
   return Math.round(Math.min(Math.max(2, centreX - width / 2), screenWidth - width - 2));
 }
 
-// Fired lines' bubbles all sit on one row, over the doghouses' faces. One opening beside
+// Fired lines' bubbles all sit on one row, over the owners' faces. One opening beside
 // another keeps LINE_GAP pixels from it, and its tail starts at least LINE_TAIL_INSET in from
 // its edges, past the bubble's rim.
 const LINE_GAP = 2;
@@ -106,25 +109,28 @@ export function firingShowMs(seconds: number): number {
   return Math.max(0, seconds * 1000 - MOMENTS.firingEndMarginMs);
 }
 
-// The firing moment's parts, from the slot's top-left corner, rising over the road above
-// the doghouse: the owner's face at 2x centred on face, the 64x64 pop drawn at 2x from pop,
-// the plate on the roof, as wide as the roof's name plate and its 3px rim and 1px more each
-// side, and the fired line's bubble centred over line, its bottom edge on it, with the 8x6
-// tail's top row at tail.y over the bubble's rim, its tip at tail.x.
+// The firing moment's parts, from the card's top-left corner: the owner's face at 2x centred on
+// the owner's tab, the 64x64 pop drawn at 2x from pop, centred on the face, the plate on the
+// card's body under the face, as wide as the card's name and PLATE_REACH more each side, and
+// the fired line's bubble centred over line, its bottom edge on it, with the 8x6 tail's top
+// row at tail.y over the bubble's rim, its tip at tail.x, LINE_CLEARANCE over the face's top.
 const PLATE_REACH = 4;
+const FACE_HALF = 32;
+const LINE_CLEARANCE = 6;
+const FACE = { x: OWNER_TAB.x + OWNER_TAB.size / 2, y: OWNER_TAB.y + OWNER_TAB.size / 2 };
 export const FIRING_PARTS = {
-  face: { x: 60, y: -34 },
-  line: { x: 60, y: -72 },
+  face: FACE,
+  line: { x: FACE.x, y: FACE.y - FACE_HALF - LINE_CLEARANCE },
   plate: {
     height: 28,
-    width: DOGHOUSE.name.width + 2 * PLATE_REACH,
-    x: DOGHOUSE.name.x - DOGHOUSE.name.width / 2 - PLATE_REACH,
-    y: -2,
+    width: DOG_CARD.name.room + 2 * PLATE_REACH,
+    x: DOG_CARD.name.x - DOG_CARD.name.room / 2 - PLATE_REACH,
+    y: FACE.y + FACE_HALF + 2,
   },
   // "FIRED!" is centred across the plate, the top of its capitals this far down.
   plateText: { y: 9 },
-  pop: { x: -4, y: -98 },
-  tail: { x: 60, y: -73 },
+  pop: { x: FACE.x - 2 * FACE_HALF, y: FACE.y - 2 * FACE_HALF },
+  tail: { x: FACE.x, y: FACE.y - FACE_HALF - LINE_CLEARANCE - 1 },
 } as const;
 
 // The firing moment's parts on screen for the dog in slot.
@@ -170,7 +176,7 @@ export interface PayoutFlight extends PayoutCue {
   startMs: number;
 }
 
-// Each paid dog's coins, top slot first, leaving their doghouse in turn. With reduced motion
+// Each paid dog's coins, first slot first, leaving their card in turn. With reduced motion
 // nothing flies: every amount lands at once.
 export function payoutFlights(
   cues: readonly PayoutCue[],
@@ -188,11 +194,11 @@ export function payoutFlights(
     });
 }
 
-// A fee's amount on its 16px tag starts gap pixels above its doghouse's roof, clear of the
-// faces and hearts, and rises rise pixels over the road.
+// A fee's amount on its 16px tag starts gap pixels above its card, and rises rise pixels over
+// the road.
 export const PAYOUT_TAG = { gap: 2, height: 16, rise: 14 } as const;
 
-// The tag's top as it starts, for the doghouse at slot.
+// The tag's top as it starts, for the card at slot.
 export function payoutTagTop(slot: Pick<Rect, "y">): number {
   return slot.y - PAYOUT_TAG.gap - PAYOUT_TAG.height;
 }

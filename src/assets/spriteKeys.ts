@@ -64,8 +64,8 @@ export function ownerFaceKey(data: Pick<GameData, "dogs">, dog: DogId): string {
   return `face-owner-${data.dogs[dog].art}`;
 }
 
-// The doghouse slot's tag: the dog's roof, or the grey empty house of a fired dog.
-export function doghouseTag(data: Pick<GameData, "dogs">, dog: DogId | null): string {
+// The dog card's tag: the dog's card, or the empty card of a fired dog.
+export function dogCardTag(data: Pick<GameData, "dogs">, dog: DogId | null): string {
   return dog === null ? "empty" : data.dogs[dog].art;
 }
 

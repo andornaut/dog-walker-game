@@ -1,69 +1,71 @@
 import { type GameObjects, Scene } from "phaser";
 
 import { MONEY_ICON_KEY, statusIconKey } from "../assets/iconKeys";
-import {
-  dogFaceKey,
-  doghouseTag,
-  ownerFaceKey,
-  ZONE_PIPS_KEY,
-  zoneIconKey,
-} from "../assets/spriteKeys";
+import { dogCardTag, dogFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { AchievementId, HintTrigger } from "../data/types";
+import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
 import { dollarAmountText } from "../home/home";
-import { DOGHOUSE, doghouseHearts, fittingScale, heartCount, slotShown } from "../hud/doghouse";
+import {
+  effectIconFallback,
+  effectIconKey,
+  type EffectItem,
+  effectItems,
+  effectItemsKey,
+} from "../hud/effectIcons";
+import { explainLines } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
-import { centredInLane, hudLanes } from "../hud/hudLanes";
+import { hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
-import { STRIP_LINE_FIELDS } from "../hud/runText";
-import { stripItems } from "../hud/stateStrip";
+import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "../hud/runText";
 import {
   buttonIcon,
-  DOLLAR_GAP,
-  HOME_BUTTON,
-  MONEY_WELL,
-  moneyTop,
-  PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
-  SOUND_BUTTON,
-  TOP_BAR,
+  TOP_BAR_BUTTONS,
   topBarAction,
   type TopBarButton,
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
-  WELL_INSET,
 } from "../hud/topBar";
-import { insetRect, type Rect } from "../layout/rect";
+import {
+  cardHearts,
+  cardNameFit,
+  cashScale,
+  cashTop,
+  DEBUFF_BAR,
+  debuffBarRects,
+  debuffFillWidth,
+  DOG_CARD,
+  effectSlots,
+  type ExplainTarget,
+  leadSlot,
+  slotShown,
+  WALK_BAR,
+  WALK_BAR_BUTTONS,
+  walkBarLayout,
+} from "../hud/walkHud";
+import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { maxHearts } from "../rules/dogs";
+import { debuffLasting } from "../rules/durations";
 import { hintFor } from "../rules/hints";
 import { currentZone, walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
-import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
 import { fillLine } from "../text/lines";
-import { drawDashedRect, drawFramedRect, drawHeart, drawRing, fillRect } from "./draw";
+import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
 import { onSceneEvent } from "./overlay";
+import { OwnerTabs } from "./ownerTabs";
 import { colorFromHex, PALETTE } from "./palette";
-import {
-  addPixelText,
-  fitPixelText,
-  inkSpan,
-  placePixelText,
-  scalePixelText,
-  setPixelText,
-  wrapPixelText,
-} from "./pixelText";
+import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
 import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,
@@ -77,78 +79,85 @@ import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
-import { StateStripView } from "./stateStripView";
-import { addPanel, artFits, BUBBLE_FADE_MS, fadeAway, soundIcon } from "./uiKit";
+import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from "./uiKit";
 
-// The zone's name is right-aligned in its well, its icon just left of it, and the pips end
-// under the name's right edge.
-const ZONE_WELL = { right: TOP_BAR.zone.nameRight, y: TOP_BAR.zone.y + 4 };
-const PIP = {
-  gap: 3,
-  height: 8,
-  width: 18,
-  x: ZONE_WELL.right + 3 - walkLength(gameData) * 21,
-  y: TOP_BAR.zone.y + 17,
-};
 const LAYOUT = screenLayout(SCREEN_CONFIG);
+const BAR = walkBarLayout(LAYOUT.topBar);
 const LANES = hudLanes(LAYOUT);
+// A pip of ui-zone-pips.
+const PIP = { height: 8, width: 18 };
 const LABEL = { height: 20, ms: 1100 };
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
-// An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x. It
-// draws over the doghouses and their heart-loss flash (depth 0), under the HUD's moments.
-const QUIP = { depth: 30, holdMs: 2600, padding: 4 };
+// An owner's quip shows this long, and their tab this long on a heart change.
+const QUIP_HOLD_MS = 2600;
+const HEART_TAB_MS = 1200;
+// A card holds up to three rows of five hearts.
+const MAX_CARD_HEARTS = 15;
+const HEART_KEY = "ui-heart";
+const CARD_KEY = "ui-dog-card";
 
-interface SlotView {
-  anchors: { name: { x: number; y: number }; ownerName: { x: number; y: number } };
-  count: GameObjects.BitmapText;
+// Each debuff bar's colours the game draws with: the fill, the name, and the face drawn while
+// the bar art is missing.
+const DEBUFF_COLORS: Readonly<Record<string, { face: number; fill: number; name: number }>> = {
+  muddy: { face: PALETTE.brown, fill: PALETTE.tan, name: PALETTE.ink },
+  stinky: { face: PALETTE.mauve, fill: PALETTE.pink, name: PALETTE.white },
+  zoomies: { face: PALETTE.blue, fill: PALETTE.cyan, name: PALETTE.ink },
+};
+const DEBUFF_FALLBACK = { face: PALETTE.slate, fill: PALETTE.cream, name: PALETTE.white };
+
+interface CardView {
+  card: GameObjects.Sprite;
   dogFace: GameObjects.Sprite;
   fired: GameObjects.BitmapText;
   hearts: GameObjects.Sprite[];
-  house: GameObjects.Sprite;
+  lead: GameObjects.Image | GameObjects.BitmapText;
   name: GameObjects.BitmapText;
-  ownerFace: GameObjects.Sprite;
-  ownerName: GameObjects.BitmapText;
-  statuses: GameObjects.Image[];
 }
 
-// A slot's parts that shake with it.
-function slotParts(view: SlotView | undefined): GameObjects.Components.Transform[] {
+// A card's parts that shake with it.
+function cardParts(view: CardView | undefined): GameObjects.Components.Transform[] {
   if (view === undefined) {
     return [];
   }
-  const { count, dogFace, fired, hearts, house, name, ownerFace, ownerName, statuses } = view;
-  return [house, dogFace, ownerFace, name, ownerName, count, fired, ...hearts, ...statuses];
+  const { card, dogFace, fired, hearts, lead, name } = view;
+  return [card, dogFace, name, fired, lead, ...hearts];
 }
 
-// The top bar and doghouses, drawn over the road for the whole walk and kept in view while
-// cards are up. It reads the run from RunScene every frame and redraws what changed, and
-// shows the run's change labels, first-time hints and owners' quips. It keeps running while
-// the walk is paused, so the top bar's buttons and their keys work in every state; its
-// animations run on too, being the bar's and not the walk's.
+interface DebuffBarView {
+  debuff: DebuffId;
+  parts: GameObjects.GameObject[];
+  rect: Rect;
+}
+
+// The walk bar, the debuff bars and the dog cards, drawn over the road for the whole walk and
+// kept in view while cards are up. It reads the run from RunScene every frame and redraws what
+// changed, and shows the run's change labels, first-time hints, owners' pop-ins and what a held
+// press explains. It keeps running while the walk is paused, so the bar's buttons and their
+// keys work in every state; its animations run on too, being the bar's and not the walk's.
 export class HudScene extends Scene {
+  private bankLabels: ChangeLabel[] = [];
+  private bankShowing = false;
+  private cards: CardView[] = [];
+  private debuffBars: DebuffBarView[] = [];
+  private debuffFills: GameObjects.Graphics | undefined;
+  private dollar: GameObjects.BitmapText | undefined;
   private drawn: Record<string, unknown> = {};
   private dynamic: GameObjects.Graphics | undefined;
+  private effectParts: GameObjects.GameObject[] = [];
+  private explained = "";
   private feedback: HudFeedback | undefined;
-  // The affected doghouses' frames, over the house art.
-  private frames: GameObjects.Graphics | undefined;
   private hearts: HeartFeedback | undefined;
-  private dollar: GameObjects.BitmapText | undefined;
+  private messages = new MessageStrip();
   private money: GameObjects.BitmapText | undefined;
+  private owners: OwnerTabs | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
   private pips: GameObjects.Sprite[] = [];
-  private bankLabels: ChangeLabel[] = [];
-  private bankShowing = false;
-  private messages = new MessageStrip();
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
-  private slots: SlotView[] = [];
   private soundHolder: GameObjects.Container | undefined;
-  private strip: StateStripView | undefined;
-
-  private zoneIcon: GameObjects.Image | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
 
   constructor() {
@@ -158,68 +167,73 @@ export class HudScene extends Scene {
   create(): void {
     const { dogRow, dogSlots, topBar } = LAYOUT;
     this.drawn = {};
+    this.debuffBars = [];
+    this.effectParts = [];
+    this.explained = "";
     this.messages = new MessageStrip();
     this.quips = [];
     this.quipShowing = false;
     this.bankLabels = [];
     this.bankShowing = false;
     const g = this.add.graphics();
-    // The band under the doghouses ends on the screen's bottom row, its top rows (the divider)
+    // The card band ends on the screen's bottom row, its top rows (the shadow and the trim)
     // over the road's last rows.
-    if (this.textures.exists("ui-dog-band")) {
-      this.add.image(dogRow.x, dogRow.y + dogRow.height, "ui-dog-band").setOrigin(0, 1);
+    if (this.textures.exists("ui-dog-card-band")) {
+      this.add.image(dogRow.x, dogRow.y + dogRow.height, "ui-dog-card-band").setOrigin(0, 1);
     } else {
       fillRect(g, PALETTE.darkBrown, dogRow);
     }
-    if (this.textures.exists("ui-top-bar")) {
-      this.add.image(topBar.x, topBar.y, "ui-top-bar").setOrigin(0);
+    if (this.textures.exists("ui-walk-bar")) {
+      this.add.image(topBar.x, topBar.y, "ui-walk-bar").setOrigin(0);
     } else {
       fillRect(g, PALETTE.plum, topBar);
-      fillRect(g, PALETTE.darkBrown, { ...topBar, height: 2, y: topBar.y + topBar.height - 2 });
-      [TOP_BAR.money, TOP_BAR.zone].forEach((well) => fillRect(g, PALETTE.ink, well));
+      [WALK_BAR.cash.well, BAR.zoneWell].forEach((well) => fillRect(g, PALETTE.ink, well));
     }
-    this.addButton(HOME_BUTTON);
+    WALK_BAR_BUTTONS.forEach((id) => this.addButton(TOP_BAR_BUTTONS[id]));
     this.addHomeIcon();
-    this.addButton(SOUND_BUTTON);
     // A container holds the icon's place in the draw order while it is swapped.
     this.soundHolder = this.add.container(0, 0);
     this.showSoundIcon(isMuted(this));
-    this.addButton(PAUSE_BUTTON);
-    const pauseIcon = buttonIcon(PAUSE_BUTTON, false);
+    const settings = buttonIcon(TOP_BAR_BUTTONS.settings, false);
+    if (imageIcon(this, "icon-settings", settings.x, settings.y).length === 0) {
+      cogIcon(this, settings.x, settings.y);
+    }
+    const pauseIcon = buttonIcon(TOP_BAR_BUTTONS.pause, false);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
 
-    const { money: moneyWell, zone: zoneWell } = TOP_BAR;
-    this.add.image(moneyWell.x + 4, moneyWell.y + 5, MONEY_ICON_KEY).setOrigin(0);
-    const money = { font: "title", scale: 2 } as const;
-    this.dollar = addPixelText(this, MONEY_WELL.dollarX, MONEY_WELL.top, "$", {
-      color: PALETTE.amber,
-      ...money,
-    });
-    this.money = addPixelText(this, 0, MONEY_WELL.top, "", { color: PALETTE.cream, ...money });
-    this.zoneIcon = this.add.image(0, zoneWell.y - 1, "__DEFAULT").setOrigin(1, 0);
-    this.zoneLabel = addPixelText(this, ZONE_WELL.right, ZONE_WELL.y, "", {
+    const { cash, zone } = WALK_BAR;
+    this.add.image(topBar.x + cash.coin.x, topBar.y + cash.coin.y, MONEY_ICON_KEY).setOrigin(0);
+    const title = { font: "title" } as const;
+    this.dollar = addPixelText(this, 0, 0, "$", { color: PALETTE.amber, ...title });
+    this.money = addPixelText(this, 0, 0, "", { color: PALETTE.cream, ...title });
+    this.zoneLabel = addPixelText(this, zone.name.x, topBar.y + zone.name.y, "", {
       color: PALETTE.cream,
-      font: "title",
-      originX: 1,
+      originX: 0.5,
     });
     this.pips = Array.from({ length: walkLength(gameData) }, (_, i) =>
-      this.add.sprite(PIP.x + i * (PIP.width + PIP.gap), PIP.y, ZONE_PIPS_KEY).setOrigin(0),
+      this.add
+        .sprite(zone.pips.x + i * zone.pips.pitch, topBar.y + zone.pips.y, ZONE_PIPS_KEY)
+        .setOrigin(0),
     );
     this.dynamic = this.add.graphics();
-    this.slots = dogSlots.map((rect) => this.createSlot(rect));
-    this.frames = this.add.graphics();
-    this.strip = new StateStripView(this);
+    this.debuffFills = this.add.graphics().setDepth(1);
+    this.cards = dogSlots.map((rect) => this.createCard(rect));
 
     const run = this.runScene();
+    this.owners = new OwnerTabs(this, {
+      packX: () => run.hudView()?.packX ?? LAYOUT.road.x + LAYOUT.road.width / 2,
+      still: () => run.reducedMotion(),
+    });
     this.feedback = new HudFeedback(this, run, {
       firingShown: () => this.hearts?.clearWay(),
       floatLabels: (labels) => this.floatLabels(labels),
+      popOwner: (dog, mood, ms) => this.popOwner(dog, mood, ms),
     });
     this.hearts = new HeartFeedback(this, {
       clearOf: () => this.feedback?.firingRects() ?? [],
       landed: (label, lane) => this.showHeartLabel(label, lane),
-      quipTop: LANES.quip.y,
+      quipTop: LANES.ownerTabs.y,
       still: () => run.reducedMotion(),
     });
     onSceneEvent(this, run.events, ACHIEVEMENTS_EVENT, (ids: AchievementId[]) =>
@@ -274,6 +288,9 @@ export class HudScene extends Scene {
       case "openMenu":
         run.openPause();
         break;
+      case "openSettings":
+        run.openSettings();
+        break;
       case "resume":
         run.closePause();
         break;
@@ -299,7 +316,7 @@ export class HudScene extends Scene {
 
   // icon-home on Home's face, else a cream house drawn on it.
   private addHomeIcon(): void {
-    const { x, y } = buttonIcon(HOME_BUTTON, false);
+    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.home, false);
     if (this.textures.exists("icon-home")) {
       this.add.image(x, y, "icon-home").setOrigin(0);
       return;
@@ -320,7 +337,7 @@ export class HudScene extends Scene {
       return;
     }
     holder.removeAll(true);
-    const { x, y } = buttonIcon(SOUND_BUTTON, false);
+    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.sound, false);
     holder.add(soundIcon(this, !muted, x, y));
   }
 
@@ -337,63 +354,49 @@ export class HudScene extends Scene {
     if (art) {
       return;
     }
+    const { x, y } = TOP_BAR_BUTTONS.pause.face;
     if (key === "icon-play") {
-      this.drawPlayTriangle(g);
-    } else {
-      this.drawPauseBars(g);
+      // Columns narrowing to a point, over the same 8x10 the pause bars cover.
+      [10, 8, 8, 6, 6, 4, 2, 2].forEach((height, i) => {
+        fillRect(g, PALETTE.cream, { height, width: 1, x: x + 6 + i, y: y + 10 - height / 2 });
+      });
+      return;
     }
-  }
-
-  private drawPauseBars(g: GameObjects.Graphics): void {
-    const { x, y } = PAUSE_BUTTON.face;
     for (const dx of [6, 11]) {
       fillRect(g, PALETTE.cream, { height: 10, width: 3, x: x + dx, y: y + 5 });
     }
   }
 
-  // Columns narrowing to a point, over the same 8x10 the pause bars cover.
-  private drawPlayTriangle(g: GameObjects.Graphics): void {
-    const { x, y } = PAUSE_BUTTON.face;
-    [10, 8, 8, 6, 6, 4, 2, 2].forEach((height, i) => {
-      fillRect(g, PALETTE.cream, { height, width: 1, x: x + 6 + i, y: y + 10 - height / 2 });
-    });
-  }
-
-  private createSlot({ x, y }: Rect): SlotView {
-    const at = (point: { x: number; y: number }) => ({ x: x + point.x, y: y + point.y });
+  private createCard({ x, y }: Rect): CardView {
     const sprite = (key: string, point: { x: number; y: number }) =>
-      this.add.sprite(at(point).x, at(point).y, key).setOrigin(0).setVisible(false);
-    const name = at(DOGHOUSE.name);
-    const count = at(DOGHOUSE.heartCount);
-    const fired = at(DOGHOUSE.fired);
-    const owner = at(DOGHOUSE.ownerName);
-    // The house first, so the faces, hearts and labels draw over it.
-    const house = sprite("ui-doghouse", { x: 0, y: 0 });
+      this.add
+        .sprite(x + point.x, y + point.y, key)
+        .setOrigin(0)
+        .setVisible(false);
+    // The card first, so the face, hearts and labels draw over it.
+    const card = sprite(CARD_KEY, { x: 0, y: 0 });
+    const { fired, lead, name } = DOG_CARD;
+    const leadTag = this.textures.exists("ui-lead-tag")
+      ? this.add.image(x + lead.x, y + lead.y, "ui-lead-tag").setOrigin(0)
+      : addPixelText(this, x + lead.x + 2, y + lead.y + 3, "Lead", {
+          color: PALETTE.amber,
+          font: "title",
+        });
     return {
-      anchors: { name, ownerName: owner },
-      count: addPixelText(this, count.x, count.y, "", {
-        color: PALETTE.darkRed,
-        font: "title",
-        originX: 0.5,
-      }),
-      dogFace: sprite("treat", DOGHOUSE.dogFace),
-      fired: addPixelText(this, fired.x, fired.y, "", {
+      card,
+      dogFace: sprite("treat", DOG_CARD.dogFace),
+      fired: addPixelText(this, x + fired.x, y + fired.y, "", {
         color: PALETTE.white,
         font: "title",
         originX: 0.5,
       }),
-      hearts: doghouseHearts(0, 11).map((cell) => sprite("ui-heart", cell)),
-      house,
-      name: addPixelText(this, name.x, name.y, "", {
-        color: PALETTE.plum,
+      hearts: Array.from({ length: MAX_CARD_HEARTS }, () => sprite(HEART_KEY, { x: 0, y: 0 })),
+      lead: leadTag.setVisible(false),
+      name: addPixelText(this, x + name.x, y, "", {
+        color: PALETTE.cream,
         font: "title",
         originX: 0.5,
       }),
-      ownerFace: sprite("treat", DOGHOUSE.ownerFace),
-      ownerName: addPixelText(this, owner.x, owner.y, "", { color: PALETTE.plum }),
-      statuses: DOGHOUSE.statuses.map((cell) =>
-        this.add.image(at(cell).x, at(cell).y, "__DEFAULT").setOrigin(0).setVisible(false),
-      ),
     };
   }
 
@@ -405,14 +408,16 @@ export class HudScene extends Scene {
     }
     const pause = run.runPause();
     this.feedback?.update(view.run, pause);
-    this.strip?.show(stripItems(gameData, view.run));
     this.raiseHints(runHintTriggers(view.run));
+    this.showExplanation(view);
+    this.showDebuffBars(view.run);
     const overlay = this.overlayScene();
     const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
-    this.messages.update(delta, overlay, depth);
+    this.messages.update(delta, overlay, depth, this.debuffBars.length);
+    const effects = effectItems(gameData, view.run);
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
-      affected: view.affected.join(),
+      effects: effectItemsKey(effects),
       fill: Math.round(view.zoneFraction * PIP.width),
       modifiers: view.run.modifiers,
       money: this.shownMoney(view.run.money),
@@ -420,12 +425,14 @@ export class HudScene extends Scene {
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
       route: view.run.route,
-      statuses: statusesKey(view.statuses),
       zone: view.run.zoneIndex,
     };
     if (Object.keys(state).some((key) => state[key] !== this.drawn[key])) {
       if (state.muted !== this.drawn.muted) {
         this.showSoundIcon(isMuted(this));
+      }
+      if (state.effects !== this.drawn.effects) {
+        this.showEffects(effects);
       }
       this.drawn = state;
       this.showPauseIcon(pause);
@@ -438,19 +445,149 @@ export class HudScene extends Scene {
     return this.feedback?.shownMoney(money) ?? money;
   }
 
-  // The amount DOLLAR_GAP after the "$" ink, in the first of TEXT_FIT_STYLES that ends
-  // WELL_INSET inside the money well, the bottom row of its capitals on the "$"'s.
+  // The "$" and the amount from the cash's x at the largest scale that fits, one font advance
+  // apart, their capitals' bottom on the same row at every scale.
   private showMoney(amount: string): void {
     const { dollar, money } = this;
     if (dollar === undefined || money === undefined || money.text === amount) {
       return;
     }
+    setPixelText(money, `$${amount}`);
+    scalePixelText(money, 1, 0, 0);
+    const whole = money.width;
     setPixelText(money, amount);
-    const well = TOP_BAR.money;
-    const start = dollar.x + inkSpan(dollar).right + DOLLAR_GAP;
-    const room = well.x + well.width - WELL_INSET - start;
-    const style = fitPixelText(money, { room, styles: TEXT_FIT_STYLES }, start, MONEY_WELL.top);
-    placePixelText(money, start - inkSpan(money).left, moneyTop(style.scale));
+    scalePixelText(money, 1, 0, 0);
+    const scale = cashScale(whole);
+    const advance = (whole - money.width) * scale;
+    const { x } = WALK_BAR.cash.text;
+    const top = LAYOUT.topBar.y + cashTop(scale);
+    scalePixelText(dollar, scale, x, top);
+    scalePixelText(money, scale, x + advance, top);
+  }
+
+  // The effect wells: each effect's icon in its well, and "+n" in the last well for the effects
+  // past the wells.
+  private showEffects(effects: readonly EffectItem[]): void {
+    this.effectParts.forEach((part) => part.destroy());
+    const wells = BAR.effectWells;
+    const { icon } = WALK_BAR.effects;
+    this.effectParts = effectSlots(wells.length, effects.length).flatMap((slot, i) => {
+      const well = wells[i];
+      if (well === undefined) {
+        return [];
+      }
+      const parts: GameObjects.GameObject[] = [];
+      if (this.textures.exists("ui-effect-well")) {
+        parts.push(this.add.image(well.x, well.y, "ui-effect-well").setOrigin(0));
+      } else {
+        parts.push(
+          this.add.rectangle(well.x, well.y, well.width, well.height, PALETTE.ink).setOrigin(0),
+        );
+      }
+      if (slot.kind === "more") {
+        const count = String(slot.hidden.length);
+        const more = fillLine(RUN_TEXT_FIELDS.explain, gameData.runText.explain, "moreEffects", {
+          count,
+        });
+        parts.push(
+          addPixelText(this, well.x + 8, well.y + 6, more, {
+            color: PALETTE.cream,
+            font: "title",
+            originX: 0.5,
+          }),
+        );
+        return parts;
+      }
+      const item = effects[slot.index];
+      if (item === undefined) {
+        return parts;
+      }
+      const key = effectIconKey(item);
+      const x = well.x + icon;
+      const y = well.y + icon;
+      parts.push(
+        this.textures.exists(key)
+          ? this.add.image(x, y, key).setOrigin(0)
+          : addPixelText(this, x + 8, y + 5, effectIconFallback(gameData, item), {
+              color: PALETTE.cream,
+              originX: 0.5,
+            }),
+      );
+      return parts;
+    });
+  }
+
+  // A bar per debuff under the walk bar, in the order they began, rebuilt as they come and go;
+  // each fill drains every frame.
+  private showDebuffBars(run: RunState): void {
+    const debuffs = run.debuffs.map(({ debuff }) => debuff);
+    if (debuffs.join() !== this.debuffBars.map(({ debuff }) => debuff).join()) {
+      this.debuffBars.forEach((bar) => bar.parts.forEach((part) => part.destroy()));
+      const rects = debuffBarRects(LAYOUT.topBar, debuffs.length);
+      this.debuffBars = debuffs.flatMap((debuff, i) => {
+        const rect = rects[i];
+        return rect === undefined ? [] : [this.addDebuffBar(debuff, rect)];
+      });
+    }
+    const g = this.debuffFills;
+    if (g === undefined) {
+      return;
+    }
+    g.clear();
+    const { fill } = DEBUFF_BAR;
+    for (const bar of this.debuffBars) {
+      const active = run.debuffs.find(({ debuff }) => debuff === bar.debuff);
+      if (active === undefined) {
+        continue;
+      }
+      const full = debuffLasting(gameData.tuning, gameData.debuffs[bar.debuff].seconds, run);
+      const width = debuffFillWidth(active.secondsLeft, full.secondsLeft);
+      const colors = DEBUFF_COLORS[bar.debuff] ?? DEBUFF_FALLBACK;
+      if (width > 0) {
+        fillRect(g, colors.fill, {
+          ...fill,
+          width,
+          x: bar.rect.x + fill.x,
+          y: bar.rect.y + fill.y,
+        });
+      }
+    }
+  }
+
+  private addDebuffBar(debuff: DebuffId, rect: Rect): DebuffBarView {
+    const colors = DEBUFF_COLORS[debuff] ?? DEBUFF_FALLBACK;
+    const parts: GameObjects.GameObject[] = [];
+    const art = addTagImage(this, "ui-debuff-bar", debuff, rect.x, rect.y);
+    if (art === undefined) {
+      parts.push(
+        this.add.rectangle(rect.x, rect.y, rect.width, rect.height, colors.face).setOrigin(0),
+      );
+    } else {
+      parts.push(art);
+    }
+    const { icon, name } = DEBUFF_BAR;
+    const iconKey = statusIconKey(debuff);
+    if (this.textures.exists(iconKey)) {
+      parts.push(this.add.image(rect.x + icon.x, rect.y + icon.y, iconKey).setOrigin(0));
+    }
+    parts.push(
+      addPixelText(this, rect.x + name.x, rect.y + name.y, gameData.debuffs[debuff].name, {
+        color: colors.name,
+        font: "title",
+      }),
+    );
+    return { debuff, parts, rect };
+  }
+
+  // What a held press explains, on the message strip until it lifts.
+  private showExplanation(view: RunHudView): void {
+    const target: ExplainTarget | undefined = view.explaining;
+    const key = target === undefined ? "" : JSON.stringify(target);
+    if (key === this.explained) {
+      return;
+    }
+    this.explained = key;
+    this.messages.explain(target === undefined ? [] : explainLines(gameData, view.run, target));
   }
 
   private redraw(view: RunHudView): void {
@@ -464,20 +601,17 @@ export class HudScene extends Scene {
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);
-      const icon = zoneIconKey(zone);
-      this.zoneIcon?.setTexture(this.textures.exists(icon) ? icon : "__DEFAULT");
-      this.zoneIcon?.setVisible(this.textures.exists(icon));
-      this.zoneIcon?.setX(ZONE_WELL.right - Math.ceil(this.zoneLabel.width) - 3);
     }
-    const pips = zonePips(walkLength(gameData), run.route, run.zoneIndex, view.zoneFraction);
-    pips.forEach((zonePip, i) => {
-      const x = PIP.x + i * (PIP.width + PIP.gap);
+    const { pips } = WALK_BAR.zone;
+    const shownPips = zonePips(walkLength(gameData), run.route, run.zoneIndex, view.zoneFraction);
+    shownPips.forEach((zonePip, i) => {
+      const at = { ...PIP, x: pips.x + i * pips.pitch, y: LAYOUT.topBar.y + pips.y };
       const pip = this.pips[i];
       const { tag, wellColor } = pipLook(gameData, zonePip);
       if (pip !== undefined && this.textures.exists(ZONE_PIPS_KEY)) {
         playTag(pip, ZONE_PIPS_KEY, tag);
       } else {
-        fillRect(g, zonePip.state === "done" ? PALETTE.green : PALETTE.brown, { ...PIP, x });
+        fillRect(g, zonePip.state === "done" ? PALETTE.green : PALETTE.brown, at);
       }
       // The current pip's well, inside its 1px rim, fills as the zone goes by.
       if (zonePip.state === "current" && wellColor !== null) {
@@ -485,102 +619,74 @@ export class HudScene extends Scene {
         fillRect(g, colorFromHex(wellColor), {
           height: PIP.height - 2,
           width,
-          x: x + 1,
-          y: PIP.y + 1,
+          x: at.x + 1,
+          y: at.y + 1,
         });
       }
     });
 
-    const { dogSlots } = LAYOUT;
-    this.frames?.clear();
     const ownedSlots = profileSave(this).owned.dogSlots;
-    dogSlots.forEach((rect, i) => {
-      const slot = this.slots[i];
-      if (slot !== undefined) {
+    const lead = leadSlot(run.pack.map((slot) => slot.status === "walking"));
+    LAYOUT.dogSlots.forEach((rect, i) => {
+      const card = this.cards[i];
+      if (card !== undefined) {
         const packSlot = run.pack[i];
         const shown = slotShown(ownedSlots, i, packSlot !== undefined);
-        this.drawSlot(g, rect, slot, run, shown === "hidden" ? null : packSlot);
-        this.showStatuses(slot, packSlot, view.statuses);
-        if (packSlot?.status === "walking" && view.affected.includes(packSlot.dog)) {
-          this.drawAffectedFrame(rect);
-        }
+        this.drawCard(g, rect, card, run, shown === "hidden" ? null : packSlot);
+        card.lead.setVisible(i === lead);
       }
     });
   }
 
-  // The white frame round a doghouse whose dog the open card affects, over the house art: round
-  // the file card, which leaves the slot's top 2 rows to the band.
-  private drawAffectedFrame(rect: Rect): void {
-    const g = this.frames;
-    if (g === undefined) {
-      return;
-    }
-    drawRing(g, PALETTE.white, { ...rect, height: rect.height - 2, y: rect.y + 2 }, 2);
-  }
-
-  // The house drawn while its art is missing: a roof band over a tan front, grey when fired.
-  private drawHouse(g: GameObjects.Graphics, rect: Rect, fired: boolean): void {
-    fillRect(g, PALETTE.plum, rect);
-    const border = 1;
-    const inner = insetRect(border, rect);
-    fillRect(g, fired ? PALETTE.lightGrey : PALETTE.tan, inner);
-    fillRect(g, fired ? PALETTE.grey : PALETTE.brown, {
-      ...inner,
-      height: DOGHOUSE.roof.height - border,
-    });
-  }
-
-  // A dog's file card: the dog's and owner's faces in their photos, the hearts and their count
-  // in the hearts box. A fired dog's card is the empty one. An owned slot with no dog
-  // is a dashed "Empty" outline on the band, and a slot not bought (null) shows the band alone.
-  private drawSlot(
+  // A dog's card: its name, face and hearts, and the LEAD tag on the front dog's. A fired dog's
+  // card is the empty one with FIRED. An owned slot with no dog is a dashed "Empty" outline on
+  // the band, and a slot not bought (null) shows the band alone.
+  private drawCard(
     g: GameObjects.Graphics,
     rect: Rect,
-    view: SlotView,
+    view: CardView,
     run: RunState,
     slot: PackSlot | null | undefined,
   ): void {
-    const parts = [view.house, view.dogFace, view.ownerFace, ...view.hearts];
+    const parts = [view.card, view.dogFace, ...view.hearts];
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
-      [view.name, view.count, view.ownerName].forEach((label) => setPixelText(label, ""));
+      setPixelText(view.name, "");
       if (slot === null) {
         setPixelText(view.fired, "");
         return;
       }
-      drawDashedRect(g, PALETTE.tan, rect);
+      drawDashedRect(g, PALETTE.tan, { ...rect, width: rect.width - 2, x: rect.x + 1 });
       setPixelText(view.fired.setTint(PALETTE.cream), "Empty");
       return;
     }
     const dog = gameData.dogs[slot.dog];
     const fired = slot.status === "fired";
-    const art = artFits(this, "ui-doghouse", DOGHOUSE.size);
-    view.house.setVisible(art);
+    const art = artFits(this, CARD_KEY, DOG_CARD.size);
+    view.card.setVisible(art);
     if (art) {
-      playTag(view.house, "ui-doghouse", doghouseTag(gameData, fired ? null : slot.dog));
+      playTag(view.card, CARD_KEY, dogCardTag(gameData, fired ? null : slot.dog));
     } else {
-      this.drawHouse(g, rect, fired);
+      fillRect(g, fired ? PALETTE.darkSlate : PALETTE.navy, {
+        ...rect,
+        width: rect.width - 2,
+        x: rect.x + 1,
+      });
     }
-    this.fitName(view.name, dog.name, DOGHOUSE.name, view.anchors.name);
-    setPixelText(view.fired.setTint(PALETTE.white), fired ? "Fired" : "");
+    this.fitName(view.name, dog.name, rect);
+    setPixelText(view.fired.setTint(PALETTE.white), fired ? gameData.runText.fired : "");
     if (fired) {
-      [view.dogFace, view.ownerFace, ...view.hearts].forEach((part) => part.setVisible(false));
-      setPixelText(view.count, "");
-      setPixelText(view.ownerName, "");
+      [view.dogFace, ...view.hearts].forEach((part) => part.setVisible(false));
       return;
     }
-    const hearts = slot.hearts;
-    const mood = faceMood(gameData, hearts);
-    const ownerKey = ownerFaceKey(gameData, slot.dog);
     const dogKey = dogFaceKey(gameData, slot.dog);
-    playTag(view.ownerFace.setTexture(ownerKey).setVisible(true), ownerKey, mood);
-    playTag(view.dogFace.setTexture(dogKey).setVisible(true), dogKey, mood);
-    this.fitName(view.ownerName, dog.owner.name, DOGHOUSE.ownerName, view.anchors.ownerName);
-
-    const max = maxHearts(gameData.tuning, run.modifiers, dog);
-    setPixelText(view.count, heartCount(hearts, max));
-    const cells = doghouseHearts(hearts, max);
-    const heartArt = this.textures.exists("ui-heart");
+    playTag(
+      view.dogFace.setTexture(dogKey).setVisible(true),
+      dogKey,
+      faceMood(gameData, slot.hearts),
+    );
+    const cells = cardHearts(slot.hearts, maxHearts(gameData.tuning, run.modifiers, dog));
+    const heartArt = this.textures.exists(HEART_KEY);
     view.hearts.forEach((sprite, i) => {
       const cell = cells[i];
       sprite.setVisible(heartArt && cell !== undefined);
@@ -588,43 +694,40 @@ export class HudScene extends Scene {
         return;
       }
       if (heartArt) {
-        playTag(sprite, "ui-heart", cell.full ? "full" : "empty");
+        sprite.setPosition(rect.x + cell.x, rect.y + cell.y);
+        playTag(sprite, HEART_KEY, cell.full ? "full-dark" : "empty-dark");
       } else {
-        drawHeart(g, rect.x + cell.x, rect.y + cell.y, cell.full ? PALETTE.darkRed : PALETTE.tan);
+        drawHeart(g, rect.x + cell.x, rect.y + cell.y, cell.full ? PALETTE.red : PALETTE.grey);
       }
     });
   }
 
-  // The dog's newest statuses on its slot; a fired dog has none.
-  private showStatuses(
-    view: SlotView,
-    slot: PackSlot | undefined,
-    statuses: readonly StatusMark[],
-  ): void {
-    const shown = slot === undefined ? [] : statusesOf(statuses, slot.dog);
-    view.statuses.forEach((image, i) => {
-      const status = shown[i];
-      const key = status === undefined ? undefined : statusIconKey(status);
-      const art = key !== undefined && this.textures.exists(key);
-      image.setTexture(art ? key : "__DEFAULT").setVisible(art);
-    });
+  // The name at 2x when it fits the card, else 1x.
+  private fitName(label: GameObjects.BitmapText, text: string, rect: Rect): void {
+    setPixelText(label, text);
+    const fit = cardNameFit(label.width / label.scaleX);
+    scalePixelText(label, fit.scale, rect.x + DOG_CARD.name.x, rect.y + fit.top);
   }
 
-  // Names are drawn at the largest of their scales that fits.
-  private fitName(
-    label: GameObjects.BitmapText,
-    text: string,
-    fit: { scales: readonly number[]; width: number },
-    at: { x: number; y: number },
-  ): void {
-    setPixelText(label, text);
-    const scale = fittingScale(fit.width, fit.scales, label.width / label.scaleX);
-    scalePixelText(label, scale, at.x, at.y);
+  // An owner's tab on their dog's card, in mood, for ms.
+  private popOwner(dog: DogId, mood: string, ms: number): void {
+    const slot = this.slotOf(dog);
+    if (slot !== undefined) {
+      this.owners?.pop({ dog, mood, slot }, ms);
+    }
+  }
+
+  private slotOf(dog: DogId): number | undefined {
+    const index =
+      this.runScene()
+        .hudView()
+        ?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
+    return index < 0 ? undefined : index;
   }
 
   // Each change shows in its lane and fades out: a money change in the bank lane (one at a
-  // time); a heart change pops over its dog and flies into its doghouse (heartFeedback.ts), and
-  // its label then fades in place on the doghouse's bottom band.
+  // time); a heart change pops over its dog and flies into its card (heartFeedback.ts), its
+  // label then fading in place on the card's bottom rows, while its owner pops in on the card.
   private floatLabels(labels: ChangeLabel[]): void {
     const run = this.runScene();
     this.bankLabels.push(...labels.filter((label) => label.target.kind === "bank"));
@@ -632,13 +735,18 @@ export class HudScene extends Scene {
       this.showNextBankLabel();
     }
     const pops = heartPops({ lanes: LANES.heartLabels, run }, labels, (slot) => {
-      const view = this.slots[slot];
-      return view === undefined ? undefined : { house: view.house, parts: slotParts(view) };
+      const view = this.cards[slot];
+      return view === undefined ? undefined : { card: view.card, parts: cardParts(view) };
     });
     pops.forEach((pop) => this.hearts?.play(pop));
+    for (const label of labels) {
+      if (label.target.kind === "dog") {
+        this.popOwner(label.target.dog, label.gain ? "happy" : "upset", HEART_TAB_MS);
+      }
+    }
   }
 
-  // The next money change in the bank lane, under the money well: it rises from the lane's
+  // The next money change in the bank lane, under the cash well: it rises from the lane's
   // bottom to its top, or fades in place with reduced motion, then the next follows.
   private showNextBankLabel(): void {
     const label = this.bankLabels.shift();
@@ -654,7 +762,7 @@ export class HudScene extends Scene {
     );
   }
 
-  // A heart change's label on its doghouse's bottom band, once its heart has landed.
+  // A heart change's label on its card's bottom rows, once its heart has landed.
   private showHeartLabel(label: ChangeLabel, lane: Rect): void {
     const at = { scale: 2, x: lane.x, y: lane.y + (lane.height - LABEL.height) / 2 };
     this.showLabel(label, at, 0, lane.width);
@@ -723,8 +831,7 @@ export class HudScene extends Scene {
     }
   }
 
-  // Owners' lines share the quip lane, so they take turns; one that has waited a whole quip's
-  // time is dropped.
+  // Owners' quips take turns; one that has waited a whole quip's time is dropped.
   private queueQuips(quips: readonly QuipBubble[]): void {
     const now = this.time.now;
     this.quips.push(...quips.map((quip) => ({ quip, raisedMs: now })));
@@ -735,7 +842,7 @@ export class HudScene extends Scene {
 
   private sayNextQuip(): void {
     const now = this.time.now;
-    this.quips = this.quips.filter(({ raisedMs }) => now - raisedMs <= QUIP.holdMs);
+    this.quips = this.quips.filter(({ raisedMs }) => now - raisedMs <= QUIP_HOLD_MS);
     const next = this.quips.shift();
     this.quipShowing = next !== undefined && this.sayQuip(next.quip);
     if (next !== undefined && !this.quipShowing) {
@@ -743,43 +850,16 @@ export class HudScene extends Scene {
     }
   }
 
-  // An owner's line in a bubble over the doghouses' roofs, centred over the owner's face and
-  // leaving every face uncovered: at 2x on one line, else at 1x. False when the dog has no slot.
+  // The owner pops in on their dog's card with their quip beside them, in the mood their hearts
+  // give. False when the dog has no card.
   private sayQuip(quip: QuipBubble): boolean {
-    const run = this.runScene();
-    const index = run.hudView()?.run.pack.findIndex((slot) => slot.dog === quip.dog) ?? -1;
-    const rect = LAYOUT.dogSlots[index];
-    if (rect === undefined) {
+    const slot = this.slotOf(quip.dog);
+    const packSlot = this.runScene().hudView()?.run.pack[slot ?? -1];
+    const hearts = packSlot?.status === "walking" ? packSlot.hearts : 0;
+    if (slot === undefined || this.owners === undefined) {
       return false;
     }
-    const lane = LANES.quip;
-    const room = lane.width - 2 * QUIP.padding;
-    const text = addPixelText(this, 0, 0, quip.text, { color: PALETTE.plum, scale: 2 });
-    if (text.width > room) {
-      text.destroy();
-      const small = { color: PALETTE.plum };
-      const lines = wrapPixelText(this, small, room, quip.text);
-      return this.placeQuip(addPixelText(this, 0, 0, lines.join("\n"), small), rect);
-    }
-    return this.placeQuip(text, rect);
-  }
-
-  private placeQuip(text: GameObjects.BitmapText, rect: Rect): true {
-    const lane = LANES.quip;
-    const width = Math.ceil(text.width) + 2 * QUIP.padding;
-    const height = lane.height;
-    const faceX = rect.x + DOGHOUSE.ownerFace.x + 16;
-    const x = centredInLane(lane, faceX, width);
-    const y = lane.y;
-    placePixelText(text, x + QUIP.padding, y + Math.round((height - text.height) / 2));
-    const parts: GameObjects.GameObject[] = [
-      addPanel(this, { height, width, x, y }, "ui-quip").setDepth(QUIP.depth),
-    ];
-    text.setDepth(QUIP.depth + 1);
-    parts.push(text);
-    fadeAway(this, parts, { delayMs: QUIP.holdMs, ms: BUBBLE_FADE_MS, rise: 0 }, () =>
-      this.sayNextQuip(),
-    );
-    return true;
+    const at = { dog: quip.dog, mood: faceMood(gameData, hearts), slot };
+    return this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
   }
 }

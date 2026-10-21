@@ -12,11 +12,14 @@ import {
   EMPTY_MESSAGE_STRIP,
   lineAlpha,
   MESSAGE_ICONS,
+  MESSAGE_LINE,
   MESSAGE_STRIP,
   MESSAGE_TIMING,
   type MessageIcon,
   messageIconKey,
   type MessageLine,
+  messageLinePanel,
+  messageLineTop,
   messagePanel,
   messageRows,
   messageStripLayout,
@@ -25,7 +28,7 @@ import {
   stepMessageStrip,
 } from "./messageStrip";
 import { STRIP_LINE_FIELDS } from "./runText";
-import { stripItems, stripLayout } from "./stateStrip";
+import { debuffBarRects } from "./walkHud";
 
 const { dwellMs, fadeMs, lifeMs, maxWaiting } = MESSAGE_TIMING;
 const line = (text: string, icon: MessageIcon = "hint"): MessageLine => ({ icon, text });
@@ -160,16 +163,6 @@ describe("messageStripLayout", () => {
     y: top,
   });
   const iconRect = { ...strip.icon, height: 16, width: 16 };
-  // Every item the state strip can hold at once: each upgrade, gear, pace, style.
-  const mostItems = Object.keys(gameData.upgrades).length + 3;
-  // The walker's pace and style, which the strip always holds.
-  const fewestItems = stripItems(gameData, {
-    gear: null,
-    immunities: [],
-    modifiers: [],
-    upgradesPicked: [],
-    walker: "casey",
-  }).length;
 
   it.each<[string, Rect, Rect]>([
     ["the strip in the backdrop band", strip.panel, backdrop],
@@ -191,19 +184,44 @@ describe("messageStripLayout", () => {
     });
   });
 
-  it.each(Array.from({ length: mostItems - fewestItems + 1 }, (_, i) => fewestItems + i))(
-    "keeps clear of the state strip's tab with %i items",
-    (count) => {
-      const tab = stripLayout(count)?.tab;
-      expect(tab).toBeDefined();
-      expect(overlaps(strip.panel, tab ?? strip.panel)).toBe(false);
-    },
-  );
+  it("starts under the walk bar, clear of it", () => {
+    const { topBar } = screenLayout(SCREEN_CONFIG);
+    expect(overlaps(strip.panel, topBar)).toBe(false);
+    expect(strip.panel.y).toBeGreaterThan(topBar.y + topBar.height);
+  });
 
   it("centres the first row's capitals on the icon", () => {
     const capsMiddle = (strip.rowTops[0] ?? 0) + (5 * scale) / 2;
     expect(Math.abs(capsMiddle - (strip.icon.y + 8))).toBeLessThanOrEqual(0.5);
   });
+});
+
+// With debuff bars up, the strip's one row sits under the last bar, in the band.
+describe("messageLinePanel", () => {
+  const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
+  const inside = (inner: Rect, outer: Rect) =>
+    inner.x >= outer.x &&
+    inner.y >= outer.y &&
+    inner.x + inner.width <= outer.x + outer.width &&
+    inner.y + inner.height <= outer.y + outer.height;
+  it.each([1, 2])("puts the one-row strip under %i bars, in the band", (bars) => {
+    const line = messageLinePanel(bars);
+    const last = debuffBarRects(topBar, bars).at(-1);
+    expect(last).toBeDefined();
+    expect(line.panel.y).toBeGreaterThanOrEqual((last?.y ?? 0) + (last?.height ?? 0));
+    expect(inside(line.panel, backdrop)).toBe(true);
+    expect(inside({ ...line.icon, height: 16, width: 16 }, line.panel)).toBe(true);
+    expect(line.textX + line.room).toBeLessThanOrEqual(line.panel.x + line.panel.width);
+  });
+
+  it.each(MESSAGE_LINE.scales.map((scale) => [scale] as const))(
+    "centres a %ix row's capitals on the icon's rows",
+    (scale) => {
+      const line = messageLinePanel(1);
+      const capsMiddle = messageLineTop(line, scale) + (5 * scale) / 2;
+      expect(Math.abs(capsMiddle - (line.icon.y + 8))).toBeLessThanOrEqual(0.5);
+    },
+  );
 });
 
 // Every hint and badge line wraps at 2x onto the strip's rows, each no wider than its room,

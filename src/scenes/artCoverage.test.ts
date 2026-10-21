@@ -12,8 +12,8 @@ import {
   cardFrameTag,
   depthVariantKey,
   DIFFICULTY_KEY,
+  dogCardTag,
   dogFaceKey,
-  doghouseTag,
   dogPortraitKey,
   dogSpriteKey,
   encounterSpriteKey,
@@ -31,9 +31,9 @@ import { gameData } from "../data";
 import type { DogId, EncounterId, GearId, MinorObstacleId, UpgradeId, ZoneId } from "../data/types";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
+import { effectIconKey } from "../hud/effectIcons";
 import { pipLook, zonePips } from "../hud/hudView";
 import { MESSAGE_ICONS } from "../hud/messageStrip";
-import { stripIconKey } from "../hud/stateStrip";
 import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
@@ -139,9 +139,9 @@ describe("dog art", () => {
     expect(missing).toEqual([]);
   });
 
-  it("names a doghouse roof for every dog and the empty house", () => {
-    const tags = [...DOGS.map((dog) => doghouseTag(gameData, dog)), doghouseTag(gameData, null)];
-    expect(missingTags("ui-doghouse", tags)).toEqual([]);
+  it("names a dog card for every dog, the empty card and the heart-loss flash", () => {
+    const tags = [...DOGS.map((dog) => dogCardTag(gameData, dog)), dogCardTag(gameData, null)];
+    expect(missingTags("ui-dog-card", [...tags, "heart-loss"])).toEqual([]);
   });
 
   it.todo("names owner-<dog> with idle and wave through ownerSpriteKey, once return home lands");
@@ -187,10 +187,10 @@ describe("image art", () => {
       "an effect icon for every upgrade and gear item",
       () => [
         ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
-          stripIconKey({ kind: "upgrade", upgrade }),
+          effectIconKey({ kind: "upgrade", upgrade }),
         ),
         ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
-          stripIconKey({ gear, kind: "gear" }),
+          effectIconKey({ gear, kind: "gear" }),
         ),
       ],
     ],
@@ -205,7 +205,7 @@ describe("image art", () => {
 });
 
 describe("icon art", () => {
-  it("names a doghouse icon for every status", () => {
+  it("names a debuff bar icon for every status", () => {
     expect(missingImages(STATUSES.map(statusIconKey))).toEqual([]);
   });
 
@@ -298,10 +298,10 @@ describe("pull art", () => {
 });
 
 describe("feedback art", () => {
-  it("names the heart pops and doghouse loss with their tags", () => {
-    const { doghouseLoss, heartGain, heartLoss } = FEEDBACK_ART;
+  it("names the heart pops and the card's heart loss with their tags", () => {
+    const { cardLoss, heartGain, heartLoss } = FEEDBACK_ART;
     const missing = [
-      ...missingTags(doghouseLoss.key, [doghouseLoss.tag]),
+      ...missingTags(cardLoss.key, [cardLoss.tag]),
       ...[heartGain, heartLoss].flatMap((heart) => missingTags(heart.key, [heart.pop, heart.fly])),
     ];
     expect(missing).toEqual([]);

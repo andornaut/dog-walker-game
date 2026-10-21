@@ -25,6 +25,7 @@ import {
   payoutTagTop,
   trotOffX,
 } from "./moments";
+import { ownerTabRect } from "./walkHud";
 
 const walking = (dog: "biscuit" | "duchess" | "koda", hearts: number) =>
   ({ dog, hearts: clampHearts(10, hearts), status: "walking" }) as const;
@@ -47,23 +48,31 @@ describe("firingShowMs", () => {
 });
 
 describe("firingLayout", () => {
-  it("places the face, pop, plate, line and tail from the slot's corner", () => {
-    expect(firingLayout({ x: 120, y: 470 })).toEqual({
-      face: { x: 180, y: 436 },
-      line: { x: 180, y: 398 },
-      plate: { height: 28, width: 116, x: 122, y: 468 },
-      pop: { x: 116, y: 372 },
-      tail: { x: 180, y: 397 },
-    });
-  });
+  const cards = screenLayout(SCREEN_CONFIG).dogSlots;
 
-  it("centres the 2x pop on the 2x face", () => {
-    const { face, pop } = firingLayout({ x: 240, y: 470 });
-    expect({ x: pop.x + 64, y: pop.y + 64 }).toEqual(face);
-  });
+  it.each(cards.map((card, i) => [i, card] as const))(
+    "centres card %i's 2x face on its owner's tab, the 2x pop on the face",
+    (_i, card) => {
+      const { face, pop } = firingLayout(card);
+      const tab = ownerTabRect(card);
+      expect(face).toEqual({ x: tab.x + tab.width / 2, y: tab.y + tab.height / 2 });
+      expect({ x: pop.x + 64, y: pop.y + 64 }).toEqual(face);
+    },
+  );
+
+  it.each(cards.map((card, i) => [i, card] as const))(
+    "puts card %i's plate on the card under the 2x face, as wide as its name and inside it",
+    (_i, card) => {
+      const { face, plate } = firingLayout(card);
+      expect(plate.y).toBeGreaterThan(face.y + 32);
+      expect(plate.x).toBeGreaterThanOrEqual(card.x);
+      expect(plate.x + plate.width).toBeLessThanOrEqual(card.x + card.width);
+      expect(plate.y + plate.height).toBeLessThanOrEqual(card.y + card.height);
+    },
+  );
 
   it("points the line's tail down at the top of the 2x face, under the bubble", () => {
-    const { face, line, tail } = firingLayout({ x: 0, y: 470 });
+    const { face, line, tail } = firingLayout(cards[0] ?? { x: 0, y: 0 });
     expect(tail.x).toBe(face.x);
     expect(tail.y).toBe(line.y - 1);
     for (const { height } of DOWN_TAILS) {
