@@ -1001,15 +1001,22 @@
         "y": 150
       },
       "newWalker": {
+        "burst": {
+          "x": 106,
+          "y": 188
+        },
+        "feetY": 326,
+        "subtitleY": 172,
+        "titleY": 140,
+        "walker": {
+          "x": 132,
+          "y": 182
+        },
         "bubble": {
           "height": 76,
           "width": 312,
           "x": 24,
           "y": 332
-        },
-        "burst": {
-          "x": 106,
-          "y": 202
         },
         "button": {
           "height": 44,
@@ -1017,7 +1024,6 @@
           "x": 48,
           "y": 416
         },
-        "feetY": 326,
         "greeting": {
           "lineTops": [
             336,
@@ -1037,12 +1043,10 @@
           "toX": 323,
           "y": 375
         },
-        "subtitleY": 184,
         "tail": {
           "x": 176,
           "y": 327
-        },
-        "titleY": 152
+        }
       },
       "runIn": {
         "burstY": 266,
@@ -1054,18 +1058,22 @@
       "zoneDone": {
         "burst": {
           "x": 106,
-          "y": 246
+          "y": 232
+        },
+        "feetY": 370,
+        "subtitleY": 212,
+        "titleY": 180,
+        "walker": {
+          "x": 132,
+          "y": 226
         },
         "earningsY": 387,
-        "feetY": 370,
         "plate": {
           "height": 32,
           "width": 280,
           "x": 40,
           "y": 380
-        },
-        "subtitleY": 224,
-        "titleY": 192
+        }
       }
     },
     "end": {
