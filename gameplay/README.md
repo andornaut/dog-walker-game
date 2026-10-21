@@ -55,4 +55,3 @@ Tuning against the targets, from a fresh baseline:
 Decided at the phone playtest, after the tuning pass:
 
 - The game's name
-- Whether the far end of the road fades into the backdrop band
