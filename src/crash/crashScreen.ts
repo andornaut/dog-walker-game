@@ -3,6 +3,7 @@
 // already saved, and the next launch banks it.
 import "./crash.css";
 
+import { BUILD_LABEL } from "../dev/buildLabel";
 import {
   crashGate,
   type CrashReport,
@@ -77,7 +78,7 @@ function showCrashScreen(dev: boolean, report: CrashReport): void {
   const reload = button(view.action, () => location.reload());
   const panel = el("div", "crash-panel", title, body, reload);
   if (view.details !== undefined) {
-    panel.append(detailsSection(view.details));
+    panel.append(detailsSection(`${BUILD_LABEL}\n${view.details}`));
   }
   const screen = el("div", "crash", panel);
   screen.setAttribute("role", "alertdialog");

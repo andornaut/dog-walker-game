@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { defineConfig } from "vitest/config";
@@ -5,6 +6,7 @@ import { defineConfig } from "vitest/config";
 import { atlasPlugin } from "./src/assets/atlas/atlasPlugin";
 import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
 import { precachePlugin } from "./src/pwa/precachePlugin";
+import { gitHead, shortCommit } from "./src/tools/buildVersion";
 import { generatedFilesPlugin } from "./src/tools/generatedFilesPlugin";
 
 // An absolute path in this repository. Vite resolves relative paths against root, which is
@@ -12,6 +14,8 @@ import { generatedFilesPlugin } from "./src/tools/generatedFilesPlugin";
 function repoPath(path: string): string {
   return resolve(import.meta.dirname, path);
 }
+
+const packageVersion: string = JSON.parse(readFileSync(repoPath("package.json"), "utf8")).version;
 
 export default defineConfig({
   build: {
@@ -37,6 +41,12 @@ export default defineConfig({
     // The Phaser chunk alone is about 1.4 MB minified, so the 500 kB default always warns.
     // Set just above it so that growth in Phaser or game code still warns.
     chunkSizeWarningLimit: 1600,
+  },
+  // The version and commit the dev bar shows, typed in src/buildInfo.d.ts. Fixed per commit, so
+  // two builds of one commit match.
+  define: {
+    __APP_VERSION__: JSON.stringify(packageVersion),
+    __COMMIT__: JSON.stringify(shortCommit(() => gitHead(repoPath(".")), process.env)),
   },
   // atlasPlugin writes public/art/manifest.json from the art files, then packs the art's images
   // and sprites into /art/atlas/ and /art/atlas-manifest.json.

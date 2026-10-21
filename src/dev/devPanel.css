@@ -17,7 +17,10 @@
 }
 
 .dev-bar {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   height: var(--dev-bar-height);
   padding: 0 max(12px, env(safe-area-inset-left, 0px));
@@ -33,6 +36,11 @@
 .dev-bar:hover,
 .dev-bar:focus-visible {
   color: var(--dev-accent);
+}
+
+.dev-version {
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 /* Below the bar, past the bottom of the screen; src/main.css scrolls the page to it. */

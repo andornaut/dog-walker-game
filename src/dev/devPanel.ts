@@ -7,6 +7,7 @@ import "./devPanel.css";
 import { gameData } from "../data";
 import { saveContextFrom } from "../save/load";
 import { browserStorage, saveStore } from "../save/storage";
+import { BUILD_LABEL } from "./buildLabel";
 import {
   applyPanel,
   applySaveEdit,
@@ -167,7 +168,13 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   const sheet = el("div", { className: "dev-sheet", hidden: true, id: "dev-sheet" });
   sheet.setAttribute("role", "dialog");
   sheet.setAttribute("aria-label", "Cheats");
-  const bar = el("button", { className: "dev-bar", type: "button" });
+  const barLabel = el("span");
+  const bar = el(
+    "button",
+    { className: "dev-bar", type: "button" },
+    barLabel,
+    el("span", { className: "dev-version", textContent: BUILD_LABEL }),
+  );
   bar.setAttribute("aria-controls", sheet.id);
 
   const render = () => {
@@ -180,7 +187,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       box.checked = staged[id];
     });
     const arrow = sheet.hidden === false ? "▾" : "▸";
-    bar.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
+    barLabel.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
   };
   const stage = (action: PanelAction) => {
     state = stagePanel(action, state);

@@ -134,6 +134,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 | `walker` | a walker id                     | saved walker    |
 | `zone`   | 1 to the walk's length          | 1               |
 
+- **Build label:** the Dev bar and the crash screen's dev details show `v<version> · <commit>`, from `__APP_VERSION__` (package.json) and `__COMMIT__`, which `vite.config.ts` defines from `WORKERS_CI_COMMIT_SHA`, else `git rev-parse HEAD`, else `dev` (`src/tools/buildVersion.ts`).
 - **Dev panel:** a "Dev" bar below the canvas opens the cheat sheet. Start at, Cheats on/off and the toggles (Invincible owners, Hit boxes, Slow motion, Fast forward) are staged until Apply; applied cheats last for the tab (`sessionStorage`) and never reach the save. The save cheats (+$100, +$1,000, Unlock all, Reset save) are queued in `sessionStorage`, written at the next boot before the save loads, and reload to the start screen.
 - **Far-road fade:** off unless the game registry's `dev-road-fade` is set, as through the console handle `dogWalkerGame`.
 - **Input log:** lane moves, card choices and heading home are recorded with their step's time in a versioned log (a replay rejects a log of any other version), whose setup names the pack, gear, walker and route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and the next walk started plays a log found under `dog-walker-game:dev-replay`.
