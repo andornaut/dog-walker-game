@@ -42,6 +42,7 @@
   - `src/home/`, `src/hud/`, `src/help/`: view models for the home, settings, stats and end screens, the walk bar and pause menu, and the help screen
   - `src/ui/`: the pixel-art UI kit: the pixel font, text fitting, grids, card rows, close controls, badges, pixel shapes, and tile and button states; `phaser/` draws pixel and display text, panels, the palette and the dimmed ramps
   - `src/layout/`: screen geometry
+  - `src/pack/`: how every screen draws the pack: each leash from the walker's hand to the dog's collar, and the draw order (the dogs by their feet rows, then the leashes, then the walker); `phaser/` stands the walker, the dogs, their leashes and shadows for the walk, the start screen's gate and the end screen's walk home, so the three draw it alike
   - `src/road/`: the pseudo-3D road: clipping sprites at the juncture and what lies beside the road; `phaser/` draws the backdrop band and its gags
   - `src/assets/`: manifest and Aseprite parsing, art keys and depth steps; `atlas/` packs the atlases at build time, and `phaser/` loads the manifest's art and makes its grey, dark and silhouette textures
   - `src/save/`: persistence

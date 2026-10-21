@@ -2,7 +2,7 @@ import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { MONEY_ICON_KEY } from "../assets/iconKeys";
-import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
+import { ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
@@ -27,16 +27,16 @@ import {
 } from "../home/returnHome";
 import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
-import { COLLAR_HEIGHTS, leashHand } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
+import { PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import type { LastWalk } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { addDisplayText } from "./displayText";
-import { drawPixelLine, drawShadow, fillRect } from "./draw";
+import { drawShadow, fillRect } from "./draw";
 import { onBackPressed } from "./overlay";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
@@ -50,7 +50,7 @@ import {
 } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { addStandingSprite, firstTag, spriteMetrics } from "./sprites";
+import { firstTag, spriteMetrics } from "./sprites";
 import {
   addMenuButton,
   addPanel,
@@ -289,46 +289,30 @@ export class EndScene extends Scene {
 
     const pack = this.add.container(0, 0);
     const shadows = this.add.graphics();
-    const leashes = this.add.graphics();
     pack.add(shadows);
     const walkerKey = walkerSpriteKey(this, walkerInUse(profileSave(this)));
     const { walker: walkerAt } = scene;
     const onPath = (x: number) => x >= scene.path.x && x < scene.path.x + scene.path.width;
-    const sprites: { key: string; sprite: GameObjects.Sprite }[] = dogs.map((dog, i) => {
-      const at = itemAt(scene.dogs, i);
-      const key = dogSpriteKey(gameData, dog);
+    const figures = new PackFigures(this, { still: reduced, tag: "walk" }, walkerKey, dogs);
+    const standing = dogs.map((dog, rank) => {
+      const { x, y } = itemAt(scene.dogs, rank);
+      const placement = { dx: x - walkerAt.x, footDy: y - walkerAt.y };
+      return { dog, feet: { footY: y, x }, placement, rank };
+    });
+    const shadow = (key: string, depth: number, x: number, footY: number) =>
       drawShadow(
         shadows,
-        onPath(at.x) ? PALETTE.brown : PALETTE.darkGreen,
-        at.x,
-        at.y,
-        spriteMetrics(key).opaqueWidth,
+        onPath(x) ? PALETTE.brown : PALETTE.darkGreen,
+        x,
+        footY,
+        spriteMetrics(key).opaqueWidth * depth,
       );
-      return { key, sprite: addStandingSprite(this, key, at.x, at.y) };
+    const look = { color: YARD_LEASH_COLOR, taut: null };
+    figures.stand(0, shadow, look, {
+      dogs: standing,
+      walker: { footY: walkerAt.y, x: walkerAt.x },
     });
-    drawShadow(
-      shadows,
-      PALETTE.brown,
-      walkerAt.x,
-      walkerAt.y,
-      spriteMetrics(walkerKey).opaqueWidth,
-    );
-    sprites.push({
-      key: walkerKey,
-      sprite: addStandingSprite(this, walkerKey, walkerAt.x, walkerAt.y),
-    });
-    pack.add(sprites.map(({ sprite }) => sprite));
-    pack.add(leashes);
-    dogs.forEach((dog, i) => {
-      const at = itemAt(scene.dogs, i);
-      const hand = leashHand({ dx: at.x - walkerAt.x, footDy: at.y - walkerAt.y });
-      drawPixelLine(
-        leashes,
-        PALETTE.darkRed,
-        { x: walkerAt.x + hand.dx, y: walkerAt.y + hand.dy },
-        { x: at.x, y: at.y - COLLAR_HEIGHTS[dog] },
-      );
-    });
+    pack.add(figures.layers());
 
     // The game loop's time: in create, the scene clock still reads the time the scene booted
     // or last ran, until its first frame.
@@ -340,9 +324,7 @@ export class EndScene extends Scene {
       const phase = returnPhase(reduced, elapsed);
       if (phase !== shown) {
         shown = phase;
-        for (const { key, sprite } of sprites) {
-          showTag(reduced, sprite, key, phase === "walking" ? "walk" : "idle");
-        }
+        figures.play(reduced, phase === "walking" ? "walk" : "idle");
         for (const { dog, sprite } of owners) {
           const body = ownerSpriteKey(gameData, dog);
           const tag = firstTag(this, body, phase === "waving" ? ["wave", "idle"] : ["idle"]);

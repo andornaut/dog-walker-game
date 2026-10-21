@@ -104,23 +104,17 @@ import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
-import { COLLAR_HEIGHTS, leashHand, type PackPlacement } from "../layout/packFormation";
+import type { PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { addFigure, PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import {
-  drawFocusRing,
-  drawFramedRect,
-  drawPixelLine,
-  drawRing,
-  drawShadow,
-  fillRect,
-} from "./draw";
+import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import {
@@ -172,7 +166,7 @@ import {
   type ShopClosed,
   type ShopSceneData,
 } from "./ShopScene";
-import { addStandingSprite, playEffect, spriteMetrics } from "./sprites";
+import { playEffect, spriteMetrics } from "./sprites";
 import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
@@ -188,7 +182,6 @@ import {
   imageIcon,
   type SelectTile,
   type SelectTileOptions,
-  showTag,
   soundIcon,
   tagFrame,
   TEXT_SCALE,
@@ -1345,9 +1338,7 @@ export class StartScene extends Scene {
       const x = at.x + PORCH_DOG_OFFSET.dx;
       const footY = at.footY + PORCH_DOG_OFFSET.footDy;
       drawShadow(g, PALETTE.darkGreen, x, footY, spriteMetrics(key).opaqueWidth);
-      const sprite = addStandingSprite(this, key, x, footY);
-      showTag(reduced, sprite, key, "idle");
-      root.add(sprite);
+      root.add(addFigure(this, reduced, "idle", key).sprite.setPosition(x, footY));
     }
   }
 
@@ -1360,47 +1351,40 @@ export class StartScene extends Scene {
     const reduced = currentSettings(this).reducedMotion;
     this.drawPorch(root, g, save, reduced);
     const walkerKey = save.walker === null ? undefined : walkerSpriteKey(this, save.walker);
-    const placements = GATE_SPOTS.slice(0, this.loadout.dogs.length);
     const groundColor = (atX: number) =>
       atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
-    const dogs = this.loadout.dogs.map((dog, i) => {
-      const { dx, footDy } = itemAt(placements, i);
-      return { dog, dx, footY: footY + footDy, key: dogSpriteKey(gameData, dog) };
+    const dogs = this.loadout.dogs.map((dog, rank) => {
+      const placement = itemAt(GATE_SPOTS, rank);
+      return {
+        dog,
+        feet: { footY: footY + placement.footDy, x: x + placement.dx },
+        placement,
+        rank,
+      };
     });
-    for (const { dx, footY: dogFoot, key } of dogs) {
-      drawShadow(g, groundColor(x + dx), x + dx, dogFoot, spriteMetrics(key).opaqueWidth);
-    }
-    if (walkerKey !== undefined) {
-      drawShadow(g, groundColor(x), x, footY, spriteMetrics(walkerKey).opaqueWidth);
-    }
+    // With no walker picked, the dogs stand without leashes.
+    const figures = new PackFigures(
+      this,
+      { still: reduced, tag: "walk" },
+      walkerKey,
+      this.loadout.dogs,
+    );
+    const shadow = (key: string, depth: number, atX: number, atFootY: number) =>
+      drawShadow(g, groundColor(atX), atX, atFootY, spriteMetrics(key).opaqueWidth * depth);
+    const look = { color: YARD_LEASH_COLOR, taut: null };
+    figures.stand(0, shadow, look, { dogs, walker: { footY, x } });
+    root.add(figures.layers());
     const now = this.time.now;
-    for (const { dog, dx, footY: dogFoot, key } of dogs) {
-      const sprite = addStandingSprite(this, key, x + dx, dogFoot);
-      showTag(reduced, sprite, key, "walk");
-      root.add(sprite);
-      this.gateDogs.push({ dog, footY: dogFoot, sprite });
+    for (const { dog, feet } of dogs) {
+      const sprite = figures.dogs.get(dog);
+      if (sprite !== undefined) {
+        this.gateDogs.push({ dog, footY: feet.footY, sprite });
+      }
       // A dog that just joined hops onto the path in a puff of dust.
       const popped = this.pops.get(`dog:${dog}`);
       if (!reduced && popped !== undefined && now - popped < FEEDBACK.dustFrameMs) {
-        playEffect(this, "fx-dust", "play", { x: x + dx, y: dogFoot - 6 }, 0);
+        playEffect(this, "fx-dust", "play", { x: feet.x, y: feet.footY - 6 }, 0);
       }
-    }
-    // The leashes run from the walker's hand to each collar; with no walker picked, there are
-    // none.
-    if (walkerKey !== undefined) {
-      const walker = addStandingSprite(this, walkerKey, x, footY);
-      showTag(reduced, walker, walkerKey, "walk");
-      root.add(walker);
-      const leash = this.graphics(root);
-      dogs.forEach(({ dog, dx, footY: dogFoot }, i) => {
-        const hand = leashHand(itemAt(placements, i));
-        drawPixelLine(
-          leash,
-          PALETTE.darkRed,
-          { x: x + hand.dx, y: footY + hand.dy },
-          { x: x + dx, y: dogFoot - COLLAR_HEIGHTS[dog] },
-        );
-      });
     }
 
     const state = { action: this.action, loadout: this.loadout };
@@ -1452,8 +1436,11 @@ export class StartScene extends Scene {
       const clear = Math.max(
         GEAR_BADGE.x,
         ...dogs
-          .filter(({ footY: dogFoot }) => dogFoot > GEAR_BADGE.y)
-          .map(({ dx, key }) => x + dx + Math.ceil(spriteMetrics(key).opaqueWidth / 2) + 1),
+          .filter(({ feet }) => feet.footY > GEAR_BADGE.y)
+          .map(
+            ({ dog, feet }) =>
+              feet.x + Math.ceil(spriteMetrics(dogSpriteKey(gameData, dog)).opaqueWidth / 2) + 1,
+          ),
       );
       const rect = { ...GEAR_BADGE, x: Math.min(clear, PET_SHOP.x - GEAR_BADGE.width) };
       const badge = this.tileView(root, "gateBadge");

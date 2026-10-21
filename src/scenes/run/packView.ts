@@ -6,16 +6,10 @@ import { dogSpriteKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { DogId } from "../../data/types";
 import { GRACE_BLINK, graceAlpha } from "../../layout/graceBlink";
-import {
-  COLLAR_HEIGHTS,
-  formationOrder,
-  leashHand,
-  PACK_DEPTH,
-  packDogOf,
-  packPlacements,
-  tautLeashLine,
-} from "../../layout/packFormation";
+import { formationOrder, packDogOf, packPlacements } from "../../layout/packFormation";
 import { distanceAtY, project } from "../../layout/projection";
+import type { StandingDog } from "../../pack/packDraw";
+import { type Figure, PackFigures } from "../../pack/phaser/packFigures";
 import { currentZone } from "../../rules/route";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
@@ -23,18 +17,10 @@ import { pullPose, type Pulls } from "../../runner/pulls";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
 import { playBarkWord } from "../comicWord";
-import { drawPixelLine } from "../draw";
 import { trotOffRoad } from "../feedbackMoments";
-import { colorFromHex, PALETTE } from "../palette";
+import { colorFromHex } from "../palette";
 import { type DogSignal, dogTop, iconArt, playPullFail, PullSignals } from "../pullSignals";
-import {
-  addStandingSprite,
-  playEffect,
-  playTag,
-  playTagOnce,
-  showAtDepth,
-  spriteMetrics,
-} from "../sprites";
+import { playEffect, playTag, playTagOnce, spriteMetrics } from "../sprites";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // What the pack is drawn with each frame besides the walk.
@@ -51,12 +37,10 @@ export interface PackFrame {
 // The walker, the dogs on their leashes, and what shows over them: each dog's pull signals
 // and the bursts over it.
 export class PackView {
-  private readonly dogSprites: Map<DogId, GameObjects.Sprite>;
+  private readonly dogSprites: ReadonlyMap<DogId, GameObjects.Sprite>;
   // The tag each dog's sprite last played.
   private readonly dogTags = new Map<DogId, string>();
-  // What the leashes were last drawn for, so an unchanged frame skips them.
-  private drawnLeash = "";
-  private readonly leash: GameObjects.Graphics;
+  private readonly figures: PackFigures;
   // Fired dogs trotting off the road, drawn by their trot and not with the pack.
   private readonly leaving = new Map<DogId, Tweens.Tween>();
   private pose: "idle" | "walk" = "walk";
@@ -64,21 +48,17 @@ export class PackView {
   // Sprites playing a one-off reaction, which the pack's pose waits for.
   private readonly reacting = new Set<GameObjects.Sprite>();
   private readonly scene: Scene;
-  private readonly walker: { key: string; sprite: GameObjects.Sprite };
+  private readonly walker: Figure;
 
   constructor(scene: Scene, dogs: readonly DogId[], walkerSprite: string) {
     this.scene = scene;
-    this.leash = scene.add.graphics();
-    this.dogSprites = new Map(
-      dogs.map((dog) => {
-        const key = dogSpriteKey(gameData, dog);
-        const sprite = addStandingSprite(scene, key, 0, 0);
-        playTag(sprite, key, "walk");
-        return [dog, sprite];
-      }),
-    );
-    this.walker = { key: walkerSprite, sprite: addStandingSprite(scene, walkerSprite, 0, 0) };
-    playTag(this.walker.sprite, walkerSprite, "walk");
+    this.figures = new PackFigures(scene, { still: false, tag: "walk" }, walkerSprite, dogs);
+    this.dogSprites = this.figures.dogs;
+    const { walker } = this.figures;
+    if (walker === undefined) {
+      throw new Error("The walk's pack has a walker");
+    }
+    this.walker = walker;
     this.pullSignals = new PullSignals(scene, DEPTH.fx);
   }
 
@@ -202,7 +182,6 @@ export class PackView {
   // leashes blink, or stay dimmed with reduced motion (graceAlpha).
   draw(walk: Walk, frame: PackFrame): void {
     const { halted, pulls, shadow, still } = frame;
-    const { leash } = this;
     const alpha = graceAlpha(
       GRACE_BLINK,
       still,
@@ -213,65 +192,50 @@ export class PackView {
     const footY = PROJECTION.footY;
     const walking = formationOrder(packDogs(walk.run));
     const placements = packPlacements(PROJECTION, walking.map(packDogOf));
-    const leashColor = colorFromHex(currentZone(gameData, walk.run).leashColor);
-    const taut = pulls.strain?.dog ?? null;
-    const leashKey = `${walkerX}|${walking.join()}|${leashColor}|${taut}`;
-    const redrawLeash = leashKey !== this.drawnLeash;
-    if (redrawLeash) {
-      this.drawnLeash = leashKey;
-      leash.clear();
-    }
     const pose = halted ? "idle" : "walk";
     const posed = pose !== this.pose;
     this.pose = pose;
+    const standing: StandingDog[] = [];
     for (const [dog, sprite] of this.dogSprites) {
       if (this.leaving.has(dog)) {
         continue;
       }
-      const index = walking.indexOf(dog);
-      sprite.setVisible(index >= 0);
-      if (index < 0) {
+      const rank = walking.indexOf(dog);
+      sprite.setVisible(rank >= 0);
+      if (rank < 0) {
         continue;
       }
-      const placement = itemAt(placements, index);
+      const placement = itemAt(placements, rank);
       const distance = distanceAtY(PROJECTION, footY + placement.footDy);
       const placed = project(PROJECTION, { distance, x: walkerX });
-      const drawn = showAtDepth(sprite, dogSpriteKey(gameData, dog), PACK_DEPTH);
-      const x = Math.round(placed.x + placement.dx);
-      const dogFoot = Math.round(placed.y);
-      this.poseDog(dog, sprite, drawn.key, pose, frame, {
-        x,
-        y: dogFoot - Math.round(spriteMetrics(drawn.key).feetY * drawn.scale),
-      });
-      // Of two dogs on one row, the later in formation order is drawn in front.
-      sprite
-        .setPosition(x, dogFoot)
-        .setDepth(DEPTH.sprite + dogFoot + index / 1000)
-        .setAlpha(alpha);
-      shadow(dogSpriteKey(gameData, dog), drawn.depth, x, dogFoot);
-      if (redrawLeash) {
-        const hand = leashHand(placement);
-        const from = { x: walkerX + hand.dx, y: footY + hand.dy };
-        const to = { x, y: dogFoot - Math.round(COLLAR_HEIGHTS[dog] * drawn.depth) };
-        drawPixelLine(leash, leashColor, from, to);
-        if (dog === taut) {
-          const line = tautLeashLine(from, to);
-          drawPixelLine(leash, PALETTE.yellow, line.from, line.to);
-        }
+      const feet = { footY: Math.round(placed.y), x: Math.round(placed.x + placement.dx) };
+      standing.push({ dog, feet, placement, rank });
+    }
+    const leash = {
+      color: colorFromHex(currentZone(gameData, walk.run).leashColor),
+      taut: pulls.strain?.dog ?? null,
+    };
+    const drawn = this.figures.stand(DEPTH.sprite, shadow, leash, {
+      dogs: standing,
+      walker: { footY, x: walkerX },
+    });
+    for (const { dog, feet } of standing) {
+      const sprite = this.dogSprites.get(dog);
+      const shown = drawn.get(dog);
+      if (sprite !== undefined && shown !== undefined) {
+        this.poseDog(dog, sprite, shown.key, pose, frame, {
+          x: feet.x,
+          y: feet.footY - Math.round(spriteMetrics(shown.key).feetY * shown.scale),
+        });
       }
     }
     const { walker } = this;
-    walker.sprite
-      .setPosition(walkerX, footY)
-      .setDepth(DEPTH.sprite + footY)
-      .setAlpha(alpha);
-    // The leashes run from the walker's hands up the road to the dogs: under the walker, whose
-    // body hides the part behind it, and over the dogs ahead.
-    leash.setDepth(DEPTH.sprite + footY - 0.5).setAlpha(alpha);
+    for (const layer of this.figures.layers()) {
+      layer.setAlpha(alpha);
+    }
     if (posed && !this.reacting.has(walker.sprite)) {
       playTag(walker.sprite, walker.key, pose, still && halted);
     }
-    shadow(walker.key, 1, walkerX, footY);
     this.drawSignals(walking, frame);
   }
 
