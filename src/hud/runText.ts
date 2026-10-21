@@ -16,6 +16,7 @@ export const RUN_TEXT_FIELDS = {
     loseWithBonus: ["fees", "zone"],
     zonesLeft: ["count"],
   },
+  lowHearts: ["owner"],
   newWalker: {
     info: ["agility", "perk"],
     subtitle: ["walker"],
