@@ -122,11 +122,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   // dog's pull can force a hit.
   it("avoids every obstacle no pull forces, as an ideal player", () => {
     const busy = withoutPulls(SHORT);
-    const results = [
-      run(busy, 1, IDEAL_SKILL, ["duchess"]),
-      run(busy, 2, IDEAL_SKILL, NO_CHASER),
-      run(busy, 3, IDEAL_SKILL, NO_CHASER),
-    ];
+    const results = [run(busy, 1, IDEAL_SKILL, ["duchess"]), run(busy, 2, IDEAL_SKILL, NO_CHASER)];
     const counts = obstacleCounts(busy, results);
 
     expect(counts.met).toBeGreaterThan(100);

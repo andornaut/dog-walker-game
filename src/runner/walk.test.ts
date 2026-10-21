@@ -336,26 +336,9 @@ describe("planZone", { timeout: 15_000 }, () => {
     expect(countOf("lucky")).toBe(2);
   });
 
-  // Without minor obstacles three lanes wide, which only fit after a row that blocks lanes
-  // beside them, so the planner has room for every obstacle at either pace.
   it("scales the obstacles, tips and need spots by the walker's pace, and nothing else", () => {
-    const narrow = (zone: Zone): Zone => ({
-      ...zone,
-      weights: {
-        ...zone.weights,
-        minorObstacles: Object.fromEntries(
-          Object.entries(zone.weights.minorObstacles).map(([id, weight]) => [
-            id,
-            footprintOf(data, id as MinorObstacleId).lanes > 2 ? 0 : weight,
-          ]),
-        ) as Zone["weights"]["minorObstacles"],
-      },
-    });
-    const [first, ...rest] = data.world.zones;
-    const world: World = { ...data.world, zones: [narrow(first), ...rest.map(narrow)] };
-    const roomy = { ...data, world };
     const paced = {
-      ...roomy,
+      ...data,
       tuning: { ...tuning, multipliers: { ...tuning.multipliers, fastWalkerSpeed: 2 } },
     };
     const counts = (tuned: typeof data) => {
@@ -375,7 +358,7 @@ describe("planZone", { timeout: 15_000 }, () => {
         treat: count("treat"),
       };
     };
-    const base = counts(roomy);
+    const base = counts(data);
     expect(base.needSpot).toBeGreaterThan(0);
     expect(counts(paced)).toEqual({
       lucky: base.lucky,

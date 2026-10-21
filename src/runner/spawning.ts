@@ -285,7 +285,10 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // kinds with bigger footprints are placed first. Lane-blocking spawns only take cells that
 // keep every hit avoidable: each row's window and the gap after it keep minOpenLanes open, and
 // from any lane at the zone's start, and from every open lane of each row, an open lane of the
-// next row is within reach without crossing a lane blocked in the gap between them. A spawn more
+// next row is within reach without crossing a lane blocked in the gap between them, or else,
+// after rows with no lane-blocking spawn, which the pack steers across, from an earlier row with
+// the lane moves that fit in all the road between less the reaction margin; those rows then stay
+// clear of lane-blocking spawns. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
 // last row. Where the path changes lanes between two lane-blocking spawns, packFitsBetween
 // holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide or wider have
@@ -340,6 +343,38 @@ export function planSpawns<Kind extends string>(
   const leadIns = new Set<number>();
   const leadInReach = lanesWithin(plan, 2 * spacing - blockingLength(plan, 1));
 
+  const isEmpty = (row: number) => (blocked[row] ?? 0) === 0 && (gapBlocked[row] ?? 0) === 0;
+  // Empty rows the pack steers across to reach a row it could not reach from the row before:
+  // they stay free of lane-blocking spawns. relied holds those a trial block needs. Only a spawn
+  // bigger than one cell, which may be skipped, keeps new rows clear, so the one-cell spawns
+  // always have the rows they had.
+  const steerRows = new Uint8Array(rows.length);
+  let relied: number[] = [];
+  // From an empty row, the reach from the nearest row before it that reaches the next row:
+  // over all the road from that row's window to the next row's, less the reaction margin, since
+  // the pack steers for a row further ahead than the next; or from any lane at the zone's start.
+  // The rows between are empty, and the pack may be in any lane of an empty one. The steering
+  // stops at the last row before it with a lane-blocking spawn.
+  const crossesEmpty = (row: number): boolean => {
+    const next = itemAt(rows, row + 1);
+    for (let from = row - 1; from >= -1; from -= 1) {
+      const road =
+        from === -1
+          ? next
+          : next - itemAt(rows, from) - blockingLength(plan, 1) - reactionLength(plan);
+      const start = from === -1 ? lanes : openLanes(from);
+      const clear = from === -1 ? -1 : ~(gapBlocked[from] ?? 0);
+      if (everyLaneReaches(lanesWithin(plan, road), start, openLanes(row + 1), clear)) {
+        relied.push(...Array.from({ length: row - from }, (_, i) => from + 1 + i));
+        return true;
+      }
+      if (from >= 0 && !isEmpty(from)) {
+        return false;
+      }
+    }
+    return false;
+  };
+
   const crossesFrom = (row: number): boolean => {
     if (row === -1) {
       return everyLaneReaches(reach.entry, lanes, openLanes(0));
@@ -355,12 +390,13 @@ export function planSpawns<Kind extends string>(
         ~(gapBlocked[row - 1] ?? 0),
       );
     }
-    return everyLaneReaches(
+    const crosses = everyLaneReaches(
       reach.betweenRows,
       openLanes(row),
       openLanes(row + 1),
       ~(gapBlocked[row] ?? 0),
     );
+    return crosses || (isEmpty(row) && crossesEmpty(row));
   };
 
   // Blocks the footprint's lanes, checks every transition it touches, and undoes the block
@@ -370,6 +406,10 @@ export function planSpawns<Kind extends string>(
     if (lastRow >= rows.length || lastGap >= rows.length - 1) {
       return false;
     }
+    if (steerRows.subarray(cell.row, lastRow + 1).includes(1)) {
+      return false;
+    }
+    relied = [];
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= lastRow; row++) {
       blockedBefore[row] = blocked[row] ?? 0;
@@ -389,6 +429,18 @@ export function planSpawns<Kind extends string>(
     const lastCrossing = leadIns.has(lastRow + 1) ? lastRow + 1 : lastRow;
     for (let row = cell.row - 1; ok && row <= lastCrossing; row++) {
       ok = crossesFrom(row);
+    }
+    // The empty rows after it now steer from it.
+    for (let row = lastCrossing + 1; ok && row < rows.length - 1 && isEmpty(row); row++) {
+      ok = crossesFrom(row);
+    }
+    if (ok && footprint.lanes * footprint.rows === 1) {
+      ok = relied.every((row) => steerRows[row] === 1);
+    }
+    if (ok && keep) {
+      relied.forEach((row) => {
+        steerRows[row] = 1;
+      });
     }
     if (!ok || !keep) {
       for (let row = cell.row; row <= lastRow; row++) {

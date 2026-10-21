@@ -361,13 +361,16 @@ describe("planSpawns", () => {
     }
   });
 
-  // At a one-lane reach a hedge fits only as the first row or after a row that blocks lanes
-  // beside it, never a wide obstacle's, so most hedges are skipped.
+  // Eight wide footprints with a row between each leave 19 rows too few for every one at times,
+  // so a bench may be skipped; the one-cell obstacles never are, and the hedges, three lanes
+  // wide at a one-lane reach, fit after rows with no obstacle, which the pack steers across.
   it("keeps a footprint on the road, its cells to itself, and two lanes open", () => {
     const kinds = new Set<Kind>();
     for (const seed of seeds) {
       const events = planSpawns(seededRandom(seed), shaped);
       expect(countOf("obstacle", events)).toBe(4);
+      expect(countOf("hedge", events)).toBe(3);
+      expect(events.filter(blocking).length).toBeGreaterThanOrEqual(13);
       events.filter(blocking).forEach(({ kind }) => kinds.add(kind));
       for (const event of events) {
         expect(event.lane + footprintOf(event.kind).lanes).toBeLessThanOrEqual(5);
