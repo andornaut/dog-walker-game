@@ -36,18 +36,24 @@ reads on them.
   brick road under the button (48,512 264x44). The houses, trees and fences
   stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
   margins show only sky, lawn and sidewalk.
-- screen-loading: Elm Avenue at night, shown while the game loads, the gate
-  scene's street seen from the road. NIGHT_SKY's bands fill the sky down to
-  the far side's ground row (HORIZON, 356), stars and a crescent moon in the
-  navy band, and the logo drawn in at 2x (256x60 at 52,80). Across the
-  street, Elm Avenue's backdrop (the hill, the water tower, the slim houses)
-  two ramp steps darker with its windows lit; then the yard one step darker:
-  the lawn, the flower bed, the picket fence with the open gate (posts at
-  x 330 and 356) and ui-pet-shop's building on the left lot (4,306), its
-  board, display window and door pane left lit. The sidewalk (rows 414 to
-  469) carries the track and the pair, a street lamp at x 238; then the
-  curb, and the street, with no markings from the curb to row 500, where a
-  status line could sit (the game draws none).
+- screen-loading: a Toronto street at night, shown while the game loads, seen
+  from the road. NIGHT_SKY's bands fill the sky down to SKY_FOOT (356), stars,
+  a crescent moon at the top left and the logo drawn in at 2x (256x60 at
+  52,80) in the navy band. Far back, downtown's towers in navy and dslate
+  silhouette with a few gold floors lit, and the CN Tower lit (its haze shaft,
+  the pod's gold window ring, the SkyPod and a red beacon on the mast, tip at
+  row 150) over the corner lot. The near row: three Cabbagetown
+  bay-and-gables in brick and dbrick (stone and driftwood bargeboards, an
+  arched attic window, a two-storey bay, the door with its lit transom),
+  most windows lit gold, over pine front yards behind a coal iron fence with
+  stone stoops; a board fence across the lane, a heritage lamp lit yellow in
+  front of it at x 227; and ui-pet-shop's building on the corner lot (236,306)
+  a ramp step darker, its board lit and its display window and door pane
+  glowing gold. The sidewalk (rows 414 to 469, grey, slabs every 24px)
+  carries the track and the pair, a TTC streetcar stop at its left end;
+  then the curb, and the street, flat navy and plain from the curb to row
+  500, where a status line could sit (the game draws none), then two
+  streetcar tracks.
 
 ui-pet-shop: a 120x108 sprite, tags normal, pressed and glint: the pet shop on
 the yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
@@ -68,8 +74,8 @@ row 82). An affordable item in the shop takes ui-afford 2px outside the frame
 (232,84 124x112).
 
 ui-loading-track: a 316x8 image, the sidewalk being walked: Biscuit's paw
-prints in dslate, staggered on two rows from Casey's heel to the gate. The game
-draws it at TRACK_AT (16,456).
+prints in dslate, staggered on two rows from Casey's heel to the Pet shop's door.
+The game draws it at TRACK_AT (16,456).
 ui-loading: a 98x84 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
 on, walking right on a plum leash, at the road sprites' size (Casey as tall as
 her 56x84 walker, Biscuit as his 56x56 dog), cel shaded with the road outline,
@@ -77,7 +83,7 @@ Casey's face flat skin. Frames 0 and 2 plant the feet apart, 1 and 3 pass
 with the body 1px higher, a foot lifted, and Biscuit's diagonal pairs swap.
 The game draws it at PAIR_AT (6,379) plus round(228 * progress) to the right,
 its feet on row 460, so Casey's heel starts on the first paw print and
-Biscuit's nose ends at the gate.
+Biscuit's nose ends at the Pet shop's door pane.
 
 Usage:
   screens.py preview OUT.png   the logo, the ui-loading frames, then every screen,
@@ -555,7 +561,8 @@ def image_rows(img):
 
 # ---------- screen-stats ----------
 
-# Elm Avenue's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading.
+# The sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading and in
+# screen-stats' window.
 NIGHT_SKY = ("navy", "purple", "mauve")
 # The first backdrop band row screen-stats' window shows, 25 rows over the far side's ground row: the
 # houses' lit walls, their doors and the ground row.
@@ -779,25 +786,40 @@ def end():
 
 # ---------- screen-loading, ui-loading-track, ui-loading ----------
 
-HORIZON = 356  # the far side's ground row, where the far houses stand and NIGHT_SKY's bands end
-YARD_FOOT = 414  # the fence's and the Pet shop's bottom row: the sidewalk starts under it
+SKY_FOOT = 356  # NIGHT_SKY's bands end here, behind the skyline's foot
+YARD_FOOT = 414  # the iron fences' and the Pet shop's bottom row: the sidewalk starts under it
 CURB = 470  # the sidewalk's last row is CURB - 1; the curb, then the street
 LOADING_LOGO_AT = ((W - 2 * LOGO_W) // 2, 80)  # the logo at 2x, 256x60
-GATE = (334, 356)
+SHOP_AT = (W - 4 - PET_SHOP_W, YARD_FOOT - PET_SHOP_H)  # ui-pet-shop's building on the corner lot
 # ui-pet-shop's display window and door pane in its frame, left lit on screen-loading
 SHOP_WINDOW = (9, 47, 67, 96)
-SHOP_DOOR_PANE = (82, 54, 100, 68)  # the open gate's posts, left and right
-LAMP_X = 238
+SHOP_DOOR_PANE = (82, 54, 100, 68)
+# The display window's and door pane's day glass, lamplit at night; the door's cream paw turns clay on it
+SHOP_GLOW = {K["sky"]: "gold", K["cyan"]: "yellow", K["blue"]: "ochre"}
+TRACK_END = 332  # the track's end and Biscuit's last nose column, at the Pet shop's door pane (318 to 335)
+LAMP_X = 227
+MOON = (40, 42)
 PAIR_W, PAIR_H = 98, 84
 PAIR_FEET = 81  # the pair's bottom opaque row (the shoes' and paws' outline) in its frame
 WALK_FOOT = 460  # the screen row the pair's feet stand on
 PAIR_HEEL, PAIR_NOSE = 10, 97  # Casey's rear heel on the contact frames and Biscuit's nose, opaque columns
 TRACK_AT = (16, WALK_FOOT - 4)
-TRACK_W, TRACK_H = GATE[0] - 2 - TRACK_AT[0], 8
+TRACK_W, TRACK_H = TRACK_END - TRACK_AT[0], 8
 # Where the game draws ui-loading (origin top left) at progress 0, and how far right it walks by 1: Casey's
-# heel starts on the first paw print and Biscuit's nose ends at the gate. Its feet stand on WALK_FOOT.
+# heel starts on the first paw print and Biscuit's nose ends at the Pet shop's door. Its feet stand on WALK_FOOT.
 PAIR_AT = (TRACK_AT[0] - PAIR_HEEL, WALK_FOOT - PAIR_FEET)
 PAIR_TRAVEL = TRACK_AT[0] + TRACK_W - PAIR_NOSE - 1 - PAIR_AT[0]
+
+# The skyline, far back: (left, width, top, wall) for each downtown tower, its foot hidden behind the street.
+TOWERS = ((-6, 28, 286, "dslate"), (44, 18, 270, "navy"), (110, 24, 258, "dslate"), (172, 20, 276, "navy"),
+          (200, 26, 250, "dslate"), (290, 24, 262, "dslate"), (318, 16, 284, "navy"), (338, 26, 272, "dslate"))
+CN_X, CN_FOOT, CN_TIP = 258, 372, 150  # the CN Tower's centre column, its foot and its mast's tip
+# The near row, Cabbagetown's bay-and-gables: (left, width, wall, trim, door, bay on the left, lit windows),
+# the lit windows by their order in victorian.
+HOMES = ((-10, 76, "brick", "stone", "forest", False, (0, 2, 3, 5)),
+         (66, 76, "dbrick", "driftwood", "ttc", True, (0, 1, 2, 4, 6)),
+         (142, 76, "brick", "stone", "navy", True, (1, 3, 4, 5)))
+HOME_BASE = YARD_FOOT - 10  # the houses' ground row, over the front yards
 
 
 def after_dark(img, steps=2):
@@ -833,120 +855,239 @@ def stars(cv, r, top, bottom, n):
         cv.fill(x, y, 1, 1, "lgrey" if r() < 0.7 else "slate")
 
 
-def picket_fence(cv, foot, x0, x1, gate=None):
-    """The start screen's picket fence standing on row foot, from x0 to x1: white pickets 14 tall on two lgrey
-    rails, and, with gate (left, right), an open gate between two posts."""
-    top = foot - 14
-    for x in range(x0, x1, 6):
-        if gate and gate[0] - 4 < x < gate[1] + 4:
+def tower_block(cv, x, w, top, wall, seed):
+    """A downtown tower in silhouette from row top down to the street, a 3-row crown stepped in 3 columns a
+    side, and its lit floors: 2x1 gold windows on a 4-column, 5-row grid, about one in five lit."""
+    cv.fill(x, top, w, YARD_FOOT - top, wall)
+    cv.fill(x + 3, top - 3, w - 6, 3, wall)
+    r = rand(seed)
+    for wy in range(top + 4, SKY_FOOT, 5):
+        for wx in range(x + 3, x + w - 4, 4):
+            if r() < 0.22:
+                cv.fill(wx, wy, 2, 1, "gold")
+
+
+def cn_tower(cv, cx, foot, tip):
+    """The CN Tower lit for the night: a tapering haze shaft in its floodlight, shaded on the right, the
+    main pod at 62% of its height with a ring of gold windows, the SkyPod above it, then the mast, a red
+    beacon at its tip."""
+    h = foot - tip
+    pod = foot - round(h * 0.62)
+    sky_pod = foot - round(h * 0.81)
+    mast = foot - round(h * 0.84)
+    for y in range(pod, foot):
+        half = 2 + (y - pod) * 7 // (foot - pod)
+        cv.fill(cx - half, y, 2 * half + 1, 1, "haze")
+        cv.fill(cx + 1, y, half, 1, "lgrey")
+        cv.fill(cx - half, y, 1, 1, "white")
+    for y in range(mast, pod):
+        cv.fill(cx - 1, y, 3, 1, "haze")
+        cv.fill(cx + 1, y, 1, 1, "lgrey")
+    # the main pod: a flared skirt, the window ring, the observation deck's cap
+    cv.fill(cx - 5, pod + 6, 11, 2, "lgrey")
+    cv.fill(cx - 8, pod + 4, 17, 2, "lgrey")
+    cv.fill(cx - 10, pod + 2, 21, 2, "haze")
+    cv.fill(cx - 11, pod - 2, 23, 4, "dlake")
+    for wx in range(cx - 10, cx + 11, 2):
+        cv.fill(wx, pod - 1, 1, 2, "gold")
+    cv.fill(cx - 10, pod - 4, 21, 2, "haze")
+    cv.fill(cx - 7, pod - 6, 15, 2, "lgrey")
+    cv.fill(cx - 4, pod - 8, 9, 2, "lgrey")
+    # the SkyPod
+    cv.fill(cx - 3, sky_pod - 1, 7, 3, "lgrey")
+    cv.fill(cx - 2, sky_pod, 5, 1, "gold")
+    # the mast, a beacon at its tip and one partway up
+    cv.fill(cx, tip, 1, mast - tip, "lgrey")
+    cv.fill(cx - 1, tip, 3, 1, "ttc")
+    cv.fill(cx, tip - 1, 1, 1, "ttc")
+    cv.fill(cx - 1, (tip + mast) // 2, 3, 1, "ttc")
+
+
+def lit_window(cv, x, y, w, h, trim, lit, arch=False):
+    """A sash window in a trim frame on a sill: lit gold glass behind amber curtains drawn back to its
+    sides, or dark shale glass. arch rounds its head."""
+    cv.fill(x - 1, y - 1, w + 2, h + 2, trim)
+    cv.fill(x, y, w, h, "gold" if lit else "shale")
+    if lit:
+        cv.fill(x, y, 1, h, "amber")
+        cv.fill(x + w - 1, y, 1, h, "amber")
+    cv.fill(x, y + h // 2, w, 1, trim)
+    cv.fill(x - 2, y + h + 1, w + 4, 1, trim)
+    if arch:
+        cv.fill(x - 1, y - 1, 1, 1, dk(trim))
+        cv.fill(x + w, y - 1, 1, 1, dk(trim))
+        cv.fill(x, y - 2, w, 1, trim)
+
+
+def door_column(home):
+    """The centre column of a HOMES house's front door, on the half its bay leaves."""
+    x, w, *_, bay_left, _ = home
+    bw = w // 2 - 2
+    return (x + w - 3 - bw if bay_left else x + 3) + bw // 2
+
+
+def victorian(cv, x, w, wall, trim, door, bay_left, lit):
+    """A Cabbagetown bay-and-gable on HOME_BASE, w wide: a steep front gable over the full width, its brick
+    face edged with a coal roof and a bargeboard in trim, a king post under the peak and an arched attic
+    window; below, a two-storey bay on one half (three windows a storey, the outer two on its shaded
+    sides) and the front door with its transom on the other, a window over it, and a stone stoop.
+    lit lists which windows glow: 0 the attic, 1 to 3 the bay's lower storey, 4 to 6 its upper one, then
+    the window over the door as 7."""
+    base = HOME_BASE
+    gable_h, wall_h = 40, 86
+    top = base - wall_h - gable_h
+    cx = x + w // 2
+    half = w // 2 + 2
+    for i in range(gable_h):
+        inset = round(i * half / gable_h)
+        cv.fill(cx - inset, top + i, 2 * inset, 1, wall)
+        cv.fill(cx - inset - 1, top + i, 1, 1, "coal")
+        cv.fill(cx + inset, top + i, 1, 1, "coal")
+        if inset > 2:
+            cv.fill(cx - inset, top + i, 2, 1, trim)
+            cv.fill(cx + inset - 2, top + i, 2, 1, trim)
+    cv.fill(x - 3, top + gable_h - 1, w + 6, 2, "coal")
+    cv.fill(cx - 1, top - 3, 1, 4, trim)
+    cv.fill(cx - 1, top + 2, 1, 7, trim)
+    cv.fill(cx - 5, top + 9, 9, 1, trim)
+    lit_window(cv, cx - 4, top + 16, 7, 14, trim, 0 in lit, arch=True)
+    wy = top + gable_h + 1
+    cv.fill(x, wy, w, base - wy, wall)
+    cv.fill(x + w - 3, wy, 3, base - wy, dk(wall))
+    # the bay
+    bw = w // 2 - 2
+    bx = x + 3 if bay_left else x + w - 3 - bw
+    cv.fill(bx - 1, wy + 6, bw + 2, 2, "coal")
+    cv.fill(bx, wy + 8, bw, base - wy - 8, wall)
+    cv.fill(bx, wy + 8, 6, base - wy - 8, dk(wall))
+    cv.fill(bx + bw - 6, wy + 8, 6, base - wy - 8, dk(wall))
+    cv.fill(bx - 1, wy + 44, bw + 2, 2, trim)
+    for storey, sy in ((4, wy + 14), (1, wy + 52)):
+        lit_window(cv, bx + 2, sy, 3, 22, trim, storey in lit)
+        lit_window(cv, bx + 9, sy, bw - 18, 22, trim, storey + 1 in lit)
+        lit_window(cv, bx + bw - 5, sy, 3, 22, trim, storey + 2 in lit)
+    # the door half
+    dc = door_column((x, w, wall, trim, door, bay_left, lit))
+    lit_window(cv, dc - 5, wy + 14, 10, 22, trim, 7 in lit)
+    cv.fill(dc - 7, base - 34, 14, 34, trim)
+    cv.fill(dc - 5, base - 32, 10, 5, "gold")
+    cv.fill(dc - 5, base - 26, 10, 26, door)
+    cv.fill(dc - 5, base - 26, 1, 26, dk(door))
+    cv.fill(dc + 2, base - 13, 1, 2, "gold")
+    for k in range(3):
+        cv.fill(dc - 7 - k, base + 3 * k, 14 + 2 * k, 3, "stone")
+        cv.fill(dc - 7 - k, base + 3 * k + 2, 14 + 2 * k, 1, "dstone")
+
+
+def iron_fence(cv, x0, x1, foot, gaps=()):
+    """A coal wrought-iron fence on row foot - 1, 9 rows tall: a bar every 3 columns, every other one
+    topped with a spear, between two rails, left open over gaps ((left, right) column pairs)."""
+    for i, x in enumerate(range(x0, x1, 3)):
+        if any(a <= x < b for a, b in gaps):
             continue
-        cv.fill(x, top, 4, 14, "white")
-        cv.fill(x + 3, top + 1, 1, 13, "lgrey")
-        cv.fill(x + 1, top - 1, 2, 1, "white")
-    cv.fill(x0, top + 4, (gate[0] if gate else x1) - x0, 2, "lgrey")
-    if gate:
-        cv.fill(gate[1] + 4, top + 4, x1 - gate[1] - 4, 2, "lgrey")
-        for px in (gate[0] - 4, gate[1]):
-            cv.fill(px, top - 4, 5, 18, "lgrey")
-            cv.fill(px, top - 4, 5, 1, "white")
-            cv.fill(px + 4, top - 3, 1, 17, "grey")
-        # the gate leaf swung open into the yard, seen edge on: three pickets foreshortened behind the right post
-        for i in range(3):
-            cv.fill(gate[1] - 6 + 2 * i, top - 2 + i, 2, 13 - i, "white" if i % 2 == 0 else "lgrey")
+        cv.fill(x, foot - 9, 1, 9, "coal")
+        if i % 2 == 0:
+            cv.fill(x, foot - 10, 1, 1, "coal")
+    edges = sorted({x0, x1, *[c for g in gaps for c in g]})
+    for a, b in zip(edges[::2], edges[1::2]):
+        cv.fill(a, foot - 8, b - a, 1, "coal")
+        cv.fill(a, foot - 2, b - a, 1, "coal")
+
+
+def heritage_lamp(cv, x, foot, top):
+    """A Toronto heritage street lamp: a coal post from row top down to foot, a fluted base, and an acorn
+    lantern lit yellow with a gold rim, a cap and a finial."""
+    cv.fill(x - 1, top, 3, foot - top, "coal")
+    cv.fill(x - 1, top, 1, foot - top, "ash")
+    cv.fill(x - 3, foot - 10, 7, 10, "coal")
+    cv.fill(x - 3, foot - 10, 1, 10, "ash")
+    cv.fill(x - 4, foot - 1, 9, 2, "coal")
+    cv.fill(x - 3, top - 2, 7, 2, "coal")
+    cv.fill(x - 4, top - 12, 9, 10, "yellow")
+    cv.fill(x - 4, top - 12, 1, 10, "gold")
+    cv.fill(x + 4, top - 12, 1, 10, "gold")
+    cv.fill(x - 2, top - 10, 2, 4, "cream")
+    cv.fill(x - 3, top - 14, 7, 2, "coal")
+    cv.fill(x - 1, top - 16, 3, 2, "coal")
+    cv.fill(x, top - 18, 1, 2, "coal")
+
+
+def ttc_stop(cv, x, foot):
+    """A TTC streetcar stop: a coal pole on row foot - 1 carrying the red and white stop sign, a white
+    streetcar on its red face."""
+    cv.fill(x, foot - 58, 2, 58, "coal")
+    cv.fill(x - 6, foot - 72, 14, 16, "white")
+    cv.fill(x - 5, foot - 71, 12, 14, "ttc")
+    cv.fill(x - 3, foot - 68, 8, 5, "white")
+    cv.fill(x - 2, foot - 67, 2, 2, "ttc")
+    cv.fill(x + 1, foot - 67, 2, 2, "ttc")
+    cv.fill(x - 3, foot - 62, 1, 1, "white")
+    cv.fill(x + 4, foot - 62, 1, 1, "white")
+    cv.fill(x, foot - 70, 2, 2, "white")
 
 
 def loading():
     cv = sn.Canvas(W, H)
     r = rand(13)
-    # the night sky in bands, navy down to a last mauve glow behind the far roofs, stars in the navy band
-    cv.fill(0, 0, W, HORIZON, NIGHT_SKY[-1])
-    rows = bd.bands(cv, 0, HORIZON, NIGHT_SKY)
-    stars(cv, r, 0, rows[0][1] - 3, 110)
-    for x, y in ((24, 36), (334, 132), (40, 190), (296, 214), (180, 30), (110, 224)):
+    # the night sky in bands, navy down to a mauve glow over the city, stars and a crescent moon in the navy band
+    rows = bd.bands(cv, 0, SKY_FOOT, NIGHT_SKY)
+    cv.fill(0, SKY_FOOT, W, YARD_FOOT - SKY_FOOT, "coal")
+    stars(cv, r, 0, rows[0][1] - 6, 36)
+    for x, y in ((334, 34), (338, 120), (22, 150), (180, 28)):
         cv.fill(x - 1, y, 3, 1, "lgrey")
         cv.fill(x, y - 1, 1, 3, "lgrey")
         cv.fill(x, y, 1, 1, "white")
-    # a crescent moon, top right, clear of the logo
     for dy in range(-10, 11):
         for dx in range(-10, 11):
             if dx * dx + dy * dy <= 100 and (dx + 5) ** 2 + (dy - 3) ** 2 > 64:
-                cv.fill(318 + dx, 44 + dy, 1, 1, "cream")
-    # the far side of the street as Elm Avenue's backdrop has it, drawn by day and taken two ramp steps down:
-    # a hill with a water tower on its crest and a second row of houses up its slope, then the slim houses
-    # across the street on HORIZON with trees and shrubs between them
-    far = clear(W, H)
-    crest = bd.hills(far, HORIZON - 52, HORIZON, "dgreen", "green", 1.7, 10)
-    tx = 298
-    for lx in (tx - 6, tx + 5):
-        far.fill(lx, HORIZON - 50, 2, 16, "slate")
-    far.fill(tx - 6, HORIZON - 43, 13, 1, "slate")
-    far.fill(tx - 9, HORIZON - 62, 20, 12, "lgrey")
-    far.fill(tx + 7, HORIZON - 62, 4, 12, "grey")
-    far.fill(tx - 9, HORIZON - 51, 20, 1, "grey")
-    for k in range(4):
-        far.fill(tx - 7 + 2 * k, HORIZON - 63 - k, 16 - 4 * k, 1, "slate")
-    for cx, w, wall_c, roof in ((22, 20, "lgrey", "slate"), (90, 18, "skin1", "dred"),
-                                (208, 20, "cream", "dslate"), (332, 18, "white", "purple")):
-        bd.far_house(far, cx, w, min(HORIZON - 26, crest[cx] + 16), 12, wall_c, roof)
-    homes = ((0, 44, 22, "lgrey", "slate", "dred", False), (60, 46, 24, "tan", "brown", "dgreen", True),
-             (120, 44, 22, "pink", "purple", "white", False), (180, 48, 24, "sky", "navy", "red", True),
-             (240, 44, 22, "cream", "dred", "sky", False), (300, 46, 24, "skin1", "dslate", "forest", True),
-             (360, 44, 22, "white", "brown", "blue", False))
-    for cx, rad in ((30, 11), (150, 12), (270, 10)):
-        bd.tree(far, cx, HORIZON - 19 - 2 * rad, r=rad, base=HORIZON, girth=4)
-    for cx, w, wall_h, wall_c, roof, door, dormer in homes:
-        bd.house(far, cx - w // 2, w, wall_c, roof, door, top=HORIZON - 46, base=HORIZON, roof_h=46 - wall_h,
-                 parts=bd.SLIM, eave=2, rake=bd.LIT.get(roof), dormer=dormer)
-    for cx in (90, 210, 330):
-        bd.bush(far, cx - 5, HORIZON - 3, "dgreen", bd.SHRUB)
-    dark = after_dark(far.img)
-    cv.img.paste(dark, (0, 0), dark)
-    # the yard, one ramp step down: the lawn, a flower bed along the fence, the front path from the gate,
-    # the picket fence with the open gate, and the Pet shop's brick on the left lot, its PET SHOP board lit
-    near = clear(W, H)
-    near.fill(0, HORIZON, W, YARD_FOOT - HORIZON, "green")
-    for i in range(40):
-        near.fill((i * 53) % W, HORIZON + 4 + (i * 29) % (YARD_FOOT - HORIZON - 24), 1, 2, "dgreen")
-    near.fill(0, YARD_FOOT - 20, W, 5, "dbrown")
-    near.fill(0, YARD_FOOT - 20, W, 1, "plum")
-    bd.flowers(near, 2, W - 2, YARD_FOOT - 19, ("red", "yellow", "pink", "white"))
-    picket_fence(near, YARD_FOOT, 0, W, GATE)
+                cv.fill(MOON[0] + dx, MOON[1] + dy, 1, 1, "cream")
+    # the skyline far back: downtown's towers in silhouette, their lit floors, and the CN Tower lit
+    for k, (x, w, top, wall) in enumerate(TOWERS):
+        tower_block(cv, x, w, top, wall, 31 + k)
+    cn_tower(cv, CN_X, CN_FOOT, CN_TIP)
+    # the near row: Cabbagetown's bay-and-gables behind their iron fences, a board fence across the lane and
+    # the lamp in front of it, and ui-pet-shop's building on the corner lot, its board, window and door pane lit
+    end = HOMES[-1][0] + HOMES[-1][1]
+    lane = (end, SHOP_AT[0] + 3)
+    cv.fill(lane[0], YARD_FOOT - 22, lane[1] - lane[0], 22, "bark")
+    for x in range(lane[0] + 3, lane[1], 4):
+        cv.fill(x, YARD_FOOT - 22, 1, 22, "walnut")
+    cv.fill(lane[0], YARD_FOOT - 23, lane[1] - lane[0], 1, "walnut")
+    cv.fill(0, HOME_BASE, end, YARD_FOOT - HOME_BASE, "pine")
+    for x, w, wall, trim, door, bay_left, lit in HOMES:
+        victorian(cv, x, w, wall, trim, door, bay_left, lit)
+    iron_fence(cv, 0, end, YARD_FOOT, [(c - 9, c + 9) for c in map(door_column, HOMES)])
     shop = pet_shop().img
-    near.img.alpha_composite(shop, (4, YARD_FOOT - PET_SHOP_H))
+    near = clear(W, H)
+    near.img.alpha_composite(shop, SHOP_AT)
     lit = after_dark(near.img, 1)
-    for box in ((0, 0, PET_SHOP_W, BOARD[3]), SHOP_WINDOW, SHOP_DOOR_PANE):
-        lit.alpha_composite(shop.crop(box), (4 + box[0], YARD_FOOT - PET_SHOP_H + box[1]))
+    lit.alpha_composite(shop.crop((0, 0, PET_SHOP_W, BOARD[3])), SHOP_AT)
+    for box, paw in ((SHOP_WINDOW, {}), (SHOP_DOOR_PANE, {K["cream"]: "clay"})):
+        glow = shop.crop(box)
+        gp = glow.load()
+        for y in range(glow.height):
+            for x in range(glow.width):
+                c = {**SHOP_GLOW, **paw}.get("%02x%02x%02x" % gp[x, y][:3])
+                if c and gp[x, y][3]:
+                    gp[x, y] = sn.rgb(c) + (255,)
+        lit.alpha_composite(glow, (SHOP_AT[0] + box[0], SHOP_AT[1] + box[1]))
     cv.img.paste(lit, (0, 0), lit)
-    # the sidewalk, a step darker than by day (Elm Avenue's road grey), slabs every 24px
-    walk = clear(W, CURB - YARD_FOOT)
-    walk.fill(0, 0, W, CURB - YARD_FOOT, "lgrey")
+    heritage_lamp(cv, LAMP_X, YARD_FOOT + 2, YARD_FOOT - 80)
+    # the sidewalk, grey, slabs every 24px, the TTC stop at its back
+    cv.fill(0, YARD_FOOT, W, CURB - YARD_FOOT, "grey")
     for x in range(0, W, 24):
-        walk.fill(x, 0, 1, CURB - YARD_FOOT, "grey")
-    walk.fill(0, 0, W, 2, "grey")
-    walk.fill(37, 30, 3, 1, "grey")
-    walk.fill(39, 31, 2, 1, "grey")
-    walk.fill(282, 18, 4, 1, "grey")
-    dim = after_dark(walk.img, 1)
-    cv.img.paste(dim, (0, YARD_FOOT))
-    # the street lamp at the back of the sidewalk
-    cv.fill(LAMP_X - 1, YARD_FOOT - 82, 3, 86, "slate")
-    cv.fill(LAMP_X - 1, YARD_FOOT - 82, 1, 86, "grey")
-    cv.fill(LAMP_X - 3, YARD_FOOT + 2, 7, 2, "navy")
-    cv.fill(LAMP_X - 5, YARD_FOOT - 90, 11, 2, "navy")
-    cv.fill(LAMP_X - 4, YARD_FOOT - 88, 9, 5, "yellow")
-    cv.fill(LAMP_X - 4, YARD_FOOT - 84, 9, 1, "amber")
-    cv.fill(LAMP_X - 2, YARD_FOOT - 87, 2, 2, "cream")
-    cv.fill(LAMP_X - 3, YARD_FOOT - 83, 7, 1, "navy")
-    # the curb, then the street: navy with specks and a dashed centre line, no other markings from the curb to
-    # row 500, the near curb and sidewalk along the bottom
+        cv.fill(x, YARD_FOOT, 1, CURB - YARD_FOOT, "slate")
+    cv.fill(0, YARD_FOOT, W, 2, "slate")
+    ttc_stop(cv, 12, YARD_FOOT + 3)
+    # the curb, then the street: flat navy, plain from the curb to row 500, then the streetcar tracks, two rails
+    # a track, set in the asphalt; the near curb and sidewalk along the bottom
     cv.fill(0, CURB, W, 4, "slate")
     cv.fill(0, CURB, W, 1, "grey")
     cv.fill(0, CURB + 4, W, 2, "ink")
     cv.fill(0, CURB + 6, W, 536 - CURB - 6, "navy")
-    for _ in range(300):
-        cv.fill(int(r() * W), CURB + 6 + int(r() * (536 - CURB - 6)), 1, 1, "dslate" if r() < 0.6 else "ink")
-    for x in range(4, W, 28):
-        cv.fill(x, 510, 14, 2, "slate")
+    for y in (506, 512, 524, 530):
+        cv.fill(0, y, W, 1, "slate")
+        cv.fill(0, y + 1, W, 1, "ink")
     cv.fill(0, 536, W, 4, "dslate")
     cv.fill(0, 536, W, 1, "slate")
     cv.fill(0, 540, W, 20, "dslate")
@@ -959,7 +1100,7 @@ def loading():
 
 def loading_track():
     """The sidewalk being walked: Biscuit's paw prints in dslate (3.39:1 on the night sidewalk's grey),
-    left and right paws 8px apart, staggered on two rows, from Casey's heel to the gate."""
+    left and right paws 8px apart, staggered on two rows, from Casey's heel to the Pet shop's door."""
     cv = clear(TRACK_W, TRACK_H)
     for n, x in enumerate(range(0, TRACK_W - 4, 8)):
         y = 0 if n % 2 else 4
