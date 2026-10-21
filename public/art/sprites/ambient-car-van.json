@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-car-van 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 69, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 69, "h": 45 },
+    "sourceSize": { "w": 69, "h": 45 },
+    "duration": 100
+   },
+   "ambient-car-van 1.aseprite": {
+    "frame": { "x": 69, "y": 0, "w": 69, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 69, "h": 45 },
+    "sourceSize": { "w": 69, "h": 45 },
+    "duration": 100
+   },
+   "ambient-car-van 2.aseprite": {
+    "frame": { "x": 138, "y": 0, "w": 69, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 69, "h": 45 },
+    "sourceSize": { "w": 69, "h": 45 },
+    "duration": 100
+   },
+   "ambient-car-van 3.aseprite": {
+    "frame": { "x": 207, "y": 0, "w": 69, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 69, "h": 45 },
+    "sourceSize": { "w": 69, "h": 45 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-car-van.png",
+  "format": "RGBA8888",
+  "size": { "w": 276, "h": 45 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "drive", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

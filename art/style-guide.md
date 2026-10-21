@@ -417,10 +417,12 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 
 ## Ambient
 
-People and traffic that pass by with no collisions and no card. `art/tools/ambient.py` draws them as road sprites: laid out on a design grid and drawn at 1.5× with `@88` to `@50` variants, outlined with `road_edge` and lit with the rim on their dark parts.
+People, traffic and lawn animals that pass by with no collisions and no card. `art/tools/ambient.py` draws them as road sprites with `@88` to `@50` variants, outlined with `road_edge` and lit with the rim on their dark parts. Side views face right; the game flips them to go left. Each sprite that rests has its `idle` first, so frame 0 is the rest pose the game stands on the ground.
 
-- The pedestrian is a student out alone: dark brown hair in a ponytail, sky headphones, a red jacket, a green backpack, sky jeans and white sneakers. No dog, no leash and nothing in hand, so it never reads as an owner, a walker, the mail carrier or a hazard. `ambient-pedestrian` faces the walker, `ambient-pedestrian-back` walks away.
-- Pedestrians stand on `road.person`'s legs, feet on row 68 at full size, and walk with the road people's stride: 4 frames at 100ms.
+- The cars (`ambient-car` and its extra bodies) are side elevations laid out in design units and drawn at 1.5×: a cyan greenhouse with a lit roof and a white glint, the body lit along the belt line and a step darker along the sill and down the nose, a yellow headlamp, a red tail lamp, lgrey bumpers and dark wheel arches. `drive`: a spoke through each hub turns an eighth of a turn a frame, clockwise as a wheel rolling right turns, and the body dips 1px onto the wheels on frames 1 and 2.
+- The cyclist (`ambient-bike`) rides an amber helmet, a mauve jersey and navy shorts on a red bike, unlike the road `cyclist`'s cyan helmet and green jersey. `ride`: the cranks turn a quarter a frame with the feet on the pedals, a cross of spokes turns an eighth (so the loop is seamless), and the back and head sit 1px lower on frames 1 and 3. Its wheels are clear inside the rim, so the road shows between the spokes.
+- The lawn animals (`ambient-bird`, `ambient-cat`, `ambient-rabbit`) are laid out on 32×32 and drawn at 1.25×, the chase animals' size, and differ from them: a ginger tabby (`chase-cat` is a tuxedo), a brown cottontail (`chase-rabbit` is white) and a robin (`chase-pigeons` are grey).
+- The pedestrian is a student out alone: dark brown hair in a ponytail, sky headphones, a red jacket, a green backpack, sky jeans and white sneakers. No dog, no leash and nothing in hand, so it never reads as an owner, a walker, the mail carrier or a hazard. `ambient-pedestrian` faces the walker, `ambient-pedestrian-back` walks away. It stands on `road.person`'s legs, feet on row 68 at full size, and walks with the road people's stride: 4 frames at 100ms.
 
 ## Backdrops
 

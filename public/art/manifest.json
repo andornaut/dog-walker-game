@@ -10,6 +10,321 @@
       }
     },
     {
+      "key": "ambient-bike",
+      "png": "sprites/ambient-bike.png",
+      "json": "sprites/ambient-bike.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "ambient-bike@50",
+      "png": "sprites/ambient-bike@50.png",
+      "json": "sprites/ambient-bike@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "ambient-bike@62",
+      "png": "sprites/ambient-bike@62.png",
+      "json": "sprites/ambient-bike@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "ambient-bike@75",
+      "png": "sprites/ambient-bike@75.png",
+      "json": "sprites/ambient-bike@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "ambient-bike@88",
+      "png": "sprites/ambient-bike@88.png",
+      "json": "sprites/ambient-bike@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "ambient-bird",
+      "png": "sprites/ambient-bird.png",
+      "json": "sprites/ambient-bird.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "ambient-bird@50",
+      "png": "sprites/ambient-bird@50.png",
+      "json": "sprites/ambient-bird@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "ambient-bird@62",
+      "png": "sprites/ambient-bird@62.png",
+      "json": "sprites/ambient-bird@62.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "ambient-bird@75",
+      "png": "sprites/ambient-bird@75.png",
+      "json": "sprites/ambient-bird@75.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "ambient-bird@88",
+      "png": "sprites/ambient-bird@88.png",
+      "json": "sprites/ambient-bird@88.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "ambient-car",
+      "png": "sprites/ambient-car.png",
+      "json": "sprites/ambient-car.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "ambient-car-hatchback",
+      "png": "sprites/ambient-car-hatchback.png",
+      "json": "sprites/ambient-car-hatchback.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@50",
+      "png": "sprites/ambient-car-hatchback@50.png",
+      "json": "sprites/ambient-car-hatchback@50.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@62",
+      "png": "sprites/ambient-car-hatchback@62.png",
+      "json": "sprites/ambient-car-hatchback@62.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@75",
+      "png": "sprites/ambient-car-hatchback@75.png",
+      "json": "sprites/ambient-car-hatchback@75.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@88",
+      "png": "sprites/ambient-car-hatchback@88.png",
+      "json": "sprites/ambient-car-hatchback@88.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "ambient-car-van",
+      "png": "sprites/ambient-car-van.png",
+      "json": "sprites/ambient-car-van.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "ambient-car-van@50",
+      "png": "sprites/ambient-car-van@50.png",
+      "json": "sprites/ambient-car-van@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "ambient-car-van@62",
+      "png": "sprites/ambient-car-van@62.png",
+      "json": "sprites/ambient-car-van@62.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "ambient-car-van@75",
+      "png": "sprites/ambient-car-van@75.png",
+      "json": "sprites/ambient-car-van@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "ambient-car-van@88",
+      "png": "sprites/ambient-car-van@88.png",
+      "json": "sprites/ambient-car-van@88.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 57
+      }
+    },
+    {
+      "key": "ambient-car-wagon",
+      "png": "sprites/ambient-car-wagon.png",
+      "json": "sprites/ambient-car-wagon.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 71
+      }
+    },
+    {
+      "key": "ambient-car-wagon@50",
+      "png": "sprites/ambient-car-wagon@50.png",
+      "json": "sprites/ambient-car-wagon@50.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "ambient-car-wagon@62",
+      "png": "sprites/ambient-car-wagon@62.png",
+      "json": "sprites/ambient-car-wagon@62.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "ambient-car-wagon@75",
+      "png": "sprites/ambient-car-wagon@75.png",
+      "json": "sprites/ambient-car-wagon@75.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "ambient-car-wagon@88",
+      "png": "sprites/ambient-car-wagon@88.png",
+      "json": "sprites/ambient-car-wagon@88.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "ambient-car@50",
+      "png": "sprites/ambient-car@50.png",
+      "json": "sprites/ambient-car@50.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "ambient-car@62",
+      "png": "sprites/ambient-car@62.png",
+      "json": "sprites/ambient-car@62.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "ambient-car@75",
+      "png": "sprites/ambient-car@75.png",
+      "json": "sprites/ambient-car@75.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 51
+      }
+    },
+    {
+      "key": "ambient-car@88",
+      "png": "sprites/ambient-car@88.png",
+      "json": "sprites/ambient-car@88.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "ambient-cat",
+      "png": "sprites/ambient-cat.png",
+      "json": "sprites/ambient-cat.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "ambient-cat@50",
+      "png": "sprites/ambient-cat@50.png",
+      "json": "sprites/ambient-cat@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "ambient-cat@62",
+      "png": "sprites/ambient-cat@62.png",
+      "json": "sprites/ambient-cat@62.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "ambient-cat@75",
+      "png": "sprites/ambient-cat@75.png",
+      "json": "sprites/ambient-cat@75.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "ambient-cat@88",
+      "png": "sprites/ambient-cat@88.png",
+      "json": "sprites/ambient-cat@88.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 25
+      }
+    },
+    {
       "key": "ambient-pedestrian",
       "png": "sprites/ambient-pedestrian.png",
       "json": "sprites/ambient-pedestrian.json",
@@ -97,6 +412,51 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "ambient-rabbit",
+      "png": "sprites/ambient-rabbit.png",
+      "json": "sprites/ambient-rabbit.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "ambient-rabbit@50",
+      "png": "sprites/ambient-rabbit@50.png",
+      "json": "sprites/ambient-rabbit@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "ambient-rabbit@62",
+      "png": "sprites/ambient-rabbit@62.png",
+      "json": "sprites/ambient-rabbit@62.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "ambient-rabbit@75",
+      "png": "sprites/ambient-rabbit@75.png",
+      "json": "sprites/ambient-rabbit@75.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "ambient-rabbit@88",
+      "png": "sprites/ambient-rabbit@88.png",
+      "json": "sprites/ambient-rabbit@88.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 28
       }
     },
     {
