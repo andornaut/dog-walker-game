@@ -5,7 +5,7 @@ import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
 import { startAmbient, stepAmbient } from "../road/ambient";
-import { newRoadsidePlaces, placeRoadside } from "../road/roadsideProps";
+import { newRoadsidePlaces, placeRoadside, ROADSIDE } from "../road/roadsideProps";
 import { currentZone, currentZoneId, zoneAt } from "../rules/route";
 import { newRun } from "../state/runState";
 import { STEP_SECONDS } from "./fixedStep";
@@ -47,10 +47,28 @@ const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
       return state.slots.filter((slot) => slot.active).length;
     };
   },
-  // The roadside props.
+  // The roadside props, from a table that stands a tree every slot along every zone, so the
+  // layer places props however sparse the shipped table is.
   roadside: () => {
     const out = newRoadsidePlaces();
-    const stage = { frameWidth: () => 0, projection: PROJECTION, width: LAYOUT.roadView.width };
+    const tree = { across: 270, dz: 0, key: "roadside-tree" };
+    const side = { gapStart: 0, gapStride: 1, lotStart: 0, lotStride: 1 };
+    const zone = {
+      gaps: [[tree]],
+      lots: [[tree]],
+      sides: { left: { ...side, offset: 0 }, right: { ...side, offset: 1 } },
+      slot: 140,
+    };
+    const table = {
+      ...ROADSIDE,
+      zones: Object.fromEntries(gameData.world.zones.map(({ art }) => [art, zone])),
+    };
+    const stage = {
+      frameWidth: () => 0,
+      projection: PROJECTION,
+      table,
+      width: LAYOUT.roadView.width,
+    };
     return (session) => {
       const { route, zoneIndex } = session.walk.run;
       return placeRoadside(

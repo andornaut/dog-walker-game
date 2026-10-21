@@ -16,10 +16,10 @@ import {
   placeRoadside,
   ROADSIDE,
   ROADSIDE_LIMIT,
-  ROADSIDE_SIDES,
   type RoadsideFrame,
   type RoadsidePlace,
   type RoadsideStage,
+  type RoadsideTable,
   type RoadsideZone,
   slotProps,
   START_STRIP_LENGTH,
@@ -30,6 +30,7 @@ const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const MANIFEST_KEYS = new Set(shippedManifest.sprites.map(({ key }) => key));
 const ZONE_ARTS = Object.keys(ROADSIDE.zones);
 const ZONES = Object.entries(ROADSIDE.zones);
+const ART = ZONE_ARTS[0] ?? "";
 const PROPS = ZONES.flatMap(([art, zone]) =>
   [...zone.lots, ...zone.gaps].flat().map((prop) => ({ art, ...prop })),
 );
@@ -50,11 +51,37 @@ function frameWidth(key: string): number {
   return width;
 }
 
-const STAGE: RoadsideStage = { frameWidth, projection: PROJECTION, width: LAYOUT.roadView.width };
+// The made-up tables' slot and sides: a lot across from a gap, each list taken in turn.
+const SLOT = 140;
+const SIDES: RoadsideZone["sides"] = {
+  left: { gapStart: 0, gapStride: 1, lotStart: 0, lotStride: 1, offset: 0 },
+  right: { gapStart: 0, gapStride: 1, lotStart: 0, lotStride: 1, offset: 1 },
+};
+const TREE = { across: 270, dz: 0, key: "roadside-tree" };
+const MAILBOX = { across: 231, dz: -38, key: "roadside-mailbox" };
+
+// A table holding ART's zone with these lots and gaps.
+function tableOf(zone: Pick<RoadsideZone, "gaps" | "lots">): RoadsideTable {
+  return { ...ROADSIDE, zones: { [ART]: { sides: SIDES, slot: SLOT, ...zone } } };
+}
+
+const DENSE = tableOf({ gaps: [[TREE, MAILBOX]], lots: [[TREE, MAILBOX], [MAILBOX]] });
+// The shipped table, and made-up ones from empty to dense.
+const TABLES: readonly (readonly [string, RoadsideTable])[] = [
+  ["the shipped table", ROADSIDE],
+  ["a table with no lots or gaps", tableOf({ gaps: [], lots: [] })],
+  ["a table of empty lots and gaps", tableOf({ gaps: [[]], lots: [[], []] })],
+  ["a table with an occasional tree", tableOf({ gaps: [[TREE], [], [], [], []], lots: [[]] })],
+  ["a dense table", DENSE],
+];
+
+function stageOf(table: RoadsideTable): RoadsideStage {
+  return { frameWidth, projection: PROJECTION, table, width: LAYOUT.roadView.width };
+}
 
 function frame(overrides: Partial<RoadsideFrame>): RoadsideFrame {
   return {
-    current: ZONE_ARTS[0] ?? "",
+    current: ART,
     currentStart: 0,
     previous: null,
     previousStart: 0,
@@ -63,9 +90,18 @@ function frame(overrides: Partial<RoadsideFrame>): RoadsideFrame {
   };
 }
 
-function placed(at: RoadsideFrame): RoadsidePlace[] {
+function placed(table: RoadsideTable, at: RoadsideFrame): RoadsidePlace[] {
   const out = newRoadsidePlaces();
-  return out.slice(0, placeRoadside(STAGE, at, out));
+  return out.slice(0, placeRoadside(stageOf(table), at, out));
+}
+
+function zoneOf(table: RoadsideTable): RoadsideZone {
+  return table.zones[ART] ?? { gaps: [], lots: [], sides: SIDES, slot: SLOT };
+}
+
+// How many props a zone holds over all its lots and gaps.
+function propCount(zone: RoadsideZone): number {
+  return [...zone.lots, ...zone.gaps].flat().length;
 }
 
 // Every prop with its z in from..to, as key, side and z.
@@ -80,9 +116,10 @@ function gcd(a: number, b: number): number {
 }
 
 // The slots after which a zone's two sides both repeat: each side's lots and gaps cycle
-// through their strides, a lot and a gap to a pair of slots.
+// through their strides, a lot and a gap to a pair of slots. An empty list repeats every slot.
 function repeatSlots(zone: RoadsideZone): number {
-  const cycle = (length: number, stride: number) => length / gcd(stride, length);
+  const cycle = (length: number, stride: number) =>
+    length === 0 ? 1 : length / gcd(stride, length);
   const lcm = (a: number, b: number) => (a * b) / gcd(a, b);
   const side = (name: "left" | "right") =>
     lcm(
@@ -105,6 +142,10 @@ describe("the roadside table", () => {
     expect(gameData.world.zones.map((zone) => zone.art)).toContain(art);
   });
 
+  it.each(ZONES)("gives %s a positive slot", (_, zone) => {
+    expect(zone.slot).toBeGreaterThan(0);
+  });
+
   it.each(KEYS.flatMap((key) => DEPTH_STEPS.map(({ suffix }) => `${key}${suffix}`)))(
     "has %s in the manifest",
     (key) => {
@@ -124,34 +165,41 @@ describe("the roadside table", () => {
 });
 
 describe("slotProps", () => {
+  // Each lot holds one prop keyed lot and each gap one keyed gap, so a slot's prop names it.
+  const MARKED = zoneOf(
+    tableOf({ gaps: [[{ ...TREE, key: "gap" }]], lots: [[{ ...TREE, key: "lot" }]] }),
+  );
+
   it.each(ZONES)("alternates %s's lots and gaps, each lot across from a gap", (_, zone) => {
+    const kind = (name: "left" | "right", n: number) =>
+      slotProps(MARKED, zone.sides[name], n)[0]?.key;
     for (let n = -100; n < 100; n++) {
-      const [left, right] = ROADSIDE_SIDES.map(({ name }) =>
-        zone.lots.includes(slotProps(zone, zone.sides[name], n)),
-      );
-      const [nextLeft] = ROADSIDE_SIDES.map(({ name }) =>
-        zone.lots.includes(slotProps(zone, zone.sides[name], n + 1)),
-      );
-      expect(left).not.toBe(right);
-      expect(nextLeft).not.toBe(left);
+      expect(kind("left", n)).not.toBe(kind("right", n));
+      expect(kind("left", n + 1)).not.toBe(kind("left", n));
     }
+  });
+
+  it("holds no props where a zone has no lots or gaps", () => {
+    const zone = zoneOf(tableOf({ gaps: [], lots: [] }));
+    expect([-1, 0, 1, 2].map((n) => slotProps(zone, SIDES.left, n))).toEqual([[], [], [], []]);
   });
 });
 
 describe("eachRoadsideProp", () => {
-  it.each(ZONES)("repeats %s's props with its slots", (_, zone) => {
+  it.each(TABLES)("repeats %s's props with its slots", (_, table) => {
+    const zone = zoneOf(table);
     const period = repeatSlots(zone) * zone.slot;
-    const from = -3 * zone.slot;
-    const to = 5 * zone.slot;
-    const shifted = propsBetween(zone, from + period, to + period).map((prop) => ({
+    const shifted = propsBetween(zone, period, 2 * period).map((prop) => ({
       ...prop,
       z: prop.z - period,
     }));
-    expect(propsBetween(zone, from, to).length).toBeGreaterThan(0);
-    expect(shifted).toEqual(propsBetween(zone, from, to));
+    const one = propsBetween(zone, 0, period);
+    expect(one.length > 0).toBe(propCount(zone) > 0);
+    expect(shifted).toEqual(one);
   });
 
-  it.each(ZONES)("puts each of %s's props in one window only", (_, zone) => {
+  it.each(TABLES)("puts each of %s's props in one window only", (_, table) => {
+    const zone = zoneOf(table);
     const whole = propsBetween(zone, 0, 4 * zone.slot);
     const halves = [
       ...propsBetween(zone, 0, 2 * zone.slot),
@@ -161,56 +209,59 @@ describe("eachRoadsideProp", () => {
       props.map(({ key, sign, z }) => `${sign} ${z} ${key}`).sort();
     expect(order(halves)).toEqual(order(whole));
   });
+
+  it.each([0, -SLOT, Number.NaN])("places nothing for a slot of %d", (slot) => {
+    const zone = { ...zoneOf(DENSE), slot };
+    expect(propsBetween(zone, 0, 10 * SLOT)).toEqual([]);
+  });
 });
 
 describe("placeRoadside", () => {
-  const SCROLLS = Array.from({ length: 60 }, (_, i) => i * 97);
-
-  it.each(SCROLLS)("places every prop in view under the limit, scroll %i", (scroll) => {
-    const out = newRoadsidePlaces();
-    const count = placeRoadside(STAGE, frame({ scroll }), out);
-    expect(count).toBeGreaterThan(0);
-    expect(count).toBeLessThan(ROADSIDE_LIMIT);
-    for (const place of out.slice(0, count)) {
-      const half = (frameWidth(place.key) * Math.min(1, place.scale)) / 2;
-      expect(place.y).toBeGreaterThanOrEqual(PROJECTION.farY - 1);
-      expect(place.y).toBeLessThanOrEqual(PROJECTION.footY);
-      expect(place.x + half).toBeGreaterThan(0);
-      expect(place.x - half).toBeLessThan(STAGE.width);
+  it.each(TABLES)("places %s's props in view on screen, under the limit", (_, table) => {
+    const zone = zoneOf(table);
+    let total = 0;
+    for (let scroll = 0; scroll < repeatSlots(zone) * zone.slot; scroll += zone.slot / 4) {
+      const props = placed(table, frame({ scroll }));
+      total += props.length;
+      expect(props.length).toBeLessThan(ROADSIDE_LIMIT);
+      for (const place of props) {
+        const half = (frameWidth(place.key) * Math.min(1, place.scale)) / 2;
+        expect(place.y).toBeGreaterThanOrEqual(PROJECTION.farY - 1);
+        expect(place.y).toBeLessThanOrEqual(PROJECTION.footY);
+        expect(place.x + half).toBeGreaterThan(0);
+        expect(place.x - half).toBeLessThan(LAYOUT.roadView.width);
+      }
     }
+    expect(total > 0).toBe(propCount(zone) > 0);
   });
 
   it("places nothing for a zone with no table", () => {
     expect(BARE).not.toBe("");
-    expect(placed(frame({ current: BARE }))).toEqual([]);
+    expect(placed(ROADSIDE, frame({ current: BARE }))).toEqual([]);
   });
 
-  it("keeps the zone before's props in view as a zone begins", () => {
-    const length = 4000;
-    const before = placed(frame({ scroll: length }));
-    const after = placed(
-      frame({
-        current: BARE,
-        currentStart: length,
-        previous: ZONE_ARTS[0] ?? "",
-        scroll: length,
-      }),
-    );
-    expect(after.length).toBeGreaterThan(0);
-    expect(after).toEqual(before);
+  it.each(TABLES)("keeps the zone before's props in view as a zone begins, %s", (_, table) => {
+    const zone = zoneOf(table);
+    for (let length = 4000; length < 4000 + repeatSlots(zone) * zone.slot; length += SLOT) {
+      const before = placed(table, frame({ scroll: length }));
+      const after = placed(
+        table,
+        frame({ current: BARE, currentStart: length, previous: ART, scroll: length }),
+      );
+      expect(after).toEqual(before);
+    }
   });
 
-  it.each(SCROLLS.slice(0, 20))("leaves a zone's start strip clear, scroll %i", (step) => {
+  it.each(TABLES)("leaves a zone's start strip clear, %s", (_, table) => {
     const length = 4000;
-    const scroll = length + step;
-    const strip = length + PROJECTION.visibleDistance - scroll;
-    const art = ZONE_ARTS[0] ?? "";
-    for (const place of placed(
-      frame({ current: art, currentStart: length, previous: art, scroll }),
-    )) {
-      const distance = PROJECTION.focal / place.scale - PROJECTION.focal;
-      const along = distance - strip;
-      expect(along < -1e-6 || along > START_STRIP_LENGTH - 1e-6).toBe(true);
+    for (let step = 0; step < PROJECTION.visibleDistance + START_STRIP_LENGTH; step += 23) {
+      const scroll = length + step;
+      const strip = length + PROJECTION.visibleDistance - scroll;
+      for (const place of placed(table, frame({ currentStart: length, previous: ART, scroll }))) {
+        const distance = PROJECTION.focal / place.scale - PROJECTION.focal;
+        const along = distance - strip;
+        expect(along < -1e-6 || along > START_STRIP_LENGTH - 1e-6).toBe(true);
+      }
     }
   });
 });

@@ -46,7 +46,6 @@ export interface RoadsideTable {
 
 export const ROADSIDE: RoadsideTable = table;
 export const ROADSIDE_SHADOW_COLOR = Number.parseInt(ROADSIDE.shadowColour, 16);
-const SHADOWED: ReadonlySet<string> = new Set(ROADSIDE.shadowed);
 
 // The table's sides, each with the sign of its across: the left side is negative.
 export const ROADSIDE_SIDES = [
@@ -61,7 +60,9 @@ export const START_STRIP_LENGTH = STRIP.height;
 // At most this many props are drawn at once.
 export const ROADSIDE_LIMIT = 40;
 
-// The props a side's slot n holds: a lot or a gap.
+const NO_PROPS: readonly RoadsideProp[] = [];
+
+// The props a side's slot n holds: a lot or a gap, none when the zone has no lots or gaps.
 export function slotProps(
   zone: RoadsideZone,
   side: RoadsideSide,
@@ -70,8 +71,15 @@ export function slotProps(
   const m = n - side.offset;
   const k = Math.floor(m / 2);
   return m % 2 === 0
-    ? itemAt(zone.lots, mod(side.lotStart + k * side.lotStride, zone.lots.length))
-    : itemAt(zone.gaps, mod(side.gapStart + k * side.gapStride, zone.gaps.length));
+    ? groupAt(zone.lots, side.lotStart + k * side.lotStride)
+    : groupAt(zone.gaps, side.gapStart + k * side.gapStride);
+}
+
+function groupAt(
+  groups: readonly (readonly RoadsideProp[])[],
+  index: number,
+): readonly RoadsideProp[] {
+  return groups.length === 0 ? NO_PROPS : itemAt(groups, mod(index, groups.length));
 }
 
 function mod(value: number, by: number): number {
@@ -94,15 +102,18 @@ function dzReach(zone: RoadsideZone): { far: number; near: number } {
 export type RoadsideVisit = (prop: RoadsideProp, sign: RoadsideSign, z: number) => void;
 
 // Visits every prop of a zone with its z in from..to (to excluded), on both sides, each with
-// the sign of its side and its z.
+// the sign of its side and its z. A zone whose slot is not a positive length places none.
 export function eachRoadsideProp(
   zone: RoadsideZone,
   from: number,
   to: number,
   visit: RoadsideVisit,
 ): void {
-  const { far, near } = dzReach(zone);
   const { slot } = zone;
+  if (!(slot > 0) || !(to > from)) {
+    return;
+  }
+  const { far, near } = dzReach(zone);
   const first = Math.floor((from - far) / slot);
   const last = Math.ceil((to - near) / slot);
   for (const { name, sign } of ROADSIDE_SIDES) {
@@ -138,11 +149,13 @@ export function newRoadsidePlaces(): RoadsidePlace[] {
   }));
 }
 
-// What the props are placed against: the road's projection, the screen's width, and a prop's
-// frame width at full size, to leave out props wholly off the screen's sides.
+// What the props are placed against: the placement table, the road's projection, the screen's
+// width, and a prop's frame width at full size, to leave out props wholly off the screen's
+// sides.
 export interface RoadsideStage {
   readonly frameWidth: (key: string) => number;
   readonly projection: RoadProjection;
+  readonly table: RoadsideTable;
   readonly width: number;
 }
 
@@ -181,7 +194,7 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
   }
   place.key = prop.key;
   place.scale = placed.scale;
-  place.shadowed = SHADOWED.has(prop.key);
+  place.shadowed = stage.table.shadowed.includes(prop.key);
   place.x = placed.x;
   place.y = placed.y;
   placing.count += 1;
@@ -190,8 +203,8 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
 // The props of the zone with art id art, which began at road distance start, from road distance
 // from to to (to excluded); none for a zone with no table.
 function placeZone(art: string | null, start: number, from: number, to: number): void {
-  const zone = art === null ? undefined : ROADSIDE.zones[art];
   const { stage } = placing;
+  const zone = art === null || stage === null ? undefined : stage.table.zones[art];
   if (zone === undefined || stage === null || to <= from) {
     return;
   }

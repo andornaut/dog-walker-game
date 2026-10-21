@@ -4,6 +4,7 @@ import { gameData } from "../../data";
 import {
   newRoadsidePlaces,
   placeRoadside,
+  ROADSIDE,
   ROADSIDE_SHADOW_COLOR,
   type RoadsideFrame,
   type RoadsideStage,
@@ -34,6 +35,7 @@ export class RoadsideView {
   private readonly stage: RoadsideStage = {
     frameWidth: (key) => spriteMetrics(key).frameWidth,
     projection: PROJECTION,
+    table: ROADSIDE,
     width: LAYOUT.roadView.width,
   };
 
