@@ -297,7 +297,7 @@ def neighbour_take():
     a = Art()
     a.grass()
     a.put("dog-biscuit", "idle", 49, 57)
-    her = sn.frame("biscuit-neighbour", "wave", 1)
+    her = sn.frame("petting-neighbor", "wave", 1)
     her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
     a.shadow(22, 66, her.width)
     a.paste(her, -2, 66 - her.height)
@@ -814,7 +814,7 @@ ILLUSTRATIONS = {
     "card-thief-chase": thief_chase,
     "card-thief-let-go": thief_let_go,
     "card-lost-wallet-keep": wallet_keep,
-    "card-biscuit-neighbour-take": neighbour_take,
+    "card-petting-neighbor-take": neighbour_take,
     "card-belly-rubs": belly_rubs,
     "card-good-leash": good_leash,
     "card-big-tipper": big_tipper,

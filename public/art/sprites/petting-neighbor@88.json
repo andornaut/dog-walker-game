@@ -1,5 +1,5 @@
 { "frames": {
-   "biscuit-neighbour@88 0.aseprite": {
+   "petting-neighbor@88 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 42, "h": 63 },
     "duration": 350
    },
-   "biscuit-neighbour@88 1.aseprite": {
+   "petting-neighbor@88 1.aseprite": {
     "frame": { "x": 42, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 42, "h": 63 },
     "duration": 350
    },
-   "biscuit-neighbour@88 2.aseprite": {
+   "petting-neighbor@88 2.aseprite": {
     "frame": { "x": 84, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 42, "h": 63 },
     "duration": 400
    },
-   "biscuit-neighbour@88 3.aseprite": {
+   "petting-neighbor@88 3.aseprite": {
     "frame": { "x": 126, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
@@ -35,7 +35,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "biscuit-neighbour@88.png",
+  "image": "petting-neighbor@88.png",
   "format": "RGBA8888",
   "size": { "w": 168, "h": 63 },
   "scale": "1",

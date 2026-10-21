@@ -28,7 +28,7 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide
 | `barrier-2`, `barrier-3`         | sprite | 112×36, 176×36 | `idle`                                           | Minor, 2 and 3 lanes                                                                                       |
 | `bench`                          | sprite | 112×36         | `idle`                                           | Minor, 2 lanes                                                                                             |
 | `bin`, `cone`                    | sprite | 48×48          | `idle`                                           | Minor, 1 lane                                                                                              |
-| `biscuit-neighbour`              | sprite | 48×72          | `wave`, `idle`                                   | Lucky; a dog lover with a red heart on her top and one floating at her top right; `wave` crouches and pats |
+| `petting-neighbor`               | sprite | 48×72          | `wave`, `idle`                                   | Lucky; a dog lover with a red heart on her top and one floating at her top right; `wave` crouches and pats |
 | `chase-cat`, `chase-rabbit`      | sprite | 38×38          | `idle`, `run`; the rabbit also `hop`             | `ambient-cat`'s and `ambient-rabbit`'s fallbacks                                                           |
 | `chase-ducklings`                | sprite | 38×38          | `idle`, `run`, `hop`                             | The ducklings mover; `hop` crosses the lanes in side view                                                  |
 | `chase-pigeons`                  | sprite | 38×38          | `idle`, `run`, `flee`                            | The pigeons mover; `flee` flies off up the road, seen from behind                                          |
@@ -182,7 +182,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`                                  | Tap-to-enlarge view                                                       |
 | `card-zone-<zone>`            | image  | 75×56   |                                                  | A fork's path card: the zone's road to a cross street, its scenery beyond |
 
-Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-biscuit-neighbour-take`, her stroking a pack dog under rising hearts, is its popup art.
+Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-petting-neighbor-take`, her stroking a pack dog under rising hearts, is its popup art.
 
 ## Screens and home
 

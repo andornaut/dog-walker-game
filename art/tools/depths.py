@@ -7,7 +7,7 @@ ball-bounce, cyclist and coyote. Each runs the sprite's own drawing function on 
 minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 
-At every step here: other-dog-owner, thief, biscuit-neighbour, mail-carrier,
+At every step here: other-dog-owner, thief, petting-neighbor, mail-carrier,
 stroller, jogger, kid-on-bike, ice-cream-truck, puddle (no
 outline), hedge, hot-dog-cart, barrier-2, barrier-3, parked-car, delivery-truck
 and streetcar. Walkers
@@ -86,7 +86,7 @@ def own(s):
                     ("flee", [small(road, p, road.thief_fleeing, k).outlined() for k in (-1, 1)], 110),
                     ("idle", [dressed(p, road.thief_top, bob=b).outlined() for b in breath], ms)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "biscuit-neighbour", [
+    yield "petting-neighbor", [
         ("wave", [dressed(p, road.neighbour_top(True, k), bob=road.NEIGHBOUR_CROUCH, **neighbour).outlined()
                   for k in (0, 1)], 350),
         ("idle", [dressed(p, road.neighbour_top(False, k), bob=b, **neighbour).outlined()

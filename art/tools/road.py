@@ -1629,7 +1629,7 @@ def sprites():
                     ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
+    yield "petting-neighbor", [("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
                                                     **neighbour) for k in (0, 1)), 350),
                                 ("idle", frames(big(dressed, neighbour_top(False, k), bob=bb, **neighbour)
                                                 for k, bb in enumerate(BREATH)), BREATH_MS)]

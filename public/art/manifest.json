@@ -850,51 +850,6 @@
       }
     },
     {
-      "key": "biscuit-neighbour",
-      "png": "sprites/biscuit-neighbour.png",
-      "json": "sprites/biscuit-neighbour.json",
-      "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 41
-      }
-    },
-    {
-      "key": "biscuit-neighbour@50",
-      "png": "sprites/biscuit-neighbour@50.png",
-      "json": "sprites/biscuit-neighbour@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 21
-      }
-    },
-    {
-      "key": "biscuit-neighbour@62",
-      "png": "sprites/biscuit-neighbour@62.png",
-      "json": "sprites/biscuit-neighbour@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "biscuit-neighbour@75",
-      "png": "sprites/biscuit-neighbour@75.png",
-      "json": "sprites/biscuit-neighbour@75.json",
-      "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 31
-      }
-    },
-    {
-      "key": "biscuit-neighbour@88",
-      "png": "sprites/biscuit-neighbour@88.png",
-      "json": "sprites/biscuit-neighbour@88.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 36
-      }
-    },
-    {
       "key": "card-frame",
       "png": "sprites/card-frame.png",
       "json": "sprites/card-frame.json"
@@ -2631,6 +2586,51 @@
       }
     },
     {
+      "key": "petting-neighbor",
+      "png": "sprites/petting-neighbor.png",
+      "json": "sprites/petting-neighbor.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "petting-neighbor@50",
+      "png": "sprites/petting-neighbor@50.png",
+      "json": "sprites/petting-neighbor@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "petting-neighbor@62",
+      "png": "sprites/petting-neighbor@62.png",
+      "json": "sprites/petting-neighbor@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "petting-neighbor@75",
+      "png": "sprites/petting-neighbor@75.png",
+      "json": "sprites/petting-neighbor@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "petting-neighbor@88",
+      "png": "sprites/petting-neighbor@88.png",
+      "json": "sprites/petting-neighbor@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 36
+      }
+    },
+    {
       "key": "puddle",
       "png": "sprites/puddle.png",
       "json": "sprites/puddle.json",
@@ -3991,10 +3991,6 @@
       "png": "images/card-big-tipper.png"
     },
     {
-      "key": "card-biscuit-neighbour-take",
-      "png": "images/card-biscuit-neighbour-take.png"
-    },
-    {
       "key": "card-cost",
       "png": "images/card-cost.png"
     },
@@ -4013,6 +4009,10 @@
     {
       "key": "card-other-dog-sniff",
       "png": "images/card-other-dog-sniff.png"
+    },
+    {
+      "key": "card-petting-neighbor-take",
+      "png": "images/card-petting-neighbor-take.png"
     },
     {
       "key": "card-raincoats",
