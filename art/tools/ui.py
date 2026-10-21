@@ -15,7 +15,7 @@ nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48)
 ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
 wood behind the dog slots); the walk HUD's ui-walk-bar (360x48), ui-effect-well (18x18),
-ui-dog-card-band (360x62, drawn at (0, 498)), ui-lead-tag (27x11, LEAD baked in with
+ui-dog-card-band (360x64, drawn at (0, 496)), ui-lead-tag (27x11, LEAD baked in with
 font-title) and ui-owner-tab (36x36).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row, drawn as a character file card;
 a tag per dog key and `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn
@@ -29,7 +29,7 @@ ui-debuff-bar (360x16, one active debuff's bar under the walk bar; tags muddy, s
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
 ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral),
-fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
+fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card), ui-button
 (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
 secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
 ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
@@ -362,9 +362,10 @@ def settings_icon():
     return g
 
 
-def heart(full):
+def heart(full, dark=False):
     """8x7: a full heart is filled dark red; an empty one is a dark brown outline, so the two
-    differ by fill as well as colour (5:1 or more on the cream and tan slots)."""
+    differ by fill as well as colour (5:1 or more on the cream and tan slots). dark is for the navy
+    dog card: the full heart red (3.31:1) lit pink and white, the empty one a grey outline (4.93:1)."""
     g = Grid(8, 7)
     rows = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
     for y, row in enumerate(rows):
@@ -374,12 +375,12 @@ def heart(full):
             inside = all(0 <= y + dy < len(rows) and 0 <= x + dx < len(row) and rows[y + dy][x + dx] == "1"
                          for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
             if full:
-                g.p(x, y, "dred")
+                g.p(x, y, "red" if dark else "dred")
             elif not inside:
-                g.p(x, y, "dbrown")
+                g.p(x, y, "grey" if dark else "dbrown")
     if full:
-        g.p(1, 1, "red")
-        g.p(2, 1, "pink")
+        g.p(1, 1, "pink" if dark else "red")
+        g.p(2, 1, "white" if dark else "pink")
     return g
 
 
@@ -1327,43 +1328,38 @@ def effect_well():
 
 
 # The dog card: 120x58 in its slot, the chrome on x 1 to 118 and rows 0 to 57, so a 1px gap runs
-# down each side and the card's foot is the screen's bottom row.
+# down each side and the card's foot is the screen's bottom row. The cards are navy, as a neutral
+# ui-section, so the eye stays on the road and the dogs' photos and hearts carry the row.
 DOG_CARD = (120, 58)
 DOG_CARD_FRAME = (1, 0, 118, 58)
 DOG_PHOTO = (4, 19)
-# The parts the heart-loss flash leaves clear, as x, y, w, h: the name plate and its shadow, the
+# The parts the heart-loss flash leaves clear, as x, y, w, h: the name's rows in the header, the
 # dog's photo, the hearts and the LEAD tag.
-DOG_CARD_PANELS = ((5, 2, 111, 15), (4, 19, 36, 36), (51, 23, 46, 27), (87, 42, 29, 13))
+DOG_CARD_PANELS = ((5, 2, 110, 14), (4, 19, 36, 36), (51, 23, 46, 27), (87, 42, 29, 13))
+# Each heart-loss frame on the navy card: the flash's fill and seam colours (red 3.31:1 and pink
+# 5.12:1 on navy), or the rim's outer and inner colours.
+DOG_CARD_HEART_LOSS = (("flash", "red", "dred"), ("flash", "pink", "red"), ("rim", "red", "pink"), ("rim", "red", None))
 
 
 def dog_card(dog):
-    """120x58, ui-dog-card: one of three cards in the walk's card row, a dog's file card in the UI
-    chrome on amber stock. A blue header (rows 1 to 15, navy shade on row 16, a plum rule on row 17)
-    holds the name plate (ink line x 5 to 114, rows 2 to 15; amber face x 6 to 113, rows 3 to 14;
-    a solid dred shadow 1px right and below). The dog's photo is an ink frame (4,19 36x36) round a
-    white mat round its colour (6,21 32x32), with plum mounts on its top corners. The hearts and
-    the LEAD tag go on the bare amber to its right. The empty card (a fired dog's) is greyed: a
-    slate header, a white plate, a dark photo, and a dred plate built as ui-fired-plate (44,28
-    68x17, its face 48,32 60x9) for FIRED."""
-    base = DOG_COLOURS[dog][0]
+    """120x58, ui-dog-card: one of three cards in the walk's card row, in the neutral section look: a
+    2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face, the header
+    (rows 1 to 16) split from the body by an ink rule on row 17. The game writes the name on the
+    header in cream (9.59:1), with no plate. The dog's photo is an ink frame (4,19 36x36) round a
+    cream mat round its colour (6,21 32x32). The hearts (ui-heart full-dark and empty-dark) and the
+    LEAD tag go on the navy to its right. The empty card (a fired dog's) is dslate in the same
+    frame, with a dslate photo and a dred plate built as ui-fired-plate (44,28 68x17, its face
+    48,32 60x9) for FIRED."""
     empty = dog == "empty"
-    face, lip, header, header_sh, plate_face = (
-        ("lgrey", "grey", "slate", "dslate", "white") if empty else (CARD_FACE, CARD_LIP, "blue", "navy", CARD_FACE))
+    face = "dslate" if empty else "navy"
     w, h = DOG_CARD
     g = Grid(w, h)
-    chrome(g, *DOG_CARD_FRAME, r=1, face=face, lip=lip)
-    g.rect(3, 1, 114, 16, header)
-    g.rect(3, 16, 114, 1, header_sh)
-    g.rect(3, 17, 114, 1, "plum")
-    g.rect(6, 3, 110, 14, "dred")
-    g.rect(5, 2, 110, 14, "ink")
-    g.rect(6, 3, 108, 12, plate_face)
+    chrome(g, *DOG_CARD_FRAME, r=1, face=face, lip="ink", line="ink")
+    g.rect(3, 17, 114, 1, "ink")
     x, y = DOG_PHOTO
     g.rect(x, y, 36, 36, "ink")
-    g.rect(x + 1, y + 1, 34, 34, "white")
-    g.rect(x + 2, y + 2, 32, 32, "dslate" if empty else base)
-    g.rect(x, y, 3, 1, "plum")
-    g.rect(x + 33, y, 3, 1, "plum")
+    g.rect(x + 1, y + 1, 34, 34, "cream")
+    g.rect(x + 2, y + 2, 32, 32, "dslate" if empty else DOG_COLOURS[dog][0])
     if empty:
         fired = plate("dred", "red", "plum", 68, 17)
         for yy, row in enumerate(fired.px):
@@ -1384,7 +1380,8 @@ def dog_card_solid():
 
 def dog_card_warn(step):
     """120x58, ui-dog-card-warn: ui-doghouse-warn's 2px rim inside the card's outline, for an owner
-    at one heart; steps 0 to 2 run dim to bright."""
+    at one heart; steps 0 to 2 run dim to bright. The outer pixel holds 7.35:1 on the wood and
+    7.49:1 on navy."""
     outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
     solid = dog_card_solid()
     w, h = DOG_CARD
@@ -1402,13 +1399,13 @@ def dog_card_warn(step):
 
 def dog_card_heart_loss(step):
     """120x58, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
-    hearts and text: frames 0 and 1 flash the header and the amber red inside a plum edge, the
-    inner line, the header's shade and the lip kept as seams and the plate, photo, hearts and LEAD
-    tag left clear; frames 2 and 3 fade to a 2px then 1px red rim inside the outline."""
-    kind, a, b = HEART_LOSS[step]
+    hearts and text: frame 0 flashes the navy red with dred seams and frame 1 pink with red seams
+    (the ink rule and lip are the seams), inside a plum edge, the name's rows, photo, hearts and
+    LEAD tag left clear; frames 2 and 3 fade to a 2px then 1px red rim inside the outline."""
+    kind, a, b = DOG_CARD_HEART_LOSS[step]
     solid = dog_card_solid()
     card = dog_card("koda").px
-    seams = {K[c] for c in SEAMS}
+    seam = K["ink"]
     w, h = DOG_CARD
     g = Grid(w, h)
 
@@ -1425,7 +1422,7 @@ def dog_card_heart_loss(step):
                 continue
             if kind == "flash":
                 if not panel(x, y):
-                    g.p(x, y, b if card[y][x] in seams else a)
+                    g.p(x, y, b if card[y][x] == seam else a)
             elif not depth(solid, x, y, 2):
                 g.p(x, y, a)
             elif b and not depth(solid, x, y, 3):
@@ -1433,18 +1430,28 @@ def dog_card_heart_loss(step):
     return g
 
 
-CARD_BAND = (360, 62)
+CARD_BAND = (360, 64)
+# The band's top rows, where the road ends: a dithered ink shadow cast onto the road (rows 0 and
+# 1, a quarter then three quarters of their pixels), then the trim: ink, a lit tan line and ink
+# (rows 2 to 4), then the wood.
+CARD_BAND_TRIM = ("ink", "tan", "ink")
 
 
 def dog_card_band():
-    """360x62, ui-dog-card-band: drawn at (0, 498) under the cards, ui-dog-band's wood and turned-over
-    trim (ink on row 0 against the road, then dbrown and brown), the wood showing on row 3 above
-    the cards and between them."""
+    """360x64, ui-dog-card-band: drawn at (0, 496) under the cards. Rows 0 and 1 (screen 496 and 497)
+    are a dithered ink shadow over the road's last rows, clear between its pixels; rows 2 to 4
+    (498 to 500) the trim, ink, tan and ink, so the road ends on a lit edge; then plum wood, which
+    shows on row 5 (501) above the cards and between them."""
     w, h = CARD_BAND
     g = Grid(w, h)
-    wood(g, 0, h)
-    for y, c in enumerate(DIVIDER):
-        g.rect(0, y, w, 1, c)
+    wood(g, 2, h - 2)
+    for x in range(w):
+        if x % 4 == 0:
+            g.p(x, 0, "ink")
+        if x % 4 != 2:
+            g.p(x, 1, "ink")
+    for i, c in enumerate(CARD_BAND_TRIM):
+        g.rect(0, 2 + i, w, 1, c)
     return g
 
 
@@ -1720,7 +1727,9 @@ def sprites():
     yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in ("complete", "neutral")]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
-    yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
+    yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000),
+                       ("full-dark", [heart(True, True).outlined(False)], 1000),
+                       ("empty-dark", [heart(False, True).outlined(False)], 1000)]
     yield "ui-tile", [(s, [tile(s).outlined(False)], 1000) for s in ("normal", "selected", "disabled")]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000)
                         for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed", "go", "go-pressed",
