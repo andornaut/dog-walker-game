@@ -35,7 +35,7 @@ import {
   stepSession,
 } from "../runner/session";
 import { activeStatuses, shownStatus, type StatusMark } from "../runner/statuses";
-import { startRoad, zoneLength } from "../runner/walk";
+import { startRoad, type Walk, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
 import { onWindowEvent } from "./overlay";
@@ -53,6 +53,7 @@ import {
 import { AccidentSpots } from "./run/accidentSpots";
 import { BackdropView } from "./run/backdropView";
 import { ForcedStopView } from "./run/forcedStopView";
+import { blendWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { MenuFlow, type MenuPause } from "./run/menuFlow";
 import { PackView } from "./run/packView";
@@ -125,6 +126,9 @@ export class RunScene extends Scene {
   private session: Session | undefined;
   private settings: Settings | undefined;
   private stepClock: StepClock = startStepClock;
+  // The walk one step before the session's, which a frame blends from; undefined draws the
+  // session's walk as it is.
+  private stepBefore: Walk | undefined;
   private world: RunWorld | undefined;
   private zoneClocks: ZoneClocks = startZoneClocks(0);
 
@@ -198,6 +202,7 @@ export class RunScene extends Scene {
 
   private resetState(): void {
     this.session = undefined;
+    this.stepBefore = undefined;
     this.stepClock = startStepClock;
     this.world = undefined;
     this.zoneClocks = startZoneClocks(0);
@@ -309,6 +314,7 @@ export class RunScene extends Scene {
     let roadMs = 0;
     let stoppedMs = 0;
     for (let step = 0; step < frame.steps && this.walking(); step++) {
+      this.stepBefore = this.session?.walk;
       if (this.session?.walk.road.hitStop == null) {
         roadMs += STEP_MS;
       } else {
@@ -322,6 +328,8 @@ export class RunScene extends Scene {
     this.zoneClocks = tickZoneClocks(clockFrame, this.zoneClocks);
     if (!this.walking()) {
       this.stepClock = holdStepClock(this.stepClock);
+      // A held walk draws as it stands, and goes on from there without a jump.
+      this.stepBefore = this.session?.walk;
     }
     this.draw();
     emitDevState(this.game, this.world?.setup, this.zoneClocks, this.session?.walk);
@@ -551,7 +559,9 @@ export class RunScene extends Scene {
     if (session === undefined || world === undefined) {
       return;
     }
-    const { distanceBeforeZone, pulls, timeMs, walk } = session;
+    const { distanceBeforeZone, pulls, timeMs } = session;
+    const before = this.stepBefore ?? session.walk;
+    const walk = blendWalk(stepAlpha(this.stepClock.bankedMs, STEP_MS), before, session.walk);
     const zone = currentZone(gameData, walk.run);
     const halted = !this.walking();
     const still = this.reducedMotion();
