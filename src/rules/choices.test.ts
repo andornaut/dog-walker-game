@@ -121,7 +121,7 @@ describe("cardFor", () => {
     expect(card.options.map(({ art }) => art)).toEqual(options.map(({ art }) => art));
     const letGo = options[optionWith("thief", "money")];
     const chase = options[optionWith("thief", "hearts")];
-    const lost = `−${Math.abs(heartsOf("thief"))} ♥`;
+    const lost = `−${Math.abs(heartsOf("thief"))}♥`;
     expect(card.options[optionWith("thief", "hearts")]?.breakdown).toEqual([
       { dog: "koda", name: chase?.name, text: lost },
       { dog: "nugget", name: chase?.name, text: lost },

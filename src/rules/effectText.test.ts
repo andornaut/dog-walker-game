@@ -30,11 +30,11 @@ describe("effectText", () => {
       [{ amount: "lostWalletKeep", change: "gain", kind: "money" }],
       `+${dollars("lostWalletKeep")}`,
     ],
-    ["hearts each", [{ amount: -2, kind: "hearts", target: { kind: "affected" } }], "−2 ♥ each"],
+    ["hearts each", [{ amount: -2, kind: "hearts", target: { kind: "affected" } }], "−2♥ each"],
     [
       "one random owner",
       [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],
-      "−1 ♥ to one random owner",
+      "−1♥ to one random owner",
     ],
     [
       "several effects, naming a debuff",
@@ -58,12 +58,12 @@ describe("effectText", () => {
           stat: "tipSpawns",
         },
       ],
-      `Tips +${percent("rushHourTips")}% next zone`,
+      `Tips +${percent("rushHourTips")}% next neighborhood`,
     ],
     [
       "an immunity as the cards it stops",
       [{ duration: "run", encounter: "thief", kind: "immune" }],
-      `No ${ENCOUNTERS.thief.name} cards for the run`,
+      `No ${ENCOUNTERS.thief.name} cards all walk`,
     ],
     ["no effects as nothing", [], "Nothing"],
   ])("writes %s", (_, effects, text) => {

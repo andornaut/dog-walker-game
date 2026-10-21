@@ -19,7 +19,7 @@ const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => (
 
 // A card's hearts text: the change by each owner's dog's name.
 function heartsText(dogs: readonly DogId[], amount: number): string {
-  const change = `${amount < 0 ? "−" : "+"}${Math.abs(amount)} ♥`;
+  const change = `${amount < 0 ? "−" : "+"}${Math.abs(amount)}♥`;
   return dogs.map((dog) => `${change} ${gameData.dogs[dog].name}`).join(", ");
 }
 

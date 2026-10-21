@@ -30,8 +30,8 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
   agility: "agility",
   bumpHearts: "♥ lost to a bump",
   debuffSeconds: "debuff time",
-  forgivenHearts: "first ♥ lost each zone forgiven",
-  freeCards: "free cards each zone",
+  forgivenHearts: "first ♥ lost each neighborhood forgiven",
+  freeCards: "free cards each neighborhood",
   laneMove: "lane change time",
   maxHearts: "max ♥",
   obstacleSpawns: "obstacles",
@@ -45,9 +45,9 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
 };
 
 const DURATION_TEXT: { readonly [D in Duration]: string } = {
-  nextZone: "next zone",
-  run: "for the run",
-  zone: "for the rest of the zone",
+  nextZone: "next neighborhood",
+  run: "all walk",
+  zone: "for the rest of the neighborhood",
 };
 
 const MINUS = "−";
@@ -77,7 +77,7 @@ function moneyText(data: TextData, effect: MoneyEffect): string {
 }
 
 function heartsText(effect: HeartsEffect): string {
-  const amount = `${sign(effect.amount)}${Math.abs(effect.amount)} ♥`;
+  const amount = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
   const target = effect.target;
   switch (target.kind) {
     case "affected":
@@ -112,8 +112,8 @@ export function modifierText(tuning: LiveTuning, modifier: Modifier): string {
   if (modifier.operation === "add" && modifier.stat === "freeCards") {
     change =
       value === 1
-        ? "the first card each zone costs nothing"
-        : `the first ${value} cards each zone cost nothing`;
+        ? "the first card each neighborhood costs nothing"
+        : `the first ${value} cards each neighborhood cost nothing`;
   } else if (modifier.operation === "add") {
     change =
       modifier.stat === "tipValue"
@@ -144,7 +144,7 @@ function effectPhrase(data: TextData, effect: Effect): string {
     case "money":
       return moneyText(data, effect);
     case "skipOption":
-      return "a free Skip on every encounter card until used, once per walk";
+      return "a free Skip on one card each neighborhood";
     default:
       return assertNever(effect);
   }
@@ -214,7 +214,7 @@ function cardHeartsText(
   if (effect.target.kind === "randomOne") {
     return heartsText(effect);
   }
-  const change = `${sign(effect.amount)}${Math.abs(effect.amount)} ♥`;
+  const change = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
   const names = context.dogs(effect.target).map((id) => `${change} ${data.dogs[id].name}`);
   return names.length === 0 ? undefined : names.join(", ");
 }

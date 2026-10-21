@@ -3,8 +3,6 @@ import type { Change, MoneyChange } from "../rules/causes";
 import { quipLine } from "../rules/choices";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
-import { fillNames } from "../text/lines";
-import { dollarText } from "./home";
 
 export type EarningsKind = "cardCosts" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";
 
@@ -43,17 +41,6 @@ export function earningsKind(change: MoneyChange): EarningsKind {
 
 // What made up a run's earnings, from the changes it made. Money that no change accounts for
 // is what the run started with (the fanny pack's), so the lines always add up to earned.
-// A breakdown line's label: the full pack bonus's says its amount, as runText.fullPackHome.
-function earningsLabel(
-  data: Pick<GameData, "menuText" | "runText">,
-  kind: EarningsKind,
-  amount: Cents,
-): string {
-  return kind === "fullPack"
-    ? fillNames(data.runText.fullPackHome, { amount: dollarText(amount) })
-    : data.menuText.end.earnings[kind];
-}
-
 export function earningsBreakdown(
   data: Pick<GameData, "menuText" | "runText">,
   changes: readonly Change[],
@@ -72,7 +59,7 @@ export function earningsBreakdown(
   return ORDER.flatMap((kind) => {
     const amount = totals.get(kind) ?? 0;
     return amount !== 0 || ALWAYS_SHOWN.has(kind)
-      ? [{ amount: cents(amount), kind, label: earningsLabel(data, kind, cents(amount)) }]
+      ? [{ amount: cents(amount), kind, label: data.menuText.end.earnings[kind] }]
       : [];
   });
 }

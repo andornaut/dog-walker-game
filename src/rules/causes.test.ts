@@ -80,7 +80,7 @@ describe("causeLabel and causeNames", () => {
     [
       "a card option just picked by its amount alone",
       () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
-      "−1 ♥",
+      "−1♥",
       [],
     ],
     [
@@ -90,7 +90,7 @@ describe("causeLabel and causeNames", () => {
           kind: "upgrade",
           upgrade: "bellyRubs",
         }),
-      "+1 ♥, at max",
+      "+1♥, at max",
       ["at max"],
     ],
     [
@@ -132,7 +132,7 @@ describe("causeLabel and causeNames", () => {
           "koda",
           testState({ koda: 3 }),
         ).change,
-      `+${read(TEST_TUNING, "hearts", "treat")} ♥ treat`,
+      `+${read(TEST_TUNING, "hearts", "treat")}♥ treat`,
       ["treat"],
     ],
     [

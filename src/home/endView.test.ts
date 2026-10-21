@@ -41,14 +41,14 @@ describe("earningsBreakdown", () => {
     ]);
   });
 
-  it("labels the full pack bonus with its amount", () => {
+  it("labels the full pack bonus row", () => {
     const line = earningsBreakdown(gameData, [bonus(3_000)], cents(3_000)).find(
       ({ kind }) => kind === "fullPack",
     );
     expect(line).toEqual({
       amount: 3_000,
       kind: "fullPack",
-      label: gameData.runText.fullPackHome.replace("{amount}", "$30"),
+      label: gameData.menuText.end.earnings.fullPack,
     });
   });
 

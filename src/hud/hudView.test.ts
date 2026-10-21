@@ -51,14 +51,14 @@ describe("changeLabels", () => {
         cause: gameData.shopGear.luckyCollar.name,
         gain: false,
         target: { dog: "nugget", kind: "dog" },
-        text: `−2 ♥, ${gameData.shopGear.luckyCollar.name}`,
+        text: `−2♥, ${gameData.shopGear.luckyCollar.name}`,
       },
       {
         amount: 1,
         cause: "treat",
         gain: true,
         target: { dog: "koda", kind: "dog" },
-        text: "+1 ♥ treat",
+        text: "+1♥ treat",
       },
       {
         amount: 200,

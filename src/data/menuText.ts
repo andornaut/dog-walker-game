@@ -14,6 +14,7 @@ export const MENU_TEXT = {
     earnings: {
       cardCosts: "Card costs",
       fees: "Pay",
+      fullPack: "Full pack bonus",
       luckyFinds: "Lucky finds",
       start: "Starting money",
       tips: "Tips",

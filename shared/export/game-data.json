@@ -10,7 +10,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1 ♥ each, −$4",
+      "text": "+1♥ each, −$4",
       "title": "Other dog"
     },
     {
@@ -23,7 +23,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "−1 ♥ each",
+      "text": "−1♥ each",
       "title": "Other dog"
     },
     {
@@ -88,7 +88,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "−1 ♥ each",
+      "text": "−1♥ each",
       "title": "Skunk"
     },
     {
@@ -114,7 +114,7 @@
         "id": "squirrel",
         "kind": "encounter"
       },
-      "text": "−1 ♥ each",
+      "text": "−1♥ each",
       "title": "Squirrel"
     },
     {
@@ -140,7 +140,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "−1 ♥ each",
+      "text": "−1♥ each",
       "title": "Thief"
     },
     {
@@ -231,7 +231,7 @@
         "id": "bellyRubs",
         "kind": "upgrade"
       },
-      "text": "+1 ♥ each",
+      "text": "+1♥ each",
       "title": "Which way?"
     },
     {
@@ -244,7 +244,7 @@
         "id": "bigTipper",
         "kind": "upgrade"
       },
-      "text": "+$1 per tip next zone",
+      "text": "+$1 per tip next neighborhood",
       "title": "Which way?"
     },
     {
@@ -257,7 +257,7 @@
         "id": "goodLeash",
         "kind": "upgrade"
       },
-      "text": "No Squirrel cards for the run, no pulls toward squirrels for the run",
+      "text": "No Squirrel cards all walk, no pulls toward squirrels all walk",
       "title": "Which way?"
     },
     {
@@ -270,7 +270,7 @@
         "id": "raincoats",
         "kind": "upgrade"
       },
-      "text": "No Puddle cards for the run",
+      "text": "No Puddle cards all walk",
       "title": "Which way?"
     },
     {
@@ -283,7 +283,7 @@
         "id": "rushHour",
         "kind": "upgrade"
       },
-      "text": "Tips +100% next zone, obstacles +50% next zone",
+      "text": "Tips +100% next neighborhood, obstacles +50% next neighborhood",
       "title": "Which way?"
     },
     {
@@ -296,7 +296,7 @@
         "id": "sweetTalker",
         "kind": "upgrade"
       },
-      "text": "The first card each zone costs nothing for the run",
+      "text": "The first card each neighborhood costs nothing all walk",
       "title": "Which way?"
     },
     {

@@ -41,7 +41,7 @@ describe("an option that would fire an owner", () => {
       ({ index }) => index === HOLD_YOUR_NOSE,
     );
     expect(option?.breakdown.map(({ dog, name, text }) => [dog, text, name])).toEqual([
-      ["koda", "−1 ♥", "Hold your nose"],
+      ["koda", "−1♥", "Hold your nose"],
       ["koda", "", "Jesse fires you"],
     ]);
   });
@@ -69,6 +69,6 @@ describe("causeLabel at a firing", () => {
       [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
       testState({ koda: 1 }),
     );
-    expect(changes.map((change) => causeLabel(data, change))).toEqual(["−1 ♥, Jesse fires you"]);
+    expect(changes.map((change) => causeLabel(data, change))).toEqual(["−1♥, Jesse fires you"]);
   });
 });

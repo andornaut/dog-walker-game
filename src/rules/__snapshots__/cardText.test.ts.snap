@@ -3,21 +3,21 @@
 exports[`a card's text for the dogs it catches > matches the snapshot for the whole pack caught 1`] = `
 {
   "encounters": {
-    "otherDog: Let them sniff": "+1 ♥ Duchess, +1 ♥ Koda, +1 ♥ Nugget, −$4",
-    "otherDog: Pull away": "−1 ♥ Duchess, −1 ♥ Koda, −1 ♥ Nugget",
+    "otherDog: Let them sniff": "+1♥ Duchess, +1♥ Koda, +1♥ Nugget, −$4",
+    "otherDog: Pull away": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "puddle: Splash through": "Muddy: bumps cost 2♥ for 20s",
     "puddle: Towel off": "−$5",
     "skunk: Full groom": "−$15",
-    "skunk: Hold your nose": "−1 ♥ Duchess, −1 ♥ Koda, −1 ♥ Nugget",
+    "skunk: Hold your nose": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "skunk: Quick rinse": "Stinky: half the tips for 20s",
-    "squirrel: Hold tight": "−1 ♥ Duchess, −1 ♥ Koda, −1 ♥ Nugget",
+    "squirrel: Hold tight": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "squirrel: Let them chase": "−$5",
-    "thief: Chase them off": "−1 ♥ Duchess, −1 ♥ Koda, −1 ♥ Nugget",
+    "thief: Chase them off": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "thief: Let them go": "−$10",
   },
   "forks": {
-    "fork: Fairview Park": "Belly rubs: +1 ♥ each",
-    "fork: Willow Crescent": "Sweet talker: The first card each zone costs nothing for the run",
+    "fork: Fairview Park": "Belly rubs: +1♥ each",
+    "fork: Willow Crescent": "Sweet talker: The first card each neighborhood costs nothing all walk",
   },
 }
 `;

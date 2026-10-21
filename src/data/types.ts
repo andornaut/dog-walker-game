@@ -646,6 +646,7 @@ export interface MenuText {
     readonly earnings: {
       readonly cardCosts: string;
       readonly fees: string;
+      readonly fullPack: string;
       readonly luckyFinds: string;
       readonly start: string;
       readonly tips: string;

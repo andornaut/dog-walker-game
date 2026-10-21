@@ -143,10 +143,10 @@ function wholeDollarText(amount: number): string {
   return `$${Math.max(1, Math.round(Math.abs(amount) / 100))}`;
 }
 
-// A signed amount in the change's unit, such as "−2 ♥" or "+$2".
+// A signed amount in the change's unit, such as "−2♥" or "+$2".
 export function amountText(kind: Change["kind"], amount: number): string {
   return kind === "hearts"
-    ? `${sign(amount)}${Math.abs(amount)} ♥`
+    ? `${sign(amount)}${Math.abs(amount)}♥`
     : `${sign(amount)}${wholeDollarText(amount)}`;
 }
 
