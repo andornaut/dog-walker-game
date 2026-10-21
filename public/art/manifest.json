@@ -1170,8 +1170,8 @@
       "png": "sprites/coyote.png",
       "json": "sprites/coyote.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 38
+        "feetY": 43,
+        "opaqueWidth": 43
       }
     },
     {
@@ -1180,7 +1180,7 @@
       "json": "sprites/coyote@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 18
+        "opaqueWidth": 22
       }
     },
     {
@@ -1188,8 +1188,8 @@
       "png": "sprites/coyote@62.png",
       "json": "sprites/coyote@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 23
+        "feetY": 28,
+        "opaqueWidth": 28
       }
     },
     {
@@ -1197,8 +1197,8 @@
       "png": "sprites/coyote@75.png",
       "json": "sprites/coyote@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 27
+        "feetY": 33,
+        "opaqueWidth": 33
       }
     },
     {
@@ -1206,8 +1206,8 @@
       "png": "sprites/coyote@88.png",
       "json": "sprites/coyote@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 33
+        "feetY": 38,
+        "opaqueWidth": 38
       }
     },
     {
