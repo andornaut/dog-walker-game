@@ -184,10 +184,10 @@ def koda_road(q):
     g.rect(bx - 2, 20 + o + b, 4, 2, "orange")
     g.rect(bx - 1, 21 + o + b, 2, 1, "slate")
     g.ell(bx, 15 + o + b, 5, 1.5, "dslate")
-    # curled tail over the hips
+    # the tail curled over the hips: grey on top like the saddle, its white underside showing in the curl
     tx = 16 + q["tail"]
-    g.ell(tx, 28 + b, 3.5, 2, "white", "lgrey")
-    g.p(tx, 28 + b, "lgrey")
+    g.ell(tx, 28 + b, 3.5, 2, "slate", "dslate", "grey")
+    g.ell(tx + 0.5, 28.5 + b, 1.8, 0.9, "white")
     # big head with white cheeks and upright ears
     hx = 16 + ln
     e = q["ears"]
@@ -386,8 +386,9 @@ def zippy_road(q):
     g.ell(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
     g.ell(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
     tx = 16 + q["tail"]
+    # a short upright tail, white with a tan tip, standing clear of the rump
     g.rect(tx - 1, 27 + b, 2, 2, "white")
-    g.p(tx, 28 + b, "ochre")
+    g.rect(tx - 1, 28 + b, 2, 1, "ochre")
     # reaching, the head stretches forward of the collar on a white neck
     hx, hb = 16 + ln, b + q["reach"]
     if q["reach"]:
@@ -506,9 +507,9 @@ def pierre_face(mood):
 
 # ---------- Archie: Australian Shepherd, medium, red merle, one blue eye, red bandana ----------
 
-# The coat (fill, shade, light), the merle blotches (patch, ragged edge) and the ears (ear, folded tip).
+# The coat (fill, shade, light), the merle patches and the ears (ear, folded tip).
 COAT = ("skin2", "brown", "skin1")
-BLOT = ("dbrown", "brown")
+BLOT = ("dbrown",)
 EAR = ("dbrown", "plum")
 
 def archie_road(q):
@@ -520,22 +521,21 @@ def archie_road(q):
                     (19, 25, q["br"] + hop)):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
-    # a cinnamon coat torn by liver merle blotches, a fluffy white ruff at the nape. As wide as Biscuit,
+    # a cinnamon coat in a few liver merle patches, a fluffy white ruff at the nape. As wide as Biscuit,
     # longer in the coat
     bx = 16 + ln // 2
     g.ell(bx, 21.5 + b, 7, 6, *COAT)
-    merle(g, bx, b, ((-5, 20, 2, 2), (1, 19, 3, 2), (3, 23, 2, 2), (-2, 24, 3, 1), (-4, 23, 1, 1), (5, 20, 1, 2)))
+    merle(g, bx, b, ((-3.5, 21, 2, 1.5), (3, 24, 2.2, 1.5), (2.5, 19.6, 1.3, 1)))
     g.ell(bx, 16.5 + b, 6, 2, "white", "lgrey")
     # the red bandana's knot at the nape, its two ends flaring down the back
     g.rect(bx - 5, 17 + b, 10, 1, "red")
     g.rect(bx - 1, 16 + b, 2, 2, "dred")
     for side in (-1, 1):
-        g.p(bx + (side - 1) // 2 + side, 18 + b, "red")
-        g.p(bx + (side - 1) // 2 + 2 * side, 19 + b, "dred")
+        x = bx + (side - 1) // 2
+        trail(g, [(x + side, 18 + b), (x + 2 * side, 19 + b)], "red")
     # a short bobtail
     tx = 16 + q["tail"]
     g.ell(tx, 27.5 + b, 2, 1.6, *COAT)
-    g.p(tx - 1, 27 + b, BLOT[0])
     # ears set high and tipped forward, the folded tips darker
     hx = 16 + ln
     e, t = q["ears"], q["twitch"]
@@ -544,7 +544,7 @@ def archie_road(q):
     g.rect(hx - 6, 5 + b + e, 2, 1, EAR[1])
     g.rect(hx + 4, 5 + b + e + t, 2, 1, EAR[1])
     g.ell(hx, 11.5 + b, 5.5, 5, *COAT)
-    merle(g, hx, b, ((-4, 9, 2, 2), (2, 8, 2, 1), (1, 12, 2, 2), (-2, 13, 1, 1)))
+    merle(g, hx, b, ((-2.5, 9.5, 2, 1.6), (2.5, 13, 1.6, 1.3)))
     spray(g, q["spray"])
     whirl(g, q["whirl"], bx, b)
     return g
@@ -602,7 +602,9 @@ def snowball_road(q):
     for dx, dy in ((-7, 0), (7, 0), (-5, 4), (5, 4)):
         g.ell(bx + dx, 20.5 + o + b + dy, 2, 2, "white", "lgrey")
     g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
-    g.p(bx + 6, 17 + o + b, "amber")
+    # the bell hangs from the collar's right end
+    g.rect(bx + 5, 17 + o + b, 2, 2, "amber")
+    g.p(bx + 6, 18 + o + b, "orange")
     tx = 16 + q["tail"]
     g.ell(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
     g.ell(tx - 1, 23 + o + b, 2.5, 1.5, "lgrey")
@@ -752,11 +754,10 @@ def puff(g, cx, cy, rx, ry, ring=False):
 
 
 def merle(g, cx, b, blots):
-    """Red merle blotches on Archie's coat: each (dx, y, w, h) a BLOT[0] patch at x cx + dx, row y + b, with
-    a BLOT[1] pixel ragging its lower-right corner."""
-    for dx, y, w, h in blots:
-        g.rect(cx + dx, y + b, w, h, BLOT[0])
-        g.p(cx + dx + w, y + b + h - 1, BLOT[1])
+    """Red merle on Archie's coat: each (dx, y, rx, ry) a flat, rounded BLOT[0] patch centred at x cx + dx,
+    row y + b, with no single-pixel ragging, so the coat reads as a few patches at road scale."""
+    for dx, y, rx, ry in blots:
+        g.blob(cx + dx, y + b, rx, ry, BLOT[0])
 
 
 def whirl(g, side, bx, b):
