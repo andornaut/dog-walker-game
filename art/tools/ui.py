@@ -1144,14 +1144,34 @@ def cork():
     tiles' ink edges hold on it, and it holds apart from the Pocket's blue and the dogs' plaid."""
     g = Grid(DENIM, DENIM)
     g.rect(0, 0, DENIM, DENIM, "brown")
-    for y in range(DENIM):
-        for x in range(DENIM):
-            h = (x * 37 + y * 91 + x * y * 13) % 23
-            if h in (0, 7):
-                g.p(x, y, "dbrown")
-            elif h in (3, 15):
-                g.p(x, y, "ochre")
+    for x, y, c in CORK_GRAINS:
+        g.p(x, y, c)
     return g
+
+
+def cork_grains(seed=11, gap=3.2, tries=4000):
+    """The cork's granules: blue noise on the 16x16 torus (no two closer than gap, measured across the tile's
+    wrap too), so the repeated tile scatters evenly with no diagonal lattice. Each is dbrown or ochre, and
+    about half grow a second pixel beside or below them, so the grains vary in size as cork's do."""
+    import random
+
+    r, seeds = random.Random(seed), []
+    for _ in range(tries):
+        x, y = r.randrange(DENIM), r.randrange(DENIM)
+        if all(min(abs(x - a), DENIM - abs(x - a)) ** 2 + min(abs(y - b), DENIM - abs(y - b)) ** 2 >= gap * gap
+               for a, b in seeds):
+            seeds.append((x, y))
+    pts = []
+    for x, y in seeds:
+        c = "dbrown" if r.random() < 0.5 else "ochre"
+        pts.append((x, y, c))
+        if r.random() < 0.5:
+            dx, dy = r.choice(((1, 0), (0, 1), (1, 1)))
+            pts.append(((x + dx) % DENIM, (y + dy) % DENIM, c))
+    return pts
+
+
+CORK_GRAINS = cork_grains()
 
 
 def plaid():
