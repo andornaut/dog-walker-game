@@ -10,6 +10,7 @@ import { memoryStorage, saveStore } from "../save/storage";
 import { heartsOf } from "../state/pack";
 import { testState } from "../testing/runState";
 import {
+  applyPanel,
   applySaveEdit,
   CHEAT_TOGGLES,
   type Cheats,
@@ -22,18 +23,22 @@ import {
   encodeCheats,
   encodeSaveEdits,
   FAST_FORWARD_SCALE,
+  openPanel,
+  type PanelAction,
+  type PanelState,
   RESET_SAVE,
   SAVE_CHEATS,
   type SaveEdit,
   setCheat,
   SLOW_MOTION_SCALE,
-  startAtSetup,
+  stagePanel,
+  START_SCREEN,
   startChoices,
   timeScaleOf,
   withCheats,
 } from "./devPanelModel";
 import { runSetupLimitsFor } from "./pageRunSetup";
-import { parseRunSetup, type RunSetup, runSetupLink } from "./runSetup";
+import { parseRunSetup, type RunSetup } from "./runSetup";
 
 const context = saveContextFrom(gameData);
 const ON = cheatsOn(CHEATS_OFF);
@@ -179,23 +184,90 @@ describe("save edits", () => {
 
 describe("start at", () => {
   const first = firstZoneId(gameData);
+
+  it("offers the start screen, then every neighborhood, the first first", () => {
+    const starts = startChoices(gameData).map(({ start }) => start);
+    expect(starts.slice(0, 2)).toEqual([START_SCREEN, first]);
+    expect(new Set(starts.slice(1))).toEqual(new Set(gameData.world.zones.map(({ id }) => id)));
+  });
+});
+
+describe("staged settings", () => {
+  const applied = setCheat("hitBoxes", true, ON);
+  const opened = openPanel(applied);
+  const stageAll = (actions: readonly PanelAction[]) =>
+    actions.reduce((state, action) => stagePanel(action, state), opened);
+
+  it("opens with the applied cheats staged, bound for the start screen", () => {
+    expect(opened).toEqual({ applied, staged: applied, start: START_SCREEN });
+  });
+
+  it.each<[string, PanelAction[], Cheats, PanelState["start"]]>([
+    ["Cheats off", [{ kind: "switch", on: false }], CHEATS_OFF, START_SCREEN],
+    [
+      "Cheats off, then on",
+      [
+        { kind: "switch", on: false },
+        { kind: "switch", on: true },
+      ],
+      ON,
+      START_SCREEN,
+    ],
+    [
+      "a toggle",
+      [{ id: "invincible", kind: "toggle", on: true }],
+      setCheat("invincible", true, applied),
+      START_SCREEN,
+    ],
+    ["a start", [{ kind: "start", start: "park" }], applied, "park"],
+    [
+      "Cancel after changes",
+      [{ kind: "switch", on: false }, { kind: "start", start: "park" }, { kind: "cancel" }],
+      applied,
+      START_SCREEN,
+    ],
+  ])("stages %s without changing what is applied", (_name, actions, staged, start) => {
+    expect(stageAll(actions)).toEqual({ applied, staged, start });
+  });
+
+  it("stages no toggle while Cheats off is staged", () => {
+    const actions: PanelAction[] = [
+      { kind: "switch", on: false },
+      { id: "hitBoxes", kind: "toggle", on: true },
+    ];
+    expect(stageAll(actions).staged).toEqual(CHEATS_OFF);
+  });
+});
+
+describe("Apply", () => {
   const limits = runSetupLimitsFor(gameData);
+  const href = "https://example.test/play/?dev=1&seed=5&zone=3&lang=fr";
+  const staged = setCheat("slowMotion", true, ON);
+  const applyFrom = (cheats: Cheats, start: PanelState["start"]) =>
+    applyPanel(gameData, href, 7, { applied: CHEATS_OFF, staged: cheats, start });
 
-  it("offers every neighborhood, the first first", () => {
-    const choices = startChoices(gameData);
-    expect(choices[0]?.zone).toBe(first);
-    expect(new Set(choices.map(({ zone }) => zone))).toEqual(
-      new Set(gameData.world.zones.map(({ id }) => id)),
-    );
+  it.each<[string, Cheats, PanelState["start"], Cheats, string]>([
+    ["cheats on, to the start screen", staged, START_SCREEN, staged, "?dev=1&lang=fr"],
+    ["cheats off, to the start screen", CHEATS_OFF, START_SCREEN, CHEATS_OFF, "?lang=fr"],
+    ["cheats off, a neighborhood ignored", CHEATS_OFF, "park", CHEATS_OFF, "?lang=fr"],
+  ])("with %s loads /play/%s", (_name, cheats, start, expected, search) => {
+    expect(applyFrom(cheats, start)).toEqual({
+      cheats: expected,
+      url: `https://example.test/play/${search}`,
+    });
   });
 
-  it.each(startChoices(gameData))("starts a walk the URL reads back at $label", ({ zone }) => {
-    const setup = startAtSetup(gameData, false, 7, zone);
-    const search = new URL(runSetupLink("https://example.test/play/", setup)).search;
-    const parsed = parseRunSetup(limits, () => 0, search);
-    expect(parsed).toEqual({ notices: [], setup, warnings: [] });
-    expect(setup.route?.at(-1) ?? first).toBe(zone);
-  });
+  it.each(startChoices(gameData).filter(({ start }) => start !== START_SCREEN))(
+    "with cheats on starts a walk the URL reads back at $label",
+    ({ start }) => {
+      const { cheats, url } = applyFrom(staged, start);
+      const parsed = parseRunSetup(limits, () => 0, new URL(url).search);
+      expect(cheats).toEqual(staged);
+      expect(parsed.warnings).toEqual([]);
+      expect(parsed.setup).toMatchObject({ dev: true, seed: 7 });
+      expect(parsed.setup.route?.at(-1) ?? firstZoneId(gameData)).toBe(start);
+    },
+  );
 });
 
 describe("the URL parameters agents use", () => {

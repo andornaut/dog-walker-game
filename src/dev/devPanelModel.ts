@@ -11,7 +11,8 @@ import {
   type SaveDocument,
 } from "../save/schema";
 import type { RunState } from "../state/runState";
-import type { RunSetup } from "./runSetup";
+import { stripDevParams } from "./devStart";
+import { type RunSetup, runSetupLink } from "./runSetup";
 
 // sessionStorage, "1" while the panel is open.
 export const DEV_PANEL_OPEN_KEY = "dog-walker-game:dev-panel-open";
@@ -213,22 +214,84 @@ export function decodeSaveEdits(text: string | null): SaveEdit[] {
   }
 }
 
+// Where Apply goes: the start screen, or a walk in a neighborhood.
+export const START_SCREEN = "startScreen";
+export type StartTarget = typeof START_SCREEN | ZoneId;
+
 export interface StartChoice {
   readonly label: string;
-  readonly zone: ZoneId;
+  readonly start: StartTarget;
 }
 
-// Every neighborhood, the first first, then the rest easiest first.
+// The start screen, then every neighborhood: the first, then the rest easiest first.
 export function startChoices(data: RouteData): StartChoice[] {
   const first = firstZoneId(data);
   const zoneById = new Map(data.world.zones.map((zone) => [zone.id as ZoneId, zone]));
   const ids = [first, ...[...zoneById.keys()].filter((id) => id !== first)];
-  return ids.map((zone) => ({ label: zoneById.get(zone)?.name ?? zone, zone }));
+  return [
+    { label: "Start screen", start: START_SCREEN },
+    ...ids.map((zone) => ({ label: zoneById.get(zone)?.name ?? zone, start: zone })),
+  ];
+}
+
+// The panel's settings: the cheats the game plays by, and those staged in the sheet with the
+// start Apply goes to. Nothing staged changes the game until Apply.
+export interface PanelState {
+  readonly applied: Cheats;
+  readonly staged: Cheats;
+  readonly start: StartTarget;
+}
+
+export type PanelAction =
+  | { readonly kind: "cancel" }
+  | { readonly kind: "start"; readonly start: StartTarget }
+  | { readonly kind: "switch"; readonly on: boolean }
+  | { readonly kind: "toggle"; readonly id: CheatToggle; readonly on: boolean };
+
+// The sheet as it opens: the applied cheats, bound for the start screen.
+export function openPanel(applied: Cheats): PanelState {
+  return { applied, staged: applied, start: START_SCREEN };
+}
+
+// Staging Cheats off turns every staged cheat off. Cancel stages what is applied again.
+export function stagePanel(action: PanelAction, state: PanelState): PanelState {
+  switch (action.kind) {
+    case "cancel":
+      return openPanel(state.applied);
+    case "start":
+      return { ...state, start: action.start };
+    case "switch":
+      return { ...state, staged: action.on ? cheatsOn(state.staged) : CHEATS_OFF };
+    case "toggle":
+      return { ...state, staged: setCheat(action.id, action.on, state.staged) };
+    default:
+      return assertNever(action);
+  }
+}
+
+// What Apply does: the cheats the tab plays by from now, and the page to load. With cheats
+// off, that is the start screen without `dev`; otherwise the chosen start, keeping `dev`. A
+// neighborhood's walk gets seed. href is the current page.
+export function applyPanel(
+  data: RouteData,
+  href: string,
+  seed: number,
+  state: PanelState,
+): { readonly cheats: Cheats; readonly url: string } {
+  const { staged, start } = state;
+  if (!staged.on || start === START_SCREEN) {
+    const url = new URL("/play/", href);
+    url.search = new URL(stripDevParams(href, !staged.on)).search;
+    return { cheats: staged.on ? staged : CHEATS_OFF, url: url.toString() };
+  }
+  const dev = new URL(href).searchParams.get("dev") === "1";
+  const playUrl = new URL("/play/", href).href;
+  return { cheats: staged, url: runSetupLink(playUrl, startAtSetup(data, dev, seed, start)) };
 }
 
 // A walk that starts at zone: the first zone is walked first, any other second, after the
 // first, as if picked at the first fork.
-export function startAtSetup(data: RouteData, dev: boolean, seed: number, zone: ZoneId): RunSetup {
+function startAtSetup(data: RouteData, dev: boolean, seed: number, zone: ZoneId): RunSetup {
   const first = firstZoneId(data);
   return zone === first
     ? { dev, seed, speed: 1, zone: 1 }

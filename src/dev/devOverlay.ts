@@ -8,7 +8,7 @@ export const DEV_STATE_EVENT = "dev-state";
 // Emitted on game.events with the overlay's wanted visibility, to show or hide it.
 export const DEV_OVERLAY_TOGGLE_EVENT = "dev-overlay-toggle";
 // Game registry keys: whether the overlay shows, which the overlay scene keeps current, and
-// whether the far end of the road fades into the backdrop band, which Cheats off clears.
+// whether the far end of the road fades into the backdrop band, set from the console.
 export const DEV_OVERLAY_VISIBLE_KEY = "dev-overlay-visible";
 export const DEV_ROAD_FADE_KEY = "dev-road-fade";
 

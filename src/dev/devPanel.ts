@@ -1,18 +1,17 @@
 // The dev panel: plain HTML under the game canvas. A thin bar that opens a sheet of cheats for
-// a person testing the game. The game reaches it only through DevPanelHost, so this module
-// needs no Phaser.
+// a person testing the game: the switch, start and toggles are staged until Apply, and the save
+// cheats act at once. The game reaches it only through DevPanelHost, so this module needs no
+// Phaser.
 import "./devPanel.css";
 
 import { gameData } from "../data";
-import type { ZoneId } from "../data/types";
 import { saveContextFrom } from "../save/load";
 import { browserStorage, saveStore } from "../save/storage";
 import {
+  applyPanel,
   applySaveEdit,
   CHEAT_TOGGLES,
   type Cheats,
-  CHEATS_OFF,
-  cheatsOn,
   decodeCheats,
   decodeSaveEdits,
   DEV_CHEATS_KEY,
@@ -20,21 +19,20 @@ import {
   DEV_SAVE_EDITS_KEY,
   encodeCheats,
   encodeSaveEdits,
+  openPanel,
+  type PanelAction,
+  type PanelState,
   RESET_SAVE,
   SAVE_CHEATS,
   type SaveEdit,
-  setCheat,
-  startAtSetup,
+  stagePanel,
   startChoices,
+  type StartTarget,
 } from "./devPanelModel";
 import { stripDevParams } from "./devStart";
-import { pageRunSetup } from "./pageRunSetup";
-import { randomSeed, runSetupLink } from "./runSetup";
+import { randomSeed } from "./runSetup";
 
 export interface DevPanelHost {
-  // Turns dev mode off on the current screen: the URL's run overrides and `dev`, the overlay,
-  // the road fade and the console handle.
-  clearDevMode(): void;
   // Hands the game the cheats it plays by.
   setCheats(cheats: Cheats): void;
 }
@@ -131,27 +129,31 @@ function editSave(edit: SaveEdit): void {
   }
 }
 
-function startAt(zone: ZoneId): void {
-  const playUrl = new URL("/play/", globalThis.location.href).href;
-  const setup = startAtSetup(gameData, pageRunSetup().setup.dev, randomSeed(), zone);
-  globalThis.location.assign(runSetupLink(playUrl, setup));
-}
-
-function startAtRow(): HTMLElement {
-  const select = el(
+function startSelect(): HTMLSelectElement {
+  return el(
     "select",
     { className: "dev-field" },
-    ...startChoices(gameData).map(({ label, zone }) =>
-      el("option", { textContent: label, value: zone }),
+    ...startChoices(gameData).map(({ label, start }) =>
+      el("option", { textContent: label, value: start }),
     ),
   );
-  return el(
-    "label",
-    { className: "dev-row" },
-    el("span", { textContent: "Start at" }),
-    select,
-    button("Go", () => startAt(select.value as ZoneId)),
-  );
+}
+
+// Writes the cheats for the tab and loads the chosen start. Cheats off leaves nothing in
+// sessionStorage, as a new tab starts.
+function applyAndGo(state: PanelState): void {
+  const href = globalThis.location.href;
+  const { cheats, url } = applyPanel(gameData, href, randomSeed(), state);
+  if (cheats.on) {
+    sessionWrite(DEV_CHEATS_KEY, encodeCheats(cheats));
+  } else {
+    sessionRemove(DEV_CHEATS_KEY);
+  }
+  if (url === href) {
+    globalThis.location.reload();
+  } else {
+    globalThis.location.assign(url);
+  }
 }
 
 export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null): void {
@@ -159,8 +161,8 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     console.warn("Dev panel: the page has no #dev-panel element");
     return;
   }
-  let cheats = decodeCheats(sessionRead(DEV_CHEATS_KEY));
-  host.setCheats(cheats);
+  let state = openPanel(decodeCheats(sessionRead(DEV_CHEATS_KEY)));
+  host.setCheats(state.applied);
 
   const sheet = el("div", { className: "dev-sheet", hidden: true, id: "dev-sheet" });
   sheet.setAttribute("role", "dialog");
@@ -168,15 +170,45 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   const bar = el("button", { className: "dev-bar", type: "button" });
   bar.setAttribute("aria-controls", sheet.id);
 
+  const render = () => {
+    const { applied, staged, start } = state;
+    on.setAttribute("aria-pressed", String(staged.on));
+    off.setAttribute("aria-pressed", String(!staged.on));
+    controls.disabled = !staged.on;
+    select.value = start;
+    toggles.forEach(({ box, id }) => {
+      box.checked = staged[id];
+    });
+    const arrow = sheet.hidden === false ? "▾" : "▸";
+    bar.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
+  };
+  const stage = (action: PanelAction) => {
+    state = stagePanel(action, state);
+    render();
+  };
+  // Closing discards what is staged, as Cancel does.
+  const setOpen = (open: boolean) => {
+    sheet.hidden = !open;
+    bar.setAttribute("aria-expanded", String(open));
+    sessionWrite(DEV_PANEL_OPEN_KEY, open ? "1" : "0");
+    stage({ kind: "cancel" });
+  };
+
+  const on = button("Cheats on", () => stage({ kind: "switch", on: true }));
+  const off = button("Cheats off", () => stage({ kind: "switch", on: false }));
+  const select = startSelect();
+  select.addEventListener("change", () =>
+    stage({ kind: "start", start: select.value as StartTarget }),
+  );
   const toggles = CHEAT_TOGGLES.map(({ id, label }) => {
     const box = el("input", { type: "checkbox" });
-    box.addEventListener("change", () => apply(setCheat(id, box.checked, cheats)));
+    box.addEventListener("change", () => stage({ id, kind: "toggle", on: box.checked }));
     return { box, id, label: el("label", { className: "dev-check" }, box, label) };
   });
   const controls = el(
     "fieldset",
     { className: "dev-cheats" },
-    startAtRow(),
+    el("label", { className: "dev-row" }, el("span", { textContent: "Start at" }), select),
     ...toggles.map(({ label }) => label),
     el("h2", { textContent: "Saved to progress" }),
     el(
@@ -185,40 +217,16 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       ...SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit))),
     ),
   );
-  const on = button("Cheats on", () => apply(cheatsOn(cheats)));
-  const off = button("Cheats off", () => {
-    host.clearDevMode();
-    apply(CHEATS_OFF);
-    setOpen(false);
-  });
+  const reset = button(
+    "Reset save",
+    () => {
+      if (globalThis.confirm("Reset save to a new player?")) {
+        editSave(RESET_SAVE);
+      }
+    },
+    "dev-button dev-danger",
+  );
 
-  const render = () => {
-    on.setAttribute("aria-pressed", String(cheats.on));
-    off.setAttribute("aria-pressed", String(!cheats.on));
-    controls.disabled = !cheats.on;
-    toggles.forEach(({ box, id }) => {
-      box.checked = cheats[id];
-    });
-    const arrow = sheet.hidden ? "▸" : "▾";
-    bar.textContent = cheats.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
-  };
-  // Cheats off leaves nothing in sessionStorage, as a new tab starts.
-  const apply = (next: Cheats) => {
-    cheats = next;
-    host.setCheats(next);
-    if (next.on) {
-      sessionWrite(DEV_CHEATS_KEY, encodeCheats(next));
-    } else {
-      sessionRemove(DEV_CHEATS_KEY);
-    }
-    render();
-  };
-  const setOpen = (open: boolean) => {
-    sheet.hidden = !open;
-    bar.setAttribute("aria-expanded", String(open));
-    sessionWrite(DEV_PANEL_OPEN_KEY, open ? "1" : "0");
-    render();
-  };
   bar.addEventListener("click", () => {
     setOpen(sheet.hidden !== false);
     if (sheet.hidden === false) {
@@ -234,19 +242,16 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     }
   });
 
-  const reset = button(
-    "Reset save",
-    () => {
-      if (globalThis.confirm("Reset save to a new player?")) {
-        editSave(RESET_SAVE);
-      }
-    },
-    "dev-button dev-danger",
-  );
   sheet.append(
     el("header", { className: "dev-header" }, el("div", { className: "dev-switch" }, on, off)),
     controls,
     el("div", { className: "dev-footer" }, reset),
+    el(
+      "div",
+      { className: "dev-actions" },
+      button("Apply", () => applyAndGo(state), "dev-button dev-primary"),
+      button("Cancel", () => setOpen(false)),
+    ),
   );
   container.append(bar, sheet);
   setOpen(sessionRead(DEV_PANEL_OPEN_KEY) === "1");

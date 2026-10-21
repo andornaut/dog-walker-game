@@ -119,13 +119,13 @@
 - Lane moves, treats, card choices (a fork's path among them) and heading home are recorded with their simulation step's time in a versioned input log that replays the run exactly. The log's setup names the pack, gear and walker walked, and a later start's route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run. Its zone clock (`src/dev/zoneClock.ts`) splits the current zone's wall-clock time into road time (simulated, the road moving), held time (hit stops and firings in simulated time, cards and the pause menu in wall-clock time) and lag (the rest: the loop behind real time), beside the road time the whole zone takes, and keeps the last zone's totals.
 - The far-road fade dithers the road's farthest rows into the band. It is off unless the game registry's `dev-road-fade` is set, as through the console handle `dogWalkerGame`.
-- The dev panel is the cheat sheet for a person testing, under a "Dev" bar below the canvas that stays visible. Opened, the sheet sits below the game and the page scrolls to it. Every cheat is off until Cheats on, and Cheats off turns every cheat off, removes `dev` and the run parameters from the URL, hides the overlay, turns the road fade off, removes the console handle and closes the sheet. The cheats:
-  - Start at: walks a neighborhood with the saved loadout. The first zone starts the walk; any other is walked second, after the first.
+- The dev panel is the cheat sheet for a person testing, under a "Dev" bar below the canvas that stays visible. Opened, the sheet sits below the game and the page scrolls to it. Every cheat is off until Cheats on. The Cheats on/off switch, Start at and the toggles are staged and change nothing until Apply, which loads the chosen start with the staged cheats; Cancel, Escape or the bar close the sheet and discard them. With Cheats off applied, every cheat is off and Apply loads the start screen without `dev` or the run parameters. The staged settings:
+  - Start at: the start screen (the default), or a neighborhood walked with the saved loadout. The first zone starts the walk; any other is walked second, after the first.
   - Invincible owners: no owner loses hearts (`RunState.invincible`, which `changeHearts` reads).
   - Hit boxes: outlines the pack's band and each road item's hit box.
   - Slow motion and Fast forward: the walk at x0.5 or x3; turning one on turns the other off.
-  - Saved to progress: +$100, +$1,000 and Unlock all (every dog, gear item, walker and slot) change the save.
-- The toggles last for the tab (`sessionStorage`), so a walk Start at begins keeps them, and never reach the save. Save edits, Reset save among them (a new player's save, after a confirm), are queued in `sessionStorage` and written at the next boot, before the game loads the save, and the page reloads to the home screen.
+- The save cheats act at once: +$100, +$1,000 and Unlock all (every dog, gear item, walker and slot) change the save, and Reset save writes a new player's save after a confirm. Each is queued in `sessionStorage` and written at the next boot, before the game loads the save, and the page reloads to the start screen.
+- Applied cheats last for the tab (`sessionStorage`) and never reach the save.
 
 ## Open questions
 

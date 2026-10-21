@@ -4,10 +4,9 @@ import { AUTO, Core, Game, Scale } from "phaser";
 
 import { installCrashScreen } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
-import { DEV_OVERLAY_TOGGLE_EVENT, DEV_ROAD_FADE_KEY } from "./dev/devOverlay";
 import { applyPendingSaveEdits, type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { DEV_CHEATS_KEY } from "./dev/devPanelModel";
-import { pageRunSetup, resetDevMode } from "./dev/pageRunSetup";
+import { pageRunSetup } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
 import { integerZoom } from "./layout/integerZoom";
@@ -41,17 +40,9 @@ installCrashScreen({
   },
 });
 
-// The dev panel's view of the game. The cheats and the road fade are registry entries RunScene
-// reads each frame; the overlay hides on an event.
+// The dev panel's view of the game: the cheats are a registry entry RunScene reads each frame.
 function devPanelHost(game: Game): DevPanelHost {
   return {
-    // The panel does not use `dogWalkerGame`, and dev mode is off now, so the console handle goes.
-    clearDevMode: () => {
-      resetDevMode();
-      game.events.emit(DEV_OVERLAY_TOGGLE_EVENT, false);
-      game.registry.set(DEV_ROAD_FADE_KEY, false);
-      Reflect.deleteProperty(globalThis, "dogWalkerGame");
-    },
     setCheats: (cheats) => {
       game.registry.set(DEV_CHEATS_KEY, cheats);
     },
