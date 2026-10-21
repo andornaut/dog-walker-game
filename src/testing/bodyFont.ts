@@ -12,3 +12,8 @@ const BODY_ADVANCES = new Map(
 export function bodyTextWidth(scale: number, line: string): number {
   return scale * [...line].reduce((sum, char) => sum + (BODY_ADVANCES.get(char) ?? 0), 0);
 }
+
+// The body font's line height in font pixels, from its .fnt: one line's box before scaling.
+export const BODY_LINE_HEIGHT = Number(
+  /<common[^>]*\blineHeight="(\d+)"/.exec(readFileSync(BODY_FNT, "utf8"))?.[1],
+);

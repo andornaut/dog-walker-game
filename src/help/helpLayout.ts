@@ -15,7 +15,7 @@ export const MIN_TAP_SIZE = 44;
 // The help screen's geometry at the render resolution. A text position is the top-left of
 // its first line.
 export const HELP_LAYOUT = {
-  body: { lineHeight: 15, width: 336, x: 12, y: 334 },
+  body: { lineHeight: 15, scale: 2, width: 336, x: 12, y: 334 },
   close: closeControl({ height, width, x: 0, y: 0 }),
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.

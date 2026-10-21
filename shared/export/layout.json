@@ -1232,6 +1232,7 @@
     "help": {
       "body": {
         "lineHeight": 15,
+        "scale": 2,
         "width": 336,
         "x": 12,
         "y": 334

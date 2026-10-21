@@ -187,12 +187,8 @@ export class HelpScene extends Scene {
 
   // Wrapped by Phaser at the body's width, with the line pitch set to the layout's.
   private drawBody(body: string): void {
-    const { lineHeight, width, x, y } = HELP_LAYOUT.body;
-    const text = addPixelText(this, x, y, body, {
-      color: PALETTE.cream,
-      maxWidth: width,
-      scale: TEXT_SCALE,
-    });
-    text.setLineSpacing(lineHeight / TEXT_SCALE - text.fontData.lineHeight);
+    const { lineHeight, scale, width, x, y } = HELP_LAYOUT.body;
+    const text = addPixelText(this, x, y, body, { color: PALETTE.cream, maxWidth: width, scale });
+    text.setLineSpacing(lineHeight / scale - text.fontData.lineHeight);
   }
 }

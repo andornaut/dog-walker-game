@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
+import { gameData } from "../data";
 import { closeFace } from "../layout/closeControl";
 import { type Rect } from "../layout/rect";
+import { BODY_LINE_HEIGHT, bodyTextWidth } from "../testing/bodyFont";
+import { wrapWords } from "../text/lines";
 import {
   CLOSE_HIT_RECT,
   dotRects,
@@ -101,4 +104,19 @@ describe("helpActionAt", () => {
   ])("maps a tap at (%i, %i) to %j", (x, y, expected) => {
     expect(helpActionAt(7, { x, y })).toEqual(expected);
   });
+});
+
+describe("help page bodies", () => {
+  const { lineHeight, scale, width, y } = HELP_LAYOUT.body;
+  const dotsTop = Math.min(...dotRects(gameData.help.length).map((dot) => dot.y));
+
+  it.each(gameData.help.map((page, index) => [index + 1, page.title, page.body] as const))(
+    "fits page %i, %s, above the page dots",
+    (_, _title, body) => {
+      const lines = wrapWords((line) => bodyTextWidth(scale, line), width, body);
+      expect(lines.every((line) => bodyTextWidth(scale, line) <= width)).toBe(true);
+      const bottom = y + (lines.length - 1) * lineHeight + BODY_LINE_HEIGHT * scale;
+      expect(bottom).toBeLessThanOrEqual(dotsTop);
+    },
+  );
 });
