@@ -29,7 +29,7 @@ import { SCENE_KEYS } from "./sceneKeys";
 import type { SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
-import { addMenuButton, addRimmedPanel, type MenuButton, TEXT_SCALE } from "./uiKit";
+import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton, TEXT_SCALE } from "./uiKit";
 
 // menu is the pause menu; homeQuestion asks whether to head home, for the top bar's Home
 // button, its note saying what going home keeps and gives up.
@@ -131,6 +131,7 @@ export class PauseScene extends Scene {
     // A press counts where it began and ended on the same target, so the release that resumes
     // the walk is never the road's.
     listenTargetPress<number>(this, {
+      onDown: (pointer) => addTapBurst(this, pointer.x, pointer.y),
       onPressed: (target) => {
         this.pressed = target;
         this.showPressed();

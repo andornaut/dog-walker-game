@@ -21,7 +21,6 @@ import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "../home/de
 import {
   badgePopOffset,
   bobOffset,
-  effectFrame,
   FEEDBACK,
   hopOffset,
   pressDip,
@@ -136,13 +135,14 @@ import {
   type ShopClosed,
   type ShopSceneData,
 } from "./ShopScene";
-import { addStandingSprite, spriteMetrics } from "./sprites";
+import { addStandingSprite, playEffect, spriteMetrics } from "./sprites";
 import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
   addNineSlice,
   addSelectTile,
   addTagImage,
+  addTapBurst,
   addTileSprite,
   cogIcon,
   drawDisabledButton,
@@ -353,13 +353,6 @@ interface TileView {
   shopNormal?: GameObjects.Image;
 }
 
-// A one-shot effect sprite (fx-tap or fx-dust) and when it started.
-interface Burst {
-  image: GameObjects.Image;
-  key: string;
-  startedMs: number;
-}
-
 // The bank the last time the home screen was shown this session, so the walker can say
 // when something new became affordable.
 const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
@@ -374,9 +367,7 @@ const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 export class StartScene extends Scene {
   // The last action, for the message line and the bubble.
   private action: HomeAction = { kind: "none" };
-  private bursts: Burst[] = [];
   private focus: Focus | null = null;
-  private fxLayer: GameObjects.Container | undefined;
   private gateDogs: { dog: DogId; footY: number; sprite: GameObjects.Sprite }[] = [];
   // A press on a dog or gear tile that may become a hold.
   private hold: HoldPress | undefined;
@@ -415,7 +406,6 @@ export class StartScene extends Scene {
 
   create(): void {
     this.action = { kind: "none" };
-    this.bursts = [];
     this.focus = null;
     this.hold = undefined;
     this.overlay = undefined;
@@ -445,12 +435,11 @@ export class StartScene extends Scene {
     this.drawGate();
     this.root = this.add.container(0, 0);
     this.overlayLayer = this.add.container(0, 0);
-    this.fxLayer = this.add.container(0, 0);
     this.render();
 
     listenOnePress(this, {
       down: (pointer) => {
-        this.addBurst("fx-tap", pointer.x, pointer.y);
+        addTapBurst(this, pointer.x, pointer.y);
         if (this.overlay !== undefined) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
           if (this.overlayPressed() !== undefined) {
@@ -877,16 +866,6 @@ export class StartScene extends Scene {
     openHelp(this, SCENE_KEYS.start);
   }
 
-  private addBurst(key: string, x: number, y: number): void {
-    const frame = tagFrame(this, key, "play");
-    if (frame === undefined || this.fxLayer === undefined) {
-      return;
-    }
-    const image = this.add.image(Math.round(x) - 8, Math.round(y) - 8, key, frame).setOrigin(0);
-    this.fxLayer.add(image);
-    this.bursts.push({ image, key, startedMs: this.time.now });
-  }
-
   override update(): void {
     const now = this.time.now;
     if (this.hold !== undefined) {
@@ -938,23 +917,6 @@ export class StartScene extends Scene {
     for (const { dog, footY, sprite } of this.gateDogs) {
       sprite.setY(footY + hopOffset(reduced, now, this.pops.get(`dog:${dog}`)));
     }
-    this.bursts = this.bursts.filter((burst) => {
-      const tap = burst.key === "fx-tap";
-      const frame = effectFrame(
-        tap ? FEEDBACK.tapFrameMs : FEEDBACK.dustFrameMs,
-        tap ? FEEDBACK.tapFrames : FEEDBACK.dustFrames,
-        now,
-        burst.startedMs,
-      );
-      const textureFrame =
-        frame === undefined ? undefined : tagFrame(this, burst.key, "play", frame);
-      if (textureFrame === undefined) {
-        burst.image.destroy();
-        return false;
-      }
-      burst.image.setFrame(textureFrame);
-      return true;
-    });
   }
 
   // Text at the 2x body size unless told otherwise.
@@ -1336,7 +1298,7 @@ export class StartScene extends Scene {
       // A dog that just joined hops onto the path in a puff of dust.
       const popped = this.pops.get(`dog:${dog}`);
       if (!reduced && popped !== undefined && now - popped < FEEDBACK.dustFrameMs) {
-        this.addBurst("fx-dust", x + dx, dogFoot - 6);
+        playEffect(this, "fx-dust", "play", { x: x + dx, y: dogFoot - 6 }, 0);
       }
     }
     if (walkerKey !== undefined) {

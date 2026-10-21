@@ -240,9 +240,10 @@ export function addMenuButton(
 }
 
 // A screen whose one control is button: it shows pressed while held, and a release over it
-// taps it.
+// taps it. Every press bursts where it lands.
 export function listenButtonTap(scene: Scene, button: MenuButton, onTap: () => void): void {
   listenTargetPress<MenuButton>(scene, {
+    onDown: (pointer) => addTapBurst(scene, pointer.x, pointer.y),
     onPressed: (target) => button.setPressed(target !== undefined),
     onTap,
     targetAt: (x, y) => (containsPoint(button.rect, x, y) ? button : undefined),

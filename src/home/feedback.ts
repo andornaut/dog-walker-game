@@ -12,9 +12,9 @@ export const FEEDBACK = {
   bobBeatMs: 600,
   // The Start walk face sinks this far into its lip while pressed.
   buttonPressPx: 4,
-  // fx-dust frames at the gate when a dog joins the pack.
+  // fx-dust plays at the gate when a dog joins the pack, if the screen is drawn within this
+  // long of it joining.
   dustFrameMs: 80,
-  dustFrames: 4,
   hopMs: 480,
   hopPx: 4,
   liftPx: 2,
@@ -29,9 +29,6 @@ export const FEEDBACK = {
   shopGlintEveryMs: 4000,
   shopGlintFrameMs: 60,
   shopGlintFrames: 7,
-  // fx-tap frames where the finger lands.
-  tapFrameMs: 60,
-  tapFrames: 4,
 } as const;
 
 // How long ago an effect started, or Infinity for one that never did.

@@ -14,7 +14,7 @@ import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { updateProfile } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
-import { addCloseButton, addMenuButton, TEXT_SCALE } from "./uiKit";
+import { addCloseButton, addMenuButton, addTapBurst, clearScene, TEXT_SCALE } from "./uiKit";
 
 // Emitted on game.events when the help closes, by any route.
 export const HELP_CLOSED_EVENT = "help-closed";
@@ -71,6 +71,7 @@ export class HelpScene extends Scene {
     // Taps act on release, so a swipe that starts on a button turns the page instead.
     listenOnePress(this, {
       down: (pointer) => {
+        addTapBurst(this, pointer.x, pointer.y);
         this.pressStart = { x: pointer.x, y: pointer.y };
         this.showPressed(pressedBy(helpActionAt(gameData.help.length, this.pressStart)));
       },
@@ -118,7 +119,7 @@ export class HelpScene extends Scene {
 
   // Redrawn whole on every page turn, reading the pages then, so a live text edit shows up.
   private draw(): void {
-    this.children.removeAll(true);
+    clearScene(this);
     const pages = gameData.help;
     const words = gameData.menuText.help;
     this.page = clampPage(pages.length, this.page);
