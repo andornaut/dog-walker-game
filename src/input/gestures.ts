@@ -15,7 +15,7 @@ interface GestureConfig {
 // road's edge, or while steering is dropped.
 export interface GestureContext {
   config: GestureConfig;
-  layout: Pick<ScreenLayout, "road" | "topBar">;
+  layout: Pick<ScreenLayout, "dogRow" | "road" | "topBar">;
   quietTaps?: readonly Rect[];
   stepMoves: (direction: LaneDirection) => boolean;
 }
@@ -36,10 +36,12 @@ interface DragLeg {
 // topBar: a press on the walk bar, which never drags and whose tap does nothing.
 // dragging: a press anywhere else, steering by its current leg. tap: the way the press's tap
 // moved the pack, until the drag's first step takes it over; 0 when it moved nothing.
+// releaseTap: where a press on the doghouse row landed, which taps on release unless its drag
+// steps first.
 export type GestureState =
   | { kind: "idle" }
   | { kind: "topBar" }
-  | { kind: "dragging"; leg: DragLeg; tap: LaneDirection | 0 };
+  | { kind: "dragging"; leg: DragLeg; releaseTap: Point | undefined; tap: LaneDirection | 0 };
 
 // stepped: the drag took a lane step, counting one its tap had already taken.
 export interface GestureResult {
@@ -118,7 +120,8 @@ function dragTo(
 }
 
 // A tap on the walk bar or a quiet rect does nothing; anywhere else, the dog cards included, it
-// steers toward the pressed half of the road: the cards take no taps of their own.
+// steers toward the pressed half of the road, if a step that way would move the pack: the cards
+// take no taps of their own.
 function tapAt(context: GestureContext, { x, y }: Point): LaneDirection | 0 {
   const quiet = [context.layout.topBar, ...(context.quietTaps ?? [])];
   if (quiet.some((rect) => containsPoint(rect, x, y))) {
@@ -128,16 +131,26 @@ function tapAt(context: GestureContext, { x, y }: Point): LaneDirection | 0 {
   return context.stepMoves(direction) ? direction : 0;
 }
 
-// A tap acts as the press lands, so every press that never steps a drag counts as one. A press
-// on the dog cards drags and taps like one anywhere on the walk.
+// A tap acts as the press lands, so every press that never steps a drag counts as one. On the
+// doghouse row it acts on release instead, so a press held there to explain a dog card never
+// steers; a drag from the row steers like one anywhere on the walk.
 export function pointerDown(context: GestureContext, point: Point): GestureResult {
-  if (containsPoint(context.layout.topBar, point.x, point.y)) {
+  const { dogRow, topBar } = context.layout;
+  if (containsPoint(topBar, point.x, point.y)) {
     return { actions: [], state: { kind: "topBar" }, stepped: false };
+  }
+  const leg = legAt(point.x);
+  if (containsPoint(dogRow, point.x, point.y)) {
+    return {
+      actions: [],
+      state: { kind: "dragging", leg, releaseTap: point, tap: 0 },
+      stepped: false,
+    };
   }
   const tap = tapAt(context, point);
   return {
     actions: tap === 0 ? [] : [move(tap)],
-    state: { kind: "dragging", leg: legAt(point.x), tap },
+    state: { kind: "dragging", leg, releaseTap: undefined, tap },
     stepped: false,
   };
 }
@@ -167,17 +180,26 @@ export function pointerMove(
   const stepped = actions.length > 0;
   return {
     actions: stepped ? afterTap(state.tap, actions) : [],
-    state: { kind: "dragging", leg, tap: stepped ? 0 : state.tap },
+    state: {
+      kind: "dragging",
+      leg,
+      releaseTap: stepped ? undefined : state.releaseTap,
+      tap: stepped ? 0 : state.tap,
+    },
     stepped,
   };
 }
 
-// The release steps any travel since the last move, and ends the press.
+// The release steps any travel since the last move, taps for a doghouse-row press whose drag
+// never stepped, and ends the press.
 export function pointerUp(
   context: GestureContext,
   point: Point,
   state: GestureState,
 ): GestureResult {
   const moved = pointerMove(context, point, state);
-  return { ...moved, state: idleGesture };
+  const releaseTap = moved.state.kind === "dragging" ? moved.state.releaseTap : undefined;
+  const tap = releaseTap === undefined ? 0 : tapAt(context, releaseTap);
+  const actions = tap === 0 ? moved.actions : [move(tap)];
+  return { actions, state: idleGesture, stepped: moved.stepped };
 }

@@ -474,7 +474,7 @@ describe("trackPointer fuzz", () => {
 
 // A press on the walk bar (y < 40) or a debuff bar (y 40 to 55) or a card (y 470 on) is on
 // something that explains itself; a tap on a debuff bar does nothing, as on the walk bar. A
-// press at x 100 lands on the left half, so a press on a card or the road taps left.
+// press at x 100 is on the left half: the road taps left as it lands, a card on release.
 describe("hold to explain", () => {
   const explainContext: TrackContext<string> = {
     ...context,
@@ -536,14 +536,14 @@ describe("hold to explain", () => {
   it("holds to explain by its rules", () => {
     for (const [, steps, actions, explained] of [
       [
-        "explains a card held still, after its tap, until its release",
+        "explains a card held still, until its release, which taps nothing",
         [
           at("down", 0, 100, card),
           tick(holdMs - 1),
           tick(holdMs),
           at("up", holdMs + 100, 100, card),
         ],
-        [left],
+        [],
         [start("card"), end],
       ],
       [
@@ -554,7 +554,7 @@ describe("hold to explain", () => {
           tick(holdMs),
           at("up", 400, 115, card),
         ],
-        [left],
+        [],
         [start("card"), end],
       ],
       [
@@ -571,7 +571,7 @@ describe("hold to explain", () => {
           tick(holdMs),
           at("up", 400, 125, card),
         ],
-        [left, right, right],
+        [right],
         [],
       ],
       [
@@ -582,13 +582,13 @@ describe("hold to explain", () => {
           at("move", 350, 200, card),
           at("up", 400, 200, card),
         ],
-        [left],
+        [],
         [start("card"), end],
       ],
       [
-        "holds, stepping nothing more, on a release past the hold time before a frame ticks",
+        "holds, never taps nor steps, on a release past the hold time before a frame ticks",
         [at("down", 0, 100, card), at("move", 50, 115, card), at("up", holdMs, 125, card)],
-        [left],
+        [],
         [],
       ],
       [
@@ -641,13 +641,13 @@ describe("hold to explain", () => {
       [
         "ends the explanation when a card or a menu takes the press",
         [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), held: true }],
-        [left],
+        [],
         [start("card"), end],
       ],
       [
         "ends the explanation when the press is cancelled",
         [at("down", 0, 100, card), tick(holdMs), at("cancel", 400, 100, card)],
-        [left],
+        [],
         [start("card"), end],
       ],
       [
@@ -658,7 +658,7 @@ describe("hold to explain", () => {
           at("down", 400, 100, road, 2),
           at("up", 450, 100, road, 2),
         ],
-        [left, left],
+        [left],
         [start("card"), end],
       ],
     ] satisfies readonly [string, Step[], GestureAction[], ExplainChange<string>[]][]) {

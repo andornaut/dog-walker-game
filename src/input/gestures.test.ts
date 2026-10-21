@@ -150,8 +150,8 @@ describe("pointer sequences", () => {
       steps: [...drag(150, 210), ["up", 150, 300]],
     },
     {
-      expected: [left, right, right],
-      name: "drags from a card press once it reaches the swipe start distance",
+      expected: [right],
+      name: "drags from a card press once it reaches the swipe start distance, without its tap",
       steps: [
         ["down", 40, 500],
         ["move", 60, 500],
@@ -254,9 +254,38 @@ describe("taps as the press lands", () => {
       name: "never taps on a quiet rect, though its drag steers",
       steps: drag(250, 270).map(([kind, x]): Step => [kind, x, 48]),
     },
+    {
+      expected: [[], [right]],
+      name: "taps a doghouse-row press on its release instead",
+      steps: tap(250, 500),
+    },
+    {
+      expected: [[], [], [right]],
+      name: "taps a doghouse-row press once on release after a drag short of the first step",
+      steps: [
+        ["down", 250, 500],
+        ["move", 265, 500],
+        ["up", 265, 500],
+      ],
+    },
+    {
+      expected: [[], [left], []],
+      name: "never taps a doghouse-row press whose drag stepped",
+      steps: [
+        ["down", 250, 500],
+        ["move", 230, 500],
+        ["up", 235, 500],
+      ],
+    },
+    {
+      context: rightEdge,
+      expected: [[], []],
+      name: "taps nothing on release for a doghouse-row step that would move nothing",
+      steps: tap(250, 500),
+    },
   ];
 
-  it("acts on the press, and lets its drag correct it", () => {
+  it("acts on the press, or on the doghouse row's release, and lets a drag correct it", () => {
     for (const row of rows) {
       expect(play(row.steps, row.context), row.name).toEqual(row.expected);
     }

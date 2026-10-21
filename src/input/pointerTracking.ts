@@ -95,8 +95,7 @@ function result<Target>(
 // stop is no hold: its lane moves are dropped where they act, and the drag goes on. A press on
 // an element that explains itself holds to explain once it has stayed within the hold's slop
 // for its time (tickTrack); one that moves past it, or takes a lane step, steers as any drag
-// does. Its tap steers as the press lands all the same, as on a dog card. While it explains, it
-// moves nothing, and its release ends it.
+// does. While it explains, it moves and taps nothing, and its release ends it.
 export function trackPointer<Target>(
   context: TrackContext<Target>,
   held: boolean,
