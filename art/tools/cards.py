@@ -806,7 +806,7 @@ def mail_hold():
 def mail_wait():
     a = Art()
     a.ground("homeStretch")
-    a.put("mail-carrier", "walk", 56, 58, 1)
+    a.put("mail-carrier", "walk", 56, 58, 2)
     c = a.put("dog-koda", "idle", 26, 54)
     a.lead(26, c, 24)
     clock(a, 10, 10)
