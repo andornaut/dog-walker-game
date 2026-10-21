@@ -16,7 +16,7 @@ export const HINTS = {
     trigger: { kind: "firedOwner" },
   },
   fork: {
-    text: "Pick a path and its upgrade.",
+    text: "Pick a path. Harder ones pay more.",
     trigger: { kind: "fork" },
   },
   homeButton: {
@@ -32,7 +32,7 @@ export const HINTS = {
     trigger: { kind: "minorBump" },
   },
   puddle: {
-    text: "A puddle splashes the whole pack.",
+    text: "Puddles soak everyone. Towel off or get muddy.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {

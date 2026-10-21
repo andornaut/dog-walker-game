@@ -7,11 +7,11 @@ export const QUIPS = {
   archie: {
     fired: [
       "Oh, sweetheart. I have to let you go.",
-      "No hard feelings, dear. Take a cookie for the road.",
+      "No hard feelings, dear. A cookie for the road?",
     ],
     happier: ["Look at him go! Lovely.", "You're a natural, pet."],
     parting: ["He'll want to say hello to everyone. Let him.", "There's a cookie for you after."],
-    upset: ["Oh well, dear. Have a cookie.", "Never mind, dear. Tea fixes most things."],
+    upset: ["Oh well, pet. Chin up.", "Never mind, dear. Tea fixes most things."],
   },
   biscuit: {
     fired: [
@@ -32,10 +32,10 @@ export const QUIPS = {
     upset: ["She's wilting! I can't bear it!", "My heart! My prize rose, trampled!"],
   },
   koda: {
-    fired: ["Time to cool down. I'll run him home.", "This is where we split. You're fired."],
+    fired: ["Time to cool down. I'll run him home.", "This is where we split. Good race."],
     happier: ["Good form! Keep it up!", "That's a personal best!"],
     parting: ["He already did 10K. He's fine.", "Warm-up's done. Keep that form tight!"],
-    upset: ["Eh, bad lap. Shake it off.", "Just a cramp. Walk it off."],
+    upset: ["Eh, bad lap. Shake it off.", "Just a cramp. Back to your pace."],
   },
   nugget: {
     fired: ["You're unfollowed. And fired!", "Worst day of Nugget's career. Blocked!"],
@@ -59,19 +59,16 @@ export const QUIPS = {
     fired: ["Disqualified. You are fired.", "Pepe withdraws from your care."],
     happier: ["Acceptable. Barely.", "Seven out of ten. Très bien."],
     parting: ["No puddles. I will check his paws.", "Posture, please. I deduct for slouching."],
-    upset: ["Points deducted.", "That would never place at a show."],
+    upset: ["Non. Points deducted.", "That would never place at a show."],
   },
   snowball: {
-    fired: [
-      "You've ruined everything! You're off the guest list!",
-      "The day is canceled. So are you!",
-    ],
+    fired: ["You've ruined everything! Off the guest list!", "The day is canceled. So are you!"],
     happier: ["Picture perfect!", "Everything is going to plan!"],
     parting: ["No mud, no fuss. The whole day depends on it!", "She's the flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],
   },
   zippy: {
-    fired: ["The numbers don't add up. We're done here.", "Your account is closed. Fired."],
+    fired: ["The numbers don't add up. We're done here.", "Your account is closed. Balance: zero."],
     happier: ["That balances nicely.", "A sound investment."],
     parting: ["Every bump goes in the ledger.", "Receipts for everything, please."],
     upset: ["That goes in the loss column.", "Noted. In red ink."],

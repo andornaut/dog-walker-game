@@ -27,7 +27,7 @@ export const HELP_PAGES = [
     body:
       "Bump a puddle, skunk, squirrel, thief or another dog and the walk pauses for a card. " +
       "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
-      "Hold a card for details. Muddy and Stinky wear off on their own.",
+      "Hold a card for details. Debuffs wear off on their own.",
     title: "Some bumps bring cards",
   },
   {
