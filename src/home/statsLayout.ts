@@ -42,8 +42,9 @@ export const STATS_LAYOUT = {
   panel: PANEL,
   rows: { left: 16, pitch: 17, right: 344 },
   // Tabs are 44 game pixels tall (48 CSS pixels on a phone), spanning the panel's width with
-  // 7 between them.
-  tab: { height: 44, pitch: 117, width: 110, x: PANEL.x, y: 56 },
+  // gap between them, the panel's margin from the screen's edge; widths, left to right, share
+  // the odd pixel with the middle tab.
+  tab: { gap: 8, height: 44, widths: [109, 110, 109], x: PANEL.x, y: 56 },
   // The badge wall: two columns filled down, each row the badge then a 132-wide text column
   // of three lines at 2x (the name, the goal, then a locked badge's progress across walks).
   wall: { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: PANEL.y + 24 },
@@ -61,8 +62,14 @@ export function detailLineY(body: FontMetrics, goalLines: number): number {
 }
 
 export function statsTabRects(): Rect[] {
-  const { height, pitch, width, x, y } = STATS_LAYOUT.tab;
-  return STATS_TABS.map((_, i) => ({ height, width, x: x + i * pitch, y }));
+  const { gap, height, widths, x, y } = STATS_LAYOUT.tab;
+  let left = x;
+  return STATS_TABS.map((_, i) => {
+    const width = widths[i] ?? 0;
+    const rect = { height, width, x: left, y };
+    left += width + gap;
+    return rect;
+  });
 }
 
 // Each number column's right edge, its heading and numbers right-aligned on it: the last

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { SCREEN_CONFIG } from "../data/screen";
 import { TEXT_SCALE } from "../layout/textFit";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
@@ -28,15 +29,20 @@ describe("the tabs", () => {
   const tabs = statsTabRects();
   const { panel } = STATS_LAYOUT;
 
-  it("run from the panel's left edge to its right edge, apart and over the panel", () => {
+  it("run from the panel's left edge to its right edge, the panel's margin apart, over it", () => {
+    expect(tabs).toHaveLength(STATS_TABS.length);
     expect(tabs[0]?.x).toBe(panel.x);
     const last = tabs[tabs.length - 1];
     expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(panel.x + panel.width);
-    tabs.slice(1).forEach((tab, i) => {
-      const left = tabs[i];
-      expect(tab.x).toBeGreaterThan((left?.x ?? 0) + (left?.width ?? 0));
-    });
+    const gaps = tabs.slice(1).map((tab, i) => tab.x - ((tabs[i]?.x ?? 0) + (tabs[i]?.width ?? 0)));
+    expect(gaps).toEqual(gaps.map(() => panel.x));
     tabs.forEach((tab) => expect(tab.y + tab.height).toBeLessThanOrEqual(panel.y));
+  });
+
+  it("is symmetric about the screen's centre", () => {
+    const lefts = tabs.map((tab) => tab.x);
+    const rights = tabs.map((tab) => SCREEN_CONFIG.width - (tab.x + tab.width)).reverse();
+    expect(lefts).toEqual(rights);
   });
 
   it.each(STATS_TABS.map((tab, i) => [tab, i] as const))("fits the %s label", (tab, i) => {
