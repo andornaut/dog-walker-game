@@ -1372,12 +1372,20 @@ export class StartScene extends Scene {
       bubble.add(this.add.image(x - tail.tipX, top + height - 1, tail.key).setOrigin(0));
     }
 
-    // Equipped gear shows as a badge beside the walker.
+    // Equipped gear shows as a badge beside the walker, moved right of any dog whose feet
+    // are below its top, and kept clear of the Pet shop.
     if (this.loadout.gear !== null) {
+      const clear = Math.max(
+        GEAR_BADGE.x,
+        ...dogs
+          .filter(({ footY: dogFoot }) => dogFoot > GEAR_BADGE.y)
+          .map(({ dx, key }) => x + dx + Math.ceil(spriteMetrics(key).opaqueWidth / 2) + 1),
+      );
+      const rect = { ...GEAR_BADGE, x: Math.min(clear, PET_SHOP.x - GEAR_BADGE.width) };
       const badge = this.tileView(root, "gateBadge");
       badge.rise = `gear:${this.loadout.gear}`;
-      fillRect(this.graphics(badge.container), PALETTE.plum, GEAR_BADGE);
-      const at = { x: GEAR_BADGE.x + 1, y: GEAR_BADGE.y + 1 };
+      fillRect(this.graphics(badge.container), PALETTE.plum, rect);
+      const at = { x: rect.x + 1, y: rect.y + 1 };
       this.addGearIcon(badge.container, "normal", this.loadout.gear, at, 0.5);
     }
   }
