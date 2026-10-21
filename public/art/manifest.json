@@ -3530,8 +3530,8 @@
       "png": "sprites/stroller.png",
       "json": "sprites/stroller.json",
       "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 46
+        "feetY": 69,
+        "opaqueWidth": 48
       }
     },
     {
@@ -3540,7 +3540,7 @@
       "json": "sprites/stroller@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 24
       }
     },
     {
@@ -3549,7 +3549,7 @@
       "json": "sprites/stroller@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 28
+        "opaqueWidth": 30
       }
     },
     {
@@ -3557,8 +3557,8 @@
       "png": "sprites/stroller@75.png",
       "json": "sprites/stroller@75.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 34
+        "feetY": 53,
+        "opaqueWidth": 36
       }
     },
     {
@@ -3566,8 +3566,8 @@
       "png": "sprites/stroller@88.png",
       "json": "sprites/stroller@88.json",
       "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 40
+        "feetY": 61,
+        "opaqueWidth": 42
       }
     },
     {
