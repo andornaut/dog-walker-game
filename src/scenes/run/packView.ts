@@ -5,6 +5,7 @@ import { SQUIRREL_ICON_KEY } from "../../assets/iconKeys";
 import { dogSpriteKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { DogId } from "../../data/types";
+import { GRACE_BLINK, graceAlpha } from "../../layout/graceBlink";
 import {
   COLLAR_HEIGHTS,
   formationOrder,
@@ -16,6 +17,7 @@ import {
 } from "../../layout/packFormation";
 import { distanceAtY, project } from "../../layout/projection";
 import { currentZone } from "../../rules/route";
+import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
 import { pullPose, type Pulls } from "../../runner/pulls";
 import type { Walk } from "../../runner/walk";
@@ -196,10 +198,17 @@ export class PackView {
   // The walker stands on the feet line at scale 1; each dog's feet stand its place in the
   // formation, up the screen and across from where the projection puts the walker's lane on that
   // row, so the pack is drawn as it collides. Lower feet are drawn in front. While the walk is
-  // held, they stand idle.
+  // held, they stand idle. Through the grace window after a hit, the walker, the dogs and the
+  // leashes blink, or stay dimmed with reduced motion (graceAlpha).
   draw(walk: Walk, frame: PackFrame): void {
     const { halted, pulls, shadow, still } = frame;
     const { leash } = this;
+    const alpha = graceAlpha(
+      GRACE_BLINK,
+      still,
+      read(gameData.tuning, "seconds", "collisionGrace"),
+      walk.road.invulnerableSeconds,
+    );
     const walkerX = Math.round(laneMotionX(LANE_XS, walk.road.control.motion));
     const footY = PROJECTION.footY;
     const walking = formationOrder(packDogs(walk.run));
@@ -235,7 +244,10 @@ export class PackView {
         y: dogFoot - Math.round(spriteMetrics(drawn.key).feetY * drawn.scale),
       });
       // Of two dogs on one row, the later in formation order is drawn in front.
-      sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot + index / 1000);
+      sprite
+        .setPosition(x, dogFoot)
+        .setDepth(DEPTH.sprite + dogFoot + index / 1000)
+        .setAlpha(alpha);
       shadow(dogSpriteKey(gameData, dog), drawn.depth, x, dogFoot);
       if (redrawLeash) {
         const hand = leashHand(placement);
@@ -249,10 +261,13 @@ export class PackView {
       }
     }
     const { walker } = this;
-    walker.sprite.setPosition(walkerX, footY).setDepth(DEPTH.sprite + footY);
+    walker.sprite
+      .setPosition(walkerX, footY)
+      .setDepth(DEPTH.sprite + footY)
+      .setAlpha(alpha);
     // The leashes run from the walker's hands up the road to the dogs: under the walker, whose
     // body hides the part behind it, and over the dogs ahead.
-    leash.setDepth(DEPTH.sprite + footY - 0.5);
+    leash.setDepth(DEPTH.sprite + footY - 0.5).setAlpha(alpha);
     if (posed && !this.reacting.has(walker.sprite)) {
       playTag(walker.sprite, walker.key, pose, still && halted);
     }
