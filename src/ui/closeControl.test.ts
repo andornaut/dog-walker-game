@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { Rect } from "../lib/rect";
 import { closeControl, closeFace } from "./closeControl";
-import type { Rect } from "./rect";
 
 const encloses = (outer: Rect, inner: Rect) =>
   inner.x >= outer.x &&

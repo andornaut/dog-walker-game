@@ -39,7 +39,7 @@
   - `src/runner/`: the walk session, lane motion, zones, spawn planning, collisions, the hit stop, pulls
   - `src/input/`: keys and the touch gesture state machine
   - `src/home/`, `src/hud/`, `src/help/`: view models for the home, settings, stats and end screens, the top bar and pause menu, and the help screen
-  - `src/text/`: the pixel font
+  - `src/ui/`: the pixel-art UI kit: the pixel font, text fitting, grids, card rows, close controls, badges, pixel shapes, and tile and button states; `phaser/` draws pixel and display text, panels, the palette and the dimmed ramps
   - `src/layout/`: screen geometry
   - `src/assets/`: manifest and Aseprite parsing, art keys and depth steps; `atlas/` packs the atlases at build time, and `phaser/` loads the manifest's art and makes its grey, dark and silhouette textures
   - `src/save/`: persistence

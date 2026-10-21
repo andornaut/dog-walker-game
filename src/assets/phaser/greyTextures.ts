@@ -1,6 +1,6 @@
 import type { Scene } from "phaser";
 
-import { PALETTE } from "../../scenes/palette";
+import { PALETTE } from "../../ui/phaser/palette";
 import { remapDarker } from "../darkRamp";
 import { remapToGrey } from "../greyRamp";
 import { remapToSilhouette } from "../silhouette";

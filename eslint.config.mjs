@@ -44,12 +44,13 @@ const CONTEXTS = {
     "lib",
     "rules/assertNever",
     "runner/statuses",
-    "scenes/palette",
     "state/runState",
     "tools/artManifest",
     "tools/files",
+    "ui/phaser/palette",
   ],
   lib: [],
+  ui: ["assets", "lib", "rules/units"],
 };
 
 const SRC_FOLDERS = folders("src").filter((folder) => folder !== "testing");
@@ -70,11 +71,27 @@ function contextBoundary(context) {
     (folder) => !own.includes(folder) && !allowed.includes(folder),
   ).flatMap((folder) => {
     const exceptions = modules.filter((entry) => entry.startsWith(`${folder}/`));
-    // A parent folder's pattern would ignore its modules past any negation, so a folder with
-    // allowed modules is forbidden by its children only.
-    return exceptions.length === 0
-      ? [`**/${folder}`, `**/${folder}/*`]
-      : [`**/${folder}/*`, ...exceptions.map((entry) => `!**/${entry}`)];
+    if (exceptions.length === 0) {
+      return [`**/${folder}`, `**/${folder}/*`];
+    }
+    // A pattern that matches a folder ignores everything in it past any negation, so a folder
+    // with allowed modules is forbidden one level at a time: each subfolder on the way to an
+    // allowed module is let through and its own children forbidden, parents first.
+    const subfolders = [
+      ...new Set(
+        exceptions.flatMap((entry) =>
+          entry
+            .split("/")
+            .slice(1, -1)
+            .map((_, index, parts) => [folder, ...parts.slice(0, index + 1)].join("/")),
+        ),
+      ),
+    ].sort((a, b) => a.split("/").length - b.split("/").length);
+    return [
+      `**/${folder}/*`,
+      ...subfolders.flatMap((subfolder) => [`!**/${subfolder}`, `**/${subfolder}/*`]),
+      ...exceptions.map((entry) => `!**/${entry}`),
+    ];
   });
   return {
     files: [`src/${context}/**/*.ts`],

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
+import { itemAt } from "../lib/arrays";
 import { defined } from "../testing/defined";
 import {
   glyphAdvance,

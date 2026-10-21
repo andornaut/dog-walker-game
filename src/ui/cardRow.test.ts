@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
+import { itemAt } from "../lib/arrays";
+import type { Rect } from "../lib/rect";
 import { cardHeader, cardRowRects } from "./cardRow";
-import type { Rect } from "./rect";
 
 const area = { height: 450, width: 280, x: 80, y: 190 };
 const spec = { cardHeight: 140, cardWidth: 83, gap: 8, maxCount: 3 };
