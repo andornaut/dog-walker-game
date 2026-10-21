@@ -14,6 +14,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
     "sourceSize": { "w": 56, "h": 35 },
     "duration": 500
+   },
+   "minor-scooter 2.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 56, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
+    "sourceSize": { "w": 56, "h": 35 },
+    "duration": 100
+   },
+   "minor-scooter 3.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 56, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
+    "sourceSize": { "w": 56, "h": 35 },
+    "duration": 100
+   },
+   "minor-scooter 4.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 56, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
+    "sourceSize": { "w": 56, "h": 35 },
+    "duration": 100
+   },
+   "minor-scooter 5.aseprite": {
+    "frame": { "x": 280, "y": 0, "w": 56, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 35 },
+    "sourceSize": { "w": 56, "h": 35 },
+    "duration": 100
    }
  },
  "meta": {
@@ -21,10 +53,11 @@
   "version": "1.2.30-x64",
   "image": "minor-scooter.png",
   "format": "RGBA8888",
-  "size": { "w": 112, "h": 35 },
+  "size": { "w": 336, "h": 35 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "pull-out", "from": 2, "to": 5, "direction": "forward" }
   ]
  }
 }

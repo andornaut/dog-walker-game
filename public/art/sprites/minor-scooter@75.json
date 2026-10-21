@@ -14,6 +14,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 26 },
     "sourceSize": { "w": 42, "h": 26 },
     "duration": 500
+   },
+   "minor-scooter@75 2.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 42, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 26 },
+    "sourceSize": { "w": 42, "h": 26 },
+    "duration": 100
+   },
+   "minor-scooter@75 3.aseprite": {
+    "frame": { "x": 126, "y": 0, "w": 42, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 26 },
+    "sourceSize": { "w": 42, "h": 26 },
+    "duration": 100
+   },
+   "minor-scooter@75 4.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 42, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 26 },
+    "sourceSize": { "w": 42, "h": 26 },
+    "duration": 100
+   },
+   "minor-scooter@75 5.aseprite": {
+    "frame": { "x": 210, "y": 0, "w": 42, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 26 },
+    "sourceSize": { "w": 42, "h": 26 },
+    "duration": 100
    }
  },
  "meta": {
@@ -21,10 +53,11 @@
   "version": "1.2.30-x64",
   "image": "minor-scooter@75.png",
   "format": "RGBA8888",
-  "size": { "w": 84, "h": 26 },
+  "size": { "w": 252, "h": 26 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "pull-out", "from": 2, "to": 5, "direction": "forward" }
   ]
  }
 }

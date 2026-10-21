@@ -5324,6 +5324,11 @@
       }
     },
     {
+      "key": "ui-warning-wander",
+      "png": "sprites/ui-warning-wander.png",
+      "json": "sprites/ui-warning-wander.json"
+    },
+    {
       "key": "ui-zone-pips",
       "png": "sprites/ui-zone-pips.png",
       "json": "sprites/ui-zone-pips.json"

@@ -19,7 +19,9 @@ hedge               168x30  3 lanes, a low hedge with a rounded, clumped top; le
                             spots in turn
 parked-car          56x35   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
                             footprint's near edge; hazards blink. 56 wide, so it centres on its lane
-                            with 4px to spare each side
+                            with 4px to spare each side. pull-out (4 frames, 100ms): drawn pulling
+                            right (the game mirrors it for left), tread lines climb the tyres and the
+                            right indicator blinks amber
 
 Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
 frame is one argument to the drawing function, listed in the *_IDLE tuples;
@@ -219,11 +221,12 @@ def barrier(lanes, f):
     return g
 
 
-def parked_car(hazard=False):
+def parked_car(hazard=False, roll=None):
     """A minivan from straight behind, wide and low: the roof edge, the rear window, the tailgate with its
     tail lights and plate, the bumper and both rear wheels under it, mirrors poking out at the sides. Its
     hazard lights, the outer end of each tail light, are lit when hazard is true. Cyan lights the top and
-    left edges, so the sky body holds on Elm Avenue."""
+    left edges, so the sky body holds on Elm Avenue. roll (0 to 3) is a pull-out frame: tread lines climb
+    the tyres 1px a frame (treads), and the right indicator is lit on frames 0 and 1."""
     g = edged(Grid(56, 35))
     # rear wheels, under the body at either side
     for x in (5, 42):
@@ -262,7 +265,23 @@ def parked_car(hazard=False):
     g.rect(3, 25, 50, 4, "dslate")
     g.rect(3, 25, 50, 1, "slate")
     g.rect(3, 25, 1, 4, "grey")
+    if roll is not None:
+        for x in (5, 42):
+            treads(g, x + 2, 29, 7, 5, roll, 1 / getattr(g, "s", 1))
+        if roll < 2:
+            g.rect(48, 16, 3, 4, "amber")
+            g.rect(48, 16, 3, 1, "yellow")
     return g
+
+
+def treads(g, x, y, w, h, f, u=1, back=False):
+    """Tread lines across a tyre seen from behind, rows y to y + h - 1: one every 4u rows, climbing u a frame
+    as the tyre rolls away (frame f of 4), or falling when back (reversing), so the loop is seamless. u is
+    one pixel at the drawn size."""
+    for k in range(-1, round(h / u) // 4 + 2):
+        ty = y + ((f if back else 3 - f) + 4 * k) * u
+        if y <= ty and ty + u <= y + h + 1e-9:
+            g.rect(x, ty, w, 1, "dslate")
 
 
 # Idle frames, one drawing argument each, and their duration in ms. Most hold the rest pose for
@@ -273,6 +292,8 @@ HYDRANT_IDLE = (0, 1, 2, 3), 450
 BENCH_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
 HEDGE_IDLE = ((), (5,), (10,), (15,)), 350
 PARKED_CAR_IDLE = (False, True), 500
+# The pull-out: 4 frames of parked_car's roll, and their duration in ms.
+PULL_OUT = range(4), 100
 
 
 def sprites():
@@ -288,7 +309,9 @@ def sprites():
     yield "hedge", idle(lambda r: hedge(rustle=r), HEDGE_IDLE)
     for lanes in (2, 3):
         yield f"barrier-{lanes}", [("idle", [barrier(lanes, f).outlined() for f in (0, 1)], 500)]
-    yield "parked-car", idle(parked_car, PARKED_CAR_IDLE)
+    args, ms = PULL_OUT
+    yield "parked-car", idle(parked_car, PARKED_CAR_IDLE) + [
+        ("pull-out", [parked_car(roll=f).outlined() for f in args], ms)]
 
 
 if __name__ == "__main__":

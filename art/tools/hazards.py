@@ -12,7 +12,11 @@ cyclist             40x60   front view, riding down a lane at the player; ride (
                             legs and a 1px sway
 ui-warning          16x16   a yellow warning sign with a bold "!", ink outline; pulse (2 frames, 250ms)
 ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms) points right for a
-                            crosser, down-pulse (2 frames, 250ms) points down the lane at the player
+                            crosser, down-pulse (2 frames, 250ms) points down the road for a mover
+                            about to come at the pack, up-pulse (2 frames, 250ms) points up the road
+                            for one about to move off ahead; each nudges 1px its way on frame 2
+ui-warning-wander   16x16   a bold yellow "?", ink outline, over a wanderer before each step; pulse
+                            (2 frames, 250ms) pops it 1px up on frame 2
 
 The side views face right; the game mirrors squirrel-dash, loose-dog and
 ui-warning-arrow for a crossing to the left. Every road sprite takes the road
@@ -320,9 +324,10 @@ def warning(big):
     return g
 
 
-def warning_arrow(shift, down=False):
-    """A yellow arrow pointing right, or down when down is true; shift nudges it along its direction on
-    the pulse frame. The down arrow is the right one transposed, so its shading lands on the right."""
+def warning_arrow(shift, down=False, up=False):
+    """A yellow arrow pointing right, down when down is true or up when up is; shift nudges it along its
+    direction on the pulse frame. The down arrow is the right one transposed, so its shading lands on the
+    right, and the up arrow is the down one flipped."""
     g = edged(Grid(16, 16), ink)
     s = shift
     g.rect(1 + s, 6, 6, 4, "yellow")
@@ -332,8 +337,29 @@ def warning_arrow(shift, down=False):
         for y in (12, 13):
             if g.px[y][x] == K["yellow"] and not (y + 1 < 16 and g.px[y + 1][x]):
                 g.p(x, y, "amber")
-    if down:
+    if down or up:
         g.px = [list(col) for col in zip(*g.px)]
+    if up:
+        g.px = g.px[::-1]
+    return g
+
+
+# The "?": (x, y, w, h) rects on the 16x16 frame, the hook from its top bar round to the stem, then the dot.
+QUERY = ((5, 2, 6, 3), (4, 3, 2, 3), (10, 3, 3, 5), (8, 7, 3, 2), (7, 8, 3, 3), (7, 12, 3, 3))
+
+
+def warning_wander(lift):
+    """A bold yellow "?" in the warning cues' style, ink outlined, amber along each part's bottom; lift raises
+    it on the pulse frame."""
+    g = edged(Grid(16, 16), ink)
+    for x, y, w, h in QUERY:
+        g.rect(x, y - lift, w, h, "yellow")
+    for x, y in ((12, 3 - lift), (4, 3 - lift)):
+        g.p(x, y, None)
+    for x in range(16):
+        for y in range(15):
+            if g.px[y][x] == K["yellow"] and not g.px[y + 1][x]:
+                g.p(x, y, "amber")
     return g
 
 
@@ -376,7 +402,10 @@ def sprites():
     yield "ui-warning", [("pulse", [warning(False).outlined(), warning(True).outlined()], 250)]
     yield "ui-warning-arrow", [("pulse", [warning_arrow(0).outlined(), warning_arrow(1).outlined()], 250),
                                ("down-pulse", [warning_arrow(0, True).outlined(),
-                                               warning_arrow(1, True).outlined()], 250)]
+                                               warning_arrow(1, True).outlined()], 250),
+                               ("up-pulse", [warning_arrow(0, up=True).outlined(),
+                                             warning_arrow(1, up=True).outlined()], 250)]
+    yield "ui-warning-wander", [("pulse", [warning_wander(0).outlined(), warning_wander(1).outlined()], 250)]
     for suffix, s in SCALES:
         yield from steps(f"@{suffix}", s)
 

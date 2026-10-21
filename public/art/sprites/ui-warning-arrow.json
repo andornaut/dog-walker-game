@@ -30,6 +30,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 250
+   },
+   "ui-warning-arrow 4.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 250
+   },
+   "ui-warning-arrow 5.aseprite": {
+    "frame": { "x": 80, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 250
    }
  },
  "meta": {
@@ -37,11 +53,12 @@
   "version": "1.2.30-x64",
   "image": "ui-warning-arrow.png",
   "format": "RGBA8888",
-  "size": { "w": 64, "h": 16 },
+  "size": { "w": 96, "h": 16 },
   "scale": "1",
   "frameTags": [
    { "name": "pulse", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "down-pulse", "from": 2, "to": 3, "direction": "forward" }
+   { "name": "down-pulse", "from": 2, "to": 3, "direction": "forward" },
+   { "name": "up-pulse", "from": 4, "to": 5, "direction": "forward" }
   ]
  }
 }

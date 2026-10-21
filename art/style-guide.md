@@ -192,7 +192,7 @@ On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 
 | Firing                   | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2× (an amber starburst behind a cream POOF cloud, and a front door slamming shut beside the face); the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                        |
 | Heart change             | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog beside the "−1" or "+1" label, then `fly` tweened into its doghouse's heart labels band; on a loss the house plays `ui-doghouse` `heart-loss` while the slot shakes                                                               |
 | Minor bump               | `fx-coin-burst` at the pack under the "−$2" label; `fx-dizzy` over the walker while lane input is locked                                                                                                                                                                                |
-| Moving hazard            | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead                                                                                                                                                                                                                     |
+| Moving hazard            | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead: the arrow's `pulse` (right, mirrored for left) for a crosser, `down-pulse` for a mover about to come at the pack, `up-pulse` for one about to move off ahead; `ui-warning-wander` over a wanderer before each step |
 | Puddle, pickup           | `fx-splash`, `fx-sparkle`                                                                                                                                                                                                                                                               |
 | Treat given              | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                                                                                             |
 
@@ -224,6 +224,8 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 - `fx-bark-word` plays at `fx-bark`'s point in place of it, over the dog's head as the tell starts.
 
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane faces the player.
+- `pull-out` (`parked-car` and its 1×3 skins) and the garbage truck's `drive` are 4 frames at 100ms. `pull-out` is drawn pulling right and mirrored for left: the car and scooter roll tread lines up their tyres 1px a frame with the right indicator blinking amber, the tricycles' hub pips and the log's face crack turn clockwise, and the canoe rack lurches 1px right on frames 1 and 2. The truck reverses down its lane at the pack, seen from behind: tread lines fall down its tyres and its body dips 1px onto them on frames 1 and 2.
+- The warning cues are yellow, ink outlined, 16×16, 2 frames at 250ms; frame 2 grows the sign 1px all round or nudges the arrow or the "?" 1px its way.
 
 ### Zone celebration
 

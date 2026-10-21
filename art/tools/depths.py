@@ -102,7 +102,9 @@ def own(s):
     for lanes in (2, 3):
         yield f"barrier-{lanes}", [("idle", [small(obstacles, s, obstacles.barrier, lanes, f).outlined()
                                              for f in (0, 1)], 500)]
-    yield "parked-car", obstacle(s, obstacles.parked_car, obstacles.PARKED_CAR_IDLE)
+    args, ms = obstacles.PULL_OUT
+    yield "parked-car", obstacle(s, obstacles.parked_car, obstacles.PARKED_CAR_IDLE) + [
+        ("pull-out", [small(obstacles, s, obstacles.parked_car, roll=f).outlined() for f in args], ms)]
 
 
 def hazard(s):

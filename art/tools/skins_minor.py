@@ -36,6 +36,11 @@ minor-log             Fairview Park    a fallen log end on, mossy, a toadstool a
 minor-scooter         Main Street      a sky scooter from behind on its stand; the indicators blink
 minor-canoe-rack      Riverside Path   four canoes upturned on a two-bar rack; a rope end swings
 
+The 1x3 skins also have parked-car's pull-out (4 frames, 100ms), drawn pulling
+right: the scooter as the car (tread lines climb the tyre, the right indicator
+blinks), the tricycles' hub pips and the log's face crack turning clockwise, the
+canoe rack lurching 1px right on frames 1 and 2.
+
 Every sprite has one looping idle, frame 0 the rest pose. Each drawing function
 takes the idle frame's argument and u, one pixel at the drawn size in full-size
 units (1 at full size, 1/s on a minis.Mini at scale s), so motion stays 1px in
@@ -56,7 +61,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, small  # noqa: E402
-from obstacles import ROW, SIZE, lit, span  # noqa: E402
+from obstacles import PULL_OUT, ROW, SIZE, lit, span, treads  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
 
 # The parked car's frame: 1 lane by 3 rows of footprint, drawn at its near edge.
@@ -453,9 +458,11 @@ def trike(g, cx, y, c, top, shade, seat):
     g.ell(cx, y + 4, 5, 2, seat)
 
 
-def tricycles(flutter=0, u=1):
+def tricycles(flutter=0, u=1, roll=None):
     """A row of tricycles from behind: a red one at the near edge, the yellow one behind it peeking over
-    its handlebar. Streamers hang from the red one's grips; flutter swings them 1px."""
+    its handlebar. Streamers hang from the red one's grips; flutter swings them 1px. roll (0 to 3) is a
+    pull-out frame: the red one's hub pips turn a quarter a frame, clockwise, the top one half under the
+    frame."""
     g = frame(CAR_W, CAR_H)
     for cx in (17, 39):
         g.ell(cx, 13, 4, 4.5, "ink")
@@ -465,7 +472,8 @@ def tricycles(flutter=0, u=1):
     for cx in (12, 44):
         g.ell(cx, 28, 6, 6.5, "ink")
         g.ell(cx, 28, 3, 3.5, "dslate")
-        g.rect(cx - 1, 27, 2, 2, "lgrey")
+        dx, dy = ((0, 0), (0, -1), (2, 0), (0, 2), (-2, 0))[0 if roll is None else roll + 1]
+        g.rect(cx - 1 + dx, 27 + dy, 2, 2, "lgrey")
     g.rect(25, 26, 6, 9, "ink")
     g.rect(13, 23, 30, 4, "red")
     g.rect(13, 23, 30, 1, "pink")
@@ -486,9 +494,10 @@ def tricycles(flutter=0, u=1):
     return lit(g)
 
 
-def log(sway=0, u=1):
+def log(sway=0, u=1, roll=None):
     """A fallen log end on: bark round a pale cut face with growth rings, moss on top, a toadstool at its
-    foot. A sprout on top sways 1px with sway."""
+    foot. A sprout on top sways 1px with sway. roll (0 to 3) is a pull-out frame, the log rolling right:
+    the crack in its cut face turns a quarter a frame, clockwise."""
     g = frame(CAR_W, CAR_H)
     # twig stubs either side
     g.rect(3, 15, 6, 3, "dbrown")
@@ -500,7 +509,7 @@ def log(sway=0, u=1):
     g.ell(28, 20, 11, 6.5, "skin1")
     g.ell(28, 20, 7, 4, "tan")
     g.ell(28, 20, 3.5, 2, "ochre")
-    g.rect(28, 11, 1, 5, "ochre")
+    g.rect(*((28, 11, 1, 5), (36, 20, 6, 1), (28, 25, 1, 5), (14, 20, 6, 1))[roll or 0], "ochre")
     # moss along the top
     g.ell(20, 7, 8, 2.5, "green", None, None)
     g.ell(33, 6.5, 7, 2, "dgreen")
@@ -517,10 +526,11 @@ def log(sway=0, u=1):
     return lit(g)
 
 
-def scooter(blink=False, u=1):
+def scooter(blink=False, u=1, roll=None):
     """A sky scooter from behind on its stand: the handlebar with small mirrors and the leg shield over the
     seat, the tail light and plate under it, the tyre between the two round side cowls. blink lights the
-    indicators on the cowls."""
+    indicators on the cowls. roll (0 to 3) is a pull-out frame, as obstacles.parked_car's: tread lines
+    climb the tyre and the right indicator is lit on frames 0 and 1."""
     g = frame(CAR_W, CAR_H)
     # mirrors on stalks, handlebar and the leg shield behind the seat
     for x in (9, 44):
@@ -552,11 +562,19 @@ def scooter(blink=False, u=1):
     g.rect(24, 15, 9, 1, "pink")
     g.rect(24, 19, 9, 5, "lgrey")
     g.rect(26, 21, 5, 1, "grey")
+    if roll is not None:
+        treads(g, 26, 24, 7, 11, roll, u)
     for x in (8, 46):
-        g.rect(x, 21, 3, 3, "yellow" if blink else "orange")
-        if blink:
+        on = blink or (roll is not None and roll < 2 and x > CAR_W / 2)
+        g.rect(x, 21, 3, 3, "yellow" if on else "orange")
+        if on:
             g.rect(x, 21, 3, 1, "white")
     return lit(g)
+
+
+def scooter_pulling(roll, u=1):
+    """scooter's pull-out frame roll."""
+    return scooter(False, u, roll)
 
 
 # Each canoe's colour and its light, per rack bar, left then right.
@@ -595,6 +613,18 @@ def canoe_rack(swing=0, u=1):
     return lit(g)
 
 
+def canoe_rack_pulling(roll, u=1):
+    """canoe_rack's pull-out frame roll: the rack lurches 1px right on frames 1 and 2, the rope end lagging
+    1px left."""
+    lurch = roll in (1, 2)
+    g = canoe_rack(-1 if lurch else 0, u)
+    if lurch:
+        px = getattr(g, "g", g).px
+        for y, row in enumerate(px):
+            px[y] = [None] + row[:-1]
+    return g
+
+
 # Each sprite: (key, drawing, idle frame arguments, ms per frame, base kind, zone). Most hold the rest
 # pose for two frames so the motion comes as a short event rather than a constant flicker.
 SKINS = (
@@ -613,6 +643,11 @@ SKINS = (
     ("minor-scooter", scooter, (False, True), 500, "parked-car", "sniff-street-shops"),
     ("minor-canoe-rack", canoe_rack, (0, 0, 1, 0), 450, "parked-car", "paws-promenade"),
 )
+# The motion tags after a skin's idle: key to [(tag, drawing, frame arguments, ms per frame)].
+MOVES = {"minor-canoe-rack": [("pull-out", canoe_rack_pulling, *PULL_OUT)],
+         "minor-log": [("pull-out", lambda roll, u=1: log(0, u, roll), *PULL_OUT)],
+         "minor-scooter": [("pull-out", scooter_pulling, *PULL_OUT)],
+         "minor-tricycles": [("pull-out", lambda roll, u=1: tricycles(0, u, roll), *PULL_OUT)]}
 # The zone road colour each skin is checked on.
 ROAD = {"snooze-crescent": "8b9bb4", "bark-park": "e4a672", "sniff-street-shops": "f6757a",
         "paws-promenade": "ead4aa"}
@@ -622,11 +657,11 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every skin at full size, then at every depth
     step on a minis.Mini."""
     this = sys.modules[__name__]
-    for key, draw, args, ms, _, _ in SKINS:
-        yield key, [("idle", [draw(a).outlined() for a in args], ms)]
-    for suffix, s in STEPS:
+    for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         for key, draw, args, ms, _, _ in SKINS:
-            yield f"{key}@{suffix}", [("idle", [small(this, s, draw, a, 1 / s).outlined() for a in args], ms)]
+            yield f"{key}{suffix}", [(tag, [small(this, s, d, a, 1 / s).outlined() if s < 1 else d(a).outlined()
+                                            for a in fargs], fms)
+                                     for tag, d, fargs, fms in [("idle", draw, args, ms), *MOVES.get(key, [])]]
 
 
 if __name__ == "__main__":

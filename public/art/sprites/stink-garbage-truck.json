@@ -14,6 +14,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 45 },
     "sourceSize": { "w": 56, "h": 45 },
     "duration": 400
+   },
+   "stink-garbage-truck 2.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 56, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 45 },
+    "sourceSize": { "w": 56, "h": 45 },
+    "duration": 100
+   },
+   "stink-garbage-truck 3.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 56, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 45 },
+    "sourceSize": { "w": 56, "h": 45 },
+    "duration": 100
+   },
+   "stink-garbage-truck 4.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 56, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 45 },
+    "sourceSize": { "w": 56, "h": 45 },
+    "duration": 100
+   },
+   "stink-garbage-truck 5.aseprite": {
+    "frame": { "x": 280, "y": 0, "w": 56, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 45 },
+    "sourceSize": { "w": 56, "h": 45 },
+    "duration": 100
    }
  },
  "meta": {
@@ -21,10 +53,11 @@
   "version": "1.2.30-x64",
   "image": "stink-garbage-truck.png",
   "format": "RGBA8888",
-  "size": { "w": 112, "h": 45 },
+  "size": { "w": 336, "h": 45 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "drive", "from": 2, "to": 5, "direction": "forward" }
   ]
  }
 }

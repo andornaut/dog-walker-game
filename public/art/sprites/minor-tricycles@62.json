@@ -30,6 +30,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 22 },
     "sourceSize": { "w": 35, "h": 22 },
     "duration": 400
+   },
+   "minor-tricycles@62 4.aseprite": {
+    "frame": { "x": 140, "y": 0, "w": 35, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 22 },
+    "sourceSize": { "w": 35, "h": 22 },
+    "duration": 100
+   },
+   "minor-tricycles@62 5.aseprite": {
+    "frame": { "x": 175, "y": 0, "w": 35, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 22 },
+    "sourceSize": { "w": 35, "h": 22 },
+    "duration": 100
+   },
+   "minor-tricycles@62 6.aseprite": {
+    "frame": { "x": 210, "y": 0, "w": 35, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 22 },
+    "sourceSize": { "w": 35, "h": 22 },
+    "duration": 100
+   },
+   "minor-tricycles@62 7.aseprite": {
+    "frame": { "x": 245, "y": 0, "w": 35, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 22 },
+    "sourceSize": { "w": 35, "h": 22 },
+    "duration": 100
    }
  },
  "meta": {
@@ -37,10 +69,11 @@
   "version": "1.2.30-x64",
   "image": "minor-tricycles@62.png",
   "format": "RGBA8888",
-  "size": { "w": 140, "h": 22 },
+  "size": { "w": 280, "h": 22 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "pull-out", "from": 4, "to": 7, "direction": "forward" }
   ]
  }
 }
