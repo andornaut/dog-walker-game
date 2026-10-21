@@ -218,7 +218,7 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
   - First-time hints (see Teaching)
   - Last heart: "Jesse has 1♥ left!"
   - Lucky find: "A neighbor shares treats! Everyone +1♥"
-  - Plain hit: "Koda hit a cone! Jesse −1♥"
+  - Plain hit: "Koda bumped the cone! Jesse −1♥"
   - Pull: "Koda spotted a squirrel!"
   - Treat: "Biscuit got a treat! Sam +1♥"
 - **Road markers:** things worth grabbing (tips, treats and lucky finds) bob gently; obstacles carry no marker. With reduced motion nothing bobs
