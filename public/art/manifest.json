@@ -2415,51 +2415,6 @@
       }
     },
     {
-      "key": "minor-tricycles",
-      "png": "sprites/minor-tricycles.png",
-      "json": "sprites/minor-tricycles.json",
-      "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 46
-      }
-    },
-    {
-      "key": "minor-tricycles@50",
-      "png": "sprites/minor-tricycles@50.png",
-      "json": "sprites/minor-tricycles@50.json",
-      "anchor": {
-        "feetY": 17,
-        "opaqueWidth": 24
-      }
-    },
-    {
-      "key": "minor-tricycles@62",
-      "png": "sprites/minor-tricycles@62.png",
-      "json": "sprites/minor-tricycles@62.json",
-      "anchor": {
-        "feetY": 21,
-        "opaqueWidth": 29
-      }
-    },
-    {
-      "key": "minor-tricycles@75",
-      "png": "sprites/minor-tricycles@75.png",
-      "json": "sprites/minor-tricycles@75.json",
-      "anchor": {
-        "feetY": 25,
-        "opaqueWidth": 34
-      }
-    },
-    {
-      "key": "minor-tricycles@88",
-      "png": "sprites/minor-tricycles@88.png",
-      "json": "sprites/minor-tricycles@88.json",
-      "anchor": {
-        "feetY": 30,
-        "opaqueWidth": 41
-      }
-    },
-    {
       "key": "other-dog",
       "png": "sprites/other-dog.png",
       "json": "sprites/other-dog.json",
@@ -3360,51 +3315,6 @@
       }
     },
     {
-      "key": "social-frisbee-dog-owner",
-      "png": "sprites/social-frisbee-dog-owner.png",
-      "json": "sprites/social-frisbee-dog-owner.json",
-      "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 35
-      }
-    },
-    {
-      "key": "social-frisbee-dog-owner@50",
-      "png": "sprites/social-frisbee-dog-owner@50.png",
-      "json": "sprites/social-frisbee-dog-owner@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "social-frisbee-dog-owner@62",
-      "png": "sprites/social-frisbee-dog-owner@62.png",
-      "json": "sprites/social-frisbee-dog-owner@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 22
-      }
-    },
-    {
-      "key": "social-frisbee-dog-owner@75",
-      "png": "sprites/social-frisbee-dog-owner@75.png",
-      "json": "sprites/social-frisbee-dog-owner@75.json",
-      "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "social-frisbee-dog-owner@88",
-      "png": "sprites/social-frisbee-dog-owner@88.png",
-      "json": "sprites/social-frisbee-dog-owner@88.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 30
-      }
-    },
-    {
       "key": "social-frisbee-dog@50",
       "png": "sprites/social-frisbee-dog@50.png",
       "json": "sprites/social-frisbee-dog@50.json",
@@ -3438,96 +3348,6 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 24
-      }
-    },
-    {
-      "key": "social-handbag-dog-owner",
-      "png": "sprites/social-handbag-dog-owner.png",
-      "json": "sprites/social-handbag-dog-owner.json",
-      "anchor": {
-        "feetY": 79,
-        "opaqueWidth": 44
-      }
-    },
-    {
-      "key": "social-handbag-dog-owner@50",
-      "png": "sprites/social-handbag-dog-owner@50.png",
-      "json": "sprites/social-handbag-dog-owner@50.json",
-      "anchor": {
-        "feetY": 41,
-        "opaqueWidth": 23
-      }
-    },
-    {
-      "key": "social-handbag-dog-owner@62",
-      "png": "sprites/social-handbag-dog-owner@62.png",
-      "json": "sprites/social-handbag-dog-owner@62.json",
-      "anchor": {
-        "feetY": 51,
-        "opaqueWidth": 29
-      }
-    },
-    {
-      "key": "social-handbag-dog-owner@75",
-      "png": "sprites/social-handbag-dog-owner@75.png",
-      "json": "sprites/social-handbag-dog-owner@75.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 33
-      }
-    },
-    {
-      "key": "social-handbag-dog-owner@88",
-      "png": "sprites/social-handbag-dog-owner@88.png",
-      "json": "sprites/social-handbag-dog-owner@88.json",
-      "anchor": {
-        "feetY": 70,
-        "opaqueWidth": 38
-      }
-    },
-    {
-      "key": "social-jogger-dog-owner",
-      "png": "sprites/social-jogger-dog-owner.png",
-      "json": "sprites/social-jogger-dog-owner.json",
-      "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 35
-      }
-    },
-    {
-      "key": "social-jogger-dog-owner@50",
-      "png": "sprites/social-jogger-dog-owner@50.png",
-      "json": "sprites/social-jogger-dog-owner@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "social-jogger-dog-owner@62",
-      "png": "sprites/social-jogger-dog-owner@62.png",
-      "json": "sprites/social-jogger-dog-owner@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 22
-      }
-    },
-    {
-      "key": "social-jogger-dog-owner@75",
-      "png": "sprites/social-jogger-dog-owner@75.png",
-      "json": "sprites/social-jogger-dog-owner@75.json",
-      "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 27
-      }
-    },
-    {
-      "key": "social-jogger-dog-owner@88",
-      "png": "sprites/social-jogger-dog-owner@88.png",
-      "json": "sprites/social-jogger-dog-owner@88.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 31
       }
     },
     {

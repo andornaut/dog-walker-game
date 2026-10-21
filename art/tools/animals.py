@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Draw the Chase, Snatch and Social animals and the Social dogs' owners: moving
-minor obstacles, ambient movers and stand-ins (src/assets/spriteKeys.ts). Every sprite also has its depth variants at every step in
-minis.STEPS (@88, @75, @62, @50), redrawn at the step with the same tags,
-frames and durations. Everything faces the player except the side views
+"""Draw the animal minor obstacles, the Chase, Snatch and Social animals: moving
+minor obstacles and ambient movers (src/assets/spriteKeys.ts). Every sprite
+also has its depth variants at every step in minis.STEPS (@88, @75, @62, @50),
+redrawn at the step with the same tags, frames and durations. Everything faces the player except the side views
 (hops and the Social dogs' run, facing right, the game mirroring them for
 left) and the flees, which go off up the road, seen from behind. Road outline
 (road_edge) and road.LIT's rim on dark fills, cel shading as the dogs have it
@@ -10,8 +10,7 @@ left) and the flees, which go off up the road, seen from behind. Road outline
 
 Each animal is laid out on 32x32 (the Snatch animals on 32x48) and drawn on a
 minis.Mini at its frame side / 32, sized against the pack (dogs.py: big 54,
-medium 48, small 38); the owners are laid out on 32x48 and drawn at road.SCALE,
-48x72, as road.py draws its people.
+medium 48, small 38).
 
 Chase, 38x38 (the small dogs' frame): idle (2 frames, 300ms: frame 1 a small
 motion), run (4 frames, 80ms: down the road at the player).
@@ -37,22 +36,17 @@ sack, as the thief does.
                      up, level, down, level
 
 Social, medium dogs (48x48, drawn SOCIAL_ZOOM narrower in it, about 26px wide
-face on) and their owners (48x72): the dog's walk (4 frames, 100ms) and idle (4
-frames, 300ms: tail at -1, 0, +1, 0, the right ear 1px higher on the last
+face on): walk (4 frames, 100ms) and idle (4 frames,
+300ms: tail at -1, 0, +1, 0, the right ear 1px higher on the last
 frame), as other-dog has them, and run (4 frames, 100ms): side view facing right
-in loose-dog's gallop (hazards.CORGI_RUN), without the broken leash; the owner's
-walk (4 frames, 100ms, road.PERSON_WALK) and idle (2 frames, 400ms).
-  social-frisbee-dog        a border collie with a red frisbee
-  social-frisbee-dog-owner  backwards cap, green tee, shorts
-  social-jogger-dog-owner   a jogger: headband, tank top, shorts; the jogger's stand-in
-  social-handbag-dog-owner  a shopper; not built, its export stays at the old
-                            56x84 scale
+in loose-dog's gallop (hazards.CORGI_RUN), without the broken leash.
+  social-frisbee-dog  a border collie with a red frisbee
 
 Usage:
-  skins_animals.py preview OUT.png   every frame of every sprite and variant on
-                                     the road colours
-  skins_animals.py build             write art/skins-animals/*.aseprite and export
-                                     to public/art/sprites/
+  animals.py preview OUT.png   every frame of every sprite and variant on the
+                               road colours
+  animals.py build             write art/animals/*.aseprite and export to
+                               public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -67,7 +61,7 @@ import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
 from pixel import Grid, build, edged, preview  # noqa: E402
-from road import BREATH, BREATH_MS, LIT, SCALE  # noqa: E402
+from road import BREATH, BREATH_MS, LIT  # noqa: E402
 
 # The zone roads, for the preview: Cabbagetown, High Park, the Distillery District, Kensington Market,
 # The Beaches and Yonge Street.
@@ -86,7 +80,7 @@ def eyes(g, xs, y, c="ink"):
         g.p(x, y, "white")
 
 
-# ---------- Chase (reskins squirrel) ----------
+# ---------- Chase ----------
 
 def paw(g, x, y, h, c, sh, leg=None):
     """A 3-unit paw from row y, h rows tall, its lower-right pixel shaded; leg, if given, the 2 rows of leg
@@ -405,7 +399,7 @@ def rabbit_hop(phase):
     return lit(g)
 
 
-# ---------- Snatch (reskins thief) ----------
+# ---------- Snatch ----------
 
 def sack(g, x, y):
     """The tan loot sack centred on (x, y), its neck gathered at the top, as the thief's."""
@@ -548,7 +542,7 @@ def seagull_fleeing(wings, bob=0):
     return lit(g)
 
 
-# ---------- Social (reskins other-dog and other-dog-owner) ----------
+# ---------- Social ----------
 
 
 def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
@@ -592,88 +586,7 @@ def collie(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     return lit(g)
 
 
-def frisbee_top(g, b):
-    """The frisbee dog's owner: a red cap on backwards, a green tee and sky shorts."""
-    g.rect(11, 33 + b, 10, 4, "sky")
-    g.rect(19, 33 + b, 2, 4, "blue")
-    g.rect(9, 21 + b, 14, 12, "green")
-    g.rect(20, 21 + b, 3, 12, "dgreen")
-    g.rect(14, 21 + b, 4, 1, "dgreen")
-    g.rect(5, 22 + b, 4, 5, "green")
-    g.rect(5, 27 + b, 4, 6, "skin2")
-    g.rect(5, 31 + b, 4, 2, "skin1")
-    g.rect(23, 22 + b, 4, 5, "green")
-    g.rect(23, 27 + b, 4, 6, "skin2")
-    g.rect(23, 31 + b, 4, 2, "skin1")
-    road.face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
-    g.rect(8, 9 + b, 2, 5, "dbrown")
-    g.rect(22, 9 + b, 2, 5, "dbrown")
-    g.cel(16, 7.5 + b, 8.5, 4.5, "red", "dred", "pink")
-    g.rect(8, 9 + b, 17, 1, "dred")
-    # the cap on backwards: the strap's gap and its button over the forehead
-    g.rect(14, 8 + b, 4, 2, "dbrown")
-    g.p(16, 3 + b, "dred")
-    road.face_front(g, 16, 13 + b)
-
-
-def shopper_top(g, b):
-    """The handbag dog's owner: a sky coat with a white collar and buttons, a blonde bob under sunglasses, red
-    lips and a shopping bag in the right hand."""
-    g.rect(9, 21 + b, 14, 15, "sky")
-    g.rect(20, 21 + b, 3, 15, "blue")
-    g.rect(9, 21 + b, 1, 14, "cyan")
-    g.tri((11, 21 + b), (21, 21 + b), (16, 25 + b), "white")
-    for y in (27, 31):
-        g.p(15, y + b, "white")
-    g.rect(5, 22 + b, 4, 9, "sky")
-    g.rect(5, 31 + b, 4, 2, "skin1")
-    g.rect(23, 22 + b, 4, 9, "sky")
-    g.rect(26, 22 + b, 1, 9, "blue")
-    g.rect(23, 31 + b, 4, 2, "skin1")
-    g.rect(22, 33 + b, 7, 7, "orange")
-    g.rect(22, 33 + b, 7, 1, "amber")
-    g.rect(27, 34 + b, 2, 6, "rust")
-    g.rect(24, 31 + b, 1, 2, "white")
-    g.rect(26, 31 + b, 1, 2, "white")
-    g.ell(16, 12.5 + b, 8, 8, "skin1", "skin2")
-    g.ell(16, 8.5 + b, 9, 5, "amber", "orange", "yellow")
-    g.rect(7, 9 + b, 3, 9, "amber")
-    g.rect(22, 9 + b, 3, 9, "orange")
-    g.rect(10, 9 + b, 12, 2, "amber")
-    road.face_front(g, 16, 13 + b, lips="red")
-    g.rect(10, 12 + b, 5, 3, "ink")
-    g.rect(17, 12 + b, 5, 3, "ink")
-    g.rect(15, 12 + b, 2, 1, "ink")
-    g.p(11, 12 + b, "slate")
-    g.p(18, 12 + b, "slate")
-
-
-def jogger_top(g, b):
-    """The jogger: a red headband and wristbands, a sky tank top, navy shorts, dark hair in a high bun."""
-    g.rect(11, 33 + b, 10, 4, "navy")
-    g.rect(19, 33 + b, 2, 4, "ink")
-    g.rect(10, 21 + b, 12, 12, "sky")
-    g.rect(19, 21 + b, 3, 12, "blue")
-    g.rect(10, 21 + b, 1, 11, "cyan")
-    g.rect(13, 21 + b, 6, 2, "skin1")
-    for x in (5, 23):
-        g.rect(x + 1, 21 + b, 4, 10, "skin1")
-        g.rect(x + (4 if x > 16 else 1), 21 + b, 1, 10, "skin2")
-        g.rect(x + 1, 28 + b, 4, 2, "red")
-        g.rect(x + 1, 30 + b, 4, 2, "skin1")
-    road.face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
-    g.cel(16, 8 + b, 8.5, 4.5, "dbrown", "plum", "brown")
-    g.cel(16, 2.5 + b, 3, 2.5, "dbrown", "plum", "brown")
-    g.rect(7, 9 + b, 2, 6, "dbrown")
-    g.rect(23, 9 + b, 2, 6, "dbrown")
-    g.rect(8, 9 + b, 16, 2, "red")
-    g.rect(8, 10 + b, 16, 1, "dred")
-    road.face_front(g, 16, 13 + b)
-    g.p(10, 16 + b, "pink")
-    g.p(22, 16 + b, "pink")
-
-
-# ---------- Social run: the loose dog's crossing, as the zone's Social dog ----------
+# ---------- Social run: the loose dog's crossing ----------
 
 def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
     """A Social dog galloping across the road in side view, facing right, on hazards.corgi_side's skeleton:
@@ -748,19 +661,9 @@ SIDE = {
 }
 
 
-# Each owner: (top, legs, shoes). The handbag dog's owner is drawn for its old export only (see BUILT).
-OWNERS = {
-    "social-frisbee-dog": (frisbee_top, "skin2", "white"),
-    "social-handbag-dog": (shopper_top, "ink", "red"),
-    "social-jogger-dog": (jogger_top, "skin1", "white"),
-}
 DOGS = {
     "social-frisbee-dog": collie,
 }
-# The owners build() writes, as <key>-owner. social-handbag-dog-owner, the stroller's stand-in, is not built:
-# its export stays at the old 56x84 scale.
-BUILT = ("social-frisbee-dog", "social-jogger-dog")
-
 # Each Chase animal's frame side: the 32-unit design drawn at side / 32. The cat and the rabbit sit at the
 # small dogs' 38, smaller than a medium dog (48); the pigeons and the ducklings are a flock of three birds a
 # third of a dog's width each, in the same frame.
@@ -773,7 +676,7 @@ SNATCH_SIDE = {"snatch-raccoon": 38, "snatch-seagull": 32}
 SOCIAL_SIDE = 48
 SOCIAL_ZOOM = 0.82
 
-# The Chase skins: (draw, idle poses, run (draw, poses), extra tags [(tag, draw, poses, ms)]), each pose a dict
+# The Chase animals: (draw, idle poses, run (draw, poses), extra tags [(tag, draw, poses, ms)]), each pose a dict
 # of keyword arguments.
 CHASE = {
     "chase-cat": (cat, [dict(), dict(tail=1)], (cat_run, [dict(phase=k) for k in range(4)]), []),
@@ -807,17 +710,9 @@ def zoomed(s, draw, *args, **q):
     return minis.zoomed(drawn((s * SOCIAL_ZOOM, s), draw, *args, **q), s, (SOCIAL_ZOOM, 1), 0)
 
 
-def dressed(s, top, legs, shoes, **q):
-    """road.dressed(top) on a minis.Mini at scale s: legs and shoes, the caller's top, the road outline and
-    the lit rim, the pose snapped to whole pixels."""
-    pose = snap({k: v for k, v in q.items() if k in POSE}, s)
-    return minis.small(road, s, road.dressed, top, legs=legs, shoes=shoes, **pose).outlined()
-
-
-def skins(step):
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every built skin at depth step step (1 at full
-    size): each animal at its frame side / 32 x step, the owners at road.SCALE x step, as road.py draws its
-    people."""
+def animals(step):
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every animal at depth step step (1 at full
+    size), at its frame side / 32 x step."""
     c = CHASE_SIDE / 32 * step
     for key, (draw, idle, (run, runs), extra) in CHASE.items():
         yield key, [("idle", [drawn(c, draw, **q) for q in idle], CHASE_IDLE_MS),
@@ -828,32 +723,27 @@ def skins(step):
         yield key, [("walk", [drawn(t, draw, **q) for q in road.PERSON_WALK], road.PERSON_WALK_MS),
                     ("flee", [drawn(t, flee, **q) for q in flees], FLEE_MS),
                     ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS)]
-    d, p = SOCIAL_SIDE / 32 * step, SCALE * step
+    d = SOCIAL_SIDE / 32 * step
     run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
     for key, draw in DOGS.items():
         yield key, [("walk", [zoomed(d, draw, **q) for q in road.CORGI_WALK], 100),
                     ("idle", [zoomed(d, draw, **q) for q in road.CORGI_IDLE], 300),
                     ("run", [zoomed(d, side_dog, SIDE[key], **q) for q in run], 100)]
-    for key in BUILT:
-        top, legs, shoes = OWNERS[key]
-        yield f"{key}-owner", [("walk", [dressed(p, top, legs, shoes, **q) for q in road.PERSON_WALK],
-                                road.PERSON_WALK_MS),
-                               ("idle", [dressed(p, top, legs, shoes, bob=bb) for bb in BREATH], BREATH_MS)]
 
 
 def sprites():
-    """Every built skin at full size, then at each depth step."""
-    return list(skins(1)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS for key, tags in skins(step)]
+    """Every animal at full size, then at each depth step."""
+    return list(animals(1)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS for key, tags in animals(step)]
 
 
 if __name__ == "__main__":
-    # minis swaps the Grid of the module named skins_animals, so the build runs that module's functions
-    import skins_animals
+    # minis swaps the Grid of the module named animals, so the build runs that module's functions
+    import animals
 
     argv = sys.argv
     if len(argv) == 3 and argv[1] == "preview":
-        preview(skins_animals.sprites(), argv[2], GROUNDS)
+        preview(animals.sprites(), argv[2], GROUNDS)
     elif len(argv) == 2 and argv[1] == "build":
-        build(skins_animals.sprites(), "art/skins-animals")
+        build(animals.sprites(), "art/animals")
     else:
         sys.exit(__doc__)

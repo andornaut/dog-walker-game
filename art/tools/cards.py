@@ -239,28 +239,24 @@ def skunk_ignore():
     return a
 
 
-# Chase, Snatch and Social take the zone's ground and the road sprite in the base kind's place, so
-# skin_cards_animals.py draws each encounter skin's cards from these.
-
-
 def small_puddle(f=0):
     """Cards show a 32x16 puddle; the road's is two lanes wide."""
     return to_image(road.puddle(f, 32, 16).outlined(False))
 
 
-def other_dog_sniff(zone="park", key="other-dog"):
+def other_dog_sniff():
     a = Art()
-    a.ground(zone)
-    a.put(key, "walk", 38, 36)
+    a.ground("park")
+    a.put("other-dog", "walk", 38, 36)
     a.put("dog-biscuit", "walk", 38, 58)
     a.hearts([(24, 6), (46, 4)])
     return a
 
 
-def other_dog_pull_away(zone="park", key="other-dog"):
+def other_dog_pull_away():
     a = Art()
-    a.ground(zone)
-    a.put(key, "walk", 56, 36)
+    a.ground("park")
+    a.put("other-dog", "walk", 56, 36)
     c = a.put("dog-biscuit", "pull", 22, 56, flip=True)
     a.lead(22, c, 6)
     a.fill(59, 4, 2, 5, "red")
@@ -268,20 +264,20 @@ def other_dog_pull_away(zone="park", key="other-dog"):
     return a
 
 
-def thief_chase(zone="street", key="thief"):
+def thief_chase():
     a = Art()
-    a.ground(zone)
-    a.put(key, "flee", 54, 59, 1)
+    a.ground("street")
+    a.put("thief", "flee", 54, 59, 1)
     a.put("dog-koda", "react", 22, 58)
     a.fill(30, 12, 2, 5, "red")
     a.fill(30, 18, 2, 2, "red")
     return a
 
 
-def thief_let_go(zone="street", key="thief"):
+def thief_let_go():
     a = Art()
-    a.ground(zone)
-    a.put(key, "walk", 52, 58)
+    a.ground("street")
+    a.put("thief", "walk", 52, 58)
     a.coins([(8, 30), (18, 36)], 1)
     a.bubble(4, 8, 24, ["-$$"], "dred")
     return a
