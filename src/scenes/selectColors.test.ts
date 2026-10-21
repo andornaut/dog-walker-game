@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
 import { gameData } from "../data";
+import { BADGE_TEXT_COLORS } from "../home/badgesView";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
   BUTTON_COLORS,
@@ -27,8 +28,8 @@ function contrast(a: number, b: number): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
-// Text that says what an item is or costs holds 4.5:1. A disabled label is exempt and holds
-// the 3:1 an icon needs.
+// Text that says what an item is or costs holds 4.5:1. A disabled label, and a locked badge's
+// goal and progress, are exempt and hold the 3:1 an icon needs.
 const TEXT = 4.5;
 const EXEMPT = 3;
 const disabled = selectLook("disabled");
@@ -81,6 +82,15 @@ describe("interaction-state colours", () => {
         TEXT,
       ],
       ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
+      ["an earned badge's name", PALETTE[BADGE_TEXT_COLORS.earned.name], PALETTE.cream, TEXT],
+      ["an earned badge's goal", PALETTE[BADGE_TEXT_COLORS.earned.goal], PALETTE.cream, TEXT],
+      ["a locked badge's name", PALETTE[BADGE_TEXT_COLORS.locked.name], PALETTE.cream, TEXT],
+      [
+        "a locked badge's goal and progress",
+        PALETTE[BADGE_TEXT_COLORS.locked.goal],
+        PALETTE.cream,
+        EXEMPT,
+      ],
       [
         "a disabled card's cost on its plaque",
         PALETTE[GREYED.plateText],

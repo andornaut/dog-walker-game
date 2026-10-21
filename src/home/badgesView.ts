@@ -19,6 +19,15 @@ export interface BadgeView {
   readonly shortGoal: string;
 }
 
+// The PALETTE names a badge's text draws in on the cream panel, by whether it is earned: its
+// name, and its goal and progress. A locked badge's open card draws its status and line in the
+// goal's colour. A locked badge's goal and progress are an inactive label, exempt from 4.5:1,
+// and hold the 3:1 a disabled tile's label does.
+export const BADGE_TEXT_COLORS = {
+  earned: { goal: "darkBrown", name: "forest" },
+  locked: { goal: "neutralSlate", name: "neutralDarkSlate" },
+} as const;
+
 // Every badge in wall order, earned or locked by the save.
 export function badgeWall(
   data: Pick<GameData, "achievements">,

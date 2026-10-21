@@ -4,6 +4,7 @@ import { dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
+  BADGE_TEXT_COLORS,
   badgeProgress,
   type BadgeView,
   badgeWall,
@@ -486,9 +487,10 @@ export class StatsScene extends Scene {
         y += WALL_TEXT.lineHeight;
       }
     };
-    draw(cell.name, badge.earned ? PALETTE.forest : PALETTE.plum);
-    draw(cell.goal, PALETTE.darkBrown);
-    draw(cell.progress, PALETTE.plum);
+    const colors = BADGE_TEXT_COLORS[badge.earned ? "earned" : "locked"];
+    draw(cell.name, PALETTE[colors.name]);
+    draw(cell.goal, PALETTE[colors.goal]);
+    draw(cell.progress, PALETTE[colors.goal]);
   }
 
   // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts
@@ -507,19 +509,33 @@ export class StatsScene extends Scene {
     addBadge(this, badge.art, badge.earned, center, badgeY)
       .setScale(DETAIL_BADGE_SCALE)
       .setDepth(1);
-    this.text(center, DETAIL.y + DETAIL_TEXT.nameY, badge.name, { font: "title", originX: 0.5 });
+    // An earned badge's card: a plum name and goal, a forest status, a dark brown line.
+    const locked = BADGE_TEXT_COLORS.locked;
+    const colors = badge.earned
+      ? { goal: PALETTE.plum, line: PALETTE.darkBrown, name: PALETTE.plum, status: PALETTE.forest }
+      : {
+          goal: PALETTE[locked.goal],
+          line: PALETTE[locked.goal],
+          name: PALETTE[locked.name],
+          status: PALETTE[locked.goal],
+        };
+    this.text(center, DETAIL.y + DETAIL_TEXT.nameY, badge.name, {
+      color: colors.name,
+      font: "title",
+      originX: 0.5,
+    });
     const words = gameData.menuText.stats;
     const status = badge.earned ? words.badgeEarned : words.badgeLocked;
     this.text(center, DETAIL.y + DETAIL_TEXT.statusY, status, {
-      color: badge.earned ? PALETTE.forest : PALETTE.darkBrown,
+      color: colors.status,
       originX: 0.5,
     });
     const x = DETAIL.x + DETAIL_TEXT.x;
     const goal = this.wrap(badge.goal);
-    this.text(x, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"));
+    this.text(x, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), { color: colors.goal });
     const line = fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine });
     const lineY = DETAIL.y + detailLineY(pixelFontMetrics(this, "body"), goal.length);
-    this.text(x, lineY, this.wrap(line).join("\n"), { color: PALETTE.darkBrown });
+    this.text(x, lineY, this.wrap(line).join("\n"), { color: colors.line });
   }
 
   // Body text at 2x broken into lines no wider than the open badge's text.
