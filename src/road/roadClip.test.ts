@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
+import { screenLayout } from "../layout/screenLayout";
 import { rowsAboveJuncture } from "./roadClip";
-import { screenLayout } from "./screenLayout";
 
 const { approach, road } = screenLayout(SCREEN_CONFIG);
 const JUNCTURE = approach.y;

@@ -50,6 +50,16 @@ const CONTEXTS = {
     "ui/phaser/palette",
   ],
   lib: [],
+  road: [
+    "assets",
+    "data",
+    "layout/sceneryGags",
+    "layout/screenLayout",
+    "lib",
+    "runner/walk",
+    "scenes/run/stage",
+    "scenes/sprites",
+  ],
   ui: ["assets", "lib", "rules/units"],
 };
 
