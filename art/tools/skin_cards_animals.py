@@ -52,16 +52,16 @@ OPTIONS = {
 }
 # {skin key: (base kind, the zone id its cards stand in)}
 SKINS = {
-    "chase-cat": ("squirrel", "cabbagetown"),
-    "chase-pigeons": ("squirrel", "kensingtonMarket"),
-    "chase-ducklings": ("squirrel", "theBeaches"),
-    "chase-rabbit": ("squirrel", "yongeStreet"),
-    "snatch-raccoon": ("thief", "cabbagetown"),
-    "snatch-seagull": ("thief", "highPark"),
-    "social-gate-dog": ("other-dog", "cabbagetown"),
-    "social-frisbee-dog": ("other-dog", "highPark"),
-    "social-handbag-dog": ("other-dog", "kensingtonMarket"),
-    "social-jogger-dog": ("other-dog", "theBeaches"),
+    "chase-cat": ("squirrel", "snoozeCrescent"),
+    "chase-pigeons": ("squirrel", "shops"),
+    "chase-ducklings": ("squirrel", "pawsPromenade"),
+    "chase-rabbit": ("squirrel", "homeStretch"),
+    "snatch-raccoon": ("thief", "snoozeCrescent"),
+    "snatch-seagull": ("thief", "park"),
+    "social-gate-dog": ("other-dog", "snoozeCrescent"),
+    "social-frisbee-dog": ("other-dog", "park"),
+    "social-handbag-dog": ("other-dog", "shops"),
+    "social-jogger-dog": ("other-dog", "pawsPromenade"),
 }
 
 

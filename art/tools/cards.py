@@ -231,7 +231,7 @@ def skunk_rinse():
 
 def skunk_ignore():
     a = Art()
-    a.ground("distilleryDistrict")
+    a.ground("street")
     a.put("skunk", "idle", 18, 44)
     a.skunk_stink(30, 6, 2)
     a.put("dog-koda", "walk", 54, 40, 2)
@@ -242,7 +242,7 @@ def skunk_ignore():
 # Chase, Snatch and Social take the zone's ground and the road sprite in the base kind's place, so
 # skin_cards_animals.py draws each encounter skin's cards from these.
 
-def squirrel_hold(zone="highPark", key="squirrel"):
+def squirrel_hold(zone="park", key="squirrel"):
     a = Art()
     a.ground(zone)
     a.put(key, "idle", 60, 37)
@@ -252,7 +252,7 @@ def squirrel_hold(zone="highPark", key="squirrel"):
     return a
 
 
-def squirrel_chase(zone="highPark", key="squirrel"):
+def squirrel_chase(zone="park", key="squirrel"):
     a = Art()
     a.ground(zone)
     a.put(key, "run", 58, 37, 1)
@@ -269,7 +269,7 @@ def small_puddle(f=0):
 
 def puddle_through():
     a = Art()
-    a.ground("distilleryDistrict")
+    a.ground("street")
     a.paste(small_puddle(), 22, 30)
     a.put("dog-duchess", "react", 38, 44, shadow=False)
     a.drops([(26, 26), (30, 22), (48, 24), (52, 28), (44, 20)])
@@ -278,7 +278,7 @@ def puddle_through():
 
 def puddle_towel():
     a = Art()
-    a.ground("yongeStreet")
+    a.ground("homeStretch")
     a.put("dog-duchess", "walk", 37, 48)
     a.fill(26, 26, 22, 9, "pink")
     for x in range(26, 48, 4):
@@ -287,7 +287,7 @@ def puddle_towel():
     return a
 
 
-def other_dog_sniff(zone="highPark", key="other-dog"):
+def other_dog_sniff(zone="park", key="other-dog"):
     a = Art()
     a.ground(zone)
     a.put(key, "walk", 38, 36)
@@ -296,7 +296,7 @@ def other_dog_sniff(zone="highPark", key="other-dog"):
     return a
 
 
-def other_dog_pull_away(zone="highPark", key="other-dog"):
+def other_dog_pull_away(zone="park", key="other-dog"):
     a = Art()
     a.ground(zone)
     a.put(key, "walk", 56, 36)
@@ -307,7 +307,7 @@ def other_dog_pull_away(zone="highPark", key="other-dog"):
     return a
 
 
-def thief_chase(zone="distilleryDistrict", key="thief"):
+def thief_chase(zone="street", key="thief"):
     a = Art()
     a.ground(zone)
     a.put(key, "flee", 54, 59, 1)
@@ -317,7 +317,7 @@ def thief_chase(zone="distilleryDistrict", key="thief"):
     return a
 
 
-def thief_let_go(zone="distilleryDistrict", key="thief"):
+def thief_let_go(zone="street", key="thief"):
     a = Art()
     a.ground(zone)
     a.put(key, "walk", 52, 58)
@@ -326,7 +326,7 @@ def thief_let_go(zone="distilleryDistrict", key="thief"):
     return a
 
 
-def thief_let_them_run(zone="distilleryDistrict", key="thief"):
+def thief_let_them_run(zone="street", key="thief"):
     a = Art()
     a.ground(zone)
     a.put(key, "flee", 54, 59, 1)
@@ -355,7 +355,7 @@ def honk(a, x, y):
 def goose_back_off():
     """Back off slowly: the goose honking at the dog as it backs away, the clock running."""
     a = Art()
-    a.ground("yongeStreet")
+    a.ground("homeStretch")
     a.put("goose", "idle", 54, 40, 1, flip=True)
     honk(a, 38, 15)
     c = a.put("dog-koda", "pull", 22, 56, flip=True)
@@ -367,7 +367,7 @@ def goose_back_off():
 def goose_honk_back():
     """Honk back: the dog barking at the goose honking back, hearts lost (two for a chaser)."""
     a = Art()
-    a.ground("yongeStreet")
+    a.ground("homeStretch")
     a.put("goose", "idle", 56, 38, 1, flip=True)
     honk(a, 40, 13)
     c = a.put("dog-koda", "react", 24, 57)
@@ -381,7 +381,7 @@ def goose_honk_back():
 
 def wallet_keep():
     a = Art()
-    a.ground("yongeStreet")
+    a.ground("homeStretch")
     a.paste(sn.frame("lost-wallet", "idle", 1), 12, 24)
     a.coins([(28, 30), (34, 22), (40, 32)])
     a.face("face-owner-zippy", "upset", 41, 12)
@@ -411,7 +411,7 @@ def clock(a, x, y):
 
 def mail_hold():
     a = Art()
-    a.ground("yongeStreet")
+    a.ground("homeStretch")
     a.put("mail-carrier", "walk", 56, 58)
     c = a.put("dog-koda", "react", 26, 50)
     a.lead(26, c, 14)
@@ -421,7 +421,7 @@ def mail_hold():
 
 def mail_wait():
     a = Art()
-    a.ground("yongeStreet")
+    a.ground("homeStretch")
     a.put("mail-carrier", "walk", 56, 58, 2)
     c = a.put("dog-koda", "idle", 26, 54)
     a.lead(26, c, 24)
@@ -535,7 +535,7 @@ def belly_rubs():
 
 def good_leash():
     a = Art()
-    a.ground("highPark")
+    a.ground("park")
     a.put("squirrel", "idle", 60, 37)
     c = a.put("dog-koda", "walk", 30, 56, 1)
     a.lead(30, c, 24, 2)
@@ -548,7 +548,7 @@ def good_leash():
 
 def big_tipper():
     a = Art()
-    a.ground("kensingtonMarket")
+    a.ground("shops")
     for k, (x, y) in enumerate(((8, 38), (14, 34), (20, 38), (11, 30), (17, 26), (26, 36), (23, 30))):
         a.paste(sn.frame("tip", "idle", k), x, y)
     a.paste(sn.frame("tip", "idle"), 44, 26)
@@ -559,7 +559,7 @@ def big_tipper():
 
 def rush_hour():
     a = Art()
-    a.ground("distilleryDistrict")
+    a.ground("street")
     a.paste(small_puddle(), 2, 38)
     a.put("skunk", "idle", 59, 55)
     a.put("squirrel", "idle", 36, 52)
@@ -570,7 +570,7 @@ def rush_hour():
 
 def raincoats():
     a = Art()
-    a.ground("distilleryDistrict")
+    a.ground("street")
     a.paste(small_puddle(1), 22, 36)
     a.put("dog-duchess", "walk", 37, 46, shadow=False)
     a.fill(31, 34, 13, 8, "amber")
@@ -597,7 +597,7 @@ def sweet_talker():
 
 def skip():
     a = Art()
-    a.ground("distilleryDistrict")
+    a.ground("street")
     a.put("skunk", "idle", 16, 54)
     a.put("dog-biscuit", "walk", 46, 52, 2)
     disc(a, 58, 13, 7, "green", "dgreen")

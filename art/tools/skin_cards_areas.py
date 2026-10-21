@@ -35,7 +35,7 @@ from ui import to_image  # noqa: E402
 
 SKUNK_INK = (road.CLOUD_INK["inner"], road.CLOUD_INK["outer"])
 # key: zone and stink line colours
-STINK = {"stink-garbage-truck": ("yongeStreet", SKUNK_INK)}
+STINK = {"stink-garbage-truck": ("homeStretch", SKUNK_INK)}
 
 
 def stink(a, x, y, n, ink):
