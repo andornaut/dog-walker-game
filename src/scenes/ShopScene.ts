@@ -203,7 +203,7 @@ export class ShopScene extends Scene {
       const index = SHOP_TABS.indexOf(this.tab) + (direction === "left" ? -1 : 1);
       const tab = SHOP_TABS[Math.min(SHOP_TABS.length - 1, Math.max(0, index))];
       if (tab !== undefined && tab !== this.tab) {
-        this.act({ kind: "tab", tab });
+        this.actAfterDip({ kind: "tab", tab });
       }
       return;
     }
@@ -217,8 +217,19 @@ export class ShopScene extends Scene {
       return;
     }
     if (isConfirmKey(key) && this.focusId !== null) {
-      this.act({ id: this.focusId, kind: "row" });
+      this.actAfterDip({ id: this.focusId, kind: "row" });
     }
+  }
+
+  // A key presses the tab or row: it dips, then acts, as a tap does.
+  private actAfterDip(target: Target): void {
+    this.pressed = target;
+    this.render();
+    this.time.delayedCall(FEEDBACK.pressDipMs, () => {
+      this.pressed = undefined;
+      this.render();
+      this.act(target);
+    });
   }
 
   private close(): void {
