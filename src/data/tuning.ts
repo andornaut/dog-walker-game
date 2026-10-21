@@ -37,8 +37,9 @@ export const TUNING = {
   hearts: {
     // The hearts a minor bump costs the owner of the dog that touched it.
     bump: 1,
-    // A face looks upset below faceNeutralFrom hearts, neutral at faceNeutralFrom or more than
-    // faceHappyWithin hearts below its max, and happy otherwise.
+    // A face at its max looks happy. Below it, a face looks upset below faceNeutralFrom hearts,
+    // neutral at faceNeutralFrom or more than faceHappyWithin hearts below its max, and happy
+    // otherwise.
     faceHappyWithin: 1,
     faceNeutralFrom: 2,
     // Second chance forgives this many hearts lost in each zone, the first ones lost.
@@ -47,7 +48,8 @@ export const TUNING = {
     maxBySize: { big: 4, medium: 3, small: 2 },
     // No owner's max goes above this, whatever the dog's size, the pack's size and the gear add.
     maxOwnerHearts: 6,
-    // Added to every owner's max, whatever the dog's size, by how many dogs the walk set out with.
+    // Added to the lead dog's owner's max, whatever its size, by how many dogs the walk set out
+    // with.
     packSizeBonus: { 1: 2, 2: 1, 3: 0 },
     treat: 1,
   },
