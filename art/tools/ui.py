@@ -1281,18 +1281,19 @@ def top_bar():
 
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash and the neighbourhood with its pips.
-WALK_WELLS = ((4, 4, 112, 40), (122, 4, 140, 21))
+WALK_WELLS = ((4, 4, 112, 40), (122, 4, 104, 21))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
-# the grain: up to seven 18x18 wells, 20px apart from x 122, on rows 26 to 43.
-EFFECT_ROW = (121, 25, 142, 20)
+# the grain: five 18x18 wells, 20px apart from x 122, on rows 26 to 43.
+EFFECT_ROW = (121, 25, 106, 20)
 EFFECT_WELL = 18
 
 
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with the top bar's trim (dbrown on row 1; brown, dbrown and
     ink on rows 45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,4 112x40 and neighbourhood 122,4 140x21. The game draws the effect wells, the Sound and
-    Pause buttons and every text and icon on it."""
+    cash 4,4 112x40 and neighbourhood 122,4 104x21, which ends clear of the Sound button's hit at
+    x 228. The game draws the effect wells, the Sound, Settings and Pause buttons and every text
+    and icon on it."""
     w, h = WALK_BAR
     g = Grid(w, h)
     wood(g, 0, h)
