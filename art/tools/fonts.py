@@ -12,7 +12,8 @@
 font-body and font-title are SIL Open Font License fonts; the font files and licenses are in
 art/fonts/. Their glyphs are white on transparent so the game tints them. Printable ASCII, the
 middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has; font-body's $ is drawn
-too (DRAWN), as Tiny5's is too thin to read at 1x.
+too (DRAWN), as Tiny5's is too thin to read at 1x, and its ascenders (b d f h k l) rise a row above
+the capitals (ASCEND), so l reads apart from I.
 
 font-display has A to Z, 0 to 9, ! ? , . ' - + $, space and ♥. Its line is 18px: the capitals'
 outline on rows 2 to 13 and their fill on rows 3 to 12 (base 13), with room above for the $ and
@@ -49,6 +50,10 @@ HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 # Tiny5's $ is a 3px S that reads as a stray mark at 1x: font-body draws a 4px S with 2px diagonals, its
 # stem a row above and below it.
 DRAWN = {"art/fonts/tiny5/Tiny5.ttf": {"$": (["..1.", ".111", "11..", "..11", "111.", ".1.."], 1, 5)}}
+# Tiny5's ascenders stop at the capitals' height, so l is I and b, d, h and k read as capitals at 1x.
+# font-body's rise a row above them, to the row i's dot, the $ and the heart already reach: the row
+# named here is drawn twice (the stem, or f's below its hook). Advances are unchanged.
+ASCEND = {"art/fonts/tiny5/Tiny5.ttf": {"b": 0, "d": 0, "f": 1, "h": 0, "k": 0, "l": 0}}
 ATLAS_W = 128
 
 # ---------- the sign lettering ----------
@@ -190,11 +195,20 @@ def kernings():
 
 # ---------- the TrueType fonts ----------
 
+def repeat_row(im, row):
+    """im one row taller, its row drawn twice."""
+    out = Image.new(im.mode, (im.width, im.height + 1), 0)
+    out.paste(im.crop((0, 0, im.width, row + 1)), (0, 0))
+    out.paste(im.crop((0, row, im.width, im.height)), (0, row + 1))
+    return out
+
+
 def glyphs(path, size):
     font = ImageFont.truetype(path, size)
     ascent, descent = font.getmetrics()
     out = {}
     drawn = DRAWN.get(path, {})
+    ascend = ASCEND.get(path, {})
     for ch in CHARS:
         if ch in drawn:
             rows, top, adv = drawn[ch]
@@ -222,7 +236,10 @@ def glyphs(path, size):
         if not box:
             out[ch] = (None, 0, 0, adv)
             continue
-        out[ch] = (canvas.crop(box), box[0], box[1], adv)
+        im, top = canvas.crop(box), box[1]
+        if ch in ascend:
+            im, top = repeat_row(im, ascend[ch]), top - 1
+        out[ch] = (im, box[0], top, adv)
     return out, ascent, descent
 
 
