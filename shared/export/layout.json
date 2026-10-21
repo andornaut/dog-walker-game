@@ -1389,7 +1389,7 @@
       },
       "dogOrigin": {
         "x": 14,
-        "y": 294
+        "y": 298
       },
       "dogTileInset": 1,
       "dogTiles": {
@@ -1403,6 +1403,10 @@
       "gate": {
         "height": 156,
         "y": 40
+      },
+      "gateBar": {
+        "height": 3,
+        "y": 196
       },
       "gateSpots": [
         {
@@ -1510,41 +1514,41 @@
         },
         "origin": {
           "x": 12,
-          "y": 459
+          "y": 462
         },
         "priceY": 28,
         "tileInset": 1
       },
       "pocketLining": {
         "denim": {
-          "height": 51,
+          "height": 50,
           "width": 346,
           "x": 7,
-          "y": 456
+          "y": 459
         },
         "stitchBottom": {
           "height": 2,
           "width": 342,
           "x": 9,
-          "y": 504
+          "y": 506
         },
         "stitchLeft": {
-          "height": 49,
+          "height": 48,
           "width": 2,
           "x": 9,
-          "y": 457
+          "y": 460
         },
         "stitchRight": {
-          "height": 49,
+          "height": 48,
           "width": 2,
           "x": 349,
-          "y": 457
+          "y": 460
         },
         "stitchTop": {
           "height": 2,
           "width": 342,
           "x": 9,
-          "y": 457
+          "y": 460
         }
       },
       "porchDogOffset": {
@@ -1574,24 +1578,25 @@
         "band": 20,
         "edge": 3
       },
+      "sectionGap": 2,
       "sections": {
         "dogs": {
-          "height": 160,
+          "height": 159,
           "width": 352,
           "x": 4,
-          "y": 270
+          "y": 274
         },
         "pocket": {
-          "height": 78,
+          "height": 77,
           "width": 352,
           "x": 4,
-          "y": 432
+          "y": 435
         },
         "walker": {
-          "height": 72,
+          "height": 71,
           "width": 352,
           "x": 4,
-          "y": 196
+          "y": 201
         }
       },
       "settings": {
@@ -1621,6 +1626,7 @@
         "x": 327,
         "y": 75
       },
+      "tileOffset": 24,
       "tileSelectOutset": 1,
       "topBar": {
         "caps": 10,
@@ -1645,7 +1651,7 @@
       },
       "walkerOrigin": {
         "x": 14,
-        "y": 221
+        "y": 225
       },
       "walkerTile": {
         "box": {
@@ -1682,55 +1688,55 @@
           "height": 44,
           "width": 105,
           "x": 14,
-          "y": 294
+          "y": 298
         },
         {
           "height": 44,
           "width": 105,
           "x": 127,
-          "y": 294
+          "y": 298
         },
         {
           "height": 44,
           "width": 105,
           "x": 240,
-          "y": 294
+          "y": 298
         },
         {
           "height": 44,
           "width": 105,
           "x": 14,
-          "y": 338
+          "y": 342
         },
         {
           "height": 44,
           "width": 105,
           "x": 127,
-          "y": 338
+          "y": 342
         },
         {
           "height": 44,
           "width": 105,
           "x": 240,
-          "y": 338
+          "y": 342
         },
         {
           "height": 44,
           "width": 105,
           "x": 14,
-          "y": 382
+          "y": 386
         },
         {
           "height": 44,
           "width": 105,
           "x": 127,
-          "y": 382
+          "y": 386
         },
         {
           "height": 44,
           "width": 105,
           "x": 240,
-          "y": 382
+          "y": 386
         }
       ],
       "pocketRects": [
@@ -1738,31 +1744,31 @@
           "height": 44,
           "width": 60,
           "x": 12,
-          "y": 459
+          "y": 462
         },
         {
           "height": 44,
           "width": 60,
           "x": 81,
-          "y": 459
+          "y": 462
         },
         {
           "height": 44,
           "width": 60,
           "x": 150,
-          "y": 459
+          "y": 462
         },
         {
           "height": 44,
           "width": 60,
           "x": 219,
-          "y": 459
+          "y": 462
         },
         {
           "height": 44,
           "width": 60,
           "x": 288,
-          "y": 459
+          "y": 462
         }
       ],
       "walkerRects": [
@@ -1770,25 +1776,25 @@
           "height": 44,
           "width": 77,
           "x": 14,
-          "y": 221
+          "y": 225
         },
         {
           "height": 44,
           "width": 77,
           "x": 99,
-          "y": 221
+          "y": 225
         },
         {
           "height": 44,
           "width": 77,
           "x": 184,
-          "y": 221
+          "y": 225
         },
         {
           "height": 44,
           "width": 77,
           "x": 269,
-          "y": 221
+          "y": 225
         }
       ]
     },

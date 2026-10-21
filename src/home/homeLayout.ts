@@ -23,12 +23,42 @@ const TOP_BAR_ICON_Y = TOP_BAR_MID - TOP_BAR_ICON / 2;
 const TOP_BAR_ONE_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS / 2;
 const TOP_BAR_FIRST_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS - TOP_BAR_LINE_GAP / 2;
 
-const POCKET_SECTION: Rect = { height: 78, width: 352, x: 4, y: 432 };
+// The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
+const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
+// Every gap between the bar, the three sections, Start walk and the screen's bottom.
+const SECTION_GAP = 2;
+// A section's tiles start this far below its top: the frame's 3px, the band's 20 rows and its
+// 1px rule.
+const TILE_OFFSET = 24;
+// The Pocket's denim carries a 2px stitch at its top, and its cells sit under that, 1px apart.
+const POCKET_CELLS_OFFSET = TILE_OFFSET + 3;
+const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
+
+// The sections stack from the bar down to Start walk, each SECTION_GAP apart; the Pocket takes
+// the rest.
+const WALKER_SECTION: Rect = {
+  height: 71,
+  width: 352,
+  x: 4,
+  y: GATE_BAR.y + GATE_BAR.height + SECTION_GAP,
+};
+const DOGS_SECTION: Rect = {
+  height: 159,
+  width: 352,
+  x: 4,
+  y: WALKER_SECTION.y + WALKER_SECTION.height + SECTION_GAP,
+};
+const POCKET_SECTION: Rect = {
+  height: START_BUTTON.y - SECTION_GAP - (DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP),
+  width: 352,
+  x: 4,
+  y: DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP,
+};
 
 // A section's tile area inside its frame, under the band: the rect its fill's TileSprite covers.
 export function sectionFill(section: Rect): Rect {
   const { height, width, x, y } = section;
-  return { height: height - 27, width: width - 6, x: x + 3, y: y + 24 };
+  return { height: height - 27, width: width - 6, x: x + 3, y: y + TILE_OFFSET };
 }
 
 // The Pocket's lining inside its section frame, each piece a TileSprite whose tile origin is
@@ -70,13 +100,14 @@ export const HOME_LAYOUT = {
   },
   // The dog card's place on screen, and the gear card's height; the gear card is centred.
   dogCard: { height: 376, width: 300, x: 30, y: 92 },
-  dogOrigin: { x: 14, y: 294 },
+  dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
   // The dog rows are hit areas 44 tall with no gap.
   dogTiles: { cellHeight: 44, cellWidth: 105, columns: 3, gapX: GAP, gapY: 0 },
   gap: GAP,
   gate: GATE,
+  gateBar: GATE_BAR,
   // At the gate the pack spreads out around the walker, the first dog through the gate.
   gateSpots: [
     { dx: 0, footDy: -46 },
@@ -116,7 +147,7 @@ export const HOME_LAYOUT = {
     cells: { cellHeight: 44, cellWidth: 60, columns: 5, gapX: 9, gapY: 0 },
     icon: { dx: 13, dy: 4 },
     lock: { dx: -2, dy: -3 },
-    origin: { x: 12, y: 459 },
+    origin: { x: 12, y: POCKET_SECTION.y + POCKET_CELLS_OFFSET },
     priceY: 28,
     tileInset: 1,
   },
@@ -134,20 +165,23 @@ export const HOME_LAYOUT = {
   sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },
   // A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
   sectionFrame: { band: 20, edge: 3 },
+  sectionGap: SECTION_GAP,
   // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a
   // heading band over its tiles; then Start walk.
   sections: {
-    dogs: { height: 160, width: 352, x: 4, y: 270 },
+    dogs: DOGS_SECTION,
     pocket: POCKET_SECTION,
-    walker: { height: 72, width: 352, x: 4, y: 196 },
+    walker: WALKER_SECTION,
   },
   settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: TOP_BAR_ICON_Y } },
-  startButton: { height: 44, width: 352, x: 4, y: 514 },
+  startButton: START_BUTTON,
   // Start walk's label caps: on the raised face when ready, on the sunk face when not.
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
   // The street name's centre and caps top on screen-home's street sign, clear of the walker's
   // speech bubble.
   streetSign: { x: 327, y: 75 },
+  // A section's tiles start this far below its top.
+  tileOffset: TILE_OFFSET,
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
   topBar: {
@@ -166,7 +200,7 @@ export const HOME_LAYOUT = {
     },
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
-  walkerOrigin: { x: 14, y: 221 },
+  walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
   // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
   // icon right of the box, and a locked walker's padlock over the tile's top-left corner and
   // its name plate's caps, centred. The tiles sit 7px inside

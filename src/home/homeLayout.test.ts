@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { SCREEN_CONFIG } from "../data/screen";
 import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
@@ -24,13 +25,32 @@ const rows = [
 ] as const;
 
 describe("home layout", () => {
-  it("spaces the three sections by the same gap", () => {
-    const gaps = [
-      sections.dogs.y - (sections.walker.y + sections.walker.height),
-      sections.pocket.y - (sections.dogs.y + sections.dogs.height),
+  it("spaces the bar, the sections, Start walk and the screen's bottom by the same gap", () => {
+    const { gateBar, sectionGap } = HOME_LAYOUT;
+    const stack = [
+      { bottom: gateBar.y + gateBar.height, top: gateBar.y },
+      ...[sections.walker, sections.dogs, sections.pocket, startButton].map((rect) => ({
+        bottom: rect.y + rect.height,
+        top: rect.y,
+      })),
+      { bottom: SCREEN_CONFIG.height, top: SCREEN_CONFIG.height },
     ];
-    expect(gaps[0]).toBe(gaps[1]);
-    expect(gaps[0]).toBeGreaterThan(0);
+    const gaps = stack.slice(1).map((item, i) => item.top - (stack[i]?.bottom ?? 0));
+    expect(gaps).toEqual(gaps.map(() => sectionGap));
+    expect(sectionGap).toBeGreaterThan(0);
+  });
+
+  it("puts the tiles directly under each band, at the same offset in every section", () => {
+    const { tileOffset } = HOME_LAYOUT;
+    const [pocketCell] = gridRects(pocket.cells, 1, pocket.origin);
+    const lining = pocketLining(sections.pocket);
+    expect(walkerOrigin.y - sections.walker.y).toBe(tileOffset);
+    expect(dogOrigin.y - sections.dogs.y).toBe(tileOffset);
+    expect(sectionFill(sections.walker).y).toBe(walkerOrigin.y);
+    expect(sectionFill(sections.dogs).y).toBe(dogOrigin.y);
+    // The Pocket's denim starts at the same offset; its cells sit under the top stitch.
+    expect(lining.denim.y - sections.pocket.y).toBe(tileOffset);
+    expect(pocketCell?.y).toBe(lining.stitchTop.y + lining.stitchTop.height);
   });
 
   it.each(Object.entries(sections))(
