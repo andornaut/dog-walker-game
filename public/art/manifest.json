@@ -1821,11 +1821,6 @@
       "json": "sprites/fx-bark.json"
     },
     {
-      "key": "fx-bark-word",
-      "png": "sprites/fx-bark-word.png",
-      "json": "sprites/fx-bark-word.json"
-    },
-    {
       "key": "fx-bump",
       "png": "sprites/fx-bump.png",
       "json": "sprites/fx-bump.json"
@@ -1871,29 +1866,14 @@
       "json": "sprites/fx-heart-loss.json"
     },
     {
-      "key": "fx-hit-goose",
-      "png": "sprites/fx-hit-goose.png",
-      "json": "sprites/fx-hit-goose.json"
-    },
-    {
       "key": "fx-hit-other-dog",
       "png": "sprites/fx-hit-other-dog.png",
       "json": "sprites/fx-hit-other-dog.json"
     },
     {
-      "key": "fx-hit-puddle",
-      "png": "sprites/fx-hit-puddle.png",
-      "json": "sprites/fx-hit-puddle.json"
-    },
-    {
       "key": "fx-hit-skunk",
       "png": "sprites/fx-hit-skunk.png",
       "json": "sprites/fx-hit-skunk.json"
-    },
-    {
-      "key": "fx-hit-squirrel",
-      "png": "sprites/fx-hit-squirrel.png",
-      "json": "sprites/fx-hit-squirrel.json"
     },
     {
       "key": "fx-hit-thief",
@@ -1924,56 +1904,6 @@
       "key": "fx-status-soaked",
       "png": "sprites/fx-status-soaked.png",
       "json": "sprites/fx-status-soaked.json"
-    },
-    {
-      "key": "fx-status-soaked-milkshake",
-      "png": "sprites/fx-status-soaked-milkshake.png",
-      "json": "sprites/fx-status-soaked-milkshake.json"
-    },
-    {
-      "key": "fx-status-soaked-milkshake@50",
-      "png": "sprites/fx-status-soaked-milkshake@50.png",
-      "json": "sprites/fx-status-soaked-milkshake@50.json"
-    },
-    {
-      "key": "fx-status-soaked-milkshake@62",
-      "png": "sprites/fx-status-soaked-milkshake@62.png",
-      "json": "sprites/fx-status-soaked-milkshake@62.json"
-    },
-    {
-      "key": "fx-status-soaked-milkshake@75",
-      "png": "sprites/fx-status-soaked-milkshake@75.png",
-      "json": "sprites/fx-status-soaked-milkshake@75.json"
-    },
-    {
-      "key": "fx-status-soaked-milkshake@88",
-      "png": "sprites/fx-status-soaked-milkshake@88.png",
-      "json": "sprites/fx-status-soaked-milkshake@88.json"
-    },
-    {
-      "key": "fx-status-soaked-mud",
-      "png": "sprites/fx-status-soaked-mud.png",
-      "json": "sprites/fx-status-soaked-mud.json"
-    },
-    {
-      "key": "fx-status-soaked-mud@50",
-      "png": "sprites/fx-status-soaked-mud@50.png",
-      "json": "sprites/fx-status-soaked-mud@50.json"
-    },
-    {
-      "key": "fx-status-soaked-mud@62",
-      "png": "sprites/fx-status-soaked-mud@62.png",
-      "json": "sprites/fx-status-soaked-mud@62.json"
-    },
-    {
-      "key": "fx-status-soaked-mud@75",
-      "png": "sprites/fx-status-soaked-mud@75.png",
-      "json": "sprites/fx-status-soaked-mud@75.json"
-    },
-    {
-      "key": "fx-status-soaked-mud@88",
-      "png": "sprites/fx-status-soaked-mud@88.png",
-      "json": "sprites/fx-status-soaked-mud@88.json"
     },
     {
       "key": "fx-status-soaked@50",
@@ -5575,30 +5505,6 @@
       "png": "images/card-zone-woof-way.png"
     },
     {
-      "key": "help-cards",
-      "png": "images/help-cards.png"
-    },
-    {
-      "key": "help-lanes",
-      "png": "images/help-lanes.png"
-    },
-    {
-      "key": "help-owners",
-      "png": "images/help-owners.png"
-    },
-    {
-      "key": "help-pickups",
-      "png": "images/help-pickups.png"
-    },
-    {
-      "key": "help-pulls",
-      "png": "images/help-pulls.png"
-    },
-    {
-      "key": "help-zones",
-      "png": "images/help-zones.png"
-    },
-    {
       "key": "icon-bump",
       "png": "images/icon-bump.png"
     },
@@ -5645,14 +5551,6 @@
     {
       "key": "icon-gear-running-shoes-20",
       "png": "images/icon-gear-running-shoes-20.png"
-    },
-    {
-      "key": "icon-gear-whistle",
-      "png": "images/icon-gear-whistle.png"
-    },
-    {
-      "key": "icon-gear-whistle-20",
-      "png": "images/icon-gear-whistle-20.png"
     },
     {
       "key": "icon-help",

@@ -28,16 +28,17 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-import help as hp  # noqa: E402
+import mock_toronto as mt  # noqa: E402
+import scene as sn  # noqa: E402
 
 # The tall band's camera and regions, which the committed layout export predates.
-hp.LAYOUT["regions"]["backdrop"] = dict(x=0, y=40, width=360, height=174)
-hp.LAYOUT["regions"]["approach"] = dict(x=0, y=195, width=360, height=19)
-hp.LAYOUT["regions"]["road"] = dict(x=20, y=214, width=320, height=256)
-hp.LAYOUT["camera"].update(horizonY=-36, farY=214, focal=720, footY=464, ratio=500 / 720)
-hp.W, hp.H, hp.OX, hp.TOP = 360, 560, 0, 0
-hp.YH, hp.FOOT, hp.F = -36, 464, 720
-hp.KS = hp.FOOT - hp.YH
+sn.LAYOUT["regions"]["backdrop"] = dict(x=0, y=40, width=360, height=174)
+sn.LAYOUT["regions"]["approach"] = dict(x=0, y=195, width=360, height=19)
+sn.LAYOUT["regions"]["road"] = dict(x=20, y=214, width=320, height=256)
+sn.LAYOUT["camera"].update(horizonY=-36, farY=214, focal=720, footY=464, ratio=500 / 720)
+mt.W, mt.H, mt.OX, mt.TOP = 360, 560, 0, 0
+mt.YH, mt.FOOT, mt.F = -36, 464, 720
+mt.KS = mt.FOOT - mt.YH
 
 import backdrops as bd  # noqa: E402  (reads the patched layout at import)
 from minis import Mini, scaled  # noqa: E402
@@ -104,19 +105,19 @@ def dividers(img, y, s, z, span):
     if span > 6 or z % 32 >= 16:
         return
     for d in (-96, -32, 32, 96):
-        x0 = round(hp.CX + (d - 1) * s - 0.5)
+        x0 = round(mt.CX + (d - 1) * s - 0.5)
         for x in range(x0, x0 + max(1, round(2 * s))):
-            img.putpixel((x, y), hp.rgb("lgrey"))
+            img.putpixel((x, y), sn.rgb("lgrey"))
 
 
 def raster(img, y0, y1):
     """The road and verges in the camera, screen rows y0 to y1 - 1."""
     for y in range(y0, y1):
-        s = (y + 0.5 - hp.YH) / hp.KS
-        z = hp.F / s - hp.F
-        span = z - (hp.F / ((y + 1.5 - hp.YH) / hp.KS) - hp.F)
+        s = (y + 0.5 - mt.YH) / mt.KS
+        z = mt.F / s - mt.F
+        span = z - (mt.F / ((y + 1.5 - mt.YH) / mt.KS) - mt.F)
         for x in range(W):
-            img.putpixel((x, y), hp.rgb(verge((x + 0.5 - hp.CX) / s, z, span, x, y)))
+            img.putpixel((x, y), sn.rgb(verge((x + 0.5 - mt.CX) / s, z, span, x, y)))
         dividers(img, y, s, z, span)
 
 
@@ -244,7 +245,7 @@ def parkette(cv, x0, x1):
 
 
 def backdrop():
-    cv = hp.Canvas(bd.W, bd.H)
+    cv = sn.Canvas(bd.W, bd.H)
     bd.sky(cv, clouds=((112, bd.BASE - 58, 22, 4),))
     base = bd.BASE
     # downtown in the distance, pale, and the CN Tower over the mural block
@@ -660,7 +661,7 @@ def render(key, step):
         for y, row in enumerate(rows):
             for x, c in enumerate(row):
                 if c:
-                    img.putpixel((x, y), hp.rgb(c) + (255,))
+                    img.putpixel((x, y), sn.rgb(c) + (255,))
         RENDERED[key, step] = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT) if key in MIRRORED else img
     return RENDERED[key, step]
 
@@ -697,11 +698,11 @@ def ground_shadow(sc, cx, foot, w):
             if dx * dx + dy * dy <= 1 and 0 <= cx + x < W:
                 px = sc.img.getpixel((int(cx + x), int(foot - 1 + y)))
                 key = "%02x%02x%02x" % px
-                sc.img.putpixel((int(cx + x), int(foot - 1 + y)), hp.rgb(DARKER.get(key, key)))
+                sc.img.putpixel((int(cx + x), int(foot - 1 + y)), sn.rgb(DARKER.get(key, key)))
 
 
 def walk_screen(band):
-    sc = hp.Scene(W, H)
+    sc = mt.Scene(W, H)
     sc.shade, sc.leash_col = "navy", "pink"
     raster(sc.img, FAR_Y, ROAD_END)
     items = []
@@ -711,30 +712,30 @@ def walk_screen(band):
     for key, tag, x, z in ROAD_OBJECTS:
         items.append((z, "road", key, (tag, x)))
     for z, kind, key, where in sorted(items, key=lambda it: -it[0]):
-        s = hp.F / (hp.F + z)
-        foot = round(hp.YH + hp.KS * s)
+        s = mt.F / (mt.F + z)
+        foot = round(mt.YH + mt.KS * s)
         if kind == "prop":
             art = at_depth(key, s)
-            cx = hp.CX + where * s
+            cx = mt.CX + where * s
             if key in FREE:
                 ground_shadow(sc, round(cx), foot, art.getbbox()[2] - art.getbbox()[0])
             sc.paste(art, cx - art.width / 2, foot - art.height)
         else:
             tag, x = where
             sc.stand(key, tag, x, z)
-    sc.pack(hp.lane(2), tuple(f"dog-{d}" for d in DOGS))
+    sc.pack(mt.lane(2), tuple(f"dog-{d}" for d in DOGS))
     sc.img.paste(band, (0, BAND_Y))
-    zone = dict(hp.ZONES["shops"], name="Kensington Market")
-    hp.ZONES["kensington"] = zone
+    zone = dict(sn.ZONES["shops"], name="Kensington Market")
+    sn.ZONES["kensington"] = zone
     sc.top_bar(["kensington"], 0, 1, 0.3)
-    b = hp.TOP_BAR["buttons"]["sound"]
-    sc.paste(hp.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
-    sc.paste(hp.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
-    panel = hp.Scene(W, H - DOG_BAND_Y)
-    dog_band = hp.image("ui-dog-band")
+    b = mt.TOP_BAR["buttons"]["sound"]
+    sc.paste(sn.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
+    sc.paste(sn.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
+    panel = mt.Scene(W, H - DOG_BAND_Y)
+    dog_band = sn.image("ui-dog-band")
     panel.img.paste(dog_band, (0, 0), dog_band)
     for i, d in enumerate(DOGS):
-        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, hp.dog(d)[3])
+        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, mt.dog(d)[3])
     sc.img.paste(panel.img, (0, DOG_BAND_Y))
     return sc.img
 
@@ -747,7 +748,7 @@ def props_sheet():
     arts = [[render(k, 1) for k in row] for row in rows]
     width = max(sum(a.width * 2 + pad for a in row) + pad for row in arts)
     height = sum(max(a.height * 2 for a in row) + label + pad for row in arts) + pad
-    sheet = hp.Canvas(width, height)
+    sheet = sn.Canvas(width, height)
     sheet.fill(0, 0, width, height, FORECOURT)
     y = pad
     for keys, row in zip(rows, arts):
@@ -756,7 +757,7 @@ def props_sheet():
         for key, art in zip(keys, row):
             big = art.resize((art.width * 2, art.height * 2), Image.NEAREST)
             sheet.paste(big, x, y + tall - big.height)
-            hp.text_c(sheet, key.upper(), x + big.width / 2, y + tall + 6, "plum", 2)
+            sn.text_c(sheet, key.upper(), x + big.width / 2, y + tall + 6, "plum", 2)
             x += big.width + pad
         y += tall + label + pad
     return sheet.img

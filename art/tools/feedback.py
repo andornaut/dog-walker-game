@@ -30,8 +30,8 @@ fx-heart-gain  32x32  pop (5 frames: 50, 50, 90, 90, 450ms; 730ms)  the same pop
                       to 117, rows 64 to 87), where its 14 rows fit.
 fx-dodge       48x48  play (5 frames, 70ms; 350ms)  laid on a small dog's 48x48 frame as it dodges a
                       hit: a dust puff kicked up at its left foot swells, drifts back and thins,
-                      three speed lines trail on its left and shorten, and DODGE! in the comic
-                      lettering sits centred over its head (ring top on row 0) on frames 0 to 3.
+                      three speed lines trail on its left and shorten. The game letters DODGE!
+                      over its head in font-comic (ring top-left at 6,0) on frames 0 to 3.
                       Drawn for a sidestep right; the game mirrors it for a sidestep left
 
 Usage:
@@ -41,7 +41,7 @@ Usage:
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
-the rim, burst, twinkle, heart and comic word helpers in fx.py, piece and
+the rim, burst, twinkle and heart helpers in fx.py, piece and
 layer in hits.py, the broken heart in needs.py.
 """
 
@@ -50,7 +50,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fx import burst, rim, stamp, star4, word  # noqa: E402
+from fx import burst, rim, stamp, star4  # noqa: E402
 from hits import layer, piece  # noqa: E402
 from needs import BROKEN, BROKEN_CRACK  # noqa: E402
 from pixel import DARKER, Grid, main  # noqa: E402
@@ -164,8 +164,7 @@ def fly_gain(glint):
 # fx-dodge is laid on a 48x48 dog's frame. The dog sidesteps right: its dust kicks up at the left foot and
 # speed lines trail it on the left (the game mirrors the frame for a sidestep left).
 DODGE = 48
-DODGE_WORD = "DODGE!"
-# Per frame: each puff's (x, y, radius), the speed lines' length; the word shows over frames 0 to 3.
+# Per frame: each puff's (x, y, radius), the speed lines' length.
 DODGE_PUFFS = (((19, 43, 2), (15, 44, 1.5)),
                ((17, 42, 2.8), (12, 43, 2.3), (21, 44, 1.8)),
                ((15, 40, 3.2), (9, 42, 2.8), (21, 43, 2.3)),
@@ -175,11 +174,10 @@ DODGE_LINES = (10, 9, 6, 3, 0)
 DODGE_ROWS = (25, 30, 35)
 
 
-def dodge(step, worded=True):
+def dodge(step):
     """A small dog's sidestep: a dust puff kicked up at its left foot that swells, drifts back and thins out,
-    three speed lines trailing on its left that shorten as it settles, and DODGE! in the comic lettering
-    centred over its head on frames 0 to 3. Light grey and white dust and white lines in a plum rim, as the
-    effects' rule, so they hold on every road."""
+    and three speed lines trailing on its left that shorten as it settles. Light grey and white dust and
+    white lines in a plum rim, as the effects' rule, so they hold on every road."""
     g = Grid(DODGE, DODGE)
     for x, y, r in DODGE_PUFFS[step]:
         g.ell(x, y, r, r * 0.8, "white" if step == 4 else "lgrey", None if step == 4 else "grey")
@@ -187,10 +185,7 @@ def dodge(step, worded=True):
     for k, y in enumerate(DODGE_ROWS):
         if n:
             g.rect(12 - n + (2 if k == 1 else 0), y, n - (2 if k == 1 else 0), 1, "white")
-    rim(g)
-    if worded and step < 4:
-        word(g, DODGE_WORD, DODGE // 2, 0)
-    return g
+    return rim(g)
 
 
 def sprites():

@@ -36,13 +36,14 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-import help as hp  # noqa: E402
+import mock_toronto as mt  # noqa: E402
+import scene as sn  # noqa: E402
 
 # The tall band's camera, ahead of the game's export: the band on rows 40 to 213, the approach
 # from band row 155, the road's far edge on row 214 at scale 0.5, feet on row 464.
-hp.LAYOUT["regions"]["backdrop"].update(y=40, height=174)
-hp.LAYOUT["regions"]["approach"]["y"] = 195
-hp.LAYOUT["camera"].update(horizonY=-36, farY=214)
+sn.LAYOUT["regions"]["backdrop"].update(y=40, height=174)
+sn.LAYOUT["regions"]["approach"]["y"] = 195
+sn.LAYOUT["camera"].update(horizonY=-36, farY=214)
 
 import backdrops as bd  # noqa: E402
 from minis import STEPS, Mini  # noqa: E402
@@ -56,13 +57,13 @@ YH, F, FOOT = -36, 720, 464
 DOG_BAND_Y = 466
 SCALE = 1.75
 
-hp.W, hp.H, hp.OX, hp.TOP = W, H, 0, 0
-hp.YH, hp.F, hp.KS = YH, F, FOOT - YH
-hp.ZONES[ZONE]["name"] = "Cabbagetown"
+mt.W, mt.H, mt.OX, mt.TOP = W, H, 0, 0
+mt.YH, mt.F, mt.KS = YH, F, FOOT - YH
+sn.ZONES[ZONE]["name"] = "Cabbagetown"
 # Cabbagetown's narrow sidewalks: the walk ends at across 184, not Elm Avenue's 208, so the
 # front gardens and porches start nearer the road.
 WALK = 184
-hp.VERGES[ZONE]["walkTo"] = WALK
+mt.VERGES[ZONE]["walkTo"] = WALK
 bd.WALK, bd.PERCH_X = WALK, (-(WALK + 8), -600)
 
 
@@ -253,7 +254,7 @@ FAR_RIGHT = (("rust", "red", True), ("cream", "blue", False), ("rust", "dgreen",
 
 
 def skyline():
-    cv = hp.Canvas(bd.W, bd.H)
+    cv = sn.Canvas(bd.W, bd.H)
     base = bd.BASE
     bd.sky(cv, clouds=((150, 82, 30, 5), (230, 74, 18, 3), (300, 86, 44, 7)))
     # far off: the downtown towers and the CN Tower over the west end
@@ -599,7 +600,7 @@ def drawn(key, step=1.0):
         for y, row in enumerate(rows):
             for x, c in enumerate(row):
                 if c:
-                    img.putpixel((x, y), hp.rgb(c) + (255,))
+                    img.putpixel((x, y), sn.rgb(c) + (255,))
         CACHE[key, step] = img
     return CACHE[key, step]
 
@@ -608,7 +609,7 @@ def prop_at(key, s):
     """A prop at scale s, from the smallest of its steps at least that size, scaled down
     nearest-neighbour, as the game draws road sprites."""
     if key not in NEW:
-        return hp.depth_frame(key, "idle", s)
+        return mt.depth_frame(key, "idle", s)
     full = drawn(key)
     size = max(1, math.floor(max(full.size) * min(1, s) + 0.5))
     art = full
@@ -623,7 +624,7 @@ def prop_at(key, s):
 
 
 def width(key):
-    return drawn(key).width if key in NEW else hp.frame(key, "idle").width
+    return drawn(key).width if key in NEW else sn.frame(key, "idle").width
 
 
 # The verges: (side, z, key, inner edge across, dz). Lots (a rowhouse, its front garden or
@@ -655,14 +656,14 @@ def lawn_shadow(sc, cx, foot, w):
 
 
 def walk():
-    sc = hp.Scene(W, H)
+    sc = mt.Scene(W, H)
     sc.road(ZONE)
     items = [(z + dz, "prop", (side, key, inner + width(key) / 2)) for side, z, key, inner, dz in LOTS]
     items += [(d, "object", (key, ln)) for key, ln, d in OBJECTS]
     for z, kind, what in sorted(items, key=lambda it: -it[0]):
         if kind == "object":
             key, ln = what
-            sc.stand(key, "idle", hp.lane(ln), z)
+            sc.stand(key, "idle", mt.lane(ln), z)
             continue
         side, key, across = what
         s = F / (F + z)
@@ -672,16 +673,16 @@ def walk():
         if key in SHADOWED:
             lawn_shadow(sc, round(cx), row, art.getbbox()[2] - art.getbbox()[0])
         sc.paste(art, cx - art.width / 2, row - art.getbbox()[3] + 1)
-    sc.pack(hp.lane(2), tuple(f"dog-{d}" for d in DOGS))
+    sc.pack(mt.lane(2), tuple(f"dog-{d}" for d in DOGS))
     sc.img.paste(skyline(), (0, BAND_Y))
     sc.top_bar([ZONE], 24, 2, 0.15)
-    b = hp.TOP_BAR["buttons"]["sound"]
-    sc.paste(hp.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
-    sc.paste(hp.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
-    band = hp.image("ui-dog-band")
+    b = mt.TOP_BAR["buttons"]["sound"]
+    sc.paste(sn.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
+    sc.paste(sn.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
+    band = sn.image("ui-dog-band")
     sc.img.paste(band, (0, DOG_BAND_Y), band)
     for i, d in enumerate(DOGS):
-        sc.doghouse(i * 120, 470, d, hp.dog(d)[3])
+        sc.doghouse(i * 120, 470, d, mt.dog(d)[3])
     return sc.img
 
 
@@ -695,7 +696,7 @@ def props_sheet():
     sizes = [[drawn(k).size for k in r] for r in rows]
     sheet_w = max(sum(w * 2 + gap for w, _ in r) + gap for r in sizes)
     sheet_h = sum(max(h for _, h in r) * 2 + label + gap for r in sizes) + gap
-    cv = hp.Canvas(sheet_w, sheet_h)
+    cv = sn.Canvas(sheet_w, sheet_h)
     cv.fill(0, 0, sheet_w, sheet_h, "green")
     y = gap
     for r, sz in zip(rows, sizes):
@@ -703,7 +704,7 @@ def props_sheet():
         for key, (w, h) in zip(r, sz):
             art = drawn(key)
             art = art.resize((w * 2, h * 2), Image.NEAREST)
-            hp.text(cv, key.removeprefix("roadside-").upper(), x, y, "ink", 2)
+            sn.text(cv, key.removeprefix("roadside-").upper(), x, y, "ink", 2)
             cv.paste(art, x, y + label + tall - h * 2)
             x += w * 2 + gap
         y += tall + label + gap

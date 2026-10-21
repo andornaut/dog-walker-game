@@ -47,7 +47,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
-import help as hp  # noqa: E402
+import scene as sn  # noqa: E402
 from pixel import DARKER, K, Grid  # noqa: E402
 
 # ---------- the band and the camera ----------
@@ -55,7 +55,7 @@ from pixel import DARKER, K, Grid  # noqa: E402
 # game's: the horizon and foot rows on screen, the focal length F in road pixels and the road's
 # centre column. The road below the band then shows VISIBLE road pixels, F (1 / s - 1) for the
 # scale s on screen row BAR + H.
-LAYOUT = hp.LAYOUT
+LAYOUT = sn.LAYOUT
 BAND = LAYOUT["regions"]["backdrop"]
 W, H = BAND["width"], BAND["height"]   # the band: screen rows BAR to BAR + H - 1
 BAR = BAND["y"]                # the status bar's height: band row y is screen row BAR + y
@@ -389,7 +389,7 @@ def poly(cv, pts, c):
     from PIL import ImageDraw
 
     xy = [(round(at(*p)[0] - 0.5), round(at(*p)[1] - 0.5)) for p in pts]
-    ImageDraw.Draw(cv.img).polygon(xy, fill=hp.rgb(K.get(c, c)))
+    ImageDraw.Draw(cv.img).polygon(xy, fill=sn.rgb(K.get(c, c)))
 
 
 def front(cv, x0, x1, z, h0, h1, c):
@@ -632,7 +632,7 @@ def flat(road):
 
 
 def woof_way():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     # fair-weather puffs of mixed sizes, spread unevenly above the hill
     sky(cv, clouds=((8, BASE - 57, 40, 7), (110, BASE - 60, 18, 3), (232, BASE - 56, 30, 5),
                     (318, BASE - 48, 18, 3)))
@@ -691,7 +691,7 @@ def woof_way():
 
 
 def bark_park():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     # two big billowing clouds clear of the gate, a small one and a kite
     sky(cv, clouds=((2, BASE - 50, 52, 9), (CX - 66, BASE - 62, 16, 3), (CX + 82, BASE - 52, 56, 10)))
     kx, ky = CX + 34, BASE - 62
@@ -847,7 +847,7 @@ def shops_verge(x, z, span, px, py):
 
 
 def shops():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     # a sunburst of sky and cyan rays from the end of the street, a cloud either side
     # the rays end on an arc below the calm rows, where flat cyan carries on
     sunburst(cv, CX, BASE + 6, 7, "sky", "cyan", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
@@ -962,7 +962,7 @@ SNOOZE_SKY = ("purple", "mauve", "pink", "skin1")
 
 
 def long_way_home():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     # a banded sunset, warm all the way up, and the low sun at the end of the street, striped,
     # setting behind the trees beyond the back yards
     sunset(cv, LONG_WAY_SKY, BASE)
@@ -1041,7 +1041,7 @@ def crescent_bend(px):
 
 
 def snooze_crescent():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     road_c = SNOOZE_ROAD
     # a banded dusk sky, purple down to a last peach glow behind the roofs, a crescent moon and
     # the first stars
@@ -1129,7 +1129,7 @@ def fence_rail(cv, x0, x1, z, col="lgrey"):
 
 
 def paws_promenade():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     road_c = PROMENADE_ROAD
     sky(cv, clouds=((14, BASE - 52, 36, 6), (CX - 20, BASE - 58, 24, 4), (CX + 96, BASE - 50, 48, 7)))
     # the far bank: hills, a village and trees along a grassy bank, a stone edge and the river
@@ -1414,7 +1414,7 @@ def gags():
 
 
 def preview(out, scale=3):
-    sheet = Image.new("RGB", (W * scale, (H + 6) * len(ZONES) * scale), hp.rgb("ink"))
+    sheet = Image.new("RGB", (W * scale, (H + 6) * len(ZONES) * scale), sn.rgb("ink"))
     for i, draw in enumerate(ZONES.values()):
         sheet.paste(draw().img.resize((W * scale, H * scale), Image.NEAREST), (0, i * (H + 6) * scale))
     sheet.save(out)

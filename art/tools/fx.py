@@ -11,15 +11,11 @@ fx-splash   32x32  play (5 frames)  water thrown up by a puddle
 fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
 fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behind
                                     the ui-new-best ribbon (centred on it)
-fx-bark-word 32x16 pop (4 frames, 60, 60, 140, 140ms)  WOOF! in the comic lettering, popping
-                                    up 2px, overshooting 1px and settling, 400ms in all. The
-                                    game plays it at fx-bark's point in place of fx-bark's pop,
-                                    and fx-bark with reduced motion
 
-The comic words (fx-bark-word, and play-word on every fx-hit-* in hits.py) are
-built like the sign logo: flat yellow letters, 7 rows with 2px stems, in a 1px ink
-ring that fills the counters and the gaps between letters, on a solid dred shadow
-2px down and right. Display words only, 2 to 7 letters.
+The comic lettering (LETTERS, word), which fonts.py exports as font-comic, is built like the
+sign logo: flat yellow letters, 7 rows with 2px stems, in a 1px ink ring that fills the
+counters and the gaps between letters, on a solid dred shadow 2px down and right. Display
+words only, 2 to 7 letters.
 
 Usage:
   fx.py preview OUT.png   every frame of every effect on the street colours
@@ -230,19 +226,12 @@ def new_best(step):
     return g
 
 
-def bark_word(step):
-    """32x16: WOOF! pops up 2px from below, overshoots by 1px and settles, in the comic lettering. Its ink
-    ring holds on the light roads and the yellow fill on Elm Avenue."""
-    return word(Grid(32, 16), "WOOF!", 16, (4, 1, 2, 2)[step])
-
-
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
     yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(5)], 70)]
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-bark-word", [("pop", [bark_word(i).outlined(False) for i in range(4)], [60, 60, 140, 140])]
 
 
 if __name__ == "__main__":

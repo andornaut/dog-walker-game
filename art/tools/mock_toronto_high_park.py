@@ -15,7 +15,7 @@ Writes, in Endesga 32, from the exported art and new drawings:
 
 The camera is the tall band's: horizon -36, feet on row 464, focal 720, the road's far edge on
 row 214 at scale 0.5. layout.json still holds the short band, so the script sets the tall band's
-regions and camera on help.py's copy before backdrops.py reads them.
+regions and camera on scene.py's copy before backdrops.py reads them.
 
 Props are drawn as roadside.py draws its own: front elevations on a design grid at 1.75x, outlined
 with road_edge, here redrawn at each prop's projected scale.
@@ -33,10 +33,11 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-import help as hp  # noqa: E402
+import mock_toronto as mt  # noqa: E402
+import scene as sn  # noqa: E402
 
 # The tall band and the tilted camera, set before backdrops.py reads the layout.
-L = hp.LAYOUT
+L = sn.LAYOUT
 L["regions"]["backdrop"]["height"] = 174
 L["regions"]["approach"].update(y=195, height=19)
 L["regions"]["road"].update(y=214, height=256)
@@ -57,8 +58,8 @@ ROAD = 160                     # half the road's width, in road px
 
 
 def use_camera():
-    hp.W, hp.H, hp.OX, hp.TOP = W, H, 0, 0
-    hp.YH, hp.F, hp.KS = YH, F, KS
+    mt.W, mt.H, mt.OX, mt.TOP = W, H, 0, 0
+    mt.YH, mt.F, mt.KS = YH, F, KS
 
 
 # ---------- the ground: one painter for the band's stub and the road below it ----------
@@ -183,7 +184,7 @@ def tiny_walker(cv, x, base, coat, dog):
 
 
 def backdrop():
-    cv = hp.Canvas(bd.W, bd.H)
+    cv = sn.Canvas(bd.W, bd.H)
     B = bd.BASE
     bd.sky(cv, clouds=((24, B - 58, 34, 6), (150, B - 64, 16, 3), (232, B - 60, 28, 4)))
     # downtown far off to the east: the CN Tower over a cluster of towers
@@ -588,7 +589,7 @@ def prop(key, s=1.0):
         draw(g)
         rows = g.outlined()
         img = Image.new("RGBA", (len(rows[0]), len(rows)))
-        img.putdata([(*hp.rgb(c), 255) if c else (0, 0, 0, 0) for row in rows for c in row])
+        img.putdata([(*sn.rgb(c), 255) if c else (0, 0, 0, 0) for row in rows for c in row])
         CACHE[key, s] = img
     return CACHE[key, s]
 
@@ -617,7 +618,7 @@ def paint_road(sc):
         s = (y + 0.5 - YH) / KS
         z = F / s - F
         for x in range(W):
-            px[x, y] = hp.rgb(ground((x + 0.5 - CX) / s, z))
+            px[x, y] = sn.rgb(ground((x + 0.5 - CX) / s, z))
 
 
 def place_prop(sc, key, side, inner, d):
@@ -636,18 +637,18 @@ def place_prop(sc, key, side, inner, d):
 
 
 def bottom_panel():
-    panel = hp.Scene(W, H - DOG_BAND_Y)
-    band = hp.image("ui-dog-band")
+    panel = mt.Scene(W, H - DOG_BAND_Y)
+    band = sn.image("ui-dog-band")
     panel.img.paste(band, (0, 0), band)
     for i, d in enumerate(DOGS):
-        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, hp.dog(d)[3])
+        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, mt.dog(d)[3])
     return panel.img
 
 
 def walk(band):
     use_camera()
-    hp.ZONES["highPark"] = {**hp.ZONES["park"], "name": "High Park"}
-    sc = hp.Scene(W, H)
+    sn.ZONES["highPark"] = {**sn.ZONES["park"], "name": "High Park"}
+    sc = mt.Scene(W, H)
     sc.shade, sc.leash_col = "slate", "plum"
     paint_road(sc)
     items = [(d, "prop", p) for p in PLACED for d in (p[3],)] + [(o[3], "obj", o) for o in OBJECTS]
@@ -655,13 +656,13 @@ def walk(band):
         if kind == "prop":
             place_prop(sc, *it)
         else:
-            sc.stand(it[0], it[1], hp.lane(it[2]), d)
-    sc.pack(hp.lane(2), tuple(f"dog-{d}" for d in DOGS))
+            sc.stand(it[0], it[1], mt.lane(it[2]), d)
+    sc.pack(mt.lane(2), tuple(f"dog-{d}" for d in DOGS))
     sc.img.paste(band, (0, BAND_Y))
     sc.top_bar(["highPark"], 42, 1, 0.4)
-    b = hp.TOP_BAR["buttons"]["sound"]
-    sc.paste(hp.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
-    sc.paste(hp.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
+    b = mt.TOP_BAR["buttons"]["sound"]
+    sc.paste(sn.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
+    sc.paste(sn.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
     sc.img.paste(bottom_panel(), (0, DOG_BAND_Y))
     return sc.img
 
@@ -673,7 +674,7 @@ def sheet():
     cw = max(i.width for _, i in cells) + pad
     rows = [cells[i:i + cols] for i in range(0, len(cells), cols)]
     rh = [max(i.height for _, i in r) + 20 for r in rows]
-    cv = hp.Canvas(cols * cw + pad, sum(rh) + pad * (len(rows) + 1))
+    cv = sn.Canvas(cols * cw + pad, sum(rh) + pad * (len(rows) + 1))
     cv.fill(0, 0, cv.img.width, cv.img.height, "plum")
     y = pad
     for r, h in zip(rows, rh):
@@ -682,8 +683,8 @@ def sheet():
             cv.fill(x, y, cw - pad, h, "green")
             cv.paste(img, x + (cw - pad - img.width) // 2, y + h - 20 - img.height)
             cv.fill(x, y + h - 18, cw - pad, 18, "cream")
-            hp.text_c(cv, f"ROADSIDE-{k.upper()}", x + (cw - pad) / 2, y + h - 15, "plum")
-            hp.text_c(cv, LABELS[k].upper(), x + (cw - pad) / 2, y + h - 8, "dbrown")
+            sn.text_c(cv, f"ROADSIDE-{k.upper()}", x + (cw - pad) / 2, y + h - 15, "plum")
+            sn.text_c(cv, LABELS[k].upper(), x + (cw - pad) / 2, y + h - 8, "dbrown")
         y += h + pad
     return cv.img.resize((cv.img.width * 2, cv.img.height * 2), Image.NEAREST)
 

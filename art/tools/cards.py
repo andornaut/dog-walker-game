@@ -41,7 +41,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
-import help as hp  # noqa: E402
+import scene as sn  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
 from ui import chrome, to_image  # noqa: E402
@@ -114,13 +114,13 @@ def card_cost():
 
 # ---------- illustration helpers ----------
 
-class Art(hp.Scene):
+class Art(sn.Scene):
     def __init__(self):
         super().__init__(AW, AH)
 
     def ground(self, zone, x0=122):
-        self.shade, self.leash_col = hp.ZONES[zone]["shadow"], hp.ZONES[zone]["leash"]
-        tile = hp.TILES[zone].crop((x0, 0, x0 + AW, 64))
+        self.shade, self.leash_col = sn.ZONES[zone]["shadow"], sn.ZONES[zone]["leash"]
+        tile = sn.TILES[zone].crop((x0, 0, x0 + AW, 64))
         self.img.paste(tile, (0, -4))
 
     def grass(self):
@@ -138,10 +138,10 @@ class Art(hp.Scene):
 
     def put(self, key, tag, cx, foot, i=0, flip=False, shadow=True):
         """key's frame standing on its shadow, its frame's bottom on row foot; returns the row of a dog's
-        collar, help.COLLAR over its feet (its last opaque row)."""
+        collar, scene.COLLAR over its feet (its last opaque row)."""
         self.feet(key, tag, cx, foot, i, flip, shadow)
-        f = hp.frame(key, tag, i)
-        return foot - f.height + f.getbbox()[3] - 1 - hp.COLLAR
+        f = sn.frame(key, tag, i)
+        return foot - f.height + f.getbbox()[3] - 1 - sn.COLLAR
 
     def stink(self, x, y, n, col, sh):
         """n wavy stink lines rising from x, y, every third pixel in sh."""
@@ -167,12 +167,12 @@ class Art(hp.Scene):
 
     def coins(self, pts, i=0):
         for k, (x, y) in enumerate(pts):
-            self.paste(hp.frame("tip", "idle", i + k), x, y)
+            self.paste(sn.frame("tip", "idle", i + k), x, y)
 
     def face(self, key, mood, x, y):
         self.fill(x - 1, y - 1, 34, 34, "plum")
         self.fill(x, y, 32, 32, "tan")
-        self.paste(hp.frame(key, mood), x, y)
+        self.paste(sn.frame(key, mood), x, y)
 
     def leash(self, x0, y0, x1, y1):
         self.line(x0, y0, x1, y1, self.leash_col)
@@ -374,7 +374,7 @@ def goose_honk_back():
     honk(a, 40, 13)
     c = a.put("dog-koda", "react", 24, 57)
     a.lead(24, c, 20)
-    a.paste(hp.frame("fx-bark", "pop", 1), 22, 2)
+    a.paste(sn.frame("fx-bark", "pop", 1), 22, 2)
     broken_hearts(a, [(2, 4), (10, 10)])
     return a
 
@@ -384,7 +384,7 @@ def goose_honk_back():
 def wallet_keep():
     a = Art()
     a.ground("homeStretch")
-    a.paste(hp.frame("lost-wallet", "idle", 1), 12, 24)
+    a.paste(sn.frame("lost-wallet", "idle", 1), 12, 24)
     a.coins([(28, 30), (34, 22), (40, 32)])
     a.face("face-owner-zippy", "upset", 41, 12)
     return a
@@ -395,7 +395,7 @@ def neighbour_take():
     a.grass()
     a.put("biscuit-neighbour", "wave", 24, 60)
     for x, y in ((46, 20), (56, 30), (50, 40)):
-        a.paste(hp.frame("treat", "idle"), x, y)
+        a.paste(sn.frame("treat", "idle"), x, y)
     return a
 
 
@@ -417,7 +417,7 @@ def mail_hold():
     a.put("mail-carrier", "walk", 56, 58)
     c = a.put("dog-koda", "react", 26, 50)
     a.lead(26, c, 14)
-    a.paste(hp.frame("fx-bark", "pop", 1), 36, 2)
+    a.paste(sn.frame("fx-bark", "pop", 1), 36, 2)
     return a
 
 
@@ -552,8 +552,8 @@ def big_tipper():
     a = Art()
     a.ground("shops")
     for k, (x, y) in enumerate(((8, 38), (14, 34), (20, 38), (11, 30), (17, 26), (26, 36), (23, 30))):
-        a.paste(hp.frame("tip", "idle", k), x, y)
-    a.paste(hp.frame("tip", "idle"), 44, 26)
+        a.paste(sn.frame("tip", "idle", k), x, y)
+    a.paste(sn.frame("tip", "idle"), 44, 26)
     a.sparkle(42, 24, "white")
     a.arrow(56, 14, -1)
     return a
@@ -590,7 +590,7 @@ def sweet_talker():
     a.face("face-owner-pierre", "happy", 6, 14)
     # cheaper per dog: the cost in the bubble, and a down arrow beside it
     a.bubble(40, 8, 32, [""])
-    hp.text(a, "$$", 45, 12, "forest")
+    sn.text(a, "$$", 45, 12, "forest")
     a.arrow(57, 11, 1)
     a.heart(50, 38, "red", "pink")
     a.heart(60, 44, "red", "pink")
@@ -606,7 +606,7 @@ def skip():
     disc(a, 58, 13, 2, "forest")
     a.fill(62, 17, 8, 4, "green")
     a.fill(68, 17, 2, 4, "dgreen")
-    hp.text(a, "SKIP", 4, 4, "white", 2)
+    sn.text(a, "SKIP", 4, 4, "white", 2)
     for y in (40, 44, 48):
         a.fill(28, y, 8, 1, "lgrey")
     return a
@@ -944,8 +944,8 @@ ILLUSTRATIONS = {
 def card_frame_tags():
     """{illustration key: the card-frame tag the game shows it in}, from the game's export: each card
     face's frame, and lucky (or encounter) for the art an instant encounter shows."""
-    tags = {card["art"]: card["frame"] for card in hp.GAME["cards"]}
-    for e in hp.GAME["encounters"]:
+    tags = {card["art"]: card["frame"] for card in sn.GAME["cards"]}
+    for e in sn.GAME["encounters"]:
         if e["resolution"]["kind"] == "instant":
             tags[e["resolution"]["art"]] = "lucky" if e["kind"] == "lucky" else "encounter"
     return tags
@@ -972,7 +972,7 @@ def mock_card(kind, key, large=False):
     im.paste(cost.resize((cost.width * scale, cost.height * scale), Image.NEAREST), (6 * scale, 121 * scale))
     art = ILLUSTRATIONS[key]().img
     im.paste(art.resize((AW * scale, AH * scale), Image.NEAREST), (5 * scale, 16 * scale))
-    bg = Image.new("RGB", im.size, hp.rgb("dbrown"))
+    bg = Image.new("RGB", im.size, sn.rgb("dbrown"))
     bg.paste(im, (0, 0), im)
     return bg
 
@@ -985,7 +985,7 @@ def preview(out, scale=3):
     big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-keep"),
            ("route", "card-zone-woof-way"), ("stop", "card-mail-carrier-wait"), ("upgrade", "card-belly-rubs")]
     width = max((CW + 6) * cols, (LW + 6) * len(big))
-    sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), hp.rgb("ink"))
+    sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), sn.rgb("ink"))
     for i, key in enumerate(keys):
         card = mock_card(card_kind(key), key).resize((CW * scale, CH * scale), Image.NEAREST)
         sheet.paste(card, ((i % cols) * (CW + 6) * scale, (i // cols) * (CH + 6) * scale))

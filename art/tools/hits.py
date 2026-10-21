@@ -1,27 +1,18 @@
 #!/usr/bin/env python3
 """Draw the encounter hit moments: a burst over the pack per encounter, the
 screen-edge flash in the encounter's colour, the plate behind the big label,
-and the per-dog status overlays. Bursts carry a 1px rim (plum, navy for water,
-teal for green) so they hold 3:1 on the three light roads while
-their fills carry Elm Avenue. The flash strips pair a light ink with a dark
+and the per-dog status overlays. Bursts carry a 1px plum rim so they hold 3:1
+on the three light roads while their fills carry Elm Avenue. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
 encounters.py. The bursts are laid out on a 64x64 design and drawn 77/64 times
-bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps, twinkles
-and comic words keep their pixels. Every burst opens on an impact frame (impact):
+bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps and
+twinkles keep their pixels. Every burst opens on an impact frame (impact):
 an eight-point star in its colour with a white core and white speed lines.
 
 fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
-fx-hit-puddle      77x77  play (7 frames, 70ms)  splash crown and flying drops
 fx-hit-thief       77x77  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
-fx-hit-squirrel    77x77  play (7 frames, 70ms)  the squirrel bolting across, speed lines, leaves
 fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
-fx-hit-goose       77x77  play (8 frames, 70ms)  a white star, sound waves arcing out to both sides,
-                                                  feathers seesawing down
-                   every fx-hit-* also has play-word, after play: the same frames and timing with
-                   its comic word over frames 0 to 5 (420ms), centred on the impact star: goose
-                   HONK!, other-dog SNIFF!, puddle SPLOSH!, skunk PHEW!, squirrel CHIRP!, thief
-                   YOINK!. The game plays play-word, and play with reduced motion
 ui-hit-flash-green, -sky, -amber, -mauve, -orange, -pink, -white
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
                           4x4 ordered dither to clear by x=15; tiles vertically, the
@@ -32,9 +23,7 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           centred, its line top 3px below the plate's top so the 10px caps sit
                           in rows 11 to 20
 fx-status-stinky   19x19  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
-fx-status-soaked   19x19  loop (4 frames, 150ms) drips falling off
-fx-status-soaked-mud, fx-status-soaked-milkshake  the same drips after the mud and milkshake
-                   Splash skins: brown mud spots, cream milkshake drips, each plum-rimmed
+fx-status-soaked   19x19  loop (4 frames, 150ms) cyan drips falling off, navy-rimmed
                    each status also has @88 (19x19), @75 (17x17), @62 (14x14) and @50
                    (11x11), the dogs' steps, each drawn in its own pixels, same tags and
                    timing; bottom-centre on the dog's centre column, a few pixels below the
@@ -47,7 +36,7 @@ Usage:
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
-the rim, burst, twinkle, heart and comic word helpers in fx.py.
+the rim, burst, twinkle and heart helpers in fx.py.
 """
 
 import math
@@ -55,7 +44,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fx import HEART, SMALL, burst, word  # noqa: E402
+from fx import HEART, SMALL, burst  # noqa: E402
 import fx  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
@@ -66,7 +55,7 @@ ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
 
 
 # The bursts are laid out on a 64x64 design and drawn BURST_SCALE times bigger, 77x77, on a minis.Mini that
-# keeps 1px lines 1px (burst_frame). Pixel maps, twinkles, the rim and the comic word go on the drawn grid
+# keeps 1px lines 1px (burst_frame). Pixel maps, twinkles and the rim go on the drawn grid
 # pixel for pixel, at the drawn place of their design position, so they keep their pixels.
 BURST = 64
 BURST_SCALE = 77 / BURST
@@ -243,53 +232,6 @@ def hit_skunk(step):
     return g
 
 
-def hit_puddle(step):
-    """A crown of water rises from a ring, throws drops off its points and falls back to a ripple."""
-    g = Grid(64, 64)
-    cx, cy = 32, 46
-    if step == 0:
-        g.ell(cx, cy, 14, 4, "sky", "blue", "cyan")
-        impact(g, "cyan", cx, cy - 6, 13)
-        return rim(g, "navy")
-    h = (0, 10, 18, 22, 15, 7, 0)[step]
-    rx = (0, 11, 14, 16, 18, 19, 21)[step]
-    ry = rx * 0.32
-    spikes = []
-    for k in range(10):
-        a = math.radians(k * 36 + 9)
-        bx, by = cx + rx * math.cos(a), cy + ry * math.sin(a)
-        hk = h * (0.7 + 0.3 * ((k * 7) % 4) / 3)
-        tip = (cx + (rx + h * 0.3) * math.cos(a), by - hk)
-        spikes.append((math.sin(a), bx, by, tip))
-    if h:
-        for s, bx, by, tip in spikes:
-            if s < 0:
-                g.tri((bx - 3, by + 1), (bx + 3, by + 1), tip, "blue")
-    g.ell(cx, cy, rx + 1, ry + 1.5, "sky", "blue")
-    g.ell(cx, cy - 0.5, max(rx - 3, 1), max(ry - 1.5, 1), "blue")
-    if step == 6:
-        g.ell(cx, cy, rx - 4, ry - 2, None)
-    if h:
-        for s, bx, by, tip in spikes:
-            if s >= 0:
-                g.tri((bx - 3, by + 1), (bx + 3, by + 1), tip, "sky")
-                g.tri((bx - 2, by), (bx, by), (tip[0] - 0.5, tip[1] + 2), "cyan")
-                g.p(tip[0], tip[1] + 0.5, "white")
-    if 2 <= step <= 4:
-        jy = cy - (0, 0, 16, 26, 30)[step]
-        g.ell(cx, jy, 2, 3, "cyan", "sky")
-        g.p(cx - 1, jy - 1, "white")
-    if step >= 2:
-        t = step - 1.5
-        for vx, vy in ((-7, -6), (-5, -9), (-2, -11), (2, -10), (5, -8), (7, -5), (-9, -3), (9, -2)):
-            x, y = cx + vx * t * 0.75, cy - 16 + vy * t + 1.7 * t * t
-            if 2 <= x < 61 and 2 <= y < 61:
-                g.rect(x, y, 2, 2 if step < 5 else 1, "cyan" if step < 5 else "sky")
-                if step < 4:
-                    g.p(x, y, "white")
-    return rim(g, "navy")
-
-
 def wallet(g, cx, cy, tilt):
     """12x8 brown wallet, its flap seam dbrown, a green bill poking out; tilt shears it by a pixel."""
     # each run of rows with the same shear is one rect, so drawn bigger the wallet stays solid
@@ -344,56 +286,6 @@ def hit_thief(step):
     piece(g, lambda p: wallet(p, cx, wy, tilt))
     if step in (3, 5):
         piece(g, lambda p: star4(p, cx + (9 if step == 3 else -10), wy - 3, 2, "yellow"))
-    return g
-
-
-LEAVES = (("green", "dgreen"), ("orange", "rust"), ("amber", "ochre"), ("green", "dgreen"),
-          ("orange", "rust"), ("amber", "ochre"), ("green", "forest"))
-LEAF = ("..111", ".1121", "1121.", "22...")
-
-
-def leaf(g, x, y, flip, cols):
-    """5x4 leaf, its midrib and stem in the darker colour; flip mirrors it, so leaves flutter."""
-    dots(g, x, y, pixmap(LEAF, {"1": cols[0], "2": cols[1]}, flip))
-
-
-# Where the squirrel dashes across its burst, frames 1 to 4: the drawn top-left of its squirrel-dash frame.
-SQUIRREL_DASH = ((4, 16), (12, 14), (20, 13), (28, 15))
-# The squirrel's size in its burst, as a depth step of squirrel-dash: a little under its 48px road size.
-SQUIRREL_HIT_STEP = 0.94
-
-
-def hit_squirrel(step):
-    """The squirrel itself bolts across the burst left to right in squirrel-dash's gallop, white speed lines
-    streaming behind it, and knocks a spray of leaves outward that flutter down behind it."""
-    import hazards  # hazards imports modules that import this one, so it is imported when first used
-
-    g = Grid(64, 64)
-    if step == 0:
-        impact(g, "orange")
-        return rim(g)
-    if step >= 2:
-        t = step - 1
-        for i, cols in enumerate(LEAVES):
-            a = math.radians(i * 360 / 7 - 100)
-            x = 30 + math.cos(a) * (8 + t * 5) + math.sin(t * 1.3 + i) * 2
-            y = 33 + math.sin(a) * (6 + t * 4) + t * t * 0.9
-            if 1 <= x < 58 and 1 <= y < 59:
-                piece(g, lambda p: leaf(p, x, y, (step + i) % 2, cols))
-    if step <= 4:
-        x0, y0 = SQUIRREL_DASH[step - 1]
-
-        def lines(p):
-            for k, dy in enumerate((16, 22, 28)):
-                for x in range(max(1, x0 - 12 + 3 * k), x0 + 6):
-                    if (x + k) % 6 < 4:
-                        p.p(x, y0 + dy, "white")
-        piece(g, lambda p: lines(raster(p)))
-        q = hazards.small(SQUIRREL_HIT_STEP, hazards.SQUIRREL_RUN[step - 1], hazards.SQUIRREL_OFFSETS)
-        for j, row in enumerate(hazards.squirrel_dash(**q).outlined()):
-            for i, c in enumerate(row):
-                if c:
-                    raster(g).px[y0 + j][x0 + i] = c
     return g
 
 
@@ -453,66 +345,6 @@ def hit_other_dog(step):
                 piece(g, lambda p: stamp(p, SMALL, x0, y))
             else:
                 piece(g, lambda p: stamp(p, HEART, x0 - 1, y))
-    return g
-
-
-def poof(g, step, cx, cy, frames=(0, 10, 13, 14), cols=("white", "lgrey")):
-    """A dust poof over the first frames, then six puffs drifting out and shrinking, as hit_thief's."""
-    pr = frames[step] if step < len(frames) else 0
-    if pr:
-        piece(g, lambda p: [p.ell(cx + dx * pr / 12, cy + dy * pr / 12, pr * 0.55, pr * 0.5, *cols)
-                            for dx, dy in ((-7, 2), (7, 2), (0, -5), (0, 5), (-4, -3), (4, -3))])
-    elif step < len(frames) + 2:
-        k = step - len(frames)
-
-        def puffs(p):
-            for j in range(6):
-                a = math.radians(j * 60 + 30)
-                d = 14 + k * 4
-                p.ell(cx + math.cos(a) * d, cy + math.sin(a) * d * 0.6, 3 - k, 2.5 - k * 0.8, *cols)
-        piece(g, puffs)
-
-
-def inside(x, y, m=4):
-    return m <= x < 64 - m and m <= y < 64 - m
-
-
-FEATHER = ("...111", ".12211", "12111.", "2.....")
-
-
-def feather(g, x, y, flip, cols=("white", "lgrey")):
-    """A 6x4 feather, its quill in the second colour; flip mirrors it, so it seesaws as it drifts."""
-    dots(g, x, y, pixmap(FEATHER, {"1": cols[0], "2": cols[1]}, flip))
-
-
-def hit_goose(step):
-    """The honk: a white puff, sound waves arcing out to both sides, and feathers flying off that seesaw
-    down."""
-    g = Grid(64, 64)
-    cx, cy = 32, 36
-    if step == 0:
-        impact(g, "white", cx, cy)
-        return rim(g)
-    poof(g, step, cx, cy, (0, 8, 10))
-    if step <= 5:
-        def waves(p):
-            # laid on the drawn pixels, 2 wide and 1 tall a step, so the arcs stay unbroken
-            for k in range(3):
-                r = 9 + k * 5 + step * 2
-                if r > 28:
-                    continue
-                for side in (-1, 1):
-                    for deg in range(-40, 41):
-                        a = math.radians(deg)
-                        x, y = drawn_at(p, cx + side * math.cos(a) * r, cy + math.sin(a) * r)
-                        raster(p).rect(x - (side < 0), y, 2, 1, "white")
-        piece(g, waves)
-    for i, (vx, vy) in enumerate(((-4, -5), (4, -5.5), (-6, -1.5), (6, -2), (-1.5, -6.5), (2, -6.5))):
-        t = step - 0.5
-        x = cx - 3 + vx * min(t, 3) + (math.sin(step * 1.7 + i) * 2 if step > 4 else 0)
-        y = cy + vy * min(t, 3) + max(0, t - 3) * 2.5
-        if inside(x, y, 3) and step >= 2:
-            piece(g, lambda p: feather(p, round(x), round(y), (step + i) % 2))
     return g
 
 
@@ -583,16 +415,10 @@ DRIP = {22: (".c..", ".cc.", "cwcc", "cwcs", ".ss."), 19: (".c.", "cwc", "ccs", 
         14: ("c.", "ws", "s."), 12: ("c.", "ws", "s."), 11: ("c.", "ws", "s."), 10: ("c.", "ws", "s.")}
 
 
-# The drip colours per Splash skin: body, glint, underside, rim.
-SOAKS = {"": ("cyan", "white", "sky", "navy"), "-mud": ("brown", "tan", "dbrown", "plum"),
-         "-milkshake": ("cream", "white", "skin1", "plum")}
 
-
-def status_soaked(size, step, look=""):
-    """Drops form at the top and fall a whole number of pixels a frame, wrapping after 4 frames.
-    Water is cyan with a sky underside and a white glint in a navy rim; mud and milkshake take
-    their own colours in a plum rim."""
-    body, glint, under, edge = SOAKS[look]
+def status_soaked(size, step):
+    """Drops form at the top and fall a whole number of pixels a frame, wrapping after 4 frames:
+    cyan with a sky underside and a white glint in a navy rim."""
     g = Grid(size, size)
     drops = {22: ((1, 0), (9, 2), (17, 1)), 19: ((1, 0), (8, 2), (15, 1)), 17: ((1, 0), (7, 2), (13, 1)),
              14: ((1, 0), (6, 2), (11, 1)), 12: ((1, 0), (5, 2), (9, 1)), 11: ((2, 0), (7, 2)),
@@ -603,35 +429,21 @@ def status_soaked(size, step, look=""):
         k = (step + ph) % 4
         y = y0 + k * fall
         if k == 0:
-            g.p(x + len(shape[0]) // 2, y + 1, body)
+            g.p(x + len(shape[0]) // 2, y + 1, "cyan")
             continue
         for j, row in enumerate(shape):
             for i, ch in enumerate(row):
                 if ch != ".":
-                    g.p(x + i, y + j, {"c": body, "w": glint, "s": under}[ch])
-    return rim(g, edge)
+                    g.p(x + i, y + j, {"c": "cyan", "w": "white", "s": "sky"}[ch])
+    return rim(g, "navy")
 
 
-# Each burst: its drawing, its frame count, its comic word and the row its impact star is centred on.
+# Each burst: its drawing and its frame count.
 HITS = {
-    "fx-hit-skunk": (hit_skunk, 8, "PHEW!", 32),
-    "fx-hit-puddle": (hit_puddle, 7, "SPLOSH!", 40),
-    "fx-hit-thief": (hit_thief, 8, "YOINK!", 40),
-    "fx-hit-squirrel": (hit_squirrel, 7, "CHIRP!", 32),
-    "fx-hit-other-dog": (hit_other_dog, 8, "SNIFF!", 38),
-    "fx-hit-goose": (hit_goose, 8, "HONK!", 36),
+    "fx-hit-skunk": (hit_skunk, 8),
+    "fx-hit-thief": (hit_thief, 8),
+    "fx-hit-other-dog": (hit_other_dog, 8),
 }
-# The word shows on frames 0 to 5 (420ms at 70ms), then the last frames play out without it.
-WORD_FRAMES = 6
-
-
-def worded(g, text, cy, step):
-    """A burst frame with its comic word over it, centred on the impact star (design row cy), while the word
-    shows. The word keeps its pixels: 7-row letters, readable at 1x."""
-    if step < WORD_FRAMES:
-        x, y = drawn_at(g, BURST / 2, cy)
-        word(raster(g), text, x, y - 5)
-    return g
 
 
 # A status overlay's frame at full size and at each depth step: 19 x the step (16 x 1.2, rounded), as the game sizes it.
@@ -645,16 +457,13 @@ def sizes(key, draw, ms):
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    for key, (draw, frames, text, cy) in HITS.items():
-        yield key, [("play", [burst_frame(draw, i).outlined(False) for i in range(frames)], 70),
-                    ("play-word", [worded(burst_frame(draw, i), text, cy, i).outlined(False) for i in range(frames)],
-                     70)]
+    for key, (draw, frames) in HITS.items():
+        yield key, [("play", [burst_frame(draw, i).outlined(False) for i in range(frames)], 70)]
     for colour in FLASH:
         yield f"ui-hit-flash-{colour}", [("play", [flash(colour, i).outlined(False) for i in range(4)], 70)]
     yield "ui-hit-label", [(tag, [label_plate(*cols).outlined(False)], 1000) for tag, cols in PLATES.items()]
     yield from sizes("fx-status-stinky", status_stinky, 180)
-    for look in SOAKS:
-        yield from sizes(f"fx-status-soaked{look}", lambda size, step, look=look: status_soaked(size, step, look), 150)
+    yield from sizes("fx-status-soaked", status_soaked, 150)
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import cards  # noqa: E402
-import help as hp  # noqa: E402
+import scene as sn  # noqa: E402
 
 # {base kind: [(option suffix, the base card's composition)]}
 OPTIONS = {
@@ -84,7 +84,7 @@ def mock_card(art):
     cost = cards.to_image(cards.card_cost().px)
     im.paste(cost, (6, 121))
     im.paste(art, (5, 16))
-    bg = Image.new("RGB", im.size, hp.rgb("dbrown"))
+    bg = Image.new("RGB", im.size, sn.rgb("dbrown"))
     bg.paste(im, (0, 0), im)
     return bg
 
@@ -92,7 +92,7 @@ def mock_card(art):
 def preview(out, scale=3):
     """One row per skin: its base kind's two cards, then the skin's two."""
     gap = 6
-    sheet = Image.new("RGB", ((cards.CW + gap) * 4 * scale, (cards.CH + gap) * len(SKINS) * scale), hp.rgb("ink"))
+    sheet = Image.new("RGB", ((cards.CW + gap) * 4 * scale, (cards.CH + gap) * len(SKINS) * scale), sn.rgb("ink"))
     for row, skin in enumerate(SKINS):
         keys = [k for k in ILLUSTRATIONS if k.startswith(f"card-{skin}-")]
         arts = [cards.ILLUSTRATIONS[ILLUSTRATIONS[k][0]]().img for k in keys] + [ILLUSTRATIONS[k][1]().img

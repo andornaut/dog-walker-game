@@ -37,7 +37,7 @@ and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile (24x24 nine-s
 on every side; tags normal, selected, disabled), ui-sticker (56x28; tags new, price, pop),
 ui-touch-drag (104x40, the help screen's one lane-width drag; tags press, drag, release).
 Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py,
-moments.py, help.py and cards.py draw their plates, callouts and frames with it.
+moments.py, scene.py and cards.py draw their plates, callouts and frames with it.
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -1463,20 +1463,6 @@ def touch_hand(g, x, y):
                             (56, 16, 1, 12, "skin2"), (43, 27, 13, 1, "skin2"), (43, 28, 13, 6, "white"),
                             (43, 33, 13, 1, "lgrey"), (55, 28, 1, 6, "lgrey")):
         g.rect(rx + dx, ry + dy, w, h, c)
-
-
-def touch_hint():
-    """96x36: a fingertip pressed on a two-way track, with fading touch marks either side and
-    speed lines. Not exported: help.py crops it for the help pages' drag illustrations. The game
-    shows no overlay tips over the play area."""
-    g = Grid(96, 36)
-    touch_track(g, 4, 91, 6)
-    for cx, col in ((26, "lgrey"), (70, "lgrey"), (36, "white"), (60, "white")):
-        touch_mark(g, cx, 6, col)
-    touch_glow(g, 48, 6)
-    touch_speed(g, 48, (-1, 1))
-    touch_hand(g, 48, 6)
-    return g
 
 
 # ui-touch-drag: one lane-width drag (64px) to the right on a 104x40 frame, for the help screen.

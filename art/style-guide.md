@@ -269,24 +269,19 @@ A firing keeps `fx-fired-pop` and the fired face at 2× as today, centred on the
 
 #### Comic words
 
-One word per moment, built like the sign logo: flat yellow letters 7 rows tall with 2px stems, a 1px ink ring that also fills the counters and the gaps between letters, and a solid dred shadow 2px down and right. Display words only, 2 to 7 letters, readable at 1×. `font-comic` sets the same letters.
+One word per moment, built like the sign logo: flat yellow letters 7 rows tall with 2px stems, a 1px ink ring that also fills the counters and the gaps between letters, and a solid dred shadow 2px down and right. Display words only, 2 to 7 letters, readable at 1×. No sprite carries a word: the game sets it in `font-comic` at 1× over the effect, still, with no pop. Places are the ring's top-left.
 
-| Effect             | Word    | Where it is                                                |
-| ------------------ | ------- | ---------------------------------------------------------- |
-| `fx-bark-word`     | WOOF!   | Its own 32×16 key, `pop` (4 frames, 60, 60, 140 and 140ms) |
-| `fx-dodge`         | DODGE!  | `play`, over frames 0 to 3                                 |
-| `fx-hit-goose`     | HONK!   | `play-word`                                                |
-| `fx-hit-other-dog` | SNIFF!  | `play-word`                                                |
-| `fx-hit-puddle`    | SPLOSH! | `play-word`                                                |
-| `fx-hit-skunk`     | PHEW!   | `play-word`                                                |
-| `fx-hit-squirrel`  | CHIRP!  | `play-word`                                                |
-| `fx-hit-thief`     | YOINK!  | `play-word`                                                |
+| Effect             | Word   | Where the game sets it                                                                                                      |
+| ------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `fx-bark`          | WOOF!  | In place of `fx-bark`, in a 32×16 box centred on its point: the ring's top on rows 4, 1, 2 and 2, for 60, 60, 140 and 140ms |
+| `fx-dodge`         | DODGE! | 6,0 on frames 0 to 3                                                                                                        |
+| `fx-hit-other-dog` | SNIFF! | 21,41 (34×11) on frames 0 to 5                                                                                              |
+| `fx-hit-skunk`     | PHEW!  | 22,33 (32×11) on frames 0 to 5                                                                                              |
+| `fx-hit-thief`     | YOINK! | 20,43 (35×11) on frames 0 to 5                                                                                              |
 
 - Every `fx-hit-*` opens on an impact frame: an eight-point star in the encounter's colour with a white core, a white speed line flying out between each pair of points.
-- `play-word` follows `play` on every `fx-hit-*`: the same frames and timing, with the word centred on the impact star on frames 0 to 5 (420ms).
-- The game plays `play-word` and `fx-bark-word`. With reduced motion it shows `play` (held on frame 0) and `fx-bark`, so no word shows.
-- `fx-bark-word` plays at `fx-bark`'s point in place of it, over the dog's head as the tell starts.
-- Over a burst's `play`, `font-comic` at 1× sets the word at the same place on frames 0 to 5 (420ms), still, with no pop. Its top-left (the ring's top-left) on the 77×77 frame: goose 22,38 (31×11), other-dog 21,41 (34×11), puddle 17,43 (42×11), skunk 22,33 (32×11), squirrel 22,33 (33×11), thief 20,43 (35×11). The word's centre column is frame x 38 and its ring's top is 5 rows above the impact star's centre row; an odd half rounds to even.
+- Over a burst's `play`, the word's centre column is frame x 38 and its ring's top is 5 rows above the impact star's centre row; an odd half rounds to even. The word shows on frames 0 to 5 (420ms).
+- With reduced motion no word shows: the game plays `fx-bark`, holds the burst's frame 0 and raises the dodge label instead of `fx-dodge`.
 
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane faces the player, and so does a mover faster than the road, which comes down its lane at the pack: `cyclist`, `jogger`, `kid-on-bike` and `minor-scooter`'s `ride`. `jogger` runs alone: a black ponytail tied high, a black fringe, an orange racerback singlet with a white race bib on its front (its number drawn from 1.5×, a 1px bar below that), bare arms, navy capri tights and cyan shoes. `kid-on-bike` is a kid (yellow tee, sky shorts, red shoes, ochre hair) riding a mauve bike on training wheels, a white reflector on the front mudguard, in a red helmet with a white stripe, pink, cyan and yellow streamers trailing from the grips; the helmet's top is 7 rows below the cyclist's and the handlebar narrower, so it reads as a child. Movers going up a lane ahead of the pack are seen from behind, like the walkers: `stroller` is a dad pushing a green stroller one-handed on his right, a takeaway coffee in his left hand, the stroller ahead of him so it stands higher in the frame.
 - `coyote` stalks the pack, stepping toward it in any direction, so it is drawn three-quarter front, facing the player and angled right, and mirrored for a step to the left; the game moves the sprite for every step. A lean tawny coyote, nothing like a pack dog: brown with a tan rim and a dbrown shade, a dbrown saddle down the back, a cream throat and chest, a long pointed snout, cream below, with an ink nose, narrowed amber eyes, and big pricked ears with cream insides. The back slopes from the hunched shoulders down to the hips and the belly tucks up behind the chest, so the body is no box. Four thin legs stand apart with the road showing between them: the hind pair angled back to the hock, the front pair under the chest; the near legs brown with a tan rim, the far ones dbrown and 1px shorter. The bushy tail hangs low, clear of the legs, with an ink tip. It sneaks: the shoulders hunched up over a head held low, the ears forward, the tail low. Crouched, it stands 31 rows tall and 43 wide on its 48×48 frame, lower than the other dog (40 rows) and Koda (46) and longer than either, and it takes the road animals' ground shadow. `idle` (2 frames, 400ms): a breath, the body 1px up, with the near ear flicked back. `walk` (4 frames, 120ms): the creep, one diagonal pair of paws lifting while the body sinks 1px under a level head, then the other. `step` (4 frames, 80ms), played on each step: a low lunge that never rises off the crouch, sinking onto the haunches, pushing off with the front paws up and the ears pinned, reaching with the head thrust lower, and landing.

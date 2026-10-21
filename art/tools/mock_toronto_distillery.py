@@ -31,7 +31,8 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
-import help as hp  # noqa: E402
+import mock_toronto as mt  # noqa: E402
+import scene as sn  # noqa: E402
 from minis import Mini  # noqa: E402
 from pixel import DARKER, K, edged  # noqa: E402
 
@@ -56,15 +57,15 @@ def dk(c):
 
 
 def use_camera():
-    hp.W, hp.H, hp.OX, hp.TOP = W, H, 0, 0
-    hp.YH, hp.F, hp.KS = HORIZON, FOCAL, FOOT_Y - HORIZON
+    mt.W, mt.H, mt.OX, mt.TOP = W, H, 0, 0
+    mt.YH, mt.F, mt.KS = HORIZON, FOCAL, FOOT_Y - HORIZON
 
 
 # ---------- the ground: cobbled lane, granite curb, brick walk, flagstone plaza ----------
 
 def ground(a, rx, z):
     """The ground colour at across a (absolute), signed road x rx and distance z."""
-    n = hp.noise
+    n = mt.noise
     if a < 160:
         u = rx + 160
         if any(abs(u - d) < 1.5 for d in (64, 128, 192, 256)):
@@ -96,10 +97,10 @@ def ground(a, rx, z):
 def road(sc):
     px = sc.img.load()
     for y in range(BAR + APPROACH, DOG_BAND_Y):
-        z, s = hp.distance_at(y)
+        z, s = mt.distance_at(y)
         for x in range(W):
             rx = (x + 0.5 - 180) / s
-            px[x, y] = hp.rgb(ground(abs(rx), rx, z))
+            px[x, y] = sn.rgb(ground(abs(rx), rx, z))
 
 
 # ---------- the skyline band ----------
@@ -179,7 +180,7 @@ def condo(cv, x, w, top, glass="cyan"):
 
 
 def band():
-    cv = hp.Canvas(W, BAND_H)
+    cv = sn.Canvas(W, BAND_H)
     # sky: flat cyan to CALM, sky below, two low clouds
     cv.fill(0, 0, W, BASE, "sky")
     cv.fill(0, 0, W, CALM, "cyan")
@@ -590,7 +591,7 @@ def prop(key, s=1.0):
     for y, row in enumerate(rows):
         for x, c in enumerate(row):
             if c:
-                img.putpixel((x, y), hp.rgb(c) + (255,))
+                img.putpixel((x, y), sn.rgb(c) + (255,))
     return img
 
 
@@ -619,26 +620,26 @@ def shadow(sc, cx, foot, w, col="brown"):
 
 
 def bottom_panel():
-    panel = hp.Scene(W, H - DOG_BAND_Y)
-    band_img = hp.image("ui-dog-band")
+    panel = mt.Scene(W, H - DOG_BAND_Y)
+    band_img = sn.image("ui-dog-band")
     panel.img.paste(band_img, (0, 0), band_img)
     for i, d in enumerate(DOGS):
-        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, hp.dog(d)[3])
+        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, mt.dog(d)[3])
     return panel.img
 
 
 def walk():
     use_camera()
-    sc = hp.Scene(W, H)
+    sc = mt.Scene(W, H)
     sc.shade, sc.leash_col = "slate", "plum"
     road(sc)
     items = []
     for key, side, d in PLACED:
         items.append((d, ("prop", key, side, INNER)))
     for key, tag, ln, d in OBJECTS:
-        x = sum(hp.lane(n) for n in ln) / len(ln) if isinstance(ln, tuple) else hp.lane(ln)
+        x = sum(mt.lane(n) for n in ln) / len(ln) if isinstance(ln, tuple) else mt.lane(ln)
         items.append((d, ("object", key, tag, x)))
-    items.append((max(d for _, d in hp.FORMATIONS[3]) + 1, ("pack",)))
+    items.append((max(d for _, d in mt.FORMATIONS[3]) + 1, ("pack",)))
     for d, item in sorted(items, key=lambda it: -it[0]):
         if item[0] == "prop":
             _, key, side, inner = item
@@ -653,15 +654,15 @@ def walk():
             _, key, tag, x = item
             sc.stand(key, tag, x, d)
         else:
-            sc.pack(hp.lane(2), tuple(f"dog-{d}" for d in DOGS))
+            sc.pack(mt.lane(2), tuple(f"dog-{d}" for d in DOGS))
     sky = band()
     sc.img.paste(sky.crop((0, 0, W, APPROACH)), (0, BAR))
-    zone = dict(hp.ZONES["shops"], name="Distillery")
-    hp.ZONES["distillery"] = zone
+    zone = dict(sn.ZONES["shops"], name="Distillery")
+    sn.ZONES["distillery"] = zone
     sc.top_bar(["distillery"], 48, 1, 0.4)
-    b = hp.TOP_BAR["buttons"]["sound"]
-    sc.paste(hp.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
-    sc.paste(hp.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
+    b = mt.TOP_BAR["buttons"]["sound"]
+    sc.paste(sn.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
+    sc.paste(sn.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
     sc.img.paste(bottom_panel(), (0, DOG_BAND_Y))
     return sc.img
 
@@ -673,7 +674,7 @@ def sheet():
     rows = [keys[i:i + cols] for i in range(0, len(keys), cols)]
     widths = [sum(imgs[k].width for k in r) + gap * (len(r) + 1) for r in rows]
     heights = [max(imgs[k].height for k in r) + 16 for r in rows]
-    cv = hp.Canvas(max(widths), sum(heights) + gap * (len(rows) + 1))
+    cv = sn.Canvas(max(widths), sum(heights) + gap * (len(rows) + 1))
     cv.fill(0, 0, cv.img.width, cv.img.height, "tan")
     y = gap
     for r, hh in zip(rows, heights):
@@ -684,7 +685,7 @@ def sheet():
             if k in SHADOWED:
                 shadow(cv, x + img.width // 2, foot, img.width)
             cv.img.paste(img, (x, foot - img.height + 1), img)
-            hp.text_c(cv, LABELS[k], x + img.width / 2, foot + 5, "plum")
+            sn.text_c(cv, LABELS[k], x + img.width / 2, foot + 5, "plum")
             x += img.width + gap
         y += hh + gap
     return cv.img.resize((cv.img.width * 2, cv.img.height * 2), Image.NEAREST)

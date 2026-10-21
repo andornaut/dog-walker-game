@@ -62,70 +62,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
     "sourceSize": { "w": 77, "h": 77 },
     "duration": 70
-   },
-   "fx-hit-skunk 8.aseprite": {
-    "frame": { "x": 616, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 9.aseprite": {
-    "frame": { "x": 693, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 10.aseprite": {
-    "frame": { "x": 770, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 11.aseprite": {
-    "frame": { "x": 847, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 12.aseprite": {
-    "frame": { "x": 924, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 13.aseprite": {
-    "frame": { "x": 1001, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 14.aseprite": {
-    "frame": { "x": 1078, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
-   },
-   "fx-hit-skunk 15.aseprite": {
-    "frame": { "x": 1155, "y": 0, "w": 77, "h": 77 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
-    "sourceSize": { "w": 77, "h": 77 },
-    "duration": 70
    }
  },
  "meta": {
@@ -133,11 +69,10 @@
   "version": "1.2.30-x64",
   "image": "fx-hit-skunk.png",
   "format": "RGBA8888",
-  "size": { "w": 1232, "h": 77 },
+  "size": { "w": 616, "h": 77 },
   "scale": "1",
   "frameTags": [
-   { "name": "play", "from": 0, "to": 7, "direction": "forward" },
-   { "name": "play-word", "from": 8, "to": 15, "direction": "forward" }
+   { "name": "play", "from": 0, "to": 7, "direction": "forward" }
   ]
  }
 }

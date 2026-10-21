@@ -104,7 +104,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
-import help as hp  # noqa: E402
+import scene as sn  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
 from pixel import DARKER, Grid, K, build as build_sprites, edged  # noqa: E402
@@ -141,7 +141,7 @@ def rand(seed):
 
 def clear(w, h):
     """A canvas with a transparent background, for the logo and the pasted strips."""
-    cv = hp.Canvas(w, h)
+    cv = sn.Canvas(w, h)
     cv.img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     return cv
 
@@ -270,7 +270,7 @@ def logo():
 # ---------- screen-home ----------
 
 def home():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     r = rand(7)
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
@@ -567,7 +567,7 @@ def night(img, top=20, horizon=46):
     in the top band, everything else a ramp step darker, windows lit."""
     px = img.load()
     w, h = img.size
-    skyc = {hp.rgb(c) for c in ("cyan", "sky", "white", "lgrey")}
+    skyc = {sn.rgb(c) for c in ("cyan", "sky", "white", "lgrey")}
     sky, todo = set(), [(x, 0) for x in range(w)]
     while todo:
         x, y = todo.pop()
@@ -577,32 +577,32 @@ def night(img, top=20, horizon=46):
         todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
     out = img.copy()
     po = out.load()
-    banded = hp.Canvas(w, h)
+    banded = sn.Canvas(w, h)
     banded.fill(0, 0, w, h, NIGHT_SKY[-1])
     rows = bd.bands(banded, top, horizon, NIGHT_SKY, w=w)
     bp = banded.img.load()
-    cyan, white = hp.rgb("cyan"), hp.rgb("white")
+    cyan, white = sn.rgb("cyan"), sn.rgb("white")
     for y in range(h):
         for x in range(w):
             c = px[x, y]
             if (x, y) in sky:
                 po[x, y] = bp[x, max(y, top)]
             elif c == cyan:
-                po[x, y] = hp.rgb("yellow")
+                po[x, y] = sn.rgb("yellow")
             elif c == white and any(0 <= x + dx < w and px[x + dx, y] == cyan for dx in (-1, 1)):
-                po[x, y] = hp.rgb("amber")
+                po[x, y] = sn.rgb("amber")
             else:
-                po[x, y] = hp.rgb(dk("%02x%02x%02x" % c))
+                po[x, y] = sn.rgb(dk("%02x%02x%02x" % c))
     r = rand(11)
     for _ in range(40):
         x, y = int(r() * w), int(r() * 60)
         if (x, y) in sky and y < rows[0][1] - 2:
-            po[x, y] = hp.rgb("white" if r() < 0.4 else "lgrey")
+            po[x, y] = sn.rgb("white" if r() < 0.4 else "lgrey")
     return out
 
 
 def stats():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     planks(cv, 0, 0, W, H, 20, vertical=True, seed=5)
     # crown moulding and baseboard
     cv.fill(0, 0, W, 6, "plum")
@@ -650,7 +650,7 @@ def stats():
     cv.fill(fx + 1, fy + 36, 36, 1, "orange")
     cv.fill(fx + 3, fy + 3, 32, 32, "sky")
     cv.fill(fx + 3, fy + 27, 32, 8, "green")
-    cv.paste(hp.frame("face-dog-koda", "happy"), fx + 3, fy + 3)
+    cv.paste(sn.frame("face-dog-koda", "happy"), fx + 3, fy + 3)
     cv.fill(fx + 18, fy - 5, 2, 2, "amber")
     cv.line(fx + 19, fy - 4, fx + 4, fy, "plum")
     cv.line(fx + 19, fy - 4, fx + 34, fy, "plum")
@@ -676,7 +676,7 @@ END_STREET = 370  # top of The Long Way Home strip on screen-end
 
 
 def end():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     # The Long Way Home's banded sunset, twice: behind the house down to its lawn, with the striped sun low
     # in the west, and behind the panel down to the far rooftops of the street below
     cv.fill(0, 0, W, 520, bd.LONG_WAY_SKY[-1])
@@ -771,7 +771,7 @@ def end():
         strip.fill(x + 1, y - 1, 1, 1, "rust")
     cv.paste(strip.img, 0, END_STREET)
     # the brick road home, its top rows under the button
-    road = hp.TILES["homeStretch"]
+    road = sn.TILES["homeStretch"]
     cv.img.paste(road, (0, END_STREET + 150))
     cv.img.paste(road, (280, END_STREET + 150))
     return cv
@@ -807,22 +807,22 @@ def after_dark(img, steps=2):
     w, h = img.size
     out = img.copy()
     po = out.load()
-    cyan, white = hp.rgb("cyan"), hp.rgb("white")
+    cyan, white = sn.rgb("cyan"), sn.rgb("white")
     for y in range(h):
         for x in range(w):
             c = px[x, y]
             if c[3] == 0:
                 continue
             if c[:3] == cyan:
-                po[x, y] = hp.rgb("yellow") + (255,)
+                po[x, y] = sn.rgb("yellow") + (255,)
             elif c[:3] == white and any(0 <= x + dx < w and 0 <= y + dy < h and px[x + dx, y + dy][:3] == cyan
                                         for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))):
-                po[x, y] = hp.rgb("amber") + (255,)
+                po[x, y] = sn.rgb("amber") + (255,)
             else:
                 d = "%02x%02x%02x" % c[:3]
                 for _ in range(steps):
                     d = dk(d)
-                po[x, y] = hp.rgb(d) + (255,)
+                po[x, y] = sn.rgb(d) + (255,)
     return out
 
 
@@ -856,7 +856,7 @@ def picket_fence(cv, foot, x0, x1, gate=None):
 
 
 def loading():
-    cv = hp.Canvas(W, H)
+    cv = sn.Canvas(W, H)
     r = rand(13)
     # the night sky in bands, navy down to a last mauve glow behind the far roofs, stars in the navy band
     cv.fill(0, 0, W, HORIZON, NIGHT_SKY[-1])
@@ -1119,7 +1119,7 @@ def sprite_image(px):
     for y, row in enumerate(px):
         for x, c in enumerate(row):
             if c:
-                img.putpixel((x, y), hp.rgb(c) + (255,))
+                img.putpixel((x, y), sn.rgb(c) + (255,))
     return img
 
 
@@ -1144,12 +1144,12 @@ def ui(cv, key):
         # The gate scene at 40..196, then StartScene's walker, dog and gear rows and Start walk on the deck,
         # which is plain planks so any arrangement of them works.
         cv.paste(logo().img, *LOGO_AT)
-        hp.text(cv, "$385", 26, 15, "cream", 2)
+        sn.text(cv, "$385", 26, 15, "cream", 2)
         for x in (216, 268):
             panel(x, 10, 20, 20, "tan")
         for x in (8, 332):
             panel(x, 46, 20, 20, "tan")
-        hp.text_c(cv, "ELM AVENUE", 327, 75, "white")
+        sn.text_c(cv, "ELM AVENUE", 327, 75, "white")
         panel(130, 46, 100, 34, "white")
         cv.paste(pet_shop().img, *PET_SHOP_AT)
         panel(194, 166, 18, 18)
@@ -1160,28 +1160,28 @@ def ui(cv, key):
         for i in range(4):
             panel(156 + i * 52, 200, 44, 44)
         panel(4, 248, 132, 24, "tan")
-        hp.text(cv, "2/3 DOGS", 308, 255, "cream")
+        sn.text(cv, "2/3 DOGS", 308, 255, "cream")
         for i in range(9):
             panel(4 + (i % 3) * 120, 276 + (i // 3) * 52, 112, 44)
         panel(4, 428, 132, 24, "tan")
         for i in range(5):
             panel(4 + i * 72, 456, 64, 44)
-        hp.text_c(cv, "PACK FEE $40 PER ZONE", 180, 502, "cream")
+        sn.text_c(cv, "PACK FEE $40 PER ZONE", 180, 502, "cream")
         cv.fill(4, 518, 352, 40, "orange")
         cv.fill(4, 514, 352, 40, "amber")
     elif key == "screen-stats":
-        hp.text(cv, "STATS", 12, 12, "cream")
+        sn.text(cv, "STATS", 12, 12, "cream")
         panel(332, 10, 20, 20, "tan")
         for i in range(3):
             panel(4 + i * 120, 56, 112, 44, "cream" if i == 2 else "tan")
-        hp.text(cv, "BADGES", 12, 112, "cream")
-        hp.text(cv, "7/15", 336, 112, "cream")
+        sn.text(cv, "BADGES", 12, 112, "cream")
+        sn.text(cv, "7/15", 336, 112, "cream")
         for i in range(15):
             x, y = 8 + (i // 8) * 176, 132 + (i % 8) * 52
             panel(x, y + 2, 32, 32, "amber")
-            hp.text(cv, "BADGE NAME", x + 36, y + 4, "amber", 2)
-            hp.text(cv, "THE GOAL", x + 36, y + 20, "lgrey", 2)
-            hp.text(cv, "SECOND LINE", x + 36, y + 36, "lgrey", 2)
+            sn.text(cv, "BADGE NAME", x + 36, y + 4, "amber", 2)
+            sn.text(cv, "THE GOAL", x + 36, y + 20, "lgrey", 2)
+            sn.text(cv, "SECOND LINE", x + 36, y + 36, "lgrey", 2)
     elif key == "screen-end":
         cv.paste(logo().img, 116, 40)
         for x, foot in ((116, 110), (144, 110), (216, 110)):
@@ -1204,16 +1204,16 @@ def preview(out, scale=2):
     shots = [(k, False) for k in keys] + [(k, True) for k in keys]
     gap = 8
     top = LOGO_H * 3 + gap
-    sheet = Image.new("RGB", ((W + gap) * len(shots) * scale, (top + H) * scale), hp.rgb("ink"))
+    sheet = Image.new("RGB", ((W + gap) * len(shots) * scale, (top + H) * scale), sn.rgb("ink"))
     x = 0
     for ground in ("green", "dbrown", "amber", "navy"):
-        bg = Image.new("RGBA", (LOGO_W, LOGO_H), hp.rgb(ground) + (255,))
+        bg = Image.new("RGBA", (LOGO_W, LOGO_H), sn.rgb(ground) + (255,))
         bg.alpha_composite(logo().img)
         sheet.paste(bg.resize((LOGO_W * 3 * scale, LOGO_H * 3 * scale), Image.NEAREST), (x * scale, 0))
         x += LOGO_W * 3 + gap
     # the ui-loading frames, on the night sidewalk
     for i in range(4):
-        bg = Image.new("RGBA", (PAIR_W, PAIR_H), hp.rgb("grey") + (255,))
+        bg = Image.new("RGBA", (PAIR_W, PAIR_H), sn.rgb("grey") + (255,))
         bg.alpha_composite(sprite_image(pair(i)))
         sheet.paste(bg.resize((PAIR_W * scale, PAIR_H * scale), Image.NEAREST), (x * scale, 0))
         x += PAIR_W + gap
@@ -1242,7 +1242,7 @@ def shop_preview(out, scale=4):
     gap = 8
     top = PET_SHOP_H * (scale + 1) + gap
     sheet = Image.new("RGB", (max(W * (scale + 1) + gap, (PET_SHOP_W * (scale + 1) + gap) * 2), top + H * scale),
-                      hp.rgb("ink"))
+                      sn.rgb("ink"))
     x = 0
     for t in tiles:
         sheet.paste(t, (x, 0))

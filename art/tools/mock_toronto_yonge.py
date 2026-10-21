@@ -32,7 +32,8 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
-import help as hp  # noqa: E402
+import mock_toronto as mt  # noqa: E402
+import scene as sn  # noqa: E402
 from minis import Mini, scaled  # noqa: E402
 from pixel import DARKER, K, edged  # noqa: E402
 from ui import to_image  # noqa: E402
@@ -57,9 +58,9 @@ def dk(c):
 
 
 def use_camera():
-    """Point help.py's Scene at the full screen and the tilted camera."""
-    hp.W, hp.H, hp.OX, hp.TOP = W, H, 0, 0
-    hp.YH, hp.F, hp.KS = YH, F, KS
+    """Point mock_toronto.py's Scene at the full screen and the tilted camera."""
+    mt.W, mt.H, mt.OX, mt.TOP = W, H, 0, 0
+    mt.YH, mt.F, mt.KS = YH, F, KS
 
 
 def scale_at(y):
@@ -79,14 +80,14 @@ def strip():
         row = []
         for x in range(320):
             c = "dslate"
-            n = hp.noise(x, y)
+            n = mt.noise(x, y)
             if n < 0.012:
                 c = "navy"
             elif n < 0.018:
                 c = "slate"
             for mid in (96, 224):
                 if mid - 18 <= x < mid + 18:
-                    c = "slate" if hp.noise(x + 7, y + 3) > 0.02 else "grey"
+                    c = "slate" if mt.noise(x + 7, y + 3) > 0.02 else "grey"
                     if x in (mid - 18, mid + 17):
                         c = "dslate"
                     for rail in (mid - 12, mid + 10):
@@ -117,7 +118,7 @@ def verge(across, z, span, rx):
     if across < FURNISH:
         if seam(24) or across < 166:
             return "slate"
-        return "lgrey" if hp.noise(math.floor(rx), math.floor(z)) < 0.03 else "grey"
+        return "lgrey" if mt.noise(math.floor(rx), math.floor(z)) < 0.03 else "grey"
     if across < WALK + 60:
         return "grey" if seam(32) else "lgrey"
     return "grey" if seam(48) or int(across) % 48 == 0 else "lgrey"
@@ -136,7 +137,7 @@ def road(sc, y0, y1):
                 c = STRIP[row][math.floor(rx + 160)]
             else:
                 c = verge(abs(rx), z, span, rx)
-            px[x, y] = hp.rgb(c)
+            px[x, y] = sn.rgb(c)
 
 
 # ---------- the roadside props: front elevations in design units, drawn 1.75x ----------
@@ -511,7 +512,7 @@ OBJECTS = [("construction", "idle", 0, 560), ("cone", "idle", 4, 470), ("tip", "
 
 # ---------- the band ----------
 
-class Band(hp.Canvas):
+class Band(sn.Canvas):
     def __init__(self):
         super().__init__(W, BAND_H)
 
@@ -523,7 +524,7 @@ def tower(cv, x, w, top, wall, glass, lit, seed, crown=None):
     cv.fill(x + w - 2, top, 2, BASE - top, dk(wall))
     for cx in range(x + 2, x + w - 3, 4):
         for cy in range(top + 3, BASE, 4):
-            n = hp.noise(cx + seed, cy)
+            n = mt.noise(cx + seed, cy)
             cv.fill(cx, cy, 2, 2, lit if n < 0.18 else glass)
     if crown:
         cv.fill(x + 1, top - 2, w - 2, 2, crown)
@@ -720,7 +721,7 @@ def band():
 
 def walk():
     use_camera()
-    sc = hp.Scene(W, H)
+    sc = mt.Scene(W, H)
     sc.shade, sc.leash_col = "navy", "pink"
     road(sc, BAR + STUB, DOG_BAND_Y)
     items = []
@@ -732,7 +733,7 @@ def walk():
     for foot, kind, a in sorted(items, key=lambda it: it[0]):
         if kind == "obj":
             key, tag, ln, d = a
-            sc.stand(key, tag, hp.lane(ln), d)
+            sc.stand(key, tag, mt.lane(ln), d)
             continue
         key, side, edge, s = a
         art = at_depth(key, s)
@@ -744,18 +745,18 @@ def walk():
             sc.shadow(round(cx), y, art.width * 0.8)
             sc.shade = shade
         sc.paste(art, cx - art.width / 2, y - art.height)
-    sc.pack(hp.lane(2), tuple(f"dog-{d}" for d in DOGS))
+    sc.pack(mt.lane(2), tuple(f"dog-{d}" for d in DOGS))
     b = band()
     sc.img.paste(b.crop((0, 0, W, STUB)), (0, BAR))
-    hp.ZONES["yonge"] = dict(hp.ZONES["shops"], name="Yonge Street")
+    sn.ZONES["yonge"] = dict(sn.ZONES["shops"], name="Yonge Street")
     sc.top_bar(["yonge"], 0, 1, 0.3)
-    bt = hp.TOP_BAR["buttons"]["sound"]
-    sc.paste(hp.frame("ui-icon-button", "normal"), bt["face"]["x"], bt["face"]["y"])
-    sc.paste(hp.frame("icon-sound", "on"), bt["icon"]["x"], bt["icon"]["y"])
-    panel = hp.Scene(W, H - DOG_BAND_Y)
-    panel.img.paste(hp.image("ui-dog-band"), (0, 0), hp.image("ui-dog-band"))
+    bt = mt.TOP_BAR["buttons"]["sound"]
+    sc.paste(sn.frame("ui-icon-button", "normal"), bt["face"]["x"], bt["face"]["y"])
+    sc.paste(sn.frame("icon-sound", "on"), bt["icon"]["x"], bt["icon"]["y"])
+    panel = mt.Scene(W, H - DOG_BAND_Y)
+    panel.img.paste(sn.image("ui-dog-band"), (0, 0), sn.image("ui-dog-band"))
     for i, d in enumerate(DOGS):
-        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, hp.dog(d)[3])
+        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, mt.dog(d)[3])
     sc.img.paste(panel.img, (0, DOG_BAND_Y))
     return sc.img
 
@@ -774,7 +775,7 @@ def props_sheet():
     rows.append(row)
     width = max(sum(a.width * 2 + pad for _, a in r) + pad for r in rows)
     height = sum(max(a.height * 2 for _, a in r) + label_h + pad for r in rows) + pad
-    cv = hp.Canvas(width, height)
+    cv = sn.Canvas(width, height)
     cv.fill(0, 0, width, height, "lgrey")
     y = pad
     for r in rows:
@@ -784,7 +785,7 @@ def props_sheet():
             big = art.resize((art.width * 2, art.height * 2), Image.NEAREST)
             cv.fill(x, y + tall, big.width, 1, "grey")
             cv.paste(big, x, y + tall - big.height)
-            hp.text(cv, CAPTIONS[key], x, y + tall + 6, "plum", 2)
+            sn.text(cv, CAPTIONS[key], x, y + tall + 6, "plum", 2)
             x += big.width + pad
         y += tall + label_h + pad
     return cv.img

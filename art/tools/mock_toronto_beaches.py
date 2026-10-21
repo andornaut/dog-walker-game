@@ -29,10 +29,11 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-import help as hp  # noqa: E402
+import mock_toronto as mt  # noqa: E402
+import scene as sn  # noqa: E402
 
 # The tall band, before backdrops.py reads the layout: rows 40 to 213, the approach from row 195.
-_L = hp.LAYOUT
+_L = sn.LAYOUT
 _L["regions"]["backdrop"].update(height=174)
 _L["regions"]["approach"].update(y=195, height=19)
 _L["regions"]["road"].update(y=214, height=256)
@@ -55,8 +56,8 @@ SAND, SAND_DK = "cream", "tan"
 
 
 def use_camera():
-    hp.W, hp.H, hp.OX, hp.TOP = W, H, 0, 0
-    hp.YH, hp.F, hp.KS = YH, F, KS
+    mt.W, mt.H, mt.OX, mt.TOP = W, H, 0, 0
+    mt.YH, mt.F, mt.KS = YH, F, KS
 
 
 def to_image(rows):
@@ -64,7 +65,7 @@ def to_image(rows):
     for y, row in enumerate(rows):
         for x, c in enumerate(row):
             if c:
-                img.putpixel((x, y), hp.rgb(c) + (255,))
+                img.putpixel((x, y), sn.rgb(c) + (255,))
     return img
 
 
@@ -90,7 +91,7 @@ def strip():
                 c = K["dbrown"]
             elif x < 5 or x >= 315:
                 c = K["brown"] if r < 15 else K["dbrown"]
-            px[x, y] = hp.rgb(K.get(c, c))
+            px[x, y] = sn.rgb(K.get(c, c))
     return img
 
 
@@ -262,7 +263,7 @@ def sand(px, py):
 
 
 def backdrop():
-    cv = hp.Canvas(bd.W, bd.H)
+    cv = sn.Canvas(bd.W, bd.H)
     bd.sky(cv)
     cv.fill(0, bd.CALM, W, 96 - bd.CALM, "cyan")
     for i in range(0, W, 5):
@@ -485,15 +486,15 @@ OBJECTS = [("goose", "idle", 3, 560), ("tip", "idle", 1, 470), ("ball-bounce", "
 
 def walk():
     use_camera()
-    hp.ZONES["beaches"] = dict(name="The Beaches", art="paws-promenade", shadow=K[SHADE], leash=K[LEASH],
+    sn.ZONES["beaches"] = dict(name="The Beaches", art="paws-promenade", shadow=K[SHADE], leash=K[LEASH],
                                difficulty=5, difficulty_name=None, fees=None)
-    sc = hp.Scene(W, H)
+    sc = mt.Scene(W, H)
     sc.shade, sc.leash_col = SHADE, LEASH
     px = sc.img.load()
     for y in range(FAR_Y, DOG_BAND_Y):
-        z, s = hp.distance_at(y)
+        z, s = mt.distance_at(y)
         for x in range(W):
-            px[x, y] = hp.rgb(ground((x + 0.5 - CX) / s, z))
+            px[x, y] = sn.rgb(ground((x + 0.5 - CX) / s, z))
     # props and road objects, far ones first
     items = []
     for key, side, inner, d in PLACED:
@@ -515,20 +516,20 @@ def walk():
             sc.paste(img, round(sx - img.width / 2), round(sy) - img.height)
         else:
             _, _, key, tag, ln, _ = it
-            sc.stand(key, tag, hp.lane(ln), d)
-    sc.pack(hp.lane(2), tuple(f"dog-{d}" for d in DOGS))
+            sc.stand(key, tag, mt.lane(ln), d)
+    sc.pack(mt.lane(2), tuple(f"dog-{d}" for d in DOGS))
     band = backdrop().img
     sc.img.paste(band, (0, 40))
-    route = [z for z in hp.ZONES if z != "beaches"][:hp.WALK_LENGTH - 1] + ["beaches"]
+    route = [z for z in sn.ZONES if z != "beaches"][:mt.WALK_LENGTH - 1] + ["beaches"]
     sc.top_bar(route, 46, 2, 0.4)
-    b = hp.TOP_BAR["buttons"]["sound"]
-    sc.paste(hp.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
-    sc.paste(hp.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
-    panel = hp.Scene(W, H - DOG_BAND_Y)
-    dog_band = hp.image("ui-dog-band")
+    b = mt.TOP_BAR["buttons"]["sound"]
+    sc.paste(sn.frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
+    sc.paste(sn.frame("icon-sound", "on"), b["icon"]["x"], b["icon"]["y"])
+    panel = mt.Scene(W, H - DOG_BAND_Y)
+    dog_band = sn.image("ui-dog-band")
     panel.img.paste(dog_band, (0, 0), dog_band)
     for i, d in enumerate(DOGS):
-        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, hp.dog(d)[3])
+        panel.doghouse(i * 120, 470 - DOG_BAND_Y, d, mt.dog(d)[3])
     sc.img.paste(panel.img, (0, DOG_BAND_Y))
     return sc.img
 
@@ -541,14 +542,14 @@ def sheet():
     cw = max(i.width for i in imgs) + pad
     rows = [imgs[i:i + cols] for i in range(0, len(imgs), cols)]
     rh = [max(i.height for i in r) + 16 for r in rows]
-    cv = hp.Canvas(cols * cw + pad, sum(rh) + pad)
+    cv = sn.Canvas(cols * cw + pad, sum(rh) + pad)
     cv.fill(0, 0, cv.img.width, cv.img.height, SAND)
     y = pad
     for r, (row, h) in enumerate(zip(rows, rh)):
         for c, img in enumerate(row):
             x = pad + c * cw
             cv.paste(img, x + (cw - pad - img.width) // 2, y + h - 16 - img.height)
-            hp.text_c(cv, keys[r * cols + c].upper(), x + (cw - pad) / 2, y + h - 12, "plum")
+            sn.text_c(cv, keys[r * cols + c].upper(), x + (cw - pad) / 2, y + h - 12, "plum")
         y += h
     return cv.img.resize((cv.img.width * 2, cv.img.height * 2), Image.NEAREST)
 

@@ -28,7 +28,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import cards  # noqa: E402
-import help as hp  # noqa: E402
+import scene as sn  # noqa: E402
 import road  # noqa: E402
 from cards import Art  # noqa: E402
 from ui import to_image  # noqa: E402
@@ -46,7 +46,7 @@ def stink(a, x, y, n, ink):
 
 def back_source(a, skin):
     """The source at its @50 step at the back left, its stink rising off it."""
-    f = hp.frame(skin + "@50", "idle")
+    f = sn.frame(skin + "@50", "idle")
     a.feet(skin + "@50", "idle", 2 + f.width / 2, f.height + 2)
     stink(a, 4 + f.width // 2, 0, 2, STINK[skin][1])
 
@@ -138,7 +138,7 @@ def preview(out, scale=3):
         rows.append([k for k in ILLUSTRATIONS if k.startswith(f"card-{skin}-")])
     every = {**cards.ILLUSTRATIONS, **ILLUSTRATIONS}
     gap = 6
-    sheet = Image.new("RGB", ((cards.CW + gap) * 3 * scale, (cards.CH + gap) * len(rows) * scale), hp.rgb("ink"))
+    sheet = Image.new("RGB", ((cards.CW + gap) * 3 * scale, (cards.CH + gap) * len(rows) * scale), sn.rgb("ink"))
     for r, keys in enumerate(rows):
         for c, key in enumerate(keys):
             card = mock_card(every, key).resize((cards.CW * scale, cards.CH * scale), Image.NEAREST)
@@ -150,7 +150,7 @@ def mock_card(every, key):
     """The illustration in an encounter card frame, as the game shows it."""
     im = to_image(cards.card_frame("encounter").px)
     im.paste(every[key]().img, (5, 16))
-    bg = Image.new("RGB", im.size, hp.rgb("dbrown"))
+    bg = Image.new("RGB", im.size, sn.rgb("dbrown"))
     bg.paste(im, (0, 0), im)
     return bg
 

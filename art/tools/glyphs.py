@@ -454,17 +454,6 @@ def gear_fanny_pack():
     return g
 
 
-def gear_whistle():
-    g = Grid(16, 16)
-    g.ell(6, 10, 4.5, 4.5, "lgrey", "grey", "white")
-    g.rect(8, 5, 7, 4, "lgrey")
-    g.rect(8, 8, 7, 1, "grey")
-    g.rect(5, 9, 2, 2, "slate")
-    g.rect(1, 2, 2, 5, "red")
-    g.rect(1, 1, 7, 2, "red")
-    return g
-
-
 def gear_poop_bags():
     g = Grid(16, 16)
     g.ell(7, 7.5, 6, 6, "green", "dgreen", "yellow")
@@ -738,19 +727,6 @@ def gear_fanny_pack20():
     return g
 
 
-def gear_whistle20():
-    """The whistle: an lgrey barrel with its slate hole and mouthpiece, on a red lanyard."""
-    g = Grid(20, 20)
-    g.ell(7, 12.5, 5.5, 5.5, "lgrey", "grey", "white")
-    g.rect(10, 7, 8, 5, "lgrey")
-    g.rect(10, 11, 8, 1, "grey")
-    g.rect(11, 7, 7, 1, "white")
-    g.rect(6, 12, 2, 2, "slate")
-    g.rect(2, 1, 2, 9, "red")
-    g.rect(2, 1, 9, 2, "red")
-    return g
-
-
 def gear_poop_bags20():
     """The roll of poop bags: a green roll lit yellow round a forest core, a bag pulled off to the right."""
     g = Grid(20, 20)
@@ -870,7 +846,6 @@ IMAGES = {
     "icon-gear-lucky-collar": gear_lucky_collar,
     "icon-gear-poop-bags": gear_poop_bags,
     "icon-gear-running-shoes": gear_running_shoes,
-    "icon-gear-whistle": gear_whistle,
     "icon-perk-calm-voice-20": calm_voice20,
     "icon-perk-kind-words-20": kind_words20,
     "icon-perk-long-reach-20": long_reach20,
@@ -888,7 +863,6 @@ IMAGES = {
     "icon-gear-lucky-collar-20": gear_lucky_collar20,
     "icon-gear-poop-bags-20": gear_poop_bags20,
     "icon-gear-running-shoes-20": gear_running_shoes20,
-    "icon-gear-whistle-20": gear_whistle20,
     "icon-bump": bump,
     "icon-fired": fired,
     "icon-hint": hint,
