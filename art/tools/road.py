@@ -1362,13 +1362,13 @@ def ice_cream_truck(f=0, roll=None):
     px.px = [[None] * px.w for _ in range(px.h)]
     dip = 1 if roll in (1, 2) else 0
     rock = -dip if roll is not None else 0
-    # the cone sign on its post: a waffle cone under a pink scoop with a cherry
-    g.rect(27, 9 + rock, 2, 3 - rock, "lgrey")
-    g.tri((23, 6 + rock), (33, 6 + rock), (28, 11.5 + rock), "tan")
-    for x, y in ((25, 7), (29, 7), (27, 9)):
+    # the cone sign on the roof: a tall waffle cone, hatched brown, under a pink scoop with a cherry
+    g.tri((23.5, 5.5 + rock), (32.5, 5.5 + rock), (28, 12.5 + rock), "tan")
+    g.tri((28, 5.5 + rock), (32.5, 5.5 + rock), (28, 12.5 + rock), "ochre")
+    for x, y in ((25.5, 6.5), (28.5, 7), (27, 8.5), (29.5, 9), (28, 10.5)):
         g.p(x, y + rock, "brown")
-    g.ell(28, 5 + rock, 5.5, 3.2, "pink", "mauve", "white")
-    g.rect(28, 1 + rock, 2, 2, "red")
+    g.ell(28, 4 + rock, 4.6, 2.6, "pink", "mauve", "white")
+    g.rect(28, 0.5 + rock, 1.5, 1.5, "red")
     # the music note: left of the sign at rest (f 0) or right (f 1); driving, it floats up a row a frame
     nx, ny = (12, 4) if f == 0 else (41, 3)
     if roll is not None:
