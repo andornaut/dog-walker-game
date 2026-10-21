@@ -980,24 +980,25 @@ def distillery_view():
 
 def kensington_view():
     paving = flecked("shale", "coal", 23)
-    a = ZoneView("kensington-market", flecked("pink", "peach", 41), paving, "white", (3, 6), curb="stone",
+    a = ZoneView("kensington-market", flecked("dbrick", "brick", 41), paving, "white", (3, 6), curb="stone",
                  walk="shale", lawn=paving, walk_fleck="coal", edge="mauve")
-    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "foam", "cyan", FAR_Y, w=AW)
-    for x, w, wall_c, roof, awn in ((-14, 28, "turquoise", "dslate", "ttc"), (14, 26, "lilac", "violet", "amber"),
-                                    (40, 26, "gold", "brick", "turquoise"), (66, 26, "lime", "dolive", "pink")):
+    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "lake", "dturq", FAR_Y, w=AW)
+    for x, w, wall_c, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "purple", "ochre"),
+                                    (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "mauve")):
         for k in range(w // 2 + 2):
             a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof)
         a.fill(x, 7, w, FAR_Y - 7, wall_c)
         a.fill(x + w - 2, 7, 2, FAR_Y - 7, bd.dk(wall_c))
-        a.fill(x + 3, 9, 4, 3, "cyan")
-        a.fill(x + w - 8, 9, 4, 3, "cyan")
+        a.fill(x + 3, 9, 4, 3, "lake")
+        a.fill(x + w - 8, 9, 4, 3, "lake")
         for i in range(0, w - 2, 4):
             a.fill(x + 1 + i, 14, 2, 2, awn)
-            a.fill(x + 3 + i, 14, 2, 2, "white")
-        a.fill(x + 3, 17, w - 10, 4, "cyan")
+            a.fill(x + 3 + i, 14, 2, 2, "cream")
+        a.fill(x + 3, 17, w - 10, 4, "lake")
     for x0 in (0, AW - 5):
-        a.fill(x0, 0, 5, FAR_Y, "coal")
-    bd.bunting(a, 5, 70, 4, 2, ("ttc", "gold", "turquoise", "lilac", "lime"))
+        for py in range(FAR_Y):
+            a.fill(x0, py, 5, 1, bd.MURAL[(py // 4) % len(bd.MURAL)])
+    bd.bunting(a, 5, 70, 4, 2, ("dred", "gold", "dturq", "lilac", "moss"))
     a.street()
     return a
 

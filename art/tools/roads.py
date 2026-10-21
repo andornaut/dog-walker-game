@@ -205,7 +205,8 @@ def shops_ground(g):
 def shops_lines(g):
     for x in DIVIDERS:
         for y in (8, 40):
-            # white dashes (2.7:1 on the pink) with a mauve edge on the right
+            # white dashes (2.7:1 on Main Street's pink, 11.8:1 on Kensington Market's dbrick) with a mauve
+            # edge on the right
             g.rect(x, y, 2, 12, "white")
             g.rect(x + 2, y + 1, 1, 12, "mauve")
 
@@ -478,20 +479,21 @@ def distillery_lines(g):
 
 
 def kensington_ground(g):
-    """Main Street's pink, laid as offset flagstones between dark laneway gutters: shale stones on the outer 4 columns
-    inside a coal seam, an ash joint every 16 rows, peach and red flecks."""
+    """Dark brick flagstones in offset courses between dark laneway gutters: dbrick stones in plum joints,
+    brick and mauve flecks worn into them; shale stones on the outer 4 columns inside a coal seam, an ash
+    joint every 16 rows."""
     rnd = random.Random("road-kensington-market")
-    g.rect(0, 0, W, H, "pink")
+    g.rect(0, 0, W, H, "dbrick")
     # flagstones half a lane wide in courses 16 rows deep, each course offset half a stone, so the
     # lane dividers fall on joints of every other course
     for course in range(H // 16):
         y, off = course * 16, 16 if course % 2 else 0
-        g.rect(0, y + 14, W, 2, "skin1")
+        g.rect(0, y + 14, W, 2, "plum")
         for x in range(off - 1, W, 32):
-            g.rect(x, y, 1, 14, "skin1")
-    specks(g, rnd, 20, "skin1", 6, W - 6)
-    specks(g, rnd, 10, "peach", 6, W - 6)
-    specks(g, rnd, 8, "red", 6, W - 6)
+            g.rect(x, y, 1, 14, "plum")
+    specks(g, rnd, 20, "brick", 6, W - 6)
+    specks(g, rnd, 10, "walnut", 6, W - 6)
+    specks(g, rnd, 6, "mauve", 6, W - 6)
     for x0, inner in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "shale")
         g.rect(inner, 0, 1, H, "coal")

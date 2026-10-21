@@ -232,10 +232,10 @@ LIT = dict(slate="grey", dslate="slate", navy="dslate", purple="mauve", dred="re
 
 
 def house(cv, x, w, wall, roof, door="dred", top=40, base=104, roof_h=26, parts=HOUSE, curtains=None,
-          eave=3, rake=None, dormer=False):
+          eave=3, rake=None, dormer=False, glass="cyan"):
     """A house facing the camera, standing on row base: a gable roof roof_h rows tall from top, its
     eaves eave pixels past the walls. curtains, a colour, draws the windows' curtains closed,
-    lamplight in the gap between them. rake, a colour, lights the roof's left edge, which faces the
+    lamplight in the gap between them; glass is the windows' colour otherwise. rake, a colour, lights the roof's left edge, which faces the
     top-left light. dormer puts a dormer window in the roof's middle."""
     wall_y = top + roof_h
     off, ww, wh, door_h = parts
@@ -254,7 +254,7 @@ def house(cv, x, w, wall, roof, door="dred", top=40, base=104, roof_h=26, parts=
     if dormer:
         dormer_window(cv, x + w // 2, top + round(roof_h * 0.42), wall_y - 2, wall, roof, curtains)
     for wx in (x + ww // 2, x + w - ww - ww // 2):
-        window(cv, wx, wall_y + off, ww, wh, curtains)
+        window(cv, wx, wall_y + off, ww, wh, curtains, glass)
     dx = x + w // 2 - 5
     cv.fill(dx, base - door_h, 10, door_h, door)
     cv.fill(dx + 7, base - door_h // 2, 1, 2, "amber")
@@ -277,8 +277,8 @@ def far_house(cv, cx, w, base, wall_h, wall, roof, lit=None):
         cv.fill(wx + 1, top + 4, 2, 2, lit or "cyan")
 
 
-def window(cv, wx, wy, ww, wh, curtains=None):
-    """A window in a plum frame on a white sill: cyan glass with white glazing bars, or curtains
+def window(cv, wx, wy, ww, wh, curtains=None, glass="cyan"):
+    """A window in a plum frame on a white sill: glass (cyan) with white glazing bars, or curtains
     drawn closed with lamplight between them."""
     cv.fill(wx, wy, ww, wh, "plum")
     if curtains:
@@ -288,7 +288,7 @@ def window(cv, wx, wy, ww, wh, curtains=None):
         cv.fill(wx + 2, wy + 2, 1, wh - 3, dk(curtains))
         cv.fill(wx + ww - 3, wy + 2, 1, wh - 3, dk(curtains))
     else:
-        cv.fill(wx + 1, wy + 1, ww - 2, wh - 2, "cyan")
+        cv.fill(wx + 1, wy + 1, ww - 2, wh - 2, glass)
         cv.fill(wx + ww // 2, wy + 1, 1, wh - 2, "white")
         cv.fill(wx + 1, wy + wh // 2, ww - 2, 1, "white")
     cv.fill(wx - 1, wy + wh, ww + 2, 2, "white")
@@ -900,10 +900,10 @@ def shops():
     return cv
 
 
-def shopfront(cv, x, w, top, base, wall_c, awn, sign, board, letters, line="plum"):
+def shopfront(cv, x, w, top, base, wall_c, awn, sign, board, letters, line="plum", glass="cyan", stripe="white"):
     """A shopfront facing the camera, rows top to base, drawn as a toy box: flat colour blocks
     inside a 1px line, a shaded top and right side, upstairs windows where there is room, a sign
-    board in the sign letters, a striped awning, the shop window and the door."""
+    board in the sign letters, an awning striped awn and stripe, the shop window in glass and the door."""
     cv.fill(x, top, w, base - top, wall_c)
     cv.fill(x + w - 3, top, 3, base - top, dk(wall_c))
     cv.fill(x, top, w, 3, dk(wall_c))
@@ -911,20 +911,20 @@ def shopfront(cv, x, w, top, base, wall_c, awn, sign, board, letters, line="plum
     if top <= base - 48:
         for wx in (x + 9, x + w - 21):
             cv.fill(wx, base - 44, 12, 10, line)
-            cv.fill(wx + 1, base - 43, 10, 8, "cyan")
+            cv.fill(wx + 1, base - 43, 10, 8, glass)
             cv.fill(wx + 2, base - 42, 3, 1, "white")
     cv.fill(x + 5, base - 32, w - 10, 13, line)
     cv.fill(x + 6, base - 31, w - 12, 11, board)
     word(cv, sign, x + w / 2, base - 29, letters)
     for i in range(0, w - 4, 8):
         cv.fill(x + 2 + i, base - 18, 4, 5, awn)
-        cv.fill(x + 6 + i, base - 18, 4, 5, "white")
+        cv.fill(x + 6 + i, base - 18, 4, 5, stripe)
     cv.fill(x + 1, base - 18, w - 2, 1, line)
     cv.fill(x + 2, base - 13, w - 4, 1, dk(awn))
     for i in range(2, w - 4, 4):
         cv.fill(x + i, base - 12, 2, 1, awn)
     cv.fill(x + 6, base - 11, w - 34, 11, line)
-    cv.fill(x + 7, base - 10, w - 36, 9, "cyan")
+    cv.fill(x + 7, base - 10, w - 36, 9, glass)
     cv.fill(x + 9, base - 8, 6, 1, "white")
     cv.fill(x + 9, base - 6, 3, 1, "white")
     cv.fill(x + w - 22, base - 12, 12, 12, line)
@@ -1732,14 +1732,14 @@ def distillery():
 
 def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE):
     """A Kensington house turned shop: a steep gable over a painted wall with two upstairs windows,
-    a shopfront under it."""
+    a shopfront under it, its glass lake and its awning striped cream."""
     x = cx - w // 2
     top = base - 58
-    house(cv, x, w, wall, roof, "dbrown", top=top, base=base, roof_h=20, parts=(3, 8, 9, 0), eave=2)
-    shopfront(cv, x, w, base - 33, base, wall, awn, sign, board, letters)
+    house(cv, x, w, wall, roof, "dbrown", top=top, base=base, roof_h=20, parts=(3, 8, 9, 0), eave=2, glass="lake")
+    shopfront(cv, x, w, base - 33, base, wall, awn, sign, board, letters, glass="lake", stripe="cream")
 
 
-MURAL = ("ttc", "gold", "lime", "turquoise", "lilac", "pink")
+MURAL = ("dred", "ochre", "olive", "dturq", "violet", "mauve")
 
 
 def mural(cv, x0, top, base, flip):
@@ -1767,21 +1767,21 @@ def mural(cv, x0, top, base, flip):
 def garden_car(cv, x, base):
     """The Garden Car, side on with its wheels on row base: an old sedan painted in patches of bright
     colour, its windows and roof, hood and trunk overgrown with plants in flower."""
-    cv.fill(x, base - 9, 38, 6, "ttc")
-    for k, c in enumerate(("gold", "turquoise", "lime", "gold", "lilac", "turquoise", "lime")):
+    cv.fill(x, base - 9, 38, 6, "rust")
+    for k, c in enumerate(("gold", "dturq", "moss", "gold", "lilac", "dturq", "moss")):
         cv.fill(x + 2 + k * 5, base - 8 + (k % 2) * 2, 3, 2, c)
-    cv.fill(x, base - 4, 38, 1, "dred")
-    cv.fill(x + 9, base - 15, 20, 6, "ttc")
-    cv.fill(x + 7, base - 13, 2, 4, "ttc")
-    cv.fill(x + 29, base - 13, 2, 4, "ttc")
+    cv.fill(x, base - 4, 38, 1, "dbrown")
+    cv.fill(x + 9, base - 15, 20, 6, "rust")
+    cv.fill(x + 7, base - 13, 2, 4, "rust")
+    cv.fill(x + 29, base - 13, 2, 4, "rust")
     for wx in (x + 10, x + 20):
-        cv.fill(wx, base - 14, 8, 4, "moss")
-        cv.fill(wx + 2, base - 13, 2, 2, "forest")
+        cv.fill(wx, base - 14, 8, 4, "olive")
+        cv.fill(wx + 2, base - 13, 2, 2, "pine")
     for bx, by, rx in ((x + 4, base - 10, 4), (x + 19, base - 16, 9), (x + 34, base - 10, 4)):
         for dy in range(-4, 1):
             for dx in range(-rx, rx + 1):
                 if (dx / (rx + 0.5)) ** 2 + (dy / 4.5) ** 2 <= 1:
-                    cv.fill(bx + dx, by + dy, 1, 1, "forest" if dx + dy > rx // 2 else "green")
+                    cv.fill(bx + dx, by + dy, 1, 1, "pine" if dx + dy > rx // 2 else "canopy")
     for fx, fy, c in ((x + 2, base - 13, "red"), (x + 6, base - 12, "yellow"), (x + 13, base - 20, "pink"),
                       (x + 18, base - 21, "yellow"), (x + 23, base - 20, "red"), (x + 27, base - 18, "white"),
                       (x + 33, base - 13, "pink"), (x + 37, base - 12, "yellow")):
@@ -1793,22 +1793,22 @@ def garden_car(cv, x, base):
 
 def kensington():
     cv = sn.Canvas(W, H)
-    # a bright aqua sunburst from the end of the street, flat cyan beyond its arc, two clouds
-    sunburst(cv, CX, BASE + 6, 7, "foam", "cyan", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
+    # a deep teal sunburst from the end of the street, flat dturq beyond its arc, two clouds
+    sunburst(cv, CX, BASE + 6, 7, "lake", "dturq", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
     for x, y, w, p in ((12, BASE - 58, 30, 4), (296, BASE - 60, 38, 5)):
         cloud(cv, x, y, w, p, f"kensington-{x}")
     # rooftops of the back lanes behind the houses
     roofline(cv, BASE - 34, ((24, 18, 10), (76, 16, 8), (228, 18, 9), (300, 16, 10)), "dbrick", "gold", step=1)
     # painted houses turned shops across the street
     for cx, w, wall_c, roof, awn, sign, board, letters in (
-            (47, 56, "turquoise", "dslate", "red", "FRUIT", "forest", "yellow"),
-            (CX - 69, 60, "lilac", "violet", "amber", "CHEESE", "navy", "yellow"),
-            (CX, 68, "gold", "brick", "turquoise", "VINTAGE", "violet", "white"),
-            (CX + 69, 60, "lime", "dolive", "pink", "SPICES", "dbrick", "gold"),
-            (313, 56, "pink", "violet", "cyan", "COFFEE", "coal", "cream")):
+            (47, 56, "dturq", "navy", "dred", "FRUIT", "forest", "gold"),
+            (CX - 69, 60, "violet", "purple", "ochre", "CHEESE", "navy", "gold"),
+            (CX, 68, "ochre", "dbrick", "dturq", "VINTAGE", "purple", "cream"),
+            (CX + 69, 60, "olive", "dolive", "mauve", "SPICES", "dbrick", "gold"),
+            (313, 56, "mauve", "purple", "lake", "COFFEE", "coal", "cream")):
         market_house(cv, cx, w, wall_c, roof, awn, sign, board, letters)
-    bunting(cv, 0, CX - 36, BASE - 37, 5, ("ttc", "gold", "turquoise", "lilac", "lime"))
-    bunting(cv, CX + 36, W, BASE - 37, 5, ("lime", "lilac", "gold", "ttc", "turquoise"))
+    bunting(cv, 0, CX - 36, BASE - 37, 5, ("dred", "gold", "dturq", "lilac", "moss"))
+    bunting(cv, CX + 36, W, BASE - 37, 5, ("moss", "lilac", "gold", "dred", "dturq"))
 
     def paving(px, py):
         return "coal" if hashed(px, py, 23) else "shale"
@@ -1832,8 +1832,8 @@ def kensington():
         if a >= ROAD - 5:
             return "coal"
         if span < 4 and crosses(z, span, 32):
-            return "skin1"
-        return "peach" if hashed(px, py, 61) else "pink"
+            return "plum"
+        return "brick" if hashed(px, py, 61) else "dbrick"
 
     cross(cv, flat(road), "coal", paving, curb="stone")
     cross_line(cv, "white", "mauve")

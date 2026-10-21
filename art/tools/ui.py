@@ -1254,12 +1254,15 @@ def owner_tab():
 ZONE_COLOURS = {
     "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "pink", "the-long-way-home": "skin2",
     "snooze-crescent": "grey", "paws-promenade": "cream",
-    "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "pink",
+    "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "dbrick",
     "the-beaches": "cream", "yonge-street": "skin2",
 }
 # One ramp step up: the inverse of DARKER over Endesga 32 and the neutral greys, for rims that must
 # lighten to hold 3:1 on ink.
 LIGHTER = {v: k for k, v in DARKER.items() if k != v and k not in TORONTO.values()}
+# A Toronto road colour steps up its own ramp, then to the Endesga colour above its top: dbrick to brick
+# to rust.
+LIGHTER.update({K["dbrick"]: K["brick"], K["brick"]: K["rust"]})
 
 
 def pip_rim(fill):
