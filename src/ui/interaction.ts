@@ -1,4 +1,5 @@
 import { type Cents, cents } from "../rules/units";
+import type { PlateKind } from "./selection";
 
 // Every tappable item and button shows one of these. disabled cannot be chosen; normal can;
 // selected is picked, equipped or open; primary is the screen's one call to action.
@@ -84,15 +85,43 @@ export function itemTile(input: ItemTileInput): ItemTile {
   return capacity > 1 && pickedCount >= capacity ? { kind: "packFull" } : { kind: "available" };
 }
 
-// The ui-tile state an item tile draws: every tile that cannot be picked now is disabled.
-export function itemTileState(tile: ItemTile): TileState {
+// How an item's art shows: in full colour, as its grey copy, or as its flat silhouette.
+export type ArtLook = "full" | "grey" | "silhouette";
+
+// The padlock over an item not owned: open while the bank covers its price, closed otherwise.
+export type Padlock = "closed" | "open";
+
+// Everything an item's state sets on its tile or row: the art, the padlock, the plate and
+// the ui-tile state.
+export interface ItemLook {
+  readonly art: ArtLook;
+  readonly padlock: Padlock | null;
+  readonly plate: PlateKind | null;
+  readonly state: TileState;
+}
+
+const OWNED_LOOK = { art: "full", padlock: null, plate: null } as const;
+
+// An item tile on the home screen. An owned item shows in full colour with no padlock or
+// plate, greyed while the pack is full. One not owned shows its silhouette: on a normal tile
+// with the open padlock and the buy plate while the bank covers it; on a disabled tile with
+// the closed padlock and the short plate when not, or the goal plate when a goal unlocks it.
+export function itemTileLook(tile: ItemTile): ItemLook {
   switch (tile.kind) {
     case "available":
-      return "normal";
+      return { ...OWNED_LOOK, state: "normal" };
     case "picked":
-      return "selected";
+      return { ...OWNED_LOOK, state: "selected" };
+    case "packFull":
+      return { ...OWNED_LOOK, art: "grey", state: "disabled" };
+    case "locked":
+      return tile.affordable
+        ? { art: "silhouette", padlock: "open", plate: "buy", state: "normal" }
+        : { art: "silhouette", padlock: "closed", plate: "short", state: "disabled" };
+    case "goal":
+      return { art: "silhouette", padlock: "closed", plate: "goal", state: "disabled" };
     default:
-      return "disabled";
+      return tile satisfies never;
   }
 }
 

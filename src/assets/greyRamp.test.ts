@@ -1,21 +1,30 @@
 import { describe, expect, it } from "vitest";
 
-import { GREY_RAMP, greyFor, remapToGrey } from "./greyRamp";
+import { greyFor, remapToGrey } from "./greyRamp";
+
+const RAMP = [0xffffff, 0xd8d8d8, 0xa4a4a4, 0x727272, 0x4a4a4a, 0x181425];
+const DARKEST = RAMP.length - 1;
 
 describe("greyFor", () => {
-  // A grey of the ramp stays; light colours go to light greys and dark ones to dark greys.
-  it.each([...GREY_RAMP.map((grey) => [grey, grey]), [0xead4aa, 0xc0cbdc], [0x3e2731, 0x262b44]])(
-    "maps %i to %i",
-    (colour, grey) => {
-      expect(greyFor(colour)).toBe(grey);
-    },
-  );
+  // A grey of the ramp stays, or steps down it and stops at its darkest; light colours go to
+  // light greys and dark ones to dark greys.
+  it.each<[number, number, number | undefined]>([
+    ...RAMP.flatMap((grey, i): [number, number, number | undefined][] => [
+      [0, grey, grey],
+      [1, grey, RAMP[Math.min(i + 1, DARKEST)]],
+    ]),
+    [0, 0xead4aa, 0xd8d8d8],
+    [0, 0x733e39, 0x4a4a4a],
+    [1, 0xead4aa, 0xa4a4a4],
+  ])("moves %i steps from %i to %i", (steps, colour, grey) => {
+    expect(greyFor(RAMP, steps, colour)).toBe(grey);
+  });
 });
 
 describe("remapToGrey", () => {
   it("replaces each pixel's colour and keeps its alpha", () => {
-    const pixels = new Uint8ClampedArray([0xea, 0xd4, 0xaa, 0x80, 0x3e, 0x27, 0x31, 0xff]);
-    remapToGrey(pixels);
-    expect([...pixels]).toEqual([0xc0, 0xcb, 0xdc, 0x80, 0x26, 0x2b, 0x44, 0xff]);
+    const pixels = new Uint8ClampedArray([0xea, 0xd4, 0xaa, 0x80, 0x73, 0x3e, 0x39, 0xff]);
+    remapToGrey(RAMP, 0, pixels);
+    expect([...pixels]).toEqual([0xd8, 0xd8, 0xd8, 0x80, 0x4a, 0x4a, 0x4a, 0xff]);
   });
 });

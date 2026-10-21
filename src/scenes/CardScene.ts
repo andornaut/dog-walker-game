@@ -7,7 +7,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
-import { DISABLED_COLORS } from "../home/selection";
+import { DISABLED_COLORS, GREYED } from "../home/selection";
 import { RUN_TEXT_FIELDS } from "../hud/runText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey } from "../input/keyBindings";
@@ -542,7 +542,7 @@ export class CardScene extends Scene {
     } else {
       fillRect(g, PALETTE.plum, rect);
       fillRect(g, PALETTE.cream, insetRect(2, rect));
-      fillRect(g, grey ? PALETTE.slate : PALETTE.red, {
+      fillRect(g, grey ? PALETTE[GREYED.edge] : PALETTE.red, {
         height: BAND.height,
         width: rect.width - 4,
         x: x + 2,
@@ -582,7 +582,7 @@ export class CardScene extends Scene {
           art.x + art.width / 2,
           art.y + art.height / 2 - 5,
           "?",
-          grey ? PALETTE.grey : PALETTE.cream,
+          grey ? PALETTE.neutralGrey : PALETTE.cream,
           { font: "title", scale: 2 },
         );
       }
@@ -608,7 +608,7 @@ export class CardScene extends Scene {
         x + EFFECT.x + EFFECT.width / 2,
         y + EFFECT.y + EFFECT.height,
         firesText(gameData, fires),
-        grey ? PALETTE.slate : PALETTE.darkRed,
+        grey ? PALETTE[GREYED.text] : PALETTE.darkRed,
         { maxWidth: EFFECT.width },
       ).setOrigin(0, 1);
       effectHeight -= Math.ceil(warning.height) + 2;
@@ -634,7 +634,7 @@ export class CardScene extends Scene {
       const key = grey ? greyTextureKey(this, COST_KEY) : COST_KEY;
       this.add.image(badge.x, badge.y, key).setOrigin(0);
     } else {
-      fillRect(g, grey ? PALETTE.lightGrey : PALETTE.cream, badge);
+      fillRect(g, grey ? PALETTE[GREYED.plateFace] : PALETTE.cream, badge);
     }
     const marker =
       fires.length > 0
@@ -645,7 +645,7 @@ export class CardScene extends Scene {
         this.plaqueCenter(badge.x, badge.width, marker),
         badge.y + 4,
         this.costText(entry),
-        grey ? PALETTE.navy : PALETTE.plum,
+        grey ? PALETTE[GREYED.plateText] : PALETTE.plum,
         { font: "title" },
       ),
     );

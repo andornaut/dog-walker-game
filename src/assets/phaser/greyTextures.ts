@@ -1,7 +1,6 @@
 import type { Scene } from "phaser";
 
-import { PALETTE } from "../../ui/phaser/palette";
-import { remapDarker } from "../darkRamp";
+import { NEUTRAL_RAMP } from "../../ui/phaser/palette";
 import { remapToGrey } from "../greyRamp";
 import { remapToSilhouette } from "../silhouette";
 
@@ -50,30 +49,24 @@ function remappedTextureKey(
   return copyKey;
 }
 
-// Every colour moved to the grey ramp, as a disabled card draws.
+// Every colour moved to the neutral ramp, as a disabled card draws.
 export function greyTextureKey(scene: Scene, key: string): string {
-  return remappedTextureKey(scene, "grey", remapToGrey, key);
+  return remappedTextureKey(scene, "grey", (pixels) => remapToGrey(NEUTRAL_RAMP, 0, pixels), key);
 }
 
-// A flat navy copy, as a locked item's art draws.
-export function silhouetteTextureKey(scene: Scene, key: string): string {
-  return remappedTextureKey(
-    scene,
-    "silhouette",
-    (pixels) => remapToSilhouette(PALETTE.navy, pixels),
-    key,
-  );
+// A flat copy in color, as a locked item's art draws. The copy is kept per key, so a scene
+// passes the same color every time.
+export function silhouetteTextureKey(scene: Scene, color: number, key: string): string {
+  return remappedTextureKey(scene, "silhouette", (pixels) => remapToSilhouette(color, pixels), key);
 }
 
-// The grey copy one ramp step darker, as art inside a disabled tile draws.
-export function disabledTextureKey(scene: Scene, key: string): string {
+// The grey copy steps further down the neutral ramp, as art inside a disabled tile draws. The
+// copy is kept per key, so a scene passes the same steps every time.
+export function disabledTextureKey(scene: Scene, steps: number, key: string): string {
   return remappedTextureKey(
     scene,
     "disabled",
-    (pixels) => {
-      remapToGrey(pixels);
-      remapDarker(1, pixels);
-    },
+    (pixels) => remapToGrey(NEUTRAL_RAMP, steps, pixels),
     key,
   );
 }

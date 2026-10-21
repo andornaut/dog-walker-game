@@ -8,7 +8,7 @@ import {
   type ItemTile,
   itemTile,
   type ItemTileInput,
-  itemTileState,
+  itemTileLook,
   PLAIN_ITEM,
   type TileState,
 } from "./interaction";
@@ -73,7 +73,7 @@ describe("itemTile", () => {
       "a locked item the bank covers",
       { bank: cents(800), price: cents(800) },
       locked(800, true),
-      "disabled",
+      "normal",
     ],
     [
       "a locked item short of the bank",
@@ -96,6 +96,6 @@ describe("itemTile", () => {
   ])("shows %s", (_, input, tile, state) => {
     const shown = itemTile({ ...owned, ...input });
     expect(shown).toEqual(tile);
-    expect(itemTileState(shown)).toBe(state);
+    expect(itemTileLook(shown).state).toBe(state);
   });
 });

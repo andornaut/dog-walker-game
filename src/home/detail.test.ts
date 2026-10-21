@@ -96,6 +96,7 @@ describe("walkerDetail", () => {
     expect(card).toEqual({
       lines: walkerDetailLines(data, walker),
       locked: false,
+      padlock: null,
       status: data.homeText.detail.walkerStatus,
       subtitle: data.homeText.detail.walkerSubtitle,
       title: data.walkers[walker].name,
@@ -111,7 +112,6 @@ describe("walkerDetail", () => {
     const goal = walkerGoal(data.walkers[walker]);
     expect(card.status).toBe(
       homeLine(data.homeText, "walkerLocked", {
-        walker: name,
         zone: data.world.zones.find(({ id }) => id === goal)?.name ?? "",
       }),
     );

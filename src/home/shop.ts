@@ -7,6 +7,7 @@ import { fillLine } from "../text/lines";
 import { isAffordable, purchases } from "./afford";
 import { dogKindText, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
+import type { ItemLook } from "./interaction";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
 
@@ -38,6 +39,17 @@ export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
   }
   return row.price <= bank ? "affordable" : "short";
 }
+
+// Everything a row's look sets. Owned shows its art in full colour with no padlock or plate.
+// Affordable keeps the full-colour art with the open padlock and the buy plate. Short is a
+// disabled row with the grey copy of its art, the closed padlock and the short plate. Blocked
+// is a disabled row with its silhouette, the closed padlock and its price on the goal plate.
+export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
+  affordable: { art: "full", padlock: "open", plate: "buy", state: "normal" },
+  blocked: { art: "silhouette", padlock: "closed", plate: "goal", state: "disabled" },
+  owned: { art: "full", padlock: null, plate: null, state: "normal" },
+  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
+};
 
 // Whether anything in the shop is affordable now: the building then wears the gold outline.
 export function shopAffordable(data: ShopData, owned: Owned, bank: Cents): boolean {

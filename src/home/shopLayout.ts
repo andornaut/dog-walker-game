@@ -29,12 +29,13 @@ export const SHOP_LAYOUT = {
   headingX: ROW_X,
   message: { y: 540 },
   panel: PANEL,
-  // In a row: the 36x36 art box and the art in it, the name and line, and the price plate or
-  // OWNED (ownedDx left of the tick's right edge) plateInset inside the right edge, the name
-  // and line keeping textGap clear of it.
+  // In a row: the 36x36 art box and the art in it, the padlock over the row's top-left
+  // corner, the name and line, and the price plate or OWNED (ownedDx left of the tick's right
+  // edge) plateInset inside the right edge, the name and line keeping textGap clear of it.
   row: {
     art: 2,
     box: { dx: 4, size: 36 },
+    lock: { dx: -2, dy: -3 },
     ownedDx: 20,
     plateInset: 6,
     textDx: 46,

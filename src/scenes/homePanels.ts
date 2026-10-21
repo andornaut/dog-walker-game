@@ -6,11 +6,14 @@ import type { DetailCard } from "../home/detail";
 import type { Logbook } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
+import { GREYED } from "../home/selection";
 import { insetRect, type Rect } from "../layout/rect";
+import { WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
 import { fillLine } from "../text/lines";
 import { addDim, drawFramedRect, drawRing, fillRect } from "./draw";
+import { artTextureKey, PADLOCK_KEYS } from "./itemArt";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole } from "./pixelText";
+import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
 import {
   addCloseButton,
   addLoopingFrame,
@@ -131,6 +134,12 @@ export interface DetailPicture {
 
 const LINE_GAP = 8;
 
+// The detail card's well: the shown one, or the grey one a locked card's silhouette sits in.
+export const DETAIL_WELL_KEYS = {
+  locked: "ui-detail-well-locked",
+  shown: "ui-detail-well",
+} as const;
+
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
 // shows. A dog's or walker's card puts its breed and status beside the portrait and its rows
 // below; a gear card puts its effect and status beside the icon. Returns the card's rect, so a
@@ -145,42 +154,63 @@ export function drawDetailCard(
 ): Rect {
   // The content is laid out first, so the card is as tall as it needs.
   const content = scene.add.container(0, 0);
-  const { well } = CARD;
-  if (scene.textures.exists("ui-detail-well")) {
-    content.add(scene.add.image(well.x, well.y, "ui-detail-well").setOrigin(0));
+  const { padlock, well } = CARD;
+  const locked = card.padlock !== null;
+  const wellKey = DETAIL_WELL_KEYS[locked ? "locked" : "shown"];
+  if (scene.textures.exists(wellKey)) {
+    content.add(scene.add.image(well.x, well.y, wellKey).setOrigin(0));
   } else {
     const g = scene.add.graphics();
     drawFramedRect(
       g,
-      { border: PALETTE.plum, fill: PALETTE.grey },
+      { border: PALETTE.plum, fill: locked ? PALETTE[GREYED.face] : PALETTE.grey },
       { height: well.size, width: well.size, x: well.x, y: well.y },
     );
     content.add(g);
   }
+  // A locked card's picture is its silhouette.
+  const shown = (key: string) => artTextureKey(scene, locked ? "silhouette" : "full", key);
   if (scene.textures.exists(picture.key)) {
     const inner = { x: well.x + well.picture, y: well.y + well.picture };
     content.add(
-      scene.add.image(inner.x, inner.y, picture.key).setOrigin(0).setScale(picture.scale),
+      scene.add.image(inner.x, inner.y, shown(picture.key)).setOrigin(0).setScale(picture.scale),
     );
   } else if (picture.fallback !== undefined && scene.textures.exists(picture.fallback)) {
-    content.add(scene.add.image(well.x + well.size / 2, well.y + well.size / 2, picture.fallback));
+    const centre = { x: well.x + well.size / 2, y: well.y + well.size / 2 };
+    content.add(scene.add.image(centre.x, centre.y, shown(picture.fallback)));
+  }
+  if (card.padlock !== null) {
+    const key = PADLOCK_KEYS[card.padlock];
+    if (scene.textures.exists(key)) {
+      content.add(scene.add.image(padlock.x, padlock.y, key).setOrigin(0).setScale(padlock.scale));
+    }
   }
   // The lowest row anything on the card reaches so far.
   let bottom = well.y + well.size;
-  // Rows of text from (x, y) down, each wrapped at the card's padding.
-  const rows = (lines: readonly { color: number; value: string }[], x: number, top: number) => {
+  // Rows of text from (x, y) down, each wrapped at the card's padding; a fitted row tries
+  // one line, its glyphs closer, before it wraps.
+  type Row = { color: number; fit?: boolean; value: string };
+  const rows = (lines: readonly Row[], x: number, top: number) => {
     let y = top;
     for (const row of lines) {
+      const room = CARD.width - x - CARD.pad;
       const label = text(scene, content, { x, y }, row.value, {
         color: row.color,
-        maxWidth: CARD.width - x - CARD.pad,
+        ...(row.fit === true ? {} : { maxWidth: room }),
       });
+      if (row.fit === true) {
+        fitPixelText(label, { room, styles: WRAPPING_TEXT_FIT_STYLES }, x, y);
+      }
       bottom = Math.max(bottom, label.y + Math.ceil(label.height));
       y += Math.ceil(label.height) + LINE_GAP;
     }
   };
-  const besideX = well.x + well.size + 10;
-  const status = { color: card.locked ? PALETTE.darkRed : PALETTE.forest, value: card.status };
+  const { besideX } = CARD;
+  const status = {
+    color: card.locked ? PALETTE.darkRed : PALETTE.forest,
+    fit: true,
+    value: card.status,
+  };
   const plum = card.lines.map((value) => ({ color: PALETTE.plum, value }));
   if (kind === "gear") {
     rows([...plum, status], besideX, well.y + 4);

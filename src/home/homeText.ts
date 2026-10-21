@@ -21,7 +21,7 @@ export const HOME_TEXT_FIELDS = {
   dogCantAfford: ["amount", "dog"],
   dogSlotName: ["slot"],
   focus: {
-    dogLocked: ["dog", "kind", "price"],
+    dogLocked: ["price"],
     dogOwned: ["dog", "fee", "kind"],
     gear: ["effect", "gear"],
     gearLocked: ["effect", "gear", "price"],
@@ -31,6 +31,7 @@ export const HOME_TEXT_FIELDS = {
   },
   gateSign: [],
   gearBought: ["gear"],
+  lockedName: [],
   logbook: {
     best: ["best", "note"],
     bestNote: ["dogs", "zones"],
@@ -64,8 +65,7 @@ export const HOME_TEXT_FIELDS = {
   },
   unsaved: [],
   walkerInfo: ["agility", "perk", "walker"],
-  walkerLocked: ["walker", "zone"],
-  walkerPlate: ["walker"],
+  walkerLocked: ["zone"],
   zoneFee: ["fee"],
 } as const satisfies Record<LineKey, readonly string[]> & FieldTable;
 

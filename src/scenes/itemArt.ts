@@ -1,6 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
-import type { ItemTile } from "../home/interaction";
+import type { ArtLook, Padlock } from "../home/interaction";
+import { PLATE_LOOKS, type PlateKind } from "../home/selection";
 import type { Rect } from "../layout/rect";
 import { fillRect } from "./draw";
 import { disabledTextureKey, silhouetteTextureKey } from "./greyTextures";
@@ -11,32 +12,66 @@ import { TEXT_SCALE } from "./uiKit";
 // The home screen's and the shop's art keys, each with a drawn stand-in below while missing.
 export const SHOP_ART = {
   dogSlot: "icon-dog-slot",
-  lock: "icon-lock",
   petShop: "ui-pet-shop",
 } as const;
 
-// A picture's texture on an item tile: a locked item's is its flat navy silhouette, a
-// pack-full one's its grey copy a ramp step darker.
-export function itemArtKey(scene: Scene, tile: ItemTile, key: string): string {
-  switch (tile.kind) {
-    case "goal":
-    case "locked":
-      return silhouetteTextureKey(scene, key);
-    case "packFull":
-      return disabledTextureKey(scene, key);
-    default:
+// The padlock's art for each shape.
+export const PADLOCK_KEYS: Readonly<Record<Padlock, string>> = {
+  closed: "icon-lock",
+  open: "icon-lock-open",
+};
+
+// A picture's texture as its look shows it: the art itself, its grey copy, or its flat
+// silhouette.
+export function artTextureKey(scene: Scene, look: ArtLook, key: string): string {
+  switch (look) {
+    case "full":
       return key;
+    case "grey":
+      return disabledTextureKey(scene, key);
+    case "silhouette":
+      return silhouetteTextureKey(scene, key);
+    default:
+      return look satisfies never;
   }
 }
 
-// The padlock over a locked item's top-left corner, or nothing while the art is missing.
-export function addLock(scene: Scene, parent: GameObjects.Container, x: number, y: number): void {
-  if (scene.textures.exists(SHOP_ART.lock)) {
-    parent.add(scene.add.image(x, y, SHOP_ART.lock).setOrigin(0));
+// The padlock over an item's top-left corner, or nothing while the art is missing.
+export function addLock(
+  scene: Scene,
+  parent: GameObjects.Container,
+  padlock: Padlock,
+  at: { x: number; y: number },
+): void {
+  const key = PADLOCK_KEYS[padlock];
+  if (scene.textures.exists(key)) {
+    parent.add(scene.add.image(at.x, at.y, key).setOrigin(0));
   }
 }
 
 const PLATE_PAD = 3;
+
+// A plate's colours: its 1px edge, its face, the face's top (lit) and bottom (shade) rows
+// where they differ from it, and its text.
+export interface PlateColors {
+  readonly edge: number;
+  readonly face: number;
+  readonly lit?: number;
+  readonly shade?: number;
+  readonly text: number;
+}
+
+// The colours of a price's or goal's plate, from PLATE_LOOKS.
+export function plateColors(kind: PlateKind): PlateColors {
+  const { edge, face, lit, shade, text } = PLATE_LOOKS[kind];
+  return {
+    edge: PALETTE[edge],
+    face: PALETTE[face],
+    text: PALETTE[text],
+    ...(lit === null ? {} : { lit: PALETTE[lit] }),
+    ...(shade === null ? {} : { shade: PALETTE[shade] }),
+  };
+}
 
 // A price or goal on a small plate: a 1px edge round a face, the text in font-body 2x with
 // its caps at capY, the plate reaching PLATE_PAD past the capitals above and below, so it is
@@ -47,7 +82,7 @@ export function addPlate(
   parent: GameObjects.Container,
   at: { capY: number; originX: number; x: number },
   text: string,
-  colors: { readonly edge: number; readonly face: number; readonly text: number },
+  colors: PlateColors,
 ): Rect {
   const label = addPixelText(scene, 0, at.capY, text, { color: colors.text, scale: TEXT_SCALE });
   const width = Math.ceil(label.width) + 2 * PLATE_PAD;
@@ -56,20 +91,20 @@ export function addPlate(
   const top = at.capY - PLATE_PAD;
   label.setX(left + PLATE_PAD);
   const g = scene.add.graphics();
+  const face = { height: height - 2, width: width - 2, x: left + 1, y: top + 1 };
   // Square corners cut by a pixel.
   fillRect(g, colors.edge, { height, width: width - 2, x: left + 1, y: top });
   fillRect(g, colors.edge, { height: height - 2, width, x: left, y: top + 1 });
-  fillRect(g, colors.face, { height: height - 2, width: width - 2, x: left + 1, y: top + 1 });
+  fillRect(g, colors.face, face);
+  // The face's top and bottom rows, lit and shaded where the plate says.
+  if (colors.lit !== undefined) {
+    fillRect(g, colors.lit, { ...face, height: 1 });
+  }
+  if (colors.shade !== undefined) {
+    fillRect(g, colors.shade, { ...face, height: 1, y: face.y + face.height - 1 });
+  }
   parent.add([g, label]);
   return { height, width, x: left, y: top };
-}
-
-// A locked item's plate: its price in dark red, or green when the bank covers it; a goal in
-// plum.
-export function lockedPlateColors(tile: ItemTile): { edge: number; face: number; text: number } {
-  const text =
-    tile.kind === "locked" ? (tile.affordable ? PALETTE.forest : PALETTE.darkRed) : PALETTE.plum;
-  return { edge: PALETTE.ink, face: PALETTE.cream, text };
 }
 
 // The pet shop building drawn in code while ui-pet-shop is missing: green walls, a striped

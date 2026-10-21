@@ -2,28 +2,49 @@
 // selected gold, disabled flat grey. Colours are the scenes' PALETTE names.
 import type { ButtonState, TileState } from "./interaction";
 
+// Every colour a disabled, short or locked item draws in, the neutral greys among them:
+// - box: the box behind a disabled tile's picture.
+// - copyDarker: a disabled tile's grey copy of its art moves each colour to the colour of
+//   NEUTRAL_RAMP nearest its brightness, as a disabled card's does, then this many steps
+//   down the ramp.
+// - edge: the line round a disabled face drawn in code and round a short or goal plate.
+// - face: a disabled tile's face drawn in code.
+// - plateFace: a short or goal plate's face.
+// - plateText, shortPrice: the text on a goal plate or a disabled card's cost plaque, and a
+//   short price on its plate.
+// - silhouette: a locked item's flat copy of its art.
+// - text: a disabled tile's label.
+export const GREYED = {
+  box: "neutralSlate",
+  copyDarker: 1,
+  edge: "neutralSlate",
+  face: "neutralGrey",
+  plateFace: "neutralLightGrey",
+  plateText: "ink",
+  shortPrice: "darkRed",
+  silhouette: "ink",
+  text: "neutralDarkSlate",
+} as const;
+
 export interface SelectLook {
   // The box behind a portrait or icon.
-  box: "amber" | "slate" | "tan";
-  face: "cream" | "grey" | "yellow";
-  // A locked item's price.
-  price: "forest" | "navy";
+  box: "amber" | typeof GREYED.box | "tan";
+  face: "cream" | typeof GREYED.face | "yellow";
   state: TileState;
-  text: "darkSlate" | "plum";
+  text: typeof GREYED.text | "plum";
 }
 
-// Text on each face: plum on cream (9.42:1) and yellow (10.92); on grey, a disabled label is
-// darkSlate (3.39, exempt as disabled) and a price navy (4.93), which says why it is
-// disabled.
+// Text on each face: plum on cream (9.42:1) and yellow (10.92); a disabled label holds the
+// 3:1 its exemption needs.
 const LOOKS: Readonly<Record<TileState, Omit<SelectLook, "state">>> = {
-  disabled: { box: "slate", face: "grey", price: "navy", text: "darkSlate" },
-  normal: { box: "tan", face: "cream", price: "forest", text: "plum" },
-  selected: { box: "amber", face: "yellow", price: "forest", text: "plum" },
+  disabled: { box: GREYED.box, face: GREYED.face, text: GREYED.text },
+  normal: { box: "tan", face: "cream", text: "plum" },
+  selected: { box: "amber", face: "yellow", text: "plum" },
 };
 
-// The disabled look drawn in code where the art has none: the flat grey face in a slate
-// line, and its label.
-export const DISABLED_COLORS = { edge: "slate", face: "grey", text: "darkSlate" } as const;
+// The disabled look drawn in code where the art has none: the flat grey face in its line,
+// and its label.
+export const DISABLED_COLORS = { edge: GREYED.edge, face: GREYED.face, text: GREYED.text } as const;
 
 // A button's look: its interaction state, or secondary, the tan button a card's own
 // controls wear in place of normal.
@@ -37,6 +58,33 @@ export const BUTTON_COLORS = {
   primary: { face: "green", label: "ink", lip: "forest" },
   secondary: { face: "tan", label: "plum", lip: "brown" },
 } as const satisfies Record<ButtonLook, { face: string; label: string; lip: string | null }>;
+
+// The plate a price or goal sits on: buy while the bank covers the price, short while it
+// does not, goal for an item a goal unlocks or one that needs another bought first.
+export type PlateKind = "buy" | "goal" | "short";
+
+// A plate's 1px line, its face, the face's top (lit) and bottom (shade) rows where they
+// differ from it, and its text.
+export const PLATE_LOOKS = {
+  buy: { edge: "ink", face: "green", lit: "yellow", shade: "forest", text: "ink" },
+  goal: {
+    edge: GREYED.edge,
+    face: GREYED.plateFace,
+    lit: null,
+    shade: null,
+    text: GREYED.plateText,
+  },
+  short: {
+    edge: GREYED.edge,
+    face: GREYED.plateFace,
+    lit: null,
+    shade: null,
+    text: GREYED.shortPrice,
+  },
+} as const satisfies Record<
+  PlateKind,
+  { edge: string; face: string; lit: string | null; shade: string | null; text: string }
+>;
 
 // A choice is full when nothing more can be picked: the pack holds its capacity.
 export function choiceFull(picked: number, capacity: number): boolean {

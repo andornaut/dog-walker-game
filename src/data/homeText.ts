@@ -26,6 +26,7 @@ export const HOME_TEXT = {
     dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
+    dogSubtitle: "Dog",
     dogTotals: "Walks {walks} · Neighborhoods {zones} · Fired {fired}",
     gearEquipped: "In your Pocket",
     gearOwned: "Yours, tap to pocket it",
@@ -41,7 +42,7 @@ export const HOME_TEXT = {
   dogCantAfford: "Save {amount} more for {dog}.",
   dogSlotName: "Dog slot {slot}",
   focus: {
-    dogLocked: "{dog}: {kind}. {price}",
+    dogLocked: "Locked dog. {price}",
     dogOwned: "{dog}: {kind}, {fee} a neighborhood.",
     gear: "{gear}: {effect}.",
     gearLocked: "{gear}: {effect}. {price}",
@@ -51,6 +52,7 @@ export const HOME_TEXT = {
   },
   gateSign: "Elm Avenue",
   gearBought: "{gear} is yours. Pocket it for a walk.",
+  lockedName: "???",
   logbook: {
     badges: "Badges",
     best: "Best {best}, {note}",
@@ -101,7 +103,6 @@ export const HOME_TEXT = {
   },
   unsaved: "Progress won't be saved.",
   walkerInfo: "{walker}: {agility}, {perk}.",
-  walkerLocked: "Finish {zone} to unlock {walker}.",
-  walkerPlate: "{walker}",
+  walkerLocked: "Finish {zone} to unlock.",
   zoneFee: "Pay {fee}",
 } as const satisfies HomeText;

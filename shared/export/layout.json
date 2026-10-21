@@ -1430,7 +1430,13 @@
           "inset": 6,
           "titleY": 6
         },
+        "besideX": 90,
         "pad": 12,
+        "padlock": {
+          "scale": 2,
+          "x": 8,
+          "y": 29
+        },
         "well": {
           "picture": 2,
           "size": 68,
@@ -1445,6 +1451,10 @@
       },
       "dogTile": {
         "feeFoot": 1,
+        "lock": {
+          "dx": -2,
+          "dy": -3
+        },
         "nameY": 4,
         "padRight": 3,
         "textX": 39
@@ -2050,6 +2060,10 @@
         "box": {
           "dx": 4,
           "size": 36
+        },
+        "lock": {
+          "dx": -2,
+          "dy": -3
         },
         "ownedDx": 20,
         "plateInset": 6,

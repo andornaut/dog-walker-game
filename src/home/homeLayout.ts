@@ -92,18 +92,21 @@ export const HOME_LAYOUT = {
   bandText: { inset: 9, y: 8 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
-  // 6px below the band's top, and the well sits under the band.
+  // 6px below the band's top, and the well sits under the band with the subtitle and status
+  // beside it at besideX. A locked card's padlock sits at 2x over the well's top-left corner.
   card: {
     band: { height: 22, inset: 6, titleY: 6 },
+    besideX: 90,
     pad: 12,
+    padlock: { scale: 2, x: 8, y: 29 },
     well: { picture: 2, size: 68, x: 12, y: 34 },
     width: 300,
   },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
   // A dog tile's name and its fee or price plate start textX in, the name's capitals nameY
   // down, the fee's lowest ink feeFoot above the tile's bottom (dogTileFeeY), and keep padRight
-  // inside its right edge.
-  dogTile: { feeFoot: 1, nameY: 4, padRight: 3, textX: 39 },
+  // inside its right edge; a locked dog's padlock sits over the tile's top-left corner.
+  dogTile: { feeFoot: 1, lock: { dx: -2, dy: -3 }, nameY: 4, padRight: 3, textX: 39 },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
   // The dog rows are hit areas 44 tall with no gap.

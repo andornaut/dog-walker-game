@@ -60,7 +60,8 @@ import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
 import { hitBurstKey, hitFlashKey, hitLook } from "./hitMoment";
-import { SHOP_ART } from "./itemArt";
+import { DETAIL_WELL_KEYS } from "./homePanels";
+import { PADLOCK_KEYS, SHOP_ART } from "./itemArt";
 
 const manifest = parseManifest(shippedManifest);
 const images = new Set(manifest.images.map(({ key }) => key));
@@ -195,6 +196,8 @@ describe("image art", () => {
   it.each<[string, () => string[]]>([
     ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
     ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
+    ["a padlock for every lock shape", () => Object.values(PADLOCK_KEYS)],
+    ["a detail card well, shown and locked", () => Object.values(DETAIL_WELL_KEYS)],
     [
       "an effect icon for every upgrade, gear item and walker perk",
       () => [

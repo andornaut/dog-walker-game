@@ -9,10 +9,12 @@ import { focusDirectionForKey } from "../home/focus";
 import { buy, dollarText, type Purchase } from "../home/home";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
-import { PLAIN_ITEM, tileState } from "../home/interaction";
+import { type ArtLook, PLAIN_ITEM, tileState } from "../home/interaction";
+import { GREYED, type PlateKind } from "../home/selection";
 import {
   dogRows,
   gearRows,
+  SHOP_ROW_VIEWS,
   SHOP_TABS,
   type ShopRow,
   shopRowId,
@@ -37,9 +39,15 @@ import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { drawFramedRect, fillRect } from "./draw";
-import { silhouetteTextureKey } from "./greyTextures";
 import { addAffordFrame, type DetailPicture, drawDetailCard } from "./homePanels";
-import { addLock, addPlate, drawDogSlotFallback, SHOP_ART } from "./itemArt";
+import {
+  addLock,
+  addPlate,
+  artTextureKey,
+  drawDogSlotFallback,
+  plateColors,
+  SHOP_ART,
+} from "./itemArt";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
@@ -554,9 +562,9 @@ export class ShopScene extends Scene {
     });
   }
 
-  // A row: its art in a box, its name and line, and its price plate or Owned at the right.
-  // A blocked row is greyed with its art as a silhouette; an affordable one wears the gold
-  // outline; the framed one ui-select.
+  // A row: its art in a box, its name and line, and its price plate or Owned at the right,
+  // each as SHOP_ROW_VIEWS sets for its look. An affordable row wears the gold outline; the
+  // framed one ui-select.
   private drawRow(
     root: GameObjects.Container,
     save: SaveDocument,
@@ -566,7 +574,7 @@ export class ShopScene extends Scene {
     const { rect, row } = placed;
     this.placed.push(placed);
     const look = shopRowLook(save.bankCents, row);
-    const blocked = look === "blocked";
+    const view = SHOP_ROW_VIEWS[look];
     const { reducedMotion } = currentSettings(this);
     const holder = this.add.container(0, 0);
     root.add(holder);
@@ -574,37 +582,37 @@ export class ShopScene extends Scene {
     const tile = addSelectTile(this, holder, rect, {
       edge: true,
       reducedMotion,
-      state: blocked ? "disabled" : "normal",
+      state: view.state,
       tile: true,
     });
     if (sameTarget({ id: row.id, kind: "row" }, this.pressed)) {
       tile.container.y += FEEDBACK.pressDipPx;
     }
     const content = tile.content;
-    const { box } = ROW;
+    const { box, lock } = ROW;
     const boxRect = {
       height: box.size,
       width: box.size,
       x: rect.x + box.dx,
       y: rect.y + Math.floor((rect.height - box.size) / 2),
     };
-    fillRect(this.graphics(content), blocked ? PALETTE.slate : PALETTE.tan, boxRect);
-    this.addArt(content, art, blocked, { x: boxRect.x + ROW.art, y: boxRect.y + ROW.art });
-    if (blocked) {
-      addLock(this, content, rect.x - 2, rect.y - 3);
+    fillRect(this.graphics(content), PALETTE[tile.look.box], boxRect);
+    this.addArt(content, art, view.art, { x: boxRect.x + ROW.art, y: boxRect.y + ROW.art });
+    if (view.padlock !== null) {
+      addLock(this, content, view.padlock, { x: rect.x + lock.dx, y: rect.y + lock.dy });
     }
-    const ink = blocked ? PALETTE.darkSlate : PALETTE.plum;
+    const ink = PALETTE[tile.look.text];
     const mid = rect.y + Math.floor(rect.height / 2);
     const textX = rect.x + ROW.textDx;
     const right = rect.x + rect.width - ROW.plateInset;
-    const rightLeft = this.drawRowRight(content, look, row, { mid, right });
+    const rightLeft = this.drawRowRight(content, view.plate, row, { mid, right });
     // The name and line fit the room the price plate or Owned leaves them.
     const fit = { room: shopRowTextRoom(right - rightLeft), styles: TEXT_FIT_STYLES };
     // A row with no second line centres its name.
     const nameY = row.line === "" ? mid - 5 : mid - 15;
     const name = this.text(content, { x: textX, y: nameY }, row.name, { color: ink });
     fitPixelText(name, fit, textX, nameY);
-    this.drawRowLine(content, row, { blocked, fit, mid, x: textX });
+    this.drawRowLine(content, row, { fit, greyed: view.state === "disabled", mid, x: textX });
     if (this.focusId === row.id) {
       addSelectFrame(this, holder, rect, reducedMotion);
     } else if (look === "affordable") {
@@ -615,7 +623,7 @@ export class ShopScene extends Scene {
   private addArt(
     parent: GameObjects.Container,
     key: string,
-    blocked: boolean,
+    look: ArtLook,
     at: { x: number; y: number },
   ): void {
     if (!this.textures.exists(key)) {
@@ -625,7 +633,7 @@ export class ShopScene extends Scene {
       return;
     }
     // A dog's face shows its happy frame; an icon has one frame.
-    const shown = blocked ? silhouetteTextureKey(this, key) : key;
+    const shown = artTextureKey(this, look, key);
     parent.add(this.add.image(at.x, at.y, shown, tagFrame(this, key, "happy")).setOrigin(0));
   }
 
@@ -634,28 +642,27 @@ export class ShopScene extends Scene {
     parent: GameObjects.Container,
     row: ShopRow,
     at: {
-      blocked: boolean;
       fit: { room: number; styles: readonly TextFitStyle[] };
+      greyed: boolean;
       mid: number;
       x: number;
     },
   ): void {
-    const color = at.blocked ? PALETTE.darkSlate : PALETTE.darkBrown;
+    const color = at.greyed ? PALETTE[GREYED.text] : PALETTE.darkBrown;
     if (row.line !== "") {
       const line = this.text(parent, { x: at.x, y: at.mid + 3 }, row.line, { color });
       fitPixelText(line, at.fit, at.x, at.mid + 3);
     }
   }
 
-  // Owned with a tick, or the price on its plate: green when the bank covers it, dark red
-  // when not, navy on grey while blocked. Returns the left edge of what it drew.
+  // Owned with a tick, or the price on its plate. Returns the left edge of what it drew.
   private drawRowRight(
     parent: GameObjects.Container,
-    look: ReturnType<typeof shopRowLook>,
+    plate: PlateKind | null,
     row: ShopRow,
     at: { mid: number; right: number },
   ): number {
-    if (row.price === null) {
+    if (row.price === null || plate === null) {
       const tick = addTagImage(this, "ui-check", "tick", at.right - 16, at.mid - 8);
       if (tick !== undefined) {
         parent.add(tick);
@@ -668,20 +675,12 @@ export class ShopScene extends Scene {
       });
       return at.right - OWNED_DX - Math.ceil(label.width);
     }
-    const colors =
-      look === "blocked"
-        ? { edge: PALETTE.slate, face: PALETTE.lightGrey, text: PALETTE.navy }
-        : {
-            edge: PALETTE.ink,
-            face: PALETTE.cream,
-            text: look === "affordable" ? PALETTE.forest : PALETTE.darkRed,
-          };
     return addPlate(
       this,
       parent,
       { capY: at.mid - 5, originX: 1, x: at.right },
       dollarText(row.price),
-      colors,
+      plateColors(plate),
     ).x;
   }
 

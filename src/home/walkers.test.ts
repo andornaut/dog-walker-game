@@ -5,7 +5,7 @@ import type { WalkerId } from "../data/types";
 import { agilityWord } from "../rules/walkers";
 import { newPlayerSave } from "../save/fixtures";
 import { homeLine } from "./homeText";
-import { type ItemTile, itemTileState, type TileState } from "./interaction";
+import { type ItemTile, itemTileLook, type TileState } from "./interaction";
 import { tapWalker, walkerInfo, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
 
 const save = {
@@ -13,8 +13,6 @@ const save = {
   owned: { ...newPlayerSave.owned, walkers: ["casey", "ben"] as WalkerId[] },
   walker: "ben" as const,
 };
-
-const plate = (walker: string) => homeLine(gameData.homeText, "walkerPlate", { walker });
 
 describe("walkerOrder", () => {
   it("lists the starting walker, then the others by the zone that unlocks them", () => {
@@ -26,11 +24,11 @@ describe("walkerTile", () => {
   it.each<[WalkerId, ItemTile, TileState]>([
     ["ben", { kind: "picked" }, "selected"],
     ["casey", { kind: "available" }, "normal"],
-    ["ada", { goal: plate("Ada"), kind: "goal" }, "disabled"],
-    ["trista", { goal: plate("Trista"), kind: "goal" }, "disabled"],
+    ["ada", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
+    ["trista", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
   ])("shows %s as %o, drawn %s", (walker, tile, state) => {
     expect(walkerTile(gameData, save, walker)).toEqual(tile);
-    expect(itemTileState(tile)).toBe(state);
+    expect(itemTileLook(tile).state).toBe(state);
   });
 });
 
@@ -48,7 +46,6 @@ const locked = (walker: WalkerId) => {
   const data = gameData.walkers[walker];
   const goal = data.unlock === "start" ? undefined : data.zone;
   return homeLine(gameData.homeText, "walkerLocked", {
-    walker: data.name,
     zone: gameData.world.zones.find(({ id }) => id === goal)?.name ?? "",
   });
 };

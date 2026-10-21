@@ -17,7 +17,14 @@ import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
 import { bubbleRect } from "../home/bubbleRect";
-import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "../home/detail";
+import {
+  type DetailCard,
+  dogDetail,
+  gearDetail,
+  lockedDogDetail,
+  lockedWalkerDetail,
+  walkerDetail,
+} from "../home/detail";
 import {
   badgePopOffset,
   bobOffset,
@@ -60,7 +67,7 @@ import {
   buttonState,
   type ItemTile,
   itemTile,
-  itemTileState,
+  itemTileLook,
   type TileState,
 } from "../home/interaction";
 import { porchOwners } from "../home/porch";
@@ -118,9 +125,9 @@ import {
 import {
   addLock,
   addPlate,
+  artTextureKey,
   drawPetShopFallback,
-  itemArtKey,
-  lockedPlateColors,
+  plateColors,
   SHOP_ART,
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
@@ -1124,14 +1131,22 @@ export class StartScene extends Scene {
     this.overlay = { ...overlay, rect };
   }
 
+  // A dog or walker not owned shows its locked card, which names and describes nothing.
   private detailCard(save: SaveDocument, target: DetailTarget): DetailCard {
+    const { bankCents, owned } = save;
     if (target.kind === "dog") {
-      return dogDetail(gameData, save.owned, save.bankCents, save.stats, target.dog);
+      return (
+        lockedDogDetail(gameData, owned, bankCents, target.dog) ??
+        dogDetail(gameData, owned, bankCents, save.stats, target.dog)
+      );
     }
     if (target.kind === "gear") {
-      return gearDetail(gameData, save.owned, save.bankCents, this.loadout, target.gear);
+      return gearDetail(gameData, owned, bankCents, this.loadout, target.gear);
     }
-    return walkerDetail(gameData, save.owned, target.walker);
+    return (
+      lockedWalkerDetail(gameData, owned, target.walker) ??
+      walkerDetail(gameData, owned, target.walker)
+    );
   }
 
   private detailPicture(target: DetailTarget): DetailPicture {
@@ -1433,17 +1448,18 @@ export class StartScene extends Scene {
     view.shopNormal = normal;
   }
 
-  // A locked item's price (or goal) plate: green while the bank covers it, dark red when not.
-  // originX places it by its left (0) or centre (0.5).
+  // A locked item's price (or goal) on the plate its look sets. originX places it by its left
+  // (0) or centre (0.5).
   private lockedPlate(
     parent: GameObjects.Container,
     tile: ItemTile,
     at: { capY: number; originX: number; x: number },
   ): void {
+    const { plate } = itemTileLook(tile);
     const text =
       tile.kind === "locked" ? dollarText(tile.price) : tile.kind === "goal" ? tile.goal : null;
-    if (text !== null) {
-      addPlate(this, parent, at, text, lockedPlateColors(tile));
+    if (text !== null && plate !== null) {
+      addPlate(this, parent, at, text, plateColors(plate));
     }
   }
 
@@ -1468,7 +1484,7 @@ export class StartScene extends Scene {
         pickedCount: this.loadout.dogs.length,
         price: purchasePrice(gameData, owned, { dog: id, kind: "dog" }),
       });
-      const state = itemTileState(tile);
+      const { art, padlock, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
         // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
         badge: "tick",
@@ -1484,33 +1500,32 @@ export class StartScene extends Scene {
         y: y + 4,
       });
       const faceKey = dogFaceKey(gameData, id);
-      const locked = tile.kind === "locked" || tile.kind === "goal";
-      const faceTag = locked ? "neutral" : "happy";
+      const faceTag = padlock === null ? "happy" : "neutral";
       const faceAt = { x: x + 4, y: y + 5 };
-      const face = locked
-        ? this.add
-            .sprite(
-              faceAt.x,
-              faceAt.y,
-              itemArtKey(this, tile, faceKey),
-              tagFrame(this, faceKey, faceTag),
-            )
-            .setOrigin(0)
-        : addTileSprite(this, state, reduced, faceKey, faceTag, faceAt);
+      const face =
+        art === "silhouette"
+          ? this.add
+              .sprite(
+                faceAt.x,
+                faceAt.y,
+                artTextureKey(this, art, faceKey),
+                tagFrame(this, faceKey, faceTag),
+              )
+              .setOrigin(0)
+          : addTileSprite(this, state, reduced, faceKey, faceTag, faceAt);
       content.add(face);
       view.face = { object: face, y: y + 5 };
 
-      const { nameY, textX } = DOG_TILE;
+      const { lock: dogLock, nameY, textX } = DOG_TILE;
       const feeY = dogTileFeeY(pixelFontMetrics(this, "body"));
       const fitText = (value: string, top: number) => {
         const label = this.text(content, x + textX, top, value, ink);
         fitPixelText(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
       };
-      fitText(dog.name, y + nameY);
-      if (locked) {
-        // A locked dog shows its padlock and its price or goal plate in place of its icons
-        // and fee.
-        addLock(this, content, x - 2, y - 3);
+      fitText(padlock === null ? dog.name : gameData.homeText.lockedName, y + nameY);
+      if (padlock !== null) {
+        // A locked dog shows its padlock and its price plate in place of its icons and fee.
+        addLock(this, content, padlock, { x: x + dogLock.dx, y: y + dogLock.dy });
         if (!stickered({ dog: id, kind: "dog" })) {
           this.lockedPlate(content, tile, { capY: y + feeY - 1, originX: 0, x: x + textX });
         }
@@ -1541,7 +1556,7 @@ export class StartScene extends Scene {
         pickedCount: pocketed === null ? 0 : 1,
         price: purchasePrice(gameData, owned, { gear: id, kind: "gear" }),
       });
-      const state = itemTileState(tile);
+      const { padlock, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
         badge: "tick",
         edge: true,
@@ -1560,8 +1575,8 @@ export class StartScene extends Scene {
       if (icon !== undefined) {
         view.face = { object: icon, y: at.y };
       }
-      if (tile.kind === "locked" || tile.kind === "goal") {
-        addLock(this, content, x + lock.dx, y + lock.dy);
+      if (padlock !== null) {
+        addLock(this, content, padlock, { x: x + lock.dx, y: y + lock.dy });
         if (!stickered({ gear: id, kind: "gear" })) {
           const plateAt = { capY: y + POCKET.priceY, originX: 0.5, x: x + width / 2 };
           this.lockedPlate(content, tile, plateAt);
@@ -1583,7 +1598,9 @@ export class StartScene extends Scene {
     const key = gearIconKey(gear);
     if (this.textures.exists(key)) {
       const shown =
-        typeof tile === "string" ? tileTextureKey(this, tile, key) : itemArtKey(this, tile, key);
+        typeof tile === "string"
+          ? tileTextureKey(this, tile, key)
+          : artTextureKey(this, itemTileLook(tile).art, key);
       const icon = this.add.image(x, y, shown).setOrigin(0).setScale(scale);
       parent.add(icon);
       return icon;
@@ -1611,7 +1628,7 @@ export class StartScene extends Scene {
       const rect = itemAt(tiles, i);
       const { x, y } = rect;
       const tile = walkerTile(gameData, save, id);
-      const state = itemTileState(tile);
+      const { art, padlock, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
         badge: "tick",
         edge: true,
@@ -1627,7 +1644,7 @@ export class StartScene extends Scene {
       });
       const walker = gameData.walkers[id];
       const at = { x: x + faceAt.dx, y: y + faceAt.dy };
-      const locked = tile.kind === "goal";
+      const locked = padlock !== null;
       if (this.textures.exists(walker.portraitKey)) {
         const tag = tile.kind === "picked" ? "happy" : "neutral";
         const face = locked
@@ -1635,7 +1652,7 @@ export class StartScene extends Scene {
               .sprite(
                 at.x,
                 at.y,
-                itemArtKey(this, tile, walker.portraitKey),
+                artTextureKey(this, art, walker.portraitKey),
                 tagFrame(this, walker.portraitKey, tag),
               )
               .setOrigin(0)
@@ -1644,14 +1661,15 @@ export class StartScene extends Scene {
         view.face = { object: face, y: at.y };
       } else {
         const centre = { x: x + box.dx + box.size / 2, y: y + box.dy + box.size / 2 };
-        this.text(content, centre.x, centre.y, walker.name.charAt(0), PALETTE[look.text], {
+        const initial = (locked ? gameData.homeText.lockedName : walker.name).charAt(0);
+        this.text(content, centre.x, centre.y, initial, PALETTE[look.text], {
           font: "title",
           originX: 0.5,
           originY: 0.5,
         });
       }
-      if (locked) {
-        addLock(this, content, x + lock.dx, y + lock.dy);
+      if (padlock !== null) {
+        addLock(this, content, padlock, { x: x + lock.dx, y: y + lock.dy });
         const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };
         this.lockedPlate(content, tile, plateAt);
         return;

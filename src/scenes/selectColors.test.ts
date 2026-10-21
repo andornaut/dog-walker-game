@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { darkerColor } from "../assets/darkRamp";
 import { greyFor } from "../assets/greyRamp";
-import { BUTTON_COLORS, DISABLED_COLORS, selectLook } from "../home/selection";
-import { PALETTE } from "./palette";
+import {
+  BUTTON_COLORS,
+  DISABLED_COLORS,
+  GREYED,
+  PLATE_LOOKS,
+  type PlateKind,
+  selectLook,
+} from "../home/selection";
+import { NEUTRAL_RAMP, PALETTE } from "./palette";
 
 // WCAG relative luminance and contrast ratio.
 function luminance(color: number): number {
@@ -33,11 +39,27 @@ describe("interaction-state colours", () => {
     ["a normal tile's label", PALETTE[normal.text], PALETTE[normal.face], TEXT],
     ["a selected tile's label", PALETTE[selected.text], PALETTE[selected.face], TEXT],
     ["a disabled tile's label", PALETTE[disabled.text], PALETTE[disabled.face], EXEMPT],
-    ["a covered price", PALETTE[normal.price], PALETTE[normal.face], TEXT],
-    ["a disabled tile's price", PALETTE[disabled.price], PALETTE[disabled.face], TEXT],
+    ...(Object.keys(PLATE_LOOKS) as PlateKind[]).map((kind): [string, number, number, number] => [
+      `a ${kind} plate's text`,
+      PALETTE[PLATE_LOOKS[kind].text],
+      PALETTE[PLATE_LOOKS[kind].face],
+      TEXT,
+    ]),
     [
       "a disabled picture's ink outline on its box",
-      darkerColor(1, greyFor(PALETTE.ink)),
+      greyFor(NEUTRAL_RAMP, GREYED.copyDarker, PALETTE.ink),
+      PALETTE[disabled.box],
+      EXEMPT,
+    ],
+    [
+      "a locked picture's silhouette on a normal box",
+      PALETTE[GREYED.silhouette],
+      PALETTE[normal.box],
+      EXEMPT,
+    ],
+    [
+      "a locked picture's silhouette on a disabled box",
+      PALETTE[GREYED.silhouette],
       PALETTE[disabled.box],
       EXEMPT,
     ],
@@ -56,9 +78,19 @@ describe("interaction-state colours", () => {
       EXEMPT,
     ],
     ["a muted volume row's label on the panel", PALETTE[DISABLED_COLORS.text], PALETTE.cream, TEXT],
-    ["a disabled card's effect", PALETTE[DISABLED_COLORS.text], greyFor(PALETTE.cream), TEXT],
+    [
+      "a disabled card's effect",
+      PALETTE[DISABLED_COLORS.text],
+      greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
+      TEXT,
+    ],
     ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
-    ["a disabled card's cost on its plaque", PALETTE.navy, greyFor(PALETTE.cream), TEXT],
+    [
+      "a disabled card's cost on its plaque",
+      PALETTE[GREYED.plateText],
+      greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
+      TEXT,
+    ],
   ])("hold %s at its minimum", (_, foreground, background, minimum) => {
     expect(contrast(foreground, background)).toBeGreaterThanOrEqual(minimum);
   });

@@ -487,7 +487,7 @@ export interface HomeText {
     readonly noWalker: string;
   };
   // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
-  // status, and the price status of anything not owned yet.
+  // status, the price status of anything not owned yet, and a locked dog's subtitle.
   readonly detail: {
     readonly dogFee: string;
     // A heavy dog's row, under its size and hearts: it slows lane changes.
@@ -495,6 +495,8 @@ export interface HomeText {
     readonly dogKind: string;
     readonly dogOwner: string;
     readonly dogStatus: string;
+    // A locked dog's hold card says this beside the well, as walkerSubtitle does a walker's.
+    readonly dogSubtitle: string;
     readonly dogTotals: string;
     readonly gearEquipped: string;
     readonly gearOwned: string;
@@ -512,8 +514,8 @@ export interface HomeText {
   // A dog slot's name in the purchase line.
   readonly dogSlotName: string;
   // The info line for a dog or gear tile the keyboard focuses: an owned dog's, a locked dog's
-  // with its price, a gear item's with its price while locked, and the parts they are built
-  // from.
+  // with its price and not its name, a gear item's with its price while locked, and the parts
+  // they are built from.
   readonly focus: {
     readonly dogLocked: string;
     readonly dogOwned: string;
@@ -526,6 +528,9 @@ export interface HomeText {
   // The street sign on the gate art.
   readonly gateSign: string;
   readonly gearBought: string;
+  // The name a dog or walker not owned shows on its start screen tile, its walker plate and
+  // its hold card, so the start screen names only what the player has.
+  readonly lockedName: string;
   // The logbook card and the lines it shares with the Stats page: the best walk, the last
   // walk by how it ended, the totals, and what it says before any walk.
   readonly logbook: {
@@ -590,10 +595,8 @@ export interface HomeText {
   readonly unsaved: string;
   // What the bubble says for an owned walker picked or focused: its agility and perk.
   readonly walkerInfo: string;
-  // What the walker's bubble says when a locked walker is tapped: the goal that unlocks it.
+  // What a locked walker's hold card and a tap on its tile say: the goal that unlocks it.
   readonly walkerLocked: string;
-  // A locked walker's name plate on its tile.
-  readonly walkerPlate: string;
   // A dog's fee on its tile and its shop row.
   readonly zoneFee: string;
 }

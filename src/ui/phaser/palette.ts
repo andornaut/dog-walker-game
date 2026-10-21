@@ -1,5 +1,5 @@
 // The Endesga 32 colours the scenes draw with, named as in the art mocks.
-export const PALETTE = {
+const ENDESGA = {
   amber: 0xfeae34,
   blue: 0x124e89,
   brown: 0xb86f50,
@@ -26,6 +26,29 @@ export const PALETTE = {
   white: 0xffffff,
   yellow: 0xfee761,
 } as const;
+
+// The neutral greys, outside Endesga 32 and allowed only for disabled and locked UI: the
+// neutral counterparts of lightGrey, grey, slate and darkSlate, with ink as their darkest step.
+export const NEUTRAL = {
+  neutralDarkSlate: 0x4a4a4a,
+  neutralGrey: 0xa4a4a4,
+  neutralLightGrey: 0xd8d8d8,
+  neutralSlate: 0x727272,
+} as const;
+
+// Every colour the scenes draw with, by name.
+export const PALETTE = { ...ENDESGA, ...NEUTRAL } as const;
+
+// The ramp every disabled thing's grey copy is drawn in, lightest first: white, the neutral
+// greys, then ink.
+export const NEUTRAL_RAMP: readonly number[] = [
+  ENDESGA.white,
+  NEUTRAL.neutralLightGrey,
+  NEUTRAL.neutralGrey,
+  NEUTRAL.neutralSlate,
+  NEUTRAL.neutralDarkSlate,
+  ENDESGA.ink,
+];
 
 // The data files write colours as "#rrggbb".
 export function colorFromHex(hex: string): number {

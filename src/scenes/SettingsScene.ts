@@ -419,34 +419,34 @@ export class SettingsScene extends Scene {
   // The slider in code while ui-slider or ui-slider-knob is missing.
   private drawSliderFallback(track: Rect, steps: number, active: boolean): void {
     const g = this.add.graphics();
-    fillRect(g, active ? PALETTE.plum : PALETTE.grey, track);
+    fillRect(g, active ? PALETTE.plum : PALETTE.neutralGrey, track);
     const inner = insetRect(1, track);
-    fillRect(g, active ? PALETTE.tan : PALETTE.lightGrey, inner);
-    fillRect(g, active ? PALETTE.forest : PALETTE.grey, {
+    fillRect(g, active ? PALETTE.tan : PALETTE.neutralLightGrey, inner);
+    fillRect(g, active ? PALETTE.forest : PALETTE.neutralGrey, {
       ...inner,
       width: Math.round((inner.width * steps) / VOLUME_STEPS),
     });
     const kx = knobX(this.layout.track, steps);
     const top = track.y - 3;
-    fillRect(g, active ? PALETTE.plum : PALETTE.grey, {
+    fillRect(g, active ? PALETTE.plum : PALETTE.neutralGrey, {
       height: KNOB_HEIGHT,
       width: this.layout.track.knobWidth,
       x: kx,
       y: top,
     });
-    fillRect(g, active ? PALETTE.cream : PALETTE.lightGrey, {
+    fillRect(g, active ? PALETTE.cream : PALETTE.neutralLightGrey, {
       height: KNOB_HEIGHT - 2,
       width: this.layout.track.knobWidth - 2,
       x: kx + 1,
       y: top + 1,
     });
-    fillRect(g, active ? PALETTE.tan : PALETTE.grey, {
+    fillRect(g, active ? PALETTE.tan : PALETTE.neutralGrey, {
       height: 2,
       width: this.layout.track.knobWidth - 2,
       x: kx + 1,
       y: top + 13,
     });
-    fillRect(g, active ? PALETTE.tan : PALETTE.grey, {
+    fillRect(g, active ? PALETTE.tan : PALETTE.neutralGrey, {
       height: 7,
       width: 2,
       x: kx + 4,
