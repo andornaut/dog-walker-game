@@ -79,7 +79,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 | Neighborhood      | Difficulty | Pay   | Encounter mix                                                           |
 | ----------------- | ---------- | ----- | ----------------------------------------------------------------------- |
 | Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, few movers, the mail carrier        |
-| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, joggers; no thieves, no cars            |
+| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, more lucky finds; no thieves, no cars   |
 | Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones; some movers. Always the first         |
 | Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers           |
 | Riverside Path    | Hard       | ×1.25 | A riverside path: puddles, geese, ducklings, cyclists, more lucky finds |
@@ -194,7 +194,7 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 
 ### Moving hazards
 
-Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share rises from about a quarter in Willow Crescent to about 60% in The Long Way Home, and most neighborhoods' obstacles are mostly kinds that can move. Each move is telegraphed about 1 second ahead, at most four movers are on screen at once (at most two darting animals and two vehicles slower than the road), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
+Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share is lowest on Elm Avenue (a fifth), where every walk starts, and rises to about 60% in The Long Way Home, and most neighborhoods' obstacles are mostly kinds that can move. Each move is telegraphed about 1 second ahead, at most four movers are on screen at once (at most two darting animals and two vehicles slower than the road), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
 
 | Group      | How it moves                                                                                                                                                      | Who                                                                   |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
