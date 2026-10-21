@@ -17,7 +17,7 @@ export const MINOR_OBSTACLES = {
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   bunny: {
-    movement: { kind: "hop", most: 2, times: { max: 2, min: 1 } },
+    movement: { kind: "hop", most: 2, shy: true, times: { max: 2, min: 1 } },
     name: "Bunny",
     shape: { lanes: 1, rows: 1 },
   },
@@ -44,7 +44,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   ducklings: {
-    movement: { kind: "hop", most: 2, sideways: true, times: { max: 2, min: 1 } },
+    movement: { kind: "hop", most: 2, shy: true, sideways: true, times: { max: 2, min: 1 } },
     name: "Ducklings",
     shape: { lanes: 1, rows: 1 },
   },

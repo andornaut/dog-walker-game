@@ -917,6 +917,7 @@
       "movement": {
         "kind": "hop",
         "most": 2,
+        "shy": true,
         "times": {
           "max": 2,
           "min": 1
@@ -1010,6 +1011,7 @@
       "movement": {
         "kind": "hop",
         "most": 2,
+        "shy": true,
         "sideways": true,
         "times": {
           "max": 2,
