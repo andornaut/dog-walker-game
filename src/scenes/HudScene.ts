@@ -90,7 +90,7 @@ import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { firstTag, playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
-import { addPanel, artFits, soundIcon } from "./uiKit";
+import { addPanel, artFits, BUBBLE_FADE_MS, fadeAway, soundIcon } from "./uiKit";
 
 // The zone's name is right-aligned in its well, its icon just left of it, and the pips end
 // under the name's right edge.
@@ -105,7 +105,7 @@ const PIP = {
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const LANES = hudLanes(LAYOUT);
 const LABEL = { height: 20, ms: 1100 };
-const HINT = { fadeMs: 400, holdMs: 4500, padding: 6 };
+const HINT = { holdMs: 4500, padding: 6 };
 // An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x. It
 // draws over the doghouses and their heart-loss flash (depth 0), under the HUD's moments.
 const QUIP = { depth: 30, holdMs: 2600, padding: 4 };
@@ -788,18 +788,7 @@ export class HudScene extends Scene {
       { height: LABEL.height, width: Math.ceil(text.width) + 4, x: at.x, y: at.y },
     );
     text.setDepth(1);
-    const parts = [chip, text];
-    this.tweens.add({
-      alpha: 0,
-      duration: LABEL.ms,
-      ease: "Sine.easeIn",
-      onComplete: () => {
-        parts.forEach((part) => part.destroy());
-        done();
-      },
-      targets: parts,
-      y: `-=${rise}`,
-    });
+    fadeAway(this, [chip, text], { ms: LABEL.ms, rise }, done);
   }
 
   // Steps the hint queue (see hintQueue.ts) a frame: hints RunScene raised and those the run's
@@ -815,7 +804,7 @@ export class HudScene extends Scene {
     }
     const before = this.hints.shown;
     const timing = {
-      fadeMs: HINT.fadeMs,
+      fadeMs: BUBBLE_FADE_MS,
       holdMs: HINT.holdMs,
       staleMs: read(gameData.tuning, "seconds", "hintStaleSeconds") * 1000,
     };
@@ -938,16 +927,9 @@ export class HudScene extends Scene {
     ];
     text.setDepth(QUIP.depth + 1);
     parts.push(text);
-    this.tweens.add({
-      alpha: 0,
-      delay: QUIP.holdMs,
-      duration: 400,
-      onComplete: () => {
-        parts.forEach((part) => part.destroy());
-        this.sayNextQuip();
-      },
-      targets: parts,
-    });
+    fadeAway(this, parts, { delayMs: QUIP.holdMs, ms: BUBBLE_FADE_MS, rise: 0 }, () =>
+      this.sayNextQuip(),
+    );
     return true;
   }
 }

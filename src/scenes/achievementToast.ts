@@ -9,13 +9,13 @@ import { addBadge, BADGE_SIZE } from "./badges";
 import { PALETTE } from "./palette";
 import { addPixelText, fitPixelText, placePixelText } from "./pixelText";
 import { soundboardOf } from "./soundboard";
-import { addPanel } from "./uiKit";
+import { addPanel, BUBBLE_FADE_MS, fadeAway } from "./uiKit";
 
 // A badge earned mid-walk: a small banner filling its lane, at the left of the backdrop band
 // under the bank's money changes, with the badge, an "Achievement!" line and its name. It
 // drops in, holds, and fades; with reduced motion it appears in place. Badges earned together
 // show one after another. The end screen still celebrates them in full.
-const TOAST = { holdMs: 2000, inMs: 180, nameY: 24, outMs: 300, padding: 6, rise: 12 };
+const TOAST = { holdMs: 2000, inMs: 180, nameY: 24, padding: 6, rise: 12 };
 
 export class AchievementToasts {
   private queue: AchievementId[] = [];
@@ -83,15 +83,7 @@ export class AchievementToasts {
         y: `+=${TOAST.rise}`,
       });
     }
-    scene.tweens.add({
-      alpha: 0,
-      delay: TOAST.holdMs + (still ? 0 : TOAST.inMs),
-      duration: TOAST.outMs,
-      onComplete: () => {
-        parts.forEach((part) => part.destroy());
-        this.next();
-      },
-      targets,
-    });
+    const delayMs = TOAST.holdMs + (still ? 0 : TOAST.inMs);
+    fadeAway(scene, parts, { delayMs, ms: BUBBLE_FADE_MS, rise: 0 }, () => this.next());
   }
 }

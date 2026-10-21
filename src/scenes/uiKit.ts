@@ -560,6 +560,32 @@ export function addTileSprite(
   return sprite;
 }
 
+// A bubble or banner that has said its piece fades out over this long: hints, owners' quips
+// and badge toasts alike.
+export const BUBBLE_FADE_MS = 400;
+
+// Fades parts out over ms after delayMs, easing in, rising rise pixels as they go (0 fades
+// them in place, as reduced motion does), then destroys them and calls done.
+export function fadeAway(
+  scene: Scene,
+  parts: readonly GameObjects.GameObject[],
+  timing: { delayMs?: number; ms: number; rise: number },
+  done: () => void = () => undefined,
+): void {
+  scene.tweens.add({
+    alpha: 0,
+    delay: timing.delayMs ?? 0,
+    duration: timing.ms,
+    ease: "Sine.easeIn",
+    onComplete: () => {
+      parts.forEach((part) => part.destroy());
+      done();
+    },
+    targets: [...parts],
+    y: `-=${timing.rise}`,
+  });
+}
+
 // Kept by clearScene, so a tap's sparkle plays on while the screen is drawn again under it.
 const KEEP_ON_REDRAW = "keep-on-redraw";
 const TAP_BURST_DEPTH = 100;

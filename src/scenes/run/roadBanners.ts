@@ -8,6 +8,7 @@ import { addDisplayText } from "../displayText";
 import { fillRect } from "../draw";
 import { PALETTE } from "../palette";
 import { addPixelText } from "../pixelText";
+import { fadeAway } from "../uiKit";
 import { DEPTH, LAYOUT } from "./stage";
 
 // An instant lucky find's art pops up over the road, then floats up and fades.
@@ -31,14 +32,7 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
     .image(road.x + road.width / 2, road.y + POPUP.artY, resolution.art)
     .setOrigin(0.5, 0)
     .setDepth(DEPTH.popup);
-  scene.tweens.add({
-    alpha: 0,
-    duration: POPUP.fadeMs,
-    ease: "Sine.easeIn",
-    onComplete: () => art.destroy(),
-    targets: art,
-    y: still ? art.y : art.y - POPUP.rise,
-  });
+  fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
 }
 
 // "MAPLEWOOD, ZONE n" and the zone's name, slid in over the road at each zone's start.

@@ -17,6 +17,7 @@ import { FEEDBACK_ART } from "./feedbackArt";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { playTagOnce } from "./sprites";
+import { fadeAway } from "./uiKit";
 
 // font-title at 2x: its capitals start 8 rows into its 24-row line and are 10 rows tall; the
 // chip reaches 2px past them.
@@ -132,12 +133,5 @@ function floatLabel(
   const x = Math.round(anchor.centreX - width / 2);
   const y = capTop - CHIP_PAD;
   const chip = scene.add.container(x, y, [box, label]).setDepth(moment.depth);
-  scene.tweens.add({
-    alpha: 0,
-    duration: timing.ms,
-    ease: "Sine.easeIn",
-    onComplete: () => chip.destroy(),
-    targets: chip,
-    y: moment.still ? y : y - timing.rise,
-  });
+  fadeAway(scene, [chip], { ms: timing.ms, rise: moment.still ? 0 : timing.rise });
 }
