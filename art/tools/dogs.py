@@ -240,10 +240,9 @@ def biscuit_road(q):
     g.rect(10, 25 + q["bl"], 3, 3, "white")
     g.rect(19, 25 + q["br"], 3, 3, "white")
     bx = 16 + ln // 2
-    g.ell(bx, 22 + b, 6.5, 5.5, "white", "lgrey")
-    g.ell(bx, 21.5 + b, 5, 4.5, "navy", "ink", "dslate")
-    g.ell(bx - 5, 23.5 + b, 1.8, 2.5, "ochre")
-    g.ell(bx + 5, 23.5 + b, 1.8, 2.5, "ochre", "rust")
+    # tricolour: a tan coat, the black saddle across the back with tan showing round the rump and hips
+    g.ell(bx, 22 + b, 6.5, 5.5, "ochre", "rust", "tan")
+    g.ell(bx, 20.5 + b, 5, 3.6, "navy", "ink", "dslate")
     # tail held up, white tip; flagged, it stands 1px longer
     tx, pk = 16 + q["tail"], 1 if q["perk"] else 0
     g.rect(tx - 1, 26 + b, 2, 3 + pk, "navy")
