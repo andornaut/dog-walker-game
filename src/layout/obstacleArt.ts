@@ -86,11 +86,10 @@ const part = (key: string, overrides: Partial<Omit<ObstaclePart, "key">> = {}): 
 type ObstacleData = Pick<GameData, "minorObstacles">;
 
 // An obstacle's road sprite: its kind's art.
-function roadArt(data: ObstacleData, has: HasArt, kind: EncounterId | MinorObstacleId): string {
-  const art = Object.hasOwn(data.minorObstacles, kind)
+function roadArt(data: ObstacleData, kind: EncounterId | MinorObstacleId): string {
+  return Object.hasOwn(data.minorObstacles, kind)
     ? minorObstacleSpriteKey(kind as MinorObstacleId)
     : encounterSpriteKey(kind as EncounterId);
-  return art;
 }
 
 // A mover's body sprite: its kind's road art, or the sprite MOVER_SPRITE_KEYS names for that art
@@ -100,7 +99,7 @@ export function moverBodyArt(
   has: HasArt,
   kind: EncounterId | MinorObstacleId,
 ): string {
-  const art = roadArt(data, has, kind);
+  const art = roadArt(data, kind);
   const sprite = MOVER_SPRITE_KEYS[art];
   return sprite !== undefined && has(sprite) ? sprite : art;
 }
@@ -116,13 +115,13 @@ export function obstacleParts(
   moving: boolean,
 ): ObstaclePart[] {
   if (kind === "skunk") {
-    const body = moving ? moverBodyArt(data, has, kind) : roadArt(data, has, kind);
+    const body = moving ? moverBodyArt(data, has, kind) : roadArt(data, kind);
     return [part(SKUNK_CLOUD_KEY, { flat: true }), part(body, { behind: SKUNK_IN_CLOUD })];
   }
   if (moving) {
     return [part(moverBodyArt(data, has, kind))];
   }
-  const art = roadArt(data, has, kind);
+  const art = roadArt(data, kind);
   const owner = `${art}-owner`;
   if (kind === "otherDog" && has(owner)) {
     return [part(art, { dx: OTHER_DOG_DX }), part(owner, { dx: OTHER_DOG_OWNER_DX })];
