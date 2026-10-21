@@ -60,7 +60,7 @@ describe("strategyFor", () => {
       {
         expected: "network-only",
         name: "a file outside the precache",
-        pathname: "/art/mocks/index.json",
+        pathname: "/art/notes/index.json",
       },
       { expected: "network-only", name: "the service worker", pathname: "/sw.js" },
     ]) {

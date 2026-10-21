@@ -61,8 +61,8 @@ describe("navWithoutStylesheet", () => {
 describe("servedPath", () => {
   // index.html at its directory, other pages without .html.
   it("serves index.html at its directory and other pages without .html", () => {
-    const files = ["index.html", "play/index.html", "art/mocks/example.html"];
-    expect(files.map(servedPath)).toEqual(["/", "/play/", "/art/mocks/example"]);
+    const files = ["index.html", "play/index.html", "art/notes/example.html"];
+    expect(files.map(servedPath)).toEqual(["/", "/play/", "/art/notes/example"]);
   });
 });
 
@@ -73,7 +73,7 @@ describe("pathMatches", () => {
     ["/", "/", true],
     ["/", "/play/", false],
     ["/play/*", "/play/", true],
-    ["/art/*", "/art/mocks/example", true],
+    ["/art/*", "/art/notes/example", true],
     ["/art/*", "/artwork", false],
     ["/a.b", "/a.b", true],
     ["/a.b", "/axb", false],
@@ -168,7 +168,7 @@ describe("pageRules", () => {
       new Map([
         ["/", { scriptHashes: ["'sha256-h'"], styleHashes: ["'sha256-s'"] }],
         ["/art/", { scriptHashes: ["'sha256-b'"], styleHashes: ["'sha256-n'"] }],
-        ["/art/mocks/x", { scriptHashes: ["'sha256-a'"], styleHashes: ["'sha256-n'"] }],
+        ["/art/notes/x", { scriptHashes: ["'sha256-a'"], styleHashes: ["'sha256-n'"] }],
       ]),
     );
     expect(emitted.map((rule) => [rule.comment, rule.path])).toEqual([
@@ -197,7 +197,7 @@ describe("pageRules", () => {
   it("covers each of the site's pages with exactly one rule", () => {
     const files = ["index.html", "play/index.html", "data/index.html", "art/index.html"];
     const pages = new Map(
-      [...files, "art/mocks/example.html"].map((file) => [
+      [...files, "art/notes/example.html"].map((file) => [
         servedPath(file),
         { scriptHashes: [], styleHashes: [] },
       ]),
