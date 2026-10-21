@@ -9,10 +9,6 @@ export interface RunSetupLimits<
   readonly dogIds: readonly DogId[];
   readonly gearIds: readonly GearId[];
   readonly maxPackSize: number;
-  // Former dog ids and the id each one is now.
-  readonly renamedDogIds: ReadonlyMap<string, DogId>;
-  // Former gear ids and the id each one is now.
-  readonly renamedGearIds: ReadonlyMap<string, GearId>;
   readonly speed: { readonly max: number; readonly min: number };
   readonly walkerIds: readonly WalkerId[];
   // The zones a walk visits.
@@ -42,14 +38,12 @@ export interface RunSetup<
   readonly zone: number;
 }
 
-// A warning is a value ignored; a notice is a value used after a change, such as a renamed
-// dog id replaced by its new one.
+// A warning is a value ignored.
 export interface ParsedRunSetup<
   DogId extends string,
   GearId extends string,
   WalkerId extends string = string,
 > {
-  readonly notices: readonly string[];
   readonly setup: RunSetup<DogId, GearId, WalkerId>;
   readonly warnings: readonly string[];
 }
@@ -92,16 +86,14 @@ function wholeNumber(text: string): number | undefined {
   return DIGITS.test(text) ? Number(text) : undefined;
 }
 
-// Never throws: every unknown or invalid value becomes a warning and is ignored, and every
-// renamed dog id becomes a notice and is replaced. newSeed is called only when the URL has no
-// valid seed.
+// Never throws: every unknown or invalid value becomes a warning and is ignored. newSeed is
+// called only when the URL has no valid seed.
 export function parseRunSetup<DogId extends string, GearId extends string, WalkerId extends string>(
   limits: RunSetupLimits<DogId, GearId, WalkerId>,
   newSeed: () => number,
   search: string,
 ): ParsedRunSetup<DogId, GearId, WalkerId> {
   const params = new URLSearchParams(search);
-  const notices: string[] = [];
   const warnings: string[] = [];
   const values = new Map<ParamName, string>();
   for (const name of new Set(params.keys())) {
@@ -130,14 +122,7 @@ export function parseRunSetup<DogId extends string, GearId extends string, Walke
       : invalid("seed", value, `an integer from 0 to ${MAX_SEED}`);
   });
   const pack = read("pack", (value) => {
-    const ids = (value === "" ? [] : value.split(",")).map((id) => {
-      const renamed = limits.renamedDogIds.get(id);
-      if (renamed === undefined) {
-        return id;
-      }
-      notices.push(`Dog "${id}" is now "${renamed}"; used "${renamed}"`);
-      return renamed;
-    });
+    const ids = value === "" ? [] : value.split(",");
     const known = ids.filter((id) => includes(limits.dogIds, id));
     if (known.length < ids.length) {
       const unknown = ids.filter((id) => !includes(limits.dogIds, id));
@@ -151,11 +136,6 @@ export function parseRunSetup<DogId extends string, GearId extends string, Walke
   const gear = read("gear", (value) => {
     if (value === NO_GEAR) {
       return null;
-    }
-    const renamed = limits.renamedGearIds.get(value);
-    if (renamed !== undefined) {
-      notices.push(`Gear "${value}" is now "${renamed}"; used "${renamed}"`);
-      return renamed;
     }
     return includes(limits.gearIds, value)
       ? value
@@ -202,7 +182,6 @@ export function parseRunSetup<DogId extends string, GearId extends string, Walke
   });
 
   return {
-    notices,
     setup: {
       dev: dev ?? false,
       ...(gear === undefined ? {} : { gear }),

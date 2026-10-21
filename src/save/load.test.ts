@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { defined, present } from "../testing/defined";
-import { newPlayerSave, testContext, veteranSave } from "./fixtures";
+import { newPlayerSave, quietCounters, testContext, veteranSave } from "./fixtures";
 import { loadSave, saveContextFrom } from "./load";
 import { createDefaultSave, SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
 
@@ -29,7 +29,17 @@ const STARTER_DOGS = (Object.keys(gameData.dogs) as DogId[]).filter(
   (id) => gameData.dogs[id].unlock === "start",
 );
 
-const PRE_FORK_ROUTE = ["street", "park", "shops", "homeStretch"];
+// A stored checkpoint two zones in, with each given field in place of its own.
+const checkpointWith = (
+  fields: Partial<NonNullable<StoredInput["checkpoint"]>>,
+): StoredInput["checkpoint"] => ({
+  counters: quietCounters(),
+  dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+  earnedCents: 4_250,
+  route: ["street", "park"],
+  zonesFinished: 2,
+  ...fields,
+});
 
 describe("loadSave", () => {
   it("gives a new player the free dogs, the default walker and the starter dog picked", () => {
@@ -43,9 +53,7 @@ describe("loadSave", () => {
     expect([picked(1), picked(2)]).toEqual([["biscuit"], ["biscuit", "koda"]]);
   });
 
-  // A save from when Duchess and Koda were starters: what it owns wins, and loading never
-  // takes a dog away.
-  it("keeps every dog an old save owns, adding the starters", () => {
+  it("keeps every dog a save owns, adding the starters", () => {
     const dogs: DogId[] = ["duchess", "koda", "penny"];
     const save = loaded((document) => {
       document.owned.dogs = dogs;
@@ -53,11 +61,35 @@ describe("loadSave", () => {
     expect(new Set(save.owned.dogs)).toEqual(new Set([...STARTER_DOGS, ...dogs]));
   });
 
-  it("loads a valid save unchanged", () => {
-    expect(loadSave(testContext, stored(veteranSave()))).toEqual({
-      save: veteranSave(),
-      status: "loaded",
+  // Each row stores the veteran save under the current version plus offset.
+  const byVersion: [string, number, (raw: string) => unknown][] = [
+    [
+      "an older save as corrupt, with a default save",
+      -1,
+      (raw) => ({
+        raw,
+        reason: expect.stringMatching(/older than this game/),
+        save: newPlayerSave,
+        status: "corrupt",
+      }),
+    ],
+    ["a current save unchanged", 0, () => ({ save: veteranSave(), status: "loaded" })],
+    [
+      "a newer save as newer, with a default save and no backup",
+      1,
+      () => ({
+        reason: expect.stringMatching(/newer than this game/),
+        save: newPlayerSave,
+        status: "newer",
+      }),
+    ],
+  ];
+
+  it.each(byVersion)("loads %s", (_name, offset, expected) => {
+    const raw = withChanges((document) => {
+      untyped(document).version = SAVE_VERSION + offset;
     });
+    expect(loadSave(testContext, raw)).toEqual(expected(raw));
   });
 
   // Each row changes the stored veteran save, then reads part of what loads.
@@ -68,153 +100,20 @@ describe("loadSave", () => {
     unknown,
   ][] = [
     [
-      "a save from before achievements, with none earned and every counter at 0",
-      (document) => {
-        delete untyped(document).achievements;
-        const stats = document.stats as unknown as Record<string, unknown>;
-        delete stats.dogsFinishedWith;
-        delete stats.tallies;
-        delete stats.walksWithoutFiring;
-      },
-      ({ achievements, stats }) => [
-        achievements,
-        stats.dogsFinishedWith,
-        stats.tallies,
-        stats.walksWithoutFiring,
-      ],
-      [{}, [], {}, 0],
-    ],
-    [
       "a checkpoint in the first zone, before any zone finished",
       (document) => {
-        document.checkpoint = { dogs: [], earnedCents: 0, zonesFinished: 0 };
+        document.checkpoint = checkpointWith({ dogs: [], earnedCents: 0, zonesFinished: 0 });
       },
       (save) => save.checkpoint?.zonesFinished,
       0,
     ],
     [
-      "a save from before the mute setting, unmuted",
-      (document) => {
-        delete (document.settings as Partial<typeof document.settings>).muted;
-      },
-      (save) => save.settings.muted,
-      false,
-    ],
-    [
-      "a pending checkpoint from before forks, on the pre-fork route",
-      (document) => {
-        document.checkpoint = {
-          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-          earnedCents: 4_250,
-          zonesFinished: 2,
-        };
-      },
-      (save) => save.checkpoint,
-      {
-        counters: null,
-        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-        earnedCents: 4_250,
-        route: PRE_FORK_ROUTE,
-        zonesFinished: 2,
-      },
-    ],
-    [
-      "a version 1 save's checkpoint on the pre-fork route",
-      (document) => {
-        untyped(document).version = 1;
-        document.checkpoint = {
-          dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
-          earnedCents: 500,
-          zonesFinished: 1,
-        };
-      },
-      (save) => save.checkpoint?.route,
-      PRE_FORK_ROUTE,
-    ],
-    [
       "a checkpoint's route, dropping zones the game no longer has",
       (document) => {
-        document.checkpoint = {
-          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-          earnedCents: 4_250,
-          route: ["street", "oldZone", "pawsPromenade"],
-          zonesFinished: 2,
-        };
+        document.checkpoint = checkpointWith({ route: ["street", "oldZone", "pawsPromenade"] });
       },
       (save) => save.checkpoint?.route,
       ["street", "pawsPromenade"],
-    ],
-    [
-      "a checkpoint's run counters saved before the first zone, starting money and debuffs got",
-      (document) => {
-        document.checkpoint = {
-          counters: { bumpsByZone: [0, 3] },
-          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-          earnedCents: 4_250,
-          zonesFinished: 2,
-        };
-      },
-      (save) => save.checkpoint?.counters,
-      {
-        bumpsByZone: [0, 3],
-        debuffsGot: {},
-        firstZone: 0,
-        lastHeartOwners: 0,
-        startCents: 0,
-        tallies: {},
-      },
-    ],
-    [
-      // Saved before the rules rewrite: a checkpoint counting zones ended with a debuff, the
-      // Whistle owned and picked, and a carried treat count.
-      "a save from before the rules rewrite, keeping its dogs and money",
-      (document) => {
-        document.owned.gear = ["fannyPack", "whistle"];
-        document.lastLoadout.gear = "whistle";
-        document.checkpoint = {
-          counters: { bumpsByZone: [1], debuffZones: { stinky: 1 } },
-          dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
-          earnedCents: 700,
-          route: ["street"],
-          treats: 2,
-          zonesFinished: 1,
-        } as unknown as StoredInput["checkpoint"];
-      },
-      (save) => [
-        save.bankCents,
-        save.owned.dogs,
-        save.owned.gear,
-        save.lastLoadout,
-        save.checkpoint,
-      ],
-      [
-        veteranSave().bankCents,
-        veteranSave().owned.dogs,
-        ["fannyPack"],
-        { dogs: veteranSave().lastLoadout.dogs, gear: null },
-        {
-          counters: {
-            bumpsByZone: [1],
-            debuffsGot: {},
-            firstZone: 0,
-            lastHeartOwners: 0,
-            startCents: 0,
-            tallies: {},
-          },
-          dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
-          earnedCents: 700,
-          route: ["street"],
-          zonesFinished: 1,
-        },
-      ],
-    ],
-    [
-      "a last walk from before forks on the pre-fork route",
-      (document) => {
-        delete present(document.stats.lastWalk).route;
-      },
-      (save) => save.stats.lastWalk?.route,
-      PRE_FORK_ROUTE,
     ],
     [
       "an empty loadout, as a stored save keeps it",
@@ -343,28 +242,20 @@ describe("loadSave", () => {
     [
       "without unknown dogs in a checkpoint, keeping its earnings",
       (document) => {
-        document.checkpoint = {
+        document.checkpoint = checkpointWith({
           dogs: [
             { fired: true, id: "ghost", zonesFinished: 1 },
             { fired: false, id: "koda", zonesFinished: 2 },
           ],
-          earnedCents: 900,
-          zonesFinished: 2,
-        };
+        });
       },
       (save) => save.checkpoint,
-      {
-        counters: null,
-        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-        earnedCents: 900,
-        route: PRE_FORK_ROUTE,
-        zonesFinished: 2,
-      },
+      checkpointWith({}),
     ],
     [
       "a checkpoint's counters, without debuffs and tallies the game no longer has",
       (document) => {
-        document.checkpoint = {
+        document.checkpoint = checkpointWith({
           counters: {
             bumpsByZone: [2, 1],
             debuffsGot: { retiredDebuff: 1, stinky: 2 },
@@ -373,10 +264,7 @@ describe("loadSave", () => {
             startCents: 1_500,
             tallies: { retiredTally: 4, squirrelPulls: 3 },
           },
-          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-          earnedCents: 900,
-          zonesFinished: 2,
-        };
+        });
       },
       (save) => save.checkpoint?.counters,
       {
@@ -398,7 +286,7 @@ describe("loadSave", () => {
     ],
   ];
 
-  it("loads old saves, dropping what the game no longer has and repairing what it can", () => {
+  it("loads a save, dropping what the game no longer has and repairing what it can", () => {
     for (const [name, change, read, expected] of repairs) {
       const { save, status } = loadSave(testContext, withChanges(change));
       expect(status, name).toBe("loaded");
@@ -442,7 +330,7 @@ describe("loadSave", () => {
       [
         "fractional checkpoint earnings",
         withChanges((document) => {
-          document.checkpoint = { dogs: [], earnedCents: 2.5, zonesFinished: 1 };
+          document.checkpoint = checkpointWith({ earnedCents: 2.5 });
         }),
       ],
       [
@@ -481,12 +369,6 @@ describe("loadSave", () => {
           (document.settings as Record<string, unknown>).reducedMotion = "yes";
         }),
       ],
-      [
-        "a version with no migration",
-        withChanges((document) => {
-          untyped(document).version = 0;
-        }),
-      ],
     ];
 
     it("returns a default save and the raw text for each", () => {
@@ -498,17 +380,6 @@ describe("loadSave", () => {
           status: "corrupt",
         });
       }
-    });
-
-    it.each([1, 10])("loads a save %i versions newer as newer, with a default save", (ahead) => {
-      const raw = withChanges((document) => {
-        untyped(document).version = SAVE_VERSION + ahead;
-      });
-      expect(loadSave(testContext, raw)).toEqual({
-        reason: expect.stringMatching(/newer than this game/),
-        save: newPlayerSave,
-        status: "newer",
-      });
     });
   });
 

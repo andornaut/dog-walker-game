@@ -3,8 +3,7 @@ import * as v from "valibot";
 import type { LaneDirection } from "../layout/lanes";
 import { parseRunSetup, type RunSetup, type RunSetupLimits, runSetupToQuery } from "./runSetup";
 
-// Version 2 added treats, version 3 heading home, and version 4 dropped treats, which are no
-// longer given; an older log still decodes, its treats left out.
+// A log of any other version is rejected.
 export const INPUT_LOG_VERSION = 4;
 
 // A card option's index in its source's data, or the Skip option, as chooseOption takes it.
@@ -81,41 +80,21 @@ export function takeCardChoice(
 }
 
 // Each event is a tuple, [timeMs, "l", direction], [timeMs, "c", choice] or [timeMs, "h"], and
-// the setup is its URL query, which keeps a long replay small. Versions 2 and 3 also held
-// [timeMs, "t", slot] for a treat given.
+// the setup is its URL query, which keeps a long replay small.
 const timeMs = v.pipe(v.number(), v.finite(), v.minValue(0));
 const index = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
 const laneTuple = v.tuple([timeMs, v.literal("l"), v.picklist([-1, 1])]);
 const cardTuple = v.tuple([timeMs, v.literal("c"), v.union([index, v.literal("skip")])]);
-const treatTuple = v.tuple([timeMs, v.literal("t"), index]);
 const homeTuple = v.tuple([timeMs, v.literal("h")]);
-const encodedSchema = v.variant("version", [
-  v.object({
-    events: v.array(v.union([laneTuple, cardTuple])),
-    setup: v.string(),
-    version: v.literal(1),
-  }),
-  v.object({
-    events: v.array(v.union([laneTuple, cardTuple, treatTuple])),
-    setup: v.string(),
-    version: v.literal(2),
-  }),
-  v.object({
-    events: v.array(v.union([laneTuple, cardTuple, treatTuple, homeTuple])),
-    setup: v.string(),
-    version: v.literal(3),
-  }),
-  v.object({
-    events: v.array(v.union([laneTuple, cardTuple, homeTuple])),
-    setup: v.string(),
-    version: v.literal(INPUT_LOG_VERSION),
-  }),
-]);
+const encodedSchema = v.object({
+  events: v.array(v.union([laneTuple, cardTuple, homeTuple])),
+  setup: v.string(),
+  version: v.literal(INPUT_LOG_VERSION),
+});
 type EncodedEvent =
   | v.InferOutput<typeof cardTuple>
   | v.InferOutput<typeof homeTuple>
-  | v.InferOutput<typeof laneTuple>
-  | v.InferOutput<typeof treatTuple>;
+  | v.InferOutput<typeof laneTuple>;
 
 function encodeEvent(event: InputEvent): EncodedEvent {
   switch (event.kind) {
@@ -128,17 +107,14 @@ function encodeEvent(event: InputEvent): EncodedEvent {
   }
 }
 
-// An old log's treat decodes to nothing.
-function decodeEvent(event: EncodedEvent): InputEvent[] {
+function decodeEvent(event: EncodedEvent): InputEvent {
   switch (event[1]) {
     case "c":
-      return [{ choice: event[2], kind: "card", timeMs: event[0] }];
+      return { choice: event[2], kind: "card", timeMs: event[0] };
     case "h":
-      return [{ kind: "home", timeMs: event[0] }];
-    case "l":
-      return [{ direction: event[2], kind: "lane", timeMs: event[0] }];
+      return { kind: "home", timeMs: event[0] };
     default:
-      return [];
+      return { direction: event[2], kind: "lane", timeMs: event[0] };
   }
 }
 
@@ -151,8 +127,7 @@ export function encodeInputLog(log: InputLog): string {
 }
 
 // Fails, rather than warning, on any setup value the current game data rejects: a replay
-// that starts from a different setup would not reproduce its run. A renamed dog id is the
-// same dog, so it is replaced rather than rejected.
+// that starts from a different setup would not reproduce its run.
 export function decodeInputLog<DogId extends string, GearId extends string>(
   limits: RunSetupLimits<DogId, GearId>,
   json: string,
@@ -183,5 +158,5 @@ export function decodeInputLog<DogId extends string, GearId extends string>(
   if (errors.length > 0) {
     return { errors, ok: false };
   }
-  return { log: { events: parsed.output.events.flatMap(decodeEvent), setup }, ok: true };
+  return { log: { events: parsed.output.events.map(decodeEvent), setup }, ok: true };
 }

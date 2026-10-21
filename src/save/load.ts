@@ -12,7 +12,6 @@ import type {
   ZoneId,
 } from "../data/types";
 import { startingDogSlots } from "../rules/shop";
-import { migrateSave, saveMigrations } from "./migrations";
 import {
   createDefaultSave,
   MAX_RUN_DOGS,
@@ -156,7 +155,6 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
     gear: gear !== null && isKnown(new Set(owned.gear), gear) ? gear : null,
   };
   const { checkpoint, settings, stats } = save;
-  const counters = checkpoint?.counters ?? null;
   return {
     ...save,
     achievements: keepKnownEntries(known.achievements, save.achievements),
@@ -165,14 +163,11 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
         ? null
         : {
             ...checkpoint,
-            counters:
-              counters === null
-                ? null
-                : {
-                    ...counters,
-                    debuffsGot: keepKnownEntries(known.debuffs, counters.debuffsGot),
-                    tallies: keepKnownEntries(KNOWN_TALLIES, counters.tallies),
-                  },
+            counters: {
+              ...checkpoint.counters,
+              debuffsGot: keepKnownEntries(known.debuffs, checkpoint.counters.debuffsGot),
+              tallies: keepKnownEntries(KNOWN_TALLIES, checkpoint.counters.tallies),
+            },
             dogs: checkpoint.dogs.flatMap(({ id, ...dog }) =>
               isKnown(known.dogs, id) ? [{ ...dog, id }] : [],
             ),
@@ -219,9 +214,18 @@ function corrupt(context: SaveContext, raw: string, reason: string): LoadResult 
   return { raw, reason, save: createDefaultSave(context.defaults), status: "corrupt" };
 }
 
-// Parses, migrates and validates the stored text. Never throws: a save from a later version
-// yields a fresh default save with status "newer", and anything else unreadable one with
-// status "corrupt".
+// The stored version, if the document is an object with an integer one.
+function storedVersion(document: unknown): number | undefined {
+  if (typeof document !== "object" || document === null || !("version" in document)) {
+    return undefined;
+  }
+  const { version } = document;
+  return typeof version === "number" && Number.isSafeInteger(version) ? version : undefined;
+}
+
+// Parses and validates the stored text. Never throws: a save from a later version yields a
+// fresh default save with status "newer", and anything else unreadable, a save from an earlier
+// version included, one with status "corrupt".
 export function loadSave(context: SaveContext, raw: string | null): LoadResult {
   if (raw === null) {
     return { save: createDefaultSave(context.defaults), status: "new" };
@@ -233,13 +237,18 @@ export function loadSave(context: SaveContext, raw: string | null): LoadResult {
     } catch {
       return corrupt(context, raw, "the save is not valid JSON");
     }
-    const migrated = migrateSave(saveMigrations, SAVE_VERSION, parsed);
-    if (!migrated.ok) {
-      return migrated.failure === "newer"
-        ? { reason: migrated.reason, save: createDefaultSave(context.defaults), status: "newer" }
-        : corrupt(context, raw, migrated.reason);
+    const version = storedVersion(parsed);
+    if (version !== undefined && version > SAVE_VERSION) {
+      return {
+        reason: `the save is from version ${version}, newer than this game`,
+        save: createDefaultSave(context.defaults),
+        status: "newer",
+      };
     }
-    const validated = v.safeParse(saveSchema, migrated.document);
+    if (version !== undefined && version < SAVE_VERSION) {
+      return corrupt(context, raw, `the save is from version ${version}, older than this game`);
+    }
+    const validated = v.safeParse(saveSchema, parsed);
     if (!validated.success) {
       return corrupt(context, raw, v.summarize(validated.issues));
     }

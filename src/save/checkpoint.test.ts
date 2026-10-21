@@ -257,13 +257,6 @@ describe("achievements at banking", () => {
       packLeader: testAwards.now,
     });
   });
-
-  it("awards only profile achievements for a checkpoint saved without counters", () => {
-    const old = { ...checkpoint, counters: null };
-    const fired = { ...newPlayerSave, stats: { ...newPlayerSave.stats, timesFired: 9 } };
-    const banked = bankCheckpoint(testAwards, recordCheckpoint(fired, old));
-    expect(banked.achievements).toEqual({ youreFired: testAwards.now });
-  });
 });
 
 describe("isNewBestWalk", () => {

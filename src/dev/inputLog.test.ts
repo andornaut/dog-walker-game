@@ -19,8 +19,6 @@ const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
   dogIds: ["bo", "koda"],
   gearIds: ["collar"],
   maxPackSize: 3,
-  renamedDogIds: new Map([["dash", "koda"]]),
-  renamedGearIds: new Map([["bags", "collar"]]),
   speed: { max: 10, min: 0.1 },
   walkerIds: ["ada", "casey"],
   zoneCount: 4,
@@ -55,7 +53,8 @@ const decodeErrors = (json: string) => {
   const decoded = decodeInputLog(limits, json);
   return decoded.ok ? [] : decoded.errors;
 };
-const encoded = (body: object) => JSON.stringify({ setup: "seed=1", version: 1, ...body });
+const encoded = (body: object) =>
+  JSON.stringify({ setup: "seed=1", version: INPUT_LOG_VERSION, ...body });
 
 describe("recording", () => {
   it("appends each event without changing the log it was given", () => {
@@ -87,53 +86,10 @@ describe("encodeInputLog and decodeInputLog", () => {
     });
   });
 
-  const older: [string, string, InputEvent[]][] = [
-    [
-      "a version 1 log, from before treats were logged",
-      encoded({
-        events: [
-          [100, "l", -1],
-          [200, "c", "skip"],
-        ],
-      }),
-      [
-        { direction: -1, kind: "lane", timeMs: 100 },
-        { choice: "skip", kind: "card", timeMs: 200 },
-      ],
-    ],
-    [
-      "a version 2 log, leaving out its treats",
-      encoded({ events: [[100, "t", 1]], version: 2 }),
-      [],
-    ],
-    [
-      "a version 3 log, leaving out its treats",
-      encoded({
-        events: [
-          [100, "t", 1],
-          [200, "h"],
-        ],
-        version: 3,
-      }),
-      [{ kind: "home", timeMs: 200 }],
-    ],
-  ];
-
-  it("still decode older logs, leaving out their treats, and renamed ids as the ids they are now", () => {
-    for (const [name, json, expected] of older) {
-      expect(decodeOk(json).events, name).toEqual(expected);
-    }
-    const json = encoded({ events: [], setup: "seed=1&pack=bo,dash&gear=bags" });
-    expect(decodeOk(json).setup).toMatchObject({ gear: "collar", pack: ["bo", "koda"] });
-  });
-
   const invalid: [string, string][] = [
     ["not JSON", "{"],
-    ["another version", encoded({ events: [], version: INPUT_LOG_VERSION + 1 })],
-    ["a treat in a current log", encoded({ events: [[0, "t", 1]], version: INPUT_LOG_VERSION })],
-    ["a treat in a version 1 log", encoded({ events: [[0, "t", 1]] })],
-    ["a fractional treat slot", encoded({ events: [[0, "t", 0.5]], version: 2 })],
-    ["heading home in a version 2 log", encoded({ events: [[0, "h"]], version: 2 })],
+    ["an older version", encoded({ events: [], version: INPUT_LOG_VERSION - 1 })],
+    ["a newer version", encoded({ events: [], version: INPUT_LOG_VERSION + 1 })],
     ["no events", encoded({ events: undefined })],
     ["an unknown event kind", encoded({ events: [[0, "x", 1]] })],
     ["a lane move of 2", encoded({ events: [[0, "l", 2]] })],
@@ -141,6 +97,7 @@ describe("encodeInputLog and decodeInputLog", () => {
     ["a fractional choice", encoded({ events: [[0, "c", 1.5]] })],
     ["a setup with no seed", encoded({ events: [], setup: "zone=2" })],
     ["a setup with an unknown dog", encoded({ events: [], setup: "seed=1&pack=ghost" })],
+    ["a setup with unknown gear", encoded({ events: [], setup: "seed=1&gear=bags" })],
   ];
 
   it("reject a log of another version or with an event or setup they cannot read", () => {

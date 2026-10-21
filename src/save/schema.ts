@@ -10,7 +10,6 @@ import type {
   ZoneId,
 } from "../data/types";
 import type { RunCounters } from "../rules/achievements";
-import { PRE_FORK_ROUTE } from "../rules/route";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
@@ -55,32 +54,25 @@ const dogRunSchema = v.object({
   zonesFinished: count,
 });
 
-// A run's achievement counters (RunCounters). debuffsGot is keyed by debuff id; a checkpoint
-// saved before it counted zones ended with a debuff instead, which is dropped.
+// A run's achievement counters (RunCounters). debuffsGot is keyed by debuff id.
 const runCountersSchema = v.object({
   bumpsByZone: v.array(count),
-  debuffsGot: v.optional(v.record(contentId, count), {}),
-  // Checkpoints saved before it walked from the first zone.
-  firstZone: v.optional(count, 0),
-  // Checkpoints saved before it had none on their last heart.
-  lastHeartOwners: v.optional(count, 0),
-  // Checkpoints saved before it count the starting money toward money goals.
-  startCents: v.optional(cents, 0),
+  debuffsGot: v.record(contentId, count),
+  firstZone: count,
+  lastHeartOwners: count,
+  startCents: cents,
   // Keyed by TallyId.
-  tallies: v.optional(v.record(contentId, count), {}),
+  tallies: v.record(contentId, count),
 });
-
-// The zones a run walked, in order, by id. A save from before forks walked the pre-fork route.
-const routeSchema = v.optional(ids, () => [...PRE_FORK_ROUTE]);
 
 // A run in progress, saved after each zone or as the tab hides. zonesFinished counts the zones
 // finished, 0 in the first.
-// counters is null in a checkpoint saved before achievements: its run earns no run badges.
 const checkpointSchema = v.object({
-  counters: v.optional(v.nullable(runCountersSchema), null),
+  counters: runCountersSchema,
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,
-  route: routeSchema,
+  // The zones walked, in order, by id.
+  route: ids,
   zonesFinished: count,
 });
 
@@ -107,21 +99,22 @@ const lastWalkSchema = v.object({
   earnedCents: cents,
   firings: v.array(firingSchema),
   outcome: v.picklist(END_REASONS),
-  route: routeSchema,
+  // The zones walked, in order, by id.
+  route: ids,
   zonesFinished: count,
 });
 
 const statsSchema = v.object({
   // The most one walk banked for each pack size, keyed by its number of dogs; a size not yet
   // walked has none. Pack sizes outside 1 to MAX_RUN_DOGS are dropped on load.
-  bestCentsByPackSize: v.optional(v.record(v.string(), cents), {}),
+  bestCentsByPackSize: v.record(v.string(), cents),
   // The walk that banked the most; null until the first run ends.
   bestWalk: v.nullable(walkSchema),
   // The most zones one run finished. Heading home mid-zone does not count that zone.
   bestZoneFinished: count,
   dogs: v.record(contentId, dogStatsSchema),
   // Every dog that finished a walk without its owner firing you, each once.
-  dogsFinishedWith: v.optional(ids, []),
+  dogsFinishedWith: ids,
   // The most recent walk; null until the first run ends.
   lastWalk: v.nullable(lastWalkSchema),
   lifetimeCents: cents,
@@ -132,15 +125,15 @@ const statsSchema = v.object({
     wentHome: count,
   }),
   // Each tally over every run, keyed by TallyId.
-  tallies: v.optional(v.record(contentId, count), {}),
+  tallies: v.record(contentId, count),
   timesFired: count,
   // Finished walks in which no owner fired you.
-  walksWithoutFiring: v.optional(count, 0),
+  walksWithoutFiring: count,
 });
 
 export const saveSchema = v.object({
   // Each earned achievement and when, in milliseconds since the Unix epoch.
-  achievements: v.optional(v.record(contentId, count), {}),
+  achievements: v.record(contentId, count),
   bankCents: cents,
   checkpoint: v.nullable(checkpointSchema),
   // Whether the player has seen the help screen, so it opens by itself only once.
@@ -156,8 +149,8 @@ export const saveSchema = v.object({
   }),
   settings: v.object({
     musicVolume: volume,
-    // Silences all sound without changing the volumes. Saves from before it load unmuted.
-    muted: v.optional(v.boolean(), false),
+    // Silences all sound without changing the volumes.
+    muted: v.boolean(),
     reducedMotion: v.boolean(),
     sfxVolume: volume,
   }),
@@ -184,7 +177,7 @@ export interface Checkpoint extends Omit<
   v.InferOutput<typeof checkpointSchema>,
   "counters" | "dogs" | "route"
 > {
-  counters: RunCounters | null;
+  counters: RunCounters;
   dogs: DogRun[];
   route: ZoneId[];
 }

@@ -13,8 +13,6 @@ const limits: RunSetupLimits<"bo" | "koda" | "rex" | "zip", "collar" | "shoes"> 
   dogIds: ["bo", "koda", "rex", "zip"],
   gearIds: ["collar", "shoes"],
   maxPackSize: 3,
-  renamedDogIds: new Map([["dash", "rex"]]),
-  renamedGearIds: new Map([["bags", "shoes"]]),
   speed: { max: 10, min: 0.1 },
   walkerIds: ["ada", "casey"],
   zoneCount: 4,
@@ -37,7 +35,7 @@ describe("parseRunSetup", () => {
   };
   const query = "seed=42&pack=koda,bo&gear=shoes&walker=ada&zone=3&money=1250&speed=1.5&dev=1";
 
-  const valid: { name: string; notices?: string[]; search: string; setup: RunSetup }[] = [
+  const valid: { name: string; search: string; setup: RunSetup }[] = [
     { name: "uses a new seed and the defaults for an empty query", search: "", setup: defaults },
     { name: "reads every parameter", search: query, setup: every },
     { name: "reads every parameter after a leading ?", search: `?${query}`, setup: every },
@@ -53,23 +51,11 @@ describe("parseRunSetup", () => {
       setup: { ...defaults, gear: null },
     },
     { name: "reads dev=0 as off", search: "dev=0", setup: defaults },
-    {
-      name: "replaces a renamed dog id with its new one, with a notice",
-      notices: ['Dog "dash" is now "rex"; used "rex"'],
-      search: "pack=koda,dash",
-      setup: { ...defaults, pack: ["koda", "rex"] },
-    },
-    {
-      name: "replaces a renamed gear id with its new one, with a notice",
-      notices: ['Gear "bags" is now "shoes"; used "shoes"'],
-      search: "gear=bags",
-      setup: { ...defaults, gear: "shoes" },
-    },
   ];
 
   it("reads each valid query, with a new seed and the defaults for what it leaves out", () => {
-    for (const { name, notices = [], search, setup } of valid) {
-      expect(parse(search), name).toEqual({ notices, setup, warnings: [] });
+    for (const { name, search, setup } of valid) {
+      expect(parse(search), name).toEqual({ setup, warnings: [] });
     }
   });
 
@@ -159,7 +145,7 @@ describe("runSetupToQuery", () => {
       { ...defaults, speed: 0.1 + 0.2 },
     ];
     for (const setup of setups) {
-      expect(parse(runSetupToQuery(setup))).toEqual({ notices: [], setup, warnings: [] });
+      expect(parse(runSetupToQuery(setup))).toEqual({ setup, warnings: [] });
     }
   });
 });

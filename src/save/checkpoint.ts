@@ -53,7 +53,6 @@ function beatsBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: Cents): 
   return stats.bestWalk === null || earnedCents > stats.bestWalk.earnedCents;
 }
 
-// counters is null for a checkpoint saved before achievements.
 type BankedRun = Pick<
   Checkpoint,
   "counters" | "dogs" | "earnedCents" | "route" | "zonesFinished"
@@ -91,8 +90,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     zonesFinished,
   };
   // A walk counts as finished for the totals only when a dev start skipped no zone.
-  const finished =
-    outcome === "finished" && (run.counters === null || walkedFromTheStart(run.counters));
+  const finished = outcome === "finished" && walkedFromTheStart(run.counters);
   const stayed = run.dogs.flatMap(({ fired, id }) => (fired ? [] : [id]));
   const bestZoneFinished = Math.max(stats.bestZoneFinished, zonesFinished);
   const { owned } = save;
@@ -123,21 +121,18 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       lastWalk,
       lifetimeCents: addCents(stats.lifetimeCents, earnedCents),
       runs: { ...stats.runs, [outcome]: stats.runs[outcome] + 1 },
-      tallies: addTallies(stats.tallies, run.counters?.tallies ?? {}),
+      tallies: addTallies(stats.tallies, run.counters.tallies),
       timesFired: stats.timesFired + firedBy.length,
       walksWithoutFiring: stats.walksWithoutFiring + (finished && firedBy.length === 0 ? 1 : 0),
     },
   };
-  const facts: RunFacts | null =
-    run.counters === null
-      ? null
-      : {
-          ...run.counters,
-          dogsHome: stayed.length,
-          earnedCents,
-          packSize: run.dogs.length,
-          zonesFinished,
-        };
+  const facts: RunFacts = {
+    ...run.counters,
+    dogsHome: stayed.length,
+    earnedCents,
+    packSize: run.dogs.length,
+    zonesFinished,
+  };
   return awardAchievements(context, facts, save, banked);
 }
 

@@ -98,14 +98,13 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 ## Save data
 
 - **Achievements:** `src/rules/achievements.ts` judges each badge's conditions when a run is banked, on a purchase and on launch.
-- **Contents:** bank, owned dogs, gear, slots and walkers, chosen walker, last loadout, stats and logbook, shown hints, settings, earned achievements and the zone checkpoint (with the run's route), all referenced by data ids. A checkpoint or last walk with no route loads with `PRE_FORK_ROUTE` (`src/rules/route.ts`).
+- **Contents:** bank, owned dogs, gear, slots and walkers, chosen walker, last loadout, stats and logbook, shown hints, settings, earned achievements and the zone checkpoint (with the run's route), all referenced by data ids.
 - **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
-- **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
 - **Scenes:** `src/scenes/profileStore.ts` holds the loaded save for every scene and is the only way scenes read or change it.
 - **Scope:** one profile per browser, local only, per origin.
 - **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter will replace it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under `dog-walker-game:save-backup` and the game starts fresh.
-- **Version:** a save from a later version than the running game (after a rollback, or on a stale page) is left as stored: the game plays from a default save in memory, writes nothing for the session, and the home screen asks the player to reload.
+- **Version:** before v1 ships, a save-format change bumps `SAVE_VERSION` (`src/save/schema.ts`) and an older save resets to a default save, kept as a backup like one that fails validation; there are no migrations. A save from a later version than the running game (after a rollback, or on a stale page) is left as stored: the game plays from a default save in memory, writes nothing for the session, and the home screen asks the player to reload.
 - **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
 
 ## Phone
@@ -121,7 +120,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL; invalid values are warned about and ignored, and a renamed dog id is replaced by its new one. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk, its pack and gear replacing the saved loadout for that walk only. Reaching the home screen removes every parameter but `dev` from the URL.
+`/play/` reads a run setup from the URL; invalid values, unknown ids included, are warned about and ignored. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk, its pack and gear replacing the saved loadout for that walk only. Reaching the home screen removes every parameter but `dev` from the URL.
 
 | Param    | Value                           | Default         |
 | -------- | ------------------------------- | --------------- |
@@ -137,7 +136,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 
 - **Dev panel:** a "Dev" bar below the canvas opens the cheat sheet. Start at, Cheats on/off and the toggles (Invincible owners, Hit boxes, Slow motion, Fast forward) are staged until Apply; applied cheats last for the tab (`sessionStorage`) and never reach the save. The save cheats (+$100, +$1,000, Unlock all, Reset save) are queued in `sessionStorage`, written at the next boot before the save loads, and reload to the start screen.
 - **Far-road fade:** off unless the game registry's `dev-road-fade` is set, as through the console handle `dogWalkerGame`.
-- **Input log:** lane moves, card choices and heading home are recorded with their step's time in a versioned log, whose setup names the pack, gear, walker and route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and the next walk started plays a log found under `dog-walker-game:dev-replay`.
+- **Input log:** lane moves, card choices and heading home are recorded with their step's time in a versioned log (a replay rejects a log of any other version), whose setup names the pack, gear, walker and route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and the next walk started plays a log found under `dog-walker-game:dev-replay`.
 - **Overlay** (backquote): the seed, zone, distance, speed, money, hearts and FPS, and a zone clock (`src/dev/zoneClock.ts`) that splits the zone's wall-clock time into road time, held time and lag. C copies a link that reproduces the run.
 - **Random streams:** one seed feeds `spawns-<zone>`, `ambient`, `cards`, `forks` and `quips`, where `<zone>` is the position in the walk. `cards` also draws a lucky find's effects, a small dog's dodges and each fork's upgrades.
 
