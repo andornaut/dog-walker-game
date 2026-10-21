@@ -236,6 +236,7 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 | `fx-hit-thief`     | YOINK!   | `play-word`                                                |
 | `fx-hit-trash`     | CLANG!   | `play-word`                                                |
 
+- Every `fx-hit-*` and `fx-lemonade` opens on an impact frame: an eight-point star in the encounter's colour with a white core, a white speed line flying out between each pair of points.
 - `play-word` follows `play` on every `fx-hit-*`: the same frames and timing, with the word centred on the impact star on frames 0 to 5 (420ms).
 - The game plays `play-word`, `fx-bark-word` and `splash-word`. With reduced motion it shows `play` (held on frame 0), `fx-bark` and `splash`, so no word shows.
 - `fx-bark-word` plays at `fx-bark`'s point in place of it, over the dog's head as the tell starts.

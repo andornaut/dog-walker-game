@@ -7,7 +7,8 @@ their fills carry Elm Avenue. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
 encounters.py. The bursts are laid out on a 64x64 design and drawn 77/64 times
 bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps, twinkles
-and comic words keep their pixels.
+and comic words keep their pixels. Every burst opens on an impact frame (impact):
+an eight-point star in its colour with a white core and white speed lines.
 
 fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
@@ -84,6 +85,8 @@ ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
 # pixel for pixel, at the drawn place of their design position, so they keep their pixels.
 BURST = 64
 BURST_SCALE = 77 / BURST
+# How much bigger frame 0's impact star is than the radius each burst gives it, for punch.
+IMPACT = 1.25
 
 
 def raster(g):
@@ -150,7 +153,15 @@ def piece(dst, draw, col="plum", size=64):
 
 
 def impact(g, outer, cx=32, cy=32, r=16):
-    """Frame 0 of every burst: an eight-point star in the encounter's colour with a white core."""
+    """Frame 0 of every burst: an eight-point star in the encounter's colour with a white core, IMPACT times
+    r, and a white speed line flying out between each pair of its points."""
+    r *= IMPACT
+    for k in range(8):
+        a = math.radians(k * 45 + 11 - 90 + 22.5)  # between the points, as burst turns them 11 degrees
+        (x0, y0), (x1, y1) = (drawn_at(g, cx + math.cos(a) * d, cy + math.sin(a) * d) for d in (r, r * 1.3))
+        n = max(abs(x1 - x0), abs(y1 - y0))
+        for i in range(n + 1):
+            raster(g).p(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n), "white")
     burst(g, cx, cy, r, r * 0.4, 8, outer, 11)
     burst(g, cx, cy, r * 0.62, r * 0.25, 8, "yellow", 11)
     g.ell(cx, cy, r * 0.25, r * 0.25, "white")
