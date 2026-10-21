@@ -23,7 +23,7 @@ import {
 } from "../../runner/movers";
 import { playTag, showAtDepth } from "../sprites";
 import type { ItemView } from "./itemViews";
-import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
 // down from the far end of the road for a cyclist, and the arrow a sign's width beside it or
@@ -79,6 +79,7 @@ export function drawMover(
         .setPosition(x, y)
         .setDepth(DEPTH.sprite + placed.y)
         .setFlipX(leftward);
+      clipToRoad(body.sprite);
       playTag(body.sprite, drawn.key, tag, still);
       const cycle = body.sprite.anims.currentAnim?.duration;
       if (path.mover !== "ball") {

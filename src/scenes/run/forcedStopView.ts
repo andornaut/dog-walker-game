@@ -6,7 +6,7 @@ import { project } from "../../layout/projection";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import type { Walk } from "../../runner/walk";
 import { addStandingSprite, firstTag, playTag, showAtDepth } from "../sprites";
-import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A forced stop's figure stands in the middle of the road; a construction barrier is
 // repeated across every lane.
@@ -46,6 +46,7 @@ export class ForcedStopView {
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       sprite.setPosition(x, y).setDepth(DEPTH.sprite + placed.y);
+      clipToRoad(sprite);
       shadow(key, drawn.depth, x, y);
     });
   }

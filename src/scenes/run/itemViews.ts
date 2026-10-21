@@ -32,7 +32,7 @@ import { needIcon } from "../needSignals";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
 import { drawMover, moverBodyKey } from "./moverView";
-import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its hit box.
 const PLACEHOLDER_HEIGHT = ROAD_SPRITE_SIZE;
@@ -114,6 +114,7 @@ export class ItemViews {
         const x = Math.round(placed.x);
         const y = Math.round(placed.y);
         part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
+        clipToRoad(part.sprite);
         const tag = firstTag(this.scene, drawn.key, itemTags);
         if (tag !== undefined) {
           playTag(part.sprite, drawn.key, tag, still);
