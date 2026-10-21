@@ -311,8 +311,8 @@
       "size": "medium",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 4,
-        "startHearts": 4,
+        "maxHearts": 3,
+        "startHearts": 3,
         "startMood": "happy"
       },
       "keys": {
@@ -337,8 +337,8 @@
       "size": "medium",
       "unlock": "start",
       "figures": {
-        "maxHearts": 4,
-        "startHearts": 4,
+        "maxHearts": 3,
+        "startHearts": 3,
         "startMood": "happy"
       },
       "keys": {
@@ -364,9 +364,9 @@
       "size": "small",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 3,
-        "startHearts": 3,
-        "startMood": "happy"
+        "maxHearts": 2,
+        "startHearts": 2,
+        "startMood": "neutral"
       },
       "keys": {
         "dogCardTag": "duchess",
@@ -391,8 +391,8 @@
       "size": "big",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 5,
-        "startHearts": 5,
+        "maxHearts": 4,
+        "startHearts": 4,
         "startMood": "happy"
       },
       "keys": {
@@ -418,9 +418,9 @@
       "size": "small",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 3,
-        "startHearts": 3,
-        "startMood": "happy"
+        "maxHearts": 2,
+        "startHearts": 2,
+        "startMood": "neutral"
       },
       "keys": {
         "dogCardTag": "nugget",
@@ -445,8 +445,8 @@
       "size": "big",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 5,
-        "startHearts": 5,
+        "maxHearts": 4,
+        "startHearts": 4,
         "startMood": "happy"
       },
       "keys": {
@@ -472,8 +472,8 @@
       "size": "medium",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 4,
-        "startHearts": 4,
+        "maxHearts": 3,
+        "startHearts": 3,
         "startMood": "happy"
       },
       "keys": {
@@ -499,8 +499,8 @@
       "size": "big",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 5,
-        "startHearts": 5,
+        "maxHearts": 4,
+        "startHearts": 4,
         "startMood": "happy"
       },
       "keys": {
@@ -526,9 +526,9 @@
       "size": "small",
       "unlock": "shop",
       "figures": {
-        "maxHearts": 3,
-        "startHearts": 3,
-        "startMood": "happy"
+        "maxHearts": 2,
+        "startHearts": 2,
+        "startMood": "neutral"
       },
       "keys": {
         "dogCardTag": "zippy",
@@ -1237,9 +1237,9 @@
       "kindWordsForgiven": 1,
       "luckyCollarMax": 1,
       "maxBySize": {
-        "big": 5,
-        "medium": 4,
-        "small": 3
+        "big": 4,
+        "medium": 3,
+        "small": 2
       },
       "treat": 1
     },

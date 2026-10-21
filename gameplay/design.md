@@ -81,7 +81,7 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
   - **Cash:** what you carry during the walk. It starts at a small purse (more with the Fanny pack) and grows with tips and lucky finds; card options are paid from it. It never goes below $0, and what's left is banked at the end
   - **Tips:** a tip is $1. Tips are the main income: each neighborhood spawns 40 or more, whatever the pack size
   - **Pay:** the steady part. After each neighborhood, each walking dog earns $10, times the neighborhood's pay multiplier. Pay is banked at the end of each neighborhood: at its celebration, or on the end screen after neighborhood 4. A firing loses that dog's pay for the current neighborhood and the Full pack bonus; its earlier pay stays banked
-- **Owner happiness (♥):** one meter per dog, shown on its doghouse card; it never relies on color alone. The dog's size sets its max (see Dogs); smaller packs add to the max of every small and medium dog's owner (never a big dog's): +2♥ walking 1 dog, +1♥ walking 2, none walking 3. The start screen's dog slots show the bonus for the pack chosen. Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
+- **Owner happiness (♥):** one meter per dog, shown on its doghouse card; it never relies on color alone. The dog's size sets its max (see Dogs); smaller packs add to every owner's max: +2♥ walking 1 dog, +1♥ walking 2, none walking 3. No owner's max goes above 6♥, whatever adds to it. The start screen's dog slots show the bonus for the pack chosen. Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
 - **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1♥ bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
 
 ### A walk
@@ -135,9 +135,9 @@ Dogs differ in play by size only:
 
 | Size   | ♥   | Effects                                                                                                                         |
 | ------ | --- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Small  | 3   | Dodges 1 in 4 of the plain hits that would land on it, with a "Dodge!" label; the hit costs nothing and doesn't count as a bump |
-| Medium | 4   | The baseline                                                                                                                    |
-| Big    | 5   | Heavy: each big dog slows lane changes (−0.1 agility, never below Relaxed); its detail card says so                             |
+| Small  | 2   | Dodges 1 in 4 of the plain hits that would land on it, with a "Dodge!" label; the hit costs nothing and doesn't count as a bump |
+| Medium | 3   | The baseline                                                                                                                    |
+| Big    | 4   | Heavy: each big dog slows lane changes (−0.1 agility, never below Relaxed); its detail card says so                             |
 
 Size shows at a glance: on the road, medium dogs are drawn 48 px, big dogs 54 px and small dogs about 38 px, in every animation, with small dogs drawn chunky so they still read; portraits and doghouse faces differ less, about 1.1× and 0.9×. Hit boxes don't change.
 

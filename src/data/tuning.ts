@@ -44,7 +44,7 @@ export const TUNING = {
     // Second chance forgives this many hearts lost in each zone, the first ones lost.
     kindWordsForgiven: 1,
     luckyCollarMax: 1,
-    maxBySize: { big: 5, medium: 4, small: 3 },
+    maxBySize: { big: 4, medium: 3, small: 2 },
     // No owner's max goes above this, whatever the dog's size, the pack's size and the gear add.
     maxOwnerHearts: 6,
     // Added to every owner's max, whatever the dog's size, by how many dogs the walk set out with.
