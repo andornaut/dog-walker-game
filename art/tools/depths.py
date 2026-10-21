@@ -14,7 +14,8 @@ pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). road.py's people are drawn at
-road.SCALE x the step, as road.py draws them at road.SCALE. Offsets that move a
+road.PERSON_SCALE x the step and the stop sign at road.SCALE x the step, as
+road.py draws them. Offsets that move a
 part by pixels (a step, a breath, a wag) are snapped to whole pixels at the small
 size.
 
@@ -63,9 +64,10 @@ def obstacle(s, draw, spec):
 def own(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) at scale s for the road sprites only this file draws
     small, with the tags road.sprites and obstacles.sprites give them. road.py's people are drawn at
-    road.SCALE x s, since their drawing functions lay them out road.SCALE times smaller than they export."""
+    road.PERSON_SCALE x s and the stop sign at road.SCALE x s, since their drawing functions lay them out that
+    many times smaller than they export."""
     breath, ms = road.BREATH, road.BREATH_MS
-    p = road.SCALE * s
+    p = road.PERSON_SCALE * s
 
     def walk(top, **q):
         return ("walk", [dressed(p, top, lf=-2, **q).outlined(), dressed(p, top, rf=-2, **q).outlined()], 200)
@@ -84,7 +86,7 @@ def own(s):
     yield "photo-op", [("idle", [dressed(p, road.tourist_top(False), bob=b, **tourist).outlined() for b in breath], ms),
                        ("flash", [dressed(p, road.tourist_top(f), **tourist).outlined() for f in (True, False)], 120)]
     # road.stop_sign draws its face, legend and sheen in pixels at the grid's scale
-    yield "stop-sign", [("idle", [small(road, p, road.stop_sign, c).outlined() for c in (None, None, 18, 24)], 400)]
+    yield "stop-sign", [("idle", [small(road, road.SCALE * s, road.stop_sign, c).outlined() for c in (None, None, 18, 24)], 400)]
 
     def kid(wave=False, mood="happy", bob=0):
         return small(road, p, road.kid, wave, mood, **snap(dict(bob=bob), p)).outlined()

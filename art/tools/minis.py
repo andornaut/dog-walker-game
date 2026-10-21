@@ -14,10 +14,10 @@ road.py draws them at road.SCALE.
 
 <key>@<step> keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
-lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog and
-skunk-cloud (no outline). At @75 and @50 only (SCALES): dog-<name> for every
-dog, since the pack is drawn at full size; a dog's design grid is drawn at
-dogs.ROAD_SCALE times the step, so its frame is 30x30 at @75 and 20x20 at @50.
+lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog,
+skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
+drawn at dogs.ROAD_SCALE times the step, so its frame is 49x49 at @88, 42x42
+at @75, 35x35 at @62 and 28x28 at @50.
 
 Usage:
   minis.py preview OUT.png   every small frame on the street colours
@@ -53,7 +53,7 @@ def depth_steps():
 
 
 STEPS = depth_steps()
-# The steps the dogs get variants at, and that hazards.py builds itself.
+# The steps hazards.py builds itself.
 SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))
 
 
@@ -401,12 +401,12 @@ def variants(s):
 
 
 def sprites():
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite: variants at every step, and the
-    dogs at SCALES only. The dogs are the pack, which the game draws at full size."""
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite: variants at every step, the dogs
+    included."""
     for suffix, s in STEPS:
         for key, tags in variants(s):
             yield f"{key}@{suffix}", tags
-    for suffix, s in SCALES:
+    for suffix, s in STEPS:
         for name, (draw, _) in dogs.DOGS.items():
             yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.ROAD_SCALE * s), ms)
                                            for tag, poses, ms in dogs.road_tags(name)]

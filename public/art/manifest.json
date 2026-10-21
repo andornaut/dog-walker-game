@@ -314,8 +314,8 @@
       "png": "sprites/biscuit-neighbour.png",
       "json": "sprites/biscuit-neighbour.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 30
+        "feetY": 79,
+        "opaqueWidth": 40
       }
     },
     {
@@ -323,8 +323,8 @@
       "png": "sprites/biscuit-neighbour@50.png",
       "json": "sprites/biscuit-neighbour@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 16
+        "feetY": 41,
+        "opaqueWidth": 22
       }
     },
     {
@@ -332,8 +332,8 @@
       "png": "sprites/biscuit-neighbour@62.png",
       "json": "sprites/biscuit-neighbour@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 19
+        "feetY": 51,
+        "opaqueWidth": 27
       }
     },
     {
@@ -341,8 +341,8 @@
       "png": "sprites/biscuit-neighbour@75.png",
       "json": "sprites/biscuit-neighbour@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 22
+        "feetY": 60,
+        "opaqueWidth": 30
       }
     },
     {
@@ -350,8 +350,8 @@
       "png": "sprites/biscuit-neighbour@88.png",
       "json": "sprites/biscuit-neighbour@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 27
+        "feetY": 70,
+        "opaqueWidth": 35
       }
     },
     {
@@ -594,8 +594,8 @@
       "png": "sprites/chatty-neighbour.png",
       "json": "sprites/chatty-neighbour.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 30
+        "feetY": 79,
+        "opaqueWidth": 40
       }
     },
     {
@@ -603,8 +603,8 @@
       "png": "sprites/chatty-neighbour@50.png",
       "json": "sprites/chatty-neighbour@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 16
+        "feetY": 41,
+        "opaqueWidth": 22
       }
     },
     {
@@ -612,8 +612,8 @@
       "png": "sprites/chatty-neighbour@62.png",
       "json": "sprites/chatty-neighbour@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 19
+        "feetY": 51,
+        "opaqueWidth": 27
       }
     },
     {
@@ -621,8 +621,8 @@
       "png": "sprites/chatty-neighbour@75.png",
       "json": "sprites/chatty-neighbour@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 22
+        "feetY": 60,
+        "opaqueWidth": 30
       }
     },
     {
@@ -630,8 +630,8 @@
       "png": "sprites/chatty-neighbour@88.png",
       "json": "sprites/chatty-neighbour@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 27
+        "feetY": 70,
+        "opaqueWidth": 35
       }
     },
     {
@@ -774,8 +774,8 @@
       "png": "sprites/dog-archie.png",
       "json": "sprites/dog-archie.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 20
+        "feetY": 52,
+        "opaqueWidth": 26
       }
     },
     {
@@ -783,8 +783,17 @@
       "png": "sprites/dog-archie@50.png",
       "json": "sprites/dog-archie@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 11
+        "feetY": 27,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-archie@62",
+      "png": "sprites/dog-archie@62.png",
+      "json": "sprites/dog-archie@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 17
       }
     },
     {
@@ -792,8 +801,17 @@
       "png": "sprites/dog-archie@75.png",
       "json": "sprites/dog-archie@75.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 16
+        "feetY": 40,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-archie@88",
+      "png": "sprites/dog-archie@88.png",
+      "json": "sprites/dog-archie@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 23
       }
     },
     {
@@ -801,8 +819,8 @@
       "png": "sprites/dog-biscuit.png",
       "json": "sprites/dog-biscuit.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 20
+        "feetY": 52,
+        "opaqueWidth": 26
       }
     },
     {
@@ -810,8 +828,17 @@
       "png": "sprites/dog-biscuit@50.png",
       "json": "sprites/dog-biscuit@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 10
+        "feetY": 27,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-biscuit@62",
+      "png": "sprites/dog-biscuit@62.png",
+      "json": "sprites/dog-biscuit@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 17
       }
     },
     {
@@ -819,8 +846,17 @@
       "png": "sprites/dog-biscuit@75.png",
       "json": "sprites/dog-biscuit@75.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 16
+        "feetY": 40,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-biscuit@88",
+      "png": "sprites/dog-biscuit@88.png",
+      "json": "sprites/dog-biscuit@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 23
       }
     },
     {
@@ -828,8 +864,8 @@
       "png": "sprites/dog-duchess.png",
       "json": "sprites/dog-duchess.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 18
+        "feetY": 52,
+        "opaqueWidth": 26
       }
     },
     {
@@ -837,8 +873,17 @@
       "png": "sprites/dog-duchess@50.png",
       "json": "sprites/dog-duchess@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 10
+        "feetY": 27,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-duchess@62",
+      "png": "sprites/dog-duchess@62.png",
+      "json": "sprites/dog-duchess@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 17
       }
     },
     {
@@ -846,8 +891,17 @@
       "png": "sprites/dog-duchess@75.png",
       "json": "sprites/dog-duchess@75.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 14
+        "feetY": 40,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-duchess@88",
+      "png": "sprites/dog-duchess@88.png",
+      "json": "sprites/dog-duchess@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 23
       }
     },
     {
@@ -855,8 +909,8 @@
       "png": "sprites/dog-koda.png",
       "json": "sprites/dog-koda.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 24
+        "feetY": 54,
+        "opaqueWidth": 34
       }
     },
     {
@@ -864,8 +918,17 @@
       "png": "sprites/dog-koda@50.png",
       "json": "sprites/dog-koda@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 14
+        "feetY": 27,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-koda@62",
+      "png": "sprites/dog-koda@62.png",
+      "json": "sprites/dog-koda@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 21
       }
     },
     {
@@ -873,8 +936,17 @@
       "png": "sprites/dog-koda@75.png",
       "json": "sprites/dog-koda@75.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 41,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "dog-koda@88",
+      "png": "sprites/dog-koda@88.png",
+      "json": "sprites/dog-koda@88.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 29
       }
     },
     {
@@ -882,8 +954,8 @@
       "png": "sprites/dog-nugget.png",
       "json": "sprites/dog-nugget.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 18
+        "feetY": 52,
+        "opaqueWidth": 24
       }
     },
     {
@@ -891,8 +963,17 @@
       "png": "sprites/dog-nugget@50.png",
       "json": "sprites/dog-nugget@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 10
+        "feetY": 27,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-nugget@62",
+      "png": "sprites/dog-nugget@62.png",
+      "json": "sprites/dog-nugget@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 15
       }
     },
     {
@@ -900,8 +981,17 @@
       "png": "sprites/dog-nugget@75.png",
       "json": "sprites/dog-nugget@75.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 14
+        "feetY": 40,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-nugget@88",
+      "png": "sprites/dog-nugget@88.png",
+      "json": "sprites/dog-nugget@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 21
       }
     },
     {
@@ -909,8 +999,8 @@
       "png": "sprites/dog-penny.png",
       "json": "sprites/dog-penny.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 24
+        "feetY": 54,
+        "opaqueWidth": 34
       }
     },
     {
@@ -918,8 +1008,17 @@
       "png": "sprites/dog-penny@50.png",
       "json": "sprites/dog-penny@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 14
+        "feetY": 27,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-penny@62",
+      "png": "sprites/dog-penny@62.png",
+      "json": "sprites/dog-penny@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 21
       }
     },
     {
@@ -927,8 +1026,17 @@
       "png": "sprites/dog-penny@75.png",
       "json": "sprites/dog-penny@75.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 41,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "dog-penny@88",
+      "png": "sprites/dog-penny@88.png",
+      "json": "sprites/dog-penny@88.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 29
       }
     },
     {
@@ -936,8 +1044,8 @@
       "png": "sprites/dog-pierre.png",
       "json": "sprites/dog-pierre.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 22
+        "feetY": 54,
+        "opaqueWidth": 30
       }
     },
     {
@@ -945,8 +1053,17 @@
       "png": "sprites/dog-pierre@50.png",
       "json": "sprites/dog-pierre@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 12
+        "feetY": 27,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "dog-pierre@62",
+      "png": "sprites/dog-pierre@62.png",
+      "json": "sprites/dog-pierre@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 19
       }
     },
     {
@@ -954,8 +1071,17 @@
       "png": "sprites/dog-pierre@75.png",
       "json": "sprites/dog-pierre@75.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 16
+        "feetY": 41,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "dog-pierre@88",
+      "png": "sprites/dog-pierre@88.png",
+      "json": "sprites/dog-pierre@88.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 27
       }
     },
     {
@@ -963,8 +1089,8 @@
       "png": "sprites/dog-snowball.png",
       "json": "sprites/dog-snowball.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 24
+        "feetY": 54,
+        "opaqueWidth": 34
       }
     },
     {
@@ -972,8 +1098,17 @@
       "png": "sprites/dog-snowball@50.png",
       "json": "sprites/dog-snowball@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 14
+        "feetY": 27,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-snowball@62",
+      "png": "sprites/dog-snowball@62.png",
+      "json": "sprites/dog-snowball@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 21
       }
     },
     {
@@ -981,8 +1116,17 @@
       "png": "sprites/dog-snowball@75.png",
       "json": "sprites/dog-snowball@75.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 41,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "dog-snowball@88",
+      "png": "sprites/dog-snowball@88.png",
+      "json": "sprites/dog-snowball@88.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 29
       }
     },
     {
@@ -990,8 +1134,8 @@
       "png": "sprites/dog-zippy.png",
       "json": "sprites/dog-zippy.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 17
+        "feetY": 52,
+        "opaqueWidth": 23
       }
     },
     {
@@ -999,8 +1143,17 @@
       "png": "sprites/dog-zippy@50.png",
       "json": "sprites/dog-zippy@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 10
+        "feetY": 27,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "dog-zippy@62",
+      "png": "sprites/dog-zippy@62.png",
+      "json": "sprites/dog-zippy@62.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 15
       }
     },
     {
@@ -1008,8 +1161,17 @@
       "png": "sprites/dog-zippy@75.png",
       "json": "sprites/dog-zippy@75.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 14
+        "feetY": 40,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-zippy@88",
+      "png": "sprites/dog-zippy@88.png",
+      "json": "sprites/dog-zippy@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1288,9 +1450,19 @@
       "json": "sprites/fx-status-soaked-milkshake@50.json"
     },
     {
+      "key": "fx-status-soaked-milkshake@62",
+      "png": "sprites/fx-status-soaked-milkshake@62.png",
+      "json": "sprites/fx-status-soaked-milkshake@62.json"
+    },
+    {
       "key": "fx-status-soaked-milkshake@75",
       "png": "sprites/fx-status-soaked-milkshake@75.png",
       "json": "sprites/fx-status-soaked-milkshake@75.json"
+    },
+    {
+      "key": "fx-status-soaked-milkshake@88",
+      "png": "sprites/fx-status-soaked-milkshake@88.png",
+      "json": "sprites/fx-status-soaked-milkshake@88.json"
     },
     {
       "key": "fx-status-soaked-mud",
@@ -1303,9 +1475,19 @@
       "json": "sprites/fx-status-soaked-mud@50.json"
     },
     {
+      "key": "fx-status-soaked-mud@62",
+      "png": "sprites/fx-status-soaked-mud@62.png",
+      "json": "sprites/fx-status-soaked-mud@62.json"
+    },
+    {
       "key": "fx-status-soaked-mud@75",
       "png": "sprites/fx-status-soaked-mud@75.png",
       "json": "sprites/fx-status-soaked-mud@75.json"
+    },
+    {
+      "key": "fx-status-soaked-mud@88",
+      "png": "sprites/fx-status-soaked-mud@88.png",
+      "json": "sprites/fx-status-soaked-mud@88.json"
     },
     {
       "key": "fx-status-soaked@50",
@@ -1313,9 +1495,19 @@
       "json": "sprites/fx-status-soaked@50.json"
     },
     {
+      "key": "fx-status-soaked@62",
+      "png": "sprites/fx-status-soaked@62.png",
+      "json": "sprites/fx-status-soaked@62.json"
+    },
+    {
       "key": "fx-status-soaked@75",
       "png": "sprites/fx-status-soaked@75.png",
       "json": "sprites/fx-status-soaked@75.json"
+    },
+    {
+      "key": "fx-status-soaked@88",
+      "png": "sprites/fx-status-soaked@88.png",
+      "json": "sprites/fx-status-soaked@88.json"
     },
     {
       "key": "fx-status-spooked",
@@ -1328,9 +1520,19 @@
       "json": "sprites/fx-status-spooked@50.json"
     },
     {
+      "key": "fx-status-spooked@62",
+      "png": "sprites/fx-status-spooked@62.png",
+      "json": "sprites/fx-status-spooked@62.json"
+    },
+    {
       "key": "fx-status-spooked@75",
       "png": "sprites/fx-status-spooked@75.png",
       "json": "sprites/fx-status-spooked@75.json"
+    },
+    {
+      "key": "fx-status-spooked@88",
+      "png": "sprites/fx-status-spooked@88.png",
+      "json": "sprites/fx-status-spooked@88.json"
     },
     {
       "key": "fx-status-stinky",
@@ -1343,9 +1545,19 @@
       "json": "sprites/fx-status-stinky@50.json"
     },
     {
+      "key": "fx-status-stinky@62",
+      "png": "sprites/fx-status-stinky@62.png",
+      "json": "sprites/fx-status-stinky@62.json"
+    },
+    {
       "key": "fx-status-stinky@75",
       "png": "sprites/fx-status-stinky@75.png",
       "json": "sprites/fx-status-stinky@75.json"
+    },
+    {
+      "key": "fx-status-stinky@88",
+      "png": "sprites/fx-status-stinky@88.png",
+      "json": "sprites/fx-status-stinky@88.json"
     },
     {
       "key": "fx-status-tangled",
@@ -1358,9 +1570,19 @@
       "json": "sprites/fx-status-tangled@50.json"
     },
     {
+      "key": "fx-status-tangled@62",
+      "png": "sprites/fx-status-tangled@62.png",
+      "json": "sprites/fx-status-tangled@62.json"
+    },
+    {
       "key": "fx-status-tangled@75",
       "png": "sprites/fx-status-tangled@75.png",
       "json": "sprites/fx-status-tangled@75.json"
+    },
+    {
+      "key": "fx-status-tangled@88",
+      "png": "sprites/fx-status-tangled@88.png",
+      "json": "sprites/fx-status-tangled@88.json"
     },
     {
       "key": "fx-status-tuckered-out",
@@ -1373,9 +1595,19 @@
       "json": "sprites/fx-status-tuckered-out@50.json"
     },
     {
+      "key": "fx-status-tuckered-out@62",
+      "png": "sprites/fx-status-tuckered-out@62.png",
+      "json": "sprites/fx-status-tuckered-out@62.json"
+    },
+    {
       "key": "fx-status-tuckered-out@75",
       "png": "sprites/fx-status-tuckered-out@75.png",
       "json": "sprites/fx-status-tuckered-out@75.json"
+    },
+    {
+      "key": "fx-status-tuckered-out@88",
+      "png": "sprites/fx-status-tuckered-out@88.png",
+      "json": "sprites/fx-status-tuckered-out@88.json"
     },
     {
       "key": "fx-tap",
@@ -1659,8 +1891,8 @@
       "png": "sprites/kid.png",
       "json": "sprites/kid.json",
       "anchor": {
-        "feetY": 58,
-        "opaqueWidth": 24
+        "feetY": 81,
+        "opaqueWidth": 34
       }
     },
     {
@@ -1668,8 +1900,8 @@
       "png": "sprites/kid@50.png",
       "json": "sprites/kid@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 14
+        "feetY": 41,
+        "opaqueWidth": 18
       }
     },
     {
@@ -1677,8 +1909,8 @@
       "png": "sprites/kid@62.png",
       "json": "sprites/kid@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 17
+        "feetY": 52,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1686,8 +1918,8 @@
       "png": "sprites/kid@75.png",
       "json": "sprites/kid@75.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 18
+        "feetY": 62,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1695,8 +1927,8 @@
       "png": "sprites/kid@88.png",
       "json": "sprites/kid@88.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 21
+        "feetY": 72,
+        "opaqueWidth": 29
       }
     },
     {
@@ -1839,8 +2071,8 @@
       "png": "sprites/mail-carrier.png",
       "json": "sprites/mail-carrier.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 32
+        "feetY": 79,
+        "opaqueWidth": 44
       }
     },
     {
@@ -1848,8 +2080,8 @@
       "png": "sprites/mail-carrier@50.png",
       "json": "sprites/mail-carrier@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 17
+        "feetY": 41,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1857,8 +2089,8 @@
       "png": "sprites/mail-carrier@62.png",
       "json": "sprites/mail-carrier@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 21
+        "feetY": 51,
+        "opaqueWidth": 29
       }
     },
     {
@@ -1866,8 +2098,8 @@
       "png": "sprites/mail-carrier@75.png",
       "json": "sprites/mail-carrier@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 24
+        "feetY": 60,
+        "opaqueWidth": 33
       }
     },
     {
@@ -1875,8 +2107,8 @@
       "png": "sprites/mail-carrier@88.png",
       "json": "sprites/mail-carrier@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 29
+        "feetY": 70,
+        "opaqueWidth": 38
       }
     },
     {
@@ -2523,8 +2755,8 @@
       "png": "sprites/other-dog-owner.png",
       "json": "sprites/other-dog-owner.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 31
+        "feetY": 79,
+        "opaqueWidth": 42
       }
     },
     {
@@ -2532,8 +2764,8 @@
       "png": "sprites/other-dog-owner@50.png",
       "json": "sprites/other-dog-owner@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 17
+        "feetY": 41,
+        "opaqueWidth": 23
       }
     },
     {
@@ -2541,8 +2773,8 @@
       "png": "sprites/other-dog-owner@62.png",
       "json": "sprites/other-dog-owner@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 20
+        "feetY": 51,
+        "opaqueWidth": 28
       }
     },
     {
@@ -2550,8 +2782,8 @@
       "png": "sprites/other-dog-owner@75.png",
       "json": "sprites/other-dog-owner@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 23
+        "feetY": 60,
+        "opaqueWidth": 32
       }
     },
     {
@@ -2559,8 +2791,8 @@
       "png": "sprites/other-dog-owner@88.png",
       "json": "sprites/other-dog-owner@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 28
+        "feetY": 70,
+        "opaqueWidth": 37
       }
     },
     {
@@ -2775,8 +3007,8 @@
       "png": "sprites/photo-op.png",
       "json": "sprites/photo-op.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 34
+        "feetY": 79,
+        "opaqueWidth": 48
       }
     },
     {
@@ -2784,8 +3016,8 @@
       "png": "sprites/photo-op@50.png",
       "json": "sprites/photo-op@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 41,
+        "opaqueWidth": 24
       }
     },
     {
@@ -2793,8 +3025,8 @@
       "png": "sprites/photo-op@62.png",
       "json": "sprites/photo-op@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 23
+        "feetY": 51,
+        "opaqueWidth": 31
       }
     },
     {
@@ -2802,8 +3034,8 @@
       "png": "sprites/photo-op@75.png",
       "json": "sprites/photo-op@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 26
+        "feetY": 60,
+        "opaqueWidth": 36
       }
     },
     {
@@ -2811,8 +3043,8 @@
       "png": "sprites/photo-op@88.png",
       "json": "sprites/photo-op@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 31
+        "feetY": 70,
+        "opaqueWidth": 41
       }
     },
     {
@@ -3810,8 +4042,8 @@
       "png": "sprites/snatch-raccoon.png",
       "json": "sprites/snatch-raccoon.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 30
+        "feetY": 79,
+        "opaqueWidth": 41
       }
     },
     {
@@ -3819,8 +4051,8 @@
       "png": "sprites/snatch-raccoon@50.png",
       "json": "sprites/snatch-raccoon@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 15
+        "feetY": 41,
+        "opaqueWidth": 21
       }
     },
     {
@@ -3828,8 +4060,8 @@
       "png": "sprites/snatch-raccoon@62.png",
       "json": "sprites/snatch-raccoon@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 19
+        "feetY": 51,
+        "opaqueWidth": 26
       }
     },
     {
@@ -3837,8 +4069,8 @@
       "png": "sprites/snatch-raccoon@75.png",
       "json": "sprites/snatch-raccoon@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 23
+        "feetY": 60,
+        "opaqueWidth": 31
       }
     },
     {
@@ -3846,8 +4078,8 @@
       "png": "sprites/snatch-raccoon@88.png",
       "json": "sprites/snatch-raccoon@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 26
+        "feetY": 70,
+        "opaqueWidth": 36
       }
     },
     {
@@ -3855,8 +4087,8 @@
       "png": "sprites/snatch-seagull.png",
       "json": "sprites/snatch-seagull.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 28
+        "feetY": 78,
+        "opaqueWidth": 38
       }
     },
     {
@@ -3864,8 +4096,8 @@
       "png": "sprites/snatch-seagull@50.png",
       "json": "sprites/snatch-seagull@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 14
+        "feetY": 40,
+        "opaqueWidth": 20
       }
     },
     {
@@ -3873,8 +4105,8 @@
       "png": "sprites/snatch-seagull@62.png",
       "json": "sprites/snatch-seagull@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 17
+        "feetY": 50,
+        "opaqueWidth": 23
       }
     },
     {
@@ -3882,8 +4114,8 @@
       "png": "sprites/snatch-seagull@75.png",
       "json": "sprites/snatch-seagull@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 20
+        "feetY": 59,
+        "opaqueWidth": 28
       }
     },
     {
@@ -3891,8 +4123,8 @@
       "png": "sprites/snatch-seagull@88.png",
       "json": "sprites/snatch-seagull@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 23
+        "feetY": 69,
+        "opaqueWidth": 33
       }
     },
     {
@@ -3909,8 +4141,8 @@
       "png": "sprites/social-frisbee-dog-owner.png",
       "json": "sprites/social-frisbee-dog-owner.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 30
+        "feetY": 79,
+        "opaqueWidth": 40
       }
     },
     {
@@ -3918,8 +4150,8 @@
       "png": "sprites/social-frisbee-dog-owner@50.png",
       "json": "sprites/social-frisbee-dog-owner@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 16
+        "feetY": 41,
+        "opaqueWidth": 22
       }
     },
     {
@@ -3927,8 +4159,8 @@
       "png": "sprites/social-frisbee-dog-owner@62.png",
       "json": "sprites/social-frisbee-dog-owner@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 19
+        "feetY": 51,
+        "opaqueWidth": 27
       }
     },
     {
@@ -3936,8 +4168,8 @@
       "png": "sprites/social-frisbee-dog-owner@75.png",
       "json": "sprites/social-frisbee-dog-owner@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 22
+        "feetY": 60,
+        "opaqueWidth": 30
       }
     },
     {
@@ -3945,8 +4177,8 @@
       "png": "sprites/social-frisbee-dog-owner@88.png",
       "json": "sprites/social-frisbee-dog-owner@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 27
+        "feetY": 70,
+        "opaqueWidth": 35
       }
     },
     {
@@ -3999,8 +4231,8 @@
       "png": "sprites/social-gate-dog-owner.png",
       "json": "sprites/social-gate-dog-owner.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 34
+        "feetY": 79,
+        "opaqueWidth": 48
       }
     },
     {
@@ -4008,8 +4240,8 @@
       "png": "sprites/social-gate-dog-owner@50.png",
       "json": "sprites/social-gate-dog-owner@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 41,
+        "opaqueWidth": 24
       }
     },
     {
@@ -4017,8 +4249,8 @@
       "png": "sprites/social-gate-dog-owner@62.png",
       "json": "sprites/social-gate-dog-owner@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 23
+        "feetY": 51,
+        "opaqueWidth": 31
       }
     },
     {
@@ -4026,8 +4258,8 @@
       "png": "sprites/social-gate-dog-owner@75.png",
       "json": "sprites/social-gate-dog-owner@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 26
+        "feetY": 60,
+        "opaqueWidth": 36
       }
     },
     {
@@ -4035,8 +4267,8 @@
       "png": "sprites/social-gate-dog-owner@88.png",
       "json": "sprites/social-gate-dog-owner@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 31
+        "feetY": 70,
+        "opaqueWidth": 41
       }
     },
     {
@@ -4089,8 +4321,8 @@
       "png": "sprites/social-handbag-dog-owner.png",
       "json": "sprites/social-handbag-dog-owner.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 32
+        "feetY": 79,
+        "opaqueWidth": 44
       }
     },
     {
@@ -4098,8 +4330,8 @@
       "png": "sprites/social-handbag-dog-owner@50.png",
       "json": "sprites/social-handbag-dog-owner@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 17
+        "feetY": 41,
+        "opaqueWidth": 23
       }
     },
     {
@@ -4107,8 +4339,8 @@
       "png": "sprites/social-handbag-dog-owner@62.png",
       "json": "sprites/social-handbag-dog-owner@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 21
+        "feetY": 51,
+        "opaqueWidth": 29
       }
     },
     {
@@ -4116,8 +4348,8 @@
       "png": "sprites/social-handbag-dog-owner@75.png",
       "json": "sprites/social-handbag-dog-owner@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 24
+        "feetY": 60,
+        "opaqueWidth": 33
       }
     },
     {
@@ -4125,8 +4357,8 @@
       "png": "sprites/social-handbag-dog-owner@88.png",
       "json": "sprites/social-handbag-dog-owner@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 29
+        "feetY": 70,
+        "opaqueWidth": 38
       }
     },
     {
@@ -4179,8 +4411,8 @@
       "png": "sprites/social-jogger-dog-owner.png",
       "json": "sprites/social-jogger-dog-owner.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 29
+        "feetY": 79,
+        "opaqueWidth": 40
       }
     },
     {
@@ -4188,8 +4420,8 @@
       "png": "sprites/social-jogger-dog-owner@50.png",
       "json": "sprites/social-jogger-dog-owner@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 16
+        "feetY": 41,
+        "opaqueWidth": 22
       }
     },
     {
@@ -4197,8 +4429,8 @@
       "png": "sprites/social-jogger-dog-owner@62.png",
       "json": "sprites/social-jogger-dog-owner@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 19
+        "feetY": 51,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4206,8 +4438,8 @@
       "png": "sprites/social-jogger-dog-owner@75.png",
       "json": "sprites/social-jogger-dog-owner@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 22
+        "feetY": 60,
+        "opaqueWidth": 31
       }
     },
     {
@@ -4215,8 +4447,8 @@
       "png": "sprites/social-jogger-dog-owner@88.png",
       "json": "sprites/social-jogger-dog-owner@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 26
+        "feetY": 70,
+        "opaqueWidth": 36
       }
     },
     {
@@ -4980,8 +5212,8 @@
       "png": "sprites/thief.png",
       "json": "sprites/thief.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 33
+        "feetY": 79,
+        "opaqueWidth": 45
       }
     },
     {
@@ -4989,8 +5221,8 @@
       "png": "sprites/thief@50.png",
       "json": "sprites/thief@50.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 41,
+        "opaqueWidth": 24
       }
     },
     {
@@ -4998,8 +5230,8 @@
       "png": "sprites/thief@62.png",
       "json": "sprites/thief@62.json",
       "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 21
+        "feetY": 51,
+        "opaqueWidth": 30
       }
     },
     {
@@ -5007,8 +5239,8 @@
       "png": "sprites/thief@75.png",
       "json": "sprites/thief@75.json",
       "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 25
+        "feetY": 60,
+        "opaqueWidth": 34
       }
     },
     {
@@ -5016,8 +5248,8 @@
       "png": "sprites/thief@88.png",
       "json": "sprites/thief@88.json",
       "anchor": {
-        "feetY": 50,
-        "opaqueWidth": 30
+        "feetY": 70,
+        "opaqueWidth": 40
       }
     },
     {
@@ -5338,8 +5570,8 @@
       "png": "sprites/walker-ada.png",
       "json": "sprites/walker-ada.json",
       "anchor": {
-        "feetY": 57,
-        "opaqueWidth": 25
+        "feetY": 80,
+        "opaqueWidth": 34
       }
     },
     {
@@ -5347,8 +5579,8 @@
       "png": "sprites/walker-ben.png",
       "json": "sprites/walker-ben.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 30
+        "feetY": 79,
+        "opaqueWidth": 40
       }
     },
     {
@@ -5356,8 +5588,8 @@
       "png": "sprites/walker-casey.png",
       "json": "sprites/walker-casey.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 30
+        "feetY": 79,
+        "opaqueWidth": 40
       }
     },
     {
@@ -5365,8 +5597,8 @@
       "png": "sprites/walker-trista.png",
       "json": "sprites/walker-trista.json",
       "anchor": {
-        "feetY": 56,
-        "opaqueWidth": 35
+        "feetY": 79,
+        "opaqueWidth": 47
       }
     }
   ],

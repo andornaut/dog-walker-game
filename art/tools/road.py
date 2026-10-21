@@ -2,9 +2,10 @@
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
 People (walkers, forced stops, lucky people, the thief and the other dog's owner)
-are 40x60, the other dog, skunk and squirrel 40x40 and pickups 20x20: their drawing
-functions lay them out on 32x48, 32x32 and 16x16, and sprites() draws them SCALE
-(1.25) times bigger on a scaling grid, never upscaled. The bark pop is 16x16. The
+are 56x84: their drawing functions lay them out on 32x48 and sprites() draws them
+PERSON_SCALE (1.75) times bigger on a scaling grid, never upscaled. The other dog,
+skunk and squirrel are 40x40, the stop sign 40x60 and pickups 20x20, laid out on
+32x32, 32x48 and 16x16 and drawn SCALE (1.25) times bigger. The bark pop is 16x16. The
 ice cream truck (104x55, two lanes, 64n-24 wide), the construction barrier (64x40, one
 whole lane, repeated across the road) and the puddle (104x40) are drawn in their own
 pixels; the skunk's stink haze (104x50) is a ground decal laid out on an 88x40 design
@@ -15,9 +16,9 @@ dogs, except in wave; everything coming down the road faces the player.
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
 as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
-1, 3, 5 and 3px right of it. At rest (idle frame 0) a 40x60 walker's feet (the outline under the
-shoes) are on row 56, and the hands' top rows 16 above them, their outer columns 14 left and 13
-right of the centre column (x 20). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
+1, 3, 5 and 3px right of it. At rest (idle frame 0) a 56x84 walker's feet (the outline under the
+shoes) are on row 79 (Ada's on row 80), and the hands' top rows 23 above them, their outer columns
+19 left and 18 right of the centre column (x 28). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
 zone celebration: the front view with the hanging arm taken off and both arms raised from the
 shoulders in a V, the hands 1, 3, 4 and 3 design pixels out; a 2px crouch, a hop 2px and 3px up,
 then a 1px landing. Trista's tote stays on her shoulder. What stands on the road
@@ -93,20 +94,32 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
            blue=("cyan", None), red=("pink", None), dred=("pink", None), mauve=("pink", None), purple=("pink", None))
 
 
-# Road sprites are drawn SCALE times the size their drawing functions lay them out at: a person laid out on
-# 32x48, an animal on 32x32 and a pickup on 16x16 export at 40x60, 40x40 and 20x20. sprites() runs the functions
-# on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines 1px, so nothing is upscaled;
-# the depth variants (minis.py, depths.py) run them at SCALE times each depth step.
+# Road sprites are drawn bigger than their drawing functions lay them out: a person laid out on 32x48 at
+# PERSON_SCALE exports at 56x84, an animal on 32x32 and a pickup on 16x16 at SCALE at 40x40 and 20x20.
+# sprites() runs the functions on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines
+# 1px, so nothing is upscaled; the depth variants (minis.py, depths.py) run them at that scale times each depth
+# step.
 SCALE = 1.25
+PERSON_SCALE = 1.75
 
 
-def big(draw, *args, **q):
-    """draw(*args, **q) at SCALE on a minis.Mini, its numeric keyword arguments (pose offsets) snapped to whole
+def drawn(s, draw, *args, **q):
+    """draw(*args, **q) at scale s on a minis.Mini, its numeric keyword arguments (pose offsets) snapped to whole
     pixels as minis.snap has them."""
     import minis  # minis imports this module, so it is imported when first used
 
     pose = {k: v for k, v in q.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
-    return minis.small(sys.modules[__name__], SCALE, draw, *args, **{**q, **minis.snap(pose, SCALE)})
+    return minis.small(sys.modules[__name__], s, draw, *args, **{**q, **minis.snap(pose, s)})
+
+
+def big(draw, *args, **q):
+    """draw(*args, **q) at SCALE: an animal or a pickup."""
+    return drawn(SCALE, draw, *args, **q)
+
+
+def tall(draw, *args, **q):
+    """draw(*args, **q) at PERSON_SCALE: a person."""
+    return drawn(PERSON_SCALE, draw, *args, **q)
 
 
 # ---------- the walker (back view) ----------
@@ -273,8 +286,8 @@ CURL_WAVE = (0, 0, 1, 1, 0, 0, -1, -1)
 
 
 def curl_runs(length):
-    """(first row, rows) of each straight run of a lock length rows long: a run is one 1px-wide rect, so at
-    SCALE the lock stays unbroken."""
+    """(first row, rows) of each straight run of a lock length rows long: a run is one 1px-wide rect, so drawn
+    bigger the lock stays unbroken."""
     k = 0
     while k < length:
         n = 1
@@ -303,8 +316,8 @@ BREATH, BREATH_MS = (0, -1), 400
 
 
 def lean(g, k):
-    """Shear a person about its feet: the head moves k layout pixels sideways (k x SCALE on a 40x60 grid), the
-    shoes stay put."""
+    """Shear a person about its feet: the head moves k layout pixels sideways (k x the grid's height / 48
+    pixels), the shoes stay put."""
     g = getattr(g, "g", g)
     f = g.h / 48
     out = Grid(g.w, g.h)
@@ -328,7 +341,7 @@ def raised_arm(g, x, w, top, bottom, dx, parts):
     y = top
     for i, (rows, fill, shade) in enumerate(parts):
         end = bottom + 1 if i == len(parts) - 1 else y + rows
-        # each run of rows with the same shift is one rect, so at SCALE the arm stays solid
+        # each run of rows with the same shift is one rect, so drawn bigger the arm stays solid
         yy = y
         while yy < end:
             s = round(dx * (bottom - yy) / (bottom - top))
@@ -897,7 +910,7 @@ def dressed(top, **q):
 def stripes(g, x, y0, y1, w, b):
     """Layout rows y0 to y1 - 1 of the thief's stripes, from x, w wide: white where (row - b) % 4 < 2, else
     ink. Drawn in pixels at the grid's scale, every stripe pair 4 x scale rows tall (white the shorter half),
-    so at SCALE the stripes stay even instead of breaking up into 1px rows."""
+    so drawn bigger the stripes stay even instead of breaking up into 1px rows."""
     s = getattr(g, "s", 1)
     px = getattr(g, "g", g)
 
@@ -1446,14 +1459,14 @@ def sprites():
     # the walkers carry the leash on every road, so their outlines hold 3:1 on the light roads
     for key, draw in {"walker-casey": walker, **WALKERS}.items():
         def pose(**q):
-            return edged(big(draw, **q))
+            return edged(tall(draw, **q))
 
         yield key, [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
                     ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
-                    ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
-                    ("cheer", [hopped(edged(big(cheering, key, swing, bob=crouch)).outlined(), hop)
+                    ("wave", frames(edged(tall(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
+                    ("cheer", [hopped(edged(tall(cheering, key, swing, bob=crouch)).outlined(), hop)
                                for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
     yield "treat", [("idle", frames([big(treat, lift=0), big(treat, lift=-1)]), 400)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
@@ -1465,20 +1478,20 @@ def sprites():
     yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),
                         ("idle", frames(big(corgi, **q) for q in CORGI_IDLE), 300)]
     owner = dict(shoes="dbrown")
-    yield "other-dog-owner", [("walk", frames([big(dressed, dog_owner_top, lf=-2, **owner),
-                                               big(dressed, dog_owner_top, rf=-2, **owner)]), 200),
-                              ("idle", frames(big(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH), BREATH_MS)]
-    yield "thief", [("walk", frames([big(dressed, thief_top, lf=-2), big(dressed, thief_top, rf=-2)]), 200),
-                    ("flee", frames(big(thief_fleeing, k) for k in (-1, 1)), 110),
-                    ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "other-dog-owner", [("walk", frames([tall(dressed, dog_owner_top, lf=-2, **owner),
+                                               tall(dressed, dog_owner_top, rf=-2, **owner)]), 200),
+                              ("idle", frames(tall(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH), BREATH_MS)]
+    yield "thief", [("walk", frames([tall(dressed, thief_top, lf=-2), tall(dressed, thief_top, rf=-2)]), 200),
+                    ("flee", frames(tall(thief_fleeing, k) for k in (-1, 1)), 110),
+                    ("idle", frames(tall(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(w), **neighbour) for w in (False, True)), 350),
-                                ("idle", frames(big(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
+    yield "biscuit-neighbour", [("wave", frames(tall(dressed, neighbour_top(w), **neighbour) for w in (False, True)), 350),
+                                ("idle", frames(tall(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
                                  BREATH_MS)]
     tourist = dict(legs="skin2", shoes="sky")
-    yield "photo-op", [("idle", frames(big(dressed, tourist_top(False), bob=bb, **tourist) for bb in BREATH), BREATH_MS),
-                       ("flash", frames(big(dressed, tourist_top(f), **tourist) for f in (True, False)), 120)]
+    yield "photo-op", [("idle", frames(tall(dressed, tourist_top(False), bob=bb, **tourist) for bb in BREATH), BREATH_MS),
+                       ("flash", frames(tall(dressed, tourist_top(f), **tourist) for f in (True, False)), 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
     yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140]),
@@ -1488,15 +1501,15 @@ def sprites():
     # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
     yield "stop-sign", [("idle", frames(big(stop_sign, c) for c in (None, None, 18, 24)), 400)]
     chatty = dict(legs="brown", shoes="dbrown")
-    yield "chatty-neighbour", [("wave", frames(big(dressed, chatty_top(w), **chatty) for w in (False, True)), 350),
-                               ("idle", frames(big(dressed, chatty_top(False), bob=bb, **chatty) for bb in BREATH),
+    yield "chatty-neighbour", [("wave", frames(tall(dressed, chatty_top(w), **chatty) for w in (False, True)), 350),
+                               ("idle", frames(tall(dressed, chatty_top(False), bob=bb, **chatty) for bb in BREATH),
                                 BREATH_MS)]
-    yield "kid", [("wave", frames([big(kid, False), big(kid, True)]), 300), ("sad", frames([big(kid, False, "sad")]), 1000),
-                  ("idle", frames(big(kid, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "kid", [("wave", frames([tall(kid, False), tall(kid, True)]), 300), ("sad", frames([tall(kid, False, "sad")]), 1000),
+                  ("idle", frames(tall(kid, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "ice-cream-truck", [("idle", frames([ice_cream_truck(0), ice_cream_truck(1)]), 400)]
     yield "construction", [("idle", frames([construction(0), construction(1)]), 500)]
-    yield "mail-carrier", [("walk", frames([big(mail_carrier, lf=-2), big(mail_carrier, rf=-2)]), 200),
-                           ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "mail-carrier", [("walk", frames([tall(mail_carrier, lf=-2), tall(mail_carrier, rf=-2)]), 200),
+                           ("idle", frames(tall(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
 
 
 if __name__ == "__main__":

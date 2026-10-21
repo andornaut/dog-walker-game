@@ -1,0 +1,163 @@
+{ "frames": {
+   "dog-pierre@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 150
+   },
+   "dog-pierre@88 1.aseprite": {
+    "frame": { "x": 49, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 150
+   },
+   "dog-pierre@88 2.aseprite": {
+    "frame": { "x": 98, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 150
+   },
+   "dog-pierre@88 3.aseprite": {
+    "frame": { "x": 147, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 150
+   },
+   "dog-pierre@88 4.aseprite": {
+    "frame": { "x": 196, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 120
+   },
+   "dog-pierre@88 5.aseprite": {
+    "frame": { "x": 245, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 120
+   },
+   "dog-pierre@88 6.aseprite": {
+    "frame": { "x": 294, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 160
+   },
+   "dog-pierre@88 7.aseprite": {
+    "frame": { "x": 343, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 160
+   },
+   "dog-pierre@88 8.aseprite": {
+    "frame": { "x": 392, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 250
+   },
+   "dog-pierre@88 9.aseprite": {
+    "frame": { "x": 441, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 250
+   },
+   "dog-pierre@88 10.aseprite": {
+    "frame": { "x": 490, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 300
+   },
+   "dog-pierre@88 11.aseprite": {
+    "frame": { "x": 539, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 300
+   },
+   "dog-pierre@88 12.aseprite": {
+    "frame": { "x": 588, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 300
+   },
+   "dog-pierre@88 13.aseprite": {
+    "frame": { "x": 637, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 300
+   },
+   "dog-pierre@88 14.aseprite": {
+    "frame": { "x": 686, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 60
+   },
+   "dog-pierre@88 15.aseprite": {
+    "frame": { "x": 735, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 60
+   },
+   "dog-pierre@88 16.aseprite": {
+    "frame": { "x": 784, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 60
+   },
+   "dog-pierre@88 17.aseprite": {
+    "frame": { "x": 833, "y": 0, "w": 49, "h": 49 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 49 },
+    "sourceSize": { "w": 49, "h": 49 },
+    "duration": 60
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "dog-pierre@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 882, "h": 49 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "react", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
+   { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
+   { "name": "idle", "from": 10, "to": 13, "direction": "forward" },
+   { "name": "shake", "from": 14, "to": 17, "direction": "forward" }
+  ]
+ }
+}

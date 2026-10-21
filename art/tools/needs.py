@@ -43,9 +43,9 @@ fx-need-met        48x48  regular, playful, friendly, nosy, thirsty (6 frames, 7
                           round bubble pops up with the need's icon baked in, swells, hearts and
                           sparkles fly out, then it bursts into droplets. Bottom-centre on the
                           dog's feet
-fx-accident        40x40  play (6 frames, 100ms)  a "!" pops over the dog, blush lines and a
+fx-accident        56x56  play (6 frames, 100ms)  a "!" pops over the dog, blush lines and a
                           sweat drop come and stay, and a small pile plops out behind. Laid on the
-                          dog's own 40x40 frame; the game then leaves accident-spot on the road
+                          dog's own 56x56 frame; the game then leaves accident-spot on the road
 accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground decal with no
                           outline drawn under everything, a fly circling it
 spot-tree          40x60  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
@@ -419,32 +419,35 @@ PILE_SMALL = ["..TB..", ".TBBD.", "DDDDD."]
 
 
 # fx-accident's frame: the dog road sprite's (dogs.ROAD_SIZE), so it lays over the dog's own frame.
-ACCIDENT = 40
+ACCIDENT = 56
+# The sweat drop, as fx-status-spooked's at full size: c cyan, w white glint, s sky underside.
+ACCIDENT_DROP = [".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."]
 
 
 def accident(step):
     """Laid over the dog's own frame: a "!" pops up at the head's right, then two pink blush strokes on
-    each side of the head and a sweat drop slide in and stay, and a small pile plops out behind the right hind paw."""
+    each side of the head and a sweat drop slide in and stay, and a small pile plops out behind the right hind
+    paw, its last row on row 53 by the dogs' feet."""
     g = Grid(ACCIDENT, ACCIDENT)
     if step in (0, 1, 2, 3):
         def mark(p):
-            h = (3, 5, 5, 4)[step]
-            p.rect(34, 9 - h, 2, h, "red")
-            p.rect(34, 10, 2, 2, "red")
-            p.p(34, 9 - h, "pink")
+            h = (4, 7, 7, 6)[step]
+            p.rect(47, 13 - h, 3, h, "red")
+            p.rect(47, 14, 3, 3, "red")
+            p.p(47, 13 - h, "pink")
         piece(g, mark, size=ACCIDENT)
     if step >= 1:
         lift = 1 if step in (2, 4) else 0
-        for x0 in (4, 26):
-            piece(g, lambda p: [p.p(x0 + d + k, 15 + lift - k, "pink") for d in (0, 3) for k in range(2)],
+        for x0 in (5, 37):
+            piece(g, lambda p: [p.p(x0 + d + k, 21 + lift - k, "pink") for d in (0, 4) for k in range(3)],
                   size=ACCIDENT)
     if step >= 2:
         slide = min(step - 2, 2)
-        piece(g, lambda p: bitmap(p, 6, 3 + slide, [".c.", "cwc", "ccs", ".s."],
-                                  {"c": "cyan", "w": "white", "s": "sky"}), "navy", size=ACCIDENT)
+        piece(g, lambda p: bitmap(p, 8, 4 + slide, ACCIDENT_DROP, {"c": "cyan", "w": "white", "s": "sky"}), "navy",
+              size=ACCIDENT)
     if step >= 3:
         rows = PILE_SMALL if step == 3 else PILE
-        piece(g, lambda p: bitmap(p, 26, 38 - len(rows), rows, {"B": "brown", "D": "dbrown", "T": "tan"}),
+        piece(g, lambda p: bitmap(p, 37, 54 - len(rows), rows, {"B": "brown", "D": "dbrown", "T": "tan"}),
               size=ACCIDENT)
     return g
 

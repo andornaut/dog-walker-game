@@ -1,42 +1,42 @@
 { "frames": {
    "kid@75 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 30, "h": 45 },
+    "frame": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
-    "sourceSize": { "w": 30, "h": 45 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
     "duration": 300
    },
    "kid@75 1.aseprite": {
-    "frame": { "x": 30, "y": 0, "w": 30, "h": 45 },
+    "frame": { "x": 42, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
-    "sourceSize": { "w": 30, "h": 45 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
     "duration": 300
    },
    "kid@75 2.aseprite": {
-    "frame": { "x": 60, "y": 0, "w": 30, "h": 45 },
+    "frame": { "x": 84, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
-    "sourceSize": { "w": 30, "h": 45 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
     "duration": 1000
    },
    "kid@75 3.aseprite": {
-    "frame": { "x": 90, "y": 0, "w": 30, "h": 45 },
+    "frame": { "x": 126, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
-    "sourceSize": { "w": 30, "h": 45 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
     "duration": 400
    },
    "kid@75 4.aseprite": {
-    "frame": { "x": 120, "y": 0, "w": 30, "h": 45 },
+    "frame": { "x": 168, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
-    "sourceSize": { "w": 30, "h": 45 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
     "duration": 400
    }
  },
@@ -45,7 +45,7 @@
   "version": "1.2.30-x64",
   "image": "kid@75.png",
   "format": "RGBA8888",
-  "size": { "w": 150, "h": 45 },
+  "size": { "w": 210, "h": 63 },
   "scale": "1",
   "frameTags": [
    { "name": "wave", "from": 0, "to": 1, "direction": "forward" },

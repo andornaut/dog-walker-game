@@ -3,8 +3,8 @@
 
 Each dog gets two sprites in Endesga 32 with coloured outlines:
 
-- dog-<name>: the road sprite, 40x40 (ROAD_SIZE), seen from above and behind. Its drawing
-  functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.25),
+- dog-<name>: the road sprite, 56x56 (ROAD_SIZE), seen from above and behind. Its drawing
+  functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.75),
   which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
   frames), react (2), pull (2, leaning right; the game mirrors it for left),
@@ -44,7 +44,7 @@ from pixel import K, Grid, edged, main, road_edge  # noqa: E402
 # The road sprites are drawn on a 32-unit design grid and rasterized at ROAD_SIZE, ROAD_SCALE times bigger, on
 # a minis.Mini that keeps 1px lines and single pixels 1px; their depth variants rasterize at ROAD_SCALE x the
 # step. Faces stay 32x32 at 1x.
-ROAD_SIZE = 40
+ROAD_SIZE = 56
 ROAD_SCALE = ROAD_SIZE / 32
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
@@ -768,10 +768,15 @@ def whirl(g, side, bx, b):
               for dx, y in ((7, 14), (8, 15), (9, 16), (9, 17), (9, 18), (9, 19), (8, 20))], "white")
 
 
-# Penny's hackles from the collar down: r rust spine, o orange fur, y yellow tips lit from the top left. The
-# second map is the road size's own, in its pixels, its spine on column 3.
+# Penny's hackles from the collar down: r rust spine, o orange fur, y yellow tips lit from the top left.
+# HACKLES is the design grid's; HACKLES_BIG gives the map drawn in the grid's own pixels from each scale up,
+# its spine on the column of the last row's r.
 HACKLES = ["yoroy", ".ory.", "yoroo", ".oro.", ".yro.", "..r.."]
-HACKLES_BIG = ["y.yro.o", "yyoroo.", ".yoroo.", "yyorooo", ".yoro..", "..yro..", "..oro..", "...r..."]
+HACKLES_BIG = (
+    (1.5, ["y.yyroo.o", "yyyoroooo", ".yyoroo..", "yyyorooo.", ".yyoroooo", "..yoroo..", ".yyorooo.", "..yoro...",
+           "...yro...", "...oro...", "....r...."]),
+    (1, ["y.yro.o", "yyoroo.", ".yoroo.", "yyorooo", ".yoro..", "..yro..", "..oro..", "...r..."]),
+)
 HACKLE_INK = {"r": "rust", "o": "orange", "y": "yellow"}
 
 
@@ -802,12 +807,13 @@ def trail(g, pts, c):
 
 def hackles(g, cx, y):
     """Penny's raised hackles: a ridge of fur standing up along her spine from the collar, bristling out to
-    a jagged edge, and a tuft standing up past each shoulder. Drawn bigger, the ridge is HACKLES_BIG in
-    the grid's own pixels."""
+    a jagged edge, and a tuft standing up past each shoulder. Drawn bigger, the ridge is HACKLES_BIG's map
+    for the scale, in the grid's own pixels."""
     s = scale_of(g)
     if s > 1:
-        x0, y0 = math.floor((cx - 1 + 0.5) * s) - 3, math.floor((y + 0.5) * s)
-        for j, row in enumerate(HACKLES_BIG):
+        rows = next(m for least, m in HACKLES_BIG if s >= least)
+        x0, y0 = math.floor((cx - 1 + 0.5) * s) - rows[-1].index("r"), math.floor((y + 0.5) * s)
+        for j, row in enumerate(rows):
             for i, c in enumerate(row):
                 if c != ".":
                     g.g.p(x0 + i, y0 + j, HACKLE_INK[c])

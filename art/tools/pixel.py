@@ -274,16 +274,23 @@ def seated(key, tags, feet):
     """A depth variant's tags moved so frame 0's last opaque row, the feet row the game measures, is feet,
     or the frame's bottom row when that is past it. Every frame moves together, and never so far that it
     clips an opaque pixel: art taller than the rows above its feet row first loses the rows that change it
-    least (see _without_rows)."""
+    least, and art reaching further below frame 0's feet than the rows under the feet row loses the rows
+    that change it least down there (see _without_rows)."""
     frames = [f for _, fs, _ in tags for f in fs]
     h = len(frames[0])
-    dy = min(feet, h - 1) - (opaque_rows([frames[0]]) or (0, h - 1))[1]
-    top, bottom = opaque_rows(frames)
+
+    def placed():
+        return min(feet, h - 1) - (opaque_rows([frames[0]]) or (0, h - 1))[1], *opaque_rows(frames)
+
+    dy, top, bottom = placed()
+    if bottom + dy > h - 1:
+        frames = _without_rows(frames, bottom + dy - (h - 1), below=(opaque_rows([frames[0]]) or (0, h - 1))[1])
+        tags = _regrouped(tags, frames)
+        dy, top, bottom = placed()
     if top + dy < 0:
         frames = _without_rows(frames, -(top + dy))
         tags = _regrouped(tags, frames)
-        dy = min(feet, h - 1) - (opaque_rows([frames[0]]) or (0, h - 1))[1]
-        top, bottom = opaque_rows(frames)
+        dy, top, bottom = placed()
     if dy and not 0 <= top + dy <= bottom + dy <= h - 1:
         print(f"{key}: cannot move {dy} rows to its feet row without clipping")
         return tags
@@ -307,13 +314,18 @@ def depth_envelope(w, h, scales):
     return out
 
 
-def _without_rows(frames, n, first=False):
-    """frames with n rows taken out from inside their opaque bounds (frame 0's when first), then as many
-    clear rows added on top. Each goes where the art changes least: the row most like the one above it in
-    every frame, in the longest run of equal rows, nearest the middle."""
+def _without_rows(frames, n, first=False, below=None):
+    """frames with n rows taken out from inside their opaque bounds (frame 0's when first), or from the rows
+    past row below to their last opaque row, then as many clear rows added on top. Each goes where the art
+    changes least: the row most like the one above it in every frame, in the longest run of equal rows,
+    nearest the middle."""
     for _ in range(n):
         top, bottom = opaque_rows(frames[:1] if first else frames)
-        if bottom - top < 2:
+        rows = range(top + 1, bottom)
+        if below is not None:
+            top, rows = below, range(below + 1, bottom + 1)
+            below += 1
+        if not rows:
             break
         h, mid = len(frames[0]), (top + bottom) / 2
 
@@ -332,7 +344,7 @@ def _without_rows(frames, n, first=False):
             diff = sum(x != y for f in frames for x, y in zip(f[r], f[r - 1]))
             return diff, -run(r), abs(r - mid)
 
-        r = min(range(top + 1, bottom), key=score)
+        r = min(rows, key=score)
         frames = [[[None] * len(f[0])] + f[:r] + f[r + 1:] for f in frames]
         assert all(len(f) == h for f in frames)
     return frames

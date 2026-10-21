@@ -1,34 +1,34 @@
 { "frames": {
    "social-jogger-dog-owner@62 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 0, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 200
    },
    "social-jogger-dog-owner@62 1.aseprite": {
-    "frame": { "x": 25, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 35, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 200
    },
    "social-jogger-dog-owner@62 2.aseprite": {
-    "frame": { "x": 50, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 70, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 400
    },
    "social-jogger-dog-owner@62 3.aseprite": {
-    "frame": { "x": 75, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 105, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 400
    }
  },
@@ -37,7 +37,7 @@
   "version": "1.2.30-x64",
   "image": "social-jogger-dog-owner@62.png",
   "format": "RGBA8888",
-  "size": { "w": 100, "h": 38 },
+  "size": { "w": 140, "h": 53 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 1, "direction": "forward" },

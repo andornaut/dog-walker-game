@@ -6,9 +6,10 @@ frame counts, durations and anchor (the feet on the frame's bottom rows), and
 the same depth variants at every step in minis.STEPS (@88, @75, @62, @50).
 
 Like road.py's encounters, every skin is laid out on 32x32 (animals) or 32x48
-(people and the Snatch animals) and drawn road.SCALE (1.25) times bigger on a
-minis.Mini, so it exports at 40x40 or 40x60, its depth variants at road.SCALE
-times each step (35/30/25/20 and 53/45/38/30). Everything faces the player
+(people and the Snatch animals) and drawn bigger on a minis.Mini: the animals
+road.SCALE (1.25) times, exporting at 40x40 (35/30/25/20 at the steps), the
+people and the Snatch animals road.PERSON_SCALE (1.75) times, exporting at
+56x84 (49x74, 42x63, 35x53, 28x42). Everything faces the player
 except flee, which runs off up the road, seen from behind. Road outline
 (road_edge) and road.LIT's rim on dark fills, as road.py has them.
 
@@ -19,13 +20,13 @@ motion), run (2 frames, 120ms: stretched, then gathered and 2 to 3px higher).
   chase-ducklings    Riverside Path     three ducklings; idle peeps, run waddles
   chase-rabbit       The Long Way Home  a white rabbit; idle twitches, run hops
 
-Snatch (reskins thief, 40x60): walk (2 frames, 200ms: a foot lifted 2px),
+Snatch (reskins thief, 56x84): walk (2 frames, 200ms: a foot lifted 2px),
 flee (2 frames, 110ms: from behind), idle (2 frames, 400ms: breathing). Each
 carries a tan loot sack, as the thief does.
   snatch-raccoon     Willow Crescent, The Long Way Home  standing, sack held at the chest
   snatch-seagull     Fairview Park, Riverside Path       the sack in its beak; flees flying
 
-Social (reskins other-dog, 40x40, and other-dog-owner, 40x60): the dog's walk
+Social (reskins other-dog, 40x40, and other-dog-owner, 56x84): the dog's walk
 (4 frames, 100ms) and idle (4 frames, 300ms: tail at -1, 0, +1, 0, the right
 ear 1px higher on the last frame), the owner's walk (2 frames, 200ms) and idle
 (2 frames, 400ms), as the other dog and its walker have them. The game draws
@@ -60,7 +61,7 @@ import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
 from pixel import Grid, build, edged, preview  # noqa: E402
-from road import BREATH, BREATH_MS, LIT, SCALE  # noqa: E402
+from road import BREATH, BREATH_MS, LIT, PERSON_SCALE, SCALE  # noqa: E402
 
 # The zone road colours: Willow Crescent, Fairview Park, Elm Avenue, Main Street, Riverside Path and The Long
 # Way Home.
@@ -766,24 +767,26 @@ def dressed(s, top, legs, shoes, **q):
     return minis.small(road, s, road.dressed, top, legs=legs, shoes=shoes, **pose).outlined()
 
 
-def skins(s):
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every skin, laid out at 32 units and drawn at
-    scale s (road.SCALE at full size)."""
+def skins(step):
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every skin at depth step step (1 at full size),
+    laid out at 32 units: the animals drawn at road.SCALE x step, the people and the Snatch animals at
+    road.PERSON_SCALE x step."""
+    s, t = SCALE * step, PERSON_SCALE * step
     for key, (draw, idle, run) in CHASE.items():
         yield key, [("idle", [drawn(s, draw, **q) for q in idle], 300),
                     ("run", [drawn(s, draw, **q) for q in run], 120)]
     for key, (draw, flee) in SNATCH.items():
-        yield key, [("walk", [drawn(s, draw, lf=-2), drawn(s, draw, rf=-2)], 200),
-                    ("flee", [drawn(s, flee, k) for k in (-1, 1)], 110),
-                    ("idle", [drawn(s, draw, bob=bb) for bb in BREATH], BREATH_MS)]
+        yield key, [("walk", [drawn(t, draw, lf=-2), drawn(t, draw, rf=-2)], 200),
+                    ("flee", [drawn(t, flee, k) for k in (-1, 1)], 110),
+                    ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS)]
     for key, draw in DOGS.items():
         run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
         yield key, [("walk", [drawn(s, draw, **q) for q in road.CORGI_WALK], 100),
                     ("idle", [drawn(s, draw, **q) for q in road.CORGI_IDLE], 300),
                     ("run", [drawn(s, side_dog, SIDE[key], **q) for q in run], 100)]
         top, legs, shoes = OWNERS[key]
-        yield f"{key}-owner", [("walk", [dressed(s, top, legs, shoes, **q) for q in (dict(lf=-2), dict(rf=-2))], 200),
-                               ("idle", [dressed(s, top, legs, shoes, bob=bb) for bb in BREATH], BREATH_MS)]
+        yield f"{key}-owner", [("walk", [dressed(t, top, legs, shoes, **q) for q in (dict(lf=-2), dict(rf=-2))], 200),
+                               ("idle", [dressed(t, top, legs, shoes, bob=bb) for bb in BREATH], BREATH_MS)]
 
 
 def base(key):
@@ -800,8 +803,7 @@ def sprites():
     tags, frame counts and durations; a Social dog has loose-dog's run after other-dog's tags."""
     kinds = dict(road.sprites())
     kinds["other-dog"] = kinds["other-dog"] + dict(hazards.sprites())["loose-dog"]
-    out = list(skins(SCALE)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS
-                                for key, tags in skins(SCALE * step)]
+    out = list(skins(1)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS for key, tags in skins(step)]
     full = dict(out)
     for key, tags in out:
         name, _, suffix = key.partition("@")

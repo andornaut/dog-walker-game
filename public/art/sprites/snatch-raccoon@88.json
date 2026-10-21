@@ -1,50 +1,50 @@
 { "frames": {
    "snatch-raccoon@88 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "frame": { "x": 0, "y": 0, "w": 49, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
-    "sourceSize": { "w": 35, "h": 53 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "sourceSize": { "w": 49, "h": 74 },
     "duration": 200
    },
    "snatch-raccoon@88 1.aseprite": {
-    "frame": { "x": 35, "y": 0, "w": 35, "h": 53 },
+    "frame": { "x": 49, "y": 0, "w": 49, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
-    "sourceSize": { "w": 35, "h": 53 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "sourceSize": { "w": 49, "h": 74 },
     "duration": 200
    },
    "snatch-raccoon@88 2.aseprite": {
-    "frame": { "x": 70, "y": 0, "w": 35, "h": 53 },
+    "frame": { "x": 98, "y": 0, "w": 49, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
-    "sourceSize": { "w": 35, "h": 53 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "sourceSize": { "w": 49, "h": 74 },
     "duration": 110
    },
    "snatch-raccoon@88 3.aseprite": {
-    "frame": { "x": 105, "y": 0, "w": 35, "h": 53 },
+    "frame": { "x": 147, "y": 0, "w": 49, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
-    "sourceSize": { "w": 35, "h": 53 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "sourceSize": { "w": 49, "h": 74 },
     "duration": 110
    },
    "snatch-raccoon@88 4.aseprite": {
-    "frame": { "x": 140, "y": 0, "w": 35, "h": 53 },
+    "frame": { "x": 196, "y": 0, "w": 49, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
-    "sourceSize": { "w": 35, "h": 53 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "sourceSize": { "w": 49, "h": 74 },
     "duration": 400
    },
    "snatch-raccoon@88 5.aseprite": {
-    "frame": { "x": 175, "y": 0, "w": 35, "h": 53 },
+    "frame": { "x": 245, "y": 0, "w": 49, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
-    "sourceSize": { "w": 35, "h": 53 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 74 },
+    "sourceSize": { "w": 49, "h": 74 },
     "duration": 400
    }
  },
@@ -53,7 +53,7 @@
   "version": "1.2.30-x64",
   "image": "snatch-raccoon@88.png",
   "format": "RGBA8888",
-  "size": { "w": 210, "h": 53 },
+  "size": { "w": 294, "h": 74 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 1, "direction": "forward" },

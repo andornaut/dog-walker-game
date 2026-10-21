@@ -1,50 +1,50 @@
 { "frames": {
    "snatch-seagull@62 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 0, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 200
    },
    "snatch-seagull@62 1.aseprite": {
-    "frame": { "x": 25, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 35, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 200
    },
    "snatch-seagull@62 2.aseprite": {
-    "frame": { "x": 50, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 70, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 110
    },
    "snatch-seagull@62 3.aseprite": {
-    "frame": { "x": 75, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 105, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 110
    },
    "snatch-seagull@62 4.aseprite": {
-    "frame": { "x": 100, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 140, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 400
    },
    "snatch-seagull@62 5.aseprite": {
-    "frame": { "x": 125, "y": 0, "w": 25, "h": 38 },
+    "frame": { "x": 175, "y": 0, "w": 35, "h": 53 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
-    "sourceSize": { "w": 25, "h": 38 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 53 },
+    "sourceSize": { "w": 35, "h": 53 },
     "duration": 400
    }
  },
@@ -53,7 +53,7 @@
   "version": "1.2.30-x64",
   "image": "snatch-seagull@62.png",
   "format": "RGBA8888",
-  "size": { "w": 150, "h": 38 },
+  "size": { "w": 210, "h": 53 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 1, "direction": "forward" },

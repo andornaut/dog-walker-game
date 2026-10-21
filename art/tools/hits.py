@@ -39,17 +39,18 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           stretched to 176x32 for every label; white font-title text at 2x,
                           centred, its line top 3px below the plate's top so the 10px caps sit
                           in rows 11 to 20
-fx-status-stinky   16x16  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
-fx-status-soaked   16x16  loop (4 frames, 150ms) drips falling off
+fx-status-stinky   22x22  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
+fx-status-soaked   22x22  loop (4 frames, 150ms) drips falling off
 fx-status-soaked-mud, fx-status-soaked-milkshake  the same drips after the mud and milkshake
                    Splash skins: brown mud spots, cream milkshake drips, each plum-rimmed
-fx-status-spooked  16x16  loop (4 frames, 150ms) sweat drop popping, surprise lines
-fx-status-tangled  16x16  loop (4 frames, 150ms) two interlocked loops of green leash, teal-rimmed,
+fx-status-spooked  22x22  loop (4 frames, 150ms) sweat drop popping, surprise lines
+fx-status-tangled  22x22  loop (4 frames, 150ms) two interlocked loops of green leash, teal-rimmed,
                                                   working loose and tight, the loose ends swinging
-fx-status-tuckered-out  16x16  loop (4 frames, 180ms) yellow z's, plum-rimmed, rising off the head
-                   each status also has @75 (12x12) and @50 (8x8), same tags and timing;
-                   bottom-centre on the dog's centre column, 6px (4px at @75, 3px at
-                   @50) below the dog's top opaque row, so the lower rows overlap the head
+fx-status-tuckered-out  22x22  loop (4 frames, 180ms) yellow z's, plum-rimmed, rising off the head
+                   each status also has @88 (19x19), @75 (17x17), @62 (14x14) and @50
+                   (11x11), the dogs' steps, each drawn in its own pixels, same tags and
+                   timing; bottom-centre on the dog's centre column, a few pixels below the
+                   dog's top opaque row, so the lower rows overlap the head
 
 Usage:
   hits.py preview OUT.png   every frame of every piece on the four road colours
@@ -803,18 +804,20 @@ def status_stinky(size, step):
     1px in from every edge, so the rim closes round them, and wave in step (the middle one a row ahead),
     so neighbouring rims never close the gap between them."""
     g = Grid(size, size)
-    lines = {16: ((2, 0), (7, 1), (12, 0)), 12: ((2, 0), (8, 1)), 8: ((4, 0),)}[size]
-    top, bottom = {16: (2, 14), 12: (1, 11), 8: (1, 7)}[size]
+    lines = {22: ((4, 0), (11, 1), (18, 0)), 19: ((3, 0), (9, 1), (15, 0)), 17: ((3, 0), (8, 1), (13, 0)),
+             14: ((3, 0), (9, 1)), 11: ((2, 0), (7, 1))}[size]
+    top, bottom = {22: (3, 20), 19: (2, 17), 17: (2, 15), 14: (1, 13), 11: (1, 10)}[size]
     for x0, ph in lines:
         for y in range(top, bottom):
             k = (y + 2 * step + ph) % 8
-            if k == 7 or (size == 8 and k == 3):
+            if k == 7:
                 continue
             g.p(x0 + WAVE[k], y, "pink")
     return rim(g, "plum")
 
 
-DRIP = {16: (".c.", "cwc", "ccs", ".s."), 12: ("c.", "ws", "s."), 8: ("c", "s")}
+DRIP = {22: (".c..", ".cc.", "cwcc", "cwcs", ".ss."), 19: (".c.", "cwc", "ccs", ".s."), 17: (".c.", "cwc", "ccs", ".s."),
+        14: ("c.", "ws", "s."), 11: ("c.", "ws", "s.")}
 
 
 # The drip colours per Splash skin: body, glint, underside, rim.
@@ -828,13 +831,14 @@ def status_soaked(size, step, look=""):
     their own colours in a plum rim."""
     body, glint, under, edge = SOAKS[look]
     g = Grid(size, size)
-    drops = {16: ((1, 0), (6, 2), (12, 1)), 12: ((1, 0), (5, 2), (9, 1)), 8: ((1, 0), (5, 2))}[size]
-    fall, y0 = {16: (3, 1), 12: (2, 1), 8: (1, 1)}[size]
+    drops = {22: ((1, 0), (9, 2), (17, 1)), 19: ((1, 0), (8, 2), (15, 1)), 17: ((1, 0), (7, 2), (13, 1)),
+             14: ((1, 0), (6, 2), (11, 1)), 11: ((2, 0), (7, 2))}[size]
+    fall, y0 = {22: (4, 1), 19: (4, 1), 17: (3, 1), 14: (3, 1), 11: (2, 1)}[size]
     shape = DRIP[size]
     for x, ph in drops:
         k = (step + ph) % 4
         y = y0 + k * fall
-        if k == 0 and size > 8:
+        if k == 0:
             g.p(x + len(shape[0]) // 2, y + 1, body)
             continue
         for j, row in enumerate(shape):
@@ -844,11 +848,13 @@ def status_soaked(size, step, look=""):
     return rim(g, edge)
 
 
-SWEAT = {16: (".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."), 12: (".c.", "cwc", "cws", ".s."),
-         8: ("c", "w", "s")}
+SWEAT = {22: ("..c..", ".ccc.", ".ccc.", "cwccc", "cwccs", "ccccs", "ccsss", ".sss."),
+         19: (".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."), 17: (".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."),
+         14: (".c.", "cwc", "cws", ".s."), 11: (".c.", "cwc", "cws", ".s.")}
 # Surprise lines: (start, end) radii out from a point at the head's top-left, and their angles.
-SURPRISE = {16: ((6, 15), (4, 7.5), (-160, -120, -80)), 12: ((4, 11), (3, 5.5), (-160, -120, -80)),
-            8: ((3, 8), (2.5, 4.5), (-150, -90))}
+SURPRISE = {22: ((8, 21), (5.5, 10.5), (-160, -120, -80)), 19: ((7, 18), (5, 9), (-160, -120, -80)),
+            17: ((6, 16), (4.5, 8), (-160, -120, -80)), 14: ((5, 13), (3.5, 6.5), (-160, -120, -80)),
+            11: ((4, 10), (3, 5.5), (-160, -120, -80))}
 
 
 def status_spooked(size, step):
@@ -857,8 +863,8 @@ def status_spooked(size, step):
     g = Grid(size, size)
     drop = Grid(size, size)
     shape = SWEAT[size]
-    dx, dy = {16: (11, 3), 12: (8, 2), 8: (6, 2)}[size]
-    slide = (0, 0, 1, 2)[step] if size > 8 else (0, 0, 1, 1)[step]
+    dx, dy = {22: (15, 4), 19: (13, 3), 17: (12, 3), 14: (10, 2), 11: (7, 2)}[size]
+    slide = {22: (0, 0, 1, 3), 11: (0, 0, 1, 1)}.get(size, (0, 0, 1, 2))[step]
     if step == 0:
         drop.p(dx + len(shape[0]) // 2, dy + len(shape) - 2, "cyan")
         drop.p(dx + len(shape[0]) // 2, dy + len(shape) - 1, "sky")
@@ -884,14 +890,18 @@ def status_spooked(size, step):
 
 
 # The tangle per size: loop A (centre and radii), loop B below and right of it, A's loose end and
-# B's (their last pixels swing), and how far A rises and B drops on each frame.
+# B's (their last pixels swing), and how far A rises and B drops on each frame. Every size rises and drops
+# A and B the same way.
 TANGLE = {
-    16: ((5.5, 5.5, 4, 3.6), (10.5, 8.5, 3.6, 3.3), ((3, 9), (3, 10), (2, 11), (2, 12)), ((14, 9), (14, 10), (14, 11)),
-         (0, 1, 1, 0), (0, 0, 1, 1)),
-    12: ((4, 4.5, 3.2, 2.9), (8, 6.5, 2.9, 2.7), ((2, 7), (2, 8), (1, 9)), ((10, 7), (10, 8), (10, 9)),
-         (0, 1, 1, 0), (0, 0, 1, 1)),
-    8: ((3, 3, 2, 2), (5, 4, 2, 2), (), (), (0, 0, 0, 0), (0, 0, 1, 1)),
+    22: ((7.5, 7.5, 5.5, 5), (14.5, 11.5, 5, 4.5), ((4, 12), (4, 13), (3, 14), (3, 15), (3, 16)),
+         ((19, 12), (19, 13), (19, 14), (19, 15))),
+    19: ((6.5, 6.5, 4.75, 4.3), (12.5, 10, 4.3, 3.9), ((3, 11), (3, 12), (2, 13), (2, 14)),
+         ((16, 11), (16, 12), (16, 13))),
+    17: ((6, 6, 4.25, 3.8), (11, 9, 3.8, 3.5), ((3, 10), (3, 11), (2, 12), (2, 13)), ((14, 10), (14, 11), (14, 12))),
+    14: ((4.5, 5, 3.6, 3.3), (9.5, 7.5, 3.3, 3.1), ((3, 8), (3, 9), (2, 10)), ((11, 8), (11, 9), (11, 10))),
+    11: ((4, 4.5, 3, 3), (7, 6, 3, 3), (), ()),
 }
+TANGLE_RISE, TANGLE_DROP = (0, 1, 1, 0), (0, 0, 1, 1)
 
 
 def rope_loop(size, cx, cy, rx, ry, thick=1, shade=None):
@@ -925,8 +935,8 @@ def status_tangled(size, step):
     each part rimmed in teal so the crossings read: green is no other status's colour and no
     leash's (pink, dred, plum), the green and yellow carry Elm Avenue and the dimmed roads, and the
     teal the light ones."""
-    (ax, ay, arx, ary), (bx, by, brx, bry), a_end, b_end, rise, drop = TANGLE[size]
-    up, down, swing = rise[step], drop[step], (0, 1, 0, -1)[step]
+    (ax, ay, arx, ary), (bx, by, brx, bry), a_end, b_end = TANGLE[size]
+    up, down, swing = TANGLE_RISE[step], TANGLE_DROP[step], (0, 1, 0, -1)[step]
     a = rope_loop(size, ax, ay - up, arx, ary)
     b = rope_loop(size, bx, by + down, brx, bry)
     for i, (x, y) in enumerate(a_end):
@@ -937,14 +947,16 @@ def status_tangled(size, step):
 
 
 # The z glyphs by height, 1px strokes.
-ZEDS = {5: ("zzzzz", "...z.", "..z..", ".z...", "zzzzz"), 4: ("zzzz", "..z.", ".z..", "zzzz")}
+ZEDS = {6: ("zzzzzz", "....z.", "...z..", "..z...", ".z....", "zzzzzz"), 5: ("zzzzz", "...z.", "..z..", ".z...", "zzzzz"),
+        4: ("zzzz", "..z.", ".z..", "zzzz")}
 # Per size: the slots a z steps through, each its top-left and height, from beside the head up and
 # to the right; None is a frame with that z gone. Each z moves one slot a frame, and the z's sit
-# a set number of slots apart, so a new one rises from the head as the top one leaves. At @50 one z
-# floats up and back, so no frame is empty.
-DRIFT = {16: (((1, 10, 4), (5, 6, 4), (9, 1, 5), None), 3),
-         12: (((1, 7, 4), (3, 5, 4), (5, 3, 4), (7, 1, 4)), 2),
-         8: (((1, 3, 4), (2, 2, 4), (3, 1, 4), (2, 2, 4)), 1)}
+# a set number of slots apart, so a new one rises from the head as the top one leaves.
+DRIFT = {22: (((1, 14, 5), (7, 8, 5), (13, 1, 6), None), 3),
+         19: (((1, 12, 4), (6, 7, 5), (11, 1, 6), None), 3),
+         17: (((1, 11, 4), (5, 6, 4), (10, 1, 5), None), 3),
+         14: (((1, 9, 4), (4, 6, 4), (7, 3, 4), (9, 1, 4)), 2),
+         11: (((1, 6, 4), (3, 4, 4), (4, 2, 4), (6, 1, 4)), 2)}
 
 
 def status_tuckered_out(size, step):
@@ -988,8 +1000,12 @@ def worded(g, text, cy, step):
     return word(g, text, 32, cy - 5) if step < WORD_FRAMES else g
 
 
+# A status overlay's frame at full size and at each depth step: 22 x the step, as the game sizes it.
+STATUS_SIZES = ((22, ""), (19, "@88"), (17, "@75"), (14, "@62"), (11, "@50"))
+
+
 def sizes(key, draw, ms):
-    for size, suffix in ((16, ""), (12, "@75"), (8, "@50")):
+    for size, suffix in STATUS_SIZES:
         yield f"{key}{suffix}", [("loop", [draw(size, i).outlined(False) for i in range(4)], ms)]
 
 

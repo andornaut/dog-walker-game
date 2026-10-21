@@ -1,0 +1,46 @@
+{ "frames": {
+   "fx-status-tuckered-out@62 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 14, "h": 14 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
+    "sourceSize": { "w": 14, "h": 14 },
+    "duration": 180
+   },
+   "fx-status-tuckered-out@62 1.aseprite": {
+    "frame": { "x": 14, "y": 0, "w": 14, "h": 14 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
+    "sourceSize": { "w": 14, "h": 14 },
+    "duration": 180
+   },
+   "fx-status-tuckered-out@62 2.aseprite": {
+    "frame": { "x": 28, "y": 0, "w": 14, "h": 14 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
+    "sourceSize": { "w": 14, "h": 14 },
+    "duration": 180
+   },
+   "fx-status-tuckered-out@62 3.aseprite": {
+    "frame": { "x": 42, "y": 0, "w": 14, "h": 14 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
+    "sourceSize": { "w": 14, "h": 14 },
+    "duration": 180
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "fx-status-tuckered-out@62.png",
+  "format": "RGBA8888",
+  "size": { "w": 56, "h": 14 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "loop", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}
