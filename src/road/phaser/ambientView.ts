@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../../assets/asepriteAnimations";
-import { AMBIENT_FALLBACKS, IDLE_TAG } from "../../assets/spriteKeys";
+import { AMBIENT_FALLBACKS, AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
 import type { AmbientMover, ZoneId } from "../../data/types";
 import type { Random } from "../../lib/random";
 import { clipToRoad, DEPTH, LAYOUT, PROJECTION } from "../../scenes/run/stage";
@@ -16,16 +16,25 @@ import {
   stepAmbient,
 } from "../ambient";
 
+// The sprites a mover may wear, one picked by its slot's look, and the tag they play while
+// moving: the mover's own when the sprites are its art, its fallback's otherwise.
+interface MoverArt {
+  readonly keys: readonly string[];
+  readonly tag: string | null;
+}
+
+const NO_ART: MoverArt = { keys: [], tag: null };
+
 // Band movers lie over the backdrop and under the gags, nearer rows in front; the rows add at
 // most this much to their depth, so they stay under the gags.
 const BAND_ROW_DEPTH = 1 / 10000;
 
 // The ambient movers' sprites, one per slot, made once and reused. With reduced motion none
-// is shown. A mover on the cross street is drawn at the road's far scale over the backdrop;
+// is shown. A mover on the cross street is drawn at its row's scale over the backdrop;
 // one beside the road stands through the projection like the road's sprites, cut off at the
 // juncture.
 export class AmbientView {
-  private readonly arts = new Map<string, string | null>();
+  private readonly arts = new Map<string, MoverArt>();
   private readonly deps: AmbientDeps;
   private frame: AmbientFrame | undefined;
   private readonly place = newPlace();
@@ -39,7 +48,7 @@ export class AmbientView {
       scene.add.sprite(0, 0, "__DEFAULT").setVisible(false),
     );
     this.deps = {
-      drawable: (mover) => this.artKey(mover) !== null,
+      drawable: (mover) => this.art(mover).keys.length > 0,
       random,
       stage: { band: LAYOUT.backdrop, projection: PROJECTION },
     };
@@ -67,13 +76,14 @@ export class AmbientView {
     const { place } = this;
     for (const [i, slot] of state.slots.entries()) {
       const sprite = this.sprites[i];
-      const key = slot.mover === null ? null : this.artKey(slot.mover);
+      const art = slot.mover === null ? NO_ART : this.art(slot.mover);
+      const key = art.keys[Math.floor(slot.look * art.keys.length)];
       const shown =
         slot.active &&
-        key !== null &&
+        key !== undefined &&
         placeAmbient(this.deps.stage, slot, walk.now, walk.travelled, place);
       sprite?.setVisible(shown);
-      if (sprite === undefined || slot.mover === null || key === null || !shown) {
+      if (sprite === undefined || slot.mover === null || key === undefined || !shown) {
         continue;
       }
       const drawn = showAtDepth(sprite, key, place.scale);
@@ -89,10 +99,7 @@ export class AmbientView {
       } else if (sprite.isCropped) {
         sprite.setCrop();
       }
-      const tag = key === slot.mover.key ? slot.mover.tag : AMBIENT_FALLBACKS[slot.mover.key]?.tag;
-      if (tag !== undefined) {
-        this.animate(sprite, drawn.key, tag, place.moving && !walk.halted);
-      }
+      this.animate(sprite, drawn.key, art.tag ?? slot.mover.tag, place.moving && !walk.halted);
     }
   }
 
@@ -109,20 +116,22 @@ export class AmbientView {
     sprite.anims.pause();
   }
 
-  // The mover's own art key, else its fallback's, else null when neither is loaded.
-  private artKey(mover: AmbientMover): string | null {
+  // The mover's own art and its variants that are loaded, else its fallback, else none.
+  private art(mover: AmbientMover): MoverArt {
     const cached = this.arts.get(mover.key);
     if (cached !== undefined) {
       return cached;
     }
     const has = (key: string) => this.scene.textures.exists(key);
-    const fallback = AMBIENT_FALLBACKS[mover.key]?.key;
-    const key = has(mover.key)
-      ? mover.key
-      : fallback !== undefined && has(fallback)
-        ? fallback
-        : null;
-    this.arts.set(mover.key, key);
-    return key;
+    const own = [mover.key, ...(AMBIENT_VARIANTS[mover.key] ?? [])].filter(has);
+    const fallback = AMBIENT_FALLBACKS[mover.key];
+    const art =
+      own.length > 0
+        ? { keys: own, tag: null }
+        : fallback != null && has(fallback.key)
+          ? { keys: [fallback.key], tag: fallback.tag }
+          : NO_ART;
+    this.arts.set(mover.key, art);
+    return art;
   }
 }

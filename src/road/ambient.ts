@@ -1,7 +1,6 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
-import { ROAD_FAR_SCALE } from "../data/screen";
 import type { AmbientGait, AmbientMover, ZoneId } from "../data/types";
-import { project, type RoadProjection, scaleAt } from "../layout/projection";
+import { project, type RoadProjection, scaleAt, scaleAtY } from "../layout/projection";
 import { CROSS_STREET } from "../layout/sceneryGags";
 import type { Random } from "../lib/random";
 import { noise, type Verge, VERGES, walkFrom } from "./roadside";
@@ -49,12 +48,14 @@ export interface AmbientStage {
 // the side of the road for one beside it (1 right, -1 left). row is a cross street mover's
 // feet row, in band pixels. Beside the road, across is where it walks or stops and outer
 // where it starts or leaves, in road pixels from the road's centre line, and z the road
-// distance from the walk's start where it set out.
+// distance from the walk's start where it set out. look, in [0, 1), picks among its art's
+// variants, such as a car's body.
 export interface AmbientSlot {
   across: number;
   active: boolean;
   bornAt: number;
   direction: -1 | 1;
+  look: number;
   mover: AmbientMover | null;
   outer: number;
   row: number;
@@ -106,6 +107,7 @@ export function startAmbient(): AmbientState {
       active: false,
       bornAt: 0,
       direction: 1,
+      look: 0,
       mover: null,
       outer: 0,
       row: 0,
@@ -206,6 +208,7 @@ function setOut(
   slot.mover = mover;
   slot.direction = random() < 0.5 ? -1 : 1;
   slot.seed = Math.floor(random() * 65536);
+  slot.look = random();
   switch (mover.path) {
     case "crossStreet":
       slot.row = slot.direction === 1 ? CROSS_STREET.nearLane : CROSS_STREET.farLane;
@@ -299,9 +302,11 @@ export function placeAmbient(
     out.band = true;
     out.flip = slot.direction === -1;
     out.moving = moving;
-    out.scale = ROAD_FAR_SCALE;
     out.x = start + slot.direction * travel;
     out.y = band.y + slot.row;
+    // The cross street lies beyond the road's far edge, at the scale the road's projection
+    // gives its row.
+    out.scale = scaleAtY(projection, out.y);
     if (mover.gait === "fly") {
       out.lift = travel * FLY_CLIMB;
     }

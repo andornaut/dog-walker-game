@@ -212,6 +212,12 @@ export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readon
 };
 export const IDLE_TAG = "idle";
 
+// An ambient mover wears its own art or one of the variants named here, picked at random as
+// it sets out, among those loaded.
+export const AMBIENT_VARIANTS: Readonly<Partial<Record<string, readonly string[]>>> = {
+  "ambient-car": ["ambient-car-hatchback", "ambient-car-van", "ambient-car-wagon"],
+};
+
 // An ambient mover whose art is not drawn yet plays the sprite and tag named here for it, or
 // is not shown while its entry is null.
 export const AMBIENT_FALLBACKS: Readonly<

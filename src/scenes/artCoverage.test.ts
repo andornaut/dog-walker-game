@@ -9,6 +9,7 @@ import { SQUIRREL_ICON_KEY, statusIconKey } from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";
 import {
   AMBIENT_FALLBACKS,
+  AMBIENT_VARIANTS,
   artOrStandIn,
   CARD_FRAME_KEY,
   cardFrameTag,
@@ -448,17 +449,25 @@ describe("road object art", () => {
     Object.entries(gameData.ambient).flatMap(([zone, movers]) =>
       movers.map((mover) => ({ ...mover, zone })),
     ),
-  )("draws the $zone ambient $key, or a fallback, with its tag at every step", (mover) => {
-    const fallback = AMBIENT_FALLBACKS[mover.key];
-    if (fallback === null && !sprites.has(mover.key)) {
-      return;
-    }
-    const { key, tag } = sprites.has(mover.key) || fallback == null ? mover : fallback;
-    const missing = [1, ...variantSteps([key])].flatMap((step) =>
-      missingTags(depthVariantKey(key, step) ?? key, [tag]),
-    );
-    expect(missing).toEqual([]);
-  });
+  )(
+    "draws the $zone ambient $key, its variants or a fallback, with its tag at every step",
+    (mover) => {
+      const fallback = AMBIENT_FALLBACKS[mover.key];
+      if (fallback === null && !sprites.has(mover.key)) {
+        return;
+      }
+      const { key, tag } = sprites.has(mover.key) || fallback == null ? mover : fallback;
+      const variants = (AMBIENT_VARIANTS[mover.key] ?? []).filter((variant) =>
+        sprites.has(variant),
+      );
+      const missing = [key, ...variants].flatMap((art) =>
+        [1, ...variantSteps([art])].flatMap((step) =>
+          missingTags(depthVariantKey(art, step) ?? art, [tag]),
+        ),
+      );
+      expect(missing).toEqual([]);
+    },
+  );
 });
 
 describe("depth variants", () => {

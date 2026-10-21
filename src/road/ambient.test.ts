@@ -4,6 +4,7 @@ import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { AmbientMover, ZoneId } from "../data/types";
+import { scaleAtY } from "../layout/projection";
 import { CROSS_STREET } from "../layout/sceneryGags";
 import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
@@ -35,13 +36,13 @@ function deps(seed: number, drawable: (mover: AmbientMover) => boolean = () => t
 }
 
 // Every frame of a walk of seconds through zone at the road's speed: the movers out, each
-// with where it is drawn.
+// with its slot and where it is drawn.
 function walkThrough(
   zone: ZoneId,
   seconds: number,
   seed = 1,
   drawable?: (mover: AmbientMover) => boolean,
-): { mover: AmbientMover; place: AmbientPlace }[][] {
+): { mover: AmbientMover; place: AmbientPlace; slot: number }[][] {
   const state = startAmbient();
   const using = deps(seed, drawable);
   const frames = [];
@@ -50,12 +51,12 @@ function walkThrough(
     const travelled = now * SPEED;
     stepAmbient(using, { movers: gameData.ambient[zone], now, travelled, zone }, state);
     frames.push(
-      state.slots.flatMap((slot) => {
+      state.slots.flatMap((slot, index) => {
         const place = newPlace();
         return slot.active &&
           slot.mover !== null &&
           placeAmbient(STAGE, slot, now, travelled, place)
-          ? [{ mover: slot.mover, place }]
+          ? [{ mover: slot.mover, place, slot: index }]
           : [];
       }),
     );
@@ -83,6 +84,44 @@ describe("stepAmbient", () => {
       );
     expect(onRoad).toEqual([]);
   });
+
+  // Side views face right in their art, so a mover moving left is mirrored; front and back
+  // views walking along the sidewalks never are.
+  it.each(ZONES)("mirrors every %s side view moving left, and only those", (zone) => {
+    const frames = walkThrough(zone, 300);
+    const wrong = frames.slice(1).flatMap((out, i) =>
+      out.filter(({ mover, place, slot }) => {
+        const before = frames[i]?.find((shown) => shown.slot === slot && shown.mover === mover);
+        if (before === undefined || !place.moving || !before.place.moving) {
+          return false;
+        }
+        if (mover.path === "sidewalkAway" || mover.path === "sidewalkToward") {
+          return place.flip;
+        }
+        const dx = place.x - before.place.x;
+        return dx !== 0 && place.flip !== dx < 0;
+      }),
+    );
+    expect(wrong).toEqual([]);
+  });
+
+  it.each(ZONES)(
+    "draws every %s mover on the cross street smaller than the road's far edge, nearer rows larger",
+    (zone) => {
+      const band = walkThrough(zone, 300)
+        .flat()
+        .filter(({ place }) => place.band)
+        .map(({ place }) => place);
+      const farEdge = scaleAtY(PROJECTION, PROJECTION.farY);
+      expect(band.length).toBeGreaterThan(0);
+      expect(band.filter(({ scale }) => scale >= farEdge)).toEqual([]);
+      const byRow = new Map(band.map(({ scale, y }) => [y, scale]));
+      const rows = [...byRow.keys()].sort((a, b) => a - b);
+      expect(rows.map((y) => byRow.get(y))).toEqual(
+        rows.map((y) => byRow.get(y)).sort((a = 0, b = 0) => a - b),
+      );
+    },
+  );
 
   it("plays the same movers for the same seed, and others for another", () => {
     const places = (seed: number) =>
