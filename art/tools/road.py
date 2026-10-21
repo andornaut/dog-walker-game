@@ -812,6 +812,15 @@ def puddle(f, w=112, h=48):
         g.ell(cx, cy, rx, ry, "blue")
     for cx, cy, rx, ry in lobes:
         g.ell(cx, cy + 0.5, rx - 1, ry - 1, "sky")
+    if w > 40:
+        # the far bank's shade, a blue band down the top edge inside the rim, and the sky's glint in the near
+        # lobe: a white streak over a cyan one
+        for cx, cy, rx, ry in lobes:
+            g.ell(cx, cy + 0.5, rx - 1, ry - 1, "blue")
+        for cx, cy, rx, ry in lobes:
+            g.ell(cx, cy + 2, rx - 1.5, ry - 2, "sky")
+        g.rect(round(w * 0.16), round(h * 0.4), round(w * 0.08), 2, "white")
+        g.rect(round(w * 0.14), round(h * 0.4) + 2, round(w * 0.13), 1, "cyan")
     s = 1 if f else 0
     for fx, fy, fw in ((0.28, 0.31, 0.125), (0.59, 0.56, 0.16), (0.41, 0.69, 0.06), (0.75, 0.3, 0.1)):
         if w > 40 or fx < 0.7:
