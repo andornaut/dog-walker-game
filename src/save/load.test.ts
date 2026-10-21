@@ -85,6 +85,14 @@ describe("loadSave", () => {
       [{}, [], {}, 0],
     ],
     [
+      "a checkpoint in the first zone, before any zone finished",
+      (document) => {
+        document.checkpoint = { dogs: [], earnedCents: 0, zonesFinished: 0 };
+      },
+      (save) => save.checkpoint?.zonesFinished,
+      0,
+    ],
+    [
       "a save from before the mute setting, unmuted",
       (document) => {
         delete (document.settings as Partial<typeof document.settings>).muted;
@@ -435,12 +443,6 @@ describe("loadSave", () => {
         "fractional checkpoint earnings",
         withChanges((document) => {
           document.checkpoint = { dogs: [], earnedCents: 2.5, zonesFinished: 1 };
-        }),
-      ],
-      [
-        "a checkpoint before any zone finished",
-        withChanges((document) => {
-          document.checkpoint = { dogs: [], earnedCents: 0, zonesFinished: 0 };
         }),
       ],
       [
