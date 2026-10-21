@@ -9,10 +9,11 @@ import {
   COLLAR_HEIGHT,
   leashHand,
   PACK_DEPTH,
+  packClearance,
   packPlacements,
   tautLeashLine,
 } from "../../layout/packFormation";
-import { project } from "../../layout/projection";
+import { distanceAtY, project } from "../../layout/projection";
 import { currentZone } from "../../rules/route";
 import { isSteeringLocked } from "../../runner/laneControl";
 import { laneMotionX } from "../../runner/laneMotion";
@@ -205,15 +206,20 @@ export class PackView {
     });
   }
 
-  // The walker stands on the feet line at scale 1; each dog stands where the projection puts
-  // its place in the formation. While the walk is held, they stand idle.
+  // The walker stands on the feet line at scale 1; each dog's feet stand its place in the drawn
+  // formation up the screen, across the road where the projection puts that row. While the
+  // walk is held, they stand idle.
   draw(walk: Walk, frame: PackFrame): void {
     const { halted, pulls, shadow, still } = frame;
     const { leash } = this;
     const walkerX = Math.round(laneMotionX(LANE_XS, walk.road.control.motion));
     const footY = PROJECTION.footY;
     const walking = packDogs(walk.run);
-    const placements = packPlacements(walking.length);
+    const clearance = packClearance(
+      spriteMetrics(this.walker.key),
+      walking.map((dog) => spriteMetrics(dogSpriteKey(gameData, dog))),
+    );
+    const placements = packPlacements(walking.length, clearance);
     const leashColor = colorFromHex(currentZone(gameData, walk.run).leashColor);
     const taut = pulls.strain?.dog ?? null;
     const leashKey = `${walkerX}|${walking.join()}|${leashColor}|${taut}`;
@@ -235,10 +241,8 @@ export class PackView {
         continue;
       }
       const placement = itemAt(placements, index);
-      const placed = project(PROJECTION, {
-        distance: -placement.footDy,
-        x: walkerX + placement.dx,
-      });
+      const distance = distanceAtY(PROJECTION, footY + placement.footDy);
+      const placed = project(PROJECTION, { distance, x: walkerX + placement.dx });
       const drawn = showAtDepth(sprite, dogSpriteKey(gameData, dog), PACK_DEPTH);
       const x = Math.round(placed.x);
       const dogFoot = Math.round(placed.y);
@@ -249,7 +253,7 @@ export class PackView {
       });
       sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
       shadow(dogSpriteKey(gameData, dog), drawn.depth, x, dogFoot);
-      this.dogFeet.set(dog, { distance: -placement.footDy, x: walkerX + placement.dx });
+      this.dogFeet.set(dog, { distance, x: walkerX + placement.dx });
       if (redrawLeash) {
         const hand = leashHand(placement);
         const from = { x: walkerX + hand.dx, y: footY + hand.dy };

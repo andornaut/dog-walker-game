@@ -1,5 +1,7 @@
+import shippedManifest from "../../public/art/manifest.json";
 import { DEPTH_STEPS } from "../assets/depthSteps";
-import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { parseManifest } from "../assets/manifest";
+import { dogSpriteKey, ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { LANE_COUNT, ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
@@ -22,8 +24,10 @@ import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScr
 import {
   COLLAR_HEIGHT,
   drawnPackBand,
+  hitPackPlacements,
   PACK_DRAW_SCALE,
   packBand,
+  packClearance,
   packPlacements,
   WALKER_HANDS,
 } from "../layout/packFormation";
@@ -45,13 +49,32 @@ import { walkerFootY, walkProjection } from "../runner/walkGeometry";
 // The screen geometry art's tools read, as shared/export/layout.json, all in screen pixels
 // unless a comment says otherwise. Each block is read from the module the game draws by.
 
-// packPlacements holds a pack larger than its largest formation to that formation.
-function packFormations(): ReturnType<typeof packPlacements>[] {
-  const sizes: ReturnType<typeof packPlacements>[] = [];
-  for (let count = 1; sizes.at(-1) !== packPlacements(count); count++) {
-    sizes.push(packPlacements(count));
+// The pack sizes with a formation of their own: hitPackPlacements holds a pack larger than its
+// largest formation to that formation.
+function packSizes(): number[] {
+  const formations: ReturnType<typeof hitPackPlacements>[] = [];
+  for (let count = 1; formations.at(-1) !== hitPackPlacements(count); count++) {
+    formations.push(hitPackPlacements(count));
   }
-  return sizes;
+  return formations.map((_, i) => i + 1);
+}
+
+// The widest packClearance any walker and dogs make, from the art manifest's feet lines:
+// every walker's, and every dog's in its ROAD_SPRITE_SIZE square frame.
+export function widestPackClearance(data: Pick<GameData, "dogs" | "walkers">): number {
+  const anchors = new Map(
+    parseManifest(shippedManifest).sprites.map(({ anchor, key }) => [key, anchor]),
+  );
+  const feetY = (key: string) => anchors.get(key)?.feetY ?? ROAD_SPRITE_SIZE;
+  const dogs = (Object.keys(data.dogs) as (keyof GameData["dogs"])[]).map((dog) => ({
+    feetY: feetY(dogSpriteKey(data, dog)),
+    frameHeight: ROAD_SPRITE_SIZE,
+  }));
+  return Math.max(
+    ...Object.values(data.walkers).map((walker) =>
+      packClearance({ feetY: feetY(walker.spriteKey), frameHeight: 0 }, dogs),
+    ),
+  );
 }
 
 // Where the projected road falls on a screen row: the row's road distance and scale, the
@@ -80,6 +103,7 @@ export function layoutExport(
   const projection = walkProjection(ROAD_CAMERA, road);
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");
   const bandRows = Array.from({ length: approach.height }, (_, i) => approach.y + i);
+  const clearance = widestPackClearance(data);
   return {
     camera: {
       ...ROAD_CAMERA,
@@ -119,18 +143,23 @@ export function layoutExport(
     // The message strip over the band's sky: its panel, the newest line's icon, the text
     // column and its room, and the older lines' capitals tops.
     messageStrip: messageStripLayout(),
-    // The pack as drawn, at the road sprite size: drawScale times its hit layout, rounded.
+    // The pack as drawn, at the road sprite size: drawScale times its hit layout's spread and
+    // stagger, rounded, with the nearest dog clearance pixels up the screen from the walker's
+    // feet (the walker's frame above its feet, plus the most rows any dog's frame has below
+    // its feet), here the widest any walker and dogs make.
     pack: {
       // By pack size, from 1: the band from the lead dog's head to the walker's feet, as drawn
       // and as hit.
-      bands: packFormations().map((_, i) => ({
-        drawn: drawnPackBand(i + 1, walkerFootY(road)),
-        hit: packBand(i + 1, walkerFootY(road)),
+      bands: packSizes().map((count) => ({
+        drawn: drawnPackBand(count, walkerFootY(road), clearance),
+        hit: packBand(count, walkerFootY(road)),
       })),
+      clearance,
       collarHeight: COLLAR_HEIGHT,
       drawScale: PACK_DRAW_SCALE,
-      // By pack size, from 1: each dog's feet from the walker's feet, the first dog leading.
-      formations: packFormations(),
+      // By pack size, from 1: each dog's feet from the walker's feet in screen pixels, the
+      // first dog leading.
+      formations: packSizes().map((count) => packPlacements(count, clearance)),
       walkerFootY: walkerFootY(road),
       walkerHands: WALKER_HANDS,
     },

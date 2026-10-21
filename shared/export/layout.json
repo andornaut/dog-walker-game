@@ -727,7 +727,7 @@
       {
         "drawn": {
           "bottom": 458,
-          "top": 369
+          "top": 361
         },
         "hit": {
           "bottom": 459,
@@ -737,7 +737,7 @@
       {
         "drawn": {
           "bottom": 458,
-          "top": 369
+          "top": 357
         },
         "hit": {
           "bottom": 459,
@@ -747,7 +747,7 @@
       {
         "drawn": {
           "bottom": 458,
-          "top": 368
+          "top": 351
         },
         "hit": {
           "bottom": 459,
@@ -755,37 +755,38 @@
         }
       }
     ],
+    "clearance": 72,
     "collarHeight": 21,
     "drawScale": 1.2,
     "formations": [
       [
         {
           "dx": 0,
-          "footDy": -64
+          "footDy": -72
         }
       ],
       [
         {
           "dx": -24,
-          "footDy": -64
+          "footDy": -76
         },
         {
           "dx": 24,
-          "footDy": -60
+          "footDy": -72
         }
       ],
       [
         {
           "dx": 0,
-          "footDy": -65
+          "footDy": -82
         },
         {
           "dx": -24,
-          "footDy": -59
+          "footDy": -76
         },
         {
           "dx": 24,
-          "footDy": -55
+          "footDy": -72
         }
       ]
     ],

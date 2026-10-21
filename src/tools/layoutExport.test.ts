@@ -47,9 +47,9 @@ describe("layoutExport", () => {
   it.each(layout.pack.formations.map((formation, i) => [i + 1, formation] as const))(
     "exports a pack of %d's drawn formation and its drawn and hit bands",
     (count, formation) => {
-      expect(formation).toEqual(packPlacements(count));
+      expect(formation).toEqual(packPlacements(count, layout.pack.clearance));
       expect(layout.pack.bands[count - 1]).toEqual({
-        drawn: drawnPackBand(count, footY),
+        drawn: drawnPackBand(count, footY, layout.pack.clearance),
         hit: packBand(count, footY),
       });
     },

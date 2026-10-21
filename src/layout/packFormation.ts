@@ -1,7 +1,7 @@
 import { clampIndex, itemAt } from "../arrays";
 import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 
-// Where a dog walks, relative to the walker's feet: dx across, footDy up the screen
+// Where a dog walks, relative to the walker's feet: dx across, footDy up the road or the screen
 // (negative). Dogs walk just ahead of the walker in the same lane, staggered because three
 // dogs do not fit side by side in a 64px lane: the centre dog of three stands behind the side
 // dogs' heads.
@@ -11,8 +11,9 @@ export interface PackPlacement {
 }
 
 // The pack is laid out at the hit size, ROAD_HIT_SIZE, where collisions read it, and drawn
-// at the sprite size, ROAD_SPRITE_SIZE: the drawn formation and band are their hit lengths
-// times PACK_DRAW_SCALE, rounded. The hands and collar are measured on the drawn art.
+// at the sprite size, ROAD_SPRITE_SIZE: the drawn formation's spread and stagger and the drawn
+// band's lengths are their hit lengths times PACK_DRAW_SCALE, rounded. The hands and collar are
+// measured on the drawn art.
 export const PACK_DRAW_SCALE = ROAD_SPRITE_SIZE / ROAD_HIT_SIZE;
 const drawn = (length: number) => Math.round(length * PACK_DRAW_SCALE);
 
@@ -30,12 +31,14 @@ const HIT_FORMATIONS: readonly (readonly PackPlacement[])[] = [
   ],
 ];
 
-const FORMATIONS = HIT_FORMATIONS.map((formation) =>
-  formation.map(({ dx, footDy }) => ({ dx: drawn(dx), footDy: drawn(footDy) })),
-);
+// The drawn formations' shapes, in screen pixels: each dog's feet from the nearest dog's.
+const DRAWN_SHAPES = HIT_FORMATIONS.map((formation) => {
+  const nearest = Math.max(...formation.map(({ footDy }) => footDy));
+  return formation.map(({ dx, footDy }) => ({ dx: drawn(dx), footDy: drawn(footDy - nearest) }));
+});
 
 // The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
-// ahead of the walker (projected 0.93 to 0.94), so they never change size, and following the
+// ahead of the walker, so they never change size, and following the
 // projection there would drop two or three pixel rows from every dog. Their status loops
 // follow, at full size.
 export const PACK_DEPTH = 1;
@@ -65,11 +68,18 @@ const HIT_PACK: PackSize = {
   formations: HIT_FORMATIONS,
 };
 
-const DRAWN_PACK: PackSize = {
-  bodyHeight: drawn(DOG_BODY_HEIGHT),
-  feetClearance: drawn(WALKER_FEET_CLEARANCE),
-  formations: FORMATIONS,
-};
+// A sprite's frame rows from its top to its feet line, and its frame height.
+interface FrameFeet {
+  feetY: number;
+  frameHeight: number;
+}
+
+// How far up the screen the nearest dog's feet stand from the walker's, so every dog walks
+// ahead of the walker and its leash shows: the walker's frame above its feet, plus the most
+// rows any dog's frame has below its feet, so no dog's frame overlaps the walker's.
+export function packClearance(walker: FrameFeet, dogs: readonly FrameFeet[]): number {
+  return walker.feetY + Math.max(0, ...dogs.map((dog) => dog.frameHeight - dog.feetY));
+}
 
 function formationOf(
   formations: PackSize["formations"],
@@ -83,9 +93,13 @@ function bandOf(size: PackSize, dogCount: number, walkerFootY: number) {
   return { bottom: walkerFootY - size.feetClearance, top: walkerFootY + lead - size.bodyHeight };
 }
 
-// Where each dog is drawn.
-export function packPlacements(dogCount: number): readonly PackPlacement[] {
-  return formationOf(FORMATIONS, dogCount);
+// Where each dog is drawn, in screen pixels from the walker's feet: the formation's shape with
+// its nearest dog clearance pixels up the screen, from packClearance.
+export function packPlacements(dogCount: number, clearance: number): readonly PackPlacement[] {
+  return formationOf(DRAWN_SHAPES, dogCount).map(({ dx, footDy }) => ({
+    dx,
+    footDy: footDy - clearance,
+  }));
 }
 
 // Where each dog stands for collisions.
@@ -123,12 +137,19 @@ export function packBand(dogCount: number, walkerFootY: number): { bottom: numbe
   return bandOf(HIT_PACK, dogCount, walkerFootY);
 }
 
-// The same band as drawn, at the sprite size. Nothing collides with it.
+// The band as drawn, from the leading dog's head to the walker's feet, at the sprite size and
+// the clearance. Nothing collides with it.
 export function drawnPackBand(
   dogCount: number,
   walkerFootY: number,
+  clearance: number,
 ): { bottom: number; top: number } {
-  return bandOf(DRAWN_PACK, dogCount, walkerFootY);
+  const drawnPack: PackSize = {
+    bodyHeight: drawn(DOG_BODY_HEIGHT),
+    feetClearance: drawn(WALKER_FEET_CLEARANCE),
+    formations: DRAWN_SHAPES.map((_, i) => packPlacements(i + 1, clearance)),
+  };
+  return bandOf(drawnPack, dogCount, walkerFootY);
 }
 
 // The tallest hit band any pack can have, so spawns stay avoidable whoever is walking.
