@@ -25,7 +25,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 ## Voice
 
-- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing (the walk's money is "cash"), ♥ right after its number ("+1♥", "{hearts}♥"), and no em dashes. Walkers: Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
+- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing, and no em dashes. Walkers: Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
 - **Lengths:** message strip lines and first-time hints at most about 46 characters (26 always fit); the walker's bubble up to 4 lines of about 30, with walker and parting lines at 2; card option names 2 or 3 words; hit labels one or two uppercase words with "!"
 - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
 - **Jesse** (Koda): laid-back runner, fitness talk (form, personal bests, shake it off)
@@ -66,7 +66,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Tips:** a tip is $1. Tips are the main income: each neighborhood spawns 52 or more, whatever the pack size, and a careful walk grabs about half
   - **Pay:** the steady part. After each neighborhood, each walking dog earns $10, times the neighborhood's pay multiplier. Pay is banked at the end of each neighborhood: at its celebration, or on the end screen after neighborhood 4. A firing loses that dog's pay for the current neighborhood and the Full pack bonus; its earlier pay stays banked
 - **Owner happiness (♥):** one meter per dog, shown as the dog's and owner's faces plus the meter, which never relies on color alone. The dog's size sets its max (see Dogs). Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
-- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1♥, bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
+- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1 ♥, bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
 
 ### A walk
 
@@ -91,7 +91,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 ### Choice cards
 
 - Used for encounters and forks. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
-- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Duchess, −1♥ Koda", not "−1♥ each"). Choices only, no minigames
+- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1 ♥ Duchess, −1 ♥ Koda", not "−1 ♥ each"). Choices only, no minigames
 - Every card hits the whole pack. No card opens without a collision, except the fork card
 - A hit that opens a card costs nothing until you choose
 - A money option you can't afford is grayed out, so cash never goes below $0; every card keeps at least one option that costs no money
@@ -101,7 +101,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - Slower options cost money (missed tips) instead of time
 - Money options are charged once per card, whatever the pack size; heart options cost each owner, so a bigger pack has more owners who can fire you
 - An immunity (Good leash, Raincoats) means the obstacle is harmless: no card, no heart and no hit stop
-- A card shows at most 3 options. Hall pass offers Walk on by (a free option that skips the card) on every card until it's used in that neighborhood; Walk on by replaces the most expensive option when a card already has 3. Sweet talker and Hall pass can both apply to the same card: its money options are free and Walk on by is offered, and the player chooses
+- A card shows at most 3 options. Hall pass offers Skip on every card until it's used in that neighborhood; Skip replaces the most expensive option when a card already has 3. Sweet talker and Hall pass can both apply to the same card: its money options are free and Skip is offered, and the player chooses
 - After a card choice, each owner whose hearts changed reacts with a quip in the message strip. Each owner has 2 lines for each of: happier, upset, fired, and parting
 
 ### Teaching, sound and settings
@@ -158,7 +158,7 @@ Each option costs one thing: money, hearts or a debuff. Let them sniff is the on
 
 **Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, every doghouse card's header and name plate take the debuff's colors, its icon shows, and a bar drains over the 20 seconds with the seconds left under it; nothing changes on the road.
 
-- **Muddy:** every plain bump costs 2♥ instead of 1
+- **Muddy:** every plain bump costs 2 ♥ instead of 1
 - **Stinky:** half as many tips appear
 
 ### Lucky encounters
@@ -170,7 +170,7 @@ Good things to bump into on purpose. None opens a card: each bobs on the road an
 
 ### Plain obstacles
 
-About half of the obstacles are plain: they open no card. A plain hit costs 1♥ from the owner of the dog it lands on (see Screen and controls).
+About half of the obstacles are plain: they open no card. A plain hit costs 1 ♥ from the owner of the dog it lands on (see Screen and controls).
 
 ### Obstacle sizes
 
@@ -219,10 +219,10 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "YOINK!") and the pack shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.3 seconds for a plain obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
-- **Low hearts:** an owner at 1♥ looks upset, and their doghouse card shows it
+- **Low hearts:** an owner at 1 ♥ looks upset, and their doghouse card shows it
 - **Pay banked:** at each neighborhood's end, the celebration shows the pay banked for it
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
-- **Treat grabbed:** the owner smiles and a "+1♥" label shows over the dog
+- **Treat grabbed:** the owner smiles and a "+1 ♥" label shows over the dog
 
 Scenery gags (a cat on a fence, a sprinkler, a kite caught in a tree) play in the backdrop band; they open no card and have no effect.
 
@@ -273,7 +273,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Start button:** the only button below the sections, reading "Start walk" in every state, and not ready until a walker and a dog are picked (the Pocket is optional). Each dog tile shows its pay
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who's walking today? Tap to pick, hold for details."; after each of the first 3 walks "Tap to pick, hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the Pet shop!"
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $45 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
-- **Gear and Pocket** (4 items, bought once at the Pet shop): Fanny pack (start the walk with more cash); Hall pass (once per neighborhood, Walk on by one encounter card for free); Lucky collar (every owner has +1 max ♥); Running shoes (+0.1 agility, one agility word up). The Pocket section is a strip of all 4 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. The section's band names the pocketed item, or reads "One per walk" when the Pocket is empty; hold an item for its effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
+- **Gear and Pocket** (4 items, bought once at the Pet shop): Fanny pack (start the walk with more cash); Hall pass (once per neighborhood, skip one encounter card for free); Lucky collar (every owner has +1 max ♥); Running shoes (+0.1 agility, one agility word up). The Pocket section is a strip of all 4 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. The section's band names the pocketed item, or reads "One per walk" when the Pocket is empty; hold an item for its effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
 - **Walker picker:** choose from the walkers you've unlocked (see Walkers). Walkers, dogs and the Pocket item share one pick toggle: tap to pick, tap the picked one again to unpick it. The walker choice is saved and comes back picked, unless it was unpicked; with no walker picked, the bubble asks "Who's walking? Tap a face." Locked walkers use the Locked tile state with a name plate ("Ben"); tapping one shakes it and the bubble gives the goal, "Finish Fairview Park to unlock Ben."; a picked walker's bubble gives their agility and perk ("Ben: relaxed, Treat finder."); a newly unlocked walker shows the walker's line "New walker!"
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Elm Avenue under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner (e.g. Jesse: "He already did 10K. He's fine.")
@@ -293,7 +293,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 | Mastery    | Big Payday            | Earn $300 in one walk                            | Treats are on you.                        |
 | Collection | Full Kennel           | Own all 9 dogs                                   | Every leash is spoken for.                |
 | Collection | Kitted Out            | Own every gear item                              | A pocket for everything. Well, one thing. |
-| Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs            | Everyone's met you now.                   |
+| Collection | Neighborhood Favorite | Finish a walk with every dog                     | Everyone's met you now.                   |
 | Collection | Top Walker            | Own every dog and all 3 dog slots                | Maplewood's finest. Ask any dog.          |
 | Silly      | You're Fired!         | Get fired 10 times                               | They always come back.                    |
 | Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                   | You can smell this badge.                 |
