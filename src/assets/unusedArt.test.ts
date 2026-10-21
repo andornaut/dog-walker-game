@@ -11,7 +11,7 @@ const SOURCES = [
 ];
 const DATA = {
   dogs: { koda: { art: "koda" } },
-  zones: [{ art: "the-long-way-home", name: "The Long Way Home" }],
+  zones: [{ art: "yonge-street", name: "Yonge Street" }],
 };
 
 describe("unusedKeys", () => {
@@ -21,8 +21,8 @@ describe("unusedKeys", () => {
     const manifest = {
       fonts: [],
       images: [
-        { key: "icon-zone-the-long-way-home", png: "a.png" },
-        { key: "the-long-way-home", png: "b.png" },
+        { key: "icon-zone-yonge-street", png: "a.png" },
+        { key: "yonge-street", png: "b.png" },
       ],
       sounds: [],
       sprites: ["fx-bump", "fx-stinky", "dog-koda", "dog-koda@88", "dog-rex", "dog-rex@62"].map(
@@ -31,7 +31,7 @@ describe("unusedKeys", () => {
     };
     expect(unusedKeys(names, manifest)).toEqual({
       fonts: [],
-      images: ["icon-zone-the-long-way-home"],
+      images: ["icon-zone-yonge-street"],
       sounds: [],
       sprites: ["fx-stinky", "dog-rex"],
     });

@@ -9,6 +9,8 @@ import { fillNames } from "../text/lines";
 import { perkIconKey } from "./effectIcons";
 import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
 
+const STREET = gameData.world.zones.find(({ id }) => id === "street")?.name ?? "";
+
 function money(kind: "bump" | "pay" | "tip", amount: number): MoneyChange {
   return {
     amount: cents(amount),
@@ -52,7 +54,7 @@ describe("zoneCelebration", () => {
       { expected: null, finished: ["street"], owned: ["casey"] },
       { expected: null, finished: [goal("ben")], owned: ["ada", "ben", "casey", "trista"] },
     ] satisfies readonly { expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }[]) {
-      const finish = { changes: [], finished, walker: "casey", zone: "Elm Avenue" } as const;
+      const finish = { changes: [], finished, walker: "casey", zone: STREET } as const;
       const joined = zoneCelebration(gameData, owned, finish);
       expect(joined.kind === "newWalker" ? joined.walker : null).toBe(expected);
     }
@@ -63,14 +65,14 @@ describe("zoneCelebration", () => {
       changes: ZONE_CHANGES,
       finished: ["street"],
       walker: "ben",
-      zone: "Elm Avenue",
+      zone: STREET,
     } as const;
     expect(zoneCelebration(gameData, ["ben", "casey"], finish)).toEqual({
       fees: 18000,
       kind: "zoneDone",
       tips: 800,
       walker: "ben",
-      zone: "Elm Avenue",
+      zone: STREET,
     });
   });
 });

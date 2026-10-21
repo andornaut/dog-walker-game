@@ -89,7 +89,7 @@ export interface HelpPicture {
   // The touch hint's drag frame, its anchor on start.
   readonly touch: { readonly frame: number; readonly start: Point } | null;
   readonly walk: Walk;
-  // How far through its neighbourhood the walk is, for the walk bar's pip.
+  // How far through its neighborhood the walk is, for the walk bar's pip.
   readonly zoneFraction: number;
 }
 
@@ -245,7 +245,7 @@ function pickups(data: GameData): HelpPicture {
   const { dogs, lane, pickups: items, tips, zone, zoneFraction } = HELP_SCENES.pickups;
   const started = startRun(data, dogs);
   const tip = tipValue(data, started).amount;
-  // The second neighbourhood, the first finished.
+  // The second neighborhood, the first finished.
   const run: RunState = {
     ...started,
     money: addCents(started.money, cents(tip * tips)),
@@ -342,7 +342,7 @@ function pulls(data: GameData): HelpPicture {
   };
 }
 
-// The fork after the first neighbourhood, its paths easiest on the left, each carrying an
+// The fork after the first neighborhood, its paths easiest on the left, each carrying an
 // upgrade in the upgrades' order.
 function zones(data: GameData): HelpPicture {
   const { dogs, lane } = HELP_SCENES.zones;

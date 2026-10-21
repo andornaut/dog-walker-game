@@ -694,7 +694,7 @@ export interface RunText {
   };
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;
-  // The walk bar's place in the walk beside the neighbourhood's name: the zone's number, n, of
+  // The walk bar's place in the walk beside the neighborhood's name: the zone's number, n, of
   // the walk's total.
   readonly zoneProgress: string;
   // The heading of the banner each zone opens with, over the zone's name: {world} is the

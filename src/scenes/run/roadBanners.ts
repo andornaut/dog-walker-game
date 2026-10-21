@@ -36,7 +36,7 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
   fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
 }
 
-// The zone banner's heading ("Maplewood, neighborhood 2") and the zone's name, slid in over
+// The zone banner's heading ("Toronto, neighborhood 2") and the zone's name, slid in over
 // the road at each zone's start.
 export class ZoneBanner {
   private banner: GameObjects.Container | undefined;

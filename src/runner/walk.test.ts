@@ -568,7 +568,7 @@ describe("planZone", { timeout: 15_000 }, () => {
   // first lane the nearer one blocks to the nearest lane the farther one leaves open. Road
   // between them is at least the tallest pack, those lane moves in whole walk steps and the
   // reaction margin, on every way out. Two obstacles two or more lanes wide have a row between
-  // them. At the road's speed in the last neighbourhood, for the walkers whose lane moves cover
+  // them. At the road's speed in the last neighborhood, for the walkers whose lane moves cover
   // the least and the most road.
   it("spaces obstacles for the pack to change lanes between them, at the shortest and longest lane move", () => {
     for (const { walker, zone } of LANE_MOVE_WALKERS.flatMap((walker) =>
