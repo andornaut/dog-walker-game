@@ -5,7 +5,6 @@ import {
   IDLE_TAG,
   moverBodyTag,
   prizeMoverTag,
-  STANDING_TAGS,
   WARNING_ARROW_KEY,
   WARNING_DOWN_TAG,
   WARNING_KEY,
@@ -29,8 +28,9 @@ import {
 } from "../../runner/movers";
 import { itemCategory, type WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth } from "../sprites";
-import type { ItemPart, ItemView } from "./itemViews";
-import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import type { ItemView } from "./itemViews";
+import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION } from "./stage";
+import { type StandFrame, standPart } from "./standPart";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
 // down from the far end of the road for an in-lane mover, and the arrow a sign's width beside
@@ -60,36 +60,6 @@ type MoverItemView = Pick<WalkItem, "height" | "kind" | "laneSpan" | "y"> & {
   readonly mover: MoverOnRoad;
 };
 
-// One of a mover's other sprites, at its body's place across the road, standing as itemViews
-// stands an obstacle's: flat on the road under everything, or on its feet row with a shadow.
-function drawWithBody(
-  item: MoverItemView,
-  part: ItemPart,
-  laneX: number,
-  still: boolean,
-  shadow: Shadow,
-): void {
-  const placed = project(PROJECTION, {
-    distance: PROJECTION.footY - part.footY(item),
-    x: laneX + part.dx,
-  });
-  const drawn = showAtDepth(part.sprite, part.key, placed.scale);
-  const x = Math.round(placed.x);
-  const y = Math.round(placed.y);
-  part.sprite.setPosition(x, y);
-  clipToRoad(part.sprite);
-  const tag = firstTag(part.sprite.scene, drawn.key, STANDING_TAGS.walking);
-  if (tag !== undefined) {
-    playTag(part.sprite, drawn.key, tag, still);
-  }
-  if (part.flat) {
-    part.sprite.setDepth(DEPTH.decal);
-  } else {
-    part.sprite.setDepth(DEPTH.sprite + placed.y);
-    shadow(part.key, drawn.depth, x, y);
-  }
-}
-
 // A mover's body sprite (moverBodyArt), of the art loaded.
 export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId): string {
   return moverBodyArt(gameData, (key) => scene.textures.exists(key), kind);
@@ -105,15 +75,15 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
 // edge during its cue. A stepper stands on the road throughout, with the wander mark over it
 // before each step. Its other sprites, after the wander mark, such as a skunk's cloud, go with
-// its body wherever it shows.
+// its body wherever it shows, standing as an obstacle's do.
 export function drawMover(
   item: MoverItemView,
   view: ItemView,
   roadTop: number,
   halted: boolean,
-  still: boolean,
-  shadow: Shadow,
+  frame: StandFrame,
 ): void {
+  const { shadow, still } = frame;
   const { road } = LAYOUT;
   const { path, since } = item.mover;
   const footY = item.y + item.height;
@@ -133,7 +103,7 @@ export function drawMover(
     for (const part of view.parts.slice(MOVER_CUE_PARTS + 1)) {
       part.sprite.setVisible(shown);
       if (shown) {
-        drawWithBody(item, part, laneX, still, shadow);
+        standPart(item, part, laneX, frame);
       }
     }
     if (shown) {

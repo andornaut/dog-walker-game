@@ -15,7 +15,6 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, HintTrigger, MinorObstacleId } from "../../data/types";
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
-import { project } from "../../layout/projection";
 import { itemAt } from "../../lib/arrays";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { moverTell } from "../../runner/movers";
@@ -23,10 +22,11 @@ import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { itemCategory, type Walk, type WalkItem, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
 import { PALETTE } from "../../ui/phaser/palette";
-import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
+import { addStandingSprite, ensurePlaceholder } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";
-import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { type StandFrame, standPart } from "./standPart";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.
@@ -62,13 +62,6 @@ interface StruckView {
   readonly offset: { dx: number; dy: number };
   readonly struck: StruckItem;
   readonly view: ItemView;
-}
-
-// What a frame draws standing items with.
-interface StandFrame {
-  readonly shadow: Shadow;
-  readonly still: boolean;
-  readonly tags: readonly string[];
 }
 
 // A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape in
@@ -114,13 +107,13 @@ export class ItemViews {
   // by showAtDepth.
   draw(walk: Walk, halted: boolean, still: boolean, shadow: Shadow): void {
     const seen = new Set<number>();
-    const tags = halted ? STANDING_TAGS.halted : STANDING_TAGS.walking;
+    const frame = { shadow, still, tags: halted ? STANDING_TAGS.halted : STANDING_TAGS.walking };
     const { roadTop } = screenRoadGeometry(walk.run);
     for (const item of walk.road.items) {
       seen.add(item.id);
       const view = this.views.get(item.id) ?? this.addView(item);
       if (item.mover !== undefined) {
-        drawMover({ ...item, mover: item.mover }, view, roadTop, halted, still, shadow);
+        drawMover({ ...item, mover: item.mover }, view, roadTop, halted, frame);
         // A moving lucky find bobs as it does standing.
         applyItemCue(item, view.parts, still, this.scene.time.now);
         // The cue's arrow shows only once it is wholly on the road below the juncture.
@@ -131,7 +124,7 @@ export class ItemViews {
         }
         continue;
       }
-      this.stand(item, view, { shadow, still, tags });
+      this.stand(item, view, frame);
       applyItemCue(item, view.parts, still, this.scene.time.now);
     }
     for (const [id, view] of this.views) {
@@ -140,7 +133,7 @@ export class ItemViews {
         this.views.delete(id);
       }
     }
-    this.drawStruck(walk, roadTop, { shadow, still, tags });
+    this.drawStruck(walk, roadTop, frame);
   }
 
   // Takes the obstacles a step's hits took out of play off the live views and keeps them as
@@ -177,14 +170,7 @@ export class ItemViews {
       if (item.mover === undefined) {
         this.stand(item, kept.view, frame);
       } else {
-        drawMover(
-          { ...item, mover: item.mover },
-          kept.view,
-          roadTop,
-          true,
-          frame.still,
-          frame.shadow,
-        );
+        drawMover({ ...item, mover: item.mover }, kept.view, roadTop, true, frame);
         parts.slice(1, MOVER_CUE_PARTS + 1).forEach(({ sprite }) => sprite.setVisible(false));
       }
       const { dx, dy } = kept.offset;
@@ -197,30 +183,12 @@ export class ItemViews {
     }
   }
 
-  // A standing item's sprites on the road through the projection.
-  private stand(item: WalkItem, view: ItemView, { shadow, still, tags }: StandFrame): void {
+  // A standing item's sprites across the middle of its lanes.
+  private stand(item: WalkItem, view: ItemView, frame: StandFrame): void {
     const first = itemAt(LANE_XS, item.lane);
     const laneX = (first + itemAt(LANE_XS, item.lane + item.laneSpan - 1)) / 2;
     for (const part of view.parts) {
-      const distance = PROJECTION.footY - part.footY(item);
-      const placed = project(PROJECTION, { distance, x: laneX + part.dx });
-      const drawn = showAtDepth(part.sprite, part.key, placed.scale, part.feet);
-      const x = Math.round(placed.x);
-      const y = Math.round(placed.y);
-      part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
-      clipToRoad(part.sprite);
-      const tag = firstTag(this.scene, drawn.key, tags);
-      if (tag !== undefined) {
-        playTag(part.sprite, drawn.key, tag, still);
-      }
-      if (part.lift > 0) {
-        part.sprite.setDepth(DEPTH.sprite + placed.y + 1);
-      } else if (part.flat) {
-        part.sprite.setDepth(DEPTH.decal);
-      } else {
-        part.sprite.setDepth(DEPTH.sprite + placed.y);
-        shadow(part.key, drawn.depth, x, y);
-      }
+      standPart(item, part, laneX, frame);
     }
   }
 
