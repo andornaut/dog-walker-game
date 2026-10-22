@@ -190,7 +190,12 @@ function raiseSave(
         ...save,
         stats: {
           ...stats,
-          lifetimeCents: cents(Math.max(stats.lifetimeCents, dollarsToCents(condition.dollars))),
+          lifetimeCents: cents(
+            Math.max(
+              stats.lifetimeCents,
+              stats.lifetimeStartCents + dollarsToCents(condition.dollars),
+            ),
+          ),
         },
       };
     case "walkersFinishedWith":

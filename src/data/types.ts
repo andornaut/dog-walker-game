@@ -952,8 +952,8 @@ export type Threshold = number | "all";
 // fired, distinct owners who fired you (all: every dog's owner), distinct dogs that finished a
 // walk without firing you (all: every dog), distinct walkers who finished a walk (all: every
 // walker), distinct zones finished across walks (all: every zone of the world), walks played,
-// dollars banked across walks, landed plain bumps by any of kinds across walks, and a lifetime
-// tally.
+// dollars earned across walks net of their starting cash, landed plain bumps by any of kinds
+// across walks, and a lifetime tally.
 export type AchievementCondition =
   | {
       readonly count: number;

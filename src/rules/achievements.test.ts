@@ -296,6 +296,18 @@ describe("profile conditions", () => {
       true,
     ],
     [
+      "lifetimeEarnings a cent short net of starting cash",
+      lifetime,
+      withStats({ lifetimeCents: cents(25_000), lifetimeStartCents: cents(5_001) }),
+      false,
+    ],
+    [
+      "lifetimeEarnings at the dollars net of starting cash",
+      lifetime,
+      withStats({ lifetimeCents: cents(25_000), lifetimeStartCents: cents(5_000) }),
+      true,
+    ],
+    [
       "walkersFinishedWith all, one missing",
       { count: "all", kind: "walkersFinishedWith" },
       withStats({ walkersFinishedWith: ALL_WALKERS.slice(1) }),

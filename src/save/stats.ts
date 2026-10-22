@@ -28,6 +28,13 @@ export function walksPlayed(stats: Pick<SaveStats, "runs">): number {
   return stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
 }
 
+// What every walk earned, net of its starting cash; below 0 when card costs spent more.
+export function lifetimeEarnedNet(
+  stats: Pick<SaveStats, "lifetimeCents" | "lifetimeStartCents">,
+): number {
+  return stats.lifetimeCents - stats.lifetimeStartCents;
+}
+
 // Every dog's walks added up: a run with 3 dogs walks 3.
 export function dogsWalked(stats: Pick<SaveStats, "dogs">): number {
   return Object.values(stats.dogs).reduce((total, { walks }) => total + walks, 0);

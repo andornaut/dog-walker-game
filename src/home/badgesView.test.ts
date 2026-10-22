@@ -5,7 +5,7 @@ import { gameData } from "../data";
 import type { AchievementCondition, DogId, WalkerId, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames, wrapWords } from "../lib/lines";
-import { dollarsToCents } from "../rules/units";
+import { cents, dollarsToCents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
 import { newPlayerSave } from "../testing/saves";
@@ -64,6 +64,8 @@ function needOf(condition: Counted): number {
       return assertNever(condition);
   }
 }
+// Starting cash across walks, which lifetime earnings leave out.
+const STARTING_CASH = cents(4_000);
 const isCounted = (condition: AchievementCondition): condition is Counted =>
   (COUNTED_KINDS as readonly string[]).includes(condition.kind);
 
@@ -80,7 +82,14 @@ function counted(condition: Counted, n: number): SaveDocument {
       return { ...newPlayerSave, stats: { ...stats, dogs } };
     }
     case "lifetimeEarnings":
-      return { ...newPlayerSave, stats: { ...stats, lifetimeCents: dollarsToCents(n) } };
+      return {
+        ...newPlayerSave,
+        stats: {
+          ...stats,
+          lifetimeCents: cents(dollarsToCents(n) + STARTING_CASH),
+          lifetimeStartCents: STARTING_CASH,
+        },
+      };
     case "walkersFinishedWith":
       return {
         ...newPlayerSave,

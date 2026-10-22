@@ -11,7 +11,7 @@ import type {
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import type { SaveDocument, SaveStats } from "../save/schema";
-import { walksPlayed } from "../save/stats";
+import { lifetimeEarnedNet, walksPlayed } from "../save/stats";
 import type { RunState } from "../state/runState";
 import { walkLength } from "./route";
 import { type Cents, dollarsToCents } from "./units";
@@ -202,7 +202,7 @@ export function conditionHolds(
         save.owned.gear.length >= needed(Object.keys(data.shopGear).length, condition.count)
       );
     case "lifetimeEarnings":
-      return save !== null && save.stats.lifetimeCents >= dollarsToCents(condition.dollars);
+      return save !== null && lifetimeEarnedNet(save.stats) >= dollarsToCents(condition.dollars);
     case "luckyFinds":
       return (
         facts !== null &&
@@ -237,10 +237,10 @@ export function conditionHolds(
 }
 
 // How far a save has come toward a condition that counts across walks (a lifetime tally,
-// landed bumps, whole dollars banked, walks played, times fired, finished walks with no firing,
-// distinct owners who fired you, distinct dogs and walkers that finished a walk, distinct zones
-// finished): have is capped at need. null for a condition judged on one walk or on what the save
-// owns.
+// landed bumps, whole dollars earned net of starting cash, walks played, times fired, finished
+// walks with no firing, distinct owners who fired you, distinct dogs and walkers that finished a
+// walk, distinct zones finished): have is capped at need. null for a condition judged on one walk
+// or on what the save owns.
 function acrossWalksProgress(
   data: Pick<GameData, "dogs" | "walkers" | "world">,
   save: Pick<SaveDocument, "stats">,
@@ -257,7 +257,10 @@ function acrossWalksProgress(
     case "firedByOwners":
       return progress(firedByOwners(stats), needed(dogs, condition.count));
     case "lifetimeEarnings":
-      return progress(Math.floor(stats.lifetimeCents / dollarsToCents(1)), condition.dollars);
+      return progress(
+        Math.max(0, Math.floor(lifetimeEarnedNet(stats) / dollarsToCents(1))),
+        condition.dollars,
+      );
     case "tally":
       return progress(stats.tallies[condition.tally] ?? 0, condition.count);
     case "timesFired":
@@ -379,7 +382,7 @@ export function achievementConditionText(
     case "gearOwned":
       return `own ${thresholdText(condition.count, "gear items")}`;
     case "lifetimeEarnings":
-      return `bank $${condition.dollars} in total`;
+      return `bank $${condition.dollars} in total, net of starting cash`;
     case "luckyFinds":
       return `${thresholdText(condition.count, "lucky finds")} each found in one walk`;
     case "packSize":
