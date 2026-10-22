@@ -52,7 +52,8 @@ interface MatrixCell {
 // when none did: hitShare of the obstacles that are encounters, but for pull obstacles such as
 // squirrels, which touching does nothing to, and bumpShare of minor obstacles, both moving or
 // not, luckyShare of lucky encounters collected, kindHitShares of each kind of obstacle that
-// does not move, minor or not, and moverHitShares of each obstacle that moves, minor or not.
+// does not move, minor or not, and moverHitShares of each obstacle that moves, minor or not,
+// both but pull obstacles.
 // meanTips counts the tips collected per run.
 export interface MatrixRow {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
@@ -197,7 +198,8 @@ export function simulateCell(
   return summarizeCell(data, cell, results);
 }
 
-// Every obstacle kind that can stand still, those that open a card first, then the minor ones.
+// Every obstacle kind, those that open a card first, then the minor ones, but pull obstacles
+// such as squirrels, which touching does nothing to.
 function obstacleKinds(data: Pick<GameData, "encounters" | "minorObstacles">): WalkItemKind[] {
   const kinds = [
     ...Object.keys(data.encounters),
@@ -205,7 +207,7 @@ function obstacleKinds(data: Pick<GameData, "encounters" | "minorObstacles">): W
   ] as WalkItemKind[];
   return kinds.filter((kind) => {
     const category = itemCategory(data, kind);
-    return category === "obstacle" || category === "minor";
+    return (category === "obstacle" || category === "minor") && !isPullObstacle(data, kind);
   });
 }
 

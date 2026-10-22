@@ -202,6 +202,7 @@ describe("simulateMatrix", () => {
     expect(row?.kindHitShares.cone).toBe(0.25);
     expect(row?.kindHitShares.hedge).toBeNull();
     expect(row?.moverHitShares.ball).toBe(0.5);
+    expect(row?.moverHitShares).not.toHaveProperty("squirrel");
     expect(row?.bumpShare).toBe(2 / 6);
     expect(row?.hitShare).toBe(0.5);
     expect(row?.meanTips).toBe(6);
