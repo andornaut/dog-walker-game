@@ -17,7 +17,7 @@ exports[`every card's text > matches the snapshot 1`] = `
   "gear": {
     "dogWhistle": "Medium and big dogs dodge 1 in 8",
     "fannyPack": "Starting cash +$20",
-    "hallPass": "A free Walk on by each neighborhood",
+    "hallPass": "One free card skip each neighborhood",
     "luckyCollar": "Max ♥ +1",
     "runningShoes": "Agility +0.3",
   },
