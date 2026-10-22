@@ -89,5 +89,8 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts"],
     root: repoPath("."),
+    // Whole-walk tests run several seconds alone and several times that on a loaded host or a
+    // CI runner, so the default 5 s is too tight; the slowest blocks set their own, longer limit.
+    testTimeout: 30_000,
   },
 });
