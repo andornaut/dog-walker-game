@@ -148,32 +148,24 @@ function targetOf(
   kind: PullTargetKind,
   item: WalkItem,
 ): Target | null {
-  if (item.y + item.height > geometry.packBand.top) {
+  const { mover } = item;
+  if (item.y + item.height > geometry.packBand.top || (mover === undefined && item.lane === lane)) {
     return null;
   }
-  const centreAt = (lanePosition: number) => ({
-    x: (lanePosition + item.laneSpan / 2) * geometry.cell.length,
-    y: item.y + item.height / 2,
-  });
-  if (item.mover !== undefined) {
-    const place = moverPlace(geometry.laneCount, item.mover.path, item.mover.since);
-    return {
-      centre: centreAt(place.lanePosition),
-      itemId: item.id,
-      kind,
-      lanePosition: place.lanePosition,
-      y: item.y,
-    };
-  }
-  return item.lane !== lane
-    ? {
-        centre: centreAt(item.lane),
-        itemId: item.id,
-        kind,
-        lanePosition: item.lane,
-        y: item.y,
-      }
-    : null;
+  const lanePosition =
+    mover === undefined
+      ? item.lane
+      : moverPlace(geometry.laneCount, mover.path, mover.since).lanePosition;
+  return {
+    centre: {
+      x: (lanePosition + item.laneSpan / 2) * geometry.cell.length,
+      y: item.y + item.height / 2,
+    },
+    itemId: item.id,
+    kind,
+    lanePosition,
+    y: item.y,
+  };
 }
 
 // How many pulls a squirrel draws: squirrelPulls modifiers, such as Good leash, scale its one
@@ -360,26 +352,27 @@ export function stepPulls(
   if (strain === null || target === null) {
     target = nearestSquirrel(geometry, spent, walk);
     const dog = target === null ? undefined : nearestDog(geometry, target, walk);
-    if (dog !== undefined && target !== null && squirrelPulls(data, walk) < 1) {
+    if (target === null || dog === undefined) {
+      return { ...NOTHING, failed, pulls: { ...pulls, clock, spent, strain: null }, walk };
+    }
+    const pullsLeft = squirrelPulls(data, walk);
+    if (pullsLeft < 1) {
       const next = { ...pulls, clock, spent: [...spent, target.itemId], strain: null };
       return { ...NOTHING, failed, leashed: [dog], pulls: next, walk };
     }
-    if (dog !== undefined && target !== null) {
-      strain = {
-        blocked: false,
-        direction: sideOf(lane, target),
-        dog,
-        fromLane: lane,
-        itemId: target.itemId,
-        kind: target.kind,
-        pullsLeft: squirrelPulls(data, walk),
-        tellSeconds: tell,
-      };
-      const started: PullTell = { direction: strain.direction, dog, kind: target.kind };
-      const next = { ...pulls, clock, spent, strain };
-      return { ...NOTHING, failed, pulls: next, tells: [started], walk };
-    }
-    return { ...NOTHING, failed, pulls: { ...pulls, clock, spent, strain: null }, walk };
+    strain = {
+      blocked: false,
+      direction: sideOf(lane, target),
+      dog,
+      fromLane: lane,
+      itemId: target.itemId,
+      kind: target.kind,
+      pullsLeft,
+      tellSeconds: tell,
+    };
+    const started: PullTell = { direction: strain.direction, dog, kind: target.kind };
+    const next = { ...pulls, clock, spent, strain };
+    return { ...NOTHING, failed, pulls: next, tells: [started], walk };
   }
 
   // Steering away from the target during the strain cancels the pull, and the target's pulls
