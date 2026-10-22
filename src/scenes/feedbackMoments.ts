@@ -1,7 +1,7 @@
 import type { Animations, GameObjects, Scene, Tweens, Types } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
-import { ownerFaceKey } from "../assets/spriteKeys";
+import { ownerFaceKey, WARNING_KEY, WARNING_TAG } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
@@ -573,9 +573,12 @@ export class HudFeedback {
     } else {
       const rim = this.scene.add.graphics();
       drawRing(rim, PALETTE.red, rect, RIM.width);
-      const sign = this.scene.add.sprite(rect.x + rect.width - 18, rect.y + 2, "ui-warning");
-      playTag(sign.setOrigin(0), "ui-warning", "pulse", still);
-      warning.parts.push(rim, sign);
+      warning.parts.push(rim);
+      if (this.scene.textures.exists(WARNING_KEY)) {
+        const sign = this.scene.add.sprite(rect.x + rect.width - 18, rect.y + 2, WARNING_KEY);
+        playTag(sign.setOrigin(0), WARNING_KEY, WARNING_TAG, still);
+        warning.parts.push(sign);
+      }
       if (!still) {
         warning.pulse = this.scene.tweens.add({
           alpha: RIM.minAlpha,
