@@ -2,14 +2,16 @@ import { signedText } from "../lib/lines";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
 
+// The dodge label shows for ms: fully opaque for holdMs, so it can be read, then rising rise
+// pixels and fading out over the rest.
+const DODGE_LABEL = { holdMs: 600, ms: 900, rise: 10 } as const;
+
 // The heart change, dodge and forgiven moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {
-  // The dodge label shows for ms: fully opaque for holdMs, so it can be read, then rising rise
-  // pixels and fading out over the rest.
-  dodge: { holdMs: 600, ms: 900, rise: 10 },
+  dodge: DODGE_LABEL,
   // The forgiven label shows, rises and fades as the dodge label does, while the forgiven heart
   // on the dog's card blinks empty and back blinks times, blinkMs a step.
-  forgiven: { blinkMs: 120, blinks: 3, holdMs: 600, ms: 900, rise: 10 },
+  forgiven: { ...DODGE_LABEL, blinkMs: 120, blinks: 3 },
   // A heart flies into its card over flyMs, peaking peak pixels above its higher end; a
   // dog's later change in one batch starts staggerMs after the one before. The card shakes
   // by shakeDx, one step a frame of its flash.
