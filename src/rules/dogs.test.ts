@@ -4,9 +4,11 @@ import { DOGS } from "../data/dogs";
 import { TUNING as REAL_TUNING } from "../data/tuning";
 import type { Modifier } from "../data/types";
 import { PACK_PLACES, placeName } from "../testing/packPlaces";
+import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   maxHearts,
+  ownerMaxHearts,
   packPlace,
   packSizeBonus,
   packSizeRaise,
@@ -62,6 +64,27 @@ describe("dog stats", () => {
   ] as const)("places a dog in the pack %j: %s", (order, dog, place) => {
     expect(packPlace(order, dog)).toEqual(place);
   });
+});
+
+describe("ownerMaxHearts", () => {
+  // A fired dog keeps its place, so the pack is the size it set out with.
+  const collar = activeModifier(
+    { gear: "luckyCollar", kind: "gear" },
+    { by: "luckyCollarMax", operation: "add", stat: "maxHearts" },
+  );
+  const run = testState({ biscuit: "fired", koda: 3, zippy: 2 }, { modifiers: [collar] });
+  it.each([
+    ["biscuit", { lead: true, size: 3 }],
+    ["koda", { lead: false, size: 3 }],
+    ["zippy", { lead: false, size: 3 }],
+  ] as const)(
+    "caps %s's owner at the max of its place in the pack it set out with",
+    (dog, place) => {
+      expect(ownerMaxHearts({ dogs: DOGS, tuning: TEST_TUNING }, run, dog)).toBe(
+        maxHearts(TEST_TUNING, run.modifiers, place, DOGS[dog]),
+      );
+    },
+  );
 });
 
 describe("zoneStats", () => {

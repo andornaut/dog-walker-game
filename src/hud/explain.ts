@@ -9,11 +9,10 @@ import {
   walkerDetail,
 } from "../home/detail";
 import { fillLine, fillNames } from "../lib/lines";
-import { maxHearts } from "../rules/dogs";
+import { ownerMaxHearts } from "../rules/dogs";
 import { capitalize } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
-import { placeInPack } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { extraHearts } from "./buffMarks";
 import { effectIconKey, effectItems } from "./effectIcons";
@@ -147,14 +146,7 @@ export function explainDetail(
       const home = dogDetail(data, save.owned, save.bankCents, save.stats, target.dog);
       const hearts = fillLine(RUN_TEXT_FIELDS.explain, text, "dogHearts", {
         hearts: String(slot.status === "walking" ? slot.hearts : 0),
-        max: String(
-          maxHearts(
-            data.tuning,
-            run.modifiers,
-            placeInPack(run, target.dog),
-            data.dogs[target.dog],
-          ),
-        ),
+        max: String(ownerMaxHearts(data, run, target.dog)),
       });
       return {
         card: {

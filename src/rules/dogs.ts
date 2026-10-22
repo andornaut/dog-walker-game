@@ -1,4 +1,5 @@
-import type { Dog, DogId, LiveTuning, Modifier, PackSize } from "../data/types";
+import type { Dog, DogId, GameData, LiveTuning, Modifier, PackSize } from "../data/types";
+import type { RunState } from "../state/runState";
 import { modifiedStat } from "./modifiers";
 import { clampHearts, type Hearts, read, readTable } from "./units";
 
@@ -42,6 +43,20 @@ export function maxHearts(
   dog: Pick<Dog, "size">,
 ): number {
   return cappedMax(tuning, modifiers, sizeHearts(tuning, dog) + packSizeBonus(tuning, place));
+}
+
+// The cap on this dog's owner's meter on the walk: its maxHearts at its place in the pack the
+// walk set out with, fired dogs included.
+export function ownerMaxHearts(
+  data: Pick<GameData, "dogs" | "tuning">,
+  run: Pick<RunState, "modifiers" | "pack">,
+  dog: DogId,
+): number {
+  const place = packPlace(
+    run.pack.map((slot) => slot.dog),
+    dog,
+  );
+  return maxHearts(data.tuning, run.modifiers, place, data.dogs[dog]);
 }
 
 // How many hearts the pack-size bonus raises this dog's owner's max by, once capped.
