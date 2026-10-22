@@ -19,6 +19,7 @@ import {
   wallCellLines,
   wallRects,
 } from "./badgesView";
+import { dollarText } from "./home";
 import { STATS_LAYOUT } from "./statsLayout";
 
 // The condition kinds a save counts across walks, and a save that has counted n of one.
@@ -108,8 +109,15 @@ const COUNTED_BADGES = gameData.achievements.flatMap((achievement) => {
   return rest.length === 0 && isCounted(condition) ? [{ condition, id: achievement.id }] : [];
 });
 
-const progressText = (have: number, need: number) =>
-  fillNames(gameData.menuText.stats.badgeProgress, { have: String(have), need: String(need) });
+// Progress as a badge of kind shows it: whole dollars for lifetime earnings, else the count, both
+// with thousands separated.
+const amountText = (kind: Counted["kind"], amount: number) =>
+  kind === "lifetimeEarnings" ? dollarText(dollarsToCents(amount)) : amount.toLocaleString("en-US");
+const progressText = (kind: Counted["kind"], have: number, need: number) =>
+  fillNames(gameData.menuText.stats.badgeProgress, {
+    have: amountText(kind, have),
+    need: amountText(kind, need),
+  });
 
 describe("badgeWall", () => {
   it("lists every badge in wall order, earned by the save or locked", () => {
@@ -136,10 +144,10 @@ describe("badgeProgress", () => {
       const locked = { earned: false, id };
       const need = needOf(condition);
       expect(badgeProgress(gameData, counted(condition, need - 1), locked), id).toBe(
-        progressText(need - 1, need),
+        progressText(condition.kind, need - 1, need),
       );
       expect(badgeProgress(gameData, counted(condition, need * 2), locked), id).toBe(
-        progressText(need, need),
+        progressText(condition.kind, need, need),
       );
       expect(badgeProgress(gameData, counted(condition, 0), { earned: true, id })).toBeUndefined();
     }
@@ -155,7 +163,11 @@ describe("wallCell", () => {
   // The widest progress a badge shows: its count over its count.
   const progressFor = (id: string) => {
     const condition = COUNTED_BADGES.find((badge) => badge.id === id)?.condition;
-    return condition === undefined ? undefined : progressText(needOf(condition), needOf(condition));
+    if (condition === undefined) {
+      return undefined;
+    }
+    const need = needOf(condition);
+    return progressText(condition.kind, need, need);
   };
 
   it.each(badgeWall(gameData, newPlayerSave).map((badge) => [badge.name, badge] as const))(

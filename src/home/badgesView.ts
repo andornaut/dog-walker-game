@@ -1,10 +1,12 @@
 import { badgeKey } from "../assets/spriteKeys";
-import type { AchievementId, GameData } from "../data/types";
+import type { AchievementCondition, AchievementId, GameData } from "../data/types";
 import { fillLine, wrapWords } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import { achievementProgress } from "../rules/achievements";
+import { dollarsToCents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import type { TextFitStyle } from "../ui/textFit";
+import { dollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
 export interface BadgeView {
@@ -53,8 +55,17 @@ export function earnedText(
   });
 }
 
-// The progress under a locked badge's goal when its condition counts across walks ("7/15");
-// undefined for an earned badge and for one judged on a single walk or on what the save owns.
+// A count of a badge's progress as the game shows it: whole dollars for lifetime earnings,
+// else the number, each with thousands separated.
+function progressAmountText(kind: AchievementCondition["kind"], amount: number): string {
+  return kind === "lifetimeEarnings"
+    ? dollarText(dollarsToCents(amount))
+    : amount.toLocaleString("en-US");
+}
+
+// The progress under a locked badge's goal when its condition counts across walks ("7/15",
+// "$1,234/$20,000"); undefined for an earned badge and for one judged on a single walk or on
+// what the save owns.
 export function badgeProgress(
   data: Pick<GameData, "achievements" | "dogs" | "menuText" | "walkers" | "world">,
   save: Pick<SaveDocument, "stats">,
@@ -63,11 +74,12 @@ export function badgeProgress(
   const achievement = data.achievements.find(({ id }) => id === badge.id);
   const progress =
     badge.earned || achievement === undefined ? null : achievementProgress(data, save, achievement);
-  return progress === null
+  const kind = achievement?.conditions[0]?.kind;
+  return progress === null || kind === undefined
     ? undefined
     : fillLine(MENU_TEXT_FIELDS.stats, data.menuText.stats, "badgeProgress", {
-        have: String(progress.have),
-        need: String(progress.need),
+        have: progressAmountText(kind, progress.have),
+        need: progressAmountText(kind, progress.need),
       });
 }
 
