@@ -19,7 +19,7 @@ exports[`every card's text > matches the snapshot 1`] = `
     "fannyPack": "Starting cash +$20",
     "hallPass": "A free Walk on by each neighborhood",
     "luckyCollar": "Max ♥ +1",
-    "runningShoes": "Agility +0.1",
+    "runningShoes": "Agility +0.3",
   },
   "upgrades": {
     "bellyRubs": "+1♥ each",
