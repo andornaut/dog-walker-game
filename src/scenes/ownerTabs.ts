@@ -11,6 +11,7 @@ import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
 import { firstTag, playTag } from "./sprites";
+import type { TimedGroup } from "./timedGroup";
 import { fadeAway } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -23,8 +24,10 @@ const TAB_KEY = "ui-owner-tab";
 
 type Depthed = GameObjects.GameObject & GameObjects.Components.Depth;
 
+// group: the HUD's timed group the pop and fade join, so they hold while the player has paused.
 // still: reduced motion, which shows a tab without popping it in.
 interface OwnerTabHooks {
+  group: TimedGroup;
   still: () => boolean;
 }
 
@@ -56,13 +59,19 @@ export class OwnerTabs {
     parts.forEach((part, i) => (part as Depthed).setDepth(DEPTH + i));
     this.shown.set(at.slot, parts);
     if (!this.hooks.still()) {
-      this.scene.tweens.add({ alpha: { from: 0, to: 1 }, duration: POP_MS, targets: parts });
+      this.hooks.group.tween(this.scene, {
+        alpha: { from: 0, to: 1 },
+        duration: POP_MS,
+        targets: parts,
+      });
     }
-    fadeAway(this.scene, parts, { delayMs: holdMs, ms: FADE_MS, rise: 0 }, () => {
-      if (this.shown.get(at.slot) === parts) {
-        this.shown.delete(at.slot);
-      }
-    });
+    this.hooks.group.join(
+      fadeAway(this.scene, parts, { delayMs: holdMs, ms: FADE_MS, rise: 0 }, () => {
+        if (this.shown.get(at.slot) === parts) {
+          this.shown.delete(at.slot);
+        }
+      }),
+    );
   }
 
   private clear(slot: number): void {

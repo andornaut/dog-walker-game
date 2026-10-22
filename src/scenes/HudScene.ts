@@ -172,8 +172,8 @@ export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } 
 // shows the run's change labels, first-time hints, owners' pop-ins and what a held press
 // explains. It keeps running while the walk is paused, so the bar's buttons and their
 // keys work in every state; its animations run on too, being the bar's and not the walk's,
-// except the walk's moments: while the player has paused, heart pops, change labels and the
-// message strip's ageing hold.
+// except the walk's moments: while the player has paused, heart pops, change labels, owners'
+// pop-ins and the message strip's ageing hold.
 export class HudScene extends Scene {
   private bankLabels: ChangeLabel[] = [];
   private bankShowing = false;
@@ -188,7 +188,8 @@ export class HudScene extends Scene {
   private explained = "";
   private feedback: HudFeedback | undefined;
   private hearts: HeartFeedback | undefined;
-  // The change labels on screen.
+  // The change labels, glints and owners' pop-ins on screen, which hold while the player has
+  // paused.
   private labels = new TimedGroup();
   private messages = new MessageStrip();
   private money: GameObjects.BitmapText | undefined;
@@ -275,7 +276,7 @@ export class HudScene extends Scene {
 
     const run = this.walk();
     const firingRects = () => this.feedback?.firingRects() ?? [];
-    this.owners = new OwnerTabs(this, { still: () => run.reducedMotion() });
+    this.owners = new OwnerTabs(this, { group: this.labels, still: () => run.reducedMotion() });
     this.feedback = new HudFeedback(this, run, {
       firingShown: () => this.hearts?.clearWay(),
       floatLabels: (ownerMs, labels) => this.floatLabels(ownerMs, labels),
