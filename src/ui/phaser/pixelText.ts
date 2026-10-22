@@ -236,18 +236,8 @@ export function fitPixelText(
   x: number,
   y: number,
 ): FittedText {
-  const text = label.text;
-  const apply = (style: TextFitStyle, lines: string) => {
-    label.setText(lines).setLetterSpacing(style.letterSpacing);
-    scalePixelText(label, style.scale, x, y);
-    return label;
-  };
-  const inkWidth = (style: TextFitStyle, line: string) => {
-    const ink = inkSpan(apply(style, line));
-    return ink.right - ink.left;
-  };
-  const fitted = fittingText(fit.styles, inkWidth, fit.room, text);
-  apply(fitted.style, fitted.lines.join("\n"));
+  const fitted = fittingText(fit.styles, labelInkWidth(label), fit.room, label.text);
+  setFittedText(label, fitted, x, y);
   return fitted;
 }
 
