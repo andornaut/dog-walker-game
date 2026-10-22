@@ -1,6 +1,7 @@
 import { read } from "../rules/units";
 import { approachOutcomes } from "../runner/approach";
 import {
+  cuedStep,
   hasStopped,
   hopShapes,
   type MoverPath,
@@ -42,12 +43,7 @@ function stepsSeen(
   path: SteppingPath,
   since: number,
 ): { readonly cued: MoverStep | undefined; readonly started: readonly MoverStep[] } {
-  return {
-    cued: path.steps.find(
-      (step) => step.uncued !== true && since >= step.at - path.warning && since < step.at,
-    ),
-    started: path.steps.filter((step) => step.at <= since),
-  };
+  return { cued: cuedStep(path, since), started: path.steps.filter((step) => step.at <= since) };
 }
 
 // What a mover shows since scroll after its cue appeared, or it spawned for a stepping mover: a

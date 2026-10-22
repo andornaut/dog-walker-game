@@ -235,10 +235,17 @@ export function moverTell(path: MoverPath, since: number): MoverTell | null {
     }
     return { kind: path.speedMultiplier > 1 ? "down" : "up" };
   }
-  const next = path.steps.some(
+  return cuedStep(path, since) === undefined ? null : { kind: "wander" };
+}
+
+// The step of a stepping mover whose cue shows since scroll after it spawned, if any.
+export function cuedStep(
+  path: { readonly steps: readonly MoverStep[]; readonly warning: number },
+  since: number,
+): MoverStep | undefined {
+  return path.steps.find(
     (step) => step.uncued !== true && since >= step.at - path.warning && since < step.at,
   );
-  return next ? { kind: "wander" } : null;
 }
 
 // Whether a mover is moving rather than standing or showing its cue: a crosser that stops stands
