@@ -10,6 +10,8 @@ import { itemAt } from "../lib/arrays";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,
+  formatDeliveryKindTable,
+  formatDeliveryTable,
   formatKindTable,
   formatTable,
   type Matrix,
@@ -36,7 +38,7 @@ const presetLines = SKILL_PRESET_IDS.map((id) => {
 const USAGE = [
   "npm run simulate -- [--skill preset,...] [--policy id,...]",
   "                    [--route id,...] [--gear id,...] [--walker id,...] [--runs N] [--seed N]",
-  "                    [--bot foresight|sight] [--out file]",
+  "                    [--bot foresight|sight] [--delivery groups|kinds] [--out file]",
   "",
   "Plays whole runs on the real rules and data, one row per policy, route, player, gear, pack",
   "and walker.",
@@ -55,6 +57,9 @@ const USAGE = [
   "  --bot     how the bots read movers: sight reads only what a player sees, a mover's cue and",
   "            its moves as they start; foresight reads every mover's whole planned path, for",
   `            checking the road stays passable (default: ${DEFAULT_MATRIX.sight})`,
+  "  --delivery",
+  "            the delivery table: groups gives a column per group, kinds also a line per kind",
+  "            (default: groups)",
   "  --out     also write the matrix and rows as JSON to this file",
   "",
   "Skill presets:",
@@ -64,9 +69,20 @@ const USAGE = [
   "not) and lucky encounters that reached the pack and were hit or collected. Tips is tips",
   "collected per run, Zones zones finished per run. A second table gives the hit rate of each",
   "obstacle kind that stands still, then of each mover.",
+  "",
+  "The delivery table compares each zone's plan with the road it placed, by walk position (Pos)",
+  "and zone, summed over every row: Plans is the zones planned, and each group column the mean",
+  "placed/planned per plan. Planned is what the tuning counts and weights asked for; the",
+  "planner skips a spawn it has no room for. Tips, Treats and Lucky are pickups and lucky",
+  "finds; Static, Dart, Rider and Hop/stalk are minor obstacles standing still, darting across,",
+  "riding in a lane, and hopping or stalking; Card and No card are obstacles that open a card",
+  "and those that do not. A mover planned that stood still counts as placed standing.",
 ].join("\n");
 
+const DELIVERY_VIEWS = ["groups", "kinds"] as const;
+
 interface Options {
+  readonly delivery: (typeof DELIVERY_VIEWS)[number];
   readonly help: boolean;
   readonly matrix: Matrix;
   readonly out: string | undefined;
@@ -114,13 +130,14 @@ function parseGears(text: string): (GearId | null)[] {
 }
 
 function parseArgs(args: readonly string[]): Options {
+  let delivery: Options["delivery"] = "groups";
   let matrix = DEFAULT_MATRIX;
   let out: string | undefined;
   let runs = DEFAULT_RUNS;
   let seed = DEFAULT_SEED;
   let skills: MatrixPlayer[] = [];
   if (args.includes("--help") || args.includes("-h")) {
-    return { help: true, matrix, out, runs, seed };
+    return { delivery, help: true, matrix, out, runs, seed };
   }
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];
@@ -131,6 +148,9 @@ function parseArgs(args: readonly string[]): Options {
     switch (flag) {
       case "--bot":
         matrix = { ...matrix, sight: parseId(flag, BOT_SIGHTS, value) };
+        break;
+      case "--delivery":
+        delivery = parseId(flag, DELIVERY_VIEWS, value);
         break;
       case "--gear":
         matrix = { ...matrix, gears: parseGears(value) };
@@ -166,7 +186,7 @@ function parseArgs(args: readonly string[]): Options {
   if (skills.length > 0) {
     matrix = { ...matrix, players: skills };
   }
-  return { help: false, matrix, out, runs, seed };
+  return { delivery, help: false, matrix, out, runs, seed };
 }
 
 function runJob({ cells, matrix, runs, seed }: Job): MatrixRow[] {
@@ -216,7 +236,11 @@ async function main(): Promise<void> {
   const seconds = (performance.now() - started) / 1000;
   const { matrix, out, runs, seed } = options;
   process.stdout.write(`${formatTable(rows)}\n\nHit rate by obstacle kind\n`);
-  process.stdout.write(`${formatKindTable(gameData, rows)}\n`);
+  process.stdout.write(`${formatKindTable(gameData, rows)}\n\nDelivery by zone\n`);
+  process.stdout.write(`${formatDeliveryTable(rows)}\n`);
+  if (options.delivery === "kinds") {
+    process.stdout.write(`\nDelivery by kind\n${formatDeliveryKindTable(rows)}\n`);
+  }
   process.stdout.write(
     `${rows.length} cells x ${runs} runs, seed ${seed}, bot ${matrix.sight}, in ${seconds.toFixed(1)}s\n`,
   );

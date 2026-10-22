@@ -6,6 +6,7 @@ import type {
   MinorObstacleId,
   MoveCount,
   Movement,
+  MovementKind,
   ObstacleEncounterId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
@@ -113,8 +114,9 @@ export type WalkItem = MoverItem<WalkItemKind>;
 type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
-// not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
-// hitStop is set while a hit or a firing holds the walk still.
+// not yet in view, at zone distances. planned is what this zone's plan asked for from the tuning
+// counts and weights, which the simulator compares with what it placed. speedFactor scales the
+// scroll speed, for testing. hitStop is set while a hit or a firing holds the walk still.
 export interface Road {
   control: LaneControl;
   hitStop: HitStop | null;
@@ -122,7 +124,15 @@ export interface Road {
   items: readonly WalkItem[];
   nextItemId: number;
   pending: readonly SpawnEvent<WalkItemKind>[];
+  planned: readonly PlannedCount[];
   speedFactor: number;
+}
+
+// A spawn quota as counted: its kind, how many, and how they move, or null standing still.
+export interface PlannedCount {
+  readonly count: number;
+  readonly kind: WalkItemKind;
+  readonly movement: MovementKind | null;
 }
 
 export interface Walk {
@@ -396,6 +406,7 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
     items: [],
     nextItemId: 0,
     pending: [],
+    planned: [],
     speedFactor,
   };
 }
@@ -686,7 +697,12 @@ export function planZone(
     stepSeconds: STEP_SECONDS,
     zoneLength: length,
   };
-  return { road: { ...road, pending: planSpawns(streams, plan) }, run };
+  const planned = plan.quotas.map(({ count, kind, mover }) => ({
+    count,
+    kind,
+    movement: mover?.movement ?? null,
+  }));
+  return { road: { ...road, pending: planSpawns(streams, plan), planned }, run };
 }
 
 // Steering during a hit stop is dropped, not queued.

@@ -4,6 +4,7 @@ import { DEFAULT_WALKER } from "../data/walkers";
 import { itemAt } from "../lib/arrays";
 import { isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
+import { type Delivered, DELIVERY_GROUPS, sumDeliveries, type ZoneDelivery } from "./delivery";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
 import type { BotSight } from "./sight";
 import {
@@ -54,11 +55,13 @@ interface MatrixCell {
 // not, luckyShare of lucky encounters collected, kindHitShares of each kind of obstacle that
 // does not move, minor or not, and moverHitShares of each obstacle that moves, minor or not,
 // both but pull obstacles.
-// meanTips counts the tips collected per run.
+// meanTips counts the tips collected per run. delivery sums every run's zone plans by walk
+// position and zone: what they asked for and what they placed, by group and by kind.
 export interface MatrixRow {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
   readonly afterPullShare: number | null;
   readonly bumpShare: number | null;
+  readonly delivery: readonly ZoneDelivery[];
   readonly finishedShare: number;
   // The share of walks with at least one firing.
   readonly firedShare: number;
@@ -250,6 +253,7 @@ function summarizeCell(
   return {
     afterPullShare: hits === 0 ? null : afterPull / hits,
     bumpShare: touchedShare(countsOf(inCategory("minor"))),
+    delivery: sumDeliveries(results.flatMap((result) => result.deliveries)),
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
     firedShare: mean(results.map((result) => (result.firings.length > 0 ? 1 : 0))),
     gear: gearName(cell.gear),
@@ -369,13 +373,16 @@ export function rowCells(row: MatrixRow): string[] {
   ];
 }
 
-// A fixed-width text table: the first six columns left-aligned, the rest right-aligned.
-function textTable(headers: readonly string[], rows: readonly (readonly string[])[]): string {
+// A fixed-width text table: the first leftAligned columns left-aligned, the rest right-aligned.
+function textTable(
+  leftAligned: number,
+  headers: readonly string[],
+  rows: readonly (readonly string[])[],
+): string {
   const lines = [headers, ...rows];
   const widths = headers.map((_, column) =>
     Math.max(...lines.map((line) => itemAt(line, column).length)),
   );
-  const leftAligned = 6;
   return lines
     .map((line) =>
       line
@@ -391,7 +398,7 @@ function textTable(headers: readonly string[], rows: readonly (readonly string[]
 }
 
 export function formatTable(rows: readonly MatrixRow[]): string {
-  return textTable(MATRIX_HEADERS, rows.map(rowCells));
+  return textTable(6, MATRIX_HEADERS, rows.map(rowCells));
 }
 
 // The measured hit rate of each obstacle kind, one column per kind, then of each mover.
@@ -405,6 +412,7 @@ export function formatKindTable(
     ...new Set(rows.flatMap((row) => Object.keys(row.moverHitShares) as WalkItemKind[])),
   ].sort();
   return textTable(
+    6,
     [
       "Policy",
       "Route",
@@ -425,5 +433,59 @@ export function formatKindTable(
       ...kinds.map((kind) => measured(row.kindHitShares[kind] ?? null)),
       ...movers.map((mover) => measured(row.moverHitShares[mover] ?? null)),
     ]),
+  );
+}
+
+const DELIVERY_HEADERS: Readonly<Record<(typeof DELIVERY_GROUPS)[number], string>> = {
+  card: "Card",
+  lucky: "Lucky",
+  minorDart: "Dart",
+  minorOther: "Hop/stalk",
+  minorRider: "Rider",
+  minorStatic: "Static",
+  noCard: "No card",
+  tips: "Tips",
+  treats: "Treats",
+};
+
+// Placed and planned per zone plan, to two decimals, as "placed/planned".
+function perPlan(plans: number, count: Delivered): string {
+  return `${(count.placed / plans).toFixed(2)}/${(count.planned / plans).toFixed(2)}`;
+}
+
+// What the zone plans delivered, summed over every row by walk position and zone: one line per
+// zone at a walk position, and for each group the mean placed and planned per plan.
+export function formatDeliveryTable(rows: readonly MatrixRow[]): string {
+  const sums = sumDeliveries(rows.flatMap((row) => row.delivery));
+  return textTable(
+    2,
+    ["Pos", "Zone", "Plans", ...DELIVERY_GROUPS.map((group) => DELIVERY_HEADERS[group])],
+    sums.map((sum) => [
+      String(sum.position),
+      sum.zone,
+      String(sum.plans),
+      ...DELIVERY_GROUPS.map((group) => perPlan(sum.plans, sum.groups[group])),
+    ]),
+  );
+}
+
+// The delivery table by kind: one line per kind planned or placed in a zone at a walk position,
+// moving or not, with the mean placed and planned per plan.
+export function formatDeliveryKindTable(rows: readonly MatrixRow[]): string {
+  const sums = sumDeliveries(rows.flatMap((row) => row.delivery));
+  return textTable(
+    3,
+    ["Pos", "Zone", "Kind", "Plans", "Placed/planned"],
+    sums.flatMap((sum) =>
+      (Object.entries(sum.kinds) as [WalkItemKind, Delivered][])
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([kind, count]) => [
+          String(sum.position),
+          sum.zone,
+          kind,
+          String(sum.plans),
+          perPlan(sum.plans, count),
+        ]),
+    ),
   );
 }

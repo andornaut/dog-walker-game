@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
 import { DOGS } from "../data/dogs";
-import type { DogId } from "../data/types";
+import type { DogId, ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
 import type { PackDogs } from "../state/runState";
 import {
   DEFAULT_MATRIX,
+  formatDeliveryKindTable,
+  formatDeliveryTable,
   formatKindTable,
   formatTable,
   type Matrix,
@@ -26,6 +28,7 @@ vi.mock("./simulate", async (importOriginal) => {
   const { newRun } = await import("../state/runState");
   const { seededRandom } = await import("../lib/random");
   const { SKILL_PRESETS } = await import("./skills");
+  const { zoneDelivery } = await import("./delivery");
   const simulateRun: typeof actual.simulateRun = (data, seed, config) => {
     const random = seededRandom(seed);
     // A novice finishes half its walks and is fired twice in each.
@@ -34,6 +37,13 @@ vi.mock("./simulate", async (importOriginal) => {
       badges: [],
       cardsSeen: Math.floor(random() * 10),
       choices: [],
+      // Each run plans its first zone: 2 tips asked for and 1 placed.
+      deliveries: [
+        zoneDelivery(data, 1, data.world.zones[0]?.id as ZoneId, {
+          pending: [{ kind: "tip" }],
+          planned: [{ count: 2, kind: "tip", movement: null }],
+        }),
+      ],
       earnings: cents(random() * 10_000),
       finished: random() >= (novice ? 0.5 : 0.1),
       firings: novice
@@ -230,5 +240,23 @@ describe("simulateMatrix", () => {
     const paid = rows.map((row) => itemAt(rowCells(row), MATRIX_HEADERS.indexOf("Paid")));
     expect(new Set(paid)).toEqual(new Set(["-"]));
     expect(formatKindTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
+  });
+
+  it("sums every run's zone plans, and gives each group as placed/planned per plan", () => {
+    const rows = simulateMatrix(gameData, 3, 2, SMALL);
+    const [sum] = rows[0]?.delivery ?? [];
+
+    expect(sum).toMatchObject({ plans: 2, position: 1, zone: gameData.world.zones[0]?.id });
+    expect(sum?.groups.tips).toEqual({ placed: 2, planned: 4 });
+    const [header, line, ...rest] = formatDeliveryTable(rows).split("\n");
+    expect(rest).toEqual([]);
+    const tips = header?.split(/ {2,}/).indexOf("Tips") ?? -1;
+    expect(line?.trim().split(/ +/)[tips]).toBe("1.00/2.00");
+    expect(formatDeliveryKindTable(rows).split("\n")).toEqual([
+      expect.stringMatching(/^Pos +Zone +Kind +Plans +Placed\/planned$/),
+      expect.stringMatching(
+        new RegExp(`^1 +${String(sum?.zone)} +tip +${2 * rows.length} +1.00/2.00$`),
+      ),
+    ]);
   });
 });

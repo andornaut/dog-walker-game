@@ -4,6 +4,7 @@ import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
+import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
@@ -32,6 +33,7 @@ import {
 import { packDogs } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";
+import { type ZoneDelivery, zoneDelivery } from "./delivery";
 import { chooseCardOption, choosePath, type PolicyId, type RoutePolicyId } from "./policies";
 import type { BotSight } from "./sight";
 import type { Skill } from "./skills";
@@ -106,6 +108,8 @@ export interface RunResult {
   // Encounter cards; forks are not counted.
   readonly cardsSeen: number;
   readonly choices: readonly ChoiceRecord[];
+  // Each zone planned, in order: what its plan asked for and what it placed.
+  readonly deliveries: readonly ZoneDelivery[];
   // The money banked at the end of the run.
   readonly earnings: Cents;
   readonly finished: boolean;
@@ -134,6 +138,7 @@ interface Tally {
   afterPull: { readonly fromLane: number; readonly until: number } | null;
   cardsSeen: number;
   readonly choices: ChoiceRecord[];
+  readonly deliveries: ZoneDelivery[];
   readonly firings: FiringRecord[];
   readonly hits: HitCounts;
   readonly inputs: InputEvent[];
@@ -241,6 +246,12 @@ function policyChoice(
   return chooseCardOption(data, tally.policyRandom, config.policy, run, card);
 }
 
+// The counts of the zone just planned, read from the road the plan left.
+function noteZonePlan(data: SimData, tally: Tally, walk: Walk): void {
+  const { run } = walk;
+  tally.deliveries.push(zoneDelivery(data, run.zoneIndex + 1, currentZoneId(data, run), walk.road));
+}
+
 // A choice's record: an encounter card seen, and the firings it brought about.
 function noteChoice(
   tally: Tally,
@@ -283,6 +294,7 @@ function playBySkill(
   const bot = newBot(randomStream(seed, "bot"), player.sight, player.skill);
   const start = { road: startRoad(LANE_COUNT), run: tally.run };
   let session = startSession(data, streams, screenRoadGeometry, start);
+  noteZonePlan(data, tally, session.walk);
   let road = botRoadOf(data, session.walk);
   bot.replan = true;
   while (session.walk.run.phase.kind !== "ended") {
@@ -350,6 +362,7 @@ function playBySkill(
           });
           break;
         case "zonePlanned":
+          noteZonePlan(data, tally, step.session.walk);
           road = botRoadOf(data, step.session.walk);
           bot.replan = true;
           break;
@@ -370,6 +383,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     afterPull: null,
     cardsSeen: 0,
     choices: [],
+    deliveries: [],
     firings: [],
     hits: { afterPull: 0, all: 0 },
     inputs: [],
@@ -397,6 +411,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     badges: earnedByRun(data, facts),
     cardsSeen: tally.cardsSeen,
     choices: tally.choices,
+    deliveries: tally.deliveries,
     earnings: tally.run.money,
     finished: tally.run.phase.kind === "ended" && tally.run.phase.reason === "finished",
     firings: tally.firings,
