@@ -96,7 +96,8 @@ describe("blendWalk", () => {
   });
 });
 
-describe("leadWalk", () => {
+// Its queued-steps case takes about 7 s on a busy machine; the limit is four times that.
+describe("leadWalk", { timeout: 30_000 }, () => {
   // The pack's lane motion drawn for a walk, the inputs queued for its next step and the
   // seconds banked toward that step.
   it("leads the drawn pack toward where it is heading", () => {

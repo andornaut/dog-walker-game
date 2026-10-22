@@ -445,9 +445,9 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
   mover: { path, since },
 });
 
-// The spawn planner takes tens of milliseconds a zone, so a loop over the game's road can pass
-// vitest's 5 s default on an oversubscribed machine.
-describe("planZone", { timeout: 15_000 }, () => {
+// The spawn planner takes tens of milliseconds a zone, so a loop over the game's road takes up
+// to about 15 s on a busy machine; the limit is four times that.
+describe("planZone", { timeout: 60_000 }, () => {
   const planned = planZone(data, geometry, plannerStreams(3), walkWith(["koda"]));
   const countOf = (category: string) =>
     planned.road.pending.filter((event) => itemCategory(data, event.kind) === category).length;
