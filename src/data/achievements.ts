@@ -19,6 +19,16 @@ export const ACHIEVEMENTS = [
     name: "Double Trouble",
   },
   {
+    badgeLine: "Two leashes, zero tangles.",
+    conditions: [
+      { count: 2, kind: "packSize" },
+      { count: "all", kind: "zonesFinished" },
+    ],
+    goal: "Finish a walk with 2 dogs",
+    id: "twosCompany",
+    name: "Two's Company",
+  },
+  {
     badgeLine: "Twelve paws, one plan.",
     conditions: [
       { count: 3, kind: "packSize" },
@@ -53,6 +63,17 @@ export const ACHIEVEMENTS = [
     shortGoal: "A bump-free walk",
   },
   {
+    badgeLine: "Three dogs, not one smudge.",
+    conditions: [
+      { count: "all", kind: "cleanZones" },
+      { count: 3, kind: "packSize" },
+    ],
+    goal: "Finish a walk with 3 dogs without a plain bump",
+    id: "flawlessTrio",
+    name: "Flawless Trio",
+    shortGoal: "A bump-free walk, 3 dogs",
+  },
+  {
     badgeLine: "Nobody left behind.",
     conditions: [{ kind: "fullPackBonus", packSize: 3 }],
     goal: "Earn the Full pack bonus with 3 dogs",
@@ -75,6 +96,13 @@ export const ACHIEVEMENTS = [
     id: "fiveStarService",
     name: "Five-Star Service",
     shortGoal: "50 calm walks",
+  },
+  {
+    badgeLine: "That's a good day's pay.",
+    conditions: [{ dollars: 300, kind: "earnings" }],
+    goal: "Earn $300 in one walk",
+    id: "goodDay",
+    name: "Good Day",
   },
   {
     badgeLine: "Treats are on you.",
