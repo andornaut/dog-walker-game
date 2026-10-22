@@ -127,10 +127,6 @@ function freePick(previews: readonly OptionPreview[]): OptionPreview | undefined
   return best(previews.filter(isFree), [mostMoney, mostHearts]);
 }
 
-function alwaysHearts(previews: readonly OptionPreview[]): OptionPreview | undefined {
-  return freePick(previews);
-}
-
 function alwaysPay(previews: readonly OptionPreview[]): OptionPreview | undefined {
   return (
     best(previews.filter(isPaid), [cheapest, mostHearts]) ??
@@ -164,7 +160,7 @@ function mixed(random: Random, previews: readonly OptionPreview[]): OptionPrevie
 type Policy = (random: Random, previews: readonly OptionPreview[]) => OptionPreview | undefined;
 
 const POLICIES: Readonly<Record<PolicyId, Policy>> = {
-  alwaysHearts: (_, previews) => alwaysHearts(previews),
+  alwaysHearts: (_, previews) => freePick(previews),
   alwaysPay: (_, previews) => alwaysPay(previews),
   heartsUnlessLow: (_, previews) => heartsUnlessLow(previews),
   mixed,
