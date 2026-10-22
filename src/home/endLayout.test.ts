@@ -35,6 +35,7 @@ import {
   quipRowHeight,
   quipTextY,
   SIDE_LABEL_ROOM,
+  sideTotalAmountY,
   sideTotalLabelRoom,
 } from "./endLayout";
 import { signedDollarText } from "./home";
@@ -74,9 +75,18 @@ const quipRows = (count: number, fired: boolean, lines: readonly number[]): Quip
   Array.from({ length: count }, (_, i) => ({ fired, lines: lines[i] ?? 1 }));
 
 describe("the side column's total row", () => {
+  const amountY = sideTotalAmountY(BODY, TITLE);
+
+  it("ends TOTAL's capitals and the walk's total's on one row at 2x", () => {
+    expect(amountY + BODY.capHeight * 2).toBe(side.totalY + TITLE.capHeight * 2);
+  });
+
   it("ends under the lowest ink of TOTAL and the walk's total at 2x", () => {
-    const lowest = Math.max(inkRowsFromCapTop(TITLE), inkRowsFromCapTop(BODY)) * 2;
-    expect(side.totalHeight).toBe(lowest);
+    const lowest = Math.max(
+      side.totalY + inkRowsFromCapTop(TITLE) * 2,
+      amountY + inkRowsFromCapTop(BODY) * 2,
+    );
+    expect(side.totalY + side.totalHeight).toBe(lowest);
   });
 });
 

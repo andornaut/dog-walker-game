@@ -56,13 +56,14 @@ export const END_LAYOUT = {
   // fx-new-best's 96x48 frame sits 12 left of and 14 above the ribbon.
   ribbonBurst: { height: 48, width: 96, x: RIBBON.x - 12, y: RIBBON.y - 14 },
   // The side column: its labels from x, the zone pips, then TOTAL in the title font with its
-  // capitals at totalY and the walk's total beside it in the body font; the zone count and the
-  // total end at right. The column ends totalHeight under totalY, the 2x body font's lowest ink.
+  // capitals at totalY and the walk's total beside it in the body font, their capitals ending on
+  // one row; the zone count and the total end at right. The column ends totalHeight under
+  // totalY, under the lowest ink of both.
   side: {
     pipPitch: 21,
     pipsY: PANEL.y + 60,
     right: 320,
-    totalHeight: 14,
+    totalHeight: 12,
     totalY: PANEL.y + 82,
     x: 208,
   },
@@ -95,6 +96,12 @@ export function breakdownLabelRoom(amountWidth: number): number {
 export function sideTotalLabelRoom(amountWidth: number): number {
   const { right, x } = END_LAYOUT.side;
   return right - amountWidth - AMOUNT_GAP - x;
+}
+
+// The capitals' top of the walk's total in the 2x body font, so its capitals end on the row
+// TOTAL's end in the 2x title font, whose capitals start at side.totalY.
+export function sideTotalAmountY(body: FontMetrics, title: FontMetrics): number {
+  return END_LAYOUT.side.totalY + (title.capHeight - body.capHeight) * END_TEXT_SCALE;
 }
 
 // An owner's row: whether the owner fired you, and how many lines its closing line takes.

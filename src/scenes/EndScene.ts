@@ -13,6 +13,7 @@ import {
   quipNameX,
   quipTextY,
   SIDE_LABEL_ROOM,
+  sideTotalAmountY,
   sideTotalLabelRoom,
 } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
@@ -186,10 +187,11 @@ export class EndScene extends Scene {
     });
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
-    // The walk's total under the pips in the body font, as the breakdown's amounts are, its
-    // title-font label fitting the room the amount leaves it.
+    // The walk's total under the pips in the body font, as the breakdown's amounts are, on
+    // TOTAL's row, its title-font label fitting the room the amount leaves it.
     const totalText = signedDollarText(walk.earnedCents);
-    const total = text(SIDE.right, SIDE.totalY, totalText, PALETTE.forest, 1);
+    const totalY = sideTotalAmountY(body, pixelFontMetrics(this, "title"));
+    const total = text(SIDE.right, totalY, totalText, PALETTE.forest, 1);
     const totalInk = inkSpan(total);
     const totalLabel = title(SIDE.x, SIDE.totalY, words.total, PALETTE.plum);
     fitted(totalLabel, sideTotalLabelRoom(totalInk.right - totalInk.left), SIDE.x, SIDE.totalY);
