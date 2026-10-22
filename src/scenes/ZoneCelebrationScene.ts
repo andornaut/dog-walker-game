@@ -16,14 +16,13 @@ import {
 } from "../hud/zoneCelebration";
 import { cardNumberForKey, isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
-import { PHONE_EVENTS } from "../pwa";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText, pixelFontMetrics, setPixelText } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addConfetti } from "./badges";
-import { closeOverlay, listenOutsideTap, onWindowEvent, type OverlayData } from "./overlay";
+import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
@@ -34,7 +33,8 @@ export interface ZoneCelebrationSceneData extends OverlayData {
   celebration: ZoneCelebration;
   // Called once the celebration has closed and the run scene is resumed.
   onDone: () => void;
-  // Opens the pause menu over the celebration, which pauses it.
+  // Opens the pause menu over the celebration, which pauses it, as P and Escape do; the run
+  // scene opens it on the phone's back button.
   openPause: () => void;
 }
 
@@ -97,7 +97,6 @@ export class ZoneCelebrationScene extends Scene {
         finish();
       }
     });
-    onWindowEvent(this, PHONE_EVENTS.backPressed, data.openPause);
     if (text.kind === "zoneDone") {
       this.addPlate(text);
       this.time.delayedCall(ZONE_DONE_MS, finish);
