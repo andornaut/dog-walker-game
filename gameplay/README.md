@@ -51,6 +51,4 @@ Tuning against the targets, from a fresh baseline:
 - Gear: each item within the window
 - Sizes: hearts against the small-dog dodge chance
 
-Decided at the phone playtest, after the tuning pass:
-
-- The game's name
+Then a phone playtest of the tuned build calls version 1. The game is called Dog Walker.
