@@ -50,7 +50,6 @@ Tuning against the targets, from a fresh baseline:
 - Economy: pay, card costs, lucky finds and shop prices
 - Gear: each item within the window
 - Sizes: hearts against the small-dog dodge chance
-- Walkers: agility and each perk within the window
 
 Decided at the phone playtest, after the tuning pass:
 
