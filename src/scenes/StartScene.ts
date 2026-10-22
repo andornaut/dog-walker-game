@@ -1301,7 +1301,7 @@ export class StartScene extends Scene {
       imageIconOr(this, "icon-logbook", x, y, "L"),
     );
     this.iconButton(root, "settings", SETTINGS_FACE, (x, y) => settingsIcon(this, x, y));
-    this.iconButton(root, "help", HELP_FACE, (x, y) => imageIcon(this, "icon-help", x, y));
+    this.iconButton(root, "help", HELP_FACE, (x, y) => imageIconOr(this, "icon-help", x, y, "?"));
     this.iconButton(root, "mute", MUTE_FACE, (x, y) => soundIcon(this, !isMuted(this), x, y));
   }
 
