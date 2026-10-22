@@ -529,11 +529,20 @@ export class StartScene extends Scene {
       this.shopClosed(closed),
     );
     // A tap made while another tap's act opened help, settings or stats over this screen is
-    // dropped, so it cannot act once the screen resumes, as is a press waiting for the art.
+    // dropped, so it cannot act once the screen resumes, as is a press waiting for the art and
+    // a press still down, whose release lands on the overlay.
     onSceneEvent(this, this.events, "pause", () => {
       this.pending.forEach((timer) => timer.remove());
       this.pending.clear();
       this.artWait = undefined;
+      const lifted = this.closePressed();
+      this.hold = undefined;
+      this.overlayPress = undefined;
+      this.press = undefined;
+      this.pressedTarget = undefined;
+      if (lifted) {
+        this.render();
+      }
     });
   }
 
