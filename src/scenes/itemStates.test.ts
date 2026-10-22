@@ -57,7 +57,7 @@ describe("a start screen tile's state", () => {
           (state) => [dog, state, itemTileLook(dogTile(state, dog))] as const,
         ),
       ),
-      ...(Object.keys(gameData.shopGear) as GearId[]).flatMap((gear) =>
+      ...GEAR.flatMap((gear) =>
         (["affordable", "owned", "short"] as const).map((state) => {
           const owned = { ...OWNED, gear: state === "owned" ? [gear] : [] };
           const price = purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0);

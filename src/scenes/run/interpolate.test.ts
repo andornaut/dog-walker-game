@@ -126,7 +126,7 @@ describe("leadWalk", { timeout: 30_000 }, () => {
       {
         expected: moving(0.01, 2, 1, MOVE),
         motion: still,
-        name: "two queued moves that cancel out, the second turning the first around",
+        name: "queued moves turning each other around, heading the last one's way",
         queued: [left, right, left],
         seconds: 0.01,
       },
