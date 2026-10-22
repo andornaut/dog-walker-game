@@ -95,15 +95,9 @@ export function currentSettings(scene: Scene): Settings {
   return opened?.save.settings ?? { ...DEFAULT_SETTINGS, reducedMotion: prefersReducedMotion() };
 }
 
-// Calls listener with the new settings on every change, until the scene shuts down or the
-// returned function is called.
-export function onSettingsChanged(
-  scene: Scene,
-  listener: (settings: Settings) => void,
-): () => void {
-  const off = session(scene).onSettingsChanged(listener);
-  scene.events.once(Scenes.Events.SHUTDOWN, off);
-  return off;
+// Calls listener with the new settings on every change, until the scene shuts down.
+export function onSettingsChanged(scene: Scene, listener: (settings: Settings) => void): void {
+  scene.events.once(Scenes.Events.SHUTDOWN, session(scene).onSettingsChanged(listener));
 }
 
 // Saves the settings, applies the volumes and tells every listener.
