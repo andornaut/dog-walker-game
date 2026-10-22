@@ -56,11 +56,11 @@ async function deleteStaleCaches(): Promise<void> {
 }
 
 // Only a whole response is stored: Cache.put rejects a 206, which an audio element's range
-// request can get.
+// request can get. A write that fails (a full quota) still answers with the network's response.
 async function fetchAndStore(cache: Cache, key: string, request: Request): Promise<Response> {
   const response = await fetch(request);
   if (response.status === 200) {
-    await cache.put(key, response.clone());
+    await cache.put(key, response.clone()).catch(() => undefined);
   }
   return response;
 }
