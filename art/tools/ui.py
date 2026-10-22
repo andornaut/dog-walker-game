@@ -59,7 +59,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import hits  # noqa: E402
-from pixel import DARKER, HEART, TORONTO, K, Grid, contrast, edged, icon_edge, to_image, build as build_sprites  # noqa: E402
+from pixel import DARKER, HEART, K, Grid, contrast, edged, icon_edge, to_image, build as build_sprites  # noqa: E402
 
 
 # ---------- the chrome: one frame for every panel, bubble, plate and card frame ----------
@@ -1238,27 +1238,21 @@ ZONE_COLOURS = {
     "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "dbrick",
     "the-beaches": "cream", "yonge-street": "shale",
 }
-# One ramp step up: the inverse of DARKER over Endesga 32 and the neutral greys, for rims that must
-# lighten to hold 3:1 on ink.
-LIGHTER = {v: k for k, v in DARKER.items() if k != v and k not in TORONTO.values()}
-# A Toronto road colour steps up its own ramp, then to the Endesga colour above its top: dbrick to brick
-# to rust, shale to ash to slate.
-LIGHTER.update({K["dbrick"]: K["brick"], K["brick"]: K["rust"], K["shale"]: K["ash"], K["ash"]: K["slate"]})
-
-
-def pip_rim(fill):
-    """A chosen pip's rim: the zone colour, stepped up its ramp until it holds 3:1 on the ink well."""
-    c = K[fill]
-    while contrast(c, "ink") < 3:
-        c = LIGHTER[c]
+def pip_rim(well):
+    """A zone pip's rim: its well's colour stepped down its ramp, at least one step, until it holds 3:1 on
+    the end screen's cream panel, so every pip shows its edge there, the cream Beaches pip too."""
+    c = DARKER[K.get(well, well)]
+    while contrast(c, "cream") < 3:
+        c = DARKER[c]
     return c
 
 
 def zone_pip(zone=None, done=False):
     """18x8, one per zone of the route on the end screen, 3px apart. todo (no zone) is a dashed dbrown
-    rim around the bare well: not yet chosen. <zone> is chosen: a rim in the zone's colour (pip_rim)
-    around a 16x6 well at 1,1 in the zone's road shadow. <zone>-done is the full colour with a tick
-    (white, or plum where white falls under 3:1), so progress never relies on colour alone."""
+    rim around the bare well: not yet chosen. <zone> is chosen: a 16x6 well at 1,1 in the zone's road
+    shadow. <zone>-done is the well in the zone's full colour with a tick (white, or plum where white falls
+    under 3:1), so progress never relies on colour alone. A chosen or done pip's rim is pip_rim of its
+    well."""
     g = Grid(18, 8)
     if zone is None:
         for x in range(1, 17, 3):
@@ -1269,9 +1263,10 @@ def zone_pip(zone=None, done=False):
         g.rect(1, 1, 16, 6, "ink")
         return g
     fill = ZONE_COLOURS[zone]
-    g.rect(1, 0, 16, 8, pip_rim(fill))
-    g.rect(0, 1, 18, 6, pip_rim(fill))
-    g.rect(1, 1, 16, 6, fill if done else DARKER[K[fill]])
+    well = K[fill] if done else DARKER[K[fill]]
+    g.rect(1, 0, 16, 8, pip_rim(well))
+    g.rect(0, 1, 18, 6, pip_rim(well))
+    g.rect(1, 1, 16, 6, well)
     if done:
         tick = "white" if contrast(fill, "white") >= 3 else "plum"
         for x, y in ((6, 4), (7, 5), (8, 4), (9, 3), (10, 2), (11, 1)):
