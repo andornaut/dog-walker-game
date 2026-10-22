@@ -189,7 +189,7 @@ export class RunMoments {
     this.deps = deps;
   }
 
-  hint(event: HintTrigger): void {
+  private hint(event: HintTrigger): void {
     showHint(this.scene, event);
   }
 

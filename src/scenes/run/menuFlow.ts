@@ -112,7 +112,7 @@ export class MenuFlow {
     this.blurred = blurred;
   }
 
-  menuState(): RunPause["menu"] {
+  private menuState(): RunPause["menu"] {
     if (!this.pauseOpen) {
       return "closed";
     }

@@ -85,7 +85,7 @@ class Soundboard {
     this.resumeAudio();
   }
 
-  setHidden(hidden: boolean): void {
+  private setHidden(hidden: boolean): void {
     this.updateMix({ hidden });
   }
 
