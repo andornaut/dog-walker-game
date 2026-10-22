@@ -208,8 +208,9 @@ def lefevre(mood):
     g.cel(16, 3.5, 5, 3.5, "navy", "ink", "dslate")
     g.rect(8, 10, 2, 8, "navy")
     g.rect(22, 10, 2, 8, "navy")
-    g.p(7, 19, "amber")
-    g.p(24, 19, "amber")
+    # amber drop earrings, two pixels long so they show, as on her figure
+    g.rect(7, 19, 1, 2, "amber")
+    g.rect(24, 19, 1, 2, "amber")
     expression(g, mood, feat="dred", lashes=True, lips="red", brow="ink")
     return g
 
