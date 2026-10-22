@@ -49,7 +49,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "Stinky: tips pay nothing for 20s",
+      "text": "Stinky: tips pay nothing for 30s",
       "title": "Skunk"
     },
     {
@@ -1400,7 +1400,7 @@
       "pullReactionWindow": 0.6,
       "pullTell": 1,
       "shyHopNearSeconds": 1.6,
-      "stinkySeconds": 20,
+      "stinkySeconds": 30,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
       "zoomiesSeconds": 20

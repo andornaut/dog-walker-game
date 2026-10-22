@@ -197,7 +197,7 @@ export const TUNING = {
     // fit in it, so it clears the pack's lane before the pack must react.
     shyHopNearSeconds: 1.6,
     // How long the Stinky debuff lasts, in walking time.
-    stinkySeconds: 20,
+    stinkySeconds: 30,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 148,
     // While the pack has the Zoomies, it drifts a lane every this many seconds of walking.
