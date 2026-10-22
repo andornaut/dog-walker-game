@@ -75,7 +75,7 @@ import {
   startReady,
 } from "../home/sections";
 import { shopAffordable } from "../home/shop";
-import { SLOT_SIGN_PURCHASE, slotSign, slotSignAt } from "../home/slotSign";
+import { SLOT_SIGN_PURCHASE, slotSign } from "../home/slotSign";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
@@ -676,8 +676,7 @@ export class StartScene extends Scene {
       [LOGBOOK_BUTTON, { kind: "logbook" }],
       [PET_SHOP, { kind: "petShop" }],
     ];
-    const { bankCents, owned } = this.save();
-    if (slotSignAt(gameData, owned, bankCents, x, y)) {
+    if (this.signShown() && containsPoint(SLOT_SIGN.hit, x, y)) {
       return { kind: "slotSign" };
     }
     return fixed.find(([rect]) => containsPoint(rect, x, y))?.[1];
