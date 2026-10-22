@@ -85,7 +85,7 @@ export function charmByWalkerRect(walkerTop: Point): Rect {
 }
 
 // Where fx-sparkle's centre goes for a well or charm at well, drawn at scale.
-export function sparkleAt(well: Point, scale = 1): Point {
+export function sparkleAt(well: Point, scale: number): Point {
   return { x: well.x + CHARM.sparkle.x * scale, y: well.y + CHARM.sparkle.y * scale };
 }
 

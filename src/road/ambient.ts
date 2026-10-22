@@ -258,14 +258,14 @@ const travelScratch: GaitTravel = { moving: false, travel: 0 };
 const scratch = newPlace();
 
 // A hopper goes in bursts of one or two hops, the count from its seed, with a pause after
-// each.
+// each. The result is one shared object, so read it before the next call.
 export function gaitTravel(
   gait: AmbientGait,
   speed: number,
   seed: number,
   seconds: number,
-  out: GaitTravel = travelScratch,
 ): GaitTravel {
+  const out = travelScratch;
   out.moving = seconds >= 0;
   out.travel = speed * Math.max(0, seconds);
   if (gait !== "hop" || seconds < 0) {
