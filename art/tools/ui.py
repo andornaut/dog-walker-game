@@ -743,14 +743,19 @@ def check_badge(label):
 
 
 def tap_burst(step):
-    """16x16, 4 frames: sparkles flying out from where a tap lands."""
+    """16x16, 4 frames: sparks flying out from where a tap lands, each a 2px streak with an orange or rust
+    head and a lighter tail, cooling to lone rust specks in the last frame, so the burst shows on the cream
+    panels and the light roads as well as on the dark ones."""
     g = Grid(16, 16)
     r = (1, 3, 5, 7)[step]
-    col = ("white", "yellow", "amber", "orange")[step]
-    for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0), (-0.7, -0.7), (0.7, -0.7), (-0.7, 0.7), (0.7, 0.7)):
-        g.p(8 + dx * r, 8 + dy * r, col)
-        if step < 2:
-            g.p(8 + dx * (r - 1), 8 + dy * (r - 1), "white")
+    tail, head = (("yellow", "orange"), ("yellow", "orange"), ("amber", "rust"), (None, "rust"))[step]
+    # the first frame is a plus on the tap's pixel: diagonals 1px out round unevenly
+    dirs = ((0, -1), (0, 1), (-1, 0), (1, 0)) + (() if step == 0 else ((-0.7, -0.7), (0.7, -0.7), (-0.7, 0.7),
+                                                                      (0.7, 0.7)))
+    for dx, dy in dirs:
+        if tail is not None:
+            g.p(8 + dx * (r - 1), 8 + dy * (r - 1), tail)
+        g.p(8 + dx * r, 8 + dy * r, head)
     return g
 
 
