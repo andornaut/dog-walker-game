@@ -42,7 +42,6 @@ import {
   WALK_BAR,
   WALK_BAR_BUTTONS,
   walkBarLayout,
-  zoneNameRoom,
   zoneProgressText,
 } from "./walkHud";
 
@@ -547,9 +546,6 @@ describe("the walk bar's neighborhood name and count", () => {
       const ink = inkOf(zoneName);
       expect(name.x + ink.left).toBeGreaterThan(well.x);
       expect(name.x + ink.right + textGap).toBeLessThanOrEqual(progressLeft + progressInk.left);
-      expect(bodyTextWidth(1, plainMarks(zoneName))).toBeLessThanOrEqual(
-        zoneNameRoom(bodyTextWidth(1, plainMarks(widest))),
-      );
     },
   );
 

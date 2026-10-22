@@ -65,12 +65,6 @@ export function zoneProgressText(
   return fillNames(data.runText.zoneProgress, { n: String(zoneIndex + 1), total });
 }
 
-// The widest the neighborhood's name may be beside "n of N" progressWidth wide.
-export function zoneNameRoom(progressWidth: number): number {
-  const { name, progress, textGap } = WALK_BAR.zone;
-  return progress.right + 1 - name.x - textGap - progressWidth;
-}
-
 // The most effects a walk can have, one well each: the walker's perk, the Pocket's gear and an
 // upgrade from each fork.
 export const EFFECT_WELLS = maxEffects(gameData);
