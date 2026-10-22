@@ -13,8 +13,6 @@ export type ModifiedSubject =
   | { readonly dog: DogId; readonly kind: "hearts" }
   // How many times an encounter applies: 1, or 0 while the pack is immune to it.
   | { readonly encounter: EncounterId; readonly kind: "immune" }
-  // How long one lane change takes, in seconds.
-  | { readonly kind: "laneMove" }
   // The most hearts an owner's meter holds.
   | { readonly dog: DogId; readonly kind: "maxHearts" }
   // A change to the money, in cents: a card option's cost, a tip's pay.

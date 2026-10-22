@@ -27,14 +27,7 @@ import {
 } from "../rules/modified";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
-import {
-  bumpParts,
-  fireOwnersAtZero,
-  fullPackBonus,
-  packModifiers,
-  payZone,
-  tipValue,
-} from "../rules/run";
+import { bumpParts, fireOwnersAtZero, fullPackBonus, payZone, tipValue } from "../rules/run";
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read } from "../rules/units";
@@ -288,9 +281,8 @@ export function isPullObstacle(
 // run fields they were worked out from. A walk asks for the same ones every step until its
 // pack, zone or modifiers or the data change; data and run states are never changed in place.
 let lastLaneMove:
-  | (Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers"> &
+  | (Pick<GameData, "dogs" | "tuning" | "walkers"> &
       Pick<RunState, "pack" | "walker"> & {
-        readonly runDebuffs: RunState["debuffs"];
         readonly runModifiers: RunState["modifiers"];
         readonly seconds: number;
       })
@@ -300,33 +292,27 @@ let lastScrollSpeed:
       Pick<RunState, "route" | "zoneIndex"> & { readonly speed: Pixels })
   | null = null;
 
-// How long one lane move takes: seconds.laneMove over the pack's agility, then the laneMove
-// modifiers.
+// How long one lane move takes: seconds.laneMove over the pack's agility.
 export function laneMoveSeconds(
-  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
-  run: Pick<RunState, "debuffs" | "modifiers" | "pack" | "walker">,
+  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
+  run: Pick<RunState, "modifiers" | "pack" | "walker">,
 ): number {
   const last = lastLaneMove;
   if (
     last !== null &&
     last.tuning === data.tuning &&
-    last.debuffs === data.debuffs &&
     last.dogs === data.dogs &&
     last.walkers === data.walkers &&
     last.pack === run.pack &&
     last.walker === run.walker &&
-    last.runDebuffs === run.debuffs &&
     last.runModifiers === run.modifiers
   ) {
     return last.seconds;
   }
-  const base = read(data.tuning, "seconds", "laneMove") / packAgility(data, run);
-  const seconds = modifiedStat(data.tuning, packModifiers(data, run), "laneMove", base);
+  const seconds = read(data.tuning, "seconds", "laneMove") / packAgility(data, run);
   lastLaneMove = {
-    debuffs: data.debuffs,
     dogs: data.dogs,
     pack: run.pack,
-    runDebuffs: run.debuffs,
     runModifiers: run.modifiers,
     seconds,
     tuning: data.tuning,
@@ -337,9 +323,9 @@ export function laneMoveSeconds(
 }
 
 export function laneMotionConfig(
-  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
+  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
   laneCount: number,
-  run: Pick<RunState, "debuffs" | "modifiers" | "pack" | "walker">,
+  run: Pick<RunState, "modifiers" | "pack" | "walker">,
 ): LaneMotionConfig {
   return { laneCount, moveDuration: laneMoveSeconds(data, run) };
 }

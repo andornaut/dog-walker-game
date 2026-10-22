@@ -163,8 +163,6 @@ export type Stat =
   | "debuffSeconds"
   // The walker's agility: how many times faster than the base the pack changes lanes.
   | "agility"
-  // How long one lane change takes.
-  | "laneMove"
   | "obstacleSpawns"
   // How many pulls a squirrel draws.
   | "squirrelPulls"

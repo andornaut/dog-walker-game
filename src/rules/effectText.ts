@@ -37,7 +37,6 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
   debuffSeconds: "debuff time",
   forgivenHearts: "first ♥ lost each neighborhood forgiven",
   freeCards: "free cards each neighborhood",
-  laneMove: "lane change time",
   maxHearts: "max ♥",
   obstacleSpawns: "obstacles",
   squirrelPulls: "pulls toward squirrels",
