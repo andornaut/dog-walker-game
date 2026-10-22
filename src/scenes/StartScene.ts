@@ -861,6 +861,7 @@ export class StartScene extends Scene {
       return;
     }
     this.game.events.once(HELP_CLOSED_EVENT, go);
+    this.events.once("shutdown", () => this.game.events.off(HELP_CLOSED_EVENT, go));
     openHelp(this, SCENE_KEYS.start);
   }
 
