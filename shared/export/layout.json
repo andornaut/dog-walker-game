@@ -1724,33 +1724,32 @@
       },
       "slotSign": {
         "art": {
-          "x": 258,
+          "x": 255,
           "y": 120
         },
         "board": {
           "height": 24,
-          "width": 73,
-          "x": 259,
+          "width": 79,
+          "x": 256,
           "y": 125
         },
-        "head": {
-          "capY": 128,
-          "color": "plum"
+        "boardEdge": {
+          "frame": 1,
+          "lit": 1,
+          "shade": 1
         },
+        "headColor": "plum",
         "hit": {
           "height": 44,
-          "width": 73,
-          "x": 259,
+          "width": 79,
+          "x": 256,
           "y": 115
         },
         "key": "ui-slot-sign",
+        "linePitch": 9,
         "pressDrop": 1,
-        "price": {
-          "capY": 137,
-          "color": "forest"
-        },
-        "scale": 1,
-        "textX": 295
+        "priceColor": "forest",
+        "scale": 1
       },
       "speech": {
         "clearance": 2,

@@ -35,6 +35,7 @@ import {
   HOME_LAYOUT,
   pocketLining,
   sectionFill,
+  slotSignText,
 } from "./homeLayout";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
@@ -470,7 +471,7 @@ describe("Start walk's loading label", () => {
 // inside the shop's, clear of the walker and the yard sign, with both its lines on its board
 // for every slot's price, pressed or not.
 describe("the dog slot sign", () => {
-  const { art, board, head, hit, key, pressDrop, price, scale, textX } = HOME_LAYOUT.slotSign;
+  const { art, board, hit, key, scale } = HOME_LAYOUT.slotSign;
   const { gate, logo, petShop, walkerAtGate } = HOME_LAYOUT;
   const outline = insetRect(-AFFORD_OUTSET, board);
   const file = (path: string) => readFileSync(new URL(`../../public/art/${path}`, import.meta.url));
@@ -526,21 +527,30 @@ describe("the dog slot sign", () => {
   const prices = gameData.dogSlots.flatMap((slot) =>
     slot.unlock === "shop" ? [dollarText(unlockPrice(gameData.tuning, slot))] : [],
   );
+  const { cream, headCapY, priceCapY, x } = slotSignText(BODY);
+  const inkRows = inkRowsFromCapTop(BODY) * scale;
   const lines = [
-    { capY: head.capY, text: gameData.homeText.slotSign },
-    ...prices.map((text) => ({ capY: price.capY, text })),
+    { capY: headCapY, text: gameData.homeText.slotSign },
+    ...prices.map((text) => ({ capY: priceCapY, text })),
   ];
 
-  it.each(lines)("sets $text on the board, pressed or not", ({ capY, text }) => {
-    const width = inkWidth("font-body", { letterSpacing: 0, scale }, text);
-    expect(Math.floor(textX - width / 2)).toBeGreaterThanOrEqual(board.x);
-    expect(Math.ceil(textX + width / 2)).toBeLessThanOrEqual(board.x + board.width);
-    expect(capY).toBeGreaterThanOrEqual(board.y);
-    const bottom = capY + inkRowsFromCapTop(BODY) * scale + pressDrop;
-    expect(bottom).toBeLessThanOrEqual(board.y + board.height);
+  it("finds its cream inside the board", () => {
+    within(cream, board);
   });
 
-  it("puts the price's capitals under the call's lowest ink", () => {
-    expect(head.capY + inkRowsFromCapTop(BODY) * scale).toBeLessThanOrEqual(price.capY);
+  it.each(lines)("sets $text on the cream", ({ capY, text }) => {
+    const width = inkWidth("font-body", { letterSpacing: 0, scale }, text);
+    expect(Math.floor(x - width / 2)).toBeGreaterThanOrEqual(cream.x);
+    expect(Math.ceil(x + width / 2)).toBeLessThanOrEqual(cream.x + cream.width);
+    expect(capY).toBeGreaterThanOrEqual(cream.y);
+    expect(capY + inkRows).toBeLessThanOrEqual(cream.y + cream.height);
+  });
+
+  it("centres its two lines down the cream, the price under the call's lowest ink", () => {
+    const above = headCapY - cream.y;
+    const below = cream.y + cream.height - (priceCapY + inkRows);
+    expect(below - above).toBeGreaterThanOrEqual(0);
+    expect(below - above).toBeLessThanOrEqual(1);
+    expect(headCapY + inkRows).toBeLessThan(priceCapY);
   });
 });

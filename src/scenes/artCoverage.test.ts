@@ -217,6 +217,10 @@ describe("Pet shop art", () => {
   it("names the faces and the glint the Start screen plays", () => {
     expect(missingTags(SHOP_ART.petShop, ["glint", "normal", "pressed"])).toEqual([]);
   });
+
+  it("names the dog slot sign's faces", () => {
+    expect(missingTags(HOME_LAYOUT.slotSign.key, ["normal", "pressed"])).toEqual([]);
+  });
 });
 
 describe("image art", () => {

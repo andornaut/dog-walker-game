@@ -205,20 +205,22 @@ export const HOME_LAYOUT = {
   settings: topBarButton("pause"),
   // The dog slot sign hung from the Pet shop's awning across its front: its art (key, with
   // normal and pressed tags) drawn at art, its board inside the frame, and its gold outline 2px
-  // outside the board. Its call to buy and the next slot's price are body text at scale, each
-  // line's ink centred on textX with its capitals at capY, in its palette color; pressed, the
-  // board drops pressDrop on longer cords and the text with it. The hit area is the board
-  // widened to 44 tall.
+  // outside the board. The board's cream lies inside its frame, lit top row and shaded bottom
+  // row (boardEdge). Its call to buy (in headColor) and the next slot's price (in priceColor
+  // while affordable) are body text at scale, linePitch apart, centred on the cream
+  // (slotSignText); pressed, the board drops pressDrop on longer cords and the text with it. The
+  // hit area is the board widened to 44 tall.
   slotSign: {
-    art: { x: 258, y: 120 },
-    board: { height: 24, width: 73, x: 259, y: 125 },
-    head: { capY: 128, color: "plum" },
-    hit: { height: 44, width: 73, x: 259, y: 115 },
+    art: { x: 255, y: 120 },
+    board: { height: 24, width: 79, x: 256, y: 125 },
+    boardEdge: { frame: 1, lit: 1, shade: 1 },
+    headColor: "plum",
+    hit: { height: 44, width: 79, x: 256, y: 115 },
     key: "ui-slot-sign",
+    linePitch: 9,
     pressDrop: 1,
-    price: { capY: 137, color: "forest" },
+    priceColor: "forest",
     scale: 1,
-    textX: 295,
   },
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
   // of 2x body text a line of the font apart, padX in from its sides, the first line's
@@ -418,4 +420,26 @@ export function dogTileNameY(body: FontMetrics): number {
 export function dogTilePlateY(body: FontMetrics): number {
   const height = HOME_LAYOUT.dogTiles.cellHeight - 2 * HOME_LAYOUT.dogTileInset;
   return height - HOME_LAYOUT.dogTile.plateFoot - inkRowsFromCapTop(body) * 2;
+}
+
+// The dog slot sign's cream inside its board's frame and lit and shaded rows, and where its two
+// lines go: each line's ink centred on the cream's middle column, the block from the call's
+// capitals to the price's lowest ink centred down the cream, any odd row left under it.
+export function slotSignText(body: FontMetrics): {
+  cream: Rect;
+  headCapY: number;
+  priceCapY: number;
+  x: number;
+} {
+  const { board, boardEdge, linePitch, scale } = HOME_LAYOUT.slotSign;
+  const { frame, lit, shade } = boardEdge;
+  const cream = {
+    height: board.height - 2 * frame - lit - shade,
+    width: board.width - 2 * frame,
+    x: board.x + frame,
+    y: board.y + frame + lit,
+  };
+  const block = linePitch + inkRowsFromCapTop(body) * scale;
+  const headCapY = cream.y + Math.floor((cream.height - block) / 2);
+  return { cream, headCapY, priceCapY: headCapY + linePitch, x: cream.x + cream.width / 2 };
 }

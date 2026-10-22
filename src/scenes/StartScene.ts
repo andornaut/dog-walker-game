@@ -55,6 +55,7 @@ import {
   dogTilePlateY,
   HOME_LAYOUT,
   sectionFill,
+  slotSignText,
 } from "../home/homeLayout";
 import {
   bubbleSpeech,
@@ -117,7 +118,7 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
-import { BUTTON_COLORS, type SelectLook } from "../ui/selection";
+import { BUTTON_COLORS, GREYED, type SelectLook } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
@@ -1493,7 +1494,7 @@ export class StartScene extends Scene {
     if (sign === null) {
       return;
     }
-    const { art, board, head, key, pressDrop, price, scale, textX } = SLOT_SIGN;
+    const { art, board, key, pressDrop, scale } = SLOT_SIGN;
     const view = this.tileView(root, "slotSign");
     view.bobsWithShop = true;
     const faces = (["normal", "pressed"] as const).flatMap((tag) => {
@@ -1508,12 +1509,19 @@ export class StartScene extends Scene {
     } else {
       view.container.add(faces);
     }
-    // Each line's ink centred on textX.
+    // Each line's ink centred on the cream; the price in red while the bank is short, as a
+    // tile's unaffordable price is.
+    const { headCapY, priceCapY, x } = slotSignText(pixelFontMetrics(this, "body"));
+    const priceColor = sign.affordable ? SLOT_SIGN.priceColor : GREYED.shortPrice;
+    const rows = [
+      { capY: headCapY, color: SLOT_SIGN.headColor },
+      { capY: priceCapY, color: priceColor },
+    ] as const;
     const labels = sign.lines.map((line, i) => {
-      const row = i === 0 ? head : price;
+      const row = rows[i] ?? rows[0];
       const label = this.text(view.container, 0, 0, line, PALETTE[row.color], { scale });
       const ink = inkSpan(label);
-      placePixelText(label, textX - (ink.left + ink.right) / 2, row.capY);
+      placePixelText(label, x - (ink.left + ink.right) / 2, row.capY);
       return { label, y: label.y };
     });
     if (normal !== undefined && pressed !== undefined) {
