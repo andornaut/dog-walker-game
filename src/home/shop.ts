@@ -15,7 +15,7 @@ type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "
 export type ShopTab = "dogs" | "gear";
 export const SHOP_TABS = ["dogs", "gear"] as const satisfies readonly ShopTab[];
 
-// The shop's lists, each under its heading: gear, dog slots and dogs.
+// The shop's lists, each under its heading: dog slots and dogs, then gear.
 export type ShopList = "dogs" | "gear" | "slots";
 
 // The note right of a list's heading: how many of everything the list sells are owned. Dogs
