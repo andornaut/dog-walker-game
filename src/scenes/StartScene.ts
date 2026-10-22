@@ -49,7 +49,6 @@ import {
 } from "../home/home";
 import {
   bankFit,
-  bankLeft,
   DOG_TILE_TEXT_ROOM,
   dogTileNameY,
   dogTilePlateY,
@@ -85,6 +84,7 @@ import {
   walkerEffectItems,
 } from "../hud/effectIcons";
 import { downTail } from "../hud/moments";
+import { cashLeft } from "../hud/walkHud";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
@@ -1293,7 +1293,7 @@ export class StartScene extends Scene {
       `$${shortDollarAmountText(save.bankCents)}`,
     ]);
     setDollarAmount(dollar, amount, text.slice(1), (inkWidth) => ({
-      left: bankLeft(inkWidth * scale),
+      left: cashLeft(inkWidth * scale),
       scale,
       top: bank.capsY[scale],
     }));
