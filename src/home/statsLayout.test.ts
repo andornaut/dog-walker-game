@@ -25,6 +25,7 @@ import {
   badgesBottom,
   DETAIL_TEXT_WIDTH,
   detailLineY,
+  detailPanel,
   DOG_STATS,
   dogBlockTop,
   dogsBottom,
@@ -89,7 +90,9 @@ describe("the open badge", () => {
       expect(Math.max(...[...goal, ...line].map(width))).toBeLessThanOrEqual(DETAIL_TEXT_WIDTH);
       const lastTop = detailLineY(BODY, goal.length) + (line.length - 1) * BODY.lineHeight * 2;
       const inkBottom = lastTop + inkRowsFromCapTop(BODY) * 2;
-      expect(inkBottom).toBeLessThanOrEqual(detail.height - detailText.foot);
+      const panel = detailPanel(BODY, goal.length, line.length);
+      expect(panel.height).toBe(inkBottom + detailText.foot + detailText.frame);
+      expect(panel.height).toBeLessThanOrEqual(detail.height);
     }
   });
 });

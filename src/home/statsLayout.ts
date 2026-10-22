@@ -2,7 +2,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
-import type { FontMetrics } from "../ui/fontMetrics";
+import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
 import { scrollbarRects, type ScrollbarSpec } from "../ui/scrollbar";
 import { BADGE_STRIP } from "./badgesView";
 
@@ -33,15 +33,17 @@ const SCROLLBAR: ScrollbarSpec = {
 export const STATS_LAYOUT = {
   // The close control, in the screen's corner.
   close: pageCloseControl(screenLayout(SCREEN_CONFIG).screen),
-  // The badge tapped open, over the wall.
+  // The badge tapped open, over the wall, at most height tall: detailPanel sizes it.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
   // In the open badge, from its top: the badge's centre at badgeY, the name's and the status's
   // capitals at nameY and statusY, then the goal and the badge's line at 2x, centred and
   // wrapped between x in from its left edge and textRight in from its right, a line of the body
-  // font apart and gap between them; the line's lowest ink keeps foot over the bottom.
+  // font apart and gap between them; foot rows of cream under the line's lowest ink, then the
+  // ui-panel's frame, frame rows deep, end the panel.
   detailText: {
     badgeY: 48,
     foot: 8,
+    frame: 3,
     gap: 8,
     goalY: 136,
     nameY: 92,
@@ -117,6 +119,14 @@ export const DETAIL_TEXT_WIDTH =
 export function detailLineY(body: FontMetrics, goalLines: number): number {
   const { gap, goalY } = STATS_LAYOUT.detailText;
   return goalY + goalLines * body.lineHeight * 2 + gap;
+}
+
+// The open badge's panel, its frame detailText.foot under its line's lowest ink, under a goal
+// goalLines lines long and a line lineLines lines long, all at 2x.
+export function detailPanel(body: FontMetrics, goalLines: number, lineLines: number): Rect {
+  const { detail, detailText } = STATS_LAYOUT;
+  const inkBottom = detailLineY(body, goalLines) + inkRowsOfLines(body, lineLines) * 2;
+  return { ...detail, height: inkBottom + detailText.foot + detailText.frame };
 }
 
 export function statsTabRects(): Rect[] {

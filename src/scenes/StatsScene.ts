@@ -21,6 +21,7 @@ import {
   badgesBottom,
   DETAIL_TEXT_WIDTH,
   detailLineY,
+  detailPanel,
   DOG_STATS,
   dogBlockTop,
   dogsBottom,
@@ -499,9 +500,14 @@ export class StatsScene extends Scene {
   // with confetti, and the close control in its corner. Any tap closes it.
   private drawDetail(badge: BadgeView): void {
     const reduced = currentSettings(this).reducedMotion;
+    const words = gameData.menuText.stats;
+    const goal = this.wrap(badge.goal);
+    const line = this.wrap(fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine }));
+    const body = pixelFontMetrics(this, "body");
+    const panel = detailPanel(body, goal.length, line.length);
     addDim(this, SCREEN);
-    addPanel(this, DETAIL);
-    addCloseButton(this, this.add.container(0, 0), closeControl(DETAIL), false);
+    addPanel(this, panel);
+    addCloseButton(this, this.add.container(0, 0), closeControl(panel), false);
     const center = DETAIL.x + DETAIL.width / 2;
     const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;
     if (badge.earned && (this.burst || reduced)) {
@@ -526,7 +532,6 @@ export class StatsScene extends Scene {
       font: "title",
       originX: 0.5,
     });
-    const words = gameData.menuText.stats;
     const status = badge.earned ? words.badgeEarned : words.badgeLocked;
     this.text(center, DETAIL.y + DETAIL_TEXT.statusY, status, {
       color: colors.status,
@@ -534,14 +539,12 @@ export class StatsScene extends Scene {
     });
     // The goal and line centred under the name, each line of them centred on the card.
     const centred = { align: "center", originX: 0.5 } as const;
-    const goal = this.wrap(badge.goal);
     this.text(center, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), {
       ...centred,
       color: colors.goal,
     });
-    const line = fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine });
-    const lineY = DETAIL.y + detailLineY(pixelFontMetrics(this, "body"), goal.length);
-    this.text(center, lineY, this.wrap(line).join("\n"), { ...centred, color: colors.line });
+    const lineY = DETAIL.y + detailLineY(body, goal.length);
+    this.text(center, lineY, line.join("\n"), { ...centred, color: colors.line });
   }
 
   // Body text at 2x broken into lines no wider than the open badge's text.
