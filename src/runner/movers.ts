@@ -381,15 +381,18 @@ interface MoverPlacement {
   readonly stands: readonly MoverStand[];
 }
 
-function laneSpan(laneCount: number, a: number, b: number): LaneSpan {
-  const first = Math.max(0, Math.min(laneAt(a), laneAt(b)));
-  const last = Math.min(laneCount - 1, Math.max(laneAt(a), laneAt(b)));
+// The lanes on the road a box a lane wide overlaps anywhere from lane position low to high: as
+// collision cuts a mover's box to its lanes, it spans half a lane either side of its position.
+function laneSpan(laneCount: number, low: number, high: number): LaneSpan {
+  const first = Math.max(0, Math.floor(low + 1e-9));
+  const last = Math.min(laneCount - 1, Math.ceil(high - 1e-9));
   return { count: Math.max(0, last - first + 1), first };
 }
 
 // The lanes a crosser touches while its travel is from to to: its travel only moves one way and its
 // lane position one way to its turn and the other way after, or to its stop and then not at all,
-// so its ends and its turn bound it. A rider or stepping mover's are its own.
+// so its ends and its turn bound it. A box between lanes touches both. A rider or stepping
+// mover's are its own.
 export function sweptLanes(laneCount: number, path: MoverPath, from: number, to: number): LaneSpan {
   if (path.motion === "ride") {
     return { count: path.lanes, first: path.lane };

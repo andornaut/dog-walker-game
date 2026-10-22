@@ -421,14 +421,14 @@ describe("sweptLanes", () => {
         name: "a crosser from the right",
         path: crosser(-1),
         to: 450,
-        want: { count: 3, first: 2 },
+        want: { count: 4, first: 1 },
       },
       {
         from: 500,
         name: "a crosser leaving",
         path: crosser(1),
         to: 700,
-        want: { count: 1, first: 4 },
+        want: { count: 2, first: 3 },
       },
       {
         from: 100,
@@ -449,7 +449,7 @@ describe("sweptLanes", () => {
         name: "a crosser turning back between, out to its turn and back",
         path: crosser(1, 0, 3),
         to: 550,
-        want: { count: 3, first: 1 },
+        want: { count: 4, first: 0 },
       },
       {
         from: 300,
