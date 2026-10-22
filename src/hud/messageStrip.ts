@@ -114,14 +114,14 @@ export function messagePanel(body: FontMetrics, rows: number, bar: Rect = WALK_B
 }
 
 // The one-row strip under bars debuff bars: a panel height tall, its top gap rows under the
-// last bar's top, the icon at icon and the text from textX, in the first of TEXT_FIT_STYLES
-// whose ink fits room, its capitals centred on the icon's rows.
+// last bar's top, the icon at icon and the text from textX, the strip's columns, in the first
+// of TEXT_FIT_STYLES whose ink fits room, its capitals centred on the icon's rows.
 export const MESSAGE_LINE = {
   gap: 2,
   height: 26,
-  icon: { x: 6, y: 5 },
-  room: 312,
-  textX: 26,
+  icon: { x: MESSAGE_STRIP.icon.x, y: 5 },
+  room: MESSAGE_STRIP.width - MESSAGE_STRIP.textX - MESSAGE_STRIP.padRight,
+  textX: MESSAGE_STRIP.textX,
 } as const;
 
 interface MessageLinePanel {
