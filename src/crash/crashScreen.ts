@@ -3,7 +3,7 @@
 // already saved, and the next launch banks it.
 import "./crash.css";
 
-import { gameData } from "../data";
+import { MENU_TEXT } from "../data/menuText";
 import { BUILD_LABEL } from "../dev/buildLabel";
 import {
   crashGate,
@@ -68,7 +68,7 @@ function detailsSection(text: string): HTMLDetailsElement {
 }
 
 function showCrashScreen(dev: boolean, report: CrashReport): void {
-  const view = crashView(gameData.menuText.crash, dev, report);
+  const view = crashView(MENU_TEXT.crash, dev, report);
   const title = el("h1", "crash-title", view.title);
   title.id = "crash-title";
   const body = el("p", "crash-body", view.body);
