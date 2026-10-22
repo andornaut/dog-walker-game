@@ -3,13 +3,7 @@ import { type AchievementData, newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
 import { earnedIfBanked } from "./achievementPreview";
 import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
-import {
-  bankCheckpoint,
-  isNewBestWalk,
-  recordCheckpoint,
-  recordRunEnd,
-  type RunResult,
-} from "./checkpoint";
+import { bankCheckpoint, recordCheckpoint, recordRunEnd, type RunResult } from "./checkpoint";
 import type { SaveContext } from "./load";
 import type { Checkpoint, SaveDocument, Settings } from "./schema";
 import type { SaveStore, StoreLoadResult } from "./storage";
@@ -162,12 +156,14 @@ export class ProfileSession {
 
   finishRun(result: RunResult, changes: readonly Change[]): Promise<void> {
     const before = this.document;
-    const newBestWalk = isNewBestWalk(before.stats, result.dogs.length, result.earnedCents);
     const written = this.update((save) => recordRunEnd(this.awardContext(), save, result));
+    // Banking raised the best for the walk's pack size, which a dev start past zone 1 never does.
+    const size = result.dogs.length;
     this.ended = {
       achievements: earnedSince(this.awards.data, before, this.document),
       changes,
-      newBestWalk,
+      newBestWalk:
+        this.document.stats.bestCentsByPackSize[size] !== before.stats.bestCentsByPackSize[size],
     };
     return written;
   }

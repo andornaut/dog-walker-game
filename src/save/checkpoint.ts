@@ -1,6 +1,6 @@
 import type { DogId, WalkerId, ZoneId } from "../data/types";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
-import { addCents, type Cents } from "../rules/units";
+import { addCents, type Cents, cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
 import { awardAchievements, type AwardContext } from "./achievements";
@@ -63,18 +63,22 @@ type BankedRun = Pick<
   walker: WalkerId | null;
 };
 
-// Banks the earnings, counts the outcome and updates every stat and the logbook. Unlocks the
-// walkers whose goal zone the run finished, leaving out zones a dev start skipped. Clears the checkpoint, since the run
-// it belonged to is now banked. Then awards what the run earned.
+// Banks the earnings, counts the outcome and updates every stat and the logbook. A run a dev
+// start began past zone 1 banks no money, adds no starting cash and sets no best walk, and its
+// zone counts leave out the zones it skipped. Unlocks the walkers whose goal zone the run finished, skipped zones
+// left out. Clears the checkpoint, since the run it belonged to is now banked. Then awards what
+// the run earned.
 function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): SaveDocument {
   const { stats } = save;
+  const walked = walkedFromTheStart(run.counters);
+  const walkedOf = (zones: number) => Math.max(0, zones - run.counters.firstZone);
   const dogs: Partial<Record<DogId, DogStats>> = { ...stats.dogs };
   for (const { fired, id, zonesFinished } of run.dogs) {
     const current = dogs[id] ?? ZERO_DOG_STATS;
     dogs[id] = {
       timesFired: current.timesFired + (fired ? 1 : 0),
       walks: current.walks + 1,
-      zonesFinished: current.zonesFinished + zonesFinished,
+      zonesFinished: current.zonesFinished + walkedOf(zonesFinished),
     };
   }
 
@@ -92,14 +96,16 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     route: run.route,
     zonesFinished,
   };
-  // A walk counts as finished for the totals only when a dev start skipped no zone.
-  const finished = outcome === "finished" && walkedFromTheStart(run.counters);
+  // A walk counts as finished for the totals only when a dev start skipped no zone, and as
+  // headed home otherwise.
+  const finished = outcome === "finished" && walked;
+  const counted: EndReason = outcome === "finished" && !walked ? "wentHome" : outcome;
   const stayed = run.dogs.flatMap(({ fired, id }) => (fired ? [] : [id]));
-  const bestZoneFinished = Math.max(stats.bestZoneFinished, zonesFinished);
+  const banks = walked ? earnedCents : cents(0);
   const { owned } = save;
   const banked: SaveDocument = {
     ...save,
-    bankCents: addCents(save.bankCents, earnedCents),
+    bankCents: addCents(save.bankCents, banks),
     checkpoint: null,
     owned: {
       ...owned,
@@ -114,22 +120,26 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     },
     stats: {
       ...stats,
-      bestCentsByPackSize: isNewBestWalk(stats, walkDogs.length, earnedCents)
-        ? { ...stats.bestCentsByPackSize, [walkDogs.length]: earnedCents }
-        : stats.bestCentsByPackSize,
-      bestWalk: beatsBestWalk(stats, earnedCents)
-        ? { dogs: walkDogs, earnedCents, zonesFinished }
-        : stats.bestWalk,
-      bestZoneFinished,
+      bestCentsByPackSize:
+        walked && isNewBestWalk(stats, walkDogs.length, earnedCents)
+          ? { ...stats.bestCentsByPackSize, [walkDogs.length]: earnedCents }
+          : stats.bestCentsByPackSize,
+      bestWalk:
+        walked && beatsBestWalk(stats, earnedCents)
+          ? { dogs: walkDogs, earnedCents, zonesFinished }
+          : stats.bestWalk,
+      bestZoneFinished: Math.max(stats.bestZoneFinished, walkedOf(zonesFinished)),
       bumpsByKind: addCounts(stats.bumpsByKind, run.counters.bumpsByKind),
       dogs,
       dogsFinishedWith: finished
         ? [...new Set([...stats.dogsFinishedWith, ...stayed])]
         : stats.dogsFinishedWith,
       lastWalk,
-      lifetimeCents: addCents(stats.lifetimeCents, earnedCents),
-      lifetimeStartCents: addCents(stats.lifetimeStartCents, run.counters.startCents),
-      runs: { ...stats.runs, [outcome]: stats.runs[outcome] + 1 },
+      lifetimeCents: addCents(stats.lifetimeCents, banks),
+      lifetimeStartCents: walked
+        ? addCents(stats.lifetimeStartCents, run.counters.startCents)
+        : stats.lifetimeStartCents,
+      runs: { ...stats.runs, [counted]: stats.runs[counted] + 1 },
       tallies: addCounts(stats.tallies, run.counters.tallies),
       timesFired: stats.timesFired + firedBy.length,
       walkersFinishedWith:
@@ -137,7 +147,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
           ? [...new Set([...stats.walkersFinishedWith, run.walker])]
           : stats.walkersFinishedWith,
       walksWithoutFiring: stats.walksWithoutFiring + (finished && firedBy.length === 0 ? 1 : 0),
-      zonesEverFinished: walkedFromTheStart(run.counters)
+      zonesEverFinished: walked
         ? [...new Set([...stats.zonesEverFinished, ...run.route.slice(0, zonesFinished)])]
         : stats.zonesEverFinished,
     },

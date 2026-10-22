@@ -165,6 +165,24 @@ describe("recordRunEnd", () => {
     expect(unlockedBy(ROUTE)).toEqual(WALKERS.map(([id]) => id).sort());
   });
 
+  it("banks no money, starting cash or best walk for a dev start past zone 1, and counts the zones it walked", () => {
+    const { bankCents, stats } = recordRunEnd(
+      testAwards,
+      newPlayerSave,
+      runResult({ counters: { ...quietCounters(), firstZone: 2, startCents: cents(1_500) } }),
+    );
+    expect(bankCents).toBe(0);
+    expect([stats.lifetimeCents, stats.lifetimeStartCents]).toEqual([0, 0]);
+    expect(stats.bestWalk).toBeNull();
+    expect(stats.bestCentsByPackSize).toEqual({});
+    expect(stats.bestZoneFinished).toBe(2);
+    expect(stats.runs).toEqual({ finished: 0, noDogs: 0, wentHome: 1 });
+    expect(stats.dogs).toEqual({
+      biscuit: { timesFired: 1, walks: 1, zonesFinished: 0 },
+      koda: { timesFired: 0, walks: 1, zonesFinished: 2 },
+    });
+  });
+
   it("records heading home mid-zone 3 as 2 zones finished", () => {
     const { stats } = recordRunEnd(
       testAwards,

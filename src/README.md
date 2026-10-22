@@ -121,7 +121,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL; invalid values, unknown ids included, are warned about and ignored. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk, its pack and gear replacing the saved loadout for that walk only. Reaching the home screen removes every parameter but `dev` from the URL.
+`/play/` reads a run setup from the URL; invalid values, unknown ids included, are warned about and ignored. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk, its pack and gear replacing the saved loadout for that walk only. A walk started past zone 1 banks no money and sets no best walk, its zone counts leave out the zones it skipped, and a finished one counts as headed home. Reaching the home screen removes every parameter but `dev` from the URL.
 
 | Param    | Value                           | Default         |
 | -------- | ------------------------------- | --------------- |
