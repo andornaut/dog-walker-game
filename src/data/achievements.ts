@@ -39,14 +39,6 @@ export const ACHIEVEMENTS = [
     name: "Pack Leader",
   },
   {
-    badgeLine: "The whole crew's here.",
-    conditions: [{ count: "all", kind: "walkersUnlocked" }],
-    goal: "Unlock all four walkers",
-    id: "dreamTeam",
-    name: "Dream Team",
-    shortGoal: "Unlock all four walkers",
-  },
-  {
     badgeLine: "Not a speck on them.",
     conditions: [{ count: 1, kind: "cleanZones" }],
     goal: "Finish a neighborhood without a plain bump",
