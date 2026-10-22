@@ -3,7 +3,6 @@ import type {
   CardOption,
   Difficulty,
   DogId,
-  Effect,
   EncounterId,
   GameData,
   QuipMoment,
@@ -524,23 +523,6 @@ export function chooseOption(
   return { ...outcome, state: countOptionTally(content.option, counted) };
 }
 
-// Applies effects that open no card, such as an instant find's, to the dogs given,
-// with the same outcome events as a card choice. Throws for an ended run.
-function applyEffectsNow(
-  data: ChoiceData,
-  random: () => number,
-  state: RunState,
-  source: EffectSource,
-  effects: readonly Effect[],
-  dogs: readonly DogId[],
-): ChoiceOutcome {
-  if (state.phase.kind === "ended") {
-    throw new Error("The run has ended");
-  }
-  const affected = packDogs(state).filter((dog) => dogs.includes(dog));
-  return outcomeOf(data, { affected, random, source }, effects, state);
-}
-
 // Applies the effects of a lucky find or a contact obstacle as it is touched, to the dogs it
 // caught, with the same outcome events as a card choice. Throws for an encounter with no
 // effects on contact or an ended run.
@@ -555,6 +537,10 @@ export function applyInstantEncounter(
   if (resolution.kind !== "instant" && resolution.kind !== "contact") {
     throw new Error(`${name} has no effects on contact`);
   }
+  if (state.phase.kind === "ended") {
+    throw new Error("The run has ended");
+  }
+  const affected = packDogs(state).filter((dog) => caught.includes(dog));
   const source = { encounter, kind: "instant" } as const;
-  return applyEffectsNow(data, random, state, source, resolution.effects, caught);
+  return outcomeOf(data, { affected, random, source }, resolution.effects, state);
 }
