@@ -174,8 +174,9 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 });
 
 // For each way an obstacle moves, at both ends of every draw that varies it (its speed, the
-// delays before its moves, a stalker's second-step share, a dart's tilt and where it turns back),
-// a dart that turns back crossing once and turning, every place the planner may put it, on the
+// delays before its moves, a stalker's second-step share, a dart's tilt and where it turns back
+// or stops), a dart that turns back or stops crossing once, turning and stopping, every place the
+// planner may put it, on the
 // first zone's road and the last's, and every way a stalker may choose its steps:
 // - it moves only while ahead of the pack's rows: no step, hop or dart starts once it has
 //   reached them, a stalker never steps up the road and a hopper never hops down it;
@@ -276,8 +277,8 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   const endName = (draws: MoverDraws) => (draws === LOW ? "draws low" : "draws high");
   type DrawWay = readonly [string, Partial<MoverDraws>];
   // A dart whose tilt is drawn from a range is checked at both ends of it, and one of a kind that
-  // turns back crossing once and turning at both ends of its turn, at either end of its other
-  // draws.
+  // turns back or stops crossing once, turning at both ends of its turn and stopping at both ends
+  // of its stop lanes, at either end of its other draws.
   const tiltEnds = (movement: Movement): readonly DrawWay[] =>
     movement.kind === "dart" && movement.tilt.min !== movement.tilt.max
       ? [
@@ -285,14 +286,27 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
           [", tilt high", { tilt: 0.999999 }],
         ]
       : [["", {}]];
-  const turnWays = (movement: Movement): readonly DrawWay[] =>
-    movement.kind === "dart" && movement.turnBackShare > 0
-      ? [
-          [", crossing once", { turn: 0.999999 }],
-          [", turning halfway", { turn: 0, turnAt: 0 }],
-          [", turning at the far edge", { turn: 0, turnAt: 0.999999 }],
-        ]
-      : [["", {}]];
+  const turnWays = (movement: Movement): readonly DrawWay[] => {
+    if (movement.kind !== "dart" || movement.turnBackShare + movement.stopShare === 0) {
+      return [["", {}]];
+    }
+    const turning: DrawWay[] =
+      movement.turnBackShare > 0
+        ? [
+            [", turning halfway", { turn: 0, turnAt: 0 }],
+            [", turning at the far edge", { turn: 0, turnAt: 0.999999 }],
+          ]
+        : [];
+    // The outcome draw at the turn-back share stops it, nearest its edge and farthest.
+    const stopping: DrawWay[] =
+      movement.stopShare > 0
+        ? [
+            [", stopping nearest", { turn: movement.turnBackShare, turnAt: 0 }],
+            [", stopping farthest", { turn: movement.turnBackShare, turnAt: 0.999999 }],
+          ]
+        : [];
+    return [[", crossing once", { turn: 0.999999 }], ...turning, ...stopping];
+  };
   const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
     [LOW, HIGH].flatMap((draws) =>
       [...movements.values()].flatMap((entry) =>
