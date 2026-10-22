@@ -252,13 +252,13 @@ export class HudScene extends Scene {
     // A container holds the icon's place in the draw order while it is swapped.
     this.soundHolder = this.add.container(0, 0);
     this.showSoundIcon(isMuted(this));
-    const help = buttonIcon(TOP_BAR_BUTTONS.help, false);
+    const help = buttonIcon(TOP_BAR_BUTTONS.help);
     if (imageIcon(this, "icon-help", help.x, help.y).length === 0) {
       addPixelText(this, help.x + 8, help.y + 4, "?", { color: PALETTE.cream, originX: 0.5 });
     }
-    const settings = buttonIcon(TOP_BAR_BUTTONS.settings, false);
+    const settings = buttonIcon(TOP_BAR_BUTTONS.settings);
     settingsIcon(this, settings.x, settings.y);
-    const pauseIcon = buttonIcon(TOP_BAR_BUTTONS.pause, false);
+    const pauseIcon = buttonIcon(TOP_BAR_BUTTONS.pause);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
 
@@ -388,7 +388,7 @@ export class HudScene extends Scene {
 
   // icon-home on Home's face, else a cream house drawn on it.
   private addHomeIcon(): void {
-    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.home, false);
+    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.home);
     if (this.textures.exists("icon-home")) {
       this.add.image(x, y, "icon-home").setOrigin(0);
       return;
@@ -409,7 +409,7 @@ export class HudScene extends Scene {
       return;
     }
     holder.removeAll(true);
-    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.sound, false);
+    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.sound);
     holder.add(soundIcon(this, !muted, x, y));
   }
 
