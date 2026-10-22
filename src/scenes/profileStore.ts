@@ -22,8 +22,13 @@ export type { Settings } from "../save/schema";
 // before any other scene runs.
 const SESSION_KEY = "profileSession";
 
+// The opened profile, or undefined before BootScene opens it.
+function openedSession(scene: Scene): ProfileSession | undefined {
+  return scene.registry.get(SESSION_KEY) as ProfileSession | undefined;
+}
+
 function session(scene: Scene): ProfileSession {
-  const opened = scene.registry.get(SESSION_KEY) as ProfileSession | undefined;
+  const opened = openedSession(scene);
   if (opened === undefined) {
     throw new Error("The profile is read before BootScene opened it");
   }
@@ -91,8 +96,12 @@ export function lastRunEnd(scene: Scene): RunEnd | null {
 
 // Before the save loads, the defaults, with reduced motion following the device's setting.
 export function currentSettings(scene: Scene): Settings {
-  const opened = scene.registry.get(SESSION_KEY) as ProfileSession | undefined;
-  return opened?.save.settings ?? { ...DEFAULT_SETTINGS, reducedMotion: prefersReducedMotion() };
+  return (
+    openedSession(scene)?.save.settings ?? {
+      ...DEFAULT_SETTINGS,
+      reducedMotion: prefersReducedMotion(),
+    }
+  );
 }
 
 // Calls listener with the new settings on every change, until the scene shuts down.
@@ -139,8 +148,7 @@ export function checkpointRun(scene: Scene, slice: Checkpoint): Promise<void> {
 // What banking result now would newly earn, for a mid-run badge line: nothing is written, and
 // nothing is earned without an opened profile.
 export function earnedIfBanked(scene: Scene, result: RunResult): AchievementId[] {
-  const opened = scene.registry.get(SESSION_KEY) as ProfileSession | undefined;
-  return opened?.earnedIfBanked(result) ?? [];
+  return openedSession(scene)?.earnedIfBanked(result) ?? [];
 }
 
 // At run end, before EndScene opens. changes is every change the run made, for the end
@@ -148,7 +156,7 @@ export function earnedIfBanked(scene: Scene, result: RunResult): AchievementId[]
 export function finishRun(
   scene: Scene,
   result: RunResult,
-  changes: readonly Change[] = [],
+  changes: readonly Change[],
 ): Promise<void> {
   return session(scene).finishRun(result, changes);
 }
