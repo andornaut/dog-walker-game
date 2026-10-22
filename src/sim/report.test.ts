@@ -3,15 +3,18 @@ import { describe, expect, it, vi } from "vitest";
 import { gameData } from "../data";
 import { DOGS } from "../data/dogs";
 import type { DogId } from "../data/types";
+import { itemAt } from "../lib/arrays";
 import type { PackDogs } from "../state/runState";
 import {
   DEFAULT_MATRIX,
   formatKindTable,
   formatTable,
   type Matrix,
+  MATRIX_HEADERS,
   matrixCells,
   type MatrixRow,
   type NamedPack,
+  rowCells,
   simulateMatrix,
   simulateMatrixInBatches,
 } from "./report";
@@ -43,8 +46,12 @@ vi.mock("./simulate", async (importOriginal) => {
         : [],
       hits: { afterPull: 1, all: 4 },
       inputs: [],
-      items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
-      movers: { ball: { met: 2, touched: 1 } },
+      items: {
+        cone: { met: 4, touched: 1 },
+        otherDog: { met: 2, touched: 1 },
+        tip: { met: 10, touched: 6 },
+      },
+      movers: { ball: { met: 2, touched: 1 }, squirrel: { met: 3, touched: 0 } },
       pullsMoved: 0,
       route: [],
       run: newRun(data, config.pack.length, {
@@ -188,6 +195,7 @@ describe("simulateMatrix", () => {
     }
   });
 
+  // The squirrels the pack passes through count toward no share of hits.
   it("measures each share over every run's items that reached the pack", () => {
     const [row] = simulateMatrix(gameData, 3, 2, SMALL);
 
@@ -195,8 +203,9 @@ describe("simulateMatrix", () => {
     expect(row?.kindHitShares.hedge).toBeNull();
     expect(row?.moverHitShares.ball).toBe(0.5);
     expect(row?.bumpShare).toBe(2 / 6);
-    expect(row?.hitShare).toBeNull();
+    expect(row?.hitShare).toBe(0.5);
     expect(row?.meanTips).toBe(6);
+    expect(row?.moneyShare).toBeNull();
   });
 
   it("gives the share of walks with a firing for each preset player", () => {
@@ -218,6 +227,9 @@ describe("simulateMatrix", () => {
     const rows = simulateMatrix(gameData, 3, 2, SMALL);
 
     expect(formatTable(rows).split("\n")).toHaveLength(rows.length + 1);
+    // With no card chosen, no share of choices paid.
+    const paid = rows.map((row) => itemAt(rowCells(row), MATRIX_HEADERS.indexOf("Paid")));
+    expect(new Set(paid)).toEqual(new Set(["-"]));
     expect(formatKindTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
   });
 });

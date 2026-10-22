@@ -2,7 +2,7 @@ import { DOGS } from "../data/dogs";
 import type { GameData, GearId, WalkerId } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { itemAt } from "../lib/arrays";
-import { itemCategory, type WalkItemKind } from "../runner/walk";
+import { isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
 import {
@@ -46,10 +46,11 @@ interface MatrixCell {
 }
 
 // Earnings are in cents. Shares are from 0 to 1, of the items that reached the pack, and null
-// when none did: hitShare of obstacles that open a card, bumpShare of minor obstacles, both
-// moving or not, luckyShare of lucky encounters collected, kindHitShares of each kind of
-// obstacle that does not move, minor or not, and moverHitShares of each obstacle that moves, minor
-// or not. meanTips counts the tips collected per run.
+// when none did: hitShare of the obstacles that are encounters, but for pull obstacles such as
+// squirrels, which touching does nothing to, and bumpShare of minor obstacles, both moving or
+// not, luckyShare of lucky encounters collected, kindHitShares of each kind of obstacle that
+// does not move, minor or not, and moverHitShares of each obstacle that moves, minor or not.
+// meanTips counts the tips collected per run.
 export interface MatrixRow {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
   readonly afterPullShare: number | null;
@@ -70,7 +71,8 @@ export interface MatrixRow {
   readonly meanTipCents: number;
   readonly meanTips: number;
   readonly meanZones: number;
-  readonly moneyShare: number;
+  // The share of choices that cost money, or null with no choice made.
+  readonly moneyShare: number | null;
   readonly moverHitShares: Readonly<Partial<Record<WalkItemKind, number | null>>>;
   readonly p10: number;
   readonly p50: number;
@@ -237,7 +239,9 @@ function summarizeCell(
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
     firedShare: mean(results.map((result) => (result.firings.length > 0 ? 1 : 0))),
     gear: gearName(cell.gear),
-    hitShare: touchedShare(countsOf(inCategory("obstacle"))),
+    hitShare: touchedShare(
+      countsOf((entry) => inCategory("obstacle")(entry) && !isPullObstacle(data, entry.kind)),
+    ),
     kindHitShares: Object.fromEntries(
       obstacleKinds(data).map((kind) => [
         kind,
@@ -254,7 +258,7 @@ function summarizeCell(
     meanZones: mean(results.map((result) => result.zones.length)),
     moneyShare:
       choices.length === 0
-        ? 0
+        ? null
         : choices.filter((choice) => choice.cost > 0).length / choices.length,
     moverHitShares: Object.fromEntries(
       [...new Set(results.flatMap((result) => Object.keys(result.movers) as WalkItemKind[]))]
@@ -346,7 +350,7 @@ export function rowCells(row: MatrixRow): string[] {
     row.meanZones.toFixed(2),
     percent(row.finishedShare),
     row.meanCardsSeen.toFixed(1),
-    percent(row.moneyShare),
+    row.moneyShare === null ? "-" : percent(row.moneyShare),
     row.meanBadges.toFixed(2),
   ];
 }
