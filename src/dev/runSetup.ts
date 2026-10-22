@@ -54,7 +54,8 @@ export const MAX_SEED = 0xffffffff;
 
 const NO_GEAR = "none";
 
-const PARAM_NAMES = [
+// Every parameter a run setup reads.
+export const PARAM_NAMES = [
   "dev",
   "gear",
   "money",

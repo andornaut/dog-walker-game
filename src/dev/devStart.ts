@@ -2,16 +2,15 @@ import type { DogId, GearId, WalkerId } from "../data/types";
 import type { HomeLoadout } from "../home/home";
 import { packDogsOf } from "../state/pack";
 import type { Loadout } from "../state/runState";
-import type { RunSetup } from "./runSetup";
+import { PARAM_NAMES, type RunSetup } from "./runSetup";
 import { loadoutFor } from "./setupRun";
 
-// The parameters that describe a run. A URL with any of them skips the home screen; dev alone
-// only shows the overlay.
-const RUN_PARAMS = ["gear", "money", "pack", "seed", "speed", "walker", "zone"] as const;
+// Every parameter that overrides a walk: all but `dev`, which only shows the overlay.
+const OVERRIDE_PARAMS = PARAM_NAMES.filter((name) => name !== "dev");
 
-// Every parameter that overrides a walk, `route` included: it shapes the walk but does not
-// start one on its own.
-const OVERRIDE_PARAMS = [...RUN_PARAMS, "route"] as const;
+// The parameters that describe a run: a URL with any of them skips the home screen. `route`
+// shapes the walk but does not start one on its own.
+const RUN_PARAMS = OVERRIDE_PARAMS.filter((name) => name !== "route");
 
 export function namesRunSetup(search: string): boolean {
   const params = new URLSearchParams(search);

@@ -123,8 +123,8 @@ export function decodeCheats(text: string | null): Cheats {
   }
 }
 
-// The run as the cheats leave it: invincible owners lose no hearts. A run with the cheat off
-// is returned as it is.
+// The run as the cheats leave it: invincible owners lose no hearts. A run already set as the
+// cheats say is returned as it is.
 export function withCheats(cheats: Cheats, run: RunState): RunState {
   const invincible = cheatActive(cheats, "invincible");
   return (run.invincible ?? false) === invincible ? run : { ...run, invincible };

@@ -123,7 +123,7 @@ const statsSchema = v.object({
   // Plain hits that cost their owner a heart over every run, keyed by minor obstacle id.
   bumpsByKind: v.record(contentId, count),
   dogs: v.record(contentId, dogStatsSchema),
-  // Every dog that finished a walk without its owner firing you, each once.
+  // Every dog that finished a walk from the first zone without its owner firing you, each once.
   dogsFinishedWith: ids,
   // The most recent walk; null until the first run ends.
   lastWalk: v.nullable(lastWalkSchema),
@@ -139,7 +139,7 @@ const statsSchema = v.object({
   timesFired: count,
   // Every walker who finished a walk from the first zone, each once.
   walkersFinishedWith: ids,
-  // Finished walks in which no owner fired you.
+  // Finished walks from the first zone in which no owner fired you.
   walksWithoutFiring: count,
   // Every zone a walk from the first zone finished, each once.
   zonesEverFinished: ids,
