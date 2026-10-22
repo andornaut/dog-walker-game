@@ -204,7 +204,9 @@ function forgivenCause(
   const left =
     modifiedStat(data.tuning, state.modifiers, "forgivenHearts", 0) - state.heartsForgiven;
   const amount = Math.min(loss, Math.max(0, left));
-  return amount === 0 ? null : { amount, kind: "modifier", source: forgiver.source };
+  return amount === 0
+    ? null
+    : { amount, forgives: true, kind: "modifier", source: forgiver.source };
 }
 
 function applyHearts(

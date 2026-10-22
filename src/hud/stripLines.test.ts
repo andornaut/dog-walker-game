@@ -39,6 +39,7 @@ const hearts = (
 });
 const secondChance: HeartChange["causes"][number] = {
   amount: 1,
+  forgives: true,
   kind: "modifier",
   source: { kind: "walker", walker: "casey" },
 };

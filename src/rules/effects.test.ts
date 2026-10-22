@@ -125,7 +125,7 @@ describe("resolveEffects: changes and their causes", () => {
             before: full,
             causes: [
               { amount: -loss, kind: "effect", source: SKUNK_IGNORE },
-              { amount: forgiven, kind: "modifier", source },
+              { amount: forgiven, forgives: true, kind: "modifier", source },
             ],
             dog: "koda",
             kind: "hearts",

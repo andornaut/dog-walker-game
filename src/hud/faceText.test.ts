@@ -62,7 +62,7 @@ const hearts = (
 });
 const forgiven = hearts(4, 4, [
   { amount: -1, kind: "bump" },
-  { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
+  { amount: 1, forgives: true, kind: "modifier", source: { kind: "walker", walker: "casey" } },
 ]);
 const muddy = testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
 const muddyCost = bumpHearts(gameData, muddy);

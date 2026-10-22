@@ -18,9 +18,11 @@ export type Cause =
   // A zone's fee multiplier, with the zone's name.
   | { readonly amount: number; readonly kind: "zone"; readonly zone: string };
 
-// One modifier's share of a change, in the change's unit.
+// One modifier's share of a change, in the change's unit. forgives marks the share of a loss a
+// forgivenHearts modifier, such as Second chance's, forgave.
 export interface ModifierCause {
   readonly amount: number;
+  readonly forgives?: true;
   readonly kind: "modifier";
   readonly source: ModifierSource;
 }
@@ -86,13 +88,11 @@ export function dollarCauses(causes: readonly Cause[]): Cause[] {
   });
 }
 
-// The hearts of a loss the walker's perk, such as Second chance, forgave: 0 for none.
+// The hearts of a loss a forgivenHearts modifier, such as Second chance's, forgave: 0 for none.
 export function heartsForgiven(change: HeartChange): number {
   return change.causes.reduce(
     (sum, cause) =>
-      cause.kind === "modifier" && cause.source.kind === "walker" && cause.amount > 0
-        ? sum + cause.amount
-        : sum,
+      cause.kind === "modifier" && cause.forgives === true ? sum + cause.amount : sum,
     0,
   );
 }

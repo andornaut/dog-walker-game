@@ -182,7 +182,14 @@ describe("a card option's modified values", () => {
         {
           after: 0,
           before: thiefHearts.effect.amount,
-          by: by(-thiefHearts.effect.amount, sources.kindWords),
+          by: [
+            {
+              amount: -thiefHearts.effect.amount,
+              forgives: true,
+              kind: "modifier",
+              source: sources.kindWords,
+            },
+          ],
           subject: { dog: "duchess", kind: "hearts" },
         },
       ],

@@ -1240,7 +1240,14 @@ describe("stepWalk's modified values", () => {
         {
           after: 0,
           before: -bump,
-          by: by(bump, { kind: "walker", walker: walkerWith("kindWords") }),
+          by: [
+            {
+              amount: bump,
+              forgives: true,
+              kind: "modifier",
+              source: { kind: "walker", walker: walkerWith("kindWords") },
+            },
+          ],
           subject: koda,
         },
       ],
