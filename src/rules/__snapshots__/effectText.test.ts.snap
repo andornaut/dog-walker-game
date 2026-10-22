@@ -10,7 +10,7 @@ exports[`every card's text > matches the snapshot 1`] = `
     "puddle: contact": "Muddy: bumps cost 2♥ for 20s",
     "skunk: Full groom": "−$10",
     "skunk: Hold your nose": "−1♥ each",
-    "skunk: Quick rinse": "Stinky: tips pay nothing for 20s",
+    "skunk: Quick rinse": "Stinky: tips pay nothing for 30s",
     "thief: Chase them off": "−1♥ each",
     "thief: Let them go": "−$10",
   },

@@ -7,7 +7,7 @@ exports[`a card's text for the dogs it catches > matches the snapshot for the wh
     "otherDog: Pull away": "Zoomies: the pack drifts on its own for 20s",
     "skunk: Full groom": "−$10",
     "skunk: Hold your nose": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
-    "skunk: Quick rinse": "Stinky: tips pay nothing for 20s",
+    "skunk: Quick rinse": "Stinky: tips pay nothing for 30s",
     "thief: Chase them off": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "thief: Let them go": "−$10",
   },
