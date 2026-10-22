@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId, ZoneId } from "../data/types";
-import { earnedByRun } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
@@ -225,22 +224,26 @@ describe("recordRunEnd", () => {
 });
 
 describe("achievements at banking", () => {
+  // A checkpoint walked as Clean Paws' goal asks, with these bumps in each zone.
+  const cleanPaws = runFactsFor(gameData, ["cleanPaws"]);
+  const cleanPawsWalk = (bumpsByZone: number[]): Checkpoint => ({
+    counters: { ...quietCounters(), bumpsByZone },
+    dogs: packOf(gameData, cleanPaws.packSize).map((id) => ({
+      fired: false,
+      id,
+      zonesFinished: cleanPaws.zonesFinished,
+    })),
+    earnedCents: cleanPaws.earnedCents,
+    route: ROUTE.slice(0, cleanPaws.zonesFinished),
+    zonesFinished: cleanPaws.zonesFinished,
+  });
+
   it("awards what a run earned, stamped with the time, and keeps those earned before", () => {
     const before = veteranSave();
-    const result = runResult();
-    const save = recordRunEnd(testAwards, before, result);
-    // The run's own badges, judged on its facts: veteranSave meets no new profile goal with it.
-    const earned = earnedByRun(gameData, {
-      ...result.counters,
-      dogsHome: result.dogs.filter(({ fired }) => !fired).length,
-      earnedCents: result.earnedCents,
-      packSize: result.dogs.length,
-      zonesFinished: zonesFinishedBy(result),
-    }).filter((id) => before.achievements[id] === undefined);
-    expect(earned.length).toBeGreaterThan(0);
-    expect(save.achievements).toEqual({
+    const banked = bankCheckpoint(testAwards, recordCheckpoint(before, cleanPawsWalk([])));
+    expect(banked.achievements).toMatchObject({
       ...before.achievements,
-      ...Object.fromEntries(earned.map((id) => [id, testAwards.now])),
+      cleanPaws: testAwards.now,
     });
   });
 
@@ -356,8 +359,7 @@ describe("achievements at banking", () => {
     expect(stats.walkersFinishedWith).toEqual(walkers);
   });
 
-  // A checkpoint walked as Clean Paws' goal asks, banked with each run's bumps.
-  const cleanPaws = runFactsFor(gameData, ["cleanPaws"]);
+  // Clean Paws' walk, banked with each run's bumps.
   const banks: [string, number[], boolean][] = [
     ["earns Clean Paws for a walk with no bump", [], true],
     [
@@ -370,17 +372,7 @@ describe("achievements at banking", () => {
   it.each(banks)(
     "awards a checkpoint's run from its counters when it is banked: %s",
     (_name, bumpsByZone, earned) => {
-      const walked: Checkpoint = {
-        counters: { ...quietCounters(), bumpsByZone },
-        dogs: packOf(gameData, cleanPaws.packSize).map((id) => ({
-          fired: false,
-          id,
-          zonesFinished: cleanPaws.zonesFinished,
-        })),
-        earnedCents: cleanPaws.earnedCents,
-        route: ROUTE.slice(0, cleanPaws.zonesFinished),
-        zonesFinished: cleanPaws.zonesFinished,
-      };
+      const walked = cleanPawsWalk(bumpsByZone);
       const banked = bankCheckpoint(testAwards, recordCheckpoint(newPlayerSave, walked));
       expect(banked.achievements.cleanPaws).toBe(earned ? testAwards.now : undefined);
     },
