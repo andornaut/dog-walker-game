@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
     "@types/pngjs": "^6.0.5",
     "eslint": "^10.13.0",
     "eslint-plugin-import-x": "4.17.1",
