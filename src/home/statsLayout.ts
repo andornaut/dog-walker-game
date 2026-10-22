@@ -83,9 +83,22 @@ export const STATS_LAYOUT = {
   // badge per row from y, gap apart, each the badge badgeTop under the row's top then a text
   // column of up to lines lines at 2x from x (the name, the goal, then a locked badge's
   // progress across walks), its capitals' top y under the row's top and pad over the row's
-  // bottom. The wall ends foot under its last row.
+  // bottom. The wall ends foot under its last row. An earned badge's row lies on a band in
+  // earned.fill with a 1px earned.outline frame, bandWidth wide from bandLeft left of the row
+  // and bandY over and under it; the ui-check tick, checkSize square, sits over the badge's
+  // top-right corner, its top-left checkDx right of the row's left and checkDy below its top.
   wall: {
     badgeTop: 2,
+    earned: {
+      bandLeft: 4,
+      bandWidth: 320,
+      bandY: 2,
+      checkDx: 20,
+      checkDy: -1,
+      checkSize: 16,
+      fill: "yellow",
+      outline: "amber",
+    },
     foot: 16,
     gap: 8,
     headingY: PANEL.y + 10,
@@ -140,6 +153,23 @@ export function badgesBottom(rows: readonly Rect[]): number {
   const { foot, y } = STATS_LAYOUT.wall;
   const last = rows.at(-1);
   return (last === undefined ? y : last.y + last.height) + foot;
+}
+
+// The band under an earned badge's row.
+export function earnedBand(row: Rect): Rect {
+  const { bandLeft, bandWidth, bandY } = STATS_LAYOUT.wall.earned;
+  return {
+    height: row.height + 2 * bandY,
+    width: bandWidth,
+    x: row.x - bandLeft,
+    y: row.y - bandY,
+  };
+}
+
+// The tick over an earned badge's top-right corner.
+export function earnedCheck(row: Rect): Rect {
+  const { checkDx, checkDy, checkSize } = STATS_LAYOUT.wall.earned;
+  return { height: checkSize, width: checkSize, x: row.x + checkDx, y: row.y + checkDy };
 }
 
 // A wall row's height for a badge whose text runs lines lines: as tall as the badge with

@@ -2364,6 +2364,16 @@
       },
       "wall": {
         "badgeTop": 2,
+        "earned": {
+          "bandLeft": 4,
+          "bandWidth": 320,
+          "bandY": 2,
+          "checkDx": 20,
+          "checkDy": -1,
+          "checkSize": 16,
+          "fill": "yellow",
+          "outline": "amber"
+        },
         "foot": 16,
         "gap": 8,
         "headingY": 118,

@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { scrollMax } from "../input/listScroll";
 import { fillLine, wrapWords } from "../lib/lines";
+import type { Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
@@ -27,6 +28,8 @@ import {
   DOG_STATS,
   dogBlockTop,
   dogsBottom,
+  earnedBand,
+  earnedCheck,
   STATS_LAYOUT,
   STATS_TABS,
   statsScrollbar,
@@ -230,4 +233,37 @@ describe("each tab's scroll", () => {
     expect(lastInk - max).toBeLessThanOrEqual(view.y + view.height);
     expect(bottom - max).toBeLessThanOrEqual(view.y + view.height);
   });
+});
+
+// The badge wall with every badge earned: each row's band and tick inside the content the view
+// clips, between the view's top and the wall's bottom and clear of the scrollbar, and each band
+// clear of the next row's.
+describe("an earned row", () => {
+  const ids = gameData.achievements.map(({ id }) => id);
+  const earnedSave = { achievements: Object.fromEntries(ids.map((id) => [id, 1])) };
+  const earned = badgeWall(gameData, earnedSave);
+  const earnedRows = wallRects(
+    wall,
+    earned.map((badge) =>
+      wallRowHeight(wallCellLineCount(wallCell(wallText, bodyInk, badge, undefined))),
+    ),
+  );
+  const bottom = badgesBottom(earnedRows);
+  const inside = (rect: Rect) => {
+    expect(rect.x).toBeGreaterThanOrEqual(view.x);
+    expect(rect.x + rect.width).toBeLessThanOrEqual(BAR_LEFT);
+    expect(rect.y).toBeGreaterThanOrEqual(view.y);
+    expect(rect.y + rect.height).toBeLessThanOrEqual(bottom);
+  };
+  it.each(earnedRows.map((row, i) => [earned[i]?.name, row, earnedRows[i + 1]] as const))(
+    "%s: keeps its band and tick in the view's content, clear of the next band",
+    (_, row, next) => {
+      const band = earnedBand(row);
+      inside(band);
+      inside(earnedCheck(row));
+      if (next !== undefined) {
+        expect(band.y + band.height).toBeLessThan(earnedBand(next).y);
+      }
+    },
+  );
 });

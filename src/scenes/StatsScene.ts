@@ -25,6 +25,8 @@ import {
   dogBlockTop,
   dogsBottom,
   type DogStat,
+  earnedBand,
+  earnedCheck,
   STATS_LAYOUT,
   STATS_TABS,
   statsScrollbar,
@@ -48,7 +50,7 @@ import {
 } from "../input/listScroll";
 import { screenLayout } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
-import { containsPoint, type Rect } from "../lib/rect";
+import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { read } from "../rules/units";
 import { closeControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
@@ -79,6 +81,7 @@ import {
   addPanel,
   addScreenBackdrop,
   addTab,
+  addTagImage,
   addTapBurst,
   clearScene,
   tagFrame,
@@ -99,6 +102,7 @@ const RIGHT = STATS_LAYOUT.rows.right;
 const PITCH = STATS_LAYOUT.rows.pitch;
 const DOGS = STATS_LAYOUT.dogs;
 const WALL = STATS_LAYOUT.wall;
+const EARNED = WALL.earned;
 const WALL_TEXT = STATS_LAYOUT.wallText;
 const VIEW: Rect = STATS_LAYOUT.view;
 const SCROLL = STATS_LAYOUT.scroll;
@@ -427,7 +431,7 @@ export class StatsScene extends Scene {
   }
 
   // The heading and the earned count, then a badge per row: earned ones in colour with a
-  // green name, locked ones greyed; each with its goal, or its short goal where the full one
+  // green name on a gold band, ticked, locked ones greyed; each with its goal, or its short goal where the full one
   // does not fit, and a locked one that counts across walks with its progress.
   private drawBadges(): number {
     const save = profileSave(this);
@@ -461,9 +465,23 @@ export class StatsScene extends Scene {
   }
 
   private drawWallBadge(badge: BadgeView, cell: WallCellLines, rect: Rect): void {
+    if (badge.earned) {
+      const band = earnedBand(rect);
+      const g = this.add.graphics();
+      fillRect(g, PALETTE[EARNED.outline], band);
+      fillRect(g, PALETTE[EARNED.fill], insetRect(1, band));
+      this.content?.add(g);
+    }
     const half = BADGE_SIZE / 2;
     const badgeY = rect.y + WALL.badgeTop + half;
     this.content?.add(addBadge(this, badge.art, badge.earned, rect.x + half, badgeY));
+    if (badge.earned) {
+      const check = earnedCheck(rect);
+      const tick = addTagImage(this, "ui-check", "tick", check.x, check.y);
+      if (tick !== undefined) {
+        this.content?.add(tick);
+      }
+    }
     const x = rect.x + WALL_TEXT.x;
     let y = rect.y + WALL_TEXT.y;
     const draw = (lines: readonly string[], color: number) => {

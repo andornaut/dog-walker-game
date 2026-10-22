@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
 import { BADGE_TEXT_COLORS } from "../home/badgesView";
+import { STATS_LAYOUT } from "../home/statsLayout";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
   BUTTON_COLORS,
@@ -12,6 +13,9 @@ import {
   selectLook,
 } from "../ui/selection";
 import { DEBUFF_COLORS } from "./debuffColors";
+
+// The band an earned badge's row lies on.
+const BAND = PALETTE[STATS_LAYOUT.wall.earned.fill];
 
 // WCAG relative luminance and contrast ratio.
 function luminance(color: number): number {
@@ -81,8 +85,8 @@ describe("interaction-state colours", () => {
         TEXT,
       ],
       ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
-      ["an earned badge's name", PALETTE[BADGE_TEXT_COLORS.earned.name], PALETTE.cream, TEXT],
-      ["an earned badge's goal", PALETTE[BADGE_TEXT_COLORS.earned.goal], PALETTE.cream, TEXT],
+      ["an earned badge's name on its band", PALETTE[BADGE_TEXT_COLORS.earned.name], BAND, TEXT],
+      ["an earned badge's goal on its band", PALETTE[BADGE_TEXT_COLORS.earned.goal], BAND, TEXT],
       ["a locked badge's name", PALETTE[BADGE_TEXT_COLORS.locked.name], PALETTE.cream, TEXT],
       [
         "a locked badge's goal and progress",
