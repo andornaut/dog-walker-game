@@ -166,7 +166,7 @@ export interface MinorBump {
   change: HeartChange | null;
   dodged: boolean;
   dog: DogId;
-  item: WalkItem;
+  item: MoverItem<MinorObstacleId>;
 }
 
 // A treat the pack grabbed: the dog whose owner it went to, by treatRecipient, and the hearts
@@ -1171,17 +1171,18 @@ export function stepWalk(
       collected.push(item);
       modifiedAt(item, [grab.change === null ? null : changeModified(grab.change)]);
     } else if (isMinorObstacle(data, kind)) {
+      const minor = { ...item, kind };
       if (dodges(data, random, nextRun, dog)) {
         // The dodges tally, toward Dodge Ball, counts only small dogs' dodges.
         if (data.dogs[dog].size === "small") {
           nextRun = countTally("dodges", nextRun);
         }
-        bumps.push({ change: null, dodged: true, dog, item });
+        bumps.push({ change: null, dodged: true, dog, item: minor });
         return;
       }
       const bump = bumpDog(data, dog, countBump(nextRun));
       nextRun = countLandedBump(kind, bump.state);
-      bumps.push({ change: bump.change, dodged: false, dog, item });
+      bumps.push({ change: bump.change, dodged: false, dog, item: minor });
       modifiedAt(item, [bump.modified]);
     } else {
       const affected = affectedDogs(run);

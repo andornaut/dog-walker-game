@@ -1,4 +1,4 @@
-import type { WalkItem, WalkStep } from "../runner/walk";
+import type { WalkItem } from "../runner/walk";
 
 // An obstacle a hit took out of play, kept on the road as scenery: the item as the hit left
 // it, and the zone and how far into it the walk was then. Scenery is drawn only: the walk never
@@ -17,8 +17,8 @@ interface RoadPlace {
 
 // The obstacles a step's plain hits, dodged ones included, and contacts took out of play.
 export function struckBy(step: {
-  readonly bumps: readonly Pick<WalkStep["bumps"][number], "item">[];
-  readonly contacts: readonly Pick<WalkStep["contacts"][number], "item">[];
+  readonly bumps: readonly { readonly item: WalkItem }[];
+  readonly contacts: readonly { readonly item: WalkItem }[];
   readonly walk: { readonly run: RoadPlace };
 }): StruckItem[] {
   const { zoneDistance, zoneIndex } = step.walk.run;
