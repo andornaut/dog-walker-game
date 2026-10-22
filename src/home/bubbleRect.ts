@@ -15,7 +15,7 @@ export function bubbleRect(
   size: { height: number; width: number },
 ): Rect {
   const centred = Math.round(at.x - size.width / 2);
-  const reaches = at.y + size.height >= keepClear.y;
+  const reaches = at.y + size.height > keepClear.y;
   const left = reaches ? Math.min(centred, keepClear.x - sizes.clearance - size.width) : centred;
   return { ...size, x: Math.max(sizes.margin, left), y: at.y };
 }

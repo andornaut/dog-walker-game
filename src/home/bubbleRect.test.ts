@@ -41,10 +41,14 @@ describe("bubbleRect", () => {
     }
   });
 
-  it("leaves a bubble that stops above the board where it is centred", () => {
-    const rect = bubbleRect(board, sizes, { x: 180, y: top }, { height: 10, width: 100 });
-    expect(rect.x).toBe(130);
-  });
+  // Short, and ending on the row over the board's top.
+  it.each([10, board.y - top])(
+    "leaves a bubble %i tall, stopping above the board, where it is centred",
+    (height) => {
+      const rect = bubbleRect(board, sizes, { x: 180, y: top }, { height, width: 100 });
+      expect(rect.x).toBe(130);
+    },
+  );
 });
 
 // Every speech the walker's bubble can say, with and without each storage warning first, wraps
