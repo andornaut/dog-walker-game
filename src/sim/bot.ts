@@ -26,6 +26,7 @@ import {
   type PlannedMove,
   WAIT_MARGIN,
 } from "./lanePlan";
+import { type BotSight, moverShows, sightPaths } from "./sight";
 import type { Skill } from "./skills";
 
 // The walk as the bot reads it: speed is the scroll speed in pixels per second.
@@ -35,11 +36,29 @@ export interface BotRoad {
   readonly speed: number;
 }
 
+// What a mover showed (moverShows) from since scroll after its cue appeared, first seen at
+// clock time at.
+interface Sighting {
+  readonly at: number;
+  readonly shows: string;
+  readonly since: number;
+}
+
+// A mover as a bot that reads by sight has it: what it has perceived the mover show, the paths it
+// reads from that, worked out when first needed, and what it has seen the mover show since,
+// oldest first, each perceived reactionSeconds after it was seen.
+interface MoverSight {
+  paths: readonly MoverPath[] | null;
+  perceived: Sighting;
+  readonly seen: Sighting[];
+}
+
 // A steering bot's state. clock is the seconds walked this run, hit stops included and cards
 // not. Moves are at clock times. target is the lane the pack headed for when the bot last acted,
 // null before it has. late holds mistimed lane changes still to come; noticeAt,
 // when set, is when the bot notices its mistake, and until then it does not replan. tellsAt is
-// when each leaning dog's tell started, and paths each mover's path as last seen.
+// when each leaning dog's tell started. sight is how it reads movers: by foresight, paths holds
+// each mover's path as last seen; by sight, sights holds what each mover has shown.
 interface Bot {
   readonly appearedAt: Map<number, number>;
   clock: number;
@@ -55,6 +74,8 @@ interface Bot {
   // After a pull, the bot changes lanes no sooner than this clock time.
   recoversAt: number;
   replan: boolean;
+  readonly sight: BotSight;
+  readonly sights: Map<number, MoverSight>;
   readonly skill: Skill;
   target: number | null;
   readonly tellsAt: Map<DogId, number>;
@@ -74,7 +95,7 @@ const GRID_SECONDS = 0.1;
 
 const PRIZE_VALUES = { lucky: 1, tip: 1, treat: 1 } as const;
 
-export function newBot(random: Random, skill: Skill): Bot {
+export function newBot(random: Random, sight: BotSight, skill: Skill): Bot {
   return {
     appearedAt: new Map(),
     clock: 0,
@@ -88,6 +109,8 @@ export function newBot(random: Random, skill: Skill): Bot {
     random,
     recoversAt: -Infinity,
     replan: true,
+    sight,
+    sights: new Map(),
     skill,
     target: null,
     tellsAt: new Map(),
@@ -316,16 +339,21 @@ function scrollContacts(
   return contacts;
 }
 
-// The stretches over which a mover, once it moves, touches the pack standing in a lane, one
-// per lane and stretch, that start within horizon seconds. Its path is sampled, so each stretch is
-// widened by a sample at each end.
-function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneContact[] {
+// The stretches over which a mover, once it moves, touches the pack standing in a lane, on any
+// of paths, one per lane and stretch, that start within horizon seconds. Its paths are sampled,
+// so each stretch is widened by a sample at each end.
+function moverContacts(
+  road: BotRoad,
+  horizon: number,
+  paths: readonly MoverPath[],
+  item: WalkItem,
+): LaneContact[] {
   const { mover } = item;
   if (mover === undefined) {
     return [];
   }
   const contacts: LaneContact[] = [];
-  for (const path of pathsAhead(mover.path)) {
+  for (const path of paths) {
     for (const { from, lane, to } of scrollContacts(road, road.geometry, item, path)) {
       const start = (from - MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
       const end = (to + MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
@@ -339,8 +367,9 @@ function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneCont
 
 const OUTCOMES = new WeakMap<object, readonly MoverPath[]>();
 
-// The paths a mover may yet take: its own, or, for a stalker or shy hopper with moves still to
-// choose, every way it may choose them, since each choice waits on where the pack is then.
+// The paths a mover may yet take, as a bot that reads by foresight has them: its own, or, for a
+// stalker or shy hopper with moves still to choose, every way it may choose them, since each
+// choice waits on where the pack is then.
 function pathsAhead(path: MoverPath): readonly MoverPath[] {
   if ((path.motion !== "approach" && path.motion !== "shy") || path.pending.length === 0) {
     return [path];
@@ -353,23 +382,29 @@ function pathsAhead(path: MoverPath): readonly MoverPath[] {
   return outcomes;
 }
 
-// The hazards a mover makes, one per lane and stretch it touches the pack in, each
+// The hazards a mover makes on any of paths, one per lane and stretch it touches the pack in, each
 // widened a walk step at each end as a standing obstacle's is.
-export function moverHazards(road: BotRoad, horizon: number, item: WalkItem): LaneHazard[] {
-  return moverContacts(road, horizon, item).map(({ from, lane, to }) => ({
+export function moverHazards(
+  road: BotRoad,
+  horizon: number,
+  paths: readonly MoverPath[],
+  item: WalkItem,
+): LaneHazard[] {
+  return moverContacts(road, horizon, paths, item).map(({ from, lane, to }) => ({
     from: from - MARGIN_SECONDS,
     lanes: 1 << lane,
     to: to + MARGIN_SECONDS,
   }));
 }
 
-// The prize a moving prize, such as a lucky find that walks about, makes on each path it may
-// take: in the lanes it covers as it reaches the pack's rows, when that is within horizon
-// seconds, worth value shared among its paths. Its path is sampled.
+// The prize a moving prize, such as a lucky find that walks about, makes on each of paths: in
+// the lanes it covers as it reaches the pack's rows, when that is within horizon seconds, worth
+// value shared among its paths. Its paths are sampled.
 export function moverPrizes(
   road: BotRoad,
   horizon: number,
   value: number,
+  paths: readonly MoverPath[],
   item: WalkItem,
 ): LanePrize[] {
   const { mover } = item;
@@ -377,7 +412,6 @@ export function moverPrizes(
     return [];
   }
   const { laneCount, packBand, roadTop } = road.geometry;
-  const paths = pathsAhead(mover.path);
   const last = mover.since + horizon * road.speed;
   return paths.flatMap((path) => {
     for (let since = mover.since; since <= last; since += MOVER_SAMPLE_SCROLL) {
@@ -424,9 +458,26 @@ function perceiveAt(bot: Bot, road: BotRoad, item: WalkItem): number {
   return visibleAt(bot, appeared, start, item.mover !== undefined) + bot.skill.reactionSeconds;
 }
 
+// What a bot that reads by sight sees a mover show: a change is perceived reactionSeconds after
+// it is seen.
+function observeMover(bot: Bot, id: number, mover: NonNullable<WalkItem["mover"]>): void {
+  const sighting = {
+    at: bot.clock,
+    shows: moverShows(mover.path, mover.since),
+    since: mover.since,
+  };
+  const sight = bot.sights.get(id);
+  if (sight === undefined) {
+    bot.sights.set(id, { paths: null, perceived: sighting, seen: [] });
+  } else if ((sight.seen.at(-1) ?? sight.perceived).shows !== sighting.shows) {
+    sight.seen.push(sighting);
+  }
+}
+
 // Records when each item new on the road came into view, from how far the road has scrolled
-// since, and forgets items that have left. A mover whose path has changed, a stalker that has
-// chosen a step, makes the bot replan.
+// since, and forgets items that have left. By foresight, a mover whose path has changed, a
+// stalker that has chosen a step, makes the bot replan; by sight, what each mover shows is
+// recorded.
 export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
   const { items } = walk.road;
   let oldest = Infinity;
@@ -436,8 +487,12 @@ export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
       const scrolled = item.mover?.since ?? item.y - (road.geometry.roadTop - item.height);
       bot.appearedAt.set(item.id, bot.clock - scrolled / road.speed);
     }
-    const path = item.mover?.path;
-    if (path !== undefined) {
+    const { mover } = item;
+    if (mover !== undefined && bot.sight === "sight") {
+      observeMover(bot, item.id, mover);
+    }
+    const path = mover?.path;
+    if (path !== undefined && bot.sight === "foresight") {
       const seen = bot.paths.get(item.id);
       if (seen !== undefined && seen !== path) {
         bot.replan = true;
@@ -450,8 +505,27 @@ export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
       bot.appearedAt.delete(id);
       bot.paths.delete(id);
       bot.perceived.delete(id);
+      bot.sights.delete(id);
     }
   }
+}
+
+// The paths the bot reads a mover as taking: by foresight, every path it may yet take; by sight,
+// those it may take from what the bot has perceived it show.
+function pathsRead(bot: Bot, road: BotRoad, item: WalkItem): readonly MoverPath[] {
+  const { mover } = item;
+  if (mover === undefined) {
+    return [];
+  }
+  if (bot.sight === "foresight") {
+    return pathsAhead(mover.path);
+  }
+  const sight = bot.sights.get(item.id);
+  if (sight === undefined) {
+    return sightPaths(road, mover.since, item);
+  }
+  sight.paths ??= sightPaths(road, sight.perceived.since, item);
+  return sight.paths;
 }
 
 // What the bot steers around and toward: every item it has perceived that has not yet passed
@@ -477,10 +551,11 @@ function botView(
     }
     const category = itemCategory(data, item.kind);
     if (item.mover !== undefined) {
+      const paths = pathsRead(bot, road, item);
       if (category === "minor" || category === "obstacle") {
-        hazards.push(...moverHazards(road, horizon, item));
+        hazards.push(...moverHazards(road, horizon, paths, item));
       } else {
-        prizes.push(...moverPrizes(road, horizon, PRIZE_VALUES[category], item));
+        prizes.push(...moverPrizes(road, horizon, PRIZE_VALUES[category], paths, item));
       }
       continue;
     }
@@ -666,6 +741,18 @@ export function actBot(
     if (!bot.perceivedTells.has(dog) && at + bot.skill.reactionSeconds <= due) {
       bot.perceivedTells.add(dog);
       bot.replan = true;
+    }
+  }
+  for (const [id, sight] of bot.sights) {
+    for (
+      let next = sight.seen[0];
+      next !== undefined && next.at + bot.skill.reactionSeconds <= due;
+      next = sight.seen[0]
+    ) {
+      sight.seen.shift();
+      sight.perceived = next;
+      sight.paths = null;
+      bot.replan ||= bot.perceived.has(id);
     }
   }
   for (;;) {

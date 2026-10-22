@@ -33,6 +33,7 @@ import { packDogs } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";
 import { chooseCardOption, choosePath, type PolicyId, type RoutePolicyId } from "./policies";
+import type { BotSight } from "./sight";
 import type { Skill } from "./skills";
 
 export type SimData = ChoiceData &
@@ -42,10 +43,11 @@ export type SimData = ChoiceData &
     "achievements" | "defaultWalker" | "dogSlots" | "runText" | "upgrades" | "walkerPerks"
   >;
 
-// Who plays the walk: a steering bot plays the real walk loop, and what it hits and collects
-// is measured.
+// Who plays the walk: a steering bot of a skill, reading movers by sight or by foresight, plays
+// the real walk loop, and what it hits and collects is measured.
 export interface SimPlayer {
   readonly kind: "skill";
+  readonly sight: BotSight;
   readonly skill: Skill;
 }
 
@@ -274,11 +276,11 @@ function playBySkill(
   data: SimData,
   seed: number,
   config: SimConfig,
-  skill: Skill,
+  player: SimPlayer,
   tally: Tally,
 ): void {
   const streams = runStreams(seed);
-  const bot = newBot(randomStream(seed, "bot"), skill);
+  const bot = newBot(randomStream(seed, "bot"), player.sight, player.skill);
   const start = { road: startRoad(LANE_COUNT), run: tally.run };
   let session = startSession(data, streams, screenRoadGeometry, start);
   let road = botRoadOf(data, session.walk);
@@ -383,7 +385,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     tips: cents(0),
     zones: [],
   };
-  playBySkill(data, seed, config, config.player.skill, tally);
+  playBySkill(data, seed, config, config.player, tally);
   const facts = {
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,

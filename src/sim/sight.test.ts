@@ -1,0 +1,134 @@
+import { describe, expect, it } from "vitest";
+
+import { gameData } from "../data";
+import type { MinorObstacleId, Movement } from "../data/types";
+import type { MoverPath } from "../runner/movers";
+import { screenRoadGeometry } from "../runner/screenGeometry";
+import { type WalkItem, type WalkItemKind, walkScrollSpeed } from "../runner/walk";
+import { testState } from "../testing/runState";
+import { sightPaths } from "./sight";
+
+const run = testState({ biscuit: 3 });
+const road = {
+  data: gameData,
+  geometry: screenRoadGeometry(run),
+  speed: walkScrollSpeed(gameData, run),
+};
+
+// The first minor obstacle that moves as wanted has it.
+function kindMoving(wanted: (movement: Movement) => boolean): WalkItemKind {
+  const kind = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).find((id) => {
+    const { movement } = gameData.minorObstacles[id];
+    return movement !== undefined && wanted(movement);
+  });
+  if (kind === undefined) {
+    throw new Error("No minor obstacle moves that way");
+  }
+  return kind as WalkItemKind;
+}
+
+const DART = kindMoving(
+  (movement) => movement.kind === "dart" && movement.tilt.min < movement.tilt.max,
+);
+const RIDER = kindMoving((movement) => movement.kind === "inLane");
+const STEPPER = kindMoving((movement) => movement.kind === "step");
+
+const dart: MoverPath = {
+  direction: 1,
+  enterTravel: 100,
+  lanesPerPixel: 0.01,
+  motion: "cross",
+  movement: "dart",
+  stopAfter: null,
+  tilt: 0.2,
+  turnAfter: null,
+  warning: 60,
+};
+const rider: MoverPath = {
+  lane: 1,
+  lanes: 1,
+  motion: "ride",
+  movement: "inLane",
+  speedMultiplier: 2,
+  warning: 60,
+};
+const stepper: MoverPath = {
+  lane: 2,
+  motion: "steps",
+  movement: "step",
+  steps: [{ at: 200, lanes: 1, length: 40, travel: 0 }],
+  warning: 60,
+};
+
+// Two movers that differ only in what they have not shown yet are read the same: a dart's speed,
+// tilt and outcome before it sets off, and its outcome as it crosses; a rider's speed before it
+// enters; a stepper's step before its wander mark, the step's shape and length while the mark
+// shows, and an uncued step until it starts.
+describe("a sight reading", () => {
+  it.each([
+    {
+      hidden: { ...dart, lanesPerPixel: 0.013, stopAfter: 2.5, tilt: 1.4 },
+      kind: DART,
+      name: "a dart's speed, tilt and stop before it sets off",
+      path: dart,
+      since: 59,
+    },
+    {
+      hidden: { ...dart, turnAfter: 3 },
+      kind: DART,
+      name: "a dart's turn back as it crosses",
+      path: dart,
+      since: 100,
+    },
+    {
+      hidden: { ...dart, stopAfter: 3.5 },
+      kind: DART,
+      name: "a dart's stop as it crosses",
+      path: dart,
+      since: 100,
+    },
+    {
+      hidden: { ...rider, speedMultiplier: 2.4 },
+      kind: RIDER,
+      name: "a rider's speed before it enters",
+      path: rider,
+      since: 59,
+    },
+    {
+      hidden: { ...stepper, steps: [{ at: 230, lanes: -1, length: 45, travel: 0 }] },
+      kind: STEPPER,
+      name: "a stepper's step before its wander mark",
+      path: stepper,
+      since: 100,
+    },
+    {
+      hidden: { ...stepper, steps: [{ at: 200, lanes: 0, length: 45, travel: 30 }] },
+      kind: STEPPER,
+      name: "a stepper's step shape and length as its wander mark shows",
+      path: stepper,
+      since: 150,
+    },
+    {
+      hidden: {
+        ...stepper,
+        steps: [...stepper.steps, { at: 260, lanes: 1, length: 40, travel: 0, uncued: true }],
+      },
+      kind: STEPPER,
+      name: "a stepper's uncued step until it starts",
+      path: stepper,
+      since: 250,
+    },
+  ] as const)("hides $name", ({ hidden, kind, path, since }) => {
+    const item = (moving: MoverPath): WalkItem => ({
+      height: 40,
+      id: 1,
+      kind,
+      lane: 0,
+      laneSpan: 1,
+      mover: { path: moving, since },
+      y: 0,
+    });
+
+    expect(sightPaths(road, since, item(hidden))).toEqual(sightPaths(road, since, item(path)));
+  });
+});

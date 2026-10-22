@@ -5,6 +5,7 @@ import { itemAt } from "../lib/arrays";
 import { isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
+import type { BotSight } from "./sight";
 import {
   type ItemCount,
   type RunResult,
@@ -26,13 +27,14 @@ export interface MatrixPlayer {
 }
 
 // Every combination of policy, route policy, player, gear, pack and walker is one cell. A null
-// gear is a walk with none equipped.
+// gear is a walk with none equipped. sight is how every cell's bot reads movers.
 export interface Matrix {
   readonly gears: readonly (GearId | null)[];
   readonly packs: readonly NamedPack[];
   readonly players: readonly MatrixPlayer[];
   readonly policies: readonly PolicyId[];
   readonly routes: readonly RoutePolicyId[];
+  readonly sight: BotSight;
   readonly walkers: readonly WalkerId[];
 }
 
@@ -42,6 +44,7 @@ interface MatrixCell {
   readonly player: MatrixPlayer;
   readonly policy: PolicyId;
   readonly route: RoutePolicyId;
+  readonly sight: BotSight;
   readonly walker: WalkerId;
 }
 
@@ -113,6 +116,7 @@ export const DEFAULT_MATRIX: Matrix = {
   players: SKILL_PLAYERS,
   policies: POLICY_IDS,
   routes: [DEFAULT_ROUTE_POLICY],
+  sight: "sight",
   walkers: [DEFAULT_WALKER],
 };
 
@@ -130,7 +134,15 @@ export function matrixCells(matrix: Matrix): MatrixCell[] {
       matrix.players.flatMap((player) =>
         matrix.gears.flatMap((gear) =>
           matrix.packs.flatMap((pack) =>
-            matrix.walkers.map((walker) => ({ gear, pack, player, policy, route, walker })),
+            matrix.walkers.map((walker) => ({
+              gear,
+              pack,
+              player,
+              policy,
+              route,
+              sight: matrix.sight,
+              walker,
+            })),
           ),
         ),
       ),
@@ -155,8 +167,8 @@ function percentile(sorted: readonly number[], fraction: number): number {
 const mean = (values: readonly number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
-function simPlayer(player: MatrixPlayer): SimPlayer {
-  return { kind: "skill", skill: SKILL_PRESETS[player.preset] };
+function simPlayer(sight: BotSight, player: MatrixPlayer): SimPlayer {
+  return { kind: "skill", sight, skill: SKILL_PRESETS[player.preset] };
 }
 
 // Run number run of a cell. It is seeded by the seed, the pack's dog ids in pack order and the
@@ -166,7 +178,7 @@ function simulateCellRun(data: SimData, seed: number, cell: MatrixCell, run: num
   return simulateRun(data, hashSeed(`${seed}:${cell.pack.dogs.join(",")}:${run}`), {
     gear: cell.gear,
     pack: cell.pack.dogs,
-    player: simPlayer(cell.player),
+    player: simPlayer(cell.sight, cell.player),
     policy: cell.policy,
     route: cell.route,
     walker: cell.walker,

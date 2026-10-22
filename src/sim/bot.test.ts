@@ -12,6 +12,7 @@ import {
   hasLeftRoad,
   type MoverDraws,
   type MoverFootprint,
+  type MoverPath,
   moverPlace,
   moverPlacements,
 } from "../runner/movers";
@@ -39,6 +40,7 @@ import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
 import { actBot, type BotRoad, moverHazards, moverPrizes, newBot } from "./bot";
+import { type BotSight, moverShows, sightPaths } from "./sight";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
 import { type Skill, SKILL_PRESETS } from "./skills";
 
@@ -80,8 +82,14 @@ function withoutPulls(data: GameData): GameData {
 const SHORT = shortZones(gameData, 0.25);
 const NO_CHASER: PackDogs = ["duchess", "biscuit", "snowball"];
 
-function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHASER): RunResult {
-  return simulateRun(data, seed, simConfig(skill, pack));
+function run(
+  data: SimData,
+  seed: number,
+  skill: Skill,
+  pack: PackDogs = NO_CHASER,
+  sight: BotSight = "sight",
+): RunResult {
+  return simulateRun(data, seed, simConfig(skill, pack, {}, sight));
 }
 
 // Obstacles, minor or not, moving or not, that the pack hit, and that reached it.
@@ -122,8 +130,9 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     expect(expert.hit / expert.met).toBeLessThan(novice.hit / novice.met);
   });
 
-  // A bot that plans over only part of the road can still box itself in.
-  it("hits nothing on a sparse road with no reaction delay, no errors and a full look-ahead", () => {
+  // A bot that plans over only part of the road can still box itself in. By foresight, nothing it
+  // reads changes under it: by sight, a dart turning back or an uncued step can still hit it.
+  it("hits nothing on a sparse road by foresight, with no reaction delay, no errors and a full look-ahead", () => {
     const sparse = withoutPulls(shortZones(gameData, 0.1));
     const sharp: Skill = {
       ...SKILL_PRESETS.typical,
@@ -131,14 +140,14 @@ describe("a steering bot", { timeout: 60_000 }, () => {
       lookAheadSeconds: Infinity,
       reactionSeconds: 0,
     };
-    const counts = obstacleCounts(sparse, [run(sparse, 5, sharp)]);
+    const counts = obstacleCounts(sparse, [run(sparse, 5, sharp, NO_CHASER, "foresight")]);
 
     expect(counts.met).toBeGreaterThan(0);
     expect(counts.hit).toBe(0);
   });
 
   // The spawn planner keeps every obstacle avoidable from any lane the pack can be in; only a
-  // dog's pull can force a hit. The bot reads a hopper's hop as it reads any mover's path.
+  // dog's pull can force a hit. Read by foresight, a hopper's hop is read as any mover's path.
   it.each([
     { busy: withoutPulls(SHORT), name: "the game's movers" },
     {
@@ -150,21 +159,27 @@ describe("a steering bot", { timeout: 60_000 }, () => {
       ),
       name: "every mover moving and every stepper and hopper hopping 1 or 2 times, up to 2 spots",
     },
-  ])("avoids every obstacle no pull forces, as an ideal player, with $name", ({ busy }) => {
-    const results = [run(busy, 1, IDEAL_SKILL, ["duchess"]), run(busy, 2, IDEAL_SKILL, NO_CHASER)];
-    const counts = obstacleCounts(busy, results);
+  ])(
+    "avoids every obstacle no pull forces, as an ideal player by foresight, with $name",
+    ({ busy }) => {
+      const results = [
+        run(busy, 1, IDEAL_SKILL, ["duchess"], "foresight"),
+        run(busy, 2, IDEAL_SKILL, NO_CHASER, "foresight"),
+      ];
+      const counts = obstacleCounts(busy, results);
 
-    // The floor only checks that the runs met a real sample; it sits well under any mix's count.
-    expect(counts.met).toBeGreaterThan(50);
-    expect(counts.hit).toBe(0);
-  });
+      // The floor only checks that the runs met a real sample; it sits well under any mix's count.
+      expect(counts.met).toBeGreaterThan(50);
+      expect(counts.hit).toBe(0);
+    },
+  );
 
   // A pull never moves the pack into an obstacle too close to react to, so an ideal player is
   // never hit right after one, whatever the pack pulls toward. Steering away during a strain
-  // cancels its pull, so only some strains pull.
-  it("is never hit right after a pull, as an ideal player, with pulls on", () => {
+  // cancels its pull, so only some strains pull. Read by foresight, no mover's surprise counts.
+  it("is never hit right after a pull, as an ideal player by foresight, with pulls on", () => {
     const pulling: PackDogs = ["koda", "biscuit", "zippy"];
-    const results = [1, 2, 3].map((seed) => run(SHORT, seed, IDEAL_SKILL, pulling));
+    const results = [1, 2, 3].map((seed) => run(SHORT, seed, IDEAL_SKILL, pulling, "foresight"));
     const hits = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
     const pulls = results.reduce((sum, result) => sum + result.pullsMoved, 0);
 
@@ -199,25 +214,23 @@ describe("a moving prize", () => {
     { lane: 1, name: "a lane left", step: { lanes: -1, travel: 0 } },
     { lane: 2, name: "a row down", step: { lanes: 0, travel: cell.length } },
   ])("is a prize in the lane she steps into: $name", ({ lane, step }) => {
+    const path: MoverPath = {
+      lane: 2,
+      motion: "steps",
+      movement: "step",
+      steps: [{ at: 100, length: 30, ...step }],
+      warning: 50,
+    };
     const item: WalkItem = {
       height,
       id: 1,
       kind: "pettingNeighbor",
       lane: 2,
       laneSpan: 1,
-      mover: {
-        path: {
-          lane: 2,
-          motion: "steps",
-          movement: "step",
-          steps: [{ at: 100, length: 30, ...step }],
-          warning: 50,
-        },
-        since: 0,
-      },
+      mover: { path, since: 0 },
       y: roadTop - height,
     };
-    const [prize, ...others] = moverPrizes(road, Infinity, 1, item);
+    const [prize, ...others] = moverPrizes(road, Infinity, 1, [path], item);
     expect(others).toEqual([]);
     expect(prize?.lanes).toBe(1 << lane);
     expect(prize?.value).toBe(1);
@@ -388,7 +401,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         mover: { path, since: 0 },
         y: roadTop - height,
       };
-      const hazards = moverHazards(road, Infinity, item);
+      const hazards = moverHazards(road, Infinity, outcomes, item);
       const packs = Array.from({ length: laneCount }, (_, lane) =>
         packBoxes(geometry, stillInLane(lane), run),
       );
@@ -452,6 +465,54 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       }
     }
   });
+
+  // By sight, the bot reads a mover from what it shows, and that reading holds until it shows
+  // something new: from each moment it does, the mover is where one of the paths read then has it,
+  // whichever way a stalker or shy hopper chooses its moves.
+  it.each(cases)(
+    "is where its sight reading has it until it shows something new: $name",
+    (mover) => {
+      const { geometry, placements, speed } = placedCase(mover);
+      const road: BotRoad = { data: gameData, geometry, speed };
+      const { laneCount, roadBottom, roadTop } = geometry;
+      const height = itemHeight(gameData, geometry, mover.kind, true);
+      const same = (a: MoverPath, b: MoverPath, since: number) => {
+        const [p, q] = [moverPlace(laneCount, a, since), moverPlace(laneCount, b, since)];
+        return (
+          p.solid === q.solid &&
+          Math.abs(p.lanePosition - q.lanePosition) < 1e-6 &&
+          Math.abs(p.travel - q.travel) < 1e-6
+        );
+      };
+      for (const outcome of placements.flatMap(({ path }) => moverOutcomes(path))) {
+        const item: WalkItem = {
+          height,
+          id: 1,
+          kind: mover.kind,
+          lane: 0,
+          laneSpan: mover.shape.lanes,
+          mover: { path: outcome, since: 0 },
+          y: roadTop - height,
+        };
+        let shows = moverShows(outcome, 0);
+        let read = sightPaths(road, 0, item);
+        for (let since = 0; ; since += (speed * STEP_SECONDS) / 4) {
+          const place = moverPlace(laneCount, outcome, since);
+          if (hasLeftRoad(laneCount, place) || roadTop - height + place.travel >= roadBottom) {
+            break;
+          }
+          if (moverShows(outcome, since) !== shows) {
+            shows = moverShows(outcome, since);
+            read = sightPaths(road, since, item);
+          }
+          expect(
+            read.some((path) => same(path, outcome, since)),
+            `showing ${shows} at ${since.toFixed(1)}`,
+          ).toBe(true);
+        }
+      }
+    },
+  );
 
   // Every way of moving has somewhere the planner can put it.
   it("has somewhere to put every way of moving", () => {
@@ -591,7 +652,7 @@ describe("a steering bot whose pack drifts", () => {
       { name: "the way it planned to go", same: true },
       { name: "the other way", same: false },
     ]) {
-      const bot = newBot(seededRandom(1), IDEAL_SKILL);
+      const bot = newBot(seededRandom(1), "sight", IDEAL_SKILL);
       actBot(bot, road, NO_PULLS, walk);
       const [planned] = bot.plan;
       if (planned === undefined) {
