@@ -143,13 +143,26 @@ describe("ProfileSession.update", () => {
     expect(written.slice(-2)).toEqual([100, 200]);
   });
 
-  it("reports storage unavailable once a write fails", async () => {
-    const entries = new Map<string, string>();
-    const failing: SaveStorage = {
-      read: async (key) => entries.get(key) ?? null,
-      write: () => Promise.reject(new Error("quota")),
+  it("reports storage unavailable while writes fail, and available once one succeeds", async () => {
+    let full = true;
+    const flaky: SaveStorage = {
+      read: async () => null,
+      write: () => (full ? Promise.reject(new Error("quota")) : Promise.resolve()),
     };
-    const { session } = await ProfileSession.open(testContext, awards, saveStore(failing));
+    const { session } = await ProfileSession.open(testContext, awards, saveStore(flaky));
+    await session.update((save) => save);
+    expect(session.storage).toBe("unavailable");
+    full = false;
+    await session.update((save) => save);
+    expect(session.storage).toBe("available");
+  });
+
+  it("stays unavailable for the session after a failed read, though writes would succeed", async () => {
+    const unreadable: SaveStorage = {
+      read: () => Promise.reject(new Error("blocked")),
+      write: () => Promise.resolve(),
+    };
+    const { session } = await ProfileSession.open(testContext, awards, saveStore(unreadable));
     await session.update((save) => save);
     expect(session.storage).toBe("unavailable");
   });

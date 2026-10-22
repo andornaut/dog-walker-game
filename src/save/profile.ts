@@ -14,8 +14,10 @@ import type { SaveContext } from "./load";
 import type { Checkpoint, SaveDocument, Settings } from "./schema";
 import type { SaveStore, StoreLoadResult } from "./storage";
 
-// "unavailable" once storage could not be read or a write failed: play goes on with the save
-// in memory, and the home screen says progress won't be saved. "newer" when a later version of
+// "unavailable" once storage could not be read, or while the last write failed: play goes on
+// with the save in memory, and the home screen says progress won't be saved. A later write
+// that succeeds makes it "available" again; a failed read lasts the session, since the store
+// then writes nothing. "newer" when a later version of
 // the game wrote the stored save: play goes on with the save in memory, nothing is written for
 // the session, and the home screen says to reload.
 export type StorageState = "available" | "newer" | "unavailable";
@@ -115,10 +117,10 @@ export class ProfileSession {
     const document = this.document;
     this.writes = this.writes.then(async () => {
       const result = await this.store.save(document);
-      if (result.status === "unavailable") {
-        this.state = "unavailable";
-      } else if (result.status === "invalid") {
+      if (result.status === "invalid") {
         console.error(`The save was not written: ${result.reason}`);
+      } else {
+        this.state = result.status === "saved" ? "available" : "unavailable";
       }
     });
     return this.writes;
