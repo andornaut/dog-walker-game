@@ -598,7 +598,9 @@ export class HudFeedback {
     const set = fitFaceRows(this.scene, style, LOW_CHIP_FIT, lowHeartsText(gameData, dog));
     const row = set.rows[0];
     const shown = {
-      ...(row !== undefined && row.faces.length > 0 ? { face: set.box } : {}),
+      ...(set.box !== undefined && row !== undefined && row.faces.length > 0
+        ? { face: set.box }
+        : {}),
       scale: set.style.scale,
       width: Math.ceil(row?.width ?? 0),
     };

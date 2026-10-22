@@ -11,6 +11,7 @@ import { faceMood } from "../rules/treats";
 import { cents, clampHearts } from "../rules/units";
 import type { Pack } from "../state/runState";
 import { bodyRunWidth } from "../testing/bodyFont";
+import { defined } from "../testing/defined";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { PACK_PLACES } from "../testing/packPlaces";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -393,7 +394,7 @@ describe("the low-hearts chip", () => {
     expect(row?.width).toBeLessThanOrEqual(LOW_CHIP_FIT.room);
     expect(row?.faces.map((face) => face.dog)).toEqual([dog]);
     expect(row?.texts.some(({ text }) => text.startsWith(name))).toBe(true);
-    const face = boxAt(fitted.style);
+    const face = defined(boxAt(fitted.style));
     const { scale } = fitted.style;
     const width = Math.ceil(row?.width ?? 0);
     const { box, text: caps } = lowChipPlace(BODY, SCREEN_CONFIG.width, slot, {

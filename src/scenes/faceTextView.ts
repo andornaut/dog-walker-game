@@ -52,7 +52,7 @@ export function fitFaceRows(
   style: PixelTextStyle,
   fit: { room: number; styles: readonly TextFitStyle[] },
   line: FaceText,
-): { box: FaceBox; rows: FaceRow[]; style: TextFitStyle } {
+): { box: FaceBox | undefined; rows: FaceRow[]; style: TextFitStyle } {
   const body = pixelFontMetrics(scene, "body");
   const boxAt = (at: TextFitStyle) => inlineFaceBox(body, at.scale);
   const fitted = measureRuns(scene, style, (width) =>
@@ -62,11 +62,11 @@ export function fitFaceRows(
 }
 
 // The rows drawn from x, the first row's capitals' top at capsTop and each further row a line
-// of the font lower, at fit, in style's colour. Returns the parts drawn.
+// of the font lower, at fit, in style's colour, each face in box. Returns the parts drawn.
 export function addFaceRows(
   scene: Scene,
   at: { capsTop: number; x: number },
-  text: { box: FaceBox; fit: TextFitStyle; style: PixelTextStyle },
+  text: { box: FaceBox | undefined; fit: TextFitStyle; style: PixelTextStyle },
   rows: readonly FaceRow[],
 ): Part[] {
   const { box, fit, style } = text;
@@ -78,15 +78,18 @@ export function addFaceRows(
       scalePixelText(label, fit.scale, at.x + x, top);
       return label;
     });
-    const faces = row.faces.flatMap((face) =>
-      addInlineFace(scene, box, { x: at.x + face.x, y: top - box.rise }, face),
-    );
+    const faces =
+      box === undefined
+        ? []
+        : row.faces.flatMap((face) =>
+            addInlineFace(scene, box, { x: at.x + face.x, y: top - box.rise }, face),
+          );
     return [...faces, ...texts];
   });
 }
 
-// The owner's 20x20 face at box's scale, in its mood, else neutral, in a 1px ink frame over
-// tan, the frame's top-left at.
+// The owner's 20x20 face at 1x, in its mood, else neutral, in a 1px ink frame over tan, the
+// frame's top-left at.
 function addInlineFace(
   scene: Scene,
   box: FaceBox,
@@ -103,10 +106,7 @@ function addInlineFace(
   if (!scene.textures.exists(key)) {
     return [g];
   }
-  const sprite = scene.add
-    .sprite(at.x + 1, at.y + 1, key)
-    .setOrigin(0)
-    .setScale(box.scale);
+  const sprite = scene.add.sprite(at.x + 1, at.y + 1, key).setOrigin(0);
   const tag = firstTag(scene, key, [face.mood, "neutral"]);
   if (tag !== undefined) {
     playTag(sprite, key, tag);

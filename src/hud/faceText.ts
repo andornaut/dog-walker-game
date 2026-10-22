@@ -26,29 +26,31 @@ export interface FaceText {
   readonly text: string;
 }
 
-// The owner's 20x20 face (face-owner-<art>-20) in a 1px ink frame over tan, as the quip line's
-// lead draws it, at scale times the text's scale: 1x beside 2x text. Its frame is centred on the
-// row's capitals, and the name starts gap screen pixels past the frame at 2x (half that at 1x),
-// as the quip line's text starts past its lead.
-export const INLINE_FACE = { face: 20, gap: 4, scale: 0.5 } as const;
+// The owner's 20x20 face (face-owner-<art>-20) at 1x in a 1px ink frame over tan, as the quip
+// line's lead draws it, beside text at textScale. Its frame is centred on the row's capitals,
+// and the name starts gap screen pixels past the frame, as the quip line's text starts past its
+// lead. Beside text at any other scale the name shows alone: the face draws only at whole-number
+// scales, and at 1x it is taller than a 1x row.
+export const INLINE_FACE = { face: 20, gap: 4, textScale: 2 } as const;
 
-// An inline face at a text scale: the face's scale, the frame's side, the gap to the name, and
-// how far the frame's top rises above the top of the row's capitals.
+// An inline face: the frame's side, the gap to the name, and how far the frame's top rises
+// above the top of the row's capitals.
 export interface FaceBox {
   readonly framed: number;
   readonly gap: number;
   readonly rise: number;
-  readonly scale: number;
 }
 
-export function inlineFaceBox(body: FontMetrics, textScale: number): FaceBox {
-  const scale = INLINE_FACE.scale * textScale;
-  const framed = INLINE_FACE.face * scale + 2;
+// The inline face beside text at textScale, or none where the name shows alone.
+export function inlineFaceBox(body: FontMetrics, textScale: number): FaceBox | undefined {
+  if (textScale !== INLINE_FACE.textScale) {
+    return undefined;
+  }
+  const framed = INLINE_FACE.face + 2;
   return {
     framed,
-    gap: INLINE_FACE.gap * scale,
+    gap: INLINE_FACE.gap,
     rise: Math.floor((framed - body.capHeight * textScale) / 2),
-    scale,
   };
 }
 
@@ -141,8 +143,12 @@ function words(line: FaceText): Word[] {
   return word.length > 0 ? [...all, word] : all;
 }
 
-// The words on one row, a space apart, laid out from its left.
-function rowOf(width: (text: string) => number, box: FaceBox, row: readonly Word[]): FaceRow {
+// The words on one row, a space apart, laid out from its left; with no box, names show alone.
+function rowOf(
+  width: (text: string) => number,
+  box: FaceBox | undefined,
+  row: readonly Word[],
+): FaceRow {
   const faces: (OwnerFace & { x: number })[] = [];
   const texts: { text: string; x: number }[] = [];
   let start = 0;
@@ -152,7 +158,7 @@ function rowOf(width: (text: string) => number, box: FaceBox, row: readonly Word
       run += " ";
     }
     for (const part of word) {
-      if (part.face !== undefined) {
+      if (part.face !== undefined && box !== undefined) {
         const x = start + (run === "" ? 0 : width(run));
         if (run !== "") {
           texts.push({ text: run, x: start });
@@ -171,11 +177,11 @@ function rowOf(width: (text: string) => number, box: FaceBox, row: readonly Word
 }
 
 // The line broken at spaces outside its names into rows no wider than room, as width measures
-// a run of text, each face box.framed wide and box.gap from its name. A word wider than room
-// gets a row of its own.
+// a run of text, each face box.framed wide and box.gap from its name, or each name alone with
+// no box. A word wider than room gets a row of its own.
 export function faceRows(
   width: (text: string) => number,
-  box: FaceBox,
+  box: FaceBox | undefined,
   room: number,
   line: FaceText,
 ): FaceRow[] {
@@ -202,7 +208,7 @@ export function faceRows(
 export function fittingFaceRows(
   styles: readonly TextFitStyle[],
   width: (style: TextFitStyle, text: string) => number,
-  box: (style: TextFitStyle) => FaceBox,
+  box: (style: TextFitStyle) => FaceBox | undefined,
   room: number,
   line: FaceText,
 ): { rows: FaceRow[]; style: TextFitStyle } {

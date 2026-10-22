@@ -239,7 +239,7 @@ export function linePanels(body: FontMetrics, bars: number, bar: Rect = WALK_BAR
 // text past the last row is left out.
 export function messageRows(
   width: (text: string) => number,
-  box: FaceBox,
+  box: FaceBox | undefined,
   room: number,
   line: FaceText,
 ): FaceRow[] {

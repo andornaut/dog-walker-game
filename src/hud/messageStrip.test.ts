@@ -10,6 +10,7 @@ import { fillNames } from "../lib/lines";
 import { type Rect } from "../lib/rect";
 import { bumpHearts } from "../rules/run";
 import { bodyRunWidth } from "../testing/bodyFont";
+import { defined } from "../testing/defined";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -266,7 +267,7 @@ const plain = (line: FaceText): FaceText => ({ ...line, text: plainMarks(line.te
 const rowText = (row: FaceRow) => row.texts.map(({ text }) => text).join("");
 const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
 const width2x = (run: string) => bodyRunWidth(AT_2X, run);
-const BOX_2X = inlineFaceBox(BODY, MESSAGE_STRIP.scale);
+const BOX_2X = defined(inlineFaceBox(BODY, MESSAGE_STRIP.scale));
 // Whether the line fits room on one row in a style of TEXT_FIT_STYLES, as the one-row strip
 // sets it.
 function fitsOneRow(room: number, line: FaceText): boolean {

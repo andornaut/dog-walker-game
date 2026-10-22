@@ -9,19 +9,23 @@ import { bumpHearts } from "../rules/run";
 import type { FaceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import { bodyRunWidth } from "../testing/bodyFont";
+import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
 import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import {
   faceRows,
   type FaceText,
   fillFaceText,
+  fittingFaceRows,
   INLINE_FACE,
   inlineFaceBox,
   ownerFaceText,
   withoutFace,
 } from "./faceText";
 import {
+  MESSAGE_LINE,
   MESSAGE_STRIP,
   messageLinePanel,
   messageLineTop,
@@ -41,7 +45,7 @@ import {
 const BODY = fontFileMetrics("font-body");
 const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
 const width2x = (run: string) => bodyRunWidth(AT_2X, run);
-const BOX_2X = inlineFaceBox(BODY, MESSAGE_STRIP.scale);
+const BOX_2X = defined(inlineFaceBox(BODY, MESSAGE_STRIP.scale));
 
 const DOG: DogId = "koda";
 const NAME = gameData.dogs[DOG].owner.name;
@@ -186,38 +190,48 @@ describe("withoutFace", () => {
   });
 });
 
-// The face keeps clear of the rows over and under its own, and inside each panel the strip
-// draws a line on.
+// The face draws at 1x, framed, beside 2x text only; it keeps clear of the rows over and under
+// its own, and inside each panel the strip draws a 2x line on.
 describe("an inline face", () => {
   const inside = (rect: Rect, panel: Rect) =>
     rect.y >= panel.y && rect.y + rect.height <= panel.y + panel.height;
+  const scale = INLINE_FACE.textScale;
 
-  it.each([1, 2])("at %ix keeps clear of the rows over and under it", (scale) => {
-    const box = inlineFaceBox(BODY, scale);
+  it("keeps clear of the rows over and under it", () => {
     const pitch = BODY.lineHeight * scale;
-    expect(box.framed).toBe(INLINE_FACE.face * INLINE_FACE.scale * scale + 2);
-    expect(-box.rise).toBeGreaterThanOrEqual(inkRowsFromCapTop(BODY) * scale - pitch);
-    expect(box.framed - box.rise).toBeLessThanOrEqual(pitch);
+    expect(BOX_2X.framed).toBe(INLINE_FACE.face + 2);
+    expect(-BOX_2X.rise).toBeGreaterThanOrEqual(inkRowsFromCapTop(BODY) * scale - pitch);
+    expect(BOX_2X.framed - BOX_2X.rise).toBeLessThanOrEqual(pitch);
   });
 
   const { rowTops } = messageStripLayout(BODY);
-  it.each<[string, number, Rect, number]>([
-    ["the strip's first row", rowTops[0] ?? 0, messagePanel(BODY, 1), 2],
-    ["the strip's second row", rowTops[1] ?? 0, messagePanel(BODY, 2), 2],
-    ...[1, 2].flatMap((bars) =>
-      [2, 1].map(
-        (scale) =>
-          [
-            `the one-row strip under ${bars} bars at ${scale}x`,
-            messageLineTop(BODY, messageLinePanel(bars), scale),
-            messageLinePanel(bars).panel,
-            scale,
-          ] as [string, number, Rect, number],
-      ),
-    ),
-  ])("sits inside the panel on %s", (_place, capsTop, panel, scale) => {
-    const box = inlineFaceBox(BODY, scale);
-    const frame = { height: box.framed, width: box.framed, x: 0, y: capsTop - box.rise };
+  it.each<[string, number, Rect]>([
+    ["the strip's first row", rowTops[0] ?? 0, messagePanel(BODY, 1)],
+    ["the strip's second row", rowTops[1] ?? 0, messagePanel(BODY, 2)],
+    ...[1, 2].map((bars): [string, number, Rect] => [
+      `the one-row strip under ${bars} bars`,
+      messageLineTop(BODY, messageLinePanel(bars), scale),
+      messageLinePanel(bars).panel,
+    ]),
+  ])("sits inside the panel on %s", (_place, capsTop, panel) => {
+    const frame = { height: BOX_2X.framed, width: BOX_2X.framed, x: 0, y: capsTop - BOX_2X.rise };
     expect(inside(frame, panel)).toBe(true);
+  });
+
+  // The one-row strip under the debuff bars: a line that fits its room at 2x keeps its face,
+  // and one set at 1x, the last of TEXT_FIT_STYLES, shows the owner's name alone.
+  const said = defined(PLACES.find(([path]) => path === "strip.plainHit")?.[1] ?? undefined);
+  const at1x = { letterSpacing: 0, scale: 1 };
+  it.each<[string, number, number, number]>([
+    ["keeps the face at 2x", MESSAGE_LINE.room, 2, 1],
+    ["shows the name alone at 1x", bodyRunWidth(at1x, said.text), 1, 0],
+  ])("%s", (_name, room, textScale, faces) => {
+    const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
+    const set = fittingFaceRows(TEXT_FIT_STYLES, bodyRunWidth, boxAt, room, said);
+    const [row] = set.rows;
+    expect(set.style.scale).toBe(textScale);
+    expect(row?.faces).toHaveLength(faces);
+    expect(row?.texts.map(({ text }) => text).join("")).toBe(said.text);
+    expect(row?.width).toBeLessThanOrEqual(room);
   });
 });
