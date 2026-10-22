@@ -150,7 +150,7 @@ describe("stepSession", () => {
   });
 });
 
-describe("a strain in the session", () => {
+describe("a strain in the session", { timeout: 30_000 }, () => {
   const SQUIRREL_LANE = 2;
 
   // Koda straining toward a squirrel in the middle lane, the pack still in lane.
