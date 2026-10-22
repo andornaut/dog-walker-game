@@ -158,23 +158,6 @@ def _(g):
         g.p(x, y + 3, "yellow")
 
 
-# A walker's bust: H hair, S skin, I eyes, C shirt.
-WALKER = [".HHH.", "HHHHH", "HSSSH", "HISIH", ".SSS.", "CCCCC", "CCCCC", "CCCCC", "CCCCC", "CCCCC", "CCCCC"]
-
-
-@icon("dream-team")
-def _(g):
-    """The four walkers shoulder to shoulder, the outer two cheering."""
-    crew = (("ink", "skin2", "red"), ("ochre", "skin1", "sky"), ("dbrown", "brown", "green"),
-            ("yellow", "skin1", "amber"))
-    for i, (hair, skin, shirt) in enumerate(crew):
-        x0, y0 = 6 + i * 5, 11 if i in (0, 3) else 10
-        bitmap(g, x0, y0, WALKER, {"H": hair, "S": skin, "I": "ink", "C": shirt})
-    for x, s in ((5, -1), (26, 1)):
-        g.rect(x, 12, 1, 4, "skin1")
-        g.p(x + s, 11, "skin1")
-
-
 @icon("clean-paws")
 def _(g):
     """A bar of soap under three bubbles."""
@@ -633,7 +616,7 @@ def _(g):
 
 
 BADGES = {
-    "double-leash": "firsts", "dream-team": "firsts", "pack-leader": "firsts",
+    "double-leash": "firsts", "pack-leader": "firsts",
     "round-trip": "firsts", "twos-company": "firsts",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
     "five-star-service": "mastery", "flawless-trio": "mastery", "good-day": "mastery", "marathon": "mastery",
