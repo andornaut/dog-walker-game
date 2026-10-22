@@ -11,6 +11,7 @@ import { clampHearts } from "../rules/units";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
+import { inside } from "../testing/rects";
 import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
@@ -193,8 +194,6 @@ describe("withoutFace", () => {
 // The face draws at 1x, framed, beside 2x text only; it keeps clear of the rows over and under
 // its own, and inside each panel the strip draws a 2x line on.
 describe("an inline face", () => {
-  const inside = (rect: Rect, panel: Rect) =>
-    rect.y >= panel.y && rect.y + rect.height <= panel.y + panel.height;
   const scale = INLINE_FACE.textScale;
 
   it("keeps clear of the rows over and under it", () => {
@@ -214,7 +213,12 @@ describe("an inline face", () => {
       messageLinePanel(bars).panel,
     ]),
   ])("sits inside the panel on %s", (_place, capsTop, panel) => {
-    const frame = { height: BOX_2X.framed, width: BOX_2X.framed, x: 0, y: capsTop - BOX_2X.rise };
+    const frame = {
+      height: BOX_2X.framed,
+      width: BOX_2X.framed,
+      x: panel.x,
+      y: capsTop - BOX_2X.rise,
+    };
     expect(inside(frame, panel)).toBe(true);
   });
 
