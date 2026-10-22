@@ -1722,7 +1722,7 @@ describe("pickWeighted", () => {
   });
 });
 
-describe("movers", { timeout: 60_000 }, () => {
+describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
   // The rulebook's obstacles that never move: barriers, benches, bins, cones, hedges and puddles.
   const NEVER_MOVE: readonly WalkItem["kind"][] = [

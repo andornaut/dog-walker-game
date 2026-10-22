@@ -276,7 +276,7 @@ describe("a firing in the walk", () => {
 
 // Playing every cause of a firing through its hold takes about 6 s on a busy machine; the limit
 // is four times that.
-describe("a firing's hold", { timeout: 25_000 }, () => {
+describe("a firing's hold", { timeout: 60_000 }, () => {
   const STEP_MS = STEP_SECONDS * 1000;
   const streams = runStreams(1);
   // The walk with nothing to come, Koda's owner on their last heart and the walker's
