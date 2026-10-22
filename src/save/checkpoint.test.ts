@@ -149,12 +149,17 @@ describe("recordRunEnd", () => {
     }
   });
 
-  it("unlocks the walkers of the zones the run finished", () => {
+  it("unlocks the walkers of the zones the run finished, not those a dev start skipped", () => {
     const walkers = (changes: Partial<RunResult>) =>
       recordRunEnd(testAwards, newPlayerSave, runResult(changes)).owned.walkers;
     expect([...walkers({ outcome: "wentHome", zone: 3 })].sort()).toEqual(
       unlockedBy(ROUTE.slice(0, 2)),
     );
+    const devStart = { counters: { ...quietCounters(), firstZone: 2 } };
+    expect([...walkers({ ...devStart, outcome: "wentHome", zone: 3 })].sort()).toEqual(
+      unlockedBy(ROUTE.slice(2, 2)),
+    );
+    expect([...walkers(devStart)].sort()).toEqual(unlockedBy(ROUTE.slice(2)));
     expect([...walkers({})].sort()).toEqual(unlockedBy(ROUTE));
     expect(unlockedBy(ROUTE)).toEqual(WALKERS.map(([id]) => id).sort());
   });

@@ -64,7 +64,7 @@ type BankedRun = Pick<
 };
 
 // Banks the earnings, counts the outcome and updates every stat and the logbook. Unlocks the
-// walkers whose goal the best zones finished now meets. Clears the checkpoint, since the run
+// walkers whose goal zone the run finished, leaving out zones a dev start skipped. Clears the checkpoint, since the run
 // it belonged to is now banked. Then awards what the run earned.
 function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): SaveDocument {
   const { stats } = save;
@@ -105,7 +105,11 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       ...owned,
       walkers: [
         ...owned.walkers,
-        ...newWalkers(context.data, owned.walkers, run.route.slice(0, zonesFinished)),
+        ...newWalkers(
+          context.data,
+          owned.walkers,
+          run.route.slice(run.counters.firstZone, zonesFinished),
+        ),
       ],
     },
     stats: {
