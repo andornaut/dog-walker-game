@@ -76,8 +76,9 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
 // edge during its cue. A crosser that has stopped plays its idle tag if it has one, and otherwise
 // stands on the first frame of the tag it would play. A stepper stands on the road throughout,
-// with the wander mark over it before each step. Its other sprites, after the wander mark, such
-// as a skunk's cloud, go with its body wherever it shows, standing as an obstacle's do.
+// with the wander mark over it before each step. A lucky find shows no cue. Its other sprites,
+// after the wander mark, such as a skunk's cloud, go with its body wherever it shows, standing
+// as an obstacle's do.
 export function drawMover(
   item: MoverItemView,
   view: ItemView,
@@ -95,7 +96,8 @@ export function drawMover(
   const laneX =
     itemAt(LANE_XS, 0) + ((place.lanePosition + (span - 1) / 2) * road.width) / LANE_COUNT;
   const leftward = facesLeft(path, since);
-  const tell = moverTell(path, since);
+  const lucky = itemCategory(gameData, item.kind) === "lucky";
+  const tell = lucky ? null : moverTell(path, since);
   const moving = inMotion(path, since);
   if (body !== undefined) {
     const scene = body.sprite.scene;
@@ -113,10 +115,9 @@ export function drawMover(
       const placed = project(PROJECTION, { distance, x: laneX });
       const drawn = showAtDepth(body.sprite, body.key, placed.scale, body.feet);
       const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
-      const tag =
-        itemCategory(gameData, item.kind) === "lucky"
-          ? prizeMoverTag(has, path.movement, moving && !halted, halted)
-          : moverBodyTag(has, path.movement, moving && !halted);
+      const tag = lucky
+        ? prizeMoverTag(has, path.movement, moving && !halted, halted)
+        : moverBodyTag(has, path.movement, moving && !halted);
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       body.sprite
