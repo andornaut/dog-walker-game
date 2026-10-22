@@ -495,19 +495,16 @@ def kind_words20():
 
 
 def big_tipper20():
-    """A stack of four coins under a fifth seen from above, and a green arrow up beside it."""
+    """A short stack of three coins under a fourth seen from above, and a small green arrow up beside
+    it, kept to the well's middle 14x9 so it sits quietly in the walk bar."""
     g = Grid(20, 20)
-    for x, y in ((1, 16), (2, 14), (1, 12), (2, 10)):
-        g.rect(x, y, 10, 2, "amber")
-        g.rect(x, y + 1, 10, 1, "orange")
+    for x, y in ((4, 13), (5, 11), (4, 9)):
+        g.rect(x, y, 8, 2, "amber")
+        g.rect(x, y + 1, 8, 1, "orange")
         g.p(x + 1, y, "yellow")
-        g.p(x + 2, y, "yellow")
-    g.ell(7, 8, 5, 2.5, "yellow", "amber")
-    g.rect(5, 8, 4, 1, "amber")
-    g.tri((16, 0.5), (11.5, 6.5), (20.5, 6.5), "green")
-    g.rect(15, 6, 3, 12, "green")
-    g.rect(17, 6, 1, 12, "dgreen")
-    g.p(16, 3, "yellow")
+    g.ell(8.5, 8, 4, 2, "yellow", "amber")
+    g.tri((15, 6.5), (12.5, 9.5), (17.5, 9.5), "green")
+    g.rect(14, 9, 2, 5, "green")
     return g
 
 
