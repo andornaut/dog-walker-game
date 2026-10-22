@@ -275,7 +275,11 @@ export class RunScene extends Scene implements HudRun {
       this.world?.menus.setPageHidden(true);
       this.openPause();
       const walk = this.session?.walk;
-      if (walk !== undefined && walk.run.phase.kind !== "ended") {
+      if (
+        walk !== undefined &&
+        walk.run.phase.kind !== "ended" &&
+        this.world?.recorder.replaying() === false
+      ) {
         void checkpointRun(this, checkpointOf(gameData, walk.run));
       }
     };
@@ -453,7 +457,7 @@ export class RunScene extends Scene implements HudRun {
     }
   }
 
-  // Pays out the zone's fees and saves the walk between zones. Unless replayed, returns the
+  // Pays out the zone's fees. Unless replayed, saves the walk between zones and returns the
   // celebration that plays once the coins land: after the last zone, only a New walker's.
   private endZone(event: Extract<SessionEvent, { kind: "zoneEnded" }>): Celebration | undefined {
     const world = this.world;
@@ -462,12 +466,12 @@ export class RunScene extends Scene implements HudRun {
     }
     const { after, before } = event;
     const payout = world.moments.payOut(event.fees, before);
+    if (world.recorder.replaying()) {
+      return undefined;
+    }
     const ended = after.phase.kind === "ended";
     if (!ended) {
       void checkpointRun(this, checkpointOf(gameData, after));
-    }
-    if (world.recorder.replaying()) {
-      return undefined;
     }
     const celebration = zoneCelebration(gameData, profileSave(this).owned.walkers, {
       changes: payout.changes,
@@ -606,6 +610,11 @@ export class RunScene extends Scene implements HudRun {
     const overlays = [SCENE_KEYS.card, SCENE_KEYS.zoneCelebration, SCENE_KEYS.pause];
     for (const key of [SCENE_KEYS.hud, ...overlays]) {
       this.scene.stop(key);
+    }
+    // A replay banks nothing, so the save keeps the walk it plays again and has no end to show.
+    if (world.recorder.replaying()) {
+      this.scene.start(SCENE_KEYS.start);
+      return;
     }
     const showEnd = () => this.scene.start(SCENE_KEYS.end);
     finishRun(this, runResultOf(gameData, walk.run), world.moments.banked()).then(
