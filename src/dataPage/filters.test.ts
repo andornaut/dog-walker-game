@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   type Facet,
+  facetStates,
   facetValues,
   filterRows,
   type Filters,
@@ -85,7 +86,8 @@ describe("filterRows", () => {
       [["Koda", "Sam", "happier", "a"]],
     ],
   ])("%s", (_name, entries, expected) => {
-    expect(filterRows([DOG, MOMENT], filters(entries), 2, QUIPS)).toEqual(expected);
+    const facets = facetStates([DOG, MOMENT], filters(entries), 2, QUIPS);
+    expect(filterRows(facets, 2, QUIPS)).toEqual(expected);
   });
 });
 

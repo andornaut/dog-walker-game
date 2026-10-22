@@ -18,6 +18,12 @@ export interface FacetValue {
   readonly label: string;
 }
 
+// A facet with the values its column offers and, among them, the selected ones.
+export interface FacetState extends Facet {
+  readonly active: ReadonlySet<string>;
+  readonly values: readonly FacetValue[];
+}
+
 // The key of the pills that pick which tables show.
 export const TABLES_KEY = "tables";
 
@@ -114,29 +120,34 @@ export function facetValues(
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
-// The rows whose value in each facet's column is one of that facet's active values. A kept row
-// that continues a group whose head was dropped gets the head's grouped cells, so it still says
-// whose it is.
-export function filterRows(
+// Each facet's values in rows and its selected ones.
+export function facetStates(
   facets: readonly Facet[],
   filters: Filters,
   groupedColumns: number,
   rows: readonly Row[],
+): FacetState[] {
+  return facets.map((facet) => {
+    const values = facetValues(facet.column, groupedColumns, rows);
+    const ids = values.map((value) => value.id);
+    return { ...facet, active: activeValues(facet.key, ids, filters), values };
+  });
+}
+
+// The rows whose value in each facet's column is one of that facet's active values. A kept row
+// that continues a group whose head was dropped gets the head's grouped cells, so it still says
+// whose it is.
+export function filterRows(
+  facets: readonly Pick<FacetState, "active" | "column">[],
+  groupedColumns: number,
+  rows: readonly Row[],
 ): Row[] {
   const resolved = resolvedRows(groupedColumns, rows);
-  const active = facets.map((facet) => ({
-    column: facet.column,
-    values: activeValues(
-      facet.key,
-      facetValues(facet.column, groupedColumns, rows).map((value) => value.id),
-      filters,
-    ),
-  }));
   const kept: Row[] = [];
   let previousKept = -1;
   resolved.forEach((row, i) => {
-    const matches = active.every(
-      ({ column, values }) => values.size === 0 || values.has(slug(String(row[column] ?? ""))),
+    const matches = facets.every(
+      ({ active, column }) => active.size === 0 || active.has(slug(String(row[column] ?? ""))),
     );
     if (!matches) {
       return;

@@ -36,10 +36,9 @@ import {
   activeValues,
   type Cell,
   clearFilter,
-  type Facet,
   facetKey,
+  facetStates,
   type FacetValue,
-  facetValues,
   filterRows,
   type Filters,
   parseFilters,
@@ -106,11 +105,16 @@ function pillRow(
 
 function renderSection(filters: Filters, shown: boolean, section: Section): HTMLElement {
   const { groupedColumns = 0, headers, note, title } = section;
-  const facets: Facet[] = (section.facets ?? []).map((header) => ({
-    column: headers.indexOf(header),
-    key: facetKey(header, title),
-  }));
-  const rows = filterRows(facets, filters, groupedColumns, section.rows);
+  const facets = facetStates(
+    (section.facets ?? []).map((header) => ({
+      column: headers.indexOf(header),
+      key: facetKey(header, title),
+    })),
+    filters,
+    groupedColumns,
+    section.rows,
+  );
+  const rows = filterRows(facets, groupedColumns, section.rows);
   const node = element("section");
   node.id = slug(title);
   node.hidden = !shown;
@@ -118,14 +122,8 @@ function renderSection(filters: Filters, shown: boolean, section: Section): HTML
   if (note !== undefined) {
     node.append(element("p", note));
   }
-  for (const [i, facet] of facets.entries()) {
-    const values = facetValues(facet.column, groupedColumns, section.rows);
-    const active = activeValues(
-      facet.key,
-      values.map((value) => value.id),
-      filters,
-    );
-    node.append(pillRow(facet.key, section.facets?.[i] ?? "", active, values));
+  for (const [i, { active, key, values }] of facets.entries()) {
+    node.append(pillRow(key, section.facets?.[i] ?? "", active, values));
   }
   if (rows.length < section.rows.length) {
     const count = element("p", `Showing ${rows.length} of ${section.rows.length} rows.`);
