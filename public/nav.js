@@ -3,8 +3,8 @@
 // site, or this project's dashboard. A page loads it with
 // <link rel="stylesheet" href="/nav.css"> and <script src="/nav.js" defer></script> in its head
 // and adds nothing else. The page links the stylesheet, rather than this script injecting it, so
-// the bar's style blocks the first paint and the CSP's 'self' covers it. On /play/ the bar is one
-// slim row that scrolls sideways, so the game keeps the height. On /play/ in the installed app
+// the bar's style blocks the first paint and the CSP's 'self' covers it. The bar is one row that
+// scrolls sideways where its links are wider than the screen. On /play/ in the installed app
 // (fullscreen or standalone display mode, or iOS's navigator.standalone) there is no bar, so no
 // link leaves the app and the game takes the full height.
 (() => {
@@ -18,7 +18,7 @@
   const here = norm(location.pathname);
 
   const nav = document.createElement("nav");
-  nav.className = here === "/play" ? "art-nav slim" : "art-nav";
+  nav.className = "art-nav";
   nav.setAttribute("aria-label", "Site");
   const ul = document.createElement("ul");
   nav.append(ul);

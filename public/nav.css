@@ -1,32 +1,47 @@
-/* The site navigation bar that public/nav.js builds. */
+/* The site navigation bar that public/nav.js builds: one row on every page, which scrolls
+   sideways when its links are wider than the screen. */
 .art-nav {
   background: #181425;
   border-bottom: 1px solid #3a4466;
   font:
-    14px/1.4 "Atkinson Hyperlegible",
+    13px/1 "Atkinson Hyperlegible",
     system-ui,
     sans-serif;
+  touch-action: pan-x;
 }
+/* The extra top padding holds the current page's lift, frame and badge inside the scroller. */
 .art-nav ul {
   list-style: none;
   margin: 0 auto;
   max-width: 1240px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 0;
+  flex-wrap: nowrap;
   align-items: center;
-  padding-block: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 11px 7px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+  white-space: nowrap;
+}
+.art-nav ul::-webkit-scrollbar {
+  display: none;
 }
 .art-nav li + li::before {
   content: "";
   display: inline-block;
   width: 1px;
-  height: 14px;
-  margin: 0 12px;
-  vertical-align: -2px;
+  height: 12px;
+  margin: 0 10px;
+  vertical-align: -1px;
   background: #3a4466;
+}
+/* Below 380px the separators close up, to 6px a side at 340px, so all six links fit inside the
+   16px gutters. */
+@media (max-width: 379.98px) {
+  .art-nav li + li::before {
+    margin: 0 max(6px, (100vw - 280px) / 10);
+  }
 }
 .art-nav a {
   color: #c0cbdc;
@@ -61,32 +76,9 @@
   background: url("/art/sprites/ui-check.png") -48px 0 / 64px 16px;
   image-rendering: pixelated;
 }
+/* Inside the link, so the scroller does not clip it. */
 .art-nav a:focus-visible {
   outline: 2px solid #feae34;
-  outline-offset: 2px;
-}
-.art-nav.slim {
-  font-size: 13px;
-  line-height: 1;
-  touch-action: pan-x;
-}
-/* The extra top padding holds the current page's lift, frame and badge inside the scroller. */
-.art-nav.slim ul {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-block: 11px 7px;
-  white-space: nowrap;
-}
-.art-nav.slim ul::-webkit-scrollbar {
-  display: none;
-}
-.art-nav.slim li + li::before {
-  height: 12px;
-  margin: 0 10px;
-  vertical-align: -1px;
-}
-.art-nav.slim a:focus-visible {
   outline-offset: -2px;
 }
 /* The scroll to top button that public/nav.js adds to long pages: a 44px square in the bar's
