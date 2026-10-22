@@ -5,13 +5,14 @@ import { statsPage } from "./stats";
 
 describe("statsPage", () => {
   it("sums the runs and dog walks, and names the owner who fired you most", () => {
-    expect(statsPage(veteranSave().stats)).toEqual({
+    const { stats } = veteranSave();
+    expect(statsPage(stats)).toEqual({
       bestRunCents: 9_000,
       bestRunDogs: ["koda", "penny"],
       bestRunZones: 4,
       bestZoneFinished: 4,
       dogsWalked: 7,
-      lifetimeCents: 30_000,
+      lifetimeCents: stats.lifetimeCents - stats.lifetimeStartCents,
       mostFiredBy: "koda",
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       runsPlayed: 5,

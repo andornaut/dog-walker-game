@@ -19,7 +19,7 @@ describe("overallRows", () => {
       { label: words.overall.bestRunZones, value: "4" },
       { label: words.overall.bestRunDogs, value: DOGS.koda.name },
       { label: "", value: DOGS.penny.name },
-      { label: words.overall.lifetime, value: "$300" },
+      { label: words.overall.lifetime, value: "$280" },
       { label: words.overall.timesFired, value: "1 (most: Jesse)" },
       { label: words.overall.bestZone, value: "4" },
     ]);

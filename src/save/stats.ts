@@ -56,7 +56,7 @@ export function statsPage(stats: SaveStats): StatsPage {
     bestRunZones: stats.bestWalk?.zonesFinished ?? 0,
     bestZoneFinished: stats.bestZoneFinished,
     dogsWalked: dogsWalked(stats),
-    lifetimeCents: stats.lifetimeCents,
+    lifetimeCents: cents(lifetimeEarnedNet(stats)),
     mostFiredBy,
     runs: stats.runs,
     runsPlayed: walksPlayed(stats),
