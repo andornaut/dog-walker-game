@@ -250,7 +250,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   // hopper of a shy kind hopping shy and not.
   const LOW: MoverDraws = {
     count: 0,
-    delays: [0, 0, 0],
+    delays: [0, 0, 0, 0],
     lengths: [0, 0, 0, 0],
     share: 0,
     shy: 0,
@@ -263,7 +263,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   };
   const HIGH: MoverDraws = {
     count: 0.999999,
-    delays: [0.999999, 0.999999, 0.999999],
+    delays: [0.999999, 0.999999, 0.999999, 0.999999],
     lengths: [0.999999, 0.999999, 0.999999, 0.999999],
     share: 0.999999,
     shy: 0.999999,

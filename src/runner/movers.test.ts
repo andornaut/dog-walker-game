@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { TUNING } from "../data/tuning";
+import { itemAt } from "../lib/arrays";
 import { read } from "../rules/units";
 import { plannerStreams } from "../testing/movers";
 import {
@@ -833,6 +834,31 @@ describe("moverPlacements", () => {
       expect(stands.map((stand) => stand.lane - lane)).toEqual(sideways ? [0, 1, 2] : [0, 0, 0]);
       expect(new Set(stands.map(({ distance }) => distance)).size).toBe(sideways ? 1 : 3);
     }
+  });
+
+  // Up to a second of delay before each of four steps, 0.1s long: at 100px/s each step comes its
+  // own draw's tenth of 100px after the one before ends.
+  it("delays each of a stepper's moves by a draw of its own, up to its most moves", () => {
+    const delays = [0.1, 0.2, 0.3, 0.4];
+    const stepper = {
+      ...spec({
+        count: { max: delays.length, min: delays.length },
+        kind: "steps",
+        sequences: [[1, -1, 1, -1].map((lanes) => ({ lanes, travel: 0 }))],
+        stepSeconds: 0.1,
+      }),
+      variation: { delaySeconds: 1, lengthShare: 0, speedShare: 0 },
+    };
+    const [placement] = moverPlacements(geometry, stepper, {
+      ...drawMover({ movers: () => 0.5, spawns: () => 0.5 }),
+      delays,
+    });
+    const steps = placement?.path.motion === "steps" ? placement.path.steps : [];
+    const ready = [geometry.cellLength + 100, ...steps.map(({ at, length }) => at + length)];
+    expect(steps).toHaveLength(delays.length);
+    steps.forEach(({ at }, i) => {
+      expect(at - itemAt(ready, i)).toBeCloseTo(itemAt(delays, i) * 100);
+    });
   });
 
   // At 3 lanes a second, set off as high as its cue allows it has crossed the road before it

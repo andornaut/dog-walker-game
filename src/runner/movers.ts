@@ -543,7 +543,7 @@ export interface MoverSpec {
 // range, never shy and crossing.
 export interface MoverDraws {
   readonly count: number;
-  readonly delays: readonly [number, number, number];
+  readonly delays: readonly number[];
   readonly lengths: readonly number[];
   readonly share: number;
   readonly shy: number;
@@ -555,13 +555,13 @@ export interface MoverDraws {
   readonly turnAt: number;
 }
 
-// How many move lengths each mover draws: as many as the most moves any kind makes.
-const LENGTH_DRAWS = 4;
+// How many move delays and lengths each mover draws: as many as the most moves any kind makes.
+const MOVE_DRAWS = 4;
 
 const EVEN_DRAWS: MoverDraws = {
   count: 0,
-  delays: [0, 0, 0],
-  lengths: Array.from({ length: LENGTH_DRAWS }, () => 0.5),
+  delays: Array.from({ length: MOVE_DRAWS }, () => 0),
+  lengths: Array.from({ length: MOVE_DRAWS }, () => 0.5),
   share: 0,
   shy: 0.999999,
   side: 0,
@@ -573,7 +573,7 @@ const EVEN_DRAWS: MoverDraws = {
 };
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
-// delays and share; movers draws each mover's count, third delay, start, shyness, tilt, outcome,
+// delays and share; movers draws each mover's count, later delays, start, shyness, tilt, outcome,
 // where it turns back or stops, reach side and move lengths, and each mover's start lane, so those
 // never shift the spawns stream.
 export interface PlannerStreams {
@@ -588,7 +588,7 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const share = spawns();
   const speed = spawns();
   const count = movers();
-  const third = movers();
+  const later = Array.from({ length: MOVE_DRAWS - delays.length }, () => movers());
   const start = movers();
   const shy = movers();
   const tilt = movers();
@@ -597,8 +597,8 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const side = movers();
   return {
     count,
-    delays: [...delays, third],
-    lengths: Array.from({ length: LENGTH_DRAWS }, () => movers()),
+    delays: [...delays, ...later],
+    lengths: Array.from({ length: MOVE_DRAWS }, () => movers()),
     share,
     shy,
     side,
@@ -1014,7 +1014,7 @@ function approachPlacements(
   const steps = drawnCount(motion.steps, draws.count);
   const pending: ApproachTiming[] = [
     {
-      at: height + (within(motion.firstDelaySeconds, draws.delays[0]) * scrollSpeed + warning),
+      at: height + (within(motion.firstDelaySeconds, draws.delays[0] ?? 0) * scrollSpeed + warning),
       kind: "after",
     },
     ...Array.from({ length: steps - 1 }, (): ApproachTiming => ({

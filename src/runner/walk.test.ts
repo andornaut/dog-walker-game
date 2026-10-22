@@ -2044,7 +2044,8 @@ describe("movers", { timeout: 60_000 }, () => {
       mover === undefined ? [] : [{ kind, mover, speed }],
     );
   it.each(counted)("moves each $kind within its range of times across seeds", ({ kind, range }) => {
-    expect(range.max).toBeLessThanOrEqual(drawMover(plannerStreams(1)).lengths.length);
+    const { delays, lengths } = drawMover(plannerStreams(1));
+    expect(range.max).toBeLessThanOrEqual(Math.min(delays.length, lengths.length));
     const paths = plannedMovers().filter((planned) => planned.kind === kind);
     expect(paths.length).toBeGreaterThan(0);
     const stalked = new Set<number>();
