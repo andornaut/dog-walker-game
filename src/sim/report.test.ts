@@ -12,14 +12,12 @@ import {
   type Matrix,
   MATRIX_HEADERS,
   matrixCells,
-  type MatrixRow,
   type NamedPack,
   rowCells,
   simulateMatrix,
-  simulateMatrixInBatches,
 } from "./report";
 
-// These tests cover how report.ts seeds, orders, batches and summarizes runs, not the runs
+// These tests cover how report.ts seeds, orders and summarizes runs, not the runs
 // themselves (simulate.test.ts does). A real run costs over a hundred milliseconds, so a stand-in
 // replaces it: like the real one, it draws only from its seed, so a seed fixes its result.
 vi.mock("./simulate", async (importOriginal) => {
@@ -232,48 +230,5 @@ describe("simulateMatrix", () => {
     const paid = rows.map((row) => itemAt(rowCells(row), MATRIX_HEADERS.indexOf("Paid")));
     expect(new Set(paid)).toEqual(new Set(["-"]));
     expect(formatKindTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
-  });
-});
-
-describe("simulateMatrixInBatches", () => {
-  it("reports the same rows as simulateMatrix, one row at a time", () => {
-    const queue: (() => void)[] = [];
-    const reports: (readonly MatrixRow[])[] = [];
-    simulateMatrixInBatches(
-      gameData,
-      3,
-      4,
-      3,
-      (step) => queue.push(step),
-      (rows) => reports.push(rows),
-      SMALL,
-    );
-    for (let step = queue.shift(); step !== undefined; step = queue.shift()) {
-      step();
-    }
-
-    expect(reports.map((rows) => rows.length)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
-    expect(reports.at(-1)).toEqual(simulateMatrix(gameData, 3, 4, SMALL));
-  });
-
-  it("stops when asked", () => {
-    const queue: (() => void)[] = [];
-    const reports: (readonly MatrixRow[])[] = [];
-    const stop = simulateMatrixInBatches(
-      gameData,
-      3,
-      4,
-      4,
-      (step) => queue.push(step),
-      (rows) => reports.push(rows),
-      SMALL,
-    );
-    queue.shift()?.();
-    stop();
-    for (let step = queue.shift(); step !== undefined; step = queue.shift()) {
-      step();
-    }
-
-    expect(reports).toHaveLength(1);
   });
 });

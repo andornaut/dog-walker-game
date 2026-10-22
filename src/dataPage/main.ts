@@ -21,17 +21,6 @@ import { firstZoneId, walkLength, zoneById } from "../rules/route";
 import { price, unlockPrice } from "../rules/shop";
 import { agilityWord } from "../rules/walkers";
 import { zoneStats } from "../rules/zones";
-import { POLICY_NAMES } from "../sim/policies";
-import {
-  DEFAULT_MATRIX,
-  type Matrix,
-  MATRIX_HEADERS,
-  matrixCells,
-  type MatrixRow,
-  rowCells,
-  simulateMatrixInBatches,
-} from "../sim/report";
-import { SKILL_PRESETS } from "../sim/skills";
 import {
   activeValues,
   type Cell,
@@ -427,39 +416,6 @@ function tuningSection(data: GameData): Section {
   };
 }
 
-// Fewer runs per row than npm run simulate, so the table fills in seconds.
-const SIMULATED_RUNS = 100;
-
-// The typical player only, so the page stays quick; npm run simulate plays every preset.
-const SIMULATED_MATRIX: Matrix = {
-  ...DEFAULT_MATRIX,
-  players: [{ kind: "skill", preset: "typical" }],
-};
-
-function simulatedSection(rows: readonly MatrixRow[]): Section {
-  const { policies } = SIMULATED_MATRIX;
-  const { errorRate, reactionSeconds } = SKILL_PRESETS.typical;
-  const total = matrixCells(SIMULATED_MATRIX).length;
-  return {
-    facets: ["Policy", "Pack"],
-    headers: MATRIX_HEADERS,
-    note: [
-      `Bots playing whole runs on the live rules and data, ${SIMULATED_RUNS} runs per row`,
-      "(npm run simulate runs 1,000). A typical player steers the real walk, pulls included:",
-      `it reacts in ${reactionSeconds}s and fumbles ${Math.round(errorRate * 100)}% of its lane`,
-      "changes. Hit, Bump and Lucky are the measured shares of obstacles, minor obstacles and",
-      "lucky finds hit or collected; Tips is tips collected per run. Fired, Zones and Cards are",
-      "per run; Paid is the share of card choices that cost money; Badges is the achievements",
-      "a run earns on its own, per run.",
-      `${policies.map((id) => `${id}: ${POLICY_NAMES[id]}`).join(". ")}.`,
-      "Route is the path the bot takes at each fork: straight is the middle one.",
-      ...(rows.length < total ? [`Simulating: ${rows.length} of ${total} rows.`] : []),
-    ].join(" "),
-    rows: rows.map(rowCells),
-    title: "Simulated runs",
-  };
-}
-
 let filters: Filters = parseFilters(globalThis.location.search);
 // Every table, in page order, and the element each renders to.
 let sections: Section[] = [];
@@ -516,15 +472,6 @@ function redraw(): void {
   });
 }
 
-function replaceSection(i: number, section: Section): void {
-  sections[i] = section;
-  keepingFocus(() => {
-    const replacement = renderSection(filters, sectionShown(section), section);
-    sectionNodes[i]?.replaceWith(replacement);
-    sectionNodes[i] = replacement;
-  });
-}
-
 function onPillClick(event: MouseEvent): void {
   const button = event.target instanceof Element ? event.target.closest("button.pill") : null;
   if (!(button instanceof HTMLElement)) {
@@ -543,8 +490,6 @@ function onPillClick(event: MouseEvent): void {
   );
   redraw();
 }
-
-let stopSimulation = () => {};
 
 function render(): void {
   const root = document.getElementById("data");
@@ -567,8 +512,6 @@ function render(): void {
     helpSection,
     tuningSection,
   ].map((section) => section(data));
-  sections.push(simulatedSection([]));
-  const simulatedIndex = sections.length - 1;
   tablesRow = renderTablesRow();
   sectionNodes = sections.map((section) => renderSection(filters, sectionShown(section), section));
   root.replaceChildren(
@@ -576,18 +519,6 @@ function render(): void {
     element("p", "Every table the game reads, with card text generated from the live values."),
     tablesRow,
     ...sectionNodes,
-  );
-  stopSimulation();
-  stopSimulation = simulateMatrixInBatches(
-    data,
-    1,
-    SIMULATED_RUNS,
-    10,
-    (step) => setTimeout(step, 0),
-    (rows) => {
-      replaceSection(simulatedIndex, simulatedSection(rows));
-    },
-    SIMULATED_MATRIX,
   );
 }
 

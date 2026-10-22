@@ -11,7 +11,7 @@
 
 ## Site
 
-`/` is a static home page, `/play/` the game, `/data/` every game data table plus simulated runs, and `/art/` the art gallery (copied from `public/art/`). The HTML pages are Vite build inputs under `pages/`, Vite's root, each at its URL's path. They load modules as `/src/...`, which `vite.config.ts` aliases to the repository's `src/`.
+`/` is a static home page, `/play/` the game, `/data/` every game data table, and `/art/` the art gallery (copied from `public/art/`). The HTML pages are Vite build inputs under `pages/`, Vite's root, each at its URL's path. They load modules as `/src/...`, which `vite.config.ts` aliases to the repository's `src/`.
 
 ## Architecture
 

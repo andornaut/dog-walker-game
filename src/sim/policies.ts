@@ -18,13 +18,6 @@ export const POLICY_IDS: readonly PolicyId[] = [
   "mixed",
 ];
 
-export const POLICY_NAMES: Readonly<Record<PolicyId, string>> = {
-  alwaysHearts: "Always take hearts",
-  alwaysPay: "Always pay when affordable",
-  heartsUnlessLow: "Hearts unless an owner would drop to 1",
-  mixed: "Pay half the time, and when an owner would drop to 1",
-};
-
 // The share of safe choices the mixed policy pays for.
 export const MIXED_PAY_SHARE = 0.5;
 
