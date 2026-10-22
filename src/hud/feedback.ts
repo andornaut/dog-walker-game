@@ -62,7 +62,7 @@ export function heartPopFrame(dogTop: Point): Point {
 
 // The heart pop's number, by the top-left of its capitals (5 rows at 1x): from the frame's
 // x 31 with its capitals centred on row 16, or ending at the frame's x 1 when that would run
-// off the screen; raised to end above top when it would reach that far down.
+// off the screen; raised to end above bounds.bottom when it would reach that far down.
 export function heartLabelAt(
   bounds: { bottom: number; screenWidth: number },
   frame: Point,
