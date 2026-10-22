@@ -89,6 +89,7 @@ import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import type { PackPlacement } from "../layout/packFormation";
+import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { addFigure, PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
@@ -174,7 +175,7 @@ import {
   tileTextureKey,
 } from "./uiKit";
 
-const SCREEN = SCREEN_CONFIG;
+const SCREEN = screenLayout(SCREEN_CONFIG).screen;
 const GATE = HOME_LAYOUT.gate;
 const PATH = HOME_LAYOUT.path;
 const WALKER_AT_GATE = HOME_LAYOUT.walkerAtGate;
@@ -509,7 +510,7 @@ export class StartScene extends Scene {
       this,
       () => {
         const rect = this.overlay?.rect;
-        return rect === undefined ? undefined : screenArea(SCREEN, [rect]);
+        return rect === undefined ? undefined : screenArea([rect]);
       },
       () => this.closeOverlay(),
     );
@@ -1007,7 +1008,7 @@ export class StartScene extends Scene {
       this.add.image(0, 0, "screen-home").setOrigin(0);
     } else {
       const g = this.add.graphics();
-      fillRect(g, PALETTE.darkBrown, { height: SCREEN.height, width: SCREEN.width, x: 0, y: 0 });
+      fillRect(g, PALETTE.darkBrown, SCREEN);
       fillRect(g, PALETTE.darkSlate, { height: 52, width: SCREEN.width, x: 0, y: GATE.y });
       fillRect(g, PALETTE.lightGrey, { height: 34, width: SCREEN.width, x: 0, y: 92 });
       fillRect(g, PALETTE.green, { height: 70, width: SCREEN.width, x: 0, y: 126 });

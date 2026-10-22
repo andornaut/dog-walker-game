@@ -5,6 +5,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { CELEBRATION_PANEL } from "../home/badgesView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
+import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
@@ -21,6 +22,7 @@ export interface CelebrationSceneData {
   resume: SceneKey;
 }
 
+const SCREEN = screenLayout(SCREEN_CONFIG).screen;
 const PANEL = CELEBRATION_PANEL;
 const FACES = { pitch: 44, size: 32, top: 4 };
 // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone, 12 under the panel.
@@ -36,14 +38,14 @@ export class CelebrationScene extends Scene {
   create({ achievements, owners, resume }: CelebrationSceneData): void {
     const reduced = currentSettings(this).reducedMotion;
     // Dimmed down the colour ramps, as under the pause menu and the cards.
-    addRampDim(this, { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 });
+    addRampDim(this, SCREEN);
     const cheering = owners.slice(0, 3);
     const height = PANEL.badgesHeight + (cheering.length > 0 ? PANEL.facesHeight : 0);
-    const top = Math.round((SCREEN_CONFIG.height - height - BUTTON.gap - BUTTON.height) / 2);
+    const top = Math.round((SCREEN.height - height - BUTTON.gap - BUTTON.height) / 2);
     const panel: Rect = { height, width: PANEL.width, x: PANEL.x, y: top };
     addBadgeCelebration(this, reduced, PANEL.nameLines, panel, achievements);
     soundboardOf(this).play("badge");
-    const left = SCREEN_CONFIG.width / 2 - ((cheering.length - 1) * FACES.pitch + FACES.size) / 2;
+    const left = SCREEN.width / 2 - ((cheering.length - 1) * FACES.pitch + FACES.size) / 2;
     const facesY = top + PANEL.badgesHeight + FACES.top;
     cheering.forEach((dog, i) => {
       addCheeringFace(this, reduced, dog, Math.round(left + i * FACES.pitch), facesY);

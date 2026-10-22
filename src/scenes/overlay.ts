@@ -1,7 +1,6 @@
 import type { Events, Scene } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
 import {
   type OutsideArea,
   type OutsidePress,
@@ -77,7 +76,7 @@ export function listenDismiss(
   back: () => void = close,
 ): void {
   onBackPressed(scene, back);
-  const area = screenArea(SCREEN_CONFIG, covered);
+  const area = screenArea(covered);
   listenOutsideTap(scene, () => area, close);
 }
 

@@ -46,6 +46,7 @@ import {
   type ScrollRule,
   stepScroll,
 } from "../input/listScroll";
+import { screenLayout } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
 import { containsPoint, type Rect } from "../lib/rect";
 import { read } from "../rules/units";
@@ -108,7 +109,7 @@ const SCROLL_RULE: ScrollRule = {
 // A screen-sized texture, white over the view: the mask that clips each tab's content to it.
 const VIEW_MASK_KEY = "stats-view-mask";
 const DETAIL: Rect = STATS_LAYOUT.detail;
-const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
+const SCREEN = screenLayout(SCREEN_CONFIG).screen;
 const DETAIL_TEXT = STATS_LAYOUT.detailText;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;

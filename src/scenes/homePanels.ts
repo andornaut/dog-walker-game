@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard, DetailPicture } from "../home/detail";
 import { CARD_TEXT_ROOM, cardBand, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
+import { screenLayout } from "../layout/screenLayout";
 import { insetRect, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
@@ -29,7 +30,7 @@ import {
 // player can afford something in it, and the detail card that opens over the screen. Positions
 // inside a piece are the art's, from the style guide.
 
-const SCREEN = SCREEN_CONFIG;
+const SCREEN = screenLayout(SCREEN_CONFIG).screen;
 
 function text(
   scene: Scene,
@@ -66,7 +67,7 @@ export function addAffordFrame(
 
 // A dim layer over the whole screen, under a card.
 function addScrim(scene: Scene, parent: GameObjects.Container): void {
-  parent.add(addDim(scene, { height: SCREEN.height, width: SCREEN.width, x: 0, y: 0 }));
+  parent.add(addDim(scene, SCREEN));
 }
 
 const CARD = HOME_LAYOUT.card;
