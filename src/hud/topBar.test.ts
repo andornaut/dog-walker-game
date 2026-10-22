@@ -5,6 +5,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { containsPoint } from "../lib/rect";
 import {
   gameplayAllowed,
+  NOTHING_PAUSED,
   pauseButtonIcon,
   playerPaused,
   pressesHeld,
@@ -18,17 +19,10 @@ import {
 } from "./topBar";
 import { WALK_BAR, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
-const WALKING: RunPause = {
-  card: false,
-  hitStop: false,
-  hold: false,
-  menu: "closed",
-  page: "shown",
-};
 // A card and the zone celebration hold the walk alike.
-const CARD: RunPause = { ...WALKING, card: true };
-const HIT_STOP: RunPause = { ...WALKING, hitStop: true };
-const HOLD: RunPause = { ...WALKING, hold: true };
+const CARD: RunPause = { ...NOTHING_PAUSED, card: true };
+const HIT_STOP: RunPause = { ...NOTHING_PAUSED, hitStop: true };
+const HOLD: RunPause = { ...NOTHING_PAUSED, hold: true };
 
 describe("the walk bar in each pause state", () => {
   interface Expected {
@@ -94,20 +88,24 @@ describe("the walk bar in each pause state", () => {
 
   it("pauses, covers and routes the bar's presses as each state calls for", () => {
     const cases: [string, RunPause, Expected][] = [
-      ["walking", WALKING, { ...walking, gameplay: true }],
+      ["walking", NOTHING_PAUSED, { ...walking, gameplay: true }],
       ["under a card", CARD, card],
       ["through the hit stop", HIT_STOP, walking],
       ["under an explanation's detail card", HOLD, detail],
-      ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
-      ["out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
-      ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
+      ["with the tab hidden", { ...NOTHING_PAUSED, page: "hidden" }, { ...walking, paused: true }],
+      ["out of focus", { ...NOTHING_PAUSED, page: "blurred" }, { ...walking, paused: true }],
+      [
+        "in the menu with the tab hidden",
+        { ...NOTHING_PAUSED, menu: "open", page: "hidden" },
+        menu,
+      ],
       ["in the menu over a card", { ...CARD, menu: "open" }, menu],
       ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
       ["asking whether to head home over a card", { ...CARD, menu: "confirmHome" }, confirm],
-      ["under help, which mutes on M", { ...WALKING, menu: "help" }, cover],
+      ["under help, which mutes on M", { ...NOTHING_PAUSED, menu: "help" }, cover],
       [
         "under settings, which leaves M to its own sound switch",
-        { ...WALKING, menu: "settings" },
+        { ...NOTHING_PAUSED, menu: "settings" },
         { ...cover, mute: undefined },
       ],
     ];

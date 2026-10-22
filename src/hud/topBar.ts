@@ -44,6 +44,15 @@ export interface RunPause {
   page: "blurred" | "hidden" | "shown";
 }
 
+// The walk going on with nothing holding it.
+export const NOTHING_PAUSED: RunPause = {
+  card: false,
+  hitStop: false,
+  hold: false,
+  menu: "closed",
+  page: "shown",
+};
+
 // Whether the walk is paused: no scroll, timers, needs or pulls, and the session does not step.
 // Every overlay over the walk, an explanation's detail card, and the page out of view or focus
 // pause it. A hit stop is part of the walk and steps on.
