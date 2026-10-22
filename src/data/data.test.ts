@@ -5,6 +5,7 @@ import { parseManifest } from "../assets/manifest";
 import { badgeKey, kebabCase } from "../assets/spriteKeys";
 import { maxHearts, startHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
+import { forkPaths } from "../rules/route";
 import { unlockPrice } from "../rules/shop";
 import { read, readTable } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
@@ -20,6 +21,7 @@ import type {
   Modifier,
   QuipMoment,
   Size,
+  ZoneId,
 } from "./types";
 
 // Invariants the rulebook states about the content and numbers, checked on the real data.
@@ -131,9 +133,8 @@ describe("cards", () => {
   it("has enough upgrades for every pick when picked cards leave the pool", () => {
     const picks = world.walkLength - 1;
     const removedBeforeLastPick = picks - 1;
-    expect(Object.keys(upgrades).length - removedBeforeLastPick).toBeGreaterThanOrEqual(
-      tuning.counts.upgradeChoiceCount,
-    );
+    const mostPaths = forkPaths(gameData, () => 0, [world.firstZone as ZoneId]).length;
+    expect(Object.keys(upgrades).length - removedBeforeLastPick).toBeGreaterThanOrEqual(mostPaths);
   });
 
   it("gives every card's options distinct names, and every option, upgrade and popup its own art key", () => {
@@ -223,7 +224,6 @@ describe("run, world and walkers", () => {
   });
 
   it("fits the largest pack in the card row, one dog slot a place, the first free and the rest dearer in turn", () => {
-    expect(tuning.counts.packSizeMin).toBeGreaterThanOrEqual(1);
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
     expect(dogSlots).toHaveLength(tuning.counts.packSizeMax);
     const prices = dogSlots.map((slot) => unlockPrice(tuning, slot));

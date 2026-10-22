@@ -80,11 +80,9 @@ export interface Tuning {
     readonly obstaclesFirstZone: number;
     readonly obstaclesGainPerZone: number;
     readonly packSizeMax: number;
-    readonly packSizeMin: number;
     readonly tipsFirstZone: number;
     readonly tipsGainPerZone: number;
     readonly treatsPerZone: number;
-    readonly upgradeChoiceCount: number;
   };
   readonly hearts: OpenGroup & {
     readonly maxBySize: Table<Size>;

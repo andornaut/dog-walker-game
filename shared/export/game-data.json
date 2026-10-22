@@ -1302,12 +1302,10 @@
       "obstaclesGainPerZone": 2,
       "openLanesPerRowMin": 2,
       "packSizeMax": 3,
-      "packSizeMin": 1,
       "sweetTalkerFreeCards": 1,
       "tipsFirstZone": 40,
       "tipsGainPerZone": 5,
-      "treatsPerZone": 2,
-      "upgradeChoiceCount": 3
+      "treatsPerZone": 2
     },
     "hearts": {
       "bump": 1,
@@ -1396,7 +1394,6 @@
       "collisionGrace": 0.7,
       "explainHoldSeconds": 0.3,
       "firingHoldSeconds": 3,
-      "hintStaleSeconds": 5,
       "hitStopSeconds": 1,
       "laneMove": 0.13,
       "lookAheadSeconds": 3.6,

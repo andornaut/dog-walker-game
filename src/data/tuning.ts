@@ -25,13 +25,11 @@ export const TUNING = {
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
     packSizeMax: 3,
-    packSizeMin: 1,
     // Sweet talker makes this many encounter cards each zone cost no money.
     sweetTalkerFreeCards: 1,
     tipsFirstZone: 40,
     tipsGainPerZone: 5,
     treatsPerZone: 2,
-    upgradeChoiceCount: 3,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
   hearts: {
@@ -165,10 +163,6 @@ export const TUNING = {
     explainHoldSeconds: 0.3,
     // An owner who fires you holds the walk still this long while their moment plays.
     firingHoldSeconds: 3,
-    // A first-time hint still waiting this long after its trigger is dropped unshown, to show
-    // the next time it triggers. Time under a card or the pause menu does not count for a hint
-    // raised while walking.
-    hintStaleSeconds: 5,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
     laneMove: 0.13,
