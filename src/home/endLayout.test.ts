@@ -8,6 +8,7 @@ import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import {
+  fitsRoom,
   fittingText,
   TEXT_FIT_STYLES,
   TEXT_SCALE,
@@ -55,10 +56,7 @@ const width = (role: Role) => (style: TextFitStyle, line: string) =>
 // style fits it.
 function fitted(role: Role, styles: readonly TextFitStyle[], room: number, text: string) {
   const set = fittingText(styles, width(role), room, shown(role, text));
-  const fits =
-    set.lines.length <= (set.style.lines ?? 1) &&
-    set.lines.every((line) => width(role)(set.style, line) <= room);
-  return fits ? set : undefined;
+  return fitsRoom(width(role), room, set) ? set : undefined;
 }
 
 // Fees, tips and card costs always show, the other earnings only sometimes, so a breakdown

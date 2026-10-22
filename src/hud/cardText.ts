@@ -4,7 +4,7 @@ import { fillLine } from "../lib/lines";
 import { firesText, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
 import type { FontMetrics } from "../ui/fontMetrics";
-import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
+import { fitsRoom, type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 import { RUN_TEXT_FIELDS } from "./runText";
 
 // What a card's plaque may say, longest first: the first that fits its room is shown. A path
@@ -69,9 +69,7 @@ export function smallCardText(
   option?: OptionView,
 ): { box: ReturnType<typeof cardEffectBox>; effect: FittedText; warning: FittedText | null } {
   const room = CARD_LAYOUT.effect.width;
-  const fits = (fitted: FittedText) =>
-    fitted.lines.length <= (fitted.style.lines ?? 1) &&
-    fitted.lines.every((line) => inkWidth(fitted.style, line) <= room);
+  const fits = (fitted: FittedText) => fitsRoom(inkWidth, room, fitted);
   const fires = option?.fires ?? [];
   const said =
     fires.length === 0

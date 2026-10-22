@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { plainMarks } from "../ui/pixelFont";
-import { fittingText, type TextFitStyle } from "../ui/textFit";
+import { fitsRoom, fittingText, type TextFitStyle } from "../ui/textFit";
 import { CELEBRATION_LAYOUT as LAYOUT, GREETING_FIT, greetingLineTops } from "./celebrationLayout";
 
 // Each version's big line, upper-cased in font-display as addDisplayText draws it.
@@ -44,9 +44,8 @@ describe("a new walker's greeting", () => {
         const { lines, style } = fittingText(styles, width, room, plainMarks(text));
         const last = greetingLineTops(body, style.scale, lines.length).at(-1) ?? 0;
         return (
-          lines.length > (style.lines ?? 1) ||
+          !fitsRoom(width, room, { lines, style }) ||
           lines.join(" ") !== plainMarks(text).split(/\s+/).join(" ") ||
-          lines.some((line) => width(style, line) > room) ||
           last + body.inkBottom * style.scale >= LAYOUT.newWalker.rule.y
         );
       });

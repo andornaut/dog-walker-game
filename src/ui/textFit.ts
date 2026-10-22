@@ -40,6 +40,17 @@ export interface FittedText {
   style: TextFitStyle;
 }
 
+// Whether fitted keeps to its style's lines, each line's ink no wider than room as inkWidth
+// measures it.
+export function fitsRoom(
+  inkWidth: (style: TextFitStyle, line: string) => number,
+  room: number,
+  fitted: FittedText,
+): boolean {
+  const { lines, style } = fitted;
+  return lines.length <= (style.lines ?? 1) && lines.every((line) => inkWidth(style, line) <= room);
+}
+
 // The first style that sets text in at most its lines, each paragraph (split at "\n") starting a
 // line and broken at spaces, each line's ink no wider than room as inkWidth measures it; else
 // the last style, a line per paragraph.
@@ -55,7 +66,7 @@ export function fittingText(
     const lines = paragraphs.flatMap((paragraph) =>
       most === 1 ? [paragraph] : wrapWords((line) => inkWidth(style, line), room, paragraph),
     );
-    if (lines.length <= most && lines.every((line) => inkWidth(style, line) <= room)) {
+    if (fitsRoom(inkWidth, room, { lines, style })) {
       return { lines, style };
     }
   }
