@@ -8,7 +8,7 @@ import type {
   Target,
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
-import { heartsOf, mapPack, packDogs, placeInPack } from "../state/pack";
+import { heartsOf, mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import {
   type Cause,
@@ -18,7 +18,7 @@ import {
   type ModifierCause,
   type MoneyChange,
 } from "./causes";
-import { maxHearts } from "./dogs";
+import { ownerMaxHearts } from "./dogs";
 import { debuffLasting, lastingFor, longerLasting } from "./durations";
 import { changeModified, type ModifiedValue, modifiedValue, statModified } from "./modified";
 import { modifiedStat, statParts } from "./modifiers";
@@ -164,10 +164,7 @@ export function changeHearts(
   const causes: Cause[] = forgiven === null ? [...given] : [...given, forgiven];
   const total = causes.reduce((sum, cause) => sum + cause.amount, 0);
   const unclamped = before + total;
-  const after = clampHearts(
-    maxHearts(data.tuning, state.modifiers, placeInPack(state, dogId), data.dogs[dogId]),
-    unclamped,
-  );
+  const after = clampHearts(ownerMaxHearts(data, state, dogId), unclamped);
   if (after === before && forgiven === null) {
     return { change: null, state };
   }
