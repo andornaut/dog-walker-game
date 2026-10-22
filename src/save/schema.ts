@@ -16,17 +16,19 @@ import type { EndReason } from "../state/runState";
 
 export const SAVE_VERSION = 9;
 
-// Every tally the save keeps; a stored key outside it is dropped on load.
-export const TALLY_IDS = [
-  "dodges",
-  "neighborsMet",
-  "sniffs",
-  "squirrelPulls",
-  "thievesLetGo",
-  "tips",
-  "treats",
-  "walletsFound",
-] as const satisfies readonly TallyId[];
+// Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
+// TallyId fails to compile until it is listed here.
+const TALLIES: Readonly<Record<TallyId, true>> = {
+  dodges: true,
+  neighborsMet: true,
+  sniffs: true,
+  squirrelPulls: true,
+  thievesLetGo: true,
+  tips: true,
+  treats: true,
+  walletsFound: true,
+};
+export const TALLY_IDS = Object.keys(TALLIES) as TallyId[];
 
 // The most dogs a run can take.
 export const MAX_RUN_DOGS = 3;
