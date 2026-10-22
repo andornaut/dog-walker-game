@@ -287,15 +287,41 @@ def wallet_keep():
 
 
 def neighbour_take():
-    """The friendly neighbour crouched beside a pack dog, her hand stroking its back, hearts rising from
-    the dog. Her floating heart sits above the art window, so it is left out here."""
+    """The friendly neighbour crouched beside a pack dog, reaching up to pat it on the head between its
+    ears, hearts rising from the dog. Her road sprite's lowered forearm is cut away and her arm drawn
+    raised instead: a mauve sleeve shaded purple in a plum outline, her hand on the dog's crown. Her
+    floating heart sits above the art window, so it is left out here."""
     a = Art()
     a.grass()
     a.put("dog-biscuit", "idle", 49, 57)
     her = sn.frame("petting-neighbor", "wave", 1)
     her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
+    top = 66 - her.height
+    her.paste((0, 0, 0, 0), (35, 30 - top, her.width, her.height))
     a.shadow(22, 66, her.width)
-    a.paste(her, -2, 66 - her.height)
+    a.paste(her, -2, top)
+    # the sleeve: the upper arm out from her shoulder to the elbow, the forearm up to the dog's crown
+    joints = [(31, 31), (37, 29), (44, 21)]
+    arm = []
+    for (x0, y0), (x1, y1) in zip(joints, joints[1:]):
+        n = max(abs(x1 - x0), abs(y1 - y0))
+        arm += [(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n)) for k in range(n + 1)]
+    for x, y in arm:
+        a.fill(x - 1, y - 1, 5, 5, "plum")
+    for x, y in arm:
+        a.fill(x, y, 3, 3, "mauve")
+    for x, y in arm:
+        a.fill(x + 2, y + 2, 1, 1, "purple")
+    # the hand, palm down on the crown between the ears: the back of it, a thumb out to the left and
+    # three fingers curled over the dog's brow, in a plum outline
+    hand = {(x, y) for x in range(45, 51) for y in range(17, 20)} | {(44, 19), (45, 20), (47, 20), (49, 20),
+                                                                     (45, 21), (47, 21), (49, 21)}
+    for x, y in hand:
+        for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+            if (x + dx, y + dy) not in hand:
+                a.fill(x + dx, y + dy, 1, 1, "plum")
+    for x, y in hand:
+        a.fill(x, y, 1, 1, "skin2" if y == 21 or x == 50 else "skin1")
     a.hearts([(44, 3), (57, 9), (66, 2), (64, 19)])
     return a
 
