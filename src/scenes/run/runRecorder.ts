@@ -18,6 +18,7 @@ import {
 import { pageRunSetup, runSetupLimitsFor } from "../../dev/pageRunSetup";
 import type { RunSetup } from "../../dev/runSetup";
 import { expectedRoadMs, type ZoneClocks } from "../../dev/zoneClock";
+import { sessionRead, sessionRemove, sessionWrite } from "../../lib/sessionStore";
 import type { SessionInput } from "../../runner/session";
 import { type Walk, walkScrollSpeed, zoneLength } from "../../runner/walk";
 
@@ -123,29 +124,4 @@ export function emitDevState(
     zoneIndex: walk.run.zoneIndex,
   };
   game.events.emit(DEV_STATE_EVENT, state);
-}
-
-// sessionStorage can be missing or throw (private browsing, blocked storage): the run goes on.
-function sessionRead(key: string): string | null {
-  try {
-    return sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function sessionWrite(key: string, value: string): void {
-  try {
-    sessionStorage.setItem(key, value);
-  } catch {
-    // The dev panel then has no log to offer.
-  }
-}
-
-function sessionRemove(key: string): void {
-  try {
-    sessionStorage.removeItem(key);
-  } catch {
-    // A replay that cannot be cleared plays again on the next run.
-  }
 }

@@ -5,6 +5,7 @@
 import "./devPanel.css";
 
 import { gameData } from "../data";
+import { sessionRead, sessionRemove, sessionWrite } from "../lib/sessionStore";
 import { saveContextFrom } from "../save/load";
 import { browserStorage, saveStore } from "../save/storage";
 import { BUILD_LABEL } from "./buildLabel";
@@ -59,32 +60,6 @@ function button(text: string, onClick: () => void, className = "dev-button"): HT
   const element = el("button", { className, textContent: text, type: "button" });
   element.addEventListener("click", onClick);
   return element;
-}
-
-// null when sessionStorage is unavailable or the key is unset.
-function sessionRead(key: string): string | null {
-  try {
-    return sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function sessionWrite(key: string, value: string): boolean {
-  try {
-    sessionStorage.setItem(key, value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function sessionRemove(key: string): void {
-  try {
-    sessionStorage.removeItem(key);
-  } catch {
-    // Nothing stored is the same as nothing to remove.
-  }
 }
 
 // Called before the game boots: the save edits the panel queued are written to the save
