@@ -555,7 +555,11 @@ export function moverSpec(
     variation: {
       delaySeconds: read(tuning, "seconds", "moverTimingJitter"),
       lengthShare: read(tuning, "seconds", "moverMoveSecondsJitter"),
-      speedShare: read(tuning, "multipliers", "moverSpeedJitter"),
+      speedShare: read(
+        tuning,
+        "multipliers",
+        movement.kind === "dart" ? "dartSpeedJitter" : "moverSpeedJitter",
+      ),
     },
     warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),
   };

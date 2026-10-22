@@ -490,6 +490,43 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     }
   });
 
+  // In every zone, a dart at either end of its speed draw crosses at its kind's speed times
+  // 1 -/+ the dart speed jitter, and set off as low and steep as it may be, still leaves the pack
+  // its reaction margin between its cue ending and its reaching the pack's rows.
+  it.each(
+    Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex).flatMap(
+      (zoneIndex) =>
+        [...movements.values()].flatMap((entry) =>
+          entry.movement.kind === "dart"
+            ? [
+                { end: -1, speed: 0 },
+                { end: 1, speed: 0.999999 },
+              ].map(({ end, speed }) => ({
+                ...entry,
+                draws: { ...LOW, speed, tilt: 0.999999 },
+                end,
+                name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, speed ${end < 0 ? "low" : "high"}`,
+                zoneIndex,
+              }))
+            : [],
+        ),
+    ),
+  )("keeps the reaction margin for a dart at either end of its speed: $name", (mover) => {
+    const { geometry, placements, speed } = placedCase(mover);
+    const reaction = read(gameData.tuning, "seconds", "pathReactionMargin");
+    const factor = 1 + mover.end * read(gameData.tuning, "multipliers", "dartSpeedJitter");
+    const lanesPerSecond = read(gameData.tuning, "counts", "dartLanesPerSecond");
+    expect(placements.length).toBeGreaterThan(0);
+    for (const { path } of placements) {
+      if (path.motion !== "cross") {
+        throw new Error("A dart crosses");
+      }
+      expect(path.lanesPerPixel * speed).toBeCloseTo(lanesPerSecond * factor, 4);
+      const reaches = (geometry.sightLength - path.enterTravel) / (1 + path.tilt) / speed;
+      expect(reaches).toBeGreaterThanOrEqual(reaction - 1e-9);
+    }
+  });
+
   // A rider slower than the road still comes down it, at its slowest draw, so it never comes
   // back up at a pack that has passed it.
   it("keeps every in-lane rider coming down the road", () => {
