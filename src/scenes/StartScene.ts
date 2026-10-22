@@ -656,11 +656,7 @@ export class StartScene extends Scene {
       [LOGBOOK_BUTTON, { kind: "logbook" }],
       [PET_SHOP, { kind: "petShop" }],
     ];
-    const hit = fixed.find(([rect]) => containsPoint(rect, x, y));
-    if (hit !== undefined) {
-      return hit[1];
-    }
-    return undefined;
+    return fixed.find(([rect]) => containsPoint(rect, x, y))?.[1];
   }
 
   // The shop over everything below the top bar, framing the item tapped.

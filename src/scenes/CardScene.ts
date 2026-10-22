@@ -114,6 +114,11 @@ function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.Bitma
   return label.setX(Math.round(x - label.width / 2));
 }
 
+// The centre of a plaque's text: the plaque's, or that of its part right of the fires marker.
+function plaqueCentre(badge: Rect, marker: number | undefined): number {
+  return marker === undefined ? badge.x + badge.width / 2 : (marker + badge.x + badge.width) / 2;
+}
+
 // The road sprite of whatever opened the card, standing in for an option's illustration: an
 // encounter's.
 function sourceSpriteKey(source: CardSource): string | undefined {
@@ -274,7 +279,7 @@ export class CardScene extends Scene {
     switch (view.source.kind) {
       case "encounter": {
         const names = view.affected.map((dog) => gameData.dogs[dog].name);
-        return names.length === 0 ? gameData.runText.card.pickOne : `${names.join(", ")}`;
+        return names.length === 0 ? gameData.runText.card.pickOne : names.join(", ");
       }
       case "fork":
         return gameData.runText.card.forkSubtitle;
@@ -472,8 +477,7 @@ export class CardScene extends Scene {
     color: number,
     option: OptionView,
   ): GameObjects.BitmapText {
-    const center =
-      marker === undefined ? badge.x + badge.width / 2 : (marker + badge.x + badge.width) / 2;
+    const center = plaqueCentre(badge, marker);
     const room = plaqueRoom(badge.x, badge.width, marker);
     const texts = plaqueTexts(gameData, option);
     const label = this.centered(center, badge.y + capsY, texts[0] ?? "", color, { font: "title" });
@@ -503,8 +507,7 @@ export class CardScene extends Scene {
     capsY: number,
     struck: Struck,
   ): void {
-    const center =
-      marker === undefined ? badge.x + badge.width / 2 : (marker + badge.x + badge.width) / 2;
+    const center = plaqueCentre(badge, marker);
     const style = { font: "title", scale: 1 } as const;
     const width = struckWidth(this, struck, style);
     addStruck(this, struck, { x: Math.round(center - width / 2), y: badge.y + capsY }, style);
