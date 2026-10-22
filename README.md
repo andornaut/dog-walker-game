@@ -29,7 +29,7 @@ Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 | `npm run check:art`                         | Run only the art tests                                                     |
 | `npm run clean`                             | Remove the build and Wrangler state                                        |
 | `npm run dev`                               | Dev server                                                                 |
-| `npm run export:data`                       | Write `shared/export/` from the game's modules, for art's tools            |
+| `npm run export:data [-- --check]`          | Write `shared/export/` from the game's modules, or fail if it differs      |
 | `npm run format`                            | Rewrite files with Prettier and apply ESLint fixes                         |
 | `npm run lint`                              | Prettier check, ESLint and markdownlint                                    |
 | `npm run preview`                           | Build, then serve it through `wrangler dev`                                |
