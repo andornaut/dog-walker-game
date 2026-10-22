@@ -102,7 +102,7 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Full pack home:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Full pack bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
-- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Full pack bonus, card costs, starting cash), neighborhoods walked and the bank; a new-best ribbon when it beats the best walk with the same number of dogs; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
+- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Full pack bonus, card costs, starting cash) and the neighborhoods walked, with no bank; a new-best ribbon when it beats the best walk with the same number of dogs; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
 
