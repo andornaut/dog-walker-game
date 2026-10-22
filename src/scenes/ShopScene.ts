@@ -161,7 +161,7 @@ function purchaseArt(purchase: Purchase): string {
 
 // A purchase's picture on its detail card and its confirm: a dog's portrait, a gear item's
 // icon or the slot's art at 2x.
-function purchasePicture(purchase: Purchase): DetailPicture {
+export function purchasePicture(purchase: Purchase): DetailPicture {
   switch (purchase.kind) {
     case "dog":
       return { key: dogPortraitKey(gameData, purchase.dog), scale: 1 };

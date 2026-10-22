@@ -2,7 +2,6 @@ import { type GameObjects, Scene, type Time } from "phaser";
 
 import {
   dogFaceKey,
-  dogPortraitKey,
   dogSpriteKey,
   gearIconKey,
   ownerFaceKey,
@@ -143,6 +142,7 @@ import { type RunPick, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import {
+  purchasePicture,
   SHOP_CHANGED_EVENT,
   SHOP_CLOSED_EVENT,
   type ShopClosed,
@@ -1179,14 +1179,8 @@ export class StartScene extends Scene {
   }
 
   private detailPicture(target: DetailTarget): DetailPicture {
-    if (target.kind === "dog") {
-      return {
-        key: dogPortraitKey(gameData, target.dog),
-        scale: 1,
-      };
-    }
-    if (target.kind === "gear") {
-      return { key: gearIconKey(target.gear), scale: 2 };
+    if (target.kind !== "walker") {
+      return purchasePicture(target);
     }
     return {
       fallback: gameData.walkers[target.walker].portraitKey,
