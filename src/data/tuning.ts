@@ -103,9 +103,10 @@ export const TUNING = {
     // How long a debuff lasts while Ada's Calm voice walks.
     calmVoiceDebuffFactor: 0.5,
     // Each dart sets off a share of the road ahead of the pack drawn per dart between these. The
-    // planner raises the low end so the pack still has pathReactionMargin after the cue, and
-    // lowers the high end so the cue still shows wholly on the road, at the zone's pace and the
-    // dart's tilt.
+    // planner raises the low end so the pack still has pathReactionMargin after the cue, at the
+    // zone's pace and the dart's tilt; a tilted dart may then start above the high end, up to
+    // where its cue still shows wholly on the road, and where even that is too low its drawn
+    // tilt is cut to fit.
     dartStartRoadShareMax: 0.45,
     dartStartRoadShareMin: 0.15,
     // A dart that turns back does so once it has crossed a share of the road drawn per dart
