@@ -1,15 +1,15 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
 import type { Struck } from "../hud/buffMarks";
 import { effectIconFallback, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
-import { chipLeft, type LabelAnchor } from "../hud/feedback";
+import type { LabelAnchor } from "../hud/feedback";
 import { BUFF_POP, CHARM, sparkleAt, strikeGeometry } from "../layout/buffLayout";
 import { insetRect, type Point, type Rect } from "../lib/rect";
-import { addFilledRect, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { addFilledRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, type FontRole, inkSpan, pixelFontMetrics } from "../ui/phaser/pixelText";
+import { CHIP_PAD, floatChip, TITLE_SCALE } from "./packFeedback";
 import { playEffect } from "./sprites";
 import type { TimedGroup } from "./timedGroup";
 import { fadeAway } from "./uiKit";
@@ -138,39 +138,31 @@ export function struckWidth(
   return probe.right - probe.left;
 }
 
-// The title font at 2x on a cream chip in a plum rim, as the forgiven label floats; its chip
-// reaches CHIP_PAD past the capitals.
-const CHIP = { pad: 2, scale: 2 } as const;
-
-// A struck value on a cream chip, centred on the anchor (moved in to stay on screen) with its
-// line's bottom there, fading out from fadeAtMs and rising unless motion is reduced.
+// A struck value on a floating chip, fading out from fadeAtMs and rising unless motion is
+// reduced.
 export function floatStruck(
   scene: Scene,
   moment: { depth: number; shownAtMs: number; still: boolean },
   anchor: LabelAnchor,
   struck: Struck,
 ): void {
-  const { pad, scale } = CHIP;
-  const title = pixelFontMetrics(scene, "title");
-  const drawn = addStruck(scene, struck, { x: pad, y: pad }, { font: "title", scale });
-  const width = drawn.right - drawn.left + 2 * pad;
-  const box = scene.add.graphics();
-  drawFramedRect(
-    box,
-    { border: PALETTE.plum, fill: PALETTE.cream },
-    { height: title.capHeight * scale + 2 * pad, width, x: 0, y: 0 },
-  );
+  const at = { x: CHIP_PAD, y: CHIP_PAD };
+  const drawn = addStruck(scene, struck, at, { font: "title", scale: TITLE_SCALE });
   drawn.parts.forEach((part) => {
     const shown = part as GameObjects.GameObject & { x: number };
-    shown.x -= drawn.left - pad;
+    shown.x -= drawn.left - CHIP_PAD;
   });
-  const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * scale;
-  const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
-  const chip = scene.add.container(x, capTop - pad, [box, ...drawn.parts]).setDepth(moment.depth);
+  const width = drawn.right - drawn.left + 2 * CHIP_PAD;
   const { fadeAtMs, fadeMs, rise } = BUFF_POP;
-  fadeAway(scene, [chip], {
-    delayMs: Math.max(0, fadeAtMs - moment.shownAtMs),
-    ms: fadeMs,
-    rise: moment.still ? 0 : rise,
-  });
+  floatChip(
+    scene,
+    moment.depth,
+    anchor,
+    { above: 0, parts: drawn.parts, width },
+    {
+      delayMs: Math.max(0, fadeAtMs - moment.shownAtMs),
+      ms: fadeMs,
+      rise: moment.still ? 0 : rise,
+    },
+  );
 }

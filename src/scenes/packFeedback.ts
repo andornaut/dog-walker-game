@@ -16,9 +16,9 @@ import { fadeAway } from "./uiKit";
 // A sidestep puff, 48x48, laid on the dog's frame and lettered with the dodge word.
 const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
 
-// The label is font-title at 2x; its chip reaches 2px past the capitals.
-const TITLE_SCALE = 2;
-const CHIP_PAD = 2;
+// A floating chip's text is font-title at 2x; the chip reaches 2px past the capitals.
+export const TITLE_SCALE = 2;
+export const CHIP_PAD = 2;
 
 interface PackMoment {
   depth: number;
@@ -57,9 +57,8 @@ export function playForgiven(
   floatLabel(scene, moment, anchor, gameData.runText.forgiven, PALETTE.forest, forgiven);
 }
 
-// font-title at 2x on a cream chip, centred on the anchor (moved in to stay on screen) with its
-// line's bottom there, held fully opaque for holdMs, then rising and fading out over the rest
-// of ms; with reduced motion it fades in place.
+// font-title at 2x on a floating chip, held fully opaque for holdMs, then rising and fading out
+// over the rest of ms; with reduced motion it fades in place.
 function floatLabel(
   scene: Scene,
   moment: PackMoment,
@@ -75,6 +74,31 @@ function floatLabel(
   const tops = label.getTextBounds(true).characters.flatMap((char) => (char.h > 0 ? [char.y] : []));
   const above = Math.max(0, title.capTop - Math.min(title.capTop, ...tops)) * TITLE_SCALE;
   label.setPosition(CHIP_PAD, CHIP_PAD + above + label.y);
+  floatChip(
+    scene,
+    moment.depth,
+    anchor,
+    { above, parts: [label], width },
+    {
+      delayMs: timing.holdMs,
+      ms: timing.ms - timing.holdMs,
+      rise: moment.still ? 0 : timing.rise,
+    },
+  );
+}
+
+// A cream chip in a plum rim round parts, placed from its top-left: width wide, and CHIP_PAD
+// past the title font's capitals at TITLE_SCALE, above more over them. It is centred on the
+// anchor (moved in to stay on screen) with its line's bottom there, and fades away as fade says.
+export function floatChip(
+  scene: Scene,
+  depth: number,
+  anchor: LabelAnchor,
+  content: { above: number; parts: GameObjects.GameObject[]; width: number },
+  fade: { delayMs: number; ms: number; rise: number },
+): void {
+  const { above, parts, width } = content;
+  const title = pixelFontMetrics(scene, "title");
   const box = scene.add.graphics();
   drawFramedRect(
     box,
@@ -84,10 +108,6 @@ function floatLabel(
   const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TITLE_SCALE;
   const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
   const y = capTop - CHIP_PAD - above;
-  const chip = scene.add.container(x, y, [box, label]).setDepth(moment.depth);
-  fadeAway(scene, [chip], {
-    delayMs: timing.holdMs,
-    ms: timing.ms - timing.holdMs,
-    rise: moment.still ? 0 : timing.rise,
-  });
+  const chip = scene.add.container(x, y, [box, ...parts]).setDepth(depth);
+  fadeAway(scene, [chip], fade);
 }
