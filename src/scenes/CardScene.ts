@@ -49,7 +49,6 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
-  fontHasGlyphs,
   type FontRole,
   inkSpan,
   labelInkWidth,
@@ -206,11 +205,10 @@ export class CardScene extends Scene {
     this.headerParts = this.children.list.slice(headerStart);
 
     const tag = cardFrameTag(view.source);
-    const bandFont = this.bandFont();
     this.entries.forEach((entry, i) => {
       const before = this.children.list.length;
       const rect = itemAt(this.cardRects, i);
-      this.drawCard(view, tag, bandFont, entry, rect);
+      this.drawCard(view, tag, entry, rect);
       // Once a key has been pressed, each card shows the number key that picks it, above it.
       if (keys) {
         this.centered(rect.x + rect.width / 2, header.keyTop, String(i + 1), PALETTE.amber, {
@@ -389,10 +387,7 @@ export class CardScene extends Scene {
       fillRect(g, PALETTE.plum, card);
       fillRect(g, PALETTE.cream, insetRect(4, card));
     }
-    const label = bandLabel(entry);
-    this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, PALETTE.white, {
-      font: this.bandLabelFits("title", label, LARGE.band.room) ? "title" : "body",
-    });
+    this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, bandLabel(entry), PALETTE.white);
     const art = illustrationKey(option);
     if (this.textures.exists(art)) {
       this.add
@@ -553,17 +548,6 @@ export class CardScene extends Scene {
     return { height: inkRowsOfLines(metrics, lines) * scale, parts: [...parts, name] };
   }
 
-  // Whether label inks no wider than room in role's font at 1x, which has its every glyph.
-  private bandLabelFits(role: FontRole, label: string, room: number): boolean {
-    if (!fontHasGlyphs(this, role, label)) {
-      return false;
-    }
-    const probe = addPixelText(this, 0, 0, label, { color: PALETTE.white, font: role });
-    const ink = inkSpan(probe);
-    probe.destroy();
-    return ink.right - ink.left <= room;
-  }
-
   private centered(
     x: number,
     y: number,
@@ -574,23 +558,7 @@ export class CardScene extends Scene {
     return snapCentre(addPixelText(this, x, y, text, { align: "center", color, ...style }), x);
   }
 
-  // The row's band labels share one font: the title font where it has every glyph of every
-  // label and each keeps the band's title room, else the narrower body font, which every label
-  // fits.
-  private bandFont(): FontRole {
-    const labels = this.entries.map(bandLabel);
-    return labels.every((label) => this.bandLabelFits("title", label, BAND.titleRoom))
-      ? "title"
-      : "body";
-  }
-
-  private drawCard(
-    view: CardView,
-    tag: string,
-    bandFont: FontRole,
-    entry: Entry,
-    rect: Rect,
-  ): void {
+  private drawCard(view: CardView, tag: string, entry: Entry, rect: Rect): void {
     const { x, y } = rect;
     const grey = tileState({ ...PLAIN_ITEM, available: entry.enabled }) === "disabled";
     const g = this.add.graphics();
@@ -609,9 +577,7 @@ export class CardScene extends Scene {
       });
     }
 
-    this.centered(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), PALETTE.white, {
-      font: bandFont,
-    });
+    this.centered(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), PALETTE.white);
 
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
     const illustration = illustrationKey(entry.option);

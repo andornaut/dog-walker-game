@@ -6,8 +6,7 @@ import { charmRowHeight } from "./buffLayout";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
 // on the road, and the enlarged card a hold opens, card-frame-large, centred in the dimmed band
-// and road. A band's label keeps room wide at 1x; a small card's row of labels takes the title
-// font only where each keeps titleRoom wide, 3px inside the band, else the body font. An option
+// and road. A band's label is body text at 1x, at most room wide. An option
 // that would fire an owner says so at the foot of the effect, warningGap over the plaque, its
 // lowest ink at the effect's bottom, the effect ending warningGap over it; the ui-fires marker,
 // fires.size square at its scale, sits over the plaque's left rivet at fires. A path card's
@@ -16,7 +15,7 @@ import { charmRowHeight } from "./buffLayout";
 export const CARD_LAYOUT = {
   art: { height: 56, width: 75, x: 4, y: 16 },
   badge: { height: 13, width: 71, x: 6, y: 121 },
-  band: { height: 11, room: 77, titleRoom: 73, y: 2 },
+  band: { height: 11, room: 77, y: 2 },
   effect: { height: 42, width: 71, x: 6, y: 76 },
   fires: { size: 16, x: 4, y: 119 },
   // A fork card's Head home button, centred under the paths, gap rows below their charm row.

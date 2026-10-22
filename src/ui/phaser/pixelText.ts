@@ -96,13 +96,6 @@ export function bitmapFontHasChars(scene: Scene, key: string, text: string): boo
   );
 }
 
-// Whether the role's font has a glyph for every character of text, spaces aside. The fallback
-// font stands in for a missing font and draws its own capitals.
-export function fontHasGlyphs(scene: Scene, role: FontRole, text: string): boolean {
-  const key = fontKey(scene, role);
-  return key === FALLBACK_FONT_KEY || bitmapFontHasChars(scene, key, textFor(key, role, text));
-}
-
 // The text in the characters the font has: the title font and the fallback are capitals.
 function textFor(key: string, role: FontRole, text: string): string {
   if (key === FALLBACK_FONT_KEY) {
