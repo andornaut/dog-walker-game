@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { plainMarks } from "../pixelFont";
-import { addPixelText, type PixelTextStyle } from "./pixelText";
+import { addPixelText, bitmapFontHasChars, type PixelTextStyle } from "./pixelText";
 
 // The sign logo's lettering: capitals with the outline and shadow baked in, so it is never
 // tinted. yellow is for dark panels; cream is for where yellow clashes.
@@ -15,19 +15,10 @@ const DISPLAY_FONT_KEYS: Readonly<Record<DisplayVariant, string>> = {
 // The capitals start this many rows into a line, 10 rows tall: font-title's at scale 2.
 const CAP_TOP = 3;
 
-interface FontData {
-  chars: Readonly<Record<number, unknown>>;
-}
-
 // The variant's font key when it is loaded and has every character of the text.
 function displayFontKey(scene: Scene, variant: DisplayVariant, text: string): string | undefined {
   const key = DISPLAY_FONT_KEYS[variant];
-  if (!scene.cache.bitmapFont.exists(key)) {
-    return undefined;
-  }
-  const { chars } = (scene.cache.bitmapFont.get(key) as { data: FontData }).data;
-  // Phaser keys a font's glyphs by character code.
-  return [...text].every((char) => char === " " || chars[char.codePointAt(0) ?? 0] !== undefined)
+  return scene.cache.bitmapFont.exists(key) && bitmapFontHasChars(scene, key, text)
     ? key
     : undefined;
 }
