@@ -18,7 +18,7 @@ import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClo
 import { effectItems } from "../hud/effectIcons";
 import { cardHintTriggers, startHintTriggers } from "../hud/hintTriggers";
 import { homeQuestionNote } from "../hud/homeQuestion";
-import { type RunPause, walkPaused } from "../hud/topBar";
+import { NOTHING_PAUSED, type RunPause, walkPaused } from "../hud/topBar";
 import { type ExplainShown } from "../hud/walkHud";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
@@ -67,7 +67,7 @@ import {
 import { HitBoxView } from "./run/hitBoxView";
 import { blendWalk, leadWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
-import { MenuFlow, type MenuPause } from "./run/menuFlow";
+import { MenuFlow } from "./run/menuFlow";
 import { PackView } from "./run/packView";
 import { ZoneBanner, zoneBannerMs } from "./run/roadBanners";
 import { RoadsideView } from "./run/roadsideView";
@@ -95,9 +95,6 @@ export interface RunSceneData {
 // the walk ahead.
 const STEP_MS = STEP_SECONDS * 1000;
 const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
-
-// Before the walk's menus exist, nothing is open over it.
-const NO_MENU_PAUSE: MenuPause = { card: false, menu: "closed", page: "shown" };
 
 // Before the walk starts, the HUD shows nothing to explain.
 const NOTHING_SHOWN: ExplainShown = { debuffs: [], dogs: [], effects: 0 };
@@ -572,7 +569,7 @@ export class RunScene extends Scene implements HudRun {
   runPause(): RunPause {
     const hitStop = this.session?.walk.road.hitStop != null;
     const hold = this.world?.input.explanation() !== undefined;
-    return { ...(this.world?.menus.pause() ?? NO_MENU_PAUSE), hitStop, hold };
+    return { ...(this.world?.menus.pause() ?? NOTHING_PAUSED), hitStop, hold };
   }
 
   openPause(mode: PauseSceneData["mode"] = "menu"): void {

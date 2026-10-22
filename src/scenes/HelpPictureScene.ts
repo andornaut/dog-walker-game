@@ -6,7 +6,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
 import { type HelpPicture, helpPicture, TOUCH_DRAG } from "../help/helpPictures";
 import { changeLabels } from "../hud/hudView";
-import type { RunPause } from "../hud/topBar";
+import { NOTHING_PAUSED } from "../hud/topBar";
 import { DOG_REACTIONS } from "../layout/hitEffects";
 import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
@@ -29,14 +29,6 @@ import { tagFrame } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const ROAD_TEXTURE = "help-road";
-// The help's pictures show the walk going on, none of it paused.
-const WALKING: RunPause = {
-  card: false,
-  hitStop: false,
-  hold: false,
-  menu: "closed",
-  page: "shown",
-};
 // The frame a still picture shows of an animation, where not its first: the heart a bump
 // knocks off is at its fullest.
 const STILL_FRAMES: Readonly<Record<string, number>> = {
@@ -166,7 +158,7 @@ export class HelpPictureScene extends Scene {
         run: walk.run,
       }),
       reducedMotion: () => true,
-      runPause: () => WALKING,
+      runPause: () => NOTHING_PAUSED,
     };
     const data: HudSceneData = { picture: { source, view } };
     this.scene.launch(SCENE_KEYS.helpHud, data);
