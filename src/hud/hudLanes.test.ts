@@ -112,9 +112,7 @@ describe("a change label", () => {
       ...modifiers,
       ...Object.values(gameData.encounters).flatMap(({ name, resolution }) => [
         name,
-        ...(resolution.kind === "card"
-          ? resolution.options.map((option) => option.cause ?? option.name)
-          : []),
+        ...(resolution.kind === "card" ? resolution.options.map((option) => option.name) : []),
       ]),
     ];
     const firedBy = (Object.keys(gameData.dogs) as DogId[]).map((dog) =>

@@ -234,8 +234,7 @@ describe("a moving prize", () => {
 
 describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   const route = gameData.world.zones.map(({ id }) => id as ZoneId);
-  type Moving = Exclude<Movement, { kind: "still" }>;
-  const entries: { kind: WalkItemKind; movement: Moving; shape: MoverFootprint }[] = [
+  const entries: { kind: WalkItemKind; movement: Movement; shape: MoverFootprint }[] = [
     ...(Object.keys(gameData.minorObstacles) as MinorObstacleId[]).map((kind) => {
       const { movement, shape } = gameData.minorObstacles[kind];
       return { kind: kind as WalkItemKind, movement, shape };
@@ -247,7 +246,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         : [];
     }),
   ].flatMap(({ kind, movement, shape }) =>
-    movement === undefined || movement.kind === "still" ? [] : [{ kind, movement, shape }],
+    movement === undefined ? [] : [{ kind, movement, shape }],
   );
   const movements = new Map(
     entries.map((entry) => [JSON.stringify([entry.movement, entry.shape]), entry]),
@@ -281,14 +280,14 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   // A dart whose tilt is drawn from a range is checked at both ends of it, and one of a kind that
   // turns back crossing once and turning at both ends of its turn, at either end of its other
   // draws.
-  const tiltEnds = (movement: Moving): readonly DrawWay[] =>
+  const tiltEnds = (movement: Movement): readonly DrawWay[] =>
     movement.kind === "dart" && movement.tilt.min !== movement.tilt.max
       ? [
           [", tilt low", { tilt: 0 }],
           [", tilt high", { tilt: 0.999999 }],
         ]
       : [["", {}]];
-  const turnWays = (movement: Moving): readonly DrawWay[] =>
+  const turnWays = (movement: Movement): readonly DrawWay[] =>
     movement.kind === "dart" && movement.turnBackShare > 0
       ? [
           [", crossing once", { turn: 0.999999 }],

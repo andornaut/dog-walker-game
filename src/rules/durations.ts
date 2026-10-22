@@ -14,8 +14,8 @@ function atFork(state: Pick<RunState, "phase">): boolean {
   return state.phase.kind === "card" && state.phase.source.kind === "fork";
 }
 
-// Picked at a fork, "zone" and "nextZone" both mean the zone about to start. Picked during a
-// zone, "zone" is the rest of it and "nextZone" lasts through the zone after it.
+// Picked at a fork, "nextZone" means the zone about to start; picked during a zone, it lasts
+// through the zone after it.
 export function lastingFor(
   duration: Duration | undefined,
   state: Pick<RunState, "phase" | "zoneIndex">,
@@ -24,8 +24,6 @@ export function lastingFor(
     case undefined:
     case "run":
       return {};
-    case "zone":
-      return { untilZone: state.zoneIndex };
     case "nextZone":
       return { untilZone: atFork(state) ? state.zoneIndex : state.zoneIndex + 1 };
     default:

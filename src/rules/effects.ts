@@ -50,7 +50,7 @@ function changesModified(changes: readonly Change[]): ModifiedValue[] {
 
 export function targetDogs(
   data: RulesData,
-  context: Pick<EffectContext, "affected" | "random">,
+  context: Pick<EffectContext, "affected">,
   state: RunState,
   target: Target,
 ): DogId[] {
@@ -60,10 +60,6 @@ export function targetDogs(
       return pack.filter((id) => context.affected.includes(id));
     case "all":
       return pack;
-    case "randomOne": {
-      const picked = pack[Math.floor(context.random() * pack.length)];
-      return picked === undefined ? [] : [picked];
-    }
     default:
       return assertNever(target);
   }

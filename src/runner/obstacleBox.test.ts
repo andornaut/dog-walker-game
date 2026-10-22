@@ -38,7 +38,7 @@ const movable = (kind: Kind): boolean => {
   const entry = Object.hasOwn(gameData.minorObstacles, kind)
     ? gameData.minorObstacles[kind as MinorObstacleId]
     : gameData.encounters[kind as EncounterId];
-  return "movement" in entry && entry.movement !== undefined && entry.movement.kind !== "still";
+  return "movement" in entry && entry.movement !== undefined;
 };
 // Every obstacle kind standing, and moving where it can.
 const LOOKS = KINDS.flatMap((kind) =>

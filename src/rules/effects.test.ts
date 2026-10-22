@@ -15,9 +15,9 @@ import { cents, read } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
 const SKUNK_IGNORE: EffectSource = { encounter: "skunk", kind: "encounter", option: 2 };
-const context = (affected: readonly DogId[], random = () => 0): EffectContext => ({
+const context = (affected: readonly DogId[]): EffectContext => ({
   affected,
-  random,
+  random: () => 0,
   source: SKUNK_IGNORE,
 });
 const sweetTalker = activeModifier(
@@ -157,32 +157,12 @@ describe("resolveEffects: changes and their causes", () => {
 
 describe("targetDogs", () => {
   const pack = testState({ duchess: 3, nugget: 3, pierre: "fired" });
-  const randomOne = { kind: "randomOne" } as const;
-  type Options = { affected?: DogId[]; random?: number; state?: RunState };
 
-  it("picks the targeted dogs, leaving out fired owners", () => {
-    const cases: [string, Parameters<typeof targetDogs>[3], DogId[], Options?][] = [
-      ["all, leaving out a fired owner's dog", { kind: "all" }, ["duchess", "nugget"]],
-      [
-        "affected, leaving out a fired owner's dog",
-        { kind: "affected" },
-        [],
-        { affected: ["pierre"] },
-      ],
-      ["one random dog, low draw", randomOne, ["duchess"]],
-      ["one random dog, high draw", randomOne, ["nugget"], { random: 0.99 }],
-      ["no random dog when all are fired", randomOne, [], { state: testState({ koda: "fired" }) }],
-    ];
-    for (const [name, target, expected, options] of cases) {
-      const { affected = [], random = 0, state = pack } = options ?? {};
-      const picked = targetDogs(
-        data,
-        context(affected, () => random),
-        state,
-        target,
-      );
-      expect(picked, name).toEqual(expected);
-    }
+  it.each<[string, Parameters<typeof targetDogs>[3], DogId[], DogId[]]>([
+    ["all, leaving out a fired owner's dog", { kind: "all" }, [], ["duchess", "nugget"]],
+    ["affected, leaving out a fired owner's dog", { kind: "affected" }, ["pierre"], []],
+  ])("picks %s", (_name, target, affected, expected) => {
+    expect(targetDogs(data, { affected }, pack, target)).toEqual(expected);
   });
 });
 

@@ -1,4 +1,4 @@
-import type { CardOption, DogId, GameData } from "../data/types";
+import type { DogId, GameData } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames } from "../lib/lines";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
@@ -101,20 +101,13 @@ export function changeAmount(change: Change): number {
   return change.kind === "hearts" ? change.after - change.before : change.amount;
 }
 
-// A card option names its changes by its cause, or else its name.
-function optionCause(option: CardOption | undefined): string | undefined {
-  return option?.cause ?? option?.name;
-}
-
 function effectSourceName(data: CauseData, source: ModifierSource): string {
   switch (source.kind) {
     case "debuff":
       return data.debuffs[source.debuff].name;
     case "encounter": {
       const { name, resolution } = data.encounters[source.encounter];
-      return resolution.kind === "card"
-        ? (optionCause(resolution.options[source.option]) ?? name)
-        : name;
+      return resolution.kind === "card" ? (resolution.options[source.option]?.name ?? name) : name;
     }
     case "gear":
       return data.shopGear[source.gear].name;

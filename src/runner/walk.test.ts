@@ -1723,7 +1723,7 @@ describe("movers", { timeout: 60_000 }, () => {
       ? tuned.minorObstacles[kind as MinorObstacleId]
       : tuned.encounters[kind as ObstacleEncounterId];
     const movement = ("movement" in entry ? entry.movement : undefined) as Movement | undefined;
-    return movement === undefined || movement.kind === "still" ? null : movement;
+    return movement ?? null;
   };
 
   it("never moves an obstacle the rulebook keeps still", () => {

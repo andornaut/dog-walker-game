@@ -8,7 +8,7 @@ import { cardFor } from "./choices";
 // How long an effect lasts, as an upgrade's duration names it.
 function effectDuration(effect: Effect): UpgradeDuration {
   if ((effect.kind === "modifier" || effect.kind === "immune") && effect.duration !== undefined) {
-    return effect.duration === "zone" ? "nextZone" : effect.duration;
+    return effect.duration;
   }
   return "now";
 }

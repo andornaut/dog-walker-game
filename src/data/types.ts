@@ -139,12 +139,11 @@ export type Dog = Unlock & {
 };
 
 // Which dogs an effect reaches, among the dogs still in the pack. "affected" is the dogs
-// the encounter affected; "randomOne" is one dog drawn at random.
-export type Target =
-  { readonly kind: "affected" } | { readonly kind: "all" } | { readonly kind: "randomOne" };
+// the encounter affected.
+export type Target = { readonly kind: "affected" } | { readonly kind: "all" };
 
-// "zone": the rest of the current zone; "nextZone": the whole of the next zone.
-export type Duration = "nextZone" | "run" | "zone";
+// "nextZone": the whole of the next zone.
+export type Duration = "nextZone" | "run";
 
 // Stats a modifier changes. An "add" names a key in the stat's own unit group.
 // How many lanes beside the pack's tips and treats are grabbed from, and how many encounter
@@ -233,9 +232,6 @@ export type Effect =
 export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
   readonly art: string;
-  // What its changes name as their cause, such as "grumpy neighbour"; the option's name when
-  // absent.
-  readonly cause?: string;
   // Picking it counts one toward this lifetime tally.
   readonly tally?: TallyId;
   readonly effects: readonly Effect[];
@@ -323,7 +319,7 @@ export interface Tilt {
 // it and the pack's rows is down to seconds.shyHopNearSeconds of the road's travel, ending in
 // neither the pack's lane nor one it is moving into, no nearer it across the road, and at most
 // most rows up the road. step: steps spots, each a lane to either side or a row
-// toward or away, seconds.moverStepSeconds each. still: it never moves, as with no movement.
+// toward or away, seconds.moverStepSeconds each.
 // Each mover's speed varies by up to multipliers.moverSpeedJitter either way, and each step and
 // hop comes up to seconds.moverTimingJitter late.
 export type Movement =
@@ -337,8 +333,7 @@ export type Movement =
       readonly times: MoveCount;
     }
   | { readonly kind: "inLane"; readonly factor: number }
-  | { readonly kind: "step"; readonly steps: MoveCount }
-  | { readonly kind: "still" };
+  | { readonly kind: "step"; readonly steps: MoveCount };
 export type MovementKind = Movement["kind"];
 
 // "obstacle": hit by accident. A card obstacle opens a card for the whole pack, with hitLabel

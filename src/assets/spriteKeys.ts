@@ -197,7 +197,7 @@ export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
   "other-dog": "loose-dog",
   squirrel: "squirrel-dash",
 };
-export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readonly string[]>> = {
+export const MOVING_TAGS: Readonly<Record<MovementKind, readonly string[]>> = {
   approach: ["step", "walk", "run"],
   dart: ["flee", "run", "bounce", "walk"],
   hop: ["hop", "pull-out", "run", "walk"],
@@ -223,7 +223,7 @@ export function moverBodyTag(
   movement: MovementKind,
   moving: boolean,
 ): string | undefined {
-  const motion = movement === "still" ? [] : MOVING_TAGS[movement];
+  const motion = MOVING_TAGS[movement];
   const stalking = movement === "approach" && has("step") ? ["walk"] : [];
   const tags = moving
     ? [...motion, IDLE_TAG, ...STANDING_TAGS.walking]

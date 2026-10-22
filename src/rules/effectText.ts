@@ -51,7 +51,6 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
 const DURATION_TEXT: { readonly [D in Duration]: string } = {
   nextZone: "next neighborhood",
   run: "all walk",
-  zone: "for the rest of the neighborhood",
 };
 
 const MINUS = "−";
@@ -92,17 +91,7 @@ function dodgeText(data: TextData, effect: DodgeEffect): string {
 }
 
 function heartsText(effect: HeartsEffect): string {
-  const amount = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
-  const target = effect.target;
-  switch (target.kind) {
-    case "affected":
-    case "all":
-      return `${amount} each`;
-    case "randomOne":
-      return `${amount} to one random owner`;
-    default:
-      return assertNever(target);
-  }
+  return `${sign(effect.amount)}${Math.abs(effect.amount)}♥ each`;
 }
 
 function addedText(modifier: Modifier, value: number): string {
@@ -255,9 +244,6 @@ function cardHeartsText(
   context: CardTextContext,
   effect: HeartsEffect,
 ): string | undefined {
-  if (effect.target.kind === "randomOne") {
-    return heartsText(effect);
-  }
   const hearts = String(Math.abs(effect.amount));
   const change = `${sign(effect.amount)}${hearts}♥`;
   const names = context.dogs(effect.target).map((id) => {

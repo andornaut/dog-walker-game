@@ -49,11 +49,6 @@ describe("effectText", () => {
         ),
       ],
       [
-        "one random owner",
-        [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],
-        "−1♥ to one random owner",
-      ],
-      [
         "several effects, naming a debuff",
         [
           { amount: "encounterLow", change: "lose", kind: "money" },

@@ -424,7 +424,7 @@ export function moverMovement(
   random: Random,
   share: number,
   kind: WalkItemKind,
-): MovingMovement | null {
+): Movement | null {
   const movement = movementOf(data, kind);
   if (movement === null || share <= 0) {
     return null;
@@ -437,17 +437,14 @@ export function moverMovement(
 function movementOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
-): MovingMovement | null {
+): Movement | null {
   if (isPickup(kind)) {
     return null;
   }
   const entry = isMinorObstacle(data, kind) ? data.minorObstacles[kind] : data.encounters[kind];
   const movement = "movement" in entry ? entry.movement : undefined;
-  return movement === undefined || movement.kind === "still" ? null : movement;
+  return movement ?? null;
 }
-
-// A movement that moves.
-type MovingMovement = Exclude<Movement, { kind: "still" }>;
 
 // A step: a lane to either side, or a row toward the pack or away.
 const STEPS: readonly StepShape[] = [
@@ -471,7 +468,7 @@ export function moverSpec(
   data: Pick<GameData, "tuning">,
   streams: PlannerStreams,
   footprint: MoverFootprint,
-  movement: MovingMovement,
+  movement: Movement,
 ): MoverSpec {
   const { tuning } = data;
   let motion: MoverMotion;
@@ -596,14 +593,14 @@ export function spawnQuotas(
   const movers = new Map<WalkItemKind, number>();
   const steppers: SpawnQuota<WalkItemKind>[] = [];
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
-  const moverQuota = (kind: WalkItemKind, movement: MovingMovement, moverCount: number) => ({
+  const moverQuota = (kind: WalkItemKind, movement: Movement, moverCount: number) => ({
     blocksLane: blocksLane(data, kind),
     count: moverCount,
     first: opensACard(data, kind),
     kind,
     mover: moverSpec(data, streams, footprintOf(data, kind), movement),
   });
-  const movements = new Map<WalkItemKind, MovingMovement>();
+  const movements = new Map<WalkItemKind, Movement>();
   for (const kind of kinds) {
     const movement = moverMovement(data, random, zone.moverShare, kind);
     if (movement === null) {

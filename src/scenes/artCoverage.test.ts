@@ -455,7 +455,7 @@ describe("road object art", () => {
       }
       const movement = "movement" in entry ? entry.movement : undefined;
       const shown = art;
-      return movement === undefined || movement.kind === "still"
+      return movement === undefined
         ? []
         : [{ key: MOVER_SPRITE_KEYS[shown] ?? shown, tags: MOVING_TAGS[movement.kind] }];
     });

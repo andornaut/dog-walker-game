@@ -350,7 +350,7 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
       state,
     );
     const textContext: CardTextContext = {
-      dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
+      dogs: (target) => targetDogs(data, { affected }, state, target),
       forgiven: (dog) =>
         preview.heartChanges.some((change) => change.dog === dog && heartsForgiven(change) > 0),
       money: (effect) => moneyAmount(data, state, effect),
