@@ -48,6 +48,11 @@ export function lazyStorage(lookup: () => StorageLike): StorageLike {
   };
 }
 
+// The page's save store, on localStorage.
+export function pageSaveStore(): SaveStore {
+  return saveStore(browserStorage(lazyStorage(() => globalThis.localStorage)));
+}
+
 function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }

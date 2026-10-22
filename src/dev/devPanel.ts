@@ -7,7 +7,8 @@ import "./devPanel.css";
 import { gameData } from "../data";
 import { sessionRead, sessionRemove, sessionWrite } from "../lib/sessionStore";
 import { saveContextFrom } from "../save/load";
-import { browserStorage, saveStore } from "../save/storage";
+import { loadedSave, newPlayerOnDevice } from "../save/profile";
+import { pageSaveStore } from "../save/storage";
 import { BUILD_LABEL } from "./buildLabel";
 import {
   applyPanel,
@@ -72,7 +73,7 @@ export async function applyPendingSaveEdits(): Promise<void> {
   }
   try {
     const context = saveContextFrom(gameData);
-    const store = saveStore(browserStorage(globalThis.localStorage));
+    const store = pageSaveStore();
     const loaded = await store.load(context);
     if (loaded.status === "newer" || loaded.status === "unavailable") {
       console.warn(`Dev panel: save edits not applied: ${loaded.reason}`);
@@ -80,7 +81,7 @@ export async function applyPendingSaveEdits(): Promise<void> {
     }
     const edited = edits.reduce(
       (save, edit) => applySaveEdit(gameData, context.defaults, edit, save),
-      loaded.save,
+      loadedSave(loaded, newPlayerOnDevice),
     );
     const saved = await store.save(edited);
     if (saved.status !== "saved") {

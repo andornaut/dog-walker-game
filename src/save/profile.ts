@@ -32,6 +32,27 @@ export interface Awards {
 
 type SettingsListener = (settings: Settings) => void;
 
+// A player's first settings on this device: reduced motion follows the device's setting.
+export function deviceSettings(settings: Settings): Settings {
+  const reducedMotion =
+    globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  return { ...settings, reducedMotion };
+}
+
+// A new player's save on this device.
+export function newPlayerOnDevice(save: SaveDocument): SaveDocument {
+  return { ...save, settings: deviceSettings(save.settings) };
+}
+
+// The save a load gives: the stored one, or else (none stored, or one that could not be kept)
+// a new player's, through newPlayer.
+export function loadedSave(
+  load: StoreLoadResult,
+  newPlayer: (save: SaveDocument) => SaveDocument,
+): SaveDocument {
+  return load.status === "loaded" ? load.save : newPlayer(load.save);
+}
+
 interface OpenedProfile {
   load: StoreLoadResult;
   session: ProfileSession;
@@ -71,7 +92,7 @@ export class ProfileSession {
     const load = await store.load(context);
     const state =
       load.status === "newer" || load.status === "unavailable" ? load.status : "available";
-    const loaded = load.status === "loaded" ? load.save : newPlayer(load.save);
+    const loaded = loadedSave(load, newPlayer);
     const session = new ProfileSession(awards, store, loaded, state);
     if (loaded.checkpoint !== null) {
       await session.update((save) => bankCheckpoint(session.awardContext(), save));

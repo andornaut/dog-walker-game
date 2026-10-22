@@ -6,14 +6,20 @@ import { soundVolumes } from "../home/settings";
 import type { Change } from "../rules/causes";
 import type { RunResult } from "../save/checkpoint";
 import { saveContextFrom } from "../save/load";
-import { ProfileSession, type RunEnd, type StorageState } from "../save/profile";
+import {
+  deviceSettings,
+  newPlayerOnDevice,
+  ProfileSession,
+  type RunEnd,
+  type StorageState,
+} from "../save/profile";
 import {
   type Checkpoint,
   DEFAULT_SETTINGS,
   type SaveDocument,
   type Settings,
 } from "../save/schema";
-import { browserStorage, lazyStorage, saveStore, type StoreLoadResult } from "../save/storage";
+import { pageSaveStore, type StoreLoadResult } from "../save/storage";
 import { soundboardOf } from "./soundboard";
 
 export type { Settings } from "../save/schema";
@@ -42,19 +48,14 @@ export function applySound(scene: Scene, settings: Settings): void {
   soundboard.setMuted(settings.muted);
 }
 
-function prefersReducedMotion(): boolean {
-  return globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-}
-
 // Loads the save from localStorage, banks a run left at a checkpoint, and applies the saved
 // volumes. A new player's reduced motion follows the device's setting.
 export async function openProfile(scene: Scene): Promise<StoreLoadResult> {
-  const store = saveStore(browserStorage(lazyStorage(() => globalThis.localStorage)));
   const { load, session: opened } = await ProfileSession.open(
     saveContextFrom(gameData),
     { data: gameData, now: () => Date.now() },
-    store,
-    (save) => ({ ...save, settings: { ...save.settings, reducedMotion: prefersReducedMotion() } }),
+    pageSaveStore(),
+    newPlayerOnDevice,
   );
   scene.registry.set(SESSION_KEY, opened);
   applySound(scene, opened.save.settings);
@@ -96,12 +97,7 @@ export function lastRunEnd(scene: Scene): RunEnd | null {
 
 // Before the save loads, the defaults, with reduced motion following the device's setting.
 export function currentSettings(scene: Scene): Settings {
-  return (
-    openedSession(scene)?.save.settings ?? {
-      ...DEFAULT_SETTINGS,
-      reducedMotion: prefersReducedMotion(),
-    }
-  );
+  return openedSession(scene)?.save.settings ?? deviceSettings(DEFAULT_SETTINGS);
 }
 
 // Calls listener with the new settings on every change, until the scene shuts down.
