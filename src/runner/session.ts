@@ -147,10 +147,11 @@ export function stepSession(
   const pressed: LaneDirection[] = [];
   let { walk } = session;
   for (const input of inputs) {
-    events.push({ input, kind: "input", timeMs: session.timeMs });
     if (input.kind === "home") {
-      return { events, session: { ...session, walk: { ...walk, run: headHome(walk.run) } } };
+      const home = headHomeSession({ ...session, walk });
+      return { events: [...events, ...home.events], session: home.session };
     }
+    events.push({ input, kind: "input", timeMs: session.timeMs });
     pressed.push(input.direction);
     walk = steerWalk(data, geometry(walk.run).laneCount, input.direction, walk);
   }
