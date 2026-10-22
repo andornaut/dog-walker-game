@@ -15,8 +15,8 @@ import {
 import type { Rect } from "../lib/rect";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, labelInkWidth, type PixelTextStyle } from "../ui/phaser/pixelText";
-import { playTagOnce } from "./sprites";
-import { addPanel, showTag, tagFrame, TEXT_SCALE } from "./uiKit";
+import { playTag, playTagOnce } from "./sprites";
+import { addPanel, tagFrame, TEXT_SCALE } from "./uiKit";
 
 export const BADGE_SIZE = BADGE_STRIP.badgeSize;
 const BURST_TAG = "play";
@@ -172,7 +172,7 @@ export function addCheeringFace(
 ): GameObjects.Sprite {
   const key = ownerFaceKey(gameData, dog);
   const face = scene.add.sprite(x, y, key).setOrigin(0);
-  showTag(reduced, face, key, "happy");
+  playTag(face, key, "happy", reduced);
   if (!reduced) {
     scene.tweens.add({
       duration: 180,

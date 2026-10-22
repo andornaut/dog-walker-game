@@ -680,14 +680,3 @@ export function clearScene(scene: Scene): void {
     }
   }
 }
-
-// CLEANUP (added 2026-10-22): badges.ts's last caller moves to playTag(sprite, key, tag,
-// reducedMotion), then this goes.
-export function showTag(
-  reducedMotion: boolean,
-  sprite: GameObjects.Sprite,
-  key: string,
-  tag: string,
-): void {
-  playTag(sprite, key, tag, reducedMotion);
-}
