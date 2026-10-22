@@ -1,6 +1,7 @@
 import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
+import { disabledTextureKey } from "../assets/phaser/greyTextures";
 import { SCREEN_CONFIG } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { screenLayout } from "../layout/screenLayout";
@@ -21,12 +22,12 @@ import {
   BUTTON_COLORS,
   type ButtonLook,
   DISABLED_COLORS,
+  GREYED,
   SELECT_OUTSET,
   type SelectLook,
   selectLook,
 } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
-import { disabledTextureKey } from "./greyTextures";
 import { playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
 
@@ -586,7 +587,7 @@ export function addTab(
 // A picture's texture on a tile in state: a disabled tile's is its grey copy, GREYED.copyDarker
 // ramp steps darker.
 export function tileTextureKey(scene: Scene, state: TileState, key: string): string {
-  return state === "disabled" ? disabledTextureKey(scene, key) : key;
+  return state === "disabled" ? disabledTextureKey(scene, GREYED.copyDarker, key) : key;
 }
 
 // A sprite on a tile, placed by its top-left corner, playing tag, or holding its first frame
