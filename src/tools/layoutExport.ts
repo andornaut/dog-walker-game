@@ -88,9 +88,9 @@ function ownerLead(body: FontMetrics, slot: LeadSlot, line: Rect) {
   return { ...lead, panel: ownerLeadPanel(line, lead) };
 }
 
-// A top-bar button with where its unpressed icon sits.
+// A top-bar button with where its icon sits.
 function withIcon(button: BarButton) {
-  return { ...button, icon: buttonIcon(button, false) };
+  return { ...button, icon: buttonIcon(button) };
 }
 
 export function layoutExport(

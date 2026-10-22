@@ -11,9 +11,9 @@ export const TOP_BAR_BUTTONS: Readonly<Record<WalkBarButtonId, BarButton>> = wal
   screenLayout(SCREEN_CONFIG).topBar,
 ).buttons;
 
-// The icon sits on the button's face, 2px lower while pressed.
-export function buttonIcon(button: BarButton, pressed: boolean): Point {
-  return { x: button.face.x + 2, y: button.face.y + (pressed ? 3 : 1) };
+// Where the button's icon sits on its face.
+export function buttonIcon(button: BarButton): Point {
+  return { x: button.face.x + 2, y: button.face.y + 1 };
 }
 
 // The button a press at (x, y) lands on, if any.
