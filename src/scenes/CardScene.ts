@@ -70,8 +70,8 @@ import { addMenuButton, addNineSlice, listenButtonTap, tagFrame } from "./uiKit"
 export interface CardSceneData {
   // Called with the option's data index, or "skip"; the run decides what happens next.
   onChoose: (choice: Choice) => void;
-  // A fork card's Head home button, under the paths.
-  onHeadHome: () => void;
+  // A fork card's Head home button, under the paths; null leaves the button out.
+  onHeadHome: (() => void) | null;
   // Set to draw the card as a still picture, such as the help's, which takes no input.
   picture?: ScenePicture;
   view: CardView;
@@ -219,7 +219,7 @@ export class CardScene extends Scene {
       this.parts[i] = this.children.list.slice(before);
     });
     this.outline = this.add.graphics();
-    if (view.source.kind === "fork") {
+    if (view.source.kind === "fork" && onHeadHome !== null) {
       const rect = forkHomeRect(itemAt(this.cardRects, 0), centerX);
       const label = gameData.runText.homeQuestion.headHome;
       const before = this.children.list.length;
