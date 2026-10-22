@@ -2,23 +2,16 @@ import { roadCameraFor } from "../layout/projection";
 import { type ScreenConfig, screenLayout, walkerFootY } from "../layout/screenLayout";
 import { TUNING } from "./tuning";
 
-// The backdrop band's heights: "short" ends it 110 rows under the walk bar; "tall" grows it by 48
-// rows, which tilts the camera so the road's rows shrink 15%. The band's bottom rows,
-// roadIntoBand, are the approach the backdrop paints. BAND picks one; the camera derives
-// from it.
-const BANDS = {
-  short: { backdropHeight: 110, roadIntoBand: 24 },
-  tall: { backdropHeight: 158, roadIntoBand: 19 },
-} as const;
-const BAND: keyof typeof BANDS = "tall";
-
 // Internal render resolution: portrait, scaled to the window without smoothing.
+// The backdrop band ends backdropHeight rows under the walk bar, and its bottom rows,
+// roadIntoBand, are the approach the backdrop paints; the camera derives from the band.
 export const SCREEN_CONFIG: ScreenConfig = {
-  ...BANDS[BAND],
+  backdropHeight: 158,
   dogCardHeight: 74,
   dogRowHeight: 78,
   dogSlotCount: 3,
   height: 560,
+  roadIntoBand: 19,
   roadWidth: 320,
   topBarHeight: 48,
   width: 360,
