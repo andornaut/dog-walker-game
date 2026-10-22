@@ -413,6 +413,45 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     );
   });
 
+  // At the top of its tilt range, in every zone, a dart tilted toward the pack sets off no
+  // higher than shows its cue wholly on the road and no lower than leaves the pack its reaction
+  // margin, at both ends of its start draw. It keeps its range's top tilt unless it sets off at
+  // that highest start, where the zone's pace leaves no start for a steeper one.
+  it.each(
+    Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex).flatMap(
+      (zoneIndex) =>
+        [...movements.values()].flatMap((entry) =>
+          entry.movement.kind === "dart" && entry.movement.tilt.max > 0
+            ? [LOW, HIGH].map((draws) => ({
+                ...entry,
+                draws: { ...draws, tilt: 0.999999 },
+                name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}`,
+                zoneIndex,
+              }))
+            : [],
+        ),
+    ),
+  )("starts a dart at its top tilt within its cue and the pack's reaction: $name", (mover) => {
+    const { geometry, placements, speed } = placedCase(mover);
+    const { cell, sightLength } = geometry;
+    const reaction = read(gameData.tuning, "seconds", "pathReactionMargin");
+    expect(placements.length).toBeGreaterThan(0);
+    for (const { path } of placements) {
+      if (path.motion !== "cross" || mover.movement.kind !== "dart") {
+        throw new Error("A dart crosses");
+      }
+      const cueOnRoad = 1 - (path.warning + cell.length) / sightLength;
+      const ahead = (sightLength - path.enterTravel) / sightLength;
+      expect(ahead).toBeLessThanOrEqual(cueOnRoad + 1e-9);
+      expect((ahead * sightLength) / (1 + path.tilt) / speed).toBeGreaterThanOrEqual(
+        reaction - 1e-9,
+      );
+      expect(
+        Math.abs(path.tilt - mover.movement.tilt.max) < 1e-3 || Math.abs(ahead - cueOnRoad) < 1e-5,
+      ).toBe(true);
+    }
+  });
+
   // A rider slower than the road still comes down it, at its slowest draw, so it never comes
   // back up at a pack that has passed it.
   it("keeps every in-lane rider coming down the road", () => {

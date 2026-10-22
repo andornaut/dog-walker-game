@@ -305,11 +305,12 @@ export interface Tilt {
 // at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile, its tilt
 // drawn per dart from its range cut to the steepest the zone's pace leaves a start for, setting
 // off multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per dart and
-// never so low that the pack has less than seconds.pathReactionMargin after its cue, nor so high
-// that its cue is off the road; one that has crossed by the time it reaches the pack's rows
-// passes harmlessly. A dart turns back at turnBackShare of its kind, drawn per dart: with no cue,
-// once it has crossed multipliers.dartTurnAtShareMin to Max of the road, drawn per dart, it
-// crosses the whole road back the other way at its tilt. inLane: down its lane at factor of the
+// never so low that the pack has less than seconds.pathReactionMargin after its cue (above Max
+// for a steep enough tilt), nor so high that its cue is off the road; one that has crossed by the
+// time it reaches the pack's rows passes harmlessly. A dart turns back at turnBackShare of its
+// kind, drawn per dart: with no cue, once it has crossed multipliers.dartTurnAtShareMin to Max of
+// the road, drawn per dart, it crosses the whole road back the other way at its tilt. inLane:
+// down its lane at factor of the
 // road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
 // to either side or, unless sideways, a row up the road or diagonally up, landing
 // seconds.moverHopSeconds after it leaves; a shy hopper, at probability.shyHopperShare of its

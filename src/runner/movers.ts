@@ -406,8 +406,9 @@ export interface ShyHops {
 // cross: across the road at lanesPerSecond, tilted down the road by a tilt of the road's speed
 // drawn per mover from tilt, setting off a share of the road ahead of the pack drawn per mover
 // from startRoadShare, never so low that the pack has less than reactionSeconds after its cue to
-// meet it at its drawn tilt. At turnBackShare of them, drawn per mover, it turns back once it has
-// crossed a share of the road drawn per mover from turnAtShare, and crosses the whole road back.
+// meet it at its drawn tilt, raised past startRoadShare where a steep tilt needs. At turnBackShare
+// of them, drawn per mover, it turns back once it has crossed a share of the road drawn per mover
+// from turnAtShare, and crosses the whole road back.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
@@ -546,19 +547,6 @@ function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): n
   return Math.max(rows, 1 + Math.ceil((needed - window) / cellLength - 1e-9));
 }
 
-// A crosser sets off at its drawn share of the road ahead of the pack, the tallest pack's rows at
-// sightLength, at its drawn speed and tilt: one placement per side it enters from, its contact with
-// the pack, if it has one, starting as its row's window does. Its share is no lower than leaves the
-// pack reactionSeconds between its cue ending and its reaching the pack's rows at its tilt, and no
-// higher than shows its cue wholly on the road. Its tilt is drawn from its range cut to the
-// steepest that leaves a share between, at the road's pace; with none, even at its range's
-// lowest, it has no placement. One that turns back crosses back the whole road from its turn,
-// on the road and in sight the longer for it, keeping clear every row it is level with and
-// meeting the pack in every lane it sweeps either way while its row is in the window. Tilted, its
-// contact lasts window / (1 + tilt), which its rows cover. One that has crossed the road by the
-// time it reaches the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps
-// clear every row it is level with as it crosses, and one that meets the pack also the row
-// before its own, as a lead-in.
 // The tilts a crosser draws from on a road scrolling at scrollSpeed: its range, its high end cut
 // to the steepest that still leaves the pack reactionSeconds from a start highest of the road
 // ahead, but never below its low end.
@@ -573,6 +561,20 @@ export function crossTilts(
   return [low, Math.max(low, Math.min(high, steepest))];
 }
 
+// A crosser sets off at its drawn share of the road ahead of the pack, the tallest pack's rows at
+// sightLength, at its drawn speed and tilt: one placement per side it enters from, its contact with
+// the pack, if it has one, starting as its row's window does. Its share is drawn from
+// startRoadShare, its low end raised to leave the pack reactionSeconds between its cue ending and
+// its reaching the pack's rows at its tilt, and its high end raised with it where a steep tilt
+// needs, but never above the highest share that shows its cue wholly on the road. Its tilt is
+// drawn from its range cut to the steepest that leaves a share at that highest, at the road's
+// pace; with none, even at its range's lowest, it has no placement. One that turns back crosses
+// back the whole road from its turn, on the road and in sight the longer for it, keeping clear
+// every row it is level with and meeting the pack in every lane it sweeps either way while its row
+// is in the window. Tilted, its contact lasts window / (1 + tilt), which its rows cover. One that
+// has crossed the road by the time it reaches the pack's rows is harmless: it blocks no lanes and
+// stands nowhere. It keeps clear every row it is level with as it crosses, and one that meets the
+// pack also the row before its own, as a lead-in.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -582,8 +584,8 @@ function crossPlacements(
   const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength, window } =
     geometry;
   const warning = spec.warningSeconds * scrollSpeed;
-  const highest = Math.min(motion.startRoadShare[1], 1 - (warning + cellLength) / sightLength);
-  const tilt = within(crossTilts(motion, scrollSpeed, sightLength, highest), draws.tilt);
+  const cueOnRoad = 1 - (warning + cellLength) / sightLength;
+  const tilt = within(crossTilts(motion, scrollSpeed, sightLength, cueOnRoad), draws.tilt);
   if (tilt <= -1) {
     throw new Error("A crosser's tilt must keep it coming down the road");
   }
@@ -592,6 +594,7 @@ function crossPlacements(
     motion.startRoadShare[0],
     (motion.reactionSeconds * scrollSpeed * (1 + tilt)) / sightLength,
   );
+  const highest = Math.min(cueOnRoad, Math.max(motion.startRoadShare[1], lowest));
   if (highest < lowest) {
     return [];
   }

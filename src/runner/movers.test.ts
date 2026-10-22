@@ -463,15 +463,12 @@ const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
   },
 ];
 
+type CrossMotion = Extract<MoverSpec["motion"], { kind: "cross" }>;
+
 // A crosser that sets off from 0.1 to 0.9 of the road ahead of the pack, leaving the pack half a
 // second after its cue, at a tilt drawn from min to max, turning back at turnBackShare of them
 // from halfway to all the way across.
-const cross = (
-  lanesPerSecond: number,
-  min: number,
-  max = min,
-  turnBackShare = 0,
-): MoverSpec["motion"] => ({
+const cross = (lanesPerSecond: number, min: number, max = min, turnBackShare = 0): CrossMotion => ({
   kind: "cross",
   lanesPerSecond,
   reactionSeconds: 0.5,
@@ -777,21 +774,49 @@ describe("moverPlacements", () => {
   );
 
   // Half a second of reaction at 100px/s, sooner at the dart's drawn tilt; a 1s cue and a cell
-  // must fit above the start.
+  // must fit above the start, which sets off at most 0.625 of the 400px road ahead, its travel at
+  // least 150. Within a narrower range, the start's high end is the range's, raised as far as a
+  // steep tilt needs.
+  const narrow = (motion: CrossMotion): CrossMotion => ({
+    ...motion,
+    startRoadShare: [0.1, 0.3],
+  });
   it.each([
-    { draw: 0, motion: cross(3, 0), name: "untilted", tilt: 0 },
-    { draw: 0, motion: cross(3, 0.1, 0.7), name: "at its lowest tilt", tilt: 0.1 },
-    { draw: 0.999999, motion: cross(3, 0.1, 0.7), name: "at its highest tilt", tilt: 0.7 },
+    { draw: 0, highTravel: 150, motion: cross(3, 0), name: "untilted", tilt: 0 },
+    { draw: 0, highTravel: 150, motion: cross(3, 0.1, 0.7), name: "at its lowest tilt", tilt: 0.1 },
+    {
+      draw: 0.999999,
+      highTravel: 150,
+      motion: cross(3, 0.1, 0.7),
+      name: "at its highest tilt",
+      tilt: 0.7,
+    },
     // At 100px/s a start at most 0.625 of the road ahead leaves half a second at tilt 4 at most.
     {
       draw: 0.999999,
+      highTravel: 150,
       motion: cross(3, 0.1, 10),
       name: "at a tilt cut to the steepest the road allows",
       tilt: 4,
     },
+    {
+      draw: 0,
+      highTravel: 280,
+      motion: narrow(cross(3, 0)),
+      name: "untilted, up to its range's high end",
+      tilt: 0,
+    },
+    // At tilt 2, half a second needs 0.375 of the road ahead, above the range's 0.3.
+    {
+      draw: 0,
+      highTravel: 250,
+      motion: narrow(cross(3, 2)),
+      name: "tilted past its range's high end, raised as far as its tilt needs",
+      tilt: 2,
+    },
   ])(
     "starts a dart $name no lower than leaves the pack its reaction time, nor higher than shows its cue",
-    ({ draw, motion, tilt }) => {
+    ({ draw, highTravel, motion, tilt }) => {
       const ends = [0, 0.999999].map((start) => {
         const [placement] = moverPlacements(geometry, spec(motion), {
           count: 0,
@@ -806,10 +831,10 @@ describe("moverPlacements", () => {
         });
         return placement?.path.motion === "cross" ? placement.path.enterTravel : NaN;
       });
-      const { cellLength, scrollSpeed, sightLength } = geometry;
+      const { scrollSpeed, sightLength } = geometry;
       const [low, high] = ends;
       expect(low).toBeCloseTo(sightLength - 0.5 * scrollSpeed * (1 + tilt), 3);
-      expect(high).toBeCloseTo(scrollSpeed + cellLength);
+      expect(high).toBeCloseTo(highTravel);
     },
   );
 
