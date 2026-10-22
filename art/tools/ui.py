@@ -3,7 +3,7 @@
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-lock, icon-lock-open (the padlock with its shackle lifted, on a
-locked item the bank covers), icon-money, icon-treat (the treat pickup, its bone and heart as road.treat lays
+locked item the bank covers), icon-treat (the treat pickup, its bone and heart as road.treat lays
 them out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
 shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
 ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
@@ -217,15 +217,6 @@ def lock_open():
     g.rect(3, 8, 10, 1, "yellow")
     g.rect(12, 8, 1, 7, "orange")
     g.rect(7, 10, 2, 3, "dbrown")
-    return g
-
-
-def money():
-    g = Grid(16, 16)
-    g.ell(8, 8, 5.5, 5.5, "amber", "orange", "yellow")
-    g.rect(8, 5, 1, 6, "orange")
-    g.p(7, 6, "orange")
-    g.p(9, 9, "orange")
     return g
 
 
@@ -1466,7 +1457,6 @@ IMAGES = {
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-lock-open": lambda: to_image(lock_open().outlined()),
-    "icon-money": lambda: to_image(money().outlined()),
     "icon-treat": lambda: to_image(treat_icon().outlined()),
     "icon-stinky": lambda: to_image(stinky()),
     "icon-dog-slot": lambda: to_image(dog_slot().outlined()),
