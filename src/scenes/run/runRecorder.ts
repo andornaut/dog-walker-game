@@ -94,7 +94,7 @@ export class RunRecorder {
     }
   }
 
-  // The finished run's log, for the dev panel to offer.
+  // The finished run's log, kept for the tab under DEV_LAST_LOG_KEY.
   save(): void {
     if (this.inputLog !== undefined) {
       sessionWrite(DEV_LAST_LOG_KEY, encodeInputLog(this.inputLog));
