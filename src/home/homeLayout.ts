@@ -147,8 +147,6 @@ export const HOME_LAYOUT = {
   // side by side to the screen's edge with each face centred in its hit.
   help: { face: { x: 265, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 258, y: 0 } },
   logbook: { face: { x: 231, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 224, y: 0 } },
-  // The logbook card's Stats and Badges buttons, side by side across its padded width.
-  logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
   mute: { face: { x: 299, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 292, y: 0 } },
   path: { width: 32, x: 164 },
@@ -337,7 +335,7 @@ export function speechBubbleHeight(body: FontMetrics, lines: number): number {
 // Rows of 2x body text from top down, each lineCounts[i] lines a line of the body font apart,
 // the next row starting a row's lines and the card's rowGap under the one before: each row's
 // capitals' top, the row after the last's, and the last row's lowest ink.
-export function cardTextRows(
+function cardTextRows(
   body: FontMetrics,
   top: number,
   lineCounts: readonly number[],
@@ -354,7 +352,7 @@ export function cardTextRows(
   return { bottom, next: y, tops };
 }
 
-// How wide the detail card's rows beside the well and under it, and the logbook's rows, may be.
+// How wide the detail card's rows beside the well and under it may be.
 export const CARD_TEXT_ROOM = {
   beside: HOME_LAYOUT.card.width - HOME_LAYOUT.card.besideX - HOME_LAYOUT.card.pad,
   full: HOME_LAYOUT.card.width - 2 * HOME_LAYOUT.card.pad,

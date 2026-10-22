@@ -1559,11 +1559,6 @@
           "y": 0
         }
       },
-      "logbookButton": {
-        "gap": 12,
-        "height": 44,
-        "width": 132
-      },
       "logo": {
         "x": 6,
         "y": 146

@@ -564,8 +564,8 @@ export interface HomeText {
   // The street sign on the gate art.
   readonly gateSign: string;
   readonly gearBought: string;
-  // The logbook card and the lines it shares with the Stats page: the best walk, the last
-  // walk by how it ended, the totals, and what it says before any walk.
+  // The logbook's lines (logbookOf): the best walk, the last walk by how it ended, the
+  // totals, and what it says before any walk.
   readonly logbook: {
     // The button that opens Stats on its badge wall.
     readonly badges: string;

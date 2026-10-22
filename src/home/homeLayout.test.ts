@@ -5,7 +5,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
 import { WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
-import { fillNames, wrapWords } from "../lib/lines";
+import { wrapWords } from "../lib/lines";
 import { insetRect, type Rect } from "../lib/rect";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
@@ -18,13 +18,12 @@ import { plainMarks } from "../ui/pixelFont";
 import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dogNames, dollarAmountText, shortDollarAmountText } from "./home";
+import { dollarAmountText, shortDollarAmountText } from "./home";
 import {
   BANK_ROOM,
   bankFit,
   bankLeft,
   CARD_TEXT_ROOM,
-  cardTextRows,
   detailCardLayout,
   DOG_TILE_TEXT_ROOM,
   dogTileNameY,
@@ -444,45 +443,6 @@ describe("a detail card", () => {
       fitsScreen(layout.height);
     },
   );
-});
-
-// The logbook with its longest best walk, totals and last walk stays on screen above its
-// buttons.
-describe("the logbook", () => {
-  const words = gameData.homeText.logbook;
-  const longest = (Object.keys(gameData.dogs) as DogId[]).sort(
-    (a, b) => gameData.dogs[b].name.length - gameData.dogs[a].name.length,
-  );
-  const dogs = dogNames(gameData, longest.slice(0, 3));
-  const zones = fillNames(words.zoneMany, { count: "4" });
-  const longestZone = gameData.world.zones
-    .map(({ name }) => name)
-    .sort((a, b) => b.length - a.length)[0];
-  const owner = Object.values(gameData.dogs)
-    .map(({ owner: { name } }) => name)
-    .sort((a, b) => b.length - a.length)[0];
-  it.each([
-    [words.empty, words.emptyNote],
-    [
-      fillNames(words.best, { best: "$99,999", note: fillNames(words.bestNote, { dogs, zones }) }),
-      fillNames(words.totals, { dogs: "9", fired: "9999", walks: "9999" }),
-      fillNames(words.last, {
-        last: fillNames(words.lastFired, {
-          earned: "+$99,999.",
-          owner: owner ?? "",
-          zone: longestZone ?? "",
-        }),
-      }),
-    ],
-  ])("holds %j", (...rows) => {
-    const { next } = cardTextRows(
-      BODY,
-      HOME_LAYOUT.card.well.y + HOME_LAYOUT.card.besideDy,
-      rows.map((row) => cardLines(CARD_TEXT_ROOM.full, row)),
-    );
-    const { height } = HOME_LAYOUT.logbookButton;
-    fitsScreen(next + HOME_LAYOUT.card.rowGap + height + HOME_LAYOUT.card.pad);
-  });
 });
 
 // Start walk's loading label fits the pressed face's room on one line in the title font, at

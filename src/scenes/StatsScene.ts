@@ -121,11 +121,11 @@ const DETAIL_TEXT = STATS_LAYOUT.detailText;
 const DETAIL_BADGE_SCALE = 2;
 const FIELDS = MENU_TEXT_FIELDS.stats;
 
-// The Stats page behind the logbook, in three tabs on the cream panel: overall figures and
-// walks by outcome; a block per dog with its walks, zones and firings; and the badge wall, a
-// badge per row, where tapping a badge opens its name, goal and line. A tab taller than the
-// panel scrolls in it by a drag, the wheel, the arrow keys or the page keys, with a scrollbar
-// at the panel's right edge; a drag taps nothing.
+// The Stats page, which the home screen's Logbook button opens, in three tabs on the cream
+// panel: overall figures and walks by outcome; a block per dog with its walks, zones and
+// firings; and the badge wall, a badge per row, where tapping a badge opens its name, goal and
+// line. A tab taller than the panel scrolls in it by a drag, the wheel, the arrow keys or the
+// page keys, with a scrollbar at the panel's right edge; a drag taps nothing.
 export class StatsScene extends Scene {
   private burst = false;
   // The open tab's content, clipped to the view and moved up by the scroll.

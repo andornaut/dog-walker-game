@@ -40,7 +40,6 @@ import {
   dollarText,
   gearInfo,
   type HomeLoadout,
-  logbookOf,
   packCapacity,
   partingSpeech,
   type Purchase,
@@ -77,7 +76,6 @@ import {
   startReady,
 } from "../home/sections";
 import { shopAffordable, type ShopTab } from "../home/shop";
-import type { StatsTab } from "../home/statsLayout";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
@@ -125,7 +123,7 @@ import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import { addAffordFrame, drawDetailCard, drawLogbookPanel, type LogbookPress } from "./homePanels";
+import { addAffordFrame, drawDetailCard } from "./homePanels";
 import {
   addLock,
   addPlate,
@@ -250,7 +248,6 @@ type Target =
   | { kind: "petShop" }
   | { kind: "settings" }
   | { kind: "start" }
-  | { kind: "stats"; tab?: StatsTab }
   | { kind: "walker"; walker: WalkerId };
 
 // One key per tappable thing, for its feedback timers.
@@ -330,20 +327,12 @@ function focusRows(): Focusable[][] {
   return rows;
 }
 
-// What is open over the screen: a held tile's detail card, or the logbook. rect is the
-// panel, so a tap outside it or on its close control closes it.
-type Overlay =
-  | {
-      kind: "detail";
-      rect: Rect | undefined;
-      target: DetailTarget;
-    }
-  | {
-      badges: Rect | undefined;
-      kind: "logbook";
-      rect: Rect | undefined;
-      stats: Rect | undefined;
-    };
+// What is open over the screen: a held tile's detail card. rect is the card, so a tap on it
+// or outside it closes it.
+interface Overlay {
+  rect: Rect | undefined;
+  target: DetailTarget;
+}
 
 // A tile that reacts to taps: its container moves for the dip, lift and shake, its face hops,
 // and its badge pops.
@@ -456,7 +445,7 @@ export class StartScene extends Scene {
         addTapBurst(this, pointer.x, pointer.y);
         if (this.overlay !== undefined) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
-          if (this.overlayPressed() !== undefined) {
+          if (this.closePressed()) {
             this.render();
           }
           return;
@@ -479,7 +468,7 @@ export class StartScene extends Scene {
       },
       up: (pointer, cancelled) => {
         const down = this.overlayPress;
-        const controlDown = this.overlayPressed() !== undefined;
+        const controlDown = this.closePressed();
         this.overlayPress = undefined;
         if (down !== undefined) {
           if (!cancelled) {
@@ -555,14 +544,8 @@ export class StartScene extends Scene {
 
   private onKey(key: string): void {
     if (this.overlay !== undefined) {
-      if (isPauseKey(key)) {
+      if (isPauseKey(key) || isConfirmKey(key)) {
         this.closeOverlay();
-      } else if (isConfirmKey(key)) {
-        const stats = this.overlay.kind === "logbook";
-        this.closeOverlay();
-        if (stats) {
-          this.act({ kind: "stats" });
-        }
       }
       return;
     }
@@ -624,7 +607,7 @@ export class StartScene extends Scene {
       return;
     }
     this.press = undefined;
-    this.overlay = { kind: "detail", rect: undefined, target };
+    this.overlay = { rect: undefined, target };
     this.render();
   }
 
@@ -633,48 +616,23 @@ export class StartScene extends Scene {
     this.render();
   }
 
-  // The control on an open panel the press under way started on: its close control, or the
-  // logbook's Stats or Badges button.
-  private overlayPressed(): LogbookPress | undefined {
-    const overlay = this.overlay;
+  // Whether the press under way started on the open card's close control.
+  private closePressed(): boolean {
+    const rect = this.overlay?.rect;
     const down = this.overlayPress;
-    if (overlay?.rect === undefined || down === undefined) {
-      return undefined;
-    }
-    const on = (rect: Rect | undefined) =>
-      rect !== undefined && containsPoint(rect, down.x, down.y);
-    if (on(closeControl(overlay.rect).hit)) {
-      return "close";
-    }
-    if (overlay.kind !== "logbook") {
-      return undefined;
-    }
-    return on(overlay.stats) ? "stats" : on(overlay.badges) ? "badges" : undefined;
+    return (
+      rect !== undefined &&
+      down !== undefined &&
+      containsPoint(closeControl(rect).hit, down.x, down.y)
+    );
   }
 
-  // A tap while a panel is open: on its close control it closes the panel, as does one anywhere
-  // on a detail card, which has no other controls, as on the shop and Stats; on the logbook's
-  // Stats button it opens Stats. A tap outside it is listenOutsideTap's.
+  // A tap anywhere on an open detail card closes it, as it has no other controls, as on the
+  // shop and Stats. A tap outside it is listenOutsideTap's.
   private releaseOnOverlay(down: { x: number; y: number }, x: number, y: number): void {
-    const overlay = this.overlay;
-    if (overlay === undefined) {
-      return;
-    }
-    const within = (rect: Rect | undefined) =>
-      rect !== undefined && containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y);
-    const { rect } = overlay;
-    if (rect !== undefined && within(overlay.kind === "detail" ? rect : closeControl(rect).hit)) {
+    const rect = this.overlay?.rect;
+    if (rect !== undefined && containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y)) {
       this.closeOverlay();
-      return;
-    }
-    if (overlay.kind === "logbook" && within(overlay.stats)) {
-      this.closeOverlay();
-      this.act({ kind: "stats" });
-      return;
-    }
-    if (overlay.kind === "logbook" && within(overlay.badges)) {
-      this.closeOverlay();
-      this.act({ kind: "stats", tab: "badges" });
     }
   }
 
@@ -828,21 +786,15 @@ export class StartScene extends Scene {
       case "help":
         this.afterArt("help", () => openHelp(this, SCENE_KEYS.start));
         return;
-      case "logbook":
-        this.overlay = { badges: undefined, kind: "logbook", rect: undefined, stats: undefined };
-        this.render();
+      case "logbook": {
+        // The logbook is the Stats page, on its first tab.
+        const data: StatsSceneData = { resume: SCENE_KEYS.start };
+        openOverlay(this, SCENE_KEYS.stats, data);
         return;
+      }
       case "settings": {
         const data: SettingsSceneData = { resume: SCENE_KEYS.start };
         openOverlay(this, SCENE_KEYS.settings, data);
-        return;
-      }
-      case "stats": {
-        const data: StatsSceneData = {
-          resume: SCENE_KEYS.start,
-          ...(target.tab === undefined ? {} : { tab: target.tab }),
-        };
-        openOverlay(this, SCENE_KEYS.stats, data);
         return;
       }
       case "start":
@@ -1199,7 +1151,7 @@ export class StartScene extends Scene {
     });
   }
 
-  // The detail card or logbook over everything else, recording its rect for taps.
+  // The detail card over everything else, recording its rect for taps.
   private drawOverlay(save: SaveDocument): void {
     const layer = this.overlayLayer;
     if (layer === undefined) {
@@ -1210,17 +1162,10 @@ export class StartScene extends Scene {
     if (overlay === undefined) {
       return;
     }
-    if (overlay.kind === "logbook") {
-      const log = logbookOf(gameData, save.stats);
-      const panel = drawLogbookPanel(this, layer, this.overlayPressed(), log);
-      this.overlay = { ...overlay, badges: panel.badges, rect: panel.panel, stats: panel.stats };
-      return;
-    }
     const { target } = overlay;
     const card = this.detailCard(save, target);
     const picture = this.detailPicture(target);
-    const closePressed = this.overlayPressed() === "close";
-    const rect = drawDetailCard(this, layer, closePressed, card, picture, target.kind);
+    const rect = drawDetailCard(this, layer, this.closePressed(), card, picture, target.kind);
     this.overlay = { ...overlay, rect };
   }
 

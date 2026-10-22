@@ -5,12 +5,12 @@ import type { ConfirmChoice } from "./purchaseConfirm";
 
 // The purchase confirm: the screen dimmed, and a card centred on it with its title band, the
 // item's picture in a well, the price and the bank it would leave centred under it, and Cancel
-// then Buy along its bottom, 44 tall, as wide as the logbook's buttons with 12 between them
-// and at the card's sides.
+// then Buy along its bottom, each 44 tall and 132 wide, with 12 between them and at the card's
+// sides.
 const CARD = HOME_LAYOUT.card;
 const WIDTH = CARD.width;
 const HEIGHT = 216;
-const BUTTON = HOME_LAYOUT.logbookButton;
+const BUTTON = { gap: 12, height: 44, width: 132 } as const;
 const card: Rect = {
   height: HEIGHT,
   width: WIDTH,

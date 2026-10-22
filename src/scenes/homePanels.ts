@@ -1,12 +1,8 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard, DetailPicture } from "../home/detail";
-import type { Logbook } from "../home/home";
-import { CARD_TEXT_ROOM, cardTextRows, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
-import { HOME_TEXT_FIELDS } from "../home/homeText";
-import { fillLine } from "../lib/lines";
+import { CARD_TEXT_ROOM, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { insetRect, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
@@ -19,18 +15,11 @@ import {
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
-import {
-  addCloseButton,
-  addLoopingFrame,
-  addMenuButton,
-  addNineSlice,
-  selectOuter,
-  TEXT_SCALE,
-} from "./uiKit";
+import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, TEXT_SCALE } from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on the Pet shop while the
-// player can afford something in it, and the detail card and logbook that open over the screen. Positions inside a
-// piece are the art's, from the style guide.
+// player can afford something in it, and the detail card that opens over the screen. Positions
+// inside a piece are the art's, from the style guide.
 
 const SCREEN = SCREEN_CONFIG;
 
@@ -214,69 +203,4 @@ export function drawDetailCard(
   const rect = centredCard(layout.height);
   drawCardFrame(scene, parent, closePressed, rect, card.title, content);
   return rect;
-}
-
-interface LogbookPanel {
-  // The Badges button, in screen pixels.
-  readonly badges: Rect;
-  readonly panel: Rect;
-  // The Stats button, in screen pixels.
-  readonly stats: Rect;
-}
-
-const LOGBOOK_BUTTON = HOME_LAYOUT.logbookButton;
-const FIELDS = HOME_TEXT_FIELDS.logbook;
-
-// What a press on the logbook started on, which shows pressed until it lifts.
-export type LogbookPress = "badges" | "close" | "stats";
-
-const CARD_BUTTON = { available: true, primary: false, secondary: true } as const;
-
-// The logbook over the screen, as a card: the best walk, totals and the last walk, then
-// Stats and Badges buttons, Badges opening Stats on its badge wall.
-export function drawLogbookPanel(
-  scene: Scene,
-  parent: GameObjects.Container,
-  pressed: LogbookPress | undefined,
-  log: Logbook | null,
-): LogbookPanel {
-  // The rows are laid out first, so the card is as tall as they and the button need.
-  const content = scene.add.container(0, 0);
-  const words = gameData.homeText.logbook;
-  const rows =
-    log === null
-      ? [words.empty, words.emptyNote]
-      : [
-          fillLine(FIELDS, words, "best", { best: log.best, note: log.bestNote }),
-          log.totals,
-          fillLine(FIELDS, words, "last", { last: log.last }),
-        ];
-  const style = { color: PALETTE.plum, scale: TEXT_SCALE };
-  const lines = rows.map((row) => wrapPixelText(scene, style, CARD_TEXT_ROOM.full, row));
-  const body = pixelFontMetrics(scene, "body");
-  const top = CARD.well.y + CARD.besideDy;
-  const { next, tops } = cardTextRows(
-    body,
-    top,
-    lines.map((row) => row.length),
-  );
-  lines.forEach((row, i) => {
-    text(scene, content, { x: CARD.pad, y: tops[i] ?? 0 }, row.join("\n"), style);
-  });
-  const y = next;
-  const { gap, height: buttonHeight, width: buttonWidth } = LOGBOOK_BUTTON;
-  const left = (CARD.width - buttonWidth * 2 - gap) / 2;
-  const button = { height: buttonHeight, width: buttonWidth, x: left, y: y + CARD.rowGap };
-  const badges = { ...button, x: left + buttonWidth + gap };
-  const rect = centredCard(button.y + button.height + CARD.pad);
-  drawCardFrame(scene, parent, pressed === "close", rect, words.title, content);
-  const buttons = [
-    [button, words.stats, "stats"],
-    [badges, words.badges, "badges"],
-  ] as const;
-  for (const [at, label, press] of buttons) {
-    addMenuButton(scene, at, label, CARD_BUTTON, content).setPressed(pressed === press);
-  }
-  const onScreen = (r: Rect) => ({ ...r, x: rect.x + r.x, y: rect.y + r.y });
-  return { badges: onScreen(badges), panel: rect, stats: onScreen(button) };
 }
