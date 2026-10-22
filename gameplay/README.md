@@ -33,7 +33,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 | Typical | 90 to 100%     | 5 to 15%            |
 | Expert  | 95 to 100%     | 0 to 10%            |
 
-- **Cards:** about 8 cards a walk at novice skill, one a minute; good dodgers meet fewer
+- **Cards:** about 10 cards a walk at novice skill, more than one a minute; good dodgers meet fewer
 - **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar, the premium gear item and the highest priced, is the exception: it may shift the finish rate more
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
 - **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
