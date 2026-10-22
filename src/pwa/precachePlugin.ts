@@ -1,15 +1,12 @@
 import type { Plugin } from "vite";
 
-import { ATLAS_MANIFEST_PATH } from "../assets/atlas/atlasManifest";
-import { assetUrl } from "../assets/manifest";
-import { ART_BASE_URL, ART_MANIFEST_URL, cacheKeyFor } from "./cachePolicy";
+import type { ArtFileMap } from "../assets/artUrl";
+import { ART_MANIFEST } from "../tools/artManifest";
+import { cacheKeyFor } from "./cachePolicy";
 import {
-  artManifestUrls,
-  artReferencedUrls,
-  artSoundUrls,
-  atlasUrls,
   bundleDependencies,
   type BundleFile,
+  hashedArtUrls,
   precacheFingerprint,
   type PrecacheManifest,
   rootRelativeUrls,
@@ -21,6 +18,8 @@ const SERVICE_WORKER_FILE_NAME = "sw.js";
 const MANIFEST_PLACEHOLDER = "DOG_WALKER_PRECACHE_MANIFEST";
 
 interface PrecachePluginOptions {
+  // The game's art files, as atlasPlugin hashed them for this build.
+  getArtFiles: () => ArtFileMap;
   // The game page's file name in the build output, which is its path under Vite's root, e.g.
   // "play/index.html".
   pageHtmlFile: string;
@@ -34,11 +33,11 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 }
 
 // Builds the service worker to /sw.js with the game page's precache list written into it: the
-// page, the build output it loads, the public files it links, the web app manifest's icons, the
-// atlas manifest and pages atlasPlugin writes, and every file /art/manifest.json lists that is
-// not in an atlas, along with the images those files load. Sounds are listed apart, by format,
-// for the worker to precache the one format the page plays.
+// page, the build output it loads, the public files it links, the web app manifest's icons and
+// the hashed art the game loads. Sounds are listed apart, by format, for the worker to precache
+// the one format the page plays.
 export function precachePlugin({
+  getArtFiles,
   pageHtmlFile,
   serviceWorkerSource,
 }: PrecachePluginOptions): Plugin {
@@ -86,24 +85,25 @@ export function precachePlugin({
           contents.set(url, bundleBytes(url) ?? new Uint8Array());
         }
 
-        const atlasJson = bundleBytes(assetUrl(ART_BASE_URL, ATLAS_MANIFEST_PATH));
-        const atlas =
-          atlasJson === undefined
-            ? { keys: new Set<string>(), urls: [] }
-            : atlasUrls(ART_BASE_URL, JSON.parse(decoder.decode(atlasJson)));
-        for (const url of atlas.urls) {
-          const bytes = bundleBytes(url);
-          if (bytes === undefined) {
-            this.error(`precache: ${url} is in the atlas manifest but not in the build output`);
-          }
-          contents.set(url, bytes);
+        const artFiles = getArtFiles();
+        const artManifestFile = artFiles.get(ART_MANIFEST);
+        const artManifest =
+          artManifestFile === undefined ? undefined : bundleBytes(`/${artManifestFile}`);
+        if (artManifest === undefined) {
+          this.error(`precache: the hashed ${ART_MANIFEST} is not in the build output`);
+        }
+        const art = hashedArtUrls(artFiles, JSON.parse(decoder.decode(artManifest)));
+        const missing = [...art.urls, ...art.sounds.m4a, ...art.sounds.ogg].filter(
+          (url) => !(url.slice(1) in bundle),
+        );
+        if (missing.length > 0) {
+          this.error(`precache: ${missing.join(", ")} in the art map but not the build output`);
+        }
+        for (const url of art.urls) {
+          contents.set(url, bundleBytes(url) ?? new Uint8Array());
         }
 
-        const publicUrls = [
-          ...pageUrls.filter((url) => !(url.slice(1) in bundle)),
-          ART_MANIFEST_URL,
-        ];
-        let soundUrls: PrecacheManifest["sounds"] = { m4a: [], ogg: [] };
+        const publicUrls = pageUrls.filter((url) => !(url.slice(1) in bundle));
         // The loop also visits the URLs pushed onto publicUrls while it runs.
         for (const url of publicUrls) {
           if (contents.has(url)) {
@@ -116,14 +116,8 @@ export function precachePlugin({
             continue;
           }
           contents.set(url, bytes);
-          if (url === ART_MANIFEST_URL) {
-            const artManifest: unknown = JSON.parse(decoder.decode(bytes));
-            publicUrls.push(...artManifestUrls(ART_BASE_URL, artManifest, atlas.keys));
-            soundUrls = artSoundUrls(ART_BASE_URL, artManifest);
-          } else if (url.endsWith(".webmanifest")) {
+          if (url.endsWith(".webmanifest")) {
             publicUrls.push(...webManifestIconUrls(JSON.parse(decoder.decode(bytes))));
-          } else if (url.startsWith(`${ART_BASE_URL}/`)) {
-            publicUrls.push(...artReferencedUrls(url, decoder.decode(bytes)));
           }
         }
 
@@ -132,23 +126,13 @@ export function precachePlugin({
             [...contents].map(async ([url, bytes]) => [url, await sha256Hex(bytes)] as const),
           ),
         );
-        const soundHashes = new Map<string, string>();
-        await Promise.all(
-          [...soundUrls.ogg, ...soundUrls.m4a].map(async (url) => {
-            const bytes = await readPublicFile(url);
-            if (bytes !== undefined) {
-              soundHashes.set(url, await sha256Hex(bytes));
-            }
-          }),
-        );
+        // A sound's hashed name stands for its content, as every hashed file's does.
+        const soundUrls = [...art.sounds.m4a, ...art.sounds.ogg].map((url) => [url, ""] as const);
         const fingerprint = await sha256Hex(
-          encoder.encode(precacheFingerprint(new Map([...contentHashes, ...soundHashes]))),
+          encoder.encode(precacheFingerprint(new Map([...contentHashes, ...soundUrls]))),
         );
         const manifest: PrecacheManifest = {
-          sounds: {
-            m4a: soundUrls.m4a.filter((url) => soundHashes.has(url)),
-            ogg: soundUrls.ogg.filter((url) => soundHashes.has(url)),
-          },
+          sounds: art.sounds,
           urls: [...contentHashes.keys()].sort(),
           version: fingerprint.slice(0, 16),
         };

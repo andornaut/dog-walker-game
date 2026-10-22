@@ -17,6 +17,9 @@ function repoPath(path: string): string {
 
 const packageVersion: string = JSON.parse(readFileSync(repoPath("package.json"), "utf8")).version;
 
+// The service worker's precache reads the map of hashed art this plugin writes.
+const atlas = atlasPlugin();
+
 export default defineConfig({
   build: {
     // Outside root, so Vite would leave the previous build's files in place without emptyOutDir.
@@ -48,16 +51,18 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(packageVersion),
     __COMMIT__: JSON.stringify(shortCommit(() => gitHead(repoPath(".")), process.env)),
   },
-  // atlasPlugin writes public/art/manifest.json from the art files, then packs the art's images
-  // and sprites into /art/atlas/ and /art/atlas-manifest.json.
+  // atlasPlugin writes public/art/manifest.json from the art files, packs the art's images and
+  // sprites into atlas pages, and writes every art file the game loads under /assets/art/ with a
+  // content hash in its name, mapped from its path under /art/ in the game's code.
   // generatedFilesPlugin, on the dev server only, rewrites public/art/manifest.json and
   // shared/export/ as the art and src/ change. npm run build writes shared/export/ first.
   // precachePlugin writes /sw.js, the service worker that precaches the game for offline play.
   // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
   plugins: [
-    atlasPlugin(),
+    atlas,
     generatedFilesPlugin({ repoRoot: repoPath(".") }),
     precachePlugin({
+      getArtFiles: atlas.api.artFiles,
       pageHtmlFile: "play/index.html",
       serviceWorkerSource: repoPath("src/pwa/serviceWorker.ts"),
     }),

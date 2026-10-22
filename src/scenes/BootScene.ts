@@ -2,10 +2,10 @@ import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
 import { loadsFirst } from "../assets/atlas/atlasLayout";
-import { type AssetManifest, assetUrl, parseManifest, type SpriteAsset } from "../assets/manifest";
+import { type AssetManifest, parseManifest, type SpriteAsset } from "../assets/manifest";
 import {
   addAtlasTextures,
-  ART_BASE_URL,
+  artUrl,
   atlasPageBytes,
   loadManifest,
   MANIFEST_CACHE_KEY,
@@ -130,7 +130,7 @@ export class BootScene extends Scene {
     const first = walkNow ? always : loadsFirst;
     queueManifestArt(this, this.manifest, first);
     for (const { fnt, key, png } of this.manifest.fonts) {
-      this.load.bitmapFont(key, assetUrl(ART_BASE_URL, png), assetUrl(ART_BASE_URL, fnt));
+      this.load.bitmapFont(key, artUrl(png), artUrl(fnt));
     }
     if (this.manifest.sounds.length > 0 && browserSoundFormat() === undefined) {
       console.warn("This browser plays neither Ogg nor AAC, so the game is silent.");
@@ -155,7 +155,7 @@ export class BootScene extends Scene {
       return;
     }
     for (const sound of this.manifest.sounds.filter(({ key }) => include(key))) {
-      this.load.audio(sound.key, assetUrl(ART_BASE_URL, sound[soundFormat]));
+      this.load.audio(sound.key, artUrl(sound[soundFormat]));
     }
   }
 

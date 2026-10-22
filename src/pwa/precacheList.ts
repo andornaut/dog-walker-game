@@ -1,5 +1,5 @@
-import { ATLAS_MANIFEST_PATH, parseAtlasManifest } from "../assets/atlas/atlasManifest";
-import { assetUrl, parseManifest } from "../assets/manifest";
+import type { ArtFileMap } from "../assets/artUrl";
+import { parseManifest } from "../assets/manifest";
 import type { SoundFormat } from "../audio/soundFormat";
 import { isHashedAssetUrl } from "./cachePolicy";
 
@@ -55,77 +55,24 @@ export function bundleDependencies(
   return [...found].sort();
 }
 
-// A path relative to the directory of the file at basePath, as a browser resolves it.
-export function resolveRelativePath(basePath: string, relativePath: string): string {
-  const segments = basePath.split("/").slice(0, -1);
-  for (const segment of relativePath.split("/")) {
-    if (segment === "..") {
-      segments.pop();
-    } else if (segment !== ".") {
-      segments.push(segment);
-    }
-  }
-  return segments.join("/");
-}
-
-// Every file /art/manifest.json lists except the sounds, as URLs under artBaseUrl, and except
-// the files of the images and sprites in atlased, which load from their atlas page instead.
-export function artManifestUrls(
-  artBaseUrl: string,
+// The art the game loads, as the URLs of its hashed files: the sound files by format, for the
+// worker to store the one the page plays, and every other file. Only the map's files are listed,
+// so no unhashed art is precached.
+export function hashedArtUrls(
+  artFiles: ArtFileMap,
   manifestJson: unknown,
-  atlased: ReadonlySet<string> = new Set(),
-): string[] {
-  const { fonts, images, sprites } = parseManifest(manifestJson);
-  const own = ({ key }: { key: string }) => !atlased.has(key);
-  const paths = [
-    ...fonts.flatMap(({ fnt, png }) => [png, fnt]),
-    ...images.filter(own).map(({ png }) => png),
-    ...sprites.filter(own).flatMap(({ json, png }) => [png, json]),
-  ];
-  return [...new Set(paths.map((path) => assetUrl(artBaseUrl, path)))];
-}
-
-// The sound files /art/manifest.json lists, by format, as URLs under artBaseUrl.
-export function artSoundUrls(
-  artBaseUrl: string,
-  manifestJson: unknown,
-): Record<SoundFormat, string[]> {
+): { sounds: Record<SoundFormat, string[]>; urls: string[] } {
   const { sounds } = parseManifest(manifestJson);
-  const urls = (format: SoundFormat) => [
-    ...new Set(sounds.map((sound) => assetUrl(artBaseUrl, sound[format]))),
-  ];
-  return { m4a: urls("m4a"), ogg: urls("ogg") };
-}
-
-// The atlas manifest's URL and its pages' URLs, under artBaseUrl, and the keys it covers.
-export function atlasUrls(
-  artBaseUrl: string,
-  atlasJson: unknown,
-): { keys: Set<string>; urls: string[] } {
-  const { pages, textures } = parseAtlasManifest(atlasJson);
+  const url = (fileName: string) => `/${fileName}`;
+  const soundUrls = (format: SoundFormat) =>
+    sounds.flatMap((sound) => artFiles.get(sound[format]) ?? []).map(url);
+  const soundPaths = new Set(sounds.flatMap(({ m4a, ogg }) => [m4a, ogg]));
   return {
-    keys: new Set(textures.map(({ key }) => key)),
-    urls: [ATLAS_MANIFEST_PATH, ...pages.map(({ png }) => png)].map((path) =>
-      assetUrl(artBaseUrl, path),
-    ),
+    sounds: { m4a: soundUrls("m4a"), ogg: soundUrls("ogg") },
+    urls: [...artFiles]
+      .filter(([path]) => !soundPaths.has(path))
+      .map(([, fileName]) => url(fileName)),
   };
-}
-
-const FONT_PAGE_FILE = /<page\b[^>]*\bfile="([^"]+)"/g;
-
-// The files an art data file loads in turn: an Aseprite sheet's meta.image, or a BMFont's page
-// images. Resolved against the data file's URL.
-export function artReferencedUrls(url: string, text: string): string[] {
-  if (url.endsWith(".fnt")) {
-    return [...text.matchAll(FONT_PAGE_FILE)].map((match) =>
-      resolveRelativePath(url, match[1] ?? ""),
-    );
-  }
-  if (url.endsWith(".json")) {
-    const image = (JSON.parse(text) as { meta?: { image?: unknown } }).meta?.image;
-    return typeof image === "string" && image !== "" ? [resolveRelativePath(url, image)] : [];
-  }
-  return [];
 }
 
 // The icons a web app manifest names.

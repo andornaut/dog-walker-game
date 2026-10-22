@@ -1,6 +1,8 @@
 import type { Loader, Scene, Textures } from "phaser";
+import artFiles from "virtual:art-files";
 
 import { itemAt } from "../../lib/arrays";
+import { artFileUrl } from "../artUrl";
 import {
   asepriteSheetOf,
   ATLAS_MANIFEST_PATH,
@@ -11,10 +13,14 @@ import {
   BASE_FRAME,
   parseAtlasManifest,
 } from "../atlas/atlasManifest";
-import { type AssetManifest, assetUrl, parseManifest } from "../manifest";
+import { type AssetManifest, parseManifest } from "../manifest";
 
-// The URL the art manifests and files load from.
-export const ART_BASE_URL = assetUrl(import.meta.env.BASE_URL, "art");
+// The URL of an art file by its path under /art/: in a build, its content-hashed copy, so the
+// code loads its own build's art whatever the service worker or the browser has cached.
+export function artUrl(path: string): string {
+  return artFileUrl(import.meta.env.BASE_URL, artFiles, path);
+}
+
 export const MANIFEST_CACHE_KEY = "art-manifest";
 const ATLAS_CACHE_KEY = "art-atlas-manifest";
 
@@ -51,7 +57,7 @@ export function loadManifest(scene: Scene, queue: (manifest: AssetManifest) => v
   for (const [key, path] of paths) {
     if (pending.has(key)) {
       scene.load.once(`filecomplete-json-${key}`, () => settle(key));
-      scene.load.json(key, assetUrl(ART_BASE_URL, path));
+      scene.load.json(key, artUrl(path));
     }
   }
 }
@@ -100,13 +106,13 @@ export function queueManifestArt(
   const queuePage = (page: number) => {
     const key = atlasPageKey(page);
     if (atlas !== undefined && !scene.textures.exists(key)) {
-      scene.load.image(key, assetUrl(ART_BASE_URL, itemAt(atlas.pages, page).png));
+      scene.load.image(key, artUrl(itemAt(atlas.pages, page).png));
     }
   };
   for (const { key, png } of images.filter(wanted)) {
     const texture = atlased.get(key);
     if (texture === undefined) {
-      scene.load.image(key, assetUrl(ART_BASE_URL, png));
+      scene.load.image(key, artUrl(png));
     } else {
       queuePage(texture.page);
     }
@@ -114,7 +120,7 @@ export function queueManifestArt(
   for (const { json, key, png } of sprites.filter(wanted)) {
     const texture = atlased.get(key);
     if (texture === undefined) {
-      scene.load.aseprite(key, assetUrl(ART_BASE_URL, png), assetUrl(ART_BASE_URL, json));
+      scene.load.aseprite(key, artUrl(png), artUrl(json));
     } else {
       queuePage(texture.page);
     }

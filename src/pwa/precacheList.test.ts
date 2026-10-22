@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { contentHash, hashedArtFileName } from "../assets/atlas/hashedArt";
+import { isHashedAssetUrl } from "./cachePolicy";
 import {
-  artManifestUrls,
-  artReferencedUrls,
-  artSoundUrls,
-  atlasUrls,
   bundleDependencies,
   type BundleFile,
+  hashedArtUrls,
   precacheFingerprint,
-  resolveRelativePath,
   rootRelativeUrls,
   webManifestIconUrls,
 } from "./precacheList";
@@ -77,137 +75,46 @@ describe("bundleDependencies", () => {
   });
 });
 
-describe("resolveRelativePath", () => {
-  it("resolves relative paths", () => {
-    for (const [from, relative, expected] of [
-      ["/art/sprites/dog.json", "dog.png", "/art/sprites/dog.png"],
-      ["/art/fonts/a.fnt", "../images/./b.png", "/art/images/b.png"],
-    ] as const) {
-      expect(resolveRelativePath(from, relative)).toBe(expected);
-    }
-  });
-});
+describe("hashedArtUrls", () => {
+  const manifest = {
+    fonts: [{ fnt: "fonts/font-body.fnt", key: "font-body", png: "fonts/font-body.png" }],
+    images: [],
+    sounds: [{ key: "sfx-tip", m4a: "sounds/sfx-tip.m4a", ogg: "sounds/sfx-tip.ogg" }],
+    sprites: [],
+  };
+  const others = [
+    "manifest.json",
+    "atlas/boot-0.png",
+    "fonts/font-body.fnt",
+    "fonts/font-body.png",
+  ];
+  const sounds = { m4a: ["sounds/sfx-tip.m4a"], ogg: ["sounds/sfx-tip.ogg"] };
+  const artFiles = new Map(
+    [...others, ...sounds.m4a, ...sounds.ogg].map((path) => [
+      path,
+      hashedArtFileName(path, contentHash(new TextEncoder().encode(path))),
+    ]),
+  );
+  const urlOf = (path: string) => `/${artFiles.get(path) ?? ""}`;
+  const listed = hashedArtUrls(artFiles, manifest);
 
-const withSounds = {
-  fonts: [],
-  images: [],
-  sounds: [
-    { key: "music-walk", m4a: "sounds/music-walk.m4a", ogg: "sounds/music-walk.ogg" },
-    { key: "sfx-tip", m4a: "sounds/sfx-tip.m4a", ogg: "sounds/sfx-tip.ogg" },
-  ],
-  sprites: [],
-};
-
-describe("artManifestUrls", () => {
-  it("lists every file of every entry under the art base URL", () => {
-    const manifest = {
-      fonts: [{ fnt: "fonts/body.fnt", key: "font-body", png: "fonts/body.png" }],
-      images: [{ key: "card-skip", png: "images/card-skip.png" }],
-      sounds: [],
-      sprites: [{ json: "sprites/dog.json", key: "dog-koda", png: "sprites/dog.png" }],
-    };
-    expect(artManifestUrls("/art", manifest)).toEqual([
-      "/art/fonts/body.png",
-      "/art/fonts/body.fnt",
-      "/art/images/card-skip.png",
-      "/art/sprites/dog.png",
-      "/art/sprites/dog.json",
-    ]);
+  it.each(Object.entries(sounds))("lists the %s sound files apart", (format, paths) => {
+    expect(listed.sounds[format as keyof typeof sounds]).toEqual(paths.map(urlOf));
   });
 
-  it("leaves out the files of atlased images and sprites", () => {
-    const manifest = {
-      fonts: [],
-      images: [
-        { key: "card-skip", png: "images/card-skip.png" },
-        { key: "logo", png: "images/logo.png" },
-      ],
-      sounds: [],
-      sprites: [{ json: "sprites/dog.json", key: "dog-koda", png: "sprites/dog.png" }],
-    };
-    expect(artManifestUrls("/art", manifest, new Set(["card-skip", "dog-koda"]))).toEqual([
-      "/art/images/logo.png",
-    ]);
+  it("lists every other file in the map by its hashed name", () => {
+    expect(listed.urls).toEqual(others.map(urlOf));
   });
 
-  it("leaves out the sounds, which the worker stores in one format", () => {
-    expect(artManifestUrls("/art", withSounds)).toEqual([]);
+  it("lists only URLs the worker serves as hashed", () => {
+    const all = [...listed.urls, ...listed.sounds.m4a, ...listed.sounds.ogg];
+    expect(all.filter((url) => !isHashedAssetUrl(url))).toEqual([]);
   });
 
   it("rejects a malformed manifest, as the game does", () => {
-    expect(() => artManifestUrls("/art", { fonts: [], images: [], sounds: [] })).toThrow(
+    expect(() => hashedArtUrls(artFiles, { fonts: [], images: [], sounds: [] })).toThrow(
       "manifest.sprites",
     );
-  });
-});
-
-describe("atlasUrls", () => {
-  it("lists the atlas manifest and its pages, and the keys it covers", () => {
-    const frame = { h: 8, name: "__BASE", w: 8, x: 1, y: 1 };
-    const atlas = {
-      pages: [
-        { bytes: 10, group: "boot", height: 16, png: "atlas/boot-0.png", width: 16 },
-        { bytes: 20, group: "ui", height: 16, png: "atlas/ui-0.png", width: 16 },
-      ],
-      textures: [
-        { frames: [frame], key: "screen-loading", page: 0 },
-        { frames: [frame], key: "logo", page: 1 },
-      ],
-    };
-    expect(atlasUrls("/art", atlas)).toEqual({
-      keys: new Set(["screen-loading", "logo"]),
-      urls: ["/art/atlas-manifest.json", "/art/atlas/boot-0.png", "/art/atlas/ui-0.png"],
-    });
-  });
-});
-
-describe("artSoundUrls", () => {
-  it("lists each case's URLs", () => {
-    for (const { expected, manifest } of [
-      {
-        expected: {
-          m4a: ["/art/sounds/music-walk.m4a", "/art/sounds/sfx-tip.m4a"],
-          ogg: ["/art/sounds/music-walk.ogg", "/art/sounds/sfx-tip.ogg"],
-        },
-        manifest: withSounds,
-        name: "every sound's file in each format under the art base URL",
-      },
-      {
-        expected: { m4a: [], ogg: [] },
-        manifest: { fonts: [], images: [], sounds: [], sprites: [] },
-        name: "no files for a manifest with no sounds",
-      },
-    ]) {
-      expect(artSoundUrls("/art", manifest)).toEqual(expected);
-    }
-  });
-});
-
-describe("artReferencedUrls", () => {
-  it("reads the URLs each file references", () => {
-    for (const { expected, path, text } of [
-      {
-        expected: ["/art/fonts/body.png", "/art/fonts/body-2.png"],
-        name: "a BMFont's page images",
-        path: "/art/fonts/body.fnt",
-        text: '<font><pages><page id="0" file="body.png"/><page id="1" file="body-2.png"/></pages>',
-      },
-      {
-        expected: ["/art/sprites/dog-koda.png"],
-        name: "an Aseprite sheet's meta.image",
-        path: "/art/sprites/dog-koda.json",
-        text: JSON.stringify({ frames: {}, meta: { image: "dog-koda.png" } }),
-      },
-      {
-        expected: [],
-        name: "nothing in a sheet without meta.image",
-        path: "/art/sprites/x.json",
-        text: "{}",
-      },
-      { expected: [], name: "nothing in an image", path: "/art/sprites/x.png", text: "" },
-    ]) {
-      expect(artReferencedUrls(path, text)).toEqual(expected);
-    }
   });
 });
 
