@@ -125,7 +125,7 @@ const STROLLING: MoverSpec = {
     stepSeconds: 0.1,
   },
   movement: "step",
-  variation: { delaySeconds: 0, speedShare: 0 },
+  variation: { delaySeconds: 0, lengthShare: 0, speedShare: 0 },
   warningSeconds: 0.2,
 };
 
