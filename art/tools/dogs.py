@@ -4,7 +4,7 @@
 Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines and an ink-outlined face:
 
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
-  SIZE_CLASS): big 54x54 (Koda the Alaskan Malamute, Snowball the Great Pyrenees, Penny the golden
+  SIZE_CLASS): big 54x54 (Koda the Alaskan Malamute, Snowy the Great Pyrenees, Penny the golden
   retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Duchess,
   Nugget, Zippy), the big dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
@@ -516,7 +516,7 @@ def archie_face(mood):
     return g
 
 
-# ---------- Snowball: Great Pyrenees, big, giant white fluff, collar with a bell ----------
+# ---------- Snowy: Great Pyrenees, big, giant white fluff, collar with a bell ----------
 
 def snowball_road(q):
     g, q = edged(Grid()), pose(q)
@@ -823,7 +823,7 @@ DOG_CLASS = {"koda": "big", "snowball": "big", "penny": "big", "archie": "medium
              "pierre": "medium", "duchess": "small", "nugget": "small", "zippy": "small"}
 DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
 # How much bigger a dog is drawn inside its frame, across and down. The big dogs are drawn narrower, Koda
-# and Snowball about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
+# and Snowy about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
 # (Zippy 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
 DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
             "nugget": (1.09, 1.27), "zippy": (1.17, 1.27)}

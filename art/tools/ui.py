@@ -651,7 +651,7 @@ def payout_label():
 # ---------- the dogs' colours and the debuff bars ----------
 
 # Each dog's colour, from its accessory, behind its photo on ui-dog-card (the empty card's is dslate). No two
-# dogs share one, and none is a zone colour. Snowball's is his collar's blue, not its sky, which backs every
+# dogs share one, and none is a zone colour. Snowy's is his collar's blue, not its sky, which backs every
 # owner's photo; Archie's is rust, for his red merle coat; Pepe's is his show bow's mauve, which holds his
 # black coat's ink line at 3.83:1.
 DOG_COLOURS = {
