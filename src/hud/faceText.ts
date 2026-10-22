@@ -122,7 +122,7 @@ function words(line: FaceText): Word[] {
   const named = (i: number) => marks.some((mark) => i >= mark.at && i < mark.at + mark.length);
   const all: { face?: OwnerFace; text: string }[][] = [];
   let word: { face?: OwnerFace; text: string }[] = [];
-  [...line.text].forEach((char, i) => {
+  line.text.split("").forEach((char, i) => {
     const mark = marks.find((candidate) => candidate.at === i);
     if (/\s/.test(char) && !named(i)) {
       if (word.length > 0) {
