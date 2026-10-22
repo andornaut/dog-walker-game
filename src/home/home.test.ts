@@ -7,25 +7,20 @@ import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
-import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
-import { fillNames } from "../lib/lines";
 import { cents, readTable } from "../rules/units";
-import { newPlayerSave, veteranSave } from "../save/fixtures";
-import type { LastWalk, Owned } from "../save/schema";
+import { newPlayerSave } from "../save/fixtures";
+import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   buy,
   type BuyResult,
   dogInfo,
-  dogNames,
   dollarAmountText,
   dollarText,
   gearInfo,
   type HomeLoadout,
   type HomeTap,
-  lastWalkLine,
-  logbookOf,
   packCapacity,
   partingSpeech,
   type Purchase,
@@ -37,15 +32,6 @@ import {
 } from "./home";
 
 const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
-const zoneName = (id: ZoneId) => WORLD.zones.find((zone) => zone.id === id)?.name ?? "";
-const { logbook } = HOME_TEXT;
-const jesse = DOGS.koda.owner.name;
-// The logbook's last walk lines, for a walk that earned whole dollars.
-const lastEarned = (whole: number) => fillNames(logbook.lastEarned, { amount: `$${whole}` });
-const lastFired = (whole: number, zone: ZoneId) =>
-  fillNames(logbook.lastFired, { earned: lastEarned(whole), owner: jesse, zone: zoneName(zone) });
-const lastHeadedHome = (zone: string) =>
-  fillNames(logbook.lastHeadedHome, { earned: lastEarned(64), zone });
 
 const data = {
   debuffs: DEBUFFS,
@@ -244,78 +230,6 @@ describe("buy", () => {
         expected,
       );
     }
-  });
-});
-
-describe("dogNames", () => {
-  it("joins names for a sentence", () => {
-    expect(dogNames(data, [])).toBe("");
-    const { biscuit, duchess, koda } = DOGS;
-    expect(dogNames(data, ["koda"])).toBe(koda.name);
-    expect(dogNames(data, ["koda", "biscuit", "duchess"])).toBe(
-      `${koda.name}, ${biscuit.name} and ${duchess.name}`,
-    );
-  });
-});
-
-describe("lastWalkLine", () => {
-  const walk: LastWalk = {
-    dogs: ["koda"],
-    earnedCents: cents(6_400),
-    firings: [],
-    outcome: "wentHome",
-    route: ["street", "park"],
-    zonesFinished: 1,
-  };
-
-  it("names where the walk ended, who fired you and how far a finished walk went", () => {
-    const cases: readonly { changes: Partial<LastWalk>; expected: string; name: string }[] = [
-      {
-        changes: {},
-        expected: lastHeadedHome(zoneName("park")),
-        name: "names the zone the walk headed home from",
-      },
-      {
-        changes: { firings: [{ dog: "koda", zone: 1 }], outcome: "noDogs" },
-        expected: lastFired(64, "street"),
-        name: "names the owner who fired you and where",
-      },
-      {
-        changes: { route: ["street"] },
-        expected: lastHeadedHome(WORLD.name),
-        name: "names a zone the walk never picked as the world",
-      },
-      {
-        changes: { outcome: "finished", zonesFinished: 4 },
-        expected: fillNames(logbook.lastFinished, {
-          earned: lastEarned(64),
-          world: WORLD.name,
-          zones: "4",
-        }),
-        name: "counts the zones a finished walk walked",
-      },
-    ];
-    for (const { changes, expected } of cases) {
-      expect(lastWalkLine(data, { ...walk, ...changes })).toBe(expected);
-    }
-  });
-});
-
-describe("logbookOf", () => {
-  it("is null before the first walk", () => {
-    expect(logbookOf(data, newPlayerSave.stats)).toBeNull();
-  });
-
-  it("shows the best walk, totals and the last walk", () => {
-    expect(logbookOf(data, veteranSave().stats)).toEqual({
-      best: "$90",
-      bestNote: fillNames(HOME_TEXT.logbook.bestNote, {
-        dogs: `${DOGS.koda.name} and ${DOGS.penny.name}`,
-        zones: fillNames(HOME_TEXT.logbook.zoneMany, { count: "4" }),
-      }),
-      last: lastFired(25, "park"),
-      totals: fillNames(HOME_TEXT.logbook.totals, { dogs: "7", fired: "1", walks: "5" }),
-    });
   });
 });
 

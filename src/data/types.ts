@@ -564,26 +564,6 @@ export interface HomeText {
   // The street sign on the gate art.
   readonly gateSign: string;
   readonly gearBought: string;
-  // The logbook's lines (logbookOf): the best walk, the last walk by how it ended, the
-  // totals, and what it says before any walk.
-  readonly logbook: {
-    // The button that opens Stats on its badge wall.
-    readonly badges: string;
-    readonly best: string;
-    readonly bestNote: string;
-    readonly empty: string;
-    readonly emptyNote: string;
-    readonly last: string;
-    readonly lastEarned: string;
-    readonly lastFinished: string;
-    readonly lastFired: string;
-    readonly lastHeadedHome: string;
-    readonly stats: string;
-    readonly title: string;
-    readonly totals: string;
-    readonly zoneMany: string;
-    readonly zoneOne: string;
-  };
   // Said first in the walker's bubble while a later version of the game holds the save: asks
   // the player to reload.
   readonly newerSave: string;

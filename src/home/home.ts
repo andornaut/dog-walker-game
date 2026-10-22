@@ -1,13 +1,12 @@
-import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
+import type { DogId, GameData, GearId, HomeText } from "../data/types";
 import { fillLine, signedText } from "../lib/lines";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
-import { effectClause, sentenceList, SIZE_NAMES } from "../rules/effectText";
+import { effectClause, SIZE_NAMES } from "../rules/effectText";
 import { payFor } from "../rules/run";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
-import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
-import { dogsWalked, walksPlayed } from "../save/stats";
+import type { Owned, SaveDocument } from "../save/schema";
 import { HOME_TEXT_FIELDS } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.
@@ -165,92 +164,6 @@ export function buy(data: ShopData, purchase: Purchase, save: SaveDocument): Buy
 // show it.
 export function dogFeeText(data: Pick<GameData, "tuning">): string {
   return dollarText(payFor(data.tuning));
-}
-
-// The name of the walk's zone at position zone, counting from 1, or the world's name for a
-// position the walk never picked a zone for.
-function zoneName(data: Pick<GameData, "world">, route: readonly ZoneId[], zone: number): string {
-  const id = route[zone - 1];
-  return data.world.zones.find((candidate) => candidate.id === id)?.name ?? data.world.name;
-}
-
-// Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Archie".
-export function dogNames(
-  data: Pick<GameData, "dogs" | "homeText">,
-  dogs: readonly DogId[],
-): string {
-  return sentenceList(
-    data.homeText.sentenceList,
-    dogs.map((dog) => data.dogs[dog].name),
-  );
-}
-
-type LogbookData = Pick<GameData, "dogs" | "homeText" | "world">;
-
-const LOGBOOK_FIELDS = HOME_TEXT_FIELDS.logbook;
-
-// The last walk as one line for the logbook, naming the last owner who fired you if one did.
-export function lastWalkLine(data: LogbookData, walk: LastWalk): string {
-  const text = data.homeText.logbook;
-  const earned = fillLine(LOGBOOK_FIELDS, text, "lastEarned", {
-    amount: dollarText(walk.earnedCents),
-  });
-  const firing = walk.firings.at(-1);
-  if (firing !== undefined) {
-    return fillLine(LOGBOOK_FIELDS, text, "lastFired", {
-      earned,
-      owner: data.dogs[firing.dog].owner.name,
-      zone: zoneName(data, walk.route, firing.zone),
-    });
-  }
-  if (walk.outcome === "finished") {
-    return fillLine(LOGBOOK_FIELDS, text, "lastFinished", {
-      earned,
-      world: data.world.name,
-      zones: String(walk.zonesFinished),
-    });
-  }
-  return fillLine(LOGBOOK_FIELDS, text, "lastHeadedHome", {
-    earned,
-    zone: zoneName(data, walk.route, walk.zonesFinished + 1),
-  });
-}
-
-// The home screen's logbook: the best walk, totals, and the last walk; null before any walk.
-export interface Logbook {
-  readonly best: string;
-  readonly bestNote: string;
-  readonly last: string;
-  readonly totals: string;
-}
-
-export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
-  const { bestWalk, lastWalk } = stats;
-  if (bestWalk === null || lastWalk === null) {
-    return null;
-  }
-  const text = data.homeText.logbook;
-  const walks = walksPlayed(stats);
-  const count = String(bestWalk.zonesFinished);
-  const zones = fillLine(
-    LOGBOOK_FIELDS,
-    text,
-    bestWalk.zonesFinished === 1 ? "zoneOne" : "zoneMany",
-    {
-      count,
-    },
-  );
-  const dogs = dogNames(data, bestWalk.dogs);
-  return {
-    best: dollarText(bestWalk.earnedCents),
-    bestNote: dogs === "" ? zones : fillLine(LOGBOOK_FIELDS, text, "bestNote", { dogs, zones }),
-    last: lastWalkLine(data, lastWalk),
-    totals: fillLine(LOGBOOK_FIELDS, text, "totals", {
-      dogs: String(dogsWalked(stats)),
-      fired: String(stats.timesFired),
-      walks: String(walks),
-    }),
-  };
 }
 
 // What a dog's owner says when the player picks it: one of their parting lines. The bubble
