@@ -22,7 +22,7 @@ export const TUNING = {
     maxMovers: 10,
     maxSlowVehicles: 4,
     // Obstacles that open no card, on top of obstaclesFirstZone.
-    minorObstaclesFirstZone: 48,
+    minorObstaclesFirstZone: 55,
     minorObstaclesGainPerZone: 0,
     obstaclesFirstZone: 19,
     obstaclesGainPerZone: 2,
@@ -31,8 +31,8 @@ export const TUNING = {
     packSizeMax: 3,
     // Sweet talker makes this many encounter cards each zone cost no money.
     sweetTalkerFreeCards: 1,
-    tipsFirstZone: 40,
-    tipsGainPerZone: 5,
+    tipsFirstZone: 30,
+    tipsGainPerZone: 4,
     treatsPerZone: 2,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
@@ -70,22 +70,22 @@ export const TUNING = {
     // Each walking dog's pay for a zone, before the zone's pay multiplier.
     payPerDog: 10,
     prices: {
-      archie: 400,
+      archie: 250,
       // The second and third dog slots; every player starts with one.
       dogSlot2: 1000,
       dogSlot3: 2500,
       dogWhistle: 800,
-      duchess: 200,
+      duchess: 150,
       fannyPack: 300,
       hallPass: 700,
-      koda: 700,
+      koda: 300,
       luckyCollar: 1000,
-      nugget: 300,
-      penny: 850,
+      nugget: 800,
+      penny: 600,
       pierre: 500,
       runningShoes: 500,
       snowball: 1000,
-      zippy: 250,
+      zippy: 450,
     },
     // The cash every walk starts with, before gear.
     startPurse: 5,

@@ -129,7 +129,7 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
 
 ### Dogs
 
-A roster of 9, three in each size, each a fixed, named character with its own art and one fixed owner. You start with 1 dog slot and Biscuit, and buy up to 2 more slots and the other 8 dogs at the Pet shop. A dog's price rises with its size; the dog slots are the big purchases. Walking more dogs is the main progression: more pay and a longer-lasting walk, but more owners who can fire you.
+A roster of 9, three in each size, each a fixed, named character with its own art and one fixed owner. You start with 1 dog slot and Biscuit, and buy up to 2 more slots and the other 8 dogs at the Pet shop. Dog prices mix sizes: each price band ($150 to $300, $450 to $600, $800 to $1,000) has dogs of at least two sizes, so a cheap dog can be big and a pricey one small; the dog slots are the big purchases. Walking more dogs is the main progression: more pay and a longer-lasting walk, but more owners who can fire you.
 
 Dogs differ in play by size only:
 
