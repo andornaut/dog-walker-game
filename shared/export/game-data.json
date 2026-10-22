@@ -252,12 +252,12 @@
       "frame": "encounter",
       "id": "skip",
       "index": null,
-      "name": "Skip",
+      "name": "Walk on by",
       "source": {
         "id": null,
         "kind": "skip"
       },
-      "text": "Nothing",
+      "text": "Skip this card, free once each neighborhood.",
       "title": ""
     }
   ],

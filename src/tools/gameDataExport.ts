@@ -122,9 +122,9 @@ function cardFaces(data: GameData): CardFace[] {
     frame: "encounter",
     id: "skip",
     index: null,
-    name: "Skip",
+    name: data.runText.card.skip,
     source: { id: null, kind: "skip" },
-    text: effectText(data, []),
+    text: data.runText.card.skipEffect,
     title: "",
   };
   return [...encounterCards, ...pathCards, ...upgradeCards, skip];
