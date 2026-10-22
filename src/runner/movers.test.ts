@@ -6,6 +6,7 @@ import { itemAt } from "../lib/arrays";
 import { read } from "../rules/units";
 import { plannerStreams } from "../testing/movers";
 import {
+  DART_LIFTS,
   dartOutcome,
   drawMover,
   drawnCount,
@@ -26,6 +27,7 @@ import {
   moverPlace,
   moverPlacements,
   type MoverSpec,
+  type MoverStand,
   type MoverTell,
   moverTell,
   type OnScreen,
@@ -957,6 +959,25 @@ describe("moverPlacements", () => {
     },
   );
 
+  // Tilted 0.4 and drawn to set off as low as the pack's half second of reaction allows, 70px
+  // ahead at 100px/s, its travel 330 of the 400px road, a dart lifted sets off that share of the
+  // way up to the highest start that shows its 1s cue and a cell, travel 150, keeping its tilt,
+  // either way it enters.
+  it.each([0, ...DART_LIFTS].map((lift) => ({ lift, travel: 330 - lift * (330 - 150) })))(
+    "lifts a dart's start $lift of the way up to its cue's limit",
+    ({ lift, travel }) => {
+      const draws = drawMover({ movers: () => 0, spawns: () => 0 });
+      const placements = moverPlacements(geometry, spec(cross(3, 0.4)), draws, lift);
+      expect(placements).toHaveLength(2);
+      for (const { path } of placements) {
+        expect(path.motion === "cross" ? [path.tilt, path.enterTravel] : []).toEqual([
+          0.4,
+          expect.closeTo(travel, 3),
+        ]);
+      }
+    },
+  );
+
   // Halfway across the 5-lane road at the low end of the turn draw, at its far edge at the high
   // end, or not at all at a turn draw at its kind's share. Turning, it is on screen until it has
   // crossed back: 2.5 or 5 lanes out and as far back, and half a lane past the edge.
@@ -1423,6 +1444,59 @@ describe("placeMovers", () => {
       blocked.forEach(({ row }, i) => {
         expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
       });
+    },
+  );
+
+  // Drawn at 0, a dart at 3 lanes a second sets off as low as it may and sweeps 4 lanes in the
+  // pack's window; lifted 0.25, 0.5, 0.75 and 1 of the way to its cue's limit it sweeps 3, 1, 0
+  // and 0. With no row fitting a dart that sweeps more than some lanes, as the grid refuses its
+  // lanes or the pack-fit gap its stands, it sets off at the lowest lift that fits, and one that
+  // fits as drawn is not lifted. A lift uses no random draw.
+  it.each(
+    [
+      { lift: 0, most: 4 },
+      { lift: 0.25, most: 3 },
+      { lift: 0.5, most: 2 },
+      { lift: 0.5, most: 1 },
+      { lift: 0.75, most: 0 },
+    ].flatMap((row) => [
+      { ...row, refused: "lanes" as const },
+      { ...row, refused: "stands" as const },
+    ]),
+  )(
+    "sets off a dart at a lift of $lift when no row fits its $refused over $most lanes",
+    ({ lift, most, refused }) => {
+      const moving = spec(cross(3, 0));
+      // Every draw 0, counted.
+      const place = (grid: Parameters<typeof placeMovers>[3]) => {
+        const draws = { movers: 0, spawns: 0 };
+        const counter = (stream: keyof typeof draws) => () => {
+          draws[stream] += 1;
+          return 0;
+        };
+        const streams = { movers: counter("movers"), spawns: counter("spawns") };
+        const { spawns } = placeMovers(streams, zoned, CAPS, grid, [], rows, [
+          { count: 1, kind: "squirrel", spec: moving },
+        ]);
+        return { draws, spawns };
+      };
+      const { grid } = freeGrid();
+      const refusal =
+        refused === "lanes"
+          ? {
+              block: (row: number, span: LaneSpan, ...rest: [number, boolean, boolean]) =>
+                span.count <= most && grid.block(row, span, ...rest),
+            }
+          : {
+              packFits: (stands: readonly MoverStand[]) =>
+                stands.every(({ lanes }) => lanes <= most),
+            };
+      const placed = place({ ...grid, ...refusal });
+      const draws = drawMover({ movers: () => 0, spawns: () => 0 });
+      const lifted = moverPlacements(geometry, moving, draws, lift).map(({ path }) => path);
+      expect(placed.spawns).toHaveLength(1);
+      expect(lifted).toContainEqual(placed.spawns[0]?.mover);
+      expect(placed.draws).toEqual(place(freeGrid().grid).draws);
     },
   );
 });

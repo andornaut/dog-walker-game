@@ -690,25 +690,28 @@ function crossTilts(
 // the pack, if it has one, starting as its row's window does. Its share is drawn from
 // startRoadShare, its low end raised to leave the pack reactionSeconds between its cue ending and
 // its reaching the pack's rows at its tilt, and its high end raised with it where a steep tilt
-// needs, but never above the highest share that shows its cue wholly on the road. Its tilt is
-// drawn from its range cut to the steepest that leaves a share at that highest, at the road's
-// pace; with none, even at its range's lowest, it has no placement. One that turns back crosses
-// back the whole road from its turn, on the road and in sight the longer for it, keeping clear
-// every row it is level with and meeting the pack in every lane it sweeps either way while its row
-// is in the window. One that stops stands in its stop lane, coming down the road with it, until it
-// scrolls off the road's bottom: it meets the pack in every lane it sweeps to its stop and in its
-// stop lane, and its start is raised as far as needed for the pack to have reactionSeconds to its
-// reaching the pack's rows, which a tilt below 0 brings sooner once it stops; past the road's far
-// edge, its stop lane is no stop, and it crosses. Its contact lasts as long as its travel takes to
-// cross the window, window / (1 + tilt) while it crosses, which its rows cover. One that has
-// crossed the road by the time it reaches the pack's rows is harmless: it blocks no lanes and
-// stands nowhere. It keeps clear every row it is level with as it crosses or stands, and one that
-// meets the pack also the row before its own, as a lead-in.
+// needs, but never above the highest share that shows its cue wholly on the road. Its tilt is drawn
+// from its range cut to the steepest that leaves a share at that highest, at the road's pace; with
+// none, even at its range's lowest, it has no placement. Lifted, it sets off that share of the way
+// from its drawn share up to the highest that shows its cue, at the same tilt, which leaves the
+// pack at least its reaction time. One that turns back crosses back the whole road from its turn,
+// on the road and in sight the longer for it, keeping clear every row it is level with and meeting
+// the pack in every lane it sweeps either way while its row is in the window. One that stops stands
+// in its stop lane, coming down the road with it, until it scrolls off the road's bottom: it meets
+// the pack in every lane it sweeps to its stop and in its stop lane, and its start is raised as far
+// as needed for the pack to have reactionSeconds to its reaching the pack's rows, which a tilt
+// below 0 brings sooner once it stops; past the road's far edge, its stop lane is no stop, and it
+// crosses. Its contact lasts as long as its travel takes to cross the window, window / (1 + tilt)
+// while it crosses, which its rows cover. One that has crossed the road by the time it reaches the
+// pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps clear every row it is
+// level with as it crosses or stands, and one that meets the pack also the row before its own, as a
+// lead-in.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
   motion: Extract<MoverMotion, { kind: "cross" }>,
   draws: MoverDraws,
+  lift: number,
 ): MoverPlacement[] {
   const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength, window } =
     geometry;
@@ -751,7 +754,8 @@ function crossPlacements(
   if (highest < lowest) {
     return [];
   }
-  const ahead = within([lowest, highest], draws.start) * sightLength;
+  const drawn = within([lowest, highest], draws.start);
+  const ahead = within([drawn, cueOnRoad], lift) * sightLength;
   const enterTravel = sightLength - ahead;
   const scrollTo = (travel: number) => crossScrollTo(along, travel - enterTravel);
   // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight:
@@ -1099,18 +1103,24 @@ function shyPlacements(
   }));
 }
 
-// One mover's placements, at its draws.
+// How far a dart with no room at its drawn start is raised toward the highest start that shows
+// its cue, lowest first, when the planner retries it.
+export const DART_LIFTS = [0.25, 0.5, 0.75, 1] as const;
+
+// One mover's placements, at its draws. A dart's start is lifted that share of the way from its
+// drawn share up to the highest that shows its cue; other movers have no lift.
 export function moverPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
   draws: MoverDraws = EVEN_DRAWS,
+  lift = 0,
 ): MoverPlacement[] {
   const { motion } = spec;
   switch (motion.kind) {
     case "approach":
       return approachPlacements(geometry, spec, motion, draws);
     case "cross":
-      return crossPlacements(geometry, spec, motion, draws);
+      return crossPlacements(geometry, spec, motion, draws, lift);
     case "ride":
       return ridePlacements(geometry, spec, motion.speedMultiplier, draws);
     default:
@@ -1225,19 +1235,21 @@ function standsOf(spot: Spot): MoverStand[] {
   }));
 }
 
-// Places every mover on rows at the distances given, each quota spread one per equal
-// stretch of the zone as the planner spreads other spawns, each mover wholly on screen
-// within the zone, within the caps on screen. A mover with no room in its stretch, such as one
-// over a cap there, waits: it comes on at the next row with room. One with no room on any later
-// row is dropped, which uses no random draw past its own draws, as the planner drops an obstacle
-// it has no room for. A dart may take cells other spawns hold (MoverGrid.isFree), but no mover
-// takes a cell a dart holds. A mover never stands still in place of moving. Each mover makes its own
-// draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
-// holds for the speed and moments it was drawn. Of the places that fit, it takes a start lane,
+// Places every mover on rows at the distances given, each quota spread one per equal stretch of the
+// zone as the planner spreads other spawns, each mover wholly on screen within the zone, within the
+// caps on screen. A mover with no room in its stretch, such as one over a cap there, waits: it
+// comes on at the next row with room. A dart with no room at its drawn start retries the same rows
+// from higher up the road, its start lifted by each of DART_LIFTS in turn, lowest first, before it
+// waits; on each later row it tries its drawn start and then each lift. One with no room on any
+// later row is dropped, which uses no random draw past its own draws, as the planner drops an
+// obstacle it has no room for. A dart may take cells other spawns hold (MoverGrid.isFree), but no
+// mover takes a cell a dart holds. A mover never stands still in place of moving. Each mover makes
+// its own draws (drawMover) before it is placed, and is placed as they have it move, so the path
+// rule holds for the speed and moments it was drawn. Of the places that fit, it takes a start lane,
 // each as likely, from the movers stream, so an edge lane that fits fewer of its ways comes up as
-// often as a middle one; then, from the spawns stream, a place in that lane of the highest rank
-// in its row, so each row gives the lane the widest reach that fits there. onScreen holds the
-// movers already on screen, from an earlier call, and gains each mover placed.
+// often as a middle one; then, from the spawns stream, a place in that lane of the highest rank in
+// its row, so each row gives the lane the widest reach that fits there. onScreen holds the movers
+// already on screen, from an earlier call, and gains each mover placed.
 export function placeMovers<Kind extends string>(
   streams: PlannerStreams,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -1268,10 +1280,24 @@ export function placeMovers<Kind extends string>(
         .map((distance, i) => ({ distance, placement, row: first + i }))
         .filter(fits),
     );
-  // The spots that fit in the next row, from first on, that has any.
-  const nearestLater = (placements: readonly MoverPlacement[], first: number) => {
+  // The spots that fit in the first of the starts that has any between first and end.
+  const firstFitting = (
+    starts: readonly (readonly MoverPlacement[])[],
+    first: number,
+    end: number,
+  ) => {
+    for (const placements of starts) {
+      const fitting = spotsIn(placements, first, end);
+      if (fitting.length > 0) {
+        return fitting;
+      }
+    }
+    return [];
+  };
+  // The spots that fit in the next row, from first on, that has any at one of the starts.
+  const nearestLater = (starts: readonly (readonly MoverPlacement[])[], first: number) => {
     for (let row = first; row < rows.length; row++) {
-      const inRow = spotsIn(placements, row, row + 1);
+      const inRow = firstFitting(starts, row, row + 1);
       if (inRow.length > 0) {
         return inRow;
       }
@@ -1283,10 +1309,12 @@ export function placeMovers<Kind extends string>(
   const dropped: Kind[] = [];
   for (const { count, kind, spec } of quotas) {
     for (let i = 0; i < count; i++) {
-      const placements = moverPlacements(geometry, spec, drawMover(streams));
+      const draws = drawMover(streams);
+      const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
+      const starts = lifts.map((lift) => moverPlacements(geometry, spec, draws, lift));
       const end = Math.floor(((i + 1) * rows.length) / count);
-      const stretch = spotsIn(placements, Math.floor((i * rows.length) / count), end);
-      const fitting = stretch.length > 0 ? stretch : nearestLater(placements, end);
+      const stretch = firstFitting(starts, Math.floor((i * rows.length) / count), end);
+      const fitting = stretch.length > 0 ? stretch : nearestLater(starts, end);
       if (fitting.length === 0) {
         dropped.push(kind);
         continue;

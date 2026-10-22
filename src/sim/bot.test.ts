@@ -9,6 +9,7 @@ import { hitDog } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { type LaneMotion, stillInLane } from "../runner/laneMotion";
 import {
+  DART_LIFTS,
   hasLeftRoad,
   type MoverDraws,
   type MoverFootprint,
@@ -320,22 +321,38 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         : [];
     return [[", crossing once", { turn: 0.999999 }], ...turning, ...stopping];
   };
+  // A dart is also checked lifted all the way to the highest start that shows its cue, as the
+  // planner retries one with no room as drawn.
+  const liftEnds = (movement: Movement, draws: MoverDraws): readonly [string, number][] =>
+    movement.kind === "dart" && draws === LOW
+      ? [
+          ["", 0],
+          [", lifted all the way", 1],
+        ]
+      : [["", 0]];
   const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
     [LOW, HIGH].flatMap((draws) =>
       [...movements.values()].flatMap((entry) =>
         tiltEnds(entry.movement).flatMap(([tiltName, tilt]) =>
-          turnWays(entry.movement).map(([turnName, turn]) => ({
-            ...entry,
-            draws: { ...draws, ...tilt, ...turn },
-            name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, ${endName(draws)}${tiltName}${turnName}`,
-            zoneIndex,
-          })),
+          turnWays(entry.movement).flatMap(([turnName, turn]) =>
+            liftEnds(entry.movement, draws).map(([liftName, lift]) => ({
+              ...entry,
+              draws: { ...draws, ...tilt, ...turn },
+              lift,
+              name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, ${endName(draws)}${[
+                tiltName,
+                turnName,
+                liftName,
+              ].join("")}`,
+              zoneIndex,
+            })),
+          ),
         ),
       ),
     ),
   );
   // The walk a case is placed on, and every place the planner may put its mover there.
-  const placedCase = (mover: (typeof cases)[number]) => {
+  const placedCase = (mover: Omit<(typeof cases)[number], "lift"> & { lift?: number }) => {
     const run = testState(
       { biscuit: 3, duchess: 3, snowball: 3 },
       { route, zoneIndex: mover.zoneIndex },
@@ -364,6 +381,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       },
       spec,
       mover.draws,
+      mover.lift,
     );
     return { geometry, placements, run, speed };
   };
@@ -528,19 +546,23 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
 
   // At the top of its tilt range, in every zone, a dart tilted toward the pack sets off no
   // higher than shows its cue wholly on the road and no lower than leaves the pack its reaction
-  // margin, at both ends of its start draw. It keeps its range's top tilt unless it sets off at
-  // that highest start, where the zone's pace leaves no start for a steeper one.
+  // margin, at both ends of its start draw and at each lift the planner retries it at. It keeps
+  // its range's top tilt unless it sets off at that highest start, where the zone's pace leaves
+  // no start for a steeper one.
   it.each(
     Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex).flatMap(
       (zoneIndex) =>
         [...movements.values()].flatMap((entry) =>
           entry.movement.kind === "dart" && entry.movement.tilt.max > 0
-            ? [LOW, HIGH].map((draws) => ({
-                ...entry,
-                draws: { ...draws, tilt: 0.999999 },
-                name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}`,
-                zoneIndex,
-              }))
+            ? [LOW, HIGH].flatMap((draws) =>
+                [0, ...DART_LIFTS].map((lift) => ({
+                  ...entry,
+                  draws: { ...draws, tilt: 0.999999 },
+                  lift,
+                  name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}, lift ${lift}`,
+                  zoneIndex,
+                })),
+              )
             : [],
         ),
     ),
