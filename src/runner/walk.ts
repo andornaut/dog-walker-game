@@ -1190,9 +1190,7 @@ export function stepWalk(
         continue;
       }
       const bump = bumpDog(data, dog, countBump(nextRun));
-      // A bump wholly forgiven, which costs no heart, counts toward no bump badge.
-      const landed = bump.change !== null && bump.change.after < bump.change.before;
-      nextRun = landed ? countLandedBump(kind, bump.state) : bump.state;
+      nextRun = countLandedBump(kind, bump.state);
       bumps.push({ change: bump.change, dodged: false, dog, item });
       modifiedAt(item, [bump.modified]);
     } else {

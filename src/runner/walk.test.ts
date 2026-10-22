@@ -1306,14 +1306,14 @@ describe("stepWalk's modified values", () => {
     );
   });
 
-  // A bump badge counts a plain hit only when it costs its owner a heart.
+  // A bump badge counts every plain hit that lands, forgiven or not.
   it.each([
     ["counts a plain bump by its obstacle's kind", data, meeting("casey", atPack("cone")), 1],
     [
-      "counts none that Second chance forgives",
+      "counts one Second chance forgives",
       forgiving,
       meeting(walkerWith("kindWords"), atPack("cone")),
-      0,
+      1,
     ],
     [
       "counts a Muddy bump Second chance forgives only in part",
@@ -1323,7 +1323,7 @@ describe("stepWalk's modified values", () => {
     ],
   ] as const)("%s", (_, walkData, walk, landed) => {
     const { run } = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk).walk;
-    expect(run.bumpsByKind).toEqual(landed === 0 ? {} : { cone: landed });
+    expect(run.bumpsByKind).toEqual({ cone: landed });
   });
 });
 

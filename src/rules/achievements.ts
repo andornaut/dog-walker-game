@@ -96,8 +96,8 @@ export function countBump(state: RunState): RunState {
   return { ...state, bumpsByZone };
 }
 
-// A plain hit by an obstacle of kind that cost its owner a heart, so neither dodged nor
-// forgiven, counted in the run until it is banked.
+// A plain hit by an obstacle of kind that landed, forgiven or not, counted in the run until it
+// is banked. A dodged hit never lands.
 export function countLandedBump(kind: MinorObstacleId, state: RunState): RunState {
   return {
     ...state,
