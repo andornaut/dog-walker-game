@@ -688,7 +688,6 @@ export class ShopScene extends Scene {
     return g;
   }
 
-  // Clips list to the list area. Without WebGL there are no filters and the list is not clipped.
   // The message on the ui-hint plate across the list's top, in one line fitted to the plate.
   private drawMessage(
     root: GameObjects.Container,

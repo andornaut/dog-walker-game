@@ -67,7 +67,8 @@ export function placeScrollbar(bar: ScrollbarRects | null, view: ScrollbarView |
   fillRect(view.graphics, PALETTE.yellow, bar.thumb);
 }
 
-// Clips list to rect, through a screen-sized texture named key, white over rect.
+// Clips list to rect, through a screen-sized texture named key, white over rect. Without WebGL
+// there are no filters and the list is not clipped.
 export function maskToRect(
   scene: Scene,
   key: string,
