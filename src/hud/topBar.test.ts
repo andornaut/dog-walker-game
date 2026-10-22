@@ -14,10 +14,9 @@ import {
   topBarAction,
   topBarButtonAt,
   topBarButtonForKey,
-  type TopBarPress,
   walkPaused,
 } from "./topBar";
-import { WALK_BAR, WALK_BAR_BUTTONS, walkBarLayout } from "./walkHud";
+import { WALK_BAR, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
 const WALKING: RunPause = {
   card: false,
@@ -136,7 +135,7 @@ describe("the walk bar in each pause state", () => {
 
 describe("topBarButtonForKey", () => {
   it("maps M to sound and P or Escape to pause, in either case, and ignores repeats", () => {
-    const keys: Record<string, TopBarPress | undefined> = {
+    const keys: Record<string, WalkBarButtonId | undefined> = {
       "1": undefined,
       ArrowLeft: undefined,
       Escape: "pause",

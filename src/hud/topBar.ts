@@ -7,25 +7,22 @@ import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout }
 // The walk bar's buttons (walkHud.ts), left to right. A press in a button's hit area is that
 // button's and never a road gesture. "sound" toggles mute, as the M key and the Settings switch
 // do.
-export type TopBarButton = BarButton;
-export type TopBarPress = WalkBarButtonId;
-
-export const TOP_BAR_BUTTONS: Readonly<Record<TopBarPress, TopBarButton>> = walkBarLayout(
+export const TOP_BAR_BUTTONS: Readonly<Record<WalkBarButtonId, BarButton>> = walkBarLayout(
   screenLayout(SCREEN_CONFIG).topBar,
 ).buttons;
 
 // The icon sits on the button's face, 2px lower while pressed.
-export function buttonIcon(button: TopBarButton, pressed: boolean): Point {
+export function buttonIcon(button: BarButton, pressed: boolean): Point {
   return { x: button.face.x + 2, y: button.face.y + (pressed ? 3 : 1) };
 }
 
 // The button a press at (x, y) lands on, if any.
-export function topBarButtonAt(x: number, y: number): TopBarPress | undefined {
+export function topBarButtonAt(x: number, y: number): WalkBarButtonId | undefined {
   return WALK_BAR_BUTTONS.find((press) => containsPoint(TOP_BAR_BUTTONS[press].hit, x, y));
 }
 
 // M mutes, and P and Escape are the pause button's. A held key's repeats press nothing.
-export function topBarButtonForKey(repeat: boolean, key: string): TopBarPress | undefined {
+export function topBarButtonForKey(repeat: boolean, key: string): WalkBarButtonId | undefined {
   if (repeat) {
     return undefined;
   }
@@ -85,7 +82,7 @@ export type TopBarAction =
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",
-  button: TopBarPress,
+  button: WalkBarButtonId,
 ): TopBarAction | undefined {
   if (pause.hold && via === "tap") {
     return undefined;

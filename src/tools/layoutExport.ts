@@ -23,8 +23,9 @@ import {
   stripLeadSlot,
 } from "../hud/messageStrip";
 import { PAUSE_MENU_ITEMS, PAUSE_NOTE_LINES, pauseMenuLayout } from "../hud/pauseMenu";
-import { buttonIcon, TOP_BAR_BUTTONS, type TopBarButton } from "../hud/topBar";
+import { buttonIcon, TOP_BAR_BUTTONS } from "../hud/topBar";
 import {
+  type BarButton,
   DEBUFF_BAR,
   debuffBarRects,
   DOG_CARD,
@@ -88,7 +89,7 @@ function ownerLead(body: FontMetrics, slot: LeadSlot, line: Rect) {
 }
 
 // A top-bar button with where its unpressed icon sits.
-function withIcon(button: TopBarButton) {
+function withIcon(button: BarButton) {
   return { ...button, icon: buttonIcon(button, false) };
 }
 
