@@ -77,8 +77,8 @@ export function bumpLine(
   };
 }
 
-// Each owner whose loss the walker's perk, such as Second chance, forgave, led by the perk's
-// icon.
+// Each owner whose loss the walker's perk, such as Second chance, forgave, led by the icon of
+// the perk that forgave it.
 export function forgivenLines(
   data: StripData & Pick<GameData, "walkers">,
   changes: readonly Change[],
@@ -88,7 +88,7 @@ export function forgivenLines(
       return [];
     }
     const perk = change.causes.flatMap((cause) =>
-      cause.kind === "modifier" && cause.source.kind === "walker"
+      cause.kind === "modifier" && cause.forgives === true && cause.source.kind === "walker"
         ? [data.walkers[cause.source.walker].perk]
         : [],
     )[0];
