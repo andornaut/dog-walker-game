@@ -76,7 +76,7 @@ interface DownTail {
   readonly tipX: number;
 }
 
-// The quip's own down tail, else the hint's, centred as before it had one.
+// The quip's own down tail, else the hint's.
 export const DOWN_TAILS: readonly DownTail[] = [
   { height: 6, key: "ui-quip-tail-down", tipX: 5 },
   { height: 6, key: "ui-hint-tail", tipX: 4 },
