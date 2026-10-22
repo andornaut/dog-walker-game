@@ -1318,9 +1318,9 @@ def pair(step):
 
 # The dog-slot sign hung from the Pet shop's awning across its front: the frame's size and where the game draws
 # it, and the cream board in the frame, where the game writes its two lines.
-SLOT_SIGN_W, SLOT_SIGN_H = 75, 30
-SLOT_SIGN_AT = (258, 120)
-SLOT_BOARD = (1, 5, 73, 24)
+SLOT_SIGN_W, SLOT_SIGN_H = 81, 30
+SLOT_SIGN_AT = (255, 120)
+SLOT_BOARD = (1, 5, 79, 24)
 
 
 def slot_sign(pressed=False):
@@ -1330,7 +1330,7 @@ def slot_sign(pressed=False):
     g = Grid(SLOT_SIGN_W, SLOT_SIGN_H)
     x, y, w, h = SLOT_BOARD
     d = 1 if pressed else 0
-    for cx in (8, 66):
+    for cx in (8, SLOT_SIGN_W - 9):
         g.rect(cx, 0, 1, y + d, "dbrown")
     g.rect(x, y + d, w, h, "dbrown")
     g.rect(x + 1, y + d + 1, w - 2, h - 2, "cream")
