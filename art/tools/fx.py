@@ -8,10 +8,10 @@ drawn at full size, so the hit effects have no depth variants.
 
 fx-bump          48x48  play (6 frames, 50ms)  impact star where a dog hits a standing
                                                obstacle, white impact lines in its gaps,
-                                               breaking into chips; centred on the contact
+                                               shrinking away; centred on the contact
 fx-bump-big      64x64  play (7 frames, 50ms)  a mover's impact: a four-layer star in a
-                                               ring of radial motion lines, a shock ring,
-                                               chips; centred on the contact
+                                               ring of radial motion lines, shrinking away;
+                                               centred on the contact
 fx-debris-leaves 48x48  play (6 frames, 70ms)  leaves and a twig knocked out of a hedge,
                                                fluttering down; centred on the contact
 fx-debris-litter 48x48  play (6 frames, 70ms)  paper, a can and a banana peel thrown out
@@ -148,16 +148,9 @@ def rays(g, cx, cy, r0, r1, count, col, turn=0.0):
         line(g, cx + math.cos(a) * r0, cy + math.sin(a) * r0, cx + math.cos(a) * r1, cy + math.sin(a) * r1, col)
 
 
-def chips(g, cx, cy, r, count, size, col, turn=11.0):
-    """count square chips of size px thrown r out from (cx, cy)."""
-    for i in range(count):
-        a = math.radians(i * 360 / count + turn - 90)
-        g.rect(round(cx + math.cos(a) * r - size / 2), round(cy + math.sin(a) * r - size / 2), size, size, col)
-
-
 def bump(step):
     """48x48, centred on the contact point: a white pip, the full amber star with white impact lines in its
-    gaps, a hotter orange star, then the star breaking into chips that fly out."""
+    gaps, a hotter orange star, then the star shrinking away, so it ends without a scatter of specks."""
     g = Grid(48, 48)
     c = 24
     if step == 0:
@@ -170,16 +163,16 @@ def bump(step):
         if step == 1:
             rays(g, c, c, 15, 22, 8, "white", 33.5)
     else:
-        if step == 3:
-            burst(g, c, c, 9, 4, 8, "yellow", 11)
-        chips(g, c, c, (16, 19, 22)[step - 3], 8, (3, 2, 1)[step - 3], ("orange", "amber", "amber")[step - 3])
+        r = (12, 8, 5)[step - 3]
+        burst(g, c, c, r, r * 0.45, 8, ("amber", "yellow", "yellow")[step - 3], 11)
+        g.ell(c, c, max(1, r * 0.25), max(1, r * 0.25), "white")
     return g
 
 
 def bump_big(step):
     """64x64, centred on the contact point, for a mover: a white star inside a ring of impact lines, a
-    four-layer star (orange, amber, yellow, white core) with the lines thrown wide, a shock ring, and
-    chips flying out."""
+    four-layer star (orange, amber, yellow, white core) with the lines thrown wide, then the star
+    shrinking away."""
     g = Grid(64, 64)
     c = 32
     if step == 0:
@@ -193,16 +186,9 @@ def bump_big(step):
         g.ell(c, c, 6 - step, 6 - step, "white")
         rays(g, c, c, (25, 28)[step - 1], 31, 16, "white", 5)
     else:
-        if step < 5:
-            burst(g, c, c, (20, 11)[step - 3], (8, 5)[step - 3], 10, ("amber", "yellow")[step - 3], 20)
-            r = (25, 29)[step - 3]
-            for y in range(64):
-                for x in range(64):
-                    d = math.hypot(x + 0.5 - c, y + 0.5 - c)
-                    if r - 1 <= d < r and (step == 3 or (x + y) % 2 == 0):
-                        g.p(x, y, "white")
-        chips(g, c, c, (22, 26, 29, 31)[step - 3], 10, (3, 2, 2, 1)[step - 3],
-              ("orange", "amber", "amber", "yellow")[step - 3], 2)
+        r = (20, 14, 9, 5)[step - 3]
+        burst(g, c, c, r, r * 0.42, 10, ("amber", "amber", "yellow", "yellow")[step - 3], 20)
+        g.ell(c, c, max(1, r * 0.22), max(1, r * 0.22), "white")
     return g
 
 
