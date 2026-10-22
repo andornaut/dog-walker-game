@@ -334,12 +334,12 @@ export function speechBubbleHeight(body: FontMetrics, lines: number): number {
 
 // Rows of 2x body text from top down, each lineCounts[i] lines a line of the body font apart,
 // the next row starting a row's lines and the card's rowGap under the one before: each row's
-// capitals' top, the row after the last's, and the last row's lowest ink.
+// capitals' top, and the last row's lowest ink.
 function cardTextRows(
   body: FontMetrics,
   top: number,
   lineCounts: readonly number[],
-): { bottom: number; next: number; tops: number[] } {
+): { bottom: number; tops: number[] } {
   const pitch = body.lineHeight * 2;
   let y = top;
   let bottom = top;
@@ -349,7 +349,7 @@ function cardTextRows(
     y += Math.max(1, lines) * pitch + HOME_LAYOUT.card.rowGap;
     return at;
   });
-  return { bottom, next: y, tops };
+  return { bottom, tops };
 }
 
 // How wide the detail card's rows beside the well and under it may be.
