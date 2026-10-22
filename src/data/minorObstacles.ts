@@ -85,11 +85,7 @@ export const MINOR_OBSTACLES = {
     name: "Mail carrier",
     shape: { lanes: 1, rows: 1 },
   },
-  parkedCar: {
-    movement: { kind: "hop", most: 1, sideways: true, times: { max: 1, min: 1 } },
-    name: "Parked car",
-    shape: { lanes: 1, rows: 3 },
-  },
+  parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
   pigeons: {
     movement: { kind: "dart", tilt: -0.3 },
     name: "Pigeons",
