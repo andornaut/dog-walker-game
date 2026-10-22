@@ -409,7 +409,7 @@ def eye_boxes(g, cx, y, spread=4):
 
 def glasses(g, cx, y, c, spread=4):
     """Round glasses on the eyes face_front draws at (cx, y): a ring 1px out from each eye with its corners
-    cut, and a bridge between them along the eyes' top row. Drawn in pixels round the eyes, so they fit
+    cut, and a bridge between them a row under the eyes' top. Drawn in pixels round the eyes, so they fit
     them at any scale."""
     px = raster(g)
     (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y, spread)
@@ -418,7 +418,7 @@ def glasses(g, cx, y, c, spread=4):
         px.rect(x0 + n, top, 1, n, c)
         px.rect(x0, top - 1, n, 1, c)
         px.rect(x0, top + n, n, 1, c)
-    px.rect(lx + n + 1, top, rx - lx - n - 2, 1, c)
+    px.rect(lx + n + 1, top + 1, rx - lx - n - 2, 1, c)
 
 
 def nose(g, cx, y, c="skin2", spread=4):
@@ -427,8 +427,20 @@ def nose(g, cx, y, c="skin2", spread=4):
     px = raster(g)
     (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y, spread)
     mid = (lx + n + rx) // 2
-    px.rect(mid, top + n - 1, 1, 2, c)
-    px.p(mid - 1, top + n, c)
+    px.rect(mid, top + n, 1, 2, c)
+    px.p(mid - 1, top + n + 1, c)
+
+
+def raise_mouth(g, cx, y, lips="dbrown", skin="skin1"):
+    """Move the smile face_front draws at (cx, y) up a drawn pixel, the skin closing in under it."""
+    px, s = raster(g), scale_of(g)
+    col, fill = K[lips], K[skin]
+    spots = [(x, yy) for yy in range(math.floor((y + 3) * s), math.ceil((y + 7) * s))
+             for x in range(math.floor((cx - 3) * s), math.ceil((cx + 3) * s)) if px.px[yy][x] == col]
+    for x, yy in spots:
+        px.px[yy][x] = fill
+    for x, yy in spots:
+        px.px[yy - 1][x] = col
 
 
 def casey_front(wave=0, bob=0):
@@ -605,6 +617,7 @@ def trista_front(wave=0, bob=0):
         g.rect(x, y + b, 1, h, "amber")
     # her eyes sit closer together than the others', behind her glasses
     face_front(g, 16, 14 + b, spread=3)
+    raise_mouth(g, 16, 14 + b)
     nose(g, 16, 14 + b, spread=3)
     glasses(g, 16, 14 + b, "dbrown", spread=3)
     return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
