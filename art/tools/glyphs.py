@@ -59,23 +59,36 @@ from road import SQUIRREL_FUR  # noqa: E402
 
 # ---------- traits ----------
 
+# The pull squirrel, facing left: f fur, l lit fur (top and left edges, and the tail's edge along the gap
+# that parts it from the back), b belly, s feet, w eye glint, n nose. The tail rises from the haunch as a
+# separate plume and curls over at the top, so the shape reads as a squirrel and not a dark blob.
+CHASER = [
+    "................",
+    ".........llll...",
+    "........lffffl..",
+    "....l...lff..ff.",
+    "..llfl..lff...f.",
+    ".lffff..lff.....",
+    ".fwffff.lff.....",
+    "nffffff..lff....",
+    ".fbffff..lff....",
+    "..bbffff.lff....",
+    "..bbffff.lfff...",
+    "..bbfffffffff...",
+    "..ffffffffff....",
+    "..ss.ss.........",
+    "................",
+    "................",
+]
+
+
 def chaser():
-    """Toronto's black squirrel in road.SQUIRREL_FUR, side on facing left, its tail up behind it, a white glint
-    over its eye."""
+    """Toronto's black squirrel in road.SQUIRREL_FUR, side on facing left, sitting up, its tail a plume
+    standing up behind it and curling over at the top, a white glint for its eye."""
     f = SQUIRREL_FUR
     g = Grid(16, 16)
-    g.ell(11.5, 6, 3.5, 5.5, f["fur"], f["shade"], f["lit"])
-    g.ell(11.5, 6.5, 1.5, 3.5, f["streak"])
-    g.ell(8.5, 9, 1.4, 4, f["shade"])
-    g.ell(7, 11, 3.5, 3.8, f["fur"], f["shade"], f["lit"])
-    g.ell(5.5, 12, 1.6, 2.4, f["belly"])
-    g.ell(5, 6, 3, 2.8, f["fur"], f["shade"], f["lit"])
-    g.p(6, 3, f["fur"])
-    g.p(6, 2, f["shade"])
-    g.p(4, 5, "white")
-    g.p(4, 6, "ink")
-    g.p(2, 7, f["nose"])
-    g.rect(4, 14, 2, 1, f["shade"])
+    bitmap(g, 0, 0, CHASER, {"f": f["fur"], "l": f["lit"], "b": f["belly"], "s": f["shade"], "w": "white",
+                             "n": f["nose"]})
     return g
 
 
@@ -334,16 +347,60 @@ def big_tipper():
     return g
 
 
-def good_leash():
-    """A leash: a handle loop, the line and its clip."""
-    g = Grid(16, 16)
-    g.ell(4.5, 4.5, 3.8, 3.8, "red", None, "pink")
-    g.ell(4.5, 4.5, 1.8, 1.8, None)
-    for i in range(6):
-        g.rect(7 + i, 7 + i, 2, 1, "red")
-    g.ell(13, 13, 2.3, 2.3, "lgrey", "grey", "white")
-    g.p(13, 13, "slate")
+# The leash, as a strap: r red, d dred on its shaded side, p pink where the light catches the handle; the
+# snap hook g lgrey, w white, s grey. The handle is an open teardrop loop and the hook a ring open on one
+# side, so the leash reads as a leash and not a key.
+LEASH = [
+    ".rrrr...........",
+    "rp..rr..........",
+    "r....rd.........",
+    "r....rd.........",
+    "rr..rrd.........",
+    ".rrrrd..........",
+    "..rrd...........",
+    "..rrd...........",
+    "..rrd...........",
+    "..rrrd..........",
+    "...rrrd....ww...",
+    "....rrrrrrrwgs..",
+    ".....dddddg..g..",
+    "..........g..gs.",
+    "...........ggs..",
+    "................",
+]
+LEASH_20 = [
+    ".rrrrrr.............",
+    "rpppprrr............",
+    "rpr...rrd...........",
+    "rr.....rd...........",
+    "rr.....rd...........",
+    "rrr...rrd...........",
+    ".rrrrrrd............",
+    "..rrrrd.............",
+    "...rrd..............",
+    "...rrd..............",
+    "...rrd..............",
+    "...rrd..............",
+    "...rrrd.............",
+    "....rrrd.......www..",
+    ".....rrrrrrrrrwwggs.",
+    "......dddddddwgg..gs",
+    ".............gg...gs",
+    "..............g..gs.",
+    "...............ggs..",
+    "....................",
+]
+
+
+def leash(rows):
+    g = Grid(len(rows[0]), len(rows))
+    bitmap(g, 0, 0, rows, {"r": "red", "d": "dred", "p": "pink", "g": "lgrey", "w": "white", "s": "grey"})
     return g
+
+
+def good_leash():
+    """A leash: a red strap with an open handle loop at the top, running down to its snap hook."""
+    return leash(LEASH)
 
 
 def raincoats():
@@ -589,15 +646,8 @@ def belly_rubs20():
 
 
 def good_leash20():
-    """A leash: a handle loop, the line and its clip."""
-    g = Grid(20, 20)
-    g.ell(5.5, 5.5, 4.5, 4.5, "red", None, "pink")
-    g.ell(5.5, 5.5, 2.2, 2.2, None)
-    for i in range(7):
-        g.rect(9 + i, 9 + i, 2, 1, "red")
-    g.ell(16, 16, 2.8, 2.8, "lgrey", "grey", "white")
-    g.p(16, 16, "slate")
-    return g
+    """A leash: a red strap with an open handle loop at the top, running down to its snap hook."""
+    return leash(LEASH_20)
 
 
 def raincoats20():
@@ -732,21 +782,35 @@ def bump():
     return g
 
 
+# The pink slip: p pink page, m mauve down its shaded side, w the folded corner's white underside with f its
+# mauve crease, t plum lines of text, s the dred stamp across the page's lower half, l its white lettering.
+# The page shows its fold, its text and its foot around the stamp, so it reads as a letter and not a box.
+FIRED = [
+    "................",
+    "...pppppppf.....",
+    "...pppppppwf....",
+    "...ppppppwwwf...",
+    "...pppppppppm...",
+    "...pttttttppm...",
+    "...pppppppppm...",
+    "...ptttttttpm...",
+    "...pppppppppm...",
+    "..ssssssssssss..",
+    "..slllllllllls..",
+    "..ssssssssssss..",
+    "...pppppppppm...",
+    "...pttttppppm...",
+    "...pppppppppm...",
+    "................",
+]
+
+
 def fired():
-    """A pink slip: a page with two lines of plum text and a folded corner, under a dred stamp
+    """A pink slip: a page with lines of plum text and its top corner folded down, a dred stamp across it
     lettered in a white line, as the empty ui-dog-card's FIRED plate."""
     g = Grid(16, 16)
-    g.rect(3, 1, 10, 14, "pink")
-    g.rect(3, 1, 10, 1, "white")
-    g.rect(12, 2, 1, 13, "mauve")
-    for x, y in ((10, 1), (11, 1), (12, 1), (11, 2), (12, 2), (12, 3)):
-        g.p(x, y, None)
-    g.rect(10, 2, 1, 2, "mauve")
-    g.rect(11, 3, 1, 1, "mauve")
-    g.rect(5, 4, 4, 1, "plum")
-    g.rect(5, 6, 6, 1, "plum")
-    g.rect(2, 9, 12, 5, "dred")
-    g.rect(4, 11, 8, 1, "white")
+    bitmap(g, 0, 0, FIRED, {"p": "pink", "m": "mauve", "w": "white", "f": "mauve", "t": "plum", "s": "dred",
+                            "l": "white"})
     return g
 
 
