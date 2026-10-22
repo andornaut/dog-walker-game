@@ -7,6 +7,8 @@ import { type Cents, cents, clampHearts } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
 import { changeLabels, heartRows } from "./hudView";
 
+const { causes } = gameData.runText;
+
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
   { by: "bigTipperTipBonus", operation: "add", stat: "tipValue" },
@@ -55,13 +57,13 @@ describe("changeLabels", () => {
         amount: 1,
         gain: true,
         target: { dog: "koda", kind: "dog" },
-        text: "+1♥ treat",
+        text: `+1♥ ${causes.treat}`,
       },
       {
         amount: 200,
         gain: true,
         target: { kind: "bank" },
-        text: "+$2 tip, Big tipper",
+        text: `+$2 ${causes.tip}, ${gameData.upgrades.bigTipper.name}`,
       },
     ]);
   });
@@ -72,7 +74,12 @@ describe("changeLabels", () => {
       before: clampHearts(10, 5),
       causes: [
         { amount: -1, kind: "bump" },
-        { amount: 1, kind: "modifier", source: { kind: "walker", walker: "casey" } },
+        {
+          amount: 1,
+          forgives: true,
+          kind: "modifier",
+          source: { kind: "walker", walker: "casey" },
+        },
       ],
       dog: "koda",
       kind: "hearts",
@@ -93,7 +100,7 @@ describe("changeLabels", () => {
         amount: -1000,
         gain: false,
         target: { kind: "bank" },
-        text: "−$10 bump",
+        text: `−$10 ${causes.bump}`,
       },
     ]);
   });
