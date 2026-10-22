@@ -40,7 +40,6 @@ const GEOMETRY: RoadGeometry = {
   roadTop: 40,
   sightLength: 514,
   tallestPackBand: 76,
-  walkerFootY: 634,
 };
 const geometry = () => GEOMETRY;
 const FIRING_SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");

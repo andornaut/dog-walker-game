@@ -32,7 +32,7 @@ export type PullData = Pick<
 >;
 export type PullGeometry = Pick<
   RoadGeometry,
-  "cell" | "laneCount" | "lens" | "packBand" | "packParts" | "roadTop" | "walkerFootY"
+  "cell" | "laneCount" | "lens" | "packBand" | "packParts" | "roadTop"
 >;
 
 type PullTargetKind = "squirrel";

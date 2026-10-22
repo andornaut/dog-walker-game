@@ -82,7 +82,6 @@ const geometry: RoadGeometry = {
   roadTop: 40,
   sightLength: 514,
   tallestPackBand: 76,
-  walkerFootY: 634,
 };
 const FRAME = 1 / 60;
 const GOOD_LEASH: Modifier & { source: { kind: "upgrade"; upgrade: "goodLeash" } } = {

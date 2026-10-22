@@ -158,7 +158,6 @@ export interface RoadGeometry {
   roadTop: number;
   sightLength: number;
   tallestPackBand: number;
-  walkerFootY: number;
 }
 
 // A lucky encounter that applied on contact, with no card.

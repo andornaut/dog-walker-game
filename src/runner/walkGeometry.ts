@@ -67,6 +67,5 @@ export function walkGeometry(
     roadTop,
     sightLength: outline.bottom - tallest - roadTop,
     tallestPackBand: tallest,
-    walkerFootY: footY,
   };
 }

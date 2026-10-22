@@ -385,7 +385,6 @@ const geometry: RoadGeometry = {
   roadTop: 40,
   sightLength: 514,
   tallestPackBand: 76,
-  walkerFootY: 634,
 };
 
 const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
