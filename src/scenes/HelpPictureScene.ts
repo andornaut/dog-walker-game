@@ -57,6 +57,9 @@ export interface HelpPictureData {
 // the page's strips of the screen. Restarted for each page; stopping it stops the HUD and card
 // pictures with it.
 export class HelpPictureScene extends Scene {
+  // The road art's pixels, read once and kept across pages, as the walk keeps its own.
+  private readonly roadArt = new RoadArt(this);
+
   constructor() {
     super(SCENE_KEYS.helpPicture);
   }
@@ -96,7 +99,7 @@ export class HelpPictureScene extends Scene {
     const { walk } = picture;
     const zone = currentZone(gameData, walk.run);
     ensureRoadPlaceholders(this);
-    new RoadView(this, new RoadArt(this), LAYOUT.rasterView, ROAD_TEXTURE).draw(walk, zone, 0);
+    new RoadView(this, this.roadArt, LAYOUT.rasterView, ROAD_TEXTURE).draw(walk, zone, 0);
     const shadows = new ShadowPool(this);
     const shadow = shadows.frame(colorFromHex(zone.roadShadowColor));
     const items = new ItemViews(this, () => undefined);
