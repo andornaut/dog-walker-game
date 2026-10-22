@@ -90,7 +90,7 @@ import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBi
 import { screenArea } from "../input/outsideTap";
 import type { PackPlacement } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
-import { itemAt } from "../lib/arrays";
+import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { addFigure, PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
 import { startWakeLock, stopWakeLock } from "../pwa";
@@ -568,16 +568,12 @@ export class StartScene extends Scene {
         direction,
         this.focus,
       );
-      this.action = this.focusAction(rows[this.focus.row]?.[this.focus.column]?.target);
+      this.action = this.focusAction(this.focused()?.target);
       this.render();
       return;
     }
     if (isConfirmKey(key)) {
-      const focused =
-        this.focus === null
-          ? undefined
-          : focusRows(this.signShown())[this.focus.row]?.[this.focus.column];
-      const target = focused?.target ?? { kind: "start" };
+      const target = this.focused()?.target ?? { kind: "start" };
       this.press = { held: false, id: targetId(target), startedMs: this.time.now };
       this.actAfterDip(target);
       return;
@@ -595,6 +591,16 @@ export class StartScene extends Scene {
 
   private save(): SaveDocument {
     return profileSave(this);
+  }
+
+  // The focused item, its column kept inside its row: the top row loses the dog slot sign once
+  // the last slot is bought.
+  private focused(): Focusable | undefined {
+    if (this.focus === null) {
+      return undefined;
+    }
+    const row = focusRows(this.signShown())[this.focus.row] ?? [];
+    return row[clampIndex(row.length, this.focus.column)];
   }
 
   // Whether the dog slot sign shows: while a dog slot is for sale.
@@ -1819,10 +1825,7 @@ export class StartScene extends Scene {
 
   // The keyboard's focus ring, outside any selection frame.
   private drawFocus(root: GameObjects.Container): void {
-    if (this.focus === null) {
-      return;
-    }
-    const rect = focusRows(this.signShown())[this.focus.row]?.[this.focus.column]?.rect;
+    const rect = this.focused()?.rect;
     if (rect === undefined) {
       return;
     }
