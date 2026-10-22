@@ -1,9 +1,7 @@
 import type { GameData } from "../data/types";
-import { containsPoint } from "../lib/rect";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { dollarText, type Purchase, purchasePrice } from "./home";
-import { HOME_LAYOUT } from "./homeLayout";
 
 type SignData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
 
@@ -24,15 +22,4 @@ export function slotSign(data: SignData, owned: Owned, bank: Cents): SlotSign | 
     return null;
   }
   return { affordable: price <= bank, lines: [data.homeText.slotSign, dollarText(price)] };
-}
-
-// Whether a tap at (x, y) lands on the dog slot sign: on its hit area while it shows.
-export function slotSignAt(
-  data: SignData,
-  owned: Owned,
-  bank: Cents,
-  x: number,
-  y: number,
-): boolean {
-  return slotSign(data, owned, bank) !== null && containsPoint(HOME_LAYOUT.slotSign.hit, x, y);
 }
