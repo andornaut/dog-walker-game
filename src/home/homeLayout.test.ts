@@ -6,7 +6,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
-import { WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
+import { cashLeft, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { unlockPrice } from "../rules/shop";
@@ -26,7 +26,6 @@ import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
 import {
   BANK_ROOM,
   bankFit,
-  bankLeft,
   CARD_TEXT_ROOM,
   detailCardLayout,
   DOG_TILE_TEXT_ROOM,
@@ -335,7 +334,7 @@ describe("the top bar's bank", () => {
   it.each(amounts)("centres $%i across the bank's ink columns at the scale it takes", (dollars) => {
     const { scale, text } = bankFit(width, texts(dollars));
     const ink = width(text) * scale;
-    const left = bankLeft(ink);
+    const left = cashLeft(ink);
     const right = left + ink - 1;
     expect(left).toBeGreaterThanOrEqual(bank.ink.left);
     expect(right).toBeLessThanOrEqual(bank.ink.right);

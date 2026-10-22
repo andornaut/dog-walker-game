@@ -337,9 +337,6 @@ export function bankFit(
   return { scale: scales.at(-1) ?? scales[0], text: texts[texts.length - 1] ?? "" };
 }
 
-// The bank's first ink column, centred across the ink columns it shares with the walk bar's cash.
-export { cashLeft as bankLeft } from "../hud/walkHud";
-
 // How wide a line of the walker's speech may be, as a label measures it: a bubble that wide
 // fits between the screen's margin and the Pet shop's board, so it never reaches the board.
 export const SPEECH_ROOM =
