@@ -29,7 +29,7 @@ import {
 } from "../../runner/movers";
 import { itemCategory, type WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth } from "../sprites";
-import type { ItemView } from "./itemViews";
+import type { ItemPart, ItemView } from "./itemViews";
 import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
 
@@ -71,7 +71,7 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // projection, across the middle of the lanes it is drawn over (drawnLanes), while it is solid,
 // sized by showAtDepth on its body part's feet, mirrored while it faces left (facesLeft), playing
 // the tag moverBodyTag picks, or prizeMoverTag for a lucky find. Before a dart or in-lane move
-// only its cue shows, at 1x:
+// only its cue shows, at 1x, each part only while its art is loaded:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
 // edge during its cue. A crosser that has stopped plays its idle tag if it has one, and otherwise
@@ -139,9 +139,13 @@ export function drawMover(
     }
   }
   const signed = tell !== null && tell.kind !== "wander";
-  cue?.sprite.setVisible(signed).setDepth(DEPTH.fx);
-  arrow?.sprite.setVisible(signed).setDepth(DEPTH.fx);
-  wander?.sprite.setVisible(tell?.kind === "wander").setDepth(DEPTH.fx);
+  const showCue = (part: ItemPart | undefined, shown: boolean) =>
+    part?.sprite
+      .setVisible(shown && part.sprite.scene.textures.exists(part.key))
+      .setDepth(DEPTH.fx);
+  showCue(cue, signed);
+  showCue(arrow, signed);
+  showCue(wander, tell?.kind === "wander");
   if (tell === null) {
     return;
   }
