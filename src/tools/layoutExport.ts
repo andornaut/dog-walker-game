@@ -219,7 +219,7 @@ export function layoutExport(
       loading: { art: LOADING_ART, track: LOADING_TRACK, walker: LOADING_WALKER },
       pause: {
         labels: PAUSE_MENU_ITEMS.map((item) => data.menuText.pause[item]),
-        // The note wraps to two lines at 2x on the plate.
+        // The note fits one line at 2x on the plate.
         ...pauseMenuLayout(body, walkView, {
           buttonCount: PAUSE_MENU_ITEMS.length,
           noteLines: PAUSE_NOTE_LINES,

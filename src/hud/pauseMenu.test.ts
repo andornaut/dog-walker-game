@@ -9,8 +9,9 @@ import { fillNames, wrapWords } from "../lib/lines";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
+import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import {
   homeQuestionLayout,
   NOTE_PLATE,
@@ -82,14 +83,16 @@ describe("the Home question's panel", () => {
   });
 });
 
-// The pause menu's own note wraps at 2x onto the lines its plate is laid out for, in a panel
+// The pause menu's own note fits at 2x onto the lines its plate is laid out for, in a panel
 // inside the band and road, the last line's lowest ink inside the plate.
 describe("the pause menu's note", () => {
-  it("wraps onto its plate's lines", () => {
+  it("fits at 2x onto its plate's lines", () => {
     const room = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
-    const lines = wrapWords(bodyWidth, room, gameData.menuText.pause.note);
-    expect(lines.filter((line) => bodyWidth(line) > room)).toEqual([]);
-    expect(lines.length).toBeLessThanOrEqual(PAUSE_NOTE_LINES);
+    const note = gameData.menuText.pause.note;
+    const fitted = fitInFont("font-body", WRAPPING_TEXT_FIT_STYLES, room, note);
+    expect(fitted.style.scale).toBe(NOTE_PLATE.scale);
+    expect(fitted.widest).toBeLessThanOrEqual(room);
+    expect(fitted.lines.length).toBeLessThanOrEqual(PAUSE_NOTE_LINES);
     const parts = { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: PAUSE_NOTE_LINES };
     const { notePlate, panel } = pauseMenuLayout(BODY, walkView, parts);
     expect(panel.y + panel.height).toBeLessThanOrEqual(walkView.y + walkView.height);

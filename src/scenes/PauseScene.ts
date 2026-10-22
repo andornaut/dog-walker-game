@@ -21,8 +21,15 @@ import { insetRect } from "../lib/rect";
 import { rectIndexAt } from "../ui/grid";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  pixelFontMetrics,
+  setFittedText,
+  wrapPixelText,
+} from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
+import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
@@ -100,11 +107,21 @@ export class PauseScene extends Scene {
         ? data.note.map((line) => ({ color: NOTE_COLORS[line.kind], text: line.text }))
         : [{ color: PALETTE.plum, text: menu.note }];
     const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
+    // The question's note wraps at 2x; the menu's own fits its plate, its glyphs closer before
+    // it wraps.
     const noteParts = note.map(({ color, text }) => {
       const style = { color, scale: NOTE_PLATE.scale };
-      return { lines: wrapPixelText(this, style, noteWidth, text), style };
+      if (asking) {
+        const lines = wrapPixelText(this, style, noteWidth, text);
+        return { fitted: { lines, style: { letterSpacing: 0, scale: style.scale } }, style };
+      }
+      const probe = addPixelText(this, 0, 0, text, style).setVisible(false);
+      const fit = { room: noteWidth, styles: WRAPPING_TEXT_FIT_STYLES };
+      const fitted = fitPixelText(probe, fit, 0, 0);
+      probe.destroy();
+      return { fitted, style };
     });
-    const noteLines = noteParts.reduce((sum, part) => sum + part.lines.length, 0);
+    const noteLines = noteParts.reduce((sum, part) => sum + part.fitted.lines.length, 0);
     const parts = { buttonCount: this.entries.length, noteLines };
     const body = pixelFontMetrics(this, "body");
     const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(body, walkView, parts);
@@ -129,14 +146,16 @@ export class PauseScene extends Scene {
     const tops = notePartTops(
       body,
       layout.notePlate,
-      noteParts.map((part) => part.lines.length),
+      noteParts.map((part) => part.fitted.lines.length),
     );
     noteParts.forEach((part, i) => {
-      addPixelText(this, center, itemAt(tops, i), part.lines.join("\n"), {
+      const top = itemAt(tops, i);
+      const label = addPixelText(this, center, top, "", {
         ...part.style,
         align: "center",
         originX: 0.5,
       });
+      setFittedText(label, part.fitted, center, top);
     });
 
     // A press counts where it began and ended on the same target, so the release that resumes

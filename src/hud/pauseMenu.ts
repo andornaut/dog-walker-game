@@ -12,15 +12,23 @@ const PANEL_WIDTH = 232;
 // Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;
 const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
-// The note plate is as wide as the buttons.
-export const PAUSE_NOTE_WIDTH = BUTTON.width;
-// The note is body text at scale, wrapped to the plate's width less padX each side, its first
-// line's capitals padTop under the plate's top, a line of the body font apart, and the last
-// line's lowest ink padBottom over its bottom.
-export const NOTE_PLATE = { gap: 4, padBottom: 4, padTop: 6, padX: 4, scale: 2 } as const;
+// The note plate reaches overhang past the buttons' sides, gap under the last one. The note is
+// body text at scale, wrapped to the plate's width less padX each side, its first line's
+// capitals padTop under the plate's top, a line of the body font apart, and the last line's
+// lowest ink padBottom over its bottom.
+export const NOTE_PLATE = {
+  gap: 4,
+  overhang: 4,
+  padBottom: 4,
+  padTop: 6,
+  padX: 4,
+  scale: 2,
+} as const;
+export const PAUSE_NOTE_WIDTH = BUTTON.width + 2 * NOTE_PLATE.overhang;
 
-// The pause menu's own note wraps onto this many lines.
-export const PAUSE_NOTE_LINES = 2;
+// The pause menu's own note, fitted to the plate in WRAPPING_TEXT_FIT_STYLES, takes this many
+// lines.
+export const PAUSE_NOTE_LINES = 1;
 
 function notePlateHeight(body: FontMetrics, lines: number): number {
   const { padBottom, padTop, scale } = NOTE_PLATE;
@@ -76,8 +84,8 @@ function panelLayout(
     })),
     notePlate: {
       height: noteHeight,
-      width: BUTTON.width,
-      x: panel.x + BUTTON.x,
+      width: PAUSE_NOTE_WIDTH,
+      x: panel.x + BUTTON.x - NOTE_PLATE.overhang,
       y: panel.y + noteY,
     },
     panel,
