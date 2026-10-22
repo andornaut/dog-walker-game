@@ -6,7 +6,6 @@ import {
   DEV_OVERLAY_VISIBLE_KEY,
   DEV_STATE_EVENT,
   devOverlayLines,
-  devOverlayShown,
   type DevState,
 } from "../dev/devOverlay";
 import { pageRunSetup } from "../dev/pageRunSetup";
@@ -100,8 +99,10 @@ export class DevOverlayScene extends Scene {
     this.applyVisible();
   }
 
+  // The overlay draws while wanted (by the player or the URL's dev=1) and only during a run:
+  // elsewhere it would cover the home screen and the Pet shop.
   private applyVisible(): void {
-    this.text?.setVisible(devOverlayShown(this.wanted, this.runActive));
+    this.text?.setVisible(this.wanted && this.runActive);
     this.redraw();
   }
 

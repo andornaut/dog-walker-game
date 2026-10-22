@@ -31,12 +31,6 @@ export interface DevState {
   readonly zoneIndex: number;
 }
 
-// Whether the overlay draws: the player (or the URL's dev=1) wants it, and the run scene is
-// active. Elsewhere it would cover the home screen and the Pet shop.
-export function devOverlayShown(wanted: boolean, runActive: boolean): boolean {
-  return wanted && runActive;
-}
-
 function secondsText(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }

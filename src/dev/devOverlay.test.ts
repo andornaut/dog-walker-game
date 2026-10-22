@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
-import { devOverlayLines, devOverlayShown, type DevState } from "./devOverlay";
+import { devOverlayLines, type DevState } from "./devOverlay";
 import type { RunSetup } from "./runSetup";
 
 const setup: RunSetup = { dev: true, seed: 42, speed: 1.5, zone: 1 };
@@ -46,18 +46,5 @@ describe("devOverlayLines", () => {
       "zone 1 wall 174.0s",
       " road 144.0s held 30.0s",
     ]);
-  });
-});
-
-describe("devOverlayShown", () => {
-  it("shows the overlay only when wanted during a run", () => {
-    for (const { runActive, shown, wanted } of [
-      { runActive: false, shown: false, wanted: false },
-      { runActive: false, shown: false, wanted: true },
-      { runActive: true, shown: false, wanted: false },
-      { runActive: true, shown: true, wanted: true },
-    ]) {
-      expect(devOverlayShown(wanted, runActive)).toBe(shown);
-    }
   });
 });
