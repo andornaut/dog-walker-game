@@ -1,5 +1,6 @@
 import type {
   DogId,
+  Encounter,
   EncounterId,
   GameData,
   MinorObstacleId,
@@ -266,15 +267,22 @@ export function blocksLane(
   return category === "minor" || category === "obstacle";
 }
 
+// How an obstacle that is an encounter resolves, or null for anything else.
+function obstacleResolution(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): Encounter["resolution"]["kind"] | null {
+  return itemCategory(data, kind) === "obstacle"
+    ? data.encounters[kind as EncounterId].resolution.kind
+    : null;
+}
+
 // An obstacle touching does nothing to, such as a squirrel: dogs pull toward it instead.
 export function isPullObstacle(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): boolean {
-  return (
-    itemCategory(data, kind) === "obstacle" &&
-    data.encounters[kind as EncounterId].resolution.kind === "pull"
-  );
+  return obstacleResolution(data, kind) === "pull";
 }
 
 // The last lane move time, scroll speed and zone length worked out, with the data groups and
@@ -558,10 +566,7 @@ export function opensACard(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): boolean {
-  return (
-    itemCategory(data, kind) === "obstacle" &&
-    data.encounters[kind as EncounterId].resolution.kind === "card"
-  );
+  return obstacleResolution(data, kind) === "card";
 }
 
 // Each obstacle, minor obstacle and lucky find is drawn first by the zone's weights, so its
@@ -590,7 +595,7 @@ export function spawnQuotas(
     ...drawn(stats.luckyEncounters, positiveWeights(zone.weights.luckyFinds)),
   ];
   const quotas = new Map<WalkItemKind, number>();
-  const movers = new Map<WalkItemKind, number>();
+  const movers = new Map<WalkItemKind, { readonly count: number; readonly movement: Movement }>();
   const steppers: SpawnQuota<WalkItemKind>[] = [];
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
   const moverQuota = (kind: WalkItemKind, movement: Movement, moverCount: number) => ({
@@ -600,7 +605,6 @@ export function spawnQuotas(
     kind,
     mover: moverSpec(data, streams, footprintOf(data, kind), movement),
   });
-  const movements = new Map<WalkItemKind, Movement>();
   for (const kind of kinds) {
     const movement = moverMovement(data, random, zone.moverShare, kind);
     if (movement === null) {
@@ -608,15 +612,13 @@ export function spawnQuotas(
     } else if (movement.kind === "step") {
       steppers.push(moverQuota(kind, movement, 1));
     } else {
-      movements.set(kind, movement);
-      count(movers, kind);
+      movers.set(kind, { count: (movers.get(kind)?.count ?? 0) + 1, movement });
     }
   }
   return [
-    ...[...movers].flatMap(([kind, moverCount]) => {
-      const movement = movements.get(kind);
-      return movement === undefined ? [] : [moverQuota(kind, movement, moverCount)];
-    }),
+    ...[...movers].map(([kind, { count: moverCount, movement }]) =>
+      moverQuota(kind, movement, moverCount),
+    ),
     ...steppers,
     ...[...quotas].map(([kind, kindCount]) => ({
       blocksLane: blocksLane(data, kind),
@@ -679,7 +681,7 @@ export function planZone(
 
 // Steering during a hit stop is dropped, not queued.
 export function steerWalk(
-  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
+  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
   laneCount: number,
   direction: LaneDirection,
   walk: Walk,
@@ -1186,15 +1188,15 @@ export function stepWalk(
         continue;
       }
       const { resolution } = data.encounters[kind];
-      if (resolution.kind === "instant") {
-        const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
-        nextRun = countTally(resolution.tally, outcome.state);
-        instants.push({ encounter: kind, outcome });
-        modifiedAt(item, outcome.modified);
-      } else if (resolution.kind === "contact") {
+      if (resolution.kind === "instant" || resolution.kind === "contact") {
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
         nextRun = outcome.state;
-        contacts.push({ dog, encounter: kind, item, outcome });
+        if (resolution.kind === "instant") {
+          nextRun = countTally(resolution.tally, nextRun);
+          instants.push({ encounter: kind, outcome });
+        } else {
+          contacts.push({ dog, encounter: kind, item, outcome });
+        }
         modifiedAt(item, outcome.modified);
       } else if (resolution.kind === "card") {
         const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
@@ -1325,7 +1327,7 @@ function collisionRules(data: WalkData, run: RunState): CollisionRules<WalkItem>
     graced: (item) => blocksLane(data, item.kind),
     invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
     startsInvulnerability: ({ kind }) =>
-      isPickup(kind) || isMinorObstacle(data, kind) || opensFor(run, kind as EncounterId),
+      isMinorObstacle(data, kind) || opensFor(run, kind as EncounterId),
   };
 }
 
