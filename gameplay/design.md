@@ -155,7 +155,7 @@ Each debuff has one source: Muddy from a puddle, Stinky from the skunk's Quick r
 
 ### Lucky finds
 
-Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained. The friendly neighbor walks about, one or two quick steps in any direction, so the pack has to go and meet her; the lost wallet lies still.
+Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained. The friendly neighbor walks about, one or two quick steps in any direction and with no cue, since a cue marks a hazard about to move, so the pack has to go and meet her; the lost wallet lies still.
 
 - **Friendly neighbor:** a pat for each dog: +♥ to every owner, the hearts jackpot
 - **Lost wallet:** +$$ found money, the money jackpot
