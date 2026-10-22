@@ -65,7 +65,6 @@ import {
 const END_SCREEN_KEY = "screen-end";
 const LOGO = { ...END_LAYOUT.logo, key: "logo" };
 const RIBBON = { ...END_LAYOUT.ribbon, dropMs: 360, key: "ui-new-best", riseFrom: 12 };
-// With reduced motion the burst holds one still frame.
 const RIBBON_BURST = END_LAYOUT.ribbonBurst;
 const TITLE_Y = END_LAYOUT.titleY;
 const BREAKDOWN = END_LAYOUT.breakdown;
@@ -73,7 +72,6 @@ const SIDE = END_LAYOUT.side;
 const QUIPS = END_LAYOUT.quips;
 const BADGES: Rect = END_LAYOUT.badges;
 const BADGE_SOUND_AFTER_BEST_MS = 1200;
-// The pack starts returnHome's risePx lower than its spots.
 const RETURN_HOME_SCENE = END_LAYOUT.returnHome;
 const BUTTON: Rect = END_LAYOUT.button;
 
@@ -128,6 +126,7 @@ export class EndScene extends Scene {
     const newBest = ended?.newBestWalk === true && walk.earnedCents > 0;
     if (newBest && this.textures.exists(RIBBON.key)) {
       // Behind the panel, so the sparkles rise from behind the ribbon and never cover the title.
+      // With reduced motion the burst holds one still frame.
       const { height, width, x, y } = RIBBON_BURST;
       addBurst(this, reduced, NEW_BEST_BURST, 1, x + width / 2, y + height / 2);
     }
@@ -264,8 +263,9 @@ export class EndScene extends Scene {
     onBackPressed(this, goHome);
   }
 
-  // The walker and the dogs still walking come up the front path, then their owners wave.
-  // Drawn before the panel, so the pack rises from behind its top edge.
+  // The walker and the dogs still walking come up the front path from RETURN_HOME.risePx
+  // under their spots (walkUpOffset), then their owners wave. Drawn before the panel, so the
+  // pack rises from behind its top edge.
   private addReturnHome(reduced: boolean, walk: Pick<LastWalk, "dogs" | "firings">): void {
     const scene = RETURN_HOME_SCENE;
     if (!this.textures.exists(END_SCREEN_KEY)) {
