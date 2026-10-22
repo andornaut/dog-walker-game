@@ -10,7 +10,6 @@ export const MENU_TEXT = {
   },
   end: {
     backHome: "Back home",
-    bank: "Bank",
     earnings: {
       cardCosts: "Card costs",
       fees: "Pay",

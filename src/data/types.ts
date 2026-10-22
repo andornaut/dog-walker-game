@@ -763,7 +763,6 @@ export interface MenuText {
   };
   readonly end: {
     readonly backHome: string;
-    readonly bank: string;
     // The breakdown's lines, by what the money came from.
     readonly earnings: {
       readonly cardCosts: string;
