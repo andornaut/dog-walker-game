@@ -31,19 +31,6 @@ export interface PackBoxes<Dog extends string = string> {
   readonly walker: ScaledBox;
 }
 
-// The pack's band down the road, from its outline's top to its bottom.
-interface PackBand {
-  readonly bottom: number;
-  readonly top: number;
-}
-
-// Whether an item's hit box, y to y + height, overlaps the pack's band, where it can touch the
-// pack's outline: from when its near edge passes the band's top until its far edge passes the
-// band's bottom.
-export function levelWithPack(pack: PackBand, item: Pick<RoadItem, "height" | "y">): boolean {
-  return item.y + item.height > pack.top && item.y < pack.bottom;
-}
-
 // Boxes that share any area overlap; boxes that only meet at an edge do not.
 export function overlaps(a: Box, b: Box): boolean {
   return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
@@ -58,7 +45,7 @@ export interface LanedBox extends ScaledBox {
 // at its scale. The item's box is cut to its lanes as the road is drawn on the part's row, so it
 // never reaches a part settled in another lane however wide the projection draws it; a box its
 // lanes cut away entirely touches nothing. Boxes that only meet at an edge do not touch.
-export function touchesAsDrawn(centerX: number, part: ScaledBox, item: LanedBox): boolean {
+function touchesAsDrawn(centerX: number, part: ScaledBox, item: LanedBox): boolean {
   const across = (scale: number, x: number) => centerX + (x - centerX) * scale;
   const left = Math.max(across(item.scale, item.left), across(part.scale, item.lanes.left));
   const right = Math.min(across(item.scale, item.right), across(part.scale, item.lanes.right));

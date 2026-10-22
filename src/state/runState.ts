@@ -57,7 +57,7 @@ export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonl
 export type ActiveModifier = Lasting & Modifier & { readonly source: ModifierSource };
 
 // A dodge effect in play for the rest of the walk, with what it came from.
-export type ActiveDodge = Omit<DodgeEffect, "kind"> & { readonly source: EffectSource };
+type ActiveDodge = Omit<DodgeEffect, "kind"> & { readonly source: EffectSource };
 
 // secondsLeft is the walking time the debuff has left.
 export type ActiveDebuff = Lasting & {

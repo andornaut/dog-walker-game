@@ -396,7 +396,7 @@ export function hopSequences(most: number, sideways: boolean, times: number): St
 // How a shy hopper hops, at a share of the movers of its kind drawn per mover: as the road between
 // it and the pack's rows comes down to nearSeconds of the road's travel, each of its hops one of
 // shapes chosen away from the pack (shy.ts), ending at most rise rows up the road.
-export interface ShyHops {
+interface ShyHops {
   readonly nearSeconds: number;
   readonly rise: number;
   readonly shapes: readonly StepShape[];
@@ -550,7 +550,7 @@ function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): n
 // The tilts a crosser draws from on a road scrolling at scrollSpeed: its range, its high end cut
 // to the steepest that still leaves the pack reactionSeconds from a start highest of the road
 // ahead, but never below its low end.
-export function crossTilts(
+function crossTilts(
   motion: Pick<Extract<MoverMotion, { kind: "cross" }>, "reactionSeconds" | "tilt">,
   scrollSpeed: number,
   sightLength: number,

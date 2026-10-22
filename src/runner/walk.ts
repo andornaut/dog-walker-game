@@ -199,7 +199,7 @@ interface ContactHit {
 // A value modifiers changed on the road, at the item it happened at: a bump's hearts, a tip's
 // pay, a tip or a treat grabbed by reach, an obstacle the pack is immune to, or a value a
 // contact's or a lucky find's effects changed.
-export interface RoadModified {
+interface RoadModified {
   readonly item: WalkItem;
   readonly value: ModifiedValue;
 }
@@ -1014,7 +1014,7 @@ export function obstacleHitBox(
 
 // The chance a plain hit landing on the dog misses it: probability.smallDodgeChance for a small
 // dog, plus the chance of each dodge effect in play whose sizes hold the dog's, at most 1.
-export function dodgeChance(
+function dodgeChance(
   data: Pick<GameData, "dogs" | "tuning">,
   run: Pick<RunState, "dodges">,
   dog: DogId,

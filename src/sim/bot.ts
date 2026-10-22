@@ -169,7 +169,7 @@ function holdTogether(pairs: readonly (readonly [Edge, Edge])[]): boolean {
 }
 
 // Whether a mover moving from one sample to the next touches a part as drawn at some moment
-// between them while level with the pack's band: touchesAsDrawn's and levelWithPack's comparisons
+// between them while level with the pack's band: touchesAsDrawn's comparisons and the band's
 // all holding at once. A box moving down the road and across it at once, as a tilted dart does,
 // can clip a part's corner between two samples, where the walk's collision, at its own walk
 // steps, can meet it. With the two samples the same, it is touchesAsDrawn's test.
