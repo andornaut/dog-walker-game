@@ -12,7 +12,7 @@ import {
 } from "../save/schema";
 import type { RunState } from "../state/runState";
 import { stripDevParams } from "./devStart";
-import { type RunSetup, runSetupLink } from "./runSetup";
+import { devInSearch, type RunSetup, runSetupLink } from "./runSetup";
 
 // sessionStorage, "1" while the panel is open.
 export const DEV_PANEL_OPEN_KEY = "dog-walker-game:dev-panel-open";
@@ -305,7 +305,7 @@ export function applyPanel(
     url.search = new URL(stripDevParams(href, !staged.on)).search;
     return { cheats: staged.on ? staged : CHEATS_OFF, url: url.toString() };
   }
-  const dev = new URL(href).searchParams.get("dev") === "1";
+  const dev = devInSearch(new URL(href).search);
   const playUrl = new URL("/play/", href).href;
   return { cheats: staged, url: runSetupLink(playUrl, startAtSetup(data, dev, seed, start)) };
 }
