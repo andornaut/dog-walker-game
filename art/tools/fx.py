@@ -16,10 +16,10 @@ fx-debris-leaves 48x48  play (6 frames, 70ms)  leaves and a twig knocked out of 
                                                fluttering down; centred on the contact
 fx-debris-litter 48x48  play (6 frames, 70ms)  paper, a can and a banana peel thrown out
                                                of a bin; centred on the contact
-fx-splash        64x48  play (8 frames, 60ms)  a puddle: a crown of spray rising from the
-                                               feet, droplets arcing out, mud kicked up and
-                                               two ripple rings; its ground point, row 40,
-                                               goes on the dog's feet
+fx-splash        64x48  play (8 frames, 60ms)  a puddle: a crown of five water jets rising
+                                               from the feet, three drops thrown off it and
+                                               one ripple; its ground point, row 40, goes on
+                                               the dog's feet
 fx-sparkle       16x16  play (4 frames, 60ms)  twinkle where a treat or tip is collected
 fx-new-best      96x48  play (8 frames, 70ms)  rays, sparkles and stars bursting from
                                                behind the ui-new-best ribbon (centred on it)
@@ -206,65 +206,54 @@ def bump_big(step):
     return g
 
 
-def ring(g, cx, cy, rx, ry, front, back, sparse=False):
-    """A 1px ripple ring: front on its near (lower) half, back on its far half; sparse keeps every other
-    pixel, for a ring that is fading."""
+def ripple(g, cx, cy, rx, ry, col):
+    """A ripple ring about 2px thick around (cx, cy)."""
     for y in range(g.h):
         for x in range(g.w):
             dx, dy = x + 0.5 - cx, y + 0.5 - cy
-            if (dx / rx) ** 2 + (dy / ry) ** 2 <= 1 and (dx / (rx - 1.3)) ** 2 + (dy / (ry - 1)) ** 2 > 1:
-                if not sparse or (x + y) % 2 == 0:
-                    g.p(x, y, front if dy > 0 else back)
+            if (dx / rx) ** 2 + (dy / ry) ** 2 <= 1 and (dx / (rx - 2)) ** 2 + (dy / (ry - 1.2)) ** 2 > 1:
+                g.p(x, y, col)
 
 
-# The splash's crown: spikes of water from the feet (base dx, tip dx, tip height) at full growth.
-CROWN = ((-7, -21, 14), (-4, -12, 24), (0, -1, 19), (4, 12, 24), (7, 21, 14))
-# How far the crown has grown, by frame: it rises over 3 frames and sinks over 2.
-CROWN_GROWTH = (0.4, 0.8, 1.0, 0.65, 0.3)
-# Droplets broken off the crown's tips (launch dx, dy per frame, size), from frame 2, under gravity.
-DROPS = ((-5, -4, 2), (-3.4, -6, 2), (-1, -7, 1), (1.6, -6.5, 2), (3.6, -5, 2), (5.4, -3, 1), (-6, -2, 1),
-         (0.4, -8, 2), (-2, -3, 1), (2.6, -2.5, 1))
-# Mud kicked up from the puddle's bed (dx, dy per frame), from frame 1: short low hops by the feet.
-MUD = ((-4, -3), (-2.4, -4), (2.8, -3.6), (4.4, -2.6), (-5.6, -1.6), (5.8, -2))
+def jet(g, x0, y0, x1, y1, w0, w1, col):
+    """A jet of water from (x0, y0) to (x1, y1), w0 thick at its foot tapering to w1 at its tip."""
+    for k in range(17):
+        t = k / 16
+        r = w0 + (w1 - w0) * t
+        g.ell(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r, r, col)
+
+
+# The splash's crown: five jets of water fanning out from the feet (base dx, tip dx, tip height) at full
+# height, and the crown's height by frame: it rises over 3 frames and sinks over 3.
+SPLASH_JETS = ((-7, -22, -9), (-3, -11, -18), (0, 0, -23), (3, 11, -18), (7, 22, -9))
+SPLASH_HEIGHT = (0.45, 0.85, 1.0, 0.8, 0.55, 0.3, 0, 0)
 # The splash's ground point, where the dog's feet meet the water: the frame's centre column, row 40.
 SPLASH_GROUND = (32, 40)
 
 
 def splash(step):
-    """64x48, its ground point 8px above the frame's bottom: a crown of water rising from the feet and
-    sinking, droplets arcing out and falling, mud kicked up, and two ripple rings spreading and fading."""
+    """64x48, its ground point 8px above the frame's bottom: a crown of five cyan jets tapering from a pool
+    of water at the feet, rising and sinking; three round drops thrown off the middle jets' tips, rising
+    and falling, each with a white glint; and one ripple spreading from frame 3. One cyan, a navy outline,
+    no specks, so it reads at a glance."""
     g = Grid(64, 48)
     cx, gy = SPLASH_GROUND
-    rings = ((12, 16, 20, 24, 27, 29, 31, 31)[step], (0, 0, 0, 0, 12, 16, 20, 24)[step])
-    for k, rx in enumerate(rings):
-        if rx:
-            ring(g, cx, gy, rx, max(3, rx * 0.28), "white" if k == 0 else "cyan", "cyan" if k == 0 else "sky",
-                 sparse=step >= 6 + k)
-    if step < 3:
-        g.ell(cx, gy, 8 + step * 3, 2.5, "cyan", None, "white")
-    if step < len(CROWN_GROWTH):
-        k = CROWN_GROWTH[step]
-        for bx, tx, h in CROWN:
-            spread = 1 + 0.4 * (step >= 3)
-            tip = (cx + bx + tx * k * spread, gy - h * k)
-            g.tri((cx + bx * k - 3, gy), (cx + bx * k + 3, gy), tip, "cyan")
-            g.tri((cx + bx * k - 1, gy), (cx + bx * k + 1, gy), tip, "sky")
-            g.rect(round(tip[0]) - 1, round(tip[1]) + 1, 2, 2, "white")
-            if step < 3:
-                g.rect(round(tip[0]) - 1, round(tip[1]) - 3, 2, 2, "white")
-    if step >= 2:
-        t = step - 1.4
-        for vx, vy, size in DROPS:
-            x, y = cx + vx * 1.8 * t, gy - 20 + vy * t + 2.4 * t * t
-            if y < gy + 1:
-                g.rect(round(x), round(y), size, size + 1, "cyan")
-                g.p(round(x), round(y), "white")
-    if 1 <= step <= 4:
-        t = step - 0.6
-        for vx, vy in MUD:
-            x, y = cx + vx * t, gy - 3 + vy * t + 1.6 * t * t
-            if y < gy + 2:
-                g.rect(round(x), round(y), 2, 1 + (step < 3), "dbrown")
+    if step >= 3:
+        k = (step - 2) / 5
+        ripple(g, cx, gy, 14 + 15 * k, 3.5 + 2.5 * k, "cyan" if step < 6 else "sky")
+    h = SPLASH_HEIGHT[step]
+    if h:
+        g.ell(cx, gy, 9 + 4 * h, 3, "cyan")
+        for bx, tx, ty in SPLASH_JETS:
+            jet(g, cx + bx, gy, cx + bx + (tx - bx) * h, gy + ty * h, 2.8, 1.2, "cyan")
+    if 1 <= step <= 6:
+        t = step - 1
+        for bx, tx, ty in SPLASH_JETS[1:4]:
+            x = cx + tx * (0.9 + 0.12 * t) + (tx / 22) * 2 * t
+            y = gy + ty - 3 - 2.5 * t + 1.6 * t * t
+            if y < gy - 2:
+                g.ell(x, y, 2, 2, "cyan")
+                g.p(round(x - 0.5), round(y - 0.5), "white")
     return g
 
 
