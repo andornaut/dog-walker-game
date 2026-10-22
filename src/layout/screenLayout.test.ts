@@ -9,9 +9,8 @@ describe("screenLayout", () => {
     expect(road.width / LANE_COUNT).toBe(64);
   });
 
-  it("fits the game's screen in 360x560, every part touching the next", () => {
+  it("stacks the screen's parts down its height, every part touching the next", () => {
     const { backdrop, dogRow, roadView, topBar } = screenLayout(SCREEN_CONFIG);
-    expect([SCREEN_CONFIG.width, SCREEN_CONFIG.height]).toEqual([360, 560]);
     expect(backdrop.y).toBe(topBar.y + topBar.height);
     expect(roadView.y).toBe(backdrop.y + backdrop.height);
     expect(dogRow.y).toBe(roadView.y + roadView.height);

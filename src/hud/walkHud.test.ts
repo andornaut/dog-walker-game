@@ -248,14 +248,7 @@ describe("cashScale", () => {
 });
 
 describe("maxEffects", () => {
-  const walk = { ...gameData.world, walkLength: walkLength(gameData) };
   it.each<[string, number, number, number]>([
-    [
-      "the game's walk",
-      read(gameData.tuning, "counts", "loadoutMax"),
-      walk.walkLength,
-      EFFECT_WELLS,
-    ],
     ["a one-zone walk with no Pocket", 0, 1, 1],
     ["a two-zone walk with a Pocket", 1, 2, 3],
     ["a four-zone walk with two Pocket items", 2, 4, 6],

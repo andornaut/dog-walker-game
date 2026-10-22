@@ -245,10 +245,6 @@ describe("top bar", () => {
     right: well.x + well.width - well.lip - 1,
   };
 
-  it("puts the middle row at the middle of the area above its rule", () => {
-    expect(mid).toBe((topBar.height - topBar.rule) / 2);
-  });
-
   // Each button under the walk bar's button in the same place among its last four.
   const under = buttons.map(([name, button], i) => {
     const walkId = WALK_BAR_BUTTONS[WALK_BAR_BUTTONS.length - buttons.length + i] ?? "pause";

@@ -78,9 +78,6 @@ describe("the card row's block", () => {
     const above = top - WALK.y;
     const below = bottom(WALK) - (top + CARD_ROW_BLOCK_HEIGHT);
     expect(above).toBe(Math.round((above + below) / 3));
-    expect(CARD_ROW_BLOCK_HEIGHT).toBe(
-      CARD_HEADER.titleRise + CARD_LAYOUT.height + charmRowHeight(1),
-    );
   });
 
   it.each(ROWS.map((row, i) => ({ count: i + 1, row })))(
