@@ -73,27 +73,24 @@ export interface Pulls {
 
 export const NO_PULLS: Pulls = { clock: 0, last: null, spent: [], strain: null };
 
-// moved is false for a pull dropped during a hit stop.
+// moved is false for a pull toward the road's edge from its edge lane.
 export interface PullEvent {
   readonly direction: LaneDirection;
   readonly dog: DogId;
   readonly moved: boolean;
 }
 
-// A dog that started straining this step, or whose strain was blocked, toward the side it
-// will pull.
+// A dog that started straining this step, toward the side it will pull.
 interface PullTell {
   readonly direction: LaneDirection;
   readonly dog: DogId;
   readonly kind: PullTargetKind;
 }
 
-// blocked is the strains blocked this step; failed the dogs whose strain ended without a pull,
-// blocked until its target went or cancelled by steering away; leashed the dogs that would have
-// started straining toward a squirrel that draws no pulls, such as under Good leash, once per
-// squirrel.
+// failed is the dogs whose strain ended without a pull, blocked until its target went or
+// cancelled by steering away; leashed the dogs that would have started straining toward a
+// squirrel that draws no pulls, such as under Good leash, once per squirrel.
 export interface PullStep {
-  readonly blocked: readonly PullTell[];
   readonly failed: readonly DogId[];
   readonly leashed: readonly DogId[];
   readonly pulled: readonly PullEvent[];
@@ -109,8 +106,7 @@ export interface PullPose {
   readonly tag: "pull" | "tell";
 }
 
-// A lane change caused by a dog: one lane toward direction, held on the road. Dropped during a
-// hit stop, as steering is.
+// A lane change caused by a dog: one lane toward direction, held on the road.
 export function pullWalk(
   data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
   laneCount: number,
@@ -118,9 +114,6 @@ export function pullWalk(
   walk: Walk,
 ): { readonly moved: boolean; readonly walk: Walk } {
   const { road, run } = walk;
-  if (road.hitStop !== null) {
-    return { moved: false, walk };
-  }
   const config = laneMotionConfig(data, laneCount, run);
   const control = pullLane(config, direction, road.control);
   return {
@@ -269,7 +262,7 @@ function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, wal
   return laneBlockedWithin(data, geometry, speed, horizon, lane, walk);
 }
 
-const NOTHING = { blocked: [], failed: [], leashed: [], pulled: [], tells: [] } as const;
+const NOTHING = { failed: [], leashed: [], pulled: [], tells: [] } as const;
 
 // The walking dog whose part of the pack's box has its centre nearest the target's across the
 // road, so the dog on the target's side strains, the first in pack order on a tie.
@@ -390,10 +383,8 @@ export function stepPulls(
     return { ...NOTHING, pulls: { ...pulls, clock, spent, strain: leaned }, walk };
   }
   if (pullBlocked(data, geometry, leaned, walk)) {
-    const { direction, dog, kind } = leaned;
     return {
       ...NOTHING,
-      blocked: leaned.blocked ? [] : [{ direction, dog, kind }],
       pulls: { ...pulls, clock, spent, strain: { ...leaned, blocked: true } },
       walk,
     };

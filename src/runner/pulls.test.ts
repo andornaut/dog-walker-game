@@ -118,7 +118,6 @@ function after(walk: Walk, seconds: number, pulls: Pulls = NO_PULLS) {
     walked = stepWalk(data, geometry, seededRandom(1), FRAME, stepped.walk).walk;
   }
   return {
-    blocked: steps.flatMap((stepped) => stepped.blocked),
     failed: steps.flatMap((stepped) => stepped.failed),
     leashed: steps.flatMap((stepped) => stepped.leashed),
     pulled: steps.flatMap((stepped) => stepped.pulled),
@@ -247,7 +246,6 @@ describe("the fairness rule", () => {
   it("strains without pulling while the lane has an obstacle too close, then pulls once clear", () => {
     const walk = walkWith(["koda"], [item("squirrel", 0, 0), cone]);
     const held = after(walk, 2);
-    expect(held.blocked).toEqual([{ direction: -1, dog: "koda", kind: "squirrel" }]);
     expect(held.pulled).toEqual([]);
     expect(held.walk.road.control.target).toBe(2);
     expect(held.pulls.strain?.blocked).toBe(true);
@@ -371,14 +369,10 @@ describe("stepPulls holds", () => {
 });
 
 describe("pullWalk", () => {
-  it("is the lane change any dog-caused pull goes through, dropped during a hit stop", () => {
-    const walk = walkWith(["archie"]);
-    expect(pullWalk(data, 5, 1, walk).walk.road.control.target).toBe(3);
-    const stopped: Walk = {
-      ...walk,
-      road: { ...walk.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
-    };
-    expect(pullWalk(data, 5, 1, stopped)).toEqual({ moved: false, walk: stopped });
+  it("is the lane change any dog-caused pull goes through, none past the road's edge", () => {
+    expect(pullWalk(data, 5, 1, walkWith(["archie"])).walk.road.control.target).toBe(3);
+    const edge = steerWalk(data, 5, -1, steerWalk(data, 5, -1, walkWith(["archie"])));
+    expect(pullWalk(data, 5, -1, edge).moved).toBe(false);
   });
 });
 
