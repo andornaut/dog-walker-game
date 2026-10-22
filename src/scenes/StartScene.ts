@@ -167,6 +167,7 @@ import {
   drawDisabledButton,
   type IconButton,
   imageIcon,
+  imageIconOr,
   type SelectTile,
   type SelectTileOptions,
   setDollarAmount,
@@ -1269,12 +1270,9 @@ export class StartScene extends Scene {
       scale,
       top: bank.capsY[scale],
     }));
-    this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) => {
-      const icon = imageIcon(this, "icon-logbook", x, y);
-      return icon.length > 0
-        ? icon
-        : [addPixelText(this, x + 8, y + 4, "L", { color: PALETTE.plum, originX: 0.5 })];
-    });
+    this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) =>
+      imageIconOr(this, "icon-logbook", x, y, "L"),
+    );
     this.iconButton(root, "settings", SETTINGS_FACE, (x, y) => {
       const icon = imageIcon(this, "icon-settings", x, y);
       return icon.length > 0 ? icon : cogIcon(this, x, y);

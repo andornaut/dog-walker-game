@@ -333,18 +333,29 @@ export function addCloseButton(
   control: CloseControl,
   pressed: boolean,
 ): void {
-  const button = addIconButton(scene, parent, control.x, control.y, (x, y) => {
-    const icon = imageIcon(scene, "icon-close", x, y);
-    return icon.length > 0
-      ? icon
-      : [addPixelText(scene, x + 8, y + 4, "X", { color: PALETTE.plum, originX: 0.5 })];
-  });
+  const button = addIconButton(scene, parent, control.x, control.y, (x, y) =>
+    imageIconOr(scene, "icon-close", x, y, "X"),
+  );
   button.setPressed(pressed);
 }
 
 // An image icon by key, or nothing while the art is missing.
 export function imageIcon(scene: Scene, key: string, x: number, y: number): Placed[] {
   return scene.textures.exists(key) ? [scene.add.image(x, y, key).setOrigin(0)] : [];
+}
+
+// An image icon by key, or letter on the icon button's face while the art is missing.
+export function imageIconOr(
+  scene: Scene,
+  key: string,
+  x: number,
+  y: number,
+  letter: string,
+): Placed[] {
+  const icon = imageIcon(scene, key, x, y);
+  return icon.length > 0
+    ? icon
+    : [addPixelText(scene, x + 8, y + 4, letter, { color: PALETTE.plum, originX: 0.5 })];
 }
 
 // A cog for settings, drawn in code: the art has no settings icon yet.
