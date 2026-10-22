@@ -408,6 +408,22 @@ describe("planSpawns", () => {
     }
   });
 
+  it("frees a one-cell spawn's kept cell once it is placed, for the bigger obstacles after it", () => {
+    // 9 rows of 5 lanes: 30 treats placed first leave 15 cells, all free for benches.
+    const placedFirst: SpawnPlan<Kind> = {
+      ...plan,
+      quotas: [
+        { blocksLane: true, count: 20, footprint: FOOTPRINTS.bench, kind: "bench" },
+        { blocksLane: false, count: 30, first: true, kind: "treat" },
+      ],
+    };
+    for (const seed of seeds.slice(0, 10)) {
+      const events = planSpawns(plannerStreams(seed), placedFirst);
+      expect(countOf("treat", events)).toBe(30);
+      expect(countOf("bench", events)).toBeGreaterThan(0);
+    }
+  });
+
   it("places every obstacle at a tight reach, an open lane within a move of each on the row before", () => {
     for (const seed of seeds) {
       const events = planSpawns(plannerStreams(seed), tight);

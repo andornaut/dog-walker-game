@@ -345,8 +345,8 @@ export function planSpawns<Kind extends string>(
   const statics = plan.quotas.filter((quota) => quota.mover === undefined);
   const prizes = plan.quotas.filter((quota) => quota.mover !== undefined && !quota.blocksLane);
   // One-cell spawns and moving prizes are never skipped, so the others keep a free cell for each
-  // of them.
-  const reserved = [...statics, ...prizes].reduce(
+  // of them still to place.
+  let reserved = [...statics, ...prizes].reduce(
     (sum, quota) => sum + (quota.mover !== undefined || area(quota) === 1 ? quota.count : 0),
     0,
   );
@@ -655,6 +655,10 @@ export function planSpawns<Kind extends string>(
         });
       }
       events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
+      // A one-cell spawn takes the cell kept for it.
+      if (statics.includes(quota) && area(quota) === 1) {
+        reserved -= 1;
+      }
     }
   };
   placeStanding((quota) => quota.first === true, placeMoving(true));
