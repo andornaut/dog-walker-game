@@ -2028,7 +2028,7 @@ describe("movers", { timeout: 60_000 }, () => {
   const plannedSpawns = () => {
     plans ??= ZONE_IDS.flatMap((zone) =>
       [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
-        [1, 2, 3, 4].flatMap((seed) => {
+        [1, 2, 3, 4, 5, 6, 7, 8].flatMap((seed) => {
           const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
           const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),
