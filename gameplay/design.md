@@ -155,7 +155,7 @@ Each debuff has one source: Muddy from a puddle, Stinky from the skunk's Quick r
 
 ### Lucky finds
 
-Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained.
+Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained. The friendly neighbor walks about, one or two quick steps in any direction, so the pack has to go and meet her; the lost wallet lies still.
 
 - **Friendly neighbor:** a pat for each dog: +♥ to every owner, the hearts jackpot
 - **Lost wallet:** +$$ found money, the money jackpot
@@ -170,7 +170,7 @@ Each obstacle has one look everywhere. Some kinds can move (each kind's movement
 - **Stalkers:** step toward the pack while still ahead of it: a lane to either side, a row down, or diagonally down, whichever brings it closest. The thief and the skunk each step two or three times, the first a little after coming on screen; the coyote three or four times, once a little after it comes on and then right after (in the faster neighborhoods it often reaches the pack first, so steps fewer times)
 - **Steps:** three or four quick steps, each in any direction (a lane to either side, or a row up or down), with a short random pause and no cue between them (the mail carrier)
 
-Each mover draws how many times it moves when it comes on, within its kind's range, so two of a kind can move different numbers of times. Vehicles (bikes, cars, scooters, the streetcar and trucks) only ever move up or down their own lane, never sideways or diagonally. Barriers, benches, bins, cones, hedges, parked cars and puddles never move.
+Each mover draws how many times it moves when it comes on, within its kind's range, so two of a kind can move different numbers of times. Every person and animal on the road moves. Vehicles (bikes, cars, scooters, the streetcar and trucks) only ever move up or down their own lane, never sideways or diagonally. Barriers, benches, bins, cones, hedges, parked cars and puddles never move.
 
 ### Feedback
 
