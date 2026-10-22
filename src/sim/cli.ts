@@ -170,6 +170,10 @@ function runInWorker(job: Job): Promise<MatrixRow[]> {
     const worker = new Worker(new URL(import.meta.url), { workerData: job });
     worker.once("message", (rows: unknown) => resolve(rows as MatrixRow[]));
     worker.once("error", reject);
+    // A worker that dies without an error, such as one killed, sends nothing either.
+    worker.once("exit", (code) =>
+      reject(new Error(`A simulation worker exited with code ${code}`)),
+    );
   });
 }
 
