@@ -908,6 +908,22 @@ describe("stepWalk", () => {
     expect(heartsByDog(step(muddy).walk.run).koda).toBe((heartsByDog(walk.run).koda ?? 0) - bump);
   });
 
+  // With no grace window, a cone, a card obstacle and a treat all meet the pack on one step.
+  it("fires an owner a hit empties before the step's treat, and leaves their dog off its card", () => {
+    const ungraced = {
+      ...data,
+      tuning: { ...tuning, seconds: { ...tuning.seconds, collisionGrace: 0 } },
+    };
+    const items = [atPack("cone"), { ...atPack("otherDog", 1), y: 556 }, atPack("treat", 2)];
+    const walk = withHearts(read(tuning, "hearts", "bump"), walkWith(["koda", "biscuit"], items));
+    const stepped = stepWalk(ungraced, geometry, seededRandom(1), 0.01, walk);
+    const card = { affected: ["biscuit"], encounter: "otherDog", kind: "encounter" };
+    expect(stepped.fired).toEqual(["koda"]);
+    expect(stepped.treats.map(({ dog }) => dog)).toEqual(["biscuit"]);
+    expect(stepped.encounterHits).toEqual([card]);
+    expect(stepped.walk.road.hitStop?.cards).toEqual([card]);
+  });
+
   // The game sets the pack's formation: the biggest dog leads, ties in roster order, whatever
   // order the dogs were picked in, and a head-on hit lands on the lead.
   it("lands a plain hit head-on on the biggest dog, ties in roster order", () => {

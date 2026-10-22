@@ -1138,9 +1138,8 @@ export function stepWalk(
   // Timed debuffs count down on walking steps only, so a hit stop or a card holds them.
   let nextRun: RunState = { ...tickDebuffs(stepSeconds, run), zoneDistance: pixels(zoneDistance) };
   const bumps: MinorBump[] = [];
-  const cards: CardSource[] = [];
+  const cards: EncounterCard[] = [];
   const collected: WalkItem[] = [];
-  const encounterHits: EncounterCard[] = [];
   const contacts: ContactHit[] = [];
   const instants: InstantFind[] = [];
   const modified: RoadModified[] = [];
@@ -1153,10 +1152,7 @@ export function stepWalk(
       }
     }
   };
-  for (const { dog, item } of [...hits, ...pickupsHit]) {
-    if (nextRun.phase.kind === "ended") {
-      break;
-    }
+  const meet = ({ dog, item }: { dog: DogId; item: WalkItem }): void => {
     const { kind } = item;
     if (isPickup(kind) && byReach.includes(item)) {
       modifiedAt(item, [reachModified(data, run, kind)]);
@@ -1181,7 +1177,7 @@ export function stepWalk(
           nextRun = countTally("dodges", nextRun);
         }
         bumps.push({ change: null, dodged: true, dog, item });
-        continue;
+        return;
       }
       const bump = bumpDog(data, dog, countBump(nextRun));
       nextRun = countLandedBump(kind, bump.state);
@@ -1198,7 +1194,7 @@ export function stepWalk(
           const by = [modifierCause(-1, immunity.source)];
           modifiedAt(item, [modifiedValue({ encounter: kind, kind: "immune" }, 1, by)]);
         }
-        continue;
+        return;
       }
       const { resolution } = data.encounters[kind];
       if (resolution.kind === "instant" || resolution.kind === "contact") {
@@ -1212,20 +1208,36 @@ export function stepWalk(
         }
         modifiedAt(item, outcome.modified);
       } else if (resolution.kind === "card") {
-        const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
-        if (hitLabel(data.encounters[kind]) !== null) {
-          encounterHits.push(card);
-        }
-        cards.push(card);
+        cards.push({ affected, encounter: kind, kind: "encounter" });
       }
     }
-  }
-  // An owner a bump left at 0 hearts fires you; with no dogs left the walk ends.
+  };
+  const meetAll = (met: readonly { dog: DogId; item: WalkItem }[]): void => {
+    for (const each of met) {
+      if (nextRun.phase.kind === "ended") {
+        break;
+      }
+      meet(each);
+    }
+  };
+  // The hits land first. An owner they left at 0 hearts fires you before the pickups, so a
+  // treat cannot save them; with no dogs left the walk ends.
+  meetAll(hits);
   const firing = fireOwnersAtZero(nextRun);
   nextRun =
     firing.fired.length > 0 && packDogs(firing.state).length === 0
       ? { ...firing.state, phase: { kind: "ended", reason: "noDogs" } }
       : firing.state;
+  meetAll(pickupsHit);
+  // A card met this step affects only the dogs still walking after its hits.
+  const walking = packDogs(nextRun);
+  const stepCards = cards.map((card): EncounterCard => ({
+    ...card,
+    affected: card.affected.filter((dog) => walking.includes(dog)),
+  }));
+  const encounterHits = stepCards.filter(
+    (card) => hitLabel(data.encounters[card.encounter]) !== null,
+  );
   const hitStop = startHitStop(
     false,
     hitStopLength(
@@ -1238,11 +1250,11 @@ export function stepWalk(
         minors: bumps.filter(({ dodged }) => !dodged).length + contacts.length,
       },
     ),
-    { cards, zoneEnded },
+    { cards: stepCards, zoneEnded },
   );
   return {
     bumps,
-    cards: hitStop === null ? cards : [],
+    cards: hitStop === null ? stepCards : [],
     collected,
     contacts,
     encounterHits,
