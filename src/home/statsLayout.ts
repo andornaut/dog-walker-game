@@ -36,9 +36,9 @@ export const STATS_LAYOUT = {
   // The badge tapped open, over the wall.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
   // In the open badge, from its top: the badge's centre at badgeY, the name's and the status's
-  // capitals at nameY and statusY, then the goal and the badge's line at 2x from x, textRight
-  // in from its right edge, a line of the body font apart and gap between them; the line's
-  // lowest ink keeps foot over the bottom.
+  // capitals at nameY and statusY, then the goal and the badge's line at 2x, centred and
+  // wrapped between x in from its left edge and textRight in from its right, a line of the body
+  // font apart and gap between them; the line's lowest ink keeps foot over the bottom.
   detailText: {
     badgeY: 48,
     foot: 8,

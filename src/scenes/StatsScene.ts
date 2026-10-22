@@ -296,9 +296,10 @@ export class StatsScene extends Scene {
     x: number,
     y: number,
     value: string,
-    options: { color?: number; font?: FontRole; originX?: number } = {},
+    options: { align?: "center"; color?: number; font?: FontRole; originX?: number } = {},
   ): GameObjects.BitmapText {
     const label = addPixelText(this, x, y, value, {
+      ...(options.align === undefined ? {} : { align: options.align }),
       color: options.color ?? PALETTE.plum,
       font: options.font ?? "body",
       originX: options.originX ?? 0,
@@ -531,12 +532,16 @@ export class StatsScene extends Scene {
       color: colors.status,
       originX: 0.5,
     });
-    const x = DETAIL.x + DETAIL_TEXT.x;
+    // The goal and line centred under the name, each line of them centred on the card.
+    const centred = { align: "center", originX: 0.5 } as const;
     const goal = this.wrap(badge.goal);
-    this.text(x, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), { color: colors.goal });
+    this.text(center, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), {
+      ...centred,
+      color: colors.goal,
+    });
     const line = fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine });
     const lineY = DETAIL.y + detailLineY(pixelFontMetrics(this, "body"), goal.length);
-    this.text(x, lineY, this.wrap(line).join("\n"), { color: colors.line });
+    this.text(center, lineY, this.wrap(line).join("\n"), { ...centred, color: colors.line });
   }
 
   // Body text at 2x broken into lines no wider than the open badge's text.
