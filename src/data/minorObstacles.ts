@@ -5,7 +5,11 @@ import type { MinorObstacle } from "./types";
 // obstacle with a movement comes as a mover at the zone's mover share, and stands still
 // otherwise.
 export const MINOR_OBSTACLES = {
-  ball: { movement: { kind: "dart" }, name: "Ball", shape: { lanes: 1, rows: 1 } },
+  ball: {
+    movement: { kind: "dart", tilt: { max: 0, min: 0 } },
+    name: "Ball",
+    shape: { lanes: 1, rows: 1 },
+  },
   barrier2: {
     name: "Barrier",
     shape: { lanes: 2, rows: 1 },
@@ -26,7 +30,11 @@ export const MINOR_OBSTACLES = {
     name: "Car",
     shape: { lanes: 1, rows: 3 },
   },
-  cat: { movement: { kind: "dart" }, name: "Cat", shape: { lanes: 1, rows: 1 } },
+  cat: {
+    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 } },
+    name: "Cat",
+    shape: { lanes: 1, rows: 1 },
+  },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
   coyote: {
     movement: { kind: "approach", steps: { max: 3, min: 2 } },
@@ -49,7 +57,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   frisbeeDog: {
-    movement: { kind: "dart", tilt: 0.3 },
+    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 } },
     name: "Frisbee dog",
     shape: { lanes: 1, rows: 1 },
   },
@@ -87,7 +95,7 @@ export const MINOR_OBSTACLES = {
   },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
   pigeons: {
-    movement: { kind: "dart", tilt: -0.3 },
+    movement: { kind: "dart", tilt: { max: -0.3, min: -0.3 } },
     name: "Pigeons",
     shape: { lanes: 1, rows: 1 },
   },
@@ -102,7 +110,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   seagull: {
-    movement: { kind: "dart", tilt: 0.3 },
+    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 } },
     name: "Seagull",
     shape: { lanes: 1, rows: 1 },
   },

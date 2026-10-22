@@ -1655,7 +1655,8 @@ describe("movers", { timeout: 60_000 }, () => {
       const movement = movementOf(kind);
       if (movement?.kind === "dart") {
         expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
-        expect(Math.abs(movement.tilt ?? 0)).toBeLessThan(1);
+        expect(movement.tilt.min).toBeLessThanOrEqual(movement.tilt.max);
+        expect(movement.tilt.min).toBeGreaterThan(-1);
       } else if (movement?.kind === "inLane") {
         expect(movement.factor).toBeGreaterThan(0);
         expect(movement.factor).not.toBe(1);

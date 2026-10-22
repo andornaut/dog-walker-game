@@ -1,7 +1,7 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { chance, type Random } from "../lib/random";
-import { type LanedBox, levelWithPack, touchesAsDrawn } from "../runner/collision";
+import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";
@@ -135,31 +135,117 @@ const SCROLL_CONTACTS = new WeakMap<
   WeakMap<object, Map<string, readonly ScrollContact[]>>
 >();
 
-// Whether a hit box touches the pack in lane, as the walk's collision has it: one of the pack's
-// hit rectangles touches it as drawn, placed at the lane's centre, or, for a box between lanes,
-// anywhere on the road within half a lane of it on the box's side of each lane edge. A box as
-// narrow as a cat's can pass between a pack standing in either of two lanes and still meet it
-// changing lanes, which the plan counts as in both, so the half lane each side of an edge counts
-// for the lane on the box's side of it alone: the lane beyond stays clear for a pack that stands
-// there while the box passes.
+// A mover as one sample of its path finds it: its hit box, the top and bottom of its rows on the
+// screen, whether it is between lanes, and whether it is solid.
+interface MoverSample {
+  readonly between: boolean;
+  readonly bottom: number;
+  readonly box: LanedBox;
+  readonly solid: boolean;
+  readonly top: number;
+}
+
+// Where an edge is at one sample and at the next, moving evenly between them.
+type Edge = readonly [number, number];
+
+// Whether, at some moment between two samples, every pair's first edge is before its second, as
+// each edge moves evenly from one sample to the next.
+function holdTogether(pairs: readonly (readonly [Edge, Edge])[]): boolean {
+  let start = 0;
+  let end = 1;
+  for (const [before, after] of pairs) {
+    const gapFrom = after[0] - before[0];
+    const gapTo = after[1] - before[1];
+    if (gapFrom <= 0 && gapTo <= 0) {
+      return false;
+    }
+    if (gapFrom <= 0) {
+      start = Math.max(start, gapFrom / (gapFrom - gapTo));
+    } else if (gapTo <= 0) {
+      end = Math.min(end, gapFrom / (gapFrom - gapTo));
+    }
+  }
+  return start < end;
+}
+
+// Whether a mover moving from one sample to the next touches a part as drawn at some moment
+// between them while level with the pack's band: touchesAsDrawn's and levelWithPack's comparisons
+// all holding at once. A box moving down the road and across it at once, as a tilted dart does,
+// can clip a part's corner between two samples, where the walk's collision, at its own walk
+// steps, can meet it. With the two samples the same, it is touchesAsDrawn's test.
+function touchesBetween(
+  centerX: number,
+  band: RoadGeometry["packBand"],
+  part: ScaledBox,
+  from: MoverSample,
+  to: MoverSample,
+): boolean {
+  const across = (scale: number, x: number) => centerX + (x - centerX) * scale;
+  const a = from.box;
+  const b = to.box;
+  // Clear of the part all the way along: the box between them stays within both samples'.
+  if (
+    Math.max(a.bottom, b.bottom) <= part.top ||
+    Math.min(a.top, b.top) >= part.bottom ||
+    Math.max(across(a.scale, a.right), across(b.scale, b.right)) <= across(part.scale, part.left) ||
+    Math.min(across(a.scale, a.left), across(b.scale, b.left)) >= across(part.scale, part.right)
+  ) {
+    return false;
+  }
+  const edge = (at: (sample: MoverSample) => number): Edge => [at(from), at(to)];
+  const still = (value: number): Edge => [value, value];
+  // The box's sides, each cut to its lanes as drawn on the part's row.
+  const lefts = [
+    edge(({ box }) => across(box.scale, box.left)),
+    edge(({ box }) => across(part.scale, box.lanes.left)),
+  ];
+  const rights = [
+    edge(({ box }) => across(box.scale, box.right)),
+    edge(({ box }) => across(part.scale, box.lanes.right)),
+  ];
+  const partLeft = still(across(part.scale, part.left));
+  const partRight = still(across(part.scale, part.right));
+  return holdTogether([
+    ...lefts.flatMap((left) => rights.map((right) => [left, right] as const)),
+    ...rights.map((right) => [partLeft, right] as const),
+    ...lefts.map((left) => [left, partRight] as const),
+    [still(part.top), edge(({ box }) => box.bottom)],
+    [edge(({ box }) => box.top), still(part.bottom)],
+    [still(band.top), edge(({ bottom }) => bottom)],
+    [edge(({ top }) => top), still(band.bottom)],
+  ]);
+}
+
+// Whether a mover moving from one sample to the next touches the pack in lane, as the walk's
+// collision has it: one of the pack's hit rectangles touches it as drawn, placed at the lane's
+// centre, or, for a box between lanes, anywhere on the road within half a lane of it on the box's
+// side of each lane edge. A box as narrow as a cat's can pass between a pack standing in either
+// of two lanes and still meet it changing lanes, which the plan counts as in both, so the half
+// lane each side of an edge counts for the lane on the box's side of it alone: the lane beyond
+// stays clear for a pack that stands there while the box passes.
 function touchesPackIn(
   geometry: ContactGeometry,
-  between: boolean,
   lane: number,
-  box: LanedBox,
+  from: MoverSample,
+  to: MoverSample,
 ): boolean {
   const { cell, laneCount } = geometry;
   const x = (lane + 0.5) * cell.length;
-  const centre = (box.lanes.left + box.lanes.right) / 2;
-  const left = between && lane > 0 && centre >= lane * cell.length ? cell.length / 2 : 0;
-  const right =
-    between && lane < laneCount - 1 && centre < (lane + 1) * cell.length ? cell.length / 2 : 0;
+  const centre = ({ box }: MoverSample) => (box.lanes.left + box.lanes.right) / 2;
+  const widens = (side: (sample: MoverSample) => boolean) =>
+    [from, to].some((sample) => sample.between && side(sample)) ? cell.length / 2 : 0;
+  const left = widens((sample) => lane > 0 && centre(sample) >= lane * cell.length);
+  const right = widens(
+    (sample) => lane < laneCount - 1 && centre(sample) < (lane + 1) * cell.length,
+  );
   const { dogs, walker } = geometry.packParts;
   return [...dogs, walker].some((part) =>
-    touchesAsDrawn(
+    touchesBetween(
       geometry.lens.centerX,
+      geometry.packBand,
       { ...part, left: part.left + x - left, right: part.right + x + right },
-      box,
+      from,
+      to,
     ),
   );
 }
@@ -191,21 +277,29 @@ function scrollContacts(
   // The contact under way in each lane, by lane. Between lanes, a mover's box can touch the
   // pack standing in either lane it straddles.
   const current = new Map<number, ScrollContact>();
+  let previous: MoverSample | null = null;
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
     const y = roadTop - height + place.travel;
     if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
       break;
     }
-    const level = place.solid && levelWithPack(packBand, { height, y });
-    const between = Math.abs(place.lanePosition - Math.round(place.lanePosition)) > 1e-9;
-    const box = obstacleHitBox(road.data, geometry, {
-      ...item,
-      mover: { path, since },
-      y,
-    });
+    const sample: MoverSample = {
+      between: Math.abs(place.lanePosition - Math.round(place.lanePosition)) > 1e-9,
+      bottom: y + height,
+      box: obstacleHitBox(road.data, geometry, { ...item, mover: { path, since }, y }),
+      solid: place.solid,
+      top: y,
+    };
+    // Since the sample before: a contact found here may have started any time after it.
+    const from = previous ?? sample;
+    previous = sample;
+    const level =
+      sample.solid &&
+      Math.max(from.bottom, sample.bottom) > packBand.top &&
+      Math.min(from.top, sample.top) < packBand.bottom;
     for (let lane = 0; lane < laneCount; lane++) {
-      const touching = level && touchesPackIn(geometry, between, lane, box);
+      const touching = level && touchesPackIn(geometry, lane, from, sample);
       const under = current.get(lane);
       if (touching && under !== undefined) {
         under.to = since;

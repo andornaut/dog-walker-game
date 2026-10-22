@@ -564,7 +564,11 @@
       "hitWord": "SNIFF!",
       "kind": "obstacle",
       "movement": {
-        "kind": "dart"
+        "kind": "dart",
+        "tilt": {
+          "max": 0,
+          "min": 0
+        }
       },
       "name": "Other dog",
       "resolution": {
@@ -710,7 +714,11 @@
       "hitWord": "CHIRP!",
       "kind": "obstacle",
       "movement": {
-        "kind": "dart"
+        "kind": "dart",
+        "tilt": {
+          "max": 0,
+          "min": 0
+        }
       },
       "name": "Squirrel",
       "resolution": {
@@ -884,7 +892,11 @@
     {
       "id": "ball",
       "movement": {
-        "kind": "dart"
+        "kind": "dart",
+        "tilt": {
+          "max": 0,
+          "min": 0
+        }
       },
       "name": "Ball",
       "shape": {
@@ -963,7 +975,11 @@
     {
       "id": "cat",
       "movement": {
-        "kind": "dart"
+        "kind": "dart",
+        "tilt": {
+          "max": 1.6,
+          "min": 0.1
+        }
       },
       "name": "Cat",
       "shape": {
@@ -1046,7 +1062,10 @@
       "id": "frisbeeDog",
       "movement": {
         "kind": "dart",
-        "tilt": 0.3
+        "tilt": {
+          "max": 1.6,
+          "min": 0.1
+        }
       },
       "name": "Frisbee dog",
       "shape": {
@@ -1167,7 +1186,10 @@
       "id": "pigeons",
       "movement": {
         "kind": "dart",
-        "tilt": -0.3
+        "tilt": {
+          "max": -0.3,
+          "min": -0.3
+        }
       },
       "name": "Pigeons",
       "shape": {
@@ -1210,7 +1232,10 @@
       "id": "seagull",
       "movement": {
         "kind": "dart",
-        "tilt": 0.3
+        "tilt": {
+          "max": 1.6,
+          "min": 0.1
+        }
       },
       "name": "Seagull",
       "shape": {

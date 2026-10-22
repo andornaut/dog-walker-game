@@ -287,6 +287,13 @@ export interface MoveCount {
   readonly min: number;
 }
 
+// A dart's tilt, drawn per dart from min to max: above 0 it comes down the road faster than the
+// road, below 0 slower, at 0 with it.
+export interface Tilt {
+  readonly max: number;
+  readonly min: number;
+}
+
 // How an obstacle moves when it comes as a mover, its first move after a cue
 // seconds.moverWarningSeconds long and each later one with no cue, and only while the mover is
 // still ahead of the pack's rows. A stepper's or hopper's later moves run back to back. approach: steps steps toward
@@ -295,11 +302,12 @@ export interface MoveCount {
 // seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, each later
 // one, with no cue of its own, once the step before has ended and the road left between it and the
 // pack is multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across the road
-// at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile (tilt 0
-// when absent), setting off multipliers.dartStartRoadShareMin to Max of the road ahead of the
-// pack, drawn per dart and never so low that the pack has less than seconds.pathReactionMargin
-// after its cue, nor so high that its cue is off the road; one that has crossed by the time it
-// reaches the pack's rows passes harmlessly. inLane: down its lane at factor of the road's speed,
+// at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile, its tilt
+// drawn per dart from its range cut to the steepest the zone's pace leaves a start for, setting
+// off multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per dart and
+// never so low that the pack has less than seconds.pathReactionMargin after its cue, nor so high
+// that its cue is off the road; one that has crossed by the time it reaches the pack's rows
+// passes harmlessly. inLane: down its lane at factor of the road's speed,
 // above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
 // to either side or, unless sideways, a row up the road or diagonally up, landing
 // seconds.moverHopSeconds after it leaves; a shy hopper, at probability.shyHopperShare of its
@@ -312,7 +320,7 @@ export interface MoveCount {
 // hop comes up to seconds.moverTimingJitter late.
 export type Movement =
   | { readonly kind: "approach"; readonly steps: MoveCount }
-  | { readonly kind: "dart"; readonly tilt?: number }
+  | { readonly kind: "dart"; readonly tilt: Tilt }
   | {
       readonly kind: "hop";
       readonly most: 1 | 2;

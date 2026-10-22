@@ -376,9 +376,10 @@ export interface ShyHops {
   readonly share: number;
 }
 
-// cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed,
-// setting off a share of the road ahead of the pack drawn per mover from startRoadShare, never so
-// low that the pack has less than reactionSeconds after its cue to meet it.
+// cross: across the road at lanesPerSecond, tilted down the road by a tilt of the road's speed
+// drawn per mover from tilt, setting off a share of the road ahead of the pack drawn per mover
+// from startRoadShare, never so low that the pack has less than reactionSeconds after its cue to
+// meet it at its drawn tilt.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
@@ -400,7 +401,7 @@ export type MoverMotion =
       readonly lanesPerSecond: number;
       readonly reactionSeconds: number;
       readonly startRoadShare: readonly [number, number];
-      readonly tilt: number;
+      readonly tilt: readonly [number, number];
     }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
@@ -428,8 +429,8 @@ export interface MoverSpec {
 
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
 // speed, the delay before each of its moves, a stalker's later-step road share, where a dart
-// sets off, and whether a hopper of a shy kind hops shy (below its kind's share). EVEN_DRAWS moves
-// it at its kind's speed with no delay, at the near end of a range, and never shy.
+// sets off, a dart's tilt, and whether a hopper of a shy kind hops shy (below its kind's share).
+// EVEN_DRAWS moves it at its kind's speed with no delay, at the near end of a range, and never shy.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
@@ -437,6 +438,7 @@ export interface MoverDraws {
   readonly shy: number;
   readonly speed: number;
   readonly start: number;
+  readonly tilt: number;
 }
 
 const EVEN_DRAWS: MoverDraws = {
@@ -446,11 +448,12 @@ const EVEN_DRAWS: MoverDraws = {
   shy: 0.999999,
   speed: 0.5,
   start: 0,
+  tilt: 0,
 };
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
-// delays and share; movers draws each mover's count, third delay, start and shyness, so those
-// never shift the spawns stream.
+// delays and share; movers draws each mover's count, third delay, start, shyness and tilt, so
+// those never shift the spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -465,7 +468,8 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const count = movers();
   const third = movers();
   const start = movers();
-  return { count, delays: [...delays, third], share, shy: movers(), speed, start };
+  const shy = movers();
+  return { count, delays: [...delays, third], share, shy, speed, start, tilt: movers() };
 }
 
 // The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
@@ -495,14 +499,30 @@ function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): n
 }
 
 // A crosser sets off at its drawn share of the road ahead of the pack, the tallest pack's rows at
-// sightLength, at its drawn speed: one placement per side it enters from, its contact with the
-// pack, if it has one, starting as its row's window does. Its share is no lower than leaves the
-// pack reactionSeconds between its cue ending and its reaching the pack's rows, and no higher
-// than shows its cue wholly on the road; with no share between, it has no placement. Tilted, its
+// sightLength, at its drawn speed and tilt: one placement per side it enters from, its contact with
+// the pack, if it has one, starting as its row's window does. Its share is no lower than leaves the
+// pack reactionSeconds between its cue ending and its reaching the pack's rows at its tilt, and no
+// higher than shows its cue wholly on the road. Its tilt is drawn from its range cut to the
+// steepest that leaves a share between, at the road's pace; with none, even at its range's
+// lowest, it has no placement. Tilted, its
 // contact lasts window / (1 + tilt), which its rows cover. One that has crossed the road by the
 // time it reaches the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps
 // clear every row it is level with as it crosses, and one that meets the pack also the row
 // before its own, as a lead-in.
+// The tilts a crosser draws from on a road scrolling at scrollSpeed: its range, its high end cut
+// to the steepest that still leaves the pack reactionSeconds from a start highest of the road
+// ahead, but never below its low end.
+export function crossTilts(
+  motion: Pick<Extract<MoverMotion, { kind: "cross" }>, "reactionSeconds" | "tilt">,
+  scrollSpeed: number,
+  sightLength: number,
+  highest: number,
+): readonly [number, number] {
+  const [low, high] = motion.tilt;
+  const steepest = (highest * sightLength) / (motion.reactionSeconds * scrollSpeed) - 1;
+  return [low, Math.max(low, Math.min(high, steepest))];
+}
+
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -511,17 +531,17 @@ function crossPlacements(
 ): MoverPlacement[] {
   const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength, window } =
     geometry;
-  const { tilt } = motion;
+  const warning = spec.warningSeconds * scrollSpeed;
+  const highest = Math.min(motion.startRoadShare[1], 1 - (warning + cellLength) / sightLength);
+  const tilt = within(crossTilts(motion, scrollSpeed, sightLength, highest), draws.tilt);
   if (tilt <= -1) {
     throw new Error("A crosser's tilt must keep it coming down the road");
   }
   const lanesPerPixel = (motion.lanesPerSecond * speedFactor(spec.variation, draws)) / scrollSpeed;
-  const warning = spec.warningSeconds * scrollSpeed;
   const lowest = Math.max(
     motion.startRoadShare[0],
     (motion.reactionSeconds * scrollSpeed * (1 + tilt)) / sightLength,
   );
-  const highest = Math.min(motion.startRoadShare[1], 1 - (warning + cellLength) / sightLength);
   if (highest < lowest) {
     return [];
   }

@@ -381,15 +381,16 @@ describe("sweptLanes", () => {
   });
 });
 
-// A mover's draws with no delay at its kind's speed, and the count and a dart's start at the low
-// end of their ranges (the fewest moves, the lowest start), there and shy, or at the high end.
+// A mover's draws with no delay at its kind's speed, and the count and a dart's start and tilt at
+// the low end of their ranges (the fewest moves, the lowest start and tilt), there and shy, or at
+// the high end.
 const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
   {
-    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0.999999, speed: 0.5, start: 0 },
+    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0.999999, speed: 0.5, start: 0, tilt: 0 },
     end: "the low end",
   },
   {
-    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0, speed: 0.5, start: 0 },
+    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0, speed: 0.5, start: 0, tilt: 0 },
     end: "the low end, shy",
   },
   {
@@ -400,19 +401,20 @@ const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
       shy: 0.999999,
       speed: 0.5,
       start: 0.999999,
+      tilt: 0.999999,
     },
     end: "the high end",
   },
 ];
 
 // A crosser that sets off from 0.1 to 0.9 of the road ahead of the pack, leaving the pack half a
-// second after its cue.
-const cross = (lanesPerSecond: number, tilt: number): MoverSpec["motion"] => ({
+// second after its cue, at a tilt drawn from min to max.
+const cross = (lanesPerSecond: number, min: number, max = min): MoverSpec["motion"] => ({
   kind: "cross",
   lanesPerSecond,
   reactionSeconds: 0.5,
   startRoadShare: [0.1, 0.9],
-  tilt,
+  tilt: [min, max],
 });
 
 // Each motion, footprint and tilt the planner meets, as a spec.
@@ -420,7 +422,7 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
   { name: "a dart", spec: spec(cross(2, 0)) },
   {
     name: "a dart tilted toward the pack",
-    spec: spec(cross(3, 0.3)),
+    spec: spec(cross(3, 0.1, 0.7)),
   },
   { name: "a dart tilted away", spec: spec(cross(3, -0.3)) },
   {
@@ -614,6 +616,7 @@ describe("moverPlacements", () => {
               shy,
               speed: 0.5,
               start: 0,
+              tilt: 0,
             },
             moving,
             name,
@@ -695,6 +698,7 @@ describe("moverPlacements", () => {
         shy: 0.999999,
         speed: 0.5,
         start,
+        tilt: 0,
       };
       const [rightward] = moverPlacements(geometry, spec(cross(3, 0)), draws);
       expect(rightward?.lanes.count).toBe(lanes);
@@ -703,24 +707,40 @@ describe("moverPlacements", () => {
     },
   );
 
-  it("starts a dart no lower than leaves the pack its reaction time, nor higher than shows its cue", () => {
-    const ends = [0, 0.999999].map((start) => {
-      const [placement] = moverPlacements(geometry, spec(cross(3, 0)), {
-        count: 0,
-        delays: [0, 0, 0],
-        share: 0,
-        shy: 0.999999,
-        speed: 0.5,
-        start,
+  // Half a second of reaction at 100px/s, sooner at the dart's drawn tilt; a 1s cue and a cell
+  // must fit above the start.
+  it.each([
+    { draw: 0, motion: cross(3, 0), name: "untilted", tilt: 0 },
+    { draw: 0, motion: cross(3, 0.1, 0.7), name: "at its lowest tilt", tilt: 0.1 },
+    { draw: 0.999999, motion: cross(3, 0.1, 0.7), name: "at its highest tilt", tilt: 0.7 },
+    // At 100px/s a start at most 0.625 of the road ahead leaves half a second at tilt 4 at most.
+    {
+      draw: 0.999999,
+      motion: cross(3, 0.1, 10),
+      name: "at a tilt cut to the steepest the road allows",
+      tilt: 4,
+    },
+  ])(
+    "starts a dart $name no lower than leaves the pack its reaction time, nor higher than shows its cue",
+    ({ draw, motion, tilt }) => {
+      const ends = [0, 0.999999].map((start) => {
+        const [placement] = moverPlacements(geometry, spec(motion), {
+          count: 0,
+          delays: [0, 0, 0],
+          share: 0,
+          shy: 0.999999,
+          speed: 0.5,
+          start,
+          tilt: draw,
+        });
+        return placement?.path.motion === "cross" ? placement.path.enterTravel : NaN;
       });
-      return placement?.path.motion === "cross" ? placement.path.enterTravel : NaN;
-    });
-    const { cellLength, scrollSpeed, sightLength } = geometry;
-    // Half a second of reaction at 100px/s; a 1s cue and a cell must fit above the start.
-    const [low, high] = ends;
-    expect(low).toBeCloseTo(sightLength - 0.5 * scrollSpeed);
-    expect(high).toBeCloseTo(scrollSpeed + cellLength);
-  });
+      const { cellLength, scrollSpeed, sightLength } = geometry;
+      const [low, high] = ends;
+      expect(low).toBeCloseTo(sightLength - 0.5 * scrollSpeed * (1 + tilt), 3);
+      expect(high).toBeCloseTo(scrollSpeed + cellLength);
+    },
+  );
 
   it("needs an in-lane mover to move at another speed than the road", () => {
     expect(() => moverPlacements(geometry, spec({ kind: "ride", speedMultiplier: 1 }))).toThrow();
