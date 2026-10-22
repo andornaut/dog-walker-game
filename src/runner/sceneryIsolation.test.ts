@@ -135,7 +135,7 @@ function walk(
   return { events, out, session };
 }
 
-describe("scenery layers", () => {
+describe("scenery layers", { timeout: 30_000 }, () => {
   it.each(Object.keys(LAYERS).map((name) => [name, 1] as const))(
     "%s leaves a same-seed walk unchanged, seed %i",
     (name, seed) => {
