@@ -46,7 +46,8 @@ interface GeneratedFilesPluginOptions {
 }
 
 // On the dev server, keeps the committed generated files in step as their sources change:
-// public/art/manifest.json with the art files, and shared/export/ with src/. The game's modules
+// public/art/manifest.json with the art files, and shared/export/ with src/, shared/'s tables
+// and the fonts' .fnt files, which the export reads. The game's modules
 // load through the server, never into this config, so editing a value file still updates the
 // game without a restart. A build writes the art manifest in atlasPlugin and shared/export/ in
 // npm's prebuild step.
@@ -56,6 +57,7 @@ export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions):
     configureServer(server: ViteDevServer) {
       const { logger, publicDir } = server.config;
       const srcDir = join(repoRoot, "src");
+      const sharedDir = join(repoRoot, "shared");
       const artDir = `${publicDir}/${ART_DIR}`;
       const log = (message: string) => logger.info(message, { timestamp: true });
       const fail = (what: string, error: unknown) =>
@@ -90,8 +92,8 @@ export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions):
 
       writeManifest();
       writeExport();
-      // Vite watches pages/ and public/, not src/.
-      server.watcher.add(srcDir);
+      // Vite watches pages/ and public/, not src/ or shared/.
+      server.watcher.add([srcDir, sharedDir]);
       server.watcher.on("all", (_event, path) => {
         const inArt = relative(artDir, path).split(sep);
         const artFile =
@@ -101,7 +103,12 @@ export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions):
           writeManifest();
         }
         const inSrc = relative(srcDir, path).split(sep)[0] !== "..";
-        if (inSrc && path.endsWith(".ts") && !path.endsWith(".test.ts")) {
+        const source = inSrc && path.endsWith(".ts") && !path.endsWith(".test.ts");
+        // shared/'s own tables, not shared/export/, which the export writes.
+        const sharedTable =
+          relative(sharedDir, path).split(sep).length === 1 && path.endsWith(".json");
+        const font = artFile && inArt[0] === "fonts" && path.endsWith(".fnt");
+        if (source || sharedTable || font) {
           writeExport();
         }
       });
