@@ -96,7 +96,7 @@ export function plaqueRoom(left: number, width: number, markerRight: number | un
   return left + width - (markerRight ?? left) - 2 * CARD_LAYOUT.plaquePadX;
 }
 
-export function cardRowSpec(maxCount: number): CardRowSpec {
+function cardRowSpec(maxCount: number): CardRowSpec {
   return {
     cardHeight: CARD_LAYOUT.height,
     cardWidth: CARD_LAYOUT.width,

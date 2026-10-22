@@ -34,10 +34,7 @@ type MarkData = Pick<
 
 // The charm a modifier's source shows: its gear, its upgrade or the walker's perk. A debuff,
 // a card's own option and a lucky find show none.
-export function charmItem(
-  data: Pick<GameData, "walkers">,
-  source: ModifierSource,
-): EffectItem | null {
+function charmItem(data: Pick<GameData, "walkers">, source: ModifierSource): EffectItem | null {
   switch (source.kind) {
     case "gear":
       return { gear: source.gear, kind: "gear" };
@@ -51,7 +48,7 @@ export function charmItem(
 }
 
 // The charms of a value's modifiers, one per modifier that has one, in the order applied.
-export function charmsOf(data: Pick<GameData, "walkers">, value: ModifiedValue): EffectItem[] {
+function charmsOf(data: Pick<GameData, "walkers">, value: ModifiedValue): EffectItem[] {
   return value.by.flatMap((cause) => charmItem(data, cause.source) ?? []);
 }
 
@@ -74,7 +71,7 @@ function heartsText(hearts: number): string {
 
 // A value as a chip over the road says it, before and after: a heart change, a money change
 // ("+$1" then "+$2") or a debuff's seconds ("8s" then "4s"). Null for any other value.
-export function chipStrike(data: Pick<GameData, "runText">, value: ModifiedValue): Struck | null {
+function chipStrike(data: Pick<GameData, "runText">, value: ModifiedValue): Struck | null {
   const seconds = (amount: number) =>
     fillNames(data.runText.seconds, { seconds: String(Math.round(amount)) });
   switch (value.subject.kind) {

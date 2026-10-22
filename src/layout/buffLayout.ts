@@ -38,7 +38,7 @@ export const BUFF_POP = {
 // A struck value: a 1px red line across the old value's capitals' middle row, past rows
 // beyond its ink each side, and the new value gap rows after the old value's ink. Each is a
 // font pixel at the text's scale.
-export const STRIKE = { gap: 4, past: 1 } as const;
+const STRIKE = { gap: 4, past: 1 } as const;
 
 // A lit charm's side at scale: the well and its ring each side.
 export function charmRingSize(scale: number): number {
