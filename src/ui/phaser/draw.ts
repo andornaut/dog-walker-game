@@ -119,16 +119,18 @@ export function drawHeart(
   });
 }
 
-// A 1px border of 2-on, 2-off dashes, for an empty slot.
+// A 1px border of 2-on, 2-off dashes, for an empty slot, the last dash on a side cut at its end.
 export function drawDashedRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
   graphics.fillStyle(color);
   const right = rect.x + rect.width - 1;
   const bottom = rect.y + rect.height - 1;
   for (let i = 0; i < rect.width; i += 4) {
-    graphics.fillRect(rect.x + i, rect.y, 2, 1).fillRect(rect.x + i, bottom, 2, 1);
+    const dash = Math.min(2, rect.width - i);
+    graphics.fillRect(rect.x + i, rect.y, dash, 1).fillRect(rect.x + i, bottom, dash, 1);
   }
   for (let i = 0; i < rect.height; i += 4) {
-    graphics.fillRect(rect.x, rect.y + i, 1, 2).fillRect(right, rect.y + i, 1, 2);
+    const dash = Math.min(2, rect.height - i);
+    graphics.fillRect(rect.x, rect.y + i, 1, dash).fillRect(right, rect.y + i, 1, dash);
   }
 }
 
