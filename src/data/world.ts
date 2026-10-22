@@ -6,7 +6,7 @@ export const WORLD = {
   firstZone: "park",
   lastZone: "homeStretch",
   name: "Toronto",
-  preForkRoute: ["street", "park", "shops", "homeStretch"],
+  preForkRoute: ["park", "street", "shops", "homeStretch"],
   walkLength: 4,
   zones: [
     {

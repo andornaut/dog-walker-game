@@ -1590,8 +1590,8 @@
     "lastZone": "homeStretch",
     "name": "Toronto",
     "preForkRoute": [
-      "street",
       "park",
+      "street",
       "shops",
       "homeStretch"
     ],
