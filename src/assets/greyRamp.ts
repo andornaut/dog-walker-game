@@ -1,3 +1,5 @@
+import { remapRgb } from "../lib/rgba";
+
 // A grey copy's colours come from a ramp of greys, lightest first.
 
 function brightness(color: number): number {
@@ -33,16 +35,5 @@ export function remapToGrey(
   steps: number,
   pixels: Uint8ClampedArray,
 ): void {
-  const cache = new Map<number, number>();
-  for (let i = 0; i + 3 < pixels.length; i += 4) {
-    const color = ((pixels[i] ?? 0) << 16) | ((pixels[i + 1] ?? 0) << 8) | (pixels[i + 2] ?? 0);
-    let grey = cache.get(color);
-    if (grey === undefined) {
-      grey = greyFor(ramp, steps, color);
-      cache.set(color, grey);
-    }
-    pixels[i] = (grey >> 16) & 0xff;
-    pixels[i + 1] = (grey >> 8) & 0xff;
-    pixels[i + 2] = grey & 0xff;
-  }
+  remapRgb((color) => greyFor(ramp, steps, color), pixels);
 }

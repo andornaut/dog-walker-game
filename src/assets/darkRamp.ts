@@ -1,3 +1,4 @@
+import { remapRgb } from "../lib/rgba";
 import { ONE_STEP_DARKER } from "./housePalette";
 
 function distance(a: number, b: number): number {
@@ -32,16 +33,5 @@ export function darkerColor(steps: number, color: number): number {
 
 // Remaps RGBA pixel data in place, steps down the ramps, leaving alpha alone.
 export function remapDarker(steps: number, pixels: Uint8ClampedArray): void {
-  const cache = new Map<number, number>();
-  for (let i = 0; i + 3 < pixels.length; i += 4) {
-    const color = ((pixels[i] ?? 0) << 16) | ((pixels[i + 1] ?? 0) << 8) | (pixels[i + 2] ?? 0);
-    let dark = cache.get(color);
-    if (dark === undefined) {
-      dark = darkerColor(steps, color);
-      cache.set(color, dark);
-    }
-    pixels[i] = (dark >> 16) & 0xff;
-    pixels[i + 1] = (dark >> 8) & 0xff;
-    pixels[i + 2] = dark & 0xff;
-  }
+  remapRgb((color) => darkerColor(steps, color), pixels);
 }
