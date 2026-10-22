@@ -209,15 +209,15 @@ export function createUpdateFlow(
     },
     watch(registration) {
       watched = registration;
+      // Follows the version installing now, whether its updatefound came before watch (the
+      // browser's own check on navigation) or after; a listener added twice runs once.
       const read = () => {
+        registration.installing?.addEventListener("statechange", read);
         const { newer, worker } = newerVersionOf(container, registration);
         waitingWorker = worker;
         update({ newer, online: online() });
       };
-      registration.addEventListener("updatefound", () => {
-        registration.installing?.addEventListener("statechange", read);
-        read();
-      });
+      registration.addEventListener("updatefound", read);
       // A version already waiting, a first install or no network: nothing to check first.
       const waiting = newerVersionOf(container, registration).newer === "waiting";
       if (waiting || container.controller === null || !online()) {

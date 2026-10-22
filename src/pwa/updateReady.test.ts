@@ -272,6 +272,16 @@ describe("createUpdateFlow", () => {
     });
   });
 
+  it("follows a version that was already installing when watching began", async () => {
+    const { booted, flow } = setup();
+    const registration = new FakeRegistration();
+    registration.installing = new FakeWorker();
+    flow.watch(registration);
+    await settle();
+    expect(booted()).toBe(false);
+    expect(registration.finishInstall().messages).toEqual([SKIP_WAITING_MESSAGE]);
+  });
+
   it("switches at once to a version already waiting at load", () => {
     const { flow } = setup();
     const registration = new FakeRegistration();
