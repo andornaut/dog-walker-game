@@ -44,7 +44,7 @@ import obstacles  # noqa: E402
 from minis import STEPS, small  # noqa: E402
 from obstacles import PULL_OUT, treads, unit  # noqa: E402
 from pixel import K, Grid, edged, main, raster  # noqa: E402
-from road import SCALE, face_disc, face_front, lit  # noqa: E402
+from road import SCALE, face_disc, face_front, lit, raise_mouth  # noqa: E402
 
 # The garbage truck is laid out on 56x50 and drawn as obstacles.delivery_truck is, its columns kept (a lane less
 # 4px each side) and its rows TRUCK_SCALE times taller: 56x60, taller than the delivery truck's 54 and as tall
@@ -244,6 +244,8 @@ def scooter_riding(roll, u=1):
     g.rect(15, 2.5, 2, 5, "sky")
     g.rect(11, 8, 10, 1, "dslate")
     face_front(g, 16, 10)
+    # the smile up a pixel, clear of the chin's edge and the jacket's collar
+    raise_mouth(g, 16, 10)
     # mirrors on stalks, the handlebar, the gloves on the grips, the indicators at its ends
     for x in (5, 24):
         g.rect(x, 13, 3, 2, "lgrey")

@@ -52,6 +52,7 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
+import math
 import os
 import sys
 
@@ -60,7 +61,7 @@ import hazards  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
-from pixel import Grid, edged, main, scale_of  # noqa: E402
+from pixel import Grid, edged, main, raster, scale_of  # noqa: E402
 from road import BREATH, BREATH_MS, lit  # noqa: E402
 
 
@@ -503,6 +504,10 @@ def seagull(lf=0, rf=0, bob=0):
     g.rect(15, 19 + b, 2, 3, "yellow")
     g.p(16, 21 + b, "red")
     sack(g, 16, 27 + b)
+    # the pupils again in drawn pixels, at least 1px, so the eyes keep them at every depth step
+    px, s = raster(g), scale_of(g)
+    for x in (13, 19):
+        px.p(math.floor((x + 0.5) * s), math.floor((17 + b + 0.5) * s), "ink")
     return lit(g)
 
 

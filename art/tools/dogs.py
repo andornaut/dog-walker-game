@@ -120,14 +120,12 @@ def koda_road(q):
     g.cel(bx, 19.5 + o + b, 6, 5.5, "slate", "dslate", "grey")
     g.rect(bx - 7, 16 + o + b, 14, 2, "orange")
     g.rect(bx - 7, 17 + o + b, 14, 1, "rust")
-    g.rect(bx - 2, 20 + o + b, 4, 2, "orange")
-    g.rect(bx - 1, 21 + o + b, 2, 1, "slate")
     g.ell(bx, 15 + o + b, 5.5, 1.5, "dslate")
     # the plumed tail curled over the hips: grey on top like the saddle, its white underside in the curl
     tx = 16 + q["tail"]
     g.cel(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
     g.ell(tx + 0.5, 28.5 + b, 2, 1, "white")
-    # a broad head with white cheeks and small ears set wide, their tips rounded
+    # a broad head with white cheeks tucked into its lower sides and small ears set wide, their tips rounded
     hx = 16 + ln
     e = q["ears"] + q["flop"]
     tip = max(2, 2.5 + o + b + e)
@@ -135,8 +133,8 @@ def koda_road(q):
     g.tri((hx - 8, 7.5 + o + b), (hx - 6.5, tip), (hx - 3, 5 + o + b), "slate")
     g.tri((hx + 8, 7.5 + o + b + t), (hx + 6.5, tip + t), (hx + 3, 5 + o + b + t), "slate")
     g.cel(hx, 10 + o + b, 8.5, 6, "slate", "dslate", "grey")
-    g.ell(hx - 7, 12.5 + o + b, 2, 2.2, "white")
-    g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
+    g.ell(hx - 6, 13 + o + b, 2, 2, "white")
+    g.ell(hx + 6, 13 + o + b, 2, 2, "white", "lgrey")
     underside(g)
     spray(g, q["spray"])
     rim(g, KODA_RIM)
@@ -234,17 +232,16 @@ def duchess_road(q):
     g.rect(18, 27 + q["br"], 2, 2, "lgrey")
     bx = 16 + ln // 2
     g.cel(bx, 23.5 + b, 5.5, 4.5, "white", "lgrey")
-    g.cel(bx - 4.5, 25 + b, 1.6, 2, "white", "lgrey")
+    g.cel(bx - 4.5, 25 + b, 1.6, 2, "white")
     g.ell(bx + 4.5, 25 + b, 1.6, 2, "lgrey")
     g.ell(bx, 20 + b, 4, 1.2, "lgrey")
     tx = 16 + q["tail"]
-    g.cel(tx, 26.5 + b, 3, 2, "white", "lgrey", "white")
-    g.p(tx + 1, 27 + b, "lgrey")
+    g.cel(tx, 26.5 + b, 3, 2, "white")
     hx = 16 + ln
     g.cel(hx - 4.5, 18 + b - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
     g.ell(hx + 4.5, 18 + b - q["ears"] + q["flop"] + q["twitch"], 2.2, 4, "lgrey")
     g.cel(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
-    bow(g, hx, 10 + b)
+    bow(g, hx, 10 + b, folds=False)
     underside(g)
     spray(g, q["spray"])
     return g
@@ -396,13 +393,15 @@ def pierre_road(q):
     puff(g, hx - 5, 14.5 + D + b - q["ears"] + q["flop"], 2, 3.5, ring=True)
     puff(g, hx + 5, 14.5 + D + b - q["ears"] + q["flop"] + q["twitch"], 2, 3.5, ring=True)
     puff(g, hx, 10.5 + D + b, 4, 3.8, ring=True)
-    # the white stripe from the top of the topknot down the neck, the mane and the back to the tail's tip;
-    # leaning, the head moves further than the body, so the neck steps it across halfway
+    # the white stripe, one width all the way, from the top of the topknot down the neck, the mane and the
+    # back to the tail's tip; leaning, the head moves further than the body, so the neck carries it across on
+    # a diagonal, a row at a time
     g.rect(hx - 1, 7 + D + b, 2, 7, STRIPE[0])
-    g.rect((hx + bx) // 2 - 1, 13 + D + b, 2, 2, STRIPE[0])
+    for k in range(3):
+        g.rect(hx - 1 + (bx - hx) * (k + 1) / 4, 13 + D + b + k, 2, 2, STRIPE[0])
     g.rect(bx - 1, 15 + D + b, 2, 10 - D, STRIPE[0])
-    g.rect(bx, 15 + D + b, 1, 10 - D, STRIPE[1])
-    g.rect(tx, 25 + b, 1, 2, STRIPE[0])
+    # the tail's stripe runs down its stem into the white tip, so the two read as one tail
+    g.rect(tx, 25 + b, 1, 3, STRIPE[0])
     g.ell(tx + 0.5, 28.8 + b, 1.2, 1, STRIPE[0])
     # a small mauve show bow tied in purple, pinned to the topknot's top right
     g.rect(hx, 5 + D + b, 2, 3, "mauve")
@@ -432,7 +431,7 @@ def pierre_face(mood):
     g.rect(15, 3, 2, 11, STRIPE[0])
     g.rect(16, 4, 1, 10, STRIPE[1])
     bow(g, 16, 4, big=True, colours=("mauve", "purple"))
-    eyes(g, 11, 19, 14, iris="brown", mood=mood)
+    eyes(g, 11, 19, 14, mood=mood)
     g.rect(15, 19, 2, 2, "ink")
     mouth(g, 22, mood)
     return g
@@ -460,12 +459,9 @@ def archie_road(q):
     g.ell(bx, 21.5 + b, 7, 6, *COAT)
     merle(g, bx, b, ((-3.5, 21, 2, 1.5), (3, 24, 2.2, 1.5), (2.5, 19.6, 1.3, 1)))
     g.cel(bx, 16.5 + b, 6, 2, "white", "lgrey")
-    # the red bandana's knot at the nape, its two ends flaring down the back
+    # the red bandana tied at the nape in one knot
     g.rect(bx - 5, 17 + b, 10, 1, "red")
-    g.rect(bx - 1, 16 + b, 2, 2, "dred")
-    for side in (-1, 1):
-        x = bx + (side - 1) // 2
-        trail(g, [(x + side, 18 + b), (x + 2 * side, 19 + b)], "red")
+    g.rect(bx - 1, 17 + b, 2, 2, "dred")
     # a short bobtail
     tx = 16 + q["tail"]
     g.ell(tx, 27.5 + b, 2, 1.6, *COAT)
@@ -535,9 +531,6 @@ def snowball_road(q):
     for dx, dy in ((-8, -1), (8, -1), (-7, 3), (7, 3), (-4, 6), (4, 6)):
         g.cel(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white", "lgrey")
     g.rect(bx - 7, 16 + o + b, 14, 1, "sky")
-    # the bell hangs from the collar's right end
-    g.rect(bx + 5, 17 + o + b, 2, 2, "amber")
-    g.p(bx + 6, 18 + o + b, "orange")
     # the plumed tail carried up over the back
     tx = 16 + q["tail"]
     g.cel(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
@@ -598,8 +591,13 @@ def penny_road(q):
     for (l, r, tl, tr), c in (((13, 19, -1.5, 1.5), GOLD[1]), ((13, 14.5, -1.5, -0.5), GOLD[0])):
         g.tri((l, 22 + b), (r, 22 + b), (tx + tr, ty), c)
         g.tri((l, 22 + b), (tx + tl, ty), (tx + tr, ty), c)
-    # a broad skull with short flat drop ears at its sides, in the shade colour
+    # a broad skull with short flat drop ears at its sides, in the shade colour, over a neck as wide as the
+    # skull down to the collar, so no road shows between an ear and the collar
     hx, hb = 16 + ln, b
+    left, right = min(hx, bx) - 6.5, max(hx, bx) + 6.5
+    g.rect(left, 13 + o + hb, right - left, 3, GOLD[0])
+    g.rect(bx - 6, 16 + o + b, 12, 2, "blue")
+    g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
     gold(g, hx, 9.5 + o + hb, 6.5, 4.5, 2.8)
     for x, t in ((hx - 6.5, 0), (hx + 6.5, q["twitch"])):
         g.blob(x, 10.5 + o + hb - q["ears"] + q["flop"] + t, 1.8, 2.5, GOLD[1], power=3)
@@ -746,15 +744,17 @@ def despeckle(g, colours):
         px[y][x] = c
 
 
-def bow(g, cx, y, big=False, colours=("pink", "mauve")):
+def bow(g, cx, y, big=False, colours=("pink", "mauve"), folds=True):
     """A bow: Duchess's is pink, Pepe's show ribbon mauve tied in purple. The knot and folds take the
-    second colour."""
+    second colour; folds=False leaves the folds out, for a bow too small at road scale for them to land
+    on its wings."""
     c, knot = colours
     w = 4 if big else 3
     g.tri((cx - 1, y + 1), (cx - 1 - w, y - 1), (cx - 1 - w, y + 3), c)
     g.tri((cx + 1, y + 1), (cx + 1 + w, y - 1), (cx + 1 + w, y + 3), c)
-    g.p(cx - 1 - w + 1, y + 2, knot)
-    g.p(cx + w, y + 2, knot)
+    if folds:
+        g.p(cx - 1 - w + 1, y + 2, knot)
+        g.p(cx + w, y + 2, knot)
     g.rect(cx - 1, y, 2, 2, knot)
 
 

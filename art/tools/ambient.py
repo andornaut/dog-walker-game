@@ -461,7 +461,9 @@ def ginger_cat(pose):
         g.tri((21.5, 14 + dy), (24.5, 13 + dy), (22.5, 8.5 + dy), "orange")
         g.tri((24.5, 13 + dy), (27.5, 13.5 + dy), (26.5, 9 + dy), "orange")
         g.rect(26, 17 + dy, 4, 2.5, "cream")
-        g.rect(26, 15 + dy, 2, 1.5, "ink")
+        # the same eye as when it sits: green, its pupil towards the front
+        g.rect(26, 15 + dy, 2, 2, "green")
+        g.rect(27, 15 + dy, 1, 2, "ink")
         g.rect(29.5, 17 + dy, 1, 1, "pink")
     return draw
 

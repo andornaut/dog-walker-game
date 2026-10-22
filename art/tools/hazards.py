@@ -375,10 +375,11 @@ def coyote(fl=0, fr=0, bl=0, br=0, bob=0, head=0, ear=0, new=Grid):
         g.rect(x + 1, top, 0.5, foot - 1 - lift - top, shade)
         paw(x, foot, lift, col, shade)
 
-    # the tail, hanging low off the rump, clear of the hind legs, a black tip
-    g.cel(5.5, 16.5 + b, 2, 3.5, "brown", "dbrown", "tan")
-    g.cel(4.5, 20.5 + b, 1.8, 2.5, "brown", "dbrown")
-    g.cel(4, 23.5 + b, 1.5, 1.8, "brown", "dbrown")
+    # the bushy tail, swept back and down off the rump and well clear of the ground, so it never reads as a
+    # leg
+    g.cel(5, 16.5 + b, 2.2, 3, "brown", "dbrown", "tan")
+    g.cel(3, 19 + b, 2.2, 2.4, "brown", "dbrown")
+    g.cel(2, 21.5 + b, 1.6, 1.8, "brown", "dbrown")
     # the far legs, a shade darker and 1px shorter: the hind under the hip, the front under the shoulder
     hind(11, 28, bl, "dbrown", "dbrown")
     fore(18.5, 19 + b, 28, fl, "dbrown", "dbrown")
@@ -415,7 +416,7 @@ def coyote(fl=0, fr=0, bl=0, br=0, bob=0, head=0, ear=0, new=Grid):
     lit(g)
     # the black nose and tail tip go on after the rim, which would light their edges grey
     g.rect(29.5, 19.5 + h, 1, 1, "ink")
-    g.cel(4, 25.5 + b, 1.3, 1.2, "ink")
+    g.cel(1.8, 22.8 + b, 1.2, 1.1, "ink")
     return g
 
 

@@ -1160,7 +1160,7 @@
       "json": "sprites/coyote.json",
       "anchor": {
         "feetY": 43,
-        "opaqueWidth": 43
+        "opaqueWidth": 46
       }
     },
     {
@@ -1187,7 +1187,7 @@
       "json": "sprites/coyote@75.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 33
+        "opaqueWidth": 34
       }
     },
     {
@@ -1196,7 +1196,7 @@
       "json": "sprites/coyote@88.json",
       "anchor": {
         "feetY": 38,
-        "opaqueWidth": 38
+        "opaqueWidth": 40
       }
     },
     {
@@ -1430,7 +1430,7 @@
       "json": "sprites/dog-koda.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 30
+        "opaqueWidth": 28
       }
     },
     {
@@ -1457,7 +1457,7 @@
       "json": "sprites/dog-koda@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
       }
     },
     {
@@ -1466,7 +1466,7 @@
       "json": "sprites/dog-koda@88.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 26
+        "opaqueWidth": 25
       }
     },
     {
@@ -3904,6 +3904,11 @@
       "key": "ui-slider-knob",
       "png": "sprites/ui-slider-knob.png",
       "json": "sprites/ui-slider-knob.json"
+    },
+    {
+      "key": "ui-slot-sign",
+      "png": "sprites/ui-slot-sign.png",
+      "json": "sprites/ui-slot-sign.json"
     },
     {
       "key": "ui-switch",

@@ -50,14 +50,15 @@ def base(g, skin, shade, shirt, shirt_sh):
 
 
 def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False, glasses=None,
-               lips=None):
+               lips=None, nose=None):
     """Eyes, brows and mouth. wide marks the dramatic owners, whose faces go further. brow is the brows'
     colour (feat unless given). whites sets a white beside each pupil, so the eyes read on dark skin.
     Happy closes the eyes into smiling arcs under raised flat brows; neutral is open eyes under flat brows;
     upset slants the brows down to the middle over a frown, angry and sad; fired narrows the eyes under brows
     pinched down hard; worried lifts the brows' inner ends over eyes gone wide, white either side of the
-    pupil, with a small wobbly mouth and a big sweat bead. glasses rings each eye in that colour and lips
-    paints the closed mouth's middle (not while firing)."""
+    pupil, with a small wobbly mouth and a big sweat bead. glasses frames each eye in that colour, lips
+    paints the closed mouth's middle (not while firing) and nose, a skin shade, puts a nose pixel between
+    the eyes, as the walkers' sprites and portraits have."""
     brow = brow or feat
     for x in (12, 19):
         if mood == "happy":
@@ -134,11 +135,16 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         g.rect(15, 22, 2, 2, "dred")
         g.rect(10, 20, 2, 1, "red")
         g.rect(20, 20, 2, 1, "red")
+    if nose:
+        g.p(16, 20, nose)
     if glasses:
+        # clear frames: a box with its corners cut round each eye, skin showing through, and a bridge
         for cx in (12, 19):
-            for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)):
-                g.p(cx + dx, 18 + dy, glasses)
-        g.rect(14, 18, 3, 1, glasses)
+            g.rect(cx - 1, 16, 3, 1, glasses)
+            g.rect(cx - 1, 20, 3, 1, glasses)
+            g.rect(cx - 2, 17, 1, 3, glasses)
+            g.rect(cx + 2, 17, 1, 3, glasses)
+        g.rect(15, 18, 2, 1, glasses)
     if lips and mood != "fired":
         g.rect(15, 23, 2, 1, lips)
 
@@ -204,7 +210,7 @@ def lefevre(mood):
     g.rect(22, 10, 2, 8, "navy")
     g.p(7, 19, "amber")
     g.p(24, 19, "amber")
-    expression(g, mood, feat="dred", lashes=True, lips="red")
+    expression(g, mood, feat="dred", lashes=True, lips="red", brow="ink")
     return g
 
 
@@ -442,7 +448,7 @@ def casey(mood):
     g.cel(16, 7.5, 9, 4.5, "amber", "orange", "yellow")
     g.rect(7, 10, 18, 2, "orange")
     g.rect(15, 5, 2, 2, "orange")
-    expression(g, mood)
+    expression(g, mood, nose="skin2")
     return g
 
 
@@ -465,7 +471,7 @@ def ada(mood):
     g.cel(16, 10, 8.5, 4, "navy", "ink", "dslate")
     g.cel(11.5, 8.5, 2.5, 1.5, "dslate")
     g.cel(22, 7, 2, 1.5, "pink", "mauve")
-    expression(g, mood, blush="pink", wide=True)
+    expression(g, mood, blush="pink", wide=True, nose="dbrown")
     # big, bright eyes with two highlights
     for x in (11, 18):
         g.rect(x, 15, 3, 4, "ink")
@@ -494,7 +500,7 @@ def ben(mood):
     g.rect(12, 26, 8, 1, "dgreen")
     g.rect(11, 27, 1, 1, "dgreen")
     g.rect(20, 27, 1, 1, "dgreen")
-    expression(g, mood, feat="cream", blush="rust", brow="ink", whites=True)
+    expression(g, mood, feat="cream", blush="rust", brow="ink", whites=True, nose="plum")
     return g
 
 
@@ -513,7 +519,7 @@ def trista(mood):
     g.cel(11, 11, 3, 2, "brown", "dbrown", "tan")
     for x, y, h in ((10, 8, 2), (14, 6, 3), (18, 7, 2)):
         g.rect(x, y, 1, h, "amber")
-    expression(g, mood, glasses="dbrown")
+    expression(g, mood, glasses="dbrown", nose="skin2")
     return g
 
 

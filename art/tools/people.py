@@ -187,6 +187,8 @@ def lefevre_top(wave):
         for x in range(12, 21, 2):
             g.p(x, 21 + b, "white")
         g.rect(15, 29 + b, 2, 1, "amber")
+        # the far earring first, so a raised arm passes in front of it
+        g.p(24, 17 + b, "amber")
         arms(g, b, wave, "purple", "plum", "skin1")
         # the rosette: blue petals round an amber button, two ribbon tails below the fist
         g.cel(6.5, 27 + b, 3, 3, "blue", "navy", "sky")
@@ -200,7 +202,6 @@ def lefevre_top(wave):
         g.rect(8, 9 + b, 2, 8, "navy")
         g.rect(22, 9 + b, 2, 8, "navy")
         g.p(7, 17 + b, "amber")
-        g.p(24, 17 + b, "amber")
         face_front(g, 16, 13 + b, lips="red")
         g.p(10, 12 + b, "ink")
         g.p(22, 12 + b, "ink")
@@ -248,6 +249,9 @@ def kiwi_top(wave):
         g.rect(17, 21 + b, 1, 12, "lgrey")
         g.rect(11, 24 + b, 2, 2, "green")
         g.p(11, 24 + b, "yellow")
+        # the curls round the head first, so a raised arm and its hand pass in front of them
+        for cx, cy in ((8, 11), (24, 11), (9, 6.5), (23, 6.5), (12.5, 3.5), (19.5, 3.5), (16, 3)):
+            g.cel(cx, cy + b, 2.6, 2.6, "white", "lgrey")
         arms(g, b, wave, "sky", "blue", "brown")
         # the yarn: a pink ball with two needles through it and a strand hanging from the fist
         for i in range(5):
@@ -261,8 +265,6 @@ def kiwi_top(wave):
         g.p(10, 22 + b, "white")
         g.rect(4, 31 + b, 1, 5, "pink")
         g.rect(5, 31 + b, 4, 3, "brown")
-        for cx, cy in ((8, 11), (24, 11), (9, 6.5), (23, 6.5), (12.5, 3.5), (19.5, 3.5), (16, 3)):
-            g.cel(cx, cy + b, 2.6, 2.6, "white", "lgrey")
         head(g, b, "brown", "dbrown")
         g.cel(16, 7 + b, 7.5, 3, "white", "lgrey")
         for cx in (10.5, 14, 18, 21.5):

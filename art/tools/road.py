@@ -407,12 +407,18 @@ def eye_boxes(g, cx, y, spread=4):
     return [(math.floor(x * s + 0.5 - n / 2), top, n) for x in (cx - spread, cx + spread)]
 
 
-def glasses(g, cx, y, c, spread=4):
-    """Round glasses on the eyes face_front draws at (cx, y): a ring 1px out from each eye with its corners
-    cut, and a bridge between them a row under the eyes' top. Drawn in pixels round the eyes, so they fit
-    them at any scale."""
+def glasses(g, cx, y, c, spread=4, skin="skin1"):
+    """Round clear glasses on the eyes face_front draws at (cx, y): a ring 1px out from each eye with its
+    corners cut, and a bridge between them a row under the eyes' top. Inside each ring the lens shows skin
+    with a 2px pupil glinting white at its top-left, set toward the nose, so they read as glasses and not
+    sunglasses. Drawn in pixels round the eyes, so they fit them at any scale."""
     px = raster(g)
     (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y, spread)
+    if n >= 3:
+        for x0, inner in ((lx, lx + n - 2), (rx, rx)):
+            px.rect(x0, top, n, n, skin)
+            px.rect(inner, top + n - 2, 2, 2, "ink")
+            px.p(inner, top + n - 2, "white")
     for x0 in (lx, rx):
         px.rect(x0 - 1, top, 1, n, c)
         px.rect(x0 + n, top, 1, n, c)
@@ -480,6 +486,7 @@ def casey_front(wave=0, bob=0):
     g.rect(7, 11 + b, 18, 1, "rust")
     g.p(16, 6 + b, "yellow")
     face_front(g, 16, 14 + b)
+    nose(g, 16, 14 + b)
     g.p(10, 17 + b, "pink")
     g.p(22, 17 + b, "pink")
     return g
@@ -522,6 +529,7 @@ def ada_front(wave=0, bob=0):
     g.rect(11, 12 + b, 3, 1, "dslate")
     g.cel(21, 13 + b, 2, 1.5, "pink", "mauve")
     face_front(g, 16, 20 + b)
+    nose(g, 16, 20 + b, "dbrown")
     return rim(g, dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"),
                        brown=("skin2", None), blue=("sky", None)))
 
@@ -560,6 +568,7 @@ def ben_front(wave=0, bob=0):
     g.cel(16, 18.5 + b, 6, 2.5, "ink")
     g.rect(13, 16 + b, 6, 1, "dbrown")
     front_eyes(g, 16, 12 + b)
+    nose(g, 16, 12 + b, "plum")
     g.rect(14, 17 + b, 4, 1, "cream")
     g.p(13, 16 + b, "cream")
     g.p(18, 16 + b, "cream")
@@ -600,14 +609,15 @@ def trista_front(wave=0, bob=0):
     g.rect(7, 26 + b, 2, 8, "tan")
     g.rect(4, 28 + b, 3, 3, "red")
     g.p(5, 27 + b, "dgreen")
+    # the bob's left flick goes under the arms, so a raised arm covers it
+    g.p(6, 19 + b, "brown")
+    g.rect(7, 19 + b, 2, 1, "brown")
     raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "skin1", "skin2"), (0, "dgreen", "forest")))
     # the bob: hair behind and beside the face to the shoulders, flicking out, then the face and fringe
     g.cel(16, 12.5 + b, 9, 9, "brown", "dbrown", "tan")
     g.rect(7, 12 + b, 18, 7, "brown")
     g.rect(22, 12 + b, 3, 7, "dbrown")
-    g.p(6, 19 + b, "brown")
     g.p(25, 19 + b, "dbrown")
-    g.rect(7, 19 + b, 2, 1, "brown")
     g.rect(23, 19 + b, 2, 1, "dbrown")
     face_disc(g, 16, 14.5 + b, 6.5, 6.5, "skin1", "skin2")
     g.rect(14, 19 + b, 4, 2, "skin2")
@@ -661,7 +671,7 @@ def cheering(key, swing, bob=0):
         inner, s = raster(g), scale_of(g)
         for x0, x1, y0, y1 in rects:
             for yy in range(math.floor((y0 + bob) * s), math.ceil((y1 + bob) * s)):
-                for xx in range(math.floor(x0 * s), math.floor(x1 * s)):
+                for xx in range(math.floor(x0 * s), math.ceil(x1 * s)):
                     if 0 <= yy < inner.h and inner.px[yy][xx] in hexes:
                         inner.px[yy][xx] = None
         lift(g, x, w, top, bottom, swing, parts)
@@ -847,7 +857,7 @@ def squirrel_head(g, x, y):
 # reaches down for the next landing.
 SQUIRREL_BOUND = (
     (22, 18.5, (22, 14, 5, 7), (8, 21, 26, 3)),
-    (21, 17.5, (21.5, 11.5, 5, 6.5), (9, 20, 25.5, 3)),
+    (21, 17, (21.5, 11.5, 5, 6.5), (9, 20, 25.5, 3)),
     (19, 14.5, (20, 9, 5, 6), (11, 17, 24, 2)),
     (20.5, 16, (21, 11, 5, 6.5), (9.5, 19.5, 25, 3)),
 )
@@ -865,11 +875,14 @@ def squirrel_run(phase):
     cx = 15 + low
     g.cel(cx, by, 5.5 + 1.5 * low, 5 - 0.5 * low, f["fur"], f["shade"], f["lit"])
     g.cel(cx, by + 1, 3 + 0.5 * low, 3 - 0.5 * low, f["belly"])
+    # the paws reach up into the body, so no gap opens under it; the head sits on a whole column, so its round
+    # eyes keep their shape
+    top = math.floor(by + 5 - 0.5 * low) - 1
     for x in (lx, rx):
-        g.rect(x, py, 3, ph, f["foot"])
+        g.rect(x, min(py, top), 3, py + ph - min(py, top), f["foot"])
         if ph > 2:
             g.rect(x, py + ph - 1, 3, 1, f["lit"])
-    squirrel_head(g, cx, hy)
+    squirrel_head(g, round(cx), hy)
     return rim(g, LIT)
 
 
