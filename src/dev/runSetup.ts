@@ -197,6 +197,23 @@ export function parseRunSetup<DogId extends string, GearId extends string, Walke
   };
 }
 
+// Limits that know no ids and no zones, for reading the dev flag without the game data.
+const NO_LIMITS: RunSetupLimits<string, string> = {
+  dogIds: [],
+  gearIds: [],
+  maxPackSize: 0,
+  speed: { max: 0, min: 0 },
+  walkerIds: [],
+  zoneCount: 0,
+  zoneIds: [],
+};
+
+// Whether a page's URL search turns dev mode on, read as parseRunSetup reads it, for code that
+// runs before the game data has loaded.
+export function devInSearch(search: string): boolean {
+  return parseRunSetup(NO_LIMITS, () => 0, search).setup.dev;
+}
+
 // The inverse of parseRunSetup, without a leading "?". The seed is always written; values at
 // their defaults are left out.
 export function runSetupToQuery(setup: RunSetup): string {

@@ -1,8 +1,10 @@
+// First, so the crash screen catches an error thrown while any other module loads.
+import "./crash/install";
 import "./main.css";
 
 import { AUTO, Core, Game, Scale } from "phaser";
 
-import { installCrashScreen } from "./crash/crashScreen";
+import { stopGameOnCrash } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
 import { applyPendingSaveEdits, type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { DEV_CHEATS_KEY } from "./dev/devPanelModel";
@@ -28,18 +30,6 @@ import { ShopScene } from "./scenes/ShopScene";
 import { StartScene } from "./scenes/StartScene";
 import { StatsScene } from "./scenes/StatsScene";
 import { ZoneCelebrationScene } from "./scenes/ZoneCelebrationScene";
-
-let game: Game | undefined;
-
-// Installed first, to catch errors while the game boots. A crash before the game exists has
-// nothing to pause.
-installCrashScreen({
-  dev: pageRunSetup().setup.dev,
-  onCrash: () => {
-    game?.pause();
-    game?.sound.pauseAll();
-  },
-});
 
 // The dev panel's view of the game: the cheats are a registry entry RunScene reads each frame.
 function devPanelHost(game: Game): DevPanelHost {
@@ -116,6 +106,10 @@ function bootGame(): Game {
     width: SCREEN_CONFIG.width,
   });
 
+  stopGameOnCrash(() => {
+    game.pause();
+    game.sound.pauseAll();
+  });
   fitWholePixels(game);
   mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
 
@@ -155,8 +149,4 @@ function bootGame(): Game {
 // The game boots once the service worker has had the chance to switch a fresh load to a newer
 // version, so it never draws the old one first, and once the dev panel's queued save edits are
 // written, so the game loads the edited save.
-void setupPhoneApp()
-  .then(applyPendingSaveEdits)
-  .then(() => {
-    game = bootGame();
-  });
+void setupPhoneApp().then(applyPendingSaveEdits).then(bootGame);

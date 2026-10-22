@@ -13,12 +13,9 @@ import {
   reportFromRejection,
 } from "./crashModel";
 
-interface CrashScreenOptions {
-  // Shows the message and stack with a Copy button.
-  readonly dev: boolean;
-  // Stops the game under the screen. Any error it throws is logged and ignored.
-  readonly onCrash: () => void;
-}
+// Stops the game under the screen, once there is a game. Any error it throws is logged and
+// ignored.
+let stopGame = () => {};
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -96,20 +93,26 @@ function showCrashScreen(dev: boolean, report: CrashReport): void {
   reload.focus();
 }
 
-// Listens for uncaught errors and unhandled rejections. Phaser 4 does not catch errors in its
-// game step: they reach window's error event and stop its requestAnimationFrame loop.
-export function installCrashScreen(options: CrashScreenOptions): void {
+// Called once the game exists, so a crash stops it under the screen.
+export function stopGameOnCrash(stop: () => void): void {
+  stopGame = stop;
+}
+
+// Listens for uncaught errors and unhandled rejections; dev shows the message and stack with a
+// Copy button. Phaser 4 does not catch errors in its game step: they reach window's error
+// event and stop its requestAnimationFrame loop.
+export function installCrashScreen(dev: boolean): void {
   const accept = crashGate();
   const crash = (report: CrashReport) => {
     if (!accept(report)) {
       return;
     }
     try {
-      options.onCrash();
+      stopGame();
     } catch (error) {
       console.error("Crash screen: stopping the game failed", error);
     }
-    showCrashScreen(options.dev, report);
+    showCrashScreen(dev, report);
   };
   window.addEventListener("error", (event) => crash(reportFromErrorEvent(event)));
   window.addEventListener("unhandledrejection", (event) =>

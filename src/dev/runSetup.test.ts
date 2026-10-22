@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  devInSearch,
   MAX_SEED,
   parseRunSetup,
   type RunSetup,
@@ -132,6 +133,20 @@ describe("the route parameter", () => {
       expect(setup.route, search).toBeUndefined();
       expect(warnings, search).toHaveLength(1);
     }
+  });
+});
+
+describe("devInSearch", () => {
+  it.each([
+    ["dev=1", true],
+    ["?seed=5&pack=koda,bogus&dev=1", true],
+    ["", false],
+    ["dev=0", false],
+    ["dev=1&dev=1", false],
+    ["dev=yes", false],
+  ])("reads %j's dev flag as parseRunSetup does, without the game data", (search, dev) => {
+    expect(devInSearch(search)).toBe(dev);
+    expect(parse(search).setup.dev).toBe(dev);
   });
 });
 
