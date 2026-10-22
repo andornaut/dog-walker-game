@@ -21,6 +21,7 @@ import { read } from "../../rules/units";
 import {
   drawnLanes,
   facesLeft,
+  hasStopped,
   inMotion,
   type MoverOnRoad,
   moverPlace,
@@ -73,9 +74,10 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // only its cue shows, at 1x:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
-// edge during its cue. A stepper stands on the road throughout, with the wander mark over it
-// before each step. Its other sprites, after the wander mark, such as a skunk's cloud, go with
-// its body wherever it shows, standing as an obstacle's do.
+// edge during its cue. A crosser that has stopped plays its idle tag if it has one, and otherwise
+// stands on the first frame of the tag it would play. A stepper stands on the road throughout,
+// with the wander mark over it before each step. Its other sprites, after the wander mark, such
+// as a skunk's cloud, go with its body wherever it shows, standing as an obstacle's do.
 export function drawMover(
   item: MoverItemView,
   view: ItemView,
@@ -123,7 +125,8 @@ export function drawMover(
         .setFlipX(leftward);
       clipToRoad(body.sprite);
       if (tag !== undefined) {
-        playTag(body.sprite, drawn.key, tag, still);
+        const standing = hasStopped(path, since) && !has(IDLE_TAG);
+        playTag(body.sprite, drawn.key, tag, still || standing);
       }
       const cycle = body.sprite.anims.currentAnim?.duration;
       if (body.key !== BALL_KEY) {
