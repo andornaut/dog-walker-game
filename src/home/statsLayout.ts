@@ -91,7 +91,7 @@ export const STATS_LAYOUT = {
     badgeTop: 2,
     earned: {
       bandLeft: 4,
-      bandWidth: 320,
+      bandWidth: 329,
       bandY: 2,
       checkDx: 20,
       checkDy: -1,

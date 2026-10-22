@@ -236,8 +236,8 @@ describe("each tab's scroll", () => {
 });
 
 // The badge wall with every badge earned: each row's band and tick inside the content the view
-// clips, between the view's top and the wall's bottom and clear of the scrollbar, and each band
-// clear of the next row's.
+// clips, between the view's top and the wall's bottom and left of the scrollbar's track, and
+// each band clear of the next row's.
 describe("an earned row", () => {
   const ids = gameData.achievements.map(({ id }) => id);
   const earnedSave = { achievements: Object.fromEntries(ids.map((id) => [id, 1])) };
@@ -251,7 +251,7 @@ describe("an earned row", () => {
   const bottom = badgesBottom(earnedRows);
   const inside = (rect: Rect) => {
     expect(rect.x).toBeGreaterThanOrEqual(view.x);
-    expect(rect.x + rect.width).toBeLessThanOrEqual(BAR_LEFT);
+    expect(rect.x + rect.width).toBeLessThanOrEqual(scrollbar.x);
     expect(rect.y).toBeGreaterThanOrEqual(view.y);
     expect(rect.y + rect.height).toBeLessThanOrEqual(bottom);
   };
