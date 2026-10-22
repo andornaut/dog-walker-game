@@ -11,9 +11,9 @@ import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
 
-// The Pet shop's tabs, left to right: gear, then dog slots and dogs.
+// The Pet shop's tabs, left to right: dog slots and dogs, then gear.
 export type ShopTab = "dogs" | "gear";
-export const SHOP_TABS: readonly ShopTab[] = ["gear", "dogs"];
+export const SHOP_TABS = ["dogs", "gear"] as const satisfies readonly ShopTab[];
 
 // The shop's lists, each under its heading: gear, dog slots and dogs.
 export type ShopList = "dogs" | "gear" | "slots";
@@ -149,4 +149,9 @@ export function shopRowId(owned: Pick<Owned, "dogSlots">, purchase: Purchase): s
 // The tab a purchase is sold on.
 export function shopTabOf(purchase: Purchase): ShopTab {
   return purchase.kind === "gear" ? "gear" : "dogs";
+}
+
+// The tab the shop opens on: focus's, else the leftmost.
+export function shopOpenTab(focus: Purchase | undefined): ShopTab {
+  return focus === undefined ? SHOP_TABS[0] : shopTabOf(focus);
 }

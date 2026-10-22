@@ -7,7 +7,7 @@ import { HOME_LAYOUT } from "./homeLayout";
 import { SHOP_TABS } from "./shop";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
-// a card with its title band and close control, the Gear and Dogs tabs, and each tab's
+// a card with its title band and close control, the Dogs and Gear tabs, and each tab's
 // lists. Rows are hit areas at least 44 tall; tabs draw 28 tall in a 44-tall hit area. The
 // lists scroll in the list area under the tabs, laid out here as they sit scrolled to the top.
 const PANEL = { height: 512, width: 352, x: 4, y: 44 };

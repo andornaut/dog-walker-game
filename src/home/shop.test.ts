@@ -24,6 +24,7 @@ import {
   gearRows,
   ownedCountNote,
   shopAffordable,
+  shopOpenTab,
   type ShopRow,
   shopRowId,
   shopRowLook,
@@ -191,6 +192,17 @@ describe("shopRowId and shopTabOf", () => {
       const ids = rows[shopTabOf(purchase)].map(({ id }) => id);
       expect(ids).toContain(shopRowId(owned, purchase));
     }
+  });
+});
+
+describe("shopOpenTab", () => {
+  it.each<[string, ShopTab, Purchase | undefined]>([
+    ["no item", "dogs", undefined],
+    ["a dog", "dogs", { dog: "nugget", kind: "dog" }],
+    ["a dog slot", "dogs", { kind: "dogSlot" }],
+    ["gear", "gear", { gear: "luckyCollar", kind: "gear" }],
+  ])("with %s, opens on the %s tab", (_, tab, focus) => {
+    expect(shopOpenTab(focus)).toBe(tab);
   });
 });
 

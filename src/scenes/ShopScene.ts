@@ -22,11 +22,11 @@ import {
   ownedCountNote,
   SHOP_ROW_VIEWS,
   SHOP_TABS,
+  shopOpenTab,
   type ShopRow,
   shopRowId,
   shopRowLook,
   type ShopTab,
-  shopTabOf,
   slotRows,
 } from "../home/shop";
 import {
@@ -106,7 +106,7 @@ import {
 } from "./uiKit";
 
 // The caller pauses itself and launches the shop, on the tab of focus and framing its row
-// when given, else on the gear tab; the shop resumes it on close.
+// when given, else on the Dogs tab; the shop resumes it on close.
 export interface ShopSceneData extends OverlayData {
   focus?: Purchase;
 }
@@ -185,8 +185,8 @@ interface PlacedRow {
   readonly row: ShopRow;
 }
 
-// The Pet shop under the home screen's top bar: a Gear tab of gear for sale, and a Dogs tab
-// of dog slots and dogs. Tapping a row the bank covers asks to confirm the purchase, and only
+// The Pet shop under the home screen's top bar: a Dogs tab of dog slots and dogs, and a Gear
+// tab of gear for sale. Tapping a row the bank covers asks to confirm the purchase, and only
 // the confirm's Buy buys it; a row it cannot pays a shake and says why. The row the shop
 // opened on, or the last one tapped, is framed.
 // Holding a dog or gear row opens its detail card. A tab's headings and rows scroll in the list
@@ -218,7 +218,7 @@ export class ShopScene extends Scene {
   private scroll: ListScroll = listScroll(0);
   private scrollbar: ScrollbarView | undefined;
   private shakes = new Map<string, number>();
-  private tab: ShopTab = "gear";
+  private tab: ShopTab = shopOpenTab(undefined);
 
   constructor() {
     super(SCENE_KEYS.shop);
@@ -235,7 +235,7 @@ export class ShopScene extends Scene {
     this.pressed = undefined;
     this.scroll = listScroll(0);
     this.shakes = new Map();
-    this.tab = data.focus === undefined ? "gear" : shopTabOf(data.focus);
+    this.tab = shopOpenTab(data.focus);
     this.focusId = data.focus === undefined ? null : shopRowId(this.save().owned, data.focus);
     this.render();
     this.showFocus();
