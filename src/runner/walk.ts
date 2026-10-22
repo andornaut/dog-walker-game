@@ -678,6 +678,7 @@ export function planZone(
     cellInset: plannedCellInset(data, geometry),
     cellLength: geometry.cell.length,
     laneCount: geometry.laneCount,
+    laneInset: geometry.cell.inset,
     // The slowest walker's lane move sets the row spacing, so every walker fits every gap:
     // big dogs never slow the pack below it.
     laneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestAgility(data),

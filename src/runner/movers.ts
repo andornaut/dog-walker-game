@@ -321,10 +321,12 @@ export function moveMovers<Item extends MoverItem>(
 
 // Planning works in road distance. sightLength is how far a row travels down the road before
 // its window, the stretch of road over which a one-row spawn on it overlaps the pack, which is
-// window long. rowSpacing is the distance between rows, and cellLength a row of a footprint.
+// window long. rowSpacing is the distance between rows, and cellLength a row of a footprint and a
+// lane's width. laneInset is how far inside its lane a mover's hit box is at each side.
 export interface MoverGeometry {
   readonly cellLength: number;
   readonly laneCount: number;
+  readonly laneInset: number;
   readonly packLength: number;
   readonly roadLength: number;
   readonly rowSpacing: number;
@@ -388,19 +390,26 @@ interface MoverPlacement {
   readonly stands: readonly MoverStand[];
 }
 
-// The lanes on the road a box a lane wide overlaps anywhere from lane position low to high: as
-// collision cuts a mover's box to its lanes, it spans half a lane either side of its position.
-function laneSpan(laneCount: number, low: number, high: number): LaneSpan {
-  const first = Math.max(0, Math.floor(low + 1e-9));
-  const last = Math.min(laneCount - 1, Math.ceil(high - 1e-9));
+// The lanes on the road a box overlaps anywhere from lane position low to high: as collision cuts
+// a mover's box to its lanes, it spans half a lane either side of its position, less inset lanes
+// at each side.
+function laneSpan(laneCount: number, low: number, high: number, inset: number): LaneSpan {
+  const first = Math.max(0, Math.floor(low - 1 + inset + 1e-9) + 1);
+  const last = Math.min(laneCount - 1, Math.ceil(high + 1 - inset - 1e-9) - 1);
   return { count: Math.max(0, last - first + 1), first };
 }
 
 // The lanes a crosser touches while its travel is from to to: its travel only moves one way and its
 // lane position one way to its turn and the other way after, or to its stop and then not at all,
-// so its ends and its turn bound it. A box between lanes touches both. A rider or stepping
-// mover's are its own.
-export function sweptLanes(laneCount: number, path: MoverPath, from: number, to: number): LaneSpan {
+// so its ends and its turn bound it. Its box is inset lanes inside a lane at each side, none
+// unless given, so a box between lanes touches both. A rider or stepping mover's are its own.
+export function sweptLanes(
+  laneCount: number,
+  path: MoverPath,
+  from: number,
+  to: number,
+  inset = 0,
+): LaneSpan {
   if (path.motion === "ride") {
     return { count: path.lanes, first: path.lane };
   }
@@ -421,7 +430,7 @@ export function sweptLanes(laneCount: number, path: MoverPath, from: number, to:
   const places = [moving, to, ...(turn !== null && turn > moving && turn < to ? [turn] : [])].map(
     at,
   );
-  return laneSpan(laneCount, Math.min(...places), Math.max(...places));
+  return laneSpan(laneCount, Math.min(...places), Math.max(...places), inset);
 }
 
 // The footprint a mover keeps: lanes across and rows along the road.
@@ -702,10 +711,13 @@ function crossTilts(
 // as needed for the pack to have reactionSeconds to its reaching the pack's rows, which a tilt
 // below 0 brings sooner once it stops; past the road's far edge, its stop lane is no stop, and it
 // crosses. Its contact lasts as long as its travel takes to cross the window, window / (1 + tilt)
-// while it crosses, which its rows cover. One that has crossed the road by the time it reaches the
-// pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps clear every row it is
-// level with as it crosses or stands, and one that meets the pack also the row before its own, as a
-// lead-in.
+// while it crosses, which its rows cover. It blocks every lane a box a lane wide would touch, but
+// stands only in the lanes its hit box touches, until its hit box leaves the road if that comes
+// before its contact's end: a stand wider or longer than its hit box would hide the road beside
+// or behind it that the pack can step into. One that has crossed the road by the time it reaches
+// the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps clear every row it
+// is level with as it crosses or stands, and one that meets the pack also the row before its own,
+// as a lead-in.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -768,8 +780,14 @@ function crossPlacements(
       ? Math.min(((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel, offRoad)
       : offRoad;
   const appears = sightLength - warning - reaches;
+  // Its hit box's inset at each side, in lanes, and the scroll from setting off to its hit box
+  // leaving the road, which one that stops never does.
+  const inset = geometry.laneInset / cellLength;
+  const touching = ((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5 - inset) / lanesPerPixel;
   const contact =
-    stopAfter === null ? window / (1 + tilt) : scrollTo(sightLength + window) - reaches;
+    stopAfter === null
+      ? Math.max(0, Math.min(window / (1 + tilt), touching - reaches))
+      : scrollTo(sightLength + window) - reaches;
   // The row offset it is level with, moving away from its own as it drifts against the road while
   // it crosses, and keeping level with one row once it stops.
   const drift = (scroll: number) => tilt * Math.min(scroll, crossingScroll(along));
@@ -784,6 +802,7 @@ function crossPlacements(
     const path: MoverPath = { ...along, direction, enterTravel };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
     const meets = lanes.count > 0;
+    const touched = sweptLanes(laneCount, path, sightLength, sightLength + window, inset);
     const first = meets ? Math.min(firstRow, -1) : firstRow;
     return {
       appears,
@@ -794,16 +813,17 @@ function crossPlacements(
       path,
       rows,
       screen: [appears, appears + warning + moving],
-      stands: meets
-        ? [
-            {
-              distance: 0,
-              lane: lanes.first,
-              lanes: lanes.count,
-              length: contact - geometry.packLength,
-            },
-          ]
-        : [],
+      stands:
+        touched.count > 0
+          ? [
+              {
+                distance: 0,
+                lane: touched.first,
+                lanes: touched.count,
+                length: contact - geometry.packLength,
+              },
+            ]
+          : [],
     };
   });
 }

@@ -38,7 +38,8 @@ export interface SpawnQuota<Kind extends string> {
 // Distances are scroll distances in pixels from the start of the zone. A spawn's footprint is
 // cellLength per row, and its hit box is planned as the footprint less cellInset at each end, which
 // is negative where obstacles are drawn longer than a row; it overlaps the pack over its hit box's
-// length plus packLength. scrollSpeed (pixels per second), laneMoveSeconds and stepSeconds, the
+// length plus packLength. A lane is cellLength wide, and a mover's hit box is laneInset inside its
+// lane at each side. scrollSpeed (pixels per second), laneMoveSeconds and stepSeconds, the
 // walk's step, set how far the pack can steer between rows. sightLength is the road in view above
 // the pack, so the next row shows before the pack has to steer for it, and roadLength the whole
 // road in view. reactionSeconds is the time the pack is given to react on top of the lane moves it
@@ -47,6 +48,7 @@ export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
   laneCount: number;
+  laneInset: number;
   laneMoveSeconds: number;
   minOpenLanes: number;
   minSpacing: number;
@@ -596,6 +598,7 @@ export function planSpawns<Kind extends string>(
   const moverRoad = {
     cellLength: plan.cellLength,
     laneCount,
+    laneInset: plan.laneInset,
     packLength: plan.packLength,
     roadLength: plan.roadLength,
     rowSpacing: spacing,

@@ -43,6 +43,7 @@ import { moverOutcomes } from "./outcomes";
 const geometry: MoverGeometry = {
   cellLength: 50,
   laneCount: 5,
+  laneInset: 10,
   packLength: 40,
   roadLength: 600,
   rowSpacing: 150,
@@ -720,6 +721,51 @@ describe("moverPlacements", () => {
             expect(first).toBeGreaterThanOrEqual(placement.lanes.first);
             expect(last).toBeLessThan(placement.lanes.first + placement.lanes.count);
           }
+        }
+      }
+    },
+  );
+
+  // A dart stands for the pack-fit gap in the lanes its hit box touches while it overlaps the
+  // pack, until that contact ends: once its travel is past the window, or once its hit box, inset
+  // inside its lane at each side, is off the road. A stand wider or longer than that would hide
+  // road beside or behind it, where the pack can step in. Sampled a pixel of scroll apart, so the
+  // contact's end is up to a pixel past the last sample.
+  it.each(
+    SPECS.flatMap(({ name, spec: moving }) =>
+      moving.motion.kind === "cross"
+        ? DRAW_ENDS.flatMap(({ draws, end }) =>
+            [0, ...DART_LIFTS].map((lift) => ({ draws, end, lift, moving, name })),
+          )
+        : [],
+    ),
+  )(
+    "stands $name where and while its hit box meets the pack, at $end of its draws, lifted $lift",
+    ({ draws, lift, moving }) => {
+      const { cellLength, laneCount, laneInset, packLength, sightLength, window } = geometry;
+      const inset = laneInset / cellLength;
+      for (const { appears, path, stands } of moverPlacements(geometry, moving, draws, lift)) {
+        // The lanes its hit box touches while it overlaps the pack, by scroll since its cue.
+        const contacts = Array.from({ length: 4000 }, (_, since) => {
+          const place = moverPlace(laneCount, path, since);
+          const overlaps =
+            place.solid && place.travel >= sightLength && place.travel < sightLength + window;
+          const first = Math.max(0, Math.floor(place.lanePosition - 1 + inset) + 1);
+          const last = Math.min(laneCount - 1, Math.ceil(place.lanePosition + 1 - inset) - 1);
+          const lanes = Array.from({ length: last - first + 1 }, (_unused, i) => first + i);
+          return { lanes: overlaps ? lanes : [], since };
+        }).filter(({ lanes }) => lanes.length > 0);
+        expect(stands).toHaveLength(contacts.length > 0 ? 1 : 0);
+        const touched = contacts.flatMap(({ lanes }) => lanes);
+        for (const stand of stands) {
+          const end = sightLength + stand.distance + stand.length + packLength;
+          const last = appears + itemAt(contacts, contacts.length - 1).since;
+          expect([stand.lane, stand.lane + stand.lanes - 1]).toEqual([
+            Math.min(...touched),
+            Math.max(...touched),
+          ]);
+          expect(end).toBeGreaterThanOrEqual(last - 1e-6);
+          expect(end).toBeLessThanOrEqual(last + 1 + 1e-6);
         }
       }
     },

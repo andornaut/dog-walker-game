@@ -35,6 +35,7 @@ const plan: SpawnPlan<Kind> = {
   cellInset: 5,
   cellLength: 30,
   laneCount: 5,
+  laneInset: 5,
   laneMoveSeconds: 0.1,
   minOpenLanes: 1,
   minSpacing: 100,

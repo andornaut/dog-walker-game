@@ -1874,6 +1874,19 @@ describe("movers", { timeout: 120_000 }, () => {
   ])("keeps every move passable with more minor obstacles: $counts", ({ counts }) => {
     expectPassable(passableCases((tuned) => withMinorCounts(counts, tuned)));
   });
+  // Minor obstacle counts either side of the game's at which seed 1 plans a dart that leaves the
+  // road while it meets the pack, with another obstacle beside it or soon after it in a lane next
+  // to its own: the pack-fit gap holds for the lanes and stretch its hit box meets the pack in.
+  it.each([
+    { minorObstaclesFirstZone: 51, minorObstaclesGainPerZone: 0 },
+    { minorObstaclesFirstZone: 54, minorObstaclesGainPerZone: 0 },
+    { minorObstaclesFirstZone: 58, minorObstaclesGainPerZone: 1 },
+  ])(
+    "keeps every move passable with a dart leaving the road as it meets the pack: %o",
+    (counts) => {
+      expectPassable(passableCases((tuned) => withMinorCounts(counts, tuned)));
+    },
+  );
   function expectPassable(
     cases: readonly { road: RoadGeometry; tuned: Real; zone: ZoneId }[],
   ): void {

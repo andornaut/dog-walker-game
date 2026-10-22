@@ -365,6 +365,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       {
         cellLength: cell.length,
         laneCount,
+        laneInset: cell.inset,
         packLength: tallestPackBand,
         roadLength: roadBottom - roadTop,
         rowSpacing: read(gameData.tuning, "pixels", "spawnRowSpacing"),
