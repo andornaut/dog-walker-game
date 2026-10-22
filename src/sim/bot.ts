@@ -377,10 +377,6 @@ function widenMask(laneCount: number, reach: number, mask: number): number {
   return widened & ((1 << laneCount) - 1);
 }
 
-function treatReachOf(data: WalkData, walk: Walk): number {
-  return pickupReach(data, walk.run, "treat");
-}
-
 // When an item comes into view: at the far edge of the road, or, with visionSeconds, once it
 // is that close to the pack. A mover shows from its warning cue on.
 function visibleAt(bot: Bot, appeared: number, contactStart: number, mover: boolean): number {
@@ -441,7 +437,6 @@ function botView(
   const { data, geometry, speed } = road;
   const hazards: LaneHazard[] = [];
   const prizes: LanePrize[] = [];
-  const treatReach = treatReachOf(data, walk);
   const horizon = bot.skill.lookAheadSeconds;
   for (const item of walk.road.items) {
     // A pull obstacle is harmless to touch: only its pulls matter.
@@ -460,14 +455,8 @@ function botView(
     const category = itemCategory(data, item.kind);
     if (category === "minor" || category === "obstacle") {
       hazards.push({ from: start - MARGIN_SECONDS, lanes, to: end + MARGIN_SECONDS });
-    } else if (category === "treat") {
-      prizes.push({
-        at: start,
-        lanes: widenMask(geometry.laneCount, treatReach, lanes),
-        value: PRIZE_VALUES.treat,
-      });
     } else {
-      const reach = category === "tip" ? pickupReach(data, walk.run, "tip") : 0;
+      const reach = category === "lucky" ? 0 : pickupReach(data, walk.run, category);
       prizes.push({
         at: start,
         lanes: widenMask(geometry.laneCount, reach, lanes),
