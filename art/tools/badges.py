@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the 24 achievement badges and the celebration burst.
+"""Draw the 38 achievement badges and the celebration burst.
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, silly pink), each with its own emblem for its goal: no
@@ -419,15 +419,231 @@ def _(g):
         g.p(x, y, "brown")
 
 
+# ---------- the second set of badges ----------
+
+# Three-row-tall digits for a number on a badge: 3x5 each, 4 apart.
+DIGITS = {"0": ["111", "1.1", "1.1", "1.1", "111"], "1": [".1.", "11.", ".1.", ".1.", "111"]}
+
+
+def digits(g, x, y, text, col):
+    """text in DIGITS from (x, y), col."""
+    for ch in text:
+        bitmap(g, x, y, DIGITS[ch], {"1": col})
+        x += 4
+
+
+def dizzy_star(g, cx, cy, col="yellow"):
+    """A 3x3 plus-shaped dizzy star with an amber centre."""
+    g.rect(cx - 1, cy, 3, 1, col)
+    g.rect(cx, cy - 1, 1, 3, col)
+    g.p(cx, cy, "amber")
+
+
+# Hearts by width, 9, 7 and 5 wide.
+H9 = [".xxx.xxx.", "xxxxxxxxx", "xxxxxxxxx", "xxxxxxxxx", ".xxxxxxx.", "..xxxxx..", "...xxx...", "....x...."]
+H7 = [".xx.xx.", "xxxxxxx", "xxxxxxx", ".xxxxx.", "..xxx..", "...x..."]
+H5 = ["xx.xx", "xxxxx", "xxxxx", ".xxx.", "..x.."]
+# A slot reel's 7.
+SEVEN = ["xxxxx", "....x", "...x.", "..x..", "..x..", ".x...", ".x..."]
+# An open palm, fingers up, thumb out to the right.
+PALM = ["1.1.1..", "1.1.1..", "1.1.1.1", "11111.1", "1111111", "111111.", ".1111..", ".111..."]
+
+@icon("twos-company")
+def _(g):
+    """Two big paw prints walking side by side, the left one a step ahead, in dbrown and rust."""
+    big = ["..aa.aa..", "..aa.aa..", "aa.....aa", "aa.....aa", "...aaa...", "..aaaaa..", ".aaaaaaa.", "..aaaaa.."]
+    bitmap(g, 5, 7, big, {"a": "dbrown"})
+    bitmap(g, 16, 14, big, {"a": "rust"})
+
+@icon("flawless-trio")
+def _(g):
+    """Three cut diamonds in a triangle, cyan lit white, each with a sky facet."""
+    for cx, cy in ((16, 9), (10.5, 19), (21.5, 19)):
+        g.tri((cx - 4.5, cy - 1), (cx + 4.5, cy - 1), (cx, cy + 5), "cyan")
+        g.rect(cx - 3, cy - 3, 6, 2, "cyan")
+        g.rect(cx - 2, cy - 3, 2, 2, "white")
+        g.tri((cx, cy - 1), (cx + 4.5, cy - 1), (cx, cy + 5), "sky")
+
+@icon("good-day")
+def _(g):
+    """A big yellow sun with eight pointed amber rays, no face."""
+    for k in range(8):
+        a = math.radians(k * 45 + 22.5)
+        tip = (16 + math.cos(a) * 10.5, 16 + math.sin(a) * 10.5)
+        l = (16 + math.cos(a - 0.35) * 6.5, 16 + math.sin(a - 0.35) * 6.5)
+        r = (16 + math.cos(a + 0.35) * 6.5, 16 + math.sin(a + 0.35) * 6.5)
+        g.tri(l, r, tip, "amber")
+    g.ell(16, 16, 6.5, 6.5, "yellow", "amber", "white")
+
+@icon("twenty-grand")
+def _(g):
+    """A thick wad of green banknotes bound by a red paper band, a white $ on the top note."""
+    for i in range(4):
+        g.rect(7, 16 + i * 2, 18, 2, "dgreen" if i % 2 else "green")
+    g.rect(7, 10, 18, 6, "green")
+    g.rect(7, 10, 18, 1, "lgrey")
+    g.rect(15, 10, 4, 14, "red")
+    g.rect(15, 10, 1, 14, "pink")
+    bitmap(g, 9, 10, [".1.", "111", "1..", "111", "..1", "111", ".1."], {"1": "white"})
+
+@icon("tip-jar")
+def _(g):
+    """A glass jar with a slot in its lid, a gold coin dropping in, loose coins piled inside."""
+    g.ell(16, 5.5, 2.6, 2.6, "amber", "orange", "yellow")
+    g.rect(10, 9, 12, 3, "dslate")
+    g.rect(13, 9, 6, 1, "ink")
+    g.rect(9, 12, 14, 13, "lgrey")
+    g.rect(10, 13, 12, 11, "white")
+    for cx, cy in ((12.5, 22.5), (16, 22.5), (19.5, 22.5), (14, 20), (18, 20), (16, 17.5)):
+        g.ell(cx, cy, 2.2, 1.6, "amber", "orange", "yellow")
+    g.rect(11, 14, 1, 3, "lgrey")
+
+@icon("marathon")
+def _(g):
+    """A white race bib pinned at its corners, a red 100 on it."""
+    g.rect(7, 9, 18, 14, "white")
+    g.rect(7, 22, 18, 1, "lgrey")
+    for x, y in ((8, 10), (23, 10), (8, 21), (23, 21)):
+        g.p(x, y, "grey")
+    digits(g, 10, 13, "100", "red")
+
+@icon("tag-team")
+def _(g):
+    """A high five: two open palms meeting, one skin1 and one skin2, a yellow flash where they slap."""
+    bitmap(g, 9, 10, PALM, {"1": "skin1"})
+    bitmap(g, 16, 10, [r[::-1] for r in PALM], {"1": "skin2"})
+    g.rect(9, 18, 4, 4, "sky")
+    g.rect(19, 18, 4, 4, "green")
+    for x, y in ((16, 4), (16, 5), (13, 6), (19, 6), (16, 8), (12, 8), (20, 8)):
+        g.p(x, y, "yellow")
+
+@icon("bird-brain")
+def _(g):
+    """A grey pigeon side on, facing left, with three yellow dizzy stars circling its head."""
+    g.ell(18, 19, 7, 4.6, "grey", "slate", "lgrey")
+    g.rect(23, 17, 4, 3, "slate")
+    g.rect(13, 15, 4, 4, "teal")
+    g.ell(12, 13, 3.4, 3.2, "grey", None, "lgrey")
+    g.p(11, 12, "ink")
+    g.tri((8.6, 13.4), (9.6, 12), (9.6, 14.6), "orange")
+    g.rect(16, 18, 6, 1, "slate")
+    g.rect(17, 20, 5, 1, "slate")
+    for x in (16, 19):
+        g.rect(x, 23, 1, 3, "pink")
+    for x, y in ((7, 8), (12, 6), (17, 8)):
+        dizzy_star(g, x, y)
+
+@icon("fender-bender")
+def _(g):
+    """A small red car side on, facing left, its front bumper crumpled in a zigzag, an amber impact mark
+    beside it."""
+    g.rect(11, 11, 9, 5, "red")
+    g.rect(12, 12, 3, 3, "sky")
+    g.rect(16, 12, 3, 3, "sky")
+    g.rect(9, 15, 17, 6, "red")
+    g.rect(9, 20, 17, 1, "dred")
+    g.rect(24, 16, 2, 2, "amber")
+    for y, x in ((15, 9), (16, 8), (17, 9), (18, 8), (19, 9), (20, 8)):
+        g.p(x, y, "lgrey")
+    g.ell(13, 21.5, 2.4, 2.4, "ink")
+    g.ell(22, 21.5, 2.4, 2.4, "ink")
+    g.p(13, 21, "grey")
+    g.p(22, 21, "grey")
+    for a, b in (((6, 13), (4, 11)), ((6, 17), (4, 17)), ((6, 21), (4, 23))):
+        line(g, a, b, "amber")
+
+@icon("trash-panda")
+def _(g):
+    """A raccoon's face front on: grey head, round dark ears, a black eye mask with white brows and eyes,
+    a white muzzle and an ink nose."""
+    g.ell(9.5, 9.5, 3, 3, "slate")
+    g.ell(22.5, 9.5, 3, 3, "slate")
+    g.ell(9.5, 9.5, 1.4, 1.4, "pink")
+    g.ell(22.5, 9.5, 1.4, 1.4, "pink")
+    g.ell(16, 16, 9, 7.5, "grey", "slate", "lgrey")
+    g.rect(9, 12, 14, 1, "white")
+    g.ell(11.5, 15.5, 3.4, 2.4, "ink")
+    g.ell(20.5, 15.5, 3.4, 2.4, "ink")
+    g.rect(12, 14, 8, 3, "ink")
+    g.p(11, 15, "white")
+    g.p(20, 15, "white")
+    g.ell(16, 20.5, 4.5, 3, "white")
+    g.ell(16, 18.8, 1.6, 1.1, "ink")
+
+@icon("burned-bridges")
+def _(g):
+    """A thick wooden arch bridge over sky-blue water, plank seams and a railing of posts along it, its
+    middle charred black with an ember edge and grey smoke rising from the burn."""
+    g.ell(16, 23, 9, 2.6, "sky")
+    g.rect(9, 22, 14, 1, "cyan")
+    for x in range(6, 27):
+        u = (x + 0.5 - 16) / 10.5
+        top = round(21 - 8 * math.sqrt(max(0.0, 1 - u * u)))
+        burnt = 14 <= x <= 18
+        g.rect(x, top, 1, 4, "ink" if burnt else "brown")
+        g.p(x, top + 3, "plum" if burnt else "dbrown")
+        if not burnt and x % 3 == 0:
+            g.rect(x, top, 1, 4, "dbrown")
+        if burnt and x in (14, 18):
+            g.rect(x, top, 1, 4, "orange")
+        if not burnt and x % 4 == 2:
+            g.rect(x, top - 3, 1, 3, "brown")
+        if not burnt:
+            g.p(x, top - 3, "tan")
+    for cx, cy, r in ((16, 9, 2.2), (14, 5.5, 2.0), (18.5, 4.5, 1.6)):
+        g.ell(cx, cy, r, r, "grey", "slate", "lgrey")
+
+@icon("finders-keepers")
+def _(g):
+    """The lost wallet as the road draws it: a green bill with a white $ standing up out of a brown
+    wallet whose flap tab carries an amber snap."""
+    g.rect(10, 6, 12, 10, "green")
+    g.rect(10, 6, 12, 1, "lgrey")
+    bitmap(g, 15, 7, [".x.", "xxx", "x..", "xxx", "..x", "xxx", ".x."], {"x": "white"})
+    g.rect(6, 14, 20, 11, "brown")
+    g.rect(6, 14, 20, 1, "tan")
+    g.rect(6, 24, 20, 1, "dbrown")
+    g.rect(25, 14, 1, 11, "dbrown")
+    g.rect(17, 17, 9, 5, "dbrown")
+    g.rect(21, 19, 3, 1, "amber")
+
+@icon("popular-pack")
+def _(g):
+    """Three whole hearts floating up from big to small, the way the friendly neighbor's hearts rise:
+    red, red and pink, each with a white glint."""
+    for x0, y0, rows in ((6, 14, H9), (17, 10, H7), (11, 6, H5)):
+        bitmap(g, x0, y0, rows, {"x": "red" if rows is not H5 else "pink"})
+        g.p(x0 + 1, y0 + 1, "white")
+
+@icon("double-jackpot")
+def _(g):
+    """A slot machine's window in a gold frame, two white reels each showing a red 7, its pull lever up
+    on the right with a red knob."""
+    g.rect(25, 11, 1, 6, "lgrey")
+    g.rect(24, 16, 2, 1, "grey")
+    g.ell(25, 9.5, 1.8, 1.8, "red")
+    g.rect(6, 9, 18, 14, "amber")
+    g.rect(6, 9, 18, 1, "yellow")
+    g.rect(6, 22, 18, 1, "orange")
+    for x0 in (8, 16):
+        g.rect(x0, 11, 6, 10, "white")
+        g.rect(x0, 11, 6, 1, "lgrey")
+        g.rect(x0, 20, 6, 1, "lgrey")
+        bitmap(g, x0, 13, SEVEN, {"x": "red"})
+
+
 BADGES = {
     "double-leash": "firsts", "dream-team": "firsts", "pack-leader": "firsts",
-    "round-trip": "firsts",
+    "round-trip": "firsts", "twos-company": "firsts",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
-    "five-star-service": "mastery", "not-a-scratch": "mastery",
+    "five-star-service": "mastery", "flawless-trio": "mastery", "good-day": "mastery", "marathon": "mastery",
+    "not-a-scratch": "mastery", "tip-jar": "mastery", "twenty-grand": "mastery",
     "full-kennel": "collection", "kitted-out": "collection", "neighborhood-favorite": "collection",
-    "top-walker": "collection", "whole-city": "collection",
-    "close-shave": "silly", "eau-de-skunk": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
-    "squirrel": "silly", "yoink": "silly", "youre-fired": "silly", "zoomies": "silly",
+    "tag-team": "collection", "top-walker": "collection", "whole-city": "collection",
+    "bird-brain": "silly", "burned-bridges": "silly", "close-shave": "silly", "double-jackpot": "silly",
+    "eau-de-skunk": "silly", "fender-bender": "silly", "finders-keepers": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
+    "popular-pack": "silly", "squirrel": "silly", "trash-panda": "silly", "yoink": "silly", "youre-fired": "silly",
+    "zoomies": "silly",
 }
 
 

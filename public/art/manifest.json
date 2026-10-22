@@ -510,6 +510,16 @@
       "json": "sprites/badge-big-payday.json"
     },
     {
+      "key": "badge-bird-brain",
+      "png": "sprites/badge-bird-brain.png",
+      "json": "sprites/badge-bird-brain.json"
+    },
+    {
+      "key": "badge-burned-bridges",
+      "png": "sprites/badge-burned-bridges.png",
+      "json": "sprites/badge-burned-bridges.json"
+    },
+    {
       "key": "badge-clean-paws",
       "png": "sprites/badge-clean-paws.png",
       "json": "sprites/badge-clean-paws.json"
@@ -523,6 +533,11 @@
       "key": "badge-dodge-ball",
       "png": "sprites/badge-dodge-ball.png",
       "json": "sprites/badge-dodge-ball.json"
+    },
+    {
+      "key": "badge-double-jackpot",
+      "png": "sprites/badge-double-jackpot.png",
+      "json": "sprites/badge-double-jackpot.json"
     },
     {
       "key": "badge-double-leash",
@@ -545,9 +560,24 @@
       "json": "sprites/badge-everybody-home.json"
     },
     {
+      "key": "badge-fender-bender",
+      "png": "sprites/badge-fender-bender.png",
+      "json": "sprites/badge-fender-bender.json"
+    },
+    {
+      "key": "badge-finders-keepers",
+      "png": "sprites/badge-finders-keepers.png",
+      "json": "sprites/badge-finders-keepers.json"
+    },
+    {
       "key": "badge-five-star-service",
       "png": "sprites/badge-five-star-service.png",
       "json": "sprites/badge-five-star-service.json"
+    },
+    {
+      "key": "badge-flawless-trio",
+      "png": "sprites/badge-flawless-trio.png",
+      "json": "sprites/badge-flawless-trio.json"
     },
     {
       "key": "badge-full-kennel",
@@ -555,9 +585,19 @@
       "json": "sprites/badge-full-kennel.json"
     },
     {
+      "key": "badge-good-day",
+      "png": "sprites/badge-good-day.png",
+      "json": "sprites/badge-good-day.json"
+    },
+    {
       "key": "badge-kitted-out",
       "png": "sprites/badge-kitted-out.png",
       "json": "sprites/badge-kitted-out.json"
+    },
+    {
+      "key": "badge-marathon",
+      "png": "sprites/badge-marathon.png",
+      "json": "sprites/badge-marathon.json"
     },
     {
       "key": "badge-mud-season",
@@ -580,6 +620,11 @@
       "json": "sprites/badge-pack-leader.json"
     },
     {
+      "key": "badge-popular-pack",
+      "png": "sprites/badge-popular-pack.png",
+      "json": "sprites/badge-popular-pack.json"
+    },
+    {
       "key": "badge-round-trip",
       "png": "sprites/badge-round-trip.png",
       "json": "sprites/badge-round-trip.json"
@@ -600,9 +645,34 @@
       "json": "sprites/badge-squirrel.json"
     },
     {
+      "key": "badge-tag-team",
+      "png": "sprites/badge-tag-team.png",
+      "json": "sprites/badge-tag-team.json"
+    },
+    {
+      "key": "badge-tip-jar",
+      "png": "sprites/badge-tip-jar.png",
+      "json": "sprites/badge-tip-jar.json"
+    },
+    {
       "key": "badge-top-walker",
       "png": "sprites/badge-top-walker.png",
       "json": "sprites/badge-top-walker.json"
+    },
+    {
+      "key": "badge-trash-panda",
+      "png": "sprites/badge-trash-panda.png",
+      "json": "sprites/badge-trash-panda.json"
+    },
+    {
+      "key": "badge-twenty-grand",
+      "png": "sprites/badge-twenty-grand.png",
+      "json": "sprites/badge-twenty-grand.json"
+    },
+    {
+      "key": "badge-twos-company",
+      "png": "sprites/badge-twos-company.png",
+      "json": "sprites/badge-twos-company.json"
     },
     {
       "key": "badge-whole-city",
