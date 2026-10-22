@@ -48,8 +48,8 @@ interface MatrixCell {
 // Earnings are in cents. Shares are from 0 to 1, of the items that reached the pack, and null
 // when none did: hitShare of obstacles that open a card, bumpShare of minor obstacles, both
 // moving or not, luckyShare of lucky encounters collected, kindHitShares of each kind of
-// obstacle that does not move, minor or not, and moverHitShares of each mover. meanTips counts
-// the tips collected per run.
+// obstacle that does not move, minor or not, and moverHitShares of each obstacle that moves, minor
+// or not. meanTips counts the tips collected per run.
 export interface MatrixRow {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
   readonly afterPullShare: number | null;
@@ -257,7 +257,8 @@ function summarizeCell(
         ? 0
         : choices.filter((choice) => choice.cost > 0).length / choices.length,
     moverHitShares: Object.fromEntries(
-      [...new Set(results.flatMap((result) => Object.keys(result.movers)))]
+      [...new Set(results.flatMap((result) => Object.keys(result.movers) as WalkItemKind[]))]
+        .filter((mover) => obstacleKinds(data).includes(mover))
         .sort()
         .map((mover) => [mover, touchedShare(countsOf((entry) => entry.mover === mover))]),
     ),

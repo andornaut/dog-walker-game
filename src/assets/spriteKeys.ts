@@ -231,6 +231,19 @@ export function moverBodyTag(
   return tags.find(has);
 }
 
+// The tag a moving prize's body plays, such as a lucky find that walks about, of those has says
+// its sprite has: while it moves, its movement's first tag; otherwise, and failing that, what it
+// plays standing, so a prize drawn with no movement tags looks as it does standing.
+export function prizeMoverTag(
+  has: (tag: string) => boolean,
+  movement: MovementKind,
+  moving: boolean,
+  halted: boolean,
+): string | undefined {
+  const motion = moving && movement !== "still" ? MOVING_TAGS[movement] : [];
+  return [...motion, ...(halted ? STANDING_TAGS.halted : STANDING_TAGS.walking)].find(has);
+}
+
 // An ambient mover wears its own art or one of the variants named here, picked at random as
 // it sets out, among those loaded.
 export const AMBIENT_VARIANTS: Readonly<Partial<Record<string, readonly string[]>>> = {

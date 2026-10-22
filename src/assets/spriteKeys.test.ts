@@ -13,6 +13,7 @@ import {
   gearIconKey,
   minorObstacleSpriteKey,
   moverBodyTag,
+  prizeMoverTag,
   roadStartKey,
   roadTileKey,
   SKUNK_CLOUD_KEY,
@@ -55,6 +56,21 @@ describe("key names", () => {
     );
     expect(wrong).toEqual([]);
   });
+
+  // A moving prize plays its movement's tag while it moves, where its art has one, and otherwise
+  // what it plays standing: waving or walking in place while the walk goes on, idle while held.
+  it.each([
+    { halted: false, moving: true, tags: ["idle", "wave", "walk"], want: "walk" },
+    { halted: false, moving: true, tags: ["idle", "wave"], want: "wave" },
+    { halted: false, moving: false, tags: ["idle", "wave"], want: "wave" },
+    { halted: true, moving: false, tags: ["idle", "wave", "walk"], want: "idle" },
+  ] as const)(
+    "plays a stepping prize's $want, moving $moving, halted $halted",
+    ({ halted, moving, tags, want }) => {
+      const has = (tag: string) => (tags as readonly string[]).includes(tag);
+      expect(prizeMoverTag(has, "step", moving, halted)).toBe(want);
+    },
+  );
 
   // A mover's cue stands on the road; faces, effects, badges and UI do not.
   it("stands road art on the ground, and nothing drawn over the road", () => {

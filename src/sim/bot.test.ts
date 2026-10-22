@@ -37,7 +37,7 @@ import {
 import type { PackDogs } from "../state/runState";
 import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
-import { actBot, type BotRoad, moverHazards, newBot } from "./bot";
+import { actBot, type BotRoad, moverHazards, moverPrizes, newBot } from "./bot";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
 import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
 
@@ -92,12 +92,11 @@ function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHAS
 
 // Obstacles, minor or not, moving or not, that the pack hit, and that reached it.
 function obstacleCounts(data: SimData, results: readonly RunResult[]) {
-  const counts = results.flatMap((result) => [
-    ...Object.entries(result.items)
+  const counts = results.flatMap((result) =>
+    [...Object.entries(result.items), ...Object.entries(result.movers)]
       .filter(([kind]) => blocksLane(data, kind as WalkItemKind))
       .map(([, count]) => count),
-    ...Object.values(result.movers),
-  ]);
+  );
   return {
     hit: counts.reduce((sum, count) => sum + count.touched, 0),
     met: counts.reduce((sum, count) => sum + count.met, 0),
@@ -191,6 +190,48 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 //   a step late; sampled a quarter step apart, wherever the mover would hit a pack standing in a
 //   lane, the bot keeps the pack out of that lane from a step before to a step after; and it
 //   keeps the pack out of no lane the mover never hits.
+// The friendly neighbor in lane 2, stepping once as she comes down the road: the bot plans her as
+// a prize in the lane she meets the pack's rows in, as soon as she reaches them.
+describe("a moving prize", () => {
+  const run = testState({ biscuit: 3 });
+  const geometry = screenRoadGeometry(run);
+  const speed = walkScrollSpeed(gameData, run);
+  const road: BotRoad = { data: gameData, geometry, speed };
+  const { cell, packBand, roadTop } = geometry;
+  const height = itemHeight(gameData, geometry, "pettingNeighbor", true);
+  it.each([
+    { lane: 3, name: "a lane right", step: { lanes: 1, travel: 0 } },
+    { lane: 1, name: "a lane left", step: { lanes: -1, travel: 0 } },
+    { lane: 2, name: "a row down", step: { lanes: 0, travel: cell.length } },
+  ])("is a prize in the lane she steps into: $name", ({ lane, step }) => {
+    const item: WalkItem = {
+      height,
+      id: 1,
+      kind: "pettingNeighbor",
+      lane: 2,
+      laneSpan: 1,
+      mover: {
+        path: {
+          lane: 2,
+          motion: "steps",
+          movement: "step",
+          steps: [{ at: 100, length: 30, ...step }],
+          warning: 50,
+        },
+        since: 0,
+      },
+      y: roadTop - height,
+    };
+    const [prize, ...others] = moverPrizes(road, Infinity, 1, item);
+    expect(others).toEqual([]);
+    expect(prize?.lanes).toBe(1 << lane);
+    expect(prize?.value).toBe(1);
+    // Her row's bottom reaches the pack's rows once her travel down the road passes their top.
+    const reaches = packBand.top - roadTop - step.travel;
+    expect(Math.abs((prize?.at ?? 0) * speed - reaches)).toBeLessThanOrEqual(1);
+  });
+});
+
 describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   const route = gameData.world.zones.map(({ id }) => id as ZoneId);
   type Moving = Exclude<Movement, { kind: "still" }>;

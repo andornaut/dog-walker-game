@@ -3,7 +3,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
-import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
+import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import {
@@ -363,6 +363,38 @@ export function moverHazards(road: BotRoad, horizon: number, item: WalkItem): La
   }));
 }
 
+// The prize a moving prize, such as a lucky find that walks about, makes on each path it may
+// take: in the lanes it covers as it reaches the pack's rows, when that is within horizon
+// seconds, worth value shared among its paths. Its path is sampled.
+export function moverPrizes(
+  road: BotRoad,
+  horizon: number,
+  value: number,
+  item: WalkItem,
+): LanePrize[] {
+  const { mover } = item;
+  if (mover === undefined) {
+    return [];
+  }
+  const { laneCount, packBand, roadTop } = road.geometry;
+  const paths = pathsAhead(mover.path);
+  const last = mover.since + horizon * road.speed;
+  return paths.flatMap((path) => {
+    for (let since = mover.since; since <= last; since += MOVER_SAMPLE_SCROLL) {
+      const place = moverPlace(laneCount, path, since);
+      const y = roadTop - item.height + place.travel;
+      if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
+        return [];
+      }
+      if (place.solid && y + item.height > packBand.top) {
+        const lanes = itemLanes({ lane: laneAt(place.lanePosition), laneSpan: item.laneSpan });
+        return [{ at: (since - mover.since) / road.speed, lanes, value: value / paths.length }];
+      }
+    }
+    return [];
+  });
+}
+
 // The lanes an item covers, as a lane mask.
 function itemLanes(item: Pick<WalkItem, "lane" | "laneSpan">): number {
   return ((1 << item.laneSpan) - 1) << item.lane;
@@ -443,8 +475,13 @@ function botView(
     if (!bot.perceived.has(item.id) || isPullObstacle(data, item.kind)) {
       continue;
     }
+    const category = itemCategory(data, item.kind);
     if (item.mover !== undefined) {
-      hazards.push(...moverHazards(road, horizon, item));
+      if (category === "minor" || category === "obstacle") {
+        hazards.push(...moverHazards(road, horizon, item));
+      } else {
+        prizes.push(...moverPrizes(road, horizon, PRIZE_VALUES[category], item));
+      }
       continue;
     }
     const { end, start } = contactWindow(geometry.packBand, speed, item.y, item.height);
@@ -452,7 +489,6 @@ function botView(
       continue;
     }
     const lanes = itemLanes(item);
-    const category = itemCategory(data, item.kind);
     if (category === "minor" || category === "obstacle") {
       hazards.push({ from: start - MARGIN_SECONDS, lanes, to: end + MARGIN_SECONDS });
     } else {

@@ -62,7 +62,17 @@ import { TEST_WORLD } from "../testing/world";
 import { approachOutcomes } from "./approach";
 import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
-import { hasLeftRoad, hopShapes, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
+import {
+  hasLeftRoad,
+  hopShapes,
+  inMotion,
+  laneAt,
+  type MoverPath,
+  moverPlace,
+  type MoverStep,
+  moverTell,
+  onScreenOf,
+} from "./movers";
 import {
   blocksLane,
   collectTip,
@@ -180,6 +190,7 @@ function raised<Id extends string>(
 }
 const OBSTACLE_IDS = Object.keys(WORLD.zones[0].weights.obstacles) as ObstacleEncounterId[];
 const MINOR_OBSTACLE_IDS = Object.keys(MINOR_OBSTACLES) as MinorObstacleId[];
+const LUCKY_IDS = Object.keys(WORLD.zones[0].weights.luckyFinds) as EncounterId[];
 const LANES = Array.from({ length: LANE_COUNT }, (_, lane) => lane);
 // The run in zone, walked at position zoneIndex.
 const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState => ({
@@ -441,6 +452,8 @@ const crossing: MoverPath = {
   turnAfter: null,
   warning: 50,
 };
+// A step a lane to the right, 30px of scroll long.
+const SIDESTEP = { lanes: 1, length: 30, travel: 0 } as const;
 const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkItem => ({
   ...atPack(kind),
   mover: { path, since },
@@ -1704,6 +1717,9 @@ describe("movers", { timeout: 60_000 }, () => {
     "puddle",
   ];
   const movementOf = (kind: WalkItem["kind"], tuned: Real = REAL) => {
+    if (kind === "tip" || kind === "treat") {
+      return null;
+    }
     const entry = Object.hasOwn(MINOR_OBSTACLES, kind)
       ? tuned.minorObstacles[kind as MinorObstacleId]
       : tuned.encounters[kind as ObstacleEncounterId];
@@ -1732,12 +1748,26 @@ describe("movers", { timeout: 60_000 }, () => {
     }
   });
 
-  it("never moves a pickup or lucky find, drawing nothing", () => {
-    for (const kind of ["tip", "treat", "lostWallet"] as const) {
+  // The rulebook's lucky finds: the friendly neighbor walks about, the lost wallet lies still.
+  it.each([
+    { kind: "lostWallet", walks: false },
+    { kind: "pettingNeighbor", walks: true },
+  ] as const)("walks the $kind about: $walks", ({ kind, walks }) => {
+    expect(movementOf(kind) !== null).toBe(walks);
+  });
+
+  // A pickup or lucky find with no movement never moves and draws nothing; one with a movement
+  // moves at the share, as an obstacle does.
+  it.each(["tip", "treat", ...LUCKY_IDS] as const)("moves a %s only by its movement", (kind) => {
+    const movement = movementOf(kind);
+    if (movement === null) {
       const never = () => {
         throw new Error("drew");
       };
       expect(moverMovement(REAL, never, 1, kind)).toBeNull();
+    } else {
+      expect(moverMovement(REAL, () => 0, 1, kind)).toEqual(movement);
+      expect(moverMovement(REAL, () => 0.99, 0.5, kind)).toBeNull();
     }
   });
 
@@ -1937,11 +1967,11 @@ describe("movers", { timeout: 60_000 }, () => {
     }
   });
 
-  // Each stepper, hopper and stalker of the game's data, planned across seeds at the first
-  // zone's pace and the last's with every mover moving: a stalker plans for its drawn count of
-  // steps, each count in its kind's range coming up, and a stepper or hopper moves at least once
-  // and never more than its kind's most.
-  const counted = OBSTACLE_KINDS.flatMap((kind) => {
+  // Each stepper, hopper and stalker of the game's data, lucky finds included, planned across
+  // seeds at the first zone's pace and the last's with every mover moving: a stalker plans for its
+  // drawn count of steps, each count in its kind's range coming up, and a stepper or hopper moves
+  // at least once and never more than its kind's most.
+  const counted = [...OBSTACLE_KINDS, ...LUCKY_IDS].flatMap((kind) => {
     const movement = movementOf(kind);
     if (movement?.kind === "approach" || movement?.kind === "step") {
       return [{ kind, range: movement.steps }];
@@ -1986,6 +2016,60 @@ describe("movers", { timeout: 60_000 }, () => {
         Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i),
       );
     }
+  });
+
+  // A lucky find that walks about is planned as a prize, blocking no lane, and like every
+  // stepper shows the wander mark before its first step alone.
+  const walkingLucky = LUCKY_IDS.filter((kind) => movementOf(kind) !== null);
+  it.each(walkingLucky)("plans a walking %s as a prize, cueing its first step only", (kind) => {
+    expect(blocksLane(REAL, kind)).toBe(false);
+    const paths = plannedMovers().filter((planned) => planned.kind === kind);
+    expect(paths.length).toBeGreaterThan(0);
+    for (const { mover } of paths) {
+      const steps = mover.motion === "steps" ? mover.steps : [];
+      expect(steps.length).toBeGreaterThan(0);
+      expect(steps.map(({ uncued }) => uncued === true)).toEqual(steps.map((_, i) => i > 0));
+      const cues = steps.map(({ at }) => moverTell(mover, at - 1e-6)?.kind ?? null);
+      expect(cues).toEqual(steps.map((_, i) => (i === 0 ? "wander" : null)));
+    }
+  });
+
+  // The friendly neighbor in the pack's lane as her row reaches the pack: showing her cue before
+  // a step, partway through a step, and standing after an uncued one. However she meets the pack
+  // she pays out as she does standing, and is never a bump, a card or a stop.
+  const stroll = (steps: readonly MoverStep[]): MoverPath => ({
+    lane: 2,
+    motion: "steps",
+    movement: "step",
+    steps,
+    warning: 50,
+  });
+  it.each([
+    { moving: false, name: "showing her cue", path: stroll([{ at: 560, ...SIDESTEP }]) },
+    { moving: true, name: "partway through a step", path: stroll([{ at: 520, ...SIDESTEP }]) },
+    {
+      moving: false,
+      name: "standing after an uncued step",
+      path: stroll([
+        { at: 400, ...SIDESTEP },
+        { at: 450, ...SIDESTEP, lanes: -1, uncued: true },
+      ]),
+    },
+  ])("pays out the friendly neighbor $name, never as a bump", ({ moving, path }) => {
+    const since = 532;
+    expect(inMotion(path, since)).toBe(moving);
+    const met = (item: WalkItem) => withHearts(1, walkWith(["koda"], [item]));
+    const walk = met(moverAt("pettingNeighbor", path, since));
+    const after = step(walk);
+    const standing = step(met(atPack("pettingNeighbor")));
+    expect(after.instants.map(({ encounter }) => encounter)).toEqual(["pettingNeighbor"]);
+    expect(heartsByDog(after.walk.run)).not.toEqual(heartsByDog(walk.run));
+    expect(after.walk.run).toEqual(standing.walk.run);
+    expect(after.bumps).toEqual([]);
+    expect(after.walk.run.bumpsByZone).toEqual([]);
+    expect(after.cards).toEqual([]);
+    expect(after.walk.road.hitStop).toBeNull();
+    expect(after.walk.road.items).toEqual([]);
   });
 
   it("brings a mover onto the road as its cue, carrying its path", () => {

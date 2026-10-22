@@ -349,13 +349,18 @@ export type MovementKind = Movement["kind"];
 // "obstacle": hit by accident. A card obstacle opens a card for the whole pack, with hitLabel
 // shown large as it hits; a contact obstacle applies its effects as it is touched; a pull
 // obstacle does nothing when touched. An obstacle the pack is immune to is harmless. "lucky": a
-// good thing to bump into, applied on contact with no card. An obstacle with a movement comes as
-// a mover at the zone's moverShare. hitWord is the comic word drawn in font-comic over its hit
-// burst: A to Z, ! ? - and space.
+// good thing to bump into, one cell big, applied on contact with no card. An obstacle or lucky
+// encounter with a movement comes as a mover at the zone's moverShare; a lucky one stays a prize
+// as it moves, never something the pack steers around. hitWord is the comic word drawn in
+// font-comic over its hit burst: A to Z, ! ? - and space.
 export type Encounter = {
   readonly name: string;
 } & (
-  | { readonly kind: "lucky"; readonly resolution: InstantResolution }
+  | {
+      readonly kind: "lucky";
+      readonly movement?: Movement;
+      readonly resolution: InstantResolution;
+    }
   | ({
       readonly hitWord: string;
       readonly kind: "obstacle";

@@ -4,6 +4,7 @@ import { animationKey } from "../../assets/asepriteAnimations";
 import {
   IDLE_TAG,
   moverBodyTag,
+  prizeMoverTag,
   STANDING_TAGS,
   WARNING_ARROW_KEY,
   WARNING_DOWN_TAG,
@@ -26,7 +27,7 @@ import {
   moverPlace,
   moverTell,
 } from "../../runner/movers";
-import type { WalkItem } from "../../runner/walk";
+import { itemCategory, type WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemPart, ItemView } from "./itemViews";
 import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
@@ -55,7 +56,7 @@ function showBelowJuncture(sprite: GameObjects.Sprite): void {
 export const MOVER_CUE_PARTS = 3;
 
 // What drawMover reads of a mover on the road.
-type MoverItemView = Pick<WalkItem, "height" | "laneSpan" | "y"> & {
+type MoverItemView = Pick<WalkItem, "height" | "kind" | "laneSpan" | "y"> & {
   readonly mover: MoverOnRoad;
 };
 
@@ -97,8 +98,9 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at
 // the juncture; a cue shows only once wholly below it. A mover stands on the road through the
 // projection, across the middle of the lanes it is drawn over (drawnLanes), while it is solid,
-// sized by showAtDepth, mirrored while it faces left (facesLeft), playing the tag moverBodyTag
-// picks. Before a dart or in-lane move only its cue shows, at 1x:
+// sized by showAtDepth on its body part's feet, mirrored while it faces left (facesLeft), playing
+// the tag moverBodyTag picks, or prizeMoverTag for a lucky find. Before a dart or in-lane move
+// only its cue shows, at 1x:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
 // edge during its cue. A stepper stands on the road throughout, with the wander mark over it
@@ -137,9 +139,12 @@ export function drawMover(
     if (shown) {
       const distance = PROJECTION.footY - body.footY(item);
       const placed = project(PROJECTION, { distance, x: laneX });
-      const drawn = showAtDepth(body.sprite, body.key, placed.scale);
+      const drawn = showAtDepth(body.sprite, body.key, placed.scale, body.feet);
       const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
-      const tag = moverBodyTag(has, path.movement, moving && !halted);
+      const tag =
+        itemCategory(gameData, item.kind) === "lucky"
+          ? prizeMoverTag(has, path.movement, moving && !halted, halted)
+          : moverBodyTag(has, path.movement, moving && !halted);
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       body.sprite

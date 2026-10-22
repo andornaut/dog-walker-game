@@ -24,6 +24,7 @@ import {
   MOVING_TAGS,
   ownerCardFaceKey,
   ownerFaceKey,
+  prizeMoverTag,
   PULL_ART,
   SKUNK_CLOUD_KEY,
   STANDING_TAGS,
@@ -423,8 +424,9 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // Every kind that moves and some zone draws plays one of its movement's tags at each step it
-  // has.
+  // Every obstacle kind that moves and some zone draws plays one of its movement's tags at each
+  // step it has. A lucky find that moves plays one where its art has one, and otherwise looks as
+  // it does standing (prizeMoverTag).
   const drawn = (kind: string) =>
     gameData.world.zones.some(({ weights }) =>
       [weights.obstacles, weights.minorObstacles, weights.luckyFinds].some(
@@ -443,9 +445,12 @@ describe("road object art", () => {
       kind,
     })),
   ];
-  it("tags every moving kind's sprite with a tag of its movement, at every step", () => {
+  const isLucky = (kind: string) =>
+    Object.hasOwn(gameData.encounters, kind) &&
+    gameData.encounters[kind as EncounterId].kind === "lucky";
+  it("tags every moving obstacle's sprite with a tag of its movement, at every step", () => {
     const moving = roadKinds.flatMap(({ art, entry, kind }) => {
-      if (!drawn(kind)) {
+      if (!drawn(kind) || isLucky(kind)) {
         return [];
       }
       const movement = "movement" in entry ? entry.movement : undefined;
@@ -500,10 +505,15 @@ describe("road object art", () => {
         const played =
           movement === null
             ? { halted: STANDING_TAGS.halted.find(has), walking: STANDING_TAGS.walking.find(has) }
-            : {
-                moving: moverBodyTag(has, movement, true),
-                stopped: moverBodyTag(has, movement, false),
-              };
+            : isLucky(item.kind)
+              ? {
+                  moving: prizeMoverTag(has, movement, true, false),
+                  stopped: prizeMoverTag(has, movement, false, false),
+                }
+              : {
+                  moving: moverBodyTag(has, movement, true),
+                  stopped: moverBodyTag(has, movement, false),
+                };
         return Object.entries(played).flatMap(([state, tag]) =>
           tag !== undefined && (frames.get(tag) ?? 0) >= least
             ? []

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../lib/arrays";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
+import type { MoverSpec } from "./movers";
 import {
   blockingLength,
   everyLaneReaches,
@@ -25,7 +26,7 @@ function laneMask(lanes: readonly number[]): number {
   return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
 }
 
-type Kind = "bench" | "car" | "hedge" | "obstacle" | "skunk" | "tip" | "treat";
+type Kind = "bench" | "car" | "hedge" | "neighbor" | "obstacle" | "skunk" | "tip" | "treat";
 
 // 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
@@ -104,7 +105,29 @@ const reacting: SpawnPlan<Kind> = {
   zoneLength: 3000,
 };
 
-const blocking = (event: SpawnEvent<Kind>) => event.kind !== "tip" && event.kind !== "treat";
+const blocking = (event: SpawnEvent<Kind>) =>
+  event.kind !== "neighbor" && event.kind !== "tip" && event.kind !== "treat";
+
+// A prize that moves, as the friendly neighbor does: 1 or 2 steps, a lane to either side then a
+// row down the road.
+const STROLLING: MoverSpec = {
+  footprint: { lanes: 1, rows: 1 },
+  motion: {
+    count: { max: 2, min: 1 },
+    kind: "steps",
+    sequences: [-1, 1].flatMap((lanes) => [
+      [{ lanes, travel: 0 }],
+      [
+        { lanes, travel: 0 },
+        { lanes: 0, travel: 1 },
+      ],
+    ]),
+    stepSeconds: 0.1,
+  },
+  movement: "step",
+  variation: { delaySeconds: 0, speedShare: 0 },
+  warningSeconds: 0.2,
+};
 
 // The lanes no lane-blocking spawn overlaps in each row's window.
 function openLanesByRow(spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]): number[][] {
@@ -469,6 +492,30 @@ describe("planSpawns", () => {
       });
     }
   });
+
+  // A moving prize is placed after every spawn the pack steers around, which it leaves where they
+  // were, and blocks no lane itself. A long zone gives it room to move; a zone shorter than the
+  // road has none, so it stands still. Either way none is skipped.
+  it.each([
+    { moves: 3, name: "a long zone", zoneLength: 6000 },
+    { moves: 0, name: "a zone shorter than the road", zoneLength: 1000 },
+  ])(
+    "places every moving prize in $name, leaving the rest as they were",
+    ({ moves, zoneLength }) => {
+      const without: SpawnPlan<Kind> = { ...plan, zoneLength };
+      const prize = { blocksLane: false, count: 3, kind: "neighbor", mover: STROLLING } as const;
+      const withPrizes: SpawnPlan<Kind> = { ...without, quotas: [...without.quotas, prize] };
+      for (const seed of seeds) {
+        const events = planSpawns(plannerStreams(seed), withPrizes);
+        const prizes = events.filter(({ kind }) => kind === "neighbor");
+        expect(prizes).toHaveLength(prize.count);
+        expect(prizes.filter(({ mover }) => mover !== undefined)).toHaveLength(moves);
+        expect(events.filter(blocking)).toEqual(
+          planSpawns(plannerStreams(seed), without).filter(blocking),
+        );
+      }
+    },
+  );
 
   it("spreads each kind over the zone, one per equal stretch of rows", () => {
     // 3 treats over 9 rows: one in rows 100-300, one in 400-600, one in 700-900.

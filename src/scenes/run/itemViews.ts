@@ -121,6 +121,8 @@ export class ItemViews {
       const view = this.views.get(item.id) ?? this.addView(item);
       if (item.mover !== undefined) {
         drawMover({ ...item, mover: item.mover }, view, roadTop, halted, still, shadow);
+        // A moving lucky find bobs as it does standing.
+        applyItemCue(item, view.parts, still, this.scene.time.now);
         // The cue's arrow shows only once it is wholly on the road below the juncture.
         if (view.parts[MOVER_ARROW_PART]?.sprite.visible === true) {
           for (const trigger of moverHintTriggers(moverTell(item.mover.path, item.mover.since))) {

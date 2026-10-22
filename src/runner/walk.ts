@@ -431,9 +431,9 @@ export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, 
   return last[0];
 }
 
-// The movement a drawn spawn moves with: an obstacle, minor or not, with a movement comes as a
-// mover at a chance of share. Other spawns never move and draw nothing, as does any spawn at a
-// share of 0.
+// The movement a drawn spawn moves with: an obstacle, minor or not, or a lucky encounter with a
+// movement comes as a mover at a chance of share. Other spawns never move and draw nothing, as
+// does any spawn at a share of 0.
 export function moverMovement(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   random: Random,
@@ -447,12 +447,13 @@ export function moverMovement(
   return chance(random, share) ? movement : null;
 }
 
-// The movement an obstacle, minor or not, can come with, or null for anything that never moves.
+// The movement an obstacle, minor or not, or a lucky encounter can come with, or null for anything
+// that never moves.
 function movementOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): MovingMovement | null {
-  if (!blocksLane(data, kind)) {
+  if (isPickup(kind)) {
     return null;
   }
   const entry = isMinorObstacle(data, kind) ? data.minorObstacles[kind] : data.encounters[kind];
@@ -591,8 +592,9 @@ export function opensACard(
 
 // Each obstacle, minor obstacle and lucky find is drawn first by the zone's weights, so its
 // shape is known when it is placed. Rush hour and the like scale both obstacle counts, the tips
-// and the treats. Then each obstacle whose look moves comes as a mover at the zone's mover
-// share: one quota per kind, and one per stepper, whose steps are its own.
+// and the treats. Then each obstacle or lucky find whose look moves comes as a mover at the zone's
+// mover share: one quota per kind, and one per stepper, whose steps are its own. A lucky find
+// blocks no lane, moving or not.
 export function spawnQuotas(
   data: WalkData,
   streams: PlannerStreams,
@@ -618,7 +620,7 @@ export function spawnQuotas(
   const steppers: SpawnQuota<WalkItemKind>[] = [];
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
   const moverQuota = (kind: WalkItemKind, movement: MovingMovement, moverCount: number) => ({
-    blocksLane: true,
+    blocksLane: blocksLane(data, kind),
     count: moverCount,
     first: opensACard(data, kind),
     kind,
@@ -985,7 +987,10 @@ function footprintLane(laneCount: number, item: WalkItem): number {
 }
 
 // An item's footprint box on the road: its lanes less the inset at each side, along its height.
-function walkItemBox(geometry: Pick<RoadGeometry, "cell" | "laneCount">, item: WalkItem): Box {
+export function walkItemBox(
+  geometry: Pick<RoadGeometry, "cell" | "laneCount">,
+  item: WalkItem,
+): Box {
   return itemBox(geometry.cell, { ...item, lane: footprintLane(geometry.laneCount, item) });
 }
 

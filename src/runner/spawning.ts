@@ -21,9 +21,11 @@ export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 
 // blocksLane marks kinds the pack must steer around, such as obstacles. first marks kinds
 // placed before every other, such as the obstacles that open a card, so they are the last
-// skipped. Spawns without a footprint take one cell. A mover's spawns block the lanes it sweeps
-// instead; one with no room to move waits for a later row with room, or is dropped, unless it
-// is marked first, when it stands still in its footprint instead.
+// skipped. Spawns without a footprint take one cell. A lane-blocking mover's spawns block the
+// lanes it sweeps instead; one with no room to move waits for a later row with room, or is
+// dropped, unless it is marked first, when it stands still in its footprint instead. A mover
+// that blocks no lane, a moving prize, only keeps clear the cells it passes through, and stands
+// still in its footprint when it has no room to move.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
@@ -293,11 +295,17 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // within the zone's last row. Where the path changes lanes between two lane-blocking spawns,
 // packFitsBetween holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide
 // or wider have a row between the rows they take. The quotas marked first are placed first, their
-// movers then the rest; then the other movers; then the other spawns. Movers are placed by
-// placeMovers; a crosser keeps the row before its own clear as a lead-in, so the pack steers into
-// its row from two rows back. A mover with no room in its stretch, such as one over a cap on
-// screen, waits for a later row with room; only one marked first stands still in its footprint when
-// no row has room for it to move. A mover, or an obstacle bigger than one cell, that the earlier
+// movers then the rest; then the other lane-blocking movers; then the other lane-blocking spawns;
+// then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
+// the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
+// mover with no room in its stretch, such as one over a cap on screen, waits for a later row with
+// room; only one marked first stands still in its footprint when no row has room for it to move. A
+// moving prize is placed as a mover that blocks nothing: the cells it passes through are kept clear
+// of other spawns, so it never walks into one, but no lane is blocked, it stands nowhere for the
+// pack-fit gap and it counts toward no cap on screen, since the pack never has to steer around it.
+// It keeps a free cell for every moving prize, its own included, and with no room to move it stands
+// still in one cell among the other spawns, so a prize is never skipped for want of room to move.
+// A lane-blocking mover, or an obstacle bigger than one cell, that the earlier
 // draws left no room for is skipped, which uses no random draw; so is one that would leave fewer
 // free cells than there are one-cell spawns. A free cell can still be one no lane-blocking spawn
 // may take, where the path rule or the pack-fit gap around the movers rules it out, so a one-cell
@@ -335,8 +343,13 @@ export function planSpawns<Kind extends string>(
     return across * length;
   };
   const statics = plan.quotas.filter((quota) => quota.mover === undefined);
-  // One-cell spawns are never skipped, so the others keep a free cell for each of them.
-  const reserved = statics.reduce((sum, quota) => sum + (area(quota) === 1 ? quota.count : 0), 0);
+  const prizes = plan.quotas.filter((quota) => quota.mover !== undefined && !quota.blocksLane);
+  // One-cell spawns and moving prizes are never skipped, so the others keep a free cell for each
+  // of them.
+  const reserved = [...statics, ...prizes].reduce(
+    (sum, quota) => sum + (quota.mover !== undefined || area(quota) === 1 ? quota.count : 0),
+    0,
+  );
   let cellsLeft = rows.length * laneCount;
   const leavesRoom = (cells: number) => cellsLeft - cells >= reserved;
   const takeCells = (row: number, mask: number) => {
@@ -516,9 +529,14 @@ export function planSpawns<Kind extends string>(
     return cells;
   };
 
-  const movers = plan.quotas.flatMap(({ count, first, kind, mover }) =>
-    mover === undefined ? [] : [{ count, first: first ?? false, kind, spec: mover }],
-  );
+  // The movers that block lanes, or the moving prizes, as placeMovers takes them.
+  const moverQuotas = (blocking: boolean) =>
+    plan.quotas.flatMap(({ blocksLane, count, first, kind, mover }) =>
+      mover === undefined || blocksLane !== blocking
+        ? []
+        : [{ count, first: first ?? false, kind, spec: mover }],
+    );
+  const movers = moverQuotas(true);
   const moverGrid = {
     block: (row: number, span: LaneSpan, rowsBlocked: number, leadIn: boolean, keep: boolean) => {
       // A lead-in needs a row before it to steer from.
@@ -578,21 +596,32 @@ export function planSpawns<Kind extends string>(
       quotas,
     );
     events.push(...spawns);
-    if (!first) {
-      return [];
-    }
-    return quotas.flatMap(({ kind, spec }) => {
-      const count = dropped.filter((other) => other === kind).length;
-      return count === 0
-        ? []
-        : [{ blocksLane: true, count, first: true, footprint: spec.footprint, kind }];
-    });
+    return first ? stilledQuotas(true, quotas, dropped) : [];
+  };
+  // A moving prize keeps its cells clear of other spawns, and nothing else: it blocks no lane,
+  // stands nowhere for the pack-fit gap, and counts toward no cap on screen. One with no room to
+  // move stands still instead, in its footprint, among the other spawns that block no lane.
+  const prizeGrid = { ...moverGrid, block: () => true, packFits: () => true, stand: () => {} };
+  const placePrizes = (): SpawnQuota<Kind>[] => {
+    const quotas = moverQuotas(false);
+    const { dropped, spawns } = placeMovers(
+      streams,
+      moverRoad,
+      plan.moverCaps,
+      prizeGrid,
+      [],
+      rows,
+      quotas,
+    );
+    events.push(...spawns);
+    return stilledQuotas(false, quotas, dropped);
   };
   // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
-  const placeStanding = (first: boolean, stilled: readonly SpawnQuota<Kind>[]) => {
-    const ordered = [...statics, ...stilled]
-      .filter((quota) => (quota.first ?? false) === first)
-      .sort((a, b) => area(b) - area(a));
+  const placeStanding = (
+    keep: (quota: SpawnQuota<Kind>) => boolean,
+    stilled: readonly SpawnQuota<Kind>[],
+  ) => {
+    const ordered = [...statics, ...stilled].filter(keep).sort((a, b) => area(b) - area(a));
     ordered.forEach(placeQuota);
   };
   const placeQuota = (quota: SpawnQuota<Kind>) => {
@@ -628,10 +657,25 @@ export function planSpawns<Kind extends string>(
       events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
     }
   };
-  placeStanding(true, placeMoving(true));
+  placeStanding((quota) => quota.first === true, placeMoving(true));
   placeMoving(false);
-  placeStanding(false, []);
+  placeStanding((quota) => quota.first !== true && quota.blocksLane, []);
+  placeStanding((quota) => quota.first !== true && !quota.blocksLane, placePrizes());
   return events.sort((a, b) => a.distance - b.distance || a.lane - b.lane);
+}
+
+// The movers placeMovers dropped, as quotas that stand still in their footprints, one per kind:
+// a kind may have several quotas, such as one per stepper.
+function stilledQuotas<Kind extends string>(
+  blocksLane: boolean,
+  quotas: readonly { readonly first: boolean; readonly kind: Kind; readonly spec: MoverSpec }[],
+  dropped: readonly Kind[],
+): SpawnQuota<Kind>[] {
+  const kinds = new Map(quotas.map((quota) => [quota.kind, quota]));
+  return [...kinds.values()].flatMap(({ first, kind, spec }) => {
+    const count = dropped.filter((other) => other === kind).length;
+    return count === 0 ? [] : [{ blocksLane, count, first, footprint: spec.footprint, kind }];
+  });
 }
 
 // Spawns become due once the distance travelled reaches them. Most steps have none due, and
