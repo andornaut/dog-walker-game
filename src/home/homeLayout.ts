@@ -203,6 +203,23 @@ export const HOME_LAYOUT = {
     walker: WALKER_SECTION,
   },
   settings: topBarButton("pause"),
+  // The dog slot sign hung from the Pet shop's awning across its front: its art (key, with
+  // normal and pressed tags) drawn at art, its board inside the frame, and its gold outline 2px
+  // outside the board. Its call to buy and the next slot's price are body text at scale, each
+  // line's ink centred on textX with its capitals at capY, in its palette color; pressed, the
+  // board drops pressDrop on longer cords and the text with it. The hit area is the board
+  // widened to 44 tall.
+  slotSign: {
+    art: { x: 258, y: 120 },
+    board: { height: 24, width: 73, x: 259, y: 125 },
+    head: { capY: 128, color: "plum" },
+    hit: { height: 44, width: 73, x: 259, y: 115 },
+    key: "ui-slot-sign",
+    pressDrop: 1,
+    price: { capY: 137, color: "forest" },
+    scale: 1,
+    textX: 295,
+  },
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
   // of 2x body text a line of the font apart, padX in from its sides, the first line's
   // capitals padTop under its top and the last line's lowest ink padBottom over its bottom. It
@@ -291,6 +308,7 @@ export const HOME_LAYOUT = {
   porchSpots: Readonly<Partial<Record<DogId, { footY: number; x: number }>>>;
   sectionFillKeys: Readonly<Record<SectionId, string>>;
   sections: Readonly<Record<SectionId, Rect>>;
+  slotSign: { readonly [key: string]: unknown; board: Rect; hit: Rect };
   walkerTiles: GridSpec;
 };
 

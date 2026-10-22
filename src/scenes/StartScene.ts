@@ -75,6 +75,7 @@ import {
   startReady,
 } from "../home/sections";
 import { shopAffordable } from "../home/shop";
+import { SLOT_SIGN_PURCHASE, slotSign, slotSignAt } from "../home/slotSign";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
@@ -191,6 +192,7 @@ const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
 const LOGBOOK_FACE = HOME_LAYOUT.logbook.face;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
+const SLOT_SIGN = HOME_LAYOUT.slotSign;
 const POCKET_LINING = HOME_LAYOUT.pocketLining;
 const SECTION_FILL_KEYS = HOME_LAYOUT.sectionFillKeys;
 const POCKET = HOME_LAYOUT.pocket;
@@ -242,6 +244,7 @@ type Target =
   | { kind: "mute" }
   | { kind: "petShop" }
   | { kind: "settings" }
+  | { kind: "slotSign" }
   | { kind: "start" }
   | { kind: "walker"; walker: WalkerId };
 
@@ -292,12 +295,13 @@ interface Focusable {
   target: Target;
 }
 
-// The keyboard's rows, top to bottom as the screen shows them: the Pet shop, the walkers,
-// the dog rows, the Pocket and Start walk.
-function focusRows(): Focusable[][] {
+// The keyboard's rows, top to bottom as the screen shows them: the dog slot sign while it
+// shows and the Pet shop, the walkers, the dog rows, the Pocket and Start walk.
+function focusRows(signShown: boolean): Focusable[][] {
   const walkers = walkerTiles();
+  const sign: Focusable = { rect: SLOT_SIGN.board, target: { kind: "slotSign" } };
   const rows: Focusable[][] = [
-    [{ rect: PET_SHOP, target: { kind: "petShop" } }],
+    [...(signShown ? [sign] : []), { rect: PET_SHOP, target: { kind: "petShop" } }],
     walkerIds().map((walker, i): Focusable => ({
       rect: itemAt(walkers, i),
       target: { kind: "walker", walker },
@@ -333,6 +337,8 @@ interface Overlay {
 // and its badge pops.
 interface TileView {
   badge?: { image: GameObjects.Image; y: number };
+  // The dog slot sign hangs from the Pet shop, so it rises and falls with the shop's bob.
+  bobsWithShop?: boolean;
   container: GameObjects.Container;
   face?: { object: GameObjects.Image | GameObjects.Sprite; y: number };
   // The Pet shop's glint frames, shown in place of its normal face while one plays.
@@ -555,7 +561,7 @@ export class StartScene extends Scene {
     }
     const direction = focusDirectionForKey(key);
     if (direction !== undefined) {
-      const rows = focusRows();
+      const rows = focusRows(this.signShown());
       this.focus = moveFocus(
         rows.map((row) => row.length),
         direction,
@@ -567,7 +573,9 @@ export class StartScene extends Scene {
     }
     if (isConfirmKey(key)) {
       const focused =
-        this.focus === null ? undefined : focusRows()[this.focus.row]?.[this.focus.column];
+        this.focus === null
+          ? undefined
+          : focusRows(this.signShown())[this.focus.row]?.[this.focus.column];
       const target = focused?.target ?? { kind: "start" };
       this.press = { held: false, id: targetId(target), startedMs: this.time.now };
       this.actAfterDip(target);
@@ -586,6 +594,12 @@ export class StartScene extends Scene {
 
   private save(): SaveDocument {
     return profileSave(this);
+  }
+
+  // Whether the dog slot sign shows: while a dog slot is for sale.
+  private signShown(): boolean {
+    const { bankCents, owned } = this.save();
+    return slotSign(gameData, owned, bankCents) !== null;
   }
 
   // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
@@ -661,6 +675,10 @@ export class StartScene extends Scene {
       [LOGBOOK_BUTTON, { kind: "logbook" }],
       [PET_SHOP, { kind: "petShop" }],
     ];
+    const { bankCents, owned } = this.save();
+    if (slotSignAt(gameData, owned, bankCents, x, y)) {
+      return { kind: "slotSign" };
+    }
     return fixed.find(([rect]) => containsPoint(rect, x, y))?.[1];
   }
 
@@ -755,6 +773,9 @@ export class StartScene extends Scene {
       }
       case "petShop":
         this.openShop({});
+        return;
+      case "slotSign":
+        this.openShop({ focus: SLOT_SIGN_PURCHASE });
         return;
       case "walker": {
         // A locked walker shakes and says its goal; nothing else changes. An owned one is
@@ -898,6 +919,11 @@ export class StartScene extends Scene {
     const pressed = this.press;
     const dip = (id: string) =>
       pressed?.id === id ? pressDip(pressed.held, now, pressed.startedMs) : 0;
+    // The Pet shop's art bobs while it is not pressed, and the slot sign with it.
+    const shopRise =
+      this.views.get("petShop")?.glint === undefined || dip("petShop") > 0
+        ? 0
+        : shopBobOffset(reduced, now);
     for (const [id, view] of this.views) {
       const rise =
         view.rise === undefined ? 0 : badgePopOffset(reduced, now, this.pops.get(view.rise));
@@ -917,7 +943,7 @@ export class StartScene extends Scene {
         shakeOffset(reduced, now, this.shakes.get(id)),
         view.lift +
           (view.iconButton === undefined ? dip(id) : 0) +
-          (glint === undefined || down ? 0 : shopBobOffset(reduced, now)) +
+          (glint !== undefined || view.bobsWithShop === true ? shopRise : 0) +
           rise,
       );
       view.face?.object.setY(view.face.y + hopOffset(reduced, now, this.pops.get(id)));
@@ -1010,6 +1036,7 @@ export class StartScene extends Scene {
     const g = this.graphics(root);
     this.drawTopBar(root, g, save);
     this.drawPetShop(root, save);
+    this.drawSlotSign(root, save);
     this.drawPackAtGate(root, g, save);
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
@@ -1456,6 +1483,54 @@ export class StartScene extends Scene {
     }
   }
 
+  // The dog slot sign hung across the Pet shop's front while a dog slot is for sale:
+  // ui-slot-sign, its board and text dropping while pressed, with its call to buy over the next
+  // slot's price, and the gold outline while the bank covers that slot. It bobs with the shop.
+  // A cream board in an ink frame stands in while the art is missing, when the whole sign dips
+  // instead.
+  private drawSlotSign(root: GameObjects.Container, save: SaveDocument): void {
+    const sign = slotSign(gameData, save.owned, save.bankCents);
+    if (sign === null) {
+      return;
+    }
+    const { art, board, head, key, pressDrop, price, scale, textX } = SLOT_SIGN;
+    const view = this.tileView(root, "slotSign");
+    view.bobsWithShop = true;
+    const faces = (["normal", "pressed"] as const).flatMap((tag) => {
+      const image = addTagImage(this, key, tag, art.x, art.y);
+      return image === undefined ? [] : [image];
+    });
+    const [normal, pressed] = faces;
+    if (normal === undefined || pressed === undefined) {
+      faces.forEach((face) => face.destroy());
+      const colors = { border: PALETTE.ink, fill: PALETTE.cream };
+      drawFramedRect(this.graphics(view.container), colors, board);
+    } else {
+      view.container.add(faces);
+    }
+    // Each line's ink centred on textX.
+    const labels = sign.lines.map((line, i) => {
+      const row = i === 0 ? head : price;
+      const label = this.text(view.container, 0, 0, line, PALETTE[row.color], { scale });
+      const ink = inkSpan(label);
+      placePixelText(label, textX - (ink.left + ink.right) / 2, row.capY);
+      return { label, y: label.y };
+    });
+    if (normal !== undefined && pressed !== undefined) {
+      view.iconButton = {
+        setPressed: (down) => {
+          normal.setVisible(!down);
+          pressed.setVisible(down);
+          labels.forEach(({ label, y }) => label.setY(y + (down ? pressDrop : 0)));
+        },
+      };
+      view.iconButton.setPressed(false);
+    }
+    if (sign.affordable) {
+      addAffordFrame(this, view.container, board, currentSettings(this).reducedMotion);
+    }
+  }
+
   // The glint frames of the Pet shop's art, an image over the normal face, hidden between
   // glints. update plays them from the clock, so there is no timer to stop.
   private addShopGlint(view: TileView, normal: GameObjects.Image): void {
@@ -1740,7 +1815,7 @@ export class StartScene extends Scene {
     if (this.focus === null) {
       return;
     }
-    const rect = focusRows()[this.focus.row]?.[this.focus.column]?.rect;
+    const rect = focusRows(this.signShown())[this.focus.row]?.[this.focus.column]?.rect;
     if (rect === undefined) {
       return;
     }

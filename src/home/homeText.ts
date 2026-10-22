@@ -51,6 +51,7 @@ export const HOME_TEXT_FIELDS = {
     slotLine: ["count"],
   },
   slotBought: ["slot"],
+  slotSign: [],
   startLoading: [],
   startWalk: [],
   unsaved: [],

@@ -1722,6 +1722,36 @@
           "y": 0
         }
       },
+      "slotSign": {
+        "art": {
+          "x": 258,
+          "y": 120
+        },
+        "board": {
+          "height": 24,
+          "width": 73,
+          "x": 259,
+          "y": 125
+        },
+        "head": {
+          "capY": 128,
+          "color": "plum"
+        },
+        "hit": {
+          "height": 44,
+          "width": 73,
+          "x": 259,
+          "y": 115
+        },
+        "key": "ui-slot-sign",
+        "pressDrop": 1,
+        "price": {
+          "capY": 137,
+          "color": "forest"
+        },
+        "scale": 1,
+        "textX": 295
+      },
       "speech": {
         "clearance": 2,
         "lines": 4,

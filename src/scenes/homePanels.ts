@@ -14,6 +14,7 @@ import {
   pixelFontMetrics,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
+import { AFFORD_OUTSET } from "../ui/selection";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import {
   addCloseButton,
@@ -46,9 +47,6 @@ function text(
   parent.add(label);
   return label;
 }
-
-// ui-afford sits this far outside an affordable item.
-const AFFORD_OUTSET = 2;
 
 // The ui-afford outline 2px outside rect, playing its glint tag, or holding its first frame
 // with reduced motion; while the art is missing, an amber line in a plum keyline. A selected

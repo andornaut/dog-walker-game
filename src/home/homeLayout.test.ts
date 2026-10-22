@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -6,7 +8,8 @@ import type { DogId, GearId, WalkerId } from "../data/types";
 import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
 import { WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
-import { insetRect, type Rect } from "../lib/rect";
+import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
+import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -15,10 +18,11 @@ import { BADGE_OFFSET } from "../ui/badge";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { plainMarks } from "../ui/pixelFont";
+import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dollarAmountText, shortDollarAmountText } from "./home";
+import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
 import {
   BANK_ROOM,
   bankFit,
@@ -459,5 +463,84 @@ describe("Start walk's loading label", () => {
     );
     expect(fitted.lines).toHaveLength(1);
     expect(fitted.widest).toBeLessThanOrEqual(room);
+  });
+});
+
+// The dog slot sign hangs on the Pet shop's front, its board inside its art and its outline
+// inside the shop's, clear of the walker and the yard sign, with both its lines on its board
+// for every slot's price, pressed or not.
+describe("the dog slot sign", () => {
+  const { art, board, head, hit, key, pressDrop, price, scale, textX } = HOME_LAYOUT.slotSign;
+  const { gate, logo, petShop, walkerAtGate } = HOME_LAYOUT;
+  const outline = insetRect(-AFFORD_OUTSET, board);
+  const file = (path: string) => readFileSync(new URL(`../../public/art/${path}`, import.meta.url));
+  // A sprite's frame size, from its sheet's data.
+  const frameSize = (key: string) => {
+    const sheet = JSON.parse(file(`sprites/${key}.json`).toString("utf8")) as {
+      frames: Record<string, { sourceSize: { h: number; w: number } }>;
+    };
+    const { h, w } = Object.values(sheet.frames)[0]?.sourceSize ?? { h: 0, w: 0 };
+    return { height: h, width: w };
+  };
+  // A walker's whole frame, centred over its feet at the gate.
+  const walkerBox = (walker: WalkerId): Rect => {
+    const { height, width } = frameSize(gameData.walkers[walker].spriteKey);
+    return { height, width, x: walkerAtGate.x - width / 2, y: walkerAtGate.footY - height };
+  };
+  const logoPng = file("images/logo.png");
+  const yardSign = { height: logoPng.readUInt32BE(20), width: logoPng.readUInt32BE(16), ...logo };
+  const within = (inner: Rect, outer: Rect) => {
+    expect(inner.x).toBeGreaterThanOrEqual(outer.x);
+    expect(inner.y).toBeGreaterThanOrEqual(outer.y);
+    expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width);
+    expect(inner.y + inner.height).toBeLessThanOrEqual(outer.y + outer.height);
+  };
+  const clear: readonly [string, Rect][] = [
+    ["the yard sign", yardSign],
+    ...(Object.keys(gameData.walkers) as WalkerId[]).map((walker): [string, Rect] => [
+      `walker ${walker}`,
+      walkerBox(walker),
+    ]),
+  ];
+
+  it.each(clear)("keeps its outline and hit area clear of %s", (_, rect) => {
+    expect(rectsOverlap(outline, rect)).toBe(false);
+    expect(rectsOverlap(hit, rect)).toBe(false);
+  });
+
+  it("draws its board inside its art, in the gate scene", () => {
+    within(board, { ...frameSize(key), ...art });
+    within(outline, { height: gate.height, width: SCREEN_CONFIG.width, x: 0, y: gate.y });
+  });
+
+  it("keeps its outline inside the Pet shop's and its hit area on the shop", () => {
+    within(outline, insetRect(-AFFORD_OUTSET, petShop));
+    within(hit, petShop);
+  });
+
+  it("covers the board with a hit area at least 44 a side", () => {
+    expect(Math.min(hit.height, hit.width)).toBeGreaterThanOrEqual(44);
+    within(board, hit);
+  });
+
+  const prices = gameData.dogSlots.flatMap((slot) =>
+    slot.unlock === "shop" ? [dollarText(unlockPrice(gameData.tuning, slot))] : [],
+  );
+  const lines = [
+    { capY: head.capY, text: gameData.homeText.slotSign },
+    ...prices.map((text) => ({ capY: price.capY, text })),
+  ];
+
+  it.each(lines)("sets $text on the board, pressed or not", ({ capY, text }) => {
+    const width = inkWidth("font-body", { letterSpacing: 0, scale }, text);
+    expect(Math.floor(textX - width / 2)).toBeGreaterThanOrEqual(board.x);
+    expect(Math.ceil(textX + width / 2)).toBeLessThanOrEqual(board.x + board.width);
+    expect(capY).toBeGreaterThanOrEqual(board.y);
+    const bottom = capY + inkRowsFromCapTop(BODY) * scale + pressDrop;
+    expect(bottom).toBeLessThanOrEqual(board.y + board.height);
+  });
+
+  it("puts the price's capitals under the call's lowest ink", () => {
+    expect(head.capY + inkRowsFromCapTop(BODY) * scale).toBeLessThanOrEqual(price.capY);
   });
 });

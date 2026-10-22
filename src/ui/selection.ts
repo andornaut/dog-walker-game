@@ -88,6 +88,9 @@ export const PLATE_LOOKS = {
 // line then lies on the item's edge.
 export const SELECT_OUTSET = 3;
 
+// ui-afford sits this far outside an affordable item on each side.
+export const AFFORD_OUTSET = 2;
+
 export function selectLook(state: TileState): SelectLook {
   return { ...LOOKS[state], state };
 }

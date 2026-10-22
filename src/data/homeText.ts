@@ -106,6 +106,7 @@ export const HOME_TEXT = {
     title: "Pet shop",
   },
   slotBought: "{slot} is open. Room for one more dog!",
+  slotSign: "Walk more dogs!",
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",

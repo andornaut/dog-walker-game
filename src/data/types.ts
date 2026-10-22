@@ -637,6 +637,8 @@ export interface HomeText {
     readonly title: string;
   };
   readonly slotBought: string;
+  // The dog slot sign's line over the next slot's price, beside the Pet shop.
+  readonly slotSign: string;
   // Start walk's label while the walk waits for its art to load.
   readonly startLoading: string;
   readonly startWalk: string;
