@@ -183,7 +183,7 @@ def small(module, s, draw, *args, **q):
             m.face_front = full_face
 
 
-def face_front(s, g, cx, y, eyes="ink", lips="dbrown"):
+def face_front(s, g, cx, y, eyes="ink", lips="dbrown", spread=4):
     """road.face_front at scale s on the Mini g, drawn at the small size: scaled, its eyes lose their glint
     and its mouth swells into a dark blot. Each eye is 2 x s square, rounded, at least 1px, centred where it
     is at full size, with its white glint at the top-left when it is 2px. The mouth is 2 x s wide on the row
@@ -191,7 +191,7 @@ def face_front(s, g, cx, y, eyes="ink", lips="dbrown"):
     px = raster(g)
     n = max(1, scaled(2, s))
     top = math.floor((y + 1) * s + 0.5 - n / 2)
-    for x in (cx - 4, cx + 4):
+    for x in (cx - spread, cx + spread):
         x0 = math.floor(x * s + 0.5 - n / 2)
         px.rect(x0, top, n, n, eyes)
         if n > 1:

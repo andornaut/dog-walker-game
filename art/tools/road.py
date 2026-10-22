@@ -57,12 +57,13 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import DARKER, Grid, K, edged, main, raster, scale_of  # noqa: E402
 
 
-def face_front(g, cx, y, eyes="ink", lips="dbrown"):
-    """Eyes and a smile for a chibi head seen from the front; y is the eye row. lips is the mouth's colour."""
-    g.rect(cx - 5, y, 2, 2, eyes)
-    g.rect(cx + 3, y, 2, 2, eyes)
-    g.p(cx - 5, y, "white")
-    g.p(cx + 3, y, "white")
+def face_front(g, cx, y, eyes="ink", lips="dbrown", spread=4):
+    """Eyes and a smile for a chibi head seen from the front; y is the eye row. lips is the mouth's colour;
+    spread is each eye's centre's distance from cx."""
+    g.rect(cx - spread - 1, y, 2, 2, eyes)
+    g.rect(cx + spread - 1, y, 2, 2, eyes)
+    g.p(cx - spread - 1, y, "white")
+    g.p(cx + spread - 1, y, "white")
     g.p(cx - 2, y + 4, lips)
     g.p(cx + 1, y + 4, lips)
     g.rect(cx - 1, y + 5, 2, 1, lips)
@@ -397,27 +398,37 @@ def front_eyes(g, cx, y):
         g.rect(x + 1, y, 1, 2, "ink")
 
 
-def eye_boxes(g, cx, y):
-    """(left column, top row, size) in pixels of each eye face_front draws at (cx, y): 2px at 1x, and on a
-    minis.Mini the eyes minis.face_front draws at its scale."""
+def eye_boxes(g, cx, y, spread=4):
+    """(left column, top row, size) in pixels of each eye face_front draws at (cx, y) with spread: 2px at
+    1x, and on a minis.Mini the eyes minis.face_front draws at its scale."""
     s = scale_of(g)
     n = max(1, math.floor(2 * s + 0.5))
     top = math.floor((y + 1) * s + 0.5 - n / 2)
-    return [(math.floor(x * s + 0.5 - n / 2), top, n) for x in (cx - 4, cx + 4)]
+    return [(math.floor(x * s + 0.5 - n / 2), top, n) for x in (cx - spread, cx + spread)]
 
 
-def glasses(g, cx, y, c):
+def glasses(g, cx, y, c, spread=4):
     """Round glasses on the eyes face_front draws at (cx, y): a ring 1px out from each eye with its corners
     cut, and a bridge between them along the eyes' top row. Drawn in pixels round the eyes, so they fit
     them at any scale."""
     px = raster(g)
-    (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y)
+    (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y, spread)
     for x0 in (lx, rx):
         px.rect(x0 - 1, top, 1, n, c)
         px.rect(x0 + n, top, 1, n, c)
         px.rect(x0, top - 1, n, 1, c)
         px.rect(x0, top + n, n, 1, c)
     px.rect(lx + n + 1, top, rx - lx - n - 2, 1, c)
+
+
+def nose(g, cx, y, c="skin2", spread=4):
+    """A small nose between the eyes face_front draws at (cx, y), just under their bottom row: a 1px shadow
+    down its right side and a pixel at its tip, so glasses have something to sit on."""
+    px = raster(g)
+    (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y, spread)
+    mid = (lx + n + rx) // 2
+    px.rect(mid, top + n - 1, 1, 2, c)
+    px.p(mid - 1, top + n, c)
 
 
 def casey_front(wave=0, bob=0):
@@ -592,8 +603,10 @@ def trista_front(wave=0, bob=0):
     g.tri((8, 8 + b), (19, 9 + b), (9, 13.5 + b), "brown")
     for x, y, h in ((11, 6, 3), (15, 5, 3), (19, 6, 2)):
         g.rect(x, y + b, 1, h, "amber")
-    face_front(g, 16, 14 + b)
-    glasses(g, 16, 14 + b, "dbrown")
+    # her eyes sit closer together than the others', behind her glasses
+    face_front(g, 16, 14 + b, spread=3)
+    nose(g, 16, 14 + b, spread=3)
+    glasses(g, 16, 14 + b, "dbrown", spread=3)
     return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
 
 
