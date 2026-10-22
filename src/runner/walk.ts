@@ -1144,6 +1144,9 @@ export function stepWalk(
     }
   };
   for (const { dog, item } of [...hits, ...pickupsHit]) {
+    if (nextRun.phase.kind === "ended") {
+      break;
+    }
     const { kind } = item;
     if (isPickup(kind) && byReach.includes(item)) {
       modifiedAt(item, [reachModified(data, run, kind)]);
