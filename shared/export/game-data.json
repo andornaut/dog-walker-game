@@ -252,7 +252,7 @@
       "frame": "encounter",
       "id": "skip",
       "index": null,
-      "name": "Walk on by",
+      "name": "Skip (Hall pass)",
       "source": {
         "id": null,
         "kind": "skip"

@@ -12,9 +12,9 @@ export const RUN_TEXT = {
     heartForgiven: "♥ {dog}'s safe!",
     need: "{amount}",
     pickOne: "Pick one",
-    skip: "Walk on by",
+    skip: "Skip (Hall pass)",
     skipEffect: "Skip this card, free once each neighborhood.",
-    skipHeld: "Walk on by: nothing happens.",
+    skipHeld: "Skip this card: nothing happens.",
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Rest of walk" },
   },
   causes: {

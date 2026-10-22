@@ -47,7 +47,7 @@ export const HOME_TEXT = {
     freeCards: "first {count} cards' cash options free each neighborhood",
     heartsEach: "{hearts} each",
     nothing: "Nothing",
-    skipOption: "a free Walk on by each neighborhood",
+    skipOption: "one free card skip each neighborhood",
     stats: {
       agility: "agility",
       bumpHearts: "♥ lost to a bump",
