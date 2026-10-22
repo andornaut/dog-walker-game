@@ -75,7 +75,7 @@ import {
   type SectionState,
   startReady,
 } from "../home/sections";
-import { shopAffordable, type ShopTab } from "../home/shop";
+import { shopAffordable } from "../home/shop";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
@@ -148,7 +148,7 @@ import {
 import { nextRunStart } from "./run/runRecorder";
 import { type RunPick, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
-import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
+import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import {
   SHOP_CHANGED_EVENT,
   SHOP_CLOSED_EVENT,
@@ -156,7 +156,6 @@ import {
   type ShopSceneData,
 } from "./ShopScene";
 import { playEffect, playTag, spriteMetrics } from "./sprites";
-import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
   addNineSlice,
@@ -664,8 +663,8 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // The shop over everything below the top bar, on a tab or framing the item tapped.
-  private openShop(open: { focus?: Purchase; tab?: ShopTab }): void {
+  // The shop over everything below the top bar, framing the item tapped.
+  private openShop(open: { focus?: Purchase }): void {
     const data: ShopSceneData = { ...open, resume: SCENE_KEYS.start };
     openOverlay(this, SCENE_KEYS.shop, data);
   }
@@ -786,17 +785,13 @@ export class StartScene extends Scene {
       case "help":
         this.afterArt("help", () => openHelp(this, SCENE_KEYS.start));
         return;
-      case "logbook": {
+      case "logbook":
         // The logbook is the Stats page, on its first tab.
-        const data: StatsSceneData = { resume: SCENE_KEYS.start };
-        openOverlay(this, SCENE_KEYS.stats, data);
+        openOverlay(this, SCENE_KEYS.stats, { resume: SCENE_KEYS.start });
         return;
-      }
-      case "settings": {
-        const data: SettingsSceneData = { resume: SCENE_KEYS.start };
-        openOverlay(this, SCENE_KEYS.settings, data);
+      case "settings":
+        openOverlay(this, SCENE_KEYS.settings, { resume: SCENE_KEYS.start });
         return;
-      }
       case "start":
         this.startWalk();
         return;

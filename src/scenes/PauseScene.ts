@@ -27,7 +27,7 @@ import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
 import { SCENE_KEYS } from "./sceneKeys";
-import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
+import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton, TEXT_SCALE } from "./uiKit";
@@ -176,7 +176,6 @@ export class PauseScene extends Scene {
   }
 
   private openSettings(): void {
-    const data: SettingsSceneData = { resume: SCENE_KEYS.pause };
-    openOverlay(this, SCENE_KEYS.settings, data);
+    openOverlay(this, SCENE_KEYS.settings, { resume: SCENE_KEYS.pause });
   }
 }

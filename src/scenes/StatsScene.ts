@@ -63,7 +63,7 @@ import {
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
-import { closeOverlay, listenDismiss } from "./overlay";
+import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import {
@@ -83,12 +83,6 @@ import {
   tagFrame,
   TEXT_SCALE,
 } from "./uiKit";
-
-// tab is the tab to open on, the first by default.
-export interface StatsSceneData {
-  resume?: SceneKey;
-  tab?: StatsTab;
-}
 
 type Tab = StatsTab;
 type Target = "close" | { badge: number } | { tab: number };
@@ -146,12 +140,12 @@ export class StatsScene extends Scene {
     super(SCENE_KEYS.stats);
   }
 
-  create(data?: StatsSceneData): void {
+  create(data?: OverlayData): void {
     this.resumeKey = data?.resume;
     this.pressed = undefined;
     this.detail = undefined;
     this.scroll = listScroll(0);
-    this.tab = data?.tab ?? "runs";
+    this.tab = "runs";
     this.render();
 
     // A pressed tab dips, then opens. With a badge's detail open, a tap anywhere closes it.

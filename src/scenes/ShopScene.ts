@@ -105,11 +105,10 @@ import {
   TEXT_SCALE,
 } from "./uiKit";
 
-// The caller pauses itself and launches the shop on a tab, framing the row of focus when
-// given; the shop resumes it on close.
+// The caller pauses itself and launches the shop, on the tab of focus and framing its row
+// when given, else on the gear tab; the shop resumes it on close.
 export interface ShopSceneData extends OverlayData {
   focus?: Purchase;
-  tab?: ShopTab;
 }
 
 // Emitted on game.events after each purchase, so the screen under the shop redraws its bank.
@@ -236,7 +235,7 @@ export class ShopScene extends Scene {
     this.pressed = undefined;
     this.scroll = listScroll(0);
     this.shakes = new Map();
-    this.tab = data.focus === undefined ? (data.tab ?? "gear") : shopTabOf(data.focus);
+    this.tab = data.focus === undefined ? "gear" : shopTabOf(data.focus);
     this.focusId = data.focus === undefined ? null : shopRowId(this.save().owned, data.focus);
     this.render();
     this.showFocus();

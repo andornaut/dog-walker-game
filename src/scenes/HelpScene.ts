@@ -14,18 +14,13 @@ import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
 import type { HelpPictureData } from "./HelpPictureScene";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, listenDismiss } from "./overlay";
+import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { updateProfile } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { addCloseButton, addMenuButton, addTapBurst, clearScene, TEXT_SCALE } from "./uiKit";
 
 // Emitted on game.events when the help closes, by any route.
 export const HELP_CLOSED_EVENT = "help-closed";
-
-// The caller pauses itself and launches help; on close, help resumes that scene.
-export interface HelpSceneData {
-  resume?: SceneKey;
-}
 
 // The other pages' dots are hollow rings and the current one is filled, so they differ by
 // shape.
@@ -47,7 +42,8 @@ function pressedBy(action: HelpAction | undefined): Pressed | undefined {
   }
 }
 
-// A full-screen overlay listed after every scene but its picture's, so it draws over them.
+// A full-screen overlay listed after every scene but its picture's, so it draws over them. The
+// caller pauses itself and launches it (openHelp); on close, help resumes that scene.
 export class HelpScene extends Scene {
   private page = 0;
   // The page whose picture shows.
@@ -60,7 +56,7 @@ export class HelpScene extends Scene {
     super(SCENE_KEYS.help);
   }
 
-  create(data?: HelpSceneData): void {
+  create(data?: OverlayData): void {
     this.page = 0;
     this.picturePage = undefined;
     this.pressed = undefined;

@@ -32,7 +32,7 @@ import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
 import { DISABLED_COLORS } from "../ui/selection";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, listenDismiss } from "./overlay";
+import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
@@ -46,11 +46,6 @@ import {
   clearScene,
   TEXT_SCALE,
 } from "./uiKit";
-
-// The caller pauses itself and launches settings; settings resumes it on close.
-export interface SettingsSceneData {
-  resume?: SceneKey;
-}
 
 // Emitted on game.events when settings close.
 export const SETTINGS_CLOSED_EVENT = "settings-closed";
@@ -125,7 +120,7 @@ export class SettingsScene extends Scene {
     super(SCENE_KEYS.settings);
   }
 
-  create(data?: SettingsSceneData): void {
+  create(data?: OverlayData): void {
     this.resumeKey = data?.resume;
     this.layout = settingsLayout(SCREEN_CONFIG, ROW_KINDS);
     this.dragging = undefined;
