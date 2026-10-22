@@ -56,6 +56,7 @@ import { firstTag, spriteMetrics } from "./sprites";
 import {
   addMenuButton,
   addPanel,
+  addScreenBackdrop,
   addTagImage,
   listenButtonTap,
   showTag,
@@ -107,16 +108,7 @@ export class EndScene extends Scene {
     const ended = lastRunEnd(this);
     const earned = ended?.achievements ?? [];
     const reduced = currentSettings(this).reducedMotion;
-    if (this.textures.exists(END_SCREEN_KEY)) {
-      this.add.image(0, 0, END_SCREEN_KEY).setOrigin(0);
-    } else {
-      fillRect(this.add.graphics(), PALETTE.darkBrown, {
-        height: SCREEN_CONFIG.height,
-        width: SCREEN_CONFIG.width,
-        x: 0,
-        y: 0,
-      });
-    }
+    addScreenBackdrop(this, END_SCREEN_KEY);
     this.addReturnHome(reduced, walk);
     // Over the house's roof, clear of the walker's head.
     if (this.textures.exists(LOGO.key)) {

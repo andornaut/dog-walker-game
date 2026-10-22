@@ -77,6 +77,7 @@ import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
   addPanel,
+  addScreenBackdrop,
   addTab,
   addTapBurst,
   clearScene,
@@ -315,16 +316,7 @@ export class StatsScene extends Scene {
 
   private render(): void {
     clearScene(this);
-    if (this.textures.exists("screen-stats")) {
-      this.add.image(0, 0, "screen-stats").setOrigin(0);
-    } else {
-      fillRect(this.add.graphics(), PALETTE.darkBrown, {
-        height: SCREEN_CONFIG.height,
-        width: SCREEN_CONFIG.width,
-        x: 0,
-        y: 0,
-      });
-    }
+    addScreenBackdrop(this, "screen-stats");
     this.content = undefined;
     this.drawingInto = undefined;
     const words = gameData.menuText.stats;

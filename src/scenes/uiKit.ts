@@ -1,7 +1,9 @@
 import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
+import { SCREEN_CONFIG } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
+import { screenLayout } from "../layout/screenLayout";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { BADGE_OFFSET } from "../ui/badge";
 import type { CloseControl } from "../ui/closeControl";
@@ -657,6 +659,16 @@ const TAP_BURST_DEPTH = 100;
 // fx-tap bursts where the finger lands, over everything else.
 export function addTapBurst(scene: Scene, x: number, y: number): void {
   playEffect(scene, "fx-tap", "play", { x, y }, TAP_BURST_DEPTH)?.setName(KEEP_ON_REDRAW);
+}
+
+// The screen's art, or dark brown over the whole screen while it is missing or the screen has
+// none.
+export function addScreenBackdrop(scene: Scene, key?: string): void {
+  if (key !== undefined && scene.textures.exists(key)) {
+    scene.add.image(0, 0, key).setOrigin(0);
+  } else {
+    fillRect(scene.add.graphics(), PALETTE.darkBrown, screenLayout(SCREEN_CONFIG).screen);
+  }
 }
 
 // Destroys everything the scene drew except tap bursts still playing.

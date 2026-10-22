@@ -41,6 +41,7 @@ import { listenTargetPress } from "./targetPress";
 import {
   addCloseButton,
   addNineSlice,
+  addScreenBackdrop,
   addSelectTile,
   addTagImage,
   addTapBurst,
@@ -275,13 +276,7 @@ export class SettingsScene extends Scene {
     clearScene(this);
     const settings = currentSettings(this);
     const { band, close, panel, title } = this.layout;
-    const g = this.add.graphics();
-    fillRect(g, PALETTE.darkBrown, {
-      height: SCREEN_CONFIG.height,
-      width: SCREEN_CONFIG.width,
-      x: 0,
-      y: 0,
-    });
+    addScreenBackdrop(this);
     // The card and its title band.
     addDetailCard(this, this.add.container(0, 0), panel, band);
     addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
