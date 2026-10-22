@@ -90,6 +90,11 @@ const NOTICE_SECONDS = 1 / 60;
 // Hazards, standing or moving, are widened a walk step at each end: a lane change starts on the
 // first step at or after it is due, up to a step late, so a planned miss never turns into a hit.
 const MARGIN_SECONDS = STEP_SECONDS;
+// How long before a hazard a plan clears its lanes where it can. A replan during a lane change
+// starts from when that change ends, which the change's late start, up to a step, has already
+// pushed back, and still counts the next change up to a step late, so it has up to a step and a
+// wait margin less to spare than the plan before it.
+const SLACK_SECONDS = STEP_SECONDS + WAIT_MARGIN;
 // How far apart the planner's waiting times are, besides the ends of hazards.
 const GRID_SECONDS = 0.1;
 
@@ -621,6 +626,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
       laneCount: road.geometry.laneCount,
       moveSeconds,
       moveStep: Math.max(moveSeconds, laneChangeCooldown),
+      slackSeconds: SLACK_SECONDS,
     },
     {
       lane,

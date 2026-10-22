@@ -9,6 +9,7 @@ const CONFIG: LanePlanConfig = {
   laneCount: 5,
   moveSeconds: MOVE,
   moveStep: MOVE,
+  slackSeconds: 0.02,
 };
 const IN_LANE_2: PlanStart = { lane: 2, movableAt: 0, readyAt: 0 };
 
@@ -53,6 +54,21 @@ describe("planLanes", () => {
       planLanes(CONFIG, IN_LANE_2, [{ from: 0.9, lanes: lanes(3), to: 1.4 }], [tip], []),
     ).toEqual([]);
   });
+
+  // The tip is in lane 3 at 1 and a hazard follows it there. On this grid, the earliest the pack
+  // can leave lane 3 and still meet the tip is 0.85, so it is clear of lane 3 at 0.85 + MOVE.
+  it.each([
+    { moves: 0, spare: CONFIG.slackSeconds / 2, takes: "leaves it" },
+    { moves: 2, spare: CONFIG.slackSeconds * 2, takes: "takes it" },
+  ])(
+    "$takes when going for a tip would clear the next hazard with $spare seconds to spare",
+    ({ moves, spare }) => {
+      const tip = { at: 1, lanes: lanes(3), value: 1 };
+      const hazard = { from: 0.85 + MOVE + spare, lanes: lanes(3), to: 2 };
+
+      expect(planLanes(CONFIG, IN_LANE_2, [hazard], [tip], [])).toHaveLength(moves);
+    },
+  );
 
   it("steers before a pull it sees coming, so the pull lands clear of a hazard", () => {
     const moves = planLanes(

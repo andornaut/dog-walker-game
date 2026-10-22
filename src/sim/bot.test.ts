@@ -175,6 +175,28 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     },
   );
 
+  // A replan during a lane change has up to a step less to spare than the plan before it, so a
+  // plan clears a hazard's lanes a step early where it can, and a prize never draws it into a
+  // path a replan finds a hit. On these counts and seed, a tip comes just before a stalker in the
+  // lane next to it.
+  it.each([{ first: 58, gain: 1, seed: 1 }])(
+    "avoids every obstacle no pull forces, as an ideal player by foresight, at minor counts $first + $gain a zone",
+    ({ first, gain, seed }) => {
+      const counts = {
+        ...gameData.tuning.counts,
+        minorObstaclesFirstZone: first,
+        minorObstaclesGainPerZone: gain,
+      };
+      const busy = withoutPulls(
+        shortZones({ ...gameData, tuning: { ...gameData.tuning, counts } }, 0.25),
+      );
+
+      expect(
+        obstacleCounts(busy, [run(busy, seed, IDEAL_SKILL, ["duchess"], "foresight")]).hit,
+      ).toBe(0);
+    },
+  );
+
   // A pull never moves the pack into an obstacle too close to react to, so an ideal player is
   // never hit right after one, whatever the pack pulls toward. Steering away during a strain
   // cancels its pull, so only some strains pull. Read by foresight, no mover's surprise counts.

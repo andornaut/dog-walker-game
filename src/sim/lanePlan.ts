@@ -31,13 +31,14 @@ export interface LanePull {
 // moveStep is the time from one lane change to the next: at least moveSeconds, longer with a
 // cooldown. gridSeconds spaces the times the plan may wait until; the ends of hazards and
 // waits, and whole lane changes after them, are tried too, so a gap is used to its full
-// length.
+// length. slackSeconds is how long before a hazard the plan clears its lanes where it can.
 export interface LanePlanConfig {
   readonly gridSeconds: number;
   readonly horizon: number;
   readonly laneCount: number;
   readonly moveSeconds: number;
   readonly moveStep: number;
+  readonly slackSeconds: number;
 }
 
 // The pack is still in lane from readyAt on, and may change lanes from movableAt on.
@@ -53,6 +54,9 @@ export interface PlannedMove {
 }
 
 const HIT_COST = 1000;
+// Clearing a hazard's lanes less than slackSeconds before it: more than the prizes a detour
+// collects, far less than a hit.
+const TIGHT_COST = 10;
 const MOVE_COST = 0.01;
 const SAME_TIME = 1e-9;
 // A wait is taken to last this much longer than it does, so rounding never has a lane change
@@ -116,9 +120,10 @@ function movableAfter(moveSeconds: number, pull: LanePull, moves: boolean): numb
 }
 
 // The cheapest way through the hazards, collecting what prizes it safely can: a hit costs
-// HIT_COST, so a plan only takes a hit it cannot avoid, and each lane change costs a little,
-// so the plan does not weave for nothing. Each lane change takes moveSeconds, during which
-// the pack occupies both lanes. A pull moves the pack whatever the plan, so the plan works
+// HIT_COST, so a plan only takes a hit it cannot avoid; clearing a hazard's lanes less than
+// slackSeconds before it costs TIGHT_COST, so a plan does that only to avoid a hit; and each
+// lane change costs a little, so the plan does not weave for nothing. Each lane change takes
+// moveSeconds, during which the pack occupies both lanes. A pull moves the pack whatever the plan, so the plan works
 // around it: none of its own lane changes is under way when a pull comes, and none starts
 // until the pull's move ends and the plan has reacted to it. Returns the plan's own lane changes in time order.
 export function planLanes(
@@ -128,7 +133,7 @@ export function planLanes(
   prizes: readonly LanePrize[],
   pulls: readonly LanePull[],
 ): PlannedMove[] {
-  const { laneCount, moveSeconds, moveStep } = config;
+  const { laneCount, moveSeconds, moveStep, slackSeconds } = config;
   const coming = pulls.filter((pull) => pull.at >= start.readyAt);
   const latest = Math.max(
     start.movableAt,
@@ -166,7 +171,8 @@ export function planLanes(
   const prizesIn = lanesOf(prizes);
 
   // The cost of occupying stay over [from, to), and leave over [from, leaveUntil) as well,
-  // where leaveUntil is at most to, so what covers both lanes counts once.
+  // where leaveUntil is at most to, so what covers both lanes counts once. Clearing hazards'
+  // lanes less than slackSeconds before them costs TIGHT_COST once, however many hazards.
   const occupyCost = (
     stay: number,
     from: number,
@@ -176,30 +182,38 @@ export function planLanes(
   ): number => {
     const stayMask = 1 << stay;
     let cost = 0;
-    for (const hazard of hazardsIn[stay] ?? []) {
-      if (hazard.from < to && hazard.to > from) {
-        cost += HIT_COST;
+    let tight = false;
+    const meet = (hazard: LaneHazard, until: number) => {
+      if (hazard.to <= from || hazard.from - slackSeconds >= until) {
+        return;
       }
+      if (hazard.from < until) {
+        cost += HIT_COST;
+      } else {
+        tight = true;
+      }
+    };
+    for (const hazard of hazardsIn[stay] ?? []) {
+      meet(hazard, to);
     }
     for (const prize of prizesIn[stay] ?? []) {
       if (prize.at >= from && prize.at < to) {
         cost -= prize.value;
       }
     }
-    if (leave < 0) {
-      return cost;
-    }
-    for (const hazard of hazardsIn[leave] ?? []) {
-      if ((hazard.lanes & stayMask) === 0 && hazard.from < leaveUntil && hazard.to > from) {
-        cost += HIT_COST;
+    if (leave >= 0) {
+      for (const hazard of hazardsIn[leave] ?? []) {
+        if ((hazard.lanes & stayMask) === 0) {
+          meet(hazard, leaveUntil);
+        }
+      }
+      for (const prize of prizesIn[leave] ?? []) {
+        if ((prize.lanes & stayMask) === 0 && prize.at >= from && prize.at < leaveUntil) {
+          cost -= prize.value;
+        }
       }
     }
-    for (const prize of prizesIn[leave] ?? []) {
-      if ((prize.lanes & stayMask) === 0 && prize.at >= from && prize.at < leaveUntil) {
-        cost -= prize.value;
-      }
-    }
-    return cost;
+    return tight ? cost + TIGHT_COST : cost;
   };
 
   // The cost to go from each time and lane, still, and the choice that gets it.
