@@ -27,15 +27,6 @@ export interface SaveStore {
   save(document: SaveDocument): Promise<StoreSaveResult>;
 }
 
-export function memoryStorage(entries: Map<string, string> = new Map()): SaveStorage {
-  return {
-    read: async (key) => entries.get(key) ?? null,
-    write: async (key, value) => {
-      entries.set(key, value);
-    },
-  };
-}
-
 // The only code that touches browser storage. A throwing getItem or setItem (private
 // mode, quota) becomes a rejected promise.
 export function browserStorage(storage: StorageLike): SaveStorage {

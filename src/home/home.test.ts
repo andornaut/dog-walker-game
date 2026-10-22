@@ -9,8 +9,8 @@ import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
 import { cents, readTable } from "../rules/units";
-import { newPlayerSave } from "../save/fixtures";
 import type { Owned } from "../save/schema";
+import { newPlayerSave } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   buy,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { newPlayerSave, veteranSave } from "./fixtures";
+import { newPlayerSave, veteranSave } from "../testing/saves";
 import { statsPage } from "./stats";
 
 describe("statsPage", () => {

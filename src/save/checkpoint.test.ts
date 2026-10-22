@@ -6,6 +6,7 @@ import { earnedByRun } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
+import { newPlayerSave, quietCounters, testAwards, veteranSave } from "../testing/saves";
 import {
   bankCheckpoint,
   isNewBestWalk,
@@ -14,7 +15,6 @@ import {
   type RunResult,
   zonesFinishedBy,
 } from "./checkpoint";
-import { newPlayerSave, quietCounters, testAwards, veteranSave } from "./fixtures";
 import { type Checkpoint, type SaveDocument } from "./schema";
 
 // veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000, best zone 4, runs

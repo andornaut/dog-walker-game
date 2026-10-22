@@ -4,11 +4,17 @@ import { gameData } from "../data";
 import type { GearId } from "../data/types";
 import { cents } from "../rules/units";
 import { packOf, runFactsFor, saveFor } from "../testing/achievements";
+import {
+  memoryStorage,
+  quietCounters,
+  testAwards,
+  testContext,
+  veteranSave,
+} from "../testing/saves";
 import { earnedSince } from "./achievements";
-import { quietCounters, testAwards, testContext, veteranSave } from "./fixtures";
 import { type Awards, ProfileSession } from "./profile";
 import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
-import { memoryStorage, SAVE_KEY, type SaveStorage, saveStore } from "./storage";
+import { SAVE_KEY, type SaveStorage, saveStore } from "./storage";
 
 const awards: Awards = { data: testAwards.data, now: () => testAwards.now };
 

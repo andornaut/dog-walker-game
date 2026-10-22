@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
-import { newPlayerSave, testContext, veteranSave } from "./fixtures";
+import { memoryStorage, newPlayerSave, testContext, veteranSave } from "../testing/saves";
 import { SAVE_VERSION } from "./schema";
 import {
   browserStorage,
   lazyStorage,
-  memoryStorage,
   SAVE_BACKUP_KEY,
   SAVE_KEY,
   type SaveStorage,

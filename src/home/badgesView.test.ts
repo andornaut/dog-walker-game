@@ -6,9 +6,9 @@ import type { AchievementCondition, DogId, WalkerId, ZoneId } from "../data/type
 import { assertNever } from "../lib/assertNever";
 import { fillNames, wrapWords } from "../lib/lines";
 import { dollarsToCents } from "../rules/units";
-import { newPlayerSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
+import { newPlayerSave } from "../testing/saves";
 import { TEXT_SCALE } from "../ui/textFit";
 import {
   badgeProgress,

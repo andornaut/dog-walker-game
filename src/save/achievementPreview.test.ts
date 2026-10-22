@@ -7,6 +7,7 @@ import { walkLength } from "../rules/route";
 import { finishZone, headHome } from "../runner/walk";
 import { newRun, type RunState } from "../state/runState";
 import { earningsGoal, packOf, runFactsFor } from "../testing/achievements";
+import { newPlayerSave, testAwards } from "../testing/saves";
 import {
   type AchievementPreview,
   earnedIfBanked,
@@ -15,7 +16,6 @@ import {
 } from "./achievementPreview";
 import { earnedSince } from "./achievements";
 import { recordCheckpoint, recordRunEnd } from "./checkpoint";
-import { newPlayerSave, testAwards } from "./fixtures";
 import { checkpointOf, runResultOf } from "./runSlices";
 
 const start = newRun(gameData, 2, { dogs: ["duchess", "koda"], gear: null, walker: "casey" });

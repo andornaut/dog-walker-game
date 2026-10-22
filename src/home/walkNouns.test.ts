@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { MENU_TEXT } from "../data/menuText";
-import { veteranSave } from "../save/fixtures";
+import { veteranSave } from "../testing/saves";
 import { STATS_TABS } from "./statsLayout";
 import { overallRows } from "./statsView";
 

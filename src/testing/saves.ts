@@ -1,10 +1,11 @@
-// Shared test fixtures, with real dog, gear, hint and walker ids.
+// Shared save fixtures, with real dog, gear, hint and walker ids.
 import { gameData } from "../data";
 import type { RunCounters } from "../rules/achievements";
 import { cents } from "../rules/units";
-import type { AwardContext } from "./achievements";
-import type { SaveContext } from "./load";
-import { SAVE_VERSION, type SaveDocument } from "./schema";
+import type { AwardContext } from "../save/achievements";
+import type { SaveContext } from "../save/load";
+import { SAVE_VERSION, type SaveDocument } from "../save/schema";
+import type { SaveStorage } from "../save/storage";
 
 export const testContext: SaveContext = {
   defaults: {
@@ -140,5 +141,14 @@ export function veteranSave(): SaveDocument {
     },
     version: SAVE_VERSION,
     walker: "ada",
+  };
+}
+
+export function memoryStorage(entries: Map<string, string> = new Map()): SaveStorage {
+  return {
+    read: async (key) => entries.get(key) ?? null,
+    write: async (key, value) => {
+      entries.set(key, value);
+    },
   };
 }

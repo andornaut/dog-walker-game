@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { AchievementCondition, DogId, TallyId, WalkerId, ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
-import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { type SaveDocument } from "../save/schema";
 import { runFactsFor, saveFor } from "../testing/achievements";
 import { testState } from "../testing/runState";
+import { newPlayerSave, veteranSave } from "../testing/saves";
 import {
   achievementConditionText,
   conditionHolds,

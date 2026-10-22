@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { changeHearts } from "../rules/effects";
 import { firstZoneId } from "../rules/route";
-import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { saveContextFrom } from "../save/load";
 import { heartsOf } from "../state/pack";
 import { testState } from "../testing/runState";
+import { newPlayerSave, veteranSave } from "../testing/saves";
 import {
   applyPanel,
   applySaveEdit,

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import { agilityWord } from "../rules/walkers";
-import { newPlayerSave } from "../save/fixtures";
+import { newPlayerSave } from "../testing/saves";
 import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";
 import { homeLine } from "./homeText";
 import { tapWalker, walkerOrder, type WalkerTap, walkerTile } from "./walkers";

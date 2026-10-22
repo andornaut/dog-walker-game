@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { defined, present } from "../testing/defined";
-import { newPlayerSave, quietCounters, testContext, veteranSave } from "./fixtures";
+import { newPlayerSave, quietCounters, testContext, veteranSave } from "../testing/saves";
 import { loadSave, saveContextFrom } from "./load";
 import { createDefaultSave, SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
 

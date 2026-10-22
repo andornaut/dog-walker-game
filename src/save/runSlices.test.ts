@@ -8,9 +8,9 @@ import { WORLD } from "../data/world";
 import { cents, clampHearts } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
+import { quietCounters } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
-import { quietCounters } from "./fixtures";
 import { checkpointOf, runResultOf } from "./runSlices";
 
 const data = {

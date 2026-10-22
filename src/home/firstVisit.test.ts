@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
-import { newPlayerSave } from "../save/fixtures";
+import { newPlayerSave } from "../testing/saves";
 import { homeSections, startReady } from "./sections";
 
 describe("a first visit", () => {
