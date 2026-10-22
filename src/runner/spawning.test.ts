@@ -458,15 +458,14 @@ describe("planSpawns", () => {
   });
 
   // Eight wide footprints with a row between each leave 19 rows too few for every one at times,
-  // so a bench may be skipped; the one-cell obstacles never are, and the hedges, three lanes
-  // wide at a one-lane reach, fit after rows with no obstacle, which the pack steers across.
+  // so a hedge or a bench may be skipped; the one-cell obstacles never are, and the hedges, three
+  // lanes wide at a one-lane reach, fit after rows with no obstacle, which the pack steers across.
   it("keeps a footprint on the road, its cells to itself, and two lanes open", () => {
     const kinds = new Set<Kind>();
     for (const seed of seeds) {
       const events = planSpawns(plannerStreams(seed), shaped);
       expect(countOf("obstacle", events)).toBe(4);
-      expect(countOf("hedge", events)).toBe(3);
-      expect(events.filter(blocking).length).toBeGreaterThanOrEqual(13);
+      expect(events.filter(blocking).length).toBeGreaterThanOrEqual(12);
       events.filter(blocking).forEach(({ kind }) => kinds.add(kind));
       for (const event of events) {
         expect(event.lane + footprintOf(event.kind).lanes).toBeLessThanOrEqual(5);
@@ -554,14 +553,15 @@ describe("planSpawns", () => {
   );
 
   // Cards (obstacles marked first) are placed before the darts, and benches and tips after. A dart
-  // sets off over a card's cell, never with a card in its lead-in row; nothing placed after it is
-  // in a row it holds; and the pack has a way past every card, dart and bench from any lane. A
-  // straight dart's row is where it sets off, its cue's lead less its cue.
+  // sets off over a card's cell, never with a card in its lead-in row; a bench placed after it may
+  // take its row but never its lead-in row; no tip is in a row it holds; and the pack has a way
+  // past every card, dart and bench from any lane. A straight dart's row is where it sets off, its
+  // cue's lead less its cue.
   it.each([
     { cards: 8, minOpenLanes: 2 },
     { cards: 14, minOpenLanes: 1 },
   ])(
-    "lets a dart set off over $cards cards' cells, keeping later spawns off its own",
+    "lets a dart set off over $cards cards' cells, and a later bench take its own outside its lead-in",
     ({ cards, minOpenLanes }) => {
       const darting: SpawnPlan<Kind> = {
         ...shaped,
@@ -577,6 +577,7 @@ describe("planSpawns", () => {
       const spacing = rowSpacing(darting);
       const window = blockingLength(darting, 1);
       let shared = 0;
+      let benchShared = 0;
       for (const seed of seeds.slice(0, 20)) {
         const events = planSpawns(plannerStreams(seed), darting);
         const darts = events.flatMap(({ distance, mover }) => {
@@ -593,11 +594,12 @@ describe("planSpawns", () => {
         for (const { lanes, row } of darts) {
           const leadIn = lanes.count > 0 ? [row - spacing] : [];
           shared += at(row, ["obstacle"]).length;
+          benchShared += at(row, ["bench"]).length;
           for (const held of [row, ...leadIn]) {
-            expect(at(held, ["bench", "tip"]), `seed ${seed}`).toEqual([]);
+            expect(at(held, ["tip"]), `seed ${seed}`).toEqual([]);
           }
           for (const held of leadIn) {
-            expect(at(held, ["obstacle"]), `seed ${seed}`).toEqual([]);
+            expect(at(held, ["obstacle", "bench"]), `seed ${seed}`).toEqual([]);
           }
         }
         const spans = [
@@ -617,8 +619,27 @@ describe("planSpawns", () => {
         }
       }
       expect(shared).toBeGreaterThan(0);
+      expect(benchShared).toBeGreaterThan(0);
     },
   );
+
+  // Twenty wide footprints with a row between each never all fit in 19 rows: the hedges and the
+  // benches take turns along the zone, so neither kind takes the room first.
+  it("keeps each standing kind's share of what is placed when room runs short", () => {
+    const crowded: SpawnPlan<Kind> = {
+      ...shaped,
+      quotas: [
+        { blocksLane: true, count: 10, footprint: FOOTPRINTS.hedge, kind: "hedge" },
+        { blocksLane: true, count: 10, footprint: FOOTPRINTS.bench, kind: "bench" },
+      ],
+    };
+    const placed = seeds.map((seed) => planSpawns(plannerStreams(seed), crowded));
+    const total = (kind: Kind) => placed.reduce((sum, events) => sum + countOf(kind, events), 0);
+    expect(total("hedge") + total("bench")).toBeLessThan(20 * seeds.length);
+    for (const kind of ["hedge", "bench"] as const) {
+      expect(total(kind) / (total("hedge") + total("bench"))).toBeGreaterThan(0.4);
+    }
+  });
 
   it("spreads each kind over the zone, one per equal stretch of rows", () => {
     // 3 treats over 9 rows: one in rows 100-300, one in 400-600, one in 700-900.

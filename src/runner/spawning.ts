@@ -284,11 +284,12 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 }
 
 // Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart. Each kind's spawns
-// are spread over equal stretches of the zone, one per stretch, so no kind bunches up; kinds with
-// bigger footprints are placed first. Lane-blocking spawns only take cells that keep every hit
-// avoidable: each row's window and the gap after it keep minOpenLanes open, and from any lane at
-// the zone's start, and from every open lane of each row, an open lane of the next row is within
-// reach without crossing a lane blocked in the gap between them, or else, after rows with no
+// are spread over equal stretches of the zone, one per stretch, so no kind bunches up. The standing
+// kinds take turns along the zone, the widest first in each turn, so each keeps its share of what
+// is placed. Lane-blocking spawns only take cells that keep every hit avoidable: each row's window
+// and the gap after it keep minOpenLanes open, and from any lane at the zone's start, and from
+// every open lane of each row, an open lane of the next row is within reach without crossing a
+// lane blocked in the gap between them, or else, after rows with no
 // lane-blocking spawn, which the pack steers across, from an earlier row with the lane moves that
 // fit in all the road between less the reaction margin; those rows then stay clear of lane-blocking
 // spawns. A spawn more than one row long blocks every window and gap it overlaps, and must end
@@ -299,13 +300,14 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
 // dart may set off over cells the spawns placed before it hold, crossing over or past them, but
-// not with a lane-blocking spawn in its lead-in row, and nothing placed after it takes its cells,
-// another dart included. A mover with no room in its stretch, such as one over a cap on screen,
-// waits for the next row with room; only one marked first stands still in its footprint when no
-// row has room for it to move. A moving prize is placed as a mover that blocks nothing: the cells
-// it passes through are kept clear of other spawns, so it never walks into one, but no lane is
-// blocked, it stands nowhere for the pack-fit gap and it counts toward no cap on screen, since the
-// pack never has to steer around it.
+// not with a lane-blocking spawn in its lead-in row. Nothing placed after it takes its cells,
+// another dart included, but a lane-blocking standing spawn outside its lead-in row, which it then
+// crosses over or past the same way. A mover with no room in its stretch, such as one over a cap
+// on screen, waits for the next row with room; only one marked first stands still in its footprint
+// when no row has room for it to move. A moving prize is placed as a mover that blocks nothing:
+// the cells it passes through are kept clear of other spawns, so it never walks into one, but no
+// lane is blocked, it stands nowhere for the pack-fit gap and it counts toward no cap on screen,
+// since the pack never has to steer around it.
 // It keeps a free cell for every moving prize, its own included, and with no room to move it stands
 // still in one cell among the other spawns, so a prize is never skipped for want of room to move.
 // A lane-blocking mover, or an obstacle bigger than one cell, that the earlier
@@ -326,6 +328,9 @@ export function planSpawns<Kind extends string>(
   // row's window, and lanes blocked in the gap after it.
   const taken = new Int32Array(rows.length);
   const dartHeld = new Int32Array(rows.length);
+  // Lanes taken by a spawn other than a dart: a lane-blocking spawn may take a cell only darts
+  // hold, as the dart then sets off over or past it.
+  const heldByOther = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
   const gapBlocked = new Int32Array(rows.length);
   // What a trial block overwrote, by row, to undo it.
@@ -490,7 +495,8 @@ export function planSpawns<Kind extends string>(
     }
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
-      if (((taken[row] ?? 0) & covered) !== 0) {
+      const held = blocksLane ? (heldByOther[row] ?? 0) : (taken[row] ?? 0);
+      if ((held & covered) !== 0 || (blocksLane && leadIns.has(row))) {
         return false;
       }
     }
@@ -581,6 +587,8 @@ export function planSpawns<Kind extends string>(
         takeCells(row, laneRun(lane, 1));
         if (dart) {
           dartHeld[row] = (dartHeld[row] ?? 0) | laneRun(lane, 1);
+        } else {
+          heldByOther[row] = (heldByOther[row] ?? 0) | laneRun(lane, 1);
         }
       }
     },
@@ -631,49 +639,65 @@ export function planSpawns<Kind extends string>(
     events.push(...spawns);
     return stilledQuotas(false, quotas, dropped);
   };
-  // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
+  // The kinds take turns, in the order of their spawns' stretches along the zone, so a kind
+  // placed later still gets cells in every stretch and each keeps its share of what is placed.
+  // Within a turn the widest kinds go first, then the biggest. Sorting copies leaves the plan
+  // alone; sort is stable, so equal kinds keep their order.
   const placeStanding = (
     keep: (quota: SpawnQuota<Kind>) => boolean,
     stilled: readonly SpawnQuota<Kind>[],
   ) => {
-    const ordered = [...statics, ...stilled].filter(keep).sort((a, b) => area(b) - area(a));
-    ordered.forEach(placeQuota);
+    const across = (quota: SpawnQuota<Kind>) => (quota.footprint ?? SINGLE_CELL).lanes;
+    const ordered = [...statics, ...stilled]
+      .filter(keep)
+      .sort((a, b) => across(b) - across(a) || area(b) - area(a));
+    ordered
+      .flatMap((quota, order) =>
+        Array.from({ length: quota.count }, (_, i) => ({
+          i,
+          middle: (i + 0.5) / quota.count,
+          order,
+          quota,
+        })),
+      )
+      .sort((a, b) => a.middle - b.middle || a.order - b.order)
+      .forEach(({ i, quota }) => placeOne(quota, i));
   };
-  const placeQuota = (quota: SpawnQuota<Kind>) => {
+  // The ith of a quota's spawns, in the ith of its count's equal stretches of the zone.
+  const placeOne = (quota: SpawnQuota<Kind>, i: number) => {
     const footprint = quota.footprint ?? SINGLE_CELL;
-    for (let i = 0; i < quota.count; i++) {
-      const stretch = freeCells(
-        quota,
-        footprint,
-        Math.floor((i * rows.length) / quota.count),
-        Math.floor(((i + 1) * rows.length) / quota.count),
-      );
-      const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
-      if (cells.length === 0) {
-        continue;
+    const stretch = freeCells(
+      quota,
+      footprint,
+      Math.floor((i * rows.length) / quota.count),
+      Math.floor(((i + 1) * rows.length) / quota.count),
+    );
+    const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
+    if (cells.length === 0) {
+      return;
+    }
+    const cell = randomPick(streams.spawns, cells);
+    const covered = laneRun(cell.lane, footprint.lanes);
+    for (let row = cell.row; row <= lastRowTaken(cell, footprint, quota.blocksLane); row++) {
+      takeCells(row, covered);
+      heldByOther[row] = (heldByOther[row] ?? 0) | covered;
+    }
+    if (quota.blocksLane) {
+      if (footprint.lanes >= WIDE_LANES) {
+        wideRows.fill(1, cell.row, lastRowTaken(cell, footprint, true) + 1);
       }
-      const cell = randomPick(streams.spawns, cells);
-      const covered = laneRun(cell.lane, footprint.lanes);
-      for (let row = cell.row; row <= lastRowTaken(cell, footprint, quota.blocksLane); row++) {
-        takeCells(row, covered);
-      }
-      if (quota.blocksLane) {
-        if (footprint.lanes >= WIDE_LANES) {
-          wideRows.fill(1, cell.row, lastRowTaken(cell, footprint, true) + 1);
-        }
-        tryBlock(cell, footprint, true);
-        placed.push({
-          distance: itemAt(rows, cell.row),
-          lane: cell.lane,
-          lanes: footprint.lanes,
-          length: hitLength(plan, footprint.rows),
-        });
-      }
-      events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
-      // A one-cell spawn takes the cell kept for it.
-      if (statics.includes(quota) && area(quota) === 1) {
-        reserved -= 1;
-      }
+      tryBlock(cell, footprint, true);
+      placed.push({
+        distance: itemAt(rows, cell.row),
+        lane: cell.lane,
+        lanes: footprint.lanes,
+        length: hitLength(plan, footprint.rows),
+      });
+    }
+    events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
+    // A one-cell spawn takes the cell kept for it.
+    if (statics.includes(quota) && area(quota) === 1) {
+      reserved -= 1;
     }
   };
   placeStanding((quota) => quota.first === true, placeMoving(true));
