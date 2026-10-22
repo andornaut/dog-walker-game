@@ -99,7 +99,7 @@ const spec = (motion: MoverSpec["motion"], lanes = 1, rows = 1): MoverSpec => ({
         : motion.kind === "approach"
           ? "approach"
           : "step",
-  variation: { delaySeconds: 0, speedShare: 0 },
+  variation: { delaySeconds: 0, lengthShare: 0, speedShare: 0 },
   warningSeconds: 1,
 });
 
@@ -414,15 +414,16 @@ describe("sweptLanes", () => {
   });
 });
 
-// A mover's draws with no delay at its kind's speed, and the count, a dart's start, tilt and turn
-// at the low end of their ranges (the fewest moves, the lowest start and tilt, turning halfway),
-// there and shy, or at the high end (turning at the far edge). A dart of a kind that turns back
-// turns at each end.
+// A mover's draws with no delay at its kind's speed, and the count, move lengths, reach side and
+// a dart's start, tilt and turn at the low end of their ranges (the fewest and shortest moves,
+// the left side first, the lowest start and tilt, turning halfway), there and shy, or at the high
+// end (turning at the far edge). A dart of a kind that turns back turns at each end.
 const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
   {
     draws: {
       count: 0,
       delays: [0, 0, 0],
+      lengths: [0, 0, 0, 0],
       share: 0,
       shy: 0.999999,
       side: 0,
@@ -438,6 +439,7 @@ const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
     draws: {
       count: 0,
       delays: [0, 0, 0],
+      lengths: [0, 0, 0, 0],
       share: 0,
       shy: 0,
       side: 0,
@@ -453,6 +455,7 @@ const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
     draws: {
       count: 0.999999,
       delays: [0, 0, 0],
+      lengths: [0.999999, 0.999999, 0.999999, 0.999999],
       share: 0,
       shy: 0.999999,
       side: 0.999999,
@@ -677,6 +680,7 @@ describe("moverPlacements", () => {
             draws: {
               count: 0.999999,
               delays: [0, 0, 0] as const,
+              lengths: [0.5, 0.5, 0.5, 0.5],
               share: 0,
               shy,
               side: 0,
@@ -762,6 +766,7 @@ describe("moverPlacements", () => {
       const draws = {
         count: 0,
         delays: [0, 0, 0] as const,
+        lengths: [0.5, 0.5, 0.5, 0.5],
         share: 0,
         shy: 0.999999,
         side: 0,
@@ -826,6 +831,7 @@ describe("moverPlacements", () => {
         const [placement] = moverPlacements(geometry, spec(motion), {
           count: 0,
           delays: [0, 0, 0],
+          lengths: [0.5, 0.5, 0.5, 0.5],
           share: 0,
           shy: 0.999999,
           side: 0,
@@ -855,6 +861,7 @@ describe("moverPlacements", () => {
     const draws = {
       count: 0,
       delays: [0, 0, 0] as const,
+      lengths: [0.5, 0.5, 0.5, 0.5],
       share: 0,
       shy: 0.999999,
       side: 0,

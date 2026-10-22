@@ -70,7 +70,7 @@ describe("shy paths", () => {
   const path: ShyPath = {
     burst: CELL,
     lane: 2,
-    length: 30,
+    lengths: [30, 30],
     motion: "shy",
     movement: "hop",
     pending: [200, 330],

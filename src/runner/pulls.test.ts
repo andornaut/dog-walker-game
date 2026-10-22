@@ -313,7 +313,7 @@ describe("the fairness rule", () => {
     const stalker = (chosen: boolean): MoverPath => ({
       burst: 56,
       lane: 2,
-      length: 100,
+      lengths: [100],
       motion: "approach",
       movement: "approach",
       pending: chosen ? [] : [{ at: 545, kind: "after" }],

@@ -30,14 +30,15 @@ export interface MoverStep {
 // steps (step, hop): it stands on the road from its spawn and takes each step in turn.
 // approach: it stands on the road from its spawn and takes the steps it has chosen, each
 // toward the pack as the pack stood when its cue began (approach.ts), and has pending steps
-// still to choose: within its reach of lanes and rows down, burst a row's travel, each length
-// long; none starts once its travel reaches stopTravel, the pack's rows. reach and lane are its
-// leftmost lane's, so one several lanes wide keeps every lane on the road.
+// still to choose: within its reach of lanes and rows down, burst a row's travel, each as long as
+// its entry in lengths, one per move in order; none starts once its travel reaches stopTravel,
+// the pack's rows. reach and lane are its leftmost lane's, so one several lanes wide keeps every
+// lane on the road.
 // shy (a shy hop): it stands on the road from its spawn and takes the hops it has chosen, each
 // away from the pack as the pack stood when its cue began (shy.ts), and has pending hops still to
 // choose, each starting at a scroll since it spawned: one of shapes, within its reach of lanes
-// and rise of rows up, burst a row's travel, each length long; none starts once its travel
-// reaches stopTravel, the pack's rows.
+// and rise of rows up, burst a row's travel, each as long as its entry in lengths; none starts
+// once its travel reaches stopTravel, the pack's rows.
 export type MoverPath = {
   readonly movement: MovementKind;
   readonly warning: number;
@@ -60,7 +61,7 @@ export type MoverPath = {
   | {
       readonly burst: number;
       readonly lane: number;
-      readonly length: number;
+      readonly lengths: readonly number[];
       readonly motion: "approach";
       readonly pending: readonly ApproachTiming[];
       readonly reach: LaneSpan;
@@ -71,7 +72,7 @@ export type MoverPath = {
   | {
       readonly burst: number;
       readonly lane: number;
-      readonly length: number;
+      readonly lengths: readonly number[];
       readonly motion: "shy";
       readonly pending: readonly number[];
       readonly reach: LaneSpan;
@@ -146,6 +147,18 @@ export function stepsTaken(path: {
     lanes: path.steps.reduce((sum, step) => sum + step.lanes, 0),
     rows: path.steps.reduce((sum, step) => sum + step.travel, 0) / path.burst,
   };
+}
+
+// How long a stalker's or shy hopper's next move lasts: its entry in lengths, by the moves taken.
+export function nextLength(path: {
+  readonly lengths: readonly number[];
+  readonly steps: readonly MoverStep[];
+}): number {
+  const length = path.lengths[path.steps.length];
+  if (length === undefined) {
+    throw new Error("A stalker or shy hopper has a length for each of its moves");
+  }
+  return length;
 }
 
 // How far through a step a mover is, from 0 before it to 1 after it.
@@ -473,10 +486,12 @@ export type MoverMotion =
       readonly stepSeconds: number;
     };
 
-// How much movers of a kind differ: each one's speed by up to speedShare of it either way, and
-// each of its steps or hops up to delaySeconds later than its earliest moment.
+// How much movers of a kind differ: each one's speed by up to speedShare of it either way, each
+// of its steps or hops up to delaySeconds later than its earliest moment, and each step's or hop's
+// length by up to lengthShare of it either way.
 interface MoverVariation {
   readonly delaySeconds: number;
+  readonly lengthShare: number;
   readonly speedShare: number;
 }
 
@@ -489,15 +504,16 @@ export interface MoverSpec {
 }
 
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
-// speed, the delay before each of its moves, a stalker's later-step road share, where a dart
-// sets off, a dart's tilt, whether a hopper of a shy kind hops shy and whether a dart of a kind
-// that turns back does (each below its kind's share), where a dart turns back, and which side a
-// stalker's or shy hopper's one-sided reach favors (below a half, the left). EVEN_DRAWS moves it
-// at its kind's speed with no delay, at the near end of a range, never shy and never turning
-// back.
+// speed, the delay before each of its moves, the length of each of its moves, a stalker's
+// later-step road share, where a dart sets off, a dart's tilt, whether a hopper of a shy kind hops
+// shy and whether a dart of a kind that turns back does (each below its kind's share), where a
+// dart turns back, and which side a stalker's or shy hopper's one-sided reach favors (below a
+// half, the left). EVEN_DRAWS moves it at its kind's speed and move length with no delay, at the
+// near end of a range, never shy and never turning back.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
+  readonly lengths: readonly number[];
   readonly share: number;
   readonly shy: number;
   readonly side: number;
@@ -508,9 +524,13 @@ export interface MoverDraws {
   readonly turnAt: number;
 }
 
+// How many move lengths each mover draws: as many as the most moves any kind makes.
+const LENGTH_DRAWS = 4;
+
 const EVEN_DRAWS: MoverDraws = {
   count: 0,
   delays: [0, 0, 0],
+  lengths: Array.from({ length: LENGTH_DRAWS }, () => 0.5),
   share: 0,
   shy: 0.999999,
   side: 0,
@@ -523,7 +543,8 @@ const EVEN_DRAWS: MoverDraws = {
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
 // delays and share; movers draws each mover's count, third delay, start, shyness, tilt, turning
-// back, turn and reach side, and each mover's start lane, so those never shift the spawns stream.
+// back, turn, reach side and move lengths, and each mover's start lane, so those never shift the
+// spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -546,6 +567,7 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   return {
     count,
     delays: [...delays, third],
+    lengths: Array.from({ length: LENGTH_DRAWS }, () => movers()),
     share,
     shy,
     side,
@@ -570,6 +592,17 @@ function speedFactor(variation: MoverVariation, draws: MoverDraws): number {
 
 function delayOf(variation: MoverVariation, draws: MoverDraws, index: number): number {
   return variation.delaySeconds * (draws.delays[index] ?? 0);
+}
+
+// How long a mover's move at index lasts: length at a factor from 1 - lengthShare to
+// 1 + lengthShare, drawn per move.
+function moveLength(
+  variation: MoverVariation,
+  draws: MoverDraws,
+  index: number,
+  length: number,
+): number {
+  return length * (1 + variation.lengthShare * (2 * (draws.lengths[index] ?? 0.5) - 1));
 }
 
 function within(range: readonly [number, number], draw: number): number {
@@ -794,13 +827,13 @@ function standingPlacements(
   return placements;
 }
 
-// A stepping mover takes each step of a sequence as long as its drawn count in turn. Its first
-// step's cue shows once it is wholly on the road; each later step, with no cue, starts as the
-// step before ends. Each move comes up to its drawn delay later, so later moves pause a random
-// gap between them. A step that would start once the mover has reached the pack's rows, at
-// sightLength, never comes, nor any after it; a sequence with no step left has no placement,
-// since a mover always moves. It stands at every spot a step of several spots passes over, as
-// it does at each step's ends.
+// A stepping mover takes each step of a sequence as long as its drawn count in turn, each step
+// its drawn length. Its first step's cue shows once it is wholly on the road; each later step,
+// with no cue, starts as the step before ends. Each move comes up to its drawn delay later, so
+// later moves pause a random gap between them. A step that would start once the mover has
+// reached the pack's rows, at sightLength, never comes, nor any after it; a sequence with no
+// step left has no placement, since a mover always moves. It stands at every spot a step of
+// several spots passes over, as it does at each step's ends.
 function stepsPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -826,6 +859,7 @@ function stepsPlacements(
       if (at + last.travel >= sightLength) {
         break;
       }
+      const stepLength = moveLength(spec.variation, draws, i, length);
       const spotCount = stepSpots(shape);
       for (let spot = 1; spot <= spotCount; spot++) {
         spots.push({
@@ -836,11 +870,11 @@ function stepsPlacements(
       steps.push({
         at,
         lanes: shape.lanes,
-        length,
+        length: stepLength,
         travel: shape.travel * cellLength,
         ...(steps.length > 0 ? { uncued: true } : {}),
       });
-      ready = at + length;
+      ready = at + stepLength;
     }
     if (steps.length === 0) {
       return [];
@@ -894,7 +928,8 @@ function reachPlacements(
 // either side: the wider, the more it can follow the pack, and the planner takes the widest that
 // fits (rank). Its first step's cue comes its drawn delay after it is wholly on the road, and each
 // later step, with no cue, once the step before has ended and the road between it and the pack,
-// the tallest pack's rows at sightLength, is down to its drawn share of the road's length.
+// the tallest pack's rows at sightLength, is down to its drawn share of the road's length. Each
+// step is its drawn length.
 function approachPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -916,10 +951,13 @@ function approachPlacements(
     })),
   ];
   const travels = Array.from({ length: steps + 1 }, (_, row) => row * cellLength);
+  const lengths = Array.from({ length: steps }, (_, i) =>
+    moveLength(spec.variation, draws, i, motion.stepSeconds * scrollSpeed),
+  );
   return reachPlacements(geometry, spec, draws.side, travels, (lane, reach) => ({
     burst: cellLength,
     lane,
-    length: motion.stepSeconds * scrollSpeed,
+    lengths,
     motion: "approach",
     movement: spec.movement,
     pending,
@@ -937,7 +975,7 @@ function approachPlacements(
 // widest that fits (rank). Its first hop's cue begins as its row comes within nearSeconds of the
 // road's travel of the tallest pack's rows at sightLength, but no sooner than it is wholly on the
 // road, and each later hop, with no cue, starts as the hop before ends, up to its drawn delay
-// later; it makes as many hops as its drawn count.
+// later; it makes as many hops as its drawn count, each its drawn length.
 function shyPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -948,23 +986,25 @@ function shyPlacements(
 ): MoverPlacement[] {
   const { cellLength, scrollSpeed, sightLength } = geometry;
   const warning = spec.warningSeconds * scrollSpeed;
-  const length = hopSeconds * scrollSpeed;
   const height = spec.footprint.rows * cellLength;
   const first = Math.max(height, sightLength - shy.nearSeconds * scrollSpeed) + warning;
+  const lengths = Array.from({ length: count }, (_, i) =>
+    moveLength(spec.variation, draws, i, hopSeconds * scrollSpeed),
+  );
   const pending: number[] = [];
   for (let i = 0; i < count; i++) {
     const before = pending.at(-1);
     pending.push(
       before === undefined
         ? first
-        : before + length + delayOf(spec.variation, draws, i) * scrollSpeed,
+        : before + (lengths[i - 1] ?? 0) + delayOf(spec.variation, draws, i) * scrollSpeed,
     );
   }
   const travels = Array.from({ length: shy.rise + 1 }, (_, row) => -row * cellLength);
   return reachPlacements(geometry, spec, draws.side, travels, (lane, reach) => ({
     burst: cellLength,
     lane,
-    length,
+    lengths,
     motion: "shy",
     movement: spec.movement,
     pending,

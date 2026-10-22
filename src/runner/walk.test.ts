@@ -63,6 +63,7 @@ import { approachOutcomes } from "./approach";
 import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import {
+  drawMover,
   hasLeftRoad,
   hopShapes,
   inMotion,
@@ -1919,10 +1920,10 @@ describe("movers", { timeout: 60_000 }, () => {
   });
 
   // A hop is one jump of 1 to most spots one way, across, up the road or diagonally up, never
-  // down, sideways only when it says so, as long as the tuning's hop; across zones and seeds,
-  // hoppers make hops of every length they can, and hop every count of times in their range at
-  // the first zone's pace, the slowest; a later hop that would come once the hopper has reached
-  // the pack's rows never does.
+  // down, sideways only when it says so, as long as the tuning's hop within its jitter; across
+  // zones and seeds, hoppers make hops of every length they can, and hop every count of times in
+  // their range at the first zone's pace, the slowest; a later hop that would come once the
+  // hopper has reached the pack's rows never does.
   it("hops each hopper its drawn count of times, any way or sideways only", () => {
     for (const { hop, tuned } of hopping) {
       const spots = new Set<number>();
@@ -1933,6 +1934,7 @@ describe("movers", { timeout: 60_000 }, () => {
         const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
         const length =
           read(tuned.tuning, "seconds", "moverHopSeconds") * walkScrollSpeed(tuned, zoned);
+        const jitter = read(tuned.tuning, "seconds", "moverMoveSecondsJitter");
         for (const seed of [1, 2, 3]) {
           const walk = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),
@@ -1954,7 +1956,7 @@ describe("movers", { timeout: 60_000 }, () => {
               if (hop.sideways === true) {
                 expect(travel).toBe(0);
               }
-              expect(hopLength).toBeCloseTo(length);
+              expect(Math.abs(hopLength / length - 1)).toBeLessThanOrEqual(jitter + 1e-9);
               spots.add(Math.max(Math.abs(lanes), rows));
             }
           }
@@ -2005,6 +2007,7 @@ describe("movers", { timeout: 60_000 }, () => {
       mover === undefined ? [] : [{ kind, mover, speed }],
     );
   it.each(counted)("moves each $kind within its range of times across seeds", ({ kind, range }) => {
+    expect(range.max).toBeLessThanOrEqual(drawMover(plannerStreams(1)).lengths.length);
     const paths = plannedMovers().filter((planned) => planned.kind === kind);
     expect(paths.length).toBeGreaterThan(0);
     const stalked = new Set<number>();
@@ -2117,6 +2120,37 @@ describe("movers", { timeout: 60_000 }, () => {
     expect([...ways].sort()).toEqual(["left", "right"]);
   });
 
+  // Each step, hop and stalker's step lasts its kind's length at a factor drawn per move within
+  // the tuning's jitter either way, and the draws spread to both sides of the kind's length.
+  const moveKinds = [
+    { movement: "approach", seconds: read(TUNING, "seconds", "moverStepSeconds") },
+    { movement: "hop", seconds: read(TUNING, "seconds", "moverHopSeconds") },
+    { movement: "step", seconds: read(TUNING, "seconds", "moverStepSeconds") },
+  ];
+  it.each(moveKinds)(
+    "draws each $movement's length within the jitter either way",
+    ({ movement, seconds: moveSeconds }) => {
+      const jitter = read(TUNING, "seconds", "moverMoveSecondsJitter");
+      const factors = plannedMovers().flatMap(({ mover, speed }) => {
+        if (mover.movement !== movement) {
+          return [];
+        }
+        const lengths =
+          mover.motion === "approach" || mover.motion === "shy"
+            ? mover.lengths
+            : mover.motion === "steps"
+              ? mover.steps.map(({ length }) => length)
+              : [];
+        return lengths.map((length) => length / (moveSeconds * speed));
+      });
+      expect(factors.length).toBeGreaterThan(0);
+      expect(Math.min(...factors)).toBeGreaterThanOrEqual(1 - jitter - 1e-9);
+      expect(Math.max(...factors)).toBeLessThanOrEqual(1 + jitter + 1e-9);
+      expect(Math.min(...factors)).toBeLessThan(1);
+      expect(Math.max(...factors)).toBeGreaterThan(1);
+    },
+  );
+
   it("brings a mover onto the road as its cue, carrying its path", () => {
     const walk = walkWith(["koda"]);
     const due: Walk = {
@@ -2145,7 +2179,7 @@ describe("movers", { timeout: 60_000 }, () => {
       const stalking: MoverPath = {
         burst: geometry.cell.length,
         lane: 2,
-        length: 50,
+        lengths: [50],
         motion: "approach",
         movement: "approach",
         pending: [{ at: 300, kind: "after" }],
@@ -2172,7 +2206,7 @@ describe("movers", { timeout: 60_000 }, () => {
     const stalking: MoverPath = {
       burst: geometry.cell.length,
       lane: 2,
-      length: 50,
+      lengths: [50, 50],
       motion: "approach",
       movement: "approach",
       pending: [{ kind: "near", travel: 0 }],
@@ -2206,7 +2240,7 @@ describe("movers", { timeout: 60_000 }, () => {
     const shy: MoverPath = {
       burst: geometry.cell.length,
       lane: 2,
-      length: 30,
+      lengths: [30],
       motion: "shy",
       movement: "hop",
       pending: [300],

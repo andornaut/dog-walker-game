@@ -320,8 +320,9 @@ export interface Tilt {
 // neither the pack's lane nor one it is moving into, no nearer it across the road, and at most
 // most rows up the road. step: steps spots, each a lane to either side or a row
 // toward or away, seconds.moverStepSeconds each.
-// Each mover's speed varies by up to multipliers.moverSpeedJitter either way, and each step and
-// hop comes up to seconds.moverTimingJitter late.
+// Each mover's speed varies by up to multipliers.moverSpeedJitter either way, each step and hop
+// comes up to seconds.moverTimingJitter late, and each step's and hop's length varies by up to
+// seconds.moverMoveSecondsJitter of it either way.
 export type Movement =
   | { readonly kind: "approach"; readonly steps: MoveCount }
   | { readonly kind: "dart"; readonly tilt: Tilt; readonly turnBackShare: number }

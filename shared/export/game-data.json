@@ -1399,6 +1399,7 @@
       "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.3,
       "moverHopSeconds": 0.3,
+      "moverMoveSecondsJitter": 0.35,
       "moverStepSeconds": 0.4,
       "moverTimingJitter": 0.6,
       "moverWarningSeconds": 0.6,

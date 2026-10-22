@@ -1,4 +1,4 @@
-import { type MoverPath, type MoverStep, type StepShape, stepsTaken } from "./movers";
+import { type MoverPath, type MoverStep, nextLength, type StepShape, stepsTaken } from "./movers";
 
 // A stalker steps toward the pack while it is still ahead of it. Its first step is chosen as its
 // cue begins; a later step has no cue of its own and is chosen as it starts. Each is chosen from
@@ -70,7 +70,7 @@ export function takeStep(path: ApproachPath, shape: StepShape | null): ApproachP
   const step: MoverStep = {
     at,
     lanes: shape.lanes,
-    length: path.length,
+    length: nextLength(path),
     travel: shape.travel * path.burst,
     ...(path.pending[0]?.kind === "near" ? { uncued: true } : {}),
   };

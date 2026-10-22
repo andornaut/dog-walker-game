@@ -16,7 +16,7 @@ const CELL = 64;
 const stalker = (overrides: Partial<ApproachPath> = {}): ApproachPath => ({
   burst: CELL,
   lane: 2,
-  length: 100,
+  lengths: [100, 100, 100],
   motion: "approach",
   movement: "approach",
   pending: [{ at: 300, kind: "after" }],

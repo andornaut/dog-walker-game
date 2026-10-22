@@ -1,4 +1,11 @@
-import { laneAt, type MoverPath, type MoverStep, type StepShape, stepsTaken } from "./movers";
+import {
+  laneAt,
+  type MoverPath,
+  type MoverStep,
+  nextLength,
+  type StepShape,
+  stepsTaken,
+} from "./movers";
 
 // A shy hopper hops away from the pack as the pack draws near. Its first hop is chosen as its cue
 // begins, and each later one, with no cue, as it starts, from where the pack is then: of the hops
@@ -51,7 +58,7 @@ export function takeHop(path: ShyPath, shape: StepShape | null): ShyPath {
   const step: MoverStep = {
     at,
     lanes: shape.lanes,
-    length: path.length,
+    length: nextLength(path),
     travel: shape.travel * path.burst,
     ...(path.steps.length > 0 ? { uncued: true } : {}),
   };

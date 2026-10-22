@@ -554,6 +554,7 @@ export function moverSpec(
     movement: movement.kind,
     variation: {
       delaySeconds: read(tuning, "seconds", "moverTimingJitter"),
+      lengthShare: read(tuning, "seconds", "moverMoveSecondsJitter"),
       speedShare: read(tuning, "multipliers", "moverSpeedJitter"),
     },
     warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),

@@ -172,6 +172,9 @@ export const TUNING = {
     minorHitStopSeconds: 0.3,
     // A hopping mover's jump lasts this long.
     moverHopSeconds: 0.3,
+    // Each step and hop lasts its moverStepSeconds or moverHopSeconds times a factor drawn per
+    // move up to this far from 1 either way.
+    moverMoveSecondsJitter: 0.35,
     // Each step of a stepping mover takes this long.
     moverStepSeconds: 0.4,
     // Each step and hop comes up to this long after its soonest moment, drawn per move.

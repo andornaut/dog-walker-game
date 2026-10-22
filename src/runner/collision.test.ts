@@ -257,7 +257,7 @@ describe("a settled pack", () => {
     const path: MoverPath = {
       burst: 1,
       lane: 1,
-      length: 1,
+      lengths: [],
       motion: "approach",
       movement: "approach",
       pending: [],
