@@ -55,6 +55,7 @@ import {
   scrollToShow,
   stepScroll,
 } from "../input/listScroll";
+import { clampIndex } from "../lib/arrays";
 import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -390,7 +391,7 @@ export class ShopScene extends Scene {
     const direction = focusDirectionForKey(key);
     if (direction === "left" || direction === "right") {
       const index = SHOP_TABS.indexOf(this.tab) + (direction === "left" ? -1 : 1);
-      const tab = SHOP_TABS[Math.min(SHOP_TABS.length - 1, Math.max(0, index))];
+      const tab = SHOP_TABS[clampIndex(SHOP_TABS.length, index)];
       if (tab !== undefined && tab !== this.tab) {
         this.actAfterDip({ kind: "tab", tab });
       }
@@ -399,7 +400,7 @@ export class ShopScene extends Scene {
     if (direction === "up" || direction === "down") {
       const ids = this.rows().map(({ id }) => id);
       const at = this.focusId === null ? -1 : ids.indexOf(this.focusId);
-      const next = Math.min(ids.length - 1, Math.max(0, at + (direction === "up" ? -1 : 1)));
+      const next = clampIndex(ids.length, at + (direction === "up" ? -1 : 1));
       this.focusId = ids[next] ?? this.focusId;
       this.message = null;
       this.render();
