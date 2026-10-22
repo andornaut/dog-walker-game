@@ -116,7 +116,7 @@ export const TUNING = {
     goodLeashSquirrelPull: 0,
     // Each mover's speed, an in-lane mover's or a dart's, is its kind's times a factor drawn per
     // mover up to this far from 1 either way.
-    moverSpeedJitter: 0.15,
+    moverSpeedJitter: 0.25,
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
     // Running shoes add this much to the walker's agility.
@@ -179,7 +179,7 @@ export const TUNING = {
     // Each step of a stepping mover takes this long.
     moverStepSeconds: 0.4,
     // Each step and hop comes up to this long after its soonest moment, drawn per move.
-    moverTimingJitter: 0.3,
+    moverTimingJitter: 0.6,
     // A mover's cue shows this long before each move.
     moverWarningSeconds: 0.6,
     // How long the Muddy debuff lasts, in walking time.
