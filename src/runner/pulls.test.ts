@@ -370,6 +370,29 @@ describe("stepPulls holds", () => {
   });
 });
 
+// A squirrel darting left past the road's edge, 0.7 lanes past lane 0's middle, as the strain of
+// the dog beside it in lane 0 ends its tell.
+it("fails a strain toward a squirrel leaving past the road's edge beside the pack", () => {
+  const path = { ...DARTING, enterTravel: 0, lanesPerPixel: 0.05 };
+  const leaving = { ...item("squirrel", 0, 0), mover: { path, since: path.warning + 104 } };
+  const walk = walkWith(["koda"], [leaving]);
+  const edge = { ...walk, road: { ...walk.road, control: laneControlIn(stillInLane(0)) } };
+  const strain = {
+    blocked: false,
+    direction: -1,
+    dog: "koda",
+    fromLane: 0,
+    itemId: leaving.id,
+    kind: "squirrel",
+    pullsLeft: 1,
+    tellSeconds: 0,
+  } as const;
+  const stepped = stepPulls(data, geometry, FRAME, [], { ...NO_PULLS, strain }, edge);
+  expect(stepped.failed).toEqual(["koda"]);
+  expect(stepped.pulled).toEqual([]);
+  expect(stepped.pulls).toMatchObject({ spent: [leaving.id], strain: null });
+});
+
 describe("pullWalk", () => {
   it("is the lane change any dog-caused pull goes through, none past the road's edge", () => {
     expect(pullWalk(data, 5, 1, walkWith(["archie"])).walk.road.control.target).toBe(3);

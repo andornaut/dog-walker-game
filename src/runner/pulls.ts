@@ -87,9 +87,10 @@ interface PullTell {
   readonly kind: PullTargetKind;
 }
 
-// failed is the dogs whose strain ended without a pull, blocked until its target went or
-// cancelled by steering away; leashed the dogs that would have started straining toward a
-// squirrel that draws no pulls, such as under Good leash, once per squirrel.
+// failed is the dogs whose strain ended without a pull: blocked until its target went, cancelled
+// by steering away, or toward a target leaving past the road's edge beside the pack; leashed the
+// dogs that would have started straining toward a squirrel that draws no pulls, such as under
+// Good leash, once per squirrel.
 export interface PullStep {
   readonly failed: readonly DogId[];
   readonly leashed: readonly DogId[];
@@ -314,7 +315,8 @@ function steeredAway(
 // steering away from the target cancels it. Once the tell has run, and the squirrel is off the
 // pack's lane (a darting one once it moves), the dog pulls one lane toward it, unless
 // the fairness rule blocks the pull: then it strains on until the lane clears or the strain
-// ends. A target with pulls left starts the tell again. Nothing moves unless the walk is
+// ends. A strain toward a target leaving past the road's edge beside the pack fails. A target
+// with pulls left starts the tell again. Nothing moves unless the walk is
 // walking with no hit stop.
 export function stepPulls(
   data: PullData,
@@ -381,6 +383,11 @@ export function stepPulls(
   };
   if (leaned.tellSeconds > 0 || laneAt(target.lanePosition) === lane) {
     return { ...NOTHING, pulls: { ...pulls, clock, spent, strain: leaned }, walk };
+  }
+  // A target leaving past the road's edge from beside the pack's edge lane draws no pull.
+  if (clampIndex(geometry.laneCount, lane + leaned.direction) === lane) {
+    const next = { ...pulls, clock, spent: [...spent, leaned.itemId], strain: null };
+    return { ...NOTHING, failed: [leaned.dog], pulls: next, walk };
   }
   if (pullBlocked(data, geometry, leaned, walk)) {
     return {
