@@ -125,7 +125,7 @@ def koda_road(q):
     tx = 16 + q["tail"]
     g.cel(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
     g.ell(tx + 0.5, 28.5 + b, 2, 1, "white")
-    # a broad head with white cheeks tucked into its lower sides and small ears set wide, their tips rounded
+    # a broad head with white cheeks at its sides, which set his ±15 outline, and small ears set wide, their tips rounded
     hx = 16 + ln
     e = q["ears"] + q["flop"]
     tip = max(2, 2.5 + o + b + e)
@@ -133,8 +133,8 @@ def koda_road(q):
     g.tri((hx - 8, 7.5 + o + b), (hx - 6.5, tip), (hx - 3, 5 + o + b), "slate")
     g.tri((hx + 8, 7.5 + o + b + t), (hx + 6.5, tip + t), (hx + 3, 5 + o + b + t), "slate")
     g.cel(hx, 10 + o + b, 8.5, 6, "slate", "dslate", "grey")
-    g.ell(hx - 6, 13 + o + b, 2, 2, "white")
-    g.ell(hx + 6, 13 + o + b, 2, 2, "white", "lgrey")
+    g.ell(hx - 7, 12.5 + o + b, 2, 2.2, "white")
+    g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
     underside(g)
     spray(g, q["spray"])
     rim(g, KODA_RIM)

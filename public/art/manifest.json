@@ -1430,7 +1430,7 @@
       "json": "sprites/dog-koda.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 28
+        "opaqueWidth": 30
       }
     },
     {
@@ -1457,7 +1457,7 @@
       "json": "sprites/dog-koda@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 21
+        "opaqueWidth": 22
       }
     },
     {
@@ -1466,7 +1466,7 @@
       "json": "sprites/dog-koda@88.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 25
+        "opaqueWidth": 26
       }
     },
     {
