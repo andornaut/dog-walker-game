@@ -120,7 +120,7 @@ export const TUNING = {
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
     // Running shoes add this much to the walker's agility.
-    runningShoesAgility: 0.1,
+    runningShoesAgility: 0.3,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     rushHourTreats: 2,
