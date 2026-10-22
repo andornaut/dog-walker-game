@@ -96,7 +96,7 @@ export const DOGS = {
     art: "snowball",
     breed: "Great Pyrenees",
     look: "Giant white fluff, collar with a bell",
-    name: "Snowball",
+    name: "Snowy",
     owner: {
       name: "Tiffany",
       role: "wedding planner",

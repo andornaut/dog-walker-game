@@ -37,7 +37,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Mr. Pruitt** (Zippy): retired accountant, dry, ledgers, receipts and red ink
   - **Rosa** (Duchess): retired florist, theatrical, flower metaphors and exclamation marks
   - **Sam** (Biscuit): easygoing barista, coffee puns, calls you "friend"
-  - **Tiffany** (Snowball): wedding planner, everything rides on today, picture perfect or disaster
+  - **Tiffany** (Snowy): wedding planner, everything rides on today, picture perfect or disaster
 
 ## Rules
 
