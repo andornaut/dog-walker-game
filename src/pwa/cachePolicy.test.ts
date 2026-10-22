@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { contentHash, hashedArtFileName } from "../assets/atlas/hashedArt";
 import {
   cachedUrlsOf,
   cacheKeyFor,
@@ -128,6 +129,39 @@ describe("the sound files", () => {
       "cache-first",
     );
     expect(strategyFor(cached, { isNavigation: true, pathname: "/play/" })).toBe("network-first");
+  });
+});
+
+describe("the game's art", () => {
+  // Hashed as a build names each file: its URL changes with its content.
+  const hashedUrl = (path: string) =>
+    `/${hashedArtFileName(path, contentHash(new TextEncoder().encode(path)))}`;
+  const hashed = [
+    "manifest.json",
+    "atlas-manifest.json",
+    "atlas/run-0.png",
+    "fonts/font-body.fnt",
+    "fonts/font-body.png",
+    "sounds/sfx-tip.ogg",
+  ].map(hashedUrl);
+
+  // An immutable name: a new deploy's code names new files, which no older cache holds.
+  it.each(hashed)("serves %s cache-first, precached or not", (pathname) => {
+    expect(fetchOf(pathname)).toBe("cache-first");
+    expect(strategyFor(new Set(), { isNavigation: false, pathname })).toBe("cache-first");
+  });
+
+  it.each(hashed)("lets the HTTP cache answer the precache's fetch of %s", (pathname) => {
+    expect(precacheFetchOptions(pathname)).toEqual({ cache: "default" });
+  });
+
+  it.each([
+    ["/art/manifest.json", "network-first"],
+    ["/art/sprites/dog.png", "cache-first"],
+    ["/art/fonts/font-body.fnt", "network-only"],
+    ["/art/atlas/run-0.png", "network-only"],
+  ] as const)("serves the unhashed %s as it serves any other file: %s", (pathname, strategy) => {
+    expect(fetchOf(pathname)).toBe(strategy);
   });
 });
 
