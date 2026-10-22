@@ -32,6 +32,7 @@ const {
   encounters,
   help,
   hints,
+  minorObstacles,
   quips,
   shopGear,
   tuning,
@@ -183,6 +184,22 @@ describe("run, world and walkers", () => {
   it("names only the world's zones on the pre-fork route", () => {
     const ids: readonly string[] = world.zones.map(({ id }) => id);
     expect(world.preForkRoute.filter((id) => !ids.includes(id))).toEqual([]);
+  });
+
+  // A dart's one outcome draw picks turning back, stopping or crossing, so its shares to turn
+  // back and to stop add up to at most 1, and the lanes a stop is drawn from are a range.
+  it("gives every dart shares to turn back and to stop adding up to at most 1, and its stop lanes a range", () => {
+    for (const [kind, { movement }] of [
+      ...Object.entries(encounters),
+      ...Object.entries(minorObstacles),
+    ]) {
+      if (movement?.kind === "dart") {
+        expect(movement.turnBackShare, kind).toBeGreaterThanOrEqual(0);
+        expect(movement.stopShare, kind).toBeGreaterThanOrEqual(0);
+        expect(movement.turnBackShare + movement.stopShare, kind).toBeLessThanOrEqual(1);
+      }
+    }
+    expect(tuning.counts.dartStopLanesMin).toBeLessThanOrEqual(tuning.counts.dartStopLanesMax);
   });
 
   it("lists the zones from easiest to hardest, each with a difficulty in words", () => {

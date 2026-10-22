@@ -1789,9 +1789,8 @@ describe("movers", { timeout: 60_000 }, () => {
     }
   });
 
-  // Movement values the planner can build: a dart is one cell, its tilt keeps it coming down
-  // the road, its shares to turn back and to stop add up to at most 1, and an in-lane mover
-  // moves at another speed than the road.
+  // Movement values the planner can build: a dart is one cell and its tilt keeps it coming down
+  // the road, and an in-lane mover moves at another speed than the road.
   it("gives every obstacle a movement the planner can build", () => {
     for (const kind of OBSTACLE_KINDS) {
       const movement = movementOf(kind);
@@ -1799,9 +1798,6 @@ describe("movers", { timeout: 60_000 }, () => {
         expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
         expect(movement.tilt.min).toBeLessThanOrEqual(movement.tilt.max);
         expect(movement.tilt.min).toBeGreaterThan(-1);
-        expect(movement.turnBackShare).toBeGreaterThanOrEqual(0);
-        expect(movement.stopShare).toBeGreaterThanOrEqual(0);
-        expect(movement.turnBackShare + movement.stopShare).toBeLessThanOrEqual(1);
       } else if (movement?.kind === "inLane") {
         expect(movement.factor).toBeGreaterThan(0);
         expect(movement.factor).not.toBe(1);
