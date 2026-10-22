@@ -485,6 +485,9 @@ export interface World {
   readonly firstZone: string;
   readonly lastZone: string;
   readonly name: string;
+  // The zones every walk took before forks, in order: a dev start at a later zone with no
+  // route walks them.
+  readonly preForkRoute: readonly string[];
   // How many zones a walk visits, none twice.
   readonly walkLength: number;
   // From easiest to hardest: a fork's paths keep this order, left to right.

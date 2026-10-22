@@ -14,7 +14,7 @@ type Slots = Readonly<Partial<Record<DogId, number | "fired">>>;
 describe("homeQuestionNote", () => {
   const words = gameData.runText.homeQuestion;
   const zones = walkLength(gameData);
-  const route = defaultRoute(zones);
+  const route = defaultRoute(gameData, zones);
   const pay = read(gameData.tuning, "money", "payPerDog");
 
   it("states the walking dogs' fees, any bonus and the zones left that going home gives up", () => {

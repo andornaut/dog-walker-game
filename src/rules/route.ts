@@ -4,10 +4,6 @@ import type { RunState } from "../state/runState";
 
 export type RouteData = Pick<GameData, "world">;
 
-// The zones every walk took before forks, in order. A save or dev start without a route
-// walked them.
-export const PRE_FORK_ROUTE: readonly ZoneId[] = ["street", "park", "shops", "homeStretch"];
-
 // A fork's paths, left to right.
 const PATH_SIDES = ["left", "straight", "right"] as const;
 export type PathSide = (typeof PATH_SIDES)[number];
@@ -107,6 +103,6 @@ export function pathSide(index: number, pathCount: number): PathSide {
 
 // The route of a walk started at a later position with no route given: the pre-fork route's
 // first zoneCount zones.
-export function defaultRoute(zoneCount: number): ZoneId[] {
-  return PRE_FORK_ROUTE.slice(0, Math.max(1, zoneCount));
+export function defaultRoute(data: RouteData, zoneCount: number): ZoneId[] {
+  return data.world.preForkRoute.slice(0, Math.max(1, zoneCount)) as ZoneId[];
 }

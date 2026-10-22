@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import type { Loadout } from "../state/runState";
 import { testState } from "../testing/runState";
@@ -38,24 +39,26 @@ describe("withSetupStart", () => {
   const state = testState({ koda: 3 });
 
   it("keeps the run's money and moves it to the setup's zone, on the pre-fork route", () => {
-    expect(withSetupStart({ ...setup, zone: 3 }, state)).toEqual({
+    expect(withSetupStart(gameData, { ...setup, zone: 3 }, state)).toEqual({
       ...state,
       firstZone: 2,
-      route: ["street", "park", "shops"],
+      route: gameData.world.preForkRoute.slice(0, 3),
       zoneIndex: 2,
     });
   });
 
   it("keeps the run's own route from the first zone", () => {
-    expect(withSetupStart(setup, state).route).toEqual(state.route);
+    expect(withSetupStart(gameData, setup, state).route).toEqual(state.route);
   });
 
   it("walks the setup's route up to its zone", () => {
     const route = ["street", "pawsPromenade", "snoozeCrescent", "park"];
-    expect(withSetupStart({ ...setup, route, zone: 3 }, state).route).toEqual(route.slice(0, 3));
+    expect(withSetupStart(gameData, { ...setup, route, zone: 3 }, state).route).toEqual(
+      route.slice(0, 3),
+    );
   });
 
   it("replaces the run's money with the setup's", () => {
-    expect(withSetupStart({ ...setup, money: 1250 }, state).money).toBe(1250);
+    expect(withSetupStart(gameData, { ...setup, money: 1250 }, state).money).toBe(1250);
   });
 });

@@ -31,7 +31,7 @@ function replay(log: InputLog): RunState {
     { dogs: ["duchess"], gear: null, walker: gameData.defaultWalker },
     typed,
   );
-  const run = withSetupStart(setup, newRun(gameData, loadout.dogs.length, loadout));
+  const run = withSetupStart(gameData, setup, newRun(gameData, loadout.dogs.length, loadout));
   const streams = runStreams(setup.seed);
   const road = startRoad(LANE_COUNT, setup.speed);
   let session = startSession(gameData, streams, screenRoadGeometry, { road, run });

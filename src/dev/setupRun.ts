@@ -1,5 +1,5 @@
 import type { DogId, GearId, WalkerId, ZoneId } from "../data/types";
-import { defaultRoute } from "../rules/route";
+import { defaultRoute, type RouteData } from "../rules/route";
 import { cents } from "../rules/units";
 import { packDogsOf } from "../state/pack";
 import type { Loadout, RunState } from "../state/runState";
@@ -16,22 +16,22 @@ export function loadoutFor(fallback: Loadout, setup: RunSetup<DogId, GearId, Wal
 
 // The route a setup starts on: its own route up to its zone, the run's own route from the
 // first zone, or the pre-fork route up to a later zone. parseRunSetup checked its ids.
-function setupRoute(setup: RunSetup, state: RunState): readonly ZoneId[] {
+function setupRoute(data: RouteData, setup: RunSetup, state: RunState): readonly ZoneId[] {
   if (setup.route !== undefined) {
     return setup.route.slice(0, setup.zone) as ZoneId[];
   }
-  return setup.zone === 1 ? state.route : defaultRoute(setup.zone);
+  return setup.zone === 1 ? state.route : defaultRoute(data, setup.zone);
 }
 
 // A new run moved to the setup's zone, on the setup's route, and given its money, applied
 // after newRun so the override replaces the gear's starting money. The zones before the
 // setup's are skipped.
-export function withSetupStart(setup: RunSetup, state: RunState): RunState {
+export function withSetupStart(data: RouteData, setup: RunSetup, state: RunState): RunState {
   return {
     ...state,
     firstZone: setup.zone - 1,
     money: setup.money === undefined ? state.money : cents(setup.money),
-    route: setupRoute(setup, state),
+    route: setupRoute(data, setup, state),
     startMoney: setup.money === undefined ? state.startMoney : cents(setup.money),
     zoneIndex: setup.zone - 1,
   };

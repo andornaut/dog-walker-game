@@ -155,7 +155,7 @@ export class RunScene extends Scene implements HudRun {
 
     const { setup } = data;
     const recorder = new RunRecorder(data.replay);
-    const run = withSetupStart(setup, newRun(gameData, data.dogSlots, data.loadout));
+    const run = withSetupStart(gameData, setup, newRun(gameData, data.dogSlots, data.loadout));
     // The log names the pack, gear and walker walked and a later start's route, so its replay
     // does not read the saved loadout. Each fork's path is a card choice in its events.
     recorder.start({

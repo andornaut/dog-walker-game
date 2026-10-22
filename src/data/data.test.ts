@@ -180,6 +180,11 @@ describe("run, world and walkers", () => {
     }
   });
 
+  it("names only the world's zones on the pre-fork route", () => {
+    const ids: readonly string[] = world.zones.map(({ id }) => id);
+    expect(world.preForkRoute.filter((id) => !ids.includes(id))).toEqual([]);
+  });
+
   it("lists the zones from easiest to hardest, each with a difficulty in words", () => {
     const ranks = world.zones.map(({ difficulty }) => difficulty);
     expect([...ranks].sort((a, b) => a - b)).toEqual(ranks);

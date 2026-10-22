@@ -7,7 +7,6 @@ import {
   defaultRoute,
   forkPaths,
   pathSide,
-  PRE_FORK_ROUTE,
   unwalkedZones,
   walkLength,
   zoneAt,
@@ -62,8 +61,8 @@ describe("the walk's zones", () => {
   });
 
   it("starts a later dev start on the pre-fork route", () => {
-    expect(defaultRoute(1)).toEqual(["street"]);
-    expect(defaultRoute(3)).toEqual(PRE_FORK_ROUTE.slice(0, 3));
+    expect(defaultRoute(data, 1)).toEqual(WORLD.preForkRoute.slice(0, 1));
+    expect(defaultRoute(data, 3)).toEqual(WORLD.preForkRoute.slice(0, 3));
   });
 });
 
