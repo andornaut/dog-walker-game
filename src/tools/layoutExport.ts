@@ -230,7 +230,7 @@ export function layoutExport(
       shop: { ...SHOP_LAYOUT, tabRects: shopTabRects() },
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },
-    screen: { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width },
+    screen: regions.screen,
     // The walk bar: its buttons left to right, each with its icon's place, its wells and
     // effect wells, and the debuff bars under it, one and two.
     walkBar: {
