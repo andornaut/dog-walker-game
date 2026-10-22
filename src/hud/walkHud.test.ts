@@ -10,7 +10,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import { screenLayout } from "../layout/screenLayout";
-import { type Point, type Rect } from "../lib/rect";
+import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { walkLength } from "../rules/route";
@@ -59,8 +59,6 @@ const inside = (inner: Rect, outer: Rect) =>
   inner.y >= outer.y &&
   inner.x + inner.width <= outer.x + outer.width &&
   inner.y + inner.height <= outer.y + outer.height;
-const overlaps = (a: Rect, b: Rect) =>
-  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 const BODY = fontFileMetrics("font-body");
 
@@ -106,15 +104,15 @@ describe("the walk bar", () => {
     ];
     for (const hold of BAR.effectHolds) {
       for (const hit of hits) {
-        expect(overlaps(hold, hit)).toBe(false);
+        expect(rectsOverlap(hold, hit)).toBe(false);
       }
     }
     for (const part of parts) {
       expect(inside(part, topBar)).toBe(true);
     }
-    expect(overlaps(WALK_BAR.cash.well, BAR.zoneWell)).toBe(false);
+    expect(rectsOverlap(WALK_BAR.cash.well, BAR.zoneWell)).toBe(false);
     for (const well of BAR.effectWells) {
-      expect(overlaps(well, BAR.zoneWell)).toBe(false);
+      expect(rectsOverlap(well, BAR.zoneWell)).toBe(false);
     }
   });
 
@@ -366,7 +364,8 @@ describe("the dog cards", () => {
     "keeps every heart of %i inside the card, under the owner's photo and clear of LEAD",
     (max) => {
       const hit = heartRects(max).filter(
-        (heart) => overlaps(heart, lead) || overlaps(heart, ownerPhoto) || !inside(heart, card),
+        (heart) =>
+          rectsOverlap(heart, lead) || rectsOverlap(heart, ownerPhoto) || !inside(heart, card),
       );
       expect(hit).toEqual([]);
     },
@@ -393,7 +392,7 @@ describe("the dog cards", () => {
     expect(flashArea).toBeDefined();
     const area = flashArea ?? card;
     expect(heartRects(mostHearts).filter((heart) => !inside(heart, area))).toEqual([]);
-    expect(overlaps(area, ownerPhoto)).toBe(false);
+    expect(rectsOverlap(area, ownerPhoto)).toBe(false);
   });
 
   it("keeps LEAD inside the card", () => {
@@ -426,7 +425,7 @@ describe("the dog cards", () => {
     const text = { height: TITLE_CAP_ROWS, width, x: left, y: fired.y };
     const photo = { ...frameSize(dogFaceKey(gameData, "koda")), ...dogFace };
     expect(inside(text, photo)).toBe(true);
-    expect(overlaps(text, ownerPhoto)).toBe(false);
+    expect(rectsOverlap(text, ownerPhoto)).toBe(false);
   });
 
   // Each line of the owner's name as the card sets it: its ink from the top of its capitals to
@@ -456,9 +455,9 @@ describe("the dog cards", () => {
       const hit = nameRects(name).filter(
         (rect) =>
           !inside(rect, card) ||
-          overlaps(rect, ownerPhoto) ||
-          overlaps(rect, lead) ||
-          hearts.some((heart) => overlaps(rect, heart)),
+          rectsOverlap(rect, ownerPhoto) ||
+          rectsOverlap(rect, lead) ||
+          hearts.some((heart) => rectsOverlap(rect, heart)),
       );
       expect(hit).toEqual([]);
     },
