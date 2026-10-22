@@ -1,4 +1,5 @@
 import type { CardSource } from "../state/runState";
+import { SECONDS_EPSILON } from "./fixedStep";
 
 // What a hit stop holds back until it ends: the cards met on the step of the hit, and
 // whether that step reached the end of the zone.
@@ -19,10 +20,6 @@ interface HitStopLengths {
   readonly encounter: number;
   readonly minor: number;
 }
-
-// Fixed steps do not sum exactly to a tuned length (60 steps of 1/60 s fall short of 1 s by
-// a rounding error), so a remainder this small ends the stop.
-const SECONDS_EPSILON = 1e-6;
 
 // The longest stop a step's hits call for: an encounter hit moment's, a minor obstacle's, or 0.
 export function hitStopLength(

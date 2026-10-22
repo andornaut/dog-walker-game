@@ -28,6 +28,10 @@ interface FrameSteps {
 // The game steps at 60 Hz.
 export const STEP_SECONDS = 1 / 60;
 
+// Fixed steps do not sum exactly to a tuned length (60 steps of 1/60 s fall short of 1 s by
+// a rounding error), so a clock counting them reaches a length within this much of it.
+export const SECONDS_EPSILON = 1e-6;
+
 export const startStepClock: StepClock = { bankedMs: 0, lastTimeMs: null };
 
 // timeMs is the frame's timestamp. It must come from the frame timestamps and not Phaser's

@@ -72,6 +72,22 @@ describe("stepZoomies", () => {
     expect(stepZoomies(gameData, ROAD, EVERY / 2, early.seconds, early.walk).drifted).toBe(1);
   });
 
+  // 90 fixed steps sum to just under 1.5 s.
+  it.each([1, 1.5])("drifts on the fixed step that walks %f s", (every) => {
+    const { tuning } = gameData;
+    const data = {
+      ...gameData,
+      tuning: { ...tuning, seconds: { ...tuning.seconds, zoomiesDriftSeconds: every } },
+    };
+    let stepped = stepZoomies(data, ROAD, STEP_SECONDS, 0, walkIn(2, 1));
+    let steps = 1;
+    while (stepped.drifted === null) {
+      stepped = stepZoomies(data, ROAD, STEP_SECONDS, stepped.seconds, stepped.walk);
+      steps += 1;
+    }
+    expect(steps).toBe(Math.round(every / STEP_SECONDS));
+  });
+
   it("rests its clock without the Zoomies", () => {
     const walk = walkIn(2, 1);
     const calm = { ...walk, run: { ...walk.run, debuffs: [] } };

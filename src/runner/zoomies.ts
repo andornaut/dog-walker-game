@@ -1,6 +1,7 @@
 import type { GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
+import { SECONDS_EPSILON } from "./fixedStep";
 import { laneBlockedWithin, type PullGeometry, pullHorizon } from "./pulls";
 import { steerWalk, type Walk, walkScrollSpeed } from "./walk";
 
@@ -72,7 +73,7 @@ export function stepZoomies(
   }
   const every = read(data.tuning, "seconds", "zoomiesDriftSeconds");
   const elapsed = seconds + stepSeconds;
-  if (elapsed < every) {
+  if (elapsed < every - SECONDS_EPSILON) {
     return { drifted: null, seconds: elapsed, walk };
   }
   const direction = driftDirection(data, geometry, walk);
