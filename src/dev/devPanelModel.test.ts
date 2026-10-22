@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { changeHearts } from "../rules/effects";
 import { firstZoneId } from "../rules/route";
 import { saveContextFrom } from "../save/load";
+import { createDefaultSave } from "../save/schema";
 import { heartsOf } from "../state/pack";
 import { testState } from "../testing/runState";
 import { newPlayerSave, veteranSave } from "../testing/saves";
@@ -109,7 +110,8 @@ describe("withCheats", () => {
 });
 
 describe("save edits", () => {
-  const edited = (edit: SaveEdit) => applySaveEdit(gameData, context.defaults, edit, veteranSave());
+  const newPlayer = () => createDefaultSave(context.defaults);
+  const edited = (edit: SaveEdit) => applySaveEdit(gameData, newPlayer, edit, veteranSave());
 
   it("adds money, unlocks everything and resets", () => {
     const addMoney = SAVE_CHEATS.flatMap(({ edit }) => (edit.kind === "addMoney" ? [edit] : []));

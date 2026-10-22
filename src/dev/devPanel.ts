@@ -8,6 +8,7 @@ import { gameData } from "../data";
 import { sessionRead, sessionRemove, sessionWrite } from "../lib/sessionStore";
 import { saveContextFrom } from "../save/load";
 import { loadedSave, newPlayerOnDevice } from "../save/profile";
+import { createDefaultSave } from "../save/schema";
 import { pageSaveStore } from "../save/storage";
 import { BUILD_LABEL } from "./buildLabel";
 import {
@@ -74,13 +75,14 @@ export async function applyPendingSaveEdits(): Promise<void> {
   try {
     const context = saveContextFrom(gameData);
     const store = pageSaveStore();
+    const newPlayer = () => newPlayerOnDevice(createDefaultSave(context.defaults));
     const loaded = await store.load(context);
     if (loaded.status === "newer" || loaded.status === "unavailable") {
       console.warn(`Dev panel: save edits not applied: ${loaded.reason}`);
       return;
     }
     const edited = edits.reduce(
-      (save, edit) => applySaveEdit(gameData, context.defaults, edit, save),
+      (save, edit) => applySaveEdit(gameData, newPlayer, edit, save),
       loadedSave(loaded, newPlayerOnDevice),
     );
     const saved = await store.save(edited);

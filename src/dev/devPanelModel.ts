@@ -4,12 +4,7 @@ import type { DogId, GameData, GearId, WalkerId, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { firstZoneId, type RouteData } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
-import {
-  createDefaultSave,
-  MAX_RUN_DOGS,
-  type SaveDefaults,
-  type SaveDocument,
-} from "../save/schema";
+import { MAX_RUN_DOGS, type SaveDocument } from "../save/schema";
 import type { RunState } from "../state/runState";
 import { stripDevParams } from "./devStart";
 import { devInSearch, type RunSetup, runSetupLink } from "./runSetup";
@@ -170,10 +165,10 @@ function unlockAll(
   };
 }
 
-// A reset is a new player's save.
+// A reset is newPlayer's save.
 export function applySaveEdit(
   data: Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "walkers">,
-  defaults: SaveDefaults,
+  newPlayer: () => SaveDocument,
   edit: SaveEdit,
   save: SaveDocument,
 ): SaveDocument {
@@ -181,7 +176,7 @@ export function applySaveEdit(
     case "addMoney":
       return addMoney(edit.amount, save);
     case "reset":
-      return createDefaultSave(defaults);
+      return newPlayer();
     case "unlockAll":
       return unlockAll(data, save);
     default:
