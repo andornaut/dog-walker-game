@@ -17,7 +17,8 @@ import {
 } from "./checkpoint";
 import { type Checkpoint, type SaveDocument } from "./schema";
 
-// veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000, best zone 4, runs
+// veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000 of which 2,000 starting
+// cash, best zone 4, runs
 // finished 2 / noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit
 // 0 / 2 / 6.
 
@@ -293,19 +294,27 @@ describe("achievements at banking", () => {
     expect(stats.zonesEverFinished).toEqual(zones);
   });
 
-  it("adds the run's tallies and bumps by kind to the lifetime ones", () => {
+  it("adds the run's tallies, bumps by kind, banked total and starting cash to the lifetime ones", () => {
     const counters = {
       ...quietCounters(),
       bumpsByKind: { pigeons: 1, raccoon: 2 },
+      startCents: cents(1_500),
       tallies: { dodges: 2 },
     };
     const before = {
       ...newPlayerSave,
-      stats: { ...newPlayerSave.stats, bumpsByKind: { pigeons: 4 }, tallies: { dodges: 3 } },
+      stats: {
+        ...newPlayerSave.stats,
+        bumpsByKind: { pigeons: 4 },
+        lifetimeCents: cents(10_000),
+        lifetimeStartCents: cents(1_000),
+        tallies: { dodges: 3 },
+      },
     };
     const { stats } = recordRunEnd(testAwards, before, runResult({ counters }));
     expect(stats.tallies).toEqual({ dodges: 5 });
     expect(stats.bumpsByKind).toEqual({ pigeons: 5, raccoon: 2 });
+    expect([stats.lifetimeCents, stats.lifetimeStartCents]).toEqual([10_000 + 6_000, 2_500]);
   });
 
   // Each row starts from a save in which casey has finished a walk.

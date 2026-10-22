@@ -347,6 +347,12 @@ describe("loadSave", () => {
         }),
       ],
       [
+        "negative lifetime starting cash",
+        withChanges((document) => {
+          document.stats.lifetimeStartCents = -100;
+        }),
+      ],
+      [
         "fractional checkpoint earnings",
         withChanges((document) => {
           document.checkpoint = checkpointWith({ earnedCents: 2.5 });

@@ -14,7 +14,7 @@ import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 // Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
 // TallyId fails to compile until it is listed here.
@@ -127,7 +127,10 @@ const statsSchema = v.object({
   dogsFinishedWith: ids,
   // The most recent walk; null until the first run ends.
   lastWalk: v.nullable(lastWalkSchema),
+  // What every walk banked, starting cash included.
   lifetimeCents: cents,
+  // Every walk's starting cash: lifetimeCents less this is what the walks earned.
+  lifetimeStartCents: cents,
   // Keyed by EndReason. A run banked from a checkpoint counts as wentHome.
   runs: v.object({
     finished: count,
@@ -305,6 +308,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       dogsFinishedWith: [],
       lastWalk: null,
       lifetimeCents: zero,
+      lifetimeStartCents: zero,
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
       tallies: {},
       timesFired: 0,

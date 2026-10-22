@@ -128,6 +128,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
         : stats.dogsFinishedWith,
       lastWalk,
       lifetimeCents: addCents(stats.lifetimeCents, earnedCents),
+      lifetimeStartCents: addCents(stats.lifetimeStartCents, run.counters.startCents),
       runs: { ...stats.runs, [outcome]: stats.runs[outcome] + 1 },
       tallies: addCounts(stats.tallies, run.counters.tallies),
       timesFired: stats.timesFired + firedBy.length,
