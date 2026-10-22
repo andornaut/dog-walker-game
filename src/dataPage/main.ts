@@ -326,10 +326,7 @@ function walkersSection(data: GameData): Section {
 function debuffsSection(data: GameData): Section {
   return {
     headers: ["Debuff", "Effect"],
-    rows: Object.values(data.debuffs).map((debuff) => [
-      debuff.name,
-      debuffText(data.tuning, debuff),
-    ]),
+    rows: Object.values(data.debuffs).map((debuff) => [debuff.name, debuffText(data, debuff)]),
     title: "Debuffs",
   };
 }

@@ -93,12 +93,12 @@ describe("causeLabel", () => {
             kind: "upgrade",
             upgrade: "bellyRubs",
           }),
-        "+1♥, at max",
+        `+1♥, ${RUN_TEXT.causes.atMax}`,
       ],
       [
         "the tip and Big tipper's bonus",
         bigTipperTip,
-        `+${tipText} tip, ${UPGRADES.bigTipper.name}`,
+        `+${tipText} ${RUN_TEXT.causes.tip}, ${UPGRADES.bigTipper.name}`,
       ],
       [
         "the zone that changed a pay",
@@ -110,7 +110,7 @@ describe("causeLabel", () => {
           }
           return pay;
         },
-        `+${formatDollars(cents(2 * lonePay))} pay, ${firstZone.name}`,
+        `+${formatDollars(cents(2 * lonePay))} ${RUN_TEXT.causes.pay}, ${firstZone.name}`,
       ],
       [
         "a cost by its amount alone",
@@ -131,7 +131,7 @@ describe("causeLabel", () => {
             "koda",
             testState({ koda: 3 }),
           ).change,
-        `+${read(TEST_TUNING, "hearts", "treat")}♥ treat`,
+        `+${read(TEST_TUNING, "hearts", "treat")}♥ ${RUN_TEXT.causes.treat}`,
       ],
       [
         "an instant encounter as the base",

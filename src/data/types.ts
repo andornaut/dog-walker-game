@@ -554,6 +554,19 @@ export interface HomeText {
   readonly dogCantAfford: string;
   // A dog slot's name in the purchase line.
   readonly dogSlotName: string;
+  // The words an effect's text is built from, wherever it shows: what each duration adds, a
+  // freeCards modifier's line for one free card and for {count}, a hearts change to each owner
+  // (its signed {hearts}), the text of no effects at all, a free Walk on by's line, and each
+  // stat's name.
+  readonly effect: {
+    readonly durations: { readonly [D in Duration]: string };
+    readonly freeCard: string;
+    readonly freeCards: string;
+    readonly heartsEach: string;
+    readonly nothing: string;
+    readonly skipOption: string;
+    readonly stats: { readonly [S in Stat]: string };
+  };
   // The info line for a dog or gear tile the keyboard focuses: an owned dog's, a locked dog's
   // with its price and not its name, a gear item's with its price while locked, and the parts
   // they are built from.
@@ -658,6 +671,16 @@ export interface RunText {
     readonly skipHeld: string;
     // An upgrade card's plaque, by how long it lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
+  };
+  // What a change's floating label names a base cause by (the Full pack bonus, a bump, a
+  // zone's pay, a tip or a treat), and atMax for a meter held at its max.
+  readonly causes: {
+    readonly atMax: string;
+    readonly bonus: string;
+    readonly bump: string;
+    readonly pay: string;
+    readonly tip: string;
+    readonly treat: string;
   };
   // The comic words drawn in font-comic (A to Z, ! ? - and space): bark in place of a dog's
   // bark, dodge over a dog that dodged a hit.

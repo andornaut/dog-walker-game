@@ -20,6 +20,7 @@ const data = {
   tuning: { ...TEST_TUNING, probability: TUNING.probability },
 };
 
+const words = HOME_TEXT.effect;
 const dollars = (key: MoneyKey) => formatDollars(read(TEST_TUNING, "money", key));
 const percent = (key: MultiplierKey) =>
   Math.round((read(TEST_TUNING, "multipliers", key) - 1) * 100);
@@ -37,7 +38,11 @@ describe("effectText", () => {
         [{ amount: "lostWalletKeep", change: "gain", kind: "money" }],
         `+${dollars("lostWalletKeep")}`,
       ],
-      ["hearts each", [{ amount: -2, kind: "hearts", target: { kind: "affected" } }], "−2♥ each"],
+      [
+        "hearts each",
+        [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
+        fillNames(words.heartsEach, { hearts: "−2♥" }),
+      ],
       [
         "a dodge for the sizes it names, as one in so many",
         [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "big"] }],
@@ -70,12 +75,14 @@ describe("effectText", () => {
             stat: "tipSpawns",
           },
         ],
-        `Tips +${percent("rushHourTips")}% next neighborhood`,
+        capitalize(
+          `${words.stats.tipSpawns} +${percent("rushHourTips")}% ${words.durations.nextZone}`,
+        ),
       ],
       [
         "an immunity as the cards it stops",
         [{ duration: "run", encounter: "thief", kind: "immune" }],
-        `No ${ENCOUNTERS.thief.name} cards all walk`,
+        `No ${ENCOUNTERS.thief.name} cards ${words.durations.run}`,
       ],
       [
         "a contact obstacle's immunity as its own line",
@@ -85,23 +92,30 @@ describe("effectText", () => {
       [
         "a duration every phrase shares once, at the end",
         UPGRADES.rushHour.effects,
-        `Tips +${percent("rushHourTips")}%, obstacles +${percent("rushHourObstacles")}%, ` +
-          `treats +${percent("rushHourTreats")}% next neighborhood`,
+        capitalize(
+          `${words.stats.tipSpawns} +${percent("rushHourTips")}%, ` +
+            `${words.stats.obstacleSpawns} +${percent("rushHourObstacles")}%, ` +
+            `${words.stats.treatSpawns} +${percent("rushHourTreats")}% ${words.durations.nextZone}`,
+        ),
       ],
       [
         "starting cash",
         [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
-        `Starting cash +${dollars("fannyPackStart")}`,
+        capitalize(`${words.stats.startMoney} +${dollars("fannyPackStart")}`),
       ],
-      ["a free Walk on by", [{ kind: "skipOption" }], "A free Walk on by each neighborhood"],
+      ["a free Walk on by", [{ kind: "skipOption" }], capitalize(words.skipOption)],
       [
         "free cards as cash options free",
         [{ by: "sweetTalkerFreeCards", kind: "modifier", operation: "add", stat: "freeCards" }],
-        read(TEST_TUNING, "counts", "sweetTalkerFreeCards") === 1
-          ? "First card's cash options free each neighborhood"
-          : `First ${read(TEST_TUNING, "counts", "sweetTalkerFreeCards")} cards' cash options free each neighborhood`,
+        capitalize(
+          read(TEST_TUNING, "counts", "sweetTalkerFreeCards") === 1
+            ? words.freeCard
+            : fillNames(words.freeCards, {
+                count: String(read(TEST_TUNING, "counts", "sweetTalkerFreeCards")),
+              }),
+        ),
       ],
-      ["no effects as nothing", [], "Nothing"],
+      ["no effects as nothing", [], words.nothing],
     ] satisfies readonly [string, readonly Effect[], string][]) {
       expect(effectText(data, effects)).toBe(text);
     }

@@ -9,48 +9,26 @@ import type {
   GameData,
   HeartsEffect,
   HomeText,
-  LiveTuning,
   Modifier,
   MoneyEffect,
   Size,
-  Stat,
   Target,
 } from "../data/types";
-import { homeLine } from "../home/homeText";
+import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
-import { fillNames } from "../lib/lines";
+import { fillLine, fillNames } from "../lib/lines";
 import type { ModifiedValue } from "./modified";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
 
 type TextData = Pick<GameData, "debuffs" | "encounters" | "homeText" | "tuning">;
+type WordsData = Pick<GameData, "homeText" | "tuning">;
+type EffectWords = HomeText["effect"];
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
   big: "big",
   medium: "medium",
   small: "small",
-};
-
-const STAT_NAMES: { readonly [S in Stat]: string } = {
-  agility: "agility",
-  bumpHearts: "♥ lost to a bump",
-  debuffSeconds: "debuff time",
-  forgivenHearts: "first ♥ lost each neighborhood forgiven",
-  freeCards: "free cards each neighborhood",
-  maxHearts: "max ♥",
-  obstacleSpawns: "obstacles",
-  squirrelPulls: "pulls toward squirrels",
-  startMoney: "starting cash",
-  tipReach: "tip reach",
-  tipSpawns: "tips",
-  tipValue: "tip value",
-  treatReach: "treat reach",
-  treatSpawns: "treats",
-};
-
-const DURATION_TEXT: { readonly [D in Duration]: string } = {
-  nextZone: "next neighborhood",
-  run: "all walk",
 };
 
 const MINUS = "−";
@@ -90,8 +68,9 @@ function dodgeText(data: TextData, effect: DodgeEffect): string {
   return homeLine(data.homeText, "dodgeEffect", { dodgeIn, sizes });
 }
 
-function heartsText(effect: HeartsEffect): string {
-  return `${sign(effect.amount)}${Math.abs(effect.amount)}♥ each`;
+function heartsText(words: EffectWords, effect: HeartsEffect): string {
+  const hearts = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
+  return fillLine(HOME_TEXT_FIELDS.effect, words, "heartsEach", { hearts });
 }
 
 function addedText(modifier: Modifier, value: number): string {
@@ -113,14 +92,15 @@ interface Phrase {
 }
 
 // One modifier's change, without its duration: "+$1 per tip", "tips +100%".
-function modifierChange(tuning: LiveTuning, modifier: Modifier): string {
-  const value = modifierValue(tuning, modifier);
-  const name = STAT_NAMES[modifier.stat];
+function modifierChange(data: WordsData, modifier: Modifier): string {
+  const words = data.homeText.effect;
+  const value = modifierValue(data.tuning, modifier);
+  const name = words.stats[modifier.stat];
   const percent = Math.round((value - 1) * 100);
   if (modifier.operation === "add" && modifier.stat === "freeCards") {
     return value === 1
-      ? "first card's cash options free each neighborhood"
-      : `first ${value} cards' cash options free each neighborhood`;
+      ? words.freeCard
+      : fillLine(HOME_TEXT_FIELDS.effect, words, "freeCards", { count: String(value) });
   }
   if (modifier.operation === "add") {
     return modifier.stat === "tipValue"
@@ -130,14 +110,17 @@ function modifierChange(tuning: LiveTuning, modifier: Modifier): string {
   return value === 0 ? `no ${name}` : `${name} ${sign(percent)}${Math.abs(percent)}%`;
 }
 
-function withDuration({ duration, text }: Phrase): string {
-  return duration === undefined ? text : `${text} ${DURATION_TEXT[duration]}`;
+function withDuration(words: EffectWords, { duration, text }: Phrase): string {
+  return duration === undefined ? text : `${text} ${words.durations[duration]}`;
 }
 
 // One modifier, such as "+$1 per tip all walk", "tips +100% next neighborhood" or "no pulls
 // toward squirrels".
-function modifierText(tuning: LiveTuning, modifier: Modifier): string {
-  return withDuration({ duration: modifier.duration, text: modifierChange(tuning, modifier) });
+function modifierText(data: WordsData, modifier: Modifier): string {
+  return withDuration(data.homeText.effect, {
+    duration: modifier.duration,
+    text: modifierChange(data, modifier),
+  });
 }
 
 // What an immunity to an encounter says: a contact obstacle's own line, or the cards it stops.
@@ -159,15 +142,15 @@ function effectPhrase(data: TextData, effect: Effect): Phrase {
     case "dodge":
       return { text: dodgeText(data, effect) };
     case "hearts":
-      return { text: heartsText(effect) };
+      return { text: heartsText(data.homeText.effect, effect) };
     case "immune":
       return { duration: effect.duration, text: immuneText(data, effect.encounter) };
     case "modifier":
-      return { duration: effect.duration, text: modifierChange(data.tuning, effect) };
+      return { duration: effect.duration, text: modifierChange(data, effect) };
     case "money":
       return { text: moneyText(data, effect) };
     case "skipOption":
-      return { text: "a free Walk on by each neighborhood" };
+      return { text: data.homeText.effect.skipOption };
     default:
       return assertNever(effect);
   }
@@ -179,26 +162,29 @@ export function capitalize(text: string): string {
 }
 
 // The phrases joined, with a duration every phrase shares said once at the end.
-function phrasesText(phrases: readonly Phrase[]): string {
+function phrasesText(words: EffectWords, phrases: readonly Phrase[]): string {
   const [first] = phrases;
   if (first === undefined) {
-    return "Nothing";
+    return words.nothing;
   }
   const shared = phrases.every(({ duration }) => duration === first.duration);
   const text =
     shared && first.duration !== undefined
-      ? withDuration({
+      ? withDuration(words, {
           duration: first.duration,
           text: phrases.map((phrase) => phrase.text).join(", "),
         })
-      : phrases.map(withDuration).join(", ");
+      : phrases.map((phrase) => withDuration(words, phrase)).join(", ");
   return capitalize(text);
 }
 
 // The one-line effect an item shows, built from its effects and the live tuning, for no
 // dogs in particular: "−1 ♥ each (−2 Fancy)".
 export function effectText(data: TextData, effects: readonly Effect[]): string {
-  return phrasesText(effects.map((effect) => effectPhrase(data, effect)));
+  return phrasesText(
+    data.homeText.effect,
+    effects.map((effect) => effectPhrase(data, effect)),
+  );
 }
 
 // The effect as it follows a name and a colon, lower case: "tip value +50% for the run".
@@ -215,9 +201,9 @@ function debuffStake(data: Pick<GameData, "debuffs">, debuff: DebuffId, seconds:
 }
 
 // A debuff's modifiers and how long it lasts: "tips -50% for 20 seconds".
-export function debuffText(tuning: LiveTuning, debuff: Debuff): string {
-  const changes = debuff.modifiers.map((modifier) => modifierText(tuning, modifier)).join(", ");
-  return `${changes} for ${read(tuning, "seconds", debuff.seconds)} seconds`;
+export function debuffText(data: WordsData, debuff: Debuff): string {
+  const changes = debuff.modifiers.map((modifier) => modifierText(data, modifier)).join(", ");
+  return `${changes} for ${read(data.tuning, "seconds", debuff.seconds)} seconds`;
 }
 
 type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
@@ -295,6 +281,7 @@ export function cardEffectText(
   effects: readonly Effect[],
 ): string {
   return phrasesText(
+    data.homeText.effect,
     effects.flatMap((effect) => {
       const phrase = cardPhrase(data, context, effect);
       return phrase === undefined ? [] : [phrase];

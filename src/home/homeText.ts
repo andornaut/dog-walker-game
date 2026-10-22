@@ -19,6 +19,10 @@ export const HOME_TEXT_FIELDS = {
   dogBought: ["dog"],
   dogCantAfford: ["amount", "dog"],
   dogSlotName: ["slot"],
+  effect: {
+    freeCards: ["count"],
+    heartsEach: ["hearts"],
+  },
   focus: {
     dogLocked: ["dog", "kind", "price"],
     dogOwned: ["dog", "kind"],
