@@ -35,7 +35,8 @@ export interface SoundAsset {
   ogg: string;
 }
 
-// public/art/manifest.json: every asset the art agent exports, paths relative to public/art/.
+// public/art/manifest.json: every asset under public/art/, derived from the files
+// (src/tools/artManifest.ts), with paths relative to public/art/.
 export interface AssetManifest {
   fonts: FontAsset[];
   images: ImageAsset[];

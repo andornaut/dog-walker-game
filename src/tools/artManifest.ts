@@ -176,10 +176,11 @@ export async function generateArtManifest(
       if (pages.length !== 1 || page === undefined) {
         throw new Error(`${fnt} must have exactly one page, not ${pages.length}`);
       }
-      if (!stemsOf(fontFiles, "png").has(splitName(page).stem) || splitName(page).ext !== "png") {
+      const { ext, stem } = splitName(page);
+      if (!stemsOf(fontFiles, "png").has(stem) || ext !== "png") {
         throw new Error(`${fnt} names page ${page}, which is not a PNG in fonts/`);
       }
-      pagePngs.add(splitName(page).stem);
+      pagePngs.add(stem);
       return { fnt, key, png: `fonts/${page}` };
     }),
   );

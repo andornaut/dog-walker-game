@@ -191,7 +191,8 @@ interface PackedPage {
 }
 
 // Each frame's top-left on a shelf of rows width wide, or undefined when they overflow
-// maxSize. Frames sit EXTRUDE apart from each other and from the page's edges.
+// maxSize. Each frame's cell adds EXTRUDE on every side, so frames sit 2 * EXTRUDE apart and
+// EXTRUDE from the page's top and left edges.
 function placeOnShelf(
   shelf: Shelf,
   frames: readonly SourceFrame[],

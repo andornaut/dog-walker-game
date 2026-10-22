@@ -29,6 +29,7 @@ import {
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
+import { GLYPH_HEIGHT } from "../ui/pixelFont";
 import { ART_DIR, ART_MANIFEST, generateArtManifest, measureAnchor } from "./artManifest";
 import {
   cloneImage,
@@ -40,7 +41,6 @@ import {
   type PreviewArt,
   sweepDistances,
   sweepRow,
-  TEXT_HEIGHT,
   upscale,
 } from "./depthPreview";
 import { nodeArtFiles } from "./files";
@@ -49,7 +49,7 @@ const PUBLIC_ART = `public/${ART_DIR}`;
 const OUT_DIR = "out/depth-preview";
 const SWEEP_COUNT = 12;
 const CELL = { height: 96, width: 112 };
-const LABEL_HEIGHT = 2 * (TEXT_HEIGHT + 3) + 2;
+const LABEL_HEIGHT = 2 * (GLYPH_HEIGHT + 3) + 2;
 const SHEET_SCALE = 2;
 const BACKGROUND = [0x18, 0x14, 0x25, 0xff];
 const DOG_ROW = [0x26, 0x2b, 0x44, 0xff];
@@ -177,7 +177,7 @@ function format(value: number): string {
 
 const keyDir = join(root, OUT_DIR, key);
 const sheetWidth = zones.length * CELL.width + (zones.length + 1) * 4;
-const headerHeight = TEXT_HEIGHT + 6;
+const headerHeight = GLYPH_HEIGHT + 6;
 const sheetHeight = headerHeight + rows.length * (CELL.height + LABEL_HEIGHT + 4) + 4;
 const sheet = blankImage(sheetWidth, sheetHeight);
 fill(BACKGROUND, { height: sheetHeight, width: sheetWidth, x: 0, y: 0 }, sheet);
@@ -225,7 +225,7 @@ await Promise.all(
         drawText(
           DIM,
           `ART ${step}  S ${format(drawn.scale)}  ${rect.width}X${rect.height}`,
-          { x, y: y + CELL.height + TEXT_HEIGHT + 5 },
+          { x, y: y + CELL.height + GLYPH_HEIGHT + 5 },
           sheet,
         );
       }),
