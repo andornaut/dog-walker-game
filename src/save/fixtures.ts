@@ -29,6 +29,7 @@ export const testContext: SaveContext = {
     ]),
     gear: new Set(["fannyPack", "hallPass", "luckyCollar", "runningShoes"]),
     hints: new Set(["card", "puddle", "tip"]),
+    minorObstacles: new Set(["bench", "pigeons", "raccoon"]),
     walkers: new Set(["ada", "ben", "casey", "trista"]),
     zones: new Set(["homeStretch", "park", "pawsPromenade", "shops", "snoozeCrescent", "street"]),
   },
@@ -39,6 +40,7 @@ export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000
 
 // A run with no bumps, debuffs, tallies or starting money.
 export const quietCounters = (): RunCounters => ({
+  bumpsByKind: {},
   bumpsByZone: [],
   debuffsGot: {},
   firstZone: 0,
@@ -66,6 +68,7 @@ export const newPlayerSave: SaveDocument = {
     bestCentsByPackSize: {},
     bestWalk: null,
     bestZoneFinished: 0,
+    bumpsByKind: {},
     dogs: {},
     dogsFinishedWith: [],
     lastWalk: null,
@@ -73,6 +76,7 @@ export const newPlayerSave: SaveDocument = {
     runs: { finished: 0, noDogs: 0, wentHome: 0 },
     tallies: {},
     timesFired: 0,
+    walkersFinishedWith: [],
     walksWithoutFiring: 0,
     zonesEverFinished: [],
   },
@@ -105,6 +109,7 @@ export function veteranSave(): SaveDocument {
       bestCentsByPackSize: { 2: cents(9_000) },
       bestWalk: { dogs: ["koda", "penny"], earnedCents: cents(9_000), zonesFinished: 4 },
       bestZoneFinished: 4,
+      bumpsByKind: { pigeons: 3 },
       dogs: {
         biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
         koda: { timesFired: 1, walks: 5, zonesFinished: 12 },
@@ -122,6 +127,7 @@ export function veteranSave(): SaveDocument {
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       tallies: { squirrelPulls: 5 },
       timesFired: 1,
+      walkersFinishedWith: ["casey"],
       walksWithoutFiring: 2,
       zonesEverFinished: [
         "homeStretch",

@@ -27,14 +27,18 @@ export interface AchievementPreview {
 
 export const NOTHING_PREVIEWED: AchievementPreview = { facts: "", shown: [] };
 
-// Mid-run, only a finished zone, a debuff got, a tally or a firing can earn a previewed badge,
-// so the bank is looked at again only when one of them has changed. Finished walks count only
-// at the end, and an ended run is left to the end screen.
+// Mid-run, only a finished zone, a debuff got, a tally, a landed bump or a firing can earn a
+// previewed badge, so the bank is looked at again only when one of them has changed. Finished
+// walks count only at the end, and an ended run is left to the end screen.
 function previewFacts(run: RunState): string {
   const fired = run.pack.filter((slot) => slot.status === "fired").length;
-  return [run.zoneIndex, JSON.stringify(run.debuffsGot), JSON.stringify(run.tallies), fired].join(
-    ":",
-  );
+  return [
+    run.zoneIndex,
+    JSON.stringify(run.debuffsGot),
+    JSON.stringify(run.tallies),
+    JSON.stringify(run.bumpsByKind),
+    fired,
+  ].join(":");
 }
 
 export function previewAchievements(

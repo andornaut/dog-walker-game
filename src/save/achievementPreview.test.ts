@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { AchievementCondition, AchievementId } from "../data/types";
-import { countBump } from "../rules/achievements";
+import { countBump, countLandedBump } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import { finishZone, headHome } from "../runner/walk";
 import { newRun, type RunState } from "../state/runState";
@@ -49,6 +49,18 @@ const ZONE_BADGES = gameData.achievements
     return { id, packSize, step: zonesFinished };
   });
 const LAST_STEP = walkLength(gameData);
+
+// Each badge that counts bumps, with the first kind it names and a save one bump short of it.
+const BUMP_BADGES = gameData.achievements.flatMap(({ conditions, id }) =>
+  conditions.flatMap((condition) => {
+    if (condition.kind !== "bumps") {
+      return [];
+    }
+    const [kind] = condition.kinds;
+    const stats = { ...newPlayerSave.stats, bumpsByKind: { [kind]: condition.count - 1 } };
+    return [{ id, kind, short: { ...newPlayerSave, stats } }];
+  }),
+);
 
 // The run at the start, then after each zone until the walk ends, with a bump in every zone or
 // none.
@@ -109,6 +121,17 @@ describe("previewAchievements", () => {
     const rich = { ...zoneDone(start), money: earningsGoal("bigPayday") };
     expect(preview(NOTHING_PREVIEWED, rich).earned).not.toContain("bigPayday");
   });
+
+  it.each(BUMP_BADGES)(
+    "looks again on a landed bump, toasting $id on the bump that meets it",
+    ({ id, kind, short }) => {
+      const { looks, preview } = previewer(short);
+      const first = preview(NOTHING_PREVIEWED, start);
+      expect(first.earned).not.toContain(id);
+      expect(preview(first.preview, countLandedBump(kind, start)).earned).toContain(id);
+      expect(looks()).toBe(2);
+    },
+  );
 
   it("does not toast Clean Paws for a walk with a bump in every zone", () => {
     const { toasts } = previewWalk(walkOf(runFactsFor(gameData, ["cleanPaws"]).packSize, true));

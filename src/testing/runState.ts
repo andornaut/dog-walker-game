@@ -17,6 +17,7 @@ export function testState(
     throw new Error(`A pack has 1 to 3 dogs, not ${pack.length}`);
   }
   return {
+    bumpsByKind: {},
     bumpsByZone: [],
     cardsThisZone: 0,
     debuffs: [],

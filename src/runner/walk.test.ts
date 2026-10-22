@@ -20,6 +20,7 @@ import type {
   Movement,
   ObstacleEncounterId,
   Size,
+  TallyId,
   WalkerId,
   World,
   Zone,
@@ -802,6 +803,19 @@ describe("stepWalk", () => {
     }
   });
 
+  // A tip counts toward the tips tally, and each lucky find toward the tally its data names.
+  const tallied: [WalkItem["kind"], TallyId][] = [
+    ["tip", "tips"],
+    ...(Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id): [EncounterId, TallyId][] => {
+      const { resolution } = ENCOUNTERS[id];
+      return resolution.kind === "instant" ? [[id, resolution.tally]] : [];
+    }),
+  ];
+
+  it.each(tallied)("counts a %s grabbed or found toward the %s tally", (kind, tally) => {
+    expect(step(walkWith(["koda"], [atPack(kind)])).walk.run.tallies).toEqual({ [tally]: 1 });
+  });
+
   it("gives a treat the front dog grabs at its owner's max to the hurt owner behind", () => {
     const walk = walkWith(["koda", "biscuit"], [atPack("treat")]);
     const hurt: Walk = {
@@ -969,6 +983,7 @@ describe("stepWalk", () => {
         [dodged, dodged],
       ]);
       expect(under.stepped.walk.run.bumpsByZone).toEqual(dodged ? [] : [1]);
+      expect(under.stepped.walk.run.bumpsByKind).toEqual(dodged ? {} : { cone: 1 });
       expect(under.stepped.walk.road.hitStop === null).toBe(dodged);
       // Only a small dog's dodge counts toward the dodges tally.
       expect(under.stepped.walk.run.tallies.dodges ?? 0).toBe(dodged && size === "small" ? 1 : 0);
@@ -1289,6 +1304,26 @@ describe("stepWalk's modified values", () => {
     expect(modified.map(({ item, value }) => ({ id: item.id, value }))).toEqual(
       expected.map((value) => ({ id: walk.road.items[0]?.id, value })),
     );
+  });
+
+  // A bump badge counts a plain hit only when it costs its owner a heart.
+  it.each([
+    ["counts a plain bump by its obstacle's kind", data, meeting("casey", atPack("cone")), 1],
+    [
+      "counts none that Second chance forgives",
+      forgiving,
+      meeting(walkerWith("kindWords"), atPack("cone")),
+      0,
+    ],
+    [
+      "counts a Muddy bump Second chance forgives only in part",
+      forgiving,
+      meeting(walkerWith("kindWords"), atPack("cone"), debuffed("muddy")),
+      1,
+    ],
+  ] as const)("%s", (_, walkData, walk, landed) => {
+    const { run } = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk).walk;
+    expect(run.bumpsByKind).toEqual(landed === 0 ? {} : { cone: landed });
   });
 });
 

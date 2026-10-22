@@ -6,6 +6,7 @@ import type {
   EncounterId,
   GameData,
   GearId,
+  MinorObstacleId,
   Modifier,
   TallyId,
   UpgradeId,
@@ -93,6 +94,8 @@ type Phase =
   | { readonly kind: "walking" };
 
 export interface RunState {
+  // Plain hits that cost their owner a heart, so neither dodged nor forgiven, by obstacle kind.
+  readonly bumpsByKind: Readonly<Partial<Record<MinorObstacleId, number>>>;
   // Plain hits that landed, by zone index. A zone with no entry had none.
   readonly bumpsByZone: readonly number[];
   // How many times each debuff was applied this run.
@@ -171,6 +174,7 @@ export function newRun(
     );
   const { walker } = loadout;
   const empty: RunState = {
+    bumpsByKind: {},
     bumpsByZone: [],
     cardsThisZone: 0,
     debuffs: [],

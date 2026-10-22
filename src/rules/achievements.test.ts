@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { AchievementCondition, TallyId, WalkerId, ZoneId } from "../data/types";
+import type { AchievementCondition, DogId, TallyId, WalkerId, ZoneId } from "../data/types";
+import { itemAt } from "../lib/arrays";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { type SaveDocument } from "../save/schema";
 import { runFactsFor, saveFor } from "../testing/achievements";
@@ -10,6 +11,7 @@ import {
   achievementConditionText,
   conditionHolds,
   countBump,
+  countLandedBump,
   countOptionTally,
   countTally,
   earnedByRun,
@@ -20,6 +22,7 @@ import { applyEffects } from "./effects";
 import { cents } from "./units";
 
 const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
+  bumpsByKind: {},
   bumpsByZone: [],
   debuffsGot: {},
   dogsHome: 1,
@@ -65,6 +68,14 @@ const bumped = (bumpsByZone: number[], finished: number) => ({
 const fromZone3 = { firstZone: 2, zonesFinished: 4 };
 const homeInZone4 = { firstZone: 3, zonesFinished: 3 };
 const minorBump = [...countBump(testState({ koda: 5 })).bumpsByZone];
+const luckyFinds = (count: Count) => ({ count, kind: "luckyFinds" }) as const;
+// Each lucky find in the data by its tally, each found once.
+const LUCKY_TALLIES = Object.values(gameData.encounters).flatMap((encounter) =>
+  encounter.kind === "lucky" ? [encounter.resolution.tally] : [],
+);
+const found = (tallies: readonly TallyId[]) => ({
+  tallies: Object.fromEntries(tallies.map((tally) => [tally, 1])),
+});
 
 describe("run conditions", () => {
   // A dev start from zone 3 skipped zones 1 and 2: they count as neither finished nor clean.
@@ -108,6 +119,15 @@ describe("run conditions", () => {
     ["debuffsGot at the count", stinky3, { debuffsGot: { stinky: 3 } }, true],
     ["debuffsGot counts one walk's zoomies", zoomies3, { debuffsGot: { zoomies: 3 } }, true],
     ["debuffsGot counts no other debuff", zoomies3, { debuffsGot: { stinky: 3 } }, false],
+    ["luckyFinds all, every lucky find", luckyFinds("all"), found(LUCKY_TALLIES), true],
+    ["luckyFinds all, one missing", luckyFinds("all"), found(LUCKY_TALLIES.slice(1)), false],
+    [
+      "luckyFinds, one find twice counts once",
+      luckyFinds(2),
+      { tallies: { [itemAt(LUCKY_TALLIES, 0)]: 2 } },
+      false,
+    ],
+    ["luckyFinds, another tally", luckyFinds(1), found(["treats"]), false],
     ["finishOnLastHeart, finished on one", closeShave, { ...walked, lastHeartOwners: 1 }, true],
     ["finishOnLastHeart, none on one", closeShave, { ...walked, lastHeartOwners: 0 }, false],
     [
@@ -154,9 +174,13 @@ describe("run conditions", () => {
 describe("profile conditions", () => {
   const all = (kind: "dogSlotsOwned" | "dogsFinishedWith" | "dogsOwned" | "gearOwned") =>
     ({ count: "all", kind }) as const;
-  const count = (kind: "timesFired" | "walksWithoutFiring", n: number) =>
+  const count = (kind: "timesFired" | "walksPlayed" | "walksWithoutFiring", n: number) =>
     ({ count: n, kind }) as const;
   const tally = (name: TallyId, n: number) => ({ count: n, kind: "tally", tally: name }) as const;
+  const birds = (n: number) => ({ count: n, kind: "bumps", kinds: ["goose", "pigeons"] }) as const;
+  const lifetime = { dollars: 200, kind: "lifetimeEarnings" } as const;
+  const firedBy = (dogs: readonly DogId[]) =>
+    Object.fromEntries(dogs.map((dog) => [dog, { timesFired: 1, walks: 1, zonesFinished: 0 }]));
   const ALL_WALKERS = Object.keys(gameData.walkers) as WalkerId[];
   const veteran = veteranSave();
 
@@ -238,6 +262,63 @@ describe("profile conditions", () => {
       withStats({ zonesEverFinished: ALL_ZONES }),
       true,
     ],
+    ["bumps below", birds(3), withStats({ bumpsByKind: { pigeons: 2 } }), false],
+    ["bumps across kinds", birds(3), withStats({ bumpsByKind: { goose: 1, pigeons: 2 } }), true],
+    [
+      "bumps, another kind's count",
+      birds(3),
+      withStats({ bumpsByKind: { pigeons: 2, raccoon: 5 } }),
+      false,
+    ],
+    [
+      "firedByOwners all, one owner short",
+      { count: "all", kind: "firedByOwners" },
+      withStats({ dogs: firedBy(ALL_DOGS.slice(1)) }),
+      false,
+    ],
+    [
+      "firedByOwners all, every owner once",
+      { count: "all", kind: "firedByOwners" },
+      withStats({ dogs: firedBy(ALL_DOGS) }),
+      true,
+    ],
+    [
+      "firedByOwners, a dog walked but never fired",
+      { count: 1, kind: "firedByOwners" },
+      withStats({ dogs: { koda: { timesFired: 0, walks: 3, zonesFinished: 4 } } }),
+      false,
+    ],
+    ["lifetimeEarnings a cent short", lifetime, withStats({ lifetimeCents: cents(19_999) }), false],
+    [
+      "lifetimeEarnings at the dollars",
+      lifetime,
+      withStats({ lifetimeCents: cents(20_000) }),
+      true,
+    ],
+    [
+      "walkersFinishedWith all, one missing",
+      { count: "all", kind: "walkersFinishedWith" },
+      withStats({ walkersFinishedWith: ALL_WALKERS.slice(1) }),
+      false,
+    ],
+    [
+      "walkersFinishedWith all, every walker",
+      { count: "all", kind: "walkersFinishedWith" },
+      withStats({ walkersFinishedWith: ALL_WALKERS }),
+      true,
+    ],
+    [
+      "walksPlayed below, however they ended",
+      count("walksPlayed", 6),
+      withStats({ runs: { finished: 1, noDogs: 2, wentHome: 2 } }),
+      false,
+    ],
+    [
+      "walksPlayed at, however they ended",
+      count("walksPlayed", 6),
+      withStats({ runs: { finished: 1, noDogs: 2, wentHome: 3 } }),
+      true,
+    ],
     ["anything without a save, as for the simulator", count("timesFired", 0), null, false],
   ];
 
@@ -259,6 +340,7 @@ const RUN_KINDS: readonly AchievementCondition["kind"][] = [
   "earnings",
   "finishOnLastHeart",
   "fullPackBonus",
+  "luckyFinds",
   "packSize",
   "zonesFinished",
 ];
@@ -302,6 +384,12 @@ describe("counters", () => {
   it("counts bumps by zone, filling the zones before with none", () => {
     const run = testState({ koda: 5 }, { zoneIndex: 2 });
     expect(countBump(countBump(run)).bumpsByZone).toEqual([0, 0, 2]);
+  });
+
+  it("counts landed bumps by obstacle kind, adding to a kind already counted", () => {
+    const run = testState({ koda: 5 });
+    const twice = countLandedBump("pigeons", countLandedBump("pigeons", run));
+    expect(countLandedBump("raccoon", twice).bumpsByKind).toEqual({ pigeons: 2, raccoon: 1 });
   });
 
   it("counts each time a debuff is applied, again on a debuff already on", () => {

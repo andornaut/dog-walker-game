@@ -17,8 +17,17 @@ export type EncounterId =
 export type PackSize = 1 | 2 | 3;
 export type Size = "big" | "medium" | "small";
 // Lifetime counts the save keeps across walks for the badges: small dogs' dodges, landed
-// squirrel pulls, treats grabbed, and the card options that name one as their tally.
-export type TallyId = "dodges" | "sniffs" | "squirrelPulls" | "thievesLetGo" | "treats";
+// squirrel pulls, tips and treats grabbed, and the card options and lucky finds that name one as
+// their tally.
+export type TallyId =
+  | "dodges"
+  | "neighborsMet"
+  | "sniffs"
+  | "squirrelPulls"
+  | "thievesLetGo"
+  | "tips"
+  | "treats"
+  | "walletsFound";
 
 // Ids come from the data, so adding an entry to a value file is a data-only change.
 export type AchievementId = (typeof ACHIEVEMENTS)[number]["id"];
@@ -251,11 +260,12 @@ interface CardResolution {
 }
 
 // The encounter applies its effects on contact, with a popup instead of a card. art is the
-// popup's illustration.
+// popup's illustration. Finding it counts one toward the lifetime tally.
 interface InstantResolution {
   readonly art: string;
   readonly effects: NonEmptyEffects;
   readonly kind: "instant";
+  readonly tally: TallyId;
 }
 
 // The obstacle applies its effects to the whole pack as it is touched, with a plain obstacle's
@@ -887,28 +897,41 @@ export type Threshold = number | "all";
 
 // What earns an achievement. Run conditions are judged on one run as it is banked: zones it
 // finished (all: every zone of a walk), zones it finished without a bump, dogs it set out
-// with, dollars it banked, times it got the debuff, a finished walk with a walking owner on
-// their last heart, and a finished walk that paid the Full pack bonus for a pack of at least
-// packSize. Profile conditions are judged on the save after a run or a purchase: dogs, gear,
-// dog slots and walkers owned (all: every one in the data), finished walks with no owner
-// firing you, times fired, distinct dogs that finished a walk without firing you (all: every
-// dog), distinct zones finished across walks (all: every zone of the world), and a lifetime
+// with, dollars it banked, times it got the debuff, distinct lucky finds it found (all: every
+// lucky find in the data), a finished walk with a walking owner on their last heart, and a
+// finished walk that paid the Full pack bonus for a pack of at least packSize. Profile
+// conditions are judged on the save after a run or a purchase: dogs, gear, dog slots and
+// walkers owned (all: every one in the data), finished walks with no owner firing you, times
+// fired, distinct owners who fired you (all: every dog's owner), distinct dogs that finished a
+// walk without firing you (all: every dog), distinct walkers who finished a walk (all: every
+// walker), distinct zones finished across walks (all: every zone of the world), walks played,
+// dollars banked across walks, landed plain bumps by any of kinds across walks, and a lifetime
 // tally.
 export type AchievementCondition =
+  | {
+      readonly count: number;
+      readonly kind: "bumps";
+      readonly kinds: readonly [MinorObstacleId, ...MinorObstacleId[]];
+    }
   | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffsGot" }
   | { readonly count: number; readonly kind: "packSize" }
   | { readonly count: number; readonly kind: "tally"; readonly tally: TallyId }
   | { readonly count: number; readonly kind: "timesFired" }
+  | { readonly count: number; readonly kind: "walksPlayed" }
   | { readonly count: number; readonly kind: "walksWithoutFiring" }
   | { readonly count: Threshold; readonly kind: "cleanZones" }
   | { readonly count: Threshold; readonly kind: "dogSlotsOwned" }
   | { readonly count: Threshold; readonly kind: "dogsFinishedWith" }
   | { readonly count: Threshold; readonly kind: "dogsOwned" }
+  | { readonly count: Threshold; readonly kind: "firedByOwners" }
   | { readonly count: Threshold; readonly kind: "gearOwned" }
+  | { readonly count: Threshold; readonly kind: "luckyFinds" }
+  | { readonly count: Threshold; readonly kind: "walkersFinishedWith" }
   | { readonly count: Threshold; readonly kind: "walkersUnlocked" }
   | { readonly count: Threshold; readonly kind: "zonesEverFinished" }
   | { readonly count: Threshold; readonly kind: "zonesFinished" }
   | { readonly dollars: number; readonly kind: "earnings" }
+  | { readonly dollars: number; readonly kind: "lifetimeEarnings" }
   | { readonly kind: "finishOnLastHeart" }
   | { readonly kind: "fullPackBonus"; readonly packSize: number };
 

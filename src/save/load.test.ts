@@ -221,6 +221,22 @@ describe("loadSave", () => {
       [["biscuit", "koda"], 3],
     ],
     [
+      "without bumps by unknown obstacles",
+      (document) => {
+        document.stats.bumpsByKind = { pigeons: 3, retiredObstacle: 2 };
+      },
+      (save) => save.stats.bumpsByKind,
+      { pigeons: 3 },
+    ],
+    [
+      "without unknown or duplicate walkers who finished a walk",
+      (document) => {
+        document.stats.walkersFinishedWith = ["casey", "retiredWalker", "casey", "ben"];
+      },
+      (save) => save.stats.walkersFinishedWith,
+      ["casey", "ben"],
+    ],
+    [
       "without unknown dogs in the logbook's walks, keeping the walks",
       (document) => {
         present(document.stats.bestWalk).dogs = ["ghost", "koda"];
@@ -254,10 +270,11 @@ describe("loadSave", () => {
       checkpointWith({}),
     ],
     [
-      "a checkpoint's counters, without debuffs and tallies the game no longer has",
+      "a checkpoint's counters, without bump kinds, debuffs and tallies the game no longer has",
       (document) => {
         document.checkpoint = checkpointWith({
           counters: {
+            bumpsByKind: { pigeons: 2, retiredObstacle: 1 },
             bumpsByZone: [2, 1],
             debuffsGot: { retiredDebuff: 1, stinky: 2 },
             firstZone: 1,
@@ -269,6 +286,7 @@ describe("loadSave", () => {
       },
       (save) => save.checkpoint?.counters,
       {
+        bumpsByKind: { pigeons: 2 },
         bumpsByZone: [2, 1],
         debuffsGot: { stinky: 2 },
         firstZone: 1,

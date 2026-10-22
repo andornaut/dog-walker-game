@@ -180,6 +180,7 @@ const result = {
   earnedCents: cents(9_500),
   outcome: "finished" as const,
   route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],
+  walker: "casey" as const,
   zone: 4,
 };
 

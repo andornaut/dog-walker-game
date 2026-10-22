@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId, ZoneId } from "../data/types";
+import { earnedByRun } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
@@ -69,6 +70,7 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   earnedCents: cents(6_000),
   outcome: "finished",
   route: ROUTE,
+  walker: "casey",
   zone: 4,
   ...changes,
 });
@@ -94,6 +96,21 @@ describe("bankCheckpoint", () => {
     expect(banked.checkpoint).toBeNull();
     expect(banked.stats.runs).toEqual({ finished: 2, noDogs: 1, wentHome: 3 });
     expect(banked.stats.lifetimeCents).toBe(30_000 + 4_250);
+  });
+
+  it("banks the run's bumps by kind and tallies, and finishes no walk for its walker", () => {
+    const counters = {
+      ...quietCounters(),
+      bumpsByKind: { raccoon: 1 },
+      tallies: { tips: 7, walletsFound: 1 },
+    };
+    const { stats } = bankCheckpoint(
+      testAwards,
+      recordCheckpoint(veteranSave(), { ...checkpoint, counters }),
+    );
+    expect(stats.bumpsByKind).toEqual({ ...veteranSave().stats.bumpsByKind, raccoon: 1 });
+    expect(stats.tallies).toEqual({ ...veteranSave().stats.tallies, tips: 7, walletsFound: 1 });
+    expect(stats.walkersFinishedWith).toEqual(veteranSave().stats.walkersFinishedWith);
   });
 
   it("credits each dog with a walk, its zones finished and its firing", () => {
@@ -185,13 +202,21 @@ describe("recordRunEnd", () => {
 
 describe("achievements at banking", () => {
   it("awards what a run earned, stamped with the time, and keeps those earned before", () => {
-    const save = recordRunEnd(testAwards, veteranSave(), runResult());
+    const before = veteranSave();
+    const result = runResult();
+    const save = recordRunEnd(testAwards, before, result);
+    // The run's own badges, judged on its facts: veteranSave meets no new profile goal with it.
+    const earned = earnedByRun(gameData, {
+      ...result.counters,
+      dogsHome: result.dogs.filter(({ fired }) => !fired).length,
+      earnedCents: result.earnedCents,
+      packSize: result.dogs.length,
+      zonesFinished: zonesFinishedBy(result),
+    }).filter((id) => before.achievements[id] === undefined);
+    expect(earned.length).toBeGreaterThan(0);
     expect(save.achievements).toEqual({
-      ...veteranSave().achievements,
-      cleanPaws: testAwards.now,
-      doubleLeash: testAwards.now,
-      notAScratch: testAwards.now,
-      roundTrip: testAwards.now,
+      ...before.achievements,
+      ...Object.fromEntries(earned.map((id) => [id, testAwards.now])),
     });
   });
 
@@ -263,11 +288,40 @@ describe("achievements at banking", () => {
     expect(stats.zonesEverFinished).toEqual(zones);
   });
 
-  it("adds the run's tallies to the lifetime tallies", () => {
-    const counters = { ...quietCounters(), tallies: { dodges: 2 } };
-    const before = { ...newPlayerSave, stats: { ...newPlayerSave.stats, tallies: { dodges: 3 } } };
+  it("adds the run's tallies and bumps by kind to the lifetime ones", () => {
+    const counters = {
+      ...quietCounters(),
+      bumpsByKind: { pigeons: 1, raccoon: 2 },
+      tallies: { dodges: 2 },
+    };
+    const before = {
+      ...newPlayerSave,
+      stats: { ...newPlayerSave.stats, bumpsByKind: { pigeons: 4 }, tallies: { dodges: 3 } },
+    };
     const { stats } = recordRunEnd(testAwards, before, runResult({ counters }));
     expect(stats.tallies).toEqual({ dodges: 5 });
+    expect(stats.bumpsByKind).toEqual({ pigeons: 5, raccoon: 2 });
+  });
+
+  // Each row starts from a save in which casey has finished a walk.
+  const walkersFinished: [string, Partial<RunResult>, WalkerId[]][] = [
+    ["adds the walker of a finished walk", { walker: "ben" }, ["casey", "ben"]],
+    ["adds a walker only once", {}, ["casey"]],
+    ["not for a walk headed home", { outcome: "wentHome", walker: "ben", zone: 3 }, ["casey"]],
+    [
+      "not for a walk a dev start began past zone 1",
+      { counters: { ...quietCounters(), firstZone: 2 }, walker: "ben" },
+      ["casey"],
+    ],
+  ];
+
+  it.each(walkersFinished)("counts the walkers who finished: %s", (_name, changes, walkers) => {
+    const before = {
+      ...newPlayerSave,
+      stats: { ...newPlayerSave.stats, walkersFinishedWith: ["casey" as const] },
+    };
+    const { stats } = recordRunEnd(testAwards, before, runResult(changes));
+    expect(stats.walkersFinishedWith).toEqual(walkers);
   });
 
   // A checkpoint walked as Clean Paws' goal asks, banked with each run's bumps.

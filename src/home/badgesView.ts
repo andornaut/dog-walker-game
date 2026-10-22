@@ -57,7 +57,7 @@ export function earnedText(
 // The progress under a locked badge's goal when its condition counts across walks ("7/15");
 // undefined for an earned badge and for one judged on a single walk or on what the save owns.
 export function badgeProgress(
-  data: Pick<GameData, "achievements" | "dogs" | "menuText" | "world">,
+  data: Pick<GameData, "achievements" | "dogs" | "menuText" | "walkers" | "world">,
   save: Pick<SaveDocument, "stats">,
   badge: Pick<BadgeView, "earned" | "id">,
 ): string | undefined {

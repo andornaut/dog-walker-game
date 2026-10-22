@@ -7,6 +7,7 @@ import type {
   GameData,
   GearId,
   HintId,
+  MinorObstacleId,
   TallyId,
   WalkerId,
   ZoneId,
@@ -32,6 +33,7 @@ interface KnownIds {
   dogs: ReadonlySet<DogId>;
   gear: ReadonlySet<GearId>;
   hints: ReadonlySet<HintId>;
+  minorObstacles: ReadonlySet<MinorObstacleId>;
   walkers: ReadonlySet<WalkerId>;
   zones: ReadonlySet<ZoneId>;
 }
@@ -61,6 +63,7 @@ type SaveData = Pick<
   | "dogSlots"
   | "dogs"
   | "hints"
+  | "minorObstacles"
   | "shopGear"
   | "walkers"
   | "world"
@@ -91,6 +94,7 @@ export function saveContextFrom(data: SaveData): SaveContext {
       dogs: new Set(dogs),
       gear: new Set(keysOf(data.shopGear)),
       hints: new Set(keysOf(data.hints)),
+      minorObstacles: new Set(keysOf(data.minorObstacles)),
       walkers: new Set(keysOf(data.walkers)),
       zones: new Set(data.world.zones.map(({ id }) => id as ZoneId)),
     },
@@ -165,6 +169,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
             ...checkpoint,
             counters: {
               ...checkpoint.counters,
+              bumpsByKind: keepKnownEntries(known.minorObstacles, checkpoint.counters.bumpsByKind),
               debuffsGot: keepKnownEntries(known.debuffs, checkpoint.counters.debuffsGot),
               tallies: keepKnownEntries(KNOWN_TALLIES, checkpoint.counters.tallies),
             },
@@ -187,6 +192,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
         Object.entries(stats.bestCentsByPackSize).filter(([size]) => PACK_SIZES.has(size)),
       ),
       bestWalk: stats.bestWalk === null ? null : keepKnownWalk(known, stats.bestWalk),
+      bumpsByKind: keepKnownEntries(known.minorObstacles, stats.bumpsByKind),
       dogs: keepKnownEntries(known.dogs, stats.dogs),
       dogsFinishedWith: keepKnown(known.dogs, stats.dogsFinishedWith),
       lastWalk:
@@ -200,6 +206,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
       tallies: keepKnownEntries(KNOWN_TALLIES, stats.tallies),
+      walkersFinishedWith: keepKnown(known.walkers, stats.walkersFinishedWith),
       zonesEverFinished: keepKnown(known.zones, stats.zonesEverFinished),
     },
     walker:

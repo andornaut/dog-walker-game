@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { badgeKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { AchievementCondition, DogId, ZoneId } from "../data/types";
+import type { AchievementCondition, DogId, WalkerId, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames, wrapWords } from "../lib/lines";
+import { dollarsToCents } from "../rules/units";
 import { newPlayerSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
@@ -21,36 +22,74 @@ import {
 import { STATS_LAYOUT } from "./statsLayout";
 
 // The condition kinds a save counts across walks, and a save that has counted n of one.
-type Counted = Extract<
-  AchievementCondition,
-  {
-    kind: "dogsFinishedWith" | "tally" | "timesFired" | "walksWithoutFiring" | "zonesEverFinished";
-  }
->;
-const COUNTED_KINDS: readonly string[] = [
+const COUNTED_KINDS = [
+  "bumps",
   "dogsFinishedWith",
+  "firedByOwners",
+  "lifetimeEarnings",
   "tally",
   "timesFired",
+  "walkersFinishedWith",
+  "walksPlayed",
   "walksWithoutFiring",
   "zonesEverFinished",
-];
+] as const satisfies readonly AchievementCondition["kind"][];
+type Counted = Extract<AchievementCondition, { kind: (typeof COUNTED_KINDS)[number] }>;
 const ALL_DOGS = Object.keys(gameData.dogs) as DogId[];
+const ALL_WALKERS = Object.keys(gameData.walkers) as WalkerId[];
 const ALL_ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
-// How many a counted condition needs: "all" is every dog, or every zone, in the data.
-const needOf = (condition: Counted) =>
-  condition.count !== "all"
-    ? condition.count
-    : condition.kind === "zonesEverFinished"
-      ? ALL_ZONES.length
-      : ALL_DOGS.length;
+// How many a counted condition needs: dollars, or its count, where "all" is every dog (or its
+// owner), walker or zone in the data.
+function needOf(condition: Counted): number {
+  const of = (all: readonly string[], count: number | "all") =>
+    count === "all" ? all.length : count;
+  switch (condition.kind) {
+    case "lifetimeEarnings":
+      return condition.dollars;
+    case "bumps":
+    case "tally":
+    case "timesFired":
+    case "walksPlayed":
+    case "walksWithoutFiring":
+      return condition.count;
+    case "dogsFinishedWith":
+    case "firedByOwners":
+      return of(ALL_DOGS, condition.count);
+    case "walkersFinishedWith":
+      return of(ALL_WALKERS, condition.count);
+    case "zonesEverFinished":
+      return of(ALL_ZONES, condition.count);
+    default:
+      return assertNever(condition);
+  }
+}
 const isCounted = (condition: AchievementCondition): condition is Counted =>
-  COUNTED_KINDS.includes(condition.kind);
+  (COUNTED_KINDS as readonly string[]).includes(condition.kind);
 
 function counted(condition: Counted, n: number): SaveDocument {
   const stats = newPlayerSave.stats;
   switch (condition.kind) {
+    case "bumps":
+      return { ...newPlayerSave, stats: { ...stats, bumpsByKind: { [condition.kinds[0]]: n } } };
     case "dogsFinishedWith":
       return { ...newPlayerSave, stats: { ...stats, dogsFinishedWith: ALL_DOGS.slice(0, n) } };
+    case "firedByOwners": {
+      const fired = { timesFired: 1, walks: 1, zonesFinished: 0 };
+      const dogs = Object.fromEntries(ALL_DOGS.slice(0, n).map((dog) => [dog, fired]));
+      return { ...newPlayerSave, stats: { ...stats, dogs } };
+    }
+    case "lifetimeEarnings":
+      return { ...newPlayerSave, stats: { ...stats, lifetimeCents: dollarsToCents(n) } };
+    case "walkersFinishedWith":
+      return {
+        ...newPlayerSave,
+        stats: { ...stats, walkersFinishedWith: ALL_WALKERS.slice(0, n) },
+      };
+    case "walksPlayed":
+      return {
+        ...newPlayerSave,
+        stats: { ...stats, runs: { finished: 0, noDogs: 0, wentHome: n } },
+      };
     case "tally":
       return { ...newPlayerSave, stats: { ...stats, tallies: { [condition.tally]: n } } };
     case "timesFired":

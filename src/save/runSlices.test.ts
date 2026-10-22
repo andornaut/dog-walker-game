@@ -54,6 +54,7 @@ describe("checkpointOf", () => {
   it("copies the run's achievement counters", () => {
     const counted: RunState = {
       ...midRun,
+      bumpsByKind: { raccoon: 2 },
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       pack: [
@@ -64,6 +65,7 @@ describe("checkpointOf", () => {
       tallies: { squirrelPulls: 3 },
     };
     expect(checkpointOf(data, counted).counters).toEqual({
+      bumpsByKind: { raccoon: 2 },
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       firstZone: 0,
@@ -91,6 +93,7 @@ describe("runResultOf", () => {
       earnedCents: 4_250,
       outcome: "finished",
       route: ["street", "pawsPromenade", "park"],
+      walker: start.walker,
       zone: 4,
     });
   });

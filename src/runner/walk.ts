@@ -13,7 +13,7 @@ import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obs
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { chance, type Random, randomPick } from "../lib/random";
-import { countBump, countTally } from "../rules/achievements";
+import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
@@ -1169,7 +1169,7 @@ export function stepWalk(
     }
     if (kind === "tip") {
       const pickup = collectTip(data, nextRun);
-      nextRun = pickup.run;
+      nextRun = countTally("tips", pickup.run);
       tips.push(pickup.tip);
       collected.push(item);
       modifiedAt(item, [changeModified(pickup.tip)]);
@@ -1190,7 +1190,9 @@ export function stepWalk(
         continue;
       }
       const bump = bumpDog(data, dog, countBump(nextRun));
-      nextRun = bump.state;
+      // A bump wholly forgiven, which costs no heart, counts toward no bump badge.
+      const landed = bump.change !== null && bump.change.after < bump.change.before;
+      nextRun = landed ? countLandedBump(kind, bump.state) : bump.state;
       bumps.push({ change: bump.change, dodged: false, dog, item });
       modifiedAt(item, [bump.modified]);
     } else {
@@ -1209,7 +1211,7 @@ export function stepWalk(
       const { resolution } = data.encounters[kind];
       if (resolution.kind === "instant") {
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
-        nextRun = outcome.state;
+        nextRun = countTally(resolution.tally, outcome.state);
         instants.push({ encounter: kind, outcome });
         modifiedAt(item, outcome.modified);
       } else if (resolution.kind === "contact") {

@@ -554,7 +554,8 @@
             "kind": "money"
           }
         ],
-        "kind": "instant"
+        "kind": "instant",
+        "tally": "walletsFound"
       },
       "spriteKey": "lost-wallet"
     },
@@ -627,7 +628,8 @@
             }
           }
         ],
-        "kind": "instant"
+        "kind": "instant",
+        "tally": "neighborsMet"
       },
       "spriteKey": "petting-neighbor"
     },

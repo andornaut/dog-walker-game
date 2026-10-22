@@ -1,4 +1,4 @@
-import type { DogId, TallyId, ZoneId } from "../data/types";
+import type { DogId, WalkerId, ZoneId } from "../data/types";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
 import { addCents, type Cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
@@ -17,6 +17,7 @@ export interface RunResult {
   outcome: EndReason;
   // The zones the run walked, in order, the one it ended in included.
   route: ZoneId[];
+  walker: WalkerId;
   zone: number;
 }
 
@@ -25,14 +26,14 @@ export function zonesFinishedBy(result: Pick<RunResult, "outcome" | "zone">): nu
   return result.outcome === "finished" ? result.zone : result.zone - 1;
 }
 
-// The lifetime tallies with a run's added.
-function addTallies(
-  lifetime: SaveStats["tallies"],
-  run: RunCounters["tallies"],
-): SaveStats["tallies"] {
-  const sum = { ...lifetime };
-  for (const [tally, count] of Object.entries(run) as [TallyId, number][]) {
-    sum[tally] = (sum[tally] ?? 0) + count;
+// Lifetime counts with a run's added, key by key: the tallies, or the bumps by kind.
+function addCounts<Key extends string>(
+  lifetime: Readonly<Partial<Record<Key, number>>>,
+  run: Readonly<Partial<Record<Key, number>>>,
+): Partial<Record<Key, number>> {
+  const sum: Partial<Record<Key, number>> = { ...lifetime };
+  for (const [key, count] of Object.entries(run) as [Key, number][]) {
+    sum[key] = (sum[key] ?? 0) + count;
   }
   return sum;
 }
@@ -53,11 +54,13 @@ function beatsBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: Cents): 
   return stats.bestWalk === null || earnedCents > stats.bestWalk.earnedCents;
 }
 
+// walker is null for a checkpoint, which banks as heading home and so finishes no walk.
 type BankedRun = Pick<
   Checkpoint,
   "counters" | "dogs" | "earnedCents" | "route" | "zonesFinished"
 > & {
   outcome: EndReason;
+  walker: WalkerId | null;
 };
 
 // Banks the earnings, counts the outcome and updates every stat and the logbook. Unlocks the
@@ -114,6 +117,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
         ? { dogs: walkDogs, earnedCents, zonesFinished }
         : stats.bestWalk,
       bestZoneFinished,
+      bumpsByKind: addCounts(stats.bumpsByKind, run.counters.bumpsByKind),
       dogs,
       dogsFinishedWith: finished
         ? [...new Set([...stats.dogsFinishedWith, ...stayed])]
@@ -121,8 +125,12 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       lastWalk,
       lifetimeCents: addCents(stats.lifetimeCents, earnedCents),
       runs: { ...stats.runs, [outcome]: stats.runs[outcome] + 1 },
-      tallies: addTallies(stats.tallies, run.counters.tallies),
+      tallies: addCounts(stats.tallies, run.counters.tallies),
       timesFired: stats.timesFired + firedBy.length,
+      walkersFinishedWith:
+        finished && run.walker !== null
+          ? [...new Set([...stats.walkersFinishedWith, run.walker])]
+          : stats.walkersFinishedWith,
       walksWithoutFiring: stats.walksWithoutFiring + (finished && firedBy.length === 0 ? 1 : 0),
       zonesEverFinished: walkedFromTheStart(run.counters)
         ? [...new Set([...stats.zonesEverFinished, ...run.route.slice(0, zonesFinished)])]
@@ -149,7 +157,7 @@ export function bankCheckpoint(context: AwardContext, save: SaveDocument): SaveD
   if (checkpoint === null) {
     return save;
   }
-  return bankRun(context, { ...checkpoint, outcome: "wentHome" }, save);
+  return bankRun(context, { ...checkpoint, outcome: "wentHome", walker: null }, save);
 }
 
 // Banks a run that ended.
@@ -166,6 +174,7 @@ export function recordRunEnd(
       earnedCents: result.earnedCents,
       outcome: result.outcome,
       route: result.route,
+      walker: result.walker,
       zonesFinished: zonesFinishedBy(result),
     },
     save,

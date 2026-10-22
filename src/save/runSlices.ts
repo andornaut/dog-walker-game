@@ -45,6 +45,7 @@ export function runResultOf(data: RunSliceData, run: RunState): RunResult {
     earnedCents: run.money,
     outcome,
     route: [...run.route],
+    walker: run.walker,
     zone: outcome === "finished" ? walkLength(data) : run.zoneIndex + 1,
   };
 }

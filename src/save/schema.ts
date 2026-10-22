@@ -5,6 +5,7 @@ import type {
   DogId,
   GearId,
   HintId,
+  MinorObstacleId,
   TallyId,
   WalkerId,
   ZoneId,
@@ -13,15 +14,18 @@ import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 
 // Every tally the save keeps; a stored key outside it is dropped on load.
 export const TALLY_IDS = [
   "dodges",
+  "neighborsMet",
   "sniffs",
   "squirrelPulls",
   "thievesLetGo",
+  "tips",
   "treats",
+  "walletsFound",
 ] as const satisfies readonly TallyId[];
 
 // The most dogs a run can take.
@@ -54,8 +58,10 @@ const dogRunSchema = v.object({
   zonesFinished: count,
 });
 
-// A run's achievement counters (RunCounters). debuffsGot is keyed by debuff id.
+// A run's achievement counters (RunCounters). bumpsByKind is keyed by minor obstacle id and
+// debuffsGot by debuff id.
 const runCountersSchema = v.object({
+  bumpsByKind: v.record(contentId, count),
   bumpsByZone: v.array(count),
   debuffsGot: v.record(contentId, count),
   firstZone: count,
@@ -112,6 +118,8 @@ const statsSchema = v.object({
   bestWalk: v.nullable(walkSchema),
   // The most zones one run finished. Heading home mid-zone does not count that zone.
   bestZoneFinished: count,
+  // Plain hits that cost their owner a heart over every run, keyed by minor obstacle id.
+  bumpsByKind: v.record(contentId, count),
   dogs: v.record(contentId, dogStatsSchema),
   // Every dog that finished a walk without its owner firing you, each once.
   dogsFinishedWith: ids,
@@ -127,6 +135,8 @@ const statsSchema = v.object({
   // Each tally over every run, keyed by TallyId.
   tallies: v.record(contentId, count),
   timesFired: count,
+  // Every walker who finished a walk from the first zone, each once.
+  walkersFinishedWith: ids,
   // Finished walks in which no owner fired you.
   walksWithoutFiring: count,
   // Every zone a walk from the first zone finished, each once.
@@ -214,20 +224,24 @@ export interface SaveStats extends Omit<
   StoredStats,
   | "bestCentsByPackSize"
   | "bestWalk"
+  | "bumpsByKind"
   | "dogs"
   | "dogsFinishedWith"
   | "lastWalk"
   | "runs"
   | "tallies"
+  | "walkersFinishedWith"
   | "zonesEverFinished"
 > {
   bestCentsByPackSize: Record<number, Cents>;
   bestWalk: Walk | null;
+  bumpsByKind: Partial<Record<MinorObstacleId, number>>;
   dogs: Partial<Record<DogId, DogStats>>;
   dogsFinishedWith: DogId[];
   lastWalk: LastWalk | null;
   runs: Record<EndReason, number>;
   tallies: Partial<Record<TallyId, number>>;
+  walkersFinishedWith: WalkerId[];
   zonesEverFinished: ZoneId[];
 }
 
@@ -284,6 +298,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       bestCentsByPackSize: {},
       bestWalk: null,
       bestZoneFinished: 0,
+      bumpsByKind: {},
       dogs: {},
       dogsFinishedWith: [],
       lastWalk: null,
@@ -291,6 +306,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
       tallies: {},
       timesFired: 0,
+      walkersFinishedWith: [],
       walksWithoutFiring: 0,
       zonesEverFinished: [],
     },

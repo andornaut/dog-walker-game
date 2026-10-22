@@ -15,6 +15,7 @@ export const ENCOUNTERS = {
       art: "card-lost-wallet-keep",
       effects: [{ amount: "lostWalletKeep", change: "gain", kind: "money" }],
       kind: "instant",
+      tally: "walletsFound",
     },
   },
   otherDog: {
@@ -51,6 +52,7 @@ export const ENCOUNTERS = {
       art: "card-petting-neighbor-take",
       effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
       kind: "instant",
+      tally: "neighborsMet",
     },
   },
   puddle: {
