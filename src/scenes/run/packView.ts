@@ -4,7 +4,7 @@ import { SQUIRREL_ICON_KEY } from "../../assets/iconKeys";
 import { dogSpriteKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { DogId } from "../../data/types";
-import { GRACE_BLINK, graceAlpha } from "../../layout/graceBlink";
+import { graceAlpha } from "../../layout/graceBlink";
 import { formationOrder, packDogOf, packPlacements } from "../../layout/packFormation";
 import { distanceAtY, project } from "../../layout/projection";
 import { itemAt } from "../../lib/arrays";
@@ -185,7 +185,6 @@ export class PackView {
   draw(walk: Walk, frame: PackFrame): void {
     const { halted, pulls, shadow, still } = frame;
     const alpha = graceAlpha(
-      GRACE_BLINK,
       still,
       read(gameData.tuning, "seconds", "collisionGrace"),
       walk.road.invulnerableSeconds,
