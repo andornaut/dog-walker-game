@@ -12,20 +12,18 @@ export function opaqueBounds(
   height: number,
   isOpaque: (x: number, y: number) => boolean,
 ): PixelBounds | undefined {
-  let bounds: PixelBounds | undefined;
+  let [left, top, right, bottom] = [width, height, 0, 0];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       if (isOpaque(x, y)) {
-        bounds = {
-          bottom: Math.max(bounds?.bottom ?? 0, y + 1),
-          left: Math.min(bounds?.left ?? x, x),
-          right: Math.max(bounds?.right ?? 0, x + 1),
-          top: Math.min(bounds?.top ?? y, y),
-        };
+        left = Math.min(left, x);
+        top = Math.min(top, y);
+        right = Math.max(right, x + 1);
+        bottom = Math.max(bottom, y + 1);
       }
     }
   }
-  return bounds;
+  return right === 0 ? undefined : { bottom, left, right, top };
 }
 
 // opaqueBounds over RGBA bytes, as canvas ImageData holds them: a pixel is opaque when its
