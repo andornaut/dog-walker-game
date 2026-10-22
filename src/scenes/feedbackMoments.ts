@@ -45,7 +45,7 @@ import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "../ui/phaser/displayText";
-import { drawFramedRect, drawRing } from "../ui/phaser/draw";
+import { addFilledRect, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -500,7 +500,7 @@ export class HudFeedback {
       ? this.scene.add
           .nineslice(0, 0, key, tagFrame(this.scene, key, "normal"), width, height, cap, cap, 0, 0)
           .setOrigin(0)
-      : this.scene.add.rectangle(0, 0, width, height, PALETTE.cream).setOrigin(0);
+      : addFilledRect(this.scene, PALETTE.cream, { height, width, x: 0, y: 0 });
     return this.scene.add.container(Math.round(x - width / 2), top, [tag, amount]).setDepth(DEPTH);
   }
 

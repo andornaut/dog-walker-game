@@ -7,7 +7,7 @@ import { effectIconFallback, type EffectItem, walkBarIconKey } from "../hud/effe
 import { chipLeft, type LabelAnchor } from "../hud/feedback";
 import { BUFF_POP, CHARM, sparkleAt, strikeGeometry } from "../layout/buffLayout";
 import { insetRect, type Point, type Rect } from "../lib/rect";
-import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { addFilledRect, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, type FontRole, inkSpan, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { playEffect } from "./sprites";
@@ -33,7 +33,7 @@ export function addCharm(
   const parts: GameObjects.GameObject[] = [
     scene.textures.exists(WELL_KEY)
       ? scene.add.image(0, 0, WELL_KEY).setOrigin(0)
-      : scene.add.rectangle(0, 0, size, size, PALETTE.ink).setOrigin(0),
+      : addFilledRect(scene, PALETTE.ink, { height: size, width: size, x: 0, y: 0 }),
     scene.textures.exists(iconKey)
       ? scene.add.image(icon, icon, iconKey).setOrigin(0)
       : addPixelText(scene, size / 2, size / 2 - 2, effectIconFallback(gameData, item), {

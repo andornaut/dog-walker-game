@@ -7,13 +7,11 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import {
-  effectIconFallback,
   effectIconKey,
   type EffectItem,
   effectItems,
   effectItemsKey,
   perkIconKey,
-  walkBarIconKey,
 } from "../hud/effectIcons";
 import { explainDetail } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
@@ -70,7 +68,13 @@ import { faceMood } from "../rules/treats";
 import { type Cents, read } from "../rules/units";
 import { placeInPack } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
-import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "../ui/phaser/draw";
+import {
+  addFilledRect,
+  drawDashedRect,
+  drawFramedRect,
+  drawHeart,
+  fillRect,
+} from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -81,7 +85,7 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
-import { glintWell } from "./buffCharm";
+import { addCharm, glintWell } from "./buffCharm";
 import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
@@ -539,30 +543,12 @@ export class HudScene extends Scene {
     scalePixelText(money, scale, x + advance, top);
   }
 
-  // The effect wells: each effect's 20x20 icon in its well, in the walk's order.
+  // The effect wells: each effect's unlit charm in its well, in the walk's order.
   private showEffects(effects: readonly EffectItem[]): void {
     this.effectParts.forEach((part) => part.destroy());
-    const { icon, iconSize } = WALK_BAR.effects;
     this.effectParts = BAR.effectWells.flatMap((well, i) => {
       const item = effects[i];
-      if (item === undefined) {
-        return [];
-      }
-      const key = walkBarIconKey(item);
-      const x = well.x + icon;
-      const y = well.y + icon;
-      const half = iconSize / 2;
-      return [
-        this.textures.exists("ui-effect-well")
-          ? this.add.image(well.x, well.y, "ui-effect-well").setOrigin(0)
-          : this.add.rectangle(well.x, well.y, well.width, well.height, PALETTE.ink).setOrigin(0),
-        this.textures.exists(key)
-          ? this.add.image(x, y, key).setOrigin(0)
-          : addPixelText(this, x + half, y + half - 2, effectIconFallback(gameData, item), {
-              color: PALETTE.cream,
-              originX: 0.5,
-            }),
-      ];
+      return item === undefined ? [] : [addCharm(this, item, well, { lit: false })];
     });
   }
 
@@ -612,13 +598,7 @@ export class HudScene extends Scene {
     const colors = DEBUFF_COLORS[debuff] ?? DEBUFF_FALLBACK;
     const parts: GameObjects.GameObject[] = [];
     const art = addTagImage(this, "ui-debuff-bar", debuff, rect.x, rect.y);
-    if (art === undefined) {
-      parts.push(
-        this.add.rectangle(rect.x, rect.y, rect.width, rect.height, colors.face).setOrigin(0),
-      );
-    } else {
-      parts.push(art);
-    }
+    parts.push(art ?? addFilledRect(this, colors.face, rect));
     const { icon, name } = DEBUFF_BAR;
     const iconKey = debuffIconKey(debuff);
     if (this.textures.exists(iconKey)) {
