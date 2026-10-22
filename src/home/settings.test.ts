@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { Rect } from "../lib/rect";
 import { DEFAULT_SETTINGS } from "../save/schema";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { inside } from "../testing/rects";
 import { closeFace } from "../ui/closeControl";
 import {
   knobX,
@@ -103,10 +104,7 @@ describe("the settings card", () => {
     ["the close control's face", face, band],
     ["the close control's hit area", close.hit, panel],
   ])("keeps %s inside its frame", (_, inner, outer) => {
-    expect(inner.x).toBeGreaterThanOrEqual(outer.x);
-    expect(inner.y).toBeGreaterThanOrEqual(outer.y);
-    expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width);
-    expect(inner.y + inner.height).toBeLessThanOrEqual(outer.y + outer.height);
+    expect(inside(inner, outer)).toBe(true);
   });
 
   it("centres the title on the card, and starts the rows 8px under the band", () => {

@@ -14,6 +14,7 @@ import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
+import { inside } from "../testing/rects";
 import { BADGE_OFFSET } from "../ui/badge";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
@@ -150,11 +151,7 @@ describe("pocket lining", () => {
   it.each(Object.entries(lining).filter(([name]) => name !== "denim"))(
     "%s lies within the denim",
     (_, rect) => {
-      const { denim } = lining;
-      expect(rect.x).toBeGreaterThanOrEqual(denim.x);
-      expect(rect.x + rect.width).toBeLessThanOrEqual(denim.x + denim.width);
-      expect(rect.y).toBeGreaterThanOrEqual(denim.y);
-      expect(rect.y + rect.height).toBeLessThanOrEqual(denim.y + denim.height);
+      expect(inside(rect, lining.denim)).toBe(true);
     },
   );
 
@@ -489,12 +486,6 @@ describe("the dog slot sign", () => {
   };
   const logoPng = file("images/logo.png");
   const yardSign = { height: logoPng.readUInt32BE(20), width: logoPng.readUInt32BE(16), ...logo };
-  const within = (inner: Rect, outer: Rect) => {
-    expect(inner.x).toBeGreaterThanOrEqual(outer.x);
-    expect(inner.y).toBeGreaterThanOrEqual(outer.y);
-    expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width);
-    expect(inner.y + inner.height).toBeLessThanOrEqual(outer.y + outer.height);
-  };
   const clear: readonly [string, Rect][] = [
     ["the yard sign", yardSign],
     ...(Object.keys(gameData.walkers) as WalkerId[]).map((walker): [string, Rect] => [
@@ -509,18 +500,20 @@ describe("the dog slot sign", () => {
   });
 
   it("draws its board inside its art, in the gate scene", () => {
-    within(board, { ...frameSize(key), ...art });
-    within(outline, { height: gate.height, width: SCREEN_CONFIG.width, x: 0, y: gate.y });
+    expect(inside(board, { ...frameSize(key), ...art })).toBe(true);
+    expect(
+      inside(outline, { height: gate.height, width: SCREEN_CONFIG.width, x: 0, y: gate.y }),
+    ).toBe(true);
   });
 
   it("keeps its outline inside the Pet shop's and its hit area on the shop", () => {
-    within(outline, insetRect(-AFFORD_OUTSET, petShop));
-    within(hit, petShop);
+    expect(inside(outline, insetRect(-AFFORD_OUTSET, petShop))).toBe(true);
+    expect(inside(hit, petShop)).toBe(true);
   });
 
   it("covers the board with a hit area at least 44 a side", () => {
     expect(Math.min(hit.height, hit.width)).toBeGreaterThanOrEqual(44);
-    within(board, hit);
+    expect(inside(board, hit)).toBe(true);
   });
 
   const prices = gameData.dogSlots.flatMap((slot) =>
@@ -534,7 +527,7 @@ describe("the dog slot sign", () => {
   ];
 
   it("finds its cream inside the board", () => {
-    within(cream, board);
+    expect(inside(cream, board)).toBe(true);
   });
 
   it.each(lines)("sets $text on the cream", ({ capY, text }) => {
