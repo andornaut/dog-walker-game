@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import { MENU_TEXT } from "../data/menuText";
-import { WORLD } from "../data/world";
+import { fillLine } from "../lib/lines";
 import { newPlayerSave, veteranSave } from "../testing/saves";
+import { MENU_TEXT_FIELDS } from "./menuText";
 import { dogRows, overallRows } from "./statsView";
 
-const data = { dogs: DOGS, menuText: MENU_TEXT, world: WORLD };
+const data = { dogs: DOGS, menuText: MENU_TEXT };
 const words = MENU_TEXT.stats;
 
 describe("overallRows", () => {
@@ -20,7 +21,13 @@ describe("overallRows", () => {
       { label: words.overall.bestRunDogs, value: DOGS.koda.name },
       { label: "", value: DOGS.penny.name },
       { label: words.overall.lifetime, value: "$280" },
-      { label: words.overall.timesFired, value: "1 (most: Jesse)" },
+      {
+        label: words.overall.timesFired,
+        value: fillLine(MENU_TEXT_FIELDS.stats, words, "timesFiredBy", {
+          count: "1",
+          owner: DOGS.koda.owner.name,
+        }),
+      },
       { label: words.overall.bestZone, value: "4" },
     ]);
     expect(outcomes).toEqual([

@@ -49,11 +49,11 @@ describe("the tabs", () => {
   const tabs = statsTabRects();
 
   it("fits every tab label", () => {
-    for (const [tab, i] of STATS_TABS.map((tab, i) => [tab, i] as const)) {
+    STATS_TABS.forEach((tab, i) => {
       const label = gameData.menuText.stats.tabs[tab];
       const style = { letterSpacing: 0, scale: TEXT_SCALE };
       expect(inkWidth("font-title", style, label.toUpperCase())).toBeLessThan(tabs[i]?.width ?? 0);
-    }
+    });
   });
 });
 // A wall row holds its badge and its text: the badge with room over and under it, and the
@@ -79,7 +79,7 @@ describe("the open badge", () => {
   const width = (line: string) => bodyTextWidth(2, plainMarks(line));
 
   it("holds every badge", () => {
-    for (const [, badge] of BADGES.map((badge) => [badge.name, badge] as const)) {
+    for (const badge of BADGES) {
       const title = { letterSpacing: 0, scale: 2 };
       const room = detail.width - 2 * detailText.x;
       expect(inkWidth("font-title", title, badge.name.toUpperCase())).toBeLessThanOrEqual(room);
