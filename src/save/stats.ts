@@ -9,6 +9,9 @@ export const ZERO_DOG_STATS: DogStats = { timesFired: 0, walks: 0, zonesFinished
 // What the logbook's Stats page shows, derived from the saved stats.
 interface StatsPage {
   bestRunCents: Cents;
+  // The best walk's dogs and neighborhoods finished; none before any walk.
+  bestRunDogs: readonly DogId[];
+  bestRunZones: number;
   bestZoneFinished: number;
   // Every dog's walks added up: a run with 3 dogs walks 3.
   dogsWalked: number;
@@ -42,6 +45,8 @@ export function statsPage(stats: SaveStats): StatsPage {
   }
   return {
     bestRunCents: stats.bestWalk?.earnedCents ?? cents(0),
+    bestRunDogs: stats.bestWalk?.dogs ?? [],
+    bestRunZones: stats.bestWalk?.zonesFinished ?? 0,
     bestZoneFinished: stats.bestZoneFinished,
     dogsWalked: dogsWalked(stats),
     lifetimeCents: stats.lifetimeCents,

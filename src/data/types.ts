@@ -820,9 +820,14 @@ export interface MenuText {
       readonly noDogs: string;
       readonly wentHome: string;
     };
+    // The overall rows; bestRunDogs labels the first of the best walk's dogs, one per row,
+    // and bestRunZones its neighborhoods finished.
     readonly overall: {
       readonly bestRun: string;
+      readonly bestRunDogs: string;
+      readonly bestRunZones: string;
       readonly bestZone: string;
+      readonly dogsWalked: string;
       readonly lifetime: string;
       readonly runsPlayed: string;
       readonly timesFired: string;

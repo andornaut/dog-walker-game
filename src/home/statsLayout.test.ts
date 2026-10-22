@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { DogId } from "../data/types";
 import { scrollMax } from "../input/listScroll";
 import { fillLine, wrapWords } from "../lib/lines";
+import { cents, read } from "../rules/units";
 import { veteranSave } from "../save/fixtures";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
@@ -101,8 +103,9 @@ const titleRight = (x: number, text: string) =>
   x + fontInk("font-title", STYLE, text.toUpperCase()).right;
 const valueLeft = (value: string) => rows.right - inkWidth("font-body", STYLE, value);
 
-// The Walks tab's rows with the widest figures: four-digit counts and dollars, and three-digit
-// firings by the owner with the widest name.
+// The Walks tab's rows with the widest figures: four-digit counts and dollars, three-digit
+// firings by the owner with the widest name, and the best walk's first dog as every dog. The
+// best walk's later dogs have no label, so the first dog's row covers them.
 const save = veteranSave();
 const widest = (texts: readonly string[]) =>
   texts.reduce((a, b) =>
@@ -111,17 +114,23 @@ const widest = (texts: readonly string[]) =>
 const ownerName = widest(Object.values(gameData.dogs).map(({ owner }) => owner.name));
 const walksRows = Object.values(overallRows(gameData, save.stats))
   .flat()
-  .map(({ label, value }) => {
+  .filter(({ label }) => label !== "")
+  .flatMap(({ label, value }) => {
     if (label === words.overall.timesFired) {
-      return {
-        label,
-        value: fillLine(MENU_TEXT_FIELDS.stats, words, "timesFiredBy", {
-          count: "999",
-          owner: ownerName,
-        }),
-      };
+      return [
+        {
+          label,
+          value: fillLine(MENU_TEXT_FIELDS.stats, words, "timesFiredBy", {
+            count: "999",
+            owner: ownerName,
+          }),
+        },
+      ];
     }
-    return { label, value: value.startsWith("$") ? "$9,999" : "9999" };
+    if (label === words.overall.bestRunDogs) {
+      return Object.values(gameData.dogs).map(({ name }) => ({ label, value: name }));
+    }
+    return [{ label, value: value.startsWith("$") ? "$9,999" : "9999" }];
   });
 // The badge wall's rows with every badge locked and showing the veteran save's progress.
 const bodyInk = (line: string) => inkWidth("font-body", STYLE, line);
@@ -186,14 +195,18 @@ describe("the scrollbar", () => {
   });
 });
 
-// Each tab as long as it gets, with every dog owned: scrolled to its end, its last row's ink
-// is in the view; the Walks tab fits without scrolling.
+// Each tab as long as it gets, with every dog owned and a best walk with the fullest pack:
+// scrolled to its end, its last row's ink is in the view; the Walks tab fits without
+// scrolling.
 describe("each tab's scroll", () => {
-  const dogCount = Object.keys(gameData.dogs).length;
+  const dogIds = Object.keys(gameData.dogs) as DogId[];
+  const dogCount = dogIds.length;
   const lastRow = wallRows.at(-1) ?? wall;
   const lastCell = wallCells.at(-1);
   const lastLines = lastCell === undefined ? 1 : wallCellLineCount(lastCell);
-  const { outcomes, overall } = overallRows(gameData, save.stats);
+  const fullPack = dogIds.slice(0, read(gameData.tuning, "counts", "packSizeMax"));
+  const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
+  const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
   const walks = [overall.length, outcomes.length];
   const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
   const walksHeight = walks.reduce((sum, n) => sum + rowsY + n * rows.pitch + sectionGap, 0);

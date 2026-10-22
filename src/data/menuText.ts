@@ -72,7 +72,10 @@ export const MENU_TEXT = {
     },
     overall: {
       bestRun: "Best walk",
+      bestRunDogs: "Best walk's dogs",
+      bestRunZones: "Best walk's neighborhoods",
       bestZone: "Most neighborhoods in a walk",
+      dogsWalked: "Dogs walked",
       lifetime: "Lifetime earnings",
       runsPlayed: "Walks played",
       timesFired: "Times fired",

@@ -14,7 +14,11 @@ describe("overallRows", () => {
     const { outcomes, overall } = overallRows(data, veteranSave().stats);
     expect(overall).toEqual([
       { label: words.overall.runsPlayed, value: "5" },
+      { label: words.overall.dogsWalked, value: "7" },
       { label: words.overall.bestRun, value: "$90" },
+      { label: words.overall.bestRunZones, value: "4" },
+      { label: words.overall.bestRunDogs, value: DOGS.koda.name },
+      { label: "", value: DOGS.penny.name },
       { label: words.overall.lifetime, value: "$300" },
       { label: words.overall.timesFired, value: "1 (most: Jesse)" },
       { label: words.overall.bestZone, value: "4" },
@@ -24,10 +28,10 @@ describe("overallRows", () => {
       { label: words.outcomes.wentHome, value: "2" },
       { label: words.outcomes.noDogs, value: "1" },
     ]);
-    expect(overallRows(data, newPlayerSave.stats).overall).toContainEqual({
-      label: words.overall.timesFired,
-      value: "0",
-    });
+    const before = overallRows(data, newPlayerSave.stats).overall;
+    expect(before).toContainEqual({ label: words.overall.timesFired, value: "0" });
+    expect(before).toContainEqual({ label: words.overall.bestRunZones, value: "0" });
+    expect(before.map(({ label }) => label)).not.toContain(words.overall.bestRunDogs);
   });
 });
 

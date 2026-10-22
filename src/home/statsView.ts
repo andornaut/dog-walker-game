@@ -10,7 +10,9 @@ export interface StatsRow {
   readonly value: string;
 }
 
-// The Stats page's overall figures, in the rulebook's order.
+// The Stats page's overall figures, in the rulebook's order. The best walk's dogs follow its
+// earnings and neighborhoods, a dog per row with only the first labeled; before any walk
+// there are none.
 export function overallRows(
   data: Pick<GameData, "dogs" | "menuText">,
   stats: SaveStats,
@@ -33,7 +35,13 @@ export function overallRows(
     ],
     overall: [
       { label: text.overall.runsPlayed, value: String(page.runsPlayed) },
+      { label: text.overall.dogsWalked, value: String(page.dogsWalked) },
       { label: text.overall.bestRun, value: dollarText(page.bestRunCents) },
+      { label: text.overall.bestRunZones, value: String(page.bestRunZones) },
+      ...page.bestRunDogs.map((dog, i) => ({
+        label: i === 0 ? text.overall.bestRunDogs : "",
+        value: data.dogs[dog].name,
+      })),
       { label: text.overall.lifetime, value: dollarText(page.lifetimeCents) },
       { label: text.overall.timesFired, value: timesFired },
       { label: text.overall.bestZone, value: String(page.bestZoneFinished) },

@@ -7,6 +7,8 @@ describe("statsPage", () => {
   it("sums the runs and dog walks, and names the owner who fired you most", () => {
     expect(statsPage(veteranSave().stats)).toEqual({
       bestRunCents: 9_000,
+      bestRunDogs: ["koda", "penny"],
+      bestRunZones: 4,
       bestZoneFinished: 4,
       dogsWalked: 7,
       lifetimeCents: 30_000,
@@ -29,6 +31,8 @@ describe("statsPage", () => {
     expect(statsPage(tied).mostFiredBy).toBe("biscuit");
     expect(statsPage(newPlayerSave.stats)).toMatchObject({
       bestRunCents: 0,
+      bestRunDogs: [],
+      bestRunZones: 0,
       mostFiredBy: null,
       runsPlayed: 0,
     });
