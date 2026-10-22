@@ -44,11 +44,4 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 **Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
 
-Tuning against the targets, from a fresh baseline:
-
-- Badges: every one that counts across walks outlasts buying out the Pet shop, and Big Payday is rarely reached
-- Economy: pay, card costs, lucky finds and shop prices
-- Gear: each item within the window
-- Sizes: hearts against the small-dog dodge chance
-
-Then a phone playtest of the tuned build calls version 1. The game is called Dog Walker.
+The tuning pass is done: a buyout of the Pet shop takes about 50 walks, Good Day and Big Payday sit within reach of a good and a great walk, and the cozy curve stays. What's left is a phone playtest of the tuned build, which calls version 1. The game is called Dog Walker.
