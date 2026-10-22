@@ -605,7 +605,7 @@ export function addTileSprite(
       .setOrigin(0);
   }
   const sprite = scene.add.sprite(at.x, at.y, key).setOrigin(0);
-  showTag(reducedMotion, sprite, key, tag);
+  playTag(sprite, key, tag, reducedMotion);
   return sprite;
 }
 
@@ -680,20 +680,13 @@ export function clearScene(scene: Scene): void {
   }
 }
 
-// Plays a looping tag, or with reduced motion holds its first frame.
+// CLEANUP (added 2026-10-22): badges.ts's last caller moves to playTag(sprite, key, tag,
+// reducedMotion), then this goes.
 export function showTag(
   reducedMotion: boolean,
   sprite: GameObjects.Sprite,
   key: string,
   tag: string,
 ): void {
-  if (!reducedMotion) {
-    playTag(sprite, key, tag);
-    return;
-  }
-  const frame = tagFrame(sprite.scene, key, tag);
-  if (frame !== undefined) {
-    sprite.stop();
-    sprite.setFrame(frame);
-  }
+  playTag(sprite, key, tag, reducedMotion);
 }

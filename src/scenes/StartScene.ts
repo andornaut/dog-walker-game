@@ -168,7 +168,6 @@ import {
   type SelectTileOptions,
   setDollarAmount,
   settingsIcon,
-  showTag,
   soundIcon,
   tagFrame,
   TEXT_SCALE,
@@ -717,7 +716,7 @@ export class StartScene extends Scene {
     const key = ownerFaceKey(gameData, dog);
     if (this.textures.exists(key)) {
       const sprite = this.add.sprite(face.x, face.y, key).setOrigin(0);
-      showTag(reduced, sprite, key, "happy");
+      playTag(sprite, key, "happy", reduced);
       root.add(sprite);
     }
     drawRing(this.graphics(root), PALETTE.ink, face, 1);

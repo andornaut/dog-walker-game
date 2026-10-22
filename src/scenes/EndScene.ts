@@ -51,14 +51,13 @@ import {
 } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { firstTag, spriteMetrics } from "./sprites";
+import { firstTag, playTag, spriteMetrics } from "./sprites";
 import {
   addMenuButton,
   addPanel,
   addScreenBackdrop,
   addTagImage,
   listenButtonTap,
-  showTag,
   TEXT_SCALE,
 } from "./uiKit";
 
@@ -209,7 +208,7 @@ export class EndScene extends Scene {
       } else {
         const key = ownerFaceKey(gameData, line.dog);
         const face = this.add.sprite(faceX, faceY, key).setOrigin(0);
-        showTag(reduced, face, key, line.fired ? "fired" : "happy");
+        playTag(face, key, line.fired ? "fired" : "happy", reduced);
       }
       const { bubble, headerY, nameY, textX } = QUIPS;
       this.addBubble({ height, width: bubble.width, x: bubble.x, y: row });
@@ -317,7 +316,7 @@ export class EndScene extends Scene {
           const body = ownerSpriteKey(gameData, dog);
           const tag = firstTag(this, body, phase === "waving" ? ["wave", "idle"] : ["idle"]);
           if (sprite.texture.key === body && tag !== undefined) {
-            showTag(reduced, sprite, body, tag);
+            playTag(sprite, body, tag, reduced);
           }
         }
       }

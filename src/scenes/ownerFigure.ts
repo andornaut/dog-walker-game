@@ -2,8 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
 import type { DogId, GameData } from "../data/types";
-import { addStandingSprite, firstTag } from "./sprites";
-import { showTag } from "./uiKit";
+import { addStandingSprite, firstTag, playTag } from "./sprites";
 
 // An owner's full-body 32x48 sprite, keyed by their dog like the faces.
 export function ownerSpriteKey(data: Pick<GameData, "dogs">, dog: DogId): string {
@@ -25,12 +24,12 @@ export function addOwnerFigure(
     const sprite = addStandingSprite(scene, body, at.x, at.footY);
     const tag = firstTag(scene, body, tags);
     if (tag !== undefined) {
-      showTag(reducedMotion, sprite, body, tag);
+      playTag(sprite, body, tag, reducedMotion);
     }
     return sprite;
   }
   const face = ownerFaceKey(data, dog);
   const sprite = scene.add.sprite(Math.round(at.x), Math.round(at.footY), face).setOrigin(0.5, 1);
-  showTag(true, sprite, face, "happy");
+  playTag(sprite, face, "happy", true);
   return sprite;
 }
