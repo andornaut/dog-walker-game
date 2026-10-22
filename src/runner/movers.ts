@@ -1218,7 +1218,7 @@ function standsOf(spot: Spot): MoverStand[] {
 // Places every mover on rows at the distances given, each quota spread one per equal
 // stretch of the zone as the planner spreads other spawns, each mover wholly on screen
 // within the zone, within the caps on screen. A mover with no room in its stretch, such as one
-// over a cap there, waits: it comes on at a later row with room. One with no room on any later
+// over a cap there, waits: it comes on at the next row with room. One with no room on any later
 // row is dropped, which uses no random draw past its own draws, as the planner drops an obstacle
 // it has no room for. A mover never stands still in place of moving. Each mover makes its own
 // draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
@@ -1256,6 +1256,16 @@ export function placeMovers<Kind extends string>(
         .map((distance, i) => ({ distance, placement, row: first + i }))
         .filter(fits),
     );
+  // The spots that fit in the next row, from first on, that has any.
+  const nearestLater = (placements: readonly MoverPlacement[], first: number) => {
+    for (let row = first; row < rows.length; row++) {
+      const inRow = spotsIn(placements, row, row + 1);
+      if (inRow.length > 0) {
+        return inRow;
+      }
+    }
+    return [];
+  };
 
   const spawns: MoverSpawn<Kind>[] = [];
   const dropped: Kind[] = [];
@@ -1264,7 +1274,7 @@ export function placeMovers<Kind extends string>(
       const placements = moverPlacements(geometry, spec, drawMover(streams));
       const end = Math.floor(((i + 1) * rows.length) / count);
       const stretch = spotsIn(placements, Math.floor((i * rows.length) / count), end);
-      const fitting = stretch.length > 0 ? stretch : spotsIn(placements, end, rows.length);
+      const fitting = stretch.length > 0 ? stretch : nearestLater(placements, end);
       if (fitting.length === 0) {
         dropped.push(kind);
         continue;

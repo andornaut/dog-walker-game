@@ -1316,30 +1316,36 @@ describe("placeMovers", () => {
     }
   });
 
-  // Three movers, one per third of the rows. One with no room in its own third, such as one over
-  // a cap there, comes on at a later row with room, never an earlier one, and is dropped when no
-  // later row has room.
-  it("waits for a later row, or drops, a mover with no room in part of the zone", () => {
-    for (const refusal of [
-      { dropped: 0, name: "the middle third", refused: (row: number) => row >= 13 && row < 26 },
-      { dropped: 2, name: "the last two thirds", refused: (row: number) => row >= 13 },
-    ]) {
+  // Three movers, one per third of the rows (0 to 12, 13 to 25, 26 to 39). One with no room in
+  // its own third, such as one over a cap there, comes on at the nearest later row with room,
+  // never an earlier one, and is dropped when no later row has room.
+  it.each([
+    { dropped: 0, firstRefused: 13, lastRefused: 25, name: "the middle third", nearest: 26 },
+    { dropped: 0, firstRefused: 13, lastRefused: 29, name: "rows 13 to 29", nearest: 30 },
+    { dropped: 2, firstRefused: 13, lastRefused: 39, name: "the last two thirds", nearest: null },
+  ])(
+    "places a mover refused $name at the nearest later row with room, or drops it",
+    ({ dropped, firstRefused, lastRefused, nearest }) => {
+      const refused = (row: number) => row >= firstRefused && row <= lastRefused;
       const { blocked, grid } = freeGrid();
       const placed = placeMovers(
         plannerStreams(3),
         zoned,
         CAPS,
-        { ...grid, block: (row, ...rest) => !refusal.refused(row) && grid.block(row, ...rest) },
+        { ...grid, block: (row, ...rest) => !refused(row) && grid.block(row, ...rest) },
         [],
         rows,
         [{ count: 3, kind: "car", spec: spec({ kind: "ride", speedMultiplier: 2 }) }],
       );
-      expect(placed.dropped).toHaveLength(refusal.dropped);
-      expect(placed.spawns).toHaveLength(3 - refusal.dropped);
+      expect(placed.dropped).toHaveLength(dropped);
+      expect(placed.spawns).toHaveLength(3 - dropped);
+      expect(blocked.map(({ row }) => refused(row))).not.toContain(true);
+      if (nearest !== null) {
+        expect(blocked[1]?.row).toBe(nearest);
+      }
       blocked.forEach(({ row }, i) => {
-        expect(refusal.refused(row)).toBe(false);
         expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
       });
-    }
-  });
+    },
+  );
 });

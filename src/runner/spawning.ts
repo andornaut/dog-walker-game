@@ -22,7 +22,7 @@ export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 // blocksLane marks kinds the pack must steer around, such as obstacles. first marks kinds
 // placed before every other, such as the obstacles that open a card, so they are the last
 // skipped. Spawns without a footprint take one cell. A lane-blocking mover's spawns block the
-// lanes it sweeps instead; one with no room to move waits for a later row with room, or is
+// lanes it sweeps instead; one with no room to move waits for the next row with room, or is
 // dropped, unless it is marked first, when it stands still in its footprint instead. A mover
 // that blocks no lane, a moving prize, only keeps clear the cells it passes through, and stands
 // still in its footprint when it has no room to move.
@@ -298,7 +298,7 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // movers then the rest; then the other lane-blocking movers; then the other lane-blocking spawns;
 // then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
-// mover with no room in its stretch, such as one over a cap on screen, waits for a later row with
+// mover with no room in its stretch, such as one over a cap on screen, waits for the next row with
 // room; only one marked first stands still in its footprint when no row has room for it to move. A
 // moving prize is placed as a mover that blocks nothing: the cells it passes through are kept clear
 // of other spawns, so it never walks into one, but no lane is blocked, it stands nowhere for the
