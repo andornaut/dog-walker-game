@@ -124,14 +124,7 @@ import type { CelebrationSceneData } from "./CelebrationScene";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
-import {
-  addLock,
-  addPlate,
-  artTextureKey,
-  drawPetShopFallback,
-  plateColors,
-  SHOP_ART,
-} from "./itemArt";
+import { addLock, addPlate, drawPetShopFallback, plateColors, SHOP_ART } from "./itemArt";
 import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
@@ -1583,7 +1576,7 @@ export class StartScene extends Scene {
         y: y + box.dy,
       });
       const at = { x: x + iconAt.dx, y: y + iconAt.dy };
-      const icon = this.addGearIcon(content, tile, id, at, 1);
+      const icon = this.addGearIcon(content, state, id, at, 1);
       if (icon !== undefined) {
         view.face = { object: icon, y: at.y };
       }
@@ -1599,7 +1592,7 @@ export class StartScene extends Scene {
   // in the manifest.
   private addGearIcon(
     parent: GameObjects.Container,
-    tile: ItemTile | TileState,
+    state: TileState,
     gear: GearId,
     at: { x: number; y: number },
     scale: number,
@@ -1607,11 +1600,10 @@ export class StartScene extends Scene {
     const { x, y } = at;
     const key = gearIconKey(gear);
     if (this.textures.exists(key)) {
-      const shown =
-        typeof tile === "string"
-          ? tileTextureKey(this, tile, key)
-          : artTextureKey(this, itemTileLook(tile).art, key);
-      const icon = this.add.image(x, y, shown).setOrigin(0).setScale(scale);
+      const icon = this.add
+        .image(x, y, tileTextureKey(this, state, key))
+        .setOrigin(0)
+        .setScale(scale);
       parent.add(icon);
       return icon;
     }
