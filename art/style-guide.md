@@ -93,7 +93,7 @@ Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the ne
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                          |
 | tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                              |
 | tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                          |
-| `ui-difficulty` on cream       | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim                                  |
+| `ui-difficulty` on cream       | 3.2+  | Filled paws plum-outlined (9.42); hollow paws a clay rim (3.2)                          |
 | `ui-zone-pips` on cream        | 3.0+  | `todo` dashed; `<zone>` and `<zone>-done` rimmed darker than their well; `-done` ticked |
 | white on darkBrown             | 8.48  | Filled page dot                                                                         |
 | white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                            |

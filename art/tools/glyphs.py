@@ -33,7 +33,8 @@ The upgrade and gear ids are the data ids in kebab case.
 
 Sprite: ui-difficulty (55x10; tags 1 to 5), a zone's difficulty under its name on a fork's path
 card: that many filled paws out of five, 11px apart. A filled paw is amber in a plum outline; a
-hollow one is only a faint tan rim, so the filled paws carry the count on the card's cream body.
+hollow one is a clay rim, 3.2:1 on the card's cream body, so all five slots show and the filled
+paws carry the count.
 
 Usage:
   glyphs.py preview OUT.png   every icon on the UI's paper, panel, wood and ink colours, then
@@ -911,8 +912,8 @@ PAW_PRINT = ("..ff.ff..", "..ff.ff..", "ff.....ff", "ff.....ff", "...fff...", ".
 
 def paw(g, x0, filled):
     """One 11x10 paw at x0: filled is amber, shaded orange along the pad's foot, outlined in plum by
-    hand; hollow is only a tan rim with no outline, so the empty slots recede and the count reads
-    from the filled paws' silhouettes."""
+    hand; hollow is a clay rim with no outline, 3.2:1 on cream, so every empty slot shows but stays
+    lighter than a filled paw."""
     cells = {(x, y) for y, row in enumerate(PAW_PRINT) for x, ch in enumerate(row) if ch == "f"}
     sides = ((0, -1), (0, 1), (-1, 0), (1, 0))
     for x, y in cells:
@@ -924,12 +925,12 @@ def paw(g, x0, filled):
         if filled:
             g.p(x0 + 1 + x, 1 + y, "orange" if y == 7 else "amber")
         elif rim:
-            g.p(x0 + 1 + x, 1 + y, "tan")
+            g.p(x0 + 1 + x, 1 + y, "clay")
 
 
 def difficulty(n):
     """55x10: n filled paws, then hollow ones, out of five. The filled paw's plum outline holds 9.4:1
-    on cream; the hollow tan rim is a faint slot marker."""
+    on cream; the hollow clay rim holds 3.2:1."""
     g = Grid(55, 10)
     for i in range(5):
         paw(g, i * 11, i < n)
