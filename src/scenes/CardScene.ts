@@ -60,6 +60,7 @@ import {
 import { addRampDim } from "../ui/phaser/rampDim";
 import { DISABLED_COLORS, GREYED } from "../ui/selection";
 import { addCharm, addStruck, struckWidth } from "./buffCharm";
+import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
@@ -245,10 +246,7 @@ export class CardScene extends Scene {
         this.pressed = index;
         this.drawOutline();
         if (index === undefined) {
-          this.hold = undefined;
-          this.enlarged.forEach((part) => part.destroy());
-          this.enlarged = [];
-          this.showRow(true);
+          this.shrink();
         }
       },
       onTap: (index) => this.choose(index),
@@ -260,6 +258,22 @@ export class CardScene extends Scene {
         this.choose(number - 1);
       }
     });
+    // The pause menu pauses the cards under it and takes the release of a press under way, so
+    // the press is dropped: it picks nothing and enlarges nothing once the cards resume.
+    onSceneEvent(this, this.events, "pause", () => {
+      this.presses?.cancel();
+      this.pressed = undefined;
+      this.drawOutline();
+      this.shrink();
+    });
+  }
+
+  // Ends a hold: the enlarged card goes and the row shows again.
+  private shrink(): void {
+    this.hold = undefined;
+    this.enlarged.forEach((part) => part.destroy());
+    this.enlarged = [];
+    this.showRow(true);
   }
 
   override update(): void {
