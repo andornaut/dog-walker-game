@@ -16,7 +16,7 @@ import { seededRandom } from "../lib/random";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { plannerStreams } from "../testing/movers";
-import { testPack } from "../testing/packGeometry";
+import { TEST_ROAD_GEOMETRY } from "../testing/packGeometry";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { laneControlIn } from "./laneControl";
@@ -32,15 +32,7 @@ import {
   pullWalk,
   stepPulls,
 } from "./pulls";
-import {
-  planZone,
-  type RoadGeometry,
-  startRoad,
-  steerWalk,
-  stepWalk,
-  type Walk,
-  type WalkItem,
-} from "./walk";
+import { planZone, startRoad, steerWalk, stepWalk, type Walk, type WalkItem } from "./walk";
 
 const data = {
   debuffs: DEBUFFS,
@@ -73,16 +65,7 @@ const data = {
   upgrades: UPGRADES,
   world: WORLD,
 };
-const geometry: RoadGeometry = {
-  cell: { inset: 12, length: 56 },
-  itemHeights: { lucky: 20, tip: 12, treat: 12 },
-  laneCount: 5,
-  ...testPack(634),
-  roadBottom: 640,
-  roadTop: 40,
-  sightLength: 514,
-  tallestPackBand: 76,
-};
+const geometry = TEST_ROAD_GEOMETRY;
 const FRAME = 1 / 60;
 const GOOD_LEASH: Modifier & { source: { kind: "upgrade"; upgrade: "goodLeash" } } = {
   by: "goodLeashSquirrelPull",

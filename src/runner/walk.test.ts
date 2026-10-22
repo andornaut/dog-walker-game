@@ -54,7 +54,7 @@ import { type ModifierSource, newRun, type PackDogs, type RunState } from "../st
 import { packOf, runFactsFor } from "../testing/achievements";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
-import { testPack } from "../testing/packGeometry";
+import { TEST_ROAD_GEOMETRY } from "../testing/packGeometry";
 import { activeModifier, heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -387,16 +387,7 @@ function expectCapsOnScreen(movers: readonly { distance: number; mover: MoverPat
     }
   }
 }
-const geometry: RoadGeometry = {
-  cell: { inset: 12, length: 56 },
-  itemHeights: { lucky: 20, tip: 12, treat: 12 },
-  laneCount: 5,
-  ...testPack(634),
-  roadBottom: 640,
-  roadTop: 40,
-  sightLength: 514,
-  tallestPackBand: 76,
-};
+const geometry = TEST_ROAD_GEOMETRY;
 
 const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
   road: { ...startRoad(5), items, nextItemId: items.length },

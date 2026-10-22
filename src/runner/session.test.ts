@@ -8,7 +8,7 @@ import { cardFor, openCard } from "../rules/choices";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { type CardSource, newRun, type PackDogs } from "../state/runState";
-import { testPack } from "../testing/packGeometry";
+import { TEST_ROAD_GEOMETRY } from "../testing/packGeometry";
 import { STEP_SECONDS } from "./fixedStep";
 import { laneControlIn } from "./laneControl";
 import { stillInLane } from "./laneMotion";
@@ -27,21 +27,11 @@ import {
   startSession,
   stepSession,
 } from "./session";
-import { itemHeight, type RoadGeometry, startRoad, type WalkItem, zoneLength } from "./walk";
+import { itemHeight, startRoad, type WalkItem, zoneLength } from "./walk";
 
 const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
 const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encounter" };
-const GEOMETRY: RoadGeometry = {
-  cell: { inset: 12, length: 56 },
-  itemHeights: { lucky: 20, tip: 12, treat: 12 },
-  laneCount: 5,
-  ...testPack(634),
-  roadBottom: 640,
-  roadTop: 40,
-  sightLength: 514,
-  tallestPackBand: 76,
-};
-const geometry = () => GEOMETRY;
+const geometry = () => TEST_ROAD_GEOMETRY;
 const FIRING_SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");
 
 function started(seed = 1): Session {
@@ -199,7 +189,7 @@ describe("a strain in the session", () => {
       ["cancels the pull on a press toward the edge from the left edge lane", 0, -1, true],
       [
         "cancels the pull on a press toward the edge from the right edge lane",
-        GEOMETRY.laneCount - 1,
+        TEST_ROAD_GEOMETRY.laneCount - 1,
         1,
         true,
       ],
@@ -207,7 +197,7 @@ describe("a strain in the session", () => {
       ["keeps the pull on a press toward the squirrel from the left edge lane", 0, 1, false],
       [
         "keeps the pull on a press toward the squirrel from the right edge lane",
-        GEOMETRY.laneCount - 1,
+        TEST_ROAD_GEOMETRY.laneCount - 1,
         -1,
         false,
       ],

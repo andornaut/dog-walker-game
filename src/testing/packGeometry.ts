@@ -32,3 +32,15 @@ export function testPack(
     packParts: { dogs: parts.dogs.map(along), outline, walker: along(parts.walker) },
   };
 }
+
+// A flat five-lane test road with the test pack on it.
+export const TEST_ROAD_GEOMETRY: RoadGeometry = {
+  cell: { inset: 12, length: 56 },
+  itemHeights: { lucky: 20, tip: 12, treat: 12 },
+  laneCount: 5,
+  ...testPack(634),
+  roadBottom: 640,
+  roadTop: 40,
+  sightLength: 514,
+  tallestPackBand: 76,
+};
