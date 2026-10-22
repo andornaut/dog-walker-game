@@ -22,7 +22,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   car: {
-    movement: { factor: 1.96, kind: "inLane" },
+    movement: { factor: 2.3, kind: "inLane" },
     name: "Car",
     shape: { lanes: 1, rows: 3 },
   },
@@ -34,12 +34,12 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   cyclist: {
-    movement: { factor: 1.84, kind: "inLane" },
+    movement: { factor: 2.0, kind: "inLane" },
     name: "Cyclist",
     shape: { lanes: 1, rows: 1 },
   },
   deliveryTruck: {
-    movement: { factor: 1.32, kind: "inLane" },
+    movement: { factor: 1.6, kind: "inLane" },
     name: "Delivery truck",
     shape: { lanes: 1, rows: 3 },
   },
@@ -101,7 +101,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   scooter: {
-    movement: { factor: 1.73, kind: "inLane" },
+    movement: { factor: 2.0, kind: "inLane" },
     name: "Scooter",
     shape: { lanes: 1, rows: 1 },
   },

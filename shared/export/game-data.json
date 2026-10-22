@@ -933,7 +933,7 @@
     {
       "id": "car",
       "movement": {
-        "factor": 1.96,
+        "factor": 2.3,
         "kind": "inLane"
       },
       "name": "Car",
@@ -983,7 +983,7 @@
     {
       "id": "cyclist",
       "movement": {
-        "factor": 1.84,
+        "factor": 2,
         "kind": "inLane"
       },
       "name": "Cyclist",
@@ -996,7 +996,7 @@
     {
       "id": "deliveryTruck",
       "movement": {
-        "factor": 1.32,
+        "factor": 1.6,
         "kind": "inLane"
       },
       "name": "Delivery truck",
@@ -1188,7 +1188,7 @@
     {
       "id": "scooter",
       "movement": {
-        "factor": 1.73,
+        "factor": 2,
         "kind": "inLane"
       },
       "name": "Scooter",
@@ -1244,10 +1244,10 @@
       "loadoutMax": 1,
       "longReachLanes": 1,
       "luckyEncountersPerZone": 1,
-      "maxDartMovers": 4,
-      "maxMovers": 6,
+      "maxDartMovers": 5,
+      "maxMovers": 8,
       "maxSlowVehicles": 3,
-      "minorObstaclesFirstZone": 42,
+      "minorObstaclesFirstZone": 48,
       "minorObstaclesGainPerZone": 0,
       "obstaclesFirstZone": 19,
       "obstaclesGainPerZone": 2,
