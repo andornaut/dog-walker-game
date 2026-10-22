@@ -56,6 +56,14 @@ export function wrapWords(
   return line === "" ? lines : [...lines, line];
 }
 
+// Text split into its sentences, at the spaces after a ".", "!" or "?".
+export function sentences(text: string): string[] {
+  return text
+    .trim()
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => sentence !== "");
+}
+
 function isTable(entry: FieldTable | readonly string[] | undefined): entry is FieldTable {
   return entry !== undefined && !Array.isArray(entry);
 }

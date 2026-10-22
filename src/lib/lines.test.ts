@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type FieldTable, fillLine, strayNames, wrapWords } from "./lines";
+import { type FieldTable, fillLine, sentences, strayNames, wrapWords } from "./lines";
 
 describe("strayNames", () => {
   it("reports each name a line uses that its table does not list", () => {
@@ -26,6 +26,21 @@ describe("fillLine", () => {
     expect(fillLine(table, { line: "{owner}, {owner}!" }, "line", { owner: "Rosa" })).toBe(
       "Rosa, Rosa!",
     );
+  });
+});
+
+describe("sentences", () => {
+  it.each<[string, string, string[]]>([
+    [
+      "splits at each sentence's end",
+      "Ends here. Then this! Why?",
+      ["Ends here.", "Then this!", "Why?"],
+    ],
+    ["keeps one sentence whole", "One sentence, no break", ["One sentence, no break"]],
+    ["keeps a mark inside a word", "Cash is $1.50 now.", ["Cash is $1.50 now."]],
+    ["gives empty text no sentences", " ", []],
+  ])("%s", (_name, text, expected) => {
+    expect(sentences(text)).toEqual(expected);
   });
 });
 

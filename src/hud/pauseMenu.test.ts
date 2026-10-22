@@ -5,13 +5,12 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { dollarText } from "../home/home";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
-import { fillNames, wrapWords } from "../lib/lines";
+import { fillNames, sentences, wrapWords } from "../lib/lines";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
-import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import {
   homeQuestionLayout,
   NOTE_PLATE,
@@ -83,16 +82,16 @@ describe("the Home question's panel", () => {
   });
 });
 
-// The pause menu's own note fits at 2x onto the lines its plate is laid out for, in a panel
-// inside the band and road, the last line's lowest ink inside the plate.
+// The pause menu's own note, a sentence a line, wraps at 2x onto the lines its plate is laid
+// out for, in a panel inside the band and road, the last line's lowest ink inside the plate.
 describe("the pause menu's note", () => {
-  it("fits at 2x onto its plate's lines", () => {
+  it("sets each sentence on a line of its plate", () => {
     const room = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
-    const note = gameData.menuText.pause.note;
-    const fitted = fitInFont("font-body", WRAPPING_TEXT_FIT_STYLES, room, note);
-    expect(fitted.style.scale).toBe(NOTE_PLATE.scale);
-    expect(fitted.widest).toBeLessThanOrEqual(room);
-    expect(fitted.lines.length).toBeLessThanOrEqual(PAUSE_NOTE_LINES);
+    const said = sentences(gameData.menuText.pause.note);
+    const lines = said.flatMap((sentence) => wrapWords(bodyWidth, room, sentence));
+    expect(lines).toEqual(said);
+    expect(lines.filter((line) => bodyWidth(line) > room)).toEqual([]);
+    expect(lines.length).toBeLessThanOrEqual(PAUSE_NOTE_LINES);
     const parts = { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: PAUSE_NOTE_LINES };
     const { notePlate, panel } = pauseMenuLayout(BODY, walkView, parts);
     expect(panel.y + panel.height).toBeLessThanOrEqual(walkView.y + walkView.height);
