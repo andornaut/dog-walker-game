@@ -1,4 +1,5 @@
 import type { DogId } from "../data/types";
+import { WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
@@ -19,6 +20,14 @@ const TOP_BAR_RULE = 2;
 const TOP_BAR_MID = (TOP_BAR_HEIGHT - TOP_BAR_RULE) / 2;
 const TOP_BAR_FACE = 20;
 const TOP_BAR_FACE_Y = TOP_BAR_MID - TOP_BAR_FACE / 2;
+// The top bar's button in the walk bar's walkId column, its hit area from the bar's top.
+function topBarButton(walkId: WalkBarButtonId) {
+  const { faceX, hitWidth, hitX } = WALK_BAR.buttons[walkId];
+  return {
+    face: { x: faceX, y: TOP_BAR_FACE_Y },
+    hit: { height: 44, width: hitWidth, x: hitX, y: 0 },
+  } as const;
+}
 
 // The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
 const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
@@ -145,10 +154,10 @@ export const HOME_LAYOUT = {
   // Settings, under the walk bar's last four (its Help, Sound, Settings and Pause). Each is its
   // ui-icon-button face and its 34x44 hit area from the bar's top, the walk bar's hit columns,
   // side by side to the screen's edge with each face centred in its hit.
-  help: { face: { x: 265, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 258, y: 0 } },
-  logbook: { face: { x: 231, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 224, y: 0 } },
+  help: topBarButton("sound"),
+  logbook: topBarButton("help"),
   logo: { x: 6, y: 146 },
-  mute: { face: { x: 299, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 292, y: 0 } },
+  mute: topBarButton("settings"),
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -193,10 +202,7 @@ export const HOME_LAYOUT = {
     pocket: POCKET_SECTION,
     walker: WALKER_SECTION,
   },
-  settings: {
-    face: { x: 333, y: TOP_BAR_FACE_Y },
-    hit: { height: 44, width: 34, x: 326, y: 0 },
-  },
+  settings: topBarButton("pause"),
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
   // of 2x body text a line of the font apart, padX in from its sides, the first line's
   // capitals padTop under its top and the last line's lowest ink padBottom over its bottom. It
@@ -246,7 +252,7 @@ export const HOME_LAYOUT = {
   topBar: {
     bank: {
       capsY: { 2: 14, 3: 11 },
-      ink: { left: 5, right: 73 },
+      ink: WALK_BAR.cash.ink,
       scales: [3, 2],
     },
     faceSize: TOP_BAR_FACE,
@@ -311,12 +317,8 @@ export function bankFit(
   return { scale: scales.at(-1) ?? scales[0], text: texts[texts.length - 1] ?? "" };
 }
 
-// The bank's first ink column for ink inkWidth wide on screen: centred across its ink columns,
-// a half pixel rounded left.
-export function bankLeft(inkWidth: number): number {
-  const { ink } = HOME_LAYOUT.topBar.bank;
-  return Math.floor((ink.left + ink.right) / 2 - (inkWidth - 1) / 2);
-}
+// The bank's first ink column, centred across the ink columns it shares with the walk bar's cash.
+export { cashLeft as bankLeft } from "../hud/walkHud";
 
 // How wide a line of the walker's speech may be, as a label measures it: a bubble that wide
 // fits between the screen's margin and the Pet shop's board, so it never reaches the board.

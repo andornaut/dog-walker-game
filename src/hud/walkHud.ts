@@ -17,6 +17,9 @@ import { heartRows } from "./hudView";
 export const WALK_BAR_BUTTONS = ["home", "help", "sound", "settings", "pause"] as const;
 export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 
+// The cash well's ink columns, which the home top bar's bank well shares.
+const CASH_INK = { left: 5, right: 73 } as const;
+
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
 // this table. buttons: each button's face x and its hit area's x and width, the hit areas the
 // bar's full height and minHitWidth wide or more (narrower than a 44px square, so five fit beside
@@ -41,7 +44,7 @@ export const WALK_BAR = {
   } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
   cash: {
     capsBottom: 30,
-    ink: { left: 5, right: 73 },
+    ink: CASH_INK,
     room: 69,
     scales: [3, 2, 1],
     well: { height: 37, width: 70, x: 5, y: 5 },
@@ -122,11 +125,10 @@ export function cashScale(widthAt1x: number): number {
   return scales.find((scale) => widthAt1x * scale <= room) ?? scales[scales.length - 1] ?? 1;
 }
 
-// The cash's first ink column for ink inkWidth wide on screen: centred across the well's ink,
-// a half pixel rounded left.
+// The first ink column of the cash, or the home top bar's bank, for ink inkWidth wide on
+// screen: centred across the well's ink, a half pixel rounded left.
 export function cashLeft(inkWidth: number): number {
-  const { ink } = WALK_BAR.cash;
-  return Math.floor((ink.left + ink.right) / 2 - (inkWidth - 1) / 2);
+  return Math.floor((CASH_INK.left + CASH_INK.right) / 2 - (inkWidth - 1) / 2);
 }
 
 // The top of the cash's capitals at scale, so their bottom row is the same at every scale.
