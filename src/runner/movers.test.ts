@@ -996,8 +996,10 @@ describe("moverPlacements", () => {
     const draws = {
       count: 0,
       delays: [0, 0, 0] as const,
+      lengths: [0.5, 0.5, 0.5, 0.5],
       share: 0,
       shy: 0.999999,
+      side: 0,
       speed: 0.5,
       start: 0,
       tilt: 0,
@@ -1068,8 +1070,10 @@ describe("moverPlacements", () => {
       const [placement] = moverPlacements(geometry, spec(motion), {
         count: 0,
         delays: [0, 0, 0],
+        lengths: [0.5, 0.5, 0.5, 0.5],
         share: 0,
         shy: 0.999999,
+        side: 0,
         speed: 0.5,
         start: 0,
         tilt: 0,
