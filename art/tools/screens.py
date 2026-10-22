@@ -838,10 +838,11 @@ def end():
     for x in (150, 210):
         bd.gas_lamp(strip, x, 144)
     cv.paste(strip.img, 0, END_STREET)
-    # Kensington Market's brick road, its top rows under the button
+    # Kensington Market's brick road, its top rows under the button. The tile's lane dashes (x 64k-1) fall
+    # under the button or off the screen's right edge, so none shows beside it.
     tile = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
     cv.img.paste(tile, (0, END_STREET + 150))
-    cv.img.paste(tile, (280, END_STREET + 150))
+    cv.img.paste(tile, (W - 63, END_STREET + 150))
     return cv
 
 
