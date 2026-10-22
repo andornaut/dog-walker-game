@@ -122,10 +122,6 @@ export const STRIP = { height: 64, width: SCREEN_CONFIG.roadWidth } as const;
 // A start strip's far rows are its zone's road; the rest, a cross street, then the previous
 // zone's road below it.
 export const START_STRIP_ZONE_ROWS = 20;
-// Rough patches are drawn in the lawn's mark colour, from blocks of road PATCH_BLOCK long
-// whose patches reach PATCH_REACH either side.
-const PATCH_BLOCK = ROUGH_PATCH_BLOCK;
-const PATCH_REACH = ROUGH_PATCH_REACH;
 // Rows covering more than this much road per strip row step down a level.
 const LEVEL_SPAN = 2;
 // A run down a strip column at least this long is a line along the road.
@@ -408,7 +404,7 @@ function vergeOf(raster: RoadRaster, zone: ZoneId): Uint32Array {
   if (drawn !== undefined) {
     return drawn;
   }
-  const verge = VERGES[zone];
+  const verge = vergeAt(zone);
   const { width } = raster.view;
   const pixels = new Uint32Array(width * raster.rows.length);
   raster.rows.forEach((row, y) => {
@@ -761,8 +757,9 @@ function drawPatches(
 ): void {
   const { centerX, view } = raster;
   const { patchWord } = planOf(verge);
-  const first = Math.floor((z - PATCH_REACH) / PATCH_BLOCK);
-  const last = Math.floor((z + PATCH_REACH) / PATCH_BLOCK);
+  // The blocks whose patches reach z.
+  const first = Math.floor((z - ROUGH_PATCH_REACH) / ROUGH_PATCH_BLOCK);
+  const last = Math.floor((z + ROUGH_PATCH_REACH) / ROUGH_PATCH_BLOCK);
   for (let block = first; block <= last; block++) {
     for (const patch of cached(raster.patches, block, roughPatches)) {
       const along = (z - patch.z) / patch.rz;
