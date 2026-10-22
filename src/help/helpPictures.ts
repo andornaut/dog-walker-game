@@ -209,6 +209,7 @@ function lanes(data: GameData): HelpPicture {
         lanesPerPixel: LANE_COUNT / SCREEN.road.width,
         motion: "cross",
         movement: "dart",
+        stopAfter: null,
         tilt: 0,
         turnAfter: null,
         warning: 1,

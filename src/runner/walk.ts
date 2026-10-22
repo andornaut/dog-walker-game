@@ -489,6 +489,11 @@ export function moverSpec(
         read(tuning, "multipliers", "dartStartRoadShareMin"),
         read(tuning, "multipliers", "dartStartRoadShareMax"),
       ],
+      stopLanes: {
+        max: read(tuning, "counts", "dartStopLanesMax"),
+        min: read(tuning, "counts", "dartStopLanesMin"),
+      },
+      stopShare: movement.stopShare,
       tilt: [movement.tilt.min, movement.tilt.max],
       turnAtShare: [
         read(tuning, "multipliers", "dartTurnAtShareMin"),

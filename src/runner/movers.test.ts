@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { TUNING } from "../data/tuning";
 import { read } from "../rules/units";
 import { plannerStreams } from "../testing/movers";
 import {
+  dartOutcome,
   drawMover,
   drawnCount,
   facesLeft,
@@ -45,16 +47,25 @@ const geometry: MoverGeometry = {
   sightLength: 400,
   window: 100,
 };
-const crosser = (direction: 1 | -1, tilt = 0, turnAfter: number | null = null): MoverPath => ({
+const crosser = (
+  direction: 1 | -1,
+  tilt = 0,
+  turnAfter: number | null = null,
+  stopAfter: number | null = null,
+): MoverPath => ({
   direction,
   enterTravel: 300,
   lanesPerPixel: 0.02,
   motion: "cross",
   movement: "dart",
+  stopAfter,
   tilt,
   turnAfter,
   warning: 100,
 });
+// A crosser that stops once it has crossed stopAfter lanes.
+const stopper = (direction: 1 | -1, tilt: number, stopAfter: number): MoverPath =>
+  crosser(direction, tilt, null, stopAfter);
 const rider = (speedMultiplier: number): MoverPath => ({
   lane: 3,
   lanes: 1,
@@ -149,6 +160,24 @@ describe("moverPlace", () => {
         want: { lanePosition: 0.5, solid: true, travel: 600 },
       },
       {
+        name: "a crosser that stops, tilted toward the pack, before its stop",
+        path: stopper(1, 0.5, 1.5),
+        since: 150,
+        want: { lanePosition: 0.5, solid: true, travel: 375 },
+      },
+      {
+        name: "a crosser stopped in its second lane, keeping step with the road",
+        path: stopper(1, 0.5, 1.5),
+        since: 400,
+        want: { lanePosition: 1, solid: true, travel: 637.5 },
+      },
+      {
+        name: "a crosser from the right stopped in its fourth lane",
+        path: stopper(-1, 0, 3.5),
+        since: 500,
+        want: { lanePosition: 1, solid: true, travel: 700 },
+      },
+      {
         name: "a rider at the top of its lane during its cue",
         path: rider(2),
         since: 50,
@@ -218,6 +247,20 @@ describe("moverTell and inMotion", () => {
         tell: { direction: -1, kind: "across" },
       },
       { moving: true, name: "a crosser on its way", path: crosser(1), since: 100, tell: null },
+      {
+        moving: true,
+        name: "a crosser that stops, before its stop",
+        path: stopper(1, 0, 1.5),
+        since: 150,
+        tell: null,
+      },
+      {
+        moving: false,
+        name: "a crosser stopped, with no cue",
+        path: stopper(1, 0, 1.5),
+        since: 200,
+        tell: null,
+      },
       {
         moving: false,
         name: "a rider faster than the road, before it enters",
@@ -289,6 +332,12 @@ describe("facesLeft", () => {
         name: "a crosser turned back to the right",
         path: crosser(-1, 0, 2.5),
         since: 275,
+      },
+      {
+        left: true,
+        name: "a crosser stopped after running left",
+        path: stopper(-1, 0, 1.5),
+        since: 400,
       },
       { left: false, name: "a rider", path: rider(2), since: 150 },
       { left: false, name: "a hopper before its hop left", path: hopper, since: 90 },
@@ -401,6 +450,20 @@ describe("sweptLanes", () => {
         to: 550,
         want: { count: 3, first: 1 },
       },
+      {
+        from: 300,
+        name: "a crosser out to its stop in its third lane",
+        path: stopper(1, 0, 2.5),
+        to: 700,
+        want: { count: 3, first: 0 },
+      },
+      {
+        from: 500,
+        name: "a crosser stopped in its third lane",
+        path: stopper(1, 0, 2.5),
+        to: 700,
+        want: { count: 1, first: 2 },
+      },
       { from: 0, name: "a rider", path: rider(2), to: 1000, want: { count: 1, first: 3 } },
     ] satisfies readonly {
       from: number;
@@ -471,14 +534,29 @@ const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
 
 type CrossMotion = Extract<MoverSpec["motion"], { kind: "cross" }>;
 
+// How many lanes from its edge a dart that stops does so, at the low and high end of its draw.
+const STOP_LANES = {
+  max: read(TUNING, "counts", "dartStopLanesMax"),
+  min: read(TUNING, "counts", "dartStopLanesMin"),
+};
+
 // A crosser that sets off from 0.1 to 0.9 of the road ahead of the pack, leaving the pack half a
 // second after its cue, at a tilt drawn from min to max, turning back at turnBackShare of them
-// from halfway to all the way across.
-const cross = (lanesPerSecond: number, min: number, max = min, turnBackShare = 0): CrossMotion => ({
+// from halfway to all the way across, and stopping at stopShare of them after the game's
+// STOP_LANES.
+const cross = (
+  lanesPerSecond: number,
+  min: number,
+  max = min,
+  turnBackShare = 0,
+  stopShare = 0,
+): CrossMotion => ({
   kind: "cross",
   lanesPerSecond,
   reactionSeconds: 0.5,
   startRoadShare: [0.1, 0.9],
+  stopLanes: STOP_LANES,
+  stopShare,
   tilt: [min, max],
   turnAtShare: [0.5, 1],
   turnBackShare,
@@ -493,6 +571,9 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
   },
   { name: "a dart tilted away", spec: spec(cross(3, -0.3)) },
   { name: "a dart that turns back", spec: spec(cross(3, 0, 0, 1)) },
+  { name: "a dart that stops", spec: spec(cross(3, 0, 0, 0, 1)) },
+  { name: "a dart tilted toward the pack that stops", spec: spec(cross(3, 0.1, 0.7, 0, 1)) },
+  { name: "a dart tilted away that stops", spec: spec(cross(3, -0.3, -0.3, 0, 1)) },
   {
     name: "an in-lane mover faster than the road",
     spec: spec({ kind: "ride", speedMultiplier: 1.6 }),
@@ -891,6 +972,122 @@ describe("moverPlacements", () => {
       );
     }
   });
+
+  // A dart's outcome draw, at the cat's shares: below its turn-back share it turns back, below
+  // that and its stop share together it stops, and above both it crosses. A dart that stops
+  // does so in the middle of the lane it draws from STOP_LANES, from the edge it enters from,
+  // and stands there, coming down the road with it, until it scrolls off the road's bottom.
+  const CAT = MINOR_OBSTACLES.cat.movement;
+  const stopDraw = (lanes: number) =>
+    (lanes - STOP_LANES.min + 0.5) / (STOP_LANES.max - STOP_LANES.min + 1);
+  it.each([
+    { name: "crosses", stopLanes: null, turn: CAT.turnBackShare + CAT.stopShare, turnAt: 0 },
+    { name: "turns back", stopLanes: null, turn: 0, turnAt: 0 },
+    ...Array.from(
+      { length: STOP_LANES.max - STOP_LANES.min + 1 },
+      (_, i) => STOP_LANES.min + i,
+    ).map((lanes) => ({
+      name: `stops after ${lanes} lanes`,
+      stopLanes: lanes,
+      turn: CAT.turnBackShare,
+      turnAt: stopDraw(lanes),
+    })),
+  ])("draws a dart that $name", (row) => {
+    const draws = {
+      count: 0,
+      delays: [0, 0, 0] as const,
+      share: 0,
+      shy: 0.999999,
+      speed: 0.5,
+      start: 0,
+      tilt: 0,
+      turn: row.turn,
+      turnAt: row.turnAt,
+    };
+    const motion = cross(3, 0, 0, CAT.turnBackShare, CAT.stopShare);
+    const placements = moverPlacements(geometry, spec(motion), draws);
+    expect(placements).toHaveLength(2);
+    for (const { appears, path, screen } of placements) {
+      if (path.motion !== "cross") {
+        throw new Error("A dart crosses");
+      }
+      expect(path.turnAfter !== null).toBe(row.name === "turns back");
+      expect(path.stopAfter).toBe(row.stopLanes === null ? null : row.stopLanes - 0.5);
+      if (row.stopLanes === null) {
+        continue;
+      }
+      const stopped = path.warning + (row.stopLanes - 0.5) / path.lanesPerPixel;
+      const lane = path.direction === 1 ? row.stopLanes - 1 : geometry.laneCount - row.stopLanes;
+      const left = screen[1] - appears;
+      for (const since of [stopped, (stopped + left) / 2, left - 1]) {
+        const place = moverPlace(geometry.laneCount, path, since);
+        expect(place.lanePosition).toBeCloseTo(lane);
+        expect(inMotion(path, since)).toBe(false);
+        expect(moverTell(path, since)).toBeNull();
+      }
+      const gone = moverPlace(geometry.laneCount, path, left);
+      expect(gone.travel).toBeCloseTo(geometry.roadLength + geometry.cellLength);
+    }
+  });
+
+  // The outcome draw takes any shares adding up to at most 1, and a stop lane past the road's far
+  // edge makes the dart cross.
+  it.each([
+    { draw: 0.49, outcome: "turn", stopShare: 0.5, turnBackShare: 0.5 },
+    { draw: 0.5, outcome: "stop", stopShare: 0.5, turnBackShare: 0.5 },
+    { draw: 0.999999, outcome: "stop", stopShare: 0.5, turnBackShare: 0.5 },
+    { draw: 0, outcome: "stop", stopShare: 1, turnBackShare: 0 },
+    { draw: 0.999999, outcome: "cross", stopShare: 0, turnBackShare: 0 },
+  ])(
+    "draws $outcome at $draw with shares $turnBackShare to turn back and $stopShare to stop",
+    ({ draw, outcome, stopShare, turnBackShare }) => {
+      expect(dartOutcome({ stopShare, turnBackShare }, draw)).toBe(outcome);
+    },
+  );
+
+  it("crosses a dart whose stop lane is past the road's far edge", () => {
+    const far = { max: geometry.laneCount + 1, min: geometry.laneCount + 1 };
+    const placements = moverPlacements(geometry, spec({ ...cross(3, 0, 0, 0, 1), stopLanes: far }));
+    expect(placements.length).toBeGreaterThan(0);
+    for (const { path } of placements) {
+      expect(path.motion === "cross" ? path.stopAfter : NaN).toBeNull();
+    }
+  });
+
+  // Tilted away, a dart that stops comes down the road faster once stopped, so it sets off
+  // higher than one that crosses to leave the pack its reaction time: 2s at 100px/s is 200px of
+  // scroll. Crossing at tilt -0.5, that is 100px of road. Stopping a lane and a half across at 3
+  // lanes a second, it covers 25px in its first 50px of scroll, then 150px in the rest.
+  it.each([
+    { enterTravel: 300, name: "crosses", stopShare: 0 },
+    { enterTravel: 225, name: "stops", stopShare: 1 },
+  ])(
+    "starts a dart tilted away that $name no lower than leaves the pack its reaction time",
+    (row) => {
+      const motion = { ...cross(3, -0.5, -0.5, 0, row.stopShare), reactionSeconds: 2 };
+      const [placement] = moverPlacements(geometry, spec(motion), {
+        count: 0,
+        delays: [0, 0, 0],
+        share: 0,
+        shy: 0.999999,
+        speed: 0.5,
+        start: 0,
+        tilt: 0,
+        turn: 0,
+        turnAt: 0,
+      });
+      const path = placement?.path;
+      if (path?.motion !== "cross") {
+        throw new Error("A dart crosses");
+      }
+      expect(path.enterTravel).toBeCloseTo(row.enterTravel);
+      let since = path.warning;
+      while (moverPlace(geometry.laneCount, path, since).travel < geometry.sightLength) {
+        since += 1;
+      }
+      expect(since - path.warning).toBeGreaterThanOrEqual(200 - 1);
+    },
+  );
 
   it("needs an in-lane mover to move at another speed than the road", () => {
     expect(() => moverPlacements(geometry, spec({ kind: "ride", speedMultiplier: 1 }))).toThrow();

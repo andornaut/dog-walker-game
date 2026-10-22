@@ -566,6 +566,7 @@
       "kind": "obstacle",
       "movement": {
         "kind": "dart",
+        "stopShare": 0.33,
         "tilt": {
           "max": 0,
           "min": 0
@@ -725,6 +726,7 @@
       "kind": "obstacle",
       "movement": {
         "kind": "dart",
+        "stopShare": 0,
         "tilt": {
           "max": 0,
           "min": 0
@@ -904,6 +906,7 @@
       "id": "ball",
       "movement": {
         "kind": "dart",
+        "stopShare": 0,
         "tilt": {
           "max": 0,
           "min": 0
@@ -988,6 +991,7 @@
       "id": "cat",
       "movement": {
         "kind": "dart",
+        "stopShare": 0.5,
         "tilt": {
           "max": 1.6,
           "min": 0.1
@@ -1075,6 +1079,7 @@
       "id": "frisbeeDog",
       "movement": {
         "kind": "dart",
+        "stopShare": 0.2,
         "tilt": {
           "max": 1.6,
           "min": 0.1
@@ -1200,6 +1205,7 @@
       "id": "pigeons",
       "movement": {
         "kind": "dart",
+        "stopShare": 0,
         "tilt": {
           "max": -0.3,
           "min": -0.3
@@ -1247,6 +1253,7 @@
       "id": "seagull",
       "movement": {
         "kind": "dart",
+        "stopShare": 0,
         "tilt": {
           "max": 1.6,
           "min": 0.1
@@ -1290,6 +1297,8 @@
   "tuning": {
     "counts": {
       "dartLanesPerSecond": 3,
+      "dartStopLanesMax": 4,
+      "dartStopLanesMin": 2,
       "loadoutMax": 1,
       "longReachLanes": 1,
       "luckyEncountersPerZone": 1,

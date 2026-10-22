@@ -8,6 +8,10 @@ export const TUNING = {
   counts: {
     // A darting mover crosses the road this many lanes a second.
     dartLanesPerSecond: 3,
+    // A dart that stops does so in a lane drawn per dart, between these many lanes from the edge
+    // it enters from.
+    dartStopLanesMax: 4,
+    dartStopLanesMin: 2,
     loadoutMax: 1,
     // Long reach grabs tips and treats this many lanes beside the pack.
     longReachLanes: 1,

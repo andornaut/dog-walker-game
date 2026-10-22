@@ -72,6 +72,8 @@ type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 export interface Tuning {
   readonly counts: OpenGroup & {
     readonly dartLanesPerSecond: number;
+    readonly dartStopLanesMax: number;
+    readonly dartStopLanesMin: number;
     readonly maxDartMovers: number;
     readonly maxMovers: number;
     readonly maxSlowVehicles: number;
@@ -310,7 +312,12 @@ export interface Tilt {
 // for a steep enough tilt), nor so high that its cue is off the road; one that has crossed by the
 // time it reaches the pack's rows passes harmlessly. A dart turns back at turnBackShare of its
 // kind, drawn per dart: with no cue, once it has crossed multipliers.dartTurnAtShareMin to Max of
-// the road, drawn per dart, it crosses the whole road back the other way at its tilt. inLane:
+// the road, drawn per dart, it crosses the whole road back the other way at its tilt. A dart
+// stops at stopShare of its kind instead, drawn with the same draw, the two shares adding up to
+// at most 1: with no cue, it stops in the lane counts.dartStopLanesMin to Max lanes from the edge
+// it enters from, drawn per dart, and stands there, coming down the road with it, until it
+// scrolls off; past the road's far edge, it crosses instead. A dart that stops never turns
+// back. inLane:
 // down its lane at factor of the
 // road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
 // to either side or, unless sideways, a row up the road or diagonally up, landing
@@ -326,7 +333,12 @@ export interface Tilt {
 // seconds.moverMoveSecondsJitter of it either way.
 export type Movement =
   | { readonly kind: "approach"; readonly steps: MoveCount }
-  | { readonly kind: "dart"; readonly tilt: Tilt; readonly turnBackShare: number }
+  | {
+      readonly kind: "dart";
+      readonly stopShare: number;
+      readonly tilt: Tilt;
+      readonly turnBackShare: number;
+    }
   | {
       readonly kind: "hop";
       readonly most: 1 | 2;

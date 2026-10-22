@@ -63,6 +63,7 @@ import { approachOutcomes } from "./approach";
 import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import {
+  dartOutcome,
   drawMover,
   hasLeftRoad,
   hopShapes,
@@ -439,6 +440,7 @@ const crossing: MoverPath = {
   lanesPerPixel: 2.5 / 32,
   motion: "cross",
   movement: "dart",
+  stopAfter: null,
   tilt: 0,
   turnAfter: null,
   warning: 50,
@@ -1770,7 +1772,8 @@ describe("movers", { timeout: 60_000 }, () => {
   });
 
   // Movement values the planner can build: a dart is one cell, its tilt keeps it coming down
-  // the road, and an in-lane mover moves at another speed than the road.
+  // the road, its shares to turn back and to stop add up to at most 1, and an in-lane mover
+  // moves at another speed than the road.
   it("gives every obstacle a movement the planner can build", () => {
     for (const kind of OBSTACLE_KINDS) {
       const movement = movementOf(kind);
@@ -1779,12 +1782,30 @@ describe("movers", { timeout: 60_000 }, () => {
         expect(movement.tilt.min).toBeLessThanOrEqual(movement.tilt.max);
         expect(movement.tilt.min).toBeGreaterThan(-1);
         expect(movement.turnBackShare).toBeGreaterThanOrEqual(0);
-        expect(movement.turnBackShare).toBeLessThanOrEqual(1);
+        expect(movement.stopShare).toBeGreaterThanOrEqual(0);
+        expect(movement.turnBackShare + movement.stopShare).toBeLessThanOrEqual(1);
       } else if (movement?.kind === "inLane") {
         expect(movement.factor).toBeGreaterThan(0);
         expect(movement.factor).not.toBe(1);
       }
     }
+  });
+
+  // Each dart kind's outcome draw, over even steps from 0 up to 1, turns back and stops at its
+  // kind's shares, so a kind with no stop share, such as the ball, never stops.
+  it.each(
+    OBSTACLE_KINDS.flatMap((kind) => {
+      const movement = movementOf(kind);
+      return movement?.kind === "dart" ? [{ kind, movement }] : [];
+    }),
+  )("turns back and stops a $kind at its kind's shares", ({ movement }) => {
+    const steps = 1000;
+    const outcomes = Array.from({ length: steps }, (_, i) =>
+      dartOutcome(movement, (i + 0.5) / steps),
+    );
+    const share = (outcome: string) => outcomes.filter((drawn) => drawn === outcome).length / steps;
+    expect(share("turn")).toBeCloseTo(movement.turnBackShare, 2);
+    expect(share("stop")).toBeCloseTo(movement.stopShare, 2);
   });
 
   // Every zone at the fastest pace in the last zone, at the zones' shares and with every

@@ -24,7 +24,9 @@ export interface MoverStep {
 // cross (dart): its cue is at its row on the edge it enters from, and it sets off when its row
 // has travelled enterTravel down the road, coming down the road at 1 + tilt of the road's speed
 // as it crosses. With turnAfter, once it has crossed that many lanes it turns back, with no cue,
-// and crosses the whole road back the other way; with null it crosses once.
+// and crosses the whole road back the other way. With stopAfter, once it has crossed that many
+// lanes it stops, with no cue, and stands there, coming down the road with it. With both null it
+// crosses once.
 // ride (inLane): its cue is at the top of its lanes, where it enters once the cue ends, coming
 // down them at speedMultiplier of the road's speed.
 // steps (step, hop): it stands on the road from its spawn and takes each step in turn.
@@ -48,6 +50,7 @@ export type MoverPath = {
       readonly enterTravel: number;
       readonly lanesPerPixel: number;
       readonly motion: "cross";
+      readonly stopAfter: number | null;
       readonly tilt: number;
       readonly turnAfter: number | null;
     }
@@ -124,6 +127,24 @@ function crossedLanes(path: Extract<MoverPath, { motion: "cross" }>, moved: numb
   return turnAfter === null || across <= turnAfter ? across : 2 * turnAfter - across;
 }
 
+// The scroll from a crosser setting off until it stops, or Infinity for one that never stops.
+function crossingScroll(path: Extract<MoverPath, { motion: "cross" }>): number {
+  return path.stopAfter === null ? Infinity : path.stopAfter / path.lanesPerPixel;
+}
+
+// The scroll from a crosser setting off until its travel reaches travel: at 1 + tilt of the
+// road's speed while it crosses, and at the road's once it has stopped.
+function crossScrollTo(path: Extract<MoverPath, { motion: "cross" }>, travel: number): number {
+  const crossing = crossingScroll(path);
+  const rise = travel - path.enterTravel;
+  return rise <= (1 + path.tilt) * crossing ? rise / (1 + path.tilt) : rise - path.tilt * crossing;
+}
+
+// Whether a crosser that stops has stopped, since scroll after its cue appeared.
+export function hasStopped(path: MoverPath, since: number): boolean {
+  return path.motion === "cross" && since - path.warning >= crossingScroll(path);
+}
+
 // Whether a crosser has turned back, since scroll after its cue appeared.
 function turnedBack(path: Extract<MoverPath, { motion: "cross" }>, since: number): boolean {
   return (
@@ -186,10 +207,12 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
     return { lanePosition, solid: true, travel };
   }
   const start = crossStart(laneCount, path.direction);
+  const crossing = Math.min(Math.max(0, moved), crossingScroll(path));
   return {
-    lanePosition: start + path.direction * crossedLanes(path, moved),
+    lanePosition: start + path.direction * crossedLanes(path, crossing),
     solid: moved >= 0,
-    travel: path.enterTravel + moved * (moved >= 0 ? 1 + path.tilt : 1),
+    travel:
+      path.enterTravel + (moved < 0 ? moved : crossing * (1 + path.tilt) + (moved - crossing)),
   };
 }
 
@@ -218,9 +241,13 @@ export function moverTell(path: MoverPath, since: number): MoverTell | null {
   return next ? { kind: "wander" } : null;
 }
 
-// Whether a mover is moving rather than standing or showing its cue.
+// Whether a mover is moving rather than standing or showing its cue: a crosser that stops stands
+// from its stop on.
 export function inMotion(path: MoverPath, since: number): boolean {
-  if (path.motion === "cross" || path.motion === "ride") {
+  if (path.motion === "cross") {
+    return since >= path.warning && !hasStopped(path, since);
+  }
+  if (path.motion === "ride") {
     return since >= path.warning;
   }
   return path.steps.some((step) => since >= step.at && since < step.at + step.length);
@@ -241,7 +268,8 @@ export function facesLeft(path: MoverPath, since: number): boolean {
   return (sideways.at(-1)?.lanes ?? 0) < 0;
 }
 
-// A crosser has left once it is half a lane past the far edge, out of sight.
+// A crosser has left once it is half a lane past the far edge, out of sight. One that stops
+// never leaves sideways: it scrolls off the road's bottom.
 export function hasLeftRoad(laneCount: number, place: MoverPlace): boolean {
   return place.lanePosition < -1 || place.lanePosition > laneCount;
 }
@@ -360,8 +388,8 @@ function laneSpan(laneCount: number, a: number, b: number): LaneSpan {
 }
 
 // The lanes a crosser touches while its travel is from to to: its travel only moves one way and its
-// lane position one way to its turn and the other way after, so its ends and its turn bound it. A
-// rider or stepping mover's are its own.
+// lane position one way to its turn and the other way after, or to its stop and then not at all,
+// so its ends and its turn bound it. A rider or stepping mover's are its own.
 export function sweptLanes(laneCount: number, path: MoverPath, from: number, to: number): LaneSpan {
   if (path.motion === "ride") {
     return { count: path.lanes, first: path.lane };
@@ -375,8 +403,7 @@ export function sweptLanes(laneCount: number, path: MoverPath, from: number, to:
   }
   // The lane position once the crosser's travel has reached travel.
   const at = (travel: number) =>
-    moverPlace(laneCount, path, path.warning + (travel - path.enterTravel) / (1 + path.tilt))
-      .lanePosition;
+    moverPlace(laneCount, path, path.warning + crossScrollTo(path, travel)).lanePosition;
   const turn =
     path.turnAfter === null
       ? null
@@ -451,7 +478,9 @@ interface ShyHops {
 // from startRoadShare, never so low that the pack has less than reactionSeconds after its cue to
 // meet it at its drawn tilt, raised past startRoadShare where a steep tilt needs. At turnBackShare
 // of them, drawn per mover, it turns back once it has crossed a share of the road drawn per mover
-// from turnAtShare, and crosses the whole road back.
+// from turnAtShare, and crosses the whole road back. At stopShare of them, drawn with the same
+// draw (dartOutcome), it stops in the lane stopLanes lanes from the edge it enters from, drawn
+// per mover, and stands there.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
@@ -473,6 +502,8 @@ export type MoverMotion =
       readonly lanesPerSecond: number;
       readonly reactionSeconds: number;
       readonly startRoadShare: readonly [number, number];
+      readonly stopLanes: MoveCount;
+      readonly stopShare: number;
       readonly tilt: readonly [number, number];
       readonly turnAtShare: readonly [number, number];
       readonly turnBackShare: number;
@@ -506,10 +537,10 @@ export interface MoverSpec {
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
 // speed, the delay before each of its moves, the length of each of its moves, a stalker's
 // later-step road share, where a dart sets off, a dart's tilt, whether a hopper of a shy kind hops
-// shy and whether a dart of a kind that turns back does (each below its kind's share), where a
-// dart turns back, and which side a stalker's or shy hopper's one-sided reach favors (below a
-// half, the left). EVEN_DRAWS moves it at its kind's speed and move length with no delay, at the
-// near end of a range, never shy and never turning back.
+// shy (below its kind's share), a dart's outcome (dartOutcome), where a dart turns back or stops,
+// and which side a stalker's or shy hopper's one-sided reach favors (below a half, the left).
+// EVEN_DRAWS moves it at its kind's speed and move length with no delay, at the near end of a
+// range, never shy and crossing.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
@@ -542,9 +573,9 @@ const EVEN_DRAWS: MoverDraws = {
 };
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
-// delays and share; movers draws each mover's count, third delay, start, shyness, tilt, turning
-// back, turn, reach side and move lengths, and each mover's start lane, so those never shift the
-// spawns stream.
+// delays and share; movers draws each mover's count, third delay, start, shyness, tilt, outcome,
+// where it turns back or stops, reach side and move lengths, and each mover's start lane, so those
+// never shift the spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -577,6 +608,20 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
     turn,
     turnAt,
   };
+}
+
+// How a dart ends, by its outcome draw from 0 up to 1: below turnBackShare it turns back, below
+// turnBackShare + stopShare it stops, and otherwise it crosses. The shares add up to at most 1.
+export type DartOutcome = "cross" | "stop" | "turn";
+
+export function dartOutcome(
+  motion: Pick<Extract<MoverMotion, { kind: "cross" }>, "stopShare" | "turnBackShare">,
+  draw: number,
+): DartOutcome {
+  if (draw < motion.turnBackShare) {
+    return "turn";
+  }
+  return draw < motion.turnBackShare + motion.stopShare ? "stop" : "cross";
 }
 
 // The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
@@ -640,10 +685,15 @@ function crossTilts(
 // pace; with none, even at its range's lowest, it has no placement. One that turns back crosses
 // back the whole road from its turn, on the road and in sight the longer for it, keeping clear
 // every row it is level with and meeting the pack in every lane it sweeps either way while its row
-// is in the window. Tilted, its contact lasts window / (1 + tilt), which its rows cover. One that
-// has crossed the road by the time it reaches the pack's rows is harmless: it blocks no lanes and
-// stands nowhere. It keeps clear every row it is level with as it crosses, and one that meets the
-// pack also the row before its own, as a lead-in.
+// is in the window. One that stops stands in its stop lane, coming down the road with it, until it
+// scrolls off the road's bottom: it meets the pack in every lane it sweeps to its stop and in its
+// stop lane, and its start is raised as far as needed for the pack to have reactionSeconds to its
+// reaching the pack's rows, which a tilt below 0 brings sooner once it stops; past the road's far
+// edge, its stop lane is no stop, and it crosses. Its contact lasts as long as its travel takes to
+// cross the window, window / (1 + tilt) while it crosses, which its rows cover. One that has
+// crossed the road by the time it reaches the pack's rows is harmless: it blocks no lanes and
+// stands nowhere. It keeps clear every row it is level with as it crosses or stands, and one that
+// meets the pack also the row before its own, as a lead-in.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -659,43 +709,65 @@ function crossPlacements(
     throw new Error("A crosser's tilt must keep it coming down the road");
   }
   const lanesPerPixel = (motion.lanesPerSecond * speedFactor(spec.variation, draws)) / scrollSpeed;
-  const lowest = Math.max(
-    motion.startRoadShare[0],
-    (motion.reactionSeconds * scrollSpeed * (1 + tilt)) / sightLength,
-  );
+  const outcome = dartOutcome(motion, draws.turn);
+  const turnAfter =
+    outcome === "turn" ? within(motion.turnAtShare, draws.turnAt) * laneCount : null;
+  // It stops in the middle of the stopLanes-th lane from its edge, half a lane short of that many.
+  const stopLanes = drawnCount(motion.stopLanes, draws.turnAt);
+  const stopAfter = outcome === "stop" && stopLanes <= laneCount ? stopLanes - 0.5 : null;
+  // Its path but for the side it enters from, which none of the distances below depend on.
+  const along = {
+    direction: 1,
+    enterTravel: 0,
+    lanesPerPixel,
+    motion: "cross",
+    movement: spec.movement,
+    stopAfter,
+    tilt,
+    turnAfter,
+    warning,
+  } as const;
+  // The travel it comes down the road in reactionSeconds of setting off.
+  const reaction = motion.reactionSeconds * scrollSpeed;
+  const reacting =
+    stopAfter === null
+      ? reaction * (1 + tilt)
+      : Math.max(
+          reaction * (1 + tilt),
+          reaction + tilt * Math.min(reaction, crossingScroll(along)),
+        );
+  const lowest = Math.max(motion.startRoadShare[0], reacting / sightLength);
   const highest = Math.min(cueOnRoad, Math.max(motion.startRoadShare[1], lowest));
   if (highest < lowest) {
     return [];
   }
   const ahead = within([lowest, highest], draws.start) * sightLength;
   const enterTravel = sightLength - ahead;
-  const turnAfter =
-    draws.turn < motion.turnBackShare ? within(motion.turnAtShare, draws.turnAt) * laneCount : null;
+  const scrollTo = (travel: number) => crossScrollTo(along, travel - enterTravel);
   // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight:
-  // half a lane past the far edge, or past the edge it entered from once it has turned back.
-  const reaches = ahead / (1 + tilt);
-  const moving = Math.min(
-    ((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel,
-    (roadLength + cellLength - enterTravel) / (1 + tilt),
-  );
+  // half a lane past the far edge, or past the edge it entered from once it has turned back. One
+  // that stops leaves only off the road's bottom.
+  const reaches = stopAfter === null ? ahead / (1 + tilt) : scrollTo(sightLength);
+  const offRoad = scrollTo(roadLength + cellLength);
+  const moving =
+    stopAfter === null
+      ? Math.min(((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel, offRoad)
+      : offRoad;
   const appears = sightLength - warning - reaches;
-  const contact = window / (1 + tilt);
-  // The row offset it is level with, moving away from its own as it drifts against the road.
-  const level = (scroll: number) => (-tilt * (scroll - reaches)) / rowSpacing;
+  const contact =
+    stopAfter === null ? window / (1 + tilt) : scrollTo(sightLength + window) - reaches;
+  // The row offset it is level with, moving away from its own as it drifts against the road while
+  // it crosses, and keeping level with one row once it stops.
+  const drift = (scroll: number) => tilt * Math.min(scroll, crossingScroll(along));
+  const level = (scroll: number) =>
+    stopAfter === null
+      ? (-tilt * (scroll - reaches)) / rowSpacing
+      : -(drift(scroll) - drift(reaches)) / rowSpacing;
   const firstRow = Math.floor(Math.min(level(0), level(moving)) + 1e-9);
   const lastRow = Math.ceil(Math.max(level(0), level(moving)) - 1e-9);
-  const rows = rowsCovering(geometry, 1, 1 / (1 + tilt));
+  const rows = rowsCovering(geometry, 1, stopAfter === null ? 1 / (1 + tilt) : contact / window);
   return ([1, -1] as const).map((direction): MoverPlacement => {
-    const path: MoverPath = {
-      direction,
-      enterTravel,
-      lanesPerPixel,
-      motion: "cross",
-      movement: spec.movement,
-      tilt,
-      turnAfter,
-      warning,
-    };
+    const path: MoverPath = { ...along, direction, enterTravel };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
     const meets = lanes.count > 0;
     const first = meets ? Math.min(firstRow, -1) : firstRow;
