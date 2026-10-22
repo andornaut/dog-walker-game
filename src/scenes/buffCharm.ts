@@ -50,7 +50,7 @@ export function addCharm(
 }
 
 // fx-sparkle over a charm or a well whose top-left is at, drawn at scale.
-export function sparkleCharm(
+function sparkleCharm(
   scene: Scene,
   at: Point,
   depth: number,

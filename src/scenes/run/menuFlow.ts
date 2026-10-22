@@ -63,12 +63,8 @@ export class MenuFlow {
     };
   }
 
-  // Whether the zone celebration holds the walk: from the zone's end, while its fee coins fly,
-  // until it closes.
-  celebration(): boolean {
-    return this.celebrating;
-  }
-
+  // The zone celebration holds the walk from the zone's end, while its fee coins fly, until it
+  // closes.
   holdForCelebration(): void {
     this.celebrating = true;
   }
