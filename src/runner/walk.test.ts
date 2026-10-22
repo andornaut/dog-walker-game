@@ -79,7 +79,6 @@ import {
   finishZone,
   footprintOf,
   headHome,
-  hopSeconds,
   itemCategory,
   itemHeight,
   laneMoveSeconds,
@@ -1934,7 +1933,8 @@ describe("movers", { timeout: 60_000 }, () => {
         [0, WORLD.walkLength - 1].map((index) => [id, index] as const),
       )) {
         const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
-        const length = hopSeconds(tuned) * walkScrollSpeed(tuned, zoned);
+        const length =
+          read(tuned.tuning, "seconds", "moverHopSeconds") * walkScrollSpeed(tuned, zoned);
         for (const seed of [1, 2, 3]) {
           const walk = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),

@@ -170,6 +170,8 @@ export const TUNING = {
     lookAheadSeconds: 3.6,
     // A minor bump holds the road and the pack still this long.
     minorHitStopSeconds: 0.3,
+    // A hopping mover's jump lasts this long.
+    moverHopSeconds: 0.3,
     // Each step of a stepping mover takes this long.
     moverStepSeconds: 0.4,
     // Each step and hop comes up to this long after its soonest moment, drawn per move.

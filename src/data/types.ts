@@ -107,8 +107,7 @@ export interface Tuning {
     readonly hitStopSeconds: number;
     readonly lookAheadSeconds: number;
     readonly minorHitStopSeconds: number;
-    // A hopping mover's jump lasts this long; the rules' own default while it is absent.
-    readonly moverHopSeconds?: number;
+    readonly moverHopSeconds: number;
     readonly moverStepSeconds: number;
     readonly moverWarningSeconds: number;
     readonly pathReactionMargin: number;

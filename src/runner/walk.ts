@@ -6,7 +6,6 @@ import type {
   MoveCount,
   Movement,
   ObstacleEncounterId,
-  Tuning,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
@@ -38,7 +37,7 @@ import {
 } from "../rules/run";
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
-import { addCents, type Pixels, pixels, read, type Seconds, seconds } from "../rules/units";
+import { addCents, type Pixels, pixels, read } from "../rules/units";
 import { packAgility, slowestAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
@@ -477,14 +476,6 @@ function countsOf(range: MoveCount): number[] {
   return Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i);
 }
 
-// A hop lasts this long while the tuning names no seconds.moverHopSeconds.
-const DEFAULT_HOP_SECONDS = 0.3;
-
-export function hopSeconds(data: Pick<GameData, "tuning">): Seconds {
-  const tuned: Tuning["seconds"] = data.tuning.seconds;
-  return seconds(tuned.moverHopSeconds ?? DEFAULT_HOP_SECONDS);
-}
-
 // How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
 // its most, the first min from the spawns stream and any more from the movers stream; it may take
 // the first steps of them, or of their mirror image, as many as its drawn count. A hopper may make
@@ -548,7 +539,7 @@ export function moverSpec(
             },
           }
         : {}),
-      stepSeconds: hopSeconds(data),
+      stepSeconds: read(tuning, "seconds", "moverHopSeconds"),
     };
   } else {
     const { max, min } = movement.steps;
