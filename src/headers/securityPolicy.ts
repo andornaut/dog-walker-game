@@ -62,10 +62,11 @@ export const COMMON_RULE = {
 export const FILE_RULES = [
   {
     comment:
-      "Bitmap font descriptors, which are XML. Cloudflare types files by extension and serves " +
-      "an unknown one untyped, which it does not compress.",
+      "Bitmap font descriptors, which are XML: the game's hashed copies and the art gallery's. " +
+      "Cloudflare types files by extension and serves an unknown one untyped, which it does " +
+      "not compress.",
     headers: [["Content-Type", "text/xml; charset=utf-8"]] satisfies HeaderList,
-    path: "/art/fonts/*.fnt",
+    path: "/*.fnt",
   },
   {
     comment:

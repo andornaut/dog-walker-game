@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { hashedArtFileName } from "../assets/atlas/hashedArt";
 import { isHashedAssetUrl } from "../pwa/cachePolicy";
 import {
   cspHash,
@@ -96,9 +97,14 @@ describe("FILE_RULES", () => {
   const immutable = { "Cache-Control": "public, max-age=31536000, immutable" };
   const xml = { "Content-Type": "text/xml; charset=utf-8" };
 
+  const hashedArt = (path: string) => `/${hashedArtFileName(path, "Bq3x_9-Z")}`;
+
   const expected: [string, Record<string, string>][] = [
     ["/assets/play-Bq3x_9-Z.js", immutable],
     ["/assets/main-0aZ9bQ1c.css", immutable],
+    [hashedArt("atlas/run-0.png"), immutable],
+    [hashedArt("fonts/font-body.fnt"), { ...immutable, ...xml }],
+    [hashedArt("sounds/sfx-tip.ogg"), immutable],
     ["/art/fonts/font-body.fnt", xml],
     ["/art/fonts/font-body.png", {}],
     ["/art/manifest.json", {}],
@@ -114,7 +120,12 @@ describe("FILE_RULES", () => {
 
   // The service worker serves the same files cache-first, so the two must agree on which.
   it("caches a file for a year only if the service worker treats it as hashed", () => {
-    for (const path of ["/assets/play-Bq3x_9-Z.js", "/art/atlas/run-0.png", "/sw.js"]) {
+    for (const path of [
+      "/assets/play-Bq3x_9-Z.js",
+      hashedArt("atlas/run-0.png"),
+      "/art/atlas/run-0.png",
+      "/sw.js",
+    ]) {
       expect("Cache-Control" in headersAt(path), path).toBe(isHashedAssetUrl(path));
     }
   });
