@@ -28,7 +28,7 @@ const noRandom = () => 0;
 const withDebuffs = (run: RunState, ids: readonly DebuffId[]): RunState =>
   applyEffects(
     data,
-    { affected: [], random: noRandom, source: { kind: "walker", walker: run.walker } },
+    { affected: [], source: { kind: "walker", walker: run.walker } },
     ids.map((debuff) => ({ debuff, kind: "debuff" as const })),
     run,
   );

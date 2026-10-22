@@ -1198,7 +1198,7 @@ export function stepWalk(
       }
       const { resolution } = data.encounters[kind];
       if (resolution.kind === "instant" || resolution.kind === "contact") {
-        const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
+        const outcome = applyInstantEncounter(data, nextRun, kind, affected);
         nextRun = outcome.state;
         if (resolution.kind === "instant") {
           nextRun = countTally(resolution.tally, nextRun);

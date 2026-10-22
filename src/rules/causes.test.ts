@@ -46,7 +46,7 @@ const resolved = (
   state: RunState,
   affected: readonly DogId[] = [],
   source: EffectSource = skunkIgnore,
-) => only(resolveEffects(data, { affected, random: () => 0, source }, [effect], state).changes);
+) => only(resolveEffects(data, { affected, source }, [effect], state).changes);
 
 const sweetTalker = activeModifier(
   { kind: "upgrade", upgrade: "sweetTalker" },

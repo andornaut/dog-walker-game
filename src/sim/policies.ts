@@ -72,7 +72,7 @@ function previewOptions(data: ChoiceData, state: RunState, card: CardView): Opti
   return card.options
     .filter((option) => option.availability.enabled)
     .map((option) => {
-      const outcome = chooseOption(data, () => 0, state, card, option.index);
+      const outcome = chooseOption(data, state, card, option.index);
       const debuffsGot = (run: RunState) =>
         Object.values(run.debuffsGot).reduce((sum, count) => sum + count, 0);
       return {

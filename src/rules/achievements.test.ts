@@ -396,7 +396,6 @@ describe("counters", () => {
     const stinky = { debuff: "stinky", kind: "debuff" } as const;
     const context = {
       affected: [],
-      random: () => 0,
       source: { kind: "walker", walker: "casey" },
     } as const;
     const once = applyEffects(gameData, context, [stinky], testState({ koda: 5 }));

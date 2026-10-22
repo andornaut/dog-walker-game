@@ -75,9 +75,9 @@ function heartsOf(id: EncounterId): number {
 const letGo = read(TEST_TUNING, "money", "thiefLetGo");
 const high = read(TEST_TUNING, "money", "encounterHigh");
 
-function choose(state: RunState, source: CardSource, choice: Choice, random = () => 0) {
+function choose(state: RunState, source: CardSource, choice: Choice) {
   const opened = openCard(source, state);
-  return chooseOption(data, random, opened, cardFor(data, opened, source), choice);
+  return chooseOption(data, opened, cardFor(data, opened, source), choice);
 }
 
 describe("cardFor", () => {
@@ -169,7 +169,7 @@ describe("hasPlaque", () => {
 describe("applyInstantEncounter", () => {
   it("pays a lost wallet at once", () => {
     const state = testState({ koda: 5, snowball: 3 });
-    const outcome = applyInstantEncounter(data, () => 0, state, "lostWallet", ["koda", "snowball"]);
+    const outcome = applyInstantEncounter(data, state, "lostWallet", ["koda", "snowball"]);
     const keep = read(TEST_TUNING, "money", "lostWalletKeep");
     expect(outcome.moneyDelta).toBe(keep);
     expect(heartsByDog(outcome.state)).toEqual(heartsByDog(state));
@@ -181,10 +181,7 @@ describe("applyInstantEncounter", () => {
 
   it("gives the friendly neighbor's hearts to every owner", () => {
     const state = testState({ duchess: 3, koda: 3 });
-    const outcome = applyInstantEncounter(data, () => 0, state, "pettingNeighbor", [
-      "duchess",
-      "koda",
-    ]);
+    const outcome = applyInstantEncounter(data, state, "pettingNeighbor", ["duchess", "koda"]);
     expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "koda"]);
   });
 
@@ -213,21 +210,19 @@ describe("applyInstantEncounter", () => {
           hearts && now < startHearts(TEST_TUNING, [], placeInPack(state, dog), DOGS[dog]),
       );
       const caught = walking.map(([dog]) => dog);
-      const outcome = applyInstantEncounter(data, () => 0, state, id, caught);
+      const outcome = applyInstantEncounter(data, state, id, caught);
       expect(outcome.quips).toEqual(raised.map(([dog]) => ({ dog, moment: "happier" })));
     },
   );
 
   it("refuses an encounter with no effects on contact", () => {
-    expect(() =>
-      applyInstantEncounter(data, () => 0, testState({ koda: 5 }), "thief", ["koda"]),
-    ).toThrow("no effects on contact");
+    expect(() => applyInstantEncounter(data, testState({ koda: 5 }), "thief", ["koda"])).toThrow(
+      "no effects on contact",
+    );
   });
 
   it("applies a contact obstacle's effects to the pack", () => {
-    const outcome = applyInstantEncounter(data, () => 0, testState({ koda: 5 }), "puddle", [
-      "koda",
-    ]);
+    const outcome = applyInstantEncounter(data, testState({ koda: 5 }), "puddle", ["koda"]);
     const { resolution } = ENCOUNTERS.puddle;
     const debuffs = resolution.effects.flatMap((effect) =>
       effect.kind === "debuff" ? [effect.debuff] : [],
@@ -314,7 +309,7 @@ describe("chooseOption", () => {
     expect(outcome.state.phase).toEqual({ kind: "ended", reason: "noDogs" });
     const source = encounter("skunk", ["koda"]);
     const card = cardFor(data, outcome.state, source);
-    expect(() => chooseOption(data, () => 0, outcome.state, card, nose)).toThrow("ended");
+    expect(() => chooseOption(data, outcome.state, card, nose)).toThrow("ended");
   });
 
   it("makes the zone's first card free with Sweet talker, and the next one not", () => {
@@ -516,14 +511,14 @@ describe("a fork", () => {
 
   it("adds the chosen path's zone to the route, takes its upgrade and walks on, and refuses one it lacks", () => {
     const opened = openCard(source, afterZone);
-    const outcome = chooseOption(data, () => 0, opened, cardFor(data, opened, source), 2);
+    const outcome = chooseOption(data, opened, cardFor(data, opened, source), 2);
     expect(outcome.state.route).toEqual(["street", "homeStretch"]);
     expect(outcome.state.upgradesPicked).toEqual([upgrades[2]]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
     expect(outcome.moneyDelta).toBe(0);
     const card = cardFor(data, opened, source);
-    expect(() => chooseOption(data, () => 0, opened, card, 3)).toThrow(RangeError);
-    expect(() => chooseOption(data, () => 0, opened, card, "skip")).toThrow(RangeError);
+    expect(() => chooseOption(data, opened, card, 3)).toThrow(RangeError);
+    expect(() => chooseOption(data, opened, card, "skip")).toThrow(RangeError);
   });
 
   it("offers only zones the route has not walked, each with an upgrade, and only the last before it", () => {

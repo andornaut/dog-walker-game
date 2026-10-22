@@ -87,7 +87,7 @@ function runWith(
     (state, upgrade) =>
       applyEffects(
         data,
-        { affected: [], random: () => 0, source: { kind: "upgrade", upgrade } },
+        { affected: [], source: { kind: "upgrade", upgrade } },
         data.upgrades[upgrade].effects,
         state,
       ),
@@ -129,7 +129,7 @@ function optionModified(encounter: EncounterId, index: number, state: RunState):
   const opened = openCard(source, state);
   const card = cardFor(data, opened, source);
   const shown = card.options.find((option) => option.index === index)?.modified ?? [];
-  expect(chooseOption(data, () => 0, opened, card, index).modified).toEqual(shown);
+  expect(chooseOption(data, opened, card, index).modified).toEqual(shown);
   return [...shown];
 }
 

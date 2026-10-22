@@ -196,7 +196,7 @@ export function chooseCard(
     throw new Error("No card is open");
   }
   const { run } = session.walk;
-  const outcome = chooseOption(data, streams.cards, run, view, choice);
+  const outcome = chooseOption(data, run, view, choice);
   const events: SessionEvent[] = [
     { choice, kind: "chosen", outcome, timeMs: session.timeMs, view },
   ];

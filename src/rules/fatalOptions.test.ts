@@ -75,7 +75,6 @@ describe("causeLabel at a firing", () => {
       data,
       {
         affected: ["koda"],
-        random: () => 0,
         source: { encounter: "skunk", kind: "encounter", option: HOLD_YOUR_NOSE },
       },
       [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],

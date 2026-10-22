@@ -29,8 +29,6 @@ type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
 export interface EffectContext {
   // The dogs the encounter affected, such as those caught by an area roll.
   readonly affected: readonly DogId[];
-  // Returns a number from 0 (inclusive) to 1 (exclusive), like Math.random.
-  readonly random: () => number;
   // What the effects came from, named by the changes and modifiers they make.
   readonly source: EffectSource;
 }

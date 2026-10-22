@@ -291,7 +291,7 @@ export function forkCard(data: CardData, state: RunState, source: ForkSource): C
     const { duration, effects } = data.upgrades[upgrade];
     const preview = outcomeOf(
       data,
-      { affected: [], random: () => 0, source: { kind: "upgrade", upgrade } },
+      { affected: [], source: { kind: "upgrade", upgrade } },
       effects,
       state,
     );
@@ -343,12 +343,7 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
       : null;
   const skip = skipBy !== null;
   const views = options.map(({ option, source: effectSource }, index): OptionView => {
-    const preview = outcomeOf(
-      data,
-      { affected, random: () => 0, source: effectSource },
-      option.effects,
-      state,
-    );
+    const preview = outcomeOf(data, { affected, source: effectSource }, option.effects, state);
     const textContext: CardTextContext = {
       dogs: (target) => targetDogs(data, { affected }, state, target),
       forgiven: (dog) =>
@@ -466,7 +461,6 @@ export function offerFork(
 // walked.
 function takePath(
   data: CardData,
-  random: () => number,
   source: ForkSource,
   state: RunState,
   choice: Choice,
@@ -478,7 +472,7 @@ function takePath(
   }
   const outcome = outcomeOf(
     data,
-    { affected: [], random, source: { kind: "upgrade", upgrade } },
+    { affected: [], source: { kind: "upgrade", upgrade } },
     data.upgrades[upgrade].effects,
     state,
     upgrade,
@@ -491,7 +485,6 @@ function takePath(
 // next zone. Throws for a disabled option or an ended run.
 export function chooseOption(
   data: CardData,
-  random: () => number,
   state: RunState,
   card: CardView,
   choice: Choice,
@@ -500,7 +493,7 @@ export function chooseOption(
     throw new Error("The run has ended");
   }
   if (card.source.kind === "fork") {
-    return takePath(data, random, card.source, state, choice);
+    return takePath(data, card.source, state, choice);
   }
   const view = effectCard(data, state, card.source);
   if (choice === "skip") {
@@ -533,7 +526,7 @@ export function chooseOption(
   }
   const outcome = outcomeOf(
     data,
-    { affected: view.affected, random, source: content.source },
+    { affected: view.affected, source: content.source },
     content.option.effects,
     state,
   );
@@ -546,7 +539,6 @@ export function chooseOption(
 // effects on contact or an ended run.
 export function applyInstantEncounter(
   data: ChoiceData,
-  random: () => number,
   state: RunState,
   encounter: EncounterId,
   caught: readonly DogId[],
@@ -560,5 +552,5 @@ export function applyInstantEncounter(
   }
   const affected = packDogs(state).filter((dog) => caught.includes(dog));
   const source = { encounter, kind: "instant" } as const;
-  return outcomeOf(data, { affected, random, source }, resolution.effects, state);
+  return outcomeOf(data, { affected, source }, resolution.effects, state);
 }

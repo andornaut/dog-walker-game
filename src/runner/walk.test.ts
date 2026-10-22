@@ -1534,7 +1534,6 @@ describe("hit stop", () => {
       due: (frame: number, timeMs: number) => StepInput[];
     }) => {
       const rolls = seededRandom(9);
-      const cardRolls = seededRandom(10);
       let log = startInputLog(setup);
       let walk: Walk = start;
       let cardsChosen = 0;
@@ -1556,7 +1555,7 @@ describe("hit stop", () => {
           const run = openCard(source, walk.run);
           const view = cardFor(data, run, source);
           const choice = inputs.choose(view);
-          walk = { ...walk, run: chooseOption(data, cardRolls, run, view, choice).state };
+          walk = { ...walk, run: chooseOption(data, run, view, choice).state };
           log = recordInput({ choice, kind: "card", timeMs: (frame + 1) * FRAME * 1000 }, log);
           cardsChosen += 1;
         }

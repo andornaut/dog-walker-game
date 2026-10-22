@@ -17,7 +17,6 @@ const data = { debuffs: DEBUFFS, dogs: DOGS, encounters: ENCOUNTERS, tuning: TES
 const SKUNK_IGNORE: EffectSource = { encounter: "skunk", kind: "encounter", option: 2 };
 const context = (affected: readonly DogId[]): EffectContext => ({
   affected,
-  random: () => 0,
   source: SKUNK_IGNORE,
 });
 const sweetTalker = activeModifier(
