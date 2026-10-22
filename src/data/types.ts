@@ -299,34 +299,32 @@ export interface Tilt {
 
 // How an obstacle moves when it comes as a mover, its first move after a cue
 // seconds.moverWarningSeconds long and each later one with no cue, and only while the mover is
-// still ahead of the pack's rows. A stepper's or hopper's later moves run back to back. approach: steps steps toward
-// the pack, each to the spot a lane to either side, a row down or diagonally down that is nearest
-// the pack as the step is chosen, seconds.moverStepSeconds each; the first's cue
-// seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, each later
-// one, with no cue of its own, once the step before has ended and the road left between it and the
-// pack is multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across the road
-// at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile, its tilt
-// drawn per dart from its range cut to the steepest the zone's pace leaves a start for, setting
-// off multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per dart and
-// never so low that the pack has less than seconds.pathReactionMargin after its cue (above Max
-// for a steep enough tilt), nor so high that its cue is off the road; one that has crossed by the
-// time it reaches the pack's rows passes harmlessly. A dart turns back at turnBackShare of its
+// still ahead of the pack's rows. A stepper's or hopper's later moves run back to back. approach:
+// steps steps toward the pack, each to the spot a lane to either side, a row down or diagonally
+// down that is nearest the pack as the step is chosen, seconds.moverStepSeconds each; the first's
+// cue seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, each
+// later one, with no cue of its own, once the step before has ended and the road left between it
+// and the pack is multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across
+// the road at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile,
+// its tilt drawn per dart from its range cut to the steepest the zone's pace leaves a start for,
+// setting off multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per
+// dart and never so low that the pack has less than seconds.pathReactionMargin after its cue (above
+// Max for a steep enough tilt), nor so high that its cue is off the road; one that has crossed by
+// the time it reaches the pack's rows passes harmlessly. A dart turns back at turnBackShare of its
 // kind, drawn per dart: with no cue, once it has crossed multipliers.dartTurnAtShareMin to Max of
-// the road, drawn per dart, it crosses the whole road back the other way at its tilt. A dart
-// stops at stopShare of its kind instead, drawn with the same draw, the two shares adding up to
-// at most 1: with no cue, it stops in the lane counts.dartStopLanesMin to Max lanes from the edge
-// it enters from, drawn per dart, and stands there, coming down the road with it, until it
-// scrolls off; past the road's far edge, it crosses instead. A dart that stops never turns
-// back. inLane:
-// down its lane at factor of the
-// road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
-// to either side or, unless sideways, a row up the road or diagonally up, landing
-// seconds.moverHopSeconds after it leaves; a shy hopper, at probability.shyHopperShare of its
-// kind drawn per mover, instead makes each hop away from the pack, starting once the road between
-// it and the pack's rows is down to seconds.shyHopNearSeconds of the road's travel, ending in
-// neither the pack's lane nor one it is moving into, no nearer it across the road, and at most
-// most rows up the road. step: steps spots, each a lane to either side or a row
-// toward or away, seconds.moverStepSeconds each.
+// the road, drawn per dart, it crosses the whole road back the other way at its tilt. A dart stops
+// at stopShare of its kind instead, drawn with the same draw, the two shares adding up to at most
+// 1: with no cue, it stops in the lane counts.dartStopLanesMin to Max lanes from the edge it enters
+// from, drawn per dart, and stands there, coming down the road with it, until it scrolls off; past
+// the road's far edge, it crosses instead. A dart that stops never turns back. inLane: down its
+// lane at factor of the road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each
+// of 1 to most spots one way, lanes to either side or, unless sideways, a row up the road or
+// diagonally up, landing seconds.moverHopSeconds after it leaves; a shy hopper, at
+// probability.shyHopperShare of its kind drawn per mover, instead makes each hop away from the
+// pack, starting once the road between it and the pack's rows is down to seconds.shyHopNearSeconds
+// of the road's travel, ending in neither the pack's lane nor one it is moving into, no nearer it
+// across the road, and at most most rows up the road. step: steps spots, each a lane to either side
+// or a row toward or away, seconds.moverStepSeconds each.
 // Each in-lane mover's speed varies by up to multipliers.moverSpeedJitter either way and each
 // dart's by up to multipliers.dartSpeedJitter, each step and hop comes up to
 // seconds.moverTimingJitter late, and each step's and hop's length varies by up to
