@@ -27,6 +27,7 @@ export const RUN_TEXT = {
   },
   comicWords: { bark: "WOOF!", dodge: "DODGE!" },
   dodge: "Dodge!",
+  empty: "Empty",
   explain: {
     debuffStatus: "Wears off on its own",
     dogHearts: "{hearts}/{max}♥ now",
@@ -47,6 +48,7 @@ export const RUN_TEXT = {
     title: "Head home?",
     zonesLeft: "Neighborhoods left: {count}",
   },
+  lead: "Lead",
   lowHearts: "{owner} has 1♥ left!",
   newWalker: {
     button: "Welcome!",

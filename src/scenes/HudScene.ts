@@ -447,7 +447,7 @@ export class HudScene extends Scene {
     const { empty, fired, lead, name, owner } = DOG_CARD;
     const leadTag = this.textures.exists("ui-lead-tag")
       ? this.add.image(x + lead.x, y + lead.y, "ui-lead-tag").setOrigin(0)
-      : addPixelText(this, x + lead.x + 2, y + lead.y + 3, "Lead", {
+      : addPixelText(this, x + lead.x + 2, y + lead.y + 3, gameData.runText.lead, {
           color: PALETTE.amber,
           font: "title",
         });
@@ -683,7 +683,7 @@ export class HudScene extends Scene {
         return;
       }
       drawDashedRect(g, PALETTE.tan, { ...rect, width: rect.width - 2, x: rect.x + 1 });
-      setPixelText(view.empty, "Empty");
+      setPixelText(view.empty, gameData.runText.empty);
       return;
     }
     setPixelText(view.empty, "");

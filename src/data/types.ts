@@ -690,6 +690,8 @@ export interface RunText {
   readonly comicWords: { readonly bark: string; readonly dodge: string };
   // Over a dog that dodged a hit, with reduced motion or while fx-dodge is missing.
   readonly dodge: string;
+  // A dog card slot the player owns with no dog in it.
+  readonly empty: string;
   // The walk's lines on the detail card a still press held on the walk HUD opens, which shows a
   // dog card and a gear or walker-perk icon as the home screen's Details do. debuffStatus: a
   // debuff bar's status, under its stake (its {seconds} the seconds it has left). dogHearts: a
@@ -723,6 +725,8 @@ export interface RunText {
     readonly title: string;
     readonly zonesLeft: string;
   };
+  // The front dog's card tag while ui-lead-tag is missing.
+  readonly lead: string;
   readonly lowHearts: string;
   // A debuff's length in seconds on a struck chip, such as Calm voice's "8s" then "4s".
   readonly seconds: string;
