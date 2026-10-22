@@ -39,7 +39,7 @@
     <style>
       /* Project home: the logo on Yonge Street's slate sky, the pitch and Play, then five
          highlights, each a cream chrome card with a navy band, game art at an integer scale and a
-         line or two. Colours are from the house palette. */
+         line or two. Colors are from the house palette. */
       :root {
         --amber: #feae34;
         --cream: #ead4aa;
@@ -83,7 +83,7 @@
       }
       /* The sky band: its slate top row runs on above the backdrop, which sits at its foot. The
          band is the backdrop's width, so on a 360px phone its margins pull it over the gutters.
-         The highlights centre the same way. */
+         The highlights center the same way. */
       .sky {
         display: grid;
         justify-items: center;
@@ -159,13 +159,16 @@
         outline-offset: 6px;
       }
       /* A highlight: the cream chrome (ink outer line, plum inner line, tan lip on the bottom
-         and right, corners cut 1px), a navy band with a display heading, then the art. */
+         and right, corners cut 1px), a navy band with a display heading, then the art. On a
+         phone it is 366px wide, a 360px screenshot inside 2px of chrome on the left and 4px on
+         the right, or the viewport's width when narrower. */
       .hl {
-        --w: min(350px, calc(100vw - 10px));
+        --w: min(366px, 100vw);
         width: var(--w);
         margin-block: 0;
         margin-inline: calc((100% - var(--w)) / 2);
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         background: var(--cream);
         color: var(--plum);
         border: 1px solid var(--ink);
@@ -211,11 +214,14 @@
         margin: 0;
         padding: 12px 14px 14px;
       }
-      /* A 360x560 game screenshot at 1x over a plum line, cropped from the centre on phones. */
+      /* A 360x560 game screenshot at 1x over a plum line. On a viewport narrower than the
+         highlight's chrome it runs into the chrome, centered, so it stays at 1x down to 360px;
+         below that it scales down to the viewport's width. */
       .shot {
-        width: 100%;
-        height: 560px;
-        object-fit: none;
+        width: min(360px, 100vw);
+        height: auto;
+        margin-left: clamp(-2px, (100vw - 360px) / 2 - 2px, 0px);
+        object-fit: contain;
         background: var(--ink);
         border-bottom: 1px solid var(--plum);
       }
@@ -294,6 +300,11 @@
         }
         .hl {
           --w: 694px;
+        }
+        .shot {
+          width: 100%;
+          height: 560px;
+          margin-left: 0;
         }
         .hl h2 {
           padding: 14px 16px 16px;

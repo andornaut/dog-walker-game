@@ -110,3 +110,39 @@ describe("the home page's sky band", () => {
     });
   });
 });
+
+// On a phone, each screenshot shows at 1x inside the highlight's chrome, and is sized to its PNG.
+describe("the home page's screenshots", () => {
+  it("are their PNGs' size, and a phone's highlight is one wide plus its chrome", async () => {
+    const html = await readFile(HOME_PAGE, "utf8");
+    const highlight = /\.hl\s*\{([^}]*)\}/u.exec(html)?.[1] ?? "";
+    const px = (pattern: RegExp) => (pattern.exec(highlight)?.slice(1) ?? []).map(Number);
+    const [cardWidth] = px(/--w:\s*min\((\d+)px,\s*100vw\)/u);
+    const [border = Number.NaN] = px(/border:\s*(\d+)px/u);
+    const [, right = Number.NaN, , left = Number.NaN] = px(
+      /padding:\s*(\d+)px\s+(\d+)px\s+(\d+)px\s+(\d+)px/u,
+    );
+    const shots = [
+      ...html.matchAll(/class="shot"\s+src="([^"]+)"\s+width="(\d+)"\s+height="(\d+)"/gu),
+    ];
+    const count = html.split('class="shot"').length - 1;
+    expect(count).toBeGreaterThan(0);
+    expect(shots).toHaveLength(count);
+    const pngs = await Promise.all(
+      shots.map(async ([, src = ""]) => {
+        const png = PNG.sync.read(await readFile(new URL(`../../public${src}`, import.meta.url)));
+        return { height: png.height, src, width: png.width };
+      }),
+    );
+    expect(
+      shots.map(([, src, width, height]) => ({
+        height: Number(height),
+        src,
+        width: Number(width),
+      })),
+    ).toEqual(pngs);
+    expect(pngs.map(({ width }) => width + 2 * border + left + right)).toEqual(
+      pngs.map(() => cardWidth),
+    );
+  });
+});
