@@ -1,13 +1,13 @@
+import { gameData } from "../data";
 import { exceedsTapDistance, swipeDirection } from "../input/gestures";
 import { isConfirmKey, isPauseKey, laneDirectionForKey } from "../input/keyBindings";
 import type { Point } from "../lib/rect";
+import { read } from "../rules/units";
 import { helpActionAt } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
 
-const HELP_GESTURES = {
-  swipeMinDistance: 40,
-  tapMaxDistance: 10,
-};
+// A swipe turns a page once it travels this far.
+const SWIPE_MIN_DISTANCE = 40;
 
 // The lane keys turn pages: arrows, A/D and H/L. Enter and Space press Next; Escape or P closes.
 // A key's auto-repeat turns pages but never presses Next or closes, so a held Enter cannot
@@ -33,11 +33,11 @@ export function helpActionForPointer(
   start: Point,
   end: Point,
 ): HelpAction | undefined {
-  const swipe = swipeDirection(HELP_GESTURES.swipeMinDistance, start, end);
+  const swipe = swipeDirection(SWIPE_MIN_DISTANCE, start, end);
   if (swipe !== undefined) {
     return swipe === -1 ? { kind: "next" } : { kind: "previous" };
   }
-  if (exceedsTapDistance(HELP_GESTURES.tapMaxDistance, start, end)) {
+  if (exceedsTapDistance(read(gameData.tuning, "pixels", "tapMaxDistance"), start, end)) {
     return undefined;
   }
   return helpActionAt(pageCount, start);
