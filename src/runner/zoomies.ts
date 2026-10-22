@@ -1,9 +1,8 @@
 import type { GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
-import { steerLane } from "./laneControl";
 import { laneBlockedWithin, type PullGeometry, pullHorizon } from "./pulls";
-import { laneMotionConfig, type Walk, walkScrollSpeed } from "./walk";
+import { steerWalk, type Walk, walkScrollSpeed } from "./walk";
 
 // While the pack has the Zoomies, every seconds.zoomiesDriftSeconds of walking it drifts one
 // lane in the direction it last moved, toward the right before it has moved. Steering still
@@ -80,15 +79,9 @@ export function stepZoomies(
   if (direction === null) {
     return { drifted: null, seconds: elapsed - every, walk };
   }
-  const { control } = walk.road;
-  const config = laneMotionConfig(data, geometry.laneCount, walk.run);
-  const steered = steerLane(config, direction, control);
   return {
     drifted: direction,
     seconds: elapsed - every,
-    walk: {
-      ...walk,
-      road: { ...walk.road, control: steered },
-    },
+    walk: steerWalk(data, geometry.laneCount, direction, walk),
   };
 }
