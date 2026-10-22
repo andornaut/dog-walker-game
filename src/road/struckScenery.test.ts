@@ -27,6 +27,7 @@ const CROSSING: NonNullable<WalkItem["mover"]>["path"] = {
   motion: "cross",
   movement: "dart",
   tilt: 0,
+  turnAfter: null,
   warning: 50,
 };
 

@@ -120,6 +120,7 @@ const DARTING: MoverPath = {
   motion: "cross",
   movement: "dart",
   tilt: 0,
+  turnAfter: null,
   warning: 80,
 };
 
@@ -302,6 +303,7 @@ describe("the fairness rule", () => {
       motion: "cross",
       movement: "dart",
       tilt: 0,
+      turnAfter: null,
       warning: 50,
     };
     const walk = walkWith(

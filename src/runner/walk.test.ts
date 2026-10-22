@@ -380,6 +380,7 @@ const crossing: MoverPath = {
   motion: "cross",
   movement: "dart",
   tilt: 0,
+  turnAfter: null,
   warning: 50,
 };
 const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkItem => ({
@@ -1657,6 +1658,8 @@ describe("movers", { timeout: 60_000 }, () => {
         expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
         expect(movement.tilt.min).toBeLessThanOrEqual(movement.tilt.max);
         expect(movement.tilt.min).toBeGreaterThan(-1);
+        expect(movement.turnBackShare).toBeGreaterThanOrEqual(0);
+        expect(movement.turnBackShare).toBeLessThanOrEqual(1);
       } else if (movement?.kind === "inLane") {
         expect(movement.factor).toBeGreaterThan(0);
         expect(movement.factor).not.toBe(1);

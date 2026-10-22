@@ -508,6 +508,11 @@ export function moverSpec(
         read(tuning, "multipliers", "dartStartRoadShareMax"),
       ],
       tilt: [movement.tilt.min, movement.tilt.max],
+      turnAtShare: [
+        read(tuning, "multipliers", "dartTurnAtShareMin"),
+        read(tuning, "multipliers", "dartTurnAtShareMax"),
+      ],
+      turnBackShare: movement.turnBackShare,
     };
   } else if (movement.kind === "inLane") {
     motion = { kind: "ride", speedMultiplier: movement.factor };

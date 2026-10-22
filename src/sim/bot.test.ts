@@ -181,9 +181,9 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 });
 
 // For each way an obstacle moves, at both ends of every draw that varies it (its speed, the
-// delays before its moves, a stalker's second-step share and a dart's tilt), every place the
-// planner may put it, on the first zone's road and the last's, and every way a stalker may choose
-// its steps:
+// delays before its moves, a stalker's second-step share, a dart's tilt and where it turns back),
+// a dart that turns back crossing once and turning, every place the planner may put it, on the
+// first zone's road and the last's, and every way a stalker may choose its steps:
 // - it moves only while ahead of the pack's rows: no step, hop or dart starts once it has
 //   reached them, a stalker never steps up the road and a hopper never hops down it;
 // - the bot reads it as the walk's collision has it, for a pack standing in each lane. A lane
@@ -221,6 +221,8 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     speed: 0,
     start: 0,
     tilt: 0,
+    turn: 0.999999,
+    turnAt: 0,
   };
   const HIGH: MoverDraws = {
     count: 0.999999,
@@ -230,26 +232,40 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     speed: 0.999999,
     start: 0.999999,
     tilt: 0.999999,
+    turn: 0.999999,
+    turnAt: 0.999999,
   };
-  const endName = (draws: MoverDraws) => (draws === LOW ? "low" : "high");
-  // A dart whose tilt is drawn from a range is checked at both ends of it, at either end of its
-  // other draws.
-  const tiltEnds = (movement: Moving): readonly (readonly [string, number])[] =>
+  const endName = (draws: MoverDraws) => (draws === LOW ? "draws low" : "draws high");
+  type DrawWay = readonly [string, Partial<MoverDraws>];
+  // A dart whose tilt is drawn from a range is checked at both ends of it, and one of a kind that
+  // turns back crossing once and turning at both ends of its turn, at either end of its other
+  // draws.
+  const tiltEnds = (movement: Moving): readonly DrawWay[] =>
     movement.kind === "dart" && movement.tilt.min !== movement.tilt.max
       ? [
-          [", tilt low", 0],
-          [", tilt high", 0.999999],
+          [", tilt low", { tilt: 0 }],
+          [", tilt high", { tilt: 0.999999 }],
         ]
-      : [["", 0]];
+      : [["", {}]];
+  const turnWays = (movement: Moving): readonly DrawWay[] =>
+    movement.kind === "dart" && movement.turnBackShare > 0
+      ? [
+          [", crossing once", { turn: 0.999999 }],
+          [", turning halfway", { turn: 0, turnAt: 0 }],
+          [", turning at the far edge", { turn: 0, turnAt: 0.999999 }],
+        ]
+      : [["", {}]];
   const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
     [LOW, HIGH].flatMap((draws) =>
       [...movements.values()].flatMap((entry) =>
-        tiltEnds(entry.movement).map(([tiltName, tilt]) => ({
-          ...entry,
-          draws: { ...draws, tilt },
-          name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, draws ${endName(draws)}${tiltName}`,
-          zoneIndex,
-        })),
+        tiltEnds(entry.movement).flatMap(([tiltName, tilt]) =>
+          turnWays(entry.movement).map(([turnName, turn]) => ({
+            ...entry,
+            draws: { ...draws, ...tilt, ...turn },
+            name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, ${endName(draws)}${tiltName}${turnName}`,
+            zoneIndex,
+          })),
+        ),
       ),
     ),
   );

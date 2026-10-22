@@ -568,7 +568,8 @@
         "tilt": {
           "max": 0,
           "min": 0
-        }
+        },
+        "turnBackShare": 0.33
       },
       "name": "Other dog",
       "resolution": {
@@ -718,7 +719,8 @@
         "tilt": {
           "max": 0,
           "min": 0
-        }
+        },
+        "turnBackShare": 0
       },
       "name": "Squirrel",
       "resolution": {
@@ -896,7 +898,8 @@
         "tilt": {
           "max": 0,
           "min": 0
-        }
+        },
+        "turnBackShare": 0
       },
       "name": "Ball",
       "shape": {
@@ -979,7 +982,8 @@
         "tilt": {
           "max": 1.6,
           "min": 0.1
-        }
+        },
+        "turnBackShare": 0.33
       },
       "name": "Cat",
       "shape": {
@@ -1065,7 +1069,8 @@
         "tilt": {
           "max": 1.6,
           "min": 0.1
-        }
+        },
+        "turnBackShare": 0
       },
       "name": "Frisbee dog",
       "shape": {
@@ -1189,7 +1194,8 @@
         "tilt": {
           "max": -0.3,
           "min": -0.3
-        }
+        },
+        "turnBackShare": 0
       },
       "name": "Pigeons",
       "shape": {
@@ -1235,7 +1241,8 @@
         "tilt": {
           "max": 1.6,
           "min": 0.1
-        }
+        },
+        "turnBackShare": 0.33
       },
       "name": "Seagull",
       "shape": {
@@ -1349,6 +1356,8 @@
       "calmVoiceDebuffFactor": 0.5,
       "dartStartRoadShareMax": 0.45,
       "dartStartRoadShareMin": 0.15,
+      "dartTurnAtShareMax": 1,
+      "dartTurnAtShareMin": 0.5,
       "goodLeashSquirrelPull": 0,
       "moverSpeedJitter": 0.15,
       "muddyBumpHearts": 2,

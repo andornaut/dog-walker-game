@@ -45,13 +45,14 @@ const geometry: MoverGeometry = {
   sightLength: 400,
   window: 100,
 };
-const crosser = (direction: 1 | -1, tilt = 0): MoverPath => ({
+const crosser = (direction: 1 | -1, tilt = 0, turnAfter: number | null = null): MoverPath => ({
   direction,
   enterTravel: 300,
   lanesPerPixel: 0.02,
   motion: "cross",
   movement: "dart",
   tilt,
+  turnAfter,
   warning: 100,
 });
 const rider = (speedMultiplier: number): MoverPath => ({
@@ -134,6 +135,18 @@ describe("moverPlace", () => {
         path: crosser(1, -0.5),
         since: 200,
         want: { lanePosition: 1.5, solid: true, travel: 350 },
+      },
+      {
+        name: "a crosser turned back halfway, crossing back",
+        path: crosser(1, 0, 2.5),
+        since: 275,
+        want: { lanePosition: 1, solid: true, travel: 475 },
+      },
+      {
+        name: "a crosser from the right turned back at the far edge, crossing back",
+        path: crosser(-1, 0, 5),
+        since: 400,
+        want: { lanePosition: 0.5, solid: true, travel: 600 },
       },
       {
         name: "a rider at the top of its lane during its cue",
@@ -264,6 +277,19 @@ describe("facesLeft", () => {
     for (const { left, path, since } of [
       { left: false, name: "a crosser running right", path: crosser(1), since: 150 },
       { left: true, name: "a crosser running left", path: crosser(-1), since: 150 },
+      { left: false, name: "a crosser before it turns back", path: crosser(1, 0, 2.5), since: 200 },
+      {
+        left: true,
+        name: "a crosser turned back to the left",
+        path: crosser(1, 0, 2.5),
+        since: 275,
+      },
+      {
+        left: false,
+        name: "a crosser turned back to the right",
+        path: crosser(-1, 0, 2.5),
+        since: 275,
+      },
       { left: false, name: "a rider", path: rider(2), since: 150 },
       { left: false, name: "a hopper before its hop left", path: hopper, since: 90 },
       { left: true, name: "a hopper as it hops left", path: hopper, since: 100 },
@@ -368,6 +394,13 @@ describe("sweptLanes", () => {
         to: 500,
         want: { count: 3, first: 0 },
       },
+      {
+        from: 350,
+        name: "a crosser turning back between, out to its turn and back",
+        path: crosser(1, 0, 3),
+        to: 550,
+        want: { count: 3, first: 1 },
+      },
       { from: 0, name: "a rider", path: rider(2), to: 1000, want: { count: 1, first: 3 } },
     ] satisfies readonly {
       from: number;
@@ -381,16 +414,37 @@ describe("sweptLanes", () => {
   });
 });
 
-// A mover's draws with no delay at its kind's speed, and the count and a dart's start and tilt at
-// the low end of their ranges (the fewest moves, the lowest start and tilt), there and shy, or at
-// the high end.
+// A mover's draws with no delay at its kind's speed, and the count, a dart's start, tilt and turn
+// at the low end of their ranges (the fewest moves, the lowest start and tilt, turning halfway),
+// there and shy, or at the high end (turning at the far edge). A dart of a kind that turns back
+// turns at each end.
 const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
   {
-    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0.999999, speed: 0.5, start: 0, tilt: 0 },
+    draws: {
+      count: 0,
+      delays: [0, 0, 0],
+      share: 0,
+      shy: 0.999999,
+      speed: 0.5,
+      start: 0,
+      tilt: 0,
+      turn: 0,
+      turnAt: 0,
+    },
     end: "the low end",
   },
   {
-    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0, speed: 0.5, start: 0, tilt: 0 },
+    draws: {
+      count: 0,
+      delays: [0, 0, 0],
+      share: 0,
+      shy: 0,
+      speed: 0.5,
+      start: 0,
+      tilt: 0,
+      turn: 0,
+      turnAt: 0,
+    },
     end: "the low end, shy",
   },
   {
@@ -402,19 +456,29 @@ const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
       speed: 0.5,
       start: 0.999999,
       tilt: 0.999999,
+      turn: 0,
+      turnAt: 0.999999,
     },
     end: "the high end",
   },
 ];
 
 // A crosser that sets off from 0.1 to 0.9 of the road ahead of the pack, leaving the pack half a
-// second after its cue, at a tilt drawn from min to max.
-const cross = (lanesPerSecond: number, min: number, max = min): MoverSpec["motion"] => ({
+// second after its cue, at a tilt drawn from min to max, turning back at turnBackShare of them
+// from halfway to all the way across.
+const cross = (
+  lanesPerSecond: number,
+  min: number,
+  max = min,
+  turnBackShare = 0,
+): MoverSpec["motion"] => ({
   kind: "cross",
   lanesPerSecond,
   reactionSeconds: 0.5,
   startRoadShare: [0.1, 0.9],
   tilt: [min, max],
+  turnAtShare: [0.5, 1],
+  turnBackShare,
 });
 
 // Each motion, footprint and tilt the planner meets, as a spec.
@@ -425,6 +489,7 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
     spec: spec(cross(3, 0.1, 0.7)),
   },
   { name: "a dart tilted away", spec: spec(cross(3, -0.3)) },
+  { name: "a dart that turns back", spec: spec(cross(3, 0, 0, 1)) },
   {
     name: "an in-lane mover faster than the road",
     spec: spec({ kind: "ride", speedMultiplier: 1.6 }),
@@ -617,6 +682,8 @@ describe("moverPlacements", () => {
               speed: 0.5,
               start: 0,
               tilt: 0,
+              turn: 0,
+              turnAt: 0,
             },
             moving,
             name,
@@ -699,6 +766,8 @@ describe("moverPlacements", () => {
         speed: 0.5,
         start,
         tilt: 0,
+        turn: 0.999999,
+        turnAt: 0,
       };
       const [rightward] = moverPlacements(geometry, spec(cross(3, 0)), draws);
       expect(rightward?.lanes.count).toBe(lanes);
@@ -732,6 +801,8 @@ describe("moverPlacements", () => {
           speed: 0.5,
           start,
           tilt: draw,
+          turn: 0.999999,
+          turnAt: 0,
         });
         return placement?.path.motion === "cross" ? placement.path.enterTravel : NaN;
       });
@@ -741,6 +812,46 @@ describe("moverPlacements", () => {
       expect(high).toBeCloseTo(scrollSpeed + cellLength);
     },
   );
+
+  // Halfway across the 5-lane road at the low end of the turn draw, at its far edge at the high
+  // end, or not at all at a turn draw at its kind's share. Turning, it is on screen until it has
+  // crossed back: 2.5 or 5 lanes out and as far back, and half a lane past the edge.
+  it.each([
+    { name: "crosses once", turn: 0.5, turnAfter: null, turnAt: 0 },
+    { name: "turns back halfway across", turn: 0.49, turnAfter: 2.5, turnAt: 0 },
+    { name: "turns back at the far edge", turn: 0, turnAfter: 5, turnAt: 0.999999 },
+  ])("draws whether a dart that turns back at half its kind's darts $name", (row) => {
+    const draws = {
+      count: 0,
+      delays: [0, 0, 0] as const,
+      share: 0,
+      shy: 0.999999,
+      speed: 0.5,
+      start: 0.999999,
+      tilt: 0,
+      turn: row.turn,
+      turnAt: row.turnAt,
+    };
+    const placements = moverPlacements(geometry, spec(cross(3, 0, 0, 0.5)), draws);
+    expect(placements).toHaveLength(2);
+    for (const { path, screen } of placements) {
+      // Crossing once, null, compares as -1.
+      const turnAfter = path.motion === "cross" ? path.turnAfter : NaN;
+      expect(turnAfter ?? -1).toBeCloseTo(row.turnAfter ?? -1, 3);
+      const lanesPerPixel = path.motion === "cross" ? path.lanesPerPixel : NaN;
+      const lanes = row.turnAfter === null ? geometry.laneCount : 2 * row.turnAfter;
+      expect(screen[1] - screen[0]).toBeCloseTo(
+        path.warning +
+          Math.min(
+            (lanes + 0.5) / lanesPerPixel,
+            geometry.roadLength +
+              geometry.cellLength -
+              (path.motion === "cross" ? path.enterTravel : NaN),
+          ),
+        3,
+      );
+    }
+  });
 
   it("needs an in-lane mover to move at another speed than the road", () => {
     expect(() => moverPlacements(geometry, spec({ kind: "ride", speedMultiplier: 1 }))).toThrow();

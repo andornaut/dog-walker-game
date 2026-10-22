@@ -21,7 +21,7 @@ export const ENCOUNTERS = {
     hitLabel: "NEW FRIEND!",
     hitWord: "SNIFF!",
     kind: "obstacle",
-    movement: { kind: "dart", tilt: { max: 0, min: 0 } },
+    movement: { kind: "dart", tilt: { max: 0, min: 0 }, turnBackShare: 0.33 },
     name: "Other dog",
     resolution: {
       kind: "card",
@@ -101,7 +101,7 @@ export const ENCOUNTERS = {
   squirrel: {
     hitWord: "CHIRP!",
     kind: "obstacle",
-    movement: { kind: "dart", tilt: { max: 0, min: 0 } },
+    movement: { kind: "dart", tilt: { max: 0, min: 0 }, turnBackShare: 0 },
     name: "Squirrel",
     resolution: { kind: "pull" },
     shape: { lanes: 1, rows: 1 },

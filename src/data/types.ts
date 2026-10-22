@@ -307,8 +307,10 @@ export interface Tilt {
 // off multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per dart and
 // never so low that the pack has less than seconds.pathReactionMargin after its cue, nor so high
 // that its cue is off the road; one that has crossed by the time it reaches the pack's rows
-// passes harmlessly. inLane: down its lane at factor of the road's speed,
-// above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
+// passes harmlessly. A dart turns back at turnBackShare of its kind, drawn per dart: with no cue,
+// once it has crossed multipliers.dartTurnAtShareMin to Max of the road, drawn per dart, it
+// crosses the whole road back the other way at its tilt. inLane: down its lane at factor of the
+// road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
 // to either side or, unless sideways, a row up the road or diagonally up, landing
 // seconds.moverHopSeconds after it leaves; a shy hopper, at probability.shyHopperShare of its
 // kind drawn per mover, instead makes each hop away from the pack, starting once the road between
@@ -320,7 +322,7 @@ export interface Tilt {
 // hop comes up to seconds.moverTimingJitter late.
 export type Movement =
   | { readonly kind: "approach"; readonly steps: MoveCount }
-  | { readonly kind: "dart"; readonly tilt: Tilt }
+  | { readonly kind: "dart"; readonly tilt: Tilt; readonly turnBackShare: number }
   | {
       readonly kind: "hop";
       readonly most: 1 | 2;

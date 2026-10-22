@@ -23,7 +23,8 @@ export interface MoverStep {
 // A planned mover. warning is the scroll each cue shows for before its move.
 // cross (dart): its cue is at its row on the edge it enters from, and it sets off when its row
 // has travelled enterTravel down the road, coming down the road at 1 + tilt of the road's speed
-// as it crosses.
+// as it crosses. With turnAfter, once it has crossed that many lanes it turns back, with no cue,
+// and crosses the whole road back the other way; with null it crosses once.
 // ride (inLane): its cue is at the top of its lanes, where it enters once the cue ends, coming
 // down them at speedMultiplier of the road's speed.
 // steps (step, hop): it stands on the road from its spawn and takes each step in turn.
@@ -47,6 +48,7 @@ export type MoverPath = {
       readonly lanesPerPixel: number;
       readonly motion: "cross";
       readonly tilt: number;
+      readonly turnAfter: number | null;
     }
   | {
       readonly lane: number;
@@ -113,6 +115,22 @@ export function drawnLanes(laneSpan: number, path: MoverPath): number {
   return path.motion === "ride" ? path.lanes : laneSpan;
 }
 
+// How far across the road a crosser is, in lanes from the edge it entered from, moved scroll after
+// setting off: out to its turn, if it has one, and back from there.
+function crossedLanes(path: Extract<MoverPath, { motion: "cross" }>, moved: number): number {
+  const across = path.lanesPerPixel * Math.max(0, moved);
+  const { turnAfter } = path;
+  return turnAfter === null || across <= turnAfter ? across : 2 * turnAfter - across;
+}
+
+// Whether a crosser has turned back, since scroll after its cue appeared.
+function turnedBack(path: Extract<MoverPath, { motion: "cross" }>, since: number): boolean {
+  return (
+    path.turnAfter !== null &&
+    path.lanesPerPixel * Math.max(0, since - path.warning) > path.turnAfter
+  );
+}
+
 // A crosser enters on the road's edge.
 function crossStart(laneCount: number, direction: LaneDirection): number {
   return direction === 1 ? -0.5 : laneCount - 0.5;
@@ -144,7 +162,7 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
   }
   const start = crossStart(laneCount, path.direction);
   return {
-    lanePosition: start + path.direction * path.lanesPerPixel * Math.max(0, moved),
+    lanePosition: start + path.direction * crossedLanes(path, moved),
     solid: moved >= 0,
     travel: path.enterTravel + moved * (moved >= 0 ? 1 + path.tilt : 1),
   };
@@ -184,11 +202,12 @@ export function inMotion(path: MoverPath, since: number): boolean {
 }
 
 // Whether a mover faces left. Side-view art faces right, so it is mirrored while this holds: a
-// crosser running left, and a stepper or hopper from the start of a step to the left until a
-// step to the right. A rider and a stepper yet to move sideways face right.
+// crosser running left, the way it set off or back after turning, and a stepper or hopper from the
+// start of a step to the left until a step to the right. A rider and a stepper yet to move sideways
+// face right.
 export function facesLeft(path: MoverPath, since: number): boolean {
   if (path.motion === "cross") {
-    return path.direction === -1;
+    return (turnedBack(path, since) ? -path.direction : path.direction) === -1;
   }
   if (path.motion === "ride") {
     return false;
@@ -297,8 +316,9 @@ function laneSpan(laneCount: number, a: number, b: number): LaneSpan {
   return { count: Math.max(0, last - first + 1), first };
 }
 
-// The lanes a crosser touches while its travel is from to to: its lane position and travel only
-// move one way, so its ends bound it. A rider or stepping mover's are its own.
+// The lanes a crosser touches while its travel is from to to: its travel only moves one way and its
+// lane position one way to its turn and the other way after, so its ends and its turn bound it. A
+// rider or stepping mover's are its own.
 export function sweptLanes(laneCount: number, path: MoverPath, from: number, to: number): LaneSpan {
   if (path.motion === "ride") {
     return { count: path.lanes, first: path.lane };
@@ -314,7 +334,14 @@ export function sweptLanes(laneCount: number, path: MoverPath, from: number, to:
   const at = (travel: number) =>
     moverPlace(laneCount, path, path.warning + (travel - path.enterTravel) / (1 + path.tilt))
       .lanePosition;
-  return laneSpan(laneCount, at(moving), at(to));
+  const turn =
+    path.turnAfter === null
+      ? null
+      : path.enterTravel + ((1 + path.tilt) * path.turnAfter) / path.lanesPerPixel;
+  const places = [moving, to, ...(turn !== null && turn > moving && turn < to ? [turn] : [])].map(
+    at,
+  );
+  return laneSpan(laneCount, Math.min(...places), Math.max(...places));
 }
 
 // The footprint a mover keeps: lanes across and rows along the road.
@@ -379,7 +406,8 @@ export interface ShyHops {
 // cross: across the road at lanesPerSecond, tilted down the road by a tilt of the road's speed
 // drawn per mover from tilt, setting off a share of the road ahead of the pack drawn per mover
 // from startRoadShare, never so low that the pack has less than reactionSeconds after its cue to
-// meet it at its drawn tilt.
+// meet it at its drawn tilt. At turnBackShare of them, drawn per mover, it turns back once it has
+// crossed a share of the road drawn per mover from turnAtShare, and crosses the whole road back.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
@@ -402,6 +430,8 @@ export type MoverMotion =
       readonly reactionSeconds: number;
       readonly startRoadShare: readonly [number, number];
       readonly tilt: readonly [number, number];
+      readonly turnAtShare: readonly [number, number];
+      readonly turnBackShare: number;
     }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
@@ -429,8 +459,10 @@ export interface MoverSpec {
 
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
 // speed, the delay before each of its moves, a stalker's later-step road share, where a dart
-// sets off, a dart's tilt, and whether a hopper of a shy kind hops shy (below its kind's share).
-// EVEN_DRAWS moves it at its kind's speed with no delay, at the near end of a range, and never shy.
+// sets off, a dart's tilt, whether a hopper of a shy kind hops shy and whether a dart of a kind
+// that turns back does (each below its kind's share), and where a dart turns back. EVEN_DRAWS
+// moves it at its kind's speed with no delay, at the near end of a range, never shy and never
+// turning back.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
@@ -439,6 +471,8 @@ export interface MoverDraws {
   readonly speed: number;
   readonly start: number;
   readonly tilt: number;
+  readonly turn: number;
+  readonly turnAt: number;
 }
 
 const EVEN_DRAWS: MoverDraws = {
@@ -449,11 +483,13 @@ const EVEN_DRAWS: MoverDraws = {
   speed: 0.5,
   start: 0,
   tilt: 0,
+  turn: 0.999999,
+  turnAt: 0,
 };
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
-// delays and share; movers draws each mover's count, third delay, start, shyness and tilt, so
-// those never shift the spawns stream.
+// delays and share; movers draws each mover's count, third delay, start, shyness, tilt, turning
+// back and turn, so those never shift the spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -469,7 +505,19 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const third = movers();
   const start = movers();
   const shy = movers();
-  return { count, delays: [...delays, third], share, shy, speed, start, tilt: movers() };
+  const tilt = movers();
+  const turn = movers();
+  return {
+    count,
+    delays: [...delays, third],
+    share,
+    shy,
+    speed,
+    start,
+    tilt,
+    turn,
+    turnAt: movers(),
+  };
 }
 
 // The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
@@ -504,7 +552,9 @@ function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): n
 // pack reactionSeconds between its cue ending and its reaching the pack's rows at its tilt, and no
 // higher than shows its cue wholly on the road. Its tilt is drawn from its range cut to the
 // steepest that leaves a share between, at the road's pace; with none, even at its range's
-// lowest, it has no placement. Tilted, its
+// lowest, it has no placement. One that turns back crosses back the whole road from its turn,
+// on the road and in sight the longer for it, keeping clear every row it is level with and
+// meeting the pack in every lane it sweeps either way while its row is in the window. Tilted, its
 // contact lasts window / (1 + tilt), which its rows cover. One that has crossed the road by the
 // time it reaches the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps
 // clear every row it is level with as it crosses, and one that meets the pack also the row
@@ -547,10 +597,13 @@ function crossPlacements(
   }
   const ahead = within([lowest, highest], draws.start) * sightLength;
   const enterTravel = sightLength - ahead;
-  // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight.
+  const turnAfter =
+    draws.turn < motion.turnBackShare ? within(motion.turnAtShare, draws.turnAt) * laneCount : null;
+  // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight:
+  // half a lane past the far edge, or past the edge it entered from once it has turned back.
   const reaches = ahead / (1 + tilt);
   const moving = Math.min(
-    (laneCount + 0.5) / lanesPerPixel,
+    ((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel,
     (roadLength + cellLength - enterTravel) / (1 + tilt),
   );
   const appears = sightLength - warning - reaches;
@@ -568,6 +621,7 @@ function crossPlacements(
       motion: "cross",
       movement: spec.movement,
       tilt,
+      turnAfter,
       warning,
     };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);

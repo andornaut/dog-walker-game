@@ -6,7 +6,7 @@ import type { MinorObstacle } from "./types";
 // otherwise.
 export const MINOR_OBSTACLES = {
   ball: {
-    movement: { kind: "dart", tilt: { max: 0, min: 0 } },
+    movement: { kind: "dart", tilt: { max: 0, min: 0 }, turnBackShare: 0 },
     name: "Ball",
     shape: { lanes: 1, rows: 1 },
   },
@@ -31,7 +31,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   cat: {
-    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 } },
+    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Cat",
     shape: { lanes: 1, rows: 1 },
   },
@@ -57,7 +57,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   frisbeeDog: {
-    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 } },
+    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0 },
     name: "Frisbee dog",
     shape: { lanes: 1, rows: 1 },
   },
@@ -95,7 +95,7 @@ export const MINOR_OBSTACLES = {
   },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
   pigeons: {
-    movement: { kind: "dart", tilt: { max: -0.3, min: -0.3 } },
+    movement: { kind: "dart", tilt: { max: -0.3, min: -0.3 }, turnBackShare: 0 },
     name: "Pigeons",
     shape: { lanes: 1, rows: 1 },
   },
@@ -110,7 +110,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   seagull: {
-    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 } },
+    movement: { kind: "dart", tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Seagull",
     shape: { lanes: 1, rows: 1 },
   },

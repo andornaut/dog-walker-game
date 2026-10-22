@@ -210,6 +210,7 @@ function lanes(data: GameData): HelpPicture {
         motion: "cross",
         movement: "dart",
         tilt: 0,
+        turnAfter: null,
         warning: 1,
       },
       since: 0,

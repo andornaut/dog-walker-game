@@ -108,6 +108,10 @@ export const TUNING = {
     // dart's tilt.
     dartStartRoadShareMax: 0.45,
     dartStartRoadShareMin: 0.15,
+    // A dart that turns back does so once it has crossed a share of the road drawn per dart
+    // between these, then crosses the whole road back.
+    dartTurnAtShareMax: 1,
+    dartTurnAtShareMin: 0.5,
     goodLeashSquirrelPull: 0,
     // Each mover's speed, an in-lane mover's or a dart's, is its kind's times a factor drawn per
     // mover up to this far from 1 either way.
