@@ -158,13 +158,13 @@ import {
   addTileSprite,
   BUTTON_PRESS_PX,
   buttonFaces,
-  cogIcon,
   type IconButton,
   imageIcon,
   imageIconOr,
   type SelectTile,
   type SelectTileOptions,
   setDollarAmount,
+  settingsIcon,
   showTag,
   soundIcon,
   tagFrame,
@@ -1231,7 +1231,7 @@ export class StartScene extends Scene {
     root: GameObjects.Container,
     id: string,
     at: { x: number; y: number },
-    icon: (x: number, y: number) => ReturnType<typeof cogIcon>,
+    icon: (x: number, y: number) => ReturnType<typeof imageIcon>,
   ): void {
     const view = this.tileView(root, id);
     view.iconButton = addIconButton(this, view.container, at.x, at.y, icon);
@@ -1277,10 +1277,7 @@ export class StartScene extends Scene {
     this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) =>
       imageIconOr(this, "icon-logbook", x, y, "L"),
     );
-    this.iconButton(root, "settings", SETTINGS_FACE, (x, y) => {
-      const icon = imageIcon(this, "icon-settings", x, y);
-      return icon.length > 0 ? icon : cogIcon(this, x, y);
-    });
+    this.iconButton(root, "settings", SETTINGS_FACE, (x, y) => settingsIcon(this, x, y));
     this.iconButton(root, "help", HELP_FACE, (x, y) => imageIcon(this, "icon-help", x, y));
     this.iconButton(root, "mute", MUTE_FACE, (x, y) => soundIcon(this, !isMuted(this), x, y));
   }

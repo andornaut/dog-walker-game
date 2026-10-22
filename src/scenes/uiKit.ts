@@ -378,6 +378,12 @@ export function cogIcon(scene: Scene, x: number, y: number): Placed[] {
   return [g];
 }
 
+// icon-settings, or the cog while the art is missing.
+export function settingsIcon(scene: Scene, x: number, y: number): Placed[] {
+  const icon = imageIcon(scene, "icon-settings", x, y);
+  return icon.length > 0 ? icon : cogIcon(scene, x, y);
+}
+
 export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
   return insetRect(-outset, rect);
 }

@@ -113,10 +113,10 @@ import { TimedGroup } from "./timedGroup";
 import {
   addTagImage,
   artFits,
-  cogIcon,
   fadeAway,
   imageIcon,
   setDollarAmount,
+  settingsIcon,
   soundIcon,
 } from "./uiKit";
 
@@ -252,9 +252,7 @@ export class HudScene extends Scene {
       addPixelText(this, help.x + 8, help.y + 4, "?", { color: PALETTE.cream, originX: 0.5 });
     }
     const settings = buttonIcon(TOP_BAR_BUTTONS.settings, false);
-    if (imageIcon(this, "icon-settings", settings.x, settings.y).length === 0) {
-      cogIcon(this, settings.x, settings.y);
-    }
+    settingsIcon(this, settings.x, settings.y);
     const pauseIcon = buttonIcon(TOP_BAR_BUTTONS.pause, false);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
