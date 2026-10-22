@@ -7,7 +7,7 @@ import { fillLine, wrapWords } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
+import { fontFileMetrics, fontInk, inkWidth, placedInk } from "../testing/fontInk";
 import { veteranSave } from "../testing/saves";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -103,7 +103,7 @@ const BAR_LEFT = scrollbar.x - GAP;
 const inkBottom = (y: number) => y + inkRowsFromCapTop(BODY) * TEXT_SCALE;
 const bodyRight = (x: number, text: string) => x + fontInk("font-body", STYLE, text).right;
 const titleRight = (x: number, text: string) =>
-  x + fontInk("font-title", STYLE, text.toUpperCase()).right;
+  x + placedInk("font-title", STYLE, text.toUpperCase()).right;
 const valueLeft = (value: string) => rows.right - inkWidth("font-body", STYLE, value);
 
 // The Walks tab's rows with the widest figures: four-digit counts and dollars, three-digit

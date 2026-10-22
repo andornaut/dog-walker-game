@@ -648,9 +648,10 @@ export function setDollarAmount(
   setPixelText(amount, text);
   scalePixelText(amount, 1, 0, 0);
   const { left, scale, top } = place(whole.right - whole.left);
-  const x = left - whole.left * scale;
-  scalePixelText(dollar, scale, x, top);
-  scalePixelText(amount, scale, x + (wholeAdvance - amount.width) * scale, top);
+  // Each label's ink starts at the x it is placed at; "$" and the digits share a left side
+  // bearing, so the two stay one advance apart.
+  scalePixelText(dollar, scale, left, top);
+  scalePixelText(amount, scale, left + (wholeAdvance - amount.width) * scale, top);
 }
 
 // Kept by clearScene, so a tap's sparkle plays on while the screen is drawn again under it.

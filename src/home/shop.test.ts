@@ -9,7 +9,7 @@ import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { fitInFont, fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics, inkWidth, placedInk } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
 import { readBitmapFont } from "../tools/fontFile";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -171,7 +171,7 @@ describe("ownedCountNote", () => {
   it.each(cases)("%s: keeps the note clear of the heading", (list, have) => {
     const text = ownedCountNote(data, have, list);
     const titleRight =
-      SHOP_LAYOUT.headingX + fontInk("font-title", style, titles[list].toUpperCase()).right;
+      SHOP_LAYOUT.headingX + placedInk("font-title", style, titles[list].toUpperCase()).right;
     const noteLeft = shopListFrame(true).headingRight - inkWidth("font-body", style, text);
     expect(titleRight + 8).toBeLessThanOrEqual(noteLeft);
   });

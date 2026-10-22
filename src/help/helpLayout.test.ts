@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { wrapWords } from "../lib/lines";
 import { rectsOverlap } from "../lib/rect";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics, fontInk } from "../testing/fontInk";
+import { fontFileMetrics, placedInk } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { closeFace } from "../ui/closeControl";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -91,7 +91,7 @@ describe("help pages", () => {
         width,
         helpBody(gameData, page),
       );
-      const title = fontInk(
+      const title = placedInk(
         "font-title",
         { letterSpacing: 0, scale: titleScale },
         page.title.toUpperCase(),

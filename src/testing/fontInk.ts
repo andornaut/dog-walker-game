@@ -1,10 +1,28 @@
 import { readBitmapFont } from "../tools/fontFile";
-import { type FontMetrics, fontMetrics } from "../ui/fontMetrics";
+import { type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
 import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 
 // A font's rows, from its .fnt.
 export function fontFileMetrics(font: string): FontMetrics {
   return fontMetrics(readBitmapFont(font));
+}
+
+// A font's .fnt as Phaser's bitmap font cache holds it: glyphs keyed by character code.
+export function phaserFontData(font: string): {
+  chars: Record<
+    number,
+    { height: number; width: number; xAdvance: number; xOffset: number; yOffset: number }
+  >;
+  lineHeight: number;
+} {
+  const { glyphs, lineHeight } = readBitmapFont(font);
+  const chars = Object.fromEntries(
+    [...glyphs].map(([char, glyph]) => [
+      char.codePointAt(0) ?? 0,
+      { ...glyph, xAdvance: glyph.advance },
+    ]),
+  );
+  return { chars, lineHeight };
 }
 
 // The screen columns each inked glyph of text covers in a font at a style, from the text's
@@ -47,6 +65,19 @@ export function fontInk(
     left: Math.min(...spans.map((span) => span.left)),
     right: Math.max(...spans.map((span) => span.right)),
   };
+}
+
+// The screen columns text inks in a font at a style from the x addPixelText places a
+// left-aligned label at: font-title's label sits left by its first glyph's left side bearing.
+export function placedInk(
+  font: string,
+  style: TextFitStyle,
+  text: string,
+): { left: number; right: number } {
+  const ink = fontInk(font, style, text);
+  const { glyphs } = readBitmapFont(font);
+  const shift = font === "font-title" ? leftBearing((char) => glyphs.get(char), text) : 0;
+  return { left: ink.left - shift * style.scale, right: ink.right - shift * style.scale };
 }
 
 // The width of the columns text inks in a font at a style.

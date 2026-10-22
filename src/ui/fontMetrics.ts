@@ -74,6 +74,16 @@ export function fontMetrics(font: {
   };
 }
 
+// The columns from the pen to the first column text's first glyph inks, in font pixels: its left
+// side bearing, or 0 for text with no glyph.
+export function leftBearing(
+  glyph: (char: string) => Pick<BitmapGlyph, "xOffset"> | undefined,
+  text: string,
+): number {
+  const first = [...text].find((char) => char.trim() !== "");
+  return first === undefined ? 0 : Math.max(0, glyph(first)?.xOffset ?? 0);
+}
+
 // The rows of ink from the top of the capitals to the lowest ink.
 export function inkRowsFromCapTop(metrics: FontMetrics): number {
   return metrics.inkBottom - metrics.capTop;

@@ -1,7 +1,7 @@
 import type { GameObjects, Scene, Types } from "phaser";
 
 import { wrapWords } from "../../lib/lines";
-import { type FontMetrics, fontMetrics } from "../fontMetrics";
+import { type FontMetrics, fontMetrics, leftBearing } from "../fontMetrics";
 import {
   GLYPH_HEIGHT,
   glyphAdvance,
@@ -163,8 +163,10 @@ export function addPixelText(
   const scale = style.scale ?? 1;
   // So y is the top of the capitals, whichever font draws it.
   const capTop = (style.originY ?? 0) !== 0 ? 0 : pixelFontMetrics(scene, role).capTop;
+  const shown = textFor(key, role, text);
+  const shift = titleInkShift(scene, key, style.originX ?? 0, shown) * scale;
   const label = scene.add
-    .bitmapText(Math.round(x), Math.round(y - capTop * scale), key, textFor(key, role, text))
+    .bitmapText(Math.round(x) - shift, Math.round(y - capTop * scale), key, shown)
     .setScale(scale)
     .setOrigin(style.originX ?? 0, style.originY ?? 0)
     .setTint(style.color);
@@ -196,10 +198,38 @@ export function wrapPixelText(
   return lines;
 }
 
-// Moves a label made by addPixelText, keeping y the top of its capitals.
+// Moves a label made by addPixelText, keeping y the top of its capitals and, for a left-aligned
+// title label, x the first column of its ink.
 export function placePixelText(label: GameObjects.BitmapText, x: number, y: number): void {
   const capTop = (label.getData("capTop") as number | undefined) ?? 0;
-  label.setPosition(Math.round(x), Math.round(y - capTop));
+  label.setPosition(Math.round(x) - labelInkShift(label), Math.round(y - capTop));
+}
+
+// font-title's glyphs start a column into their advance, where font-body's start at the pen. A
+// left-aligned title label sits left by its first glyph's left side bearing, in font pixels, so
+// its ink starts at x, in line with body text in the same column. Centred and right-aligned
+// labels keep their place: both fonts end a glyph one column short of its advance.
+function titleInkShift(scene: Scene, key: string, originX: number, text: string): number {
+  if (key !== FONT_KEYS.title || originX !== 0) {
+    return 0;
+  }
+  const { data } = scene.cache.bitmapFont.get(key) as {
+    data: Types.GameObjects.BitmapText.BitmapFontData;
+  };
+  return glyphLeftBearing(data, text);
+}
+
+function glyphLeftBearing(data: Types.GameObjects.BitmapText.BitmapFontData, text: string): number {
+  // Phaser keys a font's glyphs by character code.
+  return leftBearing((char) => data.chars[char.codePointAt(0) ?? 0], text);
+}
+
+// The screen pixels titleInkShift sets a label made by addPixelText left of its x.
+function labelInkShift(label: GameObjects.BitmapText): number {
+  if (label.font !== FONT_KEYS.title || label.originX !== 0) {
+    return 0;
+  }
+  return glyphLeftBearing(label.fontData, label.text) * label.scaleX;
 }
 
 // Rescales a label made by addPixelText or addDisplayText, keeping (x, y) its origin's x and
@@ -275,6 +305,12 @@ export function setPixelText(label: GameObjects.BitmapText, text: string): void 
   const role = (label.getData("fontRole") as FontRole | undefined) ?? "body";
   const next = textFor(label.font, role, text);
   if (label.text !== next) {
+    // So a left-aligned title label's ink keeps starting at the same x.
+    const before = labelInkShift(label);
     label.setText(next);
+    const after = labelInkShift(label);
+    if (after !== before) {
+      label.setX(label.x + before - after);
+    }
   }
 }
