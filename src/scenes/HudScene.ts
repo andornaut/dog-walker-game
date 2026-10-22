@@ -60,13 +60,12 @@ import {
 import { screenLayout } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
 import type { Rect } from "../lib/rect";
-import { maxHearts } from "../rules/dogs";
+import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { type Cents, read } from "../rules/units";
-import { placeInPack } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import {
   addFilledRect,
@@ -147,11 +146,6 @@ interface CardView {
   // The owner's name, one label per line.
   owner: GameObjects.BitmapText[];
   ownerFace: GameObjects.Sprite;
-}
-
-// The most hearts dog's owner can hold now.
-function ownerMax(run: RunState, dog: DogId) {
-  return maxHearts(gameData.tuning, run.modifiers, placeInPack(run, dog), gameData.dogs[dog]);
 }
 
 // A card's parts that shake with it.
@@ -706,7 +700,7 @@ export class HudScene extends Scene {
     this.fitName(view.name, dog.name, rect);
     this.showOwnerName(view.owner, dog.owner.name, rect);
     setPixelText(view.fired, fired ? gameData.runText.fired : "");
-    const max = ownerMax(run, slot.dog);
+    const max = ownerMaxHearts(gameData, run, slot.dog);
     const ownerKey = ownerCardFaceKey(gameData, slot.dog);
     playTag(
       view.ownerFace.setTexture(ownerKey).setVisible(true),
@@ -813,7 +807,7 @@ export class HudScene extends Scene {
     if (rect === undefined || run === undefined) {
       return;
     }
-    const max = ownerMax(run, cue.dog);
+    const max = ownerMaxHearts(gameData, run, cue.dog);
     const cell = cardHearts(cue.hearts, max)[cue.hearts - 1];
     if (cell !== undefined) {
       const perk = perkIconKey(gameData.walkers[run.walker].perk);
@@ -924,7 +918,7 @@ export class HudScene extends Scene {
     for (const { dog, text } of quips) {
       const slot = run.pack.find((candidate) => candidate.dog === dog);
       const hearts = slot?.status === "walking" ? slot.hearts : 0;
-      const max = ownerMax(run, dog);
+      const max = ownerMaxHearts(gameData, run, dog);
       const icon = { dog, kind: "owner", mood: faceMood(gameData, max, hearts) } as const;
       this.messages.say({ icon, text });
     }
