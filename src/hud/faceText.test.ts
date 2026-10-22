@@ -149,6 +149,22 @@ describe("the walk's lines that name an owner", () => {
       expect(rows[1]?.texts[0]?.text.startsWith(NAME)).toBe(true);
     },
   );
+
+  // A row just too narrow for the whole line: the heart change after the name wraps with it.
+  const CHANGED = ["strip.plainHit", "strip.treat"];
+  it.each(PLACES.filter(([path]) => CHANGED.includes(path)))(
+    "%s keeps the heart change after the name on the row with its face and name",
+    (_path, line) => {
+      const said = line ?? { text: "" };
+      const whole = faceRows(width2x, BOX_2X, Infinity, said)[0]?.width ?? 0;
+      const rows = faceRows(width2x, BOX_2X, whole - 1, said);
+      const named = said.text.slice(said.marks?.[0]?.at);
+      expect(named).toMatch(new RegExp(`^${NAME} [+−]\\d+♥$`, "u"));
+      expect(rows).toHaveLength(2);
+      expect(rows[1]?.faces.map(({ dog }) => dog)).toEqual([DOG]);
+      expect(rows[1]?.texts.map(({ text }) => text)).toEqual([named]);
+    },
+  );
 });
 
 describe("faceRows", () => {

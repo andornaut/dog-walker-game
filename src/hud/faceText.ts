@@ -5,7 +5,8 @@ import type { TextFitStyle } from "../ui/textFit";
 
 // Walk text that names owners, each name drawn led by the owner's face: the face, then the
 // name, then the rest of the line. A filled {owner} becomes a face and name token, which wraps
-// as one word, so a name that wraps onto the next row takes its face with it.
+// as one word with a heart change directly after it, so a name that wraps onto the next row
+// takes its face and its change with it.
 
 // An owner's face, playing its mood's tag of face-owner-<art>-20: upset on a heart loss, happy
 // on a gain, neutral otherwise.
@@ -115,11 +116,19 @@ export interface FaceRow {
 // A word: its text runs, each but the first led by a face.
 type Word = readonly { readonly face?: OwnerFace; readonly text: string }[];
 
-// The line's words, split at spaces outside its names: a name, spaces and all, stays in one
-// word, its face leading it.
+// A heart change, such as "−1♥" or "+1♥", a space after an owner's name.
+const NAME_CHANGE = /^ [+\-−]\d+♥/u;
+
+// The line's words, split at spaces outside its names: a name, spaces and all, and a heart
+// change directly after it stay in one word, its face leading it.
 function words(line: FaceText): Word[] {
   const marks = line.marks ?? [];
-  const named = (i: number) => marks.some((mark) => i >= mark.at && i < mark.at + mark.length);
+  const named = (i: number) =>
+    marks.some((mark) => {
+      const end = mark.at + mark.length;
+      const change = NAME_CHANGE.exec(line.text.slice(end))?.[0].length ?? 0;
+      return i >= mark.at && i < end + change;
+    });
   const all: { face?: OwnerFace; text: string }[][] = [];
   let word: { face?: OwnerFace; text: string }[] = [];
   line.text.split("").forEach((char, i) => {
