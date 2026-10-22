@@ -12,6 +12,8 @@ import {
   endPanelLayout,
   grantedQuipLines,
   QUIP_TEXT_ROOM,
+  quipNameX,
+  quipTextY,
   SIDE_LABEL_ROOM,
 } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
@@ -146,10 +148,11 @@ export class EndScene extends Scene {
       const probe = text(0, 0, line.text, PALETTE.plum);
       const { lines: shown } = fitPixelText(probe, quipFit, 0, 0);
       probe.destroy();
-      return shown.length;
+      return { fired: line.fired, lines: shown.length };
     });
     const quipLines = grantedQuipLines(body, lines.length, wanted);
-    const { panel, rows } = endPanelLayout(body, lines.length, quipLines);
+    const quipRows = closing.map(({ fired }, i) => ({ fired, lines: itemAt(quipLines, i) }));
+    const { panel, rows } = endPanelLayout(body, lines.length, quipRows);
     addPanel(this, panel);
     const g = this.add.graphics();
 
@@ -225,21 +228,26 @@ export class EndScene extends Scene {
         const face = this.add.sprite(faceX, faceY, key).setOrigin(0);
         showTag(reduced, face, key, line.fired ? "fired" : "happy");
       }
-      const { bubble, nameY, textX, textY } = QUIPS;
+      const { bubble, headerY, nameY, textX } = QUIPS;
       this.addBubble({ height, width: bubble.width, x: bubble.x, y: row });
+      // The owner's name under the well, at 1x.
       const owner = gameData.dogs[line.dog].owner.name;
-      const header = line.fired
-        ? fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner })
-        : owner;
-      const name = title(textX, row + nameY, header, line.fired ? PALETTE.darkRed : PALETTE.plum);
-      fitted(name, QUIP_TEXT_ROOM, textX, row + nameY);
-      const quip = text(textX, row + textY, line.text, PALETTE.plum);
-      const wraps = itemAt(quipLines, i) > 1;
+      const name = addPixelText(this, 0, row + nameY, owner, { color: PALETTE.rust, scale: 1 });
+      const nameInk = inkSpan(name);
+      name.setX(quipNameX(nameInk.right - nameInk.left) - nameInk.left);
+      if (line.fired) {
+        const header = fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner });
+        const fired = title(textX, row + headerY, header, PALETTE.darkRed);
+        fitted(fired, QUIP_TEXT_ROOM, textX, row + headerY);
+      }
+      const quipRow = itemAt(quipRows, i);
+      const textY = row + quipTextY(body, quipRow, height);
+      const quip = text(textX, textY, line.text, PALETTE.plum);
       fitPixelText(
         quip,
-        wraps ? quipFit : { ...quipFit, styles: TEXT_FIT_STYLES },
+        quipRow.lines > 1 ? quipFit : { ...quipFit, styles: TEXT_FIT_STYLES },
         textX,
-        row + textY,
+        textY,
       );
     });
 
@@ -342,11 +350,13 @@ export class EndScene extends Scene {
     this.returnHomeStep?.();
   }
 
-  // A ui-quip speech bubble with its tail towards the face, or a framed box while it is missing.
+  // A ui-quip speech bubble with its tail flipped to point right at the face, or a framed box
+  // while it is missing.
   private addBubble(rect: Rect): void {
     addPanel(this, rect, "ui-quip");
     if (this.textures.exists("ui-quip-tail")) {
-      this.add.image(QUIPS.tail.x, rect.y + QUIPS.tail.y, "ui-quip-tail").setOrigin(0);
+      const tail = this.add.image(QUIPS.tail.x, rect.y + QUIPS.tail.y, "ui-quip-tail");
+      tail.setOrigin(0).setFlipX(true);
     }
   }
 

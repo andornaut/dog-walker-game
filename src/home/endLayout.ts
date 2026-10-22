@@ -11,18 +11,23 @@ export const END_LAYOUT = {
   button: { height: 44, width: 264, x: 48, y: 512 },
   logo: { x: 116, y: 8 },
   panel: PANEL,
-  // An owner's row: the face in its well, and a speech bubble with the owner's name at nameY
-  // and the closing line's first capitals at textY, from the row's top. The bubble ends
-  // padBottom under the line's lowest ink, and the next row starts gap under it.
+  // An owner's row, mirroring the home screen's bubble: a speech bubble from x with its tail
+  // at the right pointing at the face in its well, and the owner's name in rust at 1x under
+  // the well, its capitals nameY under the row's top, centred on the well. A fired row's
+  // bubble has "{owner} fired you" at headerY and the closing line's first capitals at
+  // textY; a happy row's has only the line, centred down the bubble. The bubble ends
+  // padBottom under a line at textY's lowest ink, and the row is at least as tall as the
+  // name's lowest ink; the next row starts gap under it.
   quips: {
-    bubble: { padBottom: 4, width: 244, x: 80 },
-    face: { x: 37, y: 1 },
+    bubble: { padBottom: 4, width: 244, x: 36 },
+    face: { x: 291, y: 1 },
     gap: 2,
-    nameY: 5,
-    tail: { x: 75, y: 15 },
-    textX: 86,
+    headerY: 5,
+    nameY: 37,
+    tail: { x: 279, y: 15 },
+    textX: 42,
     textY: 22,
-    well: { size: 34, x: 36, y: 0 },
+    well: { size: 34, x: 290, y: 0 },
   },
   // The return home, under the logo and above the panel: the walker and pack walk up the
   // front path from behind the panel's top edge to the house's step while the owners wave
@@ -68,8 +73,8 @@ export const END_TEXT_SCALE = 2;
 // Each badge's name fits on one line under it.
 export const END_BADGE_NAME_LINES = 1;
 
-// How wide an owner's name and closing line may be: from the text column to 6px inside the
-// bubble's right edge.
+// How wide a fired row's header and a closing line may be: from the text column to 6px inside
+// the bubble's right edge.
 export const QUIP_TEXT_ROOM =
   END_LAYOUT.quips.bubble.x + END_LAYOUT.quips.bubble.width - 6 - END_LAYOUT.quips.textX;
 
@@ -86,13 +91,33 @@ export function breakdownLabelRoom(amountWidth: number): number {
   return amountRight - amountWidth - AMOUNT_GAP - label;
 }
 
-// An owner's bubble, from the row's top, with its closing line on lines lines of the body
-// font at 2x: down to the last line's lowest ink, and padBottom more.
-function quipBubbleHeight(body: FontMetrics, lines: number): number {
-  const { bubble, textY } = END_LAYOUT.quips;
+// An owner's row: whether the owner fired you, and how many lines its closing line takes.
+export interface QuipRow {
+  readonly fired: boolean;
+  readonly lines: number;
+}
+
+// From a line's capitals to its last line's lowest ink, on lines lines of the body font at 2x.
+function quipTextHeight(body: FontMetrics, lines: number): number {
   const lineHeight = body.lineHeight * END_TEXT_SCALE;
-  const ink = inkRowsFromCapTop(body) * END_TEXT_SCALE;
-  return textY + (Math.max(1, lines) - 1) * lineHeight + ink + bubble.padBottom;
+  return (Math.max(1, lines) - 1) * lineHeight + inkRowsFromCapTop(body) * END_TEXT_SCALE;
+}
+
+// An owner's row's height, and its bubble's: down to the closing line's lowest ink under the
+// header's place and padBottom more, and at least down to the lowest ink of the name under the
+// well.
+export function quipRowHeight(body: FontMetrics, row: QuipRow): number {
+  const { bubble, nameY, textY } = END_LAYOUT.quips;
+  const text = textY + quipTextHeight(body, row.lines) + bubble.padBottom;
+  return Math.max(text, nameY + inkRowsFromCapTop(body));
+}
+
+// The closing line's first capitals, from the row's top: under a fired row's header, or
+// centred down a happy row's bubble.
+export function quipTextY(body: FontMetrics, row: QuipRow, height: number): number {
+  return row.fired
+    ? END_LAYOUT.quips.textY
+    : Math.floor((height - quipTextHeight(body, row.lines)) / 2);
 }
 
 // The breakdown's rule sits 2px under its last line and the 2x total 8px under it; the side
@@ -107,17 +132,18 @@ interface EndPanelLayout {
   rows: { height: number; top: number }[];
 }
 
-// The panel and the owners' rows, each row's closing line on the lines quipLines gives it.
+// The panel and the owners' rows, each row's closing line on the lines it is given.
 export function endPanelLayout(
   body: FontMetrics,
   breakdownLines: number,
-  quipLines: readonly number[],
+  quipRows: readonly QuipRow[],
 ): EndPanelLayout {
   const { breakdown, quips, side } = END_LAYOUT;
   const totalBottom = breakdown.top + breakdownLines * breakdown.pitch + 8 + 10;
   let top = Math.max(totalBottom, side.iconY + 16) + QUIPS_GAP;
-  const rows = (quipLines.length === 0 ? [1] : quipLines).map((lines) => {
-    const row = { height: quipBubbleHeight(body, lines), top };
+  const shown = quipRows.length === 0 ? [{ fired: false, lines: 1 }] : quipRows;
+  const rows = shown.map((quip) => {
+    const row = { height: quipRowHeight(body, quip), top };
     top += row.height + quips.gap;
     return row;
   });
@@ -136,11 +162,18 @@ export function endPanelFits(panel: typeof PANEL): boolean {
 export function grantedQuipLines(
   body: FontMetrics,
   breakdownLines: number,
-  wanted: readonly number[],
+  wanted: readonly QuipRow[],
 ): number[] {
-  return wanted.reduce<number[]>((granted, lines) => {
-    const rest = wanted.slice(granted.length + 1).map(() => 1);
-    const tried = endPanelLayout(body, breakdownLines, [...granted, lines, ...rest]);
-    return [...granted, endPanelFits(tried.panel) ? lines : 1];
+  return wanted.reduce<number[]>((granted, row, i) => {
+    const above = granted.map((lines, j) => ({ fired: wanted[j]?.fired ?? false, lines }));
+    const rest = wanted.slice(i + 1).map(({ fired }) => ({ fired, lines: 1 }));
+    const tried = endPanelLayout(body, breakdownLines, [...above, row, ...rest]);
+    return [...granted, endPanelFits(tried.panel) ? row.lines : 1];
   }, []);
+}
+
+// Where the owner's name under the well starts, inkWidth wide at 1x: centred on the well.
+export function quipNameX(inkWidth: number): number {
+  const { well } = END_LAYOUT.quips;
+  return Math.round(well.x + well.size / 2 - inkWidth / 2);
 }

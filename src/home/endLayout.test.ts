@@ -22,6 +22,10 @@ import {
   endPanelLayout,
   grantedQuipLines,
   QUIP_TEXT_ROOM,
+  quipNameX,
+  type QuipRow,
+  quipRowHeight,
+  quipTextY,
   SIDE_LABEL_ROOM,
 } from "./endLayout";
 import { dollarText, signedDollarText } from "./home";
@@ -51,46 +55,103 @@ function fitted(role: Role, styles: readonly TextFitStyle[], room: number, text:
 // Fees, tips and card costs always show, lucky finds and the starting money only sometimes;
 // a walk has one owner's row per dog, up to a slot each.
 const BREAKDOWN_LINES = [3, 4, 5];
+// Every count of breakdown lines and owners' rows, the owners all happy or all firing you.
 const cases = BREAKDOWN_LINES.flatMap((lines) =>
-  Array.from({ length: SCREEN_CONFIG.dogSlotCount }, (_, i) => [lines, i + 1] as const),
+  Array.from({ length: SCREEN_CONFIG.dogSlotCount }, (_, i) =>
+    [false, true].map((fired) => [lines, i + 1, fired] as const),
+  ).flat(),
 );
+const quipRows = (count: number, fired: boolean, lines: readonly number[]): QuipRow[] =>
+  Array.from({ length: count }, (_, i) => ({ fired, lines: lines[i] ?? 1 }));
 
 describe("endPanelLayout", () => {
-  it("fits every count of breakdown lines and owners' rows, each row under the last", () => {
-    for (const [lines, rows] of cases) {
-      const { panel, rows: placed } = endPanelLayout(BODY, lines, Array<number>(rows).fill(1));
+  it.each(cases)(
+    "fits %i breakdown lines and %i owners' rows (fired: %s), each row under the last",
+    (lines, rows, fired) => {
+      const placed = endPanelLayout(BODY, lines, quipRows(rows, fired, [])).rows;
+      const { panel } = endPanelLayout(BODY, lines, quipRows(rows, fired, []));
       const totalBottom = breakdown.top + lines * breakdown.pitch + 8 + 10;
       const rule = (placed[0]?.top ?? 0) - 8;
       const last = placed.at(-1);
       expect(rule).toBeGreaterThan(Math.max(totalBottom, side.iconY + 16));
       expect(rule - Math.max(totalBottom, side.iconY + 16)).toBeLessThanOrEqual(8);
       expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
-      expect(endPanelFits(panel), `${lines} lines, ${rows} rows`).toBe(true);
-      const two = endPanelLayout(BODY, lines, Array<number>(rows).fill(2)).rows;
+      expect(endPanelFits(panel)).toBe(true);
+      const two = endPanelLayout(BODY, lines, quipRows(rows, fired, [2, 2, 2])).rows;
       two.slice(1).forEach((row, i) => {
         const above = two[i];
         expect(row.top).toBe((above?.top ?? 0) + (above?.height ?? 0) + quips.gap);
       });
-    }
+    },
+  );
+
+  it("keeps the tallest panel above the badges", () => {
     expect(most.y + most.height).toBeLessThanOrEqual(badges.y);
   });
 });
 
 describe("grantedQuipLines", () => {
-  it("grants rows second lines from the top while the panel fits", () => {
-    for (const [lines, rows] of cases) {
-      const granted = grantedQuipLines(BODY, lines, Array<number>(rows).fill(2));
-      expect(endPanelFits(endPanelLayout(BODY, lines, granted).panel)).toBe(true);
+  it.each(cases)(
+    "grants second lines from the top while the panel fits: %i lines, %i rows, fired %s",
+    (lines, rows, fired) => {
+      const wanted = quipRows(rows, fired, [2, 2, 2]);
+      const granted = grantedQuipLines(BODY, lines, wanted);
+      const layout = (given: readonly number[]) =>
+        endPanelLayout(BODY, lines, quipRows(rows, fired, given));
+      expect(endPanelFits(layout(granted).panel)).toBe(true);
       // Every row granted one line could not have had two.
       granted.forEach((given, i) => {
         if (given === 1) {
           const more = granted.map((each, j) => (j === i ? 2 : each));
-          expect(endPanelFits(endPanelLayout(BODY, lines, more).panel)).toBe(false);
+          expect(endPanelFits(layout(more).panel)).toBe(false);
         }
       });
       expect([...granted].sort((a, b) => b - a)).toEqual(granted);
+    },
+  );
+});
+
+// An owner's row, mirrored: the bubble at the left, the face's well right of the bubble's
+// tail, and the owner's name under the well inside the panel's frame.
+describe("an owner's row", () => {
+  const { bubble, face, headerY, nameY, textX, well } = quips;
+  const bodyInk = inkRowsFromCapTop(BODY);
+  const titleInk = inkRowsFromCapTop(fontFileMetrics("font-title"));
+  const rows = [false, true].flatMap((fired) => [1, 2].map((lines) => ({ fired, lines })));
+
+  it.each(rows)("holds its text, its well and the name under it: %o", (row) => {
+    const height = quipRowHeight(BODY, row);
+    const textTop = quipTextY(BODY, row, height);
+    const textBottom = textTop + (row.lines - 1) * BODY.lineHeight * 2 + bodyInk * 2;
+    expect(textBottom + bubble.padBottom).toBeLessThanOrEqual(height);
+    if (row.fired) {
+      expect(textTop).toBeGreaterThan(headerY + titleInk * 2);
+    } else {
+      // Centred down the bubble.
+      expect(Math.abs(height - textBottom - textTop)).toBeLessThanOrEqual(1);
     }
+    expect(well.y + well.size).toBeLessThanOrEqual(nameY);
+    expect(nameY + bodyInk).toBeLessThanOrEqual(height);
   });
+
+  it("puts the bubble at the left and the well at the right, inside the panel's frame", () => {
+    expect(bubble.x).toBeGreaterThanOrEqual(most.x + 2);
+    expect(textX).toBeGreaterThan(bubble.x);
+    expect(bubble.x + bubble.width).toBeLessThan(well.x);
+    expect(well.x + well.size).toBeLessThanOrEqual(most.x + most.width - 2);
+    expect(face.x).toBeGreaterThanOrEqual(well.x);
+    expect(face.y).toBeGreaterThanOrEqual(well.y);
+  });
+
+  it.each(Object.values(gameData.dogs).map(({ owner }) => [owner.name] as const))(
+    "sets %s under the well, inside the frame and clear of the bubble",
+    (name) => {
+      const width = inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name);
+      const left = quipNameX(width);
+      expect(left).toBeGreaterThan(bubble.x + bubble.width);
+      expect(left + width).toBeLessThanOrEqual(most.x + most.width - 2);
+    },
+  );
 });
 
 const QUIPS = Object.values(gameData.quips).flatMap((moments) => Object.values(moments).flat());
@@ -108,10 +169,12 @@ describe("an owner's closing line", () => {
           QUIP_TEXT_ROOM,
           shown("body", quip),
         );
-        const rows = Array<number>(SCREEN_CONFIG.dogSlotCount).fill(wanted.lines.length);
-        const granted = grantedQuipLines(BODY, lines, rows);
+        // Fired rows: the tallest, so the fewest second lines.
+        const count = SCREEN_CONFIG.dogSlotCount;
+        const wants = Array<number>(count).fill(wanted.lines.length);
+        const granted = grantedQuipLines(BODY, lines, quipRows(count, true, wants));
         return (
-          !endPanelFits(endPanelLayout(BODY, lines, granted).panel) ||
+          !endPanelFits(endPanelLayout(BODY, lines, quipRows(count, true, granted)).panel) ||
           granted.some((given) => {
             const styles = given > 1 ? WRAPPING_TEXT_FIT_STYLES : TEXT_FIT_STYLES;
             const set = fitted("body", styles, QUIP_TEXT_ROOM, quip);
@@ -142,13 +205,12 @@ describe("an owner's closing line", () => {
 describe("the end screen's text", () => {
   const words = gameData.menuText.end;
 
-  // Each owner's name, or the line saying they fired you, over their closing line.
-  it("sets every owner's row heading inside its bubble", () => {
+  // A fired row's line saying the owner fired you, over the closing line.
+  it("sets every fired row's header inside its bubble", () => {
     const owners = Object.values(gameData.dogs).map((dog) => dog.owner.name);
-    const headings = owners.flatMap((owner) => [
-      owner,
+    const headings = owners.map((owner) =>
       fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner }),
-    ]);
+    );
     expect(
       headings.filter((heading) => !fitted("title", TEXT_FIT_STYLES, QUIP_TEXT_ROOM, heading)),
     ).toEqual([]);

@@ -1245,23 +1245,24 @@
         "bubble": {
           "padBottom": 4,
           "width": 244,
-          "x": 80
+          "x": 36
         },
         "face": {
-          "x": 37,
+          "x": 291,
           "y": 1
         },
         "gap": 2,
-        "nameY": 5,
+        "headerY": 5,
+        "nameY": 37,
         "tail": {
-          "x": 75,
+          "x": 279,
           "y": 15
         },
-        "textX": 86,
+        "textX": 42,
         "textY": 22,
         "well": {
           "size": 34,
-          "x": 36,
+          "x": 290,
           "y": 0
         }
       },
