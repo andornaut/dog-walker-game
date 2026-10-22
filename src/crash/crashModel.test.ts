@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import {
   crashGate,
   type CrashReport,
@@ -118,13 +119,10 @@ describe("crashGate", () => {
 });
 
 describe("crashView", () => {
-  it("says what happened, what is kept and how to recover", () => {
-    expect(crashView(false, crash)).toEqual({
-      action: "Reload",
-      body: "Your saved progress is kept.",
-      details: undefined,
-      title: "Something went wrong",
-    });
+  const text = gameData.menuText.crash;
+
+  it("shows the crash text, without details outside dev builds", () => {
+    expect(crashView(text, false, crash)).toEqual({ ...text, details: undefined });
   });
 
   const bareStack = `step@${APP_URL}:1:200`;
@@ -139,7 +137,7 @@ describe("crashView", () => {
       ],
       ["shows only the message when there is no stack", { ...crash, stack: undefined }, "boom"],
     ] satisfies readonly [string, CrashReport, string][]) {
-      expect(crashView(true, report).details).toBe(expected);
+      expect(crashView(text, true, report).details).toBe(expected);
     }
   });
 });

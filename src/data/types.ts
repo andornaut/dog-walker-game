@@ -795,13 +795,19 @@ export interface RunText {
 }
 
 // The text of the menus and pages over the game: Settings, Stats, Help, the End screen, the
-// pause menu and the badge celebration. A {name} in a line is filled by code, and each line
-// may use only the names src/home/menuText.ts lists for it.
+// pause menu, the badge celebration and the crash screen. A {name} in a line is filled by
+// code, and each line may use only the names src/home/menuText.ts lists for it.
 export interface MenuText {
   readonly celebration: {
     readonly button: string;
     readonly titleMany: string;
     readonly titleOne: string;
+  };
+  // The crash screen, drawn in HTML over the page when the game stops on an error.
+  readonly crash: {
+    readonly body: string;
+    readonly reload: string;
+    readonly title: string;
   };
   readonly end: {
     readonly backHome: string;

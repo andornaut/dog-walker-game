@@ -3,6 +3,7 @@
 // already saved, and the next launch banks it.
 import "./crash.css";
 
+import { gameData } from "../data";
 import { BUILD_LABEL } from "../dev/buildLabel";
 import {
   crashGate,
@@ -70,12 +71,12 @@ function detailsSection(text: string): HTMLDetailsElement {
 }
 
 function showCrashScreen(dev: boolean, report: CrashReport): void {
-  const view = crashView(dev, report);
+  const view = crashView(gameData.menuText.crash, dev, report);
   const title = el("h1", "crash-title", view.title);
   title.id = "crash-title";
   const body = el("p", "crash-body", view.body);
   body.id = "crash-body";
-  const reload = button(view.action, () => location.reload());
+  const reload = button(view.reload, () => location.reload());
   const panel = el("div", "crash-panel", title, body, reload);
   if (view.details !== undefined) {
     panel.append(detailsSection(`${BUILD_LABEL}\n${view.details}`));

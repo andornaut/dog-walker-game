@@ -8,6 +8,11 @@ export const MENU_TEXT = {
     titleMany: "{count} badges earned!",
     titleOne: "Badge earned!",
   },
+  crash: {
+    body: "Your saved progress is kept.",
+    reload: "Reload",
+    title: "Something went wrong",
+  },
   end: {
     backHome: "Back home",
     earnings: {
