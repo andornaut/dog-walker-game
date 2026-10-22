@@ -19,7 +19,6 @@ export interface OrientationRelay {
   // Whether the phone is on its side as of the last event relayed: the state the turn-upright
   // notice shows, for a scene that starts after the event went out.
   sideways(): boolean;
-  stop(): void;
 }
 
 // Relays the phone's orientation as turned-sideways and turned-upright on eventTarget, each once
@@ -43,8 +42,5 @@ export function relayOrientationEvents(
   };
   check();
   eventTarget.addEventListener("resize", check);
-  return {
-    sideways: () => lastSideways,
-    stop: () => eventTarget.removeEventListener("resize", check),
-  };
+  return { sideways: () => lastSideways };
 }

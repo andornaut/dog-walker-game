@@ -6,11 +6,11 @@ export interface VisibilitySource extends EventTarget {
 
 // Relays the page's visibility as app-hidden and app-visible on eventTarget, each once per
 // change. pagehide and pageshow count too, for a page leaving or returning from the back-forward
-// cache without a visibilitychange. Returns a function that stops relaying.
+// cache without a visibilitychange.
 export function relayVisibilityEvents(
   eventTarget: EventTarget,
   visibilitySource: VisibilitySource,
-): () => void {
+): void {
   let lastHidden = visibilitySource.visibilityState === "hidden";
   const report = (hidden: boolean) => {
     if (hidden === lastHidden) {
@@ -24,9 +24,4 @@ export function relayVisibilityEvents(
   visibilitySource.addEventListener("visibilitychange", onVisibilityChange);
   eventTarget.addEventListener("pagehide", onPageHide);
   eventTarget.addEventListener("pageshow", onVisibilityChange);
-  return () => {
-    visibilitySource.removeEventListener("visibilitychange", onVisibilityChange);
-    eventTarget.removeEventListener("pagehide", onPageHide);
-    eventTarget.removeEventListener("pageshow", onVisibilityChange);
-  };
 }

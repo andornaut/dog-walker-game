@@ -30,12 +30,12 @@ function relay(start: Viewport) {
   const seen: string[] = [];
   window.addEventListener(PHONE_EVENTS.turnedSideways, () => seen.push("sideways"));
   window.addEventListener(PHONE_EVENTS.turnedUpright, () => seen.push("upright"));
-  const { sideways, stop } = relayOrientationEvents(() => viewport, window);
+  const { sideways } = relayOrientationEvents(() => viewport, window);
   const resize = (next: Viewport) => {
     viewport = next;
     window.dispatchEvent(new Event("resize"));
   };
-  return { resize, seen, sideways, stop };
+  return { resize, seen, sideways };
 }
 
 describe("relayOrientationEvents", () => {

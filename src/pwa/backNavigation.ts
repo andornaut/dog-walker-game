@@ -16,8 +16,7 @@ function isBackGuardState(state: unknown): boolean {
 // history entry for back to pop, then dispatches back-pressed on eventTarget and pushes the entry
 // again. Chrome skips an entry pushed without a user gesture when going back, until the page
 // next gets one, so during play, where every lane change is a tap, the entry is always counted.
-// Returns a function that stops handling back; the pushed entry stays.
-export function guardBackNavigation(eventTarget: EventTarget, history: HistoryLike): () => void {
+export function guardBackNavigation(eventTarget: EventTarget, history: HistoryLike): void {
   const pushGuard = () => {
     if (!isBackGuardState(history.state)) {
       history.pushState(BACK_GUARD_STATE, "");
@@ -33,5 +32,4 @@ export function guardBackNavigation(eventTarget: EventTarget, history: HistoryLi
   };
   pushGuard();
   eventTarget.addEventListener("popstate", onPopState);
-  return () => eventTarget.removeEventListener("popstate", onPopState);
 }
