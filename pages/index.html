@@ -225,6 +225,16 @@
         background: var(--ink);
         border-bottom: 1px solid var(--plum);
       }
+      /* The start screen's screenshot opens the game, so its Start walk button does what it shows. */
+      .shot-link {
+        display: block;
+        line-height: 0;
+        cursor: pointer;
+      }
+      .shot-link:focus-visible {
+        outline: 3px solid var(--yellow);
+        outline-offset: 6px;
+      }
       .art {
         display: flex;
         flex-wrap: wrap;
@@ -446,13 +456,14 @@
 
       <section class="hl" aria-labelledby="h-shop">
         <h2 id="h-shop">Grow the business</h2>
-        <img
-          class="shot"
-          src="/art/site/home-start.png"
-          width="360"
-          height="560"
-          alt="The start screen: the Pet shop on a Toronto street, Trista picked from four walkers, Duchess, Biscuit and Koda picked from nine dogs with more for sale, and Running shoes in the Pocket"
-        />
+        <a class="shot-link" href="/play/" aria-label="Play Dog Walker"
+          ><img
+            class="shot"
+            src="/art/site/home-start.png"
+            width="360"
+            height="560"
+            alt="The start screen: the Pet shop on a Toronto street, Trista picked from four walkers, Duchess, Biscuit and Koda picked from nine dogs with more for sale, and Running shoes in the Pocket"
+        /></a>
         <p>
           Pick a walker, your dogs and one gear item for your Pocket, then head out. Spend what you
           earn at the Pet shop on new dogs, dog slots and gear. Casey walks first; Ben joins when
