@@ -42,8 +42,9 @@ function pressedBy(action: HelpAction | undefined): Pressed | undefined {
   }
 }
 
-// A full-screen overlay listed after every scene but its picture's, so it draws over them. The
-// caller pauses itself and launches it (openHelp); on close, help resumes that scene.
+// A full-screen overlay listed after the scenes it opens over, the home screen and the pause
+// menu over the walk, and before its picture's scenes, which draw over it. The caller pauses
+// itself and launches it (openHelp); on close, help resumes that scene.
 export class HelpScene extends Scene {
   private page = 0;
   // The page whose picture shows.
