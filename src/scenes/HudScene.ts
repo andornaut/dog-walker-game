@@ -110,7 +110,15 @@ import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
 import { TimedGroup } from "./timedGroup";
-import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from "./uiKit";
+import {
+  addTagImage,
+  artFits,
+  cogIcon,
+  fadeAway,
+  imageIcon,
+  setDollarAmount,
+  soundIcon,
+} from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const BAR = walkBarLayout(LAYOUT.topBar);
@@ -528,19 +536,11 @@ export class HudScene extends Scene {
     if (dollar === undefined || money === undefined || money.text === amount) {
       return;
     }
-    setPixelText(money, `$${amount}`);
-    scalePixelText(money, 1, 0, 0);
-    const whole = inkSpan(money);
-    const wholeAdvance = money.width;
-    setPixelText(money, amount);
-    scalePixelText(money, 1, 0, 0);
-    const scale = cashScale(whole.right - whole.left);
-    const advance = (wholeAdvance - money.width) * scale;
-    const left = LAYOUT.topBar.x + cashLeft((whole.right - whole.left) * scale);
-    const x = left - whole.left * scale;
-    const top = LAYOUT.topBar.y + cashTop(scale);
-    scalePixelText(dollar, scale, x, top);
-    scalePixelText(money, scale, x + advance, top);
+    const { topBar } = LAYOUT;
+    setDollarAmount(dollar, money, amount, (inkWidth) => {
+      const scale = cashScale(inkWidth);
+      return { left: topBar.x + cashLeft(inkWidth * scale), scale, top: topBar.y + cashTop(scale) };
+    });
   }
 
   // The effect wells: each effect's unlit charm in its well, in the walk's order.

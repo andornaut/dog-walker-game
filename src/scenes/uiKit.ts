@@ -14,7 +14,7 @@ import {
 } from "../ui/interaction";
 import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText } from "../ui/phaser/pixelText";
+import { addPixelText, inkSpan, scalePixelText, setPixelText } from "../ui/phaser/pixelText";
 import {
   BUTTON_COLORS,
   type ButtonLook,
@@ -615,6 +615,27 @@ export function fadeAway(
     targets: [...parts],
     y: `-=${timing.rise}`,
   });
+}
+
+// The "$" and text in their labels, one font advance apart as "$<text>" sets them, at the scale
+// place picks from the pair's ink width at 1x, the ink's first column at its left and the
+// capitals' top at its top: the bank on the home screen's top bar and the walk bar's cash.
+export function setDollarAmount(
+  dollar: GameObjects.BitmapText,
+  amount: GameObjects.BitmapText,
+  text: string,
+  place: (inkWidth: number) => { left: number; scale: number; top: number },
+): void {
+  setPixelText(amount, `$${text}`);
+  scalePixelText(amount, 1, 0, 0);
+  const whole = inkSpan(amount);
+  const wholeAdvance = amount.width;
+  setPixelText(amount, text);
+  scalePixelText(amount, 1, 0, 0);
+  const { left, scale, top } = place(whole.right - whole.left);
+  const x = left - whole.left * scale;
+  scalePixelText(dollar, scale, x, top);
+  scalePixelText(amount, scale, x + (wholeAdvance - amount.width) * scale, top);
 }
 
 // Kept by clearScene, so a tap's sparkle plays on while the screen is drawn again under it.

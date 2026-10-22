@@ -169,6 +169,7 @@ import {
   imageIcon,
   type SelectTile,
   type SelectTileOptions,
+  setDollarAmount,
   showTag,
   soundIcon,
   tagFrame,
@@ -1263,14 +1264,11 @@ export class StartScene extends Scene {
       `$${dollarAmountText(save.bankCents)}`,
       `$${shortDollarAmountText(save.bankCents)}`,
     ]);
-    setPixelText(amount, text);
-    const whole = inkSpan(amount);
-    const wholeAdvance = amount.width;
-    setPixelText(amount, text.slice(1));
-    const x = bankLeft((whole.right - whole.left) * scale) - whole.left * scale;
-    const top = bank.capsY[scale];
-    scalePixelText(dollar, scale, x, top);
-    scalePixelText(amount, scale, x + (wholeAdvance - amount.width) * scale, top);
+    setDollarAmount(dollar, amount, text.slice(1), (inkWidth) => ({
+      left: bankLeft(inkWidth * scale),
+      scale,
+      top: bank.capsY[scale],
+    }));
     this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) => {
       const icon = imageIcon(this, "icon-logbook", x, y);
       return icon.length > 0
