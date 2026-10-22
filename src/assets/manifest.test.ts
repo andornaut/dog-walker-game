@@ -28,7 +28,7 @@ describe("parseManifest", () => {
       { expected: valid, manifest: valid, name: "a well-formed manifest", pick: (m) => m },
       {
         expected: [],
-        manifest: { fonts: [], images: [], sprites: [] },
+        manifest: { fonts: [], images: [], sounds: [], sprites: [] },
         name: "empty lists",
         pick: (m) => m.sprites,
       },
@@ -37,12 +37,6 @@ describe("parseManifest", () => {
         manifest: { ...valid, sprites: [sprite] },
         name: "a sprite's anchor",
         pick: (m) => m.sprites[0]?.anchor,
-      },
-      {
-        expected: [],
-        manifest: { ...valid, sounds: undefined },
-        name: "a missing sounds list as no sounds",
-        pick: (m) => m.sounds,
       },
       {
         expected: [{ key: "card-frame", png: "./images/card.frame.png" }],

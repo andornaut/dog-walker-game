@@ -74,17 +74,13 @@ const manifestSchema = v.pipe(
   record({
     fonts: list(record({ fnt: pathField, key: keyField, png: pathField })),
     images: list(record({ key: keyField, png: pathField })),
-    // Optional so a manifest exported before sounds existed still loads.
-    sounds: v.optional(
-      list(
-        record({
-          key: keyField,
-          loop: v.exactOptional(v.boolean("must be a boolean")),
-          m4a: pathField,
-          ogg: pathField,
-        }),
-      ),
-      [],
+    sounds: list(
+      record({
+        key: keyField,
+        loop: v.exactOptional(v.boolean("must be a boolean")),
+        m4a: pathField,
+        ogg: pathField,
+      }),
     ),
     sprites: list(
       record({

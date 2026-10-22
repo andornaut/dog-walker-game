@@ -103,6 +103,7 @@ describe("artManifestUrls", () => {
     const manifest = {
       fonts: [{ fnt: "fonts/body.fnt", key: "font-body", png: "fonts/body.png" }],
       images: [{ key: "card-skip", png: "images/card-skip.png" }],
+      sounds: [],
       sprites: [{ json: "sprites/dog.json", key: "dog-koda", png: "sprites/dog.png" }],
     };
     expect(artManifestUrls("/art", manifest)).toEqual([
@@ -121,6 +122,7 @@ describe("artManifestUrls", () => {
         { key: "card-skip", png: "images/card-skip.png" },
         { key: "logo", png: "images/logo.png" },
       ],
+      sounds: [],
       sprites: [{ json: "sprites/dog.json", key: "dog-koda", png: "sprites/dog.png" }],
     };
     expect(artManifestUrls("/art", manifest, new Set(["card-skip", "dog-koda"]))).toEqual([
@@ -133,7 +135,9 @@ describe("artManifestUrls", () => {
   });
 
   it("rejects a malformed manifest, as the game does", () => {
-    expect(() => artManifestUrls("/art", { fonts: [], images: [] })).toThrow("manifest.sprites");
+    expect(() => artManifestUrls("/art", { fonts: [], images: [], sounds: [] })).toThrow(
+      "manifest.sprites",
+    );
   });
 });
 
@@ -170,8 +174,8 @@ describe("artSoundUrls", () => {
       },
       {
         expected: { m4a: [], ogg: [] },
-        manifest: { fonts: [], images: [], sprites: [] },
-        name: "no files for a manifest without sounds",
+        manifest: { fonts: [], images: [], sounds: [], sprites: [] },
+        name: "no files for a manifest with no sounds",
       },
     ]) {
       expect(artSoundUrls("/art", manifest)).toEqual(expected);
