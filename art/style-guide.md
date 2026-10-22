@@ -157,6 +157,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 
 - Band colour by what opened the card: dred for an obstacle's encounter, purple for a fork's route.
 - Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge.
+- A lucky find's popup art (`card-lost-wallet-keep`) shows the one thing found, close up and larger than its road sprite, with no person. `card-petting-neighbor-take` is the exception: the find is the neighbor.
 - The art window is centred on the card's face: `card-frame` 3,15 77×58 with the illustration at 4,16; `card-frame-large` 6,30 154×116 with the illustration at 8,32.
 - A path card (`card-zone-<zone>`) samples its road strip to a cross street and repeats its backdrop's sky and scenery in miniature.
 

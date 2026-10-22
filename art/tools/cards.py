@@ -46,7 +46,7 @@ import glyphs  # noqa: E402
 import scene as sn  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
-from pixel import Grid, build as build_sprites, dk, to_image  # noqa: E402
+from pixel import Grid, bitmap, build as build_sprites, dk, edged, to_image  # noqa: E402
 from ui import chrome  # noqa: E402
 
 CW, CH = 83, 140
@@ -277,12 +277,48 @@ def thief_let_go():
 
 # ---------- lucky encounters ----------
 
+# The found wallet's $: 5x9, bold enough to read at 1x on the front bill.
+BILL_DOLLAR = ["..x..", ".xxxx", "x.x..", "x.x..", ".xxx.", "..x.x", "..x.x", "xxxx.", "..x.."]
+
+
+def found_wallet():
+    """44x34, the found wallet close up: a brown leather wallet, lit tan along its top and stitched, its
+    flap tab on the right with an amber snap, two green bills standing up out of it, the front one lit
+    along its top with a white $."""
+    g = edged(Grid(44, 34))
+    # the bills, the back one a shade darker and set left, standing up out of the wallet
+    g.rect(7, 2, 22, 16, "dgreen")
+    g.rect(7, 2, 22, 1, "green")
+    g.rect(13, 5, 22, 16, "green")
+    g.rect(13, 5, 22, 1, "lgrey")
+    g.rect(15, 7, 18, 1, "dgreen")
+    bitmap(g, 22, 8, BILL_DOLLAR, {"x": "white"})
+    # the wallet, its top edge lit and a stitched seam under it, shaded down the right and along the bottom
+    g.rect(3, 16, 38, 17, "brown")
+    g.rect(3, 16, 38, 1, "tan")
+    g.rect(3, 32, 38, 1, "dbrown")
+    g.rect(40, 16, 1, 17, "dbrown")
+    for x in range(5, 38, 3):
+        g.rect(x, 18, 2, 1, "dbrown")
+    # the flap tab with its snap
+    g.rect(28, 22, 13, 7, "dbrown")
+    g.rect(28, 22, 13, 1, "brown")
+    g.rect(33, 24, 3, 3, "amber")
+    g.p(33, 24, "yellow")
+    return g
+
+
 def wallet_keep():
+    """The found wallet, big and alone on the sidewalk, with a glint: a lucky find shows the thing found."""
     a = Art()
     a.ground("homeStretch")
-    a.paste(sn.frame("lost-wallet", "idle", 1), 12, 24)
-    a.coins([(28, 30), (34, 22), (40, 32)])
-    a.face("face-owner-zippy", "upset", 41, 12)
+    w = found_wallet()
+    img = to_image(w.outlined())
+    x, y = (AW - img.width) // 2, AH - img.height - 6
+    a.shadow(x + img.width // 2, y + img.height, img.width - 4)
+    a.paste(img, x, y)
+    a.sparkle(x + img.width - 2, y + 3)
+    a.sparkle(x + 2, y + 8)
     return a
 
 
