@@ -428,9 +428,8 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // Every obstacle kind that moves and some zone draws plays one of its movement's tags at each
-  // step it has. A lucky find that moves plays one where its art has one, and otherwise looks as
-  // it does standing (prizeMoverTag).
+  // Every obstacle or lucky find kind that moves and some zone draws plays one of its
+  // movement's tags at each step it has.
   const drawn = (kind: string) =>
     gameData.world.zones.some(({ weights }) =>
       [weights.obstacles, weights.minorObstacles, weights.luckyFinds].some(
@@ -452,16 +451,15 @@ describe("road object art", () => {
   const isLucky = (kind: string) =>
     Object.hasOwn(gameData.encounters, kind) &&
     gameData.encounters[kind as EncounterId].kind === "lucky";
-  it("tags every moving obstacle's sprite with a tag of its movement, at every step", () => {
+  it("tags every moving road item's sprite with a tag of its movement, at every step", () => {
     const moving = roadKinds.flatMap(({ art, entry, kind }) => {
-      if (!drawn(kind) || isLucky(kind)) {
+      if (!drawn(kind)) {
         return [];
       }
       const movement = "movement" in entry ? entry.movement : undefined;
-      const shown = art;
       return movement === undefined
         ? []
-        : [{ key: MOVER_SPRITE_KEYS[shown] ?? shown, tags: MOVING_TAGS[movement.kind] }];
+        : [{ key: MOVER_SPRITE_KEYS[art] ?? art, tags: MOVING_TAGS[movement.kind] }];
     });
     const missing = moving.flatMap(({ key, tags }) =>
       [1, ...variantSteps([key])].flatMap((step) => {

@@ -233,7 +233,7 @@ export function moverBodyTag(
 
 // The tag a moving prize's body plays, such as a lucky find that walks about, of those has says
 // its sprite has: while it moves, its movement's first tag; otherwise, and failing that, what it
-// plays standing, so a prize drawn with no movement tags looks as it does standing.
+// plays standing.
 export function prizeMoverTag(
   has: (tag: string) => boolean,
   movement: MovementKind,
