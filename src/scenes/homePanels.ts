@@ -37,14 +37,9 @@ function text(
   parent: GameObjects.Container,
   at: { x: number; y: number },
   value: string,
-  style: { color: number; font?: FontRole; maxWidth?: number; originX?: number },
+  style: { color: number; font?: FontRole; originX?: number },
 ): GameObjects.BitmapText {
-  const { maxWidth, ...rest } = style;
-  const label = addPixelText(scene, at.x, at.y, value, {
-    scale: TEXT_SCALE,
-    ...rest,
-    ...(maxWidth === undefined ? {} : { maxWidth }),
-  });
+  const label = addPixelText(scene, at.x, at.y, value, { scale: TEXT_SCALE, ...style });
   parent.add(label);
   return label;
 }
@@ -65,11 +60,6 @@ export function addAffordFrame(
   });
 }
 
-// A dim layer over the whole screen, under a card.
-function addScrim(scene: Scene, parent: GameObjects.Container): void {
-  parent.add(addDim(scene, SCREEN));
-}
-
 const CARD = HOME_LAYOUT.card;
 
 // A card height tall, centred on the screen.
@@ -82,17 +72,17 @@ function centredCard(height: number): Rect {
   };
 }
 
-// The card's frame, title band and close control; the content goes in a container placed at
-// the card.
+// A dim layer over the whole screen, then the card's frame, title band and close control; the
+// content goes in a container placed at the card.
 function drawCardFrame(
   scene: Scene,
   parent: GameObjects.Container,
   closePressed: boolean,
   rect: Rect,
   title: string,
-  content: GameObjects.Container = scene.add.container(0, 0),
-): GameObjects.Container {
-  addScrim(scene, parent);
+  content: GameObjects.Container,
+): void {
+  parent.add(addDim(scene, SCREEN));
   const { inset, titleY } = CARD.band;
   addDetailCard(scene, parent, rect, cardBand(rect));
   content.setPosition(rect.x, rect.y);
@@ -103,7 +93,6 @@ function drawCardFrame(
     originX: 0.5,
   });
   addCloseButton(scene, parent, closeControl(rect), closePressed);
-  return content;
 }
 
 // A nine-slice in parent, or the rect framed in code while its art is missing.
