@@ -241,33 +241,91 @@ const standingSpan = (
   laneSpan: footprintOf(tuned, kind).lanes,
   length: plannedHeight(tuned, road, zone, kind) + road.tallestPackBand,
 });
+type MoverEvent = { distance: number; kind: WalkItem["kind"]; mover: MoverPath };
+// The scroll since its cue over which moverSpans and moverContact look for a mover's contact.
+const MOVER_SCROLL = Math.ceil(4 * ROAD_LENGTH);
+// Each way a mover may move, the lanes of the game's road its hit box overlaps the pack in at a
+// scroll since its cue: a stalker's every way of choosing its steps, or the mover's one path.
+function moverContacts(
+  tuned: Real,
+  road: RoadGeometry,
+  zone: ZoneId,
+  event: MoverEvent,
+): ((since: number) => number[])[] {
+  const sight = road.sightLength;
+  const window = plannedHeight(tuned, road, zone, event.kind) + road.tallestPackBand;
+  const across = footprintOf(tuned, event.kind).lanes;
+  const paths = event.mover.motion === "approach" ? approachOutcomes(event.mover) : [event.mover];
+  return paths.map((path) => (since) => {
+    const place = moverPlace(LANE_COUNT, path, since);
+    const first = laneAt(place.lanePosition);
+    const overlaps = place.solid && place.travel >= sight && place.travel < sight + window;
+    return Array.from({ length: across }, (_unused, i) => first + i).filter(
+      (lane) => overlaps && lane >= 0 && lane < LANE_COUNT,
+    );
+  });
+}
+// The scroll between inside and outside, a pixel apart, where a mover's contact starts or
+// ends, halved down to a rounding error.
+function contactEdge(touches: (since: number) => boolean, inside: number, outside: number) {
+  let [touching, clear] = [inside, outside];
+  for (let i = 0; i < 50; i++) {
+    const middle = (touching + clear) / 2;
+    if (touches(middle)) {
+      touching = middle;
+    } else {
+      clear = middle;
+    }
+  }
+  return (touching + clear) / 2;
+}
+// The scroll over which a mover overlaps the pack in any lane, from the first moment to the
+// last, by its distance on the road: moverSpans' pixel steps put each end up to a pixel late,
+// which shows two movers that meet the pack side by side as a gap of under a pixel.
+function moverContact(
+  tuned: Real,
+  road: RoadGeometry,
+  zone: ZoneId,
+  event: MoverEvent,
+): { end: number; start: number } {
+  const ends = moverContacts(tuned, road, zone, event).flatMap((lanesAt) => {
+    const touches = (since: number) => lanesAt(since).length > 0;
+    const touching = Array.from({ length: MOVER_SCROLL }, (_, since) => since).filter(touches);
+    if (touching.length === 0) {
+      return [];
+    }
+    const [first, last] = [itemAt(touching, 0), itemAt(touching, touching.length - 1)];
+    return [
+      {
+        end: contactEdge(touches, last, last + 1),
+        start: first === 0 ? 0 : contactEdge(touches, first, first - 1),
+      },
+    ];
+  });
+  const at = (since: number) => event.distance + since - road.sightLength;
+  return {
+    end: at(Math.max(...ends.map(({ end }) => end))),
+    start: at(Math.min(...ends.map(({ start }) => start))),
+  };
+}
 // A pixel-long span for each pixel of scroll a mover overlaps the pack in each lane of the
 // game's road it covers.
 function moverSpans(
   tuned: Real,
   road: RoadGeometry,
   zone: ZoneId,
-  event: { distance: number; kind: WalkItem["kind"]; mover: MoverPath },
+  event: MoverEvent,
 ): BlockingSpan[] {
   const sight = road.sightLength;
-  const window = plannedHeight(tuned, road, zone, event.kind) + road.tallestPackBand;
-  const across = footprintOf(tuned, event.kind).lanes;
-  // A stalker's every way of choosing its steps.
-  const paths = event.mover.motion === "approach" ? approachOutcomes(event.mover) : [event.mover];
-  return paths.flatMap((path) =>
-    Array.from({ length: Math.ceil(4 * ROAD_LENGTH) }, (_, since) => {
-      const place = moverPlace(LANE_COUNT, path, since);
-      const first = laneAt(place.lanePosition);
-      const overlaps = place.solid && place.travel >= sight && place.travel < sight + window;
-      return Array.from({ length: across }, (_unused, i) => first + i)
-        .filter((lane) => overlaps && lane >= 0 && lane < LANE_COUNT)
-        .map((lane) => ({
-          distance: event.distance + since - sight,
-          lane,
-          laneSpan: 1,
-          length: 1,
-        }));
-    }).flat(),
+  return moverContacts(tuned, road, zone, event).flatMap((lanesAt) =>
+    Array.from({ length: MOVER_SCROLL }, (_, since) =>
+      lanesAt(since).map((lane) => ({
+        distance: event.distance + since - sight,
+        lane,
+        laneSpan: 1,
+        length: 1,
+      })),
+    ).flat(),
   );
 }
 // Every lane-blocking spawn's spans on the game's road: a standing one's, or a mover's as it
@@ -1692,14 +1750,37 @@ describe("movers", { timeout: 60_000 }, () => {
     { pack: "the game's pack", road: GAME_ROAD, taller: 0 },
     { pack: "a taller pack", road: TALL_PACK_ROAD, taller: TALLER },
   ];
-  it("keeps every move passable in every zone, at the shares, at a share of 1 and hopping", () => {
-    for (const { road, tuned, zone } of worlds.flatMap(({ name, tuned }, i) =>
+  // The data with the minor obstacles' counts changed as given.
+  const withMinorCounts = (counts: Partial<Real["tuning"]["counts"]>, tuned: Real): Real => ({
+    ...tuned,
+    tuning: { ...tuned.tuning, counts: { ...tuned.tuning.counts, ...counts } },
+  });
+  // Every world, pack and zone of the passability check, each world's data as retune makes it.
+  const passableCases = (retune: (tuned: Real) => Real = (tuned) => tuned) =>
+    worlds.flatMap(({ tuned }, i) =>
       packs
         .slice(0, i === 1 ? 2 : 1)
-        .flatMap(({ pack, road, taller }) =>
-          ZONE_IDS.map((zone) => ({ name, pack, road, tuned: widerRows(tuned, taller), zone })),
+        .flatMap(({ road, taller }) =>
+          ZONE_IDS.map((zone) => ({ road, tuned: widerRows(retune(tuned), taller), zone })),
         ),
-    )) {
+    );
+  it("keeps every move passable in every zone, at the shares, at a share of 1 and hopping", () => {
+    expectPassable(passableCases());
+  });
+  // Denser minor obstacles than the game's: the last zone's count rises by the gain for each
+  // zone walked before it.
+  it.each([
+    { counts: { minorObstaclesGainPerZone: 1 } },
+    { counts: { minorObstaclesGainPerZone: 2 } },
+    { counts: { minorObstaclesGainPerZone: 3 } },
+    { counts: { minorObstaclesFirstZone: 54, minorObstaclesGainPerZone: 2 } },
+  ])("keeps every move passable with more minor obstacles: $counts", ({ counts }) => {
+    expectPassable(passableCases((tuned) => withMinorCounts(counts, tuned)));
+  });
+  function expectPassable(
+    cases: readonly { road: RoadGeometry; tuned: Real; zone: ZoneId }[],
+  ): void {
+    for (const { road, tuned, zone } of cases) {
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
       const steps = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9);
       const fit = road.tallestPackBand + steps * STEP_SECONDS * walkScrollSpeed(tuned, zoned);
@@ -1732,14 +1813,14 @@ describe("movers", { timeout: 60_000 }, () => {
               start: event.distance,
             };
           }
-          const touched = moverSpans(tuned, road, zone, { ...event, mover: event.mover });
-          const from = Math.min(...touched.map(({ distance }) => distance));
-          const to = Math.max(...touched.map(({ distance }) => distance + 1));
+          const moving = { ...event, mover: event.mover };
+          const touched = moverSpans(tuned, road, zone, moving);
+          const { end, start } = moverContact(tuned, road, zone, moving);
           return {
-            end: to - road.tallestPackBand,
+            end: end - road.tallestPackBand,
             kind: event.kind,
             lanes: new Set(touched.map(({ lane }) => lane)),
-            start: from,
+            start,
           };
         });
         for (const near of contacts.filter(({ lanes }) => lanes.size > 0)) {
@@ -1761,7 +1842,7 @@ describe("movers", { timeout: 60_000 }, () => {
         }
       }
     }
-  });
+  }
 
   it("plans the same movers for the same seed", () => {
     for (const { tuned } of [{ name: "every mover", tuned: everyMover }]) {
