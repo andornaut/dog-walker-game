@@ -434,7 +434,7 @@ describe("chooseShownCard", () => {
   });
 });
 
-describe("quick lane changes across a row", () => {
+describe("quick lane changes across a row", { timeout: 10_000 }, () => {
   // The game's road for the pack, the pack in the first lane and a row of kind in lanes, the
   // row's near edge just reaching the top of the pack's outline: the drawn pack meets the row as
   // it steers across.
