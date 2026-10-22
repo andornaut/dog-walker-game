@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../help/helpLayout";
-import type { Rect } from "../lib/rect";
 import { cents } from "../rules/units";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { inside } from "../testing/rects";
 import { newPlayerSave } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -32,12 +32,6 @@ const lines = rows.map((row) =>
   }),
 );
 
-const inside = (outer: Rect, inner: Rect) =>
-  inner.x >= outer.x &&
-  inner.y >= outer.y &&
-  inner.x + inner.width <= outer.x + outer.width &&
-  inner.y + inner.height <= outer.y + outer.height;
-
 describe("the purchase confirm's layout", () => {
   it("centres the card on the screen", () => {
     const { card } = LAYOUT;
@@ -51,7 +45,7 @@ describe("the purchase confirm's layout", () => {
       const button = LAYOUT.buttons[choice];
       expect(button.width).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
       expect(button.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
-      expect(inside(LAYOUT.card, button)).toBe(true);
+      expect(inside(button, LAYOUT.card)).toBe(true);
     },
   );
 
@@ -61,7 +55,7 @@ describe("the purchase confirm's layout", () => {
   });
 
   it.each(["band", "well"] as const)("keeps the %s on the card", (part) => {
-    expect(inside(LAYOUT.card, LAYOUT[part])).toBe(true);
+    expect(inside(LAYOUT[part], LAYOUT.card)).toBe(true);
   });
 
   // Each line's font, its capitals' top and the lowest ink of its every text, as drawn at 2x.

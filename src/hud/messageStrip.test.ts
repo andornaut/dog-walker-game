@@ -12,6 +12,7 @@ import { bumpHearts } from "../rules/run";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
+import { inside } from "../testing/rects";
 import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -175,12 +176,6 @@ describe("messageIconKey", () => {
     expect(wrong).toEqual([]);
   });
 });
-
-const inside = (inner: Rect, outer: Rect) =>
-  inner.x >= outer.x &&
-  inner.y >= outer.y &&
-  inner.x + inner.width <= outer.x + outer.width &&
-  inner.y + inner.height <= outer.y + outer.height;
 
 describe("messageStripLayout", () => {
   it("keeps the strip in the backdrop band under the walk bar, with its icon and rows inside", () => {

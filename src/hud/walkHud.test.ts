@@ -18,6 +18,7 @@ import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { LONE } from "../testing/packPlaces";
+import { inside } from "../testing/rects";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { maxEffects } from "./effectIcons";
@@ -54,12 +55,6 @@ const centre = (rect: Rect): Point => ({
   x: rect.x + Math.floor(rect.width / 2),
   y: rect.y + Math.floor(rect.height / 2),
 });
-const inside = (inner: Rect, outer: Rect) =>
-  inner.x >= outer.x &&
-  inner.y >= outer.y &&
-  inner.x + inner.width <= outer.x + outer.width &&
-  inner.y + inner.height <= outer.y + outer.height;
-
 const BODY = fontFileMetrics("font-body");
 
 // The columns a line inks in the body font at 1x, from its left edge to its last ink.

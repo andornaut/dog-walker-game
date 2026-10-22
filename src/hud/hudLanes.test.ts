@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
-import type { Rect } from "../lib/rect";
+import { type Rect, rectsOverlap } from "../lib/rect";
 import { amountText, firedByText } from "../rules/causes";
 import { payFor } from "../rules/run";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
@@ -34,10 +34,6 @@ const BODY = fontFileMetrics("font-body");
 const lanes = hudLanes(BODY, layout);
 const messages = messageStripLayout(BODY).panel;
 
-function overlaps(a: Rect, b: Rect): boolean {
-  return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-}
-
 describe("hudLanes", () => {
   it("keeps the lanes apart from each other, the walk bar, the road and the cards' headers", () => {
     const slotPairs = layout.dogSlots.flatMap((slot, i): [string, Rect, Rect][] => {
@@ -58,7 +54,7 @@ describe("hudLanes", () => {
       ["the owners' tabs and the message strip", lanes.ownerTabs, messages],
       ...slotPairs,
     ];
-    expect(pairs.filter(([, a, b]) => overlaps(a, b)).map(([name]) => name)).toEqual([]);
+    expect(pairs.filter(([, a, b]) => rectsOverlap(a, b)).map(([name]) => name)).toEqual([]);
   });
 
   it("keeps every lane on screen, with one heart label per slot and each owner tab in its lane", () => {

@@ -4,6 +4,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { itemAt } from "../lib/arrays";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
+import { inside } from "../testing/rects";
 import { CARD_HEADER } from "../ui/cardRow";
 import { cardCharmsAt, CHARM, charmRingSize, charmRowHeight } from "./buffLayout";
 import {
@@ -61,11 +62,6 @@ const SCREEN = screenLayout(SCREEN_CONFIG);
 const WALK = SCREEN.walkView;
 const bottom = (rect: Rect) => rect.y + rect.height;
 const right = (rect: Rect) => rect.x + rect.width;
-const inside = (outer: Rect, inner: Rect) =>
-  inner.x >= outer.x &&
-  inner.y >= outer.y &&
-  right(inner) <= right(outer) &&
-  bottom(inner) <= bottom(outer);
 
 // Each count of cards, and each card in it, with the fork's Head home under the row.
 const ROWS = cardRows(MAX_CARD_OPTIONS, WALK);
@@ -92,7 +88,7 @@ describe("the card row's block", () => {
   it("puts Head home under the charm row, inside the walk view", () => {
     const cards = itemAt(itemAt(ROWS, 0), 0);
     expect(HEAD_HOME.y).toBe(bottom(cards) + charmRowHeight(1) + CARD_LAYOUT.forkHome.gap);
-    expect(inside(WALK, HEAD_HOME)).toBe(true);
+    expect(inside(HEAD_HOME, WALK)).toBe(true);
   });
 
   it("centres the enlarged card and its charm row in the walk view", () => {
@@ -151,7 +147,7 @@ describe("a card's charms", () => {
       for (const ring of rings) {
         expect(ring.y).toBe(bottom(card) + CHARM.under);
         expect(bottom(ring)).toBe(bottom(card) + charmRowHeight(scale));
-        expect(inside(WALK, ring)).toBe(true);
+        expect(inside(ring, WALK)).toBe(true);
         for (const other of [...row, ...controls]) {
           expect(rectsOverlap(ring, other)).toBe(false);
         }

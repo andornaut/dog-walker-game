@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { wrapWords } from "../lib/lines";
-import { type Rect } from "../lib/rect";
+import { rectsOverlap } from "../lib/rect";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
+import { inside } from "../testing/rects";
 import { closeFace } from "../ui/closeControl";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { helpBody } from "./helpBody";
@@ -17,15 +18,6 @@ import {
   tapRect,
 } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
-
-const overlaps = (a: Rect, b: Rect) =>
-  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-
-const encloses = (outer: Rect, inner: Rect) =>
-  inner.x >= outer.x &&
-  inner.y >= outer.y &&
-  inner.x + inner.width <= outer.x + outer.width &&
-  inner.y + inner.height <= outer.y + outer.height;
 
 describe("tapRect", () => {
   it("grows small art about its centre to the minimum, keeps a larger side and stays on screen", () => {
@@ -58,10 +50,10 @@ describe("help tap targets", () => {
       expect(target.width).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
       expect(target.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
     }
-    expect(encloses(CLOSE_HIT_RECT, closeFace(HELP_LAYOUT.close))).toBe(true);
-    dotRects(7).forEach((dot) => expect(encloses(tapRect(dot), dot)).toBe(true));
+    expect(inside(closeFace(HELP_LAYOUT.close), CLOSE_HIT_RECT)).toBe(true);
+    dotRects(7).forEach((dot) => expect(inside(dot, tapRect(dot))).toBe(true));
     targets.forEach((a, i) => {
-      targets.slice(i + 1).forEach((b) => expect(overlaps(a, b)).toBe(false));
+      targets.slice(i + 1).forEach((b) => expect(rectsOverlap(a, b)).toBe(false));
     });
   });
 });
