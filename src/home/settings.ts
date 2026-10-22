@@ -3,6 +3,7 @@ import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { textFitStylesOnLines } from "../ui/textFit";
+import { cardBand, HOME_LAYOUT } from "./homeLayout";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
 export const VOLUME_STEPS = 20;
@@ -104,9 +105,6 @@ export const SWITCH_NOTE_FIT = {
 };
 
 const PANEL = { width: 248 };
-// The card's title band, inset from its top and sides, with the title's capitals titleY under
-// the card's top.
-const BAND = { height: 24, inset: 6, titleY: 13 };
 // The rows start under the band; the panel ends this far under the last.
 const ROWS_TOP = 38;
 const PANEL_FOOT = 14;
@@ -129,13 +127,9 @@ export function settingsLayout(
     return row;
   });
   const panel = { ...PANEL, height, x, y };
+  const band = cardBand(panel);
   return {
-    band: {
-      height: BAND.height,
-      width: PANEL.width - 2 * BAND.inset,
-      x: x + BAND.inset,
-      y: y + BAND.inset,
-    },
+    band,
     close: closeControl(panel),
     panel,
     rows,
@@ -145,7 +139,7 @@ export function settingsLayout(
       x: row.x + SEPARATOR_INSET,
       y: row.y,
     })),
-    title: { x: x + PANEL.width / 2, y: y + BAND.titleY },
+    title: { x: x + PANEL.width / 2, y: band.y + HOME_LAYOUT.card.band.titleY },
     track: { dy: 26, height: 10, knobWidth: 10, width: 216, x: x + 16 },
   };
 }

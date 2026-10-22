@@ -1,6 +1,6 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../lib/rect";
-import { HOME_LAYOUT } from "./homeLayout";
+import { cardBand, HOME_LAYOUT } from "./homeLayout";
 import type { ConfirmChoice } from "./purchaseConfirm";
 
 // The purchase confirm: the screen dimmed, and a card centred on it with its title band, the
@@ -18,12 +18,7 @@ const card: Rect = {
   y: (SCREEN_CONFIG.height - HEIGHT) / 2,
 };
 const centerX = card.x + WIDTH / 2;
-const band: Rect = {
-  height: CARD.band.height,
-  width: WIDTH - 2 * CARD.band.inset,
-  x: card.x + CARD.band.inset,
-  y: card.y + CARD.band.inset,
-};
+const band = cardBand(card);
 const well: Rect = {
   height: CARD.well.size,
   width: CARD.well.size,

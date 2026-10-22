@@ -3,6 +3,7 @@ import { closeControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { scrollbarRects } from "../ui/scrollbar";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { HOME_LAYOUT } from "./homeLayout";
 import { SHOP_TABS } from "./shop";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
@@ -20,7 +21,8 @@ const LIST = { height: 431, width: 322, x: PANEL.x + 8, y: 117 };
 const LIST_UNSCROLLED = { ...LIST, width: PANEL.width - 16 };
 
 export const SHOP_LAYOUT = {
-  band: { height: 24, inset: 6, titleX: 16, titleY: 7 },
+  // The detail card's title band, the title from titleX.
+  band: { ...HOME_LAYOUT.card.band, titleX: 16 },
   close: closeControl(PANEL),
   // The Dogs tab: the slot heading and rows, then the dog heading and rows.
   dogs: {

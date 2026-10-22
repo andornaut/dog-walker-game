@@ -352,6 +352,13 @@ function cardTextRows(
   return { bottom, tops };
 }
 
+// The title band across the top of a card drawn as the detail card is, card.band.inset inside
+// its top and sides.
+export function cardBand(card: Rect): Rect {
+  const { height, inset } = HOME_LAYOUT.card.band;
+  return { height, width: card.width - 2 * inset, x: card.x + inset, y: card.y + inset };
+}
+
 // How wide the detail card's rows beside the well and under it may be.
 export const CARD_TEXT_ROOM = {
   beside: HOME_LAYOUT.card.width - HOME_LAYOUT.card.besideX - HOME_LAYOUT.card.pad,

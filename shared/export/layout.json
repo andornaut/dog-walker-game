@@ -2124,8 +2124,8 @@
       "band": {
         "height": 24,
         "inset": 6,
-        "titleX": 16,
-        "titleY": 7
+        "titleY": 7,
+        "titleX": 16
       },
       "close": {
         "hit": {
