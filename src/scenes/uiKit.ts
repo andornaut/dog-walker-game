@@ -158,18 +158,13 @@ const BUTTON_TAGS: Readonly<Record<ButtonLook, readonly string[]>> = {
 export const BUTTON_PRESS_PX = 2;
 const BUTTON_LIP_PX = 4;
 
-// A disabled button drawn in code: a flat grey face in an ink line, pressPx down with no
-// lip, so it never looks raised.
-export function drawDisabledButton(
-  g: GameObjects.Graphics,
-  lipPx: number,
-  pressPx: number,
-  rect: Rect,
-): void {
+// A disabled button drawn in code: a flat grey face in an ink line at the pressed depth with
+// no lip, so it never looks raised.
+function drawDisabledButton(g: GameObjects.Graphics, rect: Rect): void {
   drawFramedRect(
     g,
     { border: PALETTE.ink, fill: PALETTE[DISABLED_COLORS.face] },
-    { ...rect, height: rect.height - lipPx, y: rect.y + pressPx },
+    { ...rect, height: rect.height - BUTTON_LIP_PX, y: rect.y + BUTTON_PRESS_PX },
   );
 }
 
@@ -194,7 +189,7 @@ export function buttonFaces(
     }
     const g = scene.add.graphics();
     if (lip === null) {
-      drawDisabledButton(g, BUTTON_LIP_PX, BUTTON_PRESS_PX, rect);
+      drawDisabledButton(g, rect);
       return g;
     }
     const pressed = i === 1;
