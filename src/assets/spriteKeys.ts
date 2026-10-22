@@ -240,7 +240,7 @@ export function prizeMoverTag(
   moving: boolean,
   halted: boolean,
 ): string | undefined {
-  const motion = moving && movement !== "still" ? MOVING_TAGS[movement] : [];
+  const motion = moving ? MOVING_TAGS[movement] : [];
   return [...motion, ...(halted ? STANDING_TAGS.halted : STANDING_TAGS.walking)].find(has);
 }
 
