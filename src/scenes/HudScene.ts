@@ -287,9 +287,7 @@ export class HudScene extends Scene {
     onSceneEvent(this, run.events, FORGIVEN_EVENT, (cue: ForgivenCue) => this.forgive(cue));
     onSceneEvent(this, run.events, BUFF_GLINT_EVENT, (item: EffectItem) => this.glint(item));
     onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.sayHint(hint));
-    onSceneEvent(this, run.events, MESSAGE_EVENT, ({ icon, text }: MessageLine) =>
-      this.messages.say(icon, text),
-    );
+    onSceneEvent(this, run.events, MESSAGE_EVENT, (line: MessageLine) => this.messages.say(line));
     onSceneEvent(this, run.events, QUIPS_EVENT, (quips: OwnerQuip[]) => this.sayQuips(quips));
     if (picture !== undefined) {
       return;
@@ -923,7 +921,7 @@ export class HudScene extends Scene {
   // jumps the hints waiting their turn.
   private sayHint(hint: RaisedHint): void {
     markHintShown(this, hint.id);
-    this.messages.say("hint", hint.text, hintJumpsQueue(gameData, hint.id));
+    this.messages.say({ icon: "hint", text: hint.text }, hintJumpsQueue(gameData, hint.id));
   }
 
   // Each badge earned on the way, on the message strip.
@@ -934,7 +932,7 @@ export class HudScene extends Scene {
         name: achievement?.name ?? id,
       });
       soundboardOf(this).play("badge");
-      this.messages.say("achievement", text);
+      this.messages.say({ icon: "achievement", text });
     }
   }
 
@@ -954,7 +952,8 @@ export class HudScene extends Scene {
         placeInPack(run, dog),
         gameData.dogs[dog],
       );
-      this.messages.say({ dog, kind: "owner", mood: faceMood(gameData, max, hearts) }, text);
+      const icon = { dog, kind: "owner", mood: faceMood(gameData, max, hearts) } as const;
+      this.messages.say({ icon, text });
     }
   }
 }

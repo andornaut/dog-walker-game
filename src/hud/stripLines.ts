@@ -3,8 +3,10 @@ import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
+import type { FaceMood } from "../rules/treats";
 import { cents } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
+import { type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
 import type { MessageLine } from "./messageStrip";
 import { MOMENTS } from "./moments";
 import { STRIP_LINE_FIELDS } from "./runText";
@@ -23,7 +25,33 @@ function line<K extends StripKey>(
   return fillLine(STRIP_LINE_FIELDS, data.runText.strip, key, fields);
 }
 
-const ownerOf = (data: StripData, dog: DogId) => data.dogs[dog].owner.name;
+// The strip's lines that name an owner, each led inline by the owner's face in a mood: upset
+// on a heart loss, happy on a gain, neutral otherwise.
+export const STRIP_OWNER_MOODS = {
+  fired: "upset",
+  kindWords: "neutral",
+  lowHearts: "upset",
+  muddyHearts: "upset",
+  plainHit: "upset",
+  treat: "happy",
+} as const satisfies Partial<Record<StripKey, FaceMood>>;
+
+type OwnerKey = keyof typeof STRIP_OWNER_MOODS;
+type OwnerFields<K extends OwnerKey> = Exclude<(typeof STRIP_LINE_FIELDS)[K][number], "owner">;
+
+// The line at key, its {owner} the owner of dog's name led by their face.
+function ownerLine<K extends OwnerKey>(
+  data: StripData,
+  key: K,
+  dog: DogId,
+  fields: Readonly<Record<OwnerFields<K>, string>>,
+): FaceText {
+  const owner = ownerFaceText(data, STRIP_OWNER_MOODS[key], dog);
+  const all = { ...fields, owner } as Readonly<
+    Record<(typeof STRIP_LINE_FIELDS)[K][number], FaceText | string>
+  >;
+  return fillFaceLine(STRIP_LINE_FIELDS, data.runText.strip, key, all);
+}
 
 // A plain obstacle that landed on dog: a dodge, or the hearts its owner lost. obstacle is the
 // obstacle's name. A bump that cost nothing, such as one Second chance forgave whole, says nothing:
@@ -42,11 +70,10 @@ export function bumpLine(
   if (change === null || change.after === change.before) {
     return null;
   }
-  const owner = ownerOf(data, bump.dog);
   const hearts = String(change.before - change.after);
   return {
     icon: "bump",
-    text: line(data, "plainHit", { dog, hearts, obstacle: name, owner }),
+    ...ownerLine(data, "plainHit", bump.dog, { dog, hearts, obstacle: name }),
   };
 }
 
@@ -65,8 +92,8 @@ export function forgivenLines(
         ? [data.walkers[cause.source.walker].perk]
         : [],
     )[0];
-    const text = line(data, "kindWords", { owner: ownerOf(data, change.dog) });
-    return [{ icon: perk === undefined ? "hint" : { kind: "perk", perk }, text }];
+    const said = ownerLine(data, "kindWords", change.dog, {});
+    return [{ icon: perk === undefined ? "hint" : { kind: "perk", perk }, ...said }];
   });
 }
 
@@ -78,10 +105,9 @@ export function treatLine(data: StripData, change: HeartChange | null): MessageL
   const { dog } = change;
   return {
     icon: "treat",
-    text: line(data, "treat", {
+    ...ownerLine(data, "treat", dog, {
       dog: data.dogs[dog].name,
       hearts: String(change.after - change.before),
-      owner: ownerOf(data, dog),
     }),
   };
 }
@@ -92,7 +118,7 @@ export function lowHeartsLines(data: StripData, changes: readonly Change[]): Mes
     change.kind === "hearts" &&
     change.after === MOMENTS.lowHearts &&
     change.before > MOMENTS.lowHearts
-      ? [{ icon: "lastHeart", text: line(data, "lowHearts", { owner: ownerOf(data, change.dog) }) }]
+      ? [{ icon: "lastHeart", ...ownerLine(data, "lowHearts", change.dog, {}) }]
       : [],
   );
 }
@@ -116,10 +142,9 @@ export function muddyHeartsLines(
       ? [
           {
             icon: "lastHeart",
-            text: line(data, "muddyHearts", {
+            ...ownerLine(data, "muddyHearts", change.dog, {
               cost: String(cost),
               hearts: String(change.after),
-              owner: ownerOf(data, change.dog),
             }),
           },
         ]
@@ -128,8 +153,7 @@ export function muddyHeartsLines(
 }
 
 export function firedLine(data: StripData, dog: DogId): MessageLine {
-  const fields = { dog: data.dogs[dog].name, owner: ownerOf(data, dog) };
-  return { icon: "fired", text: line(data, "fired", fields) };
+  return { icon: "fired", ...ownerLine(data, "fired", dog, { dog: data.dogs[dog].name }) };
 }
 
 // A dog that started straining toward a squirrel. A pull the player steers away from is quiet.

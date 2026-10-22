@@ -675,6 +675,23 @@
       84
     ],
     "textX": 34,
+    "inlineFace": {
+      "face": 20,
+      "gap": 4,
+      "scale": 0.5,
+      "at1x": {
+        "framed": 12,
+        "gap": 2,
+        "rise": 3,
+        "scale": 0.5
+      },
+      "at2x": {
+        "framed": 22,
+        "gap": 4,
+        "rise": 5,
+        "scale": 1
+      }
+    },
     "ownerLead": {
       "face": 20,
       "nameGap": 2,

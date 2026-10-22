@@ -6,15 +6,23 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, QuipMoment } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
-import { fillLine, fillNames } from "../lib/lines";
+import { fillNames } from "../lib/lines";
 import { type Rect } from "../lib/rect";
 import { bumpHearts } from "../rules/run";
-import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
+import { bodyRunWidth } from "../testing/bodyFont";
+import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import {
+  type FaceRow,
+  type FaceText,
+  fillFaceText,
+  fittingFaceRows,
+  inlineFaceBox,
+  ownerFaceText,
+} from "./faceText";
 import {
   EMPTY_MESSAGE_STRIP,
   type LeadSlot,
@@ -210,13 +218,13 @@ describe("messageLinePanel", () => {
 // Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
 // owner and obstacle as each neighborhood names it, with two-digit counts and the largest
 // amounts.
-function everyStripLine(): string[] {
+function everyStripLine(): FaceText[] {
   const { strip } = gameData.runText;
-  const line = (key: keyof typeof STRIP_LINE_FIELDS, fields: Record<string, string>) =>
-    fillLine(STRIP_LINE_FIELDS, strip, key, fields as never);
-  const dogs = Object.values(gameData.dogs).map((dog) => ({
-    dog: dog.name,
-    owner: dog.owner.name,
+  const line = (key: keyof typeof STRIP_LINE_FIELDS, fields: Record<string, FaceText | string>) =>
+    fillFaceText(strip[key], fields);
+  const dogs = (Object.keys(gameData.dogs) as DogId[]).map((id) => ({
+    dog: gameData.dogs[id].name,
+    owner: ownerFaceText(gameData, "neutral", id),
   }));
   const obstacles = [
     ...new Set(Object.values(gameData.minorObstacles).map(({ name }) => name.toLowerCase())),
@@ -227,11 +235,13 @@ function everyStripLine(): string[] {
     testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
   );
   return [
-    ...Object.values(gameData.hints).map(({ text }) => text),
+    ...Object.values(gameData.hints).map(({ text }) => ({ text })),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
-    ...Object.values(strip.debuffStart).map((start) => fillNames(start, { seconds: "99" })),
-    ...Object.values(strip.debuffEnd),
-    strip.luckyNeighbor,
+    ...Object.values(strip.debuffStart).map((start) => ({
+      text: fillNames(start, { seconds: "99" }),
+    })),
+    ...Object.values(strip.debuffEnd).map((text) => ({ text })),
+    { text: strip.luckyNeighbor },
     line("fullPackHome", { amount }),
     line("luckyWallet", { amount }),
     ...dogs.flatMap(({ dog, owner }) => [
@@ -249,30 +259,46 @@ function everyStripLine(): string[] {
   ];
 }
 
-// Every line wraps at 2x onto the strip's rows, each no wider than its room, none left out;
-// under the debuff bars, it fits the one-row strip in TEXT_FIT_STYLES.
+// A line with its typographic marks made plain, as the font draws it; each mark is one
+// character either way, so its owners' names keep their places.
+const plain = (line: FaceText): FaceText => ({ ...line, text: plainMarks(line.text) });
+// A row's text, its runs joined: a face sits between a run's trailing space and its name.
+const rowText = (row: FaceRow) => row.texts.map(({ text }) => text).join("");
+const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
+const width2x = (run: string) => bodyRunWidth(AT_2X, run);
+const BOX_2X = inlineFaceBox(BODY, MESSAGE_STRIP.scale);
+// Whether the line fits room on one row in a style of TEXT_FIT_STYLES, as the one-row strip
+// sets it.
+function fitsOneRow(room: number, line: FaceText): boolean {
+  const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
+  const { rows } = fittingFaceRows(TEXT_FIT_STYLES, bodyRunWidth, boxAt, room, line);
+  return rows.length === 1 && rows.every((row) => row.width <= room);
+}
+
+// Every line wraps at 2x onto the strip's rows, each no wider than its room with each owner's
+// face inline, none left out; under the debuff bars, it fits the one-row strip in
+// TEXT_FIT_STYLES.
 describe("the strip's lines", () => {
   const { room } = messageStripLayout(BODY);
-  const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
 
   it("fits every line on the strip's rows, and on the one-row strip", () => {
-    const misfits = [...new Set(everyStripLine())].filter((said) => {
-      const text = plainMarks(said);
-      const rows = messageRows(width, room, text);
-      const one = fitInFont("font-body", TEXT_FIT_STYLES, MESSAGE_LINE.room, text);
-      return (
-        rows.join(" ") !== text.split(/\s+/).join(" ") ||
-        rows.length > MESSAGE_STRIP.rows ||
-        rows.some((row) => width(row) > room) ||
-        one.widest > MESSAGE_LINE.room
-      );
-    });
+    const misfits = everyStripLine()
+      .map(plain)
+      .filter((said) => {
+        const rows = messageRows(width2x, BOX_2X, room, said);
+        return (
+          rows.map(rowText).join(" ") !== said.text.split(/\s+/).join(" ") ||
+          rows.some((row) => row.width > room) ||
+          !fitsOneRow(MESSAGE_LINE.room, said)
+        );
+      })
+      .map(({ text }) => text);
     expect(misfits).toEqual([]);
   });
 
   it("leaves out text past the last row", () => {
     const many = Array.from({ length: 200 }, () => "Woof").join(" ");
-    expect(messageRows(width, room, many)).toHaveLength(MESSAGE_STRIP.rows);
+    expect(messageRows(width2x, BOX_2X, room, { text: many })).toHaveLength(MESSAGE_STRIP.rows);
   });
 });
 
@@ -357,7 +383,6 @@ describe("an owner's lead", () => {
 
   // Every walk quip of every owner wraps at 2x onto the strip's rows beside their lead, none
   // left out, and fits the one-row strip beside it under the bars in TEXT_FIT_STYLES.
-  const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
   it.each(OWNER_NAMES)(
     "fits every walk quip of %s's owner, %s, beside their lead",
     (dog, _name, ink) => {
@@ -366,13 +391,11 @@ describe("an owner's lead", () => {
       const misfits = WALK_QUIP_MOMENTS.flatMap((moment) => gameData.quips[dog][moment]).filter(
         (said) => {
           const text = plainMarks(said);
-          const rows = messageRows(width, strip.room, text);
+          const rows = messageRows(width2x, BOX_2X, strip.room, { text });
           return (
-            rows.join(" ") !== text.split(/\s+/).join(" ") ||
-            rows.some((row) => width(row) > strip.room) ||
-            lines.some(
-              ({ room }) => fitInFont("font-body", TEXT_FIT_STYLES, room, text).widest > room,
-            )
+            rows.map(rowText).join(" ") !== text.split(/\s+/).join(" ") ||
+            rows.some((row) => row.width > strip.room) ||
+            lines.some(({ room }) => !fitsOneRow(room, { text }))
           );
         },
       );

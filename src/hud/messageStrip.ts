@@ -1,16 +1,17 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
-import { wrapWords } from "../lib/lines";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";
+import { type FaceBox, type FaceRow, faceRows, type FaceText } from "./faceText";
 import { DEBUFF_BAR } from "./walkHud";
 
 // The message strip: what just happened, in a ui-panel across the top of the backdrop band's
 // flat sky, under the walk bar and clear of the cross street and the far road. It shows one
 // line, body text at 2x led by its 16x16 icon, or an owner's quip led by their face and name
-// (OWNER_LEAD), wrapped onto up to MESSAGE_STRIP.rows rows; the panel is as tall as the rows it
+// (OWNER_LEAD), wrapped onto up to MESSAGE_STRIP.rows rows; an owner the text names has their
+// face inline before their name (faceText.ts); the panel is as tall as the rows it
 // holds, and as the owner's lead. While debuff bars are up it moves under them and shows
 // the line on one row (messageLinePanel). A line waits its turn, shows, and fades out at the end
 // of its life. The strip shows while it has a line.
@@ -233,16 +234,22 @@ export function linePanels(body: FontMetrics, bars: number, bar: Rect = WALK_BAR
   return [...plain, ...plain.map((panel) => ownerLeadPanel(panel, lead))];
 }
 
-// A line's text broken at spaces into rows no wider than room, as width measures them, at
-// most MESSAGE_STRIP.rows of them: text past the last row is left out.
-export function messageRows(width: (row: string) => number, room: number, text: string): string[] {
-  return wrapWords(width, room, text).slice(0, MESSAGE_STRIP.rows);
+// A line broken at spaces outside its owners' names into rows no wider than room, as width
+// measures a run of text, each name led by its face in box, at most MESSAGE_STRIP.rows of them:
+// text past the last row is left out.
+export function messageRows(
+  width: (text: string) => number,
+  box: FaceBox,
+  room: number,
+  line: FaceText,
+): FaceRow[] {
+  return faceRows(width, box, room, line).slice(0, MESSAGE_STRIP.rows);
 }
 
-// icon: what leads the line, an icon or an owner's face and name.
-export interface MessageLine {
+// icon: what leads the line, an icon or an owner's face and name. Each owner its text names
+// (marks) is drawn led by their face, but for an owner whose face and name lead the line.
+export interface MessageLine extends FaceText {
   readonly icon: MessageLead;
-  readonly text: string;
 }
 
 // A line on the strip: id tells lines with the same text apart, and ageMs counts from when it

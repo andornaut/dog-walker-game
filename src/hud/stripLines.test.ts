@@ -18,6 +18,7 @@ import {
   luckyLine,
   muddyHeartsLines,
   pullLine,
+  STRIP_OWNER_MOODS,
   treatLine,
 } from "./stripLines";
 
@@ -108,6 +109,14 @@ describe("the strip's other lines", () => {
         [
           {
             icon: { kind: "perk", perk: gameData.walkers.casey.perk },
+            marks: [
+              {
+                at: strip.kindWords.indexOf("{owner}"),
+                dog: "koda",
+                length: owner.length,
+                mood: STRIP_OWNER_MOODS.kindWords,
+              },
+            ],
             text: fillNames(strip.kindWords, { owner }),
           },
         ],

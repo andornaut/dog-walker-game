@@ -24,6 +24,7 @@ import {
   LOW_CHIP_FIT,
   lowChipPlace,
   lowHeartDogs,
+  lowHeartsText,
   MOMENTS,
   newlyLow,
   PAYOUT_EVENT,
@@ -40,7 +41,6 @@ import {
 import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
 import { screenLayout } from "../layout/screenLayout";
-import { fillNames } from "../lib/lines";
 import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
@@ -53,6 +53,7 @@ import {
   pixelFontMetrics,
   placePixelText,
 } from "../ui/phaser/pixelText";
+import { addFaceRows, fitFaceRows } from "./faceTextView";
 import type { HudWalk } from "./hudWalk";
 import { onSceneEvent } from "./overlay";
 import { firstTag, playEffect, playTag } from "./sprites";
@@ -593,20 +594,25 @@ export class HudFeedback {
       return;
     }
     this.hooks.popOwner(dog, "worried", MOMENTS.lowCueMs);
-    const line = fillNames(gameData.runText.lowHearts, { owner: gameData.dogs[dog].owner.name });
-    const text = addPixelText(this.scene, 0, 0, line, { color: PALETTE.darkRed, scale: 2 });
-    const { style } = fitPixelText(text, LOW_CHIP_FIT, 0, 0);
-    const shown = { scale: style.scale, width: Math.ceil(text.width) };
+    const style = { color: PALETTE.darkRed, scale: 2 };
+    const set = fitFaceRows(this.scene, style, LOW_CHIP_FIT, lowHeartsText(gameData, dog));
+    const row = set.rows[0];
+    const shown = {
+      ...(row !== undefined && row.faces.length > 0 ? { face: set.box } : {}),
+      scale: set.style.scale,
+      width: Math.ceil(row?.width ?? 0),
+    };
     const body = pixelFontMetrics(this.scene, "body");
     const place = lowChipPlace(body, SCREEN_CONFIG.width, rect, shown);
-    placePixelText(text, place.text.x - place.box.x, place.text.y - place.box.y);
     const box = this.scene.add.graphics();
     drawFramedRect(
       box,
       { border: PALETTE.plum, fill: PALETTE.cream },
       { ...place.box, x: 0, y: 0 },
     );
-    const chip = this.scene.add.container(place.box.x, place.box.y, [box, text]).setDepth(DEPTH);
+    const at = { capsTop: place.text.y - place.box.y, x: place.text.x - place.box.x };
+    const text = addFaceRows(this.scene, at, { box: set.box, fit: set.style, style }, set.rows);
+    const chip = this.scene.add.container(place.box.x, place.box.y, [box, ...text]).setDepth(DEPTH);
     if (!still) {
       this.tween({ duration: MOMENTS.lowCueMs, targets: chip, y: chip.y - LOW_CHIP.rise });
     }

@@ -9,6 +9,7 @@ import { settingsLayout } from "../home/settings";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
+import { INLINE_FACE, inlineFaceBox } from "../hud/faceText";
 import { hudLanes } from "../hud/hudLanes";
 import {
   type LeadSlot,
@@ -143,9 +144,16 @@ export function layoutExport(
     // icon, the text column and its room, and each row's capitals top; its one-row panel
     // under one and two debuff bars; and an owner's quip's lead (OWNER_LEAD) for a name no
     // wider than the frame, on the strip and under one and two bars, with the panels it grows
-    // a one-row line to.
+    // a one-row line to. inlineFace: an owner's face inline before their name in walk text
+    // (INLINE_FACE), by the text's scale: the face's scale, the frame's side, the gap from the
+    // frame to the name, and how far the frame rises above the row's capitals.
     messageStrip: {
       ...messageStripLayout(body),
+      inlineFace: {
+        ...INLINE_FACE,
+        at1x: inlineFaceBox(body, 1),
+        at2x: inlineFaceBox(body, 2),
+      },
       ownerLead: {
         ...OWNER_LEAD,
         strip: ownerLead(body, stripLeadSlot(body), messagePanel(body, 1)),

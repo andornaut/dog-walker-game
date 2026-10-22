@@ -6,6 +6,7 @@ import type { Cents } from "../rules/units";
 import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import { type FaceBox, type FaceText, fillFaceText, ownerFaceText } from "./faceText";
 import type { ChangeLabel } from "./hudView";
 import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
 
@@ -242,9 +243,11 @@ export function newlyLow(before: readonly DogId[], now: readonly DogId[]): DogId
 // The low-hearts chip over its card, then rising rise pixels: its line on one line on a cream
 // box gap over the card's top, from dx in from the card's left but kept margin inside the
 // screen. The text sits padX in from the box's sides, its capitals padTop under the box's top
-// and its lowest ink padBottom over the box's bottom, in the body font's rows.
+// and its lowest ink padBottom over the box's bottom, in the body font's rows. The owner's
+// inline face keeps faceInset rows inside the box's top and bottom, the box growing to hold it.
 export const LOW_CHIP = {
   dx: 2,
+  faceInset: 2,
   gap: 6,
   margin: 2,
   padBottom: 3,
@@ -252,6 +255,11 @@ export const LOW_CHIP = {
   padX: 2,
   rise: 8,
 } as const;
+
+// The low-hearts chip's line, its owner's name led by their face, upset.
+export function lowHeartsText(data: Pick<GameData, "dogs" | "runText">, dog: DogId): FaceText {
+  return fillFaceText(data.runText.lowHearts, { owner: ownerFaceText(data, "upset", dog) });
+}
 
 // The line in the first of TEXT_FIT_STYLES whose ink fits the screen less the chip's margin
 // and padding each side. The box holds the label's width, which counts the last glyph's
@@ -261,16 +269,22 @@ export const LOW_CHIP_FIT = {
   styles: TEXT_FIT_STYLES,
 } as const;
 
-// The chip's box and its text's capitals' top-left, for a line width wide at scale over slot.
+// The chip's box and its text's capitals' top-left, for a line width wide at scale over slot,
+// with an inline face in face, if any.
 export function lowChipPlace(
   body: FontMetrics,
   screenWidth: number,
   slot: Pick<Rect, "x" | "y">,
-  text: { scale: number; width: number },
+  text: { face?: FaceBox; scale: number; width: number },
 ): { box: Rect; text: Point } {
-  const { dx, gap, margin, padBottom, padTop, padX } = LOW_CHIP;
+  const { dx, faceInset, gap, margin, padX } = LOW_CHIP;
+  const { face } = text;
+  const ink = inkRowsFromCapTop(body) * text.scale;
+  const padTop = Math.max(LOW_CHIP.padTop, face === undefined ? 0 : face.rise + faceInset);
+  const under = face === undefined ? 0 : face.framed - face.rise + faceInset - ink;
+  const padBottom = Math.max(LOW_CHIP.padBottom, under);
   const width = text.width + 2 * padX;
-  const height = padTop + inkRowsFromCapTop(body) * text.scale + padBottom;
+  const height = padTop + ink + padBottom;
   const x = Math.max(margin, Math.min(slot.x + dx, screenWidth - margin - width));
   const y = slot.y - gap - height;
   return { box: { height, width, x, y }, text: { x: x + padX, y: y + padTop } };

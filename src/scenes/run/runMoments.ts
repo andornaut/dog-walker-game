@@ -265,7 +265,7 @@ export class RunMoments {
   // A line on the HUD's message strip, when there is one.
   say(line: MessageLine | null): void {
     if (line !== null) {
-      sayMessage(this.scene, line.icon, line.text);
+      sayMessage(this.scene, line);
     }
   }
 

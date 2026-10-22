@@ -2,19 +2,21 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
-import { fillNames } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { faceMood } from "../rules/treats";
 import { cents, clampHearts } from "../rules/units";
 import type { Pack } from "../state/runState";
-import { bodyTextWidth } from "../testing/bodyFont";
+import { bodyRunWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { PACK_PLACES } from "../testing/packPlaces";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import type { TextFitStyle } from "../ui/textFit";
+import { fittingFaceRows, inlineFaceBox } from "./faceText";
 import { hudLanes } from "./hudLanes";
 import {
   arcControl,
@@ -36,6 +38,7 @@ import {
   LOW_CHIP_FIT,
   lowChipPlace,
   lowHeartDogs,
+  lowHeartsText,
   MOMENTS,
   newlyLow,
   PAYOUT_TAG,
@@ -364,29 +367,50 @@ describe("curvePoint", () => {
 
 const BODY = fontFileMetrics("font-body");
 const SLOTS = screenLayout(SCREEN_CONFIG).dogSlots;
-const OWNERS = Object.values(gameData.dogs).map(({ owner }) => owner.name);
+const DOGS = Object.keys(gameData.dogs) as DogId[];
+const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
 
-// Every owner's low-hearts line, over every card, fits on one line on a chip kept on screen,
-// the chip as tall as the body font's ink at the line's scale and clear of the card's top.
+// Every owner's low-hearts line, over every card, fits on one line led by the owner's face on
+// a chip kept on screen and clear of the card's top: the chip holds the body font's ink at the
+// line's scale padTop and padBottom inside it, and the face faceInset inside it.
 describe("the low-hearts chip", () => {
   it.each(
     SLOTS.flatMap((slot, i) =>
-      OWNERS.map((owner) => [i, fillNames(gameData.runText.lowHearts, { owner }), slot] as const),
+      DOGS.map((dog) => [i, gameData.dogs[dog].owner.name, dog, slot] as const),
     ),
-  )("over card %i keeps %j on screen", (_i, text, slot) => {
-    const plain = plainMarks(text);
-    const fitted = fitInFont("font-body", LOW_CHIP_FIT.styles, LOW_CHIP_FIT.room, plain);
-    expect(fitted.lines).toHaveLength(1);
-    expect(fitted.widest).toBeLessThanOrEqual(LOW_CHIP_FIT.room);
+  )("over card %i keeps %s's line, led by their face, on screen", (_i, name, dog, slot) => {
+    const said = lowHeartsText(gameData, dog);
+    const line = { ...said, text: plainMarks(said.text) };
+    const fitted = fittingFaceRows(
+      LOW_CHIP_FIT.styles,
+      bodyRunWidth,
+      boxAt,
+      LOW_CHIP_FIT.room,
+      line,
+    );
+    const [row] = fitted.rows;
+    expect(fitted.rows).toHaveLength(1);
+    expect(row?.width).toBeLessThanOrEqual(LOW_CHIP_FIT.room);
+    expect(row?.faces.map((face) => face.dog)).toEqual([dog]);
+    expect(row?.texts.some(({ text }) => text.startsWith(name))).toBe(true);
+    const face = boxAt(fitted.style);
     const { scale } = fitted.style;
-    const width = Math.ceil(bodyTextWidth(scale, plain));
-    const { box, text: caps } = lowChipPlace(BODY, SCREEN_CONFIG.width, slot, { scale, width });
+    const width = Math.ceil(row?.width ?? 0);
+    const { box, text: caps } = lowChipPlace(BODY, SCREEN_CONFIG.width, slot, {
+      face,
+      scale,
+      width,
+    });
+    const frameTop = caps.y - face.rise;
+    const inkBottom = caps.y + inkRowsFromCapTop(BODY) * scale;
+    const bottom = box.y + box.height;
     expect(box.x).toBeGreaterThanOrEqual(LOW_CHIP.margin);
     expect(box.x + box.width).toBeLessThanOrEqual(SCREEN_CONFIG.width - LOW_CHIP.margin);
-    expect(caps.y - box.y).toBe(LOW_CHIP.padTop);
-    const inkBottom = caps.y + inkRowsFromCapTop(BODY) * scale;
-    expect(box.y + box.height - inkBottom).toBe(LOW_CHIP.padBottom);
-    expect(box.y + box.height).toBe(slot.y - LOW_CHIP.gap);
+    expect(caps.y - box.y).toBeGreaterThanOrEqual(LOW_CHIP.padTop);
+    expect(bottom - inkBottom).toBeGreaterThanOrEqual(LOW_CHIP.padBottom);
+    expect(frameTop - box.y).toBe(Math.max(LOW_CHIP.faceInset, LOW_CHIP.padTop - face.rise));
+    expect(bottom - (frameTop + face.framed)).toBeGreaterThanOrEqual(LOW_CHIP.faceInset);
+    expect(bottom).toBe(slot.y - LOW_CHIP.gap);
   });
 });
 
