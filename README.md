@@ -23,7 +23,7 @@ Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 | ------------------------------------------- | -------------------------------------------------------------------------- |
 | `npm run art:depth-preview -- <key> [zone]` | Draw a road sprite at a sweep of distances into `out/depth-preview/<key>/` |
 | `npm run art:manifest [-- --check]`         | Write `public/art/manifest.json` from the art files, or fail if it differs |
-| `npm run art:unused`                        | List manifest keys that no source file, game data or shared table names    |
+| `npm run art:unused`                        | List manifest keys no source file, game data, shared table or page names   |
 | `npm run build`                             | Build to `dist/`                                                           |
 | `npm run check`                             | Type check with tsc                                                        |
 | `npm run check:art`                         | Run only the art tests                                                     |
