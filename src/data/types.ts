@@ -896,7 +896,8 @@ export type Threshold = number | "all";
 // packSize. Profile conditions are judged on the save after a run or a purchase: dogs, gear,
 // dog slots and walkers owned (all: every one in the data), finished walks with no owner
 // firing you, times fired, distinct dogs that finished a walk without firing you (all: every
-// dog), and a lifetime tally.
+// dog), distinct zones finished across walks (all: every zone of the world), and a lifetime
+// tally.
 export type AchievementCondition =
   | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffsGot" }
   | { readonly count: number; readonly kind: "packSize" }
@@ -909,6 +910,7 @@ export type AchievementCondition =
   | { readonly count: Threshold; readonly kind: "dogsOwned" }
   | { readonly count: Threshold; readonly kind: "gearOwned" }
   | { readonly count: Threshold; readonly kind: "walkersUnlocked" }
+  | { readonly count: Threshold; readonly kind: "zonesEverFinished" }
   | { readonly count: Threshold; readonly kind: "zonesFinished" }
   | { readonly dollars: number; readonly kind: "earnings" }
   | { readonly kind: "finishOnLastHeart" }

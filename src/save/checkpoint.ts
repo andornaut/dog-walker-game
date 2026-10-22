@@ -124,6 +124,9 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       tallies: addTallies(stats.tallies, run.counters.tallies),
       timesFired: stats.timesFired + firedBy.length,
       walksWithoutFiring: stats.walksWithoutFiring + (finished && firedBy.length === 0 ? 1 : 0),
+      zonesEverFinished: walkedFromTheStart(run.counters)
+        ? [...new Set([...stats.zonesEverFinished, ...run.route.slice(0, zonesFinished)])]
+        : stats.zonesEverFinished,
     },
   };
   const facts: RunFacts = {

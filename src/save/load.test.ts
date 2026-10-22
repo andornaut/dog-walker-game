@@ -133,13 +133,14 @@ describe("loadSave", () => {
       veteranSave(),
     ],
     [
-      "without achievements and finished-with dogs the game no longer has",
+      "without achievements, finished-with dogs and finished zones the game no longer has",
       (document) => {
-        document.achievements = { firstSteps: 5, retiredBadge: 6 };
+        document.achievements = { retiredBadge: 6, wholeCity: 5 };
         document.stats.dogsFinishedWith = ["koda", "ghost"];
+        document.stats.zonesEverFinished = ["park", "atlantis"];
       },
-      (save) => [save.achievements, save.stats.dogsFinishedWith],
-      [{ firstSteps: 5 }, ["koda"]],
+      (save) => [save.achievements, save.stats.dogsFinishedWith, save.stats.zonesEverFinished],
+      [{ wholeCity: 5 }, ["koda"], ["park"]],
     ],
     [
       "without unknown or duplicate owned ids",

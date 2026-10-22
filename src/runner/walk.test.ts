@@ -50,6 +50,7 @@ import { clampHearts, pixels, read } from "../rules/units";
 import { slowestAgility } from "../rules/walkers";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
+import { packOf, runFactsFor } from "../testing/achievements";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testPack } from "../testing/packGeometry";
@@ -983,21 +984,18 @@ describe("stepWalk", () => {
     });
 
     it("leaves a zone clean for Clean Paws, and a walk for Not a Scratch", () => {
-      let walk = raincoats(walkWith(["duchess"]));
+      // Every other fact comes from the badges' goals; the bumps come from the walk.
+      const badges = ["cleanPaws", "notAScratch"] as const;
+      const awardData = { ...data, achievements: ACHIEVEMENTS, dogSlots: DOG_SLOTS };
+      const goal = runFactsFor(awardData, badges);
+      let walk = raincoats(walkWith(packOf(data, goal.packSize)));
       for (let zone = 0; zone < data.world.walkLength; zone++) {
         const met = step({ ...walk, road: { ...walk.road, items: [atPack("puddle")] } }).walk;
         walk = { ...met, run: finishZone(data, met.run).run };
       }
-      const facts = {
-        ...runCountersOf(walk.run),
-        dogsHome: 1,
-        earnedCents: walk.run.money,
-        packSize: 1,
-        zonesFinished: data.world.walkLength,
-      };
-      expect(
-        earnedByRun({ ...data, achievements: ACHIEVEMENTS, dogSlots: DOG_SLOTS }, facts),
-      ).toEqual(expect.arrayContaining(["cleanPaws", "notAScratch"]));
+      const { bumpsByZone, firstZone } = runCountersOf(walk.run);
+      const facts = { ...goal, bumpsByZone, firstZone, zonesFinished: data.world.walkLength };
+      expect(earnedByRun(awardData, facts)).toEqual(expect.arrayContaining([...badges]));
     });
   });
 

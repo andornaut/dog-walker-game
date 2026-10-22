@@ -14,7 +14,7 @@ export const testContext: SaveContext = {
     walker: "casey",
   },
   known: {
-    achievements: new Set(["bigPayday", "dreamTeam", "firstSteps", "fullKennel", "squirrel"]),
+    achievements: new Set(["bigPayday", "dreamTeam", "fullKennel", "squirrel", "wholeCity"]),
     debuffs: new Set(["stinky"]),
     dogs: new Set([
       "archie",
@@ -74,19 +74,20 @@ export const newPlayerSave: SaveDocument = {
     tallies: {},
     timesFired: 0,
     walksWithoutFiring: 0,
+    zonesEverFinished: [],
   },
   version: SAVE_VERSION,
   walker: "casey",
 };
 
-// A player several runs in, with every field away from its default. It owns every walker, so it
-// holds the badge for unlocking them all.
+// A player several runs in, with every field away from its default. It owns every walker and has
+// finished every zone, so it holds the badges for both.
 export function veteranSave(): SaveDocument {
   return {
     achievements: {
       dreamTeam: 1_700_000_200_000,
-      firstSteps: 1_700_000_000_000,
       squirrel: 1_700_000_100_000,
+      wholeCity: 1_700_000_000_000,
     },
     bankCents: cents(12_345),
     checkpoint: null,
@@ -122,6 +123,14 @@ export function veteranSave(): SaveDocument {
       tallies: { squirrelPulls: 5 },
       timesFired: 1,
       walksWithoutFiring: 2,
+      zonesEverFinished: [
+        "homeStretch",
+        "park",
+        "pawsPromenade",
+        "shops",
+        "snoozeCrescent",
+        "street",
+      ],
     },
     version: SAVE_VERSION,
     walker: "ada",

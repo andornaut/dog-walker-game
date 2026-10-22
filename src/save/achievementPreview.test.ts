@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { AchievementId } from "../data/types";
+import type { AchievementCondition, AchievementId } from "../data/types";
 import { countBump } from "../rules/achievements";
+import { walkLength } from "../rules/route";
 import { finishZone, headHome } from "../runner/walk";
 import { newRun, type RunState } from "../state/runState";
-import { earningsGoal } from "../testing/achievements";
+import { earningsGoal, packOf, runFactsFor } from "../testing/achievements";
 import {
   type AchievementPreview,
   earnedIfBanked,
@@ -34,14 +35,59 @@ function previewer(save = newPlayerSave) {
   };
 }
 
-describe("previewAchievements", () => {
-  it("toasts what heading home now would earn: the pack at the start, zones as they end", () => {
-    const { preview } = previewer();
-    const atStart = preview(NOTHING_PREVIEWED, start);
-    expect(atStart.earned).toEqual(["doubleLeash"]);
-    const afterZone = preview(atStart.preview, zoneDone(start));
-    expect(afterZone.earned).toEqual(["firstSteps", "cleanPaws"]);
+// The badges a clean walk earns from its pack and zones alone, each with the step that first
+// meets its goal: 0 at the start, then each zone finished.
+const ZONE_BADGE_KINDS: readonly AchievementCondition["kind"][] = [
+  "cleanZones",
+  "packSize",
+  "zonesFinished",
+];
+const ZONE_BADGES = gameData.achievements
+  .filter(({ conditions }) => conditions.every(({ kind }) => ZONE_BADGE_KINDS.includes(kind)))
+  .map(({ id }) => {
+    const { packSize, zonesFinished } = runFactsFor(gameData, [id]);
+    return { id, packSize, step: zonesFinished };
   });
+const LAST_STEP = walkLength(gameData);
+
+// The run at the start, then after each zone until the walk ends, with a bump in every zone or
+// none.
+function walkOf(packSize: number, bumped = false): RunState[] {
+  let run = newRun(gameData, packSize, {
+    dogs: packOf(gameData, packSize),
+    gear: null,
+    walker: "casey",
+  });
+  const runs = [run];
+  for (let zone = 0; zone < LAST_STEP; zone++) {
+    run = zoneDone(bumped ? countBump(run) : run);
+    runs.push(run);
+  }
+  return runs;
+}
+
+// What each look over a walk toasts, and what the walk has shown by its end.
+function previewWalk(runs: readonly RunState[]) {
+  const { preview } = previewer();
+  let previewed = NOTHING_PREVIEWED;
+  const toasts = runs.map((run) => {
+    const looked = preview(previewed, run);
+    previewed = looked.preview;
+    return looked.earned;
+  });
+  return { shown: previewed.shown, toasts };
+}
+
+describe("previewAchievements", () => {
+  it.each(ZONE_BADGES)(
+    "toasts $id as heading home would earn it: the pack at the start, zones as they end",
+    ({ id, packSize, step }) => {
+      const { toasts } = previewWalk(walkOf(packSize));
+      const toastedAt = toasts.flatMap((earned, at) => (earned.includes(id) ? [at] : []));
+      // A goal met only by the whole walk is left to the end screen.
+      expect(toastedAt).toEqual(step < LAST_STEP ? [step] : []);
+    },
+  );
 
   it("toasts a badge once a walk, and looks again only when the facts change", () => {
     const { looks, preview } = previewer();
@@ -49,11 +95,13 @@ describe("previewAchievements", () => {
     const walked = { ...start, zoneDistance: start.zoneDistance + 100 } as RunState;
     expect(preview(first.preview, walked)).toEqual({ earned: [], preview: first.preview });
     expect(looks()).toBe(1);
-    const zone1 = zoneDone(start);
-    const second = preview(first.preview, zone1);
-    const third = preview(second.preview, zoneDone(zone1));
-    expect(third.earned).toEqual([]);
-    expect(third.preview.shown).toEqual(["doubleLeash", "firstSteps", "cleanPaws"]);
+    const { shown, toasts } = previewWalk(
+      walkOf(Math.max(...ZONE_BADGES.map(({ packSize }) => packSize))),
+    );
+    const midWalk = ZONE_BADGES.filter(({ step }) => step < LAST_STEP).map(({ id }) => id);
+    expect(toasts.flat()).toEqual(expect.arrayContaining(midWalk));
+    expect(new Set(toasts.flat()).size).toBe(toasts.flat().length);
+    expect(shown).toEqual(toasts.flat());
   });
 
   it("never toasts Big Payday mid-walk, which waits for the banked total", () => {
@@ -62,10 +110,9 @@ describe("previewAchievements", () => {
     expect(preview(NOTHING_PREVIEWED, rich).earned).not.toContain("bigPayday");
   });
 
-  it("does not toast Clean Paws for a zone with a bump", () => {
-    const { preview } = previewer();
-    const bumped = zoneDone(countBump(start));
-    expect(preview(NOTHING_PREVIEWED, bumped).earned).not.toContain("cleanPaws");
+  it("does not toast Clean Paws for a walk with a bump in every zone", () => {
+    const { toasts } = previewWalk(walkOf(runFactsFor(gameData, ["cleanPaws"]).packSize, true));
+    expect(toasts.flat()).not.toContain("cleanPaws");
   });
 
   it("leaves an ended walk to the end screen", () => {

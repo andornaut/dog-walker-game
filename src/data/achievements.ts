@@ -4,13 +4,6 @@ import type { Achievement } from "./types";
 // Each is earned once every condition holds; the wall shows the goal under a locked badge.
 export const ACHIEVEMENTS = [
   {
-    badgeLine: "Every walk starts somewhere.",
-    conditions: [{ count: 2, kind: "zonesFinished" }],
-    goal: "Finish 2 neighborhoods in one walk",
-    id: "firstSteps",
-    name: "First Steps",
-  },
-  {
     badgeLine: "Home before the streetlights.",
     conditions: [{ count: "all", kind: "zonesFinished" }],
     goal: "Finish all 4 neighborhoods of a walk",
@@ -111,6 +104,14 @@ export const ACHIEVEMENTS = [
     id: "neighborhoodFavorite",
     name: "Neighborhood Favorite",
     shortGoal: "Walk all 9 dogs",
+  },
+  {
+    badgeLine: "Every block, every bark.",
+    conditions: [{ count: "all", kind: "zonesEverFinished" }],
+    goal: "Finish every neighborhood of Toronto, across walks",
+    id: "wholeCity",
+    name: "Whole City",
+    shortGoal: "Finish all 6 neighborhoods",
   },
   {
     badgeLine: "Toronto's finest. Ask any dog.",

@@ -200,6 +200,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
       tallies: keepKnownEntries(KNOWN_TALLIES, stats.tallies),
+      zonesEverFinished: keepKnown(known.zones, stats.zonesEverFinished),
     },
     walker:
       save.walker === null

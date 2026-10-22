@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { gameData } from "../data";
 import type { GearId } from "../data/types";
 import { cents } from "../rules/units";
+import { packOf, runFactsFor, saveFor } from "../testing/achievements";
+import { earnedSince } from "./achievements";
 import { quietCounters, testAwards, testContext, veteranSave } from "./fixtures";
 import { type Awards, ProfileSession } from "./profile";
 import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
@@ -83,8 +85,7 @@ describe("ProfileSession.open", () => {
 
 describe("achievements away from a run", () => {
   it("awards on launch what the save already meets, and celebrates it once", async () => {
-    const veteran = veteranSave();
-    const fired = { ...veteran, stats: { ...veteran.stats, timesFired: 10 } };
+    const fired = saveFor(gameData, ["youreFired"], veteranSave());
     const { entries, session } = await opened(fired);
     expect(session.save.achievements.youreFired).toBe(testAwards.now);
     expect(stored(entries).achievements.youreFired).toBe(testAwards.now);
@@ -199,10 +200,25 @@ describe("runs", () => {
   });
 
   it("lists the achievements the run earned for the end screen", async () => {
+    // A finished walk as Not a Scratch's goal asks.
+    const goal = runFactsFor(gameData, ["notAScratch"]);
+    const walk = {
+      ...result,
+      dogs: packOf(gameData, goal.packSize).map((id) => ({
+        fired: false,
+        id,
+        zonesFinished: result.zone,
+      })),
+      earnedCents: goal.earnedCents,
+    };
     const { session } = await opened(veteranSave());
-    await session.finishRun(result, []);
-    expect(session.lastRunEnd?.achievements).toEqual(["roundTrip", "cleanPaws", "notAScratch"]);
-    expect(session.save.achievements.roundTrip).toBe(testAwards.now);
+    await session.finishRun(walk, []);
+    const earned = earnedSince(gameData, veteranSave(), session.save);
+    expect(earned).toContain("notAScratch");
+    expect(session.lastRunEnd?.achievements).toEqual(earned);
+    expect(earned.map((id) => session.save.achievements[id])).toEqual(
+      earned.map(() => testAwards.now),
+    );
     expect(session.takeCelebrations()).toEqual([]);
   });
 

@@ -13,7 +13,7 @@ import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 // Every tally the save keeps; a stored key outside it is dropped on load.
 export const TALLY_IDS = [
@@ -129,6 +129,8 @@ const statsSchema = v.object({
   timesFired: count,
   // Finished walks in which no owner fired you.
   walksWithoutFiring: count,
+  // Every zone a walk from the first zone finished, each once.
+  zonesEverFinished: ids,
 });
 
 export const saveSchema = v.object({
@@ -210,7 +212,14 @@ export interface LastWalk extends Walk {
 
 export interface SaveStats extends Omit<
   StoredStats,
-  "bestCentsByPackSize" | "bestWalk" | "dogs" | "dogsFinishedWith" | "lastWalk" | "runs" | "tallies"
+  | "bestCentsByPackSize"
+  | "bestWalk"
+  | "dogs"
+  | "dogsFinishedWith"
+  | "lastWalk"
+  | "runs"
+  | "tallies"
+  | "zonesEverFinished"
 > {
   bestCentsByPackSize: Record<number, Cents>;
   bestWalk: Walk | null;
@@ -219,6 +228,7 @@ export interface SaveStats extends Omit<
   lastWalk: LastWalk | null;
   runs: Record<EndReason, number>;
   tallies: Partial<Record<TallyId, number>>;
+  zonesEverFinished: ZoneId[];
 }
 
 export interface SaveDocument extends Omit<
@@ -282,6 +292,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       tallies: {},
       timesFired: 0,
       walksWithoutFiring: 0,
+      zonesEverFinished: [],
     },
     version: SAVE_VERSION,
     walker: defaults.walker,

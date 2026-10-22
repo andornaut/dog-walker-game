@@ -168,6 +168,11 @@ export function conditionHolds(
       );
     case "walksWithoutFiring":
       return save !== null && save.stats.walksWithoutFiring >= condition.count;
+    case "zonesEverFinished":
+      return (
+        save !== null &&
+        save.stats.zonesEverFinished.length >= needed(data.world.zones.length, condition.count)
+      );
     case "zonesFinished":
       return facts !== null && zonesWalked(facts) >= needed(zones, condition.count);
     default:
@@ -177,10 +182,10 @@ export function conditionHolds(
 
 // How far a save has come toward a condition that counts across walks (a lifetime tally,
 // times fired, finished walks with no firing, distinct dogs that finished a walk without firing
-// you): have is capped at need. null for a condition judged on one walk or on what the save
-// owns.
+// you, distinct zones finished): have is capped at need. null for a condition judged on one
+// walk or on what the save owns.
 function acrossWalksProgress(
-  data: Pick<GameData, "dogs">,
+  data: Pick<GameData, "dogs" | "world">,
   save: Pick<SaveDocument, "stats">,
   condition: AchievementCondition,
 ): { readonly have: number; readonly need: number } | null {
@@ -196,6 +201,11 @@ function acrossWalksProgress(
       return progress(
         save.stats.dogsFinishedWith.length,
         needed(Object.keys(data.dogs).length, condition.count),
+      );
+    case "zonesEverFinished":
+      return progress(
+        save.stats.zonesEverFinished.length,
+        needed(data.world.zones.length, condition.count),
       );
     case "cleanZones":
     case "debuffsGot":
@@ -217,7 +227,7 @@ function acrossWalksProgress(
 // A badge's progress toward its one condition when that condition counts across walks; null
 // for a badge with any other condition, or with more than one.
 export function achievementProgress(
-  data: Pick<GameData, "dogs">,
+  data: Pick<GameData, "dogs" | "world">,
   save: Pick<SaveDocument, "stats">,
   achievement: Pick<Achievement, "conditions">,
 ): { readonly have: number; readonly need: number } | null {
@@ -299,6 +309,8 @@ export function achievementConditionText(
       return `unlock ${thresholdText(condition.count, "walkers")}`;
     case "walksWithoutFiring":
       return `${condition.count} finished walks with no firing`;
+    case "zonesEverFinished":
+      return `${thresholdText(condition.count, "neighborhoods")} each finished, across walks`;
     case "zonesFinished":
       return `${thresholdText(condition.count, "neighborhoods")} of a walk finished`;
     default:

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { badgeKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { AchievementCondition, DogId } from "../data/types";
+import type { AchievementCondition, DogId, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames, wrapWords } from "../lib/lines";
 import { newPlayerSave } from "../save/fixtures";
@@ -22,18 +23,26 @@ import { STATS_LAYOUT } from "./statsLayout";
 // The condition kinds a save counts across walks, and a save that has counted n of one.
 type Counted = Extract<
   AchievementCondition,
-  { kind: "dogsFinishedWith" | "tally" | "timesFired" | "walksWithoutFiring" }
+  {
+    kind: "dogsFinishedWith" | "tally" | "timesFired" | "walksWithoutFiring" | "zonesEverFinished";
+  }
 >;
 const COUNTED_KINDS: readonly string[] = [
   "dogsFinishedWith",
   "tally",
   "timesFired",
   "walksWithoutFiring",
+  "zonesEverFinished",
 ];
 const ALL_DOGS = Object.keys(gameData.dogs) as DogId[];
-// How many a counted condition needs: "all" is every dog in the data.
+const ALL_ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
+// How many a counted condition needs: "all" is every dog, or every zone, in the data.
 const needOf = (condition: Counted) =>
-  condition.count === "all" ? ALL_DOGS.length : condition.count;
+  condition.count !== "all"
+    ? condition.count
+    : condition.kind === "zonesEverFinished"
+      ? ALL_ZONES.length
+      : ALL_DOGS.length;
 const isCounted = (condition: AchievementCondition): condition is Counted =>
   COUNTED_KINDS.includes(condition.kind);
 
@@ -48,6 +57,8 @@ function counted(condition: Counted, n: number): SaveDocument {
       return { ...newPlayerSave, stats: { ...stats, timesFired: n } };
     case "walksWithoutFiring":
       return { ...newPlayerSave, stats: { ...stats, walksWithoutFiring: n } };
+    case "zonesEverFinished":
+      return { ...newPlayerSave, stats: { ...stats, zonesEverFinished: ALL_ZONES.slice(0, n) } };
     default:
       return assertNever(condition);
   }
@@ -63,13 +74,11 @@ const progressText = (have: number, need: number) =>
 
 describe("badgeWall", () => {
   it("lists every badge in wall order, earned by the save or locked", () => {
-    const wall = badgeWall(gameData, { achievements: { firstSteps: 1, squirrel: 2 } });
+    const [first] = gameData.achievements;
+    const wall = badgeWall(gameData, { achievements: { [first.id]: 1, squirrel: 2 } });
     expect(wall).toHaveLength(gameData.achievements.length);
-    expect(wall[0]).toMatchObject({ art: "badge-first-steps", earned: true, name: "First Steps" });
-    expect(wall.filter(({ earned }) => earned).map(({ id }) => id)).toEqual([
-      "firstSteps",
-      "squirrel",
-    ]);
+    expect(wall[0]).toMatchObject({ art: badgeKey(first.id), earned: true, name: first.name });
+    expect(wall.filter(({ earned }) => earned).map(({ id }) => id)).toEqual([first.id, "squirrel"]);
     expect(earnedText(gameData, wall)).toBe(`2/${gameData.achievements.length} earned`);
   });
 });

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { AchievementCondition, TallyId, WalkerId } from "../data/types";
+import type { AchievementCondition, TallyId, WalkerId, ZoneId } from "../data/types";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { type SaveDocument } from "../save/schema";
-import { earningsGoal } from "../testing/achievements";
+import { runFactsFor, saveFor } from "../testing/achievements";
 import { testState } from "../testing/runState";
 import {
   achievementConditionText,
@@ -38,6 +38,7 @@ const holdsForRun = (condition: AchievementCondition, run: Partial<RunFacts>) =>
 
 const ALL_DOGS = Object.keys(gameData.dogs) as (keyof typeof gameData.dogs)[];
 const ALL_GEAR = Object.keys(gameData.shopGear) as (keyof typeof gameData.shopGear)[];
+const ALL_ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
 
 function withStats(stats: Partial<SaveDocument["stats"]>): SaveDocument {
   return { ...newPlayerSave, stats: { ...newPlayerSave.stats, ...stats } };
@@ -225,6 +226,18 @@ describe("profile conditions", () => {
       withStats({ dogsFinishedWith: ALL_DOGS }),
       true,
     ],
+    [
+      "zonesEverFinished all, one missing",
+      { count: "all", kind: "zonesEverFinished" },
+      withStats({ zonesEverFinished: ALL_ZONES.slice(1) }),
+      false,
+    ],
+    [
+      "zonesEverFinished all, across walks",
+      { count: "all", kind: "zonesEverFinished" },
+      withStats({ zonesEverFinished: ALL_ZONES }),
+      true,
+    ],
     ["anything without a save, as for the simulator", count("timesFired", 0), null, false],
   ];
 
@@ -238,20 +251,31 @@ describe("profile conditions", () => {
   });
 });
 
+const ALL_IDS = gameData.achievements.map(({ id }) => id);
+// The condition kinds judged on one run; every other kind is judged on the save.
+const RUN_KINDS: readonly AchievementCondition["kind"][] = [
+  "cleanZones",
+  "debuffsGot",
+  "earnings",
+  "finishOnLastHeart",
+  "fullPackBonus",
+  "packSize",
+  "zonesFinished",
+];
+
 describe("newlyEarned", () => {
-  it("lists every achievement met and not yet earned, in wall order", () => {
-    const run = facts({ packSize: 2, zonesFinished: 1 });
-    expect(newlyEarned(gameData, newPlayerSave, newPlayerSave, run)).toEqual([
-      "firstSteps",
-      "doubleLeash",
-      "cleanPaws",
-    ]);
+  it.each(ALL_IDS)("earns %s from the least its goal asks for, and only once", (id) => {
+    const after = saveFor(gameData, [id], newPlayerSave);
+    const run = runFactsFor(gameData, [id]);
+    expect(newlyEarned(gameData, newPlayerSave, after, run)).toContain(id);
+    const earned = { ...newPlayerSave, achievements: { [id]: 1 } };
+    expect(newlyEarned(gameData, earned, after, run)).not.toContain(id);
   });
 
-  it("skips one already earned", () => {
-    const earned = { ...newPlayerSave, achievements: { firstSteps: 1 } };
-    const run = facts({ bumpsByZone: [1], zonesFinished: 1 });
-    expect(newlyEarned(gameData, earned, newPlayerSave, run)).toEqual([]);
+  it("lists every achievement met and not yet earned, in wall order", () => {
+    const after = saveFor(gameData, ALL_IDS, newPlayerSave);
+    const run = runFactsFor(gameData, ALL_IDS);
+    expect(newlyEarned(gameData, newPlayerSave, after, run)).toEqual(ALL_IDS);
   });
 
   it("needs every condition: Top Walker only with every dog, slot and gear item", () => {
@@ -266,16 +290,11 @@ describe("newlyEarned", () => {
 
 describe("earnedByRun", () => {
   it("counts only achievements whose conditions are all about the run", () => {
-    const run = facts({ earnedCents: earningsGoal("bigPayday"), packSize: 3, zonesFinished: 4 });
-    expect(earnedByRun(gameData, run)).toEqual([
-      "firstSteps",
-      "roundTrip",
-      "doubleLeash",
-      "packLeader",
-      "cleanPaws",
-      "notAScratch",
-      "bigPayday",
-    ]);
+    const aboutTheRun = gameData.achievements
+      .filter(({ conditions }) => conditions.every(({ kind }) => RUN_KINDS.includes(kind)))
+      .map(({ id }) => id);
+    expect(aboutTheRun.length).toBeLessThan(ALL_IDS.length);
+    expect(earnedByRun(gameData, runFactsFor(gameData, ALL_IDS))).toEqual(aboutTheRun);
   });
 });
 
