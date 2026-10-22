@@ -1267,6 +1267,11 @@
         "gap": 2,
         "headerY": 5,
         "nameY": 37,
+        "rule": {
+          "above": 8,
+          "width": 288,
+          "x": 36
+        },
         "tail": {
           "x": 279,
           "y": 15

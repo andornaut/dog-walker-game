@@ -17,13 +17,15 @@ export const END_LAYOUT = {
   // bubble has "{owner} fired you" at headerY and the closing line's first capitals at
   // textY; a happy row's has only the line, centred down the bubble. The bubble ends
   // padBottom under a line at textY's lowest ink, and the row is at least as tall as the
-  // name's lowest ink; the next row starts gap under it.
+  // name's lowest ink; the next row starts gap under it. A 1px tan rule width wide from x
+  // runs above over the first row.
   quips: {
     bubble: { padBottom: 4, width: 244, x: 36 },
     face: { x: 291, y: 1 },
     gap: 2,
     headerY: 5,
     nameY: 37,
+    rule: { above: 8, width: 288, x: 36 },
     tail: { x: 279, y: 15 },
     textX: 42,
     textY: 22,

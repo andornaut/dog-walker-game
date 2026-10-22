@@ -205,7 +205,8 @@ export class EndScene extends Scene {
     fitted(totalLabel, sideTotalLabelRoom(totalInk.right - totalInk.left), SIDE.x, SIDE.totalY);
 
     const quipsTop = rows[0]?.top ?? 0;
-    fillRect(g, PALETTE.tan, { height: 1, width: 288, x: 36, y: quipsTop - 8 });
+    const { rule } = QUIPS;
+    fillRect(g, PALETTE.tan, { height: 1, width: rule.width, x: rule.x, y: quipsTop - rule.above });
     const celebrating = earned.length > 0;
     closing.forEach((line, i) => {
       const { height, top: row } = itemAt(rows, i);
