@@ -1976,9 +1976,16 @@ describe("movers", { timeout: 60_000 }, () => {
     }
     return movement?.kind === "hop" ? [{ kind, range: movement.times }] : [];
   });
-  let countedPlans: readonly { kind: WalkItem["kind"]; mover: MoverPath }[] | null = null;
-  const plannedMovers = () => {
-    countedPlans ??= ZONE_IDS.flatMap((zone) =>
+  // Every spawn so planned, with the road's speed where it was planned.
+  type Planned = {
+    kind: WalkItem["kind"];
+    lane: number;
+    mover: MoverPath | undefined;
+    speed: number;
+  };
+  let plans: readonly Planned[] | null = null;
+  const plannedSpawns = () => {
+    plans ??= ZONE_IDS.flatMap((zone) =>
       [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
         [1, 2, 3, 4].flatMap((seed) => {
           const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
@@ -1986,14 +1993,17 @@ describe("movers", { timeout: 60_000 }, () => {
             road: startRoad(LANE_COUNT),
             run: zoned,
           });
-          return walk.road.pending.flatMap(({ kind, mover }) =>
-            mover === undefined ? [] : [{ kind, mover }],
-          );
+          const speed = walkScrollSpeed(everyMover, zoned);
+          return walk.road.pending.map(({ kind, lane, mover }) => ({ kind, lane, mover, speed }));
         }),
       ),
     );
-    return countedPlans;
+    return plans;
   };
+  const plannedMovers = () =>
+    plannedSpawns().flatMap(({ kind, mover, speed }) =>
+      mover === undefined ? [] : [{ kind, mover, speed }],
+    );
   it.each(counted)("moves each $kind within its range of times across seeds", ({ kind, range }) => {
     const paths = plannedMovers().filter((planned) => planned.kind === kind);
     expect(paths.length).toBeGreaterThan(0);
@@ -2068,6 +2078,43 @@ describe("movers", { timeout: 60_000 }, () => {
     expect(after.cards).toEqual([]);
     expect(after.walk.road.hitStop).toBeNull();
     expect(after.walk.road.items).toEqual([]);
+  });
+
+  // Every obstacle kind that blocks a lane, moving or standing, starts against each edge of the
+  // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on
+  // another.
+  const blocking = OBSTACLE_KINDS.filter((kind) => blocksLane(everyMover, kind));
+  it.each(blocking)("starts a %s against each edge of the road on some seed", (kind) => {
+    const lanes = new Set(
+      plannedSpawns()
+        .filter((planned) => planned.kind === kind)
+        .map(({ lane }) => lane),
+    );
+    expect([...lanes]).toEqual(
+      expect.arrayContaining([0, LANE_COUNT - footprintOf(everyMover, kind).lanes]),
+    );
+  });
+
+  // A stalker wider than a lane never fits a lane to either side, so from a middle lane it
+  // reaches one side only: left on some plans and right on others.
+  const wideStalkers = OBSTACLE_KINDS.filter(
+    (kind) => movementOf(kind)?.kind === "approach" && footprintOf(everyMover, kind).lanes > 1,
+  );
+  it.each(wideStalkers)("reaches a %s either way from a middle lane across seeds", (kind) => {
+    const { lanes: width } = footprintOf(everyMover, kind);
+    const ways = new Set<string>();
+    for (const { mover } of plannedMovers().filter((planned) => planned.kind === kind)) {
+      if (mover.motion !== "approach" || mover.lane < 1 || mover.lane > LANE_COUNT - width - 1) {
+        continue;
+      }
+      if (mover.reach.first < mover.lane) {
+        ways.add("left");
+      }
+      if (mover.reach.first + mover.reach.count - 1 > mover.lane) {
+        ways.add("right");
+      }
+    }
+    expect([...ways].sort()).toEqual(["left", "right"]);
   });
 
   it("brings a mover onto the road as its cue, carrying its path", () => {

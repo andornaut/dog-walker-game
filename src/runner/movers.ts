@@ -308,7 +308,8 @@ export interface MoverStand {
 // road, and with leadIn, the whole row before its own, so the pack has two rows of road to
 // steer around a sweep of several lanes. stands are each place it stands as an obstacle, by
 // distance from its row. screen is from its cue appearing until it is out of sight. Of the
-// placements that fit, the planner takes one of the highest rank, 0 when unset.
+// placements that fit in a start lane and row, the planner takes one of the highest rank, 0 when
+// unset.
 interface BlockCell {
   readonly lane: number;
   readonly row: number;
@@ -490,14 +491,16 @@ export interface MoverSpec {
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
 // speed, the delay before each of its moves, a stalker's later-step road share, where a dart
 // sets off, a dart's tilt, whether a hopper of a shy kind hops shy and whether a dart of a kind
-// that turns back does (each below its kind's share), and where a dart turns back. EVEN_DRAWS
-// moves it at its kind's speed with no delay, at the near end of a range, never shy and never
-// turning back.
+// that turns back does (each below its kind's share), where a dart turns back, and which side a
+// stalker's or shy hopper's one-sided reach favors (below a half, the left). EVEN_DRAWS moves it
+// at its kind's speed with no delay, at the near end of a range, never shy and never turning
+// back.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
   readonly share: number;
   readonly shy: number;
+  readonly side: number;
   readonly speed: number;
   readonly start: number;
   readonly tilt: number;
@@ -510,6 +513,7 @@ const EVEN_DRAWS: MoverDraws = {
   delays: [0, 0, 0],
   share: 0,
   shy: 0.999999,
+  side: 0,
   speed: 0.5,
   start: 0,
   tilt: 0,
@@ -519,7 +523,7 @@ const EVEN_DRAWS: MoverDraws = {
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
 // delays and share; movers draws each mover's count, third delay, start, shyness, tilt, turning
-// back and turn, so those never shift the spawns stream.
+// back, turn and reach side, and each mover's start lane, so those never shift the spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -537,16 +541,19 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const shy = movers();
   const tilt = movers();
   const turn = movers();
+  const turnAt = movers();
+  const side = movers();
   return {
     count,
     delays: [...delays, third],
     share,
     shy,
+    side,
     speed,
     start,
     tilt,
     turn,
-    turnAt: movers(),
+    turnAt,
   };
 }
 
@@ -849,30 +856,35 @@ function stepsPlacements(
 }
 
 // The ways a stalker's or shy hopper's lane range may reach from its start lane, widest first: a
-// lane to either side, one side only, or none.
-const REACHES: readonly (readonly [number, number])[] = [
-  [-1, 1],
-  [-1, 0],
-  [0, 1],
-  [0, 0],
-];
+// lane to either side, one side only, or none. Of the two one-sided reaches, the side draw, from 0
+// up to 1, puts the left first below a half and the right first from a half, so neither side is
+// favored across movers.
+function reachesOf(side: number): readonly (readonly [number, number])[] {
+  const oneSided: readonly (readonly [number, number])[] = [
+    [-1, 0],
+    [0, 1],
+  ];
+  return [[-1, 1], ...(side < 0.5 ? oneSided : [...oneSided].reverse()), [0, 0]];
+}
 
-// A stalker's or shy hopper's placements, one per reach that fits, the widest ranked highest: it
-// may stand at every travel given in every lane of its reach. pathAt makes its path from its start
-// lane and its reach.
+// A stalker's or shy hopper's placements, one per reach that fits, the first in reachesOf its side
+// draw ranked highest: it may stand at every travel given in every lane of its reach. pathAt makes
+// its path from its start lane and its reach.
 function reachPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
+  side: number,
   travels: readonly number[],
   pathAt: (lane: number, reach: LaneSpan) => MoverPath,
 ): MoverPlacement[] {
-  return REACHES.flatMap(([left, right], rank) => {
+  const reaches = reachesOf(side);
+  return reaches.flatMap(([left, right], rank) => {
     const spots = Array.from({ length: right - left + 1 }, (_, i) =>
       travels.map((travel) => ({ lane: left + i, travel })),
     ).flat();
     return standingPlacements(geometry, spec, spots, (lane) =>
       pathAt(lane, { count: right - left + 1, first: lane + left }),
-    ).map((placement) => ({ ...placement, rank: REACHES.length - rank }));
+    ).map((placement) => ({ ...placement, rank: reaches.length - rank }));
   });
 }
 
@@ -904,7 +916,7 @@ function approachPlacements(
     })),
   ];
   const travels = Array.from({ length: steps + 1 }, (_, row) => row * cellLength);
-  return reachPlacements(geometry, spec, travels, (lane, reach) => ({
+  return reachPlacements(geometry, spec, draws.side, travels, (lane, reach) => ({
     burst: cellLength,
     lane,
     length: motion.stepSeconds * scrollSpeed,
@@ -949,7 +961,7 @@ function shyPlacements(
     );
   }
   const travels = Array.from({ length: shy.rise + 1 }, (_, row) => -row * cellLength);
-  return reachPlacements(geometry, spec, travels, (lane, reach) => ({
+  return reachPlacements(geometry, spec, draws.side, travels, (lane, reach) => ({
     burst: cellLength,
     lane,
     length,
@@ -1095,9 +1107,11 @@ function standsOf(spot: Spot): MoverStand[] {
 // row is dropped, which uses no random draw past its own draws, as the planner drops an obstacle
 // it has no room for. A mover never stands still in place of moving. Each mover makes its own
 // draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
-// holds for the speed and moments it was drawn; of the places that fit, it takes one of those
-// with the highest rank. onScreen holds the movers already on screen, from an earlier call,
-// and gains each mover placed.
+// holds for the speed and moments it was drawn. Of the places that fit, it takes a start lane,
+// each as likely, from the movers stream, so an edge lane that fits fewer of its ways comes up as
+// often as a middle one; then, from the spawns stream, a place in that lane of the highest rank
+// in its row, so each row gives the lane the widest reach that fits there. onScreen holds the
+// movers already on screen, from an earlier call, and gains each mover placed.
 export function placeMovers<Kind extends string>(
   streams: PlannerStreams,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -1140,10 +1154,19 @@ export function placeMovers<Kind extends string>(
         dropped.push(kind);
         continue;
       }
-      const rank = Math.max(...fitting.map(({ placement }) => placement.rank ?? 0));
+      const lane = randomPick(
+        streams.movers,
+        [...new Set(fitting.map(({ placement }) => placement.lane))].sort((a, b) => a - b),
+      );
+      const inLane = fitting.filter(({ placement }) => placement.lane === lane);
+      const rankOf = ({ placement }: Spot) => placement.rank ?? 0;
+      const best = new Map<number, number>();
+      for (const fit of inLane) {
+        best.set(fit.row, Math.max(rankOf(fit), best.get(fit.row) ?? rankOf(fit)));
+      }
       const spot = randomPick(
         streams.spawns,
-        fitting.filter(({ placement }) => (placement.rank ?? 0) === rank),
+        inLane.filter((fit) => rankOf(fit) === best.get(fit.row)),
       );
       const { placement } = spot;
       placement.cells.forEach(({ lane, row }) => grid.take(lane, spot.row + row));
