@@ -15,7 +15,7 @@ export const testContext: SaveContext = {
     walker: "casey",
   },
   known: {
-    achievements: new Set(["bigPayday", "dreamTeam", "fullKennel", "squirrel", "wholeCity"]),
+    achievements: new Set(gameData.achievements.map(({ id }) => id)),
     debuffs: new Set(["stinky"]),
     dogs: new Set([
       "archie",
@@ -85,12 +85,11 @@ export const newPlayerSave: SaveDocument = {
   walker: "casey",
 };
 
-// A player several runs in, with every field away from its default. It owns every walker and has
-// finished every zone, so it holds the badges for both.
+// A player several runs in, with every field away from its default. It has finished every zone,
+// so it holds the badge for that.
 export function veteranSave(): SaveDocument {
   return {
     achievements: {
-      dreamTeam: 1_700_000_200_000,
       squirrel: 1_700_000_100_000,
       wholeCity: 1_700_000_000_000,
     },
