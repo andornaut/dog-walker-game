@@ -251,6 +251,7 @@ export class HudFeedback {
         this.firing,
       );
     } else {
+      this.firing.animate(pop);
       face.setVisible(false);
       pop.on("animationupdate", (_: Animations.Animation, frame: Animations.AnimationFrame) => {
         face.setVisible(frame.index > 1).setScale(frame.index === 2 ? 1 / FACE.scale : 1);
@@ -509,7 +510,7 @@ export class HudFeedback {
     if (this.scene.anims.exists(animationKey(COIN.key, COIN.tag))) {
       const sprite = this.scene.add.sprite(at.x, at.y, COIN.key).setDepth(DEPTH + 1);
       playTag(sprite, COIN.key, COIN.tag);
-      return sprite;
+      return this.moments.animate(sprite);
     }
     return this.scene.add.rectangle(at.x, at.y, 10, 10, PALETTE.amber).setDepth(DEPTH + 1);
   }
