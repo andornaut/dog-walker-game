@@ -372,17 +372,78 @@ describe("skip option", () => {
     expect(() => choose(skipped.state, source, "skip")).toThrow("no Skip option");
   });
 
-  it("takes the costliest option's place on a card that already shows three", () => {
+  // Cards built from the data's options. replaced is the index Walk on by takes the place of,
+  // or null when the card keeps every option.
+  const optionOf = (id: EncounterId, kind: "debuff" | "hearts" | "money"): CardOption => {
+    const { resolution } = ENCOUNTERS[id];
+    const option = resolution.kind === "card" ? resolution.options[optionWith(id, kind)] : null;
+    if (!option) {
+      throw new Error(`${id} has no ${kind} option`);
+    }
+    return option;
+  };
+  const cardOptions = (id: EncounterId): readonly CardOption[] => {
+    const { resolution } = ENCOUNTERS[id];
+    return resolution.kind === "card" ? resolution.options : [];
+  };
+  const holdYourNose = optionOf("skunk", "hearts");
+  const fullGroom = optionOf("skunk", "money");
+  const pricedHearts: CardOption = {
+    ...holdYourNose,
+    effects: [...holdYourNose.effects, ...fullGroom.effects],
+  };
+  it.each<{
+    encounter: EncounterId;
+    name: string;
+    options?: readonly CardOption[];
+    replaced: number | null;
+  }>([
+    {
+      encounter: "skunk",
+      name: "the one option that costs hearts, over a pricier one",
+      replaced: optionWith("skunk", "hearts"),
+    },
+    {
+      encounter: "skunk",
+      name: "the pricier of two options tied on hearts",
+      options: [optionOf("thief", "hearts"), optionOf("skunk", "debuff"), pricedHearts],
+      replaced: 2,
+    },
+    {
+      encounter: "skunk",
+      name: "the most expensive option when none costs hearts",
+      options: [optionOf("otherDog", "debuff"), fullGroom, optionOf("skunk", "debuff")],
+      replaced: 1,
+    },
+    { encounter: "otherDog", name: "no option of a card with two", replaced: null },
+    { encounter: "thief", name: "no option of a card with two", replaced: null },
+  ])("takes the place of $name ($encounter)", ({ encounter: id, options, replaced }) => {
+    const shown = options ?? cardOptions(id);
+    const withOptions = {
+      ...data,
+      encounters: {
+        ...ENCOUNTERS,
+        [id]: { ...ENCOUNTERS[id], resolution: { kind: "card" as const, options: shown } },
+      },
+    };
+    const source = encounter(id, ["koda"]);
+    const indexes = (gear: "hallPass" | null) =>
+      cardFor(
+        withOptions,
+        newRun(withOptions, 1, { dogs: ["koda"], gear, walker: "casey" }),
+        source,
+      ).options.map((option) => option.index);
+    const all = shown.map((_, index) => index);
+    expect(indexes(null)).toEqual(all);
+    expect(indexes("hallPass")).toEqual(all.filter((index) => index !== replaced));
+  });
+
+  it("refuses the option Walk on by took the place of", () => {
     const withPass = newRun(data, 1, { dogs: ["koda"], gear: "hallPass", walker: "casey" });
     const skunk = encounter("skunk", ["koda"]);
-    const indexes = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.index);
-    // Skunk's options in data order, the money one the costliest.
-    expect(indexes(newRun(data, 1, { dogs: ["koda"], gear: null, walker: "casey" }))).toEqual([
-      0, 1, 2,
-    ]);
-    const groom = optionWith("skunk", "money");
-    expect(indexes(withPass)).toEqual([0, 1, 2].filter((index) => index !== groom));
-    expect(() => choose(withPass, skunk, groom)).toThrow("not on the Skunk card");
+    expect(() => choose(withPass, skunk, optionWith("skunk", "hearts"))).toThrow(
+      "not on the Skunk card",
+    );
   });
 });
 

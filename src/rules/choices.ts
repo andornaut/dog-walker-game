@@ -3,6 +3,7 @@ import type {
   CardOption,
   Difficulty,
   DogId,
+  Effect,
   EncounterId,
   GameData,
   QuipMoment,
@@ -102,7 +103,8 @@ export function hasPlaque(option: OptionView | undefined): option is OptionView 
 export const MAX_CARD_OPTIONS = 3;
 
 // What a card scene draws. skip is true when Hall pass offers a free Skip option; on a card
-// that would then show more than MAX_CARD_OPTIONS, Skip takes the most expensive option's place.
+// that would then show more than MAX_CARD_OPTIONS, Skip takes the place of the option that
+// costs the most hearts (see withoutCostliest).
 export interface CardView {
   readonly affected: readonly DogId[];
   // The Skip option a modifier, such as Hall pass, offers: Skip options from 0 to 1.
@@ -377,10 +379,10 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
         : [{ after: 1, before: 0, by: [modifierCause(1, skipBy)], subject: { kind: "skip" } }],
     options:
       skip && views.length >= MAX_CARD_OPTIONS
-        ? withoutMostExpensive(
-            (view) => baseMoneyCost(data, options[view.index]?.option.effects ?? []),
-            views,
-          )
+        ? withoutCostliest((view) => {
+            const effects = options[view.index]?.option.effects ?? [];
+            return [baseHeartsCost(effects), baseMoneyCost(data, effects)];
+          }, views)
         : views,
     skip,
     source,
@@ -388,13 +390,29 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
   };
 }
 
-// Drops the costliest option by its cost before a free card waives it, the first one if several
-// tie, keeping the others in order.
-function withoutMostExpensive(
-  cost: (option: OptionView) => number,
+// The hearts an option's effects would take from each owner they reach, before Second chance
+// forgives any.
+function baseHeartsCost(effects: readonly Effect[]): number {
+  return effects.reduce(
+    (total, effect) =>
+      effect.kind === "hearts" && effect.amount < 0 ? total - effect.amount : total,
+    0,
+  );
+}
+
+// Drops the option Skip takes the place of: the one that costs the most hearts, the most
+// expensive of those before a free card waives it if they tie, and the first one if they tie on
+// both, keeping the others in order. costs gives an option's hearts, then its money.
+function withoutCostliest(
+  costs: (option: OptionView) => readonly [number, number],
   options: readonly OptionView[],
 ): OptionView[] {
-  const costliest = options.reduce((most, option) => (cost(option) > cost(most) ? option : most));
+  const costlier = (option: OptionView, than: OptionView): boolean => {
+    const [hearts, money] = costs(option);
+    const [thanHearts, thanMoney] = costs(than);
+    return hearts > thanHearts || (hearts === thanHearts && money > thanMoney);
+  };
+  const costliest = options.reduce((most, option) => (costlier(option, most) ? option : most));
   return options.filter((option) => option !== costliest);
 }
 
