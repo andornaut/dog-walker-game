@@ -136,6 +136,18 @@ function crossStart(laneCount: number, direction: LaneDirection): number {
   return direction === 1 ? -0.5 : laneCount - 0.5;
 }
 
+// Where a stalker's or shy hopper's steps taken leave it: lanes across from its start, and rows
+// down the road, up when negative.
+export function stepsTaken(path: {
+  readonly burst: number;
+  readonly steps: readonly MoverStep[];
+}): { readonly lanes: number; readonly rows: number } {
+  return {
+    lanes: path.steps.reduce((sum, step) => sum + step.lanes, 0),
+    rows: path.steps.reduce((sum, step) => sum + step.travel, 0) / path.burst,
+  };
+}
+
 // How far through a step a mover is, from 0 before it to 1 after it.
 function stepDone(step: MoverStep, since: number): number {
   return Math.min(1, Math.max(0, (since - step.at) / step.length));
@@ -834,6 +846,25 @@ const REACHES: readonly (readonly [number, number])[] = [
   [0, 0],
 ];
 
+// A stalker's or shy hopper's placements, one per reach that fits, the widest ranked highest: it
+// may stand at every travel given in every lane of its reach. pathAt makes its path from its start
+// lane and its reach.
+function reachPlacements(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  travels: readonly number[],
+  pathAt: (lane: number, reach: LaneSpan) => MoverPath,
+): MoverPlacement[] {
+  return REACHES.flatMap(([left, right], rank) => {
+    const spots = Array.from({ length: right - left + 1 }, (_, i) =>
+      travels.map((travel) => ({ lane: left + i, travel })),
+    ).flat();
+    return standingPlacements(geometry, spec, spots, (lane) =>
+      pathAt(lane, { count: right - left + 1, first: lane + left }),
+    ).map((placement) => ({ ...placement, rank: REACHES.length - rank }));
+  });
+}
+
 // A stalker may be at any spot in its lanes, from its start down as many rows as its drawn count
 // of steps, and is placed as standing at each of them, so whichever step it chooses on the road
 // keeps the road passable. Its lanes are its start lane and, where there is room, a lane to
@@ -861,27 +892,20 @@ function approachPlacements(
       travel: sightLength - within(motion.secondRoadShare, draws.share) * roadLength,
     })),
   ];
-  return REACHES.flatMap(([left, right], rank) => {
-    const spots = Array.from({ length: right - left + 1 }, (_, i) =>
-      Array.from({ length: steps + 1 }, (_unused, row) => ({
-        lane: left + i,
-        travel: row * cellLength,
-      })),
-    ).flat();
-    return standingPlacements(geometry, spec, spots, (lane) => ({
-      burst: cellLength,
-      lane,
-      length: motion.stepSeconds * scrollSpeed,
-      motion: "approach",
-      movement: spec.movement,
-      pending,
-      reach: { count: right - left + 1, first: lane + left },
-      rows: steps,
-      steps: [],
-      stopTravel: sightLength,
-      warning,
-    })).map((placement) => ({ ...placement, rank: REACHES.length - rank }));
-  });
+  const travels = Array.from({ length: steps + 1 }, (_, row) => row * cellLength);
+  return reachPlacements(geometry, spec, travels, (lane, reach) => ({
+    burst: cellLength,
+    lane,
+    length: motion.stepSeconds * scrollSpeed,
+    motion: "approach",
+    movement: spec.movement,
+    pending,
+    reach,
+    rows: steps,
+    steps: [],
+    stopTravel: sightLength,
+    warning,
+  }));
 }
 
 // A shy hopper may be at any spot in its lanes, from its start up as many rows as its rise, and is
@@ -913,28 +937,21 @@ function shyPlacements(
         : before + length + delayOf(spec.variation, draws, i) * scrollSpeed,
     );
   }
-  return REACHES.flatMap(([left, right], rank) => {
-    const spots = Array.from({ length: right - left + 1 }, (_, i) =>
-      Array.from({ length: shy.rise + 1 }, (_unused, row) => ({
-        lane: left + i,
-        travel: -row * cellLength,
-      })),
-    ).flat();
-    return standingPlacements(geometry, spec, spots, (lane) => ({
-      burst: cellLength,
-      lane,
-      length,
-      motion: "shy",
-      movement: spec.movement,
-      pending,
-      reach: { count: right - left + 1, first: lane + left },
-      rise: shy.rise,
-      shapes: shy.shapes,
-      steps: [],
-      stopTravel: sightLength,
-      warning,
-    })).map((placement) => ({ ...placement, rank: REACHES.length - rank }));
-  });
+  const travels = Array.from({ length: shy.rise + 1 }, (_, row) => -row * cellLength);
+  return reachPlacements(geometry, spec, travels, (lane, reach) => ({
+    burst: cellLength,
+    lane,
+    length,
+    motion: "shy",
+    movement: spec.movement,
+    pending,
+    reach,
+    rise: shy.rise,
+    shapes: shy.shapes,
+    steps: [],
+    stopTravel: sightLength,
+    warning,
+  }));
 }
 
 // One mover's placements, at its draws.

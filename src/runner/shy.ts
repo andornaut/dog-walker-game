@@ -1,4 +1,4 @@
-import { laneAt, type MoverPath, type MoverStep, type StepShape } from "./movers";
+import { laneAt, type MoverPath, type MoverStep, type StepShape, stepsTaken } from "./movers";
 
 // A shy hopper hops away from the pack as the pack draws near. Its first hop is chosen as its cue
 // begins, and each later one, with no cue, as it starts, from where the pack is then: of the hops
@@ -9,14 +9,6 @@ import { laneAt, type MoverPath, type MoverStep, type StepShape } from "./movers
 // every hop after it, is dropped instead.
 
 export type ShyPath = Extract<MoverPath, { motion: "shy" }>;
-
-// Where the hops taken leave it: lanes across from its start and rows down (up when negative).
-function hopped(path: ShyPath): { readonly lanes: number; readonly rows: number } {
-  return {
-    lanes: path.steps.reduce((sum, step) => sum + step.lanes, 0),
-    rows: path.steps.reduce((sum, step) => sum + step.travel, 0) / path.burst,
-  };
-}
 
 // The scroll since it spawned at which its next pending hop is chosen: the first as its cue
 // begins, a later one as it starts. null with none.
@@ -32,7 +24,7 @@ export function nextShyChoiceAt(path: ShyPath): number | null {
 // hop would start at or past its stop travel, or with no hop pending.
 export function shyChoices(path: ShyPath): StepShape[] {
   const [at] = path.pending;
-  const { lanes, rows } = hopped(path);
+  const { lanes, rows } = stepsTaken(path);
   if (at === undefined || at + rows * path.burst >= path.stopTravel) {
     return [];
   }

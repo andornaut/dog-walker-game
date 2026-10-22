@@ -1,4 +1,4 @@
-import type { MoverPath, MoverStep, StepShape } from "./movers";
+import { type MoverPath, type MoverStep, type StepShape, stepsTaken } from "./movers";
 
 // A stalker steps toward the pack while it is still ahead of it. Its first step is chosen as its
 // cue begins; a later step has no cue of its own and is chosen as it starts. Each is chosen from
@@ -18,14 +18,6 @@ const APPROACH_STEPS: readonly StepShape[] = [
   { lanes: 1, travel: 0 },
 ];
 
-// Where the steps taken leave it: lanes across from its start and rows down.
-function stepped(path: ApproachPath): { readonly lanes: number; readonly rows: number } {
-  return {
-    lanes: path.steps.reduce((sum, step) => sum + step.lanes, 0),
-    rows: path.steps.reduce((sum, step) => sum + step.travel, 0) / path.burst,
-  };
-}
-
 // The scroll since it spawned at which its next pending step starts, or null with none.
 export function nextStepAt(path: ApproachPath): number | null {
   const [next] = path.pending;
@@ -37,7 +29,7 @@ export function nextStepAt(path: ApproachPath): number | null {
   }
   const last = path.steps.at(-1);
   const soonest = last === undefined ? 0 : last.at + last.length;
-  return Math.max(next.travel - stepped(path).rows * path.burst, soonest);
+  return Math.max(next.travel - stepsTaken(path).rows * path.burst, soonest);
 }
 
 // The scroll since it spawned at which its next pending step is chosen: as the step's cue
@@ -51,7 +43,7 @@ export function nextChoiceAt(path: ApproachPath): number | null {
 // step would start at or past its stop travel, or with no step pending.
 export function approachChoices(path: ApproachPath): StepShape[] {
   const at = nextStepAt(path);
-  const { lanes, rows } = stepped(path);
+  const { lanes, rows } = stepsTaken(path);
   if (at === null || at + rows * path.burst >= path.stopTravel) {
     return [];
   }
