@@ -4,8 +4,7 @@ import { fillLine, wrapWords } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import { achievementProgress } from "../rules/achievements";
 import type { SaveDocument } from "../save/schema";
-import type { FontMetrics } from "../ui/fontMetrics";
-import { type TextFitStyle, textFitStylesOnLines } from "../ui/textFit";
+import type { TextFitStyle } from "../ui/textFit";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
 export interface BadgeView {
@@ -179,43 +178,65 @@ export function badgeStrip(
 }
 
 // A badge strip's rows from its panel's top: the title's capitals at titleY, each badge's
-// badgeSize square from badgeTop, and its name's first capitals nameGap under the badge, each
-// further line a line of the body font at the name's scale lower.
-export const BADGE_STRIP = { badgeSize: 32, badgeTop: 34, maxNamed: 3, nameGap: 6, titleY: 10 };
+// badgeSize square from badgeTop, and its name's first capitals nameGap under the badge, on up
+// to nameLines lines namePitch apart.
+export const BADGE_STRIP = {
+  badgeSize: 32,
+  badgeTop: 22,
+  maxNamed: 3,
+  nameGap: 4,
+  nameLines: 2,
+  namePitch: 16,
+  titleY: 8,
+} as const;
 
 // The panel of badges earned away from a walk's end, as tall as badgesHeight, then a row of
-// faces facesHeight tall when owners cheer; its names take up to nameLines lines.
+// faces facesHeight tall when owners cheer.
 export const CELEBRATION_PANEL = {
   badgesHeight: 118,
   facesHeight: 44,
-  nameLines: 2,
   width: 344,
   x: 8,
 } as const;
 
-// The capitals' top of each of a name's lines lines at scale, under a strip whose panel's top
-// is top.
-export function badgeNameTops(
-  body: FontMetrics,
-  scale: number,
-  lines: number,
-  top: number,
-): number[] {
-  const { badgeSize, badgeTop, nameGap } = BADGE_STRIP;
+// The capitals' top of each of a name's lines lines, under a strip whose panel's top is top:
+// every name's first line on one cap line, a wrapped name's second line under it.
+export function badgeNameTops(lines: number, top: number): number[] {
+  const { badgeSize, badgeTop, nameGap, namePitch } = BADGE_STRIP;
   const first = top + badgeTop + badgeSize + nameGap;
-  return Array.from({ length: lines }, (_, n) => first + n * body.lineHeight * scale);
+  return Array.from({ length: lines }, (_, n) => first + n * namePitch);
 }
 
-// A badge's name under it in a strip: on up to nameLines lines at 2x, with its glyphs closer,
-// or at 1x, by TEXT_FIT_STYLES, within its slot less 2px each side.
-export function badgeNameFit(
-  nameLines: number,
-  slot: StripSlot,
-): { room: number; styles: TextFitStyle[] } {
-  return {
-    room: slot.width - 4,
-    styles: textFitStylesOnLines(nameLines),
-  };
+// A strip's names at 2x, wrapped at spaces onto up to nameLines lines, then with their glyphs a
+// screen pixel closer; never smaller.
+export const BADGE_NAME_STYLES: readonly TextFitStyle[] = [
+  { letterSpacing: 0, lines: BADGE_STRIP.nameLines, scale: 2 },
+  { letterSpacing: -0.5, lines: BADGE_STRIP.nameLines, scale: 2 },
+];
+
+export interface BadgeRowNames {
+  // Each name's lines, in the order the names came.
+  readonly lines: string[][];
+  readonly style: TextFitStyle;
+}
+
+// A strip's names in one style for the whole row, each broken at spaces into lines in a slot
+// slotWidth wide less 2px each side: the first of BADGE_NAME_STYLES that sets every name on at
+// most its lines, each no wider than the room as inkWidth measures it, else the last.
+export function badgeRowNames(
+  inkWidth: (style: TextFitStyle, line: string) => number,
+  slotWidth: number,
+  names: readonly string[],
+): BadgeRowNames {
+  const room = slotWidth - 4;
+  const setIn = (style: TextFitStyle) =>
+    names.map((name) => wrapWords((line) => inkWidth(style, line), room, name));
+  const fits = (style: TextFitStyle, lines: readonly string[]) =>
+    lines.length <= (style.lines ?? 1) && lines.every((line) => inkWidth(style, line) <= room);
+  const style =
+    BADGE_NAME_STYLES.find((tried) => setIn(tried).every((lines) => fits(tried, lines))) ??
+    (BADGE_NAME_STYLES.at(-1) as TextFitStyle);
+  return { lines: setIn(style), style };
 }
 
 export function celebrationTitle(data: Pick<GameData, "menuText">, count: number): string {

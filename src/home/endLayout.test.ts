@@ -9,13 +9,20 @@ import { plainMarks } from "../ui/pixelFont";
 import {
   fittingText,
   TEXT_FIT_STYLES,
+  TEXT_SCALE,
   type TextFitStyle,
   WRAPPING_TEXT_FIT_STYLES,
 } from "../ui/textFit";
-import { badgeNameFit, badgeNameTops, badgeStrip, CELEBRATION_PANEL } from "./badgesView";
+import {
+  BADGE_STRIP,
+  badgeNameTops,
+  type BadgeRowNames,
+  badgeRowNames,
+  badgeStrip,
+  CELEBRATION_PANEL,
+} from "./badgesView";
 import {
   breakdownLabelRoom,
-  END_BADGE_NAME_LINES,
   END_LAYOUT,
   endPanelFits,
   endPanelLayout,
@@ -33,6 +40,7 @@ import { MENU_TEXT_FIELDS } from "./menuText";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
 const BODY = fontFileMetrics("font-body");
+const TITLE = fontFileMetrics("font-title");
 
 // Text as each font draws it: the title font in capitals, typographic marks made plain.
 const FONTS = { body: "font-body", title: "font-title" } as const;
@@ -255,48 +263,51 @@ describe("the end screen's text", () => {
   });
 });
 
-describe("the end screen's badges", () => {
-  const names = gameData.achievements.map(({ name }) => name);
-  const strip = { maxNamed: 3, width: badges.width - 8, x: badges.x + 4 };
+describe("a badge strip's names", () => {
+  const names = gameData.achievements.map(({ name }) => plainMarks(name));
+  const strip = { maxNamed: BADGE_STRIP.maxNamed, width: badges.width - 8, x: badges.x + 4 };
   const counts = Array.from({ length: strip.maxNamed }, (_, i) => i + 1);
-  const firstSlot = (count: number) => {
-    const slot = badgeStrip(strip, count).slots[0];
-    if (slot === undefined) {
-      throw new Error("no slot");
-    }
-    return slot;
-  };
+  const slotWidth = (count: number) => badgeStrip(strip, count).slots[0]?.width ?? 0;
+  const bodyWidth = width("body");
+  const AT_2X = { letterSpacing: 0, scale: TEXT_SCALE };
+  const fits = (count: number, set: BadgeRowNames) =>
+    set.style.scale === TEXT_SCALE &&
+    set.lines.every(
+      (lines) =>
+        lines.length <= BADGE_STRIP.nameLines &&
+        lines.every((line) => bodyWidth(set.style, line) <= slotWidth(count) - 4),
+    );
 
-  it("sets every badge's name under its badge, with any count named", () => {
-    const offenders = counts.flatMap((count) => {
-      const fit = badgeNameFit(END_BADGE_NAME_LINES, firstSlot(count));
-      return names
-        .filter((name) => !fitted("body", fit.styles, fit.room, name))
-        .map((name) => `${count}: ${name}`);
-    });
-    expect(offenders).toEqual([]);
+  it.each(counts.flatMap((count) => names.map((name) => [name, count] as const)))(
+    "sets %s at 2x on at most 2 lines in a row of %i",
+    (name, count) => {
+      expect(fits(count, badgeRowNames(bodyWidth, slotWidth(count), [name]))).toBe(true);
+    },
+  );
+
+  // Every name sits on the row's one style, the closer glyphs only when a name needs them.
+  it.each(counts)("sets a row of %i of the widest names in one style at 2x", (count) => {
+    const wide = (name: string) => bodyWidth(AT_2X, name);
+    const widest = [...names].sort((a, b) => wide(b) - wide(a)).slice(0, count);
+    expect(fits(count, badgeRowNames(bodyWidth, slotWidth(count), widest))).toBe(true);
   });
 
-  // A strip's names, on the lines its panel gives them, keep their lowest ink inside the
-  // panel's 2px frame: the end screen's strip and the celebration's over the home screen.
-  it("keeps every badge's name inside the end screen's and a celebration's panel", () => {
-    const panels = [
-      ["the end screen", END_BADGE_NAME_LINES, badges.y, badges.height],
-      ["a celebration", CELEBRATION_PANEL.nameLines, 0, CELEBRATION_PANEL.badgesHeight],
-    ] as const;
-    const offenders = panels.flatMap(([where, lines, top, height]) =>
-      counts.flatMap((count) => {
-        const fit = badgeNameFit(lines, firstSlot(count));
-        return names
-          .filter((name) => {
-            const set = fittingText(fit.styles, width("body"), fit.room, plainMarks(name));
-            const { scale } = set.style;
-            const last = badgeNameTops(BODY, scale, set.lines.length, top).at(-1) ?? top;
-            return last + inkRowsFromCapTop(BODY) * scale > top + height - 2;
-          })
-          .map((name) => `${where}, ${count}: ${name}`);
-      }),
-    );
-    expect(offenders).toEqual([]);
+  // The title, the badges and a 2-line name each keep their ink inside the panel's 2px frame,
+  // in order down the strip: the end screen's and a celebration's over the home screen.
+  it.each([
+    ["the end screen", badges.height],
+    ["a celebration", CELEBRATION_PANEL.badgesHeight],
+  ] as const)("keeps %s's strip inside its panel", (_, height) => {
+    const titleInk = BADGE_STRIP.titleY + inkRowsFromCapTop(TITLE) * TEXT_SCALE;
+    const badgeBottom = BADGE_STRIP.badgeTop + BADGE_STRIP.badgeSize;
+    const tops = badgeNameTops(BADGE_STRIP.nameLines, 0);
+    const nameInk = (tops.at(-1) ?? 0) + inkRowsFromCapTop(BODY) * TEXT_SCALE;
+    expect(titleInk).toBeLessThanOrEqual(BADGE_STRIP.badgeTop);
+    expect(tops[0]).toBeGreaterThan(badgeBottom);
+    expect(nameInk).toBeLessThanOrEqual(height - 2);
+  });
+
+  it("keeps the end screen's strip above its button", () => {
+    expect(badges.y + badges.height).toBeLessThanOrEqual(END_LAYOUT.button.y);
   });
 });

@@ -5,7 +5,6 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
   breakdownLabelRoom,
-  END_BADGE_NAME_LINES,
   END_LAYOUT,
   END_TEXT_SCALE,
   endPanelLayout,
@@ -236,7 +235,7 @@ export class EndScene extends Scene {
     });
 
     if (celebrating) {
-      addBadgeCelebration(this, reduced, END_BADGE_NAME_LINES, BADGES, earned);
+      addBadgeCelebration(this, reduced, BADGES, earned);
       // After a new best's fanfare, so the two do not play over each other.
       this.time.delayedCall(newBest ? BADGE_SOUND_AFTER_BEST_MS : 0, () =>
         soundboardOf(this).play("badge"),

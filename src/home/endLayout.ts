@@ -72,9 +72,6 @@ export const END_LAYOUT = {
 // Every text on the end screen is body or title at 2x, or smaller where it would not fit.
 export const END_TEXT_SCALE = 2;
 
-// Each badge's name fits on one line under it.
-export const END_BADGE_NAME_LINES = 1;
-
 // How wide a fired row's header and a closing line may be: from the text column to 6px inside
 // the bubble's right edge.
 export const QUIP_TEXT_ROOM =

@@ -5,15 +5,16 @@ import { gameData } from "../data";
 import type { AchievementId, DogId } from "../data/types";
 import {
   BADGE_STRIP,
-  badgeNameFit,
   badgeNameTops,
+  type BadgeRowNames,
+  badgeRowNames,
   badgeStrip,
   badgeWall,
   celebrationTitle,
 } from "../home/badgesView";
 import type { Rect } from "../lib/rect";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, fitPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
+import { addPixelText, labelInkWidth, type PixelTextStyle } from "../ui/phaser/pixelText";
 import { playTagOnce } from "./sprites";
 import { addPanel, showTag, tagFrame, TEXT_SCALE } from "./uiKit";
 
@@ -89,13 +90,11 @@ export function addConfetti(
 }
 
 // Badges just earned, side by side in a panel with confetti behind each: they pop in one after
-// another, or with reduced motion are simply there over a still frame of confetti. Each name
-// takes up to nameLines lines, its glyphs closer or at 1x where they would not fit
-// (badgeNameFit).
+// another, or with reduced motion are simply there over a still frame of confetti. Every name
+// under its badge is set in one style for the row (badgeRowNames), centred on its slot.
 export function addBadgeCelebration(
   scene: Scene,
   reduced: boolean,
-  nameLines: number,
   rect: Rect,
   ids: readonly AchievementId[],
 ): void {
@@ -111,7 +110,10 @@ export function addBadgeCelebration(
   const { maxNamed } = BADGE_STRIP;
   const strip = badgeStrip({ maxNamed, width: rect.width - 8, x: rect.x + 4 }, badges.length);
   const badgeY = rect.y + BADGE_STRIP.badgeTop + BADGE_SIZE / 2;
-  const body = pixelFontMetrics(scene, "body");
+  const style = { color: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
+  const slotWidth = strip.slots[0]?.width ?? 0;
+  const named = badges.map(({ name }) => name);
+  const names = strip.named ? rowNames(scene, style, slotWidth, named) : undefined;
   badges.forEach((badge, i) => {
     const slot = strip.slots[i];
     if (slot === undefined) {
@@ -120,14 +122,11 @@ export function addBadgeCelebration(
     const delay = i * POP.delayMs;
     const burst = () => addConfetti(scene, reduced, 1, slot.centerX, badgeY);
     const image = addBadge(scene, badge.art, true, slot.centerX, badgeY);
-    if (strip.named) {
-      const style = { color: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
-      const probe = addPixelText(scene, 0, 0, badge.name, style).setVisible(false);
-      const name = fitPixelText(probe, badgeNameFit(nameLines, slot), 0, 0);
-      probe.destroy();
-      const { letterSpacing, scale } = name.style;
-      const tops = badgeNameTops(body, scale, name.lines.length, rect.y);
-      name.lines.forEach((line, n) => {
+    if (names !== undefined) {
+      const { letterSpacing, scale } = names.style;
+      const lines = names.lines[i] ?? [];
+      const tops = badgeNameTops(lines.length, rect.y);
+      lines.forEach((line, n) => {
         addPixelText(scene, slot.centerX, tops[n] ?? 0, line, { ...style, scale })
           .setLetterSpacing(letterSpacing)
           .setDepth(1);
@@ -148,6 +147,19 @@ export function addBadgeCelebration(
       targets: image,
     });
   });
+}
+
+// A strip's names set as badgeRowNames gives them, measured on the font they are drawn in.
+function rowNames(
+  scene: Scene,
+  style: PixelTextStyle,
+  slotWidth: number,
+  names: readonly string[],
+): BadgeRowNames {
+  const probe = addPixelText(scene, 0, 0, "", style).setVisible(false);
+  const set = badgeRowNames(labelInkWidth(probe), slotWidth, names);
+  probe.destroy();
+  return set;
 }
 
 // The owners cheering: their happy faces, hopping now and then unless motion is reduced.
