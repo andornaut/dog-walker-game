@@ -309,9 +309,26 @@ export interface MoverStand {
 // steer around a sweep of several lanes. stands are each place it stands as an obstacle, by
 // distance from its row. screen is from its cue appearing until it is out of sight. Of the
 // placements that fit, the planner takes one of the highest rank, 0 when unset.
+interface BlockCell {
+  readonly lane: number;
+  readonly row: number;
+}
+
+// Every cell of rowCount rows from firstRow by laneCount lanes from firstLane, row by row.
+function blockCells(
+  firstRow: number,
+  rowCount: number,
+  firstLane: number,
+  laneCount: number,
+): BlockCell[] {
+  return Array.from({ length: rowCount }, (_, i) =>
+    Array.from({ length: laneCount }, (_unused, j) => ({ lane: firstLane + j, row: firstRow + i })),
+  ).flat();
+}
+
 interface MoverPlacement {
   readonly appears: number;
-  readonly cells: readonly { readonly lane: number; readonly row: number }[];
+  readonly cells: readonly BlockCell[];
   readonly lane: number;
   readonly lanes: LaneSpan;
   readonly leadIn: boolean;
@@ -644,9 +661,7 @@ function crossPlacements(
     const first = meets ? Math.min(firstRow, -1) : firstRow;
     return {
       appears,
-      cells: Array.from({ length: lastRow - first + 1 }, (_, i) =>
-        Array.from({ length: laneCount }, (_unused, lane) => ({ lane, row: first + i })),
-      ).flat(),
+      cells: blockCells(first, lastRow - first + 1, 0, laneCount),
       lane: direction === 1 ? 0 : laneCount - 1,
       lanes,
       leadIn: meets,
@@ -696,9 +711,7 @@ function ridePlacements(
   const blockRows = rowsCovering(geometry, rows, 1 / speedMultiplier);
   return Array.from({ length: laneCount - across + 1 }, (_, lane) => ({
     appears: enters - warning,
-    cells: Array.from({ length: lastRow - firstRow + 1 }, (_, i) =>
-      Array.from({ length: across }, (_unused, j) => ({ lane: lane + j, row: firstRow + i })),
-    ).flat(),
+    cells: blockCells(firstRow, lastRow - firstRow + 1, lane, across),
     lane,
     lanes: { count: across, first: lane },
     leadIn: false,
@@ -756,9 +769,7 @@ function standingPlacements(
     const count = maxLane - minLane + across;
     placements.push({
       appears: maxTravel,
-      cells: Array.from({ length: rowCount }, (_, row) =>
-        Array.from({ length: count }, (_unused, i) => ({ lane: first + i, row })),
-      ).flat(),
+      cells: blockCells(0, rowCount, first, count),
       lane: start,
       lanes: { count, first },
       leadIn: false,
@@ -1034,7 +1045,7 @@ export function screenHasRoom(
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
   isFree(lane: number, row: number): boolean;
-  leavesRoom(cells: readonly { readonly lane: number; readonly row: number }[]): boolean;
+  leavesRoom(cells: readonly BlockCell[]): boolean;
   packFits(stands: readonly MoverStand[]): boolean;
   stand(stands: readonly MoverStand[]): void;
   take(lane: number, row: number): void;
