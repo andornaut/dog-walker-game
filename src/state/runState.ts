@@ -198,7 +198,6 @@ export function newRun(
     zoneDistance: pixels(0),
     zoneIndex: 0,
   };
-  // Neither walkers nor gear target a random dog, so the draw is never used.
   const applyFrom = (source: EffectSource, effects: readonly Effect[], state: RunState) =>
     applyEffects(data, { affected: [], random: () => 0, source }, effects, state);
   const walked = applyFrom({ kind: "walker", walker }, walkerEffects(data, walker), empty);

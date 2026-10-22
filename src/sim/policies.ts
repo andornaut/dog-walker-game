@@ -55,8 +55,7 @@ export function choosePath(random: () => number, policy: RoutePolicyId, pathCoun
 // An owner left at this many hearts or fewer is one bad card from firing you.
 export const LOW_HEARTS = 1;
 
-// What an enabled option would do, previewed on the current state. A random target is
-// previewed on the first owner in the pack, as the card shows it.
+// What an enabled option would do, previewed on the current state.
 interface OptionPreview {
   readonly choice: Choice;
   readonly cost: Cents;
