@@ -87,6 +87,8 @@ def own(s):
                     ("idle", [dressed(p, road.thief_top, bob=b).outlined() for b in breath], ms)]
     neighbour = dict(legs="purple", shoes="dbrown")
     yield "petting-neighbor", [
+        ("walk", [dressed(p, road.neighbour_top(False, -w.get("bob", 0)), **w, **neighbour).outlined()
+                  for w in road.PERSON_WALK], road.PERSON_WALK_MS),
         ("wave", [dressed(p, road.neighbour_top(True, k), bob=road.NEIGHBOUR_CROUCH, **neighbour).outlined()
                   for k in (0, 1)], 350),
         ("idle", [dressed(p, road.neighbour_top(False, k), bob=b, **neighbour).outlined()

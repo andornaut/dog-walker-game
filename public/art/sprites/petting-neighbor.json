@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
     "sourceSize": { "w": 48, "h": 72 },
-    "duration": 350
+    "duration": 100
    },
    "petting-neighbor 1.aseprite": {
     "frame": { "x": 48, "y": 0, "w": 48, "h": 72 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
     "sourceSize": { "w": 48, "h": 72 },
-    "duration": 350
+    "duration": 100
    },
    "petting-neighbor 2.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 48, "h": 72 },
@@ -21,10 +21,42 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
     "sourceSize": { "w": 48, "h": 72 },
-    "duration": 400
+    "duration": 100
    },
    "petting-neighbor 3.aseprite": {
     "frame": { "x": 144, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 100
+   },
+   "petting-neighbor 4.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 350
+   },
+   "petting-neighbor 5.aseprite": {
+    "frame": { "x": 240, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 350
+   },
+   "petting-neighbor 6.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
+   },
+   "petting-neighbor 7.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 48, "h": 72 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
@@ -37,11 +69,12 @@
   "version": "1.2.30-x64",
   "image": "petting-neighbor.png",
   "format": "RGBA8888",
-  "size": { "w": 192, "h": 72 },
+  "size": { "w": 384, "h": 72 },
   "scale": "1",
   "frameTags": [
-   { "name": "wave", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "idle", "from": 2, "to": 3, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "wave", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "idle", "from": 6, "to": 7, "direction": "forward" }
   ]
  }
 }

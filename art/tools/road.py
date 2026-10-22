@@ -57,16 +57,16 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import DARKER, Grid, K, edged, main, raster, scale_of  # noqa: E402
 
 
-def face_front(g, cx, y, eyes="ink", lips="dbrown", spread=4):
+def face_front(g, cx, y, eyes="ink", lips="dbrown", spread=4, mouth=4):
     """Eyes and a smile for a chibi head seen from the front; y is the eye row. lips is the mouth's colour;
-    spread is each eye's centre's distance from cx."""
+    spread is each eye's centre's distance from cx; mouth is the smile's corners' row below y."""
     g.rect(cx - spread - 1, y, 2, 2, eyes)
     g.rect(cx + spread - 1, y, 2, 2, eyes)
     g.p(cx - spread - 1, y, "white")
     g.p(cx + spread - 1, y, "white")
-    g.p(cx - 2, y + 4, lips)
-    g.p(cx + 1, y + 4, lips)
-    g.rect(cx - 1, y + 5, 2, 1, lips)
+    g.p(cx - 2, y + mouth, lips)
+    g.p(cx + 1, y + mouth, lips)
+    g.rect(cx - 1, y + mouth + 1, 2, 1, lips)
 
 
 def face_disc(g, cx, cy, rx, ry, skin, shade, to=0.35):
@@ -1196,10 +1196,11 @@ NEIGHBOUR_CROUCH = 3
 
 def neighbour_top(pet, beat):
     """The friendly neighbour, a grey-haired dog lover in a mauve cardigan open over a cream top with a big red
-    heart on it, a red heart floating at her top right. pet crouches her (with person's bob=NEIGHBOUR_CROUCH)
+    heart on it, a red heart floating at her top right. From 1x her smile sits a row lower than face_front's,
+    under a small nose, clear of her eyes. pet crouches her (with person's bob=NEIGHBOUR_CROUCH)
     and reaches her left arm (screen right) out and down, the open hand patting: beat 1 lowers it a row and
     shrinks the floating heart a step, so it beats. Standing, beat 1 lifts the floating heart a row, so it
-    bobs against her breath."""
+    bobs against her breath or her step."""
     def top(g, b):
         # the cardigan, open down the front over the cream top, and the big heart on it
         g.rect(9, 21 + b, 14, 13, "mauve")
@@ -1229,7 +1230,11 @@ def neighbour_top(pet, beat):
         g.cel(16, 3 + b, 3.5, 2.5, "lgrey", "grey", "white")
         g.rect(8, 9 + b, 2, 6, "lgrey")
         g.rect(22, 9 + b, 2, 6, "lgrey")
-        face_front(g, 16, 13 + b)
+        # from 1x the smile drops a row under a small nose; smaller, the face has no rows for either
+        roomy = scale_of(g) >= 1
+        face_front(g, 16, 13 + b, mouth=5 if roomy else 4)
+        if roomy:
+            nose(g, 16, 13 + b)
         g.rect(10, 12 + b, 5, 1, "dslate")
         g.rect(18, 12 + b, 5, 1, "dslate")
         g.p(10, 15 + b, "pink")
@@ -1717,7 +1722,9 @@ def sprites():
                     ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "petting-neighbor", [("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
+    yield "petting-neighbor", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), **q, **neighbour)
+                                                for q in PERSON_WALK), PERSON_WALK_MS),
+                                ("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
                                                     **neighbour) for k in (0, 1)), 350),
                                 ("idle", frames(big(dressed, neighbour_top(False, k), bob=bb, **neighbour)
                                                 for k, bb in enumerate(BREATH)), BREATH_MS)]
