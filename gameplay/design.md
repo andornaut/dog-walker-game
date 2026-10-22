@@ -33,7 +33,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Jesse** (Koda): laid-back runner, fitness talk (form, personal bests, shake it off)
   - **Kevin** (Nugget): influencer, everything is content (feed, trending, followers)
   - **Kiwi** (Archie): unflappable grandmother, "dear" and "pet", offers cookies and tea
-  - **Madame Lefevre** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
+  - **Ms. Lefevre** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
   - **Mr. Pruitt** (Zippy): retired accountant, dry, ledgers, receipts and red ink
   - **Rosa** (Duchess): retired florist, theatrical, flower metaphors and exclamation marks
   - **Sam** (Biscuit): easygoing barista, coffee puns, calls you "friend"
