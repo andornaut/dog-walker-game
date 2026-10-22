@@ -117,7 +117,7 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
-import { DISABLED_COLORS, type SelectLook } from "../ui/selection";
+import { BUTTON_COLORS, type SelectLook } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
@@ -156,8 +156,9 @@ import {
   addTagImage,
   addTapBurst,
   addTileSprite,
+  BUTTON_PRESS_PX,
+  buttonFaces,
   cogIcon,
-  drawDisabledButton,
   type IconButton,
   imageIcon,
   imageIconOr,
@@ -1689,34 +1690,29 @@ export class StartScene extends Scene {
 
   // Start walk keeps its words and place in every state but one. Ready, it is primary: the
   // raised green go button, sinking into its lip when pressed, drawn twice, raised and pressed,
-  // and the frame shows one. Not ready, it is disabled: a flat sunk face that never moves.
+  // and the frame shows one. Not ready, it is disabled: a flat sunk face that never moves, under
+  // both labels. The faces are the ui-button's, and the label sinks with the face.
   // Pressed while the walk's art loads, its pressed face says so, in words that keep still.
   private drawStartButton(root: GameObjects.Container, ready: boolean): void {
-    const { height, width, x, y } = START_BUTTON;
+    const { width, x, y } = START_BUTTON;
     const container = this.add.container(0, 0);
     root.add(container);
     const { startLoading: loadingLabel, startWalk: label } = gameData.homeText;
     const state = buttonState({ available: ready, primary: true });
     const disabled = state === "disabled";
+    const faces = buttonFaces(this, true, START_BUTTON, state);
+    if (faces.length === 1) {
+      container.add(faces);
+    }
     const variant = (down: boolean) => {
       const group = this.add.container(0, 0);
       container.add(group);
-      const drop = down ? FEEDBACK.buttonPressPx : 0;
-      const tag = disabled ? "go-disabled" : down ? "go-pressed" : "go";
-      const slice = addNineSlice(this, "ui-button", START_BUTTON, tag);
-      if (slice !== undefined) {
-        group.add(slice);
-      } else if (disabled) {
-        drawDisabledButton(this.graphics(group), 4, FEEDBACK.buttonPressPx, START_BUTTON);
-      } else {
-        const g = this.graphics(group);
-        if (!down) {
-          fillRect(g, PALETTE.forest, { height: height - 4, width, x, y: y + 4 });
-        }
-        fillRect(g, PALETTE.green, { height: height - 4, width, x, y: y + drop });
+      const face = faces.length > 1 ? faces[down ? 1 : 0] : undefined;
+      if (face !== undefined) {
+        group.add(face);
       }
-      const top = disabled ? START_LABEL.notReadyY : START_LABEL.readyY + drop;
-      const color = disabled ? PALETTE[DISABLED_COLORS.text] : PALETTE.ink;
+      const top = START_LABEL.readyY + (disabled || down ? BUTTON_PRESS_PX : 0);
+      const color = PALETTE[BUTTON_COLORS[state].label];
       const loading = down && this.artWait?.kind === "start";
       const text = this.text(group, x + width / 2, y + top, loading ? loadingLabel : label, color, {
         font: "title",

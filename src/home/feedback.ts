@@ -10,8 +10,6 @@ export const FEEDBACK = {
   badgePopPx: 3,
   // Ready Start walk rises 1px on every other beat.
   bobBeatMs: 600,
-  // The Start walk face sinks this far into its lip while pressed.
-  buttonPressPx: 4,
   // fx-dust plays at the gate when a dog joins the pack, if the screen is drawn within this
   // long of it joining.
   dustFrameMs: 80,

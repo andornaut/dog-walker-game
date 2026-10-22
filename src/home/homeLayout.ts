@@ -224,8 +224,8 @@ export const HOME_LAYOUT = {
     top: 6,
   },
   startButton: START_BUTTON,
-  // Start walk's label caps: on the raised face when ready, on the sunk face when not.
-  startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
+  // Start walk's label caps on its raised face; the label sinks with the face.
+  startLabel: { readyY: 12, scale: 3 },
   // The pressed face's label while the walk waits for its art: centred on the ready label's
   // caps, at its size if that fits inside the face less 12px a side, else smaller.
   startLoading: {

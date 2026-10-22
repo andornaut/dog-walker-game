@@ -155,7 +155,7 @@ const BUTTON_TAGS: Readonly<Record<ButtonLook, readonly string[]>> = {
 };
 
 // The ui-button's face sinks this far into its lip when pressed, as the art draws it.
-const BUTTON_PRESS_PX = 2;
+export const BUTTON_PRESS_PX = 2;
 const BUTTON_LIP_PX = 4;
 
 // A disabled button drawn in code: a flat grey face in an ink line, pressPx down with no
@@ -179,7 +179,7 @@ export interface MenuButton {
 }
 
 // The button's faces, raised then pressed, or the one flat face when disabled.
-function buttonFaces(
+export function buttonFaces(
   scene: Scene,
   primary: boolean,
   rect: Rect,
