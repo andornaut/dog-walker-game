@@ -1,7 +1,7 @@
 // The dev panel: plain HTML under the game canvas. A thin bar that opens a sheet of cheats for
 // a person testing the game. The top section (the switch, start and toggles) is staged until
-// Apply; the save cheats below it act at once. The game reaches it only through DevPanelHost, so this module needs no
-// Phaser.
+// Apply; the save cheats below it act at once, with cheats on or off. The game reaches it only
+// through DevPanelHost, so this module needs no Phaser.
 import "./devPanel.css";
 
 import { gameData } from "../data";
@@ -167,9 +167,6 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     });
     speeds.forEach(({ id, radio }) => {
       radio.checked = staged.speed === id;
-    });
-    saveCheats.forEach((cheat) => {
-      cheat.disabled = !staged.on;
     });
     const unchanged = !hasStagedChanges(state);
     cancel.disabled = unchanged;
