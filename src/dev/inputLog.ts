@@ -4,7 +4,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { parseRunSetup, type RunSetup, type RunSetupLimits, runSetupToQuery } from "./runSetup";
 
 // A log of any other version is rejected.
-export const INPUT_LOG_VERSION = 4;
+export const INPUT_LOG_VERSION = 5;
 
 // A card option's index in its source's data, or the Skip option, as chooseOption takes it.
 export type CardChoice = number | "skip";
