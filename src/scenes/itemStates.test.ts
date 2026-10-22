@@ -26,10 +26,10 @@ type StateName = "affordable" | "locked" | "owned" | "short";
 
 // What each state shows on the start screen, from the shop states' table.
 const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
-  affordable: { art: "grey", padlock: "open", plate: "buy", state: "disabled" },
-  locked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
-  owned: { art: "full", padlock: null, plate: null, state: "normal" },
-  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
+  affordable: { padlock: "open", plate: "buy", state: "disabled" },
+  locked: { padlock: "closed", plate: "goal", state: "disabled" },
+  owned: { padlock: null, plate: null, state: "normal" },
+  short: { padlock: "closed", plate: "short", state: "disabled" },
 };
 
 const dogPrice = (dog: DogId) => purchasePrice(gameData, OWNED, { dog, kind: "dog" }) ?? cents(0);

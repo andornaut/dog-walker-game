@@ -58,7 +58,7 @@ import {
 import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
-import type { ArtLook } from "../ui/interaction";
+import type { TileState } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
@@ -72,14 +72,7 @@ import { GREYED, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
-import {
-  addLock,
-  addPlate,
-  artTextureKey,
-  drawDogSlotFallback,
-  plateColors,
-  SHOP_ART,
-} from "./itemArt";
+import { addLock, addPlate, drawDogSlotFallback, plateColors, SHOP_ART } from "./itemArt";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirmView";
@@ -104,6 +97,7 @@ import {
   selectOuter,
   tagFrame,
   TEXT_SCALE,
+  tileTextureKey,
 } from "./uiKit";
 
 // The caller pauses itself and launches the shop, on the tab of focus and framing its row
@@ -816,7 +810,7 @@ export class ShopScene extends Scene {
       y: rect.y + Math.floor((rect.height - box.size) / 2),
     };
     fillRect(this.graphics(content), PALETTE[tile.look.box], boxRect);
-    this.addArt(content, purchaseArt(row.purchase), view.art, {
+    this.addArt(content, purchaseArt(row.purchase), view.state, {
       x: boxRect.x + ROW.art,
       y: boxRect.y + ROW.art,
     });
@@ -846,7 +840,7 @@ export class ShopScene extends Scene {
   private addArt(
     parent: GameObjects.Container,
     key: string,
-    look: ArtLook,
+    state: TileState,
     at: { x: number; y: number },
   ): void {
     if (!this.textures.exists(key)) {
@@ -856,7 +850,7 @@ export class ShopScene extends Scene {
       return;
     }
     // A dog's face shows its happy frame; an icon has one frame.
-    const shown = artTextureKey(this, look, key);
+    const shown = tileTextureKey(this, state, key);
     parent.add(this.add.image(at.x, at.y, shown, tagFrame(this, key, "happy")).setOrigin(0));
   }
 

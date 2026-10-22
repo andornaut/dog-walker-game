@@ -64,10 +64,10 @@ export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
 // plate, short the closed padlock and the short plate, and blocked the closed padlock and its
 // price on the goal plate.
 export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
-  affordable: { art: "grey", padlock: "open", plate: "buy", state: "disabled" },
-  blocked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
-  owned: { art: "full", padlock: null, plate: null, state: "normal" },
-  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
+  affordable: { padlock: "open", plate: "buy", state: "disabled" },
+  blocked: { padlock: "closed", plate: "goal", state: "disabled" },
+  owned: { padlock: null, plate: null, state: "normal" },
+  short: { padlock: "closed", plate: "short", state: "disabled" },
 };
 
 // Whether anything in the shop is affordable now: the building then wears the gold outline.

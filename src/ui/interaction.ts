@@ -86,22 +86,18 @@ export function itemTile(input: ItemTileInput): ItemTile {
   return capacity > 1 && pickedCount >= capacity ? { kind: "packFull" } : { kind: "available" };
 }
 
-// How an item's art shows: in full colour or as its grey copy.
-export type ArtLook = "full" | "grey";
-
 // The padlock over an item not owned: open while the bank covers its price, closed otherwise.
 export type Padlock = "closed" | "open";
 
-// Everything an item's state sets on its tile or row: the art, the padlock, the plate and
-// the ui-tile state.
+// Everything an item's state sets on its tile or row: the padlock, the plate and the ui-tile
+// state. A disabled tile's art shows as its grey copy, and every other tile's in full colour.
 export interface ItemLook {
-  readonly art: ArtLook;
   readonly padlock: Padlock | null;
   readonly plate: PlateKind | null;
   readonly state: TileState;
 }
 
-const OWNED_LOOK = { art: "full", padlock: null, plate: null } as const;
+const OWNED_LOOK = { padlock: null, plate: null } as const;
 
 // An item tile on the home screen. An owned item shows in full colour with no padlock or
 // plate, greyed while the pack is full. One not owned shows its own art greyed on a disabled
@@ -115,13 +111,13 @@ export function itemTileLook(tile: ItemTile): ItemLook {
     case "picked":
       return { ...OWNED_LOOK, state: "selected" };
     case "packFull":
-      return { ...OWNED_LOOK, art: "grey", state: "disabled" };
+      return { ...OWNED_LOOK, state: "disabled" };
     case "locked":
       return tile.affordable
-        ? { art: "grey", padlock: "open", plate: "buy", state: "disabled" }
-        : { art: "grey", padlock: "closed", plate: "short", state: "disabled" };
+        ? { padlock: "open", plate: "buy", state: "disabled" }
+        : { padlock: "closed", plate: "short", state: "disabled" };
     case "goal":
-      return { art: "grey", padlock: "closed", plate: "goal", state: "disabled" };
+      return { padlock: "closed", plate: "goal", state: "disabled" };
     default:
       return tile satisfies never;
   }
