@@ -10,6 +10,7 @@ import {
   inlineFaceBox,
   type OwnerFace,
 } from "../hud/faceText";
+import type { Rect } from "../lib/rect";
 import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
@@ -82,31 +83,29 @@ export function addFaceRows(
       box === undefined
         ? []
         : row.faces.flatMap((face) =>
-            addInlineFace(scene, box, { x: at.x + face.x, y: top - box.rise }, face),
+            addFramedOwnerFace(
+              scene,
+              { height: box.framed, width: box.framed, x: at.x + face.x, y: top - box.rise },
+              face,
+            ),
           );
     return [...faces, ...texts];
   });
 }
 
-// The owner's 20x20 face at 1x, in its mood, else neutral, in a 1px ink frame over tan, the
-// frame's top-left at.
-function addInlineFace(
+// The owner's 20x20 face at 1x, in its mood, else neutral, in frame's 1px ink line over tan.
+export function addFramedOwnerFace(
   scene: Scene,
-  box: FaceBox,
-  at: { x: number; y: number },
-  face: OwnerFace,
+  frame: Rect,
+  face: Pick<OwnerFace, "dog"> & { readonly mood: string },
 ): Part[] {
   const g = scene.add.graphics();
-  drawFramedRect(
-    g,
-    { border: PALETTE.ink, fill: PALETTE.tan },
-    { height: box.framed, width: box.framed, x: at.x, y: at.y },
-  );
+  drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.tan }, frame);
   const key = ownerCardFaceKey(gameData, face.dog);
   if (!scene.textures.exists(key)) {
     return [g];
   }
-  const sprite = scene.add.sprite(at.x + 1, at.y + 1, key).setOrigin(0);
+  const sprite = scene.add.sprite(frame.x + 1, frame.y + 1, key).setOrigin(0);
   const tag = firstTag(scene, key, [face.mood, "neutral"]);
   if (tag !== undefined) {
     playTag(sprite, key, tag);

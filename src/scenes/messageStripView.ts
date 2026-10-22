@@ -1,6 +1,5 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { type FaceRow, type FaceText, inlineFaceBox, withoutFace } from "../hud/faceText";
 import {
@@ -27,7 +26,6 @@ import {
   stepMessageStrip,
   stripLeadSlot,
 } from "../hud/messageStrip";
-import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -37,8 +35,7 @@ import {
   placePixelText,
 } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
-import { addFaceRows, fitFaceRows, measureRuns } from "./faceTextView";
-import { firstTag, playTag } from "./sprites";
+import { addFaceRows, addFramedOwnerFace, fitFaceRows, measureRuns } from "./faceTextView";
 import { addPanel } from "./uiKit";
 
 // A line said from the run scene, as a MessageLine: the HUD shows it on its message strip.
@@ -166,22 +163,9 @@ function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn
   return { bars, id: line.id, panel, parts, scene };
 }
 
-// The owner's 20x20 face in its mood, else neutral, in a 1px ink frame over tan, and their name
-// under it.
+// The owner's framed face in its mood, and their name under it.
 function ownerLead(scene: Scene, owner: OwnerLead, name: string, lead: OwnerLeadLayout): Faded[] {
-  const { frame } = lead;
-  const g = scene.add.graphics();
-  drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.tan }, frame);
-  const parts: Faded[] = [g];
-  const key = ownerCardFaceKey(gameData, owner.dog);
-  if (scene.textures.exists(key)) {
-    const face = scene.add.sprite(frame.x + 1, frame.y + 1, key).setOrigin(0);
-    const tag = firstTag(scene, key, [owner.mood, "neutral"]);
-    if (tag !== undefined) {
-      playTag(face, key, tag);
-    }
-    parts.push(face);
-  }
+  const parts: Faded[] = addFramedOwnerFace(scene, lead.frame, owner);
   const label = addPixelText(scene, 0, 0, name, NAME_STYLE);
   placePixelText(label, lead.name.x - inkSpan(label).left, lead.name.y);
   return [...parts, label];
