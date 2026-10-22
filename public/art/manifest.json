@@ -545,11 +545,6 @@
       "json": "sprites/badge-everybody-home.json"
     },
     {
-      "key": "badge-first-steps",
-      "png": "sprites/badge-first-steps.png",
-      "json": "sprites/badge-first-steps.json"
-    },
-    {
       "key": "badge-five-star-service",
       "png": "sprites/badge-five-star-service.png",
       "json": "sprites/badge-five-star-service.json"
@@ -608,6 +603,11 @@
       "key": "badge-top-walker",
       "png": "sprites/badge-top-walker.png",
       "json": "sprites/badge-top-walker.json"
+    },
+    {
+      "key": "badge-whole-city",
+      "png": "sprites/badge-whole-city.png",
+      "json": "sprites/badge-whole-city.json"
     },
     {
       "key": "badge-yoink",

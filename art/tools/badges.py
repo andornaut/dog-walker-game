@@ -89,19 +89,28 @@ def icon(name):
     return deco
 
 
-@icon("first-steps")
+@icon("whole-city")
 def _(g):
-    """A fingerpost: a green arrow pointing on, a sky one back, on a post in a grass tuft."""
-    g.rect(15, 7, 2, 18, "dbrown")
-    g.rect(15, 7, 1, 18, "brown")
-    for y in range(9, 14):
-        g.rect(8, y, 13 + 2 * (2 - abs(y - 11)), 1, "dgreen" if y == 13 else "green")
-    for y in range(15, 20):
-        x = 10 - 2 * (2 - abs(y - 17))
-        g.rect(x, y, 22 - x, 1, "blue" if y == 19 else "sky")
-    for x, h in ((11, 2), (12, 1), (13, 2), (17, 2), (18, 1), (19, 2), (20, 1)):
-        g.rect(x, 25 - h, 1, h, "green")
-    g.rect(11, 25, 10, 1, "dgreen")
+    """Toronto's skyline round the CN Tower: a grey needle with its pod and a red light, and either
+    side blocks in the neighborhoods' colours (Kensington's lilac, Cabbagetown's brick, the
+    Distillery's ochre, the Beaches' sky), amber-lit, on a strip of High Park green."""
+    blocks = ((7, 17, 4, "lilac", "violet"), (11, 13, 4, "brick", "dbrick"), (19, 15, 4, "ochre", "rust"),
+              (23, 18, 3, "sky", "blue"))
+    for x, top, w, fill, shade in blocks:
+        g.rect(x, top, w, 24 - top, fill)
+        g.rect(x + w - 1, top, 1, 24 - top, shade)
+        for wy in range(top + 2, 23, 3):
+            for wx in range(x + 1, x + w - 1, 2):
+                g.p(wx, wy, "yellow")
+    g.rect(15, 8, 2, 16, "lgrey")
+    g.rect(16, 8, 1, 16, "grey")
+    g.rect(15, 6, 1, 2, "grey")
+    g.p(15, 5, "red")
+    g.rect(13, 11, 6, 2, "lgrey")
+    g.rect(13, 12, 6, 1, "grey")
+    g.rect(14, 10, 4, 1, "white")
+    g.rect(6, 24, 20, 2, "green")
+    g.rect(6, 25, 20, 1, "dgreen")
 
 
 @icon("round-trip")
@@ -411,12 +420,12 @@ def _(g):
 
 
 BADGES = {
-    "double-leash": "firsts", "dream-team": "firsts", "first-steps": "firsts", "pack-leader": "firsts",
+    "double-leash": "firsts", "dream-team": "firsts", "pack-leader": "firsts",
     "round-trip": "firsts",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
     "five-star-service": "mastery", "not-a-scratch": "mastery",
     "full-kennel": "collection", "kitted-out": "collection", "neighborhood-favorite": "collection",
-    "top-walker": "collection",
+    "top-walker": "collection", "whole-city": "collection",
     "close-shave": "silly", "eau-de-skunk": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
     "squirrel": "silly", "yoink": "silly", "youre-fired": "silly", "zoomies": "silly",
 }
