@@ -442,7 +442,7 @@ export function moverMovement(
 
 // The movement an obstacle, minor or not, or a lucky encounter can come with, or null for anything
 // that never moves.
-function movementOf(
+export function movementOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): Movement | null {
@@ -455,7 +455,7 @@ function movementOf(
 }
 
 // A step: a lane to either side, or a row toward the pack or away.
-const STEPS: readonly StepShape[] = [
+export const STEP_SHAPES: readonly StepShape[] = [
   { lanes: -1, travel: 0 },
   { lanes: 1, travel: 0 },
   { lanes: 0, travel: 1 },
@@ -540,7 +540,7 @@ export function moverSpec(
   } else {
     const { max, min } = movement.steps;
     const steps = Array.from({ length: max }, (_, i) =>
-      randomPick(i < min ? streams.spawns : streams.movers, STEPS),
+      randomPick(i < min ? streams.spawns : streams.movers, STEP_SHAPES),
     );
     const mirrored = steps.map(({ lanes, travel }) => ({ lanes: -lanes as -1 | 0 | 1, travel }));
     motion = {

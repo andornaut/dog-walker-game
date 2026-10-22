@@ -146,7 +146,7 @@ export function hasStopped(path: MoverPath, since: number): boolean {
 }
 
 // Whether a crosser has turned back, since scroll after its cue appeared.
-function turnedBack(path: Extract<MoverPath, { motion: "cross" }>, since: number): boolean {
+export function turnedBack(path: Extract<MoverPath, { motion: "cross" }>, since: number): boolean {
   return (
     path.turnAfter !== null &&
     path.lanesPerPixel * Math.max(0, since - path.warning) > path.turnAfter
