@@ -1032,7 +1032,7 @@ function frontDog(run: RunState): DogId {
 // the grace window) become cards for the pack, and lucky finds apply at once. An obstacle the
 // pack is immune to is harmless: it is removed, and nothing else happens. A plain hit or an
 // obstacle with a hit moment starts a hit stop, and the steps it lasts hold everything still.
-// random draws for dodges and instant finds' effects. Does nothing unless walking.
+// random draws for dodges. Does nothing unless walking.
 export function stepWalk(
   data: WalkData,
   geometry: RoadGeometry,
