@@ -685,8 +685,8 @@ function attempt(
 // A dog's tell starts the wait before the bot sees it. After a pull, the bot drags back, if
 // that is better, once it has reacted to the pull and the pull's move has ended. A pull the bot did not
 // see coming spoils its plan until it has seen the tell; one it saw coming was in its plan. A
-// blocked pull moved nothing, so the bot replans without the pull. A tell after a pull, for a
-// target with pulls left, starts the wait again.
+// pull toward the lane the pack already heads for moved nothing, so the bot replans without
+// it. A tell after a pull, for a target with pulls left, starts the wait again.
 export function observePulls(
   bot: Bot,
   tells: readonly { readonly dog: DogId }[],

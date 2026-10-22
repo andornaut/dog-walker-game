@@ -73,7 +73,8 @@ export interface Pulls {
 
 export const NO_PULLS: Pulls = { clock: 0, last: null, spent: [], strain: null };
 
-// moved is false for a pull toward the road's edge from its edge lane.
+// moved is false for a pull toward the lane the pack already heads for, one lane past the lane
+// it is in or moving to.
 export interface PullEvent {
   readonly direction: LaneDirection;
   readonly dog: DogId;
