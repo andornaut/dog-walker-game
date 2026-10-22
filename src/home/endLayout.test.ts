@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { fillLine } from "../lib/lines";
+import { defined } from "../testing/defined";
 import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -78,8 +79,7 @@ describe("endPanelLayout", () => {
   it.each(cases)(
     "fits %i breakdown lines and %i owners' rows (fired: %s), each row under the last",
     (lines, rows, fired) => {
-      const placed = endPanelLayout(BODY, lines, quipRows(rows, fired, [])).rows;
-      const { panel } = endPanelLayout(BODY, lines, quipRows(rows, fired, []));
+      const { panel, rows: placed } = endPanelLayout(BODY, lines, quipRows(rows, fired, []));
       // The breakdown's last line's ink and the side column's total stay over the rule.
       const listInk = breakdown.top + (lines - 1) * breakdown.pitch + inkRowsFromCapTop(BODY) * 2;
       const above = Math.max(listInk, side.totalY + side.totalHeight);
@@ -267,7 +267,7 @@ describe("a badge strip's names", () => {
   const names = gameData.achievements.map(({ name }) => plainMarks(name));
   const strip = { maxNamed: BADGE_STRIP.maxNamed, width: badges.width - 8, x: badges.x + 4 };
   const counts = Array.from({ length: strip.maxNamed }, (_, i) => i + 1);
-  const slotWidth = (count: number) => badgeStrip(strip, count).slots[0]?.width ?? 0;
+  const slotWidth = (count: number) => defined(badgeStrip(strip, count).slots[0]).width;
   const bodyWidth = width("body");
   const AT_2X = { letterSpacing: 0, scale: TEXT_SCALE };
   const fits = (count: number, set: BadgeRowNames) =>

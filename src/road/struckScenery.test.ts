@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { WalkItem } from "../runner/walk";
+import { defined } from "../testing/defined";
 import { struckBy, type StruckItem, struckNow } from "./struckScenery";
 
 const ROAD_BOTTOM = 600;
@@ -33,11 +34,7 @@ const CROSSING: NonNullable<WalkItem["mover"]>["path"] = {
 };
 
 function struckOne(hit: WalkItem): StruckItem {
-  const [struck] = struckBy({ bumps: [{ item: hit }], contacts: [], walk: { run: at(0) } });
-  if (struck === undefined) {
-    throw new Error("no struck item");
-  }
-  return struck;
+  return defined(struckBy({ bumps: [{ item: hit }], contacts: [], walk: { run: at(0) } })[0]);
 }
 
 describe("struck scenery", () => {

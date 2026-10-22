@@ -6,6 +6,7 @@ import { gameData } from "../data";
 import { fillNames } from "../lib/lines";
 import { cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
+import { defined } from "../testing/defined";
 import { newPlayerSave } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import { dollarText, type Purchase, purchasePrice } from "./home";
@@ -53,10 +54,7 @@ describe("requestPurchase", () => {
   });
 
   it("refuses something owned as not for sale", () => {
-    const [dog] = owned.dogs;
-    if (dog === undefined) {
-      throw new Error("expected a starting dog");
-    }
+    const dog = defined(owned.dogs[0]);
     const request = requestPurchase(data, withBank(1_000_000), "", { dog, kind: "dog" });
     expect(request).toEqual({ kind: "refused", reason: "notForSale" });
   });
