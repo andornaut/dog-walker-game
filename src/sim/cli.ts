@@ -18,6 +18,7 @@ import {
   type MatrixRow,
   simulateCell,
 } from "./report";
+import { BOT_SIGHTS } from "./sight";
 import { SKILL_PRESET_IDS, SKILL_PRESETS } from "./skills";
 
 const DEFAULT_RUNS = 1000;
@@ -35,7 +36,7 @@ const presetLines = SKILL_PRESET_IDS.map((id) => {
 const USAGE = [
   "npm run simulate -- [--skill preset,...] [--policy id,...]",
   "                    [--route id,...] [--gear id,...] [--walker id,...] [--runs N] [--seed N]",
-  "                    [--out file]",
+  "                    [--bot foresight|sight] [--out file]",
   "",
   "Plays whole runs on the real rules and data, one row per policy, route, player, gear, pack",
   "and walker.",
@@ -51,6 +52,9 @@ const USAGE = [
   `  --walker  walkers, of ${WALKER_IDS.join(", ")} (default: ${gameData.defaultWalker})`,
   `  --runs    runs per row (default: ${DEFAULT_RUNS})`,
   `  --seed    the seed; the same seed gives the same rows (default: ${DEFAULT_SEED})`,
+  "  --bot     how the bots read movers: sight reads only what a player sees, a mover's cue and",
+  "            its moves as they start; foresight reads every mover's whole planned path, for",
+  `            checking the road stays passable (default: ${DEFAULT_MATRIX.sight})`,
   "  --out     also write the matrix and rows as JSON to this file",
   "",
   "Skill presets:",
@@ -86,14 +90,16 @@ function parseWhole(flag: string, min: number, text: string): number {
   return value;
 }
 
+function parseId<Id extends string>(flag: string, ids: readonly Id[], text: string): Id {
+  const found = ids.find((candidate) => candidate === text);
+  if (found === undefined) {
+    throw new Error(`${flag} takes ${ids.join(", ")}, not ${text}`);
+  }
+  return found;
+}
+
 function parseIds<Id extends string>(flag: string, ids: readonly Id[], text: string): Id[] {
-  return text.split(",").map((id) => {
-    const found = ids.find((candidate) => candidate === id);
-    if (found === undefined) {
-      throw new Error(`${flag} takes ${ids.join(", ")}, not ${id}`);
-    }
-    return found;
-  });
+  return text.split(",").map((id) => parseId(flag, ids, id));
 }
 
 function parseGears(text: string): (GearId | null)[] {
@@ -123,6 +129,9 @@ function parseArgs(args: readonly string[]): Options {
       throw new Error(`${flag} needs a value`);
     }
     switch (flag) {
+      case "--bot":
+        matrix = { ...matrix, sight: parseId(flag, BOT_SIGHTS, value) };
+        break;
       case "--gear":
         matrix = { ...matrix, gears: parseGears(value) };
         break;
@@ -209,7 +218,7 @@ async function main(): Promise<void> {
   process.stdout.write(`${formatTable(rows)}\n\nHit rate by obstacle kind\n`);
   process.stdout.write(`${formatKindTable(gameData, rows)}\n`);
   process.stdout.write(
-    `${rows.length} cells x ${runs} runs, seed ${seed}, in ${seconds.toFixed(1)}s\n`,
+    `${rows.length} cells x ${runs} runs, seed ${seed}, bot ${matrix.sight}, in ${seconds.toFixed(1)}s\n`,
   );
   if (out !== undefined) {
     const json = { matrix, rows, runsPerCell: runs, seed };
