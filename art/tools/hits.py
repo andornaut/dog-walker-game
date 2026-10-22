@@ -11,7 +11,8 @@ and white speed lines.
 
 fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
-fx-hit-thief       77x77  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
+fx-hit-thief       77x77  play (8 frames, 70ms)  the wallet flying up out of a poof, three coins
+                                                  thrown out
 fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
 ui-hit-flash-sky, -amber, -mauve, -orange, -pink
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
@@ -216,21 +217,23 @@ def hit_skunk(step):
 
 
 def wallet(g, cx, cy, tilt):
-    """12x8 brown wallet, its flap seam dbrown, a green bill poking out; tilt shears it by a pixel."""
-    # each run of rows with the same shear is one rect, so drawn bigger the wallet stays solid
-    j = 0
-    while j < 7:
-        sx, n = round(tilt * (j - 4) / 4), 1
-        while j + n < 7 and round(tilt * (j + n - 4) / 4) == sx:
-            n += 1
-        g.rect(cx - 6 + sx, cy - 4 + j, 12, n, "brown")
-        j += n
-    g.rect(cx - 6 + round(tilt * 3 / 4), cy + 3, 12, 1, "dbrown")
-    g.rect(cx - 4 - tilt, cy - 6, 8, 2, "green")
-    g.p(cx - 3 - tilt, cy - 6, "yellow")
-    g.rect(cx - 6, cy - 1, 12, 1, "dbrown")
-    g.rect(cx + 2, cy - 1, 3, 2, "amber")
-    g.p(cx - 5 - round(tilt * 0.75), cy - 3, "tan")
+    """The lost wallet as road.wallet draws it, 12x9: one green bill lit along its top standing up out of a
+    brown wallet, a white $ on the bill, the flap tab on the right with an amber snap; tilt shifts the bill
+    a pixel as the wallet tumbles."""
+    g.rect(cx - 4 + tilt, cy - 8, 7, 5, "green")
+    g.rect(cx - 4 + tilt, cy - 8, 7, 1, "lgrey")
+    g.rect(cx - 6, cy - 4, 12, 7, "brown")
+    g.rect(cx - 6, cy - 4, 12, 1, "tan")
+    g.rect(cx - 6, cy + 2, 12, 1, "dbrown")
+    g.rect(cx + 5, cy - 4, 1, 7, "dbrown")
+    g.rect(cx, cy - 2, 6, 3, "dbrown")
+    g.rect(cx + 2, cy - 1, 2, 1, "amber")
+    x, y = drawn_at(g, cx - 1 + tilt, cy - 7.5)
+    px = raster(g)
+    for j, row in enumerate([".1.", "111", "1..", "111", "..1", "111", ".1."]):
+        for i, c in enumerate(row):
+            if c == "1":
+                px.p(x + i - 1, y + j, "white")
 
 
 def coin(g, x, y, spin):
@@ -241,34 +244,25 @@ def coin(g, x, y, spin):
 
 
 def hit_thief(step):
-    """A dust poof; the wallet shoots straight up out of it while six coins fan out and fall."""
+    """A dust poof; the wallet shoots straight up out of it while three coins fly out and fall. No
+    second ring of puffs, so the wallet carries the moment."""
     g = Grid(64, 64)
     cx, cy = 32, 40
     if step == 0:
         impact(g, "amber", cx, cy)
         return rim(g)
-    pr = (0, 10, 13, 14, 0, 0, 0, 0)[step]
+    pr = (0, 10, 13, 14, 11, 7, 0, 0)[step]
     if pr:
         piece(g, lambda p: [p.ell(cx + dx * pr / 12, cy + dy * pr / 12, pr * 0.55, pr * 0.5, "white", "lgrey")
                             for dx, dy in ((-7, 2), (7, 2), (0, -5), (0, 5), (-4, -3), (4, -3))])
-    elif step < 6:
-        def puffs(p):
-            for k in range(6):
-                a = math.radians(k * 60 + 30)
-                d = 14 + (step - 4) * 4
-                p.ell(cx + math.cos(a) * d, cy + math.sin(a) * d * 0.6, 3 - (step - 4), 2.5 - (step - 4) * 0.8,
-                      "white", "lgrey")
-        piece(g, puffs)
     wy = (0, 32, 23, 17, 14, 13, 13, 14)[step]
     tilt = (0, 0, 1, 0, -1, 0, 1, 0)[step]
     t = step - 0.5
-    for i, (vx, vy) in enumerate(((-9, -5), (-6, -8), (-2.5, -9), (2.5, -9.5), (6, -8), (9, -5.5))):
+    for i, (vx, vy) in enumerate(((-9, -6), (9, -6), (-5, -9.5))):
         x, y = cx + vx * t * 0.85, cy - 4 + vy * t * 0.85 + 1.2 * t * t
         if 3 <= y < 60 and 3 <= x < 61:
             piece(g, lambda p: coin(p, x, y, step + i))
     piece(g, lambda p: wallet(p, cx, wy, tilt))
-    if step in (3, 5):
-        piece(g, lambda p: star4(p, cx + (9 if step == 3 else -10), wy - 3, 2, "yellow"))
     return g
 
 
