@@ -68,7 +68,6 @@ import {
   hasLeftRoad,
   hopShapes,
   inMotion,
-  laneAt,
   type MoverPath,
   moverPlace,
   type MoverStep,
@@ -258,7 +257,9 @@ type MoverEvent = { distance: number; kind: WalkItem["kind"]; mover: MoverPath }
 // The scroll since its cue over which moverSpans and moverContact look for a mover's contact.
 const MOVER_SCROLL = Math.ceil(4 * ROAD_LENGTH);
 // Each way a mover may move, the lanes of the game's road its hit box overlaps the pack in at a
-// scroll since its cue: a stalker's every way of choosing its steps, or the mover's one path.
+// scroll since its cue: a stalker's every way of choosing its steps, or the mover's one path. As
+// collision cuts it, the box spans half a lane either side of each lane it covers, less the
+// inset at each side, so one between lanes touches both.
 function moverContacts(
   tuned: Real,
   road: RoadGeometry,
@@ -268,12 +269,14 @@ function moverContacts(
   const sight = road.sightLength;
   const window = plannedHeight(tuned, road, zone, event.kind) + road.tallestPackBand;
   const across = footprintOf(tuned, event.kind).lanes;
+  const inset = road.cell.inset / road.cell.length;
   const paths = event.mover.motion === "approach" ? approachOutcomes(event.mover) : [event.mover];
   return paths.map((path) => (since) => {
     const place = moverPlace(LANE_COUNT, path, since);
-    const first = laneAt(place.lanePosition);
+    const first = Math.floor(place.lanePosition - 1 + inset) + 1;
+    const last = Math.ceil(place.lanePosition + across - inset) - 1;
     const overlaps = place.solid && place.travel >= sight && place.travel < sight + window;
-    return Array.from({ length: across }, (_unused, i) => first + i).filter(
+    return Array.from({ length: last - first + 1 }, (_unused, i) => first + i).filter(
       (lane) => overlaps && lane >= 0 && lane < LANE_COUNT,
     );
   });
