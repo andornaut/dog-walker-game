@@ -44,7 +44,6 @@ vi.mock("./simulate", async (importOriginal) => {
       hits: { afterPull: 1, all: 4 },
       inputs: [],
       items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
-      moneyShare: 0,
       movers: { ball: { met: 2, touched: 1 } },
       pullsMoved: 0,
       route: [],
@@ -54,9 +53,7 @@ vi.mock("./simulate", async (importOriginal) => {
         walker: config.walker,
       }),
       tips: cents(0),
-      upgrades: [],
       zones: [],
-      zonesCompleted: 0,
     };
   };
   return { ...actual, simulateRun };

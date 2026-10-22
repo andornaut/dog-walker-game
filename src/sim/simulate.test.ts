@@ -117,7 +117,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
     expect(ended.length).toBeGreaterThan(0);
     for (const result of ended) {
       expect(result.firings.map((firing) => firing.dog)).toEqual(["archie"]);
-      expect(result.zonesCompleted).toBeLessThan(gameData.world.walkLength);
+      expect(result.zones.length).toBeLessThan(gameData.world.walkLength);
     }
   });
 });

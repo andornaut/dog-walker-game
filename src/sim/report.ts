@@ -251,7 +251,7 @@ function summarizeCell(
     meanFirings: mean(results.map((result) => result.firings.length)),
     meanTipCents: mean(results.map((result) => result.tips as number)),
     meanTips: mean(results.map((result) => result.items.tip?.touched ?? 0)),
-    meanZones: mean(results.map((result) => result.zonesCompleted)),
+    meanZones: mean(results.map((result) => result.zones.length)),
     moneyShare:
       choices.length === 0
         ? 0

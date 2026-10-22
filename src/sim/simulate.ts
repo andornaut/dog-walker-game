@@ -1,13 +1,5 @@
 import { LANE_COUNT } from "../data/screen";
-import type {
-  AchievementId,
-  DogId,
-  GameData,
-  GearId,
-  UpgradeId,
-  WalkerId,
-  ZoneId,
-} from "../data/types";
+import type { AchievementId, DogId, GameData, GearId, WalkerId, ZoneId } from "../data/types";
 import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
@@ -124,16 +116,13 @@ export interface RunResult {
   // Items that do not move, by kind, and movers, by mover.
   readonly items: ItemCounts;
   readonly movers: MoverCounts;
-  // The share of choices that cost money, 0 with no choices.
-  readonly moneyShare: number;
   // The zones walked, in order.
   readonly route: readonly ZoneId[];
   // The run as it ended.
   readonly run: RunState;
   readonly tips: Cents;
-  readonly upgrades: readonly UpgradeId[];
+  // The zones finished, in order.
   readonly zones: readonly ZoneRecord[];
-  readonly zonesCompleted: number;
 }
 
 // The run state and everything recorded about the run so far.
@@ -154,7 +143,6 @@ interface Tally {
   readonly policyRandom: Random;
   run: RunState;
   tips: Cents;
-  readonly upgrades: UpgradeId[];
   readonly zones: ZoneRecord[];
 }
 
@@ -200,13 +188,12 @@ function countLeaving(
     let touched: boolean;
     if (mover === undefined) {
       touched = item.y + travel < geometry.roadBottom;
-      countItem(tally, touched, { kind: item.kind, moving: false });
     } else {
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
       const y = geometry.roadTop - item.height + place.travel;
       touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
-      countItem(tally, touched, { kind: item.kind, moving: true });
     }
+    countItem(tally, touched, { kind: item.kind, moving: mover !== undefined });
     if (touched && blocksLane(data, item.kind) && !isPullObstacle(data, item.kind)) {
       const inFromLane =
         pulledFrom !== null && pulledFrom >= item.lane && pulledFrom < item.lane + item.laneSpan;
@@ -252,21 +239,15 @@ function policyChoice(
   return chooseCardOption(data, tally.policyRandom, config.policy, run, card);
 }
 
-// A choice's record: the upgrade a fork's path carried, or an encounter card seen, and the
-// firings it brought about.
+// A choice's record: an encounter card seen, and the firings it brought about.
 function noteChoice(
   tally: Tally,
   run: RunState,
   event: Extract<SessionEvent, { kind: "chosen" }>,
 ): void {
   const { choice, outcome, view } = event;
-  const { source } = view;
   recordFirings(tally, run, outcome);
-  if (source.kind === "fork") {
-    const picked = typeof choice === "number" ? source.upgrades[choice] : undefined;
-    if (picked !== undefined) {
-      tally.upgrades.push(picked);
-    }
+  if (view.source.kind === "fork") {
     return;
   }
   const option = view.options.find(({ index }) => index === choice);
@@ -286,7 +267,7 @@ function botRoadOf(data: SimData, walk: Walk): BotRoad & { readonly pack: RunSta
 }
 
 // The bot plays the walk on the game's own session, a step of STEP_SECONDS at a time as the
-// game steps it: its lane moves and treats are the steps' inputs, and the policies choose each
+// game steps it: its lane moves are the steps' inputs, and the policies choose each
 // card as it opens. The inputs are logged as the game logs them, so the run's seed and log
 // replay it in the game.
 function playBySkill(
@@ -400,11 +381,9 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
       walker: config.walker,
     }),
     tips: cents(0),
-    upgrades: [],
     zones: [],
   };
   playBySkill(data, seed, config, config.player.skill, tally);
-  const paidChoices = tally.choices.filter((choice) => choice.cost > 0).length;
   const facts = {
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,
@@ -422,14 +401,11 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     hits: tally.hits,
     inputs: tally.inputs,
     items: tally.items,
-    moneyShare: tally.choices.length === 0 ? 0 : paidChoices / tally.choices.length,
     movers: tally.movers,
     pullsMoved: tally.pullsMoved,
     route: tally.run.route,
     run: tally.run,
     tips: tally.tips,
-    upgrades: tally.upgrades,
     zones: tally.zones,
-    zonesCompleted: tally.zones.length,
   };
 }
