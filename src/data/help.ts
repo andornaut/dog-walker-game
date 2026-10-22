@@ -56,7 +56,7 @@ export const HELP_PAGES = [
       "Walk {walkLength} neighborhoods of {world}, each busier than the last. " +
       "Each dog's pay is banked as you finish one. " +
       "At a fork, each path brings an upgrade, and harder ones pay more. " +
-      "Bring every dog home for the Full pack bonus.",
+      "Bring every dog home for the Pack bonus.",
     title: "Neighborhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];
