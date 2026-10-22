@@ -1,0 +1,31 @@
+{ "frames": {
+   "ui-slot-sign 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 75, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 75, "h": 30 },
+    "sourceSize": { "w": 75, "h": 30 },
+    "duration": 1000
+   },
+   "ui-slot-sign 1.aseprite": {
+    "frame": { "x": 75, "y": 0, "w": 75, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 75, "h": 30 },
+    "sourceSize": { "w": 75, "h": 30 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-slot-sign.png",
+  "format": "RGBA8888",
+  "size": { "w": 150, "h": 30 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "normal", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "pressed", "from": 1, "to": 1, "direction": "forward" }
+  ]
+ }
+}

@@ -1314,7 +1314,33 @@ def pair(step):
     return px
 
 
+# ---------- ui-slot-sign ----------
+
+# The dog-slot sign hung from the Pet shop's awning across its front: the frame's size and where the game draws
+# it, and the cream board in the frame, where the game writes its two lines.
+SLOT_SIGN_W, SLOT_SIGN_H = 75, 30
+SLOT_SIGN_AT = (258, 120)
+SLOT_BOARD = (1, 5, 73, 24)
+
+
+def slot_sign(pressed=False):
+    """ui-slot-sign: a cream board in a 1px dbrown frame, lit white along its top and tan along its bottom,
+    hung by two dbrown cords from the awning's bottom edge. pressed lets the board drop 1px on longer
+    cords."""
+    g = Grid(SLOT_SIGN_W, SLOT_SIGN_H)
+    x, y, w, h = SLOT_BOARD
+    d = 1 if pressed else 0
+    for cx in (8, 66):
+        g.rect(cx, 0, 1, y + d, "dbrown")
+    g.rect(x, y + d, w, h, "dbrown")
+    g.rect(x + 1, y + d + 1, w - 2, h - 2, "cream")
+    g.rect(x + 1, y + d + 1, w - 2, 1, "white")
+    g.rect(x + 1, y + d + h - 2, w - 2, 1, "tan")
+    return g.outlined(False)
+
+
 def sprites():
+    yield "ui-slot-sign", [(tag, [slot_sign(tag == "pressed")], 1000) for tag in ("normal", "pressed")]
     yield "ui-loading", [("walk", [pair(i) for i in range(len(PAIR_WALK))], PAIR_WALK_MS)]
     yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000)
                           for tag in ("normal", "pressed")] + [
