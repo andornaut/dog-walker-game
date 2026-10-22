@@ -1200,30 +1200,36 @@ def neighbour_top(pet, beat):
     return top
 
 
-# The bills sticking out of the wallet, back to front: left edge, width and top row.
-WALLET_BILLS = ((2, 5, 3.5), (9, 5, 2.5), (5.5, 5, 1))
+# The $ on the wallet's bill, in drawn pixels so it stays exact at any scale: 3x7 down to the 1.1x depth step,
+# a 1px stroke below that, where the bill is too short for it.
+WALLET_DOLLAR = [".1.", "111", "1..", "111", "..1", "111", ".1."]
 
 
 def wallet(glint):
-    """The lost wallet, a jackpot filling most of its frame, with the road outline: three green bills stick
-    up out of it at staggered heights, each framed in forest with a dgreen seal, over a wide dark leather
-    wallet. Its leather takes a light rim so it holds on the dslate road: the flap's top edge catches the light in
-    tan, the left edge skin2, and brown runs down the right and along the bottom. glint twinkles a white
-    sparkle at its top right."""
+    """The lost wallet, with the road outline: one green bill lit along its top edge stands up out of a
+    brown leather wallet, a white $ on it; the wallet's flap tab on the right has an amber snap. The
+    leather takes a light rim so it holds on the dslate road: tan along its top edge, brown down the
+    shaded sides. glint twinkles a white sparkle at its top right."""
     g = edged(Grid(16, 16))
-    u = 1 / scale_of(g)
-    for x, w, top in WALLET_BILLS:
-        g.rect(x, top, w, 8 - top, "forest")
-        g.rect(x + u, top + u, w - 2 * u, 8 - top, "green")
-        g.ell(x + w / 2, top + 2.5, 1, 1.2, "dgreen")
-    g.rect(1.5, 7, 13, 7.5, "dbrown")
+    g.rect(3, 1.5, 9, 7.5, "green")
+    g.rect(3, 1.5, 9, 1, "lgrey")
+    g.rect(1.5, 7, 13, 7.5, "brown")
+    g.rect(1.5, 13.5, 13, 1, "dbrown")
+    g.rect(13.5, 7, 1, 7.5, "dbrown")
     g.rect(1.5, 7, 13, 1, "tan")
-    g.rect(1.5, 10.5, 13, 1, "plum")
-    g.rect(12, 10, 2, 2, "amber")
+    g.rect(9, 9, 5.5, 3, "dbrown")
+    g.rect(12, 10, 2, 1, "amber")
+    s = scale_of(g)
+    px = raster(g)
+    rows = WALLET_DOLLAR if s >= 1.1 else ["1", "1", "1"]
+    bx, by = math.floor(7.5 * s) - len(rows[0]) // 2, math.floor(2.4 * s)
+    for y, row in enumerate(rows):
+        for x, c in enumerate(row):
+            if c == "1":
+                px.p(bx + x, by + y, "white")
     if glint:
         # a 3x3 cross centred on layout pixel (14, 1), drawn in pixels so it stays a cross at any scale
-        s = scale_of(g)
-        px, cx, cy = raster(g), math.floor(14.5 * s), math.floor(1.5 * s)
+        cx, cy = math.floor(14.5 * s), math.floor(1.5 * s)
         px.rect(cx - 1, cy, 3, 1, "white")
         px.rect(cx, cy - 1, 1, 3, "white")
     return rim(g, WALLET_RIM)
