@@ -23,7 +23,7 @@ interface MenuFlowHost {
 
 // Everything that pauses the walk but the hit stop, which the session holds, and an
 // explanation's detail card, which the input holds.
-export type MenuPause = Omit<RunPause, "hitStop" | "hold">;
+type MenuPause = Omit<RunPause, "hitStop" | "hold">;
 
 // What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the
 // Home button's question, and the page out of view or focus. pause()

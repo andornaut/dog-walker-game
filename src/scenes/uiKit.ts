@@ -367,7 +367,7 @@ const COG_ROWS = [
   "...##...",
 ];
 
-export function cogIcon(scene: Scene, x: number, y: number): Placed[] {
+function cogIcon(scene: Scene, x: number, y: number): Placed[] {
   const g = scene.add.graphics({ x, y });
   g.fillStyle(PALETTE.amber);
   COG_ROWS.forEach((row, dy) => {
