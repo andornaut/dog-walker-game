@@ -106,10 +106,9 @@ describe("firingTimeline", () => {
 });
 
 describe("firingLayout", () => {
-  const { dogSlots: cards, walkView: screen } = screenLayout(SCREEN_CONFIG);
+  const { dogSlots: cards, screen: whole, walkView: screen } = screenLayout(SCREEN_CONFIG);
   const { popSize } = FIRING_PARTS;
 
-  const whole = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
   const FACE_HALF = 32;
   // Each part's rect on screen for card: the 2x face, the plate, the pop and the line's tail
   // tips (the bubble keeps under the bank's lane, below).

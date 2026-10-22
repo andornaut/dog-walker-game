@@ -1,4 +1,5 @@
 import { SCREEN_CONFIG } from "../data/screen";
+import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
@@ -31,7 +32,7 @@ const SCROLLBAR: ScrollbarSpec = {
 // The Stats page's geometry.
 export const STATS_LAYOUT = {
   // The close control, in the screen's corner.
-  close: pageCloseControl({ height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
+  close: pageCloseControl(screenLayout(SCREEN_CONFIG).screen),
   // The badge tapped open, over the wall.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
   // In the open badge, from its top: the badge's centre at badgeY, the name's and the status's

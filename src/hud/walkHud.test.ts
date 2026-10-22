@@ -87,8 +87,7 @@ function titleWidth(text: string): number {
 
 describe("the walk bar", () => {
   it("keeps its wells, effect wells, holds and buttons inside the bar on screen, none over another", () => {
-    const screen = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
-    expect(inside(topBar, screen)).toBe(true);
+    expect(inside(topBar, LAYOUT.screen)).toBe(true);
     const hits = WALK_BAR_BUTTONS.map((id) => BAR.buttons[id].hit);
     const parts = [
       WALK_BAR.cash.well,

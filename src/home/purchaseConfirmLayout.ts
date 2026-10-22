@@ -1,4 +1,5 @@
 import { SCREEN_CONFIG } from "../data/screen";
+import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 import type { ConfirmChoice } from "./purchaseConfirm";
@@ -42,7 +43,7 @@ export const PURCHASE_CONFIRM_LAYOUT = {
   // The picture sits in the well picture pixels in from its corner.
   picture: { x: well.x + CARD.well.picture, y: well.y + CARD.well.picture },
   price: { capTop: well.y + well.height + 10, centerX, font: "title", room: WIDTH - 2 * CARD.pad },
-  screen: { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 } as Rect,
+  screen: screenLayout(SCREEN_CONFIG).screen,
   title: { capTop: band.y + CARD.band.titleY, centerX, font: "title", room: band.width - 16 },
   well,
 } as const;

@@ -15,15 +15,15 @@ export interface ScreenConfig {
   width: number;
 }
 
-// Top to bottom, each across the full width: the walk bar (topBar), the backdrop band, the road
-// and the row of dog cards. dogSlots are the cards, dogCardHeight tall on the row's bottom
-// rows. roadView is the road as drawn, verges included; road is its lanes, centred in it,
-// which the walk, the lanes and the projection use. approach is the band's bottom rows, where
-// the backdrop paints the road's approach to its cross street: the moving road surface is
-// drawn over them, beside the backdrop's own verges. rasterView is the
-// approach and roadView together, which the road raster draws. walkView is the backdrop band
-// and roadView together, everything between the walk bar and the dog cards, which a card or the
-// pause menu dims.
+// The whole screen (screen), and top to bottom, each across the full width: the walk bar
+// (topBar), the backdrop band, the road and the row of dog cards. dogSlots are the cards,
+// dogCardHeight tall on the row's bottom rows. roadView is the road as drawn, verges included;
+// road is its lanes, centred in it, which the walk, the lanes and the projection use. approach
+// is the band's bottom rows, where the backdrop paints the road's approach to its cross street:
+// the moving road surface is drawn over them, beside the backdrop's own verges. rasterView is
+// the approach and roadView together, which the road raster draws. walkView is the backdrop
+// band and roadView together, everything between the walk bar and the dog cards, which a card
+// or the pause menu dims.
 export interface ScreenLayout {
   approach: Rect;
   backdrop: Rect;
@@ -32,6 +32,7 @@ export interface ScreenLayout {
   rasterView: Rect;
   road: Rect;
   roadView: Rect;
+  screen: Rect;
   topBar: Rect;
   walkView: Rect;
 }
@@ -59,6 +60,7 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
     rasterView: { ...roadView, height: roadView.height + approach.height, y: approach.y },
     road: { ...roadView, width: roadWidth, x: (width - roadWidth) / 2 },
     roadView,
+    screen: { height, width, x: 0, y: 0 },
     topBar: { height: config.topBarHeight, width, x: 0, y: 0 },
     walkView: { ...roadView, height: dogRowY - backdrop.y, y: backdrop.y },
   };
