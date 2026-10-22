@@ -195,9 +195,9 @@ export const TUNING = {
     // How long a dog strains toward its target, with its bubble, before it pulls.
     pullTell: 1,
     // A shy hopper's first hop's cue begins once the road between it and the pack's rows is down
-    // to this long of the road's travel: its cue, its hop, pathReactionMargin and a lane move all
-    // fit in it, so it clears the pack's lane before the pack must react.
-    shyHopNearSeconds: 1.6,
+    // to this long of the road's travel: its cue, its longest hop, pathReactionMargin and a lane
+    // move all fit in it, so it clears the pack's lane before the pack must react.
+    shyHopNearSeconds: 1.65,
     // How long the Stinky debuff lasts, in walking time.
     stinkySeconds: 30,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
