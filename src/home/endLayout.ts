@@ -55,9 +55,9 @@ export const END_LAYOUT = {
   ribbon: RIBBON,
   // fx-new-best's 96x48 frame sits 12 left of and 14 above the ribbon.
   ribbonBurst: { height: 48, width: 96, x: RIBBON.x - 12, y: RIBBON.y - 14 },
-  // The side column: its labels from x, the zone pips, then TOTAL with its capitals at totalY
-  // and the walk's total beside it; the zone count and the total end at right. The column
-  // ends totalHeight under totalY, the 2x title font's capitals.
+  // The side column: its labels from x, the zone pips, then TOTAL in the title font with its
+  // capitals at totalY and the walk's total beside it in the body font; the zone count and the
+  // total end at right. The column ends totalHeight under totalY, the 2x body font's lowest ink.
   side: {
     pipPitch: 21,
     pipsY: PANEL.y + 60,

@@ -73,6 +73,13 @@ const cases = BREAKDOWN_LINES.flatMap((lines) =>
 const quipRows = (count: number, fired: boolean, lines: readonly number[]): QuipRow[] =>
   Array.from({ length: count }, (_, i) => ({ fired, lines: lines[i] ?? 1 }));
 
+describe("the side column's total row", () => {
+  it("ends under the lowest ink of TOTAL and the walk's total at 2x", () => {
+    const lowest = Math.max(inkRowsFromCapTop(TITLE), inkRowsFromCapTop(BODY)) * 2;
+    expect(side.totalHeight).toBe(lowest);
+  });
+});
+
 describe("endPanelLayout", () => {
   it.each(cases)(
     "fits %i breakdown lines and %i owners' rows (fired: %s), each row under the last",
@@ -233,7 +240,7 @@ describe("the end screen's text", () => {
   });
 
   // Each label keeps clear of a four-figure amount, gained or lost, at 2x: the breakdown's in
-  // the body font, and TOTAL beside the walk's total in the side column in the title font.
+  // the body font, and TOTAL in the title font beside the walk's total in the side column.
   const amounts = [9_999_00, -9_999_00].map((amount) => signedDollarText(amount));
   const amountWidth = (role: Role, amount: string) =>
     width(role)({ letterSpacing: 0, scale: 2 }, shown(role, amount));
@@ -249,7 +256,7 @@ describe("the end screen's text", () => {
     [
       words.total,
       "title",
-      (amount: string) => sideTotalLabelRoom(amountWidth("title", amount)),
+      (amount: string) => sideTotalLabelRoom(amountWidth("body", amount)),
     ] as const,
   ];
   it.each(
