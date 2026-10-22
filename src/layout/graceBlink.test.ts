@@ -18,7 +18,7 @@ describe("graceAlpha", () => {
     { alpha: 1, name: "in the third blink", remaining: WINDOW - 2.5 * blinkSeconds },
     { alpha: 0, name: "in the fourth blink", remaining: WINDOW - 3.5 * blinkSeconds },
   ])("shows the pack at $alpha $name", ({ alpha, remaining }) => {
-    expect(graceAlpha(GRACE_BLINK, false, WINDOW, remaining)).toBe(alpha);
+    expect(graceAlpha(false, WINDOW, remaining)).toBe(alpha);
   });
 
   it.each([
@@ -27,7 +27,7 @@ describe("graceAlpha", () => {
     { alpha: dimAlpha, remaining: blinkSeconds / 2 },
     { alpha: 1, remaining: 0 },
   ])("holds the pack at $alpha with reduced motion, $remaining s of grace left", (row) => {
-    expect(graceAlpha(GRACE_BLINK, true, WINDOW, row.remaining)).toBe(row.alpha);
+    expect(graceAlpha(true, WINDOW, row.remaining)).toBe(row.alpha);
   });
 
   // Stepped through the window at the walk's 60 Hz, the pack is hidden for about half of it,
@@ -36,7 +36,7 @@ describe("graceAlpha", () => {
     const step = 1 / 60;
     const alphas: number[] = [];
     for (let remaining: number = WINDOW; remaining > 0; remaining -= step) {
-      alphas.push(graceAlpha(GRACE_BLINK, false, WINDOW, remaining));
+      alphas.push(graceAlpha(false, WINDOW, remaining));
     }
     const hidden = alphas.filter((alpha) => alpha === 0).length / alphas.length;
     expect(hidden).toBeGreaterThan(0.4);
@@ -45,6 +45,6 @@ describe("graceAlpha", () => {
     expect(Math.max(...runs.map((run) => run.length))).toBeLessThanOrEqual(
       Math.ceil(blinkSeconds / step),
     );
-    expect(graceAlpha(GRACE_BLINK, false, WINDOW, 0)).toBe(1);
+    expect(graceAlpha(false, WINDOW, 0)).toBe(1);
   });
 });
