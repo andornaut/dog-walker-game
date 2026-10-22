@@ -46,7 +46,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 Tuning against the targets, from a fresh baseline:
 
-- Big Payday: its threshold is rarely reached
+- Badges: every one that counts across walks outlasts buying out the Pet shop, and Big Payday is rarely reached
 - Economy: pay, card costs, lucky finds and shop prices
 - Gear: each item within the window
 - Sizes: hearts against the small-dog dodge chance
