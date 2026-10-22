@@ -56,6 +56,11 @@ const SHAKE = { angle: 12, delayMs: 120, swingMs: 60, swings: 4 };
 // The moment ends this long before the stop, so nothing is left on screen under the card.
 const END_MARGIN_MS = 100;
 
+// How long a moment of seconds plays on screen.
+function momentMs(seconds: number): number {
+  return Math.max(0, seconds * 1000 - END_MARGIN_MS);
+}
+
 // The encounter's hit label, or its name for an encounter with none.
 export function hitLabelOf(encounter: Encounter): string {
   return ("hitLabel" in encounter ? encounter.hitLabel : undefined) ?? encounter.name.toUpperCase();
@@ -85,7 +90,7 @@ export function hitBurstKey(scene: Scene, look: HitLook): string {
 }
 
 export function playHitMoment(scene: Scene, moment: HitMoment): void {
-  const totalMs = Math.max(0, moment.seconds * 1000 - END_MARGIN_MS);
+  const totalMs = momentMs(moment.seconds);
   const look = hitLook(moment.kind, moment.encounter);
   playBurst(scene, moment, look, totalMs);
   if (look.flash !== null) {
@@ -103,7 +108,7 @@ export function playMinorHitLabel(
   scene: Scene,
   moment: Pick<HitMoment, "centre" | "depth" | "label" | "labelX" | "seconds" | "still">,
 ): void {
-  const totalMs = Math.max(0, moment.seconds * 1000 - END_MARGIN_MS);
+  const totalMs = momentMs(moment.seconds);
   showLabel(scene, moment, "normal", totalMs);
 }
 
