@@ -1466,12 +1466,9 @@ export class StartScene extends Scene {
   // missing, when the whole building dips instead.
   private drawPetShop(root: GameObjects.Container, save: SaveDocument): void {
     const view = this.tileView(root, "petShop");
-    const faces = (["normal", "pressed"] as const).flatMap((tag) => {
-      const image = addTagImage(this, SHOP_ART.petShop, tag, PET_SHOP.x, PET_SHOP.y);
-      return image === undefined ? [] : [image];
-    });
-    const [normal, pressed] = faces;
-    if (normal !== undefined && pressed !== undefined) {
+    const faces = this.addPressFaces(SHOP_ART.petShop, PET_SHOP);
+    if (faces !== undefined) {
+      const [normal, pressed] = faces;
       view.container.add(faces);
       view.iconButton = {
         setPressed: (down) => {
@@ -1502,13 +1499,8 @@ export class StartScene extends Scene {
     const { art, board, key, pressDrop, scale } = SLOT_SIGN;
     const view = this.tileView(root, "slotSign");
     view.bobsWithShop = true;
-    const faces = (["normal", "pressed"] as const).flatMap((tag) => {
-      const image = addTagImage(this, key, tag, art.x, art.y);
-      return image === undefined ? [] : [image];
-    });
-    const [normal, pressed] = faces;
-    if (normal === undefined || pressed === undefined) {
-      faces.forEach((face) => face.destroy());
+    const faces = this.addPressFaces(key, art);
+    if (faces === undefined) {
       const colors = { border: PALETTE.ink, fill: PALETTE.cream };
       drawFramedRect(this.graphics(view.container), colors, board);
     } else {
@@ -1529,7 +1521,8 @@ export class StartScene extends Scene {
       placePixelText(label, x - (ink.left + ink.right) / 2, row.capY);
       return { label, y: label.y };
     });
-    if (normal !== undefined && pressed !== undefined) {
+    if (faces !== undefined) {
+      const [normal, pressed] = faces;
       view.iconButton = {
         setPressed: (down) => {
           normal.setVisible(!down);
@@ -1542,6 +1535,22 @@ export class StartScene extends Scene {
     if (sign.affordable) {
       addAffordFrame(this, view.container, board, currentSettings(this).reducedMotion);
     }
+  }
+
+  // key's normal and pressed faces with their top-left corner at at, or none, with nothing left
+  // drawn, while either is missing.
+  private addPressFaces(
+    key: string,
+    at: { x: number; y: number },
+  ): [GameObjects.Image, GameObjects.Image] | undefined {
+    const normal = addTagImage(this, key, "normal", at.x, at.y);
+    const pressed = addTagImage(this, key, "pressed", at.x, at.y);
+    if (normal === undefined || pressed === undefined) {
+      normal?.destroy();
+      pressed?.destroy();
+      return undefined;
+    }
+    return [normal, pressed];
   }
 
   // The glint frames of the Pet shop's art, an image over the normal face, hidden between
