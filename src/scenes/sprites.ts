@@ -182,6 +182,19 @@ export function addStandingSprite(
 // means it never completes, and a later completion of the same tag is another play's.
 const pendingOnce = new WeakMap<GameObjects.Sprite, () => void>();
 
+// Plays the first of tags the sprite has, as playTag does; nothing plays when it has none.
+export function playFirstTag(
+  sprite: GameObjects.Sprite,
+  key: string,
+  tags: readonly string[],
+  still = false,
+): void {
+  const tag = firstTag(sprite.scene, key, tags);
+  if (tag !== undefined) {
+    playTag(sprite, key, tag, still);
+  }
+}
+
 function dropPendingOnce(sprite: GameObjects.Sprite): void {
   pendingOnce.get(sprite)?.();
 }

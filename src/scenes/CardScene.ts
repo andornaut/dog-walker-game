@@ -64,7 +64,7 @@ import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
-import { addStandingSprite, firstTag, playTag } from "./sprites";
+import { addStandingSprite, playFirstTag, playTag } from "./sprites";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import { addMenuButton, addNineSlice, listenButtonTap, tagFrame } from "./uiKit";
 
@@ -628,11 +628,11 @@ export class CardScene extends Scene {
           art.x + art.width / 2,
           art.y + art.height - 6,
         );
-        const idleTag = grey ? undefined : firstTag(this, spriteKey, ["idle", "walk", "wave"]);
         if (grey) {
           sprite.setTexture(key);
-        } else if (idleTag !== undefined) {
-          playTag(sprite, spriteKey, idleTag, currentSettings(this).reducedMotion);
+        } else {
+          const still = currentSettings(this).reducedMotion;
+          playFirstTag(sprite, spriteKey, ["idle", "walk", "wave"], still);
         }
       } else {
         this.centered(

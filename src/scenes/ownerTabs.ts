@@ -10,7 +10,7 @@ import type { Rect } from "../lib/rect";
 import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
-import { firstTag, playTag } from "./sprites";
+import { playFirstTag } from "./sprites";
 import type { TimedGroup } from "./timedGroup";
 import { fadeAway } from "./uiKit";
 
@@ -100,10 +100,7 @@ export class OwnerTabs {
     const key = ownerFaceKey(gameData, dog);
     if (this.scene.textures.exists(key)) {
       const face = this.scene.add.sprite(x, y, key).setOrigin(0);
-      const tag = firstTag(this.scene, key, [mood, "neutral"]);
-      if (tag !== undefined) {
-        playTag(face, key, tag);
-      }
+      playFirstTag(face, key, [mood, "neutral"]);
       return face;
     }
     return addPixelText(this.scene, x, y, gameData.dogs[dog].owner.name.slice(0, 1), {

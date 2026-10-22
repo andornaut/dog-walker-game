@@ -21,7 +21,7 @@ import {
   setPixelText,
 } from "../ui/phaser/pixelText";
 import type { TextFitStyle } from "../ui/textFit";
-import { firstTag, playTag } from "./sprites";
+import { playFirstTag } from "./sprites";
 
 // Walk text with owners' faces inline before their names (hud/faceText.ts), drawn in the body
 // font: each row's runs of text, and each face in its 1px ink frame over tan.
@@ -106,9 +106,6 @@ export function addFramedOwnerFace(
     return [g];
   }
   const sprite = scene.add.sprite(frame.x + 1, frame.y + 1, key).setOrigin(0);
-  const tag = firstTag(scene, key, [face.mood, "neutral"]);
-  if (tag !== undefined) {
-    playTag(sprite, key, tag);
-  }
+  playFirstTag(sprite, key, [face.mood, "neutral"]);
   return [g, sprite];
 }

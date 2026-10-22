@@ -1,6 +1,6 @@
 import { project } from "../../layout/projection";
 import type { WalkItem } from "../../runner/walk";
-import { firstTag, playTag, showAtDepth } from "../sprites";
+import { playFirstTag, showAtDepth } from "../sprites";
 import type { ItemPart } from "./itemViews";
 import { clipToRoad, DEPTH, PROJECTION, type Shadow } from "./stage";
 
@@ -28,10 +28,7 @@ export function standPart(
   const y = Math.round(placed.y);
   part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
   clipToRoad(part.sprite);
-  const tag = firstTag(part.sprite.scene, drawn.key, tags);
-  if (tag !== undefined) {
-    playTag(part.sprite, drawn.key, tag, still);
-  }
+  playFirstTag(part.sprite, drawn.key, tags, still);
   if (part.lift > 0) {
     part.sprite.setDepth(DEPTH.sprite + placed.y + 1);
   } else if (part.flat) {

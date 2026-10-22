@@ -26,7 +26,7 @@ import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { firstTag, playTag } from "./sprites";
+import { playFirstTag } from "./sprites";
 import { addMenuButton, addPanel, listenButtonTap, TEXT_SCALE } from "./uiKit";
 
 export interface ZoneCelebrationSceneData extends OverlayData {
@@ -130,10 +130,7 @@ export class ZoneCelebrationScene extends Scene {
     const { centerX, runIn, walkerScale } = LAYOUT;
     const key = walkerSpriteKey(this, celebration.walker);
     const sprite = this.add.sprite(centerX, feetY, key).setOrigin(0.5, 1).setScale(walkerScale);
-    const tag = firstTag(this, key, ART.walkerTags);
-    if (tag !== undefined) {
-      playTag(sprite, key, tag, reduced);
-    }
+    playFirstTag(sprite, key, ART.walkerTags, reduced);
     if (reduced || celebration.kind === "zoneDone") {
       return;
     }
