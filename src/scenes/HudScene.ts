@@ -86,7 +86,7 @@ import {
   setPixelText,
 } from "../ui/phaser/pixelText";
 import { addCharm, glintWell } from "./buffCharm";
-import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
+import { DEBUFF_COLORS } from "./debuffColors";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
@@ -580,7 +580,7 @@ export class HudScene extends Scene {
         debuffLasting(gameData.tuning, seconds, run).secondsLeft,
       );
       const width = debuffFillWidth(active.secondsLeft, full);
-      const colors = DEBUFF_COLORS[bar.debuff] ?? DEBUFF_FALLBACK;
+      const colors = DEBUFF_COLORS[bar.debuff];
       if (width > 0) {
         fillRect(g, colors.fill, {
           ...fill,
@@ -593,7 +593,7 @@ export class HudScene extends Scene {
   }
 
   private addDebuffBar(debuff: DebuffId, rect: Rect): DebuffBarView {
-    const colors = DEBUFF_COLORS[debuff] ?? DEBUFF_FALLBACK;
+    const colors = DEBUFF_COLORS[debuff];
     const parts: GameObjects.GameObject[] = [];
     const art = addTagImage(this, "ui-debuff-bar", debuff, rect.x, rect.y);
     parts.push(art ?? addFilledRect(this, colors.face, rect));

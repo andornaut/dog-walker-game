@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
-import { gameData } from "../data";
 import { BADGE_TEXT_COLORS } from "../home/badgesView";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
@@ -12,7 +11,7 @@ import {
   type PlateKind,
   selectLook,
 } from "../ui/selection";
-import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
+import { DEBUFF_COLORS } from "./debuffColors";
 
 // WCAG relative luminance and contrast ratio.
 function luminance(color: number): number {
@@ -106,9 +105,8 @@ describe("interaction-state colours", () => {
 });
 
 describe("debuff bar colours", () => {
-  it("give every debuff its own colours, each bar's name at 4.5:1 on its face", () => {
-    expect(Object.keys(gameData.debuffs).filter((debuff) => !DEBUFF_COLORS[debuff])).toEqual([]);
-    const faint = Object.entries({ ...DEBUFF_COLORS, fallback: DEBUFF_FALLBACK }).filter(
+  it("set each bar's name at 4.5:1 on its face", () => {
+    const faint = Object.entries(DEBUFF_COLORS).filter(
       ([, { face, name }]) => contrast(name, face) < TEXT,
     );
     expect(faint.map(([debuff]) => debuff)).toEqual([]);
