@@ -33,12 +33,11 @@ import {
   type RunPause,
   TOP_BAR_BUTTONS,
   topBarAction,
-  type TopBarButton,
   topBarButtonAt,
   topBarButtonForKey,
-  type TopBarPress,
 } from "../hud/topBar";
 import {
+  type BarButton,
   cardHearts,
   cardNameFit,
   cashLeft,
@@ -54,6 +53,7 @@ import {
   slotShown,
   WALK_BAR,
   WALK_BAR_BUTTONS,
+  type WalkBarButtonId,
   walkBarLayout,
   zoneProgressText,
 } from "../hud/walkHud";
@@ -342,7 +342,7 @@ export class HudScene extends Scene {
     return walk;
   }
 
-  private press(via: "key" | "tap", button: TopBarPress): void {
+  private press(via: "key" | "tap", button: WalkBarButtonId): void {
     const run = this.run;
     if (run === undefined) {
       return;
@@ -371,7 +371,7 @@ export class HudScene extends Scene {
   }
 
   // A 20x20 button face on the bar, drawn when the art is missing.
-  private addButton(button: TopBarButton): void {
+  private addButton(button: BarButton): void {
     const { x, y } = button.face;
     if (this.textures.exists("ui-icon-button")) {
       const face = this.add.sprite(x, y, "ui-icon-button").setOrigin(0);
