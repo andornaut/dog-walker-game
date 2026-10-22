@@ -4,26 +4,13 @@
 import { join } from "node:path";
 
 import { ART_DIR, ART_MANIFEST, artManifestText, generateArtManifest } from "./artManifest";
-import { nodeArtFiles, staleFiles, writeFiles } from "./files";
+import { nodeArtFiles, writeOrCheck } from "./files";
 
-const PUBLIC_ART = `public/${ART_DIR}`;
+const path = `public/${ART_DIR}/${ART_MANIFEST}`;
+const manifest = await generateArtManifest(nodeArtFiles(join(process.cwd(), `public/${ART_DIR}`)));
 
-const check = process.argv.includes("--check");
-const root = process.cwd();
-const manifest = await generateArtManifest(nodeArtFiles(join(root, PUBLIC_ART)));
-const files = new Map([[`${PUBLIC_ART}/${ART_MANIFEST}`, artManifestText(manifest)]]);
-
-if (check) {
-  const stale = await staleFiles(root, files);
-  for (const path of stale) {
-    process.stderr.write(`${path} differs from the files on disk: run npm run art:manifest\n`);
-  }
-  process.exitCode = stale.length === 0 ? 0 : 1;
-} else {
-  const written = await writeFiles(root, files);
-  process.stdout.write(
-    written.length === 0
-      ? `${PUBLIC_ART}/${ART_MANIFEST} is up to date\n`
-      : `wrote ${written.join(", ")}\n`,
-  );
-}
+process.exitCode = await writeOrCheck(
+  "npm run art:manifest",
+  path,
+  new Map([[path, artManifestText(manifest)]]),
+);

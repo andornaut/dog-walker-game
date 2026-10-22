@@ -42,7 +42,7 @@ async function fileNames(dir: string): Promise<string[]> {
 }
 
 // Compares generated files with those on disk under root: the paths whose text differs.
-export async function staleFiles(root: string, files: ReadonlyMap<string, string>) {
+async function staleFiles(root: string, files: ReadonlyMap<string, string>) {
   const stale = await Promise.all(
     [...files].map(async ([path, text]) =>
       (await readText(join(root, path))) === text ? null : path,
@@ -58,6 +58,29 @@ export async function writeFiles(root: string, files: ReadonlyMap<string, string
     ),
   );
   return written.filter((path) => path !== null);
+}
+
+// A generator CLI's run from the repository root, returning its exit code. With --check it
+// writes nothing and fails if a committed file differs from files, naming the command that
+// regenerates it; otherwise it writes the files that changed, or says that name is up to date.
+export async function writeOrCheck(
+  command: string,
+  name: string,
+  files: ReadonlyMap<string, string>,
+): Promise<number> {
+  const root = process.cwd();
+  if (process.argv.includes("--check")) {
+    const stale = await staleFiles(root, files);
+    for (const path of stale) {
+      process.stderr.write(`${path} is out of date: run ${command}\n`);
+    }
+    return stale.length === 0 ? 0 : 1;
+  }
+  const written = await writeFiles(root, files);
+  process.stdout.write(
+    written.length === 0 ? `${name} is up to date\n` : `wrote ${written.join(", ")}\n`,
+  );
+  return 0;
 }
 
 // The art directory on disk, for generateArtManifest.
