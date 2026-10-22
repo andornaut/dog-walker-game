@@ -97,7 +97,7 @@ import { earnedIfBanked, shownHints } from "../profileStore";
 import { dogTop } from "../pullSignals";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
-import { playEffect, playTagOnce } from "../sprites";
+import { playEffect } from "../sprites";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
@@ -534,14 +534,8 @@ export class RunMoments {
     }
     const frame = heartPopFrame(top);
     const centre = { x: frame.x + 16, y: frame.y + 16 };
-    const pop = (art: { key: string; pop: string }) => {
-      if (!this.scene.textures.exists(art.key)) {
-        return undefined;
-      }
-      const sprite = this.scene.add.sprite(centre.x, centre.y, art.key).setDepth(DEPTH.fx);
-      playTagOnce(sprite, art.key, art.pop, () => sprite.destroy());
-      return sprite;
-    };
+    const pop = (art: { key: string; pop: string }) =>
+      playEffect(this.scene, art.key, art.pop, centre, DEPTH.fx);
     const loss = forgiven.whole ? pop(FEEDBACK_ART.heartLoss) : undefined;
     this.scene.time.delayedCall(BUFF_POP.switchMs, () => {
       loss?.destroy();
