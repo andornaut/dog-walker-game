@@ -1857,11 +1857,6 @@
           "dx": -2,
           "dy": -3
         },
-        "name": {
-          "capY": 28,
-          "room": 36,
-          "x": 57
-        },
         "plateY": 28
       },
       "walkerTiles": {

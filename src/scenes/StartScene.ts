@@ -1719,9 +1719,9 @@ export class StartScene extends Scene {
   }
 
   // One tile per walker, in the shared tile states: the saved one is picked, and picking
-  // another replaces it, so the walker choice is never full. An owned walker shows its
-  // portrait with its perk icon and its name beside it; a locked one its greyed portrait and
-  // perk icon, the padlock and its name on the goal plate.
+  // another replaces it, so the walker choice is never full. Each shows its portrait with its
+  // perk icon beside it and its name on the grey goal plate at the tile's foot; a locked one's
+  // portrait and icon are greyed, under the padlock.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
@@ -1736,7 +1736,7 @@ export class StartScene extends Scene {
         state,
         tile: true,
       });
-      const { box, face: faceAt, icons, lock, name, plateY } = WALKER_TILE;
+      const { box, face: faceAt, icons, lock, plateY } = WALKER_TILE;
       fillRect(this.graphics(content), PALETTE[look.box], {
         height: box.size,
         width: box.size,
@@ -1758,16 +1758,12 @@ export class StartScene extends Scene {
           originY: 0.5,
         });
       }
-      if (padlock === null) {
-        this.text(content, x + name.x, y + name.capY, walker.name, PALETTE.ink, {
-          originX: 0.5,
-          scale: 1,
-        });
-      } else {
+      if (padlock !== null) {
         addLock(this, content, padlock, { x: x + lock.dx, y: y + lock.dy });
-        const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };
-        this.lockedPlate(content, tile, plateAt);
       }
+      // Every walker's name on the goal plate, owned or locked.
+      const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };
+      addPlate(this, content, plateAt, walker.name, plateColors("goal"));
       walkerEffectItems(gameData, id).forEach((item, n) => {
         const iconAt = { x: x + icons.dx, y: y + itemAt(icons.dy, n) };
         const key = effectIconKey(item);

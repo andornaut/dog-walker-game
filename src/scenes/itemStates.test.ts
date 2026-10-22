@@ -11,7 +11,7 @@ import { walkerTile } from "../home/walkers";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontInk } from "../testing/fontInk";
+import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
 import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { PLATE_PAD } from "./itemArt";
@@ -101,16 +101,22 @@ const inkWidth = (style: TextFitStyle, text: string) => {
   return ink.right - ink.left;
 };
 
+// Every walker's name, owned or not, shows on the goal plate at 2x.
+describe("a walker tile's name plate", () => {
+  it.each(WALKERS)("sets %s's name inside its tile", (walker) => {
+    const { name } = gameData.walkers[walker];
+    const { walkerTile: tile, walkerTiles } = HOME_LAYOUT;
+    expect(bodyTextWidth(2, name) + 2 * PLATE_PAD).toBeLessThanOrEqual(walkerTiles.cellWidth);
+    const capHeight = fontFileMetrics("font-body").capHeight * 2;
+    expect(tile.plateY + capHeight + PLATE_PAD).toBeLessThanOrEqual(walkerTiles.cellHeight);
+  });
+});
+
 describe("the text of an item not owned fits", () => {
-  const { card, walkerTiles } = HOME_LAYOUT;
+  const { card } = HOME_LAYOUT;
   const besideRoom = card.width - card.besideX - card.pad;
   const fitted = (status: string) =>
     fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, status);
-
-  it.each(WALKERS)("sets %s's name on its goal plate inside its tile", (walker) => {
-    const { name } = gameData.walkers[walker];
-    expect(bodyTextWidth(2, name) + 2 * PLATE_PAD).toBeLessThanOrEqual(walkerTiles.cellWidth);
-  });
 
   it.each(GEAR)("sets %s's price on its plate inside its Pocket tile", (gear) => {
     const { cells, tileInset } = HOME_LAYOUT.pocket;

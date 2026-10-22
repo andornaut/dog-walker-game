@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, WalkerId } from "../data/types";
-import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
 import { cashLeft, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
@@ -375,29 +374,6 @@ describe("a dog tile's text", () => {
   it.each(Object.values(gameData.dogs).map((dog) => dog.name))("sets %j", (text) => {
     const fitted = fitInFont("font-body", TEXT_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
     expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
-  });
-});
-
-// An owned walker's name fits its tile's column under the perk icon, measured on the body font.
-describe("a walker tile's name", () => {
-  const { box, icons, name } = HOME_LAYOUT.walkerTile;
-  const style = { letterSpacing: 0, scale: 1 };
-
-  it("centres its room in the column right of the portrait box", () => {
-    expect(name.x - name.room / 2).toBeGreaterThanOrEqual(box.dx + box.size);
-    expect(name.x + name.room / 2).toBeLessThanOrEqual(walkerTiles.cellWidth - 1);
-  });
-
-  it("puts its caps under the perk icon and its ink inside the tile", () => {
-    const [perkY = 0] = icons.dy;
-    expect(name.capY).toBeGreaterThanOrEqual(perkY + EFFECT_ICON_SIZE);
-    const ink = inkRowsFromCapTop(fontFileMetrics("font-body"));
-    expect(name.capY + ink).toBeLessThan(walkerTiles.cellHeight);
-  });
-
-  it.each(Object.values(gameData.walkers).map((walker) => walker.name))("sets %j", (text) => {
-    const fitted = fitInFont("font-body", [style], name.room, plainMarks(text));
-    expect(fitted.widest).toBeLessThanOrEqual(name.room);
   });
 });
 
