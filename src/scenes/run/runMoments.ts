@@ -2,7 +2,7 @@ import type { Scene } from "phaser";
 
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
-import type { DogId, HintId, HintTrigger } from "../../data/types";
+import type { DogId, HintId, HintTrigger, MinorObstacleId } from "../../data/types";
 import {
   type BuffPop,
   leashPops,
@@ -71,13 +71,7 @@ import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
-import {
-  type EncounterCard,
-  isMinorObstacle,
-  type MinorBump,
-  type WalkItemKind,
-  type WalkStep,
-} from "../../runner/walk";
+import type { EncounterCard, MinorBump, WalkStep } from "../../runner/walk";
 import {
   type AchievementPreview,
   NOTHING_PREVIEWED,
@@ -303,8 +297,7 @@ export class RunMoments {
     for (const bump of step.bumps) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
       const { kind } = bump.item;
-      const obstacle = isMinorObstacle(gameData, kind) ? gameData.minorObstacles[kind].name : kind;
-      this.say(bumpLine(gameData, bump, obstacle));
+      this.say(bumpLine(gameData, bump, gameData.minorObstacles[kind].name));
       if (bump.dodged) {
         this.deps.pack
           .sprites([bump.dog])
@@ -590,7 +583,7 @@ export class RunMoments {
     const { item } = bump;
     const hit = {
       kind: item.mover === undefined ? "plain" : "moving",
-      obstacle: isMinorObstacle(gameData, item.kind) ? item.kind : null,
+      obstacle: item.kind,
     } as const;
     const top = this.deps.pack.dogPoint(bump.dog);
     if (top !== undefined) {
@@ -612,10 +605,11 @@ export class RunMoments {
   }
 
   // A minor obstacle's hit label over the stop; none shows while it has none.
-  private playBumpLabel(kind: WalkItemKind, step: WalkStep, pack: { x: number; y: number }): void {
-    if (!isMinorObstacle(gameData, kind)) {
-      return;
-    }
+  private playBumpLabel(
+    kind: MinorObstacleId,
+    step: WalkStep,
+    pack: { x: number; y: number },
+  ): void {
     const label = gameData.minorObstacles[kind].hitLabel;
     if (label === undefined) {
       return;
