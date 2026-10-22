@@ -51,7 +51,6 @@ import { containsPoint, type Rect } from "../lib/rect";
 import { read } from "../rules/units";
 import { closeControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
-import { PLAIN_ITEM, tileState } from "../ui/interaction";
 import { addDim, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
@@ -77,7 +76,7 @@ import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
   addPanel,
-  addSelectTile,
+  addTab,
   addTapBurst,
   clearScene,
   tagFrame,
@@ -338,24 +337,11 @@ export class StatsScene extends Scene {
       if (rect === undefined) {
         return;
       }
-      const tile = addSelectTile(this, tabs, rect, {
-        edge: true,
+      addTab(this, tabs, rect, words.tabs[tab], {
+        open: tab === this.tab,
+        pressed: sameTarget({ tab: i }, this.pressed),
         reducedMotion,
-        state: tileState({ ...PLAIN_ITEM, picked: tab === this.tab }),
-        tile: false,
       });
-      if (sameTarget({ tab: i }, this.pressed)) {
-        tile.container.y += FEEDBACK.pressDipPx;
-      }
-      tile.content.add(
-        addPixelText(this, rect.x + rect.width / 2, rect.y + rect.height / 2, words.tabs[tab], {
-          color: PALETTE[tile.look.text],
-          font: "title",
-          originX: 0.5,
-          originY: 0.5,
-          scale: TEXT_SCALE,
-        }),
-      );
     });
     addPanel(this, PANEL);
     const root = this.add.container(0, 0);

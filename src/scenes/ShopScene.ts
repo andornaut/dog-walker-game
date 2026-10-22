@@ -57,7 +57,7 @@ import {
 import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
-import { type ArtLook, PLAIN_ITEM, tileState } from "../ui/interaction";
+import type { ArtLook } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
@@ -96,6 +96,7 @@ import {
   addPanel,
   addSelectFrame,
   addSelectTile,
+  addTab,
   addTagImage,
   addTapBurst,
   clearScene,
@@ -720,31 +721,11 @@ export class ShopScene extends Scene {
       if (hit === undefined) {
         return;
       }
-      const rect = shopTabFace(hit);
-      const tile = addSelectTile(this, root, rect, {
-        edge: true,
+      addTab(this, root, shopTabFace(hit), gameData.homeText.shop.tabs[tab], {
+        open: tab === this.tab,
+        pressed: sameTarget({ kind: "tab", tab }, this.pressed),
         reducedMotion,
-        state: tileState({ ...PLAIN_ITEM, picked: tab === this.tab }),
-        tile: false,
       });
-      if (sameTarget({ kind: "tab", tab }, this.pressed)) {
-        tile.container.y += FEEDBACK.pressDipPx;
-      }
-      tile.content.add(
-        addPixelText(
-          this,
-          rect.x + rect.width / 2,
-          rect.y + rect.height / 2,
-          gameData.homeText.shop.tabs[tab],
-          {
-            color: PALETTE[tile.look.text],
-            font: "title",
-            originX: 0.5,
-            originY: 0.5,
-            scale: TEXT_SCALE,
-          },
-        ),
-      );
     });
   }
 

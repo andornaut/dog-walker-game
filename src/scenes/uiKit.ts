@@ -5,7 +5,13 @@ import { FEEDBACK, loopFrame } from "../home/feedback";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { BADGE_OFFSET } from "../ui/badge";
 import type { CloseControl } from "../ui/closeControl";
-import { buttonState, type InteractionInput, type TileState } from "../ui/interaction";
+import {
+  buttonState,
+  type InteractionInput,
+  PLAIN_ITEM,
+  type TileState,
+  tileState,
+} from "../ui/interaction";
 import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
@@ -532,6 +538,35 @@ export function addSelectTile(
     }
   }
   return tile;
+}
+
+// A tab in parent: a face drawn in code, selected while it is the open tab and dipped while
+// pressed, its label centred in the title font.
+export function addTab(
+  scene: Scene,
+  parent: GameObjects.Container,
+  rect: Rect,
+  label: string,
+  look: { open: boolean; pressed: boolean; reducedMotion: boolean },
+): void {
+  const tile = addSelectTile(scene, parent, rect, {
+    edge: true,
+    reducedMotion: look.reducedMotion,
+    state: tileState({ ...PLAIN_ITEM, picked: look.open }),
+    tile: false,
+  });
+  if (look.pressed) {
+    tile.container.y += FEEDBACK.pressDipPx;
+  }
+  tile.content.add(
+    addPixelText(scene, rect.x + rect.width / 2, rect.y + rect.height / 2, label, {
+      color: PALETTE[tile.look.text],
+      font: "title",
+      originX: 0.5,
+      originY: 0.5,
+      scale: TEXT_SCALE,
+    }),
+  );
 }
 
 // A picture's texture on a tile in state: a disabled tile's is its grey copy, GREYED.copyDarker
