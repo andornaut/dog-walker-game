@@ -8,12 +8,9 @@ import { currentZone } from "./route";
 import { read } from "./units";
 import { zoneStats } from "./zones";
 
-type StandingData = Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers" | "world">;
+type StandingData = Pick<GameData, "dogs" | "tuning" | "walkers" | "world">;
 
-type StandingRun = Pick<
-  RunState,
-  "debuffs" | "modifiers" | "pack" | "route" | "walker" | "zoneIndex"
->;
+type StandingRun = Pick<RunState, "modifiers" | "pack" | "route" | "walker" | "zoneIndex">;
 
 // How many lanes beside the pack's a tip or a treat is grabbed from, as the walk rounds it,
 // when tipReach or treatReach modifiers, such as Long reach's, change it.
