@@ -7,6 +7,7 @@ import { type DetailPicture, dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
+import { cardBand } from "../home/homeLayout";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import {
   answerPurchase,
@@ -703,8 +704,8 @@ export class ShopScene extends Scene {
 
   // The card, its title band and its close control.
   private drawCard(root: GameObjects.Container): void {
-    const { height, inset, titleX, titleY } = LAYOUT.band;
-    const band = { height, width: PANEL.width - inset * 2, x: PANEL.x + inset, y: PANEL.y + inset };
+    const { titleX, titleY } = LAYOUT.band;
+    const band = cardBand(PANEL);
     addDetailCard(this, root, PANEL, band);
     this.text(root, { x: PANEL.x + titleX, y: band.y + titleY }, gameData.homeText.shop.title, {
       color: PALETTE.white,

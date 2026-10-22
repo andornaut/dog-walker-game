@@ -2,7 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard, DetailPicture } from "../home/detail";
-import { CARD_TEXT_ROOM, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
+import { CARD_TEXT_ROOM, cardBand, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { insetRect, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
@@ -94,9 +94,8 @@ function drawCardFrame(
   content: GameObjects.Container = scene.add.container(0, 0),
 ): GameObjects.Container {
   addScrim(scene, parent);
-  const { height, inset, titleY } = CARD.band;
-  const band = { height, width: rect.width - inset * 2, x: rect.x + inset, y: rect.y + inset };
-  addDetailCard(scene, parent, rect, band);
+  const { inset, titleY } = CARD.band;
+  addDetailCard(scene, parent, rect, cardBand(rect));
   content.setPosition(rect.x, rect.y);
   parent.add(content);
   text(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
