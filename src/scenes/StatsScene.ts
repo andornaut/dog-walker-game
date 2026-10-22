@@ -49,6 +49,7 @@ import {
   stepScroll,
 } from "../input/listScroll";
 import { screenLayout } from "../layout/screenLayout";
+import { clampIndex } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { read } from "../rules/units";
@@ -214,10 +215,7 @@ export class StatsScene extends Scene {
       }
       if (direction === "left" || direction === "right") {
         const index = TABS.indexOf(this.tab);
-        const next = Math.min(
-          TABS.length - 1,
-          Math.max(0, index + (direction === "left" ? -1 : 1)),
-        );
+        const next = clampIndex(TABS.length, index + (direction === "left" ? -1 : 1));
         if (next !== index) {
           this.openTabAfterDip(next);
         }
