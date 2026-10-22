@@ -39,7 +39,8 @@ export function addLock(
   }
 }
 
-const PLATE_PAD = 3;
+// How far a plate's edge sits outside its text's capitals on every side.
+export const PLATE_PAD = 3;
 
 // A plate's colours: its 1px edge, its face, the face's top (lit) and bottom (shade) rows
 // where they differ from it, and its text.

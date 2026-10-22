@@ -14,6 +14,7 @@ import { bodyTextWidth } from "../testing/bodyFont";
 import { fontInk } from "../testing/fontInk";
 import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
 import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { PLATE_PAD } from "./itemArt";
 
 const OWNED: Owned = { dogSlots: 1, dogs: [], gear: [], walkers: [] };
 const DOGS = Object.keys(gameData.dogs) as DogId[];
@@ -99,9 +100,6 @@ const inkWidth = (style: TextFitStyle, text: string) => {
   const ink = fontInk("font-body", style, text);
   return ink.right - ink.left;
 };
-
-// A plate is its text's width at 2x and 3px of face either side.
-const PLATE_PAD = 3;
 
 describe("the text of an item not owned fits", () => {
   const { card, walkerTiles } = HOME_LAYOUT;
