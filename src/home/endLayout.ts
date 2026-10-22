@@ -1,4 +1,4 @@
-import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
+import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 
 // The end screen's geometry, with every text at 2x.
 const PANEL = { height: 304, width: 312, x: 24, y: 112 };
@@ -106,8 +106,7 @@ export interface QuipRow {
 
 // From a line's capitals to its last line's lowest ink, on lines lines of the body font at 2x.
 function quipTextHeight(body: FontMetrics, lines: number): number {
-  const lineHeight = body.lineHeight * END_TEXT_SCALE;
-  return (Math.max(1, lines) - 1) * lineHeight + inkRowsFromCapTop(body) * END_TEXT_SCALE;
+  return inkRowsOfLines(body, lines) * END_TEXT_SCALE;
 }
 
 // An owner's row's height, and its bubble's: down to the closing line's lowest ink under the

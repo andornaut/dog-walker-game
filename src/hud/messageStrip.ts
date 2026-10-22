@@ -2,7 +2,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import type { Point, Rect } from "../lib/rect";
-import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
+import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";
 import { type FaceBox, type FaceRow, faceRows, type FaceText } from "./faceText";
 import { DEBUFF_BAR } from "./walkHud";
@@ -109,9 +109,7 @@ export function messageStripLayout(
 // The panel holding rows rows of text.
 export function messagePanel(body: FontMetrics, rows: number, bar: Rect = WALK_BAR_RECT): Rect {
   const { capsTop, padBottom, scale, width, x } = MESSAGE_STRIP;
-  const rowHeight = body.lineHeight * scale;
-  const ink = inkRowsFromCapTop(body) * scale;
-  const height = capsTop + (rows - 1) * rowHeight + ink + padBottom;
+  const height = capsTop + inkRowsOfLines(body, rows) * scale + padBottom;
   return { height, width, x, y: stripTop(bar) };
 }
 
