@@ -20,7 +20,7 @@ function debuffModifiers(
 }
 
 // The run's modifiers and its debuffs' modifiers together.
-export function packModifiers(
+function packModifiers(
   data: Pick<GameData, "debuffs">,
   state: Pick<RunState, "debuffs" | "modifiers">,
 ): readonly ActiveModifier[] {

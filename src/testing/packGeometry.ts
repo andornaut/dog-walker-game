@@ -13,9 +13,7 @@ const FLAT_FOCAL = 1e7;
 
 // The game's pack of three on a flat test road, the walker's feet on walkerFootY: Casey with
 // Koda leading, Biscuit and Zippy. Its first dogs stand in for a smaller pack's.
-export function testPack(
-  walkerFootY: number,
-): Pick<RoadGeometry, "lens" | "packBand" | "packParts"> {
+function testPack(walkerFootY: number): Pick<RoadGeometry, "lens" | "packBand" | "packParts"> {
   const lens = { focal: FLAT_FOCAL, footY: walkerFootY, horizonY: walkerFootY - FLAT_FOCAL };
   const pack: PackSprites = { dogs: ["koda", "biscuit", "zippy"], walker: "casey" };
   const along = <Part extends PartBox>(part: Part): Part => ({
