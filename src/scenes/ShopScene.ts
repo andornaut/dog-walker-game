@@ -58,7 +58,7 @@ import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { type ArtLook, PLAIN_ITEM, tileState } from "../ui/interaction";
-import { drawFramedRect, fillRect } from "../ui/phaser/draw";
+import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -70,7 +70,7 @@ import {
 import { GREYED, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { drawDetailCard } from "./homePanels";
+import { addDetailCard, drawDetailCard } from "./homePanels";
 import {
   addLock,
   addPlate,
@@ -93,7 +93,6 @@ import {
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
-  addNineSlice,
   addPanel,
   addSelectFrame,
   addSelectTile,
@@ -703,24 +702,9 @@ export class ShopScene extends Scene {
 
   // The card, its title band and its close control.
   private drawCard(root: GameObjects.Container): void {
-    const card = addNineSlice(this, "ui-detail-card", PANEL);
-    if (card === undefined) {
-      drawFramedRect(
-        this.graphics(root),
-        { border: PALETTE.darkBrown, fill: PALETTE.cream },
-        PANEL,
-      );
-    } else {
-      root.add(card);
-    }
     const { height, inset, titleX, titleY } = LAYOUT.band;
     const band = { height, width: PANEL.width - inset * 2, x: PANEL.x + inset, y: PANEL.y + inset };
-    const slice = addNineSlice(this, "ui-detail-band", band);
-    if (slice === undefined) {
-      fillRect(this.graphics(root), PALETTE.forest, band);
-    } else {
-      root.add(slice);
-    }
+    addDetailCard(this, root, PANEL, band);
     this.text(root, { x: PANEL.x + titleX, y: band.y + titleY }, gameData.homeText.shop.title, {
       color: PALETTE.white,
       font: "title",

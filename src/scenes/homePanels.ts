@@ -5,7 +5,7 @@ import type { DetailCard, DetailPicture } from "../home/detail";
 import { CARD_TEXT_ROOM, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { insetRect, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
-import { addDim, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -15,7 +15,14 @@ import {
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
-import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, TEXT_SCALE } from "./uiKit";
+import {
+  addCloseButton,
+  addLoopingFrame,
+  addNineSlice,
+  selectOuter,
+  type SliceKey,
+  TEXT_SCALE,
+} from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on the Pet shop while the
 // player can afford something in it, and the detail card that opens over the screen. Positions
@@ -87,24 +94,9 @@ function drawCardFrame(
   content: GameObjects.Container = scene.add.container(0, 0),
 ): GameObjects.Container {
   addScrim(scene, parent);
-  const frame = addNineSlice(scene, "ui-detail-card", rect);
-  if (frame !== undefined) {
-    parent.add(frame);
-  } else {
-    const g = scene.add.graphics();
-    drawFramedRect(g, { border: PALETTE.darkBrown, fill: PALETTE.cream }, rect);
-    parent.add(g);
-  }
   const { height, inset, titleY } = CARD.band;
   const band = { height, width: rect.width - inset * 2, x: rect.x + inset, y: rect.y + inset };
-  const bandSlice = addNineSlice(scene, "ui-detail-band", band);
-  if (bandSlice !== undefined) {
-    parent.add(bandSlice);
-  } else {
-    const bg = scene.add.graphics();
-    fillRect(bg, PALETTE.forest, band);
-    parent.add(bg);
-  }
+  addDetailCard(scene, parent, rect, band);
   content.setPosition(rect.x, rect.y);
   parent.add(content);
   text(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
@@ -116,8 +108,56 @@ function drawCardFrame(
   return content;
 }
 
+// A nine-slice in parent, or the rect framed in code while its art is missing.
+function addFramedSlice(
+  scene: Scene,
+  parent: GameObjects.Container,
+  key: SliceKey,
+  rect: Rect,
+  colors: { border: number; fill: number },
+): void {
+  const slice = addNineSlice(scene, key, rect);
+  if (slice !== undefined) {
+    parent.add(slice);
+    return;
+  }
+  const g = scene.add.graphics();
+  drawFramedRect(g, colors, rect);
+  parent.add(g);
+}
+
+// The ui-detail-card over card with its ui-detail-band over band, or a framed cream card and a
+// forest band while the art is missing. The detail cards, the shop, settings and the purchase
+// confirm all wear it.
+export function addDetailCard(
+  scene: Scene,
+  parent: GameObjects.Container,
+  card: Rect,
+  band: Rect,
+): void {
+  addFramedSlice(scene, parent, "ui-detail-card", card, {
+    border: PALETTE.darkBrown,
+    fill: PALETTE.cream,
+  });
+  addFramedSlice(scene, parent, "ui-detail-band", band, {
+    border: PALETTE.forest,
+    fill: PALETTE.forest,
+  });
+}
+
 // The detail card's well the picture sits in.
 export const DETAIL_WELL_KEY = "ui-detail-well";
+
+// The detail card's well at rect's top-left, or a framed grey box while its art is missing.
+export function addDetailWell(scene: Scene, parent: GameObjects.Container, rect: Rect): void {
+  if (scene.textures.exists(DETAIL_WELL_KEY)) {
+    parent.add(scene.add.image(rect.x, rect.y, DETAIL_WELL_KEY).setOrigin(0));
+    return;
+  }
+  const g = scene.add.graphics();
+  drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.grey }, rect);
+  parent.add(g);
+}
 
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
 // shows. A dog's or walker's card puts its breed and status beside the portrait and its rows
@@ -134,17 +174,7 @@ export function drawDetailCard(
   // The content is laid out first, so the card is as tall as it needs.
   const content = scene.add.container(0, 0);
   const { well } = CARD;
-  if (scene.textures.exists(DETAIL_WELL_KEY)) {
-    content.add(scene.add.image(well.x, well.y, DETAIL_WELL_KEY).setOrigin(0));
-  } else {
-    const g = scene.add.graphics();
-    drawFramedRect(
-      g,
-      { border: PALETTE.plum, fill: PALETTE.grey },
-      { height: well.size, width: well.size, x: well.x, y: well.y },
-    );
-    content.add(g);
-  }
+  addDetailWell(scene, content, { height: well.size, width: well.size, x: well.x, y: well.y });
   if (scene.textures.exists(picture.key)) {
     const inner = { x: well.x + well.picture, y: well.y + well.picture };
     content.add(

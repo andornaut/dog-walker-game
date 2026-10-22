@@ -27,10 +27,11 @@ import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { closeFace } from "../ui/closeControl";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
-import { drawFocusRing, drawFramedRect, fillRect } from "../ui/phaser/draw";
+import { drawFocusRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
 import { DISABLED_COLORS } from "../ui/selection";
+import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, setSettings } from "./profileStore";
@@ -282,12 +283,7 @@ export class SettingsScene extends Scene {
       y: 0,
     });
     // The card and its title band.
-    if (addNineSlice(this, "ui-detail-card", panel) === undefined) {
-      drawFramedRect(g, { border: PALETTE.darkBrown, fill: PALETTE.cream }, panel);
-    }
-    if (addNineSlice(this, "ui-detail-band", band) === undefined) {
-      fillRect(this.add.graphics(), PALETTE.forest, band);
-    }
+    addDetailCard(this, this.add.container(0, 0), panel, band);
     addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
       color: PALETTE.white,
       font: "title",

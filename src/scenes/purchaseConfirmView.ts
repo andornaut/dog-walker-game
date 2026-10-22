@@ -4,12 +4,12 @@ import type { DetailPicture } from "../home/detail";
 import type { ConfirmChoice, ConfirmLines } from "../home/purchaseConfirm";
 import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
 import type { Rect } from "../lib/rect";
-import { addDim, drawFramedRect } from "../ui/phaser/draw";
+import { addDim } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
-import { DETAIL_WELL_KEY } from "./homePanels";
-import { addMenuButton, addNineSlice, type SliceKey, TEXT_SCALE } from "./uiKit";
+import { addDetailCard, addDetailWell } from "./homePanels";
+import { addMenuButton, TEXT_SCALE } from "./uiKit";
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
 // through the model in home/purchaseConfirm; the view only draws.
@@ -30,24 +30,6 @@ export interface PurchaseConfirmHits {
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
 
-// A nine-slice in parent, or the rect filled and framed in code while its art is missing.
-function addSlice(
-  scene: Scene,
-  parent: GameObjects.Container,
-  key: SliceKey,
-  rect: Rect,
-  colors: { border: number; fill: number },
-): void {
-  const slice = addNineSlice(scene, key, rect);
-  if (slice !== undefined) {
-    parent.add(slice);
-    return;
-  }
-  const g = scene.add.graphics();
-  drawFramedRect(g, colors, rect);
-  parent.add(g);
-}
-
 // The confirm over everything the scene drew before it: the screen dimmed, the ui-detail-card
 // with its band and "Buy {name}?", the picture in its well, the price and the bank it would
 // leave, then Cancel and Buy. Returns where it is tapped.
@@ -58,14 +40,7 @@ export function drawPurchaseConfirm(
 ): PurchaseConfirmHits {
   const { lines, picture, pressed } = input;
   layer.add(addDim(scene, LAYOUT.screen));
-  addSlice(scene, layer, "ui-detail-card", LAYOUT.card, {
-    border: PALETTE.darkBrown,
-    fill: PALETTE.cream,
-  });
-  addSlice(scene, layer, "ui-detail-band", LAYOUT.band, {
-    border: PALETTE.forest,
-    fill: PALETTE.forest,
-  });
+  addDetailCard(scene, layer, LAYOUT.card, LAYOUT.band);
   const centred = (
     at: { capTop: number; centerX: number; font: "body" | "title"; room: number },
     value: string,
@@ -81,14 +56,7 @@ export function drawPurchaseConfirm(
     layer.add(label);
   };
   centred(LAYOUT.title, lines.title, PALETTE.white);
-  const { well } = LAYOUT;
-  if (scene.textures.exists(DETAIL_WELL_KEY)) {
-    layer.add(scene.add.image(well.x, well.y, DETAIL_WELL_KEY).setOrigin(0));
-  } else {
-    const g = scene.add.graphics();
-    drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.grey }, well);
-    layer.add(g);
-  }
+  addDetailWell(scene, layer, LAYOUT.well);
   if (scene.textures.exists(picture.key)) {
     const at = LAYOUT.picture;
     layer.add(scene.add.image(at.x, at.y, picture.key).setOrigin(0).setScale(picture.scale));
