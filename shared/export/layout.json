@@ -1329,12 +1329,11 @@
         "y": 88
       },
       "side": {
-        "bankDx": 20,
-        "bankY": 194,
-        "iconY": 212,
         "pipPitch": 21,
         "pipsY": 172,
         "right": 320,
+        "totalHeight": 14,
+        "totalY": 194,
         "x": 208
       },
       "titleY": 130

@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { fillLine } from "../lib/lines";
-import { cents } from "../rules/units";
 import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -27,8 +26,9 @@ import {
   quipRowHeight,
   quipTextY,
   SIDE_LABEL_ROOM,
+  sideTotalLabelRoom,
 } from "./endLayout";
-import { dollarText, signedDollarText } from "./home";
+import { signedDollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
@@ -52,9 +52,11 @@ function fitted(role: Role, styles: readonly TextFitStyle[], room: number, text:
   return fits ? set : undefined;
 }
 
-// Fees, tips and card costs always show, lucky finds and the starting money only sometimes;
-// a walk has one owner's row per dog, up to a slot each.
-const BREAKDOWN_LINES = [3, 4, 5];
+// Fees, tips and card costs always show, the other earnings only sometimes, so a breakdown
+// runs from 3 lines to one per kind of earnings; a walk has one owner's row per dog, up to a
+// slot each.
+const EARNINGS_KINDS = Object.keys(gameData.menuText.end.earnings).length;
+const BREAKDOWN_LINES = Array.from({ length: EARNINGS_KINDS - 2 }, (_, i) => i + 3);
 // Every count of breakdown lines and owners' rows, the owners all happy or all firing you.
 const cases = BREAKDOWN_LINES.flatMap((lines) =>
   Array.from({ length: SCREEN_CONFIG.dogSlotCount }, (_, i) =>
@@ -70,11 +72,13 @@ describe("endPanelLayout", () => {
     (lines, rows, fired) => {
       const placed = endPanelLayout(BODY, lines, quipRows(rows, fired, [])).rows;
       const { panel } = endPanelLayout(BODY, lines, quipRows(rows, fired, []));
-      const totalBottom = breakdown.top + lines * breakdown.pitch + 8 + 10;
+      // The breakdown's last line's ink and the side column's total stay over the rule.
+      const listInk = breakdown.top + (lines - 1) * breakdown.pitch + inkRowsFromCapTop(BODY) * 2;
+      const above = Math.max(listInk, side.totalY + side.totalHeight);
       const rule = (placed[0]?.top ?? 0) - 8;
       const last = placed.at(-1);
-      expect(rule).toBeGreaterThan(Math.max(totalBottom, side.iconY + 16));
-      expect(rule - Math.max(totalBottom, side.iconY + 16)).toBeLessThanOrEqual(8);
+      expect(rule).toBeGreaterThan(above);
+      expect(rule - above).toBeLessThanOrEqual(8);
       expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
       expect(endPanelFits(panel)).toBe(true);
       const two = endPanelLayout(BODY, lines, quipRows(rows, fired, [2, 2, 2])).rows;
@@ -216,30 +220,38 @@ describe("the end screen's text", () => {
     ).toEqual([]);
   });
 
-  it("sets the side column's labels at 2x and a six-figure bank beside the money icon", () => {
-    for (const label of [words.zonesWalked, words.bank]) {
-      expect(fitted("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, label)?.style.scale, label).toBe(2);
-    }
-    const bank = dollarText(cents(99_999_999));
-    expect(fitted("title", TEXT_FIT_STYLES, SIDE_LABEL_ROOM - side.bankDx, bank)).toBeDefined();
+  it("sets the side column's label at 2x", () => {
+    expect(fitted("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, words.zonesWalked)?.style.scale).toBe(
+      2,
+    );
   });
 
-  // Each label keeps clear of a four-figure amount, gained or lost, at 2x.
-  it("sets every breakdown label beside a four-figure amount", () => {
-    const amounts = [9_999_00, -9_999_00].map((amount) => signedDollarText(amount));
-    const labels: [Role, string][] = [
-      ...Object.values(words.earnings).map((label): [Role, string] => ["body", label]),
-      ["title", words.total],
-    ];
-    const offenders = labels.flatMap(([role, label]) =>
-      amounts
-        .filter((amount) => {
-          const amountWidth = width(role)({ letterSpacing: 0, scale: 2 }, shown(role, amount));
-          return !fitted(role, TEXT_FIT_STYLES, breakdownLabelRoom(amountWidth), label);
-        })
-        .map((amount) => `${label} beside ${amount}`),
-    );
-    expect(offenders).toEqual([]);
+  // Each label keeps clear of a four-figure amount, gained or lost, at 2x: the breakdown's in
+  // the body font, and TOTAL beside the walk's total in the side column in the title font.
+  const amounts = [9_999_00, -9_999_00].map((amount) => signedDollarText(amount));
+  const amountWidth = (role: Role, amount: string) =>
+    width(role)({ letterSpacing: 0, scale: 2 }, shown(role, amount));
+  const labels = [
+    ...Object.values(words.earnings).map(
+      (label) =>
+        [
+          label,
+          "body",
+          (amount: string) => breakdownLabelRoom(amountWidth("body", amount)),
+        ] as const,
+    ),
+    [
+      words.total,
+      "title",
+      (amount: string) => sideTotalLabelRoom(amountWidth("title", amount)),
+    ] as const,
+  ];
+  it.each(
+    labels.flatMap(([label, role, room]) =>
+      amounts.map((amount) => [label, amount, role, room] as const),
+    ),
+  )("sets %s beside %s", (label, amount, role, room) => {
+    expect(fitted(role, TEXT_FIT_STYLES, room(amount), label)).toBeDefined();
   });
 });
 

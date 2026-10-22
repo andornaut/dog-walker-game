@@ -53,15 +53,15 @@ export const END_LAYOUT = {
   ribbon: RIBBON,
   // fx-new-best's 96x48 frame sits 12 left of and 14 above the ribbon.
   ribbonBurst: { height: 48, width: 96, x: RIBBON.x - 12, y: RIBBON.y - 14 },
-  // The side column: its labels from x, the zone pips and the bank, the bank's amount bankDx
-  // right of the money icon's left edge; the zone count ends at right.
+  // The side column: its labels from x, the zone pips, then TOTAL with its capitals at totalY
+  // and the walk's total beside it; the zone count and the total end at right. The column
+  // ends totalHeight under totalY, the 2x title font's capitals.
   side: {
-    bankDx: 20,
-    bankY: PANEL.y + 82,
-    iconY: PANEL.y + 100,
     pipPitch: 21,
     pipsY: PANEL.y + 60,
     right: 320,
+    totalHeight: 14,
+    totalY: PANEL.y + 82,
     x: 208,
   },
   titleY: PANEL.y + 18,
@@ -89,6 +89,13 @@ const AMOUNT_GAP = 8;
 export function breakdownLabelRoom(amountWidth: number): number {
   const { amountRight, label } = END_LAYOUT.breakdown;
   return amountRight - amountWidth - AMOUNT_GAP - label;
+}
+
+// How wide the side column's TOTAL may be beside the walk's total, whose ink is amountWidth
+// wide.
+export function sideTotalLabelRoom(amountWidth: number): number {
+  const { right, x } = END_LAYOUT.side;
+  return right - amountWidth - AMOUNT_GAP - x;
 }
 
 // An owner's row: whether the owner fired you, and how many lines its closing line takes.
@@ -120,9 +127,9 @@ export function quipTextY(body: FontMetrics, row: QuipRow, height: number): numb
     : Math.floor((height - quipTextHeight(body, row.lines)) / 2);
 }
 
-// The breakdown's rule sits 2px under its last line and the 2x total 8px under it; the side
-// column ends with the 16px money icon. The owners' rows start QUIPS_GAP under whichever ends
-// lower, the tan rule 8px over them, and the panel ends 8px under the last bubble.
+// The breakdown ends a pitch under its last line's top; the side column ends under its total.
+// The owners' rows start QUIPS_GAP under whichever ends lower, the tan rule 8px over them, and
+// the panel ends 8px under the last bubble.
 const QUIPS_GAP = 10;
 const PANEL_FOOT = 8;
 
@@ -139,8 +146,8 @@ export function endPanelLayout(
   quipRows: readonly QuipRow[],
 ): EndPanelLayout {
   const { breakdown, quips, side } = END_LAYOUT;
-  const totalBottom = breakdown.top + breakdownLines * breakdown.pitch + 8 + 10;
-  let top = Math.max(totalBottom, side.iconY + 16) + QUIPS_GAP;
+  const listBottom = breakdown.top + breakdownLines * breakdown.pitch;
+  let top = Math.max(listBottom, side.totalY + side.totalHeight) + QUIPS_GAP;
   const shown = quipRows.length === 0 ? [{ fired: false, lines: 1 }] : quipRows;
   const rows = shown.map((quip) => {
     const row = { height: quipRowHeight(body, quip), top };

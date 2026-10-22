@@ -1,6 +1,5 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import { ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -15,9 +14,10 @@ import {
   quipNameX,
   quipTextY,
   SIDE_LABEL_ROOM,
+  sideTotalLabelRoom,
 } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
-import { dollarText, signedDollarText } from "../home/home";
+import { signedDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   homecomers,
@@ -180,13 +180,6 @@ export class EndScene extends Scene {
       fitted(text(BREAKDOWN.label, y, line.label, PALETTE.plum), room(shown), BREAKDOWN.label, y);
       y += BREAKDOWN.pitch;
     }
-    const ruleWidth = BREAKDOWN.amountRight - BREAKDOWN.label;
-    fillRect(g, PALETTE.tan, { height: 1, width: ruleWidth, x: BREAKDOWN.label, y: y + 2 });
-    const totalY = y + 8;
-    const totalText = signedDollarText(walk.earnedCents);
-    const total = title(BREAKDOWN.amountRight, totalY, totalText, PALETTE.forest, 1);
-    const totalLabel = title(BREAKDOWN.label, totalY, words.total, PALETTE.plum);
-    fitted(totalLabel, room(total), BREAKDOWN.label, totalY);
 
     const zonesLabel = text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
     fitted(zonesLabel, SIDE_LABEL_ROOM, SIDE.x, BREAKDOWN.top);
@@ -204,13 +197,12 @@ export class EndScene extends Scene {
     });
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
-    fitted(text(SIDE.x, SIDE.bankY, words.bank, PALETTE.plum), SIDE_LABEL_ROOM, SIDE.x, SIDE.bankY);
-    if (this.textures.exists(MONEY_ICON_KEY)) {
-      this.add.image(SIDE.x, SIDE.iconY, MONEY_ICON_KEY).setOrigin(0);
-    }
-    const bankX = SIDE.x + SIDE.bankDx;
-    const bank = title(bankX, SIDE.iconY + 2, dollarText(save.bankCents), PALETTE.plum);
-    fitted(bank, SIDE_LABEL_ROOM - SIDE.bankDx, bankX, SIDE.iconY + 2);
+    // The walk's total under the pips, its label fitting the room the amount leaves it.
+    const totalText = signedDollarText(walk.earnedCents);
+    const total = title(SIDE.right, SIDE.totalY, totalText, PALETTE.forest, 1);
+    const totalInk = inkSpan(total);
+    const totalLabel = title(SIDE.x, SIDE.totalY, words.total, PALETTE.plum);
+    fitted(totalLabel, sideTotalLabelRoom(totalInk.right - totalInk.left), SIDE.x, SIDE.totalY);
 
     const quipsTop = rows[0]?.top ?? 0;
     fillRect(g, PALETTE.tan, { height: 1, width: 288, x: 36, y: quipsTop - 8 });
