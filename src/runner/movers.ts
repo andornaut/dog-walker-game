@@ -1168,14 +1168,17 @@ export function screenHasRoom(
 // avoidable, and undoes it unless keep is set. leavesRoom is false when taking the cells would
 // leave too few for the spawns placed later that are never skipped. packFits is true when the
 // pack fits between each stand and every lane-blocking spawn placed so far, and stand records
-// the stands for the spawns placed later.
+// the stands for the spawns placed later. isFree is true when a mover may take a cell: a dart
+// one no dart holds, since it may set off over cells other spawns hold, crossing over or past
+// them, and any other mover one no spawn holds. take holds a cell for a mover, a dart if dart is
+// set, so nothing placed later takes it.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
-  isFree(lane: number, row: number): boolean;
+  isFree(dart: boolean, lane: number, row: number): boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
   packFits(stands: readonly MoverStand[]): boolean;
   stand(stands: readonly MoverStand[]): void;
-  take(lane: number, row: number): void;
+  take(dart: boolean, lane: number, row: number): void;
 }
 
 interface MoverQuota<Kind extends string> {
@@ -1220,7 +1223,8 @@ function standsOf(spot: Spot): MoverStand[] {
 // within the zone, within the caps on screen. A mover with no room in its stretch, such as one
 // over a cap there, waits: it comes on at the next row with room. One with no room on any later
 // row is dropped, which uses no random draw past its own draws, as the planner drops an obstacle
-// it has no room for. A mover never stands still in place of moving. Each mover makes its own
+// it has no room for. A dart may take cells other spawns hold (MoverGrid.isFree), but no mover
+// takes a cell a dart holds. A mover never stands still in place of moving. Each mover makes its own
 // draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
 // holds for the speed and moments it was drawn. Of the places that fit, it takes a start lane,
 // each as likely, from the movers stream, so an edge lane that fits fewer of its ways comes up as
@@ -1239,11 +1243,12 @@ export function placeMovers<Kind extends string>(
   const fits = (spot: Spot) => {
     const [start, end] = screenOf(spot);
     const { placement } = spot;
+    const dart = placement.path.motion === "cross";
     return (
       start >= 0 &&
       end <= geometry.zoneLength &&
       screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end])) &&
-      placement.cells.every(({ lane, row }) => grid.isFree(lane, spot.row + row)) &&
+      placement.cells.every(({ lane, row }) => grid.isFree(dart, lane, spot.row + row)) &&
       grid.leavesRoom(placement.cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
       grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, false)
@@ -1294,7 +1299,8 @@ export function placeMovers<Kind extends string>(
         inLane.filter((fit) => rankOf(fit) === best.get(fit.row)),
       );
       const { placement } = spot;
-      placement.cells.forEach(({ lane, row }) => grid.take(lane, spot.row + row));
+      const dart = placement.path.motion === "cross";
+      placement.cells.forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row));
       grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, true);
       grid.stand(standsOf(spot));
       onScreen.push(onScreenOf(placement.path, screenOf(spot)));

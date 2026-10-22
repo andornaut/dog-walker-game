@@ -1205,8 +1205,10 @@ describe("screenHasRoom", () => {
 describe("placeMovers", () => {
   const rows = Array.from({ length: 40 }, (_, i) => (i + 1) * 150);
   const zoned = { ...geometry, zoneLength: 6150 };
+  // The cells taken, and of them those a dart holds.
   const freeGrid = () => {
     const taken = new Set<string>();
+    const darts = new Set<string>();
     const blocked: { leadIn: boolean; row: number; rows: number; span: LaneSpan }[] = [];
     return {
       blocked,
@@ -1217,12 +1219,16 @@ describe("placeMovers", () => {
           }
           return true;
         },
-        isFree: (lane: number, row: number) => !taken.has(`${lane},${row}`),
+        isFree: (dart: boolean, lane: number, row: number) =>
+          !(dart ? darts : taken).has(`${lane},${row}`),
         leavesRoom: () => true,
         packFits: () => true,
         stand: () => undefined,
-        take: (lane: number, row: number) => {
+        take: (dart: boolean, lane: number, row: number) => {
           taken.add(`${lane},${row}`);
+          if (dart) {
+            darts.add(`${lane},${row}`);
+          }
         },
       },
       taken,
@@ -1288,6 +1294,77 @@ describe("placeMovers", () => {
     expect(spawn?.lane).toBe(
       spawn?.mover.motion === "cross" && spawn.mover.direction === 1 ? 0 : geometry.laneCount - 1,
     );
+  });
+
+  // Every cell of the grid already held, by a dart or by another spawn. A dart sets off over
+  // cells another spawn holds; no mover takes a cell a dart holds, and no other mover takes a
+  // held cell at all.
+  it.each([
+    { heldByDart: false, mover: "a dart", placed: true, spec: spec(cross(2, 0)) },
+    { heldByDart: true, mover: "a dart", placed: false, spec: spec(cross(2, 0)) },
+    {
+      heldByDart: false,
+      mover: "an in-lane mover",
+      placed: false,
+      spec: spec({ kind: "ride", speedMultiplier: 2 }),
+    },
+    {
+      heldByDart: true,
+      mover: "an in-lane mover",
+      placed: false,
+      spec: spec({ kind: "ride", speedMultiplier: 2 }),
+    },
+  ])(
+    "places $mover over cells held by a dart ($heldByDart): $placed",
+    ({ heldByDart, placed, spec: moving }) => {
+      const { grid, taken } = freeGrid();
+      for (let row = -geometry.laneCount; row < rows.length + geometry.laneCount; row++) {
+        for (let lane = 0; lane < geometry.laneCount; lane++) {
+          grid.take(heldByDart, lane, row);
+        }
+      }
+      const held = taken.size;
+      const { spawns } = placeMovers(plannerStreams(1), zoned, CAPS, grid, [], rows, [
+        { count: 1, kind: "mover", spec: moving },
+      ]);
+      expect(spawns).toHaveLength(placed ? 1 : 0);
+      expect(taken.size).toBe(held);
+    },
+  );
+
+  // A dart placed first holds its cells: a second dart or another mover planned on the same rows
+  // has no room, while one planned on the rows of an in-lane mover placed first sets off there.
+  it.each([
+    { first: "a dart", firstSpec: spec(cross(2, 0)), placed: 0, then: spec(cross(2, 0)) },
+    {
+      first: "a dart",
+      firstSpec: spec(cross(2, 0)),
+      placed: 0,
+      then: spec({ kind: "ride", speedMultiplier: 2 }),
+    },
+    {
+      first: "an in-lane mover",
+      firstSpec: spec({ kind: "ride", speedMultiplier: 2 }),
+      placed: 1,
+      then: spec(cross(2, 0)),
+    },
+  ])("after $first, places $placed mover on its cells", ({ firstSpec, placed, then }) => {
+    const { grid, taken } = freeGrid();
+    placeMovers(plannerStreams(1), zoned, CAPS, grid, [], rows, [
+      { count: 1, kind: "first", spec: firstSpec },
+    ]);
+    const firstCells = new Set(taken);
+    const onlyFirstRows = (row: number) => [...firstCells].some((cell) => cell.endsWith(`,${row}`));
+    const { spawns } = placeMovers(
+      plannerStreams(2),
+      zoned,
+      CAPS,
+      { ...grid, block: (row, ...rest) => onlyFirstRows(row) && grid.block(row, ...rest) },
+      [],
+      rows,
+      [{ count: 1, kind: "then", spec: then }],
+    );
+    expect(spawns).toHaveLength(placed);
   });
 
   it("drops a mover the grid refuses everywhere, drawing only its own draws", () => {

@@ -298,11 +298,14 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // movers then the rest; then the other lane-blocking movers; then the other lane-blocking spawns;
 // then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
-// mover with no room in its stretch, such as one over a cap on screen, waits for the next row with
-// room; only one marked first stands still in its footprint when no row has room for it to move. A
-// moving prize is placed as a mover that blocks nothing: the cells it passes through are kept clear
-// of other spawns, so it never walks into one, but no lane is blocked, it stands nowhere for the
-// pack-fit gap and it counts toward no cap on screen, since the pack never has to steer around it.
+// dart may set off over cells the spawns placed before it hold, crossing over or past them, but
+// not with a lane-blocking spawn in its lead-in row, and nothing placed after it takes its cells,
+// another dart included. A mover with no room in its stretch, such as one over a cap on screen,
+// waits for the next row with room; only one marked first stands still in its footprint when no
+// row has room for it to move. A moving prize is placed as a mover that blocks nothing: the cells
+// it passes through are kept clear of other spawns, so it never walks into one, but no lane is
+// blocked, it stands nowhere for the pack-fit gap and it counts toward no cap on screen, since the
+// pack never has to steer around it.
 // It keeps a free cell for every moving prize, its own included, and with no room to move it stands
 // still in one cell among the other spawns, so a prize is never skipped for want of room to move.
 // A lane-blocking mover, or an obstacle bigger than one cell, that the earlier
@@ -319,9 +322,10 @@ export function planSpawns<Kind extends string>(
   const reach = laneReach(plan);
   const spacing = rowSpacing(plan);
   const rows = spawnRowDistances(spacing, plan.zoneLength);
-  // Lane masks per row: lanes taken by a spawn, lanes blocked in the row's window, and lanes
-  // blocked in the gap after it.
+  // Lane masks per row: lanes taken by a spawn, those of them a dart holds, lanes blocked in the
+  // row's window, and lanes blocked in the gap after it.
   const taken = new Int32Array(rows.length);
+  const dartHeld = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
   const gapBlocked = new Int32Array(rows.length);
   // What a trial block overwrote, by row, to undo it.
@@ -539,8 +543,9 @@ export function planSpawns<Kind extends string>(
   const movers = moverQuotas(true);
   const moverGrid = {
     block: (row: number, span: LaneSpan, rowsBlocked: number, leadIn: boolean, keep: boolean) => {
-      // A lead-in needs a row before it to steer from.
-      if (leadIn && row < 2) {
+      // A lead-in needs a row before it to steer from, and no lane-blocking spawn in it, as the
+      // pack steers across it.
+      if (leadIn && (row < 2 || !isEmpty(row - 1))) {
         return false;
       }
       if (leadIn) {
@@ -556,17 +561,27 @@ export function planSpawns<Kind extends string>(
       }
       return ok;
     },
-    isFree: (lane: number, row: number) => ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
+    isFree: (dart: boolean, lane: number, row: number) =>
+      (((dart ? dartHeld : taken)[row] ?? 0) & laneRun(lane, 1)) === 0,
+    // Only the cells not yet taken use up room: a dart may set off over taken ones.
     leavesRoom: (cells: readonly Cell[]) =>
-      leavesRoom(cells.filter(({ row }) => row >= 0 && row < rows.length).length),
+      leavesRoom(
+        cells.filter(
+          ({ lane, row }) =>
+            row >= 0 && row < rows.length && ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
+        ).length,
+      ),
     packFits: (stands: readonly MoverStand[]) =>
       stands.every((stand) => placed.every((other) => packFitsBetween(plan, stand, other))),
     stand: (stands: readonly MoverStand[]) => {
       placed.push(...stands);
     },
-    take: (lane: number, row: number) => {
+    take: (dart: boolean, lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
         takeCells(row, laneRun(lane, 1));
+        if (dart) {
+          dartHeld[row] = (dartHeld[row] ?? 0) | laneRun(lane, 1);
+        }
       }
     },
   };

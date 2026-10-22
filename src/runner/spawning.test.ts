@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../lib/arrays";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
-import type { MoverSpec } from "./movers";
+import { type MoverSpec, sweptLanes } from "./movers";
 import {
   blockingLength,
   everyLaneReaches,
@@ -26,7 +26,7 @@ function laneMask(lanes: readonly number[]): number {
   return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
 }
 
-type Kind = "bench" | "car" | "hedge" | "neighbor" | "obstacle" | "skunk" | "tip" | "treat";
+type Kind = "bench" | "car" | "cat" | "hedge" | "neighbor" | "obstacle" | "skunk" | "tip" | "treat";
 
 // 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
@@ -125,6 +125,26 @@ const STROLLING: MoverSpec = {
     stepSeconds: 0.1,
   },
   movement: "step",
+  variation: { delaySeconds: 0, lengthShare: 0, speedShare: 0 },
+  warningSeconds: 0.2,
+};
+
+// A dart straight across the road at a lane a second, so most meet the pack: one that does holds
+// every lane of its own row and, as its lead-in, of the row before.
+const DARTING: MoverSpec = {
+  footprint: { lanes: 1, rows: 1 },
+  motion: {
+    kind: "cross",
+    lanesPerSecond: 1,
+    reactionSeconds: 0.5,
+    startRoadShare: [0.1, 0.9],
+    stopLanes: { max: 4, min: 2 },
+    stopShare: 0,
+    tilt: [0, 0],
+    turnAtShare: [0.5, 1],
+    turnBackShare: 0,
+  },
+  movement: "dart",
   variation: { delaySeconds: 0, lengthShare: 0, speedShare: 0 },
   warningSeconds: 0.2,
 };
@@ -530,6 +550,73 @@ describe("planSpawns", () => {
           planSpawns(plannerStreams(seed), without).filter(blocking),
         );
       }
+    },
+  );
+
+  // Cards (obstacles marked first) are placed before the darts, and benches and tips after. A dart
+  // sets off over a card's cell, never with a card in its lead-in row; nothing placed after it is
+  // in a row it holds; and the pack has a way past every card, dart and bench from any lane. A
+  // straight dart's row is where it sets off, its cue's lead less its cue.
+  it.each([
+    { cards: 8, minOpenLanes: 2 },
+    { cards: 14, minOpenLanes: 1 },
+  ])(
+    "lets a dart set off over $cards cards' cells, keeping later spawns off its own",
+    ({ cards, minOpenLanes }) => {
+      const darting: SpawnPlan<Kind> = {
+        ...shaped,
+        minOpenLanes,
+        quotas: [
+          { blocksLane: true, count: cards, first: true, kind: "obstacle" },
+          { blocksLane: true, count: 4, kind: "cat", mover: DARTING },
+          { blocksLane: true, count: 3, footprint: FOOTPRINTS.bench, kind: "bench" },
+          { blocksLane: false, count: 9, kind: "tip" },
+        ],
+        zoneLength: 3000,
+      };
+      const spacing = rowSpacing(darting);
+      const window = blockingLength(darting, 1);
+      let shared = 0;
+      for (const seed of seeds.slice(0, 20)) {
+        const events = planSpawns(plannerStreams(seed), darting);
+        const darts = events.flatMap(({ distance, mover }) => {
+          if (mover?.motion !== "cross") {
+            return [];
+          }
+          const row = distance - mover.enterTravel + mover.warning;
+          const lanes = sweptLanes(5, mover, darting.sightLength, darting.sightLength + window);
+          return [{ lanes, row }];
+        });
+        expect(darts.length).toBeGreaterThan(0);
+        const at = (row: number, kinds: readonly Kind[]) =>
+          events.filter(({ distance, kind }) => distance === row && kinds.includes(kind));
+        for (const { lanes, row } of darts) {
+          const leadIn = lanes.count > 0 ? [row - spacing] : [];
+          shared += at(row, ["obstacle"]).length;
+          for (const held of [row, ...leadIn]) {
+            expect(at(held, ["bench", "tip"]), `seed ${seed}`).toEqual([]);
+          }
+          for (const held of leadIn) {
+            expect(at(held, ["obstacle"]), `seed ${seed}`).toEqual([]);
+          }
+        }
+        const spans = [
+          ...spansOf(
+            darting,
+            events.filter(({ kind }) => kind !== "cat"),
+          ),
+          ...darts.map(({ lanes, row }) => ({
+            distance: row,
+            lane: lanes.first,
+            laneSpan: lanes.count,
+            length: window,
+          })),
+        ];
+        for (const start of [0, 1, 2, 3, 4]) {
+          expect(lanesReachedAtEnd(darting, spans, start), `seed ${seed}`).not.toEqual([]);
+        }
+      }
+      expect(shared).toBeGreaterThan(0);
     },
   );
 
