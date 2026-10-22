@@ -732,8 +732,9 @@ def treat(lift=0):
     g = edged(Grid(16, 16))
     y = 6
     g.rect(4, y, 8, 3, "white")
-    for cx, cy in ((3.5, y + 0.5), (3.5, y + 2.5), (12.5, y + 0.5), (12.5, y + 2.5)):
-        g.ell(cx, cy, 1.8, 1.8, "white", "lgrey")
+    # each end two round knobs with a notch between them, so the bone reads as a bone and not a bow
+    for cx, cy in ((3, y - 0.2), (3, y + 3.2), (13, y - 0.2), (13, y + 3.2)):
+        g.ell(cx, cy, 1.7, 1.7, "white", "lgrey")
     g.rect(4, y + 2, 8, 1, "lgrey")
     treat_heart(g, 8, y + 1.5, lift < 0)
     inner = raster(lit(g))

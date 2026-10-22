@@ -3730,8 +3730,8 @@
       "png": "sprites/treat.png",
       "json": "sprites/treat.json",
       "anchor": {
-        "feetY": 15,
-        "opaqueWidth": 20
+        "feetY": 16,
+        "opaqueWidth": 22
       }
     },
     {
@@ -3758,7 +3758,7 @@
       "json": "sprites/treat@75.json",
       "anchor": {
         "feetY": 12,
-        "opaqueWidth": 15
+        "opaqueWidth": 16
       }
     },
     {
@@ -3767,7 +3767,7 @@
       "json": "sprites/treat@88.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
       }
     },
     {
