@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import palette from "../../shared/palette.json";
 import { gameData } from "../data";
+import { helpBodyValues } from "../help/helpBody";
 
 const HOME_PAGE = new URL("../../pages/index.html", import.meta.url);
 const SKY_BACKDROP = new URL("../../public/art/images/backdrop-yonge-street.png", import.meta.url);
@@ -30,9 +31,6 @@ function pageFacts(): [string, string][] {
     (size) => `${count(Object.values(dogs).filter((dog) => dog.size === size).length)} ${size}`,
   );
   const { big, medium, small } = tuning.hearts.maxBySize;
-  const debuffSeconds = [
-    ...new Set(Object.values(debuffs).map((debuff) => tuning.seconds[debuff.seconds])),
-  ];
   const unlocks = Object.values(walkers)
     .flatMap((walker) => (walker.unlock === "finishZone" ? [walker] : []))
     .sort((a, b) => zoneIndex(a.zone) - zoneIndex(b.zone))
@@ -57,9 +55,9 @@ function pageFacts(): [string, string][] {
       `A small dog dodges 1 in ${1 / tuning.probability.smallDodgeChance} bumps`,
     ],
     [
-      "the debuffs and their one duration",
+      "the debuffs and their durations, as Help gives them",
       `leaves the pack ${debuffs.muddy.name}, and a cheap way out can leave it ${debuffs.stinky.name} ` +
-        `or with the ${debuffs.zoomies.name}, each for ${debuffSeconds.join(" or ")} seconds.`,
+        `or with the ${debuffs.zoomies.name}, each for ${helpBodyValues(gameData).debuffSeconds} seconds.`,
     ],
     ["the walkers' unlocks", `${walkers[defaultWalker].name} walks first; ${listed(unlocks)}.`],
   ];
