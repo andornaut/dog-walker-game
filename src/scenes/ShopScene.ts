@@ -746,14 +746,7 @@ export class ShopScene extends Scene {
     const { headingY, rows: spec } = LAYOUT.gear;
     const note = ownedCountNote(gameData, save.owned, "gear");
     this.heading(root, headingY, text.shop.tabs.gear, note);
-    const rows = gearRows(gameData, save.owned);
-    const rects = rowRects(this.frame.rowWidth, spec, rows.length);
-    rows.forEach((row, i) => {
-      const rect = rects[i];
-      if (rect !== undefined && row.purchase.kind === "gear") {
-        this.drawRow(root, save, { rect, row }, purchaseArt(row.purchase));
-      }
-    });
+    this.drawRows(root, save, spec, gearRows(gameData, save.owned));
   }
 
   // The dog slots past the first with how many are owned, then how many dogs are owned and the
@@ -767,13 +760,7 @@ export class ShopScene extends Scene {
       text.shop.slots,
       ownedCountNote(gameData, save.owned, "slots"),
     );
-    const slots = slotRows(gameData, save.owned);
-    rowRects(this.frame.rowWidth, slotSpec, slots.length).forEach((rect, i) => {
-      const row = slots[i];
-      if (row !== undefined) {
-        this.drawRow(root, save, { rect, row }, purchaseArt(row.purchase));
-      }
-    });
+    this.drawRows(root, save, slotSpec, slotRows(gameData, save.owned));
     this.heading(root, dogHeadingY, text.shop.dogs, ownedCountNote(gameData, save.owned, "dogs"));
     const dogs = dogRows(gameData, save.owned);
     if (dogs.length === 0) {
@@ -781,22 +768,27 @@ export class ShopScene extends Scene {
         color: PALETTE.darkBrown,
       });
     }
-    rowRects(this.frame.rowWidth, dogSpec, dogs.length).forEach((rect, i) => {
-      const row = dogs[i];
-      if (row?.purchase.kind === "dog") {
-        this.drawRow(root, save, { rect, row }, purchaseArt(row.purchase));
+    this.drawRows(root, save, dogSpec, dogs);
+  }
+
+  // The rows laid out from spec across the list's width.
+  private drawRows(
+    root: GameObjects.Container,
+    save: SaveDocument,
+    spec: Parameters<typeof rowRects>[1],
+    rows: readonly ShopRow[],
+  ): void {
+    rowRects(this.frame.rowWidth, spec, rows.length).forEach((rect, i) => {
+      const row = rows[i];
+      if (row !== undefined) {
+        this.drawRow(root, save, { rect, row });
       }
     });
   }
 
   // A row: its art in a box, its name and line, and its price plate or Owned at the right,
   // each as SHOP_ROW_VIEWS sets for its look. The framed one wears ui-select.
-  private drawRow(
-    root: GameObjects.Container,
-    save: SaveDocument,
-    placed: PlacedRow,
-    art: string,
-  ): void {
+  private drawRow(root: GameObjects.Container, save: SaveDocument, placed: PlacedRow): void {
     const { rect, row } = placed;
     this.placed.push(placed);
     const look = shopRowLook(save.bankCents, row);
@@ -823,7 +815,10 @@ export class ShopScene extends Scene {
       y: rect.y + Math.floor((rect.height - box.size) / 2),
     };
     fillRect(this.graphics(content), PALETTE[tile.look.box], boxRect);
-    this.addArt(content, art, view.art, { x: boxRect.x + ROW.art, y: boxRect.y + ROW.art });
+    this.addArt(content, purchaseArt(row.purchase), view.art, {
+      x: boxRect.x + ROW.art,
+      y: boxRect.y + ROW.art,
+    });
     if (view.padlock !== null) {
       addLock(this, content, view.padlock, { x: rect.x + lock.dx, y: rect.y + lock.dy });
     }
