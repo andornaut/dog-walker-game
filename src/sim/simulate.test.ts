@@ -5,8 +5,9 @@ import { itemAt } from "../lib/arrays";
 import { packOrder } from "../state/pack";
 import type { PackDogs } from "../state/runState";
 import { defined } from "../testing/defined";
+import { IDEAL_SKILL, simConfig } from "../testing/sim";
 import { type RunResult, type SimConfig, simulateRun } from "./simulate";
-import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
+import { type Skill, SKILL_PRESETS } from "./skills";
 
 const TRIO: PackDogs = ["duchess", "biscuit", "koda"];
 const RISKY: PackDogs = ["zippy", "archie", "snowball"];
@@ -21,16 +22,8 @@ const BLIND: Skill = {
 type Overrides = Partial<Omit<SimConfig, "player">> & { readonly skill?: Skill };
 
 function config(overrides: Overrides = {}): SimConfig {
-  const { skill = SKILL_PRESETS.typical, ...rest } = overrides;
-  return {
-    gear: null,
-    pack: TRIO,
-    player: { kind: "skill", skill },
-    policy: "heartsUnlessLow",
-    route: "straight",
-    walker: "casey",
-    ...rest,
-  };
+  const { pack = TRIO, skill = SKILL_PRESETS.typical, ...rest } = overrides;
+  return simConfig(skill, pack, rest);
 }
 
 function runs(count: number, overrides: Overrides = {}): RunResult[] {

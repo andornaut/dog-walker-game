@@ -37,9 +37,10 @@ import {
 import type { PackDogs } from "../state/runState";
 import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
+import { IDEAL_SKILL, simConfig } from "../testing/sim";
 import { actBot, type BotRoad, moverHazards, moverPrizes, newBot } from "./bot";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
-import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
+import { type Skill, SKILL_PRESETS } from "./skills";
 
 // Zones a quarter as long, with a quarter of the spawns, so the road is as busy as the game's
 // and a run is cheap.
@@ -80,14 +81,7 @@ const SHORT = shortZones(gameData, 0.25);
 const NO_CHASER: PackDogs = ["duchess", "biscuit", "snowball"];
 
 function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHASER): RunResult {
-  return simulateRun(data, seed, {
-    gear: null,
-    pack,
-    player: { kind: "skill", skill },
-    policy: "heartsUnlessLow",
-    route: "straight",
-    walker: "casey",
-  });
+  return simulateRun(data, seed, simConfig(skill, pack));
 }
 
 // Obstacles, minor or not, moving or not, that the pack hit, and that reached it.

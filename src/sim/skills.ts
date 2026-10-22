@@ -37,11 +37,3 @@ export const SKILL_PRESETS: Readonly<Record<SkillPresetId, Skill>> = {
     reactionSeconds: 0.35,
   },
 };
-
-// A bot that sees everything at once, never errs and plans over all it sees.
-export const IDEAL_SKILL: Skill = {
-  errorRate: 0,
-  laneChangeCooldown: 0,
-  lookAheadSeconds: Infinity,
-  reactionSeconds: 0,
-};

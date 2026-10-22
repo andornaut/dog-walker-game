@@ -17,6 +17,7 @@ import { screenRoadGeometry } from "../runner/screenGeometry";
 import { chooseCard, runStreams, startSession, stepSession } from "../runner/session";
 import { startRoad } from "../runner/walk";
 import { newRun, type RunState } from "../state/runState";
+import { simConfig } from "../testing/sim";
 import type { PolicyId } from "./policies";
 import { simulateRun } from "./simulate";
 import { SKILL_PRESETS, type SkillPresetId } from "./skills";
@@ -69,14 +70,11 @@ describe("a simulated run", { timeout: 60_000 }, () => {
     { pack: "zippy,archie,snowball", policy: "alwaysPay", seed: 3, skill: "novice" },
   ])("replays in the game: $skill, $pack, seed $seed", ({ pack, policy, seed, skill }) => {
     const dogs = pack.split(",") as [never];
-    const result = simulateRun(gameData, seed, {
-      gear: null,
-      pack: dogs,
-      player: { kind: "skill", skill: SKILL_PRESETS[skill] },
-      policy,
-      route: "straight",
-      walker: gameData.defaultWalker,
-    });
+    const result = simulateRun(
+      gameData,
+      seed,
+      simConfig(SKILL_PRESETS[skill], dogs, { policy, walker: gameData.defaultWalker }),
+    );
     const log: InputLog = {
       events: result.inputs,
       setup: {
