@@ -188,7 +188,7 @@ def casey_back(lf=0, rf=0, bob=0, arms=0):
 # ---------- the other walkers (back view) ----------
 
 def ada_back(lf=0, rf=0, bob=0, arms=0):
-    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: pink tee, blue shorts.
+    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: yellow tee, blue shorts.
     She stands 4px shorter than the adults: her head and body sit lower and her legs are shorter."""
     g = Grid(32, 48)
     b = bob
@@ -199,9 +199,9 @@ def ada_back(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 45 + f, 3, 1, "pink")
     for x, d in ((7, -arms), (22, arms)):
         g.rect(x, 30 + b + d, 3, 7, "brown")
-        g.rect(x, 30 + b + d, 3, 3, "pink")
-    g.rect(10, 29 + b, 12, 8, "pink")
-    g.rect(19, 29 + b, 3, 8, "mauve")
+        g.rect(x, 30 + b + d, 3, 3, "yellow")
+    g.rect(10, 29 + b, 12, 8, "yellow")
+    g.rect(19, 29 + b, 3, 8, "amber")
     g.rect(10, 36 + b, 12, 4, "sky")
     g.rect(19, 36 + b, 3, 4, "blue")
     g.rect(15, 36 + b, 2, 4, "blue")
@@ -231,8 +231,8 @@ def ada_back(lf=0, rf=0, bob=0, arms=0):
 
 
 def ben_back(lf=0, rf=0, bob=0, arms=0):
-    """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): green tee, navy track pants,
-    sneakers. The tee's green is a hue no road has, so he reads on all six."""
+    """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): lilac tee, navy track pants,
+    sneakers. The tee's lilac is a hue no road has, so he reads on all six."""
     g = Grid(32, 48)
     b = bob
     for x, f in ((11, lf), (17, rf)):
@@ -243,14 +243,14 @@ def ben_back(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 44 + f, 4, 1, "lgrey")
         g.rect(x + 1, 43 + f, 2, 1, "red")
     for x, d in ((5, -arms), (23, arms)):
-        g.rect(x, 22 + b + d, 4, 4, "green")
-        g.rect(x + 3, 22 + b + d, 1, 4, "dgreen")
+        g.rect(x, 22 + b + d, 4, 4, "lilac")
+        g.rect(x + 3, 22 + b + d, 1, 4, "violet")
         g.rect(x, 26 + b + d, 4, 6, "dbrown")
         g.rect(x + 3, 26 + b + d, 1, 6, "plum")
         g.rect(x, 32 + b + d, 4, 3, "dbrown")
-    # the green tee, shaded dgreen down its right side
-    g.rect(9, 21 + b, 14, 13, "green")
-    g.rect(20, 21 + b, 3, 13, "dgreen")
+    # the lilac tee, shaded dgreen down its right side
+    g.rect(9, 21 + b, 14, 13, "lilac")
+    g.rect(20, 21 + b, 3, 13, "violet")
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
     g.rect(13, 19 + b, 6, 3, "dbrown")
@@ -261,12 +261,12 @@ def ben_back(lf=0, rf=0, bob=0, arms=0):
     g.rect(11, 7 + b, 3, 1, "brown")
     g.p(11, 8 + b, "brown")
     # a light rim along the edges facing the light, a dimmer one opposite, so he holds on the dark road
-    return rim(g, dict(navy=("grey", "grey"), dgreen=("green", None), dbrown=("skin2", "brown"),
+    return rim(g, dict(navy=("grey", "grey"), violet=("lilac", None), dbrown=("skin2", "brown"),
                        plum=("skin2", "brown")))
 
 
 def trista_back(lf=0, rf=0, bob=0, arms=0):
-    """Trista, 50, dirty blonde bob to the shoulders, cute: green cardigan, navy skirt, tights, brown flats."""
+    """Trista, 50, dirty blonde bob to the shoulders, cute: green cardigan, brown skirt, tights, brown flats."""
     g = Grid(32, 48)
     b = bob
     for x, f in ((11, lf), (17, rf)):
@@ -281,9 +281,9 @@ def trista_back(lf=0, rf=0, bob=0, arms=0):
     g.rect(9, 21 + b, 1, 10, "green")
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
-    g.rect(9, 31 + b, 14, 7, "navy")
-    g.rect(20, 31 + b, 3, 7, "ink")
-    g.rect(9, 31 + b, 14, 1, "dslate")
+    g.rect(9, 31 + b, 14, 7, "clay")
+    g.rect(20, 31 + b, 3, 7, "bark")
+    g.rect(9, 31 + b, 14, 1, "tan")
     # a canvas tote with an apple on it
     g.rect(25, 24 + b, 5, 1, "brown")
     g.rect(24, 25 + b, 7, 8, "cream")
@@ -494,7 +494,7 @@ def casey_front(wave=0, bob=0):
 
 def ada_front(wave=0, bob=0):
     """Ada facing the camera, 4px shorter than the adults: long black curls framing her face and falling past
-    her shoulders, a pink clip, pink tee, blue shorts."""
+    her shoulders, a pink clip, yellow tee, blue shorts."""
     g = Grid(32, 48)
     b = bob
     for x in (12, 17):
@@ -510,15 +510,15 @@ def ada_front(wave=0, bob=0):
                             (23.4, 28.4, 1.5, 1.5, "ink")):
         g.cel(x, y + b, rx, ry, c)
     g.rect(7, 30 + b, 3, 7, "brown")
-    g.rect(7, 30 + b, 3, 3, "pink")
-    g.rect(10, 29 + b, 12, 8, "pink")
-    g.rect(19, 29 + b, 3, 8, "mauve")
-    g.rect(14, 29 + b, 4, 1, "mauve")
+    g.rect(7, 30 + b, 3, 3, "yellow")
+    g.rect(10, 29 + b, 12, 8, "yellow")
+    g.rect(19, 29 + b, 3, 8, "amber")
+    g.rect(14, 29 + b, 4, 1, "amber")
     g.rect(10, 36 + b, 12, 4, "sky")
     g.rect(19, 36 + b, 3, 4, "blue")
     g.rect(15, 38 + b, 2, 2, "blue")
     g.rect(14, 26 + b, 4, 3, "dbrown")
-    raised_arm(g, 22, 3, 16 + b, 31 + b, wave, ((3, "brown", "dbrown"), (9, "brown", "dbrown"), (0, "pink", "mauve")))
+    raised_arm(g, 22, 3, 16 + b, 31 + b, wave, ((3, "brown", "dbrown"), (9, "brown", "dbrown"), (0, "yellow", "amber")))
     # her face, then the curls over her forehead, lit dslate on the left
     face_disc(g, 16, 20.5 + b, 6.5, 6.5, "brown", "dbrown")
     g.rect(10, 18 + b, 1, 4, "navy")
@@ -535,7 +535,7 @@ def ada_front(wave=0, bob=0):
 
 
 def ben_front(wave=0, bob=0):
-    """Ben facing the camera: bald, the chin-strap beard along his jaw and under his chin, a smile, green tee,
+    """Ben facing the camera: bald, the chin-strap beard along his jaw and under his chin, a smile, lilac tee,
     navy track pants with a grey stripe, white sneakers."""
     g = Grid(32, 48)
     b = bob
@@ -545,18 +545,18 @@ def ben_front(wave=0, bob=0):
         g.rect(x, 43, 4, 2, "white")
         g.rect(x, 44, 4, 1, "lgrey")
         g.rect(x + 1, 43, 2, 1, "red")
-    g.rect(5, 22 + b, 4, 4, "green")
-    g.rect(8, 22 + b, 1, 4, "dgreen")
+    g.rect(5, 22 + b, 4, 4, "lilac")
+    g.rect(8, 22 + b, 1, 4, "violet")
     g.rect(5, 26 + b, 4, 6, "dbrown")
     g.rect(8, 26 + b, 1, 6, "plum")
     g.rect(5, 32 + b, 4, 3, "dbrown")
-    g.rect(9, 21 + b, 14, 13, "green")
-    g.rect(20, 21 + b, 3, 13, "dgreen")
+    g.rect(9, 21 + b, 14, 13, "lilac")
+    g.rect(20, 21 + b, 3, 13, "violet")
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
     g.rect(13, 19 + b, 6, 3, "plum")
-    g.rect(13, 21 + b, 6, 1, "dgreen")
-    raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "dbrown", "plum"), (8, "dbrown", "plum"), (0, "green", "dgreen")))
+    g.rect(13, 21 + b, 6, 1, "violet")
+    raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "dbrown", "plum"), (8, "dbrown", "plum"), (0, "lilac", "violet")))
     g.rect(8, 12 + b, 2, 3, "dbrown")
     g.rect(22, 12 + b, 2, 3, "plum")
     face_disc(g, 16, 12 + b, 7, 9, "dbrown", "plum")
@@ -572,13 +572,13 @@ def ben_front(wave=0, bob=0):
     g.rect(14, 17 + b, 4, 1, "cream")
     g.p(13, 16 + b, "cream")
     g.p(18, 16 + b, "cream")
-    return rim(g, dict(navy=("grey", "grey"), dgreen=("green", None), dbrown=("skin2", "brown"),
+    return rim(g, dict(navy=("grey", "grey"), violet=("lilac", None), dbrown=("skin2", "brown"),
                        plum=("skin2", "brown"), ink=("grey", "slate")))
 
 
 def trista_front(wave=0, bob=0):
     """Trista facing the camera: a dirty blonde bob framing her face with a side-swept fringe, round glasses, a
-    green cardigan open over a white blouse, navy skirt, tights, brown flats, her apple tote on her right
+    green cardigan open over a white blouse, brown skirt, tights, brown flats, her apple tote on her right
     shoulder (screen left)."""
     g = Grid(32, 48)
     b = bob
@@ -600,9 +600,9 @@ def trista_front(wave=0, bob=0):
     g.tri((16, 21 + b), (20, 21 + b), (17.5, 24.5 + b), "white")
     for y in (25, 28):
         g.p(13, y + b, "amber")
-    g.rect(9, 31 + b, 14, 7, "navy")
-    g.rect(20, 31 + b, 3, 7, "ink")
-    g.rect(9, 31 + b, 14, 1, "dslate")
+    g.rect(9, 31 + b, 14, 7, "clay")
+    g.rect(20, 31 + b, 3, 7, "bark")
+    g.rect(9, 31 + b, 14, 1, "tan")
     # the canvas tote hangs off her shoulder by a strap, the apple facing out
     g.rect(7, 21 + b, 1, 5, "brown")
     g.rect(2, 26 + b, 7, 8, "cream")
@@ -650,8 +650,8 @@ WALKER_WAVE_MS = 150
 # colours are cleared, so what overlaps the arm (Trista's tote) stays.
 CHEER_ARMS = {
     "walker-casey": (((5, 9, 22, 35),), ("sky", "cyan", "blue", "skin1")),
-    "walker-ben": (((5, 9, 22, 35),), ("green", "dgreen", "dbrown", "plum")),
-    "walker-ada": (((7, 10, 30, 37),), ("brown", "dbrown", "pink", "mauve")),
+    "walker-ben": (((5, 9, 22, 35),), ("lilac", "violet", "dbrown", "plum")),
+    "walker-ada": (((7, 10, 30, 37),), ("brown", "dbrown", "yellow", "amber")),
     "walker-trista": (((5, 9, 22, 26), (5, 9, 34, 35)), ("dgreen", "forest", "green", "skin1")),
 }
 # One frame each: (crouch in design pixels, the hands' swing out from the shoulders, hop in pixels): crouch,

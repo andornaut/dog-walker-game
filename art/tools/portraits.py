@@ -489,17 +489,17 @@ def casey(g):
 
 def ada(g):
     """11 and round-faced: a big head on small shoulders, long black curls in a few simple rounded locks with
-    a pink clip, caramel skin, big eyes set low, a small smile, pink tee."""
+    a pink clip, caramel skin, big eyes set low, a small smile, yellow tee."""
     # the curls behind her, falling past her shoulders in a few rounded locks
     g.cel(30, 29, 20, 19, "navy", "ink", "dslate")
     g.rect(10, 29, 41, 23, "navy")
     g.rect(45, 29, 6, 23, "ink")
     for x, y, c in ((10, 36, "navy"), (10, 47, "navy"), (51, 40, "ink"), (51, 50, "ink")):
         g.ell(x, y, 2.5, 4, c)
-    bust(g, "pink", "mauve", neck="brown", cx=31, cy=65, rx=21, ry=14, nx=26, nw=7)
-    g.rect(26, 51, 9, 1, "mauve")
-    g.p(25, 50, "mauve")
-    g.p(35, 50, "mauve")
+    bust(g, "yellow", "amber", neck="brown", cx=31, cy=65, rx=21, ry=14, nx=26, nw=7)
+    g.rect(26, 51, 9, 1, "amber")
+    g.p(25, 50, "amber")
+    g.p(35, 50, "amber")
     # the round face, then the fringe in three rounded bumps along the brow
     g.cel(30, 31, 14, 13.5, "brown")
     g.cel(30, 18, 16, 8.5, "navy", "ink", "dslate")
@@ -520,11 +520,11 @@ def ada(g):
 
 def ben(g):
     """Bald, a shine on the crown, the chin-strap beard along his jaw and under his chin with no moustache, the
-    green tee with its dgreen collar."""
-    bust(g, "green", "dgreen", neck="plum")
-    g.rect(22, 46, 15, 1, "dgreen")
-    g.p(21, 45, "dgreen")
-    g.p(37, 45, "dgreen")
+    lilac tee with its violet collar."""
+    bust(g, "lilac", "violet", neck="plum")
+    g.rect(22, 46, 15, 1, "violet")
+    g.p(21, 45, "violet")
+    g.p(37, 45, "violet")
     g.cel(44, 29, 2.5, 4, "dbrown", "plum")
     g.rect(44, 28, 1, 3, "plum")
     g.cel(30, 26, 13.5, 15.5, "dbrown", power=2.3)

@@ -454,7 +454,7 @@ def casey(mood):
 
 
 def ada(mood):
-    """Ada, 11, mixed race, caramel skin, long black curls falling straight down; pink tee."""
+    """Ada, 11, mixed race, caramel skin, long black curls falling straight down; yellow tee."""
     g = face()
     # black hair falling in ringlets past the shoulders, their ends bunched into bumps along the edges
     g.cel(16, 13, 10, 9, "navy", "ink", "dslate")
@@ -467,7 +467,7 @@ def ada(mood):
     for y in (17.5, 24):
         g.cel(7.5, y, 1.5, 2.5, "dslate")
         g.cel(24.5, y, 1.5, 2.5, "navy")
-    base(g, "brown", "brown", "pink", "mauve")
+    base(g, "brown", "brown", "yellow", "amber")
     g.rect(13, 24, 6, 1, "dbrown")
     g.cel(16, 10, 8.5, 4, "navy", "ink", "dslate")
     g.cel(11.5, 8.5, 2.5, 1.5, "dslate")
@@ -482,12 +482,12 @@ def ada(mood):
 
 
 def ben(mood):
-    """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; green tee."""
+    """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; lilac tee."""
     g = face()
-    # the green tee, shaded dgreen on the right, with a dgreen collar, as on his road sprite
-    g.rect(8, 27, 16, 1, "green")
-    g.rect(6, 28, 20, 3, "green")
-    g.rect(21, 28, 5, 3, "dgreen")
+    # the lilac tee, shaded violet on the right, with a violet collar, as on his road sprite
+    g.rect(8, 27, 16, 1, "lilac")
+    g.rect(6, 28, 20, 3, "lilac")
+    g.rect(21, 28, 5, 3, "violet")
     g.rect(13, 24, 6, 4, "plum")
     g.cel(8.5, 16, 1.2, 1.8, "dbrown", "plum")
     g.cel(23.5, 16, 1.2, 1.8, "dbrown", "plum")
@@ -498,9 +498,9 @@ def ben(mood):
     g.rect(22, 17, 1, 5, "ink")
     g.ell(16, 22.5, 6, 2.5, "ink")
     g.rect(13, 20, 6, 2, "dbrown")
-    g.rect(12, 26, 8, 1, "dgreen")
-    g.rect(11, 27, 1, 1, "dgreen")
-    g.rect(20, 27, 1, 1, "dgreen")
+    g.rect(12, 26, 8, 1, "violet")
+    g.rect(11, 27, 1, 1, "violet")
+    g.rect(20, 27, 1, 1, "violet")
     expression(g, mood, feat="cream", blush="rust", brow="ink", whites=True, nose="plum")
     return g
 
