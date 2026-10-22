@@ -21,7 +21,7 @@ export const MINOR_OBSTACLES = {
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   bunny: {
-    movement: { kind: "hop", most: 2, shy: true, times: { max: 2, min: 1 } },
+    movement: { kind: "hop", most: 2, shy: true, times: { max: 3, min: 2 } },
     name: "Bunny",
     shape: { lanes: 1, rows: 1 },
   },
@@ -37,7 +37,7 @@ export const MINOR_OBSTACLES = {
   },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
   coyote: {
-    movement: { kind: "approach", steps: { max: 3, min: 2 } },
+    movement: { kind: "approach", steps: { max: 4, min: 3 } },
     name: "Coyote",
     shape: { lanes: 1, rows: 1 },
   },
@@ -52,7 +52,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   ducklings: {
-    movement: { kind: "hop", most: 2, shy: true, sideways: true, times: { max: 2, min: 1 } },
+    movement: { kind: "hop", most: 2, shy: true, sideways: true, times: { max: 3, min: 2 } },
     name: "Ducklings",
     shape: { lanes: 1, rows: 1 },
   },
@@ -89,7 +89,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   mailCarrier: {
-    movement: { kind: "step", steps: { max: 3, min: 2 } },
+    movement: { kind: "step", steps: { max: 4, min: 3 } },
     name: "Mail carrier",
     shape: { lanes: 1, rows: 1 },
   },
@@ -100,7 +100,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   raccoon: {
-    movement: { kind: "hop", most: 2, times: { max: 2, min: 1 } },
+    movement: { kind: "hop", most: 2, times: { max: 3, min: 2 } },
     name: "Raccoon",
     shape: { lanes: 1, rows: 1 },
   },

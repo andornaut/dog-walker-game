@@ -14,9 +14,9 @@ export const TUNING = {
     luckyEncountersPerZone: 1,
     // At most this many movers are on screen at once, of them at most maxDartMovers darting
     // and maxSlowVehicles in-lane slower than the road.
-    maxDartMovers: 5,
-    maxMovers: 8,
-    maxSlowVehicles: 3,
+    maxDartMovers: 6,
+    maxMovers: 10,
+    maxSlowVehicles: 4,
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 48,
     minorObstaclesGainPerZone: 0,
