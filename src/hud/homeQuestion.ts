@@ -15,7 +15,7 @@ export interface HomeNoteLine {
 }
 
 // What heading home now gives up: the current zone's pay for the dogs still walking, and the
-// Full pack bonus while no owner has fired you; at a fork, with no zone picked yet, the bonus
+// Pack bonus while no owner has fired you; at a fork, with no zone picked yet, the bonus
 // alone. Then the zones left after this one, when any are.
 export function homeQuestionNote(
   data: Pick<GameData, "runText" | "tuning" | "world">,
