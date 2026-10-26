@@ -90,22 +90,15 @@ export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
 }
 
 // Every slot in order, numbered from 1, the starting ones included, each owned or for sale on
-// its own, bought in any order. A slot's line says how many dogs the pack walks with it: an
-// owned slot counts its place among the slots owned, and one for sale the pack buying it makes.
+// its own, bought in any order. Every slot's line is the same: it holds one dog.
 export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   const text = data.homeText;
   return data.dogSlots.map((_, i) => {
     const number = i + 1;
     const purchase: Purchase = { kind: "dogSlot", slot: number };
-    const walks = owned.dogSlots.includes(number)
-      ? owned.dogSlots.filter((slot) => slot <= number).length
-      : owned.dogSlots.length + 1;
     return {
       id: `slot:${number}`,
-      line:
-        walks === 1
-          ? text.shop.slotLineOne
-          : fillLine(HOME_TEXT_FIELDS.shop, text.shop, "slotLine", { count: String(walks) }),
+      line: text.shop.slotLine,
       name: homeLine(text, "dogSlotName", { slot: String(number) }),
       price: purchasePrice(data, owned, purchase),
       purchase,

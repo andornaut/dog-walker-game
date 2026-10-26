@@ -102,15 +102,16 @@ describe("shopRowLook", () => {
 });
 
 describe("slotRows", () => {
-  // Every slot listed in order, the owned ones owned whichever they are, each one for sale at
-  // its own price and opening the shop on its own row, and the heading's count the slots owned
-  // out of all of them.
+  // Every slot listed in order with the one slot line, the owned ones owned whichever they are,
+  // each one for sale at its own price and opening the shop on its own row, and the heading's
+  // count the slots owned out of all of them.
   it.each(slotSets)("lists every slot, owned ones marked, with slots %s owned", (_, dogSlots) => {
     const have = { ...owned, dogSlots };
     const rows = slotRows(data, have);
     expect(rows.map(({ id }) => id)).toEqual(allSlots.map((slot) => `slot:${slot}`));
     rows.forEach((row, i) => {
       const slot = allSlots[i] ?? 0;
+      expect(row.line).toBe(data.homeText.shop.slotLine);
       expect(row.purchase).toEqual({ kind: "dogSlot", slot });
       expect(shopRowId(row.purchase)).toBe(row.id);
       expect(row.price).toBe(
@@ -125,31 +126,6 @@ describe("slotRows", () => {
         owned: String(dogSlots.length),
       }),
     );
-  });
-
-  // An owned slot's line counts its place among the slots owned; one for sale, the pack buying
-  // it makes.
-  it.each<[number[], string[]]>([
-    [[1], ["walks one", "walks 2", "walks 2"]],
-    [
-      [1, 2],
-      ["walks one", "walks 2", "walks 3"],
-    ],
-    [
-      [1, 3],
-      ["walks one", "walks 3", "walks 2"],
-    ],
-    [
-      [1, 2, 3],
-      ["walks one", "walks 2", "walks 3"],
-    ],
-  ])("with %j owned, gives the slots the lines %j", (dogSlots, lines) => {
-    const text = {
-      ...data.homeText,
-      shop: { ...data.homeText.shop, slotLine: "walks {count}", slotLineOne: "walks one" },
-    };
-    const rows = slotRows({ ...data, homeText: text }, { ...owned, dogSlots });
-    expect(rows.map(({ line }) => line)).toEqual(lines);
   });
 
   it("puts the dog heading under the last slot row", () => {
