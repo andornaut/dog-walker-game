@@ -622,8 +622,8 @@ export interface HomeText {
     readonly between: string;
   };
   // The Pet shop page: its title, its tabs, the headings over its lists and their notes, a
-  // dog slot row's line, the line of a slot that needs the one before it, and the word on an
-  // owned row.
+  // dog slot row's line (slotLineOne for the slot that walks 1 dog), the line of a slot that
+  // needs the one before it, and the word on an owned row.
   readonly shop: {
     // The confirm every purchase asks first: its Buy and Cancel buttons, the {amount} the bank
     // would keep, and its title with the item's {name}.
@@ -637,6 +637,7 @@ export interface HomeText {
     readonly ownedCount: string;
     readonly slotFirst: string;
     readonly slotLine: string;
+    readonly slotLineOne: string;
     readonly slots: string;
     readonly tabs: { readonly dogs: string; readonly gear: string };
     readonly title: string;

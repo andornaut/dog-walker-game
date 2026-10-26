@@ -754,8 +754,8 @@ export class ShopScene extends Scene {
     this.drawRows(root, save, spec, gearRows(gameData, save.owned));
   }
 
-  // The dog slots past the first with how many are owned, then how many dogs are owned and
-  // every dog, owned ones marked as on the gear tab.
+  // How many dog slots are owned and every slot, then how many dogs are owned and every dog,
+  // owned ones marked as on the gear tab.
   private drawDogs(root: GameObjects.Container, save: SaveDocument): void {
     const text = gameData.homeText;
     const { dogHeadingY, dogRows: dogSpec, slotHeadingY, slotRows: slotSpec } = LAYOUT.dogs;

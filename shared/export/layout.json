@@ -2171,11 +2171,11 @@
         "y": 52
       },
       "dogs": {
-        "dogHeadingY": 241,
+        "dogHeadingY": 289,
         "dogRows": {
           "height": 42,
           "pitch": 48,
-          "y": 257
+          "y": 305
         },
         "slotHeadingY": 123,
         "slotRows": {

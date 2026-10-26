@@ -6,7 +6,7 @@ import { scrollMax } from "../input/listScroll";
 import { fillNames } from "../lib/lines";
 import { sizeHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
-import { unlockPrice } from "../rules/shop";
+import { startingDogSlots, unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { fitInFont, fontFileMetrics, inkWidth, placedInk } from "../testing/fontInk";
@@ -76,8 +76,8 @@ describe("shopRowLook", () => {
   it("shows an owned row owned in color, and a slot past the next blocked in grey", () => {
     const rich = cents(Number.MAX_SAFE_INTEGER);
     const twoSlots = { ...owned, dogSlots: 2 };
-    const [ownedSlot] = slotRows(data, twoSlots);
-    const [, blockedSlot] = slotRows(data, owned);
+    const ownedSlot = slotRows(data, twoSlots)[1];
+    const blockedSlot = slotRows(data, owned)[2];
     const shown = [
       ownedSlot && shopRowLook(data, twoSlots, rich, ownedSlot),
       blockedSlot && shopRowLook(data, owned, rich, blockedSlot),
@@ -99,18 +99,66 @@ describe("slotRows", () => {
 
   it("sells the next slot and blocks the one after it", () => {
     expect(view(1)).toEqual([
+      { blocked: false, id: "slot:1", owned: true },
       { blocked: false, id: "slot:2", owned: false },
       { blocked: true, id: "slot:3", owned: false },
     ]);
     expect(view(2)).toEqual([
+      { blocked: false, id: "slot:1", owned: true },
       { blocked: false, id: "slot:2", owned: true },
       { blocked: false, id: "slot:3", owned: false },
     ]);
   });
 
+  // From the starting slots to every slot owned: every slot listed in order, the starting and
+  // bought ones owned with the owned look, the first for sale the one a slot purchase opens
+  // the shop on, and the heading's count the list's owned rows out of its rows.
+  const ownedCounts = Array.from(
+    { length: data.dogSlots.length - startingDogSlots(data) + 1 },
+    (_, bought) => startingDogSlots(data) + bought,
+  );
+  it.each(ownedCounts)("with %i slots owned, lists every slot, owned ones marked", (dogSlots) => {
+    const have = { ...owned, dogSlots };
+    const rows = slotRows(data, have);
+    const ownedRows = rows.filter(({ price }) => price === null);
+    const firstForSale = rows.find(({ blocked, price }) => blocked === null && price !== null);
+    expect(rows.map(({ id }) => id)).toEqual(data.dogSlots.map((_, i) => `slot:${i + 1}`));
+    expect(ownedRows.map(({ id }) => id)).toEqual(rows.slice(0, dogSlots).map(({ id }) => id));
+    for (const row of ownedRows) {
+      expect(shopRowLook(data, have, cents(0), row)).toBe("owned");
+    }
+    expect(firstForSale?.id ?? null).toBe(
+      dogSlots < data.dogSlots.length ? shopRowId(have, { kind: "dogSlot" }) : null,
+    );
+    expect(ownedCountNote(data, have, "slots")).toBe(
+      fillNames(data.homeText.shop.ownedCount, {
+        max: String(rows.length),
+        owned: String(ownedRows.length),
+      }),
+    );
+  });
+
+  it.each<[number, string]>([
+    [1, "walks one"],
+    [2, "walks 2"],
+  ])("gives slot %i the line %s", (number, line) => {
+    const text = {
+      ...data.homeText,
+      shop: { ...data.homeText.shop, slotLine: "walks {count}", slotLineOne: "walks one" },
+    };
+    const rows = slotRows({ ...data, homeText: text }, { ...owned, dogSlots: number });
+    expect(rows[number - 1]?.line).toBe(line);
+  });
+
+  it("puts the dog heading under the last slot row", () => {
+    const { dogHeadingY, slotRows: spec } = SHOP_LAYOUT.dogs;
+    const last = rowRects(SHOP_LAYOUT.row.width, spec, slotRows(data, owned).length).at(-1);
+    expect(last && last.y + last.height).toBeLessThan(dogHeadingY);
+  });
+
   it("says which slot a blocked one needs first", () => {
     const text = { ...data.homeText, shop: { ...data.homeText.shop, slotFirst: "after {slot}" } };
-    const [, third] = slotRows({ ...data, homeText: text }, owned);
+    const third = slotRows({ ...data, homeText: text }, owned)[2];
     expect(third?.blocked).toBe("after 2");
   });
 });

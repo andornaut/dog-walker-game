@@ -1,7 +1,7 @@
 import type { DogId, GameData } from "../data/types";
 import { fillLine } from "../lib/lines";
 import { capitalize, gearShort } from "../rules/effectText";
-import { startingDogSlots, unlockPrice } from "../rules/shop";
+import { unlockPrice } from "../rules/shop";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import type { ItemLook } from "../ui/interaction";
@@ -98,22 +98,26 @@ export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// Each slot past the starting ones, numbered from 1: owned, the next one for sale, or one
-// that needs the slot before it bought first.
+// Every slot in order, numbered from 1, the starting ones included: owned, the next one for
+// sale, or one that needs the slot before it bought first. A slot's line says how many dogs
+// it walks.
 export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   const text = data.homeText;
   const fields = HOME_TEXT_FIELDS.shop;
-  const starting = startingDogSlots(data);
-  return data.dogSlots.slice(starting).map((slot, i) => {
-    const number = starting + i + 1;
+  return data.dogSlots.map((slot, i) => {
+    const number = i + 1;
     const blocked =
       number > owned.dogSlots + 1
         ? fillLine(fields, text.shop, "slotFirst", { slot: String(number - 1) })
         : null;
+    const walks =
+      number === 1
+        ? text.shop.slotLineOne
+        : fillLine(fields, text.shop, "slotLine", { count: String(number) });
     return {
       blocked,
       id: `slot:${number}`,
-      line: blocked ?? fillLine(fields, text.shop, "slotLine", { count: String(number) }),
+      line: blocked ?? walks,
       name: homeLine(text, "dogSlotName", { slot: String(number) }),
       price: number <= owned.dogSlots ? null : unlockPrice(data.tuning, slot),
       purchase: { kind: "dogSlot" },

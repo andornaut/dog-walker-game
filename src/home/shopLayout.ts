@@ -1,3 +1,4 @@
+import { DOG_SLOTS } from "../data/dogSlots";
 import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
@@ -19,17 +20,25 @@ const ROW_SCROLL_WIDTH = 314;
 // 2px short of the scrollbar's track, or with no scrollbar to the card's frame.
 const LIST = { height: 431, width: 322, x: PANEL.x + 8, y: 117 };
 const LIST_UNSCROLLED = { ...LIST, width: PANEL.width - 16 };
+// The Dogs tab's lists: each heading HEADING_TO_ROWS above its first row, and the dog heading
+// ROWS_TO_HEADING under the last slot row, so the dogs follow however many slots there are.
+const HEADING_TO_ROWS = 16;
+const ROWS_TO_HEADING = 12;
+const SLOT_HEADING_Y = 123;
+const SLOT_ROWS = { height: 42, pitch: 48, y: SLOT_HEADING_Y + HEADING_TO_ROWS };
+const DOG_HEADING_Y =
+  SLOT_ROWS.y + (DOG_SLOTS.length - 1) * SLOT_ROWS.pitch + SLOT_ROWS.height + ROWS_TO_HEADING;
 
 export const SHOP_LAYOUT = {
   // The detail card's title band, the title from titleX.
   band: { ...HOME_LAYOUT.card.band, titleX: 16 },
   close: closeControl(PANEL),
-  // The Dogs tab: the slot heading and rows, then the dog heading and rows.
+  // The Dogs tab: the slot heading and a row for every slot, then the dog heading and rows.
   dogs: {
-    dogHeadingY: 241,
-    dogRows: { height: 42, pitch: 48, y: 257 },
-    slotHeadingY: 123,
-    slotRows: { height: 42, pitch: 48, y: 139 },
+    dogHeadingY: DOG_HEADING_Y,
+    dogRows: { ...SLOT_ROWS, y: DOG_HEADING_Y + HEADING_TO_ROWS },
+    slotHeadingY: SLOT_HEADING_Y,
+    slotRows: SLOT_ROWS,
   },
   // The Gear tab: its heading and rows.
   gear: {
