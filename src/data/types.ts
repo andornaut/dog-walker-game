@@ -684,7 +684,7 @@ export interface RunText {
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeDurationShort: { readonly [D in UpgradeDuration]: string };
   };
-  // What a change's floating label names a base cause by (the Pack bonus, a bump, a
+  // What a change's floating label names a base cause by (the Full walk bonus, a bump, a
   // zone's pay, a tip or a treat), and atMax for a meter held at its max.
   readonly causes: {
     readonly atMax: string;
@@ -938,7 +938,7 @@ export type Threshold = number | "all";
 // finished (all: every zone of a walk), zones it finished without a bump, dogs it set out
 // with, dollars it banked, times it got the debuff, distinct lucky finds it found (all: every
 // lucky find in the data), a finished walk with a walking owner on their last heart, and a
-// finished walk that paid the Pack bonus for a pack of at least packSize. Profile
+// finished walk that paid the Full walk bonus for a pack of at least packSize. Profile
 // conditions are judged on the save after a run or a purchase: dogs, gear, dog slots and
 // walkers owned (all: every one in the data), finished walks with no owner firing you, times
 // fired, distinct owners who fired you (all: every dog's owner), distinct dogs that finished a

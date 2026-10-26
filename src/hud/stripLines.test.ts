@@ -92,7 +92,7 @@ describe("the strip's other lines", () => {
         fillNames(strip.luckyWallet, { amount: "$10" }),
       ],
       [
-        "the Pack bonus",
+        "the Full walk bonus",
         fullPackLine(gameData, [
           {
             amount: cents(3000),

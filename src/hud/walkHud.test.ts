@@ -179,7 +179,7 @@ describe("cashScale", () => {
 
   // The most cash a walk could plausibly reach, from the tuning: the purse and the Fanny pack,
   // a full pack's pay in every zone, every tip at Big tipper's value,
-  // every lucky find a kept wallet, and the Pack bonus.
+  // every lucky find a kept wallet, and the Full walk bonus.
   const money = (key: Parameters<typeof read<"money">>[2]) => read(gameData.tuning, "money", key);
   const count = (key: Parameters<typeof read<"counts">>[2]) => read(gameData.tuning, "counts", key);
   const zones = walkLength(gameData);

@@ -111,7 +111,7 @@ export interface BadgeCounters {
   readonly cleanZoneShare: number;
   // Each debuff: the mean, and the 90th percentile, of the times one walk got it.
   readonly debuffsGot: Readonly<Record<DebuffId, { readonly mean: number; readonly p90: number }>>;
-  // A walk finished with every dog of a full pack (MAX_RUN_DOGS) home: the Pack bonus. null for
+  // A walk finished with every dog of a full pack (MAX_RUN_DOGS) home: the Full walk bonus. null for
   // a smaller pack, which never earns it.
   readonly fullPackBonusShare: number | null;
   // A walk finished with a walking owner on their last heart.
