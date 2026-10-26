@@ -20,7 +20,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, to_image  # noqa: E402
+from pixel import Grid, bitmap, to_image  # noqa: E402
 
 
 # ---------- gear ----------
@@ -59,11 +59,26 @@ def hall_pass(g):
 
 
 def running_shoes(g):
-    g.ell(16, 20, 12, 5, "sky", "blue", "cyan")
-    g.rect(5, 23, 23, 3, "white")
-    g.rect(5, 25, 23, 1, "lgrey")
-    g.rect(10, 15, 8, 2, "white")
-    g.rect(21, 18, 6, 2, "orange")
+    """A low running shoe side on, the toe to the left: a sky upper lit cyan along its top, three white
+    laces, a navy collar, an orange stripe and heel tab, and a white sole with a toe spring on a lugged
+    lgrey outsole."""
+    bitmap(g, 2, 10, [
+        "......................oo...",
+        "...............ccccccccoo..",
+        "..............cwwnnnnnnsoo.",
+        ".............cssbnnnnnnsss.",
+        "...........ccwwssssssssssb.",
+        ".........ccsssbsssssoooossb",
+        ".......ccswwsssssoooosssssb",
+        ".....ccssssssooooossssssssb",
+        "...ccsssssooooosssssssssssb",
+        ".cccsssssssssssssssssssssbb",
+        ".sbbbbbbbbbbbbbbbbbbbbbbbbb",
+        ".wwwwwwwwwwwwwwwwwwwwwwwwww",
+        "..wwwwwwwwwwwwwwwwwwwwwwwww",
+        "...lglglglglglglglglglglgl.",
+    ], {"b": "blue", "c": "cyan", "g": "grey", "l": "lgrey", "n": "navy", "o": "orange", "s": "sky",
+        "w": "white"})
 
 
 def lucky_collar(g):

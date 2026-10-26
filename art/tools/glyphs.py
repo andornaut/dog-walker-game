@@ -503,13 +503,16 @@ def gear_hall_pass():
     return g
 
 
+SHOE_COLS = {"b": "blue", "c": "cyan", "l": "lgrey", "g": "grey", "n": "navy", "o": "orange", "s": "sky", "w": "white"}
+SHOE_16 = ["..........oo..", "......cccnnno.", ".....cwwnnnss.", "...ccwwssssssb", "..csssssoooosb",
+           ".csooooossssbb", "sbbbbbbbbbbbbb", "wwwwwwwwwwwwww", ".llllllllllll."]
+
+
 def gear_running_shoes():
+    """A low running shoe side on, the toe to the left: a sky upper lit cyan along its top, white laces,
+    a navy collar, an orange stripe and heel tab, and a white sole on an lgrey outsole."""
     g = Grid(16, 16)
-    g.ell(8, 9.5, 7, 4, "sky", None, "cyan")
-    g.rect(1, 11, 14, 2, "white")
-    g.rect(1, 13, 14, 1, "lgrey")
-    g.rect(4, 6, 5, 1, "white")
-    g.rect(10, 8, 4, 2, "orange")
+    bitmap(g, 1, 4, SHOE_16, SHOE_COLS)
     return g
 
 
@@ -567,23 +570,24 @@ def big_tipper20():
 
 
 def gear_running_shoes20():
-    """The running shoe side on, the toe to the left: a sky upper lit cyan along its top, white laces up
-    the instep, a navy collar, an orange heel tab and a white sole on an lgrey tread."""
+    """The running shoe of gear_running_shoes with room for a second lace, a toe spring and a lugged
+    outsole."""
     g = Grid(20, 20)
-    bitmap(g, 0, 4, [
-        "............ccccc...",
-        "..........ccsnnnns..",
-        "........ccssssssooo.",
-        "......ccswsswsssoo..",
-        "....ccswsswssssooo..",
-        "..ccsssssssssssss...",
-        ".csssssssssssssssss.",
-        ".sssssssssssssssssb.",
-        ".bbbbbbbbbbbbbbbbbb.",
-        ".wwwwwwwwwwwwwwwwww.",
-        ".wwwwwwwwwwwwwwwwww.",
-        "..llllllllllllllll..",
-    ], {"c": "cyan", "s": "sky", "n": "navy", "w": "white", "o": "orange", "b": "blue", "l": "lgrey"})
+    bitmap(g, 1, 4, [
+        "............oo....",
+        "........cccccoo...",
+        ".......cwwnnnnso..",
+        "......cssbnnnnsss.",
+        "....ccwwssssssssb.",
+        "...csssssssooossb.",
+        "..csssssoooosssssb",
+        ".csssooosssssssssb",
+        "cssssssssssssssbbb",
+        "sbbbbbbbbbbbbbbbbb",
+        "wwwwwwwwwwwwwwwwww",
+        ".wwwwwwwwwwwwwwwww",
+        "..lglglglglglglgl.",
+    ], SHOE_COLS)
     return g
 
 
