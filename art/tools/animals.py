@@ -317,10 +317,16 @@ def rabbit(twitch=0, bound=None):
         g.rect(x - 0.5, hy - 5 - ear - up, 1, 6, "pink")
     g.cel(hx, hy + 4.5, 4.5, 1.6, "lgrey")
     g.cel(hx, hy, 5.5, 4.5, "white", "lgrey")
+    # the eyes in drawn pixels, about 2 units square however the head's row falls, so they keep one size
+    # through the bound (3px at full size), each with a pink blush under its outer edge; on white fur a
+    # glint would only notch the eye, so they stay solid
+    px, s = raster(g), scale_of(g)
+    n = max(1, math.ceil(2 * s - 0.25))
+    top = math.floor(hy * s + 0.5 - n / 2)
     for x in (hx - 4, hx + 2):
-        g.rect(x, hy - 1, 2, 2, "ink")
-        g.p(x + (0 if x < hx else 1), hy - 1, "white")
-        g.p(x + (0 if x < hx else 1), hy + 1.5, "pink")
+        left = math.floor((x + 1) * s + 0.5 - n / 2)
+        px.rect(left, top, n, n, "ink")
+        px.p(left if x < hx else left + n - 1, top + n, "pink")
     g.p(hx - 0.5, hy + 1.5 - t, "pink")
     g.p(hx - 1.5, hy + 2.5, "lgrey")
     g.p(hx + 0.5, hy + 2.5, "lgrey")
