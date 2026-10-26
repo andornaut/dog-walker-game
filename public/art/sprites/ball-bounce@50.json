@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 18 },
     "sourceSize": { "w": 12, "h": 18 },
-    "duration": 70
+    "duration": 400
    },
    "ball-bounce@50 1.aseprite": {
     "frame": { "x": 12, "y": 0, "w": 12, "h": 18 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 18 },
     "sourceSize": { "w": 12, "h": 18 },
-    "duration": 70
+    "duration": 400
    },
    "ball-bounce@50 2.aseprite": {
     "frame": { "x": 24, "y": 0, "w": 12, "h": 18 },
@@ -46,6 +46,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 18 },
     "sourceSize": { "w": 12, "h": 18 },
     "duration": 70
+   },
+   "ball-bounce@50 6.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 12, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 18 },
+    "sourceSize": { "w": 12, "h": 18 },
+    "duration": 70
+   },
+   "ball-bounce@50 7.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 12, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 18 },
+    "sourceSize": { "w": 12, "h": 18 },
+    "duration": 70
    }
  },
  "meta": {
@@ -53,10 +69,11 @@
   "version": "1.2.30-x64",
   "image": "ball-bounce@50.png",
   "format": "RGBA8888",
-  "size": { "w": 72, "h": 18 },
+  "size": { "w": 96, "h": 18 },
   "scale": "1",
   "frameTags": [
-   { "name": "bounce", "from": 0, "to": 5, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "bounce", "from": 2, "to": 7, "direction": "forward" }
   ]
  }
 }

@@ -2,13 +2,16 @@
 """Draw the moving hazards: things that cross the road or come down it, and the
 warning cue shown at the lane edge about a second before one enters.
 
-squirrel-dash       48x48   Toronto's black squirrel, side view facing right, run (4 frames, 80ms): a
-                            bounding gallop, tail streaming
-loose-dog           48x48   the corgi from other-dog in side view facing right, no owner; run (4 frames,
+squirrel-dash       48x48   Toronto's black squirrel, side view facing right; idle (2 frames, 400ms):
+                            crouched on all four paws at the road's edge, the tail plume flicking; run
+                            (4 frames, 80ms): a bounding gallop, tail streaming
+loose-dog           48x48   the corgi from other-dog in side view facing right, no owner; idle (2 frames,
+                            400ms): standing square, a breath, the leash drifting; run (4 frames,
                             100ms): a gallop, gathered, reaching, airborne and landing, the broken leash
                             trailing up off the back, frayed, a 1px wave travelling down it
-ball-bounce         24x36   a ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
-                            contact, with its own ground shadow (the game draws none)
+ball-bounce         24x36   a ball bouncing across lanes, with its own ground shadow (the game draws
+                            none); idle (2 frames, 400ms): resting round on the ground, rocking 1px;
+                            bounce (6 frames, 70ms), squashed on contact
 cyclist             48x72   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
                             legs and a 1px sway
 coyote              48x48   three-quarter front, angled right, stalking the pack: the back sloping from
@@ -70,6 +73,8 @@ SQUIRREL_RUN = [
     dict(dy=-2, st=1, front=(26, 24), hind=(3, 22), tail=(-1, 2)),     # flight, stretched out
     dict(dy=-1, st=0, front=(23, 26), hind=(9, 23), tail=(0, 1)),      # front paws land, hind swing in
 ]
+# Waiting at the road's edge: crouched with all four paws under, the plume flicking forward and back.
+SQUIRREL_IDLE = [dict(SQUIRREL_RUN[0], st=0), dict(SQUIRREL_RUN[0], st=0, tail=(-1, 1))]
 
 
 def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Grid):
@@ -127,6 +132,9 @@ CORGI_RUN = [
     dict(bob=-2, front=(25, 23), hind=(1, 24), leash=(0, -1, 0)),    # airborne, stretched out
     dict(bob=-1, front=(20, 27), hind=(6, 25), leash=(-1, 0, 1)),    # front paws land, hind swing in
 ]
+# Waiting at the road's edge: standing square, a breath lifting the body, the leash drifting.
+CORGI_IDLE = [dict(bob=0, front=(18, 27), hind=(8, 27), leash=(0, 1, 0)),
+              dict(bob=-1, front=(18, 27), hind=(8, 27), leash=(1, 0, -1))]
 
 
 def limb(g, x0, y0, x1, y1, w, c):
@@ -219,21 +227,23 @@ def ball_steps():
 BALL = ball_steps()
 
 
-def ball_bounce(f, s=1):
+def ball_bounce(f, s=1, rest=False, rock=0):
     """Frame f of the bounce at scale s: squashed on contact (f == 0), stretched on the frames either side
-    of it, round at the top. It is white with two red stripes rolling across, so it reads on the dslate
-    road as well as the light ones."""
+    of it, round at the top; rest draws it round on the ground, as frame 0 otherwise, its stripes rolled
+    rock pixels. It is white with two red stripes rolling across, so it reads on the dslate road as well as
+    the light ones."""
     q = BALL[s]
     w, h = q["size"]
     up = q["heights"][f]
-    rx, ry = q["squash"] if f == 0 else q["stretch"] if up < max(q["heights"]) - 2 else q["round"]
+    rx, ry = (q["round"] if rest else q["squash"] if f == 0
+              else q["stretch"] if up < max(q["heights"]) - 2 else q["round"])
     g = edged(Grid(w, h))
     cx, cy = w / 2, q["ground"] - up - ry
     g.ell(cx, cy, rx, ry, "white", "lgrey")
     sw, gap, step = q["stripes"]
     left = round(cx - rx)
     for x in range(left - 2 * gap, w):
-        if (x - left - f * step) % gap < sw:
+        if (x - left - f * step - rock) % gap < sw:
             for y in range(h):
                 if g.px[y][x]:
                     g.p(x, y, "dred" if g.px[y][x] == K["lgrey"] else "red")
@@ -499,11 +509,12 @@ CORGI_OFFSETS = ("bob", "leash")
 def steps(suffix, s):
     """Yield (key + suffix, tags) for the road hazards at depth step s; depths.py draws the steps between
     SCALES with this too."""
-    yield f"squirrel-dash{suffix}", [("run", [squirrel_dash(**small(s, q, SQUIRREL_OFFSETS)).outlined()
-                                              for q in SQUIRREL_RUN], 80)]
-    yield f"loose-dog{suffix}", [("run", [corgi_side(**small(s, q, CORGI_OFFSETS)).outlined() for q in CORGI_RUN],
-                                  100)]
-    yield f"ball-bounce{suffix}", [("bounce", [ball_bounce(f, s) for f in range(6)], 70)]
+    yield f"squirrel-dash{suffix}", [(tag, [squirrel_dash(**small(s, q, SQUIRREL_OFFSETS)).outlined() for q in poses],
+                                       ms) for tag, poses, ms in (("idle", SQUIRREL_IDLE, 400), ("run", SQUIRREL_RUN, 80))]
+    yield f"loose-dog{suffix}", [(tag, [corgi_side(**small(s, q, CORGI_OFFSETS)).outlined() for q in poses], ms)
+                                 for tag, poses, ms in (("idle", CORGI_IDLE, 400), ("run", CORGI_RUN, 100))]
+    yield f"ball-bounce{suffix}", [("idle", [ball_bounce(0, s, True, r) for r in (0, 1)], 400),
+                                   ("bounce", [ball_bounce(f, s) for f in range(6)], 70)]
     yield f"cyclist{suffix}", [("ride", [cyclist_at(s, **q).outlined() for q in CYCLIST_RIDE], 90)]
     yield f"coyote{suffix}", [(tag, [coyote(**small(s, q, COYOTE_OFFSETS)).outlined() for q in poses], ms)
                               for tag, poses, ms in (("idle", COYOTE_IDLE, 400), ("walk", COYOTE_WALK, 120),

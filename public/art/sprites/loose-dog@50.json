@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
-    "duration": 100
+    "duration": 400
    },
    "loose-dog@50 1.aseprite": {
     "frame": { "x": 24, "y": 0, "w": 24, "h": 24 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
-    "duration": 100
+    "duration": 400
    },
    "loose-dog@50 2.aseprite": {
     "frame": { "x": 48, "y": 0, "w": 24, "h": 24 },
@@ -30,6 +30,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
     "duration": 100
+   },
+   "loose-dog@50 4.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 100
+   },
+   "loose-dog@50 5.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 100
    }
  },
  "meta": {
@@ -37,10 +53,11 @@
   "version": "1.2.30-x64",
   "image": "loose-dog@50.png",
   "format": "RGBA8888",
-  "size": { "w": 96, "h": 24 },
+  "size": { "w": 144, "h": 24 },
   "scale": "1",
   "frameTags": [
-   { "name": "run", "from": 0, "to": 3, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "run", "from": 2, "to": 5, "direction": "forward" }
   ]
  }
 }

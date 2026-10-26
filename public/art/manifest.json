@@ -695,7 +695,7 @@
       "json": "sprites/ball-bounce.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -704,7 +704,7 @@
       "json": "sprites/ball-bounce@50.json",
       "anchor": {
         "feetY": 17,
-        "opaqueWidth": 10
+        "opaqueWidth": 9
       }
     },
     {
@@ -713,7 +713,7 @@
       "json": "sprites/ball-bounce@62.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 13
+        "opaqueWidth": 11
       }
     },
     {
@@ -722,7 +722,7 @@
       "json": "sprites/ball-bounce@75.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 15
+        "opaqueWidth": 14
       }
     },
     {
@@ -731,7 +731,7 @@
       "json": "sprites/ball-bounce@88.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 17
+        "opaqueWidth": 16
       }
     },
     {
