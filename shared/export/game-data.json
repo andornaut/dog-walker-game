@@ -1347,8 +1347,8 @@
       "payPerDog": 20,
       "prices": {
         "archie": 250,
-        "dogSlot2": 1000,
-        "dogSlot3": 2500,
+        "dogSlot2": 2000,
+        "dogSlot3": 2000,
         "dogWhistle": 1500,
         "duchess": 150,
         "fannyPack": 600,

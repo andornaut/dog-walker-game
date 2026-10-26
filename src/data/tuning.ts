@@ -74,8 +74,8 @@ export const TUNING = {
     prices: {
       archie: 250,
       // The second and third dog slots; every player starts with one.
-      dogSlot2: 1000,
-      dogSlot3: 2500,
+      dogSlot2: 2000,
+      dogSlot3: 2000,
       dogWhistle: 1500,
       duchess: 150,
       fannyPack: 600,
