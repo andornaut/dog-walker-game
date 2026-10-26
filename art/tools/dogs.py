@@ -15,7 +15,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
   300ms, standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
 - face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
-  big by size class (big 32, medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral,
+  big and sat on the bottom edge, so each size class reads one even step from the next. Tags: happy, neutral,
   upset.
 
 Usage:
@@ -833,9 +833,11 @@ DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duche
             "nugget": (1.09, 1.27), "zippy": (1.17, 1.27)}
 
 
-# How much of its 32px photo a dog's face fills, by size class, sat on the bottom edge: the size difference
-# shows, less than on the road.
-FACE_SIDE = {"big": 32, "medium": 29, "small": 26}
+# How big each dog's face is drawn in its 32px frame, sat on the bottom edge: the side that brings its inked
+# area nearest its size class's target, so the classes step evenly (the square root of the area about 17,
+# 20 and 23px) however much of its design a breed's ears, ruff or topknot fill. The big dogs fill the frame.
+FACE_SIDE = {"archie": 27, "biscuit": 27, "duchess": 23, "koda": 32, "nugget": 26, "penny": 32, "pierre": 25,
+             "snowball": 32, "zippy": 27}
 
 
 def padded(px, side):
@@ -868,7 +870,7 @@ def sprites():
         zoom = DOG_ZOOM.get(name, 1)
         yield f"dog-{name}", [(tag, minis.dog_frames(draw_road, poses, road_scale(name), here, zoom), ms)
                               for tag, poses, ms in ROAD_TAGS]
-        yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[DOG_CLASS[name]])], 1000)
+        yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[name])], 1000)
                                    for m in FACE_TAGS]
 
 

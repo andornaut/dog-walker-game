@@ -602,8 +602,11 @@ WALKERS = {
 }
 
 
-# How much of the 64px well a dog's portrait fills, by size class, sat on the bottom edge.
-PORTRAIT_SIDE = {"big": 64, "medium": 58, "small": 52}
+# How big each dog's portrait is drawn in the 64px well, sat on the bottom edge: the side that brings its
+# inked area nearest its size class's target, so the classes step evenly (the square root of the area about
+# 35, 40 and 46px). The big dogs fill the well.
+PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "koda": 64, "nugget": 53, "penny": 64, "pierre": 56,
+                 "snowball": 63, "zippy": 53}
 
 
 def image(draw, side=S):
@@ -619,7 +622,7 @@ def image(draw, side=S):
 
 def portraits():
     """{key: (draw, side)} for every dog's portrait, then every walker's."""
-    return {**{f"portrait-dog-{n}": (d, PORTRAIT_SIDE[dogs.DOG_CLASS[n]]) for n, d in PORTRAITS.items()},
+    return {**{f"portrait-dog-{n}": (d, PORTRAIT_SIDE[n]) for n, d in PORTRAITS.items()},
             **{f"portrait-walker-{n}": (d, S) for n, d in WALKERS.items()}}
 
 
