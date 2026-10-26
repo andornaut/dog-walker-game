@@ -8,6 +8,7 @@ import {
   BUTTON_COLORS,
   DISABLED_COLORS,
   GREYED,
+  pictureBox,
   PLATE_LOOKS,
   type PlateKind,
   selectLook,
@@ -53,9 +54,9 @@ describe("interaction-state colours", () => {
         TEXT,
       ]),
       [
-        "a disabled picture's ink outline on its box",
+        "a grey picture's ink outline on its box",
         greyFor(NEUTRAL_RAMP, GREYED.copyDarker, PALETTE.ink),
-        PALETTE[disabled.box],
+        PALETTE[pictureBox({ art: "grey", state: "disabled" })],
         EXEMPT,
       ],
       ...(["normal", "primary", "secondary"] as const).map(

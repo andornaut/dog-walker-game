@@ -124,7 +124,7 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
-import { BUTTON_COLORS, GREYED, type SelectLook } from "../ui/selection";
+import { BUTTON_COLORS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
@@ -1620,7 +1620,7 @@ export class StartScene extends Scene {
       });
       const ink = PALETTE[look.text];
       const { face: faceBox, lock: dogLock, lockedNameY, textX } = DOG_TILE;
-      fillRect(this.graphics(content), PALETTE[look.box], {
+      fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: faceBox.size + 2,
         width: faceBox.size + 2,
         x: x + faceBox.dx - 1,
@@ -1673,14 +1673,14 @@ export class StartScene extends Scene {
         price: purchasePrice(gameData, owned, purchase),
       });
       const { art, padlock, state } = itemTileLook(tile);
-      const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
+      const { content, view } = this.selectTile(root, `gear:${id}`, rect, {
         badge: "tick",
         edge: true,
         state,
         tile: true,
       });
       const { box, icon: iconAt, lock } = POCKET;
-      fillRect(this.graphics(content), PALETTE[look.box], {
+      fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
         width: box.size,
         x: x + box.dx,
@@ -1748,7 +1748,7 @@ export class StartScene extends Scene {
         tile: true,
       });
       const { box, face: faceAt, icons, lock, plateY } = WALKER_TILE;
-      fillRect(this.graphics(content), PALETTE[look.box], {
+      fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
         width: box.size,
         x: x + box.dx,

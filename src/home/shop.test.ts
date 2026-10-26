@@ -14,7 +14,7 @@ import { TEST_TUNING } from "../testing/tuning";
 import { readBitmapFont } from "../tools/fontFile";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
-import { SELECT_OUTSET } from "../ui/selection";
+import { GREYED, pictureBox, SELECT_OUTSET } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { FEEDBACK } from "./feedback";
 import { dollarText, gearByPrice, type Purchase } from "./home";
@@ -71,14 +71,15 @@ describe("shopRowLook", () => {
   const banks = forSale.flatMap((row) => {
     const price = row.price ?? cents(0);
     return [
-      { art: "color", bank: price, id: row.id, look: "affordable", row },
-      { art: "grey", bank: cents(price - 1), id: row.id, look: "short", row },
+      { art: "color", bank: price, box: "tan", id: row.id, look: "affordable", row },
+      { art: "grey", bank: cents(price - 1), box: GREYED.box, id: row.id, look: "short", row },
     ] as const;
   });
 
-  it.each(banks)("shows $id $look, its art in $art", ({ art, bank, look, row }) => {
+  it.each(banks)("shows $id $look, its art in $art on $box", ({ art, bank, box, look, row }) => {
     const shown = shopRowLook(data, owned, bank, row);
-    expect({ art: SHOP_ROW_VIEWS[shown].art, look: shown }).toEqual({ art, look });
+    const view = SHOP_ROW_VIEWS[shown];
+    expect({ art: view.art, box: pictureBox(view), look: shown }).toEqual({ art, box, look });
   });
 
   it("sells every slot not owned, each with the looks dogs and gear for sale have", () => {

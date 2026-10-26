@@ -1,9 +1,9 @@
 // How a tile, tab or row shows its interaction state, as ui-tile draws it: normal is cream,
 // selected gold, disabled flat grey. Colours are the scenes' PALETTE names.
-import type { ButtonState, TileState } from "./interaction";
+import type { ButtonState, ItemLook, TileState } from "./interaction";
 
 // Every colour a disabled, short or locked item draws in, the neutral greys among them:
-// - box: the box behind a disabled tile's picture.
+// - box: the box behind a portrait or icon in grey art.
 // - copyDarker: a disabled tile's grey copy of its art moves each colour to the colour of
 //   NEUTRAL_RAMP nearest its brightness, as a disabled card's does, then this many steps
 //   down the ramp. 0 keeps a dark portrait readable on its box.
@@ -25,8 +25,6 @@ export const GREYED = {
 } as const;
 
 export interface SelectLook {
-  // The box behind a portrait or icon.
-  box: "amber" | typeof GREYED.box | "tan";
   face: "cream" | typeof GREYED.face | "yellow";
   state: TileState;
   text: typeof GREYED.text | "plum";
@@ -35,9 +33,9 @@ export interface SelectLook {
 // Text on each face: plum on cream (9.42:1) and yellow (10.92); a disabled label holds the
 // 3:1 its exemption needs.
 const LOOKS: Readonly<Record<TileState, Omit<SelectLook, "state">>> = {
-  disabled: { box: GREYED.box, face: GREYED.face, text: GREYED.text },
-  normal: { box: "tan", face: "cream", text: "plum" },
-  selected: { box: "amber", face: "yellow", text: "plum" },
+  disabled: { face: GREYED.face, text: GREYED.text },
+  normal: { face: "cream", text: "plum" },
+  selected: { face: "yellow", text: "plum" },
 };
 
 // The disabled look drawn in code where the art has none: the flat grey face in its line,
@@ -93,4 +91,17 @@ export const AFFORD_OUTSET = 2;
 
 export function selectLook(state: TileState): SelectLook {
   return { ...LOOKS[state], state };
+}
+
+// The box behind an item's portrait or icon.
+export type PictureBox = "amber" | typeof GREYED.box | "tan";
+
+// A picture's box, from its art: grey art sits on the grey box, and art in full color on the
+// tan box an owned item has, or the amber one while picked. An item the player can buy now is
+// a disabled tile with its art in color, so it sits on tan.
+export function pictureBox(look: Pick<ItemLook, "art" | "state">): PictureBox {
+  if (look.art === "grey") {
+    return GREYED.box;
+  }
+  return look.state === "selected" ? "amber" : "tan";
 }

@@ -14,6 +14,7 @@ import {
   type TileState,
   tileState,
 } from "./interaction";
+import { GREYED, type PictureBox, pictureBox } from "./selection";
 
 describe("tileState", () => {
   it("shows each item as normal, selected or disabled by its pick and room", () => {
@@ -58,17 +59,26 @@ describe("itemTile", () => {
     price: cents(price),
   });
 
-  // A tile not owned stays disabled, its art in color only while the player can buy it.
+  // A tile not owned stays disabled, its art in color only while the player can buy it. Art in
+  // color sits on the tan box (amber while picked), grey art on the grey box.
   it("shows each dog or item tile as available, picked, full, locked or goal-locked", () => {
-    for (const [, input, tile, state, art] of [
-      ["an owned dog with room", {}, { kind: "available" }, "normal", "color"],
-      ["a picked dog", { picked: true, pickedCount: 1 }, { kind: "picked" }, "selected", "color"],
+    for (const [, input, tile, state, art, box] of [
+      ["an owned dog with room", {}, { kind: "available" }, "normal", "color", "tan"],
+      [
+        "a picked dog",
+        { picked: true, pickedCount: 1 },
+        { kind: "picked" },
+        "selected",
+        "color",
+        "amber",
+      ],
       [
         "a picked dog in a full pack",
         { picked: true, pickedCount: 2 },
         { kind: "picked" },
         "selected",
         "color",
+        "amber",
       ],
       [
         "an unpicked dog in a full pack",
@@ -76,6 +86,7 @@ describe("itemTile", () => {
         { kind: "packFull" },
         "disabled",
         "grey",
+        GREYED.box,
       ],
       [
         "an unpicked dog in a full one-slot pack",
@@ -83,6 +94,7 @@ describe("itemTile", () => {
         { kind: "available" },
         "normal",
         "color",
+        "tan",
       ],
       [
         "a locked item the player can buy",
@@ -90,6 +102,7 @@ describe("itemTile", () => {
         locked(800, true),
         "disabled",
         "color",
+        "tan",
       ],
       [
         "a locked item the player cannot buy",
@@ -97,6 +110,7 @@ describe("itemTile", () => {
         locked(800, false),
         "disabled",
         "grey",
+        GREYED.box,
       ],
       [
         "a locked item the player can buy in a full pack",
@@ -104,6 +118,7 @@ describe("itemTile", () => {
         locked(800, true),
         "disabled",
         "color",
+        "tan",
       ],
       [
         "an item locked by a goal",
@@ -111,12 +126,24 @@ describe("itemTile", () => {
         { goal: "10 walks", kind: "goal" },
         "disabled",
         "grey",
+        GREYED.box,
       ],
-    ] satisfies readonly [string, Partial<ItemTileInput>, ItemTile, TileState, ArtLook][]) {
+    ] satisfies readonly [
+      string,
+      Partial<ItemTileInput>,
+      ItemTile,
+      TileState,
+      ArtLook,
+      PictureBox,
+    ][]) {
       const shown = itemTile({ ...owned, ...input });
       expect(shown).toEqual(tile);
       const look = itemTileLook(shown);
-      expect({ art: look.art, state: look.state }).toEqual({ art, state });
+      expect({ art: look.art, box: pictureBox(look), state: look.state }).toEqual({
+        art,
+        box,
+        state,
+      });
     }
   });
 });

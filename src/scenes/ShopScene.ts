@@ -71,7 +71,7 @@ import {
   pixelFontMetrics,
   placePixelText,
 } from "../ui/phaser/pixelText";
-import { GREYED, type PlateKind } from "../ui/selection";
+import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
@@ -810,7 +810,7 @@ export class ShopScene extends Scene {
       x: rect.x + box.dx,
       y: rect.y + Math.floor((rect.height - box.size) / 2),
     };
-    fillRect(this.graphics(content), PALETTE[tile.look.box], boxRect);
+    fillRect(this.graphics(content), PALETTE[pictureBox(view)], boxRect);
     this.addArt(content, purchaseArt(row.purchase), view.art, {
       x: boxRect.x + ROW.art,
       y: boxRect.y + ROW.art,
