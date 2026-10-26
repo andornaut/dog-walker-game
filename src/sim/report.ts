@@ -1,8 +1,18 @@
 import { DOGS } from "../data/dogs";
-import type { GameData, GearId, WalkerId } from "../data/types";
+import type {
+  AchievementCondition,
+  DebuffId,
+  GameData,
+  GearId,
+  MinorObstacleId,
+  TallyId,
+  WalkerId,
+} from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { itemAt } from "../lib/arrays";
+import { type AchievementData, conditionHolds, type RunFacts } from "../rules/achievements";
 import { isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
+import { MAX_RUN_DOGS, TALLY_IDS } from "../save/schema";
 import type { PackDogs } from "../state/runState";
 import { type Delivered, DELIVERY_GROUPS, sumDeliveries, type ZoneDelivery } from "./delivery";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
@@ -57,7 +67,7 @@ interface MatrixCell {
 // both but pull obstacles.
 // meanTips counts the tips collected per run. delivery sums every run's zone plans by walk
 // position and zone: what they asked for and what they placed, by group and by kind.
-export interface MatrixRow {
+export interface MatrixRow extends BadgeCounters {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
   readonly afterPullShare: number | null;
   readonly bumpShare: number | null;
@@ -90,6 +100,26 @@ export interface MatrixRow {
   readonly route: RoutePolicyId;
   readonly runs: number;
   readonly walker: WalkerId;
+}
+
+// The counters the badges read, per walk, each judged by the achievements' own condition.
+// Shares are of walks, from 0 to 1.
+export interface BadgeCounters {
+  // Every zone of the walk walked and finished without a landed bump.
+  readonly allCleanShare: number;
+  // At least one zone walked and finished without a landed bump.
+  readonly cleanZoneShare: number;
+  // Each debuff: the mean, and the 90th percentile, of the times one walk got it.
+  readonly debuffsGot: Readonly<Record<DebuffId, { readonly mean: number; readonly p90: number }>>;
+  // A walk finished with every dog of a full pack (MAX_RUN_DOGS) home: the Pack bonus. null for
+  // a smaller pack, which never earns it.
+  readonly fullPackBonusShare: number | null;
+  // A walk finished with a walking owner on their last heart.
+  readonly lastHeartShare: number;
+  // Landed bumps per walk, by minor obstacle kind.
+  readonly meanBumpsByKind: Readonly<Record<MinorObstacleId, number>>;
+  // Each lifetime tally's count per walk.
+  readonly meanTallies: Readonly<Record<TallyId, number>>;
 }
 
 // A pack named by its dogs' names in the data. The name is for display only: the pack's seeds
@@ -171,6 +201,38 @@ function percentile(sorted: readonly number[], fraction: number): number {
 const mean = (values: readonly number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
+// The badge counters of a cell's walks, from each walk's facts. packSize is the cell's dogs.
+export function badgeCounters(
+  data: AchievementData & Pick<GameData, "minorObstacles">,
+  packSize: number,
+  facts: readonly RunFacts[],
+): BadgeCounters {
+  const share = (condition: AchievementCondition) =>
+    mean(facts.map((walk) => (conditionHolds(data, null, walk, condition) ? 1 : 0)));
+  const meanOf = (count: (walk: RunFacts) => number) => mean(facts.map(count));
+  const debuffs = Object.keys(data.debuffs) as DebuffId[];
+  const kinds = Object.keys(data.minorObstacles) as MinorObstacleId[];
+  return {
+    allCleanShare: share({ count: "all", kind: "cleanZones" }),
+    cleanZoneShare: share({ count: 1, kind: "cleanZones" }),
+    debuffsGot: Object.fromEntries(
+      debuffs.map((debuff) => {
+        const got = facts.map((walk) => walk.debuffsGot[debuff] ?? 0).sort((a, b) => a - b);
+        return [debuff, { mean: mean(got), p90: percentile(got, 0.9) }];
+      }),
+    ) as BadgeCounters["debuffsGot"],
+    fullPackBonusShare:
+      packSize < MAX_RUN_DOGS ? null : share({ kind: "fullPackBonus", packSize: MAX_RUN_DOGS }),
+    lastHeartShare: share({ kind: "finishOnLastHeart" }),
+    meanBumpsByKind: Object.fromEntries(
+      kinds.map((kind) => [kind, meanOf((walk) => walk.bumpsByKind[kind] ?? 0)]),
+    ) as BadgeCounters["meanBumpsByKind"],
+    meanTallies: Object.fromEntries(
+      TALLY_IDS.map((tally) => [tally, meanOf((walk) => walk.tallies[tally] ?? 0)]),
+    ) as BadgeCounters["meanTallies"],
+  };
+}
+
 function simPlayer(sight: BotSight, player: MatrixPlayer): SimPlayer {
   return { kind: "skill", sight, skill: SKILL_PRESETS[player.preset] };
 }
@@ -220,7 +282,7 @@ function touchedShare(counts: readonly ItemCount[]): number | null {
 }
 
 function summarizeCell(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: AchievementData & Pick<GameData, "minorObstacles">,
   cell: MatrixCell,
   results: readonly RunResult[],
 ): MatrixRow {
@@ -251,6 +313,11 @@ function summarizeCell(
   const hits = results.reduce((sum, result) => sum + result.hits.all, 0);
   const afterPull = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
   return {
+    ...badgeCounters(
+      data,
+      cell.pack.dogs.length,
+      results.map((result) => result.facts),
+    ),
     afterPullShare: hits === 0 ? null : afterPull / hits,
     bumpShare: touchedShare(countsOf(inCategory("minor"))),
     delivery: sumDeliveries(results.flatMap((result) => result.deliveries)),

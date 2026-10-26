@@ -1,11 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { DebuffId, MinorObstacleId } from "../data/types";
 import { itemAt } from "../lib/arrays";
-import { packOrder } from "../state/pack";
-import type { PackDogs } from "../state/runState";
+import { TALLY_IDS } from "../save/schema";
+import { packDogs, packOrder } from "../state/pack";
+import type { PackDogs, RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
+import { badgeCounters } from "./report";
 import { type RunResult, type SimConfig, simulateRun } from "./simulate";
 import { type Skill, SKILL_PRESETS } from "./skills";
 
@@ -112,5 +115,81 @@ describe("simulateRun", { timeout: 30_000 }, () => {
       expect(result.firings.map((firing) => firing.dog)).toEqual(["archie"]);
       expect(result.zones.length).toBeLessThan(gameData.world.walkLength);
     }
+  });
+});
+
+// The badge counters of a few real walks match what their sessions counted.
+describe("badgeCounters", { timeout: 30_000 }, () => {
+  let results: RunResult[] = [];
+  beforeAll(() => {
+    results = runs(2, { pack: RISKY, policy: "alwaysHearts", skill: SKILL_PRESETS.novice });
+  }, 30_000);
+  const counters = () =>
+    badgeCounters(
+      gameData,
+      RISKY.length,
+      results.map((result) => result.facts),
+    );
+  const sessionMean = (count: (run: RunState, result: RunResult) => number) =>
+    results.reduce((sum, result) => sum + count(result.run, result), 0) / results.length;
+  const finished = (result: RunResult) =>
+    result.finished && result.zones.length === gameData.world.walkLength;
+  const cleanZones = (result: RunResult) =>
+    result.zones.filter(({ zoneIndex }) => (result.run.bumpsByZone[zoneIndex] ?? 0) === 0).length;
+
+  it("counts some tallies, so the comparisons are not all of zeros", () => {
+    expect(Object.values(counters().meanTallies).some((count) => count > 0)).toBe(true);
+  });
+
+  it.each(TALLY_IDS)("gives the mean %s per walk", (tally) => {
+    expect(counters().meanTallies[tally]).toBe(sessionMean((run) => run.tallies[tally] ?? 0));
+  });
+
+  it.each(Object.keys(gameData.minorObstacles) as MinorObstacleId[])(
+    "gives the mean landed bumps by %s per walk",
+    (kind) => {
+      expect(counters().meanBumpsByKind[kind]).toBe(
+        sessionMean((run) => run.bumpsByKind[kind] ?? 0),
+      );
+    },
+  );
+
+  // Of 2 walks, the 90th percentile is the higher.
+  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
+    "gives the mean and 90th percentile times %s was got in a walk",
+    (debuff) => {
+      const got = results.map((result) => result.run.debuffsGot[debuff] ?? 0);
+      expect(counters().debuffsGot[debuff]).toEqual({
+        mean: sessionMean((run) => run.debuffsGot[debuff] ?? 0),
+        p90: Math.max(...got),
+      });
+    },
+  );
+
+  it.each([
+    {
+      field: "allCleanShare",
+      holds: (result: RunResult) =>
+        finished(result) && cleanZones(result) === gameData.world.walkLength,
+    },
+    { field: "cleanZoneShare", holds: (result: RunResult) => cleanZones(result) > 0 },
+    {
+      field: "fullPackBonusShare",
+      holds: (result: RunResult) =>
+        finished(result) && packDogs(result.run).length === RISKY.length,
+    },
+    {
+      field: "lastHeartShare",
+      holds: (result: RunResult) =>
+        finished(result) &&
+        result.run.pack.some((slot) => slot.status === "walking" && slot.hearts === 1),
+    },
+  ] as const)("gives $field as the share of walks it holds for", ({ field, holds }) => {
+    expect(counters()[field]).toBe(sessionMean((_, result) => (holds(result) ? 1 : 0)));
+  });
+
+  it("gives no Pack bonus share for a pack under the most dogs", () => {
+    const facts = results.map((result) => result.facts);
+    expect(badgeCounters(gameData, RISKY.length - 1, facts).fullPackBonusShare).toBeNull();
   });
 });

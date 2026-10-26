@@ -2,7 +2,7 @@ import { LANE_COUNT } from "../data/screen";
 import type { AchievementId, DogId, GameData, GearId, WalkerId, ZoneId } from "../data/types";
 import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
-import { earnedByRun, runCountersOf } from "../rules/achievements";
+import { earnedByRun, runCountersOf, type RunFacts } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
@@ -112,6 +112,8 @@ export interface RunResult {
   readonly deliveries: readonly ZoneDelivery[];
   // The money banked at the end of the run.
   readonly earnings: Cents;
+  // What the achievements judge the run on: its session counters and how it ended.
+  readonly facts: RunFacts;
   readonly finished: boolean;
   readonly firings: readonly FiringRecord[];
   readonly hits: HitCounts;
@@ -400,7 +402,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     zones: [],
   };
   playBySkill(data, seed, config, config.player, tally);
-  const facts = {
+  const facts: RunFacts = {
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,
     earnedCents: tally.run.money,
@@ -413,6 +415,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     choices: tally.choices,
     deliveries: tally.deliveries,
     earnings: tally.run.money,
+    facts,
     finished: tally.run.phase.kind === "ended" && tally.run.phase.reason === "finished",
     firings: tally.firings,
     hits: tally.hits,

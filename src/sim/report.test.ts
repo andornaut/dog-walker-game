@@ -26,6 +26,7 @@ vi.mock("./simulate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./simulate")>();
   const { cents } = await import("../rules/units");
   const { newRun } = await import("../state/runState");
+  const { runCountersOf } = await import("../rules/achievements");
   const { seededRandom } = await import("../lib/random");
   const { SKILL_PRESETS } = await import("./skills");
   const { zoneDelivery } = await import("./delivery");
@@ -33,6 +34,11 @@ vi.mock("./simulate", async (importOriginal) => {
     const random = seededRandom(seed);
     // A novice finishes half its walks and is fired twice in each.
     const novice = config.player.skill === SKILL_PRESETS.novice;
+    const run = newRun(data, config.pack.length, {
+      dogs: config.pack,
+      gear: config.gear,
+      walker: config.walker,
+    });
     return {
       badges: [],
       cardsSeen: Math.floor(random() * 10),
@@ -45,6 +51,13 @@ vi.mock("./simulate", async (importOriginal) => {
         }),
       ],
       earnings: cents(random() * 10_000),
+      facts: {
+        ...runCountersOf(run),
+        dogsHome: config.pack.length,
+        earnedCents: run.money,
+        packSize: config.pack.length,
+        zonesFinished: 0,
+      },
       finished: random() >= (novice ? 0.5 : 0.1),
       firings: novice
         ? [
@@ -62,11 +75,7 @@ vi.mock("./simulate", async (importOriginal) => {
       movers: { ball: { met: 2, touched: 1 }, squirrel: { met: 3, touched: 0 } },
       pullsMoved: 0,
       route: [],
-      run: newRun(data, config.pack.length, {
-        dogs: config.pack,
-        gear: config.gear,
-        walker: config.walker,
-      }),
+      run,
       tips: cents(0),
       zones: [],
     };
