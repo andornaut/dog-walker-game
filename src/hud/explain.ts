@@ -10,7 +10,7 @@ import {
 } from "../home/detail";
 import { fillLine, fillNames } from "../lib/lines";
 import { ownerMaxHearts } from "../rules/dogs";
-import { capitalize } from "../rules/effectText";
+import { capitalize, debuffFields } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import type { RunState } from "../state/runState";
@@ -125,10 +125,10 @@ export function explainDetail(
         return undefined;
       }
       const { name, stake } = data.debuffs[target.debuff];
-      const seconds = String(Math.ceil(active.secondsLeft));
+      const fields = debuffFields(data, Math.ceil(active.secondsLeft));
       return {
         card: {
-          lines: [capitalize(fillNames(stake, { seconds }))],
+          lines: [capitalize(fillNames(stake, fields))],
           locked: false,
           status: text.debuffStatus,
           subtitle: "",

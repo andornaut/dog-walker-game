@@ -153,6 +153,21 @@ describe("effectText", () => {
       expect(effectText(data, effects)).toBe(text);
     }
   });
+
+  const muddyBumpHearts = read(TEST_TUNING, "multipliers", "muddyBumpHearts");
+  it.each([muddyBumpHearts, muddyBumpHearts + 1])(
+    "fills Muddy's stake with muddyBumpHearts at %i",
+    (hearts) => {
+      const tuning = {
+        ...data.tuning,
+        multipliers: { ...data.tuning.multipliers, muddyBumpHearts: hearts },
+      };
+      const seconds = String(read(TEST_TUNING, "seconds", DEBUFFS.muddy.seconds));
+      expect(effectText({ ...data, tuning }, [{ debuff: "muddy", kind: "debuff" }])).toBe(
+        `${DEBUFFS.muddy.name}: ${fillNames(DEBUFFS.muddy.stake, { hearts: String(hearts), seconds })}`,
+      );
+    },
+  );
 });
 
 // A share of the base lane-change speed as an unsigned whole percent.

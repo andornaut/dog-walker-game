@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { fillLine } from "../lib/lines";
+import { fillLine, fillNames } from "../lib/lines";
 import { maxHearts } from "../rules/dogs";
+import { read } from "../rules/units";
 import { placeInPack } from "../state/pack";
 import { testState } from "../testing/runState";
 import { newPlayerSave } from "../testing/saves";
@@ -75,10 +76,11 @@ describe("explainDetail", () => {
     expect(explainDetail(gameData, newPlayerSave, run, target)).toBeUndefined();
   });
 
-  it("fills the debuff's stake with its whole seconds left", () => {
+  it("fills the debuff's stake with its whole seconds left and muddyBumpHearts", () => {
     const detail = explainDetail(gameData, newPlayerSave, run, { debuff: "muddy", kind: "debuff" });
+    const hearts = String(read(gameData.tuning, "multipliers", "muddyBumpHearts"));
     expect(detail?.card.lines.join(" ").toLowerCase()).toContain(
-      gameData.debuffs.muddy.stake.replace("{seconds}", "10").toLowerCase(),
+      fillNames(gameData.debuffs.muddy.stake, { hearts, seconds: "10" }).toLowerCase(),
     );
   });
 });

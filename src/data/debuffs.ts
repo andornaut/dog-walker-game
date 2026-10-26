@@ -8,7 +8,7 @@ export const DEBUFFS = {
     modifiers: [{ by: "muddyBumpHearts", operation: "multiply", stat: "bumpHearts" }],
     name: "Muddy",
     seconds: "muddySeconds",
-    stake: "bumps cost 2♥ for {seconds}s",
+    stake: "bumps cost {hearts}♥ for {seconds}s",
   },
   stinky: {
     modifiers: [{ by: "stinkyTipValue", operation: "multiply", stat: "tipValue" }],

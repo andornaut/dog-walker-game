@@ -1,7 +1,7 @@
 import type { DebuffId, DogId, EncounterId, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
-import { formatDollars } from "../rules/effectText";
+import { debuffFields, formatDollars } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
 import type { FaceMood } from "../rules/treats";
 import { cents } from "../rules/units";
@@ -208,14 +208,14 @@ export function debuffChanges(
 
 // A debuff's start, with how long it lasts in whole seconds, or its end.
 export function debuffLines(
-  data: StripData,
+  data: StripData & Pick<GameData, "tuning">,
   changes: ReturnType<typeof debuffChanges>,
 ): MessageLine[] {
   const { debuffEnd, debuffStart } = data.runText.strip;
   return [
     ...changes.started.map(({ debuff, secondsLeft }): MessageLine => ({
       icon: debuff,
-      text: fillNames(debuffStart[debuff], { seconds: String(Math.round(secondsLeft)) }),
+      text: fillNames(debuffStart[debuff], debuffFields(data, Math.round(secondsLeft))),
     })),
     ...changes.ended.map((debuff): MessageLine => ({ icon: debuff, text: debuffEnd[debuff] })),
   ];

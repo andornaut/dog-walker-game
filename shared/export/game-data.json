@@ -273,7 +273,7 @@
       ],
       "name": "Muddy",
       "seconds": "muddySeconds",
-      "stake": "bumps cost 2♥ for {seconds}s"
+      "stake": "bumps cost {hearts}♥ for {seconds}s"
     },
     {
       "id": "stinky",

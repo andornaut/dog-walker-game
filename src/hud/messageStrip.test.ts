@@ -234,7 +234,7 @@ function everyStripLine(): FaceText[] {
     ...Object.values(gameData.hints).map(({ text }) => ({ text })),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
     ...Object.values(strip.debuffStart).map((start) => ({
-      text: fillNames(start, { seconds: "99" }),
+      text: fillNames(start, { hearts: String(muddyCost), seconds: "99" }),
     })),
     ...Object.values(strip.debuffEnd).map((text) => ({ text })),
     { text: strip.luckyNeighbor },

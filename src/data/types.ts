@@ -446,7 +446,8 @@ export type Walker = WalkerUnlock & {
 
 // A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
 // and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
-// after the debuff's name, its {seconds} filled with how long it would last. Its modifiers
+// after the debuff's name, its {seconds} filled with how long it would last and its {hearts}
+// with what a minor bump costs while Muddy. Its modifiers
 // change stats while it lasts; one the rules act on by id, such as Zoomies' drift, has none.
 export interface Debuff {
   readonly modifiers: readonly Modifier[];
@@ -754,7 +755,8 @@ export interface RunText {
     readonly title: string;
   };
   // The message strip's lines: achievement names a badge earned on the way, debuffStart and
-  // debuffEnd announce each debuff, and the rest say what just happened on the road.
+  // debuffEnd announce each debuff (debuffStart's {seconds} and {hearts} filled as a debuff's
+  // stake is), and the rest say what just happened on the road.
   readonly strip: {
     readonly achievement: string;
     readonly debuffEnd: { readonly [D in DebuffId]: string };

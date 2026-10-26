@@ -5,7 +5,7 @@ import type { DebuffId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import type { HeartChange } from "../rules/causes";
 import { bumpHearts } from "../rules/run";
-import { cents, clampHearts } from "../rules/units";
+import { cents, clampHearts, read } from "../rules/units";
 import { testState } from "../testing/runState";
 import {
   bumpLine,
@@ -153,13 +153,17 @@ describe("muddyHeartsLines", () => {
 
 describe("debuffLines", () => {
   const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
+  const muddyHearts = String(read(gameData.tuning, "multipliers", "muddyBumpHearts"));
 
   it("announces every debuff starting and ending", () => {
     for (const debuff of Object.keys(gameData.debuffs) as DebuffId[]) {
       const on = { debuffs: [active(debuff, 20)] };
       const off = { debuffs: [] };
       expect(debuffLines(gameData, debuffChanges(off, on))).toEqual([
-        { icon: debuff, text: fillNames(strip.debuffStart[debuff], { seconds: "20" }) },
+        {
+          icon: debuff,
+          text: fillNames(strip.debuffStart[debuff], { hearts: muddyHearts, seconds: "20" }),
+        },
       ]);
       expect(debuffLines(gameData, debuffChanges(on, off))).toEqual([
         { icon: debuff, text: strip.debuffEnd[debuff] },

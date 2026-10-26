@@ -66,7 +66,7 @@ export const RUN_TEXT = {
       zoomies: "The zoomies wore off.",
     },
     debuffStart: {
-      muddy: "Muddy paws! Bumps cost 2♥ for {seconds}s.",
+      muddy: "Muddy paws! Bumps cost {hearts}♥ for {seconds}s.",
       stinky: "Stinky pack! Tips pay nothing for {seconds}s.",
       zoomies: "Zoomies! The pack won't sit still for {seconds}s.",
     },

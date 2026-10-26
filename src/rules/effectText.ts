@@ -242,11 +242,27 @@ export function effectClause(data: TextData, effects: readonly Effect[]): string
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
+// The {name}s a debuff's stake and its strip start line are filled with: hearts, what a minor
+// bump costs while Muddy, and seconds, how long the debuff lasts or has left.
+export function debuffFields(
+  data: Pick<GameData, "tuning">,
+  seconds: number,
+): { readonly hearts: string; readonly seconds: string } {
+  return {
+    hearts: String(read(data.tuning, "multipliers", "muddyBumpHearts")),
+    seconds: String(seconds),
+  };
+}
+
 // A debuff's name and what it does for how long, as a card states its stake: "Muddy: bumps
 // cost 2♥ for 20s".
-function debuffStake(data: Pick<GameData, "debuffs">, debuff: DebuffId, seconds: number): string {
+function debuffStake(
+  data: Pick<GameData, "debuffs" | "tuning">,
+  debuff: DebuffId,
+  seconds: number,
+): string {
   const { name, stake } = data.debuffs[debuff];
-  return `${name}: ${fillNames(stake, { seconds: String(seconds) })}`;
+  return `${name}: ${fillNames(stake, debuffFields(data, seconds))}`;
 }
 
 // A debuff's modifiers and how long it lasts: "tips -50% for 20 seconds".
