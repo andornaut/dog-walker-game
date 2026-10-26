@@ -8,7 +8,7 @@ export const SHOP_GEAR = {
     effects: [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
     name: "Dog whistle",
     price: "dogWhistle",
-    short: "Medium and big dogs dodge too",
+    short: "Medium and large dogs dodge too",
   },
   fannyPack: {
     effects: [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],

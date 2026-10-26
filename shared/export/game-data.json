@@ -381,7 +381,7 @@
       "id": "koda",
       "art": "koda",
       "breed": "Alaskan Malamute",
-      "look": "Big and heavy, gray and white, blue eyes, harness",
+      "look": "Large and sturdy, gray and white, blue eyes, harness",
       "name": "Koda",
       "owner": {
         "name": "Jesse",
@@ -808,7 +808,7 @@
       ],
       "name": "Dog whistle",
       "price": "dogWhistle",
-      "short": "Medium and big dogs dodge too",
+      "short": "Medium and large dogs dodge too",
       "iconKey": "item-dog-whistle"
     },
     {
@@ -887,7 +887,7 @@
     },
     {
       "art": "owners",
-      "body": "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {largeHearts}♥ big, and big dogs slow your lane changes. A lone dog's owner gets +{loneBonus}♥, a pair's lead +{pairBonus}♥. A plain bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. At 0♥ the owner fires you.",
+      "body": "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {largeHearts}♥ large, and large dogs slow your lane changes. A lone dog's owner gets +{loneBonus}♥, a pair's lead +{pairBonus}♥. A plain bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. At 0♥ the owner fires you.",
       "title": "Keep owners happy"
     },
     {

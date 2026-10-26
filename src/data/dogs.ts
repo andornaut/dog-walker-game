@@ -43,7 +43,7 @@ export const DOGS = {
   koda: {
     art: "koda",
     breed: "Alaskan Malamute",
-    look: "Big and heavy, gray and white, blue eyes, harness",
+    look: "Large and sturdy, gray and white, blue eyes, harness",
     name: "Koda",
     owner: {
       name: "Jesse",
