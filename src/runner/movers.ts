@@ -1,6 +1,7 @@
 import type { MoveCount, MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { type Random, randomPick, weightedPick } from "../lib/random";
+import { itemAt } from "../lib/arrays";
+import { type Random, randomInt, randomPick, seededRandom, weightedPick } from "../lib/random";
 import type { RoadItem } from "./roadItems";
 
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover
@@ -512,13 +513,44 @@ export function stepSpots(shape: StepShape): number {
   return Math.max(Math.abs(shape.lanes), Math.abs(shape.travel));
 }
 
-// Every sequence of times hops, each one of hopShapes(most, sideways).
-export function hopSequences(most: number, sideways: boolean, times: number): StepShape[][] {
+// The most hop sequences of one count a hopper takes. There are as many as its hop shapes to the
+// power of the count, and the planner tries each one of a mover's drawn count at every start lane
+// and row, so this bounds the planner's work.
+export const HOP_SEQUENCES_MOST = 1000;
+
+// The sequences of times hops, each hop one of hopShapes(most, sideways), in order as numbers in
+// base shapes.length, the first hop the most significant digit: every one when there are at most
+// HOP_SEQUENCES_MOST, and otherwise that many distinct ones, drawn from a stream seeded with one
+// draw from random, the only draw it makes.
+export function hopSequences(
+  random: Random,
+  most: number,
+  sideways: boolean,
+  times: number,
+): StepShape[][] {
   const shapes = hopShapes(most, sideways);
-  return Array.from({ length: times }).reduce<StepShape[][]>(
-    (sequences) => sequences.flatMap((sequence) => shapes.map((shape) => [...sequence, shape])),
-    [[]],
+  const total = shapes.length ** times;
+  const indices =
+    total <= HOP_SEQUENCES_MOST
+      ? Array.from({ length: total }, (_, i) => i)
+      : drawnIndices(random, total);
+  return indices.map((index) =>
+    Array.from({ length: times }, (_, hop) =>
+      itemAt(shapes, Math.floor(index / shapes.length ** (times - 1 - hop)) % shapes.length),
+    ),
   );
+}
+
+// HOP_SEQUENCES_MOST distinct indices below total, ascending, each set of them as likely (Floyd's
+// sampling, one draw per index).
+function drawnIndices(random: Random, total: number): number[] {
+  const drawn = seededRandom(Math.floor(random() * 2 ** 32));
+  const picked = new Set<number>();
+  for (let top = total - HOP_SEQUENCES_MOST; top < total; top++) {
+    const index = randomInt(drawn, 0, top + 1);
+    picked.add(picked.has(index) ? top : index);
+  }
+  return [...picked].sort((a, b) => a - b);
 }
 
 // How a shy hopper hops, at a share of the movers of its kind drawn per mover: as the road between

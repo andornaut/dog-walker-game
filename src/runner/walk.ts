@@ -481,8 +481,9 @@ function countsOf(range: MoveCount): number[] {
 // How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
 // its most, the first min from the spawns stream and any more from the movers stream; it may take
 // the first steps of them, or of their mirror image, as many as its drawn count. A hopper may make
-// any hops it can, as many as its drawn count. The planner takes whichever way keeps the road
-// passable, drawing among those from the zone's seed.
+// any hops it can, as many as its drawn count, of up to HOP_SEQUENCES_MOST ways for each count,
+// drawn here from the movers stream where there are more. The planner takes whichever way keeps
+// the road passable, drawing among those from the zone's seed.
 export function moverSpec(
   data: Pick<GameData, "tuning">,
   streams: PlannerStreams,
@@ -534,7 +535,7 @@ export function moverSpec(
       count: movement.times,
       kind: "steps",
       sequences: countsOf(movement.times).flatMap((times) =>
-        hopSequences(movement.most, sideways, times),
+        hopSequences(streams.movers, movement.most, sideways, times),
       ),
       ...(movement.shy === true
         ? {

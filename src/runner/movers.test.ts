@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { TUNING } from "../data/tuning";
 import { itemAt } from "../lib/arrays";
+import { type Random, seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { plannerStreams } from "../testing/movers";
 import {
@@ -12,6 +13,7 @@ import {
   drawnCount,
   facesLeft,
   hasLeftRoad,
+  HOP_SEQUENCES_MOST,
   hopSequences,
   hopShapes,
   inMotion,
@@ -34,6 +36,7 @@ import {
   onScreenOf,
   placeMovers,
   screenHasRoom,
+  type StepShape,
   stepSpots,
   sweptLanes,
 } from "./movers";
@@ -112,6 +115,8 @@ const hopper: MoverPath = {
   steps: [{ at: 100, lanes: -2, length: 30, travel: 0 }],
   warning: 100,
 };
+// The stream hop sequences are drawn from where there are more than HOP_SEQUENCES_MOST.
+const HOP_RANDOM = seededRandom(1);
 // The game's caps on movers on screen.
 const CAPS: MoverCaps = {
   darts: read(TUNING, "counts", "maxDartMovers"),
@@ -649,7 +654,10 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
     spec: spec({
       count: { max: 2, min: 1 },
       kind: "steps",
-      sequences: [...hopSequences(2, false, 1), ...hopSequences(2, false, 2)],
+      sequences: [
+        ...hopSequences(HOP_RANDOM, 2, false, 1),
+        ...hopSequences(HOP_RANDOM, 2, false, 2),
+      ],
       stepSeconds: 0.3,
     }),
   },
@@ -658,7 +666,7 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
     spec: spec({
       count: { max: 2, min: 1 },
       kind: "steps",
-      sequences: [...hopSequences(2, true, 1), ...hopSequences(2, true, 2)],
+      sequences: [...hopSequences(HOP_RANDOM, 2, true, 1), ...hopSequences(HOP_RANDOM, 2, true, 2)],
       stepSeconds: 0.3,
     }),
   },
@@ -667,7 +675,10 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
     spec: spec({
       count: { max: 2, min: 1 },
       kind: "steps",
-      sequences: [...hopSequences(2, false, 1), ...hopSequences(2, false, 2)],
+      sequences: [
+        ...hopSequences(HOP_RANDOM, 2, false, 1),
+        ...hopSequences(HOP_RANDOM, 2, false, 2),
+      ],
       shy: { nearSeconds: 1.6, rise: 2, shapes: hopShapes(2, false), share: 0.5 },
       stepSeconds: 0.3,
     }),
@@ -710,6 +721,48 @@ describe("hopShapes", () => {
         expect(shapes).toContainEqual({ lanes: lanes === 0 ? 0 : -lanes, travel });
       }
     }
+  });
+});
+
+describe("hopSequences", () => {
+  // A sequence's place among every sequence: its hops as digits in base the number of shapes.
+  const indexOf = (shapes: readonly StepShape[], sequence: readonly StepShape[]) =>
+    sequence.reduce(
+      (index, hop) =>
+        index * shapes.length +
+        shapes.findIndex(({ lanes, travel }) => lanes === hop.lanes && travel === hop.travel),
+      0,
+    );
+  it.each([
+    { most: 2, sideways: false, times: 2 },
+    { most: 2, sideways: false, times: 3 },
+    { most: 2, sideways: true, times: 5 },
+    { most: 2, sideways: false, times: 5 },
+    { most: 2, sideways: false, times: 6 },
+  ])(
+    "makes distinct sequences of $times hops of $most, sideways $sideways, up to the most, in order",
+    ({ most, sideways, times }) => {
+      const shapes = hopShapes(most, sideways);
+      const total = shapes.length ** times;
+      let draws = 0;
+      const counted: Random = () => {
+        draws++;
+        return HOP_RANDOM();
+      };
+      const sequences = hopSequences(counted, most, sideways, times);
+      const indices = sequences.map((sequence) => indexOf(shapes, sequence));
+      expect(sequences).toHaveLength(Math.min(total, HOP_SEQUENCES_MOST));
+      expect(sequences.every((sequence) => sequence.length === times)).toBe(true);
+      expect(indices.every((index) => index >= 0 && index < total)).toBe(true);
+      expect(indices.every((index, i) => i === 0 || index > (indices[i - 1] ?? index))).toBe(true);
+      expect(draws).toBe(total > HOP_SEQUENCES_MOST ? 1 : 0);
+    },
+  );
+
+  it("draws the same sequences from the same seed, and others from another", () => {
+    const drawn = (seed: number) => hopSequences(seededRandom(seed), 2, false, 5);
+    expect(drawn(1)).toEqual(drawn(1));
+    expect(drawn(1)).not.toEqual(drawn(2));
   });
 });
 
