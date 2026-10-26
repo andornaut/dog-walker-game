@@ -1308,13 +1308,13 @@
       "maxSlowVehicles": 4,
       "minorObstaclesFirstZone": 83,
       "minorObstaclesGainPerZone": 1,
-      "obstaclesFirstZone": 24,
-      "obstaclesGainPerZone": 3,
+      "obstaclesFirstZone": 27,
+      "obstaclesGainPerZone": 4,
       "openLanesPerRowMin": 2,
       "packSizeMax": 3,
       "sweetTalkerFreeCards": 1,
-      "tipsFirstZone": 28,
-      "tipsGainPerZone": -3,
+      "tipsFirstZone": 35,
+      "tipsGainPerZone": -4,
       "treatsPerZone": 2
     },
     "hearts": {
@@ -1655,9 +1655,9 @@
           "stroller": 2
         },
         "obstacles": {
-          "otherDog": 1,
+          "otherDog": 1.25,
           "puddle": 1,
-          "skunk": 1,
+          "skunk": 1.25,
           "squirrel": 1,
           "thief": 0
         }
@@ -1723,9 +1723,9 @@
           "stroller": 3
         },
         "obstacles": {
-          "otherDog": 2,
+          "otherDog": 2.5,
           "puddle": 1,
-          "skunk": 1,
+          "skunk": 1.25,
           "squirrel": 1,
           "thief": 0
         }
@@ -1791,11 +1791,11 @@
           "stroller": 2
         },
         "obstacles": {
-          "otherDog": 1,
+          "otherDog": 1.25,
           "puddle": 1,
-          "skunk": 1,
+          "skunk": 1.25,
           "squirrel": 1,
-          "thief": 1
+          "thief": 1.25
         }
       },
       "keys": {
@@ -1859,11 +1859,11 @@
           "stroller": 4
         },
         "obstacles": {
-          "otherDog": 1,
+          "otherDog": 1.25,
           "puddle": 1,
-          "skunk": 1,
+          "skunk": 1.25,
           "squirrel": 1,
-          "thief": 2
+          "thief": 2.5
         }
       },
       "keys": {
@@ -1927,11 +1927,11 @@
           "stroller": 2
         },
         "obstacles": {
-          "otherDog": 2,
+          "otherDog": 2.5,
           "puddle": 2,
-          "skunk": 1,
+          "skunk": 1.25,
           "squirrel": 1,
-          "thief": 1
+          "thief": 1.25
         }
       },
       "keys": {
@@ -1995,11 +1995,11 @@
           "stroller": 2
         },
         "obstacles": {
-          "otherDog": 1,
+          "otherDog": 1.25,
           "puddle": 1,
-          "skunk": 1,
+          "skunk": 1.25,
           "squirrel": 1,
-          "thief": 1
+          "thief": 1.25
         }
       },
       "keys": {

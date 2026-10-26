@@ -26,15 +26,15 @@ export const TUNING = {
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 83,
     minorObstaclesGainPerZone: 1,
-    obstaclesFirstZone: 24,
-    obstaclesGainPerZone: 3,
+    obstaclesFirstZone: 27,
+    obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
     packSizeMax: 3,
     // Sweet talker makes this many encounter cards each zone cost no money.
     sweetTalkerFreeCards: 1,
-    tipsFirstZone: 28,
-    tipsGainPerZone: -3,
+    tipsFirstZone: 35,
+    tipsGainPerZone: -4,
     treatsPerZone: 2,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
