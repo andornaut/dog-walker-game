@@ -70,39 +70,39 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 
 Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the neutral greys and any colour it leaves out; ratios are WCAG.
 
-| Pair                           | Ratio | Use                                                                                     |
-| ------------------------------ | ----- | --------------------------------------------------------------------------------------- |
-| amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                               |
-| amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                           |
-| cream on darkBrown             | 5.85  | Text on the wood                                                                        |
-| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                     |
-| darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                            |
-| darkRed on nlgrey              | 5.15  | Price on the short plate                                                                |
-| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name       |
-| ink on deepAmber               | 7.91  | A picked picture's outline on its box                                                   |
-| ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                     |
-| ink on ngrey                   | 7.23  | The emblem's silhouette on a `locked` badge                                             |
-| ink on nlgrey                  | 12.64 | The goal plate: a walker's name, a blocked slot's price, a disabled card's cost         |
-| ink on nslate                  | 3.75  | A disabled picture's outline on its art box                                             |
-| navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                               |
-| ndslate on cream               | 6.12  | A locked badge's name in the logbook                                                    |
-| ndslate on ngrey               | 3.56  | Labels on `disabled` tiles and buttons (inactive, exempt), a `locked` badge's emblem    |
-| ngrey on darkBrown             | 3.40  | `disabled` tile face on the wood                                                        |
-| nslate on cream                | 3.32  | A locked badge's goal and progress in the logbook (inactive, exempt)                    |
-| plum on amber                  | 7.35  | Text on amber: step number                                                              |
-| plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons   |
-| plum on tan                    | 6.49  | Body text on tan                                                                        |
-| plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                          |
-| tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                              |
-| tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                          |
-| `ui-difficulty` on cream       | 3.2+  | Filled paws plum-outlined (9.42); hollow paws a clay rim (3.2)                          |
-| `ui-zone-pips` on cream        | 3.0+  | `todo` dashed; `<zone>` and `<zone>-done` rimmed darker than their well; `-done` ticked |
-| white on darkBrown             | 8.48  | Filled page dot                                                                         |
-| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                            |
-| white on forest                | 7.80  | The purchase confirmation's title                                                       |
-| white on navy                  | 13.89 | `ui-detail-band` title                                                                  |
-| white over the dimmed road     | 4.5+  | Card subtitle                                                                           |
-| yellow on navy                 | 11.13 | `ui-scroll-thumb` in `ui-scroll-track`                                                  |
+| Pair                           | Ratio | Use                                                                                                                         |
+| ------------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------- |
+| amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                                                   |
+| amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                                               |
+| cream on darkBrown             | 5.85  | Text on the wood                                                                                                            |
+| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                         |
+| darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                                                                |
+| darkRed on nlgrey              | 5.15  | Price on the short plate                                                                                                    |
+| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name                                           |
+| ink on deepAmber               | 7.91  | A picked picture's outline on its box                                                                                       |
+| ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                                                         |
+| ink on ngrey                   | 7.23  | The emblem's silhouette on a `locked` badge                                                                                 |
+| ink on nlgrey                  | 12.64 | The goal plate: a walker's name, a blocked slot's price, a disabled card's cost; an affordable picture's outline on its box |
+| ink on nslate                  | 3.75  | A disabled picture's outline on its art box                                                                                 |
+| navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                                                                   |
+| ndslate on cream               | 6.12  | A locked badge's name in the logbook                                                                                        |
+| ndslate on ngrey               | 3.56  | Labels on `disabled` tiles and buttons (inactive, exempt), a `locked` badge's emblem                                        |
+| ngrey on darkBrown             | 3.40  | `disabled` tile face on the wood                                                                                            |
+| nslate on cream                | 3.32  | A locked badge's goal and progress in the logbook (inactive, exempt)                                                        |
+| plum on amber                  | 7.35  | Text on amber: step number                                                                                                  |
+| plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons                                       |
+| plum on tan                    | 6.49  | Body text on tan                                                                                                            |
+| plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                              |
+| tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                                                  |
+| tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                                                              |
+| `ui-difficulty` on cream       | 3.2+  | Filled paws plum-outlined (9.42); hollow paws a clay rim (3.2)                                                              |
+| `ui-zone-pips` on cream        | 3.0+  | `todo` dashed; `<zone>` and `<zone>-done` rimmed darker than their well; `-done` ticked                                     |
+| white on darkBrown             | 8.48  | Filled page dot                                                                                                             |
+| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                                                |
+| white on forest                | 7.80  | The purchase confirmation's title                                                                                           |
+| white on navy                  | 13.89 | `ui-detail-band` title                                                                                                      |
+| white over the dimmed road     | 4.5+  | Card subtitle                                                                                                               |
+| yellow on navy                 | 11.13 | `ui-scroll-thumb` in `ui-scroll-track`                                                                                      |
 
 ## UI
 
@@ -123,12 +123,12 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 | State    | When                                                                          | Look                                                                        | Label                    |
 | -------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------ |
-| normal   | Available, not chosen                                                         | Cream face, ink and plum lines, tan lip                                     | plum (9.42:1)            |
+| normal   | Available, not chosen                                                         | Cream face, ink and plum lines, tan lip (brown on a tile)                   | plum (9.42:1)            |
 | selected | Picked, equipped, toggled on, the open tab or page                            | Gold: ink line, amber band, orange line, yellow face                        | plum (10.92:1)           |
 | disabled | Cannot be chosen now: not owned and short, the pack full, not available       | Flat ngrey face, ink and nslate lines, no lip                               | ndslate (3.56:1, exempt) |
 | primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board) | ink (8.41:1)             |
 
-- Art inside a disabled tile draws from its grey copy in the neutral ramp, each color at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's deepAmber. The padlock keeps its colors, and an affordable item's picture keeps its colors on the tan box an owned one has (see below).
+- Art inside a disabled tile draws from its grey copy in the neutral ramp, each color at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's deepAmber. The padlock keeps its colors, and an affordable item's picture keeps its colors on an nlgrey box, lighter than the tile, where a short one's grey copy sits on the darker nslate (see below). A normal tile's lip is brown, not the chrome's tan, so the tan box sits apart from it.
 - An item for sale is owned (no padlock, no plate), affordable (`icon-lock-open` and the green buy plate) or short (`icon-lock` and the nlgrey short plate), told apart by padlock shape and plate, never by color alone. An item not owned draws on a `disabled` tile or row, with its name, on the start screen and in the Pet shop: its portrait or icon in full color while the bank covers it, from its grey copy while short. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
 - The primary green marks a screen's call to action; on the start screen Start walk is the only full-width primary button. `go-disabled` matches `disabled`; `secondary` and `secondary-pressed` match `normal` and `pressed`.
 - Cards follow the same states: a disabled card is redrawn in the grey ramp, the selected one is outlined in amber.

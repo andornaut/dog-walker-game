@@ -419,16 +419,21 @@ def button(state):
 
 
 TILE = 24
+# A normal tile's lip: brown, not the chrome's tan, so it reads apart from the tan box behind an
+# owned item's picture, which sits on it.
+TILE_LIP = "brown"
 
 
 def tile(state):
     """24x24 nine-slice, 4px on every side: a pickable tile (walker, dog or gear) in one of the
-    interaction states. normal is the chrome: ink and plum lines, cream face, a tan lip 2px deep
-    at the bottom and 1px at the right. selected is the gold of ui-section's complete state: an
+    interaction states. normal is the chrome's ink and plum lines and cream face on a TILE_LIP
+    lip 2px deep at the bottom and 1px at the right. selected is the gold of ui-section's complete state: an
     ink line, a 1px amber band and an orange line round a yellow face on a 1px amber lip.
     disabled (not owned and short, the pack full, not available) is flat in the neutral greys: an
     ink line, an nslate line and an ngrey face with no lip. Content sits from 3px in."""
     face, lip, _ = STATES[state]
+    if state == "normal":
+        lip = TILE_LIP
     g = Grid(TILE, TILE)
     if state == "selected":
         g.rect(1, 0, TILE - 2, TILE, "ink")
