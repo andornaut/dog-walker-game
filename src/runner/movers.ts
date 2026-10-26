@@ -974,7 +974,10 @@ function standingPlacements(
 // later moves pause a random gap between them. A step that would start once the mover has
 // reached the pack's rows, at sightLength, never comes, nor any after it; a sequence with no
 // step left has no placement, since a mover always moves. It stands at every spot a step of
-// several spots passes over, as it does at each step's ends.
+// several spots passes over, as it does at each step's ends, and at both corners of each diagonal
+// spot: moving a lane across and a row along at once, its hit box is in the lane it leaves while
+// it comes level with the row it reaches, and in the lane it reaches while still level with the
+// row it leaves.
 function stepsPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -1020,7 +1023,16 @@ function stepsPlacements(
     if (steps.length === 0) {
       return [];
     }
-    return standingPlacements(geometry, spec, spots, (lane) => ({
+    const corners = spots.slice(1).flatMap((spot, i) => {
+      const before = spots[i] ?? spot;
+      return before.lane !== spot.lane && before.travel !== spot.travel
+        ? [
+            { lane: before.lane, travel: spot.travel },
+            { lane: spot.lane, travel: before.travel },
+          ]
+        : [];
+    });
+    return standingPlacements(geometry, spec, [...spots, ...corners], (lane) => ({
       lane,
       motion: "steps",
       movement: spec.movement,

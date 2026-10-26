@@ -884,6 +884,25 @@ describe("moverPlacements", () => {
     }
   });
 
+  // A diagonal hop is across and along at once, so it stands at the corners between its ends as
+  // well; a hop one way only has none.
+  it.each([
+    { hop: { lanes: 1, travel: -1 }, stands: ["0,0", "0,1", "1,0", "1,1"] },
+    { hop: { lanes: 1, travel: 0 }, stands: ["0,0", "1,0"] },
+    { hop: { lanes: 0, travel: -1 }, stands: ["0,0", "0,1"] },
+  ])("stands a hop of $hop at $stands (lane, row up the road)", ({ hop, stands }) => {
+    const [placement] = moverPlacements(
+      geometry,
+      spec({ count: { max: 1, min: 1 }, kind: "steps", sequences: [[hop]], stepSeconds: 0.3 }),
+    );
+    const lane = placement?.lane ?? 0;
+    const appears = placement?.appears ?? 0;
+    const at = (placement?.stands ?? []).map(
+      (stand) => `${stand.lane - lane},${(stand.distance - appears) / geometry.cellLength}`,
+    );
+    expect([...new Set(at)].sort()).toEqual(stands);
+  });
+
   // Up to a second of delay before each of four steps, 0.1s long: at 100px/s each step comes its
   // own draw's tenth of 100px after the one before ends.
   it("delays each of a stepper's moves by a draw of its own, up to its most moves", () => {
