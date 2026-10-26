@@ -7,7 +7,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
-import type { GearId, LiveTuning } from "../data/types";
+import type { DogId, GearId, LiveTuning } from "../data/types";
 import { WORLD } from "../data/world";
 import { price, unlockPrice } from "../rules/shop";
 import { cents, read, readTable } from "../rules/units";
@@ -28,6 +28,8 @@ import {
   partingSpeech,
   type Purchase,
   purchasePrice,
+  ROSTER_SIZES,
+  rosterRows,
   shortDollarAmountText,
   signedDollarText,
   tapDog,
@@ -221,6 +223,51 @@ describe("gearByPrice", () => {
     expect(gearByPrice({ shopGear: SHOP_GEAR, tuning: TEST_TUNING })[0]).toBe(cheapest);
     expect(gearByPrice({ shopGear: SHOP_GEAR, tuning: retuned }).at(-1)).toBe(cheapest);
   });
+});
+
+describe("rosterRows", () => {
+  const dataOrder = Object.keys(DOGS) as DogId[];
+  const listPrice = (tuning: LiveTuning, dog: DogId) => unlockPrice(tuning, DOGS[dog]);
+  const shopPrices = dataOrder.flatMap((dog) =>
+    DOGS[dog].unlock === "start" ? [] : [DOGS[dog].price],
+  );
+  const dearest = Math.max(...shopPrices.map((key) => TEST_TUNING.money.prices[key]));
+  const onePrice: LiveTuning = {
+    ...TEST_TUNING,
+    money: {
+      ...TEST_TUNING.money,
+      prices: {
+        ...TEST_TUNING.money.prices,
+        ...Object.fromEntries(shopPrices.map((key) => [key, dearest])),
+      },
+    },
+  };
+  const cases = (
+    [
+      ["today's prices", TEST_TUNING],
+      ["every dog for sale at one price", onePrice],
+    ] as const
+  ).flatMap(([name, tuning]) =>
+    ROSTER_SIZES.map((size, row) => [`${size} at ${name}`, tuning, size, row] as const),
+  );
+
+  it.each(cases)(
+    "holds exactly the %s dogs, cheapest first, ties in data order, starters first",
+    (_, tuning, size, row) => {
+      const dogs = rosterRows({ dogs: DOGS, tuning })[row] ?? [];
+      expect([...dogs].sort()).toEqual(dataOrder.filter((dog) => DOGS[dog].size === size).sort());
+      dogs.slice(1).forEach((dog, i) => {
+        const before = dogs[i] as DogId;
+        const step = listPrice(tuning, dog) - listPrice(tuning, before);
+        expect(step).toBeGreaterThanOrEqual(0);
+        if (step === 0) {
+          expect(dataOrder.indexOf(dog)).toBeGreaterThan(dataOrder.indexOf(before));
+        }
+      });
+      const starters = dogs.filter((dog) => DOGS[dog].unlock === "start");
+      expect(dogs.slice(0, starters.length)).toEqual(starters);
+    },
+  );
 });
 
 describe("purchasePrice", () => {

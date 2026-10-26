@@ -1,4 +1,4 @@
-import type { DogId, GameData, GearId } from "../data/types";
+import type { DogId, GameData, GearId, Size } from "../data/types";
 import { fillLine, signedText } from "../lib/lines";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
@@ -127,6 +127,23 @@ export function cheapestFirst<Id>(cost: (id: Id) => Cents, ids: readonly Id[]): 
 export function gearByPrice(data: Pick<GameData, "shopGear" | "tuning">): GearId[] {
   const listPrice = (gear: GearId) => price(data.tuning, data.shopGear[gear].price);
   return cheapestFirst(listPrice, Object.keys(data.shopGear) as GearId[]);
+}
+
+// The start screen's dog rows by size, smallest first.
+export const ROSTER_SIZES: readonly Size[] = ["small", "medium", "big"];
+
+// The start screen's dogs, one row per size in ROSTER_SIZES order, each row cheapest first by
+// list price with ties in data order, as the shop's Dogs tab lists them. A starting dog lists
+// at no cost, so it leads its row.
+export function rosterRows(data: Pick<GameData, "dogs" | "tuning">): DogId[][] {
+  const listPrice = (dog: DogId) => unlockPrice(data.tuning, data.dogs[dog]);
+  const dogs = Object.keys(data.dogs) as DogId[];
+  return ROSTER_SIZES.map((size) =>
+    cheapestFirst(
+      listPrice,
+      dogs.filter((dog) => data.dogs[dog].size === size),
+    ),
+  );
 }
 
 // What a purchase costs, or null when it is not for sale: already owned, or no such slot.

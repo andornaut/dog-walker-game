@@ -9,7 +9,7 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId, GearId, Size, WalkerId } from "../data/types";
+import type { DogId, GearId, WalkerId } from "../data/types";
 import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
@@ -45,6 +45,7 @@ import {
   partingSpeech,
   type Purchase,
   purchasePrice,
+  rosterRows,
   shortDollarAmountText,
   tapDog,
   tapGear,
@@ -221,7 +222,6 @@ const START_LOADING = HOME_LAYOUT.startLoading;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
-const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
 
 // The walker's speech bubble: its place, padding and most lines.
 const SPEECH = HOME_LAYOUT.speech;
@@ -267,10 +267,10 @@ function targetId(target: Target): string {
   }
 }
 
-// The roster in rows by size, each row in data order.
+// The roster as the grid lays it out, row by row (rosterRows): tiles, taps and keyboard focus
+// all read this one order.
 function rosterOrder(): DogId[] {
-  const rank = (dog: DogId) => SIZE_ORDER.indexOf(gameData.dogs[dog].size);
-  return (Object.keys(gameData.dogs) as DogId[]).sort((a, b) => rank(a) - rank(b));
+  return rosterRows(gameData).flat();
 }
 
 function dogTiles(): Rect[] {
