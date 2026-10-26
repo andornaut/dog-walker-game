@@ -1,4 +1,4 @@
-import type { DogId, GameData, GearId } from "../data/types";
+import type { DogId, GameData } from "../data/types";
 import { fillLine } from "../lib/lines";
 import { capitalize, gearShort } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
@@ -6,7 +6,7 @@ import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import type { ItemLook } from "../ui/interaction";
 import { isAffordable, purchases } from "./afford";
-import { dogKindText, type Purchase, purchasePrice } from "./home";
+import { dogKindText, gearByPrice, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
@@ -75,9 +75,9 @@ export function shopAffordable(data: ShopData, owned: Owned, bank: Cents): boole
   return purchases(data).some((purchase) => isAffordable(data, owned, bank, purchase));
 }
 
-// Every gear item in shop order, owned ones in place, each with its effect in a few words.
+// Every gear item, cheapest first (gearByPrice), owned ones in place, each with its effect in a few words.
 export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
-  return (Object.keys(data.shopGear) as GearId[]).map((gear) => {
+  return gearByPrice(data).map((gear) => {
     const purchase: Purchase = { gear, kind: "gear" };
     return {
       blocked: null,

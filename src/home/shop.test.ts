@@ -17,7 +17,7 @@ import { plainMarks } from "../ui/pixelFont";
 import { SELECT_OUTSET } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { FEEDBACK } from "./feedback";
-import { dollarText, type Purchase } from "./home";
+import { dollarText, gearByPrice, type Purchase } from "./home";
 import { messageLine } from "./homeLines";
 import {
   dogRows,
@@ -96,11 +96,9 @@ describe("slotRows", () => {
 });
 
 describe("gearRows and dogRows", () => {
-  it("list every gear item in shop order, an owned one in place without a price", () => {
+  it("list every gear item cheapest first, an owned one in place without a price", () => {
     const rows = gearRows(data, { ...owned, gear: ["fannyPack"] });
-    expect(rows.map(({ id }) => id)).toEqual(
-      Object.keys(data.shopGear).map((gear) => `gear:${gear}`),
-    );
+    expect(rows.map(({ id }) => id)).toEqual(gearByPrice(data).map((gear) => `gear:${gear}`));
     expect(rows.find(({ id }) => id === "gear:fannyPack")?.price).toBeNull();
   });
 
