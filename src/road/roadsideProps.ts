@@ -4,16 +4,20 @@ import { STRIP } from "../layout/roadRaster";
 import { itemAt } from "../lib/arrays";
 
 // The roadside props: houses, fences, trees and yard props standing on the lawns beyond the
-// sidewalks, placed from art's per-zone table (shared/roadside.json, which art/tools/roadside.py
-// writes). They are scenery only: nothing in the walk reads them and they draw no random
-// numbers, so a seed plays the same walk with or without them.
+// sidewalks, and curb props (hydrants, bins, planters, bike racks, newspaper boxes) standing on
+// the sidewalk or paving inside its curb band (curbBand), placed from art's per-zone table
+// (shared/roadside.json, which art/tools/roadside.py writes). They are scenery only: nothing
+// in the walk reads them and they draw no random numbers, so a seed plays the same walk with
+// or without them.
 //
 // Road px: across is the distance from the road's centre line to a prop frame's centre, z the
 // distance along the road from the zone's start strip's near edge, as the road raster counts
 // its strip rows. Each side has a slot every `slot` along z, slot n at z = n * slot. With
 // m = n - offset, an even m is a lot and an odd m a gap, k = floor(m / 2), and the side takes
-// lots[(lotStart + k * lotStride) mod lots] or gaps[(gapStart + k * gapStride) mod gaps]. Each
-// prop stands at its slot's z plus its dz, nearer negative.
+// lots[(lotStart + k * lotStride) mod lots] or gaps[(gapStart + k * gapStride) mod gaps]. A
+// zone's curb props take a group at every slot as well: slot n on a side takes
+// groups[(start + n * stride) mod groups]. Each prop stands at its slot's z plus its dz, nearer
+// negative.
 
 interface RoadsideProp {
   readonly across: number;
@@ -29,9 +33,24 @@ interface RoadsideSide {
   readonly offset: number;
 }
 
+// A side's pick of curb groups.
+interface CurbSide {
+  readonly start: number;
+  readonly stride: number;
+}
+
+// The curb props, each frame wholly inside its zone's curb band, which keeps them off the road
+// and clear of the ambient movers' stops.
+export interface RoadsideCurb {
+  readonly groups: readonly (readonly RoadsideProp[])[];
+  readonly sides: { readonly left: CurbSide; readonly right: CurbSide };
+}
+
 // shadowColour is the ground shadow under the zone's free-standing props, a hex RGB string: its
 // ground one ramp step darker.
+// A zone with no curb has no curb props.
 export interface RoadsideZone {
+  readonly curb?: RoadsideCurb;
   readonly gaps: readonly (readonly RoadsideProp[])[];
   readonly lots: readonly (readonly RoadsideProp[])[];
   readonly shadowColour: string;
@@ -57,7 +76,7 @@ type RoadsideSign = (typeof ROADSIDE_SIDES)[number]["sign"];
 // No prop stands on a zone's start strip, so its cross street stays clear.
 export const START_STRIP_LENGTH = STRIP.height;
 
-// At most this many props are drawn at once.
+// At most this many props are drawn at once, lawn and curb props together.
 export const ROADSIDE_LIMIT = 40;
 
 const NO_PROPS: readonly RoadsideProp[] = [];
@@ -73,6 +92,20 @@ export function slotProps(
   return m % 2 === 0
     ? groupAt(zone.lots, side.lotStart + k * side.lotStride)
     : groupAt(zone.gaps, side.gapStart + k * side.gapStride);
+}
+
+// The curb props a side's slot n holds; none for a zone with no curb.
+export function curbSlotProps(
+  zone: RoadsideZone,
+  side: "left" | "right",
+  n: number,
+): readonly RoadsideProp[] {
+  const { curb } = zone;
+  if (curb === undefined) {
+    return NO_PROPS;
+  }
+  const { start, stride } = curb.sides[side];
+  return groupAt(curb.groups, start + n * stride);
 }
 
 function groupAt(
@@ -92,7 +125,9 @@ const DZ_REACH = new Map<RoadsideZone, { far: number; near: number }>();
 function dzReach(zone: RoadsideZone): { far: number; near: number } {
   let reach = DZ_REACH.get(zone);
   if (reach === undefined) {
-    const dzs = [...zone.lots, ...zone.gaps].flat().map(({ dz }) => dz);
+    const dzs = [...zone.lots, ...zone.gaps, ...(zone.curb?.groups ?? [])]
+      .flat()
+      .map(({ dz }) => dz);
     reach = { far: Math.max(0, ...dzs), near: Math.min(0, ...dzs) };
     DZ_REACH.set(zone, reach);
   }
@@ -102,7 +137,8 @@ function dzReach(zone: RoadsideZone): { far: number; near: number } {
 type RoadsideVisit = (prop: RoadsideProp, sign: RoadsideSign, z: number) => void;
 
 // Visits every prop of a zone with its z in from..to (to excluded), on both sides, each with
-// the sign of its side and its z. A zone whose slot is not a positive length places none.
+// the sign of its side and its z: each slot's lawn props, then its curb props. A zone whose slot
+// is not a positive length places none.
 export function eachRoadsideProp(
   zone: RoadsideZone,
   from: number,
@@ -119,12 +155,25 @@ export function eachRoadsideProp(
   for (const { name, sign } of ROADSIDE_SIDES) {
     const side = zone.sides[name];
     for (let n = first; n <= last; n++) {
-      for (const prop of slotProps(zone, side, n)) {
-        const z = n * slot + prop.dz;
-        if (z >= from && z < to) {
-          visit(prop, sign, z);
-        }
-      }
+      visitSlot(slotProps(zone, side, n), sign, n * slot, from, to, visit);
+      visitSlot(curbSlotProps(zone, name, n), sign, n * slot, from, to, visit);
+    }
+  }
+}
+
+// Visits the props of a slot at z slotZ whose z is in from..to (to excluded).
+function visitSlot(
+  props: readonly RoadsideProp[],
+  sign: RoadsideSign,
+  slotZ: number,
+  from: number,
+  to: number,
+  visit: RoadsideVisit,
+): void {
+  for (const prop of props) {
+    const z = slotZ + prop.dz;
+    if (z >= from && z < to) {
+      visit(prop, sign, z);
     }
   }
 }

@@ -9,13 +9,14 @@ import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
-import { VERGES, walkFrom } from "./roadside";
+import { curbBand, curbFits, VERGES, VERGES_BY_ART, walkFrom } from "./roadside";
 import {
   eachRoadsideProp,
   newRoadsidePlaces,
   placeRoadside,
   ROADSIDE,
   ROADSIDE_LIMIT,
+  type RoadsideCurb,
   type RoadsideFrame,
   type RoadsidePlace,
   type RoadsideStage,
@@ -34,7 +35,10 @@ const ART = ZONE_ARTS[0] ?? "";
 const PROPS = ZONES.flatMap(([art, zone]) =>
   [...zone.lots, ...zone.gaps].flat().map((prop) => ({ art, ...prop })),
 );
-const KEYS = [...new Set(PROPS.map(({ key }) => key))].sort();
+const CURB_PROPS = ZONES.flatMap(([art, zone]) =>
+  (zone.curb?.groups ?? []).flat().map((prop) => ({ art, ...prop })),
+);
+const KEYS = [...new Set([...PROPS, ...CURB_PROPS].map(({ key }) => key))].sort();
 // An art id with no table, so it places no props.
 const BARE = "no-table";
 
@@ -60,12 +64,33 @@ const SIDES: RoadsideZone["sides"] = {
 const TREE = { across: 270, dz: 0, key: "roadside-tree-maple" };
 const LAMP = { across: 231, dz: -38, key: "roadside-gas-lamp" };
 const SHADOW = "3e8948";
+// Curb props from existing art, as no curb art is drawn yet: a lamp whose frame fits every curb
+// band, every third slot on each side, or two to a slot on both, the busiest curb the draw
+// limit allows beside a sparse lawn.
+const CURB_LAMP = { across: 186, dz: 0, key: "roadside-gas-lamp" };
+const CURB_SIDES: RoadsideCurb["sides"] = {
+  left: { start: 0, stride: 1 },
+  right: { start: 1, stride: 1 },
+};
+const SPARSE_CURB: RoadsideCurb = { groups: [[CURB_LAMP], [], []], sides: CURB_SIDES };
+const BUSIEST_CURB: RoadsideCurb = {
+  groups: [
+    [
+      { ...CURB_LAMP, dz: -SLOT / 4 },
+      { ...CURB_LAMP, dz: SLOT / 4 },
+    ],
+  ],
+  sides: CURB_SIDES,
+};
 
-// A table holding ART's zone with these lots and gaps.
-function tableOf(zone: Pick<RoadsideZone, "gaps" | "lots">): RoadsideTable {
+// A table holding the zone with art id art, by default ART, with these lots, gaps and curb.
+function tableOf(
+  zone: Pick<RoadsideZone, "curb" | "gaps" | "lots">,
+  art: string = ART,
+): RoadsideTable {
   return {
     ...ROADSIDE,
-    zones: { [ART]: { shadowColour: SHADOW, sides: SIDES, slot: SLOT, ...zone } },
+    zones: { [art]: { shadowColour: SHADOW, sides: SIDES, slot: SLOT, ...zone } },
   };
 }
 
@@ -77,6 +102,11 @@ const TABLES: readonly (readonly [string, RoadsideTable])[] = [
   ["a table of empty lots and gaps", tableOf({ gaps: [[]], lots: [[], []] })],
   ["a table with an occasional tree", tableOf({ gaps: [[TREE], [], [], [], []], lots: [[]] })],
   ["a dense table", DENSE],
+  ["a table with curb props only", tableOf({ curb: SPARSE_CURB, gaps: [], lots: [] })],
+  [
+    "the busiest curb beside the shipped lawn",
+    tableOf({ ...(ROADSIDE.zones[ART] ?? { gaps: [], lots: [] }), curb: BUSIEST_CURB }),
+  ],
 ];
 
 function stageOf(table: RoadsideTable): RoadsideStage {
@@ -103,9 +133,9 @@ function zoneOf(table: RoadsideTable): RoadsideZone {
   return table.zones[ART] ?? { gaps: [], lots: [], shadowColour: SHADOW, sides: SIDES, slot: SLOT };
 }
 
-// How many props a zone holds over all its lots and gaps.
+// How many props a zone holds over all its lots, gaps and curb groups.
 function propCount(zone: RoadsideZone): number {
-  return [...zone.lots, ...zone.gaps].flat().length;
+  return [...zone.lots, ...zone.gaps, ...(zone.curb?.groups ?? [])].flat().length;
 }
 
 // Every prop with its z in from..to, as key, side and z.
@@ -120,7 +150,8 @@ function gcd(a: number, b: number): number {
 }
 
 // The slots after which a zone's two sides both repeat: each side's lots and gaps cycle
-// through their strides, a lot and a gap to a pair of slots. An empty list repeats every slot.
+// through their strides, a lot and a gap to a pair of slots, and its curb groups one to a
+// slot. An empty list repeats every slot.
 function repeatSlots(zone: RoadsideZone): number {
   const cycle = (length: number, stride: number) =>
     length === 0 ? 1 : length / gcd(stride, length);
@@ -130,7 +161,9 @@ function repeatSlots(zone: RoadsideZone): number {
       cycle(zone.lots.length, zone.sides[name].lotStride),
       cycle(zone.gaps.length, zone.sides[name].gapStride),
     );
-  return 2 * lcm(side("left"), side("right"));
+  const curb = (name: "left" | "right") =>
+    zone.curb === undefined ? 1 : cycle(zone.curb.groups.length, zone.curb.sides[name].stride);
+  return lcm(2 * lcm(side("left"), side("right")), lcm(curb("left"), curb("right")));
 }
 
 describe("the roadside table", () => {
@@ -172,6 +205,15 @@ describe("the roadside table", () => {
           ? verge.walkTo
           : walkFrom(verge);
     expect(prop.across - frameWidth(prop.key) / 2).toBeGreaterThan(clear);
+  });
+
+  // Inside the curb band: off the road and the curb, and clear of the verge movers' stops.
+  it("stands every curb prop wholly inside its zone's curb band", () => {
+    const misfits = CURB_PROPS.filter(({ across, art, key }) => {
+      const verge = VERGES_BY_ART[art];
+      return verge === undefined || !curbFits(verge, { across, width: frameWidth(key) });
+    });
+    expect(misfits).toEqual([]);
   });
 
   it.each(ZONES)("shades %s's shadowed props in its own colour and the rest in none", (art) => {
@@ -257,6 +299,34 @@ describe("placeRoadside", () => {
       }
     }
     expect(total > 0).toBe(propCount(zone) > 0);
+  });
+
+  it.each(ZONES)("keeps %s's props in view under the limit", (art, zone) => {
+    for (let scroll = 0; scroll < repeatSlots(zone) * zone.slot; scroll += zone.slot / 4) {
+      expect(placed(ROADSIDE, frame({ current: art, scroll })).length).toBeLessThan(ROADSIDE_LIMIT);
+    }
+  });
+
+  // Each verge with a curb band, with the sparse curb lamps: every lamp drawn on both sides,
+  // its frame inside the band at the scale of its row.
+  const BANDED = Object.entries(VERGES_BY_ART).flatMap(([art, verge]) => {
+    const band = curbBand(verge);
+    return band === null ? [] : [{ art, band }];
+  });
+
+  it.each(BANDED)("stands curb props inside $art's curb band, on both sides", ({ art, band }) => {
+    const table = tableOf({ curb: SPARSE_CURB, gaps: [], lots: [] }, art);
+    const signs = new Set<number>();
+    for (let scroll = 0; scroll < 6 * SLOT; scroll += SLOT / 4) {
+      for (const place of placed(table, frame({ current: art, scroll }))) {
+        const offset = (place.x - PROJECTION.centerX) / place.scale;
+        const half = frameWidth(place.key) / 2;
+        signs.add(Math.sign(offset));
+        expect(Math.abs(offset) - half).toBeGreaterThanOrEqual(band.from - 1e-6);
+        expect(Math.abs(offset) + half).toBeLessThanOrEqual(band.to + 1e-6);
+      }
+    }
+    expect([...signs].sort()).toEqual([-1, 1]);
   });
 
   it("places nothing for a zone with no table", () => {

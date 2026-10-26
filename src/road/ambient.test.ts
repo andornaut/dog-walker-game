@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -26,6 +28,7 @@ import {
   startAmbient,
   stepAmbient,
 } from "./ambient";
+import { curbBand, VERGES } from "./roadside";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
@@ -40,6 +43,14 @@ function skyRowsOf(mover: AmbientMover): number[] {
   return Array.from({ length: to - from + 1 }, (_, i) => from + i);
 }
 const isSky = ({ mover }: { mover: AmbientMover }) => mover.path === "sky";
+
+// A sprite's frame width at full size, from its sheet.
+function frameWidth(key: string): number {
+  const sheet = JSON.parse(readFileSync(`public/art/sprites/${key}.json`, "utf8")) as {
+    frames: Record<string, { sourceSize: { w: number } }>;
+  };
+  return Object.values(sheet.frames)[0]?.sourceSize.w ?? 0;
+}
 
 function deps(seed: number, drawable: (mover: AmbientMover) => boolean = () => true): AmbientDeps {
   return { drawable, random: randomStream(seed, "ambient"), stage: STAGE };
@@ -174,6 +185,25 @@ describe("stepAmbient", () => {
     const drawn = walkThrough("street", 120, 1, (mover) => mover.path !== "crossStreet");
     expect(drawn.flat().filter(({ mover }) => mover.path === "crossStreet")).toEqual([]);
     expect(drawn.flat().length).toBeGreaterThan(0);
+  });
+
+  // Every zone with movers stopping beside the road: each stopped mover's frame clear of the
+  // curb band, where the curb props stand.
+  const STOPPING = ZONES.filter((zone) =>
+    gameData.ambient[zone].some(({ path }) => path === "verge"),
+  );
+
+  it.each(STOPPING)("stops %s's verge movers clear of its curb band", (zone) => {
+    const band = curbBand(VERGES[zone]);
+    const stopped = walkThrough(zone, 300)
+      .flat()
+      .filter(({ mover, place }) => mover.path === "verge" && !place.moving && place.lift === 0);
+    expect(stopped.length).toBeGreaterThan(0);
+    const inBand = stopped.filter(({ mover, place }) => {
+      const across = Math.abs(place.x - PROJECTION.centerX) / place.scale;
+      return band !== null && across - frameWidth(mover.key) / 2 <= band.to;
+    });
+    expect(inBand).toEqual([]);
   });
 
   it("ends the last zone's movers in a new zone", () => {

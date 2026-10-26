@@ -155,6 +155,41 @@ export function walkFrom(verge: Verge): number {
   return verge.strips.at(-1)?.to ?? verge.curbTo;
 }
 
+// On paving out to the screen's edges, what stands or stops beside the road takes the sidewalk
+// to be this wide, as wide as a street's.
+const PAVED_SIDEWALK_WIDTH = 44;
+
+// Where the sidewalk ends, across: its outer edge, or PAVED_SIDEWALK_WIDTH past the paving's
+// inner edge. A verge with no sidewalk ends it where it starts.
+export function sidewalkTo(verge: Verge): number {
+  const from = walkFrom(verge);
+  return Number.isFinite(verge.walkTo) ? Math.max(from, verge.walkTo) : from + PAVED_SIDEWALK_WIDTH;
+}
+
+// A curb prop's frame keeps this far inside the sidewalk's edges.
+const CURB_CLEAR = 2;
+
+// The band of the sidewalk or paving that curb props stand in, from and to across, or null for
+// a verge with no room for one.
+export interface CurbBand {
+  readonly from: number;
+  readonly to: number;
+}
+
+export function curbBand(verge: Verge): CurbBand | null {
+  const from = walkFrom(verge) + CURB_CLEAR;
+  const to = sidewalkTo(verge) - CURB_CLEAR;
+  return to > from ? { from, to } : null;
+}
+
+// Whether a curb prop, its frame's centre at across and its full-size frame width wide, stands
+// wholly inside the verge's curb band.
+export function curbFits(verge: Verge, prop: { across: number; width: number }): boolean {
+  const band = curbBand(verge);
+  const half = prop.width / 2;
+  return band !== null && prop.across - half >= band.from && prop.across + half <= band.to;
+}
+
 // A band of the verge that carries dots, from and to across.
 interface DottedBand {
   readonly dots: readonly VergeDots[];

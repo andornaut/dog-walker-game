@@ -3,7 +3,7 @@ import type { AmbientGait, AmbientMover, ZoneId } from "../data/types";
 import { CROSS_STREET } from "../layout/crossStreet";
 import { project, type RoadProjection, scaleAt, scaleAtY } from "../layout/projection";
 import type { Random } from "../lib/random";
-import { noise, type Verge, VERGES, walkFrom } from "./roadside";
+import { noise, sidewalkTo, type Verge, VERGES, walkFrom } from "./roadside";
 
 // The ambient movers: cars, bikes, people, animals and planes moving across the backdrop's
 // cross street and sky and beside the road, from each zone's table in the data. They are scenery only:
@@ -196,11 +196,10 @@ function sidewalkAcross(verge: Verge): number {
     : from + SIDEWALK_INSET;
 }
 
-// The nearest a verge mover stops to the road: past the sidewalk on the lawn, or out on the
-// paving.
+// The nearest a verge mover stops to the road: VERGE_INSET past the sidewalk, on the lawn or out
+// on the paving, so it stops clear of the curb props standing on the sidewalk.
 function vergeStop(verge: Verge): number {
-  const from = walkFrom(verge);
-  return (Number.isFinite(verge.walkTo) ? Math.max(from, verge.walkTo) : from) + VERGE_INSET;
+  return sidewalkTo(verge) + VERGE_INSET;
 }
 
 function setOut(
