@@ -29,8 +29,8 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 | Player  | Walks finished | Walks with a firing |
 | ------- | -------------- | ------------------- |
-| Novice  | 50 to 70%      | 50 to 80%           |
-| Typical | 90 to 100%     | 5 to 15%            |
+| Novice  | 20 to 40%      | 75 to 95%           |
+| Typical | 85 to 95%      | 10 to 25%           |
 | Expert  | 95 to 100%     | 0 to 10%            |
 
 - **Cards:** about 10 cards a walk at novice skill, more than one a minute; good dodgers meet fewer
