@@ -632,7 +632,6 @@ export interface HomeText {
     readonly confirmLeft: string;
     readonly confirmTitle: string;
     readonly dogs: string;
-    readonly dogsAllOwned: string;
     readonly owned: string;
     // The note right of each list's heading: {owned} of the list's {max} purchases.
     readonly ownedCount: string;

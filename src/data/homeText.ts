@@ -88,7 +88,6 @@ export const HOME_TEXT = {
     confirmLeft: "{amount} left after",
     confirmTitle: "Buy {name}?",
     dogs: "Dogs",
-    dogsAllOwned: "Every dog in Toronto is a client!",
     owned: "Owned",
     ownedCount: "{owned} of {max} owned",
     slotFirst: "Buy slot {slot} first",
