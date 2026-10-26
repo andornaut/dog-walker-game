@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import type { Rect } from "../lib/rect";
-import type { Padlock } from "../ui/interaction";
+import type { Badge } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
@@ -14,20 +14,20 @@ export const SHOP_ART = {
   petShop: "ui-pet-shop",
 } as const;
 
-// The padlock's art for each shape.
-export const PADLOCK_KEYS: Readonly<Record<Padlock, string>> = {
-  closed: "icon-lock",
-  open: "icon-lock-open",
+// Each badge's art.
+export const BADGE_KEYS: Readonly<Record<Badge, string>> = {
+  bill: "icon-bill",
+  lock: "icon-lock",
 };
 
-// The padlock over an item's top-left corner, or nothing while the art is missing.
-export function addLock(
+// The badge over an item's top-left corner, or nothing while the art is missing.
+export function addBadge(
   scene: Scene,
   parent: GameObjects.Container,
-  padlock: Padlock,
+  badge: Badge,
   at: { x: number; y: number },
 ): void {
-  const key = PADLOCK_KEYS[padlock];
+  const key = BADGE_KEYS[badge];
   if (scene.textures.exists(key)) {
     parent.add(scene.add.image(at.x, at.y, key).setOrigin(0));
   }

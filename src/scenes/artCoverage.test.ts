@@ -62,7 +62,7 @@ import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
 import { hitBurstKey, hitLook } from "./hitMoment";
 import { DETAIL_WELL_KEY } from "./homePanels";
-import { PADLOCK_KEYS, SHOP_ART } from "./itemArt";
+import { BADGE_KEYS, SHOP_ART } from "./itemArt";
 
 const manifest = parseManifest(shippedManifest);
 const images = new Set(manifest.images.map(({ key }) => key));
@@ -224,11 +224,11 @@ describe("Pet shop art", () => {
 });
 
 describe("image art", () => {
-  it("names a portrait, message icon, padlock, well, effect icon and section fill for each use", () => {
+  it("names a portrait, message icon, badge, well, effect icon and section fill for each use", () => {
     const lists: [string, () => string[]][] = [
       ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
       ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
-      ["a padlock for every lock shape", () => Object.values(PADLOCK_KEYS)],
+      ["an icon for every badge", () => Object.values(BADGE_KEYS)],
       ["a detail card well", () => [DETAIL_WELL_KEY]],
       [
         "an effect icon for every upgrade, gear item and walker perk",

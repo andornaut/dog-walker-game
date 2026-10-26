@@ -126,11 +126,11 @@ export const HOME_LAYOUT = {
   // side. Its name and a locked dog's price plate start textX in and keep padRight inside its
   // right edge. An owned dog's name has its capitals centred on the face (dogTileNameY); a
   // locked dog's name has its capitals lockedNameY down, and its plate's lowest ink sits
-  // plateFoot above the tile's bottom (dogTilePlateY). A locked dog's padlock sits over the
+  // plateFoot above the tile's bottom (dogTilePlateY). A locked dog's badge sits over the
   // tile's top-left corner.
   dogTile: {
+    badge: { dx: -2, dy: -3 },
     face: { dx: 4, dy: 5, size: 32 },
-    lock: { dx: -2, dy: -3 },
     lockedNameY: 4,
     padRight: 3,
     plateFoot: 1,
@@ -169,13 +169,13 @@ export const HOME_LAYOUT = {
     y: 86,
   },
   // The Pocket's row of gear cells under its section's band, across the walker row's span, each
-  // drawing its tile 1px inside. In a tile: the icon box and the art in it, the padlock over its
+  // drawing its tile 1px inside. In a tile: the icon box and the art in it, the badge over its
   // top-left corner, and the price plate's caps, centred.
   pocket: {
+    badge: { dx: -2, dy: -3 },
     box: { dx: 12, dy: 3, size: 34 },
     cells: POCKET_TILES,
     icon: { dx: 13, dy: 4 },
-    lock: { dx: -2, dy: -3 },
     origin: { x: WALKER_ORIGIN_X, y: POCKET_SECTION.y + POCKET_CELLS_OFFSET },
     priceY: 28,
     tileInset: 1,
@@ -284,14 +284,14 @@ export const HOME_LAYOUT = {
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: WALKER_ORIGIN_X, y: WALKER_SECTION.y + TILE_OFFSET },
   // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
-  // the box at icons.dy (a walker has one perk), a locked walker's padlock over the tile's
+  // the box at icons.dy (a walker has one perk), a locked walker's badge over the tile's
   // top-left corner, and every walker's name plate, its caps at plateY, centred. The tiles sit
   // 7px inside the section's inner frame edge, leaving the selected badge's overhang on screen.
   walkerTile: {
+    badge: { dx: -2, dy: -3 },
     box: WALKER_BOX,
     face: { dx: 4, dy: 5 },
     icons: { dx: 46, dy: [5] },
-    lock: { dx: -2, dy: -3 },
     plateY: WALKER_TEXT_Y,
   },
   walkerTiles: WALKER_TILES,

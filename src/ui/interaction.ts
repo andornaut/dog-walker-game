@@ -78,28 +78,29 @@ export function itemTile(input: ItemTileInput): ItemTile {
   return capacity > 1 && pickedCount >= capacity ? { kind: "packFull" } : { kind: "available" };
 }
 
-// The padlock over an item not owned: open while the bank covers its price, closed otherwise.
-export type Padlock = "closed" | "open";
+// The badge over an item not owned: a dollar bill while the bank covers its price, a padlock
+// otherwise.
+export type Badge = "bill" | "lock";
 
 // How an item's portrait or icon draws: in full color, or as its grey copy.
 export type ArtLook = "color" | "grey";
 
 // Everything an item's state sets on its tile or row: its portrait's or icon's look, the
-// padlock, the plate and the ui-tile state. The art is grey on a disabled tile, except on one
+// badge, the plate and the ui-tile state. The art is grey on a disabled tile, except on one
 // the player can buy now, whose art shows in full color, on its light grey box, on the grey tile.
 export interface ItemLook {
   readonly art: ArtLook;
-  readonly padlock: Padlock | null;
+  readonly badge: Badge | null;
   readonly plate: PlateKind | null;
   readonly state: TileState;
 }
 
-const OWNED_LOOK = { padlock: null, plate: null } as const;
+const OWNED_LOOK = { badge: null, plate: null } as const;
 
-// An item tile on the home screen. An owned item shows in full color with no padlock or
+// An item tile on the home screen. An owned item shows in full color with no badge or
 // plate, greyed while the pack is full. One not owned is a disabled tile, as the shop's row
-// is: while the player can buy it, its art in full color with the open padlock and the buy
-// plate; when not, its art greyed with the closed padlock and the short plate, or the goal
+// is: while the player can buy it, its art in full color with the dollar bill and the buy
+// plate; when not, its art greyed with the padlock and the short plate, or the goal
 // plate when a goal unlocks it.
 export function itemTileLook(tile: ItemTile): ItemLook {
   switch (tile.kind) {
@@ -111,10 +112,10 @@ export function itemTileLook(tile: ItemTile): ItemLook {
       return { ...OWNED_LOOK, art: "grey", state: "disabled" };
     case "locked":
       return tile.affordable
-        ? { art: "color", padlock: "open", plate: "buy", state: "disabled" }
-        : { art: "grey", padlock: "closed", plate: "short", state: "disabled" };
+        ? { art: "color", badge: "bill", plate: "buy", state: "disabled" }
+        : { art: "grey", badge: "lock", plate: "short", state: "disabled" };
     case "goal":
-      return { art: "grey", padlock: "closed", plate: "goal", state: "disabled" };
+      return { art: "grey", badge: "lock", plate: "goal", state: "disabled" };
     default:
       return tile satisfies never;
   }

@@ -75,7 +75,7 @@ import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
-import { addLock, addPlate, drawDogSlotFallback, plateColors, SHOP_ART } from "./itemArt";
+import { addBadge, addPlate, drawDogSlotFallback, plateColors, SHOP_ART } from "./itemArt";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirmView";
@@ -803,7 +803,7 @@ export class ShopScene extends Scene {
       tile.container.y += FEEDBACK.pressDipPx;
     }
     const content = tile.content;
-    const { box, lock } = ROW;
+    const { badge, box } = ROW;
     const boxRect = {
       height: box.size,
       width: box.size,
@@ -815,8 +815,8 @@ export class ShopScene extends Scene {
       x: boxRect.x + ROW.art,
       y: boxRect.y + ROW.art,
     });
-    if (view.padlock !== null) {
-      addLock(this, content, view.padlock, { x: rect.x + lock.dx, y: rect.y + lock.dy });
+    if (view.badge !== null) {
+      addBadge(this, content, view.badge, { x: rect.x + badge.dx, y: rect.y + badge.dy });
     }
     const ink = PALETTE[tile.look.text];
     const mid = rect.y + Math.floor(rect.height / 2);

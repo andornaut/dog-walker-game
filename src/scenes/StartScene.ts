@@ -131,7 +131,7 @@ import type { CelebrationSceneData } from "./CelebrationScene";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
-import { addLock, addPlate, drawPetShopFallback, plateColors, SHOP_ART } from "./itemArt";
+import { addBadge, addPlate, drawPetShopFallback, plateColors, SHOP_ART } from "./itemArt";
 import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
@@ -370,7 +370,7 @@ const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 // The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound and
 // Settings at its right; the walker and pack at the gate beside the Pet shop; the Walker, Dogs
 // and Pocket sections and Start walk. Buying happens only in the shop: tapping the building
-// opens it, and tapping a locked dog, gear item or the Dogs band's padlock opens it on that
+// opens it, and tapping a locked dog, gear item or the dog slot sign opens it on that
 // item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
 // opens help, S settings, L the logbook and M mutes. Start walk and help wait for boot to load
@@ -1610,7 +1610,7 @@ export class StartScene extends Scene {
         pickedCount: this.loadout.dogs.length,
         price: purchasePrice(gameData, owned, purchase),
       });
-      const { art, padlock, state } = itemTileLook(tile);
+      const { art, badge, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
         // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
         badge: "tick",
@@ -1619,7 +1619,7 @@ export class StartScene extends Scene {
         tile: true,
       });
       const ink = PALETTE[look.text];
-      const { face: faceBox, lock: dogLock, lockedNameY, textX } = DOG_TILE;
+      const { badge: badgeAt, face: faceBox, lockedNameY, textX } = DOG_TILE;
       fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: faceBox.size + 2,
         width: faceBox.size + 2,
@@ -1627,10 +1627,10 @@ export class StartScene extends Scene {
         y: y + faceBox.dy - 1,
       });
       const faceKey = dogFaceKey(gameData, id);
-      const faceTag = padlock === null ? "happy" : "neutral";
+      const faceTag = badge === null ? "happy" : "neutral";
       const faceAt = { x: x + faceBox.dx, y: y + faceBox.dy };
       // A dog not owned holds its first frame, in color while the player can buy it.
-      const still = reduced || padlock !== null;
+      const still = reduced || badge !== null;
       const face = addTileSprite(this, art, still, faceKey, faceTag, faceAt);
       content.add(face);
       view.face = { object: face, y: faceAt.y };
@@ -1640,14 +1640,14 @@ export class StartScene extends Scene {
         const label = this.text(content, x + textX, top, value, ink);
         names.push({ label, room: DOG_TILE_TEXT_ROOM, x: x + textX, y: top });
       };
-      if (padlock === null) {
+      if (badge === null) {
         // Every dog earns the same pay, so an owned tile names the dog alone; its card says the pay.
         fitText(dog.name, y + dogTileNameY(body));
         return;
       }
-      // A locked dog shows its name over its price plate, and its padlock.
+      // A locked dog shows its name over its price plate, and its badge.
       fitText(dog.name, y + lockedNameY);
-      addLock(this, content, padlock, { x: x + dogLock.dx, y: y + dogLock.dy });
+      addBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
       const plateY = dogTilePlateY(body);
       this.lockedPlate(content, tile, { capY: y + plateY - 1, originX: 0, x: x + textX });
     });
@@ -1672,14 +1672,14 @@ export class StartScene extends Scene {
         pickedCount: pocketed === null ? 0 : 1,
         price: purchasePrice(gameData, owned, purchase),
       });
-      const { art, padlock, state } = itemTileLook(tile);
+      const { art, badge, state } = itemTileLook(tile);
       const { content, view } = this.selectTile(root, `gear:${id}`, rect, {
         badge: "tick",
         edge: true,
         state,
         tile: true,
       });
-      const { box, icon: iconAt, lock } = POCKET;
+      const { badge: badgeAt, box, icon: iconAt } = POCKET;
       fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
         width: box.size,
@@ -1691,8 +1691,8 @@ export class StartScene extends Scene {
       if (icon !== undefined) {
         view.face = { object: icon, y: at.y };
       }
-      if (padlock !== null) {
-        addLock(this, content, padlock, { x: x + lock.dx, y: y + lock.dy });
+      if (badge !== null) {
+        addBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
         const plateAt = { capY: y + POCKET.priceY, originX: 0.5, x: x + width / 2 };
         this.lockedPlate(content, tile, plateAt);
       }
@@ -1740,14 +1740,14 @@ export class StartScene extends Scene {
       const rect = itemAt(tiles, i);
       const { x, y } = rect;
       const tile = walkerTile(gameData, save, id);
-      const { art, padlock, state } = itemTileLook(tile);
+      const { art, badge, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
         badge: "tick",
         edge: true,
         state,
         tile: true,
       });
-      const { box, face: faceAt, icons, lock, plateY } = WALKER_TILE;
+      const { badge: badgeAt, box, face: faceAt, icons, plateY } = WALKER_TILE;
       fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
         width: box.size,
@@ -1769,8 +1769,8 @@ export class StartScene extends Scene {
           originY: 0.5,
         });
       }
-      if (padlock !== null) {
-        addLock(this, content, padlock, { x: x + lock.dx, y: y + lock.dy });
+      if (badge !== null) {
+        addBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
       }
       // Every walker's name on the goal plate, owned or locked.
       const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };

@@ -27,10 +27,10 @@ type StateName = "affordable" | "locked" | "owned" | "short";
 // What each state shows on the start screen, from the shop states' table: the portrait or
 // icon in color once the bank reaches the price, and grey a cent short.
 const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
-  affordable: { art: "color", padlock: "open", plate: "buy", state: "disabled" },
-  locked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
-  owned: { art: "color", padlock: null, plate: null, state: "normal" },
-  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
+  affordable: { art: "color", badge: "bill", plate: "buy", state: "disabled" },
+  locked: { art: "grey", badge: "lock", plate: "goal", state: "disabled" },
+  owned: { art: "color", badge: null, plate: null, state: "normal" },
+  short: { art: "grey", badge: "lock", plate: "short", state: "disabled" },
 };
 
 const dogPrice = (dog: DogId) => purchasePrice(gameData, OWNED, { dog, kind: "dog" }) ?? cents(0);

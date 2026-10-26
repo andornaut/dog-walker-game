@@ -60,14 +60,14 @@ export const SHOP_LAYOUT = {
     textDx: 10,
   },
   panel: PANEL,
-  // In a row: the 36x36 art box and the art in it, the padlock over the row's top-left
+  // In a row: the 36x36 art box and the art in it, the badge over the row's top-left
   // corner, the name and line, and the price plate or OWNED (ownedDx left of the tick's right
   // edge) plateInset inside the right edge, the name and line keeping textGap clear of it. A
   // row is width wide, or scrollWidth beside a scrollbar.
   row: {
     art: 2,
+    badge: { dx: -2, dy: -3 },
     box: { dx: 4, size: 36 },
-    lock: { dx: -2, dy: -3 },
     ownedDx: 20,
     plateInset: 6,
     scrollWidth: ROW_SCROLL_WIDTH,
