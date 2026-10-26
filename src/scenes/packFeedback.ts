@@ -17,8 +17,8 @@ import { fadeAway } from "./uiKit";
 const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
 
 // A floating chip's text is font-title at 2x; the chip reaches 2px past the capitals.
-export const TITLE_SCALE = 2;
-export const CHIP_PAD = 2;
+const TITLE_SCALE = 2;
+const CHIP_PAD = 2;
 
 interface PackMoment {
   depth: number;
@@ -59,7 +59,7 @@ export function playForgiven(
 
 // font-title at 2x on a floating chip, held fully opaque for holdMs, then rising and fading out
 // over the rest of ms; with reduced motion it fades in place.
-function floatLabel(
+export function floatLabel(
   scene: Scene,
   moment: PackMoment,
   anchor: LabelAnchor,
@@ -90,7 +90,7 @@ function floatLabel(
 // A cream chip in a plum rim round parts, placed from its top-left: width wide, and CHIP_PAD
 // past the title font's capitals at TITLE_SCALE, above more over them. It is centred on the
 // anchor (moved in to stay on screen) with its line's bottom there, and fades away as fade says.
-export function floatChip(
+function floatChip(
   scene: Scene,
   depth: number,
   anchor: LabelAnchor,

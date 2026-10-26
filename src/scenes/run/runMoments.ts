@@ -82,7 +82,7 @@ import type { RunState } from "../../state/runState";
 import { fillRect } from "../../ui/phaser/draw";
 import { PALETTE } from "../../ui/phaser/palette";
 import { pixelLinePoints } from "../../ui/pixelShapes";
-import { floatStruck, popCharm } from "../buffCharm";
+import { floatValue, popCharm } from "../buffCharm";
 import { FEEDBACK_ART } from "../feedbackArt";
 import { hitLabelOf, hitLook, playEdgeFlash, playHitMoment, playMinorHitLabel } from "../hitMoment";
 import { sayMessage } from "../messageStripView";
@@ -442,9 +442,10 @@ export class RunMoments {
     marks.glints.forEach((item) => this.scene.events.emit(BUFF_GLINT_EVENT, item));
   }
 
-  // Each buff's pop: its charm, lit, with its well glinting, a chip of the value it struck, a
-  // reach's dotted line, and a forgiven bump's heart turning from loss to gain as its charm
-  // shows beside the walker.
+  // Each buff's pop: its well glinting, its charm, lit, unless the pop shows none, a chip of the
+  // value it made (over the charm, or just over the item where no charm shows), a reach's
+  // dotted line, and a forgiven bump's heart turning from loss to gain as its charm shows beside
+  // the walker.
   private popBuffs(pops: readonly BuffPop[]): void {
     const still = this.deps.still();
     for (const pop of pops) {
@@ -455,11 +456,14 @@ export class RunMoments {
       const at = { x: rect.x - pop.index * (CHARM.size + CHARM.gap), y: rect.y };
       const shownAtMs = pop.forgiven === null ? 0 : BUFF_POP.switchMs;
       const show = () => {
-        popCharm(this.scene, { depth: DEPTH.fx, shownAtMs, still }, pop.item, at);
+        if (pop.charm) {
+          popCharm(this.scene, { depth: DEPTH.fx, shownAtMs, still }, pop.item, at);
+        }
         this.scene.events.emit(BUFF_GLINT_EVENT, pop.item);
         if (pop.chip !== null) {
-          const anchor = { centreX: at.x + CHARM.size / 2, lineBottom: at.y - BUFF_POP.gap };
-          floatStruck(this.scene, { depth: DEPTH.fx + 1, shownAtMs, still }, anchor, pop.chip);
+          const lineBottom = pop.charm ? at.y - BUFF_POP.gap : at.y + CHARM.size;
+          const anchor = { centreX: at.x + CHARM.size / 2, lineBottom };
+          floatValue(this.scene, { depth: DEPTH.fx + 1, shownAtMs, still }, anchor, pop.chip);
         }
       };
       if (pop.reach !== null) {

@@ -49,6 +49,7 @@ const option = (modified: readonly ModifiedValue[], text = "Hose it off"): Optio
 describe("optionMarks", () => {
   const forgiven = value({ dog: "koda", kind: "hearts" }, -1, [[1, CASEY]]);
   const waived = value({ kind: "money" }, -1000, [[1000, SWEET_TALKER]]);
+  const cut = value({ kind: "money" }, -1000, [[500, SWEET_TALKER]]);
   const skip = value({ kind: "skip" }, 0, [[1, { gear: "hallPass", kind: "gear" }]]);
   it.each([
     {
@@ -60,21 +61,30 @@ describe("optionMarks", () => {
       expected: {
         charms: [{ kind: "upgrade", upgrade: "sweetTalker" }],
         forgiven: null,
-        plaque: { after: card.free, before: "$10" },
+        plaque: card.free,
       },
-      name: "a cost Sweet talker waived",
+      name: "a cost Sweet talker waived, as FREE alone",
       view: option([waived]),
+    },
+    {
+      expected: {
+        charms: [{ kind: "upgrade", upgrade: "sweetTalker" }],
+        forgiven: null,
+        plaque: "$5",
+      },
+      name: "a cost a buff cut, as the lowered price alone",
+      view: option([cut]),
     },
     {
       expected: {
         charms: [caseyPerk],
         forgiven: {
           name: gameData.walkerPerks[caseyPerk.perk].name,
-          rows: [{ after: `0♥ ${koda}`, before: "−1♥" }],
+          rows: [`0♥ ${koda}`],
         },
         plaque: null,
       },
-      name: "a loss the walker's perk forgives",
+      name: "a loss the walker's perk forgives, as the hearts left alone",
       view: option([forgiven], fillNames(card.heartForgiven, { dog: koda, hearts: "1" })),
     },
     {
@@ -86,7 +96,7 @@ describe("optionMarks", () => {
       expected: {
         charms: [{ gear: "hallPass", kind: "gear" }],
         forgiven: null,
-        plaque: { after: card.free, before: null },
+        plaque: card.free,
       },
       name: "the Skip Hall pass offers",
       view: undefined,
@@ -105,8 +115,9 @@ describe("popsOf", () => {
     laneSpan: 1,
     y: 0,
   });
-  const plain = { chip: null, forgiven: null, index: 0, reach: null };
+  const plain = { charm: true, chip: null, forgiven: null, index: 0, reach: null };
   const big = { kind: "upgrade", upgrade: "bigTipper" } as const;
+  const hallPass = { gear: "hallPass", kind: "gear" } as const;
   it.each<{ expected: BuffPop[]; name: string; popped: PoppedValue }>([
     {
       expected: [
@@ -130,16 +141,33 @@ describe("popsOf", () => {
         {
           ...plain,
           at: { item: 1, kind: "item" },
-          chip: { after: "+$2", before: "+$1" },
-          item: { kind: "upgrade", upgrade: "bigTipper" },
+          charm: false,
+          chip: "+$2",
+          item: big,
         },
       ],
-      name: "a tip Big tipper raised, with its chip",
+      name: "a tip Big tipper raised, as the new amount's chip with no charm",
       popped: {
         bump: false,
         dog: null,
         item: item("tip"),
         value: value({ kind: "money" }, 100, [[100, big]]),
+      },
+    },
+    {
+      expected: [
+        { ...plain, at: { item: 1, kind: "item" }, charm: false, chip: "+$3", item: big },
+        { ...plain, at: { item: 1, kind: "item" }, charm: false, index: 1, item: hallPass },
+      ],
+      name: "a tip two buffs raised, as one chip with no charm",
+      popped: {
+        bump: false,
+        dog: null,
+        item: item("tip"),
+        value: value({ kind: "money" }, 100, [
+          [100, big],
+          [100, hallPass],
+        ]),
       },
     },
     {
@@ -166,14 +194,11 @@ describe("popsOf", () => {
         {
           ...plain,
           at: { kind: "pack" },
-          chip: {
-            after: fillNames(seconds, { seconds: "4" }),
-            before: fillNames(seconds, { seconds: "8" }),
-          },
+          chip: fillNames(seconds, { seconds: "4" }),
           item: { kind: "perk", perk: "calmVoice" },
         },
       ],
-      name: "a debuff Calm voice shortened, with its chip",
+      name: "a debuff Calm voice shortened, with its charm and the new seconds' chip",
       popped: {
         bump: false,
         dog: null,

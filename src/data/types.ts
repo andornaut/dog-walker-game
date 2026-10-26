@@ -672,8 +672,8 @@ export interface RunText {
     readonly forkFees: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
-    // A plaque whose cost a modifier, such as Sweet talker, waived, after the struck price; and
-    // the plaque of the Skip a modifier, such as Hall pass, offers.
+    // A plaque whose cost a modifier, such as Sweet talker, waived; and the plaque of the Skip a
+    // modifier, such as Hall pass, offers.
     readonly free: string;
     // In an option's text, in place of a dog's heart loss Second chance would forgive; it may
     // name the loss as {hearts}.
@@ -741,7 +741,7 @@ export interface RunText {
   // The front dog's card tag while ui-lead-tag is missing.
   readonly lead: string;
   readonly lowHearts: string;
-  // A debuff's length in seconds on a struck chip, such as Calm voice's "8s" then "4s".
+  // A debuff's length in seconds on a road chip, such as the "4s" Calm voice leaves.
   readonly seconds: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about

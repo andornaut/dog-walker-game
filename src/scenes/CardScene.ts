@@ -10,7 +10,7 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { type OptionMarks, optionMarks, type Struck } from "../hud/buffMarks";
+import { type OptionMarks, optionMarks } from "../hud/buffMarks";
 import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
@@ -58,7 +58,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { DISABLED_COLORS, GREYED } from "../ui/selection";
-import { addCharm, addStruck, struckWidth } from "./buffCharm";
+import { addCharm } from "./buffCharm";
 import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -413,7 +413,7 @@ export class CardScene extends Scene {
         ? this.addFiresMarker(x + LARGE.fires.x, y + LARGE.fires.y + shift, 2, false)
         : undefined;
     if (marks.plaque !== null) {
-      this.addPlaqueStruck(badge, marker, 9, marks.plaque);
+      this.addPlaqueValue(badge, marker, 9, marks.plaque);
     } else if (hasPlaque(option)) {
       this.addPlaqueText(badge, marker, 9, PALETTE.plum, option);
     }
@@ -508,23 +508,22 @@ export class CardScene extends Scene {
     });
   }
 
-  // A plaque's struck price and what the buff made it, in the title font, centred as
-  // addPlaqueText centres its text, capsY under the plaque's top.
-  private addPlaqueStruck(
+  // The price a buff made of a plaque's, in forest in the title font, centred as addPlaqueText
+  // centres its text, capsY under the plaque's top.
+  private addPlaqueValue(
     badge: Rect,
     marker: number | undefined,
     capsY: number,
-    struck: Struck,
+    text: string,
   ): void {
-    const center = plaqueCentre(badge, marker);
-    const style = { font: "title", scale: 1 } as const;
-    const width = struckWidth(this, struck, style);
-    addStruck(this, struck, { x: Math.round(center - width / 2), y: badge.y + capsY }, style);
+    this.centered(plaqueCentre(badge, marker), badge.y + capsY, text, PALETTE.forest, {
+      font: "title",
+    });
   }
 
-  // A forgiven loss in place of the effect text: each owner's loss struck, then the hearts it
-  // leaves them, a row each in the body font at scale, and the forgiving perk's name under
-  // them, centred on x or from it. Returns its parts and the height their ink takes.
+  // A forgiven loss in place of the effect text: the hearts it leaves each owner's dog, a row
+  // each in forest in the body font at scale, and the forgiving perk's name under them, centred
+  // on x or from it. Returns its parts and the height their ink takes.
   private addForgiven(
     forgiven: NonNullable<OptionMarks["forgiven"]>,
     at: { align: "centre" | "left"; x: number },
@@ -533,12 +532,11 @@ export class CardScene extends Scene {
   ): { height: number; parts: GameObjects.GameObject[] } {
     const metrics = pixelFontMetrics(this, "body");
     const row = metrics.lineHeight * scale;
-    const style = { font: "body", scale } as const;
-    const parts = forgiven.rows.flatMap((struck, i) => {
-      const width = struckWidth(this, struck, style);
-      const x = at.align === "centre" ? Math.round(at.x - width / 2) : at.x;
-      return addStruck(this, struck, { x, y: top + i * row }, style).parts;
-    });
+    const parts = forgiven.rows.map((text, i) =>
+      at.align === "centre"
+        ? this.centered(at.x, top + i * row, text, PALETTE.forest, { scale })
+        : addPixelText(this, at.x, top + i * row, text, { color: PALETTE.forest, scale }),
+    );
     const nameTop = top + forgiven.rows.length * row;
     const name =
       at.align === "centre"
@@ -666,7 +664,7 @@ export class CardScene extends Scene {
         ? this.addFiresMarker(x + CARD.fires.x, y + CARD.fires.y, 1, grey)
         : undefined;
     if (marks.plaque !== null) {
-      this.addPlaqueStruck(badge, marker, 4, marks.plaque);
+      this.addPlaqueValue(badge, marker, 4, marks.plaque);
       this.badges.push(undefined);
       return;
     }

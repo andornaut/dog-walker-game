@@ -16,8 +16,7 @@ import type { MessageLine } from "./messageStrip";
 import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
 
 // What the player sees of a buff changing the game: its charm (the buff's walk bar icon in an
-// effect well) on the card, the road and the bar, and the value it changed struck through
-// beside the value it made.
+// effect well) on the card, the road and the bar, and the value it made.
 
 type MarkData = Pick<
   GameData,
@@ -57,44 +56,33 @@ function uniqueItems(items: readonly EffectItem[]): EffectItem[] {
   return items.filter((item, i) => keys.indexOf(effectIconKey(item)) === i);
 }
 
-// A value struck through, then the value a buff made of it; before is null where nothing is
-// struck, as on a Skip a buff offers.
-export interface Struck {
-  readonly after: string;
-  readonly before: string | null;
-}
-
 // A heart change as a chip says it: "−1♥", "+2♥", and "0♥" for none.
 function heartsText(hearts: number): string {
   return hearts === 0 ? "0♥" : amountText("hearts", hearts);
 }
 
-// A value as a chip over the road says it, before and after: a heart change, a money change
-// ("+$1" then "+$2") or a debuff's seconds ("8s" then "4s"). Null for any other value.
-function chipStrike(data: Pick<GameData, "runText">, value: ModifiedValue): Struck | null {
-  const seconds = (amount: number) =>
-    fillNames(data.runText.seconds, { seconds: String(Math.round(amount)) });
+// The value a buff made, as a chip over the road says it: a money change ("+$2") or a
+// debuff's seconds ("4s"). Null for any other value.
+function chipText(data: Pick<GameData, "runText">, value: ModifiedValue): string | null {
   switch (value.subject.kind) {
-    case "hearts":
-      return { after: heartsText(value.after), before: heartsText(value.before) };
     case "money":
-      return { after: amountText("money", value.after), before: amountText("money", value.before) };
+      return amountText("money", value.after);
     case "debuffSeconds":
-      return { after: seconds(value.after), before: seconds(value.before) };
+      return fillNames(data.runText.seconds, { seconds: String(Math.round(value.after)) });
     default:
       return null;
   }
 }
 
 // What a card shows of the buffs on an option, or on the Skip a buff offers (option
-// undefined): the lit charms on its art window; the plaque, a waived price struck then FREE,
-// or FREE alone on the Skip (null leaves the plaque as the option has it); and a loss the
-// walker's perk forgives, struck then the hearts it leaves, with the perk's name under them, in
-// place of the effect text where that text says only the forgiving.
+// undefined): the lit charms on its art window; the plaque, the price a buff waived or cut
+// (FREE, or the lowered price), or FREE on the Skip (null leaves the plaque as the option has
+// it); and a loss the walker's perk forgives, the hearts it leaves each dog, with the perk's
+// name under them, in place of the effect text where that text says only the forgiving.
 export interface OptionMarks {
   readonly charms: readonly EffectItem[];
-  readonly forgiven: { readonly name: string; readonly rows: readonly Struck[] } | null;
-  readonly plaque: Struck | null;
+  readonly forgiven: { readonly name: string; readonly rows: readonly string[] } | null;
+  readonly plaque: string | null;
 }
 
 const NO_MARKS: OptionMarks = { charms: [], forgiven: null, plaque: null };
@@ -108,9 +96,7 @@ export function optionMarks(
   if (option === undefined) {
     const skips = card.modified.filter(({ subject }) => subject.kind === "skip");
     const charms = uniqueItems(skips.flatMap((value) => charmsOf(data, value)));
-    return charms.length === 0
-      ? NO_MARKS
-      : { ...NO_MARKS, charms, plaque: { after: free, before: null } };
+    return charms.length === 0 ? NO_MARKS : { ...NO_MARKS, charms, plaque: free };
   }
   const charms = uniqueItems(option.modified.flatMap((value) => charmsOf(data, value)));
   const waived = option.modified.find(
@@ -119,10 +105,9 @@ export function optionMarks(
   const plaque =
     waived === undefined || option.path !== undefined
       ? null
-      : {
-          after: waived.after === 0 ? free : formatDollars(cents(-waived.after)),
-          before: formatDollars(cents(-waived.before)),
-        };
+      : waived.after === 0
+        ? free
+        : formatDollars(cents(-waived.after));
   return { charms, forgiven: forgivenMarks(data, option), plaque };
 }
 
@@ -148,10 +133,7 @@ function forgivenMarks(
   const items = uniqueItems(forgiven.flatMap(({ value }) => charmsOf(data, value)));
   return {
     name: items.map((item) => effectName(data, item)).join(", "),
-    rows: forgiven.map(({ dog, value }) => ({
-      after: `${heartsText(value.after)} ${data.dogs[dog].name}`,
-      before: heartsText(value.before),
-    })),
+    rows: forgiven.map(({ dog, value }) => `${heartsText(value.after)} ${data.dogs[dog].name}`),
   };
 }
 
@@ -163,13 +145,15 @@ export type PopAt =
   | { readonly kind: "pack" }
   | { readonly kind: "walker" };
 
-// One buff's pop over the road: its charm at at (index-th of the step's charms there), and a
-// chip of the value it struck. forgiven is a bump the walker's perk forgave, whole or in part,
+// One buff's pop over the road at at (index-th of the step's pops there): its charm unless
+// charm is false, as for a money value, and a chip of the value it made. Each pop glints the
+// buff's walk bar well. forgiven is a bump the walker's perk forgave, whole or in part,
 // whose heart pop turns from loss to gain as the charm shows; reach is a pickup grabbed by
 // Long reach, with a dotted line from its dog (the pack's lead when null) to the item.
 export interface BuffPop {
   readonly at: PopAt;
-  readonly chip: Struck | null;
+  readonly charm: boolean;
+  readonly chip: string | null;
   readonly forgiven: { readonly dog: DogId; readonly whole: boolean } | null;
   readonly index: number;
   readonly item: EffectItem;
@@ -203,7 +187,9 @@ export function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
 
 // One pop per modifier with a charm on each value: a forgiven bump's by the walker's head, a
 // pickup grabbed by reach over the item with its dotted line, any other over its dog, its item
-// or the pack, with a chip of a raised tip or a shortened debuff.
+// or the pack. A money value, such as a tip Big tipper raised, shows no charm, and its first
+// pop carries a chip of the new amount; a shortened debuff's first pop carries a chip of its
+// new seconds beside the charm.
 export function popsOf(
   data: Pick<GameData, "runText" | "walkers">,
   values: readonly PoppedValue[],
@@ -216,12 +202,13 @@ export function popsOf(
           : item !== null
             ? { item: item.id, kind: "item" }
             : { kind: "pack" };
-      return value.by.flatMap((cause): UnplacedPop[] => {
+      const charmed = value.by.flatMap((cause) => {
         const charm = charmItem(data, cause.source);
-        if (charm === null) {
-          return [];
-        }
-        const plain = { chip: null, forgiven: null, item: charm, reach: null };
+        return charm === null ? [] : [{ cause, charm }];
+      });
+      return charmed.flatMap(({ cause, charm }, i): UnplacedPop[] => {
+        const plain = { charm: true, chip: null, forgiven: null, item: charm, reach: null };
+        const chip = i === 0 ? chipText(data, value) : null;
         switch (value.subject.kind) {
           case "hearts":
             return bump && dog !== null && cause.amount > 0
@@ -234,8 +221,9 @@ export function popsOf(
           case "immune":
             return [{ ...plain, at: item === null ? place : { item: item.id, kind: "item" } }];
           case "money":
+            return [{ ...plain, at: place, charm: false, chip }];
           case "debuffSeconds":
-            return [{ ...plain, at: place, chip: chipStrike(data, value) }];
+            return [{ ...plain, at: place, chip }];
           default:
             return [{ ...plain, at: place }];
         }
@@ -296,6 +284,7 @@ export function spawnPops(
     }
     return charmsOf(data, value).map((charm) => ({
       at: { item: item.id, kind: "item" },
+      charm: true,
       chip: null,
       forgiven: null,
       item: charm,
@@ -319,6 +308,7 @@ export function leashPops(
     dogs.flatMap((dog) =>
       charmsOf(data, value).map((charm): UnplacedPop => ({
         at: { dog, kind: "dog" },
+        charm: true,
         chip: null,
         forgiven: null,
         item: charm,
