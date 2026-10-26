@@ -24,6 +24,11 @@ const words = HOME_TEXT.effect;
 const dollars = (key: MoneyKey) => formatDollars(read(TEST_TUNING, "money", key));
 const percent = (key: MultiplierKey) =>
   Math.round((read(TEST_TUNING, "multipliers", key) - 1) * 100);
+// An added agility as a signed percent of the base lane-change speed.
+const agilityPercent = (key: MultiplierKey) => {
+  const added = Math.round(read(TEST_TUNING, "multipliers", key) * 100);
+  return `${added < 0 ? "−" : "+"}${Math.abs(added)}%`;
+};
 
 describe("effectText", () => {
   it("writes each effect's text", () => {
@@ -102,6 +107,16 @@ describe("effectText", () => {
         "starting cash",
         [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
         capitalize(`${words.stats.startMoney} +${dollars("fannyPackStart")}`),
+      ],
+      [
+        "a raised agility as a percent of the base lane-change speed",
+        [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],
+        capitalize(`${words.stats.agility} ${agilityPercent("runningShoesAgility")}`),
+      ],
+      [
+        "a lowered agility as a percent of the base lane-change speed",
+        [{ by: "bigDogAgility", kind: "modifier", operation: "add", stat: "agility" }],
+        capitalize(`${words.stats.agility} ${agilityPercent("bigDogAgility")}`),
       ],
       ["a free Walk on by", [{ kind: "skipOption" }], capitalize(words.skipOption)],
       [

@@ -73,8 +73,17 @@ function heartsText(words: EffectWords, effect: HeartsEffect): string {
   return fillLine(HOME_TEXT_FIELDS.effect, words, "heartsEach", { hearts });
 }
 
+// A fraction as a signed whole percent: 0.3 as "+30%", -0.5 as "−50%".
+function percentText(fraction: number): string {
+  const percent = Math.round(fraction * 100);
+  return `${sign(percent)}${Math.abs(percent)}%`;
+}
+
 function addedText(modifier: Modifier, value: number): string {
   switch (modifier.stat) {
+    // Agility is a multiple of the base lane-change speed, so an added 0.3 is 30% of it.
+    case "agility":
+      return percentText(value);
     case "startMoney":
     case "tipValue":
       return `${sign(value)}${formatDollars(cents(value))}`;
@@ -96,7 +105,6 @@ function modifierChange(data: WordsData, modifier: Modifier): string {
   const words = data.homeText.effect;
   const value = modifierValue(data.tuning, modifier);
   const name = words.stats[modifier.stat];
-  const percent = Math.round((value - 1) * 100);
   if (modifier.operation === "add" && modifier.stat === "freeCards") {
     return value === 1
       ? words.freeCard
@@ -107,7 +115,7 @@ function modifierChange(data: WordsData, modifier: Modifier): string {
       ? `${addedText(modifier, value)} per tip`
       : `${name} ${addedText(modifier, value)}`;
   }
-  return value === 0 ? `no ${name}` : `${name} ${sign(percent)}${Math.abs(percent)}%`;
+  return value === 0 ? `no ${name}` : `${name} ${percentText(value - 1)}`;
 }
 
 function withDuration(words: EffectWords, { duration, text }: Phrase): string {
