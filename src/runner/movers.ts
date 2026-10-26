@@ -588,7 +588,7 @@ export interface MoverDraws {
 }
 
 // How many move delays and lengths each mover draws: as many as the most moves any kind makes.
-const MOVE_DRAWS = 4;
+const MOVE_DRAWS = 5;
 
 const EVEN_DRAWS: MoverDraws = {
   count: 0,
