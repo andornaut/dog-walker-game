@@ -206,6 +206,7 @@ function lanes(data: GameData): HelpPicture {
       path: {
         direction: 1,
         enterTravel: 0,
+        idle: 0,
         lanesPerPixel: LANE_COUNT / SCREEN.road.width,
         motion: "cross",
         movement: "dart",

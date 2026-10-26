@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { randomInt, randomPick, randomStream, seededRandom, streamSeed } from "./random";
+import {
+  randomInt,
+  randomPick,
+  randomStream,
+  seededRandom,
+  streamSeed,
+  weightedPick,
+} from "./random";
 
 const take = (count: number, random: () => number) => Array.from({ length: count }, random);
 
@@ -33,6 +40,18 @@ describe("randomPick", () => {
     expect(randomPick(() => 0, ["a", "b", "c"])).toBe("a");
     expect(randomPick(() => 0.5, ["a", "b", "c"])).toBe("b");
     expect(randomPick(() => 0.99, ["a", "b", "c"])).toBe("c");
+  });
+});
+
+describe("weightedPick", () => {
+  it.each([
+    { draw: 0, picked: "a" },
+    { draw: 0.2, picked: "b" },
+    { draw: 0.79, picked: "b" },
+    { draw: 0.8, picked: "c" },
+    { draw: 0.9999, picked: "c" },
+  ])("picks $picked at a draw of $draw, each item as likely as its weight", ({ draw, picked }) => {
+    expect(weightedPick(() => draw, ["a", "b", "c"], [1, 3, 1])).toBe(picked);
   });
 });
 

@@ -1407,6 +1407,7 @@
       "collisionGrace": 0.7,
       "explainHoldSeconds": 0.3,
       "firingHoldSeconds": 3,
+      "firstZoneContact": 1,
       "hitStopSeconds": 1,
       "laneMove": 0.11,
       "lookAheadSeconds": 3.6,

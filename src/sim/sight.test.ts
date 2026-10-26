@@ -36,6 +36,7 @@ const STEPPER = kindMoving((movement) => movement.kind === "step");
 const dart: MoverPath = {
   direction: 1,
   enterTravel: 100,
+  idle: 0,
   lanesPerPixel: 0.01,
   motion: "cross",
   movement: "dart",
@@ -72,6 +73,13 @@ describe("a sight reading", () => {
       name: "a dart's speed, tilt and stop before it sets off",
       path: dart,
       since: 59,
+    },
+    {
+      hidden: { ...dart, enterTravel: 180, idle: 80, warning: 140 },
+      kind: DART,
+      name: "how long a dart waits at its edge before its cue",
+      path: { ...dart, enterTravel: 140, idle: 40, warning: 100 },
+      since: 30,
     },
     {
       hidden: { ...dart, turnAfter: 3 },

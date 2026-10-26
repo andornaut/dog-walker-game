@@ -1,6 +1,6 @@
 import type { MoveCount, MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { type Random, randomPick } from "../lib/random";
+import { type Random, randomPick, weightedPick } from "../lib/random";
 import type { RoadItem } from "./roadItems";
 
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover
@@ -21,8 +21,9 @@ export interface MoverStep {
 }
 
 // A planned mover. warning is the scroll each cue shows for before its move.
-// cross (dart): its cue is at its row on the edge it enters from, and it sets off when its row
-// has travelled enterTravel down the road, coming down the road at 1 + tilt of the road's speed
+// cross (dart): it waits idle at the edge it enters from, at its row, for idle of its warning, then
+// shows its cue there for the rest, and it sets off when its row has travelled enterTravel down
+// the road, coming down the road at 1 + tilt of the road's speed
 // as it crosses. With turnAfter, once it has crossed that many lanes it turns back, with no cue,
 // and crosses the whole road back the other way. With stopAfter, once it has crossed that many
 // lanes it stops, with no cue, and stands there, coming down the road with it. With both null it
@@ -48,6 +49,7 @@ export type MoverPath = {
   | {
       readonly direction: LaneDirection;
       readonly enterTravel: number;
+      readonly idle: number;
       readonly lanesPerPixel: number;
       readonly motion: "cross";
       readonly stopAfter: number | null;
@@ -227,7 +229,9 @@ export type MoverTell =
 
 export function moverTell(path: MoverPath, since: number): MoverTell | null {
   if (path.motion === "cross") {
-    return since < path.warning ? { direction: path.direction, kind: "across" } : null;
+    return since >= path.idle && since < path.warning
+      ? { direction: path.direction, kind: "across" }
+      : null;
   }
   if (path.motion === "ride") {
     if (since >= path.warning) {
@@ -323,16 +327,33 @@ export function moveMovers<Item extends MoverItem>(
 // its window, the stretch of road over which a one-row spawn on it overlaps the pack, which is
 // window long. rowSpacing is the distance between rows, and cellLength a row of a footprint and a
 // lane's width. laneInset is how far inside its lane a mover's hit box is at each side.
+// packHitLength is the length of the pack's hit boxes, by which a mover's stands are measured.
 export interface MoverGeometry {
   readonly cellLength: number;
   readonly laneCount: number;
   readonly laneInset: number;
+  readonly packHitLength: number;
   readonly packLength: number;
   readonly roadLength: number;
   readonly rowSpacing: number;
   readonly scrollSpeed: number;
   readonly sightLength: number;
   readonly window: number;
+}
+
+// How strongly a placement is drawn toward the lanes left unblocked longest, from the longest run
+// of rows its lanes are clear through: the square of it.
+export function laneBalanceWeight(clearRows: number): number {
+  return clearRows * clearRows;
+}
+
+// A mover's hit length for its stands: its kind's drawn one, or the planned hit length of its
+// footprint, the window less the pack and a row per footprint row past the first.
+function drawnHitLength(geometry: MoverGeometry, spec: MoverSpec): number {
+  return (
+    spec.hitLength ??
+    geometry.window - geometry.packLength + (spec.footprint.rows - 1) * geometry.cellLength
+  );
 }
 
 // Lanes first to first + count - 1.
@@ -558,8 +579,11 @@ interface MoverVariation {
   readonly speedShare: number;
 }
 
+// hitLength is the kind's drawn hit length while it moves, by which its stands are measured;
+// without it, the planned hit length of its footprint.
 export interface MoverSpec {
   readonly footprint: MoverFootprint;
+  readonly hitLength?: number;
   readonly motion: MoverMotion;
   readonly movement: MovementKind;
   readonly variation: MoverVariation;
@@ -736,7 +760,9 @@ function crossTilts(
 // or behind it that the pack can step into. One that has crossed the road by the time it reaches
 // the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps clear every row it
 // is level with as it crosses or stands, and one that meets the pack also the row before its own,
-// as a lead-in.
+// as a lead-in. It appears as its row comes on screen, or at the road's top where its start is
+// farther up the road than its row, and waits idle at its edge until its cue, warningSeconds
+// before it sets off.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -763,6 +789,7 @@ function crossPlacements(
   const along = {
     direction: 1,
     enterTravel: 0,
+    idle: 0,
     lanesPerPixel,
     motion: "cross",
     movement: spec.movement,
@@ -798,7 +825,10 @@ function crossPlacements(
     stopAfter === null
       ? Math.min(((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel, offRoad)
       : offRoad;
-  const appears = sightLength - warning - reaches;
+  // It shows as its row comes on screen, or at the road's top where it starts farther up the road
+  // than its row: waiting idle at its edge until its cue, warning before it sets off.
+  const shown = Math.max(warning, Math.min(enterTravel, sightLength - reaches));
+  const appears = sightLength - shown - reaches;
   // Its hit box's inset at each side, in lanes, and the scroll from setting off to its hit box
   // leaving the road, which one that stops never does.
   const inset = geometry.laneInset / cellLength;
@@ -817,8 +847,20 @@ function crossPlacements(
   const firstRow = Math.floor(Math.min(level(0), level(moving)) + 1e-9);
   const lastRow = Math.ceil(Math.max(level(0), level(moving)) - 1e-9);
   const rows = rowsCovering(geometry, 1, stopAfter === null ? 1 / (1 + tilt) : contact / window);
+  // Its contact as drawn, for its stand: its own hit length and the pack's hit boxes.
+  const drawnWindow = drawnHitLength(geometry, spec) + geometry.packHitLength;
+  const drawnContact =
+    stopAfter === null
+      ? Math.max(0, Math.min(drawnWindow / (1 + tilt), touching - reaches))
+      : scrollTo(sightLength + drawnWindow) - reaches;
   return ([1, -1] as const).map((direction): MoverPlacement => {
-    const path: MoverPath = { ...along, direction, enterTravel };
+    const path: MoverPath = {
+      ...along,
+      direction,
+      enterTravel,
+      idle: shown - warning,
+      warning: shown,
+    };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
     const meets = lanes.count > 0;
     const touched = sweptLanes(laneCount, path, sightLength, sightLength + window, inset);
@@ -831,7 +873,7 @@ function crossPlacements(
       leadIn: meets,
       path,
       rows,
-      screen: [appears, appears + warning + moving],
+      screen: [appears, appears + shown + moving],
       stands:
         touched.count > 0
           ? [
@@ -839,7 +881,7 @@ function crossPlacements(
                 distance: 0,
                 lane: touched.first,
                 lanes: touched.count,
-                length: contact - geometry.packLength,
+                length: drawnContact - geometry.packHitLength,
               },
             ]
           : [],
@@ -851,7 +893,8 @@ function crossPlacements(
 // just as the row's window starts. Faster than the road, it overtakes what is in its lanes,
 // from the rows above its own to those below the pack; slower, those rows overtake it, and it
 // overlaps the pack for longer, which its rows cover. Its speed is its kind's at its drawn
-// factor; every factor keeps it coming down the road.
+// factor; every factor keeps it coming down the road. Its cue shows from as soon as its row comes
+// on screen, and for at least warningSeconds.
 function ridePlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -866,6 +909,8 @@ function ridePlacements(
   const { lanes: across, rows } = spec.footprint;
   const warning = spec.warningSeconds * scrollSpeed;
   const enters = sightLength - sightLength / speedMultiplier;
+  // Its cue shows from as soon as its row comes on screen, and never for less than its warning.
+  const shown = Math.max(warning, enters);
   const leaves = enters + (roadLength + rows * cellLength) / speedMultiplier;
   // The row offset, in distance, that the rider's near end is level with at a scroll.
   const level = (scroll: number) => scroll - speedMultiplier * (scroll - enters);
@@ -880,7 +925,7 @@ function ridePlacements(
   const gone = enters + (roadLength + Math.max(length, rows * cellLength)) / speedMultiplier;
   const [nearest, farthest] = [level(enters), level(gone)].sort((a, b) => a - b);
   return Array.from({ length: laneCount - across + 1 }, (_, lane) => ({
-    appears: enters - warning,
+    appears: enters - shown,
     body: {
       from: nearest ?? 0,
       lanes: { count: across, first: lane },
@@ -896,16 +941,18 @@ function ridePlacements(
       motion: "ride",
       movement: spec.movement,
       speedMultiplier,
-      warning,
+      warning: shown,
     },
     rows: blockRows,
-    screen: [enters - warning, leaves],
+    screen: [enters - shown, leaves],
     stands: [
       {
         distance: 0,
         lane,
         lanes: across,
-        length: (geometry.window + (rows - 1) * cellLength) / speedMultiplier - geometry.packLength,
+        length:
+          (drawnHitLength(geometry, spec) + geometry.packHitLength) / speedMultiplier -
+          geometry.packHitLength,
       },
     ],
   }));
@@ -961,7 +1008,7 @@ function standingPlacements(
         distance: maxTravel - spot.travel,
         lane: start + spot.lane,
         lanes: across,
-        length: window + (rows - 1) * cellLength - geometry.packLength,
+        length: drawnHitLength(geometry, spec),
       })),
     });
   }
@@ -1259,6 +1306,7 @@ export function screenHasRoom(
 // comes: occupy records a mover's body, at distances along the zone, for those.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
+  clearRun(lanes: LaneSpan, row: number): number;
   isFree(dart: boolean, lane: number, row: number): boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
   occupy(body: MoverBody): void;
@@ -1388,10 +1436,23 @@ export function placeMovers<Kind extends string>(
         dropped.push(kind);
         continue;
       }
-      const lane = randomPick(
-        streams.movers,
-        [...new Set(fitting.map(({ placement }) => placement.lane))].sort((a, b) => a - b),
+      const startLanes = [...new Set(fitting.map(({ placement }) => placement.lane))].sort(
+        (a, b) => a - b,
       );
+      // Each start lane is weighted by the clearest run of rows its places' lanes have; one that
+      // blocks no lane by a run of one.
+      const weights = startLanes.map((start) =>
+        laneBalanceWeight(
+          Math.max(
+            ...fitting
+              .filter(({ placement }) => placement.lane === start)
+              .map(({ placement, row }) =>
+                placement.lanes.count === 0 ? 1 : grid.clearRun(placement.lanes, row),
+              ),
+          ),
+        ),
+      );
+      const lane = weightedPick(streams.movers, startLanes, weights);
       const inLane = fitting.filter(({ placement }) => placement.lane === lane);
       const rankOf = ({ placement }: Spot) => placement.rank ?? 0;
       const best = new Map<number, number>();

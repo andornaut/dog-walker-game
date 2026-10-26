@@ -47,11 +47,14 @@ function stepsSeen(
 }
 
 // What a mover shows since scroll after its cue appeared, or it spawned for a stepping mover: a
-// dart its cue, then its crossing, its turn back or its stop; a rider its cue, then its ride; a
+// dart its wait at its edge, its cue, then its crossing, its turn back or its stop; a rider its cue, then its ride; a
 // stepper the steps it has started and the wander mark of the next. Two moments that show the
 // same read the same.
 export function moverShows(path: MoverPath, since: number): string {
   if (path.motion === "cross") {
+    if (since < path.idle) {
+      return "idle";
+    }
     if (since < path.warning) {
       return "cue";
     }
@@ -66,6 +69,9 @@ export function moverShows(path: MoverPath, since: number): string {
   const { cued, started } = stepsSeen(path, since);
   return `${started.length} ${cued === undefined ? "" : "cued"}`;
 }
+
+// The scroll a dart waiting at its edge is read as waiting for: longer than any road.
+const WAITING = 1e6;
 
 // Tilts from min to max, both ends included, at most TILT_STEP apart.
 function tiltsBetween(min: number, max: number): number[] {
@@ -84,8 +90,8 @@ function lengthsSeen(lengths: readonly number[], started: number, nominal: numbe
 // The paths a mover may take as a player reads it from what it shows since scroll after its cue
 // appeared, or it spawned for a stepping mover (moverShows):
 // - a dart, before it sets off, at its kind's speed and at tilts across its kind's range, crossing
-//   once; then at its own speed and tilt, crossing once until it turns back or stops, then as it
-//   does.
+//   once, and while it waits at its edge, as waiting there until it has left the road;
+//   then at its own speed and tilt, crossing once until it turns back or stops, then as it does.
 // - a rider at its kind's speed until it enters, then at its own.
 // - a stepper, stalker or shy hopper with the steps it has started; with its wander mark showing,
 //   also the next step, at its start, as each shape it may take, its kind's length long. An uncued
@@ -110,6 +116,23 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
     const lanesPerPixel = read(tuning, "counts", "dartLanesPerSecond") / road.speed;
     const tilts =
       movement?.kind === "dart" ? tiltsBetween(movement.tilt.min, movement.tilt.max) : [path.tilt];
+    // Waiting at its edge, it is read as waiting there until it has left the road: it shows
+    // nothing of when its cue will begin.
+    if (since < path.idle) {
+      const wait = since + WAITING;
+      return [
+        {
+          ...path,
+          enterTravel: path.enterTravel - path.warning + wait,
+          idle: wait,
+          lanesPerPixel,
+          stopAfter: null,
+          tilt: 0,
+          turnAfter: null,
+          warning: wait,
+        },
+      ];
+    }
     return tilts.map((tilt) => ({
       ...path,
       lanesPerPixel,

@@ -684,9 +684,31 @@ export function planZone(
 ): Walk {
   const { road, run } = walk;
   const length = zoneLength(data);
+  // Each lane-blocking kind's drawn hit length, standing and moving, for the pack-fit gap.
+  const withHitLengths = (quotas: SpawnQuota<WalkItemKind>[]) =>
+    quotas.map((quota) =>
+      !quota.blocksLane
+        ? quota
+        : {
+            ...quota,
+            hitLength: itemHeight(data, geometry, quota.kind, false),
+            ...(quota.mover === undefined
+              ? {}
+              : {
+                  mover: {
+                    ...quota.mover,
+                    hitLength: itemHeight(data, geometry, quota.kind, true),
+                  },
+                }),
+          },
+    );
   const plan = {
     cellInset: plannedCellInset(data, geometry),
     cellLength: geometry.cell.length,
+    // The walk's first zone starts with spawns on the road in view.
+    ...(run.zoneIndex === 0
+      ? { firstContactSeconds: read(data.tuning, "seconds", "firstZoneContact") }
+      : {}),
     laneCount: geometry.laneCount,
     laneInset: geometry.cell.inset,
     // The slowest pack's lane move sets the row spacing, so every pack fits every gap.
@@ -699,8 +721,10 @@ export function planZone(
       slowVehicles: read(data.tuning, "counts", "maxSlowVehicles"),
       total: read(data.tuning, "counts", "maxMovers"),
     },
+    // The tallest pack's hit boxes, inside its outline by PART_INSET at each end.
+    packHitLength: geometry.tallestPackBand - 2 * PART_INSET,
     packLength: geometry.tallestPackBand,
-    quotas: spawnQuotas(data, streams, run),
+    quotas: withHitLengths(spawnQuotas(data, streams, run)),
     reactionSeconds: read(data.tuning, "seconds", "pathReactionMargin"),
     roadLength: geometry.roadBottom - geometry.roadTop,
     scrollSpeed: walkScrollSpeed(data, run),

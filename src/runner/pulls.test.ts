@@ -98,6 +98,7 @@ const item = (kind: WalkItem["kind"], id: number, lane: number, y = 100): WalkIt
 const DARTING: MoverPath = {
   direction: -1,
   enterTravel: 200,
+  idle: 0,
   lanesPerPixel: 0.001,
   motion: "cross",
   movement: "dart",
@@ -280,6 +281,7 @@ describe("the fairness rule", () => {
     const crosser: MoverPath = {
       direction: 1,
       enterTravel: 500,
+      idle: 0,
       lanesPerPixel: 2.5 / 32,
       motion: "cross",
       movement: "dart",

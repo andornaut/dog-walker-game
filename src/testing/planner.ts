@@ -14,7 +14,7 @@ import type {
 } from "../data/types";
 import { DEFAULT_WALKER, WALKERS } from "../data/walkers";
 import { WORLD } from "../data/world";
-import type { PackSprites } from "../layout/packFormation";
+import { type PackSprites, PART_INSET } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { read } from "../rules/units";
@@ -99,11 +99,13 @@ export const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState
 });
 // The slowest pack's lane move, which sets the row spacing.
 export const slowestLaneMove = read(TUNING, "seconds", "laneMove") / slowestPackAgility(REAL);
-export const walkwayOf = (tuned: Real, run: RunState) => ({
+// The walkway from the zone's start, as blockingSpans measures it: its whole scroll, until the
+// zone's last row has passed the pack.
+export const walkwayOf = (tuned: Real, road: RoadGeometry, run: RunState) => ({
   laneCount: LANE_COUNT,
   laneMoveSeconds: slowestLaneMove,
   scrollSpeed: walkScrollSpeed(tuned, run),
-  zoneLength: zoneLength(tuned),
+  zoneLength: zoneLength(tuned) + road.sightLength,
 });
 // The walker whose pace scrolls the road fastest.
 export const FASTEST_WALKER = (Object.keys(WALKERS) as WalkerId[]).reduce((fastest, walker) => {
@@ -120,10 +122,10 @@ export const LANE_MOVE_WALKERS = (() => {
   const walkers = (Object.keys(WALKERS) as WalkerId[]).sort((a, b) => road(a) - road(b));
   return [itemAt(walkers, 0), itemAt(walkers, walkers.length - 1)];
 })();
-// The greatest common divisor: the row spacing, of distances on rows.
+// The greatest common divisor: the row spacing, of distances on rows, some of them negative.
 export const gcdOf = (values: readonly number[]): number =>
   values.reduce((a, b) => {
-    let [x, y] = [a, b];
+    let [x, y] = [Math.abs(a), Math.abs(b)];
     while (y !== 0) {
       [x, y] = [y, x % y];
     }
@@ -140,6 +142,25 @@ export const plannedHeight = (
   blocksLane(tuned, kind)
     ? footprintOf(tuned, kind).rows * road.cell.length - 2 * plannedCellInset(tuned, road)
     : itemHeight(tuned, road, kind, false);
+// The length of the tallest pack's hit boxes, inside its outline by PART_INSET at each end, which
+// the pack-fit gap keeps clear.
+export const packHitLength = (road: RoadGeometry): number => road.tallestPackBand - 2 * PART_INSET;
+// How the pack-fit check measures a spawn: planned, at the planner's hit length for its
+// footprint and the tallest pack's outline; or drawn, at its kind's drawn hit length and the
+// tallest pack's hit boxes.
+export type Sizing = "drawn" | "planned";
+// A spawn's hit length and the pack's length, as sizing measures them.
+const sized = (
+  sizing: Sizing,
+  tuned: Real,
+  road: RoadGeometry,
+  zone: ZoneId,
+  kind: WalkItem["kind"],
+  moving: boolean,
+): { height: number; pack: number } =>
+  sizing === "planned"
+    ? { height: plannedHeight(tuned, road, zone, kind), pack: road.tallestPackBand }
+    : { height: itemHeight(tuned, road, kind, moving), pack: packHitLength(road) };
 // A standing spawn's span on the game's road.
 export const standingSpan = (
   tuned: Real,
@@ -156,17 +177,19 @@ export type MoverEvent = { distance: number; kind: WalkItem["kind"]; mover: Move
 // The scroll since its cue over which moverSpans and moverContact look for a mover's contact.
 export const MOVER_SCROLL = Math.ceil(4 * ROAD_LENGTH);
 // Each way a mover may move, the lanes of the game's road its hit box overlaps the pack in at a
-// scroll since its cue: a stalker's every way of choosing its steps, or the mover's one path. As
-// collision cuts it, the box spans half a lane either side of each lane it covers, less the
-// inset at each side, so one between lanes touches both.
+// scroll since its cue, as sizing measures it: a stalker's every way of choosing its steps, or the
+// mover's one path. As collision cuts it, the box spans half a lane either side of each lane it
+// covers, less the inset at each side, so one between lanes touches both.
 function moverContacts(
+  sizing: Sizing,
   tuned: Real,
   road: RoadGeometry,
   zone: ZoneId,
   event: MoverEvent,
 ): ((since: number) => number[])[] {
   const sight = road.sightLength;
-  const window = plannedHeight(tuned, road, zone, event.kind) + road.tallestPackBand;
+  const { height, pack } = sized(sizing, tuned, road, zone, event.kind, true);
+  const window = height + pack;
   const across = footprintOf(tuned, event.kind).lanes;
   const inset = road.cell.inset / road.cell.length;
   const paths = event.mover.motion === "approach" ? approachOutcomes(event.mover) : [event.mover];
@@ -195,15 +218,17 @@ function contactEdge(touches: (since: number) => boolean, inside: number, outsid
   return (touching + clear) / 2;
 }
 // The scroll over which a mover overlaps the pack in any lane, from the first moment to the
-// last, by its distance on the road: moverSpans' pixel steps put each end up to a pixel late,
-// which shows two movers that meet the pack side by side as a gap of under a pixel.
+// last, by its distance on the road, as sizing measures it: moverSpans' pixel steps put each end
+// up to a pixel late, which shows two movers that meet the pack side by side as a gap of under a
+// pixel.
 export function moverContact(
+  sizing: Sizing,
   tuned: Real,
   road: RoadGeometry,
   zone: ZoneId,
   event: MoverEvent,
 ): { end: number; start: number } {
-  const ends = moverContacts(tuned, road, zone, event).flatMap((lanesAt) => {
+  const ends = moverContacts(sizing, tuned, road, zone, event).flatMap((lanesAt) => {
     const touches = (since: number) => lanesAt(since).length > 0;
     const touching = Array.from({ length: MOVER_SCROLL }, (_, since) => since).filter(touches);
     if (touching.length === 0) {
@@ -224,15 +249,16 @@ export function moverContact(
   };
 }
 // A pixel-long span for each pixel of scroll a mover overlaps the pack in each lane of the
-// game's road it covers.
+// game's road it covers, as sizing measures it.
 export function moverSpans(
+  sizing: Sizing,
   tuned: Real,
   road: RoadGeometry,
   zone: ZoneId,
   event: MoverEvent,
 ): BlockingSpan[] {
   const sight = road.sightLength;
-  return moverContacts(tuned, road, zone, event).flatMap((lanesAt) =>
+  return moverContacts(sizing, tuned, road, zone, event).flatMap((lanesAt) =>
     Array.from({ length: MOVER_SCROLL }, (_, since) =>
       lanesAt(since).map((lane) => ({
         distance: event.distance + since - sight,
@@ -243,8 +269,9 @@ export function moverSpans(
     ).flat(),
   );
 }
-// Every lane-blocking spawn's spans on the game's road: a standing one's, or a mover's as it
-// passes the pack.
+// Every lane-blocking spawn's spans on the game's road, at its planned size: a standing one's, or
+// a mover's as it passes the pack. Each is placed by the scroll from the zone's start, so a row
+// on the road in view as the zone starts, at a negative distance, is walked from the start.
 export const blockingSpans = (
   tuned: Real,
   road: RoadGeometry,
@@ -256,5 +283,6 @@ export const blockingSpans = (
     .flatMap((event) =>
       event.mover === undefined
         ? [standingSpan(tuned, road, zone, event)]
-        : moverSpans(tuned, road, zone, { ...event, mover: event.mover }),
-    );
+        : moverSpans("planned", tuned, road, zone, { ...event, mover: event.mover }),
+    )
+    .map((span) => ({ ...span, distance: span.distance + road.sightLength }));

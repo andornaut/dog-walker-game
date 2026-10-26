@@ -177,6 +177,9 @@ export const TUNING = {
     explainHoldSeconds: 0.3,
     // An owner who fires you holds the walk still this long while their moment plays.
     firingHoldSeconds: 3,
+    // The walk's first zone starts with obstacles on the road in view, the first meeting the pack
+    // no sooner than this long in, on the zone's row grid. Placeholder value, for gameplay to tune.
+    firstZoneContact: 1,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
     laneMove: 0.11,

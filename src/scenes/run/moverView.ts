@@ -74,9 +74,10 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // only its cue shows, at 1x, each part only while its art is loaded:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
-// edge during its cue. A crosser that has stopped plays its idle tag if it has one, and otherwise
-// stands on the first frame of the tag it would play. A stepper stands on the road throughout,
-// with the wander mark over it before each step. A lucky find shows no cue. Its other sprites,
+// edge, playing it, while it waits there before its cue and during its cue. A crosser that has
+// stopped plays its idle tag if it has one, and otherwise stands on the first frame of the tag it
+// would play. A stepper stands on the road throughout, with the wander mark over it before each
+// step. A lucky find shows no cue. Its other sprites,
 // after the wander mark, such as a skunk's cloud, go with its body wherever it shows, standing
 // as an obstacle's do.
 export function drawMover(

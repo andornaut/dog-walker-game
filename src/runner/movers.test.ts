@@ -44,6 +44,7 @@ const geometry: MoverGeometry = {
   cellLength: 50,
   laneCount: 5,
   laneInset: 10,
+  packHitLength: 40,
   packLength: 40,
   roadLength: 600,
   rowSpacing: 150,
@@ -59,6 +60,7 @@ const crosser = (
 ): MoverPath => ({
   direction,
   enterTravel: 300,
+  idle: 0,
   lanesPerPixel: 0.02,
   motion: "cross",
   movement: "dart",
@@ -67,6 +69,19 @@ const crosser = (
   turnAfter,
   warning: 100,
 });
+// A crosser that waits idle at its edge for 40px before its 100px cue.
+const waiting: MoverPath = {
+  direction: -1,
+  enterTravel: 300,
+  idle: 40,
+  lanesPerPixel: 0.02,
+  motion: "cross",
+  movement: "dart",
+  stopAfter: null,
+  tilt: 0,
+  turnAfter: null,
+  warning: 140,
+};
 // A crosser that stops once it has crossed stopAfter lanes.
 const stopper = (direction: 1 | -1, tilt: number, stopAfter: number): MoverPath =>
   crosser(direction, tilt, null, stopAfter);
@@ -248,6 +263,20 @@ describe("moverTell and inMotion", () => {
         name: "a crosser's cue",
         path: crosser(-1),
         since: 50,
+        tell: { direction: -1, kind: "across" },
+      },
+      {
+        moving: false,
+        name: "a crosser waiting at its edge before its cue",
+        path: waiting,
+        since: 30,
+        tell: null,
+      },
+      {
+        moving: false,
+        name: "a crosser's cue after its wait",
+        path: waiting,
+        since: 40,
         tell: { direction: -1, kind: "across" },
       },
       { moving: true, name: "a crosser on its way", path: crosser(1), since: 100, tell: null },
@@ -1208,6 +1237,31 @@ describe("moverPlacements", () => {
   it("needs an in-lane mover to move at another speed than the road", () => {
     expect(() => moverPlacements(geometry, spec({ kind: "ride", speedMultiplier: 1 }))).toThrow();
   });
+
+  // A dart shows as its row comes on screen, or from the road's top where it starts farther up
+  // the road than its row, waiting idle until its cue, its warning before it sets off. A rider's
+  // cue shows from as soon as its row comes on screen, for at least its warning.
+  it.each(
+    SPECS.filter(({ spec: moving }) => ["cross", "ride"].includes(moving.motion.kind)).flatMap(
+      ({ name, spec: moving }) => DRAW_ENDS.map(({ draws, end }) => ({ draws, end, moving, name })),
+    ),
+  )(
+    "shows $name by the time its row comes on screen, at $end of its draws",
+    ({ draws, moving }) => {
+      const warning = moving.warningSeconds * geometry.scrollSpeed;
+      for (const { appears, path } of moverPlacements(geometry, moving, draws)) {
+        if (path.motion === "cross") {
+          const atTop = moverPlace(geometry.laneCount, path, 0).travel;
+          expect(path.warning - path.idle).toBeCloseTo(warning);
+          expect(atTop).toBeGreaterThanOrEqual(-1e-9);
+          expect(Math.min(Math.max(0, appears), atTop)).toBeCloseTo(0);
+        } else {
+          expect(path.warning).toBeGreaterThanOrEqual(warning);
+          expect(appears).toBeLessThanOrEqual(1e-9);
+        }
+      }
+    },
+  );
 });
 
 describe("screenHasRoom", () => {
@@ -1305,6 +1359,8 @@ describe("placeMovers", () => {
           }
           return true;
         },
+        // Every lane equally clear, so start lanes are drawn evenly.
+        clearRun: () => 1,
         isFree: (dart: boolean, lane: number, row: number) =>
           !(dart ? darts : taken).has(`${lane},${row}`),
         leavesRoom: () => true,

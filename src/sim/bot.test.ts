@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { PART_INSET } from "../layout/packFormation";
 import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { hitDog } from "../runner/collision";
@@ -388,6 +389,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         cellLength: cell.length,
         laneCount,
         laneInset: cell.inset,
+        packHitLength: tallestPackBand - 2 * PART_INSET,
         packLength: tallestPackBand,
         roadLength: roadBottom - roadTop,
         rowSpacing: read(gameData.tuning, "pixels", "spawnRowSpacing"),
@@ -598,7 +600,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       if (path.motion !== "cross" || mover.movement.kind !== "dart") {
         throw new Error("A dart crosses");
       }
-      const cueOnRoad = 1 - (path.warning + cell.length) / sightLength;
+      const cueOnRoad = 1 - (path.warning - path.idle + cell.length) / sightLength;
       const ahead = (sightLength - path.enterTravel) / sightLength;
       expect(ahead).toBeLessThanOrEqual(cueOnRoad + 1e-9);
       expect((ahead * sightLength) / (1 + path.tilt) / speed).toBeGreaterThanOrEqual(

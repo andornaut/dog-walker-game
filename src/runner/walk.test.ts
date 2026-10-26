@@ -60,7 +60,7 @@ import {
   moverContact,
   type MoverEvent,
   OBSTACLE_IDS,
-  plannedHeight,
+  packHitLength,
   raised,
   REAL,
   type Real,
@@ -134,18 +134,21 @@ function firstInView(mover: MoverPath): number {
 // view in them, the zone's first and last rows included. A row comes on screen at its distance,
 // where a standing spawn on it does, and is overlapped by an obstacle whose contact with the
 // pack meets the row's window; a mover counts there once it is in view as the row comes on. The
-// rows are spacing apart, from spacing on, ending a spacing before the zone's end. A mover's
-// contact gets a pixel either way, so a rounding error at its edges never decides a row.
+// rows are spacing apart, from spacing on, or from the first standing spawn's row where the zone
+// starts with them on the road, ending a spacing before the zone's end. A mover's contact gets a
+// pixel either way, so a rounding error at its edges never decides a row.
 function quietRuns(
   tuned: Real,
   road: RoadGeometry,
   zone: ZoneId,
   pending: Walk["road"]["pending"],
 ): number[] {
-  const spacing = gcdOf(pending.flatMap((e) => (e.mover === undefined ? [e.distance] : [])));
+  const standing = pending.flatMap((e) => (e.mover === undefined ? [e.distance] : []));
+  const spacing = gcdOf(standing);
+  const first = Math.round(Math.min(spacing, ...standing) / spacing);
   const rows = Array.from(
-    { length: Math.floor(zoneLength(tuned) / spacing) - 1 },
-    (_, i) => (i + 1) * spacing,
+    { length: Math.floor(zoneLength(tuned) / spacing) - first },
+    (_, i) => (i + first) * spacing,
   );
   const window = road.cell.length - 2 * plannedCellInset(tuned, road) + road.tallestPackBand;
   const shows = pending
@@ -155,7 +158,10 @@ function quietRuns(
         const { distance, length } = standingSpan(tuned, road, zone, event);
         return { end: distance + length, from: distance, start: distance };
       }
-      const { end, start } = moverContact(tuned, road, zone, { ...event, mover: event.mover });
+      const { end, start } = moverContact("planned", tuned, road, zone, {
+        ...event,
+        mover: event.mover,
+      });
       return { end: end + 1, from: event.distance + firstInView(event.mover), start: start - 1 };
     });
   const runs: number[] = [];
@@ -270,15 +276,20 @@ describe("planZone", { timeout: 60_000 }, () => {
         ? [{ position: WORLD.walkLength - 1, zone }]
         : Array.from({ length: WORLD.walkLength - 2 }, (_, i) => ({ position: i + 1, zone })),
   );
-  // Every zone at each walk position, planned with the cap on quiet rows and without it, at the
-  // same seed: the capped plan has the same movers, no more of any kind than the zone planned,
-  // and never more rows quiet over the cap, and across the zones it has fewer.
+  // Every zone at each walk position, planned with a cap of one quiet row, tighter than the
+  // game's so the fill has rows to fill, and without a cap, at the same seed: the capped plan has
+  // the same movers, no more of any kind than the zone planned, and never more rows quiet over the
+  // cap, and across the zones it has fewer.
   // Two plans a zone, each with every mover's contact scanned, take about 25 s.
   it(
     "moves the zone's own fixed obstacles into rows that come on screen quiet over the cap",
     { timeout: 120_000 },
     () => {
-      const cap = read(TUNING, "counts", "maxEmptyRows");
+      const cap = 1;
+      const capping = {
+        ...REAL,
+        tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: cap } },
+      };
       const uncapped = {
         ...REAL,
         tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: Number.POSITIVE_INFINITY } },
@@ -294,7 +305,7 @@ describe("planZone", { timeout: 60_000 }, () => {
       for (const { position, zone } of POSITIONS) {
         const walk = { road: startRoad(LANE_COUNT), run: inZone(realRun(REAL), zone, position) };
         for (const seed of [1, 2]) {
-          const capped = planZone(REAL, GAME_ROAD, plannerStreams(seed), walk).road;
+          const capped = planZone(capping, GAME_ROAD, plannerStreams(seed), walk).road;
           const plain = planZone(uncapped, GAME_ROAD, plannerStreams(seed), walk).road.pending;
           const label = `${zone} at ${position}, seed ${seed}`;
           expect(movingObstacles(capped.pending), label).toEqual(movingObstacles(plain));
@@ -420,6 +431,36 @@ describe("planZone", { timeout: 60_000 }, () => {
     },
   );
 
+  // The walk's first zone's rows reach back onto the road in view as it starts, where the fill
+  // for quiet rows puts an obstacle when it can, and none meets the pack sooner than
+  // firstZoneContact in; a later zone starts with the road clear of its own.
+  it.each([
+    { onRoad: true, zoneIndex: 0 },
+    { onRoad: false, zoneIndex: WORLD.walkLength - 1 },
+  ])(
+    "starts the zone at walk position $zoneIndex with obstacles on the road: $onRoad",
+    ({ onRoad, zoneIndex }) => {
+      const zoned = inZone(realRun(REAL), WORLD.firstZone as ZoneId, zoneIndex);
+      const soonest = read(TUNING, "seconds", "firstZoneContact") * walkScrollSpeed(REAL, zoned);
+      const firsts = [1, 2, 3, 4].map((seed) =>
+        Math.min(
+          ...planZone(REAL, GAME_ROAD, plannerStreams(seed), {
+            road: startRoad(LANE_COUNT),
+            run: zoned,
+          })
+            .road.pending.filter(
+              (event) => event.mover === undefined && blocksLane(REAL, event.kind),
+            )
+            .map(({ distance }) => distance),
+        ),
+      );
+      expect(firsts.some((first) => first < 0)).toBe(onRoad);
+      for (const first of firsts) {
+        expect(first + GAME_ROAD.sightLength).toBeGreaterThanOrEqual(soonest - 1e-6);
+      }
+    },
+  );
+
   // planZone throws when a tuned spawn finds no room, so this also proves none is dropped. At
   // the road's base speed, which a walker's pace scales.
   it("plans every zone of the game's road, first walk and last, with a way past every obstacle from any lane", () => {
@@ -434,7 +475,9 @@ describe("planZone", { timeout: 60_000 }, () => {
           });
           const spans = blockingSpans(base, GAME_ROAD, zone, walk.road.pending);
           for (const start of [0, 2, 4]) {
-            expect(lanesReachedAtEnd(walkwayOf(base, zoned), spans, start)).not.toEqual([]);
+            expect(lanesReachedAtEnd(walkwayOf(base, GAME_ROAD, zoned), spans, start)).not.toEqual(
+              [],
+            );
           }
         }
       }
@@ -490,7 +533,7 @@ describe("planZone", { timeout: 60_000 }, () => {
           });
           const spans = blockingSpans(tuned, GAME_ROAD, zone, walk.road.pending);
           for (const start of LANES) {
-            const reached = lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start);
+            const reached = lanesReachedAtEnd(walkwayOf(tuned, GAME_ROAD, zoned), spans, start);
             expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
           }
         }
@@ -501,10 +544,10 @@ describe("planZone", { timeout: 60_000 }, () => {
   // Two standing obstacles: a pack passing the nearer one in a lane the farther one blocks, that
   // gets out of it by stepping in behind the nearer one, changes lanes between the two from the
   // first lane the nearer one blocks to the nearest lane the farther one leaves open. Road
-  // between them is at least the tallest pack, those lane moves in whole walk steps and the
-  // reaction margin, on every way out. Two obstacles two or more lanes wide have a row between
-  // them. At the road's speed in the last neighborhood, for the walkers whose lane moves cover
-  // the least and the most road.
+  // between them, from the nearer one's drawn hit box, is at least the tallest pack's hit boxes,
+  // those lane moves in whole walk steps and the reaction margin, on every way out. Two obstacles
+  // two or more lanes wide have a row between them. At the road's speed in the last
+  // neighborhood, for the walkers whose lane moves cover the least and the most road.
   it("spaces obstacles for the pack to change lanes between them, at the shortest and longest lane move", () => {
     for (const { walker, zone } of LANE_MOVE_WALKERS.flatMap((walker) =>
       ZONE_IDS.map((zone) => ({ walker, zone })),
@@ -529,9 +572,9 @@ describe("planZone", { timeout: 60_000 }, () => {
           for (const far of standing.filter(({ distance }) => distance > near.distance)) {
             const changes = laneChangesBehind(LANE_COUNT, nearLanes, lanesOf(far.kind, far.lane));
             const gap =
-              far.distance - near.distance - plannedHeight(REAL, GAME_ROAD, zone, near.kind);
+              far.distance - near.distance - itemHeight(REAL, GAME_ROAD, near.kind, false);
             if (changes > 0 && gap > 0) {
-              const fit = GAME_ROAD.tallestPackBand + changes * laneMove + margin;
+              const fit = packHitLength(GAME_ROAD) + changes * laneMove + margin;
               expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
                 fit - 1e-6,
               );

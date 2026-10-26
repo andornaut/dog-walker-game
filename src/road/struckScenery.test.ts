@@ -24,6 +24,7 @@ const at = (travel: number, zoneIndex = HIT_ZONE) => ({
 const CROSSING: NonNullable<WalkItem["mover"]>["path"] = {
   direction: 1,
   enterTravel: 500,
+  idle: 0,
   lanesPerPixel: 2.5 / 32,
   motion: "cross",
   movement: "dart",

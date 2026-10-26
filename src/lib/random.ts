@@ -26,6 +26,23 @@ export function randomPick<T>(random: Random, items: readonly T[]): T {
   return itemAt(items, randomInt(random, 0, items.length));
 }
 
+// One of items, drawn with one draw, each as likely as its weight.
+export function weightedPick<T>(
+  random: Random,
+  items: readonly T[],
+  weights: readonly number[],
+): T {
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  let roll = random() * total;
+  for (const [i, item] of items.entries()) {
+    roll -= weights[i] ?? 0;
+    if (roll < 0) {
+      return item;
+    }
+  }
+  return itemAt(items, items.length - 1);
+}
+
 // True with the given probability: never at 0, always at 1.
 export function chance(random: Random, probability: number): boolean {
   return random() < probability;

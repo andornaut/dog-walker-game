@@ -43,6 +43,7 @@ const plan: SpawnPlan<Kind> = {
   minOpenLanes: 1,
   minSpacing: 100,
   moverCaps: { darts: 1, slowVehicles: 1, total: 3 },
+  packHitLength: 30,
   packLength: 30,
   quotas: [
     { blocksLane: true, count: 6, kind: "obstacle" },
@@ -62,6 +63,7 @@ const plan: SpawnPlan<Kind> = {
 const tight: SpawnPlan<Kind> = {
   ...plan,
   laneMoveSeconds: 0.25,
+  packHitLength: 50,
   packLength: 50,
   quotas: [
     { blocksLane: true, count: 27, kind: "obstacle" },
@@ -807,7 +809,7 @@ describe("laneReach and rowSpacing", () => {
       {
         name: "52px between rows fits two 25px moves but not their step to spare",
         reach: { betweenRows: 1, entry: 3 },
-        spaced: { ...tight, packLength: 28 },
+        spaced: { ...tight, packHitLength: 28, packLength: 28 },
         spacing: 100,
       },
       {
@@ -927,6 +929,7 @@ describe("moverRests", () => {
   const dart = {
     direction: 1,
     enterTravel: 300,
+    idle: 0,
     lanesPerPixel: 0.01,
     motion: "cross",
     movement: "dart",
