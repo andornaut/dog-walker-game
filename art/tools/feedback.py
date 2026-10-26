@@ -175,11 +175,12 @@ DODGE_ROWS = (25, 30, 35)
 
 def dodge(step):
     """A small dog's sidestep: a dust puff kicked up at its left foot that swells, drifts back and thins out,
-    and three speed lines trailing on its left that shorten as it settles. Light grey and white dust and
-    white lines in a plum rim, as the effects' rule, so they hold on every road."""
+    and three speed lines trailing on its left that shorten as it settles. Light grey dust, its last wisps
+    unshaded rather than brighter, and white lines in a plum rim, as the effects' rule, so they hold on every
+    road."""
     g = Grid(DODGE, DODGE)
     for x, y, r in DODGE_PUFFS[step]:
-        g.ell(x, y, r, r * 0.8, "white" if step == 4 else "lgrey", None if step == 4 else "grey")
+        g.ell(x, y, r, r * 0.8, "lgrey", None if step == 4 else "grey")
     n = DODGE_LINES[step]
     for k, y in enumerate(DODGE_ROWS):
         if n:

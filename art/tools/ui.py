@@ -760,11 +760,12 @@ def tap_burst(step):
 
 
 def dust(step):
-    """16x16, 4 frames: a puff of dust when a dog joins the pack and hops onto the gate path."""
+    """16x16, 4 frames: a puff of dust when a dog joins the pack and hops onto the gate path, its last
+    wisps light grey with no shade, so it thins out rather than flashing white."""
     g = Grid(16, 16)
     spread, size = (2, 3.5, 5, 6)[step], (2.2, 3, 2.8, 1.8)[step]
     for cx, lift in ((8 - spread, 0), (8, 1), (8 + spread, 0)):
-        g.ell(cx, 12 - step - lift, size, size, "white" if step == 3 else "lgrey", None if step == 3 else "grey")
+        g.ell(cx, 12 - step - lift, size, size, "lgrey", None if step == 3 else "grey")
     return g
 
 
