@@ -542,7 +542,8 @@ def snowball_road(q):
     g.cel(hx - 7.5, 11.5 + o + b + e, 2.3, 3.8, "cream", "tan")
     g.cel(hx + 7.5, 11.5 + o + b + e + t, 2.3, 3.8, "cream", "tan")
     underside(g)
-    spray(g, q["spray"])
+    # the droplets start past the ears and tufts, so they fly clear of his white coat
+    spray(g, q["spray"], 4)
     return g
 
 
@@ -700,14 +701,15 @@ def trail(g, pts, c):
         last = ((x, y), here)
 
 
-def spray(g, d):
+def spray(g, d, out=0):
     """The shake-off's water: droplets thrown d pixels out from both flanks, rising as they fly. Each is
-    1px, cyan or white, so the road outline rings it and it holds on every road."""
+    1px, cyan or white, so the road outline rings it and it holds on every road. out starts them that much
+    further out, for a coat whose flanks or ears reach past the others'."""
     if not d:
         return
     for x, y, c in ((9, 14, "cyan"), (9, 20, "white"), (22, 12, "cyan"), (22, 18, "white"), (21, 23, "cyan")):
         side = -1 if x < 16 else 1
-        g.p(x + side * d, y - d / 2, c)
+        g.p(x + side * (d + out), y - d / 2, c)
 
 
 # A white or light grey coat's underside, one ramp step darker: white to lgrey, lgrey to grey.
