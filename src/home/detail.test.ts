@@ -17,7 +17,7 @@ import { walkerDetailLines } from "./walkers";
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
-  dogSlots: 1,
+  dogSlots: [1],
   dogs: ["biscuit", "duchess", "koda"],
   gear: ["luckyCollar"],
   walkers: ["casey"],

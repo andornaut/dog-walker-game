@@ -1,28 +1,37 @@
 import type { GameData } from "../data/types";
+import { cheapestDogSlot } from "../rules/shop";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { dollarText, isAffordable, type Purchase, purchasePrice } from "./home";
 
 type SignData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
 
-// What a tap on the dog slot sign opens the shop on: the next slot, the first one for sale.
-export const SLOT_SIGN_PURCHASE: Purchase = { kind: "dogSlot" };
+// The slot the dog slot sign offers, and a tap on it opens the shop on: the cheapest slot not
+// owned, ties to the lowest number. Null once every slot is owned.
+export function slotSignPurchase(
+  data: Pick<GameData, "dogSlots" | "tuning">,
+  owned: Pick<Owned, "dogSlots">,
+): Purchase | null {
+  const slot = cheapestDogSlot(data, owned.dogSlots);
+  return slot === null ? null : { kind: "dogSlot", slot };
+}
 
-// The dog slot sign beside the Pet shop: its two lines (the call to buy over the next slot's
-// price, as the shop shows prices) and whether the bank covers that slot. Null once every
-// slot is owned.
+// The dog slot sign beside the Pet shop: its two lines (the call to buy over its slot's price,
+// as the shop shows prices) and whether the bank covers that slot. Null once every slot is
+// owned.
 export interface SlotSign {
   readonly affordable: boolean;
   readonly lines: readonly [string, string];
 }
 
 export function slotSign(data: SignData, owned: Owned, bank: Cents): SlotSign | null {
-  const price = purchasePrice(data, owned, SLOT_SIGN_PURCHASE);
-  if (price === null) {
+  const purchase = slotSignPurchase(data, owned);
+  const price = purchase === null ? null : purchasePrice(data, owned, purchase);
+  if (purchase === null || price === null) {
     return null;
   }
   return {
-    affordable: isAffordable(data, owned, bank, SLOT_SIGN_PURCHASE),
+    affordable: isAffordable(data, owned, bank, purchase),
     lines: [data.homeText.slotSign, dollarText(price)],
   };
 }

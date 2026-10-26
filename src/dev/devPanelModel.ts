@@ -157,7 +157,7 @@ function unlockAll(
   return {
     ...save,
     owned: {
-      dogSlots: Math.min(MAX_RUN_DOGS, data.dogSlots.length),
+      dogSlots: data.dogSlots.slice(0, MAX_RUN_DOGS).map((_, i) => i + 1),
       dogs: withAll(Object.keys(data.dogs) as DogId[], owned.dogs),
       gear: withAll(Object.keys(data.shopGear) as GearId[], owned.gear),
       walkers: withAll(Object.keys(data.walkers) as WalkerId[], owned.walkers),

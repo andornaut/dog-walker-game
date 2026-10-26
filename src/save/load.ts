@@ -30,6 +30,8 @@ import {
 interface KnownIds {
   achievements: ReadonlySet<AchievementId>;
   debuffs: ReadonlySet<DebuffId>;
+  // The dog slots by number, counting from 1.
+  dogSlots: ReadonlySet<number>;
   dogs: ReadonlySet<DogId>;
   gear: ReadonlySet<GearId>;
   hints: ReadonlySet<HintId>;
@@ -91,6 +93,7 @@ export function saveContextFrom(data: SaveData): SaveContext {
     known: {
       achievements: new Set(data.achievements.map(({ id }) => id)),
       debuffs: new Set(keysOf(data.debuffs)),
+      dogSlots: new Set(data.dogSlots.map((_, i) => i + 1)),
       dogs: new Set(dogs),
       gear: new Set(keysOf(data.shopGear)),
       hints: new Set(keysOf(data.hints)),
@@ -142,20 +145,23 @@ function clamp(min: number, max: number, value: number): number {
 }
 
 // Drops ids the game no longer has, and loadout picks the player does not own. The free dogs
-// and walkers are always owned, and a walker not owned becomes the default. Dog slots are clamped to 1 to
-// MAX_RUN_DOGS and volumes to 0 to 1, and a best for a pack size outside them is dropped. A
-// loadout keeps at most one dog per slot, and may be empty.
+// and walkers are always owned, and a walker not owned becomes the default. The starting dog
+// slots are always owned, and a slot number the game has no slot for is dropped. Volumes are
+// clamped to 0 to 1, and a best for a pack size outside 1 to MAX_RUN_DOGS is dropped. A
+// loadout keeps at most one dog per slot owned, and may be empty.
 function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { defaults, known } = context;
   const owned: Owned = {
-    dogSlots: clamp(1, MAX_RUN_DOGS, save.owned.dogSlots),
+    dogSlots: [...new Set([...defaults.dogSlots, ...save.owned.dogSlots])]
+      .filter((slot) => known.dogSlots.has(slot))
+      .sort((a, b) => a - b),
     dogs: keepKnown(known.dogs, [...defaults.freeDogs, ...save.owned.dogs]),
     gear: keepKnown(known.gear, save.owned.gear),
     walkers: keepKnown(known.walkers, [...defaults.freeWalkers, ...save.owned.walkers]),
   };
   const { gear } = save.lastLoadout;
   const lastLoadout = {
-    dogs: keepKnown(new Set(owned.dogs), save.lastLoadout.dogs).slice(0, owned.dogSlots),
+    dogs: keepKnown(new Set(owned.dogs), save.lastLoadout.dogs).slice(0, owned.dogSlots.length),
     gear: gear !== null && isKnown(new Set(owned.gear), gear) ? gear : null,
   };
   const { checkpoint, settings, stats } = save;

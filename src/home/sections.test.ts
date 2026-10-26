@@ -34,7 +34,7 @@ describe("homeSections", () => {
       },
     ] as const) {
       const loadout = { dogs, gear };
-      const sections = homeSections(data, { dogSlots: 2 }, { loadout, walker });
+      const sections = homeSections(data, { dogSlots: [1, 3] }, { loadout, walker });
       expect(sections).toEqual({
         dogs: { heading: text.sectionDogs, ...expected.dogs },
         pocket: { heading: text.pocket.title, ...expected.pocket },

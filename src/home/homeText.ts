@@ -46,7 +46,6 @@ export const HOME_TEXT_FIELDS = {
     confirmLeft: ["amount"],
     confirmTitle: ["name"],
     ownedCount: ["max", "owned"],
-    slotFirst: ["slot"],
     slotLine: ["count"],
   },
   slotBought: ["slot"],

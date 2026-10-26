@@ -31,7 +31,7 @@ export function ownedCountNote(data: ShopData, owned: Owned, list: ShopList): st
   const counts: Record<ShopList, { max: number; owned: number }> = {
     dogs: { max: Object.keys(data.dogs).length, owned: owned.dogs.length },
     gear: { max: Object.keys(data.shopGear).length, owned: owned.gear.length },
-    slots: { max: data.dogSlots.length, owned: owned.dogSlots },
+    slots: { max: data.dogSlots.length, owned: owned.dogSlots.length },
   };
   const { max, owned: have } = counts[list];
   return fillLine(HOME_TEXT_FIELDS.shop, data.homeText.shop, "ownedCount", {
@@ -40,10 +40,8 @@ export function ownedCountNote(data: ShopData, owned: Owned, list: ShopList): st
   });
 }
 
-// One thing the shop sells, as its row shows it. price is null once owned. blocked is why it
-// cannot be bought yet (a slot needs the one before it), or null.
+// One thing the shop sells, as its row shows it. price is null once owned.
 export interface ShopRow {
-  readonly blocked: string | null;
   readonly id: string;
   readonly line: string;
   readonly name: string;
@@ -51,29 +49,23 @@ export interface ShopRow {
   readonly purchase: Purchase;
 }
 
-// How a row draws: owned; blocked (with its reason); affordable (isAffordable: the buy plate);
-// or short of the bank. A row not blocked is its purchase's next item for sale, so its price is
-// the one isAffordable checks.
-type ShopRowLook = "affordable" | "blocked" | "owned" | "short";
+// How a row draws: owned; affordable (isAffordable: the buy plate); or short of the bank. A
+// row's price is its own purchase's, the one isAffordable checks.
+type ShopRowLook = "affordable" | "owned" | "short";
 
 export function shopRowLook(data: ShopData, owned: Owned, bank: Cents, row: ShopRow): ShopRowLook {
   if (row.price === null) {
     return "owned";
   }
-  if (row.blocked !== null) {
-    return "blocked";
-  }
   return isAffordable(data, owned, bank, row.purchase) ? "affordable" : "short";
 }
 
-// Everything a row's look sets. Owned shows its art in full color with no padlock or plate.
-// A row not owned is a disabled row whose padlock and plate say whether it can be bought:
-// affordable has its art in full color, the open padlock and the buy plate; short its art's
-// grey copy, the closed padlock and the short plate; and blocked its art's grey copy, the
-// closed padlock and its price on the goal plate.
+// Everything a row's look sets, the same for dogs, gear and dog slots. Owned shows its art in
+// full color with no padlock or plate. A row not owned is a disabled row whose padlock and
+// plate say whether it can be bought: affordable has its art in full color, the open padlock
+// and the buy plate; short its art's grey copy, the closed padlock and the short plate.
 export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
   affordable: { art: "color", padlock: "open", plate: "buy", state: "disabled" },
-  blocked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
   owned: { art: "color", padlock: null, plate: null, state: "normal" },
   short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
 };
@@ -88,7 +80,6 @@ export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
   return gearByPrice(data).map((gear) => {
     const purchase: Purchase = { gear, kind: "gear" };
     return {
-      blocked: null,
       id: `gear:${gear}`,
       line: gearShort(data, gear),
       name: data.shopGear[gear].name,
@@ -98,29 +89,26 @@ export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// Every slot in order, numbered from 1, the starting ones included: owned, the next one for
-// sale, or one that needs the slot before it bought first. A slot's line says how many dogs
-// it walks.
+// Every slot in order, numbered from 1, the starting ones included, each owned or for sale on
+// its own, bought in any order. A slot's line says how many dogs the pack walks with it: an
+// owned slot counts its place among the slots owned, and one for sale the pack buying it makes.
 export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   const text = data.homeText;
-  const fields = HOME_TEXT_FIELDS.shop;
-  return data.dogSlots.map((slot, i) => {
+  return data.dogSlots.map((_, i) => {
     const number = i + 1;
-    const blocked =
-      number > owned.dogSlots + 1
-        ? fillLine(fields, text.shop, "slotFirst", { slot: String(number - 1) })
-        : null;
-    const walks =
-      number === 1
-        ? text.shop.slotLineOne
-        : fillLine(fields, text.shop, "slotLine", { count: String(number) });
+    const purchase: Purchase = { kind: "dogSlot", slot: number };
+    const walks = owned.dogSlots.includes(number)
+      ? owned.dogSlots.filter((slot) => slot <= number).length
+      : owned.dogSlots.length + 1;
     return {
-      blocked,
       id: `slot:${number}`,
-      line: blocked ?? walks,
+      line:
+        walks === 1
+          ? text.shop.slotLineOne
+          : fillLine(HOME_TEXT_FIELDS.shop, text.shop, "slotLine", { count: String(walks) }),
       name: homeLine(text, "dogSlotName", { slot: String(number) }),
-      price: number <= owned.dogSlots ? null : unlockPrice(data.tuning, slot),
-      purchase: { kind: "dogSlot" },
+      price: purchasePrice(data, owned, purchase),
+      purchase,
     };
   });
 }
@@ -133,7 +121,6 @@ export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
   return cheapestFirst((dog) => unlockPrice(data.tuning, data.dogs[dog]), dogs).map((dog) => {
     const purchase: Purchase = { dog, kind: "dog" };
     return {
-      blocked: null,
       id: `dog:${dog}`,
       line: capitalize(dogKindText(data, dog)),
       name: data.dogs[dog].name,
@@ -143,13 +130,13 @@ export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// The row a purchase opens the shop on: a dog's or gear item's own, or the next slot's.
-export function shopRowId(owned: Pick<Owned, "dogSlots">, purchase: Purchase): string {
+// The row a purchase opens the shop on: its own.
+export function shopRowId(purchase: Purchase): string {
   switch (purchase.kind) {
     case "dog":
       return `dog:${purchase.dog}`;
     case "dogSlot":
-      return `slot:${owned.dogSlots + 1}`;
+      return `slot:${purchase.slot}`;
     case "gear":
       return `gear:${purchase.gear}`;
     default:

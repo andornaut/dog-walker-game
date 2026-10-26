@@ -50,16 +50,24 @@ const dollars = (amount: number) => cents(amount * 100);
 const starters = (Object.keys(data.dogs) as DogId[]).filter(
   (dog) => data.dogs[dog].unlock === "start",
 );
-const owned: Owned = { dogSlots: 1, dogs: starters, gear: [], walkers: [] };
+const starting = startingDogSlots(data);
+const owned: Owned = { dogSlots: starting, dogs: starters, gear: [], walkers: [] };
+// Every slot by number, counting from 1.
+const allSlots = data.dogSlots.map((_, i) => i + 1);
+// Every set of slots a player can own, named: the starting ones and any of the others.
+const slotSets = allSlots
+  .filter((slot) => !starting.includes(slot))
+  .reduce<number[][]>((sets, slot) => [...sets, ...sets.map((set) => [...set, slot])], [starting])
+  .map((set) => [set.join(" and "), set] as const);
 
 describe("shopRowLook", () => {
-  // Every row for sale (the next slot, each gear item and each dog not owned) with the bank at
-  // its price and a cent short.
+  // Every row for sale (each slot, gear item and dog not owned) with the bank at its price and
+  // a cent short.
   const forSale: readonly ShopRow[] = [
     ...slotRows(data, owned),
     ...gearRows(data, owned),
     ...dogRows(data, owned),
-  ].filter((row) => row.blocked === null && row.price !== null);
+  ].filter((row) => row.price !== null);
   const banks = forSale.flatMap((row) => {
     const price = row.price ?? cents(0);
     return [
@@ -73,93 +81,81 @@ describe("shopRowLook", () => {
     expect({ art: SHOP_ROW_VIEWS[shown].art, look: shown }).toEqual({ art, look });
   });
 
-  it("shows an owned row owned in color, and a slot past the next blocked in grey", () => {
+  it("sells every slot not owned, each with the looks dogs and gear for sale have", () => {
+    const slotIds = forSale.flatMap(({ id, purchase }) =>
+      purchase.kind === "dogSlot" ? [id] : [],
+    );
+    expect(slotIds).toEqual(
+      allSlots.filter((slot) => !starting.includes(slot)).map((slot) => `slot:${slot}`),
+    );
+    expect(Object.keys(SHOP_ROW_VIEWS).sort()).toEqual(["affordable", "owned", "short"]);
+  });
+
+  it.each(slotSets)("shows slots %s owned with the owned look", (_, dogSlots) => {
+    const have = { ...owned, dogSlots };
     const rich = cents(Number.MAX_SAFE_INTEGER);
-    const twoSlots = { ...owned, dogSlots: 2 };
-    const ownedSlot = slotRows(data, twoSlots)[1];
-    const blockedSlot = slotRows(data, owned)[2];
-    const shown = [
-      ownedSlot && shopRowLook(data, twoSlots, rich, ownedSlot),
-      blockedSlot && shopRowLook(data, owned, rich, blockedSlot),
-    ];
-    expect(shown.map((look) => look && { art: SHOP_ROW_VIEWS[look].art, look })).toEqual([
-      { art: "color", look: "owned" },
-      { art: "grey", look: "blocked" },
-    ]);
+    const looks = slotRows(data, have).map((row) => shopRowLook(data, have, rich, row));
+    expect(looks).toEqual(
+      allSlots.map((slot) => (dogSlots.includes(slot) ? "owned" : "affordable")),
+    );
   });
 });
 
 describe("slotRows", () => {
-  const view = (dogSlots: number) =>
-    slotRows(data, { ...owned, dogSlots }).map(({ blocked, id, price }) => ({
-      blocked: blocked !== null,
-      id,
-      owned: price === null,
-    }));
-
-  it("sells the next slot and blocks the one after it", () => {
-    expect(view(1)).toEqual([
-      { blocked: false, id: "slot:1", owned: true },
-      { blocked: false, id: "slot:2", owned: false },
-      { blocked: true, id: "slot:3", owned: false },
-    ]);
-    expect(view(2)).toEqual([
-      { blocked: false, id: "slot:1", owned: true },
-      { blocked: false, id: "slot:2", owned: true },
-      { blocked: false, id: "slot:3", owned: false },
-    ]);
-  });
-
-  // From the starting slots to every slot owned: every slot listed in order, the starting and
-  // bought ones owned with the owned look, the first for sale the one a slot purchase opens
-  // the shop on, and the heading's count the list's owned rows out of its rows.
-  const ownedCounts = Array.from(
-    { length: data.dogSlots.length - startingDogSlots(data) + 1 },
-    (_, bought) => startingDogSlots(data) + bought,
-  );
-  it.each(ownedCounts)("with %i slots owned, lists every slot, owned ones marked", (dogSlots) => {
+  // Every slot listed in order, the owned ones owned whichever they are, each one for sale at
+  // its own price and opening the shop on its own row, and the heading's count the slots owned
+  // out of all of them.
+  it.each(slotSets)("lists every slot, owned ones marked, with slots %s owned", (_, dogSlots) => {
     const have = { ...owned, dogSlots };
     const rows = slotRows(data, have);
-    const ownedRows = rows.filter(({ price }) => price === null);
-    const firstForSale = rows.find(({ blocked, price }) => blocked === null && price !== null);
-    expect(rows.map(({ id }) => id)).toEqual(data.dogSlots.map((_, i) => `slot:${i + 1}`));
-    expect(ownedRows.map(({ id }) => id)).toEqual(rows.slice(0, dogSlots).map(({ id }) => id));
-    for (const row of ownedRows) {
-      expect(shopRowLook(data, have, cents(0), row)).toBe("owned");
-    }
-    expect(firstForSale?.id ?? null).toBe(
-      dogSlots < data.dogSlots.length ? shopRowId(have, { kind: "dogSlot" }) : null,
-    );
+    expect(rows.map(({ id }) => id)).toEqual(allSlots.map((slot) => `slot:${slot}`));
+    rows.forEach((row, i) => {
+      const slot = allSlots[i] ?? 0;
+      expect(row.purchase).toEqual({ kind: "dogSlot", slot });
+      expect(shopRowId(row.purchase)).toBe(row.id);
+      expect(row.price).toBe(
+        dogSlots.includes(slot)
+          ? null
+          : unlockPrice(data.tuning, data.dogSlots[i] ?? data.dogSlots[0]),
+      );
+    });
     expect(ownedCountNote(data, have, "slots")).toBe(
       fillNames(data.homeText.shop.ownedCount, {
         max: String(rows.length),
-        owned: String(ownedRows.length),
+        owned: String(dogSlots.length),
       }),
     );
   });
 
-  it.each<[number, string]>([
-    [1, "walks one"],
-    [2, "walks 2"],
-  ])("gives slot %i the line %s", (number, line) => {
+  // An owned slot's line counts its place among the slots owned; one for sale, the pack buying
+  // it makes.
+  it.each<[number[], string[]]>([
+    [[1], ["walks one", "walks 2", "walks 2"]],
+    [
+      [1, 2],
+      ["walks one", "walks 2", "walks 3"],
+    ],
+    [
+      [1, 3],
+      ["walks one", "walks 3", "walks 2"],
+    ],
+    [
+      [1, 2, 3],
+      ["walks one", "walks 2", "walks 3"],
+    ],
+  ])("with %j owned, gives the slots the lines %j", (dogSlots, lines) => {
     const text = {
       ...data.homeText,
       shop: { ...data.homeText.shop, slotLine: "walks {count}", slotLineOne: "walks one" },
     };
-    const rows = slotRows({ ...data, homeText: text }, { ...owned, dogSlots: number });
-    expect(rows[number - 1]?.line).toBe(line);
+    const rows = slotRows({ ...data, homeText: text }, { ...owned, dogSlots });
+    expect(rows.map(({ line }) => line)).toEqual(lines);
   });
 
   it("puts the dog heading under the last slot row", () => {
     const { dogHeadingY, slotRows: spec } = SHOP_LAYOUT.dogs;
     const last = rowRects(SHOP_LAYOUT.row.width, spec, slotRows(data, owned).length).at(-1);
     expect(last && last.y + last.height).toBeLessThan(dogHeadingY);
-  });
-
-  it("says which slot a blocked one needs first", () => {
-    const text = { ...data.homeText, shop: { ...data.homeText.shop, slotFirst: "after {slot}" } };
-    const third = slotRows({ ...data, homeText: text }, owned)[2];
-    expect(third?.blocked).toBe("after 2");
   });
 });
 
@@ -260,7 +256,7 @@ describe("gearRows and dogRows", () => {
 describe("shopAffordable", () => {
   it("holds while the bank covers anything, and fails once everything is owned", () => {
     const everything: Owned = {
-      dogSlots: data.dogSlots.length,
+      dogSlots: allSlots,
       dogs: Object.keys(data.dogs) as DogId[],
       gear: Object.keys(data.shopGear) as Owned["gear"],
       walkers: [],
@@ -275,7 +271,7 @@ describe("shopAffordable", () => {
 // sits right of the heading's ink with a gap, beside a scrollbar too.
 describe("ownedCountNote", () => {
   const everything: Owned = {
-    dogSlots: data.dogSlots.length,
+    dogSlots: allSlots,
     dogs: Object.keys(data.dogs) as DogId[],
     gear: Object.keys(data.shopGear) as Owned["gear"],
     walkers: [],
@@ -290,7 +286,7 @@ describe("ownedCountNote", () => {
   const cases = [owned, everything].flatMap((have) => [
     ["dogs", have, have.dogs.length, Object.keys(data.dogs).length] as const,
     ["gear", have, have.gear.length, Object.keys(data.shopGear).length] as const,
-    ["slots", have, have.dogSlots, data.dogSlots.length] as const,
+    ["slots", have, have.dogSlots.length, data.dogSlots.length] as const,
   ]);
   const style = { letterSpacing: 0, scale: 2 };
 
@@ -315,12 +311,12 @@ describe("shopRowId and shopTabOf", () => {
     };
     const purchases: Purchase[] = [
       { dog: "nugget", kind: "dog" },
-      { kind: "dogSlot" },
+      ...allSlots.map((slot): Purchase => ({ kind: "dogSlot", slot })),
       { gear: "luckyCollar", kind: "gear" },
     ];
     for (const purchase of purchases) {
       const ids = rows[shopTabOf(purchase)].map(({ id }) => id);
-      expect(ids).toContain(shopRowId(owned, purchase));
+      expect(ids).toContain(shopRowId(purchase));
     }
   });
 });
@@ -329,7 +325,7 @@ describe("shopOpenTab", () => {
   it.each<[string, ShopTab, Purchase | undefined]>([
     ["no item", "dogs", undefined],
     ["a dog", "dogs", { dog: "nugget", kind: "dog" }],
-    ["a dog slot", "dogs", { kind: "dogSlot" }],
+    ["a dog slot", "dogs", { kind: "dogSlot", slot: 2 }],
     ["gear", "gear", { gear: "luckyCollar", kind: "gear" }],
   ])("with %s, opens on the %s tab", (_, tab, focus) => {
     expect(shopOpenTab(focus)).toBe(tab);
@@ -350,7 +346,7 @@ describe("a shop row's text", () => {
       ? SHOP_LAYOUT.row.ownedDx + advances("font-title", gameData.homeText.shop.owned.toUpperCase())
       : advances("font-body", dollarText(row.price)) + 6;
   const everything: Owned = {
-    dogSlots: gameData.dogSlots.length,
+    dogSlots: allSlots,
     dogs: Object.keys(gameData.dogs) as DogId[],
     gear: Object.keys(gameData.shopGear) as Owned["gear"],
     walkers: [],
@@ -377,7 +373,7 @@ describe("a shop row's text", () => {
 });
 
 // Every message a tap in the shop leaves fits on one line on its plate, its ink inside the
-// plate's frame: each blocked row's reason, each priced row's "can't afford" with its whole
+// plate's frame: each priced row's "can't afford" with its whole
 // price short, and each purchase's thanks.
 describe("the shop's message", () => {
   const everyRow = [
@@ -386,7 +382,6 @@ describe("the shop's message", () => {
     ...dogRows(gameData, owned),
   ];
   const messages = everyRow.flatMap((row) => [
-    ...(row.blocked === null ? [] : [row.blocked]),
     ...(row.price === null
       ? []
       : [
@@ -434,7 +429,7 @@ describe("the shop's list", () => {
   const { padBottom, rect } = SHOP_LAYOUT.list;
   const listBottom = rect.y + rect.height;
   const everything: Owned = {
-    dogSlots: data.dogSlots.length,
+    dogSlots: allSlots,
     dogs: Object.keys(data.dogs) as DogId[],
     gear: Object.keys(data.shopGear) as Owned["gear"],
     walkers: [],

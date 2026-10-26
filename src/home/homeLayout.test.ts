@@ -393,8 +393,8 @@ describe("a detail card", () => {
   const dogs = Object.keys(gameData.dogs) as DogId[];
   const gear = Object.keys(gameData.shopGear) as GearId[];
   const walkers = Object.keys(gameData.walkers) as WalkerId[];
-  const none: Owned = { dogSlots: 0, dogs: [], gear: [], walkers: [] };
-  const all: Owned = { dogSlots: gameData.dogSlots.length, dogs, gear, walkers };
+  const none: Owned = { dogSlots: [], dogs: [], gear: [], walkers: [] };
+  const all: Owned = { dogSlots: gameData.dogSlots.map((_, i) => i + 1), dogs, gear, walkers };
   const loadout = { dogs: [], gear: gear[0] ?? null };
   const cards = [none, all].flatMap((owned) => [
     ...dogs.map((dog) => ["dog", dogDetail(gameData, owned, cents(0), dog)] as const),

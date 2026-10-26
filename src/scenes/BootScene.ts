@@ -278,7 +278,7 @@ export class BootScene extends Scene {
     const { lastLoadout, owned } = profileSave(this);
     const walker = walkerInUse(profileSave(this));
     const loadout = devRunLoadout(lastLoadout, walker, itemAt(owned.dogs, 0), pageRunSetup().setup);
-    const pick = { dogSlots: owned.dogSlots, loadout };
+    const pick = { dogSlots: owned.dogSlots.length, loadout };
     startWakeLock();
     this.scene.start(SCENE_KEYS.run, runSceneData(nextRunStart(), pick));
   }

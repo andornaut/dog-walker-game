@@ -411,7 +411,8 @@ export interface Gear {
   readonly short: string;
 }
 
-// The dog slots in order. A run takes at most one dog per owned slot.
+// The dog slots, numbered from 1 in order, each bought on its own in any order. A run takes at
+// most one dog per owned slot.
 export type DogSlot = Unlock;
 
 // "start": walks from the first run; "finishZone": unlocked the first time any walk finishes
@@ -619,8 +620,7 @@ export interface HomeText {
     readonly between: string;
   };
   // The Pet shop page: its title, its tabs, the headings over its lists and their notes, a
-  // dog slot row's line (slotLineOne for the slot that walks 1 dog), the line of a slot that
-  // needs the one before it, and the word on an owned row.
+  // dog slot row's line (slotLineOne when its pack walks 1 dog), and the word on an owned row.
   readonly shop: {
     // The confirm every purchase asks first: its Buy and Cancel buttons, the {amount} the bank
     // would keep, and its title with the item's {name}.
@@ -632,7 +632,6 @@ export interface HomeText {
     readonly owned: string;
     // The note right of each list's heading: {owned} of the list's {max} purchases.
     readonly ownedCount: string;
-    readonly slotFirst: string;
     readonly slotLine: string;
     readonly slotLineOne: string;
     readonly slots: string;
@@ -640,7 +639,7 @@ export interface HomeText {
     readonly title: string;
   };
   readonly slotBought: string;
-  // The dog slot sign's line over the next slot's price, beside the Pet shop.
+  // The dog slot sign's line over the cheapest slot's price, beside the Pet shop.
   readonly slotSign: string;
   // Start walk's label while the walk waits for its art to load.
   readonly startLoading: string;

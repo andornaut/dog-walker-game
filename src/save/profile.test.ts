@@ -55,7 +55,7 @@ describe("ProfileSession.open", () => {
       (save) => ({ ...save, settings: { ...save.settings, reducedMotion: true } }),
     );
     expect(session.save.settings.reducedMotion).toBe(true);
-    expect(session.save.owned.dogSlots).toBe(1);
+    expect(session.save.owned.dogSlots).toEqual(testContext.defaults.dogSlots);
     expect(session.save.lastLoadout.dogs).toEqual(testContext.defaults.freeDogs.slice(0, 1));
   });
 

@@ -8,7 +8,7 @@ import { dogDetail, gearDetail } from "./detail";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const owned: Owned = {
-  dogSlots: 1,
+  dogSlots: [1],
   dogs: ["biscuit", "duchess", "koda"],
   gear: ["luckyCollar"],
   walkers: ["casey"],

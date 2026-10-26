@@ -61,8 +61,8 @@ describe("the walker's speech", () => {
   const dogs = Object.keys(gameData.dogs) as DogId[];
   const gear = Object.keys(gameData.shopGear) as GearId[];
   const walkers = Object.keys(gameData.walkers) as WalkerId[];
-  const none: Owned = { dogSlots: 0, dogs: [], gear: [], walkers: [] };
-  const all: Owned = { dogSlots: gameData.dogSlots.length, dogs, gear, walkers };
+  const none: Owned = { dogSlots: [], dogs: [], gear: [], walkers: [] };
+  const all: Owned = { dogSlots: gameData.dogSlots.map((_, i) => i + 1), dogs, gear, walkers };
   const bought = (purchase: Purchase, name: string) =>
     messageLine(text, { kind: "bought", name, purchase }) ?? "";
   const said = (parts: string[], owner: DogId | null = null) => ({ owner, parts });
@@ -89,7 +89,7 @@ describe("the walker's speech", () => {
     ),
     ...gear.map((item) => bought({ gear: item, kind: "gear" }, gameData.shopGear[item].name)),
     bought(
-      { kind: "dogSlot" },
+      { kind: "dogSlot", slot: gameData.dogSlots.length },
       homeLine(text, "dogSlotName", { slot: String(gameData.dogSlots.length) }),
     ),
   ].map((message) => said([message]));

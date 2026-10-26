@@ -98,7 +98,7 @@ describe("messageLine", () => {
       ],
       [
         "announces a bought slot",
-        { kind: "bought", name: "Dog slot 2", purchase: { kind: "dogSlot" } },
+        { kind: "bought", name: "Dog slot 2", purchase: { kind: "dogSlot", slot: 2 } },
         "Dog slot 2 open.",
       ],
       [

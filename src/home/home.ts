@@ -3,7 +3,7 @@ import { fillLine, signedText } from "../lib/lines";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
 import { effectClause, SIZE_NAMES } from "../rules/effectText";
-import { nextDogSlot, price, unlockPrice } from "../rules/shop";
+import { price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
 import type { Owned, SaveDocument } from "../save/schema";
 import { HOME_TEXT_FIELDS } from "./homeText";
@@ -16,7 +16,8 @@ export interface HomeLoadout {
 
 export type Purchase =
   | { readonly dog: DogId; readonly kind: "dog" }
-  | { readonly kind: "dogSlot" }
+  // A dog slot by number, counting from 1.
+  | { readonly kind: "dogSlot"; readonly slot: number }
   | { readonly gear: GearId; readonly kind: "gear" };
 
 // A tap on the home screen changes the loadout, opens the shop on a locked item, or is
@@ -60,12 +61,13 @@ export function signedDollarText(amount: number): string {
   return signedText(amount, dollarText(cents(Math.abs(amount))));
 }
 
-// How many dogs the player's pack may hold: one per dog slot, up to counts.packSizeMax.
+// How many dogs the player's pack may hold: one per dog slot owned, whichever slots they are,
+// up to counts.packSizeMax.
 export function packCapacity(
   data: Pick<GameData, "tuning">,
   owned: Pick<Owned, "dogSlots">,
 ): number {
-  return Math.min(owned.dogSlots, read(data.tuning, "counts", "packSizeMax"));
+  return Math.min(owned.dogSlots.length, read(data.tuning, "counts", "packSizeMax"));
 }
 
 // A tap on an id in a pick of at most capacity: a picked id is dropped, a free slot takes it
@@ -127,15 +129,19 @@ export function gearByPrice(data: Pick<GameData, "shopGear" | "tuning">): GearId
   return cheapestFirst(listPrice, Object.keys(data.shopGear) as GearId[]);
 }
 
-// What a purchase costs, or null when it is not for sale: already owned, or no slot left.
+// What a purchase costs, or null when it is not for sale: already owned, or no such slot.
 export function purchasePrice(data: ShopData, owned: Owned, purchase: Purchase): Cents | null {
   switch (purchase.kind) {
     case "dog":
       return owned.dogs.includes(purchase.dog)
         ? null
         : unlockPrice(data.tuning, data.dogs[purchase.dog]);
-    case "dogSlot":
-      return nextDogSlot(data, owned.dogSlots)?.price ?? null;
+    case "dogSlot": {
+      const slot = data.dogSlots[purchase.slot - 1];
+      return slot === undefined || owned.dogSlots.includes(purchase.slot)
+        ? null
+        : unlockPrice(data.tuning, slot);
+    }
     case "gear":
       return owned.gear.includes(purchase.gear)
         ? null
@@ -145,8 +151,8 @@ export function purchasePrice(data: ShopData, owned: Owned, purchase: Purchase):
   }
 }
 
-// Whether the player can buy it now: it is for sale and the bank covers its price. Owned items
-// and a maxed-out slot never are. The one buyable check: the shop's rows and confirm, the home
+// Whether the player can buy it now: it is for sale and the bank covers its price. Owned items,
+// dog slots included, never are. The one buyable check: the shop's rows and confirm, the home
 // screen's tiles, slot sign and info line, and the detail cards all ask it.
 export function isAffordable(
   data: ShopData,
@@ -177,7 +183,7 @@ export function buy(data: ShopData, purchase: Purchase, save: SaveDocument): Buy
       ? { ...owned, dogs: [...owned.dogs, purchase.dog] }
       : purchase.kind === "gear"
         ? { ...owned, gear: [...owned.gear, purchase.gear] }
-        : { ...owned, dogSlots: owned.dogSlots + 1 };
+        : { ...owned, dogSlots: [...owned.dogSlots, purchase.slot].sort((a, b) => a - b) };
   return {
     kind: "bought",
     save: { ...save, bankCents: cents(save.bankCents - cost), owned: bought },

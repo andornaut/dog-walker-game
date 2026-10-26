@@ -5,12 +5,12 @@ import { isAffordable, type Purchase } from "./home";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
 
-// Everything the home screen sells: each dog and gear item, and the next dog slot.
+// Everything the home screen sells: each dog, gear item and dog slot.
 export function purchases(data: ShopData): Purchase[] {
   return [
     ...(Object.keys(data.dogs) as DogId[]).map((dog): Purchase => ({ dog, kind: "dog" })),
     ...(Object.keys(data.shopGear) as GearId[]).map((gear): Purchase => ({ gear, kind: "gear" })),
-    { kind: "dogSlot" },
+    ...data.dogSlots.map((_, i): Purchase => ({ kind: "dogSlot", slot: i + 1 })),
   ];
 }
 

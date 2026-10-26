@@ -9,8 +9,8 @@ import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import type { GearId, LiveTuning } from "../data/types";
 import { WORLD } from "../data/world";
-import { price } from "../rules/shop";
-import { cents, readTable } from "../rules/units";
+import { price, unlockPrice } from "../rules/shop";
+import { cents, read, readTable } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { newPlayerSave } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
@@ -48,13 +48,15 @@ const data = {
   world: WORLD,
 } as const;
 const owned: Owned = {
-  dogSlots: 3,
+  dogSlots: [1, 2, 3],
   dogs: ["biscuit", "duchess", "koda"],
   gear: ["fannyPack"],
   walkers: ["casey"],
 };
 const dollars = (amount: number) => cents(amount * 100);
 const collarPrice = readTable(TEST_TUNING, "money", "prices", "luckyCollar");
+// A dog slot's price, by number counting from 1.
+const slotPrice = (slot: number) => unlockPrice(TEST_TUNING, DOG_SLOTS[slot - 1] ?? DOG_SLOTS[0]);
 
 describe("money text", () => {
   it("shows cents in whole dollars with thousands separated, signed or not", () => {
@@ -112,7 +114,7 @@ describe("tapDog and tapGear", () => {
         expected: { kind: "full" },
         name: "refuses a dog past the slots owned",
         tap: () =>
-          tapDog(data, { ...owned, dogSlots: 2 }, "biscuit", {
+          tapDog(data, { ...owned, dogSlots: [1, 3] }, "biscuit", {
             dogs: ["koda", "duchess"],
             gear: null,
           }),
@@ -121,7 +123,7 @@ describe("tapDog and tapGear", () => {
         expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
         name: "swaps the dog of a full one-slot pack",
         tap: () =>
-          tapDog(data, { ...owned, dogSlots: 1 }, "duchess", { dogs: ["koda"], gear: null }),
+          tapDog(data, { ...owned, dogSlots: [1] }, "duchess", { dogs: ["koda"], gear: null }),
       },
       {
         expected: { kind: "shop", purchase: { dog: "nugget", kind: "dog" } },
@@ -151,9 +153,19 @@ describe("tapDog and tapGear", () => {
 });
 
 describe("packCapacity", () => {
-  it("holds one dog per slot, and no more than a pack can, however many slots", () => {
-    expect(packCapacity(data, { dogSlots: 1 })).toBe(1);
-    expect(packCapacity(data, { dogSlots: 9 })).toBe(3);
+  it.each([
+    ["the starting slot", [1], 1],
+    ["slots bought in order", [1, 2], 2],
+    ["a later slot bought first", [1, 3], 2],
+    ["every slot", [1, 2, 3], 3],
+  ])("holds one dog per slot owned, whichever they are: %s", (_, dogSlots, expected) => {
+    expect(packCapacity(data, { dogSlots })).toBe(expected);
+  });
+
+  it("holds no more than a pack can, however many slots", () => {
+    const max = read(TEST_TUNING, "counts", "packSizeMax");
+    const many = Array.from({ length: max + 2 }, (_, i) => i + 1);
+    expect(packCapacity(data, { dogSlots: many })).toBe(max);
   });
 });
 
@@ -213,14 +225,19 @@ describe("gearByPrice", () => {
 
 describe("purchasePrice", () => {
   it("prices what is for sale, and nothing owned or past the last slot", () => {
+    const onlyFirst = { ...owned, dogSlots: [1] };
+    const thirdFirst = { ...owned, dogSlots: [1, 3] };
+    const slot = (number: number): Purchase => ({ kind: "dogSlot", slot: number });
     const cases: readonly [string, Owned, Purchase, number | null][] = [
       ["a locked dog", owned, { dog: "nugget", kind: "dog" }, dollars(600)],
       ["locked gear", owned, { gear: "luckyCollar", kind: "gear" }, collarPrice],
-      ["the second dog slot", { ...owned, dogSlots: 1 }, { kind: "dogSlot" }, dollars(800)],
-      ["the third dog slot", { ...owned, dogSlots: 2 }, { kind: "dogSlot" }, dollars(1800)],
+      ["slot 2 with only slot 1", onlyFirst, slot(2), slotPrice(2)],
+      ["slot 3 with only slot 1", onlyFirst, slot(3), slotPrice(3)],
+      ["slot 2 after slot 3", thirdFirst, slot(2), slotPrice(2)],
       ["an owned dog as not for sale", owned, { dog: "koda", kind: "dog" }, null],
       ["owned gear as not for sale", owned, { gear: "fannyPack", kind: "gear" }, null],
-      ["no slot past the last", owned, { kind: "dogSlot" }, null],
+      ["an owned slot as not for sale", thirdFirst, slot(3), null],
+      ["no slot past the last", onlyFirst, slot(DOG_SLOTS.length + 1), null],
     ];
     for (const [, ownedNow, purchase, expected] of cases) {
       expect(purchasePrice(data, ownedNow, purchase)).toBe(expected);
@@ -257,24 +274,33 @@ describe("buy", () => {
         name: "adds gear",
         purchase: { gear: "luckyCollar", kind: "gear" },
       },
-      {
-        bank: 2_000,
-        expected: { bankCents: dollars(1_200), owned: { ...start, dogSlots: 2 } },
-        name: "adds a dog slot",
-        purchase: { kind: "dogSlot" },
-      },
-      {
-        bank: 800,
-        expected: { bankCents: cents(0), owned: { ...start, dogSlots: 2 } },
-        name: "buys with exactly the price in the bank",
-        purchase: { kind: "dogSlot" },
-      },
-      {
-        bank: 799,
-        expected: { kind: "refused", reason: "cantAfford" },
-        name: "refuses what the bank cannot cover",
-        purchase: { kind: "dogSlot" },
-      },
+      ...DOG_SLOTS.flatMap((_, i) => {
+        const slot = i + 1;
+        const cost = slotPrice(slot) / 100;
+        const purchase: Purchase = { kind: "dogSlot", slot };
+        return start.dogSlots.includes(slot)
+          ? []
+          : [
+              {
+                bank: cost + 200,
+                expected: { bankCents: dollars(200), owned: { ...start, dogSlots: [1, slot] } },
+                name: `adds dog slot ${slot} on its own`,
+                purchase,
+              },
+              {
+                bank: cost,
+                expected: { bankCents: cents(0), owned: { ...start, dogSlots: [1, slot] } },
+                name: `buys dog slot ${slot} with exactly its price in the bank`,
+                purchase,
+              },
+              {
+                bank: cost - 1,
+                expected: { kind: "refused", reason: "cantAfford" } as const,
+                name: `refuses dog slot ${slot} when the bank cannot cover it`,
+                purchase,
+              },
+            ];
+      }),
       {
         bank: 2_000,
         expected: { kind: "refused", reason: "notForSale" },
@@ -288,6 +314,31 @@ describe("buy", () => {
       );
     }
   });
+
+  // Every order the slots for sale can be bought in.
+  const forSale = DOG_SLOTS.map((_, i) => i + 1).filter((slot) => !start.dogSlots.includes(slot));
+  const orders = (slots: readonly number[]): number[][] =>
+    slots.length <= 1
+      ? [[...slots]]
+      : slots.flatMap((first) =>
+          orders(slots.filter((slot) => slot !== first)).map((rest) => [first, ...rest]),
+        );
+
+  it.each(orders(forSale).map((order) => [order.join(" then "), order] as const))(
+    "buys the slots for sale in any order (%s), paying each its own price",
+    (_, order) => {
+      const total = order.reduce((sum, slot) => sum + slotPrice(slot), 0);
+      let save = { ...newPlayerSave, bankCents: cents(total) };
+      order.forEach((slot, i) => {
+        const result = buy(data, { kind: "dogSlot", slot }, save);
+        expect(result.kind).toBe("bought");
+        save = result.kind === "bought" ? result.save : save;
+        expect(packCapacity(data, save.owned)).toBe(start.dogSlots.length + i + 1);
+      });
+      expect(save.bankCents).toBe(0);
+      expect(save.owned.dogSlots).toEqual(DOG_SLOTS.map((_, i) => i + 1));
+    },
+  );
 });
 
 describe("partingSpeech", () => {

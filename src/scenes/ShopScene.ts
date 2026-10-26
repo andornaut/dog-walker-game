@@ -236,7 +236,7 @@ export class ShopScene extends Scene {
     this.scroll = listScroll(0);
     this.shakes = new Map();
     this.tab = shopOpenTab(data.focus);
-    this.focusId = data.focus === undefined ? null : shopRowId(this.save().owned, data.focus);
+    this.focusId = data.focus === undefined ? null : shopRowId(data.focus);
     this.render();
     this.showFocus();
 
@@ -542,8 +542,8 @@ export class ShopScene extends Scene {
     }
   }
 
-  // An owned row is only framed. One that needs another first, or costs more than the bank,
-  // shakes and says why; one the bank covers asks to confirm its purchase.
+  // An owned row is only framed. One that costs more than the bank shakes and says why; one
+  // the bank covers asks to confirm its purchase.
   private tapRow(id: string): void {
     const row = this.rowById(id);
     if (row === undefined) {
@@ -555,9 +555,6 @@ export class ShopScene extends Scene {
     const text = gameData.homeText;
     if (look === "owned") {
       this.message = null;
-    } else if (look === "blocked") {
-      this.shakes.set(id, this.time.now);
-      this.message = row.blocked === null ? null : { refused: true, text: row.blocked };
     } else {
       const request = requestPurchase(gameData, save, row.name, row.purchase);
       if (request.kind === "confirm") {

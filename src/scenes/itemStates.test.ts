@@ -16,7 +16,7 @@ import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
 import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { PLATE_PAD } from "./itemArt";
 
-const OWNED: Owned = { dogSlots: 1, dogs: [], gear: [], walkers: [] };
+const OWNED: Owned = { dogSlots: [1], dogs: [], gear: [], walkers: [] };
 const DOGS = Object.keys(gameData.dogs) as DogId[];
 const GEAR = Object.keys(gameData.shopGear) as GearId[];
 const SHOP_DOGS = DOGS.filter((dog) => gameData.dogs[dog].unlock === "shop");

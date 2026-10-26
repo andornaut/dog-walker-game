@@ -15,7 +15,7 @@ const [walker] = Object.keys(gameData.walkers) as WalkerId[];
 if (dog === undefined || gear === undefined || walker === undefined) {
   throw new Error("The data needs a dog, a gear item and a walker");
 }
-const owned: Owned = { dogSlots: 1, dogs: [dog], gear: [gear], walkers: [walker] };
+const owned: Owned = { dogSlots: [1], dogs: [dog], gear: [gear], walkers: [walker] };
 
 interface Picks {
   readonly dog: DogId | null;

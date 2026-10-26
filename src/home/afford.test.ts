@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
@@ -10,7 +11,7 @@ import { isAffordable, type Purchase } from "./home";
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
-  dogSlots: 1,
+  dogSlots: [1],
   dogs: ["biscuit", "duchess", "koda"],
   gear: [],
   walkers: ["casey"],
@@ -25,17 +26,28 @@ const walk = (earned: number): LastWalk => ({
 });
 
 describe("isAffordable", () => {
-  it("holds for what the bank covers, never for what is owned or maxed out", () => {
+  it("holds for what the bank covers, never for what is owned", () => {
+    // Each slot not owned, at its own price, whichever others are owned.
+    const slots = data.dogSlots.flatMap((slot, i): [string, Owned, number, Purchase, boolean][] => {
+      const purchase: Purchase = { kind: "dogSlot", slot: i + 1 };
+      const cost = unlockPrice(data.tuning, slot) / 100;
+      return owned.dogSlots.includes(i + 1)
+        ? []
+        : [
+            [`holds for slot ${i + 1} priced at the bank`, owned, cost, purchase, true],
+            [`fails for slot ${i + 1} priced over the bank`, owned, cost - 1, purchase, false],
+          ];
+    });
     const cases: readonly [string, Owned, number, Purchase, boolean][] = [
       ["holds for a dog priced at the bank", owned, 600, { dog: "archie", kind: "dog" }, true],
       ["fails for a dog priced over the bank", owned, 599, { dog: "archie", kind: "dog" }, false],
-      ["holds for the next slot priced at the bank", owned, 800, { kind: "dogSlot" }, true],
+      ...slots,
       ["never holds for an owned dog", owned, 100_000, { dog: "koda", kind: "dog" }, false],
       [
-        "never holds for a maxed-out slot",
-        { ...owned, dogSlots: 3 },
+        "never holds for an owned slot",
+        { ...owned, dogSlots: [1, 3] },
         100_000,
-        { kind: "dogSlot" },
+        { kind: "dogSlot", slot: 3 },
         false,
       ],
     ];

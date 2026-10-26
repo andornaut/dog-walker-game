@@ -9,7 +9,7 @@ import type { SaveStorage } from "../save/storage";
 
 export const testContext: SaveContext = {
   defaults: {
-    dogSlots: 1,
+    dogSlots: [1],
     freeDogs: ["biscuit"],
     freeWalkers: ["casey"],
     walker: "casey",
@@ -17,6 +17,7 @@ export const testContext: SaveContext = {
   known: {
     achievements: new Set(gameData.achievements.map(({ id }) => id)),
     debuffs: new Set(["stinky"]),
+    dogSlots: new Set([1, 2, 3]),
     dogs: new Set([
       "archie",
       "biscuit",
@@ -58,7 +59,7 @@ export const newPlayerSave: SaveDocument = {
   helpSeen: false,
   lastLoadout: { dogs: ["biscuit"], gear: null },
   owned: {
-    dogSlots: 1,
+    dogSlots: [1],
     dogs: ["biscuit"],
     gear: [],
     walkers: ["casey"],
@@ -99,7 +100,8 @@ export function veteranSave(): SaveDocument {
     helpSeen: true,
     lastLoadout: { dogs: ["koda", "penny"], gear: "fannyPack" },
     owned: {
-      dogSlots: 2,
+      // Slot 3 bought before slot 2.
+      dogSlots: [1, 3],
       dogs: ["biscuit", "duchess", "koda", "penny"],
       gear: ["fannyPack", "runningShoes"],
       walkers: ["casey", "ada", "ben", "trista"],

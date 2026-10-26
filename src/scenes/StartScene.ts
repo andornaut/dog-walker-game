@@ -77,7 +77,7 @@ import {
   startReady,
 } from "../home/sections";
 import { shopAffordable } from "../home/shop";
-import { SLOT_SIGN_PURCHASE, slotSign } from "../home/slotSign";
+import { slotSign, slotSignPurchase } from "../home/slotSign";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
@@ -784,9 +784,11 @@ export class StartScene extends Scene {
       case "petShop":
         this.openShop({});
         return;
-      case "slotSign":
-        this.openShop({ focus: SLOT_SIGN_PURCHASE });
+      case "slotSign": {
+        const focus = slotSignPurchase(gameData, this.save().owned);
+        this.openShop(focus === null ? {} : { focus });
         return;
+      }
       case "walker": {
         // A locked walker shakes and says its goal; nothing else changes. An owned one is
         // picked and says its agility and perk, or unpicked when it was the picked one.
@@ -880,7 +882,7 @@ export class StartScene extends Scene {
       return;
     }
     const pick: RunPick = {
-      dogSlots: save.owned.dogSlots,
+      dogSlots: save.owned.dogSlots.length,
       loadout: { dogs, gear: this.loadout.gear, walker },
     };
     const go = () => {
@@ -1490,8 +1492,8 @@ export class StartScene extends Scene {
   }
 
   // The dog slot sign hung across the Pet shop's front while a dog slot is for sale:
-  // ui-slot-sign, its board and text dropping while pressed, with its call to buy over the next
-  // slot's price, and the gold outline while the bank covers that slot. It bobs with the shop.
+  // ui-slot-sign, its board and text dropping while pressed, with its call to buy over the
+  // cheapest slot's price, and the gold outline while the bank covers that slot. It bobs with the shop.
   // A cream board in an ink frame stands in while the art is missing, when the whole sign dips
   // instead.
   private drawSlotSign(root: GameObjects.Container, save: SaveDocument): void {

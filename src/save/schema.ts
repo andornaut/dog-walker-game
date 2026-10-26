@@ -14,7 +14,7 @@ import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 
 // Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
 // TallyId fails to compile until it is listed here.
@@ -39,8 +39,8 @@ const count = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
 // Stored as a plain integer, branded on load.
 const cents = v.pipe(count, v.transform(toCents));
 const zoneNumber = v.pipe(v.number(), v.safeInteger(), v.minValue(1));
-// Clamped to 1 to MAX_RUN_DOGS on load rather than rejected.
-const dogSlots = v.pipe(v.number(), v.safeInteger());
+// Slot numbers, counting from 1. A number the game data has no slot for is dropped on load.
+const slotNumbers = v.array(v.pipe(v.number(), v.safeInteger()));
 // Clamped to 0 to 1 on load rather than rejected.
 const volume = v.pipe(v.number(), v.finite());
 // Stored ids stay strings: a saved id may be one the game data no longer has.
@@ -157,8 +157,9 @@ export const saveSchema = v.object({
   helpSeen: v.boolean(),
   lastLoadout: loadoutSchema,
   owned: v.object({
-    // How many dogs a run can take; the loadout never holds more.
-    dogSlots,
+    // The dog slots owned by number, each once, bought in any order. A run takes one dog per
+    // slot owned; the loadout never holds more.
+    dogSlots: slotNumbers,
     dogs: ids,
     gear: ids,
     // The walkers unlocked, each once.
@@ -205,7 +206,7 @@ export interface Loadout {
 }
 
 export interface Owned {
-  dogSlots: number;
+  dogSlots: number[];
   dogs: DogId[];
   gear: GearId[];
   walkers: WalkerId[];
@@ -266,7 +267,7 @@ export interface SaveDocument extends Omit<
 // What a new player starts with. The free dogs and walkers stay owned on every load, and
 // walker replaces a walker not owned.
 export interface SaveDefaults {
-  dogSlots: number;
+  dogSlots: readonly number[];
   freeDogs: readonly DogId[];
   freeWalkers: readonly WalkerId[];
   walker: WalkerId;
@@ -290,9 +291,9 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
     bankCents: zero,
     checkpoint: null,
     helpSeen: false,
-    lastLoadout: { dogs: defaults.freeDogs.slice(0, defaults.dogSlots), gear: null },
+    lastLoadout: { dogs: defaults.freeDogs.slice(0, defaults.dogSlots.length), gear: null },
     owned: {
-      dogSlots: defaults.dogSlots,
+      dogSlots: [...defaults.dogSlots],
       dogs: [...defaults.freeDogs],
       gear: [],
       walkers: [...defaults.freeWalkers],

@@ -1,57 +1,95 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId } from "../data/types";
-import { startingDogSlots, unlockPrice } from "../rules/shop";
-import { type Cents, cents } from "../rules/units";
+import type { DogId, LiveTuning } from "../data/types";
+import { startingDogSlots } from "../rules/shop";
+import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { dollarText } from "./home";
-import { shopRowId, slotRows } from "./shop";
-import { SLOT_SIGN_PURCHASE, slotSign } from "./slotSign";
+import { type ShopRow, shopRowId, slotRows } from "./shop";
+import { slotSign, slotSignPurchase } from "./slotSign";
 
-const data = { ...gameData, tuning: TEST_TUNING };
-const starting = startingDogSlots(data);
-const dogs = (Object.keys(data.dogs) as DogId[]).filter((dog) => data.dogs[dog].unlock === "start");
-const ownedWith = (bought: number): Owned => ({
-  dogSlots: starting + bought,
-  dogs,
-  gear: [],
-  walkers: [],
+const starting = startingDogSlots(gameData);
+const dogs = (Object.keys(gameData.dogs) as DogId[]).filter(
+  (dog) => gameData.dogs[dog].unlock === "start",
+);
+const forSale = gameData.dogSlots.map((_, i) => i + 1).filter((slot) => !starting.includes(slot));
+// Every set of slots a player can own, named: the starting ones and any of the others.
+const slotSets = forSale.reduce<number[][]>(
+  (sets, slot) => [...sets, ...sets.map((set) => [...set, slot])],
+  [starting],
+);
+const ownedWith = (dogSlots: number[]): Owned => ({ dogSlots, dogs, gear: [], walkers: [] });
+
+// The slots for sale priced in dollars by pick, given each slot's place among them.
+const withSlotPrices = (pick: (place: number) => number): LiveTuning => ({
+  ...TEST_TUNING,
+  money: {
+    ...TEST_TUNING.money,
+    prices: {
+      ...TEST_TUNING.money.prices,
+      ...Object.fromEntries(
+        forSale.flatMap((slot, place) => {
+          const item = gameData.dogSlots[slot - 1];
+          return item?.unlock === "shop" ? [[item.price, pick(place)]] : [];
+        }),
+      ),
+    },
+  },
 });
-// The price of the slot after the bought ones, or null once every slot is owned.
-const nextPrice = (bought: number): Cents | null => {
-  const slot = data.dogSlots[starting + bought];
-  return slot === undefined ? null : unlockPrice(data.tuning, slot);
+const tunings: readonly [string, LiveTuning][] = [
+  ["the test prices", TEST_TUNING],
+  ["one price for every slot", withSlotPrices(() => 2_000)],
+  ["later slots cheaper", withSlotPrices((place) => 3_000 - 500 * place)],
+];
+
+// The row of the cheapest slot for sale, ties to the lowest number, read off the shop's rows.
+const cheapestRow = (rows: readonly ShopRow[]): ShopRow | undefined => {
+  const priced = rows.flatMap((row) => (row.price === null ? [] : [{ price: row.price, row }]));
+  return priced.reduce<(typeof priced)[number] | undefined>(
+    (best, next) => (best !== undefined && best.price <= next.price ? best : next),
+    undefined,
+  )?.row;
 };
-const forSale = data.dogSlots.length - starting;
-const boughtCounts = Array.from({ length: forSale + 1 }, (_, bought) => bought);
+
+const cases = tunings.flatMap(([prices, tuning]) =>
+  slotSets.flatMap((dogSlots) =>
+    [true, false].map((affordable) => ({
+      affordable,
+      dogSlots,
+      owned: dogSlots.join(" and "),
+      prices,
+      tuning,
+    })),
+  ),
+);
 
 describe("slotSign", () => {
-  const cases = boughtCounts.flatMap((bought) =>
-    [true, false].map((affordable) => ({ affordable, bought })),
-  );
-
   it.each(cases)(
-    "with $bought slots bought and the bank covering the next: $affordable",
-    ({ affordable, bought }) => {
-      const price = nextPrice(bought);
+    "at $prices with slots $owned owned and the bank covering the cheapest: $affordable",
+    ({ affordable, dogSlots, tuning }) => {
+      const data = { ...gameData, tuning };
+      const owned = ownedWith(dogSlots);
+      const price = cheapestRow(slotRows(data, owned))?.price ?? null;
       const bank = price === null ? cents(0) : cents(affordable ? price : price - 1);
-      const sign = slotSign(data, ownedWith(bought), bank);
-      expect(sign).toEqual(
+      expect(slotSign(data, owned, bank)).toEqual(
         price === null ? null : { affordable, lines: [data.homeText.slotSign, dollarText(price)] },
       );
     },
   );
 });
 
-describe("SLOT_SIGN_PURCHASE", () => {
-  it.each(boughtCounts.slice(0, -1))(
-    "with %i slots bought, opens the shop on the first slot for sale",
-    (bought) => {
-      const owned = ownedWith(bought);
-      const first = slotRows(data, owned).find((row) => row.price !== null && row.blocked === null);
-      expect(shopRowId(owned, SLOT_SIGN_PURCHASE)).toBe(first?.id);
+describe("slotSignPurchase", () => {
+  it.each(cases.filter(({ affordable }) => affordable))(
+    "at $prices with slots $owned owned, opens the shop on the cheapest slot for sale",
+    ({ dogSlots, tuning }) => {
+      const data = { ...gameData, tuning };
+      const owned = ownedWith(dogSlots);
+      const purchase = slotSignPurchase(data, owned);
+      expect(purchase === null ? null : shopRowId(purchase)).toBe(
+        cheapestRow(slotRows(data, owned))?.id ?? null,
+      );
     },
   );
 });

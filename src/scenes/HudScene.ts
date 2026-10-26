@@ -646,7 +646,7 @@ export class HudScene extends Scene {
     if (this.zoneProgress !== undefined) {
       setPixelText(this.zoneProgress, zoneProgressText(gameData, run.zoneIndex));
     }
-    const ownedSlots = profileSave(this).owned.dogSlots;
+    const ownedSlots = profileSave(this).owned.dogSlots.length;
     const lead = leadSlot(run.pack.map((slot) => slot.status === "walking"));
     // Every card's name at the one scale they all fit.
     const nameFit = cardNameFit(

@@ -27,7 +27,7 @@ const count = (save: SaveDocument, purchase: Purchase): number =>
     ? save.owned.dogs.filter((dog) => dog === purchase.dog).length
     : purchase.kind === "gear"
       ? save.owned.gear.filter((gear) => gear === purchase.gear).length
-      : save.owned.dogSlots;
+      : save.owned.dogSlots.filter((slot) => slot === purchase.slot).length;
 
 describe("requestPurchase", () => {
   it.each(forSale)("asks to confirm a $kind the bank covers, at its price or more", (item) => {

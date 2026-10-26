@@ -206,7 +206,7 @@ export const HOME_LAYOUT = {
   // The dog slot sign hung from the Pet shop's awning across its front: its art (key, with
   // normal and pressed tags) drawn at art, its board inside the frame, and its gold outline 2px
   // outside the board. The board's cream lies inside its frame, lit top row and shaded bottom
-  // row (boardEdge). Its call to buy (in headColor) and the next slot's price (in priceColor
+  // row (boardEdge). Its call to buy (in headColor) and the cheapest slot's price (in priceColor
   // while affordable) are body text at scale, linePitch apart, centred on the cream
   // (slotSignText); pressed, the board drops pressDrop on longer cords and the text with it. The
   // hit area is the board widened to 44 tall.

@@ -203,8 +203,18 @@ describe("profile conditions", () => {
     ["dogsOwned all, every dog", all("dogsOwned"), withOwned({ dogs: ALL_DOGS }), true],
     ["gearOwned all, one missing", all("gearOwned"), withOwned({ gear: ALL_GEAR.slice(1) }), false],
     ["gearOwned all, every item", all("gearOwned"), withOwned({ gear: ALL_GEAR }), true],
-    ["dogSlotsOwned all, one missing", all("dogSlotsOwned"), withOwned({ dogSlots: 2 }), false],
-    ["dogSlotsOwned all, every slot", all("dogSlotsOwned"), withOwned({ dogSlots: 3 }), true],
+    [
+      "dogSlotsOwned all, one missing",
+      all("dogSlotsOwned"),
+      withOwned({ dogSlots: [1, 3] }),
+      false,
+    ],
+    [
+      "dogSlotsOwned all, every slot",
+      all("dogSlotsOwned"),
+      withOwned({ dogSlots: [1, 2, 3] }),
+      true,
+    ],
     [
       "walksWithoutFiring below the count",
       count("walksWithoutFiring", 10),
@@ -373,12 +383,16 @@ describe("newlyEarned", () => {
   });
 
   it("needs every condition: Top Walker only with every dog, slot and gear item", () => {
-    const all = { dogSlots: gameData.dogSlots.length, dogs: ALL_DOGS, gear: ALL_GEAR };
+    const all = {
+      dogSlots: gameData.dogSlots.map((_, i) => i + 1),
+      dogs: ALL_DOGS,
+      gear: ALL_GEAR,
+    };
     const earns = (owned: Partial<SaveDocument["owned"]>) =>
       newlyEarned(gameData, newPlayerSave, withOwned(owned), null).includes("topWalker");
     expect(earns(all)).toBe(true);
     expect(earns({ ...all, gear: ALL_GEAR.slice(1) })).toBe(false);
-    expect(earns({ ...all, dogSlots: all.dogSlots - 1 })).toBe(false);
+    expect(earns({ ...all, dogSlots: all.dogSlots.slice(1) })).toBe(false);
   });
 });
 

@@ -47,10 +47,10 @@ describe("loadSave", () => {
   });
 
   it("picks a new save's free dogs, as many as its slots walk", () => {
-    const picked = (dogSlots: number) =>
+    const picked = (dogSlots: number[]) =>
       createDefaultSave({ ...testContext.defaults, dogSlots, freeDogs: ["biscuit", "koda"] })
         .lastLoadout.dogs;
-    expect([picked(1), picked(2)]).toEqual([["biscuit"], ["biscuit", "koda"]]);
+    expect([picked([1]), picked([1, 3])]).toEqual([["biscuit"], ["biscuit", "koda"]]);
   });
 
   it("keeps every dog a save owns, adding the starters", () => {
@@ -146,7 +146,7 @@ describe("loadSave", () => {
       "without unknown or duplicate owned ids",
       (document) => {
         document.owned = {
-          dogSlots: 2,
+          dogSlots: [3, 9, 3, 0],
           dogs: ["koda", "ghost", "penny", "koda"],
           gear: ["runningShoes", "jetpack", "runningShoes"],
           walkers: ["ben", "ghost", "ben"],
@@ -154,7 +154,7 @@ describe("loadSave", () => {
       },
       (save) => save.owned,
       {
-        dogSlots: 2,
+        dogSlots: [1, 3],
         dogs: ["biscuit", "koda", "penny"],
         gear: ["runningShoes"],
         walkers: ["casey", "ben"],
@@ -170,9 +170,9 @@ describe("loadSave", () => {
       { dogs: ["penny"], gear: null },
     ],
     [
-      "with the loadout trimmed to the clamped slots",
+      "with the loadout trimmed to the slots owned, the starting ones always among them",
       (document) => {
-        document.owned.dogSlots = 0;
+        document.owned.dogSlots = [];
         document.lastLoadout.dogs = ["penny", "koda"];
       },
       (save) => save.lastLoadout.dogs,
@@ -377,9 +377,15 @@ describe("loadSave", () => {
         }),
       ],
       [
-        "fractional dog slots",
+        "a fractional dog slot",
         withChanges((document) => {
-          document.owned.dogSlots = 1.5;
+          document.owned.dogSlots = [1, 1.5];
+        }),
+      ],
+      [
+        "dog slots as a count",
+        withChanges((document) => {
+          (document.owned as Record<string, unknown>).dogSlots = 2;
         }),
       ],
       [
@@ -408,15 +414,15 @@ describe("loadSave", () => {
     });
   });
 
-  it("clamps stored volumes and dog slots into range, and drops bests for no pack size", () => {
+  it("clamps stored volumes into range, keeps known dog slots in order, and drops bests for no pack size", () => {
     const save = loaded((document) => {
       document.settings.musicVolume = -0.5;
       document.settings.sfxVolume = 3;
-      document.owned.dogSlots = 4;
+      document.owned.dogSlots = [3, 2, 4, 1];
       document.stats.bestCentsByPackSize = { 0: 1, 2: 200, 4: 400, two: 2 };
     });
     expect([save.settings.musicVolume, save.settings.sfxVolume]).toEqual([0, 1]);
-    expect(save.owned.dogSlots).toBe(3);
+    expect(save.owned.dogSlots).toEqual([1, 2, 3]);
     expect(save.stats.bestCentsByPackSize).toEqual({ 2: 200 });
   });
 });

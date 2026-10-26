@@ -1,8 +1,8 @@
 import type { HomeText } from "./types";
 
 // The home screen's text. A {name} is filled in by the game, and src/home/homeText.ts lists
-// the names each line may use. {slot} is a slot number in dogSlotName and shop.slotFirst,
-// and the slot's name ("Dog slot 2") in slotBought.
+// the names each line may use. {slot} is a slot number in dogSlotName, and the slot's name
+// ("Dog slot 2") in slotBought.
 export const HOME_TEXT = {
   bubble: {
     afterFiring: "Rough walk. They'll come around.",
@@ -89,7 +89,6 @@ export const HOME_TEXT = {
     dogs: "Dogs",
     owned: "Owned",
     ownedCount: "{owned} of {max} owned",
-    slotFirst: "Buy slot {slot} first",
     slotLine: "Walk {count} dogs at once",
     slotLineOne: "Walk 1 dog at once",
     slots: "Dog slots",

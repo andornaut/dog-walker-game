@@ -178,7 +178,9 @@ export function conditionHolds(
     case "debuffsGot":
       return facts !== null && (facts.debuffsGot[condition.debuff] ?? 0) >= condition.count;
     case "dogSlotsOwned":
-      return save !== null && save.owned.dogSlots >= needed(data.dogSlots.length, condition.count);
+      return (
+        save !== null && save.owned.dogSlots.length >= needed(data.dogSlots.length, condition.count)
+      );
     case "dogsFinishedWith":
       return save !== null && save.stats.dogsFinishedWith.length >= needed(dogs, condition.count);
     case "dogsOwned":

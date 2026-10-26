@@ -222,7 +222,11 @@ function raiseSave(
         ...save,
         owned: {
           ...owned,
-          dogSlots: Math.max(owned.dogSlots, needed(data.dogSlots.length, condition.count)),
+          dogSlots: enough(
+            data.dogSlots.map((_, i) => i + 1),
+            condition.count,
+            owned.dogSlots,
+          ),
         },
       };
     case "dogsFinishedWith":
