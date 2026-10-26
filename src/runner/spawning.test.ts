@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../lib/arrays";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
-import { type MoverSpec, sweptLanes } from "./movers";
+import { type MoverPath, type MoverSpec, sweptLanes } from "./movers";
 import {
   blockingLength,
   everyLaneReaches,
@@ -11,6 +11,7 @@ import {
   hitLength,
   type LaneReach,
   laneReach,
+  moverRests,
   packFitsBetween,
   packGap,
   planSpawns,
@@ -816,5 +817,67 @@ describe("takeDueSpawns", () => {
     expect(takeDueSpawns(250, events)).toEqual({ due: events.slice(0, 2), pending: [events[2]] });
     expect(takeDueSpawns(200, events).due).toEqual(events.slice(0, 2));
     expect(takeDueSpawns(199.9, events).due).toEqual(events.slice(0, 1));
+  });
+});
+
+describe("moverRests", () => {
+  // A dart whose cue shows for 50px of scroll and sets off 300px down the road, crossing 0.01
+  // lanes a pixel at a tilt of 0.2. Stopping after 1.5 lanes takes 150px of scroll, so it stands
+  // level with a spawn its cue's distance plus 50 - 300 - 0.2 x 150 = -280 away.
+  const dart = {
+    direction: 1,
+    enterTravel: 300,
+    lanesPerPixel: 0.01,
+    motion: "cross",
+    movement: "dart",
+    stopAfter: null,
+    tilt: 0.2,
+    turnAfter: null,
+    warning: 50,
+  } as const;
+  const step = (lanes: number, travel: number) => ({ at: 0, lanes, length: 10, travel });
+
+  it.each<{ name: string; path: MoverPath; rests: { distance: number; lane: number }[] }>([
+    { name: "a dart that crosses", path: dart, rests: [] },
+    {
+      name: "a dart from the left that stops short",
+      path: { ...dart, stopAfter: 1.5 },
+      rests: [{ distance: 720, lane: 1 }],
+    },
+    {
+      name: "a dart from the right that stops short",
+      path: { ...dart, direction: -1, stopAfter: 1.5 },
+      rests: [{ distance: 720, lane: 3 }],
+    },
+    {
+      name: "a rider",
+      path: {
+        lane: 2,
+        lanes: 1,
+        motion: "ride",
+        movement: "inLane",
+        speedMultiplier: 2,
+        warning: 50,
+      },
+      rests: [],
+    },
+    {
+      name: "a stepper, at its last spot",
+      path: {
+        lane: 1,
+        motion: "steps",
+        movement: "step",
+        steps: [step(1, 0), step(0, 64), step(1, 64)],
+        warning: 50,
+      },
+      rests: [{ distance: 872, lane: 3 }],
+    },
+    {
+      name: "a hopper that hops up the road",
+      path: { lane: 4, motion: "steps", movement: "hop", steps: [step(-1, -64)], warning: 50 },
+      rests: [{ distance: 1064, lane: 3 }],
+    },
+  ])("finds where $name stands", ({ path, rests }) => {
+    expect(moverRests(5, 1000, path)).toEqual(rests);
   });
 });

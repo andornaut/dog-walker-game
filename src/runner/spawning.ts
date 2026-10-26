@@ -3,16 +3,19 @@ import { randomPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
 import {
   hasLeftRoad,
+  laneAt,
   type LaneSpan,
   type MoverCaps,
   type MoverPath,
   moverPlace,
   type MoverSpec,
   type MoverStand,
+  type MoverStep,
   type OnScreen,
   placeMovers,
   type PlannerStreams,
 } from "./movers";
+import { shyOutcomes } from "./shy";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
 export interface Footprint {
@@ -294,6 +297,42 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
   return { lastGap, lastRow };
 }
 
+// A spot where a mover may end a move and stand: the distance a spawn level with it has, and its
+// leftmost lane.
+export interface MoverRest {
+  distance: number;
+  lane: number;
+}
+
+// Every spot a mover whose cue is at cue may end a move and stand: a dart that stops short at its
+// stop, and a stepper, hopper or stalker at its last spot, whichever way a stalker or shy hopper
+// chooses its moves. A standing mover's travel past the road's scroll is its steps', so its spot
+// is its cue less their travel. A rider and a dart that crosses never stand.
+export function moverRests(laneCount: number, cue: number, path: MoverPath): MoverRest[] {
+  const last = (lane: number, steps: readonly MoverStep[]): MoverRest => ({
+    distance: cue - steps.reduce((sum, step) => sum + step.travel, 0),
+    lane: lane + steps.reduce((sum, step) => sum + step.lanes, 0),
+  });
+  switch (path.motion) {
+    case "approach":
+      return approachOutcomes(path).map(({ lane, steps }) => last(lane, steps));
+    case "cross": {
+      if (path.stopAfter === null) {
+        return [];
+      }
+      const since = path.warning + path.stopAfter / path.lanesPerPixel;
+      const place = moverPlace(laneCount, path, since);
+      return [{ distance: cue + since - place.travel, lane: laneAt(place.lanePosition) }];
+    }
+    case "ride":
+      return [];
+    case "shy":
+      return shyOutcomes(path).map(({ lane, steps }) => last(lane, steps));
+    default:
+      return [last(path.lane, path.steps)];
+  }
+}
+
 // Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart. Each kind's spawns
 // are spread over equal stretches of the zone, one per stretch, so no kind bunches up. The standing
 // kinds take turns along the zone, the widest first in each turn, so each keeps its share of what
@@ -321,6 +360,8 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // since the pack never has to steer around it.
 // It keeps a free cell for every moving prize, its own included, and with no room to move it stands
 // still in one cell among the other spawns, so a prize is never skipped for want of room to move.
+// A spawn that blocks no lane, such as a tip or a treat, also keeps off every spot where a mover
+// placed may end a move and stand (moverRests), so no mover ever stops on one.
 // A lane-blocking mover, or an obstacle bigger than one cell, that the earlier
 // draws left no room for is skipped, which uses no random draw; so is one that would leave fewer
 // free cells than there are one-cell spawns. A free cell can still be one no lane-blocking spawn
@@ -347,6 +388,8 @@ export function planSpawns<Kind extends string>(
   // Lanes taken by a spawn other than a dart: a lane-blocking spawn may take a cell only darts
   // hold, as the dart then sets off over or past it.
   const heldByOther = new Int32Array(rows.length);
+  // Lanes where a mover may end a move and stand, which no spawn that blocks no lane takes.
+  const restHeld = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
   const gapBlocked = new Int32Array(rows.length);
   // What a trial block overwrote, by row, to undo it.
@@ -530,7 +573,7 @@ export function planSpawns<Kind extends string>(
     }
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
-      const held = blocksLane ? (heldByOther[row] ?? 0) : (taken[row] ?? 0);
+      const held = blocksLane ? (heldByOther[row] ?? 0) : (taken[row] ?? 0) | (restHeld[row] ?? 0);
       if ((held & covered) !== 0 || (blocksLane && leadIns.has(row))) {
         return false;
       }
@@ -678,6 +721,26 @@ export function planSpawns<Kind extends string>(
     );
     events.push(...spawns);
     return stilledQuotas(false, quotas, dropped);
+  };
+  // Holds every cell a placed mover may end a move on and stand in: the rows a spawn on which
+  // overlaps the mover there, each spawn's hit box planned as hitLength, in the lanes it covers.
+  const holdRests = () => {
+    for (const { distance, kind, mover } of events) {
+      if (mover === undefined) {
+        continue;
+      }
+      const footprint =
+        plan.quotas.find((quota) => quota.kind === kind)?.mover?.footprint ?? SINGLE_CELL;
+      const length = hitLength(plan, footprint.rows);
+      for (const rest of moverRests(laneCount, distance, mover)) {
+        const covered = laneRun(rest.lane, footprint.lanes) & lanes;
+        rows.forEach((row, i) => {
+          if (row > rest.distance - hitLength(plan, 1) && row < rest.distance + length) {
+            restHeld[i] = (restHeld[i] ?? 0) | covered;
+          }
+        });
+      }
+    }
   };
   // The kinds take turns, in the order of their spawns' stretches along the zone, so a kind
   // placed later still gets cells in every stretch and each keeps its share of what is placed.
@@ -974,7 +1037,9 @@ export function planSpawns<Kind extends string>(
   placeMoving(false);
   placeStanding((quota) => quota.first !== true && quota.blocksLane, []);
   fillQuietRuns();
-  placeStanding((quota) => quota.first !== true && !quota.blocksLane, placePrizes());
+  const stilledPrizes = placePrizes();
+  holdRests();
+  placeStanding((quota) => quota.first !== true && !quota.blocksLane, stilledPrizes);
   return events.sort((a, b) => a.distance - b.distance || a.lane - b.lane);
 }
 

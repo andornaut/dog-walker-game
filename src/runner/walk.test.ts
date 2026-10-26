@@ -68,12 +68,14 @@ import {
   hasLeftRoad,
   hopShapes,
   inMotion,
+  laneAt,
   type MoverPath,
   moverPlace,
   type MoverStep,
   moverTell,
   onScreenOf,
 } from "./movers";
+import { shyOutcomes } from "./shy";
 import {
   blocksLane,
   collectTip,
@@ -669,6 +671,71 @@ describe("planZone", { timeout: 60_000 }, () => {
       }
     }
   });
+
+  // Where a mover stands once it has made its last move, as the walk moves it: a dart that stops
+  // short, and a stepper, hopper or stalker whichever way it chooses its moves. Each is the
+  // distance a spawn level with it has, and the lanes it covers.
+  const SETTLED = 10 * ROAD_LENGTH;
+  const restsOf = ({ distance, kind, mover }: MoverEvent) => {
+    const ways =
+      mover.motion === "approach"
+        ? approachOutcomes(mover)
+        : mover.motion === "shy"
+          ? shyOutcomes(mover)
+          : mover.motion === "steps" || (mover.motion === "cross" && mover.stopAfter !== null)
+            ? [mover]
+            : [];
+    return ways.map((way) => {
+      const place = moverPlace(LANE_COUNT, way, SETTLED);
+      const lane = laneAt(place.lanePosition);
+      return {
+        distance: distance + SETTLED - place.travel,
+        lanes: Array.from({ length: footprintOf(REAL, kind).lanes }, (_, i) => lane + i),
+      };
+    });
+  };
+  it.each(POSITIONS)(
+    "places every tip and treat planned, none where a mover stops, in $zone at walk position $position",
+    ({ position, zone }) => {
+      const zoned = inZone(realRun(REAL), zone, position);
+      for (let seed = 1; seed <= 10; seed++) {
+        const quotas = spawnQuotas(REAL, plannerStreams(seed), zoned);
+        const { pending } = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        }).road;
+        const pickups = pending.filter(({ kind }) => kind === "tip" || kind === "treat");
+        for (const kind of ["tip", "treat"] as const) {
+          expect(
+            pickups.filter((pickup) => pickup.kind === kind).length,
+            `seed ${seed}: ${kind}s`,
+          ).toBe(quotas.find((quota) => quota.kind === kind)?.count);
+        }
+        const stops = pending.flatMap((event) =>
+          event.mover === undefined
+            ? []
+            : restsOf({ ...event, mover: event.mover }).map((rest) => ({
+                ...rest,
+                kind: event.kind,
+                length: itemHeight(REAL, GAME_ROAD, event.kind, true),
+              })),
+        );
+        for (const pickup of pickups) {
+          const length = itemHeight(REAL, GAME_ROAD, pickup.kind, false);
+          const under = stops.filter(
+            (stop) =>
+              stop.lanes.includes(pickup.lane) &&
+              pickup.distance > stop.distance - length &&
+              pickup.distance < stop.distance + stop.length,
+          );
+          expect(
+            under.map(({ kind }) => kind),
+            `seed ${seed}: ${pickup.kind} at ${pickup.distance}`,
+          ).toEqual([]);
+        }
+      }
+    },
+  );
 
   // planZone throws when a tuned spawn finds no room, so this also proves none is dropped. At
   // the road's base speed, which a walker's pace scales.
