@@ -65,12 +65,14 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
+  fitPixelTextsAlike,
   type FontRole,
+  type LabelToFit,
   pixelFontMetrics,
   placePixelText,
 } from "../ui/phaser/pixelText";
 import { GREYED, type PlateKind } from "../ui/selection";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import { TEXT_FIT_STYLES } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
 import { addLock, addPlate, drawDogSlotFallback, plateColors, SHOP_ART } from "./itemArt";
@@ -211,6 +213,8 @@ export class ShopScene extends Scene {
   private pressed: Target | undefined;
   private presses: TargetPressListener | undefined;
   private resumeKey: SceneKey | undefined;
+  // The open tab's row names and lines, fitted once every row is drawn.
+  private rowTexts: { lines: LabelToFit[]; names: LabelToFit[] } = { lines: [], names: [] };
   private scroll: ListScroll = listScroll(0);
   private scrollbar: ScrollbarView | undefined;
   private shakes = new Map<string, number>();
@@ -649,11 +653,16 @@ export class ShopScene extends Scene {
     root.add(list);
     this.list = list;
     maskToRect(this, LIST_MASK_KEY, this.frame.rect, list);
+    this.rowTexts = { lines: [], names: [] };
     if (this.tab === "gear") {
       this.drawGear(list, save);
     } else {
       this.drawDogs(list, save);
     }
+    // Every row in the tab shares one size for its name and one for its line: the largest
+    // that fits every row's room.
+    fitPixelTextsAlike(TEXT_FIT_STYLES, this.rowTexts.names);
+    fitPixelTextsAlike(TEXT_FIT_STYLES, this.rowTexts.lines);
     this.scrollbar = addScrollbar(this, root, shopScrollbar(this.scroll.max, this.scroll.y));
     this.placeList();
     if (this.message !== null) {
@@ -817,16 +826,14 @@ export class ShopScene extends Scene {
     const textX = rect.x + ROW.textDx;
     const right = rect.x + rect.width - ROW.plateInset;
     const rightLeft = this.drawRowRight(content, view.plate, row, { mid, right });
-    // The name and line fit the room the price plate or Owned leaves them.
-    const fit = {
-      room: shopRowTextRoom(rect.width, right - rightLeft),
-      styles: TEXT_FIT_STYLES,
-    };
+    // The name and line fit the room the price plate or Owned leaves them, at the size every
+    // row in the tab shares (render).
+    const room = shopRowTextRoom(rect.width, right - rightLeft);
     // A row with no second line centres its name.
     const nameY = row.line === "" ? mid - 5 : mid - 15;
     const name = this.text(content, { x: textX, y: nameY }, row.name, { color: ink });
-    fitPixelText(name, fit, textX, nameY);
-    this.drawRowLine(content, row, { fit, greyed: view.state === "disabled", mid, x: textX });
+    this.rowTexts.names.push({ label: name, room, x: textX, y: nameY });
+    this.drawRowLine(content, row, { greyed: view.state === "disabled", mid, room, x: textX });
     if (this.focusId === row.id) {
       addSelectFrame(this, holder, rect, reducedMotion);
     }
@@ -850,20 +857,17 @@ export class ShopScene extends Scene {
   }
 
   // A row's line in words under its name: a dog's fee, a gear item's effect, a slot's note.
+  // render fits it with the tab's other lines.
   private drawRowLine(
     parent: GameObjects.Container,
     row: ShopRow,
-    at: {
-      fit: { room: number; styles: readonly TextFitStyle[] };
-      greyed: boolean;
-      mid: number;
-      x: number;
-    },
+    at: { greyed: boolean; mid: number; room: number; x: number },
   ): void {
     const color = at.greyed ? PALETTE[GREYED.text] : PALETTE.darkBrown;
     if (row.line !== "") {
-      const line = this.text(parent, { x: at.x, y: at.mid + 3 }, row.line, { color });
-      fitPixelText(line, at.fit, at.x, at.mid + 3);
+      const y = at.mid + 3;
+      const line = this.text(parent, { x: at.x, y }, row.line, { color });
+      this.rowTexts.lines.push({ label: line, room: at.room, x: at.x, y });
     }
   }
 

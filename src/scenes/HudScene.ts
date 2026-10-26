@@ -648,12 +648,24 @@ export class HudScene extends Scene {
     }
     const ownedSlots = profileSave(this).owned.dogSlots;
     const lead = leadSlot(run.pack.map((slot) => slot.status === "walking"));
+    // Every card's name at the one scale they all fit.
+    const nameFit = cardNameFit(
+      run.pack.flatMap((slot, i) => {
+        const label = this.cards[i]?.name;
+        if (label === undefined) {
+          return [];
+        }
+        setPixelText(label, gameData.dogs[slot.dog].name);
+        return [label.width / label.scaleX];
+      }),
+    );
     LAYOUT.dogSlots.forEach((rect, i) => {
       const card = this.cards[i];
       if (card !== undefined) {
         const packSlot = run.pack[i];
         const shown = slotShown(ownedSlots, i, packSlot !== undefined);
-        this.drawCard(g, rect, card, run, shown === "hidden" ? null : packSlot);
+        const slot = shown === "hidden" ? null : packSlot;
+        this.drawCard(g, { nameFit, rect, run, slot, view: card });
         card.lead.setVisible(i === lead);
       }
     });
@@ -665,11 +677,15 @@ export class HudScene extends Scene {
   // dashed "Empty" outline on the band, and a slot not bought (null) shows the band alone.
   private drawCard(
     g: GameObjects.Graphics,
-    rect: Rect,
-    view: CardView,
-    run: RunState,
-    slot: PackSlot | null | undefined,
+    card: {
+      nameFit: ReturnType<typeof cardNameFit>;
+      rect: Rect;
+      run: RunState;
+      slot: PackSlot | null | undefined;
+      view: CardView;
+    },
   ): void {
+    const { nameFit, rect, run, slot, view } = card;
     const parts = [view.card, view.dogFace, view.ownerFace, ...view.hearts];
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
@@ -698,7 +714,8 @@ export class HudScene extends Scene {
         x: rect.x + 1,
       });
     }
-    this.fitName(view.name, dog.name, rect);
+    setPixelText(view.name, dog.name);
+    scalePixelText(view.name, nameFit.scale, rect.x + DOG_CARD.name.x, rect.y + nameFit.top);
     this.showOwnerName(view.owner, dog.owner.name, rect);
     setPixelText(view.fired, fired ? gameData.runText.fired : "");
     const max = ownerMaxHearts(gameData, run, slot.dog);
@@ -733,13 +750,6 @@ export class HudScene extends Scene {
         drawHeart(g, rect.x + cell.x, rect.y + cell.y, cell.full ? PALETTE.red : PALETTE.grey);
       }
     });
-  }
-
-  // The name at 2x when it fits the card, else 1x.
-  private fitName(label: GameObjects.BitmapText, text: string, rect: Rect): void {
-    setPixelText(label, text);
-    const fit = cardNameFit(label.width / label.scaleX);
-    scalePixelText(label, fit.scale, rect.x + DOG_CARD.name.x, rect.y + fit.top);
   }
 
   // The owner's name beside their photo, on one line or two, measured on the first label.

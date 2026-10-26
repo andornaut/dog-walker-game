@@ -478,11 +478,13 @@ describe("the dog cards", () => {
   });
 
   const { room } = DOG_CARD.name;
-  it.each<[string, number, 1 | 2]>([
-    ["a name that fits at 2x", room / 2, 2],
-    ["a name one pixel too wide for 2x", room / 2 + 1, 1],
-  ])("sets %s", (_name, width, scale) => {
-    expect(cardNameFit(width)).toEqual({ scale, top: DOG_CARD.name.tops[scale] });
+  it.each<[string, number[], 1 | 2]>([
+    ["a name that fits at 2x", [room / 2], 2],
+    ["a name one pixel too wide for 2x", [room / 2 + 1], 1],
+    ["every name at 2x when all fit", [room / 2, room / 4], 2],
+    ["every name at 1x when one is too wide for 2x", [room / 4, room / 2 + 1], 1],
+  ])("sets %s", (_name, widths, scale) => {
+    expect(cardNameFit(widths)).toEqual({ scale, top: DOG_CARD.name.tops[scale] });
   });
 
   it.each<[string, boolean[], number | undefined]>([

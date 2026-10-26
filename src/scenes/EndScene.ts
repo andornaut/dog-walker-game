@@ -38,7 +38,14 @@ import type { LastWalk } from "../save/schema";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { drawShadow, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, fitPixelText, inkSpan, pixelFontMetrics } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  fitPixelTextsAlike,
+  inkSpan,
+  type LabelToFit,
+  pixelFontMetrics,
+} from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { onBackPressed } from "./overlay";
@@ -158,18 +165,22 @@ export class EndScene extends Scene {
       soundboardOf(this).play("newBest");
     }
 
-    // Each label fits the room its amount leaves it.
+    // Each label fits the room its amount leaves it, every label at the largest size that fits
+    // them all.
     const room = (amount: GameObjects.BitmapText) => {
       const ink = inkSpan(amount);
       return breakdownLabelRoom(ink.right - ink.left);
     };
     let y = BREAKDOWN.top;
+    const labels: LabelToFit[] = [];
     for (const line of lines) {
       const amount = signedDollarText(line.amount);
       const shown = text(BREAKDOWN.amountRight, y, amount, amountColor(line.amount), 1);
-      fitted(text(BREAKDOWN.label, y, line.label, PALETTE.plum), room(shown), BREAKDOWN.label, y);
+      const label = text(BREAKDOWN.label, y, line.label, PALETTE.plum);
+      labels.push({ label, room: room(shown), x: BREAKDOWN.label, y });
       y += BREAKDOWN.pitch;
     }
+    fitPixelTextsAlike(TEXT_FIT_STYLES, labels);
 
     const zonesLabel = text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
     fitted(zonesLabel, SIDE_LABEL_ROOM, SIDE.x, BREAKDOWN.top);

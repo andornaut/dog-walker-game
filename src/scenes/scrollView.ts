@@ -15,6 +15,7 @@ import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { listenOnePress } from "./onePress";
 import { currentSettings } from "./profileStore";
+import { paintRectMask } from "./rectMask";
 import { addNineSlice } from "./uiKit";
 
 // A scrollbar as drawn: the art's thumb, or the fallback's graphics.
@@ -67,23 +68,17 @@ export function placeScrollbar(bar: ScrollbarRects | null, view: ScrollbarView |
   fillRect(view.graphics, PALETTE.yellow, bar.thumb);
 }
 
-// Clips list to rect, through a screen-sized texture named key, white over rect. Without WebGL
-// there are no filters and the list is not clipped.
+// Clips list to rect, through a screen-sized texture named key, white over rect and repainted
+// when rect changes (paintRectMask). Without WebGL there are no filters and the list is not
+// clipped.
 export function maskToRect(
   scene: Scene,
   key: string,
   rect: Rect,
   list: GameObjects.Container,
 ): void {
-  if (!scene.textures.exists(key)) {
-    const mask = scene.textures.createCanvas(key, SCREEN_CONFIG.width, SCREEN_CONFIG.height);
-    const context = mask?.getContext();
-    if (mask === null || context === undefined) {
-      return;
-    }
-    context.fillStyle = "#ffffff";
-    context.fillRect(rect.x, rect.y, rect.width, rect.height);
-    mask.refresh();
+  if (paintRectMask(scene.textures, SCREEN_CONFIG, key, rect) === undefined) {
+    return;
   }
   list.enableFilters().filters?.internal.addMask(key);
 }

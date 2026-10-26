@@ -72,3 +72,31 @@ export function fittingText(
   }
   return { lines: paragraphs, style: styles.at(-1) as TextFitStyle };
 }
+
+// A text to fit alongside others: its words, its room and how its ink is measured.
+export interface TextToFit {
+  inkWidth: (style: TextFitStyle, line: string) => number;
+  room: number;
+  text: string;
+}
+
+// texts set in one style: the first of styles that sets every one of them within its room as
+// fittingText does, else the last style. The rows of a list share one size this way.
+export function fittingTextsAlike(
+  styles: readonly TextFitStyle[],
+  texts: readonly TextToFit[],
+): FittedText[] {
+  const setIn = (style: TextFitStyle) =>
+    texts.map(({ inkWidth, room, text }) => ({
+      fitted: fittingText([style], inkWidth, room, text),
+      inkWidth,
+      room,
+    }));
+  for (const style of styles) {
+    const set = setIn(style);
+    if (set.every(({ fitted, inkWidth, room }) => fitsRoom(inkWidth, room, fitted))) {
+      return set.map(({ fitted }) => fitted);
+    }
+  }
+  return setIn(styles.at(-1) as TextFitStyle).map(({ fitted }) => fitted);
+}

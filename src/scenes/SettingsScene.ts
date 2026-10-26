@@ -29,7 +29,7 @@ import { closeFace } from "../ui/closeControl";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
 import { drawFocusRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
+import { addPixelText, fitPixelTextsAlike, type LabelToFit } from "../ui/phaser/pixelText";
 import { DISABLED_COLORS } from "../ui/selection";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
@@ -286,13 +286,16 @@ export class SettingsScene extends Scene {
       scale: TEXT_SCALE,
     });
     const rows = this.add.container(0, 0);
+    const notes: LabelToFit[] = [];
     for (const row of ROWS) {
       if (row.kind === "switch") {
-        this.drawSwitchRow(rows, row, settings);
+        notes.push(this.drawSwitchRow(rows, row, settings));
       } else {
         this.drawSlider(row, settings);
       }
     }
+    // Every switch row's note at the largest size that fits them all.
+    fitPixelTextsAlike(SWITCH_NOTE_FIT.styles, notes);
     // Over the rows, since a switch row's face covers its top row.
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
@@ -304,11 +307,12 @@ export class SettingsScene extends Scene {
     }
   }
 
+  // A switch row, its note left for render to fit with the others'. Returns the note.
   private drawSwitchRow(
     parent: GameObjects.Container,
     row: Extract<Row, { kind: "switch" }>,
     settings: Settings,
-  ): void {
+  ): LabelToFit {
     const rect = this.rowRect(rowIndex(row.key));
     const on = switchOn(row.key, settings);
     // The row is normal; whether it is on shows in its switch.
@@ -334,14 +338,14 @@ export class SettingsScene extends Scene {
       color: PALETTE.darkBrown,
       scale: SWITCH_ROW.scale,
     });
-    fitPixelText(note, SWITCH_NOTE_FIT, noteAt.x, noteAt.y);
+    const noteFit = { label: note, room: SWITCH_NOTE_FIT.room, ...noteAt };
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
     const switchX = x + SWITCH.dx;
     const switchY = y + SWITCH.dy;
     const image = addTagImage(this, "ui-switch", on ? "on" : "off", switchX, switchY);
     if (image !== undefined) {
       tile.content.add(image);
-      return;
+      return noteFit;
     }
     const g = this.add.graphics();
     fillRect(g, on ? PALETTE.forest : PALETTE.slate, {
@@ -351,6 +355,7 @@ export class SettingsScene extends Scene {
       y: switchY,
     });
     tile.content.add(g);
+    return noteFit;
   }
 
   // A volume slider: drag along the row to set it. Muted, it is disabled and reads "Muted".

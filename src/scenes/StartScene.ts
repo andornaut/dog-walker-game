@@ -114,8 +114,10 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
+  fitPixelTextsAlike,
   type FontRole,
   inkSpan,
+  type LabelToFit,
   pixelFontMetrics,
   placePixelText,
   scalePixelText,
@@ -988,17 +990,16 @@ export class StartScene extends Scene {
     return label;
   }
 
-  // Fits a body label at TEXT_SCALE in the first of fit's styles, its capitals' top at (x, y);
-  // a label set smaller is centred on the row its capitals take at TEXT_SCALE.
-  private fitOnRow(
-    label: GameObjects.BitmapText,
-    fit: { room: number; styles: readonly TextFitStyle[] },
-    x: number,
-    y: number,
-  ): void {
-    const { style } = fitPixelText(label, fit, x, y);
+  // Fits body labels at TEXT_SCALE alike, in the first of styles that fits them all, each with
+  // its capitals' top at its (x, y); labels set smaller are centred on the row their capitals
+  // take at TEXT_SCALE.
+  private fitOnRowsAlike(styles: readonly TextFitStyle[], labels: readonly LabelToFit[]): void {
+    const fitted = fitPixelTextsAlike(styles, labels);
     const { capHeight } = pixelFontMetrics(this, "body");
-    placePixelText(label, x, y + Math.floor((capHeight * (TEXT_SCALE - style.scale)) / 2));
+    labels.forEach(({ label, x, y }, i) => {
+      const scale = fitted[i]?.style.scale ?? TEXT_SCALE;
+      placePixelText(label, x, y + Math.floor((capHeight * (TEXT_SCALE - scale)) / 2));
+    });
   }
 
   private graphics(parent: GameObjects.Container): GameObjects.Graphics {
@@ -1592,6 +1593,8 @@ export class StartScene extends Scene {
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
     const tiles = dogTiles();
+    // Every tile's name, fitted once all are drawn so they share one size.
+    const names: LabelToFit[] = [];
     rosterOrder().forEach((id, i) => {
       const rect = dogFace(itemAt(tiles, i));
       const { x, y } = rect;
@@ -1633,7 +1636,7 @@ export class StartScene extends Scene {
       const body = pixelFontMetrics(this, "body");
       const fitText = (value: string, top: number) => {
         const label = this.text(content, x + textX, top, value, ink);
-        this.fitOnRow(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
+        names.push({ label, room: DOG_TILE_TEXT_ROOM, x: x + textX, y: top });
       };
       if (padlock === null) {
         // Every dog earns the same pay, so an owned tile names the dog alone; its card says the pay.
@@ -1646,6 +1649,7 @@ export class StartScene extends Scene {
       const plateY = dogTilePlateY(body);
       this.lockedPlate(content, tile, { capY: y + plateY - 1, originX: 0, x: x + textX });
     });
+    this.fitOnRowsAlike(TEXT_FIT_STYLES, names);
   }
 
   // The Pocket section's tiles, one per gear item cheapest first; a hold shows an item's

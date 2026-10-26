@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "./textFit";
+import {
+  fittingText,
+  fittingTextsAlike,
+  TEXT_FIT_STYLES,
+  type TextFitStyle,
+  type TextToFit,
+  WRAPPING_TEXT_FIT_STYLES,
+} from "./textFit";
 
 // Every character 4 font pixels wide, with spacing between glyphs, at the style's scale.
 const width = (style: TextFitStyle, line: string) =>
@@ -20,5 +27,54 @@ describe("fittingText", () => {
       expect(fitted.lines).toEqual(lines);
       expect(fitted.style).toEqual(style ?? WRAPPING_TEXT_FIT_STYLES.at(-1));
     }
+  });
+});
+
+describe("fittingTextsAlike", () => {
+  const row = (room: number, text: string) => ({ inkWidth: width, room, text });
+  it.each<[string, readonly TextFitStyle[], TextToFit[], string[][]]>([
+    [
+      "every row at 2x when all fit",
+      TEXT_FIT_STYLES,
+      [row(40, "abcd"), row(40, "ab")],
+      [["abcd"], ["ab"]],
+    ],
+    [
+      "every row closer when one needs it",
+      TEXT_FIT_STYLES,
+      [row(40, "abcd"), row(30, "abcd")],
+      [["abcd"], ["abcd"]],
+    ],
+    [
+      "every row at 1x when one fits only at 1x",
+      TEXT_FIT_STYLES,
+      [row(40, "ab"), row(40, "abcd"), row(20, "abcd")],
+      [["ab"], ["abcd"], ["abcd"]],
+    ],
+    [
+      "every row in the last style when one fits none",
+      TEXT_FIT_STYLES,
+      [row(40, "ab"), row(10, "abcd")],
+      [["ab"], ["abcd"]],
+    ],
+    [
+      "every row on two lines when one needs them",
+      WRAPPING_TEXT_FIT_STYLES,
+      [row(80, "ab cd"), row(30, "abc def")],
+      [["ab cd"], ["abc", "def"]],
+    ],
+  ])("sets %s, in the largest style that fits all", (_case, styles, rows, lines) => {
+    const fitted = fittingTextsAlike(styles, rows);
+    // The largest style that fits all: the smallest any one row needs on its own.
+    const alone = rows.map(({ room, text }) =>
+      styles.indexOf(fittingText(styles, width, room, text).style),
+    );
+    const largest = styles[Math.max(...alone)];
+    expect(fitted.map((one) => one.style)).toEqual(rows.map(() => largest));
+    expect(fitted.map((one) => one.lines)).toEqual(lines);
+  });
+
+  it("sets no rows for an empty list", () => {
+    expect(fittingTextsAlike(TEXT_FIT_STYLES, [])).toEqual([]);
   });
 });

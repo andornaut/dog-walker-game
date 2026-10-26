@@ -222,10 +222,11 @@ export function cardHearts(hearts: number, max: number): CardHeart[] {
   );
 }
 
-// The 2x name when it fits, else 1x, with the top of its capitals.
-export function cardNameFit(widthAt1x: number): { scale: 1 | 2; top: number } {
+// The scale every card's name shares, from each name's width at 1x: 2x when every name fits,
+// else 1x, with the top of the capitals.
+export function cardNameFit(widthsAt1x: readonly number[]): { scale: 1 | 2; top: number } {
   const { room, tops } = DOG_CARD.name;
-  const scale = widthAt1x * 2 <= room ? 2 : 1;
+  const scale = widthsAt1x.every((width) => width * 2 <= room) ? 2 : 1;
   return { scale, top: tops[scale] };
 }
 
