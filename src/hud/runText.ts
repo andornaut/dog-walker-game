@@ -23,7 +23,6 @@ export const STRIP_LINE_FIELDS = {
 export const RUN_TEXT_FIELDS = {
   card: {
     fires: ["owners"],
-    forkFees: ["fees"],
     heartForgiven: ["dog", "hearts"],
     need: ["amount"],
   },
@@ -35,8 +34,6 @@ export const RUN_TEXT_FIELDS = {
   fullPackHome: ["amount"],
   homeQuestion: {
     lose: ["fees", "zone"],
-    loseBonus: [],
-    loseWithBonus: ["fees", "zone"],
     zonesLeft: ["count"],
   },
   lowHearts: ["owner"],

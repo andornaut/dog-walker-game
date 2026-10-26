@@ -5,14 +5,13 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, Effect, ZoneId } from "../data/types";
+import type { DogId, Effect } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import type { EffectSource, RunState } from "../state/runState";
 import { LONE } from "../testing/packPlaces";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
-import { TEST_WORLD } from "../testing/world";
 import { causeLabel, type Change, changeAmount } from "./causes";
 import { maxHearts } from "./dogs";
 import { changeHearts, resolveEffects } from "./effects";
@@ -52,12 +51,6 @@ const sweetTalker = activeModifier(
   { kind: "upgrade", upgrade: "sweetTalker" },
   { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
 );
-// The first zone at twice the pay, for a lone dog.
-const [firstZone, ...laterZones] = TEST_WORLD.zones;
-const doublePay = {
-  ...TEST_WORLD,
-  zones: [{ ...firstZone, fees: 2 }, ...laterZones] as typeof TEST_WORLD.zones,
-};
 const lonePay = read(TEST_TUNING, "money", "payPerDog");
 const tipText = formatDollars(
   cents(read(TEST_TUNING, "money", "tip") + read(TEST_TUNING, "money", "bigTipperTipBonus")),
@@ -101,16 +94,9 @@ describe("causeLabel", () => {
         `+${tipText} ${RUN_TEXT.causes.tip}, ${UPGRADES.bigTipper.name}`,
       ],
       [
-        "the zone that changed a pay",
-        () => {
-          const run = testState({ duchess: 5 }, { route: [firstZone.id as ZoneId] });
-          const [pay] = payZone({ ...data, world: doublePay }, run).changes;
-          if (pay === undefined) {
-            throw new Error("Expected a pay");
-          }
-          return pay;
-        },
-        `+${formatDollars(cents(2 * lonePay))} ${RUN_TEXT.causes.pay}, ${firstZone.name}`,
+        "a zone's pay as pay alone",
+        () => only(payZone(data, testState({ duchess: 5 })).changes),
+        `+${formatDollars(cents(lonePay))} ${RUN_TEXT.causes.pay}`,
       ],
       [
         "a cost by its amount alone",

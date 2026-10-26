@@ -337,7 +337,6 @@ function zonesSection(data: GameData): Section {
     headers: [
       "Zone",
       "Difficulty",
-      "Fees",
       "Speed",
       "Movers",
       "Minutes",
@@ -358,7 +357,6 @@ function zonesSection(data: GameData): Section {
       return [
         zone.name,
         `${zone.difficultyName} (${zone.difficulty})`,
-        `×${zone.fees}`,
         `×${zone.speed}`,
         `${Math.round(zone.moverShare * 100)}%`,
         Math.round((stats.duration / 60) * 10) / 10,

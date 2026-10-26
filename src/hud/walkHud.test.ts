@@ -178,15 +178,14 @@ describe("cashScale", () => {
   );
 
   // The most cash a walk could plausibly reach, from the tuning: the purse and the Fanny pack,
-  // a full pack's pay in every zone at the dearest zone's fees, every tip at Big tipper's value,
+  // a full pack's pay in every zone, every tip at Big tipper's value,
   // every lucky find a kept wallet, and the Pack bonus.
   const money = (key: Parameters<typeof read<"money">>[2]) => read(gameData.tuning, "money", key);
   const count = (key: Parameters<typeof read<"counts">>[2]) => read(gameData.tuning, "counts", key);
   const zones = walkLength(gameData);
-  const dearest = Math.max(...gameData.world.zones.map((zone) => zone.fees));
   const tipValue = money("tip") + money("bigTipperTipBonus");
   const perZone = (zone: number) =>
-    count("packSizeMax") * money("payPerDog") * dearest +
+    count("packSizeMax") * money("payPerDog") +
     (count("tipsFirstZone") + count("tipsGainPerZone") * zone) * tipValue +
     count("luckyEncountersPerZone") * money("lostWalletKeep");
   const plausible = cents(

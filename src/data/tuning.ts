@@ -69,7 +69,7 @@ export const TUNING = {
     fullPackBonusPerDog: 10,
     lostWalletKeep: 20,
     missedTips: 8,
-    // Each walking dog's pay for a zone, before the zone's pay multiplier.
+    // Each walking dog's pay for a zone, the same in every zone.
     payPerDog: 20,
     prices: {
       archie: 250,

@@ -480,8 +480,6 @@ export interface Zone {
   readonly difficulty: Difficulty;
   // The difficulty in words, as a path card shows it.
   readonly difficultyName: string;
-  // Multiplies every dog's fee for the zone.
-  readonly fees: number;
   readonly id: string;
   // Hex colours from the art palette. The leash stands out against the zone's road.
   readonly leashColor: string;
@@ -666,8 +664,6 @@ export interface HomeText {
 export interface RunText {
   readonly card: {
     readonly fires: string;
-    // A fork's path card plaque, with the zone's fee multiplier.
-    readonly forkFees: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
     // A plaque whose cost a modifier, such as Sweet talker, waived; and the plaque of the Skip a
@@ -683,8 +679,10 @@ export interface RunText {
     // The Skip card's effect on its face, and in its body when held.
     readonly skipEffect: string;
     readonly skipHeld: string;
-    // An upgrade card's plaque, by how long it lasts.
+    // A fork's path card plaque, by how long its upgrade lasts: upgradeDuration on the enlarged
+    // card, upgradeDurationShort on the small one.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
+    readonly upgradeDurationShort: { readonly [D in UpgradeDuration]: string };
   };
   // What a change's floating label names a base cause by (the Pack bonus, a bump, a
   // zone's pay, a tip or a treat), and atMax for a meter held at its max.
@@ -723,16 +721,12 @@ export interface RunText {
   readonly forgiven: string;
   // The end screen's line when every dog set out with got home after the last zone.
   readonly fullPackHome: string;
-  // keep is what going home keeps (the walk's money so far), lose the fees the current zone
-  // would pay the dogs still walking, and zonesLeft the zones after this one, shown when any are.
-  // lose is the zone's pay given up, loseWithBonus that and the Pack bonus, and
-  // loseBonus the bonus alone, at a fork.
+  // lose is the current zone's pay the dogs still walking would earn, given up, and zonesLeft
+  // the zones after this one, shown when any are.
   readonly homeQuestion: {
     readonly headHome: string;
     readonly keepWalking: string;
     readonly lose: string;
-    readonly loseBonus: string;
-    readonly loseWithBonus: string;
     readonly title: string;
     readonly zonesLeft: string;
   };

@@ -67,7 +67,7 @@ describe("the Home question's panel", () => {
     const money = dollarText(cents(9_999_900));
     const zone = gameData.world.zones.map((candidate) => candidate.name).reduce(longer);
     const note = [
-      fillNames(words.loseWithBonus, { fees: money, zone }),
+      fillNames(words.lose, { fees: money, zone }),
       fillNames(words.zonesLeft, { count: String(walkLength(gameData) - 1) }),
     ];
     const room = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;

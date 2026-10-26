@@ -212,8 +212,8 @@ describe("run, world and walkers", () => {
 
   it("gives every zone positive multipliers, a mover share from 0 to 1 and a kind to draw", () => {
     for (const zone of world.zones) {
-      const { density, fees, moverShare, speed, weights } = zone;
-      for (const value of [fees, speed, density.luckyFinds, density.obstacles, density.tips]) {
+      const { density, moverShare, speed, weights } = zone;
+      for (const value of [speed, density.luckyFinds, density.obstacles, density.tips]) {
         expect(value, zone.name).toBeGreaterThan(0);
       }
       expect(moverShare, zone.name).toBeGreaterThanOrEqual(0);

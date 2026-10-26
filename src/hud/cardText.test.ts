@@ -10,7 +10,7 @@ import { testState } from "../testing/runState";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import type { TextFitStyle } from "../ui/textFit";
-import { largeBodyText, plaqueTexts, smallCardText } from "./cardText";
+import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "./cardText";
 
 const BODY = fontFileMetrics("font-body");
 const TITLE = fontFileMetrics("font-title");
@@ -160,10 +160,13 @@ describe("every card the data can deal", () => {
           large.badge.width,
           fired ? large.fires.x + 2 * marker.size : undefined,
         );
-        const narrowest = Math.min(
-          ...plaqueTexts(gameData, option).map((text) => inkWidth("font-title", ONE, title(text))),
-        );
-        return narrowest <= Math.min(small, enlarged);
+        const narrowest = (size: PlaqueSize) =>
+          Math.min(
+            ...plaqueTexts(gameData, size, option).map((text) =>
+              inkWidth("font-title", ONE, title(text)),
+            ),
+          );
+        return narrowest("small") <= small && narrowest("enlarged") <= enlarged;
       }),
     ).toEqual([]);
   });

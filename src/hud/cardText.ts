@@ -7,19 +7,22 @@ import type { FontMetrics } from "../ui/fontMetrics";
 import { fitsRoom, type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 import { RUN_TEXT_FIELDS } from "./runText";
 
+// A card drawn small in a row, or enlarged while held.
+export type PlaqueSize = "enlarged" | "small";
+
 // What a card's plaque may say, longest first: the first that fits its room is shown. A path
-// card's plaque shows its zone's pay multiplier instead of a cost, then how long its upgrade
-// lasts, or the pay alone where both do not fit; another option's, its price, greyed with the
-// card when the player cannot afford it. A free option and Skip show no plaque.
-export function plaqueTexts(data: Pick<GameData, "runText">, option: OptionView): string[] {
+// card's plaque shows how long its upgrade lasts instead of a cost, in short on a small card;
+// another option's, its price, greyed with the card when the player cannot afford it. A free
+// option and Skip show no plaque.
+export function plaqueTexts(
+  data: Pick<GameData, "runText">,
+  size: PlaqueSize,
+  option: OptionView,
+): string[] {
   const text = data.runText.card;
   if (option.path !== undefined) {
-    const pay = fillLine(RUN_TEXT_FIELDS.card, text, "forkFees", {
-      fees: String(option.path.fees),
-    });
-    return option.duration === undefined
-      ? [pay]
-      : [`${pay} · ${text.upgradeDuration[option.duration]}`, pay];
+    const durations = size === "small" ? text.upgradeDurationShort : text.upgradeDuration;
+    return option.duration === undefined ? [] : [durations[option.duration]];
   }
   return [fillLine(RUN_TEXT_FIELDS.card, text, "need", { amount: formatDollars(option.cost) })];
 }

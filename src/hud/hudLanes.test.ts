@@ -123,10 +123,8 @@ describe("a change label", () => {
     const hearts = [...sources, ...firedBy].map((name) => `−10♥ ${name}`);
     const money = [
       ...sources.map((name) => `+$999 ${name}`),
-      // A zone names its pay, which is the pay per dog at its multiplier.
-      ...gameData.world.zones.map(
-        ({ fees, name }) => `${amountText("money", payFor(gameData.tuning) * fees)} ${name}`,
-      ),
+      // A zone's pay names its cause.
+      `${amountText("money", payFor(gameData.tuning))} ${gameData.runText.causes.pay}`,
       ...modifiers.map((name) => `+$99 tip, ${name}`),
     ];
     const cases = [

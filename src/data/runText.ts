@@ -15,6 +15,7 @@ export const RUN_TEXT = {
     skipEffect: "Skip this card, free once each neighborhood.",
     skipHeld: "Skip this card: nothing happens.",
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Rest of walk" },
+    upgradeDurationShort: { nextZone: "Next", now: "Now", run: "All walk" },
   },
   causes: {
     atMax: "at max",

@@ -3,7 +3,6 @@ import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
 import { dollarCauses, modifierCauses, type MoneyChange } from "./causes";
 import { type StatParts, statParts } from "./modifiers";
-import { currentZone } from "./route";
 import { addCents, type Cents, cents, read, roundDollars } from "./units";
 
 // The modifiers the pack's debuffs apply, such as Stinky's on tipValue.
@@ -70,26 +69,21 @@ interface Payments {
   readonly state: RunState;
 }
 
-// Each dog's pay for a zone, before the zone's multiplier.
+// Each dog's pay for a zone, the same in every zone.
 export function payFor(tuning: LiveTuning): Cents {
   return read(tuning, "money", "payPerDog");
 }
 
-// At the end of a zone, every dog still walking earns the pay times the zone's pay multiplier,
-// rounded to the dollar, banked into the money, one change per dog.
-export function payZone(data: Pick<GameData, "tuning" | "world">, state: RunState): Payments {
-  const zone = currentZone(data, state);
+// At the end of a zone, every dog still walking earns the pay, banked into the money, one
+// change per dog.
+export function payZone(data: Pick<GameData, "tuning">, state: RunState): Payments {
   const pay = payFor(data.tuning);
-  const changes = packDogs(state).map((dog): MoneyChange => {
-    const amount = roundDollars(pay * zone.fees);
-    const causes = dollarCauses([
-      { amount: pay, kind: "pay" },
-      ...(zone.fees === 1
-        ? []
-        : [{ amount: pay * (zone.fees - 1), kind: "zone", zone: zone.name } as const]),
-    ]);
-    return { amount, causes, dog, kind: "money" };
-  });
+  const changes = packDogs(state).map((dog): MoneyChange => ({
+    amount: pay,
+    causes: [{ amount: pay, kind: "pay" }],
+    dog,
+    kind: "money",
+  }));
   const money = changes.reduce((sum, change) => addCents(sum, change.amount), state.money);
   return { changes, state: { ...state, money } };
 }

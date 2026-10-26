@@ -5,7 +5,7 @@ import type { DogId } from "../data/types";
 import { dollarText } from "../home/home";
 import { fillNames } from "../lib/lines";
 import { currentZone, defaultRoute, walkLength } from "../rules/route";
-import { cents, read, roundDollars } from "../rules/units";
+import { cents, read } from "../rules/units";
 import { testState } from "../testing/runState";
 import { homeQuestionNote } from "./homeQuestion";
 
@@ -17,32 +17,35 @@ describe("homeQuestionNote", () => {
   const route = defaultRoute(gameData, zones);
   const pay = read(gameData.tuning, "money", "payPerDog");
 
-  it("states the walking dogs' fees, any bonus and the zones left that going home gives up", () => {
-    const cases: [Slots, number, boolean][] = [
-      [{ duchess: 5, koda: 2, zippy: 3 }, 1, true],
-      [{ duchess: 5, koda: "fired" }, 1, false],
-      [{ zippy: 4 }, zones - 1, true],
-    ];
-    for (const [slots, zoneIndex, bonus] of cases) {
+  it.each([
+    ["three dogs walking", { duchess: 5, koda: 2, zippy: 3 }, 1],
+    ["one dog walking of two", { duchess: 5, koda: "fired" }, 1],
+    ["a lone dog in the last zone", { zippy: 4 }, zones - 1],
+  ] satisfies [string, Slots, number][])(
+    "states the zone's pay and the zones left that going home gives up: %s",
+    (_name, slots, zoneIndex) => {
       const run = testState(slots, { route, zoneIndex });
       const walking = Object.values(slots).filter((hearts) => hearts !== "fired").length;
-      const fees = roundDollars(pay * currentZone(gameData, run).fees * walking);
       const left = zones - zoneIndex - 1;
-      const named = { fees: dollarText(cents(fees)), zone: currentZone(gameData, run).name };
+      const named = {
+        fees: dollarText(cents(pay * walking)),
+        zone: currentZone(gameData, run).name,
+      };
       expect(homeQuestionNote(gameData, run)).toEqual([
-        { kind: "lose", text: fillNames(bonus ? words.loseWithBonus : words.lose, named) },
+        { kind: "lose", text: fillNames(words.lose, named) },
         ...(left > 0
           ? [{ kind: "zonesLeft", text: fillNames(words.zonesLeft, { count: String(left) }) }]
           : []),
       ]);
-    }
-  });
+    },
+  );
 
-  it("gives up only the bonus at a fork, and nothing once an owner has fired you", () => {
+  it.each([
+    ["a full pack", { duchess: 5 }],
+    ["an owner who fired you", { duchess: 5, koda: "fired" }],
+  ] satisfies [string, Slots][])("gives up nothing at a fork, with %s", (_name, slots) => {
     const fork = { route: route.slice(0, 1), zoneIndex: 1 };
-    const lines = (slots: Slots) =>
-      homeQuestionNote(gameData, testState(slots, fork)).filter(({ kind }) => kind === "lose");
-    expect(lines({ duchess: 5 })).toEqual([{ kind: "lose", text: words.loseBonus }]);
-    expect(lines({ duchess: 5, koda: "fired" })).toEqual([]);
+    const lines = homeQuestionNote(gameData, testState(slots, fork));
+    expect(lines.filter(({ kind }) => kind === "lose")).toEqual([]);
   });
 });

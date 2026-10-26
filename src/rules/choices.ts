@@ -51,7 +51,6 @@ export type CardData = ChoiceData & Pick<GameData, "runText" | "upgrades">;
 interface PathView {
   readonly difficulty: Difficulty;
   readonly difficultyName: string;
-  readonly fees: number;
   readonly side: PathSide;
   readonly upgrade: UpgradeId;
   readonly zone: ZoneId;
@@ -94,7 +93,7 @@ export interface OptionView {
 }
 
 // Whether a card shows a plaque at its foot: an option that costs cash shows its price there,
-// and a fork's path card its zone's pay. A free option and the Skip card have none.
+// and a fork's path card how long its upgrade lasts. A free option and the Skip card have none.
 export function hasPlaque(option: OptionView | undefined): option is OptionView {
   return option !== undefined && (option.path !== undefined || option.cost > 0);
 }
@@ -279,7 +278,7 @@ export function firesText(
 }
 
 // A fork's card: one free path card per path, left to right, each naming its zone, with the
-// zone's difficulty and pay multiplier, and the upgrade the path carries: its effect, how long
+// zone's difficulty, and the upgrade the path carries: its effect, how long
 // it lasts, and the changes it would make now.
 export function forkCard(data: CardData, state: RunState, source: ForkSource): CardView {
   const options = source.paths.map((id, index): OptionView => {
@@ -308,7 +307,6 @@ export function forkCard(data: CardData, state: RunState, source: ForkSource): C
       path: {
         difficulty: zone.difficulty,
         difficultyName: zone.difficultyName,
-        fees: zone.fees,
         side: pathSide(index, source.paths.length),
         upgrade,
         zone: id,

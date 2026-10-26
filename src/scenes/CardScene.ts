@@ -11,7 +11,7 @@ import {
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { type OptionMarks, optionMarks } from "../hud/buffMarks";
-import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
+import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
@@ -415,7 +415,7 @@ export class CardScene extends Scene {
     if (marks.plaque !== null) {
       this.addPlaqueValue(badge, marker, 9, marks.plaque);
     } else if (hasPlaque(option)) {
-      this.addPlaqueText(badge, marker, 9, PALETTE.plum, option);
+      this.addPlaqueText("enlarged", badge, marker, 9, PALETTE.plum, option);
     }
     this.enlarged = this.children.list.slice(before);
   }
@@ -478,8 +478,9 @@ export class CardScene extends Scene {
   }
 
   // The plaque's text in the title font, centred in the plaque or its part right of the fires
-  // marker, capsY under its top: the first of plaqueTexts that fits there.
+  // marker, capsY under its top: the first of plaqueTexts for the card's size that fits there.
   private addPlaqueText(
+    size: PlaqueSize,
     badge: Rect,
     marker: number | undefined,
     capsY: number,
@@ -488,7 +489,7 @@ export class CardScene extends Scene {
   ): GameObjects.BitmapText {
     const center = plaqueCentre(badge, marker);
     const room = plaqueRoom(badge.x, badge.width, marker);
-    const texts = plaqueTexts(gameData, option);
+    const texts = plaqueTexts(gameData, size, option);
     const label = this.centered(center, badge.y + capsY, texts[0] ?? "", color, { font: "title" });
     for (const text of texts) {
       setPixelText(label, text);
@@ -671,6 +672,7 @@ export class CardScene extends Scene {
     this.badges.push(
       hasPlaque(option)
         ? this.addPlaqueText(
+            "small",
             badge,
             marker,
             4,

@@ -90,12 +90,9 @@ describe("helpPicture", () => {
     },
   );
 
-  it("shows the fork after the first neighborhood, its paths easiest first, each with its pay", () => {
+  it("shows the fork after the first neighborhood, its paths easiest first", () => {
     const { card, walk } = helpPicture(gameData, "zones");
     const paths = forkPaths(gameData, () => 0, walk.run.route);
     expect(card?.options.map((option) => option.path?.zone)).toEqual(paths);
-    expect(card?.options.map((option) => option.path?.fees)).toEqual(
-      paths.map((path) => gameData.world.zones.find((zone) => zone.id === path)?.fees),
-    );
   });
 });

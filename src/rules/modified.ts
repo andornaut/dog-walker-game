@@ -62,7 +62,7 @@ export function modifierCausesOf(change: Change): ModifierCause[] {
 }
 
 // A heart or money change's modified value: before is the sum of its causes that are no
-// modifier or limit, such as its base and a zone's fee multiplier. Null when no modifier
+// modifier or limit, such as its base. Null when no modifier
 // changed it.
 export function changeModified(change: Change): ModifiedValue | null {
   const by = modifierCausesOf(change);

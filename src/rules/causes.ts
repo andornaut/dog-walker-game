@@ -8,15 +8,13 @@ import { type Cents, type Hearts, roundDollars } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
-// base: the effect, tip, pay, treat or bump. The rest are what changed it: a modifier, a zone's
-// fee multiplier, or a limit (a meter held within 0 and its max, money held at $0 or more).
+// base: the effect, tip, pay, treat or bump. The rest are what changed it: a modifier, or a
+// limit (a meter held within 0 and its max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
   | { readonly amount: number; readonly kind: "bonus" | "bump" | "pay" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
-  | ModifierCause
-  // A zone's fee multiplier, with the zone's name.
-  | { readonly amount: number; readonly kind: "zone"; readonly zone: string };
+  | ModifierCause;
 
 // One modifier's share of a change, in the change's unit. forgives marks the share of a loss a
 // forgivenHearts modifier, such as Second chance's, forgave.
@@ -139,8 +137,6 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       return cause.bound === "min" && change.kind === "hearts"
         ? firedByText(data, change.dog)
         : data.runText.causes.atMax;
-    case "zone":
-      return cause.zone;
     default:
       return assertNever(cause);
   }

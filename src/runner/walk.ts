@@ -1404,7 +1404,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
   };
 }
 
-// The end of a zone: every dog still walking is paid at the zone's fee multiplier, each debuff
+// The end of a zone: every dog still walking is paid, each debuff
 // on counts the zone, the effects that lasted the zone expire, then the run moves to the next
 // position, whose zone the fork picks, or ends once the walk's last zone is done.
 export function finishZone(data: WalkData, run: RunState): ZoneEnd {

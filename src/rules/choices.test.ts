@@ -475,7 +475,7 @@ describe("a fork", () => {
   };
   const afterZone = testState({ koda: 4 }, { route: ["street"], zoneIndex: 1 });
 
-  it("shows a free path card per path with its zone, difficulty, pay multiplier and upgrade", () => {
+  it("shows a free path card per path with its zone, difficulty and upgrade", () => {
     const card = cardFor(data, openCard(source, afterZone), source);
     expect(card.title).toBe(data.runText.card.forkTitle);
     expect(card.affected).toEqual([]);
@@ -497,7 +497,6 @@ describe("a fork", () => {
           path: {
             difficulty: zone?.difficulty,
             difficultyName: zone?.difficultyName,
-            fees: zone?.fees,
             side: ["left", "straight", "right"][index],
             upgrade: upgrades[index],
             zone: id,

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import type { ZoneId } from "../data/types";
+import { WORLD } from "../data/world";
 import type { RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -87,27 +88,16 @@ describe("payZone", () => {
     }
   });
 
-  it("multiplies the pay by the zone multiplier, rounded to the dollar, naming the zone", () => {
-    for (const multiplier of [1.5, 1.25]) {
-      const [first, ...rest] = TEST_WORLD.zones;
-      const world = {
-        ...TEST_WORLD,
-        zones: [{ ...first, fees: multiplier }, ...rest] as typeof TEST_WORLD.zones,
-      };
-      const run = testState({ duchess: 5, koda: 5, zippy: 5 }, { route: [first.id as ZoneId] });
-      const { changes } = payZone({ ...data, world }, run);
-      const paid = Math.round((pay * multiplier) / 100) * 100;
-      expect(changes[0]).toEqual({
-        amount: paid,
-        causes: [
-          { amount: pay, kind: "pay" },
-          { amount: paid - pay, kind: "zone", zone: first.name },
-        ],
-        dog: "duchess",
-        kind: "money",
-      });
-    }
-  });
+  it.each(WORLD.zones.map((zone) => [zone.name, zone.id as ZoneId] as const))(
+    "pays each dog the same in %s as in every zone",
+    (_name, zone) => {
+      const run = testState({ duchess: 5, koda: 5, zippy: 5 }, { route: [zone] });
+      const { changes } = payZone(data, run);
+      expect(changes.map(({ amount, causes }) => ({ amount, causes }))).toEqual(
+        Array.from({ length: 3 }, () => ({ amount: pay, causes: [{ amount: pay, kind: "pay" }] })),
+      );
+    },
+  );
 });
 
 describe("fullPackBonus", () => {
