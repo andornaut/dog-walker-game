@@ -1,7 +1,7 @@
 import type { DogId, GameData, GearId } from "../data/types";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
-import { type Purchase, purchasePrice } from "./home";
+import { isAffordable, type Purchase } from "./home";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
 
@@ -12,17 +12,6 @@ export function purchases(data: ShopData): Purchase[] {
     ...(Object.keys(data.shopGear) as GearId[]).map((gear): Purchase => ({ gear, kind: "gear" })),
     { kind: "dogSlot" },
   ];
-}
-
-// For sale, and the bank covers it. Owned items and a maxed-out slot are never affordable.
-export function isAffordable(
-  data: ShopData,
-  owned: Owned,
-  bank: Cents,
-  purchase: Purchase,
-): boolean {
-  const cost = purchasePrice(data, owned, purchase);
-  return cost !== null && cost <= bank;
 }
 
 // Whether a bank of `bank` covers something that `before` did not.

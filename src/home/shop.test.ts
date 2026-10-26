@@ -23,6 +23,7 @@ import {
   dogRows,
   gearRows,
   ownedCountNote,
+  SHOP_ROW_VIEWS,
   shopAffordable,
   shopOpenTab,
   type ShopRow,
@@ -52,20 +53,39 @@ const starters = (Object.keys(data.dogs) as DogId[]).filter(
 const owned: Owned = { dogSlots: 1, dogs: starters, gear: [], walkers: [] };
 
 describe("shopRowLook", () => {
-  const row = (price: number | null, blocked: string | null): ShopRow => ({
-    blocked,
-    id: "x",
-    line: "",
-    name: "X",
-    price: price === null ? null : dollars(price),
-    purchase: { kind: "dogSlot" },
+  // Every row for sale (the next slot, each gear item and each dog not owned) with the bank at
+  // its price and a cent short.
+  const forSale: readonly ShopRow[] = [
+    ...slotRows(data, owned),
+    ...gearRows(data, owned),
+    ...dogRows(data, owned),
+  ].filter((row) => row.blocked === null && row.price !== null);
+  const banks = forSale.flatMap((row) => {
+    const price = row.price ?? cents(0);
+    return [
+      { art: "color", bank: price, id: row.id, look: "affordable", row },
+      { art: "grey", bank: cents(price - 1), id: row.id, look: "short", row },
+    ] as const;
   });
 
-  it("shows a row owned, blocked though the bank covers it, affordable at exactly its price, or short", () => {
-    expect(shopRowLook(dollars(0), row(null, null))).toBe("owned");
-    expect(shopRowLook(dollars(900), row(500, "first"))).toBe("blocked");
-    expect(shopRowLook(dollars(500), row(500, null))).toBe("affordable");
-    expect(shopRowLook(dollars(499), row(500, null))).toBe("short");
+  it.each(banks)("shows $id $look, its art in $art", ({ art, bank, look, row }) => {
+    const shown = shopRowLook(data, owned, bank, row);
+    expect({ art: SHOP_ROW_VIEWS[shown].art, look: shown }).toEqual({ art, look });
+  });
+
+  it("shows an owned row owned in color, and a slot past the next blocked in grey", () => {
+    const rich = cents(Number.MAX_SAFE_INTEGER);
+    const twoSlots = { ...owned, dogSlots: 2 };
+    const [ownedSlot] = slotRows(data, twoSlots);
+    const [, blockedSlot] = slotRows(data, owned);
+    const shown = [
+      ownedSlot && shopRowLook(data, twoSlots, rich, ownedSlot),
+      blockedSlot && shopRowLook(data, owned, rich, blockedSlot),
+    ];
+    expect(shown.map((look) => look && { art: SHOP_ROW_VIEWS[look].art, look })).toEqual([
+      { art: "color", look: "owned" },
+      { art: "grey", look: "blocked" },
+    ]);
   });
 });
 
@@ -112,13 +132,14 @@ describe("gearRows and dogRows", () => {
     ["one dog bought", [...starters, forSale[0] ?? "koda"]],
     ["every dog bought", allDogs],
   ])("list every dog in one order, owned ones marked owned, with %s", (_, dogs) => {
-    const rows = dogRows(data, { ...owned, dogs: [...dogs] });
+    const holding = { ...owned, dogs: [...dogs] };
+    const rows = dogRows(data, holding);
     expect(rows.map(({ id }) => id)).toEqual(dogRows(data, owned).map(({ id }) => id));
     expect(rows.map(dogOf).sort()).toEqual([...allDogs].sort());
     rows.forEach((row) => {
       const have = dogs.includes(dogOf(row));
       expect(row.price === null).toBe(have);
-      expect(shopRowLook(dollars(100_000), row) === "owned").toBe(have);
+      expect(shopRowLook(data, holding, dollars(100_000), row) === "owned").toBe(have);
     });
   });
 

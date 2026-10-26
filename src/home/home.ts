@@ -1,4 +1,4 @@
-import type { DogId, GameData, GearId, HomeText } from "../data/types";
+import type { DogId, GameData, GearId } from "../data/types";
 import { fillLine, signedText } from "../lib/lines";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
@@ -145,6 +145,19 @@ export function purchasePrice(data: ShopData, owned: Owned, purchase: Purchase):
   }
 }
 
+// Whether the player can buy it now: it is for sale and the bank covers its price. Owned items
+// and a maxed-out slot never are. The one buyable check: the shop's rows and confirm, the home
+// screen's tiles, slot sign and info line, and the detail cards all ask it.
+export function isAffordable(
+  data: ShopData,
+  owned: Owned,
+  bank: Cents,
+  purchase: Purchase,
+): boolean {
+  const cost = purchasePrice(data, owned, purchase);
+  return cost !== null && cost <= bank;
+}
+
 export type BuyResult =
   | { readonly kind: "bought"; readonly save: SaveDocument }
   | { readonly kind: "refused"; readonly reason: "cantAfford" | "notForSale" };
@@ -156,7 +169,7 @@ export function buy(data: ShopData, purchase: Purchase, save: SaveDocument): Buy
   if (cost === null) {
     return { kind: "refused", reason: "notForSale" };
   }
-  if (cost > save.bankCents) {
+  if (!isAffordable(data, owned, save.bankCents, purchase)) {
     return { kind: "refused", reason: "cantAfford" };
   }
   const bought: Owned =
@@ -186,11 +199,18 @@ type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText">
 const FOCUS_FIELDS = HOME_TEXT_FIELDS.focus;
 
 // What buying an item would take: its price, and how much more the bank needs if short.
-function priceInfo(text: HomeText["focus"], bank: Cents, cost: Cents): string {
+function priceInfo(
+  data: InfoData,
+  owned: Owned,
+  bank: Cents,
+  cost: Cents,
+  purchase: Purchase,
+): string {
+  const text = data.homeText.focus;
   const price = dollarText(cost);
-  return cost > bank
-    ? fillLine(FOCUS_FIELDS, text, "priceShort", { amount: dollarText(cents(cost - bank)), price })
-    : fillLine(FOCUS_FIELDS, text, "priceBuy", { price });
+  return isAffordable(data, owned, bank, purchase)
+    ? fillLine(FOCUS_FIELDS, text, "priceBuy", { price })
+    : fillLine(FOCUS_FIELDS, text, "priceShort", { amount: dollarText(cents(cost - bank)), price });
 }
 
 // A dog's size and hearts in words ("big, 5♥"), as the info line and the shop's row say them.
@@ -208,11 +228,15 @@ export function dogKindText(
 // name and size, and its price while not owned.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
   const text = data.homeText.focus;
-  const cost = purchasePrice(data, owned, { dog, kind: "dog" });
+  const purchase: Purchase = { dog, kind: "dog" };
+  const cost = purchasePrice(data, owned, purchase);
   const fields = { dog: data.dogs[dog].name, kind: dogKindText(data, dog) };
   return cost === null
     ? fillLine(FOCUS_FIELDS, text, "dogOwned", fields)
-    : fillLine(FOCUS_FIELDS, text, "dogLocked", { ...fields, price: priceInfo(text, bank, cost) });
+    : fillLine(FOCUS_FIELDS, text, "dogLocked", {
+        ...fields,
+        price: priceInfo(data, owned, bank, cost, purchase),
+      });
 }
 
 // A gear item and what it does, with its price while locked.
@@ -220,8 +244,12 @@ export function gearInfo(data: InfoData, owned: Owned, bank: Cents, gear: GearId
   const text = data.homeText.focus;
   const item = data.shopGear[gear];
   const fields = { effect: effectClause(data, item.effects), gear: item.name };
-  const cost = purchasePrice(data, owned, { gear, kind: "gear" });
+  const purchase: Purchase = { gear, kind: "gear" };
+  const cost = purchasePrice(data, owned, purchase);
   return cost === null
     ? fillLine(FOCUS_FIELDS, text, "gear", fields)
-    : fillLine(FOCUS_FIELDS, text, "gearLocked", { ...fields, price: priceInfo(text, bank, cost) });
+    : fillLine(FOCUS_FIELDS, text, "gearLocked", {
+        ...fields,
+        price: priceInfo(data, owned, bank, cost, purchase),
+      });
 }

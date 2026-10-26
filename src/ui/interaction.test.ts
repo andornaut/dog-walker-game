@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
 import {
+  type ArtLook,
   type ButtonState,
   buttonState,
   type InteractionInput,
@@ -14,13 +15,8 @@ import {
   tileState,
 } from "./interaction";
 
-const locked = (price: number, bank: number): Partial<InteractionInput> => ({
-  bank: cents(bank),
-  price: cents(price),
-});
-
 describe("tileState", () => {
-  it("shows each item as normal, selected or disabled by its pick, room and price", () => {
+  it("shows each item as normal, selected or disabled by its pick and room", () => {
     for (const [, expected, input] of [
       ["an owned item with room", "normal", {}],
       ["an unavailable item", "disabled", { available: false }],
@@ -28,11 +24,6 @@ describe("tileState", () => {
       ["a picked item in a full choice", "selected", { full: true, picked: true }],
       ["a picked item made unavailable", "disabled", { available: false, picked: true }],
       ["an unpicked item in a full choice", "disabled", { full: true }],
-      ["a locked item the bank covers", "normal", locked(500, 800)],
-      ["a locked item the bank exactly covers", "normal", locked(500, 500)],
-      ["a locked item the bank cannot cover", "disabled", locked(500, 499)],
-      ["a locked, covered item in a full choice", "normal", { ...locked(500, 800), full: true }],
-      ["a locked, uncovered item in a full choice", "disabled", { ...locked(500, 0), full: true }],
     ] satisfies readonly [string, TileState, Partial<InteractionInput>][]) {
       expect(tileState({ ...PLAIN_ITEM, ...input })).toBe(expected);
     }
@@ -54,7 +45,7 @@ describe("buttonState", () => {
 
 describe("itemTile", () => {
   const owned: ItemTileInput = {
-    bank: cents(0),
+    affordable: false,
     capacity: 2,
     goal: null,
     picked: false,
@@ -67,51 +58,65 @@ describe("itemTile", () => {
     price: cents(price),
   });
 
+  // A tile not owned stays disabled, its art in color only while the player can buy it.
   it("shows each dog or item tile as available, picked, full, locked or goal-locked", () => {
-    for (const [, input, tile, state] of [
-      ["an owned dog with room", {}, { kind: "available" }, "normal"],
-      ["a picked dog", { picked: true, pickedCount: 1 }, { kind: "picked" }, "selected"],
+    for (const [, input, tile, state, art] of [
+      ["an owned dog with room", {}, { kind: "available" }, "normal", "color"],
+      ["a picked dog", { picked: true, pickedCount: 1 }, { kind: "picked" }, "selected", "color"],
       [
         "a picked dog in a full pack",
         { picked: true, pickedCount: 2 },
         { kind: "picked" },
         "selected",
+        "color",
       ],
-      ["an unpicked dog in a full pack", { pickedCount: 2 }, { kind: "packFull" }, "disabled"],
+      [
+        "an unpicked dog in a full pack",
+        { pickedCount: 2 },
+        { kind: "packFull" },
+        "disabled",
+        "grey",
+      ],
       [
         "an unpicked dog in a full one-slot pack",
         { capacity: 1, pickedCount: 1 },
         { kind: "available" },
         "normal",
+        "color",
       ],
       [
-        "a locked item the bank covers",
-        { bank: cents(800), price: cents(800) },
+        "a locked item the player can buy",
+        { affordable: true, price: cents(800) },
         locked(800, true),
         "disabled",
+        "color",
       ],
       [
-        "a locked item short of the bank",
-        { bank: cents(799), price: cents(800) },
+        "a locked item the player cannot buy",
+        { price: cents(800) },
         locked(800, false),
         "disabled",
+        "grey",
       ],
       [
-        "a locked item in a full pack",
-        { pickedCount: 2, price: cents(800) },
-        locked(800, false),
+        "a locked item the player can buy in a full pack",
+        { affordable: true, pickedCount: 2, price: cents(800) },
+        locked(800, true),
         "disabled",
+        "color",
       ],
       [
         "an item locked by a goal",
-        { goal: "10 walks" },
+        { affordable: true, goal: "10 walks" },
         { goal: "10 walks", kind: "goal" },
         "disabled",
+        "grey",
       ],
-    ] satisfies readonly [string, Partial<ItemTileInput>, ItemTile, TileState][]) {
+    ] satisfies readonly [string, Partial<ItemTileInput>, ItemTile, TileState, ArtLook][]) {
       const shown = itemTile({ ...owned, ...input });
       expect(shown).toEqual(tile);
-      expect(itemTileLook(shown).state).toBe(state);
+      const look = itemTileLook(shown);
+      expect({ art: look.art, state: look.state }).toEqual({ art, state });
     }
   });
 });

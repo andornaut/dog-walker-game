@@ -1,7 +1,6 @@
 import type { GameData, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
 import { agilityPercent, perkEffect } from "../rules/effectText";
-import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
 import { type ItemTile, itemTile } from "../ui/interaction";
@@ -45,7 +44,7 @@ export function walkerTile(
 ): ItemTile {
   const owned = save.owned.walkers.includes(walker);
   return itemTile({
-    bank: cents(0),
+    affordable: false,
     capacity: 1,
     goal: owned ? null : data.walkers[walker].name,
     picked: save.walker === walker,

@@ -40,6 +40,7 @@ import {
   gearByPrice,
   gearInfo,
   type HomeLoadout,
+  isAffordable,
   packCapacity,
   partingSpeech,
   type Purchase,
@@ -102,11 +103,11 @@ import { packDogsOf } from "../state/pack";
 import { closeControl } from "../ui/closeControl";
 import { gridRects, rectIndexAt } from "../ui/grid";
 import {
+  type ArtLook,
   buttonState,
   type ItemTile,
   itemTile,
   itemTileLook,
-  type TileState,
 } from "../ui/interaction";
 import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
@@ -1458,7 +1459,7 @@ export class StartScene extends Scene {
       badge.rise = `gear:${this.loadout.gear}`;
       fillRect(this.graphics(badge.container), PALETTE.plum, rect);
       const at = { x: rect.x + 1, y: rect.y + 1 };
-      this.addGearIcon(badge.container, "normal", this.loadout.gear, at, 0.5);
+      this.addGearIcon(badge.container, "color", this.loadout.gear, at, 0.5);
     }
   }
 
@@ -1595,15 +1596,16 @@ export class StartScene extends Scene {
       const rect = dogFace(itemAt(tiles, i));
       const { x, y } = rect;
       const dog = gameData.dogs[id];
+      const purchase: Purchase = { dog: id, kind: "dog" };
       const tile = itemTile({
-        bank: save.bankCents,
+        affordable: isAffordable(gameData, owned, save.bankCents, purchase),
         capacity,
         goal: null,
         picked: this.loadout.dogs.includes(id),
         pickedCount: this.loadout.dogs.length,
-        price: purchasePrice(gameData, owned, { dog: id, kind: "dog" }),
+        price: purchasePrice(gameData, owned, purchase),
       });
-      const { padlock, state } = itemTileLook(tile);
+      const { art, padlock, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
         // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
         badge: "tick",
@@ -1622,7 +1624,9 @@ export class StartScene extends Scene {
       const faceKey = dogFaceKey(gameData, id);
       const faceTag = padlock === null ? "happy" : "neutral";
       const faceAt = { x: x + faceBox.dx, y: y + faceBox.dy };
-      const face = addTileSprite(this, state, reduced, faceKey, faceTag, faceAt);
+      // A dog not owned holds its first frame, in color while the player can buy it.
+      const still = reduced || padlock !== null;
+      const face = addTileSprite(this, art, still, faceKey, faceTag, faceAt);
       content.add(face);
       view.face = { object: face, y: faceAt.y };
 
@@ -1653,15 +1657,16 @@ export class StartScene extends Scene {
     gearIds().forEach((id, i) => {
       const rect = pocketTile(itemAt(slots, i));
       const { width, x, y } = rect;
+      const purchase: Purchase = { gear: id, kind: "gear" };
       const tile = itemTile({
-        bank: save.bankCents,
+        affordable: isAffordable(gameData, owned, save.bankCents, purchase),
         capacity: 1,
         goal: null,
         picked: pocketed === id,
         pickedCount: pocketed === null ? 0 : 1,
-        price: purchasePrice(gameData, owned, { gear: id, kind: "gear" }),
+        price: purchasePrice(gameData, owned, purchase),
       });
-      const { padlock, state } = itemTileLook(tile);
+      const { art, padlock, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
         badge: "tick",
         edge: true,
@@ -1676,7 +1681,7 @@ export class StartScene extends Scene {
         y: y + box.dy,
       });
       const at = { x: x + iconAt.dx, y: y + iconAt.dy };
-      const icon = this.addGearIcon(content, state, id, at, 1);
+      const icon = this.addGearIcon(content, art, id, at, 1);
       if (icon !== undefined) {
         view.face = { object: icon, y: at.y };
       }
@@ -1688,11 +1693,10 @@ export class StartScene extends Scene {
     });
   }
 
-  // The item's 32x32 icon, as a disabled tile's grey copy, or its initials until the icon is
-  // in the manifest.
+  // The item's 32x32 icon in its art look, or its initials until the icon is in the manifest.
   private addGearIcon(
     parent: GameObjects.Container,
-    state: TileState,
+    art: ArtLook,
     gear: GearId,
     at: { x: number; y: number },
     scale: number,
@@ -1701,7 +1705,7 @@ export class StartScene extends Scene {
     const key = gearIconKey(gear);
     if (this.textures.exists(key)) {
       const icon = this.add
-        .image(x, y, tileTextureKey(this, state, key))
+        .image(x, y, tileTextureKey(this, art, key))
         .setOrigin(0)
         .setScale(scale);
       parent.add(icon);
@@ -1730,7 +1734,7 @@ export class StartScene extends Scene {
       const rect = itemAt(tiles, i);
       const { x, y } = rect;
       const tile = walkerTile(gameData, save, id);
-      const { padlock, state } = itemTileLook(tile);
+      const { art, padlock, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
         badge: "tick",
         edge: true,
@@ -1748,7 +1752,7 @@ export class StartScene extends Scene {
       const at = { x: x + faceAt.dx, y: y + faceAt.dy };
       if (this.textures.exists(walker.portraitKey)) {
         const tag = tile.kind === "picked" ? "happy" : "neutral";
-        const face = addTileSprite(this, state, reduced, walker.portraitKey, tag, at);
+        const face = addTileSprite(this, art, reduced, walker.portraitKey, tag, at);
         content.add(face);
         view.face = { object: face, y: at.y };
       } else {
@@ -1769,7 +1773,7 @@ export class StartScene extends Scene {
         const iconAt = { x: x + icons.dx, y: y + itemAt(icons.dy, n) };
         const key = effectIconKey(item);
         if (this.textures.exists(key)) {
-          const shown = tileTextureKey(this, state, key);
+          const shown = tileTextureKey(this, art, key);
           content.add(this.add.image(iconAt.x, iconAt.y, shown).setOrigin(0));
           return;
         }

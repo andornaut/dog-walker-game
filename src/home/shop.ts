@@ -5,8 +5,15 @@ import { startingDogSlots, unlockPrice } from "../rules/shop";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import type { ItemLook } from "../ui/interaction";
-import { isAffordable, purchases } from "./afford";
-import { cheapestFirst, dogKindText, gearByPrice, type Purchase, purchasePrice } from "./home";
+import { purchases } from "./afford";
+import {
+  cheapestFirst,
+  dogKindText,
+  gearByPrice,
+  isAffordable,
+  type Purchase,
+  purchasePrice,
+} from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
@@ -44,30 +51,31 @@ export interface ShopRow {
   readonly purchase: Purchase;
 }
 
-// How a row draws: owned; blocked (with its reason); affordable (the buy plate); or short of
-// the bank.
+// How a row draws: owned; blocked (with its reason); affordable (isAffordable: the buy plate);
+// or short of the bank. A row not blocked is its purchase's next item for sale, so its price is
+// the one isAffordable checks.
 type ShopRowLook = "affordable" | "blocked" | "owned" | "short";
 
-export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
+export function shopRowLook(data: ShopData, owned: Owned, bank: Cents, row: ShopRow): ShopRowLook {
   if (row.price === null) {
     return "owned";
   }
   if (row.blocked !== null) {
     return "blocked";
   }
-  return row.price <= bank ? "affordable" : "short";
+  return isAffordable(data, owned, bank, row.purchase) ? "affordable" : "short";
 }
 
-// Everything a row's look sets. Owned shows its art in full colour with no padlock or plate.
-// A row not owned is a disabled row with the grey copy of its art whatever the bank holds; its
-// padlock and plate say whether it can be bought: affordable has the open padlock and the buy
-// plate, short the closed padlock and the short plate, and blocked the closed padlock and its
-// price on the goal plate.
+// Everything a row's look sets. Owned shows its art in full color with no padlock or plate.
+// A row not owned is a disabled row whose padlock and plate say whether it can be bought:
+// affordable has its art in full color, the open padlock and the buy plate; short its art's
+// grey copy, the closed padlock and the short plate; and blocked its art's grey copy, the
+// closed padlock and its price on the goal plate.
 export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
-  affordable: { padlock: "open", plate: "buy", state: "disabled" },
-  blocked: { padlock: "closed", plate: "goal", state: "disabled" },
-  owned: { padlock: null, plate: null, state: "normal" },
-  short: { padlock: "closed", plate: "short", state: "disabled" },
+  affordable: { art: "color", padlock: "open", plate: "buy", state: "disabled" },
+  blocked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
+  owned: { art: "color", padlock: null, plate: null, state: "normal" },
+  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
 };
 
 // Whether anything in the shop is affordable now: the building then wears the gold outline.

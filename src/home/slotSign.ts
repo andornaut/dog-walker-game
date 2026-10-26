@@ -1,7 +1,7 @@
 import type { GameData } from "../data/types";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { dollarText, type Purchase, purchasePrice } from "./home";
+import { dollarText, isAffordable, type Purchase, purchasePrice } from "./home";
 
 type SignData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
 
@@ -21,5 +21,8 @@ export function slotSign(data: SignData, owned: Owned, bank: Cents): SlotSign | 
   if (price === null) {
     return null;
   }
-  return { affordable: price <= bank, lines: [data.homeText.slotSign, dollarText(price)] };
+  return {
+    affordable: isAffordable(data, owned, bank, SLOT_SIGN_PURCHASE),
+    lines: [data.homeText.slotSign, dollarText(price)],
+  };
 }

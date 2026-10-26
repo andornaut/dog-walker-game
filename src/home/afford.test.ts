@@ -4,8 +4,8 @@ import { gameData } from "../data";
 import { cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import { bankAtLastVisit, isAffordable, newlyAffordable } from "./afford";
-import type { Purchase } from "./home";
+import { bankAtLastVisit, newlyAffordable } from "./afford";
+import { isAffordable, type Purchase } from "./home";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);

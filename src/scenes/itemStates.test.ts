@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { type DetailCard, dogDetail, walkerDetail } from "../home/detail";
-import { dollarText, purchasePrice } from "../home/home";
+import { dollarText, isAffordable, type Purchase, purchasePrice } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
 import { cents } from "../rules/units";
@@ -24,29 +24,43 @@ const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
 
 type StateName = "affordable" | "locked" | "owned" | "short";
 
-// What each state shows on the start screen, from the shop states' table.
+// What each state shows on the start screen, from the shop states' table: the portrait or
+// icon in color once the bank reaches the price, and grey a cent short.
 const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
-  affordable: { padlock: "open", plate: "buy", state: "disabled" },
-  locked: { padlock: "closed", plate: "goal", state: "disabled" },
-  owned: { padlock: null, plate: null, state: "normal" },
-  short: { padlock: "closed", plate: "short", state: "disabled" },
+  affordable: { art: "color", padlock: "open", plate: "buy", state: "disabled" },
+  locked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
+  owned: { art: "color", padlock: null, plate: null, state: "normal" },
+  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
 };
 
 const dogPrice = (dog: DogId) => purchasePrice(gameData, OWNED, { dog, kind: "dog" }) ?? cents(0);
 
-// A dog's tile with the bank at its price (affordable), a cent short, or the dog owned.
-function dogTile(state: Exclude<StateName, "locked">, dog: DogId) {
-  const owned = state === "owned" ? { ...OWNED, dogs: [dog] } : OWNED;
-  const price = dogPrice(dog);
+// A dog's or gear item's tile as the start screen builds it, with the bank at its price
+// (affordable), a cent short, or the item owned.
+function shopItemTile(
+  state: Exclude<StateName, "locked">,
+  purchase: Purchase & { kind: "dog" | "gear" },
+) {
+  const owned =
+    state !== "owned"
+      ? OWNED
+      : purchase.kind === "dog"
+        ? { ...OWNED, dogs: [purchase.dog] }
+        : { ...OWNED, gear: [purchase.gear] };
+  const price = purchasePrice(gameData, OWNED, purchase) ?? cents(0);
+  const bank = cents(state === "short" ? price - 1 : price);
   return itemTile({
-    bank: cents(state === "short" ? price - 1 : price),
-    capacity: 3,
+    affordable: isAffordable(gameData, owned, bank, purchase),
+    capacity: purchase.kind === "dog" ? 3 : 1,
     goal: null,
     picked: false,
     pickedCount: 0,
-    price: purchasePrice(gameData, owned, { dog, kind: "dog" }),
+    price: purchasePrice(gameData, owned, purchase),
   });
 }
+
+const dogTile = (state: Exclude<StateName, "locked">, dog: DogId) =>
+  shopItemTile(state, { dog, kind: "dog" });
 
 describe("a start screen tile's state", () => {
   it("shows every dog, gear item and walker in each of its states as that state's look", () => {
@@ -58,19 +72,10 @@ describe("a start screen tile's state", () => {
         ),
       ),
       ...GEAR.flatMap((gear) =>
-        (["affordable", "owned", "short"] as const).map((state) => {
-          const owned = { ...OWNED, gear: state === "owned" ? [gear] : [] };
-          const price = purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0);
-          const tile = itemTile({
-            bank: cents(state === "short" ? price - 1 : price),
-            capacity: 1,
-            goal: null,
-            picked: false,
-            pickedCount: 0,
-            price: purchasePrice(gameData, owned, { gear, kind: "gear" }),
-          });
-          return [gear, state, itemTileLook(tile)] as const;
-        }),
+        (["affordable", "owned", "short"] as const).map(
+          (state) =>
+            [gear, state, itemTileLook(shopItemTile(state, { gear, kind: "gear" }))] as const,
+        ),
       ),
       ...WALKERS.flatMap((walker) =>
         (["owned", "locked"] as const).map((state) => {

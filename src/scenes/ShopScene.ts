@@ -59,7 +59,7 @@ import { clampIndex } from "../lib/arrays";
 import { containsPoint, type Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
-import type { TileState } from "../ui/interaction";
+import type { ArtLook } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
@@ -547,7 +547,7 @@ export class ShopScene extends Scene {
     }
     this.focusId = id;
     const save = this.save();
-    const look = shopRowLook(save.bankCents, row);
+    const look = shopRowLook(gameData, save.owned, save.bankCents, row);
     const text = gameData.homeText;
     if (look === "owned") {
       this.message = null;
@@ -781,7 +781,7 @@ export class ShopScene extends Scene {
   private drawRow(root: GameObjects.Container, save: SaveDocument, placed: PlacedRow): void {
     const { rect, row } = placed;
     this.placed.push(placed);
-    const look = shopRowLook(save.bankCents, row);
+    const look = shopRowLook(gameData, save.owned, save.bankCents, row);
     const view = SHOP_ROW_VIEWS[look];
     const { reducedMotion } = currentSettings(this);
     const holder = this.add.container(0, 0);
@@ -805,7 +805,7 @@ export class ShopScene extends Scene {
       y: rect.y + Math.floor((rect.height - box.size) / 2),
     };
     fillRect(this.graphics(content), PALETTE[tile.look.box], boxRect);
-    this.addArt(content, purchaseArt(row.purchase), view.state, {
+    this.addArt(content, purchaseArt(row.purchase), view.art, {
       x: boxRect.x + ROW.art,
       y: boxRect.y + ROW.art,
     });
@@ -835,7 +835,7 @@ export class ShopScene extends Scene {
   private addArt(
     parent: GameObjects.Container,
     key: string,
-    state: TileState,
+    art: ArtLook,
     at: { x: number; y: number },
   ): void {
     if (!this.textures.exists(key)) {
@@ -845,7 +845,7 @@ export class ShopScene extends Scene {
       return;
     }
     // A dog's face shows its happy frame; an icon has one frame.
-    const shown = tileTextureKey(this, state, key);
+    const shown = tileTextureKey(this, art, key);
     parent.add(this.add.image(at.x, at.y, shown, tagFrame(this, key, "happy")).setOrigin(0));
   }
 

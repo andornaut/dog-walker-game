@@ -1,11 +1,11 @@
-import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
+import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
 import { isHeavy, sizeHearts } from "../rules/dogs";
 import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
-import { dollarText, type HomeLoadout, purchasePrice } from "./home";
+import { dollarText, type HomeLoadout, isAffordable, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
 import { walkerDetailLines, walkerLockedLine } from "./walkers";
 
@@ -48,13 +48,21 @@ export interface DetailPicture {
 
 const FIELDS = HOME_TEXT_FIELDS.detail;
 
+// Whether the card shows it locked: for sale, and not affordable now.
+function isLocked(data: DetailData, owned: Owned, bank: Cents, purchase: Purchase): boolean {
+  return (
+    purchasePrice(data, owned, purchase) !== null && !isAffordable(data, owned, bank, purchase)
+  );
+}
+
 // What buying it would take, or null when it is already owned.
-function priceLine(text: HomeText["detail"], cost: Cents | null, bank: Cents): string | null {
+function priceLine(data: DetailData, owned: Owned, bank: Cents, purchase: Purchase): string | null {
+  const cost = purchasePrice(data, owned, purchase);
   if (cost === null) {
     return null;
   }
-  const price = dollarText(cost);
-  return fillLine(FIELDS, text, cost > bank ? "priceLocked" : "priceBuy", { price });
+  const key = isAffordable(data, owned, bank, purchase) ? "priceBuy" : "priceLocked";
+  return fillLine(FIELDS, data.homeText.detail, key, { price: dollarText(cost) });
 }
 
 // A dog's breed, its size and hearts, a heavy dog's row, its owner, and the walks, zones and
@@ -68,7 +76,7 @@ export function dogDetail(
 ): DetailCard {
   const { breed, name, owner, size } = data.dogs[dog];
   const counted = stats.dogs[dog] ?? ZERO_DOG_STATS;
-  const cost = purchasePrice(data, owned, { dog, kind: "dog" });
+  const purchase: Purchase = { dog, kind: "dog" };
   const text = data.homeText.detail;
   return {
     lines: [
@@ -86,8 +94,8 @@ export function dogDetail(
         zones: String(counted.zonesFinished),
       }),
     ],
-    locked: cost !== null && cost > bank,
-    status: priceLine(text, cost, bank) ?? text.dogStatus,
+    locked: isLocked(data, owned, bank, purchase),
+    status: priceLine(data, owned, bank, purchase) ?? text.dogStatus,
     subtitle: breed,
     title: name,
   };
@@ -102,13 +110,13 @@ export function gearDetail(
   gear: GearId,
 ): DetailCard {
   const item = data.shopGear[gear];
-  const cost = purchasePrice(data, owned, { gear, kind: "gear" });
+  const purchase: Purchase = { gear, kind: "gear" };
   const text = data.homeText.detail;
   const status = loadout.gear === gear ? text.gearEquipped : text.gearOwned;
   return {
     lines: [`${capitalize(effectText(data, item.effects))}.`],
-    locked: cost !== null && cost > bank,
-    status: priceLine(text, cost, bank) ?? status,
+    locked: isLocked(data, owned, bank, purchase),
+    status: priceLine(data, owned, bank, purchase) ?? status,
     subtitle: text.gearSubtitle,
     title: item.name,
   };

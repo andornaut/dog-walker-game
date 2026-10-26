@@ -9,6 +9,7 @@ import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { BADGE_OFFSET } from "../ui/badge";
 import type { CloseControl } from "../ui/closeControl";
 import {
+  type ArtLook,
   buttonState,
   type InteractionInput,
   PLAIN_ITEM,
@@ -511,9 +512,9 @@ function drawTileFace(scene: Scene, edge: boolean, look: SelectLook, rect: Rect)
 
 // A tappable item in its interaction state. Selected, it has the gold face and any ui-check
 // badge and is lifted 2px onto a plum shadow; a face drawn in code adds the ui-select frame.
-// Normal, its face is cream. Disabled, it is flat grey and never lifts, and the caller draws
-// its pictures through tileTextureKey or addTileSprite. The shadow goes in parent so it
-// stays put under the lift.
+// Normal, its face is cream. Disabled, it is flat grey and never lifts. The caller draws its
+// pictures through tileTextureKey or addTileSprite in its look's art. The shadow goes in
+// parent so it stays put under the lift.
 export function addSelectTile(
   scene: Scene,
   parent: GameObjects.Container,
@@ -584,29 +585,29 @@ export function addTab(
   );
 }
 
-// A picture's texture on a tile in state: a disabled tile's is its grey copy, GREYED.copyDarker
-// ramp steps darker.
-export function tileTextureKey(scene: Scene, state: TileState, key: string): string {
-  return state === "disabled" ? disabledTextureKey(scene, GREYED.copyDarker, key) : key;
+// A picture's texture on a tile in its art look: grey is its grey copy, GREYED.copyDarker ramp
+// steps darker.
+export function tileTextureKey(scene: Scene, art: ArtLook, key: string): string {
+  return art === "grey" ? disabledTextureKey(scene, GREYED.copyDarker, key) : key;
 }
 
 // A sprite on a tile, placed by its top-left corner, playing tag, or holding its first frame
-// with reduced motion. A disabled tile's holds the first frame in its disabled copy.
+// while still. Grey art holds the first frame in its grey copy.
 export function addTileSprite(
   scene: Scene,
-  state: TileState,
-  reducedMotion: boolean,
+  art: ArtLook,
+  still: boolean,
   key: string,
   tag: string,
   at: { x: number; y: number },
 ): GameObjects.Sprite {
-  if (state === "disabled") {
+  if (art === "grey") {
     return scene.add
-      .sprite(at.x, at.y, tileTextureKey(scene, state, key), tagFrame(scene, key, tag))
+      .sprite(at.x, at.y, tileTextureKey(scene, art, key), tagFrame(scene, key, tag))
       .setOrigin(0);
   }
   const sprite = scene.add.sprite(at.x, at.y, key).setOrigin(0);
-  playTag(sprite, key, tag, reducedMotion);
+  playTag(sprite, key, tag, still);
   return sprite;
 }
 
