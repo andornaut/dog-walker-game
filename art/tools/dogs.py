@@ -15,7 +15,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
   300ms, standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
 - face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
-  big by size class (big 30, medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral,
+  big by size class (big 32, medium 29, small 26) and sat on the bottom edge. Tags: happy, neutral,
   upset.
 
 Usage:
@@ -425,12 +425,12 @@ def pierre_face(mood):
     g.cel(16, 17, 7, 7, *SHAVED)
     g.cel(11, 9, 4, 3.5, *CURL)
     g.cel(21, 9, 4, 3.5, *CURL)
-    g.cel(16, 6.5, 5, 4, *CURL)
+    g.cel(16, 8, 5, 3, *CURL)
     g.cel(16, 22, 4, 3.5, "grey", "slate", "lgrey")
     # the white stripe from the brow up over the topknot, under the show bow
-    g.rect(15, 3, 2, 11, STRIPE[0])
-    g.rect(16, 4, 1, 10, STRIPE[1])
-    bow(g, 16, 4, big=True, colours=("mauve", "purple"))
+    g.rect(15, 5, 2, 9, STRIPE[0])
+    g.rect(16, 6, 1, 8, STRIPE[1])
+    bow(g, 16, 6, big=True, colours=("mauve", "purple"))
     eyes(g, 11, 19, 14, mood=mood)
     g.rect(15, 19, 2, 2, "ink")
     mouth(g, 22, mood)
@@ -551,13 +551,15 @@ def snowball_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
     g.cel(16, 28, 9, 3.5, "white", "lgrey")
-    # a Great Pyrenees' broad head in a thick ruff, its drop ears hanging flat at the sides, marked badger
-    # cream; they swing out and sag as the dog loses heart
-    for x in (5, 27):
-        g.cel(x, 21, 2.8, 3.2, "white", "lgrey")
+    # a Great Pyrenees' broad head in a thick ruff wider than the skull, small V drop ears set at its sides,
+    # marked badger tan; they swing out and sag as the dog loses heart
+    g.cel(16, 22, 12, 4.5, "white", "lgrey")
     g.cel(16, 15.5, 10, 8.5, "white", "lgrey")
     for sgn in (-1, 1):
-        inlay(g, "tan", lambda t, sgn=sgn: t.cel(16 + sgn * (9 + d / 2), 14 + d, 2.6, 5, "cream", "tan"))
+        x = 16 + sgn * (8 + d / 2)
+        inlay(g, "skin2", lambda t, x=x, sgn=sgn: (
+            t.tri((x - 2.5 * sgn, 9 + d), (x + 2.5 * sgn, 9.5 + d), (x + 0.5 * sgn, 16 + d), "tan"),
+            t.tri((x - 1.5 * sgn, 10 + d), (x + 1.5 * sgn, 10.5 + d), (x + 0.5 * sgn, 14 + d), "cream")))
     g.rect(9, 26, 14, 1, "sky")
     g.cel(16, 28, 2, 2, "amber", "orange", "yellow")
     g.p(16, 29, "orange")
@@ -833,7 +835,7 @@ DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duche
 
 # How much of its 32px photo a dog's face fills, by size class, sat on the bottom edge: the size difference
 # shows, less than on the road.
-FACE_SIDE = {"big": 30, "medium": 29, "small": 26}
+FACE_SIDE = {"big": 32, "medium": 29, "small": 26}
 
 
 def padded(px, side):

@@ -222,12 +222,12 @@ def pierre(g):
     g.ell(31.5, 31.5, 11, 10.5, "ink")
     g.ell(29.5, 27, 11.5, 10.5, "navy")
     g.cel(29.5, 27, 10.5, 9.5, *dogs.SHAVED)
-    pom(g, 30, 12, 12, 8, 9, *dogs.CURL)
+    pom(g, 30, 15.5, 12, 6, 9, *dogs.CURL)
     # the white stripe from the brow up over the topknot, shaded down its right side, under the show bow
-    g.rect(28, 5, 4, 15, "white")
-    g.rect(31, 6, 1, 14, "lgrey")
+    g.rect(28, 10, 4, 10, "white")
+    g.rect(31, 11, 1, 9, "lgrey")
     g.rect(29, 20, 2, 2, "white")
-    bow(g, 30, 5, colours=("mauve", "purple"))
+    bow(g, 30, 10, colours=("mauve", "purple"))
     # shaved muzzle, long and narrow
     lined(g, 23, 32, 7, 4.5, "grey", "slate")
     eyes(g, 20, 32, 22)
@@ -307,26 +307,25 @@ def archie(g):
 # ---------- Snowy: Great Pyrenees, big, giant white fluff, collar with a bell ----------
 
 def snowball(g):
-    g.cel(46, 52, 13, 11, "white", "lgrey")
-    g.cel(31, 50, 16, 13, "white", "lgrey")
-    legs(g, (22, 33), 52, "white", "lgrey", w=6)
-    # fluffy cheek ruff, tufted at the edges
-    g.cel(15, 34, 7, 7, "white", "lgrey")
-    g.cel(46, 34, 7, 7, "white", "lgrey")
-    g.tri((8, 32), (10, 38), (5, 37), "white")
-    g.tri((53, 32), (51, 38), (56, 37), "lgrey")
-    g.tri((11, 39), (15, 41), (9, 43), "white")
-    g.rect(18, 43, 26, 2, "sky")
-    g.rect(18, 44, 26, 1, "blue")
+    g.cel(47, 52, 14, 11, "white", "lgrey")
+    g.cel(31, 50, 18, 14, "white", "lgrey")
+    legs(g, (21, 34), 52, "white", "lgrey", w=7)
+    # a thick ruff under the jaw, wider than the skull
+    g.cel(31, 36, 23, 8, "white", "lgrey")
+    g.rect(17, 43, 28, 2, "sky")
+    g.rect(17, 44, 28, 1, "blue")
     g.cel(31, 47.5, 3.5, 3.5, "amber", "orange", "yellow")
     g.rect(30, 48, 3, 1, "orange")
-    # a Great Pyrenees' broad head, its drop ears hanging flat at the sides, marked badger cream
-    g.cel(30, 26, 18, 15, "white", "lgrey")
-    dogs.inlay(g, "tan", lambda t: t.cel(13.5, 28, 5, 10, "cream", "tan", power=2.4))
-    dogs.inlay(g, "tan", lambda t: t.cel(46.5, 27, 5.5, 11, "cream", "tan", power=2.4))
-    g.cel(26, 33, 9, 6, "white", "lgrey")
-    eyes(g, 18, 33, 21)
-    nose(g, 21, 28)
+    # a Great Pyrenees' broad flat skull, small V drop ears set at its sides and marked badger tan, and a long
+    # wedge muzzle set off by its line, so he reads as a grown giant rather than a pup
+    g.cel(30, 24, 17, 14, "white", "lgrey")
+    dogs.inlay(g, "skin2", lambda t: (t.tri((13, 15), (22, 12), (16, 28), "tan"),
+                                      t.tri((15, 15), (21, 13.5), (16.5, 24), "cream")))
+    dogs.inlay(g, "skin2", lambda t: (t.tri((38, 12), (47, 15), (44, 28), "tan"),
+                                      t.tri((39.5, 13.5), (45, 15.5), (43.5, 24), "cream")))
+    lined(g, 25, 32, 9, 6, "white", "lgrey")
+    eyes(g, 18, 31, 20)
+    nose(g, 20, 28)
 
 
 # ---------- Penny: golden retriever with a Labrador build, big, golden coat, otter tail, blue collar ----------
@@ -604,7 +603,7 @@ WALKERS = {
 
 
 # How much of the 64px well a dog's portrait fills, by size class, sat on the bottom edge.
-PORTRAIT_SIDE = {"big": 60, "medium": 58, "small": 52}
+PORTRAIT_SIDE = {"big": 64, "medium": 58, "small": 52}
 
 
 def image(draw, side=S):
