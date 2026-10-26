@@ -21,6 +21,10 @@ const STEP_MS = STEP_SECONDS * 1000;
 const RUN = newRun(gameData, 3, { dogs: ["koda"], gear: null, walker: "casey" });
 const ROAD = startRoad(5);
 const MOVE = laneMoveSeconds(gameData, RUN);
+// Seconds banked toward the next step, and how far a move under way has gone: both fractions
+// of the pack's lane move, so the move is still under way after the banked time.
+const BANKED = MOVE / 10;
+const UNDER_WAY = MOVE / 2;
 
 function item(id: number, y: number): WalkItem {
   return { height: 10, id, kind: "cone", lane: 1, laneSpan: 1, y } as WalkItem;
@@ -107,7 +111,7 @@ describe("leadWalk", { timeout: 30_000 }, () => {
         motion: still,
         name: "a still pack with nothing queued",
         queued: [],
-        seconds: 0.01,
+        seconds: BANKED,
       },
       {
         expected: moving(0, 2, 3, MOVE),
@@ -117,32 +121,32 @@ describe("leadWalk", { timeout: 30_000 }, () => {
         seconds: 0,
       },
       {
-        expected: moving(0.01, 2, 3, MOVE),
+        expected: moving(BANKED, 2, 3, MOVE),
         motion: still,
         name: "a queued move, advanced by the banked time",
         queued: [right],
-        seconds: 0.01,
+        seconds: BANKED,
       },
       {
-        expected: moving(0.01, 2, 1, MOVE),
+        expected: moving(BANKED, 2, 1, MOVE),
         motion: still,
         name: "queued moves turning each other around, heading the last one's way",
         queued: [left, right, left],
-        seconds: 0.01,
+        seconds: BANKED,
       },
       {
-        expected: moving(0.11, 2, 3, MOVE),
-        motion: moving(0.1, 2, 3, MOVE),
+        expected: moving(UNDER_WAY + BANKED, 2, 3, MOVE),
+        motion: moving(UNDER_WAY, 2, 3, MOVE),
         name: "a move under way, advanced by the banked time",
         queued: [],
-        seconds: 0.01,
+        seconds: BANKED,
       },
       {
-        expected: moving(MOVE - 0.09, 3, 2, MOVE),
-        motion: moving(0.1, 2, 3, MOVE),
+        expected: moving(MOVE - UNDER_WAY + BANKED, 3, 2, MOVE),
+        motion: moving(UNDER_WAY, 2, 3, MOVE),
         name: "a move turned around by a queued move back",
         queued: [left],
-        seconds: 0.01,
+        seconds: BANKED,
       },
     ] satisfies readonly {
       expected: LaneMotion;
@@ -167,7 +171,7 @@ describe("leadWalk", { timeout: 30_000 }, () => {
         hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false },
       },
     };
-    expect(leadWalk(gameData, 5, 0.01, [right], held)).toBe(held);
+    expect(leadWalk(gameData, 5, BANKED, [right], held)).toBe(held);
   });
 
   // A started walk stepped `steps` times with a move right on the first step, so a lane move
