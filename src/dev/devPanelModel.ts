@@ -132,8 +132,8 @@ export type SaveEdit =
 
 // The cheats that change progress, in the panel's order.
 export const SAVE_CHEATS: readonly { readonly edit: SaveEdit; readonly label: string }[] = [
-  { edit: { amount: cents(10_000), kind: "addMoney" }, label: "+$100" },
-  { edit: { amount: cents(100_000), kind: "addMoney" }, label: "+$1,000" },
+  { edit: { amount: cents(50_000), kind: "addMoney" }, label: "+$500" },
+  { edit: { amount: cents(250_000), kind: "addMoney" }, label: "+$2,500" },
   { edit: { kind: "unlockAll" }, label: "Unlock all" },
 ];
 
