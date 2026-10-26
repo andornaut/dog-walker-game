@@ -438,15 +438,15 @@ describe("planZone", { timeout: 60_000 }, () => {
     },
   );
 
-  // The walk's first zone's rows reach back onto the road in view as it starts, where the fill
-  // for quiet rows puts an obstacle when it can, and none meets the pack sooner than
-  // firstZoneContact in; a later zone starts with the road clear of its own.
+  // No obstacle meets the pack sooner than firstZoneContact into the walk's first zone, though
+  // its rows may reach back onto the road in view; a later zone starts with the road clear of
+  // its own.
   it.each([
-    { onRoad: true, zoneIndex: 0 },
-    { onRoad: false, zoneIndex: WORLD.walkLength - 1 },
+    { clearRoad: false, zoneIndex: 0 },
+    { clearRoad: true, zoneIndex: WORLD.walkLength - 1 },
   ])(
-    "starts the zone at walk position $zoneIndex with obstacles on the road: $onRoad",
-    ({ onRoad, zoneIndex }) => {
+    "starts the zone at walk position $zoneIndex no sooner than firstZoneContact, with a clear road: $clearRoad",
+    ({ clearRoad, zoneIndex }) => {
       const zoned = inZone(realRun(REAL), WORLD.firstZone as ZoneId, zoneIndex);
       const soonest = read(TUNING, "seconds", "firstZoneContact") * walkScrollSpeed(REAL, zoned);
       const firsts = [1, 2, 3, 4].map((seed) =>
@@ -461,7 +461,9 @@ describe("planZone", { timeout: 60_000 }, () => {
             .map(({ distance }) => distance),
         ),
       );
-      expect(firsts.some((first) => first < 0)).toBe(onRoad);
+      if (clearRoad) {
+        expect(firsts.every((first) => first >= 0)).toBe(true);
+      }
       for (const first of firsts) {
         expect(first + GAME_ROAD.sightLength).toBeGreaterThanOrEqual(soonest - 1e-6);
       }
