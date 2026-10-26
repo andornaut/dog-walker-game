@@ -5,7 +5,7 @@ import type { Gear } from "./types";
 // Locked dogs are sold too: those with unlock "shop" in dogs.ts, at their price.
 export const SHOP_GEAR = {
   dogWhistle: {
-    effects: [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "big"] }],
+    effects: [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
     name: "Dog whistle",
     price: "dogWhistle",
     short: "Medium and big dogs dodge too",

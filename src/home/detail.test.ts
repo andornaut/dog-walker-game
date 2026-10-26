@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { isHeavy, sizeHearts } from "../rules/dogs";
-import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/effectText";
+import { isLarge, sizeHearts } from "../rules/dogs";
+import { capitalize, effectText, largeSpeedText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
@@ -25,18 +25,18 @@ const owned: Owned = {
 
 describe("dogDetail", () => {
   const dogIds = Object.keys(data.dogs) as DogId[];
-  const firstDog = (heavy: boolean): DogId => {
-    const id = dogIds.find((dog) => isHeavy(data.dogs[dog]) === heavy);
+  const firstDog = (large: boolean): DogId => {
+    const id = dogIds.find((dog) => isLarge(data.dogs[dog]) === large);
     if (id === undefined) {
-      throw new Error(`no ${heavy ? "heavy" : "light"} dog`);
+      throw new Error(`no ${large ? "large" : "smaller"} dog`);
     }
     return id;
   };
 
   it.each([
-    { heavy: true, id: firstDog(true) },
-    { heavy: false, id: firstDog(false) },
-  ])("gives $id's breed, size and hearts, the heavy row if heavy, and owner", ({ heavy, id }) => {
+    { id: firstDog(true), large: true },
+    { id: firstDog(false), large: false },
+  ])("gives $id's breed, size and hearts, the large row if large, and owner", ({ id, large }) => {
     const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
     const dog = data.dogs[id];
     const text = data.homeText.detail;
@@ -47,7 +47,7 @@ describe("dogDetail", () => {
         hearts: String(sizeHearts(data.tuning, dog)),
         size: capitalize(SIZE_NAMES[dog.size]),
       }),
-      ...(heavy ? [fillNames(text.dogHeavy, { speed: heavySpeedText(data.tuning) })] : []),
+      ...(large ? [fillNames(text.dogLarge, { speed: largeSpeedText(data.tuning) })] : []),
       fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
     ]);
     expect(card.status).toBe(text.dogStatus);

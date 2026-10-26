@@ -53,7 +53,7 @@ const cardOptions = cards.flatMap((card) => card.options);
 const instantEffects: readonly (readonly Effect[])[] = Object.values(encounters).flatMap(
   ({ resolution }) => (resolution.kind === "instant" ? [resolution.effects] : []),
 );
-const SIZES: readonly Size[] = ["small", "medium", "big"];
+const SIZES: readonly Size[] = ["small", "medium", "large"];
 
 describe("roster", () => {
   it("starts with at least one dog, and sells every other dog", () => {

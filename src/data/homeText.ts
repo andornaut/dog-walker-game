@@ -14,8 +14,8 @@ export const HOME_TEXT = {
     noWalker: "Who's walking? Tap a face.",
   },
   detail: {
-    dogHeavy: "Heavy: lane changes −{speed}",
     dogKind: "{size} · {hearts}♥",
+    dogLarge: "Heavy: lane changes −{speed}",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
     gearEquipped: "In your Pocket",

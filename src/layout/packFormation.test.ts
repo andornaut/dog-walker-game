@@ -253,7 +253,7 @@ describe("the pack's outline", () => {
       ...[
         ...Object.values(PACK_FEET.lead),
         ...Object.values(PACK_FEET.side),
-        PACK_FEET.sideOfThreeBigs,
+        PACK_FEET.sideOfThreeLarge,
         ...Object.values(PACK_FEET.trioLead),
       ].map(rowScale),
     );
@@ -301,7 +301,7 @@ describe("the parts' hit rectangles", () => {
 
   // Every slot of every formation, filled with the largest dog of each size.
   const SIZE_DOGS: Readonly<Record<Size, DogId>> = {
-    big: "snowball",
+    large: "snowball",
     medium: "pierre",
     small: "duchess",
   };

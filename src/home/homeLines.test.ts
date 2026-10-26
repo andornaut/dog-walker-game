@@ -178,14 +178,14 @@ describe("storageNotice", () => {
 
 describe("packBonusLine", () => {
   const { hearts } = TEST_TUNING;
-  // The pinned tuning with the owner cap at a big dog's own max, so no big dog's max can rise.
+  // The pinned tuning with the owner cap at a large dog's own max, so no large dog's max can rise.
   const capped: LiveTuning = {
     ...TEST_TUNING,
-    hearts: { ...hearts, maxOwnerHearts: hearts.maxBySize.big },
+    hearts: { ...hearts, maxOwnerHearts: hearts.maxBySize.large },
   };
   const line = (raise: number) =>
     raise > 0 ? fillNames(data.homeText.packBonus, { hearts: String(raise) }) : null;
-  // Koda is big, so leads any pack it is in.
+  // Koda is large, so leads any pack it is in.
   it.each<[string, LiveTuning, readonly DogId[], string | null]>([
     ["no dog picked", TEST_TUNING, [], null],
     ["a lone dog", TEST_TUNING, ["koda"], line(hearts.packSizeBonus[1])],

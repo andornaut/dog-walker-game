@@ -1,7 +1,7 @@
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
-import { isHeavy, sizeHearts } from "../rules/dogs";
-import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/effectText";
+import { isLarge, sizeHearts } from "../rules/dogs";
+import { capitalize, effectText, largeSpeedText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { dollarText, type HomeLoadout, isAffordable, type Purchase, purchasePrice } from "./home";
@@ -64,7 +64,7 @@ function priceLine(data: DetailData, owned: Owned, bank: Cents, purchase: Purcha
   return fillLine(FIELDS, data.homeText.detail, key, { price: dollarText(cost) });
 }
 
-// A dog's breed, its size and hearts, a heavy dog's row, and its owner.
+// A dog's breed, its size and hearts, a large dog's row, and its owner.
 export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogId): DetailCard {
   const { breed, name, owner, size } = data.dogs[dog];
   const purchase: Purchase = { dog, kind: "dog" };
@@ -75,8 +75,8 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
         hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
       }),
-      ...(isHeavy(data.dogs[dog])
-        ? [fillLine(FIELDS, text, "dogHeavy", { speed: heavySpeedText(data.tuning) })]
+      ...(isLarge(data.dogs[dog])
+        ? [fillLine(FIELDS, text, "dogLarge", { speed: largeSpeedText(data.tuning) })]
         : []),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
     ],

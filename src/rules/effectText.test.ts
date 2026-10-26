@@ -22,7 +22,7 @@ import {
   effectText,
   formatDollars,
   gearShort,
-  heavySpeedText,
+  largeSpeedText,
   perkEffect,
   sentenceList,
   SIZE_NAMES,
@@ -68,11 +68,11 @@ describe("effectText", () => {
       ],
       [
         "a dodge for the sizes it names, as one in so many",
-        [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "big"] }],
+        [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
         capitalize(
           fillNames(HOME_TEXT.dodgeEffect, {
             dodgeIn: String(Math.round(1 / TUNING.probability.dogWhistleDodgeChance)),
-            sizes: sentenceList(HOME_TEXT.sentenceList, [SIZE_NAMES.medium, SIZE_NAMES.big]),
+            sizes: sentenceList(HOME_TEXT.sentenceList, [SIZE_NAMES.medium, SIZE_NAMES.large]),
           }),
         ),
       ],
@@ -133,8 +133,8 @@ describe("effectText", () => {
       ],
       [
         "a lowered agility as a percent of the base lane-change speed",
-        [{ by: "bigDogAgility", kind: "modifier", operation: "add", stat: "agility" }],
-        capitalize(`${words.stats.agility} ${addedAgility("bigDogAgility")}`),
+        [{ by: "largeDogAgility", kind: "modifier", operation: "add", stat: "agility" }],
+        capitalize(`${words.stats.agility} ${addedAgility("largeDogAgility")}`),
       ],
       ["a free Walk on by", [{ kind: "skipOption" }], capitalize(words.skipOption)],
       [
@@ -175,13 +175,13 @@ const unsignedPercent = (fraction: number) => `${Math.abs(Math.round(fraction * 
 
 describe("agilityPercent", () => {
   const shoes = read(gameData.tuning, "multipliers", "runningShoesAgility");
-  const heavy = read(gameData.tuning, "multipliers", "bigDogAgility");
+  const large = read(gameData.tuning, "multipliers", "largeDogAgility");
   const floor = read(gameData.tuning, "multipliers", "minPackAgility");
-  // Each walker's own agility, with Running shoes, and with one big dog down to the floor.
+  // Each walker's own agility, with Running shoes, and with one large dog down to the floor.
   const cases = Object.values(gameData.walkers).flatMap(({ agility, name }) => [
     [`${name}'s own`, agility],
     [`${name} with Running shoes`, agility + shoes],
-    [`${name} with a big dog`, Math.max(Math.min(agility, floor), agility + heavy)],
+    [`${name} with a large dog`, Math.max(Math.min(agility, floor), agility + large)],
   ]) as [string, number][];
 
   it.each(cases)(
@@ -195,10 +195,10 @@ describe("agilityPercent", () => {
   );
 });
 
-describe("heavySpeedText", () => {
-  it("gives bigDogAgility as an unsigned percent of the base lane-change speed", () => {
-    expect(heavySpeedText(TEST_TUNING)).toBe(
-      unsignedPercent(read(TEST_TUNING, "multipliers", "bigDogAgility")),
+describe("largeSpeedText", () => {
+  it("gives largeDogAgility as an unsigned percent of the base lane-change speed", () => {
+    expect(largeSpeedText(TEST_TUNING)).toBe(
+      unsignedPercent(read(TEST_TUNING, "multipliers", "largeDogAgility")),
     );
   });
 });

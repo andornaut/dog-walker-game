@@ -71,19 +71,19 @@ export const PACK_SLOTS: readonly (readonly PackSlot[])[] = [
 ];
 
 // The feet rows, up the screen from the walker's feet, by the dogs' sizes: a lone dog's; a
-// side dog's, of two or three; a side dog's of three bigs, closer in; and the lead's of three,
-// keyed by the lead's, the left dog's and the right dog's sizes.
+// side dog's, of two or three; a side dog's of three large dogs, closer in; and the lead's of
+// three, keyed by the lead's, the left dog's and the right dog's sizes.
 export const PACK_FEET = {
-  lead: { big: -49, medium: -50, small: -54 },
-  side: { big: -45, medium: -45, small: -48 },
-  sideOfThreeBigs: -37,
+  lead: { large: -49, medium: -50, small: -54 },
+  side: { large: -45, medium: -45, small: -48 },
+  sideOfThreeLarge: -37,
   trioLead: {
-    "big big big": -53,
-    "big big medium": -60,
-    "big big small": -60,
-    "big medium medium": -52,
-    "big medium small": -52,
-    "big small small": -50,
+    "large large large": -53,
+    "large large medium": -60,
+    "large large small": -60,
+    "large medium medium": -52,
+    "large medium small": -52,
+    "large small small": -50,
     "medium medium medium": -50,
     "medium medium small": -56,
     "medium small small": -50,
@@ -104,9 +104,9 @@ function feetRows(sizes: readonly Size[]): number[] {
     return [PACK_FEET.lead[itemAt(sizes, 0)]];
   }
   const sides = sizes.slice(-2);
-  const threeBigs = sizes.length === 3 && sizes.every((size) => size === "big");
+  const threeLarge = sizes.length === 3 && sizes.every((size) => size === "large");
   const sideRows = sides.map((size) =>
-    threeBigs ? PACK_FEET.sideOfThreeBigs : PACK_FEET.side[size],
+    threeLarge ? PACK_FEET.sideOfThreeLarge : PACK_FEET.side[size],
   );
   if (sizes.length === 2) {
     return sideRows;
@@ -278,7 +278,7 @@ export const PACK_DEPTH = 1;
 
 // The walker sprite's hands, relative to its feet, as drawn at the sprite size.
 export const WALKER_HANDS = { heightAboveFeet: 20, leftDx: -16, rightDx: 16 };
-// Each dog's collar top, above its feet, as drawn on its road sprite: big dogs about 22,
+// Each dog's collar top, above its feet, as drawn on its road sprite: large dogs about 22,
 // medium 21 and small 16.
 export const COLLAR_HEIGHTS: Readonly<Record<DogId, number>> = {
   archie: 20,

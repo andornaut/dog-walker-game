@@ -26,11 +26,11 @@ function pageFacts(): [string, string][] {
   const zoneIndex = (zoneId: string) => world.zones.findIndex(({ id }) => id === zoneId);
   const zoneName = (zoneId: string) => world.zones[zoneIndex(zoneId)]?.name ?? zoneId;
   const count = (n: number) => NUMBER_WORDS[n] ?? String(n);
-  const sizes = ["small", "medium", "big"] as const;
+  const sizes = ["small", "medium", "large"] as const;
   const perSize = sizes.map(
     (size) => `${count(Object.values(dogs).filter((dog) => dog.size === size).length)} ${size}`,
   );
-  const { big, medium, small } = tuning.hearts.maxBySize;
+  const { large, medium, small } = tuning.hearts.maxBySize;
   const unlocks = Object.values(walkers)
     .flatMap((walker) => (walker.unlock === "finishZone" ? [walker] : []))
     .sort((a, b) => zoneIndex(a.zone) - zoneIndex(b.zone))
@@ -48,7 +48,7 @@ function pageFacts(): [string, string][] {
     ["the dogs per size", `${capitalized(listed(perSize))}.`],
     [
       "the hearts per size",
-      `${small} for a small dog, ${medium} for a medium one and ${big} for a big one.`,
+      `${small} for a small dog, ${medium} for a medium one and ${large} for a large one.`,
     ],
     [
       "the small dog's dodge",

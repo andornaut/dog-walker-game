@@ -162,11 +162,11 @@ export function layoutExport(
     },
     // The pack as drawn and hit. silhouettes: each sprite's opaque pixels over its walk loop,
     // left and right columns from its column (right exclusive) and the rows above its feet row.
-    // slots: by pack size, from 1, the slots in formation order (the biggest dog first, ties in
+    // slots: by pack size, from 1, the slots in formation order (the largest dog first, ties in
     // roster order). feet: the feet rows up the screen from the walker's feet by size: a lone
-    // dog's, a side dog's, a side dog's among three bigs, and a trio's lead's by the lead's, left
-    // and right dogs' sizes. A side dog stands the lane's half width on its feet row less half
-    // its opaque width, rounded in, across from the walker's lane. Dogs are drawn by depth, the
+    // dog's, a side dog's, a side dog's among three large dogs, and a trio's lead's by the
+    // lead's, left and right dogs' sizes. A side dog stands the lane's half width on its feet
+    // row less half its opaque width, rounded in, across from the walker's lane. Dogs are drawn by depth, the
     // farthest feet first, then the leashes, then the walker; each leash runs from the walker's
     // hand to the dog's collar, collarHeights over its feet. Obstacles hit the parts, partInset
     // screen pixels inside each sprite; pickups touch the outline around them all.

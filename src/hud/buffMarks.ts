@@ -2,8 +2,8 @@ import type { DogId, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
-import { isHeavy, packSizeRaise } from "../rules/dogs";
-import { formatDollars, heavySpeedText } from "../rules/effectText";
+import { isLarge, packSizeRaise } from "../rules/dogs";
+import { formatDollars, largeSpeedText } from "../rules/effectText";
 import type { ModifiedValue } from "../rules/modified";
 import { standingModified } from "../rules/standing";
 import { cents } from "../rules/units";
@@ -320,7 +320,7 @@ export function leashPops(
 
 // What a walk's start says of its gear and pack: a strip line for each gear that changes it
 // from the start, such as Running shoes' agility and Fanny pack's money, led by the gear's icon
-// as its well glints, Fanny pack's money rising over the bank, and a line for each heavy dog.
+// as its well glints, Fanny pack's money rising over the bank, and a line for each large dog.
 export function walkStartMarks(
   data: MarkData,
   run: Parameters<typeof standingModified>[1],
@@ -337,7 +337,7 @@ export function walkStartMarks(
         : [];
     }),
   );
-  const heavy = packDogs(run).filter((dog) => isHeavy(data.dogs[dog]));
+  const large = packDogs(run).filter((dog) => isLarge(data.dogs[dog]));
   return {
     bank: gear.flatMap(({ amount, money }): ChangeLabel[] =>
       money
@@ -360,11 +360,11 @@ export function walkStartMarks(
           name: effectName(data, item),
         }),
       })),
-      ...heavy.map((dog): MessageLine => ({
+      ...large.map((dog): MessageLine => ({
         icon: "hint",
-        text: fillLine(STRIP_LINE_FIELDS, strip, "heavyDog", {
+        text: fillLine(STRIP_LINE_FIELDS, strip, "largeDog", {
           dog: data.dogs[dog].name,
-          speed: heavySpeedText(data.tuning),
+          speed: largeSpeedText(data.tuning),
         }),
       })),
     ],

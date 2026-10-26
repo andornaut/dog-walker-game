@@ -130,7 +130,7 @@ export function gearByPrice(data: Pick<GameData, "shopGear" | "tuning">): GearId
 }
 
 // The start screen's dog rows by size, smallest first.
-export const ROSTER_SIZES: readonly Size[] = ["small", "medium", "big"];
+export const ROSTER_SIZES: readonly Size[] = ["small", "medium", "large"];
 
 // The start screen's dogs, one row per size in ROSTER_SIZES order. The dogs for sale run
 // cheapest first by list price with ties in data order, as the shop's Dogs tab lists them, and
@@ -240,7 +240,7 @@ function priceInfo(
     : fillLine(FOCUS_FIELDS, text, "priceShort", { amount: dollarText(cents(cost - bank)), price });
 }
 
-// A dog's size and hearts in words ("big, 5♥"), as the info line and the shop's row say them.
+// A dog's size and hearts in words ("large, 5♥"), as the info line and the shop's row say them.
 export function dogKindText(
   data: Pick<GameData, "dogs" | "homeText" | "tuning">,
   dog: DogId,

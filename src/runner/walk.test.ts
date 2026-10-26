@@ -871,7 +871,7 @@ describe("stepWalk", () => {
   const { probability } = TUNING;
   const [whistle] = SHOP_GEAR.dogWhistle.effects;
   const whistleSizes: readonly Size[] = whistle.sizes;
-  const dodgeCases = (["big", "medium", "small"] as const).flatMap((size) =>
+  const dodgeCases = (["large", "medium", "small"] as const).flatMap((size) =>
     ([null, "dogWhistle"] as const).map((gear: GearId | null) => ({
       chance:
         (size === "small" ? probability.smallDodgeChance : 0) +

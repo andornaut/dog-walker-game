@@ -266,7 +266,7 @@ describe("what a dog pulls toward", () => {
 });
 
 describe("the fairness rule", () => {
-  // At the pull, 1s in, the cone in lane 1 is 60px from the pack: a big dog's pull needs
+  // At the pull, 1s in, the cone in lane 1 is 60px from the pack: a large dog's pull needs
   // 0.2 + 0.5 + 0.6 + 0.2 = 1.5s, 120px at 80px/s.
   const cone = item("cone", 1, 1, 402);
 

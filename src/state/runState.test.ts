@@ -44,7 +44,7 @@ describe("newRun", () => {
     expect(state.zoneIndex).toBe(0);
   });
 
-  // Each pack, as picked, with its lead: the biggest dog, ties in roster order.
+  // Each pack, as picked, with its lead: the largest dog, ties in roster order.
   it.each([
     [["koda"], "koda"],
     [["pierre", "koda"], "koda"],

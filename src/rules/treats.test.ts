@@ -66,7 +66,7 @@ describe("treatRecipient", () => {
     maxHearts(TEST_TUNING, [], packPlace(order, dog), DOGS[dog]);
   const [first, second, third] = ofSize("medium") as [DogId, DogId, DogId];
   const [small] = ofSize("small") as [DogId];
-  const [big] = ofSize("big") as [DogId];
+  const [large] = ofSize("large") as [DogId];
 
   // Each pack in front-to-back order, each owner's hearts given as how many below their max.
   const cases: [string, [DogId, number][], DogId, DogId][] = [
@@ -112,11 +112,11 @@ describe("treatRecipient", () => {
     [
       "an owner below their max over a full one with fewer",
       [
-        [big, 0],
+        [large, 0],
         [small, 0],
         [first, 1],
       ],
-      big,
+      large,
       first,
     ],
   ];

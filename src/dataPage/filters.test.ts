@@ -22,7 +22,7 @@ describe("parseFilters", () => {
   it.each([
     ["", {}],
     ["?tables=dogs,owner-quips", { tables: ["dogs", "owner-quips"] }],
-    ["?dogs-size=Small&dogs-size=big", { "dogs-size": ["small", "big"] }],
+    ["?dogs-size=Small&dogs-size=large", { "dogs-size": ["small", "large"] }],
     ["?dogs-size=&tables=,,zones", { tables: ["zones"] }],
     ["?Dogs%20Size=small&seed=4", { seed: ["4"] }],
   ])("%j", (search, expected) => {
@@ -34,12 +34,12 @@ describe("serializeFilters", () => {
   it.each([
     [{}, ""],
     [{ tables: [] }, ""],
-    [{ "dogs-size": ["small", "big"], tables: ["dogs"] }, "?dogs-size=small,big&tables=dogs"],
+    [{ "dogs-size": ["small", "large"], tables: ["dogs"] }, "?dogs-size=small,large&tables=dogs"],
   ])("%j", (entries, expected) => {
     expect(serializeFilters(filters(entries))).toBe(expected);
   });
 
-  it.each([{ tables: ["dogs", "zones"] }, { "dogs-size": ["big"], "upgrades-kind": ["boost"] }])(
+  it.each([{ tables: ["dogs", "zones"] }, { "dogs-size": ["large"], "upgrades-kind": ["boost"] }])(
     "round-trips %j",
     (entries) => {
       expect(plain(parseFilters(serializeFilters(filters(entries))))).toEqual(entries);
@@ -50,7 +50,7 @@ describe("serializeFilters", () => {
 describe("toggleFilter", () => {
   it.each([
     [{}, "small", { "dogs-size": ["small"] }],
-    [{ "dogs-size": ["small"] }, "big", { "dogs-size": ["small", "big"] }],
+    [{ "dogs-size": ["small"] }, "large", { "dogs-size": ["small", "large"] }],
     [{ "dogs-size": ["small"] }, "small", {}],
   ])("%j toggling %s", (entries, value, expected) => {
     expect(plain(toggleFilter("dogs-size", value, filters(entries)))).toEqual(expected);

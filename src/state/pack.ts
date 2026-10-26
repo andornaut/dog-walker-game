@@ -3,7 +3,7 @@ import { type PackPlace, packPlace } from "../rules/dogs";
 import type { Hearts } from "../rules/units";
 import type { Pack, PackDogs, PackSlot, RunState } from "./runState";
 
-const SIZE_ORDER: readonly Size[] = ["big", "medium", "small"];
+const SIZE_ORDER: readonly Size[] = ["large", "medium", "small"];
 
 // The pack's order, from the dogs alone, never the order they were picked in: the biggest
 // first, ties in roster order. The first is the front dog, which leads the formation and takes

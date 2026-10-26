@@ -50,7 +50,7 @@ export const DOGS = {
       role: "trail runner",
     },
     price: "koda",
-    size: "big",
+    size: "large",
     unlock: "shop",
   },
   nugget: {
@@ -76,7 +76,7 @@ export const DOGS = {
       role: "inspector",
     },
     price: "penny",
-    size: "big",
+    size: "large",
     unlock: "shop",
   },
   pierre: {
@@ -102,7 +102,7 @@ export const DOGS = {
       role: "wedding planner",
     },
     price: "snowball",
-    size: "big",
+    size: "large",
     unlock: "shop",
   },
   zippy: {

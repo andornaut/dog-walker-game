@@ -797,23 +797,23 @@
     },
     "feet": {
       "lead": {
-        "big": -49,
+        "large": -49,
         "medium": -50,
         "small": -54
       },
       "side": {
-        "big": -45,
+        "large": -45,
         "medium": -45,
         "small": -48
       },
-      "sideOfThreeBigs": -37,
+      "sideOfThreeLarge": -37,
       "trioLead": {
-        "big big big": -53,
-        "big big medium": -60,
-        "big big small": -60,
-        "big medium medium": -52,
-        "big medium small": -52,
-        "big small small": -50,
+        "large large large": -53,
+        "large large medium": -60,
+        "large large small": -60,
+        "large medium medium": -52,
+        "large medium small": -52,
+        "large small small": -50,
         "medium medium medium": -50,
         "medium medium small": -56,
         "medium small small": -50,

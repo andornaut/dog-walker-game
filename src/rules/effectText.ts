@@ -29,7 +29,7 @@ type WordsData = Pick<GameData, "homeText" | "tuning">;
 type EffectWords = HomeText["effect"];
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
-  big: "big",
+  large: "large",
   medium: "medium",
   small: "small",
 };
@@ -61,7 +61,7 @@ function moneyText(data: TextData, effect: MoneyEffect): string {
   return `${signText}${formatDollars(amount)}`;
 }
 
-// "medium and big dogs dodge 1 in 8", lower case.
+// "medium and large dogs dodge 1 in 8", lower case.
 function dodgeText(data: TextData, effect: DodgeEffect): string {
   const sizes = sentenceList(
     data.homeText.sentenceList,
@@ -94,10 +94,10 @@ export function agilityPercent(agility: number): string | null {
   return Math.round(fraction * 100) === 0 ? null : percentText(fraction);
 }
 
-// How much a heavy dog slows the pack's lane changes, as a percent of the base lane-change
-// speed: bigDogAgility as "10%".
-export function heavySpeedText(tuning: LiveTuning): string {
-  return percentMagnitude(read(tuning, "multipliers", "bigDogAgility"));
+// How much a large dog slows the pack's lane changes, as a percent of the base lane-change
+// speed: largeDogAgility as "10%".
+export function largeSpeedText(tuning: LiveTuning): string {
+  return percentMagnitude(read(tuning, "multipliers", "largeDogAgility"));
 }
 
 // A gear item's shop line, its {percent} the share of the base lane-change speed its agility

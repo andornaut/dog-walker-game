@@ -6,10 +6,10 @@ import { read, readTable } from "../rules/units";
 // The {name}s a help page's body may use, each filled from the game data when the page shows,
 // so a tuning change never leaves a stale number.
 export const HELP_BODY_FIELDS = [
-  "bigHearts",
   "bumpHearts",
   "debuffSeconds",
   "dodgeIn",
+  "largeHearts",
   "loneBonus",
   "mediumHearts",
   "pairBonus",
@@ -27,7 +27,7 @@ type HelpBodyField = (typeof HELP_BODY_FIELDS)[number];
 // are the lead owner's extra hearts walking one dog and walking two.
 export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, string>> {
   const { tuning, world } = data;
-  const hearts = (size: "big" | "medium" | "small") =>
+  const hearts = (size: "large" | "medium" | "small") =>
     String(readTable(tuning, "hearts", "maxBySize", size));
   const seconds = (Object.keys(data.debuffs) as DebuffId[]).map((debuff) =>
     read(tuning, "seconds", data.debuffs[debuff].seconds),
@@ -35,10 +35,10 @@ export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, s
   const shortest = Math.min(...seconds);
   const longest = Math.max(...seconds);
   return {
-    bigHearts: hearts("big"),
     bumpHearts: String(read(tuning, "hearts", "bump")),
     debuffSeconds: shortest === longest ? String(shortest) : `${shortest} to ${longest}`,
     dodgeIn: String(Math.round(1 / read(tuning, "probability", "smallDodgeChance"))),
+    largeHearts: hearts("large"),
     loneBonus: String(readTable(tuning, "hearts", "packSizeBonus", 1)),
     mediumHearts: hearts("medium"),
     pairBonus: String(readTable(tuning, "hearts", "packSizeBonus", 2)),

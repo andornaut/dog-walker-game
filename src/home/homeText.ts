@@ -6,8 +6,8 @@ type LineKey = { [K in keyof HomeText]: HomeText[K] extends string ? K : never }
 // The {name}s each home text line may use; a group's table lists only its lines with names.
 export const HOME_TEXT_FIELDS = {
   detail: {
-    dogHeavy: ["speed"],
     dogKind: ["hearts", "size"],
+    dogLarge: ["speed"],
     dogOwner: ["owner", "role"],
     priceBuy: ["price"],
     priceLocked: ["price"],

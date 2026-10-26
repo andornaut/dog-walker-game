@@ -388,7 +388,7 @@
         "role": "trail runner"
       },
       "price": "koda",
-      "size": "big",
+      "size": "large",
       "unlock": "shop",
       "figures": {
         "maxHearts": 4,
@@ -442,7 +442,7 @@
         "role": "inspector"
       },
       "price": "penny",
-      "size": "big",
+      "size": "large",
       "unlock": "shop",
       "figures": {
         "maxHearts": 4,
@@ -496,7 +496,7 @@
         "role": "wedding planner"
       },
       "price": "snowball",
-      "size": "big",
+      "size": "large",
       "unlock": "shop",
       "figures": {
         "maxHearts": 4,
@@ -802,7 +802,7 @@
           "kind": "dodge",
           "sizes": [
             "medium",
-            "big"
+            "large"
           ]
         }
       ],
@@ -887,7 +887,7 @@
     },
     {
       "art": "owners",
-      "body": "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {bigHearts}♥ big, and big dogs slow your lane changes. A lone dog's owner gets +{loneBonus}♥, a pair's lead +{pairBonus}♥. A plain bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. At 0♥ the owner fires you.",
+      "body": "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {largeHearts}♥ big, and big dogs slow your lane changes. A lone dog's owner gets +{loneBonus}♥, a pair's lead +{pairBonus}♥. A plain bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. At 0♥ the owner fires you.",
       "title": "Keep owners happy"
     },
     {
@@ -1324,7 +1324,7 @@
       "kindWordsForgiven": 1,
       "luckyCollarMax": 1,
       "maxBySize": {
-        "big": 4,
+        "large": 4,
         "medium": 3,
         "small": 2
       },
@@ -1369,7 +1369,6 @@
     "multipliers": {
       "approachSecondRoadShareMax": 0.45,
       "approachSecondRoadShareMin": 0.25,
-      "bigDogAgility": -0.1,
       "calmVoiceDebuffFactor": 0.5,
       "dartSpeedJitter": 0.4,
       "dartStartRoadShareMax": 0.45,
@@ -1377,6 +1376,7 @@
       "dartTurnAtShareMax": 1,
       "dartTurnAtShareMin": 0.5,
       "goodLeashSquirrelPull": 0,
+      "largeDogAgility": -0.1,
       "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,
       "muddyBumpHearts": 2,

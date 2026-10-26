@@ -1,7 +1,7 @@
 import type { Effect, GameData, Modifier, Walker, WalkerId, ZoneId } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
-import { isHeavy } from "./dogs";
+import { isLarge } from "./dogs";
 import { modifiedStat } from "./modifiers";
 import { read } from "./units";
 
@@ -12,16 +12,16 @@ export function walkerEffects(data: WalkerData, walker: WalkerId): readonly Effe
   return data.walkerPerks[data.walkers[walker].perk].effects;
 }
 
-// What the pack's heavy dogs take off the walker's agility: bigDogAgility for each walking one.
-function bigDogsAgility(
+// What the pack's large dogs take off the walker's agility: largeDogAgility for each walking one.
+function largeDogsAgility(
   data: Pick<GameData, "dogs" | "tuning">,
   run: Pick<RunState, "pack">,
 ): number {
-  const big = packDogs(run).filter((dog) => isHeavy(data.dogs[dog])).length;
-  return big * read(data.tuning, "multipliers", "bigDogAgility");
+  const large = packDogs(run).filter((dog) => isLarge(data.dogs[dog])).length;
+  return large * read(data.tuning, "multipliers", "largeDogAgility");
 }
 
-// The agility the pack changes lanes at: the walker's, with its modifiers, and its big dogs',
+// The agility the pack changes lanes at: the walker's, with its modifiers, and its large dogs',
 // which never take it below minPackAgility, or the walker's own when lower.
 export function packAgility(
   data: Pick<GameData, "dogs" | "tuning" | "walkers">,
@@ -29,7 +29,7 @@ export function packAgility(
 ): number {
   const agility = walkerAgility(data, run.modifiers, run.walker);
   const floor = Math.min(agility, read(data.tuning, "multipliers", "minPackAgility"));
-  return Math.max(floor, agility + bigDogsAgility(data, run));
+  return Math.max(floor, agility + largeDogsAgility(data, run));
 }
 
 // The walker's agility after agility modifiers, such as Running shoes'.
@@ -42,7 +42,7 @@ export function walkerAgility(
 }
 
 // The lowest agility any pack can change lanes at, which sets the row spacing: minPackAgility,
-// which big dogs never take a pack below, or the slowest walker's own when lower.
+// which large dogs never take a pack below, or the slowest walker's own when lower.
 export function slowestPackAgility(data: Pick<GameData, "tuning" | "walkers">): number {
   const slowest = Math.min(...Object.values(data.walkers).map(({ agility }) => agility));
   return Math.min(slowest, read(data.tuning, "multipliers", "minPackAgility"));

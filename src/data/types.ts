@@ -15,7 +15,7 @@ export type EncounterId =
   "lostWallet" | "otherDog" | "pettingNeighbor" | "puddle" | "skunk" | "squirrel" | "thief";
 // How many dogs a walk sets out with.
 export type PackSize = 1 | 2 | 3;
-export type Size = "big" | "medium" | "small";
+export type Size = "large" | "medium" | "small";
 // Lifetime counts the save keeps across walks for the badges: small dogs' dodges, landed
 // squirrel pulls, tips and treats grabbed, and the card options and lucky finds that name one as
 // their tally.
@@ -539,9 +539,9 @@ export interface HomeText {
   // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
   // status, the price status of anything not owned yet, and a locked dog's subtitle.
   readonly detail: {
-    // A heavy dog's row, under its size and hearts: it slows lane changes.
-    readonly dogHeavy: string;
     readonly dogKind: string;
+    // A large dog's row, under its size and hearts: it slows lane changes.
+    readonly dogLarge: string;
     readonly dogOwner: string;
     readonly dogStatus: string;
     readonly gearEquipped: string;
@@ -757,9 +757,9 @@ export interface RunText {
     readonly effectStart: string;
     readonly fired: string;
     readonly fullPackHome: string;
-    // At a walk's start, for each heavy dog in the pack, which slows lane changes.
-    readonly heavyDog: string;
     readonly kindWords: string;
+    // At a walk's start, for each large dog in the pack, which slows lane changes.
+    readonly largeDog: string;
     readonly lowHearts: string;
     readonly luckyNeighbor: string;
     readonly luckyWallet: string;

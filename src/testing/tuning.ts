@@ -22,7 +22,7 @@ const PINNED_TUNING: LiveTuning = {
   hearts: {
     ...TUNING.hearts,
     luckyCollarMax: 1,
-    maxBySize: { big: 10, medium: 8, small: 6 },
+    maxBySize: { large: 10, medium: 8, small: 6 },
     // Above every pinned max, gear and pack-size bonus included, so no test hits it by chance.
     maxOwnerHearts: 12,
     treat: 1,

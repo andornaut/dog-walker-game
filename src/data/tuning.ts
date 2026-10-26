@@ -49,7 +49,7 @@ export const TUNING = {
     // Second chance forgives this many hearts lost in each zone, the first ones lost.
     kindWordsForgiven: 1,
     luckyCollarMax: 1,
-    maxBySize: { big: 4, medium: 3, small: 2 },
+    maxBySize: { large: 4, medium: 3, small: 2 },
     // No owner's max goes above this, whatever the dog's size, the pack's size and the gear add.
     maxOwnerHearts: 6,
     // Added to the lead dog's owner's max, whatever its size, by how many dogs the walk set out
@@ -102,8 +102,6 @@ export const TUNING = {
     // between these.
     approachSecondRoadShareMax: 0.45,
     approachSecondRoadShareMin: 0.25,
-    // Each big dog in the pack adds this to the walker's agility.
-    bigDogAgility: -0.1,
     // How long a debuff lasts while Ada's Calm voice walks.
     calmVoiceDebuffFactor: 0.5,
     // Each dart's speed across the road is its kind's times a factor drawn per dart up to this
@@ -121,7 +119,9 @@ export const TUNING = {
     dartTurnAtShareMax: 1,
     dartTurnAtShareMin: 0.5,
     goodLeashSquirrelPull: 0,
-    // Big dogs never take the pack's agility below this, or below the walker's own when lower.
+    // Each large dog in the pack adds this to the walker's agility.
+    largeDogAgility: -0.1,
+    // Large dogs never take the pack's agility below this, or below the walker's own when lower.
     // The slowest pack's lane move sets the row spacing.
     minPackAgility: 0.9,
     // Each in-lane mover's speed is its kind's times a factor drawn per mover up to this far from
@@ -155,7 +155,7 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
-    // With the Dog whistle, a hit that would land on a medium or big dog misses it this often,
+    // With the Dog whistle, a hit that would land on a medium or large dog misses it this often,
     // costing nothing.
     dogWhistleDodgeChance: 0.125,
     // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
