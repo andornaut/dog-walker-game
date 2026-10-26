@@ -180,7 +180,7 @@ export function luckyLine(
   return null;
 }
 
-// The Full walk bonus, from the fees paid at the walk's end; none paid says nothing.
+// The Walk bonus, from the fees paid at the walk's end; none paid says nothing.
 export function fullPackLine(data: StripData, fees: readonly MoneyChange[]): MessageLine | null {
   const bonus = fees.find((fee) => fee.causes.some((cause) => cause.kind === "bonus"));
   return bonus === undefined

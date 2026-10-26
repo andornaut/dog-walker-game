@@ -1509,7 +1509,7 @@ describe("finishZone", () => {
     expect(next.immunities).toEqual([{ encounter: "puddle", source: RAINCOATS }]);
   });
 
-  it("ends the run, finished, after the last zone, banking its pay and the Full walk bonus", () => {
+  it("ends the run, finished, after the last zone, banking its pay and the Walk bonus", () => {
     const { run } = walkWith(["koda", "duchess"]);
     const end = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 });
     const bonus = 2 * read(tuning, "money", "fullPackBonusPerDog");
@@ -1518,7 +1518,7 @@ describe("finishZone", () => {
     expect(end.fees.map(({ causes }) => causes[0]?.kind)).toEqual(["pay", "pay", "bonus"]);
   });
 
-  it("pays no Full walk bonus once an owner has fired you", () => {
+  it("pays no Walk bonus once an owner has fired you", () => {
     const { run } = walkWith(["koda", "duchess"]);
     const fired = {
       ...run,

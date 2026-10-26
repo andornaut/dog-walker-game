@@ -213,7 +213,7 @@ describe("badgeCounters", { timeout: 30_000 }, () => {
     expect(counters()[field]).toBe(sessionMean((_, result) => (holds(result) ? 1 : 0)));
   });
 
-  it("gives no Full walk bonus share for a pack under the most dogs", () => {
+  it("gives no Walk bonus share for a pack under the most dogs", () => {
     const facts = results.map((result) => result.facts);
     expect(badgeCounters(gameData, RISKY.length - 1, facts).fullPackBonusShare).toBeNull();
   });

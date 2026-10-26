@@ -227,7 +227,7 @@ export interface WalkStep {
   zoneEnded: boolean;
 }
 
-// A zone's end: fees are the zone's pay, banked, and after the last zone the Full walk bonus;
+// A zone's end: fees are the zone's pay, banked, and after the last zone the Walk bonus;
 // run is the run after it.
 interface ZoneEnd {
   fees: readonly MoneyChange[];
