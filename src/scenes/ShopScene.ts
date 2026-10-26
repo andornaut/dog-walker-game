@@ -908,7 +908,7 @@ export class ShopScene extends Scene {
     const layer = this.add.container(0, 0);
     const card =
       purchase.kind === "dog"
-        ? dogDetail(gameData, save.owned, save.bankCents, save.stats, purchase.dog)
+        ? dogDetail(gameData, save.owned, save.bankCents, purchase.dog)
         : gearDetail(gameData, save.owned, save.bankCents, save.lastLoadout, purchase.gear);
     drawDetailCard(this, layer, false, card, purchasePicture(purchase), purchase.kind);
   }

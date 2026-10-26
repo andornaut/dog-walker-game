@@ -18,7 +18,6 @@ export const HOME_TEXT = {
     dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
-    dogTotals: "Walks {walks} · Neighborhoods {zones} · Fired {fired}",
     gearEquipped: "In your Pocket",
     gearOwned: "Yours, tap to pocket it",
     gearSubtitle: "Gear",

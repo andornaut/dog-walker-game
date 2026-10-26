@@ -1206,7 +1206,7 @@ export class StartScene extends Scene {
   private detailCard(save: SaveDocument, target: DetailTarget): DetailCard {
     const { bankCents, owned } = save;
     if (target.kind === "dog") {
-      return dogDetail(gameData, owned, bankCents, save.stats, target.dog);
+      return dogDetail(gameData, owned, bankCents, target.dog);
     }
     if (target.kind === "gear") {
       return gearDetail(gameData, owned, bankCents, this.loadout, target.gear);

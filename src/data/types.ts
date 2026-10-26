@@ -545,7 +545,6 @@ export interface HomeText {
     readonly dogKind: string;
     readonly dogOwner: string;
     readonly dogStatus: string;
-    readonly dogTotals: string;
     readonly gearEquipped: string;
     readonly gearOwned: string;
     readonly gearSubtitle: string;

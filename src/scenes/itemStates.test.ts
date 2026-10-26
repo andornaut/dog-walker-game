@@ -90,8 +90,6 @@ describe("a start screen tile's state", () => {
   });
 });
 
-const ZERO_STATS = { dogs: {} };
-
 // Every dog for sale with the bank at its price (affordable) or a cent short.
 const forSale = SHOP_DOGS.flatMap((dog) =>
   (["affordable", "short"] as const).map((state) => {
@@ -131,7 +129,7 @@ describe("the text of an item not owned fits", () => {
   });
 
   it.each(forSale)("sets $dog's status on one line at 2x when $state", ({ bank, dog }) => {
-    const shown: DetailCard = dogDetail(gameData, OWNED, bank, ZERO_STATS, dog);
+    const shown: DetailCard = dogDetail(gameData, OWNED, bank, dog);
     const { lines, style } = fitted(shown.status);
     expect({ lines: lines.length, scale: style.scale }).toEqual({ lines: 1, scale: 2 });
   });

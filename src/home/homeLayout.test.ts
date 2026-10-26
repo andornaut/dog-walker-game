@@ -387,19 +387,17 @@ const cardLines = (room: number, text: string) => {
 const fitsScreen = (height: number) =>
   expect(height).toBeLessThanOrEqual(SCREEN_CONFIG.height - 2 * HOME_LAYOUT.gap);
 
-// Every dog's, gear item's and walker's detail card, owned or not, with the largest counts, wraps
-// its rows on the body font and stays on screen.
+// Every dog's, gear item's and walker's detail card, owned or not, wraps its rows on the body font
+// and stays on screen.
 describe("a detail card", () => {
   const dogs = Object.keys(gameData.dogs) as DogId[];
   const gear = Object.keys(gameData.shopGear) as GearId[];
   const walkers = Object.keys(gameData.walkers) as WalkerId[];
   const none: Owned = { dogSlots: 0, dogs: [], gear: [], walkers: [] };
   const all: Owned = { dogSlots: gameData.dogSlots.length, dogs, gear, walkers };
-  const most = { timesFired: 9999, walks: 9999, zonesFinished: 9999 };
-  const stats = { dogs: Object.fromEntries(dogs.map((dog) => [dog, most])) };
   const loadout = { dogs: [], gear: gear[0] ?? null };
   const cards = [none, all].flatMap((owned) => [
-    ...dogs.map((dog) => ["dog", dogDetail(gameData, owned, cents(0), stats, dog)] as const),
+    ...dogs.map((dog) => ["dog", dogDetail(gameData, owned, cents(0), dog)] as const),
     ...gear.map((item) => ["gear", gearDetail(gameData, owned, cents(0), loadout, item)] as const),
     ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
   ]);

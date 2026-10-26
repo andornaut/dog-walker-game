@@ -10,6 +10,7 @@ import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
+import { dollarText, purchasePrice } from "./home";
 import { homeLine } from "./homeText";
 import { walkerDetailLines } from "./walkers";
 
@@ -21,7 +22,6 @@ const owned: Owned = {
   gear: ["luckyCollar"],
   walkers: ["casey"],
 };
-const noStats = { dogs: {} };
 
 describe("dogDetail", () => {
   const dogIds = Object.keys(data.dogs) as DogId[];
@@ -36,36 +36,30 @@ describe("dogDetail", () => {
   it.each([
     { heavy: true, id: firstDog(true) },
     { heavy: false, id: firstDog(false) },
-  ])(
-    "gives $id's breed, size and hearts, the heavy row if heavy, owner and stats",
-    ({ heavy, id }) => {
-      const stats = { dogs: { [id]: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
-      const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), stats, id);
-      const dog = data.dogs[id];
-      const text = data.homeText.detail;
-      expect(card.title).toBe(dog.name);
-      expect(card.subtitle).toBe(dog.breed);
-      expect(card.lines).toEqual([
-        fillNames(text.dogKind, {
-          hearts: String(sizeHearts(data.tuning, dog)),
-          size: capitalize(SIZE_NAMES[dog.size]),
-        }),
-        ...(heavy ? [fillNames(text.dogHeavy, { speed: heavySpeedText(data.tuning) })] : []),
-        fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
-        fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
-      ]);
-      expect(card.status).toBe(text.dogStatus);
-    },
-  );
+  ])("gives $id's breed, size and hearts, the heavy row if heavy, and owner", ({ heavy, id }) => {
+    const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
+    const dog = data.dogs[id];
+    const text = data.homeText.detail;
+    expect(card.title).toBe(dog.name);
+    expect(card.subtitle).toBe(dog.breed);
+    expect(card.lines).toEqual([
+      fillNames(text.dogKind, {
+        hearts: String(sizeHearts(data.tuning, dog)),
+        size: capitalize(SIZE_NAMES[dog.size]),
+      }),
+      ...(heavy ? [fillNames(text.dogHeavy, { speed: heavySpeedText(data.tuning) })] : []),
+      fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
+    ]);
+    expect(card.status).toBe(text.dogStatus);
+  });
 
-  it("counts zeros for a dog never walked, and shows a locked dog's price", () => {
-    const card = dogDetail(data, owned, dollars(100), noStats, "archie");
-    expect(card.lines).toContain(
-      fillNames(data.homeText.detail.dogTotals, { fired: "0", walks: "0", zones: "0" }),
-    );
-    expect(card.status).toBe(fillNames(data.homeText.detail.priceLocked, { price: "$600" }));
-    expect(dogDetail(data, owned, dollars(600), noStats, "archie").status).toBe(
-      "Price $600, tap to buy",
+  const price = purchasePrice(data, owned, { dog: "archie", kind: "dog" }) ?? cents(0);
+  it.each([
+    { bank: cents(price - 1), key: "priceLocked", state: "a cent short" },
+    { bank: price, key: "priceBuy", state: "affordable" },
+  ] as const)("shows a dog not owned at its price, $state", ({ bank, key }) => {
+    expect(dogDetail(data, owned, bank, "archie").status).toBe(
+      fillNames(data.homeText.detail[key], { price: dollarText(price) }),
     );
   });
 });

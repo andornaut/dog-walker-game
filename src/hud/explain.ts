@@ -143,7 +143,7 @@ export function explainDetail(
       if (slot === undefined) {
         return undefined;
       }
-      const home = dogDetail(data, save.owned, save.bankCents, save.stats, target.dog);
+      const home = dogDetail(data, save.owned, save.bankCents, target.dog);
       const hearts = fillLine(RUN_TEXT_FIELDS.explain, text, "dogHearts", {
         hearts: String(slot.status === "walking" ? slot.hearts : 0),
         max: String(ownerMaxHearts(data, run, target.dog)),
