@@ -2,8 +2,8 @@
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
-icon-logbook, icon-settings, icon-lock, icon-lock-open (the padlock with its shackle lifted, on a
-locked item the bank covers), icon-treat (the treat pickup, its bone and heart as road.treat lays
+icon-logbook, icon-settings, icon-lock, icon-bill (a green dollar bill with a white $, on an item for
+sale the bank covers), icon-treat (the treat pickup, its bone and heart as road.treat lays
 them out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
 shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
 ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
@@ -59,7 +59,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import hits  # noqa: E402
-from pixel import DARKER, HEART, K, Grid, contrast, edged, icon_edge, to_image, build as build_sprites  # noqa: E402
+from pixel import DARKER, HEART, K, Grid, bitmap, contrast, edged, icon_edge, to_image, build as build_sprites  # noqa: E402
 
 
 # ---------- the chrome: one frame for every panel, bubble, plate and card frame ----------
@@ -203,20 +203,22 @@ def lock():
     return g
 
 
-def lock_open():
-    """icon-lock with its shackle lifted: the left leg still in the body, the right leg's end two
-    rows clear of it, so a locked item the bank covers reads apart from one it does not by shape.
-    The body is a row shorter than icon-lock's to leave the gap."""
+# The $ on icon-bill, 5x7: a stroke down the middle through an S.
+DOLLAR = ["..a..", ".aaaa", "a.a..", ".aaa.", "..a.a", "aaaa.", "..a.."]
+
+
+def bill():
+    """A green dollar bill, its border and its seal's ring in dgreen round a white $, on an item for
+    sale the bank covers, where icon-lock marks one it does not: the two differ by shape as well as
+    colour."""
     g = Grid(16, 16)
-    g.ell(8, 4.5, 4, 4, "grey", "slate", "lgrey")
-    g.ell(8, 5, 2, 2.6, None)
-    g.rect(4, 4, 2, 4, "grey")
-    g.rect(4, 4, 1, 4, "lgrey")
-    g.rect(8, 6, 5, 2, None)
-    g.rect(3, 8, 10, 7, "amber")
-    g.rect(3, 8, 10, 1, "yellow")
-    g.rect(12, 8, 1, 7, "orange")
-    g.rect(7, 10, 2, 3, "dbrown")
+    g.rect(1, 4, 14, 9, "green")
+    g.rect(1, 12, 14, 1, "dgreen")
+    g.rect(14, 4, 1, 9, "dgreen")
+    g.rect(2, 5, 12, 1, "dgreen")
+    g.rect(2, 11, 12, 1, "dgreen")
+    g.ell(8, 8.5, 3, 3, "dgreen")
+    bitmap(g, 6, 5, DOLLAR, {"a": "white"})
     return g
 
 
@@ -1462,7 +1464,7 @@ IMAGES = {
     "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
-    "icon-lock-open": lambda: to_image(lock_open().outlined()),
+    "icon-bill": lambda: to_image(bill().outlined()),
     "icon-treat": lambda: to_image(treat_icon().outlined()),
     "icon-stinky": lambda: to_image(stinky()),
     "icon-dog-slot": lambda: to_image(dog_slot().outlined()),

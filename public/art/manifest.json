@@ -4130,6 +4130,10 @@
       "png": "images/card-zone-yonge-street.png"
     },
     {
+      "key": "icon-bill",
+      "png": "images/icon-bill.png"
+    },
+    {
       "key": "icon-bump",
       "png": "images/icon-bump.png"
     },
@@ -4204,10 +4208,6 @@
     {
       "key": "icon-lock",
       "png": "images/icon-lock.png"
-    },
-    {
-      "key": "icon-lock-open",
-      "png": "images/icon-lock-open.png"
     },
     {
       "key": "icon-logbook",
