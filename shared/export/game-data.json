@@ -1386,7 +1386,8 @@
       "rushHourTreats": 2,
       "scrollSpeedGainPerZone": 0.2,
       "stinkyTipValue": 0,
-      "treatFinderSpawns": 2
+      "treatFinderSpawns": 2,
+      "treatFinderTipSpawns": 1.25
     },
     "pixels": {
       "roadScrollSpeed": 200,

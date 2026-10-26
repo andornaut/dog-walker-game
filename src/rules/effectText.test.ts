@@ -5,7 +5,14 @@ import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { TUNING } from "../data/tuning";
-import type { Effect, GearId, MoneyKey, MultiplierKey } from "../data/types";
+import type {
+  Effect,
+  GearId,
+  MoneyKey,
+  MultiplierKey,
+  WalkerPerk,
+  WalkerPerkId,
+} from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { fillNames, placeholders } from "../lib/lines";
 import { TEST_TUNING } from "../testing/tuning";
@@ -16,6 +23,7 @@ import {
   formatDollars,
   gearShort,
   heavySpeedText,
+  perkEffect,
   sentenceList,
   SIZE_NAMES,
 } from "./effectText";
@@ -197,6 +205,29 @@ describe("gearShort", () => {
         fillNames(short, { percent: unsignedPercent(agilityAdded(gear)) }),
       );
       expect(placeholders(gearShort(gearData, gear))).toEqual([]);
+    },
+  );
+});
+
+describe("perkEffect", () => {
+  const perks = Object.keys(gameData.walkerPerks) as WalkerPerkId[];
+
+  it.each(perks)(
+    "fills %s's effect line's {percent} from the multiplier it names, one of its own",
+    (id) => {
+      const perk: WalkerPerk = gameData.walkerPerks[id];
+      const factors = modifiersOf(perk.effects)
+        .filter(({ operation }) => operation === "multiply")
+        .map(({ by }) => by);
+      expect(placeholders(perk.effect)).toEqual(perk.percent === undefined ? [] : ["percent"]);
+      if (perk.percent !== undefined) {
+        expect(factors).toContain(perk.percent);
+      }
+      const percent =
+        perk.percent === undefined
+          ? {}
+          : { percent: unsignedPercent(read(gameData.tuning, "multipliers", perk.percent) - 1) };
+      expect(perkEffect(gameData.tuning, perk)).toBe(fillNames(perk.effect, percent));
     },
   );
 });

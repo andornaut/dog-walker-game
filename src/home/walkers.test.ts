@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { agilityPercent } from "../rules/effectText";
+import { agilityPercent, perkEffect } from "../rules/effectText";
 import { newPlayerSave } from "../testing/saves";
 import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";
 import { homeLine } from "./homeText";
@@ -84,7 +84,8 @@ describe("walkerDetailLines", () => {
     "gives %s's agility against the base, left out at the base, then its perk",
     (walker) => {
       const { agility, perk } = gameData.walkers[walker];
-      const { effect, name } = gameData.walkerPerks[perk];
+      const { name } = gameData.walkerPerks[perk];
+      const effect = perkEffect(gameData.tuning, gameData.walkerPerks[perk]);
       const percent = agilityPercent(agility);
       const detail = gameData.homeText.detail;
       expect(walkerDetailLines(gameData, walker)).toEqual([

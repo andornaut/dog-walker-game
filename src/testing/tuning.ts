@@ -8,7 +8,12 @@ export function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
     ...tuning,
     counts: { ...tuning.counts, longReachLanes: 0 },
     hearts: { ...tuning.hearts, kindWordsForgiven: 0 },
-    multipliers: { ...tuning.multipliers, calmVoiceDebuffFactor: 1, treatFinderSpawns: 1 },
+    multipliers: {
+      ...tuning.multipliers,
+      calmVoiceDebuffFactor: 1,
+      treatFinderSpawns: 1,
+      treatFinderTipSpawns: 1,
+    },
   };
 }
 

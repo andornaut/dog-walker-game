@@ -1,6 +1,6 @@
 import { kebabCase } from "../assets/spriteKeys";
 import type { GameData, GearId, UpgradeId, WalkerId, WalkerPerkId } from "../data/types";
-import { gearShort } from "../rules/effectText";
+import { gearShort, perkEffect } from "../rules/effectText";
 import { walkLength } from "../rules/route";
 import { read } from "../rules/units";
 import type { RunState } from "../state/runState";
@@ -113,7 +113,7 @@ export function effectLine(
     case "gear":
       return gearShort(data, item.gear);
     case "perk":
-      return data.walkerPerks[item.perk].effect;
+      return perkEffect(data.tuning, data.walkerPerks[item.perk]);
     case "upgrade":
       return data.upgrades[item.upgrade].effect;
     default:

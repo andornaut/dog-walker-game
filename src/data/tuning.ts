@@ -139,6 +139,8 @@ export const TUNING = {
     stinkyTipValue: 0,
     // How many treats appear while Ben's Treat finder walks.
     treatFinderSpawns: 2,
+    // How many tips appear while Ben's Treat finder walks.
+    treatFinderTipSpawns: 1.25,
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {

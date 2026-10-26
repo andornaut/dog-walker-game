@@ -2,7 +2,8 @@ import type { Walker, WalkerPerk } from "./types";
 
 // Each walker's one perk: its name, its effect in one line for the walker's detail card and
 // the top bar's icon, and its effects, which last every walk the walker walks, as gear's do.
-// The art is icon-perk-<kebab id>.
+// The art is icon-perk-<kebab id>. An effect line's {percent} is how far the multiplier the perk's
+// percent names is from 1, unsigned: 1.25 as "25%".
 export const WALKER_PERKS = {
   calmVoice: {
     effect: "Debuffs last half as long",
@@ -32,11 +33,13 @@ export const WALKER_PERKS = {
     name: "Long reach",
   },
   treatFinder: {
-    effect: "Twice as many treats appear",
+    effect: "Twice as many treats, {percent} more tips",
     effects: [
       { by: "treatFinderSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
+      { by: "treatFinderTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
     ],
     name: "Treat finder",
+    percent: "treatFinderTipSpawns",
   },
 } as const satisfies Record<string, WalkerPerk>;
 

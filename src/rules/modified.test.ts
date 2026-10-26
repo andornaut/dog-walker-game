@@ -46,6 +46,7 @@ const tuning = {
     ...TEST_TUNING.multipliers,
     calmVoiceDebuffFactor: TUNING.multipliers.calmVoiceDebuffFactor,
     treatFinderSpawns: TUNING.multipliers.treatFinderSpawns,
+    treatFinderTipSpawns: TUNING.multipliers.treatFinderTipSpawns,
   },
 };
 const data = {
@@ -305,16 +306,26 @@ describe("standingModified", () => {
       runWith(walkerWith("treatFinder")),
       sources.treatFinder,
       (state: RunState) => {
-        const base = spawnStats(state).treats;
-        const after = Math.round(base * read(tuning, "multipliers", "treatFinderSpawns"));
-        return [
-          {
-            after,
-            before: base,
-            by: by(after - base, sources.treatFinder),
-            subject: { kind: "spawns", spawn: "treats" },
-          },
-        ];
+        const stats = spawnStats(state);
+        return (
+          [
+            ["tips", stats.tips, "treatFinderTipSpawns"],
+            ["treats", stats.treats, "treatFinderSpawns"],
+          ] as const
+        ).flatMap(([spawn, base, factor]) => {
+          // A count the factor's rounding leaves alone is left out.
+          const after = Math.round(base * read(tuning, "multipliers", factor));
+          return after === base
+            ? []
+            : [
+                {
+                  after,
+                  before: base,
+                  by: by(after - base, sources.treatFinder),
+                  subject: { kind: "spawns", spawn },
+                },
+              ];
+        });
       },
     ],
     [

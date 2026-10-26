@@ -21,6 +21,7 @@ import {
   debuffText,
   effectText,
   formatDollars,
+  perkEffect,
   SIZE_NAMES,
 } from "../rules/effectText";
 import { modifiersOf } from "../rules/modifiers";
@@ -306,7 +307,7 @@ function walkersSection(data: GameData): Section {
         name,
         `${agilityPercent(walker.agility) ?? "Base"} (${walker.agility})`,
         data.walkerPerks[walker.perk].name,
-        data.walkerPerks[walker.perk].effect,
+        perkEffect(data.tuning, data.walkerPerks[walker.perk]),
         walker.unlock === "start" ? "Start" : `Finish zone ${walker.zone}`,
         walker.spriteKey,
         walker.portraitKey,

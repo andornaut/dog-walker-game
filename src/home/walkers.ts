@@ -1,6 +1,6 @@
 import type { GameData, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
-import { agilityPercent } from "../rules/effectText";
+import { agilityPercent, perkEffect } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
@@ -8,7 +8,7 @@ import { type ItemTile, itemTile } from "../ui/interaction";
 import { togglePick } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
-type WalkerText = Pick<GameData, "homeText" | "walkerPerks" | "walkers" | "world">;
+type WalkerText = Pick<GameData, "homeText" | "tuning" | "walkerPerks" | "walkers" | "world">;
 
 // The name of the zone whose finish unlocks the walker.
 function goalZone(data: Pick<GameData, "walkers" | "world">, walker: WalkerId): string {
@@ -69,7 +69,8 @@ function walkerInfo(data: WalkerText, walker: WalkerId): string {
 // lane-change speed, then its perk and what the perk does.
 export function walkerDetailLines(data: WalkerText, walker: WalkerId): string[] {
   const { agility, perk } = data.walkers[walker];
-  const { effect, name } = data.walkerPerks[perk];
+  const { name } = data.walkerPerks[perk];
+  const effect = perkEffect(data.tuning, data.walkerPerks[perk]);
   const percent = agilityPercent(agility);
   return [
     ...(percent === null

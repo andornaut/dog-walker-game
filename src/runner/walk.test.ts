@@ -38,8 +38,10 @@ import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { modifiersOf, modifierValue } from "../rules/modifiers";
+import { currentZone } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
+import { zoneStats } from "../rules/zones";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
@@ -309,6 +311,23 @@ describe("planZone", { timeout: 60_000 }, () => {
         }
       }
       expect(cappedOver).toBeLessThan(uncappedOver);
+    },
+  );
+
+  // A walker's perk tipSpawns factors scale the zone's tips, rounded as Rush hour's are; a
+  // walker without one plans the zone's own count.
+  it.each(Object.keys(WALKERS) as WalkerId[])(
+    "plans %s's tips in every zone at every walk position, scaled by its perk",
+    (walker) => {
+      const factor = modifiersOf(WALKER_PERKS[WALKERS[walker].perk].effects)
+        .filter(({ operation, stat }) => operation === "multiply" && stat === "tipSpawns")
+        .reduce((product, modifier) => product * modifierValue(TUNING, modifier), 1);
+      for (const { position, zone } of POSITIONS) {
+        const zoned = inZone(realRun(REAL, walker), zone, position);
+        const base = zoneStats(TUNING, currentZone(REAL, zoned), position).tips;
+        const tips = spawnQuotas(REAL, plannerStreams(1), zoned).find(({ kind }) => kind === "tip");
+        expect(tips?.count, `${zone} at ${position}`).toBe(Math.round(base * factor));
+      }
     },
   );
 

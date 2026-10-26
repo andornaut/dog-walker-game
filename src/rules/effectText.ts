@@ -15,6 +15,7 @@ import type {
   MoneyEffect,
   Size,
   Target,
+  WalkerPerk,
 } from "../data/types";
 import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
@@ -107,6 +108,16 @@ export function gearShort(data: Pick<GameData, "shopGear" | "tuning">, gear: Gea
     .filter((modifier) => modifier.operation === "add" && modifier.stat === "agility")
     .reduce((sum, modifier) => sum + modifierValue(data.tuning, modifier), 0);
   return fillNames(short, { percent: percentMagnitude(agility) });
+}
+
+// A walker perk's effect line, its {percent} how far the multiplier its percent names is from
+// 1: Treat finder's "25% more tips".
+export function perkEffect(tuning: LiveTuning, perk: WalkerPerk): string {
+  return perk.percent === undefined
+    ? perk.effect
+    : fillNames(perk.effect, {
+        percent: percentMagnitude(read(tuning, "multipliers", perk.percent) - 1),
+      });
 }
 
 function addedText(modifier: Modifier, value: number): string {
