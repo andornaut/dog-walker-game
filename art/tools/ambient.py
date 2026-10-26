@@ -421,7 +421,7 @@ def bikes(suffix, step):
 # Each stands on row 30 (the sitting cat on 31); frame 0 of its idle is the rest pose the game measures its feet from.
 
 def ginger_cat(pose):
-    """A ginger tabby side on. pose is (body dy, back arch, near and far front feet, near and far back feet,
+    """A ginger tabby side on. pose is (body dy, arch lift, near and far front feet, near and far back feet,
     tail tip) for a run frame, or "sit" and "sit-tail" for the idle: sat up, its tail curled round, the
     tail's tip flicking on the second frame."""
     def draw(g):
@@ -453,10 +453,11 @@ def ginger_cat(pose):
         bar(g, (8, 19 + dy), (4, 15 + dy), 2.5, "orange")
         bar(g, (4, 15 + dy), tail, 2.5, "orange")
         g.ell(tail[0], tail[1], 1.5, 1.5, "rust")
-        g.cel(15, 20 + dy - arch, 9, 4.5 + arch, "orange", "rust", "amber")
+        # the arch lifts the whole body as the legs gather under it, so it keeps its bulk instead of swelling
+        g.cel(15, 20 + dy - arch, 9, 4.5, "orange", "rust", "amber")
         for x in (11, 14, 17):
-            g.rect(x, 16 + dy - arch * 2, 1, 3, "rust")
-        g.rect(12, 23 + dy, 8, 1.5, "cream")
+            g.rect(x, 16 + dy - arch, 1, 3, "rust")
+        g.rect(12, 23 + dy - arch, 8, 1.5, "cream")
         for (x0, y0), foot in (((22, 22), nf), ((9, 22), nb)):
             bar(g, (x0, y0 + dy), foot, 3, "orange")
             g.rect(foot[0] - 1, foot[1] - 1, 3, 2, "cream")
@@ -471,7 +472,8 @@ def ginger_cat(pose):
     return draw
 
 
-# The cat's gallop: stretched out, landing on its front feet, gathered with its back arched, pushing off.
+# The cat's gallop: stretched out, landing on its front feet, gathered with its body lifted over its feet,
+# pushing off. arch lifts the body by that many units.
 CAT_RUN = ((0, 0, (28, 28.5), (26.5, 29.5), (3.5, 27.5), (5, 28.5), (3.5, 9)),
            (1, 0, (23, 29.5), (25, 29.5), (6, 28), (8, 29), (3.5, 12)),
            (-1, 2, (17, 29.5), (19, 29), (14, 29.5), (12, 29), (4, 8)),
