@@ -23,7 +23,8 @@ parked-car          56x42   1 lane by 3 rows of footprint, a minivan from straig
                             lane, the same tread roll with no indicator
 delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from straight behind with a tan
                             roller door, drawn at the footprint's near edge; idle (4 frames,
-                            400ms): an exhaust puff on frame 2. drive (4 frames, 100ms): tread lines
+                            400ms): an exhaust puff on frame 2 that drifts up and thins on frame 3.
+                            drive (4 frames, 100ms): tread lines
                             climb the tyres and the body dips 1px onto them on frames 1 and 2
 hot-dog-cart        112x66  2 lanes, a stainless street meat cart side on under a striped umbrella;
                             idle (2 frames, 500ms): steam rising off the steam table
@@ -300,16 +301,16 @@ PULL_OUT = range(4), 100
 # The drive: 4 frames of parked_car's, delivery_truck's or streetcar's roll with no indicator, and their
 # duration in ms.
 DRIVE = range(4), 100
-# The delivery truck's idle: an exhaust puff on frame 2.
-DELIVERY_IDLE = (False, False, True, False), 400
+# The delivery truck's idle: an exhaust puff on frame 2, drifting up and thinning on frame 3.
+DELIVERY_IDLE = (0, 0, 1, 2), 400
 
 
-def delivery_truck(puff=False, roll=None):
+def delivery_truck(puff=0, roll=None):
     """A box van from straight behind, a lane wide and taller than the parked car: a brown box lit tan along
     its top and left edges with mirrors at its sides and amber marker lights on the roof, a tan roller door
     ribbed in brown with a white shipping label on it, red tail lights low at the outer corners, the bumper
-    step and both rear wheels. puff blows a grey exhaust puff out beside the
-    right wheel. roll (0 to 3) is a drive frame: tread lines climb the tyres 1px a frame (treads) and the
+    step and both rear wheels. puff 1 blows a grey exhaust puff out beside the right wheel and puff 2
+    lets it drift up and thin to two wisps. roll (0 to 3) is a drive frame: tread lines climb the tyres 1px a frame (treads) and the
     body dips 1px onto them on frames 1 and 2. Laid out on 56x45 and drawn at CAR_SCALE, as the parked car."""
     g = edged(Grid(56, 45))
     px = raster(g)
@@ -320,9 +321,12 @@ def delivery_truck(puff=False, roll=None):
         g.rect(x, 34, 2, 9, "dslate")
         if roll is not None:
             treads(g, x + 2, 37, 7, 7, roll, uy)
-    if puff:
+    if puff == 1:
         g.ell(52, 40, 2.5, 2, "lgrey", "grey")
         g.p(54, 37, "lgrey")
+    elif puff == 2:
+        g.ell(51.5, 35.5, 1.8, 1.5, "lgrey")
+        g.p(53, 32.5, "lgrey")
     wheels = [row[:] for row in px.px]
     px.px = [[None] * px.w for _ in range(px.h)]
     # the box: lit along the top and the left, shaded down the right; mirrors poke out at its sides
