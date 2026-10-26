@@ -48,7 +48,7 @@ from pixel import ZONE_ROADS, build, depth_settled, preview  # noqa: E402
 # The steps hazards.py leaves to this file: it builds SCALES itself.
 BETWEEN = tuple(q for q in STEPS if q not in SCALES)
 # The pose arguments of road.person that move a part by pixels.
-POSE = ("lf", "rf", "bob")
+POSE = ("lf", "rf", "bob", "arms")
 
 
 def dressed(s, top, **q):

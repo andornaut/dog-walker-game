@@ -365,8 +365,9 @@ WALKER_IDLE = [dict(), dict(bob=-1)]
 BREATH, BREATH_MS = (0, -1), 400
 # A person walking down the road at the player, as the walkers walk: the left foot lifted, both feet 1px up
 # as the body passes over them 1px higher, the right foot lifted, passing again; 4 frames at 100ms, a 400ms
-# stride.
-PERSON_WALK = (dict(lf=-2), dict(lf=-1, rf=-1, bob=-1), dict(rf=-2), dict(lf=-1, rf=-1, bob=-1))
+# stride. arms swings the free arms against the legs: 1 takes the screen-left arm back (its hand 1 row up)
+# with the left foot lifted, -1 the screen-right arm with the right foot (see swung).
+PERSON_WALK = (dict(lf=-2, arms=1), dict(lf=-1, rf=-1, bob=-1), dict(rf=-2, arms=-1), dict(lf=-1, rf=-1, bob=-1))
 PERSON_WALK_MS = 100
 
 
@@ -1065,15 +1066,25 @@ CORGI_WALK = [dict(fl=1, fr=-1, bl=-1, br=1), dict(bob=-1), dict(fl=-1, fr=1, bl
 CORGI_IDLE = [dict(tail=-1), dict(bob=-1), dict(tail=1, bob=-1), dict(twitch=-1)]
 
 
-def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0):
-    """A chibi person facing the player: legs and shoes, then the caller's top(g, bob)."""
+def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0, arms=0):
+    """A chibi person facing the player: legs and shoes, then the caller's top(g, bob), or top(g, bob, arms)
+    for a walk frame whose free arms swing."""
     g = Grid(32, 48)
     for x, f in ((11, lf), (17, rf)):
         g.rect(x, 33 + bob, 4, 10 + f - bob, legs)
         g.rect(x + 3, 33 + bob, 1, 10 + f - bob, DARKER[K[legs]])
         g.rect(x, 43 + f, 4, 2, shoes)
-    top(g, bob)
+    if arms:
+        top(g, bob, arms)
+    else:
+        top(g, bob)
     return g
+
+
+def swung(arms, side):
+    """How many rows a passer-by's free arm on screen side side (-1 left, 1 right) is shortened in a walk
+    frame: an arm swung back, against the lifted foot on its side, shows its hand that much higher."""
+    return abs(arms) if arms * side < 0 else 0
 
 
 def dressed(top, **q):
@@ -1083,8 +1094,9 @@ def dressed(top, **q):
 
 def stripes(g, x, y0, y1, w, b, light="white"):
     """Layout rows y0 to y1 - 1 of the thief's stripes, from x, w wide: light where (row - b) % 4 < 2, else
-    ink. The sleeves take lgrey for light, so the arms stay apart from the white-striped chest. Drawn in pixels at the grid's scale, every stripe pair 4 x scale rows tall (white the shorter half),
-    so drawn bigger the stripes stay even instead of breaking up into 1px rows."""
+    ink. The sleeves take lgrey for light, so the arms stay apart from the white-striped chest. Drawn in
+    pixels at the grid's scale, every stripe pair 4 x scale rows tall (the light the shorter half), so drawn
+    bigger the stripes stay even instead of breaking up into 1px rows."""
     s = scale_of(g)
     px = raster(g)
 
@@ -1097,12 +1109,13 @@ def stripes(g, x, y0, y1, w, b, light="white"):
         px.rect(e(x), r, max(1, e(x + w) - e(x)), 1, light if (r - anchor) % period < period // 2 else "ink")
 
 
-def thief_top(g, b):
-    """The thief coming down the road: striped shirt, beanie, mask and the loot sack over his shoulder."""
+def thief_top(g, b, arms=0):
+    """The thief coming down the road: striped shirt, beanie, mask and the loot sack over his shoulder; the
+    free arm (screen left) swings, the one under the sack stays."""
     stripes(g, 9, 21 + b, 34 + b, 14, b)
-    for x in (5, 23):
-        stripes(g, x, 22 + b, 31 + b, 4, b, "lgrey")
-        g.rect(x, 31 + b, 4, 3, "skin2")
+    for x, n in ((5, swung(arms, -1)), (23, 0)):
+        stripes(g, x, 22 + b, 31 + b - n, 4, b, "lgrey")
+        g.rect(x, 31 + b - n, 4, 3, "skin2")
     # the loot sack slung over the shoulder: its neck tied and flared at the shoulder, the bag bulging
     # below it, a $ on its face
     g.cel(26, 23 + b, 4.5, 5.5, "tan", "brown", "cream")
@@ -1223,7 +1236,7 @@ def neighbour_top(pet, beat):
     and reaches her left arm (screen right) out and down, the open hand patting: beat 1 lowers it a row and
     shrinks the floating heart a step, so it beats. Standing, beat 1 lifts the floating heart a row, so it
     bobs against her breath or her step."""
-    def top(g, b):
+    def top(g, b, arms=0):
         # the cardigan, open down the front over the cream top, and the big heart on it
         g.rect(9, 21 + b, 14, 13, "mauve")
         g.rect(20, 21 + b, 3, 13, "purple")
@@ -1232,8 +1245,9 @@ def neighbour_top(pet, beat):
         g.rect(12, 21 + b, 1, 13, "pink")
         heart_px(g, 16, 24.5 + b, 7)
         # her right arm (screen left) hanging, the hand at her side
-        g.rect(5, 22 + b, 4, 9, "mauve")
-        g.rect(5, 31 + b, 4, 3, "skin1")
+        n = swung(arms, -1)
+        g.rect(5, 22 + b, 4, 9 - n, "mauve")
+        g.rect(5, 31 + b - n, 4, 3, "skin1")
         if pet:
             # the left arm (screen right) reaching out and down to a dog at her side, the hand open, palm down
             d = beat
@@ -1245,8 +1259,9 @@ def neighbour_top(pet, beat):
             for x in (26, 28):
                 g.rect(x, 33 + b + d, 1, 1, "skin1")
         else:
-            g.rect(23, 22 + b, 4, 9, "mauve")
-            g.rect(23, 31 + b, 4, 3, "skin1")
+            n = swung(arms, 1)
+            g.rect(23, 22 + b, 4, 9 - n, "mauve")
+            g.rect(23, 31 + b - n, 4, 3, "skin1")
         face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
         g.cel(16, 7.5 + b, 9, 5, "lgrey", "grey", "white")
         g.cel(16, 3 + b, 3.5, 2.5, "lgrey", "grey", "white")
@@ -1319,16 +1334,17 @@ def bark(big):
     return g
 
 
-def dog_owner_top(g, b):
-    """The other dog's walker: yellow raincoat, brown bob, leash hand held out low."""
+def dog_owner_top(g, b, arms=0):
+    """The other dog's walker: yellow raincoat, brown bob, leash hand held out low; the free arm swings."""
     g.rect(9, 21 + b, 14, 13, "amber")
     g.rect(20, 21 + b, 3, 13, "orange")
     g.rect(9, 21 + b, 1, 12, "yellow")
     g.rect(15, 22 + b, 1, 11, "orange")
     g.p(13, 25 + b, "orange")
     g.p(13, 29 + b, "orange")
-    g.rect(5, 22 + b, 4, 9, "amber")
-    g.rect(5, 31 + b, 4, 3, "skin1")
+    n = swung(arms, -1)
+    g.rect(5, 22 + b, 4, 9 - n, "amber")
+    g.rect(5, 31 + b - n, 4, 3, "skin1")
     # the leash arm angles out from the shoulder, so the hand held out low stays under its sleeve
     back_arm(g, 23, 4, 22 + b, ((8, "amber", None), (3, "skin1", None)), out=1)
     face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
@@ -1441,14 +1457,16 @@ def stair(g, x0, y0, x1, y1, c):
         px.rect(left + i * w // n, top + i, (i + 1) * w // n - i * w // n, 1, c)
 
 
-def mail_top(g, b):
-    """The mail carrier: a sky-blue shirt and cap, a navy brim, dark skin and a mailbag on a strap."""
+def mail_top(g, b, arms=0):
+    """The mail carrier: a sky-blue shirt and cap, a navy brim, dark skin and a mailbag on a strap; the free
+    arm swings, the one by the bag stays."""
     g.rect(9, 21 + b, 14, 12, "sky")
     g.rect(20, 21 + b, 3, 12, "blue")
     g.rect(15, 21 + b, 2, 12, "cyan")
-    g.rect(5, 22 + b, 4, 9, "sky")
-    g.rect(8, 22 + b, 1, 9, "blue")
-    g.rect(5, 31 + b, 4, 3, "dbrown")
+    n = swung(arms, -1)
+    g.rect(5, 22 + b, 4, 9 - n, "sky")
+    g.rect(8, 22 + b, 1, 9 - n, "blue")
+    g.rect(5, 31 + b - n, 4, 3, "dbrown")
     g.rect(23, 22 + b, 4, 9, "sky")
     g.rect(26, 22 + b, 1, 9, "blue")
     g.rect(23, 31 + b, 4, 3, "dbrown")
@@ -1482,7 +1500,7 @@ STROLLER_WALK = PERSON_WALK
 STROLLER_WALK_MS = 160
 
 
-def stroller(lf=0, rf=0, bob=0):
+def stroller(lf=0, rf=0, bob=0, arms=0):
     """A dad pushing a stroller up the road, seen from behind as the pack sees it: short ginger hair, a green
     puffer jacket quilted across, jeans and brown shoes, a takeaway coffee in his left hand, his right hand on
     the handlebar. The stroller rolls beside him on his right, its back to the player: a sky-blue hood ribbed

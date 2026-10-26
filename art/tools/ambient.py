@@ -98,18 +98,19 @@ TURBOPROP_MS = 90
 
 # ---------- the pedestrian, laid out on 32x48 as road.person's tops are ----------
 
-def student_front(g, b):
+def student_front(g, b, arms=0):
     """The student facing the walker: a red jacket with its zip, the backpack's straps over the shoulders,
-    hands at rest, and headphones over dark brown hair."""
+    its free arms swinging as it walks, and headphones over dark brown hair."""
     g.rect(9, 21 + b, 14, 13, "red")
     g.rect(20, 21 + b, 3, 13, "dred")
     g.rect(15, 21 + b, 2, 13, "dred")
     g.rect(9, 32 + b, 14, 2, "dred")
-    g.rect(5, 22 + b, 4, 9, "red")
-    g.rect(5, 31 + b, 4, 3, "skin1")
-    g.rect(23, 22 + b, 4, 9, "red")
-    g.rect(26, 22 + b, 1, 9, "dred")
-    g.rect(23, 31 + b, 4, 3, "skin1")
+    left, right = road.swung(arms, -1), road.swung(arms, 1)
+    g.rect(5, 22 + b, 4, 9 - left, "red")
+    g.rect(5, 31 + b - left, 4, 3, "skin1")
+    g.rect(23, 22 + b, 4, 9 - right, "red")
+    g.rect(26, 22 + b, 1, 9 - right, "dred")
+    g.rect(23, 31 + b - right, 4, 3, "skin1")
     g.rect(10, 21 + b, 2, 9, "green")
     g.rect(20, 21 + b, 2, 9, "dgreen")
     road.face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
@@ -125,17 +126,19 @@ def student_front(g, b):
     g.p(22, 16 + b, "pink")
 
 
-def student_back(g, b):
+def student_back(g, b, arms=0):
     """The student walking away: the green backpack over the red jacket, its pocket and zip, the ponytail
-    over the backpack's top, tied in red, the headphones' band over it and a cup over each ear."""
+    over the backpack's top, tied in red, the headphones' band over it and a cup over each ear; its arms swing
+    as it walks."""
     g.rect(9, 21 + b, 14, 13, "red")
     g.rect(20, 21 + b, 3, 13, "dred")
     g.rect(9, 32 + b, 14, 2, "dred")
-    g.rect(5, 22 + b, 4, 9, "red")
-    g.rect(5, 31 + b, 4, 3, "skin1")
-    g.rect(23, 22 + b, 4, 9, "red")
-    g.rect(26, 22 + b, 1, 9, "dred")
-    g.rect(23, 31 + b, 4, 3, "skin2")
+    left, right = road.swung(arms, -1), road.swung(arms, 1)
+    g.rect(5, 22 + b, 4, 9 - left, "red")
+    g.rect(5, 31 + b - left, 4, 3, "skin1")
+    g.rect(23, 22 + b, 4, 9 - right, "red")
+    g.rect(26, 22 + b, 1, 9 - right, "dred")
+    g.rect(23, 31 + b - right, 4, 3, "skin2")
     g.rect(10, 22 + b, 12, 10, "green")
     g.rect(19, 22 + b, 3, 10, "dgreen")
     g.rect(10, 22 + b, 12, 1, "yellow")
