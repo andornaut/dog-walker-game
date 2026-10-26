@@ -32,7 +32,10 @@ export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 // lanes it sweeps instead; one with no room to move waits for the next row with room, or is
 // dropped, unless it is marked first, when it stands still in its footprint instead. A mover
 // that blocks no lane, a moving prize, only keeps clear the cells it passes through, and stands
-// still in its footprint when it has no room to move.
+// still in its footprint when it has no room to move. moversPassOver marks standing kinds that
+// block no lane and that a mover may pass over, such as tips: they keep off the cells standing
+// spawns and moving prizes hold and every spot a mover may stand on, not off every cell a mover
+// passes through.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
@@ -40,6 +43,7 @@ export interface SpawnQuota<Kind extends string> {
   footprint?: Footprint;
   kind: Kind;
   mover?: MoverSpec;
+  moversPassOver?: boolean;
 }
 
 // Distances are scroll distances in pixels from the start of the zone. A spawn's footprint is
@@ -356,8 +360,9 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
 // which the dart then crosses over or past the same way, and one whose hit box shares no road with
 // any other mover's body, the road that mover's hit box covers at some moment on screen, so the
 // two never meet; a mover other than a dart holds every row its blocking and its path touch, which
-// is more road than its body. A mover with no room in its stretch, such as one over a cap
-// on screen, waits for the next row with room; only one marked first stands still in its footprint
+// is more road than its body. A kind marked moversPassOver also takes a mover's cells, but never
+// one where a mover may end a move and stand. A mover with no room in its stretch, such as one
+// over a cap on screen, waits for the next row with room; only one marked first stands still in its footprint
 // when no row has room for it to move. A moving prize is placed as a mover that blocks nothing:
 // the cells it passes through are kept clear of other spawns, so it never walks into one, but no
 // lane is blocked, it stands nowhere for the pack-fit gap and it counts toward no cap on screen,
@@ -408,6 +413,8 @@ export function planSpawns<Kind extends string>(
   };
   // Lanes where a mover may end a move and stand, which no spawn that blocks no lane takes.
   const restHeld = new Int32Array(rows.length);
+  // Lanes a moving prize holds, which a spawn a mover may pass over still keeps off.
+  const prizeHeld = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
   const gapBlocked = new Int32Array(rows.length);
   // What a trial block overwrote, by row, to undo it.
@@ -584,7 +591,25 @@ export function planSpawns<Kind extends string>(
   const lastRowTaken = (cell: Cell, footprint: Footprint, blocksLane: boolean): number =>
     blocksLane ? blockingSpan(plan, spacing, cell.row, footprint.rows).lastRow : cell.row;
 
-  const fits = (cell: Cell, footprint: Footprint, blocksLane: boolean): boolean => {
+  // The lanes of a row a standing spawn may not take: a lane-blocking one, those another standing
+  // spawn holds; one a mover may pass over, those, a moving prize's and every mover's resting
+  // spots; any other, every lane taken and every resting spot.
+  const heldFor = (row: number, blocksLane: boolean, passedOver: boolean): number => {
+    if (blocksLane) {
+      return heldByStanding[row] ?? 0;
+    }
+    const held = passedOver
+      ? (heldByStanding[row] ?? 0) | (prizeHeld[row] ?? 0)
+      : (taken[row] ?? 0);
+    return held | (restHeld[row] ?? 0);
+  };
+
+  const fits = (
+    cell: Cell,
+    footprint: Footprint,
+    blocksLane: boolean,
+    passedOver = false,
+  ): boolean => {
     if (cell.lane + footprint.lanes > laneCount) {
       return false;
     }
@@ -594,9 +619,7 @@ export function planSpawns<Kind extends string>(
     }
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
-      const held = blocksLane
-        ? (heldByStanding[row] ?? 0)
-        : (taken[row] ?? 0) | (restHeld[row] ?? 0);
+      const held = heldFor(row, blocksLane, passedOver);
       if ((held & covered) !== 0 || (blocksLane && leadIns.has(row))) {
         return false;
       }
@@ -635,7 +658,7 @@ export function planSpawns<Kind extends string>(
     const cells: Cell[] = [];
     for (let row = firstRow; row < endRow; row++) {
       for (let lane = 0; lane < laneCount; lane++) {
-        if (fits({ lane, row }, footprint, quota.blocksLane)) {
+        if (fits({ lane, row }, footprint, quota.blocksLane, quota.moversPassOver === true)) {
           cells.push({ lane, row });
         }
       }
@@ -741,6 +764,12 @@ export function planSpawns<Kind extends string>(
     occupy: () => {},
     packFits: () => true,
     stand: () => {},
+    take: (dart: boolean, lane: number, row: number) => {
+      moverGrid.take(dart, lane, row);
+      if (row >= 0 && row < rows.length) {
+        prizeHeld[row] = (prizeHeld[row] ?? 0) | laneRun(lane, 1);
+      }
+    },
   };
   const placePrizes = (): SpawnQuota<Kind>[] => {
     const quotas = moverQuotas(false);

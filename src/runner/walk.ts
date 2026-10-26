@@ -648,8 +648,18 @@ export function spawnQuotas(
       footprint: footprintOf(data, kind),
       kind,
     })),
-    { blocksLane: false, count: scaled("tipSpawns", stats.tips), kind: "tip" },
-    { blocksLane: false, count: scaled("treatSpawns", stats.treats), kind: "treat" },
+    {
+      blocksLane: false,
+      count: scaled("tipSpawns", stats.tips),
+      kind: "tip",
+      moversPassOver: true,
+    },
+    {
+      blocksLane: false,
+      count: scaled("treatSpawns", stats.treats),
+      kind: "treat",
+      moversPassOver: true,
+    },
   ];
 }
 

@@ -726,6 +726,46 @@ describe("planSpawns", () => {
     },
   );
 
+  // A rider passes through its own row in its lane, as it reaches the pack just as the row does,
+  // and never stops there. A tip a mover may pass over may lie on that cell; any other keeps off
+  // every cell a mover passes through.
+  it.each([
+    { moversPassOver: true, onPath: true },
+    { moversPassOver: false, onPath: false },
+  ])(
+    "lays a tip marked moversPassOver $moversPassOver on a rider's path: $onPath",
+    ({ moversPassOver, onPath }) => {
+      const riding: SpawnPlan<Kind> = {
+        ...plan,
+        quotas: [
+          {
+            blocksLane: true,
+            count: 4,
+            kind: "car",
+            mover: { ...DARTING, motion: { kind: "ride", speedMultiplier: 2 }, movement: "inLane" },
+          },
+          { blocksLane: false, count: 60, kind: "tip", moversPassOver },
+        ],
+        zoneLength: 4000,
+      };
+      let onRiders = 0;
+      for (const seed of seeds.slice(0, 20)) {
+        const events = planSpawns(plannerStreams(seed), riding);
+        for (const { distance, mover } of events) {
+          if (mover?.motion !== "ride") {
+            continue;
+          }
+          const row = distance + mover.warning - riding.sightLength / 2;
+          onRiders += events.filter(
+            (tip) =>
+              tip.kind === "tip" && tip.lane === mover.lane && Math.abs(tip.distance - row) < 1e-6,
+          ).length;
+        }
+      }
+      expect(onRiders > 0).toBe(onPath);
+    },
+  );
+
   // Twenty wide footprints with a row between each never all fit in 19 rows: the hedges and the
   // benches take turns along the zone, so neither kind takes the room first.
   it("keeps each standing kind's share of what is placed when room runs short", () => {
