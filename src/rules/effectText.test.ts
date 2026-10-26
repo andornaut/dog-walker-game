@@ -188,31 +188,3 @@ describe("formatDollars", () => {
     }
   });
 });
-
-// Every card's text from the real data, so a content or tuning edit shows up as a
-// snapshot diff to review. Update with: npx vitest run -u
-describe("every card's text", () => {
-  it("matches the snapshot", () => {
-    const effects = (items: Readonly<Record<string, { readonly effects: readonly Effect[] }>>) =>
-      Object.fromEntries(
-        Object.entries(items).map(([id, item]) => [id, effectText(gameData, item.effects)]),
-      );
-    const encounters = Object.fromEntries(
-      Object.entries(gameData.encounters).flatMap(([id, { resolution }]) =>
-        resolution.kind === "instant" || resolution.kind === "contact"
-          ? [[`${id}: ${resolution.kind}`, effectText(gameData, resolution.effects)]]
-          : resolution.kind === "pull"
-            ? []
-            : resolution.options.map((option) => [
-                `${id}: ${option.name}`,
-                effectText(gameData, option.effects),
-              ]),
-      ),
-    );
-    expect({
-      encounters,
-      gear: effects(gameData.shopGear),
-      upgrades: effects(gameData.upgrades),
-    }).toMatchSnapshot();
-  });
-});

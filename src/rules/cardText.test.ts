@@ -161,34 +161,4 @@ describe("a card's text for the dogs it catches", () => {
       expect([view?.text, largeBodyText(gameData, view)]).toEqual([text, large]);
     });
   });
-
-  it("matches the snapshot for the whole pack caught", () => {
-    const encounters = Object.fromEntries(
-      Object.entries(gameData.encounters).flatMap(([id, { resolution }]) =>
-        resolution.kind !== "card"
-          ? []
-          : cardFor(gameData, state, encounter(id as EncounterId, PACK)).options.map((view) => [
-              `${id}: ${view.label}`,
-              view.text,
-            ]),
-      ),
-    );
-    const cards = (ids: readonly string[], source: (id: string) => CardSource) =>
-      Object.fromEntries(
-        ids.flatMap((id) =>
-          cardFor(gameData, state, source(id)).options.map((view) => [
-            `${id}: ${view.label}`,
-            view.text,
-          ]),
-        ),
-      );
-    expect({
-      encounters,
-      forks: cards(["fork"], () => ({
-        kind: "fork",
-        paths: ["park", "snoozeCrescent"],
-        upgrades: ["bellyRubs", "sweetTalker"],
-      })),
-    }).toMatchSnapshot();
-  });
 });

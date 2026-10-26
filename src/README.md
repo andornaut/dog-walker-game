@@ -86,7 +86,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 
 ## Game data
 
-- **Card text:** generated from the effects and tuning, covered by a snapshot test.
+- **Card text:** generated from the effects and tuning, and exported with every card in `shared/export/game-data.json`.
 - **Choices:** `cardFor` builds a card (text, affected dogs, options disabled when unaffordable); `chooseOption` applies a choice and returns the new run state plus the outcome events the scenes animate.
 - **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline. A new kind is code in `src/rules/` plus a test.
 - **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.
