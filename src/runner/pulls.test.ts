@@ -158,6 +158,31 @@ describe("what a dog pulls toward", () => {
     expect(after(walk, 1.2).walk.road.control.target).toBe(3);
   });
 
+  // A darting squirrel waits idle at the road's edge for 60px of scroll, then shows its cue for
+  // 80px before it sets off: a dog strains toward it from its cue on, never while it waits.
+  it.each([
+    { since: 0, state: "waiting at the road's edge", strains: false },
+    { since: 59, state: "about to show its cue", strains: false },
+    { since: 60, state: "showing its cue", strains: true },
+    { since: 140, state: "setting off", strains: true },
+  ])("strains toward a darting squirrel $state: $strains", ({ since, strains }) => {
+    const path: MoverPath = {
+      direction: -1,
+      enterTravel: 260,
+      idle: 60,
+      lanesPerPixel: 0.001,
+      motion: "cross",
+      movement: "dart",
+      stopAfter: null,
+      tilt: 0,
+      turnAfter: null,
+      warning: 140,
+    };
+    const walk = walkWith(["koda"], [{ ...item("squirrel", 0, 4), mover: { path, since } }]);
+    const pulls = stepPulls(data, geometry, FRAME, [], NO_PULLS, walk);
+    expect(pulls.tells).toEqual(strains ? [{ direction: 1, dog: "koda", kind: "squirrel" }] : []);
+  });
+
   it("has every dog strain toward a squirrel", () => {
     for (const dog of Object.keys(DOGS) as (keyof typeof DOGS)[]) {
       expect(after(walkWith([dog], [item("squirrel", 0, 4)]), 0.5).tells).toEqual([

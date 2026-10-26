@@ -8,7 +8,7 @@ import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
-import { laneAt, moverPlace } from "./movers";
+import { isWaiting, laneAt, moverPlace } from "./movers";
 import { moverOutcomes } from "./outcomes";
 import {
   blocksLane,
@@ -135,8 +135,8 @@ interface Target {
 }
 
 // Only what is wholly ahead of the pack is a target: nothing acts on the pack once it reaches
-// the pack's rows. A darting squirrel is one from when its cue shows, in any lane; anything else
-// while it is off the pack's lane.
+// the pack's rows. A darting squirrel is one from when its cue shows, never while it waits idle
+// at the road's edge before it, in any lane; anything else while it is off the pack's lane.
 function targetOf(
   geometry: PullGeometry,
   lane: number,
@@ -144,7 +144,11 @@ function targetOf(
   item: WalkItem,
 ): Target | null {
   const { mover } = item;
-  if (item.y + item.height > geometry.packBand.top || (mover === undefined && item.lane === lane)) {
+  if (
+    item.y + item.height > geometry.packBand.top ||
+    (mover === undefined && item.lane === lane) ||
+    (mover !== undefined && isWaiting(mover.path, mover.since))
+  ) {
     return null;
   }
   const lanePosition =

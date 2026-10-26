@@ -242,6 +242,11 @@ export function moverTell(path: MoverPath, since: number): MoverTell | null {
   return cuedStep(path, since) === undefined ? null : { kind: "wander" };
 }
 
+// Whether a dart is still waiting idle at its edge, since scroll after it appeared: before its cue.
+export function isWaiting(path: MoverPath, since: number): boolean {
+  return path.motion === "cross" && since < path.idle;
+}
+
 // The step of a stepping mover whose cue shows since scroll after it spawned, if any.
 export function cuedStep(
   path: { readonly steps: readonly MoverStep[]; readonly warning: number },
