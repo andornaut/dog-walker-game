@@ -110,6 +110,6 @@ export const HOME_TEXT = {
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",
-  walkerInfo: "{walker}: {agility} lane changes, {perk}.",
+  walkerInfo: "{walker}: {perk}, lane changes {agility}.",
   walkerLocked: "Finish {zone} to unlock.",
 } as const satisfies HomeText;

@@ -1544,7 +1544,7 @@
   "walkers": [
     {
       "id": "ada",
-      "agility": 1.1,
+      "agility": 1.2,
       "greeting": "Tidy lane work. May I walk with you?",
       "name": "Ada",
       "perk": "calmVoice",
@@ -1555,7 +1555,7 @@
     },
     {
       "id": "ben",
-      "agility": 0.9,
+      "agility": 1,
       "greeting": "Nice pack! Mind if I tag along?",
       "name": "Ben",
       "perk": "treatFinder",
@@ -1566,7 +1566,7 @@
     },
     {
       "id": "casey",
-      "agility": 1,
+      "agility": 1.1,
       "greeting": "Nice pack! Mind if I walk with you sometime?",
       "name": "Casey",
       "perk": "kindWords",
@@ -1576,7 +1576,7 @@
     },
     {
       "id": "trista",
-      "agility": 1.2,
+      "agility": 1.4,
       "greeting": "Great pace! Race you to the next one?",
       "name": "Trista",
       "perk": "longReach",

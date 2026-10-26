@@ -137,7 +137,7 @@ Dogs differ in play by size only:
 | ------ | --- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Small  | 2   | Dodges 1 in 4 of the plain hits that would land on it, with a "Dodge!" label; the hit costs nothing and doesn't count as a bump |
 | Medium | 3   | The baseline                                                                                                                    |
-| Big    | 4   | Heavy: each big dog slows lane changes (−0.1 agility, never below Relaxed); its detail card says so                             |
+| Big    | 4   | Heavy: each big dog makes lane changes 10% slower, never below 10% slower than base; its detail card says so                    |
 
 Size shows at a glance: on the road, medium dogs are drawn 48 px, big dogs 54 px and small dogs about 38 px, in every animation, with small dogs drawn chunky so they still read; portraits and doghouse faces differ less, about 1.1× and 0.9×. Hit boxes don't change.
 
@@ -209,7 +209,7 @@ Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one p
 
 Four walkers. You start with Casey; each other walker unlocks the first time you finish their neighborhood (see New walker). Every walker walks the same road at the same speed, and a walker's effects stack with the Pocket item and upgrade cards.
 
-**Agility** sets how fast the pack changes lanes, as a multiple of the base lane-change speed. Walkers spread from 0.9 to 1.2, Running shoes add 0.3 and each big dog in the pack takes 0.1 off, never below Relaxed. Players never see the word agility: walker cards and lines say "Lane changes: Quick" or "Quick lane changes", with the word for the speed: Relaxed (0.9), Steady (1.0), Quick (1.1), Nimble (1.2), Lightning (1.3 and up, reached only with Running shoes). The slowest walker's lane move sets the row spacing, so the low end stays near 1.
+**Agility** sets how fast the pack changes lanes, as a multiple of the base lane-change speed. Walkers spread from 1.0 to 1.4, Running shoes add 0.3 and each big dog in the pack takes 0.1 off, never below 0.9. Players never see the word agility, and see it only as a percentage against the base: walker cards say "Lane changes: +40%" (Trista), "+10%" (Casey) or "default speed" (Ben), Running shoes "30% faster lane changes" and a big dog "10% slower lane changes". The slowest walker's lane move sets the row spacing, so the low end stays near 1.
 
 Each walker has one **perk**:
 
