@@ -9,7 +9,7 @@ left) and the flees, which go off up the road, seen from behind. Road outline
 (Grid.cel), as road.py has them.
 
 Each animal is laid out on 32x32 (the Snatch animals on 32x48) and drawn on a
-minis.Mini at its frame side / 32, sized against the pack (dogs.py: big 54,
+minis.Mini at its frame side / 32, sized against the pack (dogs.py: large 54,
 medium 48, small 38).
 
 Chase, 38x38 (the small dogs' frame): idle (2 frames, 300ms: frame 1 a small
@@ -654,7 +654,7 @@ CHASE_SIDE = 38
 # as a medium dog, and a 32x48 seagull a head shorter.
 SNATCH_SIDE = {"snatch-raccoon": 38, "snatch-seagull": 32}
 # The Social dogs are medium dogs, 48x48 like the pack's, drawn SOCIAL_ZOOM narrower in that frame (as
-# dogs.DOG_ZOOM draws the big dogs), so the collie is about 26px wide face on.
+# dogs.DOG_ZOOM draws the large dogs), so the collie is about 26px wide face on.
 SOCIAL_SIDE = 48
 SOCIAL_ZOOM = 0.82
 

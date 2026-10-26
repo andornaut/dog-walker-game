@@ -304,7 +304,7 @@ def archie(g):
     g.rect(21, 30, 2, 1, "dbrown")
 
 
-# ---------- Snowy: Great Pyrenees, big, giant white fluff, collar with a bell ----------
+# ---------- Snowy: Great Pyrenees, large, giant white fluff, collar with a bell ----------
 
 def snowball(g):
     g.cel(47, 52, 14, 11, "white", "lgrey")
@@ -328,7 +328,7 @@ def snowball(g):
     nose(g, 20, 28)
 
 
-# ---------- Penny: golden retriever with a Labrador build, big, golden coat, otter tail, blue collar ----------
+# ---------- Penny: golden retriever with a Labrador build, large, golden coat, otter tail, blue collar ----------
 
 def penny(g):
     base, shade, light = dogs.GOLD
@@ -356,7 +356,7 @@ def penny(g):
     nose(g, 21, 29)
 
 
-# ---------- Koda: Alaskan Malamute, big, heavy, grey and white, blue eyes, orange harness ----------
+# ---------- Koda: Alaskan Malamute, large, grey and white, blue eyes, orange harness ----------
 
 def koda(g):
     g.cel(46, 52, 13, 11, "slate", "dslate", "grey")
@@ -605,7 +605,7 @@ WALKERS = {
 
 # How big each dog's portrait is drawn in the 64px well, sat on the bottom edge: the side that brings its
 # inked area nearest its size class's target, so the classes step evenly (the square root of the area about
-# 35, 40 and 46px). The big dogs fill the well.
+# 35, 40 and 46px). The large dogs fill the well.
 # How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, topping
 # out 2 or 3px under the well's top edge, and Ada smaller as the youngest.
 WALKER_SIDE = {"ada": 64, "ben": 72, "casey": 66, "trista": 69}

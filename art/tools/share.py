@@ -49,7 +49,7 @@ BAND_ROWS = bd.H - BAND_TOP
 STREET = next(z for z, v in sn.ZONES.items() if v["art"] == "cabbagetown")   # Cabbagetown's zone id
 # The pack's formation, as src/layout/packFormation.ts: each dog's (side, distance ahead of the
 # feet), the dogs in formation order. One dog leads; two walk side by side; three walk in a
-# triangle, the lead's row keyed by the three sizes and three bigs' side dogs closer in.
+# triangle, the lead's row keyed by the three sizes and three large dogs' side dogs closer in.
 SIDES = {"lead": 0, "left": -1, "right": 1}
 SIZES = {d["id"]: d["size"] for d in sn.GAME["dogs"]}
 
@@ -58,7 +58,7 @@ def formation(dogs):
     feet = sn.PACK["feet"]
     sizes = [SIZES[d] for d in dogs]
     rows = [feet["lead"][sizes[0]]] if len(sizes) == 1 else [
-        feet["sideOfThreeBigs"] if sizes == ["big"] * 3 else feet["side"][s] for s in sizes[-2:]]
+        feet["sideOfThreeLarge"] if sizes == ["large"] * 3 else feet["side"][s] for s in sizes[-2:]]
     if len(sizes) == 3:
         rows = [feet["trioLead"][" ".join(sizes)]] + rows
     return [(SIDES[slot], -row) for slot, row in zip(sn.PACK["slots"][len(dogs) - 1], rows)]
@@ -149,7 +149,7 @@ def pack(view, cx, base):
             view.shadow(x, feet + 1, f.width)
         view.paste(f, x - f.width // 2, feet - f.getbbox()[3] + 1)
 
-    ids = ("koda", "biscuit", "duchess")   # big, medium, small: formation order
+    ids = ("koda", "biscuit", "duchess")   # large, medium, small: formation order
     dogs = [(f"dog-{d}", sn.side_dx(f"dog-{d}", side), base - row) for d, (side, row) in zip(ids, formation(ids))]
     for k, dx, feet in sorted(dogs, key=lambda d: d[2]):
         stand(k, cx + dx, feet)
