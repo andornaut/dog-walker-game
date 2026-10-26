@@ -150,7 +150,39 @@ def big(draw, *args, **q):
 
 # ---------- the walker (back view) ----------
 
-def casey_back(lf=0, rf=0, bob=0, arms=0):
+def back_arm(g, x, w, top, parts, out=0, lift=0):
+    """A walker's arm seen from behind, hanging from its shoulder at row top: parts are (rows, fill, shade) from
+    the shoulder down; shade (or None) takes the right column. The shoulder never moves. out swings the hand
+    that many pixels sideways, every row shifting in proportion to its distance from the shoulder, and lift
+    shortens the arm's longest part that many rows, as an arm swung toward or away from the camera looks
+    shorter. Offsets snap to the grid's own pixels, so the arm stays a clean stair of whole pixels."""
+    s = scale_of(g)
+    heights = [n for n, _, _ in parts]
+    longest = heights.index(max(heights))
+    heights[longest] = max(1, heights[longest] - lift)
+    span = max(1, sum(heights) - 1)
+    ends = [sum(heights[:i + 1]) for i in range(len(heights))]
+    first, last = round(top * s), round((top + ends[-1]) * s)
+    # one rect per row of the grid's own pixels, so the arm has no gaps at any scale or bob
+    for py in range(first, last):
+        d = py / s - top
+        fill, shade = next((f, sh) for (_, f, sh), e in zip(parts, ends) if d < e - 1e-9)
+        dx = math.copysign(math.floor(abs(out) * d / span * s), out) / s
+        g.rect(x + dx, py / s, w, 1 / s, fill)
+        if shade is not None:
+            g.rect(x + dx + w - 1, py / s, 1, 1 / s, shade)
+
+
+def walker_arms(g, xs, w, top, parts, arms, flare, reach):
+    """Both of a walker's arms from behind, the left at xs[0] and the right at xs[1]. arms swings them against
+    the legs: the arm swung forward (the left for arms above 0, the right below) shortens that much. flare
+    throws both hands that many pixels out from the sides and reach shortens both arms, for a start or a
+    stumble."""
+    for x, side, fwd in ((xs[0], -1, arms), (xs[1], 1, -arms)):
+        back_arm(g, x, w, top, parts, side * flare, max(0, fwd) + reach)
+
+
+def casey_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     """Casey from behind: an orange cap over a blue hoodie."""
     g = Grid(32, 48)
     b = bob
@@ -161,10 +193,7 @@ def casey_back(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 43 + f, 4, 2, "white")
         g.rect(x, 44 + f, 4, 1, "lgrey")
     # arms swing against the legs
-    for x, d in ((5, -arms), (23, arms)):
-        g.rect(x, 22 + b + d, 4, 10, "sky")
-        g.rect(x + 3, 22 + b + d, 1, 10, "blue")
-        g.rect(x, 32 + b + d, 4, 3, "skin1")
+    walker_arms(g, (5, 23), 4, 22 + b, ((10, "sky", "blue"), (3, "skin1", None)), arms, flare, reach)
     # hoodie
     g.rect(9, 21 + b, 14, 13, "sky")
     g.rect(20, 21 + b, 3, 13, "blue")
@@ -187,7 +216,7 @@ def casey_back(lf=0, rf=0, bob=0, arms=0):
 
 # ---------- the other walkers (back view) ----------
 
-def ada_back(lf=0, rf=0, bob=0, arms=0):
+def ada_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     """Ada, 11, mixed race, caramel skin, long black curls falling straight down: yellow tee, blue shorts.
     She stands 4px shorter than the adults: her head and body sit lower and her legs are shorter."""
     g = Grid(32, 48)
@@ -197,9 +226,7 @@ def ada_back(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 43 + f, 3, 1, "white")
         g.rect(x, 44 + f, 3, 1, "lgrey")
         g.rect(x, 45 + f, 3, 1, "pink")
-    for x, d in ((7, -arms), (22, arms)):
-        g.rect(x, 30 + b + d, 3, 7, "brown")
-        g.rect(x, 30 + b + d, 3, 3, "yellow")
+    walker_arms(g, (7, 22), 3, 30 + b, ((3, "yellow", None), (4, "brown", None)), arms, flare, reach)
     g.rect(10, 29 + b, 12, 8, "yellow")
     g.rect(19, 29 + b, 3, 8, "amber")
     g.rect(10, 36 + b, 12, 4, "sky")
@@ -230,7 +257,7 @@ def ada_back(lf=0, rf=0, bob=0, arms=0):
                        brown=("skin2", None), blue=("sky", None)))
 
 
-def ben_back(lf=0, rf=0, bob=0, arms=0):
+def ben_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): lilac tee, navy track pants,
     sneakers. The tee's lilac is a hue no road has, so he reads on all six."""
     g = Grid(32, 48)
@@ -242,12 +269,8 @@ def ben_back(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 43 + f, 4, 2, "white")
         g.rect(x, 44 + f, 4, 1, "lgrey")
         g.rect(x + 1, 43 + f, 2, 1, "red")
-    for x, d in ((5, -arms), (23, arms)):
-        g.rect(x, 22 + b + d, 4, 4, "lilac")
-        g.rect(x + 3, 22 + b + d, 1, 4, "violet")
-        g.rect(x, 26 + b + d, 4, 6, "dbrown")
-        g.rect(x + 3, 26 + b + d, 1, 6, "plum")
-        g.rect(x, 32 + b + d, 4, 3, "dbrown")
+    walker_arms(g, (5, 23), 4, 22 + b, ((4, "lilac", "violet"), (6, "dbrown", "plum"), (3, "dbrown", None)), arms,
+                flare, reach)
     # the lilac tee, shaded dgreen down its right side
     g.rect(9, 21 + b, 14, 13, "lilac")
     g.rect(20, 21 + b, 3, 13, "violet")
@@ -265,17 +288,14 @@ def ben_back(lf=0, rf=0, bob=0, arms=0):
                        plum=("skin2", "brown")))
 
 
-def trista_back(lf=0, rf=0, bob=0, arms=0):
+def trista_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     """Trista, 50, dirty blonde bob to the shoulders, cute: green cardigan, brown skirt, tights, brown flats."""
     g = Grid(32, 48)
     b = bob
     for x, f in ((11, lf), (17, rf)):
         g.rect(x + 1, 37 + b, 3, 6 + f - b, "dslate")
         g.rect(x, 43 + f, 4, 2, "dbrown")
-    for x, d in ((5, -arms), (23, arms)):
-        g.rect(x, 22 + b + d, 4, 10, "dgreen")
-        g.rect(x + 3, 22 + b + d, 1, 10, "forest")
-        g.rect(x, 32 + b + d, 4, 3, "skin1")
+    walker_arms(g, (5, 23), 4, 22 + b, ((10, "dgreen", "forest"), (3, "skin1", None)), arms, flare, reach)
     g.rect(9, 21 + b, 14, 11, "dgreen")
     g.rect(20, 21 + b, 3, 11, "forest")
     g.rect(9, 21 + b, 1, 10, "green")
@@ -334,10 +354,10 @@ WALKERS = {
 
 WALKER_WALK = [dict(lf=-2, rf=0, arms=1), dict(lf=-1, rf=-1, bob=-1), dict(lf=0, rf=-2, arms=-1),
                dict(lf=-1, rf=-1, bob=-1)]
-WALKER_REACT = [dict(lf=-4, rf=-4, bob=-4, arms=-3), dict(lf=-1, rf=-1, bob=-1, arms=-1)]
+WALKER_REACT = [dict(lf=-4, rf=-4, bob=-4, flare=3, reach=1), dict(lf=-1, rf=-1, bob=-1, flare=1)]
 # A bump: lurch left with the arms up, wobble back, steady (a right lean would push a tote out of the frame).
 # Each pose is (lean, walker args).
-WALKER_STUMBLE = [(-3, dict(lf=-3, rf=0, bob=1, arms=-3)), (1, dict(lf=0, rf=-3, arms=-3)),
+WALKER_STUMBLE = [(-3, dict(lf=-3, rf=0, bob=1, flare=3, reach=1)), (1, dict(lf=0, rf=-3, flare=3, reach=1)),
                   (-1, dict(lf=-1, rf=0, arms=1)), (0, dict(lf=-1, rf=-1, bob=-1))]
 # Waiting while the walk pauses: feet planted, arms at rest, a 1px breath.
 WALKER_IDLE = [dict(), dict(bob=-1)]
@@ -1117,8 +1137,8 @@ def dollar(g, cx, cy, c):
 
 def thief_fleeing(stride):
     """The thief running off up the road, seen from behind: stride is -1 or 1, the side whose knee is up.
-    The arms pump against the legs (the far arm bent forward and up, the near one swung back and low),
-    and the loot sack bounces on his back. The road outline and the lit rim."""
+    The arms pump against the legs from the shoulders (the far arm bent forward, its forearm hidden, the near
+    one swung back and low), and the loot sack bounces on his back. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     s = stride
     b = -1
@@ -1135,12 +1155,13 @@ def thief_fleeing(stride):
             g.rect(x + 3, top, 1, 10 - b, "ink")
             g.rect(x, 43, 4, 2, "ink")
     # arms: the one on the lifted leg's side swings back and low, the other is bent forward and up
+    # both hang from the shoulder at row 22, as his walking arms do
     for x, back in ((5, s < 0), (23, s > 0)):
         if back:
-            stripes(g, x - (1 if x < 16 else -1), 25 + b, 33 + b, 4, b)
-            g.rect(x - (1 if x < 16 else -1), 33 + b, 4, 3, "skin2")
+            stripes(g, x, 22 + b, 32 + b, 4, b)
+            g.rect(x, 32 + b, 4, 3, "skin2")
         else:
-            stripes(g, x, 21 + b, 26 + b, 4, b)
+            stripes(g, x, 22 + b, 26 + b, 4, b)
             g.rect(x + (1 if x < 16 else -1), 26 + b, 3, 2, "skin2")
     stripes(g, 9, 21 + b, 34 + b, 14, b)
     g.p(9, 21 + b, None)
@@ -1308,8 +1329,8 @@ def dog_owner_top(g, b):
     g.p(13, 29 + b, "orange")
     g.rect(5, 22 + b, 4, 9, "amber")
     g.rect(5, 31 + b, 4, 3, "skin1")
-    g.rect(23, 22 + b, 4, 8, "amber")
-    g.rect(24, 30 + b, 4, 3, "skin1")
+    # the leash arm angles out from the shoulder, so the hand held out low stays under its sleeve
+    back_arm(g, 23, 4, 22 + b, ((8, "amber", None), (3, "skin1", None)), out=1)
     face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
     g.cel(16, 8.5 + b, 9, 5, "dbrown", "plum", "brown")
     g.rect(7, 9 + b, 3, 9, "dbrown")
@@ -1506,13 +1527,13 @@ def stroller(lf=0, rf=0, bob=0):
         g.rect(x + 3, 33 + b, 1, 10 + f - b, "navy")
         g.rect(x, 43 + f, 4, 2, "brown")
         g.rect(x, 44 + f, 4, 1, "dbrown")
-    # the left arm holds the coffee; the right reaches out to the handlebar
-    g.rect(0, 22 + b, 4, 9, "forest")
-    g.rect(3, 22 + b, 1, 9, "teal")
-    g.rect(0, 29 + b, 4, 1, "white")
-    g.rect(0, 30 + b, 4, 5, "cream")
+    # the left arm holds the coffee, a column in from the frame's edge so the outline closes round it; the
+    # right reaches out to the handlebar
+    g.rect(1, 22 + b, 3, 9, "forest")
+    g.rect(1, 29 + b, 3, 1, "white")
+    g.rect(1, 30 + b, 3, 5, "cream")
     g.rect(3, 30 + b, 1, 5, "tan")
-    g.rect(0, 32 + b, 4, 1, "brown")
+    g.rect(1, 32 + b, 3, 1, "brown")
     g.rect(16, 22 + b, 3, 3, "forest")
     g.rect(16, 24 + b, 3, 1, "teal")
     g.rect(16, 25, 3, 2, "skin1")
@@ -1549,7 +1570,7 @@ def jogger(knee=None, passing=None, bob=0, tail=None):
     cyan shoes. knee is the side ("left" or "right", screen left and right) whose knee is driven up, the foot
     lifted and the knee lit, while the other foot plants; passing is the side whose foot is passing down under
     the body, just off the ground. The arm on the raised knee's side swings back, half hidden; the other is bent
-    forward, the fist up in front of the chest. The road outline and the lit rim."""
+    at the elbow, the fist in front of the hip. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     b = bob
     # the ponytail behind the head, out to one side
@@ -1565,14 +1586,11 @@ def jogger(knee=None, passing=None, bob=0, tail=None):
         g.rect(x + 1, 41 + f, 2, 2, "skin1")
         g.rect(x, 43 + f, 4, 2, "cyan")
         g.rect(x, 44 + f, 4, 1, "white")
-    # arms: swung back and down on the raised knee's side, the upper arm bent forward on the other
+    # arms: swung back and down on the raised knee's side; on the other the upper arm hangs to the elbow
     for x, side in ((5, "left"), (24, "right")):
-        if knee == side:
-            g.rect(x, 22 + b, 3, 8, "skin1")
-            g.rect(x + 2, 22 + b, 1, 8, "skin2")
-        else:
-            g.rect(x, 22 + b, 3, 4, "skin1")
-            g.rect(x + 2, 22 + b, 1, 4, "skin2")
+        n = 8 if knee == side else 6
+        g.rect(x, 22 + b, 3, n, "skin1")
+        g.rect(x + 2, 22 + b, 1, n, "skin2")
     # the racerback singlet, bare shoulders either side, the bib pinned on its front, the tights' waistband
     g.rect(9, 21 + b, 14, 11, "orange")
     g.rect(20, 21 + b, 3, 11, "rust")
@@ -1584,12 +1602,12 @@ def jogger(knee=None, passing=None, bob=0, tail=None):
     g.rect(12, 24 + b, 8, 1, "sky")
     bib(g, 16, 27.5 + b)
     g.rect(9, 31 + b, 14, 1, "ink")
-    # the forearm bent up and in over the singlet's edge, the fist in front of the chest
+    # the forearm bent at the elbow toward us, the fist in front of the hip just inside the elbow
     for x, side in ((5, "left"), (24, "right")):
         if knee != side:
-            fx = x + (3 if side == "left" else -3)
-            g.rect(fx, 23 + b, 3, 3, "skin1")
-            g.rect(fx, 25 + b, 3, 1, "skin2")
+            fx = x + (2 if side == "left" else -2)
+            g.rect(fx, 26 + b, 3, 3, "skin1")
+            g.rect(fx, 28 + b, 3, 1, "skin2")
     # the head: the neck, the face, black hair over the crown with a fringe and down the sides
     g.rect(14, 19 + b, 4, 3, "skin1")
     face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")

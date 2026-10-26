@@ -2462,7 +2462,7 @@
       "json": "sprites/other-dog-owner@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 23
+        "opaqueWidth": 22
       }
     },
     {
@@ -2480,7 +2480,7 @@
       "json": "sprites/other-dog-owner@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 32
+        "opaqueWidth": 31
       }
     },
     {
@@ -3596,7 +3596,7 @@
       "json": "sprites/stroller.json",
       "anchor": {
         "feetY": 69,
-        "opaqueWidth": 48
+        "opaqueWidth": 47
       }
     },
     {
@@ -3605,7 +3605,7 @@
       "json": "sprites/stroller@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 24
+        "opaqueWidth": 23
       }
     },
     {
@@ -3614,7 +3614,7 @@
       "json": "sprites/stroller@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 30
+        "opaqueWidth": 29
       }
     },
     {
@@ -3623,7 +3623,7 @@
       "json": "sprites/stroller@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 36
+        "opaqueWidth": 35
       }
     },
     {
@@ -3632,7 +3632,7 @@
       "json": "sprites/stroller@88.json",
       "anchor": {
         "feetY": 61,
-        "opaqueWidth": 42
+        "opaqueWidth": 41
       }
     },
     {
