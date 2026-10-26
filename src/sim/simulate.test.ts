@@ -76,11 +76,36 @@ describe("simulateRun", { timeout: 30_000 }, () => {
     expect(choices.filter((choice) => choice.cost > 0)).toEqual([]);
   });
 
+  // A cash option the purse can't cover is disabled, so with the tuned starting purse whether
+  // the blind walk can pay depends on the tips it grabs before its pack is fired. Starting with
+  // a purse of the dearest card option's price, every card's cash option is open from the
+  // first card.
   it("pays for cards with the alwaysPay policy", () => {
-    const choices = runs(2, { pack: RISKY, policy: "alwaysPay", skill: BLIND }).flatMap(
-      (result) => result.choices,
+    const { money } = gameData.tuning;
+    const prices = Object.values(gameData.encounters).flatMap(({ resolution }) =>
+      resolution.kind === "card"
+        ? resolution.options.map(({ effects }) =>
+            effects.reduce(
+              (sum, effect) =>
+                effect.kind === "money" && effect.change === "lose"
+                  ? sum + money[effect.amount]
+                  : sum,
+              0,
+            ),
+          )
+        : [],
     );
+    const flush = {
+      ...gameData,
+      tuning: {
+        ...gameData.tuning,
+        money: { ...money, startPurse: Math.ceil(Math.max(...prices)) },
+      },
+    };
+    const paying = config({ pack: RISKY, policy: "alwaysPay", skill: BLIND });
+    const choices = [1, 2].flatMap((seed) => simulateRun(flush, seed, paying).choices);
 
+    expect(Math.max(...prices)).toBeGreaterThan(0);
     expect(choices.filter((choice) => choice.cost > 0).length).toBeGreaterThan(0);
   });
 
