@@ -102,14 +102,26 @@ describe("gearRows and dogRows", () => {
     expect(rows.find(({ id }) => id === "gear:fannyPack")?.price).toBeNull();
   });
 
-  it("list only the dogs still for sale: a bought one leaves the list", () => {
-    const [bought, ...rest] = dogRows(data, owned).map(({ id }) => id);
-    const dog = (bought ?? "dog:koda").slice("dog:".length) as DogId;
-    const rows = dogRows(data, { ...owned, dogs: [...starters, dog] });
-    expect(rows.map(({ id }) => id)).toEqual(rest);
+  const allDogs = Object.keys(data.dogs) as DogId[];
+  const forSale = allDogs.filter((dog) => !starters.includes(dog));
+  const dogOf = (row: ShopRow): DogId => (row.purchase.kind === "dog" ? row.purchase.dog : "koda");
+
+  // Owning a dog keeps its row in place, marked owned as gear is: no price, the owned look.
+  it.each<[string, readonly DogId[]]>([
+    ["nothing bought", starters],
+    ["one dog bought", [...starters, forSale[0] ?? "koda"]],
+    ["every dog bought", allDogs],
+  ])("list every dog in one order, owned ones marked owned, with %s", (_, dogs) => {
+    const rows = dogRows(data, { ...owned, dogs: [...dogs] });
+    expect(rows.map(({ id }) => id)).toEqual(dogRows(data, owned).map(({ id }) => id));
+    expect(rows.map(dogOf).sort()).toEqual([...allDogs].sort());
+    rows.forEach((row) => {
+      const have = dogs.includes(dogOf(row));
+      expect(row.price === null).toBe(have);
+      expect(shopRowLook(dollars(100_000), row) === "owned").toBe(have);
+    });
   });
 
-  const forSale = (Object.keys(data.dogs) as DogId[]).filter((dog) => !starters.includes(dog));
   const dogPrice = (tuning: LiveTuning, dog: DogId) => unlockPrice(tuning, data.dogs[dog]);
   const withDogPrices = (pick: (dog: DogId) => number): LiveTuning => ({
     ...TEST_TUNING,
@@ -142,18 +154,16 @@ describe("gearRows and dogRows", () => {
   ];
 
   it.each(dogTunings)(
-    "list the dogs for sale cheapest first, ties in data order, at %s",
+    "list every dog cheapest first by list price, ties in data order, at %s",
     (_, tuning) => {
-      const order = dogRows({ ...data, tuning }, owned).map(({ purchase }) =>
-        purchase.kind === "dog" ? purchase.dog : "koda",
-      );
-      expect([...order].sort()).toEqual([...forSale].sort());
+      const order = dogRows({ ...data, tuning }, owned).map(dogOf);
+      expect(order.slice(0, starters.length)).toEqual(starters);
       order.slice(1).forEach((dog, i) => {
         const before = order[i] as DogId;
         const step = dogPrice(tuning, dog) - dogPrice(tuning, before);
         expect(step).toBeGreaterThanOrEqual(0);
         if (step === 0) {
-          expect(forSale.indexOf(dog)).toBeGreaterThan(forSale.indexOf(before));
+          expect(allDogs.indexOf(dog)).toBeGreaterThan(allDogs.indexOf(before));
         }
       });
     },
@@ -161,7 +171,7 @@ describe("gearRows and dogRows", () => {
 
   it("move a dog to the end of the list when a retune makes it the dearest", () => {
     const [, retuned] = dogTunings[2] as [string, LiveTuning];
-    expect(dogRows(data, owned)[0]?.id).toBe(`dog:${cheapestDog}`);
+    expect(dogRows(data, owned)[starters.length]?.id).toBe(`dog:${cheapestDog}`);
     expect(dogRows({ ...data, tuning: retuned }, owned).at(-1)?.id).toBe(`dog:${cheapestDog}`);
   });
 

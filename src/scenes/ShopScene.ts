@@ -745,8 +745,8 @@ export class ShopScene extends Scene {
     this.drawRows(root, save, spec, gearRows(gameData, save.owned));
   }
 
-  // The dog slots past the first with how many are owned, then how many dogs are owned and the
-  // dogs still for sale, or a line saying every dog is owned.
+  // The dog slots past the first with how many are owned, then how many dogs are owned and
+  // every dog, owned ones marked as on the gear tab.
   private drawDogs(root: GameObjects.Container, save: SaveDocument): void {
     const text = gameData.homeText;
     const { dogHeadingY, dogRows: dogSpec, slotHeadingY, slotRows: slotSpec } = LAYOUT.dogs;
@@ -758,13 +758,7 @@ export class ShopScene extends Scene {
     );
     this.drawRows(root, save, slotSpec, slotRows(gameData, save.owned));
     this.heading(root, dogHeadingY, text.shop.dogs, ownedCountNote(gameData, save.owned, "dogs"));
-    const dogs = dogRows(gameData, save.owned);
-    if (dogs.length === 0) {
-      this.text(root, { x: LAYOUT.headingX, y: dogSpec.y + 4 }, text.shop.dogsAllOwned, {
-        color: PALETTE.darkBrown,
-      });
-    }
-    this.drawRows(root, save, dogSpec, dogs);
+    this.drawRows(root, save, dogSpec, dogRows(gameData, save.owned));
   }
 
   // The rows laid out from spec across the list's width.

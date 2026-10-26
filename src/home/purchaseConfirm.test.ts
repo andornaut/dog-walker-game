@@ -15,12 +15,10 @@ import { dogRows, gearRows, slotRows } from "./shop";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const owned = newPlayerSave.owned;
-// One of each kind of purchase, as the shop's rows sell it.
-const forSale = [
-  ...gearRows(data, owned).slice(0, 1),
-  ...slotRows(data, owned).slice(0, 1),
-  ...dogRows(data, owned).slice(0, 1),
-].map(({ name, purchase }) => ({ kind: purchase.kind, name, purchase }));
+// One of each kind of purchase, the first for sale on its list, as the shop's rows sell it.
+const forSale = [gearRows(data, owned), slotRows(data, owned), dogRows(data, owned)]
+  .flatMap((rows) => rows.filter(({ price }) => price !== null).slice(0, 1))
+  .map(({ name, purchase }) => ({ kind: purchase.kind, name, purchase }));
 
 const priceOf = (purchase: Purchase) => purchasePrice(data, owned, purchase) ?? cents(0);
 const withBank = (bank: number): SaveDocument => ({ ...newPlayerSave, bankCents: cents(bank) });

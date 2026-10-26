@@ -113,13 +113,12 @@ export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// The dogs still for sale, cheapest first with ties in data order, each with its size and
-// hearts: a bought dog leaves the list. Its price shows on the row's plate.
+// Every dog, cheapest first by list price with ties in data order, owned ones in place as
+// gearRows lists gear, each with its size and hearts. A starting dog lists at no cost, so it
+// leads. A dog for sale shows its price on the row's plate.
 export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
-  const sold = (Object.keys(data.dogs) as DogId[]).filter(
-    (dog) => data.dogs[dog].unlock === "shop" && !owned.dogs.includes(dog),
-  );
-  return cheapestFirst((dog) => unlockPrice(data.tuning, data.dogs[dog]), sold).map((dog) => {
+  const dogs = Object.keys(data.dogs) as DogId[];
+  return cheapestFirst((dog) => unlockPrice(data.tuning, data.dogs[dog]), dogs).map((dog) => {
     const purchase: Purchase = { dog, kind: "dog" };
     return {
       blocked: null,
