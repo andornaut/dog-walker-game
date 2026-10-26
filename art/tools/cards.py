@@ -108,8 +108,11 @@ def card_cost():
 # ---------- illustration helpers ----------
 
 class Art(sn.Scene):
-    def __init__(self):
+    def __init__(self, clear=False):
+        """clear leaves the ground transparent, for a pop-up that floats over the road."""
         super().__init__(AW, AH)
+        if clear:
+            self.img = Image.new("RGBA", (AW, AH), (0, 0, 0, 0))
 
     def ground(self, zone, x0=122):
         self.shade, self.leash_col = sn.ZONES[zone]["shadow"], sn.ZONES[zone]["leash"]
@@ -309,16 +312,14 @@ def found_wallet():
 
 
 def wallet_keep():
-    """The found wallet, big and alone on the sidewalk, with a glint: a lucky find shows the thing found."""
-    a = Art()
-    a.ground("homeStretch")
-    w = found_wallet()
-    img = to_image(w.outlined())
+    """The found wallet, big and alone with a glint, cut out to float over the road: a lucky find shows the
+    thing found."""
+    a = Art(clear=True)
+    img = to_image(found_wallet().outlined())
     x, y = (AW - img.width) // 2, AH - img.height - 6
-    a.shadow(x + img.width // 2, y + img.height, img.width - 4)
     a.paste(img, x, y)
-    a.sparkle(x + img.width - 2, y + 3)
-    a.sparkle(x + 2, y + 8)
+    a.sparkle(x + img.width - 2, y + 3, "yellow")
+    a.sparkle(x + 2, y + 8, "yellow")
     return a
 
 
@@ -326,15 +327,13 @@ def neighbour_take():
     """The friendly neighbour crouched beside a pack dog, reaching up to pat it on the head between its
     ears, hearts rising from the dog. Her road sprite's lowered forearm is cut away and her arm drawn
     raised instead: a mauve sleeve shaded purple in a plum outline, her hand on the dog's crown. Her
-    floating heart sits above the art window, so it is left out here."""
-    a = Art()
-    a.grass()
-    a.put("dog-biscuit", "idle", 49, 57)
+    floating heart sits above the art window, so it is left out here. Cut out to float over the road."""
+    a = Art(clear=True)
+    a.put("dog-biscuit", "idle", 49, 57, shadow=False)
     her = sn.frame("petting-neighbor", "wave", 1)
     her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
     top = 66 - her.height
     her.paste((0, 0, 0, 0), (35, 30 - top, her.width, her.height))
-    a.shadow(22, 66, her.width)
     a.paste(her, -2, top)
     # the sleeve: the upper arm out from her shoulder to the elbow, the forearm up to the dog's crown
     joints = [(31, 31), (37, 29), (44, 21)]

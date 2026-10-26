@@ -180,7 +180,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`); sprites wit
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`      | Tap-to-enlarge view                                                       |
 | `card-zone-<zone>`            | image  | 75×56   |                      | A fork's path card: the zone's road to a cross street, its scenery beyond |
 
-Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-petting-neighbor-take`, her patting a pack dog on the head under rising hearts, is its popup art.
+Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-petting-neighbor-take`, her patting a pack dog on the head under rising hearts, is its popup art. Both lucky popups (`card-lost-wallet-keep` too) are cut out on transparency, with no background.
 
 ## Screens and home
 
