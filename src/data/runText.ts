@@ -52,7 +52,7 @@ export const RUN_TEXT = {
   lowHearts: "{owner} has 1♥ left!",
   newWalker: {
     button: "Welcome!",
-    info: "{agility} · {perk}",
+    info: "{agility} lane changes · {perk}",
     subtitle: "{walker} joins you!",
     title: "New walker!",
   },

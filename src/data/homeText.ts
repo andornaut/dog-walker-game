@@ -32,7 +32,7 @@ export const HOME_TEXT = {
     gearSubtitle: "Gear",
     priceBuy: "Price {price}, tap to buy",
     priceLocked: "Price {price}, save up for it",
-    walkerAgility: "Agility: {agility}",
+    walkerAgility: "Lane changes: {agility}",
     walkerPerk: "{perk}: {effect}",
     walkerStatus: "Your walker",
     walkerSubtitle: "Walker",
@@ -49,7 +49,7 @@ export const HOME_TEXT = {
     nothing: "Nothing",
     skipOption: "one free card skip each neighborhood",
     stats: {
-      agility: "agility",
+      agility: "lane change speed",
       bumpHearts: "♥ lost to a bump",
       debuffSeconds: "debuff time",
       forgivenHearts: "first ♥ lost each neighborhood forgiven",
@@ -110,6 +110,6 @@ export const HOME_TEXT = {
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",
-  walkerInfo: "{walker}: {agility}, {perk}.",
+  walkerInfo: "{walker}: {agility} lane changes, {perk}.",
   walkerLocked: "Finish {zone} to unlock.",
 } as const satisfies HomeText;
