@@ -116,7 +116,13 @@ export function spawnRowDistances(minSpacing: number, zoneLength: number): numbe
 // The rows a zone's spawns stand on: spawnRowDistances, or with firstContactSeconds, the same grid
 // reaching back up the road to the last row that meets the pack, at sightLength, no sooner than
 // firstContactSeconds after the zone starts, so the zone's end is as before.
-function zoneRows(plan: SpawnPlan<string>, spacing: number): number[] {
+export function zoneRows(
+  plan: Pick<
+    SpawnPlan<string>,
+    "firstContactSeconds" | "scrollSpeed" | "sightLength" | "zoneLength"
+  >,
+  spacing: number,
+): number[] {
   const rows = spawnRowDistances(spacing, plan.zoneLength);
   if (plan.firstContactSeconds === undefined) {
     return rows;
@@ -890,15 +896,24 @@ export function planSpawns<Kind extends string>(
       .forEach(({ i, quota }) => placeOne(quota, i));
   };
   // The ith of a quota's spawns, in the ith of its count's equal stretches of the zone. A plain
-  // lane-blocking one with no room is kept for a quiet stretch.
+  // lane-blocking one with no room is kept for a quiet stretch. In a zone whose rows start on the
+  // road in view, a lane-blocking one first in its stretch takes the zone's first row while that
+  // row comes on screen quiet and it fits there, before a spawn placed later on steers across it.
   const placeOne = (quota: SpawnQuota<Kind>, i: number) => {
     const footprint = quota.footprint ?? SINGLE_CELL;
-    const stretch = freeCells(
-      quota,
-      footprint,
-      Math.floor((i * rows.length) / quota.count),
-      Math.floor(((i + 1) * rows.length) / quota.count),
-    );
+    const opening =
+      plan.firstContactSeconds !== undefined && quota.blocksLane && i === 0 && inView()[0] === 0
+        ? freeCells(quota, footprint, 0, 1)
+        : [];
+    const stretch =
+      opening.length > 0
+        ? opening
+        : freeCells(
+            quota,
+            footprint,
+            Math.floor((i * rows.length) / quota.count),
+            Math.floor(((i + 1) * rows.length) / quota.count),
+          );
     const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
     if (cells.length === 0) {
       if (quota.blocksLane && quota.first !== true) {

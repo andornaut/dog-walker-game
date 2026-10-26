@@ -390,6 +390,15 @@ export function minorObstacleWeights(
   return positiveWeights(currentZone(data, run).weights.minorObstacles);
 }
 
+// The walk's first zone starts with spawns on the road in view, the first meeting the pack no
+// sooner than this long in; later zones start with their own spawns still to come into view.
+export function firstContactSeconds(
+  data: Pick<GameData, "tuning">,
+  run: Pick<RunState, "zoneIndex">,
+): number | undefined {
+  return run.zoneIndex === 0 ? read(data.tuning, "seconds", "firstZoneContact") : undefined;
+}
+
 // Every zone is the distance the base speed covers in zoneAtBaseSpeed.
 export function zoneLength(data: Pick<GameData, "tuning">): Pixels {
   return pixels(
@@ -703,13 +712,11 @@ export function planZone(
                 }),
           },
     );
+  const firstContact = firstContactSeconds(data, run);
   const plan = {
     cellInset: plannedCellInset(data, geometry),
     cellLength: geometry.cell.length,
-    // The walk's first zone starts with spawns on the road in view.
-    ...(run.zoneIndex === 0
-      ? { firstContactSeconds: read(data.tuning, "seconds", "firstZoneContact") }
-      : {}),
+    ...(firstContact === undefined ? {} : { firstContactSeconds: firstContact }),
     laneCount: geometry.laneCount,
     laneInset: geometry.cell.inset,
     // The slowest pack's lane move sets the row spacing, so every pack fits every gap.

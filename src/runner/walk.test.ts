@@ -43,7 +43,7 @@ import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { mapPack, packDogs } from "../state/pack";
-import { type ModifierSource, newRun, type PackDogs } from "../state/runState";
+import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
@@ -92,10 +92,12 @@ import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "./movers";
 import { shyOutcomes } from "./shy";
+import { zoneRows } from "./spawning";
 import {
   blocksLane,
   collectTip,
   finishZone,
+  firstContactSeconds,
   footprintOf,
   headHome,
   itemCategory,
@@ -134,21 +136,26 @@ function firstInView(mover: MoverPath): number {
 // view in them, the zone's first and last rows included. A row comes on screen at its distance,
 // where a standing spawn on it does, and is overlapped by an obstacle whose contact with the
 // pack meets the row's window; a mover counts there once it is in view as the row comes on. The
-// rows are spacing apart, from spacing on, or from the first standing spawn's row where the zone
-// starts with them on the road, ending a spacing before the zone's end. A mover's contact gets a
-// pixel either way, so a rounding error at its edges never decides a row.
+// rows are the zone's own (zoneRows), spacing apart, reaching back onto the road in view where the
+// zone starts with spawns there, and ending a spacing before the zone's end. A mover's contact
+// gets a pixel either way, so a rounding error at its edges never decides a row.
 function quietRuns(
   tuned: Real,
   road: RoadGeometry,
+  zoned: RunState,
   zone: ZoneId,
   pending: Walk["road"]["pending"],
 ): number[] {
-  const standing = pending.flatMap((e) => (e.mover === undefined ? [e.distance] : []));
-  const spacing = gcdOf(standing);
-  const first = Math.round(Math.min(spacing, ...standing) / spacing);
-  const rows = Array.from(
-    { length: Math.floor(zoneLength(tuned) / spacing) - first },
-    (_, i) => (i + first) * spacing,
+  const spacing = gcdOf(pending.flatMap((e) => (e.mover === undefined ? [e.distance] : [])));
+  const contact = firstContactSeconds(tuned, zoned);
+  const rows = zoneRows(
+    {
+      ...(contact === undefined ? {} : { firstContactSeconds: contact }),
+      scrollSpeed: walkScrollSpeed(tuned, zoned),
+      sightLength: road.sightLength,
+      zoneLength: zoneLength(tuned),
+    },
+    spacing,
   );
   const window = road.cell.length - 2 * plannedCellInset(tuned, road) + road.tallestPackBand;
   const shows = pending
@@ -294,8 +301,8 @@ describe("planZone", { timeout: 60_000 }, () => {
         ...REAL,
         tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: Number.POSITIVE_INFINITY } },
       };
-      const overCap = (zone: ZoneId, pending: Walk["road"]["pending"]) =>
-        quietRuns(REAL, GAME_ROAD, zone, pending).reduce(
+      const overCap = (zoned: RunState, zone: ZoneId, pending: Walk["road"]["pending"]) =>
+        quietRuns(REAL, GAME_ROAD, zoned, zone, pending).reduce(
           (sum, run) => sum + Math.max(0, run - cap),
           0,
         );
@@ -317,8 +324,8 @@ describe("planZone", { timeout: 60_000 }, () => {
             const placed = capped.pending.filter((event) => event.kind === kind).length;
             expect(placed, `${label}: ${kind}`).toBeLessThanOrEqual(planned);
           }
-          const over = overCap(zone, capped.pending);
-          const plainOver = overCap(zone, plain);
+          const over = overCap(walk.run, zone, capped.pending);
+          const plainOver = overCap(walk.run, zone, plain);
           expect(over, label).toBeLessThanOrEqual(plainOver);
           cappedOver += over;
           uncappedOver += plainOver;
