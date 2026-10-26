@@ -5,7 +5,6 @@ import type { RunText } from "./types";
 export const RUN_TEXT = {
   card: {
     fires: "Fires {owners}",
-    forkFees: "Pay ×{fees}",
     forkSubtitle: "Each path brings an upgrade",
     forkTitle: "Which way?",
     free: "FREE",
@@ -38,13 +37,11 @@ export const RUN_TEXT = {
   fired: "FIRED!",
   firedBy: "{owner} fired you!",
   forgiven: "♥ Oopsie! All good",
-  fullPackHome: "Pack bonus! +{amount}",
+  fullPackHome: "Full walk bonus! +{amount}",
   homeQuestion: {
     headHome: "Head home",
     keepWalking: "Keep walking",
     lose: "You give up {fees} in pay for {zone}.",
-    loseBonus: "You give up the Pack bonus.",
-    loseWithBonus: "You give up {fees} in pay for {zone} and the Pack bonus.",
     title: "Head home?",
     zonesLeft: "Neighborhoods left: {count}",
   },
@@ -73,7 +70,7 @@ export const RUN_TEXT = {
     dodge: "{dog} dodged the {obstacle}!",
     effectStart: "{name}: {effect}",
     fired: "{owner} fired you! {dog} heads home.",
-    fullPackHome: "Pack bonus! +{amount}",
+    fullPackHome: "Full walk bonus! +{amount}",
     heavyDog: "{dog} is heavy: lane changes −{speed}.",
     kindWords: "Second chance! {owner} lets it go.",
     lowHearts: "{owner} has 1♥ left!",

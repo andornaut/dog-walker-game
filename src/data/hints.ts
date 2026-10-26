@@ -16,7 +16,7 @@ export const HINTS = {
     trigger: { kind: "firedOwner" },
   },
   fork: {
-    text: "Pick a path. Harder ones pay more.",
+    text: "Pick a path: each brings an upgrade.",
     trigger: { kind: "fork" },
   },
   homeButton: {
