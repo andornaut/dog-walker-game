@@ -11,6 +11,7 @@ import {
   hitLength,
   type LaneReach,
   laneReach,
+  moverMayTake,
   moverRests,
   packFitsBetween,
   packGap,
@@ -906,6 +907,30 @@ describe("everyLaneReaches", () => {
       expect(everyLaneReaches(reach, laneMask(from), laneMask(to), clear)).toBe(reaches);
     }
   });
+});
+
+// A dart may set off over cells other spawns hold, and a rider pass over cells only darts hold;
+// no other mover takes a cell anything holds, and nothing but a dart takes one a dart holds
+// alongside another spawn.
+describe("moverMayTake", () => {
+  it.each([
+    { byDarts: false, byOthers: false, motion: "cross", takes: true },
+    { byDarts: false, byOthers: true, motion: "cross", takes: true },
+    { byDarts: true, byOthers: false, motion: "cross", takes: false },
+    { byDarts: false, byOthers: false, motion: "ride", takes: true },
+    { byDarts: true, byOthers: false, motion: "ride", takes: true },
+    { byDarts: false, byOthers: true, motion: "ride", takes: false },
+    { byDarts: true, byOthers: true, motion: "ride", takes: false },
+    { byDarts: false, byOthers: false, motion: "steps", takes: true },
+    { byDarts: true, byOthers: false, motion: "steps", takes: false },
+    { byDarts: false, byOthers: true, motion: "approach", takes: false },
+    { byDarts: true, byOthers: false, motion: "shy", takes: false },
+  ] as const)(
+    "lets a $motion mover take a cell held by darts $byDarts, by others $byOthers: $takes",
+    ({ byDarts, byOthers, motion, takes }) => {
+      expect(moverMayTake(motion, byDarts, byOthers)).toBe(takes);
+    },
+  );
 });
 
 describe("takeDueSpawns", () => {

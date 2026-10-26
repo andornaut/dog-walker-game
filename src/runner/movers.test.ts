@@ -1414,8 +1414,8 @@ describe("placeMovers", () => {
         },
         // Every lane equally clear, so start lanes are drawn evenly.
         clearRun: () => 1,
-        isFree: (dart: boolean, lane: number, row: number) =>
-          !(dart ? darts : taken).has(`${lane},${row}`),
+        isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
+          !(motion === "cross" ? darts : taken).has(`${lane},${row}`),
         leavesRoom: () => true,
         occupy: () => undefined,
         packFits: () => true,

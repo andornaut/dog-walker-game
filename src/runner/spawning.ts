@@ -337,6 +337,24 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
   return { lastGap, lastRow };
 }
 
+// Whether a mover of a motion may take a cell, held by darts or by other spawns or by none: a
+// dart one no dart holds, as it may set off over or past cells other spawns hold; a rider one only
+// darts hold, as it may pass where a dart crosses; any other mover one nothing holds.
+export function moverMayTake(
+  motion: MoverPath["motion"],
+  heldByDarts: boolean,
+  heldByOthers: boolean,
+): boolean {
+  switch (motion) {
+    case "cross":
+      return !heldByDarts;
+    case "ride":
+      return !heldByOthers;
+    default:
+      return !heldByDarts && !heldByOthers;
+  }
+}
+
 // A spot where a mover may end a move and stand: the distance a spawn level with it has, and its
 // leftmost lane.
 export interface MoverRest {
@@ -393,8 +411,10 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
 // then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
 // dart may set off over cells the spawns placed before it hold, crossing over or past them, but
-// not with a lane-blocking spawn in its lead-in row. Nothing placed after a mover takes its cells,
-// another dart included, but a lane-blocking standing spawn: one outside a dart's lead-in row,
+// not with a lane-blocking spawn in its lead-in row, and a rider may pass over cells only darts
+// hold (moverMayTake); no mover blocks a lane in a dart's lead-in row. Nothing else placed after
+// a mover takes its cells, another dart included, but a lane-blocking standing spawn: one outside
+// a dart's lead-in row,
 // which the dart then crosses over or past the same way, and one whose hit box shares no road with
 // any other mover's body, the road that mover's hit box covers at some moment on screen, so the
 // two never meet; a mover other than a dart holds every row its blocking and its path touch, which
@@ -438,6 +458,8 @@ export function planSpawns<Kind extends string>(
   const dartHeld = new Int32Array(rows.length);
   // Lanes a mover holds, a dart or any other: lifting a standing spawn never frees them.
   const moverHeld = new Int32Array(rows.length);
+  // Lanes a mover other than a dart holds, which no rider takes.
+  const otherMoverHeld = new Int32Array(rows.length);
   // Lanes taken by a standing spawn: a lane-blocking standing spawn may take a cell a mover
   // holds where no mover's body comes (clearOfMovers), and a dart then sets off over or past it.
   const heldByStanding = new Int32Array(rows.length);
@@ -745,6 +767,12 @@ export function planSpawns<Kind extends string>(
       if (leadIn && (row < 2 || !isEmpty(row - 1))) {
         return false;
       }
+      // No mover blocks a lane in a dart's lead-in row, which the pack steers across.
+      for (let blockedRow = row; blockedRow < row + rowsBlocked; blockedRow++) {
+        if (leadIns.has(blockedRow)) {
+          return false;
+        }
+      }
       if (leadIn) {
         leadIns.add(row - 1);
       }
@@ -759,8 +787,14 @@ export function planSpawns<Kind extends string>(
       return ok;
     },
     clearRun,
-    isFree: (dart: boolean, lane: number, row: number) =>
-      (((dart ? dartHeld : taken)[row] ?? 0) & laneRun(lane, 1)) === 0,
+    isFree: (motion: MoverPath["motion"], lane: number, row: number) => {
+      const cell = laneRun(lane, 1);
+      return moverMayTake(
+        motion,
+        ((dartHeld[row] ?? 0) & cell) !== 0,
+        (((heldByStanding[row] ?? 0) | (otherMoverHeld[row] ?? 0)) & cell) !== 0,
+      );
+    },
     // Only the cells not yet taken use up room: a dart may set off over taken ones.
     leavesRoom: (cells: readonly Cell[]) =>
       leavesRoom(
@@ -783,6 +817,8 @@ export function planSpawns<Kind extends string>(
         moverHeld[row] = (moverHeld[row] ?? 0) | laneRun(lane, 1);
         if (dart) {
           dartHeld[row] = (dartHeld[row] ?? 0) | laneRun(lane, 1);
+        } else {
+          otherMoverHeld[row] = (otherMoverHeld[row] ?? 0) | laneRun(lane, 1);
         }
       }
     },
