@@ -1,9 +1,12 @@
 import { itemAt } from "../lib/arrays";
 import { randomPick } from "../lib/random";
+import { approachOutcomes } from "./approach";
 import {
+  hasLeftRoad,
   type LaneSpan,
   type MoverCaps,
   type MoverPath,
+  moverPlace,
   type MoverSpec,
   type MoverStand,
   type OnScreen,
@@ -43,13 +46,15 @@ export interface SpawnQuota<Kind extends string> {
 // walk's step, set how far the pack can steer between rows. sightLength is the road in view above
 // the pack, so the next row shows before the pack has to steer for it, and roadLength the whole
 // road in view. reactionSeconds is the time the pack is given to react on top of the lane moves it
-// makes between two spawns.
+// makes between two spawns. maxEmptyRows is the most rows in a row that may come on screen with no
+// lane-blocking spawn in view in them.
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
   laneCount: number;
   laneInset: number;
   laneMoveSeconds: number;
+  maxEmptyRows: number;
   minOpenLanes: number;
   minSpacing: number;
   moverCaps: MoverCaps;
@@ -103,6 +108,10 @@ export function hitLength(geometry: Pick<Geometry, "cellInset" | "cellLength">, 
 export function blockingLength(geometry: Geometry, rows: number): number {
   return hitLength(geometry, rows) + geometry.packLength;
 }
+
+// How many road lengths of scroll after its cue a mover's contact with the pack is looked for in:
+// enough for the slowest rider to reach the pack.
+const SCAN_ROADS = 4;
 
 // A rounding error in counting steps and moves.
 const ROUNDING = 1e-9;
@@ -317,7 +326,12 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // free cells than there are one-cell spawns. A free cell can still be one no lane-blocking spawn
 // may take, where the path rule or the pack-fit gap around the movers rules it out, so a one-cell
 // spawn with no room left is skipped too, the same way: a zone never fails to plan for want of
-// room.
+// room. Once the lane-blocking spawns are placed, and before the moving prizes and the other
+// spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking spawn in
+// view, the zone's first and last rows included, gets one of the zone's own plain standing
+// spawns: one skipped for want of room, or else one moved from the busiest stretch, placed under
+// every rule above, so long as each move leaves fewer such rows in all. A run no spawn can take
+// under them, such as one held clear for a dart's lead-in or for a mover's path, stays.
 export function planSpawns<Kind extends string>(
   streams: PlannerStreams,
   plan: SpawnPlan<Kind>,
@@ -428,6 +442,31 @@ export function planSpawns<Kind extends string>(
     return crosses || (isEmpty(row) && crossesEmpty(row));
   };
 
+  // Checks every transition from the row before first up to last, and from the empty rows after
+  // it, as a block over those rows changes them.
+  const crossesAround = (first: number, last: number): boolean => {
+    const lastCrossing = leadIns.has(last + 1) ? last + 1 : last;
+    let ok = true;
+    for (let row = first - 1; ok && row <= lastCrossing; row++) {
+      ok = crossesFrom(row);
+    }
+    // The empty rows after it now steer from it.
+    for (let row = lastCrossing + 1; ok && row < rows.length - 1 && isEmpty(row); row++) {
+      ok = crossesFrom(row);
+    }
+    return ok;
+  };
+
+  // Every block kept: its first row, the last row whose window and the last whose gap it
+  // overlaps, and its lanes.
+  interface Block {
+    covered: number;
+    lastGap: number;
+    lastRow: number;
+    row: number;
+  }
+  const blocks: Block[] = [];
+
   // Blocks the footprint's lanes, checks every transition it touches, and undoes the block
   // unless keep is set and the checks pass.
   const tryBlock = (cell: Cell, footprint: Footprint, keep: boolean): boolean => {
@@ -455,14 +494,7 @@ export function planSpawns<Kind extends string>(
     for (let row = cell.row; ok && row <= lastGap; row++) {
       ok = laneCount - laneTotal(gapBlocked[row] ?? 0) >= minOpenLanes;
     }
-    const lastCrossing = leadIns.has(lastRow + 1) ? lastRow + 1 : lastRow;
-    for (let row = cell.row - 1; ok && row <= lastCrossing; row++) {
-      ok = crossesFrom(row);
-    }
-    // The empty rows after it now steer from it.
-    for (let row = lastCrossing + 1; ok && row < rows.length - 1 && isEmpty(row); row++) {
-      ok = crossesFrom(row);
-    }
+    ok = ok && crossesAround(cell.row, lastRow);
     if (ok && footprint.lanes * footprint.rows === 1) {
       ok = relied.every((row) => steerRows[row] === 1);
     }
@@ -470,6 +502,7 @@ export function planSpawns<Kind extends string>(
       relied.forEach((row) => {
         steerRows[row] = 1;
       });
+      blocks.push({ covered, lastGap, lastRow, row: cell.row });
     }
     if (!ok || !keep) {
       for (let row = cell.row; row <= lastRow; row++) {
@@ -622,6 +655,10 @@ export function planSpawns<Kind extends string>(
       quotas,
     );
     events.push(...spawns);
+    for (const { distance, kind, mover } of spawns) {
+      const quota = quotas.find((other) => other.kind === kind);
+      markInView(distance, mover, quota?.spec.footprint ?? SINGLE_CELL);
+    }
     return first ? stilledQuotas(true, quotas, dropped) : [];
   };
   // A moving prize keeps its cells clear of other spawns, and nothing else: it blocks no lane,
@@ -666,7 +703,8 @@ export function planSpawns<Kind extends string>(
       .sort((a, b) => a.middle - b.middle || a.order - b.order)
       .forEach(({ i, quota }) => placeOne(quota, i));
   };
-  // The ith of a quota's spawns, in the ith of its count's equal stretches of the zone.
+  // The ith of a quota's spawns, in the ith of its count's equal stretches of the zone. A plain
+  // lane-blocking one with no room is kept for a quiet stretch.
   const placeOne = (quota: SpawnQuota<Kind>, i: number) => {
     const footprint = quota.footprint ?? SINGLE_CELL;
     const stretch = freeCells(
@@ -677,35 +715,265 @@ export function planSpawns<Kind extends string>(
     );
     const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
     if (cells.length === 0) {
+      if (quota.blocksLane && quota.first !== true) {
+        unplaced.push(quota);
+      }
       return;
     }
-    const cell = randomPick(streams.spawns, cells);
+    placeAt(quota, randomPick(streams.spawns, cells));
+  };
+  // Places a spawn on a cell that fits it. A one-cell spawn of the plan's own takes the cell kept
+  // for it.
+  const placeAt = (quota: SpawnQuota<Kind>, cell: Cell) => {
+    const footprint = quota.footprint ?? SINGLE_CELL;
+    const lastRow = lastRowTaken(cell, footprint, quota.blocksLane);
     const covered = laneRun(cell.lane, footprint.lanes);
-    for (let row = cell.row; row <= lastRowTaken(cell, footprint, quota.blocksLane); row++) {
+    for (let row = cell.row; row <= lastRow; row++) {
       takeCells(row, covered);
       heldByOther[row] = (heldByOther[row] ?? 0) | covered;
     }
+    const event = { distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane };
     if (quota.blocksLane) {
       if (footprint.lanes >= WIDE_LANES) {
-        wideRows.fill(1, cell.row, lastRowTaken(cell, footprint, true) + 1);
+        wideRows.fill(1, cell.row, lastRow + 1);
       }
       tryBlock(cell, footprint, true);
-      placed.push({
+      const place = {
         distance: itemAt(rows, cell.row),
         lane: cell.lane,
         lanes: footprint.lanes,
         length: hitLength(plan, footprint.rows),
-      });
+      };
+      placed.push(place);
+      standing.push({ block: itemAt(blocks, blocks.length - 1), cell, event, place, quota });
     }
-    events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
-    // A one-cell spawn takes the cell kept for it.
+    events.push(event);
     if (statics.includes(quota) && area(quota) === 1) {
       reserved -= 1;
     }
   };
+
+  // The lane-blocking standing spawns placed, each with its block, cell, spawn and place for the
+  // pack-fit gap; and the plain ones that found no room.
+  interface Standing {
+    block: Block;
+    cell: Cell;
+    event: SpawnEvent<Kind>;
+    place: BlockingPlace;
+    quota: SpawnQuota<Kind>;
+  }
+  const standing: Standing[] = [];
+  const unplaced: SpawnQuota<Kind>[] = [];
+  // The rows that come on screen with a lane-blocking mover in view: of the rows whose windows
+  // the mover meets the pack in, on its path or any its stalking may take, those that come on
+  // screen once it shows, its cue or body at or below the road's top and not off its side. A row
+  // comes on screen at its distance, as a standing spawn on it does, and a mover meets the pack
+  // at its distance from its cue less sightLength, as the pixel of scroll it first overlaps it.
+  const moverInView = new Uint8Array(rows.length);
+  const window = blockingLength(plan, 1);
+  const markInView = (cue: number, path: MoverPath, footprint: Footprint) => {
+    const reach = blockingLength(plan, footprint.rows);
+    const inset = plan.laneInset / plan.cellLength;
+    const onRoad = (lanePosition: number) =>
+      Math.ceil(lanePosition + footprint.lanes - inset) - 1 >= 0 &&
+      Math.floor(lanePosition - 1 + inset) + 1 <= laneCount - 1;
+    let shows = -1;
+    let [start, end] = [Infinity, -Infinity];
+    const paths = path.motion === "approach" ? approachOutcomes(path) : [path];
+    for (const way of paths) {
+      for (let since = 0; since < SCAN_ROADS * plan.roadLength; since++) {
+        const place = moverPlace(laneCount, way, since);
+        if (shows < 0 && place.travel >= 0 && !hasLeftRoad(laneCount, place)) {
+          shows = since;
+        }
+        const meets =
+          place.solid &&
+          place.travel >= plan.sightLength &&
+          place.travel < plan.sightLength + reach &&
+          onRoad(place.lanePosition);
+        if (meets) {
+          start = Math.min(start, cue + since - plan.sightLength);
+          end = Math.max(end, cue + since + 1 - plan.sightLength);
+        }
+      }
+    }
+    rows.forEach((distance, row) => {
+      if (shows >= 0 && distance >= cue + shows && start < distance + window && end > distance) {
+        moverInView[row] = 1;
+      }
+    });
+  };
+  // Whether each row comes on screen with a lane-blocking spawn in view: a mover marked in view,
+  // or a standing spawn, in view from the moment its first row comes on.
+  const inView = (): Uint8Array => {
+    const filled = Uint8Array.from(moverInView);
+    for (const { block } of standing) {
+      filled.fill(1, block.row, block.lastRow + 1);
+    }
+    return filled;
+  };
+  interface Run {
+    first: number;
+    last: number;
+  }
+  // The runs of more than maxEmptyRows rows that come on screen with nothing lane-blocking in
+  // view, and how many rows they run over it in all.
+  const quietRuns = (): { over: number; runs: Run[] } => {
+    const filled = inView();
+    const runs: Run[] = [];
+    let over = 0;
+    let first = 0;
+    for (let row = 0; row <= rows.length; row++) {
+      if (row < rows.length && filled[row] === 0) {
+        continue;
+      }
+      if (row - first > plan.maxEmptyRows) {
+        runs.push({ first, last: row - 1 });
+        over += row - first - plan.maxEmptyRows;
+      }
+      first = row + 1;
+    }
+    return { over, runs };
+  };
+
+  // Recomputes the lanes blocked in the windows and gaps of rows first to last from the blocks
+  // kept.
+  const reblock = (first: number, last: number) => {
+    blocked.fill(0, first, last + 1);
+    gapBlocked.fill(0, first, last + 1);
+    for (const block of blocks) {
+      for (let row = Math.max(first, block.row); row <= Math.min(last, block.lastRow); row++) {
+        blocked[row] = (blocked[row] ?? 0) | block.covered;
+      }
+      for (let row = Math.max(first, block.row); row <= Math.min(last, block.lastGap); row++) {
+        gapBlocked[row] = (gapBlocked[row] ?? 0) | block.covered;
+      }
+    }
+  };
+  const without = <Item>(items: Item[], item: Item) => {
+    items.splice(items.indexOf(item), 1);
+  };
+  // Takes a standing spawn off the road, freeing its cells but those a dart holds, and checks
+  // every transition it touched. The rows its path relied on stay clear.
+  const lift = (lifted: Standing): boolean => {
+    const { block, cell, event, place, quota } = lifted;
+    const footprint = quota.footprint ?? SINGLE_CELL;
+    const covered = laneRun(cell.lane, footprint.lanes);
+    for (let row = cell.row; row <= block.lastRow; row++) {
+      heldByOther[row] = (heldByOther[row] ?? 0) & ~covered;
+      const freed = covered & (taken[row] ?? 0) & ~(dartHeld[row] ?? 0);
+      taken[row] = (taken[row] ?? 0) & ~freed;
+      cellsLeft += laneTotal(freed);
+    }
+    if (footprint.lanes >= WIDE_LANES) {
+      wideRows.fill(0, cell.row, block.lastRow + 1);
+    }
+    without(blocks, block);
+    reblock(block.row, Math.max(block.lastRow, block.lastGap));
+    without(placed, place);
+    without(events, event);
+    without(standing, lifted);
+    relied = [];
+    return crossesAround(block.row, block.lastRow);
+  };
+  // Saves what a move changes, and returns what puts it back.
+  const save = (): (() => void) => {
+    const arrays = [taken, heldByOther, blocked, gapBlocked, wideRows, steerRows];
+    const arrayCopies = arrays.map((array) => array.slice());
+    const copies = { blocks: [...blocks], events: [...events], placed: [...placed] };
+    const standingCopy = [...standing];
+    const counts = { cellsLeft, reserved };
+    return () => {
+      arrays.forEach((array, i) => {
+        array.set(itemAt(arrayCopies, i));
+      });
+      blocks.splice(0, blocks.length, ...copies.blocks);
+      events.splice(0, events.length, ...copies.events);
+      placed.splice(0, placed.length, ...copies.placed);
+      standing.splice(0, standing.length, ...standingCopy);
+      ({ cellsLeft, reserved } = counts);
+    };
+  };
+
+  // The cells of a quiet run a spawn fits, in the rows that leave no more than maxEmptyRows quiet
+  // on either side of it, or else in any of its rows.
+  const cellsIn = (quota: SpawnQuota<Kind>, run: Run): Cell[] => {
+    const footprint = quota.footprint ?? SINGLE_CELL;
+    const cells = freeCells(quota, footprint, run.first, run.last + 1);
+    const splits = cells.filter(
+      (cell) =>
+        cell.row - run.first <= plan.maxEmptyRows &&
+        run.last - lastRowTaken(cell, footprint, true) <= plan.maxEmptyRows,
+    );
+    return splits.length > 0 ? splits : cells;
+  };
+  // How many rows within maxEmptyRows of a standing spawn come on screen with something else
+  // lane-blocking in view.
+  const busyness = (from: Standing): number => {
+    const undo = save();
+    lift(from);
+    const filled = inView();
+    undo();
+    const first = Math.max(0, from.block.row - plan.maxEmptyRows);
+    const last = Math.min(rows.length - 1, from.block.lastRow + plan.maxEmptyRows);
+    return filled.subarray(first, last + 1).reduce((sum, row) => sum + row, 0);
+  };
+  // Fills a quiet run with one of the zone's plain standing spawns: one that found no room, or
+  // else one moved from the busiest stretch, where the most rows near it come on screen with
+  // something else in view; equally busy ones are tried in random order. A move stands only if
+  // it leaves fewer rows quiet over the cap in all, counting any it leaves where the spawn stood,
+  // which a later move may fill.
+  const fillRun = (run: Run, over: number): boolean => {
+    for (const quota of unplaced) {
+      const cells = cellsIn(quota, run);
+      if (cells.length > 0) {
+        without(unplaced, quota);
+        placeAt(quota, randomPick(streams.spawns, cells));
+        return true;
+      }
+    }
+    const ranked = standing
+      .filter(({ quota }) => quota.first !== true)
+      .map((from) => ({ busy: busyness(from), from }));
+    while (ranked.length > 0) {
+      const busiest = Math.max(...ranked.map(({ busy }) => busy));
+      const pick = randomPick(
+        streams.spawns,
+        ranked.filter(({ busy }) => busy === busiest),
+      );
+      without(ranked, pick);
+      const undo = save();
+      const cells = lift(pick.from) ? cellsIn(pick.from.quota, run) : [];
+      if (cells.length > 0) {
+        placeMoved(pick.from.quota, randomPick(streams.spawns, cells));
+        if (quietRuns().over < over) {
+          return true;
+        }
+      }
+      undo();
+    }
+    return false;
+  };
+  // A moved spawn takes a cell like any other, but its kept cell, if it had one, is already used.
+  const placeMoved = (quota: SpawnQuota<Kind>, cell: Cell) => {
+    const kept = reserved;
+    placeAt(quota, cell);
+    reserved = kept;
+  };
+  // Fills the quiet runs over the cap, one spawn at a time, until none left can be filled.
+  const fillQuietRuns = () => {
+    for (;;) {
+      const { over, runs } = quietRuns();
+      if (!runs.some((run) => fillRun(run, over))) {
+        return;
+      }
+    }
+  };
+
   placeStanding((quota) => quota.first === true, placeMoving(true));
   placeMoving(false);
   placeStanding((quota) => quota.first !== true && quota.blocksLane, []);
+  fillQuietRuns();
   placeStanding((quota) => quota.first !== true && !quota.blocksLane, placePrizes());
   return events.sort((a, b) => a.distance - b.distance || a.lane - b.lane);
 }

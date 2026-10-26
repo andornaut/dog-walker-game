@@ -19,6 +19,8 @@ export const TUNING = {
     // At most this many movers are on screen at once, of them at most maxDartMovers darting
     // and maxSlowVehicles in-lane slower than the road.
     maxDartMovers: 6,
+    // At most this many spawn rows in a row come on screen with no lane-blocking obstacle in view.
+    maxEmptyRows: 3,
     maxMovers: 10,
     maxSlowVehicles: 4,
     // Obstacles that open no card, on top of obstaclesFirstZone.

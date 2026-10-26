@@ -30,13 +30,15 @@ type Kind = "bench" | "car" | "cat" | "hedge" | "neighbor" | "obstacle" | "skunk
 
 // 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
-// time for a 0.05s step and 4 moves of 0.1s, so the pack can reach any lane from any row.
+// time for a 0.05s step and 4 moves of 0.1s, so the pack can reach any lane from any row. No cap
+// on rows that come on screen quiet, unless a test sets one.
 const plan: SpawnPlan<Kind> = {
   cellInset: 5,
   cellLength: 30,
   laneCount: 5,
   laneInset: 5,
   laneMoveSeconds: 0.1,
+  maxEmptyRows: Number.POSITIVE_INFINITY,
   minOpenLanes: 1,
   minSpacing: 100,
   moverCaps: { darts: 1, slowVehicles: 1, total: 3 },
@@ -357,6 +359,45 @@ describe("planSpawns", () => {
       expect(open.every((lanes) => lanes.length === 2)).toBe(true);
     }
   });
+
+  // 29 rows, with one-cell obstacles each in view as its row comes on screen: placed one per
+  // stretch at random, some stretches run quiet for longer than the cap, with room to move
+  // obstacles into them.
+  const sparse = (obstacles: number): SpawnPlan<Kind> => ({
+    ...plan,
+    quotas: [
+      { blocksLane: true, count: obstacles, kind: "obstacle" },
+      { blocksLane: false, count: 9, kind: "tip" },
+    ],
+    zoneLength: 3000,
+  });
+  const longestQuiet = (events: SpawnEvent<Kind>[]) => {
+    const filled = new Set(events.filter(blocking).map(({ distance }) => distance));
+    let [longest, run] = [0, 0];
+    for (const row of spawnRowDistances(plan.minSpacing, 3000)) {
+      run = filled.has(row) ? 0 : run + 1;
+      longest = Math.max(longest, run);
+    }
+    return longest;
+  };
+  it.each([
+    { maxEmptyRows: 3, obstacles: 10 },
+    { maxEmptyRows: 4, obstacles: 7 },
+  ])(
+    "moves $obstacles obstacles into every run of more than $maxEmptyRows quiet rows, adding none",
+    ({ maxEmptyRows, obstacles }) => {
+      const uncapped = seeds
+        .slice(0, 10)
+        .map((seed) => planSpawns(plannerStreams(seed), sparse(obstacles)));
+      expect(Math.max(...uncapped.map(longestQuiet))).toBeGreaterThan(maxEmptyRows);
+      for (const seed of seeds.slice(0, 10)) {
+        const events = planSpawns(plannerStreams(seed), { ...sparse(obstacles), maxEmptyRows });
+        expect(longestQuiet(events), `seed ${seed}`).toBeLessThanOrEqual(maxEmptyRows);
+        expect(countOf("obstacle", events)).toBe(obstacles);
+        expect(countOf("tip", events)).toBe(9);
+      }
+    },
+  );
 
   // 9 rows of 5 lanes, each keeping minOpenLanes open.
   it("places as many as fit and skips the rest, given more than fit", () => {

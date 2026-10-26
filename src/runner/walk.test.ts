@@ -359,6 +359,59 @@ const blockingSpans = (
         ? [standingSpan(tuned, road, zone, event)]
         : moverSpans(tuned, road, zone, { ...event, mover: event.mover }),
     );
+// The scroll since its cue at which a mover first shows on the road: its cue or body at or
+// below the road's top, and not yet off its side.
+function firstInView(mover: MoverPath): number {
+  let since = 0;
+  for (; since < MOVER_SCROLL; since++) {
+    const place = moverPlace(LANE_COUNT, mover, since);
+    if (place.travel >= 0 && !hasLeftRoad(LANE_COUNT, place)) {
+      break;
+    }
+  }
+  return since;
+}
+// The lengths of the runs of spawn rows that come on screen with no lane-blocking obstacle in
+// view in them, the zone's first and last rows included. A row comes on screen at its distance,
+// where a standing spawn on it does, and is overlapped by an obstacle whose contact with the
+// pack meets the row's window; a mover counts there once it is in view as the row comes on. The
+// rows are spacing apart, from spacing on, ending a spacing before the zone's end. A mover's
+// contact gets a pixel either way, so a rounding error at its edges never decides a row.
+function quietRuns(
+  tuned: Real,
+  road: RoadGeometry,
+  zone: ZoneId,
+  pending: Walk["road"]["pending"],
+): number[] {
+  const spacing = gcdOf(pending.flatMap((e) => (e.mover === undefined ? [e.distance] : [])));
+  const rows = Array.from(
+    { length: Math.floor(zoneLength(tuned) / spacing) - 1 },
+    (_, i) => (i + 1) * spacing,
+  );
+  const window = road.cell.length - 2 * plannedCellInset(tuned, road) + road.tallestPackBand;
+  const shows = pending
+    .filter((event) => blocksLane(tuned, event.kind))
+    .map((event) => {
+      if (event.mover === undefined) {
+        const { distance, length } = standingSpan(tuned, road, zone, event);
+        return { end: distance + length, from: distance, start: distance };
+      }
+      const { end, start } = moverContact(tuned, road, zone, { ...event, mover: event.mover });
+      return { end: end + 1, from: event.distance + firstInView(event.mover), start: start - 1 };
+    });
+  const runs: number[] = [];
+  let run = 0;
+  for (const row of rows) {
+    const filled = shows.some(
+      ({ end, from, start }) => from <= row && start < row + window && end > row,
+    );
+    if (filled && run > 0) {
+      runs.push(run);
+    }
+    run = filled ? 0 : run + 1;
+  }
+  return run > 0 ? [...runs, run] : runs;
+}
 // The scroll over which a mover is on the game's road: from its cue until it has left the road
 // or passed the bottom.
 function onScreen(distance: number, mover: MoverPath): readonly [number, number] {
@@ -549,6 +602,53 @@ describe("planZone", { timeout: 60_000 }, () => {
         ? [{ position: WORLD.walkLength - 1, zone }]
         : Array.from({ length: WORLD.walkLength - 2 }, (_, i) => ({ position: i + 1, zone })),
   );
+  // Every zone at each walk position, planned with the cap on quiet rows and without it, at the
+  // same seed: the capped plan has the same movers, no more of any kind than the zone planned,
+  // and never more rows quiet over the cap, and across the zones it has fewer.
+  // Two plans a zone, each with every mover's contact scanned, take about 25 s.
+  it(
+    "moves the zone's own fixed obstacles into rows that come on screen quiet over the cap",
+    { timeout: 120_000 },
+    () => {
+      const cap = read(TUNING, "counts", "maxEmptyRows");
+      const uncapped = {
+        ...REAL,
+        tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: Number.POSITIVE_INFINITY } },
+      };
+      const overCap = (zone: ZoneId, pending: Walk["road"]["pending"]) =>
+        quietRuns(REAL, GAME_ROAD, zone, pending).reduce(
+          (sum, run) => sum + Math.max(0, run - cap),
+          0,
+        );
+      const movingObstacles = (pending: Walk["road"]["pending"]) =>
+        pending.filter((event) => event.mover !== undefined && blocksLane(REAL, event.kind));
+      let [cappedOver, uncappedOver] = [0, 0];
+      for (const { position, zone } of POSITIONS) {
+        const walk = { road: startRoad(LANE_COUNT), run: inZone(realRun(REAL), zone, position) };
+        for (const seed of [1, 2]) {
+          const capped = planZone(REAL, GAME_ROAD, plannerStreams(seed), walk).road;
+          const plain = planZone(uncapped, GAME_ROAD, plannerStreams(seed), walk).road.pending;
+          const label = `${zone} at ${position}, seed ${seed}`;
+          expect(movingObstacles(capped.pending), label).toEqual(movingObstacles(plain));
+          // A kind may have several quotas, such as one per stepper.
+          for (const kind of new Set(capped.planned.map((quota) => quota.kind))) {
+            const planned = capped.planned
+              .filter((quota) => quota.kind === kind)
+              .reduce((sum, { count }) => sum + count, 0);
+            const placed = capped.pending.filter((event) => event.kind === kind).length;
+            expect(placed, `${label}: ${kind}`).toBeLessThanOrEqual(planned);
+          }
+          const over = overCap(zone, capped.pending);
+          const plainOver = overCap(zone, plain);
+          expect(over, label).toBeLessThanOrEqual(plainOver);
+          cappedOver += over;
+          uncappedOver += plainOver;
+        }
+      }
+      expect(cappedOver).toBeLessThan(uncappedOver);
+    },
+  );
+
   it("skips no card for a plain obstacle in any zone at any walk position", () => {
     for (const { position, zone } of POSITIONS) {
       const zoned = inZone(realRun(REAL), zone, position);

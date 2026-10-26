@@ -75,6 +75,7 @@ export interface Tuning {
     readonly dartStopLanesMax: number;
     readonly dartStopLanesMin: number;
     readonly maxDartMovers: number;
+    readonly maxEmptyRows: number;
     readonly maxMovers: number;
     readonly maxSlowVehicles: number;
     readonly minorObstaclesFirstZone: number;

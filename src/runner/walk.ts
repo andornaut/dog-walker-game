@@ -682,6 +682,7 @@ export function planZone(
     // The slowest walker's lane move sets the row spacing, so every walker fits every gap:
     // big dogs never slow the pack below it.
     laneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestAgility(data),
+    maxEmptyRows: read(data.tuning, "counts", "maxEmptyRows"),
     minOpenLanes: read(data.tuning, "counts", "openLanesPerRowMin"),
     minSpacing: read(data.tuning, "pixels", "spawnRowSpacing"),
     moverCaps: {
