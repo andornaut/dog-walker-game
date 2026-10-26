@@ -32,6 +32,6 @@ export const SHOP_GEAR = {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],
     name: "Running shoes",
     price: "runningShoes",
-    short: "{percent} faster lane changes",
+    short: "Lane changes +{percent}",
   },
 } as const satisfies Record<string, Gear>;

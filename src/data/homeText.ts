@@ -22,7 +22,7 @@ export const HOME_TEXT = {
   },
   detail: {
     dogFee: "Pay {fee} a neighborhood",
-    dogHeavy: "Heavy: {speed} slower lane changes",
+    dogHeavy: "Heavy: lane changes −{speed}",
     dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
@@ -49,7 +49,7 @@ export const HOME_TEXT = {
     nothing: "Nothing",
     skipOption: "one free card skip each neighborhood",
     stats: {
-      agility: "lane change speed",
+      agility: "lane changes",
       bumpHearts: "♥ lost to a bump",
       debuffSeconds: "debuff time",
       forgivenHearts: "first ♥ lost each neighborhood forgiven",
