@@ -48,6 +48,7 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 
 - A sprite in the Toronto colours carries them after Endesga 32 (and the neutral greys, when it uses them) in its Aseprite palette. UI rims that lighten (`LIGHTER` in `art/tools/ui.py`) step up the Endesga ramps; a Toronto road colour steps up its own ramp, then onto Endesga. `python3 art/tools/pixel.py palette` writes `shared/palette.json`, which the game's dark ramp reads.
 - The neutral greys (`NEUTRAL` in `pixel.py`: nlgrey d8d8d8, ngrey a4a4a4, nslate 727272, ndslate 4a4a4a, ink as their darkest step) are for disabled and locked UI only: Endesga's greys are cool, and disabled UI reads as neutral grey.
+- `deepAmber` (fc9124), outside the house palette and drawn only in code, is the box behind a picked tile's picture only: Endesga's amber sits too close to the tan box of an unpicked one.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
 - Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the light roads in `ROADS` (`pixel.py`: tan, pink and skin2, after the dslate road), and the fill carries the dslate road (the Distillery District's). A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky; `rim` and `LIT` in `art/tools/road.py`) so it holds 3:1 on dslate, Kensington Market's dbrick and Yonge Street's shale. A sprite dark all over, such as Pepe's black coat, takes a grey outline instead. Cabbagetown's grey and The Beaches' cream are lighter than skin2, so `road_edge` holds on them unchanged. A white coat on the road is white, not light grey, its lower-right silhouette one ramp step darker.
@@ -78,6 +79,7 @@ Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the ne
 | darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                            |
 | darkRed on nlgrey              | 5.15  | Price on the short plate                                                                |
 | forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name       |
+| ink on deepAmber               | 7.91  | A picked picture's outline on its box                                                   |
 | ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                     |
 | ink on ngrey                   | 7.23  | The emblem's silhouette on a `locked` badge                                             |
 | ink on nlgrey                  | 12.64 | The goal plate: a walker's name, a blocked slot's price, a disabled card's cost         |
@@ -126,7 +128,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 | disabled | Cannot be chosen now: not owned and short, the pack full, not available       | Flat ngrey face, ink and nslate lines, no lip                               | ndslate (3.56:1, exempt) |
 | primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board) | ink (8.41:1)             |
 
-- Art inside a disabled tile draws from its grey copy in the neutral ramp, each color at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's amber. The padlock keeps its colors, and an affordable item's picture keeps its colors on the tan box an owned one has (see below).
+- Art inside a disabled tile draws from its grey copy in the neutral ramp, each color at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's deepAmber. The padlock keeps its colors, and an affordable item's picture keeps its colors on the tan box an owned one has (see below).
 - An item for sale is owned (no padlock, no plate), affordable (`icon-lock-open` and the green buy plate) or short (`icon-lock` and the nlgrey short plate), told apart by padlock shape and plate, never by color alone. An item not owned draws on a `disabled` tile or row, with its name, on the start screen and in the Pet shop: its portrait or icon in full color while the bank covers it, from its grey copy while short. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
 - The primary green marks a screen's call to action; on the start screen Start walk is the only full-width primary button. `go-disabled` matches `disabled`; `secondary` and `secondary-pressed` match `normal` and `pressed`.
 - Cards follow the same states: a disabled card is redrawn in the grey ramp, the selected one is outlined in amber.
