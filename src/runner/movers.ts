@@ -354,15 +354,27 @@ export interface MoverStand {
 // One way a mover can meet a row. Distances are relative to the row's distance; appears is
 // its spawn. lanes and rows are what it blocks from its row on, as a standing obstacle that
 // size would: every lane it touches while it overlaps the pack, for as long as it can. cells
-// are the row offsets and lanes kept clear of other spawns: those it passes through on the
-// road, and with leadIn, the whole row before its own, so the pack has two rows of road to
-// steer around a sweep of several lanes. stands are each place it stands as an obstacle, by
-// distance from its row. screen is from its cue appearing until it is out of sight. Of the
-// placements that fit in a start lane and row, the planner takes one of the highest rank, 0 when
-// unset.
+// are the row offsets and lanes kept clear of other spawns, but a lane-blocking standing spawn
+// clear of its body: those it passes through on the road, and with leadIn, the whole row before
+// its own, so the pack has two rows of road to steer around a sweep of several lanes. stands are
+// each place it stands as an obstacle, by distance from its row. screen is from its cue
+// appearing until it is out of sight. body is the road its hit box covers at any moment while it
+// is on the road, by distance from its row; a dart has none, as a standing spawn may stand where
+// a dart passes. Of the placements that fit in a start lane and row, the planner takes one of
+// the highest rank, 0 when unset.
 interface BlockCell {
   readonly lane: number;
   readonly row: number;
+}
+
+// The road a mover's hit box covers, in its lanes, from its near end's nearest distance to its
+// far end's farthest. Each distance is where the near edge of a standing spawn's hit box would
+// be level with it, so a standing spawn whose hit box runs from its own distance up the road for
+// its hit length shares no road with the mover when the two spans do not overlap.
+export interface MoverBody {
+  readonly from: number;
+  readonly lanes: LaneSpan;
+  readonly to: number;
 }
 
 // Every cell of rowCount rows from firstRow by laneCount lanes from firstLane, row by row.
@@ -379,6 +391,7 @@ function blockCells(
 
 interface MoverPlacement {
   readonly appears: number;
+  readonly body?: MoverBody;
   readonly cells: readonly BlockCell[];
   readonly lane: number;
   readonly lanes: LaneSpan;
@@ -673,6 +686,12 @@ function within(range: readonly [number, number], draw: number): number {
   return range[0] + (range[1] - range[0]) * draw;
 }
 
+// The planned hit length of a mover rows long: the window less the pack's length, which is a
+// one-row hit box, and a cell for each row after the first.
+function bodyLength(geometry: MoverGeometry, rows: number): number {
+  return geometry.window - geometry.packLength + (rows - 1) * geometry.cellLength;
+}
+
 // The fewest rows whose blocking length covers rows' blocking length stretched by stretch.
 function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): number {
   const { cellLength, window } = geometry;
@@ -855,8 +874,18 @@ function ridePlacements(
     (Math.max(level(enters), level(leaves)) + (rows - 1) * cellLength) / rowSpacing,
   );
   const blockRows = rowsCovering(geometry, rows, 1 / speedMultiplier);
+  // Its body covers the road its near end is level with from entering until its hit box, drawn
+  // no longer than its planned hit length, has left the road's bottom, and its hit length above.
+  const length = bodyLength(geometry, rows);
+  const gone = enters + (roadLength + Math.max(length, rows * cellLength)) / speedMultiplier;
+  const [nearest, farthest] = [level(enters), level(gone)].sort((a, b) => a - b);
   return Array.from({ length: laneCount - across + 1 }, (_, lane) => ({
     appears: enters - warning,
+    body: {
+      from: nearest ?? 0,
+      lanes: { count: across, first: lane },
+      to: (farthest ?? 0) + length,
+    },
     cells: blockCells(firstRow, lastRow - firstRow + 1, lane, across),
     lane,
     lanes: { count: across, first: lane },
@@ -915,6 +944,12 @@ function standingPlacements(
     const count = maxLane - minLane + across;
     placements.push({
       appears: maxTravel,
+      // Its spots are from its row up the road by its spread of travels, its hit box above each.
+      body: {
+        from: 0,
+        lanes: { count, first },
+        to: maxTravel - minTravel + bodyLength(geometry, rows),
+      },
       cells: blockCells(0, rowCount, first, count),
       lane: start,
       lanes: { count, first },
@@ -1208,11 +1243,13 @@ export function screenHasRoom(
 // the stands for the spawns placed later. isFree is true when a mover may take a cell: a dart
 // one no dart holds, since it may set off over cells other spawns hold, crossing over or past
 // them, and any other mover one no spawn holds. take holds a cell for a mover, a dart if dart is
-// set, so nothing placed later takes it.
+// set, so nothing placed later takes it, but a lane-blocking standing spawn where no mover's body
+// comes: occupy records a mover's body, at distances along the zone, for those.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
   isFree(dart: boolean, lane: number, row: number): boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
+  occupy(body: MoverBody): void;
   packFits(stands: readonly MoverStand[]): boolean;
   stand(stands: readonly MoverStand[]): void;
   take(dart: boolean, lane: number, row: number): void;
@@ -1356,6 +1393,10 @@ export function placeMovers<Kind extends string>(
       const { placement } = spot;
       const dart = placement.path.motion === "cross";
       placement.cells.forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row));
+      if (placement.body !== undefined) {
+        const { from, lanes, to } = placement.body;
+        grid.occupy({ from: spot.distance + from, lanes, to: spot.distance + to });
+      }
       grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, true);
       grid.stand(standsOf(spot));
       onScreen.push(onScreenOf(placement.path, screenOf(spot)));

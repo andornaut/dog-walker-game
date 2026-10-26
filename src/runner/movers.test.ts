@@ -1289,6 +1289,7 @@ describe("placeMovers", () => {
         isFree: (dart: boolean, lane: number, row: number) =>
           !(dart ? darts : taken).has(`${lane},${row}`),
         leavesRoom: () => true,
+        occupy: () => undefined,
         packFits: () => true,
         stand: () => undefined,
         take: (dart: boolean, lane: number, row: number) => {

@@ -5,6 +5,7 @@ import {
   hasLeftRoad,
   laneAt,
   type LaneSpan,
+  type MoverBody,
   type MoverCaps,
   type MoverPath,
   moverPlace,
@@ -281,8 +282,8 @@ interface Cell {
   row: number;
 }
 
-// Lane-blocking spawns this many lanes wide or wider never take neighbouring rows: a row is left
-// between them.
+// Lane-blocking spawns this many lanes wide or wider never stand on neighbouring rows: a row is
+// left between the rows their hit boxes are on.
 const WIDE_LANES = 2;
 
 // Which rows' windows and gaps a lane-blocking spawn rows long, placed on row, overlaps.
@@ -345,14 +346,17 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
 // spawns. A spawn more than one row long blocks every window and gap it overlaps, and must end
 // within the zone's last row. Where the path changes lanes between two lane-blocking spawns,
 // packFitsBetween holds, for a mover wherever it stands. Two lane-blocking spawns WIDE_LANES wide
-// or wider have a row between the rows they take. The quotas marked first are placed first, their
+// or wider have a row between the rows their hit boxes are on. The quotas marked first are placed first, their
 // movers then the rest; then the other lane-blocking movers; then the other lane-blocking spawns;
 // then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
 // the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
 // dart may set off over cells the spawns placed before it hold, crossing over or past them, but
-// not with a lane-blocking spawn in its lead-in row. Nothing placed after it takes its cells,
-// another dart included, but a lane-blocking standing spawn outside its lead-in row, which it then
-// crosses over or past the same way. A mover with no room in its stretch, such as one over a cap
+// not with a lane-blocking spawn in its lead-in row. Nothing placed after a mover takes its cells,
+// another dart included, but a lane-blocking standing spawn: one outside a dart's lead-in row,
+// which the dart then crosses over or past the same way, and one whose hit box shares no road with
+// any other mover's body, the road that mover's hit box covers at some moment on screen, so the
+// two never meet; a mover other than a dart holds every row its blocking and its path touch, which
+// is more road than its body. A mover with no room in its stretch, such as one over a cap
 // on screen, waits for the next row with room; only one marked first stands still in its footprint
 // when no row has room for it to move. A moving prize is placed as a mover that blocks nothing:
 // the cells it passes through are kept clear of other spawns, so it never walks into one, but no
@@ -385,9 +389,23 @@ export function planSpawns<Kind extends string>(
   // row's window, and lanes blocked in the gap after it.
   const taken = new Int32Array(rows.length);
   const dartHeld = new Int32Array(rows.length);
-  // Lanes taken by a spawn other than a dart: a lane-blocking spawn may take a cell only darts
-  // hold, as the dart then sets off over or past it.
-  const heldByOther = new Int32Array(rows.length);
+  // Lanes a mover holds, a dart or any other: lifting a standing spawn never frees them.
+  const moverHeld = new Int32Array(rows.length);
+  // Lanes taken by a standing spawn: a lane-blocking standing spawn may take a cell a mover
+  // holds where no mover's body comes (clearOfMovers), and a dart then sets off over or past it.
+  const heldByStanding = new Int32Array(rows.length);
+  // The lane-blocking movers' bodies, as lane masks and distances along the zone.
+  const moverBodies: { from: number; lanes: number; to: number }[] = [];
+  // True when a lane-blocking standing spawn's hit box, from its row up the road for its hit
+  // length, shares no road with a mover's body in its lanes.
+  const clearOfMovers = (cell: Cell, footprint: Footprint): boolean => {
+    const covered = laneRun(cell.lane, footprint.lanes);
+    const from = itemAt(rows, cell.row);
+    const to = from + hitLength(plan, footprint.rows);
+    return moverBodies.every(
+      (body) => (body.lanes & covered) === 0 || body.to <= from || to <= body.from,
+    );
+  };
   // Lanes where a mover may end a move and stand, which no spawn that blocks no lane takes.
   const restHeld = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
@@ -399,8 +417,11 @@ export function planSpawns<Kind extends string>(
   const lanes = laneRun(0, laneCount);
   // The lane-blocking spawns placed so far, and every place each mover stands.
   const placed: BlockingPlace[] = [];
-  // Rows taken by a wide lane-blocking spawn.
+  // Rows a wide lane-blocking spawn's hit box is on.
   const wideRows = new Uint8Array(rows.length);
+  // The last row a spawn's hit box is on: its rows' hit length reaches a row's distance.
+  const lastHitRow = (cell: Cell, footprint: Footprint): number =>
+    cell.row + Math.max(0, Math.ceil(hitLength(plan, footprint.rows) / spacing - ROUNDING) - 1);
   const clearOfWide = (first: number, last: number): boolean =>
     !wideRows.subarray(Math.max(0, first - 1), last + 2).includes(1);
 
@@ -573,7 +594,9 @@ export function planSpawns<Kind extends string>(
     }
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
-      const held = blocksLane ? (heldByOther[row] ?? 0) : (taken[row] ?? 0) | (restHeld[row] ?? 0);
+      const held = blocksLane
+        ? (heldByStanding[row] ?? 0)
+        : (taken[row] ?? 0) | (restHeld[row] ?? 0);
       if ((held & covered) !== 0 || (blocksLane && leadIns.has(row))) {
         return false;
       }
@@ -585,7 +608,10 @@ export function planSpawns<Kind extends string>(
     if (!blocksLane) {
       return true;
     }
-    if (footprint.lanes >= WIDE_LANES && !clearOfWide(cell.row, last)) {
+    if (!clearOfMovers(cell, footprint)) {
+      return false;
+    }
+    if (footprint.lanes >= WIDE_LANES && !clearOfWide(cell.row, lastHitRow(cell, footprint))) {
       return false;
     }
     const place = {
@@ -655,6 +681,9 @@ export function planSpawns<Kind extends string>(
             row >= 0 && row < rows.length && ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
         ).length,
       ),
+    occupy: ({ from, lanes: span, to }: MoverBody) => {
+      moverBodies.push({ from, lanes: laneRun(span.first, span.count), to });
+    },
     packFits: (stands: readonly MoverStand[]) =>
       stands.every((stand) => placed.every((other) => packFitsBetween(plan, stand, other))),
     stand: (stands: readonly MoverStand[]) => {
@@ -663,10 +692,9 @@ export function planSpawns<Kind extends string>(
     take: (dart: boolean, lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
         takeCells(row, laneRun(lane, 1));
+        moverHeld[row] = (moverHeld[row] ?? 0) | laneRun(lane, 1);
         if (dart) {
           dartHeld[row] = (dartHeld[row] ?? 0) | laneRun(lane, 1);
-        } else {
-          heldByOther[row] = (heldByOther[row] ?? 0) | laneRun(lane, 1);
         }
       }
     },
@@ -707,7 +735,13 @@ export function planSpawns<Kind extends string>(
   // A moving prize keeps its cells clear of other spawns, and nothing else: it blocks no lane,
   // stands nowhere for the pack-fit gap, and counts toward no cap on screen. One with no room to
   // move stands still instead, in its footprint, among the other spawns that block no lane.
-  const prizeGrid = { ...moverGrid, block: () => true, packFits: () => true, stand: () => {} };
+  const prizeGrid = {
+    ...moverGrid,
+    block: () => true,
+    occupy: () => {},
+    packFits: () => true,
+    stand: () => {},
+  };
   const placePrizes = (): SpawnQuota<Kind>[] => {
     const quotas = moverQuotas(false);
     const { dropped, spawns } = placeMovers(
@@ -793,12 +827,12 @@ export function planSpawns<Kind extends string>(
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= lastRow; row++) {
       takeCells(row, covered);
-      heldByOther[row] = (heldByOther[row] ?? 0) | covered;
+      heldByStanding[row] = (heldByStanding[row] ?? 0) | covered;
     }
     const event = { distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane };
     if (quota.blocksLane) {
       if (footprint.lanes >= WIDE_LANES) {
-        wideRows.fill(1, cell.row, lastRow + 1);
+        wideRows.fill(1, cell.row, lastHitRow(cell, footprint) + 1);
       }
       tryBlock(cell, footprint, true);
       const place = {
@@ -916,20 +950,20 @@ export function planSpawns<Kind extends string>(
   const without = <Item>(items: Item[], item: Item) => {
     items.splice(items.indexOf(item), 1);
   };
-  // Takes a standing spawn off the road, freeing its cells but those a dart holds, and checks
+  // Takes a standing spawn off the road, freeing its cells but those a mover holds, and checks
   // every transition it touched. The rows its path relied on stay clear.
   const lift = (lifted: Standing): boolean => {
     const { block, cell, event, place, quota } = lifted;
     const footprint = quota.footprint ?? SINGLE_CELL;
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= block.lastRow; row++) {
-      heldByOther[row] = (heldByOther[row] ?? 0) & ~covered;
-      const freed = covered & (taken[row] ?? 0) & ~(dartHeld[row] ?? 0);
+      heldByStanding[row] = (heldByStanding[row] ?? 0) & ~covered;
+      const freed = covered & (taken[row] ?? 0) & ~(moverHeld[row] ?? 0);
       taken[row] = (taken[row] ?? 0) & ~freed;
       cellsLeft += laneTotal(freed);
     }
     if (footprint.lanes >= WIDE_LANES) {
-      wideRows.fill(0, cell.row, block.lastRow + 1);
+      wideRows.fill(0, cell.row, lastHitRow(cell, footprint) + 1);
     }
     without(blocks, block);
     reblock(block.row, Math.max(block.lastRow, block.lastGap));
@@ -941,7 +975,7 @@ export function planSpawns<Kind extends string>(
   };
   // Saves what a move changes, and returns what puts it back.
   const save = (): (() => void) => {
-    const arrays = [taken, heldByOther, blocked, gapBlocked, wideRows, steerRows];
+    const arrays = [taken, heldByStanding, blocked, gapBlocked, wideRows, steerRows];
     const arrayCopies = arrays.map((array) => array.slice());
     const copies = { blocks: [...blocks], events: [...events], placed: [...placed] };
     const standingCopy = [...standing];

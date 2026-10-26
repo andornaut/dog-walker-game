@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../lib/arrays";
 import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
-import { type MoverPath, type MoverSpec, sweptLanes } from "./movers";
+import { type MoverPath, moverPlace, type MoverSpec, sweptLanes } from "./movers";
 import {
   blockingLength,
   everyLaneReaches,
@@ -663,6 +663,66 @@ describe("planSpawns", () => {
       }
       expect(shared).toBeGreaterThan(0);
       expect(benchShared).toBeGreaterThan(0);
+    },
+  );
+
+  // A rider holds every row it passes on screen, from the rows its near end comes level with to
+  // the ones its far end does. A standing obstacle placed after it may stand in its lane on one of
+  // those rows where its hit box shares no road with the rider's at any moment both are on the
+  // road: below the rows a fast rider reaches, as it leaves the road's bottom first, and above the
+  // rows a slow one reaches, as the road brings them only once it has gone.
+  it.each([
+    { name: "a fast rider", rowsAfter: -1, speedMultiplier: 2 },
+    { name: "a slow rider", rowsAfter: 2, speedMultiplier: 0.5 },
+  ])(
+    "stands an obstacle in $name's lane $rowsAfter rows from its own, never on it",
+    ({ rowsAfter, speedMultiplier }) => {
+      const riding: SpawnPlan<Kind> = {
+        ...plan,
+        minOpenLanes: 2,
+        quotas: [
+          {
+            blocksLane: true,
+            count: 6,
+            kind: "car",
+            mover: { ...DARTING, motion: { kind: "ride", speedMultiplier }, movement: "inLane" },
+          },
+          { blocksLane: true, count: 20, kind: "obstacle" },
+        ],
+        zoneLength: 4000,
+      };
+      const spacing = rowSpacing(riding);
+      const height = hitLength(riding, 1);
+      let beside = 0;
+      for (const seed of seeds.slice(0, 20)) {
+        const events = planSpawns(plannerStreams(seed), riding);
+        const riders = events.flatMap(({ distance, mover }) =>
+          mover?.motion === "ride" ? [{ distance, mover }] : [],
+        );
+        expect(riders.length).toBeGreaterThan(0);
+        for (const { distance, mover } of riders) {
+          const row = distance + mover.warning - riding.sightLength * (1 - 1 / speedMultiplier);
+          for (const obstacle of events.filter(({ kind }) => kind === "obstacle")) {
+            if (obstacle.lane !== mover.lane) {
+              continue;
+            }
+            beside += Math.abs(obstacle.distance - (row + rowsAfter * spacing)) < 1e-6 ? 1 : 0;
+            // Both hit boxes run up the road from their near edges, which come down the road
+            // with the scroll: the obstacle's with the road, the rider's at its own speed.
+            const life = mover.warning + (riding.roadLength + height) / speedMultiplier;
+            for (let since = 0; since <= life; since += 1) {
+              const own = distance + since - obstacle.distance;
+              const place = moverPlace(5, mover, since);
+              const onRoad = (travel: number) => travel > 0 && travel - height < riding.roadLength;
+              if (!place.solid || !onRoad(own) || !onRoad(place.travel)) {
+                continue;
+              }
+              expect(Math.abs(own - place.travel), `seed ${seed}`).toBeGreaterThanOrEqual(height);
+            }
+          }
+        }
+      }
+      expect(beside).toBeGreaterThan(0);
     },
   );
 

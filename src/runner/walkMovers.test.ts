@@ -23,6 +23,7 @@ import {
   LANES,
   LUCKY_IDS,
   MINOR_OBSTACLE_IDS,
+  MOVER_SCROLL,
   moverContact,
   moverSpans,
   OBSTACLE_IDS,
@@ -53,6 +54,7 @@ import {
   moverTell,
   onScreenOf,
 } from "./movers";
+import { moverOutcomes } from "./outcomes";
 import {
   blocksLane,
   footprintOf,
@@ -351,6 +353,63 @@ describe("movers", { timeout: 120_000 }, () => {
       }
     }
   }
+
+  // A standing obstacle may stand where a dart passes, crossing over or past it, but never where
+  // another mover is while it is there: at no moment with both on the road do their drawn hit
+  // boxes overlap in a lane both cover, whichever way a stalker or shy hopper chooses its moves.
+  it("keeps every standing obstacle's hit box off every mover's but a dart's", () => {
+    for (const { road, tuned, zone } of passableCases()) {
+      const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
+      const walk = planZone(tuned, road, plannerStreams(1), {
+        road: startRoad(LANE_COUNT),
+        run: zoned,
+      });
+      const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
+      const roadLength = road.roadBottom - road.roadTop;
+      const inset = road.cell.inset / road.cell.length;
+      const standing = blocking.filter(({ mover }) => mover === undefined);
+      for (const { distance, kind, mover } of blocking) {
+        if (mover === undefined || mover.motion === "cross") {
+          continue;
+        }
+        const height = itemHeight(tuned, road, kind, true);
+        const across = footprintOf(tuned, kind).lanes;
+        // By lane, the nearest and farthest distances along the zone its near edge reaches on
+        // the road.
+        const reached = new Map<number, { far: number; near: number }>();
+        for (const path of moverOutcomes(mover)) {
+          for (let since = 0; since < MOVER_SCROLL; since++) {
+            const place = moverPlace(LANE_COUNT, path, since);
+            if (!place.solid || place.travel <= 0) {
+              continue;
+            }
+            if (place.travel - height >= roadLength) {
+              break;
+            }
+            const at = distance + since - place.travel;
+            const first = Math.floor(place.lanePosition - 1 + inset) + 1;
+            const last = Math.ceil(place.lanePosition + across - inset) - 1;
+            for (let lane = first; lane <= last; lane++) {
+              const { far, near } = reached.get(lane) ?? { far: at, near: at };
+              reached.set(lane, { far: Math.max(far, at), near: Math.min(near, at) });
+            }
+          }
+        }
+        for (const obstacle of standing) {
+          const { lanes } = footprintOf(tuned, obstacle.kind);
+          const length = itemHeight(tuned, road, obstacle.kind, false);
+          for (let lane = obstacle.lane; lane < obstacle.lane + lanes; lane++) {
+            const span = reached.get(lane);
+            const overlaps =
+              span !== undefined &&
+              obstacle.distance < span.far + height &&
+              span.near < obstacle.distance + length;
+            expect(overlaps, `${zone}: ${obstacle.kind} on ${kind}`).toBe(false);
+          }
+        }
+      }
+    }
+  });
 
   it("plans the same movers for the same seed", () => {
     for (const { tuned } of [{ name: "every mover", tuned: everyMover }]) {
