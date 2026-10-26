@@ -606,9 +606,9 @@ WALKERS = {
 # How big each dog's portrait is drawn in the 64px well, sat on the bottom edge: the side that brings its
 # inked area nearest its size class's target, so the classes step evenly (the square root of the area about
 # 35, 40 and 46px). The big dogs fill the well.
-# How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, Ada
-# smaller as the youngest.
-WALKER_SIDE = {"ada": 64, "ben": 72, "casey": 64, "trista": 72}
+# How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, topping
+# out 2 or 3px under the well's top edge, and Ada smaller as the youngest.
+WALKER_SIDE = {"ada": 64, "ben": 72, "casey": 66, "trista": 69}
 PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "koda": 64, "nugget": 53, "penny": 64, "pierre": 56,
                  "snowball": 63, "zippy": 53}
 
