@@ -613,19 +613,6 @@ PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "koda": 64, "nugget
                  "snowball": 63, "zippy": 53}
 
 
-def framed(px, side):
-    """Rows px set in a side x side frame, centred across and on its bottom edge, cropped where they overflow it."""
-    px = px[max(0, len(px) - side):]
-    w = len(px[0])
-    if w >= side:
-        left = (w - side) // 2
-        rows = [row[left:left + side] for row in px]
-    else:
-        left = (side - w) // 2
-        rows = [[None] * left + row + [None] * (side - w - left) for row in px]
-    return [[None] * side for _ in range(side - len(rows))] + rows
-
-
 def image(draw, side=S):
     """draw's portrait, drawn at side over S of its design, sat on the bottom edge of an S x S image; a side over
     S zooms in, cropping the shoulders."""
@@ -635,7 +622,7 @@ def image(draw, side=S):
         return to_image(g.outlined())
     g = edged(minis.Mini(side / S, S, S), "ink", close=True)
     draw(g)
-    return to_image(framed(g.outlined(), S))
+    return to_image(dogs.framed(g.outlined(), S))
 
 
 def portraits():

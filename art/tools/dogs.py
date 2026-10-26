@@ -15,7 +15,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
   300ms, standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
 - face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
-  big and sat on the bottom edge, so each size class reads one even step from the next. Tags: happy, neutral,
+  big and sat on the bottom edge, small and medium one even step apart and the big dogs zoomed to fill it. Tags: happy, neutral,
   upset.
 
 Usage:
@@ -834,26 +834,33 @@ DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duche
 
 
 # How big each dog's face is drawn in its 32px frame, sat on the bottom edge: the side that brings its inked
-# area nearest its size class's target, so the classes step evenly (the square root of the area about 17,
-# 20 and 23px) however much of its design a breed's ears, ruff or topknot fill. The big dogs fill the frame.
-FACE_SIDE = {"archie": 27, "biscuit": 27, "duchess": 23, "koda": 32, "nugget": 26, "penny": 32, "pierre": 25,
-             "snowball": 32, "zippy": 27}
+# area nearest its size class's target, so small and medium step evenly (the square root of the area about 17
+# and 20px) however much of its design a breed's ears or topknot fill. The big (heavy) dogs zoom past the frame
+# to about 25.5, as far as Koda's ears fit under its top edge, so they fill their tiles.
+FACE_SIDE = {"archie": 27, "biscuit": 27, "duchess": 23, "koda": 35, "nugget": 26, "penny": 37, "pierre": 25,
+             "snowball": 36, "zippy": 27}
 
 
-def padded(px, side):
-    """Frame rows px set in a side x side frame, centred across and on its bottom edge."""
-    h, w = len(px), len(px[0])
-    left = (side - w) // 2
-    return [[None] * side for _ in range(side - h)] + [[None] * left + row + [None] * (side - w - left) for row in px]
+def framed(px, side):
+    """Rows px set in a side x side frame, centred across and on its bottom edge, cropped where they overflow it."""
+    px = px[max(0, len(px) - side):]
+    w = len(px[0])
+    if w >= side:
+        left = (w - side) // 2
+        rows = [row[left:left + side] for row in px]
+    else:
+        left = (side - w) // 2
+        rows = [[None] * left + row + [None] * (side - w - left) for row in px]
+    return [[None] * side for _ in range(side - len(rows))] + rows
 
 
 def face_frame(face, mood, side):
     """face(mood)'s outlined rows, drawn at side over 32 of its 32-unit design and set on the bottom edge of a
-    32x32 frame."""
+    32x32 frame; a side over 32 zooms in past the frame, cropping the chest at the sides."""
     import minis
 
     here = sys.modules[__name__]
-    return padded(minis.small(here, side / 32, face, mood).outlined(), 32)
+    return framed(minis.small(here, side / 32, face, mood).outlined(), 32)
 
 
 def road_scale(name):
