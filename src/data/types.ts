@@ -540,7 +540,6 @@ export interface HomeText {
   // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
   // status, the price status of anything not owned yet, and a locked dog's subtitle.
   readonly detail: {
-    readonly dogFee: string;
     // A heavy dog's row, under its size and hearts: it slows lane changes.
     readonly dogHeavy: string;
     readonly dogKind: string;

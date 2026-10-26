@@ -3,7 +3,6 @@ import { fillLine, signedText } from "../lib/lines";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
 import { effectClause, SIZE_NAMES } from "../rules/effectText";
-import { payFor } from "../rules/run";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
 import type { Owned, SaveDocument } from "../save/schema";
@@ -166,12 +165,6 @@ export function buy(data: ShopData, purchase: Purchase, save: SaveDocument): Buy
     kind: "bought",
     save: { ...save, bankCents: cents(save.bankCents - cost), owned: bought },
   };
-}
-
-// A dog's pay for each zone it walks, before the zone's multiplier, as its tile and the shop
-// show it.
-export function dogFeeText(data: Pick<GameData, "tuning">): string {
-  return dollarText(payFor(data.tuning));
 }
 
 // What a dog's owner says when the player picks it: one of their parting lines. The bubble

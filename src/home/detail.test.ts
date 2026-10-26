@@ -3,14 +3,13 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { sizeHearts } from "../rules/dogs";
+import { isHeavy, sizeHearts } from "../rules/dogs";
 import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
-import { dogFeeText } from "./home";
 import { homeLine } from "./homeText";
 import { walkerDetailLines } from "./walkers";
 
@@ -25,29 +24,39 @@ const owned: Owned = {
 const noStats = { dogs: {} };
 
 describe("dogDetail", () => {
-  it("gives a dog's breed, size and hearts, the heavy row, owner, pay and stats", () => {
-    const id = (Object.keys(data.dogs) as DogId[]).find((dog) => data.dogs[dog].size === "big");
+  const dogIds = Object.keys(data.dogs) as DogId[];
+  const firstDog = (heavy: boolean): DogId => {
+    const id = dogIds.find((dog) => isHeavy(data.dogs[dog]) === heavy);
     if (id === undefined) {
-      throw new Error("no big dog");
+      throw new Error(`no ${heavy ? "heavy" : "light"} dog`);
     }
-    const stats = { dogs: { [id]: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
-    const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), stats, id);
-    const dog = data.dogs[id];
-    const text = data.homeText.detail;
-    expect(card.title).toBe(dog.name);
-    expect(card.subtitle).toBe(dog.breed);
-    expect(card.lines).toEqual([
-      fillNames(text.dogKind, {
-        hearts: String(sizeHearts(data.tuning, dog)),
-        size: capitalize(SIZE_NAMES[dog.size]),
-      }),
-      fillNames(text.dogHeavy, { speed: heavySpeedText(data.tuning) }),
-      fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
-      fillNames(text.dogFee, { fee: dogFeeText(data) }),
-      fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
-    ]);
-    expect(card.status).toBe(text.dogStatus);
-  });
+    return id;
+  };
+
+  it.each([
+    { heavy: true, id: firstDog(true) },
+    { heavy: false, id: firstDog(false) },
+  ])(
+    "gives $id's breed, size and hearts, the heavy row if heavy, owner and stats",
+    ({ heavy, id }) => {
+      const stats = { dogs: { [id]: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
+      const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), stats, id);
+      const dog = data.dogs[id];
+      const text = data.homeText.detail;
+      expect(card.title).toBe(dog.name);
+      expect(card.subtitle).toBe(dog.breed);
+      expect(card.lines).toEqual([
+        fillNames(text.dogKind, {
+          hearts: String(sizeHearts(data.tuning, dog)),
+          size: capitalize(SIZE_NAMES[dog.size]),
+        }),
+        ...(heavy ? [fillNames(text.dogHeavy, { speed: heavySpeedText(data.tuning) })] : []),
+        fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
+        fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
+      ]);
+      expect(card.status).toBe(text.dogStatus);
+    },
+  );
 
   it("counts zeros for a dog never walked, and shows a locked dog's price", () => {
     const card = dogDetail(data, owned, dollars(100), noStats, "archie");

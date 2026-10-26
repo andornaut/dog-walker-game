@@ -14,7 +14,6 @@ export const HOME_TEXT = {
     noWalker: "Who's walking? Tap a face.",
   },
   detail: {
-    dogFee: "Pay {fee} a neighborhood",
     dogHeavy: "Heavy: lane changes −{speed}",
     dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",

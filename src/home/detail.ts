@@ -5,7 +5,7 @@ import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/eff
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
-import { dogFeeText, dollarText, type HomeLoadout, purchasePrice } from "./home";
+import { dollarText, type HomeLoadout, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
 import { walkerDetailLines, walkerLockedLine } from "./walkers";
 
@@ -57,8 +57,8 @@ function priceLine(text: HomeText["detail"], cost: Cents | null, bank: Cents): s
   return fillLine(FIELDS, text, cost > bank ? "priceLocked" : "priceBuy", { price });
 }
 
-// A dog's breed, its size and hearts, a heavy dog's row, its owner, its pay, and the walks, zones
-// and firings the save has counted for it.
+// A dog's breed, its size and hearts, a heavy dog's row, its owner, and the walks, zones and
+// firings the save has counted for it.
 export function dogDetail(
   data: DetailData,
   owned: Owned,
@@ -68,7 +68,6 @@ export function dogDetail(
 ): DetailCard {
   const { breed, name, owner, size } = data.dogs[dog];
   const counted = stats.dogs[dog] ?? ZERO_DOG_STATS;
-  const fee = dogFeeText(data);
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   const text = data.homeText.detail;
   return {
@@ -81,7 +80,6 @@ export function dogDetail(
         ? [fillLine(FIELDS, text, "dogHeavy", { speed: heavySpeedText(data.tuning) })]
         : []),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
-      fillLine(FIELDS, text, "dogFee", { fee }),
       fillLine(FIELDS, text, "dogTotals", {
         fired: String(counted.timesFired),
         walks: String(counted.walks),
