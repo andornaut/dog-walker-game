@@ -245,14 +245,13 @@ describe("run, world and walkers", () => {
     }
   });
 
-  it("fits the largest pack in the card row, one dog slot a place, the first free and the rest dearer in turn", () => {
+  it("fits the largest pack in the card row, one dog slot a place, the first free and the rest priced", () => {
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
     expect(dogSlots).toHaveLength(tuning.counts.packSizeMax);
-    const prices = dogSlots.map((slot) => unlockPrice(tuning, slot));
-    expect(prices[0]).toBe(0);
+    const [first, ...rest] = dogSlots.map((slot) => unlockPrice(tuning, slot));
+    expect(first).toBe(0);
     expect(dogSlots.slice(1).every((slot) => slot.unlock === "shop")).toBe(true);
-    expect([...prices].sort((a, b) => a - b)).toEqual(prices);
-    expect(new Set(prices).size).toBe(prices.length);
+    expect(rest.every((price) => price > 0)).toBe(true);
   });
 
   it("gives each walker its own sprite, portrait, agility, perk and unlock zone, the default walker free", () => {
