@@ -963,7 +963,7 @@
         "most": 2,
         "shy": true,
         "times": {
-          "max": 3,
+          "max": 5,
           "min": 2
         }
       },
@@ -1225,7 +1225,7 @@
         "kind": "hop",
         "most": 2,
         "times": {
-          "max": 3,
+          "max": 5,
           "min": 2
         }
       },

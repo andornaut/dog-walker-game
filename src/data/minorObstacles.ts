@@ -21,7 +21,7 @@ export const MINOR_OBSTACLES = {
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   bunny: {
-    movement: { kind: "hop", most: 2, shy: true, times: { max: 3, min: 2 } },
+    movement: { kind: "hop", most: 2, shy: true, times: { max: 5, min: 2 } },
     name: "Bunny",
     shape: { lanes: 1, rows: 1 },
   },
@@ -100,7 +100,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   raccoon: {
-    movement: { kind: "hop", most: 2, times: { max: 3, min: 2 } },
+    movement: { kind: "hop", most: 2, times: { max: 5, min: 2 } },
     name: "Raccoon",
     shape: { lanes: 1, rows: 1 },
   },
