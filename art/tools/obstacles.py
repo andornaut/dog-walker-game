@@ -27,7 +27,7 @@ delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from 
                             drive (4 frames, 100ms): tread lines
                             climb the tyres and the body dips 1px onto them on frames 1 and 2
 hot-dog-cart        112x66  2 lanes, a stainless street meat cart side on under a striped umbrella;
-                            idle (2 frames, 500ms): steam rising off the steam table
+                            idle (2 frames, 500ms): wavy steam wisps rising off the steam table
 streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity from behind, its pantograph
                             on the roof, drawn at the footprint's near edge; idle (4 frames, 400ms): a
                             spark at the pan head on frame 2. drive (4 frames, 100ms): tread lines climb
@@ -119,7 +119,8 @@ def cone(glint=None):
 
 def bin_(lift=0):
     """lift raises the lid and handle by that many drawn pixels (negative is up), showing the dark gap under
-    the lid. The forest body takes a green rim on its top-left edges, the ink wheels and handle a grey one."""
+    the lid. The forest body takes a green rim on its top-left edges, the ink wheels and handle a grey one.
+    Its lit half has two green ribs, one below TEXTURE_MIN."""
     g = edged(Grid(SIZE, SIZE))
     lift *= unit(g)[1]
     g.rect(12, 33, 4, 4, "ink")
@@ -129,7 +130,7 @@ def bin_(lift=0):
     g.tri((10, 13), (12.5, 34), (27.5, 34), "dgreen")
     g.tri((20, 13), (30, 13), (27.5, 34), "forest")
     g.tri((20, 13), (20, 34), (27.5, 34), "forest")
-    for x in (13, 16):
+    for x in (13, 16) if scale_of(g) >= TEXTURE_MIN else (15,):
         g.rect(x, 16, 1, 14, "green")
     if lift:
         g.rect(10, 14 + lift, 20, -lift, "ink")
@@ -169,10 +170,16 @@ def bench(leaf=(0, 0), w=span(2)):
     return g
 
 
+# The smallest scale the hedge's leaf texture and the bin's two ribs are drawn at: under it (the @50 step) a
+# 1px detail lands on single pixels or merges with its neighbor.
+TEXTURE_MIN = 0.7
+
+
 def hedge(w=span(3), rustle=()):
     """Low and wide, seen side on: a rounded top edge of leaf clumps, no top surface, lit green on its
     top-left edges. rustle lists the top clumps, by index, that lift 1px and shift 1px right, drawn pixels
-    at any scale."""
+    at any scale. Below TEXTURE_MIN the lower leaf texture is left off: its clumps shrink to single pixels
+    there and read as noise."""
     g = edged(Grid(w, ROW))
     u = unit(g)[0]
     g.rect(4, 11, w - 8, 18, "forest")
@@ -189,7 +196,7 @@ def hedge(w=span(3), rustle=()):
     for x in (6, w - 6):
         g.ell(x, 18, 5, 9, "forest")
     # leaf texture lower down, dgreen clumps and teal hollows, spaced irregularly
-    for i, x in enumerate(range(7, int(w) - 7, 9)):
+    for i, x in enumerate(range(7, int(w) - 7, 9) if scale_of(g) >= TEXTURE_MIN else ()):
         g.ell(x + 2, 16 + (i * 3) % 4, 2.5, 2, "dgreen")
         g.p(x, 21 + (i * 2) % 3, "teal")
     return lit(g)
@@ -305,6 +312,11 @@ DRIVE = range(4), 100
 DELIVERY_IDLE = (0, 0, 1, 2), 400
 
 
+# The smallest column scale the delivery truck's label keeps its three lines at: under it (@62 and @50) they
+# land on adjacent rows and run together.
+LABEL_MIN = 0.7
+
+
 def delivery_truck(puff=0, roll=None):
     """A box van from straight behind, a lane wide and taller than the parked car: a brown box lit tan along
     its top and left edges with mirrors at its sides and amber marker lights on the roof, a tan roller door
@@ -349,9 +361,14 @@ def delivery_truck(puff=0, roll=None):
     g.rect(25, 27, 6, 1, "lgrey")
     g.rect(21, 11, 13, 9, "white")
     g.rect(21, 19, 13, 1, "lgrey")
-    g.rect(23, 13, 6, 1, "slate")
-    g.rect(23, 15, 9, 1, "slate")
-    g.rect(23, 17, 4, 1, "red")
+    if scale_of(g) >= LABEL_MIN:
+        g.rect(23, 13, 6, 1, "slate")
+        g.rect(23, 15, 9, 1, "slate")
+        g.rect(23, 17, 4, 1, "red")
+    else:
+        # smaller, the three lines would run together: one address line and the red tag, a row apart
+        g.rect(23, 13, 9, 1, "slate")
+        g.rect(23, 16, 4, 1, "red")
     # tail lights low at the outer corners
     for x in (5, 47):
         g.rect(x, 21, 4, 8, "red")
@@ -471,15 +488,22 @@ def streetcar(spark=False, roll=None):
 HOT_DOG_CART_IDLE = (0, 1), 500
 
 
+# The hot dog cart's steam wisps: each drawn row's sideways offset, from the lid up.
+STEAM_WAVE = (0, 1, 1, 0, -1, -1)
+
+
+def cart_edge(c):
+    """road_edge, but the steam (haze, which nothing else on the cart uses) takes no outline."""
+    return None if c == K["haze"] else road_edge(c)
+
+
 def hot_dog_cart(steam=0, w=span(2)):
     """A Toronto street meat cart side on, two lanes wide, laid out on span(2) x 55 and drawn at SCALE to
     112x66: a stainless box on two wheels under a red and yellow striped umbrella with a scalloped valance,
     lit on its left and shaded on its right; ketchup, mustard and relish bottles and a stack of buns on the
     counter at the left, the steam table's lids at the right with steam curling off them, and a hot dog
-    with a mustard zigzag on the box's side. steam (0 or 1) lifts the steam 1 drawn pixel and swaps its
-    wisps."""
-    g = edged(Grid(w, 55))
-    ux, uy = unit(g)
+    with a mustard zigzag on the box's side. steam (0 or 1) shifts the wisps' wave half a period."""
+    g = edged(Grid(w, 55), cart_edge)
     c = w / 2
     # the wheels, behind the box: ink tyres, grey hubs
     for x in (19, w - 19):
@@ -513,12 +537,13 @@ def hot_dog_cart(steam=0, w=span(2)):
     # on the counter, right: the steam table's two lids
     for x in (w - 33, w - 20):
         g.cel(x, 27, 6, 3.5, "lgrey", "grey", "white")
-    # the steam: a puff clear of each lid, drifting to one side, with a wisp trailing up off it
-    lift = steam * uy
+    # the steam: a wavy 1px wisp rising off each lid, in haze with no outline, so it reads as vapor and not
+    # as a knob on the lid; the two wisps wave in opposite phase and steam shifts the wave half a period
+    px, edge = raster(g), pixel_edge(g)
     for i, x in enumerate((w - 33, w - 20)):
-        dx = (1 if (i + steam) % 2 else -1) * ux
-        g.cel(x + dx, 20.5 - lift, 2.2, 1.4, "lgrey", None, "white")
-        g.rect(x + 2 * dx + (1 if dx > 0 else -1), 18 - lift, 1, 1.5, "white")
+        x0 = edge(x)
+        for k, y in enumerate(range(edge(22.5) - 1, edge(18.5) - 1, -1)):
+            px.p(x0 + STEAM_WAVE[(k + 3 * (steam + i)) % len(STEAM_WAVE)], y, "haze")
     # the counter's lip, then the stainless box: lit along its top and left, shaded down its right
     g.rect(6, 28, w - 12, 2, "white")
     g.rect(6, 29, w - 12, 1, "lgrey")
