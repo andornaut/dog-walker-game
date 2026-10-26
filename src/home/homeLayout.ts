@@ -286,7 +286,7 @@ export const HOME_LAYOUT = {
   // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
   // the box at icons.dy (a walker has one perk), a locked walker's badge over the tile's
   // top-left corner, and every walker's name plate, its caps at plateY, centred. The tiles sit
-  // 7px inside the section's inner frame edge, leaving the selected badge's overhang on screen.
+  // 7px inside the section's inner frame edge, leaving the selected mark's overhang on screen.
   walkerTile: {
     badge: { dx: -2, dy: -3 },
     box: WALKER_BOX,

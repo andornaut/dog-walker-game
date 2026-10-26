@@ -6,7 +6,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { screenLayout } from "../layout/screenLayout";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import { BADGE_OFFSET } from "../ui/badge";
 import type { CloseControl } from "../ui/closeControl";
 import {
   type ArtLook,
@@ -16,6 +15,7 @@ import {
   type TileState,
   tileState,
 } from "../ui/interaction";
+import { MARK_OFFSET } from "../ui/mark";
 import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, inkSpan, scalePixelText, setPixelText } from "../ui/phaser/pixelText";
@@ -448,16 +448,16 @@ export function addSelectFrame(
   });
 }
 
-// The ui-check badge at rect's top-left corner: tag is its art's tag, such as "tick". While the
+// The ui-check mark at rect's top-left corner: tag is its art's tag, such as "tick". While the
 // art is missing, a green square with the tag, or a plus for a tick.
-function addSelectBadge(
+function addSelectMark(
   scene: Scene,
   parent: GameObjects.Container,
   rect: Rect,
   tag: string,
 ): GameObjects.Image | undefined {
-  const x = rect.x + BADGE_OFFSET.x;
-  const y = rect.y + BADGE_OFFSET.y;
+  const x = rect.x + MARK_OFFSET.x;
+  const y = rect.y + MARK_OFFSET.y;
   const image = addTagImage(scene, "ui-check", tag, x, y);
   if (image !== undefined) {
     parent.add(image);
@@ -475,22 +475,22 @@ function addSelectBadge(
 }
 
 export interface SelectTile {
-  badge?: GameObjects.Image;
-  // Moves for the lift and any dip or shake; holds the face, content, frame and badge.
+  // Moves for the lift and any dip or shake; holds the face, content, frame and mark.
   container: GameObjects.Container;
   // Where the caller adds the item's text and pictures: above the face, under the frame.
   content: GameObjects.Container;
   // The container's resting y: lifted when selected.
   lift: number;
   look: SelectLook;
+  mark?: GameObjects.Image;
 }
 
 export interface SelectTileOptions {
-  // The ui-check tag on a selected tile; none without one.
-  badge?: string;
   // Drawn in code, a slate edge marks the face out from what it sits on; a row on a panel
   // has none.
   edge: boolean;
+  // The ui-check tag on a selected tile; none without one.
+  mark?: string;
   // How far the ui-select frame sits outside the tile; SELECT_OUTSET when unset.
   outset?: number;
   reducedMotion: boolean;
@@ -511,7 +511,7 @@ function drawTileFace(scene: Scene, edge: boolean, look: SelectLook, rect: Rect)
 }
 
 // A tappable item in its interaction state. Selected, it has the gold face and any ui-check
-// badge and is lifted 2px onto a plum shadow; a face drawn in code adds the ui-select frame.
+// mark and is lifted 2px onto a plum shadow; a face drawn in code adds the ui-select frame.
 // Normal, its face is cream. Disabled, it is flat grey and never lifts. The caller draws its
 // pictures through tileTextureKey or addTileSprite in its look's art. The shadow goes in
 // parent so it stays put under the lift.
@@ -521,7 +521,7 @@ export function addSelectTile(
   rect: Rect,
   options: SelectTileOptions,
 ): SelectTile {
-  const { badge, edge, outset, reducedMotion, state, tile: isTile } = options;
+  const { edge, mark, outset, reducedMotion, state, tile: isTile } = options;
   const look = selectLook(state);
   const selected = state === "selected";
   const art = isTile ? addNineSlice(scene, "ui-tile", rect, state) : undefined;
@@ -548,9 +548,9 @@ export function addSelectTile(
     addSelectFrame(scene, container, rect, reducedMotion, outset);
   }
   if (selected) {
-    const image = badge === undefined ? undefined : addSelectBadge(scene, container, rect, badge);
+    const image = mark === undefined ? undefined : addSelectMark(scene, container, rect, mark);
     if (image !== undefined) {
-      tile.badge = image;
+      tile.mark = image;
     }
   }
   return tile;

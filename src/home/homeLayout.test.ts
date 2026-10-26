@@ -14,9 +14,9 @@ import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { BADGE_OFFSET } from "../ui/badge";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
+import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
@@ -98,15 +98,15 @@ describe("home layout", () => {
       left: section.x + sectionFrame.edge,
       right: section.x + section.width - sectionFrame.edge,
     };
-    it("keep the selected badge inside the section's frame", () => {
-      expect(Math.min(...tiles.map((tile) => tile.x)) + BADGE_OFFSET.x).toBeGreaterThanOrEqual(
+    it("keep the selected mark inside the section's frame", () => {
+      expect(Math.min(...tiles.map((tile) => tile.x)) + MARK_OFFSET.x).toBeGreaterThanOrEqual(
         inner.left,
       );
     });
-    it("keep the selected badge below the band's heading", () => {
+    it("keep the selected mark below the band's heading", () => {
       const { capHeight } = fontFileMetrics("font-title");
       const headingBottom = section.y + HOME_LAYOUT.bandText.y + capHeight * TEXT_SCALE;
-      expect(Math.min(...tiles.map((tile) => tile.y)) + BADGE_OFFSET.y).toBeGreaterThanOrEqual(
+      expect(Math.min(...tiles.map((tile) => tile.y)) + MARK_OFFSET.y).toBeGreaterThanOrEqual(
         headingBottom,
       );
     });

@@ -339,9 +339,8 @@ interface Overlay {
 }
 
 // A tile that reacts to taps: its container moves for the dip, lift and shake, its face hops,
-// and its badge pops.
+// and its mark pops.
 interface TileView {
-  badge?: { image: GameObjects.Image; y: number };
   // The dog slot sign hangs from the Pet shop, so it rises and falls with the shop's bob.
   bobsWithShop?: boolean;
   container: GameObjects.Container;
@@ -351,6 +350,7 @@ interface TileView {
   // An icon button shows its pressed face rather than dipping.
   iconButton?: IconButton;
   lift: number;
+  mark?: { image: GameObjects.Image; y: number };
   // The pop timer that raises the whole tile for a moment, for the gear badge at the gate.
   rise?: string;
   // The Pet shop's normal face, which the glint covers.
@@ -959,7 +959,7 @@ export class StartScene extends Scene {
           rise,
       );
       view.face?.object.setY(view.face.y + hopOffset(reduced, now, this.pops.get(id)));
-      view.badge?.image.setY(view.badge.y + badgePopOffset(reduced, now, this.pops.get(id)));
+      view.mark?.image.setY(view.mark.y + badgePopOffset(reduced, now, this.pops.get(id)));
     }
     if (this.startButton !== undefined) {
       const { container, ready } = this.startButton;
@@ -1250,8 +1250,8 @@ export class StartScene extends Scene {
       reducedMotion,
     });
     const view: TileView = { container: tile.container, lift: tile.lift };
-    if (tile.badge !== undefined) {
-      view.badge = { image: tile.badge, y: tile.badge.y };
+    if (tile.mark !== undefined) {
+      view.mark = { image: tile.mark, y: tile.mark.y };
     }
     this.views.set(id, view);
     return { content: tile.content, look: tile.look, view };
@@ -1612,9 +1612,9 @@ export class StartScene extends Scene {
       });
       const { art, badge, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
-        // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
-        badge: "tick",
         edge: true,
+        // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
+        mark: "tick",
         state,
         tile: true,
       });
@@ -1674,8 +1674,8 @@ export class StartScene extends Scene {
       });
       const { art, badge, state } = itemTileLook(tile);
       const { content, view } = this.selectTile(root, `gear:${id}`, rect, {
-        badge: "tick",
         edge: true,
+        mark: "tick",
         state,
         tile: true,
       });
@@ -1742,8 +1742,8 @@ export class StartScene extends Scene {
       const tile = walkerTile(gameData, save, id);
       const { art, badge, state } = itemTileLook(tile);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
-        badge: "tick",
         edge: true,
+        mark: "tick",
         state,
         tile: true,
       });
