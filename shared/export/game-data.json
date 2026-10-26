@@ -808,7 +808,7 @@
       ],
       "name": "Dog whistle",
       "price": "dogWhistle",
-      "short": "Big dogs dodge too",
+      "short": "Medium and big dogs dodge too",
       "iconKey": "item-dog-whistle"
     },
     {
@@ -835,7 +835,7 @@
       ],
       "name": "Hall pass",
       "price": "hallPass",
-      "short": "1 skip per neighborhood",
+      "short": "Skip 1 card each neighborhood",
       "iconKey": "item-hall-pass"
     },
     {
@@ -850,7 +850,7 @@
       ],
       "name": "Lucky collar",
       "price": "luckyCollar",
-      "short": "Every owner +1♥ max",
+      "short": "+1 max ♥ for every owner",
       "iconKey": "item-lucky-collar"
     },
     {
@@ -1483,7 +1483,7 @@
       "id": "raincoats",
       "art": "card-raincoats",
       "duration": "run",
-      "effect": "Puddles don't muddy you",
+      "effect": "No Muddy from puddles",
       "effects": [
         {
           "duration": "run",
@@ -1498,7 +1498,7 @@
       "id": "rushHour",
       "art": "card-rush-hour",
       "duration": "nextZone",
-      "effect": "Tips, treats ×2, more bumps",
+      "effect": "Tips, treats ×2, more obstacles",
       "effects": [
         {
           "by": "rushHourTips",

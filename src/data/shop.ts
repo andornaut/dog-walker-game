@@ -8,7 +8,7 @@ export const SHOP_GEAR = {
     effects: [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "big"] }],
     name: "Dog whistle",
     price: "dogWhistle",
-    short: "Big dogs dodge too",
+    short: "Medium and big dogs dodge too",
   },
   fannyPack: {
     effects: [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
@@ -20,13 +20,13 @@ export const SHOP_GEAR = {
     effects: [{ kind: "skipOption" }],
     name: "Hall pass",
     price: "hallPass",
-    short: "1 skip per neighborhood",
+    short: "Skip 1 card each neighborhood",
   },
   luckyCollar: {
     effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],
     name: "Lucky collar",
     price: "luckyCollar",
-    short: "Every owner +1♥ max",
+    short: "+1 max ♥ for every owner",
   },
   runningShoes: {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],

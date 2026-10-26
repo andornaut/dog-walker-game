@@ -4,7 +4,7 @@ import type { Hint } from "./types";
 
 export const HINTS = {
   card: {
-    text: "Each option shows its cost. Hold one.",
+    text: "Each option shows its cost. Hold one for details.",
     trigger: { kind: "card" },
   },
   drag: {
@@ -52,7 +52,7 @@ export const HINTS = {
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Squirrels are safe. Others bump!",
+    text: "Squirrels never bump, but they tempt a pull.",
     trigger: { kind: "pullLanded" },
   },
   tip: {

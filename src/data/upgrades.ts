@@ -48,7 +48,7 @@ export const UPGRADES = {
   raincoats: {
     art: "card-raincoats",
     duration: "run",
-    effect: "Puddles don't muddy you",
+    effect: "No Muddy from puddles",
     effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
     kind: "boost",
     name: "Raincoats",
@@ -56,7 +56,7 @@ export const UPGRADES = {
   rushHour: {
     art: "card-rush-hour",
     duration: "nextZone",
-    effect: "Tips, treats ×2, more bumps",
+    effect: "Tips, treats ×2, more obstacles",
     effects: [
       {
         by: "rushHourTips",
