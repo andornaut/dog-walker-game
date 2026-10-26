@@ -1081,9 +1081,9 @@ def dressed(top, **q):
     return rim(edged(person(top, **q)), LIT)
 
 
-def stripes(g, x, y0, y1, w, b):
-    """Layout rows y0 to y1 - 1 of the thief's stripes, from x, w wide: white where (row - b) % 4 < 2, else
-    ink. Drawn in pixels at the grid's scale, every stripe pair 4 x scale rows tall (white the shorter half),
+def stripes(g, x, y0, y1, w, b, light="white"):
+    """Layout rows y0 to y1 - 1 of the thief's stripes, from x, w wide: light where (row - b) % 4 < 2, else
+    ink. The sleeves take lgrey for light, so the arms stay apart from the white-striped chest. Drawn in pixels at the grid's scale, every stripe pair 4 x scale rows tall (white the shorter half),
     so drawn bigger the stripes stay even instead of breaking up into 1px rows."""
     s = scale_of(g)
     px = raster(g)
@@ -1094,14 +1094,14 @@ def stripes(g, x, y0, y1, w, b):
     period = max(2, e(4))
     anchor = e(20 + b)
     for r in range(e(y0), e(y1)):
-        px.rect(e(x), r, max(1, e(x + w) - e(x)), 1, "white" if (r - anchor) % period < period // 2 else "ink")
+        px.rect(e(x), r, max(1, e(x + w) - e(x)), 1, light if (r - anchor) % period < period // 2 else "ink")
 
 
 def thief_top(g, b):
     """The thief coming down the road: striped shirt, beanie, mask and the loot sack over his shoulder."""
     stripes(g, 9, 21 + b, 34 + b, 14, b)
     for x in (5, 23):
-        stripes(g, x, 22 + b, 31 + b, 4, b)
+        stripes(g, x, 22 + b, 31 + b, 4, b, "lgrey")
         g.rect(x, 31 + b, 4, 3, "skin2")
     # the loot sack slung over the shoulder: its neck tied and flared at the shoulder, the bag bulging
     # below it, a $ on its face
@@ -1158,10 +1158,10 @@ def thief_fleeing(stride):
     # both hang from the shoulder at row 22, as his walking arms do
     for x, back in ((5, s < 0), (23, s > 0)):
         if back:
-            stripes(g, x, 22 + b, 32 + b, 4, b)
+            stripes(g, x, 22 + b, 32 + b, 4, b, "lgrey")
             g.rect(x, 32 + b, 4, 3, "skin2")
         else:
-            stripes(g, x, 22 + b, 26 + b, 4, b)
+            stripes(g, x, 22 + b, 26 + b, 4, b, "lgrey")
             g.rect(x + (1 if x < 16 else -1), 26 + b, 3, 2, "skin2")
     stripes(g, 9, 21 + b, 34 + b, 14, b)
     g.p(9, 21 + b, None)
