@@ -26,7 +26,7 @@ export const SHOP_GEAR = {
     effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],
     name: "Lucky collar",
     price: "luckyCollar",
-    short: "+1 max ♥ for every owner",
+    short: "+1 max ♥ for every dog's owner",
   },
   runningShoes: {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],
