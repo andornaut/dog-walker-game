@@ -36,8 +36,15 @@ const NEUTRAL = {
   neutralSlate: 0x727272,
 } as const;
 
+// Colours outside Endesga 32 and the neutral greys, each kept to one use: deepAmber is the box
+// behind a picked item's portrait or icon, a step toward orange from amber so it stands apart
+// from the tan box an owned item has.
+const EXTRA = {
+  deepAmber: 0xfc9124,
+} as const;
+
 // Every colour the scenes draw with, by name.
-export const PALETTE = { ...ENDESGA, ...NEUTRAL } as const;
+export const PALETTE = { ...ENDESGA, ...NEUTRAL, ...EXTRA } as const;
 
 // The ramp every disabled thing's grey copy is drawn in, lightest first: white, the neutral
 // greys, then ink.

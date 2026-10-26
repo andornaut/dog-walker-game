@@ -94,14 +94,14 @@ export function selectLook(state: TileState): SelectLook {
 }
 
 // The box behind an item's portrait or icon.
-export type PictureBox = "amber" | typeof GREYED.box | "tan";
+export type PictureBox = "deepAmber" | typeof GREYED.box | "tan";
 
 // A picture's box, from its art: grey art sits on the grey box, and art in full color on the
-// tan box an owned item has, or the amber one while picked. An item the player can buy now is
+// tan box an owned item has, or the deep amber one while picked. An item the player can buy now is
 // a disabled tile with its art in color, so it sits on tan.
 export function pictureBox(look: Pick<ItemLook, "art" | "state">): PictureBox {
   if (look.art === "grey") {
     return GREYED.box;
   }
-  return look.state === "selected" ? "amber" : "tan";
+  return look.state === "selected" ? "deepAmber" : "tan";
 }
