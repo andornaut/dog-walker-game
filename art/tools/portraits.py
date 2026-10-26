@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
 import minis  # noqa: E402
 import owners  # noqa: E402
-from pixel import DARKER, K, Grid, edged, to_image  # noqa: E402
+from pixel import DARKER, K, Grid, edged, raster, scale_of, to_image  # noqa: E402
 
 S = 64
 
@@ -414,31 +414,32 @@ def smile(g, x, y, lips="ink", teeth="white"):
 
 def shade_under(g, skin, sh, x0, x1, top):
     """A 1px shadow on the face just under whatever hair or cap sits over it, between columns x0 and x1."""
-    skin, sh = K[skin], K[sh]
-    for x in range(x0, x1 + 1):
-        for y in range(top, S):
-            if g.px[y][x] == skin:
-                if y > top and g.px[y - 1][x] not in (skin, None):
-                    g.p(x, y, sh)
+    px, k, skin, sh = raster(g).px, scale_of(g), K[skin], K[sh]
+    for x in range(math.floor(x0 * k), math.floor((x1 + 1) * k)):
+        for y in range(math.floor(top * k), len(px)):
+            if px[y][x] == skin:
+                if y > top * k and px[y - 1][x] not in (skin, None):
+                    px[y][x] = sh
                 break
 
 
 def shade_near(g, skin, sh, y0, y1):
     """A 1px shadow down the near (right) edge of the face from row y0 to y1, beside the eyes."""
-    skin = K[skin]
-    for y in range(y0, y1 + 1):
-        xs = [x for x in range(S) if g.px[y][x] == skin]
+    px, k, skin = raster(g).px, scale_of(g), K[skin]
+    for y in range(math.floor(y0 * k), math.floor((y1 + 1) * k)):
+        xs = [x for x, c in enumerate(px[y]) if c == skin]
         if xs:
-            g.p(max(xs), y, sh)
+            px[y][max(xs)] = K.get(sh, sh)
 
 
 def ring(g, cx, cy, rx, ry, c):
     """A 1px oval outline."""
-    for y in range(S):
-        for x in range(S):
-            d = math.hypot((x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry)
-            if abs(d - 1) * min(rx, ry) < 0.5:
-                g.p(x, y, c)
+    px, k = raster(g).px, scale_of(g)
+    for y in range(len(px)):
+        for x in range(len(px[0])):
+            d = math.hypot((x + 0.5 - cx * k) / (rx * k), (y + 0.5 - cy * k) / (ry * k))
+            if abs(d - 1) * min(rx, ry) * k < 0.5:
+                px[y][x] = K.get(c, c)
 
 
 def bust(g, c, sh, li=None, neck="skin2", cx=32, cy=62, rx=27, ry=16, nx=25, nw=9):
@@ -605,25 +606,42 @@ WALKERS = {
 # How big each dog's portrait is drawn in the 64px well, sat on the bottom edge: the side that brings its
 # inked area nearest its size class's target, so the classes step evenly (the square root of the area about
 # 35, 40 and 46px). The big dogs fill the well.
+# How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, Ada
+# smaller as the youngest.
+WALKER_SIDE = {"ada": 64, "ben": 72, "casey": 64, "trista": 72}
 PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "koda": 64, "nugget": 53, "penny": 64, "pierre": 56,
                  "snowball": 63, "zippy": 53}
 
 
+def framed(px, side):
+    """Rows px set in a side x side frame, centred across and on its bottom edge, cropped where they overflow it."""
+    px = px[max(0, len(px) - side):]
+    w = len(px[0])
+    if w >= side:
+        left = (w - side) // 2
+        rows = [row[left:left + side] for row in px]
+    else:
+        left = (side - w) // 2
+        rows = [[None] * left + row + [None] * (side - w - left) for row in px]
+    return [[None] * side for _ in range(side - len(rows))] + rows
+
+
 def image(draw, side=S):
-    """draw's portrait, drawn at side over S of its design, sat on the bottom edge of an S x S image."""
+    """draw's portrait, drawn at side over S of its design, sat on the bottom edge of an S x S image; a side over
+    S zooms in, cropping the shoulders."""
     if side == S:
         g = edged(Grid(S, S), "ink", close=True)
         draw(g)
         return to_image(g.outlined())
     g = edged(minis.Mini(side / S, S, S), "ink", close=True)
     draw(g)
-    return to_image(dogs.padded(g.outlined(), S))
+    return to_image(framed(g.outlined(), S))
 
 
 def portraits():
     """{key: (draw, side)} for every dog's portrait, then every walker's."""
     return {**{f"portrait-dog-{n}": (d, PORTRAIT_SIDE[n]) for n, d in PORTRAITS.items()},
-            **{f"portrait-walker-{n}": (d, S) for n, d in WALKERS.items()}}
+            **{f"portrait-walker-{n}": (d, WALKER_SIDE[n]) for n, d in WALKERS.items()}}
 
 
 def faces():
