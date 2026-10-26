@@ -1408,7 +1408,7 @@
       "explainHoldSeconds": 0.3,
       "firingHoldSeconds": 3,
       "hitStopSeconds": 1,
-      "laneMove": 0.13,
+      "laneMove": 0.11,
       "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.3,
       "moverHopSeconds": 0.3,
