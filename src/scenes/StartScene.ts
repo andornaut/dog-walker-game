@@ -41,6 +41,7 @@ import {
   type HomeLoadout,
   packCapacity,
   partingSpeech,
+  pocketOrder,
   type Purchase,
   purchasePrice,
   shortDollarAmountText,
@@ -229,7 +230,7 @@ function walkerIds(): WalkerId[] {
 const SECTION_IDS: readonly SectionId[] = ["walker", "dogs", "pocket"];
 
 function gearIds(): GearId[] {
-  return Object.keys(gameData.shopGear) as GearId[];
+  return pocketOrder(gameData);
 }
 
 type DetailTarget =
@@ -278,7 +279,7 @@ function dogFace(hit: Rect): Rect {
   return { ...hit, height: hit.height - DOG_TILE_INSET * 2, y: hit.y + DOG_TILE_INSET };
 }
 
-// The Pocket section's cells, in shop order; each draws its tile inset inside.
+// The Pocket section's cells, in pocketOrder; each draws its tile inset inside.
 function gearSlots(): Rect[] {
   return gridRects(POCKET.cells, gearIds().length, POCKET.origin);
 }
@@ -1643,7 +1644,7 @@ export class StartScene extends Scene {
     });
   }
 
-  // The Pocket section's tiles, one per gear item in shop order; a hold shows an item's
+  // The Pocket section's tiles, one per gear item in pocketOrder; a hold shows an item's
   // effect. Pocketing an item replaces any other, so the Pocket is never full.
   private drawPocket(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;

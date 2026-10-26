@@ -7,7 +7,9 @@ import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
+import type { GearId, LiveTuning } from "../data/types";
 import { WORLD } from "../data/world";
+import { price } from "../rules/shop";
 import { cents, readTable } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { newPlayerSave } from "../testing/saves";
@@ -23,6 +25,7 @@ import {
   type HomeTap,
   packCapacity,
   partingSpeech,
+  pocketOrder,
   type Purchase,
   purchasePrice,
   shortDollarAmountText,
@@ -151,6 +154,60 @@ describe("packCapacity", () => {
   it("holds one dog per slot, and no more than a pack can, however many slots", () => {
     expect(packCapacity(data, { dogSlots: 1 })).toBe(1);
     expect(packCapacity(data, { dogSlots: 9 })).toBe(3);
+  });
+});
+
+describe("pocketOrder", () => {
+  const shopOrder = Object.keys(SHOP_GEAR) as GearId[];
+  const priceKey = (gear: GearId) => SHOP_GEAR[gear].price;
+  const listPrice = (tuning: LiveTuning, gear: GearId) => price(tuning, priceKey(gear));
+  const withGearPrices = (pick: (gear: GearId) => number): LiveTuning => ({
+    ...TEST_TUNING,
+    money: {
+      ...TEST_TUNING.money,
+      prices: {
+        ...TEST_TUNING.money.prices,
+        ...Object.fromEntries(shopOrder.map((gear) => [priceKey(gear), pick(gear)])),
+      },
+    },
+  });
+  const dollarPrices = shopOrder.map((gear) => TEST_TUNING.money.prices[priceKey(gear)]);
+  const cheapest = shopOrder.reduce((a, b) =>
+    listPrice(TEST_TUNING, b) < listPrice(TEST_TUNING, a) ? b : a,
+  );
+  const tunings: readonly [string, LiveTuning][] = [
+    ["today's prices", TEST_TUNING],
+    ["every gear item at one price", withGearPrices(() => Math.max(...dollarPrices))],
+    [
+      "the cheapest item retuned above the dearest",
+      withGearPrices((gear) =>
+        gear === cheapest
+          ? Math.max(...dollarPrices) + 1
+          : TEST_TUNING.money.prices[priceKey(gear)],
+      ),
+    ],
+  ];
+
+  it.each(tunings)(
+    "lists every gear item once, cheapest first, ties in shop order, at %s",
+    (_, tuning) => {
+      const order = pocketOrder({ shopGear: SHOP_GEAR, tuning });
+      expect([...order].sort()).toEqual([...shopOrder].sort());
+      order.slice(1).forEach((gear, i) => {
+        const before = order[i] as GearId;
+        const step = listPrice(tuning, gear) - listPrice(tuning, before);
+        expect(step).toBeGreaterThanOrEqual(0);
+        if (step === 0) {
+          expect(shopOrder.indexOf(gear)).toBeGreaterThan(shopOrder.indexOf(before));
+        }
+      });
+    },
+  );
+
+  it("moves an item to the end when a retune makes it the dearest", () => {
+    const [, retuned] = tunings[2] as [string, LiveTuning];
+    expect(pocketOrder({ shopGear: SHOP_GEAR, tuning: TEST_TUNING })[0]).toBe(cheapest);
+    expect(pocketOrder({ shopGear: SHOP_GEAR, tuning: retuned }).at(-1)).toBe(cheapest);
   });
 });
 
