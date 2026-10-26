@@ -7,6 +7,7 @@ type LineKey = { [K in keyof HomeText]: HomeText[K] extends string ? K : never }
 export const HOME_TEXT_FIELDS = {
   detail: {
     dogFee: ["fee"],
+    dogHeavy: ["speed"],
     dogKind: ["hearts", "size"],
     dogOwner: ["owner", "role"],
     dogTotals: ["fired", "walks", "zones"],

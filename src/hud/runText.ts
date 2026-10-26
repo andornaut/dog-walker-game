@@ -8,7 +8,7 @@ export const STRIP_LINE_FIELDS = {
   effectStart: ["effect", "name"],
   fired: ["dog", "owner"],
   fullPackHome: ["amount"],
-  heavyDog: ["dog"],
+  heavyDog: ["dog", "speed"],
   kindWords: ["owner"],
   lowHearts: ["owner"],
   luckyWallet: ["amount"],

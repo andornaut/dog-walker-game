@@ -1,6 +1,6 @@
 import type { DogId, GameData, GearId } from "../data/types";
 import { fillLine } from "../lib/lines";
-import { capitalize } from "../rules/effectText";
+import { capitalize, gearShort } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
@@ -82,7 +82,7 @@ export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
     return {
       blocked: null,
       id: `gear:${gear}`,
-      line: data.shopGear[gear].short,
+      line: gearShort(data, gear),
       name: data.shopGear[gear].name,
       price: purchasePrice(data, owned, purchase),
       purchase,

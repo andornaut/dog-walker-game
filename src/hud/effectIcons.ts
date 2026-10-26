@@ -1,5 +1,6 @@
 import { kebabCase } from "../assets/spriteKeys";
 import type { GameData, GearId, UpgradeId, WalkerId, WalkerPerkId } from "../data/types";
+import { gearShort } from "../rules/effectText";
 import { walkLength } from "../rules/route";
 import { read } from "../rules/units";
 import type { RunState } from "../state/runState";
@@ -105,12 +106,12 @@ export function effectName(
 
 // What the item does, in one line: the perk's and the upgrade's effect, the gear's short line.
 export function effectLine(
-  data: Pick<GameData, "shopGear" | "upgrades" | "walkerPerks">,
+  data: Pick<GameData, "shopGear" | "tuning" | "upgrades" | "walkerPerks">,
   item: EffectItem,
 ): string {
   switch (item.kind) {
     case "gear":
-      return data.shopGear[item.gear].short;
+      return gearShort(data, item.gear);
     case "perk":
       return data.walkerPerks[item.perk].effect;
     case "upgrade":

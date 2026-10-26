@@ -22,7 +22,7 @@ export const HOME_TEXT = {
   },
   detail: {
     dogFee: "Pay {fee} a neighborhood",
-    dogHeavy: "Heavy: slower lane changes",
+    dogHeavy: "Heavy: {speed} slower lane changes",
     dogKind: "{size} · {hearts}♥",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",

@@ -73,7 +73,7 @@ export const RUN_TEXT = {
     effectStart: "{name}: {effect}",
     fired: "{owner} fired you! {dog} heads home.",
     fullPackHome: "Full pack home! +{amount}",
-    heavyDog: "{dog} is heavy: slower lane changes.",
+    heavyDog: "{dog} is heavy: {speed} slower lane changes.",
     kindWords: "Second chance! {owner} lets it go.",
     lowHearts: "{owner} has 1♥ left!",
     luckyNeighbor: "A neighbor pets the pack! Everyone +1♥",

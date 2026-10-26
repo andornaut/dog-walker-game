@@ -5,11 +5,20 @@ import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { TUNING } from "../data/tuning";
-import type { Effect, MoneyKey, MultiplierKey } from "../data/types";
+import type { Effect, GearId, MoneyKey, MultiplierKey } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { fillNames } from "../lib/lines";
+import { fillNames, placeholders } from "../lib/lines";
 import { TEST_TUNING } from "../testing/tuning";
-import { capitalize, effectText, formatDollars, sentenceList, SIZE_NAMES } from "./effectText";
+import {
+  capitalize,
+  effectText,
+  formatDollars,
+  gearShort,
+  heavySpeedText,
+  sentenceList,
+  SIZE_NAMES,
+} from "./effectText";
+import { modifiersOf, modifierValue } from "./modifiers";
 import { cents, read } from "./units";
 
 // The game's chances, which the test tuning pins to 0, so a dodge reads as one in so many.
@@ -135,6 +144,38 @@ describe("effectText", () => {
       expect(effectText(data, effects)).toBe(text);
     }
   });
+});
+
+// A share of the base lane-change speed as an unsigned whole percent.
+const unsignedPercent = (fraction: number) => `${Math.abs(Math.round(fraction * 100))}%`;
+
+describe("heavySpeedText", () => {
+  it("gives bigDogAgility as an unsigned percent of the base lane-change speed", () => {
+    expect(heavySpeedText(TEST_TUNING)).toBe(
+      unsignedPercent(read(TEST_TUNING, "multipliers", "bigDogAgility")),
+    );
+  });
+});
+
+describe("gearShort", () => {
+  const gearData = { shopGear: gameData.shopGear, tuning: TEST_TUNING };
+  const agilityAdded = (gear: GearId) =>
+    modifiersOf(gameData.shopGear[gear].effects)
+      .filter((modifier) => modifier.operation === "add" && modifier.stat === "agility")
+      .reduce((sum, modifier) => sum + modifierValue(TEST_TUNING, modifier), 0);
+
+  it.each(Object.keys(gameData.shopGear) as GearId[])(
+    "fills %s's shop line's {percent} with the agility it adds, leaving no names",
+    (gear) => {
+      const { short } = gameData.shopGear[gear];
+      expect(placeholders(short).every((name) => name === "percent")).toBe(true);
+      expect(placeholders(short).length === 0 || agilityAdded(gear) !== 0).toBe(true);
+      expect(gearShort(gearData, gear)).toBe(
+        fillNames(short, { percent: unsignedPercent(agilityAdded(gear)) }),
+      );
+      expect(placeholders(gearShort(gearData, gear))).toEqual([]);
+    },
+  );
 });
 
 describe("formatDollars", () => {

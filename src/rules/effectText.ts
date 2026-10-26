@@ -7,8 +7,10 @@ import type {
   Effect,
   EncounterId,
   GameData,
+  GearId,
   HeartsEffect,
   HomeText,
+  LiveTuning,
   Modifier,
   MoneyEffect,
   Size,
@@ -18,7 +20,7 @@ import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
 import { fillLine, fillNames } from "../lib/lines";
 import type { ModifiedValue } from "./modified";
-import { modifierValue } from "./modifiers";
+import { modifiersOf, modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
 
 type TextData = Pick<GameData, "debuffs" | "encounters" | "homeText" | "tuning">;
@@ -73,10 +75,30 @@ function heartsText(words: EffectWords, effect: HeartsEffect): string {
   return fillLine(HOME_TEXT_FIELDS.effect, words, "heartsEach", { hearts });
 }
 
+// A fraction's size as a whole percent, unsigned: 0.3 and -0.3 both as "30%".
+function percentMagnitude(fraction: number): string {
+  return `${Math.abs(Math.round(fraction * 100))}%`;
+}
+
 // A fraction as a signed whole percent: 0.3 as "+30%", -0.5 as "−50%".
 function percentText(fraction: number): string {
-  const percent = Math.round(fraction * 100);
-  return `${sign(percent)}${Math.abs(percent)}%`;
+  return `${sign(Math.round(fraction * 100))}${percentMagnitude(fraction)}`;
+}
+
+// How much a heavy dog slows the pack's lane changes, as a percent of the base lane-change
+// speed: bigDogAgility as "10%".
+export function heavySpeedText(tuning: LiveTuning): string {
+  return percentMagnitude(read(tuning, "multipliers", "bigDogAgility"));
+}
+
+// A gear item's shop line, its {percent} the share of the base lane-change speed its agility
+// modifiers add: Running shoes' "30% faster lane changes".
+export function gearShort(data: Pick<GameData, "shopGear" | "tuning">, gear: GearId): string {
+  const { effects, short } = data.shopGear[gear];
+  const agility = modifiersOf(effects)
+    .filter((modifier) => modifier.operation === "add" && modifier.stat === "agility")
+    .reduce((sum, modifier) => sum + modifierValue(data.tuning, modifier), 0);
+  return fillNames(short, { percent: percentMagnitude(agility) });
 }
 
 function addedText(modifier: Modifier, value: number): string {

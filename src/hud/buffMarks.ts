@@ -3,7 +3,7 @@ import { fillLine, fillNames } from "../lib/lines";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
 import { isHeavy, packSizeRaise } from "../rules/dogs";
-import { formatDollars } from "../rules/effectText";
+import { formatDollars, heavySpeedText } from "../rules/effectText";
 import type { ModifiedValue } from "../rules/modified";
 import { standingModified } from "../rules/standing";
 import { cents } from "../rules/units";
@@ -372,7 +372,10 @@ export function walkStartMarks(
       })),
       ...heavy.map((dog): MessageLine => ({
         icon: "hint",
-        text: fillLine(STRIP_LINE_FIELDS, strip, "heavyDog", { dog: data.dogs[dog].name }),
+        text: fillLine(STRIP_LINE_FIELDS, strip, "heavyDog", {
+          dog: data.dogs[dog].name,
+          speed: heavySpeedText(data.tuning),
+        }),
       })),
     ],
   };

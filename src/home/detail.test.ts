@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { sizeHearts } from "../rules/dogs";
-import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
+import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
@@ -41,7 +41,7 @@ describe("dogDetail", () => {
         hearts: String(sizeHearts(data.tuning, dog)),
         size: capitalize(SIZE_NAMES[dog.size]),
       }),
-      text.dogHeavy,
+      fillNames(text.dogHeavy, { speed: heavySpeedText(data.tuning) }),
       fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
       fillNames(text.dogFee, { fee: dogFeeText(data) }),
       fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),

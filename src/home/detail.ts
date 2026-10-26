@@ -1,7 +1,7 @@
 import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
 import { isHeavy, sizeHearts } from "../rules/dogs";
-import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
+import { capitalize, effectText, heavySpeedText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
@@ -77,7 +77,9 @@ export function dogDetail(
         hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
       }),
-      ...(isHeavy(data.dogs[dog]) ? [text.dogHeavy] : []),
+      ...(isHeavy(data.dogs[dog])
+        ? [fillLine(FIELDS, text, "dogHeavy", { speed: heavySpeedText(data.tuning) })]
+        : []),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
       fillLine(FIELDS, text, "dogFee", { fee }),
       fillLine(FIELDS, text, "dogTotals", {
