@@ -34,6 +34,7 @@ import {
   type StatsTab,
   statsTabRects,
   walksBottom,
+  walksHeadingTops,
   wallRowHeight,
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
@@ -380,18 +381,19 @@ export class StatsScene extends Scene {
     const { stats } = profileSave(this);
     const { outcomes, overall } = overallRows(gameData, stats);
     const words = gameData.menuText.stats;
-    const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
+    const { rowsY } = STATS_LAYOUT.walks;
     const sections = [
       { heading: words.sections.overall, rows: overall },
       { heading: words.sections.runs, rows: outcomes },
     ];
-    let y = top;
-    for (const { heading, rows } of sections) {
+    const counts = sections.map(({ rows }) => rows.length);
+    const tops = walksHeadingTops(counts);
+    sections.forEach(({ heading, rows }, i) => {
+      const y = tops[i] ?? 0;
       this.text(LEFT, y, heading, { font: "title" });
       this.rows(y + rowsY, rows);
-      y += rowsY + rows.length * PITCH + sectionGap;
-    }
-    return walksBottom(sections.map(({ rows }) => rows.length));
+    });
+    return walksBottom(counts);
   }
 
   // A block per dog: its face and name, then its walks, neighborhoods and firings, one per

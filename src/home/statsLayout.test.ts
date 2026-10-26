@@ -36,6 +36,7 @@ import {
   statsScrollbar,
   statsTabRects,
   walksBottom,
+  walksHeadingTops,
   wallRowHeight,
 } from "./statsLayout";
 import { overallRows } from "./statsView";
@@ -178,6 +179,36 @@ describe("the Dogs tab's blocks", () => {
   });
 });
 
+// The Walks tab's sections, with a best walk with the fullest pack, spaced like the Dogs tab's
+// blocks: the first heading level with the first block, and each later heading the blocks' gap
+// under the previous section's last row's pitch.
+describe("the Walks tab's sections", () => {
+  const fullPack = (Object.keys(gameData.dogs) as DogId[]).slice(
+    0,
+    read(gameData.tuning, "counts", "packSizeMax"),
+  );
+  const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
+  const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
+  const sections = [
+    { heading: words.sections.overall, rows: overall.length },
+    { heading: words.sections.runs, rows: outcomes.length },
+  ];
+  const tops = walksHeadingTops(sections.map(({ rows }) => rows));
+  it.each(
+    sections.map(({ heading }, i) => {
+      const previous = sections[i - 1];
+      const previousTop = tops[i - 1] ?? 0;
+      const expected =
+        previous === undefined
+          ? dogBlockTop(0)
+          : previousTop + STATS_LAYOUT.walks.rowsY + previous.rows * rows.pitch + dogs.gap;
+      return [heading, tops[i], expected] as const;
+    }),
+  )("puts the %s heading where the Dogs tab's spacing does", (_, top, expected) => {
+    expect(top).toBe(expected);
+  });
+});
+
 // Nothing drawn on a tab reaches the scrollbar, which sits inside the panel's frame.
 describe("the scrollbar", () => {
   it.each<[string, number]>([
@@ -214,10 +245,10 @@ describe("each tab's scroll", () => {
   const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
   const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
   const walks = [overall.length, outcomes.length];
-  const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
-  const walksHeight = walks.reduce((sum, n) => sum + rowsY + n * rows.pitch + sectionGap, 0);
+  const lastHeading = walksHeadingTops(walks).at(-1) ?? 0;
+  const walksLastRow = lastHeading + STATS_LAYOUT.walks.rowsY + (outcomes.length - 1) * rows.pitch;
   it.each<[string, number, number, boolean]>([
-    ["Walks", walksBottom(walks), inkBottom(top + walksHeight - sectionGap - rows.pitch), false],
+    ["Walks", walksBottom(walks), inkBottom(walksLastRow), false],
     [
       "Dogs",
       dogsBottom(dogCount),

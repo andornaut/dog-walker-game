@@ -20,6 +20,8 @@ const PANEL = { height: 444, width: 344, x: 8, y: 108 };
 // The panel's cream inside its 2px frame, where every tab's content scrolls, clipped to it.
 const VIEW = { height: PANEL.height - 4, width: PANEL.width - 4, x: PANEL.x + 2, y: PANEL.y + 2 };
 const PITCH = 17;
+// Between the Dogs tab's blocks and the Walks tab's sections, under the last row's pitch.
+const BLOCK_GAP = 12;
 // Beside content taller than the view: the track at the view's right edge, as tall as the view.
 const SCROLLBAR: ScrollbarSpec = {
   thumbInset: 1,
@@ -57,7 +59,7 @@ export const STATS_LAYOUT = {
   // A 1px tan rule runs ruleAbove over each block after the first, ruleDx past the rows' ends.
   dogs: {
     faceSize: 32,
-    gap: 12,
+    gap: BLOCK_GAP,
     nameDx: 40,
     nameY: 12,
     rowsY: 38,
@@ -78,9 +80,10 @@ export const STATS_LAYOUT = {
   // the odd pixel with the middle tab.
   tab: { gap: 8, height: 44, widths: [109, 110, 109], x: PANEL.x, y: 56 },
   view: VIEW,
-  // The Walks tab: each section's heading with its capitals at top, its rows rowsY under it,
-  // and the next heading sectionGap under the last row's pitch.
-  walks: { rowsY: 20, sectionGap: 6, top: PANEL.y + 10 },
+  // The Walks tab: the first section's heading with its capitals at top, level with the Dogs
+  // tab's first block, each section's rows rowsY under its heading, and the next heading
+  // sectionGap under the last row's pitch, as far as the Dogs tab's blocks are apart.
+  walks: { rowsY: 20, sectionGap: BLOCK_GAP, top: PANEL.y + 10 },
   // The badge wall: the heading and the earned count with their capitals at headingY, then one
   // badge per row from y, gap apart, each the badge badgeTop under the row's top then a text
   // column of up to lines lines at 2x from x (the name, the goal, then a locked badge's
@@ -146,12 +149,27 @@ export function dogBlockTop(index: number): number {
   return top + index * (rowsY + DOG_STATS.length * PITCH + gap);
 }
 
+// The capitals' top of each Walks tab section's heading, scrolled to its top, for sections of
+// rows.
+export function walksHeadingTops(sections: readonly number[]): number[] {
+  const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
+  let y = top;
+  return sections.map((rows) => {
+    const heading = y;
+    y += rowsY + rows * PITCH + sectionGap;
+    return heading;
+  });
+}
+
 // The bottom of each tab's content as laid out, scrolled to its top: the Walks tab with
 // sections of rows, the Dogs tab with dogs blocks and the Badges tab with badges rows.
 export function walksBottom(sections: readonly number[]): number {
-  const { rowsY, sectionGap, top } = STATS_LAYOUT.walks;
-  const height = sections.reduce((sum, rows) => sum + rowsY + rows * PITCH + sectionGap, 0);
-  return top + height - sectionGap + STATS_LAYOUT.scroll.padBottom;
+  const { rowsY, top } = STATS_LAYOUT.walks;
+  const tops = walksHeadingTops(sections);
+  const last = tops.at(-1);
+  const rows = sections.at(-1) ?? 0;
+  const end = last === undefined ? top : last + rowsY + rows * PITCH;
+  return end + STATS_LAYOUT.scroll.padBottom;
 }
 
 export function dogsBottom(dogs: number): number {

@@ -2354,7 +2354,7 @@
       },
       "walks": {
         "rowsY": 20,
-        "sectionGap": 6,
+        "sectionGap": 12,
         "top": 118
       },
       "wall": {
