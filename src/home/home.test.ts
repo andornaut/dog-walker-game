@@ -252,12 +252,13 @@ describe("rosterRows", () => {
   );
 
   it.each(cases)(
-    "holds exactly the %s dogs, cheapest first, ties in data order, starters first",
+    "holds exactly the %s dogs, those for sale cheapest first with ties in data order, starters in the middle",
     (_, tuning, size, row) => {
       const dogs = rosterRows({ dogs: DOGS, tuning })[row] ?? [];
       expect([...dogs].sort()).toEqual(dataOrder.filter((dog) => DOGS[dog].size === size).sort());
-      dogs.slice(1).forEach((dog, i) => {
-        const before = dogs[i] as DogId;
+      const forSale = dogs.filter((dog) => DOGS[dog].unlock !== "start");
+      forSale.slice(1).forEach((dog, i) => {
+        const before = forSale[i] as DogId;
         const step = listPrice(tuning, dog) - listPrice(tuning, before);
         expect(step).toBeGreaterThanOrEqual(0);
         if (step === 0) {
@@ -265,7 +266,8 @@ describe("rosterRows", () => {
         }
       });
       const starters = dogs.filter((dog) => DOGS[dog].unlock === "start");
-      expect(dogs.slice(0, starters.length)).toEqual(starters);
+      const first = Math.floor(forSale.length / 2);
+      expect(dogs.slice(first, first + starters.length)).toEqual(starters);
     },
   );
 });
