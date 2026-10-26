@@ -116,7 +116,7 @@ export function gearDetail(
   };
 }
 
-// A walker's agility word and perk lines. An owned walker's status says so; one not owned is
+// A walker's agility and perk lines. An owned walker's status says so; one not owned is
 // locked, and its status names the zone whose finish unlocks it.
 export function walkerDetail(
   data: DetailData,

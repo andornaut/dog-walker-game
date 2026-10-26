@@ -85,6 +85,14 @@ function percentText(fraction: number): string {
   return `${sign(Math.round(fraction * 100))}${percentMagnitude(fraction)}`;
 }
 
+// An agility as a signed whole percent against the base lane-change speed, an agility of 1:
+// 1.4 as "+40%", 0.9 as "−10%", or null for one that rounds to the base, which shows no
+// lane-change line.
+export function agilityPercent(agility: number): string | null {
+  const fraction = agility - 1;
+  return Math.round(fraction * 100) === 0 ? null : percentText(fraction);
+}
+
 // How much a heavy dog slows the pack's lane changes, as a percent of the base lane-change
 // speed: bigDogAgility as "10%".
 export function heavySpeedText(tuning: LiveTuning): string {

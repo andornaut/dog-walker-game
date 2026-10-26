@@ -15,11 +15,17 @@ import type {
 } from "../data/types";
 import { achievementConditionText } from "../rules/achievements";
 import { maxHearts, sizeHearts } from "../rules/dogs";
-import { capitalize, debuffText, effectText, formatDollars, SIZE_NAMES } from "../rules/effectText";
+import {
+  agilityPercent,
+  capitalize,
+  debuffText,
+  effectText,
+  formatDollars,
+  SIZE_NAMES,
+} from "../rules/effectText";
 import { modifiersOf } from "../rules/modifiers";
 import { firstZoneId, walkLength, zoneById } from "../rules/route";
 import { price, unlockPrice } from "../rules/shop";
-import { agilityWord } from "../rules/walkers";
 import { zoneStats } from "../rules/zones";
 import {
   activeValues,
@@ -298,7 +304,7 @@ function walkersSection(data: GameData): Section {
       const name = id === data.defaultWalker ? `${walker.name} (default)` : walker.name;
       return [
         name,
-        `${agilityWord(data.homeText, walker.agility)} (${walker.agility})`,
+        `${agilityPercent(walker.agility) ?? "Base"} (${walker.agility})`,
         data.walkerPerks[walker.perk].name,
         data.walkerPerks[walker.perk].effect,
         walker.unlock === "start" ? "Start" : `Finish zone ${walker.zone}`,

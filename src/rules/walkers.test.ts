@@ -5,7 +5,7 @@ import type { DogId, WalkerId, ZoneId } from "../data/types";
 import { newRun } from "../state/runState";
 import { isHeavy } from "./dogs";
 import { read } from "./units";
-import { newWalkers, packAgility, slowestAgility, walkerAgility } from "./walkers";
+import { newWalkers, packAgility, slowestPackAgility, walkerAgility } from "./walkers";
 
 const WALKER_IDS = Object.keys(gameData.walkers) as WalkerId[];
 
@@ -32,17 +32,30 @@ describe("packAgility", () => {
   const packWith = (count: number) =>
     [...heavy.slice(0, count), ...light.slice(0, 3 - count)] as [DogId, DogId, DogId];
 
-  it("slows every walker by bigDogAgility for each heavy dog, never below the slowest walker", () => {
-    for (const walker of WALKER_IDS) {
-      for (const count of [0, 1, 2, 3]) {
-        const run = newRun(gameData, 3, { dogs: packWith(count), gear: null, walker });
-        const own = walkerAgility(gameData, run.modifiers, walker);
-        const floor = Math.min(own, slowestAgility(gameData));
-        expect(packAgility(gameData, run), `${walker}, ${count}`).toBeCloseTo(
-          Math.max(floor, own + count * perHeavy),
-        );
-      }
+  const minPack = read(gameData.tuning, "multipliers", "minPackAgility");
+  const packs = WALKER_IDS.flatMap((walker) =>
+    [0, 1, 2, 3].map((count) => ({
+      count,
+      run: newRun(gameData, 3, { dogs: packWith(count), gear: null, walker }),
+      walker,
+    })),
+  );
+
+  it.each(packs)(
+    "slows $walker by bigDogAgility for each of $count heavy dogs, never below minPackAgility",
+    ({ count, run, walker }) => {
+      const own = walkerAgility(gameData, run.modifiers, walker);
+      const floor = Math.min(own, minPack);
+      expect(packAgility(gameData, run)).toBeCloseTo(Math.max(floor, own + count * perHeavy));
+    },
+  );
+
+  it("never goes below slowestPackAgility, which the slowest pack reaches", () => {
+    const agilities = packs.map(({ run }) => packAgility(gameData, run));
+    for (const agility of agilities) {
+      expect(agility).toBeGreaterThanOrEqual(slowestPackAgility(gameData) - 1e-9);
     }
+    expect(Math.min(...agilities)).toBeCloseTo(slowestPackAgility(gameData));
   });
 
   it("slows a walker above the slowest by each heavy dog", () => {

@@ -4,8 +4,8 @@ import { gameData } from "../data";
 import type { WalkerId, ZoneId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import type { Change, MoneyChange } from "../rules/causes";
+import { agilityPercent } from "../rules/effectText";
 import { cents, type Hearts } from "../rules/units";
-import { agilityWord } from "../rules/walkers";
 import { perkIconKey } from "./effectIcons";
 import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
 
@@ -105,8 +105,10 @@ describe("celebrationText", () => {
     ]);
   });
 
-  it("names a new walker, with its agility word and perk icon", () => {
-    for (const walker of ["ben", "ada"] satisfies readonly WalkerId[]) {
+  // Every walker, at the base lane-change speed or not.
+  it.each(Object.keys(gameData.walkers) as WalkerId[])(
+    "names new walker %s, with its own agility against the base, if not at it, and perk icon",
+    (walker) => {
       const shown = celebrationText(gameData, { kind: "newWalker", walker });
       const { agility, name, perk } = gameData.walkers[walker];
       expect(shown).toMatchObject({
@@ -118,15 +120,18 @@ describe("celebrationText", () => {
       if (shown.kind !== "newWalker") {
         throw new Error("a new walker's text");
       }
-      const word = agilityWord(gameData.homeText, agility);
+      const percent = agilityPercent(agility);
       const perkName = gameData.walkerPerks[perk].name;
-      const filled = text.newWalker.info.replace("{agility}", word).replace("{perk}", perkName);
+      const filled =
+        percent === null
+          ? fillNames(text.newWalker.infoBase, { perk: perkName })
+          : fillNames(text.newWalker.info, { agility: percent, perk: perkName });
       expect(shown.info.map((part) => part.text).join("")).toBe(filled);
       expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
         { icon: perkIconKey(perk), kind: "icon", text: perkName },
       ]);
-    }
-  });
+    },
+  );
 });
 
 describe("zoneBannerHeading", () => {

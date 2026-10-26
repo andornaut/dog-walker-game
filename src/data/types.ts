@@ -518,17 +518,9 @@ export interface HelpPage {
   readonly title: string;
 }
 
-interface AgilityWord {
-  readonly from: number;
-  readonly word: string;
-}
-
 // The home screen's text. A {name} in a line is filled by code, and each line may use only
 // the names src/home/homeText.ts lists for it.
 export interface HomeText {
-  // An agility's word, by band: the word of the last band whose from the agility reaches, in
-  // ascending order.
-  readonly agilityWords: readonly [AgilityWord, ...AgilityWord[]];
   // The walker's speech bubble, by what happened last. Picking a dog shows its owner's
   // parting quip instead.
   readonly bubble: {
@@ -557,7 +549,8 @@ export interface HomeText {
     readonly gearSubtitle: string;
     readonly priceBuy: string;
     readonly priceLocked: string;
-    // A walker's detail card's agility word and perk with its effect.
+    // A walker's detail card's agility, as agilityPercent says it, left out for a walker at the
+    // base lane-change speed, and perk with its effect.
     readonly walkerAgility: string;
     readonly walkerPerk: string;
     readonly walkerStatus: string;
@@ -655,8 +648,10 @@ export interface HomeText {
   readonly startWalk: string;
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
-  // What the bubble says for an owned walker picked or focused: its agility and perk.
+  // What the bubble says for an owned walker picked or focused: its agility and perk, or its
+  // perk alone in walkerInfoBase for a walker at the base lane-change speed.
   readonly walkerInfo: string;
+  readonly walkerInfoBase: string;
   // What a locked walker's hold card and a tap on its tile say: the goal that unlocks it.
   readonly walkerLocked: string;
 }
@@ -747,10 +742,12 @@ export interface RunText {
   readonly seconds: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about
-  // 28), their agility and perk under their greeting, and the button.
+  // 28), their agility and perk under their greeting (their perk alone in infoBase for a walker
+  // at the base lane-change speed), and the button.
   readonly newWalker: {
     readonly button: string;
     readonly info: string;
+    readonly infoBase: string;
     readonly subtitle: string;
     readonly title: string;
   };

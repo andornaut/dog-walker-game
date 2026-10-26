@@ -33,7 +33,7 @@ import { bumpParts, fireOwnersAtZero, fullPackBonus, payZone, tipValue } from ".
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read } from "../rules/units";
-import { packAgility, slowestAgility } from "../rules/walkers";
+import { packAgility, slowestPackAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
@@ -679,9 +679,8 @@ export function planZone(
     cellLength: geometry.cell.length,
     laneCount: geometry.laneCount,
     laneInset: geometry.cell.inset,
-    // The slowest walker's lane move sets the row spacing, so every walker fits every gap:
-    // big dogs never slow the pack below it.
-    laneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestAgility(data),
+    // The slowest pack's lane move sets the row spacing, so every pack fits every gap.
+    laneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestPackAgility(data),
     maxEmptyRows: read(data.tuning, "counts", "maxEmptyRows"),
     minOpenLanes: read(data.tuning, "counts", "openLanesPerRowMin"),
     minSpacing: read(data.tuning, "pixels", "spawnRowSpacing"),

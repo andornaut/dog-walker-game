@@ -53,6 +53,7 @@ export const RUN_TEXT = {
   newWalker: {
     button: "Welcome!",
     info: "Lane changes {agility} · {perk}",
+    infoBase: "{perk}",
     subtitle: "{walker} joins you!",
     title: "New walker!",
   },

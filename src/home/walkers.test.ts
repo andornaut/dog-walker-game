@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
-import { agilityWord } from "../rules/walkers";
+import { fillNames } from "../lib/lines";
+import { agilityPercent } from "../rules/effectText";
 import { newPlayerSave } from "../testing/saves";
 import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";
 import { homeLine } from "./homeText";
-import { tapWalker, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
+import { tapWalker, walkerDetailLines, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
 
 const save = {
   ...newPlayerSave,
@@ -35,14 +36,15 @@ describe("walkerTile", () => {
   });
 });
 
-// A walker's info line, from the data: its agility word in lower case and its perk.
+// A walker's info line, from the data: its own agility against the base and its perk, or its
+// perk alone at the base.
 const info = (walker: WalkerId) => {
   const { agility, name, perk } = gameData.walkers[walker];
-  return homeLine(gameData.homeText, "walkerInfo", {
-    agility: agilityWord(gameData.homeText, agility).toLowerCase(),
-    perk: gameData.walkerPerks[perk].name,
-    walker: name,
-  });
+  const percent = agilityPercent(agility);
+  const perkName = gameData.walkerPerks[perk].name;
+  return percent === null
+    ? homeLine(gameData.homeText, "walkerInfoBase", { perk: perkName, walker: name })
+    : homeLine(gameData.homeText, "walkerInfo", { agility: percent, perk: perkName, walker: name });
 };
 // The locked line names the zone whose finish unlocks the walker.
 const locked = (walker: WalkerId) => {
@@ -52,6 +54,7 @@ const locked = (walker: WalkerId) => {
     zone: gameData.world.zones.find(({ id }) => id === goal)?.name ?? "",
   });
 };
+const WALKER_IDS = Object.keys(gameData.walkers) as WalkerId[];
 
 describe("tapWalker", () => {
   it("drops the picked walker, picks an owned one and names a locked one's goal", () => {
@@ -65,4 +68,29 @@ describe("tapWalker", () => {
       expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap());
     }
   });
+
+  // Every walker, at the base lane-change speed or not.
+  it.each(WALKER_IDS)("says %s's agility, if not at the base, and perk on a pick", (walker) => {
+    expect(tapWalker(gameData, { walkers: WALKER_IDS }, null, walker)).toEqual({
+      kind: "pick",
+      text: info(walker),
+      walker,
+    });
+  });
+});
+
+describe("walkerDetailLines", () => {
+  it.each(WALKER_IDS)(
+    "gives %s's agility against the base, left out at the base, then its perk",
+    (walker) => {
+      const { agility, perk } = gameData.walkers[walker];
+      const { effect, name } = gameData.walkerPerks[perk];
+      const percent = agilityPercent(agility);
+      const detail = gameData.homeText.detail;
+      expect(walkerDetailLines(gameData, walker)).toEqual([
+        ...(percent === null ? [] : [fillNames(detail.walkerAgility, { agility: percent })]),
+        fillNames(detail.walkerPerk, { effect, perk: name }),
+      ]);
+    },
+  );
 });

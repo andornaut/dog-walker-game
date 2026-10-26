@@ -1,7 +1,8 @@
 import type { GameData, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
+import { agilityPercent } from "../rules/effectText";
 import { cents } from "../rules/units";
-import { agilityWord, walkerGoal } from "../rules/walkers";
+import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
 import { type ItemTile, itemTile } from "../ui/interaction";
 import { togglePick } from "./home";
@@ -53,24 +54,31 @@ export function walkerTile(
   });
 }
 
-// An owned walker in words, as a pick or keyboard focus says it: "Ben: relaxed, Treat finder."
+// An owned walker in words, as a pick or keyboard focus says it, with the walker's own agility:
+// "Trista: Long reach, lane changes +40%.", or its perk alone at the base lane-change speed.
 function walkerInfo(data: WalkerText, walker: WalkerId): string {
   const { agility, name, perk } = data.walkers[walker];
-  return homeLine(data.homeText, "walkerInfo", {
-    agility: agilityWord(data.homeText, agility).toLowerCase(),
-    perk: data.walkerPerks[perk].name,
-    walker: name,
-  });
+  const percent = agilityPercent(agility);
+  const perkName = data.walkerPerks[perk].name;
+  return percent === null
+    ? homeLine(data.homeText, "walkerInfoBase", { perk: perkName, walker: name })
+    : homeLine(data.homeText, "walkerInfo", { agility: percent, perk: perkName, walker: name });
 }
 
-// A walker's detail card lines: its agility in words, then its perk and what the perk does.
+// A walker's detail card lines: its own agility against the base, left out at the base
+// lane-change speed, then its perk and what the perk does.
 export function walkerDetailLines(data: WalkerText, walker: WalkerId): string[] {
   const { agility, perk } = data.walkers[walker];
   const { effect, name } = data.walkerPerks[perk];
+  const percent = agilityPercent(agility);
   return [
-    fillLine(HOME_TEXT_FIELDS.detail, data.homeText.detail, "walkerAgility", {
-      agility: agilityWord(data.homeText, agility),
-    }),
+    ...(percent === null
+      ? []
+      : [
+          fillLine(HOME_TEXT_FIELDS.detail, data.homeText.detail, "walkerAgility", {
+            agility: percent,
+          }),
+        ]),
     fillLine(HOME_TEXT_FIELDS.detail, data.homeText.detail, "walkerPerk", { effect, perk: name }),
   ];
 }

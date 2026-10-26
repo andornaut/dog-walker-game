@@ -18,7 +18,7 @@ import type { PackSprites } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { read } from "../rules/units";
-import { slowestAgility } from "../rules/walkers";
+import { slowestPackAgility } from "../rules/walkers";
 import { approachOutcomes } from "../runner/approach";
 import { type MoverPath, moverPlace } from "../runner/movers";
 import {
@@ -97,8 +97,8 @@ export const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState
   route: Array.from({ length: zoneIndex + 1 }, () => zone),
   zoneIndex,
 });
-// The slowest pack's lane move: the slowest walker's, which big dogs never slow a pack below.
-export const slowestLaneMove = read(TUNING, "seconds", "laneMove") / slowestAgility(REAL);
+// The slowest pack's lane move, which sets the row spacing.
+export const slowestLaneMove = read(TUNING, "seconds", "laneMove") / slowestPackAgility(REAL);
 export const walkwayOf = (tuned: Real, run: RunState) => ({
   laneCount: LANE_COUNT,
   laneMoveSeconds: slowestLaneMove,

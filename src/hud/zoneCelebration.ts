@@ -3,8 +3,9 @@ import { earningsKind } from "../home/endView";
 import { signedDollarText } from "../home/home";
 import { fillLine, fillNames } from "../lib/lines";
 import type { Change } from "../rules/causes";
+import { agilityPercent } from "../rules/effectText";
 import { type Cents, cents } from "../rules/units";
-import { agilityWord, newWalkers } from "../rules/walkers";
+import { newWalkers } from "../rules/walkers";
 import type { RunState } from "../state/runState";
 import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
@@ -86,7 +87,8 @@ export type CelebrationText =
   | {
       readonly button: string;
       readonly greeting: string;
-      // The walker's agility in a word and their perk after its icon.
+      // The walker's own agility against the base, left out at the base, and their perk after its
+      // icon.
       readonly info: readonly LinePart[];
       readonly kind: "newWalker";
       readonly subtitle: string;
@@ -106,7 +108,7 @@ function lineParts(line: string, named: Readonly<Record<string, LinePart>>): Lin
 }
 
 export function celebrationText(
-  data: Pick<GameData, "homeText" | "runText" | "walkerPerks" | "walkers">,
+  data: Pick<GameData, "runText" | "walkerPerks" | "walkers">,
   celebration: ZoneCelebration,
 ): CelebrationText {
   const text = data.runText;
@@ -126,11 +128,17 @@ export function celebrationText(
   }
   const words = text.newWalker;
   const { agility, name, perk } = data.walkers[celebration.walker];
-  const named: Record<"agility" | "perk", LinePart> = {
-    agility: { kind: "text", text: agilityWord(data.homeText, agility) },
-    perk: { icon: perkIconKey(perk), kind: "icon", text: data.walkerPerks[perk].name },
+  const percent = agilityPercent(agility);
+  const perkPart: LinePart = {
+    icon: perkIconKey(perk),
+    kind: "icon",
+    text: data.walkerPerks[perk].name,
   };
-  const info = lineParts(words.info, named);
+  // A walker at the base lane-change speed shows their perk alone.
+  const info =
+    percent === null
+      ? lineParts(words.infoBase, { perk: perkPart })
+      : lineParts(words.info, { agility: { kind: "text", text: percent }, perk: perkPart });
   return {
     button: words.button,
     greeting: data.walkers[celebration.walker].greeting,

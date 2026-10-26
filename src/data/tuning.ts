@@ -121,6 +121,9 @@ export const TUNING = {
     dartTurnAtShareMax: 1,
     dartTurnAtShareMin: 0.5,
     goodLeashSquirrelPull: 0,
+    // Big dogs never take the pack's agility below this, or below the walker's own when lower.
+    // The slowest pack's lane move sets the row spacing.
+    minPackAgility: 0.9,
     // Each in-lane mover's speed is its kind's times a factor drawn per mover up to this far from
     // 1 either way.
     moverSpeedJitter: 0.25,

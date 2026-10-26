@@ -4,13 +4,6 @@ import type { HomeText } from "./types";
 // the names each line may use. {slot} is a slot number in dogSlotName and shop.slotFirst,
 // and the slot's name ("Dog slot 2") in slotBought.
 export const HOME_TEXT = {
-  agilityWords: [
-    { from: 0, word: "Relaxed" },
-    { from: 1, word: "Steady" },
-    { from: 1.1, word: "Quick" },
-    { from: 1.2, word: "Nimble" },
-    { from: 1.3, word: "Lightning" },
-  ],
   bubble: {
     afterFiring: "Rough walk. They'll come around.",
     afterWalk: "Nice walk! Who's next?",
@@ -111,5 +104,6 @@ export const HOME_TEXT = {
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",
   walkerInfo: "{walker}: {perk}, lane changes {agility}.",
+  walkerInfoBase: "{walker}: {perk}.",
   walkerLocked: "Finish {zone} to unlock.",
 } as const satisfies HomeText;

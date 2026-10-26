@@ -1377,6 +1377,7 @@
       "dartTurnAtShareMax": 1,
       "dartTurnAtShareMin": 0.5,
       "goodLeashSquirrelPull": 0,
+      "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,
       "muddyBumpHearts": 2,
       "runningShoesAgility": 0.3,

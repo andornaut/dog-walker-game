@@ -1,4 +1,4 @@
-import type { Effect, GameData, HomeText, Modifier, Walker, WalkerId, ZoneId } from "../data/types";
+import type { Effect, GameData, Modifier, Walker, WalkerId, ZoneId } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { isHeavy } from "./dogs";
@@ -22,13 +22,13 @@ function bigDogsAgility(
 }
 
 // The agility the pack changes lanes at: the walker's, with its modifiers, and its big dogs',
-// which never take it below the slowest walker's, or the walker's own when lower.
+// which never take it below minPackAgility, or the walker's own when lower.
 export function packAgility(
   data: Pick<GameData, "dogs" | "tuning" | "walkers">,
   run: Pick<RunState, "modifiers" | "pack" | "walker">,
 ): number {
   const agility = walkerAgility(data, run.modifiers, run.walker);
-  const floor = Math.min(agility, slowestAgility(data));
+  const floor = Math.min(agility, read(data.tuning, "multipliers", "minPackAgility"));
   return Math.max(floor, agility + bigDogsAgility(data, run));
 }
 
@@ -41,16 +41,11 @@ export function walkerAgility(
   return modifiedStat(data.tuning, modifiers, "agility", data.walkers[walker].agility);
 }
 
-// The lowest agility of any walker before modifiers, which sets the row spacing.
-export function slowestAgility(data: Pick<GameData, "walkers">): number {
-  return Math.min(...Object.values(data.walkers).map(({ agility }) => agility));
-}
-
-// An agility in words: the word of the highest band it reaches, or the lowest band's below it.
-export function agilityWord(text: Pick<HomeText, "agilityWords">, agility: number): string {
-  const [first, ...rest] = text.agilityWords;
-  // A rounding error less, so 1.1 reaches a band from 1.1 whatever sums made it.
-  return rest.reduce((word, band) => (agility + 1e-9 >= band.from ? band.word : word), first.word);
+// The lowest agility any pack can change lanes at, which sets the row spacing: minPackAgility,
+// which big dogs never take a pack below, or the slowest walker's own when lower.
+export function slowestPackAgility(data: Pick<GameData, "tuning" | "walkers">): number {
+  const slowest = Math.min(...Object.values(data.walkers).map(({ agility }) => agility));
+  return Math.min(slowest, read(data.tuning, "multipliers", "minPackAgility"));
 }
 
 // The zone whose finish unlocks the walker, or null for a starting walker.
