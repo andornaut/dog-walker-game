@@ -15,7 +15,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
   300ms, standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, 60ms, a quick shake-off after an encounter hit, throwing droplets).
 - face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
-  big and sat on the bottom edge, small and medium one even step apart and the big dogs zoomed to fill it. Tags: happy, neutral,
+  big and sat on the bottom edge, the size classes one even step apart and the big dogs zoomed to fill it. Tags: happy, neutral,
   upset.
 
 Usage:
@@ -834,10 +834,10 @@ DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duche
 
 
 # How big each dog's face is drawn in its 32px frame, sat on the bottom edge: the side that brings its inked
-# area nearest its size class's target, so small and medium step evenly (the square root of the area about 17
-# and 20px) however much of its design a breed's ears or topknot fill. The big (heavy) dogs zoom past the frame
-# to about 25.5, as far as Koda's ears fit under its top edge, so they fill their tiles.
-FACE_SIDE = {"archie": 27, "biscuit": 27, "duchess": 23, "koda": 35, "nugget": 26, "penny": 37, "pierre": 25,
+# area nearest its size class's target, so the classes step evenly (the square root of the area about 17, 21.3
+# and 25.5px) however much of its design a breed's ears or topknot fill. The big (heavy) dogs zoom past the
+# frame as far as Koda's ears fit under its top edge, so they fill their tiles, and medium sits halfway.
+FACE_SIDE = {"archie": 30, "biscuit": 29, "duchess": 23, "koda": 35, "nugget": 26, "penny": 37, "pierre": 27,
              "snowball": 36, "zippy": 27}
 
 
