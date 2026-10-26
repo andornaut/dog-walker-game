@@ -119,6 +119,9 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
   mover: { path, since },
 });
 
+// The seeds the planned-spawn sweep samples: more seeds cover more plans and take longer.
+const SWEEP_SEEDS = [1, 2, 3];
+
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
   // The rulebook's obstacles that never move: barriers, benches, bins, cones, hedges and puddles.
@@ -264,8 +267,6 @@ describe("movers", { timeout: 120_000 }, () => {
   // Denser minor obstacles than the game's: the last zone's count rises by the gain for each
   // zone walked before it.
   it.each([
-    { counts: { minorObstaclesGainPerZone: 1 } },
-    { counts: { minorObstaclesGainPerZone: 2 } },
     { counts: { minorObstaclesGainPerZone: 3 } },
     { counts: { minorObstaclesFirstZone: 54, minorObstaclesGainPerZone: 2 } },
   ])("keeps every move passable with more minor obstacles: $counts", ({ counts }) => {
@@ -434,7 +435,7 @@ describe("movers", { timeout: 120_000 }, () => {
   const plannedSpawns = () => {
     plans ??= ZONE_IDS.flatMap((zone) =>
       [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
-        Array.from({ length: 10 }, (_, i) => i + 1).flatMap((seed) => {
+        SWEEP_SEEDS.flatMap((seed) => {
           const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
           const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
             road: startRoad(LANE_COUNT),

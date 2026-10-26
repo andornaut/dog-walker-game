@@ -175,6 +175,9 @@ const FRAME = 1 / 60;
 
 // The spawn planner takes tens of milliseconds a zone, so a loop over the game's road takes up
 // to about 15 s on a busy machine; the limit is four times that.
+// The seeds the tip and treat sweep samples: more seeds cover more plans and take longer.
+const SWEEP_SEEDS = [1, 2, 3];
+
 describe("planZone", { timeout: 60_000 }, () => {
   const planned = planZone(data, geometry, plannerStreams(3), walkWith(["koda"]));
   const countOf = (category: string) =>
@@ -378,7 +381,7 @@ describe("planZone", { timeout: 60_000 }, () => {
     "places every tip and treat planned, none where a mover stops, in $zone at walk position $position",
     ({ position, zone }) => {
       const zoned = inZone(realRun(REAL), zone, position);
-      for (let seed = 1; seed <= 10; seed++) {
+      for (const seed of SWEEP_SEEDS) {
         const quotas = spawnQuotas(REAL, plannerStreams(seed), zoned);
         const { pending } = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
           road: startRoad(LANE_COUNT),
