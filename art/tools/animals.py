@@ -132,10 +132,18 @@ def cat_head(g, x, y):
     g.p(x + 3.5, y - 3.5, "pink")
     g.cel(x, y, 6, 4.8, "navy", "ink", "dslate")
     g.cel(x, y + 2.5, 2.5, 1.6, "white", "lgrey")
-    for ex in (x - 4.5, x + 1.5):
-        g.rect(ex, y - 1.5, 3, 2, "green")
-        g.rect(ex + 1, y - 1.5, 1, 2, "ink")
-    g.p(x - 0.5, y + 1.5, "pink")
+    # the eyes and nose in drawn pixels, so they keep one shape however the head's row falls through the
+    # bound: each eye 3 units wide and 2 tall, green either side of a slit pupil (green outside an inner
+    # pupil once it is only 2px wide), and a 1px pink nose
+    px, s = raster(g), scale_of(g)
+    w, h = max(2, math.floor(3 * s + 0.25)), max(1, math.floor(2 * s + 0.25))
+    top = math.floor((y - 0.5) * s + 0.5 - h / 2)
+    for side in (-1, 1):
+        left = math.floor((x + side * 3) * s + 0.5 - w / 2)
+        px.rect(left, top, w, h, "green")
+        pupil = left + w // 2 if w > 2 else left + (1 if side < 0 else 0)
+        px.rect(pupil, top, 1, h, "ink")
+    px.p(math.floor(x * s), math.floor((y + 2) * s), "pink")
 
 
 def pigeon(g, cx, by, peck=False, wings=None):
