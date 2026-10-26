@@ -874,14 +874,14 @@ def squirrel_head(g, x, y):
 
 
 # The squirrel's bound, landing first: (body y, head y, tail (x, y, rx, ry), front paws (left x, right x, y,
-# height)). It lands stretched low and wide with its tail streaming up behind, crouches to push off with its
+# height)). The head's y stays sitting's 12.5 plus whole steps of 2, so its eyes raster alike every frame. It lands stretched low and wide with its tail streaming up behind, crouches to push off with its
 # tail swinging over, flies gathered 3px higher with its paws tucked under its chin and its tail arched, then
 # reaches down for the next landing.
 SQUIRREL_BOUND = (
     (22, 18.5, (22, 14, 5, 7), (8, 21, 26, 3)),
-    (21, 17, (21.5, 11.5, 5, 6.5), (9, 20, 25.5, 3)),
+    (21, 16.5, (21.5, 11.5, 5, 6.5), (9, 20, 25.5, 3)),
     (19, 14.5, (20, 9, 5, 6), (11, 17, 24, 2)),
-    (20.5, 16, (21, 11, 5, 6.5), (9.5, 19.5, 25, 3)),
+    (20.5, 16.5, (21, 11, 5, 6.5), (9.5, 19.5, 25, 3)),
 )
 
 
@@ -897,14 +897,14 @@ def squirrel_run(phase):
     cx = 15 + low
     g.cel(cx, by, 5.5 + 1.5 * low, 5 - 0.5 * low, f["fur"], f["shade"], f["lit"])
     g.cel(cx, by + 1, 3 + 0.5 * low, 3 - 0.5 * low, f["belly"])
-    # the paws reach up into the body, so no gap opens under it; the head sits on a whole column, so its round
-    # eyes keep their shape
+    # the paws reach up into the body, so no gap opens under it; the head stays on the sitting squirrel's
+    # column and its rows a whole 2 apart, so at road.SCALE its round eyes and glints keep one shape
     top = math.floor(by + 5 - 0.5 * low) - 1
     for x in (lx, rx):
         g.rect(x, min(py, top), 3, py + ph - min(py, top), f["foot"])
         if ph > 2:
             g.rect(x, py + ph - 1, 3, 1, f["lit"])
-    squirrel_head(g, round(cx), hy)
+    squirrel_head(g, 15, hy)
     return rim(g, LIT)
 
 
