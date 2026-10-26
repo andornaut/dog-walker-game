@@ -235,10 +235,15 @@ describe("sky movers", () => {
   const sheets = import.meta.glob<{
     frames: Record<string, { sourceSize: { h: number; w: number } }>;
   }>("../../public/art/sprites/*.json", { eager: true, import: "default" });
+  // Each mover's highest and lowest feet rows: the sprite's top is highest at the first and its
+  // bottom lowest at the last, so the rows between them can only fit when both ends do.
   const sky = ZONES.flatMap((zone) =>
     gameData.ambient[zone]
       .filter((mover) => mover.path === "sky")
-      .flatMap((mover) => skyRowsOf(mover).map((row) => ({ key: mover.key, row, zone }))),
+      .flatMap((mover) => {
+        const { from, to } = skyRows(mover);
+        return [...new Set([from, to])].map((row) => ({ key: mover.key, row, zone }));
+      }),
   );
 
   // The sprite's top row stays at or below the band's top edge, and its bottom row inside the
