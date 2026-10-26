@@ -68,10 +68,10 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Nobody left behind.",
     conditions: [{ kind: "fullPackBonus", packSize: 3 }],
-    goal: "Earn the Full walk bonus with 3 dogs",
+    goal: "Earn the Walk bonus with 3 dogs",
     id: "everybodyHome",
     name: "Everybody Home",
-    shortGoal: "Full walk bonus, 3 dogs",
+    shortGoal: "Walk bonus, 3 dogs",
   },
   {
     badgeLine: "Small but mighty.",

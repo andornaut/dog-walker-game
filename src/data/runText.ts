@@ -38,7 +38,7 @@ export const RUN_TEXT = {
   fired: "FIRED!",
   firedBy: "{owner} fired you!",
   forgiven: "♥ Oopsie! All good",
-  fullPackHome: "Full walk bonus! +{amount}",
+  fullPackHome: "Walk bonus! +{amount}",
   homeQuestion: {
     headHome: "Head home",
     keepWalking: "Keep walking",
@@ -71,7 +71,7 @@ export const RUN_TEXT = {
     dodge: "{dog} dodged the {obstacle}!",
     effectStart: "{name}: {effect}",
     fired: "{owner} fired you! {dog} heads home.",
-    fullPackHome: "Full walk bonus! +{amount}",
+    fullPackHome: "Walk bonus! +{amount}",
     heavyDog: "{dog} is heavy: lane changes −{speed}.",
     kindWords: "Second chance! {owner} lets it go.",
     lowHearts: "{owner} has 1♥ left!",
