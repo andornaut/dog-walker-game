@@ -115,12 +115,16 @@ export function tapGear(owned: Owned, gear: GearId, loadout: HomeLoadout): HomeT
   };
 }
 
+// ids cheapest first by cost, ties in the order given.
+export function cheapestFirst<Id>(cost: (id: Id) => Cents, ids: readonly Id[]): Id[] {
+  return [...ids].sort((a, b) => cost(a) - cost(b) || ids.indexOf(a) - ids.indexOf(b));
+}
+
 // The gear as the Pocket and the shop's gear tab list it: cheapest first by list price, owned
 // or not, ties in data order (the order of shopGear's keys).
 export function gearByPrice(data: Pick<GameData, "shopGear" | "tuning">): GearId[] {
-  const ids = Object.keys(data.shopGear) as GearId[];
   const listPrice = (gear: GearId) => price(data.tuning, data.shopGear[gear].price);
-  return [...ids].sort((a, b) => listPrice(a) - listPrice(b) || ids.indexOf(a) - ids.indexOf(b));
+  return cheapestFirst(listPrice, Object.keys(data.shopGear) as GearId[]);
 }
 
 // What a purchase costs, or null when it is not for sale: already owned, or no slot left.

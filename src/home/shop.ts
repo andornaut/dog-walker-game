@@ -6,7 +6,7 @@ import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import type { ItemLook } from "../ui/interaction";
 import { isAffordable, purchases } from "./afford";
-import { dogKindText, gearByPrice, type Purchase, purchasePrice } from "./home";
+import { cheapestFirst, dogKindText, gearByPrice, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
@@ -113,13 +113,13 @@ export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// The dogs still for sale, in data order, each with its size and hearts: a bought dog leaves
-// the list. Its price shows on the row's plate.
+// The dogs still for sale, cheapest first with ties in data order, each with its size and
+// hearts: a bought dog leaves the list. Its price shows on the row's plate.
 export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
   const sold = (Object.keys(data.dogs) as DogId[]).filter(
     (dog) => data.dogs[dog].unlock === "shop" && !owned.dogs.includes(dog),
   );
-  return sold.map((dog) => {
+  return cheapestFirst((dog) => unlockPrice(data.tuning, data.dogs[dog]), sold).map((dog) => {
     const purchase: Purchase = { dog, kind: "dog" };
     return {
       blocked: null,
