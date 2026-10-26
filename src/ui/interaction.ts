@@ -86,7 +86,7 @@ export type ArtLook = "color" | "grey";
 
 // Everything an item's state sets on its tile or row: its portrait's or icon's look, the
 // padlock, the plate and the ui-tile state. The art is grey on a disabled tile, except on one
-// the player can buy now, whose art shows in full color, on its tan box, on the grey tile.
+// the player can buy now, whose art shows in full color, on its light grey box, on the grey tile.
 export interface ItemLook {
   readonly art: ArtLook;
   readonly padlock: Padlock | null;

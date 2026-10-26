@@ -3,6 +3,8 @@
 import type { ButtonState, ItemLook, TileState } from "./interaction";
 
 // Every colour a disabled, short or locked item draws in, the neutral greys among them:
+// - affordBox: the box behind the portrait or icon of an item the player can buy now, its art
+//   in color on a disabled tile.
 // - box: the box behind a portrait or icon in grey art.
 // - copyDarker: a disabled tile's grey copy of its art moves each colour to the colour of
 //   NEUTRAL_RAMP nearest its brightness, as a disabled card's does, then this many steps
@@ -14,6 +16,7 @@ import type { ButtonState, ItemLook, TileState } from "./interaction";
 //   short price on its plate.
 // - text: a disabled tile's label.
 export const GREYED = {
+  affordBox: "neutralLightGrey",
   box: "neutralSlate",
   copyDarker: 0,
   edge: "neutralSlate",
@@ -94,14 +97,21 @@ export function selectLook(state: TileState): SelectLook {
 }
 
 // The box behind an item's portrait or icon.
-export type PictureBox = "deepAmber" | typeof GREYED.box | "tan";
+export type PictureBox = typeof GREYED.affordBox | "deepAmber" | typeof GREYED.box | "tan";
 
-// A picture's box, from its art: grey art sits on the grey box, and art in full color on the
-// tan box an owned item has, or the deep amber one while picked. An item the player can buy now is
-// a disabled tile with its art in color, so it sits on tan.
+// A picture's box, from its art and state: grey art sits on the grey box; art in full color
+// on the tan box an owned item has, the deep amber one while picked, or, on a disabled tile
+// (an item the player can buy now), the light grey one.
 export function pictureBox(look: Pick<ItemLook, "art" | "state">): PictureBox {
   if (look.art === "grey") {
     return GREYED.box;
   }
-  return look.state === "selected" ? "deepAmber" : "tan";
+  switch (look.state) {
+    case "disabled":
+      return GREYED.affordBox;
+    case "selected":
+      return "deepAmber";
+    default:
+      return "tan";
+  }
 }
