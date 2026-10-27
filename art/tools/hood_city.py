@@ -947,12 +947,12 @@ EFFECTS = {
     "sfx-hit-dropped-cone": [
         ("pinknoise", 0.16, None, 0, dict(vol=0.9, low=1800, high=150, attack=0.003, release=0.85)),
         ("triangle", 0.18, (220, 70), 0, dict(vol=0.7, attack=0.003, release=0.8)),
-        ("triangle", 0.34, ("E5", "A4"), 0.2, dict(vol=0.6, attack=0.04, release=0.6, shape="h")),
-        ("square", 0.34, ("E5", "A4"), 0.2, dict(vol=0.15, duty=25, low=1500, attack=0.04, release=0.6, shape="h")),
+        ("triangle", 0.34, ("E5", "A4"), 0.2, dict(vol=0.45, attack=0.04, release=0.6, shape="h")),
+        ("square", 0.34, ("E5", "A4"), 0.2, dict(vol=0.12, duty=25, low=1500, attack=0.04, release=0.6, shape="h")),
     ],
     # two shutter clicks, a flash whine rising, a bright "ta-da"
     "sfx-hit-promo-team": [
-        ("pinknoise", 0.025, None, 0, dict(vol=0.8, low=7000, high=2500, attack=0.001, release=0.9)),
+        ("pinknoise", 0.025, None, 0.004, dict(vol=0.8, low=7000, high=2500, attack=0.001, release=0.9)),
         ("pinknoise", 0.025, None, 0.07, dict(vol=0.7, low=7000, high=2500, attack=0.001, release=0.9)),
         ("triangle", 0.18, (1800, 4200), 0.04, dict(vol=0.25, attack=0.02, release=0.5)),
         ("square", 0.08, "G5", 0.24, dict(vol=0.5, duty=25, low=4000, release=0.5)),
