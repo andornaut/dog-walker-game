@@ -486,7 +486,7 @@ def belly_rubs():
 def good_leash():
     a = Art()
     a.ground("park")
-    a.put("squirrel", "idle", 60, 37)
+    a.put("squirrel", "idle", 58, 37)
     c = a.put("dog-archie", "walk", 30, 56, 1)
     a.lead(30, c, 24, 2)
     a.fill(29, c - 1, 3, 3, "amber")
@@ -512,8 +512,9 @@ def rush_hour():
     a.ground("street")
     a.paste(small_puddle(), 2, 38)
     a.put("skunk", "idle", 59, 55)
-    a.put("squirrel", "idle", 36, 52)
     a.coins([(8, 4), (22, 10), (40, 4), (50, 16), (30, 22), (14, 22)])
+    # the squirrel in front of the coins, so it shows whole
+    a.put("squirrel", "idle", 38, 57)
     a.arrow(62, 2, -1)
     return a
 
