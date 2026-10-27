@@ -27,9 +27,9 @@
       "title": "Escaped capybara"
     },
     {
-      "art": "card-capybara-keep-walking",
+      "art": "card-capybara-drag",
       "frame": "encounter",
-      "id": "keep-walking",
+      "id": "drag",
       "index": 2,
       "name": "Drag them away",
       "source": {
@@ -66,9 +66,9 @@
       "title": "Dropped ice cream"
     },
     {
-      "art": "card-dropped-cone-pull-away",
+      "art": "card-dropped-cone-walk-on-by",
       "frame": "encounter",
-      "id": "pull-away",
+      "id": "walk-on-by",
       "index": 2,
       "name": "Walk on by",
       "source": {
@@ -92,9 +92,9 @@
       "title": "Fish crate spill"
     },
     {
-      "art": "card-fish-crates-clean-up",
+      "art": "card-fish-crates-pay",
       "frame": "encounter",
-      "id": "clean-up",
+      "id": "pay",
       "index": 1,
       "name": "Pay for the fish",
       "source": {
@@ -105,9 +105,9 @@
       "title": "Fish crate spill"
     },
     {
-      "art": "card-fish-crates-pull-away",
+      "art": "card-fish-crates-hurry-past",
       "frame": "encounter",
-      "id": "pull-away",
+      "id": "hurry-past",
       "index": 2,
       "name": "Hurry past",
       "source": {
@@ -144,9 +144,9 @@
       "title": "Other dog"
     },
     {
-      "art": "card-porch-cat-shoo",
+      "art": "card-porch-cat-stand",
       "frame": "encounter",
-      "id": "shoo",
+      "id": "stand",
       "index": 0,
       "name": "Stand your ground",
       "source": {
@@ -313,9 +313,9 @@
       "title": "Wedding photo shoot"
     },
     {
-      "art": "card-wedding-shoot-apologize",
+      "art": "card-wedding-shoot-reshoot",
       "frame": "encounter",
-      "id": "apologize",
+      "id": "reshoot",
       "index": 2,
       "name": "Pay for a reshoot",
       "source": {
@@ -826,7 +826,7 @@
             "name": "Call the zoo"
           },
           {
-            "art": "card-capybara-keep-walking",
+            "art": "card-capybara-drag",
             "effects": [
               {
                 "amount": -1,
@@ -880,7 +880,7 @@
             "name": "Buy a new cone"
           },
           {
-            "art": "card-dropped-cone-pull-away",
+            "art": "card-dropped-cone-walk-on-by",
             "effects": [
               {
                 "amount": -1,
@@ -923,7 +923,7 @@
             "name": "Sniff the fish"
           },
           {
-            "art": "card-fish-crates-clean-up",
+            "art": "card-fish-crates-pay",
             "effects": [
               {
                 "amount": "fishCleanUp",
@@ -934,7 +934,7 @@
             "name": "Pay for the fish"
           },
           {
-            "art": "card-fish-crates-pull-away",
+            "art": "card-fish-crates-hurry-past",
             "effects": [
               {
                 "amount": -1,
@@ -1067,7 +1067,7 @@
         "kind": "card",
         "options": [
           {
-            "art": "card-porch-cat-shoo",
+            "art": "card-porch-cat-stand",
             "effects": [
               {
                 "amount": -1,
@@ -1349,7 +1349,7 @@
             "name": "Walk around"
           },
           {
-            "art": "card-wedding-shoot-apologize",
+            "art": "card-wedding-shoot-reshoot",
             "effects": [
               {
                 "amount": "weddingApology",
