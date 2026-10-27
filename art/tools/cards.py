@@ -730,7 +730,7 @@ def high_park_view():
 
 def distillery_view():
     paving = flecked("brown", "brick", 19)
-    a = ZoneView("distillery-district", flecked("dslate", "slate", 31, "navy"), paving, None, None, curb=None,
+    a = ZoneView("distillery-district", flecked("dslate", "navy", 61), paving, None, None, curb=None,
                  walk="brown", lawn=paving, walk_fleck="brick")
     bd.bands(a, 0, 13, bd.DISTILLERY_SKY, w=AW)
     bd.sun(a, 38, 9, 5, "yellow", 12)
