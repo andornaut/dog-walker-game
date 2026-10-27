@@ -863,12 +863,30 @@ def yonge_view():
                     a.fill(c, y, 1, 1, lit_c)
     a.fill(57, 5, 5, 1, "ttc")
     a.fill(64, 9, 1, 1, "green")
+    # the Eaton Centre in front of the dome's right flank: its galleria's glass roof catching the light over
+    # blue glass with lit panes, under the ink sign lettered in turquoise
+    a.fill(27, 11, 14, 1, "ink")
+    a.fill(27, 12, 14, FAR_Y - 12, "dlake")
+    a.fill(27, 12, 14, 1, "foam")
+    a.fill(40, 12, 1, FAR_Y - 12, "navy")
+    for y in (14, 16):
+        for x in range(28, 40, 2):
+            a.fill(x, y, 1, 1, "gold" if bd.hashed(x, y, 2) else "foam")
+    a.fill(26, 8, 16, 3, "ink")
+    for x in range(28, 40, 2):
+        a.fill(x, 9, 1, 1, "turquoise")
+    # the street level: neon over shop windows, lit gold or amber, a few dark, with coal between them
     a.fill(0, FAR_Y - 4, AW, 4, "coal")
     for x, w, c in ((10, 8, "pink"), (23, 8, "gold"), (44, 10, "turquoise"), (64, 9, "lilac")):
         a.fill(x, FAR_Y - 4, w, 1, c)
-    for x in range(1, AW, 3):
-        a.fill(x, FAR_Y - 2, 2, 2, "gold")
+    for k, x in enumerate(range(1, AW, 4)):
+        a.fill(x, FAR_Y - 2, 3, 2, ("gold", "amber", "dlake", "gold", "cream", "amber", "gold")[k % 7])
     a.street()
+    # crosswalks over the cross street from the stub's two sidewalks, the centre line stopping at them
+    for x in (17, 55):
+        a.fill(x, CROSS_Y + 1, 4, STUB_Y - CROSS_Y - 1, "shale")
+        for y in range(CROSS_Y + 1, STUB_Y, 2):
+            a.fill(x, y, 4, 1, "white")
     return a
 
 
