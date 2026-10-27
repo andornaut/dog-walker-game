@@ -34,10 +34,12 @@ const STOP: CardSource = { affected: ["kilo"], encounter: "thief", kind: "encoun
 const geometry = () => TEST_ROAD_GEOMETRY;
 const FIRING_SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");
 
-function started(seed = 1): Session {
-  const run = newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" });
-  return startSession(gameData, runStreams(seed), geometry, { road: startRoad(5), run });
-}
+// The walk started on seed 1: planning its first zone of the game's road is most of a test's
+// time, so every test shares the one start, which no step changes.
+const STARTED = startSession(gameData, runStreams(1), geometry, {
+  road: startRoad(5),
+  run: newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" }),
+});
 
 // A started walk with nothing on its road or still to come, so a step only walks.
 function emptyRoad(session: Session): Session {
@@ -74,11 +76,11 @@ describe("stepSession", () => {
       {
         name: "a card is open",
         session: () => {
-          const session = started();
+          const session = STARTED;
           return { ...session, card: cardFor(gameData, session.walk.run, STOP) };
         },
       },
-      { name: "the walk has ended", session: () => headHomeSession(started()).session },
+      { name: "the walk has ended", session: () => headHomeSession(STARTED).session },
     ] satisfies readonly { name: string; session: () => Session }[]) {
       const before = session();
       const lane: SessionInput = { direction: 1, kind: "lane" };
@@ -90,7 +92,7 @@ describe("stepSession", () => {
   });
 
   it("heads home before the step, after the inputs before it and without those after it", () => {
-    const before = started();
+    const before = STARTED;
     const inputs: SessionInput[] = [
       { direction: 1, kind: "lane" },
       { kind: "home" },
@@ -120,7 +122,7 @@ describe("stepSession", () => {
       geometry,
       STEP_SECONDS,
       [],
-      emptyRoad(started()),
+      emptyRoad(STARTED),
     );
 
     expect(kinds(events)).toEqual(["pulled", "walked"]);
@@ -130,7 +132,7 @@ describe("stepSession", () => {
 
   it("ends the zone, offers the fork with its upgrades, and plans the next zone once a path is chosen", () => {
     const streams = runStreams(1);
-    const walked = emptyRoad(started());
+    const walked = emptyRoad(STARTED);
     const length = zoneLength(gameData);
     const atEnd: Session = {
       ...walked,
@@ -155,7 +157,7 @@ describe("a strain in the session", { timeout: 30_000 }, () => {
 
   // Kilo straining toward a squirrel in the middle lane, the pack still in lane.
   function straining(lane: number): Session {
-    const session = emptyRoad(started());
+    const session = emptyRoad(STARTED);
     const squirrel: WalkItem = {
       height: 12,
       id: 0,
@@ -223,7 +225,7 @@ describe("a firing in the walk", { timeout: 60_000 }, () => {
     // Kilo's owner down to 1 heart with Second chance's forgiveness used, a skunk card open on Kilo,
     // a puddle queued behind it and the zone's end waiting.
     const streams = runStreams(1);
-    const walk = emptyRoad(started()).walk;
+    const walk = emptyRoad(STARTED).walk;
     const run = {
       ...walk.run,
       heartsForgiven: 1,
@@ -241,7 +243,7 @@ describe("a firing in the walk", { timeout: 60_000 }, () => {
           )
         : -1;
     const open: Session = {
-      ...emptyRoad(started()),
+      ...emptyRoad(STARTED),
       card: cardFor(gameData, opened, SKUNK),
       queue: [STOP],
       walk: { ...walk, run: opened },
@@ -282,7 +284,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
   // The walk with nothing to come, Kilo's owner on their last heart and the walker's
   // forgiveness used, so Kilo's next lost heart fires you while Biscuit walks on.
   const lastHeart = (): Session => {
-    const session = emptyRoad(started());
+    const session = emptyRoad(STARTED);
     const run = {
       ...session.walk.run,
       heartsForgiven: 1,
@@ -406,7 +408,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
 describe("chooseShownCard", () => {
   // A press reaches a card's scene until it stops, a frame after its choice closed it.
   const shown = (source: CardSource): Session => {
-    const session = emptyRoad(started());
+    const session = emptyRoad(STARTED);
     const run = openCard(source, session.walk.run);
     return { ...session, card: cardFor(gameData, run, source), walk: { ...session.walk, run } };
   };
