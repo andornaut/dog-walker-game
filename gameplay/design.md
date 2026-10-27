@@ -29,14 +29,14 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Lengths:** message strip lines at most about 46 characters (26 always fit), and first-time hints at most 312 px at 2× (about 36 characters), so they stay full size on the one row left under a debuff bar; the walker's bubble up to 4 lines of about 30 characters, with walker's lines and owner parting lines at 2; card option names 2 or 3 words; hit labels one or two uppercase words with "!"
 - **Walkers:** Ada calm and precise, Casey warm and encouraging, Mr. B easygoing, Trista sporty and quick
 - **Owners** (each with 2 lines for each of happier, upset, fired and parting):
-  - **Eve** (Duchess): retired florist, theatrical, flower metaphors and exclamation marks
+  - **Clare** (Biscuit): psychology student, quiet and friendly, gentle observations, a little shy
+  - **Eve** (Duchess): social media influencer, everything is content (feed, trending, followers)
   - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
-  - **Jason** (Kilo): laid-back runner, fitness talk (form, personal bests, shake it off)
-  - **Aunt Judy** (Sequoia): wedding planner, everything rides on today, picture perfect or disaster
+  - **Jason** (Buddy): laid-back runner, fitness talk (form, personal bests, shake it off)
+  - **Aunt Judy** (Sequoia): tennis star, older and athletic, tennis talk (aces, faults, match point)
   - **Kiwi** (Archie): unflappable grandmother, "dear" and "pet", offers cookies and tea
-  - **Ryan** (Reggie): influencer, everything is content (feed, trending, followers)
-  - **Sam** (Biscuit): easygoing barista, coffee puns, calls you "friend"
-  - **Sheba** (Buddy): retired accountant, dry, ledgers, receipts and red ink
+  - **Ralph** (Kilo): retired pilot, big and gruff, few words, flying talk (turbulence, landings, mayday)
+  - **Ryan** (Reggie): engineer, practical, specs, structures and drawing boards
   - **Ms. Tara** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
 
 ## Rules

@@ -58,7 +58,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Not today, cone.",
     conditions: [{ count: 50, kind: "tally", tally: "dodges" }],
-    goal: "Dodge 50 bumps, across all walks",
+    goal: "Dodge 50 bumps",
     id: "dodgeBall",
     name: "Dodge Ball",
     shortGoal: "Dodge 50 bumps",
@@ -81,15 +81,15 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Retire the leash? Never.",
     conditions: [{ dollars: 20_000, kind: "lifetimeEarnings" }],
-    goal: "Earn $20,000 across all walks",
+    goal: "Earn $20,000",
     id: "twentyGrand",
     name: "Twenty Grand",
-    shortGoal: "Earn $20,000 in all",
+    shortGoal: "Earn $20,000",
   },
   {
     badgeLine: "Every coin counts.",
     conditions: [{ count: 1000, kind: "tally", tally: "tips" }],
-    goal: "Grab 1,000 tips, across all walks",
+    goal: "Grab 1,000 tips",
     id: "tipJar",
     name: "Tip Jar",
     shortGoal: "Grab 1,000 tips",
@@ -126,7 +126,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Every block, every bark.",
     conditions: [{ count: "all", kind: "zonesEverFinished" }],
-    goal: "Finish every neighbourhood of Toronto, across walks",
+    goal: "Finish every neighbourhood of Toronto",
     id: "wholeCity",
     name: "Whole City",
     shortGoal: "Finish all 6 neighbourhoods",
@@ -170,8 +170,8 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "Wipe your paws, please.",
-    conditions: [{ count: 6, debuff: "muddy", kind: "debuffsGot" }],
-    goal: "Get Muddy 6 times in one walk",
+    conditions: [{ count: 5, debuff: "muddy", kind: "debuffsGot" }],
+    goal: "Get Muddy 5 times in one walk",
     id: "mudSeason",
     name: "Mud Season",
   },
@@ -194,7 +194,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "So close. Every time.",
     conditions: [{ count: 50, kind: "tally", tally: "squirrelPulls" }],
-    goal: "Get pulled toward 50 squirrels, across all walks",
+    goal: "Get pulled toward 50 squirrels",
     id: "squirrel",
     name: "Squirrel!",
     shortGoal: "50 squirrel pulls",
@@ -202,7 +202,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "They had a getaway scooter.",
     conditions: [{ count: 10, encounter: "thief", kind: "optionPicks", option: "letGo" }],
-    goal: "Let 10 thieves get away, across all walks",
+    goal: "Let 10 thieves get away",
     id: "yoink",
     name: "Yoink!",
     shortGoal: "Let 10 thieves go",
@@ -210,7 +210,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Hello. Hello. Hello.",
     conditions: [{ count: 5, encounter: "otherDog", kind: "optionPicks", option: "sniff" }],
-    goal: "Let the pack sniff 5 dogs, across all walks",
+    goal: "Let the pack sniff 5 dogs",
     id: "sniffTest",
     name: "Sniff Test",
     shortGoal: "Sniff 5 dogs",
@@ -218,7 +218,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "The capybara sends its regards.",
     conditions: [{ count: 10, encounter: "capybara", kind: "optionPicks", option: "help" }],
-    goal: "Help the keeper 10 times, across all walks",
+    goal: "Help the keeper 10 times",
     id: "zookeeper",
     name: "Zookeeper",
     shortGoal: "Help the keeper 10 times",
@@ -226,7 +226,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Your dogs are in every album.",
     conditions: [{ count: 10, encounter: "weddingShoot", kind: "optionPicks", option: "pose" }],
-    goal: "Pose for 10 wedding photos, across all walks",
+    goal: "Pose for 10 wedding photos",
     id: "sayCheese",
     name: "Say Cheese",
     shortGoal: "Pose 10 times",
@@ -234,7 +234,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Sprinkles on every whisker.",
     conditions: [{ count: 10, encounter: "droppedCone", kind: "optionPicks", option: "lick" }],
-    goal: "Let them lick 10 dropped cones, across all walks",
+    goal: "Let them lick 10 dropped cones",
     id: "sugarRush",
     name: "Sugar Rush",
     shortGoal: "Lick 10 cones",
@@ -242,7 +242,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "They save you the good crates.",
     conditions: [{ count: 10, encounter: "fishCrates", kind: "optionPicks", option: "pay" }],
-    goal: "Pay for the fish 10 times, across all walks",
+    goal: "Pay for the fish 10 times",
     id: "fishmongersFriend",
     name: "Fishmonger's Friend",
     shortGoal: "Pay for fish 10 times",
@@ -250,7 +250,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "The porch cats have you on retainer.",
     conditions: [{ count: 10, encounter: "porchCat", kind: "optionPicks", option: "treat" }],
-    goal: "Bribe 10 porch cats with treats, across all walks",
+    goal: "Bribe 10 porch cats with treats",
     id: "catWhisperer",
     name: "Cat Whisperer",
     shortGoal: "Bribe 10 cats",
@@ -258,7 +258,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Ten feet tall on every screen.",
     conditions: [{ count: 10, encounter: "promoTeam", kind: "optionPicks", option: "wave" }],
-    goal: "Wave hello to the big screen 10 times, across all walks",
+    goal: "Wave hello to the big screen 10 times",
     id: "bigScreen",
     name: "Big Screen",
     shortGoal: "Wave hello 10 times",
@@ -266,7 +266,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Crumbs everywhere.",
     conditions: [{ count: 100, kind: "tally", tally: "treats" }],
-    goal: "Grab 100 treats, across all walks",
+    goal: "Grab 100 treats",
     id: "snackAttack",
     name: "Snack Attack",
     shortGoal: "Grab 100 treats",
@@ -274,7 +274,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "The pigeons have a group chat about you.",
     conditions: [{ count: 20, kind: "bumps", kinds: ["ducklings", "goose", "pigeons", "seagull"] }],
-    goal: "Bump 20 birds, across all walks",
+    goal: "Bump 20 birds",
     id: "birdBrain",
     name: "Bird Brain",
     shortGoal: "Bump 20 birds",
@@ -303,7 +303,7 @@ export const ACHIEVEMENTS = [
         ],
       },
     ],
-    goal: "Bump 15 vehicles, across all walks",
+    goal: "Bump 15 vehicles",
     id: "fenderBender",
     name: "Fender Bender",
     shortGoal: "Bump 15 vehicles",
@@ -311,7 +311,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Masked bandits, all of them.",
     conditions: [{ count: 5, kind: "bumps", kinds: ["raccoon"] }],
-    goal: "Bump 5 raccoons, across all walks",
+    goal: "Bump 5 raccoons",
     id: "trashPanda",
     name: "Trash Panda",
     shortGoal: "Bump 5 raccoons",
@@ -319,7 +319,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Finders keepers, mostly.",
     conditions: [{ count: 5, kind: "tally", tally: "walletsFound" }],
-    goal: "Find 5 lost wallets, across all walks",
+    goal: "Find 5 lost wallets",
     id: "findersKeepers",
     name: "Finders Keepers",
     shortGoal: "Find 5 wallets",
@@ -327,7 +327,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "The whole block knows their names.",
     conditions: [{ count: 5, kind: "tally", tally: "neighboursMet" }],
-    goal: "Meet 5 friendly neighbours, across all walks",
+    goal: "Meet 5 friendly neighbours",
     id: "popularPack",
     name: "Popular Pack",
     shortGoal: "Meet 5 neighbours",

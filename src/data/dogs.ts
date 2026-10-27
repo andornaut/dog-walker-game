@@ -20,8 +20,8 @@ export const DOGS = {
     look: "Tricolour, floppy ears, green collar",
     name: "Biscuit",
     owner: {
-      name: "Sam",
-      role: "barista",
+      name: "Clare",
+      role: "psychology student",
     },
     price: "biscuit",
     size: "medium",
@@ -33,8 +33,8 @@ export const DOGS = {
     look: "White with tan patches, red collar",
     name: "Buddy",
     owner: {
-      name: "Sheba",
-      role: "retired accountant",
+      name: "Jason",
+      role: "trail runner",
     },
     price: "buddy",
     size: "small",
@@ -47,7 +47,7 @@ export const DOGS = {
     name: "Duchess",
     owner: {
       name: "Eve",
-      role: "retired florist",
+      role: "social media influencer",
     },
     price: "duchess",
     size: "small",
@@ -59,8 +59,8 @@ export const DOGS = {
     look: "Large and sturdy, grey and white, blue eyes, harness",
     name: "Kilo",
     owner: {
-      name: "Jason",
-      role: "trail runner",
+      name: "Ralph",
+      role: "retired pilot",
     },
     price: "kilo",
     size: "large",
@@ -99,7 +99,7 @@ export const DOGS = {
     name: "Reggie",
     owner: {
       name: "Ryan",
-      role: "pet influencer",
+      role: "engineer",
     },
     price: "reggie",
     size: "small",
@@ -112,7 +112,7 @@ export const DOGS = {
     name: "Sequoia",
     owner: {
       name: "Aunt Judy",
-      role: "wedding planner",
+      role: "tennis star",
     },
     price: "snowball",
     size: "large",
