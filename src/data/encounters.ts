@@ -29,7 +29,7 @@ export const ENCOUNTERS = {
           name: "Call the zoo",
         },
         {
-          art: "card-capybara-keep-walking",
+          art: "card-capybara-drag",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           name: "Drag them away",
         },
@@ -57,7 +57,7 @@ export const ENCOUNTERS = {
           name: "Buy a new cone",
         },
         {
-          art: "card-dropped-cone-pull-away",
+          art: "card-dropped-cone-walk-on-by",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           name: "Walk on by",
         },
@@ -80,12 +80,12 @@ export const ENCOUNTERS = {
           name: "Sniff the fish",
         },
         {
-          art: "card-fish-crates-clean-up",
+          art: "card-fish-crates-pay",
           effects: [{ amount: "fishCleanUp", change: "lose", kind: "money" }],
           name: "Pay for the fish",
         },
         {
-          art: "card-fish-crates-pull-away",
+          art: "card-fish-crates-hurry-past",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           name: "Hurry past",
         },
@@ -151,7 +151,7 @@ export const ENCOUNTERS = {
       kind: "card",
       options: [
         {
-          art: "card-porch-cat-shoo",
+          art: "card-porch-cat-stand",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
           name: "Stand your ground",
         },
@@ -294,7 +294,7 @@ export const ENCOUNTERS = {
           name: "Walk around",
         },
         {
-          art: "card-wedding-shoot-apologize",
+          art: "card-wedding-shoot-reshoot",
           effects: [{ amount: "weddingApology", change: "lose", kind: "money" }],
           name: "Pay for a reshoot",
         },
