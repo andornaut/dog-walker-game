@@ -56,15 +56,23 @@ function deps(seed: number, drawable: (mover: AmbientMover) => boolean = () => t
   return { drawable, random: randomStream(seed, "ambient"), stage: STAGE };
 }
 
-// Every frame of a walk of seconds through zone at the road's speed: the movers out, each
-// with its slot and where it is drawn.
+// One mover out on a frame: its slot, the walk time it set out (with the slot, which mover
+// this is), and where it is drawn.
+interface Shown {
+  born: number;
+  mover: AmbientMover;
+  place: AmbientPlace;
+  slot: number;
+}
+
+// Every frame of a walk of seconds through zone at the road's speed: the movers out.
 function walkThrough(
   zone: ZoneId,
   seconds: number,
   seed = 1,
   drawable?: (mover: AmbientMover) => boolean,
   movers: readonly AmbientMover[] = gameData.ambient[zone],
-): { mover: AmbientMover; place: AmbientPlace; slot: number }[][] {
+): Shown[][] {
   const state = startAmbient();
   const using = deps(seed, drawable);
   const frames = [];
@@ -78,12 +86,37 @@ function walkThrough(
         return slot.active &&
           slot.mover !== null &&
           placeAmbient(STAGE, slot, now, travelled, place)
-          ? [{ mover: slot.mover, place, slot: index }]
+          ? [{ born: slot.bornAt, mover: slot.mover, place, slot: index }]
           : [];
       }),
     );
   }
   return frames;
+}
+
+// The same mover on the frame before: in the same slot and set out at the same time, as a slot
+// can pass from one mover to the next within a frame.
+function before(frames: readonly Shown[][], i: number, { born, slot }: Shown): Shown | undefined {
+  return frames[i - 1]?.find((each) => each.slot === slot && each.born === born);
+}
+
+// The movers facing the wrong way while moving. Side views face right in their art, so a mover
+// moving left is mirrored; front and back views walking along the sidewalks never are.
+function misfaced(frames: readonly Shown[][]): Shown[] {
+  return frames.flatMap((out, i) =>
+    out.filter((each) => {
+      const last = before(frames, i, each);
+      const { mover, place } = each;
+      if (last === undefined || !place.moving || !last.place.moving) {
+        return false;
+      }
+      if (mover.path === "sidewalkAway" || mover.path === "sidewalkToward") {
+        return place.flip;
+      }
+      const dx = place.x - last.place.x;
+      return dx !== 0 && place.flip !== dx < 0;
+    }),
+  );
 }
 
 describe("stepAmbient", () => {
@@ -110,22 +143,7 @@ describe("stepAmbient", () => {
       });
       expect(onRoad, zone).toEqual([]);
 
-      // Side views face right in their art, so a mover moving left is mirrored; front and back
-      // views walking along the sidewalks never are.
-      const misfaced = frames.slice(1).flatMap((out, i) =>
-        out.filter(({ mover, place, slot }) => {
-          const before = frames[i]?.find((each) => each.slot === slot && each.mover === mover);
-          if (before === undefined || !place.moving || !before.place.moving) {
-            return false;
-          }
-          if (mover.path === "sidewalkAway" || mover.path === "sidewalkToward") {
-            return place.flip;
-          }
-          const dx = place.x - before.place.x;
-          return dx !== 0 && place.flip !== dx < 0;
-        }),
-      );
-      expect(misfaced, zone).toEqual([]);
+      expect(misfaced(frames), zone).toEqual([]);
 
       const sky = shown.filter(isSky).map(({ place }) => place);
       expect(
@@ -147,6 +165,43 @@ describe("stepAmbient", () => {
         zone,
       ).toEqual(rows.map((y) => byRow.get(y)).sort((a = 0, b = 0) => a - b));
     }
+  });
+
+  // A crowded band, built from the first mover on each band path: every slot is taken, so as
+  // one mover leaves the next sets out in its slot within the same frame. The newcomer is drawn
+  // from its own start, facing its way, and the facing check follows it, not the slot.
+  const CROWDED = (["crossStreet", "crossWalk", "sky"] as const).flatMap((path) =>
+    ZONES.flatMap((zone) => gameData.ambient[zone].filter((mover) => mover.path === path))
+      .slice(0, 1)
+      .map((mover) => ({ mover: { ...mover, perMinute: 6000 }, path })),
+  );
+
+  it.each(CROWDED)("hands a $path mover's slot to the next within a frame", ({ mover }) => {
+    const { width } = LAYOUT.backdrop;
+    const frames = walkThrough("homeStretch", 120, 1, undefined, [mover]);
+    const handovers = frames.flatMap((out, i) =>
+      out.filter(
+        (each) =>
+          before(frames, i, each) === undefined &&
+          (frames[i - 1] ?? []).some(({ slot }) => slot === each.slot),
+      ),
+    );
+    expect(handovers.length).toBeGreaterThan(0);
+    const offStart = handovers.filter(
+      ({ place }) => place.x !== (place.flip ? width + ROAD_SPRITE_SIZE : -ROAD_SPRITE_SIZE),
+    );
+    expect(offStart).toEqual([]);
+    expect(misfaced(frames)).toEqual([]);
+
+    // A newcomer mirrored the wrong way on its second frame is caught.
+    const [first] = handovers;
+    const next = frames.findIndex((out) => first !== undefined && out.includes(first)) + 1;
+    const second = frames[next]?.find((each) => before(frames, next, each) === first);
+    expect(second).toBeDefined();
+    if (second !== undefined) {
+      second.place.flip = !second.place.flip;
+    }
+    expect(misfaced(frames)).toEqual([second]);
   });
 
   it("plays the same movers for the same seed, and others for another", () => {
