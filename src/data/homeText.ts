@@ -45,7 +45,7 @@ export const HOME_TEXT = {
       debuffSeconds: "debuff time",
       forgivenHearts: "first ♥ lost each neighborhood forgiven",
       freeCards: "free cards each neighborhood",
-      maxHearts: "max ♥",
+      maxHearts: "max ♥ for every owner",
       obstacleSpawns: "obstacles",
       squirrelPulls: "pulls toward squirrels",
       startMoney: "starting cash",

@@ -1354,7 +1354,7 @@
         "fannyPack": 600,
         "hallPass": 1200,
         "kilo": 300,
-        "luckyCollar": 1500,
+        "luckyCollar": 2000,
         "penny": 600,
         "pierre": 500,
         "reggie": 800,
@@ -1398,7 +1398,7 @@
     "probability": {
       "shyHopperShare": 0.5,
       "smallDodgeChance": 0.25,
-      "whistleDodgeChance": 0.125
+      "whistleDodgeChance": 0.25
     },
     "seconds": {
       "approachFirstDelayMax": 0.5,

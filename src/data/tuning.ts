@@ -81,7 +81,7 @@ export const TUNING = {
       fannyPack: 600,
       hallPass: 1200,
       kilo: 300,
-      luckyCollar: 1500,
+      luckyCollar: 2000,
       penny: 600,
       pierre: 500,
       reggie: 800,
@@ -161,7 +161,7 @@ export const TUNING = {
     smallDodgeChance: 0.25,
     // With the Whistle, a hit that would land on a medium or large dog misses it this often,
     // costing nothing.
-    whistleDodgeChance: 0.125,
+    whistleDodgeChance: 0.25,
   },
   seconds: {
     // A stalker's first step's cue begins a delay drawn per stalker between these after it is
