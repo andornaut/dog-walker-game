@@ -1,5 +1,5 @@
 { "frames": {
-   "petting-neighbor@56 0.aseprite": {
+   "petting-neighbour@56 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 100
    },
-   "petting-neighbor@56 1.aseprite": {
+   "petting-neighbour@56 1.aseprite": {
     "frame": { "x": 27, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 100
    },
-   "petting-neighbor@56 2.aseprite": {
+   "petting-neighbour@56 2.aseprite": {
     "frame": { "x": 54, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 100
    },
-   "petting-neighbor@56 3.aseprite": {
+   "petting-neighbour@56 3.aseprite": {
     "frame": { "x": 81, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 100
    },
-   "petting-neighbor@56 4.aseprite": {
+   "petting-neighbour@56 4.aseprite": {
     "frame": { "x": 108, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 350
    },
-   "petting-neighbor@56 5.aseprite": {
+   "petting-neighbour@56 5.aseprite": {
     "frame": { "x": 135, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -47,7 +47,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 350
    },
-   "petting-neighbor@56 6.aseprite": {
+   "petting-neighbour@56 6.aseprite": {
     "frame": { "x": 162, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -55,7 +55,7 @@
     "sourceSize": { "w": 27, "h": 41 },
     "duration": 400
    },
-   "petting-neighbor@56 7.aseprite": {
+   "petting-neighbour@56 7.aseprite": {
     "frame": { "x": 189, "y": 0, "w": 27, "h": 41 },
     "rotated": false,
     "trimmed": false,
@@ -67,7 +67,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "petting-neighbor@56.png",
+  "image": "petting-neighbour@56.png",
   "format": "RGBA8888",
   "size": { "w": 216, "h": 41 },
   "scale": "1",

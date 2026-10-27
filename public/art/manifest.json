@@ -51,7 +51,16 @@
       "json": "sprites/ambient-bike@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 30
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "ambient-bike@56",
+      "png": "sprites/ambient-bike@56.png",
+      "json": "sprites/ambient-bike@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 35
       }
     },
     {
@@ -60,7 +69,16 @@
       "json": "sprites/ambient-bike@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 38
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "ambient-bike@69",
+      "png": "sprites/ambient-bike@69.png",
+      "json": "sprites/ambient-bike@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 43
       }
     },
     {
@@ -69,7 +87,16 @@
       "json": "sprites/ambient-bike@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 46
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "ambient-bike@81",
+      "png": "sprites/ambient-bike@81.png",
+      "json": "sprites/ambient-bike@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 50
       }
     },
     {
@@ -79,6 +106,15 @@
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "ambient-bike@94",
+      "png": "sprites/ambient-bike@94.png",
+      "json": "sprites/ambient-bike@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 58
       }
     },
     {
@@ -100,12 +136,30 @@
       }
     },
     {
+      "key": "ambient-bird@56",
+      "png": "sprites/ambient-bird@56.png",
+      "json": "sprites/ambient-bird@56.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 19
+      }
+    },
+    {
       "key": "ambient-bird@62",
       "png": "sprites/ambient-bird@62.png",
       "json": "sprites/ambient-bird@62.json",
       "anchor": {
         "feetY": 24,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "ambient-bird@69",
+      "png": "sprites/ambient-bird@69.png",
+      "json": "sprites/ambient-bird@69.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 23
       }
     },
     {
@@ -118,12 +172,30 @@
       }
     },
     {
+      "key": "ambient-bird@81",
+      "png": "sprites/ambient-bird@81.png",
+      "json": "sprites/ambient-bird@81.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "ambient-bird@88",
       "png": "sprites/ambient-bird@88.png",
       "json": "sprites/ambient-bird@88.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "ambient-bird@94",
+      "png": "sprites/ambient-bird@94.png",
+      "json": "sprites/ambient-bird@94.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 31
       }
     },
     {
@@ -150,7 +222,16 @@
       "json": "sprites/ambient-bus@50.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 62
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "ambient-bus@56",
+      "png": "sprites/ambient-bus@56.png",
+      "json": "sprites/ambient-bus@56.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 69
       }
     },
     {
@@ -159,7 +240,16 @@
       "json": "sprites/ambient-bus@62.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 77
+        "opaqueWidth": 76
+      }
+    },
+    {
+      "key": "ambient-bus@69",
+      "png": "sprites/ambient-bus@69.png",
+      "json": "sprites/ambient-bus@69.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 84
       }
     },
     {
@@ -172,12 +262,30 @@
       }
     },
     {
+      "key": "ambient-bus@81",
+      "png": "sprites/ambient-bus@81.png",
+      "json": "sprites/ambient-bus@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 99
+      }
+    },
+    {
       "key": "ambient-bus@88",
       "png": "sprites/ambient-bus@88.png",
       "json": "sprites/ambient-bus@88.json",
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 107
+      }
+    },
+    {
+      "key": "ambient-bus@94",
+      "png": "sprites/ambient-bus@94.png",
+      "json": "sprites/ambient-bus@94.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 114
       }
     },
     {
@@ -208,12 +316,30 @@
       }
     },
     {
+      "key": "ambient-car-hatchback@56",
+      "png": "sprites/ambient-car-hatchback@56.png",
+      "json": "sprites/ambient-car-hatchback@56.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "ambient-car-hatchback@62",
       "png": "sprites/ambient-car-hatchback@62.png",
       "json": "sprites/ambient-car-hatchback@62.json",
       "anchor": {
         "feetY": 25,
-        "opaqueWidth": 38
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@69",
+      "png": "sprites/ambient-car-hatchback@69.png",
+      "json": "sprites/ambient-car-hatchback@69.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 41
       }
     },
     {
@@ -222,7 +348,16 @@
       "json": "sprites/ambient-car-hatchback@75.json",
       "anchor": {
         "feetY": 30,
-        "opaqueWidth": 45
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@81",
+      "png": "sprites/ambient-car-hatchback@81.png",
+      "json": "sprites/ambient-car-hatchback@81.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 48
       }
     },
     {
@@ -232,6 +367,15 @@
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "ambient-car-hatchback@94",
+      "png": "sprites/ambient-car-hatchback@94.png",
+      "json": "sprites/ambient-car-hatchback@94.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 55
       }
     },
     {
@@ -253,12 +397,30 @@
       }
     },
     {
+      "key": "ambient-car-van@56",
+      "png": "sprites/ambient-car-van@56.png",
+      "json": "sprites/ambient-car-van@56.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 37
+      }
+    },
+    {
       "key": "ambient-car-van@62",
       "png": "sprites/ambient-car-van@62.png",
       "json": "sprites/ambient-car-van@62.json",
       "anchor": {
         "feetY": 27,
         "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "ambient-car-van@69",
+      "png": "sprites/ambient-car-van@69.png",
+      "json": "sprites/ambient-car-van@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 45
       }
     },
     {
@@ -271,12 +433,30 @@
       }
     },
     {
+      "key": "ambient-car-van@81",
+      "png": "sprites/ambient-car-van@81.png",
+      "json": "sprites/ambient-car-van@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 53
+      }
+    },
+    {
       "key": "ambient-car-van@88",
       "png": "sprites/ambient-car-van@88.png",
       "json": "sprites/ambient-car-van@88.json",
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 57
+      }
+    },
+    {
+      "key": "ambient-car-van@94",
+      "png": "sprites/ambient-car-van@94.png",
+      "json": "sprites/ambient-car-van@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 61
       }
     },
     {
@@ -294,7 +474,16 @@
       "json": "sprites/ambient-car-wagon@50.json",
       "anchor": {
         "feetY": 20,
-        "opaqueWidth": 35
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "ambient-car-wagon@56",
+      "png": "sprites/ambient-car-wagon@56.png",
+      "json": "sprites/ambient-car-wagon@56.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 40
       }
     },
     {
@@ -307,12 +496,30 @@
       }
     },
     {
+      "key": "ambient-car-wagon@69",
+      "png": "sprites/ambient-car-wagon@69.png",
+      "json": "sprites/ambient-car-wagon@69.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 49
+      }
+    },
+    {
       "key": "ambient-car-wagon@75",
       "png": "sprites/ambient-car-wagon@75.png",
       "json": "sprites/ambient-car-wagon@75.json",
       "anchor": {
-        "feetY": 31,
+        "feetY": 30,
         "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "ambient-car-wagon@81",
+      "png": "sprites/ambient-car-wagon@81.png",
+      "json": "sprites/ambient-car-wagon@81.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 58
       }
     },
     {
@@ -325,12 +532,30 @@
       }
     },
     {
+      "key": "ambient-car-wagon@94",
+      "png": "sprites/ambient-car-wagon@94.png",
+      "json": "sprites/ambient-car-wagon@94.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 67
+      }
+    },
+    {
       "key": "ambient-car@50",
       "png": "sprites/ambient-car@50.png",
       "json": "sprites/ambient-car@50.json",
       "anchor": {
         "feetY": 20,
         "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "ambient-car@56",
+      "png": "sprites/ambient-car@56.png",
+      "json": "sprites/ambient-car@56.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 38
       }
     },
     {
@@ -343,6 +568,15 @@
       }
     },
     {
+      "key": "ambient-car@69",
+      "png": "sprites/ambient-car@69.png",
+      "json": "sprites/ambient-car@69.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 47
+      }
+    },
+    {
       "key": "ambient-car@75",
       "png": "sprites/ambient-car@75.png",
       "json": "sprites/ambient-car@75.json",
@@ -352,12 +586,30 @@
       }
     },
     {
+      "key": "ambient-car@81",
+      "png": "sprites/ambient-car@81.png",
+      "json": "sprites/ambient-car@81.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "ambient-car@88",
       "png": "sprites/ambient-car@88.png",
       "json": "sprites/ambient-car@88.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "ambient-car@94",
+      "png": "sprites/ambient-car@94.png",
+      "json": "sprites/ambient-car@94.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 64
       }
     },
     {
@@ -375,7 +627,16 @@
       "json": "sprites/ambient-cat@50.json",
       "anchor": {
         "feetY": 19,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "ambient-cat@56",
+      "png": "sprites/ambient-cat@56.png",
+      "json": "sprites/ambient-cat@56.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 16
       }
     },
     {
@@ -388,12 +649,30 @@
       }
     },
     {
+      "key": "ambient-cat@69",
+      "png": "sprites/ambient-cat@69.png",
+      "json": "sprites/ambient-cat@69.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "ambient-cat@75",
       "png": "sprites/ambient-cat@75.png",
       "json": "sprites/ambient-cat@75.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 21
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "ambient-cat@81",
+      "png": "sprites/ambient-cat@81.png",
+      "json": "sprites/ambient-cat@81.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 23
       }
     },
     {
@@ -403,6 +682,15 @@
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "ambient-cat@94",
+      "png": "sprites/ambient-cat@94.png",
+      "json": "sprites/ambient-cat@94.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 27
       }
     },
     {
@@ -482,8 +770,17 @@
       "png": "sprites/ambient-pedestrian-back@50.png",
       "json": "sprites/ambient-pedestrian-back@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@56",
+      "png": "sprites/ambient-pedestrian-back@56.png",
+      "json": "sprites/ambient-pedestrian-back@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 20
       }
     },
     {
@@ -491,8 +788,17 @@
       "png": "sprites/ambient-pedestrian-back@62.png",
       "json": "sprites/ambient-pedestrian-back@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@69",
+      "png": "sprites/ambient-pedestrian-back@69.png",
+      "json": "sprites/ambient-pedestrian-back@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 24
       }
     },
     {
@@ -500,8 +806,17 @@
       "png": "sprites/ambient-pedestrian-back@75.png",
       "json": "sprites/ambient-pedestrian-back@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@81",
+      "png": "sprites/ambient-pedestrian-back@81.png",
+      "json": "sprites/ambient-pedestrian-back@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 28
       }
     },
     {
@@ -514,12 +829,30 @@
       }
     },
     {
+      "key": "ambient-pedestrian-back@94",
+      "png": "sprites/ambient-pedestrian-back@94.png",
+      "json": "sprites/ambient-pedestrian-back@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "ambient-pedestrian@50",
       "png": "sprites/ambient-pedestrian@50.png",
       "json": "sprites/ambient-pedestrian@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "ambient-pedestrian@56",
+      "png": "sprites/ambient-pedestrian@56.png",
+      "json": "sprites/ambient-pedestrian@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 20
       }
     },
     {
@@ -527,8 +860,17 @@
       "png": "sprites/ambient-pedestrian@62.png",
       "json": "sprites/ambient-pedestrian@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "ambient-pedestrian@69",
+      "png": "sprites/ambient-pedestrian@69.png",
+      "json": "sprites/ambient-pedestrian@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 24
       }
     },
     {
@@ -536,8 +878,17 @@
       "png": "sprites/ambient-pedestrian@75.png",
       "json": "sprites/ambient-pedestrian@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "ambient-pedestrian@81",
+      "png": "sprites/ambient-pedestrian@81.png",
+      "json": "sprites/ambient-pedestrian@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 28
       }
     },
     {
@@ -547,6 +898,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "ambient-pedestrian@94",
+      "png": "sprites/ambient-pedestrian@94.png",
+      "json": "sprites/ambient-pedestrian@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 33
       }
     },
     {
@@ -586,12 +946,30 @@
       }
     },
     {
+      "key": "ambient-rabbit@56",
+      "png": "sprites/ambient-rabbit@56.png",
+      "json": "sprites/ambient-rabbit@56.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "ambient-rabbit@62",
       "png": "sprites/ambient-rabbit@62.png",
       "json": "sprites/ambient-rabbit@62.json",
       "anchor": {
         "feetY": 24,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "ambient-rabbit@69",
+      "png": "sprites/ambient-rabbit@69.png",
+      "json": "sprites/ambient-rabbit@69.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 22
       }
     },
     {
@@ -604,12 +982,30 @@
       }
     },
     {
+      "key": "ambient-rabbit@81",
+      "png": "sprites/ambient-rabbit@81.png",
+      "json": "sprites/ambient-rabbit@81.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 26
+      }
+    },
+    {
       "key": "ambient-rabbit@88",
       "png": "sprites/ambient-rabbit@88.png",
       "json": "sprites/ambient-rabbit@88.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "ambient-rabbit@94",
+      "png": "sprites/ambient-rabbit@94.png",
+      "json": "sprites/ambient-rabbit@94.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 30
       }
     },
     {
@@ -825,12 +1221,30 @@
       }
     },
     {
+      "key": "ball-bounce@56",
+      "png": "sprites/ball-bounce@56.png",
+      "json": "sprites/ball-bounce@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 10
+      }
+    },
+    {
       "key": "ball-bounce@62",
       "png": "sprites/ball-bounce@62.png",
       "json": "sprites/ball-bounce@62.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "ball-bounce@69",
+      "png": "sprites/ball-bounce@69.png",
+      "json": "sprites/ball-bounce@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 12
       }
     },
     {
@@ -843,12 +1257,30 @@
       }
     },
     {
+      "key": "ball-bounce@81",
+      "png": "sprites/ball-bounce@81.png",
+      "json": "sprites/ball-bounce@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 15
+      }
+    },
+    {
       "key": "ball-bounce@88",
       "png": "sprites/ball-bounce@88.png",
       "json": "sprites/ball-bounce@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "ball-bounce@94",
+      "png": "sprites/ball-bounce@94.png",
+      "json": "sprites/ball-bounce@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 17
       }
     },
     {
@@ -870,12 +1302,30 @@
       }
     },
     {
+      "key": "barrier-2@56",
+      "png": "sprites/barrier-2@56.png",
+      "json": "sprites/barrier-2@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 63
+      }
+    },
+    {
       "key": "barrier-2@62",
       "png": "sprites/barrier-2@62.png",
       "json": "sprites/barrier-2@62.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 70
+      }
+    },
+    {
+      "key": "barrier-2@69",
+      "png": "sprites/barrier-2@69.png",
+      "json": "sprites/barrier-2@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 77
       }
     },
     {
@@ -888,12 +1338,30 @@
       }
     },
     {
+      "key": "barrier-2@81",
+      "png": "sprites/barrier-2@81.png",
+      "json": "sprites/barrier-2@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 91
+      }
+    },
+    {
       "key": "barrier-2@88",
       "png": "sprites/barrier-2@88.png",
       "json": "sprites/barrier-2@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "barrier-2@94",
+      "png": "sprites/barrier-2@94.png",
+      "json": "sprites/barrier-2@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 105
       }
     },
     {
@@ -915,12 +1383,30 @@
       }
     },
     {
+      "key": "barrier-3@56",
+      "png": "sprites/barrier-3@56.png",
+      "json": "sprites/barrier-3@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 99
+      }
+    },
+    {
       "key": "barrier-3@62",
       "png": "sprites/barrier-3@62.png",
       "json": "sprites/barrier-3@62.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "barrier-3@69",
+      "png": "sprites/barrier-3@69.png",
+      "json": "sprites/barrier-3@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 121
       }
     },
     {
@@ -933,12 +1419,30 @@
       }
     },
     {
+      "key": "barrier-3@81",
+      "png": "sprites/barrier-3@81.png",
+      "json": "sprites/barrier-3@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 143
+      }
+    },
+    {
       "key": "barrier-3@88",
       "png": "sprites/barrier-3@88.png",
       "json": "sprites/barrier-3@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 154
+      }
+    },
+    {
+      "key": "barrier-3@94",
+      "png": "sprites/barrier-3@94.png",
+      "json": "sprites/barrier-3@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 165
       }
     },
     {
@@ -956,7 +1460,16 @@
       "json": "sprites/bench@50.json",
       "anchor": {
         "feetY": 17,
-        "opaqueWidth": 54
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "bench@56",
+      "png": "sprites/bench@56.png",
+      "json": "sprites/bench@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 62
       }
     },
     {
@@ -965,7 +1478,16 @@
       "json": "sprites/bench@62.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 68
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "bench@69",
+      "png": "sprites/bench@69.png",
+      "json": "sprites/bench@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 75
       }
     },
     {
@@ -978,12 +1500,30 @@
       }
     },
     {
+      "key": "bench@81",
+      "png": "sprites/bench@81.png",
+      "json": "sprites/bench@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 89
+      }
+    },
+    {
       "key": "bench@88",
       "png": "sprites/bench@88.png",
       "json": "sprites/bench@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 96
+      }
+    },
+    {
+      "key": "bench@94",
+      "png": "sprites/bench@94.png",
+      "json": "sprites/bench@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 103
       }
     },
     {
@@ -1000,8 +1540,17 @@
       "png": "sprites/busker@50.png",
       "json": "sprites/busker@50.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 23
+        "feetY": 34,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "busker@56",
+      "png": "sprites/busker@56.png",
+      "json": "sprites/busker@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1009,8 +1558,17 @@
       "png": "sprites/busker@62.png",
       "json": "sprites/busker@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "busker@69",
+      "png": "sprites/busker@69.png",
+      "json": "sprites/busker@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 32
       }
     },
     {
@@ -1018,8 +1576,17 @@
       "png": "sprites/busker@75.png",
       "json": "sprites/busker@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "busker@81",
+      "png": "sprites/busker@81.png",
+      "json": "sprites/busker@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 38
       }
     },
     {
@@ -1029,6 +1596,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "busker@94",
+      "png": "sprites/busker@94.png",
+      "json": "sprites/busker@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 44
       }
     },
     {
@@ -1045,8 +1621,17 @@
       "png": "sprites/capybara@50.png",
       "json": "sprites/capybara@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 22
+        "feetY": 22,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "capybara@56",
+      "png": "sprites/capybara@56.png",
+      "json": "sprites/capybara@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1054,8 +1639,17 @@
       "png": "sprites/capybara@62.png",
       "json": "sprites/capybara@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 28
+        "feetY": 28,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "capybara@69",
+      "png": "sprites/capybara@69.png",
+      "json": "sprites/capybara@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 32
       }
     },
     {
@@ -1063,8 +1657,17 @@
       "png": "sprites/capybara@75.png",
       "json": "sprites/capybara@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 34
+        "feetY": 33,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "capybara@81",
+      "png": "sprites/capybara@81.png",
+      "json": "sprites/capybara@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 37
       }
     },
     {
@@ -1074,6 +1677,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "capybara@94",
+      "png": "sprites/capybara@94.png",
+      "json": "sprites/capybara@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 43
       }
     },
     {
@@ -1105,12 +1717,30 @@
       }
     },
     {
+      "key": "cargo-bike@56",
+      "png": "sprites/cargo-bike@56.png",
+      "json": "sprites/cargo-bike@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 25
+      }
+    },
+    {
       "key": "cargo-bike@62",
       "png": "sprites/cargo-bike@62.png",
       "json": "sprites/cargo-bike@62.json",
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "cargo-bike@69",
+      "png": "sprites/cargo-bike@69.png",
+      "json": "sprites/cargo-bike@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 30
       }
     },
     {
@@ -1123,12 +1753,30 @@
       }
     },
     {
+      "key": "cargo-bike@81",
+      "png": "sprites/cargo-bike@81.png",
+      "json": "sprites/cargo-bike@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 36
+      }
+    },
+    {
       "key": "cargo-bike@88",
       "png": "sprites/cargo-bike@88.png",
       "json": "sprites/cargo-bike@88.json",
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "cargo-bike@94",
+      "png": "sprites/cargo-bike@94.png",
+      "json": "sprites/cargo-bike@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 41
       }
     },
     {
@@ -1146,7 +1794,16 @@
       "json": "sprites/chase-cat@50.json",
       "anchor": {
         "feetY": 18,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "chase-cat@56",
+      "png": "sprites/chase-cat@56.png",
+      "json": "sprites/chase-cat@56.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 12
       }
     },
     {
@@ -1159,12 +1816,30 @@
       }
     },
     {
+      "key": "chase-cat@69",
+      "png": "sprites/chase-cat@69.png",
+      "json": "sprites/chase-cat@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "chase-cat@75",
       "png": "sprites/chase-cat@75.png",
       "json": "sprites/chase-cat@75.json",
       "anchor": {
         "feetY": 28,
-        "opaqueWidth": 15
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "chase-cat@81",
+      "png": "sprites/chase-cat@81.png",
+      "json": "sprites/chase-cat@81.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1174,6 +1849,15 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "chase-cat@94",
+      "png": "sprites/chase-cat@94.png",
+      "json": "sprites/chase-cat@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 20
       }
     },
     {
@@ -1190,8 +1874,17 @@
       "png": "sprites/chase-ducklings@50.png",
       "json": "sprites/chase-ducklings@50.json",
       "anchor": {
-        "feetY": 18,
-        "opaqueWidth": 14
+        "feetY": 17,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "chase-ducklings@56",
+      "png": "sprites/chase-ducklings@56.png",
+      "json": "sprites/chase-ducklings@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1199,8 +1892,17 @@
       "png": "sprites/chase-ducklings@62.png",
       "json": "sprites/chase-ducklings@62.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 18
+        "feetY": 22,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "chase-ducklings@69",
+      "png": "sprites/chase-ducklings@69.png",
+      "json": "sprites/chase-ducklings@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1208,8 +1910,17 @@
       "png": "sprites/chase-ducklings@75.png",
       "json": "sprites/chase-ducklings@75.json",
       "anchor": {
-        "feetY": 27,
-        "opaqueWidth": 22
+        "feetY": 26,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "chase-ducklings@81",
+      "png": "sprites/chase-ducklings@81.png",
+      "json": "sprites/chase-ducklings@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1219,6 +1930,15 @@
       "anchor": {
         "feetY": 30,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "chase-ducklings@94",
+      "png": "sprites/chase-ducklings@94.png",
+      "json": "sprites/chase-ducklings@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 28
       }
     },
     {
@@ -1235,8 +1955,17 @@
       "png": "sprites/chase-pigeons@50.png",
       "json": "sprites/chase-pigeons@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 17,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "chase-pigeons@56",
+      "png": "sprites/chase-pigeons@56.png",
+      "json": "sprites/chase-pigeons@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 18
       }
     },
     {
@@ -1244,8 +1973,17 @@
       "png": "sprites/chase-pigeons@62.png",
       "json": "sprites/chase-pigeons@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "chase-pigeons@69",
+      "png": "sprites/chase-pigeons@69.png",
+      "json": "sprites/chase-pigeons@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 22
       }
     },
     {
@@ -1253,8 +1991,17 @@
       "png": "sprites/chase-pigeons@75.png",
       "json": "sprites/chase-pigeons@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 26,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "chase-pigeons@81",
+      "png": "sprites/chase-pigeons@81.png",
+      "json": "sprites/chase-pigeons@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1264,6 +2011,15 @@
       "anchor": {
         "feetY": 30,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "chase-pigeons@94",
+      "png": "sprites/chase-pigeons@94.png",
+      "json": "sprites/chase-pigeons@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 30
       }
     },
     {
@@ -1281,7 +2037,16 @@
       "json": "sprites/chase-rabbit@50.json",
       "anchor": {
         "feetY": 18,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "chase-rabbit@56",
+      "png": "sprites/chase-rabbit@56.png",
+      "json": "sprites/chase-rabbit@56.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 12
       }
     },
     {
@@ -1294,12 +2059,30 @@
       }
     },
     {
+      "key": "chase-rabbit@69",
+      "png": "sprites/chase-rabbit@69.png",
+      "json": "sprites/chase-rabbit@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "chase-rabbit@75",
       "png": "sprites/chase-rabbit@75.png",
       "json": "sprites/chase-rabbit@75.json",
       "anchor": {
         "feetY": 28,
-        "opaqueWidth": 15
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "chase-rabbit@81",
+      "png": "sprites/chase-rabbit@81.png",
+      "json": "sprites/chase-rabbit@81.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1309,6 +2092,15 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "chase-rabbit@94",
+      "png": "sprites/chase-rabbit@94.png",
+      "json": "sprites/chase-rabbit@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 20
       }
     },
     {
@@ -1325,8 +2117,17 @@
       "png": "sprites/clothing-rack@50.png",
       "json": "sprites/clothing-rack@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "clothing-rack@56",
+      "png": "sprites/clothing-rack@56.png",
+      "json": "sprites/clothing-rack@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 27
       }
     },
     {
@@ -1334,8 +2135,17 @@
       "png": "sprites/clothing-rack@62.png",
       "json": "sprites/clothing-rack@62.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 28,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "clothing-rack@69",
+      "png": "sprites/clothing-rack@69.png",
+      "json": "sprites/clothing-rack@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 33
       }
     },
     {
@@ -1343,8 +2153,17 @@
       "png": "sprites/clothing-rack@75.png",
       "json": "sprites/clothing-rack@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "clothing-rack@81",
+      "png": "sprites/clothing-rack@81.png",
+      "json": "sprites/clothing-rack@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 39
       }
     },
     {
@@ -1354,6 +2173,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "clothing-rack@94",
+      "png": "sprites/clothing-rack@94.png",
+      "json": "sprites/clothing-rack@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 45
       }
     },
     {
@@ -1370,8 +2198,17 @@
       "png": "sprites/cone@50.png",
       "json": "sprites/cone@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "cone@56",
+      "png": "sprites/cone@56.png",
+      "json": "sprites/cone@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 16
       }
     },
     {
@@ -1379,8 +2216,17 @@
       "png": "sprites/cone@62.png",
       "json": "sprites/cone@62.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 27,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "cone@69",
+      "png": "sprites/cone@69.png",
+      "json": "sprites/cone@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 19
       }
     },
     {
@@ -1393,12 +2239,30 @@
       }
     },
     {
+      "key": "cone@81",
+      "png": "sprites/cone@81.png",
+      "json": "sprites/cone@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 23
+      }
+    },
+    {
       "key": "cone@88",
       "png": "sprites/cone@88.png",
       "json": "sprites/cone@88.json",
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "cone@94",
+      "png": "sprites/cone@94.png",
+      "json": "sprites/cone@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1415,8 +2279,17 @@
       "png": "sprites/couple@50.png",
       "json": "sprites/couple@50.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 36
+        "feetY": 34,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "couple@56",
+      "png": "sprites/couple@56.png",
+      "json": "sprites/couple@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 41
       }
     },
     {
@@ -1424,8 +2297,17 @@
       "png": "sprites/couple@62.png",
       "json": "sprites/couple@62.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 45
+        "feetY": 43,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "couple@69",
+      "png": "sprites/couple@69.png",
+      "json": "sprites/couple@69.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 50
       }
     },
     {
@@ -1433,8 +2315,17 @@
       "png": "sprites/couple@75.png",
       "json": "sprites/couple@75.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 54
+        "feetY": 51,
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "couple@81",
+      "png": "sprites/couple@81.png",
+      "json": "sprites/couple@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 59
       }
     },
     {
@@ -1444,6 +2335,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "couple@94",
+      "png": "sprites/couple@94.png",
+      "json": "sprites/couple@94.json",
+      "anchor": {
+        "feetY": 64,
+        "opaqueWidth": 68
       }
     },
     {
@@ -1460,8 +2360,17 @@
       "png": "sprites/coyote@50.png",
       "json": "sprites/coyote@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 22
+        "feetY": 22,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "coyote@56",
+      "png": "sprites/coyote@56.png",
+      "json": "sprites/coyote@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1469,8 +2378,17 @@
       "png": "sprites/coyote@62.png",
       "json": "sprites/coyote@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 28
+        "feetY": 27,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "coyote@69",
+      "png": "sprites/coyote@69.png",
+      "json": "sprites/coyote@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 32
       }
     },
     {
@@ -1479,7 +2397,16 @@
       "json": "sprites/coyote@75.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 34
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "coyote@81",
+      "png": "sprites/coyote@81.png",
+      "json": "sprites/coyote@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 37
       }
     },
     {
@@ -1489,6 +2416,15 @@
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "coyote@94",
+      "png": "sprites/coyote@94.png",
+      "json": "sprites/coyote@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 43
       }
     },
     {
@@ -1505,8 +2441,17 @@
       "png": "sprites/curb-barrel@50.png",
       "json": "sprites/curb-barrel@50.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 11
+        "feetY": 18,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-barrel@56",
+      "png": "sprites/curb-barrel@56.png",
+      "json": "sprites/curb-barrel@56.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 13
       }
     },
     {
@@ -1514,8 +2459,17 @@
       "png": "sprites/curb-barrel@62.png",
       "json": "sprites/curb-barrel@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-barrel@69",
+      "png": "sprites/curb-barrel@69.png",
+      "json": "sprites/curb-barrel@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 16
       }
     },
     {
@@ -1528,12 +2482,30 @@
       }
     },
     {
+      "key": "curb-barrel@81",
+      "png": "sprites/curb-barrel@81.png",
+      "json": "sprites/curb-barrel@81.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 19
+      }
+    },
+    {
       "key": "curb-barrel@88",
       "png": "sprites/curb-barrel@88.png",
       "json": "sprites/curb-barrel@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-barrel@94",
+      "png": "sprites/curb-barrel@94.png",
+      "json": "sprites/curb-barrel@94.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 22
       }
     },
     {
@@ -1555,12 +2527,30 @@
       }
     },
     {
+      "key": "curb-bike-ring@56",
+      "png": "sprites/curb-bike-ring@56.png",
+      "json": "sprites/curb-bike-ring@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 11
+      }
+    },
+    {
       "key": "curb-bike-ring@62",
       "png": "sprites/curb-bike-ring@62.png",
       "json": "sprites/curb-bike-ring@62.json",
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "curb-bike-ring@69",
+      "png": "sprites/curb-bike-ring@69.png",
+      "json": "sprites/curb-bike-ring@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 14
       }
     },
     {
@@ -1573,12 +2563,30 @@
       }
     },
     {
+      "key": "curb-bike-ring@81",
+      "png": "sprites/curb-bike-ring@81.png",
+      "json": "sprites/curb-bike-ring@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "curb-bike-ring@88",
       "png": "sprites/curb-bike-ring@88.png",
       "json": "sprites/curb-bike-ring@88.json",
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-bike-ring@94",
+      "png": "sprites/curb-bike-ring@94.png",
+      "json": "sprites/curb-bike-ring@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 19
       }
     },
     {
@@ -1596,7 +2604,16 @@
       "json": "sprites/curb-bollard@50.json",
       "anchor": {
         "feetY": 19,
-        "opaqueWidth": 6
+        "opaqueWidth": 7
+      }
+    },
+    {
+      "key": "curb-bollard@56",
+      "png": "sprites/curb-bollard@56.png",
+      "json": "sprites/curb-bollard@56.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 8
       }
     },
     {
@@ -1605,7 +2622,16 @@
       "json": "sprites/curb-bollard@62.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 8
+        "opaqueWidth": 9
+      }
+    },
+    {
+      "key": "curb-bollard@69",
+      "png": "sprites/curb-bollard@69.png",
+      "json": "sprites/curb-bollard@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 10
       }
     },
     {
@@ -1613,8 +2639,17 @@
       "png": "sprites/curb-bollard@75.png",
       "json": "sprites/curb-bollard@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 27,
         "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "curb-bollard@81",
+      "png": "sprites/curb-bollard@81.png",
+      "json": "sprites/curb-bollard@81.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 11
       }
     },
     {
@@ -1624,6 +2659,15 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-bollard@94",
+      "png": "sprites/curb-bollard@94.png",
+      "json": "sprites/curb-bollard@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 13
       }
     },
     {
@@ -1641,7 +2685,16 @@
       "json": "sprites/curb-hydrant@50.json",
       "anchor": {
         "feetY": 19,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-hydrant@56",
+      "png": "sprites/curb-hydrant@56.png",
+      "json": "sprites/curb-hydrant@56.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 13
       }
     },
     {
@@ -1654,12 +2707,30 @@
       }
     },
     {
+      "key": "curb-hydrant@69",
+      "png": "sprites/curb-hydrant@69.png",
+      "json": "sprites/curb-hydrant@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "curb-hydrant@75",
       "png": "sprites/curb-hydrant@75.png",
       "json": "sprites/curb-hydrant@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 27,
         "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-hydrant@81",
+      "png": "sprites/curb-hydrant@81.png",
+      "json": "sprites/curb-hydrant@81.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 19
       }
     },
     {
@@ -1669,6 +2740,15 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-hydrant@94",
+      "png": "sprites/curb-hydrant@94.png",
+      "json": "sprites/curb-hydrant@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
       }
     },
     {
@@ -1690,12 +2770,30 @@
       }
     },
     {
+      "key": "curb-life-ring@56",
+      "png": "sprites/curb-life-ring@56.png",
+      "json": "sprites/curb-life-ring@56.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 11
+      }
+    },
+    {
       "key": "curb-life-ring@62",
       "png": "sprites/curb-life-ring@62.png",
       "json": "sprites/curb-life-ring@62.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "curb-life-ring@69",
+      "png": "sprites/curb-life-ring@69.png",
+      "json": "sprites/curb-life-ring@69.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 14
       }
     },
     {
@@ -1708,12 +2806,30 @@
       }
     },
     {
+      "key": "curb-life-ring@81",
+      "png": "sprites/curb-life-ring@81.png",
+      "json": "sprites/curb-life-ring@81.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "curb-life-ring@88",
       "png": "sprites/curb-life-ring@88.png",
       "json": "sprites/curb-life-ring@88.json",
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "curb-life-ring@94",
+      "png": "sprites/curb-life-ring@94.png",
+      "json": "sprites/curb-life-ring@94.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 19
       }
     },
     {
@@ -1731,7 +2847,16 @@
       "json": "sprites/curb-news-box@50.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-news-box@56",
+      "png": "sprites/curb-news-box@56.png",
+      "json": "sprites/curb-news-box@56.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 13
       }
     },
     {
@@ -1744,6 +2869,15 @@
       }
     },
     {
+      "key": "curb-news-box@69",
+      "png": "sprites/curb-news-box@69.png",
+      "json": "sprites/curb-news-box@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "curb-news-box@75",
       "png": "sprites/curb-news-box@75.png",
       "json": "sprites/curb-news-box@75.json",
@@ -1753,12 +2887,30 @@
       }
     },
     {
+      "key": "curb-news-box@81",
+      "png": "sprites/curb-news-box@81.png",
+      "json": "sprites/curb-news-box@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 19
+      }
+    },
+    {
       "key": "curb-news-box@88",
       "png": "sprites/curb-news-box@88.png",
       "json": "sprites/curb-news-box@88.json",
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-news-box@94",
+      "png": "sprites/curb-news-box@94.png",
+      "json": "sprites/curb-news-box@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 22
       }
     },
     {
@@ -1776,7 +2928,16 @@
       "json": "sprites/curb-pay-station@50.json",
       "anchor": {
         "feetY": 25,
-        "opaqueWidth": 6
+        "opaqueWidth": 7
+      }
+    },
+    {
+      "key": "curb-pay-station@56",
+      "png": "sprites/curb-pay-station@56.png",
+      "json": "sprites/curb-pay-station@56.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 8
       }
     },
     {
@@ -1785,7 +2946,16 @@
       "json": "sprites/curb-pay-station@62.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 8
+        "opaqueWidth": 9
+      }
+    },
+    {
+      "key": "curb-pay-station@69",
+      "png": "sprites/curb-pay-station@69.png",
+      "json": "sprites/curb-pay-station@69.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 10
       }
     },
     {
@@ -1794,7 +2964,16 @@
       "json": "sprites/curb-pay-station@75.json",
       "anchor": {
         "feetY": 37,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "curb-pay-station@81",
+      "png": "sprites/curb-pay-station@81.png",
+      "json": "sprites/curb-pay-station@81.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 11
       }
     },
     {
@@ -1804,6 +2983,15 @@
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-pay-station@94",
+      "png": "sprites/curb-pay-station@94.png",
+      "json": "sprites/curb-pay-station@94.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 13
       }
     },
     {
@@ -1821,7 +3009,16 @@
       "json": "sprites/curb-rope-posts@50.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "curb-rope-posts@56",
+      "png": "sprites/curb-rope-posts@56.png",
+      "json": "sprites/curb-rope-posts@56.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 16
       }
     },
     {
@@ -1834,12 +3031,30 @@
       }
     },
     {
+      "key": "curb-rope-posts@69",
+      "png": "sprites/curb-rope-posts@69.png",
+      "json": "sprites/curb-rope-posts@69.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "curb-rope-posts@75",
       "png": "sprites/curb-rope-posts@75.png",
       "json": "sprites/curb-rope-posts@75.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 21
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "curb-rope-posts@81",
+      "png": "sprites/curb-rope-posts@81.png",
+      "json": "sprites/curb-rope-posts@81.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1849,6 +3064,15 @@
       "anchor": {
         "feetY": 25,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "curb-rope-posts@94",
+      "png": "sprites/curb-rope-posts@94.png",
+      "json": "sprites/curb-rope-posts@94.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 27
       }
     },
     {
@@ -1866,7 +3090,16 @@
       "json": "sprites/curb-urn@50.json",
       "anchor": {
         "feetY": 20,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "curb-urn@56",
+      "png": "sprites/curb-urn@56.png",
+      "json": "sprites/curb-urn@56.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
       }
     },
     {
@@ -1879,12 +3112,30 @@
       }
     },
     {
+      "key": "curb-urn@69",
+      "png": "sprites/curb-urn@69.png",
+      "json": "sprites/curb-urn@69.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "curb-urn@75",
       "png": "sprites/curb-urn@75.png",
       "json": "sprites/curb-urn@75.json",
       "anchor": {
-        "feetY": 31,
-        "opaqueWidth": 21
+        "feetY": 30,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "curb-urn@81",
+      "png": "sprites/curb-urn@81.png",
+      "json": "sprites/curb-urn@81.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1894,6 +3145,15 @@
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "curb-urn@94",
+      "png": "sprites/curb-urn@94.png",
+      "json": "sprites/curb-urn@94.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 27
       }
     },
     {
@@ -1911,7 +3171,16 @@
       "json": "sprites/cyclist@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "cyclist@56",
+      "png": "sprites/cyclist@56.png",
+      "json": "sprites/cyclist@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1920,7 +3189,16 @@
       "json": "sprites/cyclist@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 23
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "cyclist@69",
+      "png": "sprites/cyclist@69.png",
+      "json": "sprites/cyclist@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1929,7 +3207,16 @@
       "json": "sprites/cyclist@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 28
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "cyclist@81",
+      "png": "sprites/cyclist@81.png",
+      "json": "sprites/cyclist@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 31
       }
     },
     {
@@ -1939,6 +3226,15 @@
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "cyclist@94",
+      "png": "sprites/cyclist@94.png",
+      "json": "sprites/cyclist@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 36
       }
     },
     {
@@ -1956,7 +3252,16 @@
       "json": "sprites/delivery-cyclist@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "delivery-cyclist@56",
+      "png": "sprites/delivery-cyclist@56.png",
+      "json": "sprites/delivery-cyclist@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1965,7 +3270,16 @@
       "json": "sprites/delivery-cyclist@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 23
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "delivery-cyclist@69",
+      "png": "sprites/delivery-cyclist@69.png",
+      "json": "sprites/delivery-cyclist@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1974,7 +3288,16 @@
       "json": "sprites/delivery-cyclist@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 28
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "delivery-cyclist@81",
+      "png": "sprites/delivery-cyclist@81.png",
+      "json": "sprites/delivery-cyclist@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 31
       }
     },
     {
@@ -1984,6 +3307,15 @@
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "delivery-cyclist@94",
+      "png": "sprites/delivery-cyclist@94.png",
+      "json": "sprites/delivery-cyclist@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 36
       }
     },
     {
@@ -2005,12 +3337,30 @@
       }
     },
     {
+      "key": "delivery-truck@56",
+      "png": "sprites/delivery-truck@56.png",
+      "json": "sprites/delivery-truck@56.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 32
+      }
+    },
+    {
       "key": "delivery-truck@62",
       "png": "sprites/delivery-truck@62.png",
       "json": "sprites/delivery-truck@62.json",
       "anchor": {
         "feetY": 33,
         "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "delivery-truck@69",
+      "png": "sprites/delivery-truck@69.png",
+      "json": "sprites/delivery-truck@69.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 39
       }
     },
     {
@@ -2023,12 +3373,30 @@
       }
     },
     {
+      "key": "delivery-truck@81",
+      "png": "sprites/delivery-truck@81.png",
+      "json": "sprites/delivery-truck@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 46
+      }
+    },
+    {
       "key": "delivery-truck@88",
       "png": "sprites/delivery-truck@88.png",
       "json": "sprites/delivery-truck@88.json",
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "delivery-truck@94",
+      "png": "sprites/delivery-truck@94.png",
+      "json": "sprites/delivery-truck@94.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 53
       }
     },
     {
@@ -2046,7 +3414,16 @@
       "json": "sprites/dog-archie@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "dog-archie@56",
+      "png": "sprites/dog-archie@56.png",
+      "json": "sprites/dog-archie@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 13
       }
     },
     {
@@ -2059,12 +3436,30 @@
       }
     },
     {
+      "key": "dog-archie@69",
+      "png": "sprites/dog-archie@69.png",
+      "json": "sprites/dog-archie@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "dog-archie@75",
       "png": "sprites/dog-archie@75.png",
       "json": "sprites/dog-archie@75.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "dog-archie@81",
+      "png": "sprites/dog-archie@81.png",
+      "json": "sprites/dog-archie@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 19
       }
     },
     {
@@ -2074,6 +3469,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-archie@94",
+      "png": "sprites/dog-archie@94.png",
+      "json": "sprites/dog-archie@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2091,7 +3495,16 @@
       "json": "sprites/dog-biscuit@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "dog-biscuit@56",
+      "png": "sprites/dog-biscuit@56.png",
+      "json": "sprites/dog-biscuit@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 13
       }
     },
     {
@@ -2100,7 +3513,16 @@
       "json": "sprites/dog-biscuit@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "dog-biscuit@69",
+      "png": "sprites/dog-biscuit@69.png",
+      "json": "sprites/dog-biscuit@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 17
       }
     },
     {
@@ -2108,8 +3530,17 @@
       "png": "sprites/dog-biscuit@75.png",
       "json": "sprites/dog-biscuit@75.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 17
+        "feetY": 34,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-biscuit@81",
+      "png": "sprites/dog-biscuit@81.png",
+      "json": "sprites/dog-biscuit@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 19
       }
     },
     {
@@ -2119,6 +3550,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-biscuit@94",
+      "png": "sprites/dog-biscuit@94.png",
+      "json": "sprites/dog-biscuit@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2140,6 +3580,15 @@
       }
     },
     {
+      "key": "dog-buddy@56",
+      "png": "sprites/dog-buddy@56.png",
+      "json": "sprites/dog-buddy@56.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 11
+      }
+    },
+    {
       "key": "dog-buddy@62",
       "png": "sprites/dog-buddy@62.png",
       "json": "sprites/dog-buddy@62.json",
@@ -2149,11 +3598,29 @@
       }
     },
     {
+      "key": "dog-buddy@69",
+      "png": "sprites/dog-buddy@69.png",
+      "json": "sprites/dog-buddy@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 13
+      }
+    },
+    {
       "key": "dog-buddy@75",
       "png": "sprites/dog-buddy@75.png",
       "json": "sprites/dog-buddy@75.json",
       "anchor": {
         "feetY": 28,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-buddy@81",
+      "png": "sprites/dog-buddy@81.png",
+      "json": "sprites/dog-buddy@81.json",
+      "anchor": {
+        "feetY": 30,
         "opaqueWidth": 15
       }
     },
@@ -2164,6 +3631,15 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "dog-buddy@94",
+      "png": "sprites/dog-buddy@94.png",
+      "json": "sprites/dog-buddy@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2185,12 +3661,30 @@
       }
     },
     {
+      "key": "dog-duchess@56",
+      "png": "sprites/dog-duchess@56.png",
+      "json": "sprites/dog-duchess@56.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 11
+      }
+    },
+    {
       "key": "dog-duchess@62",
       "png": "sprites/dog-duchess@62.png",
       "json": "sprites/dog-duchess@62.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "dog-duchess@69",
+      "png": "sprites/dog-duchess@69.png",
+      "json": "sprites/dog-duchess@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 14
       }
     },
     {
@@ -2203,12 +3697,30 @@
       }
     },
     {
+      "key": "dog-duchess@81",
+      "png": "sprites/dog-duchess@81.png",
+      "json": "sprites/dog-duchess@81.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "dog-duchess@88",
       "png": "sprites/dog-duchess@88.png",
       "json": "sprites/dog-duchess@88.json",
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-duchess@94",
+      "png": "sprites/dog-duchess@94.png",
+      "json": "sprites/dog-duchess@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 19
       }
     },
     {
@@ -2226,7 +3738,16 @@
       "json": "sprites/dog-kilo@50.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "dog-kilo@56",
+      "png": "sprites/dog-kilo@56.png",
+      "json": "sprites/dog-kilo@56.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 17
       }
     },
     {
@@ -2235,7 +3756,16 @@
       "json": "sprites/dog-kilo@62.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "dog-kilo@69",
+      "png": "sprites/dog-kilo@69.png",
+      "json": "sprites/dog-kilo@69.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2244,7 +3774,16 @@
       "json": "sprites/dog-kilo@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 22
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "dog-kilo@81",
+      "png": "sprites/dog-kilo@81.png",
+      "json": "sprites/dog-kilo@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 24
       }
     },
     {
@@ -2254,6 +3793,15 @@
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "dog-kilo@94",
+      "png": "sprites/dog-kilo@94.png",
+      "json": "sprites/dog-kilo@94.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 28
       }
     },
     {
@@ -2275,12 +3823,30 @@
       }
     },
     {
+      "key": "dog-penny@56",
+      "png": "sprites/dog-penny@56.png",
+      "json": "sprites/dog-penny@56.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "dog-penny@62",
       "png": "sprites/dog-penny@62.png",
       "json": "sprites/dog-penny@62.json",
       "anchor": {
         "feetY": 33,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-penny@69",
+      "png": "sprites/dog-penny@69.png",
+      "json": "sprites/dog-penny@69.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 19
       }
     },
     {
@@ -2293,12 +3859,30 @@
       }
     },
     {
+      "key": "dog-penny@81",
+      "png": "sprites/dog-penny@81.png",
+      "json": "sprites/dog-penny@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 23
+      }
+    },
+    {
       "key": "dog-penny@88",
       "png": "sprites/dog-penny@88.png",
       "json": "sprites/dog-penny@88.json",
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "dog-penny@94",
+      "png": "sprites/dog-penny@94.png",
+      "json": "sprites/dog-penny@94.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 26
       }
     },
     {
@@ -2320,6 +3904,15 @@
       }
     },
     {
+      "key": "dog-pierre@56",
+      "png": "sprites/dog-pierre@56.png",
+      "json": "sprites/dog-pierre@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 15
+      }
+    },
+    {
       "key": "dog-pierre@62",
       "png": "sprites/dog-pierre@62.png",
       "json": "sprites/dog-pierre@62.json",
@@ -2329,12 +3922,30 @@
       }
     },
     {
+      "key": "dog-pierre@69",
+      "png": "sprites/dog-pierre@69.png",
+      "json": "sprites/dog-pierre@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "dog-pierre@75",
       "png": "sprites/dog-pierre@75.png",
       "json": "sprites/dog-pierre@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 19
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-pierre@81",
+      "png": "sprites/dog-pierre@81.png",
+      "json": "sprites/dog-pierre@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2344,6 +3955,15 @@
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "dog-pierre@94",
+      "png": "sprites/dog-pierre@94.png",
+      "json": "sprites/dog-pierre@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 24
       }
     },
     {
@@ -2365,12 +3985,30 @@
       }
     },
     {
+      "key": "dog-reggie@56",
+      "png": "sprites/dog-reggie@56.png",
+      "json": "sprites/dog-reggie@56.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 11
+      }
+    },
+    {
       "key": "dog-reggie@62",
       "png": "sprites/dog-reggie@62.png",
       "json": "sprites/dog-reggie@62.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "dog-reggie@69",
+      "png": "sprites/dog-reggie@69.png",
+      "json": "sprites/dog-reggie@69.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 14
       }
     },
     {
@@ -2383,12 +4021,30 @@
       }
     },
     {
+      "key": "dog-reggie@81",
+      "png": "sprites/dog-reggie@81.png",
+      "json": "sprites/dog-reggie@81.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "dog-reggie@88",
       "png": "sprites/dog-reggie@88.png",
       "json": "sprites/dog-reggie@88.json",
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "dog-reggie@94",
+      "png": "sprites/dog-reggie@94.png",
+      "json": "sprites/dog-reggie@94.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 19
       }
     },
     {
@@ -2406,7 +4062,16 @@
       "json": "sprites/dog-snowball@50.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "dog-snowball@56",
+      "png": "sprites/dog-snowball@56.png",
+      "json": "sprites/dog-snowball@56.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 17
       }
     },
     {
@@ -2415,7 +4080,16 @@
       "json": "sprites/dog-snowball@62.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "dog-snowball@69",
+      "png": "sprites/dog-snowball@69.png",
+      "json": "sprites/dog-snowball@69.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2424,7 +4098,16 @@
       "json": "sprites/dog-snowball@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 22
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "dog-snowball@81",
+      "png": "sprites/dog-snowball@81.png",
+      "json": "sprites/dog-snowball@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 24
       }
     },
     {
@@ -2434,6 +4117,15 @@
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "dog-snowball@94",
+      "png": "sprites/dog-snowball@94.png",
+      "json": "sprites/dog-snowball@94.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 28
       }
     },
     {
@@ -2450,8 +4142,17 @@
       "png": "sprites/dropped-cone@50.png",
       "json": "sprites/dropped-cone@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "dropped-cone@56",
+      "png": "sprites/dropped-cone@56.png",
+      "json": "sprites/dropped-cone@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 25
       }
     },
     {
@@ -2459,8 +4160,17 @@
       "png": "sprites/dropped-cone@62.png",
       "json": "sprites/dropped-cone@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "dropped-cone@69",
+      "png": "sprites/dropped-cone@69.png",
+      "json": "sprites/dropped-cone@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 30
       }
     },
     {
@@ -2468,8 +4178,17 @@
       "png": "sprites/dropped-cone@75.png",
       "json": "sprites/dropped-cone@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "dropped-cone@81",
+      "png": "sprites/dropped-cone@81.png",
+      "json": "sprites/dropped-cone@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 36
       }
     },
     {
@@ -2479,6 +4198,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "dropped-cone@94",
+      "png": "sprites/dropped-cone@94.png",
+      "json": "sprites/dropped-cone@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 41
       }
     },
     {
@@ -2655,6 +4383,15 @@
       }
     },
     {
+      "key": "fish-crates@56",
+      "png": "sprites/fish-crates@56.png",
+      "json": "sprites/fish-crates@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "fish-crates@62",
       "png": "sprites/fish-crates@62.png",
       "json": "sprites/fish-crates@62.json",
@@ -2664,12 +4401,30 @@
       }
     },
     {
+      "key": "fish-crates@69",
+      "png": "sprites/fish-crates@69.png",
+      "json": "sprites/fish-crates@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "fish-crates@75",
       "png": "sprites/fish-crates@75.png",
       "json": "sprites/fish-crates@75.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "fish-crates@81",
+      "png": "sprites/fish-crates@81.png",
+      "json": "sprites/fish-crates@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 39
       }
     },
     {
@@ -2679,6 +4434,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "fish-crates@94",
+      "png": "sprites/fish-crates@94.png",
+      "json": "sprites/fish-crates@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 45
       }
     },
     {
@@ -2840,6 +4604,15 @@
       }
     },
     {
+      "key": "goose@56",
+      "png": "sprites/goose@56.png",
+      "json": "sprites/goose@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 24
+      }
+    },
+    {
       "key": "goose@62",
       "png": "sprites/goose@62.png",
       "json": "sprites/goose@62.json",
@@ -2849,12 +4622,30 @@
       }
     },
     {
+      "key": "goose@69",
+      "png": "sprites/goose@69.png",
+      "json": "sprites/goose@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 29
+      }
+    },
+    {
       "key": "goose@75",
       "png": "sprites/goose@75.png",
       "json": "sprites/goose@75.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "goose@81",
+      "png": "sprites/goose@81.png",
+      "json": "sprites/goose@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 34
       }
     },
     {
@@ -2864,6 +4655,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "goose@94",
+      "png": "sprites/goose@94.png",
+      "json": "sprites/goose@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 40
       }
     },
     {
@@ -2885,12 +4685,30 @@
       }
     },
     {
+      "key": "hedge@56",
+      "png": "sprites/hedge@56.png",
+      "json": "sprites/hedge@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 99
+      }
+    },
+    {
       "key": "hedge@62",
       "png": "sprites/hedge@62.png",
       "json": "sprites/hedge@62.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "hedge@69",
+      "png": "sprites/hedge@69.png",
+      "json": "sprites/hedge@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 121
       }
     },
     {
@@ -2903,12 +4721,30 @@
       }
     },
     {
+      "key": "hedge@81",
+      "png": "sprites/hedge@81.png",
+      "json": "sprites/hedge@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 143
+      }
+    },
+    {
       "key": "hedge@88",
       "png": "sprites/hedge@88.png",
       "json": "sprites/hedge@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 154
+      }
+    },
+    {
+      "key": "hedge@94",
+      "png": "sprites/hedge@94.png",
+      "json": "sprites/hedge@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 165
       }
     },
     {
@@ -2930,12 +4766,30 @@
       }
     },
     {
+      "key": "hot-dog-cart@56",
+      "png": "sprites/hot-dog-cart@56.png",
+      "json": "sprites/hot-dog-cart@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 56
+      }
+    },
+    {
       "key": "hot-dog-cart@62",
       "png": "sprites/hot-dog-cart@62.png",
       "json": "sprites/hot-dog-cart@62.json",
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "hot-dog-cart@69",
+      "png": "sprites/hot-dog-cart@69.png",
+      "json": "sprites/hot-dog-cart@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 69
       }
     },
     {
@@ -2948,12 +4802,30 @@
       }
     },
     {
+      "key": "hot-dog-cart@81",
+      "png": "sprites/hot-dog-cart@81.png",
+      "json": "sprites/hot-dog-cart@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 81
+      }
+    },
+    {
       "key": "hot-dog-cart@88",
       "png": "sprites/hot-dog-cart@88.png",
       "json": "sprites/hot-dog-cart@88.json",
       "anchor": {
         "feetY": 57,
         "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "hot-dog-cart@94",
+      "png": "sprites/hot-dog-cart@94.png",
+      "json": "sprites/hot-dog-cart@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 93
       }
     },
     {
@@ -2975,12 +4847,30 @@
       }
     },
     {
+      "key": "ice-cream-truck@56",
+      "png": "sprites/ice-cream-truck@56.png",
+      "json": "sprites/ice-cream-truck@56.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 32
+      }
+    },
+    {
       "key": "ice-cream-truck@62",
       "png": "sprites/ice-cream-truck@62.png",
       "json": "sprites/ice-cream-truck@62.json",
       "anchor": {
         "feetY": 37,
         "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "ice-cream-truck@69",
+      "png": "sprites/ice-cream-truck@69.png",
+      "json": "sprites/ice-cream-truck@69.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 39
       }
     },
     {
@@ -2993,12 +4883,30 @@
       }
     },
     {
+      "key": "ice-cream-truck@81",
+      "png": "sprites/ice-cream-truck@81.png",
+      "json": "sprites/ice-cream-truck@81.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 46
+      }
+    },
+    {
       "key": "ice-cream-truck@88",
       "png": "sprites/ice-cream-truck@88.png",
       "json": "sprites/ice-cream-truck@88.json",
       "anchor": {
         "feetY": 52,
         "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "ice-cream-truck@94",
+      "png": "sprites/ice-cream-truck@94.png",
+      "json": "sprites/ice-cream-truck@94.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 53
       }
     },
     {
@@ -3040,8 +4948,17 @@
       "png": "sprites/jogger@50.png",
       "json": "sprites/jogger@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "jogger@56",
+      "png": "sprites/jogger@56.png",
+      "json": "sprites/jogger@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 20
       }
     },
     {
@@ -3049,8 +4966,17 @@
       "png": "sprites/jogger@62.png",
       "json": "sprites/jogger@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "jogger@69",
+      "png": "sprites/jogger@69.png",
+      "json": "sprites/jogger@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 24
       }
     },
     {
@@ -3058,8 +4984,17 @@
       "png": "sprites/jogger@75.png",
       "json": "sprites/jogger@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "jogger@81",
+      "png": "sprites/jogger@81.png",
+      "json": "sprites/jogger@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 28
       }
     },
     {
@@ -3069,6 +5004,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "jogger@94",
+      "png": "sprites/jogger@94.png",
+      "json": "sprites/jogger@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 33
       }
     },
     {
@@ -3085,8 +5029,17 @@
       "png": "sprites/kid-on-bike@50.png",
       "json": "sprites/kid-on-bike@50.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 18
+        "feetY": 34,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "kid-on-bike@56",
+      "png": "sprites/kid-on-bike@56.png",
+      "json": "sprites/kid-on-bike@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 21
       }
     },
     {
@@ -3094,8 +5047,17 @@
       "png": "sprites/kid-on-bike@62.png",
       "json": "sprites/kid-on-bike@62.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 23
+        "feetY": 43,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "kid-on-bike@69",
+      "png": "sprites/kid-on-bike@69.png",
+      "json": "sprites/kid-on-bike@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 26
       }
     },
     {
@@ -3103,8 +5065,17 @@
       "png": "sprites/kid-on-bike@75.png",
       "json": "sprites/kid-on-bike@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "kid-on-bike@81",
+      "png": "sprites/kid-on-bike@81.png",
+      "json": "sprites/kid-on-bike@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 31
       }
     },
     {
@@ -3114,6 +5085,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "kid-on-bike@94",
+      "png": "sprites/kid-on-bike@94.png",
+      "json": "sprites/kid-on-bike@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 35
       }
     },
     {
@@ -3135,12 +5115,30 @@
       }
     },
     {
+      "key": "leaf-pile@56",
+      "png": "sprites/leaf-pile@56.png",
+      "json": "sprites/leaf-pile@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 25
+      }
+    },
+    {
       "key": "leaf-pile@62",
       "png": "sprites/leaf-pile@62.png",
       "json": "sprites/leaf-pile@62.json",
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "leaf-pile@69",
+      "png": "sprites/leaf-pile@69.png",
+      "json": "sprites/leaf-pile@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 30
       }
     },
     {
@@ -3153,12 +5151,30 @@
       }
     },
     {
+      "key": "leaf-pile@81",
+      "png": "sprites/leaf-pile@81.png",
+      "json": "sprites/leaf-pile@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 35
+      }
+    },
+    {
       "key": "leaf-pile@88",
       "png": "sprites/leaf-pile@88.png",
       "json": "sprites/leaf-pile@88.json",
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "leaf-pile@94",
+      "png": "sprites/leaf-pile@94.png",
+      "json": "sprites/leaf-pile@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 41
       }
     },
     {
@@ -3176,7 +5192,16 @@
       "json": "sprites/lifeguard-chair@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "lifeguard-chair@56",
+      "png": "sprites/lifeguard-chair@56.png",
+      "json": "sprites/lifeguard-chair@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 24
       }
     },
     {
@@ -3185,7 +5210,16 @@
       "json": "sprites/lifeguard-chair@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 27
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "lifeguard-chair@69",
+      "png": "sprites/lifeguard-chair@69.png",
+      "json": "sprites/lifeguard-chair@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 29
       }
     },
     {
@@ -3198,12 +5232,30 @@
       }
     },
     {
+      "key": "lifeguard-chair@81",
+      "png": "sprites/lifeguard-chair@81.png",
+      "json": "sprites/lifeguard-chair@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 34
+      }
+    },
+    {
       "key": "lifeguard-chair@88",
       "png": "sprites/lifeguard-chair@88.png",
       "json": "sprites/lifeguard-chair@88.json",
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "lifeguard-chair@94",
+      "png": "sprites/lifeguard-chair@94.png",
+      "json": "sprites/lifeguard-chair@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 39
       }
     },
     {
@@ -3220,8 +5272,17 @@
       "png": "sprites/loose-dog@50.png",
       "json": "sprites/loose-dog@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "loose-dog@56",
+      "png": "sprites/loose-dog@56.png",
+      "json": "sprites/loose-dog@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 25
       }
     },
     {
@@ -3229,8 +5290,17 @@
       "png": "sprites/loose-dog@62.png",
       "json": "sprites/loose-dog@62.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 28,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "loose-dog@69",
+      "png": "sprites/loose-dog@69.png",
+      "json": "sprites/loose-dog@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 30
       }
     },
     {
@@ -3238,8 +5308,17 @@
       "png": "sprites/loose-dog@75.png",
       "json": "sprites/loose-dog@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "loose-dog@81",
+      "png": "sprites/loose-dog@81.png",
+      "json": "sprites/loose-dog@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 36
       }
     },
     {
@@ -3249,6 +5328,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "loose-dog@94",
+      "png": "sprites/loose-dog@94.png",
+      "json": "sprites/loose-dog@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 41
       }
     },
     {
@@ -3266,7 +5354,16 @@
       "json": "sprites/lost-wallet@50.json",
       "anchor": {
         "feetY": 11,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "lost-wallet@56",
+      "png": "sprites/lost-wallet@56.png",
+      "json": "sprites/lost-wallet@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 12
       }
     },
     {
@@ -3275,7 +5372,16 @@
       "json": "sprites/lost-wallet@62.json",
       "anchor": {
         "feetY": 14,
-        "opaqueWidth": 13
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "lost-wallet@69",
+      "png": "sprites/lost-wallet@69.png",
+      "json": "sprites/lost-wallet@69.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 15
       }
     },
     {
@@ -3288,12 +5394,30 @@
       }
     },
     {
+      "key": "lost-wallet@81",
+      "png": "sprites/lost-wallet@81.png",
+      "json": "sprites/lost-wallet@81.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "lost-wallet@88",
       "png": "sprites/lost-wallet@88.png",
       "json": "sprites/lost-wallet@88.json",
       "anchor": {
         "feetY": 20,
         "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "lost-wallet@94",
+      "png": "sprites/lost-wallet@94.png",
+      "json": "sprites/lost-wallet@94.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 20
       }
     },
     {
@@ -3310,8 +5434,17 @@
       "png": "sprites/mail-carrier@50.png",
       "json": "sprites/mail-carrier@50.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 18
+        "feetY": 34,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "mail-carrier@56",
+      "png": "sprites/mail-carrier@56.png",
+      "json": "sprites/mail-carrier@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 21
       }
     },
     {
@@ -3319,8 +5452,17 @@
       "png": "sprites/mail-carrier@62.png",
       "json": "sprites/mail-carrier@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "mail-carrier@69",
+      "png": "sprites/mail-carrier@69.png",
+      "json": "sprites/mail-carrier@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 25
       }
     },
     {
@@ -3328,8 +5470,17 @@
       "png": "sprites/mail-carrier@75.png",
       "json": "sprites/mail-carrier@75.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 27
+        "feetY": 51,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "mail-carrier@81",
+      "png": "sprites/mail-carrier@81.png",
+      "json": "sprites/mail-carrier@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 30
       }
     },
     {
@@ -3339,6 +5490,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "mail-carrier@94",
+      "png": "sprites/mail-carrier@94.png",
+      "json": "sprites/mail-carrier@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 35
       }
     },
     {
@@ -3360,12 +5520,30 @@
       }
     },
     {
+      "key": "minor-scooter@56",
+      "png": "sprites/minor-scooter@56.png",
+      "json": "sprites/minor-scooter@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "minor-scooter@62",
       "png": "sprites/minor-scooter@62.png",
       "json": "sprites/minor-scooter@62.json",
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "minor-scooter@69",
+      "png": "sprites/minor-scooter@69.png",
+      "json": "sprites/minor-scooter@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 25
       }
     },
     {
@@ -3378,12 +5556,30 @@
       }
     },
     {
+      "key": "minor-scooter@81",
+      "png": "sprites/minor-scooter@81.png",
+      "json": "sprites/minor-scooter@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 29
+      }
+    },
+    {
       "key": "minor-scooter@88",
       "png": "sprites/minor-scooter@88.png",
       "json": "sprites/minor-scooter@88.json",
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "minor-scooter@94",
+      "png": "sprites/minor-scooter@94.png",
+      "json": "sprites/minor-scooter@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 34
       }
     },
     {
@@ -3409,8 +5605,17 @@
       "png": "sprites/other-dog-owner@50.png",
       "json": "sprites/other-dog-owner@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "other-dog-owner@56",
+      "png": "sprites/other-dog-owner@56.png",
+      "json": "sprites/other-dog-owner@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 20
       }
     },
     {
@@ -3418,8 +5623,17 @@
       "png": "sprites/other-dog-owner@62.png",
       "json": "sprites/other-dog-owner@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "other-dog-owner@69",
+      "png": "sprites/other-dog-owner@69.png",
+      "json": "sprites/other-dog-owner@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 25
       }
     },
     {
@@ -3427,8 +5641,17 @@
       "png": "sprites/other-dog-owner@75.png",
       "json": "sprites/other-dog-owner@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "other-dog-owner@81",
+      "png": "sprites/other-dog-owner@81.png",
+      "json": "sprites/other-dog-owner@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 29
       }
     },
     {
@@ -3441,12 +5664,30 @@
       }
     },
     {
+      "key": "other-dog-owner@94",
+      "png": "sprites/other-dog-owner@94.png",
+      "json": "sprites/other-dog-owner@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 34
+      }
+    },
+    {
       "key": "other-dog@50",
       "png": "sprites/other-dog@50.png",
       "json": "sprites/other-dog@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 15
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "other-dog@56",
+      "png": "sprites/other-dog@56.png",
+      "json": "sprites/other-dog@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 17
       }
     },
     {
@@ -3459,12 +5700,30 @@
       }
     },
     {
+      "key": "other-dog@69",
+      "png": "sprites/other-dog@69.png",
+      "json": "sprites/other-dog@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 21
+      }
+    },
+    {
       "key": "other-dog@75",
       "png": "sprites/other-dog@75.png",
       "json": "sprites/other-dog@75.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "other-dog@81",
+      "png": "sprites/other-dog@81.png",
+      "json": "sprites/other-dog@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 25
       }
     },
     {
@@ -3474,6 +5733,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "other-dog@94",
+      "png": "sprites/other-dog@94.png",
+      "json": "sprites/other-dog@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 29
       }
     },
     {
@@ -3576,12 +5844,30 @@
       }
     },
     {
+      "key": "parked-car@56",
+      "png": "sprites/parked-car@56.png",
+      "json": "sprites/parked-car@56.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 29
+      }
+    },
+    {
       "key": "parked-car@62",
       "png": "sprites/parked-car@62.png",
       "json": "sprites/parked-car@62.json",
       "anchor": {
         "feetY": 25,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "parked-car@69",
+      "png": "sprites/parked-car@69.png",
+      "json": "sprites/parked-car@69.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 36
       }
     },
     {
@@ -3594,12 +5880,30 @@
       }
     },
     {
+      "key": "parked-car@81",
+      "png": "sprites/parked-car@81.png",
+      "json": "sprites/parked-car@81.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 42
+      }
+    },
+    {
       "key": "parked-car@88",
       "png": "sprites/parked-car@88.png",
       "json": "sprites/parked-car@88.json",
       "anchor": {
         "feetY": 36,
         "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "parked-car@94",
+      "png": "sprites/parked-car@94.png",
+      "json": "sprites/parked-car@94.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 49
       }
     },
     {
@@ -3617,7 +5921,16 @@
       "json": "sprites/patio-rail@50.json",
       "anchor": {
         "feetY": 17,
-        "opaqueWidth": 86
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "patio-rail@56",
+      "png": "sprites/patio-rail@56.png",
+      "json": "sprites/patio-rail@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 98
       }
     },
     {
@@ -3626,7 +5939,16 @@
       "json": "sprites/patio-rail@62.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 108
+        "opaqueWidth": 109
+      }
+    },
+    {
+      "key": "patio-rail@69",
+      "png": "sprites/patio-rail@69.png",
+      "json": "sprites/patio-rail@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 119
       }
     },
     {
@@ -3639,12 +5961,30 @@
       }
     },
     {
+      "key": "patio-rail@81",
+      "png": "sprites/patio-rail@81.png",
+      "json": "sprites/patio-rail@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 141
+      }
+    },
+    {
       "key": "patio-rail@88",
       "png": "sprites/patio-rail@88.png",
       "json": "sprites/patio-rail@88.json",
       "anchor": {
         "feetY": 30,
         "opaqueWidth": 152
+      }
+    },
+    {
+      "key": "patio-rail@94",
+      "png": "sprites/patio-rail@94.png",
+      "json": "sprites/patio-rail@94.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 163
       }
     },
     {
@@ -3666,12 +6006,30 @@
       }
     },
     {
+      "key": "pedicab@56",
+      "png": "sprites/pedicab@56.png",
+      "json": "sprites/pedicab@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "pedicab@62",
       "png": "sprites/pedicab@62.png",
       "json": "sprites/pedicab@62.json",
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "pedicab@69",
+      "png": "sprites/pedicab@69.png",
+      "json": "sprites/pedicab@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 33
       }
     },
     {
@@ -3684,12 +6042,30 @@
       }
     },
     {
+      "key": "pedicab@81",
+      "png": "sprites/pedicab@81.png",
+      "json": "sprites/pedicab@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 39
+      }
+    },
+    {
       "key": "pedicab@88",
       "png": "sprites/pedicab@88.png",
       "json": "sprites/pedicab@88.json",
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "pedicab@94",
+      "png": "sprites/pedicab@94.png",
+      "json": "sprites/pedicab@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 45
       }
     },
     {
@@ -3706,8 +6082,17 @@
       "png": "sprites/petting-neighbour@50.png",
       "json": "sprites/petting-neighbour@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "petting-neighbour@56",
+      "png": "sprites/petting-neighbour@56.png",
+      "json": "sprites/petting-neighbour@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 23
       }
     },
     {
@@ -3715,8 +6100,17 @@
       "png": "sprites/petting-neighbour@62.png",
       "json": "sprites/petting-neighbour@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "petting-neighbour@69",
+      "png": "sprites/petting-neighbour@69.png",
+      "json": "sprites/petting-neighbour@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 28
       }
     },
     {
@@ -3724,8 +6118,17 @@
       "png": "sprites/petting-neighbour@75.png",
       "json": "sprites/petting-neighbour@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "petting-neighbour@81",
+      "png": "sprites/petting-neighbour@81.png",
+      "json": "sprites/petting-neighbour@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 33
       }
     },
     {
@@ -3735,6 +6138,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "petting-neighbour@94",
+      "png": "sprites/petting-neighbour@94.png",
+      "json": "sprites/petting-neighbour@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 38
       }
     },
     {
@@ -3752,7 +6164,16 @@
       "json": "sprites/picnic-blanket@50.json",
       "anchor": {
         "feetY": 17,
-        "opaqueWidth": 54
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "picnic-blanket@56",
+      "png": "sprites/picnic-blanket@56.png",
+      "json": "sprites/picnic-blanket@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 62
       }
     },
     {
@@ -3761,7 +6182,16 @@
       "json": "sprites/picnic-blanket@62.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 68
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "picnic-blanket@69",
+      "png": "sprites/picnic-blanket@69.png",
+      "json": "sprites/picnic-blanket@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 75
       }
     },
     {
@@ -3774,12 +6204,30 @@
       }
     },
     {
+      "key": "picnic-blanket@81",
+      "png": "sprites/picnic-blanket@81.png",
+      "json": "sprites/picnic-blanket@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 89
+      }
+    },
+    {
       "key": "picnic-blanket@88",
       "png": "sprites/picnic-blanket@88.png",
       "json": "sprites/picnic-blanket@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 96
+      }
+    },
+    {
+      "key": "picnic-blanket@94",
+      "png": "sprites/picnic-blanket@94.png",
+      "json": "sprites/picnic-blanket@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 103
       }
     },
     {
@@ -3796,8 +6244,17 @@
       "png": "sprites/porch-cat@50.png",
       "json": "sprites/porch-cat@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "porch-cat@56",
+      "png": "sprites/porch-cat@56.png",
+      "json": "sprites/porch-cat@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 24
       }
     },
     {
@@ -3805,8 +6262,17 @@
       "png": "sprites/porch-cat@62.png",
       "json": "sprites/porch-cat@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 28
+        "feetY": 28,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "porch-cat@69",
+      "png": "sprites/porch-cat@69.png",
+      "json": "sprites/porch-cat@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 30
       }
     },
     {
@@ -3814,8 +6280,17 @@
       "png": "sprites/porch-cat@75.png",
       "json": "sprites/porch-cat@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 33
+        "feetY": 33,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "porch-cat@81",
+      "png": "sprites/porch-cat@81.png",
+      "json": "sprites/porch-cat@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 35
       }
     },
     {
@@ -3825,6 +6300,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "porch-cat@94",
+      "png": "sprites/porch-cat@94.png",
+      "json": "sprites/porch-cat@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 40
       }
     },
     {
@@ -3846,12 +6330,30 @@
       }
     },
     {
+      "key": "porch-steps@56",
+      "png": "sprites/porch-steps@56.png",
+      "json": "sprites/porch-steps@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "porch-steps@62",
       "png": "sprites/porch-steps@62.png",
       "json": "sprites/porch-steps@62.json",
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "porch-steps@69",
+      "png": "sprites/porch-steps@69.png",
+      "json": "sprites/porch-steps@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 33
       }
     },
     {
@@ -3864,12 +6366,30 @@
       }
     },
     {
+      "key": "porch-steps@81",
+      "png": "sprites/porch-steps@81.png",
+      "json": "sprites/porch-steps@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 39
+      }
+    },
+    {
       "key": "porch-steps@88",
       "png": "sprites/porch-steps@88.png",
       "json": "sprites/porch-steps@88.json",
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "porch-steps@94",
+      "png": "sprites/porch-steps@94.png",
+      "json": "sprites/porch-steps@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 45
       }
     },
     {
@@ -3886,8 +6406,17 @@
       "png": "sprites/produce-crates@50.png",
       "json": "sprites/produce-crates@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 22
+        "feetY": 22,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "produce-crates@56",
+      "png": "sprites/produce-crates@56.png",
+      "json": "sprites/produce-crates@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 24
       }
     },
     {
@@ -3895,8 +6424,17 @@
       "png": "sprites/produce-crates@62.png",
       "json": "sprites/produce-crates@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 27
+        "feetY": 28,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "produce-crates@69",
+      "png": "sprites/produce-crates@69.png",
+      "json": "sprites/produce-crates@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 29
       }
     },
     {
@@ -3904,8 +6442,17 @@
       "png": "sprites/produce-crates@75.png",
       "json": "sprites/produce-crates@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "produce-crates@81",
+      "png": "sprites/produce-crates@81.png",
+      "json": "sprites/produce-crates@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 34
       }
     },
     {
@@ -3915,6 +6462,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "produce-crates@94",
+      "png": "sprites/produce-crates@94.png",
+      "json": "sprites/produce-crates@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 39
       }
     },
     {
@@ -3931,8 +6487,17 @@
       "png": "sprites/promo-team@50.png",
       "json": "sprites/promo-team@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "promo-team@56",
+      "png": "sprites/promo-team@56.png",
+      "json": "sprites/promo-team@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 24
       }
     },
     {
@@ -3940,8 +6505,17 @@
       "png": "sprites/promo-team@62.png",
       "json": "sprites/promo-team@62.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 28
+        "feetY": 43,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "promo-team@69",
+      "png": "sprites/promo-team@69.png",
+      "json": "sprites/promo-team@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 30
       }
     },
     {
@@ -3949,8 +6523,17 @@
       "png": "sprites/promo-team@75.png",
       "json": "sprites/promo-team@75.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 33
+        "feetY": 51,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "promo-team@81",
+      "png": "sprites/promo-team@81.png",
+      "json": "sprites/promo-team@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 35
       }
     },
     {
@@ -3960,6 +6543,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "promo-team@94",
+      "png": "sprites/promo-team@94.png",
+      "json": "sprites/promo-team@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 40
       }
     },
     {
@@ -3981,12 +6573,30 @@
       }
     },
     {
+      "key": "puddle@56",
+      "png": "sprites/puddle@56.png",
+      "json": "sprites/puddle@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 61
+      }
+    },
+    {
       "key": "puddle@62",
       "png": "sprites/puddle@62.png",
       "json": "sprites/puddle@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 67
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "puddle@69",
+      "png": "sprites/puddle@69.png",
+      "json": "sprites/puddle@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 73
       }
     },
     {
@@ -3994,8 +6604,17 @@
       "png": "sprites/puddle@75.png",
       "json": "sprites/puddle@75.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 80
+      }
+    },
+    {
+      "key": "puddle@81",
+      "png": "sprites/puddle@81.png",
+      "json": "sprites/puddle@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 87
       }
     },
     {
@@ -4005,6 +6624,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 94
+      }
+    },
+    {
+      "key": "puddle@94",
+      "png": "sprites/puddle@94.png",
+      "json": "sprites/puddle@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 101
       }
     },
     {
@@ -4026,12 +6654,30 @@
       }
     },
     {
+      "key": "roadside-dune-grass@56",
+      "png": "sprites/roadside-dune-grass@56.png",
+      "json": "sprites/roadside-dune-grass@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 29
+      }
+    },
+    {
       "key": "roadside-dune-grass@62",
       "png": "sprites/roadside-dune-grass@62.png",
       "json": "sprites/roadside-dune-grass@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 33
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "roadside-dune-grass@69",
+      "png": "sprites/roadside-dune-grass@69.png",
+      "json": "sprites/roadside-dune-grass@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 35
       }
     },
     {
@@ -4040,7 +6686,16 @@
       "json": "sprites/roadside-dune-grass@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 39
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "roadside-dune-grass@81",
+      "png": "sprites/roadside-dune-grass@81.png",
+      "json": "sprites/roadside-dune-grass@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 41
       }
     },
     {
@@ -4050,6 +6705,15 @@
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "roadside-dune-grass@94",
+      "png": "sprites/roadside-dune-grass@94.png",
+      "json": "sprites/roadside-dune-grass@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 48
       }
     },
     {
@@ -4067,7 +6731,16 @@
       "json": "sprites/roadside-fruit-stand@50.json",
       "anchor": {
         "feetY": 41,
-        "opaqueWidth": 50
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@56",
+      "png": "sprites/roadside-fruit-stand@56.png",
+      "json": "sprites/roadside-fruit-stand@56.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 55
       }
     },
     {
@@ -4076,7 +6749,16 @@
       "json": "sprites/roadside-fruit-stand@62.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 62
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@69",
+      "png": "sprites/roadside-fruit-stand@69.png",
+      "json": "sprites/roadside-fruit-stand@69.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 67
       }
     },
     {
@@ -4089,12 +6771,30 @@
       }
     },
     {
+      "key": "roadside-fruit-stand@81",
+      "png": "sprites/roadside-fruit-stand@81.png",
+      "json": "sprites/roadside-fruit-stand@81.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 80
+      }
+    },
+    {
       "key": "roadside-fruit-stand@88",
       "png": "sprites/roadside-fruit-stand@88.png",
       "json": "sprites/roadside-fruit-stand@88.json",
       "anchor": {
         "feetY": 73,
         "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-fruit-stand@94",
+      "png": "sprites/roadside-fruit-stand@94.png",
+      "json": "sprites/roadside-fruit-stand@94.json",
+      "anchor": {
+        "feetY": 78,
+        "opaqueWidth": 92
       }
     },
     {
@@ -4112,7 +6812,16 @@
       "json": "sprites/roadside-gas-lamp@50.json",
       "anchor": {
         "feetY": 74,
-        "opaqueWidth": 10
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "roadside-gas-lamp@56",
+      "png": "sprites/roadside-gas-lamp@56.png",
+      "json": "sprites/roadside-gas-lamp@56.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 14
       }
     },
     {
@@ -4125,6 +6834,15 @@
       }
     },
     {
+      "key": "roadside-gas-lamp@69",
+      "png": "sprites/roadside-gas-lamp@69.png",
+      "json": "sprites/roadside-gas-lamp@69.json",
+      "anchor": {
+        "feetY": 102,
+        "opaqueWidth": 17
+      }
+    },
+    {
       "key": "roadside-gas-lamp@75",
       "png": "sprites/roadside-gas-lamp@75.png",
       "json": "sprites/roadside-gas-lamp@75.json",
@@ -4134,12 +6852,30 @@
       }
     },
     {
+      "key": "roadside-gas-lamp@81",
+      "png": "sprites/roadside-gas-lamp@81.png",
+      "json": "sprites/roadside-gas-lamp@81.json",
+      "anchor": {
+        "feetY": 121,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "roadside-gas-lamp@88",
       "png": "sprites/roadside-gas-lamp@88.png",
       "json": "sprites/roadside-gas-lamp@88.json",
       "anchor": {
         "feetY": 130,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "roadside-gas-lamp@94",
+      "png": "sprites/roadside-gas-lamp@94.png",
+      "json": "sprites/roadside-gas-lamp@94.json",
+      "anchor": {
+        "feetY": 140,
+        "opaqueWidth": 23
       }
     },
     {
@@ -4157,7 +6893,16 @@
       "json": "sprites/roadside-hot-dog-stand@50.json",
       "anchor": {
         "feetY": 62,
-        "opaqueWidth": 42
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@56",
+      "png": "sprites/roadside-hot-dog-stand@56.png",
+      "json": "sprites/roadside-hot-dog-stand@56.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 48
       }
     },
     {
@@ -4166,7 +6911,16 @@
       "json": "sprites/roadside-hot-dog-stand@62.json",
       "anchor": {
         "feetY": 78,
-        "opaqueWidth": 53
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@69",
+      "png": "sprites/roadside-hot-dog-stand@69.png",
+      "json": "sprites/roadside-hot-dog-stand@69.json",
+      "anchor": {
+        "feetY": 85,
+        "opaqueWidth": 59
       }
     },
     {
@@ -4174,8 +6928,17 @@
       "png": "sprites/roadside-hot-dog-stand@75.png",
       "json": "sprites/roadside-hot-dog-stand@75.json",
       "anchor": {
-        "feetY": 94,
-        "opaqueWidth": 64
+        "feetY": 93,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@81",
+      "png": "sprites/roadside-hot-dog-stand@81.png",
+      "json": "sprites/roadside-hot-dog-stand@81.json",
+      "anchor": {
+        "feetY": 100,
+        "opaqueWidth": 70
       }
     },
     {
@@ -4185,6 +6948,15 @@
       "anchor": {
         "feetY": 108,
         "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@94",
+      "png": "sprites/roadside-hot-dog-stand@94.png",
+      "json": "sprites/roadside-hot-dog-stand@94.json",
+      "anchor": {
+        "feetY": 116,
+        "opaqueWidth": 81
       }
     },
     {
@@ -4202,7 +6974,16 @@
       "json": "sprites/roadside-leuty@50.json",
       "anchor": {
         "feetY": 77,
-        "opaqueWidth": 42
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-leuty@56",
+      "png": "sprites/roadside-leuty@56.png",
+      "json": "sprites/roadside-leuty@56.json",
+      "anchor": {
+        "feetY": 87,
+        "opaqueWidth": 48
       }
     },
     {
@@ -4211,7 +6992,16 @@
       "json": "sprites/roadside-leuty@62.json",
       "anchor": {
         "feetY": 97,
-        "opaqueWidth": 53
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-leuty@69",
+      "png": "sprites/roadside-leuty@69.png",
+      "json": "sprites/roadside-leuty@69.json",
+      "anchor": {
+        "feetY": 106,
+        "opaqueWidth": 59
       }
     },
     {
@@ -4220,7 +7010,16 @@
       "json": "sprites/roadside-leuty@75.json",
       "anchor": {
         "feetY": 116,
-        "opaqueWidth": 64
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-leuty@81",
+      "png": "sprites/roadside-leuty@81.png",
+      "json": "sprites/roadside-leuty@81.json",
+      "anchor": {
+        "feetY": 126,
+        "opaqueWidth": 70
       }
     },
     {
@@ -4230,6 +7029,15 @@
       "anchor": {
         "feetY": 136,
         "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "roadside-leuty@94",
+      "png": "sprites/roadside-leuty@94.png",
+      "json": "sprites/roadside-leuty@94.json",
+      "anchor": {
+        "feetY": 145,
+        "opaqueWidth": 80
       }
     },
     {
@@ -4251,12 +7059,30 @@
       }
     },
     {
+      "key": "roadside-love-lock@56",
+      "png": "sprites/roadside-love-lock@56.png",
+      "json": "sprites/roadside-love-lock@56.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 37
+      }
+    },
+    {
       "key": "roadside-love-lock@62",
       "png": "sprites/roadside-love-lock@62.png",
       "json": "sprites/roadside-love-lock@62.json",
       "anchor": {
         "feetY": 55,
         "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "roadside-love-lock@69",
+      "png": "sprites/roadside-love-lock@69.png",
+      "json": "sprites/roadside-love-lock@69.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 45
       }
     },
     {
@@ -4269,12 +7095,30 @@
       }
     },
     {
+      "key": "roadside-love-lock@81",
+      "png": "sprites/roadside-love-lock@81.png",
+      "json": "sprites/roadside-love-lock@81.json",
+      "anchor": {
+        "feetY": 72,
+        "opaqueWidth": 53
+      }
+    },
+    {
       "key": "roadside-love-lock@88",
       "png": "sprites/roadside-love-lock@88.png",
       "json": "sprites/roadside-love-lock@88.json",
       "anchor": {
         "feetY": 78,
         "opaqueWidth": 57
+      }
+    },
+    {
+      "key": "roadside-love-lock@94",
+      "png": "sprites/roadside-love-lock@94.png",
+      "json": "sprites/roadside-love-lock@94.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 61
       }
     },
     {
@@ -4292,7 +7136,16 @@
       "json": "sprites/roadside-street-lamp@50.json",
       "anchor": {
         "feetY": 89,
-        "opaqueWidth": 26
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "roadside-street-lamp@56",
+      "png": "sprites/roadside-street-lamp@56.png",
+      "json": "sprites/roadside-street-lamp@56.json",
+      "anchor": {
+        "feetY": 100,
+        "opaqueWidth": 30
       }
     },
     {
@@ -4305,12 +7158,30 @@
       }
     },
     {
+      "key": "roadside-street-lamp@69",
+      "png": "sprites/roadside-street-lamp@69.png",
+      "json": "sprites/roadside-street-lamp@69.json",
+      "anchor": {
+        "feetY": 123,
+        "opaqueWidth": 36
+      }
+    },
+    {
       "key": "roadside-street-lamp@75",
       "png": "sprites/roadside-street-lamp@75.png",
       "json": "sprites/roadside-street-lamp@75.json",
       "anchor": {
         "feetY": 134,
-        "opaqueWidth": 39
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "roadside-street-lamp@81",
+      "png": "sprites/roadside-street-lamp@81.png",
+      "json": "sprites/roadside-street-lamp@81.json",
+      "anchor": {
+        "feetY": 145,
+        "opaqueWidth": 43
       }
     },
     {
@@ -4320,6 +7191,15 @@
       "anchor": {
         "feetY": 157,
         "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "roadside-street-lamp@94",
+      "png": "sprites/roadside-street-lamp@94.png",
+      "json": "sprites/roadside-street-lamp@94.json",
+      "anchor": {
+        "feetY": 168,
+        "opaqueWidth": 50
       }
     },
     {
@@ -4337,7 +7217,16 @@
       "json": "sprites/roadside-transit-stop@50.json",
       "anchor": {
         "feetY": 74,
-        "opaqueWidth": 15
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "roadside-transit-stop@56",
+      "png": "sprites/roadside-transit-stop@56.png",
+      "json": "sprites/roadside-transit-stop@56.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 18
       }
     },
     {
@@ -4346,7 +7235,16 @@
       "json": "sprites/roadside-transit-stop@62.json",
       "anchor": {
         "feetY": 93,
-        "opaqueWidth": 19
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "roadside-transit-stop@69",
+      "png": "sprites/roadside-transit-stop@69.png",
+      "json": "sprites/roadside-transit-stop@69.json",
+      "anchor": {
+        "feetY": 102,
+        "opaqueWidth": 22
       }
     },
     {
@@ -4359,12 +7257,30 @@
       }
     },
     {
+      "key": "roadside-transit-stop@81",
+      "png": "sprites/roadside-transit-stop@81.png",
+      "json": "sprites/roadside-transit-stop@81.json",
+      "anchor": {
+        "feetY": 121,
+        "opaqueWidth": 26
+      }
+    },
+    {
       "key": "roadside-transit-stop@88",
       "png": "sprites/roadside-transit-stop@88.png",
       "json": "sprites/roadside-transit-stop@88.json",
       "anchor": {
         "feetY": 130,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-transit-stop@94",
+      "png": "sprites/roadside-transit-stop@94.png",
+      "json": "sprites/roadside-transit-stop@94.json",
+      "anchor": {
+        "feetY": 140,
+        "opaqueWidth": 30
       }
     },
     {
@@ -4386,12 +7302,30 @@
       }
     },
     {
+      "key": "roadside-tree-maple@56",
+      "png": "sprites/roadside-tree-maple@56.png",
+      "json": "sprites/roadside-tree-maple@56.json",
+      "anchor": {
+        "feetY": 87,
+        "opaqueWidth": 59
+      }
+    },
+    {
       "key": "roadside-tree-maple@62",
       "png": "sprites/roadside-tree-maple@62.png",
       "json": "sprites/roadside-tree-maple@62.json",
       "anchor": {
         "feetY": 97,
         "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-tree-maple@69",
+      "png": "sprites/roadside-tree-maple@69.png",
+      "json": "sprites/roadside-tree-maple@69.json",
+      "anchor": {
+        "feetY": 106,
+        "opaqueWidth": 72
       }
     },
     {
@@ -4404,12 +7338,30 @@
       }
     },
     {
+      "key": "roadside-tree-maple@81",
+      "png": "sprites/roadside-tree-maple@81.png",
+      "json": "sprites/roadside-tree-maple@81.json",
+      "anchor": {
+        "feetY": 126,
+        "opaqueWidth": 85
+      }
+    },
+    {
       "key": "roadside-tree-maple@88",
       "png": "sprites/roadside-tree-maple@88.png",
       "json": "sprites/roadside-tree-maple@88.json",
       "anchor": {
         "feetY": 136,
         "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-tree-maple@94",
+      "png": "sprites/roadside-tree-maple@94.png",
+      "json": "sprites/roadside-tree-maple@94.json",
+      "anchor": {
+        "feetY": 145,
+        "opaqueWidth": 97
       }
     },
     {
@@ -4427,7 +7379,16 @@
       "json": "sprites/roadside-tree-oak@50.json",
       "anchor": {
         "feetY": 86,
-        "opaqueWidth": 66
+        "opaqueWidth": 67
+      }
+    },
+    {
+      "key": "roadside-tree-oak@56",
+      "png": "sprites/roadside-tree-oak@56.png",
+      "json": "sprites/roadside-tree-oak@56.json",
+      "anchor": {
+        "feetY": 97,
+        "opaqueWidth": 75
       }
     },
     {
@@ -4436,7 +7397,16 @@
       "json": "sprites/roadside-tree-oak@62.json",
       "anchor": {
         "feetY": 108,
-        "opaqueWidth": 83
+        "opaqueWidth": 84
+      }
+    },
+    {
+      "key": "roadside-tree-oak@69",
+      "png": "sprites/roadside-tree-oak@69.png",
+      "json": "sprites/roadside-tree-oak@69.json",
+      "anchor": {
+        "feetY": 119,
+        "opaqueWidth": 92
       }
     },
     {
@@ -4445,7 +7415,16 @@
       "json": "sprites/roadside-tree-oak@75.json",
       "anchor": {
         "feetY": 130,
-        "opaqueWidth": 100
+        "opaqueWidth": 101
+      }
+    },
+    {
+      "key": "roadside-tree-oak@81",
+      "png": "sprites/roadside-tree-oak@81.png",
+      "json": "sprites/roadside-tree-oak@81.json",
+      "anchor": {
+        "feetY": 140,
+        "opaqueWidth": 109
       }
     },
     {
@@ -4455,6 +7434,15 @@
       "anchor": {
         "feetY": 151,
         "opaqueWidth": 117
+      }
+    },
+    {
+      "key": "roadside-tree-oak@94",
+      "png": "sprites/roadside-tree-oak@94.png",
+      "json": "sprites/roadside-tree-oak@94.json",
+      "anchor": {
+        "feetY": 162,
+        "opaqueWidth": 125
       }
     },
     {
@@ -4471,8 +7459,17 @@
       "png": "sprites/rollerblader@50.png",
       "json": "sprites/rollerblader@50.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 19
+        "feetY": 34,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "rollerblader@56",
+      "png": "sprites/rollerblader@56.png",
+      "json": "sprites/rollerblader@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 23
       }
     },
     {
@@ -4480,8 +7477,17 @@
       "png": "sprites/rollerblader@62.png",
       "json": "sprites/rollerblader@62.json",
       "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 24
+        "feetY": 43,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "rollerblader@69",
+      "png": "sprites/rollerblader@69.png",
+      "json": "sprites/rollerblader@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 27
       }
     },
     {
@@ -4489,8 +7495,17 @@
       "png": "sprites/rollerblader@75.png",
       "json": "sprites/rollerblader@75.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 29
+        "feetY": 51,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "rollerblader@81",
+      "png": "sprites/rollerblader@81.png",
+      "json": "sprites/rollerblader@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 33
       }
     },
     {
@@ -4500,6 +7515,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "rollerblader@94",
+      "png": "sprites/rollerblader@94.png",
+      "json": "sprites/rollerblader@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 37
       }
     },
     {
@@ -4516,8 +7540,17 @@
       "png": "sprites/rolling-barrel@50.png",
       "json": "sprites/rolling-barrel@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 18
+        "feetY": 22,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "rolling-barrel@56",
+      "png": "sprites/rolling-barrel@56.png",
+      "json": "sprites/rolling-barrel@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 21
       }
     },
     {
@@ -4525,8 +7558,17 @@
       "png": "sprites/rolling-barrel@62.png",
       "json": "sprites/rolling-barrel@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 23
+        "feetY": 27,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "rolling-barrel@69",
+      "png": "sprites/rolling-barrel@69.png",
+      "json": "sprites/rolling-barrel@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4539,12 +7581,30 @@
       }
     },
     {
+      "key": "rolling-barrel@81",
+      "png": "sprites/rolling-barrel@81.png",
+      "json": "sprites/rolling-barrel@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 31
+      }
+    },
+    {
       "key": "rolling-barrel@88",
       "png": "sprites/rolling-barrel@88.png",
       "json": "sprites/rolling-barrel@88.json",
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "rolling-barrel@94",
+      "png": "sprites/rolling-barrel@94.png",
+      "json": "sprites/rolling-barrel@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 35
       }
     },
     {
@@ -4561,8 +7621,17 @@
       "png": "sprites/sandcastle@50.png",
       "json": "sprites/sandcastle@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 22
+        "feetY": 22,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "sandcastle@56",
+      "png": "sprites/sandcastle@56.png",
+      "json": "sprites/sandcastle@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4570,8 +7639,17 @@
       "png": "sprites/sandcastle@62.png",
       "json": "sprites/sandcastle@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 28
+        "feetY": 28,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "sandcastle@69",
+      "png": "sprites/sandcastle@69.png",
+      "json": "sprites/sandcastle@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 31
       }
     },
     {
@@ -4579,8 +7657,17 @@
       "png": "sprites/sandcastle@75.png",
       "json": "sprites/sandcastle@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "sandcastle@81",
+      "png": "sprites/sandcastle@81.png",
+      "json": "sprites/sandcastle@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 37
       }
     },
     {
@@ -4590,6 +7677,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "sandcastle@94",
+      "png": "sprites/sandcastle@94.png",
+      "json": "sprites/sandcastle@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 43
       }
     },
     {
@@ -4606,8 +7702,17 @@
       "png": "sprites/sandwich-board@50.png",
       "json": "sprites/sandwich-board@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 18
+        "feetY": 22,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "sandwich-board@56",
+      "png": "sprites/sandwich-board@56.png",
+      "json": "sprites/sandwich-board@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 21
       }
     },
     {
@@ -4615,8 +7720,17 @@
       "png": "sprites/sandwich-board@62.png",
       "json": "sprites/sandwich-board@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 23
+        "feetY": 28,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "sandwich-board@69",
+      "png": "sprites/sandwich-board@69.png",
+      "json": "sprites/sandwich-board@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4624,8 +7738,17 @@
       "png": "sprites/sandwich-board@75.png",
       "json": "sprites/sandwich-board@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "sandwich-board@81",
+      "png": "sprites/sandwich-board@81.png",
+      "json": "sprites/sandwich-board@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 31
       }
     },
     {
@@ -4635,6 +7758,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "sandwich-board@94",
+      "png": "sprites/sandwich-board@94.png",
+      "json": "sprites/sandwich-board@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 35
       }
     },
     {
@@ -4665,6 +7797,15 @@
       }
     },
     {
+      "key": "skunk-cloud@56",
+      "png": "sprites/skunk-cloud@56.png",
+      "json": "sprites/skunk-cloud@56.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 60
+      }
+    },
+    {
       "key": "skunk-cloud@62",
       "png": "sprites/skunk-cloud@62.png",
       "json": "sprites/skunk-cloud@62.json",
@@ -4674,12 +7815,30 @@
       }
     },
     {
+      "key": "skunk-cloud@69",
+      "png": "sprites/skunk-cloud@69.png",
+      "json": "sprites/skunk-cloud@69.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 74
+      }
+    },
+    {
       "key": "skunk-cloud@75",
       "png": "sprites/skunk-cloud@75.png",
       "json": "sprites/skunk-cloud@75.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 81
+        "opaqueWidth": 80
+      }
+    },
+    {
+      "key": "skunk-cloud@81",
+      "png": "sprites/skunk-cloud@81.png",
+      "json": "sprites/skunk-cloud@81.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 87
       }
     },
     {
@@ -4692,12 +7851,30 @@
       }
     },
     {
+      "key": "skunk-cloud@94",
+      "png": "sprites/skunk-cloud@94.png",
+      "json": "sprites/skunk-cloud@94.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 100
+      }
+    },
+    {
       "key": "skunk@50",
       "png": "sprites/skunk@50.png",
       "json": "sprites/skunk@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 18
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "skunk@56",
+      "png": "sprites/skunk@56.png",
+      "json": "sprites/skunk@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 19
       }
     },
     {
@@ -4706,7 +7883,16 @@
       "json": "sprites/skunk@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 22
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "skunk@69",
+      "png": "sprites/skunk@69.png",
+      "json": "sprites/skunk@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 23
       }
     },
     {
@@ -4714,8 +7900,17 @@
       "png": "sprites/skunk@75.png",
       "json": "sprites/skunk@75.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "skunk@81",
+      "png": "sprites/skunk@81.png",
+      "json": "sprites/skunk@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 28
       }
     },
     {
@@ -4725,6 +7920,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "skunk@94",
+      "png": "sprites/skunk@94.png",
+      "json": "sprites/skunk@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 32
       }
     },
     {
@@ -4741,8 +7945,17 @@
       "png": "sprites/snatch-raccoon@50.png",
       "json": "sprites/snatch-raccoon@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 27,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "snatch-raccoon@56",
+      "png": "sprites/snatch-raccoon@56.png",
+      "json": "sprites/snatch-raccoon@56.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 16
       }
     },
     {
@@ -4750,8 +7963,17 @@
       "png": "sprites/snatch-raccoon@62.png",
       "json": "sprites/snatch-raccoon@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "snatch-raccoon@69",
+      "png": "sprites/snatch-raccoon@69.png",
+      "json": "sprites/snatch-raccoon@69.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 19
       }
     },
     {
@@ -4759,8 +7981,17 @@
       "png": "sprites/snatch-raccoon@75.png",
       "json": "sprites/snatch-raccoon@75.json",
       "anchor": {
-        "feetY": 41,
+        "feetY": 40,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "snatch-raccoon@81",
+      "png": "sprites/snatch-raccoon@81.png",
+      "json": "sprites/snatch-raccoon@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 23
       }
     },
     {
@@ -4770,6 +8001,15 @@
       "anchor": {
         "feetY": 47,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "snatch-raccoon@94",
+      "png": "sprites/snatch-raccoon@94.png",
+      "json": "sprites/snatch-raccoon@94.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4787,7 +8027,16 @@
       "json": "sprites/snatch-seagull@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "snatch-seagull@56",
+      "png": "sprites/snatch-seagull@56.png",
+      "json": "sprites/snatch-seagull@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 12
       }
     },
     {
@@ -4796,7 +8045,16 @@
       "json": "sprites/snatch-seagull@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 13
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "snatch-seagull@69",
+      "png": "sprites/snatch-seagull@69.png",
+      "json": "sprites/snatch-seagull@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 15
       }
     },
     {
@@ -4804,8 +8062,17 @@
       "png": "sprites/snatch-seagull@75.png",
       "json": "sprites/snatch-seagull@75.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 16
+        "feetY": 34,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "snatch-seagull@81",
+      "png": "sprites/snatch-seagull@81.png",
+      "json": "sprites/snatch-seagull@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 18
       }
     },
     {
@@ -4815,6 +8082,15 @@
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "snatch-seagull@94",
+      "png": "sprites/snatch-seagull@94.png",
+      "json": "sprites/snatch-seagull@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 20
       }
     },
     {
@@ -4831,8 +8107,17 @@
       "png": "sprites/social-frisbee-dog@50.png",
       "json": "sprites/social-frisbee-dog@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "social-frisbee-dog@56",
+      "png": "sprites/social-frisbee-dog@56.png",
+      "json": "sprites/social-frisbee-dog@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 15
       }
     },
     {
@@ -4840,8 +8125,17 @@
       "png": "sprites/social-frisbee-dog@62.png",
       "json": "sprites/social-frisbee-dog@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
+        "feetY": 28,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "social-frisbee-dog@69",
+      "png": "sprites/social-frisbee-dog@69.png",
+      "json": "sprites/social-frisbee-dog@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 19
       }
     },
     {
@@ -4849,8 +8143,17 @@
       "png": "sprites/social-frisbee-dog@75.png",
       "json": "sprites/social-frisbee-dog@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 21
+        "feetY": 33,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "social-frisbee-dog@81",
+      "png": "sprites/social-frisbee-dog@81.png",
+      "json": "sprites/social-frisbee-dog@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 22
       }
     },
     {
@@ -4860,6 +8163,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "social-frisbee-dog@94",
+      "png": "sprites/social-frisbee-dog@94.png",
+      "json": "sprites/social-frisbee-dog@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 25
       }
     },
     {
@@ -4885,8 +8197,17 @@
       "png": "sprites/squirrel-dash@50.png",
       "json": "sprites/squirrel-dash@50.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 21,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "squirrel-dash@56",
+      "png": "sprites/squirrel-dash@56.png",
+      "json": "sprites/squirrel-dash@56.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 25
       }
     },
     {
@@ -4899,12 +8220,30 @@
       }
     },
     {
+      "key": "squirrel-dash@69",
+      "png": "sprites/squirrel-dash@69.png",
+      "json": "sprites/squirrel-dash@69.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 30
+      }
+    },
+    {
       "key": "squirrel-dash@75",
       "png": "sprites/squirrel-dash@75.png",
       "json": "sprites/squirrel-dash@75.json",
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "squirrel-dash@81",
+      "png": "sprites/squirrel-dash@81.png",
+      "json": "sprites/squirrel-dash@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 35
       }
     },
     {
@@ -4917,12 +8256,30 @@
       }
     },
     {
+      "key": "squirrel-dash@94",
+      "png": "sprites/squirrel-dash@94.png",
+      "json": "sprites/squirrel-dash@94.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 41
+      }
+    },
+    {
       "key": "squirrel@50",
       "png": "sprites/squirrel@50.png",
       "json": "sprites/squirrel@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "squirrel@56",
+      "png": "sprites/squirrel@56.png",
+      "json": "sprites/squirrel@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 16
       }
     },
     {
@@ -4930,8 +8287,17 @@
       "png": "sprites/squirrel@62.png",
       "json": "sprites/squirrel@62.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 28,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "squirrel@69",
+      "png": "sprites/squirrel@69.png",
+      "json": "sprites/squirrel@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 19
       }
     },
     {
@@ -4939,8 +8305,17 @@
       "png": "sprites/squirrel@75.png",
       "json": "sprites/squirrel@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "squirrel@81",
+      "png": "sprites/squirrel@81.png",
+      "json": "sprites/squirrel@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 22
       }
     },
     {
@@ -4950,6 +8325,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "squirrel@94",
+      "png": "sprites/squirrel@94.png",
+      "json": "sprites/squirrel@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 26
       }
     },
     {
@@ -4971,12 +8355,30 @@
       }
     },
     {
+      "key": "stink-garbage-truck@56",
+      "png": "sprites/stink-garbage-truck@56.png",
+      "json": "sprites/stink-garbage-truck@56.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 32
+      }
+    },
+    {
       "key": "stink-garbage-truck@62",
       "png": "sprites/stink-garbage-truck@62.png",
       "json": "sprites/stink-garbage-truck@62.json",
       "anchor": {
         "feetY": 37,
         "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "stink-garbage-truck@69",
+      "png": "sprites/stink-garbage-truck@69.png",
+      "json": "sprites/stink-garbage-truck@69.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 39
       }
     },
     {
@@ -4989,12 +8391,30 @@
       }
     },
     {
+      "key": "stink-garbage-truck@81",
+      "png": "sprites/stink-garbage-truck@81.png",
+      "json": "sprites/stink-garbage-truck@81.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 46
+      }
+    },
+    {
       "key": "stink-garbage-truck@88",
       "png": "sprites/stink-garbage-truck@88.png",
       "json": "sprites/stink-garbage-truck@88.json",
       "anchor": {
         "feetY": 52,
         "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "stink-garbage-truck@94",
+      "png": "sprites/stink-garbage-truck@94.png",
+      "json": "sprites/stink-garbage-truck@94.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 53
       }
     },
     {
@@ -5012,7 +8432,16 @@
       "json": "sprites/streetcar@50.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 26
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "streetcar@56",
+      "png": "sprites/streetcar@56.png",
+      "json": "sprites/streetcar@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 30
       }
     },
     {
@@ -5021,7 +8450,16 @@
       "json": "sprites/streetcar@62.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 33
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "streetcar@69",
+      "png": "sprites/streetcar@69.png",
+      "json": "sprites/streetcar@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 37
       }
     },
     {
@@ -5030,7 +8468,16 @@
       "json": "sprites/streetcar@75.json",
       "anchor": {
         "feetY": 49,
-        "opaqueWidth": 40
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "streetcar@81",
+      "png": "sprites/streetcar@81.png",
+      "json": "sprites/streetcar@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 44
       }
     },
     {
@@ -5040,6 +8487,15 @@
       "anchor": {
         "feetY": 57,
         "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "streetcar@94",
+      "png": "sprites/streetcar@94.png",
+      "json": "sprites/streetcar@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 51
       }
     },
     {
@@ -5057,7 +8513,16 @@
       "json": "sprites/stroller@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 23
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "stroller@56",
+      "png": "sprites/stroller@56.png",
+      "json": "sprites/stroller@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 26
       }
     },
     {
@@ -5070,12 +8535,30 @@
       }
     },
     {
+      "key": "stroller@69",
+      "png": "sprites/stroller@69.png",
+      "json": "sprites/stroller@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 32
+      }
+    },
+    {
       "key": "stroller@75",
       "png": "sprites/stroller@75.png",
       "json": "sprites/stroller@75.json",
       "anchor": {
-        "feetY": 53,
+        "feetY": 52,
         "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "stroller@81",
+      "png": "sprites/stroller@81.png",
+      "json": "sprites/stroller@81.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 38
       }
     },
     {
@@ -5085,6 +8568,15 @@
       "anchor": {
         "feetY": 61,
         "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "stroller@94",
+      "png": "sprites/stroller@94.png",
+      "json": "sprites/stroller@94.json",
+      "anchor": {
+        "feetY": 66,
+        "opaqueWidth": 44
       }
     },
     {
@@ -5101,8 +8593,17 @@
       "png": "sprites/thief@50.png",
       "json": "sprites/thief@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "thief@56",
+      "png": "sprites/thief@56.png",
+      "json": "sprites/thief@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 23
       }
     },
     {
@@ -5110,8 +8611,17 @@
       "png": "sprites/thief@62.png",
       "json": "sprites/thief@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "thief@69",
+      "png": "sprites/thief@69.png",
+      "json": "sprites/thief@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 28
       }
     },
     {
@@ -5119,8 +8629,17 @@
       "png": "sprites/thief@75.png",
       "json": "sprites/thief@75.json",
       "anchor": {
-        "feetY": 52,
+        "feetY": 51,
         "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "thief@81",
+      "png": "sprites/thief@81.png",
+      "json": "sprites/thief@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 33
       }
     },
     {
@@ -5130,6 +8649,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "thief@94",
+      "png": "sprites/thief@94.png",
+      "json": "sprites/thief@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 38
       }
     },
     {
@@ -5146,7 +8674,16 @@
       "png": "sprites/tip@50.png",
       "json": "sprites/tip@50.json",
       "anchor": {
-        "feetY": 11,
+        "feetY": 10,
+        "opaqueWidth": 9
+      }
+    },
+    {
+      "key": "tip@56",
+      "png": "sprites/tip@56.png",
+      "json": "sprites/tip@56.json",
+      "anchor": {
+        "feetY": 12,
         "opaqueWidth": 10
       }
     },
@@ -5155,7 +8692,16 @@
       "png": "sprites/tip@62.png",
       "json": "sprites/tip@62.json",
       "anchor": {
-        "feetY": 14,
+        "feetY": 13,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "tip@69",
+      "png": "sprites/tip@69.png",
+      "json": "sprites/tip@69.json",
+      "anchor": {
+        "feetY": 15,
         "opaqueWidth": 12
       }
     },
@@ -5164,8 +8710,17 @@
       "png": "sprites/tip@75.png",
       "json": "sprites/tip@75.json",
       "anchor": {
-        "feetY": 16,
+        "feetY": 15,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "tip@81",
+      "png": "sprites/tip@81.png",
+      "json": "sprites/tip@81.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 15
       }
     },
     {
@@ -5175,6 +8730,15 @@
       "anchor": {
         "feetY": 18,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "tip@94",
+      "png": "sprites/tip@94.png",
+      "json": "sprites/tip@94.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 17
       }
     },
     {
@@ -5191,8 +8755,17 @@
       "png": "sprites/tourist@50.png",
       "json": "sprites/tourist@50.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 34,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "tourist@56",
+      "png": "sprites/tourist@56.png",
+      "json": "sprites/tourist@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 24
       }
     },
     {
@@ -5200,8 +8773,17 @@
       "png": "sprites/tourist@62.png",
       "json": "sprites/tourist@62.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 43,
         "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "tourist@69",
+      "png": "sprites/tourist@69.png",
+      "json": "sprites/tourist@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 30
       }
     },
     {
@@ -5209,8 +8791,17 @@
       "png": "sprites/tourist@75.png",
       "json": "sprites/tourist@75.json",
       "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 33
+        "feetY": 51,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "tourist@81",
+      "png": "sprites/tourist@81.png",
+      "json": "sprites/tourist@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 35
       }
     },
     {
@@ -5220,6 +8811,15 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "tourist@94",
+      "png": "sprites/tourist@94.png",
+      "json": "sprites/tourist@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 40
       }
     },
     {
@@ -5236,8 +8836,17 @@
       "png": "sprites/trash-can@50.png",
       "json": "sprites/trash-can@50.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 22,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "trash-can@56",
+      "png": "sprites/trash-can@56.png",
+      "json": "sprites/trash-can@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 16
       }
     },
     {
@@ -5245,8 +8854,17 @@
       "png": "sprites/trash-can@62.png",
       "json": "sprites/trash-can@62.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 28,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "trash-can@69",
+      "png": "sprites/trash-can@69.png",
+      "json": "sprites/trash-can@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 19
       }
     },
     {
@@ -5254,8 +8872,17 @@
       "png": "sprites/trash-can@75.png",
       "json": "sprites/trash-can@75.json",
       "anchor": {
-        "feetY": 34,
+        "feetY": 33,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "trash-can@81",
+      "png": "sprites/trash-can@81.png",
+      "json": "sprites/trash-can@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 23
       }
     },
     {
@@ -5265,6 +8892,15 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "trash-can@94",
+      "png": "sprites/trash-can@94.png",
+      "json": "sprites/trash-can@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 26
       }
     },
     {
@@ -5282,7 +8918,16 @@
       "json": "sprites/treat@50.json",
       "anchor": {
         "feetY": 8,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "treat@56",
+      "png": "sprites/treat@56.png",
+      "json": "sprites/treat@56.json",
+      "anchor": {
+        "feetY": 10,
+        "opaqueWidth": 12
       }
     },
     {
@@ -5291,7 +8936,16 @@
       "json": "sprites/treat@62.json",
       "anchor": {
         "feetY": 10,
-        "opaqueWidth": 13
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "treat@69",
+      "png": "sprites/treat@69.png",
+      "json": "sprites/treat@69.json",
+      "anchor": {
+        "feetY": 12,
+        "opaqueWidth": 15
       }
     },
     {
@@ -5300,7 +8954,16 @@
       "json": "sprites/treat@75.json",
       "anchor": {
         "feetY": 12,
-        "opaqueWidth": 16
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "treat@81",
+      "png": "sprites/treat@81.png",
+      "json": "sprites/treat@81.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 18
       }
     },
     {
@@ -5310,6 +8973,15 @@
       "anchor": {
         "feetY": 14,
         "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "treat@94",
+      "png": "sprites/treat@94.png",
+      "json": "sprites/treat@94.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 21
       }
     },
     {
@@ -5327,7 +8999,16 @@
       "json": "sprites/ttc-bus@50.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 26
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "ttc-bus@56",
+      "png": "sprites/ttc-bus@56.png",
+      "json": "sprites/ttc-bus@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 30
       }
     },
     {
@@ -5336,7 +9017,16 @@
       "json": "sprites/ttc-bus@62.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 33
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "ttc-bus@69",
+      "png": "sprites/ttc-bus@69.png",
+      "json": "sprites/ttc-bus@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 37
       }
     },
     {
@@ -5345,7 +9035,16 @@
       "json": "sprites/ttc-bus@75.json",
       "anchor": {
         "feetY": 49,
-        "opaqueWidth": 40
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "ttc-bus@81",
+      "png": "sprites/ttc-bus@81.png",
+      "json": "sprites/ttc-bus@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 44
       }
     },
     {
@@ -5355,6 +9054,15 @@
       "anchor": {
         "feetY": 57,
         "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "ttc-bus@94",
+      "png": "sprites/ttc-bus@94.png",
+      "json": "sprites/ttc-bus@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 51
       }
     },
     {
@@ -5550,7 +9258,16 @@
       "json": "sprites/velvet-rope@50.json",
       "anchor": {
         "feetY": 17,
-        "opaqueWidth": 54
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "velvet-rope@56",
+      "png": "sprites/velvet-rope@56.png",
+      "json": "sprites/velvet-rope@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 62
       }
     },
     {
@@ -5563,6 +9280,15 @@
       }
     },
     {
+      "key": "velvet-rope@69",
+      "png": "sprites/velvet-rope@69.png",
+      "json": "sprites/velvet-rope@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 75
+      }
+    },
+    {
       "key": "velvet-rope@75",
       "png": "sprites/velvet-rope@75.png",
       "json": "sprites/velvet-rope@75.json",
@@ -5572,12 +9298,30 @@
       }
     },
     {
+      "key": "velvet-rope@81",
+      "png": "sprites/velvet-rope@81.png",
+      "json": "sprites/velvet-rope@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 89
+      }
+    },
+    {
       "key": "velvet-rope@88",
       "png": "sprites/velvet-rope@88.png",
       "json": "sprites/velvet-rope@88.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 96
+      }
+    },
+    {
+      "key": "velvet-rope@94",
+      "png": "sprites/velvet-rope@94.png",
+      "json": "sprites/velvet-rope@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 103
       }
     },
     {
@@ -5631,7 +9375,16 @@
       "json": "sprites/wedding-shoot@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 54
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "wedding-shoot@56",
+      "png": "sprites/wedding-shoot@56.png",
+      "json": "sprites/wedding-shoot@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 61
       }
     },
     {
@@ -5644,12 +9397,30 @@
       }
     },
     {
+      "key": "wedding-shoot@69",
+      "png": "sprites/wedding-shoot@69.png",
+      "json": "sprites/wedding-shoot@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 74
+      }
+    },
+    {
       "key": "wedding-shoot@75",
       "png": "sprites/wedding-shoot@75.png",
       "json": "sprites/wedding-shoot@75.json",
       "anchor": {
-        "feetY": 53,
-        "opaqueWidth": 81
+        "feetY": 52,
+        "opaqueWidth": 82
+      }
+    },
+    {
+      "key": "wedding-shoot@81",
+      "png": "sprites/wedding-shoot@81.png",
+      "json": "sprites/wedding-shoot@81.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 88
       }
     },
     {
@@ -5659,6 +9430,15 @@
       "anchor": {
         "feetY": 61,
         "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "wedding-shoot@94",
+      "png": "sprites/wedding-shoot@94.png",
+      "json": "sprites/wedding-shoot@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 101
       }
     }
   ],
