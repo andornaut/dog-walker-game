@@ -117,9 +117,9 @@ export const TUNING = {
     dartTurnAtShareMax: 1,
     dartTurnAtShareMin: 0.5,
     goodLeashSquirrelPull: 0,
-    // How many tips appear while Mr. B's Treat finder walks.
+    // How many tips appear while Mr. B's Keen eye walks.
     keenEyeTipSpawns: 1.5,
-    // How many treats appear while Mr. B's Treat finder walks.
+    // How many treats appear while Mr. B's Keen eye walks.
     keenEyeTreatSpawns: 2,
     // Each large dog in the pack adds this to the walker's agility.
     largeDogAgility: -0.1,
@@ -131,7 +131,7 @@ export const TUNING = {
     moverSpeedJitter: 0.25,
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
-    // How long a debuff lasts while Ada's Calm voice walks.
+    // How long a debuff lasts while Ada's Quick recovery walks.
     quickRecoveryDebuffFactor: 0.5,
     // Running shoes add this much to the walker's agility.
     runningShoesAgility: 0.4,

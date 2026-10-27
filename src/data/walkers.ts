@@ -11,7 +11,7 @@ export const WALKER_PERKS = {
       { by: "keenEyeTreatSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
       { by: "keenEyeTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
     ],
-    name: "Treat finder",
+    name: "Keen eye",
     percent: "keenEyeTipSpawns",
   },
   longReach: {
@@ -32,7 +32,7 @@ export const WALKER_PERKS = {
         stat: "debuffSeconds",
       },
     ],
-    name: "Calm voice",
+    name: "Quick recovery",
   },
   secondChance: {
     effect: "First ♥ lost each neighborhood is forgiven",
