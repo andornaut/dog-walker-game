@@ -13,7 +13,7 @@ import {
   type PlateKind,
   selectLook,
 } from "../ui/selection";
-import { DEBUFF_COLOURS } from "./debuffColors";
+import { DEBUFF_COLOURS } from "./debuffColours";
 
 // The band an earned badge's row lies on.
 const BAND = PALETTE[STATS_LAYOUT.wall.earned.fill];

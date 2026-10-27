@@ -86,7 +86,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
-import { DEBUFF_COLOURS } from "./debuffColors";
+import { DEBUFF_COLOURS } from "./debuffColours";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
