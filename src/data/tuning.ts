@@ -63,21 +63,21 @@ export const TUNING = {
     // Added to each tip while Big tipper is on.
     bigTipperTipBonus: 1,
     // The Escaped capybara's Call the zoo.
-    capybaraCall: 10,
-    encounterHigh: 16,
-    encounterLow: 10,
+    capybaraCall: 20,
+    encounterHigh: 20,
+    encounterLow: 20,
     // The Fish crate spill's Help clean up.
-    fishCleanUp: 16,
+    fishCleanUp: 20,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
     lostWalletKeep: 20,
-    missedTips: 10,
+    missedTips: 20,
     // The Dropped ice cream's Buy a new cone.
-    newCone: 10,
+    newCone: 20,
     // Each walking dog's pay for a zone, the same in every zone.
     payPerDog: 20,
     // The Porch cat's Treat bribe.
-    porchCatTreat: 10,
+    porchCatTreat: 20,
     prices: {
       biscuit: 250,
       buddy: 450,
@@ -97,15 +97,15 @@ export const TUNING = {
       whistle: 1500,
     },
     // The Big screen promo's Buy the merch.
-    promoMerch: 16,
+    promoMerch: 20,
     // What a plain bump costs while Spotlight lasts, instead of hearts.
     spotlightBump: 10,
     // The cash every walk starts with, before gear.
     startPurse: 0,
-    thiefLetGo: 16,
+    thiefLetGo: 20,
     tip: 1,
     // The Wedding photo shoot's Apologize.
-    weddingApology: 16,
+    weddingApology: 20,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.

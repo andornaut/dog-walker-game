@@ -23,7 +23,7 @@
         "id": "capybara",
         "kind": "encounter"
       },
-      "text": "−$10",
+      "text": "−$20",
       "title": "Escaped capybara"
     },
     {
@@ -62,7 +62,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "−$10",
+      "text": "−$20",
       "title": "Dropped ice cream"
     },
     {
@@ -101,7 +101,7 @@
         "id": "fishCrates",
         "kind": "encounter"
       },
-      "text": "−$16",
+      "text": "−$20",
       "title": "Fish crate spill"
     },
     {
@@ -127,7 +127,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1♥ each, −$10",
+      "text": "+1♥ each, −$20",
       "title": "Other dog"
     },
     {
@@ -166,7 +166,7 @@
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "−$10",
+      "text": "−$20",
       "title": "Porch cat"
     },
     {
@@ -205,7 +205,7 @@
         "id": "promoTeam",
         "kind": "encounter"
       },
-      "text": "−$16",
+      "text": "−$20",
       "title": "Big screen promo"
     },
     {
@@ -231,7 +231,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "−$16",
+      "text": "−$20",
       "title": "Skunk"
     },
     {
@@ -270,7 +270,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "−$16",
+      "text": "−$20",
       "title": "Thief"
     },
     {
@@ -322,7 +322,7 @@
         "id": "weddingShoot",
         "kind": "encounter"
       },
-      "text": "−$16",
+      "text": "−$20",
       "title": "Wedding photo shoot"
     },
     {
@@ -2190,16 +2190,16 @@
     },
     "money": {
       "bigTipperTipBonus": 1,
-      "capybaraCall": 10,
-      "encounterHigh": 16,
-      "encounterLow": 10,
-      "fishCleanUp": 16,
+      "capybaraCall": 20,
+      "encounterHigh": 20,
+      "encounterLow": 20,
+      "fishCleanUp": 20,
       "fullPackBonusPerDog": 10,
       "lostWalletKeep": 20,
-      "missedTips": 10,
-      "newCone": 10,
+      "missedTips": 20,
+      "newCone": 20,
       "payPerDog": 20,
-      "porchCatTreat": 10,
+      "porchCatTreat": 20,
       "prices": {
         "biscuit": 250,
         "buddy": 450,
@@ -2217,12 +2217,12 @@
         "snowball": 1000,
         "whistle": 1500
       },
-      "promoMerch": 16,
+      "promoMerch": 20,
       "spotlightBump": 10,
       "startPurse": 0,
-      "thiefLetGo": 16,
+      "thiefLetGo": 20,
       "tip": 1,
-      "weddingApology": 16
+      "weddingApology": 20
     },
     "multipliers": {
       "approachSecondRoadShareMax": 0.45,

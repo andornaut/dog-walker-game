@@ -147,16 +147,16 @@ Size shows at a glance: on the road, medium dogs are drawn 48 px, large dogs 54 
 
 ### Encounters and debuffs
 
-Nine card obstacles open a choice card: the other dog, the skunk and the thief, in several neighborhoods, and one of each neighborhood's own, which appears only there. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Money options cost $10 or $16 (half with the Fanny pack). Most hearts options cost each walking dog's owner 1♥; the porch cat's Shoo costs only the lead dog's owner.
+Nine card obstacles open a choice card: the other dog, the skunk and the thief, in several neighborhoods, and one of each neighborhood's own, which appears only there. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20 ($10 with the Fanny pack). Most hearts options cost each walking dog's owner 1♥; the porch cat's Shoo costs only the lead dog's owner.
 
 | Neighborhood        | Card                | Options                                                               |
 | ------------------- | ------------------- | --------------------------------------------------------------------- |
-| Cabbagetown         | Porch cat           | Shoo (−1♥ lead dog), Treat bribe ($10), Bolt past (Zoomies)           |
-| High Park           | Escaped capybara    | Help the keeper (Muddy), Call the zoo ($10), Keep walking (−1♥ each)  |
-| Distillery District | Wedding photo shoot | Pose (Spotlight), Walk around (−1♥ each), Apologize ($16)             |
-| Kensington Market   | Fish crate spill    | Let them sniff (Stinky), Help clean up ($16), Pull away (−1♥ each)    |
-| The Beaches         | Dropped ice cream   | Let them lick it (Stinky), Buy a new cone ($10), Pull away (−1♥ each) |
-| Yonge Street        | Big screen promo    | Wave hello (Spotlight), Buy the merch ($16), Push through (−1♥ each)  |
+| Cabbagetown         | Porch cat           | Shoo (−1♥ lead dog), Treat bribe ($20), Bolt past (Zoomies)           |
+| High Park           | Escaped capybara    | Help the keeper (Muddy), Call the zoo ($20), Keep walking (−1♥ each)  |
+| Distillery District | Wedding photo shoot | Pose (Spotlight), Walk around (−1♥ each), Apologize ($20)             |
+| Kensington Market   | Fish crate spill    | Let them sniff (Stinky), Help clean up ($20), Pull away (−1♥ each)    |
+| The Beaches         | Dropped ice cream   | Let them lick it (Stinky), Buy a new cone ($20), Pull away (−1♥ each) |
+| Yonge Street        | Big screen promo    | Wave hello (Spotlight), Buy the merch ($20), Push through (−1♥ each)  |
 
 The escaped capybara is a mover: it steps once or twice, like any stepper. The wedding photo shoot is 2 lanes wide; the other neighborhood cards are 1.
 
