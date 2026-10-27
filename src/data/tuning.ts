@@ -130,7 +130,7 @@ export const TUNING = {
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
     // Running shoes add this much to the walker's agility.
-    runningShoesAgility: 0.3,
+    runningShoesAgility: 0.4,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     rushHourTreats: 2,
@@ -182,7 +182,7 @@ export const TUNING = {
     firstZoneContact: 2,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
-    laneMove: 0.11,
+    laneMove: 0.1,
     // Road in view ahead of the walker at the base scroll speed. Read once at load.
     lookAheadSeconds: 3.6,
     // A minor bump holds the road and the pack still this long.

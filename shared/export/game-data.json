@@ -1380,7 +1380,7 @@
       "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,
       "muddyBumpHearts": 2,
-      "runningShoesAgility": 0.3,
+      "runningShoesAgility": 0.4,
       "rushHourObstacles": 1.5,
       "rushHourTips": 2,
       "rushHourTreats": 2,
@@ -1409,7 +1409,7 @@
       "firingHoldSeconds": 3,
       "firstZoneContact": 2,
       "hitStopSeconds": 1,
-      "laneMove": 0.11,
+      "laneMove": 0.1,
       "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.3,
       "moverHopSeconds": 0.3,
@@ -1547,7 +1547,7 @@
   "walkers": [
     {
       "id": "ada",
-      "agility": 1.25,
+      "agility": 1.2,
       "greeting": "Tidy lane work. May I walk with you?",
       "name": "Ada",
       "perk": "calmVoice",
@@ -1579,7 +1579,7 @@
     },
     {
       "id": "trista",
-      "agility": 1.4,
+      "agility": 1.3,
       "greeting": "Great pace! Race you to the next one?",
       "name": "Trista",
       "perk": "longReach",
