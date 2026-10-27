@@ -1,0 +1,30 @@
+{ "frames": {
+   "puddle@94 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 105, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 45 },
+    "sourceSize": { "w": 105, "h": 45 },
+    "duration": 500
+   },
+   "puddle@94 1.aseprite": {
+    "frame": { "x": 105, "y": 0, "w": 105, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 45 },
+    "sourceSize": { "w": 105, "h": 45 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "puddle@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 210, "h": 45 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

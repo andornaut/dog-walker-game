@@ -1,0 +1,46 @@
+{ "frames": {
+   "patio-rail@56 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 99, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 99, "h": 20 },
+    "sourceSize": { "w": 99, "h": 20 },
+    "duration": 400
+   },
+   "patio-rail@56 1.aseprite": {
+    "frame": { "x": 99, "y": 0, "w": 99, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 99, "h": 20 },
+    "sourceSize": { "w": 99, "h": 20 },
+    "duration": 400
+   },
+   "patio-rail@56 2.aseprite": {
+    "frame": { "x": 198, "y": 0, "w": 99, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 99, "h": 20 },
+    "sourceSize": { "w": 99, "h": 20 },
+    "duration": 400
+   },
+   "patio-rail@56 3.aseprite": {
+    "frame": { "x": 297, "y": 0, "w": 99, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 99, "h": 20 },
+    "sourceSize": { "w": 99, "h": 20 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "patio-rail@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 396, "h": 20 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

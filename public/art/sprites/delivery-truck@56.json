@@ -1,0 +1,79 @@
+{ "frames": {
+   "delivery-truck@56 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 400
+   },
+   "delivery-truck@56 1.aseprite": {
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 400
+   },
+   "delivery-truck@56 2.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 400
+   },
+   "delivery-truck@56 3.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 400
+   },
+   "delivery-truck@56 4.aseprite": {
+    "frame": { "x": 128, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 100
+   },
+   "delivery-truck@56 5.aseprite": {
+    "frame": { "x": 160, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 100
+   },
+   "delivery-truck@56 6.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 100
+   },
+   "delivery-truck@56 7.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 32, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 30 },
+    "sourceSize": { "w": 32, "h": 30 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "delivery-truck@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 256, "h": 30 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "drive", "from": 4, "to": 7, "direction": "forward" }
+  ]
+ }
+}

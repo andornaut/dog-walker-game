@@ -1,0 +1,63 @@
+{ "frames": {
+   "ambient-bird@69 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "sourceSize": { "w": 28, "h": 28 },
+    "duration": 400
+   },
+   "ambient-bird@69 1.aseprite": {
+    "frame": { "x": 28, "y": 0, "w": 28, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "sourceSize": { "w": 28, "h": 28 },
+    "duration": 400
+   },
+   "ambient-bird@69 2.aseprite": {
+    "frame": { "x": 56, "y": 0, "w": 28, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "sourceSize": { "w": 28, "h": 28 },
+    "duration": 90
+   },
+   "ambient-bird@69 3.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 28, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "sourceSize": { "w": 28, "h": 28 },
+    "duration": 90
+   },
+   "ambient-bird@69 4.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 28, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "sourceSize": { "w": 28, "h": 28 },
+    "duration": 90
+   },
+   "ambient-bird@69 5.aseprite": {
+    "frame": { "x": 140, "y": 0, "w": 28, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "sourceSize": { "w": 28, "h": 28 },
+    "duration": 90
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-bird@69.png",
+  "format": "RGBA8888",
+  "size": { "w": 168, "h": 28 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "fly", "from": 2, "to": 5, "direction": "forward" }
+  ]
+ }
+}

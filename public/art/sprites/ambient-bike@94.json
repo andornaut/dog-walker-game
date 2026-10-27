@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-bike@94 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 62, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 62, "h": 68 },
+    "sourceSize": { "w": 62, "h": 68 },
+    "duration": 120
+   },
+   "ambient-bike@94 1.aseprite": {
+    "frame": { "x": 62, "y": 0, "w": 62, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 62, "h": 68 },
+    "sourceSize": { "w": 62, "h": 68 },
+    "duration": 120
+   },
+   "ambient-bike@94 2.aseprite": {
+    "frame": { "x": 124, "y": 0, "w": 62, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 62, "h": 68 },
+    "sourceSize": { "w": 62, "h": 68 },
+    "duration": 120
+   },
+   "ambient-bike@94 3.aseprite": {
+    "frame": { "x": 186, "y": 0, "w": 62, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 62, "h": 68 },
+    "sourceSize": { "w": 62, "h": 68 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-bike@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 248, "h": 68 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "ride", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

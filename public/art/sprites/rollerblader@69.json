@@ -1,0 +1,46 @@
+{ "frames": {
+   "rollerblader@69 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "rollerblader@69 1.aseprite": {
+    "frame": { "x": 33, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "rollerblader@69 2.aseprite": {
+    "frame": { "x": 66, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "rollerblader@69 3.aseprite": {
+    "frame": { "x": 99, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "rollerblader@69.png",
+  "format": "RGBA8888",
+  "size": { "w": 132, "h": 50 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "ride", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

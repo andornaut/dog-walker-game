@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-car-wagon@81 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 61, "h": 34 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 61, "h": 34 },
+    "sourceSize": { "w": 61, "h": 34 },
+    "duration": 100
+   },
+   "ambient-car-wagon@81 1.aseprite": {
+    "frame": { "x": 61, "y": 0, "w": 61, "h": 34 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 61, "h": 34 },
+    "sourceSize": { "w": 61, "h": 34 },
+    "duration": 100
+   },
+   "ambient-car-wagon@81 2.aseprite": {
+    "frame": { "x": 122, "y": 0, "w": 61, "h": 34 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 61, "h": 34 },
+    "sourceSize": { "w": 61, "h": 34 },
+    "duration": 100
+   },
+   "ambient-car-wagon@81 3.aseprite": {
+    "frame": { "x": 183, "y": 0, "w": 61, "h": 34 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 61, "h": 34 },
+    "sourceSize": { "w": 61, "h": 34 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-car-wagon@81.png",
+  "format": "RGBA8888",
+  "size": { "w": 244, "h": 34 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "drive", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

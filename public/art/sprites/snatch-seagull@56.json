@@ -1,0 +1,96 @@
+{ "frames": {
+   "snatch-seagull@56 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 100
+   },
+   "snatch-seagull@56 1.aseprite": {
+    "frame": { "x": 18, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 100
+   },
+   "snatch-seagull@56 2.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 100
+   },
+   "snatch-seagull@56 3.aseprite": {
+    "frame": { "x": 54, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 100
+   },
+   "snatch-seagull@56 4.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 90
+   },
+   "snatch-seagull@56 5.aseprite": {
+    "frame": { "x": 90, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 90
+   },
+   "snatch-seagull@56 6.aseprite": {
+    "frame": { "x": 108, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 90
+   },
+   "snatch-seagull@56 7.aseprite": {
+    "frame": { "x": 126, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 90
+   },
+   "snatch-seagull@56 8.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 400
+   },
+   "snatch-seagull@56 9.aseprite": {
+    "frame": { "x": 162, "y": 0, "w": 18, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 27 },
+    "sourceSize": { "w": 18, "h": 27 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "snatch-seagull@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 180, "h": 27 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "flee", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "idle", "from": 8, "to": 9, "direction": "forward" }
+  ]
+ }
+}

@@ -1,0 +1,22 @@
+{ "frames": {
+   "curb-news-box@56.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 15, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 15, "h": 25 },
+    "sourceSize": { "w": 15, "h": 25 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "curb-news-box@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 15, "h": 25 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}

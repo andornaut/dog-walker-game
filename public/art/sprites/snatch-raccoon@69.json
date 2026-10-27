@@ -1,0 +1,96 @@
+{ "frames": {
+   "snatch-raccoon@69 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 100
+   },
+   "snatch-raccoon@69 1.aseprite": {
+    "frame": { "x": 26, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 100
+   },
+   "snatch-raccoon@69 2.aseprite": {
+    "frame": { "x": 52, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 100
+   },
+   "snatch-raccoon@69 3.aseprite": {
+    "frame": { "x": 78, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 100
+   },
+   "snatch-raccoon@69 4.aseprite": {
+    "frame": { "x": 104, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 90
+   },
+   "snatch-raccoon@69 5.aseprite": {
+    "frame": { "x": 130, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 90
+   },
+   "snatch-raccoon@69 6.aseprite": {
+    "frame": { "x": 156, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 90
+   },
+   "snatch-raccoon@69 7.aseprite": {
+    "frame": { "x": 182, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 90
+   },
+   "snatch-raccoon@69 8.aseprite": {
+    "frame": { "x": 208, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 400
+   },
+   "snatch-raccoon@69 9.aseprite": {
+    "frame": { "x": 234, "y": 0, "w": 26, "h": 39 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 39 },
+    "sourceSize": { "w": 26, "h": 39 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "snatch-raccoon@69.png",
+  "format": "RGBA8888",
+  "size": { "w": 260, "h": 39 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "flee", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "idle", "from": 8, "to": 9, "direction": "forward" }
+  ]
+ }
+}

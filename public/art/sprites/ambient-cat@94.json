@@ -1,0 +1,63 @@
+{ "frames": {
+   "ambient-cat@94 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 400
+   },
+   "ambient-cat@94 1.aseprite": {
+    "frame": { "x": 38, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 400
+   },
+   "ambient-cat@94 2.aseprite": {
+    "frame": { "x": 76, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 90
+   },
+   "ambient-cat@94 3.aseprite": {
+    "frame": { "x": 114, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 90
+   },
+   "ambient-cat@94 4.aseprite": {
+    "frame": { "x": 152, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 90
+   },
+   "ambient-cat@94 5.aseprite": {
+    "frame": { "x": 190, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 90
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-cat@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 228, "h": 38 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "run", "from": 2, "to": 5, "direction": "forward" }
+  ]
+ }
+}

@@ -1,0 +1,46 @@
+{ "frames": {
+   "skunk-cloud@94 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 105, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 56 },
+    "sourceSize": { "w": 105, "h": 56 },
+    "duration": 220
+   },
+   "skunk-cloud@94 1.aseprite": {
+    "frame": { "x": 105, "y": 0, "w": 105, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 56 },
+    "sourceSize": { "w": 105, "h": 56 },
+    "duration": 220
+   },
+   "skunk-cloud@94 2.aseprite": {
+    "frame": { "x": 210, "y": 0, "w": 105, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 56 },
+    "sourceSize": { "w": 105, "h": 56 },
+    "duration": 220
+   },
+   "skunk-cloud@94 3.aseprite": {
+    "frame": { "x": 315, "y": 0, "w": 105, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 105, "h": 56 },
+    "sourceSize": { "w": 105, "h": 56 },
+    "duration": 220
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "skunk-cloud@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 420, "h": 56 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "loop", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

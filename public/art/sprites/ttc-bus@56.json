@@ -1,0 +1,63 @@
+{ "frames": {
+   "ttc-bus@56 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "sourceSize": { "w": 32, "h": 37 },
+    "duration": 400
+   },
+   "ttc-bus@56 1.aseprite": {
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 37 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "sourceSize": { "w": 32, "h": 37 },
+    "duration": 400
+   },
+   "ttc-bus@56 2.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 37 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "sourceSize": { "w": 32, "h": 37 },
+    "duration": 100
+   },
+   "ttc-bus@56 3.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 37 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "sourceSize": { "w": 32, "h": 37 },
+    "duration": 100
+   },
+   "ttc-bus@56 4.aseprite": {
+    "frame": { "x": 128, "y": 0, "w": 32, "h": 37 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "sourceSize": { "w": 32, "h": 37 },
+    "duration": 100
+   },
+   "ttc-bus@56 5.aseprite": {
+    "frame": { "x": 160, "y": 0, "w": 32, "h": 37 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 37 },
+    "sourceSize": { "w": 32, "h": 37 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ttc-bus@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 192, "h": 37 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "drive", "from": 2, "to": 5, "direction": "forward" }
+  ]
+ }
+}

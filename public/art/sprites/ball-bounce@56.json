@@ -1,0 +1,79 @@
+{ "frames": {
+   "ball-bounce@56 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 400
+   },
+   "ball-bounce@56 1.aseprite": {
+    "frame": { "x": 14, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 400
+   },
+   "ball-bounce@56 2.aseprite": {
+    "frame": { "x": 28, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 70
+   },
+   "ball-bounce@56 3.aseprite": {
+    "frame": { "x": 42, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 70
+   },
+   "ball-bounce@56 4.aseprite": {
+    "frame": { "x": 56, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 70
+   },
+   "ball-bounce@56 5.aseprite": {
+    "frame": { "x": 70, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 70
+   },
+   "ball-bounce@56 6.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 70
+   },
+   "ball-bounce@56 7.aseprite": {
+    "frame": { "x": 98, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 14, "h": 20 },
+    "duration": 70
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ball-bounce@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 112, "h": 20 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "bounce", "from": 2, "to": 7, "direction": "forward" }
+  ]
+ }
+}
