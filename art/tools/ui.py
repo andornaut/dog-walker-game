@@ -1004,17 +1004,20 @@ def well(g, x, y, w, h):
 
 
 def strip_well():
-    """24x24 nine-slice (8px corners): the band behind a card row's subtitle, plum wood with a flat top
-    and rounded bottom corners around an ink well. Stretch it to the subtitle's width."""
+    """24x24 nine-slice (8px corners): the band behind a card row's subtitle, plum wood with rounded
+    corners round an ink well, its rim 3 rows deep at top and bottom and 3 columns at the sides. Stretch it
+    to the subtitle's width."""
     g = Grid(24, 24)
-    g.rect(0, 0, 24, 22, "plum")
-    g.rect(1, 22, 22, 1, "plum")
+    g.rect(0, 2, 24, 20, "plum")
+    for y in (1, 22):
+        g.rect(1, y, 22, 1, "plum")
+        g.p(0, y, "ink")
+        g.p(23, y, "ink")
+    g.rect(2, 0, 20, 1, "ink")
     g.rect(2, 23, 20, 1, "ink")
-    g.p(0, 22, "ink")
-    g.p(23, 22, "ink")
-    g.rect(0, 0, 1, 22, "dbrown")
-    g.rect(23, 0, 1, 22, "ink")
-    well(g, 3, 1, 18, 19)
+    g.rect(0, 2, 1, 20, "dbrown")
+    g.rect(23, 2, 1, 20, "ink")
+    well(g, 3, 4, 18, 16)
     return g
 
 
