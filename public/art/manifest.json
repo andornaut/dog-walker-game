@@ -4139,6 +4139,411 @@
       }
     },
     {
+      "key": "drop-fanny-pack",
+      "png": "sprites/drop-fanny-pack.png",
+      "json": "sprites/drop-fanny-pack.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "drop-fanny-pack@50",
+      "png": "sprites/drop-fanny-pack@50.png",
+      "json": "sprites/drop-fanny-pack@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "drop-fanny-pack@56",
+      "png": "sprites/drop-fanny-pack@56.png",
+      "json": "sprites/drop-fanny-pack@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "drop-fanny-pack@62",
+      "png": "sprites/drop-fanny-pack@62.png",
+      "json": "sprites/drop-fanny-pack@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "drop-fanny-pack@69",
+      "png": "sprites/drop-fanny-pack@69.png",
+      "json": "sprites/drop-fanny-pack@69.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "drop-fanny-pack@75",
+      "png": "sprites/drop-fanny-pack@75.png",
+      "json": "sprites/drop-fanny-pack@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "drop-fanny-pack@81",
+      "png": "sprites/drop-fanny-pack@81.png",
+      "json": "sprites/drop-fanny-pack@81.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "drop-fanny-pack@88",
+      "png": "sprites/drop-fanny-pack@88.png",
+      "json": "sprites/drop-fanny-pack@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "drop-fanny-pack@94",
+      "png": "sprites/drop-fanny-pack@94.png",
+      "json": "sprites/drop-fanny-pack@94.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "drop-hall-pass",
+      "png": "sprites/drop-hall-pass.png",
+      "json": "sprites/drop-hall-pass.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "drop-hall-pass@50",
+      "png": "sprites/drop-hall-pass@50.png",
+      "json": "sprites/drop-hall-pass@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "drop-hall-pass@56",
+      "png": "sprites/drop-hall-pass@56.png",
+      "json": "sprites/drop-hall-pass@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "drop-hall-pass@62",
+      "png": "sprites/drop-hall-pass@62.png",
+      "json": "sprites/drop-hall-pass@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "drop-hall-pass@69",
+      "png": "sprites/drop-hall-pass@69.png",
+      "json": "sprites/drop-hall-pass@69.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "drop-hall-pass@75",
+      "png": "sprites/drop-hall-pass@75.png",
+      "json": "sprites/drop-hall-pass@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "drop-hall-pass@81",
+      "png": "sprites/drop-hall-pass@81.png",
+      "json": "sprites/drop-hall-pass@81.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "drop-hall-pass@88",
+      "png": "sprites/drop-hall-pass@88.png",
+      "json": "sprites/drop-hall-pass@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "drop-hall-pass@94",
+      "png": "sprites/drop-hall-pass@94.png",
+      "json": "sprites/drop-hall-pass@94.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "drop-lucky-collar",
+      "png": "sprites/drop-lucky-collar.png",
+      "json": "sprites/drop-lucky-collar.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "drop-lucky-collar@50",
+      "png": "sprites/drop-lucky-collar@50.png",
+      "json": "sprites/drop-lucky-collar@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "drop-lucky-collar@56",
+      "png": "sprites/drop-lucky-collar@56.png",
+      "json": "sprites/drop-lucky-collar@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "drop-lucky-collar@62",
+      "png": "sprites/drop-lucky-collar@62.png",
+      "json": "sprites/drop-lucky-collar@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "drop-lucky-collar@69",
+      "png": "sprites/drop-lucky-collar@69.png",
+      "json": "sprites/drop-lucky-collar@69.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "drop-lucky-collar@75",
+      "png": "sprites/drop-lucky-collar@75.png",
+      "json": "sprites/drop-lucky-collar@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "drop-lucky-collar@81",
+      "png": "sprites/drop-lucky-collar@81.png",
+      "json": "sprites/drop-lucky-collar@81.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "drop-lucky-collar@88",
+      "png": "sprites/drop-lucky-collar@88.png",
+      "json": "sprites/drop-lucky-collar@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "drop-lucky-collar@94",
+      "png": "sprites/drop-lucky-collar@94.png",
+      "json": "sprites/drop-lucky-collar@94.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "drop-running-shoes",
+      "png": "sprites/drop-running-shoes.png",
+      "json": "sprites/drop-running-shoes.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "drop-running-shoes@50",
+      "png": "sprites/drop-running-shoes@50.png",
+      "json": "sprites/drop-running-shoes@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "drop-running-shoes@56",
+      "png": "sprites/drop-running-shoes@56.png",
+      "json": "sprites/drop-running-shoes@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "drop-running-shoes@62",
+      "png": "sprites/drop-running-shoes@62.png",
+      "json": "sprites/drop-running-shoes@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "drop-running-shoes@69",
+      "png": "sprites/drop-running-shoes@69.png",
+      "json": "sprites/drop-running-shoes@69.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "drop-running-shoes@75",
+      "png": "sprites/drop-running-shoes@75.png",
+      "json": "sprites/drop-running-shoes@75.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "drop-running-shoes@81",
+      "png": "sprites/drop-running-shoes@81.png",
+      "json": "sprites/drop-running-shoes@81.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "drop-running-shoes@88",
+      "png": "sprites/drop-running-shoes@88.png",
+      "json": "sprites/drop-running-shoes@88.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "drop-running-shoes@94",
+      "png": "sprites/drop-running-shoes@94.png",
+      "json": "sprites/drop-running-shoes@94.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "drop-whistle",
+      "png": "sprites/drop-whistle.png",
+      "json": "sprites/drop-whistle.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "drop-whistle@50",
+      "png": "sprites/drop-whistle@50.png",
+      "json": "sprites/drop-whistle@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "drop-whistle@56",
+      "png": "sprites/drop-whistle@56.png",
+      "json": "sprites/drop-whistle@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "drop-whistle@62",
+      "png": "sprites/drop-whistle@62.png",
+      "json": "sprites/drop-whistle@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "drop-whistle@69",
+      "png": "sprites/drop-whistle@69.png",
+      "json": "sprites/drop-whistle@69.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "drop-whistle@75",
+      "png": "sprites/drop-whistle@75.png",
+      "json": "sprites/drop-whistle@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "drop-whistle@81",
+      "png": "sprites/drop-whistle@81.png",
+      "json": "sprites/drop-whistle@81.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "drop-whistle@88",
+      "png": "sprites/drop-whistle@88.png",
+      "json": "sprites/drop-whistle@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "drop-whistle@94",
+      "png": "sprites/drop-whistle@94.png",
+      "json": "sprites/drop-whistle@94.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 21
+      }
+    },
+    {
       "key": "dropped-cone",
       "png": "sprites/dropped-cone.png",
       "json": "sprites/dropped-cone.json",

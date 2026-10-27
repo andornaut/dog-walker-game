@@ -1,0 +1,30 @@
+{ "frames": {
+   "drop-fanny-pack@94 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 23, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 23 },
+    "sourceSize": { "w": 23, "h": 23 },
+    "duration": 500
+   },
+   "drop-fanny-pack@94 1.aseprite": {
+    "frame": { "x": 23, "y": 0, "w": 23, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 23 },
+    "sourceSize": { "w": 23, "h": 23 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "drop-fanny-pack@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 46, "h": 23 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}
