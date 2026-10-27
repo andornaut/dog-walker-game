@@ -580,7 +580,8 @@ def boards(px, py):
 class ZoneView(Art):
     """A zone's path card illustration. road(px, py) paints the cross street, yard(px, py) the
     far side's ground and lawn(px, py) the near corners past the sidewalk; mark is the cross
-    street's centre line, dashed (on, period) or solid with None, over an edge row where given.
+    street's center line, dashed (on, period) or solid with None, over an edge row where given, or
+    None for a lane with no line.
     walk and curb are the sidewalks' and curbs' colours, None where the zone has none, and
     walk_fleck the sidewalks' flecks."""
 
@@ -624,7 +625,7 @@ class ZoneView(Art):
         for py in range(FAR_Y, AH):
             for px in range(AW):
                 self.fill(px, py, 1, 1, self.ground_px(px, py))
-        for px in range(AW):
+        for px in range(AW if self.mark else 0):
             if not self.dash or (px + 2) % self.dash[1] < self.dash[0]:
                 self.fill(px, LINE_Y, 1, 1, self.mark)
                 if self.edge:
@@ -729,21 +730,32 @@ def high_park_view():
 
 def distillery_view():
     paving = flecked("brown", "brick", 19)
-    a = ZoneView("distillery-district", flecked("dslate", "slate", 31, "navy"), paving, "lgrey", (3, 4),
-                 curb="stone", walk="brown", lawn=paving, walk_fleck="brick", edge="stone")
-    a.sky("peach", "skin1")
-    a.fill(58, 0, 5, 10, "brick")
-    a.fill(61, 0, 2, 10, "dbrick")
-    for x, w, top, wall_c, trim in ((-6, 26, 5, "brick", "stone"), (20, 36, 1, "brick", "stone"),
-                                    (56, 26, 7, "driftwood", "dstone")):
-        bd.warehouse(a, x, w, top, FAR_Y, wall_c, trim)
-    a.fill(24, 2, 28, 7, "dbrick")
-    a.fill(24, 2, 28, 1, "coal")
-    bd.string_lights(a, 0, 20, 8, 2)
-    bd.string_lights(a, 56, AW, 9, 2)
+    a = ZoneView("distillery-district", flecked("dslate", "slate", 31, "navy"), paving, None, None, curb=None,
+                 walk="brown", lawn=paving, walk_fleck="brick")
+    bd.bands(a, 0, 13, bd.DISTILLERY_SKY, w=AW)
+    bd.sun(a, 38, 9, 5, "yellow", 12)
+    a.fill(2, 0, 5, FAR_Y, "brick")
+    a.fill(5, 0, 2, FAR_Y, "dbrick")
+    # the gallery, the low warehouse across the square under its sign, the theater's lit lobby and marquee
+    bd.warehouse(a, -6, 26, 2, FAR_Y, "brick", "stone", "skin1", rows=1)
+    bd.warehouse(a, 20, 36, 13, FAR_Y, "brick", "stone", rows=0)
+    a.fill(25, 14, 26, 4, "dbrick")
+    a.fill(25, 14, 26, 1, "coal")
+    bd.warehouse(a, 56, 26, 1, FAR_Y, "dbrick", "stone", rows=1)
+    a.fill(57, 17, 22, 4, "gold")
+    a.fill(57, 15, 22, 2, "coal")
+    for x in range(57, 79, 3):
+        a.fill(x, 15, 1, 1, "yellow")
+    # Still Dancing's mast and loops, and café umbrellas in the square
+    a.fill(16, 2, 1, FAR_Y - 2, "coal")
+    for y, col in ((4, "red"), (8, "turquoise"), (12, "lilac")):
+        a.fill(13, y, 7, 1, col)
+        a.fill(14, y + 1, 5, 1, col)
+    for cx, col in ((30, "cream"), (44, "forest")):
+        a.fill(cx - 3, 16, 7, 1, col)
+        a.fill(cx - 4, 17, 9, 1, col)
+        a.fill(cx, 18, 1, 3, "cream")
     a.street()
-    for x in (6, 64):
-        bd.barrel(a, x, FAR_Y)
     return a
 
 

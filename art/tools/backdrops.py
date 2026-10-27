@@ -1015,86 +1015,243 @@ def warehouse(cv, x, w, top, base, wall, trim="stone", glass="gold", rows=2):
             cv.fill(wx + 3, wy + 2, 1, 7, trim)
 
 
-def string_lights(cv, x0, x1, y, sag):
-    """A string of lit bulbs from x0 to x1 on row y, sagging sag rows in the middle."""
-    for x in range(x0, x1):
-        t = (x - x0) / max(1, x1 - x0 - 1)
-        yy = round(y + sag * 4 * t * (1 - t))
-        cv.fill(x, yy, 1, 1, "coal")
-        if (x - x0) % 6 == 3:
-            cv.fill(x, yy + 1, 1, 2, "gold")
+def chimney(cv, x, top, w=10):
+    """The Boiler House's brick chimney stack standing on row BASE: its right 3 columns in shade, a dbrick
+    cap and a band below it."""
+    cv.fill(x, top, w, BASE - top, "brick")
+    cv.fill(x + w - 3, top, 3, BASE - top, "dbrick")
+    cv.fill(x - 1, top - 1, w + 2, 2, "dbrick")
+    cv.fill(x - 1, top + 6, w + 2, 1, "dbrick")
 
 
-def barrel(cv, x, y):
-    """A whisky barrel standing on row y."""
-    cv.fill(x, y - 9, 8, 9, "clay")
-    cv.fill(x + 6, y - 9, 2, 9, "bark")
-    cv.fill(x, y - 8, 8, 1, "coal")
-    cv.fill(x, y - 3, 8, 1, "coal")
-    cv.fill(x + 1, y - 10, 6, 1, "bark")
+def water_tower(cv, tx, low):
+    """A bark wooden water tank on two dstone legs whose feet stand on row low, under a stepped walnut cap."""
+    for lx in (tx - 6, tx + 5):
+        cv.fill(lx, low - 16, 2, 16, "dstone")
+    cv.fill(tx - 9, low - 28, 20, 12, "bark")
+    cv.fill(tx + 7, low - 28, 4, 12, "walnut")
+    for k in range(4):
+        cv.fill(tx - 7 + 2 * k, low - 29 - k, 16 - 4 * k, 1, "walnut")
 
 
-def spider(cv, cx, base):
-    """I.T., the steel spider sculpture in the lane, standing on row base: a bulbous coal head pierced
-    with gold, lit ash on its upper left, on eight long jointed legs whose knees rise over it."""
-    legs = ((8, 40, 11), (13, 42, 18), (18, 39, 25), (22, 34, 31))
-    hip = base - 26
-    for kx, ky, fx in legs:
-        for side in (-1, 1):
-            knee = (cx + side * kx, base - ky)
-            cv.line(cx + side * 3, hip, *knee, "coal")
-            cv.line(*knee, cx + side * fx, base, "coal")
-            cv.line(knee[0] + side, knee[1], cx + side * (fx + 1), base, "coal")
-    for dy in range(-7, 8):
-        for dx in range(-9, 10):
-            if (dx / 9.5) ** 2 + (dy / 7.5) ** 2 <= 1:
-                lit = dx + dy < -8
-                cv.fill(cx + dx, hip - 3 + dy, 1, 1, "ash" if lit else "coal")
-    for dx, dy in ((-4, -4), (1, -5), (5, -2), (-1, -1), (-5, 1), (2, 2), (6, 2), (-2, 4)):
-        cv.fill(cx + dx, hip - 3 + dy, 1, 1, "gold")
-    cv.fill(cx - 2, hip + 4, 5, 2, "coal")
+def sign_board(cv, mid, y, text, board, letters):
+    """A sign board centered on column mid from row y: a coal frame round a board of 9 rows, the text in sign
+    lettering."""
+    w = fonts.sign_width(text) + 8
+    x = round(mid - w / 2)
+    cv.fill(x - 1, y - 1, w + 2, 11, "coal")
+    cv.fill(x, y, w, 9, board)
+    word(cv, text, mid, y + 1, letters)
+
+
+# The paintings hung in a gallery's windows: (sky or ground, lower field, a spot of color).
+PAINTINGS = (("azure", "moss", "red"), ("mauve", "peach", "gold"), ("teal", "lilac", "white"),
+             ("ochre", "dturq", "cream"))
+
+
+def painting(cv, x, y, w, h, scheme):
+    """A painting in a gold frame shaded ochre on its right and bottom: two fields and a spot of color."""
+    a, b, c = scheme
+    cv.fill(x, y, w, h, "gold")
+    cv.fill(x + w - 1, y, 1, h, "ochre")
+    cv.fill(x, y + h - 1, w, 1, "ochre")
+    cv.fill(x + 1, y + 1, w - 2, h - 2, a)
+    cv.fill(x + 1, y + 1 + (h - 2) // 2, w - 2, h - 2 - (h - 2) // 2, b)
+    cv.fill(x + 1 + (w - 2) // 2, y + 2, 2, 2, c)
+
+
+def gallery(cv, x, w, top, base, wall="brick"):
+    """A brick warehouse whose ground floor is an art gallery: two tall coal-framed shop windows lit skin1,
+    framed paintings hung in them, a GALLERY board over a dturq door between them, the upper floor's arched
+    windows above."""
+    warehouse(cv, x, w, top, base, wall, "stone", "skin1", rows=1)
+    gy = base - 26
+    cv.fill(x + 2, gy - 1, w - 6, 1, "stone")
+    sign_board(cv, x + w / 2, gy - 10, "GALLERY", "walnut", "cream")
+    ww = (w - 26) // 2
+    k = 0
+    for wx in (x + 4, x + w - 7 - ww):
+        cv.fill(wx, gy + 2, ww, 22, "coal")
+        cv.fill(wx + 1, gy, ww - 2, 2, "coal")
+        cv.fill(wx + 1, gy + 2, ww - 2, 21, "cream")
+        cv.fill(wx + 2, gy + 1, ww - 4, 1, "cream")
+        for px in range(wx + 3, wx + ww - 8, 10):
+            painting(cv, px, gy + 6, 7, 9, PAINTINGS[k % len(PAINTINGS)])
+            k += 1
+        cv.fill(wx + 1, gy + 18, ww - 2, 1, "dstone")
+    dx = x + w // 2 - 6
+    cv.fill(dx, base - 18, 9, 18, "coal")
+    cv.fill(dx + 1, base - 17, 7, 17, "dturq")
+    cv.fill(dx + 4, base - 17, 1, 17, "coal")
+
+
+def theater(cv, x, w, top, base, wall="dbrick"):
+    """The Young Centre, a tank house turned theater: dark brick with two rows of arched windows, its ground
+    floor a glazed lobby lit gold with theatergoers' silhouettes inside, and a marquee over the doors, its
+    THEATER board in gold letters edged with yellow bulbs."""
+    warehouse(cv, x, w, top, base, wall, "stone", "gold", rows=2)
+    ly = base - 20
+    cv.fill(x + 3, ly, w - 6, 20, "coal")
+    cv.fill(x + 4, ly + 1, w - 8, 19, "gold")
+    for mx in range(x + 13, x + w - 6, 10):
+        cv.fill(mx, ly + 1, 1, 19, "coal")
+    rnd = random.Random("theater-lobby")
+    for px in range(x + 8, x + w - 10, 13):
+        h = rnd.choice((7, 8, 9))
+        cv.fill(px, base - h, 4, h, "dbrown")
+        cv.fill(px + 1, base - h - 3, 2, 3, "dbrown")
+    mw = min(w - 10, 70)
+    mx0, my = x + (w - mw) // 2, ly - 12
+    cv.fill(mx0 - 2, my + 10, mw + 4, 3, "coal")
+    cv.fill(mx0, my, mw, 10, "coal")
+    cv.fill(mx0 + 1, my + 1, mw - 2, 8, "dbrick")
+    word(cv, "THEATER", mx0 + mw / 2, my + 1, "gold")
+    for bx in range(mx0, mx0 + mw, 3):
+        cv.fill(bx, my - 1, 1, 1, "yellow")
+        cv.fill(bx + 1, my + 10, 1, 1, "yellow")
+
+
+def cafe_umbrella(cv, cx, base, col, trim, top=16):
+    """A café's market umbrella on a cream pole from row base: a canopy of col widening to 21 columns over
+    4 rows, its eave a ramp step darker with a valance dotted in trim, and a finial."""
+    cv.fill(cx, base - top, 1, top, "cream")
+    cv.fill(cx, base - top - 6, 1, 2, "cream")
+    for k, (dx, w) in enumerate(((-4, 9), (-7, 15), (-9, 19), (-10, 21))):
+        cv.fill(cx + dx, base - top - 4 + k, w, 1, col)
+    cv.fill(cx - 10, base - top, 21, 2, dk(col))
+    for vx in range(cx - 10, cx + 11, 4):
+        cv.fill(vx, base - top + 2, 2, 1, trim)
+
+
+def bistro_set(cv, cx, base):
+    """A round bistro table with a red flower and a cream cup, and a chair either side, in coal iron on
+    row base."""
+    cv.fill(cx - 4, base - 6, 9, 1, "lgrey")
+    cv.fill(cx, base - 5, 1, 5, "coal")
+    cv.fill(cx - 2, base - 1, 5, 1, "coal")
+    for sx, seat in ((cx - 8, cx - 7), (cx + 7, cx + 5)):
+        cv.fill(sx, base - 8, 1, 8, "coal")
+        cv.fill(seat, base - 4, 2, 1, "coal")
+        cv.fill(seat, base - 3, 1, 3, "coal")
+    cv.fill(cx - 2, base - 8, 2, 2, "red")
+    cv.fill(cx + 1, base - 7, 1, 1, "cream")
+
+
+def patio(cv, x0, x1, base, cols):
+    """A restaurant patio from column x0 to x1 on row base: bistro sets under umbrellas every 26 columns,
+    their canopies alternating the two cols, behind a low coal rail with a geranium planter at each end."""
+    for k, cx in enumerate(range(x0 + 12, x1 - 8, 26)):
+        col, trim = cols if k % 2 == 0 else cols[::-1]
+        cafe_umbrella(cv, cx, base, col, trim)
+        bistro_set(cv, cx, base)
+    cv.fill(x0, base - 5, x1 - x0, 1, "coal")
+    for px in range(x0, x1, 4):
+        cv.fill(px, base - 5, 1, 5, "coal")
+    for px in (x0, x1 - 6):
+        cv.fill(px, base - 6, 6, 6, "bark")
+        cv.fill(px + 4, base - 6, 2, 6, "walnut")
+        for gx in range(px, px + 6, 2):
+            cv.fill(gx, base - 8, 2, 2, "canopy")
+        cv.fill(px + 2, base - 9, 1, 1, "pink")
+
+
+# Still Dancing's loops of track, from the top: (rows below the cupola, radius, color, tilt).
+DANCING_LOOPS = ((6, 9, "red", 0.35), (18, 11, "turquoise", -0.3), (31, 10, "lilac", 0.25),
+                 (43, 8, "cream", -0.2))
+
+
+def still_dancing(cv, cx, base, top):
+    """Still Dancing, Dennis Oppenheim's sculpture in the square, standing on row base: a coal mast on a
+    tripod, lit ash on its left, ringed by four tilted loops of colored track, their far halves a ramp step
+    darker behind it, under a gold cupola on row top."""
+    for fx in (-10, 0, 10):
+        cv.line(cx + fx, base, cx, base - 22, "coal")
+
+    def loops(near):
+        for dy, r, col, tilt in DANCING_LOOPS:
+            for a in range(0, 360, 2):
+                t = math.radians(a)
+                if (math.sin(t) > 0) != near:
+                    continue
+                x = cx + r * math.cos(t)
+                y = top + 4 + dy + r * (0.32 * math.sin(t) + tilt * math.cos(t))
+                cv.fill(round(x), round(y), 1, 2, col if near else dk(col))
+    loops(False)
+    cv.fill(cx - 1, top + 3, 3, base - 25 - top, "coal")
+    cv.fill(cx - 1, top + 3, 1, base - 25 - top, "ash")
+    loops(True)
+    cv.fill(cx - 3, top - 1, 7, 4, "gold")
+    cv.fill(cx + 2, top - 1, 2, 4, "ochre")
+    cv.fill(cx - 1, top - 3, 3, 2, "gold")
+
+
+# The LOVE sign's heart, beside its letters.
+LOVE_HEART = (".##.##.", "#######", "#######", ".#####.", "..###..", "...#...")
+
+
+def love_sign(cv, cx, base):
+    """The LOVE sign standing on row base, centered on column cx: a ttc heart and the red letters LOVE on a
+    coal rail on two posts, padlocks hung along the rail."""
+    w = fonts.sign_width("LOVE") + 12
+    x0, top = round(cx - w / 2), base - 17
+    cv.fill(x0, top + 9, w, 2, "coal")
+    for px in (x0 + 1, x0 + w - 3):
+        cv.fill(px, top + 9, 2, base - top - 9, "coal")
+    for j, row in enumerate(LOVE_HEART):
+        for i, ch in enumerate(row):
+            if ch == "#":
+                cv.fill(x0 + i, top + 1 + j, 1, 1, "ttc")
+    word(cv, "LOVE", x0 + 9 + fonts.sign_width("LOVE") / 2, top, "red")
+    for k, px in enumerate(range(x0 + 2, x0 + w - 2, 3)):
+        cv.fill(px, top + 11, 1, 2, ("gold", "lgrey", "amber", "turquoise")[k % 4])
+
+
+def strollers(cv, spots, base, seed):
+    """Far passers-by on row base, one at each column in spots: 3 columns wide and 10 rows tall, coal legs,
+    a top of a mixed color shaded on its right column, a face and hair."""
+    rnd = random.Random(seed)
+    for x in spots:
+        top = rnd.choice(("dred", "teal", "cream", "mauve", "navy", "ochre", "forest"))
+        cv.fill(x, base - 3, 1, 3, "coal")
+        cv.fill(x + 2, base - 3, 1, 3, "coal")
+        cv.fill(x, base - 7, 3, 4, top)
+        cv.fill(x + 2, base - 7, 1, 4, dk(top))
+        cv.fill(x, base - 9, 3, 2, rnd.choice(("skin1", "skin2", "brown")))
+        cv.fill(x, base - 10, 3, 1, rnd.choice(("walnut", "dbrown", "ochre", "coal")))
+
+
+# The golden-hour sky's bands, from the top, down to the square's roof.
+DISTILLERY_SKY = ("peach", "orange", "amber")
 
 
 def distillery():
     cv = sn.Canvas(W, H)
-    # a warm peach evening over the old distillery, gulls
-    sky(cv, "peach", "skin1")
-    birds(cv, ((60, BASE - 64), (74, BASE - 60), (300, BASE - 66)))
-    # the water tower and the chimney stack over the warehouses
-    tx = CX + 118
-    for lx in (tx - 6, tx + 5):
-        cv.fill(lx, BASE - 50, 2, 16, "dstone")
-    cv.fill(tx - 9, BASE - 62, 20, 12, "bark")
-    cv.fill(tx + 7, BASE - 62, 4, 12, "walnut")
-    for k in range(4):
-        cv.fill(tx - 7 + 2 * k, BASE - 63 - k, 16 - 4 * k, 1, "walnut")
-    cv.fill(CX - 102, BASE - 68, 10, 30, "brick")
-    cv.fill(CX - 95, BASE - 68, 3, 30, "dbrick")
-    cv.fill(CX - 103, BASE - 69, 12, 2, "dbrick")
-    # the warehouses across the lane: brick, a limestone mill, the long sign over the middle one
-    for x, w, top, wall_c, trim, rows in ((-6, 70, BASE - 40, "brick", "stone", 2),
-                                          (64, 52, BASE - 34, "driftwood", "dstone", 2),
-                                          (CX - 60, 120, BASE - 52, "brick", "stone", 3),
-                                          (CX + 60, 50, BASE - 38, "dbrick", "stone", 2),
-                                          (CX + 110, 76, BASE - 44, "brick", "stone", 2)):
-        warehouse(cv, x, w, top, BASE, wall_c, trim, rows=rows)
-    cv.fill(CX - 46, BASE - 50, 92, 11, "coal")
-    cv.fill(CX - 45, BASE - 49, 90, 9, "dbrick")
-    word(cv, "DISTILLERY", CX, BASE - 48, "cream")
-    for x in (CX - 14, 22, CX + 136):
-        cv.fill(x, BASE - 14, 12, 14, "walnut")
-        cv.fill(x + 1, BASE - 13, 10, 13, "bark")
-        cv.fill(x + 4, BASE - 9, 1, 2, "gold")
-    string_lights(cv, 0, CX - 60, BASE - 38, 4)
-    string_lights(cv, CX + 60, W, BASE - 36, 4)
-
+    # Trinity Square at golden hour: bands of peach, orange and amber, the striped sun low over the
+    # square's far side, gulls
+    sunset(cv, DISTILLERY_SKY, BASE - 36)
+    sun(cv, CX + 4, BASE - 49, 12, "yellow", BASE - 37)
+    birds(cv, ((48, BASE - 62), (62, BASE - 58), (296, BASE - 64)))
+    chimney(cv, CX - 120, BASE - 66)
+    water_tower(cv, CX + 140, BASE - 30)
+    # round the square: the gallery and an old limestone mill on the left, the long low warehouse across
+    # it under the DISTILLERY sign, the theater and another warehouse on the right
+    gallery(cv, -10, 80, BASE - 44, BASE)
+    warehouse(cv, 70, 56, BASE - 36, BASE, "driftwood", "dstone")
+    warehouse(cv, CX - 54, 108, BASE - 36, BASE, "brick", "stone", rows=0)
+    sign_board(cv, CX, BASE - 30, "DISTILLERY", "dbrick", "cream")
+    theater(cv, CX + 54, 80, BASE - 50, BASE)
+    warehouse(cv, CX + 134, 56, BASE - 40, BASE, "brick", "stone")
+    # the square's paving, café tables under umbrellas, Still Dancing, the LOVE sign, lamps and passers-by
     def paving(px, py):
         return "brick" if hashed(px, py, 19) else "brown"
 
     yard(cv, BASE, FAR_WALK, paving)
-    for x in (6, CX + 70, CX + 150):
-        barrel(cv, x, FAR_WALK - 1)
-    spider(cv, 96, FAR_WALK - 1)
+    patio(cv, CX - 50, CX + 46, FAR_WALK - 1, ("cream", "forest"))
+    still_dancing(cv, CX - 72, FAR_WALK - 1, CALM + 4)
+    love_sign(cv, 104, FAR_WALK - 1)
+    for x in (8, CX + 60, CX + 132):
+        gas_lamp(cv, x, FAR_WALK - 1)
+    strollers(cv, (40, 52, CX + 70, CX + 100, CX + 110, 330), FAR_WALK - 1, "distillery")
 
     def road(x, z, span, px, py):
         a = abs(x)
@@ -1104,8 +1261,9 @@ def distillery():
             return "navy"
         return "slate" if hashed(px, py, 31) else "dslate"
 
-    cross(cv, lambda px, py: "slate" if hashed(px, py, 31) else "dslate", "navy", paving, curb="stone")
-    cross_line(cv, "lgrey", "stone", dash=(22, 64))
+    # the lane across is cobbled and car-free: dslate setts between brick gutters, with no curbs and no
+    # center line
+    cross(cv, lambda px, py: "dslate", "brick", paving, curb=None)
     street(cv, verge("distillery-district", road))
     lanes(cv, "lgrey", "stone", dash=(22, 64))
     return cv

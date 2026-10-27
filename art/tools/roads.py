@@ -241,10 +241,11 @@ def high_park_ground(g):
 
 
 def distillery_ground(g):
-    """Dslate laid as long granite setts along the road: columns 16 wide, each sett 30 rows long over a 2-row
-    navy joint, so a column's joints repeat every 32 rows (SEAM_PERIOD); each column starts its setts at its
-    own multiple of 4, never within 4 rows of its neighbour's, so no joint runs across the road. 1px navy
-    joints between the columns, a slate glint on some setts' top left; brick gutters along both sides."""
+    """Dslate cobbles laid long along the road: columns 16 wide, each cobble 30 rows long over a 2-row navy
+    joint, so a column's joints repeat every 32 rows (SEAM_PERIOD); each column starts its cobbles at its own
+    multiple of 4, never within 4 rows of its neighbor's, so no joint runs across the road. Each cobble's
+    corners are rounded off in navy and its top left glints slate; 1px navy joints between the columns, a
+    navy pit in some cobbles; brick gutters along both sides."""
     rnd = random.Random("road-distillery-district")
     g.rect(0, 0, W, H, "dslate")
     phase = 0
@@ -254,9 +255,11 @@ def distillery_ground(g):
         g.rect(x + 15, 0, 1, H, "navy")
         for y in range(phase, phase + H, SEAM_PERIOD):
             wrect(g, x, y + SEAM_PERIOD - 2, 15, 2, "navy")
-            if rnd.random() < 0.45:
-                wrect(g, x + 1, y + 1, 3, 1, "slate")
-            if rnd.random() < 0.3:
+            for cx, cy in ((x, y), (x + 14, y), (x, y + SEAM_PERIOD - 3), (x + 14, y + SEAM_PERIOD - 3)):
+                wp(g, cx, cy, "navy")
+            wrect(g, x + 1, y + 1, 3, 1, "slate")
+            wp(g, x + 1, y + 2, "slate")
+            if rnd.random() < 0.5:
                 wp(g, x + rnd.randrange(4, 13), y + rnd.randrange(4, 26), "navy")
     for x0, edge in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "brick")

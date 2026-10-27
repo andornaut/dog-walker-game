@@ -283,7 +283,7 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 | Sky                                | Bands or colours                                                    | Where                                          |
 | ---------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |
 | Cabbagetown (dusk)                 | lilac, pink, peach, gold bands; a crescent moon and the first stars | `backdrop-cabbagetown`, `screen-end` (no moon) |
-| Distillery District (warm evening) | peach over skin1, gulls                                             | `backdrop-distillery-district`                 |
+| Distillery District (golden hour)  | peach, orange, amber bands; a sun low over Trinity Square, gulls    | `backdrop-distillery-district`                 |
 | High Park (deep clear blue)        | azure over sky, white clouds                                        | `backdrop-high-park`                           |
 | Kensington Market (rosy sunburst)  | flat peach rays over pink from the end of the street (`sunburst`)   | `backdrop-kensington-market`                   |
 | The Beaches (late afternoon)       | gold over yellow, small clouds and gulls                            | `backdrop-the-beaches`                         |
