@@ -217,7 +217,7 @@ def bill():
     g.rect(14, 4, 1, 9, "dgreen")
     g.rect(2, 5, 12, 1, "dgreen")
     g.rect(2, 11, 12, 1, "dgreen")
-    g.ell(8, 8.5, 3, 3, "dgreen")
+    g.ell(8.5, 8.5, 3.6, 3.2, "dgreen")
     bitmap(g, 6, 5, DOLLAR, {"a": "white"})
     return g
 
