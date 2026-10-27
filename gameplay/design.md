@@ -93,14 +93,14 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
 - **Forks:** the road meets a cross street; after neighborhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighborhood you haven't walked this walk other than Yonge Street, sorted easiest on the left to hardest on the right. The fork after neighborhood 3 leads only to Yonge Street, so it shows one path. Each path card shows the neighborhood's name and difficulty, and the one upgrade card it carries. Picking a path picks the next neighborhood and its upgrade at once. A Head home button under the paths ends the walk there (see Head home)
 - **Neighborhoods** (6, each walk visits 4 with no repeats):
 
-| Neighborhood        | Difficulty | Encounter mix                                                                                                                               |
-| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cabbagetown         | Easiest    | Quiet Victorian streets: few obstacles, cats, raccoons, the mail carrier                                                                    |
-| High Park           | Easy       | Other dogs, black squirrels, bunnies, Canada geese, ducklings, joggers, strollers, more lucky finds; no cars. Always the first              |
-| Distillery District | Normal     | Cobbled pedestrian lanes: puddles, cones, cyclists, joggers, strollers, a hot dog cart; no cars                                             |
-| Kensington Market   | Hard       | Crowds: thieves, cyclists, joggers, strollers, the mail carrier; the streetcar, delivery trucks, hot dog carts, benches, more tips; no cars |
-| The Beaches         | Hard       | The lakeshore boardwalk: puddles, geese, ducklings, cyclists, more lucky finds                                                              |
-| Yonge Street        | Hardest    | Everything, the fastest, with gridlocked car and truck traffic and the streetcar. Always the last                                           |
+| Neighborhood        | Difficulty | Encounter mix                                                                                                                                        |
+| ------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cabbagetown         | Easiest    | Quiet Victorian streets: few obstacles, cats, raccoons, the mail carrier, a few cars                                                                 |
+| High Park           | Easy       | Other dogs, black squirrels, bunnies, Canada geese, ducklings, joggers, strollers, more lucky finds; no cars. Always the first                       |
+| Distillery District | Normal     | Cobbled pedestrian lanes: crowds of strollers, puddles, cones, a few cyclists, a hot dog cart; no cars                                               |
+| Kensington Market   | Hard       | Crowds on foot and bikes: thieves, cyclists, strollers, the mail carrier; the streetcar, delivery trucks, hot dog carts, benches, more tips; no cars |
+| The Beaches         | Hard       | The lakeshore boardwalk: joggers, cyclists, strollers, puddles, geese, ducklings, more lucky finds                                                   |
+| Yonge Street        | Hardest    | Everything, the fastest, with gridlocked car and truck traffic and the streetcar. Always the last                                                    |
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Walk bonus:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Walk bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it

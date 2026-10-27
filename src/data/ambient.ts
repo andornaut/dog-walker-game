@@ -73,10 +73,10 @@ const SQUIRREL = {
 export const AMBIENT = {
   homeStretch: [
     { ...CAR, perMinute: 12, speed: 24 },
-    BIKE,
+    { ...BIKE, perMinute: 1 },
     { ...CAT, path: "verge", speed: 200 },
-    PEDESTRIAN,
-    PEDESTRIAN_AWAY,
+    { ...PEDESTRIAN, perMinute: 4 },
+    { ...PEDESTRIAN_AWAY, perMinute: 4 },
     { ...RABBIT, perMinute: 2 },
     { ...SQUIRREL, perMinute: 3 },
     {
@@ -90,10 +90,10 @@ export const AMBIENT = {
   ],
   park: [
     { ...CAR, perMinute: 1 },
-    { ...BIKE, perMinute: 3 },
+    { ...BIKE, perMinute: 4 },
     { ...BIRD, perMinute: 2 },
-    PEDESTRIAN,
-    PEDESTRIAN_AWAY,
+    { ...PEDESTRIAN, perMinute: 3 },
+    { ...PEDESTRIAN_AWAY, perMinute: 3 },
     { ...RABBIT, perMinute: 3 },
     { ...SQUIRREL, perMinute: 3 },
     {
@@ -108,7 +108,7 @@ export const AMBIENT = {
   ],
   pawsPromenade: [
     { ...CAR, perMinute: 1 },
-    { ...BIKE, perMinute: 3 },
+    { ...BIKE, perMinute: 4 },
     { ...BIRD, perMinute: 3 },
     { ...PEDESTRIAN, perMinute: 3 },
     { ...PEDESTRIAN_AWAY, perMinute: 3 },
@@ -124,7 +124,7 @@ export const AMBIENT = {
     },
   ],
   shops: [
-    { ...BIKE, perMinute: 4 },
+    { ...BIKE, perMinute: 5 },
     { ...BIRD, perMinute: 3 },
     { ...PEDESTRIAN, perMinute: 5 },
     { ...PEDESTRIAN_AWAY, perMinute: 5 },
@@ -149,9 +149,11 @@ export const AMBIENT = {
   ],
   snoozeCrescent: [
     { ...CAR, perMinute: 2 },
+    { ...BIKE, perMinute: 1 },
     { ...CAT, perMinute: 2 },
     { ...CAT, path: "verge", perMinute: 2, speed: 200 },
-    { ...PEDESTRIAN, perMinute: 1 },
+    { ...PEDESTRIAN, perMinute: 2 },
+    { ...PEDESTRIAN_AWAY, perMinute: 1 },
     { ...RABBIT, perMinute: 2 },
     { ...SQUIRREL, perMinute: 1 },
     {
@@ -165,10 +167,10 @@ export const AMBIENT = {
     },
   ],
   street: [
-    { ...BIKE, perMinute: 4 },
+    { ...BIKE, perMinute: 2 },
     CAT,
-    { ...PEDESTRIAN, perMinute: 3 },
-    { ...PEDESTRIAN_AWAY, perMinute: 3 },
+    { ...PEDESTRIAN, perMinute: 5 },
+    { ...PEDESTRIAN_AWAY, perMinute: 5 },
     RABBIT,
     { ...SQUIRREL, perMinute: 3 },
   ],
