@@ -73,6 +73,14 @@ const SQUIRREL = {
 export const AMBIENT = {
   homeStretch: [
     { ...CAR, perMinute: 12, speed: 24 },
+    {
+      gait: "steady",
+      key: "ambient-bus",
+      path: "crossStreet",
+      perMinute: 4,
+      speed: 20,
+      tag: "drive",
+    },
     { ...BIKE, perMinute: 1 },
     { ...CAT, path: "verge", speed: 200 },
     { ...PEDESTRIAN, perMinute: 4 },
