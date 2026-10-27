@@ -975,24 +975,46 @@ def high_park():
         cv.fill(x - 2, BASE - 22, 6, 4, "gold")
     hot_dog_cart(cv, CX + 84, BASE + 3)
 
+    def dirt(px, py, worn=False):
+        """The trail's packed earth: tan, flecked brown and skin2, skin1 where feet wear it."""
+        if hashed(px, py, 31):
+            return "brown"
+        if hashed(px, py + 5, 37):
+            return "skin2"
+        return "skin1" if worn else "tan"
+
     def trail(x, z, span, px, py):
         a = abs(x)
-        if a >= ROAD - 6:
+        if a >= ROAD - 5:
             return "pine"
-        if a >= ROAD - 7:
-            return "bark"
-        return "brown" if hashed(px, py, 13) else "cream" if hashed(px, py + 5, 23) else "tan"
+        if a >= ROAD - 6:
+            return "brown"
+        lane = (x + ROAD) % 64 - 32
+        return dirt(px, py, abs(lane) < 5 and noise(px // 3, py // 2) < 0.7)
 
+    # the trail on to the gate, its worn middle drifting, ragged brown edges
     for py in range(BASE - 8, CROSS):
-        half = 18 + (py - BASE + 8) // 3
-        cv.fill(CX - half, py, 2 * half, 1, "bark")
+        half = 18 + (py - BASE + 8) // 3 + (1 if hashed(0, py, 3) else 0)
+        cv.fill(CX - half, py, 2 * half, 1, "brown")
         for px in range(CX - half + 1, CX + half - 1):
-            cv.fill(px, py, 1, 1, trail(0, 0, 99, px, py))
-    cross(cv, lambda px, py: "brown" if hashed(px, py, 13) else "tan", "bark", lawn, curb=None, top=CROSS)
-    cross_line(cv, "dbrown", dash=(7, 32))
+            cv.fill(px, py, 1, 1, dirt(px, py, abs(px + 0.5 - CX - (py % 7 > 3)) < 6 + (py - BASE) // 4))
+    # the cross path, packed earth with no line painted on it: a skin1 strip worn along its middle,
+    # broken where the grass edges hold
+    cross(cv, lambda px, py: "tan", "brown", lawn, curb=None, top=CROSS)
+    for px in range(W):
+        if noise(px // 6, 3) < 0.75:
+            cv.fill(px, LINE - 1, 1, 2, "skin1")
+        if hashed(px, LINE + 2, 9):
+            cv.fill(px, LINE + 2 + (px % 3 == 0), 1, 1, "skin2")
+    # grass tufts break the path's edges
+    for py in range(CROSS, STUB):
+        for px in range(W):
+            if cv.img.getpixel((px, py)) == sn.rgb("brown") and hashed(px, py, 4):
+                cv.fill(px, py, 1, 1, "pine")
     rough_patches = rough("high-park-lawn", 10, ROAD + 30, ROAD + 460, Z0 + 10, Z0 + 90)
     street(cv, verge("high-park", trail, rough_patches))
-    lanes(cv, "dbrown", dash=(7, 32))
+    # the ruts between the lanes, unbroken as the road strip's
+    lanes(cv, "brown", dash=None)
     return cv
 
 

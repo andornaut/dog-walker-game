@@ -94,15 +94,47 @@ def clip(g, y0, y1, draw):
 
 # ---------- lane lines ----------
 
-PAW = (".x.x.", "x...x", ".xxx.", ".xxx.")
+def meander(rnd, lo, hi, hold=(8, 14)):
+    """A per-row offset for each of the 64 rows, wrapping: a walk between lo and hi that steps 1px at a
+    time and holds each value hold rows or more, so a wobbling edge keeps runs long enough to read as a
+    line along the road, its steps falling at irregular rows."""
+    while True:
+        vals, v = [], rnd.randint(lo, hi)
+        while len(vals) < H:
+            vals += [v] * rnd.randint(*hold)
+            v = min(hi, max(lo, v + rnd.choice((-1, 1))))
+        vals = vals[:H]
+        tail = next(k for k in range(1, H + 1) if k == H or vals[H - 1 - k] != vals[-1])
+        if vals[-1] == vals[0] or (abs(vals[-1] - vals[0]) == 1 and tail >= hold[0]):
+            return vals
 
 
 def high_park_lines(g):
+    """Each lane line is a rut worn between two tracks: a 2px brown groove, shaded left (a skin2 shoulder
+    that widens the groove to 3px in places) and lit right (a skin1 lip), each coming and going in
+    irregular runs, a dbrown wet spot here and there; grass sprigs and pebbles along it at irregular
+    rows."""
+    rnd = random.Random("road-high-park-lines")
     for x in DIVIDERS:
-        for y in range(4, H, 32):
-            # dbrown holds 4:1 on the tan path; plum caps the bottom
-            g.rect(x, y, 2, 7, "dbrown")
-            g.rect(x, y + 7, 2, 1, "plum")
+        shoulder, lip = meander(rnd, 0, 2), meander(rnd, 0, 1)
+        for y in range(H):
+            g.rect(x, y, 2, 1, "brown")
+            if shoulder[y]:
+                g.p(x - 1, y, ("skin2", "brown")[shoulder[y] - 1])
+            if lip[y]:
+                g.p(x + 2, y, "skin1")
+        for _ in range(rnd.randint(1, 2)):
+            wrect(g, x + rnd.randrange(2), rnd.randrange(H), 1, 2, "dbrown")
+        y = rnd.randrange(H)
+        for _ in range(rnd.randint(2, 3)):
+            # a sprig: two blades leaning apart, canopy lit with moss
+            sx = x + rnd.choice((0, 1))
+            wrect(g, sx, y - 2, 1, 3, "canopy")
+            wp(g, sx - 1, y - 1, "olive")
+            wp(g, sx + 1, y - 3, "moss")
+            y += rnd.randint(14, 26)
+        for _ in range(rnd.randint(2, 4)):
+            wp(g, x + rnd.choice((-1, 2)), rnd.randrange(H), rnd.choice(("stone", "driftwood")))
 
 
 # Pedestrian Sunday's painted lane lines, one colour per divider, left to right; each holds 4:1 or more
@@ -197,47 +229,117 @@ def cabbagetown_ground(g):
     g.rect(W - 1, 0, 1, H, "dstone")
 
 
+def oval(g, rnd, x, y, w, h, col):
+    """A ragged oval w by h with its top left at x, y, wrapping: each row's ends nudged by up to a pixel."""
+    for j in range(h):
+        half = w / 2 * math.sqrt(max(0.0, 1 - ((j + 0.5 - h / 2) / (h / 2)) ** 2))
+        left = round(w / 2 - half) + rnd.choice((-1, 0, 0, 1))
+        right = round(w / 2 + half) + rnd.choice((-1, 0, 0, 1))
+        if right - left >= 1:
+            wrect(g, x + left, y + j, right - left, 1, col)
+
+
+def root(g, rnd, x, y, dx, steps):
+    """A root creeping in from the undergrowth: a bark line 2px wide stepping dx across on most rows as it
+    runs down the strip, its top rows lit clay, thinning to a 1px tip."""
+    pts = []
+    for k in range(steps):
+        pts.append((x, y, 2 if k < steps - 3 else 1))
+        if rnd.random() < 0.6:
+            x += dx
+        y += 1
+    for x, y, w in pts:
+        wrect(g, x if dx > 0 or w == 1 else x - 1, y, w, 1, "bark")
+    for x, y, w in pts[:-3]:
+        wp(g, x + (1 if dx > 0 else -1), y - 1, "clay")
+
+
 def high_park_ground(g):
-    """A dirt trail between High Park's dark undergrowth: pine edges with fir blades
-    and moss glints, bark-brown needles on the path."""
+    """Packed earth on High Park's trail: skin1 worn patches down the middle of each lane where feet go,
+    scuffed cream; skin2 damp patches; roots creeping in from the undergrowth; stones, pebbles, needles
+    and fallen leaves; ragged pine undergrowth along both edges with grass spilling onto the dirt."""
     rnd = random.Random("road-high-park")
     g.rect(0, 0, W, H, "tan")
-    specks(g, rnd, 150, "brown", 8, W - 8, 0.4)
-    specks(g, rnd, 60, "cream", 8, W - 8, 0.2)
-    # fallen needles in pairs along the trail, clear of the lane dividers
-    for x, y in scatter(rnd, 16, 10, W - 10, 9, ok=lambda x, y: (x + 4) % LANE >= 8):
+    # worn ground down each lane where feet go: skin1 patches chained along the lane's middle, drifting
+    # side to side, overlapping or leaving a gap, so the lane wears unevenly rather than in a stripe;
+    # swept clean of the grit around them but for a cream scuff
+    worn = Grid(W, H)
+    for k in range(W // LANE):
+        cx, drift = k * LANE + LANE // 2, rnd.randint(-3, 3)
+        y = y0 = rnd.randrange(H)
+        while y < y0 + H - 6:
+            w, h = rnd.randint(7, 13), rnd.randint(14, 26)
+            oval(worn, rnd, cx + drift - w // 2, y, w, h, "skin1")
+            wrect(worn, cx + drift + rnd.randint(-2, 1), y + rnd.randint(3, h - 6), 1, rnd.randint(2, 3), "cream")
+            drift = max(-8, min(8, drift + rnd.randint(-4, 4)))
+            y += rnd.randint(h // 2, h + 8)
+    specks(g, rnd, 90, "brown", 9, W - 9)
+    specks(g, rnd, 40, "skin2", 9, W - 9, 0.3)
+    for y in range(H):
+        for x in range(W):
+            if worn.px[y][x]:
+                g.px[y][x] = worn.px[y][x]
+        # a tan crease splits any row of a patch 8 or more wide, so none reads as a seam across the road
+        x = 0
+        while x < W:
+            run = 1
+            while x + run < W and worn.px[y][x + run] and g.px[y][x + run] == g.px[y][x]:
+                run += 1
+            if worn.px[y][x] and run >= 8:
+                run = min(7, run // 2 + round(wave(y, 1.7, 0, 1)))
+                g.p(x + run, y, "tan")
+            x += run
+    # damp patches, long along the road so each looks round in the view, under 8 columns wide so none
+    # reads as a seam across the road, with a brown wet spot
+    for x, y in scatter(rnd, 9, 10, W - 16, 16, ok=lambda x, y: 4 < (x + 2) % LANE < 54):
+        w, h = rnd.randint(4, 7), rnd.randint(6, 12)
+        oval(g, rnd, x, y, w, h, "skin2")
+        wp(g, x + w // 2, y + h // 2, "brown")
+    # stones half sunk in the dirt, lit on the top left, and loose pebbles
+    for x, y in scatter(rnd, 7, 12, W - 14, 16, ok=lambda x, y: 4 < (x + 2) % LANE < 58):
+        wrect(g, x, y, 3, 2, "driftwood")
+        wp(g, x, y, "lgrey")
+        wp(g, x + 2, y + 1, "stone")
+        wrect(g, x, y + 2, 3, 1, "brown")
+    for x, y in scatter(rnd, 20, 10, W - 10, 5, ok=lambda x, y: 2 < (x + 1) % LANE < 61):
+        wp(g, x, y, rnd.choice(("stone", "driftwood", "driftwood", "dstone")))
+    # fallen needles in pairs, clear of the lane lines
+    for x, y in scatter(rnd, 14, 10, W - 12, 9, ok=lambda x, y: (x + 4) % LANE >= 8):
         wp(g, x, y, "bark")
         wp(g, x + 1, y + 1, "bark")
         wp(g, x + 2, y + 1, "bark")
-    for _ in range(12):
-        x, y = rnd.randrange(12, W - 14), rnd.randrange(H)
-        if (x + 3) % LANE < 6:
-            continue
-        wrect(g, x, y, 2, 2, "lgrey")
-        wp(g, x + 1, y + 1, "grey")
-        wp(g, x, y, "white")
-    for i in range(4):
-        x, y = 214 + (6 if i % 2 else 0), i * 16 + 10
-        for j, row in enumerate(PAW):
-            for k, ch in enumerate(row):
-                if ch == "x":
-                    wp(g, x + k, y + j, "brown")
-    for y in range(H):
-        for side, seed in ((0, 1.1), (1, 2.7)):
-            # the undergrowth and its bark edge keep to the outer 8 columns, clear of a sprite's margin
-            w = min(7, wave(y, seed, 6, 1.6))
-            x0 = 0 if side == 0 else W - w
-            g.rect(x0, y, w, 1, "pine")
-            g.p(w if side == 0 else W - w - 1, y, "bark")
+    leaves(g, rnd, 5, 10, W - 10, (("moss", "olive", "dolive"), ("skin2", "brown", "dbrown")))
+    # the undergrowth along each edge keeps to the outer 8 columns, clear of a sprite's margin: pine
+    # with fir blades, a ragged brown margin of damp earth, and grass clumps spilling onto the dirt
+    def col(side, x):
+        return x if side == 0 else W - 1 - x
+
     for side in (0, 1):
-        y = side * 5
-        while y < H + side * 5 - 3:
-            x = 1 + rnd.randrange(4)
-            x = x if side == 0 else W - 1 - x
-            wrect(g, x, y, 1, 2, "fir")
-            y += rnd.randrange(2, 6)
-        for y in (9 + side * 28, 44 - side * 22):
-            wp(g, 2 if side == 0 else W - 3, y, "moss")
+        width = meander(rnd, 2, 5, (2, 6))
+        for y in range(H):
+            w = width[y]
+            for x in range(w):
+                g.p(col(side, x), y, "pine")
+            g.p(col(side, w), y, "brown")
+            if width[y - 1] < w or rnd.random() < 0.3:
+                g.p(col(side, w + 1), y, "skin2")
+        y = rnd.randrange(H)
+        while y < H * 2:
+            wrect(g, col(side, rnd.randrange(3)), y, 1, 2, "fir")
+            y += rnd.randrange(3, 7)
+        for _, y in scatter(rnd, 9, 0, 1, 5):
+            # a clump: blades spilling over the margin onto the dirt, out to column 7 at most, canopy
+            # with a lit moss or olive tip
+            reach = rnd.randint(1, 7 - width[y])
+            for b in range(reach):
+                wrect(g, col(side, width[y] + b), y - b % 2, 1, 3 - b % 2, "canopy")
+            wp(g, col(side, width[y] + reach - 1), y - 1 - (reach - 1) % 2, rnd.choice(("moss", "olive")))
+    # roots creeping in from the undergrowth, two a side, each reaching a dozen or so columns onto the dirt
+    for side in (0, 1):
+        for y in (rnd.randrange(0, 20), rnd.randrange(30, 50)):
+            dx = 1 if side == 0 else -1
+            x = 5 if side == 0 else W - 6
+            root(g, rnd, x, y, dx, rnd.randint(7, 11))
 
 
 def distillery_ground(g):

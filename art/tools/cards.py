@@ -739,9 +739,10 @@ def cabbagetown_view():
 
 
 def high_park_view():
-    trail = flecked("tan", "brown", 13, "cream")
+    trail = flecked("tan", "brown", 23, "skin2")
     dark = tufted("pine")
-    a = ZoneView("high-park", trail, dark, "dbrown", (2, 5), curb=None, walk=None, lawn=dark)
+    # the cross path's middle worn skin1 in broken runs, as the backdrop's, with no line painted on it
+    a = ZoneView("high-park", trail, dark, "skin1", (9, 13), curb=None, walk=None, lawn=dark)
     a.sky("azure", "sky")
     bd.cloud(a, 54, 5, 16, 3, 2)
     a.treeline(15, ("fir", "pine"), 0, 2, 6)
