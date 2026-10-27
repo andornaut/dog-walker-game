@@ -15,7 +15,7 @@ export const HOME_TEXT = {
   },
   detail: {
     dogKind: "{size} · {hearts}♥",
-    dogLarge: "Large: lane changes −{speed}",
+    dogLarge: "Large: −{speed} lane change speed",
     dogOwner: "Owner {owner}, {role}",
     dogStatus: "Your client",
     gearEquipped: "In your Pocket",
@@ -23,7 +23,7 @@ export const HOME_TEXT = {
     gearSubtitle: "Gear",
     priceBuy: "Price {price}, tap to buy",
     priceLocked: "Price {price}, save up for it",
-    walkerAgility: "Lane changes: {agility}",
+    walkerAgility: "{agility} lane change speed",
     walkerPerk: "{perk}: {effect}",
     walkerStatus: "Your walker",
     walkerSubtitle: "Walker",
@@ -40,7 +40,7 @@ export const HOME_TEXT = {
     nothing: "Nothing",
     skipOption: "one free card skip each neighborhood",
     stats: {
-      agility: "lane changes",
+      agility: "lane change speed",
       bumpHearts: "♥ lost to a bump",
       cardCost: "card cash costs",
       debuffSeconds: "debuff time",
@@ -99,7 +99,7 @@ export const HOME_TEXT = {
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",
-  walkerInfo: "{walker}: {perk}, lane changes {agility}.",
+  walkerInfo: "{walker}: {perk}, {agility} lane change speed.",
   walkerInfoBase: "{walker}: {perk}.",
   walkerLocked: "Finish {zone} to unlock.",
 } as const satisfies HomeText;

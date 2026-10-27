@@ -50,7 +50,7 @@ export const RUN_TEXT = {
   lowHearts: "{owner} has 1♥ left!",
   newWalker: {
     button: "Welcome!",
-    info: "Lane changes {agility} · {perk}",
+    info: "{agility} lane change speed · {perk}",
     infoBase: "{perk}",
     subtitle: "{walker} joins you!",
     title: "New walker!",
@@ -72,7 +72,7 @@ export const RUN_TEXT = {
     effectStart: "{name}: {effect}",
     fired: "{owner} fired you! {dog} heads home.",
     fullPackHome: "Walk bonus! +{amount}",
-    largeDog: "{dog} is large: lane changes −{speed}.",
+    largeDog: "{dog} is large: −{speed} lane change speed.",
     lowHearts: "{owner} has 1♥ left!",
     luckyNeighbor: "A neighbor pets the pack! Everyone +1♥",
     luckyWallet: "Found a wallet! +{amount}",

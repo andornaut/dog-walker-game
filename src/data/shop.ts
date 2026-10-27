@@ -28,7 +28,7 @@ export const SHOP_GEAR = {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],
     name: "Running shoes",
     price: "runningShoes",
-    short: "Lane changes +{percent}",
+    short: "+{percent} lane change speed",
   },
   whistle: {
     effects: [{ chance: "whistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],

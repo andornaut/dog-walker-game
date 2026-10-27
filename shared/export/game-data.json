@@ -848,7 +848,7 @@
       ],
       "name": "Running shoes",
       "price": "runningShoes",
-      "short": "Lane changes +{percent}",
+      "short": "+{percent} lane change speed",
       "iconKey": "item-running-shoes"
     },
     {
