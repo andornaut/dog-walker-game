@@ -150,69 +150,110 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
 
 
 def eve(mood):
-    """Retired florist, dramatic: grey bun with a flower, green cardigan."""
+    """Social media influencer, dramatic: long blonde hair past the shoulders with a swept fringe, gold hoop
+    earrings, a bright pink puffer jacket over a white top."""
     g = face()
-    g.cel(16, 13, 9.5, 8, "lgrey", "grey")
-    base(g, "skin1", "skin2", "green", "dgreen")
-    g.rect(15, 27, 2, 4, "cream")
-    g.cel(16, 10, 9, 4.5, "lgrey", "grey", "white")
-    g.cel(16, 4, 4, 3, "lgrey", "grey", "white")
-    for dx, dy in ((0, -2), (-2, 0), (2, 0), (0, 2)):
-        g.ell(22.5 + dx, 6 + dy, 1.3, 1.3, "pink")
-    g.p(22, 5, "yellow")
-    g.p(22, 6, "amber")
+    # the hair behind the face, down past the jaw
+    g.cel(16, 14, 10, 9, "yellow", "amber")
+    g.rect(6, 14, 20, 12, "yellow")
+    g.rect(22, 14, 4, 12, "amber")
+    base(g, "skin1", "skin2", "pink", "mauve")
+    # the puffer's quilting, and the white top at the open front
+    g.rect(6, 29, 20, 1, "mauve")
+    g.rect(21, 29, 5, 1, "purple")
+    g.rect(15, 27, 2, 4, "white")
+    # the ends falling over the shoulders onto the puffer
+    g.rect(6, 20, 3, 10, "yellow")
+    g.rect(23, 20, 3, 10, "amber")
+    g.p(8, 29, None)
+    g.p(23, 29, None)
+    # the fringe swept across the forehead, its lit edge on the left
+    g.cel(16, 10, 9, 4.5, "yellow", "amber", "white")
+    g.cel(11.5, 11, 3.5, 2, "yellow", "amber", "white")
+    g.rect(7, 19, 1, 2, "orange")
+    g.rect(24, 19, 1, 2, "orange")
     expression(g, mood, lashes=True, wide=True)
     return g
 
 
 def ryan(mood):
-    """Pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee."""
+    """Site engineer, dramatic: a blond forelock under a white hard hat, a yellow hi-vis vest with silver
+    stripes over a blue work shirt."""
     g = face()
-    base(g, "skin2", "brown", "pink", "mauve")
-    g.cel(16, 9.5, 9, 4.5, "amber", "orange", "yellow")
-    g.cel(18, 5, 6, 4, "amber", "orange", "yellow")
-    g.cel(21, 3.5, 3, 2, "yellow", "amber")
-    g.rect(9, 9, 6, 2, "ink")
-    g.rect(17, 9, 6, 2, "ink")
-    g.rect(15, 9, 2, 1, "ink")
-    g.p(10, 9, "slate")
-    g.p(18, 9, "slate")
+    base(g, "skin2", "brown", "blue", "navy")
+    # the work shirt's collar, then the vest's two panels either side of the open front
+    g.tri((12, 26), (16, 27), (13, 29), "sky")
+    g.tri((20, 26), (16, 27), (19, 29), "sky")
+    g.rect(6, 28, 7, 3, "yellow")
+    g.rect(19, 28, 7, 3, "amber")
+    g.rect(8, 27, 4, 1, "yellow")
+    g.rect(20, 27, 4, 1, "amber")
+    g.rect(6, 30, 7, 1, "lgrey")
+    g.rect(19, 30, 7, 1, "grey")
+    # blond hair at the temples, under the brim
+    g.rect(8, 11, 2, 6, "amber")
+    g.rect(22, 11, 2, 6, "orange")
+    # the hard hat: a white dome with a ridge down the middle over a full brim
+    g.cel(16, 7, 8.5, 5.5, "white", "lgrey")
+    g.rect(15, 2, 2, 7, "lgrey")
+    g.rect(5, 10, 22, 2, "white")
+    g.rect(17, 11, 10, 1, "lgrey")
+    # the forelock, swept out from under the brim above the left brow
+    g.rect(9, 12, 6, 1, "amber")
+    g.rect(10, 12, 2, 1, "yellow")
     expression(g, mood, wide=True)
     return g
 
 
-def braid(g, x, y0, n):
-    """A plait of n lobes down from row y0, its middle column x: each lobe 3 wide and 3 tall, leaning left
-    and right in turn, lit dbrown at its top and shaded walnut where the next tucks under it; a red tie
-    and a tuft below."""
-    for i in range(n):
-        y, dx = y0 + i * 3, -1 if i % 2 else 0
-        g.rect(x - 1 + dx, y, 3, 3, "bark")
-        g.p(x + dx, y, "dbrown")
-        g.p(x + 1 + dx if i % 2 else x - 1 + dx, y + 2, "walnut")
-    y = y0 + n * 3
-    g.rect(x - 1, y, 2, 1, "red")
-    g.rect(x - 1, y + 1, 2, 2, "bark")
-
-
-def sheba(mood):
-    """Retired accountant, fussy: a long dark plait over one shoulder, round glasses, a mustard sweater vest
-    over a white shirt."""
+def ralph(mood):
+    """Retired pilot, fussy: big and gruff, broad shoulders and a strong stubbled jaw, greying sandy-blonde hair
+    pulled back tight into a low ponytail behind his right shoulder, heavy brown brows, a dark leather flight
+    jacket with a cream fleece collar over a white shirt, and gold wings pinned on the chest."""
     g = face()
-    base(g, "skin2", "brown", "gold", "ochre")
-    # the shirt: its sleeves at the shoulders and its collar in the vest's V
-    g.rect(6, 28, 3, 3, "white")
-    g.tri((12, 26), (20, 26), (16, 31), "white")
-    g.tri((14, 27), (18, 27), (16, 30), "skin2")
-    g.cel(16, 10, 9.5, 5, "bark", "walnut")
-    g.rect(7, 11, 2, 9, "bark")
-    g.rect(23, 11, 2, 7, "walnut")
-    # the parting, and a sheen either side of it on the hair drawn back to the plait
-    g.rect(14, 6, 1, 4, "walnut")
-    for x, y in ((10, 9), (11, 8), (12, 7), (17, 7), (18, 7), (19, 8)):
-        g.p(x, y, "dbrown")
-    braid(g, 24, 17, 4)
-    expression(g, mood, glasses="walnut")
+    # the ponytail behind the head, hanging from the nape down behind the right shoulder, with a dbrown tie
+    for x, y, r, c in ((8, 20.5, 1.8, "cream"), (6.8, 23, 1.7, "cream"), (5.6, 25.5, 1.4, "tan"),
+                       (4.8, 27.5, 1, "tan")):
+        g.ell(x, y, r, r + 0.3, c)
+    g.p(6, 23, "lgrey")
+    g.p(5, 25, "lgrey")
+    g.rect(7, 20, 3, 1, "dbrown")
+    base(g, "skin1", "skin2", "dbrown", "plum")
+    # the strong jaw, squared off under the face, and the neck thick under it
+    g.rect(12, 24, 8, 3, "skin2")
+    g.blob(16, 21, 7, 4.5, "skin1", power=3)
+    # stubble shading the jaw and chin
+    g.rect(12, 25, 8, 1, "skin2")
+    g.p(10, 24, "skin2")
+    g.p(21, 24, "skin2")
+    # the broad shoulders of the big build, out past the other owners' busts
+    g.rect(6, 27, 20, 1, "dbrown")
+    g.rect(4, 28, 24, 3, "dbrown")
+    g.rect(21, 27, 7, 4, "plum")
+    # the white shirt, open at the neck between the fleece collar's points, cream in the light, tan in the shade
+    g.tri((13, 26), (19, 26), (16, 31), "white")
+    g.tri((7, 26), (13, 26), (12, 30), "cream")
+    g.tri((25, 26), (19, 26), (20, 30), "tan")
+    # gold wings pinned on the right of the chest
+    g.rect(21, 29, 5, 1, "amber")
+    g.p(23, 29, "yellow")
+    g.p(23, 30, "amber")
+    # the hair pulled back tight over the crown and temples: sandy cream shaded tan, off a receding hairline,
+    # gone grey at the temples, with a lgrey streak combed back through it
+    g.cel(16, 10.5, 9, 5, "cream", "tan")
+    g.ell(16, 14.5, 6.5, 3.5, "skin1")
+    g.rect(8, 11, 2, 4, "lgrey")
+    g.rect(22, 11, 2, 4, "grey")
+    g.rect(13, 7, 1, 3, "lgrey")
+    g.rect(14, 6, 2, 1, "lgrey")
+    expression(g, mood, brow="brown")
+    if not isinstance(g, minis.Mini):
+        # heavy brows: each brow pixel doubled upward
+        brows = [(x, y) for y in range(12, 17) for x in range(9, 23) if g.px[y][x] == minis.K["brown"]]
+        for x, y in brows:
+            g.p(x, y - 1, "brown")
+    # a big nose and a cleft chin
+    g.rect(15, 19, 2, 1, "skin2")
+    g.p(16, 24, "skin2")
     return g
 
 
@@ -234,21 +275,35 @@ def tara(mood):
     return g
 
 
-def sam(mood):
-    """Barista, laid-back: green beanie, beard, cream shirt with an apron."""
+def clare(mood):
+    """Psychology student, laid-back: brown hair to the shoulders with a side-swept fringe and a pink clip, a
+    cosy green knit sweater with a white collar."""
     g = face()
-    base(g, "dbrown", "plum", "cream", "tan")
-    g.rect(10, 27, 2, 4, "brown")
-    g.rect(20, 27, 2, 4, "brown")
-    g.rect(12, 29, 8, 2, "brown")
-    g.ell(16, 23.5, 6.5, 2.5, "ink")
-    g.rect(9, 18, 2, 5, "ink")
-    g.rect(21, 18, 2, 5, "ink")
-    g.cel(16, 8.5, 9, 5, "dgreen", "forest", "green")
-    g.rect(7, 11, 18, 2, "forest")
-    g.ell(16, 3, 2, 1.5, "green")
-    g.rect(14, 21, 4, 1, "ink")
-    expression(g, mood, feat="cream", blush="rust", brow="ink", whites=True)
+    # the hair falling behind the face to the shoulders
+    g.cel(16, 14, 10, 10, "dbrown", "plum", "brown")
+    g.rect(6, 14, 20, 10, "dbrown")
+    g.rect(22, 14, 4, 10, "plum")
+    base(g, "brown", "dbrown", "green", "dgreen")
+    # the knit: a ribbed crew neck and two cables down the front, either side of a white collar
+    g.rect(11, 27, 10, 1, "dgreen")
+    for x in (11, 20):
+        for y in (28, 30):
+            g.p(x, y, "dgreen")
+        g.p(x + 1, 29, "dgreen")
+    g.tri((13, 26), (16, 26), (15, 28), "white")
+    g.tri((16, 26), (19, 26), (17, 28), "white")
+    # the crown, and the fringe swept across the forehead to the left
+    g.cel(16, 10, 9, 4.5, "dbrown", "plum", "brown")
+    g.cel(12, 11, 4, 2.2, "dbrown", "plum", "brown")
+    # the locks either side of the face, a shade darker, so the face stands out from the hair
+    g.rect(8, 11, 2, 8, "plum")
+    g.rect(22, 11, 2, 8, "plum")
+    for x, y, h in ((11, 7, 2), (15, 6, 2)):
+        g.rect(x, y, 1, h, "brown")
+    # the pink clip above her right temple
+    g.rect(20, 9, 3, 1, "pink")
+    g.p(21, 10, "mauve")
+    expression(g, mood, feat="ink", blush="rust", lashes=True, whites=True)
     return g
 
 
@@ -275,17 +330,30 @@ def kiwi(mood):
 
 
 def aunt_judy(mood):
-    """Wedding planner, dramatic: blond high ponytail, headset mic, white blouse."""
+    """Tennis star, dramatic: older and fit, a silver high ponytail, a cyan visor, a sleeveless white tennis
+    dress with a cyan V neck."""
     g = face()
-    g.cel(25, 8, 3, 6, "yellow", "amber")
+    # the high ponytail behind the head, swinging out to the right
+    g.cel(25, 9, 3, 6, "lgrey", "grey", "white")
     base(g, "skin1", "skin2", "white", "lgrey")
-    g.rect(15, 27, 2, 4, "pink")
-    g.cel(16, 10, 9, 4.5, "yellow", "amber", "white")
-    g.ell(22, 5, 2.5, 2, "pink")
-    g.rect(7, 13, 2, 7, "ink")
-    g.rect(8, 20, 1, 1, "ink")
-    g.rect(9, 21, 4, 1, "slate")
-    g.p(13, 21, "ink")
+    # bare shoulders either side of the sleeveless dress, and its cyan V neck
+    g.rect(6, 28, 2, 3, "skin1")
+    g.rect(24, 28, 2, 3, "skin2")
+    g.rect(8, 28, 1, 3, "cyan")
+    g.rect(23, 28, 1, 3, "cyan")
+    for x, y in ((11, 27), (12, 28), (13, 29), (14, 30), (17, 30), (18, 29), (19, 28), (20, 27)):
+        g.p(x, y, "cyan")
+    g.rect(13, 27, 6, 2, "skin1")
+    g.rect(14, 29, 4, 1, "skin1")
+    g.rect(15, 30, 2, 1, "skin1")
+    g.cel(16, 10, 9, 4.5, "lgrey", "grey", "white")
+    g.rect(8, 11, 2, 5, "lgrey")
+    g.rect(22, 11, 2, 5, "grey")
+    # the visor: a band over the hair and the bill jutting out past it, shaded underneath
+    g.rect(7, 9, 18, 1, "cyan")
+    g.rect(6, 10, 20, 1, "cyan")
+    g.rect(10, 10, 6, 1, "white")
+    g.rect(8, 11, 16, 1, "sky")
     expression(g, mood, lashes=True, wide=True)
     return g
 
@@ -556,13 +624,13 @@ WALKERS = {
 OWNERS = {
     "duchess": eve,
     "reggie": ryan,
-    "buddy": sheba,
+    "buddy": jason,
     "pierre": tara,
-    "biscuit": sam,
+    "biscuit": clare,
     "archie": kiwi,
     "snowball": aunt_judy,
     "penny": gadget,
-    "kilo": jason,
+    "kilo": ralph,
 }
 
 

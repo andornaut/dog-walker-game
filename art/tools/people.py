@@ -24,8 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from owners import braid  # noqa: E402
-from pixel import edged, main  # noqa: E402
+from pixel import K, edged, main  # noqa: E402
 from road import BREATH, BREATH_MS, LIT, face_disc, face_front, person, rim  # noqa: E402
 
 OWNER_WAVE = ("up", "out")
@@ -84,96 +83,166 @@ def specs(g, b, c):
 
 
 def eve_top(wave):
-    """Eve, retired florist, dramatic: grey bun with a pink flower, green cardigan open over a cream blouse,
-    a brown skirt, and a posy of flowers in her left hand."""
+    """Eve, social media influencer, dramatic: really small, her head and body drawn 6 rows lower than the
+    others' over shorter legs, and slighter, with a narrower torso and arms. Long blonde hair past the shoulders
+    with a swept fringe, gold hoop earrings, a bright pink puffer jacket over a white top, a denim-blue skirt, white
+    sneakers, and her phone held up in her left hand for a selfie, its camera to the viewer."""
     def top(g, b):
-        g.rect(10, 33 + b, 12, 5, "brown")
-        g.rect(19, 33 + b, 3, 5, "dbrown")
-        torso(g, b, "green", "dgreen")
-        g.rect(14, 21 + b, 4, 12, "cream")
-        g.rect(15, 24 + b, 1, 1, "tan")
-        g.rect(15, 28 + b, 1, 1, "tan")
-        arms(g, b, wave, "green", "dgreen", "skin1")
-        # the posy: green stems from the fist, three blooms on top
-        g.rect(6, 27 + b, 1, 4, "dgreen")
-        g.rect(7, 26 + b, 1, 5, "dgreen")
-        for x, y, c in ((4, 24, "pink"), (7, 23, "red"), (5, 21, "yellow")):
-            g.rect(x, y + b, 3, 3, c)
-            g.p(x + 1, y + 1 + b, "amber" if c != "yellow" else "orange")
-        head(g, b, "skin1", "skin2")
-        g.cel(16, 7.5 + b, 9, 4.5, "lgrey", "grey", "white")
-        g.cel(16, 2.5 + b, 4, 2.5, "lgrey", "grey", "white")
-        g.rect(8, 9 + b, 2, 6, "lgrey")
-        g.rect(22, 9 + b, 2, 6, "grey")
-        for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1)):
-            g.p(22 + dx, 3 + dy + b, "pink")
-        g.p(22, 3 + b, "yellow")
-        face_front(g, 16, 13 + b)
-        cheeks(g, b)
+        # the skirt, flared at the hem
+        g.rect(10, 34 + b, 12, 4, "blue")
+        g.rect(9, 37 + b, 14, 1, "blue")
+        g.rect(19, 34 + b, 3, 4, "navy")
+        g.rect(19, 37 + b, 4, 1, "navy")
+        # the puffer, quilted across, open over the white top
+        g.rect(10, 26 + b, 12, 8, "pink")
+        g.rect(19, 26 + b, 3, 8, "mauve")
+        for y in (29, 32):
+            g.rect(10, y + b, 9, 1, "mauve")
+            g.rect(19, y + b, 3, 1, "purple")
+        g.rect(15, 26 + b, 2, 8, "white")
+        head(g, b + 6, "skin1", "skin2")
+        # the hair down past the shoulders, and the fringe swept across the forehead
+        g.cel(16, 13.5 + b, 8.5, 4.5, "yellow", "amber", "white")
+        g.cel(12, 14.5 + b, 3.5, 2, "yellow", "amber", "white")
+        g.rect(8, 15 + b, 2, 14, "yellow")
+        g.rect(23, 15 + b, 2, 14, "amber")
+        # gold hoops under the bob, and the lashes at the eyes' outer corners
+        g.p(8, 22 + b, "orange")
+        g.p(24, 22 + b, "orange")
+        face_front(g, 16, 19 + b)
+        g.p(10, 18 + b, "ink")
+        g.p(22, 18 + b, "ink")
+        cheeks(g, b + 6)
+        # the right arm, over the bob: it hangs, or waves, up raised straight and out swung outward
+        if wave is None:
+            g.rect(22, 26 + b, 3, 6, "pink")
+            g.rect(24, 26 + b, 1, 6, "mauve")
+            g.rect(22, 32 + b, 3, 2, "skin1")
+        elif wave == "up":
+            g.rect(22, 19 + b, 3, 8, "pink")
+            g.rect(24, 19 + b, 1, 8, "mauve")
+            g.rect(22, 16 + b, 3, 3, "skin1")
+            g.p(21, 17 + b, "skin1")
+        else:
+            g.rect(22, 23 + b, 3, 4, "pink")
+            g.rect(24, 23 + b, 1, 4, "mauve")
+            g.rect(24, 19 + b, 3, 4, "pink")
+            g.rect(26, 19 + b, 1, 4, "mauve")
+            g.rect(25, 16 + b, 3, 3, "skin1")
+            g.p(24, 17 + b, "skin1")
+        # the ends falling over the shoulders, in front of the arms
+        g.rect(9, 24 + b, 2, 5, "yellow")
+        g.rect(22, 24 + b, 2, 5, "amber")
+        # the left arm raised, bent at the elbow, the phone held up in the fist
+        g.rect(7, 22 + b, 3, 5, "pink")
+        g.rect(5, 18 + b, 3, 5, "pink")
+        g.rect(7, 18 + b, 1, 5, "mauve")
+        g.rect(3, 8 + b, 5, 8, "hot")
+        g.rect(7, 8 + b, 1, 8, "dred")
+        g.rect(4, 9 + b, 2, 2, "ink")
+        g.p(4, 9 + b, "white")
+        g.rect(4, 15 + b, 4, 3, "skin1")
     return top
 
 
 def ryan_top(wave):
-    """Ryan, pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee, ripped jeans and his
-    phone held up in the left hand."""
+    """Ryan, site engineer, dramatic: a blond forelock under a white hard hat, a yellow hi-vis vest with
+    silver stripes over a blue work shirt with its sleeves rolled up, slate work trousers, brown boots, and
+    rolled plans in his left hand."""
     def top(g, b):
-        torso(g, b, "pink", "mauve")
-        # a white "like" heart on the chest
-        for x, y in ((13, 24), (15, 24), (12, 25), (13, 25), (14, 25), (15, 25), (16, 25), (13, 26), (14, 26),
-                     (15, 26), (14, 27)):
-            g.p(x, y + b, "white")
-        arms(g, b, wave, "pink", "mauve", "skin2", short=True)
-        # the phone, screen out, in the left fist
-        g.rect(4, 26 + b, 5, 7, "ink")
-        g.rect(5, 27 + b, 3, 4, "sky")
-        g.p(5, 27 + b, "cyan")
-        g.rect(5, 31 + b, 4, 2, "skin2")
+        torso(g, b, "blue", "navy")
+        # the vest: two yellow panels, open down the front, each crossed by a silver stripe
+        g.rect(9, 21 + b, 5, 13, "yellow")
+        g.rect(18, 21 + b, 5, 13, "yellow")
+        g.rect(20, 21 + b, 3, 13, "amber")
+        for y in (26, 30):
+            g.rect(9, y + b, 5, 1, "lgrey")
+            g.rect(18, y + b, 5, 1, "grey")
+        g.tri((13, 21 + b), (16, 21 + b), (14, 24 + b), "sky")
+        g.tri((16, 21 + b), (19, 21 + b), (18, 24 + b), "sky")
+        arms(g, b, wave, "blue", "navy", "skin2", short=True)
+        # the plans: a white roll upright in the left fist, its blue lines showing at the end
+        g.rect(4, 23 + b, 4, 13, "white")
+        g.rect(7, 23 + b, 1, 13, "lgrey")
+        g.rect(4, 23 + b, 4, 1, "sky")
+        g.p(5, 23 + b, "blue")
+        g.rect(5, 31 + b, 4, 3, "skin2")
         head(g, b, "skin2", "brown")
-        g.cel(16, 7.5 + b, 9, 4.5, "amber", "orange", "yellow")
-        g.cel(18, 3.5 + b, 6, 3.5, "amber", "orange", "yellow")
-        g.cel(21, 1.5 + b, 3, 1.5, "yellow", "amber")
-        g.rect(9, 9 + b, 6, 2, "ink")
-        g.rect(17, 9 + b, 6, 2, "ink")
-        g.rect(15, 9 + b, 2, 1, "ink")
-        g.p(10, 9 + b, "slate")
-        g.p(18, 9 + b, "slate")
+        g.rect(8, 8 + b, 2, 6, "amber")
+        g.rect(22, 8 + b, 2, 6, "orange")
+        # the hard hat: a white dome with a ridge down the middle over a full brim
+        g.cel(16, 4.5 + b, 8, 4.5, "white", "lgrey")
+        g.rect(15, 0 + b, 2, 6, "lgrey")
+        g.rect(5, 7 + b, 22, 2, "white")
+        g.rect(17, 8 + b, 10, 1, "lgrey")
+        g.rect(9, 9 + b, 6, 1, "amber")
+        g.rect(10, 9 + b, 2, 1, "yellow")
         face_front(g, 16, 13 + b)
         cheeks(g, b, "mauve")
     return top
 
 
-def ryan_legs(g, b):
-    """Rips across the knees of Ryan's jeans."""
-    g.rect(12, 38 + b, 2, 1, "skin2")
-    g.rect(18, 39 + b, 2, 1, "skin2")
-
-
-def sheba_top(wave):
-    """Sheba, retired accountant, fussy: a long dark plait over one shoulder, round glasses, a mustard
-    sweater vest over a white shirt, slate trousers and a briefcase."""
+def ralph_top(wave):
+    """Ralph, retired pilot, fussy: big and gruff, a strong stubbled jaw, greying sandy-blonde hair pulled back
+    tight into a low ponytail behind his right shoulder, heavy brown brows, a dark leather flight jacket with a
+    cream fleece collar and gold wings, open over a white shirt and a round belly, slate trousers, and a red
+    model plane held nose up on his left fist."""
     def top(g, b):
-        torso(g, b, "gold", "ochre")
-        g.tri((13, 21 + b), (19, 21 + b), (16, 26 + b), "white")
-        g.tri((14, 21 + b), (18, 21 + b), (16, 24 + b), "skin2")
-        # the vest's ribbed hem
-        g.rect(9, 32 + b, 14, 1, "ochre")
-        arms(g, b, wave, "white", "lgrey", "skin2")
-        # the briefcase, hanging from the left fist
-        g.rect(2, 33 + b, 9, 7, "dbrown")
-        g.rect(2, 33 + b, 9, 1, "brown")
-        g.rect(2, 36 + b, 9, 1, "plum")
-        g.rect(6, 35 + b, 2, 2, "amber")
-        g.rect(5, 31 + b, 4, 3, "skin2")
-        head(g, b, "skin2", "brown")
-        g.cel(16, 7.5 + b, 9.5, 5, "bark", "walnut")
-        g.rect(8, 9 + b, 2, 8, "bark")
-        g.rect(22, 9 + b, 2, 6, "walnut")
-        g.rect(14, 4 + b, 1, 4, "walnut")
-        for x, y in ((11, 5), (12, 4), (17, 4), (18, 5)):
-            g.p(x, y + b, "dbrown")
-        braid(g, 22, 16 + b, 4)
+        torso(g, b, "dbrown", "plum")
+        # the belly, rounding the jacket out over the ribbed waistband
+        g.cel(16, 29 + b, 7.5, 4.5, "dbrown", "plum", "brown")
+        g.rect(9, 33 + b, 14, 1, "plum")
+        # the open neck: a white shirt under the fleece collar wrapped round it, its points turned down either
+        # side, cream in the light and tan in the shade, and gold wings pinned on the right of the chest
+        g.tri((13, 21 + b), (19, 21 + b), (16, 27 + b), "white")
+        g.rect(9, 21 + b, 6, 2, "cream")
+        g.tri((9, 22 + b), (14, 22 + b), (11, 25 + b), "cream")
+        g.rect(18, 21 + b, 5, 2, "tan")
+        g.tri((18, 22 + b), (23, 22 + b), (21, 25 + b), "tan")
+        g.rect(18, 27 + b, 5, 1, "amber")
+        g.p(20, 27 + b, "yellow")
+        g.p(20, 28 + b, "amber")
+        # the ponytail behind the head, hanging from the nape down behind the right shoulder, with a dbrown tie
+        for x, y, r, c in ((7.8, 16.5, 1.5, "cream"), (6.6, 18.7, 1.4, "cream"), (5.5, 20.7, 1.1, "tan")):
+            g.ell(x, y + b, r, r + 0.3, c)
+        g.p(6, 18 + b, "lgrey")
+        g.rect(7, 15 + b, 2, 1, "dbrown")
+        arms(g, b, wave, "dbrown", "plum", "skin1")
+        # the heavy build: each hanging arm a pixel thicker at the shoulder side
+        g.rect(4, 22 + b, 1, 9, "dbrown")
+        if wave is None:
+            g.rect(27, 22 + b, 1, 9, "plum")
+        # the model plane, seen from above and held nose up on the left fist, clear of the jacket: a red
+        # fuselage, wide wings and a narrower tailplane, dred on their shaded right ends, a sky cockpit and a
+        # dslate propeller
+        g.rect(4, 22 + b, 2, 9, "red")
+        g.rect(5, 23 + b, 1, 8, "dred")
+        g.rect(1, 25 + b, 9, 1, "red")
+        g.rect(2, 26 + b, 7, 1, "red")
+        g.p(9, 25 + b, "dred")
+        g.rect(7, 26 + b, 2, 1, "dred")
+        g.rect(2, 30 + b, 5, 1, "red")
+        g.p(6, 30 + b, "dred")
+        g.p(4, 24 + b, "sky")
+        g.rect(4, 22 + b, 2, 1, "dslate")
+        g.rect(5, 31 + b, 4, 3, "skin1")
+        head(g, b, "skin1", "skin2")
+        # the strong jaw, squared off under the face, with stubble shading its edge
+        g.blob(16, 17 + b, 7, 3.5, "skin1", power=3)
+        g.rect(12, 20 + b, 8, 1, "skin2")
+        # the hair pulled back tight over the crown and temples: sandy cream shaded tan, off a receding
+        # hairline, gone grey at the temples, with a lgrey streak combed back through it
+        g.cel(16, 7 + b, 8.8, 4.5, "cream", "tan")
+        g.ell(16, 10.5 + b, 5.5, 2.5, "skin1")
+        g.rect(8, 8 + b, 2, 4, "lgrey")
+        g.rect(22, 8 + b, 2, 4, "grey")
+        g.rect(13, 4 + b, 1, 3, "lgrey")
+        g.rect(14, 3 + b, 2, 1, "lgrey")
         face_front(g, 16, 13 + b)
-        specs(g, b, "walnut")
+        # heavy brows, two rows deep and pulled low over the eyes, and a big nose
+        g.rect(10, 10 + b, 4, 2, "brown")
+        g.rect(18, 10 + b, 4, 2, "brown")
+        g.rect(15, 15 + b, 2, 1, "skin2")
     return top
 
 
@@ -209,32 +278,43 @@ def tara_top(wave):
     return top
 
 
-def sam_top(wave):
-    """Sam, barista, laid-back: green beanie, black beard, a cream shirt under a brown apron, and a coffee
-    cup in his left hand."""
+def clare_top(wave):
+    """Clare, psychology student, laid-back: brown hair to the shoulders with a side-swept fringe and a pink
+    clip, a cosy green knit sweater over a white collar, a navy skirt, and her psychology textbook in
+    her left hand."""
     def top(g, b):
-        torso(g, b, "cream", "tan")
-        g.rect(11, 24 + b, 10, 13, "brown")
-        g.rect(19, 24 + b, 2, 13, "dbrown")
-        g.rect(11, 21 + b, 1, 3, "brown")
-        g.rect(20, 21 + b, 1, 3, "brown")
-        g.rect(13, 29 + b, 5, 3, "dbrown")
-        arms(g, b, wave, "cream", "tan", "dbrown", short=True)
-        # the takeaway cup: white with a brown sleeve and a lid
-        g.rect(4, 26 + b, 5, 7, "white")
-        g.rect(4, 25 + b, 5, 1, "lgrey")
-        g.rect(4, 28 + b, 5, 2, "brown")
-        g.rect(8, 26 + b, 1, 7, "lgrey")
-        g.rect(5, 31 + b, 4, 2, "dbrown")
-        head(g, b, "dbrown", "plum")
-        g.cel(16, 18.5 + b, 6, 2.5, "ink")
-        g.rect(8, 13 + b, 2, 5, "ink")
-        g.rect(22, 13 + b, 2, 5, "ink")
-        g.cel(16, 7 + b, 9, 4.5, "dgreen", "forest", "green")
-        g.rect(7, 9 + b, 18, 2, "forest")
-        g.cel(16, 1.5 + b, 2, 1.5, "green")
-        face_front(g, 16, 13 + b, lips="cream")
-        g.rect(13, 16 + b, 6, 1, "ink")
+        g.rect(10, 33 + b, 12, 5, "navy")
+        g.rect(19, 33 + b, 3, 5, "ink")
+        # the hair falling behind the head to the shoulders
+        g.rect(7, 9 + b, 18, 12, "dbrown")
+        g.rect(21, 9 + b, 4, 12, "plum")
+        torso(g, b, "green", "dgreen")
+        # the knit: a ribbed hem, two cables twisting down the front, and the collar's white points at the neck
+        g.rect(9, 32 + b, 14, 1, "dgreen")
+        for x in (11, 18):
+            for y in range(24, 31, 2):
+                g.p(x, y + b, "dgreen")
+                g.p(x + 1, y + 1 + b, "dgreen")
+        g.tri((13, 21 + b), (16, 21 + b), (15, 23 + b), "white")
+        g.tri((16, 21 + b), (19, 21 + b), (17, 23 + b), "white")
+        arms(g, b, wave, "green", "dgreen", "brown")
+        # the textbook, cover out, in the left fist: a blue cover with a pink brain, its cream pages on top
+        g.rect(3, 23 + b, 6, 10, "blue")
+        g.rect(3, 23 + b, 1, 10, "navy")
+        g.rect(4, 22 + b, 5, 1, "cream")
+        g.rect(5, 25 + b, 3, 2, "pink")
+        g.p(6, 25 + b, "mauve")
+        g.rect(5, 31 + b, 4, 3, "brown")
+        head(g, b, "brown", "dbrown")
+        g.cel(16, 7.5 + b, 9, 4.5, "dbrown", "plum", "brown")
+        g.cel(12, 8.5 + b, 4, 2, "dbrown", "plum", "brown")
+        g.rect(8, 9 + b, 2, 7, "plum")
+        g.rect(22, 9 + b, 2, 7, "plum")
+        g.rect(20, 6 + b, 3, 1, "pink")
+        face_front(g, 16, 13 + b)
+        g.p(10, 12 + b, "ink")
+        g.p(22, 12 + b, "ink")
+        cheeks(g, b, "rust")
     return top
 
 
@@ -276,34 +356,66 @@ def kiwi_top(wave):
 
 
 def aunt_judy_top(wave):
-    """Aunt Judy, wedding planner, dramatic: blond high ponytail with a pink bow, headset mic, a white blouse
-    with a pink placket, a pink skirt, and her clipboard with a heart on it."""
+    """Aunt Judy, tennis star, dramatic: older and fit, a silver high ponytail, a cyan visor, a sleeveless
+    white tennis dress with a cyan V neck, armholes and hem, a cyan sweatband on the right wrist, white socks and
+    shoes, and her racket held up in her left hand."""
     def top(g, b):
-        g.cel(25, 6 + b, 3, 6, "yellow", "amber")
-        g.rect(10, 33 + b, 12, 5, "pink")
-        g.rect(19, 33 + b, 3, 5, "mauve")
+        g.cel(25, 6 + b, 3, 6, "lgrey", "grey", "white")
+        # the pleated skirt, flared past the hips, with its cyan hem
+        g.rect(8, 33 + b, 16, 4, "white")
+        g.rect(20, 33 + b, 4, 4, "lgrey")
+        for x in (11, 14, 17):
+            g.rect(x, 34 + b, 1, 2, "lgrey")
+        g.rect(8, 36 + b, 16, 1, "cyan")
         torso(g, b, "white", "lgrey")
-        g.rect(15, 21 + b, 2, 12, "pink")
-        arms(g, b, wave, "white", "lgrey", "skin1")
-        # the clipboard: a brown board, a cream sheet with a red heart, a slate clip
-        g.rect(2, 24 + b, 7, 10, "brown")
-        g.rect(3, 26 + b, 5, 7, "cream")
-        g.rect(4, 23 + b, 3, 2, "slate")
-        g.rect(4, 28 + b, 3, 2, "red")
-        g.p(5, 30 + b, "red")
+        # the V neck and the armholes' piping
+        g.rect(14, 21 + b, 4, 1, "skin1")
+        g.rect(15, 22 + b, 2, 1, "skin1")
+        for x, y in ((13, 21), (14, 22), (15, 23), (16, 23), (17, 22), (18, 21)):
+            g.p(x, y + b, "cyan")
+        g.rect(9, 21 + b, 1, 4, "cyan")
+        g.rect(22, 21 + b, 1, 4, "cyan")
+        arms(g, b, wave, "skin1", "skin2", "skin1", short=True)
+        # the sweatband, round the right wrist wherever the arm is
+        if wave is None:
+            g.rect(23, 29 + b, 4, 2, "cyan")
+        elif wave == "up":
+            g.rect(23, 12 + b, 4, 2, "cyan")
+        else:
+            g.rect(25, 12 + b, 4, 2, "cyan")
+        # the racket, held up: a dslate frame strung in an lgrey grid, its throat down to a cyan grip in the fist
+        g.cel(4.5, 18 + b, 3.5, 5, "dslate")
+        g.cel(4.5, 18 + b, 2.5, 4, "white")
+        for y in range(14 + b, 23 + b):
+            for x in range(2, 8):
+                if g.px[y][x] == K["white"] and (x % 2 or (y - b) % 2 == 0):
+                    g.p(x, y, "lgrey")
+        g.rect(3, 23 + b, 1, 1, "dslate")
+        g.rect(5, 23 + b, 1, 1, "dslate")
+        g.rect(4, 24 + b, 2, 2, "dslate")
+        g.rect(5, 26 + b, 2, 5, "cyan")
         g.rect(5, 31 + b, 4, 3, "skin1")
         head(g, b, "skin1", "skin2")
-        g.cel(16, 7.5 + b, 9, 4.5, "yellow", "amber", "white")
-        g.cel(22, 3 + b, 2.5, 2, "pink", "mauve")
-        g.rect(7, 10 + b, 2, 7, "ink")
-        g.rect(8, 17 + b, 1, 1, "ink")
-        g.rect(9, 18 + b, 4, 1, "slate")
-        g.p(13, 18 + b, "ink")
+        g.cel(16, 7.5 + b, 9, 4.5, "lgrey", "grey", "white")
+        g.rect(8, 9 + b, 2, 6, "lgrey")
+        g.rect(22, 9 + b, 2, 6, "grey")
+        # the visor: a band over the hair and the bill jutting out past it, shaded underneath
+        g.rect(7, 6 + b, 18, 1, "cyan")
+        g.rect(6, 7 + b, 20, 1, "cyan")
+        g.rect(10, 7 + b, 6, 1, "white")
+        g.rect(8, 8 + b, 16, 1, "sky")
         face_front(g, 16, 13 + b)
         g.p(10, 12 + b, "ink")
         g.p(22, 12 + b, "ink")
         cheeks(g, b)
     return top
+
+
+def aunt_judy_legs(g, b):
+    """Aunt Judy's white tennis socks, a cyan stripe round each top."""
+    for x in (11, 17):
+        g.rect(x, 41, 4, 2, "white")
+        g.rect(x, 41, 4, 1, "cyan")
 
 
 def gadget_top(wave):
@@ -372,15 +484,15 @@ def jason_top(wave):
 
 # dog: (top, legs, shoes, extra), in owners.OWNERS order; extra draws over the legs after them
 OWNERS = {
-    "duchess": (eve_top, "skin1", "dbrown", None),
-    "reggie": (ryan_top, "blue", "white", ryan_legs),
-    "buddy": (sheba_top, "slate", "dbrown", None),
+    "duchess": (eve_top, "skin1", "white", None),
+    "reggie": (ryan_top, "slate", "dbrown", None),
+    "buddy": (jason_top, "skin2", "sky", None),
     "pierre": (tara_top, "skin1", "ink", None),
-    "biscuit": (sam_top, "navy", "dbrown", None),
+    "biscuit": (clare_top, "brown", "mauve", None),
     "archie": (kiwi_top, "brown", "red", None),
-    "snowball": (aunt_judy_top, "skin1", "pink", None),
+    "snowball": (aunt_judy_top, "skin1", "white", aunt_judy_legs),
     "penny": (gadget_top, "dslate", "dbrown", None),
-    "kilo": (jason_top, "skin2", "sky", None),
+    "kilo": (ralph_top, "slate", "dbrown", None),
 }
 
 
@@ -390,8 +502,7 @@ def owner(dog, wave=None, bob=0):
     g = edged(person(top(wave), legs=legs, shoes=shoes, bob=bob))
     if extra:
         extra(g, bob)
-    # bark, Sheba's hair, is a dark brown and takes the dark browns' rim
-    return rim(g, {**LIT, "bark": LIT["dbrown"]})
+    return rim(g, LIT)
 
 
 def sprites():
