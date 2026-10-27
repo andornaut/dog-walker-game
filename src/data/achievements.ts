@@ -144,7 +144,7 @@ export const ACHIEVEMENTS = [
     badgeLine: "Everyone's met you now.",
     conditions: [{ count: "all", kind: "dogsFinishedWith" }],
     goal: "Finish a walk with each of the 9 dogs",
-    id: "neighbourhoodFavourite",
+    id: "localFavourite",
     name: "Local Favourite",
     shortGoal: "Walk all 9 dogs",
   },
