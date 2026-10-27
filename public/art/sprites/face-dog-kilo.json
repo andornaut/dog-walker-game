@@ -1,5 +1,5 @@
 { "frames": {
-   "face-dog-nugget 0.aseprite": {
+   "face-dog-kilo 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "face-dog-nugget 1.aseprite": {
+   "face-dog-kilo 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "face-dog-nugget 2.aseprite": {
+   "face-dog-kilo 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -27,7 +27,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "face-dog-nugget.png",
+  "image": "face-dog-kilo.png",
   "format": "RGBA8888",
   "size": { "w": 96, "h": 32 },
   "scale": "1",

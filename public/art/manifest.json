@@ -1825,93 +1825,48 @@
       }
     },
     {
-      "key": "dog-koda",
-      "png": "sprites/dog-koda.png",
-      "json": "sprites/dog-koda.json",
+      "key": "dog-kilo",
+      "png": "sprites/dog-kilo.png",
+      "json": "sprites/dog-kilo.json",
       "anchor": {
         "feetY": 52,
         "opaqueWidth": 30
       }
     },
     {
-      "key": "dog-koda@50",
-      "png": "sprites/dog-koda@50.png",
-      "json": "sprites/dog-koda@50.json",
+      "key": "dog-kilo@50",
+      "png": "sprites/dog-kilo@50.png",
+      "json": "sprites/dog-kilo@50.json",
       "anchor": {
         "feetY": 26,
         "opaqueWidth": 14
       }
     },
     {
-      "key": "dog-koda@62",
-      "png": "sprites/dog-koda@62.png",
-      "json": "sprites/dog-koda@62.json",
+      "key": "dog-kilo@62",
+      "png": "sprites/dog-kilo@62.png",
+      "json": "sprites/dog-kilo@62.json",
       "anchor": {
         "feetY": 33,
         "opaqueWidth": 18
       }
     },
     {
-      "key": "dog-koda@75",
-      "png": "sprites/dog-koda@75.png",
-      "json": "sprites/dog-koda@75.json",
+      "key": "dog-kilo@75",
+      "png": "sprites/dog-kilo@75.png",
+      "json": "sprites/dog-kilo@75.json",
       "anchor": {
         "feetY": 40,
         "opaqueWidth": 22
       }
     },
     {
-      "key": "dog-koda@88",
-      "png": "sprites/dog-koda@88.png",
-      "json": "sprites/dog-koda@88.json",
+      "key": "dog-kilo@88",
+      "png": "sprites/dog-kilo@88.png",
+      "json": "sprites/dog-kilo@88.json",
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "dog-nugget",
-      "png": "sprites/dog-nugget.png",
-      "json": "sprites/dog-nugget.json",
-      "anchor": {
-        "feetY": 36,
-        "opaqueWidth": 20
-      }
-    },
-    {
-      "key": "dog-nugget@50",
-      "png": "sprites/dog-nugget@50.png",
-      "json": "sprites/dog-nugget@50.json",
-      "anchor": {
-        "feetY": 18,
-        "opaqueWidth": 10
-      }
-    },
-    {
-      "key": "dog-nugget@62",
-      "png": "sprites/dog-nugget@62.png",
-      "json": "sprites/dog-nugget@62.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 13
-      }
-    },
-    {
-      "key": "dog-nugget@75",
-      "png": "sprites/dog-nugget@75.png",
-      "json": "sprites/dog-nugget@75.json",
-      "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 15
-      }
-    },
-    {
-      "key": "dog-nugget@88",
-      "png": "sprites/dog-nugget@88.png",
-      "json": "sprites/dog-nugget@88.json",
-      "anchor": {
-        "feetY": 32,
-        "opaqueWidth": 18
       }
     },
     {
@@ -2002,6 +1957,51 @@
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "dog-reggie",
+      "png": "sprites/dog-reggie.png",
+      "json": "sprites/dog-reggie.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-reggie@50",
+      "png": "sprites/dog-reggie@50.png",
+      "json": "sprites/dog-reggie@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "dog-reggie@62",
+      "png": "sprites/dog-reggie@62.png",
+      "json": "sprites/dog-reggie@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "dog-reggie@75",
+      "png": "sprites/dog-reggie@75.png",
+      "json": "sprites/dog-reggie@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "dog-reggie@88",
+      "png": "sprites/dog-reggie@88.png",
+      "json": "sprites/dog-reggie@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2110,14 +2110,9 @@
       "json": "sprites/face-dog-duchess.json"
     },
     {
-      "key": "face-dog-koda",
-      "png": "sprites/face-dog-koda.png",
-      "json": "sprites/face-dog-koda.json"
-    },
-    {
-      "key": "face-dog-nugget",
-      "png": "sprites/face-dog-nugget.png",
-      "json": "sprites/face-dog-nugget.json"
+      "key": "face-dog-kilo",
+      "png": "sprites/face-dog-kilo.png",
+      "json": "sprites/face-dog-kilo.json"
     },
     {
       "key": "face-dog-penny",
@@ -2128,6 +2123,11 @@
       "key": "face-dog-pierre",
       "png": "sprites/face-dog-pierre.png",
       "json": "sprites/face-dog-pierre.json"
+    },
+    {
+      "key": "face-dog-reggie",
+      "png": "sprites/face-dog-reggie.png",
+      "json": "sprites/face-dog-reggie.json"
     },
     {
       "key": "face-dog-snowball",
@@ -2170,24 +2170,14 @@
       "json": "sprites/face-owner-duchess-20.json"
     },
     {
-      "key": "face-owner-koda",
-      "png": "sprites/face-owner-koda.png",
-      "json": "sprites/face-owner-koda.json"
+      "key": "face-owner-kilo",
+      "png": "sprites/face-owner-kilo.png",
+      "json": "sprites/face-owner-kilo.json"
     },
     {
-      "key": "face-owner-koda-20",
-      "png": "sprites/face-owner-koda-20.png",
-      "json": "sprites/face-owner-koda-20.json"
-    },
-    {
-      "key": "face-owner-nugget",
-      "png": "sprites/face-owner-nugget.png",
-      "json": "sprites/face-owner-nugget.json"
-    },
-    {
-      "key": "face-owner-nugget-20",
-      "png": "sprites/face-owner-nugget-20.png",
-      "json": "sprites/face-owner-nugget-20.json"
+      "key": "face-owner-kilo-20",
+      "png": "sprites/face-owner-kilo-20.png",
+      "json": "sprites/face-owner-kilo-20.json"
     },
     {
       "key": "face-owner-penny",
@@ -2208,6 +2198,16 @@
       "key": "face-owner-pierre-20",
       "png": "sprites/face-owner-pierre-20.png",
       "json": "sprites/face-owner-pierre-20.json"
+    },
+    {
+      "key": "face-owner-reggie",
+      "png": "sprites/face-owner-reggie.png",
+      "json": "sprites/face-owner-reggie.json"
+    },
+    {
+      "key": "face-owner-reggie-20",
+      "png": "sprites/face-owner-reggie-20.png",
+      "json": "sprites/face-owner-reggie-20.json"
     },
     {
       "key": "face-owner-snowball",
@@ -2952,21 +2952,12 @@
       }
     },
     {
-      "key": "owner-koda",
-      "png": "sprites/owner-koda.png",
-      "json": "sprites/owner-koda.json",
+      "key": "owner-kilo",
+      "png": "sprites/owner-kilo.png",
+      "json": "sprites/owner-kilo.json",
       "anchor": {
         "feetY": 45,
         "opaqueWidth": 24
-      }
-    },
-    {
-      "key": "owner-nugget",
-      "png": "sprites/owner-nugget.png",
-      "json": "sprites/owner-nugget.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 25
       }
     },
     {
@@ -2982,6 +2973,15 @@
       "key": "owner-pierre",
       "png": "sprites/owner-pierre.png",
       "json": "sprites/owner-pierre.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "owner-reggie",
+      "png": "sprites/owner-reggie.png",
+      "json": "sprites/owner-reggie.json",
       "anchor": {
         "feetY": 45,
         "opaqueWidth": 25
@@ -4795,12 +4795,8 @@
       "png": "images/portrait-dog-duchess.png"
     },
     {
-      "key": "portrait-dog-koda",
-      "png": "images/portrait-dog-koda.png"
-    },
-    {
-      "key": "portrait-dog-nugget",
-      "png": "images/portrait-dog-nugget.png"
+      "key": "portrait-dog-kilo",
+      "png": "images/portrait-dog-kilo.png"
     },
     {
       "key": "portrait-dog-penny",
@@ -4809,6 +4805,10 @@
     {
       "key": "portrait-dog-pierre",
       "png": "images/portrait-dog-pierre.png"
+    },
+    {
+      "key": "portrait-dog-reggie",
+      "png": "images/portrait-dog-reggie.png"
     },
     {
       "key": "portrait-dog-snowball",

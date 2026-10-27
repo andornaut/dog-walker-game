@@ -1,5 +1,5 @@
 { "frames": {
-   "owner-koda 0.aseprite": {
+   "owner-reggie 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 400
    },
-   "owner-koda 1.aseprite": {
+   "owner-reggie 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 400
    },
-   "owner-koda 2.aseprite": {
+   "owner-reggie 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 300
    },
-   "owner-koda 3.aseprite": {
+   "owner-reggie 3.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -35,7 +35,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "owner-koda.png",
+  "image": "owner-reggie.png",
   "format": "RGBA8888",
   "size": { "w": 128, "h": 48 },
   "scale": "1",

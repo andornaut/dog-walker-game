@@ -4,9 +4,9 @@
 Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines and an ink-outlined face:
 
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
-  SIZE_CLASS): large 54x54 (Koda the Alaskan Malamute, Sequoia the Great Pyrenees, Penny the golden
+  SIZE_CLASS): large 54x54 (Kilo the Alaskan Malamute, Sequoia the Great Pyrenees, Penny the golden
   retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Duchess,
-  Nugget, Zippy), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
+  Reggie, Zippy), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
   road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
   pixel take trail(), so they stay unbroken. Tags: walk (4
@@ -102,9 +102,9 @@ def pose(q):
     return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, flop=0, lean=0, twitch=0, spray=0), **q)
 
 
-# ---------- Koda: Alaskan Malamute, large, grey and white, blue eyes, orange harness ----------
+# ---------- Kilo: Alaskan Malamute, large, grey and white, blue eyes, orange harness ----------
 
-def koda_road(q):
+def kilo_road(q):
     g, q = edged(Grid()), pose(q)
     # o shifts the body down so the big head has headroom to lean
     b, ln, o = q["bob"], q["lean"], 2
@@ -137,15 +137,15 @@ def koda_road(q):
     g.ell(hx + 7, 12.5 + o + b, 2, 2.2, "white", "lgrey")
     underside(g)
     spray(g, q["spray"])
-    rim(g, KODA_RIM)
+    rim(g, KILO_RIM)
     return g
 
 
-# Koda's grey coat lit where its silhouette faces up or left, so the dark head and ears hold on the dslate road.
-KODA_RIM = {"slate": ("grey", None), "dslate": ("grey", None)}
+# Kilo's grey coat lit where its silhouette faces up or left, so the dark head and ears hold on the dslate road.
+KILO_RIM = {"slate": ("grey", None), "dslate": ("grey", None)}
 
 
-def koda_face(mood):
+def kilo_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
     # a Malamute's ears: small, set wide on the broad skull, their tips rounded
@@ -262,9 +262,9 @@ def duchess_face(mood):
     return g
 
 
-# ---------- Nugget: pug, small, fawn, black mask, red bandana ----------
+# ---------- Reggie: pug, small, fawn, black mask, red bandana ----------
 
-def nugget_road(q):
+def reggie_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 2, "skin2")
@@ -289,7 +289,7 @@ def nugget_road(q):
     return g
 
 
-def nugget_face(mood):
+def reggie_face(mood):
     g = edged(Grid(), "ink", close=True)
     g.tri((8, 26), (24, 26), (16, 31), "red")
     g.p(13, 27, "white")
@@ -809,35 +809,35 @@ def mouth(g, y, mood):
 
 DOGS = {
     "duchess": (duchess_road, duchess_face),
-    "nugget": (nugget_road, nugget_face),
+    "reggie": (reggie_road, reggie_face),
     "zippy": (zippy_road, zippy_face),
     "pierre": (pierre_road, pierre_face),
     "biscuit": (biscuit_road, biscuit_face),
     "archie": (archie_road, archie_face),
     "snowball": (snowball_road, snowball_face),
     "penny": (penny_road, penny_face),
-    "koda": (koda_road, koda_face),
+    "kilo": (kilo_road, kilo_face),
 }
 
 
 # Each dog's road sprite side, by its size class: large 54, medium ROAD_SIZE (48) and small 38, about 1.1x, 1x
 # and 0.8x.
 SIZE_CLASS = {"large": 54, "medium": ROAD_SIZE, "small": 38}
-DOG_CLASS = {"koda": "large", "snowball": "large", "penny": "large", "archie": "medium", "biscuit": "medium",
-             "pierre": "medium", "duchess": "small", "nugget": "small", "zippy": "small"}
+DOG_CLASS = {"kilo": "large", "snowball": "large", "penny": "large", "archie": "medium", "biscuit": "medium",
+             "pierre": "medium", "duchess": "small", "reggie": "small", "zippy": "small"}
 DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
-# How much bigger a dog is drawn inside its frame, across and down. The large dogs are drawn narrower, Koda
+# How much bigger a dog is drawn inside its frame, across and down. The large dogs are drawn narrower, Kilo
 # and Sequoia about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
 # (Zippy 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
-DOG_ZOOM = {"koda": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
-            "nugget": (1.09, 1.27), "zippy": (1.17, 1.27)}
+DOG_ZOOM = {"kilo": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
+            "reggie": (1.09, 1.27), "zippy": (1.17, 1.27)}
 
 
 # How big each dog's face is drawn in its 32px frame, sat on the bottom edge: the side that brings its inked
 # area nearest its size class's target, so the classes step evenly (the square root of the area about 17, 21.3
 # and 25.5px) however much of its design a breed's ears or topknot fill. The large dogs zoom past the
-# frame as far as Koda's ears fit under its top edge, so they fill their tiles, and medium sits halfway.
-FACE_SIDE = {"archie": 30, "biscuit": 29, "duchess": 23, "koda": 35, "nugget": 26, "penny": 37, "pierre": 27,
+# frame as far as Kilo's ears fit under its top edge, so they fill their tiles, and medium sits halfway.
+FACE_SIDE = {"archie": 30, "biscuit": 29, "duchess": 23, "kilo": 35, "penny": 37, "pierre": 27, "reggie": 26,
              "snowball": 36, "zippy": 27}
 
 

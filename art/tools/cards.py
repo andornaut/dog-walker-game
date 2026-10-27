@@ -229,7 +229,7 @@ def skunk_ignore():
     a.ground("street")
     a.put("skunk", "idle", 18, 44)
     a.skunk_stink(30, 6, 2)
-    a.put("dog-koda", "walk", 54, 40, 2)
+    a.put("dog-kilo", "walk", 54, 40, 2)
     a.skunk_stink(46, 4, 2)
     return a
 
@@ -263,7 +263,7 @@ def thief_chase():
     a = Art()
     a.ground("street")
     a.put("thief", "flee", 54, 59, 1)
-    a.put("dog-koda", "react", 22, 58)
+    a.put("dog-kilo", "react", 22, 58)
     a.fill(30, 12, 2, 5, "red")
     a.fill(30, 18, 2, 2, "red")
     return a
@@ -471,7 +471,7 @@ def good_leash():
     a = Art()
     a.ground("park")
     a.put("squirrel", "idle", 60, 37)
-    c = a.put("dog-koda", "walk", 30, 56, 1)
+    c = a.put("dog-kilo", "walk", 30, 56, 1)
     a.lead(30, c, 24, 2)
     a.fill(29, c - 1, 3, 3, "amber")
     # tick: the chaser ignores the squirrel

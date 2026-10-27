@@ -702,14 +702,14 @@ def stats():
             cv.fill(x0 + bulge // 2 + (1 if d > 0 else 0), y, 1, 1, "dred")
         tie = cx + (2 if d > 0 else 4)
         cv.fill(tie, wy + 22, 6, 2, "amber")
-    # a framed photo of Koda, right of the title
+    # a framed photo of Kilo, right of the title
     fx, fy = 75, 14
     cv.fill(fx, fy, 38, 38, "plum")
     cv.fill(fx + 1, fy + 1, 36, 36, "amber")
     cv.fill(fx + 1, fy + 36, 36, 1, "orange")
     cv.fill(fx + 3, fy + 3, 32, 32, "sky")
     cv.fill(fx + 3, fy + 27, 32, 8, "green")
-    cv.paste(sn.frame("face-dog-koda", "happy"), fx + 3, fy + 3)
+    cv.paste(sn.frame("face-dog-kilo", "happy"), fx + 3, fy + 3)
     cv.fill(fx + 18, fy - 5, 2, 2, "amber")
     cv.line(fx + 19, fy - 4, fx + 4, fy, "plum")
     cv.line(fx + 19, fy - 4, fx + 34, fy, "plum")

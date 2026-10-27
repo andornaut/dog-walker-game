@@ -554,14 +554,14 @@ WALKERS = {
 
 OWNERS = {
     "duchess": rosa,
-    "nugget": ralph,
+    "reggie": ralph,
     "zippy": sheba,
     "pierre": tara,
     "biscuit": sam,
     "archie": kiwi,
     "snowball": judy,
     "penny": gadget,
-    "koda": jason,
+    "kilo": jason,
 }
 
 

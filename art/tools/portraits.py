@@ -141,9 +141,9 @@ def bow(g, cx, y, colours=("pink", "mauve")):
     g.rect(cx - 1, y + 1, 2, 1, c)
 
 
-# ---------- Nugget: pug, small, fawn, black mask, red bandana ----------
+# ---------- Reggie: pug, small, fawn, black mask, red bandana ----------
 
-def nugget(g):
+def reggie(g):
     g.cel(45, 55, 11, 8, "skin1", "skin2", "cream")
     # curled tail over the hip
     g.cel(53, 46, 3.5, 3, "skin1", "skin2", "cream")
@@ -356,9 +356,9 @@ def penny(g):
     nose(g, 21, 29)
 
 
-# ---------- Koda: Alaskan Malamute, large, grey and white, blue eyes, orange harness ----------
+# ---------- Kilo: Alaskan Malamute, large, grey and white, blue eyes, orange harness ----------
 
-def koda(g):
+def kilo(g):
     g.cel(46, 52, 13, 11, "slate", "dslate", "grey")
     g.cel(31, 51, 15, 13, "lgrey", "grey", "white")
     legs(g, (22, 33), 53, "lgrey", "grey", w=6)
@@ -585,14 +585,14 @@ def trista(g):
 
 PORTRAITS = {
     "duchess": duchess,
-    "nugget": nugget,
+    "reggie": reggie,
     "zippy": zippy,
     "pierre": pierre,
     "biscuit": biscuit,
     "archie": archie,
     "snowball": snowball,
     "penny": penny,
-    "koda": koda,
+    "kilo": kilo,
 }
 
 WALKERS = {
@@ -609,7 +609,7 @@ WALKERS = {
 # How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, topping
 # out 2 or 3px under the well's top edge, and Ada smaller as the youngest.
 WALKER_SIDE = {"ada": 64, "ben": 72, "casey": 66, "trista": 69}
-PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "koda": 64, "nugget": 53, "penny": 64, "pierre": 56,
+PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "kilo": 64, "penny": 64, "pierre": 56, "reggie": 53,
                  "snowball": 63, "zippy": 53}
 
 

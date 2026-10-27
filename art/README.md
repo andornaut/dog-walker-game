@@ -30,7 +30,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 - The kebab-case manifest key is the file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`, `public/art/images/<key>.png` or `public/art/fonts/<key>.png` and `.fnt`.
 - A key starts with its kind's prefix, as in `inventory.md` (`dog-`, `fx-`, `ui-`); road objects, moving hazards and `logo` use a plain name.
-- A depth variant appends its step (`dog-koda@50`).
+- A depth variant appends its step (`dog-kilo@50`).
 - Zone keys use the zone's art id, the neighborhood's name in kebab case: `cabbagetown`, `high-park`, `distillery-district`, `kensington-market`, `the-beaches`, `yonge-street` (easiest to hardest).
 
 ### Consistency checks

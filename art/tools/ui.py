@@ -662,8 +662,8 @@ def payout_label():
 # owner's photo; Archie's is rust, for his red merle coat; Pepe's is his show bow's mauve, which holds his
 # black coat's ink line at 3.83:1.
 DOG_COLOURS = {
-    "duchess": "pink", "nugget": "red", "zippy": "dred", "pierre": "mauve", "biscuit": "green", "archie": "rust",
-    "snowball": "blue", "penny": "amber", "koda": "orange", "empty": "dslate",
+    "duchess": "pink", "reggie": "red", "zippy": "dred", "pierre": "mauve", "biscuit": "green", "archie": "rust",
+    "snowball": "blue", "penny": "amber", "kilo": "orange", "empty": "dslate",
 }
 
 

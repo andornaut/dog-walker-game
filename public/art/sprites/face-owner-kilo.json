@@ -1,5 +1,5 @@
 { "frames": {
-   "face-owner-koda 0.aseprite": {
+   "face-owner-kilo 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "face-owner-koda 1.aseprite": {
+   "face-owner-kilo 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "face-owner-koda 2.aseprite": {
+   "face-owner-kilo 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "face-owner-koda 3.aseprite": {
+   "face-owner-kilo 3.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "face-owner-koda 4.aseprite": {
+   "face-owner-kilo 4.aseprite": {
     "frame": { "x": 128, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -43,7 +43,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "face-owner-koda.png",
+  "image": "face-owner-kilo.png",
   "format": "RGBA8888",
   "size": { "w": 160, "h": 32 },
   "scale": "1",

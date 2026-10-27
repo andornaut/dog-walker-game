@@ -1,5 +1,5 @@
 { "frames": {
-   "dog-nugget@75 0.aseprite": {
+   "dog-reggie@75 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 150
    },
-   "dog-nugget@75 1.aseprite": {
+   "dog-reggie@75 1.aseprite": {
     "frame": { "x": 29, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 150
    },
-   "dog-nugget@75 2.aseprite": {
+   "dog-reggie@75 2.aseprite": {
     "frame": { "x": 58, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 150
    },
-   "dog-nugget@75 3.aseprite": {
+   "dog-reggie@75 3.aseprite": {
     "frame": { "x": 87, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 150
    },
-   "dog-nugget@75 4.aseprite": {
+   "dog-reggie@75 4.aseprite": {
     "frame": { "x": 116, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 5.aseprite": {
+   "dog-reggie@75 5.aseprite": {
     "frame": { "x": 145, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -47,7 +47,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 6.aseprite": {
+   "dog-reggie@75 6.aseprite": {
     "frame": { "x": 174, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -55,7 +55,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 7.aseprite": {
+   "dog-reggie@75 7.aseprite": {
     "frame": { "x": 203, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -63,7 +63,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 8.aseprite": {
+   "dog-reggie@75 8.aseprite": {
     "frame": { "x": 232, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -71,7 +71,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 80
    },
-   "dog-nugget@75 9.aseprite": {
+   "dog-reggie@75 9.aseprite": {
     "frame": { "x": 261, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -79,7 +79,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 80
    },
-   "dog-nugget@75 10.aseprite": {
+   "dog-reggie@75 10.aseprite": {
     "frame": { "x": 290, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -87,7 +87,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 80
    },
-   "dog-nugget@75 11.aseprite": {
+   "dog-reggie@75 11.aseprite": {
     "frame": { "x": 319, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -95,7 +95,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 80
    },
-   "dog-nugget@75 12.aseprite": {
+   "dog-reggie@75 12.aseprite": {
     "frame": { "x": 348, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -103,7 +103,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 125
    },
-   "dog-nugget@75 13.aseprite": {
+   "dog-reggie@75 13.aseprite": {
     "frame": { "x": 377, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -111,7 +111,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 125
    },
-   "dog-nugget@75 14.aseprite": {
+   "dog-reggie@75 14.aseprite": {
     "frame": { "x": 406, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -119,7 +119,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 125
    },
-   "dog-nugget@75 15.aseprite": {
+   "dog-reggie@75 15.aseprite": {
     "frame": { "x": 435, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -127,7 +127,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 125
    },
-   "dog-nugget@75 16.aseprite": {
+   "dog-reggie@75 16.aseprite": {
     "frame": { "x": 464, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -135,7 +135,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 300
    },
-   "dog-nugget@75 17.aseprite": {
+   "dog-reggie@75 17.aseprite": {
     "frame": { "x": 493, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -143,7 +143,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 300
    },
-   "dog-nugget@75 18.aseprite": {
+   "dog-reggie@75 18.aseprite": {
     "frame": { "x": 522, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -151,7 +151,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 300
    },
-   "dog-nugget@75 19.aseprite": {
+   "dog-reggie@75 19.aseprite": {
     "frame": { "x": 551, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -159,7 +159,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 300
    },
-   "dog-nugget@75 20.aseprite": {
+   "dog-reggie@75 20.aseprite": {
     "frame": { "x": 580, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -167,7 +167,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 21.aseprite": {
+   "dog-reggie@75 21.aseprite": {
     "frame": { "x": 609, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -175,7 +175,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 22.aseprite": {
+   "dog-reggie@75 22.aseprite": {
     "frame": { "x": 638, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -183,7 +183,7 @@
     "sourceSize": { "w": 29, "h": 29 },
     "duration": 60
    },
-   "dog-nugget@75 23.aseprite": {
+   "dog-reggie@75 23.aseprite": {
     "frame": { "x": 667, "y": 0, "w": 29, "h": 29 },
     "rotated": false,
     "trimmed": false,
@@ -195,7 +195,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "dog-nugget@75.png",
+  "image": "dog-reggie@75.png",
   "format": "RGBA8888",
   "size": { "w": 696, "h": 29 },
   "scale": "1",

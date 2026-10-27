@@ -1,5 +1,5 @@
 { "frames": {
-   "dog-koda@88 0.aseprite": {
+   "dog-kilo@88 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 150
    },
-   "dog-koda@88 1.aseprite": {
+   "dog-kilo@88 1.aseprite": {
     "frame": { "x": 47, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 150
    },
-   "dog-koda@88 2.aseprite": {
+   "dog-kilo@88 2.aseprite": {
     "frame": { "x": 94, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 150
    },
-   "dog-koda@88 3.aseprite": {
+   "dog-kilo@88 3.aseprite": {
     "frame": { "x": 141, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 150
    },
-   "dog-koda@88 4.aseprite": {
+   "dog-kilo@88 4.aseprite": {
     "frame": { "x": 188, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 5.aseprite": {
+   "dog-kilo@88 5.aseprite": {
     "frame": { "x": 235, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -47,7 +47,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 6.aseprite": {
+   "dog-kilo@88 6.aseprite": {
     "frame": { "x": 282, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -55,7 +55,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 7.aseprite": {
+   "dog-kilo@88 7.aseprite": {
     "frame": { "x": 329, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -63,7 +63,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 8.aseprite": {
+   "dog-kilo@88 8.aseprite": {
     "frame": { "x": 376, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -71,7 +71,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 80
    },
-   "dog-koda@88 9.aseprite": {
+   "dog-kilo@88 9.aseprite": {
     "frame": { "x": 423, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -79,7 +79,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 80
    },
-   "dog-koda@88 10.aseprite": {
+   "dog-kilo@88 10.aseprite": {
     "frame": { "x": 470, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -87,7 +87,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 80
    },
-   "dog-koda@88 11.aseprite": {
+   "dog-kilo@88 11.aseprite": {
     "frame": { "x": 517, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -95,7 +95,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 80
    },
-   "dog-koda@88 12.aseprite": {
+   "dog-kilo@88 12.aseprite": {
     "frame": { "x": 564, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -103,7 +103,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 125
    },
-   "dog-koda@88 13.aseprite": {
+   "dog-kilo@88 13.aseprite": {
     "frame": { "x": 611, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -111,7 +111,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 125
    },
-   "dog-koda@88 14.aseprite": {
+   "dog-kilo@88 14.aseprite": {
     "frame": { "x": 658, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -119,7 +119,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 125
    },
-   "dog-koda@88 15.aseprite": {
+   "dog-kilo@88 15.aseprite": {
     "frame": { "x": 705, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -127,7 +127,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 125
    },
-   "dog-koda@88 16.aseprite": {
+   "dog-kilo@88 16.aseprite": {
     "frame": { "x": 752, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -135,7 +135,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 300
    },
-   "dog-koda@88 17.aseprite": {
+   "dog-kilo@88 17.aseprite": {
     "frame": { "x": 799, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -143,7 +143,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 300
    },
-   "dog-koda@88 18.aseprite": {
+   "dog-kilo@88 18.aseprite": {
     "frame": { "x": 846, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -151,7 +151,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 300
    },
-   "dog-koda@88 19.aseprite": {
+   "dog-kilo@88 19.aseprite": {
     "frame": { "x": 893, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -159,7 +159,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 300
    },
-   "dog-koda@88 20.aseprite": {
+   "dog-kilo@88 20.aseprite": {
     "frame": { "x": 940, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -167,7 +167,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 21.aseprite": {
+   "dog-kilo@88 21.aseprite": {
     "frame": { "x": 987, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -175,7 +175,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 22.aseprite": {
+   "dog-kilo@88 22.aseprite": {
     "frame": { "x": 1034, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -183,7 +183,7 @@
     "sourceSize": { "w": 47, "h": 47 },
     "duration": 60
    },
-   "dog-koda@88 23.aseprite": {
+   "dog-kilo@88 23.aseprite": {
     "frame": { "x": 1081, "y": 0, "w": 47, "h": 47 },
     "rotated": false,
     "trimmed": false,
@@ -195,7 +195,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "dog-koda@88.png",
+  "image": "dog-kilo@88.png",
   "format": "RGBA8888",
   "size": { "w": 1128, "h": 47 },
   "scale": "1",
