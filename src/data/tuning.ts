@@ -102,7 +102,7 @@ export const TUNING = {
       reggie: 800,
       runningShoes: 1200,
       snowball: 1000,
-      whistle: 1500,
+      whistle: 2500,
     },
     // The Big screen promo's Buy the merch.
     promoMerch: 20,
