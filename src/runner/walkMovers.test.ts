@@ -180,7 +180,7 @@ describe("movers", { timeout: 120_000 }, () => {
     expect(share("verge")).toBeCloseTo(movement.stopShare * vergeShare, 2);
   });
 
-  // Every obstacle that can move moving.
+  // The data with every obstacle that can move moving.
   const everyMover: Real = { ...REAL, world: sharedWorld(WORLD, 1) };
   // Every stepper and hopper hopping alike, each hop up to 2 spots any way, or sideways only.
   const HOPS: readonly HopMovement[] = [
