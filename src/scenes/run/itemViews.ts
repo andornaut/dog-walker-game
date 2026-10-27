@@ -181,6 +181,15 @@ export class ItemViews {
     }
   }
 
+  // Each dart kept on the verge as it stands now.
+  vergeItems(walk: Walk): WalkItem[] {
+    const { roadBottom, roadTop } = screenRoadGeometry(walk.run);
+    const road = { laneCount: LANE_COUNT, roadBottom, roadTop };
+    return [...this.verge.values()]
+      .map(({ kept }) => vergeNow(road, walk.run, kept))
+      .filter((item) => item !== null);
+  }
+
   // Takes the obstacles a step's hits took out of play off the live views and keeps them as
   // scenery.
   strike(step: WalkStep): void {

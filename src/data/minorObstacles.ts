@@ -3,7 +3,7 @@ import type { MinorObstacle } from "./types";
 // Obstacles that open no card. Shapes are lanes across by rows along the road; each zone
 // weighs how often they appear there, in world.ts, and one with zones appears only in those.
 // Each obstacle has one look everywhere. An obstacle with a movement comes as a mover at the zone's mover share,
-// and stands still otherwise.
+// and stands still otherwise. onFoot marks a person or an animal, not a vehicle or a thing.
 export const MINOR_OBSTACLES = {
   ball: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
@@ -22,9 +22,15 @@ export const MINOR_OBSTACLES = {
   bunny: {
     movement: { kind: "hop", most: 2, shy: true, times: { max: 5, min: 2 } },
     name: "Bunny",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
-  busker: { name: "Busker", shape: { lanes: 1, rows: 1 }, zones: ["shops", "homeStretch"] },
+  busker: {
+    name: "Busker",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["shops", "homeStretch"],
+  },
   car: {
     movement: { factor: 2.3, kind: "inLane" },
     name: "Car",
@@ -39,6 +45,7 @@ export const MINOR_OBSTACLES = {
   cat: {
     movement: { kind: "dart", stopShare: 0.5, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Cat",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   clothingRack: { name: "Clothing rack", shape: { lanes: 1, rows: 1 }, zones: ["shops"] },
@@ -46,12 +53,14 @@ export const MINOR_OBSTACLES = {
   couple: {
     movement: { kind: "step", steps: { max: 2, min: 1 } },
     name: "Couple",
+    onFoot: true,
     shape: { lanes: 2, rows: 1 },
     zones: ["street"],
   },
   coyote: {
     movement: { kind: "approach", steps: { max: 4, min: 3 } },
     name: "Coyote",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   cyclist: {
@@ -73,11 +82,13 @@ export const MINOR_OBSTACLES = {
   ducklings: {
     movement: { kind: "hop", most: 2, shy: true, sideways: true, times: { max: 3, min: 2 } },
     name: "Ducklings",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   frisbeeDog: {
     movement: { kind: "dart", stopShare: 0.2, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0 },
     name: "Frisbee dog",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   garbageTruck: {
@@ -88,6 +99,7 @@ export const MINOR_OBSTACLES = {
   goose: {
     movement: { factor: 2.07, kind: "inLane" },
     name: "Goose",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
@@ -100,6 +112,7 @@ export const MINOR_OBSTACLES = {
   jogger: {
     movement: { factor: 1.7, kind: "inLane" },
     name: "Jogger",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   kidOnBike: {
@@ -116,6 +129,7 @@ export const MINOR_OBSTACLES = {
   mailCarrier: {
     movement: { kind: "step", steps: { max: 4, min: 3 } },
     name: "Mail carrier",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
@@ -130,6 +144,7 @@ export const MINOR_OBSTACLES = {
   pigeons: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: -0.3, min: -0.3 }, turnBackShare: 0 },
     name: "Pigeons",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   porchSteps: { name: "Porch steps", shape: { lanes: 1, rows: 1 }, zones: ["snoozeCrescent"] },
@@ -137,6 +152,7 @@ export const MINOR_OBSTACLES = {
   raccoon: {
     movement: { kind: "hop", most: 2, times: { max: 5, min: 2 } },
     name: "Raccoon",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   rollerblader: {
@@ -161,6 +177,7 @@ export const MINOR_OBSTACLES = {
   seagull: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Seagull",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   streetcar: {
@@ -171,11 +188,13 @@ export const MINOR_OBSTACLES = {
   stroller: {
     movement: { factor: 0.6, kind: "inLane" },
     name: "Stroller",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
   tourist: {
     movement: { kind: "step", steps: { max: 4, min: 2 } },
     name: "Tourist",
+    onFoot: true,
     shape: { lanes: 1, rows: 1 },
     zones: ["street", "homeStretch"],
   },

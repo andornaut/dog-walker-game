@@ -63,6 +63,7 @@ import {
   type Settings,
   walkerSpriteKey,
 } from "./profileStore";
+import { DistractionView } from "./run/distractionView";
 import { HitBoxView } from "./run/hitBoxView";
 import { blendWalk, leadWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
@@ -109,6 +110,7 @@ interface RunWorld {
   ambient: AmbientView;
   backdrop: BackdropView;
   banner: ZoneBanner;
+  distractions: DistractionView;
   hitBoxes: HitBoxView;
   input: RunInput;
   items: ItemViews;
@@ -217,7 +219,7 @@ export class RunScene extends Scene implements HudRun {
   }
 
   // The views are made in draw order: the backdrop and its ambient movers, the road and its
-  // roadside props, then the pack.
+  // roadside props, the distraction movers, then the pack.
   private createWorld(
     run: Pick<RunWorld, "random" | "recorder" | "setup" | "streams">,
     picked: Pick<RunSceneData, "loadout">,
@@ -227,6 +229,7 @@ export class RunScene extends Scene implements HudRun {
     const ambient = new AmbientView(this, random.ambient);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const roadside = new RoadsideView(this);
+    const distractions = new DistractionView(this, random.distractions);
     const pack = new PackView(
       this,
       picked.loadout.dogs,
@@ -239,6 +242,7 @@ export class RunScene extends Scene implements HudRun {
       ambient,
       backdrop,
       banner: new ZoneBanner(this),
+      distractions,
       hitBoxes: new HitBoxView(this),
       input: new RunInput(this, {
         explainShown: () => this.explainShown(),
@@ -626,7 +630,7 @@ export class RunScene extends Scene implements HudRun {
   }
 
   // While a card or the pause menu holds the walk, or a firing holds it in its stop, the road's
-  // sprites, the pack and the ambient movers stand still.
+  // sprites, the pack, the ambient movers and the distraction movers stand still.
   private draw(): void {
     const session = this.session;
     const world = this.world;
@@ -663,6 +667,7 @@ export class RunScene extends Scene implements HudRun {
     );
     const shadow = world.shadows.frame(colourFromHex(zone.roadShadowColour));
     world.items.draw(walk, held, still, shadow);
+    world.distractions.draw(walk, world.items.vergeItems(walk), { halted: held, still });
     world.pack.draw(walk, {
       halted: held,
       itemPoint: (id) => world.items.point(id),

@@ -10,12 +10,14 @@ import type { RunStart } from "./runRecorder";
 // session's own (runStreams).
 export interface RunRandom {
   ambient: Random;
+  distractions: Random;
   quips: Random;
 }
 
 export function runRandom(seed: number): RunRandom {
   return {
     ambient: randomStream(seed, "ambient"),
+    distractions: randomStream(seed, "distractions"),
     quips: randomStream(seed, "quips"),
   };
 }

@@ -12,6 +12,9 @@ export const TUNING = {
     // it enters from.
     dartStopLanesMax: 4,
     dartStopLanesMin: 2,
+    // About this many distraction movers step on and off each zone's edge lanes as scenery,
+    // spread through it.
+    distractionsPerZone: 10,
     // The gear drops a neighbourhood places on average, by its position in the walk from 1: the
     // whole part always, and one more at the fractional part's chance.
     gearDropsPerZone: { 1: 0.5, 2: 0.8, 3: 1.2, 4: 1.5 },
@@ -137,6 +140,9 @@ export const TUNING = {
     // between these, then crosses the whole road back.
     dartTurnAtShareMax: 1,
     dartTurnAtShareMin: 0.5,
+    // A distraction mover is off the road and gone before its row is down to this share of the
+    // road ahead of the pack.
+    distractionEndRoadShare: 0.5,
     // Fanny pack scales each card option's cash cost by this; the cost rounds to the dollar.
     fannyPackCardCostFactor: 0.5,
     goodLeashSquirrelPull: 0,

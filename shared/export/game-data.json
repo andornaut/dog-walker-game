@@ -1552,6 +1552,7 @@
         }
       },
       "name": "Bunny",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1561,6 +1562,7 @@
     {
       "id": "busker",
       "name": "Busker",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1612,6 +1614,7 @@
         "turnBackShare": 0.33
       },
       "name": "Cat",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1649,6 +1652,7 @@
         }
       },
       "name": "Couple",
+      "onFoot": true,
       "shape": {
         "lanes": 2,
         "rows": 1
@@ -1668,6 +1672,7 @@
         }
       },
       "name": "Coyote",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1730,6 +1735,7 @@
         }
       },
       "name": "Ducklings",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1748,6 +1754,7 @@
         "turnBackShare": 0
       },
       "name": "Frisbee dog",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1774,6 +1781,7 @@
         "kind": "inLane"
       },
       "name": "Goose",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1818,6 +1826,7 @@
         "kind": "inLane"
       },
       "name": "Jogger",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1871,6 +1880,7 @@
         }
       },
       "name": "Mail carrier",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1938,6 +1948,7 @@
         "turnBackShare": 0
       },
       "name": "Pigeons",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1979,6 +1990,7 @@
         }
       },
       "name": "Raccoon",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -2071,6 +2083,7 @@
         "turnBackShare": 0.33
       },
       "name": "Seagull",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -2097,6 +2110,7 @@
         "kind": "inLane"
       },
       "name": "Stroller",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -2113,6 +2127,7 @@
         }
       },
       "name": "Tourist",
+      "onFoot": true,
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -2166,6 +2181,7 @@
       "dartLanesPerSecond": 3,
       "dartStopLanesMax": 4,
       "dartStopLanesMin": 2,
+      "distractionsPerZone": 10,
       "gearDropsPerZone": {
         "1": 0.5,
         "2": 0.8,
@@ -2257,6 +2273,7 @@
       "dartStartRoadShareMin": 0.15,
       "dartTurnAtShareMax": 1,
       "dartTurnAtShareMin": 0.5,
+      "distractionEndRoadShare": 0.5,
       "fannyPackCardCostFactor": 0.5,
       "goodLeashSquirrelPull": 0,
       "keenEyeTipSpawns": 1.5,

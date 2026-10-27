@@ -429,11 +429,13 @@ export type Encounter = {
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
 // Each zone's weights set how often it appears there; one with zones appears only in those zones,
 // weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
-// moverShare.
+// moverShare. One onFoot is a person or an animal, not a vehicle or a thing, which the
+// distraction movers are drawn from.
 export interface MinorObstacle {
   readonly hitLabel?: string;
   readonly movement?: Movement;
   readonly name: string;
+  readonly onFoot?: true;
   readonly shape: Shape;
   // Zone ids, as an obstacle encounter's zones are.
   readonly zones?: NeighbourhoodZones;
