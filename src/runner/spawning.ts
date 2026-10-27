@@ -16,6 +16,7 @@ import {
   type OnScreen,
   placeMovers,
   type PlannerStreams,
+  stopsOnVerge,
 } from "./movers";
 import { shyOutcomes } from "./shy";
 
@@ -384,7 +385,8 @@ export interface MoverRest {
 // Every spot a mover whose cue is at cue may end a move and stand: a dart that stops short at its
 // stop, and a stepper, hopper or stalker at its last spot, whichever way a stalker or shy hopper
 // chooses its moves. A standing mover's travel past the road's scroll is its steps', so its spot
-// is its cue less their travel. A rider and a dart that crosses never stand.
+// is its cue less their travel. A rider, a dart that crosses and one that stops on the verge,
+// off the road, never stand.
 export function moverRests(laneCount: number, cue: number, path: MoverPath): MoverRest[] {
   const last = (lane: number, steps: readonly MoverStep[]): MoverRest => ({
     distance: cue - steps.reduce((sum, step) => sum + step.travel, 0),
@@ -394,7 +396,7 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
     case "approach":
       return approachOutcomes(path).map(({ lane, steps }) => last(lane, steps));
     case "cross": {
-      if (path.stopAfter === null) {
+      if (path.stopAfter === null || stopsOnVerge(laneCount, path)) {
         return [];
       }
       const since = path.warning + path.stopAfter / path.lanesPerPixel;

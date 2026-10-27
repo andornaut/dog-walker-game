@@ -8,6 +8,7 @@ import { read } from "../rules/units";
 import { plannerStreams } from "../testing/movers";
 import {
   DART_LIFTS,
+  DART_VERGE_LANES,
   dartOutcome,
   dartRetries,
   drawMover,
@@ -39,9 +40,11 @@ import {
   screenHasRoom,
   type StepShape,
   stepSpots,
+  stopsOnVerge,
   sweptLanes,
 } from "./movers";
 import { moverOutcomes } from "./outcomes";
+import { moverRests } from "./spawning";
 
 // 100px/s: a 1s warning is 100px, and a crosser at 2 lanes a second crosses 0.02 lanes a pixel.
 const geometry: MoverGeometry = {
@@ -581,14 +584,15 @@ const STOP_LANES = {
 
 // A crosser that sets off from 0.1 to 0.9 of the road ahead of the pack, leaving the pack half a
 // second after its cue, at a tilt drawn from min to max, turning back at turnBackShare of them
-// from halfway to all the way across, and stopping at stopShare of them after the game's
-// STOP_LANES.
+// from halfway to all the way across, and stopping at stopShare of them: at vergeShare of those
+// on the far verge, and at the rest after the game's STOP_LANES.
 const cross = (
   lanesPerSecond: number,
   min: number,
   max = min,
   turnBackShare = 0,
   stopShare = 0,
+  vergeShare = 0,
 ): CrossMotion => ({
   kind: "cross",
   lanesPerSecond,
@@ -599,6 +603,7 @@ const cross = (
   tilt: [min, max],
   turnAtShare: [0.5, 1],
   turnBackShare,
+  vergeShare,
 });
 
 // Each motion, footprint and tilt the planner meets, as a spec.
@@ -1228,16 +1233,24 @@ describe("moverPlacements", () => {
 
   // The outcome draw takes any shares adding up to at most 1, and a stop lane past the road's far
   // edge makes the dart cross.
+  // Of the stops, the low 1 - vergeShare of the stretch stop in a lane and the rest on the verge.
   it.each([
-    { draw: 0.49, outcome: "turn", stopShare: 0.5, turnBackShare: 0.5 },
-    { draw: 0.5, outcome: "stop", stopShare: 0.5, turnBackShare: 0.5 },
-    { draw: 0.999999, outcome: "stop", stopShare: 0.5, turnBackShare: 0.5 },
-    { draw: 0, outcome: "stop", stopShare: 1, turnBackShare: 0 },
-    { draw: 0.999999, outcome: "cross", stopShare: 0, turnBackShare: 0 },
+    { draw: 0.49, outcome: "turn", stopShare: 0.5, turnBackShare: 0.5, vergeShare: 0 },
+    { draw: 0.5, outcome: "stop", stopShare: 0.5, turnBackShare: 0.5, vergeShare: 0 },
+    { draw: 0.999999, outcome: "stop", stopShare: 0.5, turnBackShare: 0.5, vergeShare: 0 },
+    { draw: 0, outcome: "stop", stopShare: 1, turnBackShare: 0, vergeShare: 0 },
+    { draw: 0.999999, outcome: "cross", stopShare: 0, turnBackShare: 0, vergeShare: 0 },
+    { draw: 0.24, outcome: "turn", stopShare: 0.5, turnBackShare: 0.25, vergeShare: 0.5 },
+    { draw: 0.25, outcome: "stop", stopShare: 0.5, turnBackShare: 0.25, vergeShare: 0.5 },
+    { draw: 0.49, outcome: "stop", stopShare: 0.5, turnBackShare: 0.25, vergeShare: 0.5 },
+    { draw: 0.5, outcome: "verge", stopShare: 0.5, turnBackShare: 0.25, vergeShare: 0.5 },
+    { draw: 0.74, outcome: "verge", stopShare: 0.5, turnBackShare: 0.25, vergeShare: 0.5 },
+    { draw: 0.75, outcome: "cross", stopShare: 0.5, turnBackShare: 0.25, vergeShare: 0.5 },
+    { draw: 0, outcome: "verge", stopShare: 1, turnBackShare: 0, vergeShare: 1 },
   ])(
-    "draws $outcome at $draw with shares $turnBackShare to turn back and $stopShare to stop",
-    ({ draw, outcome, stopShare, turnBackShare }) => {
-      expect(dartOutcome({ stopShare, turnBackShare }, draw)).toBe(outcome);
+    "draws $outcome at $draw: $turnBackShare turn back, $stopShare stop, $vergeShare of those on the verge",
+    ({ draw, outcome, stopShare, turnBackShare, vergeShare }) => {
+      expect(dartOutcome({ stopShare, turnBackShare, vergeShare }, draw)).toBe(outcome);
     },
   );
 
@@ -1249,6 +1262,45 @@ describe("moverPlacements", () => {
       expect(path.motion === "cross" ? path.stopAfter : NaN).toBeNull();
     }
   });
+
+  // A dart that stops on the verge stands DART_VERGE_LANES past the far edge, off the road, and
+  // is planned as one that crosses: the same rows held, lanes blocked, stands and time on screen,
+  // so the cells it passed are free once it has crossed, and no spot of its rests on the road. One
+  // that stops in a lane stays on screen, and blocks the road, until it scrolls off the bottom.
+  it.each([-0.3, 0, 0.4, 0.8].flatMap((tilt) => [0, 0.5, 1].map((start) => ({ start, tilt }))))(
+    "plans a dart that stops on the verge as one that crosses, at tilt $tilt from start $start",
+    ({ start, tilt }) => {
+      const draws = { ...drawMover({ movers: () => 0.5, spawns: () => 0.5 }), start };
+      const planned = (motion: CrossMotion) =>
+        moverPlacements(geometry, spec(motion), draws).map((placement) => ({
+          ...placement,
+          path: { ...placement.path, stopAfter: null },
+        }));
+      const crossing = planned(cross(3, tilt));
+      const verging = moverPlacements(geometry, spec(cross(3, tilt, tilt, 0, 1, 1)), draws);
+      const laneStop = planned(cross(3, tilt, tilt, 0, 1, 0));
+      expect(crossing.length).toBeGreaterThan(0);
+      expect(
+        verging.map((placement) => ({
+          ...placement,
+          path: { ...placement.path, stopAfter: null },
+        })),
+      ).toEqual(crossing);
+      expect(laneStop.map(({ screen }) => screen[1])).not.toEqual(
+        crossing.map(({ screen }) => screen[1]),
+      );
+      const { laneCount } = geometry;
+      for (const { path } of verging) {
+        expect(stopsOnVerge(laneCount, path)).toBe(true);
+        expect(moverRests(laneCount, 0, path)).toEqual([]);
+        // Long since stopped, past the far edge.
+        const stood = moverPlace(laneCount, path, 1e6);
+        const edge = path.motion === "cross" && path.direction === 1 ? laneCount - 0.5 : -0.5;
+        expect(Math.abs(stood.lanePosition - edge)).toBeCloseTo(DART_VERGE_LANES);
+        expect(hasLeftRoad(laneCount, stood)).toBe(true);
+      }
+    },
+  );
 
   // Tilted away, a dart that stops comes down the road faster once stopped, so it sets off
   // higher than one that crosses to leave the pack its reaction time: 2s at 100px/s is 200px of

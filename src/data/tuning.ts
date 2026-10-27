@@ -173,6 +173,9 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
+    // About this share of the darts that stop do so on the far verge, past the road's edge and
+    // out of play, rather than in a lane, drawn per dart.
+    dartVergeStopShare: 0.25,
     // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.

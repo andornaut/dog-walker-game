@@ -27,6 +27,7 @@ import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
+import { goesToVerge, type VergeItem, vergeNow } from "./vergeScenery";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.
@@ -64,6 +65,11 @@ interface StruckView {
   readonly view: ItemView;
 }
 
+interface VergeView {
+  readonly kept: VergeItem;
+  readonly view: ItemView;
+}
+
 // A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape in
 // the data.
 export function ensureRoadPlaceholders(scene: Scene): void {
@@ -96,6 +102,10 @@ export class ItemViews {
   private readonly scene: Scene;
   // Obstacles out of play, kept as scenery until they scroll off, by item id.
   private readonly struck = new Map<number, StruckView>();
+  // Darts that stop on the verge, kept as scenery once the walk drops them off the road, by item
+  // id; and each such dart still on the road as the walk last had it.
+  private readonly verge = new Map<number, VergeView>();
+  private readonly vergeBound = new Map<number, VergeItem>();
   private readonly views = new Map<number, ItemView>();
 
   constructor(scene: Scene, hint: (event: HintTrigger) => void) {
@@ -112,6 +122,10 @@ export class ItemViews {
     for (const item of walk.road.items) {
       seen.add(item.id);
       const view = this.views.get(item.id) ?? this.addView(item);
+      if (goesToVerge(LANE_COUNT, item)) {
+        const { zoneDistance, zoneIndex } = walk.run;
+        this.vergeBound.set(item.id, { item, zoneDistance, zoneIndex });
+      }
       if (item.mover !== undefined) {
         drawMover({ ...item, mover: item.mover }, view, roadTop, halted, frame);
         // A moving lucky find bobs as it does standing.
@@ -129,11 +143,38 @@ export class ItemViews {
     }
     for (const [id, view] of this.views) {
       if (!seen.has(id)) {
-        view.parts.forEach(({ sprite }) => sprite.destroy());
+        const kept = this.vergeBound.get(id);
+        if (kept === undefined) {
+          view.parts.forEach(({ sprite }) => sprite.destroy());
+        } else {
+          this.verge.set(id, { kept, view });
+        }
         this.views.delete(id);
       }
     }
+    for (const id of this.vergeBound.keys()) {
+      if (!seen.has(id)) {
+        this.vergeBound.delete(id);
+      }
+    }
     this.drawStruck(walk, roadTop, frame);
+    this.drawVerge(walk, halted, frame);
+  }
+
+  // Each dart kept on the verge where its path and the road's scroll put it, drawn as a live
+  // road sprite is, beside the road; dropped once off the road's bottom.
+  private drawVerge(walk: Walk, halted: boolean, frame: StandFrame): void {
+    const { roadBottom, roadTop } = screenRoadGeometry(walk.run);
+    const road = { laneCount: LANE_COUNT, roadBottom, roadTop };
+    for (const [id, { kept, view }] of this.verge) {
+      const item = vergeNow(road, walk.run, kept);
+      if (item?.mover === undefined) {
+        view.parts.forEach(({ sprite }) => sprite.destroy());
+        this.verge.delete(id);
+        continue;
+      }
+      drawMover({ ...item, mover: item.mover }, view, roadTop, halted, frame);
+    }
   }
 
   // Takes the obstacles a step's hits took out of play off the live views and keeps them as
@@ -141,6 +182,7 @@ export class ItemViews {
   strike(step: WalkStep): void {
     for (const struck of struckBy(step)) {
       const view = this.views.get(struck.item.id);
+      this.vergeBound.delete(struck.item.id);
       if (view !== undefined) {
         this.views.delete(struck.item.id);
         this.struck.set(struck.item.id, { offset: { dx: 0, dy: 0 }, struck, view });

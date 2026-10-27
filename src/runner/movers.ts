@@ -430,11 +430,11 @@ interface MoverPlacement {
 
 // The lanes on the road a box overlaps anywhere from lane position low to high: as collision cuts
 // a mover's box to its lanes, it spans half a lane either side of its position, less inset lanes
-// at each side.
+// at each side. A box wholly off the road overlaps none: no lanes from lane 0.
 function laneSpan(laneCount: number, low: number, high: number, inset: number): LaneSpan {
   const first = Math.max(0, Math.floor(low - 1 + inset + 1e-9) + 1);
   const last = Math.min(laneCount - 1, Math.ceil(high + 1 - inset - 1e-9) - 1);
-  return { count: Math.max(0, last - first + 1), first };
+  return last < first ? { count: 0, first: 0 } : { count: last - first + 1, first };
 }
 
 // The lanes a crosser touches while its travel is from to to: its travel only moves one way and its
@@ -567,8 +567,9 @@ interface ShyHops {
 // meet it at its drawn tilt, raised past startRoadShare where a steep tilt needs. At turnBackShare
 // of them, drawn per mover, it turns back once it has crossed a share of the road drawn per mover
 // from turnAtShare, and crosses the whole road back. At stopShare of them, drawn with the same
-// draw (dartOutcome), it stops in the lane stopLanes lanes from the edge it enters from, drawn
-// per mover, and stands there.
+// draw (dartOutcome), it stops: at vergeShare of those on the far verge, DART_VERGE_LANES past the
+// road's far edge, out of play, and at the rest in the lane stopLanes lanes from the edge it
+// enters from, drawn per mover, standing there.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
@@ -595,6 +596,7 @@ export type MoverMotion =
       readonly tilt: readonly [number, number];
       readonly turnAtShare: readonly [number, number];
       readonly turnBackShare: number;
+      readonly vergeShare: number;
     }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
@@ -701,18 +703,36 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   };
 }
 
-// How a dart ends, by its outcome draw from 0 up to 1: below turnBackShare it turns back, below
-// turnBackShare + stopShare it stops, and otherwise it crosses. The shares add up to at most 1.
-export type DartOutcome = "cross" | "stop" | "turn";
+// How a dart ends, by its outcome draw from 0 up to 1: below turnBackShare it turns back; below
+// turnBackShare + stopShare it stops, in a lane at the low 1 - vergeShare of that stretch and on
+// the far verge at the rest; and otherwise it crosses. The turn-back and stop shares add up to at
+// most 1. One draw decides all of it, so the verge share takes no draw of its own.
+export type DartOutcome = "cross" | "stop" | "turn" | "verge";
 
 export function dartOutcome(
-  motion: Pick<Extract<MoverMotion, { kind: "cross" }>, "stopShare" | "turnBackShare">,
+  motion: Pick<
+    Extract<MoverMotion, { kind: "cross" }>,
+    "stopShare" | "turnBackShare" | "vergeShare"
+  >,
   draw: number,
 ): DartOutcome {
-  if (draw < motion.turnBackShare) {
+  const { stopShare, turnBackShare, vergeShare } = motion;
+  if (draw < turnBackShare) {
     return "turn";
   }
-  return draw < motion.turnBackShare + motion.stopShare ? "stop" : "cross";
+  if (draw < turnBackShare + stopShare * (1 - vergeShare)) {
+    return "stop";
+  }
+  return draw < turnBackShare + stopShare ? "verge" : "cross";
+}
+
+// How far past the road's far edge, in lanes, a dart that stops on the verge stands: clear of
+// the curb props on the widest sidewalk, where the ambient verge movers stop.
+export const DART_VERGE_LANES = 1.25;
+
+// Whether a dart stops on the verge, past the road's far edge: one with a stop beyond the road.
+export function stopsOnVerge(laneCount: number, path: MoverPath): boolean {
+  return path.motion === "cross" && path.stopAfter !== null && path.stopAfter > laneCount;
 }
 
 // The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
@@ -788,8 +808,10 @@ function crossTilts(
 // the pack in every lane it sweeps to its stop and in its stop lane, and its start is raised as far
 // as needed for the pack to have reactionSeconds to its reaching the pack's rows, which a tilt
 // below 0 brings sooner once it stops; past the road's far edge, its stop lane is no stop, and it
-// crosses. Its contact lasts as long as its travel takes to cross the window, window / (1 + tilt)
-// while it crosses, which its rows cover. It blocks every lane a box a lane wide would touch, but
+// crosses. One that stops on the verge is planned as one that crosses: off the road it is out of
+// play, so it holds its rows only while it crosses and stands nowhere past the road. Its contact
+// lasts as long as its travel takes to cross the window, window / (1 + tilt) while it crosses,
+// which its rows cover. It blocks every lane a box a lane wide would touch, but
 // stands only in the lanes its drawn hit box touches over its drawn contact with the pack's hit
 // boxes, until its hit box leaves the road if that comes before its contact's end: a stand wider
 // or longer than its hit box would hide the road beside or behind it that the pack can step into.
@@ -819,7 +841,16 @@ function crossPlacements(
     outcome === "turn" ? within(motion.turnAtShare, draws.turnAt) * laneCount : null;
   // It stops in the middle of the stopLanes-th lane from its edge, half a lane short of that many.
   const stopLanes = drawnCount(motion.stopLanes, draws.turnAt);
-  const stopAfter = outcome === "stop" && stopLanes <= laneCount ? stopLanes - 0.5 : null;
+  // One that stops on the verge stops DART_VERGE_LANES past the far edge.
+  const stopAfter =
+    outcome === "verge"
+      ? laneCount + DART_VERGE_LANES
+      : outcome === "stop" && stopLanes <= laneCount
+        ? stopLanes - 0.5
+        : null;
+  // Whether it is planned as one that crosses: it never stands on the road. One that stops on the
+  // verge is out of play once off the road, so it is.
+  const crosses = stopAfter === null || stopAfter > laneCount;
   // Its path but for the side it enters from, which none of the distances below depend on.
   const along = {
     direction: 1,
@@ -835,13 +866,9 @@ function crossPlacements(
   } as const;
   // The travel it comes down the road in reactionSeconds of setting off.
   const reaction = motion.reactionSeconds * scrollSpeed;
-  const reacting =
-    stopAfter === null
-      ? reaction * (1 + tilt)
-      : Math.max(
-          reaction * (1 + tilt),
-          reaction + tilt * Math.min(reaction, crossingScroll(along)),
-        );
+  const reacting = crosses
+    ? reaction * (1 + tilt)
+    : Math.max(reaction * (1 + tilt), reaction + tilt * Math.min(reaction, crossingScroll(along)));
   const lowest = Math.max(motion.startRoadShare[0], reacting / sightLength);
   const highest = Math.min(cueOnRoad, Math.max(motion.startRoadShare[1], lowest));
   if (highest < lowest) {
@@ -854,12 +881,11 @@ function crossPlacements(
   // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight:
   // half a lane past the far edge, or past the edge it entered from once it has turned back. One
   // that stops leaves only off the road's bottom.
-  const reaches = stopAfter === null ? ahead / (1 + tilt) : scrollTo(sightLength);
+  const reaches = crosses ? ahead / (1 + tilt) : scrollTo(sightLength);
   const offRoad = scrollTo(roadLength + cellLength);
-  const moving =
-    stopAfter === null
-      ? Math.min(((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel, offRoad)
-      : offRoad;
+  const moving = crosses
+    ? Math.min(((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel, offRoad)
+    : offRoad;
   // It shows as its row comes on screen, or at the road's top where it starts farther up the road
   // than its row: waiting idle at its edge until its cue, warning before it sets off.
   const shown = Math.max(warning, Math.min(enterTravel, sightLength - reaches));
@@ -868,26 +894,24 @@ function crossPlacements(
   // leaving the road, which one that stops never does.
   const inset = geometry.laneInset / cellLength;
   const touching = ((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5 - inset) / lanesPerPixel;
-  const contact =
-    stopAfter === null
-      ? Math.max(0, Math.min(window / (1 + tilt), touching - reaches))
-      : scrollTo(sightLength + window) - reaches;
+  const contact = crosses
+    ? Math.max(0, Math.min(window / (1 + tilt), touching - reaches))
+    : scrollTo(sightLength + window) - reaches;
   // The row offset it is level with, moving away from its own as it drifts against the road while
   // it crosses, and keeping level with one row once it stops.
   const drift = (scroll: number) => tilt * Math.min(scroll, crossingScroll(along));
   const level = (scroll: number) =>
-    stopAfter === null
+    crosses
       ? (-tilt * (scroll - reaches)) / rowSpacing
       : -(drift(scroll) - drift(reaches)) / rowSpacing;
   const firstRow = Math.floor(Math.min(level(0), level(moving)) + 1e-9);
   const lastRow = Math.ceil(Math.max(level(0), level(moving)) - 1e-9);
-  const rows = rowsCovering(geometry, 1, stopAfter === null ? 1 / (1 + tilt) : contact / window);
+  const rows = rowsCovering(geometry, 1, crosses ? 1 / (1 + tilt) : contact / window);
   // Its contact as drawn, for its stand: its own hit length and the pack's hit boxes.
   const drawnWindow = drawnHitLength(geometry, spec) + geometry.packHitLength;
-  const drawnContact =
-    stopAfter === null
-      ? Math.max(0, Math.min(drawnWindow / (1 + tilt), touching - reaches))
-      : scrollTo(sightLength + drawnWindow) - reaches;
+  const drawnContact = crosses
+    ? Math.max(0, Math.min(drawnWindow / (1 + tilt), touching - reaches))
+    : scrollTo(sightLength + drawnWindow) - reaches;
   return ([1, -1] as const).map((direction): MoverPlacement => {
     const path: MoverPath = {
       ...along,

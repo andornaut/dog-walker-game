@@ -44,6 +44,7 @@ import { heartsByDog } from "../testing/runState";
 import { atPack, data, geometry, inLane, step, walkWith, withHearts } from "../testing/walk";
 import { STEP_SECONDS } from "./fixedStep";
 import {
+  DART_VERGE_LANES,
   dartOutcome,
   drawMover,
   hasLeftRoad,
@@ -222,7 +223,8 @@ describe("movers", { timeout: 120_000 }, () => {
   });
 
   // Each dart kind's outcome draw, over even steps from 0 up to 1, turns back and stops at its
-  // kind's shares, so a kind with no stop share, such as the ball, never stops.
+  // kind's shares, so a kind with no stop share, such as the ball, never stops, and of its stops
+  // the tuning's verge share stops on the verge.
   it.each(
     OBSTACLE_KINDS.flatMap((kind) => {
       const movement = movementOf(kind);
@@ -230,12 +232,14 @@ describe("movers", { timeout: 120_000 }, () => {
     }),
   )("turns back and stops a $kind at its kind's shares", ({ movement }) => {
     const steps = 1000;
+    const vergeShare = read(TUNING, "probability", "dartVergeStopShare");
     const outcomes = Array.from({ length: steps }, (_, i) =>
-      dartOutcome(movement, (i + 0.5) / steps),
+      dartOutcome({ ...movement, vergeShare }, (i + 0.5) / steps),
     );
     const share = (outcome: string) => outcomes.filter((drawn) => drawn === outcome).length / steps;
     expect(share("turn")).toBeCloseTo(movement.turnBackShare, 2);
-    expect(share("stop")).toBeCloseTo(movement.stopShare, 2);
+    expect(share("stop")).toBeCloseTo(movement.stopShare * (1 - vergeShare), 2);
+    expect(share("verge")).toBeCloseTo(movement.stopShare * vergeShare, 2);
   });
 
   // Every zone at the fastest pace in the last zone, at the zones' shares and with every
@@ -939,6 +943,20 @@ describe("movers", { timeout: 120_000 }, () => {
       const { walk } = step(walkWith(dogs, [item]));
       expect(walk.road.hitStop?.cards).toEqual([{ affected: dogs, encounter, kind: "encounter" }]);
     }
+  });
+
+  // A dart that has stopped in the far lane meets the pack standing there; one that has stopped
+  // on the verge past it is off the road, so the walk drops it and the pack in the far lane
+  // takes no hit. Both crossed 90px of scroll after their cues at 2.5 lanes per 32px, so both
+  // have stopped, level with the pack's band.
+  it.each([
+    { bumps: 1, name: "in the far lane", onRoad: true, stopAfter: LANE_COUNT - 0.5 },
+    { bumps: 0, name: "on the verge", onRoad: false, stopAfter: LANE_COUNT + DART_VERGE_LANES },
+  ])("leaves a dart stopped $name with $bumps bumps", ({ bumps, onRoad, stopAfter }) => {
+    const stopped: MoverPath = { ...crossing, enterTravel: 442, stopAfter };
+    const after = step(inLane(LANE_COUNT - 1, walkWith(["kilo"], [moverAt("ball", stopped, 140)])));
+    expect(after.bumps).toHaveLength(bumps);
+    expect(after.walk.road.items.length > 0 || after.bumps.length > 0).toBe(onRoad);
   });
 
   it("bumps the pack like a plain obstacle on contact with a ball or an in-lane cyclist", () => {

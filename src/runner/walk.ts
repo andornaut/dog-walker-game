@@ -548,6 +548,7 @@ export function moverSpec(
         read(tuning, "multipliers", "dartTurnAtShareMax"),
       ],
       turnBackShare: movement.turnBackShare,
+      vergeShare: read(tuning, "probability", "dartVergeStopShare"),
     };
   } else if (movement.kind === "inLane") {
     motion = { kind: "ride", speedMultiplier: movement.factor };

@@ -164,6 +164,7 @@ const DARTING: MoverSpec = {
     tilt: [0, 0],
     turnAtShare: [0.5, 1],
     turnBackShare: 0,
+    vergeShare: 0,
   },
   movement: "dart",
   variation: { delaySeconds: 0, lengthShare: 0, speedShare: 0 },
