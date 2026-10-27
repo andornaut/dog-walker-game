@@ -1657,38 +1657,38 @@ def blade(cv, x, top, text, col):
         word(cv, ch, x + 4.5, top + 1 + 7 * k, col)
 
 
-def chum_city(cv, x, w, top):
-    """The CHUM-City building: a cream Gothic Revival block from row top to the street, a
-    crenellated parapet between corner pinnacles, two floors of pointed windows lit gold and amber
-    over a ground floor of lit arches, and on the roof the MUCHMUSIC sign: cyan letters on an ink
+def eaton_centre(cv, x, w, top):
+    """The Eaton Centre: a dlake glass front from row top to the street under the galleria's barrel vault
+    of lake glass on white ribs, white mullions every 4 columns and 4 rows, some panes lit gold and amber,
+    a lit gold entrance at its middle, and on the roof the EATON CENTRE sign: cyan letters on an ink
     board in a border of marquee bulbs, on coal legs."""
-    cv.fill(x, top, w, BASE - top, "cream")
-    cv.fill(x + w - 3, top, 3, BASE - top, "tan")
-    for c in range(x, x + w, 4):
-        cv.fill(c, top - 2, 2, 2, "cream")
-    for c in (x, x + w - 3):
-        cv.fill(c, top - 6, 3, 6, "cream")
-        cv.fill(c + 1, top - 8, 1, 2, "tan")
-    cv.fill(x + 1, top + 1, w - 2, 1, "tan")
-    rnd = random.Random("chum")
-    for y in (top + 4, top + 14):
-        for c in range(x + 5, x + w - 6, 6):
-            cv.fill(c, y + 1, 3, 6, "brown")
-            cv.fill(c + 1, y, 1, 1, "brown")
-            cv.fill(c, y + 2, 3, 5, rnd.choice(("gold", "gold", "amber", "dlake")))
-        cv.fill(x + 1, y + 8, w - 4, 1, "tan")
-    for c in range(x + 4, x + w - 8, 9):
-        cv.fill(c, BASE - 12, 7, 12, "brown")
-        cv.fill(c + 2, BASE - 13, 3, 1, "brown")
-        cv.fill(c + 1, BASE - 11, 5, 11, "gold")
-        cv.fill(c + 1, BASE - 3, 5, 3, "amber")
-    outline_box(cv, x, top, w, BASE - top + 1, "plum")
-    text = "MUCHMUSIC"
+    vault = 7
+    for dy in range(vault):
+        half = round(w / 2 * math.sqrt(1 - ((vault - dy) / vault) ** 2))
+        cv.fill(round(x + w / 2 - half), top + dy, 2 * half, 1, "lake")
+    for c in range(x + 4, x + w - 2, 8):
+        cv.fill(c, top + 2, 1, vault - 2, "white")
+    cv.fill(x, top + vault, w, BASE - top - vault, "dlake")
+    cv.fill(x + w - 3, top + vault, 3, BASE - top - vault, "navy")
+    rnd = random.Random("eaton")
+    for y in range(top + vault + 1, BASE - 12, 4):
+        for c in range(x + 1, x + w - 4, 4):
+            if rnd.random() < 0.35:
+                cv.fill(c, y, 3, 3, rnd.choice(("gold", "amber", "gold")))
+        cv.fill(x, y + 3, w - 3, 1, "foam")
+    for c in range(x + 4, x + w - 3, 4):
+        cv.fill(c, top + vault, 1, BASE - 12 - top - vault, "foam")
+    door = 16
+    cv.fill(round(x + w / 2 - door / 2), BASE - 11, door, 11, "gold")
+    cv.fill(round(x + w / 2 - door / 2), BASE - 3, door, 3, "amber")
+    cv.fill(round(x + w / 2) - 1, BASE - 11, 2, 11, "brown")
+    outline_box(cv, x, top + vault, w, BASE - top - vault + 1, "navy")
+    text = "EATON CENTRE"
     bw = fonts.sign_width(text) + 6
     bx = round(x + w / 2 - bw / 2)
     by = top - 15
     for c in (bx + 6, bx + bw - 7):
-        cv.fill(c, by + 11, 2, top - by - 11, "coal")
+        cv.fill(c, by + 11, 2, top - by - 11 + 2, "coal")
     cv.fill(bx, by, bw, 12, "ink")
     bulbs(cv, bx, by, bw, 12, ("gold", "white", "hot"))
     word(cv, text, x + w / 2, by + 2, "cyan")
@@ -1828,7 +1828,7 @@ def yonge():
     # the nearer towers: dark glass on the left and up to the SkyDome's lower half; then, down to
     # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, a TD
     # Centre tower and glass under a turquoise crown, most with neon over its street level; in front,
-    # the CHUM-City building under the MUCHMUSIC sign, a HOTEL sign down the left tower, a paw print
+    # the Eaton Centre under its sign, a HOTEL sign down the left tower, a paw print
     # billboard on the TD tower and a theatre marquee over the Royal Bank pair
     glass_tower(cv, -4, 18, 24, 4)
     glass_tower(cv, 44, 30, BASE - 30, 5, "dslate")
@@ -1845,7 +1845,7 @@ def yonge():
                                       (230, 14, None), (246, 22, None), (270, 34, ("BOOKS", "lilac")),
                                       (332, 32, ("BAR", "pink")))):
         street_level(cv, x, w, k, sign)
-    chum_city(cv, 86, 66, BASE - 36)
+    eaton_centre(cv, 82, 72, BASE - 36)
     blade(cv, 3, 58, "HOTEL", "pink")
     billboard(cv, 274, 50, 26, 14)
     marquee(cv, 210, 34, "SHOW", "red")
