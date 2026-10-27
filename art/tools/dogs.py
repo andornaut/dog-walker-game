@@ -464,7 +464,7 @@ def archie_road(q):
     g.cel(bx + 5.5, 19.5 + b, 1.5, 1.5, "white", "lgrey")
     for x, c in ((bx - 2.5, "white"), (bx + 2.5, "lgrey")):
         g.cel(x, 20.5 + b, 2, 1.5, c)
-    # the red bandana tied at the nape in one knot, its two ends hanging below
+    # the red bandana tied at the nape in one knot
     g.rect(bx - 5, 16.7 + b, 10, 1.4, "red")
     g.rect(bx - 1, 16.7 + b, 2, 2, "dred")
     # rose ears set high, each tip folding over and out in the shade

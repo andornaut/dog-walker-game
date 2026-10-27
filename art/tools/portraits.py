@@ -288,9 +288,13 @@ def archie(g):
     g.rect(34, 19, 3, 1, "ochre")
     g.cel(38, 32, 3, 2.5, "ochre", "rust")
     g.cel(25, 33, 9, 6.5, "white", "lgrey")
-    eye(g, 18, 22, 4, "sky")
-    # the near eye amber
-    eye(g, 33, 22, 5, "amber")
+    # odd eyes, the far one blue and the near one amber, each iris ringing a pupil kept to its middle so the
+    # colour still shows when the portrait is drawn smaller
+    for x, w, iris in ((18, 4, "sky"), (33, 5, "amber")):
+        eye(g, x, 22, w, iris)
+        g.rect(x + 1, 23, w - 2, 4, iris)
+        g.rect(x + w - 3, 24, 2 if w > 4 else 1, 2, "ink")
+        g.p(x + 1, 23, "white")
     g.p(36, 26, "orange")
     nose(g, 20, 29)
     # a liver nose
