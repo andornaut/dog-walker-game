@@ -30,7 +30,7 @@ export const HELP_PAGES = [
       "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
       "A puddle makes the pack Muddy. Debuffs wear off after {debuffSeconds}s. " +
       "Hold a card, an icon or a bar for details.",
-    title: "Some bumps bring cards",
+    title: "Some obstacles bring cards",
   },
   {
     art: "owners",
@@ -38,7 +38,7 @@ export const HELP_PAGES = [
       "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {largeHearts}♥ large, " +
       "and large dogs slow your lane changes. " +
       "A lone dog's owner gets +{loneBonus}♥, a pair's lead +{pairBonus}♥. " +
-      "A plain bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. " +
+      "A bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. " +
       "At 0♥ the owner fires you.",
     title: "Keep owners happy",
   },

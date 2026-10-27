@@ -28,7 +28,7 @@ export const HINTS = {
     trigger: { kind: "luckyFind" },
   },
   minorBump: {
-    text: "A plain bump costs its owner 1♥.",
+    text: "A bump costs its owner 1♥.",
     trigger: { kind: "minorBump" },
   },
   moverCue: {

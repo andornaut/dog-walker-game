@@ -41,7 +41,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Not a speck on them.",
     conditions: [{ count: 2, kind: "cleanZones" }],
-    goal: "Finish 2 neighbourhoods of a walk without a plain bump",
+    goal: "Finish 2 neighbourhoods of a walk without a bump",
     id: "cleanPaws",
     name: "Clean Paws",
     shortGoal: "2 bump-free neighbourhoods",
@@ -49,7 +49,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Spotless, nearly start to finish.",
     conditions: [{ count: 3, kind: "cleanZones" }],
-    goal: "Finish 3 neighbourhoods of a walk without a plain bump",
+    goal: "Finish 3 neighbourhoods of a walk without a bump",
     id: "notAScratch",
     name: "Not a Scratch",
     shortGoal: "3 bump-free neighbourhoods",
@@ -60,7 +60,7 @@ export const ACHIEVEMENTS = [
       { count: 2, kind: "cleanZones" },
       { count: 3, kind: "packSize" },
     ],
-    goal: "Finish 2 neighbourhoods of a walk with 3 dogs and no plain bump",
+    goal: "Finish 2 neighbourhoods of a walk with 3 dogs and no bump",
     id: "flawlessTrio",
     name: "Flawless Trio",
     shortGoal: "2 bump-free, 3 dogs",

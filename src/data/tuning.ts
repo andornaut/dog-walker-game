@@ -98,7 +98,7 @@ export const TUNING = {
     },
     // The Big screen promo's Buy the merch.
     promoMerch: 20,
-    // What a plain bump costs while Spotlight lasts, instead of hearts.
+    // What a bump costs while Spotlight lasts, instead of hearts.
     spotlightBump: 10,
     // The cash every walk starts with, before gear.
     startPurse: 0,
