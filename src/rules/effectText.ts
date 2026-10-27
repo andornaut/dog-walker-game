@@ -13,6 +13,7 @@ import type {
   LiveTuning,
   Modifier,
   MoneyEffect,
+  ProbabilityKey,
   Size,
   Target,
   WalkerPerk,
@@ -61,13 +62,18 @@ function moneyText(data: TextData, effect: MoneyEffect): string {
   return `${signText}${formatDollars(amount)}`;
 }
 
+// A dodge chance as one in so many, rounded: 0.25 as "4".
+export function dodgeInText(tuning: LiveTuning, chance: ProbabilityKey): string {
+  return String(Math.round(1 / read(tuning, "probability", chance)));
+}
+
 // "medium and large dogs dodge 1 in 8", lower case.
 function dodgeText(data: TextData, effect: DodgeEffect): string {
   const sizes = sentenceList(
     data.homeText.sentenceList,
     effect.sizes.map((size) => SIZE_NAMES[size]),
   );
-  const dodgeIn = String(Math.round(1 / read(data.tuning, "probability", effect.chance)));
+  const dodgeIn = dodgeInText(data.tuning, effect.chance);
   return homeLine(data.homeText, "dodgeEffect", { dodgeIn, sizes });
 }
 

@@ -1,6 +1,6 @@
 import type { DebuffId, GameData, HelpPage } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { formatDollars } from "../rules/effectText";
+import { dodgeInText, formatDollars } from "../rules/effectText";
 import { read, readTable } from "../rules/units";
 
 // The {name}s a help page's body may use, each filled from the game data when the page shows,
@@ -37,7 +37,7 @@ export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, s
   return {
     bumpHearts: String(read(tuning, "hearts", "bump")),
     debuffSeconds: shortest === longest ? String(shortest) : `${shortest} to ${longest}`,
-    dodgeIn: String(Math.round(1 / read(tuning, "probability", "smallDodgeChance"))),
+    dodgeIn: dodgeInText(tuning, "smallDodgeChance"),
     largeHearts: hearts("large"),
     loneBonus: String(readTable(tuning, "hearts", "packSizeBonus", 1)),
     mediumHearts: hearts("medium"),

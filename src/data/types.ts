@@ -574,6 +574,8 @@ export interface HomeText {
     // A large dog's row, under its size and hearts: it slows lane changes.
     readonly dogLarge: string;
     readonly dogOwner: string;
+    // A small dog's row, under its size and hearts: it dodges a bump one in {dodgeIn} times.
+    readonly dogSmall: string;
     readonly dogStatus: string;
     readonly gearEquipped: string;
     readonly gearOwned: string;

@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, WalkerId } from "../data/types";
+import type { DogId, Size, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { isLarge, sizeHearts } from "../rules/dogs";
-import { capitalize, effectText, largeSpeedText, SIZE_NAMES } from "../rules/effectText";
+import { sizeHearts } from "../rules/dogs";
+import {
+  capitalize,
+  dodgeInText,
+  effectText,
+  largeSpeedText,
+  SIZE_NAMES,
+} from "../rules/effectText";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
@@ -26,21 +32,28 @@ const owned: Owned = {
 
 describe("dogDetail", () => {
   const dogIds = Object.keys(data.dogs) as DogId[];
-  const firstDog = (large: boolean): DogId => {
-    const id = dogIds.find((dog) => isLarge(data.dogs[dog]) === large);
+  const firstDog = (size: Size): DogId => {
+    const id = dogIds.find((dog) => data.dogs[dog].size === size);
     if (id === undefined) {
-      throw new Error(`no ${large ? "large" : "smaller"} dog`);
+      throw new Error(`no ${size} dog`);
     }
     return id;
   };
+  const text = data.homeText.detail;
 
   it.each([
-    { id: firstDog(true), large: true },
-    { id: firstDog(false), large: false },
-  ])("gives $id's breed, size and hearts, the large row if large, and owner", ({ id, large }) => {
+    {
+      id: firstDog("large"),
+      row: [fillNames(text.dogLarge, { speed: largeSpeedText(data.tuning) })],
+    },
+    { id: firstDog("medium"), row: [] },
+    {
+      id: firstDog("small"),
+      row: [fillNames(text.dogSmall, { dodgeIn: dodgeInText(data.tuning, "smallDodgeChance") })],
+    },
+  ])("gives $id's breed, size and hearts, its size row, and owner", ({ id, row }) => {
     const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
     const dog = data.dogs[id];
-    const text = data.homeText.detail;
     expect(card.title).toBe(dog.name);
     expect(card.subtitle).toBe(dog.breed);
     expect(card.lines).toEqual([
@@ -48,7 +61,7 @@ describe("dogDetail", () => {
         hearts: String(sizeHearts(data.tuning, dog)),
         size: capitalize(SIZE_NAMES[dog.size]),
       }),
-      ...(large ? [fillNames(text.dogLarge, { speed: largeSpeedText(data.tuning) })] : []),
+      ...row,
       fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
     ]);
     expect(card.status).toBe(text.dogStatus);

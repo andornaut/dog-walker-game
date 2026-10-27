@@ -1,7 +1,13 @@
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
-import { isLarge, sizeHearts } from "../rules/dogs";
-import { capitalize, effectText, largeSpeedText, SIZE_NAMES } from "../rules/effectText";
+import { sizeHearts } from "../rules/dogs";
+import {
+  capitalize,
+  dodgeInText,
+  effectText,
+  largeSpeedText,
+  SIZE_NAMES,
+} from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { dollarText, type HomeLoadout, isAffordable, type Purchase, purchasePrice } from "./home";
@@ -64,7 +70,28 @@ function priceLine(data: DetailData, owned: Owned, bank: Cents, purchase: Purcha
   return fillLine(FIELDS, data.homeText.detail, key, { price: dollarText(cost) });
 }
 
-// A dog's breed, its size and hearts, a large dog's row, and its owner.
+// A dog's size row: a large dog's lane-change slowdown or a small dog's dodge, and none for a
+// medium dog.
+function sizeRow(data: DetailData, dog: DogId): readonly string[] {
+  const text = data.homeText.detail;
+  const { size } = data.dogs[dog];
+  switch (size) {
+    case "large":
+      return [fillLine(FIELDS, text, "dogLarge", { speed: largeSpeedText(data.tuning) })];
+    case "medium":
+      return [];
+    case "small":
+      return [
+        fillLine(FIELDS, text, "dogSmall", {
+          dodgeIn: dodgeInText(data.tuning, "smallDodgeChance"),
+        }),
+      ];
+    default:
+      return size satisfies never;
+  }
+}
+
+// A dog's breed, its size and hearts, its size row, and its owner.
 export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogId): DetailCard {
   const { breed, name, owner, size } = data.dogs[dog];
   const purchase: Purchase = { dog, kind: "dog" };
@@ -75,9 +102,7 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
         hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
       }),
-      ...(isLarge(data.dogs[dog])
-        ? [fillLine(FIELDS, text, "dogLarge", { speed: largeSpeedText(data.tuning) })]
-        : []),
+      ...sizeRow(data, dog),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
     ],
     locked: isLocked(data, owned, bank, purchase),
