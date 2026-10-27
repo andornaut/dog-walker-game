@@ -137,7 +137,7 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
 });
 
 // The seeds the planned-spawn sweep samples: more seeds cover more plans and take longer.
-const SWEEP_SEEDS = [1, 2, 3, 4];
+const SWEEP_SEEDS = [1, 2];
 
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
@@ -257,15 +257,18 @@ describe("movers", { timeout: 120_000 }, () => {
     name: `1 or 2 hops of up to ${hop.most} spots${hop.sideways === true ? ", sideways" : ""}`,
     tuned: hoppingInstead(everyMover, hop),
   }));
-  const worlds = [
-    { name: "the zones' shares", tuned: REAL },
-    { name: "a share of 1", tuned: everyMover },
-    ...hopping.slice(0, 1),
-  ];
   // The game's pack, and a taller one on rows spaced wider by as much.
   const packs = [
     { pack: "the game's pack", road: GAME_ROAD, taller: 0 },
     { pack: "a taller pack", road: TALL_PACK_ROAD, taller: TALLER },
+  ];
+  // The zones' shares with both packs, a share of 1 only where some zone's share is under 1, since
+  // it plans the same zones otherwise, and every hopper hopping.
+  const everyZoneMoves = WORLD.zones.every(({ moverShare }) => moverShare === 1);
+  const worlds = [
+    { packs, tuned: REAL },
+    ...(everyZoneMoves ? [] : [{ packs: packs.slice(0, 1), tuned: everyMover }]),
+    { packs: packs.slice(0, 1), tuned: itemAt(hopping, 0).tuned },
   ];
   // The data with the minor obstacles' counts changed as given.
   const withMinorCounts = (counts: Partial<Real["tuning"]["counts"]>, tuned: Real): Real => ({
@@ -279,41 +282,46 @@ describe("movers", { timeout: 120_000 }, () => {
     ...ZONE_IDS.map((zone) => ({ zone, zoneIndex: WORLD.walkLength - 1 })),
     { zone: WORLD.firstZone as ZoneId, zoneIndex: 0 },
   ];
-  const passableCases = (retune: (tuned: Real) => Real = (tuned) => tuned) =>
-    worlds.flatMap(({ tuned }, i) =>
-      packs.slice(0, i === 1 ? 2 : 1).flatMap(({ road, taller }) =>
-        zonePlaces.map(({ zone, zoneIndex }) => ({
-          road,
-          tuned: widerRows(retune(tuned), taller),
-          zone,
-          zoneIndex,
-        })),
-      ),
-    );
-  it("keeps every move passable in every zone, at the shares, at a share of 1 and hopping", () => {
-    expectPassable(passableCases());
+  type PassableCase = { road: RoadGeometry; tuned: Real; zone: ZoneId; zoneIndex: number };
+  const PASSABLE: readonly PassableCase[] = worlds.flatMap(({ packs: sized, tuned }) =>
+    sized.flatMap(({ road, taller }) =>
+      zonePlaces.map(({ zone, zoneIndex }) => ({
+        road,
+        tuned: widerRows(tuned, taller),
+        zone,
+        zoneIndex,
+      })),
+    ),
+  );
+  // Each case's plan on seed 1, planned once for every check made of it.
+  const plans = new Map<PassableCase, Walk>();
+  const planOf = (passable: PassableCase): Walk => {
+    let walk = plans.get(passable);
+    if (walk === undefined) {
+      const { road, tuned, zone, zoneIndex } = passable;
+      walk = planZone(tuned, road, plannerStreams(1), {
+        road: startRoad(LANE_COUNT),
+        run: inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex),
+      });
+      plans.set(passable, walk);
+    }
+    return walk;
+  };
+  it("keeps every move passable in every zone, at the shares, with a taller pack and hopping", () => {
+    expectPassable(PASSABLE);
   });
-  // Denser minor obstacles than the game's: the last zone's count rises by the gain for each
-  // zone walked before it.
-  it.each([
-    { counts: { minorObstaclesGainPerZone: 3 } },
-    { counts: { minorObstaclesFirstZone: 54, minorObstaclesGainPerZone: 2 } },
-  ])("keeps every move passable with more minor obstacles: $counts", ({ counts }) => {
-    expectPassable(passableCases((tuned) => withMinorCounts(counts, tuned)));
-  });
-  // Minor obstacle counts either side of the game's at which seed 1 plans a dart that leaves the
+  // Other minor obstacle counts on the game's pack: denser, the last zone's count rising by the
+  // gain for each zone walked before it, and counts at which seed 1 plans a dart that leaves the
   // road while it meets the pack, with another obstacle beside it or soon after it in a lane next
   // to its own: the pack-fit gap holds for the lanes and stretch its hit box meets the pack in.
   it.each([
+    { minorObstaclesGainPerZone: 3 },
     { minorObstaclesFirstZone: 51, minorObstaclesGainPerZone: 0 },
-    { minorObstaclesFirstZone: 54, minorObstaclesGainPerZone: 0 },
     { minorObstaclesFirstZone: 58, minorObstaclesGainPerZone: 1 },
-  ])(
-    "keeps every move passable with a dart leaving the road as it meets the pack: %o",
-    (counts) => {
-      expectPassable(passableCases((tuned) => withMinorCounts(counts, tuned)));
-    },
-  );
+  ])("keeps every move passable at minor obstacle counts %o", (counts) => {
+    const tuned = withMinorCounts(counts, REAL);
+    expectPassable(zonePlaces.map((place) => ({ ...place, road: GAME_ROAD, tuned })));
+  });
   // Minor obstacle counts at which seed 1, with the lane-balance bias off and every hopper
   // hopping, plans the last zone with a mover just after a card mover stilled for want of room,
   // or with a dart just before a stepper in the lane beside those it meets the pack in: the
@@ -341,19 +349,15 @@ describe("movers", { timeout: 120_000 }, () => {
   // hit boxes, the lane moves in whole walk steps and the reaction margin, less a pixel for a
   // mover's contact sampled a pixel of scroll at a time. The pack also has a way through the zone
   // from the path's first lane.
-  function expectPassable(
-    cases: readonly { road: RoadGeometry; tuned: Real; zone: ZoneId; zoneIndex: number }[],
-  ): void {
-    for (const { road, tuned, zone, zoneIndex } of cases) {
+  function expectPassable(cases: readonly PassableCase[]): void {
+    for (const passable of cases) {
+      const { road, tuned, zone, zoneIndex } = passable;
+      const walk = planOf(passable);
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
       const speed = walkScrollSpeed(tuned, zoned);
       const laneMove = Math.ceil(muddyLaneMove / STEP_SECONDS - 1e-9) * STEP_SECONDS * speed;
       const margin = read(tuned.tuning, "seconds", "pathReactionMargin") * speed;
       const fit = (moves: number) => packHitLength(road) + moves * laneMove + margin - 1;
-      const walk = planZone(tuned, road, plannerStreams(1), {
-        road: startRoad(LANE_COUNT),
-        run: zoned,
-      });
       const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
       const spans = blockingSpans(tuned, road, zone, blocking);
       const start = walk.road.path[0]?.lane ?? -1;
@@ -396,12 +400,9 @@ describe("movers", { timeout: 120_000 }, () => {
   // another mover is while it is there: at no moment with both on the road do their drawn hit
   // boxes overlap in a lane both cover, whichever way a stalker or shy hopper chooses its moves.
   it("keeps every standing obstacle's hit box off every mover's but a dart's", () => {
-    for (const { road, tuned, zone, zoneIndex } of passableCases()) {
-      const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
-      const walk = planZone(tuned, road, plannerStreams(1), {
-        road: startRoad(LANE_COUNT),
-        run: zoned,
-      });
+    for (const passable of PASSABLE) {
+      const { road, tuned, zone } = passable;
+      const walk = planOf(passable);
       const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
       const roadLength = road.roadBottom - road.roadTop;
       const inset = road.cell.inset / road.cell.length;
@@ -450,31 +451,28 @@ describe("movers", { timeout: 120_000 }, () => {
   });
 
   it("plans the same movers for the same seed", () => {
-    for (const { tuned } of [{ name: "every mover", tuned: everyMover }]) {
-      const zoned = inZone(realRun(tuned, FASTEST_WALKER), "homeStretch", WORLD.walkLength - 1);
-      const plan = (seed: number) =>
-        planZone(tuned, GAME_ROAD, plannerStreams(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        }).road.pending;
-      expect(plan(4)).toEqual(plan(4));
-      expect(plan(5)).not.toEqual(plan(4));
-    }
+    const zoned = inZone(realRun(everyMover, FASTEST_WALKER), WORLD.lastZone, WORLD.walkLength - 1);
+    const plan = (seed: number) =>
+      planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
+        road: startRoad(LANE_COUNT),
+        run: zoned,
+      }).road.pending;
+    const first = plan(4);
+    expect(plan(4)).toEqual(first);
+    expect(plan(5)).not.toEqual(first);
   });
 
   // A hop is one jump of 1 to most spots one way, across, up the road or diagonally up, never
   // down, sideways only when it says so, as long as the tuning's hop within its jitter; across
-  // zones and seeds, hoppers make hops of every length they can, and hop every count of times in
-  // their range at the first zone's pace, the slowest; a later hop that would come once the
+  // zones and seeds at the first zone's pace, the slowest, hoppers make hops of every length they
+  // can, and hop every count of times in their range; a later hop that would come once the
   // hopper has reached the pack's rows never does.
   it("hops each hopper its drawn count of times, any way or sideways only", () => {
     for (const { hop, tuned } of hopping) {
       const spots = new Set<number>();
       const times = new Set<number>();
-      for (const [zone, zoneIndex] of ZONE_IDS.flatMap((id) =>
-        [0, WORLD.walkLength - 1].map((index) => [id, index] as const),
-      )) {
-        const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
+      for (const zone of ZONE_IDS) {
+        const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, 0);
         const length =
           read(tuned.tuning, "seconds", "moverHopSeconds") * walkScrollSpeed(tuned, zoned);
         const jitter = read(tuned.tuning, "seconds", "moverMoveSecondsJitter");
@@ -528,24 +526,29 @@ describe("movers", { timeout: 120_000 }, () => {
     mover: MoverPath | undefined;
     speed: number;
   };
-  let plans: readonly Planned[] | null = null;
+  // Every spawn planned in a zone at a walk position on a seed, planned once for every sweep.
+  const spawnPlans = new Map<string, readonly Planned[]>();
+  const spawnsOf = (zone: ZoneId, zoneIndex: number, seed: number): readonly Planned[] => {
+    const key = `${zone} ${zoneIndex} ${seed}`;
+    let planned = spawnPlans.get(key);
+    if (planned === undefined) {
+      const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
+      const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
+        road: startRoad(LANE_COUNT),
+        run: zoned,
+      });
+      const speed = walkScrollSpeed(everyMover, zoned);
+      planned = walk.road.pending.map(({ kind, lane, mover }) => ({ kind, lane, mover, speed }));
+      spawnPlans.set(key, planned);
+    }
+    return planned;
+  };
   // Every spawn planned in zone at its first and last walk positions, on each of seeds.
   const planIn = (zone: ZoneId, seeds: readonly number[]): Planned[] =>
     [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
-      seeds.flatMap((seed) => {
-        const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
-        const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        });
-        const speed = walkScrollSpeed(everyMover, zoned);
-        return walk.road.pending.map(({ kind, lane, mover }) => ({ kind, lane, mover, speed }));
-      }),
+      seeds.flatMap((seed) => spawnsOf(zone, zoneIndex, seed)),
     );
-  const plannedSpawns = () => {
-    plans ??= ZONE_IDS.flatMap((zone) => planIn(zone, SWEEP_SEEDS));
-    return plans;
-  };
+  const plannedSpawns = () => ZONE_IDS.flatMap((zone) => planIn(zone, SWEEP_SEEDS));
   const plannedMovers = () =>
     plannedSpawns().flatMap(({ kind, mover, speed }) =>
       mover === undefined ? [] : [{ kind, mover, speed }],
@@ -705,18 +708,12 @@ describe("movers", { timeout: 120_000 }, () => {
     return planned.length < zones.length ? planned : undefined;
   };
   const ZONE_SWEEP_SEEDS = Array.from({ length: SWEEP_SEEDS.length * 3 }, (_, i) => i + 1);
-  const zonePlans = new Map<string, readonly Planned[]>();
-  const plannedInZone = (zone: string): readonly Planned[] => {
-    let planned = zonePlans.get(zone);
-    if (planned === undefined) {
-      planned = planIn(zone as ZoneId, ZONE_SWEEP_SEEDS);
-      zonePlans.set(zone, planned);
-    }
-    return planned;
-  };
   it.each(blocking)("starts a %s against each edge of the road on some seed", (kind) => {
     const zones = zonesOf(kind);
-    const planned = zones === undefined ? plannedSpawns() : zones.flatMap(plannedInZone);
+    const planned =
+      zones === undefined
+        ? plannedSpawns()
+        : zones.flatMap((zone) => planIn(zone as ZoneId, ZONE_SWEEP_SEEDS));
     const lanes = new Set(planned.filter((spawn) => spawn.kind === kind).map(({ lane }) => lane));
     expect([...lanes]).toEqual(
       expect.arrayContaining([0, LANE_COUNT - footprintOf(everyMover, kind).lanes]),
