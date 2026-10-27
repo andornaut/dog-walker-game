@@ -304,9 +304,14 @@ def busker_top(strum=0, nod=0):
         g.rect(2, 40, 28, 1, "dred")
         g.rect(4, 36, 6, 5, "white")
         g.rect(9, 36, 1, 5, "lgrey")
-        g.rect(5, 37, 3, 1, "grey")
-        g.rect(5, 39, 3, 1, "grey")
-        g.rect(6, 38, 1, 2, "ink")
+        # the page's staff and a note on it; a smaller page, too narrow for the note, keeps two staff lines
+        if scale_of(g) >= 1.3:
+            for y in (37, 38.5, 40):
+                g.rect(4, y, 5, 0.67, "grey")
+            note(g, 5, 36.4, "ink")
+        else:
+            for y in (37, 39):
+                g.rect(5, y, 3, 1, "grey")
         g.rect(18, 34.5, 10, 6.5, "cream")
         g.rect(27, 34.5, 1, 6.5, "tan")
         note(g, 21, 35.5, "dbrown")
