@@ -207,14 +207,19 @@ export function buttonFaces(
 }
 
 interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"> {
+  // The number key that presses the button, drawn like the label in the face's left end,
+  // MENU_BUTTON_KEY_INSET in from its edge.
+  readonly keyNumber?: string;
   // An available button that is not primary wears the secondary look, as a card's own
   // controls do, in place of normal.
   readonly secondary?: boolean;
 }
 
+const MENU_BUTTON_KEY_INSET = 10;
+
 // A ui-button with a centred label in its interaction state, drawn in parent when given.
-// Pressed shows the sunk frame and moves the label with it; disabled sits at the pressed depth
-// and never moves.
+// Pressed shows the sunk frame and moves the label, and any key number, with it; disabled sits
+// at the pressed depth and never moves.
 export function addMenuButton(
   scene: Scene,
   rect: Rect,
@@ -226,14 +231,18 @@ export function addMenuButton(
   const look: ButtonLook = state === "normal" && input.secondary === true ? "secondary" : state;
   const faces = buttonFaces(scene, input.primary, rect, look);
   const disabled = state === "disabled";
-  const title = addPixelText(scene, rect.x + rect.width / 2, 0, label, {
+  const style = {
     colour: PALETTE[BUTTON_COLOURS[look].label],
     font: "title",
-    originX: 0.5,
     originY: 0.5,
     scale: TEXT_SCALE,
-  });
-  parent?.add([...faces, title]);
+  } as const;
+  const title = addPixelText(scene, rect.x + rect.width / 2, 0, label, { ...style, originX: 0.5 });
+  const labels =
+    input.keyNumber === undefined
+      ? [title]
+      : [title, addPixelText(scene, rect.x + MENU_BUTTON_KEY_INSET, 0, input.keyNumber, style)];
+  parent?.add([...faces, ...labels]);
   const centreY = rect.y + (rect.height - BUTTON_LIP_PX) / 2;
   const button: MenuButton = {
     rect,
@@ -243,7 +252,8 @@ export function addMenuButton(
         up?.setVisible(!pressed);
         down.setVisible(pressed);
       }
-      title.setY(Math.round(centreY + (disabled || pressed ? BUTTON_PRESS_PX : 0)));
+      const y = Math.round(centreY + (disabled || pressed ? BUTTON_PRESS_PX : 0));
+      labels.forEach((text) => text.setY(y));
     },
   };
   button.setPressed(false);

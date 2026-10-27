@@ -43,7 +43,6 @@ type ZoneDoneText = Extract<CelebrationText, { kind: "zoneDone" }>;
 type Version = typeof LAYOUT.newWalker | typeof LAYOUT.zoneDone;
 
 const BODY = { colour: PALETTE.plum, scale: TEXT_SCALE } as const;
-const KEY_RISE = 14;
 
 // Places a label made with origin y 0 by the top of its font line.
 function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
@@ -225,17 +224,15 @@ export class ZoneCelebrationScene extends Scene {
     }
   }
 
-  // The version's button, with the key that presses it above it once a key has been pressed.
+  // The version's button, with the key that presses it in its left end once a key has been
+  // pressed.
   private addButton(version: Version, label: string, onTap: () => void): void {
-    const button = addMenuButton(this, version.button, label, { available: true, primary: true });
+    const button = addMenuButton(this, version.button, label, {
+      available: true,
+      primary: true,
+      ...(keyNumbersShown() ? { keyNumber: "1" } : {}),
+    });
     listenButtonTap(this, button, onTap);
-    if (keyNumbersShown()) {
-      addPixelText(this, LAYOUT.centreX, version.button.y - KEY_RISE, "1", {
-        colour: PALETTE.amber,
-        font: "title",
-        originX: 0.5,
-      });
-    }
   }
 
   // About LAYOUT.confetti.bits fx-confetti-bit, each a random colour from a random frame,
