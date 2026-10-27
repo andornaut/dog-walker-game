@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { Core, Scene } from "phaser";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -172,7 +172,11 @@ export class PauseScene extends Scene {
         this.game.events.once(closed, onResume);
         this.events.once("shutdown", () => this.game.events.off(closed, onResume));
       }
-      presses[overlay.open]();
+      // Opened once the dim has read back its first frame, so the dim holds the walk, never
+      // the page, when the page closes back to the menu.
+      const open = () => presses[overlay.open]();
+      this.game.events.once(Core.Events.POST_RENDER, open);
+      this.events.once("shutdown", () => this.game.events.off(Core.Events.POST_RENDER, open));
     }
   }
 
