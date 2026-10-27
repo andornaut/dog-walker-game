@@ -2011,8 +2011,8 @@ def bus_back(cv, cx, y):
 
 def side_street(cv, x0, x1, vy, rise=34):
     """A side street running away between two towers, columns x0 to x1, in one-point perspective to
-    a vanishing point on row vy: its two side walls, rise rows tall at the mouth, the right one ash
-    in the light and the left coal in shade, with rows of lit windows running to the vanishing
+    a vanishing point on row vy: its two side walls, rise rows tall at the mouth, the right one shale
+    and the left coal, both in the canyon's shade, with rows of lit windows running to the vanishing
     point; a far block at its end; a shale road between stone curbs; and gridlock on it, cars going
     away showing their tail lights on the left, cars coming in their headlights on the right, a TTC
     bus at the mouth."""
