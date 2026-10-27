@@ -438,29 +438,30 @@ def news_box():
 
 
 def rope_posts():
-    """Two driftwood posts with a tan rope sagging between."""
+    """Two driftwood posts with a tan rope sagging between, one unbroken line."""
     w, h = 24, 20
 
     def draw(g, f=0):
         base = h - 2
+        for x in range(6, 17):
+            g.rect(x, 7 + round(2 * (1 - ((x - 11.5) / 5) ** 2)), 2, 1, "tan")
         for x in (3, 17):
             g.rect(x, 4, 4, base - 3, "driftwood")
             g.rect(x + 3, 4, 1, base - 3, dk("driftwood"))
             g.ell(x + 2, 4, 2, 1, "cream")
-        for x in range(7, 17):
-            g.rect(x, 7 + round(2 * (1 - ((x - 11.5) / 5) ** 2)), 1, 1, "tan")
     return w, h, draw
 
 
 def life_ring():
-    """A lifebuoy on a driftwood post: an orange ring with four white bands."""
+    """A lifebuoy on a driftwood post: a red ring with four white bands, never orange, so it stays apart from
+    the tip coin."""
     w, h = 18, 34
 
     def draw(g, f=0):
         base = h - 2
         g.rect(7, 3, 4, base - 2, "driftwood")
         g.rect(10, 3, 1, base - 2, dk("driftwood"))
-        g.ell(9, 12, 6, 6, "orange")
+        g.ell(9, 12, 6, 6, "red")
         g.ell(9, 12, 3, 3, "driftwood")
         for x, y in ((3, 11), (13, 11), (8, 6), (8, 16)):
             g.rect(x, y, 2, 2, "white")
@@ -486,10 +487,11 @@ def pay_station():
         g.rect(4, 23, 4, 1, "gold")
         g.rect(6, 6, 2, 4, "stone")
         g.ell(7, 4, 3, 3, "forest")
-        g.rect(6, 2, 1, 4, "white")
-        g.rect(7, 2, 1, 1, "white")
-        g.rect(8, 3, 1, 1, "white")
-        g.rect(7, 4, 1, 1, "white")
+        # the P, 3 by 5 pixels at full size: a stem, a top and a middle bar, the bowl's right side
+        g.rect(6, 8 / 3, 1, 10 / 3, "white")
+        g.rect(6, 8 / 3, 2, 1, "white")
+        g.rect(6, 4, 2, 1, "white")
+        g.rect(22 / 3, 8 / 3, 1, 2, "white")
     return w, h, draw
 
 
