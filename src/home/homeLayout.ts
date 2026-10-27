@@ -182,13 +182,11 @@ export const HOME_LAYOUT = {
   },
   pocketLining: pocketLining(POCKET_SECTION),
   porchDogOffset: { dx: -12, footDy: 3 },
-  // Before the first walk the starter owners wait in the yard left of the path, behind the
-  // yard sign, each with their dog at their feet. Feet positions, by dog; a starter dog with
-  // no spot is not drawn.
+  // Before the first walk the starter dog's owner waits in the yard left of the path, behind
+  // the yard sign, with their dog at their feet. Feet positions, by dog; a starter dog with no
+  // spot is not drawn.
   porchSpots: {
     archie: { footY: 145, x: 120 },
-    duchess: { footY: 148, x: 150 },
-    kilo: { footY: 145, x: 92 },
   },
   // The seamless image each section's fill tiles, drawn over its tile area.
   sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },
