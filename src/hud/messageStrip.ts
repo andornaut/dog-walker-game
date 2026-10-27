@@ -4,6 +4,7 @@ import { screenLayout } from "../layout/screenLayout";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";
+import type { NameMark } from "./effectNames";
 import { type FaceBox, type FaceRow, faceRows, type FaceText } from "./faceText";
 import { DEBUFF_BAR } from "./walkHud";
 
@@ -246,9 +247,12 @@ export function messageRows(
 }
 
 // icon: what leads the line, an icon or an owner's face and name. Each owner its text names
-// (marks) is drawn led by their face, but for an owner whose face and name lead the line.
+// (marks) is drawn led by their face, but for an owner whose face and name lead the line. names:
+// effects' names the line sets apart in their colours, beyond the "Name:" leads every line's
+// names get (effectNameMarks), as a debuff's start line marks its lead.
 export interface MessageLine extends FaceText {
   readonly icon: MessageLead;
+  readonly names?: readonly NameMark[];
 }
 
 // A line on the strip: id tells lines with the same text apart, and ageMs counts from when it

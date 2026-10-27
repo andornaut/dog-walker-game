@@ -87,6 +87,35 @@ describe("changeLabels", () => {
     expect(changeLabels(gameData, [forgiven])).toEqual([]);
   });
 
+  it.each([
+    { by: { debuff: "stinky", kind: "debuff" }, zeroedBy: "stinky" },
+    { by: { kind: "upgrade", upgrade: "bigTipper" }, zeroedBy: undefined },
+  ] as const)("names $zeroedBy as what zeroed a tip cancelled by $by.kind", ({ by, zeroedBy }) => {
+    const tip = {
+      amount: cents(0),
+      causes: [
+        { amount: 100, kind: "tip" },
+        { amount: -100, kind: "modifier", source: by },
+      ],
+      dog: null,
+      kind: "money",
+    } as const;
+    expect(changeLabels(gameData, [tip])[0]?.zeroedBy).toBe(zeroedBy);
+  });
+
+  it("names no debuff on a change a debuff only shrank", () => {
+    const tip = {
+      amount: cents(100),
+      causes: [
+        { amount: 200, kind: "tip" },
+        { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
+      ],
+      dog: null,
+      kind: "money",
+    } as const;
+    expect(changeLabels(gameData, [tip])[0]?.zeroedBy).toBeUndefined();
+  });
+
   it("has no labels without changes, and marks a loss at the bank as no gain", () => {
     expect(changeLabels(gameData, [])).toEqual([]);
     const bump = {

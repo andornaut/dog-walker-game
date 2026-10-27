@@ -19,6 +19,7 @@ const ENDESGA = {
   orange: 0xf77622,
   pink: 0xf6757a,
   plum: 0x3e2731,
+  purple: 0x68386c,
   red: 0xe43b44,
   rust: 0xbe4a2f,
   slate: 0x5a6988,
@@ -38,9 +39,12 @@ const NEUTRAL = {
 
 // Colours outside Endesga 32 and the neutral greys, each kept to one use: deepAmber is the box
 // behind a picked item's portrait or icon, a step toward orange from amber so it stands apart
-// from the tan box an owned item has.
+// from the tan box an owned item has. dlake and turquoise, from art's Toronto colours, are a
+// buff's name beside its description, on cream and on dark backgrounds.
 const EXTRA = {
   deepAmber: 0xfc9124,
+  dlake: 0x1d5576,
+  turquoise: 0x35c2a6,
 } as const;
 
 // Every colour the scenes draw with, by name.

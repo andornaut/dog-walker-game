@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
+import { gameData } from "../data";
 import { BADGE_TEXT_COLOURS } from "../home/badgesView";
 import { STATS_LAYOUT } from "../home/statsLayout";
+import type { EffectNameKind } from "../hud/effectNames";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
   BUTTON_COLOURS,
@@ -14,6 +16,12 @@ import {
   selectLook,
 } from "../ui/selection";
 import { DEBUFF_COLOURS } from "./debuffColours";
+import {
+  EFFECT_NAME_COLOURS,
+  effectNameColour,
+  NAME_BACKGROUNDS,
+  type NameBackground,
+} from "./effectNameColours";
 
 // The band an earned badge's row lies on.
 const BAND = PALETTE[STATS_LAYOUT.wall.earned.fill];
@@ -115,5 +123,25 @@ describe("debuff bar colours", () => {
       ([, { face, name }]) => contrast(name, face) < TEXT,
     );
     expect(faint.map(([debuff]) => debuff)).toEqual([]);
+  });
+});
+
+describe("effect name colours", () => {
+  const kinds = [...Object.keys(gameData.debuffs), "buff"].sort() as EffectNameKind[];
+  const backgrounds = Object.keys(NAME_BACKGROUNDS) as NameBackground[];
+
+  it.each(backgrounds)("give every debuff and the buffs a name colour on %s", (background) => {
+    expect(Object.keys(EFFECT_NAME_COLOURS[background]).sort()).toEqual(kinds);
+  });
+
+  it.each(
+    backgrounds.flatMap((background) =>
+      NAME_BACKGROUNDS[background].flatMap((behind) =>
+        kinds.map((kind) => ({ background, behind, kind })),
+      ),
+    ),
+  )("set $kind's name at 4.5:1 on $behind", ({ background, behind, kind }) => {
+    const colour = effectNameColour(background, kind);
+    expect(contrast(colour, PALETTE[behind])).toBeGreaterThanOrEqual(TEXT);
   });
 });

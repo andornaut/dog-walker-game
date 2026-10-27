@@ -1,15 +1,27 @@
 import { zonePipTag } from "../assets/spriteKeys";
-import type { DogId, GameData, ZoneId } from "../data/types";
+import type { DebuffId, DogId, GameData, ZoneId } from "../data/types";
 import { type CauseData, causeLabel, type Change, changeAmount } from "../rules/causes";
 import { zoneById } from "../rules/route";
 
 // A floating label naming a change, over the dog's slot or the bank. amount is the change in
-// hearts or cents.
+// hearts or cents. zeroedBy: the debuff that cancelled a change to nothing, as Stinky zeroes a
+// tip, in whose colour the label is drawn.
 export interface ChangeLabel {
   amount: number;
   gain: boolean;
   target: { dog: DogId; kind: "dog" } | { kind: "bank" };
   text: string;
+  zeroedBy?: DebuffId;
+}
+
+// The debuff among a change's causes when the change came to nothing, or undefined.
+function zeroingDebuff(change: Change): DebuffId | undefined {
+  if (changeAmount(change) !== 0) {
+    return undefined;
+  }
+  return change.causes.flatMap((cause) =>
+    cause.kind === "modifier" && cause.source.kind === "debuff" ? [cause.source.debuff] : [],
+  )[0];
 }
 
 // One label per change, naming its causes ("−2 ♥, dramatic", "+$2 tip, Big tipper"): a heart
@@ -17,12 +29,16 @@ export interface ChangeLabel {
 // a loss forgiven whole, has none: its forgiven moment shows it.
 export function changeLabels(data: CauseData, changes: readonly Change[]): ChangeLabel[] {
   const shown = changes.filter((change) => change.kind === "money" || changeAmount(change) !== 0);
-  return shown.map((change): ChangeLabel => ({
-    amount: changeAmount(change),
-    gain: changeAmount(change) > 0,
-    target: change.kind === "hearts" ? { dog: change.dog, kind: "dog" } : { kind: "bank" },
-    text: causeLabel(data, change),
-  }));
+  return shown.map((change): ChangeLabel => {
+    const zeroedBy = zeroingDebuff(change);
+    return {
+      amount: changeAmount(change),
+      gain: changeAmount(change) > 0,
+      target: change.kind === "hearts" ? { dog: change.dog, kind: "dog" } : { kind: "bank" },
+      text: causeLabel(data, change),
+      ...(zeroedBy === undefined ? {} : { zeroedBy }),
+    };
+  });
 }
 
 // A meter of max hearts, the first `hearts` of them full, in rows of at most perRow.

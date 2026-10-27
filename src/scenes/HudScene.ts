@@ -87,6 +87,7 @@ import {
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
 import { DEBUFF_COLOURS } from "./debuffColours";
+import { effectNameColour } from "./effectNameColours";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
@@ -125,6 +126,15 @@ const LAYOUT = screenLayout(SCREEN_CONFIG);
 const BAR = walkBarLayout(LAYOUT.topBar);
 
 const LABEL = { ms: 1100 };
+
+// A change label's colour on its cream chip: the colour of the debuff that zeroed it, else grey
+// for nothing, forest for a gain and dark red for a loss.
+function changeLabelColour(label: ChangeLabel): number {
+  if (label.zeroedBy !== undefined) {
+    return effectNameColour("cream", label.zeroedBy);
+  }
+  return label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
+}
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
@@ -866,15 +876,16 @@ export class HudScene extends Scene {
     this.showLabel(label, { anchor: "middle", lane, rise: false });
   }
 
-  // A change on a cream chip, so gains in forest and losses in dark red read over anything,
-  // fitted to its lane by CHANGE_LABEL_STYLES. A rising chip rises to the lane's top.
+  // A change on a cream chip, so gains in forest and losses in dark red read over anything, and
+  // one a debuff zeroed, as Stinky's "+$0" tip, in the debuff's colour; fitted to its lane by
+  // CHANGE_LABEL_STYLES. A rising chip rises to the lane's top.
   private showLabel(
     label: ChangeLabel,
     at: { anchor: "bottom" | "middle"; lane: Rect; rise: boolean },
     done: () => void = () => undefined,
   ): void {
     const text = addPixelText(this, 0, 0, label.text, {
-      colour: label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed,
+      colour: changeLabelColour(label),
       scale: 2,
     });
     const room = changeLabelRoom(at.lane.width);

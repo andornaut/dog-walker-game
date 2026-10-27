@@ -128,6 +128,7 @@ import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selec
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
+import { tintEffectNames } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
@@ -1418,6 +1419,8 @@ export class StartScene extends Scene {
     const body = pixelFontMetrics(this, "body");
     const pitch = body.lineHeight * TEXT_SCALE;
     const labels = lines.map((line) => this.text(root, 0, 0, line, PALETTE.plum, { originX: 0.5 }));
+    // A gear's focus line, "Running shoes: …", sets the gear's name apart in its colour.
+    tintEffectNames("cream", labels, { text: [...notice, ...speech.paragraphs].join(" ") });
     const widest = Math.ceil(Math.max(...labels.map((label) => label.width)));
     const size = bubbleSize(body, lines.length, widest, faced ? column : null);
     // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.

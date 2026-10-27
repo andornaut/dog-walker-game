@@ -225,7 +225,7 @@ describe("debuffLines", () => {
       const off = { debuffs: [] };
       const slower = debuff === "muddy" ? muddySlower : "0%";
       const fields = { cash: cashOf(debuff), seconds: "20", slower };
-      expect(debuffLines(gameData, debuffChanges(off, on))).toEqual([
+      expect(debuffLines(gameData, debuffChanges(off, on))).toMatchObject([
         { icon: debuff, text: fillNames(strip.debuffStart[debuff], fields) },
       ]);
       expect(debuffLines(gameData, debuffChanges(on, off))).toEqual([
@@ -233,6 +233,19 @@ describe("debuffLines", () => {
       ]);
     }
   });
+
+  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
+    "sets apart %s's start line's lead sentence, which names it, as its name",
+    (debuff) => {
+      const [line] = debuffLines(gameData, { ended: [], started: [active(debuff, 20)] });
+      const [mark] = line?.names ?? [];
+      const lead = line?.text.slice(mark?.at, (mark?.at ?? 0) + (mark?.length ?? 0)) ?? "";
+      expect(mark?.kind).toBe(debuff);
+      expect(lead).toMatch(/^\S.*[.!?]$/);
+      expect(lead).toContain(gameData.debuffs[debuff].name);
+      expect(line?.text.startsWith(`${lead} `)).toBe(true);
+    },
+  );
 
   it("announces a debuff that restarts, and not one that counts down", () => {
     expect(

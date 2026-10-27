@@ -17,6 +17,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { tintEffectNames } from "./effectNameColours";
 import {
   addCloseButton,
   addLoopingFrame,
@@ -190,15 +191,23 @@ export function drawDetailCard(
     probe.label.destroy();
     return probe.lines.length;
   };
+  // Each effect's name a row leads with, as a perk's "Second chance: …", takes its colour.
   const draw = (rows: readonly Row[], x: number, room: number, tops: readonly number[]) =>
     rows.forEach((row, i) => {
       const y = tops[i] ?? 0;
-      if (row.fit === true) {
-        fitted(row, room, x, y);
-      } else {
-        const lines = wrapPixelText(scene, style, room, row.value);
-        text(scene, content, { x, y }, lines.join("\n"), { colour: row.colour });
-      }
+      const label =
+        row.fit === true
+          ? fitted(row, room, x, y).label
+          : text(
+              scene,
+              content,
+              { x, y },
+              wrapPixelText(scene, style, room, row.value).join("\n"),
+              {
+                colour: row.colour,
+              },
+            );
+      tintEffectNames("cream", [label], { text: row.value });
     });
   const status: Row = {
     colour: card.locked ? PALETTE.darkRed : PALETTE.forest,

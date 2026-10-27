@@ -1,6 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
+import type { NameMark } from "../hud/effectNames";
 import { type FaceRow, type FaceText, inlineFaceBox, withoutFace } from "../hud/faceText";
 import {
   EMPTY_MESSAGE_STRIP,
@@ -65,6 +66,7 @@ interface Drawn {
 interface StripLine extends FaceText {
   readonly id: number;
   readonly lead: OwnerLead | string;
+  readonly names?: readonly NameMark[];
 }
 
 // The message strip (see hud/messageStrip.ts) as drawn. It draws in whichever scene it is
@@ -114,6 +116,7 @@ export class MessageStrip {
       id: shown.id,
       lead: isOwnerLead(shown.icon) ? shown.icon : messageIconKey(shown.icon),
       ...(shown.marks === undefined ? {} : { marks: shown.marks }),
+      ...(shown.names === undefined ? {} : { names: shown.names }),
       text: shown.text,
     };
   }
@@ -150,7 +153,12 @@ function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn
       : oneRow(scene, room, said, (scale) => messageLineTop(body, one, scale));
   const fits = bars === 0 ? messagePanel(body, Math.max(1, set.rows.length)) : one.panel;
   const panel: Faded = addPanel(scene, lead === undefined ? fits : ownerLeadPanel(fits, lead));
-  const text = { box: inlineFaceBox(body, set.fit.scale), fit: set.fit, style: TEXT_STYLE };
+  const text = {
+    box: inlineFaceBox(body, set.fit.scale),
+    fit: set.fit,
+    onCream: { ...said, ...(line.names === undefined ? {} : { names: line.names }) },
+    style: TEXT_STYLE,
+  };
   const parts: Faded[] = addFaceRows(scene, { capsTop: set.capsTop, x: textX }, text, set.rows);
   if (owner !== undefined && lead !== undefined) {
     parts.unshift(...ownerLead(scene, owner, name, lead));

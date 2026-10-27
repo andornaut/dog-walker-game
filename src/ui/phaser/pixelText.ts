@@ -11,6 +11,7 @@ import {
   plainMarks,
 } from "../pixelFont";
 import { type FittedText, fittingText, fittingTextsAlike, type TextFitStyle } from "../textFit";
+import { type ColourSpan, shownSpanColours } from "../textSpans";
 
 // body: mixed case, for running text, card effects and labels. title: capitals, for
 // titles, numbers, money and buttons. Both are white glyphs, tinted to a palette colour.
@@ -336,4 +337,31 @@ export function setPixelText(label: GameObjects.BitmapText, text: string): void 
       label.setX(label.x + before - after);
     }
   }
+}
+
+// Draws each character of labels that spans on source cover in its span's colour, and the rest
+// in its label's own colour: labels are source as drawn, in order (shownSpanColours). Call it
+// once the labels' text is set and fitted; it clears the colours an earlier call set.
+export function tintSpans(
+  labels: readonly GameObjects.BitmapText[],
+  source: string,
+  spans: readonly ColourSpan[],
+): void {
+  const colours = shownSpanColours(
+    source,
+    spans,
+    labels.map((label) => label.text),
+  );
+  labels.forEach((label, n) => {
+    label.setCharacterTint(0, -1);
+    const shown = colours[n] ?? [];
+    // Phaser tints a character by its index among the characters it draws (i), which skips
+    // line breaks, not by its index in the text (idx).
+    for (const char of label.getTextBounds(false).characters) {
+      const colour = shown[char.idx];
+      if (colour !== undefined) {
+        label.setCharacterTint(char.i, 1, undefined, colour);
+      }
+    }
+  });
 }
