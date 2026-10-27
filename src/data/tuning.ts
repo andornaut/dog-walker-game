@@ -137,9 +137,9 @@ export const TUNING = {
     scrollSpeedGainPerZone: 0.2,
     // What a tip pays while the pack is Stinky.
     stinkyTipValue: 0,
-    // How many treats appear while Ben's Treat finder walks.
+    // How many treats appear while Mr. B's Treat finder walks.
     treatFinderSpawns: 2,
-    // How many tips appear while Ben's Treat finder walks.
+    // How many tips appear while Mr. B's Treat finder walks.
     treatFinderTipSpawns: 1.5,
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
@@ -159,7 +159,7 @@ export const TUNING = {
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.
     smallDodgeChance: 0.25,
-    // With the Dog whistle, a hit that would land on a medium or large dog misses it this often,
+    // With the Whistle, a hit that would land on a medium or large dog misses it this often,
     // costing nothing.
     whistleDodgeChance: 0.125,
   },

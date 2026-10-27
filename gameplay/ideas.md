@@ -16,4 +16,4 @@ Format: `- [status] **Idea**: short description · notes`. Statuses: **floated**
 - [cut] **Scripted first walk**: a one-neighborhood tutorial walk with guaranteed encounters · first-time hints and the help screen teach the rules
 - [cut] **Story recap on the end screen**: retell the walk's biggest moments · the end screen shows the walk's earnings and the owners' closing lines
 - [cut] **Walker pace and style**: fast or slow walkers, charmers and hustlers · agility and one perk per walker
-- [cut] **Whistle**: gear that makes thieves flee · thieves never flee
+- [cut] **Thief whistle**: gear that makes thieves flee · thieves never flee

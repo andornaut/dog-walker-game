@@ -69,7 +69,7 @@ export const WALKERS = {
   mrB: {
     agility: 1,
     greeting: "Nice pack! Mind if I tag along?",
-    name: "Ben",
+    name: "Mr. B",
     perk: "treatFinder",
     portraitKey: "face-walker-mr-b",
     spriteKey: "walker-mr-b",

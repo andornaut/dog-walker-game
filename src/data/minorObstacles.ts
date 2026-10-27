@@ -123,5 +123,5 @@ export const MINOR_OBSTACLES = {
     name: "Stroller",
     shape: { lanes: 1, rows: 1 },
   },
-  trashCan: { name: "Bin", shape: { lanes: 1, rows: 1 } },
+  trashCan: { name: "Trash can", shape: { lanes: 1, rows: 1 } },
 } as const satisfies Record<string, MinorObstacle>;

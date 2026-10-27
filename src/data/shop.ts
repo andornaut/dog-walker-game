@@ -30,7 +30,7 @@ export const SHOP_GEAR = {
   },
   whistle: {
     effects: [{ chance: "whistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
-    name: "Dog whistle",
+    name: "Whistle",
     price: "whistle",
     short: "Medium and large dogs dodge too",
   },

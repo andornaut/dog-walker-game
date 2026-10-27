@@ -382,7 +382,7 @@
       "art": "kilo",
       "breed": "Alaskan Malamute",
       "look": "Large and sturdy, gray and white, blue eyes, harness",
-      "name": "Koda",
+      "name": "Kilo",
       "owner": {
         "name": "Jason",
         "role": "trail runner"
@@ -463,7 +463,7 @@
       "art": "reggie",
       "breed": "Pug",
       "look": "Fawn, black mask, tiny bandana",
-      "name": "Nugget",
+      "name": "Reggie",
       "owner": {
         "name": "Ralph",
         "role": "pet influencer"
@@ -863,7 +863,7 @@
           ]
         }
       ],
-      "name": "Dog whistle",
+      "name": "Whistle",
       "price": "whistle",
       "short": "Medium and large dogs dodge too",
       "iconKey": "item-whistle"
@@ -1286,7 +1286,7 @@
     },
     {
       "id": "trashCan",
-      "name": "Bin",
+      "name": "Trash can",
       "shape": {
         "lanes": 1,
         "rows": 1
@@ -1570,7 +1570,7 @@
       "id": "mrB",
       "agility": 1,
       "greeting": "Nice pack! Mind if I tag along?",
-      "name": "Ben",
+      "name": "Mr. B",
       "perk": "treatFinder",
       "portraitKey": "face-walker-mr-b",
       "spriteKey": "walker-mr-b",

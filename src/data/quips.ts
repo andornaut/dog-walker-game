@@ -48,7 +48,7 @@ export const QUIPS = {
   },
   reggie: {
     fired: ["You're unfollowed. And fired!", "Blocked! Worst day ever."],
-    happier: ["That's going on the feed!", "Nugget is trending!"],
+    happier: ["That's going on the feed!", "Reggie is trending!"],
     parting: ["Get his good side. The followers are waiting!", "Tag me in everything."],
     upset: ["Not the content I wanted!", "I can't post this!"],
   },

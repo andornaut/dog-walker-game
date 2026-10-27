@@ -44,7 +44,7 @@ export const DOGS = {
     art: "kilo",
     breed: "Alaskan Malamute",
     look: "Large and sturdy, gray and white, blue eyes, harness",
-    name: "Koda",
+    name: "Kilo",
     owner: {
       name: "Jason",
       role: "trail runner",
@@ -83,7 +83,7 @@ export const DOGS = {
     art: "reggie",
     breed: "Pug",
     look: "Fawn, black mask, tiny bandana",
-    name: "Nugget",
+    name: "Reggie",
     owner: {
       name: "Ralph",
       role: "pet influencer",
