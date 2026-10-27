@@ -102,8 +102,6 @@ export const TUNING = {
     // between these.
     approachSecondRoadShareMax: 0.45,
     approachSecondRoadShareMin: 0.25,
-    // How long a debuff lasts while Ada's Calm voice walks.
-    calmVoiceDebuffFactor: 0.5,
     // Each dart's speed across the road is its kind's times a factor drawn per dart up to this
     // far from 1 either way, in place of moverSpeedJitter.
     dartSpeedJitter: 0.4,
@@ -129,6 +127,8 @@ export const TUNING = {
     moverSpeedJitter: 0.25,
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
+    // How long a debuff lasts while Ada's Calm voice walks.
+    quickRecoveryDebuffFactor: 0.5,
     // Running shoes add this much to the walker's agility.
     runningShoesAgility: 0.4,
     rushHourObstacles: 1.5,

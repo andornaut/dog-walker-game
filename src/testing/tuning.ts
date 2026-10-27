@@ -10,7 +10,7 @@ export function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
     hearts: { ...tuning.hearts, kindWordsForgiven: 0 },
     multipliers: {
       ...tuning.multipliers,
-      calmVoiceDebuffFactor: 1,
+      quickRecoveryDebuffFactor: 1,
       treatFinderSpawns: 1,
       treatFinderTipSpawns: 1,
     },

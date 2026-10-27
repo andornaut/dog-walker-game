@@ -44,7 +44,7 @@ const tuning = {
   hearts: { ...TEST_TUNING.hearts, kindWordsForgiven: TUNING.hearts.kindWordsForgiven },
   multipliers: {
     ...TEST_TUNING.multipliers,
-    calmVoiceDebuffFactor: TUNING.multipliers.calmVoiceDebuffFactor,
+    quickRecoveryDebuffFactor: TUNING.multipliers.quickRecoveryDebuffFactor,
     treatFinderSpawns: TUNING.multipliers.treatFinderSpawns,
     treatFinderTipSpawns: TUNING.multipliers.treatFinderTipSpawns,
   },
@@ -75,7 +75,7 @@ function walkerWith(perk: WalkerPerkId): WalkerId {
 
 // Walkers whose perks change none of the values a case checks.
 const PLAIN = walkerWith("treatFinder");
-const PLAIN_FOR_SPAWNS = walkerWith("calmVoice");
+const PLAIN_FOR_SPAWNS = walkerWith("quickRecovery");
 
 // A lone small dog's run, with the walker and gear given and the upgrades picked. A small
 // dog's max stays below hearts.maxOwnerHearts with every bonus.
@@ -136,13 +136,13 @@ function optionModified(encounter: EncounterId, index: number, state: RunState):
 
 const sources = {
   bigTipper: { kind: "upgrade", upgrade: "bigTipper" },
-  calmVoice: { kind: "walker", walker: walkerWith("calmVoice") },
   fannyPack: { gear: "fannyPack", kind: "gear" },
   goodLeash: { kind: "upgrade", upgrade: "goodLeash" },
   hallPass: { gear: "hallPass", kind: "gear" },
   kindWords: { kind: "walker", walker: walkerWith("kindWords") },
   longReach: { kind: "walker", walker: walkerWith("longReach") },
   luckyCollar: { gear: "luckyCollar", kind: "gear" },
+  quickRecovery: { kind: "walker", walker: walkerWith("quickRecovery") },
   runningShoes: { gear: "runningShoes", kind: "gear" },
   rushHour: { kind: "upgrade", upgrade: "rushHour" },
   sweetTalker: { kind: "upgrade", upgrade: "sweetTalker" },
@@ -161,7 +161,7 @@ describe("a card option's modified values", () => {
   const skunkDebuff = optionWith("skunk", "debuff");
   const letGo = read(tuning, "money", thiefPays.effect.amount);
   const seconds = read(tuning, "seconds", DEBUFFS[skunkDebuff.effect.debuff].seconds);
-  const calmed = seconds * read(tuning, "multipliers", "calmVoiceDebuffFactor");
+  const calmed = seconds * read(tuning, "multipliers", "quickRecoveryDebuffFactor");
 
   it.each([
     [
@@ -196,13 +196,13 @@ describe("a card option's modified values", () => {
       ],
     ],
     [
-      "Calm voice shortens the debuff",
-      () => optionModified("skunk", skunkDebuff.index, runWith(walkerWith("calmVoice"))),
+      "Quick recovery shortens the debuff",
+      () => optionModified("skunk", skunkDebuff.index, runWith(walkerWith("quickRecovery"))),
       [
         {
           after: calmed,
           before: seconds,
-          by: by(calmed - seconds, sources.calmVoice),
+          by: by(calmed - seconds, sources.quickRecovery),
           subject: { debuff: skunkDebuff.effect.debuff, kind: "debuffSeconds" },
         },
       ],

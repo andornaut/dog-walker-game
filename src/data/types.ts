@@ -731,7 +731,7 @@ export interface RunText {
   // The front dog's card tag while ui-lead-tag is missing.
   readonly lead: string;
   readonly lowHearts: string;
-  // A debuff's length in seconds on a road chip, such as the "4s" Calm voice leaves.
+  // A debuff's length in seconds on a road chip, such as the "4s" Quick recovery leaves.
   readonly seconds: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about

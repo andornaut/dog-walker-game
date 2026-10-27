@@ -224,20 +224,23 @@ describe("applyEffects: other kinds", () => {
     expect(state.debuffsGot).toEqual({ stinky: 2 });
   });
 
-  it("halves a debuff's time with Calm voice", () => {
-    const calmVoice = activeModifier(
+  it("halves a debuff's time with Quick recovery", () => {
+    const quickRecovery = activeModifier(
       { kind: "walker", walker: "ada" },
-      { by: "calmVoiceDebuffFactor", operation: "multiply", stat: "debuffSeconds" },
+      { by: "quickRecoveryDebuffFactor", operation: "multiply", stat: "debuffSeconds" },
     );
     const stinky: Effect = { debuff: "stinky", kind: "debuff" };
     // The test tuning makes every walker's perk neutral, so this one is put back at a half.
     const { multipliers } = TEST_TUNING;
-    const tuning = { ...TEST_TUNING, multipliers: { ...multipliers, calmVoiceDebuffFactor: 0.5 } };
+    const tuning = {
+      ...TEST_TUNING,
+      multipliers: { ...multipliers, quickRecoveryDebuffFactor: 0.5 },
+    };
     const state = applyEffects(
       { ...data, tuning },
       context([]),
       [stinky],
-      testState({ kilo: 5 }, { modifiers: [calmVoice] }),
+      testState({ kilo: 5 }, { modifiers: [quickRecovery] }),
     );
     expect(state.debuffs[0]?.secondsLeft).toBe(read(TEST_TUNING, "seconds", "stinkySeconds") / 2);
   });

@@ -40,7 +40,7 @@ export function longerLasting(a: Lasting, b: Lasting): Lasting {
 }
 
 // A debuff applied now: it lasts its seconds, no further than the rest of the zone.
-// debuffSeconds modifiers, such as Calm voice's, change how long it lasts.
+// debuffSeconds modifiers, such as Quick recovery's, change how long it lasts.
 export function debuffLasting(
   tuning: LiveTuning,
   seconds: SecondsKey,

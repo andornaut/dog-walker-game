@@ -573,7 +573,7 @@ export class HudScene extends Scene {
       if (active === undefined) {
         continue;
       }
-      // A debuff a buff shortened, such as by Calm voice, starts part way down its bar.
+      // A debuff a buff shortened, such as by Quick recovery, starts part way down its bar.
       const { seconds } = gameData.debuffs[bar.debuff];
       const full = Math.max(
         read(gameData.tuning, "seconds", seconds),

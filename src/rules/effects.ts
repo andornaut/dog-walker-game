@@ -253,7 +253,7 @@ function applyMoney(
 const unchanged = (state: RunState): Applied => ({ changes: [], modified: [], state });
 
 // How long a debuff applied now lasts, as debuffLasting has it, when debuffSeconds modifiers,
-// such as Calm voice's, change it.
+// such as Quick recovery's, change it.
 function debuffSecondsModified(
   data: RulesData,
   debuff: DebuffId,

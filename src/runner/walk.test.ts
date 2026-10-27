@@ -1107,7 +1107,7 @@ describe("stepWalk's modified values", () => {
     ...live,
     multipliers: {
       ...live.multipliers,
-      calmVoiceDebuffFactor: TUNING.multipliers.calmVoiceDebuffFactor,
+      quickRecoveryDebuffFactor: TUNING.multipliers.quickRecoveryDebuffFactor,
     },
   }));
   const reaching = withTuning((live) => ({
@@ -1138,7 +1138,8 @@ describe("stepWalk's modified values", () => {
   const bonus = read(tuning, "money", "bigTipperTipBonus");
   const reach = read(reaching.tuning, "counts", "longReachLanes");
   const muddySeconds = read(tuning, "seconds", DEBUFFS.muddy.seconds);
-  const calmedSeconds = muddySeconds * read(calming.tuning, "multipliers", "calmVoiceDebuffFactor");
+  const calmedSeconds =
+    muddySeconds * read(calming.tuning, "multipliers", "quickRecoveryDebuffFactor");
   const bigTipper = { kind: "upgrade", upgrade: "bigTipper" } as const;
   const debuffed = (debuff: "muddy" | "stinky") => ({
     debuffs: [{ debuff, secondsLeft: 20, untilZone: 0 }],
@@ -1223,14 +1224,17 @@ describe("stepWalk's modified values", () => {
       ],
     ],
     [
-      "Calm voice shortens a puddle's Muddy",
+      "Quick recovery shortens a puddle's Muddy",
       calming,
-      meeting(walkerWith("calmVoice"), atPack("puddle")),
+      meeting(walkerWith("quickRecovery"), atPack("puddle")),
       [
         {
           after: calmedSeconds,
           before: muddySeconds,
-          by: by(calmedSeconds - muddySeconds, { kind: "walker", walker: walkerWith("calmVoice") }),
+          by: by(calmedSeconds - muddySeconds, {
+            kind: "walker",
+            walker: walkerWith("quickRecovery"),
+          }),
           subject: { debuff: "muddy", kind: "debuffSeconds" },
         },
       ],

@@ -195,10 +195,10 @@ describe("popsOf", () => {
           ...plain,
           at: { kind: "pack" },
           chip: fillNames(seconds, { seconds: "4" }),
-          item: { kind: "perk", perk: "calmVoice" },
+          item: { kind: "perk", perk: "quickRecovery" },
         },
       ],
-      name: "a debuff Calm voice shortened, with its charm and the new seconds' chip",
+      name: "a debuff Quick recovery shortened, with its charm and the new seconds' chip",
       popped: {
         bump: false,
         dog: null,
