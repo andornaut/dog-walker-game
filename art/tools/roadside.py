@@ -318,25 +318,32 @@ def leuty():
 
 
 def hydrant():
-    """A Toronto hydrant: a red barrel under a domed lgrey cap, a nozzle each side, on a flange."""
+    """A Toronto hydrant: a red barrel lit pink down its left, under a domed lgrey cap with a bolt on top, a
+    nozzle each side and a round pumper cap at the front, on a dred flange."""
     w, h = 18, 26
 
     def draw(g, f=0):
         base = h - 2
-        g.rect(4, base - 3, 10, 3, "dred")
+        g.rect(3, base - 3, 12, 3, "dred")
+        g.rect(3, base - 3, 12, 1, "red")
         g.rect(5, 9, 8, base - 12, "red")
+        g.rect(5, 9, 1, base - 12, "pink")
         g.rect(11, 9, 2, base - 12, "dred")
         g.rect(2, 13, 14, 4, "red")
         g.rect(14, 13, 2, 4, "dred")
-        g.rect(7, 13, 4, 4, "lgrey")
+        g.rect(2, 13, 1, 4, "lgrey")
+        g.rect(15, 13, 1, 4, "stone")
+        g.ell(9, 15, 2.5, 2.5, "lgrey")
+        g.p(9, 15, "stone")
         g.ell(9, 8, 4, 3, "lgrey")
+        g.rect(11, 6, 2, 3, "stone")
         g.rect(5, 8, 8, 2, "stone")
         g.rect(8, 3, 2, 2, "stone")
     return w, h, draw
 
 
 def urn():
-    """A cast-iron garden urn on a pedestal, heaped with red and pink geraniums."""
+    """A cast-iron garden urn on a pedestal, heaped with red and pink geraniums, ivy trailing over its rim."""
     w, h = 22, 28
 
     def draw(g, f=0):
@@ -350,25 +357,32 @@ def urn():
             g.ell(x, y, 4, 3, "canopy")
         for x, y, c in ((5, 6, "red"), (10, 4, "pink"), (14, 6, "red"), (17, 8, "pink"), (8, 8, "pink")):
             g.ell(x, y, 1.5, 1.5, c)
+        # ivy trailing over the rim
+        g.rect(4, 12, 1, 3, "canopy")
+        g.rect(17, 12, 1, 4, "canopy")
     return w, h, draw
 
 
 def barrel():
-    """A whisky barrel on end: ochre oak staves, ash hoops, its tan head showing above."""
+    """A whisky barrel on end, bulging at its middle: ochre oak staves lit tan down the left, ash hoops at the
+    chimes and the bilge, its tan head showing above."""
     w, h = 20, 26
 
     def draw(g, f=0):
         base = h - 2
-        g.rect(3, 4, 14, base - 5, "ochre")
-        g.rect(13, 4, 4, base - 5, "brown")
-        g.rect(3, 4, 1, base - 5, "tan")
-        for x in (7, 11):
+        g.rect(4, 4, 12, base - 5, "ochre")
+        g.rect(3, 8, 14, base - 13, "ochre")
+        g.rect(13, 4, 3, base - 5, "brown")
+        g.rect(14, 8, 3, base - 13, "brown")
+        g.rect(4, 4, 1, 4, "tan")
+        g.rect(3, 8, 1, base - 13, "tan")
+        for x in (7, 10):
             g.rect(x, 4, 1, base - 5, "brown")
-        for y in (6, base - 4):
-            g.rect(3, y, 14, 2, "ash")
-            g.rect(3, y, 14, 1, "lgrey")
-        g.ell(10, 4, 7, 2, "tan")
-        g.ell(10, 4, 5, 1, "ochre")
+        for x0, x1, y in ((4, 16, 5), (3, 17, 9), (3, 17, base - 8), (4, 16, base - 3)):
+            g.rect(x0, y, x1 - x0, 2, "ash")
+            g.rect(x0, y, x1 - x0, 1, "lgrey")
+        g.ell(10, 4, 6, 2, "tan")
+        g.ell(10, 4, 4, 1, "ochre")
     return w, h, draw
 
 
@@ -389,20 +403,22 @@ def bollard():
 
 
 def bike_ring():
-    """Toronto's post-and-ring bike stand: an lgrey post through an lgrey ring."""
+    """Toronto's post-and-ring bike stand: an lgrey post through a thick lgrey ring, on a stone foot."""
     w, h = 16, 32
 
     def draw(g, f=0):
         base = h - 2
         g.ell(8, 10, 6, 6, "lgrey")
-        g.ell(8, 10, 4.5, 4.5, None)
+        g.ell(8, 10, 4, 4, None)
         g.rect(7, 4, 2, base - 3, "lgrey")
         g.rect(8, 4, 1, base - 3, "stone")
+        g.rect(6, base - 1, 4, 2, "stone")
     return w, h, draw
 
 
 def news_box():
-    """A newspaper box on legs: a cobalt cabinet with a window onto the day's paper."""
+    """A newspaper box on legs: a cobalt cabinet under a red masthead, a window onto the day's paper and a
+    pull handle under it."""
     w, h = 18, 30
 
     def draw(g, f=0):
@@ -411,11 +427,13 @@ def news_box():
         g.rect(12, base - 6, 2, 7, "coal")
         g.rect(2, 4, 14, base - 9, "cobalt")
         g.rect(14, 4, 2, base - 9, "navy")
-        g.rect(4, 7, 9, 7, "cream")
-        g.rect(5, 8, 7, 1, "ink")
-        g.rect(5, 10, 5, 1, "ash")
-        g.rect(5, 12, 6, 1, "ash")
-        g.rect(4, 16, 9, 1, "navy")
+        g.rect(2, 4, 14, 2, "red")
+        g.rect(14, 4, 2, 2, "dred")
+        g.rect(4, 8, 8, 7, "cream")
+        g.rect(5, 9, 6, 1, "ink")
+        g.rect(5, 11, 4, 1, "ash")
+        g.rect(5, 13, 5, 1, "ash")
+        g.rect(6, 16, 4, 1, "lgrey")
     return w, h, draw
 
 
@@ -450,21 +468,29 @@ def life_ring():
 
 
 def pay_station():
-    """A pay-and-display machine: an lgrey cabinet with a lit screen, a forest P sign on a post above."""
+    """A pay-and-display machine: an lgrey cabinet shaded stone, a lit screen, a keypad, a coin slot and a
+    ticket slot, under a white P on a forest disc on a post."""
     w, h = 14, 34
 
     def draw(g, f=0):
         base = h - 2
         g.rect(3, 10, 8, base - 9, "lgrey")
         g.rect(9, 10, 2, base - 9, "stone")
-        g.rect(4, 11, 4, 5, "coal")
-        g.rect(4, 12, 4, 3, "cyan")
-        g.rect(4, 17, 4, 1, "gold")
-        g.rect(6, 4, 2, 6, "stone")
+        g.rect(4, 11, 4, 4, "coal")
+        g.rect(4, 12, 4, 2, "cyan")
+        for y in (17, 19):
+            g.rect(4, y, 1, 1, "ash")
+            g.rect(6, y, 1, 1, "ash")
+        g.rect(8, 17, 1, 2, "ink")
+        g.rect(4, 22, 4, 1, "ink")
+        g.rect(4, 23, 4, 1, "gold")
+        g.rect(6, 6, 2, 4, "stone")
         g.ell(7, 4, 3, 3, "forest")
-        g.rect(6, 3, 2, 3, "white")
+        g.rect(6, 2, 1, 4, "white")
+        g.rect(7, 2, 1, 1, "white")
+        g.rect(8, 3, 1, 1, "white")
+        g.rect(7, 4, 1, 1, "white")
     return w, h, draw
-
 
 
 # key: (design w, h, draw), idle frame arguments, ms per frame, whether it stands free and casts the
