@@ -14,6 +14,7 @@ import type {
   Modifier,
   MoneyEffect,
   ProbabilityKey,
+  SharedHeartsEffect,
   Size,
   Target,
   WalkerPerk,
@@ -81,6 +82,13 @@ function heartsText(words: EffectWords, effect: HeartsEffect): string {
   const hearts = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
   const key = effect.target.kind === "lead" ? "heartsLead" : "heartsEach";
   return fillLine(HOME_TEXT_FIELDS.effect, words, key, { hearts });
+}
+
+// Hearts shared by the pack, by their signed total: "+3♥ shared by the pack".
+function sharedHeartsText(data: TextData, effect: SharedHeartsEffect): string {
+  const total = read(data.tuning, "hearts", effect.amount);
+  const hearts = `${sign(total)}${Math.abs(total)}♥`;
+  return fillLine(HOME_TEXT_FIELDS.effect, data.homeText.effect, "heartsShared", { hearts });
 }
 
 // A fraction's size as a whole percent, unsigned: 0.3 and -0.3 both as "30%".
@@ -204,6 +212,8 @@ function effectPhrase(data: TextData, effect: Effect): Phrase {
       return { duration: effect.duration, text: modifierChange(data, effect) };
     case "money":
       return { text: moneyText(data, effect) };
+    case "sharedHearts":
+      return { text: sharedHeartsText(data, effect) };
     case "skipOption":
       return { text: data.homeText.effect.skipOption };
     default:

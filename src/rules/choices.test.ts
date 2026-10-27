@@ -7,7 +7,7 @@ import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { CardOption, DogId, EncounterId, UpgradeId } from "../data/types";
+import type { CardOption, DogId, Effect, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { placeInPack } from "../state/pack";
 import { type CardSource, newRun, type RunState } from "../state/runState";
@@ -179,10 +179,14 @@ describe("applyInstantEncounter", () => {
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
-  it("gives the friendly neighbour's hearts to every owner", () => {
+  // The pinned tuning shares 3 hearts.
+  it("shares the friendly neighbour's hearts by the whole pack, whichever dog it caught", () => {
     const state = testState({ duchess: 3, kilo: 3 });
-    const outcome = applyInstantEncounter(data, state, "pettingNeighbour", ["duchess", "kilo"]);
-    expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "kilo"]);
+    const outcome = applyInstantEncounter(data, state, "pettingNeighbour", ["duchess"]);
+    expect(outcome.heartChanges.map(({ after, before, dog }) => [dog, after - before])).toEqual([
+      ["kilo", 2],
+      ["duchess", 1],
+    ]);
   });
 
   // Each lucky find, caught by the whole pack, below max, with an owner at max and with an owner
@@ -202,8 +206,10 @@ describe("applyInstantEncounter", () => {
     "has %s quip from exactly the owners it raised, %s",
     (id, _pack, state) => {
       const { resolution } = ENCOUNTERS[id];
-      const effects = resolution.kind === "instant" ? resolution.effects : [];
-      const hearts = effects.some((effect) => effect.kind === "hearts");
+      const effects: readonly Effect[] = resolution.kind === "instant" ? resolution.effects : [];
+      const hearts = effects.some(
+        (effect) => effect.kind === "hearts" || effect.kind === "sharedHearts",
+      );
       const walking = Object.entries(heartsByDog(state)) as [DogId, number][];
       const raised = walking.filter(
         ([dog, now]) =>

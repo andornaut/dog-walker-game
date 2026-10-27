@@ -3,9 +3,9 @@ import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
 import type { FaceMood } from "../rules/treats";
-import { cents } from "../rules/units";
+import { cents, read } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
-import { type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
+import { faceSentenceList, type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
 import type { MessageLine } from "./messageStrip";
 import { MOMENTS } from "./moments";
 import { STRIP_LINE_FIELDS } from "./runText";
@@ -29,6 +29,7 @@ function line<K extends StripKey>(
 export const STRIP_OWNER_MOODS = {
   fired: "upset",
   lowHearts: "upset",
+  luckyNeighbourGain: "happy",
   plainHit: "upset",
   secondChance: "neutral",
   treat: "happy",
@@ -151,17 +152,60 @@ export function pullLine(data: StripData, dog: DogId): MessageLine {
   return { icon: "pull", text: line(data, "pull", { dog: data.dogs[dog].name }) };
 }
 
-// A lucky find's line, with the money it found; a find with no line of its own says nothing.
-export function luckyLine(
-  data: StripData,
+type LuckyData = StripData & Pick<GameData, "encounters" | "homeText" | "tuning">;
+
+// The hearts an encounter's effects share by the pack, in all.
+function sharedTotal(
+  data: Pick<GameData, "encounters" | "tuning">,
   encounter: EncounterId,
-  money: readonly MoneyChange[],
+): number {
+  const { resolution } = data.encounters[encounter];
+  const effects = resolution.kind === "instant" ? resolution.effects : [];
+  return effects.reduce(
+    (total, effect) =>
+      effect.kind === "sharedHearts" ? total + read(data.tuning, "hearts", effect.amount) : total,
+    0,
+  );
+}
+
+// Each owner's gain in changes, as luckyNeighbourGain says it, joined as a sentence lists them
+// in the changes' order.
+function gainsText(data: LuckyData, changes: readonly Change[]): FaceText {
+  return faceSentenceList(
+    data.homeText.sentenceList,
+    changes.flatMap((change) =>
+      change.kind === "hearts" && change.after > change.before
+        ? [
+            ownerLine(data, "luckyNeighbourGain", change.dog, {
+              dog: data.dogs[change.dog].name,
+              hearts: String(change.after - change.before),
+            }),
+          ]
+        : [],
+    ),
+  );
+}
+
+// A lucky find's line, from the changes it made: the hearts the friendly neighbour shares and
+// each owner's gain, or the money a wallet held. A find with no line of its own says nothing.
+export function luckyLine(
+  data: LuckyData,
+  encounter: EncounterId,
+  changes: readonly Change[],
 ): MessageLine | null {
   if (encounter === "pettingNeighbour") {
-    return { icon: "lucky", text: data.runText.strip.luckyNeighbour };
+    const hearts = String(sharedTotal(data, encounter));
+    const gains = gainsText(data, changes);
+    return {
+      icon: "lucky",
+      ...fillFaceLine(STRIP_LINE_FIELDS, data.runText.strip, "luckyNeighbour", { gains, hearts }),
+    };
   }
   if (encounter === "lostWallet") {
-    const amount = money.reduce((sum, change) => sum + change.amount, 0);
+    const amount = changes.reduce(
+      (sum, change) => (change.kind === "money" ? sum + change.amount : sum),
+      0,
+    );
     return {
       icon: "lucky",
       text: line(data, "luckyWallet", { amount: formatDollars(cents(amount)) }),

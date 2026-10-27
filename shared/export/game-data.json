@@ -1040,11 +1040,8 @@
         "art": "card-petting-neighbour-take",
         "effects": [
           {
-            "amount": 1,
-            "kind": "hearts",
-            "target": {
-              "kind": "all"
-            }
+            "amount": "neighbourHearts",
+            "kind": "sharedHearts"
           }
         ],
         "kind": "instant",
@@ -2175,6 +2172,7 @@
         "small": 2
       },
       "maxOwnerHearts": 6,
+      "neighbourHearts": 3,
       "packSizeBonus": {
         "1": 2,
         "2": 1,

@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import type { Debuff, DebuffId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import type { HeartChange, MoneyChange } from "../rules/causes";
-import { formatDollars } from "../rules/effectText";
+import { formatDollars, sentenceList } from "../rules/effectText";
 import { cents, clampHearts, read } from "../rules/units";
 import {
   bumpLines,
@@ -152,6 +152,60 @@ describe("the strip's other lines", () => {
     for (const [name, line, expected] of cases) {
       expect(line, name).toEqual(expected);
     }
+  });
+});
+
+describe("luckyLine: the friendly neighbour", () => {
+  // The line with both its fields, so each one's filling shows.
+  const data = {
+    ...gameData,
+    runText: {
+      ...gameData.runText,
+      strip: { ...strip, luckyNeighbour: "{hearts} / {gains}" },
+    },
+  };
+  const total = String(read(gameData.tuning, "hearts", "neighbourHearts"));
+  const reggie = gameData.dogs.reggie;
+  const gain = (dog: typeof kilo, gained: number) =>
+    fillNames(strip.luckyNeighbourGain, {
+      dog: dog.name,
+      hearts: String(gained),
+      owner: dog.owner.name,
+    });
+  const reggieGain: HeartChange = { ...hearts(1, 2), dog: "reggie" };
+  const cappedKilo = hearts(8, 9, [
+    { amount: 2, kind: "effect", source: { encounter: "pettingNeighbour", kind: "instant" } },
+    { amount: -1, bound: "max", kind: "limit" },
+  ]);
+  const found: MoneyChange = { amount: cents(500), causes: [], dog: null, kind: "money" };
+
+  const duchess = gameData.dogs.duchess;
+  const duchessGain: HeartChange = { ...hearts(1, 2), dog: "duchess" };
+
+  it.each<[string, (HeartChange | MoneyChange)[], string[]]>([
+    ["a lone owner's gain", [hearts(1, 4)], [gain(kilo, 3)]],
+    ["each owner's gain in order", [hearts(1, 3), reggieGain], [gain(kilo, 2), gain(reggie, 1)]],
+    [
+      "a trio's gains",
+      [hearts(1, 2), reggieGain, duchessGain],
+      [gain(kilo, 1), gain(reggie, 1), gain(duchess, 1)],
+    ],
+    [
+      "an owner's actual gain under their max",
+      [cappedKilo, reggieGain],
+      [gain(kilo, 1), gain(reggie, 1)],
+    ],
+    ["no gains when every owner was at their max", [], []],
+    ["no gain for money", [found], []],
+  ])("says the total and %s", (_name, changes, gains) => {
+    const said = luckyLine(data, "pettingNeighbour", changes);
+    expect(said?.icon).toBe("lucky");
+    expect(said?.text).toBe(
+      fillNames(data.runText.strip.luckyNeighbour, {
+        gains: sentenceList(gameData.homeText.sentenceList, gains),
+        hearts: total,
+      }),
+    );
   });
 });
 

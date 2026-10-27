@@ -345,7 +345,7 @@ export class RunMoments {
     for (const { encounter, outcome } of step.instants) {
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
       showInstantPopup(this.scene, encounter, this.deps.still());
-      this.say(luckyLine(gameData, encounter, outcome.moneyChanges));
+      this.say(luckyLine(gameData, encounter, [...outcome.heartChanges, ...outcome.moneyChanges]));
       this.sayQuips(outcome.quips);
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });

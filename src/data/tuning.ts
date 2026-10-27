@@ -50,6 +50,8 @@ export const TUNING = {
     maxBySize: { large: 4, medium: 3, small: 2 },
     // No owner's max goes above this, whatever the dog's size, the pack's size and the gear add.
     maxOwnerHearts: 6,
+    // The friendly neighbour's hearts, shared by the dogs still walking.
+    neighbourHearts: 3,
     // Added to the lead dog's owner's max, whatever its size, by how many dogs the walk set out
     // with.
     packSizeBonus: { 1: 2, 2: 1, 3: 0 },

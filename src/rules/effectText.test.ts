@@ -72,6 +72,15 @@ describe("effectText", () => {
         fillNames(words.heartsLead, { hearts: "−1♥" }),
       ],
       [
+        "hearts shared by the pack, by their total",
+        [{ amount: "neighbourHearts", kind: "sharedHearts" }],
+        capitalize(
+          fillNames(words.heartsShared, {
+            hearts: `+${read(TEST_TUNING, "hearts", "neighbourHearts")}♥`,
+          }),
+        ),
+      ],
+      [
         "a dodge for the sizes it names, as one in so many",
         [{ chance: "whistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
         capitalize(

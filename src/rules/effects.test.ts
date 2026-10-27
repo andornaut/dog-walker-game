@@ -9,8 +9,15 @@ import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { LONE } from "../testing/packPlaces";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { maxHearts } from "./dogs";
-import { applyEffects, type EffectContext, moneyCost, resolveEffects, targetDogs } from "./effects";
+import { maxHearts, ownerMaxHearts } from "./dogs";
+import {
+  applyEffects,
+  type EffectContext,
+  moneyCost,
+  resolveEffects,
+  shareHearts,
+  targetDogs,
+} from "./effects";
 import { cents, read } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
@@ -62,6 +69,115 @@ describe("applyEffects: hearts", () => {
       const state = testState(slots, { modifiers });
       expect(heartsByDog(applyEffects(data, context(affected), [effect], state))).toEqual(expected);
     }
+  });
+});
+
+describe("shareHearts", () => {
+  it.each<[string, DogId[], number, [DogId, number][]]>([
+    ["a lone dog gets the whole total", ["reggie"], 3, [["reggie", 3]]],
+    [
+      "a pair's front dog gets the one left over",
+      ["reggie", "kilo"],
+      3,
+      [
+        ["kilo", 2],
+        ["reggie", 1],
+      ],
+    ],
+    [
+      "a trio gets one each",
+      ["reggie", "pierre", "kilo"],
+      3,
+      [
+        ["kilo", 1],
+        ["pierre", 1],
+        ["reggie", 1],
+      ],
+    ],
+    [
+      "the front dogs first, when more are left over",
+      ["reggie", "pierre", "kilo"],
+      5,
+      [
+        ["kilo", 2],
+        ["pierre", 2],
+        ["reggie", 1],
+      ],
+    ],
+    [
+      "nothing for a dog whose share is nothing",
+      ["reggie", "pierre", "kilo"],
+      2,
+      [
+        ["kilo", 1],
+        ["pierre", 1],
+      ],
+    ],
+    ["nothing among no dogs", [], 3, []],
+  ])("shares %s", (_name, dogs, total, expected) => {
+    expect(shareHearts(data, dogs, total)).toEqual(
+      expected.map(([dog, hearts]) => ({ dog, hearts })),
+    );
+  });
+});
+
+describe("applyEffects: hearts shared by the pack", () => {
+  const shared: Effect = { amount: "neighbourHearts", kind: "sharedHearts" };
+  type Slots = Parameters<typeof testState>[0];
+  const kiloPair = testState({ kilo: 1, reggie: 1 });
+  const kiloMax = ownerMaxHearts(data, kiloPair, "kilo");
+
+  // The pinned tuning shares 3 hearts.
+  it.each<[string, Slots, Slots]>([
+    ["all to a lone dog's owner", { reggie: 1 }, { reggie: 4 }],
+    [
+      "2 to the front dog's owner and 1 to the other",
+      { kilo: 1, reggie: 1 },
+      { kilo: 3, reggie: 2 },
+    ],
+    ["1 to each of a trio", { kilo: 1, pierre: 1, reggie: 1 }, { kilo: 2, pierre: 2, reggie: 2 }],
+    [
+      "among the dogs still walking, leaving out a fired owner's",
+      { duchess: 1, kilo: "fired", reggie: 1 },
+      { duchess: 3, reggie: 2 },
+    ],
+    [
+      "within each owner's max, losing the hearts past it",
+      { kilo: kiloMax - 1, reggie: 1 },
+      { kilo: kiloMax, reggie: 2 },
+    ],
+  ])("gives %s", (_name, slots, expected) => {
+    expect(heartsByDog(applyEffects(data, context([]), [shared], testState(slots)))).toEqual(
+      expected,
+    );
+  });
+
+  it("reports each owner's share and the cap, summing to the change", () => {
+    const { changes } = resolveEffects(
+      data,
+      context([]),
+      [shared],
+      testState({ kilo: kiloMax - 1, reggie: 1 }),
+    );
+    expect(changes).toEqual([
+      {
+        after: kiloMax,
+        before: kiloMax - 1,
+        causes: [
+          { amount: 2, kind: "effect", source: SKUNK_IGNORE },
+          { amount: -1, bound: "max", kind: "limit" },
+        ],
+        dog: "kilo",
+        kind: "hearts",
+      },
+      {
+        after: 2,
+        before: 1,
+        causes: [{ amount: 1, kind: "effect", source: SKUNK_IGNORE }],
+        dog: "reggie",
+        kind: "hearts",
+      },
+    ]);
   });
 });
 

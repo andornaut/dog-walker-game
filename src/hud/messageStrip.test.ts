@@ -17,6 +17,7 @@ import { plainMarks } from "../ui/pixelFont";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import {
   type FaceRow,
+  faceSentenceList,
   type FaceText,
   fillFaceText,
   fittingFaceRows,
@@ -224,6 +225,20 @@ function everyStripLine(): FaceText[] {
     ...new Set(Object.values(gameData.minorObstacles).map(({ name }) => name.toLowerCase())),
   ];
   const amount = "$9,999";
+  // The friendly neighbour's gains for the three owners whose gains say the most.
+  const longestGains = faceSentenceList(
+    gameData.homeText.sentenceList,
+    (Object.keys(gameData.dogs) as DogId[])
+      .map((id) =>
+        fillFaceText(strip.luckyNeighbourGain, {
+          dog: gameData.dogs[id].name,
+          hearts: "10",
+          owner: ownerFaceText(gameData, "happy", id),
+        }),
+      )
+      .sort((a, b) => b.text.length - a.text.length)
+      .slice(0, 3),
+  );
   return [
     ...Object.values(gameData.hints).map(({ text }) => ({ text })),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
@@ -231,7 +246,7 @@ function everyStripLine(): FaceText[] {
       text: fillNames(start, { cash: amount, seconds: "99", slower: "100%" }),
     })),
     ...Object.values(strip.debuffEnd).map((text) => ({ text })),
-    { text: strip.luckyNeighbour },
+    line("luckyNeighbour", { gains: longestGains, hearts: "10" }),
     line("fullPackHome", { amount }),
     line("luckyWallet", { amount }),
     ...dogs.flatMap(({ dog, owner }) => [

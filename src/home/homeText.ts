@@ -23,6 +23,7 @@ export const HOME_TEXT_FIELDS = {
     freeCards: ["count"],
     heartsEach: ["hearts"],
     heartsLead: ["hearts"],
+    heartsShared: ["hearts"],
   },
   focus: {
     dogLocked: ["dog", "kind", "price"],

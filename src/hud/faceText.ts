@@ -1,4 +1,5 @@
-import type { DogId, GameData } from "../data/types";
+import type { DogId, GameData, HomeText } from "../data/types";
+import { sentenceList } from "../rules/effectText";
 import type { FaceMood } from "../rules/treats";
 import type { FontMetrics } from "../ui/fontMetrics";
 import type { TextFitStyle } from "../ui/textFit";
@@ -83,6 +84,19 @@ export function fillFaceText(
   }
   text += line.slice(from);
   return marks.length === 0 ? { text } : { marks, text };
+}
+
+// Face texts joined as a sentence lists them, each one's marks moved with it: "Rosa +2♥ and
+// Jason +1♥".
+export function faceSentenceList(
+  words: HomeText["sentenceList"],
+  texts: readonly FaceText[],
+): FaceText {
+  const line = sentenceList(
+    words,
+    texts.map((_text, index) => `{${index}}`),
+  );
+  return fillFaceText(line, Object.fromEntries(texts.map((text, index) => [String(index), text])));
 }
 
 // The line at key in a group, with the names its table lists filled in, as fillLine fills them,

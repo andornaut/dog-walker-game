@@ -11,6 +11,8 @@ export const STRIP_LINE_FIELDS = {
   fullPackHome: ["amount"],
   largeDog: ["dog", "speed"],
   lowHearts: ["owner"],
+  luckyNeighbour: ["gains", "hearts"],
+  luckyNeighbourGain: ["dog", "hearts", "owner"],
   luckyWallet: ["amount"],
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],

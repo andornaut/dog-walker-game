@@ -137,7 +137,7 @@ export const ENCOUNTERS = {
     name: "Friendly neighbour",
     resolution: {
       art: "card-petting-neighbour-take",
-      effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
+      effects: [{ amount: "neighbourHearts", kind: "sharedHearts" }],
       kind: "instant",
       tally: "neighboursMet",
     },

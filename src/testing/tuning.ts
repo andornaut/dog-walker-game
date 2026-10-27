@@ -25,6 +25,7 @@ const PINNED_TUNING: LiveTuning = {
     maxBySize: { large: 10, medium: 8, small: 6 },
     // Above every pinned max, gear and pack-size bonus included, so no test hits it by chance.
     maxOwnerHearts: 12,
+    neighbourHearts: 3,
     treat: 1,
   },
   money: {

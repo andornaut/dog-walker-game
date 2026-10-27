@@ -5,6 +5,7 @@ import type {
   GameData,
   HeartsEffect,
   MoneyEffect,
+  SharedHeartsEffect,
   Target,
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
@@ -220,23 +221,70 @@ function forgivenCause(
     : { amount, forgives: true, kind: "modifier", source: forgiver.source };
 }
 
-function applyHearts(
+// One owner's part of a hearts effect: the dog and the hearts its owner gets or loses.
+export interface HeartsShare {
+  readonly dog: DogId;
+  readonly hearts: number;
+}
+
+// Applies each share as a change from the effect's source, in order.
+function applyShares(
   data: RulesData,
   context: EffectContext,
-  effect: HeartsEffect,
+  shares: readonly HeartsShare[],
   state: RunState,
 ): Applied {
   const changes: HeartChange[] = [];
   let next = state;
-  for (const dogId of targetDogs(data, context, state, effect.target)) {
-    const cause: Cause = { amount: effect.amount, kind: "effect", source: context.source };
-    const result = changeHearts(data, [cause], dogId, next);
+  for (const { dog, hearts } of shares) {
+    const cause: Cause = { amount: hearts, kind: "effect", source: context.source };
+    const result = changeHearts(data, [cause], dog, next);
     next = result.state;
     if (result.change !== null) {
       changes.push(result.change);
     }
   }
   return { changes, modified: changesModified(changes), state: next };
+}
+
+// A total of hearts split among dogs in formation order: an even share each, and the hearts
+// left over one each to the front dogs first. A dog whose share is nothing is left out.
+export function shareHearts(
+  data: Pick<GameData, "dogs">,
+  dogs: readonly DogId[],
+  total: number,
+): HeartsShare[] {
+  const ordered = packOrder(data.dogs, dogs);
+  const each = Math.floor(total / ordered.length);
+  const left = total - each * ordered.length;
+  return ordered.flatMap((dog, place) => {
+    const hearts = each + (place < left ? 1 : 0);
+    return hearts === 0 ? [] : [{ dog, hearts }];
+  });
+}
+
+function applyHearts(
+  data: RulesData,
+  context: EffectContext,
+  effect: HeartsEffect,
+  state: RunState,
+): Applied {
+  const shares = targetDogs(data, context, state, effect.target).map((dog) => ({
+    dog,
+    hearts: effect.amount,
+  }));
+  return applyShares(data, context, shares, state);
+}
+
+// The total is shared by the dogs still walking, whichever the encounter caught.
+function applySharedHearts(
+  data: RulesData,
+  context: EffectContext,
+  effect: SharedHeartsEffect,
+  state: RunState,
+): Applied {
+  const total = read(data.tuning, "hearts", effect.amount);
+  return applyShares(data, context, shareHearts(data, packDogs(state), total), state);
 }
 
 // A card never offers a loss the player cannot afford, so money is not held at $0 here.
@@ -337,6 +385,8 @@ function applyEffect(
       });
     case "money":
       return applyMoney(data, context, effect, state);
+    case "sharedHearts":
+      return applySharedHearts(data, context, effect, state);
     case "skipOption":
       return unchanged({ ...state, skipPass: context.source });
     default:

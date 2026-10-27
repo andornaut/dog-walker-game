@@ -39,6 +39,7 @@ export const HOME_TEXT = {
     freeCards: "first {count} cards' cash options free each neighbourhood",
     heartsEach: "{hearts} each",
     heartsLead: "{hearts} to the lead dog's owner",
+    heartsShared: "{hearts} shared by the pack",
     nothing: "Nothing",
     skipOption: "one free card skip each neighbourhood",
     stats: {

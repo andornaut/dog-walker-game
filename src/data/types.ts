@@ -214,6 +214,15 @@ export interface HeartsEffect {
   readonly target: Target;
 }
 
+// A total of hearts shared by the dogs still walking, in formation order: each owner gets an
+// even share, and the hearts left over go one each to the front dogs' owners first, so 3 is
+// 3 for a lone dog, 2 and 1 for a pair and 1 each for a trio. Each gain is held within its
+// owner's max, and hearts past it are lost.
+export interface SharedHeartsEffect {
+  readonly amount: HeartsKey;
+  readonly kind: "sharedHearts";
+}
+
 interface DebuffEffect {
   readonly debuff: DebuffId;
   readonly kind: "debuff";
@@ -248,6 +257,7 @@ export type Effect =
   | ImmuneEffect
   | ModifierEffect
   | MoneyEffect
+  | SharedHeartsEffect
   | SkipOptionEffect;
 
 export interface CardOption {
@@ -598,14 +608,16 @@ export interface HomeText {
   readonly dogSlotName: string;
   // The words an effect's text is built from, wherever it shows: what each duration adds, a
   // freeCards modifier's line for one free card and for {count}, a hearts change to each owner
-  // and to the lead dog's owner alone (its signed {hearts}), the text of no effects at all, a
-  // free Walk on by's line, and each stat's name.
+  // and to the lead dog's owner alone (its signed {hearts}), hearts shared by the pack (their
+  // signed total {hearts}), the text of no effects at all, a free Walk on by's line, and each
+  // stat's name.
   readonly effect: {
     readonly durations: { readonly [D in Duration]: string };
     readonly freeCard: string;
     readonly freeCards: string;
     readonly heartsEach: string;
     readonly heartsLead: string;
+    readonly heartsShared: string;
     readonly nothing: string;
     readonly skipOption: string;
     readonly stats: { readonly [S in Stat]: string };
@@ -796,7 +808,13 @@ export interface RunText {
     // At a walk's start, for each large dog in the pack, which slows lane changes.
     readonly largeDog: string;
     readonly lowHearts: string;
+    // The friendly neighbour's line: {hearts} is the total the neighbour shares, and {gains}
+    // each owner's actual gain, as luckyNeighbourGain says it, in formation order and joined as
+    // sentenceList joins names ("" when every owner was already at their max).
     readonly luckyNeighbour: string;
+    // One owner's gain in luckyNeighbour's {gains}: the {dog}, its {owner}, led by their happy
+    // face, and the {hearts} gained.
+    readonly luckyNeighbourGain: string;
     readonly luckyWallet: string;
     readonly plainHit: string;
     readonly pull: string;
