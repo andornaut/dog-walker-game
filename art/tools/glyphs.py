@@ -21,9 +21,9 @@ icon-zoomies                a debuff's bar and message line: an amber paw print 
 icon-spotlight              a debuff's bar and message line: a stage spotlight at the top left
                             throwing a pale beam down onto its yellow pool of light
 icon-upgrade-<upgrade>      the shop, the cards and the message strip: belly-rubs (a hand under a heart),
-                            big-tipper (coins and an up arrow), good-leash (a leash), raincoats
-                            (a yellow raincoat), rush-hour (an alarm clock), sweet-talker (a speech
-                            bubble with $ and a down arrow)
+                            big-tipper (coins and an up arrow), good-leash (a calm dog sitting
+                            politely), raincoats (a yellow raincoat), rush-hour (an alarm clock),
+                            sweet-talker (a speech bubble with $ and a down arrow)
 icon-gear-<gear>            the shop and the message strip: the shop's item art (icons.py) at 16x16
 <key>-20                    each icon-perk-*, icon-upgrade-* and icon-gear-* drawn again at 20x20 for
                             the walk bar's 22x22 effect wells: the same subject and colours
@@ -383,60 +383,58 @@ def big_tipper():
     return g
 
 
-# The leash, as a strap: r red, d dred on its shaded side, p pink where the light catches the handle; the
-# snap hook g lgrey, w white, s grey. The handle is an open teardrop loop and the hook a ring open on one
-# side, so the leash reads as a leash and not a key.
-LEASH = [
-    ".rrrr...........",
-    "rp..rr..........",
-    "r....rd.........",
-    "r....rd.........",
-    "rr..rrd.........",
-    ".rrrrd..........",
-    "..rrd...........",
-    "..rrd...........",
-    "..rrd...........",
-    "..rrrd..........",
-    "...rrrd....ww...",
-    "....rrrrrrrwgs..",
-    ".....dddddg..g..",
-    "..........g..gs.",
-    "...........ggs..",
+# Good leash, as a calm dog: a brown dog sitting politely side on, facing left, head up, a yellow
+# twinkle of good manners at its shoulder. o fur (brown), h shade (dbrown), e ear (dbrown), m chest and
+# muzzle (tan), k eye and nose (ink), c collar (red).
+CALM_DOG_COLS = {"o": "brown", "h": "dbrown", "e": "dbrown", "m": "tan", "k": "ink", "c": "red"}
+CALM_DOG = [
+    "................",
+    "................",
+    "..ooo...........",
+    ".ooooe..........",
+    ".okooe..........",
+    "kmoooe..........",
+    ".mmooe..........",
+    "...ooo..........",
+    "...ccc..........",
+    "...mooo.........",
+    "...moooo........",
+    "...mooooo.......",
+    "...mo.oooo..hh..",
+    "...mo.ooooo.h...",
+    "..hhh.hhhhhhh...",
     "................",
 ]
-LEASH_20 = [
-    ".rrrrrr.............",
-    "rpppprrr............",
-    "rpr...rrd...........",
-    "rr.....rd...........",
-    "rr.....rd...........",
-    "rrr...rrd...........",
-    ".rrrrrrd............",
-    "..rrrrd.............",
-    "...rrd..............",
-    "...rrd..............",
-    "...rrd..............",
-    "...rrd..............",
-    "...rrrd.............",
-    "....rrrd.......www..",
-    ".....rrrrrrrrrwwggs.",
-    "......dddddddwgg..gs",
-    ".............gg...gs",
-    "..............g..gs.",
-    "...............ggs..",
+CALM_DOG_20 = [
+    "....................",
+    "....................",
+    "..oooo..............",
+    ".oooooee............",
+    ".ookoooe............",
+    ".oooooee............",
+    "kmmoooee............",
+    ".mmmooe.............",
+    "....ooo.............",
+    "....cccc............",
+    "....mooo............",
+    "....moooo...........",
+    "....mooooo..........",
+    "....moooooo.........",
+    "....mooooooo........",
+    "....mo.ooooo...hh...",
+    "....mo.oooooo..h....",
+    "....mo.ooooooohh....",
+    "...hhh.hhhhhhhh.....",
     "....................",
 ]
 
 
-def leash(rows):
-    g = Grid(len(rows[0]), len(rows))
-    bitmap(g, 0, 0, rows, {"r": "red", "d": "dred", "p": "pink", "g": "lgrey", "w": "white", "s": "grey"})
-    return g
-
-
 def good_leash():
-    """A leash: a red strap with an open handle loop at the top, running down to its snap hook."""
-    return leash(LEASH)
+    """A calm dog, sitting politely with its head up and a twinkle of good manners: no squirrel pulls it."""
+    g = Grid(16, 16)
+    bitmap(g, 0, 0, CALM_DOG, CALM_DOG_COLS)
+    star4(g, 11, 4, 1, "yellow")
+    return g
 
 
 def raincoats():
@@ -699,8 +697,11 @@ def belly_rubs20():
 
 
 def good_leash20():
-    """A leash: a red strap with an open handle loop at the top, running down to its snap hook."""
-    return leash(LEASH_20)
+    """The calm dog of good_leash, sitting politely with its twinkle."""
+    g = Grid(20, 20)
+    bitmap(g, 0, 0, CALM_DOG_20, CALM_DOG_COLS)
+    star4(g, 14, 5, 2, "yellow")
+    return g
 
 
 def raincoats20():
