@@ -35,7 +35,9 @@
       "frames": 6,
       "ringAboveStar": 5,
       "starRows": {
+        "droppedCone": 48,
         "otherDog": 46,
+        "promoTeam": 43,
         "skunk": 38,
         "thief": 48
       }

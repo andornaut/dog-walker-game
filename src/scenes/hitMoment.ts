@@ -40,12 +40,12 @@ interface HitMoment {
 type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
 
 const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
-  capybara: "orange",
+  capybara: "amber",
   droppedCone: "pink",
   fishCrates: "sky",
   otherDog: "pink",
-  porchCat: "amber",
-  promoTeam: "mauve",
+  porchCat: "orange",
+  promoTeam: "amber",
   puddle: "sky",
   skunk: "mauve",
   squirrel: "orange",

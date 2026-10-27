@@ -525,20 +525,21 @@ describe("movers", { timeout: 120_000 }, () => {
     speed: number;
   };
   let plans: readonly Planned[] | null = null;
-  const plannedSpawns = () => {
-    plans ??= ZONE_IDS.flatMap((zone) =>
-      [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
-        SWEEP_SEEDS.flatMap((seed) => {
-          const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
-          const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
-            road: startRoad(LANE_COUNT),
-            run: zoned,
-          });
-          const speed = walkScrollSpeed(everyMover, zoned);
-          return walk.road.pending.map(({ kind, lane, mover }) => ({ kind, lane, mover, speed }));
-        }),
-      ),
+  // Every spawn planned in zone at its first and last walk positions, on each of seeds.
+  const planIn = (zone: ZoneId, seeds: readonly number[]): Planned[] =>
+    [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
+      seeds.flatMap((seed) => {
+        const zoned = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
+        const walk = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        });
+        const speed = walkScrollSpeed(everyMover, zoned);
+        return walk.road.pending.map(({ kind, lane, mover }) => ({ kind, lane, mover, speed }));
+      }),
     );
+  const plannedSpawns = () => {
+    plans ??= ZONE_IDS.flatMap((zone) => planIn(zone, SWEEP_SEEDS));
     return plans;
   };
   const plannedMovers = () =>
@@ -678,12 +679,28 @@ describe("movers", { timeout: 120_000 }, () => {
   // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on
   // another.
   const blocking = OBSTACLE_KINDS.filter((kind) => blocksLane(everyMover, kind));
+  // A neighbourhood-only kind is planned in its own zones alone, so its zones are swept over
+  // more seeds to plan it about as often as a kind every zone draws.
+  const zonesOf = (kind: WalkItem["kind"]): readonly string[] | undefined => {
+    const entry = Object.hasOwn(MINOR_OBSTACLES, kind)
+      ? everyMover.minorObstacles[kind as MinorObstacleId]
+      : everyMover.encounters[kind as ObstacleEncounterId];
+    return "zones" in entry ? entry.zones : undefined;
+  };
+  const ZONE_SWEEP_SEEDS = Array.from({ length: SWEEP_SEEDS.length * 3 }, (_, i) => i + 1);
+  const zonePlans = new Map<string, readonly Planned[]>();
+  const plannedInZone = (zone: string): readonly Planned[] => {
+    let planned = zonePlans.get(zone);
+    if (planned === undefined) {
+      planned = planIn(zone as ZoneId, ZONE_SWEEP_SEEDS);
+      zonePlans.set(zone, planned);
+    }
+    return planned;
+  };
   it.each(blocking)("starts a %s against each edge of the road on some seed", (kind) => {
-    const lanes = new Set(
-      plannedSpawns()
-        .filter((planned) => planned.kind === kind)
-        .map(({ lane }) => lane),
-    );
+    const zones = zonesOf(kind);
+    const planned = zones === undefined ? plannedSpawns() : zones.flatMap(plannedInZone);
+    const lanes = new Set(planned.filter((spawn) => spawn.kind === kind).map(({ lane }) => lane));
     expect([...lanes]).toEqual(
       expect.arrayContaining([0, LANE_COUNT - footprintOf(everyMover, kind).lanes]),
     );
