@@ -452,7 +452,7 @@
         "id": "raincoats",
         "kind": "upgrade"
       },
-      "text": "Puddles don't muddy the pack all walk",
+      "text": "Puddles don't make the pack Muddy all walk",
       "title": "Which way?"
     },
     {
@@ -1185,7 +1185,7 @@
             "kind": "debuff"
           }
         ],
-        "immuneText": "puddles don't muddy the pack",
+        "immuneText": "puddles don't make the pack Muddy",
         "kind": "contact"
       },
       "shape": {

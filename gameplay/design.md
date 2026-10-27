@@ -61,7 +61,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Formation:** the walker is at the bottom, the dogs close ahead in the same lane on visible leashes, every dog readable. The game sets the formation by size, never the player: the biggest dog leads in front (drawn behind the side dogs) and is the front dog, the next biggest walks on the left and the smallest on the right; ties go by roster order (alphabetical by name). Two dogs walk side by side out front, a little less far forward than a 3-dog lead, the bigger on the left as the front dog. One dog walks centred in the lead spot. No dog's hit box reaches into the next lane, so a pack fully in a lane never touches an obstacle in the lane beside it
 - **Hit boxes:** one rectangle per dog and one for the walker, each a few pixels inside its sprite; leashes can't be hit. Road sprites are drawn at 48px, and each obstacle hits as drawn: 2 px inside its opaque outline, at its depth, within its own lanes. Touching any part of an obstacle counts as one hit. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans
 - **Who a hit lands on:** a bump lands on the dog whose rectangle touched: if only the walker's did, on the front dog; if several dogs' did, on the one nearest the contact. Card obstacles hit the whole pack. Pickups (tips, treats and lucky finds) collect anywhere in the pack's whole outline, leashes included. Lane changes sweep the pack, so a fast move across several lanes can't skip a hazard or a pickup
-- **Bumps:** running into an obstacle that opens no card is a bump. A bump costs 1♥ from the owner of the dog it lands on. A collision costs hearts, makes the pack Muddy (a puddle) or opens a card. In the Spotlight a bump also costs money (see Encounters and debuffs); otherwise money is lost only through a card option you pick
+- **Bumps:** running into an obstacle that opens no card is a bump. A bump costs 1♥ from the owner of the dog it lands on. A collision costs hearts, makes the pack Muddy (a puddle) or opens a card. While Spotlight lasts, a bump also costs money (see Encounters and debuffs); otherwise money is lost only through a card option you pick
 - **After a hit:** the obstacle is out of play at once but stays on the road as scenery (a cone tipped over, a trash can rocking, a mover stopped) and scrolls off with it, touching nothing. Obstacles are ignored for a short grace window (about 0.7 seconds), during which the pack blinks; pickups still count
 - **Hit stop:** a hit freezes the road and the pack briefly while it plays (about 1 second for a card obstacle, before its card; about 0.3 seconds for a plain obstacle or a puddle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
 
@@ -218,7 +218,7 @@ Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one p
 - Belly rubs: +♥ to every owner now
 - Big tipper: every tip is worth $1 more in the next neighbourhood
 - Good leash: no dog pulls toward squirrels
-- Raincoats: puddles don't muddy: no Muddy and no hit stop. A card's Muddy still applies
+- Raincoats: puddles don't make the pack Muddy: no Muddy and no hit stop. A card's Muddy still applies
 - Rush hour (trade-off): twice the tips and treats and more obstacles in the next neighbourhood
 - Sweet talker: the first card in each neighbourhood has free money options (hearts and debuffs still cost; see Choice cards)
 

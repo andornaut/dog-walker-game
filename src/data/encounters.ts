@@ -221,7 +221,7 @@ export const ENCOUNTERS = {
     name: "Puddle",
     resolution: {
       effects: [{ debuff: "muddy", kind: "debuff" }],
-      immuneText: "puddles don't muddy the pack",
+      immuneText: "puddles don't make the pack Muddy",
       kind: "contact",
     },
     shape: { lanes: 2, rows: 1 },

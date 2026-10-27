@@ -63,7 +63,7 @@ export const RUN_TEXT = {
       muddy: "All clean again.",
       spotlight: "The cameras moved on.",
       stinky: "The pack smells fine again.",
-      zoomies: "The zoomies wore off.",
+      zoomies: "Zoomies wore off.",
     },
     debuffStart: {
       muddy: "Muddy! Slower lane changes for {seconds}s.",
