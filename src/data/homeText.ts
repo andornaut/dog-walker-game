@@ -65,7 +65,7 @@ export const HOME_TEXT = {
     priceBuy: "{price}: tap to buy.",
     priceShort: "{price}: need {amount} more.",
   },
-  gateSign: "High Park",
+  gateSign: "Toronto",
   gearBought: "{gear} is yours. Pocket it for a walk.",
   newerSave: "Newer save found. Reload.",
   noticePackFull: "The pack is full. Tap a picked dog to take it out.",
