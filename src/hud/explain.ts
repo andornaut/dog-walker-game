@@ -125,7 +125,7 @@ export function explainDetail(
         return undefined;
       }
       const { name, stake } = data.debuffs[target.debuff];
-      const fields = debuffFields(data, Math.ceil(active.secondsLeft));
+      const fields = debuffFields(data, target.debuff, Math.ceil(active.secondsLeft));
       return {
         card: {
           lines: [capitalize(fillNames(stake, fields))],

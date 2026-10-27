@@ -21,6 +21,7 @@ export const HOME_TEXT_FIELDS = {
   effect: {
     freeCards: ["count"],
     heartsEach: ["hearts"],
+    heartsLead: ["hearts"],
   },
   focus: {
     dogLocked: ["dog", "kind", "price"],

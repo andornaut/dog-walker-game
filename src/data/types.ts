@@ -12,7 +12,19 @@ import type { WORLD } from "./world";
 
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
-  "lostWallet" | "otherDog" | "pettingNeighbor" | "puddle" | "skunk" | "squirrel" | "thief";
+  | "capybara"
+  | "droppedCone"
+  | "fishCrates"
+  | "lostWallet"
+  | "otherDog"
+  | "pettingNeighbor"
+  | "porchCat"
+  | "promoTeam"
+  | "puddle"
+  | "skunk"
+  | "squirrel"
+  | "thief"
+  | "weddingShoot";
 // How many dogs a walk sets out with.
 export type PackSize = 1 | 2 | 3;
 export type Size = "large" | "medium" | "small";
@@ -142,8 +154,9 @@ export type Dog = Unlock & {
 };
 
 // Which dogs an effect reaches, among the dogs still in the pack. "affected" is the dogs
-// the encounter affected.
-export type Target = { readonly kind: "affected" } | { readonly kind: "all" };
+// the encounter affected, and "lead" the front one of them in formation order.
+export type Target =
+  { readonly kind: "affected" } | { readonly kind: "all" } | { readonly kind: "lead" };
 
 // "nextZone": the whole of the next zone.
 export type Duration = "nextZone" | "run";
@@ -161,6 +174,8 @@ export type Stat =
   | MoneyStat
   // How many hearts a minor bump costs.
   | "bumpHearts"
+  // How much cash a minor bump costs while a debuff, such as Spotlight, makes bumps cost cash.
+  | "bumpMoney"
   // What a card option's cash costs.
   | "cardCost"
   // How long a debuff lasts.
@@ -357,7 +372,8 @@ export type MovementKind = Movement["kind"];
 // good thing to bump into, one cell big, applied on contact with no card. An obstacle or lucky
 // encounter with a movement comes as a mover at the zone's moverShare; a lucky one stays a prize
 // as it moves, never something the pack steers around. hitWord is the comic word drawn in
-// font-comic over its hit burst: A to Z, ! ? - and space.
+// font-comic over its hit burst: A to Z, ! ? - and space. An obstacle with a zone appears only
+// in that zone: weighted there and 0 in every other.
 export type Encounter = {
   readonly name: string;
 } & (
@@ -371,6 +387,8 @@ export type Encounter = {
       readonly kind: "obstacle";
       readonly movement?: Movement;
       readonly shape: Shape;
+      // A zone id; typed as a string since ZoneId comes from the world, which names this type.
+      readonly zone?: string;
     } & (
       | { readonly hitLabel: string; readonly resolution: CardResolution }
       | { readonly resolution: ContactResolution | PullResolution }
@@ -378,16 +396,19 @@ export type Encounter = {
 );
 
 // An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
-// bumpHearts modifiers such as Muddy's change it, and never money; the dog it lands on may
-// dodge it.
+// bumpHearts modifiers such as Muddy's change it, or, while a debuff with bumpMoney such as
+// Spotlight lasts and there is cash, that cash instead; the dog it lands on may dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
-// Each zone's weights set how often it appears there. One with a movement comes as a mover at
-// the zone's moverShare.
+// Each zone's weights set how often it appears there; one with a zone appears only in that zone,
+// weighted there and 0 in every other. One with a movement comes as a mover at the zone's
+// moverShare.
 export interface MinorObstacle {
   readonly hitLabel?: string;
   readonly movement?: Movement;
   readonly name: string;
   readonly shape: Shape;
+  // A zone id, as an obstacle encounter's zone is.
+  readonly zone?: string;
 }
 
 // How long an upgrade card's effects last: applied at once, through the next zone, or for
@@ -449,10 +470,14 @@ export type Walker = WalkerUnlock & {
 
 // A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
 // and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
-// after the debuff's name, its {seconds} filled with how long it would last and its {hearts}
-// with what a minor bump costs while Muddy. Its modifiers
-// change stats while it lasts; one the rules act on by id, such as Zoomies' drift, has none.
+// after the debuff's name, its {seconds} filled with how long it would last, its {hearts} with
+// what a minor bump costs while Muddy and its {cash} with its bumpMoney. Its modifiers change
+// stats while it lasts; one the rules act on by id, such as Zoomies' drift, has none. While one
+// with bumpMoney lasts, a plain bump costs that cash, as bumpMoney modifiers such as Muddy's
+// change it, instead of hearts: all the cash there is when that is less, and hearts as usual at
+// $0.
 export interface Debuff {
+  readonly bumpMoney?: MoneyKey;
   readonly modifiers: readonly Modifier[];
   readonly name: string;
   readonly seconds: SecondsKey;
@@ -567,13 +592,14 @@ export interface HomeText {
   readonly dogSlotName: string;
   // The words an effect's text is built from, wherever it shows: what each duration adds, a
   // freeCards modifier's line for one free card and for {count}, a hearts change to each owner
-  // (its signed {hearts}), the text of no effects at all, a free Walk on by's line, and each
-  // stat's name.
+  // and to the lead dog's owner alone (its signed {hearts}), the text of no effects at all, a
+  // free Walk on by's line, and each stat's name.
   readonly effect: {
     readonly durations: { readonly [D in Duration]: string };
     readonly freeCard: string;
     readonly freeCards: string;
     readonly heartsEach: string;
+    readonly heartsLead: string;
     readonly nothing: string;
     readonly skipOption: string;
     readonly stats: { readonly [S in Stat]: string };
@@ -751,6 +777,8 @@ export interface RunText {
   // stake is), and the rest say what just happened on the road.
   readonly strip: {
     readonly achievement: string;
+    // A plain bump that cost cash instead of hearts, as Spotlight makes it: the {amount} lost.
+    readonly cashHit: string;
     readonly debuffEnd: { readonly [D in DebuffId]: string };
     readonly debuffStart: { readonly [D in DebuffId]: string };
     readonly dodge: string;

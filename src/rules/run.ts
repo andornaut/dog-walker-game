@@ -1,7 +1,7 @@
 import type { DogId, GameData, LiveTuning } from "../data/types";
 import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
-import { dollarCauses, modifierCauses, type MoneyChange } from "./causes";
+import { type Cause, dollarCauses, modifierCauses, type MoneyChange } from "./causes";
 import { type StatParts, statParts } from "./modifiers";
 import { addCents, type Cents, cents, read, roundDollars } from "./units";
 
@@ -48,6 +48,33 @@ export function bumpHearts(
   state: Pick<RunState, "debuffs" | "modifiers">,
 ): number {
   return bumpParts(data, state).value;
+}
+
+// What a minor bump takes from the cash now, as a change with its causes, while a debuff makes
+// bumps cost cash: the debuff's bumpMoney, such as Spotlight's, changed by bumpMoney modifiers
+// such as Muddy's, in whole dollars, or all the cash there is when that is less. Null while no
+// debuff makes bumps cost cash, or with no cash, when a bump costs hearts instead.
+export function bumpCash(
+  data: Pick<GameData, "debuffs" | "tuning">,
+  state: Pick<RunState, "debuffs" | "modifiers" | "money">,
+): MoneyChange | null {
+  const key = state.debuffs
+    .map(({ debuff }) => data.debuffs[debuff].bumpMoney)
+    .find((bumpMoney) => bumpMoney !== undefined);
+  if (key === undefined || state.money <= 0) {
+    return null;
+  }
+  const base = read(data.tuning, "money", key);
+  const parts = statParts(data.tuning, packModifiers(data, state), "bumpMoney", base);
+  const causes = dollarCauses([
+    { amount: -base, kind: "bump" },
+    ...modifierCauses(parts.contributions).map((cause) => ({ ...cause, amount: -cause.amount })),
+  ]);
+  const cost = -causes.reduce((sum, cause) => sum + cause.amount, 0);
+  const taken = Math.min(cost, state.money);
+  const limit: Cause[] =
+    taken < cost ? [{ amount: cost - taken, bound: "min", kind: "limit" }] : [];
+  return { amount: cents(-taken), causes: [...causes, ...limit], dog: null, kind: "money" };
 }
 
 // What one tip pickup pays now, with its causes: money.tip, then upgrades and debuffs apply.

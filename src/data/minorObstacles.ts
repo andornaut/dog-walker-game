@@ -1,9 +1,10 @@
 import type { MinorObstacle } from "./types";
 
 // Obstacles that open no card. Shapes are lanes across by rows along the road; each zone
-// weighs how often they appear there, in world.ts. Each obstacle has one look everywhere. An
-// obstacle with a movement comes as a mover at the zone's mover share, and stands still
-// otherwise.
+// weighs how often they appear there, in world.ts, and one with a zone appears only in that zone.
+// The neighbourhood-only obstacles' names, shapes and movements are placeholders. Each obstacle has
+// one look everywhere. An obstacle with a movement comes as a mover at the zone's mover share,
+// and stands still otherwise.
 export const MINOR_OBSTACLES = {
   ball: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
@@ -29,11 +30,18 @@ export const MINOR_OBSTACLES = {
     name: "Car",
     shape: { lanes: 1, rows: 3 },
   },
+  cargoBike: {
+    movement: { factor: 1.3, kind: "inLane" },
+    name: "Cargo bike",
+    shape: { lanes: 1, rows: 2 },
+    zone: "shops",
+  },
   cat: {
     movement: { kind: "dart", stopShare: 0.5, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Cat",
     shape: { lanes: 1, rows: 1 },
   },
+  clothingRack: { name: "Clothing rack", shape: { lanes: 1, rows: 1 }, zone: "shops" },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
   coyote: {
     movement: { kind: "approach", steps: { max: 4, min: 3 } },
@@ -87,22 +95,52 @@ export const MINOR_OBSTACLES = {
     name: "Kid on a bike",
     shape: { lanes: 1, rows: 1 },
   },
+  leafPile: { name: "Leaf pile", shape: { lanes: 1, rows: 1 }, zone: "snoozeCrescent" },
+  lifeguardChair: {
+    name: "Lifeguard chair",
+    shape: { lanes: 1, rows: 1 },
+    zone: "pawsPromenade",
+  },
   mailCarrier: {
     movement: { kind: "step", steps: { max: 4, min: 3 } },
     name: "Mail carrier",
     shape: { lanes: 1, rows: 1 },
   },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
+  patioRail: { name: "Patio rail", shape: { lanes: 3, rows: 1 }, zone: "street" },
+  pedicab: {
+    movement: { factor: 1.2, kind: "inLane" },
+    name: "Pedicab",
+    shape: { lanes: 1, rows: 2 },
+    zone: "homeStretch",
+  },
+  picnicBlanket: { name: "Picnic blanket", shape: { lanes: 2, rows: 1 }, zone: "park" },
   pigeons: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: -0.3, min: -0.3 }, turnBackShare: 0 },
     name: "Pigeons",
     shape: { lanes: 1, rows: 1 },
   },
+  porchSteps: { name: "Porch steps", shape: { lanes: 1, rows: 1 }, zone: "snoozeCrescent" },
+  produceCrates: { name: "Produce crates", shape: { lanes: 1, rows: 1 }, zone: "shops" },
   raccoon: {
     movement: { kind: "hop", most: 2, times: { max: 5, min: 2 } },
     name: "Raccoon",
     shape: { lanes: 1, rows: 1 },
   },
+  rollerblader: {
+    movement: { factor: 2.0, kind: "inLane" },
+    name: "Rollerblader",
+    shape: { lanes: 1, rows: 1 },
+    zone: "pawsPromenade",
+  },
+  rollingBarrel: {
+    movement: { kind: "dart", stopShare: 0, tilt: { max: 0.5, min: 0 }, turnBackShare: 0 },
+    name: "Rolling barrel",
+    shape: { lanes: 1, rows: 1 },
+    zone: "street",
+  },
+  sandcastle: { name: "Sandcastle", shape: { lanes: 1, rows: 1 }, zone: "pawsPromenade" },
+  sandwichBoard: { name: "Sandwich board", shape: { lanes: 1, rows: 1 }, zone: "homeStretch" },
   scooter: {
     movement: { factor: 2.0, kind: "inLane" },
     name: "Scooter",
@@ -124,4 +162,11 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   trashCan: { name: "Trash can", shape: { lanes: 1, rows: 1 } },
+  ttcBus: {
+    movement: { factor: 0.6, kind: "inLane" },
+    name: "TTC bus",
+    shape: { lanes: 1, rows: 3 },
+    zone: "homeStretch",
+  },
+  velvetRope: { name: "Velvet rope", shape: { lanes: 2, rows: 1 }, zone: "street" },
 } as const satisfies Record<string, MinorObstacle>;

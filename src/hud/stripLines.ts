@@ -53,12 +53,13 @@ function ownerLine<K extends OwnerKey>(
   return fillFaceLine(STRIP_LINE_FIELDS, data.runText.strip, key, all);
 }
 
-// A plain obstacle that landed on dog: a dodge, or the hearts its owner lost. obstacle is the
-// obstacle's name. A bump that cost nothing, such as one Second chance forgave whole, says nothing:
-// forgivenLines says the forgiving.
+// A plain obstacle that landed on dog: a dodge, the cash it cost while a debuff such as
+// Spotlight makes bumps cost cash, or the hearts its owner lost. obstacle is the obstacle's name.
+// A bump that cost nothing, such as one Second chance forgave whole, says nothing: forgivenLines
+// says the forgiving.
 export function bumpLine(
   data: StripData,
-  bump: { readonly change: HeartChange | null; readonly dodged: boolean; readonly dog: DogId },
+  bump: { readonly change: Change | null; readonly dodged: boolean; readonly dog: DogId },
   obstacle: string,
 ): MessageLine | null {
   const dog = data.dogs[bump.dog].name;
@@ -67,6 +68,10 @@ export function bumpLine(
     return { icon: "bump", text: line(data, "dodge", { dog, obstacle: name }) };
   }
   const { change } = bump;
+  if (change?.kind === "money") {
+    const amount = formatDollars(cents(-change.amount));
+    return { icon: "bump", text: line(data, "cashHit", { amount, dog, obstacle: name }) };
+  }
   if (change === null || change.after === change.before) {
     return null;
   }
@@ -208,14 +213,14 @@ export function debuffChanges(
 
 // A debuff's start, with how long it lasts in whole seconds, or its end.
 export function debuffLines(
-  data: StripData & Pick<GameData, "tuning">,
+  data: StripData & Pick<GameData, "debuffs" | "tuning">,
   changes: ReturnType<typeof debuffChanges>,
 ): MessageLine[] {
   const { debuffEnd, debuffStart } = data.runText.strip;
   return [
     ...changes.started.map(({ debuff, secondsLeft }): MessageLine => ({
       icon: debuff,
-      text: fillNames(debuffStart[debuff], debuffFields(data, Math.round(secondsLeft))),
+      text: fillNames(debuffStart[debuff], debuffFields(data, debuff, Math.round(secondsLeft))),
     })),
     ...changes.ended.map((debuff): MessageLine => ({ icon: debuff, text: debuffEnd[debuff] })),
   ];

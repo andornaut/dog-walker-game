@@ -75,7 +75,13 @@ function placeholderSizes(): Map<string, Size> {
     sizes.set(ownerFaceKey(gameData, dog), box(32, 32, PALETTE.brown));
     sizes.set(ownerCardFaceKey(gameData, dog), box(20, 20, PALETTE.brown));
   }
-  const tall: readonly EncounterId[] = ["pettingNeighbor", "thief"];
+  const tall: readonly EncounterId[] = [
+    "droppedCone",
+    "pettingNeighbor",
+    "promoTeam",
+    "thief",
+    "weddingShoot",
+  ];
   for (const encounter of Object.keys(gameData.encounters) as EncounterId[]) {
     const height = encounter === "puddle" ? short : tall.includes(encounter) ? tallest : side;
     const color = gameData.encounters[encounter].kind === "lucky" ? PALETTE.green : PALETTE.mauve;

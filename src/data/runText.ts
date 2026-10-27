@@ -58,13 +58,16 @@ export const RUN_TEXT = {
   seconds: "{seconds}s",
   strip: {
     achievement: "Badge earned! {name}",
+    cashHit: "{dog} bumped the {obstacle}! −{amount}",
     debuffEnd: {
       muddy: "All clean again.",
+      spotlight: "The cameras moved on.",
       stinky: "The pack smells fine again.",
       zoomies: "The zoomies wore off.",
     },
     debuffStart: {
       muddy: "Muddy paws! Bumps cost {hearts}♥ for {seconds}s.",
+      spotlight: "Spotlight! Bumps cost {cash} for {seconds}s.",
       stinky: "Stinky pack! Tips pay nothing for {seconds}s.",
       zoomies: "Zoomies! The pack won't sit still for {seconds}s.",
     },

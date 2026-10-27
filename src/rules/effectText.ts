@@ -73,7 +73,8 @@ function dodgeText(data: TextData, effect: DodgeEffect): string {
 
 function heartsText(words: EffectWords, effect: HeartsEffect): string {
   const hearts = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
-  return fillLine(HOME_TEXT_FIELDS.effect, words, "heartsEach", { hearts });
+  const key = effect.target.kind === "lead" ? "heartsLead" : "heartsEach";
+  return fillLine(HOME_TEXT_FIELDS.effect, words, key, { hearts });
 }
 
 // A fraction's size as a whole percent, unsigned: 0.3 and -0.3 both as "30%".
@@ -241,13 +242,17 @@ export function effectClause(data: TextData, effects: readonly Effect[]): string
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
-// The {name}s a debuff's stake and its strip start line are filled with: hearts, what a minor
+// The {name}s a debuff's stake and its strip start line are filled with: cash, what a minor bump
+// costs while the debuff makes bumps cost cash ($0 for one that does not), hearts, what a minor
 // bump costs while Muddy, and seconds, how long the debuff lasts or has left.
 export function debuffFields(
-  data: Pick<GameData, "tuning">,
+  data: Pick<GameData, "debuffs" | "tuning">,
+  debuff: DebuffId,
   seconds: number,
-): { readonly hearts: string; readonly seconds: string } {
+): { readonly cash: string; readonly hearts: string; readonly seconds: string } {
+  const { bumpMoney } = data.debuffs[debuff];
   return {
+    cash: formatDollars(bumpMoney === undefined ? cents(0) : read(data.tuning, "money", bumpMoney)),
     hearts: String(read(data.tuning, "multipliers", "muddyBumpHearts")),
     seconds: String(seconds),
   };
@@ -261,7 +266,7 @@ function debuffStake(
   seconds: number,
 ): string {
   const { name, stake } = data.debuffs[debuff];
-  return `${name}: ${fillNames(stake, debuffFields(data, seconds))}`;
+  return `${name}: ${fillNames(stake, debuffFields(data, debuff, seconds))}`;
 }
 
 // A debuff's modifiers and how long it lasts: "tips -50% for 20 seconds".

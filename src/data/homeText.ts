@@ -37,11 +37,13 @@ export const HOME_TEXT = {
     freeCard: "first card's cash options free each neighborhood",
     freeCards: "first {count} cards' cash options free each neighborhood",
     heartsEach: "{hearts} each",
+    heartsLead: "{hearts} to the lead dog's owner",
     nothing: "Nothing",
     skipOption: "one free card skip each neighborhood",
     stats: {
       agility: "lane change speed",
       bumpHearts: "♥ lost to a bump",
+      bumpMoney: "$ lost to a bump",
       cardCost: "card cash costs",
       debuffSeconds: "debuff time",
       forgivenHearts: "first ♥ lost each neighborhood forgiven",

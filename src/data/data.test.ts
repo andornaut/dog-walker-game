@@ -245,6 +245,31 @@ describe("run, world and walkers", () => {
     }
   });
 
+  // Every obstacle kind that names a zone, with the weights table that draws it in each zone.
+  const zoneKinds = [
+    ...Object.entries(encounters).flatMap(([id, encounter]) =>
+      encounter.kind === "obstacle" && "zone" in encounter && encounter.zone !== undefined
+        ? [{ id, table: "obstacles" as const, zone: encounter.zone }]
+        : [],
+    ),
+    ...Object.entries(minorObstacles).flatMap(([id, minor]) =>
+      "zone" in minor ? [{ id, table: "minorObstacles" as const, zone: minor.zone }] : [],
+    ),
+  ];
+
+  it("names a neighbourhood for some obstacles, card or not", () => {
+    expect(zoneKinds.map(({ table }) => table)).toEqual(
+      expect.arrayContaining(["minorObstacles", "obstacles"]),
+    );
+  });
+
+  it.each(zoneKinds)("draws $id only in its own zone, $zone", ({ id, table, zone }) => {
+    const weighted = world.zones.flatMap((each) =>
+      ((each.weights[table] as Readonly<Record<string, number>>)[id] ?? 0) > 0 ? [each.id] : [],
+    );
+    expect(weighted).toEqual([zone]);
+  });
+
   it("fits the largest pack in the card row, one dog slot a place, the first free and the rest priced", () => {
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
     expect(dogSlots).toHaveLength(tuning.counts.packSizeMax);

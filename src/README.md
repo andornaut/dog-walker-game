@@ -88,13 +88,15 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 ## Game data
 
 - **Card text:** generated from the effects and tuning, and exported with every card in `shared/export/game-data.json`.
+- **Bump costs:** a plain bump costs its dog's owner hearts (`bumpParts` in `src/rules/run.ts`), or, while a debuff with `bumpMoney` such as Spotlight lasts and there is cash, that cash (`bumpCash`), all of it when there is less; `bumpMoney` modifiers, such as Muddy's, change it. Forgiving modifiers, such as Second chance's, forgive hearts only.
 - **Choices:** `cardFor` builds a card (text, affected dogs, options disabled when unaffordable); `chooseOption` applies a choice and returns the new run state plus the outcome events the scenes animate.
-- **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline. A new kind is code in `src/rules/` plus a test.
+- **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline, each to a target: the affected dogs, the whole pack, or the lead dog (the front affected dog in formation order). Any card option may apply any debuff. A new kind is code in `src/rules/` plus a test.
 - **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.
 - **Integrity:** `src/data/data.test.ts` checks the rulebook's invariants, and type-level tests show invalid data fails to compile.
 - **Live tuning:** editing a value file under the dev server updates the running game through Vite HMR. Scenes and rules read tuning at the time of use.
 - **Ownership:** gameplay edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and the tests.
 - **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are branded types in the rules; value files hold plain numbers.
+- **Neighbourhood-only kinds:** an obstacle or minor obstacle with a `zone` appears only in that zone: `src/data/data.test.ts` requires its weight there above 0 and 0 in every other zone. `zone` is typed as a string, since `ZoneId` comes from the world, whose types name these types.
 - **Zones and forks:** `world.ts` lists the zones from easiest to hardest. A walk is `walkLength` zones from `firstZone`, ending on `lastZone`. The run's `route` lists the zones walked by id, and `zoneIndex` is a position in it. After each zone but the last, `offerFork` offers up to three unwalked zones in world order, each carrying an upgrade; the fork before the last zone leads only to `lastZone`. Its choice is an ordinary card choice that takes the upgrade and appends the zone to the route.
 
 ## Save data

@@ -8,6 +8,92 @@ import type { Encounter, EncounterId } from "./types";
 // Money amounts and modifier values are keys into tuning.ts; hearts are per owner.
 // art is a key into the art manifest's images.
 export const ENCOUNTERS = {
+  // Placeholder hit words, labels and option names on the six neighbourhood card obstacles.
+  capybara: {
+    hitLabel: "CAPYBARA!",
+    hitWord: "SQUEAK!",
+    kind: "obstacle",
+    movement: { kind: "step", steps: { max: 2, min: 1 } },
+    name: "Escaped capybara",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-capybara-help",
+          effects: [{ debuff: "muddy", kind: "debuff" }],
+          name: "Help the keeper",
+        },
+        {
+          art: "card-capybara-call-zoo",
+          effects: [{ amount: "capybaraCall", change: "lose", kind: "money" }],
+          name: "Call the zoo",
+        },
+        {
+          art: "card-capybara-keep-walking",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Keep walking",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zone: "park",
+  },
+  droppedCone: {
+    hitLabel: "MELTDOWN!",
+    hitWord: "SPLAT!",
+    kind: "obstacle",
+    name: "Dropped ice cream",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-dropped-cone-lick",
+          effects: [{ debuff: "stinky", kind: "debuff" }],
+          name: "Let them lick it",
+        },
+        {
+          art: "card-dropped-cone-buy",
+          effects: [{ amount: "newCone", change: "lose", kind: "money" }],
+          name: "Buy a new cone",
+        },
+        {
+          art: "card-dropped-cone-pull-away",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Pull away",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zone: "pawsPromenade",
+  },
+  fishCrates: {
+    hitLabel: "FISHY!",
+    hitWord: "FLOP!",
+    kind: "obstacle",
+    name: "Fish crate spill",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-fish-crates-sniff",
+          effects: [{ debuff: "stinky", kind: "debuff" }],
+          name: "Let them sniff",
+        },
+        {
+          art: "card-fish-crates-clean-up",
+          effects: [{ amount: "fishCleanUp", change: "lose", kind: "money" }],
+          name: "Help clean up",
+        },
+        {
+          art: "card-fish-crates-pull-away",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Pull away",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zone: "shops",
+  },
   lostWallet: {
     kind: "lucky",
     name: "Lost wallet",
@@ -55,6 +141,62 @@ export const ENCOUNTERS = {
       kind: "instant",
       tally: "neighborsMet",
     },
+  },
+  porchCat: {
+    hitLabel: "HISS!",
+    hitWord: "HISS!",
+    kind: "obstacle",
+    name: "Porch cat",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-porch-cat-shoo",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
+          name: "Shoo",
+        },
+        {
+          art: "card-porch-cat-treat",
+          effects: [{ amount: "porchCatTreat", change: "lose", kind: "money" }],
+          name: "Treat bribe",
+        },
+        {
+          art: "card-porch-cat-bolt",
+          effects: [{ debuff: "zoomies", kind: "debuff" }],
+          name: "Bolt past",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zone: "snoozeCrescent",
+  },
+  promoTeam: {
+    hitLabel: "FREE SAMPLE!",
+    hitWord: "FLASH!",
+    kind: "obstacle",
+    name: "Big screen promo",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-promo-team-wave",
+          effects: [{ debuff: "spotlight", kind: "debuff" }],
+          name: "Wave hello",
+        },
+        {
+          art: "card-promo-team-merch",
+          effects: [{ amount: "promoMerch", change: "lose", kind: "money" }],
+          name: "Buy the merch",
+        },
+        {
+          art: "card-promo-team-push-through",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Push through",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zone: "homeStretch",
   },
   puddle: {
     hitWord: "SPLOSH!",
@@ -132,5 +274,33 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
+  },
+  weddingShoot: {
+    hitLabel: "SAY CHEESE!",
+    hitWord: "CLICK!",
+    kind: "obstacle",
+    name: "Wedding photo shoot",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-wedding-shoot-pose",
+          effects: [{ debuff: "spotlight", kind: "debuff" }],
+          name: "Pose",
+        },
+        {
+          art: "card-wedding-shoot-walk-around",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Walk around",
+        },
+        {
+          art: "card-wedding-shoot-apologize",
+          effects: [{ amount: "weddingApology", change: "lose", kind: "money" }],
+          name: "Apologize",
+        },
+      ],
+    },
+    shape: { lanes: 2, rows: 1 },
+    zone: "street",
   },
 } as const satisfies Record<EncounterId, Encounter>;

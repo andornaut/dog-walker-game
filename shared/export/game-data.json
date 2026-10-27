@@ -1,6 +1,123 @@
 {
   "cards": [
     {
+      "art": "card-capybara-help",
+      "frame": "encounter",
+      "id": "help",
+      "index": 0,
+      "name": "Help the keeper",
+      "source": {
+        "id": "capybara",
+        "kind": "encounter"
+      },
+      "text": "Muddy: bumps cost 2♥ for 20s",
+      "title": "Escaped capybara"
+    },
+    {
+      "art": "card-capybara-call-zoo",
+      "frame": "encounter",
+      "id": "call-zoo",
+      "index": 1,
+      "name": "Call the zoo",
+      "source": {
+        "id": "capybara",
+        "kind": "encounter"
+      },
+      "text": "−$10",
+      "title": "Escaped capybara"
+    },
+    {
+      "art": "card-capybara-keep-walking",
+      "frame": "encounter",
+      "id": "keep-walking",
+      "index": 2,
+      "name": "Keep walking",
+      "source": {
+        "id": "capybara",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Escaped capybara"
+    },
+    {
+      "art": "card-dropped-cone-lick",
+      "frame": "encounter",
+      "id": "lick",
+      "index": 0,
+      "name": "Let them lick it",
+      "source": {
+        "id": "droppedCone",
+        "kind": "encounter"
+      },
+      "text": "Stinky: tips pay nothing for 30s",
+      "title": "Dropped ice cream"
+    },
+    {
+      "art": "card-dropped-cone-buy",
+      "frame": "encounter",
+      "id": "buy",
+      "index": 1,
+      "name": "Buy a new cone",
+      "source": {
+        "id": "droppedCone",
+        "kind": "encounter"
+      },
+      "text": "−$10",
+      "title": "Dropped ice cream"
+    },
+    {
+      "art": "card-dropped-cone-pull-away",
+      "frame": "encounter",
+      "id": "pull-away",
+      "index": 2,
+      "name": "Pull away",
+      "source": {
+        "id": "droppedCone",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Dropped ice cream"
+    },
+    {
+      "art": "card-fish-crates-sniff",
+      "frame": "encounter",
+      "id": "sniff",
+      "index": 0,
+      "name": "Let them sniff",
+      "source": {
+        "id": "fishCrates",
+        "kind": "encounter"
+      },
+      "text": "Stinky: tips pay nothing for 30s",
+      "title": "Fish crate spill"
+    },
+    {
+      "art": "card-fish-crates-clean-up",
+      "frame": "encounter",
+      "id": "clean-up",
+      "index": 1,
+      "name": "Help clean up",
+      "source": {
+        "id": "fishCrates",
+        "kind": "encounter"
+      },
+      "text": "−$16",
+      "title": "Fish crate spill"
+    },
+    {
+      "art": "card-fish-crates-pull-away",
+      "frame": "encounter",
+      "id": "pull-away",
+      "index": 2,
+      "name": "Pull away",
+      "source": {
+        "id": "fishCrates",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Fish crate spill"
+    },
+    {
       "art": "card-other-dog-sniff",
       "frame": "encounter",
       "id": "sniff",
@@ -25,6 +142,84 @@
       },
       "text": "Zoomies: the pack drifts on its own for 20s",
       "title": "Other dog"
+    },
+    {
+      "art": "card-porch-cat-shoo",
+      "frame": "encounter",
+      "id": "shoo",
+      "index": 0,
+      "name": "Shoo",
+      "source": {
+        "id": "porchCat",
+        "kind": "encounter"
+      },
+      "text": "−1♥ to the lead dog's owner",
+      "title": "Porch cat"
+    },
+    {
+      "art": "card-porch-cat-treat",
+      "frame": "encounter",
+      "id": "treat",
+      "index": 1,
+      "name": "Treat bribe",
+      "source": {
+        "id": "porchCat",
+        "kind": "encounter"
+      },
+      "text": "−$10",
+      "title": "Porch cat"
+    },
+    {
+      "art": "card-porch-cat-bolt",
+      "frame": "encounter",
+      "id": "bolt",
+      "index": 2,
+      "name": "Bolt past",
+      "source": {
+        "id": "porchCat",
+        "kind": "encounter"
+      },
+      "text": "Zoomies: the pack drifts on its own for 20s",
+      "title": "Porch cat"
+    },
+    {
+      "art": "card-promo-team-wave",
+      "frame": "encounter",
+      "id": "wave",
+      "index": 0,
+      "name": "Wave hello",
+      "source": {
+        "id": "promoTeam",
+        "kind": "encounter"
+      },
+      "text": "Spotlight: bumps cost $10 for 30s",
+      "title": "Big screen promo"
+    },
+    {
+      "art": "card-promo-team-merch",
+      "frame": "encounter",
+      "id": "merch",
+      "index": 1,
+      "name": "Buy the merch",
+      "source": {
+        "id": "promoTeam",
+        "kind": "encounter"
+      },
+      "text": "−$16",
+      "title": "Big screen promo"
+    },
+    {
+      "art": "card-promo-team-push-through",
+      "frame": "encounter",
+      "id": "push-through",
+      "index": 2,
+      "name": "Push through",
+      "source": {
+        "id": "promoTeam",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Big screen promo"
     },
     {
       "art": "card-skunk-grooming",
@@ -90,6 +285,45 @@
       },
       "text": "−1♥ each",
       "title": "Thief"
+    },
+    {
+      "art": "card-wedding-shoot-pose",
+      "frame": "encounter",
+      "id": "pose",
+      "index": 0,
+      "name": "Pose",
+      "source": {
+        "id": "weddingShoot",
+        "kind": "encounter"
+      },
+      "text": "Spotlight: bumps cost $10 for 30s",
+      "title": "Wedding photo shoot"
+    },
+    {
+      "art": "card-wedding-shoot-walk-around",
+      "frame": "encounter",
+      "id": "walk-around",
+      "index": 1,
+      "name": "Walk around",
+      "source": {
+        "id": "weddingShoot",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Wedding photo shoot"
+    },
+    {
+      "art": "card-wedding-shoot-apologize",
+      "frame": "encounter",
+      "id": "apologize",
+      "index": 2,
+      "name": "Apologize",
+      "source": {
+        "id": "weddingShoot",
+        "kind": "encounter"
+      },
+      "text": "−$16",
+      "title": "Wedding photo shoot"
     },
     {
       "art": "card-zone-cabbagetown",
@@ -269,11 +503,24 @@
           "by": "muddyBumpHearts",
           "operation": "multiply",
           "stat": "bumpHearts"
+        },
+        {
+          "by": "muddyBumpHearts",
+          "operation": "multiply",
+          "stat": "bumpMoney"
         }
       ],
       "name": "Muddy",
       "seconds": "muddySeconds",
       "stake": "bumps cost {hearts}♥ for {seconds}s"
+    },
+    {
+      "id": "spotlight",
+      "bumpMoney": "spotlightBump",
+      "modifiers": [],
+      "name": "Spotlight",
+      "seconds": "spotlightSeconds",
+      "stake": "bumps cost {cash} for {seconds}s"
     },
     {
       "id": "stinky",
@@ -542,6 +789,169 @@
   ],
   "encounters": [
     {
+      "id": "capybara",
+      "hitLabel": "CAPYBARA!",
+      "hitWord": "SQUEAK!",
+      "kind": "obstacle",
+      "movement": {
+        "kind": "step",
+        "steps": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "name": "Escaped capybara",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-capybara-help",
+            "effects": [
+              {
+                "debuff": "muddy",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Help the keeper"
+          },
+          {
+            "art": "card-capybara-call-zoo",
+            "effects": [
+              {
+                "amount": "capybaraCall",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Call the zoo"
+          },
+          {
+            "art": "card-capybara-keep-walking",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Keep walking"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "park",
+      "spriteKey": "capybara"
+    },
+    {
+      "id": "droppedCone",
+      "hitLabel": "MELTDOWN!",
+      "hitWord": "SPLAT!",
+      "kind": "obstacle",
+      "name": "Dropped ice cream",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-dropped-cone-lick",
+            "effects": [
+              {
+                "debuff": "stinky",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Let them lick it"
+          },
+          {
+            "art": "card-dropped-cone-buy",
+            "effects": [
+              {
+                "amount": "newCone",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Buy a new cone"
+          },
+          {
+            "art": "card-dropped-cone-pull-away",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Pull away"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "pawsPromenade",
+      "spriteKey": "dropped-cone"
+    },
+    {
+      "id": "fishCrates",
+      "hitLabel": "FISHY!",
+      "hitWord": "FLOP!",
+      "kind": "obstacle",
+      "name": "Fish crate spill",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-fish-crates-sniff",
+            "effects": [
+              {
+                "debuff": "stinky",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Let them sniff"
+          },
+          {
+            "art": "card-fish-crates-clean-up",
+            "effects": [
+              {
+                "amount": "fishCleanUp",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Help clean up"
+          },
+          {
+            "art": "card-fish-crates-pull-away",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Pull away"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "shops",
+      "spriteKey": "fish-crates"
+    },
+    {
       "id": "lostWallet",
       "kind": "lucky",
       "name": "Lost wallet",
@@ -640,6 +1050,110 @@
         "tally": "neighborsMet"
       },
       "spriteKey": "petting-neighbor"
+    },
+    {
+      "id": "porchCat",
+      "hitLabel": "HISS!",
+      "hitWord": "HISS!",
+      "kind": "obstacle",
+      "name": "Porch cat",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-porch-cat-shoo",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "lead"
+                }
+              }
+            ],
+            "name": "Shoo"
+          },
+          {
+            "art": "card-porch-cat-treat",
+            "effects": [
+              {
+                "amount": "porchCatTreat",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Treat bribe"
+          },
+          {
+            "art": "card-porch-cat-bolt",
+            "effects": [
+              {
+                "debuff": "zoomies",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Bolt past"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "snoozeCrescent",
+      "spriteKey": "porch-cat"
+    },
+    {
+      "id": "promoTeam",
+      "hitLabel": "FREE SAMPLE!",
+      "hitWord": "FLASH!",
+      "kind": "obstacle",
+      "name": "Big screen promo",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-promo-team-wave",
+            "effects": [
+              {
+                "debuff": "spotlight",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Wave hello"
+          },
+          {
+            "art": "card-promo-team-merch",
+            "effects": [
+              {
+                "amount": "promoMerch",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Buy the merch"
+          },
+          {
+            "art": "card-promo-team-push-through",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Push through"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "homeStretch",
+      "spriteKey": "promo-team"
     },
     {
       "id": "puddle",
@@ -791,6 +1305,58 @@
         "rows": 1
       },
       "spriteKey": "thief"
+    },
+    {
+      "id": "weddingShoot",
+      "hitLabel": "SAY CHEESE!",
+      "hitWord": "CLICK!",
+      "kind": "obstacle",
+      "name": "Wedding photo shoot",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-wedding-shoot-pose",
+            "effects": [
+              {
+                "debuff": "spotlight",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Pose"
+          },
+          {
+            "art": "card-wedding-shoot-walk-around",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Walk around"
+          },
+          {
+            "art": "card-wedding-shoot-apologize",
+            "effects": [
+              {
+                "amount": "weddingApology",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Apologize"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zone": "street",
+      "spriteKey": "wedding-shoot"
     }
   ],
   "gear": [
@@ -979,6 +1545,20 @@
       "spriteKey": "parked-car"
     },
     {
+      "id": "cargoBike",
+      "movement": {
+        "factor": 1.3,
+        "kind": "inLane"
+      },
+      "name": "Cargo bike",
+      "shape": {
+        "lanes": 1,
+        "rows": 2
+      },
+      "zone": "shops",
+      "spriteKey": "cargo-bike"
+    },
+    {
       "id": "cat",
       "movement": {
         "kind": "dart",
@@ -995,6 +1575,16 @@
         "rows": 1
       },
       "spriteKey": "chase-cat"
+    },
+    {
+      "id": "clothingRack",
+      "name": "Clothing rack",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "shops",
+      "spriteKey": "clothing-rack"
     },
     {
       "id": "cone",
@@ -1168,6 +1758,26 @@
       "spriteKey": "kid-on-bike"
     },
     {
+      "id": "leafPile",
+      "name": "Leaf pile",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "snoozeCrescent",
+      "spriteKey": "leaf-pile"
+    },
+    {
+      "id": "lifeguardChair",
+      "name": "Lifeguard chair",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "pawsPromenade",
+      "spriteKey": "lifeguard-chair"
+    },
+    {
       "id": "mailCarrier",
       "movement": {
         "kind": "step",
@@ -1193,6 +1803,40 @@
       "spriteKey": "parked-car"
     },
     {
+      "id": "patioRail",
+      "name": "Patio rail",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zone": "street",
+      "spriteKey": "patio-rail"
+    },
+    {
+      "id": "pedicab",
+      "movement": {
+        "factor": 1.2,
+        "kind": "inLane"
+      },
+      "name": "Pedicab",
+      "shape": {
+        "lanes": 1,
+        "rows": 2
+      },
+      "zone": "homeStretch",
+      "spriteKey": "pedicab"
+    },
+    {
+      "id": "picnicBlanket",
+      "name": "Picnic blanket",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zone": "park",
+      "spriteKey": "picnic-blanket"
+    },
+    {
       "id": "pigeons",
       "movement": {
         "kind": "dart",
@@ -1211,6 +1855,26 @@
       "spriteKey": "chase-pigeons"
     },
     {
+      "id": "porchSteps",
+      "name": "Porch steps",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "snoozeCrescent",
+      "spriteKey": "porch-steps"
+    },
+    {
+      "id": "produceCrates",
+      "name": "Produce crates",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "shops",
+      "spriteKey": "produce-crates"
+    },
+    {
       "id": "raccoon",
       "movement": {
         "kind": "hop",
@@ -1226,6 +1890,59 @@
         "rows": 1
       },
       "spriteKey": "snatch-raccoon"
+    },
+    {
+      "id": "rollerblader",
+      "movement": {
+        "factor": 2,
+        "kind": "inLane"
+      },
+      "name": "Rollerblader",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "pawsPromenade",
+      "spriteKey": "rollerblader"
+    },
+    {
+      "id": "rollingBarrel",
+      "movement": {
+        "kind": "dart",
+        "stopShare": 0,
+        "tilt": {
+          "max": 0.5,
+          "min": 0
+        },
+        "turnBackShare": 0
+      },
+      "name": "Rolling barrel",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "street",
+      "spriteKey": "rolling-barrel"
+    },
+    {
+      "id": "sandcastle",
+      "name": "Sandcastle",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "pawsPromenade",
+      "spriteKey": "sandcastle"
+    },
+    {
+      "id": "sandwichBoard",
+      "name": "Sandwich board",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zone": "homeStretch",
+      "spriteKey": "sandwich-board"
     },
     {
       "id": "scooter",
@@ -1292,6 +2009,30 @@
         "rows": 1
       },
       "spriteKey": "trash-can"
+    },
+    {
+      "id": "ttcBus",
+      "movement": {
+        "factor": 0.6,
+        "kind": "inLane"
+      },
+      "name": "TTC bus",
+      "shape": {
+        "lanes": 1,
+        "rows": 3
+      },
+      "zone": "homeStretch",
+      "spriteKey": "ttc-bus"
+    },
+    {
+      "id": "velvetRope",
+      "name": "Velvet rope",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zone": "street",
+      "spriteKey": "velvet-rope"
     }
   ],
   "tuning": {
@@ -1338,12 +2079,16 @@
     },
     "money": {
       "bigTipperTipBonus": 1,
+      "capybaraCall": 10,
       "encounterHigh": 16,
       "encounterLow": 10,
+      "fishCleanUp": 16,
       "fullPackBonusPerDog": 10,
       "lostWalletKeep": 20,
       "missedTips": 10,
+      "newCone": 10,
       "payPerDog": 20,
+      "porchCatTreat": 10,
       "prices": {
         "biscuit": 250,
         "buddy": 450,
@@ -1361,9 +2106,12 @@
         "snowball": 1000,
         "whistle": 1500
       },
+      "promoMerch": 16,
+      "spotlightBump": 10,
       "startPurse": 0,
       "thiefLetGo": 16,
-      "tip": 1
+      "tip": 1,
+      "weddingApology": 16
     },
     "multipliers": {
       "approachSecondRoadShareMax": 0.45,
@@ -1422,6 +2170,7 @@
       "pullReactionWindow": 0.6,
       "pullTell": 1,
       "shyHopNearSeconds": 1.65,
+      "spotlightSeconds": 30,
       "stinkySeconds": 30,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
@@ -1630,7 +2379,9 @@
           "bench": 3.5,
           "bunny": 2,
           "car": 1.5,
+          "cargoBike": 0,
           "cat": 1.8,
+          "clothingRack": 0,
           "cone": 3.5,
           "coyote": 2,
           "cyclist": 3,
@@ -1644,22 +2395,41 @@
           "iceCreamTruck": 0,
           "jogger": 2,
           "kidOnBike": 2,
+          "leafPile": 2,
+          "lifeguardChair": 0,
           "mailCarrier": 2,
           "parkedCar": 2,
+          "patioRail": 0,
+          "pedicab": 0,
+          "picnicBlanket": 0,
           "pigeons": 0,
+          "porchSteps": 2,
+          "produceCrates": 0,
           "raccoon": 2,
+          "rollerblader": 0,
+          "rollingBarrel": 0,
+          "sandcastle": 0,
+          "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
           "streetcar": 0,
           "stroller": 2,
-          "trashCan": 3.5
+          "trashCan": 3.5,
+          "ttcBus": 0,
+          "velvetRope": 0
         },
         "obstacles": {
+          "capybara": 0,
+          "droppedCone": 0,
+          "fishCrates": 0,
           "otherDog": 1.1,
+          "porchCat": 1,
+          "promoTeam": 0,
           "puddle": 1,
           "skunk": 1.1,
           "squirrel": 1,
-          "thief": 0
+          "thief": 0,
+          "weddingShoot": 0
         }
       },
       "keys": {
@@ -1698,7 +2468,9 @@
           "bench": 8,
           "bunny": 4,
           "car": 0,
+          "cargoBike": 0,
           "cat": 0,
+          "clothingRack": 0,
           "cone": 8,
           "coyote": 2,
           "cyclist": 4,
@@ -1712,22 +2484,41 @@
           "iceCreamTruck": 0,
           "jogger": 5,
           "kidOnBike": 2,
+          "leafPile": 0,
+          "lifeguardChair": 0,
           "mailCarrier": 0,
           "parkedCar": 0,
+          "patioRail": 0,
+          "pedicab": 0,
+          "picnicBlanket": 2,
           "pigeons": 1.2,
+          "porchSteps": 0,
+          "produceCrates": 0,
           "raccoon": 2,
+          "rollerblader": 0,
+          "rollingBarrel": 0,
+          "sandcastle": 0,
+          "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
           "streetcar": 0,
           "stroller": 3,
-          "trashCan": 8
+          "trashCan": 8,
+          "ttcBus": 0,
+          "velvetRope": 0
         },
         "obstacles": {
+          "capybara": 1,
+          "droppedCone": 0,
+          "fishCrates": 0,
           "otherDog": 2.2,
+          "porchCat": 0,
+          "promoTeam": 0,
           "puddle": 1,
           "skunk": 1.1,
           "squirrel": 1,
-          "thief": 0
+          "thief": 0,
+          "weddingShoot": 0
         }
       },
       "keys": {
@@ -1761,12 +2552,14 @@
         },
         "minorObstacles": {
           "ball": 1.2,
-          "barrier2": 3,
-          "barrier3": 3,
+          "barrier2": 0,
+          "barrier3": 0,
           "bench": 3,
           "bunny": 0,
           "car": 0,
+          "cargoBike": 0,
           "cat": 1.2,
+          "clothingRack": 0,
           "cone": 6,
           "coyote": 0,
           "cyclist": 5,
@@ -1775,27 +2568,46 @@
           "frisbeeDog": 0,
           "garbageTruck": 0,
           "goose": 0,
-          "hedge": 3,
+          "hedge": 0,
           "hotDogCart": 3,
           "iceCreamTruck": 0,
           "jogger": 4,
           "kidOnBike": 3,
+          "leafPile": 0,
+          "lifeguardChair": 0,
           "mailCarrier": 4,
           "parkedCar": 0,
+          "patioRail": 6,
+          "pedicab": 0,
+          "picnicBlanket": 0,
           "pigeons": 1.2,
+          "porchSteps": 0,
+          "produceCrates": 0,
           "raccoon": 0,
+          "rollerblader": 0,
+          "rollingBarrel": 2,
+          "sandcastle": 0,
+          "sandwichBoard": 0,
           "scooter": 2,
           "seagull": 0,
           "streetcar": 0,
           "stroller": 10,
-          "trashCan": 3
+          "trashCan": 3,
+          "ttcBus": 0,
+          "velvetRope": 3
         },
         "obstacles": {
+          "capybara": 0,
+          "droppedCone": 0,
+          "fishCrates": 0,
           "otherDog": 1.1,
+          "porchCat": 0,
+          "promoTeam": 0,
           "puddle": 1,
           "skunk": 1.1,
           "squirrel": 1,
-          "thief": 1.1
+          "thief": 1.1,
+          "weddingShoot": 1
         }
       },
       "keys": {
@@ -1834,7 +2646,9 @@
           "bench": 7.5,
           "bunny": 0,
           "car": 0,
+          "cargoBike": 2,
           "cat": 1.2,
+          "clothingRack": 2,
           "cone": 3.75,
           "coyote": 0,
           "cyclist": 7,
@@ -1848,22 +2662,41 @@
           "iceCreamTruck": 1,
           "jogger": 3,
           "kidOnBike": 3,
+          "leafPile": 0,
+          "lifeguardChair": 0,
           "mailCarrier": 4,
           "parkedCar": 0,
+          "patioRail": 0,
+          "pedicab": 0,
+          "picnicBlanket": 0,
           "pigeons": 1.8,
+          "porchSteps": 0,
+          "produceCrates": 2,
           "raccoon": 2,
+          "rollerblader": 0,
+          "rollingBarrel": 0,
+          "sandcastle": 0,
+          "sandwichBoard": 0,
           "scooter": 3,
           "seagull": 0,
           "streetcar": 2,
           "stroller": 7,
-          "trashCan": 3.75
+          "trashCan": 3.75,
+          "ttcBus": 0,
+          "velvetRope": 0
         },
         "obstacles": {
+          "capybara": 0,
+          "droppedCone": 0,
+          "fishCrates": 1,
           "otherDog": 1.1,
+          "porchCat": 0,
+          "promoTeam": 0,
           "puddle": 1,
           "skunk": 1.1,
           "squirrel": 1,
-          "thief": 2.2
+          "thief": 2.2,
+          "weddingShoot": 0
         }
       },
       "keys": {
@@ -1902,7 +2735,9 @@
           "bench": 3.75,
           "bunny": 2,
           "car": 0,
+          "cargoBike": 0,
           "cat": 0,
+          "clothingRack": 0,
           "cone": 3.75,
           "coyote": 2,
           "cyclist": 5,
@@ -1916,22 +2751,41 @@
           "iceCreamTruck": 0,
           "jogger": 5,
           "kidOnBike": 2,
+          "leafPile": 0,
+          "lifeguardChair": 2,
           "mailCarrier": 0,
           "parkedCar": 0,
+          "patioRail": 0,
+          "pedicab": 0,
+          "picnicBlanket": 0,
           "pigeons": 0,
+          "porchSteps": 0,
+          "produceCrates": 0,
           "raccoon": 0,
+          "rollerblader": 2,
+          "rollingBarrel": 0,
+          "sandcastle": 2,
+          "sandwichBoard": 0,
           "scooter": 1,
           "seagull": 2.4,
           "streetcar": 0,
           "stroller": 4,
-          "trashCan": 3.75
+          "trashCan": 3.75,
+          "ttcBus": 0,
+          "velvetRope": 0
         },
         "obstacles": {
+          "capybara": 0,
+          "droppedCone": 1,
+          "fishCrates": 0,
           "otherDog": 2.2,
+          "porchCat": 0,
+          "promoTeam": 0,
           "puddle": 2,
           "skunk": 1.1,
           "squirrel": 1,
-          "thief": 1.1
+          "thief": 1.1,
+          "weddingShoot": 0
         }
       },
       "keys": {
@@ -1970,7 +2824,9 @@
           "bench": 6,
           "bunny": 2,
           "car": 7,
+          "cargoBike": 0,
           "cat": 1.8,
+          "clothingRack": 0,
           "cone": 6,
           "coyote": 2,
           "cyclist": 3,
@@ -1984,22 +2840,41 @@
           "iceCreamTruck": 2,
           "jogger": 2,
           "kidOnBike": 1,
+          "leafPile": 0,
+          "lifeguardChair": 0,
           "mailCarrier": 3,
           "parkedCar": 12.5,
+          "patioRail": 0,
+          "pedicab": 2,
+          "picnicBlanket": 0,
           "pigeons": 1.2,
+          "porchSteps": 0,
+          "produceCrates": 0,
           "raccoon": 2,
+          "rollerblader": 0,
+          "rollingBarrel": 0,
+          "sandcastle": 0,
+          "sandwichBoard": 2,
           "scooter": 2,
           "seagull": 1.2,
           "streetcar": 3,
           "stroller": 3,
-          "trashCan": 6
+          "trashCan": 6,
+          "ttcBus": 2,
+          "velvetRope": 0
         },
         "obstacles": {
+          "capybara": 0,
+          "droppedCone": 0,
+          "fishCrates": 0,
           "otherDog": 1.1,
+          "porchCat": 0,
+          "promoTeam": 1,
           "puddle": 1,
           "skunk": 1.1,
           "squirrel": 1,
-          "thief": 1.1
+          "thief": 1.1,
+          "weddingShoot": 0
         }
       },
       "keys": {

@@ -7,6 +7,7 @@ export const DEBUFF_COLORS: Readonly<
   Record<DebuffId, { face: number; fill: number; name: number }>
 > = {
   muddy: { face: PALETTE.brown, fill: PALETTE.tan, name: PALETTE.ink },
+  spotlight: { face: PALETTE.navy, fill: PALETTE.amber, name: PALETTE.white },
   stinky: { face: PALETTE.mauve, fill: PALETTE.pink, name: PALETTE.white },
   zoomies: { face: PALETTE.green, fill: PALETTE.yellow, name: PALETTE.ink },
 };

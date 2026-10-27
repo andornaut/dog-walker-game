@@ -256,6 +256,56 @@ describe("chooseOption", () => {
     }
   });
 
+  // Every card option in the data that applies a debuff, whichever debuff and card it is.
+  const debuffOptions = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+    const { resolution } = ENCOUNTERS[id];
+    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
+    return options.flatMap((option, index) => {
+      const debuffs = option.effects.flatMap((effect) =>
+        effect.kind === "debuff" ? [effect.debuff] : [],
+      );
+      return debuffs.length === 0 ? [] : [{ debuffs, id, index, name: option.name }];
+    });
+  });
+
+  it("gives some card option every debuff", () => {
+    expect(new Set(debuffOptions.flatMap(({ debuffs }) => debuffs))).toEqual(
+      new Set(Object.keys(DEBUFFS)),
+    );
+  });
+
+  it.each(debuffOptions)(
+    "$id's $name leaves the pack with its debuffs",
+    ({ debuffs, id, index }) => {
+      const outcome = choose(testState({ kilo: 5 }), encounter(id, ["kilo"]), index);
+      expect(outcome.state.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
+    },
+  );
+
+  // Every card option in the data that costs the lead dog's owner hearts.
+  const leadOptions = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+    const { resolution } = ENCOUNTERS[id];
+    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
+    return options.flatMap((option, index) =>
+      option.effects.flatMap((effect) =>
+        effect.kind === "hearts" && effect.target.kind === "lead"
+          ? [{ amount: effect.amount, id, index, name: option.name }]
+          : [],
+      ),
+    );
+  });
+
+  it("has a card option that costs only the lead dog's owner", () => {
+    expect(leadOptions).not.toEqual([]);
+  });
+
+  it.each(leadOptions)("$id's $name reaches only the lead dog", ({ amount, id, index }) => {
+    // Formation leads with the largest dog: Pierre is the medium dog beside small Duchess.
+    const state = testState({ duchess: 5, pierre: 5 });
+    const outcome = choose(state, encounter(id, ["duchess", "pierre"]), index);
+    expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, pierre: 5 + amount });
+  });
+
   it("applies an option only to the affected dogs, and reports each heart change", () => {
     const outcome = choose(testState({ duchess: 5, kilo: 5 }), encounter("skunk", ["kilo"]), nose);
     expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, kilo: 5 + lost });

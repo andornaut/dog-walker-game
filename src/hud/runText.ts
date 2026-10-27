@@ -4,6 +4,7 @@ import type { FieldTable } from "../lib/lines";
 // gameData.runText.strip, key, fields); its debuff lines are filled by debuff id.
 export const STRIP_LINE_FIELDS = {
   achievement: ["name"],
+  cashHit: ["amount", "dog", "obstacle"],
   dodge: ["dog", "obstacle"],
   effectStart: ["effect", "name"],
   fired: ["dog", "owner"],
@@ -45,7 +46,12 @@ export const RUN_TEXT_FIELDS = {
   seconds: ["seconds"],
   strip: {
     ...STRIP_LINE_FIELDS,
-    debuffStart: { muddy: ["hearts", "seconds"], stinky: ["seconds"], zoomies: ["seconds"] },
+    debuffStart: {
+      muddy: ["hearts", "seconds"],
+      spotlight: ["cash", "seconds"],
+      stinky: ["seconds"],
+      zoomies: ["seconds"],
+    },
   },
   zoneBanner: ["n", "world"],
   zoneDone: {

@@ -15,7 +15,7 @@ import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { chance, type Random, randomPick } from "../lib/random";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
-import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
+import { type Change, type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
@@ -29,7 +29,14 @@ import {
 } from "../rules/modified";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
-import { bumpParts, fireOwnersAtZero, fullPackBonus, payZone, tipValue } from "../rules/run";
+import {
+  bumpCash,
+  bumpParts,
+  fireOwnersAtZero,
+  fullPackBonus,
+  payZone,
+  tipValue,
+} from "../rules/run";
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read } from "../rules/units";
@@ -172,11 +179,11 @@ interface InstantFind {
   outcome: ChoiceOutcome;
 }
 
-// A minor obstacle the pack bumped: the dog it landed on, and the hearts its owner lost, or
-// null with none to lose. The dog it would land on dodges it at its dodgeChance, and loses
-// nothing.
+// A minor obstacle the pack bumped: the dog it landed on, and the cash it cost while a debuff
+// such as Spotlight makes bumps cost cash, else the hearts its owner lost, or null with none to
+// lose. The dog it would land on dodges it at its dodgeChance, and loses nothing.
 export interface MinorBump {
-  change: HeartChange | null;
+  change: Change | null;
   dodged: boolean;
   dog: DogId;
   item: MoverItem<MinorObstacleId>;
@@ -903,14 +910,28 @@ function grabTreat(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof
   );
 }
 
-// A minor bump costs the dog's owner the hearts a bump costs now (bumpParts), with the value
-// modifiers changed: hearts.bump's loss, raised by bumpHearts modifiers such as Muddy's, then cut
-// by a forgiving one such as Second chance's. Null for a bump that changed nothing.
+// A minor bump costs cash while a debuff such as Spotlight makes bumps cost cash and there is
+// cash (bumpCash), with the value modifiers such as Muddy's changed. Otherwise it costs the
+// dog's owner the hearts a bump costs now (bumpParts), with the value modifiers changed:
+// hearts.bump's loss, raised by bumpHearts modifiers such as Muddy's, then cut by a forgiving
+// one such as Second chance's. Null for a bump that changed nothing.
 function bumpDog(
   data: WalkData,
   dog: DogId,
   run: RunState,
-): ReturnType<typeof changeHearts> & { readonly modified: ModifiedValue | null } {
+): {
+  readonly change: Change | null;
+  readonly modified: ModifiedValue | null;
+  readonly state: RunState;
+} {
+  const cash = bumpCash(data, run);
+  if (cash !== null) {
+    return {
+      change: cash,
+      modified: changeModified(cash),
+      state: { ...run, money: addCents(run.money, cash.amount) },
+    };
+  }
   const parts = bumpParts(data, run);
   const bumped = changeHearts(data, [{ amount: -parts.value, kind: "bump" }], dog, run);
   if (bumped.change === null) {

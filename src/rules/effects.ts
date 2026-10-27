@@ -8,7 +8,7 @@ import type {
   Target,
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
-import { heartsOf, mapPack, packDogs } from "../state/pack";
+import { heartsOf, mapPack, packDogs, packOrder } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import {
   type Cause,
@@ -58,6 +58,11 @@ export function targetDogs(
       return pack.filter((id) => context.affected.includes(id));
     case "all":
       return pack;
+    case "lead":
+      return packOrder(
+        data.dogs,
+        pack.filter((id) => context.affected.includes(id)),
+      ).slice(0, 1);
     default:
       return assertNever(target);
   }

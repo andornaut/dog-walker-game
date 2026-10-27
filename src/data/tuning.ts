@@ -62,14 +62,22 @@ export const TUNING = {
   money: {
     // Added to each tip while Big tipper is on.
     bigTipperTipBonus: 1,
+    // Placeholder: the Escaped capybara's Call the zoo.
+    capybaraCall: 10,
     encounterHigh: 16,
     encounterLow: 10,
+    // Placeholder: the Fish crate spill's Help clean up.
+    fishCleanUp: 16,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
     lostWalletKeep: 20,
     missedTips: 10,
+    // Placeholder: the Dropped ice cream's Buy a new cone.
+    newCone: 10,
     // Each walking dog's pay for a zone, the same in every zone.
     payPerDog: 20,
+    // Placeholder: the Porch cat's Treat bribe.
+    porchCatTreat: 10,
     prices: {
       biscuit: 250,
       buddy: 450,
@@ -88,10 +96,16 @@ export const TUNING = {
       snowball: 1000,
       whistle: 1500,
     },
+    // Placeholder: the Big screen promo's Buy the merch.
+    promoMerch: 16,
+    // Placeholder: what a plain bump costs while Spotlight lasts, instead of hearts.
+    spotlightBump: 10,
     // The cash every walk starts with, before gear.
     startPurse: 0,
     thiefLetGo: 16,
     tip: 1,
+    // Placeholder: the Wedding photo shoot's Apologize.
+    weddingApology: 16,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
@@ -213,6 +227,8 @@ export const TUNING = {
     // to this long of the road's travel: its cue, its longest hop, pathReactionMargin and a lane
     // move all fit in it, so it clears the pack's lane before the pack must react.
     shyHopNearSeconds: 1.65,
+    // Placeholder: how long the Spotlight debuff lasts, in walking time.
+    spotlightSeconds: 30,
     // How long the Stinky debuff lasts, in walking time.
     stinkySeconds: 30,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.

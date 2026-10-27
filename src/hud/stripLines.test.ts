@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DebuffId } from "../data/types";
+import type { Debuff, DebuffId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import type { HeartChange } from "../rules/causes";
+import type { HeartChange, MoneyChange } from "../rules/causes";
+import { formatDollars } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
 import { cents, clampHearts, read } from "../rules/units";
 import { testState } from "../testing/runState";
@@ -60,6 +61,22 @@ describe("bumpLine", () => {
     );
     // Its forgiven line says it.
     expect(said(forgivenLoss, false)).toBeNull();
+  });
+
+  it("says the cash a bump cost while a debuff makes bumps cost cash", () => {
+    const cash: MoneyChange = {
+      amount: cents(-700),
+      causes: [{ amount: -700, kind: "bump" }],
+      dog: null,
+      kind: "money",
+    };
+    expect(bumpLine(gameData, { change: cash, dodged: false, dog: "kilo" }, "Cone")?.text).toBe(
+      fillNames(strip.cashHit, {
+        amount: formatDollars(cents(700)),
+        dog: kilo.name,
+        obstacle: "cone",
+      }),
+    );
   });
 });
 
@@ -154,16 +171,19 @@ describe("muddyHeartsLines", () => {
 describe("debuffLines", () => {
   const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
   const muddyHearts = String(read(gameData.tuning, "multipliers", "muddyBumpHearts"));
+  // A debuff's bump cash, for one that makes bumps cost cash, such as Spotlight.
+  const cashOf = (debuff: DebuffId) => {
+    const key = (gameData.debuffs[debuff] as Debuff).bumpMoney;
+    return formatDollars(key === undefined ? cents(0) : read(gameData.tuning, "money", key));
+  };
 
   it("announces every debuff starting and ending", () => {
     for (const debuff of Object.keys(gameData.debuffs) as DebuffId[]) {
       const on = { debuffs: [active(debuff, 20)] };
       const off = { debuffs: [] };
+      const fields = { cash: cashOf(debuff), hearts: muddyHearts, seconds: "20" };
       expect(debuffLines(gameData, debuffChanges(off, on))).toEqual([
-        {
-          icon: debuff,
-          text: fillNames(strip.debuffStart[debuff], { hearts: muddyHearts, seconds: "20" }),
-        },
+        { icon: debuff, text: fillNames(strip.debuffStart[debuff], fields) },
       ]);
       expect(debuffLines(gameData, debuffChanges(on, off))).toEqual([
         { icon: debuff, text: strip.debuffEnd[debuff] },

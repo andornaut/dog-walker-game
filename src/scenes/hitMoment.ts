@@ -40,11 +40,17 @@ interface HitMoment {
 type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
 
 const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
+  capybara: "orange",
+  droppedCone: "pink",
+  fishCrates: "sky",
   otherDog: "pink",
+  porchCat: "amber",
+  promoTeam: "mauve",
   puddle: "sky",
   skunk: "mauve",
   squirrel: "orange",
   thief: "amber",
+  weddingShoot: "pink",
 };
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
 const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play" };

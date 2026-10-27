@@ -27,6 +27,7 @@ export const MESSAGE_ICONS = {
   lucky: "icon-lucky",
   muddy: "icon-muddy",
   pull: "icon-trait-chaser",
+  spotlight: "icon-spotlight",
   stinky: "icon-stinky",
   treat: "icon-treat",
   zoomies: "icon-zoomies",

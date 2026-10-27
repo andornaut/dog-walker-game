@@ -40,7 +40,7 @@ import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices
 import { modifiersOf, modifierValue } from "../rules/modifiers";
 import { currentZone } from "../rules/route";
 import { tipValue } from "../rules/run";
-import { clampHearts, pixels, read } from "../rules/units";
+import { cents, clampHearts, pixels, read, roundDollars } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
@@ -257,11 +257,10 @@ describe("planZone", { timeout: 60_000 }, () => {
         weights: {
           ...TEST_WORLD.zones[0].weights,
           obstacles: {
-            otherDog: 0,
+            ...(Object.fromEntries(
+              Object.keys(TEST_WORLD.zones[0].weights.obstacles).map((id) => [id, 0]),
+            ) as Zone["weights"]["obstacles"]),
             puddle: 2,
-            skunk: 0,
-            squirrel: 0,
-            thief: 0,
           },
         },
       },
@@ -1256,6 +1255,79 @@ describe("stepWalk's modified values", () => {
   ] as const)("%s", (_, walkData, walk, landed) => {
     const { run } = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk).walk;
     expect(run.bumpsByKind).toEqual({ cone: landed });
+  });
+
+  // While Spotlight lasts, a plain bump costs its cash instead of hearts: all the cash there is
+  // when that is less, and hearts as usual at $0. Muddy doubles whatever a bump costs, and
+  // Second chance forgives only hearts.
+  const spotlightCash = read(tuning, "money", DEBUFFS.spotlight.bumpMoney);
+  const muddyCash = roundDollars(spotlightCash * read(tuning, "multipliers", "muddyBumpHearts"));
+  const plenty = cents(muddyCash * 2);
+  const short = cents(spotlightCash - 100);
+  const lit = (money: number, ...debuffs: ("muddy" | "spotlight")[]) => ({
+    debuffs: debuffs.map((debuff) => ({ debuff, secondsLeft: 20, untilZone: 0 })),
+    money: cents(money),
+  });
+  const secondChance = walkerWith("secondChance");
+  it.each([
+    ["costs Spotlight's cash", data, "casey", lit(plenty, "spotlight"), spotlightCash, 0, 0],
+    [
+      "takes what cash there is, short of the cost",
+      data,
+      "casey",
+      lit(short, "spotlight"),
+      short,
+      0,
+      0,
+    ],
+    ["costs hearts as usual at $0", data, "casey", lit(0, "spotlight"), 0, bump, 0],
+    [
+      "doubles the cash while Muddy",
+      data,
+      "casey",
+      lit(plenty, "spotlight", "muddy"),
+      muddyCash,
+      0,
+      0,
+    ],
+    [
+      "doubles the hearts while Muddy at $0",
+      data,
+      "casey",
+      lit(0, "spotlight", "muddy"),
+      0,
+      muddied,
+      0,
+    ],
+    [
+      "leaves Second chance unused on cash",
+      forgiving,
+      secondChance,
+      lit(plenty, "spotlight"),
+      spotlightCash,
+      0,
+      0,
+    ],
+    [
+      "lets Second chance forgive the heart at $0",
+      forgiving,
+      secondChance,
+      lit(0, "spotlight"),
+      0,
+      0,
+      bump,
+    ],
+  ] as const)("Spotlight %s", (_, walkData, walker, run, cashLost, heartsLost, forgiven) => {
+    const walk = meeting(walker, atPack("cone"), run);
+    const after = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk);
+    const { run: next } = after.walk;
+    expect(next.money).toBe(walk.run.money - cashLost);
+    expect(heartsByDog(next).kilo).toBe((heartsByDog(walk.run).kilo ?? 0) - heartsLost);
+    expect(next.heartsForgiven).toBe(forgiven);
+    expect(next.bumpsByKind).toEqual({ cone: 1 });
+    expect(after.bumps.map(({ change }) => change?.kind ?? null)).toEqual([
+      cashLost > 0 ? "money" : "hearts",
+    ]);
   });
 });
 
