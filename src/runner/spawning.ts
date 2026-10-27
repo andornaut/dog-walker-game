@@ -461,8 +461,9 @@ function drawPath(streams: PlannerStreams, plan: SpawnPlan<string>, rowCount: nu
 // so a one-cell spawn with no room left is skipped too, the same way: a zone never fails to plan
 // for want of room. Once the lane-blocking spawns are placed, and before the moving prizes and the
 // other spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking
-// spawn in view, the zone's first and last rows included (none at all from the first row of a zone
-// whose rows start on the road in view), gets one of the zone's own plain standing spawns: one
+// spawn in view, half that, rounded down, from the zone's first row or to its last (none at all from
+// the first row of a zone whose rows start on the road in view), gets one of the zone's own plain
+// standing spawns: one
 // skipped for want of room, or else one moved from the busiest stretch, placed under every rule
 // above, so long as each move leaves fewer such rows in all. A run no spawn can take under them,
 // such as one held clear for the path, stays.
@@ -985,7 +986,8 @@ export function planSpawns<Kind extends string>(
   const unplaced: SpawnQuota<Kind>[] = [];
   // The rows that come on screen with a lane-blocking mover in view: of the rows whose windows
   // the mover meets the pack in, on its path or any its stalking may take, those that come on
-  // screen once it shows, its cue or body at or below the road's top and not off its side. A row
+  // screen once its body shows, at or below the road's top and not off its side: a cue, or a dart
+  // waiting at the road's edge, blocks nothing yet. A row
   // comes on screen at its distance, as a standing spawn on it does, and a mover meets the pack
   // at its distance from its cue less sightLength, as the pixel of scroll it first overlaps it.
   const moverInView = new Uint8Array(rows.length);
@@ -1002,7 +1004,7 @@ export function planSpawns<Kind extends string>(
     for (const way of paths) {
       for (let since = 0; since < SCAN_ROADS * plan.roadLength; since++) {
         const place = moverPlace(laneCount, way, since);
-        if (shows < 0 && place.travel >= 0 && !hasLeftRoad(laneCount, place)) {
+        if (shows < 0 && place.solid && place.travel >= 0 && !hasLeftRoad(laneCount, place)) {
           shows = since;
         }
         const meets =
@@ -1035,12 +1037,20 @@ export function planSpawns<Kind extends string>(
     first: number;
     last: number;
   }
-  // The runs of more than maxEmptyRows rows that come on screen with nothing lane-blocking in
-  // view, and how many rows they run over it in all.
-  // The most quiet rows a run from first may have: maxEmptyRows, or none from the first row of a
-  // zone whose rows start on the road in view, so something meets the pack soon after it starts.
-  const quietAllowed = (first: number): number =>
-    plan.firstContactSeconds !== undefined && first === 0 ? 0 : plan.maxEmptyRows;
+  // The most quiet rows a run from first to last may have: maxEmptyRows; half that, rounded down,
+  // for a run from the zone's first row or to its last, so a run across the road where two zones
+  // meet keeps near the cap; and none from the first row of a zone whose rows start on the road in
+  // view, so something meets the pack soon after it starts.
+  const quietAllowed = (first: number, last: number): number => {
+    if (first === 0 && plan.firstContactSeconds !== undefined) {
+      return 0;
+    }
+    return first === 0 || last === rows.length - 1
+      ? Math.floor(plan.maxEmptyRows / 2)
+      : plan.maxEmptyRows;
+  };
+  // The runs of more quiet rows than they may have, rows that come on screen with nothing
+  // lane-blocking in view, and how many rows they run over it in all.
   const quietRuns = (): { over: number; runs: Run[] } => {
     const filled = inView();
     const runs: Run[] = [];
@@ -1050,7 +1060,7 @@ export function planSpawns<Kind extends string>(
       if (row < rows.length && filled[row] === 0) {
         continue;
       }
-      const allowed = quietAllowed(first);
+      const allowed = quietAllowed(first, row - 1);
       if (row - first > allowed) {
         runs.push({ first, last: row - 1 });
         over += row - first - allowed;
@@ -1116,16 +1126,18 @@ export function planSpawns<Kind extends string>(
     };
   };
 
-  // The cells of a quiet run a spawn fits, in the rows that leave no more than maxEmptyRows quiet
-  // on either side of it, or else in any of its rows.
+  // The cells of a quiet run a spawn fits, in the rows that leave no more quiet rows on either
+  // side of it than they may have (quietAllowed), or else in any of its rows.
   const cellsIn = (quota: SpawnQuota<Kind>, run: Run): Cell[] => {
     const footprint = quota.footprint ?? SINGLE_CELL;
     const cells = freeCells(quota, footprint, run.first, run.last + 1);
-    const splits = cells.filter(
-      (cell) =>
-        cell.row - run.first <= quietAllowed(run.first) &&
-        run.last - lastRowTaken(cell, footprint, true) <= plan.maxEmptyRows,
-    );
+    const splits = cells.filter((cell) => {
+      const after = lastRowTaken(cell, footprint, true) + 1;
+      return (
+        cell.row - run.first <= quietAllowed(run.first, cell.row - 1) &&
+        run.last + 1 - after <= quietAllowed(after, run.last)
+      );
+    });
     return splits.length > 0 ? splits : cells;
   };
   // How many rows within maxEmptyRows of a standing spawn come on screen with something else

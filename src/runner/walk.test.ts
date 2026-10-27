@@ -119,13 +119,14 @@ import {
   zoneLength,
 } from "./walk";
 
-// The scroll since its cue at which a mover first shows on the road: its cue or body at or
-// below the road's top, and not yet off its side.
+// The scroll since its cue at which a mover's body first shows on the road: at or below the
+// road's top, and not yet off its side. A cue, or a dart waiting at the road's edge, blocks
+// nothing yet.
 function firstInView(mover: MoverPath): number {
   let since = 0;
   for (; since < MOVER_SCROLL; since++) {
     const place = moverPlace(LANE_COUNT, mover, since);
-    if (place.travel >= 0 && !hasLeftRoad(LANE_COUNT, place)) {
+    if (place.solid && place.travel >= 0 && !hasLeftRoad(LANE_COUNT, place)) {
       break;
     }
   }

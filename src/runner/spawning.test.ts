@@ -401,7 +401,8 @@ describe("planSpawns", () => {
 
   // 29 rows, with one-cell obstacles each in view as its row comes on screen: placed one per
   // stretch at random, some stretches run quiet for longer than the cap, with room to move
-  // obstacles into them.
+  // obstacles into them. A run from the zone's first row or to its last may have half the cap,
+  // rounded down, so the runs either side of two zones' meeting together keep near it.
   const sparse = (obstacles: number): SpawnPlan<Kind> => ({
     ...plan,
     quotas: [
@@ -410,15 +411,21 @@ describe("planSpawns", () => {
     ],
     zoneLength: 3000,
   });
-  const longestQuiet = (events: SpawnEvent<Kind>[]) => {
+  // The quiet runs' lengths, in order along the zone, the first and the last included even when
+  // they are empty.
+  const quietRuns = (events: SpawnEvent<Kind>[]) => {
     const filled = new Set(events.filter(blocking).map(({ distance }) => distance));
-    let [longest, run] = [0, 0];
+    const runs = [0];
     for (const row of spawnRowDistances(plan.minSpacing, 3000)) {
-      run = filled.has(row) ? 0 : run + 1;
-      longest = Math.max(longest, run);
+      if (filled.has(row)) {
+        runs.push(0);
+      } else {
+        runs[runs.length - 1] = (runs.at(-1) ?? 0) + 1;
+      }
     }
-    return longest;
+    return runs;
   };
+  const longestQuiet = (events: SpawnEvent<Kind>[]) => Math.max(...quietRuns(events));
   it.each([
     { maxEmptyRows: 3, obstacles: 10 },
     { maxEmptyRows: 4, obstacles: 7 },
@@ -434,7 +441,11 @@ describe("planSpawns", () => {
           ...sparse(obstacles),
           maxEmptyRows,
         }).events;
-        expect(longestQuiet(events), `seed ${seed}`).toBeLessThanOrEqual(maxEmptyRows);
+        const runs = quietRuns(events);
+        expect(Math.max(...runs), `seed ${seed}`).toBeLessThanOrEqual(maxEmptyRows);
+        for (const edge of [runs[0], runs.at(-1)]) {
+          expect(edge, `seed ${seed}`).toBeLessThanOrEqual(Math.floor(maxEmptyRows / 2));
+        }
         expect(countOf("obstacle", events)).toBe(obstacles);
         expect(countOf("tip", events)).toBe(9);
       }
