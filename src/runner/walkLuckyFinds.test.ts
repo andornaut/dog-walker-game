@@ -9,7 +9,10 @@ import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, LUCKY_IDS, REAL, type Real, realRun } from "../testing/planner";
 import { itemCategory, planZone, spawnQuotas, startRoad, zoneLength } from "./walk";
 
+// The seeds the quota draws sample, and the fewer the planner's placements do, each zone's plan
+// taking a few hundred milliseconds.
 const SEEDS = Array.from({ length: 12 }, (_, i) => i + 1);
+const PLAN_SEEDS = SEEDS.slice(0, 2);
 // Every zone at every walk position it can be walked at.
 const PLACES = WORLD.zones.flatMap(({ id }): { position: number; zone: ZoneId }[] =>
   id === WORLD.firstZone
@@ -24,16 +27,19 @@ const PLACES = WORLD.zones.flatMap(({ id }): { position: number; zone: ZoneId }[
 
 const isLucky = (kind: string) => itemCategory(REAL, kind as EncounterId) === "lucky";
 
-// A zone's lucky finds as planned and as placed, for the data tuned.
-function planned(tuned: Real, place: { position: number; zone: ZoneId }, seed: number) {
-  const run = inZone(realRun(tuned), place.zone, place.position);
-  const quotas = spawnQuotas(tuned, plannerStreams(seed), run).filter(({ kind }) => isLucky(kind));
-  const { pending } = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
+type Place = { position: number; zone: ZoneId };
+const zonedRun = (tuned: Real, place: Place) => inZone(realRun(tuned), place.zone, place.position);
+// A zone's lucky find quotas, drawn as the planner draws them.
+const quotasOf = (tuned: Real, place: Place, seed: number) =>
+  spawnQuotas(tuned, plannerStreams(seed), zonedRun(tuned, place)).filter(({ kind }) =>
+    isLucky(kind),
+  );
+// A zone's lucky finds as the planner places them.
+const findsOf = (tuned: Real, place: Place, seed: number) =>
+  planZone(tuned, GAME_ROAD, plannerStreams(seed), {
     road: startRoad(LANE_COUNT),
-    run,
-  }).road;
-  return { finds: pending.filter(({ kind }) => isLucky(kind)), quotas, run };
-}
+    run: zonedRun(tuned, place),
+  }).road.pending.filter(({ kind }) => isLucky(kind));
 
 // The data with every lucky find counted per zone as counts has it, and every zone's lucky finds
 // at a density of 1.
@@ -59,33 +65,36 @@ const tunedWith = (counts: Readonly<Record<string, number>>): Real => ({
 const FIRST_PLACES = PLACES.filter(
   (place, i) => PLACES.findIndex(({ zone }) => zone === place.zone) === i,
 );
-const FEW_SEEDS = [1, 2, 3];
 
 describe("lucky finds", () => {
   it.each(PLACES)(
     "places each kind's count, its expected count rounded either way, in $zone at position $position",
     (place) => {
+      const run = zonedRun(REAL, place);
+      const expected = zoneStats(REAL.tuning, currentZone(REAL, run), place.position).luckyFinds;
+      const countOf = (kinds: readonly { kind: string }[], kind: string) =>
+        kinds.filter((quota) => quota.kind === kind).length;
       for (const seed of SEEDS) {
-        const { finds, quotas, run } = planned(REAL, place, seed);
-        const expected = zoneStats(REAL.tuning, currentZone(REAL, run), place.position).luckyFinds;
+        const quotas = quotasOf(REAL, place, seed);
         for (const kind of LUCKY_IDS) {
-          const count = quotas.filter((quota) => quota.kind === kind).length;
           const mean = expected[kind as keyof typeof expected];
-          expect([Math.floor(mean), Math.ceil(mean)], `seed ${seed}: ${kind}`).toContain(count);
-          expect(
-            finds.filter((find) => find.kind === kind),
-            `seed ${seed}: ${kind}`,
-          ).toHaveLength(count);
+          expect([Math.floor(mean), Math.ceil(mean)], `seed ${seed}: ${kind}`).toContain(
+            countOf(quotas, kind),
+          );
         }
         expect(quotas.every(({ blocksLane, count }) => !blocksLane && count === 1)).toBe(true);
+      }
+      for (const seed of PLAN_SEEDS) {
+        const [quotas, finds] = [quotasOf(REAL, place, seed), findsOf(REAL, place, seed)];
+        for (const kind of LUCKY_IDS) {
+          expect(countOf(finds, kind), `seed ${seed}: ${kind}`).toBe(countOf(quotas, kind));
+        }
       }
     },
   );
 
   it.each(FIRST_PLACES)("places the same finds from the same seed in $zone", (place) => {
-    for (const seed of FEW_SEEDS) {
-      expect(planned(REAL, place, seed).finds).toEqual(planned(REAL, place, seed).finds);
-    }
+    expect(findsOf(REAL, place, 1)).toEqual(findsOf(REAL, place, 1));
   });
 
   // Two or three finds, a walking neighbour among them where the zone's mover share has one walk,
@@ -100,10 +109,8 @@ describe("lucky finds", () => {
     ({ counts, finds, position, zone }) => {
       const tuned = tunedWith(counts);
       const stretch = zoneLength(tuned) / (2 * finds - 1);
-      for (const seed of FEW_SEEDS) {
-        const placed = planned(tuned, { position, zone }, seed).finds.map(
-          ({ distance }) => distance,
-        );
+      for (const seed of PLAN_SEEDS) {
+        const placed = findsOf(tuned, { position, zone }, seed).map(({ distance }) => distance);
         expect(placed, `seed ${seed}`).toHaveLength(finds);
         const sorted = [...placed].sort((a, b) => a - b);
         for (const [i, distance] of sorted.slice(1).entries()) {
