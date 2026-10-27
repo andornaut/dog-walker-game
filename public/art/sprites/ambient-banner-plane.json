@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-banner-plane 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 39, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 10 },
+    "sourceSize": { "w": 39, "h": 10 },
+    "duration": 120
+   },
+   "ambient-banner-plane 1.aseprite": {
+    "frame": { "x": 39, "y": 0, "w": 39, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 10 },
+    "sourceSize": { "w": 39, "h": 10 },
+    "duration": 120
+   },
+   "ambient-banner-plane 2.aseprite": {
+    "frame": { "x": 78, "y": 0, "w": 39, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 10 },
+    "sourceSize": { "w": 39, "h": 10 },
+    "duration": 120
+   },
+   "ambient-banner-plane 3.aseprite": {
+    "frame": { "x": 117, "y": 0, "w": 39, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 10 },
+    "sourceSize": { "w": 39, "h": 10 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-banner-plane.png",
+  "format": "RGBA8888",
+  "size": { "w": 156, "h": 10 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "fly", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

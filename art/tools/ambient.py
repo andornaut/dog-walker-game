@@ -43,11 +43,20 @@ ambient-pigeons           36x15  five pigeons over Kensington Market; fly 4 x 90
 ambient-helicopter        26x12  a helicopter over Kensington Market; fly 4 x 80ms (rotor blur, a tail beacon)
 ambient-geese             36x18  a V of five Canada geese over Cabbagetown; fly 4 x 140ms (wingbeats)
 ambient-turboprop         32x12  a Porter turboprop over The Beaches; fly 4 x 90ms (propeller blur, a beacon)
+ambient-banner-plane      39x10  a small plane towing a banner; fly 4 x 120ms (propeller, the banner ripples)
+ambient-gulls             36x12  three gulls; fly 4 x 120ms (wingbeats out of phase)
+ambient-hawk              24x10  a red-tailed hawk soaring; fly 4 x 250ms (banking left and right)
+ambient-party-balloons    17x27  three party balloons on gathered strings; fly 4 x 250ms (each bobs 1px)
+ambient-blimp             31x12  a blimp with a lit sign; fly 4 x 200ms (the sign's lights chase)
+ambient-airliner          36x7   an airliner far overhead with its contrail; fly 4 x 200ms (the trail breaks up)
+ambient-bats              29x11  three bats at dusk; fly 4 x 80ms (wingbeats and a flutter out of phase)
+ambient-kite              17x28  a diamond kite on its string; fly 4 x 200ms (the ribbon tail sways)
 
 The sky movers fly far back, so each is at full size only with no depth variants, faces right, and has
 one fly tag. Each is a few large shapes that read at 1x on its sky (Yonge Street's slate, then azure,
-dturq, lilac and gold), with one ink line round every fill except the geese's. A line one pixel thin, a
-rope, a skid or a rotor blur, is drawn past the outline so the ink does not thicken it.
+dturq, lilac, peach and gold), with one ink line round every fill except the geese's and the bats'. A line
+one pixel thin, a rope, a string, a contrail, a skid or a rotor blur, is drawn past the outline so the ink
+does not thicken it.
 - The plane is a white fuselage over a grey belly with one row of windows, a rounded nose with cockpit
   glass, a swept red fin, and the swept slate wing below with its engine. The wingtip light and the belly
   beacon are red on frame 0 and flash white on frame 1. It stays smaller than the CN Tower's pod.
@@ -66,6 +75,21 @@ rope, a skid or a rotor blur, is drawn past the outline so the ink does not thic
   T-tail, the high wing along the roof with its engine hung forward, and the gear down for the island
   airport. The propeller is a tall slate disc crossing the fuselage with a blade bright at its top, then
   its bottom; the belly beacon is red on frames 0 and 1.
+- The banner plane is a small white high-wing plane with a red fin and wing and fixed gear, towing a
+  white banner of red lettering on a thin rope; the banner's tail ripples, the wave travelling back.
+- The gulls are white, larger than the pigeons and bent at the wrist, with grey tails and amber beaks.
+- The hawk is seen from below as it soars: cream wing linings with dark leading edges and fingertips, a
+  dark belly band and a fanned rust tail. It banks a pixel at the wingtips one way, then the other.
+- The party balloons are red, sky and yellow, each glinting and bobbing out of step, on ink strings that
+  gather to one knot; the loose end swings. They have no basket, so they never read as the hot air balloon.
+- The blimp is a white envelope shaded lgrey, red fins at its tail, a navy sign whose amber lights chase
+  toward the nose, and a gondola with cyan windows.
+- The airliner is small and high: a white fuselage, a blue fin, a slate wing and engine, and a thin white
+  contrail whose far end breaks into dashes.
+- The bats are plum wings round ink ears and bodies, with no outline, as the geese: raised, spread with
+  scalloped edges, or down, each fluttering a pixel up and down out of step.
+- The kite is a diamond quartered red and white with a red and white ribbon tail swaying under it and its
+  string running down to the lower left.
 
 Usage:
   ambient.py preview OUT.png   every frame on the zone roads
@@ -82,7 +106,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
 from minis import STEPS, Mini, small, snap  # noqa: E402
-from pixel import DARKER, K, Grid, edged, main  # noqa: E402
+from pixel import DARKER, K, Grid, bitmap, edged, main  # noqa: E402
 
 DRIVE_MS = 100
 RIDE_MS = 120
@@ -98,6 +122,14 @@ PIGEON_MS = 90
 HELICOPTER_MS = 80
 GEESE_MS = 140
 TURBOPROP_MS = 90
+BANNER_PLANE_MS = 120
+GULLS_MS = 120
+HAWK_MS = 250
+PARTY_BALLOONS_MS = 250
+BLIMP_MS = 200
+AIRLINER_MS = 200
+BATS_MS = 80
+KITE_MS = 200
 
 
 # ---------- the pedestrian, laid out on 32x48 as road.person's tops are ----------
@@ -768,6 +800,170 @@ def turboprop(blade, light):
     return g.outlined()
 
 
+def banner_plane(f):
+    """Frame f of the banner plane, side on, facing right: a small white high-wing plane with a red fin and
+    wing, cyan cockpit glass and fixed gear, its propeller a slate disc with a blade bright at the top, then
+    the bottom, towing a white banner of red lettering on a rope one pixel thin. The banner's tail ripples a
+    pixel up and down, the wave travelling back along it."""
+    g = sky_grid(39, 10)
+    for x in range(1, 17):
+        k = 16 - x
+        dy = round(math.sin(k * 0.5 - f * math.pi / 2) * 0.6) if k > 7 else 0
+        g.rect(x, 2 + dy, 1, 6, "white")
+        if 3 <= x <= 14 and x not in (7, 11):
+            g.rect(x, 4 + dy, 1, 2, "red")
+    g.rect(25, 1, 2, 3, "red")
+    g.rect(25, 4, 11, 2, "white")
+    g.rect(27, 6, 8, 1, "lgrey")
+    g.rect(29, 3, 7, 1, "red")
+    g.rect(32, 4, 2, 1, "cyan")
+    g.p(36, 5, "grey")
+    g.rect(37, 2, 1, 6, "slate")
+    g.rect(37, 2 + 3 * (f % 2), 1, 3, "lgrey")
+    out = g.outlined()
+    over(out, "ink", *((x, 5) for x in range(18, 24)))
+    return over(out, "ink", (30, 8), (33, 8))
+
+
+# A gull seen head on, its wings bent at the wrist: raised in a V (up), in an M (level) or swept down.
+GULL = dict(
+    up=("w.........w", ".w.......w.", "..ww...ww..", "....www....", ".....w....."),
+    level=("", ".ww.....ww.", "w..ww.ww..w", "....www....", ".....w....."),
+    down=("", "", "..wwwwwww..", ".w..www..w.", "w....w....w"),
+)
+GULL_FLOCK = ((6, 8, 0), (18, 4, 2), (29, 9, 1))
+
+
+def gulls(i):
+    """Frame i of the gulls: three white gulls, larger than the pigeons and bent at the wrist, a grey tail
+    and an amber beak each, each a different step through its wingbeat."""
+    g = sky_grid(36, 12)
+    for cx, cy, phase in GULL_FLOCK:
+        bitmap(g, cx - 5, cy - 3, GULL[WINGBEAT[(i + phase) % 4]], dict(w="white"))
+        g.p(cx, cy + 1, "lgrey")
+        g.p(cx + 1, cy, "amber")
+    return g.outlined()
+
+
+# A red-tailed hawk soaring, seen from below: brown head, dark leading edges and fingertips, cream wing
+# linings, a dark belly band and the fanned rust tail.
+HAWK = (
+    "..........bb..........",
+    "..dddddddcbbcddddddd..",
+    "kkcccccccccccccccccckk",
+    ".k..ccccccddcccccc..k.",
+    ".........cddc.........",
+    "..........rr..........",
+    ".........rrrr.........",
+    "........rrrrrr........",
+)
+HAWK_COLOURS = dict(b="brown", d="dbrown", c="cream", k="plum", r="rust")
+
+
+def hawk(tilt):
+    """The hawk banking: tilt lifts its left wing (1) or its right (-1) a pixel at the tip, or holds it
+    level (0)."""
+    g = sky_grid(24, 10)
+    for y, row in enumerate(HAWK):
+        for x, ch in enumerate(row):
+            if ch in HAWK_COLOURS:
+                dy = round(tilt * (x - 10.5) / 11) if y < 5 else 0
+                g.p(x + 1, y + 1 + dy, HAWK_COLOURS[ch])
+    return g.outlined()
+
+
+# Party balloons as (centre x, centre y, colour, phase): each rises and falls a pixel out of step.
+PARTY_BALLOONS = ((4, 6.5, "red", 0), (8.5, 4.5, "sky", 2), (13, 6.5, "yellow", 1))
+
+
+def party_balloons(f):
+    """Frame f of the party balloons: red, sky and yellow, each glinting at its upper left and bobbing a
+    pixel out of step with the others, on ink strings that gather to one knot, its loose end swinging."""
+    g = sky_grid(17, 27)
+    knots = []
+    for x, y, c, phase in PARTY_BALLOONS:
+        dy = (0, 0, 1, 1)[(f + phase) % 4]
+        g.ell(x, y + dy, 2.8, 3.5, c)
+        g.p(x - 1.5, y - 1.5 + dy, "white")
+        knots.append((int(x), int(y + dy + 4.5)))
+    out = g.outlined()
+    tx, ty = 8, 23
+    for kx, ky in knots:
+        n = max(abs(tx - kx), abs(ty - ky))
+        for t in range(n + 1):
+            x, y = round(kx + (tx - kx) * t / n), round(ky + (ty - ky) * t / n)
+            if out[y][x] is None:
+                out[y][x] = K["ink"]
+    return over(out, "ink", (8, 24), (8 + f % 2, 25), (8, 26))
+
+
+def blimp(f):
+    """Frame f of the blimp, side on, facing right: a white envelope shaded lgrey down its lower right, red
+    fins above and below its tail and a red one between them, a navy sign along its side whose amber lights
+    chase toward the nose, and a gondola with cyan windows under it."""
+    g = sky_grid(31, 12)
+    g.tri((0, 1), (5, 1), (8, 5), "red")
+    g.tri((0, 10), (5, 10), (8, 6), "red")
+    g.ell(16, 5.5, 14, 4.5, "white", "lgrey")
+    g.tri((0, 5), (6, 5), (6, 6), "red")
+    g.rect(8, 4, 15, 3, "navy")
+    for x in range(9, 22):
+        if (x - f) % 3 == 0:
+            g.p(x, 5, "amber")
+    g.rect(13, 10, 6, 1, "lgrey")
+    g.rect(14, 10, 4, 1, "cyan")
+    return g.outlined()
+
+
+def airliner(f):
+    """Frame f of the airliner far overhead, side on, facing right: a white fuselage with a blue fin, a slate
+    wing and engine, and a white contrail one pixel thin behind it whose far end breaks into dashes that
+    drift back."""
+    g = sky_grid(36, 7)
+    g.rect(25, 1, 2, 3, "blue")
+    g.rect(25, 3, 10, 2, "white")
+    g.p(35, 4, "white")
+    g.rect(29, 5, 3, 1, "slate")
+    g.p(32, 3, "dslate")
+    out = g.outlined()
+    return over(out, "white", *((x, 4) for x in range(23) if x >= 8 or (x + f) % 3))
+
+
+# A bat seen head on, ink ears and body between plum wings: raised, spread with scalloped edges, or down.
+BAT = dict(
+    up=("b.......b", ".b.....b.", "..bk.kb..", "...bkb...", "....k...."),
+    level=("", "", "...k.k...", ".bbbkbbb.", "b.b.k.b.b"),
+    down=("", "", "...k.k...", "..bbkbb..", ".b..k..b.", "b.......b"),
+)
+BAT_FLOCK = ((4, 7, 0), (15, 4, 1), (24, 9, 3))
+
+
+def bats(i):
+    """Frame i of the bats: three at dusk, each a step out of time with the next, fluttering a pixel up and
+    down as it beats. Like the geese they are dark with no outline."""
+    g = Grid(29, 11)
+    for cx, cy, phase in BAT_FLOCK:
+        k = (i + phase) % 4
+        bitmap(g, cx - 4, cy - 4 + (0, -1, 0, 1)[k], BAT[WINGBEAT[k]], dict(b="plum", k="ink"))
+    return g.outlined(False)
+
+
+def kite(f):
+    """Frame f of the kite: a diamond quartered red and white, a red and white ribbon tail swaying down from
+    it, the wave travelling down the tail, and its string one pixel thin down to the lower left."""
+    g = sky_grid(17, 28)
+    top, right, bottom, left, mid = (10, 1), (15, 6), (10, 13), (5, 6), (10, 6)
+    g.tri(top, mid, left, "red")
+    g.tri(top, right, mid, "white")
+    g.tri(left, mid, bottom, "white")
+    g.tri(mid, right, bottom, "red")
+    for k in range(12):
+        x = 10 + round(math.sin(k * 0.55 - f * math.pi / 2) * min(1.5, k / 3))
+        g.p(x, 14 + k, "red" if k // 3 % 2 == 0 else "white")
+    out = g.outlined()
+    return over(out, "ink", *((6 - math.floor((y - 9) * 0.35), y) for y in range(9, 28)))
+
+
 def sky_movers():
     """Yield (key, tags) for the sky movers, each at full size only."""
     yield "ambient-plane", [("fly", [plane("red"), plane("white")], PLANE_MS)]
@@ -778,6 +974,14 @@ def sky_movers():
     yield "ambient-geese", [("fly", [geese(i) for i in range(4)], GEESE_MS)]
     yield "ambient-turboprop", [("fly", [turboprop(b, l) for b, l in ((0, 1), (1, 1), (0, 0), (1, 0))],
                                  TURBOPROP_MS)]
+    yield "ambient-banner-plane", [("fly", [banner_plane(f) for f in range(4)], BANNER_PLANE_MS)]
+    yield "ambient-gulls", [("fly", [gulls(i) for i in range(4)], GULLS_MS)]
+    yield "ambient-hawk", [("fly", [hawk(t) for t in (0, 1, 0, -1)], HAWK_MS)]
+    yield "ambient-party-balloons", [("fly", [party_balloons(f) for f in range(4)], PARTY_BALLOONS_MS)]
+    yield "ambient-blimp", [("fly", [blimp(f) for f in range(4)], BLIMP_MS)]
+    yield "ambient-airliner", [("fly", [airliner(f) for f in range(4)], AIRLINER_MS)]
+    yield "ambient-bats", [("fly", [bats(i) for i in range(4)], BATS_MS)]
+    yield "ambient-kite", [("fly", [kite(f) for f in range(4)], KITE_MS)]
 
 
 def sprites():

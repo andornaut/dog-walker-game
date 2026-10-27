@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-bats 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 29, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 29, "h": 11 },
+    "sourceSize": { "w": 29, "h": 11 },
+    "duration": 80
+   },
+   "ambient-bats 1.aseprite": {
+    "frame": { "x": 29, "y": 0, "w": 29, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 29, "h": 11 },
+    "sourceSize": { "w": 29, "h": 11 },
+    "duration": 80
+   },
+   "ambient-bats 2.aseprite": {
+    "frame": { "x": 58, "y": 0, "w": 29, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 29, "h": 11 },
+    "sourceSize": { "w": 29, "h": 11 },
+    "duration": 80
+   },
+   "ambient-bats 3.aseprite": {
+    "frame": { "x": 87, "y": 0, "w": 29, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 29, "h": 11 },
+    "sourceSize": { "w": 29, "h": 11 },
+    "duration": 80
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-bats.png",
+  "format": "RGBA8888",
+  "size": { "w": 116, "h": 11 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "fly", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

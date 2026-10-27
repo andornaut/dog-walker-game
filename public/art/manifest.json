@@ -1,12 +1,39 @@
 {
   "sprites": [
     {
+      "key": "ambient-airliner",
+      "png": "sprites/ambient-airliner.png",
+      "json": "sprites/ambient-airliner.json",
+      "anchor": {
+        "feetY": 6,
+        "opaqueWidth": 35
+      }
+    },
+    {
       "key": "ambient-balloon",
       "png": "sprites/ambient-balloon.png",
       "json": "sprites/ambient-balloon.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "ambient-banner-plane",
+      "png": "sprites/ambient-banner-plane.png",
+      "json": "sprites/ambient-banner-plane.json",
+      "anchor": {
+        "feetY": 9,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "ambient-bats",
+      "png": "sprites/ambient-bats.png",
+      "json": "sprites/ambient-bats.json",
+      "anchor": {
+        "feetY": 10,
+        "opaqueWidth": 29
       }
     },
     {
@@ -97,6 +124,15 @@
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "ambient-blimp",
+      "png": "sprites/ambient-blimp.png",
+      "json": "sprites/ambient-blimp.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 31
       }
     },
     {
@@ -379,12 +415,48 @@
       }
     },
     {
+      "key": "ambient-gulls",
+      "png": "sprites/ambient-gulls.png",
+      "json": "sprites/ambient-gulls.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "ambient-hawk",
+      "png": "sprites/ambient-hawk.png",
+      "json": "sprites/ambient-hawk.json",
+      "anchor": {
+        "feetY": 9,
+        "opaqueWidth": 24
+      }
+    },
+    {
       "key": "ambient-helicopter",
       "png": "sprites/ambient-helicopter.png",
       "json": "sprites/ambient-helicopter.json",
       "anchor": {
         "feetY": 11,
         "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "ambient-kite",
+      "png": "sprites/ambient-kite.png",
+      "json": "sprites/ambient-kite.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "ambient-party-balloons",
+      "png": "sprites/ambient-party-balloons.png",
+      "json": "sprites/ambient-party-balloons.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 17
       }
     },
     {

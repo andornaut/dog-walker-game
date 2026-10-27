@@ -101,19 +101,27 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide
 
 Cosmetic movers drawn by `art/tools/ambient.py` (style guide, Ambient). The cross street draws all but the sky movers from `@50`.
 
-| Key                                                       | Type   | Size                       | Tags                               | Note                                          |
-| --------------------------------------------------------- | ------ | -------------------------- | ---------------------------------- | --------------------------------------------- |
-| `ambient-balloon`                                         | sprite | 18×26                      | `fly`                              | Sky mover over High Park                      |
-| `ambient-bike`                                            | sprite | 66×72                      | `ride`                             | A cyclist side on                             |
-| `ambient-bird`, `ambient-cat`, `ambient-rabbit`           | sprite | 40×40                      | `idle`, then `fly`, `run` or `hop` | A robin, a ginger tabby, a brown cottontail   |
-| `ambient-bus`                                             | sprite | 126×54                     | `drive`                            | A TTC bus side on, red and white              |
-| `ambient-car`, `-car-hatchback`, `-car-van`, `-car-wagon` | sprite | 72×42, 63×42, 69×45, 75×42 | `drive`                            | Side on                                       |
-| `ambient-geese`                                           | sprite | 36×18                      | `fly`                              | Sky mover over Cabbagetown, no outline        |
-| `ambient-helicopter`                                      | sprite | 26×12                      | `fly`                              | Sky mover over Kensington Market              |
-| `ambient-pedestrian`, `ambient-pedestrian-back`           | sprite | 48×72                      | `walk`                             | A student walking toward the walker, and away |
-| `ambient-pigeons`                                         | sprite | 36×15                      | `fly`                              | Sky mover over Kensington Market              |
-| `ambient-plane`                                           | sprite | 26×10                      | `fly`                              | Sky mover over Yonge Street                   |
-| `ambient-turboprop`                                       | sprite | 32×12                      | `fly`                              | Sky mover over The Beaches                    |
+| Key                                                       | Type   | Size                       | Tags                               | Note                                                  |
+| --------------------------------------------------------- | ------ | -------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| `ambient-airliner`                                        | sprite | 36×7                       | `fly`                              | Sky mover: an airliner far overhead with its contrail |
+| `ambient-balloon`                                         | sprite | 18×26                      | `fly`                              | Sky mover over High Park                              |
+| `ambient-banner-plane`                                    | sprite | 39×10                      | `fly`                              | Sky mover: a small plane towing a banner              |
+| `ambient-bats`                                            | sprite | 29×11                      | `fly`                              | Sky mover: three bats at dusk, no outline             |
+| `ambient-bike`                                            | sprite | 66×72                      | `ride`                             | A cyclist side on                                     |
+| `ambient-bird`, `ambient-cat`, `ambient-rabbit`           | sprite | 40×40                      | `idle`, then `fly`, `run` or `hop` | A robin, a ginger tabby, a brown cottontail           |
+| `ambient-blimp`                                           | sprite | 31×12                      | `fly`                              | Sky mover: a blimp with a lit sign                    |
+| `ambient-bus`                                             | sprite | 126×54                     | `drive`                            | A TTC bus side on, red and white                      |
+| `ambient-car`, `-car-hatchback`, `-car-van`, `-car-wagon` | sprite | 72×42, 63×42, 69×45, 75×42 | `drive`                            | Side on                                               |
+| `ambient-geese`                                           | sprite | 36×18                      | `fly`                              | Sky mover over Cabbagetown, no outline                |
+| `ambient-gulls`                                           | sprite | 36×12                      | `fly`                              | Sky mover: three gulls                                |
+| `ambient-hawk`                                            | sprite | 24×10                      | `fly`                              | Sky mover: a red-tailed hawk soaring                  |
+| `ambient-helicopter`                                      | sprite | 26×12                      | `fly`                              | Sky mover over Kensington Market                      |
+| `ambient-kite`                                            | sprite | 17×28                      | `fly`                              | Sky mover: a diamond kite on its string               |
+| `ambient-party-balloons`                                  | sprite | 17×27                      | `fly`                              | Sky mover: three party balloons                       |
+| `ambient-pedestrian`, `ambient-pedestrian-back`           | sprite | 48×72                      | `walk`                             | A student walking toward the walker, and away         |
+| `ambient-pigeons`                                         | sprite | 36×15                      | `fly`                              | Sky mover over Kensington Market                      |
+| `ambient-plane`                                           | sprite | 26×10                      | `fly`                              | Sky mover over Yonge Street                           |
+| `ambient-turboprop`                                       | sprite | 32×12                      | `fly`                              | Sky mover over The Beaches                            |
 
 ### Roadside props
 

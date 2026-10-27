@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-blimp 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 31, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 12 },
+    "sourceSize": { "w": 31, "h": 12 },
+    "duration": 200
+   },
+   "ambient-blimp 1.aseprite": {
+    "frame": { "x": 31, "y": 0, "w": 31, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 12 },
+    "sourceSize": { "w": 31, "h": 12 },
+    "duration": 200
+   },
+   "ambient-blimp 2.aseprite": {
+    "frame": { "x": 62, "y": 0, "w": 31, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 12 },
+    "sourceSize": { "w": 31, "h": 12 },
+    "duration": 200
+   },
+   "ambient-blimp 3.aseprite": {
+    "frame": { "x": 93, "y": 0, "w": 31, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 12 },
+    "sourceSize": { "w": 31, "h": 12 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-blimp.png",
+  "format": "RGBA8888",
+  "size": { "w": 124, "h": 12 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "fly", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

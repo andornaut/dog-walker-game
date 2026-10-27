@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-kite 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 17, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 17, "h": 28 },
+    "sourceSize": { "w": 17, "h": 28 },
+    "duration": 200
+   },
+   "ambient-kite 1.aseprite": {
+    "frame": { "x": 17, "y": 0, "w": 17, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 17, "h": 28 },
+    "sourceSize": { "w": 17, "h": 28 },
+    "duration": 200
+   },
+   "ambient-kite 2.aseprite": {
+    "frame": { "x": 34, "y": 0, "w": 17, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 17, "h": 28 },
+    "sourceSize": { "w": 17, "h": 28 },
+    "duration": 200
+   },
+   "ambient-kite 3.aseprite": {
+    "frame": { "x": 51, "y": 0, "w": 17, "h": 28 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 17, "h": 28 },
+    "sourceSize": { "w": 17, "h": 28 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-kite.png",
+  "format": "RGBA8888",
+  "size": { "w": 68, "h": 28 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "fly", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}
