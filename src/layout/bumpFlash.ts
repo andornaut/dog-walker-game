@@ -1,6 +1,5 @@
 import type { EncounterId, MinorObstacleId } from "../data/types";
 import { insetRect, type Rect, ringRects } from "../lib/rect";
-import { PALETTE } from "../ui/phaser/palette";
 
 // Every bump flashes a border round the whole screen in the bump's colour and nudges the road:
 // a minor obstacle's hit, a mover's included and one that costs cash while Spotlight lasts, and
@@ -11,8 +10,9 @@ import { PALETTE } from "../ui/phaser/palette";
 // shake (ROAD_SHAKE in hitEffects.ts); reduced motion keeps the border and drops the nudge.
 export const BUMP_FLASH = { keyline: 1, ms: 280, width: 2 } as const;
 
-// The colours a border may take: each reads against the HUD's dark panels.
-type BorderColour =
+// The colours a border may take, each a PALETTE name the scene draws it in: each reads against
+// the HUD's dark panels.
+export type BorderColour =
   | "amber"
   | "cream"
   | "cyan"
@@ -115,7 +115,7 @@ export function encounterFlashColour(encounter: EncounterId): FlashColour {
 }
 
 export interface BumpFlash {
-  readonly colour: number;
+  readonly colour: BorderColour;
   readonly nudge: boolean;
 }
 
@@ -124,7 +124,7 @@ export function bumpFlash(still: boolean, source: BumpSource): BumpFlash {
     source.kind === "minor"
       ? MINOR_FLASH_COLOURS[source.obstacle]
       : STRIP_BORDERS[encounterFlashColour(source.encounter)];
-  return { colour: PALETTE[name], nudge: !still };
+  return { colour: name, nudge: !still };
 }
 
 // The border round screen: the bump's colour band at its edge and the ink keyline inside it,

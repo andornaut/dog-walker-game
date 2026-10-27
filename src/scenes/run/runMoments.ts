@@ -613,7 +613,7 @@ export class RunMoments {
   // nudge unless motion is reduced.
   private flashBump(source: BumpSource): void {
     const { colour, nudge } = bumpFlash(this.deps.still(), source);
-    this.scene.events.emit(BUMP_FLASH_EVENT, colour);
+    this.scene.events.emit(BUMP_FLASH_EVENT, PALETTE[colour]);
     if (nudge) {
       shakeRoad(this.scene);
     }
