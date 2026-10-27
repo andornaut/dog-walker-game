@@ -786,6 +786,52 @@ describe("planSpawns", () => {
     },
   );
 
+  // A stepper ends its move in its last spot and stands there. A tip marked moversRestOn may lie
+  // where a mover rests; a treat, or a tip without the mark, keeps off every row a spawn on which
+  // would overlap the mover standing there.
+  it.each([
+    { kind: "tip", moversRestOn: true, onRest: true },
+    { kind: "tip", moversRestOn: false, onRest: false },
+    { kind: "treat", moversRestOn: undefined, onRest: false },
+  ] as const)(
+    "lays a $kind marked moversRestOn $moversRestOn where a mover rests: $onRest",
+    ({ kind, moversRestOn, onRest }) => {
+      const stepping: SpawnPlan<Kind> = {
+        ...plan,
+        quotas: [
+          { blocksLane: true, count: 4, kind: "cat", mover: STROLLING },
+          {
+            blocksLane: false,
+            count: 60,
+            kind,
+            moversPassOver: true,
+            ...(moversRestOn === undefined ? {} : { moversRestOn }),
+          },
+        ],
+        zoneLength: 4000,
+      };
+      let onRests = 0;
+      for (const seed of seeds.slice(0, 20)) {
+        const events = planSpawns(plannerStreams(seed), stepping);
+        for (const { distance, mover } of events) {
+          if (mover === undefined) {
+            continue;
+          }
+          for (const rest of moverRests(stepping.laneCount, distance, mover)) {
+            onRests += events.filter(
+              (spawn) =>
+                spawn.kind === kind &&
+                spawn.lane === rest.lane &&
+                spawn.distance > rest.distance - hitLength(stepping, 1) &&
+                spawn.distance < rest.distance + hitLength(stepping, 1),
+            ).length;
+          }
+        }
+      }
+      expect(onRests > 0).toBe(onRest);
+    },
+  );
+
   // Twenty wide footprints with a row between each never all fit in 19 rows: the hedges and the
   // benches take turns along the zone, so neither kind takes the room first.
   it("keeps each standing kind's share of what is placed when room runs short", () => {

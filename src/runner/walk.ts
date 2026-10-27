@@ -673,6 +673,7 @@ export function spawnQuotas(
       count: scaled("tipSpawns", stats.tips),
       kind: "tip",
       moversPassOver: true,
+      moversRestOn: true,
     },
     {
       blocksLane: false,

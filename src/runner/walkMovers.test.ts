@@ -12,8 +12,9 @@ import type {
 } from "../data/types";
 import { WORLD } from "../data/world";
 import { itemAt } from "../lib/arrays";
+import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
-import { type PackDogs } from "../state/runState";
+import { newRun, type PackDogs } from "../state/runState";
 import { lanesReachedAtEnd } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import {
@@ -65,6 +66,7 @@ import {
   planZone,
   type RoadGeometry,
   startRoad,
+  stepWalk,
   type Walk,
   type WalkItem,
   walkScrollSpeed,
@@ -649,6 +651,45 @@ describe("movers", { timeout: 120_000 }, () => {
     expect(after.walk.road.hitStop).toBeNull();
     expect(after.walk.road.items).toEqual([]);
   });
+
+  // A ball that has ended its move standing on a tip, both at the pack. The tip is a plain grab
+  // however the pack reaches it; the ball hits only the pack that touches it, in its lane, and
+  // not one that grabs the tip a lane over by Long reach.
+  const longReach = (Object.keys(data.walkers) as (keyof typeof data.walkers)[]).find(
+    (walker) => data.walkers[walker].perk === "longReach",
+  );
+  it.each([
+    { bumps: 1, lane: 2, name: "in its lane", reach: 0 },
+    { bumps: 0, lane: 1, name: "a lane over by Long reach", reach: 1 },
+  ])(
+    "grabs a tip a stopped mover stands on $name, with $bumps bumps",
+    ({ bumps, lane, name, reach }) => {
+      const path = stroll([
+        { at: 400, ...SIDESTEP },
+        { at: 450, ...SIDESTEP, lanes: -1, uncued: true },
+      ]);
+      const since = 532;
+      expect(inMotion(path, since)).toBe(false);
+      const reaching = {
+        ...data,
+        tuning: { ...data.tuning, counts: { ...data.tuning.counts, longReachLanes: reach } },
+      };
+      const walker = reach > 0 && longReach !== undefined ? longReach : data.defaultWalker;
+      const walk = inLane(lane, {
+        road: {
+          ...startRoad(5),
+          items: [moverAt("ball", path, since), atPack("tip", 1)],
+          nextItemId: 2,
+        },
+        run: newRun(reaching, 3, { dogs: ["koda"], gear: null, walker }),
+      });
+      const after = stepWalk(reaching, geometry, seededRandom(1), 0.01, walk);
+      expect(after.tips, name).toHaveLength(1);
+      expect(after.collected.map(({ kind }) => kind)).toEqual(["tip"]);
+      expect(after.bumps).toHaveLength(bumps);
+      expect(after.cards).toEqual([]);
+    },
+  );
 
   // Every obstacle kind that blocks a lane, moving or standing, starts against each edge of the
   // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on

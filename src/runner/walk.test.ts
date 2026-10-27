@@ -396,7 +396,7 @@ describe("planZone", { timeout: 60_000 }, () => {
     });
   };
   it.each(POSITIONS)(
-    "places every tip and treat planned, none where a mover stops, in $zone at walk position $position",
+    "places every tip and treat planned, no treat where a mover stops, in $zone at walk position $position",
     ({ position, zone }) => {
       const zoned = inZone(realRun(REAL), zone, position);
       for (const seed of SWEEP_SEEDS) {
@@ -421,7 +421,11 @@ describe("planZone", { timeout: 60_000 }, () => {
                 length: itemHeight(REAL, GAME_ROAD, event.kind, true),
               })),
         );
-        for (const pickup of pickups) {
+        // A tip may lie where a mover stops (moversRestOn); a treat may not.
+        const kept = pickups.filter(
+          (pickup) => quotas.find((quota) => quota.kind === pickup.kind)?.moversRestOn !== true,
+        );
+        for (const pickup of kept) {
           const length = itemHeight(REAL, GAME_ROAD, pickup.kind, false);
           const under = stops.filter(
             (stop) =>
