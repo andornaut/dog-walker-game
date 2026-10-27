@@ -681,7 +681,7 @@ describe("movers", { timeout: 120_000 }, () => {
           items: [moverAt("ball", path, since), atPack("tip", 1)],
           nextItemId: 2,
         },
-        run: newRun(reaching, 3, { dogs: ["koda"], gear: null, walker }),
+        run: newRun(reaching, 3, { dogs: ["kilo"], gear: null, walker }),
       });
       const after = stepWalk(reaching, geometry, seededRandom(1), 0.01, walk);
       expect(after.tips, name).toHaveLength(1);
