@@ -174,7 +174,7 @@ Debuffs come from puddles and card options: Muddy from a puddle or the capybara'
 
 Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained. The friendly neighbour walks about, one or two quick steps in any direction and with no cue, since a cue marks a hazard about to move, so the pack has to go and meet her; the lost wallet lies still.
 
-- **Friendly neighbour:** a pat for each dog: +♥ to every owner, the hearts jackpot
+- **Friendly neighbour:** pats for the pack, the hearts jackpot: 3♥ shared by the walking dogs, front dog first (a lone dog's owner +3♥; a pair's front dog +2♥ and the other +1♥; a trio +1♥ each), each owner capped at their max, so a smaller pack gains more per dog
 - **Lost wallet:** +$$ found money, the money jackpot
 
 ### Moving hazards
