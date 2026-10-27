@@ -138,7 +138,7 @@ CREAM_PANEL = ("dbrown", "plum", "dred")
 
 
 def pause():
-    """Amber bars, like the Home glyph at the other end of the walk bar, so the walk controls stand apart
+    """Amber bars, like the Home glyph, so the walk controls stand apart
     from the cream help and sound glyphs."""
     g = Grid(16, 16)
     g.rect(4, 3, 3, 10, "amber")
@@ -161,7 +161,7 @@ def play():
 
 
 def home_icon():
-    """The walk bar's Home button: a house as tall as the pause bars, amber with
+    """The Home button: a house as tall as the pause bars, amber with
     orange on its lower-right edges like them, a chimney on the right slope and a doorway the
     navy face shows through."""
     g = Grid(16, 16)
@@ -1023,25 +1023,26 @@ def strip_well():
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash, and the neighbourhood with its name and "n of N"
 # on one line.
-WALK_WELLS = ((5, 5, 70, 37), (80, 5, 110, 12))
+WALK_WELLS = ((5, 5, 70, 37), (80, 5, 132, 12))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
-# the grain: five 22x22 wells side by side from x 80, each lip against the next well, on rows 20 to 41.
-# Between the trim lines (row 1 and row 45) the neighbourhood well (rows 5 to 16) and the wells
-# split the height evenly, 3 wood rows above the name well, 3 between and 3 under the wells, and
-# the cash well spans the same rows 5 to 41. Across the bar the cash well, the neighbourhood column
-# (x 80 to 189) sit 5 columns from the screen's edge and 5 apart. The five buttons' hits, 34 wide,
-# fill x 190 to 359 at a 34 pitch, each face centred in its hit (faces at 197 + 34i), so 7 columns
-# lie before Home's face and after Pause's.
-EFFECT_ROW = (79, 17, 112, 26)
+# the grain: six 22x22 wells side by side from x 80 (the perk, Pocket, found item and three upgrades),
+# each lip against the next well, on rows 20 to 41. Between the trim lines (row 1 and row 45) the
+# neighbourhood well (rows 5 to 16) and the wells split the height evenly, 3 wood rows above the name
+# well, 3 between and 3 under the wells, and the cash well spans the same rows 5 to 41. Across the bar
+# the cash well and the neighbourhood column (x 80 to 211) sit 5 columns from the screen's edge and 5
+# apart, and plain wood runs from x 212 to the four buttons. Their hits, 34 wide, fill x 224 to 359 at
+# a 34 pitch, each face centred in its hit (faces at 231 + 34i), so 7 columns lie before Help's face
+# and after Pause's.
+EFFECT_ROW = (79, 17, 134, 26)
 EFFECT_WELL = 22
 
 
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
     45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 80,5 110x12, one text line as wide
-    as the five effect wells under it, which ends clear of the Home button's hit at x 190. The game
-    draws the effect wells, the Home, Help, Sound, Settings and Pause buttons and every text and
+    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 80,5 132x12, one text line as
+    wide as the six effect wells under it, which ends 12 columns clear of the Help button's hit at x 224.
+    The game draws the effect wells, the Help, Sound, Settings and Pause buttons and every text and
     icon on it."""
     w, h = WALK_BAR
     g = Grid(w, h)
