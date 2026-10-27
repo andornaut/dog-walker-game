@@ -555,7 +555,7 @@ WALKERS = {
 OWNERS = {
     "duchess": rosa,
     "reggie": ralph,
-    "marshall": sheba,
+    "buddy": sheba,
     "pierre": tara,
     "biscuit": sam,
     "archie": kiwi,

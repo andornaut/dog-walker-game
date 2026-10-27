@@ -122,7 +122,7 @@
   "frameTags": [
    { "name": "duchess", "from": 0, "to": 0, "direction": "forward" },
    { "name": "reggie", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "marshall", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "buddy", "from": 2, "to": 2, "direction": "forward" },
    { "name": "pierre", "from": 3, "to": 3, "direction": "forward" },
    { "name": "biscuit", "from": 4, "to": 4, "direction": "forward" },
    { "name": "archie", "from": 5, "to": 5, "direction": "forward" },

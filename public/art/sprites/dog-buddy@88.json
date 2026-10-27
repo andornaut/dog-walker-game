@@ -1,5 +1,5 @@
 { "frames": {
-   "dog-marshall@88 0.aseprite": {
+   "dog-buddy@88 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 150
    },
-   "dog-marshall@88 1.aseprite": {
+   "dog-buddy@88 1.aseprite": {
     "frame": { "x": 33, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 150
    },
-   "dog-marshall@88 2.aseprite": {
+   "dog-buddy@88 2.aseprite": {
     "frame": { "x": 66, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 150
    },
-   "dog-marshall@88 3.aseprite": {
+   "dog-buddy@88 3.aseprite": {
     "frame": { "x": 99, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 150
    },
-   "dog-marshall@88 4.aseprite": {
+   "dog-buddy@88 4.aseprite": {
     "frame": { "x": 132, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 5.aseprite": {
+   "dog-buddy@88 5.aseprite": {
     "frame": { "x": 165, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -47,7 +47,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 6.aseprite": {
+   "dog-buddy@88 6.aseprite": {
     "frame": { "x": 198, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -55,7 +55,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 7.aseprite": {
+   "dog-buddy@88 7.aseprite": {
     "frame": { "x": 231, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -63,7 +63,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 8.aseprite": {
+   "dog-buddy@88 8.aseprite": {
     "frame": { "x": 264, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -71,7 +71,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 80
    },
-   "dog-marshall@88 9.aseprite": {
+   "dog-buddy@88 9.aseprite": {
     "frame": { "x": 297, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -79,7 +79,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 80
    },
-   "dog-marshall@88 10.aseprite": {
+   "dog-buddy@88 10.aseprite": {
     "frame": { "x": 330, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -87,7 +87,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 80
    },
-   "dog-marshall@88 11.aseprite": {
+   "dog-buddy@88 11.aseprite": {
     "frame": { "x": 363, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -95,7 +95,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 80
    },
-   "dog-marshall@88 12.aseprite": {
+   "dog-buddy@88 12.aseprite": {
     "frame": { "x": 396, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -103,7 +103,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 125
    },
-   "dog-marshall@88 13.aseprite": {
+   "dog-buddy@88 13.aseprite": {
     "frame": { "x": 429, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -111,7 +111,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 125
    },
-   "dog-marshall@88 14.aseprite": {
+   "dog-buddy@88 14.aseprite": {
     "frame": { "x": 462, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -119,7 +119,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 125
    },
-   "dog-marshall@88 15.aseprite": {
+   "dog-buddy@88 15.aseprite": {
     "frame": { "x": 495, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -127,7 +127,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 125
    },
-   "dog-marshall@88 16.aseprite": {
+   "dog-buddy@88 16.aseprite": {
     "frame": { "x": 528, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -135,7 +135,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 300
    },
-   "dog-marshall@88 17.aseprite": {
+   "dog-buddy@88 17.aseprite": {
     "frame": { "x": 561, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -143,7 +143,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 300
    },
-   "dog-marshall@88 18.aseprite": {
+   "dog-buddy@88 18.aseprite": {
     "frame": { "x": 594, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -151,7 +151,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 300
    },
-   "dog-marshall@88 19.aseprite": {
+   "dog-buddy@88 19.aseprite": {
     "frame": { "x": 627, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -159,7 +159,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 300
    },
-   "dog-marshall@88 20.aseprite": {
+   "dog-buddy@88 20.aseprite": {
     "frame": { "x": 660, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -167,7 +167,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 21.aseprite": {
+   "dog-buddy@88 21.aseprite": {
     "frame": { "x": 693, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -175,7 +175,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 22.aseprite": {
+   "dog-buddy@88 22.aseprite": {
     "frame": { "x": 726, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -183,7 +183,7 @@
     "sourceSize": { "w": 33, "h": 33 },
     "duration": 60
    },
-   "dog-marshall@88 23.aseprite": {
+   "dog-buddy@88 23.aseprite": {
     "frame": { "x": 759, "y": 0, "w": 33, "h": 33 },
     "rotated": false,
     "trimmed": false,
@@ -195,7 +195,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "dog-marshall@88.png",
+  "image": "dog-buddy@88.png",
   "format": "RGBA8888",
   "size": { "w": 792, "h": 33 },
   "scale": "1",

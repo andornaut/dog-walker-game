@@ -1735,6 +1735,51 @@
       }
     },
     {
+      "key": "dog-buddy",
+      "png": "sprites/dog-buddy.png",
+      "json": "sprites/dog-buddy.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "dog-buddy@50",
+      "png": "sprites/dog-buddy@50.png",
+      "json": "sprites/dog-buddy@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "dog-buddy@62",
+      "png": "sprites/dog-buddy@62.png",
+      "json": "sprites/dog-buddy@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "dog-buddy@75",
+      "png": "sprites/dog-buddy@75.png",
+      "json": "sprites/dog-buddy@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "dog-buddy@88",
+      "png": "sprites/dog-buddy@88.png",
+      "json": "sprites/dog-buddy@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 17
+      }
+    },
+    {
       "key": "dog-duchess",
       "png": "sprites/dog-duchess.png",
       "json": "sprites/dog-duchess.json",
@@ -1822,51 +1867,6 @@
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "dog-marshall",
-      "png": "sprites/dog-marshall.png",
-      "json": "sprites/dog-marshall.json",
-      "anchor": {
-        "feetY": 36,
-        "opaqueWidth": 19
-      }
-    },
-    {
-      "key": "dog-marshall@50",
-      "png": "sprites/dog-marshall@50.png",
-      "json": "sprites/dog-marshall@50.json",
-      "anchor": {
-        "feetY": 18,
-        "opaqueWidth": 10
-      }
-    },
-    {
-      "key": "dog-marshall@62",
-      "png": "sprites/dog-marshall@62.png",
-      "json": "sprites/dog-marshall@62.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 12
-      }
-    },
-    {
-      "key": "dog-marshall@75",
-      "png": "sprites/dog-marshall@75.png",
-      "json": "sprites/dog-marshall@75.json",
-      "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 15
-      }
-    },
-    {
-      "key": "dog-marshall@88",
-      "png": "sprites/dog-marshall@88.png",
-      "json": "sprites/dog-marshall@88.json",
-      "anchor": {
-        "feetY": 32,
-        "opaqueWidth": 17
       }
     },
     {
@@ -2060,6 +2060,11 @@
       "json": "sprites/face-dog-biscuit.json"
     },
     {
+      "key": "face-dog-buddy",
+      "png": "sprites/face-dog-buddy.png",
+      "json": "sprites/face-dog-buddy.json"
+    },
+    {
       "key": "face-dog-duchess",
       "png": "sprites/face-dog-duchess.png",
       "json": "sprites/face-dog-duchess.json"
@@ -2068,11 +2073,6 @@
       "key": "face-dog-kilo",
       "png": "sprites/face-dog-kilo.png",
       "json": "sprites/face-dog-kilo.json"
-    },
-    {
-      "key": "face-dog-marshall",
-      "png": "sprites/face-dog-marshall.png",
-      "json": "sprites/face-dog-marshall.json"
     },
     {
       "key": "face-dog-penny",
@@ -2115,6 +2115,16 @@
       "json": "sprites/face-owner-biscuit-20.json"
     },
     {
+      "key": "face-owner-buddy",
+      "png": "sprites/face-owner-buddy.png",
+      "json": "sprites/face-owner-buddy.json"
+    },
+    {
+      "key": "face-owner-buddy-20",
+      "png": "sprites/face-owner-buddy-20.png",
+      "json": "sprites/face-owner-buddy-20.json"
+    },
+    {
       "key": "face-owner-duchess",
       "png": "sprites/face-owner-duchess.png",
       "json": "sprites/face-owner-duchess.json"
@@ -2133,16 +2143,6 @@
       "key": "face-owner-kilo-20",
       "png": "sprites/face-owner-kilo-20.png",
       "json": "sprites/face-owner-kilo-20.json"
-    },
-    {
-      "key": "face-owner-marshall",
-      "png": "sprites/face-owner-marshall.png",
-      "json": "sprites/face-owner-marshall.json"
-    },
-    {
-      "key": "face-owner-marshall-20",
-      "png": "sprites/face-owner-marshall-20.png",
-      "json": "sprites/face-owner-marshall-20.json"
     },
     {
       "key": "face-owner-penny",
@@ -2898,6 +2898,15 @@
       }
     },
     {
+      "key": "owner-buddy",
+      "png": "sprites/owner-buddy.png",
+      "json": "sprites/owner-buddy.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "owner-duchess",
       "png": "sprites/owner-duchess.png",
       "json": "sprites/owner-duchess.json",
@@ -2913,15 +2922,6 @@
       "anchor": {
         "feetY": 45,
         "opaqueWidth": 24
-      }
-    },
-    {
-      "key": "owner-marshall",
-      "png": "sprites/owner-marshall.png",
-      "json": "sprites/owner-marshall.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 27
       }
     },
     {
@@ -4791,16 +4791,16 @@
       "png": "images/portrait-dog-biscuit.png"
     },
     {
+      "key": "portrait-dog-buddy",
+      "png": "images/portrait-dog-buddy.png"
+    },
+    {
       "key": "portrait-dog-duchess",
       "png": "images/portrait-dog-duchess.png"
     },
     {
       "key": "portrait-dog-kilo",
       "png": "images/portrait-dog-kilo.png"
-    },
-    {
-      "key": "portrait-dog-marshall",
-      "png": "images/portrait-dog-marshall.png"
     },
     {
       "key": "portrait-dog-penny",
