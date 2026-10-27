@@ -1137,7 +1137,7 @@ def bistro_set(cv, cx, base):
     cv.fill(cx + 1, base - 7, 1, 1, "cream")
 
 
-def patio(cv, x0, x1, base, cols):
+def bistro_patio(cv, x0, x1, base, cols):
     """A restaurant patio from column x0 to x1 on row base: bistro sets under umbrellas every 26 columns,
     their canopies alternating the two cols, behind a low coal rail with a geranium planter at each end."""
     for k, cx in enumerate(range(x0 + 12, x1 - 8, 26)):
@@ -1246,7 +1246,7 @@ def distillery():
         return "brick" if hashed(px, py, 19) else "brown"
 
     yard(cv, BASE, FAR_WALK, paving)
-    patio(cv, CX - 50, CX + 46, FAR_WALK - 1, ("cream", "forest"))
+    bistro_patio(cv, CX - 50, CX + 46, FAR_WALK - 1, ("cream", "forest"))
     still_dancing(cv, CX - 72, FAR_WALK - 1, CALM + 4)
     love_sign(cv, 104, FAR_WALK - 1)
     for x in (8, CX + 60, CX + 132):
