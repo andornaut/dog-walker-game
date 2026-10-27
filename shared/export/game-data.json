@@ -2235,7 +2235,7 @@
       "fannyPackCardCostFactor": 0.5,
       "goodLeashSquirrelPull": 0,
       "keenEyeTipSpawns": 1.5,
-      "keenEyeTreatSpawns": 2,
+      "keenEyeTreatSpawns": 1.5,
       "largeDogAgility": -0.1,
       "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,

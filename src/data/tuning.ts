@@ -135,7 +135,7 @@ export const TUNING = {
     // How many tips appear while Mr. B's Keen eye walks.
     keenEyeTipSpawns: 1.5,
     // How many treats appear while Mr. B's Keen eye walks.
-    keenEyeTreatSpawns: 2,
+    keenEyeTreatSpawns: 1.5,
     // Each large dog in the pack adds this to the walker's agility.
     largeDogAgility: -0.1,
     // Large dogs never take the pack's agility below this, or below the walker's own when lower.

@@ -6,7 +6,7 @@ import type { Walker, WalkerPerk } from "./types";
 // percent names is from 1, unsigned: 1.25 as "25%".
 export const WALKER_PERKS = {
   keenEye: {
-    effect: "Twice as many treats, {percent} more tips",
+    effect: "{percent} more tips and treats",
     effects: [
       { by: "keenEyeTreatSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
       { by: "keenEyeTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },

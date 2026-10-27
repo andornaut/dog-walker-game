@@ -229,7 +229,7 @@ Four walkers. You start with Casey; each other walker unlocks the first time you
 
 Each walker has one **perk**:
 
-- **Keen eye** (Mr. B): twice as many treats appear, and 50% more tips
+- **Keen eye** (Mr. B): 50% more tips and treats appear
 - **Long reach** (Trista): the front dog grabs tips and treats one lane to either side
 - **Quick recovery** (Ada): debuffs last half as long
 - **Second chance** (Casey): the first ♥ lost in each neighbourhood is forgiven (one heart, including one of a Muddy bump's two)
