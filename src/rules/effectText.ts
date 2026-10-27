@@ -111,7 +111,7 @@ export function gearShort(data: Pick<GameData, "shopGear" | "tuning">, gear: Gea
 }
 
 // A walker perk's effect line, its {percent} how far the multiplier its percent names is from
-// 1: Treat finder's "25% more tips".
+// 1: Keen eye's "25% more tips".
 export function perkEffect(tuning: LiveTuning, perk: WalkerPerk): string {
   return perk.percent === undefined
     ? perk.effect

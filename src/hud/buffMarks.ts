@@ -256,7 +256,7 @@ export interface SpawnCounts {
 
 export const NO_SPAWNS: SpawnCounts = { tips: 0, treats: 0 };
 
-// Treat finder's and Rush hour's pops: while a buff scales a pickup's spawns, every second one
+// Keen eye's and Rush hour's pops: while a buff scales a pickup's spawns, every second one
 // collected pops each scaling buff's charm over it. Returns the pops and the counts after.
 export function spawnPops(
   data: MarkData,

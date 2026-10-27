@@ -230,14 +230,14 @@ describe("popsOf", () => {
 });
 
 describe("spawnPops", () => {
-  it("pops Treat finder's charm on every second treat collected", () => {
+  it("pops Keen eye's charm on every second treat collected", () => {
     const run = testState(
       { kilo: 3 },
       {
         modifiers: [
           activeModifier(
             { kind: "walker", walker: "mrB" },
-            { by: "treatFinderSpawns", operation: "multiply", stat: "treatSpawns" },
+            { by: "keenEyeTreatSpawns", operation: "multiply", stat: "treatSpawns" },
           ),
         ],
         walker: "mrB",
@@ -257,7 +257,7 @@ describe("spawnPops", () => {
       counts = step.counts;
       return step.pops.map(({ item }) => item);
     });
-    const finder = { kind: "perk", perk: "treatFinder" };
+    const finder = { kind: "perk", perk: "keenEye" };
     expect(popped).toEqual([[], [finder], [], [finder]]);
   });
 });

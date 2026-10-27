@@ -5,6 +5,15 @@ import type { Walker, WalkerPerk } from "./types";
 // The art is icon-perk-<kebab id>. An effect line's {percent} is how far the multiplier the perk's
 // percent names is from 1, unsigned: 1.25 as "25%".
 export const WALKER_PERKS = {
+  keenEye: {
+    effect: "Twice as many treats, {percent} more tips",
+    effects: [
+      { by: "keenEyeTreatSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
+      { by: "keenEyeTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
+    ],
+    name: "Treat finder",
+    percent: "keenEyeTipSpawns",
+  },
   longReach: {
     effect: "Grabs tips and treats a lane to each side",
     effects: [
@@ -31,15 +40,6 @@ export const WALKER_PERKS = {
       { by: "secondChanceForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
     ],
     name: "Second chance",
-  },
-  treatFinder: {
-    effect: "Twice as many treats, {percent} more tips",
-    effects: [
-      { by: "treatFinderSpawns", kind: "modifier", operation: "multiply", stat: "treatSpawns" },
-      { by: "treatFinderTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
-    ],
-    name: "Treat finder",
-    percent: "treatFinderTipSpawns",
   },
 } as const satisfies Record<string, WalkerPerk>;
 
@@ -70,7 +70,7 @@ export const WALKERS = {
     agility: 1,
     greeting: "Nice pack! Mind if I tag along?",
     name: "Mr. B",
-    perk: "treatFinder",
+    perk: "keenEye",
     portraitKey: "face-walker-mr-b",
     spriteKey: "walker-mr-b",
     unlock: "finishZone",

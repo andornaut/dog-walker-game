@@ -44,9 +44,9 @@ const tuning = {
   hearts: { ...TEST_TUNING.hearts, secondChanceForgiven: TUNING.hearts.secondChanceForgiven },
   multipliers: {
     ...TEST_TUNING.multipliers,
+    keenEyeTipSpawns: TUNING.multipliers.keenEyeTipSpawns,
+    keenEyeTreatSpawns: TUNING.multipliers.keenEyeTreatSpawns,
     quickRecoveryDebuffFactor: TUNING.multipliers.quickRecoveryDebuffFactor,
-    treatFinderSpawns: TUNING.multipliers.treatFinderSpawns,
-    treatFinderTipSpawns: TUNING.multipliers.treatFinderTipSpawns,
   },
 };
 const data = {
@@ -74,7 +74,7 @@ function walkerWith(perk: WalkerPerkId): WalkerId {
 }
 
 // Walkers whose perks change none of the values a case checks.
-const PLAIN = walkerWith("treatFinder");
+const PLAIN = walkerWith("keenEye");
 const PLAIN_FOR_SPAWNS = walkerWith("quickRecovery");
 
 // A lone small dog's run, with the walker and gear given and the upgrades picked. A small
@@ -139,6 +139,7 @@ const sources = {
   fannyPack: { gear: "fannyPack", kind: "gear" },
   goodLeash: { kind: "upgrade", upgrade: "goodLeash" },
   hallPass: { gear: "hallPass", kind: "gear" },
+  keenEye: { kind: "walker", walker: walkerWith("keenEye") },
   longReach: { kind: "walker", walker: walkerWith("longReach") },
   luckyCollar: { gear: "luckyCollar", kind: "gear" },
   quickRecovery: { kind: "walker", walker: walkerWith("quickRecovery") },
@@ -146,7 +147,6 @@ const sources = {
   rushHour: { kind: "upgrade", upgrade: "rushHour" },
   secondChance: { kind: "walker", walker: walkerWith("secondChance") },
   sweetTalker: { kind: "upgrade", upgrade: "sweetTalker" },
-  treatFinder: { kind: "walker", walker: walkerWith("treatFinder") },
 } as const satisfies Record<string, EffectSource>;
 
 const by = (amount: number, source: ModifierSource) => [{ amount, kind: "modifier", source }];
@@ -302,15 +302,15 @@ describe("standingModified", () => {
       ],
     ],
     [
-      "Treat finder",
-      runWith(walkerWith("treatFinder")),
-      sources.treatFinder,
+      "Keen eye",
+      runWith(walkerWith("keenEye")),
+      sources.keenEye,
       (state: RunState) => {
         const stats = spawnStats(state);
         return (
           [
-            ["tips", stats.tips, "treatFinderTipSpawns"],
-            ["treats", stats.treats, "treatFinderSpawns"],
+            ["tips", stats.tips, "keenEyeTipSpawns"],
+            ["treats", stats.treats, "keenEyeTreatSpawns"],
           ] as const
         ).flatMap(([spawn, base, factor]) => {
           // A count the factor's rounding leaves alone is left out.
@@ -321,7 +321,7 @@ describe("standingModified", () => {
                 {
                   after,
                   before: base,
-                  by: by(after - base, sources.treatFinder),
+                  by: by(after - base, sources.keenEye),
                   subject: { kind: "spawns", spawn },
                 },
               ];
@@ -357,7 +357,7 @@ describe("standingModified", () => {
   });
 
   it("names nothing between a zone's end and its fork", () => {
-    const state = runWith(walkerWith("treatFinder"));
+    const state = runWith(walkerWith("keenEye"));
     expect(standingModified(data, { ...state, zoneIndex: 1 })).toEqual([]);
   });
 });

@@ -117,6 +117,10 @@ export const TUNING = {
     dartTurnAtShareMax: 1,
     dartTurnAtShareMin: 0.5,
     goodLeashSquirrelPull: 0,
+    // How many tips appear while Mr. B's Treat finder walks.
+    keenEyeTipSpawns: 1.5,
+    // How many treats appear while Mr. B's Treat finder walks.
+    keenEyeTreatSpawns: 2,
     // Each large dog in the pack adds this to the walker's agility.
     largeDogAgility: -0.1,
     // Large dogs never take the pack's agility below this, or below the walker's own when lower.
@@ -137,10 +141,6 @@ export const TUNING = {
     scrollSpeedGainPerZone: 0.2,
     // What a tip pays while the pack is Stinky.
     stinkyTipValue: 0,
-    // How many treats appear while Mr. B's Treat finder walks.
-    treatFinderSpawns: 2,
-    // How many tips appear while Mr. B's Treat finder walks.
-    treatFinderTipSpawns: 1.5,
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {

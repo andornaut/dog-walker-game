@@ -40,7 +40,7 @@ function maxHeartsModified(data: StandingData, run: StandingRun): ModifiedValue[
 }
 
 // The current zone's spawn counts, as the walk plans them, when obstacleSpawns, tipSpawns or
-// treatSpawns modifiers, such as Rush hour's or Treat finder's, change them. None between a
+// treatSpawns modifiers, such as Rush hour's or Keen eye's, change them. None between a
 // zone's end and the fork after it.
 function spawnsModified(data: StandingData, run: StandingRun): ModifiedValue[] {
   if (run.route[run.zoneIndex] === undefined) {

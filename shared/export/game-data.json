@@ -1375,6 +1375,8 @@
       "dartTurnAtShareMax": 1,
       "dartTurnAtShareMin": 0.5,
       "goodLeashSquirrelPull": 0,
+      "keenEyeTipSpawns": 1.5,
+      "keenEyeTreatSpawns": 2,
       "largeDogAgility": -0.1,
       "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,
@@ -1385,9 +1387,7 @@
       "rushHourTips": 2,
       "rushHourTreats": 2,
       "scrollSpeedGainPerZone": 0.2,
-      "stinkyTipValue": 0,
-      "treatFinderSpawns": 2,
-      "treatFinderTipSpawns": 1.5
+      "stinkyTipValue": 0
     },
     "pixels": {
       "roadScrollSpeed": 200,
@@ -1571,7 +1571,7 @@
       "agility": 1,
       "greeting": "Nice pack! Mind if I tag along?",
       "name": "Mr. B",
-      "perk": "treatFinder",
+      "perk": "keenEye",
       "portraitKey": "face-walker-mr-b",
       "spriteKey": "walker-mr-b",
       "unlock": "finishZone",

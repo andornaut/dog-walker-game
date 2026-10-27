@@ -204,11 +204,11 @@ describe("planZone", { timeout: 60_000 }, () => {
     expect(countOf("lucky")).toBe(2);
   });
 
-  // Rush hour's and Treat finder's treatSpawns factors, at the live tuning's values.
-  it("plans Rush hour's and Treat finder's treatSpawns factor of treats", () => {
+  // Rush hour's and Keen eye's treatSpawns factors, at the live tuning's values.
+  it("plans Rush hour's and Keen eye's treatSpawns factor of treats", () => {
     for (const [, effects, source] of [
       ["Rush hour", UPGRADES.rushHour.effects, { kind: "upgrade", upgrade: "rushHour" }],
-      ["Treat finder", WALKER_PERKS.treatFinder.effects, { kind: "walker", walker: "mrB" }],
+      ["Keen eye", WALKER_PERKS.keenEye.effects, { kind: "walker", walker: "mrB" }],
     ] satisfies readonly [string, readonly Effect[], ModifierSource][]) {
       const live = { ...data, tuning: { ...tuning, multipliers: TUNING.multipliers } };
       const factors = modifiersOf(effects).filter(({ stat }) => stat === "treatSpawns");
