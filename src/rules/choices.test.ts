@@ -233,6 +233,22 @@ describe("applyInstantEncounter", () => {
 });
 
 describe("chooseOption", () => {
+  // Raincoats keep only a puddle's Muddy off: the capybara's Help the keeper muddies the pack
+  // with them or without.
+  it.each([{ raincoats: false }, { raincoats: true }])(
+    "muddies the pack helping the capybara's keeper, with Raincoats: $raincoats",
+    ({ raincoats }) => {
+      const coats = {
+        encounter: "puddle",
+        source: { kind: "upgrade", upgrade: "raincoats" },
+      } as const;
+      const state = testState({ kilo: 5 }, raincoats ? { immunities: [coats] } : {});
+      const help = optionWith("capybara", "debuff");
+      const { state: after } = choose(state, encounter("capybara", ["kilo"]), help);
+      expect(after.debuffs.map(({ debuff }) => debuff)).toEqual(["muddy"]);
+    },
+  );
+
   const nose = optionWith("skunk", "hearts");
   const groom = optionWith("skunk", "money");
   const lost = heartsOf("skunk");

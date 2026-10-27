@@ -8,12 +8,10 @@ import type { DogId, QuipMoment } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
 import { type Rect } from "../lib/rect";
-import { bumpHearts } from "../rules/run";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
@@ -226,15 +224,11 @@ function everyStripLine(): FaceText[] {
     ...new Set(Object.values(gameData.minorObstacles).map(({ name }) => name.toLowerCase())),
   ];
   const amount = "$9,999";
-  const muddyCost = bumpHearts(
-    gameData,
-    testState({ kilo: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
-  );
   return [
     ...Object.values(gameData.hints).map(({ text }) => ({ text })),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
     ...Object.values(strip.debuffStart).map((start) => ({
-      text: fillNames(start, { hearts: String(muddyCost), seconds: "99" }),
+      text: fillNames(start, { cash: amount, seconds: "99", slower: "100%" }),
     })),
     ...Object.values(strip.debuffEnd).map((text) => ({ text })),
     { text: strip.luckyNeighbour },
@@ -244,7 +238,6 @@ function everyStripLine(): FaceText[] {
       line("fired", { dog, owner }),
       line("secondChance", { owner }),
       line("lowHearts", { owner }),
-      line("muddyHearts", { cost: String(muddyCost), hearts: String(muddyCost), owner }),
       line("pull", { dog }),
       line("treat", { dog, hearts: "10", owner }),
       ...obstacles.flatMap((obstacle) => [

@@ -12,7 +12,6 @@ export const STRIP_LINE_FIELDS = {
   largeDog: ["dog", "speed"],
   lowHearts: ["owner"],
   luckyWallet: ["amount"],
-  muddyHearts: ["cost", "hearts", "owner"],
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],
   secondChance: ["owner"],
@@ -47,7 +46,7 @@ export const RUN_TEXT_FIELDS = {
   strip: {
     ...STRIP_LINE_FIELDS,
     debuffStart: {
-      muddy: ["hearts", "seconds"],
+      muddy: ["seconds", "slower"],
       spotlight: ["cash", "seconds"],
       stinky: ["seconds"],
       zoomies: ["seconds"],

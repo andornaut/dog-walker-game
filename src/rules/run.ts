@@ -19,7 +19,7 @@ function debuffModifiers(
 }
 
 // The run's modifiers and its debuffs' modifiers together.
-function packModifiers(
+export function packModifiers(
   data: Pick<GameData, "debuffs">,
   state: Pick<RunState, "debuffs" | "modifiers">,
 ): readonly ActiveModifier[] {
@@ -29,7 +29,7 @@ function packModifiers(
 }
 
 // The hearts a minor bump costs its dog's owner now, with what each modifier added: hearts.bump,
-// changed by bumpHearts modifiers such as Muddy's.
+// changed by bumpHearts modifiers.
 export function bumpParts(
   data: Pick<GameData, "debuffs" | "tuning">,
   state: Pick<RunState, "debuffs" | "modifiers">,
@@ -42,17 +42,9 @@ export function bumpParts(
   );
 }
 
-// The hearts a minor bump costs its dog's owner now (bumpParts' value).
-export function bumpHearts(
-  data: Pick<GameData, "debuffs" | "tuning">,
-  state: Pick<RunState, "debuffs" | "modifiers">,
-): number {
-  return bumpParts(data, state).value;
-}
-
 // What a minor bump takes from the cash now, as a change with its causes, while a debuff makes
-// bumps cost cash: the debuff's bumpMoney, such as Spotlight's, changed by bumpMoney modifiers
-// such as Muddy's, in whole dollars, or all the cash there is when that is less. Null while no
+// bumps cost cash: the debuff's bumpMoney, such as Spotlight's, changed by bumpMoney modifiers,
+// in whole dollars, or all the cash there is when that is less. Null while no
 // debuff makes bumps cost cash, or with no cash, when a bump costs hearts instead.
 export function bumpCash(
   data: Pick<GameData, "debuffs" | "tuning">,

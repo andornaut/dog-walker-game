@@ -243,23 +243,27 @@ export function effectClause(data: TextData, effects: readonly Effect[]): string
 }
 
 // The {name}s a debuff's stake and its strip start line are filled with: cash, what a minor bump
-// costs while the debuff makes bumps cost cash ($0 for one that does not), hearts, what a minor
-// bump costs while Muddy, and seconds, how long the debuff lasts or has left.
+// costs while the debuff makes bumps cost cash ($0 for one that does not), seconds, how long the
+// debuff lasts or has left, and slower, how much slower its multiply agility modifiers make lane
+// changes, such as Muddy's "50%" (0% for one with none).
 export function debuffFields(
   data: Pick<GameData, "debuffs" | "tuning">,
   debuff: DebuffId,
   seconds: number,
-): { readonly cash: string; readonly hearts: string; readonly seconds: string } {
-  const { bumpMoney } = data.debuffs[debuff];
+): { readonly cash: string; readonly seconds: string; readonly slower: string } {
+  const { bumpMoney, modifiers } = data.debuffs[debuff];
+  const speed = modifiers
+    .filter(({ operation, stat }) => operation === "multiply" && stat === "agility")
+    .reduce((product, modifier) => product * modifierValue(data.tuning, modifier), 1);
   return {
     cash: formatDollars(bumpMoney === undefined ? cents(0) : read(data.tuning, "money", bumpMoney)),
-    hearts: String(read(data.tuning, "multipliers", "muddyBumpCost")),
     seconds: String(seconds),
+    slower: percentMagnitude(1 - speed),
   };
 }
 
-// A debuff's name and what it does for how long, as a card states its stake: "Muddy: bumps
-// cost 2♥ for 20s".
+// A debuff's name and what it does for how long, as a card states its stake: "Muddy: lane
+// changes 50% slower for 20s".
 function debuffStake(
   data: Pick<GameData, "debuffs" | "tuning">,
   debuff: DebuffId,

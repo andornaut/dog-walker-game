@@ -66,7 +66,7 @@ export const RUN_TEXT = {
       zoomies: "The zoomies wore off.",
     },
     debuffStart: {
-      muddy: "Muddy paws! Bumps cost {hearts}♥ for {seconds}s.",
+      muddy: "Muddy paws! Lane changes {slower} slower for {seconds}s.",
       spotlight: "Spotlight! Bumps cost {cash} for {seconds}s.",
       stinky: "Stinky pack! Tips pay nothing for {seconds}s.",
       zoomies: "Zoomies! The pack won't sit still for {seconds}s.",
@@ -79,7 +79,6 @@ export const RUN_TEXT = {
     lowHearts: "{owner} has 1♥ left!",
     luckyNeighbour: "A neighbour pets the pack! Everyone +1♥",
     luckyWallet: "Found a wallet! +{amount}",
-    muddyHearts: "{owner} has {hearts}♥ left! Muddy bumps cost {cost}♥.",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",
     pull: "{dog} spotted a squirrel!",
     secondChance: "Second chance! {owner} lets it go.",

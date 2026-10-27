@@ -18,7 +18,7 @@ import { type PackSprites, PART_INSET } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { read } from "../rules/units";
-import { slowestPackAgility } from "../rules/walkers";
+import { slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { approachOutcomes } from "../runner/approach";
 import { type MoverPath, moverPlace } from "../runner/movers";
 import {
@@ -98,11 +98,13 @@ export const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState
 });
 // The slowest pack's lane move, which sets the row spacing.
 export const slowestLaneMove = read(TUNING, "seconds", "laneMove") / slowestPackAgility(REAL);
-// The walkway from the zone's start, as blockingSpans measures it: its whole scroll, until the
-// zone's last row has passed the pack.
+// The slowest pack's lane move while Muddy, which spaces the held path's lane changes.
+export const muddyLaneMove = read(TUNING, "seconds", "laneMove") / slowestDebuffedAgility(REAL);
+// The walkway from the zone's start, as blockingSpans measures it, for the slowest pack while
+// Muddy: its whole scroll, until the zone's last row has passed the pack.
 export const walkwayOf = (tuned: Real, road: RoadGeometry, run: RunState) => ({
   laneCount: LANE_COUNT,
-  laneMoveSeconds: slowestLaneMove,
+  laneMoveSeconds: muddyLaneMove,
   scrollSpeed: walkScrollSpeed(tuned, run),
   zoneLength: zoneLength(tuned) + road.sightLength,
 });

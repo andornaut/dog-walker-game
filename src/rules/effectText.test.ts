@@ -166,20 +166,20 @@ describe("effectText", () => {
     }
   });
 
-  const muddyBumpCost = read(TEST_TUNING, "multipliers", "muddyBumpCost");
-  it.each([muddyBumpCost, muddyBumpCost + 1])(
-    "fills Muddy's stake with muddyBumpCost at %i",
-    (hearts) => {
-      const tuning = {
-        ...data.tuning,
-        multipliers: { ...data.tuning.multipliers, muddyBumpCost: hearts },
-      };
-      const seconds = String(read(TEST_TUNING, "seconds", DEBUFFS.muddy.seconds));
-      expect(effectText({ ...data, tuning }, [{ debuff: "muddy", kind: "debuff" }])).toBe(
-        `${DEBUFFS.muddy.name}: ${fillNames(DEBUFFS.muddy.stake, { hearts: String(hearts), seconds })}`,
-      );
-    },
-  );
+  // Muddy's stake says how much slower lane changes are: 1 less muddyLaneSlow, as a percent.
+  it.each([
+    { slow: 0.5, slower: "50%" },
+    { slow: 0.75, slower: "25%" },
+  ])("fills Muddy's stake with $slower slower at muddyLaneSlow $slow", ({ slow, slower }) => {
+    const tuning = {
+      ...data.tuning,
+      multipliers: { ...data.tuning.multipliers, muddyLaneSlow: slow },
+    };
+    const seconds = String(read(TEST_TUNING, "seconds", DEBUFFS.muddy.seconds));
+    expect(effectText({ ...data, tuning }, [{ debuff: "muddy", kind: "debuff" }])).toBe(
+      `${DEBUFFS.muddy.name}: ${fillNames(DEBUFFS.muddy.stake, { seconds, slower })}`,
+    );
+  });
 });
 
 // A share of the base lane-change speed as an unsigned whole percent.

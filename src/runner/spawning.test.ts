@@ -56,6 +56,7 @@ const plan: SpawnPlan<Kind> = {
   moverCaps: { darts: 1, slowVehicles: 1, total: 3 },
   packHitLength: 30,
   packLength: 30,
+  pathLaneMoveSeconds: 0.1,
   pathStart: 2,
   quotas: [
     { blocksLane: true, count: 6, kind: "obstacle" },
@@ -77,6 +78,7 @@ const tight: SpawnPlan<Kind> = {
   laneMoveSeconds: 0.25,
   packHitLength: 50,
   packLength: 50,
+  pathLaneMoveSeconds: 0.25,
   quotas: [
     { blocksLane: true, count: 27, kind: "obstacle" },
     { blocksLane: false, count: 9, kind: "tip" },
@@ -461,7 +463,7 @@ describe("planSpawns", () => {
       {
         error: /apart/,
         name: "the rows, with no lane move to space them, are too close for the pack to pass between them",
-        unplannable: { ...plan, laneMoveSeconds: 0, packLength: 81 },
+        unplannable: { ...plan, laneMoveSeconds: 0, packLength: 81, pathLaneMoveSeconds: 0 },
       },
       {
         error: /sight/,
@@ -609,20 +611,29 @@ describe("planSpawns", () => {
   });
 
   // Along the path, checked apart from the planner: at each change of lane, the road between the
-  // hit boxes of obstacles met before and after it fits the 50px pack, 25px per lane move and the
+  // hit boxes of obstacles met before and after it fits the 50px pack, the path's lane moves of
+  // 25px, or 50px where the path is spaced for a pack changing lanes at half speed, and the
   // reaction margin. A 120px margin asks for more than the 180px between one-row obstacles two rows
   // apart. Obstacles WIDE_LANES wide or wider are two rows apart or more.
-  it.each([{ margin: 10 }, { margin: 120 }])(
-    "spaces obstacles for the path's lane changes between them, with a $margin px margin",
-    ({ margin }) => {
-      const spaced = { ...reacting, reactionSeconds: margin / reacting.scrollSpeed };
+  it.each([
+    { margin: 10, move: 25 },
+    { margin: 120, move: 25 },
+    { margin: 10, move: 50 },
+  ])(
+    "spaces obstacles for the path's $move px lane changes between them, with a $margin px margin",
+    ({ margin, move }) => {
+      const spaced = {
+        ...reacting,
+        pathLaneMoveSeconds: (reacting.laneMoveSeconds * move) / 25,
+        reactionSeconds: margin / reacting.scrollSpeed,
+      };
       for (const seed of seeds.slice(0, 5)) {
         const { events: planned, path } = planSpawns(plannerStreams(seed), spaced);
         const events = planned.filter(blocking);
         expect(events.filter((event) => footprintOf(event.kind).lanes > 1).length).toBeGreaterThan(
           4,
         );
-        const gap = (moves: number) => 50 + 25 * moves + margin - 1e-6;
+        const gap = (moves: number) => 50 + move * moves + margin - 1e-6;
         expect(pathShortfalls(50, gap, path, contactsOf(spaced, events))).toEqual([]);
         events.forEach((near, i) => {
           for (const far of events.slice(i + 1)) {
@@ -1007,7 +1018,7 @@ describe("pathReach and rowSpacing", () => {
     {
       name: "a 0.26s move lasts six steps, 30px",
       reach: 2,
-      spaced: { ...tight, laneMoveSeconds: 0.26 },
+      spaced: { ...tight, laneMoveSeconds: 0.26, pathLaneMoveSeconds: 0.26 },
       spacing: 105,
     },
     {
@@ -1031,7 +1042,7 @@ describe("pathReach and rowSpacing", () => {
     {
       name: "two lanes leave one to change to",
       reach: 1,
-      spaced: { ...plan, laneCount: 2, laneMoveSeconds: 0, pathStart: 0 },
+      spaced: { ...plan, laneCount: 2, laneMoveSeconds: 0, pathLaneMoveSeconds: 0, pathStart: 0 },
       spacing: 100,
     },
   ] satisfies readonly {

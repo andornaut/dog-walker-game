@@ -27,13 +27,13 @@ import {
   MOVER_SCROLL,
   moverContact,
   moverSpans,
+  muddyLaneMove,
   OBSTACLE_IDS,
   packHitLength,
   REAL,
   type Real,
   realRun,
   ROAD_LENGTH,
-  slowestLaneMove,
   TALL_PACK_ROAD,
   TALLER,
   walkwayOf,
@@ -343,7 +343,7 @@ describe("movers", { timeout: 120_000 }, () => {
     for (const { road, tuned, zone, zoneIndex } of cases) {
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
       const speed = walkScrollSpeed(tuned, zoned);
-      const laneMove = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9) * STEP_SECONDS * speed;
+      const laneMove = Math.ceil(muddyLaneMove / STEP_SECONDS - 1e-9) * STEP_SECONDS * speed;
       const margin = read(tuned.tuning, "seconds", "pathReactionMargin") * speed;
       const fit = (moves: number) => packHitLength(road) + moves * laneMove + margin - 1;
       const walk = planZone(tuned, road, plannerStreams(1), {

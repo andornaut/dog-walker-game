@@ -10,7 +10,7 @@
         "id": "capybara",
         "kind": "encounter"
       },
-      "text": "Muddy: bumps cost 2♥ for 30s",
+      "text": "Muddy: lane changes 50% slower for 30s",
       "title": "Escaped capybara"
     },
     {
@@ -500,19 +500,14 @@
       "id": "muddy",
       "modifiers": [
         {
-          "by": "muddyBumpCost",
+          "by": "muddyLaneSlow",
           "operation": "multiply",
-          "stat": "bumpHearts"
-        },
-        {
-          "by": "muddyBumpCost",
-          "operation": "multiply",
-          "stat": "bumpMoney"
+          "stat": "agility"
         }
       ],
       "name": "Muddy",
       "seconds": "muddySeconds",
-      "stake": "bumps cost {hearts}♥ for {seconds}s"
+      "stake": "lane changes {slower} slower for {seconds}s"
     },
     {
       "id": "spotlight",
@@ -2239,7 +2234,7 @@
       "largeDogAgility": -0.1,
       "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,
-      "muddyBumpCost": 2,
+      "muddyLaneSlow": 0.5,
       "quickRecoveryDebuffFactor": 0.5,
       "runningShoesAgility": 0.4,
       "rushHourObstacles": 1.5,

@@ -3,6 +3,7 @@ import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { isLarge } from "./dogs";
 import { modifiedStat } from "./modifiers";
+import { packModifiers } from "./run";
 import { read } from "./units";
 
 type WalkerData = Pick<GameData, "walkerPerks" | "walkers">;
@@ -22,23 +23,28 @@ function largeDogsAgility(
 }
 
 // The agility the pack changes lanes at: the walker's, with its modifiers, and its large dogs',
-// which never take it below minPackAgility, or the walker's own when lower.
+// which never take it below minPackAgility, or the walker's own when lower; then scaled by the
+// multiply agility modifiers of the run and its debuffs, such as Muddy's, so a Muddy pack changes
+// lanes at muddyLaneSlow of its own speed.
 export function packAgility(
-  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
-  run: Pick<RunState, "modifiers" | "pack" | "walker">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack" | "walker">,
 ): number {
   const agility = walkerAgility(data, run.modifiers, run.walker);
   const floor = Math.min(agility, read(data.tuning, "multipliers", "minPackAgility"));
-  return Math.max(floor, agility + largeDogsAgility(data, run));
+  const walking = Math.max(floor, agility + largeDogsAgility(data, run));
+  const scaling = packModifiers(data, run).filter(({ operation }) => operation === "multiply");
+  return modifiedStat(data.tuning, scaling, "agility", walking);
 }
 
-// The walker's agility after agility modifiers, such as Running shoes'.
+// The walker's agility after add agility modifiers, such as Running shoes'.
 export function walkerAgility(
   data: Pick<GameData, "tuning" | "walkers">,
   modifiers: readonly Modifier[],
   walker: WalkerId,
 ): number {
-  return modifiedStat(data.tuning, modifiers, "agility", data.walkers[walker].agility);
+  const adding = modifiers.filter(({ operation }) => operation === "add");
+  return modifiedStat(data.tuning, adding, "agility", data.walkers[walker].agility);
 }
 
 // The lowest agility any pack can change lanes at, which sets the row spacing: minPackAgility,
@@ -46,6 +52,21 @@ export function walkerAgility(
 export function slowestPackAgility(data: Pick<GameData, "tuning" | "walkers">): number {
   const slowest = Math.min(...Object.values(data.walkers).map(({ agility }) => agility));
   return Math.min(slowest, read(data.tuning, "multipliers", "minPackAgility"));
+}
+
+// The lowest agility any pack can change lanes at with every debuff on it, which spaces the held
+// path's lane changes: slowestPackAgility, scaled by each debuff's multiply agility modifiers
+// that slow it, such as Muddy's.
+export function slowestDebuffedAgility(
+  data: Pick<GameData, "debuffs" | "tuning" | "walkers">,
+): number {
+  const slowing = Object.values(data.debuffs)
+    .flatMap(({ modifiers }): readonly Modifier[] => modifiers)
+    .filter(({ operation, stat }) => operation === "multiply" && stat === "agility");
+  return Math.min(
+    slowestPackAgility(data),
+    modifiedStat(data.tuning, slowing, "agility", slowestPackAgility(data)),
+  );
 }
 
 // The zone whose finish unlocks the walker, or null for a starting walker.

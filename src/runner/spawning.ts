@@ -56,7 +56,9 @@ export interface SpawnQuota<Kind extends string> {
 // is negative where obstacles are drawn longer than a row; it overlaps the pack over its hit box's
 // length plus packLength. A lane is cellLength wide, and a mover's hit box is laneInset inside its
 // lane at each side. scrollSpeed (pixels per second), laneMoveSeconds and stepSeconds, the
-// walk's step, set how far the pack can steer between rows. sightLength is the road in view above
+// walk's step, set how far the pack can steer between rows; pathLaneMoveSeconds, the slowest lane
+// move the pack may make in the zone, such as a Muddy pack's, spaces the path's lane changes
+// (packGap). sightLength is the road in view above
 // the pack, so the next row shows before the pack has to steer for it, and roadLength the whole
 // road in view. reactionSeconds is the time the pack is given to react on top of the lane moves it
 // makes between two spawns. maxEmptyRows is the most rows in a row that may come on screen with no
@@ -80,6 +82,7 @@ export interface SpawnPlan<Kind extends string> {
   moverCaps: MoverCaps;
   packHitLength: number;
   packLength: number;
+  pathLaneMoveSeconds: number;
   pathStart: number;
   quotas: readonly SpawnQuota<Kind>[];
   reactionSeconds: number;
@@ -182,6 +185,11 @@ function laneMoveLength(plan: SpawnPlan<string>): number {
   return Math.ceil(plan.laneMoveSeconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
 }
 
+// The scroll the slowest lane move covers, for the path's lane changes: it lasts whole walk steps.
+function pathMoveLength(plan: SpawnPlan<string>): number {
+  return Math.ceil(plan.pathLaneMoveSeconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
+}
+
 // The scroll the reaction margin covers.
 function reactionLength(plan: SpawnPlan<string>): number {
   return plan.reactionSeconds * plan.scrollSpeed;
@@ -239,9 +247,10 @@ interface BlockingPlace {
 
 // The least clear road, from the far edge of the nearer obstacle's hit box to the near edge of
 // the farther one's, across which the path makes changes lane changes between them: the
-// pack's hit boxes, the lane moves and the reaction margin, so the pack visibly fits between them.
+// pack's hit boxes, the lane moves at the slowest the pack may make them (pathLaneMoveSeconds) and
+// the reaction margin, so the pack visibly fits between them.
 export function packGap(plan: SpawnPlan<string>, changes: number): number {
-  return plan.packHitLength + changes * laneMoveLength(plan) + reactionLength(plan);
+  return plan.packHitLength + changes * pathMoveLength(plan) + reactionLength(plan);
 }
 
 // A change of lane on the path, from the lane it holds on one row to the next row's lane: at is

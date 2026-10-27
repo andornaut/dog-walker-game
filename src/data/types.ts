@@ -180,7 +180,8 @@ export type Stat =
   | "cardCost"
   // How long a debuff lasts.
   | "debuffSeconds"
-  // The walker's agility: how many times faster than the base the pack changes lanes.
+  // The walker's agility: how many times faster than the base the pack changes lanes. An add
+  // modifier changes the walker's agility; a multiply one, such as Muddy's, scales the pack's.
   | "agility"
   | "obstacleSpawns"
   // How many pulls a squirrel draws.
@@ -399,8 +400,8 @@ export type Encounter = {
 );
 
 // An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
-// bumpHearts modifiers such as Muddy's change it, or, while a debuff with bumpMoney such as
-// Spotlight lasts and there is cash, that cash instead; the dog it lands on may dodge it.
+// bumpHearts modifiers change it, or, while a debuff with bumpMoney such as Spotlight lasts and
+// there is cash, that cash instead; the dog it lands on may dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
 // Each zone's weights set how often it appears there; one with zones appears only in those zones,
 // weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
@@ -473,12 +474,12 @@ export type Walker = WalkerUnlock & {
 
 // A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
 // and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
-// after the debuff's name, its {seconds} filled with how long it would last, its {hearts} with
-// what a minor bump costs while Muddy and its {cash} with its bumpMoney. Its modifiers change
-// stats while it lasts; one the rules act on by id, such as Zoomies' drift, has none. While one
-// with bumpMoney lasts, a plain bump costs that cash, as bumpMoney modifiers such as Muddy's
-// change it, instead of hearts: all the cash there is when that is less, and hearts as usual at
-// $0.
+// after the debuff's name, its {seconds} filled with how long it would last, its {slower} with how
+// much slower its multiply agility modifiers make lane changes, such as Muddy's, and its {cash}
+// with its bumpMoney. Its modifiers change stats while it lasts; one the rules act on by id, such
+// as Zoomies' drift, has none. While one with bumpMoney lasts, a plain bump costs that cash, as
+// bumpMoney modifiers change it, instead of hearts: all the cash there is when that is less, and
+// hearts as usual at $0.
 export interface Debuff {
   readonly bumpMoney?: MoneyKey;
   readonly modifiers: readonly Modifier[];
@@ -795,8 +796,6 @@ export interface RunText {
     readonly lowHearts: string;
     readonly luckyNeighbour: string;
     readonly luckyWallet: string;
-    // While Muddy, an owner left one Muddy bump from firing you, above their last heart.
-    readonly muddyHearts: string;
     readonly plainHit: string;
     readonly pull: string;
     readonly secondChance: string;

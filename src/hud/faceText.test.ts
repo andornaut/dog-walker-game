@@ -5,14 +5,12 @@ import type { DogId } from "../data/types";
 import { placeholders } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import type { HeartChange } from "../rules/causes";
-import { bumpHearts } from "../rules/run";
 import type { FaceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { testState } from "../testing/runState";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import {
@@ -34,14 +32,7 @@ import {
   messageStripLayout,
 } from "./messageStrip";
 import { lowHeartsText } from "./moments";
-import {
-  bumpLine,
-  firedLine,
-  forgivenLines,
-  lowHeartsLines,
-  muddyHeartsLines,
-  treatLine,
-} from "./stripLines";
+import { bumpLine, firedLine, forgivenLines, lowHeartsLines, treatLine } from "./stripLines";
 
 const BODY = fontFileMetrics("font-body");
 const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
@@ -65,8 +56,6 @@ const forgiven = hearts(4, 4, [
   { amount: -1, kind: "bump" },
   { amount: 1, forgives: true, kind: "modifier", source: { kind: "walker", walker: "casey" } },
 ]);
-const muddy = testState({ kilo: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
-const muddyCost = bumpHearts(gameData, muddy);
 
 // An owner's face shows upset on a heart loss, happy on a gain, and neutral otherwise.
 const MOOD = { gain: "happy", loss: "upset", none: "neutral" } as const satisfies Record<
@@ -81,11 +70,6 @@ const PLACES: readonly (readonly [string, FaceText | null | undefined, keyof typ
   ["strip.fired", firedLine(gameData, DOG), "loss"],
   ["strip.secondChance", forgivenLines(gameData, [forgiven])[0], "none"],
   ["strip.lowHearts", lowHeartsLines(gameData, [hearts(2, 1)])[0], "loss"],
-  [
-    "strip.muddyHearts",
-    muddyHeartsLines(gameData, muddy, [hearts(muddyCost + 1, muddyCost)])[0],
-    "loss",
-  ],
   [
     "strip.plainHit",
     bumpLine(gameData, { change: hearts(4, 2), dodged: false, dog: DOG }, "Cone"),

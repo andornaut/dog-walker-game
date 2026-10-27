@@ -5,9 +5,7 @@ import type { Debuff, DebuffId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
-import { bumpHearts } from "../rules/run";
 import { cents, clampHearts, read } from "../rules/units";
-import { testState } from "../testing/runState";
 import {
   bumpLine,
   debuffChanges,
@@ -17,7 +15,6 @@ import {
   fullPackLine,
   lowHeartsLines,
   luckyLine,
-  muddyHeartsLines,
   pullLine,
   STRIP_OWNER_MOODS,
   treatLine,
@@ -146,31 +143,10 @@ describe("the strip's other lines", () => {
   });
 });
 
-describe("muddyHeartsLines", () => {
-  it("warns an owner down to a Muddy bump's cost, leaving the last heart to its own line", () => {
-    const calm = testState({ kilo: 5 });
-    const muddy = testState({ kilo: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
-    const cost = bumpHearts(gameData, muddy);
-    expect(cost).toBeGreaterThan(Math.max(1, bumpHearts(gameData, calm)));
-    const warning = fillNames(strip.muddyHearts, {
-      cost: String(cost),
-      hearts: String(cost),
-      owner,
-    });
-    const said = (run: typeof calm, change: HeartChange) =>
-      muddyHeartsLines(gameData, run, [change]).map(({ text }) => text);
-    expect(said(muddy, hearts(cost + 1, cost))).toEqual([warning]);
-    expect(said(muddy, hearts(cost + cost, cost))).toEqual([warning]);
-    expect(said(muddy, hearts(cost, 1))).toEqual([]);
-    expect(said(muddy, hearts(9, cost + 1))).toEqual([]);
-    expect(said(muddy, hearts(cost - 1, cost))).toEqual([]);
-    expect(said(calm, hearts(cost + 1, cost))).toEqual([]);
-  });
-});
-
 describe("debuffLines", () => {
   const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
-  const muddyHearts = String(read(gameData.tuning, "multipliers", "muddyBumpCost"));
+  // How much slower Muddy makes lane changes: 1 less muddyLaneSlow, as a percent.
+  const muddySlower = `${Math.round(100 * (1 - read(gameData.tuning, "multipliers", "muddyLaneSlow")))}%`;
   // A debuff's bump cash, for one that makes bumps cost cash, such as Spotlight.
   const cashOf = (debuff: DebuffId) => {
     const key = (gameData.debuffs[debuff] as Debuff).bumpMoney;
@@ -181,7 +157,8 @@ describe("debuffLines", () => {
     for (const debuff of Object.keys(gameData.debuffs) as DebuffId[]) {
       const on = { debuffs: [active(debuff, 20)] };
       const off = { debuffs: [] };
-      const fields = { cash: cashOf(debuff), hearts: muddyHearts, seconds: "20" };
+      const slower = debuff === "muddy" ? muddySlower : "0%";
+      const fields = { cash: cashOf(debuff), seconds: "20", slower };
       expect(debuffLines(gameData, debuffChanges(off, on))).toEqual([
         { icon: debuff, text: fillNames(strip.debuffStart[debuff], fields) },
       ]);

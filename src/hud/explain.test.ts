@@ -76,11 +76,12 @@ describe("explainDetail", () => {
     expect(explainDetail(gameData, newPlayerSave, run, target)).toBeUndefined();
   });
 
-  it("fills the debuff's stake with its whole seconds left and muddyBumpCost", () => {
+  it("fills the debuff's stake with its whole seconds left and how much slower lanes change", () => {
     const detail = explainDetail(gameData, newPlayerSave, run, { debuff: "muddy", kind: "debuff" });
-    const hearts = String(read(gameData.tuning, "multipliers", "muddyBumpCost"));
+    const slow = read(gameData.tuning, "multipliers", "muddyLaneSlow");
+    const slower = `${Math.round(100 * (1 - slow))}%`;
     expect(detail?.card.lines.join(" ").toLowerCase()).toContain(
-      fillNames(gameData.debuffs.muddy.stake, { hearts, seconds: "10" }).toLowerCase(),
+      fillNames(gameData.debuffs.muddy.stake, { seconds: "10", slower }).toLowerCase(),
     );
   });
 });

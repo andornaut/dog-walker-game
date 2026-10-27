@@ -40,7 +40,7 @@ import {
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read } from "../rules/units";
-import { packAgility, slowestPackAgility } from "../rules/walkers";
+import { packAgility, slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
@@ -317,10 +317,11 @@ export function blocksLane(
 
 // The last lane move time, scroll speed and zone length worked out, with the data groups and
 // run fields they were worked out from. A walk asks for the same ones every step until its
-// pack, zone or modifiers or the data change; data and run states are never changed in place.
+// pack, zone, modifiers or debuffs or the data change; data and run states are never changed in place.
 let lastLaneMove:
-  | (Pick<GameData, "dogs" | "tuning" | "walkers"> &
+  | (Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers"> &
       Pick<RunState, "pack" | "walker"> & {
+        readonly runDebuffs: RunState["debuffs"];
         readonly runModifiers: RunState["modifiers"];
         readonly seconds: number;
       })
@@ -330,27 +331,31 @@ let lastScrollSpeed:
       Pick<RunState, "route" | "zoneIndex"> & { readonly speed: Pixels })
   | null = null;
 
-// How long one lane move takes: seconds.laneMove over the pack's agility.
+// How long one lane move takes: seconds.laneMove over the pack's agility, a Muddy pack's included.
 export function laneMoveSeconds(
-  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
-  run: Pick<RunState, "modifiers" | "pack" | "walker">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack" | "walker">,
 ): number {
   const last = lastLaneMove;
   if (
     last !== null &&
     last.tuning === data.tuning &&
+    last.debuffs === data.debuffs &&
     last.dogs === data.dogs &&
     last.walkers === data.walkers &&
     last.pack === run.pack &&
     last.walker === run.walker &&
-    last.runModifiers === run.modifiers
+    last.runModifiers === run.modifiers &&
+    last.runDebuffs === run.debuffs
   ) {
     return last.seconds;
   }
   const seconds = read(data.tuning, "seconds", "laneMove") / packAgility(data, run);
   lastLaneMove = {
+    debuffs: data.debuffs,
     dogs: data.dogs,
     pack: run.pack,
+    runDebuffs: run.debuffs,
     runModifiers: run.modifiers,
     seconds,
     tuning: data.tuning,
@@ -361,9 +366,9 @@ export function laneMoveSeconds(
 }
 
 export function laneMotionConfig(
-  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
   laneCount: number,
-  run: Pick<RunState, "modifiers" | "pack" | "walker">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack" | "walker">,
 ): LaneMotionConfig {
   return { laneCount, moveDuration: laneMoveSeconds(data, run) };
 }
@@ -764,6 +769,9 @@ export function planZone(
     // The tallest pack's hit boxes, inside its outline by PART_INSET at each end.
     packHitLength: geometry.tallestPackBand - 2 * PART_INSET,
     packLength: geometry.tallestPackBand,
+    // A Muddy pack's lane move, the slowest, spaces the path's lane changes: a puddle may be on
+    // any neighbourhood's road, and Muddy may last past a neighbourhood's end.
+    pathLaneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestDebuffedAgility(data),
     // The path goes on from where the last zone's ends, or starts in the pack's lane.
     pathStart: road.path[road.path.length - 1]?.lane ?? road.control.target,
     quotas: withHitLengths(spawnQuotas(data, streams, run)),
@@ -785,7 +793,7 @@ export function planZone(
 
 // Steering during a hit stop is dropped, not queued.
 export function steerWalk(
-  data: Pick<GameData, "dogs" | "tuning" | "walkers">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
   laneCount: number,
   direction: LaneDirection,
   walk: Walk,
@@ -921,10 +929,10 @@ function grabTreat(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof
 }
 
 // A minor bump costs cash while a debuff such as Spotlight makes bumps cost cash and there is
-// cash (bumpCash), with the value modifiers such as Muddy's changed. Otherwise it costs the
-// dog's owner the hearts a bump costs now (bumpParts), with the value modifiers changed:
-// hearts.bump's loss, raised by bumpHearts modifiers such as Muddy's, then cut by a forgiving
-// one such as Second chance's. Null for a bump that changed nothing.
+// cash (bumpCash), with the value modifiers changed. Otherwise it costs the dog's owner the
+// hearts a bump costs now (bumpParts), with the value modifiers changed: hearts.bump's loss,
+// changed by bumpHearts modifiers, then cut by a forgiving one such as Second chance's. Null for
+// a bump that changed nothing.
 function bumpDog(
   data: WalkData,
   dog: DogId,

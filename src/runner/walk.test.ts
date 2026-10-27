@@ -40,7 +40,7 @@ import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices
 import { modifiersOf, modifierValue } from "../rules/modifiers";
 import { currentZone } from "../rules/route";
 import { tipValue } from "../rules/run";
-import { cents, clampHearts, pixels, read, roundDollars } from "../rules/units";
+import { cents, clampHearts, pixels, read } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
@@ -58,6 +58,7 @@ import {
   MOVER_SCROLL,
   moverContact,
   type MoverEvent,
+  muddyLaneMove,
   OBSTACLE_IDS,
   packHitLength,
   raised,
@@ -567,7 +568,7 @@ describe("planZone", { timeout: 60_000 }, () => {
     )) {
       const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
       const speed = walkScrollSpeed(REAL, zoned);
-      const steps = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9);
+      const steps = Math.ceil(muddyLaneMove / STEP_SECONDS - 1e-9);
       const laneMove = steps * STEP_SECONDS * speed;
       const margin = read(TUNING, "seconds", "pathReactionMargin") * speed;
       const lanesOf = (kind: WalkItem["kind"], lane: number) =>
@@ -801,14 +802,31 @@ describe("stepWalk", () => {
     expect(after.road.items.map(({ kind }) => kind)).toEqual(["otherDog"]);
   });
 
-  it("costs muddyBumpCost times as much while Muddy", () => {
+  // Muddy only slows lane changes: a bump costs what it always does.
+  it("costs a plain bump's hearts while Muddy", () => {
     const walk = walkWith(["kilo"], [atPack("cone")]);
     const muddy = {
       ...walk,
       run: { ...walk.run, debuffs: [{ debuff: "muddy", secondsLeft: 20, untilZone: 0 }] },
     } as const;
-    const bump = read(tuning, "hearts", "bump") * read(tuning, "multipliers", "muddyBumpCost");
+    const bump = read(tuning, "hearts", "bump");
     expect(heartsByDog(step(muddy).walk.run).kilo).toBe((heartsByDog(walk.run).kilo ?? 0) - bump);
+  });
+
+  // A Muddy pack's lane move lasts 1 / muddyLaneSlow times as long, whatever walks it: every
+  // walker, Running shoes or not, and a large dog's slowing included.
+  it.each(
+    (Object.keys(WALKERS) as WalkerId[]).flatMap((walker) =>
+      ([["biscuit"], ["kilo", "penny"]] as const).map((dogs) => ({ dogs, walker })),
+    ),
+  )("slows $walker's lane moves with $dogs while Muddy", ({ dogs, walker }) => {
+    const run = newRun(data, dogs.length, { dogs, gear: null, walker });
+    const muddy = {
+      ...run,
+      debuffs: [{ debuff: "muddy", secondsLeft: 20, untilZone: 0 }] as const,
+    };
+    const slow = read(tuning, "multipliers", "muddyLaneSlow");
+    expect(laneMoveSeconds(data, muddy)).toBeCloseTo(laneMoveSeconds(data, run) / slow, 9);
   });
 
   // With no grace window, a cone, a card obstacle and a treat all meet the pack on one step.
@@ -931,6 +949,20 @@ describe("stepWalk", () => {
         { affected: packDogs(walk.run), encounter, kind: "encounter" },
       ]);
     }
+  });
+
+  // Raincoats keep a puddle's Muddy off; the capybara's Help the keeper muddies the pack anyway
+  // (chooseOption).
+  it.each([
+    { muddy: true, raincoats: false },
+    { muddy: false, raincoats: true },
+  ])("muddies the pack on a puddle: $muddy, with Raincoats: $raincoats", ({ muddy, raincoats }) => {
+    const walk = walkWith(["kilo"], [atPack("puddle")]);
+    const coated = raincoats
+      ? { ...walk, run: { ...walk.run, immunities: [{ encounter: "puddle", source: RAINCOATS }] } }
+      : walk;
+    const debuffs = step(coated as Walk).walk.run.debuffs.map(({ debuff }) => debuff);
+    expect(debuffs).toEqual(muddy ? ["muddy"] : []);
   });
 
   it("muddies the whole pack on a puddle, with no card or heart and a plain obstacle's stop", () => {
@@ -1124,10 +1156,8 @@ describe("stepWalk's modified values", () => {
     { amount, kind: "modifier" as const, source },
   ];
   const kilo = { dog: "kilo", kind: "hearts" } as const;
-  const muddy = { debuff: "muddy", kind: "debuff" } as const;
   const stinky = { debuff: "stinky", kind: "debuff" } as const;
   const bump = read(tuning, "hearts", "bump");
-  const muddied = bump * read(tuning, "multipliers", "muddyBumpCost");
   const tip = read(tuning, "money", "tip");
   const bonus = read(tuning, "money", "bigTipperTipBonus");
   const reach = read(reaching.tuning, "counts", "longReachLanes");
@@ -1140,12 +1170,6 @@ describe("stepWalk's modified values", () => {
   });
 
   it.each([
-    [
-      "Muddy raises a bump's loss",
-      data,
-      meeting("casey", atPack("cone"), debuffed("muddy")),
-      [{ after: -muddied, before: -bump, by: by(bump - muddied, muddy), subject: kilo }],
-    ],
     [
       "Second chance forgives a bump",
       forgiving,
@@ -1251,23 +1275,15 @@ describe("stepWalk's modified values", () => {
       meeting(walkerWith("secondChance"), atPack("cone")),
       1,
     ],
-    [
-      "counts a Muddy bump Second chance forgives only in part",
-      forgiving,
-      meeting(walkerWith("secondChance"), atPack("cone"), debuffed("muddy")),
-      1,
-    ],
   ] as const)("%s", (_, walkData, walk, landed) => {
     const { run } = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk).walk;
     expect(run.bumpsByKind).toEqual({ cone: landed });
   });
 
   // While Spotlight lasts, a plain bump costs its cash instead of hearts: all the cash there is
-  // when that is less, and hearts as usual at $0. Muddy doubles whatever a bump costs, and
-  // Second chance forgives only hearts.
+  // when that is less, and hearts as usual at $0. Second chance forgives only hearts.
   const spotlightCash = read(tuning, "money", DEBUFFS.spotlight.bumpMoney);
-  const muddyCash = roundDollars(spotlightCash * read(tuning, "multipliers", "muddyBumpCost"));
-  const plenty = cents(muddyCash * 2);
+  const plenty = cents(spotlightCash * 2);
   const short = cents(spotlightCash - 100);
   const lit = (money: number, ...debuffs: ("muddy" | "spotlight")[]) => ({
     debuffs: debuffs.map((debuff) => ({ debuff, secondsLeft: 20, untilZone: 0 })),
@@ -1286,24 +1302,6 @@ describe("stepWalk's modified values", () => {
       0,
     ],
     ["costs hearts as usual at $0", data, "casey", lit(0, "spotlight"), 0, bump, 0],
-    [
-      "doubles the cash while Muddy",
-      data,
-      "casey",
-      lit(plenty, "spotlight", "muddy"),
-      muddyCash,
-      0,
-      0,
-    ],
-    [
-      "doubles the hearts while Muddy at $0",
-      data,
-      "casey",
-      lit(0, "spotlight", "muddy"),
-      0,
-      muddied,
-      0,
-    ],
     [
       "leaves Second chance unused on cash",
       forgiving,
