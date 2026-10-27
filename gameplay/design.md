@@ -208,7 +208,7 @@ Each mover draws how many times it moves when it comes on, within its kind's ran
 After each of neighbourhoods 1 to 3, before the fork, a short celebration plays over the paused road. After neighbourhood 4 the end screen takes its place, preceded by a New walker celebration when finishing it unlocks a walker.
 
 - **Neighbourhood banner:** each neighbourhood opens with a banner over the road naming the world, the neighbourhood's number and its name; the player never sees the word "zone"
-- **Neighbourhood done:** the walker you're walking with cheers, under a big title and the neighbourhood's name, with the pay it banks and its tips. It moves on by itself after 2 seconds, or at a tap
+- **Neighbourhood done:** the walker you're walking with cheers, under a big title and the neighbourhood's name, with the pay it banks and its tips. It waits for a tap, on the dim or beside the game, or key 1
 - **New walker:** the first time you finish the neighbourhood that unlocks a walker, that walker runs in to join, with their greeting, agility and perk, and waits for a tap on its button (key 1). This replaces Neighbourhood done for that neighbourhood
 - Confetti plays in both; with reduced motion it doesn't
 
