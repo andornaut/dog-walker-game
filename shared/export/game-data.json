@@ -2266,7 +2266,7 @@
       "moverSpeedJitter": 0.25,
       "muddyLaneSlow": 0.5,
       "quickRecoveryDebuffFactor": 0.5,
-      "runningShoesAgility": 0.4,
+      "runningShoesAgility": 0.5,
       "rushHourObstacles": 1.5,
       "rushHourTips": 2,
       "rushHourTreats": 2,
