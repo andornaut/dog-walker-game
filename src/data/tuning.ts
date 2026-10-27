@@ -18,7 +18,9 @@ export const TUNING = {
     loadoutMax: 1,
     // Long reach grabs tips and treats this many lanes beside the pack.
     longReachLanes: 1,
-    luckyEncountersPerZone: 1,
+    // The lucky finds of each kind a neighbourhood places on average, before its luckyFinds
+    // density: the whole part always, and one more at the fractional part's chance.
+    luckyFindsPerZone: { lostWallet: 1, pettingNeighbour: 0.5 },
     // At most this many movers are on screen at once, of them at most maxDartMovers darting
     // and maxSlowVehicles in-lane slower than the road.
     maxDartMovers: 6,

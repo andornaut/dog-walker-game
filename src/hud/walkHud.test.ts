@@ -183,11 +183,13 @@ describe("cashScale", () => {
   const money = (key: Parameters<typeof read<"money">>[2]) => read(gameData.tuning, "money", key);
   const count = (key: Parameters<typeof read<"counts">>[2]) => read(gameData.tuning, "counts", key);
   const zones = walkLength(gameData);
+  const busiest = Math.max(...gameData.world.zones.map(({ density }) => density.luckyFinds));
   const tipValue = money("tip") + money("bigTipperTipBonus");
   const perZone = (zone: number) =>
     count("packSizeMax") * money("payPerDog") +
     (count("tipsFirstZone") + count("tipsGainPerZone") * zone) * tipValue +
-    count("luckyEncountersPerZone") * money("lostWalletKeep");
+    Math.ceil(gameData.tuning.counts.luckyFindsPerZone.lostWallet * busiest) *
+      money("lostWalletKeep");
   const plausible = cents(
     money("startPurse") +
       Array.from({ length: zones }, (_, zone) => perZone(zone)).reduce((a, b) => a + b, 0) +

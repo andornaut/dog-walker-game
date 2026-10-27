@@ -245,17 +245,21 @@ describe("run, world and walkers", () => {
     }
   });
 
-  it("weighs every obstacle and lucky find in every zone, each of its own kind", () => {
+  it("weighs every obstacle in every zone, and counts every lucky find per zone, 0 or more", () => {
+    const lucky = Object.keys(encounters).filter(
+      (id) => encounters[id as EncounterId].kind === "lucky",
+    );
     for (const { name, weights } of world.zones) {
       for (const id of Object.keys(weights.obstacles)) {
         expect(encounters[id as EncounterId].kind, name).toBe("obstacle");
       }
-      for (const id of Object.keys(weights.luckyFinds)) {
-        expect(encounters[id as EncounterId].kind, name).toBe("lucky");
-      }
-      const kinds = [...Object.keys(weights.obstacles), ...Object.keys(weights.luckyFinds)];
-      expect(kinds.sort(), name).toEqual(Object.keys(encounters).sort());
+      expect([...Object.keys(weights.obstacles), ...lucky].sort(), name).toEqual(
+        Object.keys(encounters).sort(),
+      );
     }
+    const counts = tuning.counts.luckyFindsPerZone as Readonly<Record<string, number>>;
+    expect(Object.keys(counts).sort()).toEqual(lucky.sort());
+    expect(Object.values(counts).every((count) => count >= 0)).toBe(true);
   });
 
   // Every obstacle kind that names its zones, with the weights table that draws it in each zone.

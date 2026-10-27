@@ -1392,10 +1392,13 @@ interface MoverGrid {
   take(dart: boolean, lane: number, row: number): void;
 }
 
+// within is the share of the zone's rows the quota's movers are spread over, from and to; the
+// whole zone without it.
 interface MoverQuota<Kind extends string> {
   readonly count: number;
   readonly kind: Kind;
   readonly spec: MoverSpec;
+  readonly within?: readonly [number, number];
 }
 
 interface MoverSpawn<Kind extends string> {
@@ -1430,9 +1433,10 @@ function standsOf(spot: Spot): MoverStand[] {
 }
 
 // Places every mover on rows at the distances given, each quota spread one per equal stretch of the
-// zone as the planner spreads other spawns, each mover wholly on screen within the zone, within the
-// caps on screen. A mover with no room in its stretch, such as one over a cap there, waits: it
-// comes on at the next row with room. A dart with no room at its drawn start retries the same rows
+// zone, or of the share of it the quota's within holds it to, as the planner spreads other
+// spawns, each mover wholly on screen within the zone, within the caps on screen. A mover with no
+// room in its stretch, such as one over a cap there, waits: it comes on at the next row with
+// room, within its share of the zone. A dart with no room at its drawn start retries the same rows
 // from higher up the road, its start lifted by each of DART_LIFTS in turn, lowest first, before it
 // waits; on each later row it tries its drawn start and then each lift. A dart with no room on any
 // later row tries again the same way at each of its retries (dartRetries), another tilt of its
@@ -1493,8 +1497,12 @@ export function placeMovers<Kind extends string>(
     return [];
   };
   // The spots that fit in the next row, from first on, that has any at one of the starts.
-  const nearestLater = (starts: readonly (readonly MoverPlacement[])[], first: number) => {
-    for (let row = first; row < rows.length; row++) {
+  const nearestLater = (
+    starts: readonly (readonly MoverPlacement[])[],
+    first: number,
+    last: number,
+  ) => {
+    for (let row = first; row < last; row++) {
       const inRow = firstFitting(starts, row, row + 1);
       if (inRow.length > 0) {
         return inRow;
@@ -1505,16 +1513,20 @@ export function placeMovers<Kind extends string>(
 
   const spawns: MoverSpawn<Kind>[] = [];
   const dropped: Kind[] = [];
-  for (const { count, kind, spec } of quotas) {
+  for (const { count, kind, spec, within } of quotas) {
+    const [from, to] = (within ?? [0, 1]).map((share) => Math.floor(share * rows.length)) as [
+      number,
+      number,
+    ];
     for (let i = 0; i < count; i++) {
       const draws = drawMover(streams);
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
-      const first = Math.floor((i * rows.length) / count);
-      const end = Math.floor(((i + 1) * rows.length) / count);
+      const first = from + Math.floor((i * (to - from)) / count);
+      const end = from + Math.floor(((i + 1) * (to - from)) / count);
       const fittingAt = (moverDraws: MoverDraws) => {
         const starts = lifts.map((lift) => moverPlacements(geometry, spec, moverDraws, lift));
         const stretch = firstFitting(starts, first, end);
-        return stretch.length > 0 ? stretch : nearestLater(starts, end);
+        return stretch.length > 0 ? stretch : nearestLater(starts, end, to);
       };
       let fitting = fittingAt(draws);
       if (fitting.length === 0) {

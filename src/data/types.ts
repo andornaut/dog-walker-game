@@ -49,7 +49,7 @@ export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 type EncounterOfKind<Kind extends Encounter["kind"]> = {
   [Id in EncounterId]: (typeof ENCOUNTERS)[Id]["kind"] extends Kind ? Id : never;
 }[EncounterId];
-type LuckyEncounterId = EncounterOfKind<"lucky">;
+export type LuckyEncounterId = EncounterOfKind<"lucky">;
 export type ObstacleEncounterId = EncounterOfKind<"obstacle">;
 
 // The option ids of an encounter's card; never for an encounter that opens no card.
@@ -99,6 +99,7 @@ export interface Tuning {
     readonly dartStopLanesMax: number;
     readonly dartStopLanesMin: number;
     readonly gearDropsPerZone: Table<number>;
+    readonly luckyFindsPerZone: Table<string>;
     readonly maxDartMovers: number;
     readonly maxEmptyRows: number;
     readonly maxMovers: number;
@@ -517,7 +518,6 @@ export type Difficulty = 1 | 2 | 3 | 4 | 5;
 // How often each kind is drawn in a zone, relative to the others of its group. 0 keeps it out
 // of the zone; each group needs at least one kind above 0.
 export interface ZoneWeights {
-  readonly luckyFinds: Readonly<Record<LuckyEncounterId, number>>;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, number>>;
   readonly obstacles: Readonly<Record<ObstacleEncounterId, number>>;
 }
@@ -526,7 +526,7 @@ export interface Zone {
   // The zone's name in its art keys, such as backdrop-<art>.
   readonly art: string;
   // Multiply the zone's counts, on top of the per-zone gains in counts: obstacles (minor ones
-  // too), tips and lucky finds.
+  // too), tips and each kind of lucky find's.
   readonly density: {
     readonly luckyFinds: number;
     readonly obstacles: number;

@@ -117,6 +117,10 @@ describe("zoneStats", () => {
     expect(stats.duration).toBe(240 / 1.25);
     expect(stats.obstacles).toBe(Math.round(counts.obstaclesFirstZone * 0.5));
     expect(stats.tips).toBe(Math.round(counts.tipsFirstZone * 1.5));
-    expect(stats.luckyEncounters).toBe(counts.luckyEncountersPerZone * 2);
+    expect(stats.luckyFinds).toEqual(
+      Object.fromEntries(
+        Object.entries(counts.luckyFindsPerZone).map(([id, count]) => [id, count * 2]),
+      ),
+    );
   });
 });

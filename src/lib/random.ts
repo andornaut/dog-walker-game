@@ -43,6 +43,24 @@ export function weightedPick<T>(
   return itemAt(items, items.length - 1);
 }
 
+// A whole number whose mean is expected: expected's whole part, and one more at its fractional
+// part's chance, drawn from random only when it has one.
+export function chanceRound(random: Random, expected: number): number {
+  const whole = Math.floor(expected);
+  const part = expected - whole;
+  return whole + (part > 0 && random() < part ? 1 : 0);
+}
+
+// The items in an order drawn from random, each order as likely (Fisher-Yates).
+export function shuffled<T>(random: Random, items: readonly T[]): T[] {
+  const order = [...items];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [order[i], order[j]] = [order[j] as T, order[i] as T];
+  }
+  return order;
+}
+
 // True with the given probability: never at 0, always at 1.
 export function chance(random: Random, probability: number): boolean {
   return random() < probability;

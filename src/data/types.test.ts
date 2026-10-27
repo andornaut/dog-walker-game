@@ -25,7 +25,7 @@ describe("types", () => {
     {
       expectTypeOf(read(TUNING, "money", "tip")).toEqualTypeOf<Cents>();
       expectTypeOf(read(TUNING, "seconds", "laneMove")).toEqualTypeOf<Seconds>();
-      expectTypeOf(read(TUNING, "counts", "luckyEncountersPerZone")).toEqualTypeOf<number>();
+      expectTypeOf(read(TUNING, "counts", "treatsPerZone")).toEqualTypeOf<number>();
     }
 
     // Rejects a money key that is missing, from another unit, or a nested table.

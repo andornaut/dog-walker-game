@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  chanceRound,
   randomInt,
   randomPick,
   randomStream,
   seededRandom,
+  shuffled,
   streamSeed,
   weightedPick,
 } from "./random";
@@ -52,6 +54,58 @@ describe("weightedPick", () => {
     { draw: 0.9999, picked: "c" },
   ])("picks $picked at a draw of $draw, each item as likely as its weight", ({ draw, picked }) => {
     expect(weightedPick(() => draw, ["a", "b", "c"], [1, 3, 1])).toBe(picked);
+  });
+});
+
+describe("chanceRound", () => {
+  // A draw under the fractional part adds one; a whole number draws nothing.
+  it.each([
+    { draw: 0, draws: 1, expected: 0.5, rounded: 1 },
+    { draw: 0.49, draws: 1, expected: 0.5, rounded: 1 },
+    { draw: 0.5, draws: 1, expected: 0.5, rounded: 0 },
+    { draw: 0.2, draws: 1, expected: 1.25, rounded: 2 },
+    { draw: 0.3, draws: 1, expected: 1.25, rounded: 1 },
+    { draw: 0, draws: 0, expected: 0, rounded: 0 },
+    { draw: 0, draws: 0, expected: 2, rounded: 2 },
+  ])(
+    "rounds $expected to $rounded at a draw of $draw, drawing $draws times",
+    ({ draw, draws, expected, rounded }) => {
+      let made = 0;
+      const random = () => {
+        made += 1;
+        return draw;
+      };
+      expect(chanceRound(random, expected)).toBe(rounded);
+      expect(made).toBe(draws);
+    },
+  );
+
+  it.each([0.5, 1.25, 1.875])("averages %f", (expected) => {
+    const random = seededRandom(3);
+    const runs = 20000;
+    const total = Array.from({ length: runs }, () => chanceRound(random, expected)).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
+    expect(total / runs).toBeCloseTo(expected, 1);
+  });
+});
+
+describe("shuffled", () => {
+  it("keeps every item, leaves the list as it was and puts each first about as often", () => {
+    const items = ["a", "b", "c"] as const;
+    const random = seededRandom(5);
+    const firsts = new Map<string, number>();
+    const runs = 6000;
+    for (let i = 0; i < runs; i++) {
+      const order = shuffled(random, items);
+      expect([...order].sort()).toEqual([...items]);
+      firsts.set(order[0] ?? "", (firsts.get(order[0] ?? "") ?? 0) + 1);
+    }
+    expect(items).toEqual(["a", "b", "c"]);
+    for (const item of items) {
+      expect((firsts.get(item) ?? 0) / runs).toBeCloseTo(1 / items.length, 1);
+    }
   });
 });
 

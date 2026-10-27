@@ -14,7 +14,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
-import { chance, type Random, randomPick } from "../lib/random";
+import { chance, chanceRound, type Random, randomPick, shuffled } from "../lib/random";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -95,6 +95,7 @@ import {
   type PathRow,
   planSpawns,
   SINGLE_CELL,
+  spacedStretch,
   type SpawnEvent,
   type SpawnQuota,
   takeDueSpawns,
@@ -651,13 +652,15 @@ export function opensACard(
   return obstacleResolution(data, kind) === "card";
 }
 
-// Each obstacle, minor obstacle and lucky find is drawn first by the zone's weights, so its
-// shape is known when it is placed. Rush hour and the like scale both obstacle counts, the tips
-// and the treats. Then each obstacle or lucky find whose look moves comes as a mover at the zone's
-// mover share: one quota per kind, and one per stepper, whose steps are its own. A lucky find
-// or a pull obstacle blocks no lane, moving or not (blocksLane). Last, the zone's gear drops are
-// drawn (drawGearDrops), each a quota of its own that blocks no lane, held to its stretch of the
-// zone (gearDropStretch).
+// Each obstacle and minor obstacle is drawn first by the zone's weights, so its shape is known
+// when it is placed. Rush hour and the like scale both obstacle counts, the tips and the treats.
+// Then each obstacle whose look moves comes as a mover at the zone's mover share: one quota per
+// kind, and one per stepper, whose steps are its own. A pull obstacle blocks no lane, moving or
+// not (blocksLane). Then the zone's lucky finds: of each kind, zoneStats' luckyFinds rounded by
+// chanceRound, in the kinds' order, then shuffled, each a quota of its own held to its spaced
+// stretch of the zone (spacedStretch) and, where its look moves, a mover at the mover share; a
+// lucky find blocks no lane. Last, the zone's gear drops (drawGearDrops), each a quota of its own
+// that blocks no lane, held to its spaced stretch.
 export function spawnQuotas(
   data: WalkData,
   streams: PlannerStreams,
@@ -676,7 +679,6 @@ export function spawnQuotas(
   const kinds: WalkItemKind[] = [
     ...drawn(scaled("obstacleSpawns", stats.obstacles), obstacleWeights(data, run)),
     ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),
-    ...drawn(stats.luckyEncounters, positiveWeights(zone.weights.luckyFinds)),
   ];
   const quotas = new Map<WalkItemKind, number>();
   const movers = new Map<WalkItemKind, { readonly count: number; readonly movement: Movement }>();
@@ -699,6 +701,19 @@ export function spawnQuotas(
       movers.set(kind, { count: (movers.get(kind)?.count ?? 0) + 1, movement });
     }
   }
+  const finds = shuffled(
+    random,
+    (Object.entries(stats.luckyFinds) as [EncounterId, number][]).flatMap(([kind, expected]) =>
+      Array.from({ length: chanceRound(random, expected) }, () => kind),
+    ),
+  );
+  const lucky = finds.map((kind, i): SpawnQuota<WalkItemKind> => {
+    const within = spacedStretch(finds.length, i);
+    const movement = moverMovement(data, random, zone.moverShare, kind);
+    return movement === null
+      ? { blocksLane: false, count: 1, footprint: footprintOf(data, kind), kind, within }
+      : { ...moverQuota(kind, movement, 1), within };
+  });
   const drops = drawGearDrops(data, random, run);
   return [
     ...[...movers].map(([kind, { count: moverCount, movement }]) =>
@@ -712,11 +727,12 @@ export function spawnQuotas(
       footprint: footprintOf(data, kind),
       kind,
     })),
+    ...lucky,
     ...drops.map((gear, i): SpawnQuota<WalkItemKind> => ({
       blocksLane: false,
       count: 1,
       kind: gear,
-      within: gearDropStretch(drops.length, i),
+      within: spacedStretch(drops.length, i),
     })),
     {
       blocksLane: false,
@@ -732,14 +748,6 @@ export function spawnQuotas(
       moversPassOver: true,
     },
   ];
-}
-
-// The share of a zone the ith of count gear drops stands in: every other one of 2 * count - 1
-// equal stretches, so a lone drop may stand anywhere and two stand in the first and last thirds,
-// at least a third of the zone apart.
-export function gearDropStretch(count: number, i: number): readonly [number, number] {
-  const stretches = 2 * count - 1;
-  return [(2 * i) / stretches, (2 * i + 1) / stretches];
 }
 
 // Plans the run's current zone: its spawns, each obstacle and lucky encounter drawn by the

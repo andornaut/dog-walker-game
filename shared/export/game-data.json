@@ -2174,7 +2174,10 @@
       },
       "loadoutMax": 1,
       "longReachLanes": 1,
-      "luckyEncountersPerZone": 1,
+      "luckyFindsPerZone": {
+        "lostWallet": 1,
+        "pettingNeighbour": 0.5
+      },
       "maxDartMovers": 6,
       "maxEmptyRows": 3,
       "maxMovers": 10,
@@ -2502,10 +2505,6 @@
       "roadShadowColour": "#5a6988",
       "speed": 1,
       "weights": {
-        "luckyFinds": {
-          "lostWallet": 1,
-          "pettingNeighbour": 1
-        },
         "minorObstacles": {
           "ball": 1.2,
           "barrier2": 3.5,
@@ -2595,10 +2594,6 @@
       "roadShadowColour": "#b86f50",
       "speed": 1,
       "weights": {
-        "luckyFinds": {
-          "lostWallet": 1,
-          "pettingNeighbour": 1
-        },
         "minorObstacles": {
           "ball": 1.2,
           "barrier2": 0,
@@ -2688,10 +2683,6 @@
       "roadShadowColour": "#262b44",
       "speed": 1,
       "weights": {
-        "luckyFinds": {
-          "lostWallet": 1,
-          "pettingNeighbour": 1
-        },
         "minorObstacles": {
           "ball": 1.2,
           "barrier2": 0,
@@ -2781,10 +2772,6 @@
       "roadShadowColour": "#2e2019",
       "speed": 1,
       "weights": {
-        "luckyFinds": {
-          "lostWallet": 1,
-          "pettingNeighbour": 1
-        },
         "minorObstacles": {
           "ball": 1.2,
           "barrier2": 3.75,
@@ -2874,10 +2861,6 @@
       "roadShadowColour": "#e4a672",
       "speed": 1,
       "weights": {
-        "luckyFinds": {
-          "lostWallet": 1,
-          "pettingNeighbour": 1
-        },
         "minorObstacles": {
           "ball": 1.2,
           "barrier2": 3.75,
@@ -2967,10 +2950,6 @@
       "roadShadowColour": "#26292f",
       "speed": 0.94,
       "weights": {
-        "luckyFinds": {
-          "lostWallet": 1,
-          "pettingNeighbour": 1
-        },
         "minorObstacles": {
           "ball": 1.2,
           "barrier2": 0,

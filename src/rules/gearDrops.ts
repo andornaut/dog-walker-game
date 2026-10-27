@@ -1,5 +1,5 @@
 import type { GameData, GearId, LiveTuning } from "../data/types";
-import { chance, type Random, weightedPick } from "../lib/random";
+import { chanceRound, type Random, weightedPick } from "../lib/random";
 import { mapPack } from "../state/pack";
 import type { EffectSource, ModifierSource, RunState } from "../state/runState";
 import { ownerMaxHearts } from "./dogs";
@@ -19,15 +19,11 @@ export function gearInEffect(run: Pick<RunState, "foundGear" | "gear">): GearId[
   return [run.gear, run.foundGear].filter((gear) => gear !== null);
 }
 
-// How many drops the neighbourhood at walk position zoneIndex (from 0) places: the whole part
-// of counts.gearDropsPerZone for its position, and one more at the fractional part's chance,
-// drawn from random only when there is a fractional part.
+// How many drops the neighbourhood at walk position zoneIndex (from 0) places:
+// counts.gearDropsPerZone for its position, rounded by chanceRound.
 export function gearDropCount(tuning: LiveTuning, random: Random, zoneIndex: number): number {
   const position = (zoneIndex + 1) as keyof LiveTuning["counts"]["gearDropsPerZone"];
-  const expected = readTable(tuning, "counts", "gearDropsPerZone", position);
-  const whole = Math.floor(expected);
-  const part = expected - whole;
-  return whole + (part > 0 && chance(random, part) ? 1 : 0);
+  return chanceRound(random, readTable(tuning, "counts", "gearDropsPerZone", position));
 }
 
 // The gear items a drop may be, each weighted by 1 over its price, so a cheaper item drops more

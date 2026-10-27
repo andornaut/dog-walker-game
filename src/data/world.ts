@@ -22,7 +22,6 @@ export const WORLD = {
       roadShadowColour: "#5a6988",
       speed: 1,
       weights: {
-        luckyFinds: { lostWallet: 1, pettingNeighbour: 1 },
         minorObstacles: {
           ball: 1.2,
           barrier2: 3.5,
@@ -101,7 +100,6 @@ export const WORLD = {
       roadShadowColour: "#b86f50",
       speed: 1,
       weights: {
-        luckyFinds: { lostWallet: 1, pettingNeighbour: 1 },
         minorObstacles: {
           ball: 1.2,
           barrier2: 0,
@@ -180,7 +178,6 @@ export const WORLD = {
       roadShadowColour: "#262b44",
       speed: 1,
       weights: {
-        luckyFinds: { lostWallet: 1, pettingNeighbour: 1 },
         minorObstacles: {
           ball: 1.2,
           barrier2: 0,
@@ -259,7 +256,6 @@ export const WORLD = {
       roadShadowColour: "#2e2019",
       speed: 1,
       weights: {
-        luckyFinds: { lostWallet: 1, pettingNeighbour: 1 },
         minorObstacles: {
           ball: 1.2,
           barrier2: 3.75,
@@ -338,7 +334,6 @@ export const WORLD = {
       roadShadowColour: "#e4a672",
       speed: 1,
       weights: {
-        luckyFinds: { lostWallet: 1, pettingNeighbour: 1 },
         minorObstacles: {
           ball: 1.2,
           barrier2: 3.75,
@@ -417,7 +412,6 @@ export const WORLD = {
       roadShadowColour: "#26292f",
       speed: 0.94,
       weights: {
-        luckyFinds: { lostWallet: 1, pettingNeighbour: 1 },
         minorObstacles: {
           ball: 1.2,
           barrier2: 0,

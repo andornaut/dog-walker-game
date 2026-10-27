@@ -364,7 +364,7 @@ function zonesSection(data: GameData): Section {
         stats.obstacles,
         stats.tips,
         stats.treats,
-        stats.luckyEncounters,
+        Math.round(Object.values(stats.luckyFinds).reduce((sum, n) => sum + n, 0) * 100) / 100,
         neverIn(zone),
       ];
     }),

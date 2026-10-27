@@ -6,7 +6,6 @@ const even = <Id extends string>(weights: Readonly<Record<Id, number>>): Record<
 
 function neutral(zone: Zone): Zone {
   const weights: ZoneWeights = {
-    luckyFinds: even(zone.weights.luckyFinds),
     minorObstacles: even(zone.weights.minorObstacles),
     obstacles: even(zone.weights.obstacles),
   };

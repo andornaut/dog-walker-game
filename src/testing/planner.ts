@@ -89,7 +89,7 @@ export function raised<Id extends string>(
 }
 export const OBSTACLE_IDS = Object.keys(WORLD.zones[0].weights.obstacles) as ObstacleEncounterId[];
 export const MINOR_OBSTACLE_IDS = Object.keys(MINOR_OBSTACLES) as MinorObstacleId[];
-export const LUCKY_IDS = Object.keys(WORLD.zones[0].weights.luckyFinds) as EncounterId[];
+export const LUCKY_IDS = Object.keys(TUNING.counts.luckyFindsPerZone) as EncounterId[];
 // The run in zone, walked at position zoneIndex.
 export const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState => ({
   ...run,

@@ -180,7 +180,15 @@ const SCAN_ROADS = 4;
 const ROUNDING = 1e-9;
 
 // The share of the zone's rows a quota without within is spread over.
-const WHOLE_ZONE: readonly [number, number] = [0, 1];
+export const WHOLE_ZONE: readonly [number, number] = [0, 1];
+
+// The share of a zone the ith of count like spawns placed apart stands in, such as a zone's gear
+// drops or its lucky finds: every other one of 2 * count - 1 equal stretches, so a lone one may
+// stand anywhere and two stand in the first and last thirds, at least a third of the zone apart.
+export function spacedStretch(count: number, i: number): readonly [number, number] {
+  const stretches = 2 * count - 1;
+  return [(2 * i) / stretches, (2 * i + 1) / stretches];
+}
 
 // The scroll a walk step covers.
 function stepLength(plan: SpawnPlan<string>): number {
@@ -778,10 +786,20 @@ export function planSpawns<Kind extends string>(
   // The movers that block lanes, or the moving prizes, as placeMovers takes them, each with its
   // kind's drawn hit length standing, which one stilled for want of room stands at.
   const moverQuotas = (blocking: boolean) =>
-    plan.quotas.flatMap(({ blocksLane, count, first, hitLength: standingLength, kind, mover }) =>
-      mover === undefined || blocksLane !== blocking
-        ? []
-        : [{ count, first: first ?? false, kind, spec: mover, standingLength }],
+    plan.quotas.flatMap(
+      ({ blocksLane, count, first, hitLength: standingLength, kind, mover, within }) =>
+        mover === undefined || blocksLane !== blocking
+          ? []
+          : [
+              {
+                count,
+                first: first ?? false,
+                kind,
+                spec: mover,
+                standingLength,
+                ...(within === undefined ? {} : { within }),
+              },
+            ],
     );
   const movers = moverQuotas(true);
   const moverGrid = {
@@ -879,19 +897,22 @@ export function planSpawns<Kind extends string>(
       }
     },
   };
+  // One quota at a time, sharing what is on screen, so each stilled one keeps its own within.
   const placePrizes = (): SpawnQuota<Kind>[] => {
-    const quotas = moverQuotas(false);
-    const { dropped, spawns } = placeMovers(
-      streams,
-      moverRoad,
-      plan.moverCaps,
-      prizeGrid,
-      [],
-      rows,
-      quotas,
-    );
-    events.push(...spawns);
-    return stilledQuotas(false, quotas, dropped);
+    const onScreen: OnScreen[] = [];
+    return moverQuotas(false).flatMap((quota) => {
+      const { dropped, spawns } = placeMovers(
+        streams,
+        moverRoad,
+        plan.moverCaps,
+        prizeGrid,
+        onScreen,
+        rows,
+        [quota],
+      );
+      events.push(...spawns);
+      return stilledQuotas(false, [quota], dropped);
+    });
   };
   // Holds every cell a placed mover may end a move on and stand in: the rows a spawn on which
   // overlaps the mover there, each spawn's hit box planned as hitLength, in the lanes it covers.
@@ -1306,7 +1327,7 @@ export function planSpawns<Kind extends string>(
 
 // The movers placeMovers dropped, as quotas that stand still in their footprints, one per kind:
 // a kind may have several quotas, such as one per stepper. Each keeps its kind's drawn hit length
-// standing, which the pack-fit gap measures it by.
+// standing, which the pack-fit gap measures it by, and its within.
 function stilledQuotas<Kind extends string>(
   blocksLane: boolean,
   quotas: readonly {
@@ -1314,11 +1335,12 @@ function stilledQuotas<Kind extends string>(
     readonly kind: Kind;
     readonly spec: MoverSpec;
     readonly standingLength: number | undefined;
+    readonly within?: readonly [number, number];
   }[],
   dropped: readonly Kind[],
 ): SpawnQuota<Kind>[] {
   const kinds = new Map(quotas.map((quota) => [quota.kind, quota]));
-  return [...kinds.values()].flatMap(({ first, kind, spec, standingLength }) => {
+  return [...kinds.values()].flatMap(({ first, kind, spec, standingLength, within }) => {
     const count = dropped.filter((other) => other === kind).length;
     return count === 0
       ? []
@@ -1330,6 +1352,7 @@ function stilledQuotas<Kind extends string>(
             footprint: spec.footprint,
             kind,
             ...(standingLength === undefined ? {} : { hitLength: standingLength }),
+            ...(within === undefined ? {} : { within }),
           },
         ];
   });

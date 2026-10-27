@@ -439,11 +439,13 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // Every obstacle or lucky find kind that moves and some zone draws plays one of its
-  // movement's tags at each step it has.
+  // Every obstacle or lucky find kind that moves and some zone draws, or a lucky find any zone
+  // counts, plays one of its movement's tags at each step it has.
   const drawn = (kind: string) =>
+    ((gameData.tuning.counts.luckyFindsPerZone as Readonly<Record<string, number>>)[kind] ?? 0) >
+      0 ||
     gameData.world.zones.some(({ weights }) =>
-      [weights.obstacles, weights.minorObstacles, weights.luckyFinds].some(
+      [weights.obstacles, weights.minorObstacles].some(
         (table) => ((table as Readonly<Record<string, number>>)[kind] ?? 0) > 0,
       ),
     );

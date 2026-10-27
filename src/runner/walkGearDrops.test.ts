@@ -8,15 +8,8 @@ import { gearDropCount, gearInEffect } from "../rules/gearDrops";
 import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";
 import { atPack, inLane, step, walkWith } from "../testing/walk";
-import {
-  gearDropStretch,
-  isGearDrop,
-  planZone,
-  spawnQuotas,
-  startRoad,
-  type Walk,
-  zoneLength,
-} from "./walk";
+import { spacedStretch } from "./spawning";
+import { isGearDrop, planZone, spawnQuotas, startRoad, type Walk, zoneLength } from "./walk";
 
 const GEAR = Object.keys(SHOP_GEAR) as GearId[];
 const POSITIONS = Array.from({ length: WORLD.walkLength }, (_, position) => position);
@@ -112,7 +105,7 @@ describe("gear drop planning", () => {
   });
 
   it.each([1, 2, 3])("gives %i drops stretches of the zone a stretch apart", (count) => {
-    const stretches = Array.from({ length: count }, (_, i) => gearDropStretch(count, i));
+    const stretches = Array.from({ length: count }, (_, i) => spacedStretch(count, i));
     expect(stretches[0]?.[0]).toBe(0);
     expect(stretches.at(-1)?.[1]).toBe(1);
     for (const [i, [from, to]] of stretches.entries()) {

@@ -1,10 +1,11 @@
-import type { LiveTuning, Zone } from "../data/types";
+import type { LiveTuning, LuckyEncounterId, Zone } from "../data/types";
 import { type Pixels, pixels, read, type Seconds, seconds } from "./units";
 
 interface ZoneStats {
   // At base speed and before upgrades.
   readonly duration: Seconds;
-  readonly luckyEncounters: number;
+  // How many of each kind of lucky find the zone places on average, which chanceRound rounds.
+  readonly luckyFinds: Readonly<Record<LuckyEncounterId, number>>;
   // Obstacles that open no card, on top of obstacles.
   readonly minorObstacles: number;
   readonly obstacles: number;
@@ -25,9 +26,12 @@ export function zoneStats(
   const { density } = zone;
   return {
     duration: seconds(read(tuning, "seconds", "zoneAtBaseSpeed") / speedFactor),
-    luckyEncounters: Math.round(
-      read(tuning, "counts", "luckyEncountersPerZone") * density.luckyFinds,
-    ),
+    luckyFinds: Object.fromEntries(
+      Object.entries(tuning.counts.luckyFindsPerZone).map(([id, count]) => [
+        id,
+        count * density.luckyFinds,
+      ]),
+    ) as Record<LuckyEncounterId, number>,
     minorObstacles: zoneCount(
       zoneIndex,
       tuning.counts.minorObstaclesFirstZone,
