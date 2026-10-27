@@ -163,10 +163,13 @@ def clear(w, h):
 
 
 def leaf(cv, x, y, col="orange"):
-    """A fallen maple leaf, 3x3 with a stem."""
-    cv.fill(x + 1, y, 1, 3, col)
-    cv.fill(x, y + 1, 3, 1, col)
-    cv.fill(x + 2, y + 3, 1, 1, dk(col))
+    """A fallen leaf lying askew, 3x3 on a diagonal with its stem a ramp step darker at the narrow end,
+    tilted the other way on an odd column, so the leaves never read as crosses or sparkles."""
+    pts = ((2, 0), (1, 1), (2, 1), (0, 2), (1, 2))
+    flip = x % 2
+    for dx, dy in pts:
+        cv.fill(x + (2 - dx if flip else dx), y + dy, 1, 1, col)
+    cv.fill(x + (2 if flip else 0), y + 3, 1, 1, dk(col))
 
 
 def planks(cv, x, y, w, h, step, vertical=False, seed=1):
@@ -533,9 +536,11 @@ def home():
     cv.fill(222, 189, 10, 4, "slate")
     cv.fill(223, 189, 8, 2, "sky")
     cv.fill(224, 189, 3, 1, "cyan")
-    cv.fill(250, 176, 5, 5, "red")
-    cv.fill(250, 176, 2, 2, "pink")
-    cv.fill(254, 179, 1, 2, "dred")
+    cv.fill(251, 176, 3, 5, "red")
+    cv.fill(250, 177, 5, 3, "red")
+    cv.fill(251, 177, 1, 1, "pink")
+    cv.fill(253, 179, 1, 1, "dred")
+    cv.fill(254, 178, 1, 1, "dred")
     # the porch: a step nosing, then the deck under the panels
     cv.fill(0, 196, W, 1, "tan")
     cv.fill(0, 197, W, 1, "brown")
