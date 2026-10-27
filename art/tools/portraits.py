@@ -260,15 +260,13 @@ def biscuit(g):
     nose(g, 20, 29)
 
 
-# ---------- Archie: Australian Shepherd, medium, red merle, one blue eye, red bandana ----------
+# ---------- Archie: Australian Shepherd, medium, brown and white, one blue eye, red bandana ----------
 
 def archie(g):
-    coat, (blot,), (ear, tip) = dogs.COAT, dogs.BLOT, dogs.EAR
-    # merle haunch and bobtail behind, a white ruff down the chest in front
+    coat, (ear, tip) = dogs.COAT, dogs.EAR
+    # brown haunch and bobtail behind, a white ruff down the chest in front
     g.cel(45, 54, 12, 9, *coat)
     g.cel(53, 46, 3.5, 3, *coat)
-    g.cel(44, 52, 4.5, 3, blot)
-    g.cel(52, 59, 3, 2.5, blot)
     g.cel(31, 52, 13, 11, "white", "lgrey")
     legs(g, (23, 33), 53, "white", "lgrey")
     for x in (23, 33):
@@ -277,18 +275,15 @@ def archie(g):
     g.tri((17, 40), (45, 40), (30, 57), "red")
     g.tri((32, 46), (45, 40), (30, 57), "dred")
     g.rect(17, 40, 28, 1, "dred")
-    # ears set high, the tips folding forward
+    # rose ears set high, the tips folding forward
     g.tri((12, 21), (15, 7), (24, 13), ear)
     g.tri((15, 7), (9, 13), (16, 13), tip)
     g.tri((47, 20), (45, 6), (36, 12), ear)
     g.tri((45, 6), (51, 12), (44, 12), tip)
     g.cel(30, 26, 16, 14, *coat)
-    # merle in three flat patches: over the blue eye, across the skull and on the near cheek
-    g.cel(20, 23, 6.5, 6, blot)
-    g.cel(38, 16, 4.5, 3.5, blot)
-    g.cel(42.5, 28.5, 2.5, 2, blot)
-    # white blaze into a white muzzle, copper brows and cheek
-    g.tri((27, 12), (31, 12), (29, 26), "white")
+    # a white blaze widening down into a white muzzle, copper brows and cheek
+    g.tri((26, 12), (32, 12), (29, 28), "white")
+    g.tri((24, 28), (34, 28), (29, 20), "white")
     g.rect(27, 12, 4, 5, "white")
     g.rect(34, 19, 3, 1, "ochre")
     g.cel(38, 32, 3, 2.5, "ochre", "rust")

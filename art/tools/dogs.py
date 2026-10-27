@@ -437,12 +437,11 @@ def pierre_face(mood):
     return g
 
 
-# ---------- Archie: Australian Shepherd, medium, red merle, one blue eye, red bandana ----------
+# ---------- Archie: Australian Shepherd, medium, brown and white, one blue eye, red bandana ----------
 
-# The coat (fill, shade, light), the merle patches and the ears (ear, folded tip).
-COAT = ("skin2", "brown", "skin1")
-BLOT = ("dbrown",)
-EAR = ("dbrown", "plum")
+# The brown coat (fill, shade, light) and the ears (ear, folded tip).
+COAT = ("brown", "dbrown", "skin2")
+EAR = ("brown", "dbrown")
 
 
 def archie_road(q):
@@ -453,35 +452,42 @@ def archie_road(q):
                     (19, 25, q["br"])):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
-    # a cinnamon coat in a few liver merle patches, a fluffy white ruff at the nape. As wide as Biscuit,
-    # longer in the coat
+    # a solid brown coat, as wide as Biscuit and longer in the coat
     bx = 16 + ln // 2
-    g.ell(bx, 21.5 + b, 7, 6, *COAT)
-    merle(g, bx, b, ((-3.5, 21, 2, 1.5), (3, 24, 2.2, 1.5), (2.5, 19.6, 1.3, 1)))
-    g.cel(bx, 16.5 + b, 6, 2, "white", "lgrey")
+    g.cel(bx, 21.5 + b, 7, 6, *COAT)
+    # a short bobtail
+    tx = 16 + q["tail"]
+    g.cel(tx, 27.5 + b, 2, 1.6, *COAT)
+    # the fluffy white ruff round the neck, tufted out past the shoulders and down onto the back
+    g.cel(bx, 17.5 + b, 6.5, 2.8, "white", "lgrey")
+    g.cel(bx - 6, 18.5 + b, 1.6, 1.6, "white")
+    g.cel(bx + 6, 18.5 + b, 1.6, 1.6, "white", "lgrey")
+    for x, c in ((bx - 2.5, "white"), (bx + 2.5, "lgrey")):
+        g.tri((x - 2, 19.5 + b), (x + 2, 19.5 + b), (x, 22 + b), c)
     # the red bandana tied at the nape in one knot
     g.rect(bx - 5, 17 + b, 10, 1, "red")
     g.rect(bx - 1, 17 + b, 2, 2, "dred")
-    # a short bobtail
-    tx = 16 + q["tail"]
-    g.ell(tx, 27.5 + b, 2, 1.6, *COAT)
-    # ears set high and tipped forward, the folded tips darker
+    # rose ears set high, each tip folding over and out in the shade
     hx = 16 + ln
-    e, t = q["ears"] + q["flop"], q["twitch"]
-    g.tri((hx - 5.5, 10 + b), (hx - 5, 5 + b + e), (hx - 1.5, 7 + b), EAR[0])
-    g.tri((hx + 5.5, 10 + b + t), (hx + 5, 5 + b + e + t), (hx + 1.5, 7 + b + t), EAR[0])
-    g.rect(hx - 6, 5 + b + e, 2, 1, EAR[1])
-    g.rect(hx + 4, 5 + b + e + t, 2, 1, EAR[1])
-    g.ell(hx, 11.5 + b, 5.5, 5, *COAT)
-    merle(g, hx, b, ((-2.5, 9.5, 2, 1.6), (2.5, 13, 1.6, 1.3)))
+    e = q["ears"] + q["flop"]
+    for s, t in ((-1, 0), (1, q["twitch"])):
+        g.tri((hx + s * 6, 10 + b + t), (hx + s * 5, 5 + b + e + t), (hx + s * 1.5, 7 + b + t), EAR[0])
+    g.cel(hx, 11.5 + b, 5.5, 5, *COAT)
+    for s, t in ((-1, 0), (1, q["twitch"])):
+        g.tri((hx + s * 5, 5 + b + e + t), (hx + s * 7.5, 7.5 + b + e + t), (hx + s * 4, 7.5 + b + e + t), EAR[1])
     spray(g, q["spray"])
+    rim(g, ARCHIE_RIM)
     return g
+
+
+# Archie's brown coat lit where its silhouette faces up or left, so it holds on the dslate road.
+ARCHIE_RIM = {"brown": ("tan", None), "dbrown": ("skin2", None)}
 
 
 def archie_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
-    # ears set high, the tips folding forward and out
+    # rose ears set high, the tips folding forward and out
     g.tri((7, 12), (8 - d, 3 + d), (13.5, 7 + d / 2), EAR[0])
     g.tri((25, 12), (24 + d, 3 + d), (18.5, 7 + d / 2), EAR[0])
     g.tri((8 - d, 3 + d), (4 - d, 6 + d), (9 - d, 6 + d), EAR[1])
@@ -491,12 +497,11 @@ def archie_face(mood):
     g.tri((8, 25), (24, 25), (16, 31.5), "red")
     g.tri((16, 25), (24, 25), (16, 31.5), "dred")
     g.rect(8, 25, 16, 1, "dred")
-    g.cel(16, 16, 9.5, 8.5, *COAT)
-    # merle in three flat patches: over the blue eye, across the skull and on the near cheek
-    g.cel(11, 14, 4, 3.5, BLOT[0])
-    g.cel(21.5, 10.5, 3, 2.2, BLOT[0])
-    g.cel(23.5, 20.5, 1.8, 1.5, BLOT[0])
+    # a broad skull, squared so it fills in under the ears
+    g.cel(16, 16, 9.5, 8.5, *COAT, power=2.4)
+    # a white blaze up the forehead, widening down into the white muzzle
     g.rect(15, 7, 2, 9, "white")
+    g.rect(14, 13, 4, 3, "white")
     # copper brows and cheeks
     g.p(10, 11, "ochre")
     g.p(21, 11, "ochre")
@@ -674,13 +679,6 @@ def puff(g, cx, cy, rx, ry, ring=False):
     if ring:
         g.ell(cx, cy, rx + 1, ry + 1, CURL[1])
     g.ell(cx, cy, rx, ry, CURL[0], CURL[1], CURL[2] if min(rx, ry) >= 3 else None)
-
-
-def merle(g, cx, b, blots):
-    """Red merle on Archie's coat: each (dx, y, rx, ry) a flat, rounded BLOT[0] patch centred at x cx + dx,
-    row y + b, with no single-pixel ragging, so the coat reads as a few patches at road scale."""
-    for dx, y, rx, ry in blots:
-        g.blob(cx + dx, y + b, rx, ry, BLOT[0])
 
 
 def trail(g, pts, c):

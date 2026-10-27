@@ -1695,7 +1695,7 @@
       "json": "sprites/dog-archie.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 23
+        "opaqueWidth": 24
       }
     },
     {
@@ -1704,7 +1704,7 @@
       "json": "sprites/dog-archie@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
       }
     },
     {
@@ -1713,7 +1713,7 @@
       "json": "sprites/dog-archie@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
       }
     },
     {
@@ -1722,7 +1722,7 @@
       "json": "sprites/dog-archie@75.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 17
+        "opaqueWidth": 18
       }
     },
     {
@@ -1731,7 +1731,7 @@
       "json": "sprites/dog-archie@88.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 20
+        "opaqueWidth": 21
       }
     },
     {
