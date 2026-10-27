@@ -351,6 +351,32 @@ def crown(cv, cx, cy, rad, lit, face, shade, bright=-0.7, dim=0.6):
                 cv.fill(cx + dx, cy + dy, 1, 1, shade if t > dim else lit if t < bright else face)
 
 
+def crowns(cv, lobes, lit, face, shade):
+    """A crown of round lobes, (cx, cy, rad) back to front, lit as one mass from the top left: each lobe
+    takes a crescent of shade along its lower right rim and of light along its upper left, the shade only
+    where the lobe lies off the crown's lit side and the light only off its shaded side, so the lobes read as
+    clumps of one tree rather than separate balls."""
+    mx = sum(x for x, _, _ in lobes) / len(lobes)
+    my = sum(y for _, y, _ in lobes) / len(lobes)
+    reach = max(math.hypot(x - mx, y - my) + r for x, y, r in lobes)
+    px = {}
+    for cx, cy, rad in lobes:
+        dark, light = rad * 0.4, rad * 0.35
+        for dy in range(-rad, rad + 1):
+            for dx in range(-rad, rad + 1):
+                if dx * dx + dy * dy <= rad * rad:
+                    g = (cx + dx - mx + cy + dy - my) / reach
+                    if (dx + dark) ** 2 + (dy + dark) ** 2 > rad * rad and g > -0.35:
+                        c = shade
+                    elif (dx - light) ** 2 + (dy - light) ** 2 > rad * rad and g < 0.35:
+                        c = lit
+                    else:
+                        c = face
+                    px[(cx + dx, cy + dy)] = c
+    for (x, y), c in px.items():
+        cv.fill(x, y, 1, 1, c)
+
+
 def far_tree(cv, cx, top, rad):
     """An autumn street tree across the street: a 2px bark trunk on FAR_BASE under an ochre, brown and bark
     crown centred on row top."""
@@ -456,8 +482,8 @@ def home():
     cv.fill(62, 110, 18, 2, "dbrown")
     cv.fill(69, 92, 4, 20, "bark")
     cv.fill(69, 92, 1, 20, "clay")
-    for lx, ly, rad in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10), (13, 4, 10), (0, 10, 10)):
-        crown(cv, 71 + lx, 80 + ly, rad, "amber", "ochre", "rust", -0.75, 0.55)
+    crowns(cv, [(71 + lx, 80 + ly, rad) for lx, ly, rad in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10),
+                                                             (13, 4, 10), (0, 10, 10))], "amber", "ochre", "rust")
     for x, y in ((92, 104), (110, 118), (128, 100), (34, 116), (206, 112), (140, 122)):
         leaf(cv, x, y, "ochre")
     # the street sign at the right edge, under the sound toggle and clear of the walker's speech
