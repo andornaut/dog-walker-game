@@ -707,6 +707,11 @@
       "json": "sprites/badge-kitted-out.json"
     },
     {
+      "key": "badge-local-favourite",
+      "png": "sprites/badge-local-favourite.png",
+      "json": "sprites/badge-local-favourite.json"
+    },
+    {
       "key": "badge-marathon",
       "png": "sprites/badge-marathon.png",
       "json": "sprites/badge-marathon.json"
@@ -715,11 +720,6 @@
       "key": "badge-mud-season",
       "png": "sprites/badge-mud-season.png",
       "json": "sprites/badge-mud-season.json"
-    },
-    {
-      "key": "badge-neighbourhood-favourite",
-      "png": "sprites/badge-neighbourhood-favourite.png",
-      "json": "sprites/badge-neighbourhood-favourite.json"
     },
     {
       "key": "badge-not-a-scratch",
