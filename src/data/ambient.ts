@@ -72,7 +72,7 @@ const SQUIRREL = {
 
 export const AMBIENT = {
   homeStretch: [
-    CAR,
+    { ...CAR, perMinute: 12, speed: 24 },
     BIKE,
     { ...CAT, path: "verge", speed: 200 },
     PEDESTRIAN,
@@ -124,11 +124,10 @@ export const AMBIENT = {
     },
   ],
   shops: [
-    { ...CAR, perMinute: 5 },
-    BIKE,
+    { ...BIKE, perMinute: 4 },
     { ...BIRD, perMinute: 3 },
-    { ...PEDESTRIAN, perMinute: 4 },
-    { ...PEDESTRIAN_AWAY, perMinute: 4 },
+    { ...PEDESTRIAN, perMinute: 5 },
+    { ...PEDESTRIAN_AWAY, perMinute: 5 },
     {
       gait: "steady",
       key: "ambient-pigeons",
@@ -166,11 +165,10 @@ export const AMBIENT = {
     },
   ],
   street: [
-    { ...CAR, perMinute: 4 },
-    BIKE,
+    { ...BIKE, perMinute: 4 },
     CAT,
-    PEDESTRIAN,
-    PEDESTRIAN_AWAY,
+    { ...PEDESTRIAN, perMinute: 3 },
+    { ...PEDESTRIAN_AWAY, perMinute: 3 },
     RABBIT,
     { ...SQUIRREL, perMinute: 3 },
   ],

@@ -98,7 +98,7 @@ export const DOGS = {
     look: "Fawn, black mask, tiny bandana",
     name: "Reggie",
     owner: {
-      name: "Ralph",
+      name: "Ryan",
       role: "pet influencer",
     },
     price: "reggie",
@@ -111,7 +111,7 @@ export const DOGS = {
     look: "Giant white fluff, collar with a bell",
     name: "Sequoia",
     owner: {
-      name: "Judy",
+      name: "Aunt Judy",
       role: "wedding planner",
     },
     price: "snowball",
