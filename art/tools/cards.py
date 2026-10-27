@@ -789,7 +789,7 @@ def beaches_view():
     sand = flecked("skin1", "tan", 43)
     a = ZoneView("the-beaches", boards, sand, "dbrown", (4, 9), curb=None, walk="skin1", lawn=sand, walk_fleck="tan")
     a.sky("gold", "yellow")
-    bd.cloud(a, 6, 5, 16, 2, 4)
+    bd.cloud(a, 26, 5, 16, 2, 4)
     for py in range(8, 17):
         for px in range(AW):
             c = "dlake" if py < 10 else "lake" if py < 14 else "shallow"
@@ -811,6 +811,8 @@ def beaches_view():
         a.fill(53 + k, 8 - k, 13 - 2 * k, 1, "ttc")
     a.fill(59, 3, 1, 3, "coal")
     bd.umbrella(a, 16, FAR_Y, "ttc", "white")
+    # a shade tree in the park at the east end, cut by the card's edge
+    bd.shade_tree(a, 73, 10, 4, FAR_Y - 2, "canopy", "pine", "green", girth=2)
     a.street()
     return a
 
