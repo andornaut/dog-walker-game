@@ -263,13 +263,18 @@ export interface ExplainShown {
   effects: number;
 }
 
-// The element under point that explains itself, if any.
+// The element under point that explains itself, if any. dimmed: the pause menu's dim covers
+// walkView, debuff bars included, and a press there is the menu's.
 export function explainTargetAt(
-  layout: Pick<ScreenLayout, "dogSlots" | "topBar">,
+  layout: Pick<ScreenLayout, "dogSlots" | "topBar" | "walkView">,
   shown: ExplainShown,
+  dimmed: boolean,
   point: Point,
 ): ExplainTarget | undefined {
   const { x, y } = point;
+  if (dimmed && containsPoint(layout.walkView, x, y)) {
+    return undefined;
+  }
   const bar = walkBarLayout(layout.topBar);
   const well = bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y));
   if (well >= 0 && well < shown.effects) {

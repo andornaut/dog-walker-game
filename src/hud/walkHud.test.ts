@@ -552,25 +552,35 @@ describe("explainTargetAt", () => {
   const holdAt = (i: number) => centre(BAR.effectHolds[i] ?? topBar);
   const bars = debuffBarRects(topBar, debuffs.length);
   const button = centre(BAR.buttons[WALK_BAR_BUTTONS[0]].hit);
-  it.each<[string, number, Point, ExplainTarget | undefined]>([
-    ["the first effect", 1, holdAt(0), { effect: 0, kind: "effect" }],
-    ["the neighbourhood well's column over an effect", 1, centre(BAR.zoneWell), undefined],
-    ["an empty well", 1, holdAt(1), undefined],
+  const first: ExplainTarget = { effect: 0, kind: "effect" };
+  const last: ExplainTarget = { effect: WELLS - 1, kind: "effect" };
+  const muddy: ExplainTarget = { debuff: "muddy", kind: "debuff" };
+  const stinky: ExplainTarget = { debuff: "stinky", kind: "debuff" };
+  const kilo: ExplainTarget = { dog: "kilo", kind: "dog" };
+  const biscuit: ExplainTarget = { dog: "biscuit", kind: "dog" };
+  // What a press explains on the walk, and under the pause menu's dim, where the debuff bars
+  // are the dim's.
+  it.each<[string, number, Point, ExplainTarget | undefined, ExplainTarget | undefined]>([
+    ["the first effect", 1, holdAt(0), first, first],
     [
-      "the last well with as many effects as wells",
-      WELLS,
-      holdAt(WELLS - 1),
-      { effect: WELLS - 1, kind: "effect" },
+      "the neighbourhood well's column over an effect",
+      1,
+      centre(BAR.zoneWell),
+      undefined,
+      undefined,
     ],
-    ["the cash well", 1, centre(WALK_BAR.cash.well), undefined],
-    ["a button", 1, button, undefined],
-    ["the first debuff bar", 0, centre(bars[0] ?? topBar), { debuff: "muddy", kind: "debuff" }],
-    ["the second debuff bar", 0, centre(bars[1] ?? topBar), { debuff: "stinky", kind: "debuff" }],
-    ["the first card", 0, centre(dogSlots[0] ?? topBar), { dog: "kilo", kind: "dog" }],
-    ["the second card", 0, centre(dogSlots[1] ?? topBar), { dog: "biscuit", kind: "dog" }],
-    ["a card with no dog", 0, centre(dogSlots[2] ?? topBar), undefined],
-    ["the road", 0, centre(LAYOUT.road), undefined],
-  ])("finds what %s explains", (_name, effects, point, expected) => {
-    expect(explainTargetAt(LAYOUT, shown(effects), point)).toEqual(expected);
+    ["an empty well", 1, holdAt(1), undefined, undefined],
+    ["the last well with as many effects as wells", WELLS, holdAt(WELLS - 1), last, last],
+    ["the cash well", 1, centre(WALK_BAR.cash.well), undefined, undefined],
+    ["a button", 1, button, undefined, undefined],
+    ["the first debuff bar", 0, centre(bars[0] ?? topBar), muddy, undefined],
+    ["the second debuff bar", 0, centre(bars[1] ?? topBar), stinky, undefined],
+    ["the first card", 0, centre(dogSlots[0] ?? topBar), kilo, kilo],
+    ["the second card", 0, centre(dogSlots[1] ?? topBar), biscuit, biscuit],
+    ["a card with no dog", 0, centre(dogSlots[2] ?? topBar), undefined, undefined],
+    ["the road", 0, centre(LAYOUT.road), undefined, undefined],
+  ])("finds what %s explains", (_name, effects, point, walking, dimmed) => {
+    expect(explainTargetAt(LAYOUT, shown(effects), false, point)).toEqual(walking);
+    expect(explainTargetAt(LAYOUT, shown(effects), true, point)).toEqual(dimmed);
   });
 });

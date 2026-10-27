@@ -2,7 +2,7 @@ import type { Input, Scene } from "phaser";
 
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import { gameplayAllowed, pressesHeld, type RunPause, topBarButtonAt } from "../../hud/topBar";
+import { gameplayAllowed, type RunPause, topBarButtonAt, walkPresses } from "../../hud/topBar";
 import {
   debuffBarRects,
   type ExplainShown,
@@ -15,6 +15,7 @@ import {
   idleTrack,
   type PointerSample,
   type PointerTrack,
+  type PressMode,
   tickTrack,
   type TrackContext,
   trackPointer,
@@ -84,7 +85,8 @@ export class RunInput {
 
   // Each frame: a press held still on an element long enough opens its explanation.
   tick(nowMs: number): void {
-    this.pointers = tickTrack(this.context(), nowMs, this.pointers);
+    const presses = this.presses();
+    this.pointers = tickTrack(this.context(presses), presses, nowMs, this.pointers);
   }
 
   // M, P and Escape are the walk bar's keys, which the HUD handles. Phaser hands a key down to
@@ -96,12 +98,18 @@ export class RunInput {
     }
   }
 
-  // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
-  // running while a card or the pause menu covers the walk, and the press is theirs then.
-  private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
+  // What the walk's presses do now: nothing once the walk is over or before it starts.
+  private presses(): PressMode {
     const walk = this.host.walk();
     const walking = walk !== undefined && walk.run.phase.kind === "walking";
-    const held = !walking || pressesHeld(this.host.runPause());
+    return walking ? walkPresses(this.host.runPause()) : "none";
+  }
+
+  // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
+  // running while a card or the pause menu covers the walk, and the press is theirs then, but
+  // for a hold on what the menu leaves in view.
+  private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
+    const presses = this.presses();
     const sample: PointerSample = {
       onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
       phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
@@ -109,14 +117,14 @@ export class RunInput {
       press: { downTime: pointer.downTime, id: pointer.id },
       timeMs: this.scene.game.loop.time,
     };
-    const result = trackPointer(this.context(), held, sample, this.pointers);
+    const result = trackPointer(this.context(presses), presses, sample, this.pointers);
     this.pointers = result.track;
     result.actions.forEach((action) => this.act(action));
   }
 
-  private context(): TrackContext<ExplainTarget> {
+  private context(presses: PressMode): TrackContext<ExplainTarget> {
     const stepMoves = (direction: LaneDirection) => this.stepMoves(direction);
-    return trackContext(this.host.explainShown(), stepMoves);
+    return trackContext(presses === "explain", this.host.explainShown(), stepMoves);
   }
 
   // The walk that takes live lane moves now, if any does.
@@ -152,15 +160,16 @@ export class RunInput {
 
 // A tap on a debuff bar does nothing, and a press on anything that explains itself opens its
 // explanation once still for explainHoldSeconds within swipeStartDistance, the drag's first
-// step.
+// step. dimmed: the pause menu's dim takes the presses on the walk.
 function trackContext(
+  dimmed: boolean,
   shown: ExplainShown,
   stepMoves: (direction: LaneDirection) => boolean,
 ): TrackContext<ExplainTarget> {
   const swipeStartDistance = read(gameData.tuning, "pixels", "swipeStartDistance");
   return {
     config: { laneCount: LANE_COUNT, swipeStartDistance },
-    explainAt: (point) => explainTargetAt(LAYOUT, shown, point),
+    explainAt: (point) => explainTargetAt(LAYOUT, shown, dimmed, point),
     hold: {
       holdMs: read(gameData.tuning, "seconds", "explainHoldSeconds") * 1000,
       slopPx: swipeStartDistance,

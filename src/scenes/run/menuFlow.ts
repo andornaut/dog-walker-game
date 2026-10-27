@@ -32,6 +32,8 @@ export class MenuFlow {
   private blurred = false;
   private cardView: CardView | undefined;
   private celebrating = false;
+  // Whether an explanation's detail card covers the pause menu, which is paused under it.
+  private covered = false;
   // Whether the player's pause holds the run scene's tweens and timers and ducks the music.
   private held = false;
   private hidden = false;
@@ -139,7 +141,7 @@ export class MenuFlow {
     if (this.pauseOpen) {
       if (mode !== this.pauseMode) {
         this.pauseMode = mode;
-        scene.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
+        this.restartPause();
       }
       return;
     }
@@ -167,11 +169,25 @@ export class MenuFlow {
     if (this.pauseOpen) {
       this.pauseMode = "menu";
       this.pauseOverlay = { alone: false, open };
-      this.scene.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
+      this.restartPause();
       return;
     }
     this.pauseOverlay = { alone: true, open };
     this.openPause("menu");
+  }
+
+  // An explanation's detail card opened over the pause menu or the Home question takes every
+  // press until a tap closes it, so the menu pauses under it and shows again, the walk still
+  // paused, once it closes. Called each frame with whether one is open.
+  coverMenu(explaining: boolean): void {
+    const { scene } = this.scene;
+    if (explaining && !this.covered && scene.isActive(SCENE_KEYS.pause)) {
+      this.covered = true;
+      scene.pause(SCENE_KEYS.pause);
+    } else if (!explaining && this.covered) {
+      this.covered = false;
+      scene.resume(SCENE_KEYS.pause);
+    }
   }
 
   closePause(): void {
@@ -180,6 +196,7 @@ export class MenuFlow {
     }
     const { scene } = this;
     scene.scene.stop(SCENE_KEYS.pause);
+    this.covered = false;
     this.pauseOpen = false;
     this.hold();
     if (this.cardView !== undefined) {
@@ -207,6 +224,12 @@ export class MenuFlow {
       scene.tweens.resumeAll();
     }
     scene.time.paused = held;
+  }
+
+  // The menu shown afresh, running: coverMenu pauses it again while an explanation is open.
+  private restartPause(): void {
+    this.covered = false;
+    this.scene.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
   }
 
   private pauseData(): PauseSceneData {

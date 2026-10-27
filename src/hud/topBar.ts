@@ -1,5 +1,6 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import { isMuteKey, isPauseKey } from "../input/keyBindings";
+import type { PressMode } from "../input/pointerTracking";
 import { screenLayout } from "../layout/screenLayout";
 import { containsPoint, type Point } from "../lib/rect";
 import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
@@ -67,11 +68,15 @@ export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
   return pause.menu !== "closed";
 }
 
-// Whether the walk drops its presses: a card or a menu over the walk takes every press. A hit
-// stop covers nothing, and an explanation's detail card takes its presses itself: the walk's
-// input closes it on the next tap.
-export function pressesHeld(pause: RunPause): boolean {
-  return pause.card || pause.menu !== "closed";
+// What the walk's presses do. The pause menu and the Home question dim only the walk, so a hold
+// on the walk bar's wells or a dog card still explains it over them; a card, help and the
+// settings take every press. A hit stop covers nothing, and an explanation's detail card takes
+// its presses itself: the walk's input closes it on the next tap.
+export function walkPresses(pause: RunPause): PressMode {
+  if (pause.menu === "open" || pause.menu === "confirmHome") {
+    return "explain";
+  }
+  return pause.card || pause.menu !== "closed" ? "none" : "steer";
 }
 
 // Lane moves act only while nothing pauses the walk or holds it in a hit stop.

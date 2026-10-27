@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
+import type { PressMode } from "../input/pointerTracking";
 import { screenLayout } from "../layout/screenLayout";
 import { containsPoint } from "../lib/rect";
 import {
@@ -8,7 +9,6 @@ import {
   NOTHING_PAUSED,
   pauseButtonIcon,
   playerPaused,
-  pressesHeld,
   type RunPause,
   TOP_BAR_BUTTONS,
   type TopBarAction,
@@ -16,6 +16,7 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   walkPaused,
+  walkPresses,
 } from "./topBar";
 import { WALK_BAR, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
@@ -29,8 +30,8 @@ describe("the walk bar in each pause state", () => {
     // The pause button's icon, and whether lane moves act.
     icon: "icon-pause" | "icon-play";
     gameplay: boolean;
-    // Whether a card or a menu takes the walk's presses, so the walk drops them.
-    held: boolean;
+    // What the walk's presses do: steer, only hold to explain, or nothing.
+    presses: PressMode;
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
     player: boolean;
@@ -45,7 +46,6 @@ describe("the walk bar in each pause state", () => {
 
   const walking = {
     gameplay: false,
-    held: false,
     help: "openHelp",
     icon: "icon-pause",
     mute: "mute",
@@ -53,22 +53,27 @@ describe("the walk bar in each pause state", () => {
     pauseKey: "openMenu",
     paused: false,
     player: false,
+    presses: "steer",
     settings: "openSettings",
     sound: "mute",
   } as const;
-  const card = { ...walking, held: true, paused: true } as const;
+  const card = { ...walking, paused: true, presses: "none" } as const;
+  // The menu and the Home question dim the walk only: a hold on the bar's wells explains.
   const menu = {
-    ...card,
+    ...walking,
     icon: "icon-play",
     pause: "resume",
     pauseKey: "resume",
+    paused: true,
     player: true,
+    presses: "explain",
   } as const;
   const cover = {
     ...menu,
     help: undefined,
     pause: undefined,
     pauseKey: undefined,
+    presses: "none",
     settings: undefined,
     sound: undefined,
   } as const;
@@ -98,6 +103,11 @@ describe("the walk bar in each pause state", () => {
       ["in the menu over a card", { ...CARD, menu: "open" }, menu],
       ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
       ["asking whether to head home over a card", { ...CARD, menu: "confirmHome" }, menu],
+      [
+        "under an explanation's detail card over the menu",
+        { ...HOLD, menu: "open" },
+        { ...menu, help: undefined, pause: undefined, settings: undefined, sound: undefined },
+      ],
       ["under help, which mutes on M", { ...NOTHING_PAUSED, menu: "help" }, cover],
       [
         "under settings, which leaves M to its own sound switch",
@@ -109,7 +119,6 @@ describe("the walk bar in each pause state", () => {
       expect(
         {
           gameplay: gameplayAllowed(pause),
-          held: pressesHeld(pause),
           help: topBarAction(pause, "tap", "help"),
           icon: pauseButtonIcon(pause),
           mute: topBarAction(pause, "key", "sound"),
@@ -117,6 +126,7 @@ describe("the walk bar in each pause state", () => {
           pauseKey: topBarAction(pause, "key", "pause"),
           paused: walkPaused(pause),
           player: playerPaused(pause),
+          presses: walkPresses(pause),
           settings: topBarAction(pause, "tap", "settings"),
           sound: topBarAction(pause, "tap", "sound"),
         },

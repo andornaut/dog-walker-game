@@ -108,7 +108,7 @@ import {
   QUIPS_EVENT,
   type RaisedHint,
 } from "./run/runMoments";
-import { SCENE_KEYS } from "./sceneKeys";
+import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
@@ -138,9 +138,11 @@ function changeLabelText(label: ChangeLabel): string {
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
-// An explanation's detail card draws over every other part of the HUD but a bump's border. A
-// bump's tint draws under every part of the HUD, the message strip included.
+// An explanation's detail card draws over every other part of the HUD but a bump's border, and
+// over the pause menu's panel and the message strip drawn there. A bump's tint draws under
+// every part of the HUD, the message strip included.
 const DETAIL_DEPTH = 2000;
+const NOT_EXPLAINED = { key: "", layer: undefined };
 const BUMP_DEPTH = { border: 3000, tint: MESSAGE_DEPTH.hud - 1 };
 // An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
@@ -194,12 +196,12 @@ export class HudScene extends Scene {
   private cards: CardView[] = [];
   private debuffBars: DebuffBarView[] = [];
   private debuffFills: GameObjects.Graphics | undefined;
-  private detailLayer: GameObjects.Container | undefined;
   private dollar: GameObjects.BitmapText | undefined;
   private drawn: Record<string, unknown> = {};
   private dynamic: GameObjects.Graphics | undefined;
   private effectParts: GameObjects.GameObject[] = [];
-  private explained = "";
+  // What the open explanation explains, and its detail card as drawn, if any.
+  private explained: { key: string; layer: GameObjects.Container | undefined } = NOT_EXPLAINED;
   private feedback: HudFeedback | undefined;
   private hearts: HeartFeedback | undefined;
   // The change labels, glints and owners' pop-ins on screen, which hold while the player has
@@ -237,7 +239,7 @@ export class HudScene extends Scene {
     this.drawn = {};
     this.debuffBars = [];
     this.effectParts = [];
-    this.explained = "";
+    this.explained = NOT_EXPLAINED;
     this.messages = new MessageStrip();
     this.bankLabels = [];
     this.bankShowing = false;
@@ -285,7 +287,6 @@ export class HudScene extends Scene {
     this.dynamic = this.add.graphics();
     this.debuffFills = this.add.graphics().setDepth(1);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
-    this.detailLayer = this.add.container(0, 0).setDepth(DETAIL_DEPTH);
     const border = new BumpBorder(this, BUMP_DEPTH);
 
     const run = this.walk();
@@ -337,9 +338,11 @@ export class HudScene extends Scene {
   }
 
   // The topmost overlay over the walk, the pause menu or the card, else the HUD itself. A
-  // picture of the HUD has none.
+  // picture of the HUD has none. The menu counts while paused, under an explanation or a page
+  // it opened; a card is paused only under the menu.
   private overlayScene(): Scene {
-    const key = [SCENE_KEYS.pause, SCENE_KEYS.card].find((overlay) => this.scene.isActive(overlay));
+    const shown = (key: SceneKey) => this.scene.isActive(key) || this.scene.isPaused(key);
+    const key = [SCENE_KEYS.pause, SCENE_KEYS.card].find(shown);
     return key === undefined || this.picture !== undefined ? this : this.scene.get(key);
   }
 
@@ -486,9 +489,9 @@ export class HudScene extends Scene {
     if (this.picture === undefined) {
       this.raiseHints(runHintTriggers(view.run));
     }
-    this.showExplanation(view);
-    this.showDebuffBars(view.run);
     const overlay = this.overlayScene();
+    this.showExplanation(view, overlay);
+    this.showDebuffBars(view.run);
     const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
     // The strip's lines wait under an explanation's detail card.
     const aged = held || pause.hold ? 0 : delta;
@@ -607,24 +610,29 @@ export class HudScene extends Scene {
     return { debuff, parts, rect };
   }
 
-  // The detail card of what a held press explains, the home screen's, over the HUD while it is
-  // open. The walk is paused under it, so it is drawn once as it opens.
-  private showExplanation(view: RunHudView): void {
+  // The detail card of what a held press explains, the home screen's, while it is open: over the
+  // HUD, or drawn in the pause menu, over its panel, when the hold opened it there. The walk is
+  // paused under it, so it is drawn once as it opens, and again only in a new overlay or a
+  // restarted one.
+  private showExplanation(view: RunHudView, overlay: Scene): void {
     const target: ExplainTarget | undefined = view.explaining;
     const key = target === undefined ? "" : JSON.stringify(target);
-    const layer = this.detailLayer;
-    if (key === this.explained || layer === undefined) {
+    const shown = this.explained;
+    if (shown.key === key && (shown.layer === undefined || shown.layer.scene === overlay)) {
       return;
     }
-    this.explained = key;
-    layer.removeAll(true);
+    shown.layer?.destroy();
     const detail =
       target === undefined
         ? undefined
         : explainDetail(gameData, profileSave(this), view.run, target);
-    if (detail !== undefined) {
-      drawDetailCard(this, layer, false, detail.card, detail.picture, detail.kind);
+    if (detail === undefined) {
+      this.explained = { key, layer: undefined };
+      return;
     }
+    const layer = overlay.add.container(0, 0).setDepth(DETAIL_DEPTH);
+    drawDetailCard(overlay, layer, false, detail.card, detail.picture, detail.kind);
+    this.explained = { key, layer };
   }
 
   private redraw(view: RunHudView): void {

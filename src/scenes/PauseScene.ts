@@ -62,7 +62,9 @@ interface MenuEntry {
 
 // The pause menu over the dimmed band and road: resume, help, settings or head home; or the Home
 // button's question, keep walking or head home. The HUD keeps running under it, so the top
-// bar's buttons and their keys (P, Escape and M) stay with it.
+// bar's buttons and their keys (P, Escape and M) stay with it, and a hold on a walk-bar well or
+// a dog card opens its explanation over the panel, with this scene paused until it closes
+// (MenuFlow.coverMenu).
 export class PauseScene extends Scene {
   private buttons: MenuButton[] = [];
   private entries: MenuEntry[] = [];

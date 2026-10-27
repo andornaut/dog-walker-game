@@ -18,6 +18,7 @@ import {
   type PointerPhase,
   type PointerTrack,
   type Press,
+  type PressMode,
   tickTrack,
   type TrackContext,
   trackPointer,
@@ -50,10 +51,10 @@ const context: TrackContext<string> = {
 const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
 
 interface Event {
-  held?: boolean;
   onButton?: boolean;
   phase: PointerPhase;
   press: Press;
+  presses?: PressMode;
   x: number;
   y?: number;
 }
@@ -63,10 +64,10 @@ function feed(events: readonly Event[]): { actions: GestureAction[]; track: Poin
   const actions: GestureAction[] = [];
   let current: PointerTrack<string> = idleTrack;
   for (const event of events) {
-    const { held = false, onButton = false, phase, press, x, y = 400 } = event;
+    const { onButton = false, phase, press, presses = "steer", x, y = 400 } = event;
     const result = trackPointer(
       context,
-      held,
+      presses,
       { onButton, phase, point: { x, y }, press, timeMs: 0 },
       current,
     );
@@ -104,7 +105,7 @@ describe("trackPointer", () => {
         actions: [right],
         events: [
           { phase: "down", press: first, x: 200 },
-          { held: true, phase: "move", press: first, x: 210 },
+          { phase: "move", press: first, presses: "none", x: 210 },
           { phase: "move", press: first, x: 300 },
         ],
         name: "drops the press under way while a card or the menu holds the walk",
@@ -258,7 +259,12 @@ describe("trackPointer fuzz", () => {
       timeMs: world.time,
     };
     const driver = world.track.press;
-    const result = trackPointer(worldContext(world), world.held, sample, world.track);
+    const result = trackPointer(
+      worldContext(world),
+      world.held ? "none" : "steer",
+      sample,
+      world.track,
+    );
     world.track = result.track;
     if (phase === "down" && on !== "button" && !world.held) {
       world.latest = { downTime: press.downTime, id };
@@ -482,16 +488,17 @@ describe("hold to explain", () => {
     quietTaps: [{ height: 16, width: 360, x: 0, y: 40 }],
   };
   const { holdMs } = explainContext.hold;
-  // A pointer event at a time, or a frame's tick. held: a card or a menu takes the press.
+  // A pointer event at a time, or a frame's tick, each under what the walk's presses do then:
+  // steer when not given.
   type PointerStep = {
     at: number;
-    held?: boolean;
     id?: number;
     kind: PointerPhase;
+    presses?: PressMode;
     x: number;
     y: number;
   };
-  type Step = PointerStep | { at: number; kind: "tick" };
+  type Step = PointerStep | { at: number; kind: "tick"; presses?: PressMode };
 
   // Every action, and each change of the open explanation as "<target>@<step>" or
   // "closed@<step>". The walk is paused exactly while one is open.
@@ -501,12 +508,13 @@ describe("hold to explain", () => {
     let track: PointerTrack<string> = idleTrack;
     for (const step of steps) {
       const before = track.open;
+      const presses = step.presses ?? "steer";
       if (step.kind === "tick") {
-        track = tickTrack(explainContext, step.at, track);
+        track = tickTrack(explainContext, presses, step.at, track);
       } else {
         const press = finger(0, step.id ?? 1);
         const sample = { onButton: false, phase: step.kind, point: step, press, timeMs: step.at };
-        const result = trackPointer(explainContext, step.held ?? false, sample, track);
+        const result = trackPointer(explainContext, presses, sample, track);
         track = result.track;
         actions.push(...result.actions);
       }
@@ -533,6 +541,9 @@ describe("hold to explain", () => {
   const road = 300;
   // A card held open, its finger lifted.
   const heldCard = [at("down", 0, 100, card), tick(holdMs), at("up", holdMs + 100, 100, card)];
+  // Steps under the pause menu or the Home question, where only a hold acts.
+  const underMenu = (steps: readonly Step[]): Step[] =>
+    steps.map((step): Step => ({ ...step, presses: "explain" }));
 
   it.each<[string, Step[], GestureAction[], string[]]>([
     [
@@ -596,7 +607,7 @@ describe("hold to explain", () => {
     ],
     [
       "closes it when a card or a menu takes the press",
-      [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), held: true }],
+      [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), presses: "none" }],
       [],
       ["card@tick", "closed@move"],
     ],
@@ -659,6 +670,56 @@ describe("hold to explain", () => {
       "never opens the road, however long the press",
       [at("down", 0, 100, road), tick(10 * holdMs), at("up", 10 * holdMs, 100, road)],
       [left],
+      [],
+    ],
+    [
+      "under the menu, opens an effect icon held still, and keeps it open after the release",
+      underMenu([at("down", 0, 100, icon), tick(holdMs), at("up", 400, 100, icon)]),
+      [],
+      ["icon@tick"],
+    ],
+    [
+      "under the menu, closes it when a tap on the road lifts, which steers nothing",
+      underMenu([...heldCard, at("down", 500, 100, road), at("up", 550, 100, road)]),
+      [],
+      ["card@tick", "closed@up"],
+    ],
+    [
+      "under the menu, opens a card released past the hold time before a frame ticks",
+      underMenu([at("down", 0, 100, card), at("up", holdMs, 100, card)]),
+      [],
+      ["card@up"],
+    ],
+    [
+      "under the menu, does nothing on a tap on a card",
+      underMenu([at("down", 0, 100, card), at("up", 50, 100, card)]),
+      [],
+      [],
+    ],
+    [
+      "under the menu, opens nothing past the slop",
+      underMenu([
+        at("down", 0, 100, icon),
+        at("move", 50, 200, icon),
+        tick(holdMs),
+        at("up", 400, 200, icon),
+      ]),
+      [],
+      [],
+    ],
+    [
+      "under the menu, never steers from the road, even when its release comes after the menu",
+      [
+        ...underMenu([at("down", 0, 300, road), at("move", 50, 100, road)]),
+        at("up", 100, 100, road),
+      ],
+      [],
+      [],
+    ],
+    [
+      "drops a hold under way when help takes the presses before its time comes",
+      [at("down", 0, 100, icon), { ...tick(holdMs), presses: "none" }, tick(holdMs + 10)],
+      [],
       [],
     ],
   ])("%s", (_name, steps, actions, changes) => {
