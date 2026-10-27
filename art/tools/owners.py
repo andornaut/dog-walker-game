@@ -183,16 +183,16 @@ def ryan(mood):
 
 def braid(g, x, y0, n):
     """A plait of n lobes down from row y0, its middle column x: each lobe 3 wide and 3 tall, leaning left
-    and right in turn, lit brown at its top and shaded plum where the next tucks under it; a red tie
+    and right in turn, lit dbrown at its top and shaded walnut where the next tucks under it; a red tie
     and a tuft below."""
     for i in range(n):
         y, dx = y0 + i * 3, -1 if i % 2 else 0
-        g.rect(x - 1 + dx, y, 3, 3, "walnut")
-        g.p(x + dx, y, "brown")
-        g.p(x + 1 + dx if i % 2 else x - 1 + dx, y + 2, "plum")
+        g.rect(x - 1 + dx, y, 3, 3, "bark")
+        g.p(x + dx, y, "dbrown")
+        g.p(x + 1 + dx if i % 2 else x - 1 + dx, y + 2, "walnut")
     y = y0 + n * 3
     g.rect(x - 1, y, 2, 1, "red")
-    g.rect(x - 1, y + 1, 2, 2, "walnut")
+    g.rect(x - 1, y + 1, 2, 2, "bark")
 
 
 def sheba(mood):
@@ -202,14 +202,13 @@ def sheba(mood):
     base(g, "skin2", "brown", "gold", "ochre")
     # the shirt: its sleeves at the shoulders and its collar in the vest's V
     g.rect(6, 28, 3, 3, "white")
-    g.rect(23, 28, 3, 3, "lgrey")
     g.tri((12, 26), (20, 26), (16, 31), "white")
     g.tri((14, 27), (18, 27), (16, 30), "skin2")
-    g.cel(16, 10, 9.5, 5, "walnut", "plum")
-    g.rect(7, 11, 2, 9, "walnut")
+    g.cel(16, 10, 9.5, 5, "bark", "walnut")
+    g.rect(7, 11, 2, 9, "bark")
     g.rect(23, 11, 2, 7, "walnut")
     # the parting, and a sheen either side of it on the hair drawn back to the plait
-    g.rect(14, 6, 1, 4, "plum")
+    g.rect(14, 6, 1, 4, "walnut")
     for x, y in ((10, 9), (11, 8), (12, 7), (17, 7), (18, 7), (19, 8)):
         g.p(x, y, "dbrown")
     braid(g, 24, 17, 4)
@@ -374,6 +373,8 @@ def small_expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=Fa
     for x, y in brows:
         p(x, y, brow)
     if glasses:
+        # the frames a step lighter than on the large face, so the 1px eyes show inside them
+        glasses = {"walnut": "dbrown"}.get(glasses, glasses)
         for x in (7, 12):
             for dx, dy in ((-1, 10), (-1, 11), (1, 10), (1, 11), (0, 12)):
                 p(x + dx, dy, glasses)

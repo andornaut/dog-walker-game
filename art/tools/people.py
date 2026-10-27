@@ -165,10 +165,10 @@ def sheba_top(wave):
         g.rect(6, 35 + b, 2, 2, "amber")
         g.rect(5, 31 + b, 4, 3, "skin2")
         head(g, b, "skin2", "brown")
-        g.cel(16, 7.5 + b, 9.5, 5, "walnut", "plum")
-        g.rect(8, 9 + b, 2, 8, "walnut")
+        g.cel(16, 7.5 + b, 9.5, 5, "bark", "walnut")
+        g.rect(8, 9 + b, 2, 8, "bark")
         g.rect(22, 9 + b, 2, 6, "walnut")
-        g.rect(14, 4 + b, 1, 4, "plum")
+        g.rect(14, 4 + b, 1, 4, "walnut")
         for x, y in ((11, 5), (12, 4), (17, 4), (18, 5)):
             g.p(x, y + b, "dbrown")
         braid(g, 22, 16 + b, 4)
@@ -390,7 +390,8 @@ def owner(dog, wave=None, bob=0):
     g = edged(person(top(wave), legs=legs, shoes=shoes, bob=bob))
     if extra:
         extra(g, bob)
-    return rim(g, LIT)
+    # bark, Sheba's hair, is a dark brown and takes the dark browns' rim
+    return rim(g, {**LIT, "bark": LIT["dbrown"]})
 
 
 def sprites():
