@@ -49,7 +49,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 30s",
+      "text": "Muddy: lane changes 50% slower for 30s",
       "title": "Dropped ice cream"
     },
     {
@@ -860,7 +860,7 @@
             "art": "card-dropped-cone-lick",
             "effects": [
               {
-                "debuff": "zoomies",
+                "debuff": "muddy",
                 "kind": "debuff"
               }
             ],
@@ -1381,6 +1381,7 @@
         "rows": 1
       },
       "zones": [
+        "pawsPromenade",
         "street"
       ],
       "spriteKey": "wedding-shoot"
@@ -2580,7 +2581,7 @@
           "porchCat": 1,
           "promoTeam": 0,
           "puddle": 1,
-          "skunk": 1.1,
+          "skunk": 2.2,
           "squirrel": 1,
           "thief": 0,
           "weddingShoot": 0
@@ -2668,8 +2669,8 @@
           "otherDog": 2.2,
           "porchCat": 0,
           "promoTeam": 0,
-          "puddle": 1,
-          "skunk": 1.1,
+          "puddle": 2,
+          "skunk": 2.2,
           "squirrel": 1,
           "thief": 0,
           "weddingShoot": 0
@@ -2757,11 +2758,11 @@
           "otherDog": 1.1,
           "porchCat": 0,
           "promoTeam": 0,
-          "puddle": 1,
+          "puddle": 0,
           "skunk": 1.1,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingShoot": 1
+          "weddingShoot": 2
         }
       },
       "keys": {
@@ -2847,7 +2848,7 @@
           "porchCat": 0,
           "promoTeam": 0,
           "puddle": 1,
-          "skunk": 1.1,
+          "skunk": 2.2,
           "squirrel": 1,
           "thief": 2.2,
           "weddingShoot": 0
@@ -2932,14 +2933,14 @@
           "capybara": 0,
           "droppedCone": 1,
           "fishCrates": 0,
-          "otherDog": 2.2,
+          "otherDog": 0,
           "porchCat": 0,
           "promoTeam": 0,
-          "puddle": 2,
-          "skunk": 1.1,
+          "puddle": 3,
+          "skunk": 2.2,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingShoot": 0
+          "weddingShoot": 1.5
         }
       },
       "keys": {
@@ -3021,9 +3022,9 @@
           "capybara": 0,
           "droppedCone": 0,
           "fishCrates": 0,
-          "otherDog": 1.1,
+          "otherDog": 0,
           "porchCat": 0,
-          "promoTeam": 1,
+          "promoTeam": 2,
           "puddle": 1,
           "skunk": 1.1,
           "squirrel": 1,

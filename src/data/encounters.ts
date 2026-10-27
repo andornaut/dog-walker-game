@@ -52,7 +52,7 @@ export const ENCOUNTERS = {
       options: [
         {
           art: "card-dropped-cone-lick",
-          effects: [{ debuff: "zoomies", kind: "debuff" }],
+          effects: [{ debuff: "muddy", kind: "debuff" }],
           id: "lick",
           name: "Let them lick it",
         },
@@ -325,6 +325,6 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["street"],
+    zones: ["pawsPromenade", "street"],
   },
 } as const satisfies Record<EncounterId, Encounter>;
