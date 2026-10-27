@@ -10,7 +10,7 @@ import { walkGeometry, walkProjection } from "./walkGeometry";
 const gameRoad = screenLayout(SCREEN_CONFIG).road;
 const projection = walkProjection(ROAD_CAMERA, gameRoad);
 const PACKS = [
-  { dogs: ["koda"], walker: "ada" },
+  { dogs: ["kilo"], walker: "ada" },
   { dogs: ["zippy", "penny"], walker: "ben" },
   { dogs: ["snowball", "duchess", "pierre"], walker: "trista" },
 ] as const;

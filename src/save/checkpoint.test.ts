@@ -18,14 +18,14 @@ import { type Checkpoint, type SaveDocument } from "./schema";
 
 // veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000 of which 2,000 starting
 // cash, best zone 4, runs
-// finished 2 / noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit
+// finished 2 / noDogs 1 / wentHome 2, 1 firing; kilo 1 fired / 5 walks / 12 zones, biscuit
 // 0 / 2 / 6.
 
-// After zone 2: koda and duchess walked both zones, penny was fired in zone 2.
+// After zone 2: kilo and duchess walked both zones, penny was fired in zone 2.
 const checkpoint: Checkpoint = {
   counters: quietCounters(),
   dogs: [
-    { fired: false, id: "koda", zonesFinished: 2 },
+    { fired: false, id: "kilo", zonesFinished: 2 },
     { fired: false, id: "duchess", zonesFinished: 2 },
     { fired: true, id: "penny", zonesFinished: 1 },
   ],
@@ -64,7 +64,7 @@ const unlockedBy = (finished: readonly ZoneId[]) =>
 const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   counters: quietCounters(),
   dogs: [
-    { fired: false, id: "koda", zonesFinished: 4 },
+    { fired: false, id: "kilo", zonesFinished: 4 },
     { fired: true, id: "biscuit", zonesFinished: 1 },
   ],
   earnedCents: cents(6_000),
@@ -117,7 +117,7 @@ describe("bankCheckpoint", () => {
     expect(banked.stats.dogs).toEqual({
       biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
       duchess: { timesFired: 0, walks: 1, zonesFinished: 2 },
-      koda: { timesFired: 1, walks: 6, zonesFinished: 14 },
+      kilo: { timesFired: 1, walks: 6, zonesFinished: 14 },
       penny: { timesFired: 1, walks: 1, zonesFinished: 1 },
     });
     expect(banked.stats.timesFired).toBe(2);
@@ -125,7 +125,7 @@ describe("bankCheckpoint", () => {
 
   it("records the last walk with the zone that just ended", () => {
     expect(banked.stats.lastWalk).toEqual({
-      dogs: ["koda", "duchess", "penny"],
+      dogs: ["kilo", "duchess", "penny"],
       earnedCents: 4_250,
       firings: [{ dog: "penny", zone: 2 }],
       outcome: "wentHome",
@@ -178,7 +178,7 @@ describe("recordRunEnd", () => {
     expect(stats.runs).toEqual({ finished: 0, noDogs: 0, wentHome: 1 });
     expect(stats.dogs).toEqual({
       biscuit: { timesFired: 1, walks: 1, zonesFinished: 0 },
-      koda: { timesFired: 0, walks: 1, zonesFinished: 2 },
+      kilo: { timesFired: 0, walks: 1, zonesFinished: 2 },
     });
   });
 
@@ -201,7 +201,7 @@ describe("recordRunEnd", () => {
     expect(low.stats.bestWalk).toEqual(veteranSave().stats.bestWalk);
     expect(low.stats.bestZoneFinished).toBe(4);
     expect(low.stats.lastWalk).toEqual({
-      dogs: ["koda", "biscuit"],
+      dogs: ["kilo", "biscuit"],
       earnedCents: 100,
       firings: [{ dog: "biscuit", zone: 2 }],
       outcome: "finished",
@@ -210,7 +210,7 @@ describe("recordRunEnd", () => {
     });
     const high = recordRunEnd(testAwards, veteranSave(), runResult({ earnedCents: cents(9_999) }));
     expect(high.stats.bestWalk).toEqual({
-      dogs: ["koda", "biscuit"],
+      dogs: ["kilo", "biscuit"],
       earnedCents: 9_999,
       zonesFinished: 4,
     });
@@ -253,14 +253,14 @@ describe("achievements at banking", () => {
       "counts a finished walk with no firing, and the dogs that finished it",
       {
         dogs: [
-          { fired: false, id: "koda", zonesFinished: 4 },
+          { fired: false, id: "kilo", zonesFinished: 4 },
           { fired: false, id: "penny", zonesFinished: 4 },
         ],
       },
       3,
-      ["biscuit", "koda", "penny"],
+      ["biscuit", "kilo", "penny"],
     ],
-    ["counts neither a walk with a firing", {}, 2, ["biscuit", "koda"]],
+    ["counts neither a walk with a firing", {}, 2, ["biscuit", "kilo"]],
     [
       "counts neither a walk that ended early",
       { dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome" },
@@ -405,7 +405,7 @@ describe("bests by pack size", () => {
     ["raises the best for its size when beaten", { earnedCents: cents(9_999) }, { 2: 9_999 }],
     [
       "adds a best for a size walked the first time",
-      { dogs: [{ fired: false, id: "koda", zonesFinished: 4 }], earnedCents: cents(100) },
+      { dogs: [{ fired: false, id: "kilo", zonesFinished: 4 }], earnedCents: cents(100) },
       { 1: 100, 2: 9_000 },
     ],
   ];

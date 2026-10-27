@@ -6,14 +6,14 @@ import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import { affectedDogs, hitLabel, opensCard } from "./encounters";
 
-const pack = testState({ duchess: 5, koda: 5, pierre: 5 });
-const everyDog: DogId[] = ["duchess", "koda", "pierre"];
+const pack = testState({ duchess: 5, kilo: 5, pierre: 5 });
+const everyDog: DogId[] = ["duchess", "kilo", "pierre"];
 
 describe("affectedDogs", () => {
   it("classifies each encounter", () => {
     for (const [, state, affected] of [
       ["every walking dog", pack, everyDog],
-      ["no fired dog", testState({ duchess: 5, koda: "fired", pierre: 5 }), ["duchess", "pierre"]],
+      ["no fired dog", testState({ duchess: 5, kilo: "fired", pierre: 5 }), ["duchess", "pierre"]],
     ] satisfies readonly [string, RunState, DogId[]][]) {
       expect(affectedDogs(state)).toEqual(affected);
     }

@@ -102,7 +102,7 @@ describe("opaqueRect", () => {
       },
     ];
     for (const { expected, rows, within } of cases) {
-      expect(opaqueRect(sheetFromRows("dog-koda", [rows]).image, within)).toEqual(expected);
+      expect(opaqueRect(sheetFromRows("dog-kilo", [rows]).image, within)).toEqual(expected);
     }
   });
 });

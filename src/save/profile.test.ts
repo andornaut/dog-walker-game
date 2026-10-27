@@ -68,7 +68,7 @@ describe("ProfileSession.open", () => {
   it("banks a run left at a checkpoint as headed home and writes it back", async () => {
     const checkpoint = {
       counters: quietCounters(),
-      dogs: [{ fired: false, id: "koda" as const, zonesFinished: 2 }],
+      dogs: [{ fired: false, id: "kilo" as const, zonesFinished: 2 }],
       earnedCents: cents(1_000),
       route: ["street" as const, "park" as const],
       zonesFinished: 2,
@@ -195,7 +195,7 @@ describe("hints", () => {
 
 const result = {
   counters: quietCounters(),
-  dogs: [{ fired: false, id: "koda" as const, zonesFinished: 4 }],
+  dogs: [{ fired: false, id: "kilo" as const, zonesFinished: 4 }],
   earnedCents: cents(9_500),
   outcome: "finished" as const,
   route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],

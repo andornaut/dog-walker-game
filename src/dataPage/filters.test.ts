@@ -59,7 +59,7 @@ describe("toggleFilter", () => {
 
 // Two dogs' quips, grouped: a continuation row leaves the dog and owner blank.
 const QUIPS: Row[] = [
-  ["Koda", "Sam", "happier", "a"],
+  ["Kilo", "Sam", "happier", "a"],
   ["", "", "upset", "b"],
   ["Penny", "Ari", "happier", "c"],
   ["", "", "upset", "d"],
@@ -75,15 +75,15 @@ describe("filterRows", () => {
       "a continuation row, given its group's cells",
       { "quips-moment": ["upset"] },
       [
-        ["Koda", "Sam", "upset", "b"],
+        ["Kilo", "Sam", "upset", "b"],
         ["Penny", "Ari", "upset", "d"],
       ],
     ],
     ["a grouped column, matched by its head", { "quips-dog": ["penny"] }, QUIPS.slice(2)],
     [
       "two facets, each matched",
-      { "quips-dog": ["koda"], "quips-moment": ["happier"] },
-      [["Koda", "Sam", "happier", "a"]],
+      { "quips-dog": ["kilo"], "quips-moment": ["happier"] },
+      [["Kilo", "Sam", "happier", "a"]],
     ],
   ])("%s", (_name, entries, expected) => {
     const facets = facetStates([DOG, MOMENT], filters(entries), 2, QUIPS);
@@ -93,9 +93,9 @@ describe("filterRows", () => {
 
 describe("facetValues", () => {
   it.each([
-    [0, 2, ["koda", "penny"]],
+    [0, 2, ["kilo", "penny"]],
     [2, 2, ["happier", "upset"]],
-    [0, 0, ["koda", "penny"]],
+    [0, 0, ["kilo", "penny"]],
   ])("column %i with %i grouped columns", (column, grouped, expected) => {
     expect(facetValues(column, grouped, QUIPS).map((value) => value.id)).toEqual(expected);
   });

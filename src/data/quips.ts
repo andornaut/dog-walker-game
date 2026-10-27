@@ -25,17 +25,11 @@ export const QUIPS = {
     parting: ["She's delicate. Guard her!", "Keep her bow straight!"],
     upset: ["She's wilting! I can't bear it!", "My heart! My prize rose, trampled!"],
   },
-  koda: {
+  kilo: {
     fired: ["I'll run him home. Bye.", "This is where we split."],
     happier: ["Good form! Keep it up!", "That's a personal best!"],
     parting: ["He already did 10K. He's fine.", "Warm-up's done. Keep that form tight!"],
     upset: ["Eh, bad lap. Shake it off.", "Just a cramp. Back to your pace."],
-  },
-  nugget: {
-    fired: ["You're unfollowed. And fired!", "Blocked! Worst day ever."],
-    happier: ["That's going on the feed!", "Nugget is trending!"],
-    parting: ["Get his good side. The followers are waiting!", "Tag me in everything."],
-    upset: ["Not the content I wanted!", "I can't post this!"],
   },
   penny: {
     fired: ["Oh no, oh no. You're fired.", "So sorry! Here's a tissue."],
@@ -51,6 +45,12 @@ export const QUIPS = {
     happier: ["Acceptable. Barely.", "Seven out of ten. C'est bien."],
     parting: ["No puddles. I will check his paws.", "Posture! I deduct for slouching."],
     upset: ["Non. Points deducted.", "That would never place at a show."],
+  },
+  reggie: {
+    fired: ["You're unfollowed. And fired!", "Blocked! Worst day ever."],
+    happier: ["That's going on the feed!", "Nugget is trending!"],
+    parting: ["Get his good side. The followers are waiting!", "Tag me in everything."],
+    upset: ["Not the content I wanted!", "I can't post this!"],
   },
   snowball: {
     fired: ["Off the guest list! Now!", "Ugh! The day is canceled!"],

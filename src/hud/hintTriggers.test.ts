@@ -13,7 +13,7 @@ import {
 describe("cardHintTriggers", () => {
   it("raises the fork hint for a fork, and the encounter's and the card's for an encounter", () => {
     expect(cardHintTriggers({ kind: "fork", paths: [], upgrades: [] })).toEqual([{ kind: "fork" }]);
-    expect(cardHintTriggers({ affected: ["koda"], encounter: "skunk", kind: "encounter" })).toEqual(
+    expect(cardHintTriggers({ affected: ["kilo"], encounter: "skunk", kind: "encounter" })).toEqual(
       [{ encounter: "skunk", kind: "encounter" }, { kind: "card" }],
     );
   });
@@ -39,9 +39,9 @@ describe("runHintTriggers", () => {
   it("raises the fired-owner hint for an owner at 1 heart, not a calm walk or a fired owner", () => {
     const kinds = (run: ReturnType<typeof testState>) =>
       runHintTriggers(run).map(({ kind }) => kind);
-    expect(kinds(testState({ biscuit: 5, duchess: 5, koda: 5 }))).toEqual([]);
-    expect(kinds(testState({ duchess: 5, koda: 1 }))).toEqual(["firedOwner"]);
-    expect(kinds(testState({ duchess: 5, koda: "fired" }))).toEqual([]);
+    expect(kinds(testState({ biscuit: 5, duchess: 5, kilo: 5 }))).toEqual([]);
+    expect(kinds(testState({ duchess: 5, kilo: 1 }))).toEqual(["firedOwner"]);
+    expect(kinds(testState({ duchess: 5, kilo: "fired" }))).toEqual([]);
   });
 });
 
@@ -49,9 +49,9 @@ describe("startHintTriggers", () => {
   const { packSizeBonus } = gameData.tuning.hearts;
 
   it.each([
-    ["a lone dog", testState({ koda: 5 }), packSizeBonus[1]],
-    ["a pair", testState({ duchess: 5, koda: 5 }), packSizeBonus[2]],
-    ["a full pack", testState({ biscuit: 5, duchess: 5, koda: 5 }), packSizeBonus[3]],
+    ["a lone dog", testState({ kilo: 5 }), packSizeBonus[1]],
+    ["a pair", testState({ duchess: 5, kilo: 5 }), packSizeBonus[2]],
+    ["a full pack", testState({ biscuit: 5, duchess: 5, kilo: 5 }), packSizeBonus[3]],
   ])(
     "raises the pack-bonus hint for %s only when its lead's owner gets a bonus",
     (_, run, bonus) => {

@@ -17,7 +17,7 @@ function tag(direction: string, from: number, to: number) {
 describe("animationSpecs", () => {
   it("builds one animation per tag, keyed by texture and tag", () => {
     const specs = animationSpecs(
-      "dog-koda",
+      "dog-kilo",
       sheet(
         [150, 150, 120, 120],
         [
@@ -26,7 +26,7 @@ describe("animationSpecs", () => {
         ],
       ),
     );
-    expect(specs.map(({ key }) => key)).toEqual(["dog-koda:walk", "dog-koda:react"]);
+    expect(specs.map(({ key }) => key)).toEqual(["dog-kilo:walk", "dog-kilo:react"]);
     expect(itemAt(specs, 1).frames).toEqual([
       { duration: 120, frame: "dog 2.aseprite" },
       { duration: 120, frame: "dog 3.aseprite" },
@@ -53,39 +53,39 @@ describe("animationSpecs", () => {
   it("rejects a malformed sheet, naming the tag or frame", () => {
     const cases: { error: string; json: unknown; name: string }[] = [
       {
-        error: 'dog-koda tag "walk" refers to missing frame 1',
+        error: 'dog-kilo tag "walk" refers to missing frame 1',
         json: sheet([150], [tag("forward", 0, 4)]),
         name: "a tag that points past the last frame, naming it",
       },
       {
-        error: "dog-koda sheet.meta.frameTags[0] from must not be after to",
+        error: "dog-kilo sheet.meta.frameTags[0] from must not be after to",
         json: sheet([150, 150, 150], [tag("forward", 2, 1)]),
         name: "a tag whose from is after its to",
       },
       {
-        error: "dog-koda sheet.meta.frameTags[0].direction must be one of",
+        error: "dog-kilo sheet.meta.frameTags[0].direction must be one of",
         json: sheet([150], [tag("sideways", 0, 0)]),
         name: "a tag with an unknown direction",
       },
       {
-        error: "dog-koda sheet.meta.frameTags[0].from must be a whole number",
+        error: "dog-kilo sheet.meta.frameTags[0].from must be a whole number",
         json: sheet([150, 150], [tag("forward", 0.5, 1)]),
         name: "a tag whose frames are not whole numbers",
       },
       {
-        error: "dog-koda sheet.frames.dog 0.aseprite.duration must be positive",
+        error: "dog-kilo sheet.frames.dog 0.aseprite.duration must be positive",
         json: sheet([0], []),
         name: "a frame without a positive duration",
       },
-      { error: "dog-koda sheet.meta is required", json: { frames: {} }, name: "a missing meta" },
+      { error: "dog-kilo sheet.meta is required", json: { frames: {} }, name: "a missing meta" },
       {
-        error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
+        error: 'dog-kilo sheet.frames must be an object: export with the "hash" JSON format',
         json: { frames: [{ duration: 150, filename: "dog 0.aseprite" }], meta: {} },
         name: "Aseprite's array export",
       },
     ];
     for (const { error, json, name } of cases) {
-      expect(() => animationSpecs("dog-koda", json), name).toThrow(error);
+      expect(() => animationSpecs("dog-kilo", json), name).toThrow(error);
     }
   });
 });

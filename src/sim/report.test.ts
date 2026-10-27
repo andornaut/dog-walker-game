@@ -61,8 +61,8 @@ vi.mock("./simulate", async (importOriginal) => {
       finished: random() >= (novice ? 0.5 : 0.1),
       firings: novice
         ? [
-            { dog: "koda", zoneIndex: 0 },
-            { dog: "koda", zoneIndex: 1 },
+            { dog: "kilo", zoneIndex: 0 },
+            { dog: "kilo", zoneIndex: 1 },
           ]
         : [],
       hits: { afterPull: 1, all: 4 },
@@ -86,7 +86,7 @@ vi.mock("./simulate", async (importOriginal) => {
 const SMALL: Matrix = {
   ...DEFAULT_MATRIX,
   packs: [
-    { dogs: ["koda"], name: "Koda" },
+    { dogs: ["kilo"], name: "Kilo" },
     { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
   ],
   players: [
@@ -120,9 +120,9 @@ describe("simulateMatrix", () => {
     });
 
     expect(rows.map(({ gear, pack }) => [gear, pack])).toEqual([
-      ["none", "Koda"],
+      ["none", "Kilo"],
       ["none", "Risky trio"],
-      ["runningShoes", "Koda"],
+      ["runningShoes", "Kilo"],
       ["runningShoes", "Risky trio"],
     ]);
   });
@@ -136,10 +136,10 @@ describe("simulateMatrix", () => {
     const rows = simulateMatrix(gameData, 3, 2, { ...walkers, players: SMALL.players.slice(0, 1) });
 
     expect(rows.map(({ pack, policy, walker }) => [policy, pack, walker])).toEqual([
-      ["heartsUnlessLow", "Koda", "casey"],
-      ["heartsUnlessLow", "Koda", "trista"],
-      ["alwaysPay", "Koda", "casey"],
-      ["alwaysPay", "Koda", "trista"],
+      ["heartsUnlessLow", "Kilo", "casey"],
+      ["heartsUnlessLow", "Kilo", "trista"],
+      ["alwaysPay", "Kilo", "casey"],
+      ["alwaysPay", "Kilo", "trista"],
     ]);
     expect(formatTable(rows).split("\n")[0]).toMatch(/Pack +Walker/);
   });
@@ -148,13 +148,13 @@ describe("simulateMatrix", () => {
     const rows = simulateMatrix(gameData, 3, 4, SMALL);
 
     expect(rows.map(({ pack, player, policy }) => [policy, player, pack])).toEqual([
-      ["heartsUnlessLow", "typical", "Koda"],
+      ["heartsUnlessLow", "typical", "Kilo"],
       ["heartsUnlessLow", "typical", "Risky trio"],
-      ["heartsUnlessLow", "expert", "Koda"],
+      ["heartsUnlessLow", "expert", "Kilo"],
       ["heartsUnlessLow", "expert", "Risky trio"],
-      ["alwaysPay", "typical", "Koda"],
+      ["alwaysPay", "typical", "Kilo"],
       ["alwaysPay", "typical", "Risky trio"],
-      ["alwaysPay", "expert", "Koda"],
+      ["alwaysPay", "expert", "Kilo"],
       ["alwaysPay", "expert", "Risky trio"],
     ]);
     for (const row of rows) {

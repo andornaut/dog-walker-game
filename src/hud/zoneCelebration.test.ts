@@ -15,7 +15,7 @@ function money(kind: "bump" | "pay" | "tip", amount: number): MoneyChange {
   return {
     amount: cents(amount),
     causes: [{ amount, kind }],
-    dog: kind === "pay" ? "koda" : null,
+    dog: kind === "pay" ? "kilo" : null,
     kind: "money",
   };
 }
@@ -24,7 +24,7 @@ const hearts: Change = {
   after: 3 as Hearts,
   before: 4 as Hearts,
   causes: [{ amount: -1, kind: "bump" }],
-  dog: "koda",
+  dog: "kilo",
   kind: "hearts",
 };
 

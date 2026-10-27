@@ -51,7 +51,7 @@ const data = {
 } as const;
 const owned: Owned = {
   dogSlots: [1, 2, 3],
-  dogs: ["biscuit", "duchess", "koda"],
+  dogs: ["biscuit", "duchess", "kilo"],
   gear: ["fannyPack"],
   walkers: ["casey"],
 };
@@ -103,21 +103,21 @@ describe("tapDog and tapGear", () => {
   it("picks and drops owned dogs and gear, refuses a dog past the slots and opens the shop on one not owned", () => {
     const cases: readonly { expected: HomeTap; name: string; tap: () => HomeTap }[] = [
       {
-        expected: { kind: "loadout", loadout: { dogs: ["koda", "duchess"], gear: null } },
+        expected: { kind: "loadout", loadout: { dogs: ["kilo", "duchess"], gear: null } },
         name: "adds an owned dog to the pack, in the order picked",
-        tap: () => tapDog(data, owned, "duchess", { dogs: ["koda"], gear: null }),
+        tap: () => tapDog(data, owned, "duchess", { dogs: ["kilo"], gear: null }),
       },
       {
         expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
         name: "takes a picked dog back out of the pack",
-        tap: () => tapDog(data, owned, "koda", { dogs: ["koda", "duchess"], gear: null }),
+        tap: () => tapDog(data, owned, "kilo", { dogs: ["kilo", "duchess"], gear: null }),
       },
       {
         expected: { kind: "full" },
         name: "refuses a dog past the slots owned",
         tap: () =>
           tapDog(data, { ...owned, dogSlots: [1, 3] }, "biscuit", {
-            dogs: ["koda", "duchess"],
+            dogs: ["kilo", "duchess"],
             gear: null,
           }),
       },
@@ -125,12 +125,12 @@ describe("tapDog and tapGear", () => {
         expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
         name: "swaps the dog of a full one-slot pack",
         tap: () =>
-          tapDog(data, { ...owned, dogSlots: [1] }, "duchess", { dogs: ["koda"], gear: null }),
+          tapDog(data, { ...owned, dogSlots: [1] }, "duchess", { dogs: ["kilo"], gear: null }),
       },
       {
-        expected: { kind: "shop", purchase: { dog: "nugget", kind: "dog" } },
+        expected: { kind: "shop", purchase: { dog: "reggie", kind: "dog" } },
         name: "opens the shop on a dog not owned yet, without touching the pack",
-        tap: () => tapDog(data, owned, "nugget", emptyLoadout),
+        tap: () => tapDog(data, owned, "reggie", emptyLoadout),
       },
       {
         expected: { kind: "loadout", loadout: { dogs: [], gear: "fannyPack" } },
@@ -278,12 +278,12 @@ describe("purchasePrice", () => {
     const thirdFirst = { ...owned, dogSlots: [1, 3] };
     const slot = (number: number): Purchase => ({ kind: "dogSlot", slot: number });
     const cases: readonly [string, Owned, Purchase, number | null][] = [
-      ["a locked dog", owned, { dog: "nugget", kind: "dog" }, dollars(600)],
+      ["a locked dog", owned, { dog: "reggie", kind: "dog" }, dollars(600)],
       ["locked gear", owned, { gear: "luckyCollar", kind: "gear" }, collarPrice],
       ["slot 2 with only slot 1", onlyFirst, slot(2), slotPrice(2)],
       ["slot 3 with only slot 1", onlyFirst, slot(3), slotPrice(3)],
       ["slot 2 after slot 3", thirdFirst, slot(2), slotPrice(2)],
-      ["an owned dog as not for sale", owned, { dog: "koda", kind: "dog" }, null],
+      ["an owned dog as not for sale", owned, { dog: "kilo", kind: "dog" }, null],
       ["owned gear as not for sale", owned, { gear: "fannyPack", kind: "gear" }, null],
       ["an owned slot as not for sale", thirdFirst, slot(3), null],
       ["no slot past the last", onlyFirst, slot(DOG_SLOTS.length + 1), null],
@@ -312,10 +312,10 @@ describe("buy", () => {
         bank: 2_000,
         expected: {
           bankCents: dollars(1_400),
-          owned: { ...start, dogs: [...start.dogs, "nugget"] },
+          owned: { ...start, dogs: [...start.dogs, "reggie"] },
         },
         name: "takes the price from the bank and adds a dog",
-        purchase: { dog: "nugget", kind: "dog" },
+        purchase: { dog: "reggie", kind: "dog" },
       },
       {
         bank: collarPrice / 100 + 600,
@@ -395,7 +395,7 @@ describe("partingSpeech", () => {
     [0, 0],
     [0.99, 1],
   ])("says the owner's parting line for a draw of %d, without their name", (draw, index) => {
-    expect(partingSpeech(data, () => draw, "koda")).toBe(QUIPS.koda.parting[index]);
+    expect(partingSpeech(data, () => draw, "kilo")).toBe(QUIPS.kilo.parting[index]);
   });
 });
 
@@ -404,17 +404,17 @@ describe("dogInfo and gearInfo", () => {
     const cases: readonly [string, () => string, RegExp][] = [
       [
         "describes an owned dog in words, with its size, hearts and pay",
-        () => dogInfo(data, owned, cents(0), "koda"),
-        new RegExp(`^${DOGS.koda.name}: ${DOGS.koda.size}, \\d+♥\\.$`),
+        () => dogInfo(data, owned, cents(0), "kilo"),
+        new RegExp(`^${DOGS.kilo.name}: ${DOGS.kilo.size}, \\d+♥\\.$`),
       ],
       [
         "adds a locked dog's price and how much more the bank needs",
-        () => dogInfo(data, owned, dollars(100), "nugget"),
+        () => dogInfo(data, owned, dollars(100), "reggie"),
         /\$600: need \$500 more\.$/,
       ],
       [
         "offers a locked dog the bank can cover",
-        () => dogInfo(data, owned, dollars(600), "nugget"),
+        () => dogInfo(data, owned, dollars(600), "reggie"),
         /\$600: tap to buy\.$/,
       ],
       [

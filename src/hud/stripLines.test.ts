@@ -23,8 +23,8 @@ import {
 } from "./stripLines";
 
 const { strip } = gameData.runText;
-const koda = gameData.dogs.koda;
-const owner = koda.owner.name;
+const kilo = gameData.dogs.kilo;
+const owner = kilo.owner.name;
 
 const hearts = (
   before: number,
@@ -34,7 +34,7 @@ const hearts = (
   after: clampHearts(9, after),
   before: clampHearts(9, before),
   causes,
-  dog: "koda",
+  dog: "kilo",
   kind: "hearts",
 });
 const secondChance: HeartChange["causes"][number] = {
@@ -49,14 +49,14 @@ const forgivenLoss = hearts(4, 4, [{ amount: -1, kind: "bump" }, secondChance]);
 describe("bumpLine", () => {
   it("says a dodge, a hit's hearts lost past Second chance, and nothing for a loss forgiven whole", () => {
     const said = (change: HeartChange | null, dodged: boolean) =>
-      bumpLine(gameData, { change, dodged, dog: "koda" }, "Cone")?.text ?? null;
-    expect(said(null, true)).toBe(fillNames(strip.dodge, { dog: koda.name, obstacle: "cone" }));
+      bumpLine(gameData, { change, dodged, dog: "kilo" }, "Cone")?.text ?? null;
+    expect(said(null, true)).toBe(fillNames(strip.dodge, { dog: kilo.name, obstacle: "cone" }));
     expect(said(hearts(4, 2), false)).toBe(
-      fillNames(strip.plainHit, { dog: koda.name, hearts: "2", obstacle: "cone", owner }),
+      fillNames(strip.plainHit, { dog: kilo.name, hearts: "2", obstacle: "cone", owner }),
     );
     const softened = hearts(4, 3, [{ amount: -2, kind: "bump" }, secondChance]);
     expect(said(softened, false)).toBe(
-      fillNames(strip.plainHit, { dog: koda.name, hearts: "1", obstacle: "cone", owner }),
+      fillNames(strip.plainHit, { dog: kilo.name, hearts: "1", obstacle: "cone", owner }),
     );
     // Its forgiven line says it.
     expect(said(forgivenLoss, false)).toBeNull();
@@ -69,7 +69,7 @@ describe("the strip's other lines", () => {
       [
         "a treat",
         treatLine(gameData, hearts(2, 3))?.text,
-        fillNames(strip.treat, { dog: koda.name, hearts: "1", owner }),
+        fillNames(strip.treat, { dog: kilo.name, hearts: "1", owner }),
       ],
       ["nothing for a treat at the max", treatLine(gameData, hearts(3, 3)), null],
       [
@@ -80,10 +80,10 @@ describe("the strip's other lines", () => {
       ["no last heart already on one", lowHeartsLines(gameData, [hearts(1, 1)]), []],
       [
         "a firing",
-        firedLine(gameData, "koda").text,
-        fillNames(strip.fired, { dog: koda.name, owner }),
+        firedLine(gameData, "kilo").text,
+        fillNames(strip.fired, { dog: kilo.name, owner }),
       ],
-      ["a pull", pullLine(gameData, "koda").text, fillNames(strip.pull, { dog: koda.name })],
+      ["a pull", pullLine(gameData, "kilo").text, fillNames(strip.pull, { dog: kilo.name })],
       [
         "the lost wallet's money",
         luckyLine(gameData, "lostWallet", [
@@ -113,7 +113,7 @@ describe("the strip's other lines", () => {
             marks: [
               {
                 at: strip.kindWords.indexOf("{owner}"),
-                dog: "koda",
+                dog: "kilo",
                 length: owner.length,
                 mood: STRIP_OWNER_MOODS.kindWords,
               },
@@ -131,8 +131,8 @@ describe("the strip's other lines", () => {
 
 describe("muddyHeartsLines", () => {
   it("warns an owner down to a Muddy bump's cost, leaving the last heart to its own line", () => {
-    const calm = testState({ koda: 5 });
-    const muddy = testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
+    const calm = testState({ kilo: 5 });
+    const muddy = testState({ kilo: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
     const cost = bumpHearts(gameData, muddy);
     expect(cost).toBeGreaterThan(Math.max(1, bumpHearts(gameData, calm)));
     const warning = fillNames(strip.muddyHearts, {

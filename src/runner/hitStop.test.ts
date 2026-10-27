@@ -4,7 +4,7 @@ import type { CardSource } from "../state/runState";
 import { type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 
 const LENGTHS = { encounter: 1, minor: 0.6 };
-const CARD: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
+const CARD: CardSource = { affected: ["kilo"], encounter: "skunk", kind: "encounter" };
 
 describe("hitStopLength", () => {
   it("is the encounter's length for an encounter, the minor one's for a bump, else 0", () => {

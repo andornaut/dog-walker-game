@@ -18,7 +18,7 @@ import { newRun } from "../../state/runState";
 import { blendWalk, leadWalk, stepAlpha } from "./interpolate";
 
 const STEP_MS = STEP_SECONDS * 1000;
-const RUN = newRun(gameData, 3, { dogs: ["koda"], gear: null, walker: "casey" });
+const RUN = newRun(gameData, 3, { dogs: ["kilo"], gear: null, walker: "casey" });
 const ROAD = startRoad(5);
 const MOVE = laneMoveSeconds(gameData, RUN);
 // Seconds banked toward the next step, and how far a move under way has gone: both fractions

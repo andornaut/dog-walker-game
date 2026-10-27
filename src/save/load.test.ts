@@ -34,7 +34,7 @@ const checkpointWith = (
   fields: Partial<NonNullable<StoredInput["checkpoint"]>>,
 ): StoredInput["checkpoint"] => ({
   counters: quietCounters(),
-  dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+  dogs: [{ fired: false, id: "kilo", zonesFinished: 2 }],
   earnedCents: 4_250,
   route: ["street", "park"],
   zonesFinished: 2,
@@ -48,13 +48,13 @@ describe("loadSave", () => {
 
   it("picks a new save's free dogs, as many as its slots walk", () => {
     const picked = (dogSlots: number[]) =>
-      createDefaultSave({ ...testContext.defaults, dogSlots, freeDogs: ["biscuit", "koda"] })
+      createDefaultSave({ ...testContext.defaults, dogSlots, freeDogs: ["biscuit", "kilo"] })
         .lastLoadout.dogs;
-    expect([picked([1]), picked([1, 3])]).toEqual([["biscuit"], ["biscuit", "koda"]]);
+    expect([picked([1]), picked([1, 3])]).toEqual([["biscuit"], ["biscuit", "kilo"]]);
   });
 
   it("keeps every dog a save owns, adding the starters", () => {
-    const dogs: DogId[] = ["duchess", "koda", "penny"];
+    const dogs: DogId[] = ["duchess", "kilo", "penny"];
     const save = loaded((document) => {
       document.owned.dogs = dogs;
     });
@@ -136,18 +136,18 @@ describe("loadSave", () => {
       "without achievements, finished-with dogs and finished zones the game no longer has",
       (document) => {
         document.achievements = { retiredBadge: 6, wholeCity: 5 };
-        document.stats.dogsFinishedWith = ["koda", "ghost"];
+        document.stats.dogsFinishedWith = ["kilo", "ghost"];
         document.stats.zonesEverFinished = ["park", "atlantis"];
       },
       (save) => [save.achievements, save.stats.dogsFinishedWith, save.stats.zonesEverFinished],
-      [{ wholeCity: 5 }, ["koda"], ["park"]],
+      [{ wholeCity: 5 }, ["kilo"], ["park"]],
     ],
     [
       "without unknown or duplicate owned ids",
       (document) => {
         document.owned = {
           dogSlots: [3, 9, 3, 0],
-          dogs: ["koda", "ghost", "penny", "koda"],
+          dogs: ["kilo", "ghost", "penny", "kilo"],
           gear: ["runningShoes", "jetpack", "runningShoes"],
           walkers: ["ben", "ghost", "ben"],
         };
@@ -155,7 +155,7 @@ describe("loadSave", () => {
       (save) => save.owned,
       {
         dogSlots: [1, 3],
-        dogs: ["biscuit", "koda", "penny"],
+        dogs: ["biscuit", "kilo", "penny"],
         gear: ["runningShoes"],
         walkers: ["casey", "ben"],
       },
@@ -173,7 +173,7 @@ describe("loadSave", () => {
       "with the loadout trimmed to the slots owned, the starting ones always among them",
       (document) => {
         document.owned.dogSlots = [];
-        document.lastLoadout.dogs = ["penny", "koda"];
+        document.lastLoadout.dogs = ["penny", "kilo"];
       },
       (save) => save.lastLoadout.dogs,
       ["penny"],
@@ -218,7 +218,7 @@ describe("loadSave", () => {
         document.stats.timesFired = 3;
       },
       (save) => [Object.keys(save.stats.dogs).sort(), save.stats.timesFired],
-      [["biscuit", "koda"], 3],
+      [["biscuit", "kilo"], 3],
     ],
     [
       "without bumps by unknown obstacles",
@@ -239,22 +239,22 @@ describe("loadSave", () => {
     [
       "without unknown dogs in the logbook's walks, keeping the walks",
       (document) => {
-        present(document.stats.bestWalk).dogs = ["ghost", "koda"];
+        present(document.stats.bestWalk).dogs = ["ghost", "kilo"];
         present(document.stats.lastWalk).dogs = ["ghost"];
       },
       (save) => [save.stats.bestWalk?.dogs, save.stats.lastWalk],
-      [["koda"], { ...veteranSave().stats.lastWalk, dogs: [] }],
+      [["kilo"], { ...veteranSave().stats.lastWalk, dogs: [] }],
     ],
     [
       "without unknown dogs in the last walk's firings",
       (document) => {
         present(document.stats.lastWalk).firings = [
           { dog: "ghost", zone: 1 },
-          { dog: "koda", zone: 2 },
+          { dog: "kilo", zone: 2 },
         ];
       },
       (save) => save.stats.lastWalk?.firings,
-      [{ dog: "koda", zone: 2 }],
+      [{ dog: "kilo", zone: 2 }],
     ],
     [
       "without unknown dogs in a checkpoint, keeping its earnings",
@@ -262,7 +262,7 @@ describe("loadSave", () => {
         document.checkpoint = checkpointWith({
           dogs: [
             { fired: true, id: "ghost", zonesFinished: 1 },
-            { fired: false, id: "koda", zonesFinished: 2 },
+            { fired: false, id: "kilo", zonesFinished: 2 },
           ],
         });
       },
@@ -361,7 +361,7 @@ describe("loadSave", () => {
       [
         "a fractional stat count",
         withChanges((document) => {
-          defined(document.stats.dogs.koda).walks = 1.5;
+          defined(document.stats.dogs.kilo).walks = 1.5;
         }),
       ],
       [
@@ -373,7 +373,7 @@ describe("loadSave", () => {
       [
         "a loadout of four dogs",
         withChanges((document) => {
-          document.lastLoadout.dogs = ["koda", "biscuit", "duchess", "penny"];
+          document.lastLoadout.dogs = ["kilo", "biscuit", "duchess", "penny"];
         }),
       ],
       [

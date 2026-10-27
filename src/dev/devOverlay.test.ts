@@ -20,13 +20,13 @@ describe("devOverlayLines", () => {
     const run = {
       money: cents(1205),
       pack: [
-        { dog: "koda", hearts: 3, status: "walking" },
+        { dog: "kilo", hearts: 3, status: "walking" },
         { dog: "bo", status: "fired" },
       ],
     } as const;
     expect(devOverlayLines(60, undefined, setup, { ...state, run }).slice(3, 6)).toEqual([
       "money $12.05",
-      "koda 3hp",
+      "kilo 3hp",
       "bo fired",
     ]);
   });

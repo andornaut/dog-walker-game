@@ -31,7 +31,7 @@ const text = {
   slotBought: "{slot} open.",
 };
 const dollars = (amount: number) => cents(amount * 100);
-const firing = { dog: "koda", zone: 2 } as const;
+const firing = { dog: "kilo", zone: 2 } as const;
 
 describe("walkerLineKey", () => {
   const later = HOW_TO_WALKS + 1;
@@ -82,14 +82,14 @@ describe("messageLine", () => {
     const cases: readonly [string, HomeAction, string | null][] = [
       [
         "says a focused item in words",
-        { kind: "focus", text: "Koda: big chaser." },
-        "Koda: big chaser.",
+        { kind: "focus", text: "Kilo: big chaser." },
+        "Kilo: big chaser.",
       ],
       ["says nothing after an action that leaves no message", { kind: "none" }, null],
       [
         "announces a bought dog",
-        { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
-        "Nugget joined.",
+        { kind: "bought", name: "Reggie", purchase: { dog: "reggie", kind: "dog" } },
+        "Reggie joined.",
       ],
       [
         "announces bought gear",
@@ -103,8 +103,8 @@ describe("messageLine", () => {
       ],
       [
         "says how much more an unaffordable item needs",
-        { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
-        "$480 short for Nugget.",
+        { amount: dollars(480), kind: "cantAfford", name: "Reggie" },
+        "$480 short for Reggie.",
       ],
     ];
     for (const [, action, expected] of cases) {
@@ -115,9 +115,9 @@ describe("messageLine", () => {
 
 describe("bubbleSpeech", () => {
   const quips = new Map<DogId, string>([
-    ["koda", "He already did 10K."],
+    ["kilo", "He already did 10K."],
     ["biscuit", "Snacks are in the left pocket."],
-    ["nugget", "Tag me in everything."],
+    ["reggie", "Tag me in everything."],
   ]);
   const none: HomeAction = { kind: "none" };
 
@@ -131,7 +131,7 @@ describe("bubbleSpeech", () => {
     }[] = [
       {
         action: none,
-        dogs: ["koda", "biscuit"],
+        dogs: ["kilo", "biscuit"],
         expected: { owner: "biscuit", paragraphs: ["Snacks are in the left pocket."] },
         line: "afterWalk",
         name: "lets the owner of the latest pick still in the pack speak",
@@ -144,16 +144,16 @@ describe("bubbleSpeech", () => {
         name: "returns to the walker's line once the speakers leave the pack",
       },
       {
-        action: { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
+        action: { kind: "bought", name: "Reggie", purchase: { dog: "reggie", kind: "dog" } },
         dogs: [],
-        expected: { owner: "nugget", paragraphs: ["Nugget joined.", "Tag me in everything."] },
+        expected: { owner: "reggie", paragraphs: ["Reggie joined.", "Tag me in everything."] },
         line: "firstVisit",
         name: "announces a just-bought dog, then lets its owner speak though the dog is not picked",
       },
       {
-        action: { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
-        dogs: ["koda"],
-        expected: { owner: null, paragraphs: ["$480 short for Nugget."] },
+        action: { amount: dollars(480), kind: "cantAfford", name: "Reggie" },
+        dogs: ["kilo"],
+        expected: { owner: null, paragraphs: ["$480 short for Reggie."] },
         line: "afterWalk",
         name: "puts the last action's message ahead of a picked dog's owner",
       },
@@ -185,13 +185,13 @@ describe("packBonusLine", () => {
   };
   const line = (raise: number) =>
     raise > 0 ? fillNames(data.homeText.packBonus, { hearts: String(raise) }) : null;
-  // Koda is large, so leads any pack it is in.
+  // Kilo is large, so leads any pack it is in.
   it.each<[string, LiveTuning, readonly DogId[], string | null]>([
     ["no dog picked", TEST_TUNING, [], null],
-    ["a lone dog", TEST_TUNING, ["koda"], line(hearts.packSizeBonus[1])],
-    ["a pair", TEST_TUNING, ["duchess", "koda"], line(hearts.packSizeBonus[2])],
-    ["a full pack", TEST_TUNING, ["koda", "duchess", "pierre"], line(hearts.packSizeBonus[3])],
-    ["a lead already at the cap", capped, ["duchess", "koda"], null],
+    ["a lone dog", TEST_TUNING, ["kilo"], line(hearts.packSizeBonus[1])],
+    ["a pair", TEST_TUNING, ["duchess", "kilo"], line(hearts.packSizeBonus[2])],
+    ["a full pack", TEST_TUNING, ["kilo", "duchess", "pierre"], line(hearts.packSizeBonus[3])],
+    ["a lead already at the cap", capped, ["duchess", "kilo"], null],
   ])("shows how far the lead's owner's max rises for %s", (_name, tuning, dogs, expected) => {
     expect(packBonusLine({ ...data, tuning }, { dogs, gear: null })).toBe(expected);
   });

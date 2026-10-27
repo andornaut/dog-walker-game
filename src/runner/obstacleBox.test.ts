@@ -25,7 +25,7 @@ type Kind = EncounterId | MinorObstacleId;
 
 const ROAD = screenLayout(SCREEN_CONFIG).road;
 const PROJECTION = walkProjection(ROAD_CAMERA, ROAD);
-const GEOMETRY = screenRoadGeometry(testState({ koda: 3 }));
+const GEOMETRY = screenRoadGeometry(testState({ kilo: 3 }));
 const { cell, lens } = GEOMETRY;
 
 const KINDS = [
@@ -224,12 +224,12 @@ describe("a pack settled in a lane", () => {
   });
 
   it("is touched by an obstacle in its own lane level with it", () => {
-    const run = testState({ koda: 3 });
+    const run = testState({ kilo: 3 });
     const pack = packBoxes(GEOMETRY, stillInLane(2), run);
     const parts = obstacleOnRoad(gameData, GEOMETRY, "cone", false);
     const feetY = GEOMETRY.packBand.bottom - 10;
     const box = drawnObstacleBox(lens, PART_INSET, parts, { feetY, x: 2.5 * cell.length });
     const lanes = { left: 2 * cell.length, right: 3 * cell.length };
-    expect(hitDog(pack, { ...box, lanes })).toBe("koda");
+    expect(hitDog(pack, { ...box, lanes })).toBe("kilo");
   });
 });

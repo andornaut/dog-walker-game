@@ -48,7 +48,7 @@ const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
 const width2x = (run: string) => bodyRunWidth(AT_2X, run);
 const BOX_2X = defined(inlineFaceBox(BODY, MESSAGE_STRIP.scale));
 
-const DOG: DogId = "koda";
+const DOG: DogId = "kilo";
 const NAME = gameData.dogs[DOG].owner.name;
 const hearts = (
   before: number,
@@ -65,7 +65,7 @@ const forgiven = hearts(4, 4, [
   { amount: -1, kind: "bump" },
   { amount: 1, forgives: true, kind: "modifier", source: { kind: "walker", walker: "casey" } },
 ]);
-const muddy = testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
+const muddy = testState({ kilo: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] });
 const muddyCost = bumpHearts(gameData, muddy);
 
 // An owner's face shows upset on a heart loss, happy on a gain, and neutral otherwise.
@@ -75,7 +75,7 @@ const MOOD = { gain: "happy", loss: "upset", none: "neutral" } as const satisfie
 >;
 
 // Each walk text line that names an owner in the game area, by its path in the walk's text, as
-// the walk says it of koda's owner, and the heart change it tells of.
+// the walk says it of kilo's owner, and the heart change it tells of.
 const PLACES: readonly (readonly [string, FaceText | null | undefined, keyof typeof MOOD])[] = [
   ["lowHearts", lowHeartsText(gameData, DOG), "loss"],
   ["strip.fired", firedLine(gameData, DOG), "loss"],
@@ -193,13 +193,13 @@ describe("faceRows", () => {
 
 describe("withoutFace", () => {
   const two = fillFaceText("{a} and {b}", {
-    a: ownerFaceText(gameData, "happy", "koda"),
+    a: ownerFaceText(gameData, "happy", "kilo"),
     b: ownerFaceText(gameData, "upset", "zippy"),
   });
 
   it.each<[string, DogId | undefined, DogId[]]>([
-    ["keeps every face with no lead", undefined, ["koda", "zippy"]],
-    ["drops the leading owner's face", "koda", ["zippy"]],
+    ["keeps every face with no lead", undefined, ["kilo", "zippy"]],
+    ["drops the leading owner's face", "kilo", ["zippy"]],
   ])("%s", (_name, lead, kept) => {
     const line = withoutFace(lead, two);
     expect(line.text).toBe(two.text);

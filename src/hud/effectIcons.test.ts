@@ -9,7 +9,7 @@ import { effectIconKey, type EffectItem, effectItems, walkerEffectItems } from "
 describe("effectItems", () => {
   it("lists the walker's perk, the gear, then the upgrades in effect in pick order", () => {
     const run = testState(
-      { koda: 5 },
+      { kilo: 5 },
       {
         gear: "luckyCollar",
         immunities: [{ encounter: "puddle", source: { kind: "upgrade", upgrade: "raincoats" } }],
@@ -32,7 +32,7 @@ describe("effectItems", () => {
   });
 
   it("drops an upgrade once its effects expire, and never shows one applied at once", () => {
-    const run = testState({ koda: 5 }, { upgradesPicked: ["bigTipper", "bellyRubs"] });
+    const run = testState({ kilo: 5 }, { upgradesPicked: ["bigTipper", "bellyRubs"] });
     expect(effectItems(gameData, run)).toEqual(walkerEffectItems(gameData, run.walker));
   });
 });

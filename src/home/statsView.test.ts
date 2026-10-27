@@ -18,14 +18,14 @@ describe("overallRows", () => {
       { label: words.overall.dogsWalked, value: "7" },
       { label: words.overall.bestRun, value: "$90" },
       { label: words.overall.bestRunZones, value: "4" },
-      { label: words.overall.bestRunDogs, value: DOGS.koda.name },
+      { label: words.overall.bestRunDogs, value: DOGS.kilo.name },
       { label: "", value: DOGS.penny.name },
       { label: words.overall.lifetime, value: "$280" },
       {
         label: words.overall.timesFired,
         value: fillLine(MENU_TEXT_FIELDS.stats, words, "timesFiredBy", {
           count: "1",
-          owner: DOGS.koda.owner.name,
+          owner: DOGS.kilo.owner.name,
         }),
       },
       { label: words.overall.bestZone, value: "4" },
@@ -49,13 +49,13 @@ describe("dogRows", () => {
     expect(rows.map((row) => row.dog)).toEqual(
       Object.keys(DOGS).filter((dog) => save.owned.dogs.includes(dog as never)),
     );
-    expect(rows.find((row) => row.dog === "koda")).toMatchObject({
+    expect(rows.find((row) => row.dog === "kilo")).toMatchObject({
       timesFired: 1,
       walks: 5,
       zonesFinished: 12,
     });
     expect(rows.find((row) => row.dog === "duchess")).toMatchObject({ walks: 0 });
     const unowned = dogRows(data, { dogs: [] }, save.stats);
-    expect(unowned.map((row) => row.dog).sort()).toEqual(["biscuit", "koda"]);
+    expect(unowned.map((row) => row.dog).sort()).toEqual(["biscuit", "kilo"]);
   });
 });

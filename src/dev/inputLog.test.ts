@@ -15,8 +15,8 @@ import {
 } from "./inputLog";
 import type { RunSetup, RunSetupLimits } from "./runSetup";
 
-const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
-  dogIds: ["bo", "koda"],
+const limits: RunSetupLimits<"bo" | "kilo", "collar"> = {
+  dogIds: ["bo", "kilo"],
   gearIds: ["collar"],
   maxPackSize: 3,
   speed: { max: 10, min: 0.1 },
@@ -24,10 +24,10 @@ const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
   zoneCount: 4,
   zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
 };
-const setup: RunSetup<"bo" | "koda", "collar"> = {
+const setup: RunSetup<"bo" | "kilo", "collar"> = {
   dev: false,
   gear: "collar",
-  pack: ["koda", "bo"],
+  pack: ["kilo", "bo"],
   seed: 31337,
   speed: 1,
   zone: 2,
@@ -81,7 +81,7 @@ describe("encodeInputLog and decodeInputLog", () => {
         [9000, "c", "skip"],
         [10_000, "h"],
       ],
-      setup: "seed=31337&pack=koda,bo&gear=collar&zone=2",
+      setup: "seed=31337&pack=kilo,bo&gear=collar&zone=2",
       version: INPUT_LOG_VERSION,
     });
   });

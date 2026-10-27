@@ -17,10 +17,10 @@ import { planZone, startRoad, steerWalk, stepWalk, type Walk, type WalkItem } fr
 import { walkGeometry, walkProjection } from "./walkGeometry";
 import { hasZoomies, stepZoomies } from "./zoomies";
 
-// The game's road for the pack of three the drift test walks; walkIn's lone Koda leads it.
+// The game's road for the pack of three the drift test walks; walkIn's lone Kilo leads it.
 const ROAD = (() => {
   const road = screenLayout(SCREEN_CONFIG).road;
-  const pack = { dogs: ["koda", "biscuit", "duchess"], walker: "casey" } as const;
+  const pack = { dogs: ["kilo", "biscuit", "duchess"], walker: "casey" } as const;
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
 const EVERY = read(gameData.tuning, "seconds", "zoomiesDriftSeconds");
@@ -35,7 +35,7 @@ const zoomed = (run: RunState): RunState => ({
 
 // A walk in lane, heading heading, with nothing on the road.
 function walkIn(lane: number, heading?: LaneDirection, items: readonly WalkItem[] = []): Walk {
-  const run = newRun(gameData, 3, { dogs: ["koda"], gear: null, walker: "casey" });
+  const run = newRun(gameData, 3, { dogs: ["kilo"], gear: null, walker: "casey" });
   const control = laneControlIn(stillInLane(lane));
   return {
     road: {
@@ -138,7 +138,7 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
   it("drift into no unavoidable hit on any zone's road", () => {
     for (const [zone, seed] of zones.map((zone) => [zone, 1] as const)) {
       const start = newRun(gameData, 3, {
-        dogs: ["koda", "biscuit", "duchess"],
+        dogs: ["kilo", "biscuit", "duchess"],
         gear: null,
         walker: "casey",
       });

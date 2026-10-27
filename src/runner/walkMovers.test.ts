@@ -623,7 +623,7 @@ describe("movers", { timeout: 120_000 }, () => {
   ])("pays out the friendly neighbor $name, never as a bump", ({ moving, path }) => {
     const since = 532;
     expect(inMotion(path, since)).toBe(moving);
-    const met = (item: WalkItem) => withHearts(1, walkWith(["koda"], [item]));
+    const met = (item: WalkItem) => withHearts(1, walkWith(["kilo"], [item]));
     const walk = met(moverAt("pettingNeighbor", path, since));
     const after = step(walk);
     const standing = step(met(atPack("pettingNeighbor")));
@@ -706,7 +706,7 @@ describe("movers", { timeout: 120_000 }, () => {
   );
 
   it("brings a mover onto the road as its cue, carrying its path", () => {
-    const walk = walkWith(["koda"]);
+    const walk = walkWith(["kilo"]);
     const due: Walk = {
       ...walk,
       road: {
@@ -743,7 +743,7 @@ describe("movers", { timeout: 120_000 }, () => {
         stopTravel: geometry.sightLength,
         warning: 100,
       };
-      const before = inLane(lane, walkWith(["koda"], [moverAt("coyote", stalking, 200 - 1e-6)]));
+      const before = inLane(lane, walkWith(["kilo"], [moverAt("coyote", stalking, 200 - 1e-6)]));
       const [waiting] = step(before, 0).walk.road.items;
       expect(waiting?.mover?.path).toBe(stalking);
       const [item] = step(before).walk.road.items;
@@ -770,7 +770,7 @@ describe("movers", { timeout: 120_000 }, () => {
       stopTravel: geometry.sightLength,
       warning: 100,
     };
-    const before = inLane(4, walkWith(["koda"], [moverAt("coyote", stalking, 150 - 1e-6)]));
+    const before = inLane(4, walkWith(["kilo"], [moverAt("coyote", stalking, 150 - 1e-6)]));
     const [waiting] = step(before, 0).walk.road.items;
     expect(waiting?.mover?.path).toBe(stalking);
     const [item] = step(before).walk.road.items;
@@ -805,7 +805,7 @@ describe("movers", { timeout: 120_000 }, () => {
       stopTravel: geometry.sightLength,
       warning: 100,
     };
-    const before = inLane(lane, walkWith(["koda"], [moverAt("bunny", shy, 200 - 1e-6)]));
+    const before = inLane(lane, walkWith(["kilo"], [moverAt("bunny", shy, 200 - 1e-6)]));
     const [waiting] = step(before, 0).walk.road.items;
     expect(waiting?.mover?.path).toBe(shy);
     const [item] = step(before).walk.road.items;
@@ -843,7 +843,7 @@ describe("movers", { timeout: 120_000 }, () => {
       ["standing in the lane", atPack("squirrel")],
       ["darting across it", moverAt("squirrel", crossing, 82)],
     ] as const) {
-      const walk = walkWith(["koda"], [item]);
+      const walk = walkWith(["kilo"], [item]);
       const after = step(walk);
       expect(after.cards).toEqual([]);
       expect(after.encounterHits).toEqual([]);
@@ -876,7 +876,7 @@ describe("movers", { timeout: 120_000 }, () => {
 
   it("bumps the pack like a plain obstacle on contact with a ball or an in-lane cyclist", () => {
     const ball = crossing;
-    expect(step(walkWith(["koda"], [moverAt("ball", ball, 82)])).bumps).toHaveLength(1);
+    expect(step(walkWith(["kilo"], [moverAt("ball", ball, 82)])).bumps).toHaveLength(1);
     const cyclist: MoverPath = {
       lane: 2,
       lanes: 1,
@@ -886,6 +886,6 @@ describe("movers", { timeout: 120_000 }, () => {
       warning: 50,
     };
     // 50px of cue, then 266px of scroll at twice the road's speed: 532px down the road.
-    expect(step(walkWith(["koda"], [moverAt("cyclist", cyclist, 316)])).bumps).toHaveLength(1);
+    expect(step(walkWith(["kilo"], [moverAt("cyclist", cyclist, 316)])).bumps).toHaveLength(1);
   });
 });

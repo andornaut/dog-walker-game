@@ -145,12 +145,12 @@ describe("gearRows and dogRows", () => {
 
   const allDogs = Object.keys(data.dogs) as DogId[];
   const forSale = allDogs.filter((dog) => !starters.includes(dog));
-  const dogOf = (row: ShopRow): DogId => (row.purchase.kind === "dog" ? row.purchase.dog : "koda");
+  const dogOf = (row: ShopRow): DogId => (row.purchase.kind === "dog" ? row.purchase.dog : "kilo");
 
   // Owning a dog keeps its row in place, marked owned as gear is: no price, the owned look.
   it.each<[string, readonly DogId[]]>([
     ["nothing bought", starters],
-    ["one dog bought", [...starters, forSale[0] ?? "koda"]],
+    ["one dog bought", [...starters, forSale[0] ?? "kilo"]],
     ["every dog bought", allDogs],
   ])("list every dog in one order, owned ones marked owned, with %s", (_, dogs) => {
     const holding = { ...owned, dogs: [...dogs] };
@@ -218,7 +218,7 @@ describe("gearRows and dogRows", () => {
   });
 
   it("gives a dog's row its size and hearts, and its price on the plate", () => {
-    const dog = forSale[0] ?? "koda";
+    const dog = forSale[0] ?? "kilo";
     const row = dogRows(data, owned).find(({ id }) => id === `dog:${dog}`);
     const { size } = data.dogs[dog];
     const kind = fillNames(data.homeText.focus.kind, {
@@ -287,7 +287,7 @@ describe("shopRowId and shopTabOf", () => {
       gear: gearRows(data, owned),
     };
     const purchases: Purchase[] = [
-      { dog: "nugget", kind: "dog" },
+      { dog: "reggie", kind: "dog" },
       ...allSlots.map((slot): Purchase => ({ kind: "dogSlot", slot })),
       { gear: "luckyCollar", kind: "gear" },
     ];
@@ -301,7 +301,7 @@ describe("shopRowId and shopTabOf", () => {
 describe("shopOpenTab", () => {
   it.each<[string, ShopTab, Purchase | undefined]>([
     ["no item", "dogs", undefined],
-    ["a dog", "dogs", { dog: "nugget", kind: "dog" }],
+    ["a dog", "dogs", { dog: "reggie", kind: "dog" }],
     ["a dog slot", "dogs", { kind: "dogSlot", slot: 2 }],
     ["gear", "gear", { gear: "luckyCollar", kind: "gear" }],
   ])("with %s, opens on the %s tab", (_, tab, focus) => {

@@ -10,8 +10,8 @@ describe("artFileUrl", () => {
   it.each([
     ["/", hashed, `/${artFiles.get(hashed)}`],
     ["/game/", hashed, `/game/${artFiles.get(hashed)}`],
-    ["/", "sprites/dog-koda.png", "/art/sprites/dog-koda.png"],
-    ["/game/", "sprites/dog-koda.png", "/game/art/sprites/dog-koda.png"],
+    ["/", "sprites/dog-kilo.png", "/art/sprites/dog-kilo.png"],
+    ["/game/", "sprites/dog-kilo.png", "/game/art/sprites/dog-kilo.png"],
     ["/", "constructor", "/art/constructor"],
   ])("under %s, loads %s from %s", (baseUrl, path, url) => {
     expect(artFileUrl(baseUrl, artFiles, path)).toBe(url);

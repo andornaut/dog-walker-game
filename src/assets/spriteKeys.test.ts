@@ -32,8 +32,8 @@ const images = new Set(manifest.images.map(({ key }) => key));
 
 describe("key names", () => {
   it("names a depth variant by its step's rounded percentage, and throws off the steps", () => {
-    expect(depthVariantKey("dog-koda", 0.875)).toBe("dog-koda@88");
-    expect(depthVariantKey("dog-koda", 0.625)).toBe("dog-koda@62");
+    expect(depthVariantKey("dog-kilo", 0.875)).toBe("dog-kilo@88");
+    expect(depthVariantKey("dog-kilo", 0.625)).toBe("dog-kilo@62");
     expect(depthVariantKey("tip", 1)).toBeNull();
     expect(() => depthVariantKey("tip", 0.63)).toThrow("not a depth step");
   });
@@ -74,8 +74,8 @@ describe("key names", () => {
 
   // A mover's cue stands on the road; faces, effects, badges and UI do not.
   it("stands road art on the ground, and nothing drawn over the road", () => {
-    const standing = ["dog-koda", "tip", "ambient-cat", "dog-koda@50", WARNING_KEY];
-    const flat = ["face-dog-koda", "fx-bump", "badge-squirrel", "ui-button", "card-frame"];
+    const standing = ["dog-kilo", "tip", "ambient-cat", "dog-kilo@50", WARNING_KEY];
+    const flat = ["face-dog-kilo", "fx-bump", "badge-squirrel", "ui-button", "card-frame"];
     expect(standing.filter((key) => !standsOnGround(key))).toEqual([]);
     expect(flat.filter(standsOnGround)).toEqual([]);
   });

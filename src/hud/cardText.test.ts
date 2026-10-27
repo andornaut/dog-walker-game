@@ -39,7 +39,7 @@ function everyOption(): OptionView[] {
   );
   const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
   const upgrades = Object.keys(gameData.upgrades) as UpgradeId[];
-  const first = states[0] ?? testState({ koda: 5 });
+  const first = states[0] ?? testState({ kilo: 5 });
   return [
     ...states.flatMap((state) =>
       encounters.flatMap(

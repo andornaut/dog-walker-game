@@ -8,7 +8,7 @@ const valid = {
   sounds: [
     { key: "music-walk", loop: true, m4a: "sounds/music-walk.m4a", ogg: "sounds/music-walk.ogg" },
   ],
-  sprites: [{ json: "sprites/dog-koda.json", key: "dog-koda", png: "sprites/dog-koda.png" }],
+  sprites: [{ json: "sprites/dog-kilo.json", key: "dog-kilo", png: "sprites/dog-kilo.png" }],
 };
 
 type Manifest = ReturnType<typeof parseManifest>;
@@ -44,7 +44,7 @@ describe("parseManifest", () => {
         name: "a path with a dot segment and dotted file names",
         pick: (m) => m.images,
       },
-      ...["bin@50", "dog-koda@62", "dog-koda@75", "parked-car@88"].map((key) => ({
+      ...["bin@50", "dog-kilo@62", "dog-kilo@75", "parked-car@88"].map((key) => ({
         expected: key,
         manifest: keyed(key),
         name: `the depth step key ${key}`,
@@ -93,7 +93,7 @@ describe("parseManifest", () => {
       },
       {
         error: "manifest.sprites[0].json is required",
-        manifest: { ...valid, sprites: [{ key: "dog-koda", png: "sprites/dog-koda.png" }] },
+        manifest: { ...valid, sprites: [{ key: "dog-kilo", png: "sprites/dog-kilo.png" }] },
         name: "a missing field, naming the entry and field",
       },
       {
@@ -107,8 +107,8 @@ describe("parseManifest", () => {
         name: `the key ${key}, which is not a depth step`,
       })),
       {
-        error: 'manifest key "dog-koda" appears more than once, in images[0] and sprites[0]',
-        manifest: { ...valid, images: [{ key: "dog-koda", png: "images/dog-koda.png" }] },
+        error: 'manifest key "dog-kilo" appears more than once, in images[0] and sprites[0]',
+        manifest: { ...valid, images: [{ key: "dog-kilo", png: "images/dog-kilo.png" }] },
         name: "a key used twice across lists, naming both lists",
       },
       { error: "manifest must be an object", manifest: null, name: "a null manifest" },
@@ -153,7 +153,7 @@ describe("parseManifest", () => {
 
 describe("assetUrl", () => {
   it("joins a base and a path with one slash", () => {
-    expect(assetUrl("/art/", "/sprites/dog-koda.png")).toBe("/art/sprites/dog-koda.png");
-    expect(assetUrl("/art", "sprites/dog-koda.png")).toBe("/art/sprites/dog-koda.png");
+    expect(assetUrl("/art/", "/sprites/dog-kilo.png")).toBe("/art/sprites/dog-kilo.png");
+    expect(assetUrl("/art", "sprites/dog-kilo.png")).toBe("/art/sprites/dog-kilo.png");
   });
 });

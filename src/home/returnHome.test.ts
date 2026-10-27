@@ -14,17 +14,17 @@ describe("homecomers", () => {
       walk: Pick<LastWalk, "dogs" | "firings">;
     }[] = [
       {
-        expected: ["koda", "biscuit"],
+        expected: ["kilo", "biscuit"],
         name: "brings home the dogs still walking, in pack order, without the fired ones",
         walk: {
-          dogs: ["koda", "nugget", "biscuit"],
-          firings: [{ dog: "nugget", zone: 2 }],
+          dogs: ["kilo", "reggie", "biscuit"],
+          firings: [{ dog: "reggie", zone: 2 }],
         },
       },
       {
         expected: [],
         name: "brings nobody home when every owner fired you",
-        walk: { dogs: ["koda"], firings: [{ dog: "koda", zone: 1 }] },
+        walk: { dogs: ["kilo"], firings: [{ dog: "kilo", zone: 1 }] },
       },
     ];
     for (const { expected, walk } of cases) {

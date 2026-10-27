@@ -10,8 +10,8 @@ import {
   runSetupToQuery,
 } from "./runSetup";
 
-const limits: RunSetupLimits<"bo" | "koda" | "rex" | "zip", "collar" | "shoes"> = {
-  dogIds: ["bo", "koda", "rex", "zip"],
+const limits: RunSetupLimits<"bo" | "kilo" | "rex" | "zip", "collar" | "shoes"> = {
+  dogIds: ["bo", "kilo", "rex", "zip"],
   gearIds: ["collar", "shoes"],
   maxPackSize: 3,
   speed: { max: 10, min: 0.1 },
@@ -28,13 +28,13 @@ describe("parseRunSetup", () => {
     dev: true,
     gear: "shoes",
     money: 1250,
-    pack: ["koda", "bo"],
+    pack: ["kilo", "bo"],
     seed: 42,
     speed: 1.5,
     walker: "ada",
     zone: 3,
   };
-  const query = "seed=42&pack=koda,bo&gear=shoes&walker=ada&zone=3&money=1250&speed=1.5&dev=1";
+  const query = "seed=42&pack=kilo,bo&gear=shoes&walker=ada&zone=3&money=1250&speed=1.5&dev=1";
 
   const valid: { name: string; search: string; setup: RunSetup }[] = [
     { name: "uses a new seed and the defaults for an empty query", search: "", setup: defaults },
@@ -77,9 +77,9 @@ describe("parseRunSetup", () => {
     ["seed", "1.5"],
     ["seed", `${MAX_SEED + 1}`],
     ["pack", ""],
-    ["pack", "koda,nobody"],
-    ["pack", "koda,koda"],
-    ["pack", "koda,bo,rex,zip"],
+    ["pack", "kilo,nobody"],
+    ["pack", "kilo,kilo"],
+    ["pack", "kilo,bo,rex,zip"],
     ["gear", "cape"],
     ["walker", "bob"],
     ["zone", "0"],
@@ -139,7 +139,7 @@ describe("the route parameter", () => {
 describe("devInSearch", () => {
   it.each([
     ["dev=1", true],
-    ["?seed=5&pack=koda,bogus&dev=1", true],
+    ["?seed=5&pack=kilo,bogus&dev=1", true],
     ["", false],
     ["dev=0", false],
     ["dev=1&dev=1", false],
@@ -167,9 +167,9 @@ describe("runSetupToQuery", () => {
 
 describe("runSetupLink", () => {
   it("replaces the page's query and drops its hash", () => {
-    const setup: RunSetup = { ...defaults, pack: ["koda", "bo"], seed: 12 };
+    const setup: RunSetup = { ...defaults, pack: ["kilo", "bo"], seed: 12 };
     expect(runSetupLink("https://example.com/play/?seed=1&dev=1#top", setup)).toBe(
-      "https://example.com/play/?seed=12&pack=koda,bo",
+      "https://example.com/play/?seed=12&pack=kilo,bo",
     );
   });
 });

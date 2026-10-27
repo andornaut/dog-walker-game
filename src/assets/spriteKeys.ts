@@ -118,7 +118,7 @@ export const ZONE_CELEBRATION_ART = {
   walkerTags: ["cheer", "idle"],
 } as const;
 
-// A road sprite's hand-drawn version for a depth step, such as dog-koda@62 for 0.625x, or
+// A road sprite's hand-drawn version for a depth step, such as dog-kilo@62 for 0.625x, or
 // null at full size. Throws for a scale that is not a step.
 export function depthVariantKey(key: string, step: number): string | null {
   const { suffix } = depthStepOfScale(step);

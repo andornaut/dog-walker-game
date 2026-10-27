@@ -20,11 +20,11 @@ const stinky = { debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] 
 
 describe("tipValue", () => {
   const tip = read(TEST_TUNING, "money", "tip");
-  const three = { duchess: 5, koda: 5, nugget: 5 };
+  const three = { duchess: 5, kilo: 5, reggie: 5 };
 
   it("pays tips by their modifiers", () => {
     for (const [, state, amount] of [
-      ["a solo walk money.tip", testState({ koda: 5 }), tip],
+      ["a solo walk money.tip", testState({ kilo: 5 }), tip],
       ["a pack of three money.tip too", testState(three), tip],
       [
         "Big tipper money.tip and its bonus",
@@ -42,7 +42,7 @@ describe("tipValue", () => {
         (tip + read(TEST_TUNING, "money", "bigTipperTipBonus")) *
           read(TEST_TUNING, "multipliers", "stinkyTipValue"),
       ],
-      ["nothing with no dogs left", testState({ koda: "fired" }), 0],
+      ["nothing with no dogs left", testState({ kilo: "fired" }), 0],
     ] satisfies readonly [string, RunState, number][]) {
       expect(tipValue(data, state).amount).toBe(amount);
     }
@@ -50,7 +50,7 @@ describe("tipValue", () => {
 
   it("gives the tip and each modifier as causes", () => {
     const bonus = read(TEST_TUNING, "money", "bigTipperTipBonus");
-    expect(tipValue(data, testState({ koda: 5 }, { modifiers: [bigTipper] }))).toEqual({
+    expect(tipValue(data, testState({ kilo: 5 }, { modifiers: [bigTipper] }))).toEqual({
       amount: tip + bonus,
       causes: [
         { amount: tip, kind: "tip" },
@@ -70,11 +70,11 @@ describe("payZone", () => {
       ["a lone dog", testState({ duchess: 5 }), ["duchess"]],
       [
         "two dogs walking of three",
-        testState({ duchess: 5, koda: "fired", zippy: 3 }),
+        testState({ duchess: 5, kilo: "fired", zippy: 3 }),
         ["duchess", "zippy"],
       ],
-      ["three dogs", testState({ duchess: 5, koda: 5, zippy: 3 }), ["duchess", "koda", "zippy"]],
-    ] satisfies readonly [string, RunState, readonly ("duchess" | "koda" | "zippy")[]][]) {
+      ["three dogs", testState({ duchess: 5, kilo: 5, zippy: 3 }), ["duchess", "kilo", "zippy"]],
+    ] satisfies readonly [string, RunState, readonly ("duchess" | "kilo" | "zippy")[]][]) {
       const { changes, state } = payZone(data, run);
       expect(state.money).toBe(run.money + pay * walking.length);
       expect(changes).toEqual(
@@ -91,7 +91,7 @@ describe("payZone", () => {
   it.each(WORLD.zones.map((zone) => [zone.name, zone.id as ZoneId] as const))(
     "pays each dog the same in %s as in every zone",
     (_name, zone) => {
-      const run = testState({ duchess: 5, koda: 5, zippy: 5 }, { route: [zone] });
+      const run = testState({ duchess: 5, kilo: 5, zippy: 5 }, { route: [zone] });
       const { changes } = payZone(data, run);
       expect(changes.map(({ amount, causes }) => ({ amount, causes }))).toEqual(
         Array.from({ length: 3 }, () => ({ amount: pay, causes: [{ amount: pay, kind: "pay" }] })),

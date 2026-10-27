@@ -392,7 +392,7 @@ describe("the dog cards", () => {
   });
 
   it("keeps the owner's photo inside the card, right of the dog's", () => {
-    const dogFace = frameSize(dogFaceKey(gameData, "koda"));
+    const dogFace = frameSize(dogFaceKey(gameData, "kilo"));
     expect(inside(ownerPhoto, card)).toBe(true);
     expect(ownerPhoto.x).toBeGreaterThan(DOG_CARD.dogFace.x + dogFace.width);
   });
@@ -409,7 +409,7 @@ describe("the dog cards", () => {
     const { dogFace, fired } = DOG_CARD;
     const left = fired.x - Math.floor(width / 2);
     const text = { height: TITLE_CAP_ROWS, width, x: left, y: fired.y };
-    const photo = { ...frameSize(dogFaceKey(gameData, "koda")), ...dogFace };
+    const photo = { ...frameSize(dogFaceKey(gameData, "kilo")), ...dogFace };
     expect(inside(text, photo)).toBe(true);
     expect(rectsOverlap(text, ownerPhoto)).toBe(false);
   });
@@ -545,7 +545,7 @@ describe("the walk bar's neighborhood name and count", () => {
 });
 
 describe("explainTargetAt", () => {
-  const dogs: (DogId | undefined)[] = ["koda", "biscuit", undefined];
+  const dogs: (DogId | undefined)[] = ["kilo", "biscuit", undefined];
   const debuffs: DebuffId[] = ["muddy", "stinky"];
   const shown = (effects: number): ExplainShown => ({ debuffs, dogs, effects });
   const holdAt = (i: number) => centre(BAR.effectHolds[i] ?? topBar);
@@ -565,7 +565,7 @@ describe("explainTargetAt", () => {
     ["a button", 1, button, undefined],
     ["the first debuff bar", 0, centre(bars[0] ?? topBar), { debuff: "muddy", kind: "debuff" }],
     ["the second debuff bar", 0, centre(bars[1] ?? topBar), { debuff: "stinky", kind: "debuff" }],
-    ["the first card", 0, centre(dogSlots[0] ?? topBar), { dog: "koda", kind: "dog" }],
+    ["the first card", 0, centre(dogSlots[0] ?? topBar), { dog: "kilo", kind: "dog" }],
     ["the second card", 0, centre(dogSlots[1] ?? topBar), { dog: "biscuit", kind: "dog" }],
     ["a card with no dog", 0, centre(dogSlots[2] ?? topBar), undefined],
     ["the road", 0, centre(LAYOUT.road), undefined],

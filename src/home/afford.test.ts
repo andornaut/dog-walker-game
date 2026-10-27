@@ -12,12 +12,12 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: [1],
-  dogs: ["biscuit", "duchess", "koda"],
+  dogs: ["biscuit", "duchess", "kilo"],
   gear: [],
   walkers: ["casey"],
 };
 const walk = (earned: number): LastWalk => ({
-  dogs: ["koda"],
+  dogs: ["kilo"],
   earnedCents: dollars(earned),
   firings: [],
   outcome: "finished",
@@ -42,7 +42,7 @@ describe("isAffordable", () => {
       ["holds for a dog priced at the bank", owned, 600, { dog: "archie", kind: "dog" }, true],
       ["fails for a dog priced over the bank", owned, 599, { dog: "archie", kind: "dog" }, false],
       ...slots,
-      ["never holds for an owned dog", owned, 100_000, { dog: "koda", kind: "dog" }, false],
+      ["never holds for an owned dog", owned, 100_000, { dog: "kilo", kind: "dog" }, false],
       [
         "never holds for an owned slot",
         { ...owned, dogSlots: [1, 3] },

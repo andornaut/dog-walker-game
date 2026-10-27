@@ -21,7 +21,7 @@ const { card, seconds } = gameData.runText;
 const SWEET_TALKER: ModifierSource = { kind: "upgrade", upgrade: "sweetTalker" };
 const CASEY: ModifierSource = { kind: "walker", walker: "casey" };
 const caseyPerk = { kind: "perk", perk: gameData.walkers.casey.perk } as const;
-const koda = gameData.dogs.koda.name;
+const kilo = gameData.dogs.kilo.name;
 
 const value = (
   subject: ModifiedValue["subject"],
@@ -47,7 +47,7 @@ const option = (modified: readonly ModifiedValue[], text = "Hose it off"): Optio
 });
 
 describe("optionMarks", () => {
-  const forgiven = value({ dog: "koda", kind: "hearts" }, -1, [[1, CASEY]]);
+  const forgiven = value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]);
   const waived = value({ kind: "money" }, -1000, [[1000, SWEET_TALKER]]);
   const cut = value({ kind: "money" }, -1000, [[500, SWEET_TALKER]]);
   const skip = value({ kind: "skip" }, 0, [[1, { gear: "hallPass", kind: "gear" }]]);
@@ -80,17 +80,17 @@ describe("optionMarks", () => {
         charms: [caseyPerk],
         forgiven: {
           name: gameData.walkerPerks[caseyPerk.perk].name,
-          rows: [`0♥ ${koda}`],
+          rows: [`0♥ ${kilo}`],
         },
         plaque: null,
       },
       name: "a loss the walker's perk forgives, as the hearts left alone",
-      view: option([forgiven], fillNames(card.heartForgiven, { dog: koda, hearts: "1" })),
+      view: option([forgiven], fillNames(card.heartForgiven, { dog: kilo, hearts: "1" })),
     },
     {
       expected: { charms: [caseyPerk], forgiven: null, plaque: null },
       name: "a forgiven loss among other effects, which keep their text",
-      view: option([forgiven], `−$5, ${fillNames(card.heartForgiven, { dog: koda, hearts: "1" })}`),
+      view: option([forgiven], `−$5, ${fillNames(card.heartForgiven, { dog: kilo, hearts: "1" })}`),
     },
     {
       expected: {
@@ -124,16 +124,16 @@ describe("popsOf", () => {
         {
           ...plain,
           at: { kind: "walker" },
-          forgiven: { dog: "koda", whole: true },
+          forgiven: { dog: "kilo", whole: true },
           item: caseyPerk,
         },
       ],
       name: "a bump forgiven whole, by the walker",
       popped: {
         bump: true,
-        dog: "koda",
+        dog: "kilo",
         item: item("bin"),
-        value: value({ dog: "koda", kind: "hearts" }, -1, [[1, CASEY]]),
+        value: value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]),
       },
     },
     {
@@ -176,13 +176,13 @@ describe("popsOf", () => {
           ...plain,
           at: { item: 1, kind: "item" },
           item: { kind: "perk", perk: "longReach" },
-          reach: { dog: "koda", item: 1 },
+          reach: { dog: "kilo", item: 1 },
         },
       ],
       name: "a treat Long reach grabbed, with its line",
       popped: {
         bump: false,
-        dog: "koda",
+        dog: "kilo",
         item: item("treat"),
         value: value({ kind: "reach", pickup: "treat" }, 0, [
           [1, { kind: "walker", walker: "trista" }],
@@ -232,7 +232,7 @@ describe("popsOf", () => {
 describe("spawnPops", () => {
   it("pops Treat finder's charm on every second treat collected", () => {
     const run = testState(
-      { koda: 3 },
+      { kilo: 3 },
       {
         modifiers: [
           activeModifier(

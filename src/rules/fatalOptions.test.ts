@@ -35,10 +35,10 @@ const skunk = (affected: DogId[]): CardSource => ({
 describe("an option that would fire an owner", () => {
   it("flags each option that can fire an owner", () => {
     for (const { fires, hearts } of [
-      { fires: ["koda"], hearts: NOSE_EFFECT, why: "a meter landing on 0" },
+      { fires: ["kilo"], hearts: NOSE_EFFECT, why: "a meter landing on 0" },
       { fires: [], hearts: NOSE_EFFECT + 1, why: "a meter left above 0" },
     ]) {
-      const option = cardFor(data, testState({ koda: hearts }), skunk(["koda"])).options.find(
+      const option = cardFor(data, testState({ kilo: hearts }), skunk(["kilo"])).options.find(
         ({ index }) => index === HOLD_YOUR_NOSE,
       );
       expect(option?.fires).toEqual(fires);
@@ -46,23 +46,23 @@ describe("an option that would fire an owner", () => {
   });
 
   it("says who fires you in plain words, not as a meter held at 0", () => {
-    const option = cardFor(data, testState({ koda: NOSE_EFFECT }), skunk(["koda"])).options.find(
+    const option = cardFor(data, testState({ kilo: NOSE_EFFECT }), skunk(["kilo"])).options.find(
       ({ index }) => index === HOLD_YOUR_NOSE,
     );
     expect(option?.breakdown.map(({ dog, name, text }) => [dog, text, name])).toEqual([
-      ["koda", `−${NOSE_EFFECT}♥`, NOSE_NAME],
-      ["koda", "", firedByText(data, "koda")],
+      ["kilo", `−${NOSE_EFFECT}♥`, NOSE_NAME],
+      ["kilo", "", firedByText(data, "kilo")],
     ]);
   });
 });
 
 describe("firesText", () => {
   it("names each fatal option", () => {
-    const [koda, duchess, biscuit] = [owner("koda"), owner("duchess"), owner("biscuit")];
+    const [kilo, duchess, biscuit] = [owner("kilo"), owner("duchess"), owner("biscuit")];
     for (const { dogs, owners } of [
-      { dogs: ["koda"], owners: koda },
-      { dogs: ["koda", "duchess"], owners: `${koda} and ${duchess}` },
-      { dogs: ["koda", "duchess", "biscuit"], owners: `${koda}, ${duchess} and ${biscuit}` },
+      { dogs: ["kilo"], owners: kilo },
+      { dogs: ["kilo", "duchess"], owners: `${kilo} and ${duchess}` },
+      { dogs: ["kilo", "duchess", "biscuit"], owners: `${kilo}, ${duchess} and ${biscuit}` },
     ] as const) {
       expect(firesText(data, dogs)).toBe(fillNames(gameData.runText.card.fires, { owners }));
     }
@@ -74,14 +74,14 @@ describe("causeLabel at a firing", () => {
     const { changes } = resolveEffects(
       data,
       {
-        affected: ["koda"],
+        affected: ["kilo"],
         source: { encounter: "skunk", kind: "encounter", option: HOLD_YOUR_NOSE },
       },
       [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
-      testState({ koda: 1 }),
+      testState({ kilo: 1 }),
     );
     expect(changes.map((change) => causeLabel(data, change))).toEqual([
-      `−1♥, ${firedByText(data, "koda")}`,
+      `−1♥, ${firedByText(data, "kilo")}`,
     ]);
   });
 });

@@ -51,12 +51,12 @@ import {
 } from "./moments";
 import { ownerTabRect } from "./walkHud";
 
-const walking = (dog: "biscuit" | "duchess" | "koda", hearts: number) =>
+const walking = (dog: "biscuit" | "duchess" | "kilo", hearts: number) =>
   ({ dog, hearts: clampHearts(10, hearts), status: "walking" }) as const;
 const PACK: Pack = [
   walking("duchess", 1),
   { dog: "biscuit", status: "fired", zoneIndex: 0 },
-  walking("koda", 4),
+  walking("kilo", 4),
 ];
 const fee = (dog: PayoutCue["dog"], amount: number): PayoutCue => ({
   amount: cents(amount),
@@ -248,7 +248,7 @@ describe("lowHeartDogs and newlyLow", () => {
   it("cues only an owner who has just dropped to their last heart", () => {
     expect(newlyLow([], ["duchess"])).toEqual(["duchess"]);
     expect(newlyLow(["duchess"], ["duchess"])).toEqual([]);
-    expect(newlyLow(["duchess"], ["duchess", "koda"])).toEqual(["koda"]);
+    expect(newlyLow(["duchess"], ["duchess", "kilo"])).toEqual(["kilo"]);
   });
 });
 
@@ -272,7 +272,7 @@ describe("cardOwnerMood", () => {
   it.each(cases)(
     "shows a walking dog's owner (max %i) at %i hearts worried on the last heart, else as the dog's face",
     (max, hearts) => {
-      const mood = cardOwnerMood(gameData, max, walking("koda", hearts));
+      const mood = cardOwnerMood(gameData, max, walking("kilo", hearts));
       expect(mood).toBe(hearts === MOMENTS.lowHearts ? "worried" : faceMood(gameData, max, hearts));
     },
   );
@@ -280,14 +280,14 @@ describe("cardOwnerMood", () => {
   it.each(Array.from({ length: gameData.tuning.hearts.maxOwnerHearts }, (_, i) => i + 1))(
     "shows a full owner (max %i) happy, or worried when full is the last heart",
     (max) => {
-      expect(cardOwnerMood(gameData, max, walking("koda", max))).toBe(
+      expect(cardOwnerMood(gameData, max, walking("kilo", max))).toBe(
         max === MOMENTS.lowHearts ? "worried" : "happy",
       );
     },
   );
 
   it.each(maxes)("shows a fired dog's owner (max %i) fired", (max) => {
-    expect(cardOwnerMood(gameData, max, { dog: "koda", status: "fired", zoneIndex: 0 })).toBe(
+    expect(cardOwnerMood(gameData, max, { dog: "kilo", status: "fired", zoneIndex: 0 })).toBe(
       "fired",
     );
   });
@@ -305,7 +305,7 @@ describe("payoutTagTop", () => {
 });
 
 describe("payoutFlights", () => {
-  const cues = [fee("koda", 2000), fee("duchess", 2000), fee("biscuit", 3000)];
+  const cues = [fee("kilo", 2000), fee("duchess", 2000), fee("biscuit", 3000)];
 
   it("sends each paid dog's coins in slot order, staggered, and skips dogs not in the pack", () => {
     const { flightMs, staggerMs } = MOMENTS.payout;
@@ -315,7 +315,7 @@ describe("payoutFlights", () => {
     ).toEqual([
       { dog: "duchess", landMs: flightMs, slot: 0, startMs: 0 },
       { dog: "biscuit", landMs: staggerMs + flightMs, slot: 1, startMs: staggerMs },
-      { dog: "koda", landMs: 2 * staggerMs + flightMs, slot: 2, startMs: 2 * staggerMs },
+      { dog: "kilo", landMs: 2 * staggerMs + flightMs, slot: 2, startMs: 2 * staggerMs },
     ]);
   });
 

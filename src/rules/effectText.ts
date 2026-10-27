@@ -289,7 +289,7 @@ export interface CardTextContext {
 }
 
 // Each owner's change by their dog's name, a loss the walker's perk would forgive saying so in
-// place of its cost: "♥ Duchess's safe!, −1♥ Koda".
+// place of its cost: "♥ Duchess's safe!, −1♥ Kilo".
 function cardHeartsText(
   data: CardTextData,
   context: CardTextContext,

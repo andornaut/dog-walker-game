@@ -14,11 +14,11 @@ describe("loadoutFor", () => {
   it("sets up the run from the setup", () => {
     for (const [, overrides, expected] of [
       ["keeps the fallback when the setup overrides nothing", {}, fallback],
-      ["takes a pack of one from the setup", { pack: ["koda"] }, { ...fallback, dogs: ["koda"] }],
+      ["takes a pack of one from the setup", { pack: ["kilo"] }, { ...fallback, dogs: ["kilo"] }],
       [
         "takes a pack of three from the setup",
-        { pack: ["koda", "archie", "zippy"] },
-        { ...fallback, dogs: ["koda", "archie", "zippy"] },
+        { pack: ["kilo", "archie", "zippy"] },
+        { ...fallback, dogs: ["kilo", "archie", "zippy"] },
       ],
       ["takes the setup's gear", { gear: "luckyCollar" }, { ...fallback, gear: "luckyCollar" }],
       ["takes the setup's lack of gear", { gear: null }, { ...fallback, gear: null }],
@@ -26,7 +26,7 @@ describe("loadoutFor", () => {
       ["keeps the fallback pack for an empty pack", { pack: [] }, fallback],
       [
         "keeps the fallback pack for a pack too big for a run",
-        { pack: ["koda", "archie", "zippy", "penny"] },
+        { pack: ["kilo", "archie", "zippy", "penny"] },
         fallback,
       ],
     ] satisfies readonly [string, Partial<RunSetup<DogId, GearId, WalkerId>>, Loadout][]) {
@@ -36,7 +36,7 @@ describe("loadoutFor", () => {
 });
 
 describe("withSetupStart", () => {
-  const state = testState({ koda: 3 });
+  const state = testState({ kilo: 3 });
 
   it("keeps the run's money and moves it to the setup's zone, on the pre-fork route", () => {
     expect(withSetupStart(gameData, { ...setup, zone: 3 }, state)).toEqual({

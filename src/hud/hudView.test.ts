@@ -26,14 +26,14 @@ describe("changeLabels", () => {
           { amount: -1, kind: "effect", source: skunkIgnore },
           { amount: -1, kind: "modifier", source: { gear: "luckyCollar", kind: "gear" } },
         ],
-        dog: "nugget",
+        dog: "reggie",
         kind: "hearts",
       },
       {
         after: clampHearts(10, 6),
         before: clampHearts(10, 5),
         causes: [{ amount: 1, kind: "treat" }],
-        dog: "koda",
+        dog: "kilo",
         kind: "hearts",
       },
       {
@@ -50,13 +50,13 @@ describe("changeLabels", () => {
       {
         amount: -2,
         gain: false,
-        target: { dog: "nugget", kind: "dog" },
+        target: { dog: "reggie", kind: "dog" },
         text: `−2♥, ${gameData.shopGear.luckyCollar.name}`,
       },
       {
         amount: 1,
         gain: true,
-        target: { dog: "koda", kind: "dog" },
+        target: { dog: "kilo", kind: "dog" },
         text: `+1♥ ${causes.treat}`,
       },
       {
@@ -81,7 +81,7 @@ describe("changeLabels", () => {
           source: { kind: "walker", walker: "casey" },
         },
       ],
-      dog: "koda",
+      dog: "kilo",
       kind: "hearts",
     } as const;
     expect(changeLabels(gameData, [forgiven])).toEqual([]);
@@ -109,8 +109,8 @@ describe("changeLabels", () => {
 describe("the money counter", () => {
   it("moves the counter by the dollars a tip's label shows, a Big tipper tip's too", () => {
     for (const run of [
-      testState({ koda: 5 }),
-      testState({ koda: 5 }, { modifiers: [bigTipper] }),
+      testState({ kilo: 5 }),
+      testState({ kilo: 5 }, { modifiers: [bigTipper] }),
     ]) {
       const tip = tipValue(gameData, run);
       const shown = (money: Cents) => Number(dollarAmountText(money).replaceAll(",", ""));

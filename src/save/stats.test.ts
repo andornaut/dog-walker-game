@@ -8,12 +8,12 @@ describe("statsPage", () => {
     const { stats } = veteranSave();
     expect(statsPage(stats)).toEqual({
       bestRunCents: 9_000,
-      bestRunDogs: ["koda", "penny"],
+      bestRunDogs: ["kilo", "penny"],
       bestRunZones: 4,
       bestZoneFinished: 4,
       dogsWalked: 7,
       lifetimeCents: stats.lifetimeCents - stats.lifetimeStartCents,
-      mostFiredBy: "koda",
+      mostFiredBy: "kilo",
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       runsPlayed: 5,
       timesFired: 1,
@@ -26,7 +26,7 @@ describe("statsPage", () => {
       ...stats,
       dogs: {
         biscuit: { timesFired: 2, walks: 2, zonesFinished: 6 },
-        koda: { timesFired: 2, walks: 5, zonesFinished: 12 },
+        kilo: { timesFired: 2, walks: 5, zonesFinished: 12 },
       },
     };
     expect(statsPage(tied).mostFiredBy).toBe("biscuit");

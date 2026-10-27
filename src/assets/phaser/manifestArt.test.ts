@@ -88,7 +88,7 @@ const FRAMES = {
 // The sprite's frame, as a build with trimming or without it packs it and the runtime adds
 // it, and its atlas page.
 function packedFrame(rows: readonly string[], trim: boolean) {
-  const { image, texture } = sheetFromRows("dog-koda", [rows]);
+  const { image, texture } = sheetFromRows("dog-kilo", [rows]);
   const layout = layoutAtlases([compactFrames(image, trim, texture)]);
   const page = layout.pages[0];
   const atlased = layout.textures[0]?.frames[0];

@@ -40,8 +40,8 @@ export const DOGS = {
     size: "small",
     unlock: "shop",
   },
-  koda: {
-    art: "koda",
+  kilo: {
+    art: "kilo",
     breed: "Alaskan Malamute",
     look: "Large and sturdy, gray and white, blue eyes, harness",
     name: "Koda",
@@ -49,21 +49,8 @@ export const DOGS = {
       name: "Jason",
       role: "trail runner",
     },
-    price: "koda",
+    price: "kilo",
     size: "large",
-    unlock: "shop",
-  },
-  nugget: {
-    art: "nugget",
-    breed: "Pug",
-    look: "Fawn, black mask, tiny bandana",
-    name: "Nugget",
-    owner: {
-      name: "Ralph",
-      role: "pet influencer",
-    },
-    price: "nugget",
-    size: "small",
     unlock: "shop",
   },
   penny: {
@@ -90,6 +77,19 @@ export const DOGS = {
     },
     price: "pierre",
     size: "medium",
+    unlock: "shop",
+  },
+  reggie: {
+    art: "reggie",
+    breed: "Pug",
+    look: "Fawn, black mask, tiny bandana",
+    name: "Nugget",
+    owner: {
+      name: "Ralph",
+      role: "pet influencer",
+    },
+    price: "reggie",
+    size: "small",
     unlock: "shop",
   },
   snowball: {

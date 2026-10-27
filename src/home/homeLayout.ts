@@ -188,7 +188,7 @@ export const HOME_LAYOUT = {
   porchSpots: {
     biscuit: { footY: 145, x: 120 },
     duchess: { footY: 148, x: 150 },
-    koda: { footY: 145, x: 92 },
+    kilo: { footY: 145, x: 92 },
   },
   // The seamless image each section's fill tiles, drawn over its tile area.
   sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },

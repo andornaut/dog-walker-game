@@ -253,7 +253,7 @@ describe("compactFrames", () => {
       },
     ];
     for (const { expected, frames, trim } of cases) {
-      const { image, texture } = sheetFromRows("dog-koda", frames);
+      const { image, texture } = sheetFromRows("dog-kilo", frames);
       const compacted = compactFrames(image, trim, texture).frames.map(
         ({ bounds, from, trim: offset }) => ({ bounds, from, trim: offset }),
       );

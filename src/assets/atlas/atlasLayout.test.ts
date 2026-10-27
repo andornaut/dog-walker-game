@@ -30,11 +30,11 @@ describe("atlasGroupOf", () => {
       ["screen-home", "ui"],
       ["icon-lock", "ui"],
       ["logo", "ui"],
-      ["dog-koda", "home"],
-      ["owner-koda", "home"],
+      ["dog-kilo", "home"],
+      ["owner-kilo", "home"],
       ["walker-ada", "home"],
       ["fx-tap", "home"],
-      ["dog-koda@50", "run"],
+      ["dog-kilo@50", "run"],
       ["other-dog-owner", "run"],
       ["fx-hit-skunk", "run"],
     ];
@@ -60,13 +60,13 @@ describe("spriteSource", () => {
       ]),
       meta: { frameTags: tags },
     };
-    expect(spriteSource("dog-koda", "sprites/dog-koda.png", json)).toEqual({
+    expect(spriteSource("dog-kilo", "sprites/dog-kilo.png", json)).toEqual({
       frames: [
         { duration: 120, from: { height: 32, width: 32, x: 32, y: 0 }, name: "b 1" },
         { duration: 80, from: { height: 32, width: 32, x: 0, y: 0 }, name: "a 0" },
       ],
-      key: "dog-koda",
-      png: "sprites/dog-koda.png",
+      key: "dog-kilo",
+      png: "sprites/dog-kilo.png",
       tags,
     });
   });
@@ -74,18 +74,18 @@ describe("spriteSource", () => {
   it("rejects a trimmed frame and the array export", () => {
     const cases = [
       {
-        error: 'dog-koda frame "a 0" is rotated or trimmed',
+        error: 'dog-kilo frame "a 0" is rotated or trimmed',
         json: { frames: { "a 0": { ...frame(0, 80), trimmed: true } }, meta: {} },
         name: "a frame the export trimmed, whose offset the packer does not read",
       },
       {
-        error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
+        error: 'dog-kilo sheet.frames must be an object: export with the "hash" JSON format',
         json: { frames: [], meta: {} },
         name: "the array export",
       },
     ];
     for (const { error, json, name } of cases) {
-      expect(() => spriteSource("dog-koda", "dog-koda.png", json), name).toThrow(error);
+      expect(() => spriteSource("dog-kilo", "dog-kilo.png", json), name).toThrow(error);
     }
   });
 });
@@ -94,7 +94,7 @@ describe("layoutAtlases", () => {
   const textures = [
     imageSource("images/screen-home.png", 360, 640, "screen-home"),
     imageSource("images/card-skip.png", 120, 90, "card-skip"),
-    sprite("dog-koda", 6, 32, 32),
+    sprite("dog-kilo", 6, 32, 32),
     sprite("ui-loading", 4, 32, 32),
     sprite("fx-confetti", 10, 64, 64),
     sprite("cone", 2, 32, 32),
@@ -180,7 +180,7 @@ describe("layoutAtlases", () => {
       { bounds, from, name: "b", trim: { h: 32, w: 32, x: 9, y: 2 } },
       { from: { height: 32, width: 32, x: 32, y: 0 }, name: "c" },
     ];
-    const layout = layoutAtlases([{ frames, key: "dog-koda", png: "sprites/dog-koda.png" }]);
+    const layout = layoutAtlases([{ frames, key: "dog-kilo", png: "sprites/dog-kilo.png" }]);
     const mapped = layout.textures[0]?.frames ?? [];
     expect(mapped.map(({ trim }) => trim)).toEqual(frames.map(({ trim }) => trim));
     expect([mapped[1]?.x, mapped[1]?.y]).toEqual([mapped[0]?.x, mapped[0]?.y]);

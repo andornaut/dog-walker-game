@@ -11,10 +11,10 @@ import { explainDetail } from "./explain";
 import { RUN_TEXT_FIELDS } from "./runText";
 import type { ExplainTarget } from "./walkHud";
 
-// Koda walks at 2 hearts with Lucky collar in the Pocket, the Raincoats upgrade in effect and
+// Kilo walks at 2 hearts with Lucky collar in the Pocket, the Raincoats upgrade in effect and
 // Muddy on the pack: the effects are the walker's perk, the gear, then the upgrade.
 const run = testState(
-  { koda: 2 },
+  { kilo: 2 },
   {
     debuffs: [{ debuff: "muddy", secondsLeft: 9.2 }],
     gear: "luckyCollar",
@@ -23,7 +23,7 @@ const run = testState(
   },
 );
 const text = gameData.runText.explain;
-const koda = gameData.dogs.koda;
+const kilo = gameData.dogs.kilo;
 
 describe("explainDetail", () => {
   it.each<[string, ExplainTarget, { kind: string; status?: string; title: string }]>([
@@ -49,14 +49,14 @@ describe("explainDetail", () => {
     ],
     [
       "a dog with its owner's hearts now as its status",
-      { dog: "koda", kind: "dog" },
+      { dog: "kilo", kind: "dog" },
       {
         kind: "dog",
         status: fillLine(RUN_TEXT_FIELDS.explain, text, "dogHearts", {
           hearts: "2",
-          max: String(maxHearts(gameData.tuning, run.modifiers, placeInPack(run, "koda"), koda)),
+          max: String(maxHearts(gameData.tuning, run.modifiers, placeInPack(run, "kilo"), kilo)),
         }),
-        title: koda.name,
+        title: kilo.name,
       },
     ],
   ])("shows %s", (_name, target, expected) => {

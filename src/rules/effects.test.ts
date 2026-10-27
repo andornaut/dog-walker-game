@@ -40,15 +40,15 @@ describe("applyEffects: hearts", () => {
         "never above the dog's max, which depends on its size",
         [],
         gainOne,
-        { duchess: 6, koda: 9, pierre: 8 },
-        { duchess: 6, koda: 10, pierre: 8 },
+        { duchess: 6, kilo: 9, pierre: 8 },
+        { duchess: 6, kilo: 10, pierre: 8 },
       ],
       [
         "the same amount to every owner",
-        ["koda", "nugget"],
+        ["kilo", "reggie"],
         loseTwo,
-        { koda: 5, nugget: 5 },
-        { koda: 3, nugget: 3 },
+        { kilo: 5, reggie: 5 },
+        { kilo: 3, reggie: 3 },
       ],
       [
         "the max raised by a maxHearts modifier",
@@ -68,12 +68,12 @@ describe("applyEffects: hearts", () => {
 describe("resolveEffects: changes and their causes", () => {
   it("reports the base and the cap, summing to the change", () => {
     const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
-    const max = maxHearts(TEST_TUNING, [], LONE, DOGS.nugget);
+    const max = maxHearts(TEST_TUNING, [], LONE, DOGS.reggie);
     const { changes } = resolveEffects(
       data,
       context([]),
       [gainTwo],
-      testState({ nugget: max - 1 }),
+      testState({ reggie: max - 1 }),
     );
     expect(changes).toEqual([
       {
@@ -83,7 +83,7 @@ describe("resolveEffects: changes and their causes", () => {
           { amount: 2, kind: "effect", source: SKUNK_IGNORE },
           { amount: -1, bound: "max", kind: "limit" },
         ],
-        dog: "nugget",
+        dog: "reggie",
         kind: "hearts",
       },
     ]);
@@ -105,8 +105,8 @@ describe("resolveEffects: changes and their causes", () => {
       operation: "add",
       stat: "forgivenHearts",
     });
-    // Koda's owner walking Koda alone, at full hearts.
-    const full = maxHearts(tuning, [], LONE, DOGS.koda);
+    // Kilo's owner walking Kilo alone, at full hearts.
+    const full = maxHearts(tuning, [], LONE, DOGS.kilo);
     const lose = (amount: 1 | 2): Effect => ({
       amount: amount === 1 ? -1 : -2,
       kind: "hearts",
@@ -116,7 +116,7 @@ describe("resolveEffects: changes and their causes", () => {
     it("forgives up to its allowance of a loss, reporting it when nothing is lost", () => {
       for (const loss of [1, 2] as const) {
         const forgiven = Math.min(loss, allowance);
-        const state = testState({ koda: full }, { modifiers: [kindWords] });
+        const state = testState({ kilo: full }, { modifiers: [kindWords] });
         const applied = resolveEffects({ ...data, tuning }, context([]), [lose(loss)], state);
         expect(applied.changes).toEqual([
           {
@@ -126,7 +126,7 @@ describe("resolveEffects: changes and their causes", () => {
               { amount: -loss, kind: "effect", source: SKUNK_IGNORE },
               { amount: forgiven, forgives: true, kind: "modifier", source },
             ],
-            dog: "koda",
+            dog: "kilo",
             kind: "hearts",
           },
         ]);
@@ -135,7 +135,7 @@ describe("resolveEffects: changes and their causes", () => {
     });
 
     it("forgives no more once its allowance is used this zone", () => {
-      const used = testState({ koda: full }, { heartsForgiven: allowance, modifiers: [kindWords] });
+      const used = testState({ kilo: full }, { heartsForgiven: allowance, modifiers: [kindWords] });
       const { changes } = resolveEffects({ ...data, tuning }, context([]), [lose(1)], used);
       expect(changes.map((change) => change.causes.length)).toEqual([1]);
     });
@@ -147,18 +147,18 @@ describe("resolveEffects: changes and their causes", () => {
       change: "lose",
       kind: "money",
     };
-    const state = testState({ duchess: 5, koda: 5 }, { modifiers: [sweetTalker] });
-    const { changes } = resolveEffects(data, context(["duchess", "koda"]), [towel], state);
+    const state = testState({ duchess: 5, kilo: 5 }, { modifiers: [sweetTalker] });
+    const { changes } = resolveEffects(data, context(["duchess", "kilo"]), [towel], state);
     expect(changes).toEqual([]);
     expect(moneyCost(data, state, [towel])).toBe(0);
   });
 });
 
 describe("targetDogs", () => {
-  const pack = testState({ duchess: 3, nugget: 3, pierre: "fired" });
+  const pack = testState({ duchess: 3, pierre: "fired", reggie: 3 });
 
   it.each<[string, Parameters<typeof targetDogs>[3], DogId[], DogId[]]>([
-    ["all, leaving out a fired owner's dog", { kind: "all" }, [], ["duchess", "nugget"]],
+    ["all, leaving out a fired owner's dog", { kind: "all" }, [], ["duchess", "reggie"]],
     ["affected, leaving out a fired owner's dog", { kind: "affected" }, ["pierre"], []],
   ])("picks %s", (_name, target, affected, expected) => {
     expect(targetDogs(data, { affected }, pack, target)).toEqual(expected);
@@ -186,24 +186,24 @@ describe("moneyCost and applyEffects: money", () => {
 
   it("charges a cost once, nothing on the zone's first card with Sweet talker", () => {
     for (const [, effect, state, cost] of [
-      ["a cost once, whatever the pack", towel, testState({ duchess: 5, koda: 5, nugget: 5 }), low],
-      ["another cost once too", letGo, testState({ duchess: 5, koda: 5 }), letGoCost],
+      ["a cost once, whatever the pack", towel, testState({ duchess: 5, kilo: 5, reggie: 5 }), low],
+      ["another cost once too", letGo, testState({ duchess: 5, kilo: 5 }), letGoCost],
       [
         "nothing on the zone's first card with Sweet talker",
         towel,
-        talked({ duchess: 5, koda: 5 }),
+        talked({ duchess: 5, kilo: 5 }),
         0,
       ],
       ["a flat cost free too on that card", letGo, talked({ duchess: 5 }), 0],
-      ["in full on the zone's next card", towel, talked({ duchess: 5, koda: 5 }, 1), low],
-      ["nothing for a gain", gain, testState({ duchess: 5, koda: 5 }), 0],
+      ["in full on the zone's next card", towel, talked({ duchess: 5, kilo: 5 }, 1), low],
+      ["nothing for a gain", gain, testState({ duchess: 5, kilo: 5 }), 0],
     ] satisfies readonly [string, Effect, RunState, number][]) {
       expect(moneyCost(data, state, [effect])).toBe(cost);
     }
   });
 
   it("adds gains and subtracts costs", () => {
-    const start = testState({ duchess: 5, koda: 5 }, { money: cents(5000) });
+    const start = testState({ duchess: 5, kilo: 5 }, { money: cents(5000) });
     const gained = read(TEST_TUNING, "money", "missedTips");
     expect(applyEffects(data, context([]), [gain], start).money).toBe(5000 + gained);
     expect(applyEffects(data, context([]), [letGo], start).money).toBe(5000 - letGoCost);
@@ -213,7 +213,7 @@ describe("moneyCost and applyEffects: money", () => {
 describe("applyEffects: other kinds", () => {
   it("refreshes a debuff the pack already has instead of stacking it", () => {
     const stinky: Effect = { debuff: "stinky", kind: "debuff" };
-    const state = applyEffects(data, context([]), [stinky, stinky], testState({ koda: 5 }));
+    const state = applyEffects(data, context([]), [stinky, stinky], testState({ kilo: 5 }));
     expect(state.debuffs).toEqual([
       {
         debuff: "stinky",
@@ -237,14 +237,14 @@ describe("applyEffects: other kinds", () => {
       { ...data, tuning },
       context([]),
       [stinky],
-      testState({ koda: 5 }, { modifiers: [calmVoice] }),
+      testState({ kilo: 5 }, { modifiers: [calmVoice] }),
     );
     expect(state.debuffs[0]?.secondsLeft).toBe(read(TEST_TUNING, "seconds", "stinkySeconds") / 2);
   });
 
   it("records an immunity once", () => {
     const raincoats: Effect = { duration: "run", encounter: "puddle", kind: "immune" };
-    const state = applyEffects(data, context([]), [raincoats, raincoats], testState({ koda: 5 }));
+    const state = applyEffects(data, context([]), [raincoats, raincoats], testState({ kilo: 5 }));
     expect(state.immunities).toEqual([{ encounter: "puddle", source: SKUNK_IGNORE }]);
   });
 
@@ -256,13 +256,13 @@ describe("applyEffects: other kinds", () => {
       operation: "add",
       stat: "tipValue",
     };
-    const state = applyEffects(data, context([]), [bigTipper], testState({ koda: 5 }));
+    const state = applyEffects(data, context([]), [bigTipper], testState({ kilo: 5 }));
     expect(state.modifiers).toEqual([{ ...bigTipper, source: SKUNK_IGNORE }]);
   });
 
   it("offers a free Skip, naming what gave it", () => {
     const skip: Effect = { kind: "skipOption" };
-    const state = applyEffects(data, context([]), [skip], testState({ duchess: 5, koda: 5 }));
+    const state = applyEffects(data, context([]), [skip], testState({ duchess: 5, kilo: 5 }));
     expect(state.skipPass).toEqual(SKUNK_IGNORE);
   });
 });

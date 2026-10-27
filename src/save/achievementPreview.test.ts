@@ -18,7 +18,7 @@ import { earnedSince } from "./achievements";
 import { recordCheckpoint, recordRunEnd } from "./checkpoint";
 import { checkpointOf, runResultOf } from "./runSlices";
 
-const start = newRun(gameData, 2, { dogs: ["duchess", "koda"], gear: null, walker: "casey" });
+const start = newRun(gameData, 2, { dogs: ["duchess", "kilo"], gear: null, walker: "casey" });
 const zoneDone = (run: RunState) => finishZone(gameData, run).run;
 
 // Previews the run against the save as it stands, counting how often the bank is looked at.

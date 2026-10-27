@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { animationKey } from "../assets/asepriteAnimations";
 import { playTag, playTagOnce } from "./sprites";
 
-const KEY = "dog-koda";
+const KEY = "dog-kilo";
 
 // A sprite that has every tag and keeps its one-off listeners as Phaser's emitter does:
 // complete(tag) ends that tag's play and stop() stops whatever plays.

@@ -18,7 +18,7 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: [1],
-  dogs: ["biscuit", "duchess", "koda"],
+  dogs: ["biscuit", "duchess", "kilo"],
   gear: ["luckyCollar"],
   walkers: ["casey"],
 };

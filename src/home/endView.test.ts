@@ -24,7 +24,7 @@ const hearts: Change = {
   after: 3 as Hearts,
   before: 4 as Hearts,
   causes: [],
-  dog: "koda",
+  dog: "kilo",
   kind: "hearts",
 };
 
@@ -88,11 +88,11 @@ describe("zonePips", () => {
 describe("closingLines", () => {
   it("has each owner say a happier line, or their fired line if they fired you", () => {
     const walk = {
-      dogs: ["koda", "biscuit"] as const,
+      dogs: ["kilo", "biscuit"] as const,
       firings: [{ dog: "biscuit" as const, zone: 2 }],
     };
     expect(closingLines({ quips: QUIPS }, () => 0, { ...walk, dogs: [...walk.dogs] })).toEqual([
-      { dog: "koda", fired: false, text: QUIPS.koda.happier[0] },
+      { dog: "kilo", fired: false, text: QUIPS.kilo.happier[0] },
       { dog: "biscuit", fired: true, text: QUIPS.biscuit.fired[0] },
     ]);
   });

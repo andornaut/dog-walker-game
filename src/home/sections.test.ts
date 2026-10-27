@@ -23,7 +23,7 @@ describe("homeSections", () => {
         walker: null,
       },
       {
-        dogs: ["koda"],
+        dogs: ["kilo"],
         expected: {
           dogs: { note: homeLine(text, "packCount", { count: "1", max: "2" }), state: "complete" },
           pocket: { note: data.shopGear.luckyCollar.name, state: "complete" },

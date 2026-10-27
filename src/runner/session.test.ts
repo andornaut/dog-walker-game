@@ -29,13 +29,13 @@ import {
 } from "./session";
 import { itemHeight, startRoad, type WalkItem, zoneLength } from "./walk";
 
-const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
-const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encounter" };
+const SKUNK: CardSource = { affected: ["kilo"], encounter: "skunk", kind: "encounter" };
+const STOP: CardSource = { affected: ["kilo"], encounter: "thief", kind: "encounter" };
 const geometry = () => TEST_ROAD_GEOMETRY;
 const FIRING_SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");
 
 function started(seed = 1): Session {
-  const run = newRun(gameData, 3, { dogs: ["koda", "biscuit"], gear: null, walker: "casey" });
+  const run = newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" });
   return startSession(gameData, runStreams(seed), geometry, { road: startRoad(5), run });
 }
 
@@ -153,7 +153,7 @@ describe("stepSession", () => {
 describe("a strain in the session", { timeout: 30_000 }, () => {
   const SQUIRREL_LANE = 2;
 
-  // Koda straining toward a squirrel in the middle lane, the pack still in lane.
+  // Kilo straining toward a squirrel in the middle lane, the pack still in lane.
   function straining(lane: number): Session {
     const session = emptyRoad(started());
     const squirrel: WalkItem = {
@@ -173,7 +173,7 @@ describe("a strain in the session", { timeout: 30_000 }, () => {
     const strain: Strain = {
       blocked: false,
       direction: lane < SQUIRREL_LANE ? 1 : -1,
-      dog: "koda",
+      dog: "kilo",
       fromLane: lane,
       itemId: squirrel.id,
       kind: "squirrel",
@@ -213,14 +213,14 @@ describe("a strain in the session", { timeout: 30_000 }, () => {
       );
       const failed = events.flatMap((event) => (event.kind === "pulled" ? event.step.failed : []));
       expect(session.pulls.strain === null).toBe(cancelled);
-      expect(failed).toEqual(cancelled ? ["koda"] : []);
+      expect(failed).toEqual(cancelled ? ["kilo"] : []);
     }
   });
 });
 
 describe("a firing in the walk", { timeout: 60_000 }, () => {
   it("holds the road, the queued cards and the zone's end for firingHoldSeconds of steps", () => {
-    // Koda's owner down to 1 heart with Second chance's forgiveness used, a skunk card open on Koda,
+    // Kilo's owner down to 1 heart with Second chance's forgiveness used, a skunk card open on Kilo,
     // a puddle queued behind it and the zone's end waiting.
     const streams = runStreams(1);
     const walk = emptyRoad(started()).walk;
@@ -228,7 +228,7 @@ describe("a firing in the walk", { timeout: 60_000 }, () => {
       ...walk.run,
       heartsForgiven: 1,
       pack: mapPack(
-        (slot) => (slot.dog === "koda" ? { ...slot, hearts: clampHearts(10, 1) } : slot),
+        (slot) => (slot.dog === "kilo" ? { ...slot, hearts: clampHearts(10, 1) } : slot),
         walk.run.pack,
       ),
     };
@@ -250,7 +250,7 @@ describe("a firing in the walk", { timeout: 60_000 }, () => {
 
     const chosen = chooseCard(gameData, streams, geometry, holdNose, open);
     const [event] = chosen.events;
-    expect(event?.kind === "chosen" && event.outcome.fired).toEqual(["koda"]);
+    expect(event?.kind === "chosen" && event.outcome.fired).toEqual(["kilo"]);
     expect(kinds(chosen.events)).toEqual(["chosen"]);
     expect(chosen.session.walk.road.hitStop).toEqual({
       cards: [STOP],
@@ -279,21 +279,21 @@ describe("a firing in the walk", { timeout: 60_000 }, () => {
 describe("a firing's hold", { timeout: 60_000 }, () => {
   const STEP_MS = STEP_SECONDS * 1000;
   const streams = runStreams(1);
-  // The walk with nothing to come, Koda's owner on their last heart and the walker's
-  // forgiveness used, so Koda's next lost heart fires you while Biscuit walks on.
+  // The walk with nothing to come, Kilo's owner on their last heart and the walker's
+  // forgiveness used, so Kilo's next lost heart fires you while Biscuit walks on.
   const lastHeart = (): Session => {
     const session = emptyRoad(started());
     const run = {
       ...session.walk.run,
       heartsForgiven: 1,
       pack: mapPack(
-        (slot) => (slot.dog === "koda" ? { ...slot, hearts: clampHearts(10, 1) } : slot),
+        (slot) => (slot.dog === "kilo" ? { ...slot, hearts: clampHearts(10, 1) } : slot),
         session.walk.run.pack,
       ),
     };
     return { ...session, walk: { ...session.walk, run } };
   };
-  // kind in the pack's lane, its bottom just inside the pack's band, met head-on by Koda.
+  // kind in the pack's lane, its bottom just inside the pack's band, met head-on by Kilo.
   const meeting = (kind: WalkItem["kind"], session: Session): Session => {
     const item: WalkItem = { height: 12, id: 0, kind, lane: 2, laneSpan: 1, y: 560 };
     const road = { ...session.walk.road, items: [item], nextItemId: 1 };
@@ -328,7 +328,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
       const { contacts, fired, instants } = event.step;
       return [...fired, ...[...contacts, ...instants].flatMap(({ outcome }) => outcome.fired)];
     });
-  // The skunk card open on Koda, chosen on its option that costs a heart.
+  // The skunk card open on Kilo, chosen on its option that costs a heart.
   const chooseHoldNose = (data: SessionData, session: Session): SessionStep => {
     const run = openCard(SKUNK, session.walk.run);
     const { resolution } = gameData.encounters.skunk;
@@ -369,7 +369,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
     for (const { data: base, fire, seconds } of cases) {
       const data = holding(base, seconds);
       const fired = fire(data, lastHeart());
-      expect(firedIn(fired.events)).toEqual(["koda"]);
+      expect(firedIn(fired.events)).toEqual(["kilo"]);
       expect(fired.session.walk.road.hitStop?.firing).toBe(true);
 
       // Every step of the hold, a lane press included, leaves the run, the road, the pulls and
@@ -473,22 +473,22 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       [
         "three dogs across tips in three lanes",
         "casey",
-        ["koda", "biscuit", "zippy"],
+        ["kilo", "biscuit", "zippy"],
         "tip",
         3,
         [1, 2, 3],
       ],
       ["two dogs across tips in two lanes", "ada", ["duchess", "snowball"], "tip", 2, [1, 2]],
-      ["one dog across tips in two lanes", "trista", ["nugget"], "tip", 2, [1, 2]],
+      ["one dog across tips in two lanes", "trista", ["reggie"], "tip", 2, [1, 2]],
       [
         "three dogs past a cone two lanes back",
         "casey",
-        ["koda", "biscuit", "zippy"],
+        ["kilo", "biscuit", "zippy"],
         "cone",
         3,
         [1],
       ],
-      ["one dog past a cone a lane back", "trista", ["nugget"], "cone", 2, [1]],
+      ["one dog past a cone a lane back", "trista", ["reggie"], "cone", 2, [1]],
     ] satisfies readonly [string, WalkerId, PackDogs, "cone" | "tip", number, number[]][]) {
       let session = crossing(walker, dogs, kind, lanes);
       const met: number[] = [];

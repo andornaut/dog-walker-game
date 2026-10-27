@@ -228,7 +228,7 @@ function everyStripLine(): FaceText[] {
   const amount = "$9,999";
   const muddyCost = bumpHearts(
     gameData,
-    testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
+    testState({ kilo: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
   );
   return [
     ...Object.values(gameData.hints).map(({ text }) => ({ text })),

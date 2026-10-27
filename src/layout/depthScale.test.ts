@@ -82,7 +82,7 @@ const approach = Array.from({ length: 4 * (Math.ceil(projection.visibleDistance)
 // Floating-point rounding in a drawn size, far below a pixel.
 const ROUNDING = 1e-9;
 // Shipped road sprites, small and large, flat and standing.
-const STANDING = ["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge"];
+const STANDING = ["tip", "treat", "cone", "dog-kilo", "loose-dog", "squirrel", "hedge"];
 // Every standing sprite in the manifest, each with its depth variants.
 const ROAD_SPRITES = manifest.sprites
   .map(({ key }) => key)

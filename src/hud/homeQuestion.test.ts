@@ -18,8 +18,8 @@ describe("homeQuestionNote", () => {
   const pay = read(gameData.tuning, "money", "payPerDog");
 
   it.each([
-    ["three dogs walking", { duchess: 5, koda: 2, zippy: 3 }, 1],
-    ["one dog walking of two", { duchess: 5, koda: "fired" }, 1],
+    ["three dogs walking", { duchess: 5, kilo: 2, zippy: 3 }, 1],
+    ["one dog walking of two", { duchess: 5, kilo: "fired" }, 1],
     ["a lone dog in the last zone", { zippy: 4 }, zones - 1],
   ] satisfies [string, Slots, number][])(
     "states the zone's pay and the zones left that going home gives up: %s",
@@ -42,7 +42,7 @@ describe("homeQuestionNote", () => {
 
   it.each([
     ["a full pack", { duchess: 5 }],
-    ["an owner who fired you", { duchess: 5, koda: "fired" }],
+    ["an owner who fired you", { duchess: 5, kilo: "fired" }],
   ] satisfies [string, Slots][])("gives up nothing at a fork, with %s", (_name, slots) => {
     const fork = { route: route.slice(0, 1), zoneIndex: 1 };
     const lines = homeQuestionNote(gameData, testState(slots, fork));

@@ -14,7 +14,7 @@ const SOURCES = [
   `export const joined = (a: string, b: string) => \`\${a}-\${b}\`;`,
 ];
 const DATA = {
-  dogs: { koda: { art: "koda" } },
+  dogs: { kilo: { art: "kilo" } },
   statuses: ["stinky"],
   zones: [{ art: "yonge-street", name: "Yonge Street" }],
 };
@@ -33,7 +33,7 @@ describe("unusedKeys", () => {
         { key: "yonge-street", png: "b.png" },
       ],
       sounds: [],
-      sprites: ["fx-bump", "fx-stinky", "dog-koda", "dog-koda@88", "dog-rex", "dog-rex@62"].map(
+      sprites: ["fx-bump", "fx-stinky", "dog-kilo", "dog-kilo@88", "dog-rex", "dog-rex@62"].map(
         sprite,
       ),
     };
@@ -46,8 +46,8 @@ describe("unusedKeys", () => {
   });
 
   it.each([
-    ["a template filled with a data name", "face-koda", true],
-    ["a suffix on a key another template builds", "face-koda-20", true],
+    ["a template filled with a data name", "face-kilo", true],
+    ["a suffix on a key another template builds", "face-kilo-20", true],
     ["a suffix on a key no template builds", "face-rex-20", false],
     ["words joined only by a separator-only template", "status-stinky", false],
   ])("counts %s (%s) as used: %s", (_case, key, used) => {

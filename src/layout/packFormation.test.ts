@@ -161,9 +161,9 @@ describe("silhouettes", () => {
 describe("formationOrder", () => {
   // The biggest first, ties in roster order, whatever order the dogs were picked in.
   it("orders the biggest first, ties in roster order", () => {
-    const picked: DogId[] = ["zippy", "nugget", "duchess"];
-    expect(formationOrder(picked)).toEqual(["duchess", "nugget", "zippy"]);
-    expect(formationOrder([...picked].reverse())).toEqual(["duchess", "nugget", "zippy"]);
+    const picked: DogId[] = ["zippy", "reggie", "duchess"];
+    expect(formationOrder(picked)).toEqual(["duchess", "reggie", "zippy"]);
+    expect(formationOrder([...picked].reverse())).toEqual(["duchess", "reggie", "zippy"]);
   });
 });
 

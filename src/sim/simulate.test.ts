@@ -12,7 +12,7 @@ import { badgeCounters } from "./report";
 import { type RunResult, type SimConfig, simulateRun } from "./simulate";
 import { type Skill, SKILL_PRESETS } from "./skills";
 
-const TRIO: PackDogs = ["duchess", "biscuit", "koda"];
+const TRIO: PackDogs = ["duchess", "biscuit", "kilo"];
 const RISKY: PackDogs = ["zippy", "archie", "snowball"];
 // A bot that misses every lane change it plans, so it walks into whatever comes.
 const BLIND: Skill = {

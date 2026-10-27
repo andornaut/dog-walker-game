@@ -11,7 +11,7 @@ const setup: RunSetup<DogId, GearId, WalkerId> = { dev: false, seed: 1, speed: 1
 describe("namesRunSetup", () => {
   it("reads which queries name a run setup", () => {
     for (const [search, expected] of [
-      ["?seed=123&pack=koda,duchess&zone=1&dev=1", true],
+      ["?seed=123&pack=kilo,duchess&zone=1&dev=1", true],
       ["?speed=2", true],
       ["?gear=none", true],
       ["?walker=ada", true],
@@ -29,8 +29,8 @@ describe("devRunLoadout", () => {
       [
         "takes the link's pack, gear and walker over the saved loadout",
         { dogs: ["biscuit"], gear: null },
-        { gear: "luckyCollar", pack: ["koda", "duchess"], walker: "trista" },
-        { dogs: ["koda", "duchess"], gear: "luckyCollar", walker: "trista" },
+        { gear: "luckyCollar", pack: ["kilo", "duchess"], walker: "trista" },
+        { dogs: ["kilo", "duchess"], gear: "luckyCollar", walker: "trista" },
       ],
       [
         "keeps the saved loadout and walker for what the link leaves out",
@@ -42,7 +42,7 @@ describe("devRunLoadout", () => {
         "walks the first owned dog when nothing was picked yet",
         { dogs: [], gear: null },
         {},
-        { dogs: ["koda"], gear: null, walker: "ben" },
+        { dogs: ["kilo"], gear: null, walker: "ben" },
       ],
     ] satisfies readonly [
       string,
@@ -50,7 +50,7 @@ describe("devRunLoadout", () => {
       Partial<RunSetup<DogId, GearId, WalkerId>>,
       Loadout,
     ][]) {
-      expect(devRunLoadout(saved, "ben", "koda", { ...setup, ...overrides })).toEqual(expected);
+      expect(devRunLoadout(saved, "ben", "kilo", { ...setup, ...overrides })).toEqual(expected);
     }
   });
 });
@@ -60,12 +60,12 @@ describe("stripDevParams", () => {
   it("strips the dev parameters", () => {
     for (const [search, disableDev, expected] of [
       [
-        "?dev=1&pack=koda&seed=3&gear=none&walker=ada&zone=2&money=5&speed=2&route=a,b",
+        "?dev=1&pack=kilo&seed=3&gear=none&walker=ada&zone=2&money=5&speed=2&route=a,b",
         false,
         "?dev=1",
       ],
-      ["?dev=1&pack=koda", true, ""],
-      ["?pack=koda&lang=fr&zone=2#top", false, "?lang=fr#top"],
+      ["?dev=1&pack=kilo", true, ""],
+      ["?pack=kilo&lang=fr&zone=2#top", false, "?lang=fr#top"],
       ["?dev=1&lang=fr", true, "?lang=fr"],
       ["", false, ""],
     ] as const) {
@@ -84,7 +84,7 @@ describe("homeRunSetup", () => {
         dev,
         gear: "luckyCollar",
         money: 5,
-        pack: ["koda"],
+        pack: ["kilo"],
         route: ["a"],
         seed: 1,
         speed: 3,

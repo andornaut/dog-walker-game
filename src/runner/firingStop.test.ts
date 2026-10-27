@@ -5,8 +5,8 @@ import type { CardSource } from "../state/runState";
 import { type FiringHold, holdForFiring } from "./firingStop";
 import type { HitStop } from "./hitStop";
 
-const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
-const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encounter" };
+const SKUNK: CardSource = { affected: ["kilo"], encounter: "skunk", kind: "encounter" };
+const STOP: CardSource = { affected: ["kilo"], encounter: "thief", kind: "encounter" };
 const NOTHING = { cards: [], zoneEnded: false };
 
 describe("holdForFiring", () => {
@@ -23,7 +23,7 @@ describe("holdForFiring", () => {
       },
       {
         expected: { queued: { cards: [STOP], zoneEnded: true }, stop: null },
-        fired: ["koda"],
+        fired: ["kilo"],
         name: "changes nothing for a hold of no length",
         running: null,
         seconds: 0,
@@ -33,7 +33,7 @@ describe("holdForFiring", () => {
           queued: NOTHING,
           stop: { cards: [STOP], firing: true, seconds: 1, zoneEnded: true },
         },
-        fired: ["koda"],
+        fired: ["kilo"],
         name: "holds the queued cards and the zone end for the firing's length",
         running: null,
         seconds: 1,
@@ -43,7 +43,7 @@ describe("holdForFiring", () => {
           queued: NOTHING,
           stop: { cards: [SKUNK, STOP], firing: true, seconds: 1, zoneEnded: true },
         },
-        fired: ["koda"],
+        fired: ["kilo"],
         name: "keeps a longer firing over a running stop, holding what both hold",
         running: RUNNING,
         seconds: 1,
@@ -53,7 +53,7 @@ describe("holdForFiring", () => {
           queued: NOTHING,
           stop: { cards: [SKUNK, STOP], firing: true, seconds: 1.5, zoneEnded: true },
         },
-        fired: ["koda"],
+        fired: ["kilo"],
         name: "keeps a longer running stop over the firing",
         running: { ...RUNNING, seconds: 1.5 },
         seconds: 1,

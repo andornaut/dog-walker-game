@@ -12,8 +12,8 @@ import { plainMarks } from "../ui/pixelFont";
 import { cardFor } from "./choices";
 import { cents, dollarsToCents, read } from "./units";
 
-const PACK: readonly DogId[] = ["koda", "duchess", "nugget"];
-const state = testState({ duchess: 5, koda: 5, nugget: 5 }, { money: cents(10_000) });
+const PACK: readonly DogId[] = ["kilo", "duchess", "reggie"];
+const state = testState({ duchess: 5, kilo: 5, reggie: 5 }, { money: cents(10_000) });
 const { encounterHigh, thiefLetGo } = gameData.tuning.money;
 
 const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => ({
@@ -40,21 +40,21 @@ describe("a card's text for the dogs it catches", () => {
   it("words each option's effects as its card shows them", () => {
     for (const { affected, id, label, text } of [
       {
-        affected: ["duchess", "koda"],
+        affected: ["duchess", "kilo"],
         id: "thief",
         label: "Chase them off",
-        text: heartsText(["duchess", "koda"], -1),
+        text: heartsText(["duchess", "kilo"], -1),
         why: "names each dog it reaches, in pack order",
       },
       {
-        affected: ["koda", "duchess"],
+        affected: ["kilo", "duchess"],
         id: "skunk",
         label: "Full groom",
         text: `−$${encounterHigh}`,
         why: "charges a cost once, whatever the pack",
       },
       {
-        affected: ["koda"],
+        affected: ["kilo"],
         id: "thief",
         label: "Let them go",
         text: `−$${thiefLetGo}`,
@@ -67,10 +67,10 @@ describe("a card's text for the dogs it catches", () => {
 
   it("agrees with the cost plaque for every pack size", () => {
     for (const row of [
-      { affected: ["koda"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
+      { affected: ["kilo"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
       { affected: PACK, dollars: encounterHigh, id: "skunk", label: "Full groom" },
       { affected: PACK, dollars: thiefLetGo, id: "thief", label: "Let them go" },
-      { affected: ["koda"], dollars: thiefLetGo, id: "thief", label: "Let them go" },
+      { affected: ["kilo"], dollars: thiefLetGo, id: "thief", label: "Let them go" },
     ] as const) {
       const view = option(encounter(row.id, row.affected), row.label);
       expect(view.cost).toBe(dollarsToCents(row.dollars));
@@ -89,18 +89,18 @@ describe("a card's text for the dogs it catches", () => {
 
     it("says each effect's line", () => {
       for (const [, used, text] of [
-        ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["koda"], -1)}`],
+        ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["kilo"], -1)}`],
         [
           "nothing forgiven once Second chance is used",
           allowance,
-          heartsText(["duchess", "koda"], -1),
+          heartsText(["duchess", "kilo"], -1),
         ],
       ] as const) {
         const kind = testState(
-          { duchess: 5, koda: 5 },
+          { duchess: 5, kilo: 5 },
           { heartsForgiven: used, modifiers: [kindWords] },
         );
-        const source = encounter("thief", ["duchess", "koda"]);
+        const source = encounter("thief", ["duchess", "kilo"]);
         const view = cardFor(gameData, kind, source).options.find(
           ({ label }) => label === "Chase them off",
         );
@@ -152,10 +152,10 @@ describe("a card's text for the dogs it catches", () => {
       },
     ])("$why, on the small and large card", ({ cardsThisZone, large, modifiers, text }) => {
       const run = testState(
-        { duchess: 5, koda: 5 },
+        { duchess: 5, kilo: 5 },
         { cardsThisZone, modifiers, money: cents(10_000) },
       );
-      const view = cardFor(gameData, run, encounter("skunk", ["koda"])).options.find(
+      const view = cardFor(gameData, run, encounter("skunk", ["kilo"])).options.find(
         ({ label }) => label === groom,
       );
       expect([view?.text, largeBodyText(gameData, view)]).toEqual([text, large]);

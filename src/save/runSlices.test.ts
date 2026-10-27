@@ -22,7 +22,7 @@ const data = {
   tuning: TEST_TUNING,
   world: WORLD,
 };
-const start = newRun(data, 3, { dogs: ["koda", "duchess"], gear: null, walker: "casey" });
+const start = newRun(data, 3, { dogs: ["kilo", "duchess"], gear: null, walker: "casey" });
 // In zone 3 with 2 zones paid; duchess fired you in zone 2.
 const midRun: RunState = {
   ...start,
@@ -34,7 +34,7 @@ const midRun: RunState = {
 
 const walking = defined(start.pack[0]);
 if (walking.status !== "walking") {
-  throw new Error("The run starts with koda walking");
+  throw new Error("The run starts with kilo walking");
 }
 
 describe("checkpointOf", () => {
@@ -42,7 +42,7 @@ describe("checkpointOf", () => {
     expect(checkpointOf(data, midRun)).toEqual({
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
-        { fired: false, id: "koda", zonesFinished: 2 },
+        { fired: false, id: "kilo", zonesFinished: 2 },
         { fired: true, id: "duchess", zonesFinished: 1 },
       ],
       earnedCents: 4_250,
@@ -87,7 +87,7 @@ describe("runResultOf", () => {
     expect(runResultOf(data, finished)).toEqual({
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
-        { fired: false, id: "koda", zonesFinished: 4 },
+        { fired: false, id: "kilo", zonesFinished: 4 },
         { fired: true, id: "duchess", zonesFinished: 1 },
       ],
       earnedCents: 4_250,

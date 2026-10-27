@@ -82,8 +82,8 @@ function choose(state: RunState, source: CardSource, choice: Choice) {
 
 describe("cardFor", () => {
   it("disables an option the player cannot afford, with the reason", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { money: cents(letGo - 100) });
-    const card = cardFor(data, state, encounter("thief", ["duchess", "koda"]));
+    const state = testState({ duchess: 5, kilo: 5 }, { money: cents(letGo - 100) });
+    const card = cardFor(data, state, encounter("thief", ["duchess", "kilo"]));
     const letGoOption = optionWith("thief", "money");
     expect(card.title).toBe(ENCOUNTERS.thief.name);
     expect(card.options.map(({ availability }) => availability)).toEqual(
@@ -95,11 +95,11 @@ describe("cardFor", () => {
   });
 
   it("keeps every card's free option enabled with no money", () => {
-    const state = testState({ duchess: 5, koda: 5, pierre: 5 });
+    const state = testState({ duchess: 5, kilo: 5, pierre: 5 });
     const cardEncounters = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
       (id) => ENCOUNTERS[id].resolution.kind === "card",
     );
-    const sources = cardEncounters.map((id) => encounter(id, ["duchess", "koda", "pierre"]));
+    const sources = cardEncounters.map((id) => encounter(id, ["duchess", "kilo", "pierre"]));
     for (const source of sources) {
       const card = cardFor(data, state, source);
       const free = card.options.filter(({ cost }) => cost === 0);
@@ -112,8 +112,8 @@ describe("cardFor", () => {
   });
 
   it("gives each option its art and a breakdown of every change it would make", () => {
-    const state = testState({ koda: 5, nugget: 5 }, { money: cents(5000) });
-    const card = cardFor(data, state, encounter("thief", ["koda", "nugget"]));
+    const state = testState({ kilo: 5, reggie: 5 }, { money: cents(5000) });
+    const card = cardFor(data, state, encounter("thief", ["kilo", "reggie"]));
     const { resolution } = ENCOUNTERS.thief;
     const options = resolution.kind === "card" ? resolution.options : [];
     expect(card.options.map(({ art }) => art)).toEqual(options.map(({ art }) => art));
@@ -121,8 +121,8 @@ describe("cardFor", () => {
     const chase = options[optionWith("thief", "hearts")];
     const lost = `−${Math.abs(heartsOf("thief"))}♥`;
     expect(card.options[optionWith("thief", "hearts")]?.breakdown).toEqual([
-      { dog: "koda", name: chase?.name, text: lost },
-      { dog: "nugget", name: chase?.name, text: lost },
+      { dog: "kilo", name: chase?.name, text: lost },
+      { dog: "reggie", name: chase?.name, text: lost },
     ]);
     expect(
       card.options[optionWith("thief", "money")]?.breakdown.filter(({ dog }) => dog === null),
@@ -130,14 +130,14 @@ describe("cardFor", () => {
   });
 
   it("refuses an instant encounter, which opens no card", () => {
-    const state = testState({ koda: 5 });
-    expect(() => cardFor(data, state, encounter("lostWallet", ["koda"]))).toThrow("opens no card");
+    const state = testState({ kilo: 5 });
+    expect(() => cardFor(data, state, encounter("lostWallet", ["kilo"]))).toThrow("opens no card");
   });
 });
 
 describe("hasPlaque", () => {
-  const pack: DogId[] = ["duchess", "koda", "pierre"];
-  const state = testState({ duchess: 5, koda: 5, pierre: 5 }, { money: cents(1_000_000) });
+  const pack: DogId[] = ["duchess", "kilo", "pierre"];
+  const state = testState({ duchess: 5, kilo: 5, pierre: 5 }, { money: cents(1_000_000) });
   const rows = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
     return resolution.kind === "card"
@@ -160,7 +160,7 @@ describe("hasPlaque", () => {
 
   it("gives the Skip card no plaque and a fork's path card one, for its zone's pay", () => {
     const fork: CardSource = { kind: "fork", paths: ["shops"], upgrades: ["bigTipper"] };
-    const afterZone = testState({ koda: 4 }, { route: ["street"], zoneIndex: 1 });
+    const afterZone = testState({ kilo: 4 }, { route: ["street"], zoneIndex: 1 });
     expect(hasPlaque(undefined)).toBe(false);
     expect(hasPlaque(cardFor(data, openCard(fork, afterZone), fork).options[0])).toBe(true);
   });
@@ -168,8 +168,8 @@ describe("hasPlaque", () => {
 
 describe("applyInstantEncounter", () => {
   it("pays a lost wallet at once", () => {
-    const state = testState({ koda: 5, snowball: 3 });
-    const outcome = applyInstantEncounter(data, state, "lostWallet", ["koda", "snowball"]);
+    const state = testState({ kilo: 5, snowball: 3 });
+    const outcome = applyInstantEncounter(data, state, "lostWallet", ["kilo", "snowball"]);
     const keep = read(TEST_TUNING, "money", "lostWalletKeep");
     expect(outcome.moneyDelta).toBe(keep);
     expect(heartsByDog(outcome.state)).toEqual(heartsByDog(state));
@@ -180,9 +180,9 @@ describe("applyInstantEncounter", () => {
   });
 
   it("gives the friendly neighbor's hearts to every owner", () => {
-    const state = testState({ duchess: 3, koda: 3 });
-    const outcome = applyInstantEncounter(data, state, "pettingNeighbor", ["duchess", "koda"]);
-    expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "koda"]);
+    const state = testState({ duchess: 3, kilo: 3 });
+    const outcome = applyInstantEncounter(data, state, "pettingNeighbor", ["duchess", "kilo"]);
+    expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "kilo"]);
   });
 
   // Each lucky find, caught by the whole pack, below max, with an owner at max and with an owner
@@ -191,12 +191,12 @@ describe("applyInstantEncounter", () => {
   const luckyFinds = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
     (id) => ENCOUNTERS[id].kind === "lucky",
   );
-  const low = testState({ duchess: 1, koda: 1, snowball: 1 });
-  const kodaFull = startHearts(TEST_TUNING, [], placeInPack(low, "koda"), DOGS.koda);
+  const low = testState({ duchess: 1, kilo: 1, snowball: 1 });
+  const kiloFull = startHearts(TEST_TUNING, [], placeInPack(low, "kilo"), DOGS.kilo);
   const packs: [string, RunState][] = [
     ["below max", low],
-    ["Koda's owner at max", testState({ duchess: 1, koda: kodaFull, snowball: 1 })],
-    ["Sequoia's owner fired", testState({ duchess: 1, koda: 1, snowball: "fired" })],
+    ["Kilo's owner at max", testState({ duchess: 1, kilo: kiloFull, snowball: 1 })],
+    ["Sequoia's owner fired", testState({ duchess: 1, kilo: 1, snowball: "fired" })],
   ];
   it.each(luckyFinds.flatMap((id) => packs.map(([pack, state]) => [id, pack, state] as const)))(
     "has %s quip from exactly the owners it raised, %s",
@@ -216,13 +216,13 @@ describe("applyInstantEncounter", () => {
   );
 
   it("refuses an encounter with no effects on contact", () => {
-    expect(() => applyInstantEncounter(data, testState({ koda: 5 }), "thief", ["koda"])).toThrow(
+    expect(() => applyInstantEncounter(data, testState({ kilo: 5 }), "thief", ["kilo"])).toThrow(
       "no effects on contact",
     );
   });
 
   it("applies a contact obstacle's effects to the pack", () => {
-    const outcome = applyInstantEncounter(data, testState({ koda: 5 }), "puddle", ["koda"]);
+    const outcome = applyInstantEncounter(data, testState({ kilo: 5 }), "puddle", ["kilo"]);
     const { resolution } = ENCOUNTERS.puddle;
     const debuffs = resolution.effects.flatMap((effect) =>
       effect.kind === "debuff" ? [effect.debuff] : [],
@@ -247,9 +247,9 @@ describe("chooseOption", () => {
   });
 
   it("counts a tally only for the option that names it", () => {
-    const state = testState({ koda: 5 }, { money: cents(5_000) });
+    const state = testState({ kilo: 5 }, { money: cents(5_000) });
     for (const row of tallied) {
-      const card = encounter(row.id, ["koda"]);
+      const card = encounter(row.id, ["kilo"]);
       expect(row.tally, row.id).toBeDefined();
       expect(choose(state, card, row.counted).state.tallies).toEqual({ [row.tally ?? ""]: 1 });
       expect(choose(state, card, row.plain).state.tallies).toEqual({});
@@ -257,8 +257,8 @@ describe("chooseOption", () => {
   });
 
   it("applies an option only to the affected dogs, and reports each heart change", () => {
-    const outcome = choose(testState({ duchess: 5, koda: 5 }), encounter("skunk", ["koda"]), nose);
-    expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, koda: 5 + lost });
+    const outcome = choose(testState({ duchess: 5, kilo: 5 }), encounter("skunk", ["kilo"]), nose);
+    expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, kilo: 5 + lost });
     expect(outcome.heartChanges).toEqual([
       {
         after: 5 + lost,
@@ -270,25 +270,25 @@ describe("chooseOption", () => {
             source: { encounter: "skunk", kind: "encounter", option: nose },
           },
         ],
-        dog: "koda",
+        dog: "kilo",
         kind: "hearts",
       },
     ]);
-    expect(outcome.quips).toEqual([{ dog: "koda", moment: "upset" }]);
+    expect(outcome.quips).toEqual([{ dog: "kilo", moment: "upset" }]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
   it("charges the option's cost and reports the money change", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { money: cents(4000) });
-    const outcome = choose(state, encounter("skunk", ["duchess", "koda"]), groom);
+    const state = testState({ duchess: 5, kilo: 5 }, { money: cents(4000) });
+    const outcome = choose(state, encounter("skunk", ["duchess", "kilo"]), groom);
     expect(outcome.state.money).toBe(4000 - high);
     expect(outcome.moneyDelta).toBe(-high);
   });
 
   it("rejects a disabled option", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { money: cents(0) });
+    const state = testState({ duchess: 5, kilo: 5 }, { money: cents(0) });
     expect(() =>
-      choose(state, encounter("thief", ["duchess", "koda"]), optionWith("thief", "money")),
+      choose(state, encounter("thief", ["duchess", "kilo"]), optionWith("thief", "money")),
     ).toThrow("not enough money");
   });
 
@@ -305,9 +305,9 @@ describe("chooseOption", () => {
   });
 
   it("ends the run when the last owner fires you", () => {
-    const outcome = choose(testState({ koda: -lost }), encounter("skunk", ["koda"]), nose);
+    const outcome = choose(testState({ kilo: -lost }), encounter("skunk", ["kilo"]), nose);
     expect(outcome.state.phase).toEqual({ kind: "ended", reason: "noDogs" });
-    const source = encounter("skunk", ["koda"]);
+    const source = encounter("skunk", ["kilo"]);
     const card = cardFor(data, outcome.state, source);
     expect(() => chooseOption(data, outcome.state, card, nose)).toThrow("ended");
   });
@@ -318,10 +318,10 @@ describe("chooseOption", () => {
       { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
     );
     const state = testState(
-      { duchess: 5, koda: 5 },
+      { duchess: 5, kilo: 5 },
       { modifiers: [sweetTalker], money: cents(4000) },
     );
-    const skunk = encounter("skunk", ["duchess", "koda"]);
+    const skunk = encounter("skunk", ["duchess", "kilo"]);
     const first = choose(state, skunk, groom);
     expect(first.state.money).toBe(4000);
     expect(first.state.cardsThisZone).toBe(1);
@@ -332,7 +332,7 @@ describe("chooseOption", () => {
 describe("offerUpgrades", () => {
   it("never offers an upgrade already picked", () => {
     const all = Object.keys(UPGRADES) as UpgradeId[];
-    const picked = testState({ koda: 5 }, { upgradesPicked: all.slice(0, 2) });
+    const picked = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, 2) });
     for (let draw = 0; draw < 1; draw += 0.1) {
       const offer = offerUpgrades(data, () => draw, 3, picked);
       expect(offer).toHaveLength(3);
@@ -342,17 +342,17 @@ describe("offerUpgrades", () => {
 
   it("offers the only ones left when the rest are picked, and fails with fewer", () => {
     const all = Object.keys(UPGRADES) as UpgradeId[];
-    const left = testState({ koda: 5 }, { upgradesPicked: all.slice(0, all.length - 3) });
+    const left = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 3) });
     expect([...offerUpgrades(data, () => 0.5, 3, left)].sort()).toEqual(all.slice(-3).sort());
-    const fewer = testState({ koda: 5 }, { upgradesPicked: all.slice(0, all.length - 2) });
+    const fewer = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 2) });
     expect(() => offerUpgrades(data, () => 0, 3, fewer)).toThrow("Fewer than 3");
   });
 });
 
 describe("skip option", () => {
   it("is offered on every obstacle card with Hall pass until it is taken, once per zone", () => {
-    const state = newRun(data, 1, { dogs: ["koda"], gear: "hallPass", walker: "casey" });
-    const source = encounter("skunk", ["koda"]);
+    const state = newRun(data, 1, { dogs: ["kilo"], gear: "hallPass", walker: "casey" });
+    const source = encounter("skunk", ["kilo"]);
     expect(cardFor(data, state, source).skip).toBe(true);
     const skipped = choose(state, source, "skip");
     expect(heartsByDog(skipped.state)).toEqual(heartsByDog(state));
@@ -421,11 +421,11 @@ describe("skip option", () => {
         [id]: { ...ENCOUNTERS[id], resolution: { kind: "card" as const, options: shown } },
       },
     };
-    const source = encounter(id, ["koda"]);
+    const source = encounter(id, ["kilo"]);
     const indexes = (gear: "hallPass" | null) =>
       cardFor(
         withOptions,
-        newRun(withOptions, 1, { dogs: ["koda"], gear, walker: "casey" }),
+        newRun(withOptions, 1, { dogs: ["kilo"], gear, walker: "casey" }),
         source,
       ).options.map((option) => option.index);
     const all = shown.map((_, index) => index);
@@ -434,8 +434,8 @@ describe("skip option", () => {
   });
 
   it("refuses the option Walk on by took the place of", () => {
-    const withPass = newRun(data, 1, { dogs: ["koda"], gear: "hallPass", walker: "casey" });
-    const skunk = encounter("skunk", ["koda"]);
+    const withPass = newRun(data, 1, { dogs: ["kilo"], gear: "hallPass", walker: "casey" });
+    const skunk = encounter("skunk", ["kilo"]);
     expect(() => choose(withPass, skunk, optionWith("skunk", "hearts"))).toThrow(
       "not on the Skunk card",
     );
@@ -473,7 +473,7 @@ describe("a fork", () => {
     paths: ["snoozeCrescent", "shops", "homeStretch"],
     upgrades,
   };
-  const afterZone = testState({ koda: 4 }, { route: ["street"], zoneIndex: 1 });
+  const afterZone = testState({ kilo: 4 }, { route: ["street"], zoneIndex: 1 });
 
   it("shows a free path card per path with its zone, difficulty and upgrade", () => {
     const card = cardFor(data, openCard(source, afterZone), source);
@@ -521,12 +521,12 @@ describe("a fork", () => {
   });
 
   it("offers only zones the route has not walked, each with an upgrade, and only the last before it", () => {
-    const walked = testState({ koda: 4 }, { route: ["street", "park"], zoneIndex: 2 });
+    const walked = testState({ kilo: 4 }, { route: ["street", "park"], zoneIndex: 2 });
     const fork = offerFork(data, { forks: () => 0, upgrades: () => 0 }, walked);
     expect(fork.paths).toEqual(["snoozeCrescent", "shops", "pawsPromenade"]);
     expect(fork.upgrades).toHaveLength(fork.paths.length);
     // Before the last zone, it leads only there.
-    const before = testState({ koda: 4 }, { route: ["street", "park", "shops"], zoneIndex: 3 });
+    const before = testState({ kilo: 4 }, { route: ["street", "park", "shops"], zoneIndex: 3 });
     const last = offerFork(data, { forks: () => 0, upgrades: () => 0 }, before);
     expect(last.paths).toEqual([TEST_WORLD.lastZone]);
     expect(last.upgrades).toHaveLength(1);

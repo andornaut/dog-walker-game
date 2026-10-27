@@ -22,9 +22,9 @@ describe("splitDepthKey", () => {
   // A plain key is its own full size.
   it("splits a key into its base and step", () => {
     const cases = [
-      ["dog-koda@88", "dog-koda", { scale: 0.875, suffix: "@88" }],
+      ["dog-kilo@88", "dog-kilo", { scale: 0.875, suffix: "@88" }],
       ["parked-car@62", "parked-car", { scale: 0.625, suffix: "@62" }],
-      ["dog-koda", "dog-koda", { scale: 1, suffix: "" }],
+      ["dog-kilo", "dog-kilo", { scale: 1, suffix: "" }],
     ] as const;
     for (const [key, base, step] of cases) {
       expect(splitDepthKey(key)).toEqual({ base, step });

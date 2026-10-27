@@ -94,9 +94,9 @@ export interface HelpPicture {
 export const HELP_SCENES = {
   // The card scene's title stands this many rows into a card page's picture.
   cardTitleInset: 8,
-  cards: { dogs: ["koda"], encounter: "skunk", lane: 2 },
+  cards: { dogs: ["kilo"], encounter: "skunk", lane: 2 },
   lanes: {
-    dogs: ["koda", "biscuit", "duchess"],
+    dogs: ["kilo", "biscuit", "duchess"],
     lane: 3,
     mover: { distance: 190, kind: "cat" },
     // The pack's move from the lane before: dots from dotsFrom right of that lane's centre,
@@ -109,7 +109,7 @@ export const HELP_SCENES = {
   owners: {
     // The dog that loses a heart to a bump.
     bumped: { dog: "biscuit", lost: 1 },
-    dogs: ["koda", "biscuit", "duchess"],
+    dogs: ["kilo", "biscuit", "duchess"],
     fired: "duchess",
     lane: 1,
   },
@@ -127,13 +127,13 @@ export const HELP_SCENES = {
     zoneFraction: 0.4,
   },
   pulls: {
-    dogs: ["koda", "biscuit"],
+    dogs: ["kilo", "biscuit"],
     lane: 2,
     squirrel: { distance: 260, lane: 3 },
     strainer: "biscuit",
     zone: "park",
   },
-  zones: { dogs: ["koda", "biscuit", "duchess"], lane: 2 },
+  zones: { dogs: ["kilo", "biscuit", "duchess"], lane: 2 },
 } as const;
 
 // The strip of height rows ending on the road's last row.

@@ -131,11 +131,11 @@ function namedByDogs(dogs: PackDogs): NamedPack {
 const PACKS: readonly NamedPack[] = [
   namedByDogs(["duchess"]),
   namedByDogs(["biscuit"]),
-  namedByDogs(["koda"]),
+  namedByDogs(["kilo"]),
   namedByDogs(["penny"]),
-  namedByDogs(["koda", "biscuit"]),
-  namedByDogs(["nugget", "pierre"]),
-  namedByDogs(["duchess", "biscuit", "koda"]),
+  namedByDogs(["kilo", "biscuit"]),
+  namedByDogs(["reggie", "pierre"]),
+  namedByDogs(["duchess", "biscuit", "kilo"]),
   { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
 ];
 

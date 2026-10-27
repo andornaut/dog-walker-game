@@ -69,20 +69,20 @@ const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
   { by: "bigTipperTipBonus", operation: "add", stat: "tipValue" },
 );
-const bigTipperTip = () => tipValue(data, testState({ koda: 5 }, { modifiers: [bigTipper] }));
+const bigTipperTip = () => tipValue(data, testState({ kilo: 5 }, { modifiers: [bigTipper] }));
 
 describe("causeLabel", () => {
   it("names each cause", () => {
     for (const [, change, text] of [
       [
         "a card option just picked by its amount alone",
-        () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
+        () => resolved(loseOne, testState({ reggie: 5 }), ["reggie"]),
         "−1♥",
       ],
       [
         "the max when a gain is cut short there",
         () =>
-          resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], {
+          resolved(gainTwo, testState({ reggie: maxOf("reggie") - 1 }), [], {
             kind: "upgrade",
             upgrade: "bellyRubs",
           }),
@@ -103,8 +103,8 @@ describe("causeLabel", () => {
         () =>
           resolved(
             towel,
-            testState({ duchess: 5, koda: 5 }, { cardsThisZone: 1, modifiers: [sweetTalker] }),
-            ["duchess", "koda"],
+            testState({ duchess: 5, kilo: 5 }, { cardsThisZone: 1, modifiers: [sweetTalker] }),
+            ["duchess", "kilo"],
           ),
         `−${formatDollars(read(TEST_TUNING, "money", "encounterLow"))}`,
       ],
@@ -114,8 +114,8 @@ describe("causeLabel", () => {
           changeHearts(
             data,
             [{ amount: read(TEST_TUNING, "hearts", "treat"), kind: "treat" }],
-            "koda",
-            testState({ koda: 3 }),
+            "kilo",
+            testState({ kilo: 3 }),
           ).change,
         `+${read(TEST_TUNING, "hearts", "treat")}♥ ${RUN_TEXT.causes.treat}`,
       ],
@@ -124,7 +124,7 @@ describe("causeLabel", () => {
         () =>
           resolved(
             { amount: "lostWalletKeep", change: "gain", kind: "money" },
-            testState({ koda: 5 }),
+            testState({ kilo: 5 }),
             [],
             { encounter: "lostWallet", kind: "instant" },
           ),
@@ -143,7 +143,7 @@ describe("change causes", () => {
       ["a tip with Big tipper's bonus", bigTipperTip],
       [
         "hearts capped",
-        () => resolved(gainTwo, testState({ nugget: maxOf("nugget") - 1 }), [], skunkIgnore),
+        () => resolved(gainTwo, testState({ reggie: maxOf("reggie") - 1 }), [], skunkIgnore),
       ],
     ] satisfies readonly [string, () => Change][]) {
       const made = change();

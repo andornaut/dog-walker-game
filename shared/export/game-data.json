@@ -378,8 +378,8 @@
       }
     },
     {
-      "id": "koda",
-      "art": "koda",
+      "id": "kilo",
+      "art": "kilo",
       "breed": "Alaskan Malamute",
       "look": "Large and sturdy, gray and white, blue eyes, harness",
       "name": "Koda",
@@ -387,7 +387,7 @@
         "name": "Jason",
         "role": "trail runner"
       },
-      "price": "koda",
+      "price": "kilo",
       "size": "large",
       "unlock": "shop",
       "figures": {
@@ -396,39 +396,12 @@
         "startMood": "happy"
       },
       "keys": {
-        "dogCardTag": "koda",
-        "face": "face-dog-koda",
-        "ownerCardFace": "face-owner-koda-20",
-        "ownerFace": "face-owner-koda",
-        "portrait": "portrait-dog-koda",
-        "sprite": "dog-koda"
-      }
-    },
-    {
-      "id": "nugget",
-      "art": "nugget",
-      "breed": "Pug",
-      "look": "Fawn, black mask, tiny bandana",
-      "name": "Nugget",
-      "owner": {
-        "name": "Ralph",
-        "role": "pet influencer"
-      },
-      "price": "nugget",
-      "size": "small",
-      "unlock": "shop",
-      "figures": {
-        "maxHearts": 2,
-        "startHearts": 2,
-        "startMood": "happy"
-      },
-      "keys": {
-        "dogCardTag": "nugget",
-        "face": "face-dog-nugget",
-        "ownerCardFace": "face-owner-nugget-20",
-        "ownerFace": "face-owner-nugget",
-        "portrait": "portrait-dog-nugget",
-        "sprite": "dog-nugget"
+        "dogCardTag": "kilo",
+        "face": "face-dog-kilo",
+        "ownerCardFace": "face-owner-kilo-20",
+        "ownerFace": "face-owner-kilo",
+        "portrait": "portrait-dog-kilo",
+        "sprite": "dog-kilo"
       }
     },
     {
@@ -483,6 +456,33 @@
         "ownerFace": "face-owner-pierre",
         "portrait": "portrait-dog-pierre",
         "sprite": "dog-pierre"
+      }
+    },
+    {
+      "id": "reggie",
+      "art": "reggie",
+      "breed": "Pug",
+      "look": "Fawn, black mask, tiny bandana",
+      "name": "Nugget",
+      "owner": {
+        "name": "Ralph",
+        "role": "pet influencer"
+      },
+      "price": "reggie",
+      "size": "small",
+      "unlock": "shop",
+      "figures": {
+        "maxHearts": 2,
+        "startHearts": 2,
+        "startMood": "happy"
+      },
+      "keys": {
+        "dogCardTag": "reggie",
+        "face": "face-dog-reggie",
+        "ownerCardFace": "face-owner-reggie-20",
+        "ownerFace": "face-owner-reggie",
+        "portrait": "portrait-dog-reggie",
+        "sprite": "dog-reggie"
       }
     },
     {
@@ -1352,11 +1352,11 @@
         "duchess": 150,
         "fannyPack": 600,
         "hallPass": 1200,
-        "koda": 300,
+        "kilo": 300,
         "luckyCollar": 1500,
-        "nugget": 800,
         "penny": 600,
         "pierre": 500,
+        "reggie": 800,
         "runningShoes": 800,
         "snowball": 1000,
         "whistle": 1500,

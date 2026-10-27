@@ -49,7 +49,7 @@ const packOf = (walker: Box, dogs: readonly Omit<DogBox, "scale">[]): PackBoxes 
 // halfway between lanes 2 and 3, as mid-move.
 const single = (centreX: number) =>
   packOf({ bottom: 600, left: centreX - 20, right: centreX + 20, top: 585 }, [
-    { bottom: 585, dog: "koda", left: centreX - 20, right: centreX + 20, top: 560 },
+    { bottom: 585, dog: "kilo", left: centreX - 20, right: centreX + 20, top: 560 },
   ]);
 const touchingWith = (pack: PackBoxes) => (hit: RoadItem<Kind>) =>
   hitDog(pack, solid(itemBox(CELL, hit)));
@@ -88,34 +88,34 @@ describe("a one-dog pack", () => {
       { touches: true, where: "starting just above the box's bottom", y: 599 },
       { touches: false, where: "starting on the box's bottom", y: 600 },
     ]) {
-      expect(still(item(1, "tip", 2, y))).toBe(touches ? "koda" : null);
+      expect(still(item(1, "tip", 2, y))).toBe(touches ? "kilo" : null);
     }
   });
 
   it("touches an item spanning several lanes in any of them", () => {
-    expect(still(item(1, "obstacle", 0, 570, 3))).toBe("koda");
-    expect(still(item(1, "obstacle", 2, 570, 2))).toBe("koda");
+    expect(still(item(1, "obstacle", 0, 570, 3))).toBe("kilo");
+    expect(still(item(1, "obstacle", 2, 570, 2))).toBe("kilo");
     expect(still(item(1, "obstacle", 0, 570, 2))).toBeNull();
     expect(still(item(1, "obstacle", 3, 570, 2))).toBeNull();
   });
 
   it("touches items only in the pack's lane, both lanes while it is between them", () => {
     expect(still(item(1, "tip", 3, 570))).toBeNull();
-    expect(midMove(item(1, "tip", 2, 570))).toBe("koda");
-    expect(midMove(item(2, "tip", 3, 570))).toBe("koda");
+    expect(midMove(item(1, "tip", 2, 570))).toBe("kilo");
+    expect(midMove(item(2, "tip", 3, 570))).toBe("kilo");
     expect(midMove(item(3, "tip", 1, 570))).toBeNull();
   });
 });
 
-// Koda leads in the centre, out front; Biscuit and Zippy walk front-left and front-right a
-// little behind, a gap between them under Koda; the walker below. Pickups touch the outline
+// Kilo leads in the centre, out front; Biscuit and Zippy walk front-left and front-right a
+// little behind, a gap between them under Kilo; the walker below. Pickups touch the outline
 // around them all; obstacles touch the parts.
 const chevron = packOf({ bottom: 100, left: -10, right: 10, top: 50 }, [
-  { bottom: 20, dog: "koda", left: -10, right: 10, top: -20 },
+  { bottom: 20, dog: "kilo", left: -10, right: 10, top: -20 },
   { bottom: 40, dog: "biscuit", left: -30, right: -12, top: 0 },
   { bottom: 40, dog: "zippy", left: 12, right: 30, top: 0 },
 ]);
-// Between the side dogs, under Koda and over the walker: inside the outline, on no part.
+// Between the side dogs, under Kilo and over the walker: inside the outline, on no part.
 const GAP: Box = { bottom: 48, left: -8, right: 8, top: 26 };
 
 describe("hitDog", () => {
@@ -129,17 +129,17 @@ describe("hitDog", () => {
       [
         "on the lead when it touches the lead",
         { bottom: -10, left: -5, right: 5, top: -30 },
-        "koda",
+        "kilo",
       ],
       [
         "on the front dog when it touches only the walker",
         { bottom: 120, left: -5, right: 5, top: 90 },
-        "koda",
+        "kilo",
       ],
       [
         "on the nearest of the dogs it touches",
         { bottom: 35, left: -40, right: 40, top: 15 },
-        "koda",
+        "kilo",
       ],
       [
         "on the nearer side dog when it touches both and not the lead",
@@ -181,12 +181,12 @@ describe("pickupDog", () => {
       [
         "to the front dog when the walker is nearest",
         { bottom: 120, left: -5, right: 5, top: 90 },
-        "koda",
+        "kilo",
       ],
       [
         "to the dog whose rectangle holds the contact",
         { bottom: 10, left: -1, right: 1, top: -10 },
-        "koda",
+        "kilo",
       ],
       ["to no dog outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
     ] satisfies readonly [string, Box, DogId | null][]) {
@@ -201,7 +201,7 @@ describe("pickupDog", () => {
 });
 
 describe("a settled pack", () => {
-  const DOGS: DogId[] = ["koda", "biscuit", "zippy"];
+  const DOGS: DogId[] = ["kilo", "biscuit", "zippy"];
   const runOf = (count: number) =>
     testState(Object.fromEntries(DOGS.slice(0, count).map((dog) => [dog, 3])));
   // A goose, drawn about as wide as a lane's hit box, standing level with the lead's rectangle, in

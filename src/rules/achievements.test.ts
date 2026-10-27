@@ -67,7 +67,7 @@ const bumped = (bumpsByZone: number[], finished: number) => ({
 });
 const fromZone3 = { firstZone: 2, zonesFinished: 4 };
 const homeInZone4 = { firstZone: 3, zonesFinished: 3 };
-const minorBump = [...countBump(testState({ koda: 5 })).bumpsByZone];
+const minorBump = [...countBump(testState({ kilo: 5 })).bumpsByZone];
 const luckyFinds = (count: Count) => ({ count, kind: "luckyFinds" }) as const;
 // Each lucky find in the data by its tally, each found once.
 const LUCKY_TALLIES = Object.values(gameData.encounters).flatMap((encounter) =>
@@ -295,7 +295,7 @@ describe("profile conditions", () => {
     [
       "firedByOwners, a dog walked but never fired",
       { count: 1, kind: "firedByOwners" },
-      withStats({ dogs: { koda: { timesFired: 0, walks: 3, zonesFinished: 4 } } }),
+      withStats({ dogs: { kilo: { timesFired: 0, walks: 3, zonesFinished: 4 } } }),
       false,
     ],
     ["lifetimeEarnings a cent short", lifetime, withStats({ lifetimeCents: cents(19_999) }), false],
@@ -408,12 +408,12 @@ describe("earnedByRun", () => {
 
 describe("counters", () => {
   it("counts bumps by zone, filling the zones before with none", () => {
-    const run = testState({ koda: 5 }, { zoneIndex: 2 });
+    const run = testState({ kilo: 5 }, { zoneIndex: 2 });
     expect(countBump(countBump(run)).bumpsByZone).toEqual([0, 0, 2]);
   });
 
   it("counts landed bumps by obstacle kind, adding to a kind already counted", () => {
-    const run = testState({ koda: 5 });
+    const run = testState({ kilo: 5 });
     const twice = countLandedBump("pigeons", countLandedBump("pigeons", run));
     expect(countLandedBump("raccoon", twice).bumpsByKind).toEqual({ pigeons: 2, raccoon: 1 });
   });
@@ -424,13 +424,13 @@ describe("counters", () => {
       affected: [],
       source: { kind: "walker", walker: "casey" },
     } as const;
-    const once = applyEffects(gameData, context, [stinky], testState({ koda: 5 }));
+    const once = applyEffects(gameData, context, [stinky], testState({ kilo: 5 }));
     expect(once.debuffsGot).toEqual({ stinky: 1 });
     expect(applyEffects(gameData, context, [stinky], once).debuffsGot).toEqual({ stinky: 2 });
   });
 
   it("counts a tally only for an option that names one, adding to one already counted", () => {
-    const run = testState({ koda: 5 });
+    const run = testState({ kilo: 5 });
     expect(countOptionTally({ tally: "sniffs" }, run).tallies).toEqual({ sniffs: 1 });
     expect(countOptionTally({}, run)).toBe(run);
     const twice = countTally("treats", countTally("treats", run));

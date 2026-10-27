@@ -134,12 +134,12 @@ const CARD_OWNER_MOODS = [
     Array.from({ length: 21 }, (_, max) => [
       ...Array.from({ length: max + 1 }, (__, hearts) =>
         cardOwnerMood(gameData, max, {
-          dog: "koda",
+          dog: "kilo",
           hearts: clampHearts(max, hearts),
           status: "walking",
         }),
       ),
-      cardOwnerMood(gameData, max, { dog: "koda", status: "fired", zoneIndex: 0 }),
+      cardOwnerMood(gameData, max, { dog: "kilo", status: "fired", zoneIndex: 0 }),
     ]).flat(),
   ),
 ];
@@ -332,7 +332,7 @@ describe("card art", () => {
   it("names a card preview for every zone, as a fork's path card shows it", () => {
     const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
     const arts = [zones.slice(0, 3), zones.slice(3)].flatMap((paths) =>
-      cardFor(gameData, testState({ koda: 4 }), {
+      cardFor(gameData, testState({ kilo: 4 }), {
         kind: "fork",
         paths,
         upgrades: paths.map(() => "bellyRubs"),

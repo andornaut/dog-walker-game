@@ -131,17 +131,17 @@ function after(walk: Walk, seconds: number, pulls: Pulls = NO_PULLS) {
 
 describe("what a dog pulls toward", () => {
   it("strains toward a squirrel for its tell, then pulls the pack a lane toward it, once", () => {
-    const walk = walkWith(["koda"], [item("squirrel", 0, 0)]);
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0)]);
     const straining = after(walk, 0.5);
-    expect(straining.tells).toEqual([{ direction: -1, dog: "koda", kind: "squirrel" }]);
+    expect(straining.tells).toEqual([{ direction: -1, dog: "kilo", kind: "squirrel" }]);
     expect(straining.walk.road.control.target).toBe(2);
-    expect(pullPose(data, straining.walk.run, straining.pulls, "koda")).toEqual({
+    expect(pullPose(data, straining.walk.run, straining.pulls, "kilo")).toEqual({
       direction: -1,
       tag: "tell",
     });
     const pulled = after(walk, 1.1);
-    expect(pulled.pulled).toEqual([{ direction: -1, dog: "koda", moved: true }]);
-    expect(pullPose(data, pulled.walk.run, pulled.pulls, "koda")).toEqual({
+    expect(pulled.pulled).toEqual([{ direction: -1, dog: "kilo", moved: true }]);
+    expect(pullPose(data, pulled.walk.run, pulled.pulls, "kilo")).toEqual({
       direction: -1,
       tag: "pull",
     });
@@ -150,10 +150,10 @@ describe("what a dog pulls toward", () => {
 
   it("pulls toward a darting squirrel from its cue, once it moves", () => {
     const walk = walkWith(
-      ["koda"],
+      ["kilo"],
       [{ ...item("squirrel", 0, 4), mover: { path: DARTING, since: 0 } }],
     );
-    expect(after(walk, 0.5).tells).toEqual([{ direction: 1, dog: "koda", kind: "squirrel" }]);
+    expect(after(walk, 0.5).tells).toEqual([{ direction: 1, dog: "kilo", kind: "squirrel" }]);
     // The tell runs out at 1s; the squirrel moves from 80px of scroll, at 1s.
     expect(after(walk, 1.2).walk.road.control.target).toBe(3);
   });
@@ -178,9 +178,9 @@ describe("what a dog pulls toward", () => {
       turnAfter: null,
       warning: 140,
     };
-    const walk = walkWith(["koda"], [{ ...item("squirrel", 0, 4), mover: { path, since } }]);
+    const walk = walkWith(["kilo"], [{ ...item("squirrel", 0, 4), mover: { path, since } }]);
     const pulls = stepPulls(data, geometry, FRAME, [], NO_PULLS, walk);
-    expect(pulls.tells).toEqual(strains ? [{ direction: 1, dog: "koda", kind: "squirrel" }] : []);
+    expect(pulls.tells).toEqual(strains ? [{ direction: 1, dog: "kilo", kind: "squirrel" }] : []);
   });
 
   it("has every dog strain toward a squirrel", () => {
@@ -198,16 +198,16 @@ describe("what a dog pulls toward", () => {
   });
 
   it("never pulls without a target: no random pulls", () => {
-    expect(after(walkWith(["koda", "biscuit", "zippy"]), 30).tells).toEqual([]);
+    expect(after(walkWith(["kilo", "biscuit", "zippy"]), 30).tells).toEqual([]);
   });
 
   it("does not chase with Good leash, or toward a squirrel in the pack's lane", () => {
-    const leashed = walkWith(["koda"], [item("squirrel", 0, 0)]);
+    const leashed = walkWith(["kilo"], [item("squirrel", 0, 0)]);
     const withLeash = { ...leashed, run: { ...leashed.run, modifiers: [GOOD_LEASH] } };
     const held = after(withLeash, 2);
     expect(held.tells).toEqual([]);
-    expect(held.leashed).toEqual(["koda"]);
-    expect(after(walkWith(["koda"], [item("squirrel", 0, 2)]), 2).tells).toEqual([]);
+    expect(held.leashed).toEqual(["kilo"]);
+    expect(after(walkWith(["kilo"], [item("squirrel", 0, 2)]), 2).tells).toEqual([]);
   });
 
   it.each([
@@ -217,13 +217,13 @@ describe("what a dog pulls toward", () => {
       standing: "darting",
     },
   ])("ignores a $standing squirrel the pack has passed", ({ squirrel }) => {
-    expect(after(walkWith(["koda"], [squirrel]), 1.5).tells).toEqual([]);
+    expect(after(walkWith(["kilo"], [squirrel]), 1.5).tells).toEqual([]);
   });
 
   // Of three dogs, the biggest leads, the next walks front-left and the smallest front-right.
   it("strains one dog at a time, the one nearest the squirrel, each squirrel once", () => {
     const walk = walkWith(
-      ["zippy", "biscuit", "koda"],
+      ["zippy", "biscuit", "kilo"],
       [item("squirrel", 0, 0), item("squirrel", 1, 4, 60)],
     );
     const { pulled, tells } = after(walk, 4);
@@ -235,7 +235,7 @@ describe("what a dog pulls toward", () => {
   });
 
   it("ends the strain without a pull once the straining dog's owner fires you", () => {
-    const straining = after(walkWith(["koda", "biscuit"], [item("squirrel", 0, 0)]), 0.3);
+    const straining = after(walkWith(["kilo", "biscuit"], [item("squirrel", 0, 0)]), 0.3);
     const dog = straining.pulls.strain?.dog;
     const { run } = straining.walk;
     const fired = {
@@ -255,10 +255,10 @@ describe("what a dog pulls toward", () => {
   });
 
   it("cancels the pull when the pack steers away from the squirrel during the strain", () => {
-    const straining = after(walkWith(["koda"], [item("squirrel", 0, 0)]), 0.3);
+    const straining = after(walkWith(["kilo"], [item("squirrel", 0, 0)]), 0.3);
     const steered = steerWalk(data, 5, 1, straining.walk);
     const rest = after(steered, 2, straining.pulls);
-    expect(rest.failed).toEqual(["koda"]);
+    expect(rest.failed).toEqual(["kilo"]);
     expect(rest.pulled).toEqual([]);
     expect(rest.walk.road.control.target).toBe(3);
     expect(rest.pulls.strain).toBeNull();
@@ -271,18 +271,18 @@ describe("the fairness rule", () => {
   const cone = item("cone", 1, 1, 402);
 
   it("strains without pulling while the lane has an obstacle too close, then pulls once clear", () => {
-    const walk = walkWith(["koda"], [item("squirrel", 0, 0), cone]);
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0), cone]);
     const held = after(walk, 2);
     expect(held.pulled).toEqual([]);
     expect(held.walk.road.control.target).toBe(2);
     expect(held.pulls.strain?.blocked).toBe(true);
-    expect(pullPose(data, held.walk.run, held.pulls, "koda")).toEqual({
+    expect(pullPose(data, held.walk.run, held.pulls, "kilo")).toEqual({
       direction: -1,
       tag: "tell",
     });
     // The cone passes the pack's band at about 2.85s.
     const cleared = after(walk, 3.5);
-    expect(cleared.pulled).toEqual([{ direction: -1, dog: "koda", moved: true }]);
+    expect(cleared.pulled).toEqual([{ direction: -1, dog: "kilo", moved: true }]);
     expect(cleared.failed).toEqual([]);
   });
 
@@ -293,10 +293,10 @@ describe("the fairness rule", () => {
   });
 
   it("ends a blocked strain without a pull once its target passes", () => {
-    const walk = walkWith(["koda"], [item("squirrel", 0, 0, 380), cone]);
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0, 380), cone]);
     const passed = after(walk, 2.5);
     expect(passed.pulled).toEqual([]);
-    expect(passed.failed).toEqual(["koda"]);
+    expect(passed.failed).toEqual(["kilo"]);
     expect(passed.pulls.strain).toBeNull();
   });
 
@@ -316,7 +316,7 @@ describe("the fairness rule", () => {
       warning: 50,
     };
     const walk = walkWith(
-      ["koda"],
+      ["kilo"],
       [{ ...item("ball", 0, 0, 0), mover: { path: crosser, since: 50 } }],
     );
     // The pack's band from 554 to 630.
@@ -357,7 +357,7 @@ describe("the fairness rule", () => {
       { chosen: true, lanes: [false, false, true, false, false] },
     ])("blocks the lanes a stalker may step into, its step chosen: $chosen", (row) => {
       const stalking = walkWith(
-        ["koda"],
+        ["kilo"],
         [{ ...item("coyote", 0, 2, 568), mover: { path: stalker(row.chosen), since: 540 } }],
       );
       const lanes = [0, 1, 2, 3, 4].map((lane) =>
@@ -380,7 +380,7 @@ describe("the fairness rule", () => {
 
 describe("stepPulls holds", () => {
   it("stands still through a hit stop and once the walk has ended", () => {
-    const walk = walkWith(["koda"], [item("squirrel", 0, 0)]);
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0)]);
     const stopped: Walk = {
       ...walk,
       road: { ...walk.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
@@ -402,12 +402,12 @@ describe("stepPulls holds", () => {
 it("fails a strain toward a squirrel leaving past the road's edge beside the pack", () => {
   const path = { ...DARTING, enterTravel: 0, lanesPerPixel: 0.05 };
   const leaving = { ...item("squirrel", 0, 0), mover: { path, since: path.warning + 104 } };
-  const walk = walkWith(["koda"], [leaving]);
+  const walk = walkWith(["kilo"], [leaving]);
   const edge = { ...walk, road: { ...walk.road, control: laneControlIn(stillInLane(0)) } };
   const strain = {
     blocked: false,
     direction: -1,
-    dog: "koda",
+    dog: "kilo",
     fromLane: 0,
     itemId: leaving.id,
     kind: "squirrel",
@@ -415,7 +415,7 @@ it("fails a strain toward a squirrel leaving past the road's edge beside the pac
     tellSeconds: 0,
   } as const;
   const stepped = stepPulls(data, geometry, FRAME, [], { ...NO_PULLS, strain }, edge);
-  expect(stepped.failed).toEqual(["koda"]);
+  expect(stepped.failed).toEqual(["kilo"]);
   expect(stepped.pulled).toEqual([]);
   expect(stepped.pulls).toMatchObject({ spent: [leaving.id], strain: null });
 });
@@ -433,7 +433,7 @@ describe("replay with pulls", () => {
     // As RunScene steps: the moves due now, each logged, then the pulls, then the walk.
     const play = (seed: number, movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
       const setup = { dev: true, seed, speed: 1, zone: 1 };
-      const start = planZone(data, geometry, plannerStreams(seed), walkWith(["biscuit", "koda"]));
+      const start = planZone(data, geometry, plannerStreams(seed), walkWith(["biscuit", "kilo"]));
       const rolls = seededRandom(seed + 4);
       let log = startInputLog(setup);
       let walk = start;

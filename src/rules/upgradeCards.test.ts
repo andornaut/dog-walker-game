@@ -22,7 +22,7 @@ describe("an upgrade's duration", () => {
 
   it("is on each fork path card, for the upgrade it carries", () => {
     const upgrades: UpgradeId[] = ["bellyRubs", "rushHour", "raincoats"];
-    const card = cardFor(gameData, testState({ koda: 5 }), {
+    const card = cardFor(gameData, testState({ kilo: 5 }), {
       kind: "fork",
       paths: ["snoozeCrescent", "park", "street"],
       upgrades,
