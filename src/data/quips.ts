@@ -17,7 +17,7 @@ export const QUIPS = {
       "He sniffs every hedge like a coffee taster.",
       "He likes his walks like his espresso: strong.",
     ],
-    upset: ["Oof. Bit of a bitter blend.", "Not my favorite roast, friend."],
+    upset: ["Oof. Bit of a bitter blend.", "Not my favourite roast, friend."],
   },
   buddy: {
     fired: ["The numbers don't add up.", "Account closed. Balance: $0."],
@@ -59,7 +59,7 @@ export const QUIPS = {
     upset: ["Not the content I wanted!", "I can't post this!"],
   },
   snowball: {
-    fired: ["Off the guest list! Now!", "Ugh! The day is canceled!"],
+    fired: ["Off the guest list! Now!", "Ugh! The day is cancelled!"],
     happier: ["Picture perfect!", "Everything is going to plan!"],
     parting: ["No mud, no fuss. Big day!", "Flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],

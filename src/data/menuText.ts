@@ -31,7 +31,7 @@ export const MENU_TEXT = {
       wentHome: "Home sweet home",
     },
     total: "Total",
-    zonesWalked: "Neighborhoods",
+    zonesWalked: "Route",
   },
   help: {
     gotIt: "Got it",
@@ -67,7 +67,7 @@ export const MENU_TEXT = {
     dogColumns: {
       fired: "Fired",
       walks: "Walks",
-      zones: "Neighborhoods",
+      zones: "Neighbourhoods",
     },
     earnedCount: "{earned}/{total} earned",
     outcomes: {
@@ -78,8 +78,8 @@ export const MENU_TEXT = {
     overall: {
       bestRun: "Most earned from 1 walk",
       bestRunDogs: "That walk's dogs",
-      bestRunZones: "That walk's neighborhoods",
-      bestZone: "Most neighborhoods in a walk",
+      bestRunZones: "That walk's neighbourhoods",
+      bestZone: "Most neighbourhoods in a walk",
       dogsWalked: "Dogs walked",
       lifetime: "Lifetime earnings",
       runsPlayed: "Walks started",

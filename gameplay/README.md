@@ -25,7 +25,7 @@ Gameplay owns the rulebook and the values and content in the data value files (e
 
 ## Targets
 
-Some walks should fail: the road stays calm, so losing comes from bumps and choices, not from speed. A failed walk is one that ends before neighborhood 4 because every owner fired you. The simulator measures each target per skill preset and card policy.
+Some walks should fail: the road stays calm, so losing comes from bumps and choices, not from speed. A failed walk is one that ends before neighbourhood 4 because every owner fired you. The simulator measures each target per skill preset and card policy.
 
 | Player  | Walks finished | Walks with a firing |
 | ------- | -------------- | ------------------- |

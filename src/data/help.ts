@@ -20,7 +20,7 @@ export const HELP_PAGES = [
     body:
       "Tips are {tip} each, on top of each dog's pay, so grab what you can. " +
       "A dog that reaches a treat cheers its owner: +{treatHearts}♥. " +
-      "Aim for a lost wallet or a friendly neighbor, too.",
+      "Aim for a lost wallet or a friendly neighbour, too.",
     title: "Tips and treats",
   },
   {
@@ -53,10 +53,10 @@ export const HELP_PAGES = [
   {
     art: "zones",
     body:
-      "Walk {walkLength} neighborhoods of {world}, each busier than the last. " +
+      "Walk {walkLength} neighbourhoods of {world}, each busier than the last. " +
       "Each dog's pay is banked as you finish one. " +
       "At a fork, each path brings an upgrade. " +
       "Bring every dog home for the Walk bonus.",
-    title: "Neighborhoods",
+    title: "Neighbourhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];

@@ -17,7 +17,7 @@ export const DOGS = {
   biscuit: {
     art: "biscuit",
     breed: "Beagle",
-    look: "Tricolor, floppy ears, green collar",
+    look: "Tricolour, floppy ears, green collar",
     name: "Biscuit",
     owner: {
       name: "Sam",
@@ -56,7 +56,7 @@ export const DOGS = {
   kilo: {
     art: "kilo",
     breed: "Alaskan Malamute",
-    look: "Large and sturdy, gray and white, blue eyes, harness",
+    look: "Large and sturdy, grey and white, blue eyes, harness",
     name: "Kilo",
     owner: {
       name: "Jason",

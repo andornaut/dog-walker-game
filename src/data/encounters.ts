@@ -134,7 +134,7 @@ export const ENCOUNTERS = {
   pettingNeighbour: {
     kind: "lucky",
     movement: { kind: "step", steps: { max: 2, min: 1 } },
-    name: "Friendly neighbor",
+    name: "Friendly neighbour",
     resolution: {
       art: "card-petting-neighbour-take",
       effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],

@@ -426,7 +426,7 @@
         "id": "bigTipper",
         "kind": "upgrade"
       },
-      "text": "+$1 per tip next neighborhood",
+      "text": "+$1 per tip next neighbourhood",
       "title": "Which way?"
     },
     {
@@ -465,7 +465,7 @@
         "id": "rushHour",
         "kind": "upgrade"
       },
-      "text": "+100% tips, +50% obstacles, +100% treats next neighborhood",
+      "text": "+100% tips, +50% obstacles, +100% treats next neighbourhood",
       "title": "Which way?"
     },
     {
@@ -478,7 +478,7 @@
         "id": "sweetTalker",
         "kind": "upgrade"
       },
-      "text": "First card's cash options free each neighborhood all walk",
+      "text": "First card's cash options free each neighbourhood all walk",
       "title": "Which way?"
     },
     {
@@ -491,7 +491,7 @@
         "id": null,
         "kind": "skip"
       },
-      "text": "Skip this card, free once each neighborhood.",
+      "text": "Skip this card, free once each neighbourhood.",
       "title": ""
     }
   ],
@@ -574,7 +574,7 @@
       "id": "biscuit",
       "art": "biscuit",
       "breed": "Beagle",
-      "look": "Tricolor, floppy ears, green collar",
+      "look": "Tricolour, floppy ears, green collar",
       "name": "Biscuit",
       "owner": {
         "name": "Sam",
@@ -655,7 +655,7 @@
       "id": "kilo",
       "art": "kilo",
       "breed": "Alaskan Malamute",
-      "look": "Large and sturdy, gray and white, blue eyes, harness",
+      "look": "Large and sturdy, grey and white, blue eyes, harness",
       "name": "Kilo",
       "owner": {
         "name": "Jason",
@@ -1040,7 +1040,7 @@
           "min": 1
         }
       },
-      "name": "Friendly neighbor",
+      "name": "Friendly neighbour",
       "resolution": {
         "art": "card-petting-neighbour-take",
         "effects": [
@@ -1396,7 +1396,7 @@
       ],
       "name": "Hall pass",
       "price": "hallPass",
-      "short": "Skip 1 card each neighborhood",
+      "short": "Skip 1 card each neighbourhood",
       "iconKey": "item-hall-pass"
     },
     {
@@ -1455,7 +1455,7 @@
     },
     {
       "art": "pickups",
-      "body": "Tips are {tip} each, on top of each dog's pay, so grab what you can. A dog that reaches a treat cheers its owner: +{treatHearts}♥. Aim for a lost wallet or a friendly neighbor, too.",
+      "body": "Tips are {tip} each, on top of each dog's pay, so grab what you can. A dog that reaches a treat cheers its owner: +{treatHearts}♥. Aim for a lost wallet or a friendly neighbour, too.",
       "title": "Tips and treats"
     },
     {
@@ -1475,8 +1475,8 @@
     },
     {
       "art": "zones",
-      "body": "Walk {walkLength} neighborhoods of {world}, each busier than the last. Each dog's pay is banked as you finish one. At a fork, each path brings an upgrade. Bring every dog home for the Walk bonus.",
-      "title": "Neighborhoods"
+      "body": "Walk {walkLength} neighbourhoods of {world}, each busier than the last. Each dog's pay is banked as you finish one. At a fork, each path brings an upgrade. Bring every dog home for the Walk bonus.",
+      "title": "Neighbourhoods"
     }
   ],
   "minorObstacles": [

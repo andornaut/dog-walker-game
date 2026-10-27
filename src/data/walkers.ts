@@ -35,7 +35,7 @@ export const WALKER_PERKS = {
     name: "Quick recovery",
   },
   secondChance: {
-    effect: "First ♥ lost each neighborhood is forgiven",
+    effect: "First ♥ lost each neighbourhood is forgiven",
     effects: [
       { by: "secondChanceForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
     ],

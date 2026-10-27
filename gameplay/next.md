@@ -4,14 +4,14 @@ Everything set aside for later. Nothing here is scheduled or ordered.
 
 ## Worlds
 
-The game grows sideways rather than upward. A world is a set of neighborhoods with its own theme, obstacles and mechanics (e.g. fantasy, the future, the past, dinosaurs). Toronto is the first world; real places follow, unlocked by progress (the UK, then Japan). Finishing a full walk in a world shows the next one on the home screen; buying access lets you walk it. Stats track the times each world was finished.
+The game grows sideways rather than upward. A world is a set of neighbourhoods with its own theme, obstacles and mechanics (e.g. fantasy, the future, the past, dinosaurs). Toronto is the first world; real places follow, unlocked by progress (the UK, then Japan). Finishing a full walk in a world shows the next one on the home screen; buying access lets you walk it. Stats track the times each world was finished.
 
 ## Other ideas for later
 
 - Accounts and cloud saves
 - Art polish beyond a basic pixel pass; sound beyond a few effects and one music loop
-- Card variety: once the numbers are tuned, give each card obstacle a look per neighborhood or a second option set, so the three don't repeat
-- Cosmetics: 2 accessories per dog, each made for that dog ($60 each; e.g. Duchess tiara and pearl collar, Kilo beanie and trail pack, Pepe beret and bow tie); 6 leash colors ($30 each); 6 home screen decor pieces with fixed spots in the gate scene ($50 to $130)
+- Card variety: once the numbers are tuned, give each card obstacle a look per neighbourhood or a second option set, so the three don't repeat
+- Cosmetics: 2 accessories per dog, each made for that dog ($60 each; e.g. Duchess tiara and pearl collar, Kilo beanie and trail pack, Pepe beret and bow tie); 6 leash colours ($30 each); 6 home screen decor pieces with fixed spots in the gate scene ($50 to $130)
 - Dog training: two courses per owned dog: Heel (the dog strains twice as long before it pulls, $80) and Good manners (its owner has +1 max ♥, $120)
 - House hub: a home base you decorate and improve with mostly cosmetic unlocks
 - iOS and Android app wrappers
@@ -25,6 +25,6 @@ The game grows sideways rather than upward. A world is a set of neighborhoods wi
 - Time of day: dawn, midday, dusk, night
 - Tip streak: each tip collected without a hit makes tips appear a little more often; a hit resets it
 - Walk of the day: each walk rolls one modifier shown before starting (e.g. rainy: more puddles, tips ×1.2; market day: more thieves and tips; quiet Sunday: fewer obstacles and tips)
-- Walker kit (permanent, always on): Business cards (+$2 pay per dog per neighborhood, $320); Good eye (the pull strain starts 0.5s earlier, $320)
+- Walker kit (permanent, always on): Business cards (+$2 pay per dog per neighbourhood, $320); Good eye (the pull strain starts 0.5s earlier, $320)
 - Weather: variants with pros and cons, some mostly cosmetic
 - Your own dog: an end-game unlock

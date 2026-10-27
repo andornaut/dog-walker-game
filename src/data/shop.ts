@@ -16,7 +16,7 @@ export const SHOP_GEAR = {
     effects: [{ kind: "skipOption" }],
     name: "Hall pass",
     price: "hallPass",
-    short: "Skip 1 card each neighborhood",
+    short: "Skip 1 card each neighbourhood",
   },
   luckyCollar: {
     effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],
