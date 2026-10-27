@@ -9,7 +9,13 @@ import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { fitInFont, fontFileMetrics, inkWidth, placedInk } from "../testing/fontInk";
+import {
+  fitInFont,
+  fontFileMetrics,
+  inkWidth,
+  placedInk,
+  TWO_X_FIT_STYLES,
+} from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
 import { readBitmapFont } from "../tools/fontFile";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -347,6 +353,16 @@ describe("a shop row's text", () => {
     );
     expect(offenders).toEqual([]);
   });
+
+  // A tab's names share one size, so each name, a dog's, a gear item's or a slot's, fits at 2x.
+  it.each(rows.map((row) => [row.name, row.id, row] as const))(
+    "sets %j (%s) at 2x",
+    (_name, _id, row) => {
+      const room = shopRowTextRoom(SHOP_LAYOUT.row.scrollWidth, rightWidth(row));
+      const fitted = fitInFont("font-body", TWO_X_FIT_STYLES, room, plainMarks(row.name));
+      expect(fitted.widest).toBeLessThanOrEqual(room);
+    },
+  );
 });
 
 // Every message a tap in the shop leaves fits on one line on its plate, its ink inside the

@@ -1,6 +1,18 @@
 import { readBitmapFont } from "../tools/fontFile";
 import { type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
-import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
+import {
+  type FittedText,
+  fittingText,
+  TEXT_FIT_STYLES,
+  TEXT_SCALE,
+  type TextFitStyle,
+} from "../ui/textFit";
+
+// The TEXT_FIT_STYLES at TEXT_SCALE: the sizes a list of names is built to keep, since the
+// list shares one size and one name too wide at 2x sets them all at 1x.
+export const TWO_X_FIT_STYLES: readonly TextFitStyle[] = TEXT_FIT_STYLES.filter(
+  (style) => style.scale === TEXT_SCALE,
+);
 
 // A font's rows, from its .fnt.
 export function fontFileMetrics(font: string): FontMetrics {

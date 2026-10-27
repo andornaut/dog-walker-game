@@ -12,14 +12,14 @@ import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics, inkWidth, TWO_X_FIT_STYLES } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";
 import { AFFORD_OUTSET } from "../ui/selection";
-import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
 import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
@@ -371,8 +371,10 @@ describe("a dog tile's text", () => {
     expect(dogTile.lockedNameY + ink).toBeLessThan(plateY);
   });
 
-  it.each(Object.values(gameData.dogs).map((dog) => dog.name))("sets %j", (text) => {
-    const fitted = fitInFont("font-body", TEXT_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
+  // The grid's names share one size, so one name too wide at 2x sets every dog's name at 1x:
+  // each must fit the column at 2x, its glyphs closer if need be.
+  it.each(Object.values(gameData.dogs).map((dog) => dog.name))("sets %j at 2x", (text) => {
+    const fitted = fitInFont("font-body", TWO_X_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
     expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
   });
 });
