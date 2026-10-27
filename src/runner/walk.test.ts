@@ -220,11 +220,14 @@ describe("planZone", { timeout: 60_000 }, () => {
     planned.road.pending.filter((event) => itemCategory(data, event.kind) === category).length;
 
   it("plans the zone's counts of each kind of spawn", () => {
-    expect(countOf("obstacle")).toBe(6);
-    expect(countOf("minor")).toBe(4);
-    expect(countOf("tip")).toBe(tuning.counts.tipsFirstZone);
-    expect(countOf("treat")).toBe(tuning.counts.treatsPerZone);
-    expect(countOf("lucky")).toBe(2);
+    const { counts } = tuning;
+    expect(countOf("obstacle")).toBe(counts.obstaclesFirstZone);
+    expect(countOf("minor")).toBe(counts.minorObstaclesFirstZone);
+    expect(countOf("tip")).toBe(counts.tipsFirstZone);
+    expect(countOf("treat")).toBe(counts.treatsPerZone);
+    expect(countOf("lucky")).toBe(
+      Object.values(counts.luckyFindsPerZone).reduce((sum, count) => sum + count, 0),
+    );
   });
 
   // Rush hour's and Keen eye's treatSpawns factors, at the live tuning's values.
