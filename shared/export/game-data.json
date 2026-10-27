@@ -1031,7 +1031,7 @@
       "spriteKey": "other-dog"
     },
     {
-      "id": "pettingNeighbor",
+      "id": "pettingNeighbour",
       "kind": "lucky",
       "movement": {
         "kind": "step",
@@ -1042,7 +1042,7 @@
       },
       "name": "Friendly neighbor",
       "resolution": {
-        "art": "card-petting-neighbor-take",
+        "art": "card-petting-neighbour-take",
         "effects": [
           {
             "amount": 1,
@@ -1053,9 +1053,9 @@
           }
         ],
         "kind": "instant",
-        "tally": "neighborsMet"
+        "tally": "neighboursMet"
       },
-      "spriteKey": "petting-neighbor"
+      "spriteKey": "petting-neighbour"
     },
     {
       "id": "porchCat",
@@ -2472,16 +2472,16 @@
       "difficulty": 1,
       "difficultyName": "Easiest",
       "id": "snoozeCrescent",
-      "leashColor": "#3e2731",
+      "leashColour": "#3e2731",
       "moverShare": 1,
       "name": "Cabbagetown",
-      "roadColor": "#8b9bb4",
-      "roadShadowColor": "#5a6988",
+      "roadColour": "#8b9bb4",
+      "roadShadowColour": "#5a6988",
       "speed": 1,
       "weights": {
         "luckyFinds": {
           "lostWallet": 1,
-          "pettingNeighbor": 1
+          "pettingNeighbour": 1
         },
         "minorObstacles": {
           "ball": 1.2,
@@ -2565,16 +2565,16 @@
       "difficulty": 2,
       "difficultyName": "Easy",
       "id": "park",
-      "leashColor": "#a22633",
+      "leashColour": "#a22633",
       "moverShare": 1,
       "name": "High Park",
-      "roadColor": "#e4a672",
-      "roadShadowColor": "#b86f50",
+      "roadColour": "#e4a672",
+      "roadShadowColour": "#b86f50",
       "speed": 1,
       "weights": {
         "luckyFinds": {
           "lostWallet": 1,
-          "pettingNeighbor": 1
+          "pettingNeighbour": 1
         },
         "minorObstacles": {
           "ball": 1.2,
@@ -2658,16 +2658,16 @@
       "difficulty": 3,
       "difficultyName": "Normal",
       "id": "street",
-      "leashColor": "#f6757a",
+      "leashColour": "#f6757a",
       "moverShare": 1,
       "name": "Distillery District",
-      "roadColor": "#3a4466",
-      "roadShadowColor": "#262b44",
+      "roadColour": "#3a4466",
+      "roadShadowColour": "#262b44",
       "speed": 1,
       "weights": {
         "luckyFinds": {
           "lostWallet": 1,
-          "pettingNeighbor": 1
+          "pettingNeighbour": 1
         },
         "minorObstacles": {
           "ball": 1.2,
@@ -2751,16 +2751,16 @@
       "difficulty": 4,
       "difficultyName": "Hard",
       "id": "shops",
-      "leashColor": "#f6757a",
+      "leashColour": "#f6757a",
       "moverShare": 1,
       "name": "Kensington Market",
-      "roadColor": "#5e2620",
-      "roadShadowColor": "#2e2019",
+      "roadColour": "#5e2620",
+      "roadShadowColour": "#2e2019",
       "speed": 1,
       "weights": {
         "luckyFinds": {
           "lostWallet": 1,
-          "pettingNeighbor": 1
+          "pettingNeighbour": 1
         },
         "minorObstacles": {
           "ball": 1.2,
@@ -2844,16 +2844,16 @@
       "difficulty": 4,
       "difficultyName": "Hard",
       "id": "pawsPromenade",
-      "leashColor": "#a22633",
+      "leashColour": "#a22633",
       "moverShare": 1,
       "name": "The Beaches",
-      "roadColor": "#ead4aa",
-      "roadShadowColor": "#e4a672",
+      "roadColour": "#ead4aa",
+      "roadShadowColour": "#e4a672",
       "speed": 1,
       "weights": {
         "luckyFinds": {
           "lostWallet": 1,
-          "pettingNeighbor": 1
+          "pettingNeighbour": 1
         },
         "minorObstacles": {
           "ball": 1.2,
@@ -2937,16 +2937,16 @@
       "difficulty": 5,
       "difficultyName": "Hardest",
       "id": "homeStretch",
-      "leashColor": "#f6757a",
+      "leashColour": "#f6757a",
       "moverShare": 1,
       "name": "Yonge Street",
-      "roadColor": "#353b45",
-      "roadShadowColor": "#26292f",
+      "roadColour": "#353b45",
+      "roadShadowColour": "#26292f",
       "speed": 0.94,
       "weights": {
         "luckyFinds": {
           "lostWallet": 1,
-          "pettingNeighbor": 1
+          "pettingNeighbour": 1
         },
         "minorObstacles": {
           "ball": 1.2,

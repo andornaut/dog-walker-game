@@ -204,7 +204,7 @@ export const HOME_LAYOUT = {
   // The dog slot sign hung from the Pet shop's awning across its front: its art (key, with
   // normal and pressed tags) drawn at art, its board inside the frame, and its gold outline 2px
   // outside the board. The board's cream lies inside its frame, lit top row and shaded bottom
-  // row (boardEdge). Its call to buy (in headColor) and the cheapest slot's price (in priceColor
+  // row (boardEdge). Its call to buy (in headColour) and the cheapest slot's price (in priceColour
   // while affordable) are body text at scale, linePitch apart, centred on the cream
   // (slotSignText); pressed, the board drops pressDrop on longer cords and the text with it. The
   // hit area is the board widened to 44 tall.
@@ -212,12 +212,12 @@ export const HOME_LAYOUT = {
     art: { x: 255, y: 120 },
     board: { height: 24, width: 79, x: 256, y: 125 },
     boardEdge: { frame: 1, lit: 1, shade: 1 },
-    headColor: "plum",
+    headColour: "plum",
     hit: { height: 44, width: 79, x: 256, y: 115 },
     key: "ui-slot-sign",
     linePitch: 9,
     pressDrop: 1,
-    priceColor: "forest",
+    priceColour: "forest",
     scale: 1,
   },
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines

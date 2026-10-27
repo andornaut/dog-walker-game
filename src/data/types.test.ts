@@ -83,7 +83,7 @@ describe("types", () => {
         art: "card-instant",
         effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
         kind: "instant",
-        tally: "neighborsMet",
+        tally: "neighboursMet",
       } as const;
       const base = { name: "Find" } as const;
       // @ts-expect-error: an obstacle always opens a card

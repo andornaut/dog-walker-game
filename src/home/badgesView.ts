@@ -24,7 +24,7 @@ export interface BadgeView {
 // name, and its goal and progress. A locked badge's open card draws its status and line in the
 // goal's colour. A locked badge's goal and progress are an inactive label, exempt from 4.5:1,
 // and hold the 3:1 a disabled tile's label does.
-export const BADGE_TEXT_COLORS = {
+export const BADGE_TEXT_COLOURS = {
   earned: { goal: "darkBrown", name: "forest" },
   locked: { goal: "neutralSlate", name: "neutralDarkSlate" },
 } as const;
@@ -164,7 +164,7 @@ export function wallRects(spec: WallSpec, heights: readonly number[]): Rect[] {
 
 interface StripSlot {
   // The centre of the slot, where its badge sits.
-  readonly centerX: number;
+  readonly centreX: number;
   readonly width: number;
 }
 
@@ -183,7 +183,7 @@ export function badgeStrip(
   return {
     named: count <= layout.maxNamed,
     slots: Array.from({ length: count }, (_, i) => ({
-      centerX: Math.round(layout.x + width * (i + 0.5)),
+      centreX: Math.round(layout.x + width * (i + 0.5)),
       width: Math.floor(width),
     })),
   };

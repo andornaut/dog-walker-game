@@ -4,7 +4,7 @@ import { dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
-  BADGE_TEXT_COLORS,
+  BADGE_TEXT_COLOURS,
   badgeProgress,
   type BadgeView,
   badgeWall,
@@ -298,11 +298,11 @@ export class StatsScene extends Scene {
     x: number,
     y: number,
     value: string,
-    options: { align?: "center"; color?: number; font?: FontRole; originX?: number } = {},
+    options: { align?: "centre"; colour?: number; font?: FontRole; originX?: number } = {},
   ): GameObjects.BitmapText {
     const label = addPixelText(this, x, y, value, {
       ...(options.align === undefined ? {} : { align: options.align }),
-      color: options.color ?? PALETTE.plum,
+      colour: options.colour ?? PALETTE.plum,
       font: options.font ?? "body",
       originX: options.originX ?? 0,
       scale: TEXT_SCALE,
@@ -314,7 +314,7 @@ export class StatsScene extends Scene {
   // Each row's label at the left and its value right-aligned at the right, from y.
   private rows(y: number, rows: readonly StatsRow[]): void {
     rows.forEach(({ label, value }, i) => {
-      this.text(LEFT, y + i * PITCH, label, { color: PALETTE.darkBrown });
+      this.text(LEFT, y + i * PITCH, label, { colour: PALETTE.darkBrown });
       this.text(RIGHT, y + i * PITCH, value, { originX: 1 });
     });
   }
@@ -325,7 +325,7 @@ export class StatsScene extends Scene {
     this.content = undefined;
     this.drawingInto = undefined;
     const words = gameData.menuText.stats;
-    this.text(12, 14, words.title, { color: PALETTE.cream, font: "title" });
+    this.text(12, 14, words.title, { colour: PALETTE.cream, font: "title" });
     addCloseButton(this, this.add.container(0, 0), CLOSE, this.pressed === "close");
     // The open tab is selected and the others normal.
     const tabs = this.add.container(0, 0);
@@ -396,7 +396,7 @@ export class StatsScene extends Scene {
     return walksBottom(counts);
   }
 
-  // A block per dog: its face and name, then its walks, neighborhoods and firings, one per
+  // A block per dog: its face and name, then its walks, neighbourhoods and firings, one per
   // row, with a rule between blocks.
   private drawDogs(): number {
     const save = profileSave(this);
@@ -440,7 +440,7 @@ export class StatsScene extends Scene {
     const badges = this.badges();
     this.text(LEFT, WALL.headingY, gameData.menuText.stats.badges, { font: "title" });
     this.text(RIGHT, WALL.headingY, earnedText(gameData, badges), { originX: 1 });
-    const probe = addPixelText(this, 0, 0, "", { color: PALETTE.plum, scale: TEXT_SCALE });
+    const probe = addPixelText(this, 0, 0, "", { colour: PALETTE.plum, scale: TEXT_SCALE });
     probe.setVisible(false);
     const inkWidth = (line: string) => {
       setPixelText(probe, line);
@@ -486,16 +486,16 @@ export class StatsScene extends Scene {
     }
     const x = rect.x + WALL_TEXT.x;
     let y = rect.y + WALL_TEXT.y;
-    const draw = (lines: readonly string[], color: number) => {
+    const draw = (lines: readonly string[], colour: number) => {
       for (const line of lines) {
-        this.text(x, y, line, { color });
+        this.text(x, y, line, { colour });
         y += WALL_TEXT.lineHeight;
       }
     };
-    const colors = BADGE_TEXT_COLORS[badge.earned ? "earned" : "locked"];
-    draw(cell.name, PALETTE[colors.name]);
-    draw(cell.goal, PALETTE[colors.goal]);
-    draw(cell.progress, PALETTE[colors.goal]);
+    const colours = BADGE_TEXT_COLOURS[badge.earned ? "earned" : "locked"];
+    draw(cell.name, PALETTE[colours.name]);
+    draw(cell.goal, PALETTE[colours.goal]);
+    draw(cell.progress, PALETTE[colours.goal]);
   }
 
   // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts
@@ -510,18 +510,18 @@ export class StatsScene extends Scene {
     addDim(this, SCREEN);
     addPanel(this, panel);
     addCloseButton(this, this.add.container(0, 0), closeControl(panel), false);
-    const center = DETAIL.x + DETAIL.width / 2;
+    const centre = DETAIL.x + DETAIL.width / 2;
     const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;
     if (badge.earned && (this.burst || reduced)) {
-      addConfetti(this, reduced, DETAIL_BADGE_SCALE, center, badgeY);
+      addConfetti(this, reduced, DETAIL_BADGE_SCALE, centre, badgeY);
     }
     this.burst = false;
-    addBadge(this, badge.art, badge.earned, center, badgeY)
+    addBadge(this, badge.art, badge.earned, centre, badgeY)
       .setScale(DETAIL_BADGE_SCALE)
       .setDepth(1);
     // An earned badge's card: a plum name and goal, a forest status, a dark brown line.
-    const locked = BADGE_TEXT_COLORS.locked;
-    const colors = badge.earned
+    const locked = BADGE_TEXT_COLOURS.locked;
+    const colours = badge.earned
       ? { goal: PALETTE.plum, line: PALETTE.darkBrown, name: PALETTE.plum, status: PALETTE.forest }
       : {
           goal: PALETTE[locked.goal],
@@ -529,29 +529,29 @@ export class StatsScene extends Scene {
           name: PALETTE[locked.name],
           status: PALETTE[locked.goal],
         };
-    this.text(center, DETAIL.y + DETAIL_TEXT.nameY, badge.name, {
-      color: colors.name,
+    this.text(centre, DETAIL.y + DETAIL_TEXT.nameY, badge.name, {
+      colour: colours.name,
       font: "title",
       originX: 0.5,
     });
     const status = badge.earned ? words.badgeEarned : words.badgeLocked;
-    this.text(center, DETAIL.y + DETAIL_TEXT.statusY, status, {
-      color: colors.status,
+    this.text(centre, DETAIL.y + DETAIL_TEXT.statusY, status, {
+      colour: colours.status,
       originX: 0.5,
     });
     // The goal and line centred under the name, each line of them centred on the card.
-    const centred = { align: "center", originX: 0.5 } as const;
-    this.text(center, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), {
+    const centred = { align: "centre", originX: 0.5 } as const;
+    this.text(centre, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), {
       ...centred,
-      color: colors.goal,
+      colour: colours.goal,
     });
     const lineY = DETAIL.y + detailLineY(body, goal.length);
-    this.text(center, lineY, line.join("\n"), { ...centred, color: colors.line });
+    this.text(centre, lineY, line.join("\n"), { ...centred, colour: colours.line });
   }
 
   // Body text at 2x broken into lines no wider than the open badge's text.
   private wrap(text: string): string[] {
-    const style = { color: PALETTE.plum, scale: TEXT_SCALE };
+    const style = { colour: PALETTE.plum, scale: TEXT_SCALE };
     return wrapPixelText(this, style, DETAIL_TEXT_WIDTH, text);
   }
 }

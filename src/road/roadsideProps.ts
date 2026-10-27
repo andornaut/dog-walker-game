@@ -237,7 +237,7 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
   }
   const { projection } = stage;
   const distance = placing.origin + z - placing.scroll;
-  const placed = project(projection, { distance, x: projection.centerX + sign * prop.across });
+  const placed = project(projection, { distance, x: projection.centreX + sign * prop.across });
   const half = (stage.frameWidth(prop.key) * Math.min(1, placed.scale)) / 2;
   if (placed.x + half <= 0 || placed.x - half >= stage.width) {
     return;

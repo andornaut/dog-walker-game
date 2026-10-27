@@ -194,7 +194,7 @@ function showLabel(
       LABEL.lineTop + LABEL.capTop * LABEL.scale,
       moment.label,
       {
-        color: PALETTE.white,
+        colour: PALETTE.white,
         font: "title",
         originX: 0.5,
         scale: LABEL.scale,

@@ -319,7 +319,7 @@ describe("placeRoadside", () => {
     const signs = new Set<number>();
     for (let scroll = 0; scroll < 6 * SLOT; scroll += SLOT / 4) {
       for (const place of placed(table, frame({ current: art, scroll }))) {
-        const offset = (place.x - PROJECTION.centerX) / place.scale;
+        const offset = (place.x - PROJECTION.centreX) / place.scale;
         const half = frameWidth(place.key) / 2;
         signs.add(Math.sign(offset));
         expect(Math.abs(offset) - half).toBeGreaterThanOrEqual(band.from - 1e-6);

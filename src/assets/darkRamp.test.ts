@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { darkerColor, remapDarker } from "./darkRamp";
-import { PALETTE_COLORS, paletteColor } from "./housePalette";
+import { darkerColour, remapDarker } from "./darkRamp";
+import { PALETTE_COLOURS, paletteColour } from "./housePalette";
 
-describe("darkerColor", () => {
+describe("darkerColour", () => {
   it("moves a colour down its ramp, no further than ink, from its nearest palette colour", () => {
     const cases: [string, number, number, number][] = [
       ["one step down its ramp", 1, 0xead4aa, 0xe4a672],
@@ -14,15 +14,15 @@ describe("darkerColor", () => {
       ["off the palette to its nearest palette colour", 0, 0xebd5ab, 0xead4aa],
       ["off the palette, then down its ramp", 2, 0xebd5ab, 0xb86f50],
     ];
-    const wrong = cases.filter(([, steps, from, to]) => darkerColor(steps, from) !== to);
+    const wrong = cases.filter(([, steps, from, to]) => darkerColour(steps, from) !== to);
     expect(wrong).toEqual([]);
   });
 
   it("keeps every palette colour on the palette and steps each down to ink", () => {
-    const ink = paletteColor("ink");
-    const wrong = [...PALETTE_COLORS].filter(
-      ([, color]) =>
-        darkerColor(0, color) !== color || darkerColor(PALETTE_COLORS.size, color) !== ink,
+    const ink = paletteColour("ink");
+    const wrong = [...PALETTE_COLOURS].filter(
+      ([, colour]) =>
+        darkerColour(0, colour) !== colour || darkerColour(PALETTE_COLOURS.size, colour) !== ink,
     );
     expect(wrong).toEqual([]);
   });

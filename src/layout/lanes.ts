@@ -4,7 +4,7 @@ import type { Rect } from "../lib/rect";
 export type LaneDirection = -1 | 1;
 
 // Lanes split the road into equal widths.
-export function laneCenterXs(laneCount: number, road: Rect): number[] {
+export function laneCentreXs(laneCount: number, road: Rect): number[] {
   const laneWidth = road.width / laneCount;
   return Array.from({ length: laneCount }, (_, i) => road.x + laneWidth * (i + 0.5));
 }

@@ -16,7 +16,7 @@ import { laneMotionX } from "../../runner/laneMotion";
 import { pullPose, type Pulls } from "../../runner/pulls";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
-import { colorFromHex } from "../../ui/phaser/palette";
+import { colourFromHex } from "../../ui/phaser/palette";
 import { playBarkWord } from "../comicWord";
 import { trotOffRoad } from "../feedbackMoments";
 import { type DogSignal, dogTop, iconArt, playPullFail, PullSignals } from "../pullSignals";
@@ -213,7 +213,7 @@ export class PackView {
       standing.push({ dog, feet, placement, rank });
     }
     const leash = {
-      color: colorFromHex(currentZone(gameData, walk.run).leashColor),
+      colour: colourFromHex(currentZone(gameData, walk.run).leashColour),
       taut: pulls.strain?.dog ?? null,
     };
     const drawn = this.figures.stand(DEPTH.sprite, shadow, leash, {

@@ -21,7 +21,7 @@ export const HELP_LAYOUT = {
   close: pageCloseControl(SCREEN, closeTopOnBar(TOP_BAR)),
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.
-  dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
+  dots: { centreX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
   heading: { x: 12, y: 19 },
   illustration: { height: 236, width, x: 0, y: 48 },
   next: { height: MIN_TAP_SIZE, width: 110, x: 242, y: height - 56 },
@@ -50,8 +50,8 @@ export const CLOSE_HIT_RECT = HELP_LAYOUT.close.hit;
 
 // One dot per page, centred as a row.
 export function dotRects(pageCount: number): Rect[] {
-  const { centerX, size, spacing, y } = HELP_LAYOUT.dots;
-  const left = centerX - (pageCount * spacing) / 2 + (spacing - size) / 2;
+  const { centreX, size, spacing, y } = HELP_LAYOUT.dots;
+  const left = centreX - (pageCount * spacing) / 2 + (spacing - size) / 2;
   return Array.from({ length: pageCount }, (_, i) => ({
     height: size,
     width: size,

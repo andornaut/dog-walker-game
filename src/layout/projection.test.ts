@@ -24,7 +24,7 @@ const screenCentre = SCREEN_CONFIG.width / 2;
 describe("roadProjection", () => {
   it("draws the walker's feet at scale 1 on their row, centred on the screen", () => {
     expect(projection.footY).toBe(walkerFootY(road));
-    expect(projection.centerX).toBe(screenCentre);
+    expect(projection.centreX).toBe(screenCentre);
     expect(scaleAt(projection, 0)).toBe(1);
     expect(screenYAt(projection, 0)).toBe(projection.footY);
   });

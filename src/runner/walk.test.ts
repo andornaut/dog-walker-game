@@ -554,7 +554,7 @@ describe("planZone", { timeout: 60_000 }, () => {
   // Standing obstacles along the path: at each change of lane, the road between the drawn hit
   // boxes of obstacles met before and after it is at least the tallest pack's hit boxes, the lane
   // moves made between them in whole walk steps and the reaction margin. Two obstacles WIDE_LANES
-  // or more lanes wide have a row between them. At the road's speed in the last neighborhood, for
+  // or more lanes wide have a row between them. At the road's speed in the last neighbourhood, for
   // the walkers whose lane moves cover the least and the most road.
   it("spaces obstacles for the path's lane changes between them, at the shortest and longest lane move", () => {
     for (const { walker, zone } of LANE_MOVE_WALKERS.flatMap((walker) =>
@@ -1397,7 +1397,7 @@ describe("hit stop", () => {
 
   it("never stops for a lucky find without a hit label", () => {
     expect(step(walkWith(["kilo"], [atPack("lostWallet")])).walk.road.hitStop).toBeNull();
-    expect(step(walkWith(["kilo"], [atPack("pettingNeighbor")])).walk.road.hitStop).toBeNull();
+    expect(step(walkWith(["kilo"], [atPack("pettingNeighbour")])).walk.road.hitStop).toBeNull();
   });
 
   it("advances neither distance, the spawn plan, the road nor the pack during the stop", () => {

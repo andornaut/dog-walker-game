@@ -58,6 +58,6 @@ export const NEUTRAL_RAMP: readonly number[] = [
 ];
 
 // The data files write colours as "#rrggbb".
-export function colorFromHex(hex: string): number {
+export function colourFromHex(hex: string): number {
   return Number.parseInt(hex.replace(/^#/, ""), 16);
 }

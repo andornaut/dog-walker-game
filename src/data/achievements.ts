@@ -144,7 +144,7 @@ export const ACHIEVEMENTS = [
     badgeLine: "Everyone's met you now.",
     conditions: [{ count: "all", kind: "dogsFinishedWith" }],
     goal: "Finish a walk with each of the 9 dogs",
-    id: "neighborhoodFavorite",
+    id: "neighbourhoodFavourite",
     name: "Neighborhood Favorite",
     shortGoal: "Walk all 9 dogs",
   },
@@ -301,7 +301,7 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "The whole block knows their names.",
-    conditions: [{ count: 5, kind: "tally", tally: "neighborsMet" }],
+    conditions: [{ count: 5, kind: "tally", tally: "neighboursMet" }],
     goal: "Meet 5 friendly neighbors, across all walks",
     id: "popularPack",
     name: "Popular Pack",

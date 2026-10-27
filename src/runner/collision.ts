@@ -9,8 +9,8 @@ export interface Box {
 }
 
 // A box drawn on a row of the road at scale: its columns are road pixels on that row, so it is
-// drawn from centerX + (left - centerX) * scale to centerX + (right - centerX) * scale across the
-// screen, centerX being the road's centre, which the projection leaves in place.
+// drawn from centreX + (left - centreX) * scale to centreX + (right - centreX) * scale across the
+// screen, centreX being the road's centre, which the projection leaves in place.
 export interface ScaledBox extends Box {
   readonly scale: number;
 }
@@ -22,10 +22,10 @@ export interface DogBox<Dog extends string = string> extends ScaledBox {
 
 // The pack on the road: its outline, the bounding box of everything drawn for it (the walker,
 // the dogs and the leashes between them), which pickups touch; and its parts' hit rectangles,
-// each dog's in pack order and the walker's, which obstacles touch. A leash is not hit. centerX
+// each dog's in pack order and the walker's, which obstacles touch. A leash is not hit. centreX
 // is the road's centre, where the parts' scales meet.
 export interface PackBoxes<Dog extends string = string> {
-  readonly centerX: number;
+  readonly centreX: number;
   readonly dogs: readonly DogBox<Dog>[];
   readonly outline: Box;
   readonly walker: ScaledBox;
@@ -45,8 +45,8 @@ export interface LanedBox extends ScaledBox {
 // at its scale. The item's box is cut to its lanes as the road is drawn on the part's row, so it
 // never reaches a part settled in another lane however wide the projection draws it; a box its
 // lanes cut away entirely touches nothing. Boxes that only meet at an edge do not touch.
-function touchesAsDrawn(centerX: number, part: ScaledBox, item: LanedBox): boolean {
-  const across = (scale: number, x: number) => centerX + (x - centerX) * scale;
+function touchesAsDrawn(centreX: number, part: ScaledBox, item: LanedBox): boolean {
+  const across = (scale: number, x: number) => centreX + (x - centreX) * scale;
   const left = Math.max(across(item.scale, item.left), across(part.scale, item.lanes.left));
   const right = Math.min(across(item.scale, item.right), across(part.scale, item.lanes.right));
   return (
@@ -124,9 +124,9 @@ export function hitDog<Dog extends string>(pack: PackBoxes<Dog>, box: LanedBox):
   if (front === undefined) {
     return null;
   }
-  const touched = pack.dogs.filter((dog) => touchesAsDrawn(pack.centerX, dog, box));
+  const touched = pack.dogs.filter((dog) => touchesAsDrawn(pack.centreX, dog, box));
   if (touched.length === 0) {
-    return touchesAsDrawn(pack.centerX, pack.walker, box) ? front.dog : null;
+    return touchesAsDrawn(pack.centreX, pack.walker, box) ? front.dog : null;
   }
   return (nearestOf(touched, contactPoint(pack.outline, box)) ?? front).dog;
 }

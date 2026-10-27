@@ -71,7 +71,7 @@ describe("addDisplayText", () => {
       },
     ]) {
       const { drawn, scene } = fakeScene(fonts);
-      addDisplayText(scene, 0, 10, "Which way?", { color: 0x123456, font: "title", scale: 2 });
+      addDisplayText(scene, 0, 10, "Which way?", { colour: 0x123456, font: "title", scale: 2 });
       expect(drawn).toEqual([expected]);
     }
   });

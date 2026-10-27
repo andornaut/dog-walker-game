@@ -46,9 +46,9 @@ export function sayMessage(runScene: Scene, line: MessageLine): void {
   runScene.events.emit(MESSAGE_EVENT, line);
 }
 
-const TEXT_STYLE: PixelTextStyle = { color: PALETTE.plum, scale: MESSAGE_STRIP.scale };
+const TEXT_STYLE: PixelTextStyle = { colour: PALETTE.plum, scale: MESSAGE_STRIP.scale };
 // An owner's name under their face, leading their quip.
-const NAME_STYLE: PixelTextStyle = { color: PALETTE.rust };
+const NAME_STYLE: PixelTextStyle = { colour: PALETTE.rust };
 
 type Faded = GameObjects.GameObject & { alpha: number };
 

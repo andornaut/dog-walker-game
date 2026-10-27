@@ -30,7 +30,7 @@ import { PLAIN_ITEM, tileState } from "../ui/interaction";
 import { drawFocusRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelTextsAlike, type LabelToFit } from "../ui/phaser/pixelText";
-import { DISABLED_COLORS } from "../ui/selection";
+import { DISABLED_COLOURS } from "../ui/selection";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
@@ -280,7 +280,7 @@ export class SettingsScene extends Scene {
     // The card and its title band.
     addDetailCard(this, this.add.container(0, 0), panel, band);
     addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
-      color: PALETTE.white,
+      colour: PALETTE.white,
       font: "title",
       originX: 0.5,
       scale: TEXT_SCALE,
@@ -329,13 +329,13 @@ export class SettingsScene extends Scene {
     const icon = addTagImage(this, row.icon, on ? "on" : "off", x + ICON_DX, y + SWITCH_ROW.iconDy);
     const words = gameData.menuText.settings;
     const label = addPixelText(this, x + LABEL_DX, y + SWITCH_ROW.labelDy, words[row.label], {
-      color: PALETTE[tile.look.text],
+      colour: PALETTE[tile.look.text],
       font: "title",
       scale: TEXT_SCALE,
     });
     const noteAt = { x: x + LABEL_DX, y: y + SWITCH_ROW.noteDy };
     const note = addPixelText(this, noteAt.x, noteAt.y, words[row.note], {
-      color: PALETTE.darkBrown,
+      colour: PALETTE.darkBrown,
       scale: SWITCH_ROW.scale,
     });
     const noteFit = { label: note, room: SWITCH_NOTE_FIT.room, ...noteAt };
@@ -365,11 +365,11 @@ export class SettingsScene extends Scene {
     const { track: slider } = this.layout;
     const active = tileState({ ...PLAIN_ITEM, available: !settings.muted }) !== "disabled";
     const steps = volumeSteps(settings[key]);
-    const ink = active ? PALETTE.plum : PALETTE[DISABLED_COLORS.text];
+    const ink = active ? PALETTE.plum : PALETTE[DISABLED_COLOURS.text];
     const { iconDy, labelDy } = SETTINGS_ROW.slider;
     addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON_DX, y + iconDy);
     const words = gameData.menuText.settings;
-    const label = { color: ink, font: "title", scale: TEXT_SCALE } as const;
+    const label = { colour: ink, font: "title", scale: TEXT_SCALE } as const;
     addPixelText(this, x + LABEL_DX, y + labelDy, words[row.label], label);
     addPixelText(
       this,

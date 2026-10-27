@@ -14,13 +14,13 @@ import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 
 // Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
 // TallyId fails to compile until it is listed here.
 const TALLIES: Readonly<Record<TallyId, true>> = {
   dodges: true,
-  neighborsMet: true,
+  neighboursMet: true,
   sniffs: true,
   squirrelPulls: true,
   thievesLetGo: true,

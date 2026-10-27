@@ -439,7 +439,7 @@ describe("counters", () => {
 });
 
 describe("achievementConditionText", () => {
-  it("words every achievement's conditions in walks and neighborhoods, never runs or zones", () => {
+  it("words every achievement's conditions in walks and neighbourhoods, never runs or zones", () => {
     const worded = gameData.achievements.flatMap(({ conditions }) =>
       conditions.map((condition) => achievementConditionText(gameData, condition)),
     );

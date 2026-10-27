@@ -971,7 +971,7 @@ export function sweptPackBoxes(
   });
   const { packParts } = geometry;
   return {
-    centerX: geometry.lens.centerX,
+    centreX: geometry.lens.centreX,
     dogs: formationOrder(packDogs(run)).map((dog, index): DogBox<DogId> => ({
       ...across(itemAt(packParts.dogs, index)),
       dog,

@@ -30,7 +30,7 @@ type Kind =
   | "car"
   | "cat"
   | "hedge"
-  | "neighbor"
+  | "neighbour"
   | "obstacle"
   | "skunk"
   | "squirrel"
@@ -121,9 +121,9 @@ const reacting: SpawnPlan<Kind> = {
 };
 
 const blocking = (event: SpawnEvent<Kind>) =>
-  !["neighbor", "squirrel", "tip", "treat"].includes(event.kind);
+  !["neighbour", "squirrel", "tip", "treat"].includes(event.kind);
 
-// A prize that moves, as the friendly neighbor does: 1 or 2 steps, a lane to either side then a
+// A prize that moves, as the friendly neighbour does: 1 or 2 steps, a lane to either side then a
 // row down the road.
 const STROLLING: MoverSpec = {
   footprint: { lanes: 1, rows: 1 },
@@ -634,14 +634,14 @@ describe("planSpawns", () => {
     },
   );
 
-  // A moving prize, stepping as the friendly neighbor does or darting as a squirrel does, is
+  // A moving prize, stepping as the friendly neighbour does or darting as a squirrel does, is
   // placed after every spawn the pack steers around, a lane-blocking dart included, which it
   // leaves where they were: it blocks no lane and takes no dart's place on screen. A long zone
   // gives it room to move; a zone shorter than the road gives a stepper none, so it stands still.
   // Either way none is skipped.
   it.each([
-    { kind: "neighbor", mover: STROLLING, moves: 3, name: "a long zone", zoneLength: 6000 },
-    { kind: "neighbor", mover: STROLLING, moves: 0, name: "a short zone", zoneLength: 1000 },
+    { kind: "neighbour", mover: STROLLING, moves: 3, name: "a long zone", zoneLength: 6000 },
+    { kind: "neighbour", mover: STROLLING, moves: 0, name: "a short zone", zoneLength: 1000 },
     { kind: "squirrel", mover: DARTING, moves: 3, name: "a long zone", zoneLength: 6000 },
   ] as const)(
     "places every moving $kind in $name, leaving the rest as they were",

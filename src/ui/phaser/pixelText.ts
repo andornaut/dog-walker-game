@@ -70,8 +70,8 @@ export function registerFallbackPixelFont(scene: Scene): void {
 
 export interface PixelTextStyle {
   // How centred lines of wrapped text sit against each other.
-  align?: "center" | "left" | "right";
-  color: number;
+  align?: "centre" | "left" | "right";
+  colour: number;
   font?: FontRole;
   // Wraps at spaces to stay within this many screen pixels: Phaser measures the wrap at the
   // label's scale.
@@ -104,7 +104,7 @@ function textFor(key: string, role: FontRole, text: string): string {
   return role === "title" ? plainMarks(text).toUpperCase() : plainMarks(text);
 }
 
-const ALIGN = { center: 1, left: 0, right: 2 } as const;
+const ALIGN = { centre: 1, left: 0, right: 2 } as const;
 
 // The fallback font's capitals fill its glyphs, from the line's top.
 const FALLBACK_METRICS: FontMetrics = {
@@ -162,7 +162,7 @@ export function addPixelText(
     .bitmapText(Math.round(x) - shift, Math.round(y - capTop * scale), key, shown)
     .setScale(scale)
     .setOrigin(style.originX ?? 0, style.originY ?? 0)
-    .setTint(style.color);
+    .setTint(style.colour);
   label.setData({ capTop: capTop * scale, fontRole: role });
   if (style.maxWidth !== undefined) {
     label.setMaxWidth(style.maxWidth);

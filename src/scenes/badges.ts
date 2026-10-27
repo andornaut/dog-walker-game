@@ -30,16 +30,16 @@ export function addBadge(
   scene: Scene,
   art: string,
   earned: boolean,
-  centerX: number,
-  centerY: number,
+  centreX: number,
+  centreY: number,
 ): Placed {
   const frame = tagFrame(scene, art, earned ? "earned" : "locked");
   if (frame !== undefined) {
-    return scene.add.image(Math.round(centerX), Math.round(centerY), art, frame);
+    return scene.add.image(Math.round(centreX), Math.round(centreY), art, frame);
   }
   const half = BADGE_SIZE / 2;
   return scene.add
-    .graphics({ x: Math.round(centerX), y: Math.round(centerY) })
+    .graphics({ x: Math.round(centreX), y: Math.round(centreY) })
     .fillStyle(earned ? PALETTE.amber : PALETTE.grey)
     .fillRect(-half, -half, BADGE_SIZE, BADGE_SIZE);
 }
@@ -59,14 +59,14 @@ export function addBurst(
   reduced: boolean,
   burst: Burst,
   scale: number,
-  centerX: number,
-  centerY: number,
+  centreX: number,
+  centreY: number,
 ): void {
   if (!scene.textures.exists(burst.key)) {
     return;
   }
   const sprite = scene.add
-    .sprite(Math.round(centerX), Math.round(centerY), burst.key)
+    .sprite(Math.round(centreX), Math.round(centreY), burst.key)
     .setScale(scale);
   if (reduced) {
     const frame = tagFrame(scene, burst.key, BURST_TAG, burst.stillFrame);
@@ -83,10 +83,10 @@ export function addConfetti(
   scene: Scene,
   reduced: boolean,
   scale: number,
-  centerX: number,
-  centerY: number,
+  centreX: number,
+  centreY: number,
 ): void {
-  addBurst(scene, reduced, CONFETTI, scale, centerX, centerY);
+  addBurst(scene, reduced, CONFETTI, scale, centreX, centreY);
 }
 
 // Badges just earned, side by side in a panel with confetti behind each: they pop in one after
@@ -99,9 +99,9 @@ export function addBadgeCelebration(
   ids: readonly AchievementId[],
 ): void {
   addPanel(scene, rect);
-  const center = rect.x + rect.width / 2;
-  addPixelText(scene, center, rect.y + BADGE_STRIP.titleY, celebrationTitle(gameData, ids.length), {
-    color: PALETTE.plum,
+  const centre = rect.x + rect.width / 2;
+  addPixelText(scene, centre, rect.y + BADGE_STRIP.titleY, celebrationTitle(gameData, ids.length), {
+    colour: PALETTE.plum,
     font: "title",
     originX: 0.5,
     scale: TEXT_SCALE,
@@ -110,7 +110,7 @@ export function addBadgeCelebration(
   const { maxNamed } = BADGE_STRIP;
   const strip = badgeStrip({ maxNamed, width: rect.width - 8, x: rect.x + 4 }, badges.length);
   const badgeY = rect.y + BADGE_STRIP.badgeTop + BADGE_SIZE / 2;
-  const style = { color: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
+  const style = { colour: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
   const slotWidth = strip.slots[0]?.width ?? 0;
   const named = badges.map(({ name }) => name);
   const names = strip.named ? rowNames(scene, style, slotWidth, named) : undefined;
@@ -120,14 +120,14 @@ export function addBadgeCelebration(
       return;
     }
     const delay = i * POP.delayMs;
-    const burst = () => addConfetti(scene, reduced, 1, slot.centerX, badgeY);
-    const image = addBadge(scene, badge.art, true, slot.centerX, badgeY);
+    const burst = () => addConfetti(scene, reduced, 1, slot.centreX, badgeY);
+    const image = addBadge(scene, badge.art, true, slot.centreX, badgeY);
     if (names !== undefined) {
       const { letterSpacing, scale } = names.style;
       const lines = names.lines[i] ?? [];
       const tops = badgeNameTops(lines.length, rect.y);
       lines.forEach((line, n) => {
-        addPixelText(scene, slot.centerX, tops[n] ?? 0, line, { ...style, scale })
+        addPixelText(scene, slot.centreX, tops[n] ?? 0, line, { ...style, scale })
           .setLetterSpacing(letterSpacing)
           .setDepth(1);
       });

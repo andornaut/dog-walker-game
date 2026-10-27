@@ -18,12 +18,12 @@ const card: Rect = {
   x: (SCREEN_CONFIG.width - WIDTH) / 2,
   y: (SCREEN_CONFIG.height - HEIGHT) / 2,
 };
-const centerX = card.x + WIDTH / 2;
+const centreX = card.x + WIDTH / 2;
 const band = cardBand(card);
 const well: Rect = {
   height: CARD.well.size,
   width: CARD.well.size,
-  x: centerX - CARD.well.size / 2,
+  x: centreX - CARD.well.size / 2,
   y: card.y + 40,
 };
 const buttonsY = card.y + HEIGHT - BUTTON.gap - BUTTON.height;
@@ -38,12 +38,12 @@ export const PURCHASE_CONFIRM_LAYOUT = {
   band,
   buttons: { buy: button(1), cancel: button(0) } satisfies Readonly<Record<ConfirmChoice, Rect>>,
   card,
-  // Each line is centred on centerX with its capitals' top at capTop, in its font at 2x.
-  left: { capTop: well.y + well.height + 28, centerX, font: "body", room: WIDTH - 2 * CARD.pad },
+  // Each line is centred on centreX with its capitals' top at capTop, in its font at 2x.
+  left: { capTop: well.y + well.height + 28, centreX, font: "body", room: WIDTH - 2 * CARD.pad },
   // The picture sits in the well picture pixels in from its corner.
   picture: { x: well.x + CARD.well.picture, y: well.y + CARD.well.picture },
-  price: { capTop: well.y + well.height + 10, centerX, font: "title", room: WIDTH - 2 * CARD.pad },
+  price: { capTop: well.y + well.height + 10, centreX, font: "title", room: WIDTH - 2 * CARD.pad },
   screen: screenLayout(SCREEN_CONFIG).screen,
-  title: { capTop: band.y + CARD.band.titleY, centerX, font: "title", room: band.width - 16 },
+  title: { capTop: band.y + CARD.band.titleY, centreX, font: "title", room: band.width - 16 },
   well,
 } as const;

@@ -8,9 +8,9 @@ import type { ScaledBox } from "./collision";
 // and a long footprint, such as a truck's, hits only as long as the truck is drawn. Columns are
 // screen columns, kept at the scale of the obstacle's feet row.
 
-// The road's projection in road pixels: centerX is the road's centre across from its left edge.
+// The road's projection in road pixels: centreX is the road's centre across from its left edge.
 export interface RoadLens {
-  readonly centerX: number;
+  readonly centreX: number;
   readonly focal: number;
   readonly footY: number;
   readonly horizonY: number;
@@ -49,7 +49,7 @@ export function drawnObstacleBox(
     const projected = scaleAt(lens, distance);
     const drawn = Math.min(1, projected);
     const feetRow = screenYAt(lens, distance);
-    const centre = lens.centerX + (place.x + dx - lens.centerX) * projected;
+    const centre = lens.centreX + (place.x + dx - lens.centreX) * projected;
     top = Math.min(top, feetRow - silhouette.above * drawn + inset);
     bottom = Math.max(bottom, feetRow - inset);
     left = Math.min(left, centre + silhouette.left * drawn + inset);
@@ -57,7 +57,7 @@ export function drawnObstacleBox(
   }
   // Columns go back to road pixels at the scale of the near edge's row.
   const scale = scaleAt(lens, lens.footY - place.feetY);
-  const across = (column: number) => lens.centerX + (column - lens.centerX) / scale;
+  const across = (column: number) => lens.centreX + (column - lens.centreX) / scale;
   return {
     bottom: lens.footY - distanceAtY(lens, bottom),
     left: across(left),

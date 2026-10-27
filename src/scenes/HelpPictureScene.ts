@@ -12,7 +12,7 @@ import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { currentZone } from "../rules/route";
 import { laneMotionX } from "../runner/laneMotion";
-import { colorFromHex, PALETTE } from "../ui/phaser/palette";
+import { colourFromHex, PALETTE } from "../ui/phaser/palette";
 import type { CardSceneData } from "./CardScene";
 import type { HudSceneData } from "./HudScene";
 import type { HudWalk } from "./hudWalk";
@@ -93,7 +93,7 @@ export class HelpPictureScene extends Scene {
     ensureRoadPlaceholders(this);
     new RoadView(this, this.roadArt, LAYOUT.rasterView, ROAD_TEXTURE).draw(walk, zone, 0);
     const shadows = new ShadowPool(this);
-    const shadow = shadows.frame(colorFromHex(zone.roadShadowColor));
+    const shadow = shadows.frame(colourFromHex(zone.roadShadowColour));
     const items = new ItemViews(this, () => undefined);
     items.draw(walk, picture.halted, true, shadow);
     const dogs = walk.run.pack.map(({ dog }) => dog);

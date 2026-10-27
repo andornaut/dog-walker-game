@@ -104,7 +104,7 @@ export class OwnerTabs {
       return face;
     }
     return addPixelText(this.scene, x, y, gameData.dogs[dog].owner.name.slice(0, 1), {
-      color: PALETTE.ink,
+      colour: PALETTE.ink,
     });
   }
 }

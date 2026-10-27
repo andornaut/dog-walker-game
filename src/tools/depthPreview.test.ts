@@ -23,7 +23,7 @@ describe("sweepDistances", () => {
     expect(distances[0]).toBe(0);
     expect(distances.at(-1)).toBe(Math.floor(lens.visibleDistance));
     const keyAt = (distance: number) =>
-      depthDraw(ARTS, project(lens, { distance, x: lens.centerX }).scale).key;
+      depthDraw(ARTS, project(lens, { distance, x: lens.centreX }).scale).key;
     const changes = distances.filter((d) => d > 0 && keyAt(d) !== keyAt(d - 1));
     expect(changes.map(keyAt)).toEqual(["cone@75", "cone@50"]);
   });
@@ -31,8 +31,8 @@ describe("sweepDistances", () => {
 
 describe("sweepRow", () => {
   it("draws the art depthDraw picks, standing on the projected feet", () => {
-    const row = sweepRow(ARTS, lens, lens.centerX, 0);
+    const row = sweepRow(ARTS, lens, lens.centreX, 0);
     expect(row.drawn.key).toBe("cone");
-    expect(row.rect).toEqual({ height: 32, width: 32, x: lens.centerX - 16, y: lens.footY - 32 });
+    expect(row.rect).toEqual({ height: 32, width: 32, x: lens.centreX - 16, y: lens.footY - 32 });
   });
 });

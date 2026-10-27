@@ -20,9 +20,9 @@ import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, inkSpan, scalePixelText, setPixelText } from "../ui/phaser/pixelText";
 import {
-  BUTTON_COLORS,
+  BUTTON_COLOURS,
   type ButtonLook,
-  DISABLED_COLORS,
+  DISABLED_COLOURS,
   GREYED,
   SELECT_OUTSET,
   type SelectLook,
@@ -167,7 +167,7 @@ const BUTTON_LIP_PX = 4;
 function drawDisabledButton(g: GameObjects.Graphics, rect: Rect): void {
   drawFramedRect(
     g,
-    { border: PALETTE.ink, fill: PALETTE[DISABLED_COLORS.face] },
+    { border: PALETTE.ink, fill: PALETTE[DISABLED_COLOURS.face] },
     { ...rect, height: rect.height - BUTTON_LIP_PX, y: rect.y + BUTTON_PRESS_PX },
   );
 }
@@ -184,7 +184,7 @@ export function buttonFaces(
   rect: Rect,
   look: ButtonLook,
 ): (GameObjects.Graphics | GameObjects.NineSlice)[] {
-  const { face: faceColor, lip } = BUTTON_COLORS[look];
+  const { face: faceColour, lip } = BUTTON_COLOURS[look];
   return BUTTON_TAGS[look].map((tag, i) => {
     const artTag = look === "disabled" && primary ? "go-disabled" : tag;
     const slice = addNineSlice(scene, "ui-button", rect, artTag);
@@ -201,7 +201,7 @@ export function buttonFaces(
     if (!pressed) {
       fillRect(g, PALETTE[lip], rect);
     }
-    fillRect(g, PALETTE[faceColor], { ...face, y: face.y + (pressed ? BUTTON_PRESS_PX : 0) });
+    fillRect(g, PALETTE[faceColour], { ...face, y: face.y + (pressed ? BUTTON_PRESS_PX : 0) });
     return g;
   });
 }
@@ -227,14 +227,14 @@ export function addMenuButton(
   const faces = buttonFaces(scene, input.primary, rect, look);
   const disabled = state === "disabled";
   const title = addPixelText(scene, rect.x + rect.width / 2, 0, label, {
-    color: PALETTE[BUTTON_COLORS[look].label],
+    colour: PALETTE[BUTTON_COLOURS[look].label],
     font: "title",
     originX: 0.5,
     originY: 0.5,
     scale: TEXT_SCALE,
   });
   parent?.add([...faces, title]);
-  const centerY = rect.y + (rect.height - BUTTON_LIP_PX) / 2;
+  const centreY = rect.y + (rect.height - BUTTON_LIP_PX) / 2;
   const button: MenuButton = {
     rect,
     setPressed(pressed) {
@@ -243,7 +243,7 @@ export function addMenuButton(
         up?.setVisible(!pressed);
         down.setVisible(pressed);
       }
-      title.setY(Math.round(centerY + (disabled || pressed ? BUTTON_PRESS_PX : 0)));
+      title.setY(Math.round(centreY + (disabled || pressed ? BUTTON_PRESS_PX : 0)));
     },
   };
   button.setPressed(false);
@@ -321,7 +321,7 @@ export function soundIcon(scene: Scene, on: boolean, x: number, y: number): Plac
     return [image];
   }
   return [
-    addPixelText(scene, x + 8, y + 4, on ? "On" : "X", { color: PALETTE.plum, originX: 0.5 }),
+    addPixelText(scene, x + 8, y + 4, on ? "On" : "X", { colour: PALETTE.plum, originX: 0.5 }),
   ];
 }
 
@@ -354,7 +354,7 @@ export function imageIconOr(
   const icon = imageIcon(scene, key, x, y);
   return icon.length > 0
     ? icon
-    : [addPixelText(scene, x + 8, y + 4, letter, { color: PALETTE.plum, originX: 0.5 })];
+    : [addPixelText(scene, x + 8, y + 4, letter, { colour: PALETTE.plum, originX: 0.5 })];
 }
 
 // A cog for settings, drawn in code: the art has no settings icon yet.
@@ -466,7 +466,7 @@ function addSelectMark(
   const g = scene.add.graphics();
   fillRect(g, PALETTE.green, { height: 12, width: 12, x: x + 2, y: y + 2 });
   const label = addPixelText(scene, x + 8, y + 4, tag === "tick" ? "+" : tag, {
-    color: PALETTE.white,
+    colour: PALETTE.white,
     font: "title",
     originX: 0.5,
   });
@@ -505,7 +505,7 @@ function drawTileFace(scene: Scene, edge: boolean, look: SelectLook, rect: Rect)
   const g = scene.add.graphics();
   const fill = PALETTE[look.face];
   const border =
-    look.state === "selected" ? PALETTE.ink : edge ? PALETTE[DISABLED_COLORS.edge] : fill;
+    look.state === "selected" ? PALETTE.ink : edge ? PALETTE[DISABLED_COLOURS.edge] : fill;
   drawFramedRect(g, { border, fill }, rect);
   return g;
 }
@@ -576,7 +576,7 @@ export function addTab(
   }
   tile.content.add(
     addPixelText(scene, rect.x + rect.width / 2, rect.y + rect.height / 2, label, {
-      color: PALETTE[tile.look.text],
+      colour: PALETTE[tile.look.text],
       font: "title",
       originX: 0.5,
       originY: 0.5,

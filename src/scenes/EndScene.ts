@@ -31,7 +31,7 @@ import { isConfirmKey } from "../input/keyBindings";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import type { Rect } from "../lib/rect";
-import { PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
+import { PackFigures, YARD_LEASH_COLOUR } from "../pack/phaser/packFigures";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import type { LastWalk } from "../save/schema";
@@ -83,7 +83,7 @@ const RETURN_HOME_SCENE = END_LAYOUT.returnHome;
 const BUTTON: Rect = END_LAYOUT.button;
 
 // Money gained in forest and lost in darkRed, each with its sign, on the cream panel.
-function amountColor(amount: number): number {
+function amountColour(amount: number): number {
   if (amount === 0) {
     return PALETTE.plum;
   }
@@ -131,10 +131,10 @@ export class EndScene extends Scene {
     const lines =
       ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
     const closing = closingLines(gameData, Math.random, walk);
-    const text = (x: number, y: number, value: string, color: number, originX = 0) =>
-      addPixelText(this, x, y, value, { color, originX, scale: END_TEXT_SCALE });
-    const title = (x: number, y: number, value: string, color: number, originX = 0) =>
-      addPixelText(this, x, y, value, { color, font: "title", originX, scale: END_TEXT_SCALE });
+    const text = (x: number, y: number, value: string, colour: number, originX = 0) =>
+      addPixelText(this, x, y, value, { colour, originX, scale: END_TEXT_SCALE });
+    const title = (x: number, y: number, value: string, colour: number, originX = 0) =>
+      addPixelText(this, x, y, value, { colour, font: "title", originX, scale: END_TEXT_SCALE });
     // A label set in the first of TEXT_FIT_STYLES that fits room.
     const fitted = (label: GameObjects.BitmapText, room: number, x: number, y: number) =>
       fitPixelText(label, { room, styles: TEXT_FIT_STYLES }, x, y);
@@ -155,7 +155,7 @@ export class EndScene extends Scene {
 
     const words = gameData.menuText.end;
     addDisplayText(this, SCREEN_CONFIG.width / 2, TITLE_Y, words.titles[walk.outcome], {
-      color: PALETTE.plum,
+      colour: PALETTE.plum,
       font: "title",
       originX: 0.5,
       scale: TEXT_SCALE,
@@ -175,7 +175,7 @@ export class EndScene extends Scene {
     const labels: LabelToFit[] = [];
     for (const line of lines) {
       const amount = signedDollarText(line.amount);
-      const shown = text(BREAKDOWN.amountRight, y, amount, amountColor(line.amount), 1);
+      const shown = text(BREAKDOWN.amountRight, y, amount, amountColour(line.amount), 1);
       const label = text(BREAKDOWN.label, y, line.label, PALETTE.plum);
       labels.push({ label, room: room(shown), x: BREAKDOWN.label, y });
       y += BREAKDOWN.pitch;
@@ -228,7 +228,7 @@ export class EndScene extends Scene {
       this.addBubble({ height, width: bubble.width, x: bubble.x, y: row });
       // The owner's name under the well, at 1x.
       const owner = gameData.dogs[line.dog].owner.name;
-      const name = addPixelText(this, 0, row + nameY, owner, { color: PALETTE.rust, scale: 1 });
+      const name = addPixelText(this, 0, row + nameY, owner, { colour: PALETTE.rust, scale: 1 });
       const nameInk = inkSpan(name);
       name.setX(quipNameX(nameInk.right - nameInk.left) - nameInk.left);
       if (line.fired) {
@@ -308,7 +308,7 @@ export class EndScene extends Scene {
         footY,
         spriteMetrics(key).opaqueWidth * depth,
       );
-    const look = { color: YARD_LEASH_COLOR, taut: null };
+    const look = { colour: YARD_LEASH_COLOUR, taut: null };
     figures.stand(0, shadow, look, {
       dogs: standing,
       walker: { footY: walkerAt.y, x: walkerAt.x },
@@ -361,7 +361,7 @@ export class EndScene extends Scene {
   private showRibbon(reduced: boolean): void {
     if (!this.textures.exists(RIBBON.key)) {
       addDisplayText(this, SCREEN_CONFIG.width / 2, RIBBON.y + 4, gameData.menuText.end.newBest, {
-        color: PALETTE.darkRed,
+        colour: PALETTE.darkRed,
         font: "title",
         originX: 0.5,
         scale: TEXT_SCALE,

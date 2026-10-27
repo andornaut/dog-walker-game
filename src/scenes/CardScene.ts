@@ -57,7 +57,7 @@ import {
   setPixelText,
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
-import { DISABLED_COLORS, GREYED } from "../ui/selection";
+import { DISABLED_COLOURS, GREYED } from "../ui/selection";
 import { addCharm } from "./buffCharm";
 import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
@@ -187,21 +187,21 @@ export class CardScene extends Scene {
     this.cardRects = cardRowIn(walkView, MAX_CARD_OPTIONS, this.entries.length);
     const keys = picture === undefined && keyNumbersShown();
     const header = cardHeader(keys, this.cardRects);
-    const centerX = walkView.x + walkView.width / 2;
+    const centreX = walkView.x + walkView.width / 2;
     const title = { font: "title", scale: 2 } as const;
     const headerStart = this.children.list.length;
     // The title, subtitle and key numbers sit on a dark band over the dimmed road.
     addNineSlice(this, "ui-strip-well", header.band);
     if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
       snapCentre(
-        addDisplayText(this, centerX, header.titleTop, view.title, { color: PALETTE.white }),
-        centerX,
+        addDisplayText(this, centreX, header.titleTop, view.title, { colour: PALETTE.white }),
+        centreX,
       );
     } else {
-      this.centered(centerX + 1, header.titleTop + 1, view.title, PALETTE.ink, title);
-      this.centered(centerX, header.titleTop, view.title, PALETTE.white, title);
+      this.centred(centreX + 1, header.titleTop + 1, view.title, PALETTE.ink, title);
+      this.centred(centreX, header.titleTop, view.title, PALETTE.white, title);
     }
-    this.centered(centerX, header.subtitleTop, this.subtitle(view), PALETTE.white);
+    this.centred(centreX, header.subtitleTop, this.subtitle(view), PALETTE.white);
     this.headerParts = this.children.list.slice(headerStart);
 
     const tag = cardFrameTag(view.source);
@@ -211,7 +211,7 @@ export class CardScene extends Scene {
       this.drawCard(view, tag, entry, rect);
       // Once a key has been pressed, each card shows the number key that picks it, above it.
       if (keys) {
-        this.centered(rect.x + rect.width / 2, header.keyTop, String(i + 1), PALETTE.amber, {
+        this.centred(rect.x + rect.width / 2, header.keyTop, String(i + 1), PALETTE.amber, {
           font: "title",
         });
       }
@@ -219,7 +219,7 @@ export class CardScene extends Scene {
     });
     this.outline = this.add.graphics();
     if (view.source.kind === "fork" && onHeadHome !== null) {
-      const rect = forkHomeRect(itemAt(this.cardRects, 0), centerX);
+      const rect = forkHomeRect(itemAt(this.cardRects, 0), centreX);
       const label = gameData.runText.homeQuestion.headHome;
       const before = this.children.list.length;
       const button = addMenuButton(this, rect, label, { available: true, primary: false });
@@ -387,7 +387,7 @@ export class CardScene extends Scene {
       fillRect(g, PALETTE.plum, card);
       fillRect(g, PALETTE.cream, insetRect(4, card));
     }
-    this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, bandLabel(entry), PALETTE.white);
+    this.centred(x + LARGE.width / 2, y + LARGE.band.y + 5, bandLabel(entry), PALETTE.white);
     const art = illustrationKey(option);
     if (this.textures.exists(art)) {
       this.add
@@ -432,7 +432,7 @@ export class CardScene extends Scene {
     let fireLines = 0;
     if (option !== undefined && option.fires.length > 0) {
       const warning = addPixelText(this, x, top, firesText(gameData, option.fires), {
-        color: PALETTE.darkRed,
+        colour: PALETTE.darkRed,
         font: "title",
       });
       fireLines = fitPixelText(warning, FIRES_FIT.large, x, top).lines.length;
@@ -445,7 +445,7 @@ export class CardScene extends Scene {
       return this.addForgiven(forgiven, { align: "left", x }, top + box.top, 2);
     }
     const body = addPixelText(this, x, top + box.top, largeBodyText(gameData, option), {
-      color: PALETTE.plum,
+      colour: PALETTE.plum,
       scale: 2,
     });
     const metrics = pixelFontMetrics(this, "body");
@@ -484,13 +484,13 @@ export class CardScene extends Scene {
     badge: Rect,
     marker: number | undefined,
     capsY: number,
-    color: number,
+    colour: number,
     option: OptionView,
   ): GameObjects.BitmapText {
-    const center = plaqueCentre(badge, marker);
+    const centre = plaqueCentre(badge, marker);
     const room = plaqueRoom(badge.x, badge.width, marker);
     const texts = plaqueTexts(gameData, size, option);
-    const label = this.centered(center, badge.y + capsY, texts[0] ?? "", color, { font: "title" });
+    const label = this.centred(centre, badge.y + capsY, texts[0] ?? "", colour, { font: "title" });
     for (const text of texts) {
       setPixelText(label, text);
       const ink = inkSpan(label);
@@ -498,7 +498,7 @@ export class CardScene extends Scene {
         break;
       }
     }
-    return snapCentre(label, center);
+    return snapCentre(label, centre);
   }
 
   // The lit charm of each buff on the option, in a row centred under its card, at scale.
@@ -517,7 +517,7 @@ export class CardScene extends Scene {
     capsY: number,
     text: string,
   ): void {
-    this.centered(plaqueCentre(badge, marker), badge.y + capsY, text, PALETTE.forest, {
+    this.centred(plaqueCentre(badge, marker), badge.y + capsY, text, PALETTE.forest, {
       font: "title",
     });
   }
@@ -535,26 +535,26 @@ export class CardScene extends Scene {
     const row = metrics.lineHeight * scale;
     const parts = forgiven.rows.map((text, i) =>
       at.align === "centre"
-        ? this.centered(at.x, top + i * row, text, PALETTE.forest, { scale })
-        : addPixelText(this, at.x, top + i * row, text, { color: PALETTE.forest, scale }),
+        ? this.centred(at.x, top + i * row, text, PALETTE.forest, { scale })
+        : addPixelText(this, at.x, top + i * row, text, { colour: PALETTE.forest, scale }),
     );
     const nameTop = top + forgiven.rows.length * row;
     const name =
       at.align === "centre"
-        ? this.centered(at.x, nameTop, forgiven.name, PALETTE.plum, { scale })
-        : addPixelText(this, at.x, nameTop, forgiven.name, { color: PALETTE.plum, scale });
+        ? this.centred(at.x, nameTop, forgiven.name, PALETTE.plum, { scale })
+        : addPixelText(this, at.x, nameTop, forgiven.name, { colour: PALETTE.plum, scale });
     const lines = forgiven.rows.length + 1;
     return { height: inkRowsOfLines(metrics, lines) * scale, parts: [...parts, name] };
   }
 
-  private centered(
+  private centred(
     x: number,
     y: number,
     text: string,
-    color: number,
+    colour: number,
     style: { font?: FontRole; maxWidth?: number; scale?: number } = {},
   ): GameObjects.BitmapText {
-    return snapCentre(addPixelText(this, x, y, text, { align: "center", color, ...style }), x);
+    return snapCentre(addPixelText(this, x, y, text, { align: "centre", colour, ...style }), x);
   }
 
   private drawCard(view: CardView, tag: string, entry: Entry, rect: Rect): void {
@@ -576,7 +576,7 @@ export class CardScene extends Scene {
       });
     }
 
-    this.centered(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), PALETTE.white);
+    this.centred(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), PALETTE.white);
 
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
     const illustration = illustrationKey(entry.option);
@@ -600,7 +600,7 @@ export class CardScene extends Scene {
           playFirstTag(sprite, spriteKey, ["idle", "walk", "wave"], still);
         }
       } else {
-        this.centered(
+        this.centred(
           art.x + art.width / 2,
           art.y + art.height / 2 - 5,
           "?",
@@ -627,7 +627,7 @@ export class CardScene extends Scene {
     // the effect still fits over it; the effect at 2x where it fits the card, else at 1x. Holding
     // the card shows both larger.
     const fires = entry.option?.fires ?? [];
-    const probe = addPixelText(this, 0, 0, "", { color: PALETTE.plum });
+    const probe = addPixelText(this, 0, 0, "", { colour: PALETTE.plum });
     const shown = smallCardText(
       gameData,
       pixelFontMetrics(this, "body"),
@@ -636,13 +636,13 @@ export class CardScene extends Scene {
     );
     probe.destroy();
     if (shown.warning !== null) {
-      const warning = this.centered(centreX, 0, "", grey ? PALETTE[GREYED.text] : PALETTE.darkRed);
+      const warning = this.centred(centreX, 0, "", grey ? PALETTE[GREYED.text] : PALETTE.darkRed);
       setFittedText(warning, shown.warning, centreX, y + shown.box.warningY);
       snapCentre(warning, centreX);
     }
     if (marks.forgiven === null) {
-      const effectColor = grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum;
-      const effect = this.centered(centreX, 0, "", effectColor);
+      const effectColour = grey ? PALETTE[DISABLED_COLOURS.text] : PALETTE.plum;
+      const effect = this.centred(centreX, 0, "", effectColour);
       setFittedText(effect, shown.effect, centreX, y + shown.box.y);
       snapCentre(effect, centreX);
     } else {

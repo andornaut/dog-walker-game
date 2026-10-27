@@ -266,7 +266,7 @@ describe("Apply", () => {
   it.each([
     ["no cheats", CHEATS_OFF],
     ["every cheat", every],
-  ])("with %s starts a walk in dev mode the URL reads back at every neighborhood", (_, cheats) => {
+  ])("with %s starts a walk in dev mode the URL reads back at every neighbourhood", (_, cheats) => {
     const starts = startChoices(gameData).map(({ start }) => start);
     expect(starts.slice(0, 2)).toEqual([START_SCREEN, firstZoneId(gameData)]);
     for (const start of starts.slice(1)) {

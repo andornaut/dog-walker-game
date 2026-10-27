@@ -7,7 +7,7 @@ import type { RgbaImage } from "./atlasPixels";
 export const MAX_PALETTE = 256;
 
 const SIGNATURE = Uint8Array.of(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
-export const COLOR_TYPE_INDEXED = 3;
+export const COLOUR_TYPE_INDEXED = 3;
 const FILTER_NONE = 0;
 
 // Each pixel's palette index and the palette as RGBA values (R in the high byte), or undefined
@@ -67,7 +67,7 @@ export function encodeIndexedPng(image: RgbaImage): Uint8Array | undefined {
   const headerView = new DataView(header.buffer);
   headerView.setUint32(0, width);
   headerView.setUint32(4, height);
-  header.set([8, COLOR_TYPE_INDEXED, 0, 0, 0], 8);
+  header.set([8, COLOUR_TYPE_INDEXED, 0, 0, 0], 8);
   const plte = new Uint8Array(
     palette.flatMap((rgba) => [rgba >>> 24, (rgba >>> 16) & 0xff, (rgba >>> 8) & 0xff]),
   );

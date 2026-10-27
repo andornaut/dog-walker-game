@@ -4,8 +4,8 @@ import { insetRect, type Rect, ringRects } from "../../lib/rect";
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../pixelShapes";
 import { PALETTE } from "./palette";
 
-export function addFilledRect(scene: Scene, color: number, rect: Rect): GameObjects.Rectangle {
-  return scene.add.rectangle(rect.x, rect.y, rect.width, rect.height, color).setOrigin(0);
+export function addFilledRect(scene: Scene, colour: number, rect: Rect): GameObjects.Rectangle {
+  return scene.add.rectangle(rect.x, rect.y, rect.width, rect.height, colour).setOrigin(0);
 }
 
 // The ink layer an overlay dims what is under it with.
@@ -17,18 +17,18 @@ export function addDim(scene: Scene, rect: Rect): GameObjects.Rectangle {
     .setOrigin(0);
 }
 
-export function fillRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
-  graphics.fillStyle(color).fillRect(rect.x, rect.y, rect.width, rect.height);
+export function fillRect(graphics: GameObjects.Graphics, colour: number, rect: Rect): void {
+  graphics.fillStyle(colour).fillRect(rect.x, rect.y, rect.width, rect.height);
 }
 
 // A ring of the given thickness just inside rect's edge.
 export function drawRing(
   g: GameObjects.Graphics,
-  color: number,
+  colour: number,
   rect: Rect,
   thickness: number,
 ): void {
-  ringRects(thickness, rect).forEach((band) => fillRect(g, color, band));
+  ringRects(thickness, rect).forEach((band) => fillRect(g, colour, band));
 }
 
 // The keyboard's focus ring: a 2px cyan frame outset pixels outside rect.
@@ -41,12 +41,12 @@ const SHADOW_RADIUS_Y = 2.5;
 // A solid pixel ellipse under a sprite, centred on its x about a pixel above its feet.
 export function drawShadow(
   graphics: GameObjects.Graphics,
-  color: number,
+  colour: number,
   x: number,
   footY: number,
   spriteWidth: number,
 ): void {
-  graphics.fillStyle(color);
+  graphics.fillStyle(colour);
   for (const span of pixelEllipseSpans(
     Math.round(x),
     Math.round(footY) - 1,
@@ -63,17 +63,17 @@ export function drawShadow(
 // to place a pixel above the sprite's feet, at its x.
 export function shadowTexture(
   scene: Scene,
-  color: number,
+  colour: number,
   spriteWidth: number,
   scale = 1,
 ): { anchor: { x: number; y: number }; key: string } {
   const radiusX = Math.round(shadowRadiusX(spriteWidth) * 2) / 2;
   const radiusY = Math.max(1, Math.round(SHADOW_RADIUS_Y * scale * 2) / 2);
   const anchor = { x: Math.ceil(radiusX) + 1, y: Math.ceil(radiusY) + 1 };
-  const key = `shadow-${color.toString(16)}-${radiusX}-${radiusY}`;
+  const key = `shadow-${colour.toString(16)}-${radiusX}-${radiusY}`;
   if (!scene.textures.exists(key)) {
     const graphics = scene.make.graphics({}, false);
-    graphics.fillStyle(color);
+    graphics.fillStyle(colour);
     for (const span of pixelEllipseSpans(anchor.x, anchor.y, radiusX, radiusY)) {
       graphics.fillRect(span.x, span.y, span.width, 1);
     }
@@ -86,11 +86,11 @@ export function shadowTexture(
 // A 1px line with no smoothing, so it stays on the palette.
 export function drawPixelLine(
   graphics: GameObjects.Graphics,
-  color: number,
+  colour: number,
   from: { x: number; y: number },
   to: { x: number; y: number },
 ): void {
-  graphics.fillStyle(color);
+  graphics.fillStyle(colour);
   for (const [x, y] of pixelLinePoints(from.x, from.y, to.x, to.y)) {
     graphics.fillRect(x, y, 1, 1);
   }
@@ -103,9 +103,9 @@ export function drawHeart(
   graphics: GameObjects.Graphics,
   x: number,
   y: number,
-  color: number,
+  colour: number,
 ): void {
-  graphics.fillStyle(color);
+  graphics.fillStyle(colour);
   HEART_ROWS.forEach((row, dy) => {
     [...row].forEach((cell, dx) => {
       if (cell === "1") {
@@ -116,8 +116,8 @@ export function drawHeart(
 }
 
 // A 1px border of 2-on, 2-off dashes, for an empty slot, the last dash on a side cut at its end.
-export function drawDashedRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
-  graphics.fillStyle(color);
+export function drawDashedRect(graphics: GameObjects.Graphics, colour: number, rect: Rect): void {
+  graphics.fillStyle(colour);
   const right = rect.x + rect.width - 1;
   const bottom = rect.y + rect.height - 1;
   for (let i = 0; i < rect.width; i += 4) {
@@ -133,9 +133,9 @@ export function drawDashedRect(graphics: GameObjects.Graphics, color: number, re
 // A box with a 1px border drawn inside it, not straddling its edge as a Phaser stroke would.
 export function drawFramedRect(
   graphics: GameObjects.Graphics,
-  colors: { border: number; fill: number },
+  colours: { border: number; fill: number },
   rect: Rect,
 ): void {
-  fillRect(graphics, colors.border, rect);
-  fillRect(graphics, colors.fill, insetRect(1, rect));
+  fillRect(graphics, colours.border, rect);
+  fillRect(graphics, colours.fill, insetRect(1, rect));
 }

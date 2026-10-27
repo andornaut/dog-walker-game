@@ -224,7 +224,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 //   a step late; sampled a quarter step apart, wherever the mover would hit a pack standing in a
 //   lane, the bot keeps the pack out of that lane from a step before to a step after; and it
 //   keeps the pack out of no lane the mover never hits.
-// The friendly neighbor in lane 2, stepping once as she comes down the road: the bot plans her as
+// The friendly neighbour in lane 2, stepping once as she comes down the road: the bot plans her as
 // a prize in the lane she meets the pack's rows in, as soon as she reaches them.
 describe("a moving prize", () => {
   const run = testState({ biscuit: 3 });
@@ -232,7 +232,7 @@ describe("a moving prize", () => {
   const speed = walkScrollSpeed(gameData, run);
   const road: BotRoad = { data: gameData, geometry, speed };
   const { cell, packBand, roadTop } = geometry;
-  const height = itemHeight(gameData, geometry, "pettingNeighbor", true);
+  const height = itemHeight(gameData, geometry, "pettingNeighbour", true);
   it.each([
     { lane: 3, name: "a lane right", step: { lanes: 1, travel: 0 } },
     { lane: 1, name: "a lane left", step: { lanes: -1, travel: 0 } },
@@ -248,7 +248,7 @@ describe("a moving prize", () => {
     const item: WalkItem = {
       height,
       id: 1,
-      kind: "pettingNeighbor",
+      kind: "pettingNeighbour",
       lane: 2,
       laneSpan: 1,
       mover: { path, since: 0 },

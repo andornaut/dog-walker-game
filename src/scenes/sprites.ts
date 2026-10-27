@@ -147,14 +147,14 @@ export function spriteMetrics(key: string): SpriteMetrics {
 export function ensurePlaceholder(
   scene: Scene,
   key: string,
-  size: { color: number; height: number; width: number },
+  size: { colour: number; height: number; width: number },
 ): void {
   if (scene.textures.exists(key)) {
     return;
   }
-  const { color, height, width } = size;
+  const { colour, height, width } = size;
   const graphics = scene.make.graphics({}, false);
-  graphics.fillStyle(color).fillRect(2, 2, width - 4, height - 2);
+  graphics.fillStyle(colour).fillRect(2, 2, width - 4, height - 2);
   graphics.generateTexture(key, width, height);
   graphics.destroy();
   measured.set(key, {

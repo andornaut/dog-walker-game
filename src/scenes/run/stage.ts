@@ -2,7 +2,7 @@ import type { GameObjects } from "phaser";
 
 import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
-import { laneCenterXs } from "../../layout/lanes";
+import { laneCentreXs } from "../../layout/lanes";
 import { screenLayout, walkerFootY } from "../../layout/screenLayout";
 import { rowsAboveJuncture } from "../../road/roadClip";
 import { read } from "../../rules/units";
@@ -15,7 +15,7 @@ import { walkProjection } from "../../runner/walkGeometry";
 export const LAYOUT = screenLayout(SCREEN_CONFIG);
 // Every road sprite, the road and its verge are drawn through this one projection.
 export const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
-export const LANE_XS = laneCenterXs(LANE_COUNT, LAYOUT.road);
+export const LANE_XS = laneCentreXs(LANE_COUNT, LAYOUT.road);
 
 // The backdrop band, the road's approach drawn over it and the band's movers lie under the
 // road and its sprites, which clipToRoad cuts off at the juncture: an item at the far edge of the

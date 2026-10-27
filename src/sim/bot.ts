@@ -202,13 +202,13 @@ function holdTogether(pairs: readonly (readonly [Edge, Edge])[]): boolean {
 // can clip a part's corner between two samples, where the walk's collision, at its own walk
 // steps, can meet it. With the two samples the same, it is touchesAsDrawn's test.
 function touchesBetween(
-  centerX: number,
+  centreX: number,
   band: RoadGeometry["packBand"],
   part: ScaledBox,
   from: MoverSample,
   to: MoverSample,
 ): boolean {
-  const across = (scale: number, x: number) => centerX + (x - centerX) * scale;
+  const across = (scale: number, x: number) => centreX + (x - centreX) * scale;
   const a = from.box;
   const b = to.box;
   // Clear of the part all the way along: the box between them stays within both samples'.
@@ -269,7 +269,7 @@ function touchesPackIn(
   const { dogs, walker } = geometry.packParts;
   return [...dogs, walker].some((part) =>
     touchesBetween(
-      geometry.lens.centerX,
+      geometry.lens.centreX,
       geometry.packBand,
       { ...part, left: part.left + x - left, right: part.right + x + right },
       from,

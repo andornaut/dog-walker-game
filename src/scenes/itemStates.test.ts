@@ -25,11 +25,11 @@ const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
 type StateName = "affordable" | "locked" | "owned" | "short";
 
 // What each state shows on the start screen, from the shop states' table: the portrait or
-// icon in color once the bank reaches the price, and grey a cent short.
+// icon in colour once the bank reaches the price, and grey a cent short.
 const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
-  affordable: { art: "color", badge: "bill", plate: "buy", state: "disabled" },
+  affordable: { art: "colour", badge: "bill", plate: "buy", state: "disabled" },
   locked: { art: "grey", badge: "lock", plate: "goal", state: "disabled" },
-  owned: { art: "color", badge: null, plate: null, state: "normal" },
+  owned: { art: "colour", badge: null, plate: null, state: "normal" },
   short: { art: "grey", badge: "lock", plate: "short", state: "disabled" },
 };
 

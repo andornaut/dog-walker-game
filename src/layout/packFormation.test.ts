@@ -10,7 +10,7 @@ import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
 import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
-import { laneCenterXs } from "./lanes";
+import { laneCentreXs } from "./lanes";
 import {
   COLLAR_HEIGHTS,
   DOG_SILHOUETTES,
@@ -38,7 +38,7 @@ import { screenLayout } from "./screenLayout";
 const ROAD = screenLayout(SCREEN_CONFIG).road;
 // The game's projection, its feet on the walker's feet line.
 const PROJECTION = walkProjection(ROAD_CAMERA, ROAD);
-const LANE_XS = laneCenterXs(LANE_COUNT, ROAD);
+const LANE_XS = laneCentreXs(LANE_COUNT, ROAD);
 const WALKERS = Object.keys(WALKER_SILHOUETTES) as WalkerId[];
 const DOGS = Object.keys(DOG_SILHOUETTES) as DogId[];
 const PACKS = everyPack();

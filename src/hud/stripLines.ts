@@ -172,8 +172,8 @@ export function luckyLine(
   encounter: EncounterId,
   money: readonly MoneyChange[],
 ): MessageLine | null {
-  if (encounter === "pettingNeighbor") {
-    return { icon: "lucky", text: data.runText.strip.luckyNeighbor };
+  if (encounter === "pettingNeighbour") {
+    return { icon: "lucky", text: data.runText.strip.luckyNeighbour };
   }
   if (encounter === "lostWallet") {
     const amount = money.reduce((sum, change) => sum + change.amount, 0);

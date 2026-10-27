@@ -5,16 +5,22 @@ import { spriteMetrics } from "../sprites";
 import { DEPTH, type Shadow } from "./stage";
 
 // A Shadow placer that takes each shadow's colour.
-type ColoredShadow = (color: number, key: string, depth: number, x: number, footY: number) => void;
+type ColouredShadow = (
+  colour: number,
+  key: string,
+  depth: number,
+  x: number,
+  footY: number,
+) => void;
 
 // Shadow images, reused frame to frame: the first `used` are in use this frame.
 export class ShadowPool {
-  private color = 0;
-  private readonly coloredPlacer: ColoredShadow = (color, key, depth, x, footY) =>
-    this.place(color, key, depth, x, footY);
+  private colour = 0;
+  private readonly colouredPlacer: ColouredShadow = (colour, key, depth, x, footY) =>
+    this.place(colour, key, depth, x, footY);
   private readonly images: GameObjects.Image[] = [];
   private readonly placer: Shadow = (key, depth, x, footY) =>
-    this.place(this.color, key, depth, x, footY);
+    this.place(this.colour, key, depth, x, footY);
   private readonly scene: Scene;
   private used = 0;
 
@@ -22,18 +28,18 @@ export class ShadowPool {
     this.scene = scene;
   }
 
-  // The shadow placer for a frame drawn in color. Call hideUnused once the frame is drawn.
-  frame(color: number): Shadow {
+  // The shadow placer for a frame drawn in colour. Call hideUnused once the frame is drawn.
+  frame(colour: number): Shadow {
     this.used = 0;
-    this.color = color;
+    this.colour = colour;
     return this.placer;
   }
 
   // The shadow placer for a frame whose shadows each name their colour. Call hideUnused once
   // the frame is drawn.
-  frameInColors(): ColoredShadow {
+  frameInColours(): ColouredShadow {
     this.used = 0;
-    return this.coloredPlacer;
+    return this.colouredPlacer;
   }
 
   hideUnused(): void {
@@ -44,9 +50,9 @@ export class ShadowPool {
 
   // A shadow under a sprite, centred on its x a pixel above its feet. It is sized from the
   // sprite's 1x art at its depth, whichever art step draws it.
-  private place(color: number, key: string, depth: number, x: number, footY: number): void {
+  private place(colour: number, key: string, depth: number, x: number, footY: number): void {
     const width = spriteMetrics(key).opaqueWidth * depth;
-    const { anchor, key: texture } = shadowTexture(this.scene, color, width, depth);
+    const { anchor, key: texture } = shadowTexture(this.scene, colour, width, depth);
     let image = this.images[this.used];
     if (image === undefined) {
       image = this.scene.add.image(0, 0, texture).setOrigin(0).setDepth(DEPTH.shadow);

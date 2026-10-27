@@ -36,7 +36,7 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
   fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
 }
 
-// The zone banner's heading ("Toronto, neighborhood 2") and the zone's name, slid in over
+// The zone banner's heading ("Toronto, neighbourhood 2") and the zone's name, slid in over
 // the road at each zone's start.
 export class ZoneBanner {
   private banner: GameObjects.Container | undefined;
@@ -68,14 +68,14 @@ export class ZoneBanner {
     const heading = zoneBannerHeading(gameData, run);
     banner.add(
       addPixelText(scene, BANNER.width / 2, 11, heading, {
-        color: PALETTE.plum,
+        colour: PALETTE.plum,
         font: "title",
         originX: 0.5,
       }),
     );
     banner.add(
       addDisplayText(scene, BANNER.width / 2, 27, zone.name, {
-        color: PALETTE.plum,
+        colour: PALETTE.plum,
         font: "title",
         originX: 0.5,
         scale: 2,

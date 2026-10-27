@@ -19,16 +19,16 @@ const VERGE_ARTS = Object.entries(VERGES_BY_ART);
 
 // A paved verge as art writes it, with colours by palette name.
 const PAVED = {
-  curbColor: "stone",
+  curbColour: "stone",
   curbTo: 164,
   lawn: "none",
-  lawnColors: null,
+  lawnColours: null,
   leaves: false,
-  seamColor: "grey",
+  seamColour: "grey",
   seamEvery: 32,
   strips: [],
-  walkColor: "lgrey",
-  walkDots: [{ colors: ["grey"], share: 0.1 }],
+  walkColour: "lgrey",
+  walkDots: [{ colours: ["grey"], share: 0.1 }],
   walkTo: null,
 };
 
@@ -36,14 +36,14 @@ describe("vergeFrom", () => {
   it("reads colours by palette name and a null walkTo as paving out to the screen's edges", () => {
     const verge = vergeFrom(PAVED);
     expect(verge.walkTo).toBe(Number.POSITIVE_INFINITY);
-    expect(verge.walkDots[0]?.colors).toEqual([verge.seamColor]);
+    expect(verge.walkDots[0]?.colours).toEqual([verge.seamColour]);
   });
 
   it.each([
-    ["a colour name not on the palette", { ...PAVED, curbColor: "no-such-colour" }],
+    ["a colour name not on the palette", { ...PAVED, curbColour: "no-such-colour" }],
     ["a lawn kind it does not know", { ...PAVED, lawn: "meadow" }],
     ["a lawn with no colours", { ...PAVED, lawn: "mown", walkTo: 208 }],
-    ["lawn colours with no lawn", { ...PAVED, lawnColors: ["grey", "grey", "grey"] }],
+    ["lawn colours with no lawn", { ...PAVED, lawnColours: ["grey", "grey", "grey"] }],
   ])("throws on %s", (_, entry) => {
     expect(() => vergeFrom(entry)).toThrow();
   });
@@ -65,7 +65,7 @@ describe("curbBand", () => {
       (across) =>
         across >= walkFrom(verge) &&
         !isLawn(verge, across) &&
-        vergeBase(verge, across, 1) === verge.walkColor,
+        vergeBase(verge, across, 1) === verge.walkColour,
     );
     expect(band === null).toBe(walk.length === 0);
     if (band !== null) {

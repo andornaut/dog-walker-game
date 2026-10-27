@@ -16,7 +16,7 @@ import {
 import type { Rect } from "../../lib/rect";
 import { zoneAt } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
-import { colorFromHex } from "../../ui/phaser/palette";
+import { colourFromHex } from "../../ui/phaser/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 const ROAD_TEXTURE = "road-projected";
@@ -37,7 +37,7 @@ export class RoadArt {
     if (look === undefined) {
       const image = this.imagePixels(key);
       const fits = image?.width === STRIP.width && image.height === STRIP.height;
-      const strip = fits ? image : solidStrip(colorFromHex(zone.roadColor));
+      const strip = fits ? image : solidStrip(colourFromHex(zone.roadColour));
       look = roadLook(zone.id as RoadLook["zone"], strip);
       this.looks.set(key, look);
     }

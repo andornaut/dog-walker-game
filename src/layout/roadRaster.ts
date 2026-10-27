@@ -2,7 +2,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import type { Rect } from "../lib/rect";
 import {
-  dotColor,
+  dotColour,
   dottedBands,
   LEAF_PIXELS,
   markFits,
@@ -80,7 +80,7 @@ interface RasterRow {
 // the verge as the raster draws it, leaving its corners, fences and the rest as they are.
 export interface RoadRaster {
   readonly approachRows: number;
-  readonly centerX: number;
+  readonly centreX: number;
   readonly marks: Map<number, RowMarks>;
   readonly patches: Map<number, readonly RoughPatch[]>;
   readonly rows: readonly RasterRow[];
@@ -326,13 +326,13 @@ function levelFor(span: number): 0 | 1 | 2 {
 export function roadRaster(
   projection: Pick<
     RoadProjection,
-    "centerX" | "farY" | "focal" | "footY" | "horizonY" | "visibleDistance"
+    "centreX" | "farY" | "focal" | "footY" | "horizonY" | "visibleDistance"
   >,
   view: Rect,
 ): RoadRaster {
   const rows: RasterRow[] = [];
-  const { centerX } = projection;
-  const left = centerX - STRIP.width / 2;
+  const { centreX } = projection;
+  const left = centreX - STRIP.width / 2;
   for (let y = view.y; y < view.y + view.height; y++) {
     const scale = rowScale(projection, y);
     const distance = distanceAtY(projection, y + 0.5);
@@ -347,7 +347,7 @@ export function roadRaster(
       roadXFrom[i] = Math.ceil(roadXAt(projection, scale, view.x + i));
       roadXTo[i] = Math.ceil(roadXAt(projection, scale, view.x + i + 1)) - 1;
       const onStrip = x >= left && x < left + STRIP.width;
-      across[i] = onStrip ? -1 : Math.abs(x - centerX);
+      across[i] = onStrip ? -1 : Math.abs(x - centreX);
     }
     const roadStart = across.findIndex((value) => value < 0);
     // The strip's columns are one run, as the projection keeps order across a row.
@@ -376,7 +376,7 @@ export function roadRaster(
   }
   return {
     approachRows: Math.min(view.height, Math.max(0, projection.farY - view.y)),
-    centerX,
+    centreX,
     marks: new Map(),
     patches: new Map(),
     rows,
@@ -402,7 +402,7 @@ function wordOf(rgb: number): number {
 }
 
 const LEAF_WORDS = LEAF_PIXELS.map((rows) =>
-  rows.map((cells) => cells.map(({ color, dx }) => ({ dx, word: wordOf(color) }))),
+  rows.map((cells) => cells.map(({ colour, dx }) => ({ dx, word: wordOf(colour) }))),
 );
 const NO_LEAF: readonly { dx: number; word: number }[] = [];
 
@@ -428,19 +428,19 @@ interface VergePlan {
 const NOISE_STEPS = 256;
 
 function vergePlan(verge: Verge): VergePlan {
-  const lawn = verge.lawnColors;
+  const lawn = verge.lawnColours;
   return {
     dots: dottedBands(verge).map(({ dots, from, to }) => ({
       from,
       to,
       words: Uint32Array.from({ length: NOISE_STEPS }, (_, n) => {
-        const rgb = dotColor(dots, (n + 0.5) / NOISE_STEPS);
+        const rgb = dotColour(dots, (n + 0.5) / NOISE_STEPS);
         return rgb === null ? 0 : wordOf(rgb);
       }),
     })),
     leafFrom: markFrom(verge, "leaf"),
     patchWord: lawn === null ? 0 : wordOf(lawn[1]),
-    seamWord: wordOf(verge.seamColor),
+    seamWord: wordOf(verge.seamColour),
     tuftFrom: markFrom(verge, "tuft"),
     tuftWords: new Map(
       lawn === null ? [] : [lawn[0], lawn[1]].map((rgb) => [wordOf(rgb), wordOf(lawn[2])]),
@@ -583,8 +583,8 @@ function markPixel(
 // zone's, then the seams, rough patches and 2-row marks that scroll with the road. On the
 // approach rows the verge shows only where the backdrop's own pixel is the verge's.
 export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array): void {
-  const { centerX, rows, view } = raster;
-  const stripLeft = centerX - STRIP.width / 2;
+  const { centreX, rows, view } = raster;
+  const stripLeft = centreX - STRIP.width / 2;
   const { width } = view;
   const scratch = raster.scratch;
   let carried = scratch.carried[0];
@@ -710,7 +710,7 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
         if (mark.keep >= tuftLimit) {
           break;
         }
-        const column = Math.floor(centerX + mark.x * row.scale) - view.x;
+        const column = Math.floor(centreX + mark.x * row.scale) - view.x;
         markPixel(out, marked, row, verge, offset, column, TUFT);
         carry(next, column, TUFT);
       }
@@ -718,7 +718,7 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
         if (mark.keep >= leafLimit) {
           break;
         }
-        const column = Math.floor(centerX + mark.x * row.scale) - view.x;
+        const column = Math.floor(centreX + mark.x * row.scale) - view.x;
         const shape = LEAF_WORDS[mark.shape];
         for (const { dx, word } of shape?.[0] ?? NO_LEAF) {
           markPixel(out, marked, row, verge, offset, column + dx, word);
@@ -903,7 +903,7 @@ function drawPatches(
   offset: number,
   out: Uint32Array,
 ): void {
-  const { centerX, view } = raster;
+  const { centreX, view } = raster;
   const { patchWord } = planOf(verge);
   // The blocks whose patches reach z.
   const first = Math.floor((z - ROUGH_PATCH_REACH) / ROUGH_PATCH_BLOCK);
@@ -915,8 +915,8 @@ function drawPatches(
         continue;
       }
       const half = patch.rx * Math.sqrt(1 - along * along);
-      const from = Math.ceil(centerX + (patch.x - half) * row.scale - 0.5) - view.x;
-      const to = Math.ceil(centerX + (patch.x + half) * row.scale - 0.5) - view.x;
+      const from = Math.ceil(centreX + (patch.x - half) * row.scale - 0.5) - view.x;
+      const to = Math.ceil(centreX + (patch.x + half) * row.scale - 0.5) - view.x;
       for (let i = Math.max(0, from); i < Math.min(view.width, to); i++) {
         if (markFits(verge, "tuft", row.across[i] ?? -1)) {
           out[offset + i] = patchWord;

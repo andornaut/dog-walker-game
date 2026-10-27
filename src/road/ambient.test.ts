@@ -124,7 +124,7 @@ describe("stepAmbient", () => {
   // each side view mirrored only moving left, and the cross street's movers smaller than the
   // road's far edge, nearer rows larger.
   it("keeps every zone's movers to the limit, off the road, facing their way and to scale", () => {
-    const { centerX } = PROJECTION;
+    const { centreX } = PROJECTION;
     const roadHalf = LAYOUT.road.width / 2;
     const farEdge = scaleAtY(PROJECTION, PROJECTION.farY);
     for (const zone of ZONES) {
@@ -139,7 +139,7 @@ describe("stepAmbient", () => {
         const rows = isSky(each) ? skyRowsOf(each.mover) : BAND_ROWS;
         return place.band
           ? !rows.includes(place.y - LAYOUT.backdrop.y) || place.y >= LAYOUT.approach.y
-          : Math.abs(place.x - centerX) < (roadHalf + ROAD_SPRITE_SIZE / 2) * place.scale;
+          : Math.abs(place.x - centreX) < (roadHalf + ROAD_SPRITE_SIZE / 2) * place.scale;
       });
       expect(onRoad, zone).toEqual([]);
 
@@ -255,7 +255,7 @@ describe("stepAmbient", () => {
       .filter(({ mover, place }) => mover.path === "verge" && !place.moving && place.lift === 0);
     expect(stopped.length).toBeGreaterThan(0);
     const inBand = stopped.filter(({ mover, place }) => {
-      const across = Math.abs(place.x - PROJECTION.centerX) / place.scale;
+      const across = Math.abs(place.x - PROJECTION.centreX) / place.scale;
       return band !== null && across - frameWidth(mover.key) / 2 <= band.to;
     });
     expect(inBand).toEqual([]);

@@ -15,7 +15,7 @@ import { backdropKey, depthVariantKey, roadTileKey } from "../assets/spriteKeys"
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { Zone } from "../data/types";
-import { laneCenterXs } from "../layout/lanes";
+import { laneCentreXs } from "../layout/lanes";
 import { SCALE_STEPS } from "../layout/projection";
 import {
   drawRoad,
@@ -120,7 +120,7 @@ if (zones.length === 0) {
 const layout = screenLayout(SCREEN_CONFIG);
 const { backdrop, dogRow, rasterView, road } = layout;
 const projection = walkProjection(ROAD_CAMERA, road);
-const laneX = itemAt(laneCenterXs(LANE_COUNT, road), Math.floor(LANE_COUNT / 2));
+const laneX = itemAt(laneCentreXs(LANE_COUNT, road), Math.floor(LANE_COUNT / 2));
 const distances = sweepDistances(arts, projection, SWEEP_COUNT);
 const rows = distances.map((distance) => sweepRow(arts, projection, laneX, distance));
 // The view runs from the band's top to the screen's bottom, full width.
@@ -132,7 +132,7 @@ function pixelImage(image: RgbaImage): PixelImage {
   return { height: image.height, pixels: new Uint32Array(copy.buffer), width: image.width };
 }
 
-function hexColor(hex: string): number {
+function hexColour(hex: string): number {
   return Number.parseInt(hex.replace("#", ""), 16);
 }
 
@@ -147,7 +147,7 @@ async function zoneLayers(zone: Zone): Promise<{ over: RgbaImage; under: RgbaIma
   const strip =
     tileImage?.width === STRIP.width && tileImage.height === STRIP.height
       ? pixelImage(tileImage)
-      : solidStrip(hexColor(zone.roadColor));
+      : solidStrip(hexColour(zone.roadColour));
   const look = roadLook(zone.id as RoadLook["zone"], strip);
   const raster = roadRaster(projection, rasterView);
   const pixels = new Uint32Array(rasterView.width * rasterView.height);

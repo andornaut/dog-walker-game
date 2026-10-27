@@ -229,9 +229,9 @@ describe("wallRects", () => {
 describe("badgeStrip", () => {
   it("shares the width, naming the badges only while few share it", () => {
     const layout = { maxNamed: 3, width: 300, x: 30 };
-    expect(badgeStrip(layout, 1)).toEqual({ named: true, slots: [{ centerX: 180, width: 300 }] });
+    expect(badgeStrip(layout, 1)).toEqual({ named: true, slots: [{ centreX: 180, width: 300 }] });
     const four = badgeStrip(layout, 4);
     expect(four.named).toBe(false);
-    expect(four.slots.map(({ centerX }) => centerX)).toEqual([68, 143, 218, 293]);
+    expect(four.slots.map(({ centreX }) => centreX)).toEqual([68, 143, 218, 293]);
   });
 });

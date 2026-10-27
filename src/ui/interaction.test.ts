@@ -59,18 +59,18 @@ describe("itemTile", () => {
     price: cents(price),
   });
 
-  // A tile not owned stays disabled, its art in color only while the player can buy it. Art in
-  // color sits on the tan box (deep amber while picked, light grey while for sale), grey art on
+  // A tile not owned stays disabled, its art in colour only while the player can buy it. Art in
+  // colour sits on the tan box (deep amber while picked, light grey while for sale), grey art on
   // the grey box.
   it("shows each dog or item tile as available, picked, full, locked or goal-locked", () => {
     for (const [, input, tile, state, art, box] of [
-      ["an owned dog with room", {}, { kind: "available" }, "normal", "color", "tan"],
+      ["an owned dog with room", {}, { kind: "available" }, "normal", "colour", "tan"],
       [
         "a picked dog",
         { picked: true, pickedCount: 1 },
         { kind: "picked" },
         "selected",
-        "color",
+        "colour",
         "deepAmber",
       ],
       [
@@ -78,7 +78,7 @@ describe("itemTile", () => {
         { picked: true, pickedCount: 2 },
         { kind: "picked" },
         "selected",
-        "color",
+        "colour",
         "deepAmber",
       ],
       [
@@ -94,7 +94,7 @@ describe("itemTile", () => {
         { capacity: 1, pickedCount: 1 },
         { kind: "available" },
         "normal",
-        "color",
+        "colour",
         "tan",
       ],
       [
@@ -102,7 +102,7 @@ describe("itemTile", () => {
         { affordable: true, price: cents(800) },
         locked(800, true),
         "disabled",
-        "color",
+        "colour",
         GREYED.affordBox,
       ],
       [
@@ -118,7 +118,7 @@ describe("itemTile", () => {
         { affordable: true, pickedCount: 2, price: cents(800) },
         locked(800, true),
         "disabled",
-        "color",
+        "colour",
         GREYED.affordBox,
       ],
       [

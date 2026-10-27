@@ -16,7 +16,7 @@ import {
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
 import { BASE_FRAME, parseAtlasManifest } from "./atlasManifest";
 import type { RgbaImage } from "./atlasPixels";
-import { COLOR_TYPE_INDEXED } from "./indexedPng";
+import { COLOUR_TYPE_INDEXED } from "./indexedPng";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
@@ -120,7 +120,7 @@ describe("the shipped art's atlases", () => {
       .filter(({ bytes, drawn: rgba }) => {
         const decoded = bytes === undefined ? undefined : decodePng(bytes);
         return (
-          bytes?.[25] !== COLOR_TYPE_INDEXED ||
+          bytes?.[25] !== COLOUR_TYPE_INDEXED ||
           rgba === undefined ||
           decoded === undefined ||
           decoded.width !== rgba.width ||

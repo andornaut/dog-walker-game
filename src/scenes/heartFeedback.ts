@@ -199,7 +199,7 @@ export class HeartFeedback {
   // rect on screen.
   private addNumber(label: ChangeLabel, frame: Point): { chip: GameObjects.Container; rect: Rect } {
     const text = addPixelText(this.scene, 0, 0, heartPopText(label.amount), {
-      color: label.amount < 0 ? PALETTE.darkRed : PALETTE.forest,
+      colour: label.amount < 0 ? PALETTE.darkRed : PALETTE.forest,
       font: "title",
     });
     const width = Math.ceil(text.width);

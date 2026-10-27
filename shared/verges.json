@@ -1,15 +1,15 @@
 {
   "cabbagetown": {
-    "curbColor": "stone",
+    "curbColour": "stone",
     "curbTo": 164,
     "strips": [],
-    "walkColor": "lgrey",
+    "walkColour": "lgrey",
     "walkDots": [],
-    "seamColor": "grey",
+    "seamColour": "grey",
     "seamEvery": 32,
     "walkTo": 208,
     "lawn": "mown",
-    "lawnColors": [
+    "lawnColours": [
       "dgreen",
       "canopy",
       "pine"
@@ -17,16 +17,16 @@
     "leaves": false
   },
   "high-park": {
-    "curbColor": "pine",
+    "curbColour": "pine",
     "curbTo": 160,
     "strips": [],
-    "walkColor": "pine",
+    "walkColour": "pine",
     "walkDots": [],
-    "seamColor": "pine",
+    "seamColour": "pine",
     "seamEvery": 32,
     "walkTo": 160,
     "lawn": "rough",
-    "lawnColors": [
+    "lawnColours": [
       "pine",
       "fir",
       "fir"
@@ -34,107 +34,107 @@
     "leaves": false
   },
   "distillery-district": {
-    "curbColor": "stone",
+    "curbColour": "stone",
     "curbTo": 164,
     "strips": [],
-    "walkColor": "brown",
+    "walkColour": "brown",
     "walkDots": [
       {
-        "colors": [
+        "colours": [
           "brick"
         ],
         "share": 0.05
       },
       {
-        "colors": [
+        "colours": [
           "rust"
         ],
         "share": 0.02
       }
     ],
-    "seamColor": "brick",
+    "seamColour": "brick",
     "seamEvery": 16,
     "walkTo": null,
     "lawn": "none",
-    "lawnColors": null,
+    "lawnColours": null,
     "leaves": false
   },
   "kensington-market": {
-    "curbColor": "stone",
+    "curbColour": "stone",
     "curbTo": 162,
     "strips": [
       {
-        "color": "clay",
+        "colour": "clay",
         "dots": [],
         "to": 166
       }
     ],
-    "walkColor": "skin2",
+    "walkColour": "skin2",
     "walkDots": [
       {
-        "colors": [
+        "colours": [
           "clay"
         ],
         "share": 0.05
       },
       {
-        "colors": [
+        "colours": [
           "brown"
         ],
         "share": 0.03
       }
     ],
-    "seamColor": "clay",
+    "seamColour": "clay",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
-    "lawnColors": null,
+    "lawnColours": null,
     "leaves": false
   },
   "the-beaches": {
-    "curbColor": "driftwood",
+    "curbColour": "driftwood",
     "curbTo": 164,
     "strips": [],
-    "walkColor": "skin1",
+    "walkColour": "skin1",
     "walkDots": [
       {
-        "colors": [
+        "colours": [
           "tan"
         ],
         "share": 0.05
       },
       {
-        "colors": [
+        "colours": [
           "white"
         ],
         "share": 0.008
       }
     ],
-    "seamColor": "skin1",
+    "seamColour": "skin1",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
-    "lawnColors": null,
+    "lawnColours": null,
     "leaves": false
   },
   "yonge-street": {
-    "curbColor": "stone",
+    "curbColour": "stone",
     "curbTo": 164,
     "strips": [],
-    "walkColor": "dstone",
+    "walkColour": "dstone",
     "walkDots": [
       {
-        "colors": [
+        "colours": [
           "shale"
         ],
         "share": 0.015
       }
     ],
-    "seamColor": "shale",
+    "seamColour": "shale",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
-    "lawnColors": null,
+    "lawnColours": null,
     "leaves": false
   }
 }

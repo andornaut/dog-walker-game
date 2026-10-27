@@ -28,7 +28,7 @@ interface ScreenPlacement {
 // farY is the screen row where the road meets the backdrop band, and visibleDistance how far
 // ahead of the feet that is: the road in view.
 export interface RoadProjection {
-  readonly centerX: number;
+  readonly centreX: number;
   readonly farY: number;
   readonly focal: number;
   readonly footY: number;
@@ -66,7 +66,7 @@ export function roadProjection(camera: RoadCamera, footY: number, road: Rect): R
   const lens = { focal, footY, horizonY: camera.horizonY };
   return {
     ...lens,
-    centerX: road.x + road.width / 2,
+    centreX: road.x + road.width / 2,
     farY: road.y,
     visibleDistance: distanceAtY(lens, road.y),
   };
@@ -92,24 +92,24 @@ export function scaleAtY(projection: Pick<Camera, "footY" | "horizonY">, y: numb
 }
 
 export function project(
-  projection: Pick<RoadProjection, "centerX" | keyof Camera>,
+  projection: Pick<RoadProjection, "centreX" | keyof Camera>,
   point: RoadPoint,
 ): ScreenPlacement {
   const scale = scaleAt(projection, point.distance);
   return {
     scale,
-    x: projection.centerX + (point.x - projection.centerX) * scale,
+    x: projection.centreX + (point.x - projection.centreX) * scale,
     y: screenYAt(projection, point.distance),
   };
 }
 
 // The inverse of project's x: the road x drawn at screenX on a row of this scale.
 export function roadXAt(
-  projection: Pick<RoadProjection, "centerX">,
+  projection: Pick<RoadProjection, "centreX">,
   scale: number,
   screenX: number,
 ): number {
-  return projection.centerX + (screenX - projection.centerX) / scale;
+  return projection.centreX + (screenX - projection.centreX) / scale;
 }
 
 // Screen rows are sampled at their centres.
@@ -120,24 +120,24 @@ export function rowScale(projection: Pick<Camera, "footY" | "horizonY">, row: nu
 // The screen columns on a row whose centres fall inside road x0..x1 (x1 excluded), or null
 // when none does.
 export function columnSpan(
-  projection: Pick<RoadProjection, "centerX" | "footY" | "horizonY">,
+  projection: Pick<RoadProjection, "centreX" | "footY" | "horizonY">,
   row: number,
   x0: number,
   x1: number,
 ): ColumnSpan | null {
   const scale = rowScale(projection, row);
-  const { centerX } = projection;
-  const first = Math.ceil(centerX + (x0 - centerX) * scale - 0.5);
-  const last = Math.ceil(centerX + (x1 - centerX) * scale - 0.5) - 1;
+  const { centreX } = projection;
+  const first = Math.ceil(centreX + (x0 - centreX) * scale - 0.5);
+  const last = Math.ceil(centreX + (x1 - centreX) * scale - 0.5) - 1;
   return last >= first ? { first, last } : null;
 }
 
 // The screen column a line along the road at road x lands on, on a row.
 export function lineColumn(
-  projection: Pick<RoadProjection, "centerX" | "footY" | "horizonY">,
+  projection: Pick<RoadProjection, "centreX" | "footY" | "horizonY">,
   row: number,
   x: number,
 ): number {
-  const { centerX } = projection;
-  return Math.floor(centerX + (x - centerX) * rowScale(projection, row));
+  const { centreX } = projection;
+  return Math.floor(centreX + (x - centreX) * rowScale(projection, row));
 }

@@ -1,5 +1,5 @@
 import vergeTable from "../../shared/verges.json";
-import { paletteColor } from "../assets/housePalette";
+import { paletteColour } from "../assets/housePalette";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
@@ -32,13 +32,13 @@ const BAND_SCALE = 0.5;
 // Dots of other colours scattered over a band of the verge: share is the part of the band's
 // pixels they cover, which its colours split equally.
 interface VergeDots {
-  readonly colors: readonly number[];
+  readonly colours: readonly number[];
   readonly share: number;
 }
 
 // A band of one colour, with its dots, running out to its to, across.
 interface VergeStrip {
-  readonly color: number;
+  readonly colour: number;
   readonly dots: readonly VergeDots[];
   readonly to: number;
 }
@@ -46,7 +46,7 @@ interface VergeStrip {
 // Outward from the road: the curb, the strips, the sidewalk or paving, then the lawn.
 export interface Verge {
   // A curb that would match the road's grey is darker, so the road's edge still reads.
-  readonly curbColor: number;
+  readonly curbColour: number;
   // Where the curb ends and the sidewalk or paving ends, across; the lawn lies beyond.
   readonly curbTo: number;
   // Fallen leaves on the sidewalks and lawns.
@@ -55,42 +55,42 @@ export interface Verge {
   // is paved out to the screen's edges: its walkTo is Infinity.
   readonly lawn: "mown" | "rough" | "none";
   // The lawn's base, its mown stripes or rough patches, and its tufts; null with no lawn.
-  readonly lawnColors: LawnColors | null;
+  readonly lawnColours: LawnColours | null;
   // The line across the sidewalk or paving, every seamEvery along the road.
-  readonly seamColor: number;
+  readonly seamColour: number;
   readonly seamEvery: number;
   // The bands between the curb and the sidewalk or paving, outward.
   readonly strips: readonly VergeStrip[];
-  readonly walkColor: number;
+  readonly walkColour: number;
   readonly walkDots: readonly VergeDots[];
   readonly walkTo: number;
 }
 
 // A tuft draws its own colour over the lawn's base or its marks, rather than darkening them.
-type LawnColors = readonly [base: number, marks: number, tufts: number];
+type LawnColours = readonly [base: number, marks: number, tufts: number];
 
 // A verge as art writes it in shared/verges.json (art/tools/backdrops.py verges --write): the
 // same fields with colours by palette name, a null walkTo for paving out to the screen's edges,
-// and lawnColors null with no lawn.
+// and lawnColours null with no lawn.
 interface VergeDotsEntry {
-  readonly colors: readonly string[];
+  readonly colours: readonly string[];
   readonly share: number;
 }
 
 interface VergeEntry {
-  readonly curbColor: string;
+  readonly curbColour: string;
   readonly curbTo: number;
   readonly lawn: string;
-  readonly lawnColors: readonly string[] | null;
+  readonly lawnColours: readonly string[] | null;
   readonly leaves: boolean;
-  readonly seamColor: string;
+  readonly seamColour: string;
   readonly seamEvery: number;
   readonly strips: readonly {
-    readonly color: string;
+    readonly colour: string;
     readonly dots: readonly VergeDotsEntry[];
     readonly to: number;
   }[];
-  readonly walkColor: string;
+  readonly walkColour: string;
   readonly walkDots: readonly VergeDotsEntry[];
   readonly walkTo: number | null;
 }
@@ -98,7 +98,7 @@ interface VergeEntry {
 const LAWNS: readonly Verge["lawn"][] = ["mown", "rough", "none"];
 
 function dotsOf(entries: readonly VergeDotsEntry[]): VergeDots[] {
-  return entries.map(({ colors, share }) => ({ colors: colors.map(paletteColor), share }));
+  return entries.map(({ colours, share }) => ({ colours: colours.map(paletteColour), share }));
 }
 
 // A verge from its entry in shared/verges.json; a lawn kind or colour it does not know throws.
@@ -107,25 +107,25 @@ export function vergeFrom(entry: VergeEntry): Verge {
   if (lawn === undefined) {
     throw new Error(`No verge lawn ${entry.lawn}`);
   }
-  const [base, marks, tufts] = (entry.lawnColors ?? []).map(paletteColor);
+  const [base, marks, tufts] = (entry.lawnColours ?? []).map(paletteColour);
   const hasLawn = lawn !== "none";
   if (hasLawn !== (base !== undefined && marks !== undefined && tufts !== undefined)) {
     throw new Error("A verge has lawn colours exactly when it has a lawn");
   }
   return {
-    curbColor: paletteColor(entry.curbColor),
+    curbColour: paletteColour(entry.curbColour),
     curbTo: entry.curbTo,
     lawn,
-    lawnColors: hasLawn ? [base ?? 0, marks ?? 0, tufts ?? 0] : null,
+    lawnColours: hasLawn ? [base ?? 0, marks ?? 0, tufts ?? 0] : null,
     leaves: entry.leaves,
-    seamColor: paletteColor(entry.seamColor),
+    seamColour: paletteColour(entry.seamColour),
     seamEvery: entry.seamEvery,
-    strips: entry.strips.map(({ color, dots, to }) => ({
-      color: paletteColor(color),
+    strips: entry.strips.map(({ colour, dots, to }) => ({
+      colour: paletteColour(colour),
       dots: dotsOf(dots),
       to,
     })),
-    walkColor: paletteColor(entry.walkColor),
+    walkColour: paletteColour(entry.walkColour),
     walkDots: dotsOf(entry.walkDots),
     walkTo: entry.walkTo ?? Number.POSITIVE_INFINITY,
   };
@@ -210,11 +210,11 @@ export function dottedBands(verge: Verge): DottedBand[] {
 
 // The dot colour a noise value in [0, 1) picks, or null for none: each dot takes its share of
 // the range in turn, its colours equal parts of that share.
-export function dotColor(dots: readonly VergeDots[], value: number): number | null {
+export function dotColour(dots: readonly VergeDots[], value: number): number | null {
   let rest = value;
-  for (const { colors, share } of dots) {
+  for (const { colours, share } of dots) {
     if (rest < share) {
-      return colors[Math.floor((rest / share) * colors.length)] ?? null;
+      return colours[Math.floor((rest / share) * colours.length)] ?? null;
     }
     rest -= share;
   }
@@ -252,17 +252,17 @@ export function mownAt(walkTo: number, across: number, scale: number): boolean {
 // The verge's colour at across on a row of this scale, before seams, dots, patches and marks.
 export function vergeBase(verge: Verge, across: number, scale: number): number {
   if (across < verge.curbTo) {
-    return verge.curbColor;
+    return verge.curbColour;
   }
   for (const strip of verge.strips) {
     if (across < strip.to) {
-      return strip.color;
+      return strip.colour;
     }
   }
   if (across < verge.walkTo) {
-    return verge.walkColor;
+    return verge.walkColour;
   }
-  const [base, marks] = verge.lawnColors ?? [verge.walkColor, verge.walkColor];
+  const [base, marks] = verge.lawnColours ?? [verge.walkColour, verge.walkColour];
   return verge.lawn === "mown" && mownAt(verge.walkTo, across, scale) ? marks : base;
 }
 
@@ -356,12 +356,12 @@ const LEAF_TONES = [
 ] as const;
 
 // Each leaf shape's pixels on its 2 rows: offsets from its column and their colours.
-export const LEAF_PIXELS: readonly (readonly (readonly { color: number; dx: number }[])[])[] =
+export const LEAF_PIXELS: readonly (readonly (readonly { colour: number; dx: number }[])[])[] =
   LEAF_SHAPES.map((rows, shape) => {
     const [lit, shaded] = LEAF_TONES[shape % LEAF_TONES.length] ?? LEAF_TONES[0];
     return rows.map((cells) =>
       [...cells].flatMap((cell, dx) =>
-        cell === "." ? [] : [{ color: cell === "f" ? lit : shaded, dx }],
+        cell === "." ? [] : [{ colour: cell === "f" ? lit : shaded, dx }],
       ),
     );
   });

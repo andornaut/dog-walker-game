@@ -4,7 +4,7 @@ import type { ButtonState, ItemLook, TileState } from "./interaction";
 
 // Every colour a disabled, short or locked item draws in, the neutral greys among them:
 // - affordBox: the box behind the portrait or icon of an item the player can buy now, its art
-//   in color on a disabled tile.
+//   in colour on a disabled tile.
 // - box: the box behind a portrait or icon in grey art.
 // - copyDarker: a disabled tile's grey copy of its art moves each colour to the colour of
 //   NEUTRAL_RAMP nearest its brightness, as a disabled card's does, then this many steps
@@ -43,7 +43,11 @@ const LOOKS: Readonly<Record<TileState, Omit<SelectLook, "state">>> = {
 
 // The disabled look drawn in code where the art has none: the flat grey face in its line,
 // and its label.
-export const DISABLED_COLORS = { edge: GREYED.edge, face: GREYED.face, text: GREYED.text } as const;
+export const DISABLED_COLOURS = {
+  edge: GREYED.edge,
+  face: GREYED.face,
+  text: GREYED.text,
+} as const;
 
 // A button's look: its interaction state, or secondary, the cream button a card's own
 // controls wear in place of normal, with ui-button's secondary tags.
@@ -51,8 +55,8 @@ export type ButtonLook = ButtonState | "secondary";
 
 // How ui-button colours each look: its face, the lip under a raised one, and the label.
 // Primary is the green go button; disabled is flat, with no lip.
-export const BUTTON_COLORS = {
-  disabled: { face: DISABLED_COLORS.face, label: DISABLED_COLORS.text, lip: null },
+export const BUTTON_COLOURS = {
+  disabled: { face: DISABLED_COLOURS.face, label: DISABLED_COLOURS.text, lip: null },
   normal: { face: "cream", label: "plum", lip: "tan" },
   primary: { face: "green", label: "ink", lip: "forest" },
   secondary: { face: "cream", label: "plum", lip: "tan" },
@@ -99,7 +103,7 @@ export function selectLook(state: TileState): SelectLook {
 // The box behind an item's portrait or icon.
 export type PictureBox = typeof GREYED.affordBox | "deepAmber" | typeof GREYED.box | "tan";
 
-// A picture's box, from its art and state: grey art sits on the grey box; art in full color
+// A picture's box, from its art and state: grey art sits on the grey box; art in full colour
 // on the tan box an owned item has, the deep amber one while picked, or, on a disabled tile
 // (an item the player can buy now), the light grey one.
 export function pictureBox(look: Pick<ItemLook, "art" | "state">): PictureBox {

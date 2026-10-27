@@ -212,7 +212,7 @@ describe("messageLinePanel", () => {
 });
 
 // Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
-// owner and obstacle as each neighborhood names it, with two-digit counts and the largest
+// owner and obstacle as each neighbourhood names it, with two-digit counts and the largest
 // amounts.
 function everyStripLine(): FaceText[] {
   const { strip } = gameData.runText;
@@ -237,7 +237,7 @@ function everyStripLine(): FaceText[] {
       text: fillNames(start, { hearts: String(muddyCost), seconds: "99" }),
     })),
     ...Object.values(strip.debuffEnd).map((text) => ({ text })),
-    { text: strip.luckyNeighbor },
+    { text: strip.luckyNeighbour },
     line("fullPackHome", { amount }),
     line("luckyWallet", { amount }),
     ...dogs.flatMap(({ dog, owner }) => [

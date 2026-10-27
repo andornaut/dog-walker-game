@@ -12,8 +12,8 @@ export function shadowRadiusX(spriteWidth: number): number {
 
 // The pixels whose centres fall inside the ellipse, as one span per row.
 export function pixelEllipseSpans(
-  centerX: number,
-  centerY: number,
+  centreX: number,
+  centreY: number,
   radiusX: number,
   radiusY: number,
 ): PixelSpan[] {
@@ -34,8 +34,8 @@ export function pixelEllipseSpans(
     if (first !== undefined) {
       spans.push({
         width: last - first + 1,
-        x: Math.floor(centerX + first),
-        y: Math.floor(centerY + dy),
+        x: Math.floor(centreX + first),
+        y: Math.floor(centreY + dy),
       });
     }
   }

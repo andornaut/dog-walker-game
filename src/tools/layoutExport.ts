@@ -37,7 +37,7 @@ import {
 } from "../hud/walkHud";
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
 import { COMIC_WORDS } from "../layout/comicWords";
-import { laneCenterXs, laneDividerXs } from "../layout/lanes";
+import { laneCentreXs, laneDividerXs } from "../layout/lanes";
 import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
 import {
   COLLAR_HEIGHTS,
@@ -73,7 +73,7 @@ import { readBitmapFont } from "./fontFile";
 function roadRow(projection: RoadProjection, road: Rect, row: number) {
   return {
     distance: distanceAtY(projection, row + 0.5),
-    laneCenters: laneCenterXs(LANE_COUNT, road).map((x) => lineColumn(projection, row, x)),
+    laneCentres: laneCentreXs(LANE_COUNT, road).map((x) => lineColumn(projection, row, x)),
     laneDividers: laneDividerXs(LANE_COUNT, road).map((x) => lineColumn(projection, row, x)),
     road: columnSpan(projection, row, road.x, road.x + road.width),
     row,
@@ -105,7 +105,7 @@ export function layoutExport(
   return {
     camera: {
       ...ROAD_CAMERA,
-      centerX: projection.centerX,
+      centreX: projection.centreX,
       farScale: ROAD_FAR_SCALE,
       farY: projection.farY,
       focal: projection.focal,
@@ -136,7 +136,7 @@ export function layoutExport(
       ...roadRow(projection, road, row),
     })),
     lanes: {
-      centers: laneCenterXs(LANE_COUNT, road),
+      centres: laneCentreXs(LANE_COUNT, road),
       count: LANE_COUNT,
       dividers: laneDividerXs(LANE_COUNT, road),
       width: road.width / LANE_COUNT,

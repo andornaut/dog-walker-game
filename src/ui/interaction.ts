@@ -82,12 +82,12 @@ export function itemTile(input: ItemTileInput): ItemTile {
 // otherwise.
 export type Badge = "bill" | "lock";
 
-// How an item's portrait or icon draws: in full color, or as its grey copy.
-export type ArtLook = "color" | "grey";
+// How an item's portrait or icon draws: in full colour, or as its grey copy.
+export type ArtLook = "colour" | "grey";
 
 // Everything an item's state sets on its tile or row: its portrait's or icon's look, the
 // badge, the plate and the ui-tile state. The art is grey on a disabled tile, except on one
-// the player can buy now, whose art shows in full color, on its light grey box, on the grey tile.
+// the player can buy now, whose art shows in full colour, on its light grey box, on the grey tile.
 export interface ItemLook {
   readonly art: ArtLook;
   readonly badge: Badge | null;
@@ -97,22 +97,22 @@ export interface ItemLook {
 
 const OWNED_LOOK = { badge: null, plate: null } as const;
 
-// An item tile on the home screen. An owned item shows in full color with no badge or
+// An item tile on the home screen. An owned item shows in full colour with no badge or
 // plate, greyed while the pack is full. One not owned is a disabled tile, as the shop's row
-// is: while the player can buy it, its art in full color with the dollar bill and the buy
+// is: while the player can buy it, its art in full colour with the dollar bill and the buy
 // plate; when not, its art greyed with the padlock and the short plate, or the goal
 // plate when a goal unlocks it.
 export function itemTileLook(tile: ItemTile): ItemLook {
   switch (tile.kind) {
     case "available":
-      return { ...OWNED_LOOK, art: "color", state: "normal" };
+      return { ...OWNED_LOOK, art: "colour", state: "normal" };
     case "picked":
-      return { ...OWNED_LOOK, art: "color", state: "selected" };
+      return { ...OWNED_LOOK, art: "colour", state: "selected" };
     case "packFull":
       return { ...OWNED_LOOK, art: "grey", state: "disabled" };
     case "locked":
       return tile.affordable
-        ? { art: "color", badge: "bill", plate: "buy", state: "disabled" }
+        ? { art: "colour", badge: "bill", plate: "buy", state: "disabled" }
         : { art: "grey", badge: "lock", plate: "short", state: "disabled" };
     case "goal":
       return { art: "grey", badge: "lock", plate: "goal", state: "disabled" };

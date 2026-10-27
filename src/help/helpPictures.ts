@@ -8,7 +8,7 @@ import type {
   UpgradeId,
 } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
-import { laneCenterXs } from "../layout/lanes";
+import { laneCentreXs } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import type { Point, Rect } from "../lib/rect";
@@ -48,7 +48,7 @@ import { HELP_LAYOUT } from "./helpLayout";
 
 const SCREEN = screenLayout(SCREEN_CONFIG);
 const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN.road);
-const LANES = laneCenterXs(LANE_COUNT, SCREEN.road);
+const LANES = laneCentreXs(LANE_COUNT, SCREEN.road);
 
 // The help screen's picture height: its strips fill it.
 const HELP_PICTURE_HEIGHT = HELP_LAYOUT.illustration.height;
@@ -240,7 +240,7 @@ function pickups(data: GameData): HelpPicture {
   const { dogs, lane, pickups: items, tips, zoneFraction } = HELP_SCENES.pickups;
   const started = startRun(data, dogs);
   const tip = tipValue(data, started).amount;
-  // The second neighborhood, the first finished.
+  // The second neighbourhood, the first finished.
   const run: RunState = {
     ...started,
     money: addCents(started.money, cents(tip * tips)),
@@ -337,7 +337,7 @@ function pulls(data: GameData): HelpPicture {
   };
 }
 
-// The fork after the first neighborhood, its paths easiest on the left, each carrying an
+// The fork after the first neighbourhood, its paths easiest on the left, each carrying an
 // upgrade in the upgrades' order.
 function zones(data: GameData): HelpPicture {
   const { dogs, lane } = HELP_SCENES.zones;

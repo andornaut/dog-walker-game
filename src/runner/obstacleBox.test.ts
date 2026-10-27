@@ -120,7 +120,7 @@ function drawnBounds(kind: Kind, moving: boolean, feetY: number, x: number) {
 
 // A box as drawn on the screen: its rows through the projection, its columns at its scale.
 function onScreen(box: ScaledBox) {
-  const across = (x: number) => ROAD.x + lens.centerX + (x - lens.centerX) * box.scale;
+  const across = (x: number) => ROAD.x + lens.centreX + (x - lens.centreX) * box.scale;
   return {
     bottom: screenYAt(PROJECTION, PROJECTION.footY - box.bottom),
     left: across(box.left),

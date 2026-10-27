@@ -81,8 +81,8 @@ export class HitBoxView {
     if (near >= far) {
       return;
     }
-    const centerX = LAYOUT.road.x + LAYOUT.road.width / 2;
-    const across = (x: number) => centerX + (LAYOUT.road.x + x - centerX) * box.scale;
+    const centreX = LAYOUT.road.x + LAYOUT.road.width / 2;
+    const across = (x: number) => centreX + (LAYOUT.road.x + x - centreX) * box.scale;
     const top = screenYAt(PROJECTION, far);
     const left = across(box.left);
     this.graphics.strokeRect(

@@ -17,7 +17,7 @@ export type EncounterId =
   | "fishCrates"
   | "lostWallet"
   | "otherDog"
-  | "pettingNeighbor"
+  | "pettingNeighbour"
   | "porchCat"
   | "promoTeam"
   | "puddle"
@@ -33,7 +33,7 @@ export type Size = "large" | "medium" | "small";
 // their tally.
 export type TallyId =
   | "dodges"
-  | "neighborsMet"
+  | "neighboursMet"
   | "sniffs"
   | "squirrelPulls"
   | "thievesLetGo"
@@ -513,13 +513,13 @@ export interface Zone {
   readonly difficultyName: string;
   readonly id: string;
   // Hex colours from the art palette. The leash stands out against the zone's road.
-  readonly leashColor: string;
+  readonly leashColour: string;
   // The share of the zone's obstacles, minor or not, whose look has a movement that come as
   // movers, from 0 to 1.
   readonly moverShare: number;
   readonly name: string;
-  readonly roadColor: string;
-  readonly roadShadowColor: string;
+  readonly roadColour: string;
+  readonly roadShadowColour: string;
   // Multiplies the scroll speed, on top of multipliers.scrollSpeedGainPerZone.
   readonly speed: number;
   readonly weights: ZoneWeights;
@@ -793,7 +793,7 @@ export interface RunText {
     // At a walk's start, for each large dog in the pack, which slows lane changes.
     readonly largeDog: string;
     readonly lowHearts: string;
-    readonly luckyNeighbor: string;
+    readonly luckyNeighbour: string;
     readonly luckyWallet: string;
     // While Muddy, an owner left one Muddy bump from firing you, above their last heart.
     readonly muddyHearts: string;
@@ -802,7 +802,7 @@ export interface RunText {
     readonly secondChance: string;
     readonly treat: string;
   };
-  // The walk bar's place in the walk beside the neighborhood's name: the zone's number, n, of
+  // The walk bar's place in the walk beside the neighbourhood's name: the zone's number, n, of
   // the walk's total.
   readonly zoneProgress: string;
   // The heading of the banner each zone opens with, over the zone's name: {world} is the
@@ -901,7 +901,7 @@ export interface MenuText {
       readonly wentHome: string;
     };
     // The overall rows; bestRunDogs labels the first of the best walk's dogs, one per row,
-    // and bestRunZones its neighborhoods finished.
+    // and bestRunZones its neighbourhoods finished.
     readonly overall: {
       readonly bestRun: string;
       readonly bestRunDogs: string;

@@ -40,7 +40,7 @@ const solid = (box: Box): LanedBox => ({
 });
 // A pack of parts on a flat road, outlined by their bounding box.
 const packOf = (walker: Box, dogs: readonly Omit<DogBox, "scale">[]): PackBoxes => ({
-  centerX: 0,
+  centreX: 0,
   dogs: dogs.map(flat),
   outline: unionBox([walker, ...dogs]),
   walker: flat(walker),

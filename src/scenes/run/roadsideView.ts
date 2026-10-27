@@ -56,7 +56,7 @@ export class RoadsideView {
     frame.previousStart = zoneStart - zoneLength(gameData);
     frame.scroll = scroll;
     const count = placeRoadside(this.stage, frame, places);
-    const shadow = this.shadows.frameInColors();
+    const shadow = this.shadows.frameInColours();
     for (let i = 0; i < sprites.length; i++) {
       const sprite = sprites[i];
       const place = places[i];

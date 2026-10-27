@@ -61,12 +61,12 @@ export function shopRowLook(data: ShopData, owned: Owned, bank: Cents, row: Shop
 }
 
 // Everything a row's look sets, the same for dogs, gear and dog slots. Owned shows its art in
-// full color with no badge or plate. A row not owned is a disabled row whose badge and plate
-// say whether it can be bought: affordable has its art in full color, the dollar bill and the
+// full colour with no badge or plate. A row not owned is a disabled row whose badge and plate
+// say whether it can be bought: affordable has its art in full colour, the dollar bill and the
 // buy plate; short its art's grey copy, the padlock and the short plate.
 export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
-  affordable: { art: "color", badge: "bill", plate: "buy", state: "disabled" },
-  owned: { art: "color", badge: null, plate: null, state: "normal" },
+  affordable: { art: "colour", badge: "bill", plate: "buy", state: "disabled" },
+  owned: { art: "colour", badge: null, plate: null, state: "normal" },
   short: { art: "grey", badge: "lock", plate: "short", state: "disabled" },
 };
 

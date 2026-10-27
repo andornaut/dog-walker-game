@@ -9,11 +9,11 @@ function distance(a: number, b: number): number {
 }
 
 // The palette colour nearest the colour, so a blended pixel still lands on a ramp.
-function nearestPaletteColor(color: number): number {
-  let best = color;
+function nearestPaletteColour(colour: number): number {
+  let best = colour;
   let bestDistance = Number.POSITIVE_INFINITY;
   for (const candidate of ONE_STEP_DARKER.keys()) {
-    const d = distance(candidate, color);
+    const d = distance(candidate, colour);
     if (d < bestDistance) {
       best = candidate;
       bestDistance = d;
@@ -23,8 +23,8 @@ function nearestPaletteColor(color: number): number {
 }
 
 // The colour moved steps down its ramp, after snapping it to the palette.
-export function darkerColor(steps: number, color: number): number {
-  let result = nearestPaletteColor(color);
+export function darkerColour(steps: number, colour: number): number {
+  let result = nearestPaletteColour(colour);
   for (let i = 0; i < steps; i += 1) {
     result = ONE_STEP_DARKER.get(result) ?? result;
   }
@@ -33,5 +33,5 @@ export function darkerColor(steps: number, color: number): number {
 
 // Remaps RGBA pixel data in place, steps down the ramps, leaving alpha alone.
 export function remapDarker(steps: number, pixels: Uint8ClampedArray): void {
-  remapRgb((color) => darkerColor(steps, color), pixels);
+  remapRgb((colour) => darkerColour(steps, colour), pixels);
 }

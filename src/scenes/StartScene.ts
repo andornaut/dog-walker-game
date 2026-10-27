@@ -95,7 +95,7 @@ import type { PackPlacement } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import { addFigure, PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
+import { addFigure, PackFigures, YARD_LEASH_COLOUR } from "../pack/phaser/packFigures";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import type { Cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -124,14 +124,14 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
-import { BUTTON_COLORS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
+import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
-import { addBadge, addPlate, drawPetShopFallback, plateColors, SHOP_ART } from "./itemArt";
+import { addBadge, addPlate, drawPetShopFallback, plateColours, SHOP_ART } from "./itemArt";
 import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
@@ -984,10 +984,10 @@ export class StartScene extends Scene {
     x: number,
     y: number,
     value: string,
-    color: number,
+    colour: number,
     options: { font?: FontRole; originX?: number; originY?: number; scale?: number } = {},
   ): GameObjects.BitmapText {
-    const label = addPixelText(this, x, y, value, { color, scale: TEXT_SCALE, ...options });
+    const label = addPixelText(this, x, y, value, { colour, scale: TEXT_SCALE, ...options });
     parent.add(label);
     return label;
   }
@@ -1028,7 +1028,7 @@ export class StartScene extends Scene {
     }
     const sign = HOME_LAYOUT.streetSign;
     addPixelText(this, sign.x, sign.y, gameData.homeText.gateSign, {
-      color: PALETTE.white,
+      colour: PALETTE.white,
       originX: 0.5,
     });
   }
@@ -1349,7 +1349,7 @@ export class StartScene extends Scene {
     const reduced = currentSettings(this).reducedMotion;
     this.drawPorch(root, g, save, reduced);
     const walkerKey = save.walker === null ? undefined : walkerSpriteKey(this, save.walker);
-    const groundColor = (atX: number) =>
+    const groundColour = (atX: number) =>
       atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
     const dogs = this.loadout.dogs.map((dog, rank) => {
       const placement = itemAt(GATE_SPOTS, rank);
@@ -1368,8 +1368,8 @@ export class StartScene extends Scene {
       this.loadout.dogs,
     );
     const shadow = (key: string, depth: number, atX: number, atFootY: number) =>
-      drawShadow(g, groundColor(atX), atX, atFootY, spriteMetrics(key).opaqueWidth * depth);
-    const look = { color: YARD_LEASH_COLOR, taut: null };
+      drawShadow(g, groundColour(atX), atX, atFootY, spriteMetrics(key).opaqueWidth * depth);
+    const look = { colour: YARD_LEASH_COLOUR, taut: null };
     figures.stand(0, shadow, look, { dogs, walker: { footY, x } });
     root.add(figures.layers());
     const now = this.time.now;
@@ -1462,7 +1462,7 @@ export class StartScene extends Scene {
       badge.rise = `gear:${this.loadout.gear}`;
       fillRect(this.graphics(badge.container), PALETTE.plum, rect);
       const at = { x: rect.x + 1, y: rect.y + 1 };
-      this.addGearIcon(badge.container, "color", this.loadout.gear, at, 0.5);
+      this.addGearIcon(badge.container, "colour", this.loadout.gear, at, 0.5);
     }
   }
 
@@ -1506,22 +1506,22 @@ export class StartScene extends Scene {
     view.bobsWithShop = true;
     const faces = this.addPressFaces(key, art);
     if (faces === undefined) {
-      const colors = { border: PALETTE.ink, fill: PALETTE.cream };
-      drawFramedRect(this.graphics(view.container), colors, board);
+      const colours = { border: PALETTE.ink, fill: PALETTE.cream };
+      drawFramedRect(this.graphics(view.container), colours, board);
     } else {
       view.container.add(faces);
     }
     // Each line's ink centred on the cream; the price in red while the bank is short, as a
     // tile's unaffordable price is.
     const { headCapY, priceCapY, x } = slotSignText(pixelFontMetrics(this, "body"));
-    const priceColor = sign.affordable ? SLOT_SIGN.priceColor : GREYED.shortPrice;
+    const priceColour = sign.affordable ? SLOT_SIGN.priceColour : GREYED.shortPrice;
     const rows = [
-      { capY: headCapY, color: SLOT_SIGN.headColor },
-      { capY: priceCapY, color: priceColor },
+      { capY: headCapY, colour: SLOT_SIGN.headColour },
+      { capY: priceCapY, colour: priceColour },
     ] as const;
     const labels = sign.lines.map((line, i) => {
       const row = rows[i] ?? rows[0];
-      const label = this.text(view.container, 0, 0, line, PALETTE[row.color], { scale });
+      const label = this.text(view.container, 0, 0, line, PALETTE[row.colour], { scale });
       const ink = inkSpan(label);
       placePixelText(label, x - (ink.left + ink.right) / 2, row.capY);
       return { label, y: label.y };
@@ -1586,7 +1586,7 @@ export class StartScene extends Scene {
     const text =
       tile.kind === "locked" ? dollarText(tile.price) : tile.kind === "goal" ? tile.goal : null;
     if (text !== null && plate !== null) {
-      addPlate(this, parent, at, text, plateColors(plate));
+      addPlate(this, parent, at, text, plateColours(plate));
     }
   }
 
@@ -1629,7 +1629,7 @@ export class StartScene extends Scene {
       const faceKey = dogFaceKey(gameData, id);
       const faceTag = badge === null ? "happy" : "neutral";
       const faceAt = { x: x + faceBox.dx, y: y + faceBox.dy };
-      // A dog not owned holds its first frame, in color while the player can buy it.
+      // A dog not owned holds its first frame, in colour while the player can buy it.
       const still = reduced || badge !== null;
       const face = addTileSprite(this, art, still, faceKey, faceTag, faceAt);
       content.add(face);
@@ -1774,7 +1774,7 @@ export class StartScene extends Scene {
       }
       // Every walker's name on the goal plate, owned or locked.
       const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };
-      addPlate(this, content, plateAt, walker.name, plateColors("goal"));
+      addPlate(this, content, plateAt, walker.name, plateColours("goal"));
       walkerEffectItems(gameData, id).forEach((item, n) => {
         const iconAt = { x: x + icons.dx, y: y + itemAt(icons.dy, n) };
         const key = effectIconKey(item);
@@ -1817,13 +1817,20 @@ export class StartScene extends Scene {
         group.add(face);
       }
       const top = START_LABEL.readyY + (disabled || down ? BUTTON_PRESS_PX : 0);
-      const color = PALETTE[BUTTON_COLORS[state].label];
+      const colour = PALETTE[BUTTON_COLOURS[state].label];
       const loading = down && this.artWait?.kind === "start";
-      const text = this.text(group, x + width / 2, y + top, loading ? loadingLabel : label, color, {
-        font: "title",
-        originX: 0.5,
-        scale: START_LABEL.scale,
-      });
+      const text = this.text(
+        group,
+        x + width / 2,
+        y + top,
+        loading ? loadingLabel : label,
+        colour,
+        {
+          font: "title",
+          originX: 0.5,
+          scale: START_LABEL.scale,
+        },
+      );
       if (loading) {
         // Centred on the ready label's caps, at whichever size fits.
         const { scale } = fitPixelText(text, START_LOADING, x + width / 2, y + top).style;

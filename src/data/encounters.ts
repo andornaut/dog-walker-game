@@ -131,15 +131,15 @@ export const ENCOUNTERS = {
     },
     shape: { lanes: 1, rows: 1 },
   },
-  pettingNeighbor: {
+  pettingNeighbour: {
     kind: "lucky",
     movement: { kind: "step", steps: { max: 2, min: 1 } },
     name: "Friendly neighbor",
     resolution: {
-      art: "card-petting-neighbor-take",
+      art: "card-petting-neighbour-take",
       effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
       kind: "instant",
-      tally: "neighborsMet",
+      tally: "neighboursMet",
     },
   },
   porchCat: {

@@ -179,9 +179,9 @@ describe("applyInstantEncounter", () => {
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
-  it("gives the friendly neighbor's hearts to every owner", () => {
+  it("gives the friendly neighbour's hearts to every owner", () => {
     const state = testState({ duchess: 3, kilo: 3 });
-    const outcome = applyInstantEncounter(data, state, "pettingNeighbor", ["duchess", "kilo"]);
+    const outcome = applyInstantEncounter(data, state, "pettingNeighbour", ["duchess", "kilo"]);
     expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["duchess", "kilo"]);
   });
 

@@ -56,7 +56,7 @@ export function walkGeometry(
     itemHeights: ITEM_HEIGHTS,
     laneCount,
     lens: {
-      centerX: road.width / 2,
+      centreX: road.width / 2,
       focal: projection.focal,
       footY: projection.footY,
       horizonY: projection.horizonY,

@@ -77,7 +77,7 @@ export const RUN_TEXT = {
     fullPackHome: "Walk bonus! +{amount}",
     largeDog: "{dog} is large: −{speed} lane change speed.",
     lowHearts: "{owner} has 1♥ left!",
-    luckyNeighbor: "A neighbor pets the pack! Everyone +1♥",
+    luckyNeighbour: "A neighbor pets the pack! Everyone +1♥",
     luckyWallet: "Found a wallet! +{amount}",
     muddyHearts: "{owner} has {hearts}♥ left! Muddy bumps cost {cost}♥.",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",

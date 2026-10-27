@@ -110,7 +110,7 @@ describe("the walk bar", () => {
     }
   });
 
-  it("lines a well for every effect under the neighborhood well, its holds up to the first button", () => {
+  it("lines a well for every effect under the neighbourhood well, its holds up to the first button", () => {
     const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
     expect(BAR.effectWells).toHaveLength(EFFECT_WELLS);
     for (const hold of BAR.effectHolds) {
@@ -150,13 +150,13 @@ describe("the walk bar", () => {
     }
   });
 
-  it("spans the cash well from the neighborhood well's top to the effect wells' bottom", () => {
+  it("spans the cash well from the neighbourhood well's top to the effect wells' bottom", () => {
     const { cash, effects, zone } = WALK_BAR;
     expect(cash.well.y).toBe(zone.well.y);
     expect(cash.well.y + cash.well.height).toBe(effects.y + effects.size);
   });
 
-  it("ends the neighborhood well before the first button's hit area", () => {
+  it("ends the neighbourhood well before the first button's hit area", () => {
     const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
     expect(BAR.zoneWell.x + BAR.zoneWell.width).toBeLessThanOrEqual(first.x);
   });
@@ -505,9 +505,9 @@ describe("the owner's tab", () => {
   );
 });
 
-// The neighborhood's name from name.x and "n of N" right-aligned to progress.right, both at 1x
+// The neighbourhood's name from name.x and "n of N" right-aligned to progress.right, both at 1x
 // in the body font, stay in the well and apart, for every zone beside the widest count.
-describe("the walk bar's neighborhood name and count", () => {
+describe("the walk bar's neighbourhood name and count", () => {
   const { name, progress, textGap } = WALK_BAR.zone;
   const well = BAR.zoneWell;
   const body = fontFileMetrics("font-body");
@@ -552,7 +552,7 @@ describe("explainTargetAt", () => {
   const button = centre(BAR.buttons[WALK_BAR_BUTTONS[0]].hit);
   it.each<[string, number, Point, ExplainTarget | undefined]>([
     ["the first effect", 1, holdAt(0), { effect: 0, kind: "effect" }],
-    ["the neighborhood well's column over an effect", 1, centre(BAR.zoneWell), undefined],
+    ["the neighbourhood well's column over an effect", 1, centre(BAR.zoneWell), undefined],
     ["an empty well", 1, holdAt(1), undefined],
     [
       "the last well with as many effects as wells",

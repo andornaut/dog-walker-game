@@ -240,7 +240,7 @@ function setOut(
       slot.across = vergeStop(verge) + VERGE_SPREAD * random();
       slot.outer = Math.max(
         slot.across + OFF_SCREEN,
-        (projection.centerX + OFF_SCREEN) / scaleAt(projection, distance),
+        (projection.centreX + OFF_SCREEN) / scaleAt(projection, distance),
       );
       slot.z = frame.travelled + distance;
     }
@@ -359,7 +359,7 @@ export function placeAmbient(
   }
   const placed = project(projection, {
     distance,
-    x: projection.centerX + slot.direction * across,
+    x: projection.centreX + slot.direction * across,
   });
   out.scale = placed.scale;
   out.x = placed.x;

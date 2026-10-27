@@ -3,7 +3,7 @@ import { PALETTE } from "../ui/phaser/palette";
 
 // Each debuff bar's colours the game draws with: the fill, the name, and the face drawn while
 // the bar art is missing. The name holds 4.5:1 on the face.
-export const DEBUFF_COLORS: Readonly<
+export const DEBUFF_COLOURS: Readonly<
   Record<DebuffId, { face: number; fill: number; name: number }>
 > = {
   muddy: { face: PALETTE.brown, fill: PALETTE.tan, name: PALETTE.ink },

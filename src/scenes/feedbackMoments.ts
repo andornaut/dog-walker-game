@@ -352,7 +352,7 @@ export class HudFeedback {
         { height: size, width: size, x: -size / 2, y: -size / 2 },
       );
       const name = addPixelText(this.scene, 0, 0, gameData.dogs[dog].owner.name, {
-        color: PALETTE.plum,
+        colour: PALETTE.plum,
         originX: 0.5,
         originY: 0.5,
       });
@@ -381,7 +381,7 @@ export class HudFeedback {
     const { plateText } = FIRING_PARTS;
     container.add(
       addDisplayText(this.scene, rect.width / 2, plateText.y, gameData.runText.fired, {
-        color: PALETTE.white,
+        colour: PALETTE.white,
         font: "title",
         originX: 0.5,
         scale: 2,
@@ -395,7 +395,7 @@ export class HudFeedback {
   // False, drawing nothing, while there is no room for it.
   private addLine(line: FiredLine): boolean {
     const label = addPixelText(this.scene, 0, 0, line.text, {
-      color: PALETTE.plum,
+      colour: PALETTE.plum,
       scale: FIRED_LINE.scale,
     });
     const { lines } = fitPixelText(label, FIRED_LINE_FIT, 0, 0);
@@ -492,7 +492,7 @@ export class HudFeedback {
     const { cap, inkX, inkY, key } = PAYOUT_LABEL;
     const { height } = PAYOUT_TAG;
     const amount = addPixelText(this.scene, inkX, inkY, text, {
-      color: PALETTE.forest,
+      colour: PALETTE.forest,
       font: "title",
       scale: 2,
     });
@@ -598,7 +598,7 @@ export class HudFeedback {
       return;
     }
     this.hooks.popOwner(dog, "worried", MOMENTS.lowCueMs);
-    const style = { color: PALETTE.darkRed, scale: 2 };
+    const style = { colour: PALETTE.darkRed, scale: 2 };
     const set = fitFaceRows(this.scene, style, LOW_CHIP_FIT, lowHeartsText(gameData, dog));
     const row = set.rows[0];
     const shown = {

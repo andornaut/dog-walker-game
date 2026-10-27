@@ -42,17 +42,17 @@ export function drawPurchaseConfirm(
   layer.add(addDim(scene, LAYOUT.screen));
   addDetailCard(scene, layer, LAYOUT.card, LAYOUT.band);
   const centred = (
-    at: { capTop: number; centerX: number; font: "body" | "title"; room: number },
+    at: { capTop: number; centreX: number; font: "body" | "title"; room: number },
     value: string,
-    color: number,
+    colour: number,
   ) => {
-    const label = addPixelText(scene, at.centerX, at.capTop, value, {
-      color,
+    const label = addPixelText(scene, at.centreX, at.capTop, value, {
+      colour,
       font: at.font,
       originX: 0.5,
       scale: TEXT_SCALE,
     });
-    fitPixelText(label, { room: at.room, styles: TEXT_FIT_STYLES }, at.centerX, at.capTop);
+    fitPixelText(label, { room: at.room, styles: TEXT_FIT_STYLES }, at.centreX, at.capTop);
     layer.add(label);
   };
   centred(LAYOUT.title, lines.title, PALETTE.white);

@@ -55,8 +55,8 @@ const HOME_SOUND_KEYS: ReadonlySet<string> = new Set(HOME_CUES.map((cue) => SOUN
 const loadsSoundFirst = (key: string): boolean => HOME_SOUND_KEYS.has(key);
 const always = () => true;
 
-type Size = { color: number; height: number; width: number };
-const box = (width: number, height: number, color: number): Size => ({ color, height, width });
+type Size = { colour: number; height: number; width: number };
+const box = (width: number, height: number, colour: number): Size => ({ colour, height, width });
 
 // Every sprite the scenes draw, with the box drawn in its place if it is missing.
 function placeholderSizes(): Map<string, Size> {
@@ -77,15 +77,15 @@ function placeholderSizes(): Map<string, Size> {
   }
   const tall: readonly EncounterId[] = [
     "droppedCone",
-    "pettingNeighbor",
+    "pettingNeighbour",
     "promoTeam",
     "thief",
     "weddingShoot",
   ];
   for (const encounter of Object.keys(gameData.encounters) as EncounterId[]) {
     const height = encounter === "puddle" ? short : tall.includes(encounter) ? tallest : side;
-    const color = gameData.encounters[encounter].kind === "lucky" ? PALETTE.green : PALETTE.mauve;
-    sizes.set(encounterSpriteKey(encounter), box(side, height, color));
+    const colour = gameData.encounters[encounter].kind === "lucky" ? PALETTE.green : PALETTE.mauve;
+    sizes.set(encounterSpriteKey(encounter), box(side, height, colour));
   }
   return sizes;
 }

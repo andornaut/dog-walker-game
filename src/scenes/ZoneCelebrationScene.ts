@@ -44,7 +44,7 @@ type Version = typeof LAYOUT.newWalker | typeof LAYOUT.zoneDone;
 
 // Zone done moves on by itself after this long.
 const ZONE_DONE_MS = 2000;
-const BODY = { color: PALETTE.plum, scale: TEXT_SCALE } as const;
+const BODY = { colour: PALETTE.plum, scale: TEXT_SCALE } as const;
 const KEY_RISE = 14;
 
 // Places a label made with origin y 0 by the top of its font line.
@@ -112,24 +112,24 @@ export class ZoneCelebrationScene extends Scene {
   // The title in font-display at 2x, or smaller where it would not fit the screen, and the
   // subtitle in font-display-cream under it.
   private addHeadline(version: Version, text: CelebrationText): void {
-    const { centerX, titleRoom, titleScale, titleStyles } = LAYOUT;
-    const title = { color: PALETTE.yellow, font: "title", originX: 0.5 } as const;
+    const { centreX, titleRoom, titleScale, titleStyles } = LAYOUT;
+    const title = { colour: PALETTE.yellow, font: "title", originX: 0.5 } as const;
     // addDisplayText draws the display font at 1x, so the title is scaled after.
-    const big = addDisplayText(this, centerX, 0, text.title, title);
-    const { scale } = fitPixelText(big, { room: titleRoom, styles: titleStyles }, centerX, 0).style;
+    const big = addDisplayText(this, centreX, 0, text.title, title);
+    const { scale } = fitPixelText(big, { room: titleRoom, styles: titleStyles }, centreX, 0).style;
     // A smaller title keeps its line's bottom row, so it stays over the subtitle.
     atLineTop(big, version.titleY + (big.height / scale) * (titleScale - scale));
-    const subtitle = { ...title, color: PALETTE.cream, variant: "cream" } as const;
-    atLineTop(addDisplayText(this, centerX, 0, text.subtitle, subtitle), version.subtitleY);
+    const subtitle = { ...title, colour: PALETTE.cream, variant: "cream" } as const;
+    atLineTop(addDisplayText(this, centreX, 0, text.subtitle, subtitle), version.subtitleY);
   }
 
   // The walker's cheer at 2x, its frame's bottom centre on the feet line. A new walker hops in
   // from past the right edge, and fx-confetti bursts as they land. Reduced motion shows the
   // cheer's first frame, in place.
   private addWalker(celebration: ZoneCelebration, reduced: boolean, feetY: number): void {
-    const { centerX, runIn, walkerScale } = LAYOUT;
+    const { centreX, runIn, walkerScale } = LAYOUT;
     const key = walkerSpriteKey(this, celebration.walker);
-    const sprite = this.add.sprite(centerX, feetY, key).setOrigin(0.5, 1).setScale(walkerScale);
+    const sprite = this.add.sprite(centreX, feetY, key).setOrigin(0.5, 1).setScale(walkerScale);
     playFirstTag(sprite, key, ART.walkerTags, reduced);
     if (reduced || celebration.kind === "zoneDone") {
       return;
@@ -138,19 +138,19 @@ export class ZoneCelebrationScene extends Scene {
     this.tweens.add({
       duration: runIn.durationMs,
       ease: "Cubic.easeOut",
-      onComplete: () => addConfetti(this, false, 1, centerX, runIn.burstY),
+      onComplete: () => addConfetti(this, false, 1, centreX, runIn.burstY),
       targets: sprite,
-      x: centerX,
+      x: centreX,
     });
   }
 
   // The zone's earnings on a cream plate, the amounts in forest.
   private addPlate(text: ZoneDoneText): void {
-    const { centerX, zoneDone } = LAYOUT;
+    const { centreX, zoneDone } = LAYOUT;
     addPanel(this, zoneDone.plate);
     const line = text.earnings.map((part) => part.text).join("");
     const whole = atLineTop(addPixelText(this, 0, 0, line, BODY), zoneDone.earningsY);
-    const left = Math.round(centerX - whole.width / 2);
+    const left = Math.round(centreX - whole.width / 2);
     whole.setX(left);
     // Each amount is drawn again in forest over its place in the line, measured from the
     // line's start through the amount, since a trailing space has no width.
@@ -163,7 +163,7 @@ export class ZoneCelebrationScene extends Scene {
     for (const part of text.earnings) {
       if (part.kind === "money") {
         const x = left + widthOf(before + part.text) - widthOf(part.text);
-        const amount = addPixelText(this, x, 0, part.text, { ...BODY, color: PALETTE.forest });
+        const amount = addPixelText(this, x, 0, part.text, { ...BODY, colour: PALETTE.forest });
         atLineTop(amount, zoneDone.earningsY);
       }
       before += part.text;
@@ -174,7 +174,7 @@ export class ZoneCelebrationScene extends Scene {
   // The walker's line in a speech bubble whose tail points up at them, a dotted rule, and
   // their agility and perk under it.
   private addBubble(text: NewWalkerText): void {
-    const { centerX, newWalker } = LAYOUT;
+    const { centreX, newWalker } = LAYOUT;
     const { bubble, greeting, rule, tail } = newWalker;
     addPanel(this, bubble, "ui-quip");
     if (this.textures.exists(ART.tailUp)) {
@@ -185,7 +185,7 @@ export class ZoneCelebrationScene extends Scene {
     probe.destroy();
     const tops = greetingLineTops(pixelFontMetrics(this, "body"), style.scale, lines.length);
     lines.forEach((line, i) => {
-      const label = addPixelText(this, centerX, 0, line, {
+      const label = addPixelText(this, centreX, 0, line, {
         ...BODY,
         originX: 0.5,
         scale: style.scale,
@@ -202,7 +202,7 @@ export class ZoneCelebrationScene extends Scene {
   // The agility and perk row, centred: each word after its icon, if it has one; the gaps from
   // the layout.
   private addInfo(parts: readonly LinePart[]): void {
-    const { centerX, newWalker } = LAYOUT;
+    const { centreX, newWalker } = LAYOUT;
     const { iconGap, iconY, itemGap, y } = newWalker.info;
     const items = parts.flatMap((part) => {
       const word = part.text.trim();
@@ -220,7 +220,7 @@ export class ZoneCelebrationScene extends Scene {
       (sum, entry) => sum + entry.item.displayWidth + (entry === last ? 0 : entry.gap),
       0,
     );
-    let x = Math.round(centerX - total / 2);
+    let x = Math.round(centreX - total / 2);
     for (const { gap, item } of items) {
       item.setX(x);
       x += item.displayWidth + gap;
@@ -229,12 +229,12 @@ export class ZoneCelebrationScene extends Scene {
 
   // Welcome!, with the key that presses it above it once a key has been pressed.
   private addButton(label: string, onTap: () => void): void {
-    const { centerX, newWalker } = LAYOUT;
+    const { centreX, newWalker } = LAYOUT;
     const button = addMenuButton(this, newWalker.button, label, { available: true, primary: true });
     listenButtonTap(this, button, onTap);
     if (keyNumbersShown()) {
-      addPixelText(this, centerX, newWalker.button.y - KEY_RISE, "1", {
-        color: PALETTE.amber,
+      addPixelText(this, centreX, newWalker.button.y - KEY_RISE, "1", {
+        colour: PALETTE.amber,
         font: "title",
         originX: 0.5,
       });

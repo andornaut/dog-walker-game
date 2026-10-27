@@ -64,10 +64,10 @@ export function floatLabel(
   moment: PackMoment,
   anchor: LabelAnchor,
   text: string,
-  color: number,
+  colour: number,
   timing: { holdMs: number; ms: number; rise: number },
 ): void {
-  const label = addPixelText(scene, 0, 0, text, { color, font: "title", scale: TITLE_SCALE });
+  const label = addPixelText(scene, 0, 0, text, { colour, font: "title", scale: TITLE_SCALE });
   const title = pixelFontMetrics(scene, "title");
   const width = Math.ceil(label.width) + 2 * CHIP_PAD;
   // A glyph inked above the capitals, such as ♥, grows the chip up to hold it.

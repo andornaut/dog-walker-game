@@ -48,7 +48,7 @@ import {
 import { startRoad, type Walk } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun } from "../state/runState";
-import { colorFromHex } from "../ui/phaser/palette";
+import { colourFromHex } from "../ui/phaser/palette";
 import type { HudSceneData } from "./HudScene";
 import type { HudRun, RunHudView } from "./hudWalk";
 import { onWindowEvent } from "./overlay";
@@ -661,7 +661,7 @@ export class RunScene extends Scene implements HudRun {
       distanceBeforeZone,
       distanceBeforeZone + walk.run.zoneDistance,
     );
-    const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
+    const shadow = world.shadows.frame(colourFromHex(zone.roadShadowColour));
     world.items.draw(walk, held, still, shadow);
     world.pack.draw(walk, {
       halted: held,

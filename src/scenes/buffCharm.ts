@@ -36,7 +36,7 @@ export function addCharm(
     scene.textures.exists(iconKey)
       ? scene.add.image(icon, icon, iconKey).setOrigin(0)
       : addPixelText(scene, size / 2, size / 2 - 2, effectIconFallback(gameData, item), {
-          color: PALETTE.cream,
+          colour: PALETTE.cream,
           originX: 0.5,
         }),
   ];

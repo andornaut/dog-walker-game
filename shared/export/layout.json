@@ -2,7 +2,7 @@
   "camera": {
     "horizonY": -66,
     "ratio": 0.7555555555555555,
-    "centerX": 180,
+    "centreX": 180,
     "farScale": 0.5,
     "farY": 206,
     "focal": 720,
@@ -212,7 +212,7 @@
     {
       "bandRow": 139,
       "distance": 825.0887573964496,
-      "laneCenters": [
+      "laneCentres": [
         120,
         150,
         180,
@@ -235,7 +235,7 @@
     {
       "bandRow": 140,
       "distance": 819.0176817288802,
-      "laneCenters": [
+      "laneCentres": [
         120,
         150,
         180,
@@ -258,7 +258,7 @@
     {
       "bandRow": 141,
       "distance": 812.9941291585128,
-      "laneCenters": [
+      "laneCentres": [
         119,
         149,
         180,
@@ -281,7 +281,7 @@
     {
       "bandRow": 142,
       "distance": 807.0175438596491,
-      "laneCenters": [
+      "laneCentres": [
         119,
         149,
         180,
@@ -304,7 +304,7 @@
     {
       "bandRow": 143,
       "distance": 801.0873786407767,
-      "laneCenters": [
+      "laneCentres": [
         119,
         149,
         180,
@@ -327,7 +327,7 @@
     {
       "bandRow": 144,
       "distance": 795.2030947775629,
-      "laneCenters": [
+      "laneCentres": [
         119,
         149,
         180,
@@ -350,7 +350,7 @@
     {
       "bandRow": 145,
       "distance": 789.3641618497109,
-      "laneCenters": [
+      "laneCentres": [
         118,
         149,
         180,
@@ -373,7 +373,7 @@
     {
       "bandRow": 146,
       "distance": 783.5700575815738,
-      "laneCenters": [
+      "laneCentres": [
         118,
         149,
         180,
@@ -396,7 +396,7 @@
     {
       "bandRow": 147,
       "distance": 777.8202676864244,
-      "laneCenters": [
+      "laneCentres": [
         118,
         149,
         180,
@@ -419,7 +419,7 @@
     {
       "bandRow": 148,
       "distance": 772.1142857142856,
-      "laneCenters": [
+      "laneCentres": [
         118,
         149,
         180,
@@ -442,7 +442,7 @@
     {
       "bandRow": 149,
       "distance": 766.4516129032259,
-      "laneCenters": [
+      "laneCentres": [
         118,
         149,
         180,
@@ -465,7 +465,7 @@
     {
       "bandRow": 150,
       "distance": 760.8317580340265,
-      "laneCenters": [
+      "laneCentres": [
         117,
         148,
         180,
@@ -488,7 +488,7 @@
     {
       "bandRow": 151,
       "distance": 755.2542372881355,
-      "laneCenters": [
+      "laneCentres": [
         117,
         148,
         180,
@@ -511,7 +511,7 @@
     {
       "bandRow": 152,
       "distance": 749.7185741088181,
-      "laneCenters": [
+      "laneCentres": [
         117,
         148,
         180,
@@ -534,7 +534,7 @@
     {
       "bandRow": 153,
       "distance": 744.2242990654206,
-      "laneCenters": [
+      "laneCentres": [
         117,
         148,
         180,
@@ -557,7 +557,7 @@
     {
       "bandRow": 154,
       "distance": 738.7709497206704,
-      "laneCenters": [
+      "laneCentres": [
         116,
         148,
         180,
@@ -580,7 +580,7 @@
     {
       "bandRow": 155,
       "distance": 733.3580705009276,
-      "laneCenters": [
+      "laneCentres": [
         116,
         148,
         180,
@@ -603,7 +603,7 @@
     {
       "bandRow": 156,
       "distance": 727.985212569316,
-      "laneCenters": [
+      "laneCentres": [
         116,
         148,
         180,
@@ -626,7 +626,7 @@
     {
       "bandRow": 157,
       "distance": 722.6519337016575,
-      "laneCenters": [
+      "laneCentres": [
         116,
         148,
         180,
@@ -648,7 +648,7 @@
     }
   ],
   "lanes": {
-    "centers": [
+    "centres": [
       52,
       116,
       180,
@@ -1128,7 +1128,7 @@
       ]
     },
     "celebration": {
-      "centerX": 180,
+      "centreX": 180,
       "confetti": {
         "bits": 60,
         "fallMs": 2000,
@@ -1381,7 +1381,7 @@
         "y": 14
       },
       "dots": {
-        "centerX": 180,
+        "centreX": 180,
         "size": 8,
         "spacing": 44,
         "y": 476,
@@ -1735,7 +1735,7 @@
           "lit": 1,
           "shade": 1
         },
-        "headColor": "plum",
+        "headColour": "plum",
         "hit": {
           "height": 44,
           "width": 79,
@@ -1745,7 +1745,7 @@
         "key": "ui-slot-sign",
         "linePitch": 9,
         "pressDrop": 1,
-        "priceColor": "forest",
+        "priceColour": "forest",
         "scale": 1
       },
       "speech": {

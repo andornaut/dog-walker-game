@@ -90,7 +90,7 @@ describe("helpPicture", () => {
     },
   );
 
-  it("shows the fork after the first neighborhood, its paths easiest first", () => {
+  it("shows the fork after the first neighbourhood, its paths easiest first", () => {
     const { card, walk } = helpPicture(gameData, "zones");
     const paths = forkPaths(gameData, () => 0, walk.run.route);
     expect(card?.options.map((option) => option.path?.zone)).toEqual(paths);

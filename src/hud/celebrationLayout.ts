@@ -5,7 +5,7 @@ import type { FontMetrics } from "../ui/fontMetrics";
 import { type TextFitStyle, textFitStylesOnLines } from "../ui/textFit";
 
 const SCREEN_WIDTH = SCREEN_CONFIG.width;
-const CENTER_X = SCREEN_WIDTH / 2;
+const CENTRE_X = SCREEN_WIDTH / 2;
 // The bubble's and the title's inset from either screen edge.
 const SIDE = 24;
 const TITLE_SCALE = 2;
@@ -29,16 +29,16 @@ const ZONE_DONE_FEET = ROAD_TOP + 148;
 const PLATE_TOP = ZONE_DONE_FEET + 10;
 
 // A version's headline from its feet line: the walker's frame at WALKER_SCALE, centred on
-// CENTER_X, standing on feetY; the burst behind it; and the small line's top subtitleGap rows
+// CENTRE_X, standing on feetY; the burst behind it; and the small line's top subtitleGap rows
 // above the walker's frame top, so the head clears it, with the big line above that.
 function headline(feetY: number, subtitleGap: number) {
   const walker = {
-    x: CENTER_X - (WALKER_FRAME.width * WALKER_SCALE) / 2,
+    x: CENTRE_X - (WALKER_FRAME.width * WALKER_SCALE) / 2,
     y: feetY - WALKER_FRAME.height * WALKER_SCALE,
   };
   const subtitleY = walker.y - subtitleGap;
   return {
-    burst: { x: CENTER_X - BURST_WIDTH / 2, y: walker.y + BURST_DROP },
+    burst: { x: CENTRE_X - BURST_WIDTH / 2, y: walker.y + BURST_DROP },
     feetY,
     subtitleY,
     titleY: subtitleY - TITLE_OVER_SUBTITLE,
@@ -47,9 +47,9 @@ function headline(feetY: number, subtitleGap: number) {
 }
 
 // The zone celebration's geometry, in screen pixels, as art's style guide sets it out: over
-// the dimmed road view, everything centred on centerX. A text y is the top of its font line.
+// the dimmed road view, everything centred on centreX. A text y is the top of its font line.
 export const CELEBRATION_LAYOUT = {
-  centerX: CENTER_X,
+  centreX: CENTRE_X,
   // About bits fx-confetti-bit fall from row fromY to row toY over fallMs, spread across x
   // fromX to toX, each swaying sideways by sway pixels every swayMs.
   confetti: {

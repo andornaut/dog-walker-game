@@ -175,9 +175,9 @@ describe("run, world and walkers", () => {
   it("gives every zone palette road colours, and leaves three unwalked zones at every fork", () => {
     expect(world.zones.length - (world.walkLength - 1)).toBeGreaterThanOrEqual(3);
     for (const zone of world.zones) {
-      expect(zone.roadColor).toMatch(/^#[0-9a-f]{6}$/);
-      expect(zone.leashColor).toMatch(/^#[0-9a-f]{6}$/);
-      expect(zone.roadShadowColor).toMatch(/^#[0-9a-f]{6}$/);
+      expect(zone.roadColour).toMatch(/^#[0-9a-f]{6}$/);
+      expect(zone.leashColour).toMatch(/^#[0-9a-f]{6}$/);
+      expect(zone.roadShadowColour).toMatch(/^#[0-9a-f]{6}$/);
     }
   });
 

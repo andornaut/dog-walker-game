@@ -13,7 +13,7 @@ import { type Feet, type LeashLine, leashLine, packLayers, type StandingDog } fr
 
 // The leashes' colour off the road, at the start screen's gate and on the end screen's walk
 // home; on the road each zone sets its own.
-export const YARD_LEASH_COLOR = PALETTE.darkRed;
+export const YARD_LEASH_COLOUR = PALETTE.darkRed;
 
 export interface Figure {
   key: string;
@@ -22,7 +22,7 @@ export interface Figure {
 
 // The leashes' colour, and the dog whose leash is taut, highlighted along its upper-left side.
 interface LeashLook {
-  color: number;
+  colour: number;
   taut: DogId | null;
 }
 
@@ -127,7 +127,7 @@ export class PackFigures {
     const { leash } = this;
     leash.clear();
     for (const { dog, line } of lines) {
-      drawPixelLine(leash, look.color, line.from, line.to);
+      drawPixelLine(leash, look.colour, line.from, line.to);
       if (dog === look.taut) {
         const taut = tautLeashLine(line.from, line.to);
         drawPixelLine(leash, PALETTE.yellow, taut.from, taut.to);

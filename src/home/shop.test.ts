@@ -77,7 +77,7 @@ describe("shopRowLook", () => {
   const banks = forSale.flatMap((row) => {
     const price = row.price ?? cents(0);
     return [
-      { art: "color", bank: price, box: GREYED.affordBox, id: row.id, look: "affordable", row },
+      { art: "colour", bank: price, box: GREYED.affordBox, id: row.id, look: "affordable", row },
       { art: "grey", bank: cents(price - 1), box: GREYED.box, id: row.id, look: "short", row },
     ] as const;
   });

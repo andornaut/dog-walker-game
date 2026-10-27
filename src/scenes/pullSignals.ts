@@ -58,14 +58,14 @@ function bubbleKey(scene: Scene): string {
 }
 
 // A 16x16 letter in a circle, standing in for icon art not loaded.
-function letterIcon(scene: Scene, key: string, letter: string, color: number): string {
+function letterIcon(scene: Scene, key: string, letter: string, colour: number): string {
   if (!scene.textures.exists(key)) {
     const canvas = scene.textures.createCanvas(key, ICON_SIZE, ICON_SIZE);
     const context = canvas?.getContext();
     if (canvas === null || context === undefined) {
       return key;
     }
-    context.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
+    context.fillStyle = `#${colour.toString(16).padStart(6, "0")}`;
     context.beginPath();
     context.arc(ICON_SIZE / 2, ICON_SIZE / 2, ICON_SIZE / 2, 0, 2 * Math.PI);
     context.fill();
@@ -194,11 +194,11 @@ export class PullSignals {
       g.fillStyle(PALETTE.plum).fillRect(x - 1, y - 1, LINE.dot + 2, LINE.dot + 2);
       g.fillStyle(PALETTE.yellow).fillRect(x, y, LINE.dot, LINE.dot);
     }
-    const head = (size: number, color: number, inset: number) => {
+    const head = (size: number, colour: number, inset: number) => {
       const tip = { x: to.x - ux * inset, y: to.y - uy * inset };
       const base = { x: tip.x - ux * size, y: tip.y - uy * size };
       const half = size / 2;
-      g.fillStyle(color).fillTriangle(
+      g.fillStyle(colour).fillTriangle(
         Math.round(tip.x),
         Math.round(tip.y),
         Math.round(base.x - uy * half),

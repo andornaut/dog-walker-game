@@ -1,27 +1,27 @@
 import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
-import { BADGE_TEXT_COLORS } from "../home/badgesView";
+import { BADGE_TEXT_COLOURS } from "../home/badgesView";
 import { STATS_LAYOUT } from "../home/statsLayout";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
-  BUTTON_COLORS,
-  DISABLED_COLORS,
+  BUTTON_COLOURS,
+  DISABLED_COLOURS,
   GREYED,
   pictureBox,
   PLATE_LOOKS,
   type PlateKind,
   selectLook,
 } from "../ui/selection";
-import { DEBUFF_COLORS } from "./debuffColors";
+import { DEBUFF_COLOURS } from "./debuffColors";
 
 // The band an earned badge's row lies on.
 const BAND = PALETTE[STATS_LAYOUT.wall.earned.fill];
 
 // WCAG relative luminance and contrast ratio.
-function luminance(color: number): number {
+function luminance(colour: number): number {
   const [r, g, b] = [16, 8, 0].map((shift) => {
-    const channel = ((color >> shift) & 0xff) / 255;
+    const channel = ((colour >> shift) & 0xff) / 255;
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
   }) as [number, number, number];
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -62,36 +62,36 @@ describe("interaction-state colours", () => {
       ...(["normal", "primary", "secondary"] as const).map(
         (state): [string, number, number, number] => [
           `a ${state} button's label`,
-          PALETTE[BUTTON_COLORS[state].label],
-          PALETTE[BUTTON_COLORS[state].face],
+          PALETTE[BUTTON_COLOURS[state].label],
+          PALETTE[BUTTON_COLOURS[state].face],
           TEXT,
         ],
       ),
       [
         "a disabled button's label",
-        PALETTE[BUTTON_COLORS.disabled.label],
-        PALETTE[BUTTON_COLORS.disabled.face],
+        PALETTE[BUTTON_COLOURS.disabled.label],
+        PALETTE[BUTTON_COLOURS.disabled.face],
         EXEMPT,
       ],
       [
         "a muted volume row's label on the panel",
-        PALETTE[DISABLED_COLORS.text],
+        PALETTE[DISABLED_COLOURS.text],
         PALETTE.cream,
         TEXT,
       ],
       [
         "a disabled card's effect",
-        PALETTE[DISABLED_COLORS.text],
+        PALETTE[DISABLED_COLOURS.text],
         greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
         TEXT,
       ],
       ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
-      ["an earned badge's name on its band", PALETTE[BADGE_TEXT_COLORS.earned.name], BAND, TEXT],
-      ["an earned badge's goal on its band", PALETTE[BADGE_TEXT_COLORS.earned.goal], BAND, TEXT],
-      ["a locked badge's name", PALETTE[BADGE_TEXT_COLORS.locked.name], PALETTE.cream, TEXT],
+      ["an earned badge's name on its band", PALETTE[BADGE_TEXT_COLOURS.earned.name], BAND, TEXT],
+      ["an earned badge's goal on its band", PALETTE[BADGE_TEXT_COLOURS.earned.goal], BAND, TEXT],
+      ["a locked badge's name", PALETTE[BADGE_TEXT_COLOURS.locked.name], PALETTE.cream, TEXT],
       [
         "a locked badge's goal and progress",
-        PALETTE[BADGE_TEXT_COLORS.locked.goal],
+        PALETTE[BADGE_TEXT_COLOURS.locked.goal],
         PALETTE.cream,
         EXEMPT,
       ],
@@ -111,7 +111,7 @@ describe("interaction-state colours", () => {
 
 describe("debuff bar colours", () => {
   it("set each bar's name at 4.5:1 on its face", () => {
-    const faint = Object.entries(DEBUFF_COLORS).filter(
+    const faint = Object.entries(DEBUFF_COLOURS).filter(
       ([, { face, name }]) => contrast(name, face) < TEXT,
     );
     expect(faint.map(([debuff]) => debuff)).toEqual([]);

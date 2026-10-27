@@ -24,7 +24,7 @@ interface SweepRow {
   readonly rect: Rect;
 }
 
-type Lens = Pick<RoadProjection, "centerX" | "focal" | "footY" | "horizonY">;
+type Lens = Pick<RoadProjection, "centreX" | "focal" | "footY" | "horizonY">;
 
 export function sweepRow(arts: readonly PreviewArt[], lens: Lens, x: number, distance: number) {
   const placed = project(lens, { distance, x });
@@ -58,9 +58,9 @@ export function sweepDistances(
   const far = Math.floor(lens.visibleDistance);
   const even = Array.from({ length: count }, (_, i) => Math.round((far * i) / (count - 1)));
   const changes: number[] = [];
-  let key = depthDraw(arts, project(lens, { distance: 0, x: lens.centerX }).scale).key;
+  let key = depthDraw(arts, project(lens, { distance: 0, x: lens.centreX }).scale).key;
   for (let distance = 1; distance <= far; distance++) {
-    const next = depthDraw(arts, project(lens, { distance, x: lens.centerX }).scale).key;
+    const next = depthDraw(arts, project(lens, { distance, x: lens.centreX }).scale).key;
     if (next !== key) {
       changes.push(distance);
       key = next;

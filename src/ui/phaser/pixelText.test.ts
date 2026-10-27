@@ -44,7 +44,7 @@ describe("addPixelText", () => {
       const x = 12;
       const style = { letterSpacing: 0, scale };
       const inkLeft = (["title", "body"] as const).map((font) => {
-        addPixelText(scene, x, 0, text, { color: 0, font, scale });
+        addPixelText(scene, x, 0, text, { colour: 0, font, scale });
         const shown = font === "title" ? text.toUpperCase() : text;
         return (drawn.at(-1)?.x ?? 0) + fontInk(FONTS[font], style, shown).left;
       });

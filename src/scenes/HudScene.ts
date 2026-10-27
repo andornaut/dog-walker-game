@@ -86,7 +86,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
-import { DEBUFF_COLORS } from "./debuffColors";
+import { DEBUFF_COLOURS } from "./debuffColors";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
@@ -252,7 +252,7 @@ export class HudScene extends Scene {
     this.showSoundIcon(isMuted(this));
     const help = buttonIcon(TOP_BAR_BUTTONS.help);
     if (imageIcon(this, "icon-help", help.x, help.y).length === 0) {
-      addPixelText(this, help.x + 8, help.y + 4, "?", { color: PALETTE.cream, originX: 0.5 });
+      addPixelText(this, help.x + 8, help.y + 4, "?", { colour: PALETTE.cream, originX: 0.5 });
     }
     const settings = buttonIcon(TOP_BAR_BUTTONS.settings);
     settingsIcon(this, settings.x, settings.y);
@@ -262,14 +262,14 @@ export class HudScene extends Scene {
 
     const { zone } = WALK_BAR;
     const title = { font: "title" } as const;
-    this.dollar = addPixelText(this, 0, 0, "$", { color: PALETTE.amber, ...title });
-    this.money = addPixelText(this, 0, 0, "", { color: PALETTE.cream, ...title });
+    this.dollar = addPixelText(this, 0, 0, "$", { colour: PALETTE.amber, ...title });
+    this.money = addPixelText(this, 0, 0, "", { colour: PALETTE.cream, ...title });
     this.zoneLabel = addPixelText(this, topBar.x + zone.name.x, topBar.y + zone.name.y, "", {
-      color: PALETTE.cream,
+      colour: PALETTE.cream,
     });
     const progressRight = topBar.x + zone.progress.right + 1;
     this.zoneProgress = addPixelText(this, progressRight, topBar.y + zone.progress.y, "", {
-      color: PALETTE.grey,
+      colour: PALETTE.grey,
       originX: 1,
     });
     this.dynamic = this.add.graphics();
@@ -451,31 +451,31 @@ export class HudScene extends Scene {
     const leadTag = this.textures.exists("ui-lead-tag")
       ? this.add.image(x + lead.x, y + lead.y, "ui-lead-tag").setOrigin(0)
       : addPixelText(this, x + lead.x + 2, y + lead.y + 3, gameData.runText.lead, {
-          color: PALETTE.amber,
+          colour: PALETTE.amber,
           font: "title",
         });
     return {
       card,
       dogFace: sprite("treat", DOG_CARD.dogFace),
       empty: addPixelText(this, x + empty.x, y + empty.y, "", {
-        color: PALETTE.cream,
+        colour: PALETTE.cream,
         font: "title",
         originX: 0.5,
       }),
       fired: addPixelText(this, x + fired.x, y + fired.y, "", {
-        color: PALETTE.white,
+        colour: PALETTE.white,
         font: "title",
         originX: 0.5,
       }),
       hearts: Array.from({ length: MAX_CARD_HEARTS }, () => sprite(HEART_KEY, { x: 0, y: 0 })),
       lead: leadTag.setVisible(false),
       name: addPixelText(this, x + name.x, y, "", {
-        color: PALETTE.cream,
+        colour: PALETTE.cream,
         font: "title",
         originX: 0.5,
       }),
       owner: owner.tops.twoLines.map((top) =>
-        addPixelText(this, x + owner.x, y + top, "", { color: PALETTE.tan }),
+        addPixelText(this, x + owner.x, y + top, "", { colour: PALETTE.tan }),
       ),
       ownerFace: sprite("treat", owner.face),
     };
@@ -585,9 +585,9 @@ export class HudScene extends Scene {
         debuffLasting(gameData.tuning, seconds, run).secondsLeft,
       );
       const width = debuffFillWidth(active.secondsLeft, full);
-      const colors = DEBUFF_COLORS[bar.debuff];
+      const colours = DEBUFF_COLOURS[bar.debuff];
       if (width > 0) {
-        fillRect(g, colors.fill, {
+        fillRect(g, colours.fill, {
           ...fill,
           width,
           x: bar.rect.x + fill.x,
@@ -598,10 +598,10 @@ export class HudScene extends Scene {
   }
 
   private addDebuffBar(debuff: DebuffId, rect: Rect): DebuffBarView {
-    const colors = DEBUFF_COLORS[debuff];
+    const colours = DEBUFF_COLOURS[debuff];
     const parts: GameObjects.GameObject[] = [];
     const art = addTagImage(this, "ui-debuff-bar", debuff, rect.x, rect.y);
-    parts.push(art ?? addFilledRect(this, colors.face, rect));
+    parts.push(art ?? addFilledRect(this, colours.face, rect));
     const { icon, name } = DEBUFF_BAR;
     const iconKey = debuffIconKey(debuff);
     if (this.textures.exists(iconKey)) {
@@ -609,7 +609,7 @@ export class HudScene extends Scene {
     }
     parts.push(
       addPixelText(this, rect.x + name.x, rect.y + name.y, gameData.debuffs[debuff].name, {
-        color: colors.name,
+        colour: colours.name,
         font: "title",
       }),
     );
@@ -874,7 +874,7 @@ export class HudScene extends Scene {
     done: () => void = () => undefined,
   ): void {
     const text = addPixelText(this, 0, 0, label.text, {
-      color: label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed,
+      colour: label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed,
       scale: 2,
     });
     const room = changeLabelRoom(at.lane.width);

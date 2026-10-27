@@ -37,7 +37,7 @@ function text(
   parent: GameObjects.Container,
   at: { x: number; y: number },
   value: string,
-  style: { color: number; font?: FontRole; originX?: number },
+  style: { colour: number; font?: FontRole; originX?: number },
 ): GameObjects.BitmapText {
   const label = addPixelText(scene, at.x, at.y, value, { scale: TEXT_SCALE, ...style });
   parent.add(label);
@@ -88,7 +88,7 @@ function drawCardFrame(
   content.setPosition(rect.x, rect.y);
   parent.add(content);
   text(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
-    color: PALETTE.white,
+    colour: PALETTE.white,
     font: "title",
     originX: 0.5,
   });
@@ -101,7 +101,7 @@ function addFramedSlice(
   parent: GameObjects.Container,
   key: SliceKey,
   rect: Rect,
-  colors: { border: number; fill: number },
+  colours: { border: number; fill: number },
 ): void {
   const slice = addNineSlice(scene, key, rect);
   if (slice !== undefined) {
@@ -109,7 +109,7 @@ function addFramedSlice(
     return;
   }
   const g = scene.add.graphics();
-  drawFramedRect(g, colors, rect);
+  drawFramedRect(g, colours, rect);
   parent.add(g);
 }
 
@@ -173,10 +173,10 @@ export function drawDetailCard(
   }
   // Rows of text at the tops the card's layout gives them: each wrapped on the font within its
   // room, or a fitted row on one line, its glyphs closer, before it wraps.
-  type Row = { color: number; fit?: boolean; value: string };
-  const style = { color: PALETTE.plum, scale: TEXT_SCALE };
+  type Row = { colour: number; fit?: boolean; value: string };
+  const style = { colour: PALETTE.plum, scale: TEXT_SCALE };
   const fitted = (row: Row, room: number, x: number, y: number) => {
-    const label = text(scene, content, { x, y }, row.value, { color: row.color });
+    const label = text(scene, content, { x, y }, row.value, { colour: row.colour });
     return {
       label,
       lines: fitPixelText(label, { room, styles: WRAPPING_TEXT_FIT_STYLES }, x, y).lines,
@@ -197,19 +197,19 @@ export function drawDetailCard(
         fitted(row, room, x, y);
       } else {
         const lines = wrapPixelText(scene, style, room, row.value);
-        text(scene, content, { x, y }, lines.join("\n"), { color: row.color });
+        text(scene, content, { x, y }, lines.join("\n"), { colour: row.colour });
       }
     });
   const status: Row = {
-    color: card.locked ? PALETTE.darkRed : PALETTE.forest,
+    colour: card.locked ? PALETTE.darkRed : PALETTE.forest,
     fit: true,
     value: card.status,
   };
-  const plum: Row[] = card.lines.map((value) => ({ color: PALETTE.plum, value }));
+  const plum: Row[] = card.lines.map((value) => ({ colour: PALETTE.plum, value }));
   const besideRows: Row[] =
     kind === "gear"
       ? [...plum, status]
-      : [{ color: PALETTE.darkBrown, value: card.subtitle }, status];
+      : [{ colour: PALETTE.darkBrown, value: card.subtitle }, status];
   const belowRows = kind === "gear" ? [] : plum;
   const layout = detailCardLayout(pixelFontMetrics(scene, "body"), {
     below: belowRows.map((row) => lineCount(row, CARD_TEXT_ROOM.full)),

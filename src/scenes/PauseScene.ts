@@ -50,7 +50,7 @@ export type PauseSceneData = {
 );
 
 // The Home question's note lines' colours, by what they say.
-const NOTE_COLORS: Readonly<Record<HomeNoteLine["kind"], number>> = {
+const NOTE_COLOURS: Readonly<Record<HomeNoteLine["kind"], number>> = {
   lose: PALETTE.darkRed,
   zonesLeft: PALETTE.plum,
 };
@@ -98,12 +98,12 @@ export class PauseScene extends Scene {
       : PAUSE_MENU_ITEMS.map((item) => ({ label: menu[item], press: presses[item] }));
     const note =
       data.mode === "homeQuestion"
-        ? data.note.map((line) => ({ color: NOTE_COLORS[line.kind], text: line.text }))
-        : [{ color: PALETTE.plum, text: menu.note }];
+        ? data.note.map((line) => ({ colour: NOTE_COLOURS[line.kind], text: line.text }))
+        : [{ colour: PALETTE.plum, text: menu.note }];
     const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
     // The note wraps at 2x; the menu's own starts each sentence on a line of its own.
-    const noteParts = note.map(({ color, text }) => {
-      const style = { color, scale: NOTE_PLATE.scale };
+    const noteParts = note.map(({ colour, text }) => {
+      const style = { colour, scale: NOTE_PLATE.scale };
       const said = asking ? [text] : sentences(text);
       return { lines: said.flatMap((part) => wrapPixelText(this, style, noteWidth, part)), style };
     });
@@ -114,9 +114,9 @@ export class PauseScene extends Scene {
     const { panel } = layout;
 
     addRimmedPanel(this, panel);
-    const center = panel.x + panel.width / 2;
-    addPixelText(this, center, layout.titleY, asking ? question.title : menu.title, {
-      color: PALETTE.plum,
+    const centre = panel.x + panel.width / 2;
+    addPixelText(this, centre, layout.titleY, asking ? question.title : menu.title, {
+      colour: PALETTE.plum,
       font: "title",
       originX: 0.5,
       scale: TEXT_SCALE,
@@ -135,9 +135,9 @@ export class PauseScene extends Scene {
       noteParts.map((part) => part.lines.length),
     );
     noteParts.forEach((part, i) => {
-      addPixelText(this, center, itemAt(tops, i), part.lines.join("\n"), {
+      addPixelText(this, centre, itemAt(tops, i), part.lines.join("\n"), {
         ...part.style,
-        align: "center",
+        align: "centre",
         originX: 0.5,
       });
     });

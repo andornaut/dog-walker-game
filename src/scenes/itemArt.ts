@@ -38,7 +38,7 @@ export const PLATE_PAD = 3;
 
 // A plate's colours: its 1px edge, its face, the face's top (lit) and bottom (shade) rows
 // where they differ from it, and its text.
-interface PlateColors {
+interface PlateColours {
   readonly edge: number;
   readonly face: number;
   readonly lit?: number;
@@ -47,7 +47,7 @@ interface PlateColors {
 }
 
 // The colours of a price's or goal's plate, from PLATE_LOOKS.
-export function plateColors(kind: PlateKind): PlateColors {
+export function plateColours(kind: PlateKind): PlateColours {
   const { edge, face, lit, shade, text } = PLATE_LOOKS[kind];
   return {
     edge: PALETTE[edge],
@@ -67,9 +67,9 @@ export function addPlate(
   parent: GameObjects.Container,
   at: { capY: number; originX: number; x: number },
   text: string,
-  colors: PlateColors,
+  colours: PlateColours,
 ): Rect {
-  const label = addPixelText(scene, 0, at.capY, text, { color: colors.text, scale: TEXT_SCALE });
+  const label = addPixelText(scene, 0, at.capY, text, { colour: colours.text, scale: TEXT_SCALE });
   const width = Math.ceil(label.width) + 2 * PLATE_PAD;
   const height = pixelFontMetrics(scene, "body").capHeight * TEXT_SCALE + 2 * PLATE_PAD;
   const left = Math.round(at.x - at.originX * width);
@@ -78,15 +78,15 @@ export function addPlate(
   const g = scene.add.graphics();
   const face = { height: height - 2, width: width - 2, x: left + 1, y: top + 1 };
   // Square corners cut by a pixel.
-  fillRect(g, colors.edge, { height, width: width - 2, x: left + 1, y: top });
-  fillRect(g, colors.edge, { height: height - 2, width, x: left, y: top + 1 });
-  fillRect(g, colors.face, face);
+  fillRect(g, colours.edge, { height, width: width - 2, x: left + 1, y: top });
+  fillRect(g, colours.edge, { height: height - 2, width, x: left, y: top + 1 });
+  fillRect(g, colours.face, face);
   // The face's top and bottom rows, lit and shaded where the plate says.
-  if (colors.lit !== undefined) {
-    fillRect(g, colors.lit, { ...face, height: 1 });
+  if (colours.lit !== undefined) {
+    fillRect(g, colours.lit, { ...face, height: 1 });
   }
-  if (colors.shade !== undefined) {
-    fillRect(g, colors.shade, { ...face, height: 1, y: face.y + face.height - 1 });
+  if (colours.shade !== undefined) {
+    fillRect(g, colours.shade, { ...face, height: 1, y: face.y + face.height - 1 });
   }
   parent.add([g, label]);
   return { height, width, x: left, y: top };
@@ -116,7 +116,7 @@ export function drawPetShopFallback(
   parent.add(g);
   parent.add(
     addPixelText(scene, x + width / 2, y + 5, name, {
-      color: PALETTE.ink,
+      colour: PALETTE.ink,
       font: "title",
       originX: 0.5,
     }),

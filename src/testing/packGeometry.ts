@@ -23,7 +23,7 @@ export const TEST_ROAD_GEOMETRY: RoadGeometry = {
   itemHeights: { lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
   // On a flat road every row is drawn at scale 1, so the road's centre moves nothing.
-  lens: { centerX: 0, ...FLAT_LENS },
+  lens: { centreX: 0, ...FLAT_LENS },
   packBand,
   packParts,
   roadBottom: 640,

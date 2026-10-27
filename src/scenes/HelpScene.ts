@@ -24,8 +24,8 @@ export const HELP_CLOSED_EVENT = "help-closed";
 
 // The other pages' dots are hollow rings and the current one is filled, so they differ by
 // shape.
-const DOT_COLOR = PALETTE.tan;
-const DOT_CURRENT_COLOR = PALETTE.white;
+const DOT_COLOUR = PALETTE.tan;
+const DOT_CURRENT_COLOUR = PALETTE.white;
 
 type Pressed = "close" | "next" | "previous";
 
@@ -138,7 +138,7 @@ export class HelpScene extends Scene {
       y: layout.topBar.y + layout.topBar.height - layout.topBarEdge,
     });
     addPixelText(this, layout.heading.x, layout.heading.y, words.heading, {
-      color: PALETTE.cream,
+      colour: PALETTE.cream,
       font: "title",
       scale: TEXT_SCALE,
     });
@@ -151,7 +151,7 @@ export class HelpScene extends Scene {
     this.showPicture(page.art, frame);
 
     addPixelText(this, layout.title.x, layout.title.y, page.title, {
-      color: PALETTE.amber,
+      colour: PALETTE.amber,
       font: "title",
       scale: layout.title.scale,
     });
@@ -159,9 +159,9 @@ export class HelpScene extends Scene {
 
     dotRects(pages.length).forEach((dot, i) => {
       if (i === this.page) {
-        addFilledRect(this, DOT_CURRENT_COLOR, dot);
+        addFilledRect(this, DOT_CURRENT_COLOUR, dot);
       } else {
-        addFilledRect(this, DOT_COLOR, dot);
+        addFilledRect(this, DOT_COLOUR, dot);
         addFilledRect(this, PALETTE.darkBrown, insetRect(1, dot));
       }
     });
@@ -193,7 +193,7 @@ export class HelpScene extends Scene {
   private drawBody(body: string): void {
     const { lineHeight, scale, width, x, y } = HELP_LAYOUT.body;
     const text = addPixelText(this, x, y, helpBody(gameData, { body }), {
-      color: PALETTE.cream,
+      colour: PALETTE.cream,
       maxWidth: width,
       scale,
     });

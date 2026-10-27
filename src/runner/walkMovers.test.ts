@@ -182,10 +182,10 @@ describe("movers", { timeout: 120_000 }, () => {
     }
   });
 
-  // The rulebook's lucky finds: the friendly neighbor walks about, the lost wallet lies still.
+  // The rulebook's lucky finds: the friendly neighbour walks about, the lost wallet lies still.
   it.each([
     { kind: "lostWallet", walks: false },
-    { kind: "pettingNeighbor", walks: true },
+    { kind: "pettingNeighbour", walks: true },
   ] as const)("walks the $kind about: $walks", ({ kind, walks }) => {
     expect(movementOf(kind) !== null).toBe(walks);
   });
@@ -598,7 +598,7 @@ describe("movers", { timeout: 120_000 }, () => {
     expect(spawns.filter(({ mover }) => mover === undefined)).toEqual([]);
   });
 
-  // The friendly neighbor in the pack's lane as her row reaches the pack: showing her cue before
+  // The friendly neighbour in the pack's lane as her row reaches the pack: showing her cue before
   // a step, partway through a step, and standing after an uncued one. However she meets the pack
   // she pays out as she does standing, and is never a bump, a card or a stop.
   const stroll = (steps: readonly MoverStep[]): MoverPath => ({
@@ -619,14 +619,14 @@ describe("movers", { timeout: 120_000 }, () => {
         { at: 450, ...SIDESTEP, lanes: -1, uncued: true },
       ]),
     },
-  ])("pays out the friendly neighbor $name, never as a bump", ({ moving, path }) => {
+  ])("pays out the friendly neighbour $name, never as a bump", ({ moving, path }) => {
     const since = 532;
     expect(inMotion(path, since)).toBe(moving);
     const met = (item: WalkItem) => withHearts(1, walkWith(["kilo"], [item]));
-    const walk = met(moverAt("pettingNeighbor", path, since));
+    const walk = met(moverAt("pettingNeighbour", path, since));
     const after = step(walk);
-    const standing = step(met(atPack("pettingNeighbor")));
-    expect(after.instants.map(({ encounter }) => encounter)).toEqual(["pettingNeighbor"]);
+    const standing = step(met(atPack("pettingNeighbour")));
+    expect(after.instants.map(({ encounter }) => encounter)).toEqual(["pettingNeighbour"]);
     expect(heartsByDog(after.walk.run)).not.toEqual(heartsByDog(walk.run));
     expect(after.walk.run).toEqual(standing.walk.run);
     expect(after.bumps).toEqual([]);

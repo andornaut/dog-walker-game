@@ -340,7 +340,7 @@ export function earnedByRun(data: AchievementData, facts: RunFacts): Achievement
 // Each tally in plain words, for the data page.
 const TALLY_NAMES: Readonly<Record<TallyId, string>> = {
   dodges: "small dog dodges",
-  neighborsMet: "friendly neighbors met",
+  neighboursMet: "friendly neighbours met",
   sniffs: "other dogs let sniff",
   squirrelPulls: "squirrel pulls landed",
   thievesLetGo: "thieves let go",
@@ -364,7 +364,7 @@ export function achievementConditionText(
       return `${condition.count} landed bumps in total, by any of: ${names.join(", ")}`;
     }
     case "cleanZones":
-      return `${thresholdText(condition.count, "neighborhoods")} of a walk finished without a bump`;
+      return `${thresholdText(condition.count, "neighbourhoods")} of a walk finished without a bump`;
     case "debuffsGot":
       return `${data.debuffs[condition.debuff].name} ${condition.count} times in one walk`;
     case "dogSlotsOwned":
@@ -402,9 +402,9 @@ export function achievementConditionText(
     case "walksWithoutFiring":
       return `${condition.count} finished walks with no firing`;
     case "zonesEverFinished":
-      return `${thresholdText(condition.count, "neighborhoods")} each finished, across walks`;
+      return `${thresholdText(condition.count, "neighbourhoods")} each finished, across walks`;
     case "zonesFinished":
-      return `${thresholdText(condition.count, "neighborhoods")} of a walk finished`;
+      return `${thresholdText(condition.count, "neighbourhoods")} of a walk finished`;
     default:
       return assertNever(condition);
   }

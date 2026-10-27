@@ -71,7 +71,7 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   const { cell } = walkGeometry(LANE_COUNT, pack, PROJECTION, LAYOUT.road);
   const add = (key: string, lanes: number) =>
     ensurePlaceholder(scene, key, {
-      color: PALETTE.slate,
+      colour: PALETTE.slate,
       height: PLACEHOLDER_HEIGHT,
       width: lanes * cell.length - (cell.length - ROAD_SPRITE_SIZE),
     });

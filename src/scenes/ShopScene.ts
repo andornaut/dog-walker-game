@@ -75,7 +75,7 @@ import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
-import { addBadge, addPlate, drawDogSlotFallback, plateColors, SHOP_ART } from "./itemArt";
+import { addBadge, addPlate, drawDogSlotFallback, plateColours, SHOP_ART } from "./itemArt";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirmView";
@@ -616,10 +616,10 @@ export class ShopScene extends Scene {
     parent: GameObjects.Container,
     at: { x: number; y: number },
     value: string,
-    style: { color?: number; font?: FontRole; originX?: number } = {},
+    style: { colour?: number; font?: FontRole; originX?: number } = {},
   ): GameObjects.BitmapText {
     const label = addPixelText(this, at.x, at.y, value, {
-      color: PALETTE.plum,
+      colour: PALETTE.plum,
       scale: TEXT_SCALE,
       ...style,
     });
@@ -697,7 +697,7 @@ export class ShopScene extends Scene {
     root.add(addPanel(this, PLATE, "ui-hint"));
     const x = PLATE.x + LAYOUT.message.textDx;
     const label = this.text(root, { x, y: PLATE.y }, message.text, {
-      color: message.refused ? PALETTE.darkRed : PALETTE.forest,
+      colour: message.refused ? PALETTE.darkRed : PALETTE.forest,
     });
     const { style } = fitPixelText(label, SHOP_MESSAGE_FIT, x, PLATE.y);
     placePixelText(label, x, shopMessageCapTop(pixelFontMetrics(this, "body"), style.scale));
@@ -709,7 +709,7 @@ export class ShopScene extends Scene {
     const band = cardBand(PANEL);
     addDetailCard(this, root, PANEL, band);
     this.text(root, { x: PANEL.x + titleX, y: band.y + titleY }, gameData.homeText.shop.title, {
-      color: PALETTE.white,
+      colour: PALETTE.white,
       font: "title",
     });
     addCloseButton(this, root, LAYOUT.close, this.pressed?.kind === "close");
@@ -735,7 +735,7 @@ export class ShopScene extends Scene {
     this.text(root, { x: LAYOUT.headingX, y }, title, { font: "title" });
     if (note !== undefined) {
       this.text(root, { x: this.frame.headingRight, y }, note, {
-        color: PALETTE.darkBrown,
+        colour: PALETTE.darkBrown,
         originX: 1,
       });
     }
@@ -828,7 +828,7 @@ export class ShopScene extends Scene {
     const room = shopRowTextRoom(rect.width, right - rightLeft);
     // A row with no second line centres its name.
     const nameY = row.line === "" ? mid - 5 : mid - 15;
-    const name = this.text(content, { x: textX, y: nameY }, row.name, { color: ink });
+    const name = this.text(content, { x: textX, y: nameY }, row.name, { colour: ink });
     this.rowTexts.names.push({ label: name, room, x: textX, y: nameY });
     this.drawRowLine(content, row, { greyed: view.state === "disabled", mid, room, x: textX });
     if (this.focusId === row.id) {
@@ -860,10 +860,10 @@ export class ShopScene extends Scene {
     row: ShopRow,
     at: { greyed: boolean; mid: number; room: number; x: number },
   ): void {
-    const color = at.greyed ? PALETTE[GREYED.text] : PALETTE.darkBrown;
+    const colour = at.greyed ? PALETTE[GREYED.text] : PALETTE.darkBrown;
     if (row.line !== "") {
       const y = at.mid + 3;
-      const line = this.text(parent, { x: at.x, y }, row.line, { color });
+      const line = this.text(parent, { x: at.x, y }, row.line, { colour });
       this.rowTexts.lines.push({ label: line, room: at.room, x: at.x, y });
     }
   }
@@ -882,7 +882,7 @@ export class ShopScene extends Scene {
       }
       const owned = gameData.homeText.shop.owned;
       const label = this.text(parent, { x: at.right - OWNED_DX, y: at.mid - 4 }, owned, {
-        color: PALETTE.forest,
+        colour: PALETTE.forest,
         font: "title",
         originX: 1,
       });
@@ -893,7 +893,7 @@ export class ShopScene extends Scene {
       parent,
       { capY: at.mid - 5, originX: 1, x: at.right },
       dollarText(row.price),
-      plateColors(plate),
+      plateColours(plate),
     ).x;
   }
 
