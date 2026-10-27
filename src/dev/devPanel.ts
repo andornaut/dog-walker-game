@@ -239,8 +239,8 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       bar.blur();
     }
   });
-  // Phaser listens for keys on window, so keys typed here would move lanes or toggle the
-  // overlay without this.
+  // Phaser listens for keys on window, so keys typed here would move lanes or copy the run
+  // link without this.
   sheet.addEventListener("keydown", (event) => {
     event.stopPropagation();
     if (event.key === "Escape") {

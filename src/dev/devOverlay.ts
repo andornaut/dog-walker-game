@@ -5,10 +5,6 @@ import { lagMs, type ZoneClock, type ZoneClocks } from "./zoneClock";
 
 // Emitted on game.events with a DevState by whichever scene runs the road.
 export const DEV_STATE_EVENT = "dev-state";
-// Emitted on game.events with the overlay's wanted visibility, to show or hide it.
-export const DEV_OVERLAY_TOGGLE_EVENT = "dev-overlay-toggle";
-// Game registry key: whether the overlay shows, which the overlay scene keeps current.
-export const DEV_OVERLAY_VISIBLE_KEY = "dev-overlay-visible";
 
 // The slice of a run the overlay shows. RunState fits it as it is.
 interface DevRunView {

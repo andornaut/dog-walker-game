@@ -103,10 +103,12 @@ describe("stored cheats", () => {
     ["an unknown speed", { ...every, speed: "warp" }, { ...every, speed: "normal" }],
     [
       "the two speed toggles",
-      { fastForward: true, hitBoxes: true, invincible: true, on: true },
+      { ...every, fastForward: true, on: true, speed: undefined },
       { ...every, speed: "normal" },
     ],
     ["an on field", { ...every, on: false }, every],
+    ["a missing toggle", { hitBoxes: true, speed: "slow" }, { ...hitBoxes, speed: "slow" }],
+    ["a toggle not stored as true", { ...every, devStats: "yes" }, { ...every, devStats: false }],
   ])("decodes %s, keeping the cheats it names", (_, stored, expected) => {
     expect(decodeCheats(JSON.stringify(stored))).toEqual(expected);
   });
@@ -188,12 +190,12 @@ describe("hasStagedChanges", () => {
   it.each<{ actions: PanelAction[]; applied: Cheats; enabled: boolean; name: string }>([
     { actions: [], applied: CHEATS_OFF, enabled: false, name: "no cheats, untouched" },
     { actions: [], applied: every, enabled: false, name: "every cheat, untouched" },
-    {
-      actions: [{ id: "invincible", kind: "toggle", on: true }],
+    ...CHEAT_TOGGLES.map(({ id }) => ({
+      actions: [{ id, kind: "toggle", on: true } as const],
       applied: CHEATS_OFF,
       enabled: true,
-      name: "no cheats, a toggle staged",
-    },
+      name: `no cheats, ${id} staged`,
+    })),
     {
       actions: [
         { id: "invincible", kind: "toggle", on: true },
@@ -249,6 +251,7 @@ describe("Apply", () => {
     ["no cheats, out of dev mode", "?seed=5&lang=fr", CHEATS_OFF, "?lang=fr"],
     ["a cheat, in dev mode", "?dev=1&seed=5&zone=3&lang=fr", hitBoxes, "?dev=1&lang=fr"],
     ["a cheat, out of dev mode", "?seed=5&lang=fr", hitBoxes, "?lang=fr&dev=1"],
+    ["dev stats", "?lang=fr", setCheat("devStats", true, CHEATS_OFF), "?lang=fr&dev=1"],
     ["a speed, with dev off", "?dev=0&lang=fr", setSpeed("slow", CHEATS_OFF), "?dev=1&lang=fr"],
   ])(
     "at the start screen with %s drops the overrides, with dev on only for a cheat",

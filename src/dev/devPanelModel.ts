@@ -29,14 +29,16 @@ export type Speed = "fast" | "normal" | "slow";
 
 // Each cheat applies on its own: a toggle when true, the speed when not normal.
 export interface Cheats {
+  readonly devStats: boolean;
   readonly hitBoxes: boolean;
   readonly invincible: boolean;
   readonly speed: Speed;
 }
 
-type CheatToggle = "hitBoxes" | "invincible";
+type CheatToggle = "devStats" | "hitBoxes" | "invincible";
 
 export const CHEATS_OFF: Cheats = {
+  devStats: false,
   hitBoxes: false,
   invincible: false,
   speed: "normal",
@@ -45,6 +47,7 @@ export const CHEATS_OFF: Cheats = {
 // The panel's toggles, in its order.
 export const CHEAT_TOGGLES: readonly { readonly id: CheatToggle; readonly label: string }[] = [
   { id: "invincible", label: "Invincible owners" },
+  { id: "devStats", label: "Show dev stats" },
   { id: "hitBoxes", label: "Show hit boxes" },
 ];
 
@@ -71,7 +74,7 @@ export function setSpeed(speed: Speed, cheats: Cheats): Cheats {
 
 // Whether any cheat applies: a toggle on, or a speed other than normal.
 export function cheatsInUse(cheats: Cheats): boolean {
-  return cheats.hitBoxes || cheats.invincible || cheats.speed !== CHEATS_OFF.speed;
+  return CHEAT_TOGGLES.some(({ id }) => cheats[id]) || cheats.speed !== CHEATS_OFF.speed;
 }
 
 export function timeScaleOf(cheats: Cheats): number {
@@ -82,17 +85,18 @@ function isSpeed(value: unknown): value is Speed {
   return SPEEDS.some(({ id }) => id === value);
 }
 
-// Anything without the two toggles is every cheat off; a missing or unknown speed is normal.
-// Any other field is ignored.
+// A toggle is on only when stored as true, and a missing or unknown speed is normal, so
+// anything but an object is every cheat off. Any other field is ignored.
 export function cheatsFrom(value: unknown): Cheats {
   if (typeof value !== "object" || value === null) {
     return CHEATS_OFF;
   }
-  const { hitBoxes, invincible, speed } = value as Record<string, unknown>;
-  if (typeof hitBoxes !== "boolean" || typeof invincible !== "boolean") {
-    return CHEATS_OFF;
-  }
-  return { hitBoxes, invincible, speed: isSpeed(speed) ? speed : "normal" };
+  const stored = value as Record<string, unknown>;
+  const { speed } = stored;
+  return CHEAT_TOGGLES.reduce(
+    (cheats, { id }) => setCheat(id, stored[id] === true, cheats),
+    setSpeed(isSpeed(speed) ? speed : CHEATS_OFF.speed, CHEATS_OFF),
+  );
 }
 
 export function encodeCheats(cheats: Cheats): string {
@@ -260,7 +264,7 @@ export function stagePanel(action: PanelAction, state: PanelState): PanelState {
 }
 
 function sameCheats(a: Cheats, b: Cheats): boolean {
-  return a.hitBoxes === b.hitBoxes && a.invincible === b.invincible && a.speed === b.speed;
+  return CHEAT_TOGGLES.every(({ id }) => a[id] === b[id]) && a.speed === b.speed;
 }
 
 // Whether Apply would change anything: the staged cheats differ from the applied ones, or a

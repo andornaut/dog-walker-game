@@ -1,13 +1,8 @@
 import { type GameObjects, Scene, Scenes } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
-import {
-  DEV_OVERLAY_TOGGLE_EVENT,
-  DEV_OVERLAY_VISIBLE_KEY,
-  DEV_STATE_EVENT,
-  devOverlayLines,
-  type DevState,
-} from "../dev/devOverlay";
+import { DEV_STATE_EVENT, devOverlayLines, type DevState } from "../dev/devOverlay";
+import { cheatsFrom, DEV_CHEATS_KEY } from "../dev/devPanelModel";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import { runSetupLink } from "../dev/runSetup";
 import { screenLayout } from "../layout/screenLayout";
@@ -27,18 +22,17 @@ const TEXT_STYLE = {
   padding: { x: 3, y: 2 },
 };
 
-// Starts with the game and runs for the page's life, so the backquote key can show it at any
-// time; dev=1 shows it from the start. It draws only while the run scene is active. Listed last in
-// the game config to draw over every scene.
-// It learns about the run only from DEV_STATE_EVENT on game.events, and shows or hides on
-// DEV_OVERLAY_TOGGLE_EVENT, keeping DEV_OVERLAY_VISIBLE_KEY in the registry current.
+// Starts with the game and runs for the page's life. It shows while the dev panel's "Show dev
+// stats" cheat is on, read from the registry each frame, and draws only while the run scene is
+// active. Listed last in the game config to draw over every scene.
+// It learns about the run only from DEV_STATE_EVENT on game.events.
 export class DevOverlayScene extends Scene {
   private runActive = false;
   private sinceRedrawMs = 0;
   private state: DevState | undefined;
   private status: { readonly text: string; readonly untilMs: number } | undefined;
   private text?: GameObjects.Text;
-  // Whether the player or the URL wants the overlay, apart from whether the run scene is up.
+  // Whether the Show dev stats cheat is on, apart from whether the run scene is up.
   private wanted = false;
 
   constructor() {
@@ -47,19 +41,14 @@ export class DevOverlayScene extends Scene {
 
   create(): void {
     const { road } = screenLayout(SCREEN_CONFIG);
-    this.wanted = pageRunSetup().setup.dev;
+    this.wanted = this.cheatOn();
     this.runActive = this.scene.isActive(SCENE_KEYS.run);
     this.text = this.add.text(road.x + INSET, road.y + INSET, "", TEXT_STYLE);
     this.applyVisible();
 
-    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, this.wanted);
-
     onSceneEvent(this, this.game.events, DEV_STATE_EVENT, (state: DevState) => {
       this.state = state;
     });
-    onSceneEvent(this, this.game.events, DEV_OVERLAY_TOGGLE_EVENT, (visible: boolean) =>
-      this.setVisible(visible),
-    );
     const runEvents = this.scene.get(SCENE_KEYS.run).events;
     const runListeners: readonly (readonly [string, () => void])[] = [
       [Scenes.Events.START, () => this.setRunActive(true)],
@@ -71,27 +60,27 @@ export class DevOverlayScene extends Scene {
       onSceneEvent(this, runEvents, event, listener);
     }
 
-    // Matched on the physical key, so the toggle sits in the same place on every layout.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (event.code === "Backquote") {
-        this.setVisible(!this.wanted);
-      } else if (event.key.toLowerCase() === "c" && this.text?.visible === true) {
+      if (event.key.toLowerCase() === "c" && this.text?.visible === true) {
         this.copyLink();
       }
     });
   }
 
   override update(_time: number, delta: number): void {
+    const wanted = this.cheatOn();
+    if (wanted !== this.wanted) {
+      this.wanted = wanted;
+      this.applyVisible();
+    }
     this.sinceRedrawMs += delta;
     if (this.sinceRedrawMs >= REDRAW_INTERVAL_MS) {
       this.redraw();
     }
   }
 
-  private setVisible(wanted: boolean): void {
-    this.wanted = wanted;
-    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, wanted);
-    this.applyVisible();
+  private cheatOn(): boolean {
+    return cheatsFrom(this.registry.get(DEV_CHEATS_KEY)).devStats;
   }
 
   private setRunActive(active: boolean): void {
@@ -99,8 +88,8 @@ export class DevOverlayScene extends Scene {
     this.applyVisible();
   }
 
-  // The overlay draws while wanted (by the player or the URL's dev=1) and only during a run:
-  // elsewhere it would cover the home screen and the Pet shop.
+  // The overlay draws while the cheat is on and only during a run: elsewhere it would cover the
+  // home screen and the Pet shop.
   private applyVisible(): void {
     this.text?.setVisible(this.wanted && this.runActive);
     this.redraw();
