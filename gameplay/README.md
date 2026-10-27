@@ -38,7 +38,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
 - **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
 - **Trade-offs:** a strong downside always comes with a matching upside (Rush hour's extra tips come with more obstacles), and the net stays in the window
-- **Walker spread:** every walker lands within the play-style window: agility and perk make a walker feel different, never a lot easier or harder. The skill targets are for the median walker
+- **Walker spread:** every walker lands within the play-style window, and each, in unlock order (Casey, Mr. B, Ada, Trista), is slightly stronger than the one before: agility and perk make a walker feel different, never a lot easier or harder. The skill targets are for the median walker
 
 ## Remaining for the first build
 
