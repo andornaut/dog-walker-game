@@ -425,16 +425,13 @@ describe("movers", { timeout: 120_000 }, () => {
   // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on
   // another.
   const blocking = OBSTACLE_KINDS.filter((kind) => blocksLane(everyMover, kind));
-  // A kind planned in only some zones, a neighbourhood-only kind or one the other zones weigh at 0,
-  // is planned in those zones alone, so they are swept over more seeds to plan it about as often
-  // as a kind every zone draws.
-  const zonesOf = (kind: WalkItem["kind"]): readonly string[] | undefined => {
+  // The zones that plan a kind: those that weigh it above 0, of its own zones if it has any.
+  const zonesOf = (kind: WalkItem["kind"]): ZoneId[] => {
     const minor = Object.hasOwn(MINOR_OBSTACLES, kind);
     const entry = minor
       ? everyMover.minorObstacles[kind as MinorObstacleId]
       : everyMover.encounters[kind as ObstacleEncounterId];
-    const { zones } = everyMover.world;
-    const planned = zones
+    return everyMover.world.zones
       .filter(({ id, weights }) => {
         const weight = minor
           ? weights.minorObstacles[kind as MinorObstacleId]
@@ -443,20 +440,23 @@ describe("movers", { timeout: 120_000 }, () => {
           weight > 0 && (!("zones" in entry) || (entry.zones as readonly string[]).includes(id))
         );
       })
-      .map(({ id }) => id);
-    return planned.length < zones.length ? planned : undefined;
+      .map(({ id }) => id as ZoneId);
   };
-  const ZONE_SWEEP_SEEDS = Array.from({ length: SWEEP_SEEDS.length * 3 }, (_, i) => i + 1);
+  // Each kind is planned in its zones one seed at a time until it has started against both edges,
+  // so a kind that a zone's weights plan less often takes more seeds rather than failing.
+  const EDGE_SEEDS_MOST = 20;
   it.each(blocking)("starts a %s against each edge of the road on some seed", (kind) => {
+    const edges = [0, LANE_COUNT - footprintOf(everyMover, kind).lanes];
     const zones = zonesOf(kind);
-    const planned =
-      zones === undefined
-        ? plannedSpawns()
-        : zones.flatMap((zone) => planIn(zone as ZoneId, ZONE_SWEEP_SEEDS));
-    const lanes = new Set(planned.filter((spawn) => spawn.kind === kind).map(({ lane }) => lane));
-    expect([...lanes]).toEqual(
-      expect.arrayContaining([0, LANE_COUNT - footprintOf(everyMover, kind).lanes]),
-    );
+    const lanes = new Set<number>();
+    for (let seed = 1; seed <= EDGE_SEEDS_MOST && !edges.every((lane) => lanes.has(lane)); seed++) {
+      for (const spawn of zones.flatMap((zone) => planIn(zone, [seed]))) {
+        if (spawn.kind === kind) {
+          lanes.add(spawn.lane);
+        }
+      }
+    }
+    expect([...lanes]).toEqual(expect.arrayContaining(edges));
   });
 
   // A stalker wider than a lane never fits a lane to either side, so from a middle lane it
