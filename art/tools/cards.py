@@ -336,7 +336,7 @@ def neighbour_take():
     floating heart sits above the art window, so it is left out here. Cut out to float over the road."""
     a = Art(clear=True)
     a.put("dog-archie", "idle", 47, 57, shadow=False)
-    her = sn.frame("petting-neighbor", "wave", 1)
+    her = sn.frame("petting-neighbour", "wave", 1)
     her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
     top = 66 - her.height
     her.paste((0, 0, 0, 0), (35, 30 - top, her.width, her.height))
@@ -936,7 +936,7 @@ ILLUSTRATIONS = {
     "card-thief-chase": thief_chase,
     "card-thief-let-go": thief_let_go,
     "card-lost-wallet-keep": wallet_keep,
-    "card-petting-neighbor-take": neighbour_take,
+    "card-petting-neighbour-take": neighbour_take,
     "card-belly-rubs": belly_rubs,
     "card-good-leash": good_leash,
     "card-big-tipper": big_tipper,

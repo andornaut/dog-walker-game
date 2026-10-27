@@ -717,9 +717,9 @@
       "json": "sprites/badge-mud-season.json"
     },
     {
-      "key": "badge-neighborhood-favorite",
-      "png": "sprites/badge-neighborhood-favorite.png",
-      "json": "sprites/badge-neighborhood-favorite.json"
+      "key": "badge-neighbourhood-favourite",
+      "png": "sprites/badge-neighbourhood-favourite.png",
+      "json": "sprites/badge-neighbourhood-favourite.json"
     },
     {
       "key": "badge-not-a-scratch",
@@ -3693,45 +3693,45 @@
       }
     },
     {
-      "key": "petting-neighbor",
-      "png": "sprites/petting-neighbor.png",
-      "json": "sprites/petting-neighbor.json",
+      "key": "petting-neighbour",
+      "png": "sprites/petting-neighbour.png",
+      "json": "sprites/petting-neighbour.json",
       "anchor": {
         "feetY": 68,
         "opaqueWidth": 41
       }
     },
     {
-      "key": "petting-neighbor@50",
-      "png": "sprites/petting-neighbor@50.png",
-      "json": "sprites/petting-neighbor@50.json",
+      "key": "petting-neighbour@50",
+      "png": "sprites/petting-neighbour@50.png",
+      "json": "sprites/petting-neighbour@50.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 21
       }
     },
     {
-      "key": "petting-neighbor@62",
-      "png": "sprites/petting-neighbor@62.png",
-      "json": "sprites/petting-neighbor@62.json",
+      "key": "petting-neighbour@62",
+      "png": "sprites/petting-neighbour@62.png",
+      "json": "sprites/petting-neighbour@62.json",
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 26
       }
     },
     {
-      "key": "petting-neighbor@75",
-      "png": "sprites/petting-neighbor@75.png",
-      "json": "sprites/petting-neighbor@75.json",
+      "key": "petting-neighbour@75",
+      "png": "sprites/petting-neighbour@75.png",
+      "json": "sprites/petting-neighbour@75.json",
       "anchor": {
         "feetY": 52,
         "opaqueWidth": 31
       }
     },
     {
-      "key": "petting-neighbor@88",
-      "png": "sprites/petting-neighbor@88.png",
-      "json": "sprites/petting-neighbor@88.json",
+      "key": "petting-neighbour@88",
+      "png": "sprites/petting-neighbour@88.png",
+      "json": "sprites/petting-neighbour@88.json",
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 36
@@ -5779,8 +5779,8 @@
       "png": "images/card-other-dog-sniff.png"
     },
     {
-      "key": "card-petting-neighbor-take",
-      "png": "images/card-petting-neighbor-take.png"
+      "key": "card-petting-neighbour-take",
+      "png": "images/card-petting-neighbour-take.png"
     },
     {
       "key": "card-porch-cat-bolt",

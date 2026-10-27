@@ -1759,7 +1759,7 @@ def sprites():
                     ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "petting-neighbor", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), **q, **neighbour)
+    yield "petting-neighbour", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), **q, **neighbour)
                                                 for q in PERSON_WALK), PERSON_WALK_MS),
                                 ("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
                                                     **neighbour) for k in (0, 1)), 350),

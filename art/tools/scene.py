@@ -94,8 +94,8 @@ def read_json(path):
 GAME = read_json("shared/export/game-data.json")
 LAYOUT = read_json("shared/export/layout.json")
 # {zone id: zone} in the world's order: each zone's name, art key, road shadow and leash colours.
-ZONES = {z["id"]: dict(name=z["name"], art=z["art"], shadow=z["roadShadowColor"].lstrip("#"),
-                       leash=z["leashColor"].lstrip("#"))
+ZONES = {z["id"]: dict(name=z["name"], art=z["art"], shadow=z["roadShadowColour"].lstrip("#"),
+                       leash=z["leashColour"].lstrip("#"))
          for z in GAME["zones"]}
 # Each zone's road strip: the exported road-<zone> image (roads.py).
 TILES = {z: Image.open(f"public/art/images/road-{zone['art']}.png").convert("RGB") for z, zone in ZONES.items()}

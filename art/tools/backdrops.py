@@ -57,7 +57,7 @@ BAND = LAYOUT["regions"]["backdrop"]
 W, H = BAND["width"], BAND["height"]   # the band: screen rows BAR to BAR + H - 1
 BAR = BAND["y"]                # the status bar's height: band row y is screen row BAR + y
 CAMERA = LAYOUT["camera"]
-CX = CAMERA["centerX"]         # the road's centre column, and its vanishing point's
+CX = CAMERA["centreX"]         # the road's centre column, and its vanishing point's
 YH, FOOT, F = CAMERA["horizonY"], CAMERA["footY"], CAMERA["focal"]
 
 
@@ -653,32 +653,32 @@ def crescent_bend(px):
 # The game's verge beside each road, keyed by art id, with colours
 # by K name (shared/verges.json):
 # the curb to curbTo, the strips (each to its to), the sidewalk or paving with a seam every
-# seamEvery to walkTo (None: paving on out, with no lawn), then the lawn, mown or rough. lawnColors
+# seamEvery to walkTo (None: paving on out, with no lawn), then the lawn, mown or rough. lawnColours
 # are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
 # colour rather than darkening the pixel under them; None where there is no lawn.
 VERGES = {
-    "cabbagetown": dict(curbColor="stone", curbTo=CURB, strips=[], walkColor="lgrey", walkDots=[],
-                        seamColor="grey", seamEvery=32, walkTo=WALK, lawn="mown",
-                        lawnColors=("dgreen", "canopy", "pine"), leaves=False),
-    "high-park": dict(curbColor="pine", curbTo=160, strips=[], walkColor="pine", walkDots=[],
-                      seamColor="pine", seamEvery=32, walkTo=160, lawn="rough",
-                      lawnColors=("pine", "fir", "fir"), leaves=False),
-    "distillery-district": dict(curbColor="stone", curbTo=164, strips=[], walkColor="brown",
-                                walkDots=[dict(colors=["brick"], share=0.05), dict(colors=["rust"], share=0.02)],
-                                seamColor="brick", seamEvery=16, walkTo=None, lawn="none",
-                                lawnColors=None, leaves=False),
-    "kensington-market": dict(curbColor="stone", curbTo=162, strips=[dict(color="clay", dots=[], to=166)],
-                              walkColor="skin2", walkDots=[dict(colors=["clay"], share=0.05),
-                                                           dict(colors=["brown"], share=0.03)],
-                              seamColor="clay", seamEvery=32, walkTo=None, lawn="none",
-                              lawnColors=None, leaves=False),
-    "the-beaches": dict(curbColor="driftwood", curbTo=164, strips=[], walkColor="skin1",
-                        walkDots=[dict(colors=["tan"], share=0.05), dict(colors=["white"], share=0.008)],
-                        seamColor="skin1", seamEvery=32, walkTo=None, lawn="none",
-                        lawnColors=None, leaves=False),
-    "yonge-street": dict(curbColor="stone", curbTo=164, strips=[], walkColor="dstone",
-                         walkDots=[dict(colors=["shale"], share=0.015)], seamColor="shale", seamEvery=32,
-                         walkTo=None, lawn="none", lawnColors=None, leaves=False),
+    "cabbagetown": dict(curbColour="stone", curbTo=CURB, strips=[], walkColour="lgrey", walkDots=[],
+                        seamColour="grey", seamEvery=32, walkTo=WALK, lawn="mown",
+                        lawnColours=("dgreen", "canopy", "pine"), leaves=False),
+    "high-park": dict(curbColour="pine", curbTo=160, strips=[], walkColour="pine", walkDots=[],
+                      seamColour="pine", seamEvery=32, walkTo=160, lawn="rough",
+                      lawnColours=("pine", "fir", "fir"), leaves=False),
+    "distillery-district": dict(curbColour="stone", curbTo=164, strips=[], walkColour="brown",
+                                walkDots=[dict(colours=["brick"], share=0.05), dict(colours=["rust"], share=0.02)],
+                                seamColour="brick", seamEvery=16, walkTo=None, lawn="none",
+                                lawnColours=None, leaves=False),
+    "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="clay", dots=[], to=166)],
+                              walkColour="skin2", walkDots=[dict(colours=["clay"], share=0.05),
+                                                           dict(colours=["brown"], share=0.03)],
+                              seamColour="clay", seamEvery=32, walkTo=None, lawn="none",
+                              lawnColours=None, leaves=False),
+    "the-beaches": dict(curbColour="driftwood", curbTo=164, strips=[], walkColour="skin1",
+                        walkDots=[dict(colours=["tan"], share=0.05), dict(colours=["white"], share=0.008)],
+                        seamColour="skin1", seamEvery=32, walkTo=None, lawn="none",
+                        lawnColours=None, leaves=False),
+    "yonge-street": dict(curbColour="stone", curbTo=164, strips=[], walkColour="dstone",
+                         walkDots=[dict(colours=["shale"], share=0.015)], seamColour="shale", seamEvery=32,
+                         walkTo=None, lawn="none", lawnColours=None, leaves=False),
 }
 
 
@@ -687,7 +687,7 @@ def dotted(dots, value):
     turn, its colours equal parts of that share (as the game's verge dots)."""
     for d in dots:
         if value < d["share"]:
-            return d["colors"][math.floor(value / d["share"] * len(d["colors"]))]
+            return d["colours"][math.floor(value / d["share"] * len(d["colours"]))]
         value -= d["share"]
     return None
 
@@ -703,15 +703,15 @@ def verge(zone, road, patches=()):
         if a < ROAD:
             return road(x, z, span, px, py)
         if a < v["curbTo"]:
-            return v["curbColor"]
+            return v["curbColour"]
         for strip in v["strips"]:
             if a < strip["to"]:
-                return dotted(strip["dots"], noise(math.floor(x), math.floor(z))) or strip["color"]
+                return dotted(strip["dots"], noise(math.floor(x), math.floor(z))) or strip["colour"]
         if a < walk_to:
             if span < 16 and crosses(z, span, v["seamEvery"]):
-                return v["seamColor"]
-            return dotted(v["walkDots"], noise(math.floor(x), math.floor(z))) or v["walkColor"]
-        lawn, dark, tufted = v["lawnColors"]
+                return v["seamColour"]
+            return dotted(v["walkDots"], noise(math.floor(x), math.floor(z))) or v["walkColour"]
+        lawn, dark, tufted = v["lawnColours"]
         s = F / (F + z)
         c = lawn
         if v["lawn"] == "mown" and mown(x, s):
