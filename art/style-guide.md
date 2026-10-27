@@ -74,11 +74,13 @@ Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the ne
 | ------------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------- |
 | amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                                                   |
 | amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                                               |
+| blue on cream                  | 5.85  | Spotlight's name beside its effect                                                                                          |
 | cream on darkBrown             | 5.85  | Text on the wood                                                                                                            |
-| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                         |
+| darkBrown on cream             | 5.85  | Secondary text, empty heart outline; Muddy's name beside its effect                                                         |
 | darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                                                                |
 | darkRed on nlgrey              | 5.15  | Price on the short plate                                                                                                    |
-| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name                                           |
+| dlake on cream                 | 5.55  | A buff's name (gear, perk, upgrade) beside its effect                                                                       |
+| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name; Zoomies' name beside its effect          |
 | ink on deepAmber               | 7.91  | A picked picture's outline on its box                                                                                       |
 | ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                                                         |
 | ink on ngrey                   | 7.23  | The emblem's silhouette on a `locked` badge                                                                                 |
@@ -93,8 +95,10 @@ Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the ne
 | plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons                                       |
 | plum on tan                    | 6.49  | Body text on tan                                                                                                            |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                              |
+| purple on cream                | 6.11  | Stinky's name beside its effect, Stinky's "+$0" tip label                                                                   |
 | tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                                                  |
 | tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                                                              |
+| turquoise on ink               | 8.08  | A buff's name beside its effect on ink (6.12 on plum, the walk bar)                                                         |
 | `ui-difficulty` on cream       | 3.2+  | Filled paws plum-outlined (9.42); hollow paws a clay rim (3.2)                                                              |
 | `ui-zone-pips` on cream        | 3.0+  | `todo` dashed; `<zone>` and `<zone>-done` rimmed darker than their well; `-done` ticked                                     |
 | white on darkBrown             | 8.48  | Filled page dot                                                                                                             |
