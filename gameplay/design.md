@@ -138,11 +138,11 @@ A roster of 9, three in each size, each a fixed, named character with its own ar
 
 Dogs differ in play by size only:
 
-| Size   | ♥   | Effects                                                                                                                    |
-| ------ | --- | -------------------------------------------------------------------------------------------------------------------------- |
-| Small  | 2   | Dodges 1 in 4 of the bumps that would land on it, with a "Dodge!" label; the hit costs nothing and doesn't count as a bump |
-| Medium | 3   | The baseline                                                                                                               |
-| Large  | 4   | Each large dog makes lane changes 10% slower, never below 10% slower than base; its detail card says so                    |
+| Size   | ♥   | Effects                                                                                                                                             |
+| ------ | --- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Small  | 2   | Dodges 1 in 4 of the bumps that would land on it, with a "Dodge!" label; the hit costs nothing and doesn't count as a bump; its detail card says so |
+| Medium | 3   | The baseline                                                                                                                                        |
+| Large  | 4   | Each large dog makes lane changes 10% slower, never below 10% slower than base; its detail card says so                                             |
 
 Size shows at a glance: on the road, medium dogs are drawn 48 px, large dogs 54 px and small dogs about 38 px, in every animation, with small dogs drawn chunky so they still read; portraits and doghouse faces differ less, about 1.1× and 0.9×. Hit boxes don't change.
 
