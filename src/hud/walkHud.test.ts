@@ -193,7 +193,7 @@ describe("cashScale", () => {
   const plausible = cents(
     money("startPurse") +
       Array.from({ length: zones }, (_, zone) => perZone(zone)).reduce((a, b) => a + b, 0) +
-      count("packSizeMax") * money("fullPackBonusPerDog"),
+      money("walkBonus"),
   );
   const amounts = [...[0, 9, 99, 999].map((dollars) => cents(dollars * 100)), plausible];
   it.each(amounts.map((amount) => `$${dollarAmountText(amount)}`))(

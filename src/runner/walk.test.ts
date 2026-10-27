@@ -1609,7 +1609,7 @@ describe("finishZone", () => {
   it("ends the run, finished, after the last zone, banking its pay and the Walk bonus", () => {
     const { run } = walkWith(["kilo", "duchess"]);
     const end = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 });
-    const bonus = 2 * read(tuning, "money", "fullPackBonusPerDog");
+    const bonus = read(tuning, "money", "walkBonus");
     expect(end.run.phase).toEqual({ kind: "ended", reason: "finished" });
     expect(end.run.money).toBe(run.money + 2 * pay + bonus);
     expect(end.fees.map(({ causes }) => causes[0]?.kind)).toEqual(["pay", "pay", "bonus"]);

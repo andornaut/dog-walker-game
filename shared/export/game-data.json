@@ -2219,7 +2219,6 @@
       "encounterHigh": 20,
       "encounterLow": 20,
       "fishCleanUp": 20,
-      "fullPackBonusPerDog": 30,
       "lostWalletKeep": 20,
       "missedTips": 20,
       "newCone": 20,
@@ -2247,6 +2246,7 @@
       "startPurse": 0,
       "thiefLetGo": 20,
       "tip": 1,
+      "walkBonus": 50,
       "weddingApology": 20
     },
     "multipliers": {

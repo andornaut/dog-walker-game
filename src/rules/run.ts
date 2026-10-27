@@ -108,12 +108,12 @@ export function payZone(data: Pick<GameData, "tuning">, state: RunState): Paymen
 }
 
 // When every dog the walk set out with gets home after its last zone, the walk pays
-// money.fullPackBonusPerDog for each of them into the money, as one change.
+// money.walkBonus into the money, as one change.
 export function fullPackBonus(data: Pick<GameData, "tuning">, state: RunState): Payments {
   if (packDogs(state).length !== state.pack.length) {
     return { changes: [], state };
   }
-  const amount = cents(read(data.tuning, "money", "fullPackBonusPerDog") * state.pack.length);
+  const amount = cents(read(data.tuning, "money", "walkBonus"));
   const change: MoneyChange = {
     amount,
     causes: [{ amount, kind: "bonus" }],

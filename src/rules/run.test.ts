@@ -101,20 +101,20 @@ describe("payZone", () => {
 });
 
 describe("fullPackBonus", () => {
-  const perDog = read(TEST_TUNING, "money", "fullPackBonusPerDog");
+  const bonus = read(TEST_TUNING, "money", "walkBonus");
 
   it("ends the run by its rules", () => {
-    for (const [, run, dogs] of [
+    for (const [, run, paid] of [
       [
-        "pays the bonus per dog when every dog is still walking",
+        "pays the bonus once when every dog is still walking",
         testState({ buddy: 3, duchess: 5 }),
-        2,
+        1,
       ],
       ["pays nothing once an owner has fired you", testState({ buddy: "fired", duchess: 5 }), 0],
     ] satisfies readonly [string, RunState, number][]) {
       const { changes, state } = fullPackBonus(data, run);
-      expect(state.money).toBe(run.money + perDog * dogs);
-      expect(changes.map(({ amount }) => amount)).toEqual(dogs === 0 ? [] : [perDog * dogs]);
+      expect(state.money).toBe(run.money + bonus * paid);
+      expect(changes.map(({ amount }) => amount)).toEqual(paid === 0 ? [] : [bonus]);
     }
   });
 });

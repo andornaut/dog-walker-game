@@ -75,8 +75,6 @@ export const TUNING = {
     encounterLow: 20,
     // The Fish crate spill's Pay for the fish.
     fishCleanUp: 20,
-    // Paid into the bank per dog when every dog set out with gets home after the last zone.
-    fullPackBonusPerDog: 30,
     lostWalletKeep: 20,
     missedTips: 20,
     // The Dropped ice cream's Buy a new cone.
@@ -111,6 +109,9 @@ export const TUNING = {
     startPurse: 0,
     thiefLetGo: 20,
     tip: 1,
+    // The Walk bonus: paid into the bank when every dog set out with gets home after the last
+    // zone, whatever the pack's size.
+    walkBonus: 50,
     // The Wedding photo shoot's Pay for a reshoot.
     weddingApology: 20,
   },
