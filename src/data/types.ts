@@ -1084,9 +1084,7 @@ export type AmbientGait = "fly" | "hop" | "steady";
 // and gait, its speed while moving (band pixels a second on the cross street, its sidewalks
 // and in the sky, road pixels a second beside the road) and how often one sets out, per minute.
 // rows, for a sky mover, is the range its feet row is drawn from, in band pixels, from..to
-// inclusive; without it, the plane's (SKY_ROWS in src/road/ambient.ts). twin is the obstacle it
-// looks like, such as the cat obstacle for an ambient cat: a zone that weighs its twin above 0
-// never draws it as a distraction mover, so nothing harmless looks like something that hits.
+// inclusive; without it, the plane's (SKY_ROWS in src/road/ambient.ts).
 export interface AmbientMover {
   readonly gait: AmbientGait;
   readonly key: string;
@@ -1095,7 +1093,6 @@ export interface AmbientMover {
   readonly rows?: { readonly from: number; readonly to: number };
   readonly speed: number;
   readonly tag: string;
-  readonly twin?: MinorObstacleId | ObstacleEncounterId;
 }
 
 export interface GameData {

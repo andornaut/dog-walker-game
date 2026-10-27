@@ -3,10 +3,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
-import { encounterSpriteKey, minorObstacleSpriteKey } from "../../assets/spriteKeys";
+import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
-import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
+import type { MinorObstacleId } from "../../data/types";
 import { laneCentreXs } from "../../layout/lanes";
 import { screenLayout } from "../../layout/screenLayout";
 import { randomStream } from "../../lib/random";
@@ -18,7 +18,7 @@ import {
 } from "../../road/roadsideProps";
 import { currentZone } from "../../rules/route";
 import { STEP_SECONDS } from "../../runner/fixedStep";
-import { moverPlace } from "../../runner/movers";
+import { DART_VERGE_LANES, moverPlace } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import {
   chooseCard,
@@ -35,7 +35,7 @@ import { defined } from "../../testing/defined";
 import {
   type DistractionDeps,
   type DistractionFrame,
-  distractionKeys,
+  distractionKinds,
   type DistractionPlace,
   distractionScroll,
   newDistractionPlace,
@@ -55,6 +55,10 @@ const COUNT = gameData.tuning.counts.distractionsPerZone;
 const RIGHT = GEOMETRY.laneCount - 1;
 const FIRST_ZONE = defined(gameData.world.zones[0]);
 const NO_ROADSIDE: RoadsideTable = { shadowed: [], zones: {} };
+// Every minor obstacle weighed 0.
+const NO_MINORS = Object.fromEntries(
+  Object.keys(gameData.minorObstacles).map((id) => [id, 0]),
+) as Record<MinorObstacleId, number>;
 
 // The shipped art, as the scene measures it: each sprite's tags and drawn width.
 const ANCHORS = new Map(shippedManifest.sprites.map(({ anchor, key }) => [key, anchor]));
@@ -124,38 +128,57 @@ const propsOn = (sides: readonly ("left" | "right")[]): RoadsideTable => {
 
 const ZONES = gameData.world.zones.map((zone) => [zone.id, zone] as const);
 
-describe("distractionKeys", () => {
-  it.each(ZONES)("gives %s only art that is no obstacle on its road", (_, zone) => {
-    const keys = distractionKeys(gameData, drawable, zone);
-    const minors = Object.entries(zone.weights.minorObstacles) as [MinorObstacleId, number][];
-    const encounters = Object.entries(zone.weights.obstacles) as [EncounterId, number][];
-    const live = [
-      ...minors.filter(([, weight]) => weight > 0).map(([id]) => minorObstacleSpriteKey(id)),
-      ...encounters.filter(([, weight]) => weight > 0).map(([id]) => encounterSpriteKey(id)),
-    ];
-    // The ambient animals whose twin obstacle the zone weighs.
-    const twins = gameData.ambient[zone.id as ZoneId]
-      .filter(
-        ({ twin }) =>
-          twin !== undefined &&
-          [...minors, ...encounters].some(([id, weight]) => id === twin && weight > 0),
-      )
-      .map(({ key }) => key);
-    expect(keys.length).toBeGreaterThan(0);
-    expect(
-      keys.filter((key) => live.includes(key) || twins.includes(key) || !drawable(key)),
-    ).toEqual([]);
+describe("distractionKinds", () => {
+  it.each(ZONES)("gives %s its own one-lane people and animals at their weights", (_, zone) => {
+    const kinds = distractionKinds(gameData, drawable, zone);
+    const weights = Object.entries(zone.weights.minorObstacles) as [MinorObstacleId, number][];
+    const expected = weights
+      .filter(([id, weight]) => {
+        const { onFoot, shape } = gameData.minorObstacles[id];
+        return weight > 0 && onFoot === true && shape.lanes === 1;
+      })
+      .map(([id, weight]): [string, number] => [minorObstacleSpriteKey(id), weight])
+      .filter(([key]) => drawable(key));
+    expect(kinds.length).toBeGreaterThan(0);
+    expect(kinds).toEqual(expected);
+    expect(kinds.map(([key]) => key)).not.toContain(minorObstacleSpriteKey("couple"));
   });
 
-  it("leaves out an ambient squirrel where squirrels are obstacles", () => {
-    const zone = defined(
-      gameData.world.zones.find(
-        ({ id, weights }) =>
-          weights.obstacles.squirrel > 0 &&
-          gameData.ambient[id as ZoneId].some(({ key }) => key === "squirrel-dash"),
-      ),
-    );
-    expect(distractionKeys(gameData, drawable, zone)).not.toContain("squirrel-dash");
+  it("gives a zone with no hazard to wear the ambient walkers", () => {
+    const kinds = distractionKinds(gameData, drawable, {
+      weights: {
+        ...FIRST_ZONE.weights,
+        minorObstacles: { ...FIRST_ZONE.weights.minorObstacles, ...NO_MINORS },
+      },
+    });
+    expect(kinds).toEqual([
+      ["ambient-pedestrian", 1],
+      ["ambient-pedestrian-back", 1],
+    ]);
+  });
+});
+
+describe("placeDistraction", () => {
+  // Where each pattern starts, in lanes out from the left edge lane's middle: a visit on the verge,
+  // an edge waiter at the road's edge where a dart waits idle, a leave in the edge lane.
+  it.each([
+    ["edge", 0.5],
+    ["leave", 0],
+    ["visit", DART_VERGE_LANES + 0.5],
+  ] as const)("starts a %s %s lanes out", (pattern, out) => {
+    const distraction = {
+      key: "tourist",
+      latest: 1000,
+      pattern,
+      placed: -1,
+      row: 0,
+      side: -1,
+      skipped: false,
+      step: 0,
+    } as const;
+    const place = newDistractionPlace();
+    expect(placeDistraction(gameData, GEOMETRY, 0, { ...distraction }, place)).toBe(true);
+    expect(place.lanePosition).toBeCloseTo(-out);
   });
 });
 
@@ -163,7 +186,7 @@ describe("planDistractions", () => {
   it.each(ZONES)("plans %s's count, one in each stretch, gone before its end", (_, zone) => {
     const planned = planDistractions(deps(1), GEOMETRY, zone);
     expect(planned).toHaveLength(COUNT);
-    const keys = distractionKeys(gameData, drawable, zone);
+    const keys = distractionKinds(gameData, drawable, zone).map(([key]) => key);
     expect(planned.filter(({ key }) => !keys.includes(key))).toEqual([]);
     const stretch = zoneLength(gameData) / COUNT;
     planned.forEach(({ latest, row }, i) => {

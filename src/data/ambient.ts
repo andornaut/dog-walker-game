@@ -3,8 +3,7 @@ import type { AmbientMover, ZoneId } from "./types";
 // The ambient movers: scenery that moves across the backdrop's cross street and beside the
 // road, with no effect on play. Each zone lists its kinds; perMinute sets how often each sets
 // out, and the mix is drawn in proportion to it. Speeds are band pixels a second on the cross
-// street and its sidewalks, road pixels a second beside the road. twin names the obstacle an
-// animal looks like.
+// street and its sidewalks, road pixels a second beside the road.
 
 const CAR = {
   gait: "steady",
@@ -29,7 +28,6 @@ const CAT = {
   perMinute: 1,
   speed: 80,
   tag: "run",
-  twin: "cat",
 } as const satisfies AmbientMover;
 const PEDESTRIAN = {
   gait: "steady",
@@ -54,7 +52,6 @@ const RABBIT = {
   perMinute: 1,
   speed: 110,
   tag: "hop",
-  twin: "bunny",
 } as const satisfies AmbientMover;
 const BIRD = {
   gait: "fly",
@@ -71,7 +68,6 @@ const SQUIRREL = {
   perMinute: 2,
   speed: 220,
   tag: "run",
-  twin: "squirrel",
 } as const satisfies AmbientMover;
 
 export const AMBIENT = {
@@ -205,7 +201,6 @@ export const AMBIENT = {
       rows: { from: 16, to: 40 },
       speed: 45,
       tag: "fly",
-      twin: "seagull",
     },
     {
       gait: "steady",
@@ -230,7 +225,6 @@ export const AMBIENT = {
       rows: { from: 16, to: 40 },
       speed: 60,
       tag: "fly",
-      twin: "pigeons",
     },
     {
       gait: "steady",
@@ -277,7 +271,6 @@ export const AMBIENT = {
       rows: { from: 18, to: 44 },
       speed: 40,
       tag: "fly",
-      twin: "goose",
     },
     {
       gait: "steady",
@@ -331,7 +324,6 @@ export const AMBIENT = {
       rows: { from: 16, to: 40 },
       speed: 45,
       tag: "fly",
-      twin: "seagull",
     },
   ],
 } as const satisfies Readonly<Record<ZoneId, readonly AmbientMover[]>>;

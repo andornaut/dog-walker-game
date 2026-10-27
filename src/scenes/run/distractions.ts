@@ -1,16 +1,5 @@
-import {
-  encounterSpriteKey,
-  minorObstacleSpriteKey,
-  MOVER_SPRITE_KEYS,
-} from "../../assets/spriteKeys";
-import type {
-  AmbientMover,
-  EncounterId,
-  GameData,
-  MinorObstacleId,
-  Zone,
-  ZoneId,
-} from "../../data/types";
+import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
+import type { GameData, MinorObstacleId, Zone } from "../../data/types";
 import type { Random } from "../../lib/random";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
 import { read } from "../../rules/units";
@@ -26,21 +15,23 @@ import type { SpawnEvent } from "../../runner/spawning";
 import {
   footprintOf,
   itemHeight,
+  pickWeighted,
   type RoadGeometry,
   type WalkItem,
   type WalkItemKind,
   zoneLength,
 } from "../../runner/walk";
 
-// The distraction movers: people and animals that step on and off the road's edge lanes in the
-// top part of the road, and are gone before their row nears the pack. They are scenery only:
-// they block no lane, the walk never reads them, and they draw from a random stream of their own,
-// so a seed plays the same walk with or without them. Each zone has about
-// counts.distractionsPerZone, spread through it, each wearing the art of something that is not an
-// obstacle on that road (distractionKeys), picked evenly. One either starts on the verge, steps
-// into the edge lane and steps back off (visit), or starts in the edge lane as its row comes into
-// view and steps off (leave), fading out past the verge. Like the road's movers it is measured in
-// road scroll, so it stands still while the road does.
+// The distraction movers: red herrings. They wear the zone's own hazards (distractionKinds), step
+// on and off the road's edges in the top part of the road, and are gone before their row nears the
+// pack. They never hit anything and show no move cue: they block no lane, the walk never reads
+// them, and they draw from a random stream of their own, so a seed plays the same walk with or
+// without them. Each zone has about counts.distractionsPerZone, spread through it, each in one of
+// three patterns: it starts on the verge, steps into the edge lane and steps back off (visit); it
+// waits at the road's edge, half on the verge where a dart waits idle, then leaves (edge); or it
+// starts in the edge lane as its row comes into view and steps off (leave). Each fades out past
+// the verge. Like the road's movers it is measured in road scroll, so it stands still while the
+// road does.
 //
 // None is drawn over a pickup or an obstacle, or stands on a roadside prop's footprint: as its row
 // comes into view, it takes the side it drew if every road item, pending spawn and verge scenery
@@ -49,7 +40,7 @@ import {
 // allows, where it is skipped. It sorts with the props by row, so a prop nearer the walker stands
 // in front of it.
 
-export type DistractionPattern = "leave" | "visit";
+export type DistractionPattern = "edge" | "leave" | "visit";
 
 // One distraction. key is its sprite. row is the zone distance its row comes into view at, the
 // one it waits for until placed. side is the side it tries first, -1 left and 1 right, and placed
@@ -71,10 +62,7 @@ export interface DistractionState {
   zoneIndex: number | null;
 }
 
-export type DistractionData = Pick<
-  GameData,
-  "ambient" | "encounters" | "minorObstacles" | "tuning"
->;
+export type DistractionData = Pick<GameData, "encounters" | "minorObstacles" | "tuning">;
 
 // What the distractions are placed against, in flat road pixels: the road's centre line and lane
 // 0's middle, the roadside props' table, and the width of each sprite's drawn pixels at full size.
@@ -102,7 +90,7 @@ export interface DistractionFrame {
   readonly items: readonly WalkItem[];
   readonly pending: readonly SpawnEvent<WalkItemKind>[];
   readonly previousArt: string | null;
-  readonly zone: Pick<Zone, "art" | "id" | "weights">;
+  readonly zone: Pick<Zone, "art" | "weights">;
   readonly zoneDistance: number;
   readonly zoneIndex: number;
 }
@@ -136,23 +124,20 @@ const ROW_MARGIN = 1;
 // many cell lengths nearer than its feet to this many beyond them. A distraction's feet keep out
 // of every footprint.
 const PROP_FOOTPRINT = { far: 1, near: 0.5 } as const;
-// A zone with fewer sprites than this also takes the ambient walkers.
-const MIN_KINDS = 3;
+// A zone with no hazard to wear takes these.
 const AMBIENT_WALKERS = ["ambient-pedestrian", "ambient-pedestrian-back"] as const;
-// The ambient paths of people and animals on foot beside the road, not on the cross street's
-// lanes or in the sky.
-const ON_FOOT_PATHS: ReadonlySet<AmbientMover["path"]> = new Set([
-  "crossWalk",
-  "sidewalkAway",
-  "sidewalkToward",
-  "verge",
-]);
+const PATTERNS: readonly DistractionPattern[] = ["edge", "leave", "visit"];
+// Lanes out from the edge lane's middle to the road's edge, where a dart waits idle before its cue
+// and an edge waiter stands, half on the verge.
+const EDGE_OUT = 0.5;
 
 // Its timeline, as shares of its time on screen. A visit waits on the verge from 0 to a share
 // from waitFrom up to waitSpan more, by its step, steps in over stepIn, stands for stand, then
-// steps out to the verge and fades out by the end. A leave stands in its lane from 0 to a share
-// from waitFrom up to waitSpan more, then steps out and fades over stepOut.
+// steps out to the verge and fades out by the end. A leave stands in its lane, and an edge waiter
+// at the road's edge, from 0 to a share from waitFrom up to waitSpan more, then steps out and
+// fades over stepOut.
 const TIMELINE = {
+  edge: { stepOut: 0.3, waitFrom: 0.3, waitSpan: 0.3 },
   leave: { stepOut: 0.35, waitFrom: 0.2, waitSpan: 0.25 },
   visit: { stand: 0.15, stepIn: 0.25, waitFrom: 0.05, waitSpan: 0.15 },
 } as const;
@@ -175,55 +160,39 @@ export function distractionScroll(
   return Math.max(0, geometry.sightLength * (1 - share));
 }
 
-// The sprites a zone's distractions wear: none that is the art of an obstacle on its road, so
-// nothing harmless looks like something that hits. They are its one-lane people and animals
-// (onFoot) that it weighs 0, and its ambient people and animals on foot beside the road but
-// those whose twin obstacle it weighs above 0, each only where its art can walk or hop and is not
-// the art of an obstacle the zone weighs; with fewer than MIN_KINDS, the ambient walkers as well.
-export function distractionKeys(
-  data: Pick<GameData, "ambient" | "minorObstacles">,
+// The sprites a zone's distractions wear, each with its weight: the zone's own hazards, so a red
+// herring looks like the real thing. They are its one-lane people and animals (onFoot) that it
+// weighs above 0, at their weights, each only where its art can walk, hop or run; a zone with
+// none takes the ambient walkers, evenly.
+export function distractionKinds(
+  data: Pick<GameData, "minorObstacles">,
   drawable: (key: string) => boolean,
-  zone: Pick<Zone, "id" | "weights">,
-): string[] {
+  zone: Pick<Zone, "weights">,
+): [string, number][] {
   const minors = Object.entries(zone.weights.minorObstacles) as [MinorObstacleId, number][];
-  const encounters = Object.entries(zone.weights.obstacles) as [EncounterId, number][];
-  const live = new Set<string | undefined>([
-    ...minors.filter(([, weight]) => weight > 0).map(([id]) => minorObstacleSpriteKey(id)),
-    ...encounters
-      .filter(([, weight]) => weight > 0)
-      .flatMap(([id]) => [encounterSpriteKey(id), MOVER_SPRITE_KEYS[encounterSpriteKey(id)]]),
-  ]);
-  const onFoot = minors
+  const kinds = minors
     .filter(([id, weight]) => {
       const obstacle = data.minorObstacles[id];
-      return weight === 0 && obstacle.onFoot === true && obstacle.shape.lanes === 1;
+      return weight > 0 && obstacle.onFoot === true && obstacle.shape.lanes === 1;
     })
-    .map(([id]) => minorObstacleSpriteKey(id));
-  const weighs = (id: MinorObstacleId | EncounterId): boolean =>
-    ((zone.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0 ||
-    ((zone.weights.obstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0;
-  const ambient = data.ambient[zone.id as ZoneId]
-    .filter(({ path, twin }) => ON_FOOT_PATHS.has(path) && (twin === undefined || !weighs(twin)))
-    .map(({ key }) => key);
-  const keys = [...new Set([...onFoot, ...ambient])].filter(
-    (key) => !live.has(key) && drawable(key),
-  );
-  return keys.length >= MIN_KINDS
-    ? keys
-    : [...new Set([...keys, ...AMBIENT_WALKERS.filter((key) => drawable(key))])];
+    .map(([id, weight]): [string, number] => [minorObstacleSpriteKey(id), weight])
+    .filter(([key]) => drawable(key));
+  return kinds.length > 0
+    ? kinds
+    : AMBIENT_WALKERS.filter((key) => drawable(key)).map((key) => [key, 1]);
 }
 
 // The zone's distractions: one in each of distractionsPerZone equal stretches of it, its row
-// drawn in the stretch's first ROW_SHARE, each wearing one of distractionKeys picked evenly. Each
-// takes the same draws whatever is picked.
+// drawn in the stretch's first ROW_SHARE, each wearing one of distractionKinds by its weight and
+// taking one of the three patterns evenly. Each takes the same draws whatever is picked.
 export function planDistractions(
   deps: Pick<DistractionDeps, "data" | "drawable" | "random">,
   geometry: Pick<RoadGeometry, "cell" | "sightLength">,
-  zone: Pick<Zone, "id" | "weights">,
+  zone: Pick<Zone, "weights">,
 ): Distraction[] {
   const { data, drawable, random } = deps;
   const count = Math.max(0, Math.floor(read(data.tuning, "counts", "distractionsPerZone")));
-  const keys = distractionKeys(data, drawable, zone);
+  const kinds = distractionKinds(data, drawable, zone);
   const length = zoneLength(data);
   const stretch = count > 0 ? length / count : 0;
   // Every row is gone from the road before the zone ends.
@@ -231,14 +200,14 @@ export function planDistractions(
   const planned: Distraction[] = [];
   for (let i = 0; i < count; i++) {
     const pick = random();
-    const pattern: DistractionPattern = random() < 0.5 ? "visit" : "leave";
+    const pattern = PATTERNS[Math.floor(random() * PATTERNS.length)] ?? "visit";
     const side = random() < 0.5 ? -1 : 1;
     const row = stretch * (i + ROW_SHARE * random());
     const step = random();
-    const key = keys[Math.floor(pick * keys.length)];
-    if (key === undefined) {
+    if (kinds.length === 0) {
       continue;
     }
+    const key = pickWeighted(() => pick, kinds);
     const latest = Math.min(stretch * (i + 1) - geometry.cell.length, last);
     planned.push({
       key,
@@ -473,12 +442,14 @@ function outAt(
       out: (VERGE_OUT + FADE_OUT) * ease(outFrom, 1 - outFrom),
     };
   }
-  const { stepOut, waitFrom, waitSpan } = TIMELINE.leave;
+  const { stepOut, waitFrom, waitSpan } = TIMELINE[distraction.pattern];
   const wait = waitFrom + waitSpan * distraction.step;
+  // An edge waiter faces the road while it waits, as a dart does.
+  const start = distraction.pattern === "edge" ? EDGE_OUT : 0;
   return {
-    inward: false,
+    inward: distraction.pattern === "edge" && share < wait,
     moving: share >= wait,
-    out: (VERGE_OUT + FADE_OUT) * ease(wait, stepOut),
+    out: start + (VERGE_OUT + FADE_OUT - start) * ease(wait, stepOut),
   };
 }
 
