@@ -288,7 +288,7 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 | Kensington Market (deep sunburst)  | flat rays of lake and dturq from the end of the street (`sunburst`) | `backdrop-kensington-market`                   |
 | The Beaches (late afternoon)       | gold over yellow, small clouds and gulls                            | `backdrop-the-beaches`                         |
 | Toronto at night                   | navy, purple, mauve bands; a crescent moon, stars in the navy band  | `screen-loading`                               |
-| Toronto summer day                 | cyan over haze                                                      | `screen-home`                                  |
+| Toronto autumn day                 | foam over haze                                                      | `screen-home`                                  |
 | Yonge Street (evening)             | slate, dslate, purple, mauve bands; a full moon and stars           | `backdrop-yonge-street`                        |
 
 - A zone card repeats its backdrop's sky, bands and sun included.

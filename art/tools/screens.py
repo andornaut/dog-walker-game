@@ -10,19 +10,23 @@ stands), and works as a header on any other screen.
 screen-<name>: 360x560 backgrounds in the house palette, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
-- screen-home: a summer morning on a Cabbagetown street. The bar strip, then the
-  gate scene (y 40 to 196). Across the street (FAR_BASE 74): a cyan sky over a
+- screen-home: an autumn morning on a Cabbagetown street. The bar strip, then the
+  gate scene (y 40 to 196). Across the street (FAR_BASE 74): a foam sky over a
   haze band, the CN Tower far back over the laneway at the right (FAR_CN), a
-  row of small bay-and-gables in brick, dbrick, cream and clay with canopy
-  trees between them, their front yards behind an iron fence. Then the far
-  sidewalk, the street (rows 82 to 91), the curb and our sidewalk with a maple
-  in summer leaf in its planter, then the iron fence on a stone kerb, open at
-  the gate between two brick piers (152 and 202), the front path, the yard sign
-  and the porch deck from y 198 under the walker, dogs and Pocket sections and
-  Start walk. The street sign's board (300,72 54x11, a 52x9 forest face) sits
-  at the right edge, clear of the walker's speech bubble; the game prints
-  homeText.gateSign on it in font-body, white, centred at 327,75. The yard's
-  right lot is left for ui-pet-shop.
+  row of small bay-and-gables in brick, dbrick, cream and clay with ochre and
+  brown trees between them, their bare front yards strewn with leaves behind
+  an iron fence. Then the far sidewalk, the street (rows 82 to 91), the curb
+  and our sidewalk with a turned maple (amber, ochre and rust) in its planter
+  and its leaves fallen around it, then the iron fence on a stone kerb with beds
+  of mums inside it, open at the gate between two brick piers (152 and 202). The
+  front yard is pale driftwood flagstones, the front path (x 164 to 195) red
+  brick in basket weave, with fallen leaves, the yard sign, a stone urn of
+  mums in the corner and the porch deck from y 198 under the walker, dogs and
+  Pocket sections and Start walk. The street sign's board (300,72 54x11, a
+  52x9 navy face) sits at the right edge, clear of the walker's speech bubble;
+  the game prints homeText.gateSign on it in font-body, white, centred at
+  327,75. The yard's right lot is left for ui-pet-shop. The scene holds no
+  strong green, so the Pet shop's board and Start walk stand out.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
@@ -283,11 +287,11 @@ def logo():
 
 FAR_BASE = 74  # the far side's ground row on screen-home: its houses stand on it, their front yards under it
 # The far side's bay-and-gables: (left, width, wall, trim, door, bay on the left).
-FAR_HOMES = ((-8, 30, "brick", "white", "forest", True), (24, 30, "cream", "stone", "ttc", False),
+FAR_HOMES = ((-8, 30, "brick", "white", "dbrick", True), (24, 30, "cream", "stone", "ttc", False),
              (56, 30, "dbrick", "driftwood", "navy", True), (88, 30, "brick", "white", "ttc", False),
-             (120, 30, "clay", "stone", "forest", True), (152, 30, "brick", "driftwood", "navy", False),
-             (184, 30, "dbrick", "white", "forest", True), (216, 30, "brick", "stone", "ttc", False),
-             (248, 30, "cream", "white", "navy", True), (280, 30, "brick", "stone", "forest", False))
+             (120, 30, "clay", "stone", "dbrick", True), (152, 30, "brick", "driftwood", "navy", False),
+             (184, 30, "dbrick", "white", "dbrick", True), (216, 30, "brick", "stone", "ttc", False),
+             (248, 30, "cream", "white", "navy", True), (280, 30, "brick", "stone", "dbrick", False))
 FAR_CN = (340, 89, 36)  # the CN Tower's centre column, foot and mast tip on screen-home, over the laneway
 
 
@@ -332,30 +336,98 @@ def far_gable(cv, x, w, wall, trim, door, bay_left, base=FAR_BASE):
     cv.fill(dc - 4, base + 2, 8, 1, "dstone")
 
 
+def noise(x, y, seed):
+    """A fixed pseudo-random value in [0, 1) per cell and seed, from backdrops.noise."""
+    return bd.noise(x * 7 + seed * 131, y * 13 + seed * 71)
+
+
+def crown(cv, cx, cy, rad, lit, face, shade, bright=-0.7, dim=0.6):
+    """A round crown of leaves centred on cx,cy, lit from the top left: lit where (dx + dy) / rad is under
+    bright, shade where it is over dim, face between."""
+    for dy in range(-rad, rad + 1):
+        for dx in range(-rad, rad + 1):
+            if dx * dx + dy * dy <= rad * rad:
+                t = (dx + dy) / rad
+                cv.fill(cx + dx, cy + dy, 1, 1, shade if t > dim else lit if t < bright else face)
+
+
+def far_tree(cv, cx, top, rad):
+    """An autumn street tree across the street: a 2px bark trunk on FAR_BASE under an ochre, brown and bark
+    crown centred on row top."""
+    cv.fill(cx - 1, top + rad, 2, FAR_BASE - top - rad, "bark")
+    crown(cv, cx, top, rad, "ochre", "brown", "bark")
+
+
+def flagstones(cv, x0, y0, w, courses, face, joint, alt, seed):
+    """Irregular flagstones from x0, w wide, in courses of the given heights from row y0 down: each course
+    split into stones 10 to 21 wide, a 1px joint under and between them, about a third in alt."""
+    top = y0
+    for k, h in enumerate(courses):
+        edges, x = [], x0 - int(noise(k, 1, seed) * 12)
+        while x < x0 + w:
+            edges.append(x)
+            x += 10 + int(noise(k, x, seed) * 12)
+        for y in range(top, top + h):
+            for px in range(x0, x0 + w):
+                start = max(e for e in edges if e <= px)
+                c = joint if y == top + h - 1 or px in edges else alt if noise(start, k, seed) < 0.3 else face
+                cv.fill(px, y, 1, 1, c)
+        top += h
+
+
+def basket_weave(cv, x0, y0, w, h, face, joint, alt, seed=2):
+    """Basket-weave brick: 8x8 tiles on the screen's grid, each two bricks laid across or along in turn,
+    1px joints, about a quarter of the bricks in alt."""
+    for y in range(y0, y0 + h):
+        for x in range(x0, x0 + w):
+            lx, ly, tx, ty = x % 8, y % 8, x // 8, y // 8
+            across = (tx + ty) % 2 == 0
+            if (ly in (3, 7) or lx == 7) if across else (lx in (3, 7) or ly == 7):
+                c = joint
+            else:
+                half = ly // 4 if across else lx // 4
+                c = alt if noise(tx * 2 + half, ty, seed) < 0.25 else face
+            cv.fill(x, y, 1, 1, c)
+
+
+def urn(cv, x, foot):
+    """A stone urn planter centred on column x, its plinth's bottom row on foot - 1, holding amber, red and
+    cream mums."""
+    cv.fill(x - 4, foot - 2, 9, 2, "dstone")
+    cv.fill(x - 2, foot - 5, 5, 3, "stone")
+    cv.fill(x - 5, foot - 11, 11, 6, "stone")
+    cv.fill(x + 3, foot - 11, 3, 6, "dstone")
+    cv.fill(x - 6, foot - 12, 13, 1, "driftwood")
+    for k, (dx, dy) in enumerate(((-5, -14), (-2, -15), (1, -15), (4, -14), (-3, -13), (2, -13))):
+        cv.fill(x + dx, foot + dy, 2, 2, ("amber", "red", "cream")[k % 3])
+
+
 def home():
     cv = sn.Canvas(W, H)
     r = rand(7)
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
-    # across the street: a summer sky, the CN Tower far back over the laneway at the right, a row of
-    # Cabbagetown bay-and-gables with canopy trees between them, their front yards behind an iron fence
-    cv.fill(0, 40, W, FAR_BASE - 40, "cyan")
-    cv.fill(0, 56, W, FAR_BASE - 56, "haze")
+    # across the street: an autumn sky, the CN Tower far back over the laneway at the right, a row of
+    # Cabbagetown bay-and-gables with turned trees between them, their bare front yards strewn with
+    # leaves behind an iron fence
+    cv.fill(0, 40, W, FAR_BASE - 40, "foam")
+    cv.fill(0, 57, W, FAR_BASE - 57, "haze")
     for i in range(0, W, 5):
-        cv.fill(i, 56 - (i // 5) % 2, 5, 1, "haze")
+        cv.fill(i, 57 - (i // 5) % 2, 5, 1, "haze")
     cn_tower(cv, *FAR_CN, lit=False)
-    for k in range(len(FAR_HOMES)):
-        tx = FAR_HOMES[k][0] + FAR_HOMES[k][1] + 1
-        bd.tree(cv, tx, FAR_BASE - 20, "canopy", "pine", "bark", r=8, base=FAR_BASE, girth=2)
-    bd.tree(cv, 322, FAR_BASE - 8, "canopy", "pine", "bark", r=7, base=FAR_BASE, girth=2)
+    for x, w, *_ in FAR_HOMES:
+        far_tree(cv, x + w + 1, FAR_BASE - 20, 8)
+    far_tree(cv, 322, FAR_BASE - 8, 7)
     for x, w, wall, trim, door, bay_left in FAR_HOMES:
         far_gable(cv, x, w, wall, trim, door, bay_left)
-    cv.fill(0, FAR_BASE, W, 3, "dgreen")
+    cv.fill(0, FAR_BASE, W, 3, "bark")
+    for i in range(0, W, 7):
+        cv.fill(i + (i * 3) % 5, FAR_BASE + 1, 1, 1, "ochre")
     iron_fence(cv, 0, W, FAR_BASE + 3, [(x + (w - w // 2 // 2 - 6 if bay else w // 2 // 2 - 4),
                                         x + (w - w // 2 // 2 + 2 if bay else w // 2 // 2 + 4))
                                        for x, w, _, _, _, bay in FAR_HOMES])
-    # the far sidewalk and curb, then the street: asphalt, a manhole and a storm drain
+    # the far sidewalk and curb, then the street: asphalt and a storm drain
     cv.fill(0, FAR_BASE + 3, W, 4, "lgrey")
     for x in range(10, W, 24):
         cv.fill(x, FAR_BASE + 3, 1, 4, "grey")
@@ -363,10 +435,6 @@ def home():
     cv.fill(0, FAR_BASE + 8, W, 92 - FAR_BASE - 8, "dslate")
     for _ in range(90):
         cv.fill(int(r() * W), FAR_BASE + 8 + int(r() * (92 - FAR_BASE - 8)), 1, 1, "slate" if r() < 0.6 else "navy")
-    for dy in range(-2, 3):
-        for dx in range(-6, 7):
-            if (dx / 6.5) ** 2 + (dy / 2.5) ** 2 <= 1:
-                cv.fill(250 + dx, 87 + dy, 1, 1, "slate" if (dx + dy) % 3 == 0 and abs(dx) < 5 else "navy")
     cv.fill(52, 88, 18, 4, "navy")
     for x in range(54, 70, 3):
         cv.fill(x, 89, 1, 3, "ink")
@@ -376,11 +444,8 @@ def home():
     cv.fill(0, 96, W, 30, "lgrey")
     for x in range(0, W, 24):
         cv.fill(x, 96, 1, 30, "grey")
-    cv.fill(98, 104, 3, 1, "grey")
-    cv.fill(100, 105, 2, 1, "grey")
-    cv.fill(270, 116, 4, 1, "grey")
-    # a maple in a sidewalk planter in summer leaf: its shadow, the trunk, then a lumpy canopy crown, lit
-    # moss from the top left and shaded pine
+    # a maple in a sidewalk planter, turned: its shadow, the trunk, then a lumpy crown, lit amber from the
+    # top left and shaded rust, and its leaves fallen on the sidewalk
     for dy in range(-6, 7):
         for dx in range(-24, 25):
             if (dx / 24) ** 2 + (dy / 6.5) ** 2 <= 1:
@@ -392,38 +457,29 @@ def home():
     cv.fill(69, 92, 4, 20, "bark")
     cv.fill(69, 92, 1, 20, "clay")
     for lx, ly, rad in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10), (13, 4, 10), (0, 10, 10)):
-        for dy in range(-rad, rad + 1):
-            for dx in range(-rad, rad + 1):
-                if dx * dx + dy * dy <= rad * rad:
-                    lit = (dx + dy) / rad
-                    c = "pine" if lit > 0.55 else "moss" if lit < -0.75 else "canopy"
-                    cv.fill(71 + lx + dx, 80 + ly + dy, 1, 1, c)
-    for x, y in ((58, 70), (66, 66), (74, 68), (56, 80)):
-        cv.fill(x, y, 1, 1, "lime")
+        crown(cv, 71 + lx, 80 + ly, rad, "amber", "ochre", "rust", -0.75, 0.55)
+    for x, y in ((92, 104), (110, 118), (128, 100), (34, 116), (206, 112), (140, 122)):
+        leaf(cv, x, y, "ochre")
     # the street sign at the right edge, under the sound toggle and clear of the walker's speech
     # bubble (x 70 to 290, rows 46 to 112); the game prints the name centred at 327,75 in white,
-    # which holds 7.8:1 on forest green
+    # which holds 13.9:1 on navy
     cv.fill(326, 72, 2, 44, "slate")
     cv.fill(326, 72, 1, 44, "grey")
-    cv.fill(300, 72, 54, 11, "teal")
-    cv.fill(301, 73, 52, 9, "forest")
+    cv.fill(300, 72, 54, 11, "dslate")
+    cv.fill(301, 73, 52, 9, "navy")
     cv.fill(324, 114, 6, 2, "dslate")
-    # the front yard
-    cv.fill(0, 126, W, 70, "green")
-    for i in range(46):
-        cv.fill((i * 53) % W, 132 + (i * 29) % 60, 1, 2, "dgreen")
-    # flower beds along the inside of the fence
+    # the front yard: pale driftwood flagstones, some in stone
+    flagstones(cv, 0, 126, W, (7, 8, 9, 8, 9, 9, 10, 10), "driftwood", "dstone", "stone", seed=11)
+    # beds of mums along the inside of the fence
     for x0, x1 in ((0, 152), (208, W)):
-        cv.fill(x0, 139, x1 - x0, 5, "dbrown")
-        cv.fill(x0, 139, x1 - x0, 1, "plum")
-        bd.flowers(cv, x0 + 2, x1 - 2, 140, ("red", "yellow", "pink", "white"))
-    # the front path: tan flagstones from the porch to the gate
-    cv.fill(164, 126, 32, 70, "tan")
-    for y in range(130, 196, 8):
-        cv.fill(164, y, 32, 1, "brown")
-        cv.fill(180 + (4 if (y // 8) % 2 else -6), y + 1, 1, 7, "brown")
-    cv.fill(163, 126, 1, 70, "dgreen")
-    cv.fill(196, 126, 1, 70, "dgreen")
+        cv.fill(x0, 139, x1 - x0, 5, "bark")
+        cv.fill(x0, 139, x1 - x0, 1, "walnut")
+        for i, x in enumerate(range(x0 + 2, x1 - 2, 4)):
+            cv.fill(x, 140 + i % 2, 2, 2, ("amber", "red", "cream", "rust")[i % 4])
+    # the front path: red brick in basket weave from the porch to the gate
+    basket_weave(cv, 164, 126, 32, 70, "brick", "dbrick", "clay")
+    cv.fill(163, 126, 1, 70, "dstone")
+    cv.fill(196, 126, 1, 70, "dstone")
     # the iron fence on a stone kerb, open at the gate between two brick piers with stone caps
     cv.fill(0, 135, 156, 3, "stone")
     cv.fill(204, 135, W - 204, 3, "stone")
@@ -437,14 +493,17 @@ def home():
             cv.fill(px, y, 6, 1, "dbrick")
         cv.fill(px - 1, 116, 8, 2, "stone")
         cv.fill(px - 1, 116, 8, 1, "lgrey")
-        cv.fill(px, 140, 6, 1, "dgreen")
+        cv.fill(px, 140, 6, 1, "dstone")
     # the yard sign: blank board (the logo goes over it) on two posts
     for px in (16, 120):
         cv.fill(px, 172, 3, 22, "dbrown")
-        cv.fill(px - 1, 194, 5, 1, "dgreen")
+        cv.fill(px - 1, 194, 5, 1, "dstone")
     board(cv, *LOGO_AT)
-    # a bush in the corner, a water bowl by the path and a ball on the lawn
-    bd.bush(cv, 322, 186, "dgreen")
+    # an urn of mums in the corner, fallen leaves, a water bowl by the path and a ball on the flagstones
+    urn(cv, 324, 194)
+    for x, y, col in ((40, 186, "ochre"), (140, 178, "rust"), (212, 172, "brown"), (96, 160, "ochre"),
+                      (230, 150, "rust"), (300, 170, "ochre")):
+        leaf(cv, x, y, col)
     cv.fill(222, 189, 10, 4, "slate")
     cv.fill(223, 189, 8, 2, "sky")
     cv.fill(224, 189, 3, 1, "cyan")
