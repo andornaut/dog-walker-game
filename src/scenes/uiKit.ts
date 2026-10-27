@@ -18,7 +18,13 @@ import {
 import { MARK_OFFSET } from "../ui/mark";
 import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, inkSpan, scalePixelText, setPixelText } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  inkSpan,
+  type PixelTextStyle,
+  scalePixelText,
+  setPixelText,
+} from "../ui/phaser/pixelText";
 import {
   BUTTON_COLOURS,
   type ButtonLook,
@@ -207,15 +213,37 @@ export function buttonFaces(
 }
 
 interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"> {
-  // The number key that presses the button, drawn like the label in the face's left end,
-  // MENU_BUTTON_KEY_INSET in from its edge.
+  // The number key that presses the button, drawn like the label and MENU_BUTTON_KEY_GAP
+  // before it, the two inks centred together as one group.
   readonly keyNumber?: string;
   // An available button that is not primary wears the secondary look, as a card's own
   // controls do, in place of normal.
   readonly secondary?: boolean;
 }
 
-const MENU_BUTTON_KEY_INSET = 10;
+// One word space at the label's size: a glyph advance and the tracking.
+const MENU_BUTTON_KEY_GAP = 16;
+
+// The key number and the label, their inks MENU_BUTTON_KEY_GAP apart and centred together on
+// centreX, on whole pixels.
+function keyedLabels(
+  scene: Scene,
+  centreX: number,
+  keyNumber: string,
+  label: string,
+  style: PixelTextStyle,
+): GameObjects.BitmapText[] {
+  const key = addPixelText(scene, 0, 0, keyNumber, style);
+  const title = addPixelText(scene, 0, 0, label, style);
+  const keyInk = inkSpan(key);
+  const titleInk = inkSpan(title);
+  const keyWidth = keyInk.right - keyInk.left;
+  const width = keyWidth + MENU_BUTTON_KEY_GAP + (titleInk.right - titleInk.left);
+  const left = Math.round(centreX - width / 2);
+  key.setX(left - keyInk.left);
+  title.setX(left + keyWidth + MENU_BUTTON_KEY_GAP - titleInk.left);
+  return [key, title];
+}
 
 // A ui-button with a centred label in its interaction state, drawn in parent when given.
 // Pressed shows the sunk frame and moves the label, and any key number, with it; disabled sits
@@ -237,11 +265,11 @@ export function addMenuButton(
     originY: 0.5,
     scale: TEXT_SCALE,
   } as const;
-  const title = addPixelText(scene, rect.x + rect.width / 2, 0, label, { ...style, originX: 0.5 });
+  const centreX = rect.x + rect.width / 2;
   const labels =
     input.keyNumber === undefined
-      ? [title]
-      : [title, addPixelText(scene, rect.x + MENU_BUTTON_KEY_INSET, 0, input.keyNumber, style)];
+      ? [addPixelText(scene, centreX, 0, label, { ...style, originX: 0.5 })]
+      : keyedLabels(scene, centreX, input.keyNumber, label, style);
   parent?.add([...faces, ...labels]);
   const centreY = rect.y + (rect.height - BUTTON_LIP_PX) / 2;
   const button: MenuButton = {
