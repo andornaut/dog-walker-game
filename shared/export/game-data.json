@@ -1387,7 +1387,7 @@
       "scrollSpeedGainPerZone": 0.2,
       "stinkyTipValue": 0,
       "treatFinderSpawns": 2,
-      "treatFinderTipSpawns": 1.25
+      "treatFinderTipSpawns": 1.5
     },
     "pixels": {
       "roadScrollSpeed": 200,
@@ -1547,7 +1547,7 @@
   "walkers": [
     {
       "id": "ada",
-      "agility": 1.2,
+      "agility": 1.25,
       "greeting": "Tidy lane work. May I walk with you?",
       "name": "Ada",
       "perk": "calmVoice",

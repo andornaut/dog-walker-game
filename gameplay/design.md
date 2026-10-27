@@ -218,7 +218,7 @@ Each walker has one **perk**:
 - **Calm voice** (Ada): debuffs last half as long
 - **Long reach** (Trista): the front dog grabs tips and treats one lane to either side
 - **Second chance** (Casey): the first ♥ lost in each neighborhood is forgiven (one heart, including one of a Muddy bump's two)
-- **Treat finder** (Ben): twice as many treats appear, and 25% more tips
+- **Treat finder** (Ben): twice as many treats appear, and 50% more tips
 
 ### Home screen and progression
 
