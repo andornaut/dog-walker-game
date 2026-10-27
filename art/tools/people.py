@@ -275,8 +275,8 @@ def kiwi_top(wave):
     return top
 
 
-def judy_top(wave):
-    """Judy, wedding planner, dramatic: blond high ponytail with a pink bow, headset mic, a white blouse
+def aunt_judy_top(wave):
+    """Aunt Judy, wedding planner, dramatic: blond high ponytail with a pink bow, headset mic, a white blouse
     with a pink placket, a pink skirt, and her clipboard with a heart on it."""
     def top(g, b):
         g.cel(25, 6 + b, 3, 6, "yellow", "amber")
@@ -378,7 +378,7 @@ OWNERS = {
     "pierre": (tara_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),
     "archie": (kiwi_top, "brown", "red", None),
-    "snowball": (judy_top, "skin1", "pink", None),
+    "snowball": (aunt_judy_top, "skin1", "pink", None),
     "penny": (gadget_top, "dslate", "dbrown", None),
     "kilo": (jason_top, "skin2", "sky", None),
 }

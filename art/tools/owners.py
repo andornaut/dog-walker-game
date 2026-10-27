@@ -275,7 +275,7 @@ def kiwi(mood):
     return g
 
 
-def judy(mood):
+def aunt_judy(mood):
     """Wedding planner, dramatic: blond high ponytail, headset mic, white blouse."""
     g = face()
     g.cel(25, 8, 3, 6, "yellow", "amber")
@@ -559,7 +559,7 @@ OWNERS = {
     "pierre": tara,
     "biscuit": sam,
     "archie": kiwi,
-    "snowball": judy,
+    "snowball": aunt_judy,
     "penny": gadget,
     "kilo": jason,
 }
