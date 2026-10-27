@@ -45,12 +45,12 @@ import {
   treatLine,
 } from "../../hud/stripLines";
 import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/buffLayout";
+import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
 import {
   DOG_REACTIONS,
   dogReaction,
   hitEffects,
   obstacleMotion,
-  shakesRoad,
   splashEffect,
   tipSide,
   whiteFlash,
@@ -131,6 +131,8 @@ export const QUIPS_EVENT = "quips";
 export const ACHIEVEMENTS_EVENT = "achievements";
 // An EffectItem whose walk bar well glints as its charm pops.
 export const BUFF_GLINT_EVENT = "buff-glint";
+// A bump's border colour, for the HUD to flash round the screen.
+export const BUMP_FLASH_EVENT = "bump-flash";
 
 // Raises the first-time hint for event until it has shown once: the HUD says it on the
 // message strip and marks it shown.
@@ -315,8 +317,8 @@ export class RunMoments {
       step.bumps.flatMap(({ change }) => (change === null ? [] : [change])),
     );
     // A contact obstacle, such as a puddle, plays its own hit sound, a splash at the touching
-    // dog's feet and its edge flash, with a plain obstacle's stop; the walker stumbles and every
-    // dog reacts and shakes off.
+    // dog's feet, its edge flash and the bump's flash, with a plain obstacle's stop; the walker
+    // stumbles and every dog reacts and shakes off.
     for (const { dog, encounter, outcome } of step.contacts) {
       const still = this.deps.still();
       const { kind } = gameData.encounters[encounter];
@@ -331,6 +333,7 @@ export class RunMoments {
         const moment = { depth: DEPTH.popup, field: hitField(), still };
         playEdgeFlash(this.scene, moment, flash);
       }
+      this.flashBump({ encounter, kind: "encounter" });
       this.deps.pack.stumble(still, DOG_REACTIONS.splash);
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
       this.sayQuips(outcome.quips);
@@ -351,6 +354,9 @@ export class RunMoments {
       sound.play(hitCue(kind, hit.encounter));
       this.deps.pack.stumble(this.deps.still(), DOG_REACTIONS.hit);
       this.playHit(hit, step, pack);
+      if (kind === "obstacle") {
+        this.flashBump({ encounter: hit.encounter, kind: "encounter" });
+      }
     }
   }
 
@@ -578,7 +584,7 @@ export class RunMoments {
   }
 
   // A plain or moving hit's cues: its bump and debris over the struck dog, the dog reacting
-  // and flashing white, the struck obstacle's motion, and a mover's road shake.
+  // and flashing white, the struck obstacle's motion, and the bump's flash.
   private playBumpHit(bump: MinorBump, step: WalkStep, pack: { x: number; y: number }): void {
     const still = this.deps.still();
     const { item } = bump;
@@ -600,7 +606,15 @@ export class RunMoments {
       const side = tipSide(body.sprite.x, pack.x);
       moveObstacle(this.scene, body, obstacleMotion(still, hit, side));
     }
-    if (shakesRoad(still, hit.kind)) {
+    this.flashBump({ kind: "minor", obstacle: item.kind });
+  }
+
+  // A bump's border round the screen, flashed by the HUD in the bump's colour, and the road's
+  // nudge unless motion is reduced.
+  private flashBump(source: BumpSource): void {
+    const { colour, nudge } = bumpFlash(this.deps.still(), source);
+    this.scene.events.emit(BUMP_FLASH_EVENT, colour);
+    if (nudge) {
       shakeRoad(this.scene);
     }
   }

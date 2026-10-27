@@ -11,7 +11,6 @@ import {
   type MotionStep,
   OBSTACLE_HITS,
   obstacleMotion,
-  shakesRoad,
   splashEffect,
   type StruckDog,
   tipSide,
@@ -109,11 +108,6 @@ describe("hit effects", () => {
     }
   });
 
-  it("shakes the road for a mover's hit only", () => {
-    expect(shakesRoad(false, "moving")).toBe(true);
-    expect(shakesRoad(false, "plain")).toBe(false);
-  });
-
   it("has the struck dog react, and every dog react and shake off on a splash", () => {
     expect(dogReaction(false, "hit")).toEqual(["react"]);
     expect(dogReaction(false, "splash")).toEqual(["react", "shake"]);
@@ -136,9 +130,8 @@ describe("hit effects with reduced motion", () => {
     ["plain", "trashCan"],
     ["plain", "cone"],
     ["plain", "hedge"],
-  ])("keeps a %s %s still, with no road shake or dog reaction", (kind, obstacle) => {
+  ])("keeps a %s %s still, with no dog reaction", (kind, obstacle) => {
     expect(obstacleMotion(true, struck(kind, obstacle), 1)).toEqual([]);
-    expect(shakesRoad(true, kind)).toBe(false);
     expect(dogReaction(true, "hit")).toEqual([]);
     expect(dogReaction(true, "splash")).toEqual([]);
   });

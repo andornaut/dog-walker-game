@@ -85,6 +85,7 @@ import {
   setPixelText,
 } from "../ui/phaser/pixelText";
 import { addCharm, glintWell } from "./buffCharm";
+import { BumpBorder } from "./bumpBorder";
 import { DEBUFF_COLORS } from "./debuffColors";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
@@ -98,6 +99,7 @@ import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./
 import {
   ACHIEVEMENTS_EVENT,
   BUFF_GLINT_EVENT,
+  BUMP_FLASH_EVENT,
   CHANGE_LABELS_EVENT,
   HINT_EVENT,
   type OwnerQuip,
@@ -126,8 +128,9 @@ const LABEL = { ms: 1100 };
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
-// An explanation's detail card draws over every other part of the HUD.
+// An explanation's detail card draws over every other part of the HUD but a bump's border.
 const DETAIL_DEPTH = 2000;
+const BUMP_BORDER_DEPTH = 3000;
 // An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
 // A card holds one row of hearts, as many as the most an owner can have.
@@ -273,6 +276,7 @@ export class HudScene extends Scene {
     this.debuffFills = this.add.graphics().setDepth(1);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
     this.detailLayer = this.add.container(0, 0).setDepth(DETAIL_DEPTH);
+    const border = new BumpBorder(this, BUMP_BORDER_DEPTH);
 
     const run = this.walk();
     const firingRects = () => this.feedback?.firingRects() ?? [];
@@ -296,6 +300,7 @@ export class HudScene extends Scene {
     );
     onSceneEvent(this, run.events, FORGIVEN_EVENT, (cue: ForgivenCue) => this.forgive(cue));
     onSceneEvent(this, run.events, BUFF_GLINT_EVENT, (item: EffectItem) => this.glint(item));
+    onSceneEvent(this, run.events, BUMP_FLASH_EVENT, (colour: number) => border.flash(colour));
     onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.sayHint(hint));
     onSceneEvent(this, run.events, MESSAGE_EVENT, (line: MessageLine) => this.messages.say(line));
     onSceneEvent(this, run.events, QUIPS_EVENT, (quips: OwnerQuip[]) => this.sayQuips(quips));

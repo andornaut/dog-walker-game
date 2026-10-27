@@ -2,6 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
+import { encounterFlashColour } from "../layout/bumpFlash";
 import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
 import type { Point, Rect } from "../lib/rect";
 import { addDisplayText } from "../ui/phaser/displayText";
@@ -37,21 +38,6 @@ interface HitMoment {
   word: string | null;
 }
 
-type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
-
-const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
-  capybara: "amber",
-  droppedCone: "pink",
-  fishCrates: "sky",
-  otherDog: "pink",
-  porchCat: "orange",
-  promoTeam: "amber",
-  puddle: "sky",
-  skunk: "mauve",
-  squirrel: "orange",
-  thief: "amber",
-  weddingShoot: "pink",
-};
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
 const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play" };
 const PLATE = { height: 32, key: "ui-hit-label", width: 176 } as const;
@@ -86,7 +72,7 @@ export function hitLook(kind: Encounter["kind"], encounter: EncounterId): HitLoo
   if (kind === "lucky") {
     return { burst: `fx-${art}`, flash: null, plate: "lucky" };
   }
-  const colour = FLASH_COLOURS[encounter] ?? "amber";
+  const colour = encounterFlashColour(encounter);
   return { burst: `fx-hit-${art}`, flash: `ui-hit-flash-${colour}`, plate: "normal" };
 }
 

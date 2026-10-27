@@ -31,3 +31,15 @@ export function insetRect(amount: number, rect: Rect): Rect {
     y: rect.y + amount,
   };
 }
+
+// A ring of the given thickness just inside rect's edge, as its top, bottom, left and right
+// bands; the side bands run the rect's full height.
+export function ringRects(thickness: number, rect: Rect): Rect[] {
+  const { height, width, x, y } = rect;
+  return [
+    { height: thickness, width, x, y },
+    { height: thickness, width, x, y: y + height - thickness },
+    { height, width: thickness, x, y },
+    { height, width: thickness, x: x + width - thickness, y },
+  ];
+}

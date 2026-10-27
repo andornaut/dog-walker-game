@@ -151,13 +151,9 @@ export function whiteFlash(still: boolean): FlashCue[] {
   }));
 }
 
-// A mover's hit shakes the road's camera, the HUD's excepted, this far for this long; reduced
-// motion keeps it still.
+// A bump's nudge (bumpFlash.ts) shakes the road's camera, the HUD's excepted, this far for this
+// long.
 export const ROAD_SHAKE = { ms: 150, px: 2 };
-
-export function shakesRoad(still: boolean, kind: HitKind): boolean {
-  return !still && kind === "moving";
-}
 
 // The tags a dog plays in order after a hit before it walks on: the struck dog reacts, and on a
 // splash every dog reacts and shakes off. Reduced motion skips them.

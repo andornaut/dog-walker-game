@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { insetRect, type Rect } from "../../lib/rect";
+import { insetRect, type Rect, ringRects } from "../../lib/rect";
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../pixelShapes";
 import { PALETTE } from "./palette";
 
@@ -28,11 +28,7 @@ export function drawRing(
   rect: Rect,
   thickness: number,
 ): void {
-  const { height, width, x, y } = rect;
-  fillRect(g, color, { height: thickness, width, x, y });
-  fillRect(g, color, { height: thickness, width, x, y: y + height - thickness });
-  fillRect(g, color, { height, width: thickness, x, y });
-  fillRect(g, color, { height, width: thickness, x: x + width - thickness, y });
+  ringRects(thickness, rect).forEach((band) => fillRect(g, color, band));
 }
 
 // The keyboard's focus ring: a 2px cyan frame outset pixels outside rect.
