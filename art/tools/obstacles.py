@@ -9,7 +9,7 @@ of top surface and never its length along the road. The game scales each one
 by distance with its base on the road line.
 
 cone                48x48   1 lane, a glint runs down its highlight
-trash-can           48x48   1 lane, the lid lifts 1px in a breeze
+trash-can           48x48   1 lane, the lid's handle rattles up 1px
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
 barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink
 barrier-3           176x36  3 lanes, lamps blink
@@ -118,11 +118,10 @@ def cone(glint=None):
 
 
 def trash_can(lift=0):
-    """lift raises the lid and handle by that many drawn pixels (negative is up), showing the dark gap under
-    the lid. The forest body takes a green rim on its top-left edges, the ink wheels and handle a grey one.
+    """lift raises the lid's handle by that many drawn pixels (negative is up), the lid held still. The forest
+    body takes a green rim on its top-left edges, the ink wheels and handle a grey one.
     Its lit half has two green ribs, one below TEXTURE_MIN."""
     g = edged(Grid(SIZE, SIZE))
-    lift *= unit(g)[1]
     g.rect(12, 33, 4, 4, "ink")
     g.rect(24, 33, 4, 4, "ink")
     # the body tapers to its foot; its right half is in shade
@@ -132,12 +131,12 @@ def trash_can(lift=0):
     g.tri((20, 13), (20, 34), (27.5, 34), "forest")
     for x in (13, 16) if scale_of(g) >= TEXTURE_MIN else (15,):
         g.rect(x, 16, 1, 14, "green")
-    if lift:
-        g.rect(10, 14 + lift, 20, -lift, "ink")
-    g.rect(9, 8 + lift, 22, 6, "dgreen")
-    g.rect(9, 8 + lift, 22, 1, "green")
-    g.rect(20, 9 + lift, 11, 5, "forest")
-    g.rect(16, 5 + lift, 8, 3, "ink")
+    g.rect(9, 8, 22, 6, "dgreen")
+    g.rect(9, 8, 22, 1, "green")
+    g.rect(20, 9, 11, 5, "forest")
+    # the handle in drawn pixels, so the lift moves it whole at any scale
+    x0, y0, x1, y1 = (math.floor(v * scale_of(g) + 0.5) for v in (16, 5, 24, 8))
+    raster(g).rect(x0, y0 + lift, x1 - x0, y1 - y0, "ink")
     return lit(g)
 
 
