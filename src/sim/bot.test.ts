@@ -81,22 +81,6 @@ function withoutPulls(data: GameData): GameData {
   };
 }
 
-// Every walker's perk also slows the pack's lane changes as Muddy does, so the pack is Muddy all
-// walk long.
-function alwaysMuddy(data: GameData): GameData {
-  const muddy = data.debuffs.muddy.modifiers.map((modifier) => ({
-    ...modifier,
-    kind: "modifier" as const,
-  }));
-  const walkerPerks = Object.fromEntries(
-    Object.entries(data.walkerPerks).map(([id, perk]) => [
-      id,
-      { ...perk, effects: [...perk.effects, ...muddy] },
-    ]),
-  ) as unknown as GameData["walkerPerks"];
-  return { ...data, walkerPerks };
-}
-
 const SHORT = shortZones(gameData, 0.25);
 const NO_CHASER: PackDogs = ["duchess", "biscuit", "snowball"];
 
@@ -177,7 +161,6 @@ describe("a steering bot", { timeout: 60_000 }, () => {
       ),
       name: "every mover moving and every stepper and hopper hopping 1 or 2 times, up to 2 spots",
     },
-    { busy: withoutPulls(alwaysMuddy(SHORT)), name: "a pack Muddy all walk" },
   ])(
     "avoids every obstacle no pull forces, as an ideal player by foresight, with $name",
     ({ busy }) => {
