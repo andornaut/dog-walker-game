@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the 38 achievement badges and the celebration burst.
+"""Draw the 39 achievement badges and the celebration burst.
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, silly pink), each with its own emblem for its goal: no
@@ -232,18 +232,20 @@ def _(g):
     bitmap(g, 22, 5, ["..c..", ".ccc.", "cwccc", "ccccs", ".css."], {"c": "cyan", "w": "white", "s": "sky"})
 
 
-# A small dog side on, stretched mid-leap: B body, E ear, N nose, I eye.
-LEAPER = ["........EB..", "B......BIBBN", ".BBBBBBBBB..", "..BBBBBBB...", ".BB......BB.", "BB........BB"]
+# A dog side on, stretched mid-leap, forelegs reaching and hind legs pushing off: B body, L legs, E ear,
+# N nose, I eye, T tail.
+LEAPER = ["............EE....", "T..........EBBBB..", "TT.........BIBBBN.", ".TBBBBBBBBBBBB....", "..BBBBBBBBBBB.....",
+          "..LBBBBBBBBLL.....", ".LL........LLL....", "LL...........LL..."]
 
 
 @icon("dodge-ball")
 def _(g):
-    """A tiny dog mid-hop over a traffic cone."""
+    """A dog mid-leap over a traffic cone, its jump's arc dotted behind it."""
     g.tri((16, 15), (11.5, 24.5), (20.5, 24.5), "orange")
     g.rect(13, 19, 6, 2, "white")
     g.rect(10, 24, 12, 2, "rust")
-    bitmap(g, 10, 7, LEAPER, {"B": "white", "E": "ink", "N": "ink", "I": "ink"})
-    for x, y in ((7, 20), (7, 17), (8, 14), (9, 12)):
+    bitmap(g, 7, 6, LEAPER, {"B": "white", "L": "lgrey", "E": "ink", "N": "ink", "I": "ink", "T": "white"})
+    for x, y in ((6, 21), (6, 18), (7, 15)):
         g.p(x, y, "sky")
 
 
@@ -280,18 +282,6 @@ def _(g):
     g.rect(13, 19, 6, 1, "plum")
     g.p(11, 16, "pink")
     g.p(20, 16, "pink")
-
-
-@icon("top-walker")
-def _(g):
-    g.rect(9, 14, 14, 8, "amber")
-    g.tri((9, 14), (9, 8), (13, 14), "amber")
-    g.tri((16, 14), (16, 7), (12.5, 14), "amber")
-    g.tri((16, 14), (16, 7), (19.5, 14), "amber")
-    g.tri((23, 14), (23, 8), (19, 14), "amber")
-    g.rect(9, 20, 14, 2, "orange")
-    for x, c in ((12, "red"), (16, "sky"), (20, "green")):
-        g.rect(x - 1, 16, 2, 2, c)
 
 
 @icon("youre-fired")
@@ -426,37 +416,9 @@ def dizzy_star(g, cx, cy, col="yellow"):
 H9 = [".xxx.xxx.", "xxxxxxxxx", "xxxxxxxxx", "xxxxxxxxx", ".xxxxxxx.", "..xxxxx..", "...xxx...", "....x...."]
 H7 = [".xx.xx.", "xxxxxxx", "xxxxxxx", ".xxxxx.", "..xxx..", "...x..."]
 H5 = ["xx.xx", "xxxxx", "xxxxx", ".xxx.", "..x.."]
-# A slot reel's 7.
-SEVEN = ["xxxxx", "....x", "...x.", "..x..", "..x..", ".x...", ".x..."]
 # An open palm, fingers up, thumb out to the right.
 PALM = ["1.1.1..", "1.1.1..", "1.1.1.1", "11111.1", "1111111", "111111.", ".1111..", ".111..."]
 
-@icon("twos-company")
-def _(g):
-    """Two big paw prints walking side by side, the left one a step ahead, in dbrown and rust."""
-    big = ["..aa.aa..", "..aa.aa..", "aa.....aa", "aa.....aa", "...aaa...", "..aaaaa..", ".aaaaaaa.", "..aaaaa.."]
-    bitmap(g, 5, 7, big, {"a": "dbrown"})
-    bitmap(g, 16, 14, big, {"a": "rust"})
-
-@icon("flawless-trio")
-def _(g):
-    """Three cut diamonds in a triangle, cyan lit white, each with a sky facet."""
-    for cx, cy in ((16, 9), (10.5, 19), (21.5, 19)):
-        g.tri((cx - 4.5, cy - 1), (cx + 4.5, cy - 1), (cx, cy + 5), "cyan")
-        g.rect(cx - 3, cy - 3, 6, 2, "cyan")
-        g.rect(cx - 2, cy - 3, 2, 2, "white")
-        g.tri((cx, cy - 1), (cx + 4.5, cy - 1), (cx, cy + 5), "sky")
-
-@icon("good-day")
-def _(g):
-    """A big yellow sun with eight pointed amber rays, no face."""
-    for k in range(8):
-        a = math.radians(k * 45 + 22.5)
-        tip = (16 + math.cos(a) * 10.5, 16 + math.sin(a) * 10.5)
-        l = (16 + math.cos(a - 0.35) * 6.5, 16 + math.sin(a - 0.35) * 6.5)
-        r = (16 + math.cos(a + 0.35) * 6.5, 16 + math.sin(a + 0.35) * 6.5)
-        g.tri(l, r, tip, "amber")
-    g.ell(16, 16, 6.5, 6.5, "yellow", "amber", "white")
 
 @icon("twenty-grand")
 def _(g):
@@ -468,6 +430,7 @@ def _(g):
     g.rect(15, 10, 4, 14, "red")
     g.rect(15, 10, 1, 14, "pink")
     bitmap(g, 9, 10, [".1.", "111", "1..", "111", "..1", "111", ".1."], {"1": "white"})
+
 
 @icon("tip-jar")
 def _(g):
@@ -481,6 +444,7 @@ def _(g):
         g.ell(cx, cy, 2.2, 1.6, "amber", "orange", "yellow")
     g.rect(11, 14, 1, 3, "lgrey")
 
+
 @icon("marathon")
 def _(g):
     """A white race bib pinned at its corners, a red 100 on it."""
@@ -489,6 +453,7 @@ def _(g):
     for x, y in ((8, 10), (23, 10), (8, 21), (23, 21)):
         g.p(x, y, "grey")
     digits(g, 10, 13, "100", "red")
+
 
 @icon("tag-team")
 def _(g):
@@ -499,6 +464,7 @@ def _(g):
     g.rect(19, 18, 4, 4, "green")
     for x, y in ((16, 4), (16, 5), (13, 6), (19, 6), (16, 8), (12, 8), (20, 8)):
         g.p(x, y, "yellow")
+
 
 @icon("bird-brain")
 def _(g):
@@ -515,6 +481,7 @@ def _(g):
         g.rect(x, 23, 1, 3, "pink")
     for x, y in ((7, 8), (12, 6), (17, 8)):
         dizzy_star(g, x, y)
+
 
 @icon("fender-bender")
 def _(g):
@@ -535,6 +502,7 @@ def _(g):
     for a, b in (((6, 13), (4, 11)), ((6, 17), (4, 17)), ((6, 21), (4, 23))):
         line(g, a, b, "amber")
 
+
 @icon("trash-panda")
 def _(g):
     """A raccoon's face front on: grey head, round dark ears, a black eye mask with white brows and eyes,
@@ -552,6 +520,7 @@ def _(g):
     g.p(20, 15, "white")
     g.ell(16, 20.5, 4.5, 3, "white")
     g.ell(16, 18.8, 1.6, 1.1, "ink")
+
 
 @icon("burned-bridges")
 def _(g):
@@ -576,6 +545,7 @@ def _(g):
     for cx, cy, r in ((16, 9, 2.2), (14, 5.5, 2.0), (18.5, 4.5, 1.6)):
         g.ell(cx, cy, r, r, "grey", "slate", "lgrey")
 
+
 @icon("finders-keepers")
 def _(g):
     """The lost wallet as the road draws it: a green bill with a white $ standing up out of a brown
@@ -590,6 +560,7 @@ def _(g):
     g.rect(17, 17, 9, 5, "dbrown")
     g.rect(21, 19, 3, 1, "amber")
 
+
 @icon("popular-pack")
 def _(g):
     """Three whole hearts floating up from big to small, the way the friendly neighbour's hearts rise:
@@ -598,35 +569,172 @@ def _(g):
         bitmap(g, x0, y0, rows, {"x": "red" if rows is not H5 else "pink"})
         g.p(x0 + 1, y0 + 1, "white")
 
-@icon("double-jackpot")
+# ---------- the card choices and the Spotlight ----------
+
+# A camera flash popping: a white four-point star round a yellow core.
+FLASH = ["...w...", "...w...", "..wyw..", "wwyyyww", "..wyw..", "...w...", "...w..."]
+# The stage lamp at the Spotlight's upper left, aimed down and right: d its dslate can, s slate light on it,
+# g its grey rim and yoke, w the white lens.
+LAMP = ["..g......", ".gsdd....", "gssddd...", ".sddddd..", ".ddddddg.", "..ddddgww", "...dgwww.", "....gww.."]
+# A $ for a price tag, 3x7.
+DOLLAR = [".1.", "111", "1..", "111", "..1", "111", ".1."]
+# A smaller flash, 5x5.
+SPARK = ["..w..", ".wyw.", "wyyyw", ".wyw.", "..w.."]
+
+
+@icon("paparazzi")
 def _(g):
-    """A slot machine's window in a gold frame, two white reels each showing a red 7, its pull lever up
-    on the right with a red knob."""
-    g.rect(25, 11, 1, 6, "lgrey")
-    g.rect(24, 16, 2, 1, "grey")
-    g.ell(25, 9.5, 1.8, 1.8, "red")
-    g.rect(6, 9, 18, 14, "amber")
-    g.rect(6, 9, 18, 1, "yellow")
-    g.rect(6, 22, 18, 1, "orange")
-    for x0 in (8, 16):
-        g.rect(x0, 11, 6, 10, "white")
-        g.rect(x0, 11, 6, 1, "lgrey")
-        g.rect(x0, 20, 6, 1, "lgrey")
-        bitmap(g, x0, 13, SEVEN, {"x": "red"})
+    """The Spotlight debuff's stage lamp at the upper left throwing a yellow beam onto an amber pool, three
+    camera flashes popping round it."""
+    g.ell(17, 22.5, 7, 2.2, "amber", "orange")
+    g.ell(17, 22.3, 4.5, 1.2, "yellow")
+    g.tri((10, 14), (14, 11), (23, 21.5), "yellow")
+    g.tri((10, 14), (23, 21.5), (11, 22), "yellow")
+    for k in range(6):
+        g.p(13.5 + k * 1.2, 15 + k, "white")
+    bitmap(g, 7, 7, LAMP, {"d": "dslate", "s": "slate", "g": "grey", "w": "white"})
+    for x0, y0 in ((17, 6), (20, 13), (6, 16)):
+        bitmap(g, x0, y0, FLASH, {"w": "white", "y": "yellow"})
+
+
+@icon("zookeeper")
+def _(g):
+    """The escaped capybara side on, facing right, its blunt snout and small ear under its keeper's khaki
+    safari hat."""
+    g.ell(13, 19, 7.5, 5, "brown", "dbrown", "tan")
+    g.rect(18, 13, 6, 8, "brown")
+    g.rect(23, 14, 3, 6, "brown")
+    g.rect(18, 20, 8, 1, "dbrown")
+    g.rect(25, 15, 1, 2, "dbrown")
+    g.p(24, 18, "plum")
+    g.p(21, 15, "ink")
+    g.rect(17, 12, 2, 2, "dbrown")
+    for x in (8, 11, 15, 18):
+        g.rect(x, 22, 2, 3, "dbrown")
+    g.rect(16, 11, 10, 1, "ochre")
+    g.rect(18, 8, 6, 3, "ochre")
+    g.rect(18, 8, 6, 1, "tan")
+    g.rect(18, 10, 6, 1, "dbrown")
+
+
+@icon("say-cheese")
+def _(g):
+    """The wedding photographer's camera face on, its flash popping, the bride's red and pink bouquet in its
+    white ribbon before it."""
+    g.rect(15, 10, 5, 2, "slate")
+    g.rect(10, 12, 16, 10, "dslate")
+    g.rect(10, 12, 16, 1, "slate")
+    g.rect(10, 21, 16, 1, "navy")
+    g.rect(21, 10, 3, 2, "lgrey")
+    g.ell(18, 16.5, 4.5, 4.5, "lgrey", "grey", "white")
+    g.ell(18, 16.5, 3, 3, "ink")
+    g.ell(18, 16.5, 1.6, 1.6, "blue")
+    g.p(17, 15, "white")
+    bitmap(g, 20, 5, SPARK, {"w": "white", "y": "yellow"})
+    for x, y in ((9, 23), (11, 23), (10, 24)):
+        g.rect(x, y, 1, 2, "dgreen")
+    g.rect(9, 22, 3, 1, "white")
+    for cx, cy, col in ((8.5, 19.5, "red"), (12.5, 19.5, "pink"), (10.5, 18, "pink"), (10.5, 21, "red")):
+        g.ell(cx, cy, 1.8, 1.8, col)
+
+
+@icon("sugar-rush")
+def _(g):
+    """A dropped cone tipped on its side, its waffle in an ochre and rust grid, its pink scoop rolled out
+    onto a melting splat, speed lines streaking over it where the pack zoomed off."""
+    g.ell(20, 22, 6.5, 1.6, "mauve")
+    for x, h in ((16, 2), (24, 1)):
+        g.rect(x, 23, 1, h, "mauve")
+    cone = Grid(32, 32)
+    cone.tri((6, 17), (15, 11.5), (15, 21.5), "ochre")
+    for y in range(32):
+        for x in range(32):
+            if cone.px[y][x]:
+                g.p(x, y, "rust" if (x + y) % 3 == 0 or (x - y) % 3 == 0 else "ochre")
+    g.ell(19.5, 16, 4.5, 4.5, "pink", "mauve", "white")
+    for x, y in ((19, 13), (22, 16), (18, 18)):
+        g.p(x, y, "red")
+    for y, x0, w in ((8, 8, 7), (10, 6, 5)):
+        g.rect(x0, y, w, 1, "sky")
+
+
+# A fish side on, facing left: B its sky body, D the blue back, W the white belly, F the blue fins and tail,
+# I its eye.
+FISH = ["......DDDD.......", "....DDDDDDDD...FF", "..BBBBBBBBBBB.FFF", ".BIBBBBBBBBBBBFFF", "BBBBBBBBBBBBBBFF.",
+        ".BBWWWWWWWBBBBFFF", "..WWWWWWWWWBB.FFF", "....WWWWWW.....FF"]
+
+
+@icon("fishmongers-friend")
+def _(g):
+    """A fish off the spilled crates with an amber price tag tied on, a dbrown $ on it."""
+    bitmap(g, 6, 8, FISH, {"B": "sky", "D": "blue", "W": "white", "F": "blue", "I": "ink"})
+    line(g, (19, 14), (18, 17), "plum")
+    g.rect(14, 18, 9, 9, "amber")
+    g.rect(14, 18, 9, 1, "yellow")
+    g.rect(22, 18, 1, 9, "orange")
+    g.p(18, 18, "plum")
+    bitmap(g, 17, 20, DOLLAR, {"1": "dbrown"})
+
+
+# The porch cat's fish treat: b brown, d its dbrown eye and tail edge.
+TREAT = [".bbbb.d", "bdbbbbd", ".bbbb.d"]
+
+
+@icon("cat-whisperer")
+def _(g):
+    """The porch cat's calico face front on, an orange patch and an ink patch over its white, a little heart
+    above it and a brown fish treat under its chin."""
+    g.tri((7, 16), (8, 8), (13, 12), "orange")
+    g.tri((16, 12), (21, 8), (22, 16), "ink")
+    g.tri((8.5, 14), (9, 10.5), (11.5, 12.5), "pink")
+    g.ell(14.5, 17.5, 8, 6, "white", "lgrey")
+    g.ell(10, 14.5, 3.5, 2.5, "orange")
+    g.ell(19.5, 14.5, 3, 2.2, "ink")
+    g.rect(10, 16, 2, 2, "green")
+    g.rect(17, 16, 2, 2, "green")
+    g.p(11, 16, "ink")
+    g.p(18, 16, "ink")
+    g.p(14, 19, "pink")
+    g.p(13, 20, "plum")
+    g.p(15, 20, "plum")
+    bitmap(g, 12, 6, H5, {"x": "red"})
+    g.p(13, 7, "white")
+    bitmap(g, 12, 23, TREAT, {"b": "brown", "d": "dbrown"})
+
+
+# A dog's paw raised to wave: F fur, P a pink pad.
+WAVE_PAW = [".P.P.P.", "PFPFPFP", "FFFFFFF", "FFPPPFF", "FPPPPPF", ".FPPPF.", "..FFF..", "..FFF..", "..FFF.."]
+
+
+@icon("big-screen")
+def _(g):
+    """The promo's big screen on its post, bulbs along the top, a dog's paw on it waving between yellow
+    wave marks."""
+    g.rect(15, 21, 3, 4, "slate")
+    g.rect(12, 25, 9, 1, "dslate")
+    g.rect(8, 8, 17, 14, "ink")
+    g.rect(9, 10, 15, 11, "blue")
+    g.rect(9, 10, 15, 4, "sky")
+    for x in range(9, 24, 2):
+        g.p(x, 8, "yellow")
+    bitmap(g, 13, 11, WAVE_PAW, {"F": "ochre", "P": "pink"})
+    for x, y in ((11, 12), (10, 13), (10, 14), (11, 15), (21, 12), (22, 13), (22, 14), (21, 15)):
+        g.p(x, y, "yellow")
 
 
 BADGES = {
-    "double-leash": "firsts", "pack-leader": "firsts",
-    "round-trip": "firsts", "twos-company": "firsts",
+    "double-leash": "firsts", "pack-leader": "firsts", "round-trip": "firsts",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
-    "five-star-service": "mastery", "flawless-trio": "mastery", "good-day": "mastery", "marathon": "mastery",
-    "not-a-scratch": "mastery", "tip-jar": "mastery", "twenty-grand": "mastery",
+    "five-star-service": "mastery", "marathon": "mastery", "not-a-scratch": "mastery", "tip-jar": "mastery",
+    "twenty-grand": "mastery",
     "full-kennel": "collection", "kitted-out": "collection", "local-favourite": "collection",
-    "tag-team": "collection", "top-walker": "collection", "whole-city": "collection",
-    "bird-brain": "silly", "burned-bridges": "silly", "close-shave": "silly", "double-jackpot": "silly",
-    "eau-de-skunk": "silly", "fender-bender": "silly", "finders-keepers": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
-    "popular-pack": "silly", "squirrel": "silly", "trash-panda": "silly", "yoink": "silly", "youre-fired": "silly",
-    "zoomies": "silly",
+    "tag-team": "collection", "whole-city": "collection",
+    "big-screen": "silly", "bird-brain": "silly", "burned-bridges": "silly", "cat-whisperer": "silly",
+    "close-shave": "silly", "eau-de-skunk": "silly", "fender-bender": "silly", "finders-keepers": "silly",
+    "fishmongers-friend": "silly", "mud-season": "silly", "paparazzi": "silly", "popular-pack": "silly",
+    "say-cheese": "silly", "snack-attack": "silly", "sniff-test": "silly", "squirrel": "silly",
+    "sugar-rush": "silly", "trash-panda": "silly", "yoink": "silly", "youre-fired": "silly",
+    "zookeeper": "silly", "zoomies": "silly",
 }
 
 

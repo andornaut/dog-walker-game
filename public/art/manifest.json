@@ -1023,6 +1023,11 @@
       "json": "sprites/badge-big-payday.json"
     },
     {
+      "key": "badge-big-screen",
+      "png": "sprites/badge-big-screen.png",
+      "json": "sprites/badge-big-screen.json"
+    },
+    {
       "key": "badge-bird-brain",
       "png": "sprites/badge-bird-brain.png",
       "json": "sprites/badge-bird-brain.json"
@@ -1031,6 +1036,11 @@
       "key": "badge-burned-bridges",
       "png": "sprites/badge-burned-bridges.png",
       "json": "sprites/badge-burned-bridges.json"
+    },
+    {
+      "key": "badge-cat-whisperer",
+      "png": "sprites/badge-cat-whisperer.png",
+      "json": "sprites/badge-cat-whisperer.json"
     },
     {
       "key": "badge-clean-paws",
@@ -1046,11 +1056,6 @@
       "key": "badge-dodge-ball",
       "png": "sprites/badge-dodge-ball.png",
       "json": "sprites/badge-dodge-ball.json"
-    },
-    {
-      "key": "badge-double-jackpot",
-      "png": "sprites/badge-double-jackpot.png",
-      "json": "sprites/badge-double-jackpot.json"
     },
     {
       "key": "badge-double-leash",
@@ -1078,24 +1083,19 @@
       "json": "sprites/badge-finders-keepers.json"
     },
     {
+      "key": "badge-fishmongers-friend",
+      "png": "sprites/badge-fishmongers-friend.png",
+      "json": "sprites/badge-fishmongers-friend.json"
+    },
+    {
       "key": "badge-five-star-service",
       "png": "sprites/badge-five-star-service.png",
       "json": "sprites/badge-five-star-service.json"
     },
     {
-      "key": "badge-flawless-trio",
-      "png": "sprites/badge-flawless-trio.png",
-      "json": "sprites/badge-flawless-trio.json"
-    },
-    {
       "key": "badge-full-kennel",
       "png": "sprites/badge-full-kennel.png",
       "json": "sprites/badge-full-kennel.json"
-    },
-    {
-      "key": "badge-good-day",
-      "png": "sprites/badge-good-day.png",
-      "json": "sprites/badge-good-day.json"
     },
     {
       "key": "badge-kitted-out",
@@ -1128,6 +1128,11 @@
       "json": "sprites/badge-pack-leader.json"
     },
     {
+      "key": "badge-paparazzi",
+      "png": "sprites/badge-paparazzi.png",
+      "json": "sprites/badge-paparazzi.json"
+    },
+    {
       "key": "badge-popular-pack",
       "png": "sprites/badge-popular-pack.png",
       "json": "sprites/badge-popular-pack.json"
@@ -1136,6 +1141,11 @@
       "key": "badge-round-trip",
       "png": "sprites/badge-round-trip.png",
       "json": "sprites/badge-round-trip.json"
+    },
+    {
+      "key": "badge-say-cheese",
+      "png": "sprites/badge-say-cheese.png",
+      "json": "sprites/badge-say-cheese.json"
     },
     {
       "key": "badge-snack-attack",
@@ -1153,6 +1163,11 @@
       "json": "sprites/badge-squirrel.json"
     },
     {
+      "key": "badge-sugar-rush",
+      "png": "sprites/badge-sugar-rush.png",
+      "json": "sprites/badge-sugar-rush.json"
+    },
+    {
       "key": "badge-tag-team",
       "png": "sprites/badge-tag-team.png",
       "json": "sprites/badge-tag-team.json"
@@ -1163,11 +1178,6 @@
       "json": "sprites/badge-tip-jar.json"
     },
     {
-      "key": "badge-top-walker",
-      "png": "sprites/badge-top-walker.png",
-      "json": "sprites/badge-top-walker.json"
-    },
-    {
       "key": "badge-trash-panda",
       "png": "sprites/badge-trash-panda.png",
       "json": "sprites/badge-trash-panda.json"
@@ -1176,11 +1186,6 @@
       "key": "badge-twenty-grand",
       "png": "sprites/badge-twenty-grand.png",
       "json": "sprites/badge-twenty-grand.json"
-    },
-    {
-      "key": "badge-twos-company",
-      "png": "sprites/badge-twos-company.png",
-      "json": "sprites/badge-twos-company.json"
     },
     {
       "key": "badge-whole-city",
@@ -1196,6 +1201,11 @@
       "key": "badge-youre-fired",
       "png": "sprites/badge-youre-fired.png",
       "json": "sprites/badge-youre-fired.json"
+    },
+    {
+      "key": "badge-zookeeper",
+      "png": "sprites/badge-zookeeper.png",
+      "json": "sprites/badge-zookeeper.json"
     },
     {
       "key": "badge-zoomies",
