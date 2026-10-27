@@ -222,7 +222,32 @@ export function faceRows(
   if (row.length > 0) {
     rows.push(row);
   }
-  return rows.map((words) => rowOf(width, box, words));
+  return withoutOrphan(width, box, room, rows).map((words) => rowOf(width, box, words));
+}
+
+// The rows with a last row of one lone word given the word before it too, where the two fit
+// room and the row before keeps a word, so no word sits alone on the last row. A name with the
+// heart change after it is two words already.
+function withoutOrphan(
+  width: (text: string) => number,
+  box: FaceBox | undefined,
+  room: number,
+  rows: readonly Word[][],
+): Word[][] {
+  const last = rows.at(-1);
+  const before = rows.at(-2);
+  const moved = before?.at(-1);
+  const lone = last?.length === 1 && !(last[0] ?? []).some(({ text }) => text.includes(" "));
+  if (!lone || last === undefined || before === undefined || moved === undefined) {
+    return [...rows];
+  }
+  if (before.length < 2) {
+    return [...rows];
+  }
+  const together = [moved, ...last];
+  return rowOf(width, box, together).width <= room
+    ? [...rows.slice(0, -2), before.slice(0, -1), together]
+    : [...rows];
 }
 
 // The line's rows in the first of styles that sets it on at most the style's lines, each row

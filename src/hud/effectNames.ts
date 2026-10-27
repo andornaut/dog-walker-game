@@ -98,9 +98,22 @@ function pilled(
 }
 
 // The text with each effect's name that leads its description set in its pill
-// (effectNameMarks), as the scenes draw it.
-export function withNamePills(data: NameData, text: string): string {
-  return pilled(data, text, []).text;
+// (effectNameMarks), and the names it marks itself, as the scenes draw it.
+export function withNamePills(data: NameData, text: string, own: readonly NameMark[] = []): string {
+  return pilled(data, text, own).text;
+}
+
+// The debuff's name where text first names it as a word, as a debuff's strip line ("Stinky pack!")
+// or a tip it zeroed ("+$0 Stinky") does, or none.
+export function debuffNameMarks(
+  data: Pick<GameData, "debuffs">,
+  debuff: DebuffId,
+  text: string,
+): NameMark[] {
+  const { name } = data.debuffs[debuff];
+  const literal = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const at = text.search(new RegExp(`(?<!\\p{L})${literal}(?!\\p{L})`, "u"));
+  return at < 0 ? [] : [{ at, kind: debuff, length: name.length }];
 }
 
 // A face text, such as a message strip line, with each effect's name in its pill: the names it

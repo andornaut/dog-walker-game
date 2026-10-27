@@ -1,10 +1,11 @@
 import type { DebuffId, DogId, EncounterId, GameData } from "../data/types";
-import { fillLine, fillNames, sentences } from "../lib/lines";
+import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
 import type { FaceMood } from "../rules/treats";
 import { cents, read } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
+import { debuffNameMarks } from "./effectNames";
 import { faceSentenceList, type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
 import type { MessageLine } from "./messageStrip";
 import { MOMENTS } from "./moments";
@@ -240,8 +241,8 @@ export function debuffChanges(
   return { ended, started };
 }
 
-// A debuff's start, with how long it lasts in whole seconds, its lead sentence, which names the
-// debuff ("Stinky pack!"), set apart in the debuff's colour; or its end.
+// A debuff's start, with how long it lasts in whole seconds, the debuff's name in it ("Stinky
+// pack!") marked for its pill; or its end.
 export function debuffLines(
   data: StripData & Pick<GameData, "debuffs" | "tuning">,
   changes: ReturnType<typeof debuffChanges>,
@@ -249,12 +250,9 @@ export function debuffLines(
   const { debuffEnd, debuffStart } = data.runText.strip;
   return [
     ...changes.started.map(({ debuff, secondsLeft }): MessageLine => {
-      const text = fillNames(
-        debuffStart[debuff],
-        debuffFields(data, debuff, Math.round(secondsLeft)),
-      );
-      const lead = sentences(text)[0] ?? "";
-      return { icon: debuff, names: [{ at: 0, kind: debuff, length: lead.length }], text };
+      const fields = debuffFields(data, debuff, Math.round(secondsLeft));
+      const text = fillNames(debuffStart[debuff], fields);
+      return { icon: debuff, names: debuffNameMarks(data, debuff, text), text };
     }),
     ...changes.ended.map((debuff): MessageLine => ({ icon: debuff, text: debuffEnd[debuff] })),
   ];

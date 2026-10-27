@@ -5,7 +5,13 @@ import type { DebuffId } from "../data/types";
 import { cardEffectText, type CardTextContext } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { PILL_CLOSE, PILL_SPACE, pillIndex } from "../ui/namePills";
-import { effectNameMarks, faceTextWithNamePills, pillKind, withNamePills } from "./effectNames";
+import {
+  debuffNameMarks,
+  effectNameMarks,
+  faceTextWithNamePills,
+  pillKind,
+  withNamePills,
+} from "./effectNames";
 
 // The text each mark covers, with its kind.
 function marked(text: string): { kind: string; name: string }[] {
@@ -90,14 +96,25 @@ describe("faceTextWithNamePills", () => {
     const text = "Stinky pack! Stinky: Rosa smiles";
     const shown = faceTextWithNamePills(gameData, {
       marks: [{ at: text.indexOf("Rosa"), dog: "kilo", length: 4, mood: "happy" }],
-      names: [{ at: 0, kind: "stinky", length: "Stinky pack!".length }],
+      names: debuffNameMarks(gameData, "stinky", text),
       text,
     });
     const [mark] = shown.marks ?? [];
     expect(shown.text.slice(mark?.at, (mark?.at ?? 0) + 4)).toBe("Rosa");
     const { kind, rest } = opened(shown.text);
     expect(kind).toBe("stinky");
-    expect(rest.startsWith(`Stinky${PILL_SPACE}pack!${PILL_CLOSE} `)).toBe(true);
+    expect(rest.startsWith(`Stinky${PILL_CLOSE} pack! `)).toBe(true);
     expect(shown.text.split(PILL_CLOSE)).toHaveLength(3);
+  });
+});
+
+describe("debuffNameMarks", () => {
+  it.each([
+    ["+$0 Stinky", [{ at: 4, kind: "stinky", length: 6 }]],
+    ["Stinky pack! Stinky again", [{ at: 0, kind: "stinky", length: 6 }]],
+    ["UnStinky", []],
+    ["Stinkyness", []],
+  ])("marks the first word %s names Stinky by", (text, marks) => {
+    expect(debuffNameMarks(gameData, "stinky", text)).toEqual(marks);
   });
 });

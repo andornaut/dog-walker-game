@@ -143,10 +143,11 @@ describe("the walk's lines that name an owner", () => {
       const said = line ?? { text: "" };
       const before = said.text.slice(0, said.marks?.[0]?.at).trimEnd();
       const rows = faceRows(width2x, BOX_2X, width2x(before), said);
+      const [face] = rows[1]?.faces ?? [];
+      const name = rows[1]?.texts.find(({ text }) => text.startsWith(NAME));
       expect(rows[0]?.faces).toEqual([]);
-      expect(rows[1]?.faces.map(({ dog, x }) => ({ dog, x }))).toEqual([{ dog: DOG, x: 0 }]);
-      expect(rows[1]?.texts[0]?.x).toBe(BOX_2X.framed + BOX_2X.gap);
-      expect(rows[1]?.texts[0]?.text.startsWith(NAME)).toBe(true);
+      expect(rows[1]?.faces.map(({ dog }) => dog)).toEqual([DOG]);
+      expect(name?.x).toBe((face?.x ?? 0) + BOX_2X.framed + BOX_2X.gap);
     },
   );
 
@@ -178,6 +179,23 @@ describe("faceRows", () => {
     const texts = rows.map((row) => row.texts.map(({ text }) => text).join(""));
     expect(texts).toEqual(["Hi", gameData.dogs[dog].owner.name, "again"]);
     expect(rows.map((row) => row.faces.length)).toEqual([0, 1, 0]);
+  });
+
+  it.each<[string, string, string[]]>([
+    [
+      "takes the word before a lone last word with it",
+      "Good dog sits here",
+      ["Good dog", "sits here"],
+    ],
+    [
+      "keeps a lone last word alone where the two would not fit",
+      "Good dog sits xxxxxxxxxxxxx",
+      ["Good dog sits", "xxxxxxxxxxxxx"],
+    ],
+  ])("%s", (_name, text, rows) => {
+    const room = width2x("Good dog sits");
+    const set = faceRows(width2x, BOX_2X, room, { text });
+    expect(set.map((row) => row.texts.map((run) => run.text).join(""))).toEqual(rows);
   });
 
   it.each<[string, number, string[]]>([
