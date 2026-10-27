@@ -19,7 +19,7 @@ icon-muddy                  a debuff beside icon-stinky (ui.py), on its bar and 
 icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
                             off three sky speed lines
 icon-spotlight              a debuff's bar and message line: a stage spotlight at the top left
-                            throwing a yellow beam down onto its pool of light
+                            throwing a pale beam down onto its yellow pool of light
 icon-upgrade-<upgrade>      the shop, the cards and the message strip: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
                             (a yellow raincoat), rush-hour (an alarm clock), sweet-talker (a speech
@@ -322,25 +322,28 @@ def zoomies():
     return g
 
 
+# The stage lamp at the spotlight's top left, aimed down and right: d its dslate can, s slate light on it, g
+# its grey rim and yoke, w the white lens.
+SPOT_LAMP = (".g.....",
+             "gsdd...",
+             ".sdddg.",
+             ".ddddgw",
+             "..dgww.",
+             "...gw..")
+
+
 def spotlight():
-    """A stage spotlight from above: a dslate lamp lit slate in its grey yoke at the top, its grey lens rim
-    under it, throwing a yellow beam that widens down onto a pool of light, an amber ring round a yellow
-    centre, with white streaks down the beam."""
+    """A stage spotlight: a dslate lamp at the top left, aimed down and right, its white lens throwing a pale
+    cream beam that widens onto a pool of light, an amber ring round a yellow centre, with a white streak
+    down the beam. Aimed, not hanging straight down, so it never reads as a bell."""
     g = Grid(16, 16)
-    g.tri((6, 5), (10, 5), (1.5, 13), "yellow")
-    g.tri((10, 5), (14.5, 13), (1.5, 13), "yellow")
-    g.ell(8, 12.8, 6.5, 2, "amber")
-    g.ell(8, 12.6, 4.6, 1.2, "yellow")
-    for x0, x1 in ((7, 5), (9, 11)):
-        for k in range(5):
-            g.p(x0 + (x1 - x0) * k / 5, 6 + k, "white")
-    g.rect(5, 2, 6, 3, "dslate")
-    g.rect(5, 2, 5, 1, "slate")
-    g.rect(6, 4, 4, 1, "grey")
-    # the yoke it hangs from, either side of the lamp
-    g.rect(3, 1, 10, 1, "grey")
-    g.rect(3, 2, 1, 3, "grey")
-    g.rect(12, 2, 1, 3, "grey")
+    g.ell(9, 12.6, 6, 2, "amber")
+    g.ell(9, 12.4, 4.2, 1, "yellow")
+    g.tri((4, 6.5), (7, 4.5), (12.5, 12), "cream")
+    g.tri((4, 6.5), (12.5, 12), (6, 12), "cream")
+    for k in range(5):
+        g.p(6.5 + k * 0.9, 7 + k, "white")
+    bitmap(g, 1, 1, list(SPOT_LAMP), {"d": "dslate", "s": "slate", "g": "grey", "w": "white"})
     return g
 
 
