@@ -48,7 +48,7 @@ export const WALKER_PERKS = {
 // spriteKey and portraitKey are keys into the art manifest.
 export const WALKERS = {
   ada: {
-    agility: 1.2,
+    agility: 1.3,
     greeting: "Tidy lane work. May I walk with you?",
     name: "Ada",
     perk: "calmVoice",
@@ -77,7 +77,7 @@ export const WALKERS = {
     zone: "snoozeCrescent",
   },
   trista: {
-    agility: 1.3,
+    agility: 1.2,
     greeting: "Great pace! Race you to the next one?",
     name: "Trista",
     perk: "longReach",
