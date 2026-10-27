@@ -31,7 +31,7 @@ export const DOGS = {
     art: "buddy",
     breed: "Jack Russell",
     look: "White with tan patches, red collar",
-    name: "Marshall",
+    name: "Buddy",
     owner: {
       name: "Sheba",
       role: "retired accountant",
