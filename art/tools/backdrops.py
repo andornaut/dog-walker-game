@@ -45,6 +45,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import scene as sn  # noqa: E402
 from pixel import dk  # noqa: E402
+from roads import LANE_PAINT  # noqa: E402
 
 # ---------- the band and the camera ----------
 # Everything below is drawn from these, read from the game's layout export. The camera is the
@@ -375,17 +376,20 @@ def crosses(z, span, period):
 
 
 def lanes(cv, mark, edge=None, dash=(12, 32), span=6):
-    """The stub's lane dividers, 1px wide; dashes stop where a row spans too much road."""
+    """The stub's lane dividers, 1px wide; dashes stop where a row spans too much road. mark and edge
+    are a color, or a tuple of one per divider, left to right."""
+    marks = mark if isinstance(mark, tuple) else (mark,) * len(DIVIDERS)
+    edges = edge if isinstance(edge, tuple) else (edge,) * len(DIVIDERS)
     for py in range(STUB, H):
         s = scale(py + 0.5)
         z, z1 = F / s - F, F / scale(py + 1.5) - F
         if z - z1 > span or (dash and z % dash[1] >= dash[0]):
             continue
-        for d in DIVIDERS:
+        for d, m, e in zip(DIVIDERS, marks, edges):
             x = round(CX + d * s - 0.5)
-            cv.fill(x, py, 1, 1, mark)
-            if edge:
-                cv.fill(x + 1, py, 1, 1, edge)
+            cv.fill(x, py, 1, 1, m)
+            if e:
+                cv.fill(x + 1, py, 1, 1, e)
 
 
 def corner_depth(px, py):
@@ -643,8 +647,8 @@ def crescent_bend(px):
 
 # ---------- the six neighborhoods ----------
 # The six Toronto neighborhoods, sharing the cross street. Their
-# darkness ranges from the open sand of The Beaches to Yonge Street's evening, Kensington Market's
-# dark laneways and High Park's canopy, and each has its own sky.
+# darkness ranges from the open sand of The Beaches and Kensington Market's Pedestrian Sunday to Yonge
+# Street's evening and High Park's canopy, and each has its own sky.
 
 # The game's verge beside each road, keyed by art id, with colours
 # by K name (shared/verges.json):
@@ -663,10 +667,10 @@ VERGES = {
                                 walkDots=[dict(colors=["brick"], share=0.05), dict(colors=["rust"], share=0.02)],
                                 seamColor="brick", seamEvery=16, walkTo=None, lawn="none",
                                 lawnColors=None, leaves=False),
-    "kensington-market": dict(curbColor="stone", curbTo=162, strips=[dict(color="coal", dots=[], to=166)],
-                              walkColor="shale", walkDots=[dict(colors=["coal"], share=0.06),
-                                                           dict(colors=["ash"], share=0.02)],
-                              seamColor="coal", seamEvery=32, walkTo=None, lawn="none",
+    "kensington-market": dict(curbColor="stone", curbTo=162, strips=[dict(color="clay", dots=[], to=166)],
+                              walkColor="skin2", walkDots=[dict(colors=["clay"], share=0.05),
+                                                           dict(colors=["brown"], share=0.03)],
+                              seamColor="clay", seamEvery=32, walkTo=None, lawn="none",
                               lawnColors=None, leaves=False),
     "the-beaches": dict(curbColor="driftwood", curbTo=164, strips=[], walkColor="skin1",
                         walkDots=[dict(colors=["tan"], share=0.05), dict(colors=["white"], share=0.008)],
@@ -1107,12 +1111,15 @@ def distillery():
     return cv
 
 
-def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE):
-    """A Kensington house turned shop: a steep gable over a painted wall,
-    a shopfront under it, its glass lake and its awning striped cream."""
+def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE, trim="gold"):
+    """A Kensington house turned shop: a steep gable over a painted wall, its roof's left edge lit, a
+    scalloped trim under the eaves, a shopfront under it, its glass lake and its awning striped cream."""
     x = cx - w // 2
     top = base - 58
-    house(cv, x, w, wall, roof, "dbrown", top=top, base=base, roof_h=20, parts=(3, 8, 9, 0), eave=2, glass="lake")
+    house(cv, x, w, wall, roof, "dbrown", top=top, base=base, roof_h=20, parts=(3, 8, 9, 0), eave=2, glass="lake",
+          rake=RAKE.get(roof))
+    for i in range(x - 1, x + w + 1, 3):
+        cv.fill(i, top + 21, 2, 1, trim)
     shopfront(cv, x, w, base - 33, base, wall, awn, sign, board, letters, glass="lake", stripe="cream")
 
 
@@ -1168,36 +1175,158 @@ def garden_car(cv, x, base):
         cv.fill(wx - 1, base - 4, 3, 2, "ash")
 
 
+def ring(cv, cx, cy, r, col):
+    """A 1px circle of radius r round cx, cy."""
+    for a in range(0, 360, 6):
+        t = math.radians(a)
+        cv.fill(round(cx + r * math.cos(t)), round(cy + r * math.sin(t)), 1, 1, col)
+
+
+def bike(cv, x, base, frame="red", flip=False):
+    """A bicycle side on, 15 wide and 9 tall, its wheels on row base: coal tires round ash hubs, a
+    diamond frame, a saddle, and the handlebars at the front (right, or left when flipped)."""
+    def at_x(dx):
+        return x + (14 - dx if flip else dx)
+    for wx in (2, 12):
+        ring(cv, at_x(wx), base - 3, 3, "coal")
+        cv.fill(at_x(wx), base - 3, 1, 1, "ash")
+    for (x0, y0), (x1, y1) in (((2, 3), (6, 7)), ((6, 7), (11, 7)), ((6, 7), (7, 3)), ((7, 3), (2, 3)),
+                               ((7, 3), (11, 7)), ((11, 7), (12, 3))):
+        cv.line(at_x(x0), base - y0, at_x(x1), base - y1, frame)
+    cv.fill(min(at_x(4), at_x(7)), base - 9, 4, 1, "coal")
+    cv.fill(at_x(6), base - 8, 1, 1, "coal")
+    cv.fill(at_x(11), base - 9, 1, 2, "coal")
+    cv.fill(min(at_x(10), at_x(13)), base - 9, 3, 1, "coal")
+
+
+def basket_bike(cv, x, base, frame, flip=False):
+    """A bicycle with an ochre basket of flowers on its handlebars."""
+    bike(cv, x, base, frame, flip)
+    bx = x + (0 if flip else 11)
+    cv.fill(bx, base - 11, 5, 3, "ochre")
+    cv.fill(bx, base - 11, 5, 1, dk("ochre"))
+    for k, c in enumerate(("pink", "yellow", "red")):
+        cv.fill(bx + k * 2, base - 13 + (k % 2), 1, 2, c)
+
+
+GARMENTS = ("red", "dturq", "gold", "lilac", "pink", "moss", "orange", "cream")
+
+
+def clothes_rack(cv, x, w, base, first=0):
+    """A vintage clothes rail out front, w wide: two coal posts and a rail 14 rows up, hung with shirts
+    and dresses in GARMENTS from the first, each 3 wide on a hanger, every third a dress flaring at the
+    hem, its right column in shade."""
+    top = base - 14
+    cv.fill(x, top, 1, 14, "coal")
+    cv.fill(x + w - 1, top, 1, 14, "coal")
+    cv.fill(x, top, w, 1, "coal")
+    for k, gx in enumerate(range(x + 2, x + w - 4, 4), first):
+        c = GARMENTS[k % len(GARMENTS)]
+        n = 9 if k % 3 == 1 else 6
+        cv.fill(gx + 1, top + 1, 1, 1, "ash")
+        cv.fill(gx, top + 2, 3, n, c)
+        cv.fill(gx + 2, top + 2, 1, n, dk(c))
+        if k % 3 == 1:
+            cv.fill(gx - 1, top + n, 5, 2, c)
+            cv.fill(gx + 3, top + n, 1, 2, dk(c))
+
+
+def crates(cv, x, base, fruit):
+    """Produce on the sidewalk: two clay crates side by side and one stepped back on top, each heaped
+    with fruit in turn, a white glint on the heap."""
+    for tier, (y, n) in enumerate(((base - 5, 2), (base - 10, 1))):
+        for i in range(n):
+            cx = x + i * 13 + tier * 6
+            cv.fill(cx, y, 12, 5, "clay")
+            cv.fill(cx, y, 12, 1, "bark")
+            cv.fill(cx + 11, y, 1, 5, "bark")
+            for k in range(5):
+                cv.fill(cx + 1 + k * 2, y - 2 + (k % 2), 2, 2, fruit[(i + tier) % len(fruit)])
+            cv.fill(cx + 2, y - 2, 1, 1, "white")
+
+
+# An eighth note: a 2x2 head, its stem and a flag.
+NOTE = (".xx.", ".xxx", ".x.x", ".x..", "xx..", "xx..")
+
+
+def note(cv, x, y, col, edge="plum"):
+    """An eighth note 4x6 from x, y in col inside a 1px edge, so it holds on any wall."""
+    pts = {(i, j) for j, r in enumerate(NOTE) for i, ch in enumerate(r) if ch == "x"}
+    for i, j in pts:
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                if (i + di, j + dj) not in pts:
+                    cv.fill(x + i + di, y + j + dj, 1, 1, edge)
+    for i, j in pts:
+        cv.fill(x + i, y + j, 1, 1, col)
+
+
+def busker(cv, x, base):
+    """A busker's pitch with no one at it, on row base: an amp, a guitar leaning on it beside its open
+    case, and music notes rising over them."""
+    cv.fill(x, base - 8, 8, 8, "coal")
+    cv.fill(x + 1, base - 7, 6, 5, "ash")
+    cv.fill(x + 3, base - 5, 2, 2, "coal")
+    cv.fill(x + 1, base - 9, 6, 1, "coal")
+    gx = x + 10
+    for dy in range(-3, 4):
+        for dx in range(-3, 4):
+            if (dx / 3.4) ** 2 + (dy / 3.4) ** 2 <= 1:
+                cv.fill(gx + dx, base - 4 + dy, 1, 1, "ochre" if dx + dy < 2 else "brown")
+    cv.fill(gx, base - 4, 1, 1, "walnut")
+    cv.line(gx, base - 7, gx - 2, base - 17, "walnut")
+    cv.fill(gx - 3, base - 18, 2, 2, "walnut")
+    cv.fill(x + 15, base - 3, 12, 3, "walnut")
+    cv.fill(x + 16, base - 2, 10, 1, "dred")
+    for nx, ny, c in ((-1, -20, "white"), (8, -27, "gold"), (17, -19, "white")):
+        note(cv, x + nx, base + ny, c)
+
+
+def patio(cv, cx, base, a, b):
+    """A cafe table under an umbrella striped a and b, a chair each side, on row base."""
+    umbrella(cv, cx, base, a, b)
+    cv.fill(cx - 4, base - 5, 9, 1, "walnut")
+    cv.fill(cx, base - 4, 1, 4, "walnut")
+    for sx in (cx - 7, cx + 6):
+        cv.fill(sx, base - 4, 2, 1, "walnut")
+        cv.fill(sx, base - 3, 2, 3, "walnut")
+
+
 def kensington():
     cv = sn.Canvas(W, H)
-    # a deep teal sunburst from the end of the street, flat dturq beyond its arc, two clouds
-    sunburst(cv, CX, BASE + 6, 7, "lake", "dturq", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
-    for x, y, w, p in ((12, BASE - 58, 30, 4), (296, BASE - 60, 38, 5)):
-        cloud(cv, x, y, w, p, f"kensington-{x}")
+    # a Pedestrian Sunday afternoon: a rosy sunburst of peach rays from the end of the street, flat pink
+    # beyond its arc
+    sunburst(cv, CX, BASE + 6, 7, "peach", "pink", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
     # rooftops of the back lanes behind the houses
-    roofline(cv, BASE - 34, ((24, 18, 10), (76, 16, 8), (228, 18, 9), (300, 16, 10)), "dbrick")
+    roofline(cv, BASE - 34, ((24, 18, 10), (76, 16, 8), (228, 18, 9), (300, 16, 10)), "brick")
     # painted houses turned shops across the street
     for cx, w, wall_c, roof, awn, sign, board, letters in (
             (47, 56, "dturq", "navy", "dred", "FRUIT", "forest", "gold"),
-            (CX - 69, 60, "violet", "purple", "ochre", "CHEESE", "navy", "gold"),
+            (CX - 69, 60, "violet", "purple", "ochre", "RECORDS", "navy", "gold"),
             (CX, 68, "ochre", "dbrick", "dturq", "VINTAGE", "purple", "cream"),
-            (CX + 69, 60, "olive", "dolive", "mauve", "SPICES", "dbrick", "gold"),
-            (313, 56, "mauve", "purple", "lake", "COFFEE", "coal", "cream")):
+            (CX + 69, 60, "olive", "dolive", "red", "CHEESE", "dbrick", "gold"),
+            (313, 56, "mauve", "purple", "lake", "TACOS", "coal", "cream")):
         market_house(cv, cx, w, wall_c, roof, awn, sign, board, letters)
-    bunting(cv, 0, CX - 36, BASE - 37, 5, ("dred", "gold", "dturq", "lilac", "moss"))
-    bunting(cv, CX + 36, W, BASE - 37, 5, ("moss", "lilac", "gold", "dred", "dturq"))
+    # pennants zig-zagging across the street between the house fronts
+    pennants = ("red", "gold", "dturq", "lilac", "lime", "orange")
+    for i, (x0, x1, y) in enumerate(((0, 90, BASE - 44), (90, 180, BASE - 40), (180, 270, BASE - 44),
+                                     (270, W, BASE - 40))):
+        bunting(cv, x0, x1, y, 5, pennants[i:] + pennants[:i])
 
     def paving(px, py):
-        return "coal" if hashed(px, py, 23) else "shale"
+        return "clay" if hashed(px, py, 23) else "skin2"
 
     yard(cv, BASE, FAR_WALK, paving)
-    # produce out on the sidewalk: crates of fruit
-    for x, fruit in ((6, ("red", "amber")), (CX + 52, ("amber", "orange")), (CX + 108, ("red", "lime"))):
-        cv.fill(x, FAR_WALK - 6, 14, 5, "clay")
-        cv.fill(x, FAR_WALK - 6, 14, 1, "bark")
-        for k in range(6):
-            cv.fill(x + 1 + k * 2, FAR_WALK - 8 + (k % 2), 2, 2, fruit[k % 2])
+    # out front: produce, the Garden Car, a stall, a vintage rail, a busker's pitch, bikes and a patio
+    crates(cv, 4, FAR_WALK - 1, ("red", "lime", "orange"))
     garden_car(cv, 58, FAR_WALK - 1)
+    umbrella(cv, CX - 64, FAR_WALK - 1, "gold", "dturq")
+    clothes_rack(cv, CX - 28, 22, FAR_WALK - 1, first=5)
+    busker(cv, CX + 6, FAR_WALK - 1)
+    bike(cv, CX + 40, FAR_WALK - 1, "dturq")
+    basket_bike(cv, CX + 56, FAR_WALK - 1, "lime", flip=True)
+    patio(cv, CX + 96, FAR_WALK - 1, "red", "cream")
+    bike(cv, 250, FAR_WALK - 1, "gold", flip=True)
     # the laneway walls at both ends of the street, painted with murals
     for x0 in (0, W - 16):
         mural(cv, x0, BASE - 66, FAR_WALK, x0 > 0)
@@ -1205,17 +1334,17 @@ def kensington():
     def road(x, z, span, px, py):
         a = abs(x)
         if a >= ROAD - 4:
-            return "shale"
+            return "clay"
         if a >= ROAD - 5:
-            return "coal"
+            return "bark"
         if span < 4 and crosses(z, span, 32):
             return "plum"
         return "brick" if hashed(px, py, 61) else "dbrick"
 
-    cross(cv, flat(road), "coal", paving, curb="stone")
-    cross_line(cv, "white", "mauve", dash=(12, 64))
+    cross(cv, flat(road), "bark", paving, curb="stone")
+    cross_line(cv, "gold", "dred", dash=(12, 64))
     street(cv, verge("kensington-market", road))
-    lanes(cv, "white", "mauve", dash=(12, 64))
+    lanes(cv, LANE_PAINT, tuple(dk(c) for c in LANE_PAINT), dash=(10, 32))
     return cv
 
 

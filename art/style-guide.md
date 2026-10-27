@@ -231,7 +231,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 - 320×64 (`art/tools/roads.py`), tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Cabbagetown grey (slate), High Park tan (brown), Distillery District dslate (navy), Kensington Market dbrick (walnut), The Beaches cream (tan), Yonge Street shale (coal). Every road sprite's light rim holds on dbrick and shale at least as well as on dslate.
-- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone.
+- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Kensington Market paints each divider its own color (`LANE_PAINT` in `roads.py`), none of them gold, amber or orange, which read as coins.
 - Curbs and verges stay inside the outer 5 to 8px of the strip, clear of the 8px each side of a 48px sprite in its lane.
 - Every zone has a start strip: a neutral cross street (near curb, asphalt with a zebra, far curb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The rows from the road's far edge down to about y 214 sample the strip shrunk 4×, so lane dashes and texture along the road repeat every 8 rows or more, lines across the road are at least 2 rows tall and low in contrast, fine detail runs along the road, and small texture is spaced irregularly.
@@ -241,7 +241,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. They are `VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge.
 
-An ambient person or lawn animal holds 3:1 on its edge pixels (within 1%) on the light verges, the Distillery District's brick and Cabbagetown's lawn, and on 74% or more on High Park's pine and Kensington Market's shale, where the light rim carries it.
+An ambient person or lawn animal holds 3:1 on its edge pixels (within 1%) on the light verges, the Distillery District's brick, Cabbagetown's lawn and Kensington Market's skin2, and on 74% or more on High Park's pine, where the light rim carries it.
 
 ## Roadside
 
@@ -259,7 +259,7 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 | Cabbagetown         | `tree-maple`  | `gas-lamp`      | `hydrant`, `urn`           | canopy |
 | Distillery District | `gas-lamp`    | `love-lock`     | `barrel`, `bollard`        | dbrown |
 | High Park           | `tree-oak`    | `hot-dog-stand` |                            | fir    |
-| Kensington Market   | `tree-maple`  | `fruit-stand`   | `bike-ring`, `news-box`    | coal   |
+| Kensington Market   | `tree-maple`  | `fruit-stand`   | `bike-ring`, `news-box`    | brown  |
 | The Beaches         | `leuty`       | `dune-grass`    | `rope-posts`, `life-ring`  | skin2  |
 | Yonge Street        | `street-lamp` | `transit-stop`  | `pay-station`, `bike-ring` | coal   |
 
@@ -272,7 +272,7 @@ People, traffic, lawn animals and sky movers that pass by with no collisions and
 Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band row y is screen row 48 + y. The band, its approach rows and the camera come from `shared/export/layout.json`. The street ends at a T-junction: the approach rows continue the road's projection (in play the road surface scrolls over them), and above them runs a flat cross street, beyond which the far side faces the camera. The tool's docstring lists the rows.
 
 - Above the far side's front row the scenery goes back in depth, not taller. The debuff bars and the message strip lie over the band's top rows, so the sky above row 45 is one flat colour with no clouds, stars or scenery. Yonge Street is the exception: its skyline rises above row 45, under the bars' and the strip's opaque plates.
-- Darkness varies: The Beaches bright and open, Cabbagetown and the Distillery District in between, Yonge Street an evening downtown, Kensington Market dark all through and High Park darkest, under its canopy.
+- Darkness varies: The Beaches bright and open, Kensington Market a bright Pedestrian Sunday afternoon, Cabbagetown and the Distillery District in between, Yonge Street an evening downtown and High Park darkest, under its canopy.
 - Houses on the far side are slim, about as tall as they are wide, under a gable that rises about a row for each column it narrows, past 2px eaves. Light comes from the top left: the roof's left edge a ramp step lighter, the wall's right 3 columns a step darker. Trees, hedges and side yards fill the gaps, and the end houses run off the band's edges so the street carries on. Houses further back are smaller and show between the near roofs.
 - The approach rows carry no static scenery. The near corners and the stub's verges show only their ground (lawn, paving, sidewalk and curb, as the verge paints them): the game's road begins there and its items spawn over them, so no perch, ornament, tree, lamp, bench, sign or other prop stands there. Everything static stands at or beyond the cross street, and no static vehicle stands on it: the ambient traffic drives there, so a jam (Yonge Street's side street) stays beyond the far sidewalk.
 
@@ -285,7 +285,7 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 | Cabbagetown (dusk)                 | lilac, pink, peach, gold bands; a crescent moon and the first stars | `backdrop-cabbagetown`, `screen-end` (no moon) |
 | Distillery District (warm evening) | peach over skin1, gulls                                             | `backdrop-distillery-district`                 |
 | High Park (deep clear blue)        | azure over sky, white clouds                                        | `backdrop-high-park`                           |
-| Kensington Market (deep sunburst)  | flat rays of lake and dturq from the end of the street (`sunburst`) | `backdrop-kensington-market`                   |
+| Kensington Market (rosy sunburst)  | flat peach rays over pink from the end of the street (`sunburst`)   | `backdrop-kensington-market`                   |
 | The Beaches (late afternoon)       | gold over yellow, small clouds and gulls                            | `backdrop-the-beaches`                         |
 | Toronto at night                   | navy, purple, mauve bands; a crescent moon, stars in the navy band  | `screen-loading`                               |
 | Toronto autumn day                 | foam over haze                                                      | `screen-home`                                  |

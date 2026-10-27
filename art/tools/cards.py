@@ -595,11 +595,10 @@ class ZoneView(Art):
         ground(g)
         self.strip = [row[:] for row in g.px]
         lines(g)
-        # the stub's dividers take the strip's colour, solid or dashed as the strip's are
-        marked = [g.px[y][roads.DIVIDERS[0]] for y in range(roads.H)
-                  if g.px[y][roads.DIVIDERS[0]] != self.strip[y][roads.DIVIDERS[0]]]
-        self.lane = Counter(marked).most_common(1)[0][0]
-        self.duty = 1 if len(marked) == roads.H else max(0.5, len(marked) / roads.H)
+        # each of the stub's dividers takes its strip line's color, solid or dashed as the strip's are
+        marked = [[g.px[y][x] for y in range(roads.H) if g.px[y][x] != self.strip[y][x]] for x in roads.DIVIDERS]
+        self.lane = [Counter(m).most_common(1)[0][0] for m in marked]
+        self.duty = 1 if len(marked[0]) == roads.H else max(0.5, len(marked[0]) / roads.H)
         # lines along the road (board seams): columns off the base colour in 3 rows of 4
         base = Counter(c for row in self.strip for c in row).most_common(1)[0][0]
         lanes = {x + d for x in roads.DIVIDERS for d in (0, 1)}
@@ -669,8 +668,8 @@ class ZoneView(Art):
             if self.duty < 1 and (DASH * math.log(py + 0.5 - HORIZON)) % 1 >= self.duty:
                 continue
             s = SPREAD * (py + 0.5 - HORIZON) / bd.ROAD
-            for x in roads.DIVIDERS:
-                self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, self.lane)
+            for x, c in zip(roads.DIVIDERS, self.lane):
+                self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, c)
 
 
 # ---------- the Toronto neighborhoods' path cards, after their backdrops ----------
@@ -749,12 +748,12 @@ def distillery_view():
 
 
 def kensington_view():
-    paving = flecked("shale", "coal", 23)
-    a = ZoneView("kensington-market", flecked("dbrick", "brick", 41), paving, "white", (3, 6), curb="stone",
-                 walk="shale", lawn=paving, walk_fleck="coal", edge="mauve")
-    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "lake", "dturq", FAR_Y, w=AW)
+    paving = flecked("skin2", "clay", 23)
+    a = ZoneView("kensington-market", flecked("dbrick", "brick", 41), paving, "gold", (3, 6), curb="stone",
+                 walk="skin2", lawn=paving, walk_fleck="clay", edge="dred")
+    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "peach", "pink", FAR_Y, w=AW)
     for x, w, wall_c, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "purple", "ochre"),
-                                    (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "mauve")):
+                                    (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "red")):
         for k in range(w // 2 + 2):
             a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof)
         a.fill(x, 7, w, FAR_Y - 7, wall_c)
@@ -768,7 +767,8 @@ def kensington_view():
     for x0 in (0, AW - 5):
         for py in range(FAR_Y):
             a.fill(x0, py, 5, 1, bd.MURAL[(py // 4) % len(bd.MURAL)])
-    bd.bunting(a, 5, 70, 4, 2, ("dred", "gold", "dturq", "lilac", "moss"))
+    bd.bunting(a, 5, 38, 4, 2, ("red", "gold", "dturq", "lilac", "lime", "orange"))
+    bd.bunting(a, 38, 70, 5, 2, ("lime", "orange", "red", "gold", "dturq", "lilac"))
     a.street()
     return a
 

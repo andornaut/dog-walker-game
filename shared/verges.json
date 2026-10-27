@@ -64,27 +64,27 @@
     "curbTo": 162,
     "strips": [
       {
-        "color": "coal",
+        "color": "clay",
         "dots": [],
         "to": 166
       }
     ],
-    "walkColor": "shale",
+    "walkColor": "skin2",
     "walkDots": [
       {
         "colors": [
-          "coal"
+          "clay"
         ],
-        "share": 0.06
+        "share": 0.05
       },
       {
         "colors": [
-          "ash"
+          "brown"
         ],
-        "share": 0.02
+        "share": 0.03
       }
     ],
-    "seamColor": "coal",
+    "seamColor": "clay",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",

@@ -12,9 +12,10 @@ road-<zone>-start  320x64 images, one per zone. Rows 20 to 63 are a neutral cros
 
 Each strip keeps its zone's road colour (the game data's roadColor) as the base, so
 the game's shadows (one ramp step darker) still match. The four lane dividers sit
-at x = 64k-1 (2px wide) and share one look per zone, so lane edges stay
-readable at speed; the outer 5 to 8 px of each side is a curb or verge, which an
-outer lane's 56px sprite (4 px in from its 64px lane's edge) overlaps by up to 4 px.
+at x = 64k-1 (2px wide) and share one look per zone (Kensington Market's are
+painted a color each), so lane edges stay readable at speed; the outer 5 to 8 px
+of each side is a curb or verge, which an outer lane's 56px sprite (4 px in from
+its 64px lane's edge) overlaps by up to 4 px.
 
 Usage:
   roads.py preview OUT.png   each zone's road scrolling up: two strips of the zone
@@ -32,7 +33,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import PALETTE64, Grid  # noqa: E402
+from pixel import PALETTE64, Grid, dk  # noqa: E402
 
 W, H = 320, 64
 LANE = 64
@@ -104,13 +105,19 @@ def high_park_lines(g):
             g.rect(x, y + 7, 2, 1, "plum")
 
 
+# Pedestrian Sunday's painted lane lines, one color per divider, left to right; each holds 4:1 or more
+# on Kensington Market's dbrick, and none is gold, amber or orange, which read as coins.
+LANE_PAINT = ("cream", "turquoise", "pink", "lime")
+
+
 def kensington_lines(g):
-    for x in DIVIDERS:
-        for y in (8,):
-            # white dashes (11.8:1 on Kensington Market's dbrick) with a mauve
-            # edge on the right
-            g.rect(x, y, 2, 12, "white")
-            g.rect(x + 2, y + 1, 1, 12, "mauve")
+    """A 10-row painted dash every SEAM_PERIOD rows from row 24, wrapping, each divider its own color, a
+    ramp step darker down its right edge. Rows 35 to 55 stay bare: screen-end shows rows 36 to 39 below its
+    button."""
+    for x, c in zip(DIVIDERS, LANE_PAINT):
+        for y in range(24, 24 + H, SEAM_PERIOD):
+            wrect(g, x, y, 2, 10, c)
+            wrect(g, x + 2, y + 1, 1, 10, dk(c))
 
 
 # fallen leaves (never amber or orange, which read as coins): a pointed blade, lit (f) on
@@ -267,8 +274,8 @@ def distillery_lines(g):
 
 
 def kensington_ground(g):
-    """Dark brick flagstones in offset courses between dark laneway gutters: dbrick stones in plum joints,
-    brick, walnut and mauve flecks worn into them; shale stones on the outer 4 columns inside a coal seam, an ash
+    """Dark brick flagstones in offset courses between clay gutters: dbrick stones in plum joints, brick,
+    walnut and mauve flecks worn into them; clay stones on the outer 4 columns inside a bark seam, a bark
     joint every 32 rows."""
     rnd = random.Random("road-kensington-market")
     g.rect(0, 0, W, H, "dbrick")
@@ -283,10 +290,10 @@ def kensington_ground(g):
     specks(g, rnd, 10, "walnut", 6, W - 6)
     specks(g, rnd, 6, "mauve", 6, W - 6)
     for x0, inner in ((0, 4), (W - 4, W - 5)):
-        g.rect(x0, 0, 4, H, "shale")
-        g.rect(inner, 0, 1, H, "coal")
+        g.rect(x0, 0, 4, H, "clay")
+        g.rect(inner, 0, 1, H, "bark")
         for y in range(0, H, SEAM_PERIOD):
-            g.rect(x0, y, 4, 2, "ash")
+            g.rect(x0, y, 4, 2, "bark")
 
 
 def beaches_ground(g):

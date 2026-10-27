@@ -630,7 +630,7 @@ CURB = {
 }
 # Each zone's ground shadow under a free-standing prop: a darker tone of its lawn or paving.
 SHADOWS = {"cabbagetown": "canopy", "high-park": "fir", "distillery-district": "dbrown",
-           "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "coal"}
+           "kensington-market": "brown", "the-beaches": "skin2", "yonge-street": "coal"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 TABLE_JSON = "shared/roadside.json"
