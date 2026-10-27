@@ -25,7 +25,7 @@ export type BotSight = "foresight" | "sight";
 export const BOT_SIGHTS: readonly BotSight[] = ["foresight", "sight"];
 
 // The widest gap between the tilts a dart is read at before it sets off: close enough that the
-// contacts of neighboring tilts overlap, so the tilts between them are covered too.
+// contacts of neighbouring tilts overlap, so the tilts between them are covered too.
 const TILT_STEP = 0.25;
 
 // The road as a sight reading needs it: speed is the scroll speed in pixels per second.

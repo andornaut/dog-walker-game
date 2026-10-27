@@ -40,11 +40,11 @@ function pageFacts(): [string, string][] {
     );
   return [
     ["the world", `Walk a pack of dogs through ${world.name}.`],
-    ["the walk length", `${capitalized(count(world.walkLength))} neighborhoods a walk`],
+    ["the walk length", `${capitalized(count(world.walkLength))} neighbourhoods a walk`],
     [
       "the first and last zones",
       `Every walk starts in ${zoneName(world.firstZone)}, ends on ${zoneName(world.lastZone)} and ` +
-        `covers ${count(world.walkLength)} of ${world.name}'s ${count(world.zones.length)} neighborhoods.`,
+        `covers ${count(world.walkLength)} of ${world.name}'s ${count(world.zones.length)} neighbourhoods.`,
     ],
     ["the dogs per size", `${capitalized(listed(perSize))}.`],
     [

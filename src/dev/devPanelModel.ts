@@ -208,7 +208,7 @@ export function decodeSaveEdits(text: string | null): SaveEdit[] {
   }
 }
 
-// Where Apply goes: the start screen, or a walk in a neighborhood.
+// Where Apply goes: the start screen, or a walk in a neighbourhood.
 export const START_SCREEN = "startScreen";
 export type StartTarget = typeof START_SCREEN | ZoneId;
 
@@ -217,7 +217,7 @@ interface StartChoice {
   readonly start: StartTarget;
 }
 
-// The start screen, then every neighborhood: the first, then the rest easiest first.
+// The start screen, then every neighbourhood: the first, then the rest easiest first.
 export function startChoices(data: RouteData): StartChoice[] {
   const first = firstZoneId(data);
   const zoneById = new Map(data.world.zones.map((zone) => [zone.id as ZoneId, zone]));
@@ -276,7 +276,7 @@ export function hasStagedChanges(state: PanelState): boolean {
 
 // What Apply does: the cheats the tab plays by from now, and the page to load, with `dev` on
 // exactly when a cheat is in use or a walk is chosen. The start screen drops the URL's run
-// overrides; a neighborhood's walk gets seed. href is the current page.
+// overrides; a neighbourhood's walk gets seed. href is the current page.
 export function applyPanel(
   data: RouteData,
   href: string,

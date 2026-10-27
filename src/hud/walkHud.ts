@@ -27,7 +27,7 @@ const CASH_INK = { left: 5, right: 73 } as const;
 // row buttonFace.y, centred in its hit area. cash:
 // the "$" and the amount at the largest of scales whose ink fits room, centred across the well's
 // ink columns (ink.left to ink.right), their capitals' bottom on capsBottom. zone: the
-// neighborhood well on one text line, the name from name.x and "n of N" right-aligned to end on
+// neighbourhood well on one text line, the name from name.x and "n of N" right-aligned to end on
 // column progress.right, at least textGap apart.
 // effects: a well of size at pitch from x along y for every effect a walk can have
 // (EFFECT_WELLS), each icon iconSize at icon,icon in its well; the holds run side by side from
@@ -59,7 +59,7 @@ export const WALK_BAR = {
   },
 } as const;
 
-// The walk's place beside the neighborhood's name: the zone at zoneIndex's number of the walk's.
+// The walk's place beside the neighbourhood's name: the zone at zoneIndex's number of the walk's.
 export function zoneProgressText(
   data: Pick<GameData, "runText" | "world">,
   zoneIndex: number,
@@ -84,7 +84,7 @@ export interface BarButton {
 interface WalkBarLayout {
   buttons: Readonly<Record<WalkBarButtonId, BarButton>>;
   // Each effect well, left to right, and the press area that holds it: the well's column of
-  // the bar, from the neighborhood well's top to the bar's bottom.
+  // the bar, from the neighbourhood well's top to the bar's bottom.
   effectHolds: Rect[];
   effectWells: Rect[];
   zoneWell: Rect;

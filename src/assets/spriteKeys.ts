@@ -153,7 +153,7 @@ export const SKUNK_CLOUD_KEY = "skunk-cloud";
 // Zone art is keyed by the zone's art: backdrop-high-park, road-high-park and so on.
 type ZoneArt = Pick<Zone, "art">;
 
-// The 360x150 neighborhood behind the zone.
+// The 360x150 neighbourhood behind the zone.
 export function backdropKey(zone: ZoneArt): string {
   return `backdrop-${zone.art}`;
 }

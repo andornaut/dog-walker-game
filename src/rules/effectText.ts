@@ -163,7 +163,7 @@ function withDuration(words: EffectWords, { duration, text }: Phrase): string {
   return duration === undefined ? text : `${text} ${words.durations[duration]}`;
 }
 
-// One modifier, such as "+$1 per tip all walk", "tips +100% next neighborhood" or "no pulls
+// One modifier, such as "+$1 per tip all walk", "tips +100% next neighbourhood" or "no pulls
 // toward squirrels".
 function modifierText(data: WordsData, modifier: Modifier): string {
   return withDuration(data.homeText.effect, {

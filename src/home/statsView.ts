@@ -11,7 +11,7 @@ export interface StatsRow {
 }
 
 // The Stats page's overall figures, in the rulebook's order. The best walk's dogs follow its
-// earnings and neighborhoods, a dog per row with only the first labeled; before any walk
+// earnings and neighbourhoods, a dog per row with only the first labelled; before any walk
 // there are none.
 export function overallRows(
   data: Pick<GameData, "dogs" | "menuText">,

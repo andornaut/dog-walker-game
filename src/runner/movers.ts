@@ -629,7 +629,7 @@ export interface MoverSpec {
 // speed, the delay before each of its moves, the length of each of its moves, a stalker's
 // later-step road share, where a dart sets off, a dart's tilt, whether a hopper of a shy kind hops
 // shy (below its kind's share), a dart's outcome (dartOutcome), where a dart turns back or stops,
-// and which side a stalker's or shy hopper's one-sided reach favors (below a half, the left).
+// and which side a stalker's or shy hopper's one-sided reach favours (below a half, the left).
 // EVEN_DRAWS moves it at its kind's speed and move length with no delay, at the near end of a
 // range, never shy and crossing.
 export interface MoverDraws {
@@ -1122,7 +1122,7 @@ function stepsPlacements(
 // The ways a stalker's or shy hopper's lane range may reach from its start lane, widest first: a
 // lane to either side, one side only, or none. Of the two one-sided reaches, the side draw, from 0
 // up to 1, puts the left first below a half and the right first from a half, so neither side is
-// favored across movers.
+// favoured across movers.
 function reachesOf(side: number): readonly (readonly [number, number])[] {
   const oneSided: readonly (readonly [number, number])[] = [
     [-1, 0],
