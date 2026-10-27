@@ -113,8 +113,8 @@ def eve_top(wave):
     return top
 
 
-def ralph_top(wave):
-    """Ralph, pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee, ripped jeans and his
+def ryan_top(wave):
+    """Ryan, pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee, ripped jeans and his
     phone held up in the left hand."""
     def top(g, b):
         torso(g, b, "pink", "mauve")
@@ -142,8 +142,8 @@ def ralph_top(wave):
     return top
 
 
-def ralph_legs(g, b):
-    """Rips across the knees of Ralph's jeans."""
+def ryan_legs(g, b):
+    """Rips across the knees of Ryan's jeans."""
     g.rect(12, 38 + b, 2, 1, "skin2")
     g.rect(18, 39 + b, 2, 1, "skin2")
 
@@ -373,7 +373,7 @@ def jason_top(wave):
 # dog: (top, legs, shoes, extra), in owners.OWNERS order; extra draws over the legs after them
 OWNERS = {
     "duchess": (eve_top, "skin1", "dbrown", None),
-    "reggie": (ralph_top, "blue", "white", ralph_legs),
+    "reggie": (ryan_top, "blue", "white", ryan_legs),
     "buddy": (sheba_top, "slate", "dbrown", None),
     "pierre": (tara_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),

@@ -165,7 +165,7 @@ def eve(mood):
     return g
 
 
-def ralph(mood):
+def ryan(mood):
     """Pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee."""
     g = face()
     base(g, "skin2", "brown", "pink", "mauve")
@@ -554,7 +554,7 @@ WALKERS = {
 
 OWNERS = {
     "duchess": eve,
-    "reggie": ralph,
+    "reggie": ryan,
     "buddy": sheba,
     "pierre": tara,
     "biscuit": sam,
