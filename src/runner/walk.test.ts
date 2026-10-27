@@ -867,14 +867,14 @@ describe("stepWalk", () => {
     }
   });
 
-  // Each size's chance to dodge a plain hit, without and with the Dog whistle in the Pocket, at
+  // Each size's chance to dodge a plain hit, without and with the Whistle in the Pocket, at
   // the game's chances, which the test tuning pins to 0: a small dog's own chance, plus the
   // whistle's for the sizes it names.
   const { probability } = TUNING;
-  const [whistle] = SHOP_GEAR.dogWhistle.effects;
+  const [whistle] = SHOP_GEAR.whistle.effects;
   const whistleSizes: readonly Size[] = whistle.sizes;
   const dodgeCases = (["large", "medium", "small"] as const).flatMap((size) =>
-    ([null, "dogWhistle"] as const).map((gear: GearId | null) => ({
+    ([null, "whistle"] as const).map((gear: GearId | null) => ({
       chance:
         (size === "small" ? probability.smallDodgeChance : 0) +
         (gear !== null && whistleSizes.includes(size) ? probability[whistle.chance] : 0),

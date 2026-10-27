@@ -68,10 +68,10 @@ describe("effectText", () => {
       ],
       [
         "a dodge for the sizes it names, as one in so many",
-        [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
+        [{ chance: "whistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
         capitalize(
           fillNames(HOME_TEXT.dodgeEffect, {
-            dodgeIn: String(Math.round(1 / TUNING.probability.dogWhistleDodgeChance)),
+            dodgeIn: String(Math.round(1 / TUNING.probability.whistleDodgeChance)),
             sizes: sentenceList(HOME_TEXT.sentenceList, [SIZE_NAMES.medium, SIZE_NAMES.large]),
           }),
         ),

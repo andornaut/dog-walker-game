@@ -4,12 +4,6 @@ import type { Gear } from "./types";
 // Pocket for a walk.
 // Locked dogs are sold too: those with unlock "shop" in dogs.ts, at their price.
 export const SHOP_GEAR = {
-  dogWhistle: {
-    effects: [{ chance: "dogWhistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
-    name: "Dog whistle",
-    price: "dogWhistle",
-    short: "Medium and large dogs dodge too",
-  },
   fannyPack: {
     effects: [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
     name: "Fanny pack",
@@ -33,5 +27,11 @@ export const SHOP_GEAR = {
     name: "Running shoes",
     price: "runningShoes",
     short: "Lane changes +{percent}",
+  },
+  whistle: {
+    effects: [{ chance: "whistleDodgeChance", kind: "dodge", sizes: ["medium", "large"] }],
+    name: "Dog whistle",
+    price: "whistle",
+    short: "Medium and large dogs dodge too",
   },
 } as const satisfies Record<string, Gear>;

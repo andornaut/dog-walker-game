@@ -76,7 +76,6 @@ export const TUNING = {
       // The second and third dog slots; every player starts with one.
       dogSlot2: 2000,
       dogSlot3: 2000,
-      dogWhistle: 1500,
       duchess: 150,
       fannyPack: 600,
       hallPass: 1200,
@@ -87,6 +86,7 @@ export const TUNING = {
       pierre: 500,
       runningShoes: 800,
       snowball: 1000,
+      whistle: 1500,
       zippy: 450,
     },
     // The cash every walk starts with, before gear.
@@ -155,13 +155,13 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
-    // With the Dog whistle, a hit that would land on a medium or large dog misses it this often,
-    // costing nothing.
-    dogWhistleDodgeChance: 0.125,
     // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.
     smallDodgeChance: 0.25,
+    // With the Dog whistle, a hit that would land on a medium or large dog misses it this often,
+    // costing nothing.
+    whistleDodgeChance: 0.125,
   },
   seconds: {
     // A stalker's first step's cue begins a delay drawn per stalker between these after it is

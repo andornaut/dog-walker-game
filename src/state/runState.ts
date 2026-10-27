@@ -102,7 +102,7 @@ export interface RunState {
   readonly debuffsGot: Readonly<Partial<Record<DebuffId, number>>>;
   // Each debuff at most once: applying one the pack has refreshes it.
   readonly debuffs: readonly ActiveDebuff[];
-  // The dodges effects such as the Dog whistle's gave, which last the walk.
+  // The dodges effects such as the Whistle's gave, which last the walk.
   readonly dodges: readonly ActiveDodge[];
   // The zone index the run began in. A dev start skips the zones before it, which count
   // toward no achievement.
