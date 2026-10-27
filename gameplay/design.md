@@ -69,7 +69,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 - Spawning always leaves a reachable path, accounting for every mover's moves, so every hit is avoidable
 - Scroll speed and obstacle density rise gently each neighborhood
-- Obstacles span lanes and rows (shapes in the data). None is wider than 3 lanes, every row leaves at least 2 lanes open, and obstacle rows leave room for the pack's full length. Wherever the path has to change lanes between two obstacles, the road between their hit boxes, as drawn, is at least the tallest pack's height plus every lane change the path needs there (crossing a 3-lane obstacle's width takes up to three) plus about half a second to react. Two obstacles 2 or more lanes wide never sit in neighboring rows: at least one empty row separates them
+- Obstacles span lanes and rows (shapes in the data). None is wider than 3 lanes, every row leaves at least 2 lanes open, and obstacle rows leave room for the pack's full length. Wherever the path has to change lanes between two obstacles, the road between their hit boxes, as drawn, is at least the tallest pack's height plus every lane change the path needs there (crossing a 3-lane obstacle's width takes up to three) plus about half a second to react. Two obstacles 3 lanes wide never sit in neighboring rows: at least one empty row separates them. Narrower ones may, wherever the gap rule and the 2 open lanes per row still hold
 - Obstacles, fixed and moving, go toward the lanes left clear longest, so no lane, the sides included, stays clear for long
 - The first neighborhood's first obstacle reaches the pack about two seconds in at the soonest, so a walk never opens with a hit
 
