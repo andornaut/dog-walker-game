@@ -87,7 +87,7 @@ const SMALL: Matrix = {
   ...DEFAULT_MATRIX,
   packs: [
     { dogs: ["kilo"], name: "Kilo" },
-    { dogs: ["marshall", "archie", "snowball"], name: "Risky trio" },
+    { dogs: ["buddy", "archie", "snowball"], name: "Risky trio" },
   ],
   players: [
     { kind: "skill", preset: "typical" },

@@ -17,8 +17,8 @@ describe("loadoutFor", () => {
       ["takes a pack of one from the setup", { pack: ["kilo"] }, { ...fallback, dogs: ["kilo"] }],
       [
         "takes a pack of three from the setup",
-        { pack: ["kilo", "archie", "marshall"] },
-        { ...fallback, dogs: ["kilo", "archie", "marshall"] },
+        { pack: ["kilo", "archie", "buddy"] },
+        { ...fallback, dogs: ["kilo", "archie", "buddy"] },
       ],
       ["takes the setup's gear", { gear: "luckyCollar" }, { ...fallback, gear: "luckyCollar" }],
       ["takes the setup's lack of gear", { gear: null }, { ...fallback, gear: null }],
@@ -26,7 +26,7 @@ describe("loadoutFor", () => {
       ["keeps the fallback pack for an empty pack", { pack: [] }, fallback],
       [
         "keeps the fallback pack for a pack too big for a run",
-        { pack: ["kilo", "archie", "marshall", "penny"] },
+        { pack: ["kilo", "archie", "buddy", "penny"] },
         fallback,
       ],
     ] satisfies readonly [string, Partial<RunSetup<DogId, GearId, WalkerId>>, Loadout][]) {

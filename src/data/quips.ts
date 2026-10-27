@@ -19,6 +19,12 @@ export const QUIPS = {
     ],
     upset: ["Oof. Bit of a bitter blend.", "Not my favorite roast, friend."],
   },
+  buddy: {
+    fired: ["The numbers don't add up.", "Account closed. Balance: $0."],
+    happier: ["That balances nicely.", "A sound investment."],
+    parting: ["Every bump goes in the ledger.", "Receipts for everything, please."],
+    upset: ["That goes in the loss column.", "Noted. In red ink."],
+  },
   duchess: {
     fired: ["Consider yourself pruned!", "A catastrophe in full bloom!"],
     happier: ["Divine! She's simply blossoming!", "Oh, I could weep with joy!"],
@@ -30,12 +36,6 @@ export const QUIPS = {
     happier: ["Good form! Keep it up!", "That's a personal best!"],
     parting: ["He already did 10K. He's fine.", "Warm-up's done. Keep that form tight!"],
     upset: ["Eh, bad lap. Shake it off.", "Just a cramp. Back to your pace."],
-  },
-  marshall: {
-    fired: ["The numbers don't add up.", "Account closed. Balance: $0."],
-    happier: ["That balances nicely.", "A sound investment."],
-    parting: ["Every bump goes in the ledger.", "Receipts for everything, please."],
-    upset: ["That goes in the loss column.", "Noted. In red ink."],
   },
   penny: {
     fired: ["Oh no, oh no. You're fired.", "So sorry! Here's a tissue."],

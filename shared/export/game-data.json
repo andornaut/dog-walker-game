@@ -351,6 +351,33 @@
       }
     },
     {
+      "id": "buddy",
+      "art": "buddy",
+      "breed": "Jack Russell",
+      "look": "White with tan patches, red collar",
+      "name": "Marshall",
+      "owner": {
+        "name": "Sheba",
+        "role": "retired accountant"
+      },
+      "price": "buddy",
+      "size": "small",
+      "unlock": "shop",
+      "figures": {
+        "maxHearts": 2,
+        "startHearts": 2,
+        "startMood": "happy"
+      },
+      "keys": {
+        "dogCardTag": "buddy",
+        "face": "face-dog-buddy",
+        "ownerCardFace": "face-owner-buddy-20",
+        "ownerFace": "face-owner-buddy",
+        "portrait": "portrait-dog-buddy",
+        "sprite": "dog-buddy"
+      }
+    },
+    {
       "id": "duchess",
       "art": "duchess",
       "breed": "Maltese",
@@ -402,33 +429,6 @@
         "ownerFace": "face-owner-kilo",
         "portrait": "portrait-dog-kilo",
         "sprite": "dog-kilo"
-      }
-    },
-    {
-      "id": "marshall",
-      "art": "marshall",
-      "breed": "Jack Russell",
-      "look": "White with tan patches, red collar",
-      "name": "Marshall",
-      "owner": {
-        "name": "Sheba",
-        "role": "retired accountant"
-      },
-      "price": "marshall",
-      "size": "small",
-      "unlock": "shop",
-      "figures": {
-        "maxHearts": 2,
-        "startHearts": 2,
-        "startMood": "happy"
-      },
-      "keys": {
-        "dogCardTag": "marshall",
-        "face": "face-dog-marshall",
-        "ownerCardFace": "face-owner-marshall-20",
-        "ownerFace": "face-owner-marshall",
-        "portrait": "portrait-dog-marshall",
-        "sprite": "dog-marshall"
       }
     },
     {
@@ -1347,6 +1347,7 @@
       "payPerDog": 20,
       "prices": {
         "biscuit": 250,
+        "buddy": 450,
         "dogSlot2": 2000,
         "dogSlot3": 2000,
         "duchess": 150,
@@ -1354,7 +1355,6 @@
         "hallPass": 1200,
         "kilo": 300,
         "luckyCollar": 1500,
-        "marshall": 450,
         "penny": 600,
         "pierre": 500,
         "reggie": 800,

@@ -70,15 +70,11 @@ describe("payZone", () => {
       ["a lone dog", testState({ duchess: 5 }), ["duchess"]],
       [
         "two dogs walking of three",
-        testState({ duchess: 5, kilo: "fired", marshall: 3 }),
-        ["duchess", "marshall"],
+        testState({ buddy: 3, duchess: 5, kilo: "fired" }),
+        ["buddy", "duchess"],
       ],
-      [
-        "three dogs",
-        testState({ duchess: 5, kilo: 5, marshall: 3 }),
-        ["duchess", "kilo", "marshall"],
-      ],
-    ] satisfies readonly [string, RunState, readonly ("duchess" | "kilo" | "marshall")[]][]) {
+      ["three dogs", testState({ buddy: 3, duchess: 5, kilo: 5 }), ["buddy", "duchess", "kilo"]],
+    ] satisfies readonly [string, RunState, readonly ("buddy" | "duchess" | "kilo")[]][]) {
       const { changes, state } = payZone(data, run);
       expect(state.money).toBe(run.money + pay * walking.length);
       expect(changes).toEqual(
@@ -95,7 +91,7 @@ describe("payZone", () => {
   it.each(WORLD.zones.map((zone) => [zone.name, zone.id as ZoneId] as const))(
     "pays each dog the same in %s as in every zone",
     (_name, zone) => {
-      const run = testState({ duchess: 5, kilo: 5, marshall: 5 }, { route: [zone] });
+      const run = testState({ buddy: 5, duchess: 5, kilo: 5 }, { route: [zone] });
       const { changes } = payZone(data, run);
       expect(changes.map(({ amount, causes }) => ({ amount, causes }))).toEqual(
         Array.from({ length: 3 }, () => ({ amount: pay, causes: [{ amount: pay, kind: "pay" }] })),
@@ -111,10 +107,10 @@ describe("fullPackBonus", () => {
     for (const [, run, dogs] of [
       [
         "pays the bonus per dog when every dog is still walking",
-        testState({ duchess: 5, marshall: 3 }),
+        testState({ buddy: 3, duchess: 5 }),
         2,
       ],
-      ["pays nothing once an owner has fired you", testState({ duchess: 5, marshall: "fired" }), 0],
+      ["pays nothing once an owner has fired you", testState({ buddy: "fired", duchess: 5 }), 0],
     ] satisfies readonly [string, RunState, number][]) {
       const { changes, state } = fullPackBonus(data, run);
       expect(state.money).toBe(run.money + perDog * dogs);
@@ -125,24 +121,24 @@ describe("fullPackBonus", () => {
 
 describe("fireOwnersAtZero", () => {
   it("marks the dog fired and keeps the money banked", () => {
-    const banked = payZone(data, testState({ duchess: 5, marshall: 5 })).state;
+    const banked = payZone(data, testState({ buddy: 5, duchess: 5 })).state;
     const emptied = {
       ...banked,
-      pack: testState({ duchess: 1, marshall: 0 }).pack,
+      pack: testState({ buddy: 0, duchess: 1 }).pack,
       zoneIndex: 2,
     };
     const { fired, state } = fireOwnersAtZero(emptied);
-    expect(fired).toEqual(["marshall"]);
+    expect(fired).toEqual(["buddy"]);
     expect(state.money).toBe(banked.money);
     expect(state.pack).toEqual([
+      { dog: "buddy", status: "fired", zoneIndex: 2 },
       { dog: "duchess", hearts: 1, status: "walking" },
-      { dog: "marshall", status: "fired", zoneIndex: 2 },
     ]);
     expect(heartsByDog(state)).toEqual({ duchess: 1 });
   });
 
   it("pays the fired dog nothing at the end of the zone it was fired in", () => {
-    const { state } = fireOwnersAtZero(testState({ duchess: 5, marshall: 0 }));
+    const { state } = fireOwnersAtZero(testState({ buddy: 0, duchess: 5 }));
     const { changes } = payZone(data, state);
     expect(changes.map((change) => change.dog)).toEqual(["duchess"]);
   });

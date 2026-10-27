@@ -67,7 +67,7 @@ function replay(log: InputLog): RunState {
 describe("a simulated run", { timeout: 60_000 }, () => {
   it.each<{ pack: string; policy: PolicyId; seed: number; skill: SkillPresetId }>([
     { pack: "kilo,biscuit", policy: "mixed", seed: 1, skill: "typical" },
-    { pack: "marshall,archie,snowball", policy: "alwaysPay", seed: 3, skill: "novice" },
+    { pack: "buddy,archie,snowball", policy: "alwaysPay", seed: 3, skill: "novice" },
   ])("replays in the game: $skill, $pack, seed $seed", ({ pack, policy, seed, skill }) => {
     const dogs = pack.split(",") as [never];
     const result = simulateRun(

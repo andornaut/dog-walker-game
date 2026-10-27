@@ -72,11 +72,11 @@ describe("ownerMaxHearts", () => {
     { gear: "luckyCollar", kind: "gear" },
     { by: "luckyCollarMax", operation: "add", stat: "maxHearts" },
   );
-  const run = testState({ biscuit: "fired", kilo: 3, marshall: 2 }, { modifiers: [collar] });
+  const run = testState({ biscuit: "fired", buddy: 2, kilo: 3 }, { modifiers: [collar] });
   it.each([
     ["biscuit", { lead: true, size: 3 }],
     ["kilo", { lead: false, size: 3 }],
-    ["marshall", { lead: false, size: 3 }],
+    ["buddy", { lead: false, size: 3 }],
   ] as const)(
     "caps %s's owner at the max of its place in the pack it set out with",
     (dog, place) => {

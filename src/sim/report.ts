@@ -136,7 +136,7 @@ const PACKS: readonly NamedPack[] = [
   namedByDogs(["kilo", "biscuit"]),
   namedByDogs(["reggie", "pierre"]),
   namedByDogs(["duchess", "biscuit", "kilo"]),
-  { dogs: ["marshall", "archie", "snowball"], name: "Risky trio" },
+  { dogs: ["buddy", "archie", "snowball"], name: "Risky trio" },
 ];
 
 const SKILL_PLAYERS: readonly MatrixPlayer[] = SKILL_PRESET_IDS.map((preset) => ({

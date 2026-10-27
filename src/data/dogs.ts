@@ -27,6 +27,19 @@ export const DOGS = {
     size: "medium",
     unlock: "shop",
   },
+  buddy: {
+    art: "buddy",
+    breed: "Jack Russell",
+    look: "White with tan patches, red collar",
+    name: "Marshall",
+    owner: {
+      name: "Sheba",
+      role: "retired accountant",
+    },
+    price: "buddy",
+    size: "small",
+    unlock: "shop",
+  },
   duchess: {
     art: "duchess",
     breed: "Maltese",
@@ -51,19 +64,6 @@ export const DOGS = {
     },
     price: "kilo",
     size: "large",
-    unlock: "shop",
-  },
-  marshall: {
-    art: "marshall",
-    breed: "Jack Russell",
-    look: "White with tan patches, red collar",
-    name: "Marshall",
-    owner: {
-      name: "Sheba",
-      role: "retired accountant",
-    },
-    price: "marshall",
-    size: "small",
     unlock: "shop",
   },
   penny: {

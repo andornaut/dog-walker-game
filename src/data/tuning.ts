@@ -73,6 +73,7 @@ export const TUNING = {
     payPerDog: 20,
     prices: {
       biscuit: 250,
+      buddy: 450,
       // The second and third dog slots; every player starts with one.
       dogSlot2: 2000,
       dogSlot3: 2000,
@@ -81,7 +82,6 @@ export const TUNING = {
       hallPass: 1200,
       kilo: 300,
       luckyCollar: 1500,
-      marshall: 450,
       penny: 600,
       pierre: 500,
       reggie: 800,

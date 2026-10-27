@@ -194,12 +194,12 @@ describe("faceRows", () => {
 describe("withoutFace", () => {
   const two = fillFaceText("{a} and {b}", {
     a: ownerFaceText(gameData, "happy", "kilo"),
-    b: ownerFaceText(gameData, "upset", "marshall"),
+    b: ownerFaceText(gameData, "upset", "buddy"),
   });
 
   it.each<[string, DogId | undefined, DogId[]]>([
-    ["keeps every face with no lead", undefined, ["kilo", "marshall"]],
-    ["drops the leading owner's face", "kilo", ["marshall"]],
+    ["keeps every face with no lead", undefined, ["kilo", "buddy"]],
+    ["drops the leading owner's face", "kilo", ["buddy"]],
   ])("%s", (_name, lead, kept) => {
     const line = withoutFace(lead, two);
     expect(line.text).toBe(two.text);

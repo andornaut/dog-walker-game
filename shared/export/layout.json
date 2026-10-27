@@ -787,9 +787,9 @@
     "collarHeights": {
       "archie": 20,
       "biscuit": 21,
+      "buddy": 16,
       "duchess": 16,
       "kilo": 21,
-      "marshall": 16,
       "penny": 22,
       "pierre": 21,
       "reggie": 16,
@@ -834,6 +834,11 @@
           "left": -12,
           "right": 12
         },
+        "buddy": {
+          "above": 31,
+          "left": -9,
+          "right": 10
+        },
         "duchess": {
           "above": 32,
           "left": -10,
@@ -843,11 +848,6 @@
           "above": 45,
           "left": -15,
           "right": 15
-        },
-        "marshall": {
-          "above": 31,
-          "left": -9,
-          "right": 10
         },
         "penny": {
           "above": 42,
