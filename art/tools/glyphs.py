@@ -98,32 +98,32 @@ def chaser():
 
 def quick_recovery():
     """An hourglass in a brown frame, its sand nearly all run through, a white speed tick at each side:
-    a debuff over in half the time."""
+    a debuff over in half the time. It keeps a clear ring round it for its outline."""
     g = Grid(16, 16)
-    g.rect(3, 0, 10, 2, "brown")
-    g.rect(3, 14, 10, 2, "brown")
-    g.rect(3, 1, 10, 1, "dbrown")
-    g.rect(3, 15, 10, 1, "dbrown")
-    g.tri((4, 2), (12, 2), (8, 8), "foam")
-    g.tri((4, 14), (12, 14), (8, 8), "foam")
+    g.rect(3, 1, 10, 1, "brown")
+    g.rect(3, 13, 10, 1, "brown")
+    g.rect(3, 2, 10, 1, "dbrown")
+    g.rect(3, 14, 10, 1, "dbrown")
+    g.tri((4, 3), (12, 3), (8, 8), "foam")
+    g.tri((4, 13), (12, 13), (8, 8), "foam")
+    g.rect(7, 7, 2, 2, "foam")
     # a little sand left on top, its thread through the waist and the heap below
-    g.tri((6.5, 6), (9.5, 6), (8, 8), "amber")
-    g.p(8, 8, "amber")
-    g.p(8, 9, "amber")
-    g.tri((4.5, 14), (11.5, 14), (8, 10), "amber")
-    g.rect(5, 13, 6, 1, "orange")
-    for y in (5, 9):
-        g.rect(0, y, 2, 1, "white")
-        g.rect(14, y, 2, 1, "white")
+    g.rect(7, 6, 2, 1, "amber")
+    g.rect(8, 7, 1, 3, "amber")
+    g.tri((4.5, 13), (11.5, 13), (8, 9.5), "amber")
+    g.rect(5, 12, 6, 1, "orange")
+    for y in (5, 10):
+        g.rect(1, y, 2, 1, "white")
+        g.rect(13, y, 2, 1, "white")
     return g
 
 
 def second_chance():
     """A pink speech bubble holding a red heart."""
     g = Grid(16, 16)
-    g.rect(1, 1, 14, 10, "pink")
-    g.rect(0, 2, 16, 8, "pink")
-    g.rect(1, 10, 14, 1, "mauve")
+    g.rect(2, 1, 12, 10, "pink")
+    g.rect(1, 2, 14, 8, "pink")
+    g.rect(2, 10, 12, 1, "mauve")
     g.tri((10, 10), (13, 15), (13.5, 10), "pink")
     heart(g, 4, 2)
     return g
@@ -145,7 +145,7 @@ def keen_eye():
     """A magnifying glass, its cyan lens over the treat (a white bone with a red heart on its shaft), its
     brown handle down to the right."""
     g = Grid(16, 16)
-    for i in range(5):
+    for i in range(4):
         g.rect(10 + i, 10 + i, 2, 2, "brown")
     g.ell(6.5, 6.5, 5.7, 5.7, "lgrey", "grey")
     g.ell(6.5, 6.5, 4.2, 4.2, "cyan", None, "white")
@@ -616,21 +616,22 @@ def bubble20(g, fill, shade, lit=None):
 def quick_recovery20():
     """An hourglass in a brown frame, its sand nearly all run through, a white speed tick at each side."""
     g = Grid(20, 20)
-    g.rect(4, 0, 12, 2, "brown")
-    g.rect(4, 18, 12, 2, "brown")
-    g.rect(4, 1, 12, 1, "dbrown")
-    g.rect(4, 19, 12, 1, "dbrown")
-    g.tri((5, 2), (15, 2), (10, 10), "foam")
-    g.tri((5, 18), (15, 18), (10, 10), "foam")
-    g.rect(6, 2, 1, 2, "white")
+    g.rect(4, 1, 12, 1, "brown")
+    g.rect(4, 17, 12, 1, "brown")
+    g.rect(4, 2, 12, 1, "dbrown")
+    g.rect(4, 18, 12, 1, "dbrown")
+    g.tri((5, 3), (15, 3), (10, 10), "foam")
+    g.tri((5, 17), (15, 17), (10, 10), "foam")
+    g.rect(9, 9, 2, 2, "foam")
+    g.rect(7, 3, 1, 2, "white")
     g.tri((8, 7.5), (12, 7.5), (10, 10), "amber")
-    g.rect(10, 10, 1, 3, "amber")
-    g.tri((5.5, 18), (14.5, 18), (10, 12.5), "amber")
-    g.rect(6, 17, 8, 1, "orange")
+    g.rect(10, 9, 1, 4, "amber")
+    g.tri((5.5, 17), (14.5, 17), (10, 12.5), "amber")
+    g.rect(6, 16, 8, 1, "orange")
     g.p(9, 15, "yellow")
-    for y in (6, 12):
-        g.rect(0, y, 3, 1, "white")
-        g.rect(17, y, 3, 1, "white")
+    for y in (6, 13):
+        g.rect(1, y, 3, 1, "white")
+        g.rect(16, y, 3, 1, "white")
     return g
 
 
