@@ -415,14 +415,14 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
 // hit length (hitLength) and the pack at its hit boxes (packHitLength). Two lane-blocking spawns WIDE_LANES wide
 // or wider have a row between the rows their hit boxes are on. The quotas marked first are placed first, their
 // movers then the rest; then the other lane-blocking movers; then the other lane-blocking spawns;
-// then the moving prizes; then the other spawns. Movers are placed by placeMovers; a crosser keeps
-// the row before its own clear as a lead-in, so the pack steers into its row from two rows back. A
-// dart may set off over cells the spawns placed before it hold, crossing over or past them, but
-// not with a lane-blocking spawn in its lead-in row, and a rider may pass over cells only darts
-// hold (moverMayTake); no mover blocks a lane in a dart's lead-in row. Nothing else placed after
-// a mover takes its cells, another dart included, but a lane-blocking standing spawn: one outside
-// a dart's lead-in row,
-// which the dart then crosses over or past the same way, and one whose hit box shares no road with
+// then the moving prizes; then the other spawns. Movers are placed by placeMovers. The row before
+// a crosser's own is its lead-in: left empty, the pack steers into the crosser's row from two rows
+// back; a lane-blocking spawn may stand in it wherever the path rule and the pack-fit gap with the
+// crosser still hold, and the pack then crosses it like any other row. A dart may set off over
+// cells the spawns placed before it hold, crossing over or past them, and a rider may pass over
+// cells only darts hold (moverMayTake). Nothing else placed after a mover takes its cells, another
+// dart included, but a lane-blocking standing spawn: one where a dart passes, which the dart then
+// crosses over or past the same way, and one whose hit box shares no road with
 // any other mover's body, the road that mover's hit box covers at some moment on screen, so the
 // two never meet; a mover other than a dart holds every row its blocking and its path touch, which
 // is more road than its body. A kind marked moversPassOver also takes a mover's cells, but not
@@ -451,7 +451,7 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
 // rows start on the road in view), gets one of the zone's own plain standing
 // spawns: one skipped for want of room, or else one moved from the busiest stretch, placed under
 // every rule above, so long as each move leaves fewer such rows in all. A run no spawn can take
-// under them, such as one held clear for a dart's lead-in or for a mover's path, stays.
+// under them, such as one held clear for a mover's path, stays.
 export function planSpawns<Kind extends string>(
   streams: PlannerStreams,
   plan: SpawnPlan<Kind>,
@@ -588,7 +588,7 @@ export function planSpawns<Kind extends string>(
     taken[row] = (taken[row] ?? 0) | mask;
   };
 
-  // Rows a mover keeps clear before its own, so the pack steers from the row before them.
+  // The rows before the darts' own: one left empty is steered across from the row before it.
   const leadIns = new Set<number>();
   const leadInReach = lanesWithin(plan, 2 * spacing - blockingLength(plan, 1));
 
@@ -631,7 +631,9 @@ export function planSpawns<Kind extends string>(
     if (row === rows.length - 1) {
       return true;
     }
-    if (leadIns.has(row)) {
+    // An empty lead-in row is steered across from the row before it, over both rows' road; one a
+    // lane-blocking spawn stands in is crossed like any other row.
+    if (leadIns.has(row) && isEmpty(row)) {
       return everyLaneReaches(
         leadInReach,
         openLanes(row - 1),
@@ -756,7 +758,7 @@ export function planSpawns<Kind extends string>(
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
       const held = heldFor(row, quota);
-      if ((held & covered) !== 0 || (blocksLane && leadIns.has(row))) {
+      if ((held & covered) !== 0) {
         return false;
       }
     }
@@ -810,16 +812,9 @@ export function planSpawns<Kind extends string>(
   const movers = moverQuotas(true);
   const moverGrid = {
     block: (row: number, span: LaneSpan, rowsBlocked: number, leadIn: boolean, keep: boolean) => {
-      // A lead-in needs a row before it to steer from, and no lane-blocking spawn in it, as the
-      // pack steers across it.
-      if (leadIn && (row < 2 || !isEmpty(row - 1))) {
+      // A lead-in needs a row before it to steer from.
+      if (leadIn && row < 2) {
         return false;
-      }
-      // No mover blocks a lane in a dart's lead-in row, which the pack steers across.
-      for (let blockedRow = row; blockedRow < row + rowsBlocked; blockedRow++) {
-        if (leadIns.has(blockedRow)) {
-          return false;
-        }
       }
       if (leadIn) {
         leadIns.add(row - 1);
@@ -843,7 +838,6 @@ export function planSpawns<Kind extends string>(
         (((heldByStanding[row] ?? 0) | (otherMoverHeld[row] ?? 0)) & cell) !== 0,
       );
     },
-    keepsLeadIns: true,
     // Only the cells not yet taken use up room: a dart may set off over taken ones.
     leavesRoom: (cells: readonly Cell[]) =>
       leavesRoom(
@@ -912,7 +906,6 @@ export function planSpawns<Kind extends string>(
   const prizeGrid = {
     ...moverGrid,
     block: () => true,
-    keepsLeadIns: false,
     occupy: () => {},
     packFits: () => true,
     stand: () => {},

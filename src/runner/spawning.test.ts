@@ -616,15 +616,15 @@ describe("planSpawns", () => {
   );
 
   // Cards (obstacles marked first) are placed before the darts, and benches and tips after. A dart
-  // sets off over a card's cell, never with a card in its lead-in row; a bench placed after it may
-  // take its row but never its lead-in row; no tip is in a row it holds; and the pack has a way
-  // past every card, dart and bench from any lane. A straight dart's row is where it sets off, its
-  // cue's lead less its cue.
+  // sets off over a card's cell; cards and benches may stand in its lead-in row, the row before
+  // its own, and a bench placed after it may take its row; no tip is in its row; and the pack has a
+  // way past every card, dart and bench from any lane. A straight dart's row is where it sets off,
+  // its cue's lead less its cue.
   it.each([
     { cards: 8, minOpenLanes: 2 },
     { cards: 14, minOpenLanes: 1 },
   ])(
-    "lets a dart set off over $cards cards' cells, and a later bench take its own outside its lead-in",
+    "lets a dart set off over $cards cards' cells, with cards and benches in its lead-in row",
     ({ cards, minOpenLanes }) => {
       const darting: SpawnPlan<Kind> = {
         ...shaped,
@@ -641,6 +641,7 @@ describe("planSpawns", () => {
       const window = blockingLength(darting, 1);
       let shared = 0;
       let benchShared = 0;
+      let leadInShared = 0;
       for (const seed of seeds.slice(0, 20)) {
         const events = planSpawns(plannerStreams(seed), darting);
         const darts = events.flatMap(({ distance, mover }) => {
@@ -658,11 +659,9 @@ describe("planSpawns", () => {
           const leadIn = lanes.count > 0 ? [row - spacing] : [];
           shared += at(row, ["obstacle"]).length;
           benchShared += at(row, ["bench"]).length;
-          for (const held of [row, ...leadIn]) {
-            expect(at(held, ["tip"]), `seed ${seed}`).toEqual([]);
-          }
+          expect(at(row, ["tip"]), `seed ${seed}`).toEqual([]);
           for (const held of leadIn) {
-            expect(at(held, ["obstacle", "bench"]), `seed ${seed}`).toEqual([]);
+            leadInShared += at(held, ["obstacle", "bench"]).length;
           }
         }
         const spans = [
@@ -683,6 +682,7 @@ describe("planSpawns", () => {
       }
       expect(shared).toBeGreaterThan(0);
       expect(benchShared).toBeGreaterThan(0);
+      expect(leadInShared).toBeGreaterThan(0);
     },
   );
 
