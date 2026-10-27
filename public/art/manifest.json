@@ -987,6 +987,51 @@
       }
     },
     {
+      "key": "busker",
+      "png": "sprites/busker.png",
+      "json": "sprites/busker.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "busker@50",
+      "png": "sprites/busker@50.png",
+      "json": "sprites/busker@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "busker@62",
+      "png": "sprites/busker@62.png",
+      "json": "sprites/busker@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "busker@75",
+      "png": "sprites/busker@75.png",
+      "json": "sprites/busker@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "busker@88",
+      "png": "sprites/busker@88.png",
+      "json": "sprites/busker@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 41
+      }
+    },
+    {
       "key": "capybara",
       "png": "sprites/capybara.png",
       "json": "sprites/capybara.json",
@@ -1354,6 +1399,51 @@
       "anchor": {
         "feetY": 38,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "couple",
+      "png": "sprites/couple.png",
+      "json": "sprites/couple.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 73
+      }
+    },
+    {
+      "key": "couple@50",
+      "png": "sprites/couple@50.png",
+      "json": "sprites/couple@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "couple@62",
+      "png": "sprites/couple@62.png",
+      "json": "sprites/couple@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "couple@75",
+      "png": "sprites/couple@75.png",
+      "json": "sprites/couple@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "couple@88",
+      "png": "sprites/couple@88.png",
+      "json": "sprites/couple@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 63
       }
     },
     {
@@ -1846,6 +1936,51 @@
       "key": "cyclist@88",
       "png": "sprites/cyclist@88.png",
       "json": "sprites/cyclist@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "delivery-cyclist",
+      "png": "sprites/delivery-cyclist.png",
+      "json": "sprites/delivery-cyclist.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "delivery-cyclist@50",
+      "png": "sprites/delivery-cyclist@50.png",
+      "json": "sprites/delivery-cyclist@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "delivery-cyclist@62",
+      "png": "sprites/delivery-cyclist@62.png",
+      "json": "sprites/delivery-cyclist@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "delivery-cyclist@75",
+      "png": "sprites/delivery-cyclist@75.png",
+      "json": "sprites/delivery-cyclist@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "delivery-cyclist@88",
+      "png": "sprites/delivery-cyclist@88.png",
+      "json": "sprites/delivery-cyclist@88.json",
       "anchor": {
         "feetY": 62,
         "opaqueWidth": 33
@@ -5040,6 +5175,51 @@
       "anchor": {
         "feetY": 18,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "tourist",
+      "png": "sprites/tourist.png",
+      "json": "sprites/tourist.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "tourist@50",
+      "png": "sprites/tourist@50.png",
+      "json": "sprites/tourist@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "tourist@62",
+      "png": "sprites/tourist@62.png",
+      "json": "sprites/tourist@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "tourist@75",
+      "png": "sprites/tourist@75.png",
+      "json": "sprites/tourist@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "tourist@88",
+      "png": "sprites/tourist@88.png",
+      "json": "sprites/tourist@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 38
       }
     },
     {

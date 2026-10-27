@@ -1,0 +1,63 @@
+{ "frames": {
+   "couple@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "couple@88 1.aseprite": {
+    "frame": { "x": 98, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "couple@88 2.aseprite": {
+    "frame": { "x": 196, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "couple@88 3.aseprite": {
+    "frame": { "x": 294, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "couple@88 4.aseprite": {
+    "frame": { "x": 392, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 400
+   },
+   "couple@88 5.aseprite": {
+    "frame": { "x": 490, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "couple@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 588, "h": 63 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" }
+  ]
+ }
+}
