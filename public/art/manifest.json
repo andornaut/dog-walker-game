@@ -100,6 +100,51 @@
       }
     },
     {
+      "key": "ambient-bus",
+      "png": "sprites/ambient-bus.png",
+      "json": "sprites/ambient-bus.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 122
+      }
+    },
+    {
+      "key": "ambient-bus@50",
+      "png": "sprites/ambient-bus@50.png",
+      "json": "sprites/ambient-bus@50.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "ambient-bus@62",
+      "png": "sprites/ambient-bus@62.png",
+      "json": "sprites/ambient-bus@62.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "ambient-bus@75",
+      "png": "sprites/ambient-bus@75.png",
+      "json": "sprites/ambient-bus@75.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 92
+      }
+    },
+    {
+      "key": "ambient-bus@88",
+      "png": "sprites/ambient-bus@88.png",
+      "json": "sprites/ambient-bus@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 107
+      }
+    },
+    {
       "key": "ambient-car",
       "png": "sprites/ambient-car.png",
       "json": "sprites/ambient-car.json",

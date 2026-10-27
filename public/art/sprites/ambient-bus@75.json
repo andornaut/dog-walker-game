@@ -1,0 +1,46 @@
+{ "frames": {
+   "ambient-bus@75 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 95, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 41 },
+    "sourceSize": { "w": 95, "h": 41 },
+    "duration": 100
+   },
+   "ambient-bus@75 1.aseprite": {
+    "frame": { "x": 95, "y": 0, "w": 95, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 41 },
+    "sourceSize": { "w": 95, "h": 41 },
+    "duration": 100
+   },
+   "ambient-bus@75 2.aseprite": {
+    "frame": { "x": 190, "y": 0, "w": 95, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 41 },
+    "sourceSize": { "w": 95, "h": 41 },
+    "duration": 100
+   },
+   "ambient-bus@75 3.aseprite": {
+    "frame": { "x": 285, "y": 0, "w": 95, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 41 },
+    "sourceSize": { "w": 95, "h": 41 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ambient-bus@75.png",
+  "format": "RGBA8888",
+  "size": { "w": 380, "h": 41 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "drive", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

@@ -1497,10 +1497,10 @@ def lit(cv, x0, x1, y0, y1, seed, rate, cols=("gold", "amber", "cream"), step=(3
 
 def skyline(cv, towers):
     """The towers behind the front row: silhouettes standing on BASE, each (x, w, top, wall), a lit
-    window in some of every 3 columns and rows."""
+    window in a third of every 3 columns and rows, gold and amber and a few pink and cyan."""
     for k, (x, w, top, wall) in enumerate(towers):
         cv.fill(x, top, w, BASE - top, wall)
-        lit(cv, x + 2, x + w - 1, top + 3, BASE, f"far-{k}", 0.2, ("gold", "amber"))
+        lit(cv, x + 2, x + w - 1, top + 3, BASE, f"far-{k}", 0.3, ("gold", "amber") * 2 + ("pink", "cyan"))
 
 
 def skydome(cv, x, w, wall, ry):
@@ -1576,7 +1576,7 @@ def dominion(cv, x, w, top, seed):
     for y in range(top + 6, BASE, 3):
         run = 0
         for c in range(x + 1, x + w - 2, 3):
-            run = rnd.randrange(2, 6) if run == 0 and rnd.random() < 0.3 else max(0, run - 1)
+            run = rnd.randrange(2, 6) if run == 0 and rnd.random() < 0.4 else max(0, run - 1)
             if run:
                 cv.fill(c, y, 2, 1, rnd.choice(("gold", "amber", "cream")))
     cv.fill(x + 2, top + 2, 3, 3, "green")
@@ -1593,7 +1593,7 @@ def glass_tower(cv, x, w, top, seed, glass="dlake", line="ink"):
     for y in range(top + 2, BASE, 3):
         cv.fill(x + 1, y, w - 2, 1, dk(glass))
     cv.fill(x + w - 3, top, 3, BASE - top, dk(glass))
-    lit(cv, x + 2, x + w - 3, top + 3, BASE, f"glass-{seed}", 0.25, ("gold", "amber", "foam"), (2, 3))
+    lit(cv, x + 2, x + w - 3, top + 3, BASE, f"glass-{seed}", 0.35, ("gold", "amber", "foam"), (2, 3))
     outline_box(cv, x, top, w, BASE - top + 1, line)
     cv.fill(x + 1, top + 1, 1, BASE - top - 1, "lake")
 
@@ -1639,6 +1639,159 @@ def street_level(cv, x, w, seed, sign=None):
         word(cv, s, x + w / 2, BASE - 17, col)
 
 
+def bulbs(cv, x, y, w, h, cols=("gold", "white")):
+    """A border of marquee bulbs round the box x, y, w, h: every other pixel lit, the colours in turn."""
+    ring = [(x + i, y) for i in range(w)] + [(x + w - 1, y + j) for j in range(1, h)]
+    ring += [(x + w - 1 - i, y + h - 1) for i in range(1, w)] + [(x, y + h - 1 - j) for j in range(1, h - 1)]
+    for k, (px, py) in enumerate(ring):
+        cv.fill(px, py, 1, 1, cols[k // 2 % len(cols)] if k % 2 == 0 else "ink")
+
+
+def blade(cv, x, top, text, col):
+    """A vertical neon sign hung from a wall: an ink board from row top with text read down it, a
+    letter every 7 rows, edged in col."""
+    h = 7 * len(text) + 3
+    cv.fill(x, top, 9, h, "ink")
+    outline_box(cv, x, top, 9, h, col)
+    for k, ch in enumerate(text):
+        word(cv, ch, x + 4.5, top + 1 + 7 * k, col)
+
+
+def chum_city(cv, x, w, top):
+    """The CHUM-City building: a cream Gothic Revival block from row top to the street, a
+    crenellated parapet between corner pinnacles, two floors of pointed windows lit gold and amber
+    over a ground floor of lit arches, and on the roof the MUCHMUSIC sign: cyan letters on an ink
+    board in a border of marquee bulbs, on coal legs."""
+    cv.fill(x, top, w, BASE - top, "cream")
+    cv.fill(x + w - 3, top, 3, BASE - top, "tan")
+    for c in range(x, x + w, 4):
+        cv.fill(c, top - 2, 2, 2, "cream")
+    for c in (x, x + w - 3):
+        cv.fill(c, top - 6, 3, 6, "cream")
+        cv.fill(c + 1, top - 8, 1, 2, "tan")
+    cv.fill(x + 1, top + 1, w - 2, 1, "tan")
+    rnd = random.Random("chum")
+    for y in (top + 4, top + 14):
+        for c in range(x + 5, x + w - 6, 6):
+            cv.fill(c, y + 1, 3, 6, "brown")
+            cv.fill(c + 1, y, 1, 1, "brown")
+            cv.fill(c, y + 2, 3, 5, rnd.choice(("gold", "gold", "amber", "dlake")))
+        cv.fill(x + 1, y + 8, w - 4, 1, "tan")
+    for c in range(x + 4, x + w - 8, 9):
+        cv.fill(c, BASE - 12, 7, 12, "brown")
+        cv.fill(c + 2, BASE - 13, 3, 1, "brown")
+        cv.fill(c + 1, BASE - 11, 5, 11, "gold")
+        cv.fill(c + 1, BASE - 3, 5, 3, "amber")
+    outline_box(cv, x, top, w, BASE - top + 1, "plum")
+    text = "MUCHMUSIC"
+    bw = fonts.sign_width(text) + 6
+    bx = round(x + w / 2 - bw / 2)
+    by = top - 15
+    for c in (bx + 6, bx + bw - 7):
+        cv.fill(c, by + 11, 2, top - by - 11, "coal")
+    cv.fill(bx, by, bw, 12, "ink")
+    bulbs(cv, bx, by, bw, 12, ("gold", "white", "hot"))
+    word(cv, text, x + w / 2, by + 2, "cyan")
+
+
+def car_lights(cv, cx, y, w, back):
+    """A car in a jam far down a side street, w columns wide on row y: from behind, a slate body with
+    red tail lights at its corners; from the front, gold headlights."""
+    h = max(2, round(w * 0.6))
+    x = cx - w // 2
+    cv.fill(x, y - h + 1, w, h, "slate")
+    if h > 3:
+        cv.fill(x + 1, y - h + 1, w - 2, 1, "ink")
+    lamp, size = "red" if back else "gold", 1 + (w >= 6)
+    cv.fill(x, y - h // 2, size, 1, lamp)
+    cv.fill(x + w - size, y - h // 2, size, 1, lamp)
+
+
+def bus_back(cv, cx, y):
+    """A TTC bus from behind at the mouth of the side street: white over red, a dark back window,
+    red tail lights low at its corners and an amber route sign."""
+    cv.fill(cx - 6, y - 12, 13, 13, "ink")
+    cv.fill(cx - 5, y - 11, 11, 6, "white")
+    cv.fill(cx - 5, y - 5, 11, 5, "ttc")
+    cv.fill(cx - 4, y - 10, 9, 4, "dslate")
+    cv.fill(cx - 2, y - 11, 5, 1, "amber")
+    cv.fill(cx - 5, y - 3, 2, 2, "red")
+    cv.fill(cx + 4, y - 3, 2, 2, "red")
+    cv.fill(cx - 5, y - 6, 11, 1, "white")
+
+
+def side_street(cv, x0, x1, vy, rise=34):
+    """A side street running away between two towers, columns x0 to x1, in one-point perspective to
+    a vanishing point on row vy: its two side walls, rise rows tall at the mouth, the right one ash
+    in the light and the left coal in shade, with rows of lit windows running to the vanishing
+    point; a far block at its end; a shale road between stone curbs; and gridlock on it, cars going
+    away showing their tail lights on the left, cars coming in their headlights on the right, a TTC
+    bus at the mouth."""
+    mid = (x0 + x1 + 1) / 2
+    floor = FAR_WALK - 1
+    half = (x1 - x0 + 1) / 2
+    depth = floor + 0.5 - vy
+    rnd = random.Random("side-street")
+    for px in range(x0, x1 + 1):
+        d = px + 0.5 - mid
+        k = abs(d) / half                       # 0 at the vanishing point, 1 at the mouth
+        top, foot = vy - rise * k, vy + depth * k
+        floors = {math.floor(vy - rise * k * f) for f in (0.15, 0.3, 0.45, 0.6, 0.75, 0.9)}
+        for py in range(math.floor(top), floor + 1):
+            if py + 0.5 < foot:
+                c = "coal" if d < 0 else "ash"
+                if py in floors and px % 2 and rnd.random() < 0.55:
+                    c = rnd.choice(("gold", "amber", "cream"))
+            else:
+                t = (py + 0.5 - vy) / depth
+                c = "shale" if abs(d) < half * t * 0.75 else "stone" if abs(d) < half * t * 0.8 else "dstone"
+            cv.fill(px, py, 1, 1, c)
+    cv.fill(round(mid) - 3, vy - 7, 6, 7, "dslate")
+    lit(cv, round(mid) - 2, round(mid) + 3, vy - 6, vy, "side-end", 0.6, ("gold", "cream"), (2, 2))
+    for t in (0.12, 0.2, 0.3, 0.42, 0.56, 0.72):
+        y = round(vy + depth * t)
+        w = max(2, round(11 * t))
+        car_lights(cv, round(mid - half * t * 0.38), y, w, True)
+        car_lights(cv, round(mid + half * t * 0.38), y, w, False)
+    bus_back(cv, round(mid - half * 0.38), floor)
+
+
+def marquee(cv, x, w, text, col):
+    """A theatre marquee over a street level, columns x to x + w - 1: text in col on a cream board
+    in a border of marquee bulbs, a plum canopy edge under it."""
+    cv.fill(x, BASE - 22, w, 13, "ink")
+    cv.fill(x + 2, BASE - 20, w - 4, 9, "cream")
+    bulbs(cv, x, BASE - 22, w, 13)
+    word(cv, text, x + w / 2, BASE - 20, col)
+    cv.fill(x + 1, BASE - 9, w - 2, 1, "plum")
+
+
+# A paw print, 11 by 10: four toe beans over the pad.
+PAW = ("..##...##..", ".####.####.", ".####.####.", "..##...##..", "##.......##", "##..###..##",
+       "...#####...", "..#######..", "..#######..", "...##.##...")
+
+
+def billboard(cv, x, y, w, h):
+    """A billboard on a tower's face: a white paw print on azure in an ink frame, a gold glint at
+    each top corner."""
+    cv.fill(x, y, w, h, "ink")
+    cv.fill(x + 1, y + 1, w - 2, h - 2, "azure")
+    px, py = x + (w - len(PAW[0])) // 2, y + (h - len(PAW)) // 2
+    for j, row in enumerate(PAW):
+        for i, ch in enumerate(row):
+            if ch == "#":
+                cv.fill(px + i, py + j, 1, 1, "white")
+    for c in (x + 2, x + w - 3):
+        cv.fill(c, y + 2, 1, 1, "gold")
+
+
+def crosswalk(cv, mid, w):
+    """A crosswalk over the cross street, w columns centred on mid: white bars along the street on
+    every other row."""
+    for py in range(CROSS + 1, NEAR_CURB, 2):
+        cv.fill(round(mid - w / 2), py, w, 1, "white")
+
+
 YONGE_SKY = ("slate", "dslate", "purple", "mauve")
 
 
@@ -1652,7 +1805,7 @@ def yonge():
     full_moon(cv, 304, 14, 5)
     # downtown is a wall of towers filling most of the sky, the only sky left in the gaps and over the
     # top: unlike the other backdrops it rises above row 45, under the debuff bars' and the message
-    # strip's opaque plates. Far back, dark towers in navy and dslate with a few windows lit
+    # strip's opaque plates. Far back, dark towers in navy and dslate with a third of their windows lit
     skyline(cv, ((-2, 16, 30, "navy"), (44, 20, 22, "dslate"), (66, 18, 36, "navy"), (114, 22, 26, "navy"),
                  (150, 18, 16, "dslate"), (170, 20, 34, "navy"), (196, 16, 24, "dslate"), (214, 14, 12, "navy"),
                  (228, 18, 30, "navy"),
@@ -1673,26 +1826,29 @@ def yonge():
     lit(cv, 51, 72, 74, 80, "dome-block", 0.45, ("amber", "ochre"), (3, 3))
     skydome(cv, 44, 94, BASE - 26, 20)
     # the nearer towers: dark glass on the left and up to the SkyDome's lower half; then, down to
-    # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, the TD
-    # Centre's black pair and glass, each with neon over its street level
+    # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, a TD
+    # Centre tower and glass under a turquoise crown, most with neon over its street level; in front,
+    # the CHUM-City building under the MUCHMUSIC sign, a HOTEL sign down the left tower, a paw print
+    # billboard on the TD tower and a theatre marquee over the Royal Bank pair
     glass_tower(cv, -4, 18, 24, 4)
     glass_tower(cv, 44, 30, BASE - 30, 5, "dslate")
     glass_tower(cv, 74, 14, BASE - 40, 6)
-    dominion(cv, 88, 38, BASE - 28, 4)
-    glass_tower(cv, 126, 26, BASE - 34, 1)
     dundas_screens(cv, CX - 28, 56, 48)
     royal_bank(cv, 210, 20, 36)
     royal_bank(cv, 230, 14, 58)
     first_canadian(cv, 246, 22, 14)
     dominion(cv, 270, 34, 30, 1)
-    dominion(cv, 306, 24, 48, 2)
     glass_tower(cv, 332, 32, 34, 3)
-    for k, (x, w, sign) in enumerate(((-4, 18, None), (14, 30, None), (44, 30, None), (74, 14, None),
-                                      (88, 38, ("SHOES", "pink")), (126, 26, ("EAT", "gold")),
-                                      (CX - 28, 56, ("MUSIC", "turquoise")), (210, 20, None), (230, 14, None),
-                                      (246, 22, None), (270, 34, ("BOOKS", "lilac")), (306, 24, None),
-                                      (332, 32, None))):
+    crown(cv, 332, 32, 34, "turquoise", "turquoise", steps=3)
+    for k, (x, w, sign) in enumerate(((-4, 18, None), (14, 30, ("CAFE", "turquoise")), (44, 30, None),
+                                      (74, 14, None), (CX - 28, 56, ("PIZZA", "gold")), (210, 20, None),
+                                      (230, 14, None), (246, 22, None), (270, 34, ("BOOKS", "lilac")),
+                                      (332, 32, ("BAR", "pink")))):
         street_level(cv, x, w, k, sign)
+    chum_city(cv, 86, 66, BASE - 36)
+    blade(cv, 3, 58, "HOTEL", "pink")
+    billboard(cv, 274, 50, 26, 14)
+    marquee(cv, 210, 34, "SHOW", "red")
     # the subway entrance sign
     sx = 64
     cv.fill(sx, BASE - 4, 2, FAR_WALK - BASE + 4, "coal")
@@ -1704,6 +1860,8 @@ def yonge():
         return "shale" if hashed(px, py, 67) else "dstone"
 
     yard(cv, BASE, FAR_WALK, paving)
+    # a side street jammed with traffic between the TD tower and the glass, down to the far sidewalk
+    side_street(cv, 304, 331, BASE - 26)
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 5:
@@ -1714,6 +1872,9 @@ def yonge():
 
     cross(cv, flat(road), "dstone", paving, curb="stone")
     cross_line(cv, "amber", "coal", dash=(14, 64))
+    # crosswalks over the cross street from the stub's two sidewalks
+    for mid in (94, 266):
+        crosswalk(cv, mid, 14)
     street(cv, verge("yonge-street", road))
     lanes(cv, "white", "coal", dash=(14, 64))
     return cv

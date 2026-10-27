@@ -15,7 +15,10 @@ The cars are laid out in design units and drawn at road.SCALE: a cyan greenhouse
 glint, the body lit along the belt line and a step darker along the sill and down the nose, lamps,
 bumpers, dark wheel arches. drive (4 frames at DRIVE_MS): a spoke through each hub turns an eighth a frame,
 and the body dips 1px onto the wheels on frames 1 and 2. ambient-car is the sedan; the other bodies are
-extra keys. The cyclist rides an amber helmet, a mauve jersey and navy shorts on a red bike; ride
+extra keys. The bus is a TTC bus: a white greenhouse and roof pod over a red body with two white stripes,
+six windows, glass front and middle doors split down the middle, a tall windshield under an amber-lit
+destination sign, and its lamps low at the bumpers; side on it shows no pantograph and rides on tyres, so it
+never reads as the streetcar. The cyclist rides an amber helmet, a mauve jersey and navy shorts on a red bike; ride
 (4 frames at RIDE_MS): the cranks turn a quarter a frame with the feet on the pedals, a cross of spokes
 turns a sixteenth, and the back and head sit 1px lower on frames 1 and 3. Its wheels are clear inside, so
 the road shows between the spokes.
@@ -29,6 +32,7 @@ ambient-car               72x42  an orange sedan; drive 4 x 100ms
 ambient-car-hatchback     63x42  a red hatchback
 ambient-car-van           69x45  a two-tone van, white over green
 ambient-car-wagon         75x42  a cream station wagon with a wood side panel and a roof rack
+ambient-bus               126x54 a TTC bus, red and white; drive 4 x 100ms
 ambient-bike              66x72  the cyclist side on; ride 4 x 120ms
 ambient-cat               40x40  a ginger tabby; idle 2 x 400ms (sat, its tail flicking), run 4 x 90ms (a gallop)
 ambient-rabbit            40x40  a brown cottontail; idle 2 x 400ms (a nose twitch), hop 4 x 110ms
@@ -183,7 +187,9 @@ class Car:
     row above belt, the body from belt for body rows, and the tyres reach TYRE * 2 - 3 rows past the body to
     the ground row. cabin is the roof's first and last column; back and front are how many columns the
     greenhouse widens per row behind and ahead. Columns are counted from the art's left edge, 2 in from the
-    frame's."""
+    frame's. The extras in q: upper, the greenhouse's paint; pillars and doors, their columns; bands, (x0, x1,
+    y0, y1, colour) blocks over the body; rack and pod, a roof rack's or a roof pod's columns; sign, the
+    columns of an amber-lit destination sign along the greenhouse's top; lamp, the lamps' top row."""
 
     def __init__(self, length, belt, cabin, back, front, wheels, paint, body=9, **q):
         self.length, self.belt, self.body, self.cabin = length, belt, body, cabin
@@ -231,6 +237,15 @@ class Car:
             rect(x0, ROOF - 1, x1 - x0 + 1, 1, "dslate")
             for x in (x0 + 1, x1 - 1):
                 rect(x, ROOF - 1, 1, 1, "grey")
+        if "pod" in q:
+            x0, x1 = q["pod"]
+            rect(x0, ROOF - 2, x1 - x0 + 1, 2, "lgrey")
+            rect(x0, ROOF - 2, x1 - x0 + 1, 1, "white")
+        if "sign" in q:
+            x0, x1 = q["sign"]
+            rect(x0, ROOF + 1, x1 - x0 + 1, 2, "ink")
+            for x in range(x0 + 1, x1, 2):
+                rect(x, ROOF + 1.5, 1, 1, "amber")
         # the body: lit along the belt, a step darker along the sill and down the nose
         rect(1, belt, L - 2, self.body, self.base)
         rect(1, belt, L - 2, 1, self.light)
@@ -244,9 +259,10 @@ class Car:
         mx = self.span(belt - 1)[1] - 2
         rect(mx, belt - 2, 3, 2, self.shade)
         # lamps and bumpers
-        rect(L - 3, belt + 1, 2, 2, "yellow")
-        rect(L - 3, belt + 1, 1, 1, "white")
-        rect(1, belt + 1, 2, 3, "red")
+        lamp = q.get("lamp", belt + 1)
+        rect(L - 3, lamp, 2, 2, "yellow")
+        rect(L - 3, lamp, 1, 1, "white")
+        rect(1, lamp, 2, 3, "red")
         rect(0, end - 3, 3, 3, "lgrey")
         rect(L - 3, end - 3, 3, 3, "lgrey")
         rect(0, end - 1, 3, 1, "grey")
@@ -279,6 +295,11 @@ CARS = {
     "ambient-car-wagon": Car(46, 11, (6, 32), 0, 1.4, (10, 36), ("cream", "tan", "white"), pillars=(13, 23),
                              doors=(14, 24), rack=(8, 30),
                              bands=((3, 41, 14, 17, "brown"), (3, 41, 14, 14, "ochre"), (3, 41, 17, 17, "dbrown"))),
+    "ambient-bus": Car(80, 15, (2, 76), 0, 0.2, (14, 58), ("ttc", "dred", "red"), body=13, upper="white",
+                       pillars=(12, 23, 34, 45, 54, 64), lamp=23, sign=(66, 78), pod=(8, 24),
+                       bands=((3, 63, 4, 5, "white"), (1, 77, 15, 15, "white"), (1, 77, 22, 22, "white"),
+                              (34, 41, 15, 24, "cyan"), (37, 38, 15, 24, "white"), (66, 73, 15, 24, "cyan"),
+                              (69, 70, 15, 24, "white"), (75, 77, 15, 20, "cyan"))),
 }
 
 

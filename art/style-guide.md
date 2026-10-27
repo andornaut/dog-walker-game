@@ -265,7 +265,7 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 
 ## Ambient
 
-People, traffic, lawn animals and sky movers that pass by with no collisions and no card (`art/tools/ambient.py`), outlined with `road_edge` and lit with the rim on their dark parts. Side views face right; the game flips them to go left. The sky movers fly far back across a neighborhood's sky, outlined in ink, with no depth variants. A sprite that rests has its `idle` first. Each differs from the road sprite it could be taken for: the cyclist's colours from `cyclist`'s, the lawn animals from the chase animals, and the pedestrian carries nothing and walks no dog, so it never reads as an owner, a walker or a hazard.
+People, traffic, lawn animals and sky movers that pass by with no collisions and no card (`art/tools/ambient.py`), outlined with `road_edge` and lit with the rim on their dark parts. Side views face right; the game flips them to go left. The sky movers fly far back across a neighborhood's sky, outlined in ink, with no depth variants. A sprite that rests has its `idle` first. Each differs from the road sprite it could be taken for: the cyclist's colours from `cyclist`'s, the bus (side on, on tyres, with no pantograph) from `streetcar`, the lawn animals from the chase animals, and the pedestrian carries nothing and walks no dog, so it never reads as an owner, a walker or a hazard.
 
 ## Backdrops
 
@@ -274,7 +274,7 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 - Above the far side's front row the scenery goes back in depth, not taller. The debuff bars and the message strip lie over the band's top rows, so the sky above row 45 is one flat colour with no clouds, stars or scenery. Yonge Street is the exception: its skyline rises above row 45, under the bars' and the strip's opaque plates.
 - Darkness varies: The Beaches bright and open, Cabbagetown and the Distillery District in between, Yonge Street an evening downtown, Kensington Market dark all through and High Park darkest, under its canopy.
 - Houses on the far side are slim, about as tall as they are wide, under a gable that rises about a row for each column it narrows, past 2px eaves. Light comes from the top left: the roof's left edge a ramp step lighter, the wall's right 3 columns a step darker. Trees, hedges and side yards fill the gaps, and the end houses run off the band's edges so the street carries on. Houses further back are smaller and show between the near roofs.
-- The approach rows carry no static scenery. The near corners and the stub's verges show only their ground (lawn, paving, sidewalk and curb, as the verge paints them): the game's road begins there and its items spawn over them, so no perch, ornament, tree, lamp, bench, sign or other prop stands there. Everything static stands at or beyond the cross street.
+- The approach rows carry no static scenery. The near corners and the stub's verges show only their ground (lawn, paving, sidewalk and curb, as the verge paints them): the game's road begins there and its items spawn over them, so no perch, ornament, tree, lamp, bench, sign or other prop stands there. Everything static stands at or beyond the cross street, and no static vehicle stands on it: the ambient traffic drives there, so a jam (Yonge Street's side street) stays beyond the far sidewalk.
 
 ## Skies
 

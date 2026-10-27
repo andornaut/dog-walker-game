@@ -106,6 +106,7 @@ Cosmetic movers drawn by `art/tools/ambient.py` (style guide, Ambient). The cros
 | `ambient-balloon`                                         | sprite | 18×26                      | `fly`                              | Sky mover over High Park                      |
 | `ambient-bike`                                            | sprite | 66×72                      | `ride`                             | A cyclist side on                             |
 | `ambient-bird`, `ambient-cat`, `ambient-rabbit`           | sprite | 40×40                      | `idle`, then `fly`, `run` or `hop` | A robin, a ginger tabby, a brown cottontail   |
+| `ambient-bus`                                             | sprite | 126×54                     | `drive`                            | A TTC bus side on, red and white              |
 | `ambient-car`, `-car-hatchback`, `-car-van`, `-car-wagon` | sprite | 72×42, 63×42, 69×45, 75×42 | `drive`                            | Side on                                       |
 | `ambient-geese`                                           | sprite | 36×18                      | `fly`                              | Sky mover over Cabbagetown, no outline        |
 | `ambient-helicopter`                                      | sprite | 26×12                      | `fly`                              | Sky mover over Kensington Market              |
