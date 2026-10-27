@@ -181,19 +181,39 @@ def kevin(mood):
     return g
 
 
-def pruitt(mood):
-    """Retired accountant, fussy: bald with grey sides, round glasses, bow tie."""
+def braid(g, x, y0, n):
+    """A plait of n lobes down from row y0, its middle column x: each lobe 3 wide and 3 tall, leaning left
+    and right in turn, lit brown at its top and shaded plum where the next tucks under it; a red tie
+    and a tuft below."""
+    for i in range(n):
+        y, dx = y0 + i * 3, -1 if i % 2 else 0
+        g.rect(x - 1 + dx, y, 3, 3, "walnut")
+        g.p(x + dx, y, "brown")
+        g.p(x + 1 + dx if i % 2 else x - 1 + dx, y + 2, "plum")
+    y = y0 + n * 3
+    g.rect(x - 1, y, 2, 1, "red")
+    g.rect(x - 1, y + 1, 2, 2, "walnut")
+
+
+def sheba(mood):
+    """Retired accountant, fussy: a long dark plait over one shoulder, round glasses, a mustard sweater vest
+    over a white shirt."""
     g = face()
-    base(g, "skin1", "skin2", "brown", "dbrown")
-    g.rect(13, 26, 6, 3, "white")
-    g.tri((12, 26), (16, 28), (12, 30), "red")
-    g.tri((20, 26), (16, 28), (20, 30), "red")
-    g.p(16, 28, "dred")
-    g.cel(8.5, 15, 2, 4, "lgrey", "grey")
-    g.cel(23.5, 15, 2, 4, "lgrey", "grey")
-    g.p(14, 9, "cream")
-    g.p(15, 9, "cream")
-    expression(g, mood, glasses="slate")
+    base(g, "skin2", "brown", "gold", "ochre")
+    # the shirt: its sleeves at the shoulders and its collar in the vest's V
+    g.rect(6, 28, 3, 3, "white")
+    g.rect(23, 28, 3, 3, "lgrey")
+    g.tri((12, 26), (20, 26), (16, 31), "white")
+    g.tri((14, 27), (18, 27), (16, 30), "skin2")
+    g.cel(16, 10, 9.5, 5, "walnut", "plum")
+    g.rect(7, 11, 2, 9, "walnut")
+    g.rect(23, 11, 2, 7, "walnut")
+    # the parting, and a sheen either side of it on the hair drawn back to the plait
+    g.rect(14, 6, 1, 4, "plum")
+    for x, y in ((10, 9), (11, 8), (12, 7), (17, 7), (18, 7), (19, 8)):
+        g.p(x, y, "dbrown")
+    braid(g, 24, 17, 4)
+    expression(g, mood, glasses="walnut")
     return g
 
 
@@ -535,7 +555,7 @@ WALKERS = {
 OWNERS = {
     "duchess": rosa,
     "nugget": kevin,
-    "zippy": pruitt,
+    "zippy": sheba,
     "pierre": lefevre,
     "biscuit": sam,
     "archie": kiwi,

@@ -24,6 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+from owners import braid  # noqa: E402
 from pixel import edged, main  # noqa: E402
 from road import BREATH, BREATH_MS, LIT, face_disc, face_front, person, rim  # noqa: E402
 
@@ -147,32 +148,32 @@ def kevin_legs(g, b):
     g.rect(18, 39 + b, 2, 1, "skin2")
 
 
-def pruitt_top(wave):
-    """Mr. Pruitt, retired accountant, fussy: bald with grey sides, round glasses, a brown jacket over a white
-    shirt and red bow tie, grey trousers and his briefcase."""
+def sheba_top(wave):
+    """Sheba, retired accountant, fussy: a long dark plait over one shoulder, round glasses, a mustard
+    sweater vest over a white shirt, slate trousers and a briefcase."""
     def top(g, b):
-        torso(g, b, "brown", "dbrown")
-        g.tri((13, 21 + b), (19, 21 + b), (16, 28 + b), "white")
-        g.tri((13, 21 + b), (15, 22 + b), (13, 24 + b), "red")
-        g.tri((19, 21 + b), (17, 22 + b), (19, 24 + b), "red")
-        g.rect(15, 22 + b, 2, 1, "dred")
-        g.rect(15, 29 + b, 2, 1, "amber")
-        g.rect(15, 31 + b, 2, 1, "amber")
-        arms(g, b, wave, "brown", "dbrown", "skin1")
+        torso(g, b, "gold", "ochre")
+        g.tri((13, 21 + b), (19, 21 + b), (16, 26 + b), "white")
+        g.tri((14, 21 + b), (18, 21 + b), (16, 24 + b), "skin2")
+        # the vest's ribbed hem
+        g.rect(9, 32 + b, 14, 1, "ochre")
+        arms(g, b, wave, "white", "lgrey", "skin2")
         # the briefcase, hanging from the left fist
         g.rect(2, 33 + b, 9, 7, "dbrown")
         g.rect(2, 33 + b, 9, 1, "brown")
         g.rect(2, 36 + b, 9, 1, "plum")
         g.rect(6, 35 + b, 2, 2, "amber")
-        g.rect(5, 31 + b, 4, 3, "skin1")
-        head(g, b, "skin1", "skin2")
-        g.p(13, 6 + b, "cream")
-        g.p(14, 6 + b, "cream")
-        g.p(12, 7 + b, "cream")
-        g.cel(8.5, 12 + b, 2, 4, "lgrey", "grey")
-        g.cel(23.5, 12 + b, 2, 4, "lgrey", "grey")
+        g.rect(5, 31 + b, 4, 3, "skin2")
+        head(g, b, "skin2", "brown")
+        g.cel(16, 7.5 + b, 9.5, 5, "walnut", "plum")
+        g.rect(8, 9 + b, 2, 8, "walnut")
+        g.rect(22, 9 + b, 2, 6, "walnut")
+        g.rect(14, 4 + b, 1, 4, "plum")
+        for x, y in ((11, 5), (12, 4), (17, 4), (18, 5)):
+            g.p(x, y + b, "dbrown")
+        braid(g, 22, 16 + b, 4)
         face_front(g, 16, 13 + b)
-        specs(g, b, "slate")
+        specs(g, b, "walnut")
     return top
 
 
@@ -373,7 +374,7 @@ def jesse_top(wave):
 OWNERS = {
     "duchess": (rosa_top, "skin1", "dbrown", None),
     "nugget": (kevin_top, "blue", "white", kevin_legs),
-    "zippy": (pruitt_top, "slate", "ink", None),
+    "zippy": (sheba_top, "slate", "dbrown", None),
     "pierre": (lefevre_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),
     "archie": (kiwi_top, "brown", "red", None),
