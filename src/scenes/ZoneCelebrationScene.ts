@@ -42,8 +42,6 @@ type NewWalkerText = Extract<CelebrationText, { kind: "newWalker" }>;
 type ZoneDoneText = Extract<CelebrationText, { kind: "zoneDone" }>;
 type Version = typeof LAYOUT.newWalker | typeof LAYOUT.zoneDone;
 
-// Zone done moves on by itself after this long.
-const ZONE_DONE_MS = 2000;
 const BODY = { colour: PALETTE.plum, scale: TEXT_SCALE } as const;
 const KEY_RISE = 14;
 
@@ -53,7 +51,7 @@ function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
 }
 
 // Between zones, over the paused walk: the walker cheers on a starburst under the zone's name
-// and earnings, and moves on after ZONE_DONE_MS or a tap; or a newly unlocked walker hops in,
+// and earnings, and waits for a tap or key 1; or a newly unlocked walker hops in,
 // greets the pack in a bubble with their agility and perk, and waits for Welcome! (key 1).
 // Confetti falls in both, unless motion is reduced.
 export class ZoneCelebrationScene extends Scene {
@@ -99,7 +97,6 @@ export class ZoneCelebrationScene extends Scene {
     });
     if (text.kind === "zoneDone") {
       this.addPlate(text);
-      this.time.delayedCall(ZONE_DONE_MS, finish);
       // A tap on the dim, or on the page beside the game, moves on.
       const area = { covered: [], dim: LAYOUT.dim };
       listenOutsideTap(this, () => area, finish);
