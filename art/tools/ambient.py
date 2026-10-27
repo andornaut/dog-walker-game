@@ -54,7 +54,7 @@ ambient-kite              17x28  a diamond kite on its string; fly 4 x 200ms (th
 
 The sky movers fly far back, so each is at full size only with no depth variants, faces right, and has
 one fly tag. Each is a few large shapes that read at 1x on its sky (Yonge Street's slate, then azure,
-dturq, lilac, peach and gold), with one ink line round every fill except the geese's and the bats'. A line
+pink, lilac, peach and gold), with one ink line round every fill except the geese's and the bats'. A line
 one pixel thin, a rope, a string, a contrail, a skid or a rotor blur, is drawn past the outline so the ink
 does not thicken it.
 - The plane is a white fuselage over a grey belly with one row of windows, a rounded nose with cockpit
@@ -86,8 +86,9 @@ does not thicken it.
   toward the nose, and a gondola with cyan windows.
 - The airliner is small and high: a white fuselage, a blue fin, a slate wing and engine, and a thin white
   contrail whose far end breaks into dashes.
-- The bats are plum wings round ink ears and bodies, with no outline, as the geese: raised, spread with
-  scalloped edges, or down, each fluttering a pixel up and down out of step.
+- The bats are ink silhouettes with no outline, as the geese, so they hold on Yonge Street's slate: ears,
+  a body and wings raised, spread with a scalloped trailing edge, or down, each fluttering a pixel up and
+  down out of step.
 - The kite is a diamond quartered red and white with a red and white ribbon tail swaying under it and its
   string running down to the lower left.
 
@@ -929,22 +930,23 @@ def airliner(f):
     return over(out, "white", *((x, 4) for x in range(23) if x >= 8 or (x + f) % 3))
 
 
-# A bat seen head on, ink ears and body between plum wings: raised, spread with scalloped edges, or down.
+# A bat seen head on, an ink silhouette: ears and body between its wings, raised, spread with a scalloped
+# trailing edge, or down.
 BAT = dict(
-    up=("b.......b", ".b.....b.", "..bk.kb..", "...bkb...", "....k...."),
-    level=("", "", "...k.k...", ".bbbkbbb.", "b.b.k.b.b"),
-    down=("", "", "...k.k...", "..bbkbb..", ".b..k..b.", "b.......b"),
+    up=("b.......b", "bb.b.b.bb", ".bbbbbbb.", "..bbbbb..", "....b...."),
+    level=("", "", "...b.b...", "bb.bbb.bb", ".bbbbbbb.", ".b..b..b."),
+    down=("", "", "...b.b...", "..bbbbb..", ".b.bbb.b.", "b...b...b"),
 )
-BAT_FLOCK = ((4, 7, 0), (15, 4, 1), (24, 9, 3))
+BAT_FLOCK = ((4, 7, 0), (15, 4, 1), (24, 8, 3))
 
 
 def bats(i):
     """Frame i of the bats: three at dusk, each a step out of time with the next, fluttering a pixel up and
-    down as it beats. Like the geese they are dark with no outline."""
+    down as it beats. Like the geese they are dark with no outline, in ink so they hold on every sky."""
     g = Grid(29, 11)
     for cx, cy, phase in BAT_FLOCK:
         k = (i + phase) % 4
-        bitmap(g, cx - 4, cy - 4 + (0, -1, 0, 1)[k], BAT[WINGBEAT[k]], dict(b="plum", k="ink"))
+        bitmap(g, cx - 4, cy - 4 + (0, -1, 0, 1)[k], BAT[WINGBEAT[k]], dict(b="ink"))
     return g.outlined(False)
 
 
