@@ -2028,7 +2028,7 @@ def side_street(cv, x0, x1, vy, rise=34):
         floors = {math.floor(vy - rise * k * f) for f in (0.15, 0.3, 0.45, 0.6, 0.75, 0.9)}
         for py in range(math.floor(top), floor + 1):
             if py + 0.5 < foot:
-                c = "coal" if d < 0 else "ash"
+                c = "coal" if d < 0 else "shale"
                 if py in floors and px % 2 and rnd.random() < 0.55:
                     c = rnd.choice(("gold", "amber", "cream"))
             else:
