@@ -1195,6 +1195,411 @@
       }
     },
     {
+      "key": "curb-barrel",
+      "png": "sprites/curb-barrel.png",
+      "json": "sprites/curb-barrel.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "curb-barrel@50",
+      "png": "sprites/curb-barrel@50.png",
+      "json": "sprites/curb-barrel@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "curb-barrel@62",
+      "png": "sprites/curb-barrel@62.png",
+      "json": "sprites/curb-barrel@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-barrel@75",
+      "png": "sprites/curb-barrel@75.png",
+      "json": "sprites/curb-barrel@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-barrel@88",
+      "png": "sprites/curb-barrel@88.png",
+      "json": "sprites/curb-barrel@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-bike-ring",
+      "png": "sprites/curb-bike-ring.png",
+      "json": "sprites/curb-bike-ring.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-bike-ring@50",
+      "png": "sprites/curb-bike-ring@50.png",
+      "json": "sprites/curb-bike-ring@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "curb-bike-ring@62",
+      "png": "sprites/curb-bike-ring@62.png",
+      "json": "sprites/curb-bike-ring@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "curb-bike-ring@75",
+      "png": "sprites/curb-bike-ring@75.png",
+      "json": "sprites/curb-bike-ring@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "curb-bike-ring@88",
+      "png": "sprites/curb-bike-ring@88.png",
+      "json": "sprites/curb-bike-ring@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-bollard",
+      "png": "sprites/curb-bollard.png",
+      "json": "sprites/curb-bollard.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-bollard@50",
+      "png": "sprites/curb-bollard@50.png",
+      "json": "sprites/curb-bollard@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 6
+      }
+    },
+    {
+      "key": "curb-bollard@62",
+      "png": "sprites/curb-bollard@62.png",
+      "json": "sprites/curb-bollard@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "curb-bollard@75",
+      "png": "sprites/curb-bollard@75.png",
+      "json": "sprites/curb-bollard@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "curb-bollard@88",
+      "png": "sprites/curb-bollard@88.png",
+      "json": "sprites/curb-bollard@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-hydrant",
+      "png": "sprites/curb-hydrant.png",
+      "json": "sprites/curb-hydrant.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "curb-hydrant@50",
+      "png": "sprites/curb-hydrant@50.png",
+      "json": "sprites/curb-hydrant@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "curb-hydrant@62",
+      "png": "sprites/curb-hydrant@62.png",
+      "json": "sprites/curb-hydrant@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-hydrant@75",
+      "png": "sprites/curb-hydrant@75.png",
+      "json": "sprites/curb-hydrant@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-hydrant@88",
+      "png": "sprites/curb-hydrant@88.png",
+      "json": "sprites/curb-hydrant@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-life-ring",
+      "png": "sprites/curb-life-ring.png",
+      "json": "sprites/curb-life-ring.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-life-ring@50",
+      "png": "sprites/curb-life-ring@50.png",
+      "json": "sprites/curb-life-ring@50.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "curb-life-ring@62",
+      "png": "sprites/curb-life-ring@62.png",
+      "json": "sprites/curb-life-ring@62.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "curb-life-ring@75",
+      "png": "sprites/curb-life-ring@75.png",
+      "json": "sprites/curb-life-ring@75.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "curb-life-ring@88",
+      "png": "sprites/curb-life-ring@88.png",
+      "json": "sprites/curb-life-ring@88.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "curb-news-box",
+      "png": "sprites/curb-news-box.png",
+      "json": "sprites/curb-news-box.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "curb-news-box@50",
+      "png": "sprites/curb-news-box@50.png",
+      "json": "sprites/curb-news-box@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "curb-news-box@62",
+      "png": "sprites/curb-news-box@62.png",
+      "json": "sprites/curb-news-box@62.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-news-box@75",
+      "png": "sprites/curb-news-box@75.png",
+      "json": "sprites/curb-news-box@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-news-box@88",
+      "png": "sprites/curb-news-box@88.png",
+      "json": "sprites/curb-news-box@88.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-pay-station",
+      "png": "sprites/curb-pay-station.png",
+      "json": "sprites/curb-pay-station.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-pay-station@50",
+      "png": "sprites/curb-pay-station@50.png",
+      "json": "sprites/curb-pay-station@50.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 6
+      }
+    },
+    {
+      "key": "curb-pay-station@62",
+      "png": "sprites/curb-pay-station@62.png",
+      "json": "sprites/curb-pay-station@62.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "curb-pay-station@75",
+      "png": "sprites/curb-pay-station@75.png",
+      "json": "sprites/curb-pay-station@75.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "curb-pay-station@88",
+      "png": "sprites/curb-pay-station@88.png",
+      "json": "sprites/curb-pay-station@88.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-rope-posts",
+      "png": "sprites/curb-rope-posts.png",
+      "json": "sprites/curb-rope-posts.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "curb-rope-posts@50",
+      "png": "sprites/curb-rope-posts@50.png",
+      "json": "sprites/curb-rope-posts@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-rope-posts@62",
+      "png": "sprites/curb-rope-posts@62.png",
+      "json": "sprites/curb-rope-posts@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "curb-rope-posts@75",
+      "png": "sprites/curb-rope-posts@75.png",
+      "json": "sprites/curb-rope-posts@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "curb-rope-posts@88",
+      "png": "sprites/curb-rope-posts@88.png",
+      "json": "sprites/curb-rope-posts@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "curb-urn",
+      "png": "sprites/curb-urn.png",
+      "json": "sprites/curb-urn.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "curb-urn@50",
+      "png": "sprites/curb-urn@50.png",
+      "json": "sprites/curb-urn@50.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "curb-urn@62",
+      "png": "sprites/curb-urn@62.png",
+      "json": "sprites/curb-urn@62.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "curb-urn@75",
+      "png": "sprites/curb-urn@75.png",
+      "json": "sprites/curb-urn@75.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "curb-urn@88",
+      "png": "sprites/curb-urn@88.png",
+      "json": "sprites/curb-urn@88.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 25
+      }
+    },
+    {
       "key": "cyclist",
       "png": "sprites/cyclist.png",
       "json": "sprites/cyclist.json",

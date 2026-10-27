@@ -116,10 +116,19 @@ Cosmetic movers drawn by `art/tools/ambient.py` (style guide, Ambient). The cros
 
 ### Roadside props
 
-Placed by the style guide's Roadside table (`shared/roadside.json`); sprites with one static `idle` frame, drawn by `art/tools/roadside.py`.
+Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn props beyond the sidewalks, the curb props on them. Sprites with one static `idle` frame, drawn by `art/tools/roadside.py`.
 
 | Key                      | Size    | Note                                             |
 | ------------------------ | ------- | ------------------------------------------------ |
+| `curb-barrel`            | 30×39   | A whisky barrel on end, oak staves               |
+| `curb-bike-ring`         | 24×48   | Toronto's post-and-ring bike stand               |
+| `curb-bollard`           | 18×39   | A cast-iron bollard with a gold collar           |
+| `curb-hydrant`           | 27×39   | A red hydrant under a silver cap                 |
+| `curb-life-ring`         | 27×51   | A lifebuoy on a driftwood post                   |
+| `curb-news-box`          | 27×45   | A cobalt newspaper box on legs                   |
+| `curb-pay-station`       | 21×51   | A pay-and-display machine under a P sign         |
+| `curb-rope-posts`        | 36×30   | Two driftwood posts with a rope between          |
+| `curb-urn`               | 33×42   | A cast-iron urn heaped with geraniums            |
 | `roadside-dune-grass`    | 60×48   | A tuft of dune grass                             |
 | `roadside-fruit-stand`   | 108×84  | Fruit crates under a striped awning on two posts |
 | `roadside-gas-lamp`      | 36×150  | A heritage lamp lit gold                         |

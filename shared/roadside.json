@@ -9,7 +9,16 @@
     "roadside-transit-stop",
     "roadside-hot-dog-stand",
     "roadside-love-lock",
-    "roadside-leuty"
+    "roadside-leuty",
+    "curb-barrel",
+    "curb-bike-ring",
+    "curb-bollard",
+    "curb-hydrant",
+    "curb-life-ring",
+    "curb-news-box",
+    "curb-pay-station",
+    "curb-rope-posts",
+    "curb-urn"
   ],
   "zones": {
     "cabbagetown": {
@@ -53,7 +62,37 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "357a2f"
+      "shadowColour": "357a2f",
+      "curb": {
+        "groups": [
+          [
+            {
+              "key": "curb-hydrant",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          [],
+          [
+            {
+              "key": "curb-urn",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          []
+        ],
+        "sides": {
+          "left": {
+            "start": 0,
+            "stride": 1
+          },
+          "right": {
+            "start": 1,
+            "stride": 1
+          }
+        }
+      }
     },
     "high-park": {
       "slot": 140,
@@ -139,7 +178,37 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "733e39"
+      "shadowColour": "733e39",
+      "curb": {
+        "groups": [
+          [
+            {
+              "key": "curb-barrel",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          [],
+          [
+            {
+              "key": "curb-bollard",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          []
+        ],
+        "sides": {
+          "left": {
+            "start": 0,
+            "stride": 1
+          },
+          "right": {
+            "start": 1,
+            "stride": 1
+          }
+        }
+      }
     },
     "kensington-market": {
       "slot": 140,
@@ -182,7 +251,37 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "26292f"
+      "shadowColour": "26292f",
+      "curb": {
+        "groups": [
+          [
+            {
+              "key": "curb-bike-ring",
+              "across": 188,
+              "dz": 70
+            }
+          ],
+          [],
+          [
+            {
+              "key": "curb-news-box",
+              "across": 188,
+              "dz": 70
+            }
+          ],
+          []
+        ],
+        "sides": {
+          "left": {
+            "start": 0,
+            "stride": 1
+          },
+          "right": {
+            "start": 1,
+            "stride": 1
+          }
+        }
+      }
     },
     "the-beaches": {
       "slot": 140,
@@ -225,7 +324,37 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "c28569"
+      "shadowColour": "c28569",
+      "curb": {
+        "groups": [
+          [
+            {
+              "key": "curb-rope-posts",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          [],
+          [
+            {
+              "key": "curb-life-ring",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          []
+        ],
+        "sides": {
+          "left": {
+            "start": 0,
+            "stride": 1
+          },
+          "right": {
+            "start": 1,
+            "stride": 1
+          }
+        }
+      }
     },
     "yonge-street": {
       "slot": 140,
@@ -268,7 +397,37 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "26292f"
+      "shadowColour": "26292f",
+      "curb": {
+        "groups": [
+          [
+            {
+              "key": "curb-pay-station",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          [],
+          [
+            {
+              "key": "curb-bike-ring",
+              "across": 186,
+              "dz": 70
+            }
+          ],
+          []
+        ],
+        "sides": {
+          "left": {
+            "start": 0,
+            "stride": 1
+          },
+          "right": {
+            "start": 1,
+            "stride": 1
+          }
+        }
+      }
     }
   }
 }

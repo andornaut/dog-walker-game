@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Draw the roadside props: the trees, lamps and landmarks on the verges beyond the
-sidewalks, and hold the per-zone table that places them.
+sidewalks, and the street furniture on the sidewalks and paving, and hold the per-zone table
+that places them.
 
 They are road sprites in the OutRun manner: front elevations, anchored bottom centre on their road
 row, scaled with the road camera and drawn back to front with the road objects. Every prop's inner
-edge lies beyond the sidewalk, so none stands on a lane or a sidewalk, and none is a person, a live
+edge lies beyond the sidewalk (a curb prop's frame wholly inside its zone's curb band, on the sidewalk
+or paving), so none stands on a lane, and none is a person, a live
 animal on the ground, a coin or a bone, so none reads as an obstacle, an encounter or a pickup.
 
 Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the road objects are:
@@ -22,13 +24,23 @@ roadside-street-lamp     60x180   a downtown street light, an arm each way, lit 
 roadside-transit-stop    42x150   a TTC stop pole with its sign and a timetable box
 roadside-tree-maple      114x156  a street maple in lobes over a trunk
 roadside-tree-oak        144x174  a big park oak
+curb-barrel              30x39    a whisky barrel on end, oak staves and silver hoops
+curb-bike-ring           24x48    Toronto's post-and-ring bike stand
+curb-bollard             18x39    a cast-iron heritage bollard with a gold collar
+curb-hydrant             27x39    a red Toronto hydrant under a silver cap
+curb-life-ring           27x51    a lifebuoy on a driftwood post
+curb-news-box            27x45    a cobalt newspaper box on legs
+curb-pay-station         21x51    a pay-and-display machine under a P sign
+curb-rope-posts          36x30    two driftwood posts with a rope between
+curb-urn                 33x42    a cast-iron garden urn heaped with geraniums
 
 Every prop has one tag, `idle`: one frame of 1000ms, no motion. The ground row is the last opaque
 row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no light rim
 (road.LIT), since the props stand on the verge, never on the road.
 
-PLACEMENT holds the per-zone placement tables (see the style guide's Roadside section); `table`
-prints them as JSON with every prop's across offset resolved and each zone's shadow colour.
+PLACEMENT holds the per-zone placement tables and CURB the curb props' (see the style guide's
+Roadside section); `table` prints them as JSON with every prop's across offset resolved and each
+zone's shadow colour.
 
 Usage:
   roadside.py preview OUT.png   every frame on green, dgreen and dslate
@@ -302,6 +314,159 @@ def leuty():
     return w, h, draw
 
 
+# ---------- the curb props: street furniture on the sidewalk or paving, in design units ----------
+
+
+def hydrant():
+    """A Toronto hydrant: a red barrel under a domed lgrey cap, a nozzle each side, on a flange."""
+    w, h = 18, 26
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(4, base - 3, 10, 3, "dred")
+        g.rect(5, 9, 8, base - 12, "red")
+        g.rect(11, 9, 2, base - 12, "dred")
+        g.rect(2, 13, 14, 4, "red")
+        g.rect(14, 13, 2, 4, "dred")
+        g.rect(7, 13, 4, 4, "lgrey")
+        g.ell(9, 8, 4, 3, "lgrey")
+        g.rect(5, 8, 8, 2, "stone")
+        g.rect(8, 3, 2, 2, "stone")
+    return w, h, draw
+
+
+def urn():
+    """A cast-iron garden urn on a pedestal, heaped with red and pink geraniums."""
+    w, h = 22, 28
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(7, base - 3, 8, 3, "coal")
+        g.rect(9, base - 9, 4, 6, "coal")
+        g.tri((3, 11), (19, 11), (11, base - 8), "coal")
+        g.rect(3, 10, 16, 3, "ash")
+        g.rect(3, 12, 16, 1, "coal")
+        for x, y in ((6, 7), (11, 5), (16, 7)):
+            g.ell(x, y, 4, 3, "canopy")
+        for x, y, c in ((5, 6, "red"), (10, 4, "pink"), (14, 6, "red"), (17, 8, "pink"), (8, 8, "pink")):
+            g.ell(x, y, 1.5, 1.5, c)
+    return w, h, draw
+
+
+def barrel():
+    """A whisky barrel on end: ochre oak staves, ash hoops, its tan head showing above."""
+    w, h = 20, 26
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(3, 4, 14, base - 5, "ochre")
+        g.rect(13, 4, 4, base - 5, "brown")
+        g.rect(3, 4, 1, base - 5, "tan")
+        for x in (7, 11):
+            g.rect(x, 4, 1, base - 5, "brown")
+        for y in (6, base - 4):
+            g.rect(3, y, 14, 2, "ash")
+            g.rect(3, y, 14, 1, "lgrey")
+        g.ell(10, 4, 7, 2, "tan")
+        g.ell(10, 4, 5, 1, "ochre")
+    return w, h, draw
+
+
+def bollard():
+    """A cast-iron heritage bollard: a coal post lit ash down its left, a domed cap and a gold collar."""
+    w, h = 12, 26
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(2, base - 3, 8, 3, "coal")
+        g.rect(2, base - 3, 1, 3, "stone")
+        g.rect(3, 7, 6, base - 9, "coal")
+        g.rect(3, 7, 2, base - 9, "ash")
+        g.rect(2, 9, 8, 2, "gold")
+        g.ell(6, 6, 3, 3, "coal")
+        g.rect(4, 4, 2, 2, "stone")
+    return w, h, draw
+
+
+def bike_ring():
+    """Toronto's post-and-ring bike stand: an lgrey post through an lgrey ring."""
+    w, h = 16, 32
+
+    def draw(g, f=0):
+        base = h - 2
+        g.ell(8, 10, 6, 6, "lgrey")
+        g.ell(8, 10, 4.5, 4.5, None)
+        g.rect(7, 4, 2, base - 3, "lgrey")
+        g.rect(8, 4, 1, base - 3, "stone")
+    return w, h, draw
+
+
+def news_box():
+    """A newspaper box on legs: a cobalt cabinet with a window onto the day's paper."""
+    w, h = 18, 30
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(4, base - 6, 2, 7, "coal")
+        g.rect(12, base - 6, 2, 7, "coal")
+        g.rect(2, 4, 14, base - 9, "cobalt")
+        g.rect(14, 4, 2, base - 9, "navy")
+        g.rect(4, 7, 9, 7, "cream")
+        g.rect(5, 8, 7, 1, "ink")
+        g.rect(5, 10, 5, 1, "ash")
+        g.rect(5, 12, 6, 1, "ash")
+        g.rect(4, 16, 9, 1, "navy")
+    return w, h, draw
+
+
+def rope_posts():
+    """Two driftwood posts with a tan rope sagging between."""
+    w, h = 24, 20
+
+    def draw(g, f=0):
+        base = h - 2
+        for x in (3, 17):
+            g.rect(x, 4, 4, base - 3, "driftwood")
+            g.rect(x + 3, 4, 1, base - 3, dk("driftwood"))
+            g.ell(x + 2, 4, 2, 1, "cream")
+        for x in range(7, 17):
+            g.rect(x, 7 + round(2 * (1 - ((x - 11.5) / 5) ** 2)), 1, 1, "tan")
+    return w, h, draw
+
+
+def life_ring():
+    """A lifebuoy on a driftwood post: an orange ring with four white bands."""
+    w, h = 18, 34
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(7, 3, 4, base - 2, "driftwood")
+        g.rect(10, 3, 1, base - 2, dk("driftwood"))
+        g.ell(9, 12, 6, 6, "orange")
+        g.ell(9, 12, 3, 3, "driftwood")
+        for x, y in ((3, 11), (13, 11), (8, 6), (8, 16)):
+            g.rect(x, y, 2, 2, "white")
+    return w, h, draw
+
+
+def pay_station():
+    """A pay-and-display machine: an lgrey cabinet with a lit screen, a forest P sign on a post above."""
+    w, h = 14, 34
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(3, 10, 8, base - 9, "lgrey")
+        g.rect(9, 10, 2, base - 9, "stone")
+        g.rect(4, 11, 4, 5, "coal")
+        g.rect(4, 12, 4, 3, "cyan")
+        g.rect(4, 17, 4, 1, "gold")
+        g.rect(6, 4, 2, 6, "stone")
+        g.ell(7, 4, 3, 3, "forest")
+        g.rect(6, 3, 2, 3, "white")
+    return w, h, draw
+
+
+
 # key: (design w, h, draw), idle frame arguments, ms per frame, whether it stands free and casts the
 # game's ground shadow.
 PROPS = {
@@ -315,6 +480,15 @@ PROPS = {
     "roadside-hot-dog-stand": (hot_dog_stand(), (0,), STILL_MS, True),
     "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
     "roadside-leuty": (leuty(), (0,), STILL_MS, True),
+    "curb-barrel": (barrel(), (0,), STILL_MS, True),
+    "curb-bike-ring": (bike_ring(), (0,), STILL_MS, True),
+    "curb-bollard": (bollard(), (0,), STILL_MS, True),
+    "curb-hydrant": (hydrant(), (0,), STILL_MS, True),
+    "curb-life-ring": (life_ring(), (0,), STILL_MS, True),
+    "curb-news-box": (news_box(), (0,), STILL_MS, True),
+    "curb-pay-station": (pay_station(), (0,), STILL_MS, True),
+    "curb-rope-posts": (rope_posts(), (0,), STILL_MS, True),
+    "curb-urn": (urn(), (0,), STILL_MS, True),
 }
 
 
@@ -388,6 +562,46 @@ PLACEMENT = {
     "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0)),
     "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0)),
 }
+
+# Curb props stand on the sidewalk or paving, each frame wholly inside the zone's curb band: from 2 road
+# px past the curb (or the last strip) to 2 px inside the sidewalk's outer edge, paving out to the
+# screen's edge counting as a sidewalk PAVED wide. The band comes from the verges the game reads
+# (VERGES_JSON); a zone with no band has no curb props. Every slot on a side takes a group, slot n
+# groups[(start + n * stride) % len(groups)]; across is the frame's centre, the band's middle.
+VERGES_JSON = "shared/verges.json"
+PAVED = 44
+CURB_CLEAR = 2
+# Half a slot further than the lawn props, so a curb prop never stands abreast of one.
+CURB_DZ = 70
+CURB_SIDES = dict(left=dict(start=0, stride=1), right=dict(start=1, stride=1))
+
+
+def curb_band(verge):
+    """The curb band of a verge, (from, to) across, or None."""
+    start = verge["strips"][-1]["to"] if verge["strips"] else verge["curbTo"]
+    walk = start + PAVED if verge["walkTo"] is None else max(start, verge["walkTo"])
+    band = (start + CURB_CLEAR, walk - CURB_CLEAR)
+    return band if band[1] > band[0] else None
+
+
+def curb(zone, *names):
+    """A curb table: each prop in turn on every other slot of a side, the sides alternating, so over both
+    one stands every slot."""
+    with open(VERGES_JSON) as f:
+        lo, hi = curb_band(json.load(f)[zone])
+    groups = []
+    for name in names:
+        groups += [((f"curb-{name}", (lo + hi) // 2, CURB_DZ),), ()]
+    return dict(groups=tuple(groups), sides=CURB_SIDES)
+
+
+CURB = {
+    "cabbagetown": curb("cabbagetown", "hydrant", "urn"),
+    "distillery-district": curb("distillery-district", "barrel", "bollard"),
+    "kensington-market": curb("kensington-market", "bike-ring", "news-box"),
+    "the-beaches": curb("the-beaches", "rope-posts", "life-ring"),
+    "yonge-street": curb("yonge-street", "pay-station", "bike-ring"),
+}
 # Each zone's ground shadow under a free-standing prop: a darker tone of its lawn or paving.
 SHADOWS = {"cabbagetown": "canopy", "high-park": "fir", "distillery-district": "dbrown",
            "kensington-market": "coal", "the-beaches": "skin2", "yonge-street": "coal"}
@@ -397,8 +611,8 @@ TABLE_JSON = "shared/roadside.json"
 
 
 def check_placement():
-    """Every prop's frame clears the sidewalk by at least 4 road px, and at no k do the two sides take the
-    same lot or gap that holds props."""
+    """Every lawn prop's frame clears the sidewalk by at least 4 road px, at no k do the two sides take the
+    same lot or gap that holds props, and every curb prop's frame lies wholly inside its zone's curb band."""
     walk = 208
     for zone, p in PLACEMENT.items():
         for group in p["lots"] + p["gaps"]:
@@ -414,6 +628,15 @@ def check_placement():
                 a, b = ((sd[f"{kind}Start"] + k * sd[f"{kind}Stride"]) % n for sd in (left, right))
                 if a == b and groups[a]:
                     sys.exit(f"{zone}: the sides take the same {kind} in step")
+    with open(VERGES_JSON) as f:
+        verges = json.load(f)
+    for zone, c in CURB.items():
+        band = curb_band(verges[zone])
+        for group in c["groups"]:
+            for key, across, _ in group:
+                half = size(key)[0] / 2
+                if band is None or across - half < band[0] or across + half > band[1]:
+                    sys.exit(f"{zone}: {key} at across {across} is outside the curb band {band}")
 
 
 def table():
@@ -425,6 +648,8 @@ def table():
             return [{"key": k, "across": a, "dz": dz} for k, a, dz in group]
         out[zone] = {"slot": p["slot"], "lots": [props(g) for g in p["lots"]], "gaps": [props(g) for g in p["gaps"]],
                      "sides": p["sides"], "shadowColour": K[SHADOWS[zone]]}
+        if zone in CURB:
+            out[zone]["curb"] = {"groups": [props(g) for g in CURB[zone]["groups"]], "sides": CURB[zone]["sides"]}
     return {"shadowed": list(SHADOWED), "zones": out}
 
 
