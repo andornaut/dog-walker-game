@@ -159,17 +159,18 @@ def bride(g, b):
 
 def photographer(g):
     """The photographer, kneeling on his right knee in the right lane and facing left at the bride: black
-    shirt and dslate trousers, rust hair, a black camera raised to his eye, its grey lens pointing left with
-    a sky glint, a white flash on the hot shoe on top."""
+    shirt and slate trousers, lighter than the dslate road so his legs never sink into it, rust hair, a
+    black camera raised to his eye, its grey lens pointing left with a sky glint, a white flash on the hot
+    shoe on top."""
     # the knee on the ground, the shin back along it, the shoe's toes tucked under
-    line(g, [(60, 35), (64, 41)], 4, "dslate")
-    g.rect(63, 42, 7, 3, "dslate")
-    g.rect(63, 44, 7, 1, "navy")
+    line(g, [(60, 35), (64, 41)], 4, "slate")
+    g.rect(63, 42, 7, 3, "slate")
+    g.rect(63, 44, 7, 1, "dslate")
     g.rect(69, 41, 3, 4, "ink")
     # the raised knee: the thigh forward, the shin down to the shoe, toes pointing at the bride
-    g.rect(48, 33, 12, 4, "dslate")
-    g.rect(48, 33, 4, 10, "dslate")
-    g.rect(51, 37, 1, 6, "navy")
+    g.rect(48, 33, 12, 4, "slate")
+    g.rect(48, 33, 4, 10, "slate")
+    g.rect(51, 37, 1, 6, "dslate")
     g.rect(45, 43, 7, 2, "ink")
     # the torso, upright, leaning a little forward
     g.rect(53, 23, 10, 12, "ink")
