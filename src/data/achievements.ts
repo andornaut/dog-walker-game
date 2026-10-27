@@ -102,6 +102,13 @@ export const ACHIEVEMENTS = [
     name: "Marathon",
   },
   {
+    badgeLine: "They named a street after you.",
+    conditions: [{ count: 1000, kind: "walksFinished" }],
+    goal: "Finish 1,000 walks",
+    id: "legendOfTheLeash",
+    name: "Legend of the Leash",
+  },
+  {
     badgeLine: "Every leash is spoken for.",
     conditions: [{ count: "all", kind: "dogsOwned" }],
     goal: "Own all 9 dogs",

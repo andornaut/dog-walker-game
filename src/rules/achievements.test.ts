@@ -161,8 +161,10 @@ describe("run conditions", () => {
 describe("profile conditions", () => {
   const all = (kind: "dogsFinishedWith" | "dogsOwned" | "gearOwned") =>
     ({ count: "all", kind }) as const;
-  const count = (kind: "noFiringStreak" | "timesFired" | "walksPlayed", n: number) =>
-    ({ count: n, kind }) as const;
+  const count = (
+    kind: "noFiringStreak" | "timesFired" | "walksFinished" | "walksPlayed",
+    n: number,
+  ) => ({ count: n, kind }) as const;
   const helpKeeper = (n: number) =>
     ({ count: n, encounter: "capybara", kind: "optionPicks", option: "help" }) as const;
   const tally = (name: TallyId, n: number) => ({ count: n, kind: "tally", tally: name }) as const;
@@ -340,6 +342,18 @@ describe("profile conditions", () => {
       "walksPlayed at, however they ended",
       count("walksPlayed", 6),
       withStats({ runs: { finished: 1, noDogs: 2, wentHome: 3 } }),
+      true,
+    ],
+    [
+      "walksFinished below, the others played ended early",
+      count("walksFinished", 6),
+      withStats({ runs: { finished: 5, noDogs: 4, wentHome: 4 } }),
+      false,
+    ],
+    [
+      "walksFinished at",
+      count("walksFinished", 6),
+      withStats({ runs: { finished: 6, noDogs: 0, wentHome: 0 } }),
       true,
     ],
     ["anything without a save, as for the simulator", count("timesFired", 0), null, false],

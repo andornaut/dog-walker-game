@@ -1018,9 +1018,9 @@ export type Threshold = number | "all";
 // owner firing you, times fired, distinct owners who fired you (all: every dog's owner),
 // distinct dogs that finished a walk without firing you (all: every dog), distinct walkers who
 // finished a walk (all: every walker), distinct zones finished across walks (all: every zone of
-// the world), walks played, dollars earned across walks net of their starting cash, landed
-// plain bumps by any of kinds across walks, a lifetime tally, and picks of one card option
-// across walks.
+// the world), walks played, walks finished (every zone walked from the first), dollars earned
+// across walks net of their starting cash, landed plain bumps by any of kinds across walks, a
+// lifetime tally, and picks of one card option across walks.
 export type AchievementCondition =
   | {
       readonly count: number;
@@ -1034,6 +1034,7 @@ export type AchievementCondition =
   | { readonly count: number; readonly kind: "tally"; readonly tally: TallyId }
   | { readonly count: number; readonly kind: "timesFired" }
   | { readonly count: number; readonly kind: "walksPlayed" }
+  | { readonly count: number; readonly kind: "walksFinished" }
   | { readonly count: Threshold; readonly kind: "cleanZones" }
   | { readonly count: Threshold; readonly kind: "dogsFinishedWith" }
   | { readonly count: Threshold; readonly kind: "dogsOwned" }

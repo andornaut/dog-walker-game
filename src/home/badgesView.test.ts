@@ -33,6 +33,7 @@ const COUNTED_KINDS = [
   "tally",
   "timesFired",
   "walkersFinishedWith",
+  "walksFinished",
   "walksPlayed",
   "zonesEverFinished",
 ] as const satisfies readonly AchievementCondition["kind"][];
@@ -53,6 +54,7 @@ function needOf(condition: Counted): number {
     case "optionPicks":
     case "tally":
     case "timesFired":
+    case "walksFinished":
     case "walksPlayed":
       return condition.count;
     case "dogsFinishedWith":
@@ -96,6 +98,11 @@ function counted(condition: Counted, n: number): SaveDocument {
       return {
         ...newPlayerSave,
         stats: { ...stats, walkersFinishedWith: ALL_WALKERS.slice(0, n) },
+      };
+    case "walksFinished":
+      return {
+        ...newPlayerSave,
+        stats: { ...stats, runs: { finished: n, noDogs: 0, wentHome: 0 } },
       };
     case "walksPlayed":
       return {

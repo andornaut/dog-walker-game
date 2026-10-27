@@ -12,7 +12,7 @@ import type {
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import type { SaveDocument, SaveStats } from "../save/schema";
-import { lifetimeEarnedNet, walksPlayed } from "../save/stats";
+import { lifetimeEarnedNet, walksFinished, walksPlayed } from "../save/stats";
 import type { RunState } from "../state/runState";
 import { walkLength } from "./route";
 import { type Cents, dollarsToCents } from "./units";
@@ -240,6 +240,8 @@ export function conditionHolds(
       );
     case "walkersUnlocked":
       return save !== null && save.owned.walkers.length >= needed(walkers, condition.count);
+    case "walksFinished":
+      return save !== null && walksFinished(save.stats) >= condition.count;
     case "walksPlayed":
       return save !== null && walksPlayed(save.stats) >= condition.count;
     case "zonesEverFinished":
@@ -255,10 +257,10 @@ export function conditionHolds(
 }
 
 // How far a save has come toward a condition that counts across walks (a lifetime tally,
-// option picks, landed bumps, whole dollars earned net of starting cash, walks played, times
-// fired, the current streak of finished walks with no firing, distinct owners who fired you,
-// distinct dogs and walkers that finished a walk, distinct zones finished): have is capped at
-// need. null for a condition judged on one walk or on what the save owns.
+// option picks, landed bumps, whole dollars earned net of starting cash, walks played or
+// finished, times fired, the current streak of finished walks with no firing, distinct owners
+// who fired you, distinct dogs and walkers that finished a walk, distinct zones finished): have
+// is capped at need. null for a condition judged on one walk or on what the save owns.
 function acrossWalksProgress(
   data: Pick<GameData, "dogs" | "walkers" | "world">,
   save: Pick<SaveDocument, "stats">,
@@ -295,6 +297,8 @@ function acrossWalksProgress(
         stats.walkersFinishedWith.length,
         needed(Object.keys(data.walkers).length, condition.count),
       );
+    case "walksFinished":
+      return progress(walksFinished(stats), condition.count);
     case "walksPlayed":
       return progress(walksPlayed(stats), condition.count);
     case "zonesEverFinished":
@@ -436,6 +440,8 @@ export function achievementConditionText(
       return `${thresholdText(condition.count, "walkers")} each finished a walk`;
     case "walkersUnlocked":
       return `unlock ${thresholdText(condition.count, "walkers")}`;
+    case "walksFinished":
+      return `${condition.count} walks finished, every neighbourhood of each walked`;
     case "walksPlayed":
       return `${condition.count} walks played`;
     case "zonesEverFinished":

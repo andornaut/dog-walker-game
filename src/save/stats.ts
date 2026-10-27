@@ -28,6 +28,12 @@ export function walksPlayed(stats: Pick<SaveStats, "runs">): number {
   return stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
 }
 
+// Every walk that finished its last zone, walked from the first: a dev start's counts as headed
+// home.
+export function walksFinished(stats: Pick<SaveStats, "runs">): number {
+  return stats.runs.finished;
+}
+
 // What every walk earned, net of its starting cash; below 0 when card costs spent more.
 export function lifetimeEarnedNet(
   stats: Pick<SaveStats, "lifetimeCents" | "lifetimeStartCents">,
