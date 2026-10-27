@@ -679,13 +679,26 @@ describe("movers", { timeout: 120_000 }, () => {
   // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on
   // another.
   const blocking = OBSTACLE_KINDS.filter((kind) => blocksLane(everyMover, kind));
-  // A neighbourhood-only kind is planned in its own zones alone, so its zones are swept over
-  // more seeds to plan it about as often as a kind every zone draws.
+  // A kind planned in only some zones, a neighbourhood-only kind or one the other zones weigh at 0,
+  // is planned in those zones alone, so they are swept over more seeds to plan it about as often
+  // as a kind every zone draws.
   const zonesOf = (kind: WalkItem["kind"]): readonly string[] | undefined => {
-    const entry = Object.hasOwn(MINOR_OBSTACLES, kind)
+    const minor = Object.hasOwn(MINOR_OBSTACLES, kind);
+    const entry = minor
       ? everyMover.minorObstacles[kind as MinorObstacleId]
       : everyMover.encounters[kind as ObstacleEncounterId];
-    return "zones" in entry ? entry.zones : undefined;
+    const { zones } = everyMover.world;
+    const planned = zones
+      .filter(({ id, weights }) => {
+        const weight = minor
+          ? weights.minorObstacles[kind as MinorObstacleId]
+          : weights.obstacles[kind as ObstacleEncounterId];
+        return (
+          weight > 0 && (!("zones" in entry) || (entry.zones as readonly string[]).includes(id))
+        );
+      })
+      .map(({ id }) => id);
+    return planned.length < zones.length ? planned : undefined;
   };
   const ZONE_SWEEP_SEEDS = Array.from({ length: SWEEP_SEEDS.length * 3 }, (_, i) => i + 1);
   const zonePlans = new Map<string, readonly Planned[]>();
