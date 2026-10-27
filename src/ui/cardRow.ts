@@ -10,13 +10,13 @@ export interface CardRowSpec {
 // The header over a card row, by the tops of its capitals: a dark band (ui-strip-well) across
 // the row behind the 2x title titleRise above the cards, the 1x subtitle and, once a number key
 // has been pressed, each card's 1x key number centred over it, so the road's signs never show
-// through the title. The band's ink well runs from its second row to 6 rows above its bottom,
+// through the title. The band's ink well runs from its fifth row to 6 rows above its bottom,
 // and the band ends a row above the cards while key numbers show.
 export const CARD_HEADER = {
-  bandRise: 43,
+  bandRise: 46,
   keyRise: 13,
-  keysHeight: 42,
-  plainHeight: 34,
+  keysHeight: 45,
+  plainHeight: 37,
   subtitleRise: 22,
   titleRise: 38,
 } as const;
