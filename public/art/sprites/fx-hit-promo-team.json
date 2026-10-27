@@ -1,0 +1,78 @@
+{ "frames": {
+   "fx-hit-promo-team 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 1.aseprite": {
+    "frame": { "x": 77, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 2.aseprite": {
+    "frame": { "x": 154, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 3.aseprite": {
+    "frame": { "x": 231, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 4.aseprite": {
+    "frame": { "x": 308, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 5.aseprite": {
+    "frame": { "x": 385, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 6.aseprite": {
+    "frame": { "x": 462, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-promo-team 7.aseprite": {
+    "frame": { "x": 539, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "fx-hit-promo-team.png",
+  "format": "RGBA8888",
+  "size": { "w": 616, "h": 77 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "play", "from": 0, "to": 7, "direction": "forward" }
+  ]
+ }
+}

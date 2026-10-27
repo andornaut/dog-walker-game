@@ -2302,6 +2302,51 @@
       }
     },
     {
+      "key": "dropped-cone",
+      "png": "sprites/dropped-cone.png",
+      "json": "sprites/dropped-cone.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "dropped-cone@50",
+      "png": "sprites/dropped-cone@50.png",
+      "json": "sprites/dropped-cone@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "dropped-cone@62",
+      "png": "sprites/dropped-cone@62.png",
+      "json": "sprites/dropped-cone@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "dropped-cone@75",
+      "png": "sprites/dropped-cone@75.png",
+      "json": "sprites/dropped-cone@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "dropped-cone@88",
+      "png": "sprites/dropped-cone@88.png",
+      "json": "sprites/dropped-cone@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 38
+      }
+    },
+    {
       "key": "face-dog-archie",
       "png": "sprites/face-dog-archie.png",
       "json": "sprites/face-dog-archie.json"
@@ -2572,6 +2617,11 @@
       "json": "sprites/fx-hit-capybara.json"
     },
     {
+      "key": "fx-hit-dropped-cone",
+      "png": "sprites/fx-hit-dropped-cone.png",
+      "json": "sprites/fx-hit-dropped-cone.json"
+    },
+    {
       "key": "fx-hit-fish-crates",
       "png": "sprites/fx-hit-fish-crates.png",
       "json": "sprites/fx-hit-fish-crates.json"
@@ -2585,6 +2635,11 @@
       "key": "fx-hit-porch-cat",
       "png": "sprites/fx-hit-porch-cat.png",
       "json": "sprites/fx-hit-porch-cat.json"
+    },
+    {
+      "key": "fx-hit-promo-team",
+      "png": "sprites/fx-hit-promo-team.png",
+      "json": "sprites/fx-hit-promo-team.json"
     },
     {
       "key": "fx-hit-skunk",
@@ -2969,6 +3024,51 @@
       "anchor": {
         "feetY": 41,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "lifeguard-chair",
+      "png": "sprites/lifeguard-chair.png",
+      "json": "sprites/lifeguard-chair.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "lifeguard-chair@50",
+      "png": "sprites/lifeguard-chair@50.png",
+      "json": "sprites/lifeguard-chair@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "lifeguard-chair@62",
+      "png": "sprites/lifeguard-chair@62.png",
+      "json": "sprites/lifeguard-chair@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "lifeguard-chair@75",
+      "png": "sprites/lifeguard-chair@75.png",
+      "json": "sprites/lifeguard-chair@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "lifeguard-chair@88",
+      "png": "sprites/lifeguard-chair@88.png",
+      "json": "sprites/lifeguard-chair@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 37
       }
     },
     {
@@ -3413,6 +3513,51 @@
       }
     },
     {
+      "key": "pedicab",
+      "png": "sprites/pedicab.png",
+      "json": "sprites/pedicab.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "pedicab@50",
+      "png": "sprites/pedicab@50.png",
+      "json": "sprites/pedicab@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "pedicab@62",
+      "png": "sprites/pedicab@62.png",
+      "json": "sprites/pedicab@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "pedicab@75",
+      "png": "sprites/pedicab@75.png",
+      "json": "sprites/pedicab@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "pedicab@88",
+      "png": "sprites/pedicab@88.png",
+      "json": "sprites/pedicab@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 42
+      }
+    },
+    {
       "key": "petting-neighbor",
       "png": "sprites/petting-neighbor.png",
       "json": "sprites/petting-neighbor.json",
@@ -3635,6 +3780,51 @@
       "anchor": {
         "feetY": 39,
         "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "promo-team",
+      "png": "sprites/promo-team.png",
+      "json": "sprites/promo-team.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "promo-team@50",
+      "png": "sprites/promo-team@50.png",
+      "json": "sprites/promo-team@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "promo-team@62",
+      "png": "sprites/promo-team@62.png",
+      "json": "sprites/promo-team@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "promo-team@75",
+      "png": "sprites/promo-team@75.png",
+      "json": "sprites/promo-team@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "promo-team@88",
+      "png": "sprites/promo-team@88.png",
+      "json": "sprites/promo-team@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 38
       }
     },
     {
@@ -4133,6 +4323,51 @@
       }
     },
     {
+      "key": "rollerblader",
+      "png": "sprites/rollerblader.png",
+      "json": "sprites/rollerblader.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "rollerblader@50",
+      "png": "sprites/rollerblader@50.png",
+      "json": "sprites/rollerblader@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "rollerblader@62",
+      "png": "sprites/rollerblader@62.png",
+      "json": "sprites/rollerblader@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "rollerblader@75",
+      "png": "sprites/rollerblader@75.png",
+      "json": "sprites/rollerblader@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "rollerblader@88",
+      "png": "sprites/rollerblader@88.png",
+      "json": "sprites/rollerblader@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 34
+      }
+    },
+    {
       "key": "rolling-barrel",
       "png": "sprites/rolling-barrel.png",
       "json": "sprites/rolling-barrel.json",
@@ -4174,6 +4409,96 @@
       "json": "sprites/rolling-barrel@88.json",
       "anchor": {
         "feetY": 38,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "sandcastle",
+      "png": "sprites/sandcastle.png",
+      "json": "sprites/sandcastle.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "sandcastle@50",
+      "png": "sprites/sandcastle@50.png",
+      "json": "sprites/sandcastle@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "sandcastle@62",
+      "png": "sprites/sandcastle@62.png",
+      "json": "sprites/sandcastle@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "sandcastle@75",
+      "png": "sprites/sandcastle@75.png",
+      "json": "sprites/sandcastle@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "sandcastle@88",
+      "png": "sprites/sandcastle@88.png",
+      "json": "sprites/sandcastle@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "sandwich-board",
+      "png": "sprites/sandwich-board.png",
+      "json": "sprites/sandwich-board.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "sandwich-board@50",
+      "png": "sprites/sandwich-board@50.png",
+      "json": "sprites/sandwich-board@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "sandwich-board@62",
+      "png": "sprites/sandwich-board@62.png",
+      "json": "sprites/sandwich-board@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "sandwich-board@75",
+      "png": "sprites/sandwich-board@75.png",
+      "json": "sprites/sandwich-board@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "sandwich-board@88",
+      "png": "sprites/sandwich-board@88.png",
+      "json": "sprites/sandwich-board@88.json",
+      "anchor": {
+        "feetY": 39,
         "opaqueWidth": 33
       }
     },
@@ -4808,6 +5133,51 @@
       }
     },
     {
+      "key": "ttc-bus",
+      "png": "sprites/ttc-bus.png",
+      "json": "sprites/ttc-bus.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "ttc-bus@50",
+      "png": "sprites/ttc-bus@50.png",
+      "json": "sprites/ttc-bus@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "ttc-bus@62",
+      "png": "sprites/ttc-bus@62.png",
+      "json": "sprites/ttc-bus@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "ttc-bus@75",
+      "png": "sprites/ttc-bus@75.png",
+      "json": "sprites/ttc-bus@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "ttc-bus@88",
+      "png": "sprites/ttc-bus@88.png",
+      "json": "sprites/ttc-bus@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 47
+      }
+    },
+    {
       "key": "ui-afford",
       "png": "sprites/ui-afford.png",
       "json": "sprites/ui-afford.json"
@@ -5189,6 +5559,18 @@
       "png": "images/card-cost.png"
     },
     {
+      "key": "card-dropped-cone-buy",
+      "png": "images/card-dropped-cone-buy.png"
+    },
+    {
+      "key": "card-dropped-cone-lick",
+      "png": "images/card-dropped-cone-lick.png"
+    },
+    {
+      "key": "card-dropped-cone-pull-away",
+      "png": "images/card-dropped-cone-pull-away.png"
+    },
+    {
       "key": "card-fish-crates-clean-up",
       "png": "images/card-fish-crates-clean-up.png"
     },
@@ -5231,6 +5613,18 @@
     {
       "key": "card-porch-cat-treat",
       "png": "images/card-porch-cat-treat.png"
+    },
+    {
+      "key": "card-promo-team-merch",
+      "png": "images/card-promo-team-merch.png"
+    },
+    {
+      "key": "card-promo-team-push-through",
+      "png": "images/card-promo-team-push-through.png"
+    },
+    {
+      "key": "card-promo-team-wave",
+      "png": "images/card-promo-team-wave.png"
     },
     {
       "key": "card-raincoats",
@@ -5439,6 +5833,10 @@
     {
       "key": "icon-settings",
       "png": "images/icon-settings.png"
+    },
+    {
+      "key": "icon-spotlight",
+      "png": "images/icon-spotlight.png"
     },
     {
       "key": "icon-stinky",
@@ -5819,6 +6217,11 @@
       "m4a": "sounds/sfx-hit-capybara.m4a"
     },
     {
+      "key": "sfx-hit-dropped-cone",
+      "ogg": "sounds/sfx-hit-dropped-cone.ogg",
+      "m4a": "sounds/sfx-hit-dropped-cone.m4a"
+    },
+    {
       "key": "sfx-hit-fish-crates",
       "ogg": "sounds/sfx-hit-fish-crates.ogg",
       "m4a": "sounds/sfx-hit-fish-crates.m4a"
@@ -5832,6 +6235,11 @@
       "key": "sfx-hit-porch-cat",
       "ogg": "sounds/sfx-hit-porch-cat.ogg",
       "m4a": "sounds/sfx-hit-porch-cat.m4a"
+    },
+    {
+      "key": "sfx-hit-promo-team",
+      "ogg": "sounds/sfx-hit-promo-team.ogg",
+      "m4a": "sounds/sfx-hit-promo-team.m4a"
     },
     {
       "key": "sfx-hit-puddle",

@@ -22,6 +22,14 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 360, "h": 16 },
     "sourceSize": { "w": 360, "h": 16 },
     "duration": 1000
+   },
+   "ui-debuff-bar 3.aseprite": {
+    "frame": { "x": 1080, "y": 0, "w": 360, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 360, "h": 16 },
+    "sourceSize": { "w": 360, "h": 16 },
+    "duration": 1000
    }
  },
  "meta": {
@@ -29,12 +37,13 @@
   "version": "1.2.30-x64",
   "image": "ui-debuff-bar.png",
   "format": "RGBA8888",
-  "size": { "w": 1080, "h": 16 },
+  "size": { "w": 1440, "h": 16 },
   "scale": "1",
   "frameTags": [
    { "name": "muddy", "from": 0, "to": 0, "direction": "forward" },
    { "name": "stinky", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "zoomies", "from": 2, "to": 2, "direction": "forward" }
+   { "name": "zoomies", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "spotlight", "from": 3, "to": 3, "direction": "forward" }
   ]
  }
 }

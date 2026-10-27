@@ -18,6 +18,8 @@ icon-muddy                  a debuff beside icon-stinky (ui.py), on its bar and 
                             muddy paw print
 icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
                             off three sky speed lines
+icon-spotlight              a debuff's bar and message line: a stage spotlight at the top left
+                            throwing a yellow beam down onto its pool of light
 icon-upgrade-<upgrade>      the shop, the cards and the message strip: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
                             (a yellow raincoat), rush-hour (an alarm clock), sweet-talker (a speech
@@ -317,6 +319,28 @@ def zoomies():
                      ".sss.....oooo...",
                      "................"],
            {"a": "amber", "y": "yellow", "o": "orange", "s": "sky"})
+    return g
+
+
+def spotlight():
+    """A stage spotlight from above: a dslate lamp lit slate in its grey yoke at the top, its grey lens rim
+    under it, throwing a yellow beam that widens down onto a pool of light, an amber ring round a yellow
+    centre, with white streaks down the beam."""
+    g = Grid(16, 16)
+    g.tri((6, 5), (10, 5), (1.5, 13), "yellow")
+    g.tri((10, 5), (14.5, 13), (1.5, 13), "yellow")
+    g.ell(8, 12.8, 6.5, 2, "amber")
+    g.ell(8, 12.6, 4.6, 1.2, "yellow")
+    for x0, x1 in ((7, 5), (9, 11)):
+        for k in range(5):
+            g.p(x0 + (x1 - x0) * k / 5, 6 + k, "white")
+    g.rect(5, 2, 6, 3, "dslate")
+    g.rect(5, 2, 5, 1, "slate")
+    g.rect(6, 4, 4, 1, "grey")
+    # the yoke it hangs from, either side of the lamp
+    g.rect(3, 1, 10, 1, "grey")
+    g.rect(3, 2, 1, 3, "grey")
+    g.rect(12, 2, 1, 3, "grey")
     return g
 
 
@@ -895,6 +919,7 @@ IMAGES = {
     "icon-zone-yonge-street": yonge_street,
     "icon-muddy": muddy,
     "icon-zoomies": zoomies,
+    "icon-spotlight": spotlight,
     "icon-upgrade-belly-rubs": belly_rubs,
     "icon-upgrade-big-tipper": big_tipper,
     "icon-upgrade-good-leash": good_leash,

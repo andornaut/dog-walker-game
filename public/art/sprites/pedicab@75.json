@@ -1,0 +1,46 @@
+{ "frames": {
+   "pedicab@75 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 120
+   },
+   "pedicab@75 1.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 120
+   },
+   "pedicab@75 2.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 120
+   },
+   "pedicab@75 3.aseprite": {
+    "frame": { "x": 108, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "pedicab@75.png",
+  "format": "RGBA8888",
+  "size": { "w": 144, "h": 54 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "ride", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

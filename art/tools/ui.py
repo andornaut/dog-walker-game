@@ -24,7 +24,7 @@ Sprites: ui-dog-card (120x74, one of three cards in the walk's card row; a tag p
 `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn over the card and under
 the game's faces, hearts and text), ui-dog-card-warn (120x74, the low-hearts rim drawn over
 ui-dog-card; tags pulse, static), ui-debuff-bar (360x16, one active debuff's bar under the walk bar;
-tags muddy, stinky, zoomies), ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24
+tags muddy, stinky, zoomies, spotlight), ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24
 nine-slice, 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick), ui-section (24x32
 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral), fx-tap and fx-dust (16x16; tag
 play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card),
@@ -674,10 +674,11 @@ def interior(solid, x, y, r):
 
 # Each debuff's bar under the walk bar: its face, the empty track, the track's fill and the name's
 # colour. The name holds 4.5:1 or more on the face: ink on brown 4.66:1, white on mauve 4.70:1,
-# ink on green 8.41:1. Zoomies is green so its bar never sits blue on a blue sky.
+# ink on green 8.41:1, white on blue 8.48:1. Zoomies is green so its bar never sits blue on a blue sky;
+# the spotlight's is a dark stage blue under its yellow beam, darker than every sky band.
 DEBUFF_LOOKS = {
     "muddy": ("brown", "dbrown", "tan", "ink"), "stinky": ("mauve", "purple", "pink", "white"),
-    "zoomies": ("green", "forest", "yellow", "ink"),
+    "zoomies": ("green", "forest", "yellow", "ink"), "spotlight": ("blue", "navy", "yellow", "white"),
 }
 DEBUFF_BAR = (360, 16)
 # The bar's track, in bar pixels: its ink frame, and the run the game fills inside it.
