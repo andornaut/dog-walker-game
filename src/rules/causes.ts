@@ -56,7 +56,7 @@ export type CauseData = Pick<
   | "walkers"
 >;
 
-// "Jesse fires you": the dog's owner, whose meter reached 0.
+// "Jason fires you": the dog's owner, whose meter reached 0.
 export function firedByText(data: Pick<GameData, "dogs" | "runText">, dog: DogId): string {
   return fillNames(data.runText.firedBy, { owner: data.dogs[dog].owner.name });
 }

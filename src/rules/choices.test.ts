@@ -196,7 +196,7 @@ describe("applyInstantEncounter", () => {
   const packs: [string, RunState][] = [
     ["below max", low],
     ["Koda's owner at max", testState({ duchess: 1, koda: kodaFull, snowball: 1 })],
-    ["Snowy's owner fired", testState({ duchess: 1, koda: 1, snowball: "fired" })],
+    ["Sequoia's owner fired", testState({ duchess: 1, koda: 1, snowball: "fired" })],
   ];
   it.each(luckyFinds.flatMap((id) => packs.map(([pack, state]) => [id, pack, state] as const)))(
     "has %s quip from exactly the owners it raised, %s",

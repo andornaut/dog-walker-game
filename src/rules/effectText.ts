@@ -36,7 +36,7 @@ export const SIZE_NAMES: { readonly [S in Size]: string } = {
 
 const MINUS = "−";
 
-// Names joined for a sentence by the words' joins: "Jesse", "Jesse and Rosa", "Jesse, Rosa and
+// Names joined for a sentence by the words' joins: "Jason", "Jason and Rosa", "Jason, Rosa and
 // Kim".
 export function sentenceList(words: HomeText["sentenceList"], names: readonly string[]): string {
   const head = names.slice(0, -1);

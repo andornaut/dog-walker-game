@@ -613,7 +613,7 @@ export interface HomeText {
   readonly sectionDogs: string;
   readonly sectionWalker: string;
   readonly sectionWalkerPrompt: string;
-  // The words that join names in a sentence, as "Jesse, Rosa and Kim": between joins all but
+  // The words that join names in a sentence, as "Jason, Rosa and Kim": between joins all but
   // the last two, and beforeLast the last two. The card's firing warning uses them too.
   readonly sentenceList: {
     readonly beforeLast: string;
