@@ -20,10 +20,10 @@ lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
 leaf-pile           48x48   1 lane, a raked dome of overlapping autumn leaves in orange, amber,
                             ochre, red, brick and gold, a red maple leaf on top; idle (4 frames,
                             400ms): the maple leaf lifts 1px and turns over on frame 2
-porch-steps         48x48   1 lane, three brick steps with stone treads, each further one narrower,
-                            white newel posts under ball caps at the foot and white rails rising
-                            to the top, a jack-o'-lantern on the top step; idle (4 frames,
-                            400ms): its candle dims on frame 2 and flares on frame 3
+porch-steps         48x48   1 lane, three brick steps with stone treads in a front elevation,
+                            tall white newel posts under ball caps either side,
+                            a jack-o'-lantern with a dark carved face on the top step;
+                            idle (4 frames, 400ms): its candle dims on frame 2 and flares on frame 3
 picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road with a wicker basket
                             on it, a baguette leaning out of the basket, a lemonade jug and two
                             apples; idle (4 frames, 450ms): the blanket's near right corner lifts
@@ -90,6 +90,7 @@ import scene as sn  # noqa: E402
 import sounds  # noqa: E402
 from minis import STEPS  # noqa: E402
 from pixel import ZONE_ROADS, Grid, build as build_sprites, depth_settled, edged, to_image  # noqa: E402
+from pixel import raster, scale_of  # noqa: E402
 from pixel import preview as sheet  # noqa: E402
 from road import lit  # noqa: E402
 
@@ -231,15 +232,18 @@ def capybara(a=0, b=0, bob=0, chew=0, ear=0, blink=False):
 
 SIZE, ROW = obstacles.SIZE, obstacles.ROW
 
-# Autumn leaves, each a fill and the shade of its lower half.
-LEAF_COLOURS = (("orange", "rust"), ("amber", "ochre"), ("ochre", "rust"), ("red", "dred"), ("brick", "dbrick"),
-                ("gold", "amber"), ("orange", "ochre"))
+# Autumn leaves, each a fill and the shade of its lower half, from the lightest (the heap's top left, facing
+# the light) to the darkest (its lower right).
+LEAF_COLOURS = (("gold", "amber"), ("amber", "ochre"), ("orange", "rust"), ("ochre", "brown"), ("rust", "dbrick"),
+                ("brown", "dbrown"))
 # The heap: a dome, centre (PILE_X, PILE_Y), radii PILE_R, laid out in leaves LEAF wide in rows ROW_STEP apart.
 PILE_X, PILE_Y, PILE_R = 20, 39, (18, 17)
 LEAF = 7
 ROW_STEP = 2
-# The red maple leaf on top, a character map in layout pixels: r TTC red, d its dred shade and stem.
-MAPLE = ("...r...", ".r.r.r.", ".rrrrr.", "rrrrrrd", ".rrrdd.", "..rdd..", "...d...")
+# The red maple leaf on top, character maps in drawn pixels (r TTC red, d its dred shade and stem): a top lobe,
+# two side lobes and two small lower ones at full size and the larger steps, three points below them.
+MAPLE = ("....r....", "...rrr...", ".r.rrr.r.", ".rrrrrrr.", "rrrrrrrrd", ".rrrrrdd.", "..rr.dd..", "....d....")
+MAPLE_SMALL = ("..r..", "r.r.r", "rrrrd", ".rdd.", "..d..")
 # The pile's idle: rest, rest, the maple leaf lifted 1px and turned over, rest.
 LEAF_PILE_IDLE = (0, 0, 1, 0), 400
 
@@ -250,80 +254,102 @@ def lens(g, x, y, fill, shade):
     g.tri((x, y + 2), (x + LEAF / 2, y + 4), (x + LEAF, y + 2), shade)
 
 
-def maple(g, x, y, flip):
-    """MAPLE from (x, y), mirrored when flip, each cell a layout pixel."""
-    for j, row in enumerate(MAPLE):
+def maple(g, cx, bottom, lift, flip):
+    """The maple leaf centred on layout column cx with its stem's foot on layout row bottom, pixel for pixel
+    in drawn pixels so its points stay sharp at every step, lifted lift drawn pixels and mirrored when flip."""
+    px, s = raster(g), scale_of(g)
+    leaf = MAPLE if s >= 0.9 else MAPLE_SMALL
+    x0, y0 = round(cx * s - len(leaf[0]) / 2), round(bottom * s) - len(leaf) - lift
+    for j, row in enumerate(leaf):
         for i, ch in enumerate(row[::-1] if flip else row):
             if ch != ".":
-                g.rect(x + i, y + j, 1, 1, "ttc" if ch == "r" else "dred")
+                px.p(x0 + i, y0 + j, "ttc" if ch == "r" else "dred")
+
+
+def scatter(a, b):
+    """A fixed pseudo-random number in 0 to 96 for the pair (a, b)."""
+    return (a * 73856093 ^ b * 19349663) % 97
 
 
 def pile_leaves():
-    """(x, y, colour index) for every leaf in the heap, back rows first: each row's leaves centred on the
-    heap, as many as its width across the dome holds, so its tips make the rim ragged on both sides alike."""
+    """(x, y, colour index) for every leaf in the heap, back rows first: each row's leaves spread across the
+    dome's width there, the outer ones' tips on its rim so it is ragged, the inner ones nudged a pseudo-random
+    pixel so no two rows line up into a weave. Each leaf takes the colour its place on the dome faces the
+    light with, give or take a step."""
     out = []
     rx, ry = PILE_R
     for r, y in enumerate(range(PILE_Y - ry + 1, PILE_Y - 3, ROW_STEP)):
         half = rx * math.sqrt(max(0, 1 - ((y + 2 - PILE_Y) / ry) ** 2))
-        n = max(1, round(2 * half / LEAF))
+        n = max(1, round(2 * half / (LEAF - 1)))
+        step = (2 * half - LEAF) / max(1, n - 1)
         for i in range(n):
-            out.append((PILE_X + (i - n / 2) * LEAF, y, (len(out) * 7 + r * 11) % 13 % len(LEAF_COLOURS)))
+            nudge = 0 if i in (0, n - 1) else scatter(r, i) % 3 - 1
+            x = PILE_X - half + i * step + nudge if n > 1 else PILE_X - LEAF / 2
+            light = 0.55 * (x + LEAF / 2 - PILE_X + rx) / (2 * rx) + 0.45 * (y - PILE_Y + ry) / ry
+            k = round(light * (len(LEAF_COLOURS) - 1)) + scatter(r, i + 5) % 3 - 1
+            out.append((x, y + (scatter(i, r) % 2) * 0.5, max(0, min(len(LEAF_COLOURS) - 1, k))))
     return out
 
 
 def leaf_pile(lift=0):
-    """A raked heap of autumn leaves: a low dome built of overlapping leaves in orange, amber, ochre, red,
-    brick and gold, each shaded on its lower half, so the heap reads as leaves and its rim is ragged with
-    their tips; a red maple leaf lies on top. lift raises the maple leaf 1 drawn pixel and turns it over."""
+    """A raked heap of autumn leaves: a low dome built of overlapping leaves in gold, amber, orange, ochre,
+    rust and brick, lighter where the dome faces the light, each shaded on its lower half, so the heap reads
+    as leaves and its rim is ragged with their tips; a red maple leaf lies on top, its edge lit red rather than
+    pink so it never reads as a heart. lift raises the maple leaf 1 drawn pixel and turns it over."""
     g = edged(Grid(SIZE, SIZE))
-    u = obstacles.unit(g)[1]
     rx, ry = PILE_R
     g.cel(PILE_X, PILE_Y, rx - 2, ry - 2, "rust", "dbrick")
     for x, y, k in pile_leaves():
         lens(g, x, y, *LEAF_COLOURS[k])
-    maple(g, 16.5, 17 - lift * u, lift)
-    return lit(g)
+    maple(g, 20, 23.7, lift, lift)
+    return lit(g, dict(dred=("red", None)))
 
 
 # The steps' idle: rest, rest, the candle guttering low, then flaring.
 PORCH_STEPS_IDLE = (0, 0, 1, 2), 400
-# The steps, bottom up: (tread row, left, right). Each further one is narrower, set back up the walk.
-STEPS_ROWS = ((30, 4, 36), (23, 8, 32), (16, 12, 28))
+# The steps, bottom up: (tread row, left, right). A front elevation, so each is as wide as the next but for a
+# 1px setback each side.
+STEPS_ROWS = ((30, 5, 35), (23, 6, 34), (16, 7, 33))
+# Brick courses: the mortar rows down a riser and the joints' spacing along a course.
+COURSE, BRICK = 2, 5
 
 
 def porch_steps(flicker=0):
-    """A short flight of three brick steps up to a porch, a front elevation: each a stone tread over a brick
-    riser, the further ones narrower as they go back, white newel posts under ball caps at the foot and
-    white rails rising from them to thin posts at the top step. A jack-o'-lantern sits on the top step, its
-    eyes and grin lit amber; flicker 1 dims them to orange, 2 flares them yellow."""
+    """A short flight of three brick steps up to a porch, a front elevation, so the flight never tapers like
+    a tiered cake: each a lit stone tread with a dstone nosing over a red brick riser laid in dbrick courses;
+    tall white newel posts under ball caps either side. A jack-o'-lantern sits on the top step, its eyes and
+    grin cut dark with a candle glowing amber inside; flicker 1 dims the glow to orange, 2 flares it
+    yellow."""
     g = edged(Grid(SIZE, SIZE))
-    # the rails, behind the steps: a white rail from each foot post up to a thin post at the top step
-    for x0, x1 in ((4, 11), (34, 27)):
-        bar(g, (x0 + 1, 15), (x1 + 1, 8), 1.6, "white")
-        g.rect(x1 + 0.5, 8, 1, 9, "lgrey")
-    for k, (top, x0, x1) in enumerate(STEPS_ROWS):
-        h = 7 if k else 8
-        g.rect(x0, top + 2, x1 - x0, h - 2, "brick")
-        g.rect(x1 - 2, top + 2, 2, h - 2, "dbrick")
-        for y in range(top + 4, top + h, 2):
-            for x in range(x0 + 2 + (y // 2 % 2) * 2, x1 - 3, 4):
-                g.rect(x, y, 1, 1, "dbrick")
-        g.rect(x0 - 1, top, x1 - x0 + 2, 2, "stone")
-        g.rect(x0 - 1, top, x1 - x0 + 2, 1, "driftwood")
-    # the newel posts at the foot, either side of the bottom step, white with ball caps
+    for top, x0, x1 in STEPS_ROWS:
+        bottom = top + (8 if top == STEPS_ROWS[0][0] else 7)
+        g.rect(x0, top + 3, x1 - x0, bottom - top - 3, "brick")
+        for y in range(top + 3 + COURSE, bottom, COURSE + 1):
+            g.rect(x0, y, x1 - x0, 1, "dbrick")
+        for y in range(top + 3, bottom, COURSE + 1):
+            for x in range(x0 + 2 + (y // (COURSE + 1) % 2) * 2, x1 - 2, BRICK):
+                g.rect(x, y, 1, COURSE, "dbrick")
+        g.rect(x1 - 2, top + 3, 2, bottom - top - 3, "dbrick")
+        g.rect(x0 - 1, top, x1 - x0 + 2, 3, "stone")
+        g.rect(x0 - 1, top, x1 - x0 + 2, 1, "lgrey")
+        g.rect(x0 - 1, top + 2, x1 - x0 + 2, 1, "dstone")
+        g.rect(x1 - 1, top, 2, 2, "dstone")
+    # the newel posts either side of the flight, white with ball caps, as tall as the top step
     for x in (1, 35):
-        g.rect(x, 17, 4, 20, "white")
-        g.rect(x + 3, 17, 1, 20, "lgrey")
-        g.rect(x - 1, 15, 6, 2, "white")
-        g.rect(x - 1, 16, 6, 1, "lgrey")
-        g.cel(x + 2, 12.5, 2.5, 2.5, "white", "lgrey")
-    # the jack-o'-lantern on the top step
-    g.cel(20, 12.5, 4.5, 3.5, "orange", "rust", "amber")
+        g.rect(x, 15, 4, 22, "white")
+        g.rect(x + 3, 15, 1, 22, "lgrey")
+        g.rect(x - 1, 13, 6, 2, "white")
+        g.rect(x - 1, 14, 6, 1, "lgrey")
+        g.cel(x + 2, 10.5, 2.5, 2.5, "white", "lgrey")
+    # the jack-o'-lantern on the top step: eyes and a grin cut dark, the candle's glow inside them
+    g.cel(20, 12.5, 5, 3.5, "orange", "rust", "amber")
     g.rect(19.5, 7.5, 1.5, 2, "olive")
     glow = ("amber", "orange", "yellow")[flicker]
-    g.rect(17.5, 11, 1.5, 1.5, glow)
-    g.rect(21, 11, 1.5, 1.5, glow)
-    g.rect(18, 14, 4, 1, glow)
+    for x in (17, 21):
+        g.rect(x, 10.5, 2, 2, "plum")
+        g.rect(x + 0.5, 11.5, 1, 1, glow)
+    g.rect(17.5, 13.5, 5, 1.5, "plum")
+    g.rect(18.5, 13.5, 3, 1, glow)
     return lit(g)
 
 
@@ -503,12 +529,12 @@ def hit_sprites():
 EFFECTS = {
     # A hiss falling from a high band to a lower one, then a "mrr" rising into a falling "ow".
     "sfx-hit-porch-cat": [
-        ("pinknoise", 0.12, None, 0, dict(vol=0.8, low=7000, high=3200, attack=0.006, release=0.5, shape="h")),
-        ("pinknoise", 0.14, None, 0.08, dict(vol=0.6, low=4500, high=1800, attack=0.02, release=0.7, shape="h")),
-        ("square", 0.1, (430, 760), 0.24, dict(vol=0.4, duty=35, low=2200, attack=0.015, release=0.3)),
-        ("square", 0.16, (760, 520), 0.33, dict(vol=0.4, duty=35, low=2200, attack=0.005, release=0.8, shape="h")),
-        ("triangle", 0.1, (215, 380), 0.24, dict(vol=0.6, attack=0.015, release=0.3)),
-        ("triangle", 0.16, (380, 260), 0.33, dict(vol=0.6, attack=0.005, release=0.8, shape="h")),
+        ("pinknoise", 0.12, None, 0, dict(vol=1.0, low=7000, high=3200, attack=0.006, release=0.5, shape="h")),
+        ("pinknoise", 0.14, None, 0.08, dict(vol=0.9, low=4500, high=1800, attack=0.02, release=0.7, shape="h")),
+        ("square", 0.1, (430, 760), 0.24, dict(vol=0.3, duty=35, low=2200, attack=0.015, release=0.3)),
+        ("square", 0.16, (760, 520), 0.33, dict(vol=0.3, duty=35, low=2200, attack=0.005, release=0.8, shape="h")),
+        ("triangle", 0.1, (215, 380), 0.24, dict(vol=0.45, attack=0.015, release=0.3)),
+        ("triangle", 0.16, (380, 260), 0.33, dict(vol=0.45, attack=0.005, release=0.8, shape="h")),
     ],
     # A low "huff" through the nose, then three soft chirps rising, each quieter.
     "sfx-hit-capybara": [
@@ -520,6 +546,11 @@ EFFECTS = {
         ("square", 0.06, (880, 1250), 0.18, dict(vol=0.12, duty=25, low=2500, attack=0.012, release=0.6)),
     ],
 }
+
+
+# Gain after the peak normalization, in dB, for a sound dense enough to sound louder than the other hits at the
+# same peak: the cat's meow holds its pitch longer than the other hits' notes.
+TRIM_DB = {"sfx-hit-porch-cat": -1.5}
 
 
 def render_sounds(out_dir):
@@ -534,6 +565,9 @@ def render_sounds(out_dir):
                 layers.append(path)
             wav = f"{tmp}/{key}.wav"
             sounds.mix([(path, 1 / len(layers)) for path in layers], wav)
+            if key in TRIM_DB:
+                sounds.sox(wav, f"{tmp}/{key}-trim.wav", "gain", str(TRIM_DB[key]))
+                wav = f"{tmp}/{key}-trim.wav"
             sounds.encode(wav, out_dir, key)
     return list(EFFECTS)
 
@@ -595,10 +629,10 @@ def picture(img):
     return to_image(img.outlined())
 
 
-def speed_lines(a, pts, col="lgrey"):
-    """Speed lines: (x, y, length) runs along a row."""
+def speed_lines(a, pts, col="white", down=False):
+    """Speed lines: (x, y, length) runs along a row, or down a column when down (a dog going up the road)."""
     for x, y, n in pts:
-        a.fill(x, y, n, 1, col)
+        a.fill(x, y, *((1, n) if down else (n, 1)), col)
 
 
 def porch_cat_shoo():
@@ -629,10 +663,10 @@ def porch_cat_bolt():
     """Bolt past: Kilo pulls hard past the lounging cat, speed lines behind him, the leash taut."""
     a = cards.Art()
     a.ground(CABBAGETOWN)
-    a.put("porch-cat", "idle", 18, 34)
+    a.put("porch-cat", "idle", 22, 34)
     c = a.put("dog-kilo", "pull", 50, 58)
     a.lead(48, c, 34, 2)
-    speed_lines(a, ((22, 40, 8), (18, 46, 10), (24, 52, 6)))
+    speed_lines(a, ((24, 42, 8), (20, 47, 10), (26, 52, 6)))
     return a
 
 
@@ -687,7 +721,7 @@ def capybara_keep_walking():
     c1 = a.put("dog-duchess", "walk", 41, 57, 1)
     a.lead(41, c1, 48)
     a.lead(63, c2, 56)
-    speed_lines(a, ((29, 47, 5), (31, 53, 4), (51, 38, 4), (52, 31, 3)))
+    speed_lines(a, ((33, 44, 6), (49, 46, 5), (56, 38, 5), (70, 37, 4)), down=True)
     return a
 
 
