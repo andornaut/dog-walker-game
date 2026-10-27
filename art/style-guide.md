@@ -68,39 +68,42 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 
 ### UI colour pairs
 
+An effect's name beside its description sits on a pale pill in the effect's family, its name dark on it, so it reads the same on cream and on ink: 11px tall, the name inset 3px each side, the corners cut by 1px.
+
 Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the neutral greys and any colour it leaves out; ratios are WCAG.
 
 | Pair                           | Ratio | Use                                                                                                                         |
 | ------------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------- |
 | amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                                                   |
 | amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                                               |
-| blue on cream                  | 5.85  | Spotlight's name beside its effect                                                                                          |
 | cream on darkBrown             | 5.85  | Text on the wood                                                                                                            |
-| darkBrown on cream             | 5.85  | Secondary text, empty heart outline; Muddy's name beside its effect                                                         |
+| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                         |
 | darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                                                                |
 | darkRed on nlgrey              | 5.15  | Price on the short plate                                                                                                    |
-| dlake on cream                 | 5.55  | A buff's name (gear, perk, upgrade) beside its effect                                                                       |
-| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name; Zoomies' name beside its effect          |
+| dlake on foam                  | 5.54  | A buff's name (gear, perk, upgrade) on its pill, beside its effect                                                          |
+| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name                                           |
+| forest on lime                 | 4.80  | Zoomies' name on its pill                                                                                                   |
 | ink on deepAmber               | 7.91  | A picked picture's outline on its box                                                                                       |
 | ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                                                         |
 | ink on ngrey                   | 7.23  | The emblem's silhouette on a `locked` badge                                                                                 |
 | ink on nlgrey                  | 12.64 | The goal plate: a walker's name, a blocked slot's price, a disabled card's cost; an affordable picture's outline on its box |
 | ink on nslate                  | 3.75  | A disabled picture's outline on its art box                                                                                 |
 | navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                                                                   |
+| navy on yellow                 | 11.13 | Spotlight's name on its pill                                                                                                |
 | ndslate on cream               | 6.12  | A locked badge's name in the logbook                                                                                        |
 | ndslate on ngrey               | 3.56  | Labels on `disabled` tiles and buttons (inactive, exempt), a `locked` badge's emblem                                        |
 | ngrey on darkBrown             | 3.40  | `disabled` tile face on the wood                                                                                            |
 | nslate on cream                | 3.32  | A locked badge's goal and progress in the logbook (inactive, exempt)                                                        |
 | plum on amber                  | 7.35  | Text on amber: step number                                                                                                  |
 | plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons                                       |
+| plum on pink                   | 5.03  | Stinky's name on its pill, Stinky's "+$0" tip label                                                                         |
 | plum on tan                    | 6.49  | Body text on tan                                                                                                            |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                              |
-| purple on cream                | 6.11  | Stinky's name beside its effect, Stinky's "+$0" tip label                                                                   |
 | tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                                                  |
 | tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                                                              |
-| turquoise on ink               | 8.08  | A buff's name beside its effect on ink (6.12 on plum, the walk bar)                                                         |
 | `ui-difficulty` on cream       | 3.2+  | Filled paws plum-outlined (9.42); hollow paws a clay rim (3.2)                                                              |
 | `ui-zone-pips` on cream        | 3.0+  | `todo` dashed; `<zone>` and `<zone>-done` rimmed darker than their well; `-done` ticked                                     |
+| walnut on tan                  | 7.48  | Muddy's name on its pill                                                                                                    |
 | white on darkBrown             | 8.48  | Filled page dot                                                                                                             |
 | white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                                                |
 | white on forest                | 7.80  | The purchase confirmation's title                                                                                           |
