@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
+import { decodePng } from "../assets/atlas/atlasBuild";
+import { roadTileKey } from "../assets/spriteKeys";
+import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
@@ -30,6 +35,7 @@ import {
   STRIP,
   stripLevels,
   stripLines,
+  stripSeams,
 } from "./roadRaster";
 import { screenLayout, walkerFootY } from "./screenLayout";
 
@@ -533,6 +539,13 @@ describe("shrinkRows", () => {
     expect([...shrunk.pixels]).toEqual([1, 1, 1, 1]);
   });
 
+  it("leaves skipped pixels out of the vote, and takes the base where all are skipped", () => {
+    const source = image([[4], [9], [9], [9], [2], [2], [2], [2]]);
+    const skip = Uint8Array.from([0, 1, 1, 1, 1, 1, 1, 1]);
+    expect([...shrinkRows(4, source).pixels]).toEqual([9, 2]);
+    expect([...shrinkRows(4, source, skip).pixels]).toEqual([4, 2]);
+  });
+
   it("uses only colours the image has", () => {
     const source = image([[5], [6], [7], [8]]);
     const shrunk = shrinkRows(2, source);
@@ -560,4 +573,134 @@ describe("stripLines", () => {
     expect(lines.mask[((from + rows - 1) % STRIP.height) * STRIP.width + 5] === 1).toBe(line);
     expect(lines.columns.reduce((sum, value) => sum + value, 0)).toBe(line ? 1 : 0);
   });
+});
+
+describe("stripSeams", () => {
+  // A one-colour strip with a band of another colour across columns 10 on, cols wide, from row
+  // from, rows thick.
+  const bandStrip = (from: number, rows: number, cols: number): PixelImage => {
+    const pixels = new Uint32Array(STRIP.width * STRIP.height).fill(1);
+    for (let k = 0; k < rows; k++) {
+      pixels.fill(
+        2,
+        ((from + k) % STRIP.height) * STRIP.width + 10,
+        ((from + k) % STRIP.height) * STRIP.width + 10 + cols,
+      );
+    }
+    return { ...STRIP, pixels };
+  };
+  it.each([
+    { cols: STRIP.width - 10, from: 14, name: "a joint across the road", rows: 2, seam: true },
+    { cols: LINE_RUN, from: 14, name: "a joint as long as a line", rows: 2, seam: true },
+    { cols: LINE_RUN - 1, from: 14, name: "a shorter mark", rows: 2, seam: false },
+    { cols: 100, from: 10, name: "a band as thick as a line", rows: LINE_RUN, seam: false },
+    { cols: 100, from: 10, name: "a band just thinner", rows: LINE_RUN - 1, seam: true },
+    { cols: 100, from: STRIP.height - 1, name: "a joint that wraps", rows: 2, seam: true },
+  ])("marks $name as a seam: $seam", ({ cols, from, rows, seam }) => {
+    const seams = stripSeams(bandStrip(from, rows, cols));
+    // A seam's count sits at its nearest pixel, its last row in the strip.
+    const nearest = ((from + rows - 1) % STRIP.height) * STRIP.width + 10;
+    expect(seams.starts[nearest]).toBe(seam ? rows : 0);
+    expect(seams.mask[(from % STRIP.height) * STRIP.width + 10]).toBe(seam ? 1 : 0);
+    expect(seams.starts.filter((n) => n > 0).length).toBe(seam ? cols : 0);
+  });
+});
+
+describe("seams across the road", () => {
+  const stripOf = (key: string): PixelImage => {
+    const { data, height, width } = decodePng(readFileSync(`public/art/images/${key}.png`));
+    return { height, pixels: new Uint32Array(data.slice().buffer), width };
+  };
+  const zones = gameData.world.zones.map((zone) => ({ strip: stripOf(roadTileKey(zone)), zone }));
+  // Each seam, by its nearest strip row, as a run along the road from a, n rows long, and the
+  // strip with its pixels labelled with that row (plus 2) and every other pixel 1, so a frame
+  // shows which seams it draws. A row's seams must span at least LINE_RUN columns, as a
+  // narrower fleck can fall between the columns a far row samples.
+  const labelled = (strip: PixelImage) => {
+    const seams = stripSeams(strip);
+    const pixels = new Uint32Array(strip.pixels.length).fill(1);
+    const runs = new Map<number, number>();
+    for (let r = 0; r < STRIP.height; r++) {
+      const row = seams.starts.subarray(r * STRIP.width, (r + 1) * STRIP.width);
+      const n = Math.max(...row);
+      if (row.filter((count) => count > 0).length < LINE_RUN) {
+        continue;
+      }
+      runs.set(r, n);
+      row.forEach((count, x) => {
+        for (let k = 0; k < count; k++) {
+          pixels[((((r - k) % STRIP.height) + STRIP.height) % STRIP.height) * STRIP.width + x] =
+            r + 2;
+        }
+      });
+    }
+    const look: RoadLook = {
+      seams,
+      strip: stripLevels({ ...strip, pixels }, seams),
+      zone: "street",
+    };
+    return { look, runs };
+  };
+  const affected = zones.filter(({ strip }) => labelled(strip).runs.size > 0);
+
+  it("finds seams on some zones' roads and none on the others'", () => {
+    expect(affected.length).toBeGreaterThan(0);
+    expect(affected.length).toBeLessThan(zones.length);
+  });
+
+  // Every seam wholly on the stretch of road in view shows, as one run of rows, so as the road
+  // scrolls no seam blinks, and the far rows show theirs.
+  it.each(affected.map(({ strip, zone }) => ({ id: zone.id, strip })))(
+    "draws each of $id's seams once in every frame, far rows included",
+    ({ strip }) => {
+      const { look, runs } = labelled(strip);
+      const { rows, visibleDistance } = raster;
+      const farRows = rows.flatMap((row, y) => (row.level === 2 ? [y] : []));
+      for (let frame = 0; frame < 48; frame++) {
+        const scroll = 1000.3 + frame * 4.67;
+        const out = draw(frameOf({ current: look, scroll }));
+        const lineStart = scroll - visibleDistance;
+        const alongAt = (distance: number) => Math.floor(lineStart + distance);
+        // Each seam copy drawn, keyed by its nearest strip row and its copy along the road,
+        // with the rows it shows on.
+        const drawn = new Map<string, number[]>();
+        rows.forEach((row, y) => {
+          const labels = new Set(
+            out.subarray(y * view.width + row.roadStart, y * view.width + row.roadEnd),
+          );
+          for (const label of labels) {
+            const r = label - 2;
+            if (runs.has(r)) {
+              const copy = Math.floor(
+                (alongAt(row.distance) - (STRIP.height - 1 - r)) / STRIP.height,
+              );
+              drawn.set(`${r}@${copy}`, [...(drawn.get(`${r}@${copy}`) ?? []), y]);
+            }
+          }
+        });
+        const from = alongAt(itemAt(rows, rows.length - 1).below) + 1;
+        const to = alongAt(itemAt(rows, 0).distance);
+        const wholly = [...runs].flatMap(([r, n]) => {
+          const a = STRIP.height - 1 - r;
+          const copies = Array.from(
+            { length: Math.ceil((to - from) / STRIP.height) + 2 },
+            (_, k) => Math.floor((from - a) / STRIP.height) + k,
+          );
+          return copies
+            .filter(
+              (copy) => a + copy * STRIP.height >= from && a + copy * STRIP.height + n - 1 <= to,
+            )
+            .map((copy) => `${r}@${copy}`);
+        });
+        expect(
+          wholly.filter((key) => !drawn.has(key)),
+          `frame ${frame}`,
+        ).toEqual([]);
+        for (const [key, ys] of drawn) {
+          expect(ys.length, `${key} on one run of rows`).toBe((ys.at(-1) ?? 0) - (ys[0] ?? 0) + 1);
+        }
+        expect(farRows.some((y) => [...drawn.values()].some((ys) => ys.includes(y)))).toBe(true);
+      }
+    },
+  );
 });

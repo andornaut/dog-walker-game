@@ -42,14 +42,16 @@ type StripLevels = readonly [PixelImage, PixelImage, PixelImage];
 // or -1 on the strip, which covers columns roadStart to roadEnd (excluded). roadXFrom to
 // roadXTo are the road pixels whose left edges fall in each column, so the columns share the
 // road's pixels out between them, none missed and none twice (none on a row wider than the
-// road, where a pixel covers more than a column). The row covers
-// the road from near to far ahead of the feet. dotLevel sizes the cells the verge's dots are
-// seeded on, 2^dotLevel road pixels long, at least as long as the row's span, so every cell
-// shows on some row and the dots move down with the road rather than reshuffle. splits caches
+// road, where a pixel covers more than a column). The row covers the road from near to far
+// ahead of the feet and samples it at distance; the row below samples it at below. dotLevel
+// sizes the cells the verge's dots are seeded on, 2^dotLevel road pixels long, at least as long
+// as the row's span, so every cell shows on some row and the dots move down with the road
+// rather than reshuffle. splits caches
 // verge edges by across, and lineColumns the columns whose share of the road holds a strip
 // line, by the strip's lines.
 interface RasterRow {
   readonly across: Float32Array;
+  readonly below: number;
   readonly distance: number;
   readonly dotLevel: number;
   readonly far: number;
@@ -90,12 +92,20 @@ export interface RoadRaster {
   readonly visibleDistance: number;
 }
 
-// A zone's look: its strip and the zone whose verge goes beside it, and the strip's lines along
-// the road, which every row that covers them keeps (stripLines).
+// A zone's look: its strip and the zone whose verge goes beside it, the strip's lines along the
+// road, which every row that covers them keeps (stripLines), and its seams across the road,
+// which every pass of the road through the view shows (stripSeams).
 export interface RoadLook {
   readonly lines?: StripLines;
+  readonly seams?: StripSeams;
   readonly strip: StripLevels;
   readonly zone: ZoneId;
+}
+
+// A strip's look, with its lines and seams.
+export function roadLook(zone: ZoneId, strip: PixelImage): RoadLook {
+  const seams = stripSeams(strip);
+  return { lines: stripLines(strip), seams, strip: stripLevels(strip, seams), zone };
 }
 
 // The pixels of a strip that lie on its lines along the road, such as lane marks: runs at
@@ -151,8 +161,10 @@ function mostCommon(pixels: Uint32Array): number {
 // The image shrunk factor times along its height. Each pixel takes the colour most of the
 // rows it stands for have; a tie goes to the image's commonest colour if it is one of the
 // tied, else to the nearest of them to the top. Colours are never mixed, so it stays on the
-// palette, and a far row shows the road's base rather than a speckle that blinks.
-export function shrinkRows(factor: number, image: PixelImage): PixelImage {
+// palette, and a far row shows the road's base rather than a speckle that blinks. The pixels
+// set in skip, such as seams, which drawRoad draws itself, have no say; a pixel with none
+// takes the base.
+export function shrinkRows(factor: number, image: PixelImage, skip?: Uint8Array): PixelImage {
   const { width } = image;
   const height = Math.floor(image.height / factor);
   const base = mostCommon(image.pixels);
@@ -164,7 +176,11 @@ export function shrinkRows(factor: number, image: PixelImage): PixelImage {
       seen.length = 0;
       counts.length = 0;
       for (let k = 0; k < factor; k++) {
-        const pixel = image.pixels[(row * factor + k) * width + x] ?? 0;
+        const index = (row * factor + k) * width + x;
+        if (skip?.[index] === 1) {
+          continue;
+        }
+        const pixel = image.pixels[index] ?? 0;
         const at = seen.indexOf(pixel);
         if (at < 0) {
           seen.push(pixel);
@@ -181,8 +197,10 @@ export function shrinkRows(factor: number, image: PixelImage): PixelImage {
   return { height, pixels, width };
 }
 
-export function stripLevels(strip: PixelImage): StripLevels {
-  return [strip, shrinkRows(2, strip), shrinkRows(4, strip)];
+// The strip and its shrunk copies, which leave out seams, so a seam shows only on the rows
+// drawRoad draws it on.
+export function stripLevels(strip: PixelImage, seams?: StripSeams): StripLevels {
+  return [strip, shrinkRows(2, strip, seams?.mask), shrinkRows(4, strip, seams?.mask)];
 }
 
 // The strip's lines along the road, wrapping from its last row to its first as it tiles.
@@ -222,6 +240,73 @@ export function stripLines(strip: PixelImage): StripLines {
     }
   }
   return { columns, mask };
+}
+
+// The pixels of a strip that lie on its seams across the road, such as paving joints: runs at
+// least LINE_RUN columns long, along one row, of a colour other than the strip's commonest, and
+// fewer than LINE_RUN rows of that colour down each column, wrapping as the strip tiles. Each
+// column's run of seam rows is one seam: starts holds its row count at its nearest pixel (its
+// last row in the strip, the first along the road), and 0 elsewhere. rows flags the strip rows
+// holding a seam pixel (SEAM_PIXEL) and a seam's nearest pixel (SEAM_START).
+export interface StripSeams {
+  readonly mask: Uint8Array;
+  readonly rows: Uint8Array;
+  readonly starts: Uint8Array;
+}
+
+const SEAM_PIXEL = 1;
+const SEAM_START = 2;
+
+export function stripSeams(strip: PixelImage): StripSeams {
+  const { height, pixels, width } = strip;
+  const base = mostCommon(pixels);
+  const across = new Uint8Array(width * height);
+  for (let y = 0; y < height; y++) {
+    let x = 0;
+    while (x < width) {
+      const pixel = pixels[y * width + x];
+      let run = 1;
+      while (x + run < width && pixels[y * width + x + run] === pixel) {
+        run += 1;
+      }
+      if (pixel !== base && run >= LINE_RUN) {
+        across.fill(1, y * width + x, y * width + x + run);
+      }
+      x += run;
+    }
+  }
+  const mask = new Uint8Array(width * height);
+  const starts = new Uint8Array(width * height);
+  const rows = new Uint8Array(height);
+  const at = (x: number, y: number) => (((y % height) + height) % height) * width + x;
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const pixel = pixels[at(x, y)];
+      // A seam starts on a row whose pixel above is not the same seam; a column all one seam
+      // colour has no start, and is a line along the road.
+      if (
+        across[at(x, y)] !== 1 ||
+        (across[at(x, y - 1)] === 1 && pixels[at(x, y - 1)] === pixel)
+      ) {
+        continue;
+      }
+      let run = 1;
+      while (run < height && across[at(x, y + run)] === 1 && pixels[at(x, y + run)] === pixel) {
+        run += 1;
+      }
+      if (run >= LINE_RUN) {
+        continue;
+      }
+      for (let k = 0; k < run; k++) {
+        mask[at(x, y + k)] = 1;
+        rows[(y + k) % height] = (rows[(y + k) % height] ?? 0) | SEAM_PIXEL;
+      }
+      const nearest = (y + run - 1) % height;
+      starts[nearest * width + x] = run;
+      rows[nearest] = (rows[nearest] ?? 0) | SEAM_START;
+    }
+  }
+  return { mask, rows, starts };
 }
 
 // A strip of one colour, for a zone whose art is missing.
@@ -269,6 +354,7 @@ export function roadRaster(
     const roadEnd = Math.max(0, roadStart) + across.filter((value) => value < 0).length;
     rows.push({
       across,
+      below: distanceAtY(projection, y + 1.5),
       distance,
       dotLevel: Math.max(0, Math.ceil(Math.log2(span))),
       far: distanceAtY(projection, y),
@@ -514,13 +600,8 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     }
     const z = frame.scroll + row.distance;
     const along = Math.floor(z - frame.zoneStart - raster.visibleDistance);
-    const look =
-      frame.transition === null || along >= STRIP.height
-        ? frame.current
-        : along >= 0
-          ? frame.transition.start
-          : frame.transition.previous;
-    const stripRow = (((STRIP.height - 1 - along) % STRIP.height) + STRIP.height) % STRIP.height;
+    const look = lookAt(frame, along);
+    const stripRow = stripRowAt(along);
     // Below its own zone's rows, the start strip is a cross street that follows the previous
     // zone: the verge beside it is the previous zone's.
     const vergeZone =
@@ -545,6 +626,28 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     const rowStart = ((stripRow >> row.level) * image.width - stripLeft) | 0;
     for (let i = roadStart; i < roadEnd; i++) {
       out[offset + i] = pixels[rowStart + (roadX[i] ?? 0)] ?? 0;
+    }
+    // The shrunk strips leave seams out, so draw those on the row's strip row.
+    if (row.level > 0 && look.seams !== undefined) {
+      drawSeams(out, offset, row, look, stripLeft, stripRow, look.seams.mask, SEAM_PIXEL);
+    }
+    // The seams wholly between this row's strip row and the row below's, which no row samples.
+    const below = Math.floor(frame.scroll + row.below - frame.zoneStart - raster.visibleDistance);
+    for (let k = Math.max(below + 1, along - STRIP.height); k < along; k++) {
+      const skipped = lookAt(frame, k);
+      if (skipped.seams !== undefined) {
+        drawSeams(
+          out,
+          offset,
+          row,
+          skipped,
+          stripLeft,
+          stripRowAt(k),
+          skipped.seams.starts,
+          SEAM_START,
+          along - k + 1,
+        );
+      }
     }
     if (look.lines !== undefined) {
       const first = Math.floor(lineStart + row.near);
@@ -630,6 +733,51 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     next = swap;
     if (y < raster.approachRows) {
       keepBackdropVerge(frame.approach ?? null, row, vergePixels, offset, out);
+    }
+  }
+}
+
+// The look a strip row along the road shows: while a start strip rolls in, the previous zone's
+// road lies on its near side.
+function lookAt(frame: RoadFrame, along: number): RoadLook {
+  if (frame.transition === null || along >= STRIP.height) {
+    return frame.current;
+  }
+  return along >= 0 ? frame.transition.start : frame.transition.previous;
+}
+
+// The strip row a row along the road shows: strip rows count down the road from the strip's far
+// end.
+function stripRowAt(along: number): number {
+  return (((STRIP.height - 1 - along) % STRIP.height) + STRIP.height) % STRIP.height;
+}
+
+// Draws a strip row's seam pixels on a screen row, from the full-size strip: the columns whose
+// road x has a mark under fits. For a strip row no row samples, marks are its seam starts and
+// fits the strip rows up to the row's own, so only the seams that end before it draw; the row's
+// own strip row shows the rest.
+function drawSeams(
+  out: Uint32Array,
+  offset: number,
+  row: RasterRow,
+  look: RoadLook,
+  stripLeft: number,
+  stripRow: number,
+  marks: Uint8Array,
+  flag: number,
+  fits = 256,
+): void {
+  if (((look.seams?.rows[stripRow] ?? 0) & flag) === 0) {
+    return;
+  }
+  const { pixels, width } = look.strip[0];
+  const rowStart = (stripRow * width - stripLeft) | 0;
+  const { roadEnd, roadX } = row;
+  for (let i = row.roadStart; i < roadEnd; i++) {
+    const at = rowStart + (roadX[i] ?? 0);
+    const mark = marks[at] ?? 0;
+    if (mark > 0 && mark < fits) {
+      out[offset + i] = pixels[at] ?? 0;
     }
   }
 }

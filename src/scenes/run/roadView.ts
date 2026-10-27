@@ -7,12 +7,11 @@ import {
   drawRoad,
   type PixelImage,
   type RoadLook,
+  roadLook,
   type RoadRaster,
   roadRaster,
   solidStrip,
   STRIP,
-  stripLevels,
-  stripLines,
 } from "../../layout/roadRaster";
 import type { Rect } from "../../lib/rect";
 import { zoneAt } from "../../rules/route";
@@ -39,11 +38,7 @@ export class RoadArt {
       const image = this.imagePixels(key);
       const fits = image?.width === STRIP.width && image.height === STRIP.height;
       const strip = fits ? image : solidStrip(colorFromHex(zone.roadColor));
-      look = {
-        lines: stripLines(strip),
-        strip: stripLevels(strip),
-        zone: zone.id as RoadLook["zone"],
-      };
+      look = roadLook(zone.id as RoadLook["zone"], strip);
       this.looks.set(key, look);
     }
     return look;

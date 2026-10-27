@@ -21,10 +21,10 @@ import {
   drawRoad,
   type PixelImage,
   type RoadLook,
+  roadLook,
   roadRaster,
   solidStrip,
   STRIP,
-  stripLevels,
 } from "../layout/roadRaster";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
@@ -148,7 +148,7 @@ async function zoneLayers(zone: Zone): Promise<{ over: RgbaImage; under: RgbaIma
     tileImage?.width === STRIP.width && tileImage.height === STRIP.height
       ? pixelImage(tileImage)
       : solidStrip(hexColor(zone.roadColor));
-  const look: RoadLook = { strip: stripLevels(strip), zone: zone.id as RoadLook["zone"] };
+  const look = roadLook(zone.id as RoadLook["zone"], strip);
   const raster = roadRaster(projection, rasterView);
   const pixels = new Uint32Array(rasterView.width * rasterView.height);
   const frame = { current: look, scroll: 0, transition: null, zoneStart: 0 };
