@@ -810,17 +810,49 @@ def card_wedding_pose():
     return a
 
 
+def arc(a, pts, col, dash=2, gap=2):
+    """A dashed trail through the joints pts, dash pixels on and gap off along it."""
+    run = []
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        n = max(1, round(math.hypot(x1 - x0, y1 - y0)))
+        run += [(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n)) for k in range(n)]
+    for k, (x, y) in enumerate(dict.fromkeys(run)):
+        if k % (dash + gap) < dash:
+            a.fill(x, y, 1, 1, col)
+
+
+def bezier(p0, p1, p2, n=24):
+    """n + 1 points along the quadratic Bezier curve p0, p1, p2."""
+    return [((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+             (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]) for t in (k / n for k in range(n + 1))]
+
+
+def put_dog(a, dog, step, tag, cx, foot, i=0, shadow=True):
+    """dog's depth variant at step (a percentage) put on a card as cards.Art.put puts a dog, returning its collar's
+    row: its own collar height at the step's scale over its feet."""
+    import cards
+    c = a.put(f"dog-{dog}@{step}", tag, cx, foot, i, shadow=shadow)
+    return c + cards.sn.COLLAR - round(cards.sn.collar(dog) * step / 100)
+
+
 def card_wedding_walk_around():
-    """Walk around: the shoot stands at the left while the dog trots on past it up the right, lgrey speed
-    lines at its heels."""
+    """Walk around: the shoot posing up the road, drawn small, the flash firing, while the pack swings wide round
+    it in an arc: Biscuit at the bottom pulling out to the right and Kilo far up the road at its widest, a dashed
+    white trail along it from the bottom edge curving back in over the top of the shoot."""
     import cards
     a = cards.Art()
     a.ground("street")
-    a.put("wedding-shoot@62", "idle", 24, 34)
-    c = a.put("dog-biscuit", "walk", 56, 56, 1)
-    a.lead(56, c, 62)
-    for x, y, h in ((45, 48, 6), (49, 51, 5), (65, 49, 5)):
-        a.fill(x, y, 1, h, "lgrey")
+    shoot = to_image(drawn(PERSON * 0.4, wedding_shoot, flash=True).outlined())
+    a.shadow(9, 30, 18)
+    a.shadow(29, 30, 18)
+    a.paste(shoot, 1, 30 - shoot.height)
+    pack = (("kilo", 50, 65, 30, "walk", 2), ("biscuit", 75, 35, 57, "pull", 0))
+    for dog, step, x, foot, tag, i in pack:
+        a.shadow(x, foot, cards.sn.frame(f"dog-{dog}@{step}", tag).width)
+    arc(a, bezier((30, 62), (104, 30), (26, -6)), "white")
+    for dog, step, x, foot, tag, i in pack:
+        c = put_dog(a, dog, step, tag, x, foot, i, shadow=False)
+        a.lead(x, c, 42)
     return a
 
 
