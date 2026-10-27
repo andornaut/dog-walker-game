@@ -47,8 +47,8 @@ sfx-hit-porch-cat   0.49s  a hiss of pink noise stepping down two bands, then a 
 sfx-hit-capybara    0.42s  a low triangle "huff", then three soft rising triangle chirps
 
 Card illustrations, 75x56, composed from the exported sprites as cards.py composes its own:
-card-porch-cat-shoo         the cat bolting off the left edge past speed lines, Archie
-                            standing calm on his leash
+card-porch-cat-stand        Archie standing firm on his leash while the cat swipes up at his
+                            nose, plum-rimmed white claw slashes and a red scratch on his cheek
 card-porch-cat-treat        the cat lounging over a treat under rising hearts, Archie sitting
                             calm beside it
 card-porch-cat-bolt         Archie pulling hard past the lounging cat, speed lines behind it
@@ -56,8 +56,9 @@ card-capybara-help          the zookeeper in an olive shirt and a bush hat leadi
                             off on a rope, a heart over the capybara
 card-capybara-call-zoo      a phone ringing in a callout over the capybara, chewing on the
                             trail, Archie waiting on his leash
-card-capybara-keep-walking  Archie and Duchess trotting on up the trail past speed lines, the
-                            capybara left behind chewing at the side
+card-capybara-drag          the capybara chewing up the trail, Archie and Biscuit leaning hard
+                            toward it, hauled away on leashes taut off the bottom right, skid
+                            marks and dust at their paws
 
 Usage:
   hood_parks.py preview OUT_DIR   OUT_DIR/road.png (every road sprite and depth step on the
@@ -127,11 +128,13 @@ PORCH_CAT_IDLE = (dict(), dict(tail=-1), dict(blink=True), dict(tail=1))
 PORCH_CAT_WALK = (dict(near=1, sway=-1), dict(bob=-1), dict(far=1, sway=1), dict(bob=-1))
 
 
-def porch_cat(tail=0, blink=False, near=0, far=0, bob=0, sway=0):
+def porch_cat(tail=0, blink=False, near=0, far=0, bob=0, sway=0, swipe=False):
     """A calico lounging on its side, facing right, its head raised and turned to the player. tail moves the
     curled tip up or down (negative is up), blink shuts the eyes to lids, near and far push the front paws
-    ahead, bob lifts the body (negative is up), sway swings the tail sideways. Its coat is white, so it reads
-    apart from the tuxedo chase-cat and the ginger ambient-cat; the road outline holds it on the light roads.
+    ahead, bob lifts the body (negative is up), sway swings the tail sideways. swipe, for the cards only,
+    raises the near front paw up and out ahead, claws out, and narrows the eyes. Its coat is white, so it
+    reads apart from the tuxedo chase-cat and the ginger ambient-cat; the road outline holds it on the light
+    roads.
     """
     c = CALICO
     g = edged(Grid())
@@ -151,9 +154,16 @@ def porch_cat(tail=0, blink=False, near=0, far=0, bob=0, sway=0):
     # the back paw tucked along the ground
     g.rect(4, 27.5, 6, 1.5, c["coat"])
     g.p(9, 28, c["coat_sh"])
-    # near front paw stretched out along the road ahead of the chest
-    g.rect(19 + near, 27.5, 9, 1.5, c["coat"])
-    g.p(27 + near, 28, c["coat_sh"])
+    if swipe:
+        # near front paw raised up and out ahead of the chest, its claws out
+        bar(g, (20, 25 + b), (28, 19 + b), 2.2, c["coat"])
+        g.cel(28.5, 18.5 + b, 1.6, 1.6, c["coat"], c["coat_sh"])
+        for dy in (-1.5, 0, 1.5):
+            g.p(30.5, 18.5 + b + dy, "ink")
+    else:
+        # near front paw stretched out along the road ahead of the chest
+        g.rect(19 + near, 27.5, 9, 1.5, c["coat"])
+        g.p(27 + near, 28, c["coat_sh"])
     # the head, raised and turned to the player: ears, a dbrown patch over the left eye, an ochre right ear
     hx, hy = 23.5, 16.5 + b
     g.tri((hx - 5, hy - 1), (hx - 4.5, hy - 7), (hx - 1, hy - 3.5), c["dark"])
@@ -166,6 +176,10 @@ def porch_cat(tail=0, blink=False, near=0, far=0, bob=0, sway=0):
     for ex in (hx - 3, hx + 1):
         if blink:
             g.rect(ex, hy, 2, 1, "ink")
+            continue
+        if swipe:
+            g.rect(ex, hy, 2, 1, "amber")
+            g.rect(ex + 1, hy - 1, 1, 2, "ink")
             continue
         g.rect(ex, hy - 1, 2, 2, "amber")
         g.rect(ex + 1, hy - 1, 1, 2, "ink")
@@ -578,33 +592,6 @@ def render_sounds(out_dir):
 CABBAGETOWN, HIGH_PARK = "snoozeCrescent", "park"
 
 
-def cat_dash(reach=0):
-    """The calico bolting, side on facing right: stretched long and low, forelegs flung ahead and hind legs
-    kicked back, its tail streaming out behind, its head turned to the player wide-eyed. reach stretches the
-    legs further."""
-    c = CALICO
-    g = edged(Grid())
-    r = reach
-    for (x0, y0), foot in (((21, 22), (28 + r, 25)), ((8, 22), (1 - r, 25))):
-        bar(g, (x0, y0), foot, 2.5, c["coat_sh"])
-    bar(g, (5, 19), (0, 13), 2, c["dark"])
-    g.cel(14, 20, 10.5, 4, c["coat"], c["coat_sh"])
-    g.cel(8, 19, 3.5, 2.8, c["orange"], c["orange_sh"])
-    g.cel(15, 17.6, 3.5, 1.6, c["dark"], c["dark_sh"])
-    for (x0, y0), foot in (((22, 22), (30 + r, 26)), ((9, 22), (2 - r, 26))):
-        bar(g, (x0, y0), foot, 2.5, c["coat"])
-    hx, hy = 25, 15
-    g.tri((hx - 5, hy - 1), (hx - 4.5, hy - 7), (hx - 1, hy - 3.5), c["dark"])
-    g.tri((hx + 5, hy - 1), (hx + 4.5, hy - 7), (hx + 1, hy - 3.5), c["orange"])
-    g.cel(hx, hy, 5.5, 4.5, c["coat"], c["coat_sh"])
-    g.cel(hx - 2.8, hy - 1.6, 2.6, 2.4, c["dark"], c["dark_sh"])
-    for ex in (hx - 3, hx + 1):
-        g.rect(ex, hy - 1.5, 2, 2.5, "amber")
-        g.rect(ex + 0.5, hy - 1, 1, 1.5, "ink")
-    g.rect(hx - 1, hy + 2, 2, 1.5, "pink")
-    return lit(g)
-
-
 def keeper_top(g, b):
     """The zookeeper facing the player: an olive work shirt with a pocket and a tan bush hat, one arm held out
     low with the lead (screen right; the card mirrors him)."""
@@ -635,15 +622,30 @@ def speed_lines(a, pts, col="white", down=False):
         a.fill(x, y, *((1, n) if down else (n, 1)), col)
 
 
-def porch_cat_shoo():
-    """Shoo: the cat bolts off the left edge past speed lines, Archie standing calm on his leash."""
+def swipe_marks(a, x, y):
+    """Three white claw slashes in a plum rim, as the effects are rimmed, each falling 9 rows to the right from
+    x, y, 4px apart: the cat's swipe."""
+    pts = [(x + k * 4 + j // 2, y + j - k) for k in range(3) for j in range(9)]
+    for px, py in pts:
+        a.fill(px - 1, py - 1, 3, 3, "plum")
+    for px, py in pts:
+        a.fill(px, py, 1, 1, "white")
+
+
+def porch_cat_stand():
+    """Stand your ground: Archie stands firm on his leash while the cat swipes up at his nose, three white
+    claw slashes across the side of his head and a red scratch on his cheek."""
     a = cards.Art()
     a.ground(CABBAGETOWN)
-    cat = picture(drawn(ANIMAL, cat_dash, reach=1))
-    a.paste(cat, -10, 6, flip=True)
-    speed_lines(a, ((36, 14, 7), (39, 19, 9), (34, 24, 6)))
-    c = a.dog("archie", "idle", 58, 56)
-    a.lead(58, c, 64)
+    cat = picture(drawn(ANIMAL, porch_cat, swipe=True))
+    a.shadow(18, 46, 36)
+    a.paste(cat, 18 - cat.width / 2, 46 - cat.height)
+    c = a.dog("archie", "walk", 56, 56)
+    a.lead(56, c, 64)
+    swipe_marks(a, 38, 11)
+    for k in range(3):
+        a.fill(48 + k, 22 + k, 1, 1, "red")
+        a.fill(50 + k, 21 + k, 1, 1, "red")
     return a
 
 
@@ -711,27 +713,37 @@ def capybara_call_zoo():
     return a
 
 
-def capybara_keep_walking():
-    """Keep walking: Archie and Duchess trot on up the trail past speed lines, the capybara left behind,
-    chewing at the side."""
+def puff(a, x, y):
+    """A 5x3 puff of trail dust kicked up at a paw, cream lit white."""
+    a.fill(x + 1, y, 3, 1, "white")
+    a.fill(x, y + 1, 5, 2, "cream")
+
+
+def capybara_drag():
+    """Drag them away: the capybara chewing up the trail at the left, Archie and Biscuit leaning hard toward it
+    with their paws dug in, hauled away by their leashes taut off the bottom right, skid marks behind them and
+    dust kicking up at their paws."""
     a = cards.Art()
     a.ground(HIGH_PARK)
-    a.put("capybara", "idle", 15, 34)
-    c2 = a.dog("duchess", "walk", 63, 46, 2)
-    c1 = a.dog("archie", "walk", 41, 57, 1)
-    a.lead(41, c1, 48)
-    a.lead(63, c2, 56)
-    speed_lines(a, ((27, 46, 6), (58, 48, 6), (68, 48, 5)), down=True)
+    a.put("capybara@62", "idle", 14, 24)
+    for x0, y0, x1, y1 in ((12, 48, 20, 56), (15, 46, 23, 54), (40, 36, 46, 42), (43, 35, 50, 42)):
+        a.line(x0, y0, x1, y1, "bark")
+    c2 = a.dog("biscuit", "pull", 56, 46, step=88, flip=True)
+    c1 = a.dog("archie", "pull", 32, 58, flip=True)
+    a.lead(32, c1, 60, 2)
+    a.lead(56, c2, 70, 2)
+    for x, y in ((20, 54), (40, 55), (46, 43), (64, 44)):
+        puff(a, x, y)
     return a
 
 
 ILLUSTRATIONS = {
-    "card-porch-cat-shoo": porch_cat_shoo,
+    "card-porch-cat-stand": porch_cat_stand,
     "card-porch-cat-treat": porch_cat_treat,
     "card-porch-cat-bolt": porch_cat_bolt,
     "card-capybara-help": capybara_help,
     "card-capybara-call-zoo": capybara_call_zoo,
-    "card-capybara-keep-walking": capybara_keep_walking,
+    "card-capybara-drag": capybara_drag,
 }
 
 
