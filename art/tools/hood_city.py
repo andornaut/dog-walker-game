@@ -440,22 +440,19 @@ def pedicab(lf=39, rf=44, roll=0):
 
 # ---------- sandcastle ----------
 
-SANDCASTLE_IDLE = (0, 0, 1, 0), 400
+SANDCASTLE_IDLE = (0, 1, 2, 1), 400
 
 
 def sandcastle(flutter=0):
     """A sandcastle, front on, laid out on obstacles.SIZE: a mound of sand, a crenellated wall with an
     arched door between two bucket towers ribbed where the bucket left its rings, a taller middle tower
     behind with a red pennant on a stick. Tan, lit cream on the left, shaded brown on the right, with pink
-    and white shells pressed in. flutter 1 swings the pennant's tail up a pixel and in one."""
+    and white shells pressed in. flutter lifts the pennant's tip that many pixels, its hoist held still."""
     g = edged(Grid(obstacles.SIZE, obstacles.SIZE))
     uy = unit(g)[1]
     # the pennant on its stick
     g.rect(20, 2, 1, 8, "brown")
-    if flutter:
-        g.tri((21, 2), (21, 6), (25, 3 - uy), "red")
-    else:
-        g.tri((21, 2), (21, 6), (26, 4), "red")
+    g.tri((21, 2), (21, 6), (26, 4 - flutter * uy), "red")
     g.p(21, 2, "pink")
     # the middle tower, behind
     g.rect(15, 9, 11, 14, "tan")
@@ -497,7 +494,7 @@ def sandcastle(flutter=0):
 
 # ---------- lifeguard chair ----------
 
-LIFEGUARD_IDLE = (0, 0, 1, 0), 450
+LIFEGUARD_IDLE = (0, 0, 2, 0), 450
 LIFEGUARD_H = 60
 
 
@@ -505,7 +502,8 @@ def lifeguard_chair(lift=0):
     """A tall lifeguard chair, front on, laid out on obstacles.SIZE by LIFEGUARD_H: two driftwood legs
     splayed to the sand with ladder rungs between, a footrest, the seat with a red back panel and a white
     cross on it, a yellow and white umbrella over the seat on a grey pole and an orange life ring hung on
-    the left leg. lift 1 lifts the umbrella's valance a pixel, as a breeze catches it."""
+    the left leg. lift lifts that many of the valance's scallops a pixel, from its right end, as a breeze
+    catches it."""
     g = edged(Grid(obstacles.SIZE, LIFEGUARD_H))
     uy = unit(g)[1]
     # the legs, splayed from the seat to the sand, lit on their left
@@ -540,7 +538,7 @@ def lifeguard_chair(lift=0):
     for i in range(6):
         x0 = left + (right - left) * i / 6
         col = ("yellow" if i < 3 else "amber") if i % 2 == 0 else ("white" if i < 3 else "lgrey")
-        g.cel(x0 + (right - left) / 12, base - lift * uy, (right - left) / 12, 1.8, col)
+        g.cel(x0 + (right - left) / 12, base - (i >= 6 - lift) * uy, (right - left) / 12, 1.8, col)
     # the life ring hung on the left leg
     g.cel(9, 38, 4, 4, "orange", "rust", "amber")
     g.cel(9, 38, 1.6, 1.6, None)
