@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { LANE_COUNT } from "../data/screen";
@@ -11,6 +11,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { WORLD } from "../data/world";
+import { itemAt } from "../lib/arrays";
 import { read } from "../rules/units";
 import { type PackDogs } from "../state/runState";
 import { lanesReachedAtEnd } from "../testing/avoidable";
@@ -67,6 +68,16 @@ import {
   type WalkItem,
   walkScrollSpeed,
 } from "./walk";
+
+// While set, the lane-balance bias is off: the planner's only weighted draws are its lane balance
+// (laneBalanceWeight), so even weights draw every place that fits alike.
+const unbiased = vi.hoisted(() => ({ on: false }));
+vi.mock("../lib/random", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../lib/random")>();
+  const weightedPick: typeof actual.weightedPick = (random, items, weights) =>
+    actual.weightedPick(random, items, unbiased.on ? weights.map(() => 1) : weights);
+  return { ...actual, weightedPick };
+});
 
 // The scroll over which a mover is on the game's road: from its cue until it has left the road
 // or passed the bottom.
@@ -297,6 +308,28 @@ describe("movers", { timeout: 120_000 }, () => {
       expectPassable(passableCases((tuned) => withMinorCounts(counts, tuned)));
     },
   );
+  // Minor obstacle counts at which seed 1, with the lane-balance bias off and every hopper
+  // hopping, plans the last zone with a mover just after a card mover stilled for want of room,
+  // or with a dart just before a stepper in the lane beside those it meets the pack in: the
+  // pack-fit gap holds whatever the bias draws.
+  it.each([
+    { minorObstaclesFirstZone: 70, minorObstaclesGainPerZone: 0 },
+    { minorObstaclesFirstZone: 90, minorObstaclesGainPerZone: 1 },
+  ])("keeps every move passable with the lane-balance bias off: %o", (counts) => {
+    unbiased.on = true;
+    try {
+      expectPassable([
+        {
+          road: GAME_ROAD,
+          tuned: withMinorCounts(counts, itemAt(hopping, 0).tuned),
+          zone: WORLD.lastZone,
+          zoneIndex: WORLD.walkLength - 1,
+        },
+      ]);
+    } finally {
+      unbiased.on = false;
+    }
+  });
   // The pack-fit gap is measured as drawn: each obstacle at its kind's drawn hit length and the
   // pack at the tallest pack's hit boxes. Two spawns that meet the pack within a pixel of each
   // other, or with under a pixel of road between them, are met at once: side by side, with no

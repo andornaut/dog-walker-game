@@ -752,12 +752,13 @@ export function planSpawns<Kind extends string>(
     return cells;
   };
 
-  // The movers that block lanes, or the moving prizes, as placeMovers takes them.
+  // The movers that block lanes, or the moving prizes, as placeMovers takes them, each with its
+  // kind's drawn hit length standing, which one stilled for want of room stands at.
   const moverQuotas = (blocking: boolean) =>
-    plan.quotas.flatMap(({ blocksLane, count, first, kind, mover }) =>
+    plan.quotas.flatMap(({ blocksLane, count, first, hitLength: standingLength, kind, mover }) =>
       mover === undefined || blocksLane !== blocking
         ? []
-        : [{ count, first: first ?? false, kind, spec: mover }],
+        : [{ count, first: first ?? false, kind, spec: mover, standingLength }],
     );
   const movers = moverQuotas(true);
   const moverGrid = {
@@ -1232,16 +1233,33 @@ export function planSpawns<Kind extends string>(
 }
 
 // The movers placeMovers dropped, as quotas that stand still in their footprints, one per kind:
-// a kind may have several quotas, such as one per stepper.
+// a kind may have several quotas, such as one per stepper. Each keeps its kind's drawn hit length
+// standing, which the pack-fit gap measures it by.
 function stilledQuotas<Kind extends string>(
   blocksLane: boolean,
-  quotas: readonly { readonly first: boolean; readonly kind: Kind; readonly spec: MoverSpec }[],
+  quotas: readonly {
+    readonly first: boolean;
+    readonly kind: Kind;
+    readonly spec: MoverSpec;
+    readonly standingLength: number | undefined;
+  }[],
   dropped: readonly Kind[],
 ): SpawnQuota<Kind>[] {
   const kinds = new Map(quotas.map((quota) => [quota.kind, quota]));
-  return [...kinds.values()].flatMap(({ first, kind, spec }) => {
+  return [...kinds.values()].flatMap(({ first, kind, spec, standingLength }) => {
     const count = dropped.filter((other) => other === kind).length;
-    return count === 0 ? [] : [{ blocksLane, count, first, footprint: spec.footprint, kind }];
+    return count === 0
+      ? []
+      : [
+          {
+            blocksLane,
+            count,
+            first,
+            footprint: spec.footprint,
+            kind,
+            ...(standingLength === undefined ? {} : { hitLength: standingLength }),
+          },
+        ];
   });
 }
 

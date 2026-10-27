@@ -792,14 +792,14 @@ function crossTilts(
 // below 0 brings sooner once it stops; past the road's far edge, its stop lane is no stop, and it
 // crosses. Its contact lasts as long as its travel takes to cross the window, window / (1 + tilt)
 // while it crosses, which its rows cover. It blocks every lane a box a lane wide would touch, but
-// stands only in the lanes its hit box touches, until its hit box leaves the road if that comes
-// before its contact's end: a stand wider or longer than its hit box would hide the road beside
-// or behind it that the pack can step into. One that has crossed the road by the time it reaches
-// the pack's rows is harmless: it blocks no lanes and stands nowhere. It keeps clear every row it
-// is level with as it crosses or stands, and one that meets the pack also the row before its own,
-// as a lead-in. It appears as its row comes on screen, or at the road's top where its start is
-// farther up the road than its row, and waits idle at its edge until its cue, warningSeconds
-// before it sets off.
+// stands only in the lanes its drawn hit box touches over its drawn contact with the pack's hit
+// boxes, until its hit box leaves the road if that comes before its contact's end: a stand wider
+// or longer than its hit box would hide the road beside or behind it that the pack can step into.
+// One that has crossed the road by the time it reaches the pack's rows is harmless: it blocks no
+// lanes and stands nowhere. It keeps clear every row it is level with as it crosses or stands, and
+// one that meets the pack also the row before its own, as a lead-in. It appears as its row comes
+// on screen, or at the road's top where its start is farther up the road than its row, and waits
+// idle at its edge until its cue, warningSeconds before it sets off.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -900,7 +900,7 @@ function crossPlacements(
     };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
     const meets = lanes.count > 0;
-    const touched = sweptLanes(laneCount, path, sightLength, sightLength + window, inset);
+    const touched = sweptLanes(laneCount, path, sightLength, sightLength + drawnWindow, inset);
     const first = meets ? Math.min(firstRow, -1) : firstRow;
     return {
       appears,
