@@ -64,11 +64,13 @@ export interface SpawnQuota<Kind extends string> {
 // the pack-fit gap keeps clear. With firstContactSeconds, the rows reach back up the road, on the
 // same grid, to the last that meets the pack no sooner than that long after the zone starts: rows
 // at negative distances are on the road in view as the zone starts. pathStart is the lane the
-// zone's guaranteed path starts in (planSpawns).
+// zone's guaranteed path starts in (planSpawns). fixedKinds are the zone's fixed obstacles, which
+// a lane-blocking standing spawn of one of them with no room is swapped among (planSpawns).
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
   firstContactSeconds?: number;
+  fixedKinds: readonly FixedKind<Kind>[];
   laneCount: number;
   laneInset: number;
   laneMoveSeconds: number;
@@ -86,6 +88,15 @@ export interface SpawnPlan<Kind extends string> {
   sightLength: number;
   stepSeconds: number;
   zoneLength: number;
+}
+
+// A kind of fixed obstacle in the zone: its footprint, its drawn hit length (SpawnQuota) and its
+// weight in the zone's draw.
+export interface FixedKind<Kind extends string> {
+  footprint: Footprint;
+  hitLength?: number;
+  kind: Kind;
+  weight: number;
 }
 
 // lane is the footprint's leftmost lane. A mover's distance is where its cue appears.
@@ -459,7 +470,10 @@ function drawPath(streams: PlannerStreams, plan: SpawnPlan<string>, rowCount: nu
 // one that would leave fewer free cells than there are one-cell spawns. A free cell can still be
 // one no lane-blocking spawn may take, where the path or the pack-fit gap along it rules it out,
 // so a one-cell spawn with no room left is skipped too, the same way: a zone never fails to plan
-// for want of room. Once the lane-blocking spawns are placed, and before the moving prizes and the
+// for want of room. A standing spawn of one of the zone's fixedKinds that finds no room in its
+// stretch or anywhere else in the zone is first swapped for a narrower fixed kind, a lane
+// narrower at a time, drawn by the kinds' weights among those that fit, and is skipped only when
+// none of any narrower width fits. Once the lane-blocking spawns are placed, and before the moving prizes and the
 // other spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking
 // spawn in view, half that, rounded down, from the zone's first row or to its last (none at all from
 // the first row of a zone whose rows start on the road in view), gets one of the zone's own plain
@@ -905,11 +919,11 @@ export function planSpawns<Kind extends string>(
       .sort((a, b) => a.middle - b.middle || a.order - b.order)
       .forEach(({ i, quota }) => placeOne(quota, i));
   };
-  // The ith of a quota's spawns, in the ith of its count's equal stretches of the zone. A plain
-  // lane-blocking one with no room is kept for a quiet stretch. In a zone whose rows start on the
-  // road in view, a lane-blocking one first in its stretch takes the zone's first row while that
-  // row comes on screen quiet and it fits there, before a spawn placed later on steers across it.
-  const placeOne = (quota: SpawnQuota<Kind>, i: number) => {
+  // The cells for the ith of a quota's spawns: those in the ith of its count's equal stretches of
+  // the zone, or else anywhere in it. In a zone whose rows start on the road in view, a
+  // lane-blocking one first in its stretch takes the zone's first row while that row comes on
+  // screen quiet and it fits there, before a spawn placed later on steers across it.
+  const cellsFor = (quota: SpawnQuota<Kind>, i: number): Cell[] => {
     const footprint = quota.footprint ?? SINGLE_CELL;
     const opening =
       plan.firstContactSeconds !== undefined && quota.blocksLane && i === 0 && inView()[0] === 0
@@ -924,23 +938,69 @@ export function planSpawns<Kind extends string>(
             Math.floor((i * rows.length) / quota.count),
             Math.floor(((i + 1) * rows.length) / quota.count),
           );
-    const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
-    if (cells.length === 0) {
-      if (quota.blocksLane && quota.first !== true) {
-        unplaced.push(quota);
-      }
-      return;
+    return stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
+  };
+  // One of cells for a spawn: a lane-blocking one toward the lanes left unblocked longest.
+  const pickCell = (quota: SpawnQuota<Kind>, cells: readonly Cell[]): Cell => {
+    const across = (quota.footprint ?? SINGLE_CELL).lanes;
+    return quota.blocksLane
+      ? weightedPick(
+          streams.spawns,
+          cells,
+          cells.map((cell) =>
+            laneBalanceWeight(clearRun({ count: across, first: cell.lane }, cell.row)),
+          ),
+        )
+      : randomPick(streams.spawns, cells);
+  };
+  // The ith of a quota's spawns, on one of its cells (cellsFor). A fixed obstacle with no room
+  // is swapped for a narrower one (placeNarrower); a plain lane-blocking one that still finds
+  // none is kept for a quiet stretch.
+  const placeOne = (quota: SpawnQuota<Kind>, i: number) => {
+    const cells = cellsFor(quota, i);
+    if (cells.length > 0) {
+      placeAt(quota, pickCell(quota, cells));
+    } else if (!placeNarrower(quota, i) && quota.blocksLane && quota.first !== true) {
+      unplaced.push(quota);
     }
-    // A lane-blocking one goes toward the lanes left unblocked longest.
-    const balanced = (): Cell =>
-      weightedPick(
-        streams.spawns,
-        cells,
-        cells.map((cell) =>
-          laneBalanceWeight(clearRun({ count: footprint.lanes, first: cell.lane }, cell.row)),
-        ),
-      );
-    placeAt(quota, quota.blocksLane ? balanced() : randomPick(streams.spawns, cells));
+  };
+  // Swaps the ith spawn of a standing quota of a fixed kind, which has no room, for one of the
+  // zone's narrower fixed kinds, a lane narrower at a time down to one: at each width, a kind
+  // drawn by its weight among those with cells for the spawn (cellsFor), so the road keeps its
+  // count of obstacles. No cell is kept for the narrower one, so it also leaves room for the
+  // one-cell spawns still to place. True when one is placed.
+  const placeNarrower = (quota: SpawnQuota<Kind>, i: number): boolean => {
+    if (quota.mover !== undefined || !plan.fixedKinds.some(({ kind }) => kind === quota.kind)) {
+      return false;
+    }
+    for (let across = (quota.footprint ?? SINGLE_CELL).lanes - 1; across >= 1; across--) {
+      const fitting = plan.fixedKinds.flatMap(({ footprint, hitLength: length, kind, weight }) => {
+        if (footprint.lanes !== across) {
+          return [];
+        }
+        const swapped: SpawnQuota<Kind> = {
+          blocksLane: true,
+          count: quota.count,
+          footprint,
+          kind,
+          ...(length === undefined ? {} : { hitLength: length }),
+        };
+        const cells = cellsFor(swapped, i).filter((cell) =>
+          leavesRoom(across * (lastRowTaken(cell, footprint, true) - cell.row + 1)),
+        );
+        return cells.length > 0 ? [{ cells, swapped, weight }] : [];
+      });
+      if (fitting.length > 0) {
+        const { cells, swapped } = weightedPick(
+          streams.spawns,
+          fitting,
+          fitting.map(({ weight }) => weight),
+        );
+        placeAt(swapped, pickCell(swapped, cells));
+        return true;
+      }
+    }
+    return false;
   };
   // Places a spawn on a cell that fits it. A one-cell spawn of the plan's own takes the cell kept
   // for it.

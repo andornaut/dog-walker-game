@@ -735,10 +735,20 @@ export function planZone(
           },
     );
   const firstContact = firstContactSeconds(data, run);
+  // The zone's minor obstacles that never move, which one with no room is swapped among.
+  const fixedKinds = minorObstacleWeights(data, run)
+    .filter(([kind]) => movementOf(data, kind) === null)
+    .map(([kind, weight]) => ({
+      footprint: footprintOf(data, kind),
+      hitLength: itemHeight(data, geometry, kind, false),
+      kind,
+      weight,
+    }));
   const plan = {
     cellInset: plannedCellInset(data, geometry),
     cellLength: geometry.cell.length,
     ...(firstContact === undefined ? {} : { firstContactSeconds: firstContact }),
+    fixedKinds,
     laneCount: geometry.laneCount,
     laneInset: geometry.cell.inset,
     // The slowest pack's lane move sets the row spacing, so every pack fits every gap.

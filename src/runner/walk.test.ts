@@ -99,10 +99,12 @@ import {
   firstContactSeconds,
   footprintOf,
   headHome,
+  isMinorObstacle,
   itemCategory,
   itemHeight,
   laneMoveSeconds,
   minorObstacleWeights,
+  movementOf,
   obstacleWeights,
   opensACard,
   pickWeighted,
@@ -284,8 +286,9 @@ describe("planZone", { timeout: 60_000 }, () => {
   );
   // Every zone at each walk position, planned with a cap of one quiet row, tighter than the
   // game's so the fill has rows to fill, and without a cap, at the same seed: the capped plan has
-  // the same movers, no more of any kind than the zone planned, and never more rows quiet over the
-  // cap, and across the zones it has fewer.
+  // the same movers, no more of any kind than the zone planned, the fixed obstacles counted together
+  // as one with no room is swapped for another, and never more rows quiet over the cap, and across
+  // the zones it has fewer.
   // Two plans a zone, each with every mover's contact scanned, take about 25 s.
   it(
     "moves the zone's own fixed obstacles into rows that come on screen quiet over the cap",
@@ -316,11 +319,13 @@ describe("planZone", { timeout: 60_000 }, () => {
           const label = `${zone} at ${position}, seed ${seed}`;
           expect(movingObstacles(capped.pending), label).toEqual(movingObstacles(plain));
           // A kind may have several quotas, such as one per stepper.
-          for (const kind of new Set(capped.planned.map((quota) => quota.kind))) {
+          const group = (kind: WalkItem["kind"]) =>
+            isMinorObstacle(REAL, kind) && movementOf(REAL, kind) === null ? "fixed" : kind;
+          for (const kind of new Set(capped.planned.map((quota) => group(quota.kind)))) {
             const planned = capped.planned
-              .filter((quota) => quota.kind === kind)
+              .filter((quota) => group(quota.kind) === kind)
               .reduce((sum, { count }) => sum + count, 0);
-            const placed = capped.pending.filter((event) => event.kind === kind).length;
+            const placed = capped.pending.filter((event) => group(event.kind) === kind).length;
             expect(placed, `${label}: ${kind}`).toBeLessThanOrEqual(planned);
           }
           const over = overCap(walk.run, zone, capped.pending);

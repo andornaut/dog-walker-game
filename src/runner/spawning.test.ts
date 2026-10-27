@@ -32,6 +32,7 @@ type Kind =
   | "hedge"
   | "neighbour"
   | "obstacle"
+  | "rope"
   | "skunk"
   | "squirrel"
   | "tip"
@@ -41,9 +42,11 @@ type Kind =
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
 // time for a 0.05s step and 4 moves of 0.1s, so the pack can reach any lane from any row. No cap
 // on rows that come on screen quiet, unless a test sets one. The path starts in the middle lane.
+// No fixed kinds to swap among, unless a test sets them.
 const plan: SpawnPlan<Kind> = {
   cellInset: 5,
   cellLength: 30,
+  fixedKinds: [],
   laneCount: 5,
   laneInset: 5,
   laneMoveSeconds: 0.1,
@@ -84,6 +87,7 @@ const FOOTPRINTS = {
   bench: { lanes: 2, rows: 1 },
   car: { lanes: 1, rows: 3 },
   hedge: { lanes: 3, rows: 1 },
+  rope: { lanes: 2, rows: 1 },
   skunk: { lanes: 2, rows: 2 },
 } satisfies Partial<Record<Kind, Footprint>>;
 const footprintOf = (kind: Kind): Footprint =>
@@ -898,6 +902,82 @@ describe("planSpawns", () => {
     expect(total("hedge") + total("bench")).toBeLessThan(20 * seeds.length);
     for (const kind of ["hedge", "bench"] as const) {
       expect(total(kind) / (total("hedge") + total("bench"))).toBeGreaterThan(0.3);
+    }
+  });
+
+  // Ten hedges, or twenty benches, never all fit shaped's 19 rows. Each with no room is swapped
+  // for one of the fixed kinds narrower than it, a lane at a time, drawn by their weights among
+  // those that fit, so the zone keeps its count; a kind that is not fixed is skipped instead.
+  it.each<{
+    count: number;
+    fixed: Partial<Record<Kind, number>>;
+    kind: Kind;
+    name: string;
+    swaps: Partial<Record<Kind, number>>;
+  }>([
+    {
+      count: 10,
+      fixed: { bench: 1, hedge: 1, obstacle: 1 },
+      kind: "hedge",
+      name: "a hedge for the two-lane kind",
+      swaps: { bench: 1 },
+    },
+    {
+      count: 10,
+      fixed: { bench: 3, hedge: 1, rope: 1 },
+      kind: "hedge",
+      name: "a hedge for two-lane kinds by their weights",
+      swaps: { bench: 0.75, rope: 0.25 },
+    },
+    {
+      count: 10,
+      fixed: { hedge: 1, obstacle: 1 },
+      kind: "hedge",
+      name: "a hedge for a one-lane kind with no two-lane one",
+      swaps: { obstacle: 1 },
+    },
+    {
+      count: 20,
+      fixed: { bench: 1, hedge: 1, obstacle: 1 },
+      kind: "bench",
+      name: "a bench for a one-lane kind, never a wider one",
+      swaps: { obstacle: 1 },
+    },
+    {
+      count: 10,
+      fixed: { bench: 1, obstacle: 1 },
+      kind: "hedge",
+      name: "no hedge that is not fixed",
+      swaps: {},
+    },
+  ])("swaps $name when it has no room", ({ count, fixed, kind, swaps }) => {
+    const swapping: SpawnPlan<Kind> = {
+      ...shaped,
+      fixedKinds: Object.entries(fixed).map(([fixedKind, weight]) => ({
+        footprint: footprintOf(fixedKind as Kind),
+        kind: fixedKind as Kind,
+        weight,
+      })),
+      quotas: [
+        { blocksLane: true, count, footprint: footprintOf(kind), kind },
+        { blocksLane: false, count: 9, kind: "tip" },
+      ],
+    };
+    const placed = seeds.map((seed) => planSpawns(plannerStreams(seed), swapping));
+    const total = (other: Kind) =>
+      placed.reduce((sum, { events }) => sum + countOf(other, events), 0);
+    const swapped = Object.keys(swaps) as Kind[];
+    placed.forEach((planned, i) => {
+      expectPathPassable(swapping, planned, `seed ${itemAt(seeds, i)}`);
+      expect(countOf("tip", planned.events)).toBe(9);
+      expect(planned.events.filter(blocking).length).toBe(
+        swapped.length > 0 ? count : countOf(kind, planned.events),
+      );
+    });
+    expect(total(kind)).toBeLessThan(count * seeds.length);
+    const allSwaps = swapped.reduce((sum, other) => sum + total(other), 0);
+    for (const other of swapped) {
+      expect(total(other) / allSwaps).toBeCloseTo(swaps[other] ?? 0, 1);
     }
   });
 
