@@ -106,7 +106,7 @@ Each neighbourhood also has its own card obstacle (see Encounters and debuffs) a
 | Yonge Street        | Hardest    | Everything, the fastest, with gridlocked car and truck traffic and the streetcar; its own: TTC buses, sandwich boards, pedicabs, buskers, delivery cyclists, tourists. Always the last                                                 |
 
 - The walk ends after neighbourhood 4, on Head home, or when no dogs are left. Your cash is banked
-- **Walk bonus:** when every dog you set out with gets home at the end of neighbourhood 4, the walk pays a Walk bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
+- **Walk bonus:** when every dog you set out with gets home at the end of neighbourhood 4, the walk pays a Walk bonus of $50 into the bank, whatever the pack size, shown on the end screen. Heading home early or a firing loses it
 - **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Walk bonus, card costs) and the neighbourhoods walked, with no bank; a new-best ribbon when it beats the best walk with the same number of dogs; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
