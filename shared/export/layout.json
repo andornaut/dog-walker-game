@@ -789,11 +789,11 @@
       "biscuit": 21,
       "duchess": 16,
       "kilo": 21,
+      "marshall": 16,
       "penny": 22,
       "pierre": 21,
       "reggie": 16,
-      "snowball": 22,
-      "zippy": 16
+      "snowball": 22
     },
     "feet": {
       "lead": {
@@ -844,6 +844,11 @@
           "left": -15,
           "right": 15
         },
+        "marshall": {
+          "above": 31,
+          "left": -9,
+          "right": 10
+        },
         "penny": {
           "above": 42,
           "left": -14,
@@ -863,11 +868,6 @@
           "above": 46,
           "left": -15,
           "right": 15
-        },
-        "zippy": {
-          "above": 31,
-          "left": -9,
-          "right": 10
         }
       },
       "walkers": {

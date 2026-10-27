@@ -473,7 +473,7 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       [
         "three dogs across tips in three lanes",
         "casey",
-        ["kilo", "biscuit", "zippy"],
+        ["kilo", "biscuit", "marshall"],
         "tip",
         3,
         [1, 2, 3],
@@ -483,7 +483,7 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       [
         "three dogs past a cone two lanes back",
         "casey",
-        ["kilo", "biscuit", "zippy"],
+        ["kilo", "biscuit", "marshall"],
         "cone",
         3,
         [1],

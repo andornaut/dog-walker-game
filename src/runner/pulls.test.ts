@@ -198,7 +198,7 @@ describe("what a dog pulls toward", () => {
   });
 
   it("never pulls without a target: no random pulls", () => {
-    expect(after(walkWith(["kilo", "biscuit", "zippy"]), 30).tells).toEqual([]);
+    expect(after(walkWith(["kilo", "biscuit", "marshall"]), 30).tells).toEqual([]);
   });
 
   it("does not chase with Good leash, or toward a squirrel in the pack's lane", () => {
@@ -223,14 +223,14 @@ describe("what a dog pulls toward", () => {
   // Of three dogs, the biggest leads, the next walks front-left and the smallest front-right.
   it("strains one dog at a time, the one nearest the squirrel, each squirrel once", () => {
     const walk = walkWith(
-      ["zippy", "biscuit", "kilo"],
+      ["marshall", "biscuit", "kilo"],
       [item("squirrel", 0, 0), item("squirrel", 1, 4, 60)],
     );
     const { pulled, tells } = after(walk, 4);
-    expect(tells.map(({ dog }) => dog)).toEqual(["biscuit", "zippy"]);
+    expect(tells.map(({ dog }) => dog)).toEqual(["biscuit", "marshall"]);
     expect(pulled.map(({ direction, dog }) => [dog, direction])).toEqual([
       ["biscuit", -1],
-      ["zippy", 1],
+      ["marshall", 1],
     ]);
   });
 
@@ -288,8 +288,8 @@ describe("the fairness rule", () => {
 
   it("pulls into a lane whose obstacle is far enough away to react to", () => {
     const far = { ...cone, y: 300 };
-    const walk = walkWith(["zippy"], [item("squirrel", 0, 0), far]);
-    expect(after(walk, 1.1).pulled).toEqual([{ direction: -1, dog: "zippy", moved: true }]);
+    const walk = walkWith(["marshall"], [item("squirrel", 0, 0), far]);
+    expect(after(walk, 1.1).pulled).toEqual([{ direction: -1, dog: "marshall", moved: true }]);
   });
 
   it("ends a blocked strain without a pull once its target passes", () => {

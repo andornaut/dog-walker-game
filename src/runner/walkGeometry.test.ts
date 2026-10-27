@@ -11,7 +11,7 @@ const gameRoad = screenLayout(SCREEN_CONFIG).road;
 const projection = walkProjection(ROAD_CAMERA, gameRoad);
 const PACKS = [
   { dogs: ["kilo"], walker: "ada" },
-  { dogs: ["zippy", "penny"], walker: "mrB" },
+  { dogs: ["marshall", "penny"], walker: "mrB" },
   { dogs: ["snowball", "duchess", "pierre"], walker: "trista" },
 ] as const;
 

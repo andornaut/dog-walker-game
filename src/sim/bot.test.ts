@@ -202,7 +202,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   // never hit right after one, whatever the pack pulls toward. Steering away during a strain
   // cancels its pull, so only some strains pull. Read by foresight, no mover's surprise counts.
   it("is never hit right after a pull, as an ideal player by foresight, with pulls on", () => {
-    const pulling: PackDogs = ["kilo", "biscuit", "zippy"];
+    const pulling: PackDogs = ["kilo", "biscuit", "marshall"];
     const results = [1, 2, 3].map((seed) => run(SHORT, seed, IDEAL_SKILL, pulling, "foresight"));
     const hits = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
     const pulls = results.reduce((sum, result) => sum + result.pullsMoved, 0);

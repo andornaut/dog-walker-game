@@ -18,9 +18,9 @@ describe("homeQuestionNote", () => {
   const pay = read(gameData.tuning, "money", "payPerDog");
 
   it.each([
-    ["three dogs walking", { duchess: 5, kilo: 2, zippy: 3 }, 1],
+    ["three dogs walking", { duchess: 5, kilo: 2, marshall: 3 }, 1],
     ["one dog walking of two", { duchess: 5, kilo: "fired" }, 1],
-    ["a lone dog in the last zone", { zippy: 4 }, zones - 1],
+    ["a lone dog in the last zone", { marshall: 4 }, zones - 1],
   ] satisfies [string, Slots, number][])(
     "states the zone's pay and the zones left that going home gives up: %s",
     (_name, slots, zoneIndex) => {

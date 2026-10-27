@@ -53,6 +53,19 @@ export const DOGS = {
     size: "large",
     unlock: "shop",
   },
+  marshall: {
+    art: "marshall",
+    breed: "Jack Russell",
+    look: "White with tan patches, red collar",
+    name: "Zippy",
+    owner: {
+      name: "Sheba",
+      role: "retired accountant",
+    },
+    price: "marshall",
+    size: "small",
+    unlock: "shop",
+  },
   penny: {
     art: "penny",
     breed: "Golden Retriever mix",
@@ -103,19 +116,6 @@ export const DOGS = {
     },
     price: "snowball",
     size: "large",
-    unlock: "shop",
-  },
-  zippy: {
-    art: "zippy",
-    breed: "Jack Russell",
-    look: "White with tan patches, red collar",
-    name: "Zippy",
-    owner: {
-      name: "Sheba",
-      role: "retired accountant",
-    },
-    price: "zippy",
-    size: "small",
     unlock: "shop",
   },
 } as const satisfies Record<string, Dog>;

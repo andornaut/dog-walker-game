@@ -27,7 +27,7 @@ export const testContext: SaveContext = {
       "penny",
       "pierre",
       "snowball",
-      "zippy",
+      "marshall",
     ]),
     gear: new Set(["fannyPack", "hallPass", "luckyCollar", "runningShoes"]),
     hints: new Set(["card", "puddle", "tip"]),

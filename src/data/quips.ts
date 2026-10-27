@@ -31,6 +31,12 @@ export const QUIPS = {
     parting: ["He already did 10K. He's fine.", "Warm-up's done. Keep that form tight!"],
     upset: ["Eh, bad lap. Shake it off.", "Just a cramp. Back to your pace."],
   },
+  marshall: {
+    fired: ["The numbers don't add up.", "Account closed. Balance: $0."],
+    happier: ["That balances nicely.", "A sound investment."],
+    parting: ["Every bump goes in the ledger.", "Receipts for everything, please."],
+    upset: ["That goes in the loss column.", "Noted. In red ink."],
+  },
   penny: {
     fired: ["Oh no, oh no. You're fired.", "So sorry! Here's a tissue."],
     happier: ["Phew! Good, good.", "Oh, what a relief. Thank you!"],
@@ -57,11 +63,5 @@ export const QUIPS = {
     happier: ["Picture perfect!", "Everything is going to plan!"],
     parting: ["No mud, no fuss. Big day!", "Flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],
-  },
-  zippy: {
-    fired: ["The numbers don't add up.", "Account closed. Balance: $0."],
-    happier: ["That balances nicely.", "A sound investment."],
-    parting: ["Every bump goes in the ledger.", "Receipts for everything, please."],
-    upset: ["That goes in the loss column.", "Noted. In red ink."],
   },
 } as const satisfies Record<DogId, Quips>;

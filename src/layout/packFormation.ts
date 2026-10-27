@@ -30,11 +30,11 @@ export const DOG_SILHOUETTES: Readonly<Record<DogId, Silhouette>> = {
   biscuit: { above: 38, left: -12, right: 12 },
   duchess: { above: 32, left: -10, right: 10 },
   kilo: { above: 45, left: -15, right: 15 },
+  marshall: { above: 31, left: -9, right: 10 },
   penny: { above: 42, left: -14, right: 14 },
   pierre: { above: 39, left: -13, right: 13 },
   reggie: { above: 31, left: -10, right: 10 },
   snowball: { above: 46, left: -15, right: 15 },
-  zippy: { above: 31, left: -9, right: 10 },
 };
 
 // How far a dog reaches either side of its column, mirrored too, as a pull draws it.
@@ -285,11 +285,11 @@ export const COLLAR_HEIGHTS: Readonly<Record<DogId, number>> = {
   biscuit: 21,
   duchess: 16,
   kilo: 21,
+  marshall: 16,
   penny: 22,
   pierre: 21,
   reggie: 16,
   snowball: 22,
-  zippy: 16,
 };
 
 // A dog on the left of the walker is held in the left hand.

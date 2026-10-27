@@ -405,6 +405,33 @@
       }
     },
     {
+      "id": "marshall",
+      "art": "marshall",
+      "breed": "Jack Russell",
+      "look": "White with tan patches, red collar",
+      "name": "Zippy",
+      "owner": {
+        "name": "Sheba",
+        "role": "retired accountant"
+      },
+      "price": "marshall",
+      "size": "small",
+      "unlock": "shop",
+      "figures": {
+        "maxHearts": 2,
+        "startHearts": 2,
+        "startMood": "happy"
+      },
+      "keys": {
+        "dogCardTag": "marshall",
+        "face": "face-dog-marshall",
+        "ownerCardFace": "face-owner-marshall-20",
+        "ownerFace": "face-owner-marshall",
+        "portrait": "portrait-dog-marshall",
+        "sprite": "dog-marshall"
+      }
+    },
+    {
       "id": "penny",
       "art": "penny",
       "breed": "Golden Retriever mix",
@@ -510,33 +537,6 @@
         "ownerFace": "face-owner-snowball",
         "portrait": "portrait-dog-snowball",
         "sprite": "dog-snowball"
-      }
-    },
-    {
-      "id": "zippy",
-      "art": "zippy",
-      "breed": "Jack Russell",
-      "look": "White with tan patches, red collar",
-      "name": "Zippy",
-      "owner": {
-        "name": "Sheba",
-        "role": "retired accountant"
-      },
-      "price": "zippy",
-      "size": "small",
-      "unlock": "shop",
-      "figures": {
-        "maxHearts": 2,
-        "startHearts": 2,
-        "startMood": "happy"
-      },
-      "keys": {
-        "dogCardTag": "zippy",
-        "face": "face-dog-zippy",
-        "ownerCardFace": "face-owner-zippy-20",
-        "ownerFace": "face-owner-zippy",
-        "portrait": "portrait-dog-zippy",
-        "sprite": "dog-zippy"
       }
     }
   ],
@@ -1354,13 +1354,13 @@
         "hallPass": 1200,
         "kilo": 300,
         "luckyCollar": 1500,
+        "marshall": 450,
         "penny": 600,
         "pierre": 500,
         "reggie": 800,
         "runningShoes": 800,
         "snowball": 1000,
-        "whistle": 1500,
-        "zippy": 450
+        "whistle": 1500
       },
       "startPurse": 5,
       "thiefLetGo": 10,

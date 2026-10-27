@@ -107,13 +107,13 @@ describe("a one-dog pack", () => {
   });
 });
 
-// Kilo leads in the centre, out front; Biscuit and Zippy walk front-left and front-right a
+// Kilo leads in the centre, out front; Biscuit and Marshall walk front-left and front-right a
 // little behind, a gap between them under Kilo; the walker below. Pickups touch the outline
 // around them all; obstacles touch the parts.
 const chevron = packOf({ bottom: 100, left: -10, right: 10, top: 50 }, [
   { bottom: 20, dog: "kilo", left: -10, right: 10, top: -20 },
   { bottom: 40, dog: "biscuit", left: -30, right: -12, top: 0 },
-  { bottom: 40, dog: "zippy", left: 12, right: 30, top: 0 },
+  { bottom: 40, dog: "marshall", left: 12, right: 30, top: 0 },
 ]);
 // Between the side dogs, under Kilo and over the walker: inside the outline, on no part.
 const GAP: Box = { bottom: 48, left: -8, right: 8, top: 26 };
@@ -124,7 +124,7 @@ describe("hitDog", () => {
       [
         "on the dog whose rectangle it touches",
         { bottom: 30, left: 20, right: 40, top: 10 },
-        "zippy",
+        "marshall",
       ],
       [
         "on the lead when it touches the lead",
@@ -153,10 +153,10 @@ describe("hitDog", () => {
     }
   });
 
-  // Zippy's rectangle runs 12 to 30 across; the box reaches 20 to 40, its lanes 25 on.
+  // Marshall's rectangle runs 12 to 30 across; the box reaches 20 to 40, its lanes 25 on.
   it("lands an obstacle only on a dog its lanes reach, not past them", () => {
     for (const [, laneLeft, dog] of [
-      ["on a dog its lanes reach", 15, "zippy"],
+      ["on a dog its lanes reach", 15, "marshall"],
       ["on no dog only the box's spill past its lanes reaches", 30, null],
     ] satisfies readonly [string, number, DogId | null][]) {
       const box = {
@@ -176,7 +176,7 @@ describe("hitDog", () => {
 describe("pickupDog", () => {
   it("gives a pickup to the dog it reaches first", () => {
     for (const [, box, dog] of [
-      ["to the dog nearest the contact", { bottom: 30, left: 20, right: 40, top: 10 }, "zippy"],
+      ["to the dog nearest the contact", { bottom: 30, left: 20, right: 40, top: 10 }, "marshall"],
       ["to the dog nearest the contact in the gap between the parts", GAP, "biscuit"],
       [
         "to the front dog when the walker is nearest",
@@ -201,7 +201,7 @@ describe("pickupDog", () => {
 });
 
 describe("a settled pack", () => {
-  const DOGS: DogId[] = ["kilo", "biscuit", "zippy"];
+  const DOGS: DogId[] = ["kilo", "biscuit", "marshall"];
   const runOf = (count: number) =>
     testState(Object.fromEntries(DOGS.slice(0, count).map((dog) => [dog, 3])));
   // A goose, drawn about as wide as a lane's hit box, standing level with the lead's rectangle, in
