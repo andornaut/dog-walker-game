@@ -200,7 +200,7 @@ ARROW = ["...a...", "..aaa..", ".aaaaa.", "aaaaaaa", "..aaa..", "..aaa..", "..aa
 def skunk_grooming():
     a = Art()
     a.tiles_bg()
-    a.put("dog-archie", "walk", 37, 42, shadow=False)
+    a.put("dog-archie", "walk", 37, 44, shadow=False)
     a.fill(14, 34, 47, 3, "white")
     a.fill(16, 37, 43, 14, "white")
     a.fill(56, 37, 3, 14, "lgrey")
