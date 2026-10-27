@@ -35,7 +35,7 @@ export const TUNING = {
     sweetTalkerFreeCards: 1,
     tipsFirstZone: 31,
     tipsGainPerZone: -3,
-    treatsPerZone: 2,
+    treatsPerZone: 3,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
   hearts: {
