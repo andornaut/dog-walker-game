@@ -36,7 +36,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Ralph** (Reggie): influencer, everything is content (feed, trending, followers)
   - **Rosa** (Duchess): retired florist, theatrical, flower metaphors and exclamation marks
   - **Sam** (Biscuit): easygoing barista, coffee puns, calls you "friend"
-  - **Sheba** (Zippy): retired accountant, dry, ledgers, receipts and red ink
+  - **Sheba** (Marshall): retired accountant, dry, ledgers, receipts and red ink
   - **Ms. Tara** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
 
 ## Rules
