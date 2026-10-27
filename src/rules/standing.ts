@@ -60,19 +60,13 @@ function spawnsModified(data: StandingData, run: StandingRun): ModifiedValue[] {
 }
 
 // Every value modifiers change for as long as they last, rather than at a moment of the walk:
-// the starting money, each owner's max hearts, the walker's agility, how far tips and treats are
-// grabbed from, how many pulls a squirrel draws, and the current zone's spawn counts. Each is
-// left out unless a modifier changes it. A moment a modifier changes, such as a bump or a tip,
-// is reported where it happens instead.
+// each owner's max hearts, the walker's agility, how far tips and treats are grabbed from, how
+// many pulls a squirrel draws, and the current zone's spawn counts. Each is left out unless a
+// modifier changes it. A moment a modifier changes, such as a bump, a tip or a card's cost, is
+// reported where it happens instead.
 export function standingModified(data: StandingData, run: StandingRun): ModifiedValue[] {
-  const purse = read(data.tuning, "money", "startPurse");
   const agility = data.walkers[run.walker].agility;
   const values = [
-    statModified(
-      { kind: "startMoney" },
-      purse,
-      statParts(data.tuning, run.modifiers, "startMoney", purse),
-    ),
     ...maxHeartsModified(data, run),
     statModified(
       { kind: "agility" },

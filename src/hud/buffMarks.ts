@@ -11,7 +11,6 @@ import type { WalkItem, WalkStep } from "../runner/walk";
 import { packDogs, placeInPack } from "../state/pack";
 import type { ModifierSource } from "../state/runState";
 import { effectIconKey, type EffectItem, effectLine, effectName } from "./effectIcons";
-import type { ChangeLabel } from "./hudView";
 import type { MessageLine } from "./messageStrip";
 import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
 
@@ -319,41 +318,25 @@ export function leashPops(
 }
 
 // What a walk's start says of its gear and pack: a strip line for each gear that changes it
-// from the start, such as Running shoes' agility and Fanny pack's money, led by the gear's icon
-// as its well glints, Fanny pack's money rising over the bank, and a line for each large dog.
+// from the start, such as Running shoes' agility, led by the gear's icon as its well glints, and
+// a line for each large dog.
 export function walkStartMarks(
   data: MarkData,
   run: Parameters<typeof standingModified>[1],
-): { bank: ChangeLabel[]; glints: EffectItem[]; lines: MessageLine[] } {
+): { glints: EffectItem[]; lines: MessageLine[] } {
   const strip = data.runText.strip;
-  const values = standingModified(data, run).filter(
-    ({ subject }) => subject.kind === "agility" || subject.kind === "startMoney",
-  );
+  const values = standingModified(data, run).filter(({ subject }) => subject.kind === "agility");
   const gear = values.flatMap((value) =>
     value.by.flatMap((cause) => {
       const item = charmItem(data, cause.source);
-      return item?.kind === "gear"
-        ? [{ amount: cause.amount, item, money: value.subject.kind === "startMoney" }]
-        : [];
+      return item?.kind === "gear" ? [item] : [];
     }),
   );
   const large = packDogs(run).filter((dog) => isLarge(data.dogs[dog]));
   return {
-    bank: gear.flatMap(({ amount, money }): ChangeLabel[] =>
-      money
-        ? [
-            {
-              amount,
-              gain: amount > 0,
-              target: { kind: "bank" },
-              text: amountText("money", amount),
-            },
-          ]
-        : [],
-    ),
-    glints: gear.map(({ item }) => item),
+    glints: gear,
     lines: [
-      ...gear.map(({ item }): MessageLine => ({
+      ...gear.map((item): MessageLine => ({
         icon: item,
         text: fillLine(STRIP_LINE_FIELDS, strip, "effectStart", {
           effect: effectLine(data, item),

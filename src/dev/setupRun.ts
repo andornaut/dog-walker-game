@@ -24,7 +24,7 @@ function setupRoute(data: RouteData, setup: RunSetup, state: RunState): readonly
 }
 
 // A new run moved to the setup's zone, on the setup's route, and given its money, applied
-// after newRun so the override replaces the gear's starting money. The zones before the
+// after newRun so the override replaces the starting purse. The zones before the
 // setup's are skipped.
 export function withSetupStart(data: RouteData, setup: RunSetup, state: RunState): RunState {
   return {

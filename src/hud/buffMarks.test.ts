@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { EncounterId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import type { OptionView } from "../rules/choices";
+import { amountText } from "../rules/causes";
+import { cardFor, chooseOption, openCard, type OptionView } from "../rules/choices";
+import { baseMoneyCost } from "../rules/effects";
+import { formatDollars } from "../rules/effectText";
 import { type ModifiedValue, modifierCause } from "../rules/modified";
-import { cents } from "../rules/units";
+import { cents, read, roundDollars } from "../rules/units";
 import type { WalkItem } from "../runner/walk";
 import type { ModifierSource } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
@@ -20,6 +24,7 @@ import {
 const { card, seconds } = gameData.runText;
 const SWEET_TALKER: ModifierSource = { kind: "upgrade", upgrade: "sweetTalker" };
 const CASEY: ModifierSource = { kind: "walker", walker: "casey" };
+const FANNY_PACK = { gear: "fannyPack", kind: "gear" } as const;
 const caseyPerk = { kind: "perk", perk: gameData.walkers.casey.perk } as const;
 const kilo = gameData.dogs.kilo.name;
 
@@ -49,7 +54,7 @@ const option = (modified: readonly ModifiedValue[], text = "Hose it off"): Optio
 describe("optionMarks", () => {
   const forgiven = value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]);
   const waived = value({ kind: "money" }, -1000, [[1000, SWEET_TALKER]]);
-  const cut = value({ kind: "money" }, -1000, [[500, SWEET_TALKER]]);
+  const cut = value({ kind: "money" }, -1000, [[500, FANNY_PACK]]);
   const skip = value({ kind: "skip" }, 0, [[1, { gear: "hallPass", kind: "gear" }]]);
   it.each([
     {
@@ -68,7 +73,7 @@ describe("optionMarks", () => {
     },
     {
       expected: {
-        charms: [{ kind: "upgrade", upgrade: "sweetTalker" }],
+        charms: [FANNY_PACK],
         forgiven: null,
         plaque: "$5",
       },
@@ -259,5 +264,48 @@ describe("spawnPops", () => {
     });
     const finder = { kind: "perk", perk: "keenEye" };
     expect(popped).toEqual([[], [finder], [], [finder]]);
+  });
+});
+
+describe("a card cost Fanny pack cuts", () => {
+  const fannyPack = activeModifier(FANNY_PACK, {
+    by: "fannyPackCardCostFactor",
+    operation: "multiply",
+    stat: "cardCost",
+  });
+  const factor = read(gameData.tuning, "multipliers", "fannyPackCardCostFactor");
+  const optionEffects = (id: EncounterId, index: number) => {
+    const { resolution } = gameData.encounters[id];
+    return resolution.kind === "card" ? (resolution.options[index]?.effects ?? []) : [];
+  };
+  const paid = (Object.keys(gameData.encounters) as EncounterId[]).flatMap((id) => {
+    const { resolution } = gameData.encounters[id];
+    return resolution.kind === "card"
+      ? resolution.options.flatMap((option, index) =>
+          baseMoneyCost(gameData, option.effects) > 0 ? [[id, option.name, index] as const] : [],
+        )
+      : [];
+  });
+
+  it.each(paid)("shows %s's %s at the cut price everywhere, and charges it", (id, _, index) => {
+    const state = testState(
+      { duchess: 5, kilo: 5 },
+      { modifiers: [fannyPack], money: cents(5000) },
+    );
+    const source = { affected: ["duchess", "kilo"], encounter: id, kind: "encounter" } as const;
+    const opened = openCard(source, state);
+    const card = cardFor(gameData, opened, source);
+    const view = card.options.find((each) => each.index === index);
+    const base = baseMoneyCost(gameData, optionEffects(id, index));
+    const cost = roundDollars(base * factor);
+    const charged = -chooseOption(gameData, opened, card, index).moneyDelta;
+    expect([view?.cost, charged]).toEqual([cost, cost]);
+    expect(optionMarks(gameData, card, view).plaque).toBe(formatDollars(cost));
+    expect(view?.text).toContain(`−${formatDollars(cost)}`);
+    expect(view?.breakdown).toContainEqual({
+      dog: null,
+      name: gameData.shopGear.fannyPack.name,
+      text: amountText("money", base - cost),
+    });
   });
 });

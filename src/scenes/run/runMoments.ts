@@ -432,13 +432,10 @@ export class RunMoments {
   }
 
   // The walk's start: a strip line for each gear that changes it from the start, its well
-  // glinting, Fanny pack's money rising over the bank, and a line for each large dog.
+  // glinting, and a line for each large dog.
   walkStarted(run: RunState): void {
     const marks = walkStartMarks(gameData, run);
     marks.lines.forEach((line) => this.say(line));
-    if (marks.bank.length > 0) {
-      this.scene.events.emit(CHANGE_LABELS_EVENT, marks.bank);
-    }
     marks.glints.forEach((item) => this.scene.events.emit(BUFF_GLINT_EVENT, item));
   }
 

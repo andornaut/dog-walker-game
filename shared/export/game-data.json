@@ -798,15 +798,15 @@
       "id": "fannyPack",
       "effects": [
         {
-          "by": "fannyPackStart",
+          "by": "fannyPackCardCostFactor",
           "kind": "modifier",
-          "operation": "add",
-          "stat": "startMoney"
+          "operation": "multiply",
+          "stat": "cardCost"
         }
       ],
       "name": "Fanny pack",
       "price": "fannyPack",
-      "short": "Start walks with +$20",
+      "short": "Card cash options cost half",
       "iconKey": "item-fanny-pack"
     },
     {
@@ -1340,7 +1340,6 @@
       "bigTipperTipBonus": 1,
       "encounterHigh": 16,
       "encounterLow": 10,
-      "fannyPackStart": 20,
       "fullPackBonusPerDog": 10,
       "lostWalletKeep": 20,
       "missedTips": 10,
@@ -1374,6 +1373,7 @@
       "dartStartRoadShareMin": 0.15,
       "dartTurnAtShareMax": 1,
       "dartTurnAtShareMin": 0.5,
+      "fannyPackCardCostFactor": 0.5,
       "goodLeashSquirrelPull": 0,
       "keenEyeTipSpawns": 1.5,
       "keenEyeTreatSpawns": 2,

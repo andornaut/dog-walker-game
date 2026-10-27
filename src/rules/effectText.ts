@@ -125,7 +125,6 @@ function addedText(modifier: Modifier, value: number): string {
     // Agility is a multiple of the base lane-change speed, so an added 0.3 is 30% of it.
     case "agility":
       return percentText(value);
-    case "startMoney":
     case "tipValue":
       return `${sign(value)}${formatDollars(cents(value))}`;
     case "treatReach":

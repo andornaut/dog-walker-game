@@ -27,9 +27,7 @@ export type ModifiedSubject =
       readonly spawn: "minorObstacles" | "obstacles" | "tips" | "treats";
     }
   // How many pulls a squirrel draws.
-  | { readonly kind: "squirrelPulls" }
-  // The money the run started with, in cents.
-  | { readonly kind: "startMoney" };
+  | { readonly kind: "squirrelPulls" };
 
 // A value that modifiers changed, such as a bump's hearts that Second chance forgave or a
 // card's cost that Sweet talker waived, so a view can show the modifiers' icons: before is the

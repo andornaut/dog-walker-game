@@ -122,9 +122,16 @@ describe("effectText", () => {
         ),
       ],
       [
-        "starting cash",
-        [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
-        capitalize(`${words.stats.startMoney} +${dollars("fannyPackStart")}`),
+        "a cut card cost as a signed percent",
+        [
+          {
+            by: "fannyPackCardCostFactor",
+            kind: "modifier",
+            operation: "multiply",
+            stat: "cardCost",
+          },
+        ],
+        capitalize(`${words.stats.cardCost} −${-percent("fannyPackCardCostFactor")}%`),
       ],
       [
         "a raised agility as a percent of the base lane-change speed",

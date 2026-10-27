@@ -8,7 +8,6 @@ export function modifierValue(tuning: LiveTuning, modifier: Modifier): number {
     return read(tuning, "multipliers", modifier.by);
   }
   switch (modifier.stat) {
-    case "startMoney":
     case "tipValue":
       return read(tuning, "money", modifier.by);
     case "forgivenHearts":

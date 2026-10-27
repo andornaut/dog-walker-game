@@ -154,13 +154,15 @@ export type Duration = "nextZone" | "run";
 type CountStat = "freeCards" | "tipReach" | "treatReach";
 // forgivenHearts: how many of the first hearts lost in each zone are forgiven.
 type HeartsStat = "forgivenHearts" | "maxHearts";
-type MoneyStat = "startMoney" | "tipValue";
+type MoneyStat = "tipValue";
 export type Stat =
   | CountStat
   | HeartsStat
   | MoneyStat
   // How many hearts a minor bump costs.
   | "bumpHearts"
+  // What a card option's cash costs.
+  | "cardCost"
   // How long a debuff lasts.
   | "debuffSeconds"
   // The walker's agility: how many times faster than the base the pack changes lanes.

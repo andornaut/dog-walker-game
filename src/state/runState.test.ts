@@ -67,16 +67,9 @@ describe("newRun", () => {
   );
 
   it("starts with what the gear gives", () => {
-    const fannyPackPurse =
-      read(TEST_TUNING, "money", "startPurse") + read(TEST_TUNING, "money", "fannyPackStart");
+    const purse = read(TEST_TUNING, "money", "startPurse");
     for (const { expected, gear } of [
-      {
-        expected: {
-          money: fannyPackPurse,
-          startMoney: fannyPackPurse,
-        },
-        gear: "fannyPack",
-      },
+      { expected: { money: purse, startMoney: purse }, gear: "fannyPack" },
       { expected: { skipPass: { gear: "hallPass", kind: "gear" } }, gear: "hallPass" },
     ] satisfies readonly { expected: object; gear: GearId }[]) {
       expect(newRun(data, 3, { dogs: ["kilo"], gear, walker: "casey" })).toMatchObject(expected);
@@ -93,7 +86,7 @@ describe("newRun", () => {
     );
     expect(state.modifiers.map(({ by, source, stat }) => [stat, by, source])).toEqual([
       ...perkModifiers,
-      ["startMoney", "fannyPackStart", { gear: "fannyPack", kind: "gear" }],
+      ["cardCost", "fannyPackCardCostFactor", { gear: "fannyPack", kind: "gear" }],
     ]);
     expect(state.modifiers.every(({ untilZone }) => untilZone === undefined)).toBe(true);
   });

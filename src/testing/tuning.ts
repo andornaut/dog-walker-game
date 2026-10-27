@@ -32,7 +32,6 @@ const PINNED_TUNING: LiveTuning = {
     bigTipperTipBonus: 1,
     encounterHigh: 15,
     encounterLow: 5,
-    fannyPackStart: 15,
     missedTips: 5,
     payPerDog: 10,
     prices: { ...TUNING.money.prices, biscuit: 600, dogSlot2: 800, dogSlot3: 1800, reggie: 600 },

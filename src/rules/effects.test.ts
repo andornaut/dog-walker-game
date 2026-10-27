@@ -205,6 +205,32 @@ describe("moneyCost and applyEffects: money", () => {
     }
   });
 
+  // A cost in dollars and what Fanny pack's half leaves of it, a half dollar rounding up.
+  it.each([
+    [1, 1],
+    [2, 1],
+    [3, 2],
+    [5, 3],
+    [8, 4],
+    [10, 5],
+    [15, 8],
+    [20, 10],
+  ])("charges a $%i cost as $%i with Fanny pack, as moneyCost says", (dollars, cut) => {
+    const fannyPack = activeModifier(
+      { gear: "fannyPack", kind: "gear" },
+      { by: "fannyPackCardCostFactor", operation: "multiply", stat: "cardCost" },
+    );
+    const tuning = {
+      ...TEST_TUNING,
+      money: { ...TEST_TUNING.money, thiefLetGo: dollars },
+      multipliers: { ...TEST_TUNING.multipliers, fannyPackCardCostFactor: 0.5 },
+    };
+    const pinned = { ...data, tuning };
+    const state = testState({ duchess: 5 }, { modifiers: [fannyPack], money: cents(5000) });
+    expect(moneyCost(pinned, state, [letGo])).toBe(cut * 100);
+    expect(applyEffects(pinned, context([]), [letGo], state).money).toBe(5000 - cut * 100);
+  });
+
   it("adds gains and subtracts costs", () => {
     const start = testState({ duchess: 5, kilo: 5 }, { money: cents(5000) });
     const gained = read(TEST_TUNING, "money", "missedTips");

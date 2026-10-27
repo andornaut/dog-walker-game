@@ -124,17 +124,17 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 
 `/play/` reads a run setup from the URL; invalid values, unknown ids included, are warned about and ignored. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk, its pack and gear replacing the saved loadout for that walk only. A walk started past zone 1 banks no money and sets no best walk, its zone counts leave out the zones it skipped, and a finished one counts as headed home. Reaching the home screen removes every parameter but `dev` from the URL.
 
-| Param    | Value                           | Default         |
-| -------- | ------------------------------- | --------------- |
-| `dev`    | `1` shows the overlay           | `0`             |
-| `gear`   | a gear id, or `none`            | saved loadout   |
-| `money`  | whole cents                     | gear's starting |
-| `pack`   | 1 to 3 dog ids, comma-separated | saved loadout   |
-| `route`  | zone ids walked, from the first | pre-fork route  |
-| `seed`   | integer 0 to 4294967295         | random          |
-| `speed`  | scroll-speed multiplier         | 1               |
-| `walker` | a walker id                     | saved walker    |
-| `zone`   | 1 to the walk's length          | 1               |
+| Param    | Value                           | Default        |
+| -------- | ------------------------------- | -------------- |
+| `dev`    | `1` shows the overlay           | `0`            |
+| `gear`   | a gear id, or `none`            | saved loadout  |
+| `money`  | whole cents                     | starting purse |
+| `pack`   | 1 to 3 dog ids, comma-separated | saved loadout  |
+| `route`  | zone ids walked, from the first | pre-fork route |
+| `seed`   | integer 0 to 4294967295         | random         |
+| `speed`  | scroll-speed multiplier         | 1              |
+| `walker` | a walker id                     | saved walker   |
+| `zone`   | 1 to the walk's length          | 1              |
 
 - **Build label:** the Dev bar and the crash screen's dev details show `v<version> · <commit>`, from `__APP_VERSION__` (package.json) and `__COMMIT__`, which `vite.config.ts` defines from `WORKERS_CI_COMMIT_SHA`, else `git rev-parse HEAD`, else `dev` (`src/tools/buildVersion.ts`).
 - **Dev panel:** a "Dev" bar below the canvas opens the cheat sheet. Its top section, "Changes your walks", holds Start at and the cheats (Invincible owners, Show hit boxes, Movement speed: slow, normal or fast), each applying on its own, staged until Apply; applied cheats last for the tab (`sessionStorage`) and never reach the save. Apply turns dev mode (`dev=1`) on exactly when a cheat is in use or Start at picks a walk; with every setting at its default, it loads the start screen without `dev` and the run overrides. Below a divider, the save cheats (+$500, +$2,500, Unlock all, Reset save) act at once: they are queued in `sessionStorage`, written at the next boot before the save loads, and reload to the start screen.

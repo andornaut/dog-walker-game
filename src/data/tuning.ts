@@ -64,7 +64,6 @@ export const TUNING = {
     bigTipperTipBonus: 1,
     encounterHigh: 16,
     encounterLow: 10,
-    fannyPackStart: 20,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
     lostWalletKeep: 20,
@@ -116,6 +115,8 @@ export const TUNING = {
     // between these, then crosses the whole road back.
     dartTurnAtShareMax: 1,
     dartTurnAtShareMin: 0.5,
+    // Fanny pack scales each card option's cash cost by this; the cost rounds to the dollar.
+    fannyPackCardCostFactor: 0.5,
     goodLeashSquirrelPull: 0,
     // How many tips appear while Mr. B's Keen eye walks.
     keenEyeTipSpawns: 1.5,

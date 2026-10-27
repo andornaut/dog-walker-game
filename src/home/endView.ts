@@ -40,7 +40,8 @@ export function earningsKind(change: MoneyChange): EarningsKind {
 }
 
 // What made up a run's earnings, from the changes it made. Money that no change accounts for
-// is what the run started with (the fanny pack's), so the lines always add up to earned.
+// is what the run started with (the starting purse, or a dev start's money), so the lines always
+// add up to earned.
 export function earningsBreakdown(
   data: Pick<GameData, "menuText" | "runText">,
   changes: readonly Change[],

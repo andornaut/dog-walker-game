@@ -34,7 +34,7 @@ import { applyEffects } from "./effects";
 import type { ModifiedValue } from "./modified";
 import { currentZone } from "./route";
 import { standingModified } from "./standing";
-import { read } from "./units";
+import { read, roundDollars } from "./units";
 import { zoneStats } from "./zones";
 
 // The test tuning with every walker's perk in force.
@@ -162,8 +162,34 @@ describe("a card option's modified values", () => {
   const letGo = read(tuning, "money", thiefPays.effect.amount);
   const seconds = read(tuning, "seconds", DEBUFFS[skunkDebuff.effect.debuff].seconds);
   const calmed = seconds * read(tuning, "multipliers", "quickRecoveryDebuffFactor");
+  const cut = roundDollars(letGo * read(tuning, "multipliers", "fannyPackCardCostFactor"));
 
   it.each([
+    [
+      "Fanny pack cuts the cost",
+      () =>
+        optionModified("thief", thiefPays.index, { ...runWith(PLAIN, "fannyPack"), money: letGo }),
+      [
+        {
+          after: -cut,
+          before: -letGo,
+          by: by(letGo - cut, sources.fannyPack),
+          subject: { kind: "money" },
+        },
+      ],
+    ],
+    [
+      "Sweet talker waives a cost Fanny pack would cut",
+      () => optionModified("thief", thiefPays.index, runWith(PLAIN, "fannyPack", ["sweetTalker"])),
+      [
+        {
+          after: 0,
+          before: -letGo,
+          by: by(letGo, sources.sweetTalker),
+          subject: { kind: "money" },
+        },
+      ],
+    ],
     [
       "Sweet talker waives the cost",
       () => optionModified("thief", thiefPays.index, runWith(PLAIN, null, ["sweetTalker"])),
@@ -227,7 +253,6 @@ describe("a card option's modified values", () => {
 });
 
 describe("standingModified", () => {
-  const purse = read(tuning, "money", "startPurse");
   const agility = (walker: WalkerId) => data.walkers[walker].agility;
   const reach = read(tuning, "counts", "longReachLanes");
   const duchess = (state: RunState, modifiers: RunState["modifiers"]) =>
@@ -236,22 +261,6 @@ describe("standingModified", () => {
     Math.round(base * read(tuning, "multipliers", factor));
 
   it.each([
-    [
-      "Fanny pack",
-      runWith(PLAIN, "fannyPack"),
-      sources.fannyPack,
-      () => {
-        const added = read(tuning, "money", "fannyPackStart");
-        return [
-          {
-            after: purse + added,
-            before: purse,
-            by: by(added, sources.fannyPack),
-            subject: { kind: "startMoney" },
-          },
-        ];
-      },
-    ],
     [
       "Lucky collar",
       runWith(PLAIN, "luckyCollar"),

@@ -64,8 +64,8 @@ export function targetDogs(
 }
 
 // A money effect's amount, and how it came about: base is the amount before modifiers, and
-// adjustments the freeCards modifier that waived a cost. base and adjustments are signed as
-// changes to the money.
+// adjustments the cardCost modifiers that cut a cost, or the freeCards modifier that waived it.
+// base and adjustments are signed as changes to the money.
 interface MoneyParts {
   readonly adjustments: readonly ModifierCause[];
   readonly amount: Cents;
@@ -84,26 +84,37 @@ function freeCardModifier(
     : undefined;
 }
 
-// Each amount is rounded to the dollar, and charged once whatever the pack. A cost on a free
-// card is waived, naming the modifier that waived it.
+// Each amount is rounded to the dollar, and charged once whatever the pack. Every money loss is
+// a card option's cost. A cost on a free card is waived, naming the modifier that waived it;
+// otherwise cardCost modifiers, such as Fanny pack's, scale it, each naming its share of the cut.
 function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): MoneyParts {
   const amount = read(data.tuning, "money", effect.amount);
-  const total = roundDollars(amount);
   if (effect.change === "gain") {
-    return { adjustments: [], amount: total, base: amount };
+    return { adjustments: [], amount: roundDollars(amount), base: amount };
   }
   const free = freeCardModifier(data, state);
-  return free === undefined
-    ? { adjustments: [], amount: total, base: -amount }
-    : {
-        adjustments: [{ amount, kind: "modifier", source: free.source }],
-        amount: cents(0),
-        base: -amount,
-      };
+  if (free !== undefined) {
+    return {
+      adjustments: [{ amount, kind: "modifier", source: free.source }],
+      amount: cents(0),
+      base: -amount,
+    };
+  }
+  const cost = statModified(
+    { kind: "money" },
+    amount,
+    statParts(data.tuning, state.modifiers, "cardCost", amount),
+    roundDollars,
+  );
+  return {
+    adjustments: (cost?.by ?? []).map((cause) => ({ ...cause, amount: -cause.amount })),
+    amount: cents(cost?.after ?? roundDollars(amount)),
+    base: -amount,
+  };
 }
 
-// What an option's effects would take from the player before a free card waives it, such as
-// Sweet talker's.
+// What an option's effects would take from the player before modifiers, such as Sweet talker's
+// free card or Fanny pack's cut.
 export function baseMoneyCost(data: Pick<GameData, "tuning">, effects: readonly Effect[]): Cents {
   return cents(
     effects.reduce(

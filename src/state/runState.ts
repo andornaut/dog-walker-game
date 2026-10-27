@@ -16,7 +16,6 @@ import type {
 import { packPlace, startHearts } from "../rules/dogs";
 import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
-import { modifiedStat } from "../rules/modifiers";
 import { firstZoneId } from "../rules/route";
 import { type Cents, cents, type Hearts, type Pixels, pixels, read } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
@@ -209,7 +208,6 @@ export function newRun(
           data.shopGear[loadout.gear].effects,
           walked,
         );
-  const purse = read(data.tuning, "money", "startPurse");
-  const money = cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", purse));
+  const money = read(data.tuning, "money", "startPurse");
   return { ...geared, money, pack: packWith(geared.modifiers), startMoney: money };
 }
