@@ -259,25 +259,6 @@ describe("chooseOption", () => {
   const groom = optionWith("skunk", "money");
   const lost = heartsOf("skunk");
 
-  // Each card option that names a tally, from the data, and one beside it that names none.
-  const tallied = (["otherDog", "thief"] as const).flatMap((id) => {
-    const { resolution } = ENCOUNTERS[id];
-    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
-    const counted = options.findIndex((option) => option.tally !== undefined);
-    const plain = options.findIndex((option) => option.tally === undefined);
-    return [{ counted, id, plain, tally: options[counted]?.tally }];
-  });
-
-  it("counts a tally only for the option that names it", () => {
-    const state = testState({ kilo: 5 }, { money: cents(5_000) });
-    for (const row of tallied) {
-      const card = encounter(row.id, ["kilo"]);
-      expect(row.tally, row.id).toBeDefined();
-      expect(choose(state, card, row.counted).state.tallies).toEqual({ [row.tally ?? ""]: 1 });
-      expect(choose(state, card, row.plain).state.tallies).toEqual({});
-    }
-  });
-
   // Every option of every card in the data, by its encounter, index and id.
   const picked = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
@@ -285,14 +266,18 @@ describe("chooseOption", () => {
     return options.map((option, index) => ({ id, index, option: option.id }));
   });
 
-  it.each(picked)("counts a pick of $id's $option by encounter and option id", (row) => {
-    const state = testState({ kilo: 5 }, { money: cents(5_000) });
-    const card = encounter(row.id, ["kilo"]);
-    const once = choose(state, card, row.index).state;
-    expect(once.optionPicks).toEqual({ [row.id]: { [row.option]: 1 } });
-    const twice = choose({ ...once, phase: { kind: "walking" } }, card, row.index).state;
-    expect(twice.optionPicks).toEqual({ [row.id]: { [row.option]: 2 } });
-  });
+  it.each(picked)(
+    "counts a pick of $id's $option by encounter and option id, as no tally",
+    (row) => {
+      const state = testState({ kilo: 5 }, { money: cents(5_000) });
+      const card = encounter(row.id, ["kilo"]);
+      const once = choose(state, card, row.index).state;
+      expect(once.optionPicks).toEqual({ [row.id]: { [row.option]: 1 } });
+      expect(once.tallies).toEqual({});
+      const twice = choose({ ...once, phase: { kind: "walking" } }, card, row.index).state;
+      expect(twice.optionPicks).toEqual({ [row.id]: { [row.option]: 2 } });
+    },
+  );
 
   // Every card option in the data that applies a debuff, whichever debuff and card it is.
   const debuffOptions = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {

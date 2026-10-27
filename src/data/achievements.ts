@@ -198,7 +198,7 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "They had a getaway scooter.",
-    conditions: [{ count: 10, kind: "tally", tally: "thievesLetGo" }],
+    conditions: [{ count: 10, encounter: "thief", kind: "optionPicks", option: "letGo" }],
     goal: "Let 10 thieves get away, across all walks",
     id: "yoink",
     name: "Yoink!",
@@ -206,7 +206,7 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "Hello. Hello. Hello.",
-    conditions: [{ count: 5, kind: "tally", tally: "sniffs" }],
+    conditions: [{ count: 5, encounter: "otherDog", kind: "optionPicks", option: "sniff" }],
     goal: "Let the pack sniff 5 dogs, across all walks",
     id: "sniffTest",
     name: "Sniff Test",

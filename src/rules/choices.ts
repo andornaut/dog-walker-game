@@ -14,7 +14,7 @@ import type {
 import { fillNames } from "../lib/lines";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
-import { countOptionPick, countOptionTally } from "./achievements";
+import { countOptionPick } from "./achievements";
 import {
   amountText,
   type CauseData,
@@ -479,9 +479,8 @@ function takePath(
 }
 
 // Applies the chosen option. Owners at 0 hearts fire you; with no dogs left the run ends. The
-// pick counts toward the option's picks, and an option that names a tally counts one toward it.
-// A Skip counts toward neither. A fork's path takes its upgrade and sets the
-// next zone. Throws for a disabled option or an ended run.
+// pick counts one toward the option's picks; a Skip counts toward none. A fork's path takes its
+// upgrade and sets the next zone. Throws for a disabled option or an ended run.
 export function chooseOption(
   data: CardData,
   state: RunState,
@@ -529,11 +528,8 @@ export function chooseOption(
     content.option.effects,
     state,
   );
-  const counted = countOptionPick(card.source.encounter, content.option.id, {
-    ...outcome.state,
-    cardsThisZone: state.cardsThisZone + 1,
-  });
-  return { ...outcome, state: countOptionTally(content.option, counted) };
+  const counted = { ...outcome.state, cardsThisZone: state.cardsThisZone + 1 };
+  return { ...outcome, state: countOptionPick(card.source.encounter, content.option.id, counted) };
 }
 
 // Applies the effects of a lucky find or a contact obstacle as it is touched, to the dogs it

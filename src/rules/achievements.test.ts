@@ -12,7 +12,6 @@ import {
   countBump,
   countLandedBump,
   countOptionPick,
-  countOptionTally,
   countTally,
   earnedByRun,
   newlyEarned,
@@ -431,10 +430,8 @@ describe("counters", () => {
     expect(applyEffects(gameData, context, [stinky], once).debuffsGot).toEqual({ stinky: 2 });
   });
 
-  it("counts a tally only for an option that names one, adding to one already counted", () => {
+  it("counts a tally, adding to one already counted", () => {
     const run = testState({ kilo: 5 });
-    expect(countOptionTally({ tally: "sniffs" }, run).tallies).toEqual({ sniffs: 1 });
-    expect(countOptionTally({}, run)).toBe(run);
     const twice = countTally("treats", countTally("treats", run));
     expect(twice.tallies).toEqual({ treats: 2 });
   });

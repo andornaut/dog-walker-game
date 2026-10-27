@@ -2,7 +2,6 @@ import type {
   Achievement,
   AchievementCondition,
   AchievementId,
-  CardOption,
   DebuffId,
   EncounterId,
   GameData,
@@ -128,11 +127,6 @@ export function countLandedBump(kind: MinorObstacleId, state: RunState): RunStat
 // One more toward a lifetime tally, counted in the run until it is banked.
 export function countTally(tally: TallyId, state: RunState): RunState {
   return { ...state, tallies: { ...state.tallies, [tally]: (state.tallies[tally] ?? 0) + 1 } };
-}
-
-// A card option that names a tally counts one toward it.
-export function countOptionTally(option: Pick<CardOption, "tally">, state: RunState): RunState {
-  return option.tally === undefined ? state : countTally(option.tally, state);
 }
 
 // How many times picks counts the option with id option on encounter's card.
@@ -366,9 +360,7 @@ export function earnedByRun(data: AchievementData, facts: RunFacts): Achievement
 const TALLY_NAMES: Readonly<Record<TallyId, string>> = {
   dodges: "dodges by any dog",
   neighboursMet: "friendly neighbours met",
-  sniffs: "other dogs let sniff",
   squirrelPulls: "squirrel pulls landed",
-  thievesLetGo: "thieves let go",
   tips: "tips grabbed",
   treats: "treats grabbed",
   walletsFound: "lost wallets found",

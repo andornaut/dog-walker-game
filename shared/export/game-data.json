@@ -1014,8 +1014,7 @@
               }
             ],
             "id": "sniff",
-            "name": "Let them sniff",
-            "tally": "sniffs"
+            "name": "Let them sniff"
           },
           {
             "art": "card-other-dog-pull-away",
@@ -1305,8 +1304,7 @@
               }
             ],
             "id": "letGo",
-            "name": "Let them go",
-            "tally": "thievesLetGo"
+            "name": "Let them go"
           },
           {
             "art": "card-thief-chase",

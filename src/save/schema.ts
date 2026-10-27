@@ -22,9 +22,7 @@ export const SAVE_VERSION = 16;
 const TALLIES: Readonly<Record<TallyId, true>> = {
   dodges: true,
   neighboursMet: true,
-  sniffs: true,
   squirrelPulls: true,
-  thievesLetGo: true,
   tips: true,
   treats: true,
   walletsFound: true,

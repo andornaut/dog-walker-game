@@ -131,7 +131,6 @@ export const ENCOUNTERS = {
           ],
           id: "sniff",
           name: "Let them sniff",
-          tally: "sniffs",
         },
         {
           art: "card-other-dog-pull-away",
@@ -286,7 +285,6 @@ export const ENCOUNTERS = {
           effects: [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
           id: "letGo",
           name: "Let them go",
-          tally: "thievesLetGo",
         },
         {
           art: "card-thief-chase",

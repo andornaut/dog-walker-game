@@ -29,17 +29,10 @@ export type EncounterId =
 export type PackSize = 1 | 2 | 3;
 export type Size = "large" | "medium" | "small";
 // Lifetime counts the save keeps across walks for the badges: every dog's dodges, landed
-// squirrel pulls, tips and treats grabbed, and the card options and lucky finds that name one as
-// their tally.
+// squirrel pulls, tips and treats grabbed, and the lucky finds that name one as their tally.
+// Card option picks are counted apart, by encounter and option id.
 export type TallyId =
-  | "dodges"
-  | "neighboursMet"
-  | "sniffs"
-  | "squirrelPulls"
-  | "thievesLetGo"
-  | "tips"
-  | "treats"
-  | "walletsFound";
+  "dodges" | "neighboursMet" | "squirrelPulls" | "tips" | "treats" | "walletsFound";
 
 // Ids come from the data, so adding an entry to a value file is a data-only change.
 export type AchievementId = (typeof ACHIEVEMENTS)[number]["id"];
@@ -284,8 +277,6 @@ export interface CardOption {
   readonly art: string;
   // Unique on its card and kept across renames: the save counts picks by it.
   readonly id: string;
-  // Picking it counts one toward this lifetime tally.
-  readonly tally?: TallyId;
   readonly effects: readonly Effect[];
   readonly name: string;
 }
