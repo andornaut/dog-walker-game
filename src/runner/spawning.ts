@@ -270,16 +270,21 @@ export function packFitsBetween(
   a: BlockingPlace,
   b: BlockingPlace,
 ): boolean {
-  const fitsBehind = (near: BlockingPlace, far: BlockingPlace) => {
-    const gap = far.distance - near.distance - near.length;
-    const changes = laneChangesBetween(plan.laneCount, near, far);
-    return gap <= 0 || changes === 0 || gap >= packGap(plan, changes) - ROUNDING;
-  };
   // Met at once, either may be the nearer one.
   if (a.distance === b.distance) {
-    return fitsBehind(a, b) && fitsBehind(b, a);
+    return packFitsBehind(plan, a, b) && packFitsBehind(plan, b, a);
   }
-  return a.distance < b.distance ? fitsBehind(a, b) : fitsBehind(b, a);
+  return a.distance < b.distance ? packFitsBehind(plan, a, b) : packFitsBehind(plan, b, a);
+}
+
+// True when the pack fits behind the nearer of two lane-blocking spawns (packFitsBetween).
+function packFitsBehind(plan: SpawnPlan<string>, near: BlockingPlace, far: BlockingPlace): boolean {
+  const gap = far.distance - near.distance - near.length;
+  if (gap <= 0) {
+    return true;
+  }
+  const changes = laneChangesBetween(plan.laneCount, near, far);
+  return changes === 0 || gap >= packGap(plan, changes) - ROUNDING;
 }
 
 // The mask of count lanes from first on.
@@ -488,8 +493,51 @@ export function planSpawns<Kind extends string>(
   const gapBefore = new Int32Array(rows.length);
   const events: SpawnEvent<Kind>[] = [];
   const lanes = laneRun(0, laneCount);
-  // The lane-blocking spawns placed so far, and every place each mover stands.
+  // The lane-blocking spawns placed so far, and every place each mover stands, by distance. Two
+  // places with more road between them than the widest pack gap always fit the pack, so a place
+  // is checked only against those within longestPlaced, the longest length placed, and that gap.
   const placed: BlockingPlace[] = [];
+  let longestPlaced = 0;
+  const widestGap = Math.max(packGap(plan, 0), packGap(plan, laneCount));
+  const addPlaced = (place: BlockingPlace) => {
+    let low = 0;
+    let high = placed.length;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      if (itemAt(placed, middle).distance < place.distance) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    placed.splice(low, 0, place);
+    longestPlaced = Math.max(longestPlaced, place.length);
+  };
+  // True when the pack fits between a place and every place placed (packFitsBetween).
+  const fitsPlaced = (place: BlockingPlace): boolean => {
+    const from = place.distance - longestPlaced - widestGap;
+    const to = place.distance + Math.max(0, place.length) + widestGap;
+    let low = 0;
+    let high = placed.length;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      if (itemAt(placed, middle).distance < from) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    for (let i = low; i < placed.length; i++) {
+      const other = itemAt(placed, i);
+      if (other.distance > to) {
+        return true;
+      }
+      if (!packFitsBetween(plan, place, other)) {
+        return false;
+      }
+    }
+    return true;
+  };
   // Rows a wide lane-blocking spawn's hit box is on.
   const wideRows = new Uint8Array(rows.length);
   // The last row a spawn's hit box is on: its rows' hit length reaches a row's distance.
@@ -729,10 +777,7 @@ export function planSpawns<Kind extends string>(
       lanes: footprint.lanes,
       length: gapLength(quota, footprint),
     };
-    return (
-      placed.every((other) => packFitsBetween(plan, place, other)) &&
-      tryBlock(cell, footprint, false)
-    );
+    return fitsPlaced(place) && tryBlock(cell, footprint, false);
   };
 
   const freeCells = (
@@ -810,10 +855,9 @@ export function planSpawns<Kind extends string>(
     occupy: ({ from, lanes: span, to }: MoverBody) => {
       moverBodies.push({ from, lanes: laneRun(span.first, span.count), to });
     },
-    packFits: (stands: readonly MoverStand[]) =>
-      stands.every((stand) => placed.every((other) => packFitsBetween(plan, stand, other))),
+    packFits: (stands: readonly MoverStand[]) => stands.every(fitsPlaced),
     stand: (stands: readonly MoverStand[]) => {
-      placed.push(...stands);
+      stands.forEach(addPlaced);
     },
     take: (dart: boolean, lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
@@ -996,7 +1040,7 @@ export function planSpawns<Kind extends string>(
         lanes: footprint.lanes,
         length: gapLength(quota, footprint),
       };
-      placed.push(place);
+      addPlaced(place);
       standing.push({ block: itemAt(blocks, blocks.length - 1), cell, event, place, quota });
     }
     events.push(event);
