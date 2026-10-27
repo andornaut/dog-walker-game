@@ -153,9 +153,9 @@ function modifierChange(data: WordsData, modifier: Modifier): string {
   if (modifier.operation === "add") {
     return modifier.stat === "tipValue"
       ? `${addedText(modifier, value)} per tip`
-      : `${name} ${addedText(modifier, value)}`;
+      : `${addedText(modifier, value)} ${name}`;
   }
-  return value === 0 ? `no ${name}` : `${name} ${percentText(value - 1)}`;
+  return value === 0 ? `no ${name}` : `${percentText(value - 1)} ${name}`;
 }
 
 function withDuration(words: EffectWords, { duration, text }: Phrase): string {

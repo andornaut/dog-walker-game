@@ -99,7 +99,7 @@ describe("effectText", () => {
           },
         ],
         capitalize(
-          `${words.stats.tipSpawns} +${percent("rushHourTips")}% ${words.durations.nextZone}`,
+          `+${percent("rushHourTips")}% ${words.stats.tipSpawns} ${words.durations.nextZone}`,
         ),
       ],
       [
@@ -116,9 +116,9 @@ describe("effectText", () => {
         "a duration every phrase shares once, at the end",
         UPGRADES.rushHour.effects,
         capitalize(
-          `${words.stats.tipSpawns} +${percent("rushHourTips")}%, ` +
-            `${words.stats.obstacleSpawns} +${percent("rushHourObstacles")}%, ` +
-            `${words.stats.treatSpawns} +${percent("rushHourTreats")}% ${words.durations.nextZone}`,
+          `+${percent("rushHourTips")}% ${words.stats.tipSpawns}, ` +
+            `+${percent("rushHourObstacles")}% ${words.stats.obstacleSpawns}, ` +
+            `+${percent("rushHourTreats")}% ${words.stats.treatSpawns} ${words.durations.nextZone}`,
         ),
       ],
       [
@@ -131,17 +131,17 @@ describe("effectText", () => {
             stat: "cardCost",
           },
         ],
-        capitalize(`${words.stats.cardCost} −${-percent("fannyPackCardCostFactor")}%`),
+        capitalize(`−${-percent("fannyPackCardCostFactor")}% ${words.stats.cardCost}`),
       ],
       [
         "a raised agility as a percent of the base lane-change speed",
         [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],
-        capitalize(`${words.stats.agility} ${addedAgility("runningShoesAgility")}`),
+        capitalize(`${addedAgility("runningShoesAgility")} ${words.stats.agility}`),
       ],
       [
         "a lowered agility as a percent of the base lane-change speed",
         [{ by: "largeDogAgility", kind: "modifier", operation: "add", stat: "agility" }],
-        capitalize(`${words.stats.agility} ${addedAgility("largeDogAgility")}`),
+        capitalize(`${addedAgility("largeDogAgility")} ${words.stats.agility}`),
       ],
       ["a free Walk on by", [{ kind: "skipOption" }], capitalize(words.skipOption)],
       [
