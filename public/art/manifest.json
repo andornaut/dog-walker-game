@@ -5727,12 +5727,12 @@
       "png": "images/card-capybara-call-zoo.png"
     },
     {
-      "key": "card-capybara-help",
-      "png": "images/card-capybara-help.png"
+      "key": "card-capybara-drag",
+      "png": "images/card-capybara-drag.png"
     },
     {
-      "key": "card-capybara-keep-walking",
-      "png": "images/card-capybara-keep-walking.png"
+      "key": "card-capybara-help",
+      "png": "images/card-capybara-help.png"
     },
     {
       "key": "card-cost",
@@ -5747,16 +5747,16 @@
       "png": "images/card-dropped-cone-lick.png"
     },
     {
-      "key": "card-dropped-cone-pull-away",
-      "png": "images/card-dropped-cone-pull-away.png"
+      "key": "card-dropped-cone-walk-on-by",
+      "png": "images/card-dropped-cone-walk-on-by.png"
     },
     {
-      "key": "card-fish-crates-clean-up",
-      "png": "images/card-fish-crates-clean-up.png"
+      "key": "card-fish-crates-hurry-past",
+      "png": "images/card-fish-crates-hurry-past.png"
     },
     {
-      "key": "card-fish-crates-pull-away",
-      "png": "images/card-fish-crates-pull-away.png"
+      "key": "card-fish-crates-pay",
+      "png": "images/card-fish-crates-pay.png"
     },
     {
       "key": "card-fish-crates-sniff",
@@ -5787,8 +5787,8 @@
       "png": "images/card-porch-cat-bolt.png"
     },
     {
-      "key": "card-porch-cat-shoo",
-      "png": "images/card-porch-cat-shoo.png"
+      "key": "card-porch-cat-stand",
+      "png": "images/card-porch-cat-stand.png"
     },
     {
       "key": "card-porch-cat-treat",
@@ -5843,12 +5843,12 @@
       "png": "images/card-thief-let-go.png"
     },
     {
-      "key": "card-wedding-shoot-apologize",
-      "png": "images/card-wedding-shoot-apologize.png"
-    },
-    {
       "key": "card-wedding-shoot-pose",
       "png": "images/card-wedding-shoot-pose.png"
+    },
+    {
+      "key": "card-wedding-shoot-reshoot",
+      "png": "images/card-wedding-shoot-reshoot.png"
     },
     {
       "key": "card-wedding-shoot-walk-around",

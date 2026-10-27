@@ -52,8 +52,10 @@ sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, the
 sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet flops
 
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
-card-wedding-shoot-pose, -walk-around and -apologize on the Distillery District's road;
-card-fish-crates-sniff, -clean-up and -pull-away on Kensington Market's.
+card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery District's road;
+card-fish-crates-sniff, -pay and -hurry-past on Kensington Market's. The two paid options show a bill
+(icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a white apron
+holding it up.
 
 The road sprites take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark
 colours, so their silhouettes hold 3:1 on every road. People, movers and the card obstacles are laid
@@ -157,11 +159,12 @@ def bride(g, b):
     g.p(22, 16 + b, "pink")
 
 
-def photographer(g):
+def photographer(g, pay=False):
     """The photographer, kneeling on his right knee in the right lane and facing left at the bride: black
     shirt and slate trousers, lighter than the dslate road so his legs never sink into it, rust hair, a
     black camera raised to his eye, its grey lens pointing left with a sky glint, a white flash on the hot
-    shoe on top."""
+    shoe on top. pay, for the reshoot card, lowers his near arm from the camera and reaches it out low in
+    front of him, the hand open."""
     # the knee on the ground, the shin back along it, the shoe's toes tucked under
     line(g, [(60, 35), (64, 41)], 4, "slate")
     g.rect(63, 42, 7, 3, "slate")
@@ -198,10 +201,15 @@ def photographer(g):
     g.rect(48, 9, 5, 4, "white")
     g.rect(52, 9, 1, 4, "lgrey")
     g.rect(48, 12, 5, 1, "lgrey")
+    g.rect(55, 16, 2, 4, "skin2")
+    if pay:
+        # the near arm lowered from the camera and reached out low in front of him, the hand taking the fee
+        line(g, [(58, 24), (53, 31), (41, 32)], 3, "ink")
+        g.rect(38, 31, 3, 3, "skin2")
+        return
     # the near arm: the sleeve from the shoulder to the elbow, the forearm up to the hand under the lens
     line(g, [(58, 24), (54, 29), (48, 23)], 3, "ink")
     g.rect(45, 20, 4, 2.5, "skin2")
-    g.rect(55, 16, 2, 4, "skin2")
 
 
 def reflector(g):
@@ -217,16 +225,17 @@ def reflector(g):
 SHOOT_PARTS = ("bride", "photographer", "reflector")
 
 
-def wedding_shoot(bob=0, flash=False, parts=SHOOT_PARTS):
+def wedding_shoot(bob=0, flash=False, parts=SHOOT_PARTS, pay=False):
     """The shoot across two lanes, laid out on SHOOT_W x 48 and drawn at PERSON to 112x72. bob is the
     bride's breath in drawn pixels; flash fires the flash: a white star, its arms tipped yellow, with
-    yellow diagonals, flaring off the flash head. parts picks which figures to draw (the cards use them one at a time)."""
+    yellow diagonals, flaring off the flash head. parts picks which figures to draw (the cards use them one at
+    a time), and pay draws the photographer's pay pose."""
     g = edged(Grid(SHOOT_W, 48))
     u = unit(g)
     if "reflector" in parts:
         reflector(g)
     if "photographer" in parts:
-        photographer(g)
+        photographer(g, pay)
     if "bride" in parts:
         bride(g, bob * u)
     lit(g, dict(slate=("lgrey", None)))
@@ -440,26 +449,6 @@ def fish_crates(flop=0):
 
 
 FISH_IDLE = (0, 0, 1, 2), 350
-
-
-def fish_box_upright():
-    """The crate set back upright, for card-fish-crates-clean-up: its slatted front, tan lit cream and
-    shaded brown, with ice and three fish heaped back in on top, on the 32-unit grid."""
-    g = edged(Grid(32, 32))
-    for x, y in ((7, 13), (10, 12), (14, 12.5), (18, 12), (22, 13)):
-        g.rect(x, y, 3, 3, "white")
-        g.rect(x + 2, y + 1, 1, 2, "foam")
-    fish(g, 6, 12, 12, "slate", "lgrey")
-    fish(g, 15, 11, 12, "red", "pink", flip=True)
-    fish(g, 10, 14, 11, "grey", "lgrey")
-    g.rect(5, 16, 23, 13, "tan")
-    g.rect(5, 16, 23, 1, "cream")
-    g.rect(5, 16, 1, 13, "cream")
-    g.rect(26, 17, 2, 12, "brown")
-    for y in (20, 24):
-        g.rect(6, y, 20, 1, "brown")
-    g.rect(5, 28, 23, 1, "brown")
-    return lit(g)
 
 
 # ---------- the produce crates ----------
@@ -790,9 +779,9 @@ def sprites():
 
 # ---------- cards ----------
 
-def figure(*parts, flash=False):
+def figure(*parts, flash=False, pay=False):
     """Some of the wedding shoot's figures at 1x, as an image the size of its frame."""
-    return to_image(drawn(PERSON, wedding_shoot, flash=flash, parts=parts).outlined())
+    return to_image(drawn(PERSON, wedding_shoot, flash=flash, parts=parts, pay=pay).outlined())
 
 
 def card_wedding_pose():
@@ -848,16 +837,19 @@ def card_wedding_walk_around():
     return a
 
 
-def card_wedding_apologize():
-    """Apologize: the bride at the left, Archie backing off with its head down, and a SORRY! bubble from
-    off the bottom edge, where the walker is."""
+def card_wedding_reshoot():
+    """Pay for a reshoot: the bride posing again at the left, the photographer's camera at the right edge lined
+    up on her, its flash not yet fired, while his free hand reaches out to take a bill, Archie sitting aside at
+    his feet, out of the shot."""
     import cards
     a = cards.Art()
     a.ground("street")
+    a.shadow(18, 62, 30)
     a.paste(figure("bride"), -6, -11)
-    c = a.dog("archie", "react", 54, 60)
-    a.lead(54, c, 60)
-    a.bubble(36, 3, 36, ["SORRY!"])
+    a.paste(cards.sn.image("icon-bill"), 33, 31)
+    a.paste(figure("photographer", pay=True), -10, -12)
+    c = a.dog("archie", "idle", 62, 62)
+    a.lead(62, c, 66)
     return a
 
 
@@ -880,24 +872,42 @@ def card_fish_sniff():
     return a
 
 
-def card_fish_clean_up():
-    """Help clean up: the crate set back upright and heaped with ice and fish, sparkling clean, Archie
-    sitting by it."""
+def fishmonger_top(g, b):
+    """The fishmonger facing the player: a blue shirt under a long white apron, a navy flat cap, the near
+    hand (screen left) raised beside the face to hold up the fee, the other arm at the side."""
+    g.rect(9, 21 + b, 14, 13, "blue")
+    g.rect(20, 21 + b, 3, 13, "navy")
+    g.rect(11, 23 + b, 10, 12, "white")
+    g.rect(19, 23 + b, 2, 12, "lgrey")
+    g.rect(11, 21 + b, 1, 2, "white")
+    g.rect(20, 21 + b, 1, 2, "lgrey")
+    g.rect(5, 22 + b, 4, 4, "blue")
+    g.rect(4, 15 + b, 4, 8, "blue")
+    g.rect(4, 13 + b, 4, 3, "skin1")
+    road.back_arm(g, 23, 4, 22 + b, ((8, "blue", "navy"), (3, "skin1", None)))
+    face_disc(g, 16, 13.5 + b, 7.5, 7.5, "skin1", "skin2")
+    face_front(g, 16, 14 + b)
+    g.cel(16, 8 + b, 7.5, 3, "navy", "ink", "blue")
+    g.rect(10, 9 + b, 14, 1.5, "navy")
+
+
+def card_fish_pay():
+    """Pay for the fish: the spilt crate at the left with Archie sitting by it, and the fishmonger at the
+    right holding up the bill he has been paid."""
     import cards
     a = cards.Art()
     a.ground("shops")
-    box = crate_image(fish_box_upright)
-    a.shadow(26, 44, 34)
-    a.paste(box, 26 - box.width / 2, 44 - box.height + 1)
-    c = a.dog("archie", "idle", 56, 58)
-    a.lead(56, c, 62)
-    for x, y in ((12, 14), (40, 10), (8, 34), (44, 30)):
-        a.sparkle(x, y, "white")
+    a.put("fish-crates", "idle", 22, 40)
+    monger = to_image(road.drawn(PERSON, road.dressed, fishmonger_top, legs="slate", shoes="white").outlined())
+    a.paste(monger, 38, -4)
+    a.paste(cards.sn.image("icon-bill"), 38, 4)
+    c = a.dog("archie", "idle", 30, 58)
+    a.lead(30, c, 36)
     return a
 
 
-def card_fish_pull_away():
-    """Pull away: the spilt crate at the right and Archie pulled away to the left, the leash taut off the
+def card_fish_hurry_past():
+    """Hurry past: the spilt crate at the right and Archie pulled away to the left, the leash taut off the
     bottom, a red ! by the fish."""
     import cards
     a = cards.Art()
@@ -913,10 +923,10 @@ def card_fish_pull_away():
 CARDS = {
     "card-wedding-shoot-pose": card_wedding_pose,
     "card-wedding-shoot-walk-around": card_wedding_walk_around,
-    "card-wedding-shoot-apologize": card_wedding_apologize,
+    "card-wedding-shoot-reshoot": card_wedding_reshoot,
     "card-fish-crates-sniff": card_fish_sniff,
-    "card-fish-crates-clean-up": card_fish_clean_up,
-    "card-fish-crates-pull-away": card_fish_pull_away,
+    "card-fish-crates-pay": card_fish_pay,
+    "card-fish-crates-hurry-past": card_fish_hurry_past,
 }
 
 
