@@ -4,7 +4,13 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { defined, present } from "../testing/defined";
-import { newPlayerSave, quietCounters, testContext, veteranSave } from "../testing/saves";
+import {
+  newPlayerSave,
+  quietCounters,
+  STARTER_DOGS,
+  testContext,
+  veteranSave,
+} from "../testing/saves";
 import { loadSave, saveContextFrom } from "./load";
 import { createDefaultSave, SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
 
@@ -24,10 +30,6 @@ function withChanges(change: (document: StoredInput) => void): string {
 
 const loaded = (change: (document: StoredInput) => void): SaveDocument =>
   loadSave(testContext, withChanges(change)).save;
-
-const STARTER_DOGS = (Object.keys(gameData.dogs) as DogId[]).filter(
-  (id) => gameData.dogs[id].unlock === "start",
-);
 
 // A stored checkpoint two zones in, with each given field in place of its own.
 const checkpointWith = (
@@ -155,16 +157,16 @@ describe("loadSave", () => {
       (save) => save.owned,
       {
         dogSlots: [1, 3],
-        dogs: ["biscuit", "kilo", "penny"],
+        dogs: [...STARTER_DOGS, "kilo", "penny"],
         gear: ["runningShoes"],
         walkers: ["casey", "mrB"],
       },
     ],
     [
-      // archie is a known dog that this player has not bought.
+      // pierre is a known dog that this player has not bought.
       "without unknown or unowned loadout picks",
       (document) => {
-        document.lastLoadout = { dogs: ["ghost", "penny", "archie"], gear: "luckyCollar" };
+        document.lastLoadout = { dogs: ["ghost", "penny", "pierre"], gear: "luckyCollar" };
       },
       (save) => save.lastLoadout,
       { dogs: ["penny"], gear: null },

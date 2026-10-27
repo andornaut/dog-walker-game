@@ -186,7 +186,7 @@ export const HOME_LAYOUT = {
   // yard sign, each with their dog at their feet. Feet positions, by dog; a starter dog with
   // no spot is not drawn.
   porchSpots: {
-    biscuit: { footY: 145, x: 120 },
+    archie: { footY: 145, x: 120 },
     duchess: { footY: 148, x: 150 },
     kilo: { footY: 145, x: 92 },
   },

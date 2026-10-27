@@ -1,5 +1,6 @@
 // Shared save fixtures, with real dog, gear, hint and walker ids.
 import { gameData } from "../data";
+import type { DogId } from "../data/types";
 import type { RunCounters } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { AwardContext } from "../save/achievements";
@@ -7,10 +8,15 @@ import type { SaveContext } from "../save/load";
 import { SAVE_VERSION, type SaveDocument } from "../save/schema";
 import type { SaveStorage } from "../save/storage";
 
+// The dogs every player owns from the start, as the data marks them.
+export const STARTER_DOGS: readonly DogId[] = (Object.keys(gameData.dogs) as DogId[]).filter(
+  (id) => gameData.dogs[id].unlock === "start",
+);
+
 export const testContext: SaveContext = {
   defaults: {
     dogSlots: [1],
-    freeDogs: ["biscuit"],
+    freeDogs: STARTER_DOGS,
     freeWalkers: ["casey"],
     walker: "casey",
   },
@@ -57,10 +63,10 @@ export const newPlayerSave: SaveDocument = {
   bankCents: cents(0),
   checkpoint: null,
   helpSeen: false,
-  lastLoadout: { dogs: ["biscuit"], gear: null },
+  lastLoadout: { dogs: STARTER_DOGS.slice(0, 1), gear: null },
   owned: {
     dogSlots: [1],
-    dogs: ["biscuit"],
+    dogs: [...STARTER_DOGS],
     gear: [],
     walkers: ["casey"],
   },
@@ -102,7 +108,8 @@ export function veteranSave(): SaveDocument {
     owned: {
       // Slot 3 bought before slot 2.
       dogSlots: [1, 3],
-      dogs: ["biscuit", "duchess", "kilo", "penny"],
+      // The starters first, as a load lists them.
+      dogs: [...new Set<DogId>([...STARTER_DOGS, "biscuit", "duchess", "kilo", "penny"])],
       gear: ["fannyPack", "runningShoes"],
       walkers: ["casey", "ada", "mrB", "trista"],
     },

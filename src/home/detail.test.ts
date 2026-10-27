@@ -8,6 +8,7 @@ import { capitalize, effectText, largeSpeedText, SIZE_NAMES } from "../rules/eff
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
+import { STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import { dogDetail, gearDetail, walkerDetail } from "./detail";
 import { dollarText, purchasePrice } from "./home";
@@ -18,7 +19,7 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: [1],
-  dogs: ["biscuit", "duchess", "kilo"],
+  dogs: [...STARTER_DOGS, "duchess", "kilo"],
   gear: ["luckyCollar"],
   walkers: ["casey"],
 };
@@ -53,12 +54,12 @@ describe("dogDetail", () => {
     expect(card.status).toBe(text.dogStatus);
   });
 
-  const price = purchasePrice(data, owned, { dog: "archie", kind: "dog" }) ?? cents(0);
+  const price = purchasePrice(data, owned, { dog: "biscuit", kind: "dog" }) ?? cents(0);
   it.each([
     { bank: cents(price - 1), key: "priceLocked", state: "a cent short" },
     { bank: price, key: "priceBuy", state: "affordable" },
   ] as const)("shows a dog not owned at its price, $state", ({ bank, key }) => {
-    expect(dogDetail(data, owned, bank, "archie").status).toBe(
+    expect(dogDetail(data, owned, bank, "biscuit").status).toBe(
       fillNames(data.homeText.detail[key], { price: dollarText(price) }),
     );
   });

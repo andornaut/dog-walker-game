@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
+import { STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import { bankAtLastVisit, newlyAffordable } from "./afford";
 import { isAffordable, type Purchase } from "./home";
@@ -12,7 +13,7 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: [1],
-  dogs: ["biscuit", "duchess", "kilo"],
+  dogs: [...STARTER_DOGS, "duchess", "kilo"],
   gear: [],
   walkers: ["casey"],
 };
@@ -39,8 +40,8 @@ describe("isAffordable", () => {
           ];
     });
     const cases: readonly [string, Owned, number, Purchase, boolean][] = [
-      ["holds for a dog priced at the bank", owned, 600, { dog: "archie", kind: "dog" }, true],
-      ["fails for a dog priced over the bank", owned, 599, { dog: "archie", kind: "dog" }, false],
+      ["holds for a dog priced at the bank", owned, 600, { dog: "biscuit", kind: "dog" }, true],
+      ["fails for a dog priced over the bank", owned, 599, { dog: "biscuit", kind: "dog" }, false],
       ...slots,
       ["never holds for an owned dog", owned, 100_000, { dog: "kilo", kind: "dog" }, false],
       [

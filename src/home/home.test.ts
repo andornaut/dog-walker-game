@@ -12,7 +12,8 @@ import { WORLD } from "../data/world";
 import { price, unlockPrice } from "../rules/shop";
 import { cents, read, readTable } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { newPlayerSave } from "../testing/saves";
+import { defined } from "../testing/defined";
+import { newPlayerSave, STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   buy,
@@ -354,7 +355,7 @@ describe("buy", () => {
         bank: 2_000,
         expected: { kind: "refused", reason: "notForSale" },
         name: "refuses what is not for sale",
-        purchase: { dog: "biscuit", kind: "dog" },
+        purchase: { dog: defined(STARTER_DOGS[0]), kind: "dog" },
       },
     ];
     for (const { bank, expected, purchase } of cases) {
