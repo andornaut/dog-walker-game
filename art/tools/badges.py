@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Draw the 39 achievement badges and the celebration burst.
+"""Draw the 40 achievement badges and the celebration burst.
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
-silver, collection gold, silly pink), each with its own emblem for its goal: no
+silver, collection gold, silly pink, and the one legend, the hardest, purple), each with its own emblem for its goal: no
 two share a motif, so each reads apart from the rest at 1x on the badge wall.
 Tags: earned (in colour) and locked (in the neutral greys of locked UI: an
 ndslate ring, an ngrey face, the emblem as a two-tone ink and ndslate silhouette,
@@ -36,7 +36,10 @@ from pixel import HEART, K, Grid, bitmap, contrast, main  # noqa: E402
 from road import SQUIRREL_FUR  # noqa: E402
 
 RIMS = {"firsts": ("ochre", "rust", "tan"), "mastery": ("lgrey", "grey", "white"),
-        "collection": ("amber", "orange", "yellow"), "silly": ("pink", "mauve", "white")}
+        "collection": ("amber", "orange", "yellow"), "legend": ("purple", "plum", "mauve"),
+        "silly": ("pink", "mauve", "white")}
+# The rim's studs where they are not the rim's shade: gold on the legend's purple.
+STUDS = {"legend": "yellow"}
 # The icon keyline's colour where it is not plum, after the effects' rims.
 KEYLINES = {"eau-de-skunk": "teal"}
 
@@ -445,6 +448,28 @@ def _(g):
     g.rect(11, 14, 1, 3, "lgrey")
 
 
+# A paw print for a street sign's blade: P pad, T toe.
+SIGN_PAW = [".T.T.T.", ".......", "..PPP..", ".PPPPP.", ".PPPPP."]
+
+
+@icon("legend-of-the-leash")
+def _(g):
+    """A Toronto street sign named for you: a blue blade with a white rule and a white paw, under its
+    ornamental cap, on a slate pole, a yellow star at its corner."""
+    g.rect(15, 17, 2, 10, "slate")
+    g.rect(16, 17, 1, 10, "dslate")
+    g.rect(12, 26, 8, 1, "dslate")
+    g.rect(5, 9, 22, 9, "navy")
+    g.rect(6, 10, 20, 7, "blue")
+    g.rect(6, 15, 20, 1, "white")
+    bitmap(g, 13, 10, SIGN_PAW, {"P": "white", "T": "white"})
+    # the cap: a stepped crest over the blade's middle, as Toronto's signs have
+    g.rect(11, 7, 10, 2, "navy")
+    g.rect(14, 6, 4, 1, "navy")
+    g.rect(15, 7, 2, 1, "sky")
+    dizzy_star(g, 24, 7)
+
+
 @icon("marathon")
 def _(g):
     """A white race bib pinned at its corners, a red 100 on it."""
@@ -724,6 +749,7 @@ def _(g):
 
 BADGES = {
     "double-leash": "firsts", "pack-leader": "firsts", "round-trip": "firsts",
+    "legend-of-the-leash": "legend",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
     "five-star-service": "mastery", "marathon": "mastery", "not-a-scratch": "mastery", "tip-jar": "mastery",
     "twenty-grand": "mastery",
@@ -743,7 +769,8 @@ def badge(name, locked=False):
     g = Grid(32, 32)
     g.ell(16, 16, 14.5, 14.5, rim, rim_sh, rim_li)
     for a in range(0, 360, 30):
-        g.p(16 + math.cos(math.radians(a)) * 13, 16 + math.sin(math.radians(a)) * 13, rim_sh)
+        g.p(16 + math.cos(math.radians(a)) * 13, 16 + math.sin(math.radians(a)) * 13,
+            STUDS.get(BADGES[name], rim_sh))
     g.ell(16, 16, 11, 11, "cream", "tan")
     disc = Grid(32, 32)
     disc.ell(16, 16, 11, 11, "cream")
@@ -762,7 +789,8 @@ def badge(name, locked=False):
         # In the neutral greys, as locked UI is: the ring darkens to ndslate and the face to ngrey, so a locked
         # badge never reads as silver; the icon becomes a two-tone silhouette (dark lines in ink, the rest
         # ndslate, 3.56:1 on ngrey) so its goal still reads on the grey face. The padlock keeps its colours.
-        ring_to = {K[rim]: K["ndslate"], K[rim_sh]: K["ink"], K[rim_li]: K["nslate"]}
+        ring_to = {K[rim]: K["ndslate"], K[rim_sh]: K["ink"], K[rim_li]: K["nslate"],
+                   K[STUDS.get(BADGES[name], rim_sh)]: K["ink"]}
         for y in range(32):
             for x in range(32):
                 c = g.px[y][x]

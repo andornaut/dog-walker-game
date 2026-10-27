@@ -214,7 +214,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 
 `badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 39 read apart at 1× on the badge wall's cream panel. An emblem shows only what is in the game.
 
-- Tiers: firsts bronze, mastery silver, collection gold, silly pink. Silly is the joke tier, earned by mishaps and running gags; pink marks a joke, never a rank.
+- Tiers: firsts bronze, mastery silver, collection gold, legend purple with gold studs, silly pink. Legend is the one hardest badge, Legend of the Leash. Silly is the joke tier, earned by mishaps and running gags; pink marks a joke, never a rank.
 - Every ring is a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade.
 - `locked` is in the neutral greys: an ndslate ring (ink shade, nslate light), an ngrey face and the emblem a two-tone ink and ndslate silhouette under a small amber padlock, so a locked badge never reads as silver.
 

@@ -1103,6 +1103,11 @@
       "json": "sprites/badge-kitted-out.json"
     },
     {
+      "key": "badge-legend-of-the-leash",
+      "png": "sprites/badge-legend-of-the-leash.png",
+      "json": "sprites/badge-legend-of-the-leash.json"
+    },
+    {
       "key": "badge-local-favourite",
       "png": "sprites/badge-local-favourite.png",
       "json": "sprites/badge-local-favourite.json"
