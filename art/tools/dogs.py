@@ -6,7 +6,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
   SIZE_CLASS): large 54x54 (Kilo the Alaskan Malamute, Sequoia the Great Pyrenees, Penny the golden
   retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Duchess,
-  Reggie, Zippy), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
+  Marshall, Reggie), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
   road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
   pixel take trail(), so they stay unbroken. Tags: walk (4
@@ -307,9 +307,9 @@ def reggie_face(mood):
     return g
 
 
-# ---------- Zippy: Jack Russell, small, white with tan patches, red collar ----------
+# ---------- Marshall: Jack Russell, small, white with tan patches, red collar ----------
 
-def zippy_road(q):
+def marshall_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 3, "white")
@@ -335,7 +335,7 @@ def zippy_road(q):
     return g
 
 
-def zippy_face(mood):
+def marshall_face(mood):
     g = edged(Grid(), "ink", close=True)
     g.cel(16, 16, 9, 8, "white", "lgrey")
     g.cel(10.5, 12.5, 4, 4, "ochre", "rust", "tan")
@@ -810,7 +810,7 @@ def mouth(g, y, mood):
 DOGS = {
     "duchess": (duchess_road, duchess_face),
     "reggie": (reggie_road, reggie_face),
-    "zippy": (zippy_road, zippy_face),
+    "marshall": (marshall_road, marshall_face),
     "pierre": (pierre_road, pierre_face),
     "biscuit": (biscuit_road, biscuit_face),
     "archie": (archie_road, archie_face),
@@ -824,21 +824,21 @@ DOGS = {
 # and 0.8x.
 SIZE_CLASS = {"large": 54, "medium": ROAD_SIZE, "small": 38}
 DOG_CLASS = {"kilo": "large", "snowball": "large", "penny": "large", "archie": "medium", "biscuit": "medium",
-             "pierre": "medium", "duchess": "small", "reggie": "small", "zippy": "small"}
+             "pierre": "medium", "duchess": "small", "reggie": "small", "marshall": "small"}
 DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
 # How much bigger a dog is drawn inside its frame, across and down. The large dogs are drawn narrower, Kilo
 # and Sequoia about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
-# (Zippy 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
+# (Marshall 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
 DOG_ZOOM = {"kilo": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
-            "reggie": (1.09, 1.27), "zippy": (1.17, 1.27)}
+            "reggie": (1.09, 1.27), "marshall": (1.17, 1.27)}
 
 
 # How big each dog's face is drawn in its 32px frame, sat on the bottom edge: the side that brings its inked
 # area nearest its size class's target, so the classes step evenly (the square root of the area about 17, 21.3
 # and 25.5px) however much of its design a breed's ears or topknot fill. The large dogs zoom past the
 # frame as far as Kilo's ears fit under its top edge, so they fill their tiles, and medium sits halfway.
-FACE_SIDE = {"archie": 30, "biscuit": 29, "duchess": 23, "kilo": 35, "penny": 37, "pierre": 27, "reggie": 26,
-             "snowball": 36, "zippy": 27}
+FACE_SIDE = {"archie": 30, "biscuit": 29, "duchess": 23, "kilo": 35, "marshall": 27, "penny": 37, "pierre": 27,
+             "reggie": 26, "snowball": 36}
 
 
 def framed(px, side):

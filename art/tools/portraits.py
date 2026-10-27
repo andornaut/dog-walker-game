@@ -171,9 +171,9 @@ def reggie(g):
     nose(g, 23, 29)
 
 
-# ---------- Zippy: Jack Russell, small, white with tan patches, red collar ----------
+# ---------- Marshall: Jack Russell, small, white with tan patches, red collar ----------
 
-def zippy(g):
+def marshall(g):
     g.cel(44, 54, 11, 9, "white", "lgrey")
     g.cel(47, 51, 5, 4, "ochre", "rust")
     g.cel(31, 52, 12, 11, "white", "lgrey")
@@ -586,7 +586,7 @@ def trista(g):
 PORTRAITS = {
     "duchess": duchess,
     "reggie": reggie,
-    "zippy": zippy,
+    "marshall": marshall,
     "pierre": pierre,
     "biscuit": biscuit,
     "archie": archie,
@@ -609,8 +609,8 @@ WALKERS = {
 # How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, topping
 # out 2 or 3px under the well's top edge, and Ada smaller as the youngest.
 WALKER_SIDE = {"ada": 64, "casey": 66, "mr-b": 72, "trista": 69}
-PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "kilo": 64, "penny": 64, "pierre": 56, "reggie": 53,
-                 "snowball": 63, "zippy": 53}
+PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "kilo": 64, "marshall": 53, "penny": 64, "pierre": 56,
+                 "reggie": 53, "snowball": 63}
 
 
 def image(draw, side=S):

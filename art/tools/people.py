@@ -374,7 +374,7 @@ def jason_top(wave):
 OWNERS = {
     "duchess": (rosa_top, "skin1", "dbrown", None),
     "reggie": (ralph_top, "blue", "white", ralph_legs),
-    "zippy": (sheba_top, "slate", "dbrown", None),
+    "marshall": (sheba_top, "slate", "dbrown", None),
     "pierre": (tara_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),
     "archie": (kiwi_top, "brown", "red", None),
