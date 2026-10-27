@@ -241,11 +241,11 @@ describe("cashScale", () => {
 
 describe("maxEffects", () => {
   it.each<[string, number, number, number]>([
-    ["a one-zone walk with no Pocket", 0, 1, 1],
-    ["a two-zone walk with a Pocket", 1, 2, 3],
-    ["a four-zone walk with two Pocket items", 2, 4, 6],
+    ["a one-zone walk with no Pocket", 0, 1, 2],
+    ["a two-zone walk with a Pocket", 1, 2, 4],
+    ["a four-zone walk with two Pocket items", 2, 4, 7],
   ])(
-    "counts the perk, the Pocket and a fork's upgrade each for %s",
+    "counts the perk, the Pocket, the found gear and a fork's upgrade each for %s",
     (_name, pocket, zones, expected) => {
       const tuning = {
         ...gameData.tuning,

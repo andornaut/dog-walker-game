@@ -71,7 +71,8 @@ interface MatrixCell {
 // not, luckyShare of lucky encounters collected, kindHitShares of each kind of obstacle that
 // does not move, minor or not, and moverHitShares of each obstacle that moves, minor or not,
 // both but pull obstacles.
-// meanTips counts the tips collected per run. delivery sums every run's zone plans by walk
+// meanTips counts the tips collected per run, meanDrops the gear drops that reached the pack per
+// run and meanGrabs those grabbed. delivery sums every run's zone plans by walk
 // position and zone: what they asked for and what they placed, by group and by kind.
 export interface MatrixRow extends BadgeCounters {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
@@ -89,8 +90,10 @@ export interface MatrixRow extends BadgeCounters {
   // Achievements a run earns on its own facts, per run.
   readonly meanBadges: number;
   readonly meanCardsSeen: number;
+  readonly meanDrops: number;
   readonly meanEarnings: number;
   readonly meanFirings: number;
+  readonly meanGrabs: number;
   readonly meanTipCents: number;
   readonly meanTips: number;
   readonly meanZones: number;
@@ -333,6 +336,7 @@ function summarizeCell(
     (category: string) =>
     ({ kind }: (typeof counted)[number]) =>
       itemCategory(data, kind) === category;
+  const drops = countsOf(inCategory("gear"));
   const hits = results.reduce((sum, result) => sum + result.hits.all, 0);
   const afterPull = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
   return {
@@ -359,8 +363,10 @@ function summarizeCell(
     luckyShare: touchedShare(countsOf(inCategory("lucky"))),
     meanBadges: mean(results.map((result) => result.badges.length)),
     meanCardsSeen: mean(results.map((result) => result.cardsSeen)),
+    meanDrops: drops.reduce((sum, count) => sum + count.met, 0) / results.length,
     meanEarnings: mean(earnings),
     meanFirings: mean(results.map((result) => result.firings.length)),
+    meanGrabs: drops.reduce((sum, count) => sum + count.touched, 0) / results.length,
     meanTipCents: mean(results.map((result) => result.tips as number)),
     meanTips: mean(results.map((result) => result.items.tip?.touched ?? 0)),
     meanZones: mean(results.map((result) => result.zones.length)),
@@ -423,6 +429,8 @@ export const MATRIX_HEADERS = [
   "Forced",
   "Lucky",
   "Tips",
+  "Drops",
+  "Grabs",
   "Mean",
   "p10",
   "p50",
@@ -449,6 +457,8 @@ export function rowCells(row: MatrixRow): string[] {
     measured(row.afterPullShare),
     measured(row.luckyShare),
     row.meanTips.toFixed(1),
+    row.meanDrops.toFixed(2),
+    row.meanGrabs.toFixed(2),
     dollars(row.meanEarnings),
     dollars(row.p10),
     dollars(row.p50),
@@ -528,6 +538,7 @@ export function formatKindTable(
 
 const DELIVERY_HEADERS: Readonly<Record<(typeof DELIVERY_GROUPS)[number], string>> = {
   card: "Card",
+  drops: "Drops",
   lucky: "Lucky",
   minorDart: "Dart",
   minorOther: "Hop/stalk",

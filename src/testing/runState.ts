@@ -24,6 +24,7 @@ export function testState(
     debuffsGot: {},
     dodges: [],
     firstZone: 0,
+    foundGear: null,
     gear: null,
     heartsForgiven: 0,
     immunities: [],

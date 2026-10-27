@@ -98,6 +98,7 @@ export interface Tuning {
     readonly dartLanesPerSecond: number;
     readonly dartStopLanesMax: number;
     readonly dartStopLanesMin: number;
+    readonly gearDropsPerZone: Table<number>;
     readonly maxDartMovers: number;
     readonly maxEmptyRows: number;
     readonly maxMovers: number;
@@ -713,7 +714,7 @@ export interface HomeText {
 
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data
 // does not name, the Skip card, and the cost plaque's words. fired is the firing plate's
-// word, homeQuestion is what the walk bar's Home button asks, with its two answers, and
+// word, homeQuestion is what the pause menu's and a fork card's Head home ask, with its two answers, and
 // lowHearts is the chip over a dog card down to its last heart, naming its owner. A {name} in a line is filled
 // by code, and each line may use only the names src/hud/runText.ts lists for it. firedBy
 // names an owner who fires you, and card.fires flags an option that would fire owners.
@@ -768,6 +769,8 @@ export interface RunText {
     // A held dog card's row for each source of its owner's extra max hearts: {name} is the
     // gear's name, such as Lucky collar's, or smallPack for the lead dog's pack-size bonus.
     readonly extraHearts: string;
+    // A found gear item's status, under its effect.
+    readonly foundStatus: string;
     readonly smallPack: string;
     readonly upgradeStatus: string;
   };
@@ -775,6 +778,9 @@ export interface RunText {
   readonly firedBy: string;
   // Over a dog whose owner's heart loss Second chance forgave.
   readonly forgiven: string;
+  // A gear drop's name wherever a change or a held card names what made it: {gear} is the
+  // item's name.
+  readonly foundGear: string;
   // The end screen's line when every dog set out with got home after the last zone.
   readonly fullPackHome: string;
   // lose is the current zone's pay the dogs still walking would earn, given up, and zonesLeft
@@ -817,6 +823,10 @@ export interface RunText {
     readonly effectStart: string;
     readonly fired: string;
     readonly fullPackHome: string;
+    // A gear drop grabbed on the road: {gear} is the item's name. gearSwapped when it replaces
+    // the item found before it, {old}.
+    readonly gearFound: string;
+    readonly gearSwapped: string;
     // At a walk's start, for each large dog in the pack, which slows lane changes.
     readonly largeDog: string;
     readonly lowHearts: string;

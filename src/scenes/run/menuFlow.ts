@@ -26,7 +26,7 @@ interface MenuFlowHost {
 type MenuPause = Omit<RunPause, "hitStop" | "hold">;
 
 // What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the
-// Home button's question, and the page out of view or focus. pause()
+// Home question, and the page out of view or focus. pause()
 // reports all of them, and walkPaused decides from it, so each new one pauses the walk.
 export class MenuFlow {
   private blurred = false;
@@ -125,7 +125,7 @@ export class MenuFlow {
     return this.pauseMode === "homeQuestion" ? "confirmHome" : "open";
   }
 
-  // The pause menu, or the Home button's question, over the walk or over the card that holds
+  // The pause menu, or the Home question, over the walk or over the card that holds
   // it. The walk steps only while walking, so the menu stops it without pausing the run
   // scene: sprite animations loop on, while tweens and timers stop, keeping a hit moment in
   // step with its hit stop. The card under the menu pauses and hides, so no card shows beside

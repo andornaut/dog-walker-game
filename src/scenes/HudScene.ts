@@ -256,7 +256,6 @@ export class HudScene extends Scene {
       [WALK_BAR.cash.well, BAR.zoneWell].forEach((well) => fillRect(g, PALETTE.ink, well));
     }
     WALK_BAR_BUTTONS.forEach((id) => this.addButton(TOP_BAR_BUTTONS[id]));
-    this.addHomeIcon();
     // A container holds the icon's place in the draw order while it is swapped.
     this.soundHolder = this.add.container(0, 0);
     this.showSoundIcon(isMuted(this));
@@ -358,9 +357,6 @@ export class HudScene extends Scene {
       return;
     }
     switch (topBarAction(run.runPause(), via, button)) {
-      case "confirmHome":
-        run.openPause("homeQuestion");
-        break;
       case "mute":
         toggleMuted(this);
         break;
@@ -394,22 +390,6 @@ export class HudScene extends Scene {
       { border: PALETTE.darkBrown, fill: PALETTE.navy },
       { height: 20, width: 20, x, y },
     );
-  }
-
-  // icon-home on Home's face, else a cream house drawn on it.
-  private addHomeIcon(): void {
-    const { x, y } = buttonIcon(TOP_BAR_BUTTONS.home);
-    if (this.textures.exists("icon-home")) {
-      this.add.image(x, y, "icon-home").setOrigin(0);
-      return;
-    }
-    const g = this.add.graphics();
-    // The roof's rows widening down from its peak, then the walls with a door in the middle.
-    [2, 4, 6, 8, 10, 12].forEach((width, row) => {
-      fillRect(g, PALETTE.cream, { height: 1, width, x: x + 8 - width / 2, y: y + 2 + row });
-    });
-    fillRect(g, PALETTE.cream, { height: 6, width: 10, x: x + 3, y: y + 8 });
-    fillRect(g, PALETTE.navy, { height: 4, width: 2, x: x + 7, y: y + 10 });
   }
 
   // icon-sound's on or off frame on the sound button's face, for M and Settings too.

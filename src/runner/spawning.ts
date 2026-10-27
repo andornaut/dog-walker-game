@@ -39,7 +39,9 @@ export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 // spawns and moving prizes hold and every spot a mover may stand on, not off every cell a mover
 // passes through. moversRestOn marks such kinds that may also lie where a mover may end a move
 // and stand, such as tips. hitLength is a lane-blocking kind's drawn hit length, which the pack-fit gap
-// measures it by; without it, its planned hit length.
+// measures it by; without it, its planned hit length. within is the share of the zone's rows a
+// standing kind's spawns are spread over, from and to, each 0 to 1, such as a gear drop held to
+// a third of the zone; without it, the whole zone.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
@@ -50,6 +52,7 @@ export interface SpawnQuota<Kind extends string> {
   mover?: MoverSpec;
   moversPassOver?: boolean;
   moversRestOn?: boolean;
+  within?: readonly [number, number];
 }
 
 // Distances are scroll distances in pixels from the start of the zone. A spawn's footprint is
@@ -175,6 +178,9 @@ const SCAN_ROADS = 4;
 
 // A rounding error in counting steps and moves.
 const ROUNDING = 1e-9;
+
+// The share of the zone's rows a quota without within is spread over.
+const WHOLE_ZONE: readonly [number, number] = [0, 1];
 
 // The scroll a walk step covers.
 function stepLength(plan: SpawnPlan<string>): number {
@@ -441,14 +447,15 @@ function drawPath(streams: PlannerStreams, plan: SpawnPlan<string>, rowCount: nu
 }
 
 // Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart (zoneRows). Each
-// kind's spawns are spread over equal stretches of the zone, one per stretch, so no kind bunches
-// up. A lane-blocking spawn, standing or moving, is drawn among the places that fit toward the
-// lanes left unblocked longest (laneBalanceWeight), so no lane stays clear for long. The standing
-// kinds take turns along the zone, the widest first in each turn, so each keeps its share of what
-// is placed. Before anything is placed, the zone draws its guaranteed path (drawPath), the lanes a
-// pack can follow through it from pathStart. Lane-blocking spawns only take cells that keep that
-// path clear: the path's lane stays open in every row's window and the gap after it, and on the
-// row before the path changes lane every lane the change crosses does too. Each row's window and
+// kind's spawns are spread over equal stretches of the zone, or of the share of it a quota's
+// within holds them to, one per stretch, so no kind bunches up. A lane-blocking spawn, standing
+// or moving, is drawn among the places that fit toward the lanes left unblocked longest
+// (laneBalanceWeight), so no lane stays clear for long. The standing kinds take turns along the
+// zone, the widest first in each turn, so each keeps its share of what is placed. Before anything
+// is placed, the zone draws its guaranteed path (drawPath), the lanes a pack can follow through
+// it from pathStart. Lane-blocking spawns only take cells that keep that path clear: the path's
+// lane stays open in every row's window and the gap after it, and on the row before the path
+// changes lane every lane the change crosses does too. Each row's window and
 // the gap after it also keep minOpenLanes open. A spawn more than one row long blocks every window
 // and gap it overlaps, and must end within the zone's last row. Where the path changes lanes
 // between two lane-blocking spawns, packFitsOnPath holds, for a mover wherever it stands, each
@@ -919,23 +926,29 @@ export function planSpawns<Kind extends string>(
       .filter(keep)
       .sort((a, b) => across(b) - across(a) || area(b) - area(a));
     ordered
-      .flatMap((quota, order) =>
-        Array.from({ length: quota.count }, (_, i) => ({
+      .flatMap((quota, order) => {
+        const [from, to] = quota.within ?? WHOLE_ZONE;
+        return Array.from({ length: quota.count }, (_, i) => ({
           i,
-          middle: (i + 0.5) / quota.count,
+          middle: from + ((i + 0.5) / quota.count) * (to - from),
           order,
           quota,
-        })),
-      )
+        }));
+      })
       .sort((a, b) => a.middle - b.middle || a.order - b.order)
       .forEach(({ i, quota }) => placeOne(quota, i));
   };
   // The cells for the ith of a quota's spawns: those in the ith of its count's equal stretches of
-  // the zone, or else anywhere in it. In a zone whose rows start on the road in view, a
-  // lane-blocking one first in its stretch takes the zone's first row while that row comes on
-  // screen quiet and it fits there, before a spawn placed later on steers across it.
+  // the rows it is spread over (within), or else anywhere in those rows. In a zone whose rows
+  // start on the road in view, a lane-blocking one first in its stretch takes the zone's first
+  // row while that row comes on screen quiet and it fits there, before a spawn placed later on
+  // steers across it.
   const cellsFor = (quota: SpawnQuota<Kind>, i: number): Cell[] => {
     const footprint = quota.footprint ?? SINGLE_CELL;
+    const [from, to] = (quota.within ?? WHOLE_ZONE).map((share) =>
+      Math.floor(share * rows.length),
+    ) as [number, number];
+    const span = to - from;
     const opening =
       plan.firstContactSeconds !== undefined && quota.blocksLane && i === 0 && inView()[0] === 0
         ? freeCells(quota, footprint, 0, 1)
@@ -946,10 +959,10 @@ export function planSpawns<Kind extends string>(
         : freeCells(
             quota,
             footprint,
-            Math.floor((i * rows.length) / quota.count),
-            Math.floor(((i + 1) * rows.length) / quota.count),
+            from + Math.floor((i * span) / quota.count),
+            from + Math.floor(((i + 1) * span) / quota.count),
           );
-    return stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
+    return stretch.length > 0 ? stretch : freeCells(quota, footprint, from, to);
   };
   // One of cells for a spawn: a lane-blocking one toward the lanes left unblocked longest.
   const pickCell = (quota: SpawnQuota<Kind>, cells: readonly Cell[]): Cell => {

@@ -20,7 +20,7 @@ const { packBand, packParts } = walkGeometry(
 // A flat five-lane test road with the test pack on it.
 export const TEST_ROAD_GEOMETRY: RoadGeometry = {
   cell: { inset: 12, length: 56 },
-  itemHeights: { lucky: 20, tip: 12, treat: 12 },
+  itemHeights: { gear: 20, lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
   // On a flat road every row is drawn at scale 1, so the road's centre moves nothing.
   lens: { centreX: 0, ...FLAT_LENS },

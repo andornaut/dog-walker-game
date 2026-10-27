@@ -1,7 +1,8 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { gearIconKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
-import type { EncounterId } from "../../data/types";
+import type { EncounterId, GearId } from "../../data/types";
 import { zoneBannerHeading } from "../../hud/zoneCelebration";
 import { currentZone } from "../../rules/route";
 import type { RunState } from "../../state/runState";
@@ -14,6 +15,7 @@ import { DEPTH, LAYOUT } from "./stage";
 
 // An instant lucky find's art pops up over the road, then floats up and fades.
 const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };
+const GEAR_POPUP_SCALE = 2;
 const BANNER = { holdMs: 1800, key: "ui-zone-banner", slideMs: 300, width: 248, y: 70 };
 
 // How long the zone banner shows, from sliding in to leaving.
@@ -32,6 +34,22 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
   const art = scene.add
     .image(road.x + road.width / 2, road.y + POPUP.artY, resolution.art)
     .setOrigin(0.5, 0)
+    .setDepth(DEPTH.popup);
+  fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
+}
+
+// A gear drop grabbed pops up as a lucky find does: the item's shop art at 2x, as the explain
+// card draws it.
+export function showGearPopup(scene: Scene, gear: GearId, still: boolean): void {
+  const key = gearIconKey(gear);
+  if (!scene.textures.exists(key)) {
+    return;
+  }
+  const { road } = LAYOUT;
+  const art = scene.add
+    .image(road.x + road.width / 2, road.y + POPUP.artY, key)
+    .setOrigin(0.5, 0)
+    .setScale(GEAR_POPUP_SCALE)
     .setDepth(DEPTH.popup);
   fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { Debuff, DebuffId } from "../data/types";
+import type { Debuff, DebuffId, GearId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars, sentenceList } from "../rules/effectText";
@@ -13,6 +13,7 @@ import {
   firedLine,
   forgivenLines,
   fullPackLine,
+  gearFoundLine,
   lowHeartsLines,
   luckyLine,
   pullLine,
@@ -254,5 +255,27 @@ describe("debuffLines", () => {
     expect(
       debuffChanges({ debuffs: [active("muddy", 5)] }, { debuffs: [active("muddy", 4)] }),
     ).toEqual({ ended: [], started: [] });
+  });
+});
+
+describe("gear found line", () => {
+  const GEAR = Object.keys(gameData.shopGear) as GearId[];
+  const name = (gear: GearId) => gameData.shopGear[gear].name;
+  const { gearFound, gearSwapped } = gameData.runText.strip;
+  // A first find, and a find that replaces the item found before it.
+  it.each(
+    GEAR.flatMap((gear) => [
+      { gear, replaced: null, text: fillNames(gearFound, { gear: name(gear) }) },
+      ...GEAR.filter((old) => old !== gear).map((old) => ({
+        gear,
+        replaced: old,
+        text: fillNames(gearSwapped, { gear: name(gear), old: name(old) }),
+      })),
+    ]),
+  )("says $gear was found, replacing $replaced, led by its icon", ({ gear, replaced, text }) => {
+    expect(gearFoundLine(gameData, gear, replaced)).toEqual({
+      icon: { found: true, gear, kind: "gear" },
+      text,
+    });
   });
 });

@@ -3,6 +3,7 @@ import type {
   Encounter,
   EncounterId,
   GameData,
+  GearId,
   MinorObstacleId,
   MoveCount,
   Movement,
@@ -20,6 +21,7 @@ import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
 import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
+import { drawGearDrops, grabGear } from "../rules/gearDrops";
 import {
   changeModified,
   type ModifiedValue,
@@ -115,11 +117,12 @@ export type WalkData = Pick<
 >;
 
 type PickupKind = "tip" | "treat";
-export type WalkItemKind = EncounterId | MinorObstacleId | PickupKind;
+// A road item's kind: an encounter, a minor obstacle, a pickup, or a gear drop by its gear.
+export type WalkItemKind = EncounterId | GearId | MinorObstacleId | PickupKind;
 export type WalkItem = MoverItem<WalkItemKind>;
 // What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
-// no card, a lucky encounter, or a pickup.
-type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
+// no card, a lucky encounter, a gear drop, or a pickup.
+type ItemCategory = "gear" | "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. path is this zone's guaranteed path, at zone distances,
@@ -162,7 +165,7 @@ export interface Walk {
 // the road in view above the tallest pack.
 export interface RoadGeometry {
   cell: { inset: number; length: number };
-  itemHeights: Readonly<Record<"lucky" | PickupKind, number>>;
+  itemHeights: Readonly<Record<"gear" | "lucky" | PickupKind, number>>;
   laneCount: number;
   lens: RoadLens;
   packBand: { bottom: number; top: number };
@@ -177,6 +180,14 @@ export interface RoadGeometry {
 interface InstantFind {
   encounter: EncounterId;
   outcome: ChoiceOutcome;
+}
+
+// A gear drop the pack grabbed: its gear, now the found item, and the found item it replaced,
+// which went back, or null.
+export interface GearFind {
+  gear: GearId;
+  item: WalkItem;
+  replaced: GearId | null;
 }
 
 // A minor obstacle the pack bumped: the dog it landed on, the hearts its owner lost, or null with
@@ -217,7 +228,7 @@ interface RoadModified {
   readonly value: ModifiedValue;
 }
 
-// bumps, cards, contacts, instants and treats are in the order the pack met them; tips are the
+// bumps, cards, contacts, found, instants and treats are in the order the pack met them; tips are the
 // money changes of the tips collected; modified every value modifiers changed, in the order the
 // pack met their items; fired the owners a bump left at 0 hearts; zoneEnded is
 // set on the step that reaches the end of the zone. encounterHits are the card obstacles met
@@ -230,6 +241,7 @@ export interface WalkStep {
   contacts: ContactHit[];
   encounterHits: EncounterCard[];
   fired: readonly DogId[];
+  found: GearFind[];
   instants: InstantFind[];
   modified: RoadModified[];
   tips: MoneyChange[];
@@ -252,6 +264,14 @@ export function isMinorObstacle(
   return Object.hasOwn(data.minorObstacles, kind);
 }
 
+// A gear drop: a kind that is no pickup, minor obstacle or encounter, so one of the gear.
+export function isGearDrop(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): kind is GearId {
+  return !isPickup(kind) && !isMinorObstacle(data, kind) && !Object.hasOwn(data.encounters, kind);
+}
+
 export function itemCategory(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
@@ -259,7 +279,10 @@ export function itemCategory(
   if (isPickup(kind)) {
     return kind;
   }
-  return isMinorObstacle(data, kind) ? "minor" : data.encounters[kind].kind;
+  if (isGearDrop(data, kind)) {
+    return "gear";
+  }
+  return isMinorObstacle(data, kind) ? "minor" : data.encounters[kind as EncounterId].kind;
 }
 
 // The lanes and rows an item covers: an obstacle's shape, or one cell.
@@ -267,13 +290,13 @@ export function footprintOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): Footprint {
-  if (isPickup(kind)) {
+  if (isPickup(kind) || isGearDrop(data, kind)) {
     return SINGLE_CELL;
   }
   if (isMinorObstacle(data, kind)) {
     return data.minorObstacles[kind].shape;
   }
-  const encounter = data.encounters[kind];
+  const encounter = data.encounters[kind as EncounterId];
   return encounter.kind === "obstacle" ? encounter.shape : SINGLE_CELL;
 }
 
@@ -493,7 +516,7 @@ export function movementOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): Movement | null {
-  if (isPickup(kind)) {
+  if (isPickup(kind) || isGearDrop(data, kind)) {
     return null;
   }
   const entry = isMinorObstacle(data, kind) ? data.minorObstacles[kind] : data.encounters[kind];
@@ -632,7 +655,9 @@ export function opensACard(
 // shape is known when it is placed. Rush hour and the like scale both obstacle counts, the tips
 // and the treats. Then each obstacle or lucky find whose look moves comes as a mover at the zone's
 // mover share: one quota per kind, and one per stepper, whose steps are its own. A lucky find
-// or a pull obstacle blocks no lane, moving or not (blocksLane).
+// or a pull obstacle blocks no lane, moving or not (blocksLane). Last, the zone's gear drops are
+// drawn (drawGearDrops), each a quota of its own that blocks no lane, held to its stretch of the
+// zone (gearDropStretch).
 export function spawnQuotas(
   data: WalkData,
   streams: PlannerStreams,
@@ -674,6 +699,7 @@ export function spawnQuotas(
       movers.set(kind, { count: (movers.get(kind)?.count ?? 0) + 1, movement });
     }
   }
+  const drops = drawGearDrops(data, random, run);
   return [
     ...[...movers].map(([kind, { count: moverCount, movement }]) =>
       moverQuota(kind, movement, moverCount),
@@ -685,6 +711,12 @@ export function spawnQuotas(
       first: opensACard(data, kind),
       footprint: footprintOf(data, kind),
       kind,
+    })),
+    ...drops.map((gear, i): SpawnQuota<WalkItemKind> => ({
+      blocksLane: false,
+      count: 1,
+      kind: gear,
+      within: gearDropStretch(drops.length, i),
     })),
     {
       blocksLane: false,
@@ -700,6 +732,14 @@ export function spawnQuotas(
       moversPassOver: true,
     },
   ];
+}
+
+// The share of a zone the ith of count gear drops stands in: every other one of 2 * count - 1
+// equal stretches, so a lone drop may stand anywhere and two stand in the first and last thirds,
+// at least a third of the zone apart.
+export function gearDropStretch(count: number, i: number): readonly [number, number] {
+  const stretches = 2 * count - 1;
+  return [(2 * i) / stretches, (2 * i + 1) / stretches];
 }
 
 // Plans the run's current zone: its spawns, each obstacle and lucky encounter drawn by the
@@ -1259,6 +1299,7 @@ export function stepWalk(
   const cards: EncounterCard[] = [];
   const collected: WalkItem[] = [];
   const contacts: ContactHit[] = [];
+  const found: GearFind[] = [];
   const instants: InstantFind[] = [];
   const modified: RoadModified[] = [];
   const tips: MoneyChange[] = [];
@@ -1300,6 +1341,12 @@ export function stepWalk(
       nextRun = countLandedBump(kind, bump.state);
       bumps.push({ cash: bump.cash, change: bump.change, dodged: false, dog, item: minor });
       modifiedAt(item, bump.modified);
+    } else if (isGearDrop(data, kind)) {
+      const grab = grabGear(data, kind, nextRun);
+      nextRun = grab.run;
+      found.push({ gear: kind, item, replaced: grab.replaced });
+      collected.push(item);
+      modifiedAt(item, grab.modified);
     } else {
       const affected = affectedDogs(run);
       if (!opensCard(affected, run, kind)) {
@@ -1376,6 +1423,7 @@ export function stepWalk(
     contacts,
     encounterHits,
     fired: firing.fired,
+    found,
     instants,
     modified,
     tips,
@@ -1484,6 +1532,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     contacts: [],
     encounterHits: [],
     fired: [],
+    found: [],
     instants: [],
     modified: [],
     tips: [],

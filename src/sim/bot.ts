@@ -98,7 +98,8 @@ const SLACK_SECONDS = STEP_SECONDS + WAIT_MARGIN;
 // How far apart the planner's waiting times are, besides the ends of hazards.
 const GRID_SECONDS = 0.1;
 
-const PRIZE_VALUES = { lucky: 1, tip: 1, treat: 1 } as const;
+// A gear drop is worth what a lucky find is: the bot grabs both alike.
+const PRIZE_VALUES = { gear: 1, lucky: 1, tip: 1, treat: 1 } as const;
 
 export function newBot(random: Random, sight: BotSight, skill: Skill): Bot {
   return {
@@ -572,7 +573,8 @@ function botView(
     if (category === "minor" || category === "obstacle") {
       hazards.push({ from: start - MARGIN_SECONDS, lanes, to: end + MARGIN_SECONDS });
     } else {
-      const reach = category === "lucky" ? 0 : pickupReach(data, walk.run, category);
+      const reach =
+        category === "lucky" || category === "gear" ? 0 : pickupReach(data, walk.run, category);
       prizes.push({
         at: start,
         lanes: widenMask(geometry.laneCount, reach, lanes),

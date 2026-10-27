@@ -18,6 +18,7 @@ import {
   dogPortraitKey,
   dogSpriteKey,
   encounterSpriteKey,
+  gearDropSpriteKey,
   minorObstacleSpriteKey,
   MOVER_SPRITE_KEYS,
   moverBodyTag,
@@ -423,6 +424,16 @@ describe("road object art", () => {
     const missing = keys.flatMap((key) =>
       SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key).filter(
         (key) => !sprites.has(key),
+      ),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("names a gear drop sprite with an idle tag for every gear item, at every depth step", () => {
+    const keys = (Object.keys(gameData.shopGear) as GearId[]).map(gearDropSpriteKey);
+    const missing = keys.flatMap((key) =>
+      SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key).filter(
+        (variant) => !sprites.has(variant) || !tagsOf(variant).includes("idle"),
       ),
     );
     expect(missing).toEqual([]);

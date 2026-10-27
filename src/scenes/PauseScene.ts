@@ -40,8 +40,8 @@ export interface PauseOverlay {
   readonly open: "help" | "settings";
 }
 
-// menu is the pause menu; homeQuestion asks whether to head home, for the walk bar's Home
-// button, its note saying what going home keeps and gives up.
+// menu is the pause menu; homeQuestion asks whether to head home, for the pause menu's and a
+// fork card's Head home, its note saying what going home keeps and gives up.
 export type PauseSceneData = {
   onHeadHome: () => void;
   onResume: () => void;

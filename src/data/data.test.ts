@@ -186,6 +186,14 @@ describe("run, world and walkers", () => {
     }
   });
 
+  it("gives every walk position a gear drop count of 0 or more, and every gear item a road kind of its own", () => {
+    const drops = tuning.counts.gearDropsPerZone as Readonly<Record<number, number>>;
+    const positions = Array.from({ length: world.walkLength }, (_, i) => i + 1);
+    expect(positions.map((position) => drops[position] ?? -1).every((n) => n >= 0)).toBe(true);
+    const roadKinds = [...Object.keys(encounters), ...Object.keys(minorObstacles), "tip", "treat"];
+    expect(Object.keys(shopGear).filter((gear) => roadKinds.includes(gear))).toEqual([]);
+  });
+
   it("names only the world's zones on the pre-fork route", () => {
     const ids: readonly string[] = world.zones.map(({ id }) => id);
     expect(world.preForkRoute.filter((id) => !ids.includes(id))).toEqual([]);

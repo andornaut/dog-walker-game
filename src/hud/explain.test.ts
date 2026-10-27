@@ -11,12 +11,14 @@ import { explainDetail } from "./explain";
 import { RUN_TEXT_FIELDS } from "./runText";
 import type { ExplainTarget } from "./walkHud";
 
-// Kilo walks at 2 hearts with Lucky collar in the Pocket, the Raincoats upgrade in effect and
-// Muddy on the pack: the effects are the walker's perk, the gear, then the upgrade.
+// Kilo walks at 2 hearts with Lucky collar in the Pocket, a Whistle found, the Raincoats upgrade
+// in effect and Muddy on the pack: the effects are the walker's perk, the Pocket's gear, the found
+// gear, then the upgrade.
 const run = testState(
   { kilo: 2 },
   {
     debuffs: [{ debuff: "muddy", secondsLeft: 9.2 }],
+    foundGear: "whistle",
     gear: "luckyCollar",
     immunities: [{ encounter: "puddle", source: { kind: "upgrade", upgrade: "raincoats" } }],
     upgradesPicked: ["raincoats"],
@@ -38,8 +40,17 @@ describe("explainDetail", () => {
       { kind: "gear", title: gameData.shopGear.luckyCollar.name },
     ],
     [
-      "an upgrade with its status",
+      "found gear as its gear card, named and marked found",
       { effect: 2, kind: "effect" },
+      {
+        kind: "gear",
+        status: text.foundStatus,
+        title: fillNames(gameData.runText.foundGear, { gear: gameData.shopGear.whistle.name }),
+      },
+    ],
+    [
+      "an upgrade with its status",
+      { effect: 3, kind: "effect" },
       { kind: "gear", status: text.upgradeStatus, title: gameData.upgrades.raincoats.name },
     ],
     [
@@ -69,7 +80,7 @@ describe("explainDetail", () => {
   });
 
   it.each<[string, ExplainTarget]>([
-    ["an effect past the walk's", { effect: 3, kind: "effect" }],
+    ["an effect past the walk's", { effect: 4, kind: "effect" }],
     ["a debuff that wore off", { debuff: "stinky", kind: "debuff" }],
     ["a dog not in the pack", { dog: "biscuit", kind: "dog" }],
   ])("shows nothing for %s", (_name, target) => {

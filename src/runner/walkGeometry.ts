@@ -12,7 +12,7 @@ import { walkerFootY } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import type { RoadGeometry } from "./walk";
 
-// A pickup's or lucky find's hit box is its lanes less the inset at each side, a cell's spare
+// A pickup's, lucky find's or gear drop's hit box is its lanes less the inset at each side, a cell's spare
 // width beside ROAD_HIT_SIZE, so one lane hits 40px wide on 64px lanes, whatever size it is
 // drawn.
 function footprintInset(cellLength: number): number {
@@ -22,6 +22,7 @@ function footprintInset(cellLength: number): number {
 // Collision heights in screen pixels of what is not an obstacle: the part of each sprite that
 // bumps into the pack, at the hit size, whatever size it is drawn.
 const ITEM_HEIGHTS: RoadGeometry["itemHeights"] = {
+  gear: 25,
   lucky: 25,
   tip: 15,
   treat: 15,

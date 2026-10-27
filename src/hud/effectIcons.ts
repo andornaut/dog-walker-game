@@ -1,18 +1,22 @@
 import { kebabCase } from "../assets/spriteKeys";
 import type { GameData, GearId, UpgradeId, WalkerId, WalkerPerkId } from "../data/types";
+import { gearSourceName } from "../rules/causes";
 import { gearShort, perkEffect } from "../rules/effectText";
 import { walkLength } from "../rules/route";
 import { read } from "../rules/units";
 import type { RunState } from "../state/runState";
 
 // An effect in force on the walk, shown as an icon in the walk bar's effect wells. Holding one
-// explains it.
+// explains it. A gear drop's charm is its gear, found, which has no well of its own.
 export type EffectItem =
-  | { readonly gear: GearId; readonly kind: "gear" }
+  | { readonly found?: true; readonly gear: GearId; readonly kind: "gear" }
   | { readonly kind: "perk"; readonly perk: WalkerPerkId }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
 
-type EffectRun = Pick<RunState, "gear" | "immunities" | "modifiers" | "upgradesPicked" | "walker">;
+type EffectRun = Pick<
+  RunState,
+  "foundGear" | "gear" | "immunities" | "modifiers" | "upgradesPicked" | "walker"
+>;
 
 // An effect's icon is this many pixels square.
 export const EFFECT_ICON_SIZE = 16;
@@ -39,8 +43,9 @@ export function walkerEffectItems(data: Pick<GameData, "walkers">, walker: Walke
   return [{ kind: "perk", perk: data.walkers[walker].perk }];
 }
 
-// The walker's perk, the gear in the Pocket, then the upgrades in effect in the order they were
-// picked.
+// The walker's perk, the gear in the Pocket, the found gear, then the upgrades in effect in the
+// order they were picked. Each takes the next well, so a walk with no found gear leaves no well
+// empty between the Pocket's and the upgrades'.
 export function effectItems(
   data: Pick<GameData, "upgrades" | "walkers">,
   run: EffectRun,
@@ -48,6 +53,9 @@ export function effectItems(
   return [
     ...walkerEffectItems(data, run.walker),
     ...(run.gear === null ? [] : [{ gear: run.gear, kind: "gear" } as const]),
+    ...(run.foundGear === null
+      ? []
+      : [{ found: true, gear: run.foundGear, kind: "gear" } as const]),
     ...run.upgradesPicked
       .filter((upgrade) => inEffect(data, run, upgrade))
       .map((upgrade): EffectItem => ({ kind: "upgrade", upgrade })),
@@ -55,9 +63,9 @@ export function effectItems(
 }
 
 // The most effects a walk can have at once: the walker's perk, up to loadoutMax gear in the
-// Pocket, and an upgrade from each fork, one between each two zones.
+// Pocket, one found gear item, and an upgrade from each fork, one between each two zones.
 export function maxEffects(data: Pick<GameData, "tuning" | "world">): number {
-  return 1 + read(data.tuning, "counts", "loadoutMax") + walkLength(data) - 1;
+  return 1 + read(data.tuning, "counts", "loadoutMax") + 1 + walkLength(data) - 1;
 }
 
 // The 16x16 icon of a walker's perk.
@@ -81,20 +89,20 @@ export function effectIconKey(item: EffectItem): string {
 
 // What an item's icon slot shows while its icon art is missing: its name's first letter.
 export function effectIconFallback(
-  data: Pick<GameData, "shopGear" | "upgrades" | "walkerPerks">,
+  data: Pick<GameData, "runText" | "shopGear" | "upgrades" | "walkerPerks">,
   item: EffectItem,
 ): string {
   return effectName(data, item).slice(0, 1);
 }
 
-// The item's name.
+// The item's name: a gear drop's names it found (gearSourceName).
 export function effectName(
-  data: Pick<GameData, "shopGear" | "upgrades" | "walkerPerks">,
+  data: Pick<GameData, "runText" | "shopGear" | "upgrades" | "walkerPerks">,
   item: EffectItem,
 ): string {
   switch (item.kind) {
     case "gear":
-      return data.shopGear[item.gear].name;
+      return gearSourceName(data, item);
     case "perk":
       return data.walkerPerks[item.perk].name;
     case "upgrade":

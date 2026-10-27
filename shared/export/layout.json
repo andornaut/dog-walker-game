@@ -2429,23 +2429,6 @@
   "walkBar": {
     "buttons": [
       {
-        "id": "home",
-        "face": {
-          "x": 197,
-          "y": 14
-        },
-        "hit": {
-          "height": 48,
-          "width": 34,
-          "x": 190,
-          "y": 0
-        },
-        "icon": {
-          "x": 199,
-          "y": 15
-        }
-      },
-      {
         "id": "help",
         "face": {
           "x": 231,
@@ -2544,6 +2527,12 @@
         "width": 22,
         "x": 168,
         "y": 5
+      },
+      {
+        "height": 43,
+        "width": 34,
+        "x": 190,
+        "y": 5
       }
     ],
     "effectWells": [
@@ -2576,11 +2565,17 @@
         "y": 20,
         "height": 22,
         "width": 22
+      },
+      {
+        "x": 190,
+        "y": 20,
+        "height": 22,
+        "width": 22
       }
     ],
     "zoneWell": {
       "height": 12,
-      "width": 110,
+      "width": 132,
       "x": 80,
       "y": 5
     },
@@ -2626,11 +2621,6 @@
           "faceX": 231,
           "hitWidth": 34,
           "hitX": 224
-        },
-        "home": {
-          "faceX": 197,
-          "hitWidth": 34,
-          "hitX": 190
         },
         "pause": {
           "faceX": 333,
@@ -2683,13 +2673,13 @@
           "y": 8
         },
         "progress": {
-          "right": 185,
+          "right": 207,
           "y": 8
         },
         "textGap": 4,
         "well": {
           "height": 12,
-          "width": 110,
+          "width": 132,
           "x": 80,
           "y": 5
         }

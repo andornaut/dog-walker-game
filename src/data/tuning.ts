@@ -12,6 +12,9 @@ export const TUNING = {
     // it enters from.
     dartStopLanesMax: 4,
     dartStopLanesMin: 2,
+    // The gear drops a neighbourhood places on average, by its position in the walk from 1: the
+    // whole part always, and one more at the fractional part's chance.
+    gearDropsPerZone: { 1: 0.5, 2: 0.8, 3: 1.2, 4: 1.5 },
     loadoutMax: 1,
     // Long reach grabs tips and treats this many lanes beside the pack.
     longReachLanes: 1,

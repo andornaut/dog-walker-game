@@ -43,10 +43,11 @@ export type Pack =
 export type PackDogs = readonly [DogId] | readonly [DogId, DogId] | readonly [DogId, DogId, DogId];
 
 // What a list of effects came from: a card option by its index in the source's data, an
-// instant encounter, gear, an upgrade, or the walker.
+// instant encounter, gear (found set for a gear drop grabbed on the road, else the Pocket's), an
+// upgrade, or the walker.
 export type EffectSource =
   | { readonly encounter: EncounterId; readonly kind: "encounter"; readonly option: number }
-  | { readonly gear: GearId; readonly kind: "gear" }
+  | { readonly found?: true; readonly gear: GearId; readonly kind: "gear" }
   | { readonly encounter: EncounterId; readonly kind: "instant" }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId }
   | { readonly kind: "walker"; readonly walker: WalkerId };
@@ -107,6 +108,10 @@ export interface RunState {
   // The zone index the run began in. A dev start skips the zones before it, which count
   // toward no achievement.
   readonly firstZone: number;
+  // The gear drop grabbed last, in effect on top of the Pocket's gear until the walk ends or the
+  // next grab replaces it; null before any.
+  readonly foundGear: GearId | null;
+  // The gear in the Pocket.
   readonly gear: GearId | null;
   // Hearts lost this zone that forgivenHearts modifiers forgave.
   readonly heartsForgiven: number;
@@ -184,6 +189,7 @@ export function newRun(
     debuffsGot: {},
     dodges: [],
     firstZone: 0,
+    foundGear: null,
     gear: loadout.gear,
     heartsForgiven: 0,
     immunities: [],

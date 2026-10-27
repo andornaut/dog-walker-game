@@ -59,6 +59,12 @@ export function gearIconKey(gear: GearId): string {
   return `item-${kebabCase(gear)}`;
 }
 
+// A gear drop on the road, drop-<gear>: 24x24 as a tip or a treat, with an idle tag and depth
+// steps, standing on its frame's bottom.
+export function gearDropSpriteKey(gear: GearId): string {
+  return `drop-${kebabCase(gear)}`;
+}
+
 // Owner faces are keyed by their dog.
 export function ownerFaceKey(data: Pick<GameData, "dogs">, dog: DogId): string {
   return `face-owner-${data.dogs[dog].art}`;

@@ -1,4 +1,4 @@
-import type { DogId, GameData } from "../data/types";
+import type { DogId, GameData, GearId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames } from "../lib/lines";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
@@ -99,6 +99,16 @@ export function changeAmount(change: Change): number {
   return change.kind === "hearts" ? change.after - change.before : change.amount;
 }
 
+// A gear item's name, as a change or a held card names what made it: a drop's, found, named
+// by runText.foundGear.
+export function gearSourceName(
+  data: Pick<GameData, "runText" | "shopGear">,
+  source: { readonly found?: true; readonly gear: GearId },
+): string {
+  const { name } = data.shopGear[source.gear];
+  return source.found === true ? fillNames(data.runText.foundGear, { gear: name }) : name;
+}
+
 function effectSourceName(data: CauseData, source: ModifierSource): string {
   switch (source.kind) {
     case "debuff":
@@ -108,7 +118,7 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
       return resolution.kind === "card" ? (resolution.options[source.option]?.name ?? name) : name;
     }
     case "gear":
-      return data.shopGear[source.gear].name;
+      return gearSourceName(data, source);
     case "instant":
       return data.encounters[source.encounter].name;
     case "upgrade":

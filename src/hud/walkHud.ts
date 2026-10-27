@@ -14,7 +14,7 @@ import { heartRows } from "./hudView";
 // top of the capitals.
 
 // The walk bar's buttons, left to right.
-export const WALK_BAR_BUTTONS = ["home", "help", "sound", "settings", "pause"] as const;
+export const WALK_BAR_BUTTONS = ["help", "sound", "settings", "pause"] as const;
 export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 
 // The cash well's ink columns, which the home top bar's bank well shares.
@@ -22,8 +22,8 @@ const CASH_INK = { left: 5, right: 73 } as const;
 
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
 // this table. buttons: each button's face x and its hit area's x and width, the hit areas the
-// bar's full height and minHitWidth wide or more (narrower than a 44px square, so five fit beside
-// five effect wells), side by side to the bar's right edge, each face buttonFace.size square on
+// bar's full height and minHitWidth wide or more (narrower than a 44px square, so four fit beside
+// six effect wells), side by side to the bar's right edge, each face buttonFace.size square on
 // row buttonFace.y, centred in its hit area. cash:
 // the "$" and the amount at the largest of scales whose ink fits room, centred across the well's
 // ink columns (ink.left to ink.right), their capitals' bottom on capsBottom. zone: the
@@ -37,7 +37,6 @@ export const WALK_BAR = {
   buttonFace: { size: 20, y: 14 },
   buttons: {
     help: { faceX: 231, hitWidth: 34, hitX: 224 },
-    home: { faceX: 197, hitWidth: 34, hitX: 190 },
     pause: { faceX: 333, hitWidth: 34, hitX: 326 },
     settings: { faceX: 299, hitWidth: 34, hitX: 292 },
     sound: { faceX: 265, hitWidth: 34, hitX: 258 },
@@ -53,9 +52,9 @@ export const WALK_BAR = {
   minHitWidth: 34,
   zone: {
     name: { x: 83, y: 8 },
-    progress: { right: 185, y: 8 },
+    progress: { right: 207, y: 8 },
     textGap: 4,
-    well: { height: 12, width: 110, x: 80, y: 5 },
+    well: { height: 12, width: 132, x: 80, y: 5 },
   },
 } as const;
 
@@ -68,8 +67,8 @@ export function zoneProgressText(
   return fillNames(data.runText.zoneProgress, { n: String(zoneIndex + 1), total });
 }
 
-// The most effects a walk can have, one well each: the walker's perk, the Pocket's gear and an
-// upgrade from each fork.
+// The most effects a walk can have, one well each: the walker's perk, the Pocket's gear, the
+// found gear and an upgrade from each fork.
 export const EFFECT_WELLS = maxEffects(gameData);
 
 // The title font's capitals are this many rows tall at 1x.

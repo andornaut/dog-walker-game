@@ -34,8 +34,7 @@ describe("the walk bar in each pause state", () => {
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
     player: boolean;
-    // What a tap on Home, a tap on pause, P, the M key, and a tap on sound, Help and Settings do.
-    home: TopBarAction | undefined;
+    // What a tap on pause, P, the M key, and a tap on sound, Help and Settings do.
     pause: TopBarAction | undefined;
     pauseKey: TopBarAction | undefined;
     mute: TopBarAction | undefined;
@@ -48,7 +47,6 @@ describe("the walk bar in each pause state", () => {
     gameplay: false,
     held: false,
     help: "openHelp",
-    home: "confirmHome",
     icon: "icon-pause",
     mute: "mute",
     pause: "openMenu",
@@ -66,9 +64,8 @@ describe("the walk bar in each pause state", () => {
     pauseKey: "resume",
     player: true,
   } as const;
-  const confirm = { ...menu, home: undefined } as const;
   const cover = {
-    ...confirm,
+    ...menu,
     help: undefined,
     pause: undefined,
     pauseKey: undefined,
@@ -79,7 +76,6 @@ describe("the walk bar in each pause state", () => {
   const detail = {
     ...walking,
     help: undefined,
-    home: undefined,
     pause: undefined,
     paused: true,
     settings: undefined,
@@ -101,7 +97,7 @@ describe("the walk bar in each pause state", () => {
       ],
       ["in the menu over a card", { ...CARD, menu: "open" }, menu],
       ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
-      ["asking whether to head home over a card", { ...CARD, menu: "confirmHome" }, confirm],
+      ["asking whether to head home over a card", { ...CARD, menu: "confirmHome" }, menu],
       ["under help, which mutes on M", { ...NOTHING_PAUSED, menu: "help" }, cover],
       [
         "under settings, which leaves M to its own sound switch",
@@ -115,7 +111,6 @@ describe("the walk bar in each pause state", () => {
           gameplay: gameplayAllowed(pause),
           held: pressesHeld(pause),
           help: topBarAction(pause, "tap", "help"),
-          home: topBarAction(pause, "tap", "home"),
           icon: pauseButtonIcon(pause),
           mute: topBarAction(pause, "key", "sound"),
           pause: topBarAction(pause, "tap", "pause"),

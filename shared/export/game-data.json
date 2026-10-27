@@ -2166,6 +2166,12 @@
       "dartLanesPerSecond": 3,
       "dartStopLanesMax": 4,
       "dartStopLanesMin": 2,
+      "gearDropsPerZone": {
+        "1": 0.5,
+        "2": 0.8,
+        "3": 1.2,
+        "4": 1.5
+      },
       "loadoutMax": 1,
       "longReachLanes": 1,
       "luckyEncountersPerZone": 1,

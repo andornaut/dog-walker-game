@@ -191,7 +191,7 @@ export class RunScene extends Scene implements HudRun {
     const started = this.session.walk.run;
     this.time.delayedCall(0, () => moments.walkStarted(started));
     // The first hints wait for the zone banner to leave: how to steer, the lead dog's
-    // pack-size bonus, then the Home button.
+    // pack-size bonus, then heading home.
     this.time.delayedCall(zoneBannerMs(this.reducedMotion()), () => {
       if (this.sys.game.device.input.touch) {
         showHint(this, { kind: "drag" });

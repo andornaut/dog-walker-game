@@ -30,12 +30,14 @@ type MarkData = Pick<
   | "world"
 >;
 
-// The charm a modifier's source shows: its gear, its upgrade or the walker's perk. A debuff,
-// a card's own option and a lucky find show none.
+// The charm a modifier's source shows: its gear (found for a gear drop), its upgrade or the
+// walker's perk. A debuff, a card's own option and a lucky find show none.
 function charmItem(data: Pick<GameData, "walkers">, source: ModifierSource): EffectItem | null {
   switch (source.kind) {
     case "gear":
-      return { gear: source.gear, kind: "gear" };
+      return source.found === true
+        ? { found: true, gear: source.gear, kind: "gear" }
+        : { gear: source.gear, kind: "gear" };
     case "upgrade":
       return { kind: "upgrade", upgrade: source.upgrade };
     case "walker":

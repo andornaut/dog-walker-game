@@ -19,13 +19,15 @@ export interface ZonePlanView {
   }[];
 }
 
-// Minor obstacles are split by how they move: standing still, darting across, riding in a lane,
-// or anything else (hopping or stalking). Obstacles that are encounters split into those that
-// open a card and those that do not (contact and pull obstacles).
+// Gear drops are their own group. Minor obstacles are split by how they move: standing still,
+// darting across, riding in a lane, or anything else (hopping or stalking). Obstacles that are
+// encounters split into those that open a card and those that do not (contact and pull
+// obstacles).
 export const DELIVERY_GROUPS = [
   "tips",
   "treats",
   "lucky",
+  "drops",
   "minorStatic",
   "minorDart",
   "minorRider",
@@ -64,6 +66,9 @@ export function deliveryGroup(
   }
   if (category === "lucky") {
     return "lucky";
+  }
+  if (category === "gear") {
+    return "drops";
   }
   if (category === "obstacle") {
     return opensACard(data, kind) ? "card" : "noCard";

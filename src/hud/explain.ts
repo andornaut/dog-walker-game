@@ -15,7 +15,7 @@ import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import type { RunState } from "../state/runState";
 import { extraHearts } from "./buffMarks";
-import { effectIconKey, effectItems } from "./effectIcons";
+import { effectIconKey, effectItems, effectName } from "./effectIcons";
 import { RUN_TEXT_FIELDS } from "./runText";
 import type { ExplainTarget } from "./walkHud";
 
@@ -38,6 +38,7 @@ type ExplainData = Pick<
 type ExplainRun = Pick<
   RunState,
   | "debuffs"
+  | "foundGear"
   | "gear"
   | "immunities"
   | "modifiers"
@@ -69,8 +70,8 @@ const ICON_SCALE = 4;
 // What target explains, from the data, the save and the walk as it stands, on the detail card
 // the home screen's Details show: a dog card's dog, with its owner's hearts now as its status
 // and each source of their extra max hearts after its rows; the walker's perk as its walker;
-// gear as the gear; an upgrade's effect; or a debuff's stake with its seconds left. None for
-// what the walk no longer has.
+// gear as the gear, the found gear named found with explain.foundStatus; an upgrade's effect;
+// or a debuff's stake with its seconds left. None for what the walk no longer has.
 export function explainDetail(
   data: ExplainData,
   save: ExplainSave,
@@ -85,12 +86,17 @@ export function explainDetail(
         return undefined;
       }
       switch (item.kind) {
-        case "gear":
+        case "gear": {
+          const card = gearDetail(data, save.owned, save.bankCents, { gear: item.gear }, item.gear);
           return {
-            card: gearDetail(data, save.owned, save.bankCents, { gear: item.gear }, item.gear),
+            card:
+              item.found === true
+                ? { ...card, status: text.foundStatus, title: effectName(data, item) }
+                : card,
             kind: "gear",
             picture: { key: gearIconKey(item.gear), scale: 2 },
           };
+        }
         case "perk":
           return {
             card: walkerDetail(data, save.owned, run.walker),

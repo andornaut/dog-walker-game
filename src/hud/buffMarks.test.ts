@@ -3,17 +3,19 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { amountText } from "../rules/causes";
+import { amountText, gearSourceName } from "../rules/causes";
 import { cardFor, chooseOption, openCard, type OptionView } from "../rules/choices";
 import { baseMoneyCost } from "../rules/effects";
 import { formatDollars } from "../rules/effectText";
+import { grabGear } from "../rules/gearDrops";
 import { type ModifiedValue, modifierCause } from "../rules/modified";
 import { cents, read, roundDollars } from "../rules/units";
 import type { WalkItem } from "../runner/walk";
-import type { ModifierSource } from "../state/runState";
+import { type ModifierSource, newRun } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import {
   type BuffPop,
+  extraHearts,
   NO_SPAWNS,
   optionMarks,
   type PoppedValue,
@@ -307,5 +309,26 @@ describe("a card cost Fanny pack cuts", () => {
       name: gameData.shopGear.fannyPack.name,
       text: amountText("money", base - cost),
     });
+  });
+});
+
+describe("found gear's marks", () => {
+  // A Lucky collar in the Pocket, or found on the road, names its row in a held dog card: Buddy's,
+  // which walks beside the lead and takes no pack-size bonus.
+  const fresh = (gear: "luckyCollar" | null) =>
+    newRun(gameData, 3, { dogs: ["reggie", "buddy", "kilo"], gear, walker: "casey" });
+  it.each([
+    { found: false, run: fresh("luckyCollar") },
+    { found: true, run: grabGear(gameData, "luckyCollar", fresh(null)).run },
+  ])("names the Lucky collar's extra hearts row, found: $found", ({ found, run }) => {
+    const name = gearSourceName(gameData, {
+      gear: "luckyCollar",
+      ...(found ? { found: true as const } : {}),
+    });
+    const hearts = String(read(gameData.tuning, "hearts", "luckyCollarMax"));
+    const owner = gameData.dogs.buddy.owner.name;
+    expect(extraHearts(gameData, run, "buddy")).toEqual([
+      fillNames(gameData.runText.explain.extraHearts, { hearts, name, owner }),
+    ]);
   });
 });

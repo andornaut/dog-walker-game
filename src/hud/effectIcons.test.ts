@@ -7,10 +7,11 @@ import { activeModifier, testState } from "../testing/runState";
 import { effectIconKey, type EffectItem, effectItems, walkerEffectItems } from "./effectIcons";
 
 describe("effectItems", () => {
-  it("lists the walker's perk, the gear, then the upgrades in effect in pick order", () => {
+  it("lists the perk, the Pocket's gear, the found gear, then the upgrades in pick order", () => {
     const run = testState(
       { kilo: 5 },
       {
+        foundGear: "whistle",
         gear: "luckyCollar",
         immunities: [{ encounter: "puddle", source: { kind: "upgrade", upgrade: "raincoats" } }],
         modifiers: [
@@ -26,6 +27,7 @@ describe("effectItems", () => {
     expect(effectItems(gameData, run)).toEqual([
       { kind: "perk", perk: gameData.walkers.trista.perk },
       { gear: "luckyCollar", kind: "gear" },
+      { found: true, gear: "whistle", kind: "gear" },
       { kind: "upgrade", upgrade: "raincoats" },
       { kind: "upgrade", upgrade: "bigTipper" },
     ]);

@@ -33,7 +33,7 @@ export function topBarButtonForKey(repeat: boolean, key: string): WalkBarButtonI
 }
 
 // What holds the walk still. card: a card or the zone celebration, which can sit under the
-// pause menu or the Home button's question, as the hit stop can. hold: a press held on the HUD
+// pause menu or the Home question, as the hit stop can. hold: a press held on the HUD
 // opened the detail card that explains it. Help and settings cover the whole screen, walk bar included. page:
 // the tab is hidden or the window has lost focus.
 export interface RunPause {
@@ -79,15 +79,14 @@ export function gameplayAllowed(pause: RunPause): boolean {
   return !walkPaused(pause) && !pause.hitStop;
 }
 
-export type TopBarAction =
-  "confirmHome" | "mute" | "openHelp" | "openMenu" | "openSettings" | "resume";
+export type TopBarAction = "mute" | "openHelp" | "openMenu" | "openSettings" | "resume";
 
 // What a walk-bar button does, pressed by a tap or by its key. Every button works whenever the
-// bar is in view: Home asks whether to head home, from the pause menu too, sound and M mute or
-// unmute, Help and Settings open help and the settings, and pause opens the menu, or resumes while the menu or
-// the question is up. Help and settings cover the bar, so a tap there is theirs, and so are P
-// and Escape, which close them. M still mutes under help; settings flips its own sound switch
-// on M. A tap while an explanation's detail card is up only closes it, so it presses no button.
+// bar is in view: sound and M mute or unmute, Help and Settings open help and the settings,
+// and pause opens the menu, or resumes while the menu or the question is up. Help and settings
+// cover the bar, so a tap there is theirs, and so are P and Escape, which close them. M still
+// mutes under help; settings flips its own sound switch on M. A tap while an explanation's
+// detail card is up only closes it, so it presses no button.
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",
@@ -101,8 +100,6 @@ export function topBarAction(
     return mutes ? "mute" : undefined;
   }
   switch (button) {
-    case "home":
-      return pause.menu === "confirmHome" ? undefined : "confirmHome";
     case "sound":
       return "mute";
     case "help":

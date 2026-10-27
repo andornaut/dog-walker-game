@@ -14,6 +14,7 @@ import {
   stepValues,
   walkStartMarks,
 } from "../../hud/buffMarks";
+import type { EffectItem } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
 import { changeLabels } from "../../hud/hudView";
 import type { MessageLine } from "../../hud/messageStrip";
@@ -38,6 +39,7 @@ import {
   firedLine,
   forgivenLines,
   fullPackLine,
+  gearFoundLine,
   lowHeartsLines,
   luckyLine,
   pullLine,
@@ -94,7 +96,7 @@ import { playEffect } from "../sprites";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
-import { showInstantPopup } from "./roadBanners";
+import { showGearPopup, showInstantPopup } from "./roadBanners";
 import { DEPTH, firingSeconds, LAYOUT } from "./stage";
 
 // How long the step's hit stop holds the road, or a plain obstacle's stop while it has none.
@@ -349,6 +351,13 @@ export class RunMoments {
       this.sayQuips(outcome.quips);
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });
+    }
+    // A gear drop pops its art over the road and glints the found well, whose icon it takes.
+    for (const { gear, replaced } of step.found) {
+      showGearPopup(this.scene, gear, this.deps.still());
+      this.say(gearFoundLine(gameData, gear, replaced));
+      const item: EffectItem = { found: true, gear, kind: "gear" };
+      this.scene.events.emit(BUFF_GLINT_EVENT, item);
     }
     for (const hit of step.encounterHits) {
       const { kind } = gameData.encounters[hit.encounter];

@@ -1,4 +1,4 @@
-import type { DebuffId, DogId, EncounterId, GameData } from "../data/types";
+import type { DebuffId, DogId, EncounterId, GameData, GearId } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
@@ -213,6 +213,27 @@ export function luckyLine(
     };
   }
   return null;
+}
+
+// A gear drop grabbed, led by its gear's icon: gearFound, or gearSwapped naming the found item
+// it replaced.
+export function gearFoundLine(
+  data: Pick<GameData, "runText" | "shopGear">,
+  gear: GearId,
+  replaced: GearId | null,
+): MessageLine {
+  const { strip } = data.runText;
+  const name = data.shopGear[gear].name;
+  return {
+    icon: { found: true, gear, kind: "gear" },
+    text:
+      replaced === null
+        ? fillLine(STRIP_LINE_FIELDS, strip, "gearFound", { gear: name })
+        : fillLine(STRIP_LINE_FIELDS, strip, "gearSwapped", {
+            gear: name,
+            old: data.shopGear[replaced].name,
+          }),
+  };
 }
 
 // The Walk bonus, from the fees paid at the walk's end; none paid says nothing.

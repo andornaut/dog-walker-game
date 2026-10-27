@@ -2,6 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import {
   encounterSpriteKey,
+  gearDropSpriteKey,
   minorObstacleSpriteKey,
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
@@ -12,7 +13,7 @@ import {
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import type { EncounterId, HintTrigger, MinorObstacleId } from "../../data/types";
+import type { EncounterId, GearId, HintTrigger, MinorObstacleId } from "../../data/types";
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
 import { itemAt } from "../../lib/arrays";
@@ -70,8 +71,8 @@ interface VergeView {
   readonly view: ItemView;
 }
 
-// A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape in
-// the data.
+// A box for each minor obstacle, gear drop and the skunk's cloud whose art is missing, from its
+// shape in the data, a drop one lane wide.
 export function ensureRoadPlaceholders(scene: Scene): void {
   const pack = { dogs: [], walker: gameData.defaultWalker };
   const { cell } = walkGeometry(LANE_COUNT, pack, PROJECTION, LAYOUT.road);
@@ -84,6 +85,9 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   for (const [id, obstacle] of Object.entries(gameData.minorObstacles)) {
     const art = minorObstacleSpriteKey(id as MinorObstacleId);
     add(art, obstacle.shape.lanes);
+  }
+  for (const gear of Object.keys(gameData.shopGear) as GearId[]) {
+    add(gearDropSpriteKey(gear), 1);
   }
   const skunk = gameData.encounters.skunk;
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
@@ -244,16 +248,18 @@ export class ItemViews {
   }
 
   // Each item stands once at the near edge of its hit box, however many rows it covers, and a
-  // lucky find on its frame's bottom. An obstacle draws obstacleParts, which it collides as.
+  // lucky find or a gear drop on its frame's bottom. An obstacle draws obstacleParts, which it
+  // collides as.
   private addView(item: WalkItem): ItemView {
     const { scene } = this;
     const has = (key: string) => scene.textures.exists(key);
     const bottom = (shown: Pick<WalkItem, "height" | "y">) => shown.y + shown.height;
-    const lucky = itemCategory(gameData, item.kind) === "lucky";
+    const category = itemCategory(gameData, item.kind);
+    const lucky = category === "lucky";
     const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
       const made: ItemPart = {
         dx: 0,
-        feet: lucky ? "bottom" : "anchor",
+        feet: lucky || category === "gear" ? "bottom" : "anchor",
         flat: false,
         footY: bottom,
         key,
@@ -287,6 +293,8 @@ export class ItemViews {
       parts = [part(item.kind)];
     } else if (lucky) {
       parts = [part(encounterSpriteKey(item.kind as EncounterId))];
+    } else if (category === "gear") {
+      parts = [part(gearDropSpriteKey(item.kind as GearId))];
     } else {
       parts = obstacleParts(gameData, has, item.kind as EncounterId | MinorObstacleId, false).map(
         ({ behind, dx, flat, key }) =>

@@ -9,6 +9,8 @@ export const STRIP_LINE_FIELDS = {
   effectStart: ["effect", "name"],
   fired: ["dog", "owner"],
   fullPackHome: ["amount"],
+  gearFound: ["gear"],
+  gearSwapped: ["gear", "old"],
   largeDog: ["dog", "speed"],
   lowHearts: ["owner"],
   luckyNeighbour: ["gains", "hearts"],
@@ -33,6 +35,7 @@ export const RUN_TEXT_FIELDS = {
     extraHearts: ["hearts", "name", "owner"],
   },
   firedBy: ["owner"],
+  foundGear: ["gear"],
   fullPackHome: ["amount"],
   homeQuestion: {
     lose: ["fees", "zone"],
