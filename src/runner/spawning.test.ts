@@ -21,6 +21,7 @@ import {
   type SpawnPlan,
   spawnRowDistances,
   takeDueSpawns,
+  WIDE_LANES,
 } from "./spawning";
 
 // A set of lanes as a bit mask: bit n set means lane n is in it.
@@ -562,7 +563,8 @@ describe("planSpawns", () => {
 
   // Every pair of obstacles, checked apart from the planner: where a way out of a lane the
   // farther one blocks steps in behind the nearer one, the road between their hit boxes fits the
-  // 50px pack, 25px per lane change and the 10px margin; wide ones are two rows apart or more.
+  // 50px pack, 25px per lane change and the 10px margin; ones WIDE_LANES wide or wider are two rows
+  // apart or more.
   it("spaces obstacles for lane changes between them, for any seed", () => {
     for (const seed of seeds.slice(0, 5)) {
       const events = planSpawns(plannerStreams(seed), reacting).filter(blocking);
@@ -576,7 +578,10 @@ describe("planSpawns", () => {
           if (changes > 0 && gap > 0) {
             expect(gap).toBeGreaterThanOrEqual(50 + 25 * changes + 10);
           }
-          if (footprintOf(near.kind).lanes > 1 && footprintOf(far.kind).lanes > 1) {
+          if (
+            footprintOf(near.kind).lanes >= WIDE_LANES &&
+            footprintOf(far.kind).lanes >= WIDE_LANES
+          ) {
             expect(far.distance - near.distance).toBeGreaterThanOrEqual(2 * 100);
           }
         }

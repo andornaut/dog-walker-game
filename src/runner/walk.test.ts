@@ -92,7 +92,7 @@ import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "./movers";
 import { shyOutcomes } from "./shy";
-import { zoneRows } from "./spawning";
+import { WIDE_LANES, zoneRows } from "./spawning";
 import {
   blocksLane,
   collectTip,
@@ -559,7 +559,7 @@ describe("planZone", { timeout: 60_000 }, () => {
   // first lane the nearer one blocks to the nearest lane the farther one leaves open. Road
   // between them, from the nearer one's drawn hit box, is at least the tallest pack's hit boxes,
   // those lane moves in whole walk steps and the reaction margin, on every way out. Two obstacles
-  // two or more lanes wide have a row between them. At the road's speed in the last
+  // WIDE_LANES or more lanes wide have a row between them. At the road's speed in the last
   // neighborhood, for the walkers whose lane moves cover the least and the most road.
   it("spaces obstacles for the pack to change lanes between them, at the shortest and longest lane move", () => {
     for (const { walker, zone } of LANE_MOVE_WALKERS.flatMap((walker) =>
@@ -595,7 +595,7 @@ describe("planZone", { timeout: 60_000 }, () => {
           }
         }
         const spacing = gcdOf(walk.road.pending.flatMap((e) => (e.mover ? [] : [e.distance])));
-        const wide = standing.filter(({ kind }) => footprintOf(REAL, kind).lanes >= 2);
+        const wide = standing.filter(({ kind }) => footprintOf(REAL, kind).lanes >= WIDE_LANES);
         wide.forEach((near, i) => {
           for (const far of wide.slice(i + 1)) {
             const rowsApart = Math.abs(far.distance - near.distance) / spacing;

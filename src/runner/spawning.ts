@@ -330,7 +330,7 @@ interface Cell {
 
 // Lane-blocking spawns this many lanes wide or wider never stand on neighbouring rows: a row is
 // left between the rows their hit boxes are on.
-const WIDE_LANES = 2;
+export const WIDE_LANES = 3;
 
 // Which rows' windows and gaps a lane-blocking spawn rows long, placed on row, overlaps.
 // Rows are spacing apart, so the indexes are counted from distances.
