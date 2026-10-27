@@ -38,6 +38,7 @@ export const testContext: SaveContext = {
     gear: new Set(["fannyPack", "hallPass", "luckyCollar", "runningShoes"]),
     hints: new Set(["card", "puddle", "tip"]),
     minorObstacles: new Set(["bench", "pigeons", "raccoon"]),
+    options: new Map([["capybara", new Set(["callZoo", "help"])]]),
     walkers: new Set(["ada", "mrB", "casey", "trista"]),
     zones: new Set(["homeStretch", "park", "pawsPromenade", "shops", "snoozeCrescent", "street"]),
   },
@@ -46,13 +47,14 @@ export const testContext: SaveContext = {
 // Awards from the live game data, stamped at a fixed time.
 export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000 };
 
-// A run with no bumps, debuffs, tallies or starting money.
+// A run with no bumps, debuffs, option picks, tallies or starting money.
 export const quietCounters = (): RunCounters => ({
   bumpsByKind: {},
   bumpsByZone: [],
   debuffsGot: {},
   firstZone: 0,
   lastHeartOwners: 0,
+  optionPicks: {},
   startCents: cents(0),
   tallies: {},
 });
@@ -82,11 +84,12 @@ export const newPlayerSave: SaveDocument = {
     lastWalk: null,
     lifetimeCents: cents(0),
     lifetimeStartCents: cents(0),
+    noFiringStreak: 0,
+    optionPicks: {},
     runs: { finished: 0, noDogs: 0, wentHome: 0 },
     tallies: {},
     timesFired: 0,
     walkersFinishedWith: [],
-    walksWithoutFiring: 0,
     zonesEverFinished: [],
   },
   version: SAVE_VERSION,
@@ -135,11 +138,12 @@ export function veteranSave(): SaveDocument {
       },
       lifetimeCents: cents(30_000),
       lifetimeStartCents: cents(2_000),
+      noFiringStreak: 2,
+      optionPicks: { capybara: { help: 2 } },
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       tallies: { squirrelPulls: 5 },
       timesFired: 1,
       walkersFinishedWith: ["casey"],
-      walksWithoutFiring: 2,
       zonesEverFinished: [
         "homeStretch",
         "park",

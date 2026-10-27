@@ -278,6 +278,22 @@ describe("chooseOption", () => {
     }
   });
 
+  // Every option of every card in the data, by its encounter, index and id.
+  const picked = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+    const { resolution } = ENCOUNTERS[id];
+    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
+    return options.map((option, index) => ({ id, index, option: option.id }));
+  });
+
+  it.each(picked)("counts a pick of $id's $option by encounter and option id", (row) => {
+    const state = testState({ kilo: 5 }, { money: cents(5_000) });
+    const card = encounter(row.id, ["kilo"]);
+    const once = choose(state, card, row.index).state;
+    expect(once.optionPicks).toEqual({ [row.id]: { [row.option]: 1 } });
+    const twice = choose({ ...once, phase: { kind: "walking" } }, card, row.index).state;
+    expect(twice.optionPicks).toEqual({ [row.id]: { [row.option]: 2 } });
+  });
+
   // Every card option in the data that applies a debuff, whichever debuff and card it is.
   const debuffOptions = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
@@ -435,6 +451,8 @@ describe("skip option", () => {
       phase: { kind: "walking" },
       skipUsed: true,
     });
+    // A Skip picks no option.
+    expect(skipped.state.optionPicks).toEqual({});
     expect(cardFor(data, skipped.state, source).skip).toBe(false);
     expect(() => choose(skipped.state, source, "skip")).toThrow("no Skip option");
   });

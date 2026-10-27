@@ -6,7 +6,8 @@ import type { Encounter, EncounterId } from "./types";
 // does nothing, and dogs pull toward it. A lucky find applies its effects on contact with a
 // popup.
 // Money amounts and modifier values are keys into tuning.ts; hearts are per owner.
-// art is a key into the art manifest's images.
+// art is a key into the art manifest's images. A card option's id, unique on its card, is what
+// the save counts its picks by: keep it when the option is renamed.
 export const ENCOUNTERS = {
   // Each neighbourhood's own card obstacle comes only in its zone.
   capybara: {
@@ -21,16 +22,19 @@ export const ENCOUNTERS = {
         {
           art: "card-capybara-help",
           effects: [{ debuff: "muddy", kind: "debuff" }],
+          id: "help",
           name: "Help the keeper",
         },
         {
           art: "card-capybara-call-zoo",
           effects: [{ amount: "capybaraCall", change: "lose", kind: "money" }],
+          id: "callZoo",
           name: "Call the zoo",
         },
         {
           art: "card-capybara-drag",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "drag",
           name: "Drag them away",
         },
       ],
@@ -49,16 +53,19 @@ export const ENCOUNTERS = {
         {
           art: "card-dropped-cone-lick",
           effects: [{ debuff: "zoomies", kind: "debuff" }],
+          id: "lick",
           name: "Let them lick it",
         },
         {
           art: "card-dropped-cone-buy",
           effects: [{ amount: "newCone", change: "lose", kind: "money" }],
+          id: "buy",
           name: "Buy a new cone",
         },
         {
           art: "card-dropped-cone-walk-on-by",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "walkOnBy",
           name: "Walk on by",
         },
       ],
@@ -77,16 +84,19 @@ export const ENCOUNTERS = {
         {
           art: "card-fish-crates-sniff",
           effects: [{ debuff: "stinky", kind: "debuff" }],
+          id: "sniff",
           name: "Sniff the fish",
         },
         {
           art: "card-fish-crates-pay",
           effects: [{ amount: "fishCleanUp", change: "lose", kind: "money" }],
+          id: "pay",
           name: "Pay for the fish",
         },
         {
           art: "card-fish-crates-hurry-past",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "hurryPast",
           name: "Hurry past",
         },
       ],
@@ -119,12 +129,14 @@ export const ENCOUNTERS = {
             { amount: 1, kind: "hearts", target: { kind: "affected" } },
             { amount: "missedTips", change: "lose", kind: "money" },
           ],
+          id: "sniff",
           name: "Let them sniff",
           tally: "sniffs",
         },
         {
           art: "card-other-dog-pull-away",
           effects: [{ debuff: "zoomies", kind: "debuff" }],
+          id: "pullAway",
           name: "Pull away",
         },
       ],
@@ -153,16 +165,19 @@ export const ENCOUNTERS = {
         {
           art: "card-porch-cat-stand",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
+          id: "stand",
           name: "Stand your ground",
         },
         {
           art: "card-porch-cat-treat",
           effects: [{ amount: "porchCatTreat", change: "lose", kind: "money" }],
+          id: "treat",
           name: "Treat bribe",
         },
         {
           art: "card-porch-cat-bolt",
           effects: [{ debuff: "zoomies", kind: "debuff" }],
+          id: "bolt",
           name: "Bolt past",
         },
       ],
@@ -181,16 +196,19 @@ export const ENCOUNTERS = {
         {
           art: "card-promo-team-wave",
           effects: [{ debuff: "spotlight", kind: "debuff" }],
+          id: "wave",
           name: "Wave hello",
         },
         {
           art: "card-promo-team-merch",
           effects: [{ amount: "promoMerch", change: "lose", kind: "money" }],
+          id: "merch",
           name: "Buy the merch",
         },
         {
           art: "card-promo-team-push-through",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "pushThrough",
           name: "Push through",
         },
       ],
@@ -227,16 +245,19 @@ export const ENCOUNTERS = {
               kind: "money",
             },
           ],
+          id: "grooming",
           name: "Full groom",
         },
         {
           art: "card-skunk-rinse",
           effects: [{ debuff: "stinky", kind: "debuff" }],
+          id: "rinse",
           name: "Quick rinse",
         },
         {
           art: "card-skunk-ignore",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "ignore",
           name: "Hold your nose",
         },
       ],
@@ -263,12 +284,14 @@ export const ENCOUNTERS = {
         {
           art: "card-thief-let-go",
           effects: [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
+          id: "letGo",
           name: "Let them go",
           tally: "thievesLetGo",
         },
         {
           art: "card-thief-chase",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "chase",
           name: "Chase them off",
         },
       ],
@@ -286,16 +309,19 @@ export const ENCOUNTERS = {
         {
           art: "card-wedding-shoot-pose",
           effects: [{ debuff: "spotlight", kind: "debuff" }],
+          id: "pose",
           name: "Pose",
         },
         {
           art: "card-wedding-shoot-walk-around",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "walkAround",
           name: "Walk around",
         },
         {
           art: "card-wedding-shoot-reshoot",
           effects: [{ amount: "weddingApology", change: "lose", kind: "money" }],
+          id: "reshoot",
           name: "Pay for a reshoot",
         },
       ],

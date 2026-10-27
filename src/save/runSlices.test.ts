@@ -57,6 +57,7 @@ describe("checkpointOf", () => {
       bumpsByKind: { raccoon: 2 },
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
+      optionPicks: { capybara: { help: 2 } },
       pack: [
         { ...walking, hearts: clampHearts(5, 1) },
         { dog: "duchess", status: "fired", zoneIndex: 1 },
@@ -70,6 +71,7 @@ describe("checkpointOf", () => {
       debuffsGot: { stinky: 1 },
       firstZone: 0,
       lastHeartOwners: 1,
+      optionPicks: { capybara: { help: 2 } },
       startCents: 500,
       tallies: { squirrelPulls: 3 },
     });

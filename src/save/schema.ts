@@ -6,6 +6,7 @@ import type {
   GearId,
   HintId,
   MinorObstacleId,
+  OptionPicks,
   TallyId,
   WalkerId,
   ZoneId,
@@ -14,7 +15,7 @@ import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 16;
 
 // Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
 // TallyId fails to compile until it is listed here.
@@ -60,6 +61,9 @@ const dogRunSchema = v.object({
   zonesFinished: count,
 });
 
+// Card option picks, keyed by encounter id, then by option id.
+const optionPicksSchema = v.record(contentId, v.record(contentId, count));
+
 // A run's achievement counters (RunCounters). bumpsByKind is keyed by minor obstacle id and
 // debuffsGot by debuff id.
 const runCountersSchema = v.object({
@@ -68,6 +72,7 @@ const runCountersSchema = v.object({
   debuffsGot: v.record(contentId, count),
   firstZone: count,
   lastHeartOwners: count,
+  optionPicks: optionPicksSchema,
   startCents: cents,
   // Keyed by TallyId.
   tallies: v.record(contentId, count),
@@ -131,6 +136,11 @@ const statsSchema = v.object({
   lifetimeCents: cents,
   // Every walk's starting cash: lifetimeCents less this is what the walks earned.
   lifetimeStartCents: cents,
+  // Finished walks from the first zone in which no owner fired you, since the last walk with a
+  // firing. A walk headed home early with no firing leaves it as it is.
+  noFiringStreak: count,
+  // Each card option's picks over every run.
+  optionPicks: optionPicksSchema,
   // Keyed by EndReason. A run banked from a checkpoint counts as wentHome.
   runs: v.object({
     finished: count,
@@ -142,8 +152,6 @@ const statsSchema = v.object({
   timesFired: count,
   // Every walker who finished a walk from the first zone, each once.
   walkersFinishedWith: ids,
-  // Finished walks from the first zone in which no owner fired you.
-  walksWithoutFiring: count,
   // Every zone a walk from the first zone finished, each once.
   zonesEverFinished: ids,
 });
@@ -234,6 +242,7 @@ export interface SaveStats extends Omit<
   | "dogs"
   | "dogsFinishedWith"
   | "lastWalk"
+  | "optionPicks"
   | "runs"
   | "tallies"
   | "walkersFinishedWith"
@@ -245,6 +254,7 @@ export interface SaveStats extends Omit<
   dogs: Partial<Record<DogId, DogStats>>;
   dogsFinishedWith: DogId[];
   lastWalk: LastWalk | null;
+  optionPicks: OptionPicks;
   runs: Record<EndReason, number>;
   tallies: Partial<Record<TallyId, number>>;
   walkersFinishedWith: WalkerId[];
@@ -310,11 +320,12 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       lastWalk: null,
       lifetimeCents: zero,
       lifetimeStartCents: zero,
+      noFiringStreak: 0,
+      optionPicks: {},
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
       tallies: {},
       timesFired: 0,
       walkersFinishedWith: [],
-      walksWithoutFiring: 0,
       zonesEverFinished: [],
     },
     version: SAVE_VERSION,

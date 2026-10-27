@@ -14,7 +14,7 @@ import type {
 import { fillNames } from "../lib/lines";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
-import { countOptionTally } from "./achievements";
+import { countOptionPick, countOptionTally } from "./achievements";
 import {
   amountText,
   type CauseData,
@@ -478,8 +478,9 @@ function takePath(
   return { ...outcome, state: { ...outcome.state, route: [...outcome.state.route, zone] } };
 }
 
-// Applies the chosen option. Owners at 0 hearts fire you; with no dogs left the run ends. An
-// option that names a tally counts one toward it. A fork's path takes its upgrade and sets the
+// Applies the chosen option. Owners at 0 hearts fire you; with no dogs left the run ends. The
+// pick counts toward the option's picks, and an option that names a tally counts one toward it.
+// A Skip counts toward neither. A fork's path takes its upgrade and sets the
 // next zone. Throws for a disabled option or an ended run.
 export function chooseOption(
   data: CardData,
@@ -528,7 +529,10 @@ export function chooseOption(
     content.option.effects,
     state,
   );
-  const counted = { ...outcome.state, cardsThisZone: state.cardsThisZone + 1 };
+  const counted = countOptionPick(card.source.encounter, content.option.id, {
+    ...outcome.state,
+    cardsThisZone: state.cardsThisZone + 1,
+  });
   return { ...outcome, state: countOptionTally(content.option, counted) };
 }
 

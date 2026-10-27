@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { AchievementCondition, DogId, TallyId, WalkerId, ZoneId } from "../data/types";
-import { itemAt } from "../lib/arrays";
 import { type SaveDocument } from "../save/schema";
 import { runFactsFor, saveFor } from "../testing/achievements";
 import { testState } from "../testing/runState";
@@ -12,10 +11,12 @@ import {
   conditionHolds,
   countBump,
   countLandedBump,
+  countOptionPick,
   countOptionTally,
   countTally,
   earnedByRun,
   newlyEarned,
+  runCountersOf,
   type RunFacts,
 } from "./achievements";
 import { applyEffects } from "./effects";
@@ -29,6 +30,7 @@ const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   earnedCents: cents(0),
   firstZone: 0,
   lastHeartOwners: 0,
+  optionPicks: {},
   packSize: 1,
   startCents: cents(0),
   tallies: {},
@@ -68,14 +70,7 @@ const bumped = (bumpsByZone: number[], finished: number) => ({
 const fromZone3 = { firstZone: 2, zonesFinished: 4 };
 const homeInZone4 = { firstZone: 3, zonesFinished: 3 };
 const minorBump = [...countBump(testState({ kilo: 5 })).bumpsByZone];
-const luckyFinds = (count: Count) => ({ count, kind: "luckyFinds" }) as const;
-// Each lucky find in the data by its tally, each found once.
-const LUCKY_TALLIES = Object.values(gameData.encounters).flatMap((encounter) =>
-  encounter.kind === "lucky" ? [encounter.resolution.tally] : [],
-);
-const found = (tallies: readonly TallyId[]) => ({
-  tallies: Object.fromEntries(tallies.map((tally) => [tally, 1])),
-});
+const spotlight3 = { count: 3, debuff: "spotlight", kind: "debuffsGot" } as const;
 
 describe("run conditions", () => {
   // A dev start from zone 3 skipped zones 1 and 2: they count as neither finished nor clean.
@@ -119,15 +114,8 @@ describe("run conditions", () => {
     ["debuffsGot at the count", stinky3, { debuffsGot: { stinky: 3 } }, true],
     ["debuffsGot counts one walk's zoomies", zoomies3, { debuffsGot: { zoomies: 3 } }, true],
     ["debuffsGot counts no other debuff", zoomies3, { debuffsGot: { stinky: 3 } }, false],
-    ["luckyFinds all, every lucky find", luckyFinds("all"), found(LUCKY_TALLIES), true],
-    ["luckyFinds all, one missing", luckyFinds("all"), found(LUCKY_TALLIES.slice(1)), false],
-    [
-      "luckyFinds, one find twice counts once",
-      luckyFinds(2),
-      { tallies: { [itemAt(LUCKY_TALLIES, 0)]: 2 } },
-      false,
-    ],
-    ["luckyFinds, another tally", luckyFinds(1), found(["treats"]), false],
+    ["debuffsGot, the Spotlight a time short", spotlight3, { debuffsGot: { spotlight: 2 } }, false],
+    ["debuffsGot, the Spotlight at the count", spotlight3, { debuffsGot: { spotlight: 3 } }, true],
     ["finishOnLastHeart, finished on one", closeShave, { ...walked, lastHeartOwners: 1 }, true],
     ["finishOnLastHeart, none on one", closeShave, { ...walked, lastHeartOwners: 0 }, false],
     [
@@ -172,10 +160,12 @@ describe("run conditions", () => {
 });
 
 describe("profile conditions", () => {
-  const all = (kind: "dogSlotsOwned" | "dogsFinishedWith" | "dogsOwned" | "gearOwned") =>
+  const all = (kind: "dogsFinishedWith" | "dogsOwned" | "gearOwned") =>
     ({ count: "all", kind }) as const;
-  const count = (kind: "timesFired" | "walksPlayed" | "walksWithoutFiring", n: number) =>
+  const count = (kind: "noFiringStreak" | "timesFired" | "walksPlayed", n: number) =>
     ({ count: n, kind }) as const;
+  const helpKeeper = (n: number) =>
+    ({ count: n, encounter: "capybara", kind: "optionPicks", option: "help" }) as const;
   const tally = (name: TallyId, n: number) => ({ count: n, kind: "tally", tally: name }) as const;
   const birds = (n: number) => ({ count: n, kind: "bumps", kinds: ["goose", "pigeons"] }) as const;
   const lifetime = { dollars: 200, kind: "lifetimeEarnings" } as const;
@@ -204,28 +194,40 @@ describe("profile conditions", () => {
     ["gearOwned all, one missing", all("gearOwned"), withOwned({ gear: ALL_GEAR.slice(1) }), false],
     ["gearOwned all, every item", all("gearOwned"), withOwned({ gear: ALL_GEAR }), true],
     [
-      "dogSlotsOwned all, one missing",
-      all("dogSlotsOwned"),
-      withOwned({ dogSlots: [1, 3] }),
+      "noFiringStreak below the count",
+      count("noFiringStreak", 10),
+      withStats({ noFiringStreak: 9 }),
       false,
     ],
     [
-      "dogSlotsOwned all, every slot",
-      all("dogSlotsOwned"),
-      withOwned({ dogSlots: [1, 2, 3] }),
+      "noFiringStreak at the count",
+      count("noFiringStreak", 10),
+      withStats({ noFiringStreak: 10 }),
       true,
     ],
     [
-      "walksWithoutFiring below the count",
-      count("walksWithoutFiring", 10),
-      withStats({ walksWithoutFiring: 9 }),
+      "optionPicks below the count",
+      helpKeeper(10),
+      withStats({ optionPicks: { capybara: { help: 9 } } }),
       false,
     ],
     [
-      "walksWithoutFiring at the count",
-      count("walksWithoutFiring", 10),
-      withStats({ walksWithoutFiring: 10 }),
+      "optionPicks at the count",
+      helpKeeper(10),
+      withStats({ optionPicks: { capybara: { help: 10 } } }),
       true,
+    ],
+    [
+      "optionPicks, another option of the card",
+      helpKeeper(10),
+      withStats({ optionPicks: { capybara: { callZoo: 10, drag: 10 } } }),
+      false,
+    ],
+    [
+      "optionPicks, an option of the same id on another card",
+      { count: 10, encounter: "otherDog", kind: "optionPicks", option: "sniff" },
+      withStats({ optionPicks: { fishCrates: { sniff: 10 } } }),
+      false,
     ],
     ["timesFired at the count", count("timesFired", 10), withStats({ timesFired: 10 }), true],
     ["tally below", tally("dodges", 5), withStats({ tallies: { dodges: 4 } }), false],
@@ -362,7 +364,6 @@ const RUN_KINDS: readonly AchievementCondition["kind"][] = [
   "earnings",
   "finishOnLastHeart",
   "fullPackBonus",
-  "luckyFinds",
   "packSize",
   "zonesFinished",
 ];
@@ -382,17 +383,18 @@ describe("newlyEarned", () => {
     expect(newlyEarned(gameData, newPlayerSave, after, run)).toEqual(ALL_IDS);
   });
 
-  it("needs every condition: Top Walker only with every dog, slot and gear item", () => {
-    const all = {
-      dogSlots: gameData.dogSlots.map((_, i) => i + 1),
-      dogs: ALL_DOGS,
-      gear: ALL_GEAR,
-    };
-    const earns = (owned: Partial<SaveDocument["owned"]>) =>
-      newlyEarned(gameData, newPlayerSave, withOwned(owned), null).includes("topWalker");
-    expect(earns(all)).toBe(true);
-    expect(earns({ ...all, gear: ALL_GEAR.slice(1) })).toBe(false);
-    expect(earns({ ...all, dogSlots: all.dogSlots.slice(1) })).toBe(false);
+  // A badge of two conditions: a pack of 2 that finishes the walk.
+  const [first] = gameData.achievements;
+  const both = { ...first, conditions: [packOf2, zonesFinished("all")] } as const;
+  it.each<[string, Partial<RunFacts>, boolean]>([
+    ["both met", { packSize: 2, ...walked }, true],
+    ["the pack too small", { packSize: 1, ...walked }, false],
+    ["a zone short", { packSize: 2, zonesFinished: 3 }, false],
+  ])("needs every condition: %s", (_, run, earned) => {
+    const data = { ...gameData, achievements: [both] as const };
+    expect(newlyEarned(data, newPlayerSave, newPlayerSave, facts(run))).toEqual(
+      earned ? [first.id] : [],
+    );
   });
 });
 
@@ -435,6 +437,22 @@ describe("counters", () => {
     expect(countOptionTally({}, run)).toBe(run);
     const twice = countTally("treats", countTally("treats", run));
     expect(twice.tallies).toEqual({ treats: 2 });
+  });
+
+  it("counts option picks by encounter and option id, each apart", () => {
+    const run = testState({ kilo: 5 });
+    const picked = [
+      ["capybara", "help"],
+      ["capybara", "help"],
+      ["capybara", "drag"],
+      ["fishCrates", "sniff"],
+    ] as const;
+    const after = picked.reduce(
+      (state, [encounter, option]) => countOptionPick(encounter, option, state),
+      run,
+    );
+    expect(after.optionPicks).toEqual({ capybara: { drag: 1, help: 2 }, fishCrates: { sniff: 1 } });
+    expect(runCountersOf(after).optionPicks).toEqual(after.optionPicks);
   });
 });
 

@@ -1290,10 +1290,8 @@ export function stepWalk(
     } else if (isMinorObstacle(data, kind)) {
       const minor = { ...item, kind };
       if (dodges(data, random, nextRun, dog)) {
-        // The dodges tally, toward Dodge Ball, counts only small dogs' dodges.
-        if (data.dogs[dog].size === "small") {
-          nextRun = countTally("dodges", nextRun);
-        }
+        // Every dog's dodge counts toward the dodges tally, a dodge effect's included.
+        nextRun = countTally("dodges", nextRun);
         bumps.push({ cash: null, change: null, dodged: true, dog, item: minor });
         return;
       }

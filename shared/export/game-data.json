@@ -807,6 +807,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "help",
             "name": "Help the keeper"
           },
           {
@@ -818,6 +819,7 @@
                 "kind": "money"
               }
             ],
+            "id": "callZoo",
             "name": "Call the zoo"
           },
           {
@@ -831,6 +833,7 @@
                 }
               }
             ],
+            "id": "drag",
             "name": "Drag them away"
           }
         ]
@@ -861,6 +864,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "lick",
             "name": "Let them lick it"
           },
           {
@@ -872,6 +876,7 @@
                 "kind": "money"
               }
             ],
+            "id": "buy",
             "name": "Buy a new cone"
           },
           {
@@ -885,6 +890,7 @@
                 }
               }
             ],
+            "id": "walkOnBy",
             "name": "Walk on by"
           }
         ]
@@ -915,6 +921,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "sniff",
             "name": "Sniff the fish"
           },
           {
@@ -926,6 +933,7 @@
                 "kind": "money"
               }
             ],
+            "id": "pay",
             "name": "Pay for the fish"
           },
           {
@@ -939,6 +947,7 @@
                 }
               }
             ],
+            "id": "hurryPast",
             "name": "Hurry past"
           }
         ]
@@ -1004,6 +1013,7 @@
                 "kind": "money"
               }
             ],
+            "id": "sniff",
             "name": "Let them sniff",
             "tally": "sniffs"
           },
@@ -1015,6 +1025,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "pullAway",
             "name": "Pull away"
           }
         ]
@@ -1069,6 +1080,7 @@
                 }
               }
             ],
+            "id": "stand",
             "name": "Stand your ground"
           },
           {
@@ -1080,6 +1092,7 @@
                 "kind": "money"
               }
             ],
+            "id": "treat",
             "name": "Treat bribe"
           },
           {
@@ -1090,6 +1103,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "bolt",
             "name": "Bolt past"
           }
         ]
@@ -1120,6 +1134,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "wave",
             "name": "Wave hello"
           },
           {
@@ -1131,6 +1146,7 @@
                 "kind": "money"
               }
             ],
+            "id": "merch",
             "name": "Buy the merch"
           },
           {
@@ -1144,6 +1160,7 @@
                 }
               }
             ],
+            "id": "pushThrough",
             "name": "Push through"
           }
         ]
@@ -1203,6 +1220,7 @@
                 "kind": "money"
               }
             ],
+            "id": "grooming",
             "name": "Full groom"
           },
           {
@@ -1213,6 +1231,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "rinse",
             "name": "Quick rinse"
           },
           {
@@ -1226,6 +1245,7 @@
                 }
               }
             ],
+            "id": "ignore",
             "name": "Hold your nose"
           }
         ]
@@ -1284,6 +1304,7 @@
                 "kind": "money"
               }
             ],
+            "id": "letGo",
             "name": "Let them go",
             "tally": "thievesLetGo"
           },
@@ -1298,6 +1319,7 @@
                 }
               }
             ],
+            "id": "chase",
             "name": "Chase them off"
           }
         ]
@@ -1325,6 +1347,7 @@
                 "kind": "debuff"
               }
             ],
+            "id": "pose",
             "name": "Pose"
           },
           {
@@ -1338,6 +1361,7 @@
                 }
               }
             ],
+            "id": "walkAround",
             "name": "Walk around"
           },
           {
@@ -1349,6 +1373,7 @@
                 "kind": "money"
               }
             ],
+            "id": "reshoot",
             "name": "Pay for a reshoot"
           }
         ]

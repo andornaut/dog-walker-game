@@ -4,8 +4,10 @@ import type {
   AchievementId,
   CardOption,
   DebuffId,
+  EncounterId,
   GameData,
   MinorObstacleId,
+  OptionPicks,
   TallyId,
   Threshold,
 } from "../data/types";
@@ -18,20 +20,21 @@ import { type Cents, dollarsToCents } from "./units";
 
 export type AchievementData = Pick<
   GameData,
-  "achievements" | "debuffs" | "dogSlots" | "dogs" | "encounters" | "shopGear" | "walkers" | "world"
+  "achievements" | "debuffs" | "dogs" | "encounters" | "shopGear" | "walkers" | "world"
 >;
 
 // The counters a run keeps for its achievements, copied out of the run state for the save.
 // Zones before firstZone were skipped by a dev start: they are neither finished nor clean.
 // lastHeartOwners is how many walking owners are on their last heart. startCents is the money
-// the run began with, which a money goal leaves out. bumpsByKind and tallies are this run's
-// share of the lifetime ones.
+// the run began with, which a money goal leaves out. bumpsByKind, optionPicks and tallies are
+// this run's share of the lifetime ones.
 export interface RunCounters {
   bumpsByKind: Partial<Record<MinorObstacleId, number>>;
   bumpsByZone: number[];
   debuffsGot: Partial<Record<DebuffId, number>>;
   firstZone: number;
   lastHeartOwners: number;
+  optionPicks: OptionPicks;
   startCents: Cents;
   tallies: Partial<Record<TallyId, number>>;
 }
@@ -48,16 +51,33 @@ export interface RunFacts extends RunCounters {
 export function runCountersOf(
   run: Pick<
     RunState,
-    "bumpsByKind" | "bumpsByZone" | "debuffsGot" | "firstZone" | "pack" | "startMoney" | "tallies"
+    | "bumpsByKind"
+    | "bumpsByZone"
+    | "debuffsGot"
+    | "firstZone"
+    | "optionPicks"
+    | "pack"
+    | "startMoney"
+    | "tallies"
   >,
 ): RunCounters {
-  const { bumpsByKind, bumpsByZone, debuffsGot, firstZone, pack, startMoney, tallies } = run;
+  const {
+    bumpsByKind,
+    bumpsByZone,
+    debuffsGot,
+    firstZone,
+    optionPicks,
+    pack,
+    startMoney,
+    tallies,
+  } = run;
   return {
     bumpsByKind: { ...bumpsByKind },
     bumpsByZone: [...bumpsByZone],
     debuffsGot: { ...debuffsGot },
     firstZone,
     lastHeartOwners: pack.filter((slot) => slot.status === "walking" && slot.hearts === 1).length,
+    optionPicks: { ...optionPicks },
     startCents: startMoney,
     tallies: { ...tallies },
   };
@@ -115,6 +135,24 @@ export function countOptionTally(option: Pick<CardOption, "tally">, state: RunSt
   return option.tally === undefined ? state : countTally(option.tally, state);
 }
 
+// How many times picks counts the option with id option on encounter's card.
+export function picksOf(picks: OptionPicks, encounter: EncounterId, option: string): number {
+  return picks[encounter]?.[option] ?? 0;
+}
+
+// One more pick of the option with id option on encounter's card, counted in the run until it
+// is banked.
+export function countOptionPick(encounter: EncounterId, option: string, state: RunState): RunState {
+  const picks = state.optionPicks[encounter] ?? {};
+  return {
+    ...state,
+    optionPicks: {
+      ...state.optionPicks,
+      [encounter]: { ...picks, [option]: picksOf(state.optionPicks, encounter, option) + 1 },
+    },
+  };
+}
+
 // Whether the walk was finished: every zone of it walked, none skipped by a dev start.
 function finishedWalk(facts: RunFacts, zones: number): boolean {
   return walkedFromTheStart(facts) && facts.zonesFinished >= zones;
@@ -147,18 +185,6 @@ function firedByOwners(stats: Pick<SaveStats, "dogs">): number {
   return Object.values(stats.dogs).filter((dog) => dog.timesFired > 0).length;
 }
 
-// Each lucky find in the data, by the tally finding it counts toward.
-export function luckyFindTallies(data: Pick<GameData, "encounters">): TallyId[] {
-  return Object.values(data.encounters).flatMap((encounter) =>
-    encounter.kind === "lucky" ? [encounter.resolution.tally] : [],
-  );
-}
-
-// The distinct lucky finds a run found.
-function luckyFinds(data: Pick<GameData, "encounters">, facts: RunFacts): number {
-  return luckyFindTallies(data).filter((tally) => (facts.tallies[tally] ?? 0) > 0).length;
-}
-
 // Run conditions need the run's facts, so they never hold for a purchase (facts null); profile
 // conditions need the save, so they never hold without one (save null).
 export function conditionHolds(
@@ -177,10 +203,6 @@ export function conditionHolds(
       return facts !== null && cleanZones(facts) >= needed(zones, condition.count);
     case "debuffsGot":
       return facts !== null && (facts.debuffsGot[condition.debuff] ?? 0) >= condition.count;
-    case "dogSlotsOwned":
-      return (
-        save !== null && save.owned.dogSlots.length >= needed(data.dogSlots.length, condition.count)
-      );
     case "dogsFinishedWith":
       return save !== null && save.stats.dogsFinishedWith.length >= needed(dogs, condition.count);
     case "dogsOwned":
@@ -205,10 +227,12 @@ export function conditionHolds(
       );
     case "lifetimeEarnings":
       return save !== null && lifetimeEarnedNet(save.stats) >= dollarsToCents(condition.dollars);
-    case "luckyFinds":
+    case "noFiringStreak":
+      return save !== null && save.stats.noFiringStreak >= condition.count;
+    case "optionPicks":
       return (
-        facts !== null &&
-        luckyFinds(data, facts) >= needed(luckyFindTallies(data).length, condition.count)
+        save !== null &&
+        picksOf(save.stats.optionPicks, condition.encounter, condition.option) >= condition.count
       );
     case "packSize":
       return facts !== null && facts.packSize >= condition.count;
@@ -224,8 +248,6 @@ export function conditionHolds(
       return save !== null && save.owned.walkers.length >= needed(walkers, condition.count);
     case "walksPlayed":
       return save !== null && walksPlayed(save.stats) >= condition.count;
-    case "walksWithoutFiring":
-      return save !== null && save.stats.walksWithoutFiring >= condition.count;
     case "zonesEverFinished":
       return (
         save !== null &&
@@ -239,10 +261,10 @@ export function conditionHolds(
 }
 
 // How far a save has come toward a condition that counts across walks (a lifetime tally,
-// landed bumps, whole dollars earned net of starting cash, walks played, times fired, finished
-// walks with no firing, distinct owners who fired you, distinct dogs and walkers that finished a
-// walk, distinct zones finished): have is capped at need. null for a condition judged on one walk
-// or on what the save owns.
+// option picks, landed bumps, whole dollars earned net of starting cash, walks played, times
+// fired, the current streak of finished walks with no firing, distinct owners who fired you,
+// distinct dogs and walkers that finished a walk, distinct zones finished): have is capped at
+// need. null for a condition judged on one walk or on what the save owns.
 function acrossWalksProgress(
   data: Pick<GameData, "dogs" | "walkers" | "world">,
   save: Pick<SaveDocument, "stats">,
@@ -263,6 +285,13 @@ function acrossWalksProgress(
         Math.max(0, Math.floor(lifetimeEarnedNet(stats) / dollarsToCents(1))),
         condition.dollars,
       );
+    case "noFiringStreak":
+      return progress(stats.noFiringStreak, condition.count);
+    case "optionPicks":
+      return progress(
+        picksOf(stats.optionPicks, condition.encounter, condition.option),
+        condition.count,
+      );
     case "tally":
       return progress(stats.tallies[condition.tally] ?? 0, condition.count);
     case "timesFired":
@@ -274,8 +303,6 @@ function acrossWalksProgress(
       );
     case "walksPlayed":
       return progress(walksPlayed(stats), condition.count);
-    case "walksWithoutFiring":
-      return progress(stats.walksWithoutFiring, condition.count);
     case "zonesEverFinished":
       return progress(
         stats.zonesEverFinished.length,
@@ -283,13 +310,11 @@ function acrossWalksProgress(
       );
     case "cleanZones":
     case "debuffsGot":
-    case "dogSlotsOwned":
     case "dogsOwned":
     case "earnings":
     case "finishOnLastHeart":
     case "fullPackBonus":
     case "gearOwned":
-    case "luckyFinds":
     case "packSize":
     case "walkersUnlocked":
     case "zonesFinished":
@@ -339,7 +364,7 @@ export function earnedByRun(data: AchievementData, facts: RunFacts): Achievement
 
 // Each tally in plain words, for the data page.
 const TALLY_NAMES: Readonly<Record<TallyId, string>> = {
-  dodges: "small dog dodges",
+  dodges: "dodges by any dog",
   neighboursMet: "friendly neighbours met",
   sniffs: "other dogs let sniff",
   squirrelPulls: "squirrel pulls landed",
@@ -353,9 +378,25 @@ function thresholdText(threshold: Threshold, unit: string): string {
   return threshold === "all" ? `all ${unit}` : `${threshold} ${unit}`;
 }
 
+// The name of the option with id option on encounter's card. Throws for an option the card
+// does not have.
+function optionName(
+  data: Pick<GameData, "encounters">,
+  encounter: EncounterId,
+  option: string,
+): string {
+  const { name, resolution } = data.encounters[encounter];
+  const found =
+    resolution.kind === "card" ? resolution.options.find(({ id }) => id === option) : undefined;
+  if (found === undefined) {
+    throw new Error(`${name} has no card option ${option}`);
+  }
+  return found.name;
+}
+
 // A condition in plain words, for the data page.
 export function achievementConditionText(
-  data: Pick<GameData, "debuffs" | "minorObstacles">,
+  data: Pick<GameData, "debuffs" | "encounters" | "minorObstacles">,
   condition: AchievementCondition,
 ): string {
   switch (condition.kind) {
@@ -367,8 +408,6 @@ export function achievementConditionText(
       return `${thresholdText(condition.count, "neighbourhoods")} of a walk finished without a bump`;
     case "debuffsGot":
       return `${data.debuffs[condition.debuff].name} ${condition.count} times in one walk`;
-    case "dogSlotsOwned":
-      return `own ${thresholdText(condition.count, "dog slots")}`;
     case "dogsFinishedWith":
       return `${thresholdText(condition.count, "dogs")} each finished a walk without firing you`;
     case "dogsOwned":
@@ -385,8 +424,16 @@ export function achievementConditionText(
       return `own ${thresholdText(condition.count, "gear items")}`;
     case "lifetimeEarnings":
       return `bank $${condition.dollars} in total, net of starting cash`;
-    case "luckyFinds":
-      return `${thresholdText(condition.count, "lucky finds")} each found in one walk`;
+    case "noFiringStreak":
+      return (
+        `${condition.count} finished walks in a row with no firing; ` +
+        "heading home early neither counts nor breaks the streak"
+      );
+    case "optionPicks": {
+      const { name } = data.encounters[condition.encounter];
+      const option = optionName(data, condition.encounter, condition.option);
+      return `${option} picked ${condition.count} times in total, on the ${name.toLowerCase()} card`;
+    }
     case "packSize":
       return `start a walk with ${condition.count} dogs`;
     case "tally":
@@ -399,8 +446,6 @@ export function achievementConditionText(
       return `unlock ${thresholdText(condition.count, "walkers")}`;
     case "walksPlayed":
       return `${condition.count} walks played`;
-    case "walksWithoutFiring":
-      return `${condition.count} finished walks with no firing`;
     case "zonesEverFinished":
       return `${thresholdText(condition.count, "neighbourhoods")} each finished, across walks`;
     case "zonesFinished":

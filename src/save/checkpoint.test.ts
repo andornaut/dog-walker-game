@@ -247,10 +247,10 @@ describe("achievements at banking", () => {
     });
   });
 
-  // veteranSave has 2 walks without firing, and biscuit finished one.
+  // veteranSave is 2 finished walks into a streak with no firing, and biscuit finished one.
   const walks: [string, Partial<RunResult>, number, DogId[]][] = [
     [
-      "counts a finished walk with no firing, and the dogs that finished it",
+      "a finished walk with no firing adds to the streak, with the dogs that finished it",
       {
         dogs: [
           { fired: false, id: "kilo", zonesFinished: 4 },
@@ -260,21 +260,76 @@ describe("achievements at banking", () => {
       3,
       ["biscuit", "kilo", "penny"],
     ],
-    ["counts neither a walk with a firing", {}, 2, ["biscuit", "kilo"]],
+    ["a finished walk with a firing resets the streak", {}, 0, ["biscuit", "kilo"]],
     [
-      "counts neither a walk that ended early",
-      { dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome" },
+      "a walk headed home early with no firing leaves the streak",
+      { dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome", zone: 3 },
       2,
+      ["biscuit"],
+    ],
+    [
+      "a walk headed home early with a firing resets the streak",
+      {
+        dogs: [
+          { fired: false, id: "penny", zonesFinished: 2 },
+          { fired: true, id: "kilo", zonesFinished: 1 },
+        ],
+        outcome: "wentHome",
+        zone: 3,
+      },
+      0,
+      ["biscuit"],
+    ],
+    [
+      "a walk that ran out of dogs resets the streak",
+      { dogs: [{ fired: true, id: "penny", zonesFinished: 1 }], outcome: "noDogs", zone: 2 },
+      0,
       ["biscuit"],
     ],
   ];
 
-  it("counts a finished walk with no firing, and the dogs that finished it", () => {
-    for (const [name, changes, walksWithoutFiring, dogsFinishedWith] of walks) {
-      const { stats } = recordRunEnd(testAwards, veteranSave(), runResult(changes));
-      expect(stats.walksWithoutFiring, name).toBe(walksWithoutFiring);
-      expect(stats.dogsFinishedWith, name).toEqual(dogsFinishedWith);
-    }
+  it.each(walks)("%s", (_name, changes, noFiringStreak, dogsFinishedWith) => {
+    const { stats } = recordRunEnd(testAwards, veteranSave(), runResult(changes));
+    expect(stats.noFiringStreak).toBe(noFiringStreak);
+    expect(stats.dogsFinishedWith).toEqual(dogsFinishedWith);
+  });
+
+  // Each badge for a streak of finished walks with no firing, and the streak it needs.
+  const streakBadges = gameData.achievements.flatMap(({ conditions, id }) =>
+    conditions.flatMap((condition) =>
+      condition.kind === "noFiringStreak" ? [{ count: condition.count, id }] : [],
+    ),
+  );
+
+  it.each(streakBadges)(
+    "earns $id on the finished walk that makes the streak $count, not on one headed home",
+    ({ count, id }) => {
+      const before = {
+        ...newPlayerSave,
+        stats: { ...newPlayerSave.stats, noFiringStreak: count - 1 },
+      };
+      const dogs = [{ fired: false, id: "kilo", zonesFinished: 4 }] as const;
+      const finished = recordRunEnd(testAwards, before, runResult({ dogs: [...dogs] }));
+      expect(finished.achievements[id]).toBe(testAwards.now);
+      const home = runResult({ dogs: [...dogs], outcome: "wentHome", zone: 3 });
+      expect(recordRunEnd(testAwards, before, home).achievements[id]).toBeUndefined();
+    },
+  );
+
+  it("adds the run's option picks to the lifetime ones, option by option", () => {
+    const counters = {
+      ...quietCounters(),
+      optionPicks: { capybara: { help: 1 }, weddingShoot: { pose: 2 } },
+    };
+    const before = {
+      ...newPlayerSave,
+      stats: { ...newPlayerSave.stats, optionPicks: { capybara: { callZoo: 3, help: 4 } } },
+    };
+    const { stats } = recordRunEnd(testAwards, before, runResult({ counters }));
+    expect(stats.optionPicks).toEqual({
+      capybara: { callZoo: 3, help: 5 },
+      weddingShoot: { pose: 2 },
+    });
   });
 
   it("counts a walk a dev start began past zone 1 toward no total or zone badge", () => {
@@ -284,7 +339,7 @@ describe("achievements at banking", () => {
       dogs: [{ fired: false, id: "penny", zonesFinished: 4 }],
     });
     const save = recordRunEnd(testAwards, newPlayerSave, clean);
-    expect(save.stats.walksWithoutFiring).toBe(0);
+    expect(save.stats.noFiringStreak).toBe(0);
     expect(save.stats.dogsFinishedWith).toEqual([]);
     expect(save.stats.zonesEverFinished).toEqual([]);
     expect(save.achievements.notAScratch).toBeUndefined();

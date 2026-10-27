@@ -4,6 +4,7 @@ import { type Cents, type Hearts, read, type Seconds } from "../rules/units";
 import type { Pack } from "../state/runState";
 import { TUNING } from "./tuning";
 import type {
+  AchievementCondition,
   CardOptions,
   Dog,
   Encounter,
@@ -16,7 +17,7 @@ import type {
 
 // Type-level checks: tsc (npm run check) fails if a @ts-expect-error line stops erroring.
 const check = <T>(value: T): T => value;
-const option = { art: "card-option", effects: [], name: "Option" };
+const option = { art: "card-option", effects: [], id: "option", name: "Option" };
 
 describe("types", () => {
   it("holds the type-level rules, which tsc checks", () => {
@@ -89,6 +90,17 @@ describe("types", () => {
       // @ts-expect-error: an obstacle always opens a card
       check<Encounter>({ ...base, kind: "obstacle", resolution: instant });
       expect(check<Encounter>({ ...base, kind: "lucky", resolution: instant }).kind).toBe("lucky");
+    }
+
+    // Counts picks only of an option the encounter's card has, by its id.
+    {
+      const picks = { count: 1, kind: "optionPicks" } as const;
+      // @ts-expect-error: an option of another encounter's card
+      check<AchievementCondition>({ ...picks, encounter: "capybara", option: "pose" });
+      // @ts-expect-error: an encounter that opens no card
+      check<AchievementCondition>({ ...picks, encounter: "lostWallet", option: "keep" });
+      const help = { ...picks, encounter: "capybara", option: "help" } as const;
+      expect(check<AchievementCondition>(help).kind).toBe("optionPicks");
     }
 
     // Holds 1 to 3 dogs in a pack.

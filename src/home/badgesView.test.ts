@@ -28,11 +28,12 @@ const COUNTED_KINDS = [
   "dogsFinishedWith",
   "firedByOwners",
   "lifetimeEarnings",
+  "noFiringStreak",
+  "optionPicks",
   "tally",
   "timesFired",
   "walkersFinishedWith",
   "walksPlayed",
-  "walksWithoutFiring",
   "zonesEverFinished",
 ] as const satisfies readonly AchievementCondition["kind"][];
 type Counted = Extract<AchievementCondition, { kind: (typeof COUNTED_KINDS)[number] }>;
@@ -48,10 +49,11 @@ function needOf(condition: Counted): number {
     case "lifetimeEarnings":
       return condition.dollars;
     case "bumps":
+    case "noFiringStreak":
+    case "optionPicks":
     case "tally":
     case "timesFired":
     case "walksPlayed":
-    case "walksWithoutFiring":
       return condition.count;
     case "dogsFinishedWith":
     case "firedByOwners":
@@ -100,12 +102,16 @@ function counted(condition: Counted, n: number): SaveDocument {
         ...newPlayerSave,
         stats: { ...stats, runs: { finished: 0, noDogs: 0, wentHome: n } },
       };
+    case "noFiringStreak":
+      return { ...newPlayerSave, stats: { ...stats, noFiringStreak: n } };
+    case "optionPicks": {
+      const optionPicks = { [condition.encounter]: { [condition.option]: n } };
+      return { ...newPlayerSave, stats: { ...stats, optionPicks } };
+    }
     case "tally":
       return { ...newPlayerSave, stats: { ...stats, tallies: { [condition.tally]: n } } };
     case "timesFired":
       return { ...newPlayerSave, stats: { ...stats, timesFired: n } };
-    case "walksWithoutFiring":
-      return { ...newPlayerSave, stats: { ...stats, walksWithoutFiring: n } };
     case "zonesEverFinished":
       return { ...newPlayerSave, stats: { ...stats, zonesEverFinished: ALL_ZONES.slice(0, n) } };
     default:

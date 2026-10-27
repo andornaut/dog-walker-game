@@ -928,8 +928,8 @@ describe("stepWalk", () => {
       expect(under.stepped.walk.run.bumpsByZone).toEqual(dodged ? [] : [1]);
       expect(under.stepped.walk.run.bumpsByKind).toEqual(dodged ? {} : { cone: 1 });
       expect(under.stepped.walk.road.hitStop === null).toBe(dodged);
-      // Only a small dog's dodge counts toward the dodges tally.
-      expect(under.stepped.walk.run.tallies.dodges ?? 0).toBe(dodged && size === "small" ? 1 : 0);
+      // Every dog's dodge counts toward the dodges tally, the Whistle's included.
+      expect(under.stepped.walk.run.tallies.dodges ?? 0).toBe(dodged ? 1 : 0);
       expect(at.stepped.bumps.map((bump) => bump.dodged)).toEqual([false]);
     },
   );

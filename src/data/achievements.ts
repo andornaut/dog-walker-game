@@ -19,16 +19,6 @@ export const ACHIEVEMENTS = [
     name: "Double Trouble",
   },
   {
-    badgeLine: "Two leashes, zero tangles.",
-    conditions: [
-      { count: 2, kind: "packSize" },
-      { count: "all", kind: "zonesFinished" },
-    ],
-    goal: "Finish a walk with 2 dogs",
-    id: "twosCompany",
-    name: "Two's Company",
-  },
-  {
     badgeLine: "Twelve paws, one plan.",
     conditions: [
       { count: 3, kind: "packSize" },
@@ -55,17 +45,6 @@ export const ACHIEVEMENTS = [
     shortGoal: "3 bump-free neighbourhoods",
   },
   {
-    badgeLine: "Three dogs, not one smudge.",
-    conditions: [
-      { count: 2, kind: "cleanZones" },
-      { count: 3, kind: "packSize" },
-    ],
-    goal: "Finish 2 neighbourhoods of a walk with 3 dogs and no bump",
-    id: "flawlessTrio",
-    name: "Flawless Trio",
-    shortGoal: "2 bump-free, 3 dogs",
-  },
-  {
     badgeLine: "Nobody left behind.",
     conditions: [{ kind: "fullPackBonus", packSize: 3 }],
     goal: "Earn the Walk bonus with 3 dogs",
@@ -83,18 +62,11 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "The reviews are in.",
-    conditions: [{ count: 50, kind: "walksWithoutFiring" }],
-    goal: "Finish 50 walks with nobody fired",
+    conditions: [{ count: 10, kind: "noFiringStreak" }],
+    goal: "Finish 10 walks in a row with nobody fired",
     id: "fiveStarService",
     name: "Five-Star Service",
-    shortGoal: "50 calm walks",
-  },
-  {
-    badgeLine: "That's a good day's pay.",
-    conditions: [{ dollars: 350, kind: "earnings" }],
-    goal: "Earn $350 in one walk",
-    id: "goodDay",
-    name: "Good Day",
+    shortGoal: "10 calm walks in a row",
   },
   {
     badgeLine: "Treats are on you.",
@@ -165,17 +137,6 @@ export const ACHIEVEMENTS = [
     shortGoal: "Finish with every walker",
   },
   {
-    badgeLine: "Toronto's finest. Ask any dog.",
-    conditions: [
-      { count: "all", kind: "dogsOwned" },
-      { count: "all", kind: "dogSlotsOwned" },
-      { count: "all", kind: "gearOwned" },
-    ],
-    goal: "Own every dog, slot and gear item",
-    id: "topWalker",
-    name: "Top Walker",
-  },
-  {
     badgeLine: "They always come back.",
     conditions: [{ count: 5, kind: "timesFired" }],
     goal: "Get fired 5 times",
@@ -220,6 +181,14 @@ export const ACHIEVEMENTS = [
     shortGoal: "Get the zoomies 3 times",
   },
   {
+    badgeLine: "No photos, please. Fine, one more.",
+    conditions: [{ count: 3, debuff: "spotlight", kind: "debuffsGot" }],
+    goal: "Get the Spotlight 3 times in one walk",
+    id: "paparazzi",
+    name: "Paparazzi",
+    shortGoal: "Get the Spotlight 3 times",
+  },
+  {
     badgeLine: "So close. Every time.",
     conditions: [{ count: 50, kind: "tally", tally: "squirrelPulls" }],
     goal: "Get pulled toward 50 squirrels, across all walks",
@@ -242,6 +211,54 @@ export const ACHIEVEMENTS = [
     id: "sniffTest",
     name: "Sniff Test",
     shortGoal: "Sniff 5 dogs",
+  },
+  {
+    badgeLine: "The capybara sends its regards.",
+    conditions: [{ count: 10, encounter: "capybara", kind: "optionPicks", option: "help" }],
+    goal: "Help the keeper 10 times, across all walks",
+    id: "zookeeper",
+    name: "Zookeeper",
+    shortGoal: "Help the keeper 10 times",
+  },
+  {
+    badgeLine: "Your dogs are in every album.",
+    conditions: [{ count: 10, encounter: "weddingShoot", kind: "optionPicks", option: "pose" }],
+    goal: "Pose for 10 wedding photos, across all walks",
+    id: "sayCheese",
+    name: "Say Cheese",
+    shortGoal: "Pose 10 times",
+  },
+  {
+    badgeLine: "Sprinkles on every whisker.",
+    conditions: [{ count: 10, encounter: "droppedCone", kind: "optionPicks", option: "lick" }],
+    goal: "Let them lick 10 dropped cones, across all walks",
+    id: "sugarRush",
+    name: "Sugar Rush",
+    shortGoal: "Lick 10 cones",
+  },
+  {
+    badgeLine: "They save you the good crates.",
+    conditions: [{ count: 10, encounter: "fishCrates", kind: "optionPicks", option: "pay" }],
+    goal: "Pay for the fish 10 times, across all walks",
+    id: "fishmongersFriend",
+    name: "Fishmonger's Friend",
+    shortGoal: "Pay for fish 10 times",
+  },
+  {
+    badgeLine: "The porch cats have you on retainer.",
+    conditions: [{ count: 10, encounter: "porchCat", kind: "optionPicks", option: "treat" }],
+    goal: "Bribe 10 porch cats with treats, across all walks",
+    id: "catWhisperer",
+    name: "Cat Whisperer",
+    shortGoal: "Bribe 10 cats",
+  },
+  {
+    badgeLine: "Ten feet tall on every screen.",
+    conditions: [{ count: 10, encounter: "promoTeam", kind: "optionPicks", option: "wave" }],
+    goal: "Wave hello to the big screen 10 times, across all walks",
+    id: "bigScreen",
+    name: "Big Screen",
+    shortGoal: "Wave hello 10 times",
   },
   {
     badgeLine: "Crumbs everywhere.",
@@ -306,13 +323,5 @@ export const ACHIEVEMENTS = [
     id: "popularPack",
     name: "Popular Pack",
     shortGoal: "Meet 5 neighbours",
-  },
-  {
-    badgeLine: "Cash and cuddles, same walk.",
-    conditions: [{ count: "all", kind: "luckyFinds" }],
-    goal: "Find a lost wallet and a friendly neighbour in one walk",
-    id: "doubleJackpot",
-    name: "Double Jackpot",
-    shortGoal: "Both lucky finds, one walk",
   },
 ] as const satisfies readonly [Achievement, ...Achievement[]];

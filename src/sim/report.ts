@@ -2,6 +2,7 @@ import { DOGS } from "../data/dogs";
 import type {
   AchievementCondition,
   DebuffId,
+  EncounterId,
   GameData,
   GearId,
   MinorObstacleId,
@@ -10,7 +11,12 @@ import type {
 } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { itemAt } from "../lib/arrays";
-import { type AchievementData, conditionHolds, type RunFacts } from "../rules/achievements";
+import {
+  type AchievementData,
+  conditionHolds,
+  picksOf,
+  type RunFacts,
+} from "../rules/achievements";
 import { isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
 import { MAX_RUN_DOGS, TALLY_IDS } from "../save/schema";
 import type { PackDogs } from "../state/runState";
@@ -118,6 +124,10 @@ export interface BadgeCounters {
   readonly lastHeartShare: number;
   // Landed bumps per walk, by minor obstacle kind.
   readonly meanBumpsByKind: Readonly<Record<MinorObstacleId, number>>;
+  // Each card option's picks per walk, by encounter and option id.
+  readonly meanOptionPicks: Readonly<
+    Partial<Record<EncounterId, Readonly<Record<string, number>>>>
+  >;
   // Each lifetime tally's count per walk.
   readonly meanTallies: Readonly<Record<TallyId, number>>;
 }
@@ -227,6 +237,19 @@ export function badgeCounters(
     meanBumpsByKind: Object.fromEntries(
       kinds.map((kind) => [kind, meanOf((walk) => walk.bumpsByKind[kind] ?? 0)]),
     ) as BadgeCounters["meanBumpsByKind"],
+    meanOptionPicks: Object.fromEntries(
+      (Object.keys(data.encounters) as EncounterId[]).flatMap((encounter) => {
+        const { resolution } = data.encounters[encounter];
+        if (resolution.kind !== "card") {
+          return [];
+        }
+        const picks = resolution.options.map(({ id }) => [
+          id,
+          meanOf((walk) => picksOf(walk.optionPicks, encounter, id)),
+        ]);
+        return [[encounter, Object.fromEntries(picks)]];
+      }),
+    ),
     meanTallies: Object.fromEntries(
       TALLY_IDS.map((tally) => [tally, meanOf((walk) => walk.tallies[tally] ?? 0)]),
     ) as BadgeCounters["meanTallies"],

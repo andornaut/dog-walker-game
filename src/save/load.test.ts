@@ -272,7 +272,7 @@ describe("loadSave", () => {
       checkpointWith({}),
     ],
     [
-      "a checkpoint's counters, without bump kinds, debuffs and tallies the game no longer has",
+      "a checkpoint's counters, without bump kinds, debuffs, picks and tallies the game no longer has",
       (document) => {
         document.checkpoint = checkpointWith({
           counters: {
@@ -281,6 +281,7 @@ describe("loadSave", () => {
             debuffsGot: { retiredDebuff: 1, stinky: 2 },
             firstZone: 1,
             lastHeartOwners: 1,
+            optionPicks: { capybara: { help: 1, retiredOption: 2 }, retiredCard: { help: 3 } },
             startCents: 1_500,
             tallies: { retiredTally: 4, squirrelPulls: 3 },
           },
@@ -293,9 +294,21 @@ describe("loadSave", () => {
         debuffsGot: { stinky: 2 },
         firstZone: 1,
         lastHeartOwners: 1,
+        optionPicks: { capybara: { help: 1 } },
         startCents: 1_500,
         tallies: { squirrelPulls: 3 },
       },
+    ],
+    [
+      "without picks of options or cards the game no longer has",
+      (document) => {
+        document.stats.optionPicks = {
+          capybara: { callZoo: 4, help: 2, retiredOption: 1 },
+          retiredCard: { help: 5 },
+        };
+      },
+      (save) => save.stats.optionPicks,
+      { capybara: { callZoo: 4, help: 2 } },
     ],
     [
       "without unknown, removed (pause) or duplicate hints shown",

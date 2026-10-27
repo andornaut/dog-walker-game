@@ -9,7 +9,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
-import { type AchievementData, luckyFindTallies, type RunFacts } from "../rules/achievements";
+import { type AchievementData, picksOf, type RunFacts } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import { type Cents, cents, dollarsToCents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -97,29 +97,21 @@ function raiseRun(
         packSize: Math.max(facts.packSize, condition.packSize),
         zonesFinished: zones,
       };
-    case "luckyFinds": {
-      const all = luckyFindTallies(data);
-      const tallies = { ...facts.tallies };
-      for (const tally of all.slice(0, needed(all.length, condition.count))) {
-        tallies[tally] = Math.max(tallies[tally] ?? 0, 1);
-      }
-      return { ...facts, tallies };
-    }
     case "packSize":
       return { ...facts, packSize: Math.max(facts.packSize, condition.count) };
     case "bumps":
-    case "dogSlotsOwned":
     case "dogsFinishedWith":
     case "dogsOwned":
     case "firedByOwners":
     case "gearOwned":
     case "lifetimeEarnings":
+    case "noFiringStreak":
+    case "optionPicks":
     case "tally":
     case "timesFired":
     case "walkersFinishedWith":
     case "walkersUnlocked":
     case "walksPlayed":
-    case "walksWithoutFiring":
     case "zonesEverFinished":
       return facts;
     default:
@@ -129,8 +121,8 @@ function raiseRun(
 
 // The least walk that meets every run condition of these achievements, read from their goals:
 // a pack of the size asked for with every dog home, walked from the first zone with no bump and
-// no starting cash, through the zones and with the debuffs, earnings, lucky finds and owners on
-// their last heart each goal asks for.
+// no starting cash, through the zones and with the debuffs, earnings and owners on their last
+// heart each goal asks for.
 export function runFactsFor(data: AchievementData, ids: readonly AchievementId[]): RunFacts {
   const facts = conditionsOf(data, ids).reduce<RunFacts>(
     (raised, condition) => raiseRun(data, condition, raised),
@@ -142,6 +134,7 @@ export function runFactsFor(data: AchievementData, ids: readonly AchievementId[]
       earnedCents: cents(0),
       firstZone: 0,
       lastHeartOwners: 0,
+      optionPicks: {},
       packSize: 1,
       startCents: cents(0),
       tallies: {},
@@ -217,18 +210,6 @@ function raiseSave(
         stats: { ...stats, runs: { ...stats.runs, wentHome: stats.runs.wentHome + short } },
       };
     }
-    case "dogSlotsOwned":
-      return {
-        ...save,
-        owned: {
-          ...owned,
-          dogSlots: enough(
-            data.dogSlots.map((_, i) => i + 1),
-            condition.count,
-            owned.dogSlots,
-          ),
-        },
-      };
     case "dogsFinishedWith":
       return {
         ...save,
@@ -250,6 +231,25 @@ function raiseSave(
           gear: enough(Object.keys(data.shopGear) as GearId[], condition.count, owned.gear),
         },
       };
+    case "noFiringStreak":
+      return {
+        ...save,
+        stats: { ...stats, noFiringStreak: Math.max(stats.noFiringStreak, condition.count) },
+      };
+    case "optionPicks": {
+      const { encounter, option } = condition;
+      const picks = Math.max(picksOf(stats.optionPicks, encounter, option), condition.count);
+      return {
+        ...save,
+        stats: {
+          ...stats,
+          optionPicks: {
+            ...stats.optionPicks,
+            [encounter]: { ...stats.optionPicks[encounter], [option]: picks },
+          },
+        },
+      };
+    }
     case "tally":
       return {
         ...save,
@@ -274,14 +274,6 @@ function raiseSave(
           walkers: enough(Object.keys(data.walkers) as WalkerId[], condition.count, owned.walkers),
         },
       };
-    case "walksWithoutFiring":
-      return {
-        ...save,
-        stats: {
-          ...stats,
-          walksWithoutFiring: Math.max(stats.walksWithoutFiring, condition.count),
-        },
-      };
     case "zonesEverFinished":
       return {
         ...save,
@@ -299,7 +291,6 @@ function raiseSave(
     case "earnings":
     case "finishOnLastHeart":
     case "fullPackBonus":
-    case "luckyFinds":
     case "packSize":
     case "zonesFinished":
       return save;
@@ -309,9 +300,9 @@ function raiseSave(
 }
 
 // save raised to meet every profile condition of these achievements, read from their goals:
-// the lifetime counts, dollars and walks each asks for (bumps all by the first kind it names),
-// and the first dogs, gear items, slots, walkers, owners who fired you and finished zones in
-// data order where it holds too few.
+// the lifetime counts, option picks, streak, dollars and walks each asks for (bumps all by the
+// first kind it names), and the first dogs, gear items, walkers, owners who fired you and
+// finished zones in data order where it holds too few.
 export function saveFor(
   data: AchievementData,
   ids: readonly AchievementId[],

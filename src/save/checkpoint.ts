@@ -1,4 +1,4 @@
-import type { DogId, WalkerId, ZoneId } from "../data/types";
+import type { DogId, EncounterId, OptionPicks, WalkerId, ZoneId } from "../data/types";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
 import { addCents, type Cents, cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
@@ -36,6 +36,28 @@ function addCounts<Key extends string>(
     sum[key] = (sum[key] ?? 0) + count;
   }
   return sum;
+}
+
+// Lifetime option picks with a run's added, option by option.
+function addPicks(lifetime: OptionPicks, run: OptionPicks): OptionPicks {
+  const sum: OptionPicks = { ...lifetime };
+  for (const [encounter, picks] of Object.entries(run) as [EncounterId, Record<string, number>][]) {
+    const added: Record<string, number> = { ...sum[encounter] };
+    for (const [option, count] of Object.entries(picks)) {
+      added[option] = (added[option] ?? 0) + count;
+    }
+    sum[encounter] = added;
+  }
+  return sum;
+}
+
+// The streak of finished walks with no firing after a walk: a firing ends it, a walk finished
+// from the first zone adds one, and any other walk, headed home early, leaves it as it was.
+function nextNoFiringStreak(streak: number, finished: boolean, firings: number): number {
+  if (firings > 0) {
+    return 0;
+  }
+  return finished ? streak + 1 : streak;
 }
 
 // Whether a walk of packSize dogs banking earnedCents beats every walk yet with that many
@@ -139,6 +161,8 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       lifetimeStartCents: walked
         ? addCents(stats.lifetimeStartCents, run.counters.startCents)
         : stats.lifetimeStartCents,
+      noFiringStreak: nextNoFiringStreak(stats.noFiringStreak, finished, firedBy.length),
+      optionPicks: addPicks(stats.optionPicks, run.counters.optionPicks),
       runs: { ...stats.runs, [counted]: stats.runs[counted] + 1 },
       tallies: addCounts(stats.tallies, run.counters.tallies),
       timesFired: stats.timesFired + firedBy.length,
@@ -146,7 +170,6 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
         finished && run.walker !== null
           ? [...new Set([...stats.walkersFinishedWith, run.walker])]
           : stats.walkersFinishedWith,
-      walksWithoutFiring: stats.walksWithoutFiring + (finished && firedBy.length === 0 ? 1 : 0),
       zonesEverFinished: walked
         ? [...new Set([...stats.zonesEverFinished, ...run.route.slice(0, zonesFinished)])]
         : stats.zonesEverFinished,

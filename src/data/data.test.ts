@@ -138,10 +138,15 @@ describe("cards", () => {
     expect(Object.keys(upgrades).length - removedBeforeLastPick).toBeGreaterThanOrEqual(mostPaths);
   });
 
-  it("gives every card's options distinct names, and every option, upgrade and popup its own art key", () => {
+  it("gives every card's options distinct names and ids, and every option, upgrade and popup its own art key", () => {
     for (const card of cards) {
       const names = card.options.map((option) => option.name);
       expect(new Set(names).size, card.name).toBe(names.length);
+      const ids = card.options.map((option) => option.id);
+      expect(new Set(ids).size, card.name).toBe(ids.length);
+      for (const id of ids) {
+        expect(id, card.name).toMatch(/^[a-z][A-Za-z]*$/);
+      }
     }
     const arts = [
       ...cardOptions.map((option) => option.art),

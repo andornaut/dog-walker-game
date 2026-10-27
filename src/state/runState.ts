@@ -8,6 +8,7 @@ import type {
   GearId,
   MinorObstacleId,
   Modifier,
+  OptionPicks,
   TallyId,
   UpgradeId,
   WalkerId,
@@ -114,6 +115,9 @@ export interface RunState {
   readonly invincible?: boolean;
   readonly modifiers: readonly ActiveModifier[];
   readonly money: Cents;
+  // This run's card option picks by encounter and option id, banked into the save's at the
+  // run's end.
+  readonly optionPicks: Readonly<OptionPicks>;
   readonly pack: Pack;
   readonly phase: Phase;
   // The zones walked and the zone being walked, in order: zoneIndex is a position in it.
@@ -185,6 +189,7 @@ export function newRun(
     immunities: [],
     modifiers: [],
     money: cents(0),
+    optionPicks: {},
     pack: packWith([]),
     phase: { kind: "walking" },
     route: [firstZoneId(data)],

@@ -4,10 +4,12 @@ import type {
   AchievementId,
   DebuffId,
   DogId,
+  EncounterId,
   GameData,
   GearId,
   HintId,
   MinorObstacleId,
+  OptionPicks,
   TallyId,
   WalkerId,
   ZoneId,
@@ -36,6 +38,8 @@ interface KnownIds {
   gear: ReadonlySet<GearId>;
   hints: ReadonlySet<HintId>;
   minorObstacles: ReadonlySet<MinorObstacleId>;
+  // Each encounter that opens a card, with its option ids.
+  options: ReadonlyMap<EncounterId, ReadonlySet<string>>;
   walkers: ReadonlySet<WalkerId>;
   zones: ReadonlySet<ZoneId>;
 }
@@ -64,6 +68,7 @@ type SaveData = Pick<
   | "defaultWalker"
   | "dogSlots"
   | "dogs"
+  | "encounters"
   | "hints"
   | "minorObstacles"
   | "shopGear"
@@ -98,6 +103,14 @@ export function saveContextFrom(data: SaveData): SaveContext {
       gear: new Set(keysOf(data.shopGear)),
       hints: new Set(keysOf(data.hints)),
       minorObstacles: new Set(keysOf(data.minorObstacles)),
+      options: new Map(
+        keysOf(data.encounters).flatMap((id) => {
+          const { resolution } = data.encounters[id];
+          return resolution.kind === "card"
+            ? [[id, new Set(resolution.options.map((option) => option.id))] as const]
+            : [];
+        }),
+      ),
       walkers: new Set(keysOf(data.walkers)),
       zones: new Set(data.world.zones.map(({ id }) => id as ZoneId)),
     },
@@ -128,6 +141,23 @@ function keepKnownEntries<Key extends string, Value>(
   for (const [key, value] of Object.entries(record)) {
     if (isKnown(known, key)) {
       kept[key] = value;
+    }
+  }
+  return kept;
+}
+
+// The picks of options the game still has, on cards it still has.
+function keepKnownPicks(
+  known: KnownIds,
+  picks: Readonly<Record<string, Readonly<Record<string, number>>>>,
+): OptionPicks {
+  const kept: OptionPicks = {};
+  for (const [encounter, byOption] of Object.entries(picks)) {
+    const options = known.options.get(encounter as EncounterId);
+    if (options !== undefined) {
+      kept[encounter as EncounterId] = Object.fromEntries(
+        Object.entries(byOption).filter(([option]) => options.has(option)),
+      );
     }
   }
   return kept;
@@ -177,6 +207,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
               ...checkpoint.counters,
               bumpsByKind: keepKnownEntries(known.minorObstacles, checkpoint.counters.bumpsByKind),
               debuffsGot: keepKnownEntries(known.debuffs, checkpoint.counters.debuffsGot),
+              optionPicks: keepKnownPicks(known, checkpoint.counters.optionPicks),
               tallies: keepKnownEntries(KNOWN_TALLIES, checkpoint.counters.tallies),
             },
             dogs: checkpoint.dogs.flatMap(({ id, ...dog }) =>
@@ -211,6 +242,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
               ),
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
+      optionPicks: keepKnownPicks(known, stats.optionPicks),
       tallies: keepKnownEntries(KNOWN_TALLIES, stats.tallies),
       walkersFinishedWith: keepKnown(known.walkers, stats.walkersFinishedWith),
       zonesEverFinished: keepKnown(known.zones, stats.zonesEverFinished),

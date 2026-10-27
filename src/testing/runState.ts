@@ -29,6 +29,7 @@ export function testState(
     immunities: [],
     modifiers: [],
     money: cents(0),
+    optionPicks: {},
     pack: pack as readonly PackSlot[] as Pack,
     phase: { kind: "walking" },
     route: ["street"],

@@ -28,7 +28,7 @@ export type EncounterId =
 // How many dogs a walk sets out with.
 export type PackSize = 1 | 2 | 3;
 export type Size = "large" | "medium" | "small";
-// Lifetime counts the save keeps across walks for the badges: small dogs' dodges, landed
+// Lifetime counts the save keeps across walks for the badges: every dog's dodges, landed
 // squirrel pulls, tips and treats grabbed, and the card options and lucky finds that name one as
 // their tally.
 export type TallyId =
@@ -58,6 +58,25 @@ type EncounterOfKind<Kind extends Encounter["kind"]> = {
 }[EncounterId];
 type LuckyEncounterId = EncounterOfKind<"lucky">;
 export type ObstacleEncounterId = EncounterOfKind<"obstacle">;
+
+// The option ids of an encounter's card; never for an encounter that opens no card.
+type CardOptionIdOf<Id extends EncounterId> = (typeof ENCOUNTERS)[Id]["resolution"] extends {
+  readonly options: readonly (infer Option)[];
+}
+  ? Option extends { readonly id: infer OptionId extends string }
+    ? OptionId
+    : never
+  : never;
+
+// An option on an encounter's card, by its encounter and its id.
+export type OptionPick = {
+  [Id in EncounterId]: [CardOptionIdOf<Id>] extends [never]
+    ? never
+    : { readonly encounter: Id; readonly option: CardOptionIdOf<Id> };
+}[EncounterId];
+
+// Card option picks counted across walks or in one run, by encounter and option id.
+export type OptionPicks = Partial<Record<EncounterId, Readonly<Record<string, number>>>>;
 
 // The tuning as the game reads it: every value is a number, so a live edit type-checks.
 export type LiveTuning = typeof TUNING;
@@ -263,6 +282,8 @@ export type Effect =
 export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
   readonly art: string;
+  // Unique on its card and kept across renames: the save counts picks by it.
+  readonly id: string;
   // Picking it counts one toward this lifetime tally.
   readonly tally?: TallyId;
   readonly effects: readonly Effect[];
@@ -986,16 +1007,16 @@ export type Threshold = number | "all";
 
 // What earns an achievement. Run conditions are judged on one run as it is banked: zones it
 // finished (all: every zone of a walk), zones it finished without a bump, dogs it set out
-// with, dollars it banked, times it got the debuff, distinct lucky finds it found (all: every
-// lucky find in the data), a finished walk with a walking owner on their last heart, and a
-// finished walk that paid the Walk bonus for a pack of at least packSize. Profile
-// conditions are judged on the save after a run or a purchase: dogs, gear, dog slots and
-// walkers owned (all: every one in the data), finished walks with no owner firing you, times
-// fired, distinct owners who fired you (all: every dog's owner), distinct dogs that finished a
-// walk without firing you (all: every dog), distinct walkers who finished a walk (all: every
-// walker), distinct zones finished across walks (all: every zone of the world), walks played,
-// dollars earned across walks net of their starting cash, landed plain bumps by any of kinds
-// across walks, and a lifetime tally.
+// with, dollars it banked, times it got the debuff, a finished walk with a walking owner on
+// their last heart, and a finished walk that paid the Walk bonus for a pack of at least
+// packSize. Profile conditions are judged on the save after a run or a purchase: dogs, gear
+// and walkers owned (all: every one in the data), the current streak of finished walks with no
+// owner firing you, times fired, distinct owners who fired you (all: every dog's owner),
+// distinct dogs that finished a walk without firing you (all: every dog), distinct walkers who
+// finished a walk (all: every walker), distinct zones finished across walks (all: every zone of
+// the world), walks played, dollars earned across walks net of their starting cash, landed
+// plain bumps by any of kinds across walks, a lifetime tally, and picks of one card option
+// across walks.
 export type AchievementCondition =
   | {
       readonly count: number;
@@ -1003,18 +1024,17 @@ export type AchievementCondition =
       readonly kinds: readonly [MinorObstacleId, ...MinorObstacleId[]];
     }
   | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffsGot" }
+  | { readonly count: number; readonly kind: "noFiringStreak" }
+  | ({ readonly count: number; readonly kind: "optionPicks" } & OptionPick)
   | { readonly count: number; readonly kind: "packSize" }
   | { readonly count: number; readonly kind: "tally"; readonly tally: TallyId }
   | { readonly count: number; readonly kind: "timesFired" }
   | { readonly count: number; readonly kind: "walksPlayed" }
-  | { readonly count: number; readonly kind: "walksWithoutFiring" }
   | { readonly count: Threshold; readonly kind: "cleanZones" }
-  | { readonly count: Threshold; readonly kind: "dogSlotsOwned" }
   | { readonly count: Threshold; readonly kind: "dogsFinishedWith" }
   | { readonly count: Threshold; readonly kind: "dogsOwned" }
   | { readonly count: Threshold; readonly kind: "firedByOwners" }
   | { readonly count: Threshold; readonly kind: "gearOwned" }
-  | { readonly count: Threshold; readonly kind: "luckyFinds" }
   | { readonly count: Threshold; readonly kind: "walkersFinishedWith" }
   | { readonly count: Threshold; readonly kind: "walkersUnlocked" }
   | { readonly count: Threshold; readonly kind: "zonesEverFinished" }
