@@ -59,6 +59,7 @@ import { moverOutcomes } from "./outcomes";
 import {
   blocksLane,
   footprintOf,
+  isPullObstacle,
   itemHeight,
   moverMovement,
   planZone,
@@ -134,7 +135,7 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
 });
 
 // The seeds the planned-spawn sweep samples: more seeds cover more plans and take longer.
-const SWEEP_SEEDS = [1, 2, 3];
+const SWEEP_SEEDS = [1, 2, 3, 4];
 
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
@@ -597,6 +598,18 @@ describe("movers", { timeout: 120_000 }, () => {
       const cues = steps.map(({ at }) => moverTell(mover, at - 1e-6)?.kind ?? null);
       expect(cues).toEqual(steps.map((_, i) => (i === 0 ? "wander" : null)));
     }
+  });
+
+  // A pull obstacle passes through the pack, so it blocks no lane: one that moves is planned as a
+  // moving prize, as a walking lucky find is, and comes moving on every plan.
+  const movingPull = OBSTACLE_KINDS.filter(
+    (kind) => isPullObstacle(REAL, kind) && movementOf(kind) !== null,
+  );
+  it.each(movingPull)("plans a moving %s as a prize that moves", (kind) => {
+    expect(blocksLane(REAL, kind)).toBe(false);
+    const spawns = plannedSpawns().filter((planned) => planned.kind === kind);
+    expect(spawns.length).toBeGreaterThan(0);
+    expect(spawns.filter(({ mover }) => mover === undefined)).toEqual([]);
   });
 
   // The friendly neighbor in the pack's lane as her row reaches the pack: showing her cue before

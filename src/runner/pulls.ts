@@ -12,7 +12,6 @@ import { isWaiting, laneAt, moverPlace } from "./movers";
 import { moverOutcomes } from "./outcomes";
 import {
   blocksLane,
-  isPullObstacle,
   laneMotionConfig,
   laneMoveSeconds,
   packBoxes,
@@ -221,7 +220,7 @@ export function laneBlockedWithin(
   // A hit box's inset from its lanes' edges, in lanes.
   const inset = geometry.cell.inset / geometry.cell.length;
   return walk.road.items.some((item) => {
-    if (!blocksLane(data, item.kind) || isPullObstacle(data, item.kind)) {
+    if (!blocksLane(data, item.kind)) {
       return false;
     }
     const { mover } = item;

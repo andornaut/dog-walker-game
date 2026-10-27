@@ -1,12 +1,12 @@
 import type { GameData } from "../data/types";
-import { blocksLane, type WalkItemKind } from "../runner/walk";
+import { isObstacle, type WalkItemKind } from "../runner/walk";
 
 type CueData = Pick<GameData, "encounters" | "minorObstacles">;
 
 // Whether a road item bobs, which marks it as worth grabbing: tips, treats and lucky finds.
 // Obstacles carry no marker.
 export function itemBobs(data: CueData, kind: WalkItemKind): boolean {
-  return !blocksLane(data, kind);
+  return !isObstacle(data, kind);
 }
 
 // Whole-pixel steps of one bob, in screen pixels from the sprite's resting row.

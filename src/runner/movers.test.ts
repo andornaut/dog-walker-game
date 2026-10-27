@@ -1416,6 +1416,7 @@ describe("placeMovers", () => {
         clearRun: () => 1,
         isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
           !(motion === "cross" ? darts : taken).has(`${lane},${row}`),
+        keepsLeadIns: true,
         leavesRoom: () => true,
         occupy: () => undefined,
         packFits: () => true,
@@ -1473,24 +1474,44 @@ describe("placeMovers", () => {
     }
   });
 
-  it("blocks the lanes a crosser sweeps with its lead-in, and takes the cells it keeps clear", () => {
-    const { blocked, grid, taken } = freeGrid();
-    const [moving] = SPECS;
-    const { spawns } = placeMovers(plannerStreams(2), zoned, CAPS, grid, [], rows, [
-      {
-        count: 1,
-        kind: "squirrel",
-        spec: moving?.spec ?? spec({ kind: "ride", speedMultiplier: 2 }),
-      },
-    ]);
-    const [spawn] = spawns;
-    expect(blocked).toHaveLength(1);
-    expect(blocked[0]?.leadIn).toBe(true);
-    expect(taken.size).toBe(2 * geometry.laneCount);
-    expect(spawn?.lane).toBe(
-      spawn?.mover.motion === "cross" && spawn.mover.direction === 1 ? 0 : geometry.laneCount - 1,
-    );
-  });
+  // A crosser that meets the pack takes every cell of its own row, and on a grid that keeps
+  // lead-ins, as the lane-blocking movers' does, those of the row before too. A moving prize's
+  // grid keeps none.
+  it.each([
+    { keepsLeadIns: true, rowsTaken: 2 },
+    { keepsLeadIns: false, rowsTaken: 1 },
+  ])(
+    "blocks the lanes a crosser sweeps with its lead-in, taking $rowsTaken rows' cells (keepsLeadIns $keepsLeadIns)",
+    ({ keepsLeadIns, rowsTaken }) => {
+      const { blocked, grid, taken } = freeGrid();
+      const [moving] = SPECS;
+      const { spawns } = placeMovers(
+        plannerStreams(2),
+        zoned,
+        CAPS,
+        { ...grid, keepsLeadIns },
+        [],
+        rows,
+        [
+          {
+            count: 1,
+            kind: "squirrel",
+            spec: moving?.spec ?? spec({ kind: "ride", speedMultiplier: 2 }),
+          },
+        ],
+      );
+      const [spawn] = spawns;
+      expect(blocked).toHaveLength(1);
+      expect(blocked[0]?.leadIn).toBe(true);
+      expect(taken.size).toBe(rowsTaken * geometry.laneCount);
+      const row = blocked[0]?.row ?? Number.NaN;
+      const takenRows = new Set([...taken].map((cell) => Number(cell.split(",")[1])));
+      expect([...takenRows].sort((a, b) => a - b)).toEqual(keepsLeadIns ? [row - 1, row] : [row]);
+      expect(spawn?.lane).toBe(
+        spawn?.mover.motion === "cross" && spawn.mover.direction === 1 ? 0 : geometry.laneCount - 1,
+      );
+    },
+  );
 
   // Every cell of the grid already held, by a dart or by another spawn. A dart sets off over
   // cells another spawn holds; no mover takes a cell a dart holds, and no other mover takes a

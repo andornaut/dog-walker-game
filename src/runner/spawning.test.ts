@@ -28,7 +28,17 @@ function laneMask(lanes: readonly number[]): number {
   return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
 }
 
-type Kind = "bench" | "car" | "cat" | "hedge" | "neighbor" | "obstacle" | "skunk" | "tip" | "treat";
+type Kind =
+  | "bench"
+  | "car"
+  | "cat"
+  | "hedge"
+  | "neighbor"
+  | "obstacle"
+  | "skunk"
+  | "squirrel"
+  | "tip"
+  | "treat";
 
 // 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
@@ -113,7 +123,7 @@ const reacting: SpawnPlan<Kind> = {
 };
 
 const blocking = (event: SpawnEvent<Kind>) =>
-  event.kind !== "neighbor" && event.kind !== "tip" && event.kind !== "treat";
+  !["neighbor", "squirrel", "tip", "treat"].includes(event.kind);
 
 // A prize that moves, as the friendly neighbor does: 1 or 2 steps, a lane to either side then a
 // row down the road.
@@ -574,21 +584,28 @@ describe("planSpawns", () => {
     }
   });
 
-  // A moving prize is placed after every spawn the pack steers around, which it leaves where they
-  // were, and blocks no lane itself. A long zone gives it room to move; a zone shorter than the
-  // road has none, so it stands still. Either way none is skipped.
+  // A moving prize, stepping as the friendly neighbor does or darting as a squirrel does, is
+  // placed after every spawn the pack steers around, a lane-blocking dart included, which it
+  // leaves where they were: it blocks no lane, holds no lead-in row and takes no dart's place on
+  // screen. A long zone gives it room to move; a zone shorter than the road gives a stepper none,
+  // so it stands still. Either way none is skipped.
   it.each([
-    { moves: 3, name: "a long zone", zoneLength: 6000 },
-    { moves: 0, name: "a zone shorter than the road", zoneLength: 1000 },
-  ])(
-    "places every moving prize in $name, leaving the rest as they were",
-    ({ moves, zoneLength }) => {
-      const without: SpawnPlan<Kind> = { ...plan, zoneLength };
-      const prize = { blocksLane: false, count: 3, kind: "neighbor", mover: STROLLING } as const;
+    { kind: "neighbor", mover: STROLLING, moves: 3, name: "a long zone", zoneLength: 6000 },
+    { kind: "neighbor", mover: STROLLING, moves: 0, name: "a short zone", zoneLength: 1000 },
+    { kind: "squirrel", mover: DARTING, moves: 3, name: "a long zone", zoneLength: 6000 },
+  ] as const)(
+    "places every moving $kind in $name, leaving the rest as they were",
+    ({ kind, mover, moves, zoneLength }) => {
+      const without: SpawnPlan<Kind> = {
+        ...plan,
+        quotas: [...plan.quotas, { blocksLane: true, count: 2, kind: "cat", mover: DARTING }],
+        zoneLength,
+      };
+      const prize = { blocksLane: false, count: 3, kind, mover };
       const withPrizes: SpawnPlan<Kind> = { ...without, quotas: [...without.quotas, prize] };
       for (const seed of seeds) {
         const events = planSpawns(plannerStreams(seed), withPrizes);
-        const prizes = events.filter(({ kind }) => kind === "neighbor");
+        const prizes = events.filter((event) => event.kind === kind);
         expect(prizes).toHaveLength(prize.count);
         expect(prizes.filter(({ mover }) => mover !== undefined)).toHaveLength(moves);
         expect(events.filter(blocking)).toEqual(

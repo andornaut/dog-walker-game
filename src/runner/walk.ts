@@ -268,8 +268,8 @@ export function footprintOf(
 
 type ObstacleKind = EncounterId | MinorObstacleId;
 
-// What the pack steers around: obstacles, minor or not, which hit as they are drawn.
-export function blocksLane(
+// Obstacles, minor or not, which hit as they are drawn.
+export function isObstacle(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): kind is ObstacleKind {
@@ -293,6 +293,16 @@ export function isPullObstacle(
   kind: WalkItemKind,
 ): boolean {
   return obstacleResolution(data, kind) === "pull";
+}
+
+// What the pack steers around, and the spawn planner keeps a path past: every obstacle but a
+// pull obstacle, which passes through the pack. A pull obstacle that moves is planned as a moving
+// prize.
+export function blocksLane(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): boolean {
+  return isObstacle(data, kind) && !isPullObstacle(data, kind);
 }
 
 // The last lane move time, scroll speed and zone length worked out, with the data groups and
@@ -604,7 +614,7 @@ export function opensACard(
 // shape is known when it is placed. Rush hour and the like scale both obstacle counts, the tips
 // and the treats. Then each obstacle or lucky find whose look moves comes as a mover at the zone's
 // mover share: one quota per kind, and one per stepper, whose steps are its own. A lucky find
-// blocks no lane, moving or not.
+// or a pull obstacle blocks no lane, moving or not (blocksLane).
 export function spawnQuotas(
   data: WalkData,
   streams: PlannerStreams,
@@ -803,7 +813,7 @@ export function itemHeight(
   kind: WalkItemKind,
   moving: boolean,
 ): number {
-  if (!blocksLane(data, kind)) {
+  if (!isObstacle(data, kind)) {
     const category = itemCategory(data, kind) as Exclude<ItemCategory, "minor" | "obstacle">;
     return geometry.itemHeights[category];
   }
@@ -827,8 +837,8 @@ export function itemHeight(
   return length;
 }
 
-// The planner's inset at each end of a footprint row: whatever obstacle stands in a
-// footprint, standing or moving, its hit length is no more than the footprint's rows less this
+// The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in
+// a footprint, standing or moving, its hit length is no more than the footprint's rows less this
 // at each end, so every blocking span it plans covers the obstacle's. Negative where an obstacle
 // is drawn longer than its rows.
 export function plannedCellInset(
@@ -1047,7 +1057,7 @@ export function obstacleHitBox(
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
   item: WalkItem,
 ): LanedBox {
-  if (!blocksLane(data, item.kind)) {
+  if (!isObstacle(data, item.kind)) {
     throw new Error(`${item.kind} is not an obstacle`);
   }
   const { cell, lens } = geometry;
@@ -1165,7 +1175,7 @@ export function stepWalk(
   const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
   // An obstacle hits a part of the pack; a lucky find, as a pickup does, touches its outline.
   const touching = (item: WalkItem) =>
-    blocksLane(data, item.kind)
+    isObstacle(data, item.kind)
       ? hitDog(pack, obstacleHitBox(data, geometry, item))
       : pickupDog(pack, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
@@ -1409,7 +1419,7 @@ function opensFor(run: RunState, encounter: EncounterId): boolean {
 // grace window.
 function collisionRules(data: WalkData, run: RunState): CollisionRules<WalkItem> {
   return {
-    graced: (item) => blocksLane(data, item.kind),
+    graced: (item) => isObstacle(data, item.kind),
     invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
     startsInvulnerability: ({ kind }) =>
       isMinorObstacle(data, kind) || opensFor(run, kind as EncounterId),

@@ -11,7 +11,7 @@ import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { screenRoadGeometry } from "./screenGeometry";
-import { blocksLane, itemHeight, obstacleHitBox, packBoxes, type WalkItemKind } from "./walk";
+import { isObstacle, itemHeight, obstacleHitBox, packBoxes, type WalkItemKind } from "./walk";
 import { walkProjection } from "./walkGeometry";
 
 const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
@@ -46,7 +46,7 @@ describe("screenRoadGeometry", () => {
       // From where the item spawns until it has scrolled off the road and is dropped.
       for (let y = geometry.roadTop - height; y < geometry.roadBottom; y += SCROLL_STEP) {
         const item = { height, id: 0, kind, lane: 0, laneSpan: 1, y };
-        const obstacle = blocksLane(DATA, kind) ? obstacleHitBox(DATA, geometry, item) : null;
+        const obstacle = isObstacle(DATA, kind) ? obstacleHitBox(DATA, geometry, item) : null;
         const hit =
           obstacle === null
             ? pickupDog(pack, itemBox(geometry.cell, item))

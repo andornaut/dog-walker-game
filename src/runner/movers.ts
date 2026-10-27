@@ -382,13 +382,14 @@ export interface MoverStand {
 // its spawn. lanes and rows are what it blocks from its row on, as a standing obstacle that
 // size would: every lane it touches while it overlaps the pack, for as long as it can. cells
 // are the row offsets and lanes kept clear of other spawns, but a lane-blocking standing spawn
-// clear of its body: those it passes through on the road, and with leadIn, the whole row before
-// its own, so the pack has two rows of road to steer around a sweep of several lanes. stands are
-// each place it stands as an obstacle, by distance from its row. screen is from its cue
-// appearing until it is out of sight. body is the road its hit box covers at any moment while it
-// is on the road, by distance from its row; a dart has none, as a standing spawn may stand where
-// a dart passes. Of the placements that fit in a start lane and row, the planner takes one of
-// the highest rank, 0 when unset.
+// clear of its body: those it passes through on the road. With leadIn, leadInCells are the rest
+// of the whole row before its own, which a lane-blocking mover also keeps clear, so the pack has
+// two rows of road to steer around a sweep of several lanes. stands are each place it stands as
+// an obstacle, by distance from its row. screen is from its cue appearing until it is out of
+// sight. body is the road its hit box covers at any moment while it is on the road, by distance
+// from its row; a dart has none, as a standing spawn may stand where a dart passes. Of the
+// placements that fit in a start lane and row, the planner takes one of the highest rank, 0 when
+// unset.
 interface BlockCell {
   readonly lane: number;
   readonly row: number;
@@ -423,6 +424,7 @@ interface MoverPlacement {
   readonly lane: number;
   readonly lanes: LaneSpan;
   readonly leadIn: boolean;
+  readonly leadInCells: readonly BlockCell[];
   readonly path: MoverPath;
   readonly rank?: number;
   readonly rows: number;
@@ -901,13 +903,13 @@ function crossPlacements(
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
     const meets = lanes.count > 0;
     const touched = sweptLanes(laneCount, path, sightLength, sightLength + drawnWindow, inset);
-    const first = meets ? Math.min(firstRow, -1) : firstRow;
     return {
       appears,
-      cells: blockCells(first, lastRow - first + 1, 0, laneCount),
+      cells: blockCells(firstRow, lastRow - firstRow + 1, 0, laneCount),
       lane: direction === 1 ? 0 : laneCount - 1,
       lanes,
       leadIn: meets,
+      leadInCells: meets && firstRow > -1 ? blockCells(-1, firstRow + 1, 0, laneCount) : [],
       path,
       rows,
       screen: [appears, appears + shown + moving],
@@ -972,6 +974,7 @@ function ridePlacements(
     lane,
     lanes: { count: across, first: lane },
     leadIn: false,
+    leadInCells: [],
     path: {
       lane,
       lanes: across,
@@ -1038,6 +1041,7 @@ function standingPlacements(
       lane: start,
       lanes: { count, first },
       leadIn: false,
+      leadInCells: [],
       path: pathAt(start),
       rows: blockRows,
       screen: [maxTravel, leaves],
@@ -1333,17 +1337,20 @@ export function screenHasRoom(
 
 // The spawn planner's grid of rows and lanes. block blocks lanes in a row's window for rows
 // rows, with the row before it as a lead-in if asked, if every lane-blocking spawn stays
-// avoidable, and undoes it unless keep is set. leavesRoom is false when taking the cells would
-// leave too few for the spawns placed later that are never skipped. packFits is true when the
-// pack fits between each stand and every lane-blocking spawn placed so far, and stand records
-// the stands for the spawns placed later. isFree is true when a mover of a motion may take a
-// cell (moverMayTake in spawning.ts). take holds a cell for a mover, a dart if dart is
-// set, so nothing placed later takes it, but a lane-blocking standing spawn where no mover's body
-// comes: occupy records a mover's body, at distances along the zone, for those.
+// avoidable, and undoes it unless keep is set. keepsLeadIns is set when its movers block lanes,
+// so each also keeps its lead-in cells clear; a moving prize blocks no lane and needs none.
+// leavesRoom is false when taking the cells would leave too few for the spawns placed later that
+// are never skipped. packFits is true when the pack fits between each stand and every
+// lane-blocking spawn placed so far, and stand records the stands for the spawns placed later.
+// isFree is true when a mover of a motion may take a cell (moverMayTake in spawning.ts). take
+// holds a cell for a mover, a dart if dart is set, so nothing placed later takes it, but a
+// lane-blocking standing spawn where no mover's body comes: occupy records a mover's body, at
+// distances along the zone, for those.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
   clearRun(lanes: LaneSpan, row: number): number;
   isFree(motion: MoverPath["motion"], lane: number, row: number): boolean;
+  readonly keepsLeadIns: boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
   occupy(body: MoverBody): void;
   packFits(stands: readonly MoverStand[]): boolean;
@@ -1413,17 +1420,19 @@ export function placeMovers<Kind extends string>(
   rows: readonly number[],
   quotas: readonly MoverQuota<Kind>[],
 ): PlacedMovers<Kind> {
+  // The cells a placement keeps clear on the grid: its lead-in cells too where they are kept.
+  const cellsOf = (placement: MoverPlacement) =>
+    grid.keepsLeadIns ? [...placement.cells, ...placement.leadInCells] : placement.cells;
   const fits = (spot: Spot) => {
     const [start, end] = screenOf(spot);
     const { placement } = spot;
+    const cells = cellsOf(placement);
     return (
       start >= 0 &&
       end <= geometry.zoneLength &&
       screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end])) &&
-      placement.cells.every(({ lane, row }) =>
-        grid.isFree(placement.path.motion, lane, spot.row + row),
-      ) &&
-      grid.leavesRoom(placement.cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
+      cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row)) &&
+      grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
       grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, false)
     );
@@ -1503,7 +1512,7 @@ export function placeMovers<Kind extends string>(
       );
       const { placement } = spot;
       const dart = placement.path.motion === "cross";
-      placement.cells.forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row));
+      cellsOf(placement).forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row));
       if (placement.body !== undefined) {
         const { from, lanes, to } = placement.body;
         grid.occupy({ from: spot.distance + from, lanes, to: spot.distance + to });

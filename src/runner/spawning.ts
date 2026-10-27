@@ -421,10 +421,12 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
 // is more road than its body. A kind marked moversPassOver also takes a mover's cells, but never
 // one where a mover may end a move and stand. A mover with no room in its stretch, such as one
 // over a cap on screen, waits for the next row with room; only one marked first stands still in its footprint
-// when no row has room for it to move. A moving prize is placed as a mover that blocks nothing:
-// the cells it passes through are kept clear of other spawns, so it never walks into one, but no
-// lane is blocked, it stands nowhere for the pack-fit gap and it counts toward no cap on screen,
-// since the pack never has to steer around it.
+// when no row has room for it to move. A moving prize, such as a walking lucky find or a darting
+// squirrel, is placed as a mover that blocks nothing: the cells it passes through are kept clear
+// of other spawns placed after it, so it never walks into one, but no lane is blocked, it keeps
+// no lead-in row, it stands nowhere for the pack-fit gap and it counts toward no cap on screen
+// beside the lane-blocking movers, since the pack never has to steer around it. A darting one may
+// set off over the lane-blocking spawns' cells, as any dart may.
 // It keeps a free cell for every moving prize, its own included, and with no room to move it stands
 // still in one cell among the other spawns, so a prize is never skipped for want of room to move.
 // A spawn that blocks no lane, such as a tip or a treat, also keeps off every spot where a mover
@@ -796,6 +798,7 @@ export function planSpawns<Kind extends string>(
         (((heldByStanding[row] ?? 0) | (otherMoverHeld[row] ?? 0)) & cell) !== 0,
       );
     },
+    keepsLeadIns: true,
     // Only the cells not yet taken use up room: a dart may set off over taken ones.
     leavesRoom: (cells: readonly Cell[]) =>
       leavesRoom(
@@ -859,11 +862,13 @@ export function planSpawns<Kind extends string>(
     return first ? stilledQuotas(true, quotas, dropped) : [];
   };
   // A moving prize keeps its cells clear of other spawns, and nothing else: it blocks no lane,
-  // stands nowhere for the pack-fit gap, and counts toward no cap on screen. One with no room to
-  // move stands still instead, in its footprint, among the other spawns that block no lane.
+  // keeps no lead-in row, stands nowhere for the pack-fit gap, and counts toward no cap on screen
+  // beside the lane-blocking movers. One with no room to move stands still instead, in its
+  // footprint, among the other spawns that block no lane.
   const prizeGrid = {
     ...moverGrid,
     block: () => true,
+    keepsLeadIns: false,
     occupy: () => {},
     packFits: () => true,
     stand: () => {},

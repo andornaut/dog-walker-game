@@ -21,7 +21,6 @@ import {
 } from "../runner/session";
 import {
   blocksLane,
-  isPullObstacle,
   laneMoveSeconds,
   type RoadGeometry,
   startRoad,
@@ -203,7 +202,7 @@ function countLeaving(
       touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
     }
     countItem(tally, touched, { kind: item.kind, moving: mover !== undefined });
-    if (touched && blocksLane(data, item.kind) && !isPullObstacle(data, item.kind)) {
+    if (touched && blocksLane(data, item.kind)) {
       const inFromLane =
         pulledFrom !== null && pulledFrom >= item.lane && pulledFrom < item.lane + item.laneSpan;
       tally.hits.all += 1;
