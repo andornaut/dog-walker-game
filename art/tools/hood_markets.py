@@ -351,19 +351,21 @@ PATIO_IDLE = ((), (), (1, 6), (3, 8)), 400
 
 # ---------- the rolling barrel ----------
 
-def rolling_barrel(turn=0.0, dust=None):
+def rolling_barrel(turn=0.0, dust=None, rock=0.0):
     """A whisky barrel on its side, seen end-on: an ash iron hoop lit grey on its upper left and shaded
     slate on its lower right, the chime's dbrown ring inside it, and the brown head with its dbrown stave
     seams and a walnut bung, dark oak with no gold or orange so it never reads as a coin, turned turn
     degrees clockwise. dust (0 or 1) kicks up a puff of driftwood dust behind it on the left, low on the
-    ground, in one of two shapes. Laid out on the 32-unit grid; the head is drawn
-    pixel for pixel at the grid's scale so its seams stay 1px at any angle."""
+    ground, in one of two shapes. rock turns the bung alone that many degrees, the seams held still. Laid out
+    on the 32-unit grid; the head is drawn pixel for pixel at the grid's scale so its seams stay 1px at any
+    angle."""
     g = edged(Grid(32, 32))
     px, s = raster(g), scale_of(g)
     cx, cy, r = 16 * s, 16.5 * s, 12 * s
     a = math.radians(turn)
     gap = max(3, round(3.3 * s))
-    bung = (cx + math.cos(a - math.pi / 2) * 0.55 * r, cy + math.sin(a - math.pi / 2) * 0.55 * r)
+    b = a + math.radians(rock)
+    bung = (cx + math.cos(b - math.pi / 2) * 0.55 * r, cy + math.sin(b - math.pi / 2) * 0.55 * r)
     for y in range(px.h):
         for x in range(px.w):
             dx, dy = x + 0.5 - cx, y + 0.5 - cy
@@ -388,7 +390,7 @@ def rolling_barrel(turn=0.0, dust=None):
     return g
 
 
-# Resting, then rocked 15 degrees; the roll, a full turn clockwise, 45 degrees a frame, the dust in two shapes.
+# Resting, then the bung rocked 15 degrees; the roll, a full turn clockwise, 45 degrees a frame, the dust in two shapes.
 BARREL_IDLE = ((0,), (15,)), 400
 BARREL_RUN = tuple((k * 45, k % 2) for k in range(8)), 60
 
@@ -637,7 +639,7 @@ def road_sprites(s=1):
     yield "patio-rail", [("idle", frames(o, patio_rail, [dict(nod=a) for a in args]), ms)]
     idle, idle_ms = BARREL_IDLE
     run, run_ms = BARREL_RUN
-    yield "rolling-barrel", [("idle", frames(p, rolling_barrel, [dict(turn=a) for a, in idle]), idle_ms),
+    yield "rolling-barrel", [("idle", frames(p, rolling_barrel, [dict(rock=a) for a, in idle]), idle_ms),
                              ("run", frames(p, rolling_barrel, [dict(turn=a, dust=d) for a, d in run]), run_ms)]
     args, ms = FISH_IDLE
     yield "fish-crates", [("idle", frames(p, fish_crates, [dict(flop=a) for a in args]), ms)]
