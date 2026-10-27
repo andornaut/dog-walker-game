@@ -870,51 +870,6 @@
       }
     },
     {
-      "key": "bin",
-      "png": "sprites/bin.png",
-      "json": "sprites/bin.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 28
-      }
-    },
-    {
-      "key": "bin@50",
-      "png": "sprites/bin@50.png",
-      "json": "sprites/bin@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 14
-      }
-    },
-    {
-      "key": "bin@62",
-      "png": "sprites/bin@62.png",
-      "json": "sprites/bin@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "bin@75",
-      "png": "sprites/bin@75.png",
-      "json": "sprites/bin@75.json",
-      "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 21
-      }
-    },
-    {
-      "key": "bin@88",
-      "png": "sprites/bin@88.png",
-      "json": "sprites/bin@88.json",
-      "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 25
-      }
-    },
-    {
       "key": "card-frame",
       "png": "sprites/card-frame.png",
       "json": "sprites/card-frame.json"
@@ -4128,6 +4083,51 @@
       "anchor": {
         "feetY": 18,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "trash-can",
+      "png": "sprites/trash-can.png",
+      "json": "sprites/trash-can.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "trash-can@50",
+      "png": "sprites/trash-can@50.png",
+      "json": "sprites/trash-can@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "trash-can@62",
+      "png": "sprites/trash-can@62.png",
+      "json": "sprites/trash-can@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "trash-can@75",
+      "png": "sprites/trash-can@75.png",
+      "json": "sprites/trash-can@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "trash-can@88",
+      "png": "sprites/trash-can@88.png",
+      "json": "sprites/trash-can@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 25
       }
     },
     {

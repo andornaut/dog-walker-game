@@ -15,7 +15,7 @@ fx-bump-big      64x64  play (7 frames, 50ms)  a mover's impact: a four-layer st
 fx-debris-leaves 48x48  play (6 frames, 70ms)  leaves and a twig knocked out of a hedge,
                                                fluttering down; centred on the contact
 fx-debris-litter 48x48  play (6 frames, 70ms)  paper, a can and a banana peel thrown out
-                                               of a bin; centred on the contact
+                                               of a trash can; centred on the contact
 fx-splash        64x48  play (8 frames, 60ms)  a puddle: a crown of five water jets rising
                                                from the feet, three drops thrown off it and
                                                one ripple; its ground point, row 40, goes on
@@ -274,7 +274,7 @@ def debris_leaves(step):
 
 
 def debris_litter(step):
-    """48x48, centred on the contact point: litter thrown out of a bin, arcing up and falling, each piece
+    """48x48, centred on the contact point: litter thrown out of a trash can, arcing up and falling, each piece
     turning as it goes: two paper balls, a crumpled sheet, a can and a banana peel."""
     g = Grid(48, 48)
     t = step + 1

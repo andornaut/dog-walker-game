@@ -15,7 +15,7 @@ grow taller.
 
 <key>@<step> keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
-lost-wallet, cone, bin, bench, skunk, squirrel, other-dog,
+lost-wallet, cone, trash-can, bench, skunk, squirrel, other-dog,
 skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
 drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 42x42 at @88, 36x36
 at @75, 30x30 at @62 and 24x24 at @50.
@@ -352,15 +352,15 @@ def squirrel(s, draw, *args, **q):
 def variants(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s.
     road.py's sprites are drawn at road.SCALE x s and obstacles.py's at obstacles.SCALE x s, as those
-    files draw them at road.SCALE and obstacles.SCALE. The bin's lift and the bench's leaf are in drawn
+    files draw them at road.SCALE and obstacles.SCALE. The trash can's lift and the bench's leaf are in drawn
     pixels, so they stay 1px here."""
     p, o = road.SCALE * s, obstacles.SCALE * s
     yield "tip", [("idle", [small(road, p, road.tip, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
     yield "treat", [("idle", [shrunk(p, road.treat, **q).outlined() for q in road.TREAT_IDLE], 400)]
     frames, ms = obstacles.CONE_IDLE
     yield "cone", [("idle", [cone(o, gl).outlined() for gl in frames], ms)]
-    frames, ms = obstacles.BIN_IDLE
-    yield "bin", [("idle", [small(obstacles, o, obstacles.bin_, a).outlined() for a in frames], ms)]
+    frames, ms = obstacles.TRASH_CAN_IDLE
+    yield "trash-can", [("idle", [small(obstacles, o, obstacles.trash_can, a).outlined() for a in frames], ms)]
     frames, ms = obstacles.BENCH_IDLE
     yield "bench", [("idle", [small(obstacles, o, obstacles.bench, a).outlined() for a in frames], ms)]
     yield "skunk", [("idle", [shrunk(p, road.skunk, **q).outlined() for q in road.SKUNK_IDLE], 300),

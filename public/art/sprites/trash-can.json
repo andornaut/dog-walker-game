@@ -1,5 +1,5 @@
 { "frames": {
-   "bin 0.aseprite": {
+   "trash-can 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 48, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 48, "h": 48 },
     "duration": 400
    },
-   "bin 1.aseprite": {
+   "trash-can 1.aseprite": {
     "frame": { "x": 48, "y": 0, "w": 48, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 48, "h": 48 },
     "duration": 400
    },
-   "bin 2.aseprite": {
+   "trash-can 2.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 48, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 48, "h": 48 },
     "duration": 400
    },
-   "bin 3.aseprite": {
+   "trash-can 3.aseprite": {
     "frame": { "x": 144, "y": 0, "w": 48, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -35,7 +35,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "bin.png",
+  "image": "trash-can.png",
   "format": "RGBA8888",
   "size": { "w": 192, "h": 48 },
   "scale": "1",

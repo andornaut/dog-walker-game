@@ -9,7 +9,7 @@ of top surface and never its length along the road. The game scales each one
 by distance with its base on the road line.
 
 cone                48x48   1 lane, a glint runs down its highlight
-bin                 48x48   1 lane, the lid lifts 1px in a breeze
+trash-can           48x48   1 lane, the lid lifts 1px in a breeze
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
 barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink
 barrier-3           176x36  3 lanes, lamps blink
@@ -117,7 +117,7 @@ def cone(glint=None):
     return g
 
 
-def bin_(lift=0):
+def trash_can(lift=0):
     """lift raises the lid and handle by that many drawn pixels (negative is up), showing the dark gap under
     the lid. The forest body takes a green rim on its top-left edges, the ink wheels and handle a grey one.
     Its lit half has two green ribs, one below TEXTURE_MIN."""
@@ -170,7 +170,7 @@ def bench(leaf=(0, 0), w=span(2)):
     return g
 
 
-# The smallest scale the hedge's leaf texture and the bin's two ribs are drawn at: under it (the @50 step) a
+# The smallest scale the hedge's leaf texture and the trash can's two ribs are drawn at: under it (the @50 step) a
 # 1px detail lands on single pixels or merges with its neighbor.
 TEXTURE_MIN = 0.7
 
@@ -299,7 +299,7 @@ def treads(g, x, y, w, h, f, u=1, back=False):
 # Idle frames, one drawing argument each, and their duration in ms. Most hold the rest pose for
 # two frames so the motion comes as a short event rather than a constant flicker.
 CONE_IDLE = (None, None, 9, 11), 400
-BIN_IDLE = (0, 0, -1, 0), 400
+TRASH_CAN_IDLE = (0, 0, -1, 0), 400
 BENCH_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
 HEDGE_IDLE = ((), (5,), (10,), (1,)), 350
 PARKED_CAR_IDLE = (False, True), 500
@@ -570,7 +570,7 @@ def sprites():
         return [("idle", [drawn(s, draw, a).outlined() for a in args], ms)]
 
     yield "cone", idle(cone, CONE_IDLE)
-    yield "bin", idle(bin_, BIN_IDLE)
+    yield "trash-can", idle(trash_can, TRASH_CAN_IDLE)
     yield "bench", idle(bench, BENCH_IDLE)
     yield "hedge", idle(lambda r: hedge(rustle=r), HEDGE_IDLE)
     for lanes in (2, 3):
