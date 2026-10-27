@@ -382,10 +382,8 @@ export interface MoverStand {
 // its spawn. lanes and rows are what it blocks from its row on, as a standing obstacle that
 // size would: every lane it touches while it overlaps the pack, for as long as it can. cells
 // are the row offsets and lanes kept clear of other spawns, but a lane-blocking standing spawn
-// clear of its body: those it passes through on the road. With leadIn, the row before its own is
-// its lead-in: left empty, the pack has two rows of road to steer around a sweep of several lanes;
-// otherwise it is crossed like any other row. stands are
-// each place it stands as an obstacle, by distance from its row. screen is from its cue
+// clear of its body: those it passes through on the road. stands are each place it stands as an
+// obstacle, by distance from its row. screen is from its cue
 // appearing until it is out of sight. body is the road its hit box covers at any moment while it
 // is on the road, by distance from its row; a dart has none, as a standing spawn may stand where
 // a dart passes. Of the placements that fit in a start lane and row, the planner takes one of
@@ -423,7 +421,6 @@ interface MoverPlacement {
   readonly cells: readonly BlockCell[];
   readonly lane: number;
   readonly lanes: LaneSpan;
-  readonly leadIn: boolean;
   readonly path: MoverPath;
   readonly rank?: number;
   readonly rows: number;
@@ -797,8 +794,8 @@ function crossTilts(
 // boxes, until its hit box leaves the road if that comes before its contact's end: a stand wider
 // or longer than its hit box would hide the road beside or behind it that the pack can step into.
 // One that has crossed the road by the time it reaches the pack's rows is harmless: it blocks no
-// lanes and stands nowhere. It keeps clear every row it is level with as it crosses or stands, and
-// one that meets the pack has the row before its own as a lead-in. It appears as its row comes
+// lanes and stands nowhere. It keeps clear every row it is level with as it crosses or stands. It
+// appears as its row comes
 // on screen, or at the road's top where its start is farther up the road than its row, and waits
 // idle at its edge until its cue, warningSeconds before it sets off.
 function crossPlacements(
@@ -900,14 +897,12 @@ function crossPlacements(
       warning: shown,
     };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
-    const meets = lanes.count > 0;
     const touched = sweptLanes(laneCount, path, sightLength, sightLength + drawnWindow, inset);
     return {
       appears,
       cells: blockCells(firstRow, lastRow - firstRow + 1, 0, laneCount),
       lane: direction === 1 ? 0 : laneCount - 1,
       lanes,
-      leadIn: meets,
       path,
       rows,
       screen: [appears, appears + shown + moving],
@@ -971,7 +966,6 @@ function ridePlacements(
     cells: blockCells(firstRow, lastRow - firstRow + 1, lane, across),
     lane,
     lanes: { count: across, first: lane },
-    leadIn: false,
     path: {
       lane,
       lanes: across,
@@ -1037,7 +1031,6 @@ function standingPlacements(
       cells: blockCells(0, rowCount, first, count),
       lane: start,
       lanes: { count, first },
-      leadIn: false,
       path: pathAt(start),
       rows: blockRows,
       screen: [maxTravel, leaves],
@@ -1331,17 +1324,17 @@ export function screenHasRoom(
   );
 }
 
-// The spawn planner's grid of rows and lanes. block blocks lanes in a row's window for rows
-// rows, with the row before it as a lead-in if asked, if every lane-blocking spawn stays
-// avoidable, and undoes it unless keep is set. leavesRoom is false when taking the cells would
-// leave too few for the spawns placed later that are never skipped. packFits is true when the
-// pack fits between each stand and every lane-blocking spawn placed so far, and stand records the
+// The spawn planner's grid of rows and lanes. block blocks lanes in a row's window for rows rows,
+// if every lane-blocking spawn keeps clear of the path, and undoes it unless keep is set.
+// leavesRoom is false when taking the cells would leave too few for the spawns placed later that
+// are never skipped. packFits is true when the pack fits between each stand and every lane-blocking
+// spawn placed so far along the path, and between the stands themselves, and stand records the
 // stands for the spawns placed later. isFree is true when a mover of a motion may take a cell
 // (moverMayTake in spawning.ts). take holds a cell for a mover, a dart if dart is set, so nothing
 // placed later takes it, but a lane-blocking standing spawn where no mover's body comes: occupy
 // records a mover's body, at distances along the zone, for those.
 interface MoverGrid {
-  block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
+  block(row: number, lanes: LaneSpan, rows: number, keep: boolean): boolean;
   clearRun(lanes: LaneSpan, row: number): number;
   isFree(motion: MoverPath["motion"], lane: number, row: number): boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
@@ -1424,7 +1417,7 @@ export function placeMovers<Kind extends string>(
       cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row)) &&
       grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
-      grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, false)
+      grid.block(spot.row, placement.lanes, placement.rows, false)
     );
   };
   const spotsIn = (placements: readonly MoverPlacement[], first: number, end: number) =>
@@ -1507,7 +1500,7 @@ export function placeMovers<Kind extends string>(
         const { from, lanes, to } = placement.body;
         grid.occupy({ from: spot.distance + from, lanes, to: spot.distance + to });
       }
-      grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, true);
+      grid.block(spot.row, placement.lanes, placement.rows, true);
       grid.stand(standsOf(spot));
       onScreen.push(onScreenOf(placement.path, screenOf(spot)));
       spawns.push({

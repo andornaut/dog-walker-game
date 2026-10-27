@@ -63,7 +63,8 @@ export interface SpawnQuota<Kind extends string> {
 // lane-blocking spawn in view in them. packHitLength is the length of the pack's hit boxes, which
 // the pack-fit gap keeps clear. With firstContactSeconds, the rows reach back up the road, on the
 // same grid, to the last that meets the pack no sooner than that long after the zone starts: rows
-// at negative distances are on the road in view as the zone starts.
+// at negative distances are on the road in view as the zone starts. pathStart is the lane the
+// zone's guaranteed path starts in (planSpawns).
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -77,6 +78,7 @@ export interface SpawnPlan<Kind extends string> {
   moverCaps: MoverCaps;
   packHitLength: number;
   packLength: number;
+  pathStart: number;
   quotas: readonly SpawnQuota<Kind>[];
   reactionSeconds: number;
   roadLength: number;
@@ -94,15 +96,21 @@ export interface SpawnEvent<Kind extends string> {
   mover?: MoverPath;
 }
 
+// A row of a zone's guaranteed path: the row's distance and the lane the path holds on it.
+export interface PathRow {
+  distance: number;
+  lane: number;
+}
+
+// A zone's spawns, sorted by distance, and its guaranteed path, a row for each of its rows.
+export interface PlannedSpawns<Kind extends string> {
+  events: SpawnEvent<Kind>[];
+  path: PathRow[];
+}
+
 interface DueSpawns<Kind extends string> {
   due: SpawnEvent<Kind>[];
   pending: readonly SpawnEvent<Kind>[];
-}
-
-// entry is the reach into the first row from any lane: the zone starts a row spacing clear.
-export interface LaneReach {
-  betweenRows: number;
-  entry: number;
 }
 
 // Rows minSpacing apart, leaving at least minSpacing clear at both ends of the zone.
@@ -132,15 +140,6 @@ export function zoneRows(
   const earliest = plan.firstContactSeconds * plan.scrollSpeed - plan.sightLength;
   const before = Math.floor((spacing - earliest) / spacing + ROUNDING);
   return [...Array.from({ length: before }, (_, i) => spacing * (i + 1 - before)), ...rows];
-}
-
-// The road the pack has to steer for a row from the zone's start: the row's distance, or where
-// the zone's rows reach back onto the road in view, the road before the row meets the pack less
-// the reaction margin.
-function roadFromStart(plan: SpawnPlan<string>, distance: number): number {
-  return plan.firstContactSeconds === undefined
-    ? distance
-    : distance + plan.sightLength - reactionLength(plan);
 }
 
 type Geometry = Pick<SpawnPlan<string>, "cellInset" | "cellLength" | "packLength">;
@@ -177,17 +176,6 @@ function reactionLength(plan: SpawnPlan<string>): number {
   return plan.reactionSeconds * plan.scrollSpeed;
 }
 
-// Whole lane moves that fit in a stretch of clear road. The pack starts a move only on a walk
-// step, which can come up to a step into the stretch, so the moves need a step to spare.
-function lanesWithin(plan: SpawnPlan<string>, clearDistance: number): number {
-  const maxReach = plan.laneCount - 1;
-  if (plan.laneMoveSeconds <= 0) {
-    return maxReach;
-  }
-  const moves = Math.floor((clearDistance - stepLength(plan)) / laneMoveLength(plan) + ROUNDING);
-  return Math.max(0, Math.min(maxReach, moves));
-}
-
 // Rows are minSpacing apart, or, on a road too fast for a lane move between one row's window
 // and the next, the fewest whole pixels apart that fit one with its step to spare.
 export function rowSpacing(plan: SpawnPlan<string>): number {
@@ -198,9 +186,18 @@ export function rowSpacing(plan: SpawnPlan<string>): number {
   return Math.max(plan.minSpacing, Math.ceil(oneMove - ROUNDING));
 }
 
-// Every row has a window, the distance over which a one-row spawn on it overlaps the pack,
-// and a gap of clear road before the next row's window, where the pack changes lanes.
-export function laneReach(plan: SpawnPlan<string>): LaneReach {
+// The guaranteed path holds each lane for at least PATH_HOLD_ROWS rows, then changes lane with
+// PATH_CHANGE_CHANCE at each row, by PATH_MOST_LANES or fewer.
+export const PATH_HOLD_ROWS = 2;
+export const PATH_CHANGE_CHANCE = 0.5;
+export const PATH_MOST_LANES = 2;
+
+// The most lanes the path changes by at once: as many as the pack fits past (packGap) on the road
+// between one-row spawns two rows apart, with the row between them clear, at least one and no
+// more than PATH_MOST_LANES. Every row has a window, the distance over which a one-row spawn on it
+// overlaps the pack, which must fit between rows, and the next row must be in sight before the
+// pack steers for it.
+export function pathReach(plan: SpawnPlan<string>): number {
   const spacing = rowSpacing(plan);
   const window = blockingLength(plan, 1);
   if (window > spacing) {
@@ -209,10 +206,13 @@ export function laneReach(plan: SpawnPlan<string>): LaneReach {
   if (spacing > window + plan.sightLength) {
     throw new Error("Rows must keep the next row in sight before the pack steers for it");
   }
-  return {
-    betweenRows: lanesWithin(plan, spacing - window),
-    entry: lanesWithin(plan, spacing),
-  };
+  const road = 2 * spacing - hitLength(plan, 1);
+  const most = Math.min(PATH_MOST_LANES, plan.laneCount - 1);
+  let reach = 1;
+  while (reach < most && packGap(plan, reach + 1) <= road + ROUNDING) {
+    reach += 1;
+  }
+  return reach;
 }
 
 // A lane-blocking spawn as the pack meets it: the distance at which its hit box's near edge
@@ -233,60 +233,73 @@ export function packGap(plan: SpawnPlan<string>, changes: number): number {
   return plan.packHitLength + changes * laneMoveLength(plan) + reactionLength(plan);
 }
 
-// The most lane changes a pack passing the nearer spawn, in a lane the farther one blocks, makes
-// between them on a way out of that lane that steps in behind the nearer one: from the first
-// lane the nearer one blocks to the nearest lane the farther one leaves open, on either side.
-// The moves before that first lane can be made beside the nearer one. 0 when no way steps in
-// behind it.
-function laneChangesBetween(laneCount: number, near: BlockingPlace, far: BlockingPlace): number {
-  const nearMask = laneRun(near.lane, near.lanes);
-  const farMask = laneRun(far.lane, far.lanes);
-  let most = 0;
-  for (let lane = 0; lane < laneCount; lane++) {
-    if ((farMask & ~nearMask & (1 << lane)) === 0) {
-      continue;
-    }
-    for (const side of [-1, 1]) {
-      let behind = -1;
-      for (let next = lane + side; next >= 0 && next < laneCount; next += side) {
-        if (behind === -1 && (nearMask & (1 << next)) !== 0) {
-          behind = next;
-        }
-        if ((farMask & (1 << next)) === 0) {
-          if (behind !== -1) {
-            most = Math.max(most, Math.abs(next - behind) + 1);
-          }
-          break;
-        }
-      }
-    }
-  }
-  return most;
+// A change of lane on the path, from the lane it holds on one row to the next row's lane: at is
+// halfway between the two rows. The row before a change keeps every lane the change crosses clear
+// in its window and gap, so a lane-blocking spawn in those lanes meets the pack before at or after.
+export interface PathChange {
+  at: number;
+  from: number;
+  to: number;
 }
 
-// True when the pack fits between two lane-blocking spawns: where the path changes lanes
-// between them and road shows between them, that road is at least the packGap for those lane
-// changes. Spawns side by side, with no road between them, leave no gap to change lanes through.
-export function packFitsBetween(
+// The lane moves the pack makes between two lane-blocking spawns as it follows a change of the
+// path met between them: as the nearer one passes, the pack is still short of the first lane on
+// the way that it blocks, past the lane the path leaves; as the farther one meets it, the pack is
+// past the last lane on the way that it blocks, short of the lane the path takes. 0 when either
+// blocks no such lane, or the pack can wait between them.
+function pathMovesBetween(change: PathChange, near: BlockingPlace, far: BlockingPlace): number {
+  const side = Math.sign(change.to - change.from);
+  const steps = Math.abs(change.to - change.from);
+  const nearMask = laneRun(near.lane, near.lanes);
+  const farMask = laneRun(far.lane, far.lanes);
+  let nearest = Infinity;
+  let farthest = -Infinity;
+  for (let step = 0; step <= steps; step++) {
+    const bit = 1 << (change.from + side * step);
+    if (step > 0 && (nearMask & bit) !== 0) {
+      nearest = Math.min(nearest, step);
+    }
+    if (step < steps && (farMask & bit) !== 0) {
+      farthest = Math.max(farthest, step);
+    }
+  }
+  return Math.max(0, farthest - nearest + 2);
+}
+
+// True when the pack fits between two lane-blocking spawns along the path: at each change of
+// lane the path makes between them, changes sorted by at, the road from the nearer one's hit box
+// to the farther one's is at least the packGap for the lane moves made between them
+// (pathMovesBetween), never more than PATH_MOST_LANES. Spawns met at once have no change between
+// them.
+export function packFitsOnPath(
   plan: SpawnPlan<string>,
+  changes: readonly PathChange[],
   a: BlockingPlace,
   b: BlockingPlace,
 ): boolean {
-  // Met at once, either may be the nearer one.
-  if (a.distance === b.distance) {
-    return packFitsBehind(plan, a, b) && packFitsBehind(plan, b, a);
-  }
-  return a.distance < b.distance ? packFitsBehind(plan, a, b) : packFitsBehind(plan, b, a);
-}
-
-// True when the pack fits behind the nearer of two lane-blocking spawns (packFitsBetween).
-function packFitsBehind(plan: SpawnPlan<string>, near: BlockingPlace, far: BlockingPlace): boolean {
+  const [near, far] = a.distance <= b.distance ? [a, b] : [b, a];
   const gap = far.distance - near.distance - near.length;
-  if (gap <= 0) {
+  if (gap >= packGap(plan, PATH_MOST_LANES) - ROUNDING) {
     return true;
   }
-  const changes = laneChangesBetween(plan.laneCount, near, far);
-  return changes === 0 || gap >= packGap(plan, changes) - ROUNDING;
+  // The first change past the nearer one.
+  let low = 0;
+  let high = changes.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (itemAt(changes, middle).at <= near.distance) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  for (let i = low; i < changes.length && itemAt(changes, i).at <= far.distance; i++) {
+    const moves = pathMovesBetween(itemAt(changes, i), near, far);
+    if (moves > 0 && gap < packGap(plan, moves) - ROUNDING) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // The mask of count lanes from first on.
@@ -300,27 +313,6 @@ function laneTotal(mask: number): number {
     count += 1;
   }
   return count;
-}
-
-// True when every lane in from has a lane in to no more than reach lanes away, with every
-// lane on the way, both ends included, in clear. All are lane masks.
-export function everyLaneReaches(reach: number, from: number, to: number, clear = -1): boolean {
-  for (let lane = 0; from >>> lane !== 0; lane++) {
-    if ((from & (1 << lane)) === 0) {
-      continue;
-    }
-    let reached = false;
-    for (let target = Math.max(0, lane - reach); target <= lane + reach && !reached; target++) {
-      if ((to & (1 << target)) !== 0) {
-        const path = laneRun(Math.min(lane, target), Math.abs(target - lane) + 1);
-        reached = (clear & path) === path;
-      }
-    }
-    if (!reached) {
-      return false;
-    }
-  }
-  return true;
 }
 
 interface Cell {
@@ -398,71 +390,103 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
   }
 }
 
+// The guaranteed path, a lane for each row: from pathStart, it holds each lane for at least
+// PATH_HOLD_ROWS rows, and on each row after that it changes lane with PATH_CHANGE_CHANCE, to a
+// lane drawn evenly among those on the road up to pathReach lanes either way. Every row draws
+// twice from the movers stream, whatever the path does there.
+function drawPath(streams: PlannerStreams, plan: SpawnPlan<string>, rowCount: number): number[] {
+  const most = pathReach(plan);
+  const path: number[] = [];
+  let lane = plan.pathStart;
+  let held = 0;
+  for (let row = 0; row < rowCount; row++) {
+    const change = streams.movers();
+    const pick = streams.movers();
+    if (held >= PATH_HOLD_ROWS && change < PATH_CHANGE_CHANCE) {
+      const options: number[] = [];
+      for (let step = -most; step <= most; step++) {
+        if (step !== 0 && lane + step >= 0 && lane + step < plan.laneCount) {
+          options.push(lane + step);
+        }
+      }
+      lane = options[Math.floor(pick * options.length)] ?? lane;
+      held = 0;
+    }
+    path.push(lane);
+    held += 1;
+  }
+  return path;
+}
+
 // Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart (zoneRows). Each
 // kind's spawns are spread over equal stretches of the zone, one per stretch, so no kind bunches
 // up. A lane-blocking spawn, standing or moving, is drawn among the places that fit toward the
 // lanes left unblocked longest (laneBalanceWeight), so no lane stays clear for long. The standing
 // kinds take turns along the zone, the widest first in each turn, so each keeps its share of what
-// is placed. Lane-blocking spawns only take cells that keep every hit avoidable: each row's window
-// and the gap after it keep minOpenLanes open, and from any lane at the zone's start, and from
-// every open lane of each row, an open lane of the next row is within reach without crossing a
-// lane blocked in the gap between them, or else, after rows with no
-// lane-blocking spawn, which the pack steers across, from an earlier row with the lane moves that
-// fit in all the road between less the reaction margin; those rows then stay clear of lane-blocking
-// spawns. A spawn more than one row long blocks every window and gap it overlaps, and must end
-// within the zone's last row. Where the path changes lanes between two lane-blocking spawns,
-// packFitsBetween holds, for a mover wherever it stands, each spawn measured at its kind's drawn
-// hit length (hitLength) and the pack at its hit boxes (packHitLength). Two lane-blocking spawns WIDE_LANES wide
-// or wider have a row between the rows their hit boxes are on. The quotas marked first are placed first, their
-// movers then the rest; then the other lane-blocking movers; then the other lane-blocking spawns;
-// then the moving prizes; then the other spawns. Movers are placed by placeMovers. The row before
-// a crosser's own is its lead-in: left empty, the pack steers into the crosser's row from two rows
-// back; a lane-blocking spawn may stand in it wherever the path rule and the pack-fit gap with the
-// crosser still hold, and the pack then crosses it like any other row. A dart may set off over
-// cells the spawns placed before it hold, crossing over or past them, and a rider may pass over
-// cells only darts hold (moverMayTake). Nothing else placed after a mover takes its cells, another
-// dart included, but a lane-blocking standing spawn: one where a dart passes, which the dart then
-// crosses over or past the same way, and one whose hit box shares no road with
-// any other mover's body, the road that mover's hit box covers at some moment on screen, so the
-// two never meet; a mover other than a dart holds every row its blocking and its path touch, which
-// is more road than its body. A kind marked moversPassOver also takes a mover's cells, but not
-// one where a mover may end a move and stand unless it is also marked moversRestOn. A mover with
-// no room in its stretch, such as one over a cap on screen, waits for the next row with room;
-// only one marked first stands still in its footprint when no row has room for it to move. A
-// moving prize, such as a walking lucky find or a darting squirrel, is placed as a mover that
-// blocks nothing: the cells it passes through are kept clear of other spawns placed after it, so
-// it never walks into one, but no lane is blocked, it keeps no lead-in row, it stands nowhere for
-// the pack-fit gap and it counts toward no cap on screen beside the lane-blocking movers, since
-// the pack never has to steer around it. A darting one may set off over the lane-blocking spawns'
-// cells, as any dart may.
-// It keeps a free cell for every moving prize, its own included, and with no room to move it stands
-// still in one cell among the other spawns, so a prize is never skipped for want of room to move.
-// A spawn that blocks no lane, such as a treat, also keeps off every spot where a mover placed may
-// end a move and stand (moverRests), so no mover ever stops on one; a kind marked moversRestOn,
-// such as a tip, may lie there.
-// A lane-blocking mover, or an obstacle bigger than one cell, that the earlier
-// draws left no room for is skipped, which uses no random draw; so is one that would leave fewer
-// free cells than there are one-cell spawns. A free cell can still be one no lane-blocking spawn
-// may take, where the path rule or the pack-fit gap around the movers rules it out, so a one-cell
-// spawn with no room left is skipped too, the same way: a zone never fails to plan for want of
-// room. Once the lane-blocking spawns are placed, and before the moving prizes and the other
-// spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking spawn in
-// view, the zone's first and last rows included (none at all from the first row of a zone whose
-// rows start on the road in view), gets one of the zone's own plain standing
-// spawns: one skipped for want of room, or else one moved from the busiest stretch, placed under
-// every rule above, so long as each move leaves fewer such rows in all. A run no spawn can take
-// under them, such as one held clear for a mover's path, stays.
+// is placed. Before anything is placed, the zone draws its guaranteed path (drawPath), the lanes a
+// pack can follow through it from pathStart. Lane-blocking spawns only take cells that keep that
+// path clear: the path's lane stays open in every row's window and the gap after it, and on the
+// row before the path changes lane every lane the change crosses does too. Each row's window and
+// the gap after it also keep minOpenLanes open. A spawn more than one row long blocks every window
+// and gap it overlaps, and must end within the zone's last row. Where the path changes lanes
+// between two lane-blocking spawns, packFitsOnPath holds, for a mover wherever it stands, each
+// spawn measured at its kind's drawn hit length (hitLength) and the pack at the tallest pack's hit
+// boxes (packHitLength). Off the path, nothing checks a way between spawns. Two lane-blocking
+// spawns WIDE_LANES wide or wider have a row between the rows their hit boxes are on. The quotas
+// marked first are placed first, their movers then the rest; then the other lane-blocking movers;
+// then the other lane-blocking spawns; then the moving prizes; then the other spawns. Movers are
+// placed by placeMovers. A dart may set off over cells the spawns placed before it hold, crossing
+// over or past them, and a rider may pass over cells only darts hold (moverMayTake). Nothing else
+// placed after a mover takes its cells, another dart included, but a lane-blocking standing spawn:
+// one where a dart passes, which the dart then crosses over or past the same way, and one whose
+// hit box shares no road with any other mover's body, the road that mover's hit box covers at some
+// moment on screen, so the two never meet; a mover other than a dart holds every row its blocking
+// and its path touch, which is more road than its body. A kind marked moversPassOver also takes a
+// mover's cells, but not one where a mover may end a move and stand unless it is also marked
+// moversRestOn. A mover with no room in its stretch, such as one over a cap on screen, waits for
+// the next row with room; only one marked first stands still in its footprint when no row has room
+// for it to move. A moving prize, such as a walking lucky find or a darting squirrel, is placed as
+// a mover that blocks nothing: the cells it passes through are kept clear of other spawns placed
+// after it, so it never walks into one, but no lane is blocked, it stands nowhere for the pack-fit
+// gap and it counts toward no cap on screen beside the lane-blocking movers, since the pack never
+// has to steer around it. A darting one may set off over the lane-blocking spawns' cells, as any
+// dart may. It keeps a free cell for every moving prize, its own included, and with no room to
+// move it stands still in one cell among the other spawns, so a prize is never skipped for want of
+// room to move. A spawn that blocks no lane, such as a treat, also keeps off every spot where a
+// mover placed may end a move and stand (moverRests), so no mover ever stops on one; a kind marked
+// moversRestOn, such as a tip, may lie there. A lane-blocking mover, or an obstacle bigger than
+// one cell, that the earlier draws left no room for is skipped, which uses no random draw; so is
+// one that would leave fewer free cells than there are one-cell spawns. A free cell can still be
+// one no lane-blocking spawn may take, where the path or the pack-fit gap along it rules it out,
+// so a one-cell spawn with no room left is skipped too, the same way: a zone never fails to plan
+// for want of room. Once the lane-blocking spawns are placed, and before the moving prizes and the
+// other spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking
+// spawn in view, the zone's first and last rows included (none at all from the first row of a zone
+// whose rows start on the road in view), gets one of the zone's own plain standing spawns: one
+// skipped for want of room, or else one moved from the busiest stretch, placed under every rule
+// above, so long as each move leaves fewer such rows in all. A run no spawn can take under them,
+// such as one held clear for the path, stays.
 export function planSpawns<Kind extends string>(
   streams: PlannerStreams,
   plan: SpawnPlan<Kind>,
-): SpawnEvent<Kind>[] {
+): PlannedSpawns<Kind> {
   const { laneCount, minOpenLanes } = plan;
   const spacing = rowSpacing(plan);
   const rows = zoneRows(plan, spacing);
-  const reach = {
-    ...laneReach(plan),
-    entry: lanesWithin(plan, roadFromStart(plan, itemAt(rows, 0))),
-  };
+  if (plan.pathStart < 0 || plan.pathStart >= laneCount) {
+    throw new Error("The path must start on the road");
+  }
+  const path = drawPath(streams, plan, rows.length);
+  // The lanes the path keeps clear in each row's window and the gap after it: its own and, on the
+  // row before a change, every lane the change crosses.
+  const pathHeld = Int32Array.from(path, (lane, row) => {
+    const next = path[row + 1] ?? lane;
+    return laneRun(Math.min(lane, next), Math.abs(next - lane) + 1);
+  });
+  const changes: PathChange[] = path.flatMap((from, row) => {
+    const to = path[row + 1] ?? from;
+    return to === from ? [] : [{ at: (itemAt(rows, row) + itemAt(rows, row + 1)) / 2, from, to }];
+  });
   // Lane masks per row: lanes taken by a spawn, those of them a dart holds, lanes blocked in the
   // row's window, and lanes blocked in the gap after it.
   const taken = new Int32Array(rows.length);
@@ -503,7 +527,7 @@ export function planSpawns<Kind extends string>(
   // is checked only against those within longestPlaced, the longest length placed, and that gap.
   const placed: BlockingPlace[] = [];
   let longestPlaced = 0;
-  const widestGap = Math.max(packGap(plan, 0), packGap(plan, laneCount));
+  const widestGap = packGap(plan, PATH_MOST_LANES);
   const addPlaced = (place: BlockingPlace) => {
     let low = 0;
     let high = placed.length;
@@ -518,7 +542,8 @@ export function planSpawns<Kind extends string>(
     placed.splice(low, 0, place);
     longestPlaced = Math.max(longestPlaced, place.length);
   };
-  // True when the pack fits between a place and every place placed (packFitsBetween).
+  // True when the pack fits between a place and every place placed along the path
+  // (packFitsOnPath).
   const fitsPlaced = (place: BlockingPlace): boolean => {
     const from = place.distance - longestPlaced - widestGap;
     const to = place.distance + Math.max(0, place.length) + widestGap;
@@ -537,7 +562,7 @@ export function planSpawns<Kind extends string>(
       if (other.distance > to) {
         return true;
       }
-      if (!packFitsBetween(plan, place, other)) {
+      if (!packFitsOnPath(plan, changes, place, other)) {
         return false;
       }
     }
@@ -551,7 +576,6 @@ export function planSpawns<Kind extends string>(
   const clearOfWide = (first: number, last: number): boolean =>
     !wideRows.subarray(Math.max(0, first - 1), last + 2).includes(1);
 
-  const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
   // The longest run of rows through row whose windows leave any one of span's lanes unblocked.
   const clearRun = (span: LaneSpan, row: number): number => {
     let best = 0;
@@ -588,83 +612,6 @@ export function planSpawns<Kind extends string>(
     taken[row] = (taken[row] ?? 0) | mask;
   };
 
-  // The rows before the darts' own: one left empty is steered across from the row before it.
-  const leadIns = new Set<number>();
-  const leadInReach = lanesWithin(plan, 2 * spacing - blockingLength(plan, 1));
-
-  const isEmpty = (row: number) => (blocked[row] ?? 0) === 0 && (gapBlocked[row] ?? 0) === 0;
-  // Empty rows the pack steers across to reach a row it could not reach from the row before:
-  // they stay free of lane-blocking spawns. relied holds those a trial block needs. Only a spawn
-  // bigger than one cell, which may be skipped, keeps new rows clear, so the one-cell spawns
-  // always have the rows they had.
-  const steerRows = new Uint8Array(rows.length);
-  let relied: number[] = [];
-  // From an empty row, the reach from the nearest row before it that reaches the next row:
-  // over all the road from that row's window to the next row's, less the reaction margin, since
-  // the pack steers for a row further ahead than the next; or from any lane at the zone's start.
-  // The rows between are empty, and the pack may be in any lane of an empty one. The steering
-  // stops at the last row before it with a lane-blocking spawn.
-  const crossesEmpty = (row: number): boolean => {
-    const next = itemAt(rows, row + 1);
-    for (let from = row - 1; from >= -1; from -= 1) {
-      const road =
-        from === -1
-          ? roadFromStart(plan, next)
-          : next - itemAt(rows, from) - blockingLength(plan, 1) - reactionLength(plan);
-      const start = from === -1 ? lanes : openLanes(from);
-      const clear = from === -1 ? -1 : ~(gapBlocked[from] ?? 0);
-      if (everyLaneReaches(lanesWithin(plan, road), start, openLanes(row + 1), clear)) {
-        relied.push(...Array.from({ length: row - from }, (_, i) => from + 1 + i));
-        return true;
-      }
-      if (from >= 0 && !isEmpty(from)) {
-        return false;
-      }
-    }
-    return false;
-  };
-
-  const crossesFrom = (row: number): boolean => {
-    if (row === -1) {
-      return everyLaneReaches(reach.entry, lanes, openLanes(0));
-    }
-    if (row === rows.length - 1) {
-      return true;
-    }
-    // An empty lead-in row is steered across from the row before it, over both rows' road; one a
-    // lane-blocking spawn stands in is crossed like any other row.
-    if (leadIns.has(row) && isEmpty(row)) {
-      return everyLaneReaches(
-        leadInReach,
-        openLanes(row - 1),
-        openLanes(row + 1),
-        ~(gapBlocked[row - 1] ?? 0),
-      );
-    }
-    const crosses = everyLaneReaches(
-      reach.betweenRows,
-      openLanes(row),
-      openLanes(row + 1),
-      ~(gapBlocked[row] ?? 0),
-    );
-    return crosses || (isEmpty(row) && crossesEmpty(row));
-  };
-
-  // Checks every transition from the row before first up to last, and from the empty rows after
-  // it, as a block over those rows changes them.
-  const crossesAround = (first: number, last: number): boolean => {
-    const lastCrossing = leadIns.has(last + 1) ? last + 1 : last;
-    let ok = true;
-    for (let row = first - 1; ok && row <= lastCrossing; row++) {
-      ok = crossesFrom(row);
-    }
-    // The empty rows after it now steer from it.
-    for (let row = lastCrossing + 1; ok && row < rows.length - 1 && isEmpty(row); row++) {
-      ok = crossesFrom(row);
-    }
-    return ok;
-  };
-
   // Every block kept: its first row, the last row whose window and the last whose gap it
   // overlaps, and its lanes.
   interface Block {
@@ -675,18 +622,19 @@ export function planSpawns<Kind extends string>(
   }
   const blocks: Block[] = [];
 
-  // Blocks the footprint's lanes, checks every transition it touches, and undoes the block
-  // unless keep is set and the checks pass.
+  // Blocks the footprint's lanes where they keep clear of the path and leave minOpenLanes open
+  // in every window and gap they block, and undoes the block unless keep is set and they do.
   const tryBlock = (cell: Cell, footprint: Footprint, keep: boolean): boolean => {
     const { lastGap, lastRow } = blockingSpan(plan, spacing, cell.row, footprint.rows);
     if (lastRow >= rows.length || lastGap >= rows.length - 1) {
       return false;
     }
-    if (steerRows.subarray(cell.row, lastRow + 1).includes(1)) {
-      return false;
-    }
-    relied = [];
     const covered = laneRun(cell.lane, footprint.lanes);
+    for (let row = cell.row; row <= Math.max(lastRow, lastGap); row++) {
+      if (((pathHeld[row] ?? 0) & covered) !== 0) {
+        return false;
+      }
+    }
     for (let row = cell.row; row <= lastRow; row++) {
       blockedBefore[row] = blocked[row] ?? 0;
       blocked[row] = (blocked[row] ?? 0) | covered;
@@ -702,14 +650,7 @@ export function planSpawns<Kind extends string>(
     for (let row = cell.row; ok && row <= lastGap; row++) {
       ok = laneCount - laneTotal(gapBlocked[row] ?? 0) >= minOpenLanes;
     }
-    ok = ok && crossesAround(cell.row, lastRow);
-    if (ok && footprint.lanes * footprint.rows === 1) {
-      ok = relied.every((row) => steerRows[row] === 1);
-    }
     if (ok && keep) {
-      relied.forEach((row) => {
-        steerRows[row] = 1;
-      });
       blocks.push({ covered, lastGap, lastRow, row: cell.row });
     }
     if (!ok || !keep) {
@@ -811,24 +752,8 @@ export function planSpawns<Kind extends string>(
     );
   const movers = moverQuotas(true);
   const moverGrid = {
-    block: (row: number, span: LaneSpan, rowsBlocked: number, leadIn: boolean, keep: boolean) => {
-      // A lead-in needs a row before it to steer from.
-      if (leadIn && row < 2) {
-        return false;
-      }
-      if (leadIn) {
-        leadIns.add(row - 1);
-      }
-      const ok = tryBlock(
-        { lane: span.first, row },
-        { lanes: span.count, rows: rowsBlocked },
-        keep,
-      );
-      if (leadIn && !(ok && keep)) {
-        leadIns.delete(row - 1);
-      }
-      return ok;
-    },
+    block: (row: number, span: LaneSpan, rowsBlocked: number, keep: boolean) =>
+      tryBlock({ lane: span.first, row }, { lanes: span.count, rows: rowsBlocked }, keep),
     clearRun,
     isFree: (motion: MoverPath["motion"], lane: number, row: number) => {
       const cell = laneRun(lane, 1);
@@ -849,7 +774,12 @@ export function planSpawns<Kind extends string>(
     occupy: ({ from, lanes: span, to }: MoverBody) => {
       moverBodies.push({ from, lanes: laneRun(span.first, span.count), to });
     },
-    packFits: (stands: readonly MoverStand[]) => stands.every(fitsPlaced),
+    packFits: (stands: readonly MoverStand[]) =>
+      stands.every(
+        (stand, i) =>
+          fitsPlaced(stand) &&
+          stands.slice(i + 1).every((other) => packFitsOnPath(plan, changes, stand, other)),
+      ),
     stand: (stands: readonly MoverStand[]) => {
       stands.forEach(addPlaced);
     },
@@ -900,7 +830,7 @@ export function planSpawns<Kind extends string>(
     return first ? stilledQuotas(true, quotas, dropped) : [];
   };
   // A moving prize keeps its cells clear of other spawns, and nothing else: it blocks no lane,
-  // keeps no lead-in row, stands nowhere for the pack-fit gap, and counts toward no cap on screen
+  // stands nowhere for the pack-fit gap, and counts toward no cap on screen
   // beside the lane-blocking movers. One with no room to move stands still instead, in its
   // footprint, among the other spawns that block no lane.
   const prizeGrid = {
@@ -1147,9 +1077,8 @@ export function planSpawns<Kind extends string>(
   const without = <Item>(items: Item[], item: Item) => {
     items.splice(items.indexOf(item), 1);
   };
-  // Takes a standing spawn off the road, freeing its cells but those a mover holds, and checks
-  // every transition it touched. The rows its path relied on stay clear.
-  const lift = (lifted: Standing): boolean => {
+  // Takes a standing spawn off the road, freeing its cells but those a mover holds.
+  const lift = (lifted: Standing) => {
     const { block, cell, event, place, quota } = lifted;
     const footprint = quota.footprint ?? SINGLE_CELL;
     const covered = laneRun(cell.lane, footprint.lanes);
@@ -1167,12 +1096,10 @@ export function planSpawns<Kind extends string>(
     without(placed, place);
     without(events, event);
     without(standing, lifted);
-    relied = [];
-    return crossesAround(block.row, block.lastRow);
   };
   // Saves what a move changes, and returns what puts it back.
   const save = (): (() => void) => {
-    const arrays = [taken, heldByStanding, blocked, gapBlocked, wideRows, steerRows];
+    const arrays = [taken, heldByStanding, blocked, gapBlocked, wideRows];
     const arrayCopies = arrays.map((array) => array.slice());
     const copies = { blocks: [...blocks], events: [...events], placed: [...placed] };
     const standingCopy = [...standing];
@@ -1214,9 +1141,9 @@ export function planSpawns<Kind extends string>(
   };
   // Fills a quiet run with one of the zone's plain standing spawns: one that found no room, or
   // else one moved from the busiest stretch, where the most rows near it come on screen with
-  // something else in view; equally busy ones are tried in random order. A move stands only if
-  // it leaves fewer rows quiet over the cap in all, counting any it leaves where the spawn stood,
-  // which a later move may fill.
+  // something else in view; equally busy ones are tried in random order, each into the run as it
+  // stands once that spawn is lifted. A move stands only if it leaves fewer rows quiet over the
+  // cap in all, counting any it leaves where the spawn stood, which a later move may fill.
   const fillRun = (run: Run, over: number): boolean => {
     for (const quota of unplaced) {
       const cells = cellsIn(quota, run);
@@ -1237,7 +1164,11 @@ export function planSpawns<Kind extends string>(
       );
       without(ranked, pick);
       const undo = save();
-      const cells = lift(pick.from) ? cellsIn(pick.from.quota, run) : [];
+      lift(pick.from);
+      // The run as it stands with the spawn lifted, longer where the spawn stood beside it.
+      const grown =
+        quietRuns().runs.find(({ first, last }) => first <= run.first && run.last <= last) ?? run;
+      const cells = cellsIn(pick.from.quota, grown);
       if (cells.length > 0) {
         placeMoved(pick.from.quota, randomPick(streams.spawns, cells));
         if (quietRuns().over < over) {
@@ -1271,7 +1202,10 @@ export function planSpawns<Kind extends string>(
   const stilledPrizes = placePrizes();
   holdRests();
   placeStanding((quota) => quota.first !== true && !quota.blocksLane, stilledPrizes);
-  return events.sort((a, b) => a.distance - b.distance || a.lane - b.lane);
+  return {
+    events: events.sort((a, b) => a.distance - b.distance || a.lane - b.lane),
+    path: path.map((lane, row) => ({ distance: itemAt(rows, row), lane })),
+  };
 }
 
 // The movers placeMovers dropped, as quotas that stand still in their footprints, one per kind:

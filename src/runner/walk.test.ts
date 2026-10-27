@@ -45,7 +45,7 @@ import { zoneStats } from "../rules/zones";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
-import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
+import { lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
 import {
   blockingSpans,
@@ -54,7 +54,6 @@ import {
   gcdOf,
   inZone,
   LANE_MOVE_WALKERS,
-  LANES,
   MINOR_OBSTACLE_IDS,
   MOVER_SCROLL,
   moverContact,
@@ -476,7 +475,7 @@ describe("planZone", { timeout: 60_000 }, () => {
 
   // planZone throws when a tuned spawn finds no room, so this also proves none is dropped. At
   // the road's base speed, which a walker's pace scales.
-  it("plans every zone of the game's road, first walk and last, with a way past every obstacle from any lane", () => {
+  it("plans every zone of the game's road, first walk and last, with a way from the path's start", () => {
     const base = { ...REAL, tuning: withNeutralWalkers(TUNING) };
     for (const zone of ZONE_IDS) {
       for (const zoneIndex of [0, WORLD.walkLength - 1]) {
@@ -487,11 +486,10 @@ describe("planZone", { timeout: 60_000 }, () => {
             run: zoned,
           });
           const spans = blockingSpans(base, GAME_ROAD, zone, walk.road.pending);
-          for (const start of [0, 2, 4]) {
-            expect(lanesReachedAtEnd(walkwayOf(base, GAME_ROAD, zoned), spans, start)).not.toEqual(
-              [],
-            );
-          }
+          const start = walk.road.path[0]?.lane ?? -1;
+          expect(lanesReachedAtEnd(walkwayOf(base, GAME_ROAD, zoned), spans, start)).not.toEqual(
+            [],
+          );
         }
       }
     }
@@ -519,7 +517,7 @@ describe("planZone", { timeout: 60_000 }, () => {
 
   // Every obstacle's and every minor obstacle's weight raised at once, at the fastest pace in
   // the last zone, where the road is fastest.
-  it("plans a way past every row from any lane with every obstacle or minor obstacle weighed higher", () => {
+  it("plans a way past every row from the path's start with every obstacle or minor obstacle weighed higher", () => {
     for (const { world } of [
       {
         name: "every obstacle",
@@ -545,23 +543,20 @@ describe("planZone", { timeout: 60_000 }, () => {
             run: zoned,
           });
           const spans = blockingSpans(tuned, GAME_ROAD, zone, walk.road.pending);
-          for (const start of LANES) {
-            const reached = lanesReachedAtEnd(walkwayOf(tuned, GAME_ROAD, zoned), spans, start);
-            expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
-          }
+          const start = walk.road.path[0]?.lane ?? -1;
+          const reached = lanesReachedAtEnd(walkwayOf(tuned, GAME_ROAD, zoned), spans, start);
+          expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
         }
       }
     }
   });
 
-  // Two standing obstacles: a pack passing the nearer one in a lane the farther one blocks, that
-  // gets out of it by stepping in behind the nearer one, changes lanes between the two from the
-  // first lane the nearer one blocks to the nearest lane the farther one leaves open. Road
-  // between them, from the nearer one's drawn hit box, is at least the tallest pack's hit boxes,
-  // those lane moves in whole walk steps and the reaction margin, on every way out. Two obstacles
-  // WIDE_LANES or more lanes wide have a row between them. At the road's speed in the last
-  // neighborhood, for the walkers whose lane moves cover the least and the most road.
-  it("spaces obstacles for the pack to change lanes between them, at the shortest and longest lane move", () => {
+  // Standing obstacles along the path: at each change of lane, the road between the drawn hit
+  // boxes of obstacles met before and after it is at least the tallest pack's hit boxes, the lane
+  // moves made between them in whole walk steps and the reaction margin. Two obstacles WIDE_LANES
+  // or more lanes wide have a row between them. At the road's speed in the last neighborhood, for
+  // the walkers whose lane moves cover the least and the most road.
+  it("spaces obstacles for the path's lane changes between them, at the shortest and longest lane move", () => {
     for (const { walker, zone } of LANE_MOVE_WALKERS.flatMap((walker) =>
       ZONE_IDS.map((zone) => ({ walker, zone })),
     )) {
@@ -580,20 +575,14 @@ describe("planZone", { timeout: 60_000 }, () => {
         const standing = walk.road.pending.filter(
           (event) => event.mover === undefined && blocksLane(REAL, event.kind),
         );
-        for (const near of standing) {
-          const nearLanes = lanesOf(near.kind, near.lane);
-          for (const far of standing.filter(({ distance }) => distance > near.distance)) {
-            const changes = laneChangesBehind(LANE_COUNT, nearLanes, lanesOf(far.kind, far.lane));
-            const gap =
-              far.distance - near.distance - itemHeight(REAL, GAME_ROAD, near.kind, false);
-            if (changes > 0 && gap > 0) {
-              const fit = packHitLength(GAME_ROAD) + changes * laneMove + margin;
-              expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
-                fit - 1e-6,
-              );
-            }
-          }
-        }
+        const contacts = standing.map(({ distance, kind, lane }) => ({
+          end: distance + itemHeight(REAL, GAME_ROAD, kind, false),
+          label: `seed ${seed}: ${kind} at ${distance}`,
+          lanes: lanesOf(kind, lane),
+          start: distance,
+        }));
+        const fit = (moves: number) => packHitLength(GAME_ROAD) + moves * laneMove + margin - 1e-6;
+        expect(pathShortfalls(packHitLength(GAME_ROAD), fit, walk.road.path, contacts)).toEqual([]);
         const spacing = gcdOf(walk.road.pending.flatMap((e) => (e.mover ? [] : [e.distance])));
         const wide = standing.filter(({ kind }) => footprintOf(REAL, kind).lanes >= WIDE_LANES);
         wide.forEach((near, i) => {

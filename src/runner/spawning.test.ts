@@ -1,20 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../lib/arrays";
-import { laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
+import { type Contact, lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
 import { type MoverPath, moverPlace, type MoverSpec, sweptLanes } from "./movers";
 import {
   blockingLength,
-  everyLaneReaches,
   type Footprint,
   hitLength,
-  type LaneReach,
-  laneReach,
   moverMayTake,
   moverRests,
-  packFitsBetween,
+  packFitsOnPath,
   packGap,
+  PATH_HOLD_ROWS,
+  type PathChange,
+  pathReach,
+  type PlannedSpawns,
   planSpawns,
   rowSpacing,
   type SpawnEvent,
@@ -23,11 +24,6 @@ import {
   takeDueSpawns,
   WIDE_LANES,
 } from "./spawning";
-
-// A set of lanes as a bit mask: bit n set means lane n is in it.
-function laneMask(lanes: readonly number[]): number {
-  return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
-}
 
 type Kind =
   | "bench"
@@ -44,7 +40,7 @@ type Kind =
 // 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
 // time for a 0.05s step and 4 moves of 0.1s, so the pack can reach any lane from any row. No cap
-// on rows that come on screen quiet, unless a test sets one.
+// on rows that come on screen quiet, unless a test sets one. The path starts in the middle lane.
 const plan: SpawnPlan<Kind> = {
   cellInset: 5,
   cellLength: 30,
@@ -57,6 +53,7 @@ const plan: SpawnPlan<Kind> = {
   moverCaps: { darts: 1, slowVehicles: 1, total: 3 },
   packHitLength: 30,
   packLength: 30,
+  pathStart: 2,
   quotas: [
     { blocksLane: true, count: 6, kind: "obstacle" },
     { blocksLane: false, count: 9, kind: "tip" },
@@ -148,7 +145,7 @@ const STROLLING: MoverSpec = {
 };
 
 // A dart straight across the road at a lane a second, so most meet the pack: one that does holds
-// every lane of its own row and, as its lead-in, of the row before.
+// every lane of its own row.
 const DARTING: MoverSpec = {
   footprint: { lanes: 1, rows: 1 },
   motion: {
@@ -182,6 +179,35 @@ function openLanesByRow(spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]):
   });
 }
 
+// Each lane-blocking spawn as the pack meets it, its hit box planned from its footprint.
+const contactsOf = (spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]): Contact[] =>
+  events.filter(blocking).map((event) => {
+    const { lanes, rows } = footprintOf(event.kind);
+    return {
+      end: event.distance + hitLength(spawnPlan, rows),
+      label: `${event.kind} at ${event.distance} in lane ${event.lane}`,
+      lanes: new Set(Array.from({ length: lanes }, (_, i) => event.lane + i)),
+      start: event.distance,
+    };
+  });
+
+// The planned path passes every lane-blocking spawn with full margins, as the planner measures
+// them, and the pack has a way through the zone from the path's first lane.
+function expectPathPassable(
+  spawnPlan: SpawnPlan<Kind>,
+  planned: PlannedSpawns<Kind>,
+  label: string,
+): void {
+  const { events, path } = planned;
+  const gap = (moves: number) => packGap(spawnPlan, moves) - 1e-6;
+  expect(
+    pathShortfalls(spawnPlan.packLength, gap, path, contactsOf(spawnPlan, events)),
+    label,
+  ).toEqual([]);
+  const spans = spansOf(spawnPlan, events);
+  expect(lanesReachedAtEnd(spawnPlan, spans, spawnPlan.pathStart), label).not.toEqual([]);
+}
+
 const spansOf = (spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]) =>
   events.filter(blocking).map((event) => {
     const { lanes, rows } = footprintOf(event.kind);
@@ -210,60 +236,48 @@ describe("spawnRowDistances", () => {
   });
 });
 
-describe("packFitsBetween", () => {
-  // A car three rows long in lane 1; road starts showing behind it at its hit box's far edge.
-  const car = { distance: 0, lane: 1, lanes: 1, length: hitLength(plan, 3) };
+describe("packFitsOnPath", () => {
+  // A car three rows long in lane 2, and the path changing from lane 1 to lane 2 just after it
+  // meets the pack: road starts showing behind it at its hit box's far edge.
+  const car = { distance: 0, lane: 2, lanes: 1, length: hitLength(plan, 3) };
   const behind = car.length;
-  it("fits a pack between two obstacles only with a pack gap of road, or a lane apart", () => {
-    for (const { far, fits } of [
-      {
-        far: { distance: behind + packGap(plan, 1) - 1, lane: 2, lanes: 1 },
-        fits: false,
-        name: "a pack gap less a pixel beside it",
-      },
-      {
-        far: { distance: behind + packGap(plan, 1), lane: 2, lanes: 1 },
-        fits: true,
-        name: "a pack gap beside it",
-      },
-      {
-        far: { distance: behind, lane: 2, lanes: 1 },
-        fits: true,
-        name: "touching it, with no road between",
-      },
-      { far: { distance: behind + 1, lane: 3, lanes: 1 }, fits: true, name: "a lane away" },
-      { far: { distance: behind + 1, lane: 1, lanes: 1 }, fits: true, name: "in its lane" },
-      {
-        far: { distance: behind + 1, lane: 1, lanes: 2 },
-        fits: false,
-        name: "over its lane and the one beside, a pixel behind it",
-      },
-    ] satisfies readonly {
-      far: { distance: number; lane: number; lanes: number };
-      fits: boolean;
-      name: string;
-    }[]) {
-      const other = { ...far, length: hitLength(plan, 1) };
-      expect(packFitsBetween(plan, car, other)).toBe(fits);
-      expect(packFitsBetween(plan, other, car)).toBe(fits);
-    }
-  });
-
-  // A mover faster than the road is in contact with the pack for less than the pack's length,
-  // so road shows behind it while the obstacle met with it still passes.
-  it("fits a pack beside a standing obstacle met at once, not a mover passing faster than the road", () => {
-    for (const { fits, length } of [
-      { fits: true, length: hitLength(plan, 1), name: "a standing obstacle" },
-      { fits: false, length: -1, name: "a mover passing faster than the road" },
-    ] satisfies readonly { fits: boolean; length: number; name: string }[]) {
-      const beside = { distance: 0, lane: 2, lanes: 1, length };
-      expect(packFitsBetween(plan, car, beside)).toBe(fits);
-      expect(packFitsBetween(plan, beside, car)).toBe(fits);
-    }
+  const change: PathChange = { at: 1, from: 1, to: 2 };
+  it.each([
+    {
+      far: { distance: behind + packGap(plan, 1) - 1, lane: 1 },
+      fits: false,
+      name: "a pack gap less a pixel later, in the lane the path leaves",
+    },
+    {
+      far: { distance: behind + packGap(plan, 1), lane: 1 },
+      fits: true,
+      name: "a pack gap later, in the lane the path leaves",
+    },
+    {
+      far: { distance: behind + 1, lane: 2 },
+      fits: true,
+      name: "a pixel later, in the lane the path takes",
+    },
+    {
+      far: { distance: behind + 1, lane: 3 },
+      fits: true,
+      name: "a pixel later, off the path's way",
+    },
+    {
+      far: { distance: behind + 1, lane: 1 },
+      fits: true,
+      name: "a pixel later, with no change between",
+      unchanged: true,
+    },
+  ])("fits a pack past a car and an obstacle $name: $fits", ({ far, fits, unchanged }) => {
+    const changes = unchanged === true ? [] : [change];
+    const other = { ...far, lanes: 1, length: hitLength(plan, 1) };
+    expect(packFitsOnPath(plan, changes, car, other)).toBe(fits);
+    expect(packFitsOnPath(plan, changes, other, car)).toBe(fits);
   });
 });
 
-describe("packGap and packFitsBetween over wide obstacles", () => {
+describe("packGap and packFitsOnPath over wide obstacles", () => {
   // At 100px/s a 0.1s lane move lasts two 0.05s steps, 10px, and a 0.2s reaction margin is 20px.
   const margined = { ...plan, reactionSeconds: 0.2 };
   it("is the pack, its lane moves and the reaction margin", () => {
@@ -275,50 +289,63 @@ describe("packGap and packFitsBetween over wide obstacles", () => {
     }
   });
 
-  // A pack beside the nearer obstacle in a lane the farther one blocks steps in behind the
-  // nearer one, and on to the nearest lane the farther one leaves open.
-  it("leaves room for every lane change between wide obstacles", () => {
-    for (const { changes, far, near } of [
-      { changes: 1, far: { lane: 3, lanes: 1 }, name: "0-2, then 3", near: { lane: 0, lanes: 3 } },
-      {
-        changes: 2,
-        far: { lane: 2, lanes: 3 },
-        name: "0-2, then 2-4",
-        near: { lane: 0, lanes: 3 },
-      },
-      {
-        changes: 3,
-        far: { lane: 0, lanes: 3 },
-        name: "1-3, then 0-2",
-        near: { lane: 1, lanes: 3 },
-      },
-      {
-        changes: 2,
-        far: { lane: 0, lanes: 2 },
-        name: "1-3, then 0-1",
-        near: { lane: 1, lanes: 3 },
-      },
-    ]) {
-      const nearer = { ...near, distance: 0, length: hitLength(plan, 1) };
-      const at = (gap: number) => ({
-        ...far,
-        distance: nearer.length + gap,
-        length: nearer.length,
-      });
-      for (const [a, b] of [
-        [nearer, at(packGap(margined, changes) - 1)],
-        [at(packGap(margined, changes) - 1), nearer],
-      ] as const) {
-        expect(packFitsBetween(margined, a, b)).toBe(false);
-      }
-      expect(packFitsBetween(margined, nearer, at(packGap(margined, changes)))).toBe(true);
+  // The path changes from lane 0 to lane 2 between the two: as the nearer one passes the pack is
+  // short of the first lane on the way it covers, and as the farther one meets it, past the last.
+  it.each([
+    { far: { lane: 0, lanes: 2 }, moves: 2, name: "1-3, then 0-1", near: { lane: 1, lanes: 3 } },
+    { far: { lane: 0, lanes: 1 }, moves: 1, name: "1-3, then 0", near: { lane: 1, lanes: 3 } },
+    { far: { lane: 0, lanes: 2 }, moves: 1, name: "2-4, then 0-1", near: { lane: 2, lanes: 3 } },
+    { far: { lane: 0, lanes: 1 }, moves: 0, name: "2-4, then 0", near: { lane: 2, lanes: 3 } },
+  ])("leaves room for $moves lane moves between wide obstacles $name", ({ far, moves, near }) => {
+    const change: PathChange = { at: 1, from: 0, to: 2 };
+    const nearer = { ...near, distance: 0, length: hitLength(plan, 1) };
+    const at = (gap: number) => ({ ...far, distance: nearer.length + gap, length: nearer.length });
+    const tightest = moves === 0 ? 1 : packGap(margined, moves);
+    for (const [a, b] of [
+      [nearer, at(tightest - 1)],
+      [at(tightest - 1), nearer],
+    ] as const) {
+      expect(packFitsOnPath(margined, [change], a, b)).toBe(moves === 0);
     }
+    expect(packFitsOnPath(margined, [change], nearer, at(tightest))).toBe(true);
+  });
+});
+
+// The independent check the planner tests use: a path holding lane 1 on the rows at 100 and 200
+// and changing to lane 2 at 300, halfway at 250, a 30px pack and 150px of road per lane move.
+describe("pathShortfalls", () => {
+  const path = [
+    { distance: 100, lane: 1 },
+    { distance: 200, lane: 1 },
+    { distance: 300, lane: 2 },
+  ];
+  const contact = (lane: number, start: number): Contact => ({
+    end: start + 20,
+    label: `lane ${lane} at ${start}`,
+    lanes: new Set([lane]),
+    start,
+  });
+  it.each([
+    { contacts: [contact(1, 160)], name: "an obstacle in the path's lane", shortfalls: 1 },
+    {
+      contacts: [contact(2, 150), contact(1, 300)],
+      name: "obstacles either side of the change with 130px between them",
+      shortfalls: 1,
+    },
+    {
+      contacts: [contact(2, 150), contact(1, 320)],
+      name: "obstacles either side of the change with 150px between them",
+      shortfalls: 0,
+    },
+    { contacts: [contact(1, 300)], name: "an obstacle after the change alone", shortfalls: 0 },
+  ])("finds $shortfalls shortfalls with $name", ({ contacts, shortfalls }) => {
+    expect(pathShortfalls(30, (moves) => 150 * moves, path, contacts)).toHaveLength(shortfalls);
   });
 });
 
 describe("planSpawns", () => {
   it("spawns exactly the count of each kind, sorted by distance", () => {
-    const events = planSpawns(plannerStreams(1), plan);
+    const events = planSpawns(plannerStreams(1), plan).events;
     expect(countOf("obstacle", events)).toBe(6);
     expect(countOf("tip", events)).toBe(9);
     expect(countOf("treat", events)).toBe(3);
@@ -329,7 +356,7 @@ describe("planSpawns", () => {
   it("puts every spawn on a row and in a lane, one spawn per cell", () => {
     const rows = spawnRowDistances(100, 1000);
     for (const seed of seeds) {
-      const events = planSpawns(plannerStreams(seed), plan);
+      const events = planSpawns(plannerStreams(seed), plan).events;
       const cells = new Set(events.map(({ distance, lane }) => `${distance}:${lane}`));
       expect(cells.size).toBe(events.length);
       for (const { distance, lane } of events) {
@@ -341,39 +368,36 @@ describe("planSpawns", () => {
   });
 
   it("repeats the same plan for the same seed and varies with the seed", () => {
-    expect(planSpawns(plannerStreams(9), plan)).toEqual(planSpawns(plannerStreams(9), plan));
-    expect(planSpawns(plannerStreams(9), plan)).not.toEqual(planSpawns(plannerStreams(10), plan));
+    expect(planSpawns(plannerStreams(9), plan).events).toEqual(
+      planSpawns(plannerStreams(9), plan).events,
+    );
+    expect(planSpawns(plannerStreams(9), plan).events).not.toEqual(
+      planSpawns(plannerStreams(10), plan).events,
+    );
   });
 
-  it("never blocks every lane on a row, even when obstacles fill all the room they may", () => {
-    const crowded: SpawnPlan<Kind> = {
-      ...plan,
-      quotas: [
-        { blocksLane: true, count: 9 * 4, kind: "obstacle" },
-        { blocksLane: false, count: 9, kind: "tip" },
-      ],
-    };
-    for (const seed of seeds) {
-      const events = planSpawns(plannerStreams(seed), crowded);
-      for (const row of spawnRowDistances(100, 1000)) {
-        const onRow = events.filter((event) => event.distance === row);
-        expect(countOf("obstacle", onRow)).toBe(4);
-        expect(countOf("tip", onRow)).toBe(1);
+  // 9 rows of 5 lanes, given more obstacles than fit: each row keeps open the lanes the path holds
+  // on it, its own and on the row before a change every lane the change crosses, and at least
+  // minOpenLanes; every other lane takes an obstacle.
+  it.each([{ minOpenLanes: 1 }, { minOpenLanes: 2 }])(
+    "fills every row but the lanes the path holds and $minOpenLanes more open, skipping the rest",
+    ({ minOpenLanes }) => {
+      const crowded: SpawnPlan<Kind> = {
+        ...plan,
+        minOpenLanes,
+        quotas: [{ blocksLane: true, count: 9 * 4 + 1, kind: "obstacle" }],
+      };
+      for (const seed of seeds.slice(0, 10)) {
+        const { events, path } = planSpawns(plannerStreams(seed), crowded);
+        const kept = path.map(({ lane }, row) =>
+          Math.max(minOpenLanes, Math.abs((path[row + 1]?.lane ?? lane) - lane) + 1),
+        );
+        const open = openLanesByRow(crowded, events).map((lanes) => lanes.length);
+        expect(open, `seed ${seed}`).toEqual(kept);
+        expect(countOf("obstacle", events)).toBe(kept.reduce((sum, lanes) => sum + 5 - lanes, 0));
       }
-    }
-  });
-
-  it("keeps minOpenLanes open on every row", () => {
-    const crowded: SpawnPlan<Kind> = {
-      ...plan,
-      minOpenLanes: 2,
-      quotas: [{ blocksLane: true, count: 9 * 3, kind: "obstacle" }],
-    };
-    for (const seed of seeds.slice(0, 10)) {
-      const open = openLanesByRow(crowded, planSpawns(plannerStreams(seed), crowded));
-      expect(open.every((lanes) => lanes.length === 2)).toBe(true);
-    }
-  });
+    },
+  );
 
   // 29 rows, with one-cell obstacles each in view as its row comes on screen: placed one per
   // stretch at random, some stretches run quiet for longer than the cap, with room to move
@@ -403,38 +427,19 @@ describe("planSpawns", () => {
     ({ maxEmptyRows, obstacles }) => {
       const uncapped = seeds
         .slice(0, 10)
-        .map((seed) => planSpawns(plannerStreams(seed), sparse(obstacles)));
+        .map((seed) => planSpawns(plannerStreams(seed), sparse(obstacles)).events);
       expect(Math.max(...uncapped.map(longestQuiet))).toBeGreaterThan(maxEmptyRows);
       for (const seed of seeds.slice(0, 10)) {
-        const events = planSpawns(plannerStreams(seed), { ...sparse(obstacles), maxEmptyRows });
+        const events = planSpawns(plannerStreams(seed), {
+          ...sparse(obstacles),
+          maxEmptyRows,
+        }).events;
         expect(longestQuiet(events), `seed ${seed}`).toBeLessThanOrEqual(maxEmptyRows);
         expect(countOf("obstacle", events)).toBe(obstacles);
         expect(countOf("tip", events)).toBe(9);
       }
     },
   );
-
-  // 9 rows of 5 lanes, each keeping minOpenLanes open.
-  it("places as many as fit and skips the rest, given more than fit", () => {
-    for (const { minOpenLanes } of [
-      { minOpenLanes: 1, name: "more obstacles than the rows have room for" },
-      { minOpenLanes: 2, name: "obstacles that would leave fewer than minOpenLanes open" },
-    ]) {
-      const room = 9 * (5 - minOpenLanes);
-      const crowded: SpawnPlan<Kind> = {
-        ...plan,
-        minOpenLanes,
-        quotas: [{ blocksLane: true, count: room + 1, kind: "obstacle" }],
-      };
-      for (const seed of seeds.slice(0, 10)) {
-        const events = planSpawns(plannerStreams(seed), crowded);
-        expect(countOf("obstacle", events)).toBe(room);
-        expect(openLanesByRow(crowded, events).every((lanes) => lanes.length >= minOpenLanes)).toBe(
-          true,
-        );
-      }
-    }
-  });
 
   it("throws when the rows cannot be planned", () => {
     for (const { error, unplannable } of [
@@ -449,7 +454,7 @@ describe("planSpawns", () => {
         unplannable: { ...plan, sightLength: 49 },
       },
     ] satisfies readonly { error: RegExp; name: string; unplannable: SpawnPlan<Kind> }[]) {
-      expect(() => planSpawns(plannerStreams(1), unplannable)).toThrow(error);
+      expect(() => planSpawns(plannerStreams(1), unplannable).events).toThrow(error);
     }
   });
 
@@ -461,11 +466,11 @@ describe("planSpawns", () => {
         { blocksLane: false, count: 9, kind: "tip" },
       ],
     };
-    const events = planSpawns(plannerStreams(1), tooBig);
+    const events = planSpawns(plannerStreams(1), tooBig).events;
     expect(countOf("obstacle", events)).toBeGreaterThan(0);
     expect(countOf("obstacle", events)).toBeLessThan(40);
     expect(countOf("tip", events)).toBe(9);
-    expect(planSpawns(plannerStreams(1), tooBig)).toEqual(events);
+    expect(planSpawns(plannerStreams(1), tooBig).events).toEqual(events);
   });
 
   it("skips a bigger obstacle that would leave too few cells for the one-cell spawns", () => {
@@ -478,7 +483,7 @@ describe("planSpawns", () => {
       ],
     };
     for (const seed of seeds.slice(0, 10)) {
-      const events = planSpawns(plannerStreams(seed), crowded);
+      const events = planSpawns(plannerStreams(seed), crowded).events;
       expect(countOf("tip", events)).toBe(30);
       expect(countOf("bench", events)).toBeGreaterThan(0);
       expect(countOf("bench", events)).toBeLessThanOrEqual(7);
@@ -486,41 +491,71 @@ describe("planSpawns", () => {
   });
 
   it("frees a one-cell spawn's kept cell once it is placed, for the bigger obstacles after it", () => {
-    // 9 rows of 5 lanes: 30 treats placed first leave 15 cells, all free for benches.
+    // 9 rows of 5 lanes: 25 treats placed first leave 20 cells, all free for benches off the
+    // path; were the treats' kept cells still kept, no bench would leave room for them.
     const placedFirst: SpawnPlan<Kind> = {
       ...plan,
       quotas: [
         { blocksLane: true, count: 20, footprint: FOOTPRINTS.bench, kind: "bench" },
-        { blocksLane: false, count: 30, first: true, kind: "treat" },
+        { blocksLane: false, count: 25, first: true, kind: "treat" },
       ],
     };
     for (const seed of seeds.slice(0, 10)) {
-      const events = planSpawns(plannerStreams(seed), placedFirst);
-      expect(countOf("treat", events)).toBe(30);
+      const events = planSpawns(plannerStreams(seed), placedFirst).events;
+      expect(countOf("treat", events)).toBe(25);
       expect(countOf("bench", events)).toBeGreaterThan(0);
     }
   });
 
-  it("places every obstacle at a tight reach, an open lane within a move of each on the row before", () => {
+  it("places every obstacle at a tight reach, keeping the path passable", () => {
     for (const seed of seeds) {
-      const events = planSpawns(plannerStreams(seed), tight);
-      expect(countOf("obstacle", events)).toBe(27);
-      const open = openLanesByRow(tight, events);
-      open.slice(1).forEach((lanes, i) => {
-        for (const from of itemAt(open, i)) {
-          expect(lanes.some((lane) => Math.abs(lane - from) <= 1)).toBe(true);
-        }
-      });
+      const planned = planSpawns(plannerStreams(seed), tight);
+      expect(countOf("obstacle", planned.events)).toBe(27);
+      expectPathPassable(tight, planned, `seed ${seed}`);
     }
   });
 
+  // The path starts in pathStart, holds each lane for PATH_HOLD_ROWS rows or more, and changes by
+  // pathReach lanes or fewer; its lane is open in every row, and so is every lane a change crosses
+  // on the row before it.
+  it.each([
+    { name: "plan", spawnPlan: plan },
+    { name: "tight", spawnPlan: tight },
+    { name: "shaped", spawnPlan: shaped },
+    { name: "reacting", spawnPlan: reacting },
+  ])("holds the path's lanes clear in $name", ({ spawnPlan }) => {
+    let changes = 0;
+    for (const seed of seeds.slice(0, 20)) {
+      const { events, path } = planSpawns(plannerStreams(seed), spawnPlan);
+      const open = openLanesByRow(spawnPlan, events);
+      expect(path.map(({ distance }) => distance)).toEqual(
+        spawnRowDistances(rowSpacing(spawnPlan), spawnPlan.zoneLength),
+      );
+      expect(path[0]?.lane).toBe(spawnPlan.pathStart);
+      let held = 0;
+      path.forEach(({ lane }, row) => {
+        const next = path[row + 1]?.lane ?? lane;
+        held += 1;
+        if (next !== lane) {
+          changes += 1;
+          expect(held).toBeGreaterThanOrEqual(PATH_HOLD_ROWS);
+          expect(Math.abs(next - lane)).toBeLessThanOrEqual(pathReach(spawnPlan));
+          held = 0;
+        }
+        for (let crossed = Math.min(lane, next); crossed <= Math.max(lane, next); crossed++) {
+          expect(itemAt(open, row), `seed ${seed}, row ${row}`).toContain(crossed);
+        }
+      });
+    }
+    expect(changes).toBeGreaterThan(0);
+  });
+
   // Eight wide footprints with a row between each leave 19 rows too few for every one at times,
-  // so a hedge or a bench may be skipped; the one-cell obstacles never are, and the hedges, three
-  // lanes wide at a one-lane reach, fit after rows with no obstacle, which the pack steers across.
+  // so a hedge or a bench may be skipped; the one-cell obstacles never are.
   it("keeps a footprint on the road, its cells to itself, and two lanes open", () => {
     const kinds = new Set<Kind>();
     for (const seed of seeds) {
-      const events = planSpawns(plannerStreams(seed), shaped);
+      const events = planSpawns(plannerStreams(seed), shaped).events;
       expect(countOf("obstacle", events)).toBe(4);
       expect(events.filter(blocking).length).toBeGreaterThanOrEqual(12);
       events.filter(blocking).forEach(({ kind }) => kinds.add(kind));
@@ -540,12 +575,9 @@ describe("planSpawns", () => {
     expect([...kinds].sort()).toEqual(["bench", "car", "hedge", "obstacle", "skunk"]);
   });
 
-  it("leaves a way through footprints over several lanes and rows, from any lane", () => {
+  it("keeps the path passable through footprints over several lanes and rows", () => {
     for (const seed of seeds) {
-      const spans = spansOf(shaped, planSpawns(plannerStreams(seed), shaped));
-      for (const start of [0, 1, 2, 3, 4]) {
-        expect(lanesReachedAtEnd(shaped, spans, start)).not.toEqual([]);
-      }
+      expectPathPassable(shaped, planSpawns(plannerStreams(seed), shaped), `seed ${seed}`);
     }
   });
 
@@ -555,45 +587,47 @@ describe("planSpawns", () => {
       quotas: [{ blocksLane: true, count: 12, footprint: FOOTPRINTS.car, kind: "car" }],
     };
     for (const seed of seeds.slice(0, 10)) {
-      for (const event of planSpawns(plannerStreams(seed), cars)) {
+      for (const event of planSpawns(plannerStreams(seed), cars).events) {
         expect(event.distance + blockingLength(cars, 3)).toBeLessThanOrEqual(1900 + 70);
       }
     }
   });
 
-  // Every pair of obstacles, checked apart from the planner: where a way out of a lane the
-  // farther one blocks steps in behind the nearer one, the road between their hit boxes fits the
-  // 50px pack, 25px per lane change and the 10px margin; ones WIDE_LANES wide or wider are two rows
-  // apart or more.
-  it("spaces obstacles for lane changes between them, for any seed", () => {
-    for (const seed of seeds.slice(0, 5)) {
-      const events = planSpawns(plannerStreams(seed), reacting).filter(blocking);
-      const lanesOf = (event: SpawnEvent<Kind>) =>
-        new Set(Array.from({ length: footprintOf(event.kind).lanes }, (_, i) => event.lane + i));
-      expect(events.filter((event) => footprintOf(event.kind).lanes > 1).length).toBeGreaterThan(4);
-      events.forEach((near, i) => {
-        for (const far of events.slice(i + 1)) {
-          const gap = far.distance - near.distance - (30 * footprintOf(near.kind).rows - 10);
-          const changes = laneChangesBehind(5, lanesOf(near), lanesOf(far));
-          if (changes > 0 && gap > 0) {
-            expect(gap).toBeGreaterThanOrEqual(50 + 25 * changes + 10);
+  // Along the path, checked apart from the planner: at each change of lane, the road between the
+  // hit boxes of obstacles met before and after it fits the 50px pack, 25px per lane move and the
+  // reaction margin. A 120px margin asks for more than the 180px between one-row obstacles two rows
+  // apart. Obstacles WIDE_LANES wide or wider are two rows apart or more.
+  it.each([{ margin: 10 }, { margin: 120 }])(
+    "spaces obstacles for the path's lane changes between them, with a $margin px margin",
+    ({ margin }) => {
+      const spaced = { ...reacting, reactionSeconds: margin / reacting.scrollSpeed };
+      for (const seed of seeds.slice(0, 5)) {
+        const { events: planned, path } = planSpawns(plannerStreams(seed), spaced);
+        const events = planned.filter(blocking);
+        expect(events.filter((event) => footprintOf(event.kind).lanes > 1).length).toBeGreaterThan(
+          4,
+        );
+        const gap = (moves: number) => 50 + 25 * moves + margin - 1e-6;
+        expect(pathShortfalls(50, gap, path, contactsOf(spaced, events))).toEqual([]);
+        events.forEach((near, i) => {
+          for (const far of events.slice(i + 1)) {
+            if (
+              footprintOf(near.kind).lanes >= WIDE_LANES &&
+              footprintOf(far.kind).lanes >= WIDE_LANES
+            ) {
+              expect(far.distance - near.distance).toBeGreaterThanOrEqual(2 * 100);
+            }
           }
-          if (
-            footprintOf(near.kind).lanes >= WIDE_LANES &&
-            footprintOf(far.kind).lanes >= WIDE_LANES
-          ) {
-            expect(far.distance - near.distance).toBeGreaterThanOrEqual(2 * 100);
-          }
-        }
-      });
-    }
-  });
+        });
+      }
+    },
+  );
 
   // A moving prize, stepping as the friendly neighbor does or darting as a squirrel does, is
   // placed after every spawn the pack steers around, a lane-blocking dart included, which it
-  // leaves where they were: it blocks no lane, holds no lead-in row and takes no dart's place on
-  // screen. A long zone gives it room to move; a zone shorter than the road gives a stepper none,
-  // so it stands still. Either way none is skipped.
+  // leaves where they were: it blocks no lane and takes no dart's place on screen. A long zone
+  // gives it room to move; a zone shorter than the road gives a stepper none, so it stands still.
+  // Either way none is skipped.
   it.each([
     { kind: "neighbor", mover: STROLLING, moves: 3, name: "a long zone", zoneLength: 6000 },
     { kind: "neighbor", mover: STROLLING, moves: 0, name: "a short zone", zoneLength: 1000 },
@@ -609,27 +643,27 @@ describe("planSpawns", () => {
       const prize = { blocksLane: false, count: 3, kind, mover };
       const withPrizes: SpawnPlan<Kind> = { ...without, quotas: [...without.quotas, prize] };
       for (const seed of seeds) {
-        const events = planSpawns(plannerStreams(seed), withPrizes);
+        const events = planSpawns(plannerStreams(seed), withPrizes).events;
         const prizes = events.filter((event) => event.kind === kind);
         expect(prizes).toHaveLength(prize.count);
         expect(prizes.filter(({ mover }) => mover !== undefined)).toHaveLength(moves);
         expect(events.filter(blocking)).toEqual(
-          planSpawns(plannerStreams(seed), without).filter(blocking),
+          planSpawns(plannerStreams(seed), without).events.filter(blocking),
         );
       }
     },
   );
 
   // Cards (obstacles marked first) are placed before the darts, and benches and tips after. A dart
-  // sets off over a card's cell; cards and benches may stand in its lead-in row, the row before
-  // its own, and a bench placed after it may take its row; no tip is in its row; and the pack has a
-  // way past every card, dart and bench from any lane. A straight dart's row is where it sets off,
-  // its cue's lead less its cue.
+  // sets off over a card's cell; cards and benches may stand in the row before its own, and a bench
+  // placed after it may take its row; no tip is in its row; and the pack has a way past every card,
+  // dart and bench from the path's first lane. A straight dart's row is where it sets off, its
+  // cue's lead less its cue.
   it.each([
     { cards: 8, minOpenLanes: 2 },
     { cards: 14, minOpenLanes: 1 },
   ])(
-    "lets a dart set off over $cards cards' cells, with cards and benches in its lead-in row",
+    "lets a dart set off over $cards cards' cells, with cards and benches in the row before",
     ({ cards, minOpenLanes }) => {
       const darting: SpawnPlan<Kind> = {
         ...shaped,
@@ -646,9 +680,9 @@ describe("planSpawns", () => {
       const window = blockingLength(darting, 1);
       let shared = 0;
       let benchShared = 0;
-      let leadInShared = 0;
+      let beforeShared = 0;
       for (const seed of seeds.slice(0, 20)) {
-        const events = planSpawns(plannerStreams(seed), darting);
+        const events = planSpawns(plannerStreams(seed), darting).events;
         const darts = events.flatMap(({ distance, mover }) => {
           if (mover?.motion !== "cross") {
             return [];
@@ -661,12 +695,12 @@ describe("planSpawns", () => {
         const at = (row: number, kinds: readonly Kind[]) =>
           events.filter(({ distance, kind }) => distance === row && kinds.includes(kind));
         for (const { lanes, row } of darts) {
-          const leadIn = lanes.count > 0 ? [row - spacing] : [];
+          const before = lanes.count > 0 ? [row - spacing] : [];
           shared += at(row, ["obstacle"]).length;
           benchShared += at(row, ["bench"]).length;
           expect(at(row, ["tip"]), `seed ${seed}`).toEqual([]);
-          for (const held of leadIn) {
-            leadInShared += at(held, ["obstacle", "bench"]).length;
+          for (const held of before) {
+            beforeShared += at(held, ["obstacle", "bench"]).length;
           }
         }
         const spans = [
@@ -681,13 +715,13 @@ describe("planSpawns", () => {
             length: window,
           })),
         ];
-        for (const start of [0, 1, 2, 3, 4]) {
-          expect(lanesReachedAtEnd(darting, spans, start), `seed ${seed}`).not.toEqual([]);
-        }
+        expect(lanesReachedAtEnd(darting, spans, darting.pathStart), `seed ${seed}`).not.toEqual(
+          [],
+        );
       }
       expect(shared).toBeGreaterThan(0);
       expect(benchShared).toBeGreaterThan(0);
-      expect(leadInShared).toBeGreaterThan(0);
+      expect(beforeShared).toBeGreaterThan(0);
     },
   );
 
@@ -712,7 +746,7 @@ describe("planSpawns", () => {
             kind: "car",
             mover: { ...DARTING, motion: { kind: "ride", speedMultiplier }, movement: "inLane" },
           },
-          { blocksLane: true, count: 20, kind: "obstacle" },
+          { blocksLane: true, count: 40, kind: "obstacle" },
         ],
         zoneLength: 4000,
       };
@@ -720,7 +754,7 @@ describe("planSpawns", () => {
       const height = hitLength(riding, 1);
       let beside = 0;
       for (const seed of seeds.slice(0, 20)) {
-        const events = planSpawns(plannerStreams(seed), riding);
+        const events = planSpawns(plannerStreams(seed), riding).events;
         const riders = events.flatMap(({ distance, mover }) =>
           mover?.motion === "ride" ? [{ distance, mover }] : [],
         );
@@ -775,7 +809,7 @@ describe("planSpawns", () => {
       };
       let onRiders = 0;
       for (const seed of seeds.slice(0, 20)) {
-        const events = planSpawns(plannerStreams(seed), riding);
+        const events = planSpawns(plannerStreams(seed), riding).events;
         for (const { distance, mover } of events) {
           if (mover?.motion !== "ride") {
             continue;
@@ -817,7 +851,7 @@ describe("planSpawns", () => {
       };
       let onRests = 0;
       for (const seed of seeds.slice(0, 20)) {
-        const events = planSpawns(plannerStreams(seed), stepping);
+        const events = planSpawns(plannerStreams(seed), stepping).events;
         for (const { distance, mover } of events) {
           if (mover === undefined) {
             continue;
@@ -838,7 +872,8 @@ describe("planSpawns", () => {
   );
 
   // Twenty wide footprints with a row between each never all fit in 19 rows: the hedges and the
-  // benches take turns along the zone, so neither kind takes the room first.
+  // benches take turns along the zone, so neither kind takes the room first. A hedge, three lanes
+  // wide beside the path's lane and two kept open, fits fewer rows than a bench, so it keeps less.
   it("keeps each standing kind's share of what is placed when room runs short", () => {
     const crowded: SpawnPlan<Kind> = {
       ...shaped,
@@ -847,133 +882,82 @@ describe("planSpawns", () => {
         { blocksLane: true, count: 10, footprint: FOOTPRINTS.bench, kind: "bench" },
       ],
     };
-    const placed = seeds.map((seed) => planSpawns(plannerStreams(seed), crowded));
+    const placed = seeds.map((seed) => planSpawns(plannerStreams(seed), crowded).events);
     const total = (kind: Kind) => placed.reduce((sum, events) => sum + countOf(kind, events), 0);
     expect(total("hedge") + total("bench")).toBeLessThan(20 * seeds.length);
     for (const kind of ["hedge", "bench"] as const) {
-      expect(total(kind) / (total("hedge") + total("bench"))).toBeGreaterThan(0.4);
+      expect(total(kind) / (total("hedge") + total("bench"))).toBeGreaterThan(0.3);
     }
   });
 
   it("spreads each kind over the zone, one per equal stretch of rows", () => {
     // 3 treats over 9 rows: one in rows 100-300, one in 400-600, one in 700-900.
     for (const seed of seeds) {
-      const treats = planSpawns(plannerStreams(seed), plan).filter((e) => e.kind === "treat");
+      const treats = planSpawns(plannerStreams(seed), plan).events.filter(
+        (e) => e.kind === "treat",
+      );
       expect(treats.map(({ distance }) => Math.floor((distance - 100) / 300))).toEqual([0, 1, 2]);
     }
   });
 });
 
-describe("laneReach and rowSpacing", () => {
+describe("pathReach and rowSpacing", () => {
   // tight's 70px window leaves 30px between rows 100px apart. A move lasts whole 0.05s steps,
-  // and needs a step to spare.
-  it("spaces rows for a lane move between them", () => {
-    for (const { reach, spaced, spacing } of [
-      {
-        name: "a step and a move fit",
-        reach: { betweenRows: 1, entry: 3 },
-        spaced: tight,
-        spacing: 100,
-      },
-      {
-        name: "52px between rows fits two 25px moves but not their step to spare",
-        reach: { betweenRows: 1, entry: 3 },
-        spaced: { ...tight, packHitLength: 28, packLength: 28 },
-        spacing: 100,
-      },
-      {
-        name: "a 0.26s move lasts six steps, 30px",
-        reach: { betweenRows: 1, entry: 3 },
-        spaced: { ...tight, laneMoveSeconds: 0.26 },
-        spacing: 105,
-      },
-      {
-        name: "at 200px/s a 10px step and a 50px move need 60px",
-        reach: { betweenRows: 1, entry: 2 },
-        spaced: { ...tight, scrollSpeed: 200 },
-        spacing: 130,
-      },
-      {
-        name: "a hit box 30px longer than its row widens a 120px window's rows past minSpacing",
-        reach: { betweenRows: 1, entry: 4 },
-        spaced: { ...tight, cellInset: -20 },
-        spacing: 150,
-      },
-      // Never further than the road is wide.
-      {
-        name: "an instant move reaches every lane",
-        reach: { betweenRows: 4, entry: 4 },
-        spaced: { ...plan, laneMoveSeconds: 0 },
-        spacing: 100,
-      },
-    ] satisfies readonly {
-      name: string;
-      reach: LaneReach;
-      spaced: SpawnPlan<Kind>;
-      spacing: number;
-    }[]) {
-      expect(rowSpacing(spaced)).toBe(spacing);
-      expect(laneReach(spaced)).toEqual(reach);
-    }
+  // and needs a step to spare. The path changes by up to two lanes where the pack fits past them
+  // on the road between one-row spawns two rows apart.
+  it.each([
+    { name: "a step and a move fit", reach: 2, spaced: tight, spacing: 100 },
+    {
+      name: "52px between rows fits two 25px moves but not their step to spare",
+      reach: 2,
+      spaced: { ...tight, packHitLength: 28, packLength: 28 },
+      spacing: 100,
+    },
+    {
+      name: "a 0.26s move lasts six steps, 30px",
+      reach: 2,
+      spaced: { ...tight, laneMoveSeconds: 0.26 },
+      spacing: 105,
+    },
+    {
+      name: "at 200px/s a 10px step and a 50px move need 60px",
+      reach: 2,
+      spaced: { ...tight, scrollSpeed: 200 },
+      spacing: 130,
+    },
+    {
+      name: "a hit box 30px longer than its row widens a 120px window's rows past minSpacing",
+      reach: 2,
+      spaced: { ...tight, cellInset: -20 },
+      spacing: 150,
+    },
+    {
+      name: "a 1.2s reaction margin leaves room for one move at most",
+      reach: 1,
+      spaced: { ...tight, reactionSeconds: 1.2 },
+      spacing: 100,
+    },
+    {
+      name: "two lanes leave one to change to",
+      reach: 1,
+      spaced: { ...plan, laneCount: 2, laneMoveSeconds: 0, pathStart: 0 },
+      spacing: 100,
+    },
+  ] satisfies readonly {
+    name: string;
+    reach: number;
+    spaced: SpawnPlan<Kind>;
+    spacing: number;
+  }[])("spaces rows and reaches $reach lanes when $name", ({ reach, spaced, spacing }) => {
+    expect(rowSpacing(spaced)).toBe(spacing);
+    expect(pathReach(spaced)).toBe(reach);
   });
 
   it("plans the spawns on rows that far apart", () => {
     const fast = { ...tight, quotas: plan.quotas, scrollSpeed: 200 };
-    const distances = planSpawns(plannerStreams(1), fast).map(({ distance }) => distance);
+    const distances = planSpawns(plannerStreams(1), fast).events.map(({ distance }) => distance);
     expect(distances.length).toBeGreaterThan(0);
     expect(distances.every((distance) => distance % rowSpacing(fast) === 0)).toBe(true);
-  });
-});
-
-describe("everyLaneReaches", () => {
-  const notLane1 = ~laneMask([1]);
-
-  it("tells whether every lane has a target within reach", () => {
-    for (const { clear, from, reach, reaches, to } of [
-      {
-        clear: -1,
-        from: [0, 2],
-        name: "every lane has a target within reach",
-        reach: 1,
-        reaches: true,
-        to: [1],
-      },
-      {
-        clear: -1,
-        from: [0, 4],
-        name: "one lane has no target within reach",
-        reach: 1,
-        reaches: false,
-        to: [1],
-      },
-      { clear: -1, from: [0], name: "there are no targets", reach: 4, reaches: false, to: [] },
-      {
-        clear: -1,
-        from: [],
-        name: "there are no lanes to reach from",
-        reach: 0,
-        reaches: true,
-        to: [],
-      },
-      {
-        clear: notLane1,
-        from: [0],
-        name: "the only way crosses a lane that is not clear",
-        reach: 2,
-        reaches: false,
-        to: [2],
-      },
-      {
-        clear: notLane1,
-        from: [0],
-        name: "a target short of a lane that is not clear",
-        reach: 2,
-        reaches: true,
-        to: [0, 2],
-      },
-    ]) {
-      expect(everyLaneReaches(reach, laneMask(from), laneMask(to), clear)).toBe(reaches);
-    }
   });
 });
 

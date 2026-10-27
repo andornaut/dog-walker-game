@@ -15,14 +15,13 @@ import { itemAt } from "../lib/arrays";
 import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { newRun, type PackDogs } from "../state/runState";
-import { lanesReachedAtEnd } from "../testing/avoidable";
+import { lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import {
   blockingSpans,
   FASTEST_WALKER,
   GAME_ROAD,
   inZone,
-  LANES,
   LUCKY_IDS,
   MINOR_OBSTACLE_IDS,
   MOVER_SCROLL,
@@ -333,75 +332,59 @@ describe("movers", { timeout: 120_000 }, () => {
       unbiased.on = false;
     }
   });
-  // The pack-fit gap is measured as drawn: each obstacle at its kind's drawn hit length and the
-  // pack at the tallest pack's hit boxes. Two spawns that meet the pack within a pixel of each
-  // other, or with under a pixel of road between them, are met at once: side by side, with no
-  // road to change lanes through.
+  // A pack following the zone's path passes every obstacle with full margins (pathShortfalls),
+  // measured as drawn: each obstacle at its kind's drawn hit length, the pack at the tallest pack's
+  // hit boxes, the lane moves in whole walk steps and the reaction margin, less a pixel for a
+  // mover's contact sampled a pixel of scroll at a time. The pack also has a way through the zone
+  // from the path's first lane.
   function expectPassable(
     cases: readonly { road: RoadGeometry; tuned: Real; zone: ZoneId; zoneIndex: number }[],
   ): void {
     for (const { road, tuned, zone, zoneIndex } of cases) {
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
-      const steps = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9);
-      const fit = packHitLength(road) + steps * STEP_SECONDS * walkScrollSpeed(tuned, zoned);
-      for (const seed of [1]) {
-        const walk = planZone(tuned, road, plannerStreams(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        });
-        const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
-        const spans = blockingSpans(tuned, road, zone, blocking);
-        for (const start of LANES) {
-          const reached = lanesReachedAtEnd(walkwayOf(tuned, road, zoned), spans, start);
-          expect(reached, `seed ${seed}, from lane ${start}`).not.toEqual([]);
-        }
-        const movers = blocking.flatMap(({ distance, kind, mover }) =>
-          mover === undefined ? [] : [{ distance, kind, mover }],
-        );
-        for (const { kind, mover } of movers) {
-          expect(mover.movement).toBe(movementOf(kind, tuned)?.kind);
-        }
-        expectCapsOnScreen(movers);
-        // Each obstacle's contact with the pack: its drawn hit box's extent and its lanes.
-        const contacts = blocking.map((event) => {
-          if (event.mover === undefined) {
-            const { lanes } = footprintOf(tuned, event.kind);
-            return {
-              end: event.distance + itemHeight(tuned, road, event.kind, false),
-              kind: event.kind,
-              lanes: new Set(Array.from({ length: lanes }, (_, i) => event.lane + i)),
-              start: event.distance,
-            };
-          }
-          const moving = { ...event, mover: event.mover };
-          const touched = moverSpans("drawn", tuned, road, zone, moving);
-          const { end, start } = moverContact("drawn", tuned, road, zone, moving);
-          return {
-            end: end - packHitLength(road),
-            kind: event.kind,
-            lanes: new Set(touched.map(({ lane }) => lane)),
-            start,
-          };
-        });
-        for (const near of contacts.filter(({ lanes }) => lanes.size > 0)) {
-          for (const far of contacts.filter(({ start }) => start >= near.start + 1)) {
-            const steppedIn = [...far.lanes].some(
-              (beside) =>
-                !near.lanes.has(beside) &&
-                [beside - 1, beside + 1].some(
-                  (lane) => near.lanes.has(lane) && !far.lanes.has(lane),
-                ),
-            );
-            const gap = far.start - near.end;
-            if (steppedIn && gap >= 1) {
-              expect(
-                gap,
-                `seed ${seed}, ${zone} ${zoneIndex}: ${near.kind} then ${far.kind}`,
-              ).toBeGreaterThanOrEqual(fit - 1);
-            }
-          }
-        }
+      const speed = walkScrollSpeed(tuned, zoned);
+      const laneMove = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9) * STEP_SECONDS * speed;
+      const margin = read(tuned.tuning, "seconds", "pathReactionMargin") * speed;
+      const fit = (moves: number) => packHitLength(road) + moves * laneMove + margin - 1;
+      const walk = planZone(tuned, road, plannerStreams(1), {
+        road: startRoad(LANE_COUNT),
+        run: zoned,
+      });
+      const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
+      const spans = blockingSpans(tuned, road, zone, blocking);
+      const start = walk.road.path[0]?.lane ?? -1;
+      const label = `${zone} ${zoneIndex}`;
+      expect(lanesReachedAtEnd(walkwayOf(tuned, road, zoned), spans, start), label).not.toEqual([]);
+      const movers = blocking.flatMap(({ distance, kind, mover }) =>
+        mover === undefined ? [] : [{ distance, kind, mover }],
+      );
+      for (const { kind, mover } of movers) {
+        expect(mover.movement).toBe(movementOf(kind, tuned)?.kind);
       }
+      expectCapsOnScreen(movers);
+      // Each obstacle's contact with the pack: its drawn hit box's extent and its lanes.
+      const contacts = blocking.map((event) => {
+        const named = `${event.kind} at ${event.distance}`;
+        if (event.mover === undefined) {
+          const { lanes } = footprintOf(tuned, event.kind);
+          return {
+            end: event.distance + itemHeight(tuned, road, event.kind, false),
+            label: named,
+            lanes: new Set(Array.from({ length: lanes }, (_, i) => event.lane + i)),
+            start: event.distance,
+          };
+        }
+        const moving = { ...event, mover: event.mover };
+        const touched = moverSpans("drawn", tuned, road, zone, moving);
+        const { end, start: meets } = moverContact("drawn", tuned, road, zone, moving);
+        return {
+          end: end - packHitLength(road),
+          label: named,
+          lanes: new Set(touched.map(({ lane }) => lane)),
+          start: meets,
+        };
+      });
+      expect(pathShortfalls(packHitLength(road), fit, walk.road.path, contacts), label).toEqual([]);
     }
   }
 

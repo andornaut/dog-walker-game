@@ -83,6 +83,7 @@ import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./
 import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./shy";
 import {
   type Footprint,
+  type PathRow,
   planSpawns,
   SINGLE_CELL,
   type SpawnEvent,
@@ -114,15 +115,17 @@ export type WalkItem = MoverItem<WalkItemKind>;
 type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
-// not yet in view, at zone distances. planned is what this zone's plan asked for from the tuning
-// counts and weights, which the simulator compares with what it placed. speedFactor scales the
-// scroll speed, for testing. hitStop is set while a hit or a firing holds the walk still.
+// not yet in view, at zone distances. path is this zone's guaranteed path, at zone distances,
+// empty before the first zone is planned. planned is what this zone's plan asked for from the
+// tuning counts and weights, which the simulator compares with what it placed. speedFactor scales
+// the scroll speed, for testing. hitStop is set while a hit or a firing holds the walk still.
 export interface Road {
   control: LaneControl;
   hitStop: HitStop | null;
   invulnerableSeconds: number;
   items: readonly WalkItem[];
   nextItemId: number;
+  path: readonly PathRow[];
   pending: readonly SpawnEvent<WalkItemKind>[];
   planned: readonly PlannedCount[];
   speedFactor: number;
@@ -424,6 +427,7 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
     invulnerableSeconds: 0,
     items: [],
     nextItemId: 0,
+    path: [],
     pending: [],
     planned: [],
     speedFactor,
@@ -743,6 +747,8 @@ export function planZone(
     // The tallest pack's hit boxes, inside its outline by PART_INSET at each end.
     packHitLength: geometry.tallestPackBand - 2 * PART_INSET,
     packLength: geometry.tallestPackBand,
+    // The path goes on from where the last zone's ends, or starts in the pack's lane.
+    pathStart: road.path[road.path.length - 1]?.lane ?? road.control.target,
     quotas: withHitLengths(spawnQuotas(data, streams, run)),
     reactionSeconds: read(data.tuning, "seconds", "pathReactionMargin"),
     roadLength: geometry.roadBottom - geometry.roadTop,
@@ -756,7 +762,8 @@ export function planZone(
     kind,
     movement: mover?.movement ?? null,
   }));
-  return { road: { ...road, pending: planSpawns(streams, plan), planned }, run };
+  const { events, path } = planSpawns(streams, plan);
+  return { road: { ...road, path, pending: events, planned }, run };
 }
 
 // Steering during a hit stop is dropped, not queued.

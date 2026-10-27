@@ -1034,7 +1034,6 @@ describe("moverPlacements", () => {
       };
       const [rightward] = moverPlacements(geometry, spec(cross(3, 0)), draws);
       expect(rightward?.lanes.count).toBe(lanes);
-      expect(rightward?.leadIn).toBe(meets);
       expect(rightward?.stands.length).toBe(meets ? 1 : 0);
     },
   );
@@ -1402,13 +1401,13 @@ describe("placeMovers", () => {
   const freeGrid = () => {
     const taken = new Set<string>();
     const darts = new Set<string>();
-    const blocked: { leadIn: boolean; row: number; rows: number; span: LaneSpan }[] = [];
+    const blocked: { row: number; rows: number; span: LaneSpan }[] = [];
     return {
       blocked,
       grid: {
-        block: (row: number, span: LaneSpan, blockRows: number, leadIn: boolean, keep: boolean) => {
+        block: (row: number, span: LaneSpan, blockRows: number, keep: boolean) => {
           if (keep) {
-            blocked.push({ leadIn, row, rows: blockRows, span });
+            blocked.push({ row, rows: blockRows, span });
           }
           return true;
         },
@@ -1473,9 +1472,9 @@ describe("placeMovers", () => {
     }
   });
 
-  // A crosser marks the row before its own as its lead-in, and holds only the rows it is level with
-  // as it crosses: here its own row, across the road.
-  it("blocks the lanes a crosser sweeps with its lead-in, and takes the cells it keeps clear", () => {
+  // A crosser holds only the rows it is level with as it crosses: here its own row, across the
+  // road.
+  it("blocks the lanes a crosser sweeps, and takes the cells it keeps clear", () => {
     const { blocked, grid, taken } = freeGrid();
     const [moving] = SPECS;
     const { spawns } = placeMovers(plannerStreams(2), zoned, CAPS, grid, [], rows, [
@@ -1487,7 +1486,7 @@ describe("placeMovers", () => {
     ]);
     const [spawn] = spawns;
     expect(blocked).toHaveLength(1);
-    expect(blocked[0]?.leadIn).toBe(true);
+    expect(blocked[0]?.span.count).toBeGreaterThan(0);
     expect(taken.size).toBe(geometry.laneCount);
     expect(spawn?.lane).toBe(
       spawn?.mover.motion === "cross" && spawn.mover.direction === 1 ? 0 : geometry.laneCount - 1,
@@ -1661,7 +1660,7 @@ describe("placeMovers", () => {
       const refusal =
         refused === "lanes"
           ? {
-              block: (row: number, span: LaneSpan, ...rest: [number, boolean, boolean]) =>
+              block: (row: number, span: LaneSpan, ...rest: [number, boolean]) =>
                 span.count <= most && grid.block(row, span, ...rest),
             }
           : {
