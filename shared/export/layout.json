@@ -1237,6 +1237,12 @@
           "x": 132,
           "y": 210
         },
+        "button": {
+          "height": 44,
+          "width": 264,
+          "x": 48,
+          "y": 404
+        },
         "earningsY": 371,
         "plate": {
           "height": 32,

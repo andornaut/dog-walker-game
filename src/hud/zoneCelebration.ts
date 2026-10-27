@@ -78,6 +78,7 @@ export type LinePart =
 
 export type CelebrationText =
   | {
+      readonly button: string;
       // The zone's fees and tips, the amounts as money.
       readonly earnings: readonly LinePart[];
       readonly kind: "zoneDone";
@@ -120,6 +121,7 @@ export function celebrationText(
       tips: { kind: "money", text: signedDollarText(amounts.tips) },
     };
     return {
+      button: words.button,
       earnings: lineParts(words.earnings, named),
       kind: "zoneDone",
       subtitle: fillLine(FIELDS.zoneDone, words, "subtitle", { zone: celebration.zone }),

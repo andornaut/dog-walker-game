@@ -27,6 +27,8 @@ const NEW_WALKER_FEET = ROAD_TOP + 104;
 const BUBBLE_TOP = NEW_WALKER_FEET + 6;
 const ZONE_DONE_FEET = ROAD_TOP + 148;
 const PLATE_TOP = ZONE_DONE_FEET + 10;
+// Each version's button, 8 rows under its bubble or plate.
+const BUTTON = { height: 44, width: 264, x: 48 };
 
 // A version's headline from its feet line: the walker's frame at WALKER_SCALE, centred on
 // CENTRE_X, standing on feetY; the burst behind it; and the small line's top subtitleGap rows
@@ -68,7 +70,7 @@ export const CELEBRATION_LAYOUT = {
   newWalker: {
     ...headline(NEW_WALKER_FEET, 10),
     bubble: { height: 76, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: BUBBLE_TOP },
-    button: { height: 44, width: 264, x: 48, y: BUBBLE_TOP + 84 },
+    button: { ...BUTTON, y: BUBBLE_TOP + 84 },
     // The walker's line, its first line's top at top, wrapped within maxWidth onto up to lines
     // lines a line of the body font apart, by GREETING_FIT.
     greeting: { lines: 2, maxWidth: 296, top: BUBBLE_TOP + 4 },
@@ -93,6 +95,7 @@ export const CELEBRATION_LAYOUT = {
   walkerScale: WALKER_SCALE,
   zoneDone: {
     ...headline(ZONE_DONE_FEET, 14),
+    button: { ...BUTTON, y: PLATE_TOP + 40 },
     earningsY: PLATE_TOP + 7,
     plate: { height: 32, width: 280, x: 40, y: PLATE_TOP },
   },

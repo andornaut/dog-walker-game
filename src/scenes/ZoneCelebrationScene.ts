@@ -51,7 +51,7 @@ function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
 }
 
 // Between zones, over the paused walk: the walker cheers on a starburst under the zone's name
-// and earnings, and waits for a tap or key 1; or a newly unlocked walker hops in,
+// and earnings over a button, and waits for a tap or key 1; or a newly unlocked walker hops in,
 // greets the pack in a bubble with their agility and perk, and waits for Welcome! (key 1).
 // Confetti falls in both, unless motion is reduced.
 export class ZoneCelebrationScene extends Scene {
@@ -97,13 +97,14 @@ export class ZoneCelebrationScene extends Scene {
     });
     if (text.kind === "zoneDone") {
       this.addPlate(text);
-      // A tap on the dim, or on the page beside the game, moves on.
-      const area = { covered: [], dim: LAYOUT.dim };
+      this.addButton(version, text.button, finish);
+      // A tap anywhere else on the dim, or on the page beside the game, moves on too.
+      const area = { covered: [version.button], dim: LAYOUT.dim };
       listenOutsideTap(this, () => area, finish);
       return;
     }
     this.addBubble(text);
-    this.addButton(text.button, finish);
+    this.addButton(version, text.button, finish);
   }
 
   // The title in font-display at 2x, or smaller where it would not fit the screen, and the
@@ -224,13 +225,12 @@ export class ZoneCelebrationScene extends Scene {
     }
   }
 
-  // Welcome!, with the key that presses it above it once a key has been pressed.
-  private addButton(label: string, onTap: () => void): void {
-    const { centreX, newWalker } = LAYOUT;
-    const button = addMenuButton(this, newWalker.button, label, { available: true, primary: true });
+  // The version's button, with the key that presses it above it once a key has been pressed.
+  private addButton(version: Version, label: string, onTap: () => void): void {
+    const button = addMenuButton(this, version.button, label, { available: true, primary: true });
     listenButtonTap(this, button, onTap);
     if (keyNumbersShown()) {
-      addPixelText(this, centreX, newWalker.button.y - KEY_RISE, "1", {
+      addPixelText(this, LAYOUT.centreX, version.button.y - KEY_RISE, "1", {
         colour: PALETTE.amber,
         font: "title",
         originX: 0.5,

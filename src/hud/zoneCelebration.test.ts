@@ -90,6 +90,7 @@ describe("celebrationText", () => {
     } as const;
     const shown = celebrationText(gameData, celebration);
     expect(shown).toMatchObject({
+      button: text.zoneDone.button,
       kind: "zoneDone",
       subtitle: text.zoneDone.subtitle.replace("{zone}", "Willow Crescent"),
       title: text.zoneDone.title,

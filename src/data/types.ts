@@ -850,8 +850,9 @@ export interface RunText {
   // world's name and {n} the zone's place in the walk, from 1.
   readonly zoneBanner: string;
   // The zone celebration after any other zone but the last: its headline, as newWalker's,
-  // and the zone's fees and tips.
+  // and the zone's fees and tips, over its button.
   readonly zoneDone: {
+    readonly button: string;
     readonly earnings: string;
     readonly subtitle: string;
     readonly title: string;
