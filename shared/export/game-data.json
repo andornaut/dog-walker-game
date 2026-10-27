@@ -307,9 +307,8 @@
         "name": "Kiwi",
         "role": "grandmother"
       },
-      "price": "archie",
       "size": "medium",
-      "unlock": "shop",
+      "unlock": "start",
       "figures": {
         "maxHearts": 3,
         "startHearts": 3,
@@ -334,8 +333,9 @@
         "name": "Sam",
         "role": "barista"
       },
+      "price": "biscuit",
       "size": "medium",
-      "unlock": "start",
+      "unlock": "shop",
       "figures": {
         "maxHearts": 3,
         "startHearts": 3,
@@ -1346,7 +1346,7 @@
       "missedTips": 8,
       "payPerDog": 20,
       "prices": {
-        "archie": 250,
+        "biscuit": 250,
         "dogSlot2": 2000,
         "dogSlot3": 2000,
         "duchess": 150,

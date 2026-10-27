@@ -72,7 +72,7 @@ export const TUNING = {
     // Each walking dog's pay for a zone, the same in every zone.
     payPerDog: 20,
     prices: {
-      archie: 250,
+      biscuit: 250,
       // The second and third dog slots; every player starts with one.
       dogSlot2: 2000,
       dogSlot3: 2000,

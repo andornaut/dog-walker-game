@@ -11,9 +11,8 @@ export const DOGS = {
       name: "Kiwi",
       role: "grandmother",
     },
-    price: "archie",
     size: "medium",
-    unlock: "shop",
+    unlock: "start",
   },
   biscuit: {
     art: "biscuit",
@@ -24,8 +23,9 @@ export const DOGS = {
       name: "Sam",
       role: "barista",
     },
+    price: "biscuit",
     size: "medium",
-    unlock: "start",
+    unlock: "shop",
   },
   duchess: {
     art: "duchess",
