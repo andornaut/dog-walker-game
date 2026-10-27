@@ -178,18 +178,18 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Zero to sixty, every time.",
     conditions: [{ count: 5, debuff: "zoomies", kind: "debuffsGot" }],
-    goal: "Get the zoomies 5 times in one walk",
+    goal: "Get Zoomies 5 times in one walk",
     id: "zoomies",
     name: "Zoomies!",
-    shortGoal: "Get the zoomies 5 times",
+    shortGoal: "Get Zoomies 5 times",
   },
   {
     badgeLine: "No photos, please. Fine, one more.",
     conditions: [{ count: 3, debuff: "spotlight", kind: "debuffsGot" }],
-    goal: "Get the Spotlight 3 times in one walk",
+    goal: "Get Spotlight 3 times in one walk",
     id: "paparazzi",
     name: "Paparazzi",
-    shortGoal: "Get the Spotlight 3 times",
+    shortGoal: "Get Spotlight 3 times",
   },
   {
     badgeLine: "So close. Every time.",
