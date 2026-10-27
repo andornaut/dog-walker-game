@@ -11,7 +11,7 @@ import { itemAt } from "../lib/arrays";
 import { insetRect, type Point, type Rect } from "../lib/rect";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText } from "../ui/phaser/pixelText";
+import { addPixelText, wrapPixelText } from "../ui/phaser/pixelText";
 import type { HelpPictureData } from "./HelpPictureScene";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
@@ -188,15 +188,14 @@ export class HelpScene extends Scene {
     this.scene.launch(SCENE_KEYS.helpPicture, data);
   }
 
-  // Wrapped by Phaser at the body's width, with the line pitch set to the layout's, its names
-  // filled from the game data.
+  // Wrapped at the body's width as the help pages' fit test wraps it, measured on the font, with
+  // the line pitch set to the layout's, its names filled from the game data. Phaser's own wrap
+  // counts a line's trailing space, so it would break a line that fits exactly.
   private drawBody(body: string): void {
     const { lineHeight, scale, width, x, y } = HELP_LAYOUT.body;
-    const text = addPixelText(this, x, y, helpBody(gameData, { body }), {
-      colour: PALETTE.cream,
-      maxWidth: width,
-      scale,
-    });
+    const style = { colour: PALETTE.cream, scale };
+    const lines = wrapPixelText(this, style, width, helpBody(gameData, { body }));
+    const text = addPixelText(this, x, y, lines.join("\n"), style);
     text.setLineSpacing(lineHeight / scale - text.fontData.lineHeight);
   }
 }
