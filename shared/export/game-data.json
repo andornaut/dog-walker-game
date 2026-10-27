@@ -10,7 +10,7 @@
         "id": "capybara",
         "kind": "encounter"
       },
-      "text": "Muddy: bumps cost 2♥ for 20s",
+      "text": "Muddy: bumps cost 2♥ for 30s",
       "title": "Escaped capybara"
     },
     {
@@ -49,7 +49,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 20s",
+      "text": "Zoomies: the pack drifts on its own for 30s",
       "title": "Dropped ice cream"
     },
     {
@@ -140,7 +140,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 20s",
+      "text": "Zoomies: the pack drifts on its own for 30s",
       "title": "Other dog"
     },
     {
@@ -179,7 +179,7 @@
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 20s",
+      "text": "Zoomies: the pack drifts on its own for 30s",
       "title": "Porch cat"
     },
     {
@@ -2276,7 +2276,7 @@
       "moverStepSeconds": 0.4,
       "moverTimingJitter": 0.6,
       "moverWarningSeconds": 0.6,
-      "muddySeconds": 20,
+      "muddySeconds": 30,
       "pathReactionMargin": 0.5,
       "pullReactionWindow": 0.6,
       "pullTell": 1,
@@ -2285,7 +2285,7 @@
       "stinkySeconds": 30,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
-      "zoomiesSeconds": 20
+      "zoomiesSeconds": 30
     }
   },
   "upgrades": [

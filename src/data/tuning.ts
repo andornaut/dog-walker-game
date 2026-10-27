@@ -214,7 +214,7 @@ export const TUNING = {
     // A mover's cue shows this long before each move.
     moverWarningSeconds: 0.6,
     // How long the Muddy debuff lasts, in walking time.
-    muddySeconds: 20,
+    muddySeconds: 30,
     // Wherever the path changes lanes between two obstacles, the road between them also leaves
     // the pack this long to react, on top of the pack's height and the lane moves.
     pathReactionMargin: 0.5,
@@ -236,6 +236,6 @@ export const TUNING = {
     // While the pack has the Zoomies, it drifts a lane every this many seconds of walking.
     zoomiesDriftSeconds: 1,
     // How long the Zoomies debuff lasts, in walking time.
-    zoomiesSeconds: 20,
+    zoomiesSeconds: 30,
   },
 } satisfies Tuning;
