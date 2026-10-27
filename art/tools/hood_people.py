@@ -12,10 +12,10 @@ tourist             48x72   Distillery District and Yonge Street; a stepper faci
                             shoulders), driftwood shorts and sandals, an open map in the right hand
                             (screen left); walk (4 frames, 100ms): road.PERSON_WALK, the free arm
                             swinging; idle (2 frames, 400ms): road.BREATH
-couple              112x72  Distillery District, 2 lanes; two people strolling arm in arm up the road
-                            ahead of the pack, seen from behind as the stroller is: on the left a man in
-                            a red sweater and grey trousers carrying a kraft shopping bag, on the right
-                            a woman with long copper hair in a lilac dress with a mauve shoulder bag,
+couple              112x72  Distillery District, 2 lanes; two people strolling arm in arm, a stepper
+                            facing the player as the tourist is: on the left a man in a red sweater
+                            and grey trousers carrying a kraft shopping bag, on the right a woman with
+                            long copper hair and a fringe in a lilac dress with a mauve shoulder bag,
                             their inner arms hooked together between them; walk (4 frames, 160ms, the
                             stroller's pace): road.PERSON_WALK, in step, the outer arms swinging; idle
                             (2 frames, 400ms): road.BREATH
@@ -132,7 +132,7 @@ def tourist(**q):
     return rim(edged(road.person(tourist_top, **TOURIST, **q)), TOURIST_RIM)
 
 
-# ---------- couple: arm in arm, seen from behind, two lanes ----------
+# ---------- couple: arm in arm, facing the player, two lanes ----------
 
 # The couple's design grid: 112 px wide at road.SCALE, 48 rows.
 COUPLE_W = 112 / SCALE
@@ -142,25 +142,26 @@ COUPLE_WALK = road.PERSON_WALK
 COUPLE_WALK_MS = 160
 
 
-def back_legs(g, x0, b, lf, rf, legs, shoes):
-    """A person's legs and shoes from behind, in the cell at x0: legs (fill, shade) from the hem at row 33
-    (or legs[2]) down, the shoes' heels a row darker."""
-    top = legs[2] if len(legs) > 2 else 33
+def front_legs(g, x0, b, lf, rf, legs, shoes, top=33):
+    """A person's legs and shoes facing the player, as road.person draws them, in the cell at x0: legs (fill,
+    shade) from the hem at row top down."""
     for x, f in ((x0 + 11, lf), (x0 + 17, rf)):
         g.rect(x, top + b, 4, 43 - top + f - b, legs[0])
         g.rect(x + 3, top + b, 1, 43 - top + f - b, legs[1])
-        g.rect(x, 43 + f, 4, 2, shoes[0])
-        g.rect(x, 44 + f, 4, 1, shoes[1])
+        g.rect(x, 43 + f, 4, 2, shoes)
 
 
 def couple(lf=0, rf=0, bob=0, arms=0):
-    """The couple from behind, strolling up the road arm in arm, in step."""
+    """The couple facing the player, strolling arm in arm, in step."""
     g = edged(Grid(COUPLE_W, 48))
     b = bob
     m, w = MAN, WOMAN
     # legs: his grey trousers and brown shoes, her bare legs under the dress and pink flats
-    back_legs(g, m, b, lf, rf, ("grey", "slate"), ("brown", "dbrown"))
-    back_legs(g, w, b, lf, rf, ("skin1", "skin2", 38), ("pink", "mauve"))
+    front_legs(g, m, b, lf, rf, ("grey", "slate"), "brown")
+    front_legs(g, w, b, lf, rf, ("skin1", "skin2"), "pink", top=38)
+    # her long copper hair, falling behind her shoulders
+    g.rect(w + 8, 10 + b, 16, 13, "ochre")
+    g.rect(w + 20, 10 + b, 4, 13, "rust")
     # his outer arm (screen left) swings, carrying the kraft shopping bag
     n = swung(arms, -1)
     road.back_arm(g, m + 5, 4, 22 + b, ((9, "red", "dred"), (3, "skin1", None)), lift=n)
@@ -172,10 +173,11 @@ def couple(lf=0, rf=0, bob=0, arms=0):
     # her outer arm (screen right) swings against his
     n = swung(arms, 1)
     road.back_arm(g, w + 23, 3, 22 + b, ((3, "lilac", "violet"), (9, "skin1", "skin2")), lift=n)
-    # the red sweater, lit down its left side, a ribbed hem
+    # the red sweater, lit down its left side, a crew neck and a ribbed hem
     g.rect(m + 9, 21 + b, 14, 13, "red")
     g.rect(m + 20, 21 + b, 3, 13, "dred")
     g.rect(m + 9, 21 + b, 1, 12, "pink")
+    g.rect(m + 13, 21 + b, 6, 1, "dred")
     g.rect(m + 9, 32 + b, 14, 2, "dred")
     g.p(m + 9, 21 + b, None)
     g.p(m + 22, 21 + b, None)
@@ -188,9 +190,8 @@ def couple(lf=0, rf=0, bob=0, arms=0):
     g.rect(w + 20, 29 + b, 4, 9, "violet")
     g.rect(w + 21, 33 + b, 4, 5, "violet")
     g.rect(w + 8, 30 + b, 1, 3, "white")
-    g.p(w + 10, 21 + b, None)
-    g.p(w + 21, 21 + b, None)
-    # the mauve shoulder bag on its strap, at her right hip (screen right)
+    g.rect(w + 14, 21 + b, 4, 1, "skin1")
+    # the mauve shoulder bag, its strap across her from her right shoulder (screen left) to her left hip
     stair(g, w + 11, 21 + b, w + 21, 30 + b, "purple")
     g.rect(w + 20, 29 + b, 5, 4, "mauve")
     g.rect(w + 20, 29 + b, 5, 1, "pink")
@@ -205,19 +206,20 @@ def couple(lf=0, rf=0, bob=0, arms=0):
     g.rect(m + 26, 27 + b, 5, 3, "skin1")
     g.rect(m + 26, 29 + b, 5, 1, "skin2")
     g.rect(m + 25, 27 + b, 2, 2, "red")
-    # his head from behind: short dark brown hair over the nape and ears
-    g.rect(m + 14, 19 + b, 4, 3, "skin1")
-    g.rect(m + 7, 14 + b, 2, 3, "skin1")
-    g.rect(m + 23, 14 + b, 2, 3, "skin2")
-    g.cel(m + 16, 13.5 + b, 7.5, 7, "dbrown", "plum", "brown")
-    g.rect(m + 12, 19 + b, 8, 1, "dbrown")
-    # her head from behind: long copper hair falling over her shoulders, a lighter sheen at the crown
-    g.cel(w + 16, 13 + b, 8, 7.5, "ochre", "rust", "tan")
-    g.rect(w + 9, 14 + b, 14, 8, "ochre")
-    g.rect(w + 19, 14 + b, 4, 8, "rust")
-    g.rect(w + 10, 22 + b, 12, 1, "ochre")
-    g.rect(w + 19, 22 + b, 3, 1, "rust")
-    g.rect(w + 15, 9 + b, 1, 13, "rust")
+    # his face under short dark brown hair
+    face_disc(g, m + 16, 12.5 + b, 8, 8, "skin1", "skin2")
+    g.cel(m + 16, 7.5 + b, 8.5, 4, "dbrown", "plum", "brown")
+    g.rect(m + 8, 8 + b, 2, 4, "dbrown")
+    g.rect(m + 22, 8 + b, 2, 4, "dbrown")
+    road.face_front(g, m + 16, 13 + b)
+    # her face framed by the copper hair, a fringe over the brow
+    face_disc(g, w + 16, 13 + b, 7.5, 7.5, "skin1", "skin2")
+    g.cel(w + 16, 8 + b, 8.5, 4.5, "ochre", "rust", "tan")
+    g.rect(w + 8, 9 + b, 2, 13, "ochre")
+    g.rect(w + 22, 9 + b, 2, 13, "rust")
+    road.face_front(g, w + 16, 13.5 + b, lips="dred")
+    g.p(w + 10, 16.5 + b, "pink")
+    g.p(w + 22, 16.5 + b, "pink")
     return rim(g, {**LIT, "violet": ("lilac", None), "slate": ("grey", None)})
 
 
