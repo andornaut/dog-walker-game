@@ -87,10 +87,18 @@ const STANDING = ["tip", "treat", "cone", "dog-kilo", "loose-dog", "squirrel", "
 const ROAD_SPRITES = manifest.sprites
   .map(({ key }) => key)
   .filter((key) => splitDepthKey(key).base === key && standsOnGround(key));
-// Every set of steps a sprite may have, whichever sprites ship with them.
-const STEP_SETS = [[], [0.75], [0.5], [0.75, 0.5], [0.875, 0.75, 0.625, 0.5]].flatMap((steps) =>
-  [16, 88].map((width) => syntheticArts(`w${width}`, width, steps)),
-);
+// Every depth step below full size.
+const SMALLER_STEPS = SCALE_STEPS.filter((step) => step < 1);
+// Every set of steps a sprite may have, whichever sprites ship with them: some, every 1/8 and
+// every 1/16.
+const STEP_SETS = [
+  [],
+  [0.75],
+  [0.5],
+  [0.75, 0.5],
+  [0.875, 0.75, 0.625, 0.5],
+  SMALLER_STEPS,
+].flatMap((steps) => [16, 88].map((width) => syntheticArts(`w${width}`, width, steps)));
 
 describe("scaleAt", () => {
   it("only grows as a point approaches the walker's feet", () => {
@@ -120,6 +128,50 @@ describe("depthDraw", () => {
       const drawn = depthDraw(arts, PACK_DEPTH);
       expect(drawn, drawn.key).toMatchObject({ depth: 1, key: itemAt(arts, 0).key, scale: 1 });
     }
+  });
+
+  // A 48x64 sprite, whole pixels at every 1/16, with every step: at a step's own scale it draws
+  // that step's art unscaled, and just past it the next larger step's, shrunk.
+  const EXACT = syntheticArts("exact", 48, SMALLER_STEPS).map((art) => ({
+    ...art,
+    feetY: (art.width * 4) / 3,
+    height: (art.width * 4) / 3,
+  }));
+  it.each(SMALLER_STEPS.map((step, i) => [step, itemAt(SCALE_STEPS, i)]))(
+    "draws %f from its own step, and just past it from the %f step",
+    (step, larger) => {
+      expect(depthDraw(EXACT, step)).toMatchObject({
+        key: depthVariantKey("exact", step),
+        scale: 1,
+      });
+      const past = depthDraw(EXACT, step + 1 / 64);
+      expect(past.key).toBe(depthVariantKey("exact", larger) ?? "exact");
+      expect(past.scale).toBeLessThan(1);
+    },
+  );
+
+  // On a slow approach every road sprite, with the steps it ships and with every step, draws
+  // the smallest of its arts at least its projected size on both axes.
+  it("draws each sprite from its smallest art at least its projected size", () => {
+    const offenders: string[] = [];
+    for (const arts of stepSets(ROAD_SPRITES)) {
+      const full = itemAt(arts, 0);
+      for (const projected of approach) {
+        const depth = Math.min(1, projected);
+        const covers = (art: DepthArt) =>
+          art.width + ROUNDING >= full.width * depth &&
+          art.height + ROUNDING >= full.height * depth;
+        const smallest = arts
+          .filter(covers)
+          .reduce((best, art) => (art.width * art.height < best.width * best.height ? art : best));
+        const { key } = depthDraw(arts, projected);
+        if (key !== smallest.key) {
+          offenders.push(`${full.key} at ${projected}: ${key}, not ${smallest.key}`);
+          break;
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 
   // A 32-wide cone with only @75 and @50, whatever steps the shipped cone has.

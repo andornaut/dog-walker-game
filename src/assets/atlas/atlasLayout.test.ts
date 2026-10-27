@@ -5,10 +5,13 @@ import {
   ATLAS_MAX_SIZE,
   atlasGroupOf,
   EXTRUDE,
+  filtersLinear,
   imageSource,
   layoutAtlases,
+  pageGroupOf,
   type SourceTexture,
   spriteSource,
+  steppedBases,
 } from "./atlasLayout";
 
 function sprite(key: string, count: number, width: number, height: number): SourceTexture {
@@ -39,6 +42,29 @@ describe("atlasGroupOf", () => {
       ["fx-hit-skunk", "run"],
     ];
     expect(cases.filter(([key, group]) => atlasGroupOf(key) !== group)).toEqual([]);
+  });
+});
+
+describe("pageGroupOf", () => {
+  // cone and dog-kilo have depth step variants; fx-hit-skunk and ui-heart do not.
+  const stepped = steppedBases(["cone", "cone@94", "dog-kilo", "dog-kilo@50", "fx-hit-skunk"]);
+
+  // Road art drawn between its depth steps packs on its own linear pages; the home screen's 1x
+  // art, the UI and the rest of the road stay nearest.
+  it.each([
+    ["cone", "road", true],
+    ["cone@94", "road", true],
+    ["cone@50", "road", true],
+    ["dog-kilo@50", "road", true],
+    ["dog-kilo", "home", false],
+    ["fx-hit-skunk", "run", false],
+    ["ambient-kite", "run", false],
+    ["ui-heart", "ui", false],
+    ["card-skip", "cards", false],
+    [LOADING_ART.walker, "boot", false],
+  ] as const)("packs %s on a %s page, filtered linearly: %s", (key, group, linear) => {
+    expect(pageGroupOf(stepped, key)).toBe(group);
+    expect(filtersLinear(stepped, key)).toBe(linear);
   });
 });
 
@@ -98,6 +124,8 @@ describe("layoutAtlases", () => {
     sprite("ui-loading", 4, 32, 32),
     sprite("fx-confetti", 10, 64, 64),
     sprite("cone", 2, 32, 32),
+    sprite("cone@50", 2, 16, 16),
+    sprite("fx-hit-skunk", 2, 32, 32),
   ];
 
   it("maps every frame of every texture, keeping names, sizes and durations", () => {
@@ -117,12 +145,13 @@ describe("layoutAtlases", () => {
     }
   });
 
-  it("orders pages boot, ui, home, run, cards, each named for its group", () => {
+  it("orders pages boot, ui, home, run, road, cards, each named for its group", () => {
     expect(layoutAtlases(textures).pages.map(({ group, png }) => [group, png])).toEqual([
       ["boot", "atlas/boot-0.png"],
       ["ui", "atlas/ui-0.png"],
       ["home", "atlas/home-0.png"],
       ["run", "atlas/run-0.png"],
+      ["road", "atlas/road-0.png"],
       ["cards", "atlas/cards-0.png"],
     ]);
   });

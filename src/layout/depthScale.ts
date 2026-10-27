@@ -32,6 +32,10 @@ function cover(art: DepthArt, other: DepthArt): number {
   return Math.max(other.width / art.width, other.height / art.height);
 }
 
+// Floating-point rounding in a scale, far below a pixel: a step exactly the projected size
+// draws unscaled rather than from the next larger step.
+const ROUNDING = 1e-9;
+
 // arts holds the 1x art first, then any smaller steps.
 export function depthDraw(arts: readonly DepthArt[], projected: number): DepthDraw {
   const full = itemAt(arts, 0);
@@ -39,7 +43,7 @@ export function depthDraw(arts: readonly DepthArt[], projected: number): DepthDr
   const scaleOf = (art: DepthArt) => depth * cover(art, full);
   let art = full;
   for (const step of arts) {
-    if (scaleOf(step) <= 1 && step.width * step.height < art.width * art.height) {
+    if (scaleOf(step) <= 1 + ROUNDING && step.width * step.height < art.width * art.height) {
       art = step;
     }
   }

@@ -21,15 +21,21 @@ export const EXTRUDE = 1;
 const PAGE_WIDTHS = [256, 512, 1024, 2048] as const;
 
 // Pages in load order: the loading screen's art first, so it shows while the rest loads.
-const ATLAS_GROUPS = ["boot", "ui", "home", "run", "cards"] as const;
+const ATLAS_GROUPS = ["boot", "ui", "home", "run", "road", "cards"] as const;
 type AtlasGroup = (typeof ATLAS_GROUPS)[number];
+// The groups a key belongs to by its name alone. road is split out of run by pageGroupOf.
+type KeyGroup = Exclude<AtlasGroup, "road">;
 
 // The groups boot loads before the home screen shows. The rest load behind it, and a walk or
 // help waits for them.
 const FIRST_ATLAS_GROUPS: readonly AtlasGroup[] = ["boot", "ui", "home"];
 
+// The groups whose pages draw with linear filtering. A page's filter covers every frame on it,
+// so the road art drawn between its depth steps packs on pages of its own.
+const LINEAR_GROUPS: ReadonlySet<AtlasGroup> = new Set(["road"]);
+
 const LOADING_KEYS: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
-const GROUP_PREFIXES: readonly (readonly [AtlasGroup, readonly string[]])[] = [
+const GROUP_PREFIXES: readonly (readonly [KeyGroup, readonly string[]])[] = [
   ["cards", ["card-"]],
   ["ui", ["badge-", "face-", "icon-", "item-", "logo", "portrait-", "screen-", "ui-"]],
 ];
@@ -51,7 +57,7 @@ const isHomeArt = (key: string): boolean =>
 
 // boot is the loading screen; ui the home screen, menus, HUD and icons; home the road art the
 // home screen draws too; cards the choice cards; run everything else on the road.
-export function atlasGroupOf(key: string): AtlasGroup {
+export function atlasGroupOf(key: string): KeyGroup {
   if (LOADING_KEYS.has(key)) {
     return "boot";
   }
@@ -66,6 +72,35 @@ export function atlasGroupOf(key: string): AtlasGroup {
 
 // Whether boot loads key before the home screen shows.
 export const loadsFirst = (key: string): boolean => FIRST_ATLAS_GROUPS.includes(atlasGroupOf(key));
+
+// The sprites among keys that have a depth step variant: the road sprites drawn through their
+// depth steps.
+export function steppedBases(keys: Iterable<string>): Set<string> {
+  const bases = new Set<string>();
+  for (const key of keys) {
+    const { base } = splitDepthKey(key);
+    if (base !== key) {
+      bases.add(base);
+    }
+  }
+  return bases;
+}
+
+// The page group a key packs into, given steppedBases of the keys packed: atlasGroupOf's, except
+// that the road art drawn between its depth steps (each depth step variant, and the full size of
+// a sprite with one) is road, whose pages filter linearly so it shrinks smoothly. Home art keeps
+// its group and stays nearest: the home screen draws it at 1x, and the pack stands at full size.
+export function pageGroupOf(stepped: ReadonlySet<string>, key: string): AtlasGroup {
+  const group = atlasGroupOf(key);
+  return group === "run" && stepped.has(splitDepthKey(key).base) ? "road" : group;
+}
+
+// Whether a key's texture draws with linear filtering, given steppedBases of the keys loaded.
+// At 1x on a whole pixel, as Phaser places unscaled sprites, linear filtering samples each
+// texel's centre and draws the same pixels as nearest.
+export function filtersLinear(stepped: ReadonlySet<string>, key: string): boolean {
+  return LINEAR_GROUPS.has(pageGroupOf(stepped, key));
+}
 
 // A frame of a source PNG, by the rect of it that is packed. A trimmed frame's rect holds only
 // its opaque pixels: bounds is then the whole frame it was cut from, and trim where it sits in
@@ -292,8 +327,9 @@ export function layoutAtlases(
   maxSize: number = ATLAS_MAX_SIZE,
 ): AtlasLayout {
   const layout: AtlasLayout = { pages: [], skipped: [], textures: [] };
+  const stepped = steppedBases(textures.map(({ key }) => key));
   for (const group of ATLAS_GROUPS) {
-    const members = textures.filter((texture) => atlasGroupOf(texture.key) === group);
+    const members = textures.filter((texture) => pageGroupOf(stepped, texture.key) === group);
     layout.skipped.push(...members.filter((t) => !fits(t, maxSize)).map(({ key }) => key));
     const packed = members.filter((texture) => fits(texture, maxSize));
     const { pages, width } = packGroup(packed, maxSize);

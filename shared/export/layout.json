@@ -58,16 +58,32 @@
       "suffix": ""
     },
     {
+      "scale": 0.9375,
+      "suffix": "@94"
+    },
+    {
       "scale": 0.875,
       "suffix": "@88"
+    },
+    {
+      "scale": 0.8125,
+      "suffix": "@81"
     },
     {
       "scale": 0.75,
       "suffix": "@75"
     },
     {
+      "scale": 0.6875,
+      "suffix": "@69"
+    },
+    {
       "scale": 0.625,
       "suffix": "@62"
+    },
+    {
+      "scale": 0.5625,
+      "suffix": "@56"
     },
     {
       "scale": 0.5,

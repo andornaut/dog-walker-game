@@ -10,6 +10,7 @@ import {
   loadManifest,
   MANIFEST_CACHE_KEY,
   queueManifestArt,
+  smoothDepthArt,
 } from "../assets/phaser/manifestArt";
 import {
   DOG_FRAME_SIDES,
@@ -213,7 +214,10 @@ export class BootScene extends Scene {
     budgetMs: number,
     done: () => void,
   ): void {
-    const steps: (() => void)[] = [() => addAtlasTextures(this)];
+    const steps: (() => void)[] = [
+      () => addAtlasTextures(this),
+      () => smoothDepthArt(this, this.manifest),
+    ];
     for (const sprite of this.manifest.sprites) {
       if (sprite.key !== LOADING_ART.walker && include(sprite.key)) {
         steps.push(() => this.registerSprite(sprite));

@@ -1,14 +1,15 @@
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
-import type { Textures } from "phaser";
+import type { Scene, Textures } from "phaser";
 import { describe, expect, it } from "vitest";
 
 import { sheetFromRows } from "../../testing/sheetImage";
 import { compactFrames, drawPage } from "../atlas/atlasBuild";
 import { layoutAtlases } from "../atlas/atlasLayout";
 import type { RgbaImage } from "../atlas/atlasPixels";
-import { addAtlasFrame } from "./manifestArt";
+import type { AssetManifest } from "../manifest";
+import { addAtlasFrame, smoothDepthArt } from "./manifestArt";
 
 // Phaser's frame and its image render nodes, which place a sprite's quad and pick its texels,
 // loaded from its sources: the package's bundle needs a browser.
@@ -243,5 +244,78 @@ describe("a trimmed atlas frame", () => {
         : [`${frame} ${JSON.stringify(draw)}`];
     });
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("smoothDepthArt", () => {
+  // Phaser's FilterMode: LINEAR is 0, and pixelArt starts every texture NEAREST, 1.
+  const [LINEAR, NEAREST] = [0, 1];
+  const sprite = (key: string) => ({ json: `sprites/${key}.json`, key, png: `sprites/${key}.png` });
+  const manifest: AssetManifest = {
+    fonts: [],
+    images: [{ key: "screen-home", png: "images/screen-home.png" }],
+    sounds: [],
+    sprites: ["cone", "cone@94", "cone@50", "dog-kilo", "dog-kilo@50", "fx-tap", "ui-heart"].map(
+      sprite,
+    ),
+  };
+
+  // A build's pages: road holds cone, its steps and dog-kilo@50, and other the rest, except
+  // ui-heart, loaded from its own files.
+  function loadedScene() {
+    const road = { scaleMode: NEAREST };
+    const other = { scaleMode: NEAREST };
+    const sources: Record<string, { scaleMode: number }> = {
+      cone: road,
+      "cone@50": road,
+      "cone@94": road,
+      "dog-kilo": other,
+      "dog-kilo@50": road,
+      "fx-tap": other,
+      "screen-home": other,
+      "ui-heart": { scaleMode: NEAREST },
+    };
+    let uploads = 0;
+    const textures = new Map(
+      Object.entries(sources).map(([key, source]) => [
+        key,
+        {
+          setFilter(mode: number) {
+            uploads += 1;
+            source.scaleMode = mode;
+          },
+          source: [source],
+        },
+      ]),
+    );
+    const scene = {
+      textures: {
+        exists: (key: string) => textures.has(key),
+        get: (key: string) => textures.get(key),
+      },
+    } as unknown as Scene;
+    return { scene, sources, uploads: () => uploads };
+  }
+
+  it.each([
+    ["cone", LINEAR],
+    ["cone@94", LINEAR],
+    ["cone@50", LINEAR],
+    ["dog-kilo@50", LINEAR],
+    ["dog-kilo", NEAREST],
+    ["fx-tap", NEAREST],
+    ["screen-home", NEAREST],
+    ["ui-heart", NEAREST],
+  ])("leaves %s with filter mode %i", (key, mode) => {
+    const { scene, sources } = loadedScene();
+    smoothDepthArt(scene, manifest);
+    expect(sources[key]?.scaleMode).toBe(mode);
+  });
+
+  it("filters a shared page once, however many of its keys load", () => {
+    const { scene, uploads } = loadedScene();
+    smoothDepthArt(scene, manifest);
+    smoothDepthArt(scene, manifest);
+    expect(uploads()).toBe(1);
   });
 });

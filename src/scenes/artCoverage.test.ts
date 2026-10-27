@@ -110,6 +110,8 @@ const DOGS = Object.keys(gameData.dogs) as DogId[];
 const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
 const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
+// Every depth step below full size.
+const SMALLER_STEPS = SCALE_STEPS.filter((step) => step < 1);
 // The steps below 1 at which any of keys has a variant. Art adds a step to a whole family of
 // sprites at once, so each of them must then have it.
 function variantSteps(keys: readonly string[]): number[] {
@@ -156,14 +158,12 @@ describe("dog art", () => {
     expect(DOGS.flatMap((dog) => missingTags(dogSpriteKey(gameData, dog), tags))).toEqual([]);
   });
 
-  it("names a hand-drawn depth variant for every dog at every step any dog has", () => {
+  it("names a hand-drawn depth variant for every dog at every depth step", () => {
     const keys = DOGS.map((dog) => dogSpriteKey(gameData, dog));
-    const steps = variantSteps(keys);
-    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
     const missing = keys.flatMap((key) =>
-      steps
-        .map((step) => depthVariantKey(key, step) ?? "")
-        .filter((variant) => !sprites.has(variant)),
+      SMALLER_STEPS.map((step) => depthVariantKey(key, step) ?? "").filter(
+        (variant) => !sprites.has(variant),
+      ),
     );
     expect(missing).toEqual([]);
   });
@@ -418,12 +418,12 @@ describe("plain and moving hit art", () => {
 });
 
 describe("road object art", () => {
-  it("names a road sprite for every encounter, at every step any encounter has", () => {
+  it("names a road sprite for every encounter, at every depth step", () => {
     const keys = ENCOUNTERS.map(encounterSpriteKey);
-    const steps = [1, ...variantSteps(keys)];
-    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
     const missing = keys.flatMap((key) =>
-      steps.map((step) => depthVariantKey(key, step) ?? key).filter((key) => !sprites.has(key)),
+      SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key).filter(
+        (key) => !sprites.has(key),
+      ),
     );
     expect(missing).toEqual([]);
   });

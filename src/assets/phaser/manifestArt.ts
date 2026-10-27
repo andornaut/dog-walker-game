@@ -3,6 +3,7 @@ import artFiles from "virtual:art-files";
 
 import { itemAt } from "../../lib/arrays";
 import { artFileUrl } from "../artUrl";
+import { filtersLinear, steppedBases } from "../atlas/atlasLayout";
 import {
   asepriteSheetOf,
   ATLAS_MANIFEST_PATH,
@@ -162,6 +163,28 @@ function addAtlasTexture(scene: Scene, atlased: AtlasTexture): void {
   }
   for (const frame of frames) {
     addAtlasFrame(texture, frame.name, frame);
+  }
+}
+
+// Phaser's Textures.FilterMode.LINEAR, named here so this module imports Phaser's types only.
+const LINEAR_FILTER = 0 as Textures.FilterMode.LINEAR;
+
+// Filters each loaded texture that filtersLinear names linearly, so road art drawn between its
+// depth steps shrinks smoothly rather than dropping whole rows and columns of pixels. An
+// atlased key shares its page's source, which holds only such art, so the first key filters the
+// page and the rest find it done; the dev server's keys each have their own. Every other
+// texture keeps the nearest filtering pixelArt gives it.
+export function smoothDepthArt(scene: Scene, { images, sprites }: AssetManifest): void {
+  const keys = [...images, ...sprites].map(({ key }) => key);
+  const stepped = steppedBases(keys);
+  for (const key of keys) {
+    if (!filtersLinear(stepped, key) || !scene.textures.exists(key)) {
+      continue;
+    }
+    const texture = scene.textures.get(key);
+    if (texture.source.some(({ scaleMode }) => scaleMode !== LINEAR_FILTER)) {
+      texture.setFilter(LINEAR_FILTER);
+    }
   }
 }
 
