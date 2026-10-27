@@ -36,6 +36,9 @@ from pixel import PALETTE64, Grid  # noqa: E402
 
 W, H = 320, 64
 LANE = 64
+# The period of every joint or seam across the road: the road scrolls up to 11 px a frame at 30 fps, and a
+# pattern that repeats in under twice that strobes like a wagon wheel, its motion seeming to reverse.
+SEAM_PERIOD = 32
 DIVIDERS = [k * LANE - 1 for k in range(1, 5)]
 
 
@@ -172,7 +175,7 @@ def cracks(g, rnd, runs, col):
 
 
 def cabbagetown_ground(g):
-    """Pale asphalt with granite gutters in stone, their joints every 16 rows."""
+    """Pale asphalt with granite gutters in stone, their joints every 32 rows."""
     rnd = random.Random("road-cabbagetown")
     g.rect(0, 0, W, H, "grey")
     grit(g, rnd, 60, ("slate", "slate", "dslate", "lgrey", "lgrey"))
@@ -181,7 +184,7 @@ def cabbagetown_ground(g):
     for x0, edge in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "stone")
         g.rect(edge, 0, 1, H, "slate")
-        for y in range(0, H, 16):
+        for y in range(0, H, SEAM_PERIOD):
             g.rect(x0, y, 4, 2, "dstone")
     g.rect(0, 0, 1, H, "lgrey")
     g.rect(W - 1, 0, 1, H, "dstone")
@@ -231,57 +234,58 @@ def high_park_ground(g):
 
 
 def distillery_ground(g):
-    """Dslate laid as cobbles: setts 15 wide in courses 8 rows deep, half-offset each
-    course, navy joints (2 rows across the road, 1px along it), a slate glint on some setts' top
-    left; brick gutters along both sides."""
+    """Dslate laid as long granite setts along the road: columns 16 wide, each sett 30 rows long over a 2-row
+    navy joint, so a column's joints repeat every 32 rows (SEAM_PERIOD); each column starts its setts at its
+    own multiple of 4, never within 4 rows of its neighbour's, so no joint runs across the road. 1px navy
+    joints between the columns, a slate glint on some setts' top left; brick gutters along both sides."""
     rnd = random.Random("road-distillery-district")
     g.rect(0, 0, W, H, "dslate")
-    for course in range(H // 8):
-        y, off = course * 8, 8 if course % 2 else 0
-        g.rect(0, y + 6, W, 2, "navy")
-        for x in range(off - 16, W, 16):
-            g.rect(x + 15, y, 1, 6, "navy")
+    phase = 0
+    for x in range(0, W, 16):
+        prev = phase
+        phase = rnd.choice([p for p in range(0, SEAM_PERIOD, 4) if min(abs(p - prev), SEAM_PERIOD - abs(p - prev)) > 4])
+        g.rect(x + 15, 0, 1, H, "navy")
+        for y in range(phase, phase + H, SEAM_PERIOD):
+            wrect(g, x, y + SEAM_PERIOD - 2, 15, 2, "navy")
             if rnd.random() < 0.45:
-                g.rect(x + 1, y + 1, 3, 1, "slate")
-            if rnd.random() < 0.15:
-                g.p(x + rnd.randrange(4, 13), y + rnd.randrange(2, 5), "navy")
+                wrect(g, x + 1, y + 1, 3, 1, "slate")
+            if rnd.random() < 0.3:
+                wp(g, x + rnd.randrange(4, 13), y + rnd.randrange(4, 26), "navy")
     for x0, edge in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "brick")
         g.rect(edge, 0, 1, H, "navy")
-        for y in range(0, H, 8):
+        for y in range(0, H, SEAM_PERIOD):
             g.rect(x0, y + 6, 4, 2, "dbrick")
     g.rect(0, 0, 1, H, "rust")
 
 
 def distillery_lines(g):
-    """A run of three pale granite setts on each lane line every 64 rows: lgrey, 6 rows on and 2 off, a stone
-    edge."""
+    """A pale granite kerbstone on each lane line every 64 rows: lgrey, 22 rows long, a stone edge."""
     for x in DIVIDERS:
-        for y in range(0, 24, 8):
-            g.rect(x, y, 2, 6, "lgrey")
-            g.rect(x + 1, y, 1, 6, "stone")
+        g.rect(x, 0, 2, 22, "lgrey")
+        g.rect(x + 1, 0, 1, 22, "stone")
 
 
 def kensington_ground(g):
     """Dark brick flagstones in offset courses between dark laneway gutters: dbrick stones in plum joints,
     brick, walnut and mauve flecks worn into them; shale stones on the outer 4 columns inside a coal seam, an ash
-    joint every 16 rows."""
+    joint every 32 rows."""
     rnd = random.Random("road-kensington-market")
     g.rect(0, 0, W, H, "dbrick")
-    # flagstones half a lane wide in courses 16 rows deep, each course offset half a stone, so the
-    # lane dividers fall on joints of every other course
-    for course in range(H // 16):
-        y, off = course * 16, 16 if course % 2 else 0
-        g.rect(0, y + 14, W, 2, "plum")
+    # flagstones half a lane wide in courses SEAM_PERIOD rows deep, each course offset half a stone, so
+    # the lane dividers fall on joints of every other course
+    for course in range(H // SEAM_PERIOD):
+        y, off = course * SEAM_PERIOD, 16 if course % 2 else 0
+        g.rect(0, y + SEAM_PERIOD - 2, W, 2, "plum")
         for x in range(off - 1, W, 32):
-            g.rect(x, y, 1, 14, "plum")
+            g.rect(x, y, 1, SEAM_PERIOD - 2, "plum")
     specks(g, rnd, 20, "brick", 6, W - 6)
     specks(g, rnd, 10, "walnut", 6, W - 6)
     specks(g, rnd, 6, "mauve", 6, W - 6)
     for x0, inner in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "shale")
         g.rect(inner, 0, 1, H, "coal")
-        for y in range(0, H, 16):
+        for y in range(0, H, SEAM_PERIOD):
             g.rect(x0, y, 4, 2, "ash")
 
 
@@ -322,7 +326,7 @@ def beaches_ground(g):
 def yonge_ground(g):
     """Dark concrete: shale slabs a lane wide and 32 rows long, their 2-row expansion joints in coal
     across the road and 1px along it under the lane lines, sparse ash and coal grit, a few coal cracks;
-    dstone granite gutters, their joints in shale every 16 rows."""
+    dstone granite gutters, their joints in shale every 32 rows."""
     rnd = random.Random("road-yonge-street")
     g.rect(0, 0, W, H, "shale")
     grit(g, rnd, 50, ("ash", "ash", "coal", "coal", "dslate"))
@@ -333,7 +337,7 @@ def yonge_ground(g):
         g.rect(x, 0, 1, H, "coal")
     for x0, line in ((0, 5), (W - 5, W - 6)):
         g.rect(x0, 0, 5, H, "dstone")
-        for y in range(0, H, 16):
+        for y in range(0, H, SEAM_PERIOD):
             g.rect(x0, y, 5, 2, "shale")
         g.rect(line, 0, 1, H, "coal")
     g.rect(0, 0, 1, H, "stone")
