@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Draw the choice card frame and compose the card illustrations.
 
-- card-frame: an 83x140 sprite, one frame per card type (tags encounter for an
+- card-frame: a 112x153 sprite, one frame per card type (tags encounter for an
   obstacle's card, route for a fork's path cards). The game draws the title
   in the band, the effect text in the body and the cost in the badge. Layout,
   in card pixels:
-    band 2..12 (title), art window 3,15 to 79,72 (illustration at 4,16, 75x56), 1px
-    of face or lip either side of it,
-    body 6..76 x 76..117, badge spot 6,121, 71x13 (plain face; card-cost goes there on a paid option).
+    band 2..12 (title), art window 17,15 to 93,72 (illustration at 18,16, 75x56), centred
+    with cream face either side,
+    body 6..105 x 76..130, badge spot 20,134, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
-  view: the same layout doubled with 1px detail. Band 4..24 (title line from row
+  view: the 83x140 layout (art window 3,15, body 6..76 x 76..117, badge spot 6,121) doubled with
+  1px detail. Band 4..24 (title line from row
   9), art window 6,30, 154x116 (illustration at 2x at 8,32),
   body 12..153 x 152..233, badge spot 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
@@ -49,8 +50,14 @@ import roads  # noqa: E402
 from pixel import Grid, bitmap, build as build_sprites, dk, edged, to_image  # noqa: E402
 from ui import chrome  # noqa: E402
 
-CW, CH = 83, 140
+CW, CH = 112, 153
 AW, AH = 75, 56
+# The illustration's top left on card-frame, centred across the card, and the badge spot's (the cost
+# plaque's), centred under the body.
+ART_X, ART_Y = (CW - AW) // 2, 16
+BADGE_X, BADGE_Y = (CW - 71) // 2, 134
+# card-frame-large keeps the 83x140 layout doubled.
+LBW, LBH = 83, 140
 # Band colours hold white labels at 7:1 or more. The game draws encounter for an obstacle and route for a
 # fork.
 BANDS = {"encounter": ("dred", "plum"), "route": ("purple", "plum")}
@@ -68,13 +75,13 @@ def card_frame(kind):
     g.rect(2, 2, CW - 4, 11, band)
     g.rect(2, 12, CW - 4, 1, band_sh)
     # recessed art window
-    g.rect(3, 15, AW + 2, AH + 2, "plum")
-    g.rect(3, 15, AW + 2, 1, "ink")
-    g.rect(4, 16, AW, AH, "tan")
+    g.rect(ART_X - 1, ART_Y - 1, AW + 2, AH + 2, "plum")
+    g.rect(ART_X - 1, ART_Y - 1, AW + 2, 1, "ink")
+    g.rect(ART_X, ART_Y, AW, AH, "tan")
     return g
 
 
-LW, LH = 2 * CW, 2 * CH
+LW, LH = 2 * LBW, 2 * LBH
 
 
 def card_frame_large(kind):
@@ -83,7 +90,7 @@ def card_frame_large(kind):
     chrome's lines and lip are 2px."""
     g = Grid(LW, LH)
     band, band_sh = BANDS[kind]
-    small = chrome(Grid(CW, CH), 0, 0, CW, CH).px
+    small = chrome(Grid(LBW, LBH), 0, 0, LBW, LBH).px
     for y in range(LH):
         for x in range(LW):
             g.px[y][x] = small[y // 2][x // 2]
@@ -981,9 +988,11 @@ def mock_card(kind, key, large=False):
     scale = 2 if large else 1
     im = to_image((card_frame_large if large else card_frame)(kind).px)
     cost = to_image(card_cost().px)
-    im.paste(cost.resize((cost.width * scale, cost.height * scale), Image.NEAREST), (6 * scale, 121 * scale))
+    badge, at = ((6, 121), (4, 16)) if large else ((BADGE_X, BADGE_Y), (ART_X, ART_Y))
+    im.paste(cost.resize((cost.width * scale, cost.height * scale), Image.NEAREST),
+             (badge[0] * scale, badge[1] * scale))
     art = ILLUSTRATIONS[key]().img
-    im.paste(art.resize((AW * scale, AH * scale), Image.NEAREST), (4 * scale, 16 * scale))
+    im.paste(art.resize((AW * scale, AH * scale), Image.NEAREST), (at[0] * scale, at[1] * scale))
     bg = Image.new("RGB", im.size, sn.rgb("dbrown"))
     bg.paste(im, (0, 0), im)
     return bg

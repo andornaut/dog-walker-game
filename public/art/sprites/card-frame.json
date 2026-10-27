@@ -1,18 +1,18 @@
 { "frames": {
    "card-frame 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 83, "h": 140 },
+    "frame": { "x": 0, "y": 0, "w": 112, "h": 153 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 140 },
-    "sourceSize": { "w": 83, "h": 140 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 153 },
+    "sourceSize": { "w": 112, "h": 153 },
     "duration": 1000
    },
    "card-frame 1.aseprite": {
-    "frame": { "x": 83, "y": 0, "w": 83, "h": 140 },
+    "frame": { "x": 112, "y": 0, "w": 112, "h": 153 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 140 },
-    "sourceSize": { "w": 83, "h": 140 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 153 },
+    "sourceSize": { "w": 112, "h": 153 },
     "duration": 1000
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "card-frame.png",
   "format": "RGBA8888",
-  "size": { "w": 166, "h": 140 },
+  "size": { "w": 224, "h": 153 },
   "scale": "1",
   "frameTags": [
    { "name": "encounter", "from": 0, "to": 0, "direction": "forward" },

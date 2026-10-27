@@ -220,7 +220,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `card-<encounter>-<option>`   | image  | 75×56   |                      | One per option of the encounters and lucky encounters                     |
 | `card-<upgrade>`, `card-skip` | image  | 75×56   |                      | One per upgrade (6), and the Walk on by option Hall pass adds             |
 | `card-cost`                   | image  | 71×13   |                      | Cost plaque, at 2× on the large frame                                     |
-| `card-frame`                  | sprite | 83×140  | `encounter`, `route` | The game draws `encounter` for an obstacle and `route` for a fork         |
+| `card-frame`                  | sprite | 112×153 | `encounter`, `route` | The game draws `encounter` for an obstacle and `route` for a fork         |
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`      | Tap-to-enlarge view                                                       |
 | `card-zone-<zone>`            | image  | 75×56   |                      | A fork's path card: the zone's road to a cross street, its scenery beyond |
 
