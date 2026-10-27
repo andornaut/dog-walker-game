@@ -89,8 +89,8 @@ def lucky_collar(g):
         g.ell(cx, cy, 1.6, 1.6, "green")
 
 
-def dog_whistle(g):
-    """The dog whistle: a silver sports whistle side on, lit white along its top, its mouthpiece
+def whistle(g):
+    """The whistle: a silver sports whistle side on, lit white along its top, its mouthpiece
     running right with an ink slot on top, a dred paw stamped on the barrel, and three cyan sound
     lines fanning up from the slot."""
     g.ell(13, 20, 9, 8, "lgrey", "grey", "white")
@@ -108,7 +108,7 @@ def dog_whistle(g):
 
 
 ICONS = {
-    "dog-whistle": dog_whistle,
+    "whistle": whistle,
     "fanny-pack": fanny_pack,
     "hall-pass": hall_pass,
     "running-shoes": running_shoes,

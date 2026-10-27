@@ -454,8 +454,8 @@ def rush_hour():
 
 # The gear, after its 32x32 item art in icons.py.
 
-def gear_dog_whistle():
-    """The dog whistle without its sound lines, which blur together at 16x16."""
+def gear_whistle():
+    """The whistle without its sound lines, which blur together at 16x16."""
     g = Grid(16, 16)
     g.ell(6.5, 11, 5.5, 4.8, "lgrey", "grey", "white")
     g.rect(6, 7, 10, 4, "lgrey")
@@ -706,8 +706,8 @@ def sweet_talker20():
     return g
 
 
-def gear_dog_whistle20():
-    """The dog whistle: a silver sports whistle side on with an ink slot, a dred paw on the barrel and
+def gear_whistle20():
+    """The whistle: a silver sports whistle side on with an ink slot, a dred paw on the barrel and
     three cyan sound lines fanning up from the slot."""
     g = Grid(20, 20)
     g.ell(8, 13.5, 7, 6, "lgrey", "grey", "white")
@@ -880,7 +880,7 @@ IMAGES = {
     "icon-upgrade-raincoats": raincoats,
     "icon-upgrade-rush-hour": rush_hour,
     "icon-upgrade-sweet-talker": sweet_talker,
-    "icon-gear-dog-whistle": gear_dog_whistle,
+    "icon-gear-whistle": gear_whistle,
     "icon-gear-fanny-pack": gear_fanny_pack,
     "icon-gear-lucky-collar": gear_lucky_collar,
     "icon-gear-hall-pass": gear_hall_pass,
@@ -895,7 +895,7 @@ IMAGES = {
     "icon-upgrade-raincoats-20": raincoats20,
     "icon-upgrade-rush-hour-20": rush_hour20,
     "icon-upgrade-sweet-talker-20": sweet_talker20,
-    "icon-gear-dog-whistle-20": gear_dog_whistle20,
+    "icon-gear-whistle-20": gear_whistle20,
     "icon-gear-fanny-pack-20": gear_fanny_pack20,
     "icon-gear-lucky-collar-20": gear_lucky_collar20,
     "icon-gear-hall-pass-20": gear_hall_pass20,

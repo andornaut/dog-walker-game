@@ -4555,14 +4555,6 @@
       "png": "images/icon-fired.png"
     },
     {
-      "key": "icon-gear-dog-whistle",
-      "png": "images/icon-gear-dog-whistle.png"
-    },
-    {
-      "key": "icon-gear-dog-whistle-20",
-      "png": "images/icon-gear-dog-whistle-20.png"
-    },
-    {
       "key": "icon-gear-fanny-pack",
       "png": "images/icon-gear-fanny-pack.png"
     },
@@ -4593,6 +4585,14 @@
     {
       "key": "icon-gear-running-shoes-20",
       "png": "images/icon-gear-running-shoes-20.png"
+    },
+    {
+      "key": "icon-gear-whistle",
+      "png": "images/icon-gear-whistle.png"
+    },
+    {
+      "key": "icon-gear-whistle-20",
+      "png": "images/icon-gear-whistle-20.png"
     },
     {
       "key": "icon-help",
@@ -4759,10 +4759,6 @@
       "png": "images/icon-zoomies.png"
     },
     {
-      "key": "item-dog-whistle",
-      "png": "images/item-dog-whistle.png"
-    },
-    {
       "key": "item-fanny-pack",
       "png": "images/item-fanny-pack.png"
     },
@@ -4777,6 +4773,10 @@
     {
       "key": "item-running-shoes",
       "png": "images/item-running-shoes.png"
+    },
+    {
+      "key": "item-whistle",
+      "png": "images/item-whistle.png"
     },
     {
       "key": "logo",
