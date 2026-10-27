@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { PART_INSET } from "../layout/packFormation";
+import { itemAt } from "../lib/arrays";
 import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { hitDog } from "../runner/collision";
@@ -214,9 +215,9 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 
 // For each way an obstacle moves, at both ends of every draw that varies it (its speed, the
 // delays before its moves, a stalker's second-step share, a dart's tilt and where it turns back
-// or stops), a dart that turns back or stops crossing once, turning and stopping, every place the
-// planner may put it, on the
-// first zone's road and the last's, and every way a stalker may choose its steps:
+// or stops), a dart that turns back or stops crossing once, turning and stopping, places the
+// planner may put it spread across all of them, on the first zone's road and the last's, and every
+// way a stalker may choose its steps:
 // - it moves only while ahead of the pack's rows: no step, hop or dart starts once it has
 //   reached them, a stalker never steps up the road and a hopper never hops down it;
 // - the bot reads it as the walk's collision has it, for a pack standing in each lane. A lane
@@ -374,7 +375,16 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       ),
     ),
   );
-  // The walk a case is placed on, and every place the planner may put its mover there.
+  // A hopper that hops its most times has thousands of places, which repeat the same checks, so
+  // a case checks at most PLACES of them, spread evenly from the first to the last.
+  const PLACES = 200;
+  const spread = <T>(items: readonly T[]): readonly T[] =>
+    items.length <= PLACES
+      ? items
+      : Array.from({ length: PLACES }, (_, i) =>
+          itemAt(items, Math.round((i * (items.length - 1)) / (PLACES - 1))),
+        );
+  // The walk a case is placed on, and the places the planner may put its mover there.
   const placedCase = (mover: Omit<(typeof cases)[number], "lift"> & { lift?: number }) => {
     const run = testState(
       { biscuit: 3, duchess: 3, snowball: 3 },
@@ -408,7 +418,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       mover.draws,
       mover.lift,
     );
-    return { geometry, placements, run, speed };
+    return { geometry, placements: spread(placements), run, speed };
   };
   it.each(cases)("moves ahead of the pack and is read as it hits: $name", (mover) => {
     const { geometry, placements, run, speed } = placedCase(mover);
