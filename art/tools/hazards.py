@@ -66,57 +66,61 @@ from road import SCALE, SQUIRREL_FUR, face_disc, face_front, lean, lit  # noqa: 
 # ---------- squirrel-dash: side view, facing right ----------
 
 # A bounding gallop, one dict per frame: body lift, body stretch, front and hind paw positions
-# (x, y of the paw's top-left pixel) and the tail tip's offset as it streams.
+# (x, y of the paw's top-left pixel) and the tail tip's offset as it streams. Laid out small, as road.squirrel
+# is: a design unit is 1.5px at full size, so thirds land on whole pixels.
 SQUIRREL_RUN = [
-    dict(dy=0, st=-1, front=(18, 26), hind=(13, 26), tail=(0, 0)),     # gathered: all four paws under
-    dict(dy=-1, st=1, front=(25, 23), hind=(7, 26), tail=(-1, 1)),     # hind push off, front reaching
-    dict(dy=-2, st=1, front=(26, 24), hind=(3, 22), tail=(-1, 2)),     # flight, stretched out
-    dict(dy=-1, st=0, front=(23, 26), hind=(9, 23), tail=(0, 1)),      # front paws land, hind swing in
+    dict(dy=0, st=-2 / 3, front=(17 + 1 / 3, 26 + 2 / 3), hind=(14, 26 + 2 / 3), tail=(0, 0)),  # gathered
+    dict(dy=-2 / 3, st=2 / 3, front=(21 + 1 / 3, 24 + 2 / 3), hind=(10 + 2 / 3, 26 + 2 / 3),
+         tail=(-2 / 3, 2 / 3)),                                                                # hind push off
+    dict(dy=-4 / 3, st=2 / 3, front=(22, 25 + 1 / 3), hind=(8, 24), tail=(-2 / 3, 4 / 3)),         # flight
+    dict(dy=-2 / 3, st=0, front=(20 + 2 / 3, 26 + 2 / 3), hind=(11 + 1 / 3, 24 + 2 / 3),
+         tail=(0, 2 / 3)),                                                                     # front lands
 ]
 # Waiting at the road's edge: crouched with all four paws under, the plume flicking forward and back.
-SQUIRREL_IDLE = [dict(SQUIRREL_RUN[0], st=0), dict(SQUIRREL_RUN[0], st=0, tail=(-1, 1))]
+SQUIRREL_IDLE = [dict(SQUIRREL_RUN[0], st=0), dict(SQUIRREL_RUN[0], st=0, tail=(-2 / 3, 2 / 3))]
 
 
-def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Grid):
-    """Toronto's black squirrel in road.SQUIRREL_FUR, lit by LIT's rim. new makes the grid: a Grid at full size, or
-    a minis.Mini for a depth variant."""
+def squirrel_dash(dy=0, st=0, front=(17 + 1 / 3, 26 + 2 / 3), hind=(14, 26 + 2 / 3), tail=(0, 0), new=Grid):
+    """Toronto's black squirrel in road.SQUIRREL_FUR, lit by LIT's rim, small beside the pack as road.squirrel
+    is. new makes the grid: a Grid at full size, or a minis.Mini for a depth variant."""
     f = SQUIRREL_FUR
     g = edged(new())
     tx, ty = tail
+    u = 2 / 3
     # far legs: a shade darker, a step behind the near ones
-    g.rect(hind[0] + 2, hind[1] - 1, 3, 2, f["shade"])
-    g.rect(front[0] - 2, front[1] - 1, 2, 2, f["shade"])
+    g.rect(hind[0] + 2 * u, hind[1] - u, 2, 2 * u, f["shade"])
+    g.rect(front[0] - 2 * u, front[1] - u, 2 * u, 2 * u, f["shade"])
     # tail: a big plume streaming back and up from the rump, its tip curling over
-    g.cel(9.5 + tx / 2, 15 + dy + ty / 2, 3.5, 3.5, f["fur"], f["shade"])
-    g.cel(7 + tx, 9 + dy + ty, 4.8, 5.5, f["fur"], f["shade"], f["lit"])
-    g.cel(7.5 + tx, 10 + dy + ty, 2.5, 3.5, f["streak"])
-    g.cel(10.5 + tx, 4.5 + dy + ty, 3.5, 2.5, f["fur"], f["shade"], f["lit"])
+    g.cel(12 + tx / 2, 21 + dy + ty / 2, 2.2, 2.2, f["fur"], f["shade"])
+    g.cel(14.6 + tx, 15.6 + dy + ty, 1, 1, f["fur"], f["shade"])
+    g.cel(12.6 + tx, 14.6 + dy + ty, 2.4, 1.5, f["fur"], f["shade"], f["lit"])
+    g.cel(10.2 + tx, 17.4 + dy + ty, 3, 3.5, f["fur"], f["shade"], f["lit"])
+    g.cel(10.5 + tx, 18 + dy + ty, 1.5, 2.1, f["streak"])
     # hind leg: haunch, then a long foot
     hx, hy = hind
-    for k in range(6):
-        t = k / 5
-        g.rect(round(11 + (hx - 11) * t), round(21 + dy + (hy - 21 - dy) * t), 2, 2, f["fur"])
-    g.rect(hx, hy, 3, 2, f["fur"])
-    g.rect(hx, hy + 1, 3, 1, f["shade"])
-    # body
-    g.cel(15, 20 + dy, 6.5 + st, 4.5, f["fur"], f["shade"], f["lit"])
-    g.cel(11, 20 + dy, 3.5, 4, f["fur"], f["shade"], f["lit"])
-    g.cel(16.5, 22.5 + dy, 3.5, 1.5, f["belly"])
-    # front leg: a thin arm from the chest to the paw
-    fx, fy = front
     for k in range(5):
         t = k / 4
-        g.rect(round(20 + (fx - 20) * t), round(22 + dy + (fy - 22 - dy) * t), 2, 2, f["fur"])
-    g.rect(fx, fy, 2, 2, f["fur"])
-    g.p(fx + 1, fy + 1, f["shade"])
+        g.rect(13 + (hx - 13) * t, 23.6 + dy + (hy - 23.6 - dy) * t, 2 * u, 2 * u, f["fur"])
+    g.rect(hx, hy, 2, 2 * u, f["fur"])
+    g.rect(hx, hy + u, 2, u, f["shade"])
+    # body
+    g.cel(13.2, 23 + dy, 2.4, 2.8, f["fur"], f["shade"], f["lit"])
+    g.cel(15.6, 23 + dy, 4 + st, 3.1, f["fur"], f["shade"], f["lit"])
+    g.cel(16.6, 24.8 + dy, 2.2, 1, f["belly"])
+    # front leg: a thin arm from the chest to the paw
+    fx, fy = front
+    for k in range(4):
+        t = k / 3
+        g.rect(18.7 + (fx - 18.7) * t, 24.4 + dy + (fy - 24.4 - dy) * t, 2 * u, 2 * u, f["fur"])
+    g.rect(fx, fy, 2 * u, 2 * u, f["fur"])
+    g.rect(fx + u, fy + u, u, u, f["shade"])
     # head: round, a lighter cheek, a tufted ear, a big eye with a white glint and a grey nose
-    g.tri((20, 12 + dy), (21.5, 7.5 + dy), (23.5, 11.5 + dy), f["fur"])
-    g.p(21, 10 + dy, f["shade"])
-    g.cel(24, 15.5 + dy, 5, 4.5, f["fur"], f["shade"], f["lit"])
-    g.cel(25.5, 18 + dy, 3, 1.5, f["belly"])
-    g.rect(25, 13 + dy, 2, 2, "ink")
-    g.p(25, 13 + dy, "white")
-    g.p(29, 15 + dy, f["nose"])
+    g.tri((18.6, 18.6 + dy), (19.5, 16.4 + dy), (20.9, 18.2 + dy), f["fur"])
+    g.cel(21.3, 20.6 + dy, 3.1, 2.8, f["fur"], f["shade"], f["lit"])
+    g.cel(22.3, 22.1 + dy, 1.9, 0.9, f["belly"])
+    g.rect(21 + 1 / 3, 18 + 2 / 3 + dy, 2 * u, 2 * u, "ink")
+    g.rect(21 + 1 / 3, 18 + 2 / 3 + dy, u, u, "white")
+    g.rect(24, 20 + dy, u, u, f["nose"])
     lit(g)
     return g
 

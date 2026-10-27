@@ -8180,7 +8180,7 @@
       "json": "sprites/squirrel.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 28
+        "opaqueWidth": 21
       }
     },
     {
@@ -8189,7 +8189,7 @@
       "json": "sprites/squirrel-dash.json",
       "anchor": {
         "feetY": 42,
-        "opaqueWidth": 44
+        "opaqueWidth": 28
       }
     },
     {
@@ -8198,7 +8198,7 @@
       "json": "sprites/squirrel-dash@50.json",
       "anchor": {
         "feetY": 21,
-        "opaqueWidth": 22
+        "opaqueWidth": 14
       }
     },
     {
@@ -8207,7 +8207,7 @@
       "json": "sprites/squirrel-dash@56.json",
       "anchor": {
         "feetY": 24,
-        "opaqueWidth": 25
+        "opaqueWidth": 16
       }
     },
     {
@@ -8216,7 +8216,7 @@
       "json": "sprites/squirrel-dash@62.json",
       "anchor": {
         "feetY": 27,
-        "opaqueWidth": 28
+        "opaqueWidth": 18
       }
     },
     {
@@ -8225,7 +8225,7 @@
       "json": "sprites/squirrel-dash@69.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 30
+        "opaqueWidth": 19
       }
     },
     {
@@ -8234,7 +8234,7 @@
       "json": "sprites/squirrel-dash@75.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 33
+        "opaqueWidth": 21
       }
     },
     {
@@ -8243,7 +8243,7 @@
       "json": "sprites/squirrel-dash@81.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 35
+        "opaqueWidth": 23
       }
     },
     {
@@ -8252,7 +8252,7 @@
       "json": "sprites/squirrel-dash@88.json",
       "anchor": {
         "feetY": 37,
-        "opaqueWidth": 38
+        "opaqueWidth": 25
       }
     },
     {
@@ -8261,7 +8261,7 @@
       "json": "sprites/squirrel-dash@94.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 41
+        "opaqueWidth": 26
       }
     },
     {
@@ -8270,7 +8270,7 @@
       "json": "sprites/squirrel@50.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 14
+        "opaqueWidth": 11
       }
     },
     {
@@ -8279,7 +8279,7 @@
       "json": "sprites/squirrel@56.json",
       "anchor": {
         "feetY": 25,
-        "opaqueWidth": 16
+        "opaqueWidth": 12
       }
     },
     {
@@ -8288,7 +8288,7 @@
       "json": "sprites/squirrel@62.json",
       "anchor": {
         "feetY": 28,
-        "opaqueWidth": 18
+        "opaqueWidth": 13
       }
     },
     {
@@ -8297,7 +8297,7 @@
       "json": "sprites/squirrel@69.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 19
+        "opaqueWidth": 14
       }
     },
     {
@@ -8306,7 +8306,7 @@
       "json": "sprites/squirrel@75.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 21
+        "opaqueWidth": 16
       }
     },
     {
@@ -8315,7 +8315,7 @@
       "json": "sprites/squirrel@81.json",
       "anchor": {
         "feetY": 36,
-        "opaqueWidth": 22
+        "opaqueWidth": 17
       }
     },
     {
@@ -8324,7 +8324,7 @@
       "json": "sprites/squirrel@88.json",
       "anchor": {
         "feetY": 39,
-        "opaqueWidth": 25
+        "opaqueWidth": 18
       }
     },
     {
@@ -8333,7 +8333,7 @@
       "json": "sprites/squirrel@94.json",
       "anchor": {
         "feetY": 42,
-        "opaqueWidth": 26
+        "opaqueWidth": 19
       }
     },
     {

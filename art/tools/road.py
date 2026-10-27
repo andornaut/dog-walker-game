@@ -837,51 +837,72 @@ SQUIRREL_FUR = dict(fur="navy", shade="ink", lit="slate", streak="dslate", belly
                     foot="navy", nose="grey")
 
 
+# The squirrel is laid out small on the 32x32 animal grid, so at SCALE its body (head to feet, without the
+# tail) stands about 20px, under the smallest dog's: a design unit is 1.5px, so lengths in thirds land on whole
+# pixels. SQUIRREL_EYE is each eye's side and SQUIRREL_EYE_SPREAD each eye centre's distance from the head's
+# centre column, both 2px at full size; minis.squirrel_head draws the eyes from them at every depth step.
+SQUIRREL_EYE = 4 / 3
+SQUIRREL_EYE_SPREAD = 4 / 3
+
+
+def squirrel_tail(g, x, y, rx, ry, sway=0):
+    """The squirrel's bushy tail, standing ry above and below (x, y): a narrower stem rising from behind the body
+    into a plume rx wide at the top, its tip flicked out, with a lighter streak down its core, so it reads apart
+    from the darker body in front of it. sway moves the plume sideways and leaves the stem on the body."""
+    f = SQUIRREL_FUR
+    g.cel(x - 0.5, y + 0.4 * ry, rx - 1, 0.6 * ry, f["fur"], f["shade"], f["lit"])
+    x += sway
+    g.cel(x, y - 0.3 * ry, rx, 0.7 * ry, f["fur"], f["shade"], f["lit"])
+    g.cel(x + rx - 0.6, y - 0.8 * ry, 1.4, 1.2, f["fur"], f["shade"], f["lit"])
+    g.cel(x + 0.2, y - 0.2 * ry, rx - 1.8, 0.7 * ry - 1.6, f["streak"])
+
+
 def squirrel(tail=0):
-    """The squirrel sitting up facing the player, a front elevation: its bushy tail curls up behind its
-    right side, the body sits upright with its paws held at its chest and its hind feet planted. tail
-    swishes the tail's tip 1px right. The road outline and LIT's rim."""
+    """The squirrel sitting up facing the player, a front elevation: its bushy tail rises behind its
+    right side and curls over at the top, the body sits upright with its paws held at its chest and its hind
+    feet planted. tail swishes the tail 1px right. The road outline and LIT's rim."""
     f = SQUIRREL_FUR
     g = edged(Grid())
-    t = tail
-    # the tail, rising from the base behind the body and curling over at the top
-    g.cel(21 + t, 15, 5.5, 9, f["fur"], f["shade"], f["lit"])
-    g.cel(18 + t, 6.5, 5, 3.5, f["fur"], f["shade"], f["lit"])
-    g.cel(21 + t, 15.5, 2.5, 6, f["streak"])
+    squirrel_tail(g, 21.3, 20, 3, 6.5, tail)
     # body, sitting up, with a lighter belly; hind feet either side
-    g.cel(15, 21.5, 5.5, 6.5, f["fur"], f["shade"], f["lit"])
-    g.cel(15, 22.5, 3, 4.5, f["belly"])
-    for x in (10, 17):
-        g.rect(x, 27, 4, 2, f["foot"])
+    g.cel(16, 25.2, 3.5, 3.8, f["fur"], f["shade"], f["lit"])
+    g.cel(16, 26, 1.5, 2, f["belly"])
+    for x in (12 + 2 / 3, 17 + 1 / 3):
+        g.rect(x, 28, 2, 4 / 3, f["foot"])
     # paws held together at the chest
-    g.rect(13, 19, 4, 2, f["paw"])
-    squirrel_head(g, 15, 12.5)
+    g.rect(14 + 2 / 3, 23 + 1 / 3, 2 + 2 / 3, 4 / 3, f["paw"])
+    squirrel_head(g, 16, 19 + 1 / 3)
     return rim(g, LIT)
 
 
 def squirrel_head(g, x, y):
-    """The squirrel's head facing the player, centred on (x, y), with its ears and face."""
+    """The squirrel's head facing the player, its eyes' centres on row y and either side of column x, with
+    its ears, an ink chin line parting it from the body, and its face."""
     f = SQUIRREL_FUR
-    g.tri((x - 4, y - 1.5), (x - 3.5, y - 6), (x - 1, y - 3), f["fur"])
-    g.tri((x + 4, y - 1.5), (x + 3.5, y - 6), (x + 1, y - 3), f["fur"])
-    g.cel(x, y, 4.5, 4, f["fur"], f["shade"], f["lit"])
-    g.cel(x, y + 2, 2.5, 1.5, f["belly"])
-    # round eyes, each with a glint a quarter of its size at the top-left, so they read as two bright eyes
-    for ex in (x - 2, x + 2):
-        g.cel(ex, y + 0.5, 1.15, 1.15, "ink")
-        g.rect(ex - 0.9, y - 0.4, 0.95, 0.95, "white")
-    g.rect(x - 1, y + 1.5, 2, 1, f["nose"])
+    g.tri((x - 3, y - 0.7), (x - 2.3, y - 3.3), (x - 0.9, y - 2), f["fur"])
+    g.tri((x + 3, y - 0.7), (x + 2.3, y - 3.3), (x + 0.9, y - 2), f["fur"])
+    g.cel(x, y + 0.3 + 2 / 3, 3.1, 2.6, f["shade"])
+    g.cel(x, y + 0.3, 3.1, 2.6, f["fur"], f["shade"], f["lit"])
+    g.cel(x, y + 1.6, 1.6, 1, f["belly"])
+    # square eyes, each with a glint a quarter of its size at the top-left, so they read as two bright eyes
+    e = SQUIRREL_EYE
+    for d in (-1, 1):
+        ex = x + d * SQUIRREL_EYE_SPREAD - e / 2
+        g.rect(ex, y - e / 2, e, e, "ink")
+        g.rect(ex, y - e / 2, e / 2, e / 2, "white")
+    g.rect(x - 2 / 3, y + 4 / 3, 4 / 3, 2 / 3, f["nose"])
 
 
 # The squirrel's bound, landing first: (body y, head y, tail (x, y, rx, ry), front paws (left x, right x, y,
-# height)). The head's y stays sitting's 12.5 plus whole steps of 2, so its eyes raster alike every frame. It lands stretched low and wide with its tail streaming up behind, crouches to push off with its
-# tail swinging over, flies gathered 3px higher with its paws tucked under its chin and its tail arched, then
+# height)). The head's y stays sitting's plus whole steps of 2px (4/3), so its eyes raster alike every frame.
+# It lands stretched low and wide with its tail streaming up behind, crouches to push off with its tail
+# swinging over, flies gathered 2px higher with its paws tucked under its chin and its tail arched, then
 # reaches down for the next landing.
 SQUIRREL_BOUND = (
-    (22, 18.5, (22, 14, 5, 7), (8, 21, 26, 3)),
-    (21, 16.5, (21.5, 11.5, 5, 6.5), (9, 20, 25.5, 3)),
-    (19, 14.5, (20, 9, 5, 6), (11, 17, 24, 2)),
-    (20.5, 16.5, (21, 11, 5, 6.5), (9.5, 19.5, 25, 3)),
+    (25.3, 23 + 1 / 3, (21.8, 20, 3, 5.6), (12, 18 + 2 / 3, 27 + 2 / 3, 4 / 3)),
+    (24.7, 22, (21.6, 18.8, 3, 5.6), (12 + 2 / 3, 18, 27 + 1 / 3, 4 / 3)),
+    (23.4, 20 + 2 / 3, (21, 17.3, 3, 5.4), (13 + 1 / 3, 17 + 1 / 3, 26, 4 / 3)),
+    (24.3, 22, (21.4, 18.6, 3, 5.6), (12 + 1 / 3, 18 + 1 / 3, 27, 4 / 3)),
 )
 
 
@@ -891,20 +912,15 @@ def squirrel_run(phase):
     f = SQUIRREL_FUR
     g = edged(Grid())
     by, hy, (tx, ty, trx, try_), (lx, rx, py, ph) = SQUIRREL_BOUND[phase]
-    low = (by - 19) / 3
-    g.cel(tx, ty, trx, try_, f["fur"], f["shade"], f["lit"])
-    g.cel(tx, ty + 0.5, 2.5, try_ - 2.5, f["streak"])
-    cx = 15 + low
-    g.cel(cx, by, 5.5 + 1.5 * low, 5 - 0.5 * low, f["fur"], f["shade"], f["lit"])
-    g.cel(cx, by + 1, 3 + 0.5 * low, 3 - 0.5 * low, f["belly"])
+    low = (by - 23.4) / 1.9
+    squirrel_tail(g, tx, ty, trx, try_)
+    g.cel(16, by, 3.6 + low, 3.4 - 0.3 * low, f["fur"], f["shade"], f["lit"])
+    g.cel(16, by + 0.7, 1.5 + 0.3 * low, 1.8 - 0.3 * low, f["belly"])
     # the paws reach up into the body, so no gap opens under it; the head stays on the sitting squirrel's
-    # column and its rows a whole 2 apart, so at road.SCALE its round eyes and glints keep one shape
-    top = math.floor(by + 5 - 0.5 * low) - 1
+    # column and its rows 2px apart, so at road.SCALE its square eyes and glints keep one shape
     for x in (lx, rx):
-        g.rect(x, min(py, top), 3, py + ph - min(py, top), f["foot"])
-        if ph > 2:
-            g.rect(x, py + ph - 1, 3, 1, f["lit"])
-    squirrel_head(g, 15, hy)
+        g.rect(x, min(py, by), 2, py + ph - min(py, by), f["foot"])
+    squirrel_head(g, 16, hy)
     return rim(g, LIT)
 
 

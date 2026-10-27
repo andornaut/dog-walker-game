@@ -325,18 +325,17 @@ class Faceless:
 
 def squirrel_head(full, s, g, x, y):
     """road.squirrel_head on the Mini g without its face, then the face at the small size: scaled, the eyes
-    and nose merge into one dark row. Each eye is 2 x s square, rounded, ink with a white glint at its
-    top-left when it is 2px, centred where it is at full size; the nose fills the gap between them on
-    the row under them."""
+    and nose merge into one dark row. Each eye is road.SQUIRREL_EYE x s square, ink with a white glint at its
+    top-left (a 1px eye is all glint, so the dark face keeps its two bright eyes), centred where it is at full
+    size; the nose fills the gap between them on the row under them."""
     full(Faceless(g, ("ink", "white", road.SQUIRREL_FUR["nose"])), x, y)
-    n = max(1, scaled(2, s))
-    top = math.floor((y + 0.5) * s + 0.5 - n / 2)
-    left, right = (math.floor((x + d) * s + 0.5 - n / 2) for d in (-2, 2))
+    n = max(1, scaled(road.SQUIRREL_EYE, s))
+    top = math.floor(y * s + 0.5 - n / 2)
+    left, right = (math.floor((x + d * road.SQUIRREL_EYE_SPREAD) * s + 0.5 - n / 2) for d in (-1, 1))
     for x0 in (left, right):
         g.g.rect(x0, top, n, n, "ink")
-        if n > 1:
-            g.g.p(x0, top, "white")
-    g.g.rect(left + n, top + n, right - left - n, 1, road.SQUIRREL_FUR["nose"])
+        g.g.p(x0, top, "white")
+    g.g.rect(left + n, top + n, max(1, right - left - n), 1, road.SQUIRREL_FUR["nose"])
 
 
 def squirrel(s, draw, *args, **q):
