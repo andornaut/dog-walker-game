@@ -35,11 +35,15 @@
       "frames": 6,
       "ringAboveStar": 5,
       "starRows": {
+        "capybara": 48,
         "droppedCone": 48,
+        "fishCrates": 46,
         "otherDog": 46,
+        "porchCat": 43,
         "promoTeam": 43,
         "skunk": 38,
-        "thief": 48
+        "thief": 48,
+        "weddingShoot": 43
       }
     },
     "dodge": {

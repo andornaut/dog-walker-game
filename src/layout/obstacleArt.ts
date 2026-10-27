@@ -30,7 +30,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "chase-rabbit": { above: 36, left: -19, right: 17 },
   "clothing-rack": { above: 44, left: -24, right: 24 },
   cone: { above: 34, left: -14, right: 14 },
-  couple: { above: 62, left: -37, right: 36 },
+  couple: { above: 65, left: -37, right: 36 },
   coyote: { above: 31, left: -24, right: 22 },
   cyclist: { above: 67, left: -20, right: 20 },
   "delivery-cyclist": { above: 69, left: -20, right: 20 },
