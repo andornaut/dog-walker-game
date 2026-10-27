@@ -85,7 +85,7 @@ export const TUNING = {
       dogSlot2: 2000,
       dogSlot3: 2000,
       duchess: 150,
-      fannyPack: 600,
+      fannyPack: 500,
       hallPass: 800,
       kilo: 300,
       luckyCollar: 2000,
