@@ -143,7 +143,7 @@ describe("movers", { timeout: 120_000 }, () => {
     "barrier2",
     "barrier3",
     "bench",
-    "bin",
+    "trashCan",
     "cone",
     "hedge",
     "puddle",

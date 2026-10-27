@@ -44,7 +44,7 @@ describe("parseManifest", () => {
         name: "a path with a dot segment and dotted file names",
         pick: (m) => m.images,
       },
-      ...["bin@50", "dog-kilo@62", "dog-kilo@75", "parked-car@88"].map((key) => ({
+      ...["trash-can@50", "dog-kilo@62", "dog-kilo@75", "parked-car@88"].map((key) => ({
         expected: key,
         manifest: keyed(key),
         name: `the depth step key ${key}`,
@@ -101,7 +101,14 @@ describe("parseManifest", () => {
         manifest: { ...valid, images: [{ key: "Card_Frame", png: "images/card-frame.png" }] },
         name: "a key that is not kebab-case",
       },
-      ...["bin@25", "bin@33", "bin@63", "bin@", "bin@88@50", "bin@100"].map((key) => ({
+      ...[
+        "trash-can@25",
+        "trash-can@33",
+        "trash-can@63",
+        "trash-can@",
+        "trash-can@88@50",
+        "trash-can@100",
+      ].map((key) => ({
         error: "kebab-case",
         manifest: keyed(key),
         name: `the key ${key}, which is not a depth step`,

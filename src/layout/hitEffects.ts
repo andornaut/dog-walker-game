@@ -7,7 +7,7 @@ import type { Point } from "../lib/rect";
 // A plain hit is on a standing obstacle; a moving hit is on a mover.
 export type HitKind = "moving" | "plain";
 type Debris = "leaves" | "litter";
-// How a struck obstacle moves: a cone rocks and tips over, a bin rocks back upright, and a wide
+// How a struck obstacle moves: a cone rocks and tips over, a trash can rocks back upright, and a wide
 // obstacle shakes sideways.
 type ObstacleMotion = "rock" | "shake" | "tip";
 
@@ -33,9 +33,9 @@ export const OBSTACLE_HITS: Readonly<
   barrier2: { motion: "shake" },
   barrier3: { motion: "shake" },
   bench: { motion: "shake" },
-  bin: { debris: "litter", motion: "rock" },
   cone: { motion: "tip" },
   hedge: { debris: "leaves", motion: "shake" },
+  trashCan: { debris: "litter", motion: "rock" },
 };
 
 // One effect over the road: its art, centred at a point, drawn this many steps over the fx

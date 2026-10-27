@@ -948,15 +948,6 @@
       "spriteKey": "bench"
     },
     {
-      "id": "bin",
-      "name": "Bin",
-      "shape": {
-        "lanes": 1,
-        "rows": 1
-      },
-      "spriteKey": "bin"
-    },
-    {
       "id": "bunny",
       "movement": {
         "kind": "hop",
@@ -1292,6 +1283,15 @@
         "rows": 1
       },
       "spriteKey": "stroller"
+    },
+    {
+      "id": "trashCan",
+      "name": "Bin",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "trash-can"
     }
   ],
   "tuning": {
@@ -1628,7 +1628,6 @@
           "barrier2": 3.5,
           "barrier3": 3.5,
           "bench": 3.5,
-          "bin": 3.5,
           "bunny": 2,
           "car": 0,
           "cat": 1.8,
@@ -1652,7 +1651,8 @@
           "scooter": 0,
           "seagull": 0,
           "streetcar": 0,
-          "stroller": 2
+          "stroller": 2,
+          "trashCan": 3.5
         },
         "obstacles": {
           "otherDog": 1.1,
@@ -1696,7 +1696,6 @@
           "barrier2": 0,
           "barrier3": 0,
           "bench": 8,
-          "bin": 8,
           "bunny": 4,
           "car": 0,
           "cat": 0,
@@ -1720,7 +1719,8 @@
           "scooter": 0,
           "seagull": 0,
           "streetcar": 0,
-          "stroller": 3
+          "stroller": 3,
+          "trashCan": 8
         },
         "obstacles": {
           "otherDog": 2.2,
@@ -1764,7 +1764,6 @@
           "barrier2": 3,
           "barrier3": 3,
           "bench": 3,
-          "bin": 3,
           "bunny": 0,
           "car": 2,
           "cat": 1.2,
@@ -1788,7 +1787,8 @@
           "scooter": 2,
           "seagull": 0,
           "streetcar": 2,
-          "stroller": 2
+          "stroller": 2,
+          "trashCan": 3
         },
         "obstacles": {
           "otherDog": 1.1,
@@ -1832,7 +1832,6 @@
           "barrier2": 3.75,
           "barrier3": 3.75,
           "bench": 7.5,
-          "bin": 3.75,
           "bunny": 0,
           "car": 2,
           "cat": 1.2,
@@ -1856,7 +1855,8 @@
           "scooter": 3,
           "seagull": 0,
           "streetcar": 2,
-          "stroller": 4
+          "stroller": 4,
+          "trashCan": 3.75
         },
         "obstacles": {
           "otherDog": 1.1,
@@ -1900,7 +1900,6 @@
           "barrier2": 3.75,
           "barrier3": 3.75,
           "bench": 3.75,
-          "bin": 3.75,
           "bunny": 2,
           "car": 0,
           "cat": 0,
@@ -1924,7 +1923,8 @@
           "scooter": 2,
           "seagull": 2.4,
           "streetcar": 0,
-          "stroller": 2
+          "stroller": 2,
+          "trashCan": 3.75
         },
         "obstacles": {
           "otherDog": 2.2,
@@ -1968,7 +1968,6 @@
           "barrier2": 0,
           "barrier3": 0,
           "bench": 6,
-          "bin": 6,
           "bunny": 2,
           "car": 5,
           "cat": 1.8,
@@ -1992,7 +1991,8 @@
           "scooter": 2,
           "seagull": 1.2,
           "streetcar": 2,
-          "stroller": 2
+          "stroller": 2,
+          "trashCan": 6
         },
         "obstacles": {
           "otherDog": 1.1,

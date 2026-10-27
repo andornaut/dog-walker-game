@@ -132,7 +132,7 @@ describe("popsOf", () => {
       popped: {
         bump: true,
         dog: "kilo",
-        item: item("bin"),
+        item: item("trashCan"),
         value: value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]),
       },
     },

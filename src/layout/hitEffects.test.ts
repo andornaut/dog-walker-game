@@ -43,7 +43,12 @@ describe("hit effects", () => {
     for (const [, kind, obstacle, keys] of [
       ["a barrier", "plain", "barrier3", [HIT_ART.bump.key]],
       ["a bench", "plain", "bench", [HIT_ART.bump.key]],
-      ["a bin, with litter", "plain", "bin", [HIT_ART.bump.key, HIT_ART.debris.litter.key]],
+      [
+        "a trash can, with litter",
+        "plain",
+        "trashCan",
+        [HIT_ART.bump.key, HIT_ART.debris.litter.key],
+      ],
       ["a cone", "plain", "cone", [HIT_ART.bump.key]],
       ["a hedge, with leaves", "plain", "hedge", [HIT_ART.bump.key, HIT_ART.debris.leaves.key]],
       ["a standing hazard", "plain", STANDING_HAZARD ?? null, [HIT_ART.bump.key]],
@@ -74,7 +79,7 @@ describe("hit effects", () => {
   it.each<[string, HitKind, MinorObstacleId | null, string[], "tipped" | "upright"]>([
     ["a barrier shakes sideways", "plain", "barrier2", ["dx"], "upright"],
     ["a bench shakes sideways", "plain", "bench", ["dx"], "upright"],
-    ["a bin rocks back upright", "plain", "bin", ["angle"], "upright"],
+    ["a trash can rocks back upright", "plain", "trashCan", ["angle"], "upright"],
     ["a cone rocks and stays tipped", "plain", "cone", ["angle"], "tipped"],
     ["a hedge shakes sideways", "plain", "hedge", ["dx"], "upright"],
     ["a standing hazard keeps still", "plain", STANDING_HAZARD ?? null, [], "upright"],
@@ -128,7 +133,7 @@ describe("hit effects with reduced motion", () => {
 
   it.each<[HitKind, MinorObstacleId]>([
     ["moving", "car"],
-    ["plain", "bin"],
+    ["plain", "trashCan"],
     ["plain", "cone"],
     ["plain", "hedge"],
   ])("keeps a %s %s still, with no road shake or dog reaction", (kind, obstacle) => {

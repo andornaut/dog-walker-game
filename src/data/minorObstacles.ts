@@ -19,7 +19,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 3, rows: 1 },
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
-  bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   bunny: {
     movement: { kind: "hop", most: 2, shy: true, times: { max: 5, min: 2 } },
     name: "Bunny",
@@ -124,4 +123,5 @@ export const MINOR_OBSTACLES = {
     name: "Stroller",
     shape: { lanes: 1, rows: 1 },
   },
+  trashCan: { name: "Bin", shape: { lanes: 1, rows: 1 } },
 } as const satisfies Record<string, MinorObstacle>;

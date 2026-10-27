@@ -21,7 +21,6 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "barrier-2": { above: 35, left: -56, right: 56 },
   "barrier-3": { above: 35, left: -88, right: 88 },
   bench: { above: 34, left: -55, right: 55 },
-  bin: { above: 40, left: -14, right: 14 },
   "chase-cat": { above: 32, left: -10, right: 13 },
   "chase-ducklings": { above: 25, left: -19, right: 19 },
   "chase-pigeons": { above: 31, left: -19, right: 19 },
@@ -54,6 +53,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   streetcar: { above: 65, left: -28, right: 28 },
   stroller: { above: 60, left: -23, right: 24 },
   thief: { above: 67, left: -17, right: 23 },
+  "trash-can": { above: 40, left: -14, right: 14 },
 };
 
 // Whether a sprite is drawn, judged by the table: the art the game loads has a silhouette, so
