@@ -46,7 +46,7 @@ export const DOGS = {
     look: "Large and sturdy, gray and white, blue eyes, harness",
     name: "Koda",
     owner: {
-      name: "Jesse",
+      name: "Jason",
       role: "trail runner",
     },
     price: "koda",
@@ -59,7 +59,7 @@ export const DOGS = {
     look: "Fawn, black mask, tiny bandana",
     name: "Nugget",
     owner: {
-      name: "Kevin",
+      name: "Ralph",
       role: "pet influencer",
     },
     price: "nugget",
@@ -85,7 +85,7 @@ export const DOGS = {
     look: "Black coat, a white stripe from head to tail tip, show-clip pom-poms",
     name: "Pepe",
     owner: {
-      name: "Ms. Lefevre",
+      name: "Ms. Tara",
       role: "dog-show judge",
     },
     price: "pierre",
@@ -96,9 +96,9 @@ export const DOGS = {
     art: "snowball",
     breed: "Great Pyrenees",
     look: "Giant white fluff, collar with a bell",
-    name: "Snowy",
+    name: "Sequoia",
     owner: {
-      name: "Tiffany",
+      name: "Judy",
       role: "wedding planner",
     },
     price: "snowball",

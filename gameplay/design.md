@@ -30,14 +30,14 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Walkers:** Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
 - **Owners** (each with 2 lines for each of happier, upset, fired and parting):
   - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
-  - **Jesse** (Koda): laid-back runner, fitness talk (form, personal bests, shake it off)
-  - **Kevin** (Nugget): influencer, everything is content (feed, trending, followers)
+  - **Jason** (Koda): laid-back runner, fitness talk (form, personal bests, shake it off)
+  - **Judy** (Sequoia): wedding planner, everything rides on today, picture perfect or disaster
   - **Kiwi** (Archie): unflappable grandmother, "dear" and "pet", offers cookies and tea
-  - **Ms. Lefevre** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
+  - **Ralph** (Nugget): influencer, everything is content (feed, trending, followers)
   - **Rosa** (Duchess): retired florist, theatrical, flower metaphors and exclamation marks
   - **Sam** (Biscuit): easygoing barista, coffee puns, calls you "friend"
   - **Sheba** (Zippy): retired accountant, dry, ledgers, receipts and red ink
-  - **Tiffany** (Snowy): wedding planner, everything rides on today, picture perfect or disaster
+  - **Ms. Tara** (Pepe): dog-show judge, curt and formal, scores and deductions, a little French
 
 ## Rules
 
@@ -112,7 +112,7 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
 - Every card hits the whole pack. No card opens without a collision, except the fork card. A hit that opens a card costs nothing until you choose
 - Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Duchess, −1♥ Koda", not "−1♥ each"). A perk, gear item or upgrade that changes an option shows its charm centered just under that option's card, the enlarged card included, never on the card, so the card keeps its full text box. The card row (title, cards and charms) rises to the 2/3 line of the walk view. Choices only, no minigames
 - A money option shows its price on its plate, grayed out when you can't afford it, so cash never goes below $0; every card keeps at least one option that costs no money, and its plate is blank. Money options are charged once per card, whatever the pack size; heart options cost each owner, so a bigger pack has more owners who can fire you. Slower options cost money (missed tips) instead of time
-- An option says what it would do before you pick: a debuff option states its stake ("Quick rinse → Stinky: tips pay nothing for 30s"), an option that would fire an owner says so ("Fires Jesse"), and a heart Second chance would forgive reads as safe
+- An option says what it would do before you pick: a debuff option states its stake ("Quick rinse → Stinky: tips pay nothing for 30s"), an option that would fire an owner says so ("Fires Jason"), and a heart Second chance would forgive reads as safe
 - A fork's path card shows its upgrade's duration (Now, Next neighborhood, Rest of walk) where other cards show a price
 - A card shows at most 3 options. Hall pass offers "Skip (Hall pass)" (a free option that skips the card) on every card until it's used in that neighborhood; the skip replaces the option that costs the most hearts when a card already has 3 (the most expensive of those if they tie). Sweet talker and Hall pass can both apply to the same card: its money options are free and the skip is offered, and the player chooses; Sweet talker is used up by that card whichever option is picked
 - After a card choice, each owner whose hearts changed reacts with a quip in the message strip
