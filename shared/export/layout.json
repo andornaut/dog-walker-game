@@ -120,31 +120,31 @@
     "parts": {
       "dogFace": {
         "x": 8,
-        "y": 28
+        "y": 25
       },
       "empty": {
         "x": 60,
-        "y": 35
+        "y": 33
       },
       "fired": {
         "x": 24,
-        "y": 41
+        "y": 38
       },
       "hearts": {
         "perRow": 6,
         "pitch": 9,
         "x": 45,
-        "y": 55
+        "y": 52
       },
       "lead": {
         "x": 10,
-        "y": 57
+        "y": 54
       },
       "name": {
         "room": 108,
         "tops": {
-          "1": 7,
-          "2": 5
+          "1": 6,
+          "2": 4
         },
         "x": 60
       },
@@ -152,38 +152,38 @@
         "face": {
           "size": 20,
           "x": 47,
-          "y": 28
+          "y": 25
         },
         "room": 41,
         "tops": {
-          "oneLine": 35,
+          "oneLine": 32,
           "twoLines": [
-            30,
-            40
+            27,
+            37
           ]
         },
         "x": 72
       },
       "size": {
-        "height": 74,
+        "height": 70,
         "width": 120
       }
     },
     "slots": [
       {
-        "height": 74,
+        "height": 70,
         "width": 120,
         "x": 0,
         "y": 486
       },
       {
-        "height": 74,
+        "height": 70,
         "width": 120,
         "x": 120,
         "y": 486
       },
       {
-        "height": 74,
+        "height": 70,
         "width": 120,
         "x": 240,
         "y": 486
@@ -202,19 +202,19 @@
         "height": 24,
         "width": 116,
         "x": 2,
-        "y": 534
+        "y": 530
       },
       {
         "height": 24,
         "width": 116,
         "x": 122,
-        "y": 534
+        "y": 530
       },
       {
         "height": 24,
         "width": 116,
         "x": 242,
-        "y": 534
+        "y": 530
       }
     ],
     "ownerTabs": {
@@ -950,26 +950,26 @@
       "y": 48
     },
     "dogRow": {
-      "height": 78,
+      "height": 74,
       "width": 360,
       "x": 0,
       "y": 482
     },
     "dogSlots": [
       {
-        "height": 74,
+        "height": 70,
         "width": 120,
         "x": 0,
         "y": 486
       },
       {
-        "height": 74,
+        "height": 70,
         "width": 120,
         "x": 120,
         "y": 486
       },
       {
-        "height": 74,
+        "height": 70,
         "width": 120,
         "x": 240,
         "y": 486
@@ -1010,6 +1010,12 @@
       "width": 360,
       "x": 0,
       "y": 48
+    },
+    "zoneProgress": {
+      "height": 4,
+      "width": 360,
+      "x": 0,
+      "y": 556
     }
   },
   "roadSprites": {
@@ -2690,6 +2696,65 @@
           "y": 5
         }
       }
+    }
+  },
+  "zoneProgress": {
+    "fills": [
+      {
+        "colour": "yellow",
+        "height": 1,
+        "width": 0,
+        "x": 5,
+        "y": 557
+      },
+      {
+        "colour": "amber",
+        "height": 1,
+        "width": 0,
+        "x": 5,
+        "y": 558
+      }
+    ],
+    "frame": {
+      "height": 4,
+      "width": 352,
+      "x": 4,
+      "y": 556
+    },
+    "track": {
+      "height": 2,
+      "width": 350,
+      "x": 5,
+      "y": 557
+    },
+    "full": [
+      {
+        "colour": "yellow",
+        "height": 1,
+        "width": 350,
+        "x": 5,
+        "y": 557
+      },
+      {
+        "colour": "amber",
+        "height": 1,
+        "width": 350,
+        "x": 5,
+        "y": 558
+      }
+    ],
+    "look": {
+      "border": 1,
+      "colours": {
+        "border": "ink",
+        "fill": [
+          "yellow",
+          "amber"
+        ],
+        "strip": "plum",
+        "track": "darkSlate"
+      },
+      "inset": 4
     }
   }
 }

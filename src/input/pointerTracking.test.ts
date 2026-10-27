@@ -36,6 +36,7 @@ const screen: ScreenConfig = {
   roadWidth: 280,
   topBarHeight: 40,
   width: 360,
+  zoneProgressHeight: 0,
 };
 const LANES = 5;
 const LANE_WIDTH = 56;

@@ -27,6 +27,7 @@ const screen: ScreenConfig = {
   roadWidth: 280,
   topBarHeight: 40,
   width: 360,
+  zoneProgressHeight: 0,
 };
 const layout = screenLayout(screen);
 const QUIET = { height: 16, width: 360, x: 0, y: 40 };

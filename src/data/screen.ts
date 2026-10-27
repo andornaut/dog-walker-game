@@ -4,17 +4,20 @@ import { TUNING } from "./tuning";
 
 // Internal render resolution: portrait, scaled to the window without smoothing.
 // The backdrop band ends backdropHeight rows under the walk bar, and its bottom rows,
-// roadIntoBand, are the approach the backdrop paints; the camera derives from the band.
+// roadIntoBand, are the approach the backdrop paints; the camera derives from the band. The
+// neighbourhood's progress line takes the screen's last zoneProgressHeight rows: its borders
+// and a row per fill colour (ZONE_PROGRESS in src/hud/walkHud.ts).
 export const SCREEN_CONFIG: ScreenConfig = {
   backdropHeight: 158,
-  dogCardHeight: 74,
-  dogRowHeight: 78,
+  dogCardHeight: 70,
+  dogRowHeight: 74,
   dogSlotCount: 3,
   height: 560,
   roadIntoBand: 19,
   roadWidth: 320,
   topBarHeight: 48,
   width: 360,
+  zoneProgressHeight: 4,
 };
 
 export const LANE_COUNT = 5;

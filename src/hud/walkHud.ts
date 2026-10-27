@@ -3,15 +3,17 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId, GameData } from "../data/types";
 import type { ScreenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
-import { containsPoint, type Point, type Rect } from "../lib/rect";
+import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import { walkLength } from "../rules/route";
+import { zoneLength } from "../runner/walk";
+import type { RunState } from "../state/runState";
 import { maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
 // The walk screen's HUD: the walk bar (ui-walk-bar) across the top, a full-width bar per active
-// debuff under it, and a card per dog slot along the bottom. Every position is the art's, in
-// screen pixels from the bar's top-left corner, the debuff bar's or the card's; text y is the
-// top of the capitals.
+// debuff under it, a card per dog slot along the bottom and the neighbourhood's progress line
+// under the cards. Every position is the art's, in screen pixels from the bar's top-left
+// corner, the debuff bar's or the card's; text y is the top of the capitals.
 
 // The walk bar's buttons, left to right.
 export const WALK_BAR_BUTTONS = ["help", "sound", "settings", "pause"] as const;
@@ -160,6 +162,60 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
   return Math.round(DEBUFF_BAR.fill.width * share);
 }
 
+// The neighbourhood's progress line on the screen's last rows, under the dog cards (the
+// screen's zoneProgress strip): a track inset from the screen's left and right edges, in a
+// border on every side, and a fill that grows left to right in whole pixels with the share of
+// the neighbourhood walked, a row per fill colour, top to bottom. The strip is the borders and
+// the fill's rows tall, in the card band's body colour beside the line. Each colour is a PALETTE
+// name the scene draws it in.
+export const ZONE_PROGRESS = {
+  border: 1,
+  colours: {
+    border: "ink",
+    fill: ["yellow", "amber"],
+    strip: "plum",
+    track: "darkSlate",
+  },
+  inset: 4,
+} as const;
+
+type ZoneFillColour = (typeof ZONE_PROGRESS.colours.fill)[number];
+
+// The share of the neighbourhood walked, from 0 at its start to 1 where the walk ends it.
+export function zoneShare(
+  data: Pick<GameData, "tuning">,
+  run: Pick<RunState, "zoneDistance">,
+): number {
+  const length = zoneLength(data);
+  return length > 0 ? Math.min(1, Math.max(0, run.zoneDistance / length)) : 0;
+}
+
+interface ZoneProgressLayout {
+  // The line, its border included.
+  frame: Rect;
+  // The fill's rows, top to bottom, each in its fill colour.
+  fills: (Rect & { colour: ZoneFillColour })[];
+  track: Rect;
+}
+
+// The progress line in strip with share of the neighbourhood walked: the fill as wide as the
+// whole pixels of the track that share covers, so it is full only at the neighbourhood's end.
+export function zoneProgressLayout(strip: Rect, share: number): ZoneProgressLayout {
+  const { border, colours, inset } = ZONE_PROGRESS;
+  const frame = { ...strip, width: strip.width - 2 * inset, x: strip.x + inset };
+  const track = insetRect(border, frame);
+  const width = Math.floor(track.width * Math.min(1, Math.max(0, share)));
+  const rowHeight = track.height / colours.fill.length;
+  const fills = colours.fill.map((colour, i) => ({
+    colour,
+    height: rowHeight,
+    width,
+    x: track.x,
+    y: track.y + i * rowHeight,
+  }));
+  return { fills, frame, track };
+}
+
 // A dog card (ui-dog-card, the size of a slot in the card row). The name is centred on name.x
 // at the largest of its scales that fits name.room, its top by scale. The owner's photo heads
 // the column right of the dog's, their face (face.size square) at owner.face on every card with
@@ -169,16 +225,16 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
 // and FIRED is centred on fired.x across a fired dog's empty photo. An owned slot with no dog
 // shows "Empty" centred on empty.x in its outline.
 export const DOG_CARD = {
-  dogFace: { x: 8, y: 28 },
-  empty: { x: 60, y: 35 },
-  fired: { x: 24, y: 41 },
-  hearts: { perRow: 6, pitch: 9, x: 45, y: 55 },
-  lead: { x: 10, y: 57 },
-  name: { room: 108, tops: { 1: 7, 2: 5 }, x: 60 },
+  dogFace: { x: 8, y: 25 },
+  empty: { x: 60, y: 33 },
+  fired: { x: 24, y: 38 },
+  hearts: { perRow: 6, pitch: 9, x: 45, y: 52 },
+  lead: { x: 10, y: 54 },
+  name: { room: 108, tops: { 1: 6, 2: 4 }, x: 60 },
   owner: {
-    face: { size: 20, x: 47, y: 28 },
+    face: { size: 20, x: 47, y: 25 },
     room: 41,
-    tops: { oneLine: 35, twoLines: [30, 40] },
+    tops: { oneLine: 32, twoLines: [27, 37] },
     x: 72,
   },
   size: {

@@ -34,6 +34,8 @@ import {
   WALK_BAR,
   WALK_BAR_BUTTONS,
   walkBarLayout,
+  ZONE_PROGRESS,
+  zoneProgressLayout,
 } from "../hud/walkHud";
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
 import { COMIC_WORDS } from "../layout/comicWords";
@@ -239,6 +241,13 @@ export function layoutExport(
       debuffBar: DEBUFF_BAR,
       debuffBars: debuffBarRects(regions.topBar, 2),
       parts: WALK_BAR,
+    },
+    // The neighbourhood's progress line on the screen's last rows: its parts at the
+    // neighbourhood's start, its fill's rows at the end, and its look.
+    zoneProgress: {
+      ...zoneProgressLayout(regions.zoneProgress, 0),
+      full: zoneProgressLayout(regions.zoneProgress, 1).fills,
+      look: ZONE_PROGRESS,
     },
   };
 }

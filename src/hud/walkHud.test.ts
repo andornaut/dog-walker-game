@@ -14,7 +14,8 @@ import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { walkLength } from "../rules/route";
-import { cents, read } from "../rules/units";
+import { cents, pixels, read } from "../rules/units";
+import { zoneLength } from "../runner/walk";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { LONE } from "../testing/packPlaces";
@@ -43,7 +44,10 @@ import {
   WALK_BAR,
   WALK_BAR_BUTTONS,
   walkBarLayout,
+  ZONE_PROGRESS,
+  zoneProgressLayout,
   zoneProgressText,
+  zoneShare,
 } from "./walkHud";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -295,13 +299,65 @@ describe("the debuff bars", () => {
   });
 });
 
+describe("the neighbourhood's progress line", () => {
+  const strip = LAYOUT.zoneProgress;
+  const empty = zoneProgressLayout(strip, 0);
+  const { track } = empty;
+  const { border, colours, inset } = ZONE_PROGRESS;
+
+  it("fills the strip: its borders and a row per fill colour, inset from the sides", () => {
+    expect(strip.height).toBe(2 * border + colours.fill.length);
+    expect(empty.frame).toEqual({
+      height: strip.height,
+      width: strip.width - 2 * inset,
+      x: strip.x + inset,
+      y: strip.y,
+    });
+    expect(track).toEqual({
+      height: strip.height - 2 * border,
+      width: empty.frame.width - 2 * border,
+      x: empty.frame.x + border,
+      y: strip.y + border,
+    });
+  });
+
+  it("keeps the strip under every dog card", () => {
+    for (const slot of dogSlots) {
+      expect(rectsOverlap(slot, strip)).toBe(false);
+    }
+  });
+
+  const length = zoneLength(gameData);
+  it.each<[string, number, number]>([
+    ["empty at the neighbourhood's start", 0, 0],
+    ["half full half way", length / 2, 0.5],
+    ["full where the walk ends the neighbourhood", length, 1],
+    ["full past the end", length * 2, 1],
+  ])("is %s", (_name, distance, share) => {
+    expect(zoneShare(gameData, { zoneDistance: pixels(distance) })).toBe(share);
+  });
+
+  it.each<[string, number, number]>([
+    ["no pixels at the start", 0, 0],
+    ["the whole pixels half way covers", 0.5, Math.floor(track.width / 2)],
+    ["one pixel short just before the end", 1 - 1 / (2 * track.width), track.width - 1],
+    ["the whole track at the end", 1, track.width],
+  ])("grows its fill rows by %s", (_name, share, width) => {
+    const { fills } = zoneProgressLayout(strip, share);
+    expect(fills.map(({ colour }) => colour)).toEqual(colours.fill);
+    fills.forEach((fill, i) => {
+      expect(fill).toMatchObject({ height: 1, width, x: track.x, y: track.y + i });
+    });
+  });
+});
+
 describe("the dog cards", () => {
   it.each(dogSlots.map((slot, i) => [i, slot] as const))(
-    "places card %i at the card's size on the screen's bottom rows, side by side",
+    "places card %i at the card's size just over the progress line, side by side",
     (i, slot) => {
       expect({ height: slot.height, width: slot.width }).toEqual(DOG_CARD.size);
       expect(slot.x).toBe(i * DOG_CARD.size.width);
-      expect(slot.y + slot.height).toBe(SCREEN_CONFIG.height);
+      expect(slot.y + slot.height).toBe(LAYOUT.zoneProgress.y);
       expect(inside(slot, LAYOUT.dogRow)).toBe(true);
     },
   );

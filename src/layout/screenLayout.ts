@@ -13,10 +13,12 @@ export interface ScreenConfig {
   roadWidth: number;
   topBarHeight: number;
   width: number;
+  zoneProgressHeight: number;
 }
 
 // The whole screen (screen), and top to bottom, each across the full width: the walk bar
-// (topBar), the backdrop band, the road and the row of dog cards. dogSlots are the cards,
+// (topBar), the backdrop band, the road, the row of dog cards and the neighbourhood's progress
+// line (zoneProgress) on the screen's last zoneProgressHeight rows. dogSlots are the cards,
 // dogCardHeight tall on the row's bottom rows. roadView is the road as drawn, verges included;
 // road is its lanes, centred in it, which the walk, the lanes and the projection use. approach
 // is the band's bottom rows, where the backdrop paints the road's approach to its cross street:
@@ -35,6 +37,7 @@ export interface ScreenLayout {
   screen: Rect;
   topBar: Rect;
   walkView: Rect;
+  zoneProgress: Rect;
 }
 
 // The card row has a fixed number of equal slots, so the cards keep their place however many
@@ -42,7 +45,8 @@ export interface ScreenLayout {
 export function screenLayout(config: ScreenConfig): ScreenLayout {
   const { backdropHeight, dogRowHeight, dogSlotCount, height, roadWidth, width } = config;
   const roadY = config.topBarHeight + backdropHeight;
-  const dogRowY = height - dogRowHeight;
+  const zoneProgressY = height - config.zoneProgressHeight;
+  const dogRowY = zoneProgressY - dogRowHeight;
   const roadView = { height: dogRowY - roadY, width, x: 0, y: roadY };
   const slotWidth = width / dogSlotCount;
   const backdrop = { height: backdropHeight, width, x: 0, y: config.topBarHeight };
@@ -55,7 +59,7 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
       height: config.dogCardHeight,
       width: slotWidth,
       x: i * slotWidth,
-      y: height - config.dogCardHeight,
+      y: zoneProgressY - config.dogCardHeight,
     })),
     rasterView: { ...roadView, height: roadView.height + approach.height, y: approach.y },
     road: { ...roadView, width: roadWidth, x: (width - roadWidth) / 2 },
@@ -63,6 +67,7 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
     screen: { height, width, x: 0, y: 0 },
     topBar: { height: config.topBarHeight, width, x: 0, y: 0 },
     walkView: { ...roadView, height: dogRowY - backdrop.y, y: backdrop.y },
+    zoneProgress: { height: config.zoneProgressHeight, width, x: 0, y: zoneProgressY },
   };
 }
 

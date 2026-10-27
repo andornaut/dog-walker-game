@@ -10,10 +10,11 @@ describe("screenLayout", () => {
   });
 
   it("stacks the screen's parts down its height, every part touching the next", () => {
-    const { backdrop, dogRow, roadView, topBar } = screenLayout(SCREEN_CONFIG);
+    const { backdrop, dogRow, roadView, topBar, zoneProgress } = screenLayout(SCREEN_CONFIG);
     expect(backdrop.y).toBe(topBar.y + topBar.height);
     expect(roadView.y).toBe(backdrop.y + backdrop.height);
     expect(dogRow.y).toBe(roadView.y + roadView.height);
-    expect(dogRow.y + dogRow.height).toBe(SCREEN_CONFIG.height);
+    expect(zoneProgress.y).toBe(dogRow.y + dogRow.height);
+    expect(zoneProgress.y + zoneProgress.height).toBe(SCREEN_CONFIG.height);
   });
 });

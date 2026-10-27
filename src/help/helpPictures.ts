@@ -112,6 +112,9 @@ export const HELP_SCENES = {
     dogs: ["kilo", "archie", "duchess"],
     fired: "duchess",
     lane: 1,
+    // How far through the neighbourhood the walk is, which the progress line under the cards
+    // shows.
+    zoneFraction: 0.6,
   },
   pickups: {
     dogs: ["archie", "biscuit"],
@@ -286,7 +289,7 @@ function cards(data: GameData): HelpPicture {
 }
 
 function owners(data: GameData): HelpPicture {
-  const { bumped, dogs, fired, lane } = HELP_SCENES.owners;
+  const { bumped, dogs, fired, lane, zoneFraction } = HELP_SCENES.owners;
   const started = startRun(data, dogs);
   const hearts = (slot: PackSlot | undefined) => (slot?.status === "walking" ? slot.hearts : 0);
   const before = hearts(started.pack.find((slot) => slot.dog === bumped.dog));
@@ -309,7 +312,11 @@ function owners(data: GameData): HelpPicture {
     changes: [change],
     hud: true,
     strips: [{ height: HELP_PICTURE_HEIGHT, screenY: SCREEN_CONFIG.height - HELP_PICTURE_HEIGHT }],
-    walk: walkIn({ ...started, pack }, lane, []),
+    walk: walkIn(
+      { ...started, pack, zoneDistance: pixels(zoneLength(data) * zoneFraction) },
+      lane,
+      [],
+    ),
   };
 }
 

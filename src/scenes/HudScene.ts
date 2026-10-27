@@ -56,7 +56,10 @@ import {
   WALK_BAR_BUTTONS,
   type WalkBarButtonId,
   walkBarLayout,
+  ZONE_PROGRESS,
+  zoneProgressLayout,
   zoneProgressText,
+  zoneShare,
 } from "../hud/walkHud";
 import { screenLayout } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
@@ -183,10 +186,10 @@ interface DebuffBarView {
 // in view's strips, and takes no input or hints.
 export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } | { run: HudRun };
 
-// The walk bar, the debuff bars and the dog cards, drawn over the road for the whole walk and
-// kept in view while cards are up. It reads the run every frame and redraws what changed, and
-// shows the run's change labels, first-time hints, owners' pop-ins and what a held press
-// explains. It keeps running while the walk is paused, so the bar's buttons and their
+// The walk bar, the debuff bars, the dog cards and the neighbourhood's progress line, drawn over
+// the road for the whole walk and kept in view while cards are up. It reads the run every frame
+// and redraws what changed, and shows the run's change labels, first-time hints, owners'
+// pop-ins and what a held press explains. It keeps running while the walk is paused, so the bar's buttons and their
 // keys work in every state; its animations run on too, being the bar's and not the walk's,
 // except the walk's moments: while the player has paused, heart pops, change labels, owners'
 // pop-ins and the message strip's ageing hold.
@@ -215,6 +218,8 @@ export class HudScene extends Scene {
   private soundHolder: GameObjects.Container | undefined;
   private picture: HudWalk | undefined;
   private run: HudRun | undefined;
+  private zoneFill: GameObjects.Graphics | undefined;
+  private zoneFillWidth: number | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
   private zoneProgress: GameObjects.BitmapText | undefined;
 
@@ -229,7 +234,7 @@ export class HudScene extends Scene {
   }
 
   create(data: HudSceneData): void {
-    const { dogRow, dogSlots, topBar } = LAYOUT;
+    const { dogRow, dogSlots, topBar, zoneProgress } = LAYOUT;
     const picture = "picture" in data ? data.picture : undefined;
     this.picture = picture?.source;
     this.run = "run" in data ? data.run : undefined;
@@ -245,13 +250,21 @@ export class HudScene extends Scene {
     this.bankShowing = false;
     this.labels = new TimedGroup();
     const g = this.add.graphics();
-    // The card band ends on the screen's bottom row, its top rows (the shadow and the trim)
-    // over the road's last rows.
+    // The card band ends on the dog row's bottom row, its top rows (the shadow and the trim)
+    // over the road's last rows. The progress line's strip is under it, on the screen's last
+    // rows.
     if (this.textures.exists("ui-dog-card-band")) {
       this.add.image(dogRow.x, dogRow.y + dogRow.height, "ui-dog-card-band").setOrigin(0, 1);
     } else {
       fillRect(g, PALETTE.darkBrown, dogRow);
     }
+    const { colours } = ZONE_PROGRESS;
+    const line = zoneProgressLayout(zoneProgress, 0);
+    fillRect(g, PALETTE[colours.strip], zoneProgress);
+    fillRect(g, PALETTE[colours.border], line.frame);
+    fillRect(g, PALETTE[colours.track], line.track);
+    this.zoneFill = this.add.graphics();
+    this.zoneFillWidth = undefined;
     if (this.textures.exists("ui-walk-bar")) {
       this.add.image(topBar.x, topBar.y, "ui-walk-bar").setOrigin(0);
     } else {
@@ -492,6 +505,7 @@ export class HudScene extends Scene {
     const overlay = this.overlayScene();
     this.showExplanation(view, overlay);
     this.showDebuffBars(view.run);
+    this.showZoneProgress(view.run);
     const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
     // The strip's lines wait under an explanation's detail card.
     const aged = held || pause.hold ? 0 : delta;
@@ -588,6 +602,21 @@ export class HudScene extends Scene {
           y: bar.rect.y + fill.y,
         });
       }
+    }
+  }
+
+  // The progress line's fill, redrawn as it grows by a pixel or starts again.
+  private showZoneProgress(run: RunState): void {
+    const g = this.zoneFill;
+    const { fills } = zoneProgressLayout(LAYOUT.zoneProgress, zoneShare(gameData, run));
+    const width = fills[0]?.width ?? 0;
+    if (g === undefined || width === this.zoneFillWidth) {
+      return;
+    }
+    this.zoneFillWidth = width;
+    g.clear();
+    if (width > 0) {
+      fills.forEach((fill) => fillRect(g, PALETTE[fill.colour], fill));
     }
   }
 
