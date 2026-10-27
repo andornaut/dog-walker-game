@@ -428,7 +428,7 @@ def scratch(g, x, y, length):
     n = round(length)
     for k in range(n):
         bow = math.sin(math.pi * k / max(1, n - 1))
-        w = 3 if 2 <= k < n - 2 else 2 if 0 < k < n - 1 else 1
+        w = 2 if 1 < k < n - 2 else 1
         dots = [(i, 0, "pink" if i == 0 and w > 1 else "red") for i in range(w)]
         hits.dots(g, x - k * 0.45 - bow * 1.5, y + k, dots)
 
@@ -721,7 +721,7 @@ def capybara_keep_walking():
     c1 = a.put("dog-duchess", "walk", 41, 57, 1)
     a.lead(41, c1, 48)
     a.lead(63, c2, 56)
-    speed_lines(a, ((33, 44, 6), (49, 46, 5), (56, 38, 5), (70, 37, 4)), down=True)
+    speed_lines(a, ((27, 46, 6), (58, 48, 6), (68, 48, 5)), down=True)
     return a
 
 
