@@ -4,9 +4,8 @@
 The Beaches:
 dropped-cone        48x72   card obstacle (Dropped ice cream): a kid in a peach sundress with brown
                             pigtails looking down, sad, at her ice cream cone tipped on its side on the
-                            ground beside her, its strawberry scoop squashed into a pink puddle. walk (4
-                            frames, 100ms): road.PERSON_WALK; idle (2 frames, 400ms): a breath, a tear
-                            on her cheek on frame 1
+                            ground beside her, its strawberry scoop squashed into a pink puddle. She stands
+                            still. idle (2 frames, 400ms): a breath, a tear on her cheek on frame 1
 sandcastle          48x48   minor, 1 lane: a sandcastle of three bucket towers over a crenellated wall
                             and an arched door on a mound of sand, a red pennant on the middle tower,
                             shells pressed into the wall. idle (4 frames, 400ms): the pennant flutters
@@ -747,7 +746,6 @@ def sprites():
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         p, o, car = P * step, O * step, tuple(v * step for v in CAR)
         yield f"dropped-cone{suffix}", [
-            ("walk", [person(p, dropped_cone, **w).outlined() for w in PERSON_WALK], PERSON_WALK_MS),
             ("idle", [person(p, dropped_cone, bob=b, tear=k == 1).outlined() for k, b in enumerate(BREATH)],
              BREATH_MS)]
         yield f"promo-team{suffix}", [

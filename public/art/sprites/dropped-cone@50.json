@@ -5,42 +5,10 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
     "sourceSize": { "w": 24, "h": 36 },
-    "duration": 100
+    "duration": 400
    },
    "dropped-cone@50 1.aseprite": {
     "frame": { "x": 24, "y": 0, "w": 24, "h": 36 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
-    "sourceSize": { "w": 24, "h": 36 },
-    "duration": 100
-   },
-   "dropped-cone@50 2.aseprite": {
-    "frame": { "x": 48, "y": 0, "w": 24, "h": 36 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
-    "sourceSize": { "w": 24, "h": 36 },
-    "duration": 100
-   },
-   "dropped-cone@50 3.aseprite": {
-    "frame": { "x": 72, "y": 0, "w": 24, "h": 36 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
-    "sourceSize": { "w": 24, "h": 36 },
-    "duration": 100
-   },
-   "dropped-cone@50 4.aseprite": {
-    "frame": { "x": 96, "y": 0, "w": 24, "h": 36 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
-    "sourceSize": { "w": 24, "h": 36 },
-    "duration": 400
-   },
-   "dropped-cone@50 5.aseprite": {
-    "frame": { "x": 120, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
@@ -53,11 +21,10 @@
   "version": "1.2.30-x64",
   "image": "dropped-cone@50.png",
   "format": "RGBA8888",
-  "size": { "w": 144, "h": 36 },
+  "size": { "w": 48, "h": 36 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 5, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
   ]
  }
 }
