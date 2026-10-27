@@ -200,14 +200,14 @@ ARROW = ["...a...", "..aaa..", ".aaaaa.", "aaaaaaa", "..aaa..", "..aaa..", "..aa
 def skunk_grooming():
     a = Art()
     a.tiles_bg()
-    a.put("dog-biscuit", "walk", 37, 42, shadow=False)
+    a.put("dog-archie", "walk", 37, 42, shadow=False)
     a.fill(14, 34, 47, 3, "white")
     a.fill(16, 37, 43, 14, "white")
     a.fill(56, 37, 3, 14, "lgrey")
     a.fill(16, 50, 43, 1, "grey")
     a.fill(20, 51, 3, 3, "grey")
     a.fill(52, 51, 3, 3, "grey")
-    for x, y in ((18, 28), (24, 24), (52, 26), (58, 20), (30, 18), (46, 16)):
+    for x, y in ((16, 28), (19, 20), (23, 12), (54, 26), (57, 18), (52, 10)):
         a.fill(x, y, 3, 3, "white")
         a.fill(x + 1, y + 1, 1, 1, "cyan")
     return a
@@ -216,11 +216,11 @@ def skunk_grooming():
 def skunk_rinse():
     a = Art()
     a.grass()
-    a.put("dog-biscuit", "walk", 44, 50, 1)
+    a.put("dog-archie", "walk", 44, 50, 1)
     a.fill(0, 10, 16, 2, "dgreen")
     a.fill(16, 9, 3, 4, "grey")
     a.drops([(20 + k * 2, 11 + k + (k % 2)) for k in range(10)])
-    a.skunk_stink(50, 8)
+    a.skunk_stink(56, 8)
     return a
 
 
@@ -229,8 +229,8 @@ def skunk_ignore():
     a.ground("street")
     a.put("skunk", "idle", 18, 44)
     a.skunk_stink(30, 6, 2)
-    a.put("dog-kilo", "walk", 54, 40, 2)
-    a.skunk_stink(46, 4, 2)
+    a.put("dog-archie", "walk", 56, 50, 2)
+    a.skunk_stink(52, 0, 2)
     return a
 
 
@@ -242,20 +242,20 @@ def small_puddle(f=0):
 def other_dog_sniff():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "walk", 38, 36)
-    a.put("dog-biscuit", "walk", 38, 58)
-    a.hearts([(24, 6), (46, 4)])
+    a.put("other-dog", "walk", 46, 42)
+    a.put("dog-archie", "walk", 30, 58)
+    a.hearts([(6, 12), (14, 4), (25, 9)])
     return a
 
 
 def other_dog_pull_away():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "walk", 56, 36)
-    c = a.put("dog-biscuit", "pull", 22, 56, flip=True)
+    a.put("other-dog", "walk", 52, 44)
+    c = a.put("dog-archie", "pull", 22, 56, flip=True)
     a.lead(22, c, 6)
-    a.fill(59, 4, 2, 5, "red")
-    a.fill(59, 10, 2, 2, "red")
+    a.fill(70, 3, 2, 5, "red")
+    a.fill(70, 9, 2, 2, "red")
     return a
 
 
@@ -263,9 +263,9 @@ def thief_chase():
     a = Art()
     a.ground("street")
     a.put("thief", "flee", 54, 59, 1)
-    a.put("dog-kilo", "react", 22, 58)
-    a.fill(30, 12, 2, 5, "red")
-    a.fill(30, 18, 2, 2, "red")
+    a.put("dog-archie", "react", 22, 58)
+    a.fill(34, 12, 2, 5, "red")
+    a.fill(34, 18, 2, 2, "red")
     return a
 
 
@@ -329,7 +329,7 @@ def neighbour_take():
     raised instead: a mauve sleeve shaded purple in a plum outline, her hand on the dog's crown. Her
     floating heart sits above the art window, so it is left out here. Cut out to float over the road."""
     a = Art(clear=True)
-    a.put("dog-biscuit", "idle", 49, 57, shadow=False)
+    a.put("dog-archie", "idle", 47, 57, shadow=False)
     her = sn.frame("petting-neighbor", "wave", 1)
     her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
     top = 66 - her.height
@@ -391,44 +391,52 @@ def paw(g, x, y, col="white"):
 
 
 def rolled_over():
-    """Biscuit rolled onto its back: the body lies along the grass with the navy saddle down
-    and the white belly up, pink at its middle. The legs fold: the hind pair splay out at the
-    knee with the soles up, the front pair flop at the wrist, each white paw showing its pink
-    pads; the far leg of each pair is shaded. The tail wags along the grass at the left, the
-    head at the right faces the viewer, eyes shut in happy arcs and mouth open in a grin with
-    the tongue out, ears flopped on the grass. 50x36 with its outline; the collar's lower end
-    is at 32,28."""
+    """Archie rolled onto his back: the brown body lies along the grass, its back down in
+    dbrown, and the white belly up, pink at its middle. The legs fold: the hind pair splay out
+    at the knee with the soles up, the front pair flop at the wrist, copper at the top and white
+    below, each white paw showing its pink pads; the far leg of each pair is shaded. The bobtail
+    wags on the grass at the left, the head at the right faces the viewer with the white blaze
+    and muzzle and copper brows and cheeks, eyes shut in happy arcs and mouth open in a grin
+    with the tongue out, the rose ears flopped on the grass. The red bandana rings the neck,
+    its point lying on the white chest. 50x36 with its outline; the collar's lower end is at
+    32,28."""
     g = Grid(50, 36)
-    # tail, along the grass from the rump, white tipped
-    for i, (x, y) in enumerate(((8, 25), (6, 25), (4, 24), (3, 23), (2, 22))):
-        g.rect(x, y, 2, 2, "white" if i > 2 else "ochre")
+    # the bobtail, on the grass at the rump
+    g.ell(7.5, 24.5, 2.5, 2, "brown", "dbrown")
     # far legs first, shaded: a hind leg splayed at the knee and a front leg flopped at the wrist
-    limb(g, [(16, 17), (14, 11), (16, 7)], "rust")
+    limb(g, [(16, 17), (14, 11)], "rust")
+    limb(g, [(14, 11), (16, 7)], "lgrey")
     paw(g, 15, 2, "lgrey")
-    limb(g, [(25, 16), (23, 11), (26, 10)], "rust")
+    limb(g, [(25, 16), (23, 11)], "rust")
+    limb(g, [(23, 11), (26, 10)], "lgrey")
     paw(g, 25, 6, "lgrey")
     # the body, back down
-    g.ell(21, 22, 13, 6.5, "ochre", "rust")
-    g.ell(21, 27.5, 11, 2, "navy")
+    g.ell(21, 22, 13, 6.5, "brown", "dbrown")
+    g.ell(21, 27.5, 11, 2, "dbrown")
     g.ell(21.5, 18.5, 9, 3.2, "white", "lgrey")
     g.rect(19, 18, 4, 2, "pink")
     g.rect(20, 17, 2, 1, "pink")
     # near legs: the hind thigh out to the left, the shin back up to the sole; the front leg up
     # from the chest, the forearm flopped toward the head
-    limb(g, [(11, 19), (7, 13), (8, 8)], "ochre")
-    limb(g, [(8, 10), (8, 8)], "white")
+    limb(g, [(11, 19), (7, 13)], "ochre")
+    limb(g, [(7, 13), (8, 8)], "white")
     paw(g, 6, 3)
-    limb(g, [(29, 16), (29, 11), (32, 11)], "ochre")
-    limb(g, [(31, 11), (32, 11)], "white")
+    limb(g, [(29, 16), (29, 12)], "ochre")
+    limb(g, [(29, 12), (29, 11), (32, 11)], "white")
     paw(g, 32, 8)
-    # ears flopped on the grass either side of the head
-    g.ell(34, 26, 3, 5, "rust", "dbrown")
-    g.ell(44, 26, 3, 5, "rust", "dbrown")
-    # the head, facing the viewer
-    g.ell(39, 20, 7, 6.5, "ochre", "rust", "tan")
+    # rose ears flopped on the grass either side of the head
+    g.ell(33.5, 26, 2.5, 4, "dbrown", "plum")
+    g.ell(44.5, 26, 2.5, 4, "dbrown", "plum")
+    # the head, facing the viewer: the white blaze up the forehead into the white muzzle, copper
+    # brows and cheeks
+    g.ell(39, 20, 7, 6.5, "brown", "dbrown", "skin2")
     g.rect(38, 14, 2, 6, "white")
+    g.p(35, 17, "ochre")
+    g.p(42, 17, "ochre")
+    g.rect(33, 22, 2, 2, "ochre")
+    g.rect(44, 22, 2, 2, "ochre")
     g.ell(39, 23.5, 3.6, 2.6, "white", "lgrey")
-    g.rect(38, 21, 3, 1, "ink")
+    g.rect(38, 21, 3, 1, "plum")
     # eyes shut in happy arcs, curving up
     for x in (34, 41):
         g.p(x, 20, "ink")
@@ -440,9 +448,11 @@ def rolled_over():
     g.p(42, 23, "ink")
     g.rect(38, 25, 3, 3, "pink")
     g.p(39, 25, "red")
-    # collar between the head and the chest
-    g.rect(31, 15, 2, 12, "green")
-    g.rect(32, 15, 1, 12, "dgreen")
+    # the red bandana between the head and the chest, its point on the chest, the leash ring at its end
+    g.tri((31, 17), (31, 24), (27, 20.5), "red")
+    g.tri((31, 20.5), (31, 24), (27, 20.5), "dred")
+    g.rect(31, 15, 2, 12, "red")
+    g.rect(32, 15, 1, 12, "dred")
     g.p(32, 26, "amber")
     return to_image(g.outlined())
 
@@ -460,7 +470,7 @@ def belly_rubs():
     # kicking paws and a wriggling back, drawn as motion arcs
     kick(a, 15, 13, -1)
     kick(a, 51, 18, 1)
-    kick(a, 11, 30, -1)
+    kick(a, 14, 32, -1)
     # the leash runs from the collar off the bottom edge
     a.lead(44, 38, 52)
     a.hearts([(4, 4), (26, 2), (54, 4), (66, 18), (4, 44)])
@@ -471,7 +481,7 @@ def good_leash():
     a = Art()
     a.ground("park")
     a.put("squirrel", "idle", 60, 37)
-    c = a.put("dog-kilo", "walk", 30, 56, 1)
+    c = a.put("dog-archie", "walk", 30, 56, 1)
     a.lead(30, c, 24, 2)
     a.fill(29, c - 1, 3, 3, "amber")
     # tick: the chaser ignores the squirrel
@@ -502,15 +512,34 @@ def rush_hour():
     return a
 
 
+def raincoat():
+    """24x17, a yellow raincoat seen from behind, as a dog wears it: a coat over the back with its top
+    corners rounded and a straight hem, lit along its top and shaded down its right side and along the
+    hem, and the hood folded down at the nape over it, casting an orange line on the coat. In an
+    outline."""
+    g = Grid(24, 17)
+    for y, (x0, x1) in enumerate(((3, 20), (2, 21)) + ((1, 22),) * 11, 3):
+        g.rect(x0, y, x1 - x0 + 1, 1, "amber")
+    g.rect(3, 3, 18, 1, "yellow")
+    g.rect(2, 4, 1, 1, "yellow")
+    g.rect(21, 4, 2, 11, "orange")
+    g.rect(1, 15, 22, 1, "orange")
+    # the hood, folded down
+    for y, (x0, x1) in enumerate(((8, 15), (7, 16), (7, 16), (7, 16)), 1):
+        g.rect(x0, y, x1 - x0 + 1, 1, "amber")
+    g.rect(8, 1, 8, 1, "yellow")
+    g.rect(16, 2, 1, 3, "orange")
+    g.rect(7, 5, 10, 1, "orange")
+    return to_image(g.outlined())
+
+
 def raincoats():
+    """Archie in a yellow raincoat, standing in a puddle in the rain."""
     a = Art()
     a.ground("street")
-    a.paste(small_puddle(1), 22, 36)
-    a.put("dog-duchess", "walk", 37, 46, shadow=False)
-    a.fill(31, 34, 13, 8, "amber")
-    a.fill(31, 34, 13, 1, "yellow")
-    a.fill(42, 34, 2, 8, "orange")
-    a.fill(34, 31, 7, 3, "amber")
+    a.paste(small_puddle(1), 22, 38)
+    a.put("dog-archie", "walk", 37, 50, shadow=False)
+    a.paste(raincoat(), 25, 27)
     for x, y in ((6, 4), (16, 12), (26, 2), (54, 8), (64, 16), (12, 28), (60, 30), (48, 2)):
         a.fill(x, y, 1, 3, "cyan")
     return a
@@ -530,13 +559,13 @@ def sweet_talker():
 
 
 def skip():
-    """Walk on by: the skunk waits at the left while Duchess and Biscuit trot on past it up the street,
+    """Walk on by: the skunk waits at the left while Duchess and Archie trot on past it up the street,
     lgrey speed lines at their heels, and the Hall pass held up over them (glyphs.py's 20x20 icon)."""
     a = Art()
     a.ground("street")
     a.put("skunk", "idle", 13, 49)
     a.put("dog-duchess", "walk", 41, 55, 1)
-    a.put("dog-biscuit", "walk", 62, 49, 2)
+    a.put("dog-archie", "walk", 62, 49, 2)
     for x, y, h in ((33, 47, 6), (49, 48, 5), (55, 43, 5), (70, 42, 4)):
         a.fill(x, y, 1, h, "lgrey")
     a.paste(glyphs.image(glyphs.gear_hall_pass20), 30, 1)
