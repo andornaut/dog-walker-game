@@ -62,13 +62,13 @@ export const TUNING = {
   money: {
     // Added to each tip while Big tipper is on.
     bigTipperTipBonus: 1,
-    encounterHigh: 10,
-    encounterLow: 5,
+    encounterHigh: 16,
+    encounterLow: 10,
     fannyPackStart: 20,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
     lostWalletKeep: 20,
-    missedTips: 8,
+    missedTips: 10,
     // Each walking dog's pay for a zone, the same in every zone.
     payPerDog: 20,
     prices: {
@@ -91,7 +91,7 @@ export const TUNING = {
     },
     // The cash every walk starts with, before gear.
     startPurse: 0,
-    thiefLetGo: 10,
+    thiefLetGo: 16,
     tip: 1,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
