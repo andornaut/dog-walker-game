@@ -41,7 +41,7 @@ import { zoneStats } from "./zones";
 const tuning = {
   ...TEST_TUNING,
   counts: { ...TEST_TUNING.counts, longReachLanes: TUNING.counts.longReachLanes },
-  hearts: { ...TEST_TUNING.hearts, kindWordsForgiven: TUNING.hearts.kindWordsForgiven },
+  hearts: { ...TEST_TUNING.hearts, secondChanceForgiven: TUNING.hearts.secondChanceForgiven },
   multipliers: {
     ...TEST_TUNING.multipliers,
     quickRecoveryDebuffFactor: TUNING.multipliers.quickRecoveryDebuffFactor,
@@ -139,12 +139,12 @@ const sources = {
   fannyPack: { gear: "fannyPack", kind: "gear" },
   goodLeash: { kind: "upgrade", upgrade: "goodLeash" },
   hallPass: { gear: "hallPass", kind: "gear" },
-  kindWords: { kind: "walker", walker: walkerWith("kindWords") },
   longReach: { kind: "walker", walker: walkerWith("longReach") },
   luckyCollar: { gear: "luckyCollar", kind: "gear" },
   quickRecovery: { kind: "walker", walker: walkerWith("quickRecovery") },
   runningShoes: { gear: "runningShoes", kind: "gear" },
   rushHour: { kind: "upgrade", upgrade: "rushHour" },
+  secondChance: { kind: "walker", walker: walkerWith("secondChance") },
   sweetTalker: { kind: "upgrade", upgrade: "sweetTalker" },
   treatFinder: { kind: "walker", walker: walkerWith("treatFinder") },
 } as const satisfies Record<string, EffectSource>;
@@ -178,7 +178,7 @@ describe("a card option's modified values", () => {
     ],
     [
       "Second chance forgives the loss",
-      () => optionModified("thief", thiefHearts.index, runWith(walkerWith("kindWords"))),
+      () => optionModified("thief", thiefHearts.index, runWith(walkerWith("secondChance"))),
       [
         {
           after: 0,
@@ -188,7 +188,7 @@ describe("a card option's modified values", () => {
               amount: -thiefHearts.effect.amount,
               forgives: true,
               kind: "modifier",
-              source: sources.kindWords,
+              source: sources.secondChance,
             },
           ],
           subject: { dog: "duchess", kind: "hearts" },

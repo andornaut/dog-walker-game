@@ -7,7 +7,7 @@ export function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
   return {
     ...tuning,
     counts: { ...tuning.counts, longReachLanes: 0 },
-    hearts: { ...tuning.hearts, kindWordsForgiven: 0 },
+    hearts: { ...tuning.hearts, secondChanceForgiven: 0 },
     multipliers: {
       ...tuning.multipliers,
       quickRecoveryDebuffFactor: 1,

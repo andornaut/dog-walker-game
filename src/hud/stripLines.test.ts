@@ -112,13 +112,13 @@ describe("the strip's other lines", () => {
             icon: { kind: "perk", perk: gameData.walkers.casey.perk },
             marks: [
               {
-                at: strip.kindWords.indexOf("{owner}"),
+                at: strip.secondChance.indexOf("{owner}"),
                 dog: "kilo",
                 length: owner.length,
-                mood: STRIP_OWNER_MOODS.kindWords,
+                mood: STRIP_OWNER_MOODS.secondChance,
               },
             ],
-            text: fillNames(strip.kindWords, { owner }),
+            text: fillNames(strip.secondChance, { owner }),
           },
         ],
       ],

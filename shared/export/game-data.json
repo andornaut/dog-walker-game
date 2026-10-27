@@ -1321,7 +1321,6 @@
       "bump": 1,
       "faceHappyWithin": 1,
       "faceNeutralFrom": 2,
-      "kindWordsForgiven": 1,
       "luckyCollarMax": 1,
       "maxBySize": {
         "large": 4,
@@ -1334,6 +1333,7 @@
         "2": 1,
         "3": 0
       },
+      "secondChanceForgiven": 1,
       "treat": 1
     },
     "money": {
@@ -1561,7 +1561,7 @@
       "agility": 1.1,
       "greeting": "Nice pack! Mind if I walk with you sometime?",
       "name": "Casey",
-      "perk": "kindWords",
+      "perk": "secondChance",
       "portraitKey": "face-walker-casey",
       "spriteKey": "walker-casey",
       "unlock": "start"

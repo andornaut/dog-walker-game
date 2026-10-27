@@ -98,10 +98,10 @@ describe("resolveEffects: changes and their causes", () => {
 
   describe("Second chance", () => {
     const tuning = TUNING;
-    const allowance = read(tuning, "hearts", "kindWordsForgiven");
+    const allowance = read(tuning, "hearts", "secondChanceForgiven");
     const source = { kind: "walker", walker: "casey" } as const;
-    const kindWords = activeModifier(source, {
-      by: "kindWordsForgiven",
+    const secondChance = activeModifier(source, {
+      by: "secondChanceForgiven",
       operation: "add",
       stat: "forgivenHearts",
     });
@@ -116,7 +116,7 @@ describe("resolveEffects: changes and their causes", () => {
     it("forgives up to its allowance of a loss, reporting it when nothing is lost", () => {
       for (const loss of [1, 2] as const) {
         const forgiven = Math.min(loss, allowance);
-        const state = testState({ kilo: full }, { modifiers: [kindWords] });
+        const state = testState({ kilo: full }, { modifiers: [secondChance] });
         const applied = resolveEffects({ ...data, tuning }, context([]), [lose(loss)], state);
         expect(applied.changes).toEqual([
           {
@@ -135,7 +135,10 @@ describe("resolveEffects: changes and their causes", () => {
     });
 
     it("forgives no more once its allowance is used this zone", () => {
-      const used = testState({ kilo: full }, { heartsForgiven: allowance, modifiers: [kindWords] });
+      const used = testState(
+        { kilo: full },
+        { heartsForgiven: allowance, modifiers: [secondChance] },
+      );
       const { changes } = resolveEffects({ ...data, tuning }, context([]), [lose(1)], used);
       expect(changes.map((change) => change.causes.length)).toEqual([1]);
     });

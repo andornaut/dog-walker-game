@@ -5,13 +5,6 @@ import type { Walker, WalkerPerk } from "./types";
 // The art is icon-perk-<kebab id>. An effect line's {percent} is how far the multiplier the perk's
 // percent names is from 1, unsigned: 1.25 as "25%".
 export const WALKER_PERKS = {
-  kindWords: {
-    effect: "First ♥ lost each neighborhood is forgiven",
-    effects: [
-      { by: "kindWordsForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
-    ],
-    name: "Second chance",
-  },
   longReach: {
     effect: "Grabs tips and treats a lane to each side",
     effects: [
@@ -31,6 +24,13 @@ export const WALKER_PERKS = {
       },
     ],
     name: "Calm voice",
+  },
+  secondChance: {
+    effect: "First ♥ lost each neighborhood is forgiven",
+    effects: [
+      { by: "secondChanceForgiven", kind: "modifier", operation: "add", stat: "forgivenHearts" },
+    ],
+    name: "Second chance",
   },
   treatFinder: {
     effect: "Twice as many treats, {percent} more tips",
@@ -61,7 +61,7 @@ export const WALKERS = {
     agility: 1.1,
     greeting: "Nice pack! Mind if I walk with you sometime?",
     name: "Casey",
-    perk: "kindWords",
+    perk: "secondChance",
     portraitKey: "face-walker-casey",
     spriteKey: "walker-casey",
     unlock: "start",

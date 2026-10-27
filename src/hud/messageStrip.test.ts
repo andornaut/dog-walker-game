@@ -242,7 +242,7 @@ function everyStripLine(): FaceText[] {
     line("luckyWallet", { amount }),
     ...dogs.flatMap(({ dog, owner }) => [
       line("fired", { dog, owner }),
-      line("kindWords", { owner }),
+      line("secondChance", { owner }),
       line("lowHearts", { owner }),
       line("muddyHearts", { cost: String(muddyCost), hearts: String(muddyCost), owner }),
       line("pull", { dog }),

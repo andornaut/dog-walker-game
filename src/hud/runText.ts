@@ -8,13 +8,13 @@ export const STRIP_LINE_FIELDS = {
   effectStart: ["effect", "name"],
   fired: ["dog", "owner"],
   fullPackHome: ["amount"],
-  kindWords: ["owner"],
   largeDog: ["dog", "speed"],
   lowHearts: ["owner"],
   luckyWallet: ["amount"],
   muddyHearts: ["cost", "hearts", "owner"],
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],
+  secondChance: ["owner"],
   treat: ["dog", "hearts", "owner"],
 } as const;
 

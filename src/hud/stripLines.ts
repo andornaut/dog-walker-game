@@ -29,10 +29,10 @@ function line<K extends StripKey>(
 // on a heart loss, happy on a gain, neutral otherwise.
 export const STRIP_OWNER_MOODS = {
   fired: "upset",
-  kindWords: "neutral",
   lowHearts: "upset",
   muddyHearts: "upset",
   plainHit: "upset",
+  secondChance: "neutral",
   treat: "happy",
 } as const satisfies Partial<Record<StripKey, FaceMood>>;
 
@@ -92,7 +92,7 @@ export function forgivenLines(
         ? [data.walkers[cause.source.walker].perk]
         : [],
     )[0];
-    const said = ownerLine(data, "kindWords", change.dog, {});
+    const said = ownerLine(data, "secondChance", change.dog, {});
     return [{ icon: perk === undefined ? "hint" : { kind: "perk", perk }, ...said }];
   });
 }

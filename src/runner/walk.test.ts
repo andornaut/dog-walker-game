@@ -1101,7 +1101,7 @@ describe("stepWalk's modified values", () => {
   });
   const forgiving = withTuning((live) => ({
     ...live,
-    hearts: { ...live.hearts, kindWordsForgiven: TUNING.hearts.kindWordsForgiven },
+    hearts: { ...live.hearts, secondChanceForgiven: TUNING.hearts.secondChanceForgiven },
   }));
   const calming = withTuning((live) => ({
     ...live,
@@ -1155,7 +1155,7 @@ describe("stepWalk's modified values", () => {
     [
       "Second chance forgives a bump",
       forgiving,
-      meeting(walkerWith("kindWords"), atPack("cone")),
+      meeting(walkerWith("secondChance"), atPack("cone")),
       [
         {
           after: 0,
@@ -1165,7 +1165,7 @@ describe("stepWalk's modified values", () => {
               amount: bump,
               forgives: true,
               kind: "modifier",
-              source: { kind: "walker", walker: walkerWith("kindWords") },
+              source: { kind: "walker", walker: walkerWith("secondChance") },
             },
           ],
           subject: kilo,
@@ -1254,13 +1254,13 @@ describe("stepWalk's modified values", () => {
     [
       "counts one Second chance forgives",
       forgiving,
-      meeting(walkerWith("kindWords"), atPack("cone")),
+      meeting(walkerWith("secondChance"), atPack("cone")),
       1,
     ],
     [
       "counts a Muddy bump Second chance forgives only in part",
       forgiving,
-      meeting(walkerWith("kindWords"), atPack("cone"), debuffed("muddy")),
+      meeting(walkerWith("secondChance"), atPack("cone"), debuffed("muddy")),
       1,
     ],
   ] as const)("%s", (_, walkData, walk, landed) => {

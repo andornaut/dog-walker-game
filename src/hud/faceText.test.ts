@@ -79,7 +79,7 @@ const MOOD = { gain: "happy", loss: "upset", none: "neutral" } as const satisfie
 const PLACES: readonly (readonly [string, FaceText | null | undefined, keyof typeof MOOD])[] = [
   ["lowHearts", lowHeartsText(gameData, DOG), "loss"],
   ["strip.fired", firedLine(gameData, DOG), "loss"],
-  ["strip.kindWords", forgivenLines(gameData, [forgiven])[0], "none"],
+  ["strip.secondChance", forgivenLines(gameData, [forgiven])[0], "none"],
   ["strip.lowHearts", lowHeartsLines(gameData, [hearts(2, 1)])[0], "loss"],
   [
     "strip.muddyHearts",

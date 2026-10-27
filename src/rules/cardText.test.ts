@@ -79,11 +79,11 @@ describe("a card's text for the dogs it catches", () => {
   });
 
   describe("with Second chance", () => {
-    const kindWords = activeModifier(
+    const secondChance = activeModifier(
       { kind: "walker", walker: "casey" },
-      { by: "kindWordsForgiven", operation: "add", stat: "forgivenHearts" },
+      { by: "secondChanceForgiven", operation: "add", stat: "forgivenHearts" },
     );
-    const allowance = read(gameData.tuning, "hearts", "kindWordsForgiven");
+    const allowance = read(gameData.tuning, "hearts", "secondChanceForgiven");
     const forgiven = (dog: DogId) =>
       fillNames(gameData.runText.card.heartForgiven, { dog: gameData.dogs[dog].name, hearts: "1" });
 
@@ -98,7 +98,7 @@ describe("a card's text for the dogs it catches", () => {
       ] as const) {
         const kind = testState(
           { duchess: 5, kilo: 5 },
-          { heartsForgiven: used, modifiers: [kindWords] },
+          { heartsForgiven: used, modifiers: [secondChance] },
         );
         const source = encounter("thief", ["duchess", "kilo"]);
         const view = cardFor(gameData, kind, source).options.find(

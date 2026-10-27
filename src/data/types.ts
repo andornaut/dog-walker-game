@@ -757,7 +757,6 @@ export interface RunText {
     readonly effectStart: string;
     readonly fired: string;
     readonly fullPackHome: string;
-    readonly kindWords: string;
     // At a walk's start, for each large dog in the pack, which slows lane changes.
     readonly largeDog: string;
     readonly lowHearts: string;
@@ -767,6 +766,7 @@ export interface RunText {
     readonly muddyHearts: string;
     readonly plainHit: string;
     readonly pull: string;
+    readonly secondChance: string;
     readonly treat: string;
   };
   // The walk bar's place in the walk beside the neighborhood's name: the zone's number, n, of
