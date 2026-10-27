@@ -57,8 +57,13 @@ function pageFacts(): [string, string][] {
     ],
     [
       "the debuffs and their durations, as Help gives them",
-      `leaves the pack ${debuffs.muddy.name}, and a cheap way out can leave it ${debuffs.stinky.name} ` +
-        `or with the ${debuffs.zoomies.name}, each for ${helpBodyValues(gameData).debuffSeconds} seconds.`,
+      `leaves the pack ${debuffs.muddy.name}, and a cheap way out can bring ${debuffs.spotlight.name}, ` +
+        `${debuffs.stinky.name} or ${debuffs.zoomies.name}, each for ` +
+        `${helpBodyValues(gameData).debuffSeconds} seconds.`,
+    ],
+    [
+      "the Walk bonus",
+      `Bring every dog home for a ${helpBodyValues(gameData).walkBonus} Walk bonus`,
     ],
     ["the walkers' unlocks", `${walkers[defaultWalker].name} walks first; ${listed(unlocks)}.`],
   ];

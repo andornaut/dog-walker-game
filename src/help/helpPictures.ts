@@ -119,9 +119,12 @@ export const HELP_SCENES = {
   pickups: {
     dogs: ["archie", "biscuit"],
     lane: 2,
+    // Tips, a treat, a lucky find and a gear drop.
     pickups: [
       { distance: 270, kind: "tip", lane: 2 },
+      { distance: 240, kind: "lostWallet", lane: 1 },
       { distance: 210, kind: "tip", lane: 2 },
+      { distance: 170, kind: "runningShoes", lane: 3 },
       { distance: 150, kind: "tip", lane: 2 },
       { distance: 110, kind: "treat", lane: 1 },
     ],

@@ -16,6 +16,7 @@ export const HELP_BODY_FIELDS = [
   "smallHearts",
   "tip",
   "treatHearts",
+  "walkBonus",
   "walkLength",
   "world",
 ] as const;
@@ -45,6 +46,7 @@ export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, s
     smallHearts: hearts("small"),
     tip: formatDollars(read(tuning, "money", "tip")),
     treatHearts: String(read(tuning, "hearts", "treat")),
+    walkBonus: formatDollars(read(tuning, "money", "walkBonus")),
     walkLength: String(world.walkLength),
     world: world.name,
   };
