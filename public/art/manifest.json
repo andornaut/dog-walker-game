@@ -997,6 +997,51 @@
       "json": "sprites/card-frame-large.json"
     },
     {
+      "key": "cargo-bike",
+      "png": "sprites/cargo-bike.png",
+      "json": "sprites/cargo-bike.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "cargo-bike@50",
+      "png": "sprites/cargo-bike@50.png",
+      "json": "sprites/cargo-bike@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "cargo-bike@62",
+      "png": "sprites/cargo-bike@62.png",
+      "json": "sprites/cargo-bike@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "cargo-bike@75",
+      "png": "sprites/cargo-bike@75.png",
+      "json": "sprites/cargo-bike@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "cargo-bike@88",
+      "png": "sprites/cargo-bike@88.png",
+      "json": "sprites/cargo-bike@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 38
+      }
+    },
+    {
       "key": "chase-cat",
       "png": "sprites/chase-cat.png",
       "json": "sprites/chase-cat.json",
@@ -1174,6 +1219,51 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "clothing-rack",
+      "png": "sprites/clothing-rack.png",
+      "json": "sprites/clothing-rack.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "clothing-rack@50",
+      "png": "sprites/clothing-rack@50.png",
+      "json": "sprites/clothing-rack@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "clothing-rack@62",
+      "png": "sprites/clothing-rack@62.png",
+      "json": "sprites/clothing-rack@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "clothing-rack@75",
+      "png": "sprites/clothing-rack@75.png",
+      "json": "sprites/clothing-rack@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "clothing-rack@88",
+      "png": "sprites/clothing-rack@88.png",
+      "json": "sprites/clothing-rack@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 42
       }
     },
     {
@@ -2322,6 +2412,51 @@
       "json": "sprites/face-walker-trista.json"
     },
     {
+      "key": "fish-crates",
+      "png": "sprites/fish-crates.png",
+      "json": "sprites/fish-crates.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "fish-crates@50",
+      "png": "sprites/fish-crates@50.png",
+      "json": "sprites/fish-crates@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "fish-crates@62",
+      "png": "sprites/fish-crates@62.png",
+      "json": "sprites/fish-crates@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "fish-crates@75",
+      "png": "sprites/fish-crates@75.png",
+      "json": "sprites/fish-crates@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "fish-crates@88",
+      "png": "sprites/fish-crates@88.png",
+      "json": "sprites/fish-crates@88.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 42
+      }
+    },
+    {
       "key": "fx-bark",
       "png": "sprites/fx-bark.png",
       "json": "sprites/fx-bark.json"
@@ -2387,6 +2522,11 @@
       "json": "sprites/fx-heart-loss.json"
     },
     {
+      "key": "fx-hit-fish-crates",
+      "png": "sprites/fx-hit-fish-crates.png",
+      "json": "sprites/fx-hit-fish-crates.json"
+    },
+    {
       "key": "fx-hit-other-dog",
       "png": "sprites/fx-hit-other-dog.png",
       "json": "sprites/fx-hit-other-dog.json"
@@ -2400,6 +2540,11 @@
       "key": "fx-hit-thief",
       "png": "sprites/fx-hit-thief.png",
       "json": "sprites/fx-hit-thief.json"
+    },
+    {
+      "key": "fx-hit-wedding-shoot",
+      "png": "sprites/fx-hit-wedding-shoot.png",
+      "json": "sprites/fx-hit-wedding-shoot.json"
     },
     {
       "key": "fx-new-best",
@@ -3123,6 +3268,51 @@
       }
     },
     {
+      "key": "patio-rail",
+      "png": "sprites/patio-rail.png",
+      "json": "sprites/patio-rail.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 174
+      }
+    },
+    {
+      "key": "patio-rail@50",
+      "png": "sprites/patio-rail@50.png",
+      "json": "sprites/patio-rail@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "patio-rail@62",
+      "png": "sprites/patio-rail@62.png",
+      "json": "sprites/patio-rail@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "patio-rail@75",
+      "png": "sprites/patio-rail@75.png",
+      "json": "sprites/patio-rail@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 130
+      }
+    },
+    {
+      "key": "patio-rail@88",
+      "png": "sprites/patio-rail@88.png",
+      "json": "sprites/patio-rail@88.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 152
+      }
+    },
+    {
       "key": "petting-neighbor",
       "png": "sprites/petting-neighbor.png",
       "json": "sprites/petting-neighbor.json",
@@ -3165,6 +3355,51 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "produce-crates",
+      "png": "sprites/produce-crates.png",
+      "json": "sprites/produce-crates.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "produce-crates@50",
+      "png": "sprites/produce-crates@50.png",
+      "json": "sprites/produce-crates@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "produce-crates@62",
+      "png": "sprites/produce-crates@62.png",
+      "json": "sprites/produce-crates@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "produce-crates@75",
+      "png": "sprites/produce-crates@75.png",
+      "json": "sprites/produce-crates@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "produce-crates@88",
+      "png": "sprites/produce-crates@88.png",
+      "json": "sprites/produce-crates@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 37
       }
     },
     {
@@ -3660,6 +3895,51 @@
       "anchor": {
         "feetY": 151,
         "opaqueWidth": 117
+      }
+    },
+    {
+      "key": "rolling-barrel",
+      "png": "sprites/rolling-barrel.png",
+      "json": "sprites/rolling-barrel.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "rolling-barrel@50",
+      "png": "sprites/rolling-barrel@50.png",
+      "json": "sprites/rolling-barrel@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "rolling-barrel@62",
+      "png": "sprites/rolling-barrel@62.png",
+      "json": "sprites/rolling-barrel@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "rolling-barrel@75",
+      "png": "sprites/rolling-barrel@75.png",
+      "json": "sprites/rolling-barrel@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "rolling-barrel@88",
+      "png": "sprites/rolling-barrel@88.png",
+      "json": "sprites/rolling-barrel@88.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 33
       }
     },
     {
@@ -4471,6 +4751,51 @@
       "json": "sprites/ui-zone-pips.json"
     },
     {
+      "key": "velvet-rope",
+      "png": "sprites/velvet-rope.png",
+      "json": "sprites/velvet-rope.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "velvet-rope@50",
+      "png": "sprites/velvet-rope@50.png",
+      "json": "sprites/velvet-rope@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "velvet-rope@62",
+      "png": "sprites/velvet-rope@62.png",
+      "json": "sprites/velvet-rope@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "velvet-rope@75",
+      "png": "sprites/velvet-rope@75.png",
+      "json": "sprites/velvet-rope@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 82
+      }
+    },
+    {
+      "key": "velvet-rope@88",
+      "png": "sprites/velvet-rope@88.png",
+      "json": "sprites/velvet-rope@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 96
+      }
+    },
+    {
       "key": "walker-ada",
       "png": "sprites/walker-ada.png",
       "json": "sprites/walker-ada.json",
@@ -4504,6 +4829,51 @@
       "anchor": {
         "feetY": 68,
         "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "wedding-shoot",
+      "png": "sprites/wedding-shoot.png",
+      "json": "sprites/wedding-shoot.json",
+      "anchor": {
+        "feetY": 69,
+        "opaqueWidth": 109
+      }
+    },
+    {
+      "key": "wedding-shoot@50",
+      "png": "sprites/wedding-shoot@50.png",
+      "json": "sprites/wedding-shoot@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "wedding-shoot@62",
+      "png": "sprites/wedding-shoot@62.png",
+      "json": "sprites/wedding-shoot@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "wedding-shoot@75",
+      "png": "sprites/wedding-shoot@75.png",
+      "json": "sprites/wedding-shoot@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "wedding-shoot@88",
+      "png": "sprites/wedding-shoot@88.png",
+      "json": "sprites/wedding-shoot@88.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 95
       }
     }
   ],
@@ -4572,6 +4942,18 @@
       "png": "images/card-cost.png"
     },
     {
+      "key": "card-fish-crates-clean-up",
+      "png": "images/card-fish-crates-clean-up.png"
+    },
+    {
+      "key": "card-fish-crates-pull-away",
+      "png": "images/card-fish-crates-pull-away.png"
+    },
+    {
+      "key": "card-fish-crates-sniff",
+      "png": "images/card-fish-crates-sniff.png"
+    },
+    {
       "key": "card-good-leash",
       "png": "images/card-good-leash.png"
     },
@@ -4626,6 +5008,18 @@
     {
       "key": "card-thief-let-go",
       "png": "images/card-thief-let-go.png"
+    },
+    {
+      "key": "card-wedding-shoot-apologize",
+      "png": "images/card-wedding-shoot-apologize.png"
+    },
+    {
+      "key": "card-wedding-shoot-pose",
+      "png": "images/card-wedding-shoot-pose.png"
+    },
+    {
+      "key": "card-wedding-shoot-walk-around",
+      "png": "images/card-wedding-shoot-walk-around.png"
     },
     {
       "key": "card-zone-cabbagetown",
@@ -5161,6 +5555,11 @@
       "m4a": "sounds/sfx-fired.m4a"
     },
     {
+      "key": "sfx-hit-fish-crates",
+      "ogg": "sounds/sfx-hit-fish-crates.ogg",
+      "m4a": "sounds/sfx-hit-fish-crates.m4a"
+    },
+    {
       "key": "sfx-hit-other-dog",
       "ogg": "sounds/sfx-hit-other-dog.ogg",
       "m4a": "sounds/sfx-hit-other-dog.m4a"
@@ -5184,6 +5583,11 @@
       "key": "sfx-hit-thief",
       "ogg": "sounds/sfx-hit-thief.ogg",
       "m4a": "sounds/sfx-hit-thief.m4a"
+    },
+    {
+      "key": "sfx-hit-wedding-shoot",
+      "ogg": "sounds/sfx-hit-wedding-shoot.ogg",
+      "m4a": "sounds/sfx-hit-wedding-shoot.m4a"
     },
     {
       "key": "sfx-new-best",

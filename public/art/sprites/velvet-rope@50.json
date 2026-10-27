@@ -1,0 +1,46 @@
+{ "frames": {
+   "velvet-rope@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 56, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
+    "sourceSize": { "w": 56, "h": 18 },
+    "duration": 400
+   },
+   "velvet-rope@50 1.aseprite": {
+    "frame": { "x": 56, "y": 0, "w": 56, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
+    "sourceSize": { "w": 56, "h": 18 },
+    "duration": 400
+   },
+   "velvet-rope@50 2.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 56, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
+    "sourceSize": { "w": 56, "h": 18 },
+    "duration": 400
+   },
+   "velvet-rope@50 3.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 56, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
+    "sourceSize": { "w": 56, "h": 18 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "velvet-rope@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 224, "h": 18 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}
