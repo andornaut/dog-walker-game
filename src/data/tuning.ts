@@ -71,7 +71,7 @@ export const TUNING = {
     // The Fish crate spill's Pay for the fish.
     fishCleanUp: 20,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
-    fullPackBonusPerDog: 10,
+    fullPackBonusPerDog: 30,
     lostWalletKeep: 20,
     missedTips: 20,
     // The Dropped ice cream's Buy a new cone.
