@@ -67,9 +67,9 @@ describe("walkerLineKey", () => {
 describe("walkerUnlockedSince", () => {
   it("finds a walker owned now and not at the last visit, and none with no last visit", () => {
     const cases: readonly [string, WalkerId[] | undefined, WalkerId[], boolean][] = [
-      ["finds a walker owned now and not at the last visit", ["casey"], ["casey", "ben"], true],
-      ["finds none when the walkers are unchanged", ["casey", "ben"], ["casey", "ben"], false],
-      ["finds none with no last visit to compare with", undefined, ["casey", "ben"], false],
+      ["finds a walker owned now and not at the last visit", ["casey"], ["casey", "mrB"], true],
+      ["finds none when the walkers are unchanged", ["casey", "mrB"], ["casey", "mrB"], false],
+      ["finds none with no last visit to compare with", undefined, ["casey", "mrB"], false],
     ];
     for (const [, remembered, owned, expected] of cases) {
       expect(walkerUnlockedSince(remembered, owned)).toBe(expected);

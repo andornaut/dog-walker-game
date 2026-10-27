@@ -11,20 +11,20 @@ import { tapWalker, walkerDetailLines, walkerOrder, type WalkerTap, walkerTile }
 
 const save = {
   ...newPlayerSave,
-  owned: { ...newPlayerSave.owned, walkers: ["casey", "ben"] as WalkerId[] },
-  walker: "ben" as const,
+  owned: { ...newPlayerSave.owned, walkers: ["casey", "mrB"] as WalkerId[] },
+  walker: "mrB" as const,
 };
 
 describe("walkerOrder", () => {
   it("lists the starting walker, then the others by the zone that unlocks them", () => {
-    expect(walkerOrder(gameData)).toEqual(["casey", "ben", "ada", "trista"]);
+    expect(walkerOrder(gameData)).toEqual(["casey", "mrB", "ada", "trista"]);
   });
 });
 
 describe("walkerTile", () => {
   it("shows the picked walker selected, an owned one normal and a locked one by its goal", () => {
     const cases: readonly [WalkerId, ItemTile, TileState][] = [
-      ["ben", { kind: "picked" }, "selected"],
+      ["mrB", { kind: "picked" }, "selected"],
       ["casey", { kind: "available" }, "normal"],
       ["ada", { goal: gameData.walkers.ada.name, kind: "goal" }, "disabled"],
       ["trista", { goal: gameData.walkers.trista.name, kind: "goal" }, "disabled"],
@@ -59,7 +59,7 @@ const WALKER_IDS = Object.keys(gameData.walkers) as WalkerId[];
 describe("tapWalker", () => {
   it("drops the picked walker, picks an owned one and names a locked one's goal", () => {
     const cases: readonly [WalkerId, () => WalkerTap][] = [
-      ["ben", () => ({ kind: "drop" })],
+      ["mrB", () => ({ kind: "drop" })],
       ["casey", () => ({ kind: "pick", text: info("casey"), walker: "casey" })],
       ["ada", () => ({ kind: "locked", text: locked("ada") })],
       ["trista", () => ({ kind: "locked", text: locked("trista") })],

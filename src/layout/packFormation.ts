@@ -20,8 +20,8 @@ export interface Silhouette {
 
 export const WALKER_SILHOUETTES: Readonly<Record<WalkerId, Silhouette>> = {
   ada: { above: 55, left: -15, right: 15 },
-  ben: { above: 65, left: -17, right: 18 },
   casey: { above: 65, left: -17, right: 18 },
+  mrB: { above: 65, left: -17, right: 18 },
   trista: { above: 65, left: -17, right: 24 },
 };
 

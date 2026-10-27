@@ -84,12 +84,12 @@ describe("newRun", () => {
   });
 
   it("applies the walker's perk, then the gear, for the whole run", () => {
-    const state = newRun(data, 3, { dogs: ["kilo"], gear: "fannyPack", walker: "ben" });
-    expect(state.walker).toBe("ben");
-    const ben = { kind: "walker", walker: "ben" };
-    const perk = data.walkerPerks[data.walkers.ben.perk];
+    const state = newRun(data, 3, { dogs: ["kilo"], gear: "fannyPack", walker: "mrB" });
+    expect(state.walker).toBe("mrB");
+    const mrB = { kind: "walker", walker: "mrB" };
+    const perk = data.walkerPerks[data.walkers.mrB.perk];
     const perkModifiers = perk.effects.flatMap((effect) =>
-      effect.kind === "modifier" ? [[effect.stat, effect.by, ben]] : [],
+      effect.kind === "modifier" ? [[effect.stat, effect.by, mrB]] : [],
     );
     expect(state.modifiers.map(({ by, source, stat }) => [stat, by, source])).toEqual([
       ...perkModifiers,

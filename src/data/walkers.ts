@@ -57,16 +57,6 @@ export const WALKERS = {
     unlock: "finishZone",
     zone: "pawsPromenade",
   },
-  ben: {
-    agility: 1,
-    greeting: "Nice pack! Mind if I tag along?",
-    name: "Ben",
-    perk: "treatFinder",
-    portraitKey: "face-walker-ben",
-    spriteKey: "walker-ben",
-    unlock: "finishZone",
-    zone: "snoozeCrescent",
-  },
   casey: {
     agility: 1.1,
     greeting: "Nice pack! Mind if I walk with you sometime?",
@@ -75,6 +65,16 @@ export const WALKERS = {
     portraitKey: "face-walker-casey",
     spriteKey: "walker-casey",
     unlock: "start",
+  },
+  mrB: {
+    agility: 1,
+    greeting: "Nice pack! Mind if I tag along?",
+    name: "Ben",
+    perk: "treatFinder",
+    portraitKey: "face-walker-mr-b",
+    spriteKey: "walker-mr-b",
+    unlock: "finishZone",
+    zone: "snoozeCrescent",
   },
   trista: {
     agility: 1.4,

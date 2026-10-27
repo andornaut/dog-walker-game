@@ -46,7 +46,7 @@ export function dogPortraitKey(data: Pick<GameData, "dogs">, dog: DogId): string
 
 // A walker's 64x64 portrait, for its detail card.
 export function walkerPortraitKey(walker: WalkerId): string {
-  return `portrait-walker-${walker}`;
+  return `portrait-walker-${kebabCase(walker)}`;
 }
 
 // An achievement's 32x32 badge, tagged earned and locked.

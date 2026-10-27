@@ -47,12 +47,12 @@ describe("zoneCelebration", () => {
   };
   it("lets a walker join on finishing their zone only while not owned", () => {
     for (const { expected, finished, owned } of [
-      { expected: "ben", finished: ["street", goal("ben")], owned: ["casey"] },
+      { expected: "mrB", finished: ["street", goal("mrB")], owned: ["casey"] },
       { expected: "ada", finished: ["street", goal("ada")], owned: ["casey"] },
       { expected: "trista", finished: ["street", goal("trista")], owned: ["casey"] },
-      { expected: null, finished: ["street", goal("ben")], owned: ["casey", "ben"] },
+      { expected: null, finished: ["street", goal("mrB")], owned: ["casey", "mrB"] },
       { expected: null, finished: ["street"], owned: ["casey"] },
-      { expected: null, finished: [goal("ben")], owned: ["ada", "ben", "casey", "trista"] },
+      { expected: null, finished: [goal("mrB")], owned: ["ada", "mrB", "casey", "trista"] },
     ] satisfies readonly { expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }[]) {
       const finish = { changes: [], finished, walker: "casey", zone: STREET } as const;
       const joined = zoneCelebration(gameData, owned, finish);
@@ -64,14 +64,14 @@ describe("zoneCelebration", () => {
     const finish = {
       changes: ZONE_CHANGES,
       finished: ["street"],
-      walker: "ben",
+      walker: "mrB",
       zone: STREET,
     } as const;
-    expect(zoneCelebration(gameData, ["ben", "casey"], finish)).toEqual({
+    expect(zoneCelebration(gameData, ["mrB", "casey"], finish)).toEqual({
       fees: 18000,
       kind: "zoneDone",
       tips: 800,
-      walker: "ben",
+      walker: "mrB",
       zone: STREET,
     });
   });

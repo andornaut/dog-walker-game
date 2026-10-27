@@ -340,12 +340,12 @@ describe("achievements at banking", () => {
 
   // Each row starts from a save in which casey has finished a walk.
   const walkersFinished: [string, Partial<RunResult>, WalkerId[]][] = [
-    ["adds the walker of a finished walk", { walker: "ben" }, ["casey", "ben"]],
+    ["adds the walker of a finished walk", { walker: "mrB" }, ["casey", "mrB"]],
     ["adds a walker only once", {}, ["casey"]],
-    ["not for a walk headed home", { outcome: "wentHome", walker: "ben", zone: 3 }, ["casey"]],
+    ["not for a walk headed home", { outcome: "wentHome", walker: "mrB", zone: 3 }, ["casey"]],
     [
       "not for a walk a dev start began past zone 1",
-      { counters: { ...quietCounters(), firstZone: 2 }, walker: "ben" },
+      { counters: { ...quietCounters(), firstZone: 2 }, walker: "mrB" },
       ["casey"],
     ],
   ];

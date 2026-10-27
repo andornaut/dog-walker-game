@@ -208,7 +208,7 @@ describe("planZone", { timeout: 60_000 }, () => {
   it("plans Rush hour's and Treat finder's treatSpawns factor of treats", () => {
     for (const [, effects, source] of [
       ["Rush hour", UPGRADES.rushHour.effects, { kind: "upgrade", upgrade: "rushHour" }],
-      ["Treat finder", WALKER_PERKS.treatFinder.effects, { kind: "walker", walker: "ben" }],
+      ["Treat finder", WALKER_PERKS.treatFinder.effects, { kind: "walker", walker: "mrB" }],
     ] satisfies readonly [string, readonly Effect[], ModifierSource][]) {
       const live = { ...data, tuning: { ...tuning, multipliers: TUNING.multipliers } };
       const factors = modifiersOf(effects).filter(({ stat }) => stat === "treatSpawns");

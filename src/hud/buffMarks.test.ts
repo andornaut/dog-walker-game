@@ -236,11 +236,11 @@ describe("spawnPops", () => {
       {
         modifiers: [
           activeModifier(
-            { kind: "walker", walker: "ben" },
+            { kind: "walker", walker: "mrB" },
             { by: "treatFinderSpawns", operation: "multiply", stat: "treatSpawns" },
           ),
         ],
-        walker: "ben",
+        walker: "mrB",
       },
     );
     const treat = (id: number): WalkItem => ({

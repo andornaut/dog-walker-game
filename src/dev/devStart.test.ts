@@ -36,13 +36,13 @@ describe("devRunLoadout", () => {
         "keeps the saved loadout and walker for what the link leaves out",
         { dogs: ["biscuit"], gear: "fannyPack" },
         {},
-        { dogs: ["biscuit"], gear: "fannyPack", walker: "ben" },
+        { dogs: ["biscuit"], gear: "fannyPack", walker: "mrB" },
       ],
       [
         "walks the first owned dog when nothing was picked yet",
         { dogs: [], gear: null },
         {},
-        { dogs: ["kilo"], gear: null, walker: "ben" },
+        { dogs: ["kilo"], gear: null, walker: "mrB" },
       ],
     ] satisfies readonly [
       string,
@@ -50,7 +50,7 @@ describe("devRunLoadout", () => {
       Partial<RunSetup<DogId, GearId, WalkerId>>,
       Loadout,
     ][]) {
-      expect(devRunLoadout(saved, "ben", "kilo", { ...setup, ...overrides })).toEqual(expected);
+      expect(devRunLoadout(saved, "mrB", "kilo", { ...setup, ...overrides })).toEqual(expected);
     }
   });
 });

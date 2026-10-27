@@ -76,6 +76,6 @@ describe("newWalkers", () => {
     if (ada.unlock !== "start") {
       expect(newWalkers(gameData, ["casey"], [ada.zone])).toEqual(["ada"]);
     }
-    expect(newWalkers(gameData, ["casey", "trista"], ZONES)).toEqual(["ada", "ben"]);
+    expect(newWalkers(gameData, ["casey", "trista"], ZONES)).toEqual(["ada", "mrB"]);
   });
 });

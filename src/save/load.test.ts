@@ -149,7 +149,7 @@ describe("loadSave", () => {
           dogSlots: [3, 9, 3, 0],
           dogs: ["kilo", "ghost", "penny", "kilo"],
           gear: ["runningShoes", "jetpack", "runningShoes"],
-          walkers: ["ben", "ghost", "ben"],
+          walkers: ["mrB", "ghost", "mrB"],
         };
       },
       (save) => save.owned,
@@ -157,7 +157,7 @@ describe("loadSave", () => {
         dogSlots: [1, 3],
         dogs: ["biscuit", "kilo", "penny"],
         gear: ["runningShoes"],
-        walkers: ["casey", "ben"],
+        walkers: ["casey", "mrB"],
       },
     ],
     [
@@ -197,7 +197,7 @@ describe("loadSave", () => {
     [
       "with a walker not unlocked swapped for the default",
       (document) => {
-        document.owned.walkers = ["casey", "ben"];
+        document.owned.walkers = ["casey", "mrB"];
         document.walker = "trista";
       },
       (save) => save.walker,
@@ -231,10 +231,10 @@ describe("loadSave", () => {
     [
       "without unknown or duplicate walkers who finished a walk",
       (document) => {
-        document.stats.walkersFinishedWith = ["casey", "retiredWalker", "casey", "ben"];
+        document.stats.walkersFinishedWith = ["casey", "retiredWalker", "casey", "mrB"];
       },
       (save) => save.stats.walkersFinishedWith,
-      ["casey", "ben"],
+      ["casey", "mrB"],
     ],
     [
       "without unknown dogs in the logbook's walks, keeping the walks",
@@ -445,7 +445,7 @@ describe("saveContextFrom", () => {
       Object.entries(gameData.dogs).map(([id, dog]) => [id, { ...dog, unlock: "shop" as const }]),
     ) as typeof gameData.dogs;
     expect(() => saveContextFrom({ ...gameData, dogs })).toThrow("needs a starter dog");
-    const walkers = { ...gameData.walkers, casey: { ...gameData.walkers.ben, name: "Casey" } };
+    const walkers = { ...gameData.walkers, casey: { ...gameData.walkers.mrB, name: "Casey" } };
     expect(() => saveContextFrom({ ...gameData, walkers })).toThrow("default walker");
   });
 });

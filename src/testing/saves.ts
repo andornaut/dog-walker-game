@@ -32,7 +32,7 @@ export const testContext: SaveContext = {
     gear: new Set(["fannyPack", "hallPass", "luckyCollar", "runningShoes"]),
     hints: new Set(["card", "puddle", "tip"]),
     minorObstacles: new Set(["bench", "pigeons", "raccoon"]),
-    walkers: new Set(["ada", "ben", "casey", "trista"]),
+    walkers: new Set(["ada", "mrB", "casey", "trista"]),
     zones: new Set(["homeStretch", "park", "pawsPromenade", "shops", "snoozeCrescent", "street"]),
   },
 };
@@ -104,7 +104,7 @@ export function veteranSave(): SaveDocument {
       dogSlots: [1, 3],
       dogs: ["biscuit", "duchess", "kilo", "penny"],
       gear: ["fannyPack", "runningShoes"],
-      walkers: ["casey", "ada", "ben", "trista"],
+      walkers: ["casey", "ada", "mrB", "trista"],
     },
     settings: { musicVolume: 0.25, muted: true, reducedMotion: true, sfxVolume: 0.5 },
     shownHints: ["card", "tip"],
