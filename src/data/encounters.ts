@@ -230,7 +230,7 @@ export const ENCOUNTERS = {
     hitLabel: "SPRAYED!",
     hitWord: "PHEW!",
     kind: "obstacle",
-    movement: { kind: "approach", steps: { max: 5, min: 3 } },
+    movement: { kind: "approach", steps: { max: 6, min: 3 } },
     name: "Skunk",
     resolution: {
       kind: "card",

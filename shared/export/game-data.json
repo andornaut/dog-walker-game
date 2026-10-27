@@ -1202,7 +1202,7 @@
       "movement": {
         "kind": "approach",
         "steps": {
-          "max": 5,
+          "max": 6,
           "min": 3
         }
       },
