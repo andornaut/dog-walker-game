@@ -372,8 +372,11 @@ export type MovementKind = Movement["kind"];
 // good thing to bump into, one cell big, applied on contact with no card. An obstacle or lucky
 // encounter with a movement comes as a mover at the zone's moverShare; a lucky one stays a prize
 // as it moves, never something the pack steers around. hitWord is the comic word drawn in
-// font-comic over its hit burst: A to Z, ! ? - and space. An obstacle with a zone appears only
-// in that zone: weighted there and 0 in every other.
+// font-comic over its hit burst: A to Z, ! ? - and space. An obstacle with zones appears only
+// in those zones: weighted in each and 0 in every other.
+// The zones a neighbourhood-only obstacle appears in, by id, at least one.
+type NeighbourhoodZones = readonly [string, ...string[]];
+
 export type Encounter = {
   readonly name: string;
 } & (
@@ -387,8 +390,8 @@ export type Encounter = {
       readonly kind: "obstacle";
       readonly movement?: Movement;
       readonly shape: Shape;
-      // A zone id; typed as a string since ZoneId comes from the world, which names this type.
-      readonly zone?: string;
+      // Zone ids, typed as strings since ZoneId comes from the world, which names this type.
+      readonly zones?: NeighbourhoodZones;
     } & (
       | { readonly hitLabel: string; readonly resolution: CardResolution }
       | { readonly resolution: ContactResolution | PullResolution }
@@ -399,16 +402,16 @@ export type Encounter = {
 // bumpHearts modifiers such as Muddy's change it, or, while a debuff with bumpMoney such as
 // Spotlight lasts and there is cash, that cash instead; the dog it lands on may dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
-// Each zone's weights set how often it appears there; one with a zone appears only in that zone,
-// weighted there and 0 in every other. One with a movement comes as a mover at the zone's
+// Each zone's weights set how often it appears there; one with zones appears only in those zones,
+// weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
 // moverShare.
 export interface MinorObstacle {
   readonly hitLabel?: string;
   readonly movement?: Movement;
   readonly name: string;
   readonly shape: Shape;
-  // A zone id, as an obstacle encounter's zone is.
-  readonly zone?: string;
+  // Zone ids, as an obstacle encounter's zones are.
+  readonly zones?: NeighbourhoodZones;
 }
 
 // How long an upgrade card's effects last: applied at once, through the next zone, or for

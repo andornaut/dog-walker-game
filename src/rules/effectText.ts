@@ -253,7 +253,7 @@ export function debuffFields(
   const { bumpMoney } = data.debuffs[debuff];
   return {
     cash: formatDollars(bumpMoney === undefined ? cents(0) : read(data.tuning, "money", bumpMoney)),
-    hearts: String(read(data.tuning, "multipliers", "muddyBumpHearts")),
+    hearts: String(read(data.tuning, "multipliers", "muddyBumpCost")),
     seconds: String(seconds),
   };
 }

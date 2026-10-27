@@ -96,7 +96,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - **Live tuning:** editing a value file under the dev server updates the running game through Vite HMR. Scenes and rules read tuning at the time of use.
 - **Ownership:** gameplay edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and the tests.
 - **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are branded types in the rules; value files hold plain numbers.
-- **Neighbourhood-only kinds:** an obstacle or minor obstacle with a `zone` appears only in that zone: `src/data/data.test.ts` requires its weight there above 0 and 0 in every other zone. `zone` is typed as a string, since `ZoneId` comes from the world, whose types name these types.
+- **Neighbourhood-only kinds:** an obstacle or minor obstacle with `zones` appears only in those zones: `src/data/data.test.ts` requires its weight above 0 in each and 0 in every other zone. `zones` holds strings, since `ZoneId` comes from the world, whose types name these types.
 - **Zones and forks:** `world.ts` lists the zones from easiest to hardest. A walk is `walkLength` zones from `firstZone`, ending on `lastZone`. The run's `route` lists the zones walked by id, and `zoneIndex` is a position in it. After each zone but the last, `offerFork` offers up to three unwalked zones in world order, each carrying an upgrade; the fork before the last zone leads only to `lastZone`. Its choice is an ordinary card choice that takes the upgrade and appends the zone to the route.
 
 ## Save data

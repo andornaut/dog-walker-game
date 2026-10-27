@@ -166,13 +166,13 @@ describe("effectText", () => {
     }
   });
 
-  const muddyBumpHearts = read(TEST_TUNING, "multipliers", "muddyBumpHearts");
-  it.each([muddyBumpHearts, muddyBumpHearts + 1])(
-    "fills Muddy's stake with muddyBumpHearts at %i",
+  const muddyBumpCost = read(TEST_TUNING, "multipliers", "muddyBumpCost");
+  it.each([muddyBumpCost, muddyBumpCost + 1])(
+    "fills Muddy's stake with muddyBumpCost at %i",
     (hearts) => {
       const tuning = {
         ...data.tuning,
-        multipliers: { ...data.tuning.multipliers, muddyBumpHearts: hearts },
+        multipliers: { ...data.tuning.multipliers, muddyBumpCost: hearts },
       };
       const seconds = String(read(TEST_TUNING, "seconds", DEBUFFS.muddy.seconds));
       expect(effectText({ ...data, tuning }, [{ debuff: "muddy", kind: "debuff" }])).toBe(

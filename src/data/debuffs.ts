@@ -7,8 +7,8 @@ import type { Debuff } from "./types";
 export const DEBUFFS = {
   muddy: {
     modifiers: [
-      { by: "muddyBumpHearts", operation: "multiply", stat: "bumpHearts" },
-      { by: "muddyBumpHearts", operation: "multiply", stat: "bumpMoney" },
+      { by: "muddyBumpCost", operation: "multiply", stat: "bumpHearts" },
+      { by: "muddyBumpCost", operation: "multiply", stat: "bumpMoney" },
     ],
     name: "Muddy",
     seconds: "muddySeconds",

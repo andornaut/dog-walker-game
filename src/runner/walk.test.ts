@@ -796,13 +796,13 @@ describe("stepWalk", () => {
     expect(after.road.items.map(({ kind }) => kind)).toEqual(["otherDog"]);
   });
 
-  it("costs muddyBumpHearts times as much while Muddy", () => {
+  it("costs muddyBumpCost times as much while Muddy", () => {
     const walk = walkWith(["kilo"], [atPack("cone")]);
     const muddy = {
       ...walk,
       run: { ...walk.run, debuffs: [{ debuff: "muddy", secondsLeft: 20, untilZone: 0 }] },
     } as const;
-    const bump = read(tuning, "hearts", "bump") * read(tuning, "multipliers", "muddyBumpHearts");
+    const bump = read(tuning, "hearts", "bump") * read(tuning, "multipliers", "muddyBumpCost");
     expect(heartsByDog(step(muddy).walk.run).kilo).toBe((heartsByDog(walk.run).kilo ?? 0) - bump);
   });
 
@@ -1122,7 +1122,7 @@ describe("stepWalk's modified values", () => {
   const muddy = { debuff: "muddy", kind: "debuff" } as const;
   const stinky = { debuff: "stinky", kind: "debuff" } as const;
   const bump = read(tuning, "hearts", "bump");
-  const muddied = bump * read(tuning, "multipliers", "muddyBumpHearts");
+  const muddied = bump * read(tuning, "multipliers", "muddyBumpCost");
   const tip = read(tuning, "money", "tip");
   const bonus = read(tuning, "money", "bigTipperTipBonus");
   const reach = read(reaching.tuning, "counts", "longReachLanes");
@@ -1261,7 +1261,7 @@ describe("stepWalk's modified values", () => {
   // when that is less, and hearts as usual at $0. Muddy doubles whatever a bump costs, and
   // Second chance forgives only hearts.
   const spotlightCash = read(tuning, "money", DEBUFFS.spotlight.bumpMoney);
-  const muddyCash = roundDollars(spotlightCash * read(tuning, "multipliers", "muddyBumpHearts"));
+  const muddyCash = roundDollars(spotlightCash * read(tuning, "multipliers", "muddyBumpCost"));
   const plenty = cents(muddyCash * 2);
   const short = cents(spotlightCash - 100);
   const lit = (money: number, ...debuffs: ("muddy" | "spotlight")[]) => ({

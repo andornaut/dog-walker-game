@@ -245,29 +245,32 @@ describe("run, world and walkers", () => {
     }
   });
 
-  // Every obstacle kind that names a zone, with the weights table that draws it in each zone.
+  // Every obstacle kind that names its zones, with the weights table that draws it in each zone.
   const zoneKinds = [
     ...Object.entries(encounters).flatMap(([id, encounter]) =>
-      encounter.kind === "obstacle" && "zone" in encounter && encounter.zone !== undefined
-        ? [{ id, table: "obstacles" as const, zone: encounter.zone }]
+      encounter.kind === "obstacle" && "zones" in encounter && encounter.zones !== undefined
+        ? [{ id, table: "obstacles" as const, zones: encounter.zones }]
         : [],
     ),
     ...Object.entries(minorObstacles).flatMap(([id, minor]) =>
-      "zone" in minor ? [{ id, table: "minorObstacles" as const, zone: minor.zone }] : [],
+      "zones" in minor ? [{ id, table: "minorObstacles" as const, zones: minor.zones }] : [],
     ),
   ];
+  const zoneIds = world.zones.map(({ id }) => id);
 
-  it("names a neighbourhood for some obstacles, card or not", () => {
+  it("names the neighbourhoods of some obstacles, card or not, one or more each", () => {
     expect(zoneKinds.map(({ table }) => table)).toEqual(
       expect.arrayContaining(["minorObstacles", "obstacles"]),
     );
+    expect(zoneKinds.some(({ zones }) => zones.length > 1)).toBe(true);
   });
 
-  it.each(zoneKinds)("draws $id only in its own zone, $zone", ({ id, table, zone }) => {
+  it.each(zoneKinds)("draws $id only in its own zones, $zones", ({ id, table, zones }) => {
     const weighted = world.zones.flatMap((each) =>
       ((each.weights[table] as Readonly<Record<string, number>>)[id] ?? 0) > 0 ? [each.id] : [],
     );
-    expect(weighted).toEqual([zone]);
+    expect(weighted).toEqual(zoneIds.filter((zone) => zones.includes(zone)));
+    expect(zones.filter((zone) => !zoneIds.includes(zone))).toEqual([]);
   });
 
   it("fits the largest pack in the card row, one dog slot a place, the first free and the rest priced", () => {

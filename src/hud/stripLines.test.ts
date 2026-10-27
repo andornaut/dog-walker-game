@@ -170,7 +170,7 @@ describe("muddyHeartsLines", () => {
 
 describe("debuffLines", () => {
   const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
-  const muddyHearts = String(read(gameData.tuning, "multipliers", "muddyBumpHearts"));
+  const muddyHearts = String(read(gameData.tuning, "multipliers", "muddyBumpCost"));
   // A debuff's bump cash, for one that makes bumps cost cash, such as Spotlight.
   const cashOf = (debuff: DebuffId) => {
     const key = (gameData.debuffs[debuff] as Debuff).bumpMoney;

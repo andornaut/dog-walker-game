@@ -36,7 +36,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zone: "park",
+    zones: ["park"],
   },
   droppedCone: {
     hitLabel: "MELTDOWN!",
@@ -64,7 +64,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zone: "pawsPromenade",
+    zones: ["pawsPromenade"],
   },
   fishCrates: {
     hitLabel: "FISHY!",
@@ -92,7 +92,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zone: "shops",
+    zones: ["shops"],
   },
   lostWallet: {
     kind: "lucky",
@@ -168,7 +168,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zone: "snoozeCrescent",
+    zones: ["snoozeCrescent"],
   },
   promoTeam: {
     hitLabel: "FREE SAMPLE!",
@@ -196,7 +196,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zone: "homeStretch",
+    zones: ["homeStretch"],
   },
   puddle: {
     hitWord: "SPLOSH!",
@@ -301,6 +301,6 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 1 },
-    zone: "street",
+    zones: ["street"],
   },
 } as const satisfies Record<EncounterId, Encounter>;

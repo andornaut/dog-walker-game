@@ -76,9 +76,9 @@ describe("explainDetail", () => {
     expect(explainDetail(gameData, newPlayerSave, run, target)).toBeUndefined();
   });
 
-  it("fills the debuff's stake with its whole seconds left and muddyBumpHearts", () => {
+  it("fills the debuff's stake with its whole seconds left and muddyBumpCost", () => {
     const detail = explainDetail(gameData, newPlayerSave, run, { debuff: "muddy", kind: "debuff" });
-    const hearts = String(read(gameData.tuning, "multipliers", "muddyBumpHearts"));
+    const hearts = String(read(gameData.tuning, "multipliers", "muddyBumpCost"));
     expect(detail?.card.lines.join(" ").toLowerCase()).toContain(
       fillNames(gameData.debuffs.muddy.stake, { hearts, seconds: "10" }).toLowerCase(),
     );

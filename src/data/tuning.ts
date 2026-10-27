@@ -144,8 +144,8 @@ export const TUNING = {
     // Each in-lane mover's speed is its kind's times a factor drawn per mover up to this far from
     // 1 either way.
     moverSpeedJitter: 0.25,
-    // How many hearts a minor bump costs while the pack is Muddy.
-    muddyBumpHearts: 2,
+    // What a minor bump costs while the pack is Muddy, hearts or cash, as a factor.
+    muddyBumpCost: 2,
     // How long a debuff lasts while Ada's Quick recovery walks.
     quickRecoveryDebuffFactor: 0.5,
     // Running shoes add this much to the walker's agility.
