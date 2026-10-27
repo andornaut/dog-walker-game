@@ -151,10 +151,6 @@ export function whiteFlash(still: boolean): FlashCue[] {
   }));
 }
 
-// A bump's nudge (bumpFlash.ts) shakes the road's camera, the HUD's excepted, this far for this
-// long.
-export const ROAD_SHAKE = { ms: 150, px: 2 };
-
 // The tags a dog plays in order after a hit before it walks on: the struck dog reacts, and on a
 // splash every dog reacts and shakes off. Reduced motion skips them.
 export const DOG_REACTIONS = { hit: ["react"], splash: ["react", "shake"] } as const;

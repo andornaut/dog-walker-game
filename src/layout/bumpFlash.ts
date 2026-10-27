@@ -1,14 +1,23 @@
 import type { EncounterId, MinorObstacleId } from "../data/types";
 import { insetRect, type Rect, ringRects } from "../lib/rect";
 
-// Every bump flashes a border round the whole screen in the bump's colour and nudges the road:
-// a minor obstacle's hit, a mover's included and one that costs cash while Spotlight lasts, and
-// a card or contact obstacle's hit. A squirrel is not a bump: touching it does nothing. The
-// border is BUMP_FLASH.width pixels of the colour at the screen's edge with an ink keyline
-// BUMP_FLASH.keyline wide just inside it, so it reads over a backdrop of its own colour, and
-// it shows for BUMP_FLASH.ms, as long as an encounter's edge flash. The nudge is a mover's road
-// shake (ROAD_SHAKE in hitEffects.ts); reduced motion keeps the border and drops the nudge.
-export const BUMP_FLASH = { keyline: 1, ms: 280, width: 2 } as const;
+// Every bump flashes the screen in the bump's colour and nudges the road: a minor obstacle's
+// hit, a mover's included and one that costs cash while Spotlight lasts, and a card or contact
+// obstacle's hit, a puddle's splash included. A squirrel is not a bump: touching it does
+// nothing. The flash is a border BUMP_FLASH.width pixels of the colour at the screen's edge,
+// with an ink keyline BUMP_FLASH.keyline wide just inside it so it reads over a backdrop of its
+// own colour, and a tint of the colour over the road, under the HUD's panels, that starts at
+// BUMP_FLASH.tintAlpha and fades out. The flash lasts BUMP_FLASH.ms, as long as an encounter's
+// edge flash. The nudge shakes the road's camera, the HUD's excepted, BUMP_FLASH.nudgePx for
+// BUMP_FLASH.nudgeMs. Reduced motion keeps the flash and drops the nudge.
+export const BUMP_FLASH = {
+  keyline: 1,
+  ms: 280,
+  nudgeMs: 150,
+  nudgePx: 4,
+  tintAlpha: 0.25,
+  width: 4,
+} as const;
 
 // The colours a border may take, each a PALETTE name the scene draws it in: each reads against
 // the HUD's dark panels.

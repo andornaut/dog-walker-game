@@ -1,12 +1,7 @@
 import { type GameObjects, Math as PhaserMath, type Scene, TintModes } from "phaser";
 
-import {
-  type FlashCue,
-  HIT_ART,
-  type HitEffect,
-  type MotionStep,
-  ROAD_SHAKE,
-} from "../../layout/hitEffects";
+import { BUMP_FLASH } from "../../layout/bumpFlash";
+import { type FlashCue, HIT_ART, type HitEffect, type MotionStep } from "../../layout/hitEffects";
 import { playEffect } from "../sprites";
 import { tagFrame } from "../uiKit";
 import type { StruckBody } from "./itemViews";
@@ -70,13 +65,12 @@ export function moveObstacle(scene: Scene, body: StruckBody, steps: readonly Mot
   }
 }
 
-// Shakes the scene's camera by ROAD_SHAKE's pixels; another scene's camera, the HUD's, keeps
-// still.
+// Shakes the scene's camera by a bump's nudge; another scene's camera, the HUD's, keeps still.
 export function shakeRoad(scene: Scene): void {
   const camera = scene.cameras.main;
   const intensity = new PhaserMath.Vector2(
-    ROAD_SHAKE.px / camera.width,
-    ROAD_SHAKE.px / camera.height,
+    BUMP_FLASH.nudgePx / camera.width,
+    BUMP_FLASH.nudgePx / camera.height,
   );
-  camera.shake(ROAD_SHAKE.ms, intensity);
+  camera.shake(BUMP_FLASH.nudgeMs, intensity);
 }

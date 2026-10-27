@@ -138,9 +138,10 @@ function changeLabelText(label: ChangeLabel): string {
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
-// An explanation's detail card draws over every other part of the HUD but a bump's border.
+// An explanation's detail card draws over every other part of the HUD but a bump's border. A
+// bump's tint draws under every part of the HUD, the message strip included.
 const DETAIL_DEPTH = 2000;
-const BUMP_BORDER_DEPTH = 3000;
+const BUMP_DEPTH = { border: 3000, tint: MESSAGE_DEPTH.hud - 1 };
 // An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
 // A card holds one row of hearts, as many as the most an owner can have.
@@ -285,7 +286,7 @@ export class HudScene extends Scene {
     this.debuffFills = this.add.graphics().setDepth(1);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
     this.detailLayer = this.add.container(0, 0).setDepth(DETAIL_DEPTH);
-    const border = new BumpBorder(this, BUMP_BORDER_DEPTH);
+    const border = new BumpBorder(this, BUMP_DEPTH);
 
     const run = this.walk();
     const firingRects = () => this.feedback?.firingRects() ?? [];
