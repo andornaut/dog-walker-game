@@ -96,7 +96,7 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `fx-bump`               | sprite | 48×48            | `play`            | Impact star on a plain hit                                                                                                        |
 | `fx-bump-big`           | sprite | 64×64            | `play`            | A mover's hit                                                                                                                     |
 | `fx-debris-<material>`  | sprite | 48×48            | `play`            | Leaves (hedge), litter (trash can); over the bump                                                                                 |
-| `fx-dodge`              | sprite | 48×48            | `play`            | A small dog dodges a hit; mirrored for a sidestep left                                                                            |
+| `fx-dodge`              | sprite | 48×48            | `play`            | A dog dodges a hit (small dogs always; medium and large ones with the Whistle); mirrored for a sidestep left                      |
 | `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`      | Pink heart over a dog on +♥                                                                                                       |
 | `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`      | Broken heart over a dog on −♥                                                                                                     |
 | `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | capybara, dropped-cone, fish-crates, other-dog, porch-cat, promo-team, skunk, thief, wedding-shoot; the comic word is set over it |

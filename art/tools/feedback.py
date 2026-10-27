@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Draw the road feedback for heart changes and dodges: the
 broken heart that pops over a dog and arcs into its card, the pink heart
-that pops and flies up, and a small dog's dodge.
+that pops and flies up, and a dog's dodge (small dogs always; medium and
+large ones with the Whistle).
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (pink, white
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
@@ -29,7 +30,7 @@ fx-heart-gain  32x32  pop (5 frames: 50, 50, 90, 90, 450ms; 730ms)  the same pop
                       centred on row 16. The game swaps pop's last frame for fly at the same
                       point and tweens fly's centre to its slot's heartLabels band (the layout
                       export's hudLanes, 24 rows on the card's bottom), where its 14 rows fit.
-fx-dodge       48x48  play (5 frames, 70ms; 350ms)  laid on a small dog's 48x48 frame as it dodges a
+fx-dodge       48x48  play (5 frames, 70ms; 350ms)  laid on a dog's 48x48 frame as it dodges a
                       hit: a dust puff kicked up at its left foot swells, drifts back and thins,
                       three speed lines trail on its left and shorten. The game letters DODGE!
                       over its head in font-comic (ring top-left at 6,0) on frames 0 to 3.
