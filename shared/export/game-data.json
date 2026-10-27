@@ -1203,7 +1203,7 @@
         "kind": "approach",
         "steps": {
           "max": 5,
-          "min": 2
+          "min": 3
         }
       },
       "name": "Skunk",
