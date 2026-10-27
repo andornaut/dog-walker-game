@@ -304,7 +304,7 @@ def archie(g):
     g.rect(21, 30, 2, 1, "dbrown")
 
 
-# ---------- Snowy: Great Pyrenees, large, giant white fluff, collar with a bell ----------
+# ---------- Sequoia: Great Pyrenees, large, giant white fluff, collar with a bell ----------
 
 def snowball(g):
     g.cel(47, 52, 14, 11, "white", "lgrey")

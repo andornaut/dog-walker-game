@@ -113,8 +113,8 @@ def rosa_top(wave):
     return top
 
 
-def kevin_top(wave):
-    """Kevin, pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee, ripped jeans and his
+def ralph_top(wave):
+    """Ralph, pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee, ripped jeans and his
     phone held up in the left hand."""
     def top(g, b):
         torso(g, b, "pink", "mauve")
@@ -142,8 +142,8 @@ def kevin_top(wave):
     return top
 
 
-def kevin_legs(g, b):
-    """Rips across the knees of Kevin's jeans."""
+def ralph_legs(g, b):
+    """Rips across the knees of Ralph's jeans."""
     g.rect(12, 38 + b, 2, 1, "skin2")
     g.rect(18, 39 + b, 2, 1, "skin2")
 
@@ -177,8 +177,8 @@ def sheba_top(wave):
     return top
 
 
-def lefevre_top(wave):
-    """Madame Lefevre, dog-show judge, fussy: tall dark updo, amber earrings, red lips, a purple blazer over
+def tara_top(wave):
+    """Ms. Tara, dog-show judge, fussy: tall dark updo, amber earrings, red lips, a purple blazer over
     a white blouse and pearls, a pencil skirt, and a blue first-prize rosette in her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 6, "purple")
@@ -275,8 +275,8 @@ def kiwi_top(wave):
     return top
 
 
-def tiffany_top(wave):
-    """Tiffany, wedding planner, dramatic: blond high ponytail with a pink bow, headset mic, a white blouse
+def judy_top(wave):
+    """Judy, wedding planner, dramatic: blond high ponytail with a pink bow, headset mic, a white blouse
     with a pink placket, a pink skirt, and her clipboard with a heart on it."""
     def top(g, b):
         g.cel(25, 6 + b, 3, 6, "yellow", "amber")
@@ -344,8 +344,8 @@ def gadget_top(wave):
     return top
 
 
-def jesse_top(wave):
-    """Jesse, trail runner, laid-back: short brown hair, a sky-blue headband, an orange running top with a
+def jason_top(wave):
+    """Jason, trail runner, laid-back: short brown hair, a sky-blue headband, an orange running top with a
     race bib, navy shorts, and a water bottle in the left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 4, "navy")
@@ -373,14 +373,14 @@ def jesse_top(wave):
 # dog: (top, legs, shoes, extra), in owners.OWNERS order; extra draws over the legs after them
 OWNERS = {
     "duchess": (rosa_top, "skin1", "dbrown", None),
-    "nugget": (kevin_top, "blue", "white", kevin_legs),
+    "nugget": (ralph_top, "blue", "white", ralph_legs),
     "zippy": (sheba_top, "slate", "dbrown", None),
-    "pierre": (lefevre_top, "skin1", "ink", None),
+    "pierre": (tara_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),
     "archie": (kiwi_top, "brown", "red", None),
-    "snowball": (tiffany_top, "skin1", "pink", None),
+    "snowball": (judy_top, "skin1", "pink", None),
     "penny": (gadget_top, "dslate", "dbrown", None),
-    "koda": (jesse_top, "skin2", "sky", None),
+    "koda": (jason_top, "skin2", "sky", None),
 }
 
 

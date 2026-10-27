@@ -9,7 +9,7 @@ expressions go.
 
 face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
-natively at 20x20, one pixel per feature, and Lefevre's bun is redrawn by hand.
+natively at 20x20, one pixel per feature, and Tara's bun is redrawn by hand.
 
 face-walker-<name>: 32x32 portraits for the walker picker. Tags: happy, neutral.
 
@@ -165,7 +165,7 @@ def rosa(mood):
     return g
 
 
-def kevin(mood):
+def ralph(mood):
     """Pet influencer, dramatic: tall blond quiff, sunglasses pushed up, pink tee."""
     g = face()
     base(g, "skin2", "brown", "pink", "mauve")
@@ -217,7 +217,7 @@ def sheba(mood):
     return g
 
 
-def lefevre(mood):
+def tara(mood):
     """Dog-show judge, fussy: tall dark updo, pearls, red lips, purple blazer."""
     g = face()
     base(g, "skin1", "skin2", "purple", "plum")
@@ -275,7 +275,7 @@ def kiwi(mood):
     return g
 
 
-def tiffany(mood):
+def judy(mood):
     """Wedding planner, dramatic: blond high ponytail, headset mic, white blouse."""
     g = face()
     g.cel(25, 8, 3, 6, "yellow", "amber")
@@ -319,7 +319,7 @@ def gadget(mood):
     return g
 
 
-def jesse(mood):
+def jason(mood):
     """Trail runner, laid-back: short hair, sky-blue headband, orange running top."""
     g = face()
     base(g, "skin2", "brown", "orange", "rust")
@@ -415,7 +415,7 @@ def small_expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=Fa
         p(14, 12, "red")
 
 
-LEFEVRE_SMALL_HAIR = (
+TARA_SMALL_HAIR = (
     "....................",
     "........dnni........",
     ".......dnnnni.......",
@@ -426,11 +426,11 @@ LEFEVRE_SMALL_HAIR = (
 )
 
 
-def lefevre_small_bun(g):
+def tara_small_bun(g):
     """Her updo's top rows drawn again at 20px: a round bun pinched in above a domed crown, lit dslate on the
     left and shaded ink on the right, where the scaled bun and crown square off into a top hat."""
     colours = {"d": "dslate", "n": "navy", "i": "ink"}
-    for y, row in enumerate(LEFEVRE_SMALL_HAIR):
+    for y, row in enumerate(TARA_SMALL_HAIR):
         for x, c in enumerate(row):
             g.g.px[y][x] = None
             if c in colours:
@@ -438,7 +438,7 @@ def lefevre_small_bun(g):
 
 
 # Fixes drawn after the scaled owner, for shapes that do not survive the scale.
-SMALL_FIXES = {"pierre": lefevre_small_bun}
+SMALL_FIXES = {"pierre": tara_small_bun}
 
 
 def small(dog, mood):
@@ -554,14 +554,14 @@ WALKERS = {
 
 OWNERS = {
     "duchess": rosa,
-    "nugget": kevin,
+    "nugget": ralph,
     "zippy": sheba,
-    "pierre": lefevre,
+    "pierre": tara,
     "biscuit": sam,
     "archie": kiwi,
-    "snowball": tiffany,
+    "snowball": judy,
     "penny": gadget,
-    "koda": jesse,
+    "koda": jason,
 }
 
 
