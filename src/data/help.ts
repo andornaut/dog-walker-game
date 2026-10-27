@@ -26,7 +26,7 @@ export const HELP_PAGES = [
   {
     art: "cards",
     body:
-      "A skunk, a thief or another dog opens a card. " +
+      "Skunks, thieves, dogs and more open cards. " +
       "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
       "A puddle makes the pack Muddy. Debuffs wear off after {debuffSeconds}s. " +
       "Hold a card, an icon or a bar for details.",

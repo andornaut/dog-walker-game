@@ -2,8 +2,7 @@ import type { MinorObstacle } from "./types";
 
 // Obstacles that open no card. Shapes are lanes across by rows along the road; each zone
 // weighs how often they appear there, in world.ts, and one with zones appears only in those.
-// The neighbourhood-only obstacles' names, shapes and movements are placeholders. Each obstacle has
-// one look everywhere. An obstacle with a movement comes as a mover at the zone's mover share,
+// Each obstacle has one look everywhere. An obstacle with a movement comes as a mover at the zone's mover share,
 // and stands still otherwise.
 export const MINOR_OBSTACLES = {
   ball: {

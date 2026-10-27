@@ -8,7 +8,7 @@ import type { Encounter, EncounterId } from "./types";
 // Money amounts and modifier values are keys into tuning.ts; hearts are per owner.
 // art is a key into the art manifest's images.
 export const ENCOUNTERS = {
-  // Placeholder hit words, labels and option names on the six neighbourhood card obstacles.
+  // Each neighbourhood's own card obstacle comes only in its zone.
   capybara: {
     hitLabel: "CAPYBARA!",
     hitWord: "SQUEAK!",

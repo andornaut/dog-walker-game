@@ -14,7 +14,6 @@ export const DEBUFFS = {
     seconds: "muddySeconds",
     stake: "bumps cost {hearts}♥ for {seconds}s",
   },
-  // Placeholder name and stake.
   spotlight: {
     bumpMoney: "spotlightBump",
     modifiers: [],
