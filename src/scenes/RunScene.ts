@@ -4,7 +4,6 @@ import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
 import type { DogId } from "../data/types";
 import {
-  cheatActive,
   type Cheats,
   cheatsFrom,
   DEV_CHEATS_KEY,
@@ -672,7 +671,7 @@ export class RunScene extends Scene implements HudRun {
       still,
     });
     const cheats = cheatsFrom(this.registry.get(DEV_CHEATS_KEY));
-    world.hitBoxes.draw(walk, cheatActive(cheats, "hitBoxes"));
+    world.hitBoxes.draw(walk, cheats.hitBoxes);
     world.shadows.hideUnused();
   }
 }

@@ -7,7 +7,7 @@ import { addCents, type Cents, cents } from "../rules/units";
 import { MAX_RUN_DOGS, type SaveDocument } from "../save/schema";
 import type { RunState } from "../state/runState";
 import { stripDevParams } from "./devStart";
-import { devInSearch, type RunSetup, runSetupLink } from "./runSetup";
+import { type RunSetup, runSetupLink } from "./runSetup";
 
 // sessionStorage, "1" while the panel is open.
 export const DEV_PANEL_OPEN_KEY = "dog-walker-game:dev-panel-open";
@@ -27,11 +27,10 @@ export const DEV_SAVE_EDITS_KEY = "dog-walker-game:dev-save-edits";
 // The walk's movement speed under the speed cheat.
 export type Speed = "fast" | "normal" | "slow";
 
-// Every cheat is off, and the speed normal, unless `on` is true.
+// Each cheat applies on its own: a toggle when true, the speed when not normal.
 export interface Cheats {
   readonly hitBoxes: boolean;
   readonly invincible: boolean;
-  readonly on: boolean;
   readonly speed: Speed;
 }
 
@@ -40,7 +39,6 @@ type CheatToggle = "hitBoxes" | "invincible";
 export const CHEATS_OFF: Cheats = {
   hitBoxes: false,
   invincible: false,
-  on: false,
   speed: "normal",
 };
 
@@ -63,44 +61,38 @@ export const SPEEDS: readonly {
   { id: "fast", label: "Fast", scale: 3 },
 ];
 
-export function cheatActive(cheats: Cheats, id: CheatToggle): boolean {
-  return cheats.on && cheats[id];
-}
-
-// With cheats off, every toggle stays off.
 export function setCheat(id: CheatToggle, on: boolean, cheats: Cheats): Cheats {
-  return cheats.on ? { ...cheats, [id]: on } : cheats;
+  return { ...cheats, [id]: on };
 }
 
-// With cheats off, the speed stays normal.
 export function setSpeed(speed: Speed, cheats: Cheats): Cheats {
-  return cheats.on ? { ...cheats, speed } : cheats;
+  return { ...cheats, speed };
 }
 
-export function cheatsOn(cheats: Cheats): Cheats {
-  return { ...cheats, on: true };
+// Whether any cheat applies: a toggle on, or a speed other than normal.
+export function cheatsInUse(cheats: Cheats): boolean {
+  return cheats.hitBoxes || cheats.invincible || cheats.speed !== CHEATS_OFF.speed;
 }
 
 export function timeScaleOf(cheats: Cheats): number {
-  const speed = cheats.on ? cheats.speed : "normal";
-  return SPEEDS.find(({ id }) => id === speed)?.scale ?? 1;
+  return SPEEDS.find(({ id }) => id === cheats.speed)?.scale ?? 1;
 }
 
 function isSpeed(value: unknown): value is Speed {
   return SPEEDS.some(({ id }) => id === value);
 }
 
-// Anything without the three switches is every cheat off; a missing or unknown speed is
-// normal.
+// Anything without the two toggles is every cheat off; a missing or unknown speed is normal.
+// Any other field is ignored.
 export function cheatsFrom(value: unknown): Cheats {
   if (typeof value !== "object" || value === null) {
     return CHEATS_OFF;
   }
-  const { hitBoxes, invincible, on, speed } = value as Record<string, unknown>;
-  if (typeof hitBoxes !== "boolean" || typeof invincible !== "boolean" || typeof on !== "boolean") {
+  const { hitBoxes, invincible, speed } = value as Record<string, unknown>;
+  if (typeof hitBoxes !== "boolean" || typeof invincible !== "boolean") {
     return CHEATS_OFF;
   }
-  return { hitBoxes, invincible, on, speed: isSpeed(speed) ? speed : "normal" };
+  return { hitBoxes, invincible, speed: isSpeed(speed) ? speed : "normal" };
 }
 
 export function encodeCheats(cheats: Cheats): string {
@@ -121,7 +113,7 @@ export function decodeCheats(text: string | null): Cheats {
 // The run as the cheats leave it: invincible owners lose no hearts. A run already set as the
 // cheats say is returned as it is.
 export function withCheats(cheats: Cheats, run: RunState): RunState {
-  const invincible = cheatActive(cheats, "invincible");
+  const { invincible } = cheats;
   return (run.invincible ?? false) === invincible ? run : { ...run, invincible };
 }
 
@@ -244,7 +236,6 @@ export type PanelAction =
   | { readonly kind: "cancel" }
   | { readonly kind: "speed"; readonly speed: Speed }
   | { readonly kind: "start"; readonly start: StartTarget }
-  | { readonly kind: "switch"; readonly on: boolean }
   | { readonly kind: "toggle"; readonly id: CheatToggle; readonly on: boolean };
 
 // The sheet as it opens: the applied cheats, bound for the start screen.
@@ -252,7 +243,7 @@ export function openPanel(applied: Cheats): PanelState {
   return { applied, staged: applied, start: START_SCREEN };
 }
 
-// Staging Cheats off turns every staged cheat off. Cancel stages what is applied again.
+// Cancel stages what is applied again.
 export function stagePanel(action: PanelAction, state: PanelState): PanelState {
   switch (action.kind) {
     case "cancel":
@@ -261,8 +252,6 @@ export function stagePanel(action: PanelAction, state: PanelState): PanelState {
       return { ...state, staged: setSpeed(action.speed, state.staged) };
     case "start":
       return { ...state, start: action.start };
-    case "switch":
-      return { ...state, staged: action.on ? cheatsOn(state.staged) : CHEATS_OFF };
     case "toggle":
       return { ...state, staged: setCheat(action.id, action.on, state.staged) };
     default:
@@ -270,24 +259,20 @@ export function stagePanel(action: PanelAction, state: PanelState): PanelState {
   }
 }
 
-// Cheats off are equal whatever their other fields hold, since none of them applies.
 function sameCheats(a: Cheats, b: Cheats): boolean {
-  if (!a.on || !b.on) {
-    return a.on === b.on;
-  }
   return a.hitBoxes === b.hitBoxes && a.invincible === b.invincible && a.speed === b.speed;
 }
 
-// Whether Apply would change anything: the staged cheats differ from the applied ones, or
-// cheats are on with a walk chosen as the start. Apply and Cancel are enabled only then.
+// Whether Apply would change anything: the staged cheats differ from the applied ones, or a
+// walk is chosen as the start. Apply and Cancel are enabled only then.
 export function hasStagedChanges(state: PanelState): boolean {
   const { applied, staged, start } = state;
-  return !sameCheats(applied, staged) || (staged.on && start !== START_SCREEN);
+  return !sameCheats(applied, staged) || start !== START_SCREEN;
 }
 
-// What Apply does: the cheats the tab plays by from now, and the page to load. With cheats
-// off, that is the start screen without `dev`; otherwise the chosen start, keeping `dev`. A
-// neighborhood's walk gets seed. href is the current page.
+// What Apply does: the cheats the tab plays by from now, and the page to load, with `dev` on
+// exactly when a cheat is in use or a walk is chosen. The start screen drops the URL's run
+// overrides; a neighborhood's walk gets seed. href is the current page.
 export function applyPanel(
   data: RouteData,
   href: string,
@@ -295,21 +280,24 @@ export function applyPanel(
   state: PanelState,
 ): { readonly cheats: Cheats; readonly url: string } {
   const { staged, start } = state;
-  if (!staged.on || start === START_SCREEN) {
-    const url = new URL("/play/", href);
-    url.search = new URL(stripDevParams(href, !staged.on)).search;
-    return { cheats: staged.on ? staged : CHEATS_OFF, url: url.toString() };
+  const playUrl = new URL("/play/", href);
+  if (start !== START_SCREEN) {
+    return { cheats: staged, url: runSetupLink(playUrl.href, startAtSetup(data, seed, start)) };
   }
-  const dev = devInSearch(new URL(href).search);
-  const playUrl = new URL("/play/", href).href;
-  return { cheats: staged, url: runSetupLink(playUrl, startAtSetup(data, dev, seed, start)) };
+  const dev = cheatsInUse(staged);
+  const search = new URL(stripDevParams(href, !dev)).searchParams;
+  if (dev) {
+    search.set("dev", "1");
+  }
+  playUrl.search = search.toString();
+  return { cheats: staged, url: playUrl.toString() };
 }
 
-// A walk that starts at zone: the first zone is walked first, any other second, after the
-// first, as if picked at the first fork.
-function startAtSetup(data: RouteData, dev: boolean, seed: number, zone: ZoneId): RunSetup {
+// A walk, in dev mode, that starts at zone: the first zone is walked first, any other second,
+// after the first, as if picked at the first fork.
+function startAtSetup(data: RouteData, seed: number, zone: ZoneId): RunSetup {
   const first = firstZoneId(data);
   return zone === first
-    ? { dev, seed, speed: 1, zone: 1 }
-    : { dev, route: [first, zone], seed, speed: 1, zone: 2 };
+    ? { dev: true, seed, speed: 1, zone: 1 }
+    : { dev: true, route: [first, zone], seed, speed: 1, zone: 2 };
 }

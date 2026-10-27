@@ -1,7 +1,7 @@
 // The dev panel: plain HTML under the game canvas. A thin bar that opens a sheet of cheats for
-// a person testing the game. The top section (the switch, start and toggles) is staged until
-// Apply; the save cheats below it act at once, with cheats on or off. The game reaches it only
-// through DevPanelHost, so this module needs no Phaser.
+// a person testing the game. The top section (start and cheats) is staged until Apply; the
+// save cheats below it act at once. The game reaches it only through DevPanelHost, so this
+// module needs no Phaser.
 import "./devPanel.css";
 
 import { gameData } from "../data";
@@ -16,6 +16,7 @@ import {
   applySaveEdit,
   CHEAT_TOGGLES,
   type Cheats,
+  cheatsInUse,
   decodeCheats,
   decodeSaveEdits,
   DEV_CHEATS_KEY,
@@ -121,12 +122,12 @@ function startSelect(): HTMLSelectElement {
   );
 }
 
-// Writes the cheats for the tab and loads the chosen start. Cheats off leaves nothing in
-// sessionStorage, as a new tab starts.
+// Writes the cheats for the tab and loads the chosen start. With no cheat in use, nothing is
+// left in sessionStorage, as a new tab starts.
 function applyAndGo(state: PanelState): void {
   const href = globalThis.location.href;
   const { cheats, url } = applyPanel(gameData, href, randomSeed(), state);
-  if (cheats.on) {
+  if (cheatsInUse(cheats)) {
     sessionWrite(DEV_CHEATS_KEY, encodeCheats(cheats));
   } else {
     sessionRemove(DEV_CHEATS_KEY);
@@ -160,9 +161,6 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
 
   const render = () => {
     const { applied, staged, start } = state;
-    on.setAttribute("aria-pressed", String(staged.on));
-    off.setAttribute("aria-pressed", String(!staged.on));
-    controls.disabled = !staged.on;
     select.value = start;
     toggles.forEach(({ box, id }) => {
       box.checked = staged[id];
@@ -174,7 +172,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     cancel.disabled = unchanged;
     apply.disabled = unchanged;
     const arrow = sheet.hidden === false ? "▾" : "▸";
-    barLabel.textContent = applied.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
+    barLabel.textContent = cheatsInUse(applied) ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
   };
   const stage = (action: PanelAction) => {
     state = stagePanel(action, state);
@@ -188,8 +186,6 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     stage({ kind: "cancel" });
   };
 
-  const on = button("Cheats on", () => stage({ kind: "switch", on: true }));
-  const off = button("Cheats off", () => stage({ kind: "switch", on: false }));
   const select = startSelect();
   select.addEventListener("change", () =>
     stage({ kind: "start", start: select.value as StartTarget }),
@@ -253,7 +249,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   });
 
   sheet.append(
-    el("header", { className: "dev-header" }, el("div", { className: "dev-switch" }, on, off)),
+    el("h2", { textContent: "Changes your walks" }),
     controls,
     el("div", { className: "dev-actions" }, cancel, apply),
     el("hr", { className: "dev-divider" }),

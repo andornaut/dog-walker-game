@@ -63,48 +63,10 @@
   margin-inline: auto;
 }
 
-.dev-header {
-  position: sticky;
-  top: 0;
-  /* Above the faded controls, whose opacity puts them in their own stacking contexts. */
-  z-index: 1;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--dev-line);
-  background: var(--dev-bg);
-}
-
-/* Two halves of one switch: the pressed half is the state. */
-.dev-switch {
-  display: flex;
-}
-
-.dev-switch .dev-button {
-  flex: 1;
-}
-
-.dev-switch .dev-button:first-child {
-  border-radius: 4px 0 0 4px;
-}
-
-.dev-switch .dev-button:last-child {
-  border-left: 0;
-  border-radius: 0 4px 4px 0;
-}
-
-.dev-switch .dev-button[aria-pressed="true"] {
-  background: var(--dev-accent);
-  color: var(--dev-bg);
-  font-weight: 700;
-}
-
 .dev-cheats {
   margin: 0;
   padding: 8px 0;
   border: 0;
-}
-
-.dev-cheats:disabled {
-  opacity: 0.4;
 }
 
 .dev-sheet h2 {
