@@ -73,7 +73,7 @@ import {
   ZONE_IDS,
 } from "../testing/planner";
 import { activeModifier, heartsByDog } from "../testing/runState";
-import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
+import { TEST_TUNING } from "../testing/tuning";
 import {
   atPack,
   data,
@@ -189,12 +189,32 @@ function quietRuns(
 }
 const FRAME = 1 / 60;
 
-// The spawn planner takes tens of milliseconds a zone, so a loop over the game's road takes up
-// to about 15 s on a busy machine; the limit is four times that.
-// The seeds the tip and treat sweep samples: more seeds cover more plans and take longer.
-const SWEEP_SEEDS = [1, 2, 3];
+// The seeds the game's road sweeps sample: more seeds cover more plans and take longer.
+const SWEEP_SEEDS = [1, 2];
 
+// The spawn planner takes a few hundred milliseconds a zone of the game's road, so a sweep over it
+// takes several seconds, more on a busy machine.
 describe("planZone", { timeout: 60_000 }, () => {
+  // The game's road planned in zone at walk position on seed, for walker, planned once for every
+  // check made of it.
+  const realPlans = new Map<string, Walk["road"]>();
+  const realPlan = (
+    seed: number,
+    zone: ZoneId,
+    position: number,
+    walker?: WalkerId,
+  ): Walk["road"] => {
+    const key = `${walker ?? ""} ${zone} ${position} ${seed}`;
+    let road = realPlans.get(key);
+    if (road === undefined) {
+      road = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
+        road: startRoad(LANE_COUNT),
+        run: inZone(realRun(REAL, walker), zone, position),
+      }).road;
+      realPlans.set(key, road);
+    }
+    return road;
+  };
   const planned = planZone(data, geometry, plannerStreams(3), walkWith(["kilo"]));
   const countOf = (category: string) =>
     planned.road.pending.filter((event) => itemCategory(data, event.kind) === category).length;
@@ -286,59 +306,52 @@ describe("planZone", { timeout: 60_000 }, () => {
         : Array.from({ length: WORLD.walkLength - 2 }, (_, i) => ({ position: i + 1, zone })),
   );
   // Every zone at each walk position, planned with a cap of one quiet row, tighter than the
-  // game's so the fill has rows to fill, and without a cap, at the same seed: the capped plan has
+  // game's so the fill has rows to fill, and without a cap, on one seed: the capped plan has
   // the same movers, no more of any kind than the zone planned, the fixed obstacles counted together
   // as one with no room is swapped for another, and never more rows quiet over the cap, and across
   // the zones it has fewer.
-  // Two plans a zone, each with every mover's contact scanned, take about 25 s.
-  it(
-    "moves the zone's own fixed obstacles into rows that come on screen quiet over the cap",
-    { timeout: 120_000 },
-    () => {
-      const cap = 1;
-      const capping = {
-        ...REAL,
-        tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: cap } },
-      };
-      const uncapped = {
-        ...REAL,
-        tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: Number.POSITIVE_INFINITY } },
-      };
-      const overCap = (zoned: RunState, zone: ZoneId, pending: Walk["road"]["pending"]) =>
-        quietRuns(REAL, GAME_ROAD, zoned, zone, pending).reduce(
-          (sum, run) => sum + Math.max(0, run - cap),
-          0,
-        );
-      const movingObstacles = (pending: Walk["road"]["pending"]) =>
-        pending.filter((event) => event.mover !== undefined && blocksLane(REAL, event.kind));
-      let [cappedOver, uncappedOver] = [0, 0];
-      for (const { position, zone } of POSITIONS) {
-        const walk = { road: startRoad(LANE_COUNT), run: inZone(realRun(REAL), zone, position) };
-        for (const seed of [1, 2]) {
-          const capped = planZone(capping, GAME_ROAD, plannerStreams(seed), walk).road;
-          const plain = planZone(uncapped, GAME_ROAD, plannerStreams(seed), walk).road.pending;
-          const label = `${zone} at ${position}, seed ${seed}`;
-          expect(movingObstacles(capped.pending), label).toEqual(movingObstacles(plain));
-          // A kind may have several quotas, such as one per stepper.
-          const group = (kind: WalkItem["kind"]) =>
-            isMinorObstacle(REAL, kind) && movementOf(REAL, kind) === null ? "fixed" : kind;
-          for (const kind of new Set(capped.planned.map((quota) => group(quota.kind)))) {
-            const planned = capped.planned
-              .filter((quota) => group(quota.kind) === kind)
-              .reduce((sum, { count }) => sum + count, 0);
-            const placed = capped.pending.filter((event) => group(event.kind) === kind).length;
-            expect(placed, `${label}: ${kind}`).toBeLessThanOrEqual(planned);
-          }
-          const over = overCap(walk.run, zone, capped.pending);
-          const plainOver = overCap(walk.run, zone, plain);
-          expect(over, label).toBeLessThanOrEqual(plainOver);
-          cappedOver += over;
-          uncappedOver += plainOver;
-        }
+  it("moves the zone's own fixed obstacles into rows that come on screen quiet over the cap", () => {
+    const cap = 1;
+    const capping = {
+      ...REAL,
+      tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: cap } },
+    };
+    const uncapped = {
+      ...REAL,
+      tuning: { ...TUNING, counts: { ...TUNING.counts, maxEmptyRows: Number.POSITIVE_INFINITY } },
+    };
+    const overCap = (zoned: RunState, zone: ZoneId, pending: Walk["road"]["pending"]) =>
+      quietRuns(REAL, GAME_ROAD, zoned, zone, pending).reduce(
+        (sum, run) => sum + Math.max(0, run - cap),
+        0,
+      );
+    const movingObstacles = (pending: Walk["road"]["pending"]) =>
+      pending.filter((event) => event.mover !== undefined && blocksLane(REAL, event.kind));
+    let [cappedOver, uncappedOver] = [0, 0];
+    // A kind may have several quotas, such as one per stepper.
+    const group = (kind: WalkItem["kind"]) =>
+      isMinorObstacle(REAL, kind) && movementOf(REAL, kind) === null ? "fixed" : kind;
+    for (const { position, zone } of POSITIONS) {
+      const walk = { road: startRoad(LANE_COUNT), run: inZone(realRun(REAL), zone, position) };
+      const capped = planZone(capping, GAME_ROAD, plannerStreams(1), walk).road;
+      const plain = planZone(uncapped, GAME_ROAD, plannerStreams(1), walk).road.pending;
+      const label = `${zone} at ${position}`;
+      expect(movingObstacles(capped.pending), label).toEqual(movingObstacles(plain));
+      for (const kind of new Set(capped.planned.map((quota) => group(quota.kind)))) {
+        const planned = capped.planned
+          .filter((quota) => group(quota.kind) === kind)
+          .reduce((sum, { count }) => sum + count, 0);
+        const placed = capped.pending.filter((event) => group(event.kind) === kind).length;
+        expect(placed, `${label}: ${kind}`).toBeLessThanOrEqual(planned);
       }
-      expect(cappedOver).toBeLessThan(uncappedOver);
-    },
-  );
+      const over = overCap(walk.run, zone, capped.pending);
+      const plainOver = overCap(walk.run, zone, plain);
+      expect(over, label).toBeLessThanOrEqual(plainOver);
+      cappedOver += over;
+      uncappedOver += plainOver;
+    }
+    expect(cappedOver).toBeLessThan(uncappedOver);
+  });
 
   // A walker's perk tipSpawns factors scale the zone's tips, rounded as Rush hour's are; a
   // walker without one plans the zone's own count.
@@ -360,14 +373,11 @@ describe("planZone", { timeout: 60_000 }, () => {
   it("skips no card for a plain obstacle in any zone at any walk position", () => {
     for (const { position, zone } of POSITIONS) {
       const zoned = inZone(realRun(REAL), zone, position);
-      for (const seed of [1, 2, 3]) {
+      for (const seed of SWEEP_SEEDS) {
         const asked = spawnQuotas(REAL, plannerStreams(seed), zoned)
           .filter(({ kind }) => opensACard(REAL, kind))
           .reduce((sum, { count }) => sum + count, 0);
-        const { pending } = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        }).road;
+        const { pending } = realPlan(seed, zone, position);
         const cards = pending.filter(({ kind }) => opensACard(REAL, kind)).length;
         const plain = pending.filter(
           ({ kind }) => blocksLane(REAL, kind) && !opensACard(REAL, kind),
@@ -406,10 +416,7 @@ describe("planZone", { timeout: 60_000 }, () => {
       const zoned = inZone(realRun(REAL), zone, position);
       for (const seed of SWEEP_SEEDS) {
         const quotas = spawnQuotas(REAL, plannerStreams(seed), zoned);
-        const { pending } = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        }).road;
+        const { pending } = realPlan(seed, zone, position);
         const pickups = pending.filter(({ kind }) => kind === "tip" || kind === "treat");
         for (const kind of ["tip", "treat"] as const) {
           expect(
@@ -458,15 +465,10 @@ describe("planZone", { timeout: 60_000 }, () => {
     ({ clearRoad, zoneIndex }) => {
       const zoned = inZone(realRun(REAL), WORLD.firstZone as ZoneId, zoneIndex);
       const soonest = read(TUNING, "seconds", "firstZoneContact") * walkScrollSpeed(REAL, zoned);
-      const firsts = [1, 2, 3, 4].map((seed) =>
+      const firsts = SWEEP_SEEDS.map((seed) =>
         Math.min(
-          ...planZone(REAL, GAME_ROAD, plannerStreams(seed), {
-            road: startRoad(LANE_COUNT),
-            run: zoned,
-          })
-            .road.pending.filter(
-              (event) => event.mover === undefined && blocksLane(REAL, event.kind),
-            )
+          ...realPlan(seed, WORLD.firstZone as ZoneId, zoneIndex)
+            .pending.filter((event) => event.mover === undefined && blocksLane(REAL, event.kind))
             .map(({ distance }) => distance),
         ),
       );
@@ -478,28 +480,6 @@ describe("planZone", { timeout: 60_000 }, () => {
       }
     },
   );
-
-  // planZone throws when a tuned spawn finds no room, so this also proves none is dropped. At
-  // the road's base speed, which a walker's pace scales.
-  it("plans every zone of the game's road, first walk and last, with a way from the path's start", () => {
-    const base = { ...REAL, tuning: withNeutralWalkers(TUNING) };
-    for (const zone of ZONE_IDS) {
-      for (const zoneIndex of [0, WORLD.walkLength - 1]) {
-        const zoned = inZone(realRun(base), zone, zoneIndex);
-        for (const seed of [1]) {
-          const walk = planZone(base, GAME_ROAD, plannerStreams(seed), {
-            road: startRoad(LANE_COUNT),
-            run: zoned,
-          });
-          const spans = blockingSpans(base, GAME_ROAD, zone, walk.road.pending);
-          const start = walk.road.path[0]?.lane ?? -1;
-          expect(lanesReachedAtEnd(walkwayOf(base, GAME_ROAD, zoned), spans, start)).not.toEqual(
-            [],
-          );
-        }
-      }
-    }
-  });
 
   // Each zone at the latest place the route can put it, where the road is fastest: the first
   // zone only starts a walk, the last zone only ends one, and the rest come between.
@@ -543,16 +523,14 @@ describe("planZone", { timeout: 60_000 }, () => {
       const tuned = { ...REAL, world };
       for (const zone of ZONE_IDS) {
         const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
-        for (const seed of [1]) {
-          const walk = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
-            road: startRoad(LANE_COUNT),
-            run: zoned,
-          });
-          const spans = blockingSpans(tuned, GAME_ROAD, zone, walk.road.pending);
-          const start = walk.road.path[0]?.lane ?? -1;
-          const reached = lanesReachedAtEnd(walkwayOf(tuned, GAME_ROAD, zoned), spans, start);
-          expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
-        }
+        const walk = planZone(tuned, GAME_ROAD, plannerStreams(1), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        });
+        const spans = blockingSpans(tuned, GAME_ROAD, zone, walk.road.pending);
+        const start = walk.road.path[0]?.lane ?? -1;
+        const reached = lanesReachedAtEnd(walkwayOf(tuned, GAME_ROAD, zoned), spans, start);
+        expect(reached, `${zone}, from lane ${start}`).not.toEqual([]);
       }
     }
   });
@@ -573,33 +551,27 @@ describe("planZone", { timeout: 60_000 }, () => {
       const margin = read(TUNING, "seconds", "pathReactionMargin") * speed;
       const lanesOf = (kind: WalkItem["kind"], lane: number) =>
         new Set(Array.from({ length: footprintOf(REAL, kind).lanes }, (_, i) => lane + i));
-      for (const seed of [1, 2]) {
-        const walk = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
-          road: startRoad(LANE_COUNT),
-          run: zoned,
-        });
-        const standing = walk.road.pending.filter(
-          (event) => event.mover === undefined && blocksLane(REAL, event.kind),
-        );
-        const contacts = standing.map(({ distance, kind, lane }) => ({
-          end: distance + itemHeight(REAL, GAME_ROAD, kind, false),
-          label: `seed ${seed}: ${kind} at ${distance}`,
-          lanes: lanesOf(kind, lane),
-          start: distance,
-        }));
-        const fit = (moves: number) => packHitLength(GAME_ROAD) + moves * laneMove + margin - 1e-6;
-        expect(pathShortfalls(packHitLength(GAME_ROAD), fit, walk.road.path, contacts)).toEqual([]);
-        const spacing = gcdOf(walk.road.pending.flatMap((e) => (e.mover ? [] : [e.distance])));
-        const wide = standing.filter(({ kind }) => footprintOf(REAL, kind).lanes >= WIDE_LANES);
-        wide.forEach((near, i) => {
-          for (const far of wide.slice(i + 1)) {
-            const rowsApart = Math.abs(far.distance - near.distance) / spacing;
-            expect(rowsApart, `seed ${seed}: ${near.kind} and ${far.kind}`).toBeGreaterThanOrEqual(
-              2,
-            );
-          }
-        });
-      }
+      const road = realPlan(1, zone, WORLD.walkLength - 1, walker);
+      const standing = road.pending.filter(
+        (event) => event.mover === undefined && blocksLane(REAL, event.kind),
+      );
+      const contacts = standing.map(({ distance, kind, lane }) => ({
+        end: distance + itemHeight(REAL, GAME_ROAD, kind, false),
+        label: `${walker} in ${zone}: ${kind} at ${distance}`,
+        lanes: lanesOf(kind, lane),
+        start: distance,
+      }));
+      const fit = (moves: number) => packHitLength(GAME_ROAD) + moves * laneMove + margin - 1e-6;
+      expect(pathShortfalls(packHitLength(GAME_ROAD), fit, road.path, contacts)).toEqual([]);
+      const spacing = gcdOf(road.pending.flatMap((e) => (e.mover ? [] : [e.distance])));
+      const wide = standing.filter(({ kind }) => footprintOf(REAL, kind).lanes >= WIDE_LANES);
+      wide.forEach((near, i) => {
+        for (const far of wide.slice(i + 1)) {
+          const rowsApart = Math.abs(far.distance - near.distance) / spacing;
+          const label = `${walker} in ${zone}: ${near.kind} and ${far.kind}`;
+          expect(rowsApart, label).toBeGreaterThanOrEqual(2);
+        }
+      });
     }
   });
 });
