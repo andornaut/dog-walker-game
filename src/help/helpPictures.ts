@@ -16,7 +16,7 @@ import type { Change } from "../rules/causes";
 import { cardFor, type CardView, forkCard, MAX_CARD_OPTIONS } from "../rules/choices";
 import { firstZoneId, forkPaths, middleZoneId } from "../rules/route";
 import { tipValue } from "../rules/run";
-import { addCents, cents, clampHearts, pixels } from "../rules/units";
+import { addCents, cents, clampHearts, pixels, read } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";
 import { stillInLane } from "../runner/laneMotion";
 import type { MoverOnRoad } from "../runner/movers";
@@ -94,9 +94,9 @@ export interface HelpPicture {
 export const HELP_SCENES = {
   // The card scene's title stands this many rows into a card page's picture.
   cardTitleInset: 8,
-  cards: { dogs: ["kilo"], encounter: "skunk", lane: 2 },
+  cards: { dogs: ["archie"], encounter: "skunk", lane: 2 },
   lanes: {
-    dogs: ["kilo", "biscuit", "duchess"],
+    dogs: ["archie", "biscuit", "duchess"],
     lane: 3,
     mover: { distance: 190, kind: "cat" },
     // The pack's move from the lane before: dots from dotsFrom right of that lane's centre,
@@ -108,13 +108,13 @@ export const HELP_SCENES = {
   },
   owners: {
     // The dog that loses a heart to a bump.
-    bumped: { dog: "biscuit", lost: 1 },
-    dogs: ["kilo", "biscuit", "duchess"],
+    bumped: { dog: "archie", lost: 1 },
+    dogs: ["kilo", "archie", "duchess"],
     fired: "duchess",
     lane: 1,
   },
   pickups: {
-    dogs: ["biscuit"],
+    dogs: ["archie", "biscuit"],
     lane: 2,
     pickups: [
       { distance: 270, kind: "tip", lane: 2 },
@@ -127,13 +127,13 @@ export const HELP_SCENES = {
     zoneFraction: 0.4,
   },
   pulls: {
-    dogs: ["kilo", "biscuit"],
+    dogs: ["archie", "biscuit"],
     lane: 2,
     squirrel: { distance: 260, lane: 3 },
     strainer: "biscuit",
     zone: "park",
   },
-  zones: { dogs: ["kilo", "biscuit", "duchess"], lane: 2 },
+  zones: { dogs: ["archie", "biscuit", "duchess"], lane: 2 },
 } as const;
 
 // The strip of height rows ending on the road's last row.
@@ -268,7 +268,13 @@ function cards(data: GameData): HelpPicture {
   const source: CardSource = { affected: [...dogs], encounter: id, kind: "encounter" };
   // Cash enough for every option, so none is disabled.
   const cost = Math.max(...cardFor(data, started, source).options.map((option) => option.cost));
-  const run: RunState = { ...started, money: cents(Math.max(started.money, cost)) };
+  // Second chance has already forgiven this neighbourhood's heart, so the hearts option shows
+  // its full loss.
+  const run: RunState = {
+    ...started,
+    heartsForgiven: read(data.tuning, "hearts", "secondChanceForgiven"),
+    money: cents(Math.max(started.money, cost)),
+  };
   return {
     ...STILL,
     card: cardFor(data, run, source),

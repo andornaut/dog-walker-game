@@ -35,8 +35,8 @@ const STILL_FRAMES: Readonly<Record<string, number>> = {
   [animationKey("fx-heart-loss", "pop")]: 1,
 };
 // The pack's move after a drag: 2x2 dots every 4px, then a chevron of two 8-row strokes 3px
-// thick meeting at its tip.
-const MOVE = { chevron: 8, dot: 2, pitch: 4, stroke: 3 };
+// thick meeting at its tip, each piece over an ink rect outline px larger on every side.
+const MOVE = { chevron: 8, dot: 2, outline: 1, pitch: 4, stroke: 3 };
 
 export interface HelpPictureData {
   // Where the picture shows on the help screen.
@@ -126,20 +126,31 @@ export class HelpPictureScene extends Scene {
       .setDepth(DEPTH.fx);
   }
 
-  // Amber dots from the lane the pack left toward the one it moved to, and a chevron.
+  // Amber dots from the lane the pack left toward the one it moved to, and a chevron, outlined
+  // in ink so they read on any ground.
   private drawPackMove(picture: HelpPicture): void {
     const move = picture.packMove;
     if (move === null) {
       return;
     }
-    const g = this.add.graphics().setDepth(DEPTH.fx).fillStyle(PALETTE.amber);
+    const rects: Rect[] = [];
     for (let x = move.fromX; x < move.toX; x += MOVE.pitch) {
-      g.fillRect(x, move.y, MOVE.dot, MOVE.dot);
+      rects.push({ height: MOVE.dot, width: MOVE.dot, x, y: move.y });
     }
     for (let i = 0; i < MOVE.chevron; i++) {
       const x = move.chevronX + i - MOVE.chevron / 2;
-      g.fillRect(x, move.y + 1 - MOVE.chevron + i, MOVE.stroke, 1);
-      g.fillRect(x, move.y + 1 + MOVE.chevron - i, MOVE.stroke, 1);
+      rects.push({ height: 1, width: MOVE.stroke, x, y: move.y + 1 - MOVE.chevron + i });
+      rects.push({ height: 1, width: MOVE.stroke, x, y: move.y + 1 + MOVE.chevron - i });
+    }
+    const g = this.add.graphics().setDepth(DEPTH.fx);
+    const edge = MOVE.outline;
+    g.fillStyle(PALETTE.ink);
+    for (const { height, width, x, y } of rects) {
+      g.fillRect(x - edge, y - edge, width + 2 * edge, height + 2 * edge);
+    }
+    g.fillStyle(PALETTE.amber);
+    for (const { height, width, x, y } of rects) {
+      g.fillRect(x, y, width, height);
     }
   }
 
