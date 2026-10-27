@@ -400,8 +400,8 @@ export type Encounter = {
 );
 
 // An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
-// bumpHearts modifiers change it, or, while a debuff with bumpMoney such as Spotlight lasts and
-// there is cash, that cash instead; the dog it lands on may dodge it.
+// bumpHearts modifiers change it, and, while a debuff with bumpMoney such as Spotlight lasts and
+// there is cash, that cash too; the dog it lands on may dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
 // Each zone's weights set how often it appears there; one with zones appears only in those zones,
 // weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
@@ -477,9 +477,9 @@ export type Walker = WalkerUnlock & {
 // after the debuff's name, its {seconds} filled with how long it would last, its {slower} with how
 // much slower its multiply agility modifiers make lane changes, such as Muddy's, and its {cash}
 // with its bumpMoney. Its modifiers change stats while it lasts; one the rules act on by id, such
-// as Zoomies' drift, has none. While one with bumpMoney lasts, a plain bump costs that cash, as
-// bumpMoney modifiers change it, instead of hearts: all the cash there is when that is less, and
-// hearts as usual at $0.
+// as Zoomies' drift, has none. While one with bumpMoney lasts, a plain bump also costs that cash,
+// as bumpMoney modifiers change it, on top of its hearts: all the cash there is when that is
+// less, and none at $0.
 export interface Debuff {
   readonly bumpMoney?: MoneyKey;
   readonly modifiers: readonly Modifier[];

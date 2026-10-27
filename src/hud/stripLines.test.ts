@@ -7,7 +7,7 @@ import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
 import { cents, clampHearts, read } from "../rules/units";
 import {
-  bumpLine,
+  bumpLines,
   debuffChanges,
   debuffLines,
   firedLine,
@@ -44,36 +44,48 @@ const secondChance: HeartChange["causes"][number] = {
 
 const forgivenLoss = hearts(4, 4, [{ amount: -1, kind: "bump" }, secondChance]);
 
-describe("bumpLine", () => {
-  it("says a dodge, a hit's hearts lost past Second chance, and nothing for a loss forgiven whole", () => {
-    const said = (change: HeartChange | null, dodged: boolean) =>
-      bumpLine(gameData, { change, dodged, dog: "kilo" }, "Cone")?.text ?? null;
-    expect(said(null, true)).toBe(fillNames(strip.dodge, { dog: kilo.name, obstacle: "cone" }));
-    expect(said(hearts(4, 2), false)).toBe(
-      fillNames(strip.plainHit, { dog: kilo.name, hearts: "2", obstacle: "cone", owner }),
-    );
-    const softened = hearts(4, 3, [{ amount: -2, kind: "bump" }, secondChance]);
-    expect(said(softened, false)).toBe(
-      fillNames(strip.plainHit, { dog: kilo.name, hearts: "1", obstacle: "cone", owner }),
-    );
-    // Its forgiven line says it.
-    expect(said(forgivenLoss, false)).toBeNull();
-  });
-
-  it("says the cash a bump cost while a debuff makes bumps cost cash", () => {
-    const cash: MoneyChange = {
-      amount: cents(-700),
-      causes: [{ amount: -700, kind: "bump" }],
-      dog: null,
-      kind: "money",
-    };
-    expect(bumpLine(gameData, { change: cash, dodged: false, dog: "kilo" }, "Cone")?.text).toBe(
-      fillNames(strip.cashHit, {
-        amount: formatDollars(cents(700)),
-        dog: kilo.name,
-        obstacle: "cone",
-      }),
-    );
+describe("bumpLines", () => {
+  // Spotlight's cash, taken on top of the hearts.
+  const cash: MoneyChange = {
+    amount: cents(-700),
+    causes: [{ amount: -700, kind: "bump" }],
+    dog: null,
+    kind: "money",
+  };
+  const softened = hearts(4, 3, [{ amount: -2, kind: "bump" }, secondChance]);
+  const dodge = fillNames(strip.dodge, { dog: kilo.name, obstacle: "cone" });
+  const hit = (lost: string) =>
+    fillNames(strip.plainHit, { dog: kilo.name, hearts: lost, obstacle: "cone", owner });
+  const paid = fillNames(strip.cashHit, { amount: formatDollars(cents(700)) });
+  // A loss forgiven whole says nothing here: its forgiven line says it.
+  it.each([
+    { cash: null, change: null, dodged: true, lines: [dodge], name: "a dodge" },
+    { cash: null, change: hearts(4, 2), dodged: false, lines: [hit("2")], name: "hearts lost" },
+    {
+      cash: null,
+      change: softened,
+      dodged: false,
+      lines: [hit("1")],
+      name: "hearts lost past Second chance",
+    },
+    { cash: null, change: forgivenLoss, dodged: false, lines: [], name: "a loss forgiven whole" },
+    {
+      cash,
+      change: hearts(4, 3),
+      dodged: false,
+      lines: [hit("1"), paid],
+      name: "a heart and Spotlight's cash",
+    },
+    {
+      cash,
+      change: forgivenLoss,
+      dodged: false,
+      lines: [paid],
+      name: "Spotlight's cash with the heart forgiven",
+    },
+  ])("says $name", ({ cash: taken, change, dodged, lines }) => {
+    const said = bumpLines(gameData, { cash: taken, change, dodged, dog: "kilo" }, "Cone");
+    expect(said.map(({ text }) => text)).toEqual(lines);
   });
 });
 

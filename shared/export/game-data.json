@@ -192,7 +192,7 @@
         "id": "promoTeam",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps cost $10 for 30s",
+      "text": "Spotlight: bumps also cost $10 for 30s",
       "title": "Big screen promo"
     },
     {
@@ -296,7 +296,7 @@
         "id": "weddingShoot",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps cost $10 for 30s",
+      "text": "Spotlight: bumps also cost $10 for 30s",
       "title": "Wedding photo shoot"
     },
     {
@@ -515,7 +515,7 @@
       "modifiers": [],
       "name": "Spotlight",
       "seconds": "spotlightSeconds",
-      "stake": "bumps cost {cash} for {seconds}s"
+      "stake": "bumps also cost {cash} for {seconds}s"
     },
     {
       "id": "stinky",

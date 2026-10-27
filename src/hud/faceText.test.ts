@@ -32,7 +32,7 @@ import {
   messageStripLayout,
 } from "./messageStrip";
 import { lowHeartsText } from "./moments";
-import { bumpLine, firedLine, forgivenLines, lowHeartsLines, treatLine } from "./stripLines";
+import { bumpLines, firedLine, forgivenLines, lowHeartsLines, treatLine } from "./stripLines";
 
 const BODY = fontFileMetrics("font-body");
 const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
@@ -72,7 +72,7 @@ const PLACES: readonly (readonly [string, FaceText | null | undefined, keyof typ
   ["strip.lowHearts", lowHeartsLines(gameData, [hearts(2, 1)])[0], "loss"],
   [
     "strip.plainHit",
-    bumpLine(gameData, { change: hearts(4, 2), dodged: false, dog: DOG }, "Cone"),
+    bumpLines(gameData, { cash: null, change: hearts(4, 2), dodged: false, dog: DOG }, "Cone")[0],
     "loss",
   ],
   ["strip.treat", treatLine(gameData, hearts(2, 3)), "gain"],

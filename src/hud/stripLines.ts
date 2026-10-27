@@ -51,33 +51,49 @@ function ownerLine<K extends OwnerKey>(
   return fillFaceLine(STRIP_LINE_FIELDS, data.runText.strip, key, all);
 }
 
-// A plain obstacle that landed on dog: a dodge, the cash it cost while a debuff such as
-// Spotlight makes bumps cost cash, or the hearts its owner lost. obstacle is the obstacle's name.
-// A bump that cost nothing, such as one Second chance forgave whole, says nothing: forgivenLines
-// says the forgiving.
-export function bumpLine(
+// The lines for a plain obstacle that landed on dog: a dodge; or the hearts its owner lost, then
+// the cash it also cost while a debuff such as Spotlight makes bumps cost cash. obstacle is the
+// obstacle's name. Hearts that cost nothing, such as a loss Second chance forgave whole, say
+// nothing: forgivenLines says the forgiving.
+export function bumpLines(
   data: StripData,
-  bump: { readonly change: Change | null; readonly dodged: boolean; readonly dog: DogId },
+  bump: {
+    readonly cash: MoneyChange | null;
+    readonly change: HeartChange | null;
+    readonly dodged: boolean;
+    readonly dog: DogId;
+  },
   obstacle: string,
-): MessageLine | null {
+): MessageLine[] {
   const dog = data.dogs[bump.dog].name;
   const name = obstacle.toLowerCase();
   if (bump.dodged) {
-    return { icon: "bump", text: line(data, "dodge", { dog, obstacle: name }) };
+    return [{ icon: "bump", text: line(data, "dodge", { dog, obstacle: name }) }];
   }
-  const { change } = bump;
-  if (change?.kind === "money") {
-    const amount = formatDollars(cents(-change.amount));
-    return { icon: "bump", text: line(data, "cashHit", { amount, dog, obstacle: name }) };
-  }
-  if (change === null || change.after === change.before) {
-    return null;
-  }
-  const hearts = String(change.before - change.after);
-  return {
-    icon: "bump",
-    ...ownerLine(data, "plainHit", bump.dog, { dog, hearts, obstacle: name }),
-  };
+  const { cash, change } = bump;
+  const hearts: MessageLine[] =
+    change === null || change.after === change.before
+      ? []
+      : [
+          {
+            icon: "bump",
+            ...ownerLine(data, "plainHit", bump.dog, {
+              dog,
+              hearts: String(change.before - change.after),
+              obstacle: name,
+            }),
+          },
+        ];
+  const paid: MessageLine[] =
+    cash === null
+      ? []
+      : [
+          {
+            icon: "bump",
+            text: line(data, "cashHit", { amount: formatDollars(cents(-cash.amount)) }),
+          },
+        ];
+  return [...hearts, ...paid];
 }
 
 // Each owner whose loss the walker's perk, such as Second chance, forgave, led by the icon of

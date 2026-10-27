@@ -4,7 +4,7 @@ import type { FieldTable } from "../lib/lines";
 // gameData.runText.strip, key, fields); its debuff lines are filled by debuff id.
 export const STRIP_LINE_FIELDS = {
   achievement: ["name"],
-  cashHit: ["amount", "dog", "obstacle"],
+  cashHit: ["amount"],
   dodge: ["dog", "obstacle"],
   effectStart: ["effect", "name"],
   fired: ["dog", "owner"],

@@ -32,7 +32,7 @@ import {
   type TreatCue,
 } from "../../hud/moments";
 import {
-  bumpLine,
+  bumpLines,
   debuffChanges,
   debuffLines,
   firedLine,
@@ -298,7 +298,9 @@ export class RunMoments {
     for (const bump of step.bumps) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
       const { kind } = bump.item;
-      this.say(bumpLine(gameData, bump, gameData.minorObstacles[kind].name));
+      bumpLines(gameData, bump, gameData.minorObstacles[kind].name).forEach((said) => {
+        this.say(said);
+      });
       if (bump.dodged) {
         this.deps.pack
           .sprites([bump.dog])
@@ -307,7 +309,10 @@ export class RunMoments {
       }
       this.playBumpHit(bump, step, pack);
       sound.play("bump");
-      this.addChanges(bump.change === null ? [] : [bump.change], BUFF_POP.fadeAtMs);
+      this.addChanges(
+        [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
+        BUFF_POP.fadeAtMs,
+      );
       this.playBumpLabel(kind, step, pack);
       this.hint({ kind: "minorBump" });
     }

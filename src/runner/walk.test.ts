@@ -1280,56 +1280,53 @@ describe("stepWalk's modified values", () => {
     expect(run.bumpsByKind).toEqual({ cone: landed });
   });
 
-  // While Spotlight lasts, a plain bump costs its cash instead of hearts: all the cash there is
-  // when that is less, and hearts as usual at $0. Second chance forgives only hearts.
+  // While Spotlight lasts, a plain bump costs its cash on top of its hearts: all the cash there is
+  // when that is less, and none at $0. Second chance may forgive the heart, never the cash.
   const spotlightCash = read(tuning, "money", DEBUFFS.spotlight.bumpMoney);
   const plenty = cents(spotlightCash * 2);
   const short = cents(spotlightCash - 100);
-  const lit = (money: number, ...debuffs: ("muddy" | "spotlight")[]) => ({
-    debuffs: debuffs.map((debuff) => ({ debuff, secondsLeft: 20, untilZone: 0 })),
+  const lit = (money: number) => ({
+    debuffs: [{ debuff: "spotlight", secondsLeft: 20, untilZone: 0 }] as const,
     money: cents(money),
   });
   const secondChance = walkerWith("secondChance");
   it.each([
-    ["costs Spotlight's cash", data, "casey", lit(plenty, "spotlight"), spotlightCash, 0, 0],
-    [
-      "takes what cash there is, short of the cost",
-      data,
-      "casey",
-      lit(short, "spotlight"),
-      short,
-      0,
-      0,
-    ],
-    ["costs hearts as usual at $0", data, "casey", lit(0, "spotlight"), 0, bump, 0],
-    [
-      "leaves Second chance unused on cash",
-      forgiving,
-      secondChance,
-      lit(plenty, "spotlight"),
-      spotlightCash,
-      0,
-      0,
-    ],
-    [
-      "lets Second chance forgive the heart at $0",
-      forgiving,
-      secondChance,
-      lit(0, "spotlight"),
-      0,
-      0,
-      bump,
-    ],
-  ] as const)("Spotlight %s", (_, walkData, walker, run, cashLost, heartsLost, forgiven) => {
-    const walk = meeting(walker, atPack("cone"), run);
+    { cash: spotlightCash, forgiven: 0, hearts: bump, money: plenty, name: "its cash and a heart" },
+    {
+      cash: short,
+      forgiven: 0,
+      hearts: bump,
+      money: short,
+      name: "what cash there is and a heart",
+    },
+    { cash: 0, forgiven: 0, hearts: bump, money: 0, name: "a heart and no cash at $0" },
+    {
+      cash: spotlightCash,
+      forgiven: bump,
+      hearts: 0,
+      money: plenty,
+      name: "its cash, Second chance forgiving the heart",
+      walker: secondChance,
+    },
+    {
+      cash: 0,
+      forgiven: bump,
+      hearts: 0,
+      money: 0,
+      name: "nothing at $0, Second chance forgiving the heart",
+      walker: secondChance,
+    },
+  ])("costs a Spotlight bump $name", ({ cash, forgiven, hearts, money, walker }) => {
+    const walk = meeting(walker ?? "casey", atPack("cone"), lit(money));
+    const walkData = walker === undefined ? data : forgiving;
     const after = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk);
     const { run: next } = after.walk;
-    expect(next.money).toBe(walk.run.money - cashLost);
-    expect(heartsByDog(next).kilo).toBe((heartsByDog(walk.run).kilo ?? 0) - heartsLost);
+    expect(next.money).toBe(walk.run.money - cash);
+    expect(heartsByDog(next).kilo).toBe((heartsByDog(walk.run).kilo ?? 0) - hearts);
     expect(next.heartsForgiven).toBe(forgiven);
     expect(next.bumpsByKind).toEqual({ cone: 1 });
-    expect(after.bumps.map(({ change }) => change?.kind ?? null)).toEqual([
-      cashLost > 0 ? "money" : "hearts",
+    expect(after.bumps.map((landed) => (landed.cash === null ? 0 : -landed.cash.amount))).toEqual([
+      cash,
     ]);
   });
 });

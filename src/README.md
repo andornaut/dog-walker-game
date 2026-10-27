@@ -88,7 +88,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 ## Game data
 
 - **Card text:** generated from the effects and tuning, and exported with every card in `shared/export/game-data.json`.
-- **Bump costs:** a plain bump costs its dog's owner hearts (`bumpParts` in `src/rules/run.ts`), or, while a debuff with `bumpMoney` such as Spotlight lasts and there is cash, that cash (`bumpCash`), all of it when there is less; `bumpMoney` modifiers change it. Forgiving modifiers, such as Second chance's, forgive hearts only.
+- **Bump costs:** a plain bump costs its dog's owner hearts (`bumpParts` in `src/rules/run.ts`), and, while a debuff with `bumpMoney` such as Spotlight lasts and there is cash, that cash too (`bumpCash`), all of it when there is less; `bumpMoney` modifiers change it. Forgiving modifiers, such as Second chance's, forgive hearts only.
 - **Choices:** `cardFor` builds a card (text, affected dogs, options disabled when unaffordable); `chooseOption` applies a choice and returns the new run state plus the outcome events the scenes animate.
 - **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline, each to a target: the affected dogs, the whole pack, or the lead dog (the front affected dog in formation order). Any card option may apply any debuff. A new kind is code in `src/rules/` plus a test.
 - **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.

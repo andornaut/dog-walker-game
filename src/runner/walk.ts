@@ -15,7 +15,7 @@ import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { chance, type Random, randomPick } from "../lib/random";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
-import { type Change, type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
+import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
@@ -179,11 +179,12 @@ interface InstantFind {
   outcome: ChoiceOutcome;
 }
 
-// A minor obstacle the pack bumped: the dog it landed on, and the cash it cost while a debuff
-// such as Spotlight makes bumps cost cash, else the hearts its owner lost, or null with none to
-// lose. The dog it would land on dodges it at its dodgeChance, and loses nothing.
+// A minor obstacle the pack bumped: the dog it landed on, the hearts its owner lost, or null with
+// none to lose, and the cash it also cost while a debuff such as Spotlight makes bumps cost cash,
+// or null with none. The dog it would land on dodges it at its dodgeChance, and loses nothing.
 export interface MinorBump {
-  change: Change | null;
+  cash: MoneyChange | null;
+  change: HeartChange | null;
   dodged: boolean;
   dog: DogId;
   item: MoverItem<MinorObstacleId>;
@@ -928,32 +929,31 @@ function grabTreat(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof
   );
 }
 
-// A minor bump costs cash while a debuff such as Spotlight makes bumps cost cash and there is
-// cash (bumpCash), with the value modifiers changed. Otherwise it costs the dog's owner the
-// hearts a bump costs now (bumpParts), with the value modifiers changed: hearts.bump's loss,
-// changed by bumpHearts modifiers, then cut by a forgiving one such as Second chance's. Null for
-// a bump that changed nothing.
+// A minor bump costs the dog's owner the hearts a bump costs now (bumpParts), with the value
+// modifiers changed: hearts.bump's loss, changed by bumpHearts modifiers, then cut by a forgiving
+// one such as Second chance's. While a debuff such as Spotlight makes bumps cost cash and there is
+// cash, it costs that cash too (bumpCash), which nothing forgives. Each change is null when it
+// changed nothing.
 function bumpDog(
   data: WalkData,
   dog: DogId,
   run: RunState,
 ): {
-  readonly change: Change | null;
-  readonly modified: ModifiedValue | null;
+  readonly cash: MoneyChange | null;
+  readonly change: HeartChange | null;
+  readonly modified: readonly (ModifiedValue | null)[];
   readonly state: RunState;
 } {
-  const cash = bumpCash(data, run);
-  if (cash !== null) {
-    return {
-      change: cash,
-      modified: changeModified(cash),
-      state: { ...run, money: addCents(run.money, cash.amount) },
-    };
-  }
   const parts = bumpParts(data, run);
   const bumped = changeHearts(data, [{ amount: -parts.value, kind: "bump" }], dog, run);
+  const cash = bumpCash(data, bumped.state);
+  const state =
+    cash === null
+      ? bumped.state
+      : { ...bumped.state, money: addCents(bumped.state.money, cash.amount) };
+  const paid = cash === null ? null : changeModified(cash);
   if (bumped.change === null) {
-    return { ...bumped, modified: null };
+    return { cash, change: null, modified: [paid], state };
   }
   const raised = modifierCauses(parts.contributions).map((cause) => ({
     ...cause,
@@ -961,7 +961,8 @@ function bumpDog(
   }));
   const by = [...raised, ...modifierCausesOf(bumped.change)];
   const base = -read(data.tuning, "hearts", "bump");
-  return { ...bumped, modified: modifiedValue({ dog, kind: "hearts" }, base, by) };
+  const hearts = modifiedValue({ dog, kind: "hearts" }, base, by);
+  return { cash, change: bumped.change, modified: [hearts, paid], state };
 }
 
 // The pack's place across the road, in road pixels from its left edge: the walker's lane
@@ -1293,13 +1294,13 @@ export function stepWalk(
         if (data.dogs[dog].size === "small") {
           nextRun = countTally("dodges", nextRun);
         }
-        bumps.push({ change: null, dodged: true, dog, item: minor });
+        bumps.push({ cash: null, change: null, dodged: true, dog, item: minor });
         return;
       }
       const bump = bumpDog(data, dog, countBump(nextRun));
       nextRun = countLandedBump(kind, bump.state);
-      bumps.push({ change: bump.change, dodged: false, dog, item: minor });
-      modifiedAt(item, [bump.modified]);
+      bumps.push({ cash: bump.cash, change: bump.change, dodged: false, dog, item: minor });
+      modifiedAt(item, bump.modified);
     } else {
       const affected = affectedDogs(run);
       if (!opensCard(affected, run, kind)) {

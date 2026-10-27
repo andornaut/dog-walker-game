@@ -42,10 +42,10 @@ export function bumpParts(
   );
 }
 
-// What a minor bump takes from the cash now, as a change with its causes, while a debuff makes
-// bumps cost cash: the debuff's bumpMoney, such as Spotlight's, changed by bumpMoney modifiers,
-// in whole dollars, or all the cash there is when that is less. Null while no
-// debuff makes bumps cost cash, or with no cash, when a bump costs hearts instead.
+// What a minor bump also takes from the cash now, on top of its hearts, as a change with its
+// causes, while a debuff makes bumps cost cash: the debuff's bumpMoney, such as Spotlight's,
+// changed by bumpMoney modifiers, in whole dollars, or all the cash there is when that is less.
+// Null while no debuff makes bumps cost cash, or with no cash.
 export function bumpCash(
   data: Pick<GameData, "debuffs" | "tuning">,
   state: Pick<RunState, "debuffs" | "modifiers" | "money">,
