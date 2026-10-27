@@ -17,8 +17,8 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide
 | `face-walker-<name>`     | sprite | 32×32               | `happy`, `neutral`                                  | Walker picker                                                                                                                                                                      |
 | `owner-<name>`           | sprite | 32×48               | `idle`, `wave`                                      | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                        |
 | `portrait-dog-<name>`    | image  | 64×64               |                                                     | Dog pick and shop; each dog sized so its inked area is about 35, 40 or 46 px square by size class, on the bottom edge                                                              |
-| `portrait-walker-<name>` | image  | 64×64               |                                                     | Walker detail card; ada, ben, casey, trista                                                                                                                                        |
-| `walker-<name>`          | sprite | 48×72               | `walk`, `react`, `stumble`, `idle`, `wave`, `cheer` | ada, ben, casey, trista; `wave` and `cheer` face the camera; `cheer` is the zone celebration's, drawn at 2×                                                                        |
+| `portrait-walker-<name>` | image  | 64×64               |                                                     | Walker detail card; ada, casey, mr-b, trista                                                                                                                                       |
+| `walker-<name>`          | sprite | 48×72               | `walk`, `react`, `stumble`, `idle`, `wave`, `cheer` | ada, casey, mr-b, trista; `wave` and `cheer` face the camera; `cheer` is the zone celebration's, drawn at 2×                                                                       |
 
 ## Road objects
 

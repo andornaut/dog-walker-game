@@ -501,8 +501,8 @@ def ada(mood):
     return g
 
 
-def ben(mood):
-    """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; lilac tee."""
+def mr_b(mood):
+    """Mr. B, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; lilac tee."""
     g = face()
     # the lilac tee, shaded violet on the right, with a violet collar, as on his road sprite
     g.rect(8, 27, 16, 1, "lilac")
@@ -547,7 +547,7 @@ def trista(mood):
 WALKERS = {
     "walker-casey": casey,
     "walker-ada": ada,
-    "walker-ben": ben,
+    "walker-mr-b": mr_b,
     "walker-trista": trista,
 }
 

@@ -257,8 +257,8 @@ def ada_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
                        brown=("skin2", None), blue=("sky", None)))
 
 
-def ben_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
-    """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): lilac tee, navy track pants,
+def mr_b_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
+    """Mr. B, 45, Black, bald (his beard is under his chin, out of sight from behind): lilac tee, navy track pants,
     sneakers. The tee's lilac is a hue no road has, so he reads on all six."""
     g = Grid(32, 48)
     b = bob
@@ -347,7 +347,7 @@ def curl_runs(length):
 WALKERS = {
     "walker-casey": casey_back,
     "walker-ada": ada_back,
-    "walker-ben": ben_back,
+    "walker-mr-b": mr_b_back,
     "walker-trista": trista_back,
 }
 
@@ -555,8 +555,8 @@ def ada_front(wave=0, bob=0):
                        brown=("skin2", None), blue=("sky", None)))
 
 
-def ben_front(wave=0, bob=0):
-    """Ben facing the camera: bald, the chin-strap beard along his jaw and under his chin, a smile, lilac tee,
+def mr_b_front(wave=0, bob=0):
+    """Mr. B facing the camera: bald, the chin-strap beard along his jaw and under his chin, a smile, lilac tee,
     navy track pants with a grey stripe, white sneakers."""
     g = Grid(32, 48)
     b = bob
@@ -657,7 +657,7 @@ def trista_front(wave=0, bob=0):
 WAVES = {
     "walker-casey": casey_front,
     "walker-ada": ada_front,
-    "walker-ben": ben_front,
+    "walker-mr-b": mr_b_front,
     "walker-trista": trista_front,
 }
 # The hand's swing right of the shoulder, one frame each: out, further, back.
@@ -671,7 +671,7 @@ WALKER_WAVE_MS = 150
 # colours are cleared, so what overlaps the arm (Trista's tote) stays.
 CHEER_ARMS = {
     "walker-casey": (((5, 9, 22, 35),), ("sky", "cyan", "blue", "skin1")),
-    "walker-ben": (((5, 9, 22, 35),), ("lilac", "violet", "dbrown", "plum")),
+    "walker-mr-b": (((5, 9, 22, 35),), ("lilac", "violet", "dbrown", "plum")),
     "walker-ada": (((7, 10, 30, 37),), ("brown", "dbrown", "yellow", "amber")),
     "walker-trista": (((5, 9, 22, 26), (5, 9, 34, 35)), ("dgreen", "forest", "green", "skin1")),
 }

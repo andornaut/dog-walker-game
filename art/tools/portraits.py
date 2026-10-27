@@ -518,7 +518,7 @@ def ada(g):
     g.p(29, 40, "dbrown")
 
 
-def ben(g):
+def mr_b(g):
     """Bald, a shine on the crown, the chin-strap beard along his jaw and under his chin with no moustache, the
     lilac tee with its violet collar."""
     bust(g, "lilac", "violet", neck="plum")
@@ -597,8 +597,8 @@ PORTRAITS = {
 
 WALKERS = {
     "ada": ada,
-    "ben": ben,
     "casey": casey,
+    "mr-b": mr_b,
     "trista": trista,
 }
 
@@ -608,7 +608,7 @@ WALKERS = {
 # 35, 40 and 46px). The large dogs fill the well.
 # How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, topping
 # out 2 or 3px under the well's top edge, and Ada smaller as the youngest.
-WALKER_SIDE = {"ada": 64, "ben": 72, "casey": 66, "trista": 69}
+WALKER_SIDE = {"ada": 64, "casey": 66, "mr-b": 72, "trista": 69}
 PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "duchess": 51, "kilo": 64, "penny": 64, "pierre": 56, "reggie": 53,
                  "snowball": 63, "zippy": 53}
 

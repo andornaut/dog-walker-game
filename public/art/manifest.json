@@ -2235,14 +2235,14 @@
       "json": "sprites/face-walker-ada.json"
     },
     {
-      "key": "face-walker-ben",
-      "png": "sprites/face-walker-ben.png",
-      "json": "sprites/face-walker-ben.json"
-    },
-    {
       "key": "face-walker-casey",
       "png": "sprites/face-walker-casey.png",
       "json": "sprites/face-walker-casey.json"
+    },
+    {
+      "key": "face-walker-mr-b",
+      "png": "sprites/face-walker-mr-b.png",
+      "json": "sprites/face-walker-mr-b.json"
     },
     {
       "key": "face-walker-trista",
@@ -4363,18 +4363,18 @@
       }
     },
     {
-      "key": "walker-ben",
-      "png": "sprites/walker-ben.png",
-      "json": "sprites/walker-ben.json",
+      "key": "walker-casey",
+      "png": "sprites/walker-casey.png",
+      "json": "sprites/walker-casey.json",
       "anchor": {
         "feetY": 68,
         "opaqueWidth": 35
       }
     },
     {
-      "key": "walker-casey",
-      "png": "sprites/walker-casey.png",
-      "json": "sprites/walker-casey.json",
+      "key": "walker-mr-b",
+      "png": "sprites/walker-mr-b.png",
+      "json": "sprites/walker-mr-b.json",
       "anchor": {
         "feetY": 68,
         "opaqueWidth": 35
@@ -4823,12 +4823,12 @@
       "png": "images/portrait-walker-ada.png"
     },
     {
-      "key": "portrait-walker-ben",
-      "png": "images/portrait-walker-ben.png"
-    },
-    {
       "key": "portrait-walker-casey",
       "png": "images/portrait-walker-casey.png"
+    },
+    {
+      "key": "portrait-walker-mr-b",
+      "png": "images/portrait-walker-mr-b.png"
     },
     {
       "key": "portrait-walker-trista",
