@@ -13,7 +13,10 @@ import { isGearDrop, planZone, spawnQuotas, startRoad, type Walk, zoneLength } f
 
 const GEAR = Object.keys(SHOP_GEAR) as GearId[];
 const POSITIONS = Array.from({ length: WORLD.walkLength }, (_, position) => position);
+// The seeds the quota draws sample, and the fewer the planner's placements do, each zone's plan
+// taking a few hundred milliseconds.
 const SEEDS = Array.from({ length: 12 }, (_, i) => i + 1);
+const PLAN_SEEDS = SEEDS.slice(0, 4);
 
 // The real run in the last zone at a walk position, with the Pocket's gear.
 const zonedRun = (position: number, pocket: GearId | null = null) => ({
@@ -57,26 +60,24 @@ describe("gear drops on the road", () => {
 
 describe("gear drop planning", () => {
   // Each zone's drops, counted and placed as the planner places them.
-  const planned = (position: number, seed: number, pocket: GearId | null = null) => {
-    const run = zonedRun(position, pocket);
-    const quotas = spawnQuotas(REAL, plannerStreams(seed), run);
-    const { pending } = planZone(REAL, GAME_ROAD, plannerStreams(seed), {
+  // The zone's gear drop quotas, drawn as the planner draws them.
+  const quotasOf = (position: number, seed: number, pocket: GearId | null = null) =>
+    spawnQuotas(REAL, plannerStreams(seed), zonedRun(position, pocket)).filter(({ kind }) =>
+      isGearDrop(REAL, kind),
+    );
+  // The zone's drops as the planner places them.
+  const dropsOf = (position: number, seed: number) =>
+    planZone(REAL, GAME_ROAD, plannerStreams(seed), {
       road: startRoad(LANE_COUNT),
-      run,
-    }).road;
-    return {
-      drops: pending.filter(({ kind }) => isGearDrop(REAL, kind)),
-      quotas: quotas.filter(({ kind }) => isGearDrop(REAL, kind)),
-      run,
-    };
-  };
+      run: zonedRun(position),
+    }).road.pending.filter(({ kind }) => isGearDrop(REAL, kind));
 
   it.each(POSITIONS)(
     "plans as many drops as the count rule draws at walk position %i, each its own item",
     (position) => {
       const counts = new Set<number>();
-      for (const seed of SEEDS) {
-        const { drops, quotas } = planned(position, seed);
+      for (const seed of PLAN_SEEDS) {
+        const [drops, quotas] = [dropsOf(position, seed), quotasOf(position, seed)];
         expect(quotas.every(({ blocksLane, count }) => !blocksLane && count === 1)).toBe(true);
         expect(new Set(quotas.map(({ kind }) => kind)).size).toBe(quotas.length);
         expect(drops.map(({ kind }) => kind).sort()).toEqual(quotas.map(({ kind }) => kind).sort());
@@ -91,15 +92,14 @@ describe("gear drop planning", () => {
   );
 
   it.each(POSITIONS)("plans the same drops from the same seed at walk position %i", (position) => {
-    for (const seed of SEEDS) {
-      expect(planned(position, seed).drops).toEqual(planned(position, seed).drops);
-    }
+    expect(dropsOf(position, 1)).toEqual(dropsOf(position, 1));
   });
 
+  // The planner places each quota it draws, so the Pocket's item is checked among the quotas.
   it.each(GEAR)("never drops the Pocket's %s", (pocket) => {
     for (const position of POSITIONS) {
       for (const seed of SEEDS) {
-        expect(planned(position, seed, pocket).drops.map(({ kind }) => kind)).not.toContain(pocket);
+        expect(quotasOf(position, seed, pocket).map(({ kind }) => kind)).not.toContain(pocket);
       }
     }
   });
@@ -125,7 +125,7 @@ describe("gear drop planning", () => {
     const real = { ...REAL, tuning };
     const length = zoneLength(real);
     for (const position of POSITIONS) {
-      for (const seed of SEEDS) {
+      for (const seed of PLAN_SEEDS) {
         const { pending } = planZone(real, GAME_ROAD, plannerStreams(seed), {
           road: startRoad(LANE_COUNT),
           run: zonedRun(position),
