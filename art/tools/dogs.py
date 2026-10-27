@@ -459,9 +459,9 @@ def archie_road(q):
     tx = 16 + q["tail"]
     g.cel(tx, 27.5 + b, 2, 1.6, *COAT)
     # the fluffy white ruff round the neck, tufted out past the shoulders and down onto the back
-    g.cel(bx, 17.5 + b, 6.5, 2.8, "white", "lgrey")
-    g.cel(bx - 6, 18.5 + b, 1.6, 1.6, "white")
-    g.cel(bx + 6, 18.5 + b, 1.6, 1.6, "white", "lgrey")
+    g.cel(bx, 18.5 + b, 6.5, 2.4, "white", "lgrey")
+    g.cel(bx - 5.5, 19.5 + b, 1.5, 1.5, "white")
+    g.cel(bx + 5.5, 19.5 + b, 1.5, 1.5, "white", "lgrey")
     for x, c in ((bx - 2.5, "white"), (bx + 2.5, "lgrey")):
         g.tri((x - 2, 19.5 + b), (x + 2, 19.5 + b), (x, 22 + b), c)
     # the red bandana tied at the nape in one knot
@@ -471,10 +471,10 @@ def archie_road(q):
     hx = 16 + ln
     e = q["ears"] + q["flop"]
     for s, t in ((-1, 0), (1, q["twitch"])):
-        g.tri((hx + s * 6, 10 + b + t), (hx + s * 5, 5 + b + e + t), (hx + s * 1.5, 7 + b + t), EAR[0])
+        g.tri((hx + s * 5.5, 10 + b + t), (hx + s * 5, 5 + b + e + t), (hx + s * 1.5, 7 + b + t), EAR[0])
     g.cel(hx, 11.5 + b, 5.5, 5, *COAT)
     for s, t in ((-1, 0), (1, q["twitch"])):
-        g.tri((hx + s * 5, 5 + b + e + t), (hx + s * 7.5, 7.5 + b + e + t), (hx + s * 4, 7.5 + b + e + t), EAR[1])
+        g.tri((hx + s * 5, 5 + b + e + t), (hx + s * 6, 6.5 + b + e + t), (hx + s * 4, 6.5 + b + e + t), EAR[1])
     spray(g, q["spray"])
     rim(g, ARCHIE_RIM)
     return g
