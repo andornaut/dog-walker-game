@@ -17,7 +17,7 @@ patio-rail          176x36  minor, 3 lanes: a restaurant patio's low black iron 
                             two green bistro chairs showing over it. idle (4 frames, 400ms): a
                             geranium clump nods 1px at three spots in turn
 rolling-barrel      48x48   minor dart, 1 lane: a whisky barrel on its side rolling across the lanes,
-                            seen end-on, its head's staves and bung turning inside a grey iron hoop;
+                            seen end-on, its dark oak head's staves and bung turning inside an iron hoop;
                             rolls right, the game mirrors it for left. idle (2 frames, 400ms):
                             resting, rocking 15 degrees; run (8 frames, 60ms): a full turn, 45
                             degrees a frame, a puff of dust kicked up behind it
@@ -342,10 +342,11 @@ PATIO_IDLE = ((), (), (1, 6), (3, 8)), 400
 # ---------- the rolling barrel ----------
 
 def rolling_barrel(turn=0.0, dust=None):
-    """A whisky barrel on its side, seen end-on: a grey iron hoop lit lgrey on its upper left and shaded
-    slate on its lower right, the chime's ochre ring inside it, and the tan head with its brown stave seams and a
-    walnut bung, turned turn degrees clockwise. dust (0 or 1) kicks up a puff of driftwood dust behind it
-    on the left, low on the ground, in one of two shapes. Laid out on the 32-unit grid; the head is drawn
+    """A whisky barrel on its side, seen end-on: an ash iron hoop lit grey on its upper left and shaded
+    slate on its lower right, the chime's dbrown ring inside it, and the brown head with its dbrown stave
+    seams and a walnut bung, dark oak with no gold or orange so it never reads as a coin, turned turn
+    degrees clockwise. dust (0 or 1) kicks up a puff of driftwood dust behind it on the left, low on the
+    ground, in one of two shapes. Laid out on the 32-unit grid; the head is drawn
     pixel for pixel at the grid's scale so its seams stay 1px at any angle."""
     g = edged(Grid(32, 32))
     px, s = raster(g), scale_of(g)
@@ -361,12 +362,12 @@ def rolling_barrel(turn=0.0, dust=None):
                 continue
             light = (dx + dy) / max(d, 1e-9)
             if d > r - max(2, 2.2 * s):
-                c = "lgrey" if light < -0.6 else "slate" if light > 0.75 else "grey"
+                c = "grey" if light < -0.6 else "slate" if light > 0.5 else "ash"
             elif d > r - max(3, 3.6 * s):
-                c = "brown" if light > 0.5 else "ochre"
+                c = "bark" if light > 0.5 else "dbrown"
             else:
                 along = dx * math.cos(a) + dy * math.sin(a)
-                c = "brown" if math.floor(along) % gap == 0 else "tan"
+                c = "dbrown" if math.floor(along) % gap == 0 else "brown"
                 if math.hypot(x + 0.5 - bung[0], y + 0.5 - bung[1]) < max(1.2, 1.4 * s):
                     c = "walnut"
             px.p(x, y, c)
@@ -417,11 +418,14 @@ def fish_crates(flop=0):
     g.rect(6, 11, 20, 1, "walnut")
     for x in (4, 15, 26):
         g.rect(x + (1 if x == 4 else 0), 10, 1, 1, "brown")
-    # the ice and a fish still inside
-    for x, y in ((7, 19), (10, 18.5), (14, 19), (18, 18.5), (21, 19), (8.5, 21.5), (12, 21), (16, 21.5), (20, 21)):
-        g.rect(x, y, 3, 3, "white")
-        g.rect(x + 2, y + 1, 1, 2, "lgrey")
-    fish(g, 9, 16, 12, "grey", "lgrey", flip=True)
+    # the ice heaped in it, a mound of crushed ice shaded foam with a few chunks' edges in it, and a fish
+    # still lying on top
+    g.cel(16, 22, 10, 3.5, "white", "foam")
+    g.rect(6, 22, 20, 2, "white")
+    for x, y in ((9, 20), (14, 19.5), (20, 20), (11, 22.5), (17, 22.5), (23, 22.5)):
+        g.rect(x, y, 2, 1, "foam")
+        g.rect(x + 2, y - 1, 1, 1, "foam")
+    fish(g, 9, 17.5, 12, "grey", "lgrey", flip=True)
     # the spill across the road in front: ice chips under the fish
     g.cel(16, 27.5, 13, 2.6, "white", "lgrey")
     for x, y, w, h in ((1, 27, 2, 2), (29, 26.5, 2, 2), (6, 24.5, 2.5, 2), (22, 24.5, 3, 2)):
