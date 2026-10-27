@@ -1,8 +1,9 @@
 import type { GameObjects, Scene } from "phaser";
 import { describe, expect, it } from "vitest";
 
-import { fontInk, phaserFontData } from "../../testing/fontInk";
-import { addPixelText, type FontRole, tintSpans } from "./pixelText";
+import { fontInk, laidChars, phaserFontData } from "../../testing/fontInk";
+import { inPill, laidPills } from "../namePills";
+import { addPixelText, type FontRole, labelPills } from "./pixelText";
 
 const FONTS: Readonly<Record<FontRole, string>> = { body: "font-body", title: "font-title" };
 
@@ -36,39 +37,47 @@ function fakeScene(): { drawn: { x: number }[]; scene: Scene } {
 // A word starting with each capital and digit, and with "$" and "+" for amounts.
 const FIRSTS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+"];
 
-// A label showing text that records the colour each drawn character is tinted, by Phaser's
-// index among the characters it draws, which skips line breaks.
-function tintedLabel(text: string): { label: GameObjects.BitmapText; tints: Map<number, number> } {
-  const tints = new Map<number, number>();
-  const drawn = text
-    .split("")
-    .map((char, idx) => ({ char, idx }))
-    .filter(({ char }) => char !== "\n")
-    .map(({ idx }, i) => ({ i, idx }));
-  const label = {
-    getTextBounds: () => ({ characters: drawn }),
-    setCharacterTint: (start: number, _length: number, _mode?: number, colour?: number) => {
-      if (colour === undefined) {
-        tints.clear();
-      } else {
-        tints.set(start, colour);
-      }
-      return label;
-    },
-    text,
-  };
-  return { label: label as unknown as GameObjects.BitmapText, tints };
-}
-
-describe("tintSpans", () => {
-  it("tints the span's characters on each label they wrapped onto, after its line breaks", () => {
-    const source = "Big tipper: tips pay double";
-    const first = tintedLabel("Big\ntipper:");
-    const second = tintedLabel("tips pay\ndouble");
-    tintSpans([first.label, second.label], source, [{ at: 4, colour: 7, length: 6 }]);
-    // "tipper" is drawn from the fourth character, the line break not drawn.
-    expect([...first.tints]).toEqual([3, 4, 5, 6, 7, 8].map((i) => [i, 7]));
-    expect(second.tints.size).toBe(0);
+describe("labelPills", () => {
+  it("places a pill on its line, in the label's parent, by the label's origin and scale", () => {
+    const second = `${inPill(1, "Hi")} x`;
+    const laid = [
+      { char: "a", ink: { left: 0, right: 4 }, line: 0 },
+      ...laidChars("font-body", { letterSpacing: 0, scale: 1 }, second).map((char) => ({
+        ...char,
+        line: 1,
+      })),
+    ];
+    // As Phaser lays the label out: line tops a line height apart, the line break not drawn.
+    const characters = laid.map(({ char, ink, line }, i) => ({
+      char,
+      i,
+      line,
+      t: line * 10,
+      w: ink === null ? 0 : ink.right - ink.left,
+      x: ink?.left ?? 0,
+    }));
+    const label = {
+      displayOriginX: 4,
+      displayOriginY: 0,
+      getTextBounds: () => ({ characters }),
+      scaleX: 2,
+      scaleY: 2,
+      x: 100,
+      y: 50,
+    } as unknown as GameObjects.BitmapText;
+    const [pill] = laidPills(1, laid);
+    expect(labelPills(label)).toEqual([
+      {
+        index: 1,
+        name: [2, 3],
+        rect: {
+          height: 22,
+          width: ((pill?.right ?? 0) - (pill?.left ?? 0)) * 2,
+          x: 100 + ((pill?.left ?? 0) - 4) * 2,
+          y: 50 + (10 - 1) * 2,
+        },
+      },
+    ]);
   });
 });
 

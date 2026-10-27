@@ -5,6 +5,7 @@ import { firesText, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { fitsRoom, type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
+import { withNamePills } from "./effectNames";
 import { RUN_TEXT_FIELDS } from "./runText";
 
 // A card drawn small in a row, or enlarged while held.
@@ -27,17 +28,19 @@ export function plaqueTexts(
   return [fillLine(RUN_TEXT_FIELDS.card, text, "need", { amount: formatDollars(option.cost) })];
 }
 
+type PillData = Pick<GameData, "debuffs" | "shopGear" | "upgrades" | "walkerPerks">;
+
 // The enlarged card's body: each change the option makes, cause by cause, a line each, or its
-// effect where it names none; Skip's line for the skip card.
+// effect, its effects' names in their pills, where it names none; Skip's line for the skip card.
 export function largeBodyText(
-  data: Pick<GameData, "dogs" | "runText">,
+  data: Pick<GameData, "dogs" | "runText"> & PillData,
   option?: OptionView,
 ): string {
   if (option === undefined) {
     return data.runText.card.skipHeld;
   }
   if (option.breakdown.length === 0) {
-    return option.text;
+    return withNamePills(data, option.text);
   }
   return option.breakdown
     .map(({ dog, name, text }) =>
@@ -48,17 +51,18 @@ export function largeBodyText(
     .join("\n");
 }
 
-// What a card's small effect may say, longest first: its effect, or for a path card its
-// upgrade's name alone, which the enlarged card shows in full.
+// What a card's small effect may say, longest first: its effect, its effects' names in their
+// pills, or for a path card its upgrade's name alone, which the enlarged card shows in full.
 function smallEffectTexts(
-  data: Pick<GameData, "runText" | "upgrades">,
+  data: Pick<GameData, "runText"> & PillData,
   option?: OptionView,
 ): string[] {
   if (option === undefined) {
     return [data.runText.card.skipEffect];
   }
+  const text = withNamePills(data, option.text);
   const upgrade = option.path?.upgrade;
-  return upgrade === undefined ? [option.text] : [option.text, data.upgrades[upgrade].name];
+  return upgrade === undefined ? [text] : [text, data.upgrades[upgrade].name];
 }
 
 // A small card's effect and firing warning, as inkWidth measures a line in the body font: the
@@ -66,7 +70,7 @@ function smallEffectTexts(
 // first that fits the whole box with the warning left to the fires marker and the enlarged
 // card; else the last text in the box's last style. The effect's top is box.y.
 export function smallCardText(
-  data: Pick<GameData, "dogs" | "homeText" | "runText" | "upgrades">,
+  data: Pick<GameData, "dogs" | "homeText" | "runText"> & PillData,
   body: FontMetrics,
   inkWidth: (style: TextFitStyle, line: string) => number,
   option?: OptionView,

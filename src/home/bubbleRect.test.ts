@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
+import { withNamePills } from "../hud/effectNames";
 import { wrapWords } from "../lib/lines";
 import { insetRect, rectsOverlap } from "../lib/rect";
 import { cents } from "../rules/units";
@@ -65,7 +66,11 @@ describe("the walker's speech", () => {
   const all: Owned = { dogSlots: gameData.dogSlots.map((_, i) => i + 1), dogs, gear, walkers };
   const bought = (purchase: Purchase, name: string) =>
     messageLine(text, { kind: "bought", name, purchase }) ?? "";
-  const said = (parts: string[], owner: DogId | null = null) => ({ owner, parts });
+  // As the bubble says them, each effect's name in its pill.
+  const said = (parts: string[], owner: DogId | null = null) => ({
+    owner,
+    parts: parts.map((part) => withNamePills(gameData, part)),
+  });
   const messages = [
     ...Object.values(text.bubble),
     text.noticePackFull,

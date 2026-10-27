@@ -59,7 +59,7 @@ import {
 import { addRampDim } from "../ui/phaser/rampDim";
 import { DISABLED_COLOURS, GREYED } from "../ui/selection";
 import { addCharm } from "./buffCharm";
-import { tintEffectNames } from "./effectNameColours";
+import { addNamePills } from "./effectNameColours";
 import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -450,7 +450,7 @@ export class CardScene extends Scene {
     const metrics = pixelFontMetrics(this, "body");
     const fit = { room: LARGE.body.width, styles: boxStyles(metrics, box.height) };
     const { lines, style } = fitPixelText(body, fit, x, top + box.top);
-    tintEffectNames("cream", [body], { text });
+    addNamePills([body]);
     parts.push(body);
     return { height: box.top + inkRowsOfLines(metrics, lines.length) * style.scale, parts };
   }
@@ -645,9 +645,7 @@ export class CardScene extends Scene {
       const effect = this.centred(centreX, 0, "", effectColour);
       setFittedText(effect, shown.effect, centreX, y + shown.box.y);
       snapCentre(effect, centreX);
-      if (!grey) {
-        tintEffectNames("cream", [effect], { text: shown.effect.lines.join(" ") });
-      }
+      addNamePills([effect], grey);
     } else {
       this.addForgiven(marks.forgiven, { align: "centre", x: centreX }, y + shown.box.y, 1);
     }

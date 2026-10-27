@@ -16,12 +16,7 @@ import {
   selectLook,
 } from "../ui/selection";
 import { DEBUFF_COLOURS } from "./debuffColours";
-import {
-  EFFECT_NAME_COLOURS,
-  effectNameColour,
-  NAME_BACKGROUNDS,
-  type NameBackground,
-} from "./effectNameColours";
+import { EFFECT_PILLS, pillColours } from "./effectNameColours";
 
 // The band an earned badge's row lies on.
 const BAND = PALETTE[STATS_LAYOUT.wall.earned.fill];
@@ -126,22 +121,15 @@ describe("debuff bar colours", () => {
   });
 });
 
-describe("effect name colours", () => {
+describe("effect name pills", () => {
   const kinds = [...Object.keys(gameData.debuffs), "buff"].sort() as EffectNameKind[];
-  const backgrounds = Object.keys(NAME_BACKGROUNDS) as NameBackground[];
 
-  it.each(backgrounds)("give every debuff and the buffs a name colour on %s", (background) => {
-    expect(Object.keys(EFFECT_NAME_COLOURS[background]).sort()).toEqual(kinds);
+  it("give every debuff and the buffs a pill", () => {
+    expect(Object.keys(EFFECT_PILLS).sort()).toEqual(kinds);
   });
 
-  it.each(
-    backgrounds.flatMap((background) =>
-      NAME_BACKGROUNDS[background].flatMap((behind) =>
-        kinds.map((kind) => ({ background, behind, kind })),
-      ),
-    ),
-  )("set $kind's name at 4.5:1 on $behind", ({ background, behind, kind }) => {
-    const colour = effectNameColour(background, kind);
-    expect(contrast(colour, PALETTE[behind])).toBeGreaterThanOrEqual(TEXT);
+  it.each(kinds)("set %s's name at 4.5:1 on its pill", (kind) => {
+    const { name, pill } = pillColours(kind);
+    expect(contrast(name, pill)).toBeGreaterThanOrEqual(TEXT);
   });
 });

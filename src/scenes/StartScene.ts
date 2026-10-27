@@ -86,6 +86,7 @@ import {
   effectIconKey,
   walkerEffectItems,
 } from "../hud/effectIcons";
+import { withNamePills } from "../hud/effectNames";
 import { downTail } from "../hud/moments";
 import { cashLeft } from "../hud/walkHud";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
@@ -128,7 +129,7 @@ import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selec
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { tintEffectNames } from "./effectNameColours";
+import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
@@ -1407,10 +1408,11 @@ export class StartScene extends Scene {
         : this.text(root, 0, 0, ownerName, PALETTE.rust, { scale: 1 });
     const nameInk = nameLabel === undefined ? undefined : inkSpan(nameLabel);
     const column = nameInk === undefined ? null : ownerColumn(nameInk.right - nameInk.left);
-    const { faced, lines } = bubbleLines(measure, SPEECH.lines, column, [
-      ...notice,
-      ...speech.paragraphs,
-    ]);
+    // A gear's focus line, "Running shoes: …", sets the gear's name in its pill.
+    const paragraphs = [...notice, ...speech.paragraphs].map((paragraph) =>
+      withNamePills(gameData, paragraph),
+    );
+    const { faced, lines } = bubbleLines(measure, SPEECH.lines, column, paragraphs);
     probe.destroy();
     const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.
@@ -1419,8 +1421,6 @@ export class StartScene extends Scene {
     const body = pixelFontMetrics(this, "body");
     const pitch = body.lineHeight * TEXT_SCALE;
     const labels = lines.map((line) => this.text(root, 0, 0, line, PALETTE.plum, { originX: 0.5 }));
-    // A gear's focus line, "Running shoes: …", sets the gear's name apart in its colour.
-    tintEffectNames("cream", labels, { text: [...notice, ...speech.paragraphs].join(" ") });
     const widest = Math.ceil(Math.max(...labels.map((label) => label.width)));
     const size = bubbleSize(body, lines.length, widest, faced ? column : null);
     // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.
@@ -1431,6 +1431,7 @@ export class StartScene extends Scene {
       placePixelText(label, 0, rect.y + size.textTop + i * pitch);
       label.setX(rect.x + SPEECH.padX + widest / 2);
     });
+    addNamePills(labels);
     const quip = addNineSlice(this, "ui-quip", rect);
     if (quip === undefined) {
       drawFramedRect(this.graphics(bubble), { border: PALETTE.plum, fill: PALETTE.cream }, rect);

@@ -38,7 +38,7 @@ import { itemAt } from "../lib/arrays";
 import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { registerFallbackPixelFont } from "../ui/phaser/pixelText";
+import { addPillGlyphs, registerFallbackPixelFont } from "../ui/phaser/pixelText";
 import { markArtReady } from "./artReady";
 import { onLoadProgress } from "./loadProgress";
 import { currentSettings, openProfile, profileSave, walkerInUse } from "./profileStore";
@@ -149,6 +149,7 @@ export class BootScene extends Scene {
     this.load.once("complete", () =>
       this.processAssets(first, FRAME_BUDGET_MS, () => {
         registerFallbackPixelFont(this);
+        addPillGlyphs(this);
         void profileOpened.then(() => (walkNow ? this.startWalk() : this.showHome()));
       }),
     );

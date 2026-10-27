@@ -1,5 +1,6 @@
 import { readBitmapFont } from "../tools/fontFile";
-import { type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
+import { type BitmapFontFile, type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
+import { inkWithPills, type LaidChar, pillGlyphAdvances } from "../ui/namePills";
 import {
   type FittedText,
   fittingText,
@@ -14,6 +15,29 @@ export const TWO_X_FIT_STYLES: readonly TextFitStyle[] = TEXT_FIT_STYLES.filter(
   (style) => style.scale === TEXT_SCALE,
 );
 
+const GAME_GLYPHS = new Map<string, BitmapFontFile["glyphs"]>();
+
+// A font's glyphs as the game holds them: its .fnt's, and a blank glyph for each pill character,
+// a copy of its space with the pill's advance, as addPillGlyphs adds them.
+export function gameGlyphs(font: string): BitmapFontFile["glyphs"] {
+  const known = GAME_GLYPHS.get(font);
+  if (known !== undefined) {
+    return known;
+  }
+  const { glyphs } = readBitmapFont(font);
+  const space = glyphs.get(" ");
+  const pills =
+    space === undefined
+      ? []
+      : [...pillGlyphAdvances(space.advance)].map(([char, advance]): [string, typeof space] => [
+          char,
+          { ...space, advance },
+        ]);
+  const all = new Map([...glyphs, ...pills]);
+  GAME_GLYPHS.set(font, all);
+  return all;
+}
+
 // A font's rows, from its .fnt.
 export function fontFileMetrics(font: string): FontMetrics {
   return fontMetrics(readBitmapFont(font));
@@ -27,9 +51,9 @@ export function phaserFontData(font: string): {
   >;
   lineHeight: number;
 } {
-  const { glyphs, lineHeight } = readBitmapFont(font);
+  const { lineHeight } = readBitmapFont(font);
   const chars = Object.fromEntries(
-    [...glyphs].map(([char, glyph]) => [
+    [...gameGlyphs(font)].map(([char, glyph]) => [
       char.codePointAt(0) ?? 0,
       { ...glyph, xAdvance: glyph.advance },
     ]),
@@ -37,19 +61,16 @@ export function phaserFontData(font: string): {
   return { chars, lineHeight };
 }
 
-// The screen columns each inked glyph of text covers in a font at a style, from the text's
-// left edge, as Phaser lays it out: the pen moves by each glyph's advance, the pair's kerning
-// and the style's letterSpacing, all in font pixels before the style's scale. A glyph that inks
-// nothing, such as a space, is left out.
-function glyphSpans(
-  font: string,
-  style: TextFitStyle,
-  text: string,
-): { left: number; right: number }[] {
-  const { glyphs, kernings } = readBitmapFont(font);
+// Each character of a line of text in a font at a style, with the screen columns it inks from
+// the line's left edge, as Phaser lays it out: the pen moves by each glyph's advance, the pair's
+// kerning and the style's letterSpacing, all in font pixels before the style's scale. A glyph
+// that inks nothing, such as a space, inks no columns.
+export function laidChars(font: string, style: TextFitStyle, text: string): LaidChar[] {
+  const { kernings } = readBitmapFont(font);
+  const glyphs = gameGlyphs(font);
   let x = 0;
   let previous = "";
-  return [...text].flatMap((char) => {
+  return [...text].map((char) => {
     const glyph = glyphs.get(char);
     if (glyph === undefined) {
       throw new Error(`${font} has no ${char}`);
@@ -59,24 +80,27 @@ function glyphSpans(
     x += glyph.advance + style.letterSpacing;
     previous = char;
     const scaled = { left: span.left * style.scale, right: span.right * style.scale };
-    return glyph.width === 0 ? [] : [scaled];
+    return { char, ink: glyph.width === 0 ? null : scaled, line: 0 };
   });
 }
 
-// The screen columns text inks in a font at a style, from its left edge.
+// The screen columns each inked glyph of text covers (laidChars).
+function glyphSpans(
+  font: string,
+  style: TextFitStyle,
+  text: string,
+): { left: number; right: number }[] {
+  return laidChars(font, style, text).flatMap((char) => char.ink ?? []);
+}
+
+// The screen columns text inks in a font at a style, its name pills' included, from its left
+// edge.
 export function fontInk(
   font: string,
   style: TextFitStyle,
   text: string,
 ): { left: number; right: number } {
-  const spans = glyphSpans(font, style, text);
-  if (spans.length === 0) {
-    return { left: 0, right: 0 };
-  }
-  return {
-    left: Math.min(...spans.map((span) => span.left)),
-    right: Math.max(...spans.map((span) => span.right)),
-  };
+  return inkWithPills(style.scale, laidChars(font, style, text)) ?? { left: 0, right: 0 };
 }
 
 // The screen columns text inks in a font at a style from the x addPixelText places a

@@ -1,7 +1,9 @@
 import type { GameObjects, Scene, Types } from "phaser";
 
 import { wrapWords } from "../../lib/lines";
+import type { Rect } from "../../lib/rect";
 import { type FontMetrics, fontMetrics, leftBearing } from "../fontMetrics";
+import { inkWithPills, type LaidChar, laidPills, pillGlyphAdvances, pillRows } from "../namePills";
 import {
   GLYPH_HEIGHT,
   glyphAdvance,
@@ -11,7 +13,6 @@ import {
   plainMarks,
 } from "../pixelFont";
 import { type FittedText, fittingText, fittingTextsAlike, type TextFitStyle } from "../textFit";
-import { type ColourSpan, shownSpanColours } from "../textSpans";
 
 // body: mixed case, for running text, card effects and labels. title: capitals, for
 // titles, numbers, money and buttons. Both are white glyphs, tinted to a palette colour.
@@ -240,16 +241,22 @@ export function scalePixelText(
   placePixelText(label, x, y);
 }
 
-// The columns a label's glyphs ink, from its left edge, in screen pixels: the first glyph's
-// left side bearing and the last glyph's right one left out.
+// The columns a label's glyphs and pills ink, from its left edge, in screen pixels: the first
+// glyph's left side bearing and the last glyph's right one left out.
 export function inkSpan(label: GameObjects.BitmapText): { left: number; right: number } {
-  const inked = label.getTextBounds(true).characters.filter((char) => char.w > 0);
-  if (inked.length === 0) {
-    return { left: 0, right: 0 };
-  }
-  const left = Math.min(...inked.map((char) => char.x));
-  const right = Math.max(...inked.map((char) => char.x + char.w));
-  return { left: left * label.scaleX, right: right * label.scaleX };
+  const ink = inkWithPills(1, label.getTextBounds(true).characters.map(laidChar));
+  return ink === null
+    ? { left: 0, right: 0 }
+    : { left: ink.left * label.scaleX, right: ink.right * label.scaleX };
+}
+
+// A character Phaser laid out, as ui/namePills.ts reads it.
+function laidChar(char: Types.GameObjects.BitmapText.BitmapTextCharacter): LaidChar {
+  return {
+    char: char.char,
+    ink: char.w > 0 ? { left: char.x, right: char.x + char.w } : null,
+    line: char.line,
+  };
 }
 
 // Sets the label in the first of styles that fits its text in room, each line's ink no wider
@@ -339,29 +346,48 @@ export function setPixelText(label: GameObjects.BitmapText, text: string): void 
   }
 }
 
-// Draws each character of labels that spans on source cover in its span's colour, and the rest
-// in its label's own colour: labels are source as drawn, in order (shownSpanColours). Call it
-// once the labels' text is set and fitted; it clears the colours an earlier call set.
-export function tintSpans(
-  labels: readonly GameObjects.BitmapText[],
-  source: string,
-  spans: readonly ColourSpan[],
-): void {
-  const colours = shownSpanColours(
-    source,
-    spans,
-    labels.map((label) => label.text),
-  );
-  labels.forEach((label, n) => {
-    label.setCharacterTint(0, -1);
-    const shown = colours[n] ?? [];
-    // Phaser tints a character by its index among the characters it draws (i), which skips
-    // line breaks, not by its index in the text (idx).
-    for (const char of label.getTextBounds(false).characters) {
-      const colour = shown[char.idx];
-      if (colour !== undefined) {
-        label.setCharacterTint(char.i, 1, undefined, colour);
-      }
-    }
+// Each pill in a label's text (ui/namePills.ts): its kind, the rect it covers in the label's
+// parent's coordinates, and the indices Phaser tints its name's characters by.
+export function labelPills(
+  label: GameObjects.BitmapText,
+): { index: number; name: number[]; rect: Rect }[] {
+  // Read first: it also updates the label's display origin.
+  const { characters } = label.getTextBounds(false);
+  const rows = pillRows(1);
+  const left = label.x - label.displayOriginX * label.scaleX;
+  const top = label.y - label.displayOriginY * label.scaleY;
+  return laidPills(1, characters.map(laidChar)).map((pill) => {
+    const lineTop = characters[pill.name[0] ?? 0]?.t ?? 0;
+    return {
+      index: pill.index,
+      // Phaser tints a character by its index among the characters it draws (i).
+      name: pill.name.map((at) => characters[at]?.i ?? 0),
+      rect: {
+        height: rows.height * label.scaleY,
+        width: (pill.right - pill.left) * label.scaleX,
+        x: left + pill.left * label.scaleX,
+        y: top + (lineTop + rows.top) * label.scaleY,
+      },
+    };
   });
+}
+
+// Gives each loaded pixel font a blank glyph for each pill character (ui/namePills.ts), copied
+// from its space with the pill's advance, so measuring, fitting and wrapping make room for pills.
+export function addPillGlyphs(scene: Scene): void {
+  for (const key of [...Object.values(FONT_KEYS), FALLBACK_FONT_KEY]) {
+    if (!scene.cache.bitmapFont.exists(key)) {
+      continue;
+    }
+    // Phaser keys a font's glyphs by character code, each with its advance.
+    type Glyph = Types.GameObjects.BitmapText.BitmapFontCharacterData & { xAdvance: number };
+    const { data } = scene.cache.bitmapFont.get(key) as { data: { chars: Record<number, Glyph> } };
+    const space = data.chars[" ".codePointAt(0) ?? 32];
+    if (space === undefined) {
+      continue;
+    }
+    for (const [char, advance] of pillGlyphAdvances(space.xAdvance)) {
+      data.chars[char.codePointAt(0) ?? 0] = { ...space, kerning: {}, xAdvance: advance };
+    }
+  }
 }

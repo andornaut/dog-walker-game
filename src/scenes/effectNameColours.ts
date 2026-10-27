@@ -1,67 +1,82 @@
 import type { GameObjects } from "phaser";
 
-import { gameData } from "../data";
-import { type EffectNameKind, effectNameMarks, type NameMark } from "../hud/effectNames";
+import { type EffectNameKind, pillKind } from "../hud/effectNames";
 import { PALETTE } from "../ui/phaser/palette";
-import { tintSpans } from "../ui/phaser/pixelText";
-import type { ColourSpan } from "../ui/textSpans";
+import { labelPills } from "../ui/phaser/pixelText";
 
 type PaletteName = keyof typeof PALETTE;
 
-// The backgrounds an effect's name is drawn on beside its description, each with the colours it
-// stands for: cream for the card face, the message strip, the detail cards and a change label's
-// chip; dark for ink and the walk bar's plum.
-export const NAME_BACKGROUNDS = {
-  cream: ["cream"],
-  dark: ["ink", "plum"],
-} as const satisfies Record<string, readonly PaletteName[]>;
-
-export type NameBackground = keyof typeof NAME_BACKGROUNDS;
-
-// Each effect's name colour on each background, at 4.5:1 or better on every colour the
-// background stands for: a debuff's darker bar shade on cream and its light shade on dark, and
-// one colour for every buff. A change a debuff zeroed, as Stinky's "+$0" tip, draws in that
-// debuff's colour on its cream chip.
-export const EFFECT_NAME_COLOURS: Readonly<
-  Record<NameBackground, Readonly<Record<EffectNameKind, PaletteName>>>
+// Each effect's name pill: a pale pill behind a dark name, so the pair reads the same on cream,
+// ink or the walk bar, the name at 4.5:1 or better on its pill. A change a debuff zeroed, as
+// Stinky's "+$0" tip, is drawn in that debuff's pill.
+export const EFFECT_PILLS: Readonly<
+  Record<EffectNameKind, { readonly name: PaletteName; readonly pill: PaletteName }>
 > = {
-  cream: {
-    buff: "dlake",
-    muddy: "darkBrown",
-    spotlight: "blue",
-    stinky: "purple",
-    zoomies: "forest",
-  },
-  dark: {
-    buff: "turquoise",
-    muddy: "tan",
-    spotlight: "yellow",
-    stinky: "pink",
-    zoomies: "yellow",
-  },
+  buff: { name: "dlake", pill: "foam" },
+  muddy: { name: "walnut", pill: "tan" },
+  spotlight: { name: "navy", pill: "yellow" },
+  stinky: { name: "plum", pill: "pink" },
+  zoomies: { name: "forest", pill: "lime" },
 };
 
-export function effectNameColour(background: NameBackground, kind: EffectNameKind): number {
-  return PALETTE[EFFECT_NAME_COLOURS[background][kind]];
+export function pillColours(kind: EffectNameKind): { name: number; pill: number } {
+  const { name, pill } = EFFECT_PILLS[kind];
+  return { name: PALETTE[name], pill: PALETTE[pill] };
 }
 
-// The marked names as spans in their colours on background.
-export function nameSpans(background: NameBackground, marks: readonly NameMark[]): ColourSpan[] {
-  return marks.map(({ at, kind, length }) => ({
-    at,
-    colour: effectNameColour(background, kind),
-    length,
-  }));
-}
-
-// Draws each effect's name in labels, the text drawn in order, in its colour on background: the
-// names effectNameMarks finds in the text and any the text marks itself, as a debuff's strip
-// line marks its lead.
-export function tintEffectNames(
-  background: NameBackground,
-  labels: readonly GameObjects.BitmapText[],
-  text: { readonly names?: readonly NameMark[]; readonly text: string },
+// rect filled with its four corner pixels, at scale, left out.
+export function fillPill(
+  g: GameObjects.Graphics,
+  colour: number,
+  rect: { height: number; width: number; x: number; y: number },
+  scale: number,
 ): void {
-  const marks = [...(text.names ?? []), ...effectNameMarks(gameData, text.text)];
-  tintSpans(labels, text.text, nameSpans(background, marks));
+  g.fillStyle(colour);
+  g.fillRect(rect.x + scale, rect.y, rect.width - 2 * scale, rect.height);
+  g.fillRect(rect.x, rect.y + scale, scale, rect.height - 2 * scale);
+  g.fillRect(rect.x + rect.width - scale, rect.y + scale, scale, rect.height - 2 * scale);
+}
+
+// A disabled item's pills, such as on a card the player cannot afford: neutral, the name left in
+// the label's own grey.
+const GREY_PILL: PaletteName = "neutralLightGrey";
+
+// Draws the pill behind each effect's name the labels' text sets in one (hud/effectNames.ts),
+// under its label in the label's parent, and the name in its colour, or grey for a disabled
+// item. Call it once the labels' text is set, fitted and placed. Returns the pills drawn, which go
+// when their label does.
+export function addNamePills(
+  labels: readonly GameObjects.BitmapText[],
+  grey = false,
+): GameObjects.Graphics[] {
+  return labels.flatMap((label) => {
+    label.setCharacterTint(0, -1);
+    const pills = labelPills(label);
+    if (pills.length === 0) {
+      return [];
+    }
+    const g = label.scene.add.graphics();
+    for (const { index, name, rect } of pills) {
+      const kind = pillKind(index);
+      if (kind === undefined) {
+        continue;
+      }
+      if (grey) {
+        fillPill(g, PALETTE[GREY_PILL], rect, label.scaleX);
+        continue;
+      }
+      const colours = pillColours(kind);
+      fillPill(g, colours.pill, rect, label.scaleX);
+      name.forEach((i) => label.setCharacterTint(i, 1, undefined, colours.name));
+    }
+    const parent = label.parentContainer;
+    if (parent === null) {
+      g.setDepth(label.depth);
+      label.scene.children.moveBelow(g as GameObjects.GameObject, label);
+    } else {
+      parent.addAt(g, parent.getIndex(label));
+    }
+    label.once("destroy", () => g.destroy());
+    return [g];
+  });
 }

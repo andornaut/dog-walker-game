@@ -87,7 +87,7 @@ import {
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
 import { DEBUFF_COLOURS } from "./debuffColours";
-import { effectNameColour } from "./effectNameColours";
+import { fillPill, pillColours } from "./effectNameColours";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
@@ -127,13 +127,16 @@ const BAR = walkBarLayout(LAYOUT.topBar);
 
 const LABEL = { ms: 1100 };
 
-// A change label's colour on its cream chip: the colour of the debuff that zeroed it, else grey
-// for nothing, forest for a gain and dark red for a loss.
-function changeLabelColour(label: ChangeLabel): number {
+// A change label's text colour and its chip: one a debuff zeroed, as Stinky's "+$0" tip, in the
+// debuff's name pill; else on a cream chip, grey for nothing, forest for a gain and dark red for
+// a loss.
+function changeLabelLook(label: ChangeLabel): { pill: number | null; text: number } {
   if (label.zeroedBy !== undefined) {
-    return effectNameColour("cream", label.zeroedBy);
+    const { name, pill } = pillColours(label.zeroedBy);
+    return { pill, text: name };
   }
-  return label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
+  const text = label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
+  return { pill: null, text };
 }
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
@@ -884,10 +887,8 @@ export class HudScene extends Scene {
     at: { anchor: "bottom" | "middle"; lane: Rect; rise: boolean },
     done: () => void = () => undefined,
   ): void {
-    const text = addPixelText(this, 0, 0, label.text, {
-      colour: changeLabelColour(label),
-      scale: 2,
-    });
+    const look = changeLabelLook(label);
+    const text = addPixelText(this, 0, 0, label.text, { colour: look.text, scale: 2 });
     const room = changeLabelRoom(at.lane.width);
     const { lines, style } = fitPixelText(text, { room, styles: CHANGE_LABEL_STYLES }, 0, 0);
     const ink = inkSpan(text);
@@ -895,7 +896,11 @@ export class HudScene extends Scene {
     const place = changeChipPlace(pixelFontMetrics(this, "body"), at.lane, at.anchor, shown);
     placePixelText(text, place.text.x - ink.left, place.text.y);
     const chip = this.add.graphics();
-    drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, place.chip);
+    if (look.pill === null) {
+      drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, place.chip);
+    } else {
+      fillPill(chip, look.pill, place.chip, style.scale);
+    }
     text.setDepth(1);
     const rise = at.rise ? place.chip.y - at.lane.y : 0;
     this.labels.join(fadeAway(this, [chip, text], { ms: LABEL.ms, rise }, done));

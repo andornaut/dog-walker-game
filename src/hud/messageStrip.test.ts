@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId, QuipMoment } from "../data/types";
+import type { DebuffId, DogId, GearId, QuipMoment } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
 import { type Rect } from "../lib/rect";
@@ -15,6 +15,8 @@ import { inside } from "../testing/rects";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import { effectLine } from "./effectIcons";
+import { faceTextWithNamePills } from "./effectNames";
 import {
   type FaceRow,
   faceSentenceList,
@@ -50,6 +52,7 @@ import {
   stripLeadSlot,
 } from "./messageStrip";
 import { STRIP_LINE_FIELDS } from "./runText";
+import { debuffLines } from "./stripLines";
 import { debuffBarRects } from "./walkHud";
 
 const { dwellMs, fadeMs, lifeMs, maxWaiting } = MESSAGE_TIMING;
@@ -213,7 +216,7 @@ describe("messageLinePanel", () => {
 // Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
 // owner and obstacle as each neighbourhood names it, with two-digit counts and the largest
 // amounts.
-function everyStripLine(): FaceText[] {
+function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
   const { strip } = gameData.runText;
   const line = (key: keyof typeof STRIP_LINE_FIELDS, fields: Record<string, FaceText | string>) =>
     fillFaceText(strip[key], fields);
@@ -242,9 +245,19 @@ function everyStripLine(): FaceText[] {
   return [
     ...Object.values(gameData.hints).map(({ text }) => ({ text })),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
-    ...Object.values(strip.debuffStart).map((start) => ({
-      text: fillNames(start, { cash: amount, seconds: "99", slower: "100%" }),
-    })),
+    // Each debuff's start line at the largest amounts, its lead in its pill as debuffLines marks it.
+    ...(Object.keys(gameData.debuffs) as DebuffId[]).map((debuff) => {
+      const started = [{ debuff, secondsLeft: 99, untilZone: 0 }];
+      const [said] = debuffLines(gameData, { ended: [], started });
+      const fields = { cash: amount, seconds: "99", slower: "100%" };
+      return { names: said?.names ?? [], text: fillNames(strip.debuffStart[debuff], fields) };
+    }),
+    ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
+      line("effectStart", {
+        effect: effectLine(gameData, { gear, kind: "gear" }),
+        name: gameData.shopGear[gear].name,
+      }),
+    ),
     ...Object.values(strip.debuffEnd).map((text) => ({ text })),
     line("luckyNeighbour", { gains: longestGains, hearts: "10" }),
     line("fullPackHome", { amount }),
@@ -287,7 +300,7 @@ describe("the strip's lines", () => {
 
   it("fits every line on the strip's rows, and on the one-row strip", () => {
     const misfits = everyStripLine()
-      .map(plain)
+      .map((line) => plain(faceTextWithNamePills(gameData, line)))
       .filter((said) => {
         const rows = messageRows(width2x, BOX_2X, room, said);
         return (

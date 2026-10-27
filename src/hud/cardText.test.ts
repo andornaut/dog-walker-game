@@ -11,6 +11,7 @@ import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import type { TextFitStyle } from "../ui/textFit";
 import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "./cardText";
+import { withNamePills } from "./effectNames";
 
 const BODY = fontFileMetrics("font-body");
 const TITLE = fontFileMetrics("font-title");
@@ -109,7 +110,7 @@ describe("every card the data can deal", () => {
     expect(
       misfits((option) => {
         const { box, effect, warning } = smallCardText(gameData, BODY, bodyWidth, option);
-        const full = option?.text ?? gameData.runText.card.skipEffect;
+        const full = withNamePills(gameData, option?.text ?? gameData.runText.card.skipEffect);
         const fitted = warning === null ? [effect] : [effect, warning];
         const effectBottom = box.y + inkRowsOfLines(BODY, effect.lines.length) * effect.style.scale;
         const foot = warning === null ? area.y + area.height : box.warningY - warningGap;

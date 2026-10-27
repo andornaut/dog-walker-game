@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
-import type { NameMark } from "../hud/effectNames";
+import { faceTextWithNamePills, type NameMark } from "../hud/effectNames";
 import { type FaceRow, type FaceText, inlineFaceBox, withoutFace } from "../hud/faceText";
 import {
   EMPTY_MESSAGE_STRIP,
@@ -146,7 +146,11 @@ function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn
       : ownerLeadLayout(body, slot, inkWidth(scene, name, NAME_STYLE));
   const textX = lead?.textX ?? slot.textX;
   const room = lead?.room ?? slot.room;
-  const said = withoutFace(owner?.dog, line);
+  // Each effect's name the line leads with, or marks, in its pill, laid out with the text.
+  const said = faceTextWithNamePills(gameData, {
+    ...withoutFace(owner?.dog, line),
+    ...(line.names === undefined ? {} : { names: line.names }),
+  });
   const set =
     bars === 0
       ? { ...wrappedRows(scene, room, said), capsTop: strip.rowTops[0] ?? 0 }
@@ -156,7 +160,6 @@ function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn
   const text = {
     box: inlineFaceBox(body, set.fit.scale),
     fit: set.fit,
-    onCream: { ...said, ...(line.names === undefined ? {} : { names: line.names }) },
     style: TEXT_STYLE,
   };
   const parts: Faded[] = addFaceRows(scene, { capsTop: set.capsTop, x: textX }, text, set.rows);

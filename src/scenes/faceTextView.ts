@@ -2,7 +2,6 @@ import type { GameObjects, Scene } from "phaser";
 
 import { ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { NameMark } from "../hud/effectNames";
 import {
   type FaceBox,
   type FaceRow,
@@ -22,7 +21,7 @@ import {
   setPixelText,
 } from "../ui/phaser/pixelText";
 import type { TextFitStyle } from "../ui/textFit";
-import { tintEffectNames } from "./effectNameColours";
+import { addNamePills } from "./effectNameColours";
 import { playFirstTag } from "./sprites";
 
 // Walk text with owners' faces inline before their names (hud/faceText.ts), drawn in the body
@@ -65,16 +64,14 @@ export function fitFaceRows(
 }
 
 // The rows drawn from x, the first row's capitals' top at capsTop and each further row a line
-// of the font lower, at fit, in style's colour, each face in box. Given onCream, the line the
-// rows were set from, drawn on cream, each effect's name in it takes its colour
-// (tintEffectNames). Returns the parts drawn.
+// of the font lower, at fit, in style's colour, each face in box, and each effect's name the text
+// sets in a pill in its pill (addNamePills). Returns the parts drawn.
 export function addFaceRows(
   scene: Scene,
   at: { capsTop: number; x: number },
   text: {
     box: FaceBox | undefined;
     fit: TextFitStyle;
-    onCream?: FaceText & { readonly names?: readonly NameMark[] };
     style: PixelTextStyle;
   },
   rows: readonly FaceRow[],
@@ -102,10 +99,7 @@ export function addFaceRows(
           );
     return [...faces, ...texts];
   });
-  if (text.onCream !== undefined) {
-    tintEffectNames("cream", labels, text.onCream);
-  }
-  return parts;
+  return [...addNamePills(labels), ...parts];
 }
 
 // The owner's 20x20 face at 1x, in its mood, else neutral, in frame's 1px ink line over tan.

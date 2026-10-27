@@ -1,8 +1,10 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard, DetailPicture } from "../home/detail";
 import { CARD_TEXT_ROOM, cardBand, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
+import { withNamePills } from "../hud/effectNames";
 import { screenLayout } from "../layout/screenLayout";
 import { insetRect, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
@@ -17,7 +19,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
-import { tintEffectNames } from "./effectNameColours";
+import { addNamePills } from "./effectNameColours";
 import {
   addCloseButton,
   addLoopingFrame,
@@ -191,7 +193,6 @@ export function drawDetailCard(
     probe.label.destroy();
     return probe.lines.length;
   };
-  // Each effect's name a row leads with, as a perk's "Second chance: …", takes its colour.
   const draw = (rows: readonly Row[], x: number, room: number, tops: readonly number[]) =>
     rows.forEach((row, i) => {
       const y = tops[i] ?? 0;
@@ -207,14 +208,18 @@ export function drawDetailCard(
                 colour: row.colour,
               },
             );
-      tintEffectNames("cream", [label], { text: row.value });
+      addNamePills([label]);
     });
   const status: Row = {
     colour: card.locked ? PALETTE.darkRed : PALETTE.forest,
     fit: true,
     value: card.status,
   };
-  const plum: Row[] = card.lines.map((value) => ({ colour: PALETTE.plum, value }));
+  // Each effect's name a line leads with, as a perk's "Second chance: …", in its pill.
+  const plum: Row[] = card.lines.map((value) => ({
+    colour: PALETTE.plum,
+    value: withNamePills(gameData, value),
+  }));
   const besideRows: Row[] =
     kind === "gear"
       ? [...plum, status]
