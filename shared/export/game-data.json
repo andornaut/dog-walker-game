@@ -10,7 +10,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1♥ each, −$8",
+      "text": "+1♥ each, −$10",
       "title": "Other dog"
     },
     {
@@ -36,7 +36,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "−$10",
+      "text": "−$16",
       "title": "Skunk"
     },
     {
@@ -75,7 +75,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "−$10",
+      "text": "−$16",
       "title": "Thief"
     },
     {
@@ -384,7 +384,7 @@
       "look": "White coat, pink bow",
       "name": "Duchess",
       "owner": {
-        "name": "Rosa",
+        "name": "Eve",
         "role": "retired florist"
       },
       "price": "duchess",
@@ -1338,12 +1338,12 @@
     },
     "money": {
       "bigTipperTipBonus": 1,
-      "encounterHigh": 10,
-      "encounterLow": 5,
+      "encounterHigh": 16,
+      "encounterLow": 10,
       "fannyPackStart": 20,
       "fullPackBonusPerDog": 10,
       "lostWalletKeep": 20,
-      "missedTips": 8,
+      "missedTips": 10,
       "payPerDog": 20,
       "prices": {
         "biscuit": 250,
@@ -1363,7 +1363,7 @@
         "whistle": 1500
       },
       "startPurse": 0,
-      "thiefLetGo": 10,
+      "thiefLetGo": 16,
       "tip": 1
     },
     "multipliers": {
