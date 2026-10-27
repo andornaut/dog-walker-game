@@ -66,7 +66,7 @@ export const TUNING = {
     capybaraCall: 20,
     encounterHigh: 20,
     encounterLow: 20,
-    // The Fish crate spill's Help clean up.
+    // The Fish crate spill's Pay for the fish.
     fishCleanUp: 20,
     // Paid into the bank per dog when every dog set out with gets home after the last zone.
     fullPackBonusPerDog: 10,
@@ -104,7 +104,7 @@ export const TUNING = {
     startPurse: 0,
     thiefLetGo: 20,
     tip: 1,
-    // The Wedding photo shoot's Apologize.
+    // The Wedding photo shoot's Pay for a reshoot.
     weddingApology: 20,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are

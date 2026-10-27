@@ -31,7 +31,7 @@
       "frame": "encounter",
       "id": "keep-walking",
       "index": 2,
-      "name": "Keep walking",
+      "name": "Drag them away",
       "source": {
         "id": "capybara",
         "kind": "encounter"
@@ -49,7 +49,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "Stinky: tips pay nothing for 30s",
+      "text": "Zoomies: the pack drifts on its own for 20s",
       "title": "Dropped ice cream"
     },
     {
@@ -70,7 +70,7 @@
       "frame": "encounter",
       "id": "pull-away",
       "index": 2,
-      "name": "Pull away",
+      "name": "Walk on by",
       "source": {
         "id": "droppedCone",
         "kind": "encounter"
@@ -83,7 +83,7 @@
       "frame": "encounter",
       "id": "sniff",
       "index": 0,
-      "name": "Let them sniff",
+      "name": "Sniff the fish",
       "source": {
         "id": "fishCrates",
         "kind": "encounter"
@@ -96,7 +96,7 @@
       "frame": "encounter",
       "id": "clean-up",
       "index": 1,
-      "name": "Help clean up",
+      "name": "Pay for the fish",
       "source": {
         "id": "fishCrates",
         "kind": "encounter"
@@ -109,7 +109,7 @@
       "frame": "encounter",
       "id": "pull-away",
       "index": 2,
-      "name": "Pull away",
+      "name": "Hurry past",
       "source": {
         "id": "fishCrates",
         "kind": "encounter"
@@ -148,7 +148,7 @@
       "frame": "encounter",
       "id": "shoo",
       "index": 0,
-      "name": "Shoo",
+      "name": "Stand your ground",
       "source": {
         "id": "porchCat",
         "kind": "encounter"
@@ -317,7 +317,7 @@
       "frame": "encounter",
       "id": "apologize",
       "index": 2,
-      "name": "Apologize",
+      "name": "Pay for a reshoot",
       "source": {
         "id": "weddingShoot",
         "kind": "encounter"
@@ -836,7 +836,7 @@
                 }
               }
             ],
-            "name": "Keep walking"
+            "name": "Drag them away"
           }
         ]
       },
@@ -862,7 +862,7 @@
             "art": "card-dropped-cone-lick",
             "effects": [
               {
-                "debuff": "stinky",
+                "debuff": "zoomies",
                 "kind": "debuff"
               }
             ],
@@ -890,7 +890,7 @@
                 }
               }
             ],
-            "name": "Pull away"
+            "name": "Walk on by"
           }
         ]
       },
@@ -920,7 +920,7 @@
                 "kind": "debuff"
               }
             ],
-            "name": "Let them sniff"
+            "name": "Sniff the fish"
           },
           {
             "art": "card-fish-crates-clean-up",
@@ -931,7 +931,7 @@
                 "kind": "money"
               }
             ],
-            "name": "Help clean up"
+            "name": "Pay for the fish"
           },
           {
             "art": "card-fish-crates-pull-away",
@@ -944,7 +944,7 @@
                 }
               }
             ],
-            "name": "Pull away"
+            "name": "Hurry past"
           }
         ]
       },
@@ -1077,7 +1077,7 @@
                 }
               }
             ],
-            "name": "Shoo"
+            "name": "Stand your ground"
           },
           {
             "art": "card-porch-cat-treat",
@@ -1357,7 +1357,7 @@
                 "kind": "money"
               }
             ],
-            "name": "Apologize"
+            "name": "Pay for a reshoot"
           }
         ]
       },

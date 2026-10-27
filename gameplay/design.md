@@ -147,22 +147,22 @@ Size shows at a glance: on the road, medium dogs are drawn 48 px, large dogs 54 
 
 ### Encounters and debuffs
 
-Nine card obstacles open a choice card: the other dog, the skunk and the thief, in several neighborhoods, and one of each neighborhood's own, which appears only there. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20 ($10 with the Fanny pack). Most hearts options cost each walking dog's owner 1♥; the porch cat's Shoo costs only the lead dog's owner.
+Nine card obstacles open a choice card: the other dog, the skunk and the thief, in several neighborhoods, and one of each neighborhood's own, which appears only there. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20 ($10 with the Fanny pack). Most hearts options cost each walking dog's owner 1♥; the porch cat's Stand your ground costs only the lead dog's owner.
 
-| Neighborhood        | Card                | Options                                                               |
-| ------------------- | ------------------- | --------------------------------------------------------------------- |
-| Cabbagetown         | Porch cat           | Shoo (−1♥ lead dog), Treat bribe ($20), Bolt past (Zoomies)           |
-| High Park           | Escaped capybara    | Help the keeper (Muddy), Call the zoo ($20), Keep walking (−1♥ each)  |
-| Distillery District | Wedding photo shoot | Pose (Spotlight), Walk around (−1♥ each), Apologize ($20)             |
-| Kensington Market   | Fish crate spill    | Let them sniff (Stinky), Help clean up ($20), Pull away (−1♥ each)    |
-| The Beaches         | Dropped ice cream   | Let them lick it (Stinky), Buy a new cone ($20), Pull away (−1♥ each) |
-| Yonge Street        | Big screen promo    | Wave hello (Spotlight), Buy the merch ($20), Push through (−1♥ each)  |
+| Neighborhood        | Card                | Options                                                                  |
+| ------------------- | ------------------- | ------------------------------------------------------------------------ |
+| Cabbagetown         | Porch cat           | Stand your ground (−1♥ lead dog), Treat bribe ($20), Bolt past (Zoomies) |
+| High Park           | Escaped capybara    | Help the keeper (Muddy), Call the zoo ($20), Drag them away (−1♥ each)   |
+| Distillery District | Wedding photo shoot | Pose (Spotlight), Walk around (−1♥ each), Pay for a reshoot ($20)        |
+| Kensington Market   | Fish crate spill    | Sniff the fish (Stinky), Pay for the fish ($20), Hurry past (−1♥ each)   |
+| The Beaches         | Dropped ice cream   | Let them lick it (Zoomies), Buy a new cone ($20), Walk on by (−1♥ each)  |
+| Yonge Street        | Big screen promo    | Wave hello (Spotlight), Buy the merch ($20), Push through (−1♥ each)     |
 
 The escaped capybara is a mover: it steps once or twice, like any stepper. The wedding photo shoot is 2 lanes wide; the other neighborhood cards are 1.
 
 A puddle opens no card: hitting one costs no heart and makes the pack _Muddy_, with a plain obstacle's hit stop.
 
-Debuffs come from puddles and card options: Muddy from a puddle or the capybara's Help the keeper; Stinky from the skunk's Quick rinse, the fish crates' Let them sniff or the dropped ice cream's Let them lick it; Zoomies from the other dog's Pull away or the porch cat's Bolt past; Spotlight from the wedding shoot's Pose or the promo's Wave hello. Debuffs are mild. Muddy and Zoomies last 20 seconds of walking, and Stinky and Spotlight 30, or until the neighborhood ends, whichever comes first. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its time; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's own color runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over its time; two active debuffs show as two bars. Hold a bar to see what the debuff does.
+Debuffs come from puddles and card options: Muddy from a puddle or the capybara's Help the keeper; Stinky from the skunk's Quick rinse or the fish crates' Sniff the fish; Zoomies from the other dog's Pull away, the porch cat's Bolt past or the dropped ice cream's Let them lick it; Spotlight from the wedding shoot's Pose or the promo's Wave hello. Debuffs are mild. Muddy and Zoomies last 20 seconds of walking, and Stinky and Spotlight 30, or until the neighborhood ends, whichever comes first. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its time; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's own color runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over its time; two active debuffs show as two bars. Hold a bar to see what the debuff does.
 
 - **Muddy:** every plain bump costs twice as much: 2♥ instead of 1, or twice the cash in the Spotlight. Its hearts warning still shows in the Spotlight
 - **Spotlight:** a plain bump costs $10 of cash instead of hearts; with less on hand it takes what's left, and with $0 it costs hearts as usual, which Second chance may forgive. Second chance never forgives cash. A Spotlight bump is still a plain hit: it has the hit stop and grace window and counts toward bumps, bump-free neighborhoods and bump badges

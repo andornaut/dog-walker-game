@@ -31,7 +31,7 @@ export const ENCOUNTERS = {
         {
           art: "card-capybara-keep-walking",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          name: "Keep walking",
+          name: "Drag them away",
         },
       ],
     },
@@ -48,7 +48,7 @@ export const ENCOUNTERS = {
       options: [
         {
           art: "card-dropped-cone-lick",
-          effects: [{ debuff: "stinky", kind: "debuff" }],
+          effects: [{ debuff: "zoomies", kind: "debuff" }],
           name: "Let them lick it",
         },
         {
@@ -59,7 +59,7 @@ export const ENCOUNTERS = {
         {
           art: "card-dropped-cone-pull-away",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          name: "Pull away",
+          name: "Walk on by",
         },
       ],
     },
@@ -77,17 +77,17 @@ export const ENCOUNTERS = {
         {
           art: "card-fish-crates-sniff",
           effects: [{ debuff: "stinky", kind: "debuff" }],
-          name: "Let them sniff",
+          name: "Sniff the fish",
         },
         {
           art: "card-fish-crates-clean-up",
           effects: [{ amount: "fishCleanUp", change: "lose", kind: "money" }],
-          name: "Help clean up",
+          name: "Pay for the fish",
         },
         {
           art: "card-fish-crates-pull-away",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          name: "Pull away",
+          name: "Hurry past",
         },
       ],
     },
@@ -153,7 +153,7 @@ export const ENCOUNTERS = {
         {
           art: "card-porch-cat-shoo",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
-          name: "Shoo",
+          name: "Stand your ground",
         },
         {
           art: "card-porch-cat-treat",
@@ -296,7 +296,7 @@ export const ENCOUNTERS = {
         {
           art: "card-wedding-shoot-apologize",
           effects: [{ amount: "weddingApology", change: "lose", kind: "money" }],
-          name: "Apologize",
+          name: "Pay for a reshoot",
         },
       ],
     },
