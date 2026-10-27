@@ -60,9 +60,10 @@ fx-hit-promo-team   the impact star in amber, then camera flashes popping round 
                     shrinks away, confetti in cyan, pink and yellow falling
 
 Cards (75x56 images, composed from the sprites above as cards.py composes its own):
-card-dropped-cone-lick        Archie licking the pink puddle round the dropped cone, the kid by it
+card-dropped-cone-lick        Archie licking the pink puddle round the dropped cone, the kid by it, sky
+                              speed lines and icon-zoomies' amber paw print for the sugar rush
 card-dropped-cone-buy         the kid holding a new cone up under hearts, a callout of -$
-card-dropped-cone-pull-away   Archie pulled away from the dropped cone on its leash
+card-dropped-cone-walk-on-by  Archie pulled away from the dropped cone on its leash
 card-promo-team-wave          Archie under a spotlight beam, the promoter filming, flashes round it
 card-promo-team-merch         the promoter's turquoise star tee held up as merch, a callout of -$
 card-promo-team-push-through  Archie pulling past the promoter, speed lines behind it
@@ -833,14 +834,18 @@ def merch_tee():
 
 
 def card_lick():
-    """Archie leaning in to lick the pink puddle round the dropped cone, the kid looking on."""
+    """Let them lick it: Archie leaning in to lick the pink puddle round the dropped cone, the kid looking on,
+    and the sugar rush hitting him: sky speed lines streaming off him and an amber paw print dashing, as
+    icon-zoomies draws the zoomies."""
     import cards
     a = cards.Art()
     a.ground("pawsPromenade")
     a.put("dropped-cone", "idle", 20, 60, 1)
     c = a.dog("archie", "pull", 50, 57, flip=True)
     a.lead(50, c, 62)
-    a.hearts([(52, 8)])
+    for x, y, n in ((63, 22, 6), (65, 27, 8), (63, 32, 5)):
+        a.fill(x, y, n, 1, "sky")
+    a.paste(cards.sn.image("icon-zoomies"), 52, 2)
     return a
 
 
@@ -857,8 +862,8 @@ def card_buy():
     return a
 
 
-def card_pull_away():
-    """Archie pulled away from the dropped cone on its leash."""
+def card_walk_on_by():
+    """Walk on by: Archie pulled away from the dropped cone on its leash."""
     import cards
     a = cards.Art()
     a.ground("pawsPromenade")
@@ -928,7 +933,7 @@ def card_push_through():
 ILLUSTRATIONS = {
     "card-dropped-cone-lick": card_lick,
     "card-dropped-cone-buy": card_buy,
-    "card-dropped-cone-pull-away": card_pull_away,
+    "card-dropped-cone-walk-on-by": card_walk_on_by,
     "card-promo-team-wave": card_wave,
     "card-promo-team-merch": card_merch,
     "card-promo-team-push-through": card_push_through,
