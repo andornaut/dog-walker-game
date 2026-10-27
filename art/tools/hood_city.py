@@ -41,9 +41,10 @@ sandwich-board      48x48   minor, 1 lane: a café's A-frame sign, a forest chal
                             on frame 2
 pedicab             48x72   minor rider, 1 lane, coming down its lane at the pack, facing the player: a
                             bike taxi, its cobalt canopy edged in a white scalloped valance with yellow
-                            string lights over a gold cab on two wheels behind the rider, who wears a
-                            purple tee and a white headband. ride (4 frames, 120ms): the pedals going
-                            round, the front tyre's tread falling 1px a frame
+                            string lights shading a padded red bench on two wheels, a passenger in a
+                            green top and a gold bob sitting on its left, and in front the rider, who
+                            wears a purple tee and a white headband. ride (4 frames, 120ms): the pedals
+                            going round, the front tyre's tread falling 1px a frame
 
 Every key above also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5),
 with the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The people
@@ -356,71 +357,82 @@ def rollerblader(push=None, sway=0, roll=0):
 # ---------- pedicab ----------
 
 # Pedalling: each foot's row (the pedals go round) and the tread's roll; 4 frames at 120ms.
-PEDICAB_RIDE = [dict(lf=37, rf=42, roll=0), dict(lf=39, rf=40, roll=1), dict(lf=42, rf=37, roll=2),
-                dict(lf=40, rf=39, roll=3)]
+PEDICAB_RIDE = [dict(lf=39, rf=44, roll=0), dict(lf=41, rf=42, roll=1), dict(lf=44, rf=39, roll=2),
+                dict(lf=42, rf=41, roll=3)]
 PEDICAB_RIDE_MS = 120
 
 
-def pedicab(lf=37, rf=42, roll=0):
-    """A bike taxi coming down the road at the pack, facing the player: behind the rider its gold cab on two
-    wheels, set further up the road so they stand higher, under a cobalt canopy lit azure, edged by a
-    white scalloped valance strung with yellow lights on grey posts. In front, the rider in a purple tee
-    and a white headband, the hands on the handlebar, the legs either side of the front tyre, edge-on
-    under its mudguard, the tread falling down it 1px a frame."""
+def pedicab(lf=39, rf=44, roll=0):
+    """A bike taxi coming down the road at the pack, facing the player. Further up the road, so standing
+    higher: a cobalt canopy lit azure, edged by a white scalloped valance strung with yellow lights on grey
+    posts, shading a padded red bench, button tufted, its seat roll lit pink, and on the bench's left a
+    passenger, gold hair and a green top, their head and shoulders under the valance. In front, lower and
+    centred, the rider in a purple tee and a white headband, the hands on the handlebar, the legs either side
+    of the front tyre, edge-on under its mudguard, the tread falling down it 1px a frame; the cab's two
+    wheels show either side."""
     g = edged(Grid(32, 48))
     u = unit(g)[1]
     # the cab's wheels, behind and to the sides
     for x in (3.5, 28.5):
         g.blob(x, 40, 1.8, 4.5, "ink")
         g.rect(x - 0.5, 37, 1, 6, "dslate")
-    # the canopy posts and the cab: its front panel behind the rider, the seat's edge over it
-    for x in (2, 29):
-        g.rect(x, 12, 1, 22, "grey")
-    g.rect(2, 23, 28, 12, "gold")
-    g.rect(2, 23, 28, 1, "yellow")
-    g.rect(26, 24, 4, 11, "amber")
-    g.rect(2, 33, 28, 1, "ochre")
-    # the canopy: a dome over the cab, lit on its upper left, the valance scalloped under it with lights
+    # the canopy: a dome, lit on its upper left, its shade underneath, and its posts
     g.cel(16, 9, 15, 8, "cobalt", "blue", "azure", power=2.4)
     g.rect(0, 9, 32, 9, None)
-    g.rect(1, 9, 30, 3, "cobalt")
-    g.rect(27, 9, 4, 3, "blue")
+    g.rect(3, 10, 26, 9, "navy")
+    for x in (2, 29):
+        g.rect(x, 9, 1, 25, "grey")
+    # the bench: its back, button tufted, and the seat roll along its front
+    g.cel(16, 22.5, 13, 5.5, "red", "dred", "pink", power=4)
+    for x, y in ((24, 19), (27, 22), (24, 25)):
+        g.p(x, y, "dred")
+    g.cel(16, 29, 14.5, 2.5, "red", "dred", "pink", power=4)
+    # the passenger on the bench's left: shoulders in a green top, the neck, the face, a gold bob
+    g.cel(8, 22, 5, 3.5, "green", "dgreen", "lime", power=3)
+    g.rect(6.5, 17, 2, 3, "skin1")
+    face_disc(g, 7.5, 14.5, 3.5, 4, "skin1", "skin2")
+    g.cel(7.5, 11.5, 4, 2.5, "gold", "amber", "yellow")
+    g.rect(3.5, 12, 1.5, 4.5, "gold")
+    g.rect(10, 12, 1.5, 4, "amber")
+    road.face_front(g, 7.5, 14, lips="dbrown", spread=2, mouth=3)
+    # the valance along the canopy's edge, scalloped, with lights
+    g.rect(1, 8, 30, 2, "cobalt")
+    g.rect(27, 8, 4, 2, "blue")
     for k in range(6):
-        g.cel(3.5 + k * 5, 12, 2.5, 1.8, "white", "lgrey")
+        g.cel(3.5 + k * 5, 10.5, 2.5, 1.5, "white", "lgrey")
     for k in range(6):
-        g.p(3 + k * 5, 11, "yellow")
+        g.p(3 + k * 5, 9, "yellow")
     # the rider's legs either side of the front wheel, bare shins, shoes on the pedals
     g.blob(16, 41, 2, 5.5, "ink")
     treads(g, 15.5, 38, 1, 8, roll, u, back=True)
-    g.rect(15.5, 33, 1, 4, "lgrey")
+    g.rect(15.5, 34, 1, 3, "lgrey")
     g.rect(13.5, 35, 5, 2, "dslate")
     g.rect(13.5, 35, 5, 1, "slate")
     for x, foot in ((10, lf), (19, rf)):
-        g.rect(x, 29, 3, 4, "shale")
-        g.rect(x + 2, 29, 1, 4, "coal")
-        g.rect(x, 33, 3, foot - 33, "dbrown")
-        g.rect(x + 2, 33, 1, foot - 33, "plum")
+        g.rect(x, 31, 3, 4, "shale")
+        g.rect(x + 2, 31, 1, 4, "coal")
+        g.rect(x, 35, 3, foot - 35, "dbrown")
+        g.rect(x + 2, 35, 1, foot - 35, "plum")
         g.rect(x - 1 if x < 16 else x, foot, 4, 2, "ink")
     # the tee and the arms down to the grips, the handlebar across
-    g.rect(9, 20, 14, 10, "purple")
-    g.rect(20, 20, 3, 10, "plum")
-    g.rect(9, 20, 1, 9, "mauve")
+    g.cel(16, 27.5, 7, 4.5, "purple", "plum", "mauve", power=3.5)
+    g.rect(9, 28, 14, 4, "purple")
+    g.rect(20, 28, 3, 4, "plum")
+    g.rect(9, 28, 1, 3, "mauve")
     for x in (5, 24):
-        g.rect(x, 21, 3, 3, "purple")
-        g.rect(x, 24, 3, 3, "dbrown")
-    g.rect(6, 27, 20, 2, "grey")
-    g.rect(6, 27, 20, 1, "lgrey")
+        g.rect(x, 24, 3, 3, "purple")
+        g.rect(x, 27, 3, 2, "dbrown")
+    g.rect(6, 29.5, 20, 1.5, "grey")
+    g.rect(6, 29.5, 20, 0.75, "lgrey")
     for x in (4, 25):
-        g.rect(x, 26, 3, 3, "ink")
+        g.rect(x, 28.5, 3, 3, "ink")
     # the head: the face, short black hair, a white headband
-    g.rect(14, 18, 4, 3, "dbrown")
-    face_disc(g, 16, 14.5, 6.5, 6, "dbrown", "plum")
-    g.cel(16, 10.5, 7, 3.5, "ink", None, "shale")
-    g.rect(9.5, 11, 13, 2, "white")
-    g.rect(19.5, 11, 3, 2, "lgrey")
-    road.face_front(g, 16, 14, lips="ink")
-    g.p(11, 14, "white")
-    g.p(19, 14, "white")
+    g.rect(14, 21, 4, 2.5, "dbrown")
+    face_disc(g, 16, 18, 5, 5, "dbrown", "plum")
+    g.cel(16, 14.5, 5.5, 2.5, "ink", None, "shale")
+    g.rect(11, 15, 10, 1.5, "white")
+    g.rect(18.5, 15, 2.5, 1.5, "lgrey")
+    road.face_front(g, 16, 18, lips="ink", spread=3, mouth=3)
     return rim(g, dict(LIT, dbrown=("skin2", "brown"), plum=("skin2", "brown"), coal=("ash", None),
                        shale=("ash", None)))
 
