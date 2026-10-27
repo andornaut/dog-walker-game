@@ -1421,7 +1421,7 @@ def note(cv, x, y, col, edge="plum"):
 
 def busker(cv, x, base):
     """A busker's pitch with no one at it, on row base: an amp, a guitar leaning on it beside its open
-    case, and music notes rising over them."""
+    case, and music notes rising over them, below the shop's sign board."""
     cv.fill(x, base - 8, 8, 8, "coal")
     cv.fill(x + 1, base - 7, 6, 5, "ash")
     cv.fill(x + 3, base - 5, 2, 2, "coal")
@@ -1436,7 +1436,7 @@ def busker(cv, x, base):
     cv.fill(gx - 3, base - 18, 2, 2, "walnut")
     cv.fill(x + 15, base - 3, 12, 3, "walnut")
     cv.fill(x + 16, base - 2, 10, 1, "dred")
-    for nx, ny, c in ((-1, -20, "white"), (8, -27, "gold"), (17, -19, "white")):
+    for nx, ny, c in ((-1, -15, "white"), (8, -20, "gold"), (17, -14, "white")):
         note(cv, x + nx, base + ny, c)
 
 
@@ -1481,7 +1481,7 @@ def kensington():
     umbrella(cv, CX - 64, FAR_WALK - 1, "gold", "dturq")
     clothes_rack(cv, CX - 28, 22, FAR_WALK - 1, first=5)
     busker(cv, CX + 6, FAR_WALK - 1)
-    bike(cv, CX + 40, FAR_WALK - 1, "dturq")
+    bike(cv, CX + 40, FAR_WALK - 1, "lilac")
     basket_bike(cv, CX + 56, FAR_WALK - 1, "lime", flip=True)
     patio(cv, CX + 96, FAR_WALK - 1, "red", "cream")
     bike(cv, 250, FAR_WALK - 1, "gold", flip=True)
@@ -1646,10 +1646,12 @@ def volleyball(cv, x, base):
     net(cv, (x + 38, base), (x + 50, base - 8))
     player(cv, x + 29, base - 2, "block", "gold", "skin2", "ttc", lift=3)
     player(cv, x + 67, base - 2, "ready", "plum", "skin2", "cobalt", flip=True)
-    # the ball: a white plus, yellow on its lower right
+    # the ball: a white plus shaded lgrey on its lower right, never yellow, so it reads as a ball and not a
+    # sparkle
     cv.fill(x + 45, base - 25, 3, 1, "white")
     cv.fill(x + 46, base - 26, 1, 3, "white")
-    cv.fill(x + 46, base - 25, 2, 1, "yellow")
+    cv.fill(x + 47, base - 25, 1, 1, "lgrey")
+    cv.fill(x + 46, base - 24, 1, 1, "lgrey")
 
 
 def beaches():
@@ -2072,11 +2074,13 @@ def billboard(cv, x, y, w, h):
         cv.fill(c, y + 2, 1, 1, "gold")
 
 
-def crosswalk(cv, mid, w):
+def crosswalk(cv, mid, w, road):
     """A crosswalk over the cross street, w columns centred on mid: white bars along the street on
-    every other row."""
+    every other row, the road between them clear of the centre line."""
+    x = round(mid - w / 2)
+    cv.fill(x, CROSS + 1, w, NEAR_CURB - CROSS - 1, road)
     for py in range(CROSS + 1, NEAR_CURB, 2):
-        cv.fill(round(mid - w / 2), py, w, 1, "white")
+        cv.fill(x, py, w, 1, "white")
 
 
 YONGE_SKY = ("slate", "dslate", "purple", "mauve")
@@ -2161,7 +2165,7 @@ def yonge():
     cross_line(cv, "amber", "coal", dash=(14, 64))
     # crosswalks over the cross street from the stub's two sidewalks
     for mid in (94, 266):
-        crosswalk(cv, mid, 14)
+        crosswalk(cv, mid, 14, "shale")
     street(cv, verge("yonge-street", road))
     lanes(cv, "white", "coal", dash=(14, 64))
     return cv
