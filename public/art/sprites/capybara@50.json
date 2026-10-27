@@ -1,0 +1,79 @@
+{ "frames": {
+   "capybara@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "capybara@50 1.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "capybara@50 2.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "capybara@50 3.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "capybara@50 4.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 160
+   },
+   "capybara@50 5.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 160
+   },
+   "capybara@50 6.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 160
+   },
+   "capybara@50 7.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 160
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "capybara@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 192, "h": 24 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "walk", "from": 4, "to": 7, "direction": "forward" }
+  ]
+ }
+}
