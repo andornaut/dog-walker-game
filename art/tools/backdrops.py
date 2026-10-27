@@ -1269,11 +1269,107 @@ def rc_harris(cv, x0, base):
     cv.fill(x0 + 31, base - 9, 8, 1, "tan")
 
 
+def shade_tree(cv, cx, cy, r, base, leaf, shade, lit, trunk="dbrown", girth=4):
+    """A broad shade tree, a maple or an oak, on row base: a trunk under a crown of five round lobes
+    about row cy, shade on the lower right and lit flecks on the upper left."""
+    cv.fill(cx - girth // 2, cy, girth, base - cy, trunk)
+    cv.fill(cx + girth // 2 - 1, cy, 1, base - cy, dk(trunk))
+    lobes = ((cx - r * 0.8, cy + r * 0.25, r * 0.7), (cx + r * 0.8, cy + r * 0.25, r * 0.7),
+             (cx - r * 0.3, cy - r * 0.45, r * 0.75), (cx + r * 0.35, cy - r * 0.35, r * 0.7),
+             (cx, cy + r * 0.1, r * 0.8))
+    for px in range(int(cx - 2 * r), int(cx + 2 * r + 1)):
+        for py in range(int(cy - 2 * r), int(cy + r + 1)):
+            d = min(((px + 0.5 - lx) ** 2 + (py + 0.5 - ly) ** 2) / lr ** 2 for lx, ly, lr in lobes)
+            if d <= 1:
+                t = (px - cx) + 1.4 * (py - cy)
+                c = shade if t > r * 0.55 else lit if t < -r and hashed(px, py, 2) else leaf
+                cv.fill(px, py, 1, 1, c)
+
+
+def willow(cv, cx, cy, r, base, trunk="dbrown"):
+    """A weeping willow on row base: a round crown on row cy whose streamers flare 2 columns past it
+    and hang to ragged tips above the ground; olive, moss on the lit left, dolive on the right and in
+    the gaps between streamers, lime along the crown's lit top."""
+    cv.fill(cx - 2, cy, 4, base - cy, trunk)
+    cv.fill(cx + 1, cy, 1, base - cy, dk(trunk))
+    for px in range(cx - r - 2, cx + r + 3):
+        dx = (px + 0.5 - cx) / r
+        out = abs(px - cx) - r
+        top = cy + 2 * out + 1 if out > 0 else cy - round(r * 0.75 * math.sqrt(max(0.0, 1 - dx * dx)))
+        hem = base - 5 - round(7 * dx * dx) - (4 if px % 2 else 0) - round(3 * noise(px, 7))
+        for py in range(top, hem):
+            gap = py > cy + 2 and px % 3 == 2
+            c = "dolive" if gap or dx > 0.6 else "moss" if dx + (py - cy) / (2 * r) < -0.35 else "olive"
+            cv.fill(px, py, 1, 1, "lime" if py == top and dx < 0.3 and out <= 0 else c)
+
+
+# Beach volleyball players side on, facing right: rows from the top down to the feet, h hair, s skin,
+# t swimsuit. block and spike are jumps, drawn in the air.
+PLAYER = dict(
+    block=("...s.s", "...s.s", "..hhss", "..hss.", "..ttt.", "..tt..", "..tt..", "..tt..", "..s.s.",
+           "..s.s.", ".s..s."),
+    dig=("..hh..", "..hs..", ".ttt..", ".tttss", ".ttt.s", ".s..s.", "s...s."),
+    ready=("..hh..", "..hs..", "..ss..", ".ttt..", ".ttts.", ".ttt.s", ".ttt..", ".s..s.", ".s..s.",
+           "s...s."),
+    spike=(".....s", "....s.", "..hhs.", "..hs..", ".ttt..", "sttt..", "..tt..", "..tt..", ".s..s.",
+           "s...s.", "s....."),
+)
+
+
+def player(cv, x, base, pose, hair, skin, suit, flip=False, lift=0):
+    """A beach volleyball player (PLAYER) from column x, feet on row base, or lift rows above it in a
+    jump; flip faces left."""
+    rows = PLAYER[pose]
+    w = len(rows[0])
+    for dy, row in enumerate(rows):
+        for dx, ch in enumerate(row):
+            if ch != ".":
+                cv.fill(x + (w - 1 - dx if flip else dx), base - lift - len(rows) + 1 + dy, 1, 1,
+                        dict(h=hair, s=skin, t=suit)[ch])
+
+
+def net(cv, near, far, top=13, deep=4):
+    """A volleyball net seen end on, running away from the camera between posts at near and far,
+    (column, ground row): white posts, the far one lgrey and a row shorter, and between their tops a
+    white tape over deep rows of coal mesh, its bottom cord coal."""
+    (x0, g0), (x1, g1) = near, far
+    cv.fill(x1, g1 - top + 1, 1, top, "lgrey")
+    for i in range(x1 - x0 + 1):
+        x = x0 + i
+        t = round(g0 - top + (g1 - g0 + 1) * i / (x1 - x0))
+        cv.fill(x, t, 1, 1, "white")
+        for y in range(t + 1, t + deep):
+            if (x + y) % 2 == 0:
+                cv.fill(x, y, 1, 1, "coal")
+        cv.fill(x, t + deep, 1, 1, "coal")
+    cv.fill(x0, g0 - top, 1, top + 1, "white")
+
+
+def volleyball(cv, x, base):
+    """A beach volleyball game mid-rally, two against two, on a court roped in lake blue whose near
+    left corner is column x on row base: the net runs away from the camera across the court's middle,
+    a red player digs at the back and a red player jumps to block as a blue player leaps to spike the
+    ball over the net, the blue partner ready behind."""
+    cv.fill(x, base, 80, 1, "lake")
+    cv.fill(x + 12, base - 8, 74, 1, "lake")
+    cv.line(x, base, x + 12, base - 8, "lake")
+    cv.line(x + 79, base, x + 85, base - 8, "lake")
+    player(cv, x + 14, base - 4, "dig", "dbrown", "brown", "ttc")
+    player(cv, x + 51, base - 6, "spike", "walnut", "clay", "cobalt", flip=True, lift=5)
+    net(cv, (x + 38, base), (x + 50, base - 8))
+    player(cv, x + 29, base - 2, "block", "gold", "skin2", "ttc", lift=3)
+    player(cv, x + 67, base - 2, "ready", "plum", "skin2", "cobalt", flip=True)
+    # the ball: a white plus, yellow on its lower right
+    cv.fill(x + 45, base - 25, 3, 1, "white")
+    cv.fill(x + 46, base - 26, 1, 3, "white")
+    cv.fill(x + 46, base - 25, 2, 1, "yellow")
+
+
 def beaches():
     cv = sn.Canvas(W, H)
     # a warm yellow late afternoon over the lake, small clouds and gulls
-    sky(cv, "gold", "yellow", clouds=((20, BASE - 56, 26, 4), (CX + 90, BASE - 60, 30, 4)))
-    birds(cv, ((70, BASE - 48), (82, BASE - 44), (244, BASE - 52)))
+    sky(cv, "gold", "yellow", clouds=((58, BASE - 58, 26, 4), (CX + 70, BASE - 60, 30, 4)))
+    birds(cv, ((100, BASE - 50), (112, BASE - 46), (232, BASE - 52)))
     # Lake Ontario out to the horizon: dark far water, then lake and shallows, foam lines, sails
     for py in range(BASE - 40, BASE - 12):
         for px in range(W):
@@ -1282,7 +1378,7 @@ def beaches():
                 c = "shallow" if c == "lake" else "foam" if c == "shallow" else "lake"
             cv.fill(px, py, 1, 1, c)
     cv.fill(0, BASE - 41, W, 1, "lake")
-    for sx, sy in ((CX - 120, BASE - 36), (CX + 40, BASE - 38), (CX - 40, BASE - 30)):
+    for sx, sy in ((CX - 96, BASE - 36), (CX + 40, BASE - 38), (CX + 2, BASE - 30)):
         cv.fill(sx - 4, sy + 6, 10, 2, "white")
         for k in range(8):
             cv.fill(sx, sy - 2 + k, 1 + k // 2, 1, "white")
@@ -1292,10 +1388,17 @@ def beaches():
     for px in range(W):
         if hashed(px, BASE - 11, 5):
             cv.fill(px, BASE - 11, 1, 1, "foam")
+    # big shade trees: two in Kew-Balmy Beach park behind the plant, a maple and a willow by the
+    # boardwalk at the west end
+    shade_tree(cv, 338, BASE - 42, 12, BASE - 8, "canopy", "pine", "green")
+    shade_tree(cv, 310, BASE - 36, 9, BASE - 8, "green", "dgreen", "lime")
     leuty(cv, CX + 96, BASE - 2)
-    for cx, a, b in ((CX - 130, "ttc", "white"), (CX - 60, "turquoise", "white"), (CX + 30, "gold", "dlake")):
-        umbrella(cv, cx, BASE - 1, a, b)
     rc_harris(cv, CX + 116, BASE - 9)
+    shade_tree(cv, 6, BASE - 44, 16, BASE, "green", "dgreen", "lime", girth=5)
+    willow(cv, 44, BASE - 30, 14, BASE)
+    for cx, a, b in ((CX - 100, "ttc", "white"), (CX + 30, "gold", "dlake")):
+        umbrella(cv, cx, BASE - 1, a, b)
+    volleyball(cv, CX - 82, BASE - 1)
 
     def sand(px, py):
         return "tan" if hashed(px, py, 43) else "white" if hashed(px, py + 7, 150) else "skin1"
