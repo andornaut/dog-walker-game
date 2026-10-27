@@ -1085,10 +1085,10 @@ def gallery(cv, x, w, top, base, wall="brick"):
     cv.fill(dx + 4, base - 17, 1, 17, "coal")
 
 
-def theater(cv, x, w, top, base, wall="dbrick"):
-    """The Young Centre, a tank house turned theater: dark brick with two rows of arched windows, its ground
-    floor a glazed lobby lit gold with theatergoers' silhouettes inside, and a marquee over the doors, its
-    THEATER board in gold letters edged with yellow bulbs."""
+def theatre(cv, x, w, top, base, wall="dbrick"):
+    """The Young Centre, a tank house turned theatre: dark brick with two rows of arched windows, its ground
+    floor a glazed lobby lit gold with theatregoers' silhouettes inside, and a marquee over the doors, its
+    THEATRE board in gold letters edged with yellow bulbs."""
     warehouse(cv, x, w, top, base, wall, "stone", "gold", rows=2)
     ly = base - 20
     cv.fill(x + 3, ly, w - 6, 20, "coal")
@@ -1105,7 +1105,7 @@ def theater(cv, x, w, top, base, wall="dbrick"):
     cv.fill(mx0 - 2, my + 10, mw + 4, 3, "coal")
     cv.fill(mx0, my, mw, 10, "coal")
     cv.fill(mx0 + 1, my + 1, mw - 2, 8, "dbrick")
-    word(cv, "THEATER", mx0 + mw / 2, my + 1, "gold")
+    word(cv, "THEATRE", mx0 + mw / 2, my + 1, "gold")
     for bx in range(mx0, mx0 + mw, 3):
         cv.fill(bx, my - 1, 1, 1, "yellow")
         cv.fill(bx + 1, my + 10, 1, 1, "yellow")
@@ -1234,12 +1234,12 @@ def distillery():
     chimney(cv, CX - 120, BASE - 66)
     water_tower(cv, CX + 140, BASE - 30)
     # round the square: the gallery and an old limestone mill on the left, the long low warehouse across
-    # it under the DISTILLERY sign, the theater and another warehouse on the right
+    # it under the DISTILLERY sign, the theatre and another warehouse on the right
     gallery(cv, -10, 80, BASE - 44, BASE)
     warehouse(cv, 70, 56, BASE - 36, BASE, "driftwood", "dstone")
     warehouse(cv, CX - 54, 108, BASE - 36, BASE, "brick", "stone", rows=0)
     sign_board(cv, CX, BASE - 30, "DISTILLERY", "dbrick", "cream")
-    theater(cv, CX + 54, 80, BASE - 50, BASE)
+    theatre(cv, CX + 54, 80, BASE - 50, BASE)
     warehouse(cv, CX + 134, 56, BASE - 40, BASE, "brick", "stone")
     # the square's paving, café tables under umbrellas, Still Dancing, the LOVE sign, lamps and passers-by
     def paving(px, py):

@@ -736,7 +736,7 @@ def distillery_view():
     bd.sun(a, 38, 9, 5, "yellow", 12)
     a.fill(2, 0, 5, FAR_Y, "brick")
     a.fill(5, 0, 2, FAR_Y, "dbrick")
-    # the gallery, the low warehouse across the square under its sign, the theater's lit lobby and marquee
+    # the gallery, the low warehouse across the square under its sign, the theatre's lit lobby and marquee
     bd.warehouse(a, -6, 26, 2, FAR_Y, "brick", "stone", "skin1", rows=1)
     bd.warehouse(a, 20, 36, 13, FAR_Y, "brick", "stone", rows=0)
     a.fill(25, 14, 26, 4, "dbrick")
