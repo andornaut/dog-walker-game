@@ -9,6 +9,7 @@ import { plannerStreams } from "../testing/movers";
 import {
   DART_LIFTS,
   dartOutcome,
+  dartRetries,
   drawMover,
   drawnCount,
   facesLeft,
@@ -1675,4 +1676,58 @@ describe("placeMovers", () => {
       expect(placed.draws).toEqual(place(freeGrid().grid).draws);
     },
   );
+
+  // Drawn at 0, each dart sweeps more than 2 lanes in the pack's window from every lift. With no
+  // row fitting a sweep over 2 lanes, one whose kind varies its tilt or speed comes on at the
+  // first of its retries that sweeps 2 or fewer from some lift, and one that varies neither is
+  // dropped. A retry uses no random draw.
+  it.each([
+    { lands: true, name: "another tilt", retried: spec(cross(2, 0.5, 1.5)) },
+    {
+      lands: true,
+      name: "another speed",
+      retried: {
+        ...spec(cross(2, 0)),
+        variation: { delaySeconds: 0, lengthShare: 0, speedShare: 0.4 },
+      },
+    },
+    { lands: false, name: "nothing, as its kind varies neither", retried: spec(cross(1.2, 0)) },
+  ])("retries a dart with no room as drawn at $name", ({ lands, retried }) => {
+    const most = 2;
+    // Every draw 0, counted.
+    const place = (grid: Parameters<typeof placeMovers>[3]) => {
+      const draws = { movers: 0, spawns: 0 };
+      const counter = (stream: keyof typeof draws) => () => {
+        draws[stream] += 1;
+        return 0;
+      };
+      const streams = { movers: counter("movers"), spawns: counter("spawns") };
+      const placed = placeMovers(streams, zoned, CAPS, grid, [], rows, [
+        { count: 1, kind: "seagull", spec: retried },
+      ]);
+      return { draws, placed };
+    };
+    const { grid } = freeGrid();
+    const { draws, placed } = place({
+      ...grid,
+      block: (row: number, span: LaneSpan, ...rest: [number, boolean]) =>
+        span.count <= most && grid.block(row, span, ...rest),
+    });
+    const drawn = drawMover({ movers: () => 0, spawns: () => 0 });
+    const placements = (moverDraws: MoverDraws) =>
+      [0, ...DART_LIFTS].flatMap((lift) => moverPlacements(geometry, retried, moverDraws, lift));
+    expect(placements(drawn).every(({ lanes }) => lanes.count > most)).toBe(true);
+    const landing = dartRetries(retried, drawn).find((retry) =>
+      placements(retry).some(({ lanes }) => lanes.count <= most),
+    );
+    expect(landing !== undefined).toBe(lands);
+    expect(placed.spawns).toHaveLength(lands ? 1 : 0);
+    expect(placed.dropped).toHaveLength(lands ? 0 : 1);
+    const landed = landing === undefined ? [] : placements(landing).map(({ path }) => path);
+    expect(landed).toEqual(expect.arrayContaining(placed.spawns.map(({ mover }) => mover)));
+    // As many draws as placing it on a free grid, or, dropped, as its own draws.
+    const own = { movers: 0, spawns: 0 };
+    drawMover({ movers: () => ((own.movers += 1), 0), spawns: () => ((own.spawns += 1), 0) });
+    expect(draws).toEqual(lands ? place(freeGrid().grid).draws : own);
+  });
 });

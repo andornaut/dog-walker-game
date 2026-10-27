@@ -1251,6 +1251,30 @@ function shyPlacements(
 // its cue, lowest first, when the planner retries it.
 export const DART_LIFTS = [0.25, 0.5, 0.75, 1] as const;
 
+// The even draws from 0 to 1 a dart with no room at its own draws retries its tilt and speed at.
+export const DART_RETRY_DRAWS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1] as const;
+
+// The draws a dart with no room at its own retries at, each its own draws with one changed: its
+// tilt at each of DART_RETRY_DRAWS, then its speed at each, nearest its own draw first, the lower
+// first between two as near. A draw its kind does not vary by, a tilt with no range or a speed with
+// no jitter, is not retried, nor is a mover that is not a dart.
+export function dartRetries(spec: MoverSpec, draws: MoverDraws): MoverDraws[] {
+  const { motion, variation } = spec;
+  if (motion.kind !== "cross") {
+    return [];
+  }
+  const nearest = (own: number) =>
+    DART_RETRY_DRAWS.filter((draw) => Math.abs(draw - own) > 1e-9).sort(
+      (a, b) => Math.abs(a - own) - Math.abs(b - own) || a - b,
+    );
+  const tilts = motion.tilt[0] < motion.tilt[1] ? nearest(draws.tilt) : [];
+  const speeds = variation.speedShare > 0 ? nearest(draws.speed) : [];
+  return [
+    ...tilts.map((tilt) => ({ ...draws, tilt })),
+    ...speeds.map((speed) => ({ ...draws, speed })),
+  ];
+}
+
 // One mover's placements, at its draws. A dart's start is lifted that share of the way from its
 // drawn share up to the highest that shows its cue; other movers have no lift.
 export function moverPlacements(
@@ -1386,8 +1410,11 @@ function standsOf(spot: Spot): MoverStand[] {
 // caps on screen. A mover with no room in its stretch, such as one over a cap there, waits: it
 // comes on at the next row with room. A dart with no room at its drawn start retries the same rows
 // from higher up the road, its start lifted by each of DART_LIFTS in turn, lowest first, before it
-// waits; on each later row it tries its drawn start and then each lift. One with no room on any
-// later row is dropped, which uses no random draw past its own draws, as the planner drops an
+// waits; on each later row it tries its drawn start and then each lift. A dart with no room on any
+// later row tries again the same way at each of its retries (dartRetries), another tilt of its
+// kind's range and then another speed, until one has room, so a dart whose drawn path sweeps too
+// many lanes in the pack's window still comes on, crossing at another tilt or speed. A mover with
+// no room at any is dropped, which uses no random draw past its own draws, as the planner drops an
 // obstacle it has no room for. A dart may take cells other spawns hold, and a rider cells only
 // darts hold (MoverGrid.isFree); no other mover takes a cell a dart holds. A mover never stands
 // still in place of moving. Each mover makes its own draws (drawMover) before it is placed, and is
@@ -1458,10 +1485,22 @@ export function placeMovers<Kind extends string>(
     for (let i = 0; i < count; i++) {
       const draws = drawMover(streams);
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
-      const starts = lifts.map((lift) => moverPlacements(geometry, spec, draws, lift));
+      const first = Math.floor((i * rows.length) / count);
       const end = Math.floor(((i + 1) * rows.length) / count);
-      const stretch = firstFitting(starts, Math.floor((i * rows.length) / count), end);
-      const fitting = stretch.length > 0 ? stretch : nearestLater(starts, end);
+      const fittingAt = (moverDraws: MoverDraws) => {
+        const starts = lifts.map((lift) => moverPlacements(geometry, spec, moverDraws, lift));
+        const stretch = firstFitting(starts, first, end);
+        return stretch.length > 0 ? stretch : nearestLater(starts, end);
+      };
+      let fitting = fittingAt(draws);
+      if (fitting.length === 0) {
+        for (const retry of dartRetries(spec, draws)) {
+          fitting = fittingAt(retry);
+          if (fitting.length > 0) {
+            break;
+          }
+        }
+      }
       if (fitting.length === 0) {
         dropped.push(kind);
         continue;
