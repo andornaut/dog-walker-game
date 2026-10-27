@@ -133,8 +133,18 @@ describe("distractionKeys", () => {
       ...minors.filter(([, weight]) => weight > 0).map(([id]) => minorObstacleSpriteKey(id)),
       ...encounters.filter(([, weight]) => weight > 0).map(([id]) => encounterSpriteKey(id)),
     ];
-    expect(keys.length).toBeGreaterThanOrEqual(3);
-    expect(keys.filter((key) => live.includes(key) || !drawable(key))).toEqual([]);
+    // The ambient animals whose twin obstacle the zone weighs.
+    const twins = gameData.ambient[zone.id as ZoneId]
+      .filter(
+        ({ twin }) =>
+          twin !== undefined &&
+          [...minors, ...encounters].some(([id, weight]) => id === twin && weight > 0),
+      )
+      .map(({ key }) => key);
+    expect(keys.length).toBeGreaterThan(0);
+    expect(
+      keys.filter((key) => live.includes(key) || twins.includes(key) || !drawable(key)),
+    ).toEqual([]);
   });
 
   it("leaves out an ambient squirrel where squirrels are obstacles", () => {

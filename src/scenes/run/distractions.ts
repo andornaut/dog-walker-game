@@ -177,9 +177,9 @@ export function distractionScroll(
 
 // The sprites a zone's distractions wear: none that is the art of an obstacle on its road, so
 // nothing harmless looks like something that hits. They are its one-lane people and animals
-// (onFoot) that it weighs 0, and its ambient people and animals on foot beside the road, each
-// only where its art can walk or hop and is not the art of an obstacle the zone weighs; with
-// fewer than MIN_KINDS, the ambient walkers as well.
+// (onFoot) that it weighs 0, and its ambient people and animals on foot beside the road but
+// those whose twin obstacle it weighs above 0, each only where its art can walk or hop and is not
+// the art of an obstacle the zone weighs; with fewer than MIN_KINDS, the ambient walkers as well.
 export function distractionKeys(
   data: Pick<GameData, "ambient" | "minorObstacles">,
   drawable: (key: string) => boolean,
@@ -199,8 +199,11 @@ export function distractionKeys(
       return weight === 0 && obstacle.onFoot === true && obstacle.shape.lanes === 1;
     })
     .map(([id]) => minorObstacleSpriteKey(id));
+  const weighs = (id: MinorObstacleId | EncounterId): boolean =>
+    ((zone.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0 ||
+    ((zone.weights.obstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0;
   const ambient = data.ambient[zone.id as ZoneId]
-    .filter(({ path }) => ON_FOOT_PATHS.has(path))
+    .filter(({ path, twin }) => ON_FOOT_PATHS.has(path) && (twin === undefined || !weighs(twin)))
     .map(({ key }) => key);
   const keys = [...new Set([...onFoot, ...ambient])].filter(
     (key) => !live.has(key) && drawable(key),
