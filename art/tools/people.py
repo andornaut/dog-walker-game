@@ -83,8 +83,8 @@ def specs(g, b, c):
     g.rect(14, 13 + b, 4, 1, c)
 
 
-def rosa_top(wave):
-    """Rosa, retired florist, dramatic: grey bun with a pink flower, green cardigan open over a cream blouse,
+def eve_top(wave):
+    """Eve, retired florist, dramatic: grey bun with a pink flower, green cardigan open over a cream blouse,
     a brown skirt, and a posy of flowers in her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 5, "brown")
@@ -372,7 +372,7 @@ def jason_top(wave):
 
 # dog: (top, legs, shoes, extra), in owners.OWNERS order; extra draws over the legs after them
 OWNERS = {
-    "duchess": (rosa_top, "skin1", "dbrown", None),
+    "duchess": (eve_top, "skin1", "dbrown", None),
     "reggie": (ralph_top, "blue", "white", ralph_legs),
     "buddy": (sheba_top, "slate", "dbrown", None),
     "pierre": (tara_top, "skin1", "ink", None),

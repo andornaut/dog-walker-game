@@ -149,7 +149,7 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         g.rect(15, 23, 2, 1, lips)
 
 
-def rosa(mood):
+def eve(mood):
     """Retired florist, dramatic: grey bun with a flower, green cardigan."""
     g = face()
     g.cel(16, 13, 9.5, 8, "lgrey", "grey")
@@ -553,7 +553,7 @@ WALKERS = {
 
 
 OWNERS = {
-    "duchess": rosa,
+    "duchess": eve,
     "reggie": ralph,
     "buddy": sheba,
     "pierre": tara,
