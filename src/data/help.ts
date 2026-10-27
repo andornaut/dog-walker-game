@@ -12,7 +12,7 @@ export const HELP_PAGES = [
     body:
       "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. " +
       "A tap moves one lane toward that side. Keys: arrows, A/D or H/L. " +
-      "Some obstacles move: an arrow shows where.",
+      "Some obstacles move: an arrow shows where, and every arrow is real.",
     title: "Switch lanes",
   },
   {
@@ -20,8 +20,9 @@ export const HELP_PAGES = [
     body:
       "Tips are {tip} each, on top of each dog's pay, so grab what you can. " +
       "A dog that reaches a treat cheers its owner: +{treatHearts}♥. " +
-      "Aim for a lost wallet or a friendly neighbour, too.",
-    title: "Tips and treats",
+      "Aim for a lost wallet or a friendly neighbour, and grab dropped gear: " +
+      "it works for the rest of the walk.",
+    title: "Tips, treats and finds",
   },
   {
     art: "cards",
@@ -56,7 +57,8 @@ export const HELP_PAGES = [
       "Walk {walkLength} neighbourhoods of {world}, each busier than the last. " +
       "Each dog's pay is banked as you finish one. " +
       "At a fork, each path brings an upgrade. " +
-      "Bring every dog home for the Walk bonus.",
+      "Bring every dog home for the {walkBonus} Walk bonus, " +
+      "or pause to head home early with your cash.",
     title: "Neighbourhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];
