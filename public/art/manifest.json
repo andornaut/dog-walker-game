@@ -4676,20 +4676,12 @@
       "png": "images/icon-pause.png"
     },
     {
-      "key": "icon-perk-calm-voice",
-      "png": "images/icon-perk-calm-voice.png"
+      "key": "icon-perk-keen-eye",
+      "png": "images/icon-perk-keen-eye.png"
     },
     {
-      "key": "icon-perk-calm-voice-20",
-      "png": "images/icon-perk-calm-voice-20.png"
-    },
-    {
-      "key": "icon-perk-kind-words",
-      "png": "images/icon-perk-kind-words.png"
-    },
-    {
-      "key": "icon-perk-kind-words-20",
-      "png": "images/icon-perk-kind-words-20.png"
+      "key": "icon-perk-keen-eye-20",
+      "png": "images/icon-perk-keen-eye-20.png"
     },
     {
       "key": "icon-perk-long-reach",
@@ -4700,12 +4692,20 @@
       "png": "images/icon-perk-long-reach-20.png"
     },
     {
-      "key": "icon-perk-treat-finder",
-      "png": "images/icon-perk-treat-finder.png"
+      "key": "icon-perk-quick-recovery",
+      "png": "images/icon-perk-quick-recovery.png"
     },
     {
-      "key": "icon-perk-treat-finder-20",
-      "png": "images/icon-perk-treat-finder-20.png"
+      "key": "icon-perk-quick-recovery-20",
+      "png": "images/icon-perk-quick-recovery-20.png"
+    },
+    {
+      "key": "icon-perk-second-chance",
+      "png": "images/icon-perk-second-chance.png"
+    },
+    {
+      "key": "icon-perk-second-chance-20",
+      "png": "images/icon-perk-second-chance-20.png"
     },
     {
       "key": "icon-play",

@@ -5,10 +5,10 @@ walk bar's effect wells, the walk's message strip icons and a path card's diffic
 16x16 images in the house palette with coloured outlines, on transparency:
 icon-trait-chaser           a black squirrel, in the pull bubble and on the message strip
 icon-perk-<perk>            a walker's perk, on walker tiles, the new walker celebration and
-                            the message strip: calm-voice (a sky speech bubble with a white
-                            wave), kind-words (a pink speech bubble with a red heart), long-reach
-                            (an open hand over a green arrow pointing both ways), treat-finder (a
-                            magnifying glass over a treat)
+                            the message strip: keen-eye (a magnifying glass over a treat),
+                            long-reach (an open hand over a green arrow pointing both ways),
+                            quick-recovery (an hourglass with its sand nearly run through),
+                            second-chance (a pink speech bubble with a red heart)
 icon-zone-<zone>            cabbagetown (a bay-and-gable house), high-park (a pine and a cherry
                             in blossom), distillery-district (a brick warehouse),
                             kensington-market (a painted house turned shop), the-beaches (the
@@ -94,23 +94,31 @@ def chaser():
 
 
 # ---------- walkers: perks, on walker tiles, the new walker celebration and the message strip ----------
-# Each holds its silhouette on cream and on the strip's ink. The two voice perks are speech bubbles told
-# apart by colour and mark: calm voice a sky bubble with a wave, kind words a pink one with a heart.
+# Each holds its silhouette on cream and on the strip's ink.
 
-def calm_voice():
-    """A sky speech bubble, lit cyan along its top, holding a white wave: a soft, even tone."""
+def quick_recovery():
+    """An hourglass in a brown frame, its sand nearly all run through, a white speed tick at each side:
+    a debuff over in half the time."""
     g = Grid(16, 16)
-    g.rect(1, 2, 14, 9, "sky")
-    g.rect(0, 3, 16, 7, "sky")
-    g.rect(1, 2, 14, 1, "cyan")
-    g.rect(0, 3, 1, 3, "cyan")
-    g.rect(1, 10, 14, 1, "blue")
-    g.tri((3, 10), (3, 15), (7, 10), "sky")
-    bitmap(g, 2, 5, [".ww...ww...ww", "w..w.w..w.w..", "....w....w..."], {"w": "white"})
+    g.rect(3, 0, 10, 2, "brown")
+    g.rect(3, 14, 10, 2, "brown")
+    g.rect(3, 1, 10, 1, "dbrown")
+    g.rect(3, 15, 10, 1, "dbrown")
+    g.tri((4, 2), (12, 2), (8, 8), "foam")
+    g.tri((4, 14), (12, 14), (8, 8), "foam")
+    # a little sand left on top, its thread through the waist and the heap below
+    g.tri((6.5, 6), (9.5, 6), (8, 8), "amber")
+    g.p(8, 8, "amber")
+    g.p(8, 9, "amber")
+    g.tri((4.5, 14), (11.5, 14), (8, 10), "amber")
+    g.rect(5, 13, 6, 1, "orange")
+    for y in (5, 9):
+        g.rect(0, y, 2, 1, "white")
+        g.rect(14, y, 2, 1, "white")
     return g
 
 
-def kind_words():
+def second_chance():
     """A pink speech bubble holding a red heart."""
     g = Grid(16, 16)
     g.rect(1, 1, 14, 10, "pink")
@@ -133,7 +141,7 @@ def long_reach():
     return g
 
 
-def treat_finder():
+def keen_eye():
     """A magnifying glass, its cyan lens over the treat (a white bone with a red heart on its shaft), its
     brown handle down to the right."""
     g = Grid(16, 16)
@@ -541,7 +549,7 @@ def heart20(g, x, y):
     g.p(x + 2, y + 1, "pink")
 
 
-def kind_words20():
+def second_chance20():
     """A pink speech bubble holding a red heart, its tail down to the right."""
     g = Grid(20, 20)
     g.rect(2, 1, 16, 13, "pink")
@@ -605,12 +613,24 @@ def bubble20(g, fill, shade, lit=None):
         g.rect(1, 2, 1, 5, lit)
 
 
-def calm_voice20():
-    """A sky speech bubble, lit cyan along its top, holding a white wave: a soft, even tone."""
+def quick_recovery20():
+    """An hourglass in a brown frame, its sand nearly all run through, a white speed tick at each side."""
     g = Grid(20, 20)
-    bubble20(g, "sky", "blue", "cyan")
-    bitmap(g, 2, 5, ["..ww......ww....", ".w..w....w..w...", "w....w..w....w..", "......ww......ww"],
-           {"w": "white"})
+    g.rect(4, 0, 12, 2, "brown")
+    g.rect(4, 18, 12, 2, "brown")
+    g.rect(4, 1, 12, 1, "dbrown")
+    g.rect(4, 19, 12, 1, "dbrown")
+    g.tri((5, 2), (15, 2), (10, 10), "foam")
+    g.tri((5, 18), (15, 18), (10, 10), "foam")
+    g.rect(6, 2, 1, 2, "white")
+    g.tri((8, 7.5), (12, 7.5), (10, 10), "amber")
+    g.rect(10, 10, 1, 3, "amber")
+    g.tri((5.5, 18), (14.5, 18), (10, 12.5), "amber")
+    g.rect(6, 17, 8, 1, "orange")
+    g.p(9, 15, "yellow")
+    for y in (6, 12):
+        g.rect(0, y, 3, 1, "white")
+        g.rect(17, y, 3, 1, "white")
     return g
 
 
@@ -627,7 +647,7 @@ def long_reach20():
     return g
 
 
-def treat_finder20():
+def keen_eye20():
     """A magnifying glass, its cyan lens over the treat (a white bone with a red heart on its shaft), its
     brown handle down to the right."""
     g = Grid(20, 20)
@@ -862,10 +882,10 @@ def lucky():
 
 IMAGES = {
     "icon-trait-chaser": chaser,
-    "icon-perk-calm-voice": calm_voice,
-    "icon-perk-kind-words": kind_words,
+    "icon-perk-keen-eye": keen_eye,
     "icon-perk-long-reach": long_reach,
-    "icon-perk-treat-finder": treat_finder,
+    "icon-perk-quick-recovery": quick_recovery,
+    "icon-perk-second-chance": second_chance,
     "icon-zone-cabbagetown": cabbagetown,
     "icon-zone-high-park": high_park,
     "icon-zone-distillery-district": distillery_district,
@@ -885,10 +905,10 @@ IMAGES = {
     "icon-gear-lucky-collar": gear_lucky_collar,
     "icon-gear-hall-pass": gear_hall_pass,
     "icon-gear-running-shoes": gear_running_shoes,
-    "icon-perk-calm-voice-20": calm_voice20,
-    "icon-perk-kind-words-20": kind_words20,
+    "icon-perk-keen-eye-20": keen_eye20,
     "icon-perk-long-reach-20": long_reach20,
-    "icon-perk-treat-finder-20": treat_finder20,
+    "icon-perk-quick-recovery-20": quick_recovery20,
+    "icon-perk-second-chance-20": second_chance20,
     "icon-upgrade-belly-rubs-20": belly_rubs20,
     "icon-upgrade-big-tipper-20": big_tipper20,
     "icon-upgrade-good-leash-20": good_leash20,
