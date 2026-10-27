@@ -631,9 +631,10 @@ class ZoneView(Art):
         ground(g)
         self.strip = [row[:] for row in g.px]
         lines(g)
-        # each of the stub's dividers takes its strip line's colour, solid or dashed as the strip's are
+        # each of the stub's dividers takes its strip line's colour, solid or dashed as the strip's are; a
+        # strip with no lines (High Park's path) leaves the stub without them
         marked = [[g.px[y][x] for y in range(roads.H) if g.px[y][x] != self.strip[y][x]] for x in roads.DIVIDERS]
-        self.lane = [Counter(m).most_common(1)[0][0] for m in marked]
+        self.lane = [Counter(m).most_common(1)[0][0] if m else None for m in marked]
         self.duty = 1 if len(marked[0]) == roads.H else max(0.5, len(marked[0]) / roads.H)
         # lines along the road (board seams): columns off the base colour in 3 rows of 4
         base = Counter(c for row in self.strip for c in row).most_common(1)[0][0]
@@ -705,7 +706,8 @@ class ZoneView(Art):
                 continue
             s = SPREAD * (py + 0.5 - HORIZON) / bd.ROAD
             for x, c in zip(roads.DIVIDERS, self.lane):
-                self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, c)
+                if c:
+                    self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, c)
 
 
 # ---------- the Toronto neighbourhoods' path cards, after their backdrops ----------

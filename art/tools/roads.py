@@ -110,31 +110,7 @@ def meander(rnd, lo, hi, hold=(8, 14)):
 
 
 def high_park_lines(g):
-    """Each lane line is a rut worn between two tracks: a 2px brown groove, shaded left (a skin2 shoulder
-    that widens the groove to 3px in places) and lit right (a skin1 lip), each coming and going in
-    irregular runs, a dbrown wet spot here and there; grass sprigs and pebbles along it at irregular
-    rows."""
-    rnd = random.Random("road-high-park-lines")
-    for x in DIVIDERS:
-        shoulder, lip = meander(rnd, 0, 2), meander(rnd, 0, 1)
-        for y in range(H):
-            g.rect(x, y, 2, 1, "brown")
-            if shoulder[y]:
-                g.p(x - 1, y, ("skin2", "brown")[shoulder[y] - 1])
-            if lip[y]:
-                g.p(x + 2, y, "skin1")
-        for _ in range(rnd.randint(1, 2)):
-            wrect(g, x + rnd.randrange(2), rnd.randrange(H), 1, 2, "dbrown")
-        y = rnd.randrange(H)
-        for _ in range(rnd.randint(2, 3)):
-            # a sprig: two blades leaning apart, canopy lit with moss
-            sx = x + rnd.choice((0, 1))
-            wrect(g, sx, y - 2, 1, 3, "canopy")
-            wp(g, sx - 1, y - 1, "olive")
-            wp(g, sx + 1, y - 3, "moss")
-            y += rnd.randint(14, 26)
-        for _ in range(rnd.randint(2, 4)):
-            wp(g, x + rnd.choice((-1, 2)), rnd.randrange(H), rnd.choice(("stone", "driftwood")))
+    """High Park's path has no lines between its lanes: a dirt path, unlike the streets."""
 
 
 # Pedestrian Sunday's painted lane lines, one colour per divider, left to right; each holds 4:1 or more

@@ -1013,8 +1013,6 @@ def high_park():
                 cv.fill(px, py, 1, 1, "pine")
     rough_patches = rough("high-park-lawn", 10, ROAD + 30, ROAD + 460, Z0 + 10, Z0 + 90)
     street(cv, verge("high-park", trail, rough_patches))
-    # the ruts between the lanes, unbroken as the road strip's
-    lanes(cv, "brown", dash=None)
     return cv
 
 
