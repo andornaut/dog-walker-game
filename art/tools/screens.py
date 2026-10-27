@@ -17,7 +17,7 @@ reads on them.
   brown trees between them, their bare front yards strewn with leaves behind
   an iron fence. Then the far sidewalk, the street (rows 82 to 91), the curb
   and our sidewalk with a turned maple (amber, ochre and rust) in its planter
-  and its leaves fallen around it, then the iron fence on a stone kerb with beds
+  and its leaves fallen around it, then the iron fence on a stone curb with beds
   of mums inside it, open at the gate between two brick piers (152 and 202). The
   front yard is pale driftwood flagstones, the front path (x 164 to 195) red
   brick in basket weave, with fallen leaves, the yard sign, a stone urn of
@@ -509,7 +509,7 @@ def home():
     basket_weave(cv, 164, 126, 32, 70, "brick", "dbrick", "clay")
     cv.fill(163, 126, 1, 70, "dstone")
     cv.fill(196, 126, 1, 70, "dstone")
-    # the iron fence on a stone kerb, open at the gate between two brick piers with stone caps
+    # the iron fence on a stone curb, open at the gate between two brick piers with stone caps
     cv.fill(0, 135, 156, 3, "stone")
     cv.fill(204, 135, W - 204, 3, "stone")
     cv.fill(0, 137, 156, 1, "dstone")

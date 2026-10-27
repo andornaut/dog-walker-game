@@ -615,7 +615,7 @@ def boards(px, py):
 class ZoneView(Art):
     """A zone's path card illustration. road(px, py) paints the cross street, yard(px, py) the
     far side's ground and lawn(px, py) the near corners past the sidewalk; mark is the cross
-    street's center line, dashed (on, period) or solid with None, over an edge row where given, or
+    street's centre line, dashed (on, period) or solid with None, over an edge row where given, or
     None for a lane with no line.
     walk and curb are the sidewalks' and curbs' colours, None where the zone has none, and
     walk_fleck the sidewalks' flecks."""
@@ -631,7 +631,7 @@ class ZoneView(Art):
         ground(g)
         self.strip = [row[:] for row in g.px]
         lines(g)
-        # each of the stub's dividers takes its strip line's color, solid or dashed as the strip's are
+        # each of the stub's dividers takes its strip line's colour, solid or dashed as the strip's are
         marked = [[g.px[y][x] for y in range(roads.H) if g.px[y][x] != self.strip[y][x]] for x in roads.DIVIDERS]
         self.lane = [Counter(m).most_common(1)[0][0] for m in marked]
         self.duty = 1 if len(marked[0]) == roads.H else max(0.5, len(marked[0]) / roads.H)
@@ -708,7 +708,7 @@ class ZoneView(Art):
                 self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, c)
 
 
-# ---------- the Toronto neighborhoods' path cards, after their backdrops ----------
+# ---------- the Toronto neighbourhoods' path cards, after their backdrops ----------
 
 def cabbagetown_view():
     a = ZoneView("cabbagetown", flecked("grey", "slate", 53), tufted("dgreen"), "white", (2, 6), curb="stone",

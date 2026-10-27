@@ -59,7 +59,7 @@ Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide
 | `parked-car`                     | sprite | 56×42          | `idle`, `pull-out`, `drive`                      | Minor, 1 lane by 3 rows; `pull-out` pulls right, mirrored for left                                                                                   |
 | `patio-rail`                     | sprite | 176×36         | `idle`                                           | Minor, Distillery District, 3 lanes; an iron patio rail between geranium planters, a chalkboard menu                                                 |
 | `pedicab`                        | sprite | 48×72          | `ride`                                           | Minor, Yonge Street; a bike taxi carrying a passenger on its padded bench under a cobalt canopy, facing the pack                                     |
-| `petting-neighbor`               | sprite | 48×72          | `walk`, `wave`, `idle`                           | Lucky; a dog lover with a red heart on her top and one floating at her top right; `walk` steps, the heart lifting with her; `wave` crouches and pats |
+| `petting-neighbour`              | sprite | 48×72          | `walk`, `wave`, `idle`                           | Lucky; a dog lover with a red heart on her top and one floating at her top right; `walk` steps, the heart lifting with her; `wave` crouches and pats |
 | `picnic-blanket`                 | sprite | 112×36         | `idle`                                           | Minor, High Park, 2 lanes; a checked blanket with a basket                                                                                           |
 | `porch-cat`                      | sprite | 48×48          | `idle`, `walk`                                   | Encounter, Cabbagetown; a white calico lounging, side view facing right                                                                              |
 | `porch-steps`                    | sprite | 48×48          | `idle`                                           | Minor, Cabbagetown, 1 lane; brick steps with a jack-o'-lantern                                                                                       |
@@ -223,7 +223,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`      | Tap-to-enlarge view                                                       |
 | `card-zone-<zone>`            | image  | 75×56   |                      | A fork's path card: the zone's road to a cross street, its scenery beyond |
 
-Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-petting-neighbor-take`, her patting a pack dog on the head under rising hearts, is its popup art. Both lucky popups (`card-lost-wallet-keep` too) are cut out on transparency, with no background.
+Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-petting-neighbour-take`, her patting a pack dog on the head under rising hearts, is its popup art. Both lucky popups (`card-lost-wallet-keep` too) are cut out on transparency, with no background.
 
 ## Screens and home
 

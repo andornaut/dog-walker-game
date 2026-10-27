@@ -92,7 +92,7 @@ def icon(name):
 @icon("whole-city")
 def _(g):
     """Toronto's skyline round the CN Tower: a grey needle with its pod and a red light, and either
-    side blocks in the neighborhoods' colours (Kensington's lilac, Cabbagetown's brick, the
+    side blocks in the neighbourhoods' colours (Kensington's lilac, Cabbagetown's brick, the
     Distillery's ochre, the Beaches' sky), amber-lit, on a strip of High Park green."""
     blocks = ((7, 17, 4, "lilac", "violet"), (11, 13, 4, "brick", "dbrick"), (19, 15, 4, "ochre", "rust"),
               (23, 18, 3, "sky", "blue"))
@@ -592,7 +592,7 @@ def _(g):
 
 @icon("popular-pack")
 def _(g):
-    """Three whole hearts floating up from big to small, the way the friendly neighbor's hearts rise:
+    """Three whole hearts floating up from big to small, the way the friendly neighbour's hearts rise:
     red, red and pink, each with a white glint."""
     for x0, y0, rows in ((6, 14, H9), (17, 10, H7), (11, 6, H5)):
         bitmap(g, x0, y0, rows, {"x": "red" if rows is not H5 else "pink"})

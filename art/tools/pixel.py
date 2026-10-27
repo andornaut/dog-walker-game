@@ -36,7 +36,7 @@ DARKER = dict(p.split(":") for p in (
 NEUTRAL = dict(nlgrey="d8d8d8", ngrey="a4a4a4", nslate="727272", ndslate="4a4a4a")
 K.update(NEUTRAL)
 DARKER.update({"d8d8d8": "a4a4a4", "a4a4a4": "727272", "727272": "4a4a4a", "4a4a4a": "181425"})
-# The Toronto colours, 32 past Endesga 32 for the Toronto neighborhoods' scenery, roads, verges and
+# The Toronto colours, 32 past Endesga 32 for the Toronto neighbourhoods' scenery, roads, verges and
 # skies, in ramps that end on an Endesga colour: canopy and olive greens, brick and warm browns,
 # warm stones and dark slates for shaded laneways, TTC red, Kensington's painted-house brights, lake
 # blues and sky tones. Endesga 32 plus these is the 64-colour house palette.
@@ -266,7 +266,7 @@ def preview(sprites, out, grounds=ZONE_ROADS, scale=6, gap=4):
 
 LUA = """
 local spr = Sprite({w}, {h}, ColorMode.RGB)
-local pal = Palette({ncolors})
+local pal = Palette({ncolours})
 {palette}
 spr:setPalette(pal)
 local rgba = app.pixelColor.rgba
@@ -308,7 +308,7 @@ def _lua(tags, out):
         f"pal:setColor({i}, Color{{ r = {int(c[0:2], 16)}, g = {int(c[2:4], 16)}, b = {int(c[4:6], 16)} }})"
         for i, c in enumerate(colours)
     )
-    return LUA.format(w=w, h=h, ncolors=len(colours), palette=palette, frames="{" + ",\n".join(frames) + "}",
+    return LUA.format(w=w, h=h, ncolours=len(colours), palette=palette, frames="{" + ",\n".join(frames) + "}",
                       durations="{" + ",".join(durations) + "}", tags="\n".join(tag_lines), out=out)
 
 

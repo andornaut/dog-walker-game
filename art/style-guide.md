@@ -28,7 +28,7 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 | Small effects, icons                                                                                           | 16×16                      |
 
 - Road sprites are 1.2× the game's 40px hit box. Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.5× (depth variants at 1.5× the step): every shape scales, 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. Minor obstacles are laid out in their own pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn at 1.2×; vehicles keep their columns to their lanes and draw their rows at 1.2×. A 48px sprite leaves 8px of margin each side of its 64px lane. Sizes are in `inventory.md`.
-- Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite.
+- Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalized to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite.
 - Ground decals (the puddle, the skunk cloud) stay low so they read as lying on the road.
 - A lucky person reads as good before the pack reaches it: the neighbour wears a red heart and has another floating at her frame's top right (`road.HEARTS`, picked per depth step so it stays a clean bitmap). No hazard carries a heart.
 
@@ -128,8 +128,8 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 | disabled | Cannot be chosen now: not owned and short, the pack full, not available       | Flat ngrey face, ink and nslate lines, no lip                               | ndslate (3.56:1, exempt) |
 | primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board) | ink (8.41:1)             |
 
-- Art inside a disabled tile draws from its grey copy in the neutral ramp, each color at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's deepAmber. The padlock and the bill keep their colors, and an affordable item's picture keeps its colors on an nlgrey box, lighter than the tile, where a short one's grey copy sits on the darker nslate (see below). A normal tile's lip is brown, not the chrome's tan, so the tan box sits apart from it.
-- An item for sale is owned (no badge, no plate), affordable (`icon-bill` and the green buy plate) or short (`icon-lock` and the nlgrey short plate), told apart by badge shape and plate, never by color alone. An item not owned draws on a `disabled` tile or row, with its name, on the start screen and in the Pet shop: its portrait or icon in full color while the bank covers it, from its grey copy while short. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
+- Art inside a disabled tile draws from its grey copy in the neutral ramp, each colour at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's deepAmber. The padlock and the bill keep their colours, and an affordable item's picture keeps its colours on an nlgrey box, lighter than the tile, where a short one's grey copy sits on the darker nslate (see below). A normal tile's lip is brown, not the chrome's tan, so the tan box sits apart from it.
+- An item for sale is owned (no badge, no plate), affordable (`icon-bill` and the green buy plate) or short (`icon-lock` and the nlgrey short plate), told apart by badge shape and plate, never by colour alone. An item not owned draws on a `disabled` tile or row, with its name, on the start screen and in the Pet shop: its portrait or icon in full colour while the bank covers it, from its grey copy while short. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
 - The primary green marks a screen's call to action; on the start screen Start walk is the only full-width primary button. `go-disabled` matches `disabled`; `secondary` and `secondary-pressed` match `normal` and `pressed`.
 - Cards follow the same states: a disabled card is redrawn in the grey ramp, the selected one is outlined in amber.
 
@@ -150,7 +150,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece's drawing in `art/tools/ui.py`.
 
-- The walk bar is plum wood with an ink cash well, a neighborhood well (the zone's name in cream `font-body`, "n of N" right-aligned in grey) and five `ui-effect-well`s holding the effects' `-20` icons. The 16×16 icon keys stay for the message strip, the shop and the cards.
+- The walk bar is plum wood with an ink cash well, a neighbourhood well (the zone's name in cream `font-body`, "n of N" right-aligned in grey) and five `ui-effect-well`s holding the effects' `-20` icons. The 16×16 icon keys stay for the message strip, the shop and the cards.
 - A `ui-debuff-bar` (360×16) per active debuff sits under the walk bar, its face, shade and fill in the debuff's colours: muddy brown, dbrown and tan with an ink name (4.66:1); stinky mauve, purple and pink with a white name (4.70:1); zoomies green, forest and yellow with an ink name (8.41:1); spotlight blue, navy and yellow with a white name (8.48:1).
 - `ui-dog-card` (120×74) is a file card in the neutral `ui-section` look so the eye stays on the road: a navy face, the dog's photo and the owner's photo (`face-owner-<dog>-20`) with the owner's name in tan and hearts as `ui-heart` `full-dark` and `empty-dark`. The `empty` card (a fired dog's) is the same frame in dslate with the FIRED plate across the photo. `ui-dog-card-warn` pulses at 1 ♥ (`static` with reduced motion); `heart-loss` fills only the hearts area, never the card's edge, so `ui-dog-card-warn` stays the card's only border.
 - `ui-owner-tab` pops in centred on a card's top edge when its dog's hearts change or the dog is fired. An owner's quip on the walk is a message strip line led by their face (`face-owner-<dog>-20`, framed in ink over tan) with their name under it in rust.
@@ -159,7 +159,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 
 - Band colour by what opened the card: dred for an obstacle's encounter, purple for a fork's route.
 - Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge.
-- A lucky find's popup art (`card-lost-wallet-keep`) shows the one thing found, close up and larger than its road sprite, with no person. `card-petting-neighbor-take` is the exception: the find is the neighbor. Both pop up over the road with no background, cut out on transparency with no ground or shadow, their sparkles yellow so they read on every road.
+- A lucky find's popup art (`card-lost-wallet-keep`) shows the one thing found, close up and larger than its road sprite, with no person. `card-petting-neighbour-take` is the exception: the find is the neighbour. Both pop up over the road with no background, cut out on transparency with no ground or shadow, their sparkles yellow so they read on every road.
 - The art window is centred on the card's face: `card-frame` 3,15 77×58 with the illustration at 4,16; `card-frame-large` 6,30 154×116 with the illustration at 8,32.
 - A path card (`card-zone-<zone>`) samples its road strip to a cross street and repeats its backdrop's sky and scenery in miniature.
 
@@ -191,7 +191,7 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the sign logo: 
 ### Road movers
 
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane at the pack faces the player (`cyclist`, `jogger`, `kid-on-bike`, `minor-scooter`'s `ride`); anything going up a lane ahead of the pack, or slower than the road, is seen from behind (`stroller`, `ice-cream-truck`, `streetcar`). `coyote` steps toward the pack in any direction, so it is three-quarter front, angled right and mirrored for left.
-- Each neighbourhood has its own road objects, drawn in `art/tools/hood_parks.py` (Cabbagetown, High Park), `hood_markets.py` (Distillery District, Kensington Market) and `hood_city.py` (The Beaches, Yonge Street). Each reads apart from the object it could be taken for: `porch-cat` is a white calico, unlike the tuxedo `chase-cat` and the ginger `ambient-cat`; `produce-crates` has no awning or posts, unlike `roadside-fruit-stand`; `cargo-bike`'s flower box hides the rider's legs, unlike `cyclist` and `kid-on-bike`; `ttc-bus` has a white upper body, a roof pod and tyres and no pantograph, unlike `streetcar`; `dropped-cone`'s cone lies on its side, unlike `cone`.
+- Each neighbourhood has its own road objects, drawn in `art/tools/hood_parks.py` (Cabbagetown, High Park), `hood_markets.py` (Distillery District, Kensington Market) and `hood_city.py` (The Beaches, Yonge Street). Each reads apart from the object it could be taken for: `porch-cat` is a white calico, unlike the tuxedo `chase-cat` and the ginger `ambient-cat`; `produce-crates` has no awning or posts, unlike `roadside-fruit-stand`; `cargo-bike`'s flower box hides the rider's legs, unlike `cyclist` and `kid-on-bike`; `ttc-bus` has a white upper body, a roof pod and tires and no pantograph, unlike `streetcar`; `dropped-cone`'s cone lies on its side, unlike `cone`.
 - `tourist` and `couple` step facing the player like `mail-carrier`; `delivery-cyclist` faces the player like `cyclist`, told apart from it and `kid-on-bike` by its turquoise box. A busker's case holds sheet music and a sign, never coins, which read as pickups.
 - `rollerblader`, `pedicab` and `cargo-bike` come down their lane facing the player; `ttc-bus` is slower than the road, so it is seen from behind; `porch-cat` and `capybara` are side views facing right, never mirrored while they stand.
 - `squirrel`, `squirrel-dash`, `icon-trait-chaser` and `badge-squirrel` are Toronto's black squirrel (`SQUIRREL_FUR` in `art/tools/road.py`), lit by `LIT`'s rim.
@@ -234,7 +234,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 - 320×64 (`art/tools/roads.py`), tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Cabbagetown grey (slate), High Park tan (brown), Distillery District dslate (navy), Kensington Market dbrick (walnut), The Beaches cream (tan), Yonge Street shale (coal). Every road sprite's light rim holds on dbrick and shale at least as well as on dslate.
-- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Kensington Market paints each divider its own color (`LANE_PAINT` in `roads.py`), none of them gold, amber or orange, which read as coins.
+- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Kensington Market paints each divider its own colour (`LANE_PAINT` in `roads.py`), none of them gold, amber or orange, which read as coins.
 - Curbs and verges stay inside the outer 5 to 8px of the strip, clear of the 8px each side of a 48px sprite in its lane.
 - Every zone has a start strip: a neutral cross street (near curb, asphalt with a zebra, far curb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The rows from the road's far edge down to about y 214 sample the strip shrunk 4×, so lane dashes and texture along the road repeat every 8 rows or more, lines across the road are at least 2 rows tall and low in contrast, fine detail runs along the road, and small texture is spaced irregularly.
@@ -252,12 +252,12 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 
 - Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5×. They are front elevations, never flipped, outlined with `road_edge` and no light rim, with one static `idle` frame, so the verges never pull the eye from the road.
 - A prop never reads as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for (the fruit stand has no wheels, unlike the hot dog cart; the transit stop has no shelter; the street lamp lights both ways, since a prop is never flipped).
-- Each side has a slot every 140 road px, slot n at z = 140n. With m = n − offset (left 0, right 1), an even m is a lot and an odd m a gap, and k = floor(m / 2); a side takes gap (gapStart + k) mod 6, left gaps starting at 0 and right at 2. Every lot is empty; gap 0 holds the neighborhood's tree or street furniture and gap 3 its own prop, so each side has a prop every 6 slots and over both sides one stands every 420 px.
+- Each side has a slot every 140 road px, slot n at z = 140n. With m = n − offset (left 0, right 1), an even m is a lot and an odd m a gap, and k = floor(m / 2); a side takes gap (gapStart + k) mod 6, left gaps starting at 0 and right at 2. Every lot is empty; gap 0 holds the neighbourhood's tree or street furniture and gap 3 its own prop, so each side has a prop every 6 slots and over both sides one stands every 420 px.
 - Every frame's inner edge is at across 212 or more, past the sidewalk's outer edge at 208. No prop stands within a zone's start strip.
 - Curb props are `curb-<name>`, drawn the same way: small street furniture on the sidewalk or paving, each frame wholly inside the zone's curb band (from 2 road px past the curb or its strip to 2 px inside the sidewalk's outer edge; paving out to the screen's edge counts as a 44 px sidewalk). Each stands at the band's middle, half a slot (70 px) further than the lawn props, and on each side every other slot holds one, the zone's two in turn, the sides alternating, so over both sides one stands every 140 px. High Park's lawn starts at the curb, so it has none. None reads as a road obstacle: no trash can, cone, bench or barrier.
 - Free-standing props take the road objects' ground shadow in the zone's `shadowColour`, a darker tone of its lawn or paving.
 
-| Neighborhood        | Gap 0         | Gap 3           | Curb                       | Shadow |
+| Neighbourhood       | Gap 0         | Gap 3           | Curb                       | Shadow |
 | ------------------- | ------------- | --------------- | -------------------------- | ------ |
 | Cabbagetown         | `tree-maple`  | `gas-lamp`      | `hydrant`, `urn`           | canopy |
 | Distillery District | `gas-lamp`    | `love-lock`     | `barrel`, `bollard`        | dbrown |
@@ -268,7 +268,7 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 
 ## Ambient
 
-People, traffic, lawn animals and sky movers that pass by with no collisions and no card (`art/tools/ambient.py`), outlined with `road_edge` and lit with the rim on their dark parts. Side views face right; the game flips them to go left. The sky movers fly far back across a neighborhood's sky, outlined in ink, with no depth variants. A sprite that rests has its `idle` first. Each differs from the road sprite it could be taken for: the cyclist's colours from `cyclist`'s, the bus (side on, on tyres, with no pantograph) from `streetcar`, the lawn animals from the chase animals, and the pedestrian carries nothing and walks no dog, so it never reads as an owner, a walker or a hazard.
+People, traffic, lawn animals and sky movers that pass by with no collisions and no card (`art/tools/ambient.py`), outlined with `road_edge` and lit with the rim on their dark parts. Side views face right; the game flips them to go left. The sky movers fly far back across a neighbourhood's sky, outlined in ink, with no depth variants. A sprite that rests has its `idle` first. Each differs from the road sprite it could be taken for: the cyclist's colours from `cyclist`'s, the bus (side on, on tires, with no pantograph) from `streetcar`, the lawn animals from the chase animals, and the pedestrian carries nothing and walks no dog, so it never reads as an owner, a walker or a hazard.
 
 ## Backdrops
 
@@ -281,7 +281,7 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 
 ## Skies
 
-- Each neighborhood has its own sky, flat above `CALM` (70 rows over the far side's ground row) but for Yonge Street's towers. Ink edges hold 3:1 or more on every sky.
+- Each neighbourhood has its own sky, flat above `CALM` (70 rows over the far side's ground row) but for Yonge Street's towers. Ink edges hold 3:1 or more on every sky.
 
 | Sky                               | Bands or colours                                                    | Where                                          |
 | --------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |

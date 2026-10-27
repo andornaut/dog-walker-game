@@ -9,16 +9,16 @@ stink-garbage-truck 56x60   a rear-loader garbage truck from behind, its hopper
                             (56 columns, rows 1.2x), so it centres on a lane with 4px to spare, taller
                             than the delivery truck (56x54) and as tall as the ice cream truck.
                             idle (2 frames, 400ms). drive (4 frames, 100ms): reversing down the lane
-                            at the pack, tread lines fall down the tyres, the body dips 1px onto them
+                            at the pack, tread lines fall down the tires, the body dips 1px onto them
                             on frames 1 and 2, the beacon blinks
 minor-scooter       48x72   a sky scooter from behind on its stand, laid out on 32x48 and drawn at
                             road.SCALE as hazards.cyclist is; idle (2 frames, 500ms): the indicators
                             blink. pull-out (4 frames, 100ms), parked-car's, drawn pulling right:
-                            tread lines climb the tyre, the right indicator blinks. ride (4 frames,
+                            tread lines climb the tire, the right indicator blinks. ride (4 frames,
                             100ms): ridden down its lane at the pack, facing the player as
                             hazards.cyclist does, a rider in an open white helmet with a sky stripe
                             and a purple jacket on it behind the leg shield and headlight, the tread
-                            falling down the tyre 1px a frame and the scooter and rider dipping 1px
+                            falling down the tire 1px a frame and the scooter and rider dipping 1px
                             onto it on frames 1 and 2
 
 Every key also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5), with
@@ -66,7 +66,7 @@ def garbage_truck(f, roll=None):
     packer body with a rounded top, ribbed in forest with a white stripe, its hopper open on a bag, a sack, a
     can and a banana peel under the grey packer blade, grab bars either side, red tail lights, the bumper
     step, both rear wheels and an amber beacon on the roof that blinks (f 1 off). roll (0 to 3) is a drive
-    frame, reversing down the lane at the pack: tread lines fall down the tyres 1px a frame and the body
+    frame, reversing down the lane at the pack: tread lines fall down the tires 1px a frame and the body
     dips 1px onto them on frames 1 and 2."""
     w = TRUCK_W
     g = edged(Grid(TRUCK_W, TRUCK_H))
@@ -154,19 +154,19 @@ def truck(draw, f, step):
 # The scooter is laid out on 32x48 and drawn at road.SCALE, 48x72, as hazards.cyclist is: a two-wheeler a
 # rider sits on, so the rider is a road person's size.
 SCOOTER_W, SCOOTER_H = 32, 48
-# The ride's 4 frames, each this long: the tyre's tread falls 1px a frame, as the garbage truck's reverse.
+# The ride's 4 frames, each this long: the tire's tread falls 1px a frame, as the garbage truck's reverse.
 SCOOTER_RIDE_MS = 100
 
 
 def scooter(blink=False, u=1, roll=None):
-    """A sky scooter from behind: its tyre between the two round side cowls, the tail light and plate under
+    """A sky scooter from behind: its tire between the two round side cowls, the tail light and plate under
     the seat, the leg shield and handlebar with its mirrors over it. Parked (roll None), it stands on its
     stand and blink lights both indicators on the cowls. roll (0 to 3) is a pull-out frame: tread
-    lines climb the tyre 1px a frame (obstacles.treads) and the stand is up; pulling out, the right
+    lines climb the tire 1px a frame (obstacles.treads) and the stand is up; pulling out, the right
     indicator is lit on frames 0 and 1. u is one pixel at the drawn size, in layout units."""
     g = frame(SCOOTER_W, SCOOTER_H)
     px = raster(g)
-    # the tyre first, so the body lies over it
+    # the tire first, so the body lies over it
     g.rect(14, 38, 4, 9, "ink")
     g.rect(14, 38, 1, 8, "dslate")
     if roll is not None:
@@ -215,15 +215,15 @@ def scooter_pulling(roll, u=1):
 
 def scooter_riding(roll, u=1):
     """scooter's ride frame roll: ridden down its lane at the pack, facing the player as hazards.cyclist does.
-    The front tyre edge-on under the front mudguard, tread lines falling 1px a frame as it rolls toward the
+    The front tire edge-on under the front mudguard, tread lines falling 1px a frame as it rolls toward the
     player (obstacles.treads, back); the sky leg shield across the front with a chrome horn badge, the
     headlight on the headset over it, the handlebar with its orange indicators at the ends and the mirrors
     on stalks. Its rider, behind the shield: an open white helmet with a sky stripe over the face, a purple
-    jacket, brown gloves on the grips. The scooter and rider dip 1px onto the tyre on frames 1 and 2. u is
+    jacket, brown gloves on the grips. The scooter and rider dip 1px onto the tire on frames 1 and 2. u is
     one pixel at the drawn size, in layout units."""
     g = frame(SCOOTER_W, SCOOTER_H)
     px = raster(g)
-    # the tyre first, so the body can dip over it
+    # the tire first, so the body can dip over it
     g.rect(14, 38, 4, 9, "ink")
     g.rect(14, 38, 1, 8, "dslate")
     treads(g, 15, 40, 3, 7, roll, u, back=True)
@@ -265,7 +265,7 @@ def scooter_riding(roll, u=1):
     g.rect(14, 27, 4, 1, "white")
     g.rect(15, 29, 2, 1, "grey")
     g.cel(16, 21, 2.5, 2, "yellow", "amber", "white")
-    # the front mudguard over the tyre
+    # the front mudguard over the tire
     g.cel(16, 38.5, 3, 2, "sky", "blue", "cyan")
     dip = 1 if roll in (1, 2) else 0
     body = px.px

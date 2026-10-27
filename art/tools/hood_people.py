@@ -351,7 +351,7 @@ def delivery_cyclist(lf=36, rf=41):
     g.rect(23, 13, 4, 2, "grey")
     g.p(5, 1, None)
     g.p(26, 1, None)
-    # front wheel: a fat black tyre edge-on, the fork, a black mudguard and the white headlamp
+    # front wheel: a fat black tire edge-on, the fork, a black mudguard and the white headlamp
     g.blob(16, 39.5, 3, 7, "ink")
     g.rect(15, 34, 2, 9, "dslate")
     g.rect(13.5, 32, 5, 2, "ink")

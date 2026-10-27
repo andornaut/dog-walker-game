@@ -274,7 +274,7 @@ CYCLIST_RIDE = [
 def cyclist(lf=36, rf=41):
     """The rider facing the player, laid out on 32x48; cyclist_at draws it at size and adds the sway."""
     g = edged(Grid(32, 48))
-    # front wheel: a tyre seen edge-on, with a mudguard and the fork
+    # front wheel: a tire seen edge-on, with a mudguard and the fork
     g.blob(16, 39.5, 2.5, 7, "ink")
     g.rect(15, 35, 1, 9, "grey")
     g.rect(14, 33, 4, 2, "lgrey")

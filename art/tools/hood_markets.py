@@ -39,7 +39,7 @@ cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding d
                             facing it: a wooden box of sunflowers, tulips and lilac out front over a
                             small front wheel, its rider behind in a rust beanie and a turquoise
                             jacket; the box hides the legs. ride (4 frames, 100ms): the rider sways
-                            1px over the bars, the flowers jiggle and a tread line rolls down the tyre
+                            1px over the bars, the flowers jiggle and a tread line rolls down the tire
 
 fx-hit-wedding-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a camera flash flaring
                             and fading while the bouquet flies up out of it, tumbling, and petals
@@ -564,7 +564,7 @@ def cargo_bike(sway=0, jiggle=0, roll=0):
     edge-on under a wide wooden box (tan slats lit cream, shaded brown) full of flowers, sunflowers, tulips
     and lilac over green leaves; behind it the rider in a turquoise jacket with a rust beanie and an ochre
     pompom, dark curls showing under it, hands on the wide handlebar. sway shifts the rider 1 drawn pixel
-    over the bars; jiggle lifts alternate flowers 1px; roll (0 to 3) rolls a grey tread line down the tyre."""
+    over the bars; jiggle lifts alternate flowers 1px; roll (0 to 3) rolls a grey tread line down the tire."""
     g = edged(Grid(32, 48))
     u = unit(g)
     w = sway * u

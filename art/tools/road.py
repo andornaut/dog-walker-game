@@ -1370,7 +1370,7 @@ def ice_cream_truck(f=0, roll=None):
     The rear doors split down the middle, each with a window; a pink drip stripe runs across them; tall red
     tail lights sit at the outer corners, amber blinkers under them; then the plate, the bumper and both rear
     wheels. A mirror pokes out on the left and the serving hatch's striped awning on the right. f swaps the
-    lit blinker and the music note. roll (0 to 3) is a drive frame: tread lines climb the tyres, the body dips
+    lit blinker and the music note. roll (0 to 3) is a drive frame: tread lines climb the tires, the body dips
     1px onto them on frames 1 and 2, the cone sign rocks on its post the other way, and a note floats up beside
     it. The road outline and the lit rim."""
     import obstacles  # obstacles imports this module
@@ -1517,7 +1517,7 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
     for i in range(9):
         g.p(20 - i // 5, 31 + i, "lgrey")
         g.p(28 + i // 5, 31 + i, "lgrey")
-    # the rear wheels: round tyres lit along the top, a hub in the middle
+    # the rear wheels: round tires lit along the top, a hub in the middle
     for cx in (18.5, 29.5):
         g.ell(cx, 42.5, 1.7, 3.2, "ink")
         g.p(cx, 40, "slate")
@@ -1670,12 +1670,12 @@ KID_BIKE_RIDE_MS = 100
 def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     """A kid riding a little bike down the road at the pack, facing the player as the cyclist does: a yellow
     tee, sky shorts, red shoes and ochre hair under a red helmet with a white stripe and a dark visor. The
-    bike is mauve, its front tyre edge-on under a mudguard with a white reflector, the training wheels
+    bike is mauve, its front tire edge-on under a mudguard with a white reflector, the training wheels
     showing either side behind, streamers trailing from the grips. Shorter than an adult rider: the helmet's
     top is 4 design rows (6px) lower than the cyclist's. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     w = sway
-    # the training wheels behind, on their strut, then the front tyre, fork, mudguard and reflector
+    # the training wheels behind, on their strut, then the front tire, fork, mudguard and reflector
     for x in (9.5, 22.5):
         g.blob(x, 42, 1.5, 2.5, "ink")
     g.rect(10, 40, 13, 1, "grey")

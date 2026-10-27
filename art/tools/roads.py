@@ -10,10 +10,10 @@ road-<zone>-start  320x64 images, one per zone. Rows 20 to 63 are a neutral cros
                    fork: the road reads up the screen as the previous zone's
                    strip, the start strip, then this zone's strip.
 
-Each strip keeps its zone's road colour (the game data's roadColor) as the base, so
+Each strip keeps its zone's road colour (the game data's roadColour) as the base, so
 the game's shadows (one ramp step darker) still match. The four lane dividers sit
 at x = 64k-1 (2px wide) and share one look per zone (Kensington Market's are
-painted a color each), so lane edges stay readable at speed; the outer 5 to 8 px
+painted a colour each), so lane edges stay readable at speed; the outer 5 to 8 px
 of each side is a curb or verge, which an outer lane's 56px sprite (4 px in from
 its 64px lane's edge) overlaps by up to 4 px.
 
@@ -105,13 +105,13 @@ def high_park_lines(g):
             g.rect(x, y + 7, 2, 1, "plum")
 
 
-# Pedestrian Sunday's painted lane lines, one color per divider, left to right; each holds 4:1 or more
+# Pedestrian Sunday's painted lane lines, one colour per divider, left to right; each holds 4:1 or more
 # on Kensington Market's dbrick, and none is gold, amber or orange, which read as coins.
 LANE_PAINT = ("cream", "turquoise", "pink", "lime")
 
 
 def kensington_lines(g):
-    """A 10-row painted dash every SEAM_PERIOD rows from row 24, wrapping, each divider its own color, a
+    """A 10-row painted dash every SEAM_PERIOD rows from row 24, wrapping, each divider its own colour, a
     ramp step darker down its right edge. Rows 35 to 55 stay bare: screen-end shows rows 36 to 39 below its
     button."""
     for x, c in zip(DIVIDERS, LANE_PAINT):
@@ -157,7 +157,7 @@ def beaches_lines(g):
             g.rect(x, y, 2, 20, "dbrown")
 
 
-# ---------- the six neighborhoods ----------
+# ---------- the six neighbourhoods ----------
 # Each strip's base is its zone's road colour, which the game's road shadow steps down from.
 
 def grit(g, rnd, n, cols):
@@ -243,7 +243,7 @@ def high_park_ground(g):
 def distillery_ground(g):
     """Dslate cobbles laid long along the road: columns 16 wide, each cobble 30 rows long over a 2-row navy
     joint, so a column's joints repeat every 32 rows (SEAM_PERIOD); each column starts its cobbles at its own
-    multiple of 4, never within 4 rows of its neighbor's, so no joint runs across the road. Each cobble's
+    multiple of 4, never within 4 rows of its neighbour's, so no joint runs across the road. Each cobble's
     corners are rounded off in navy and its top left glints slate; 1px navy joints between the columns, a
     navy pit in some cobbles; brick gutters along both sides."""
     rnd = random.Random("road-distillery-district")
@@ -270,7 +270,7 @@ def distillery_ground(g):
 
 
 def distillery_lines(g):
-    """A pale granite kerbstone on each lane line every 64 rows: lgrey, 22 rows long, a stone edge."""
+    """A pale granite curbstone on each lane line every 64 rows: lgrey, 22 rows long, a stone edge."""
     for x in DIVIDERS:
         g.rect(x, 0, 2, 22, "lgrey")
         g.rect(x + 1, 0, 1, 22, "stone")

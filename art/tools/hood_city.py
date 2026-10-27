@@ -32,9 +32,9 @@ ttc-bus             56x66   minor, 1 lane by 3 rows of footprint, slower than th
                             streetcar is: a roof pod over a white upper body, a wide dark rear window
                             under an amber route sign "97", a ttc red lower body with two white stripes,
                             "TTC" in white, the engine grille, tail lights and blinkers at the outer
-                            corners, the bumper and both rear tyres. idle (2 frames, 400ms): the left
+                            corners, the bumper and both rear tires. idle (2 frames, 400ms): the left
                             blinker flashes, pulling out from a stop; drive (4 frames, 100ms): tread
-                            lines climb the tyres and the body dips 1px onto them on frames 1 and 2
+                            lines climb the tires and the body dips 1px onto them on frames 1 and 2
 sandwich-board      48x48   minor, 1 lane: a café's A-frame sign, a forest chalkboard in a brown
                             wooden frame with a chalk coffee cup and two lines of chalk writing, on
                             splayed legs. idle (4 frames, 450ms): the chalk steam over the cup wavers
@@ -44,7 +44,7 @@ pedicab             48x72   minor rider, 1 lane, coming down its lane at the pac
                             string lights shading a padded red bench on two wheels, a passenger in a
                             green top and a gold bob sitting on its left, and in front the rider, who
                             wears a purple tee and a white headband. ride (4 frames, 120ms): the pedals
-                            going round, the front tyre's tread falling 1px a frame
+                            going round, the front tire's tread falling 1px a frame
 
 Every key above also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5),
 with the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The people
@@ -369,7 +369,7 @@ def pedicab(lf=39, rf=44, roll=0):
     posts, shading a padded red bench, button tufted, its seat roll lit pink, and on the bench's left a
     passenger, gold hair and a green top, their head and shoulders under the valance. In front, lower and
     centred, the rider in a purple tee and a white headband, the hands on the handlebar, the legs either side
-    of the front tyre, edge-on under its mudguard, the tread falling down it 1px a frame; the cab's two
+    of the front tire, edge-on under its mudguard, the tread falling down it 1px a frame; the cab's two
     wheels show either side."""
     g = edged(Grid(32, 48))
     u = unit(g)[1]
@@ -610,8 +610,8 @@ def ttc_bus(blink=0, roll=None):
     roof pod over a white upper body lit along its top and left; the wide rear window, dark with a glint,
     under the amber route sign "97" on black; the ttc red lower body with two white stripes, "TTC" in
     white, the engine grille's slats, the tail lights and blinkers at the outer corners; the bumper and
-    both rear tyres, black, no bogie. blink 1 lights the left blinker. roll (0 to 3) is a drive frame:
-    tread lines climb the tyres and the body dips 1px onto them on frames 1 and 2."""
+    both rear tires, black, no bogie. blink 1 lights the left blinker. roll (0 to 3) is a drive frame:
+    tread lines climb the tires and the body dips 1px onto them on frames 1 and 2."""
     g = edged(Grid(56, 55))
     px = raster(g)
     uy = unit(g)[1]

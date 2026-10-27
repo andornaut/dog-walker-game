@@ -10,7 +10,7 @@
   font-display-cream, a red heart in both. Draw them untinted.
 - font-comic: the comic words' lettering from fx.py, for the word over a hit burst. Draw it untinted.
 
-font-body and font-title are SIL Open Font License fonts; the font files and licenses are in
+font-body and font-title are SIL Open Font License fonts; the font files and licences are in
 art/fonts/. Their glyphs are white on transparent so the game tints them. Printable ASCII, the
 middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has.
 

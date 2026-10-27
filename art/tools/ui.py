@@ -1357,7 +1357,7 @@ def quip_tail():
 def zone_banner():
     """248x48: a cream board in the chrome on navy ribbon ends, shown over the road between
     zones. The game writes two lines in font-title, plum, centred on x=124: the world and zone
-    number ("TORONTO, NEIGHBORHOOD 2") with its caps in rows 11 to 15, and the zone name at x2
+    number ("TORONTO, NEIGHBOURHOOD 2") with its caps in rows 11 to 15, and the zone name at x2
     ("KENSINGTON MARKET", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
     g = Grid(248, 48)
     ribbon = Grid(248, 48)

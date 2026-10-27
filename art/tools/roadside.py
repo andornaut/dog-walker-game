@@ -567,9 +567,9 @@ def gap(*props):
 # the side takes lots[(lotStart + k * lotStride) % len(lots)] and gaps[(gapStart + k * gapStride) %
 # len(gaps)]. gap() takes each prop as (key, inner edge, dz) and resolves its across from its frame's width;
 # dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
-# a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighborhood's tree or
+# a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
-# 3 slots after the left's, so they alternate sides, one every 420 px. Each neighborhood's character
+# 3 slots after the left's, so they alternate sides, one every 420 px. Each neighbourhood's character
 # comes from its backdrop, verges and road, not from its roadside.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),

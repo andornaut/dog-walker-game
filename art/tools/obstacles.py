@@ -18,14 +18,14 @@ hedge               176x36  3 lanes, a low hedge with a rounded, clumped top; le
 parked-car          56x42   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
                             footprint's near edge; hazards blink. 56 wide, so it centres on its lane
                             with 4px to spare each side. pull-out (4 frames, 100ms): drawn pulling
-                            right (the game mirrors it for left), tread lines climb the tyres and the
+                            right (the game mirrors it for left), tread lines climb the tires and the
                             right indicator blinks amber; drive (4 frames, 100ms): driving down its
                             lane, the same tread roll with no indicator
 delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from straight behind with a tan
                             roller door, drawn at the footprint's near edge; idle (4 frames,
                             400ms): an exhaust puff on frame 2 that drifts up and thins on frame 3.
                             drive (4 frames, 100ms): tread lines
-                            climb the tyres and the body dips 1px onto them on frames 1 and 2
+                            climb the tires and the body dips 1px onto them on frames 1 and 2
 hot-dog-cart        112x66  2 lanes, a stainless street meat cart side on under a striped umbrella;
                             idle (2 frames, 500ms): wavy steam wisps rising off the steam table
 streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity from behind, its pantograph
@@ -170,7 +170,7 @@ def bench(leaf=(0, 0), w=span(2)):
 
 
 # The smallest scale the hedge's leaf texture and the trash can's two ribs are drawn at: under it (the @50 step) a
-# 1px detail lands on single pixels or merges with its neighbor.
+# 1px detail lands on single pixels or merges with its neighbour.
 TEXTURE_MIN = 0.7
 
 
@@ -236,7 +236,7 @@ def parked_car(hazard=False, roll=None, blink=True):
     tail lights and plate, the bumper and both rear wheels under it, mirrors poking out at the sides. Its
     hazard lights, the outer end of each tail light, are lit when hazard is true. Cyan lights the top and
     left edges, so the sky body holds on the dslate road. roll (0 to 3) is a pull-out or drive frame: tread
-    lines climb the tyres 1px a frame (treads), and, when blink is true (pull-out), the right indicator is
+    lines climb the tires 1px a frame (treads), and, when blink is true (pull-out), the right indicator is
     lit on frames 0 and 1."""
     g = edged(Grid(56, 35))
     # rear wheels, under the body at either side
@@ -286,8 +286,8 @@ def parked_car(hazard=False, roll=None, blink=True):
 
 
 def treads(g, x, y, w, h, f, u=1, back=False):
-    """Tread lines across a tyre seen from behind, rows y to y + h - 1: one every 4u rows, climbing u a frame
-    as the tyre rolls away (frame f of 4), or falling when back (reversing), so the loop is seamless. u is
+    """Tread lines across a tire seen from behind, rows y to y + h - 1: one every 4u rows, climbing u a frame
+    as the tire rolls away (frame f of 4), or falling when back (reversing), so the loop is seamless. u is
     one pixel at the drawn size."""
     for k in range(-1, round(h / u) // 4 + 2):
         ty = y + ((f if back else 3 - f) + 4 * k) * u
@@ -321,7 +321,7 @@ def delivery_truck(puff=0, roll=None):
     its top and left edges with mirrors at its sides and amber marker lights on the roof, a tan roller door
     ribbed in brown with a white shipping label on it, red tail lights low at the outer corners, the bumper
     step and both rear wheels. puff 1 blows a grey exhaust puff out beside the right wheel and puff 2
-    lets it drift up and thin to two wisps. roll (0 to 3) is a drive frame: tread lines climb the tyres 1px a frame (treads) and the
+    lets it drift up and thin to two wisps. roll (0 to 3) is a drive frame: tread lines climb the tires 1px a frame (treads) and the
     body dips 1px onto them on frames 1 and 2. Laid out on 56x45 and drawn at CAR_SCALE, as the parked car."""
     g = edged(Grid(56, 45))
     px = raster(g)
@@ -504,7 +504,7 @@ def hot_dog_cart(steam=0, w=span(2)):
     with a mustard zigzag on the box's side. steam (0 or 1) shifts the wisps' wave half a period."""
     g = edged(Grid(w, 55), cart_edge)
     c = w / 2
-    # the wheels, behind the box: ink tyres, grey hubs
+    # the wheels, behind the box: ink tires, grey hubs
     for x in (19, w - 19):
         g.cel(x, 48, 6, 6.5, "ink", None, "dslate")
         g.cel(x, 48, 2, 2, "grey", None, "lgrey")
@@ -536,7 +536,7 @@ def hot_dog_cart(steam=0, w=span(2)):
     # on the counter, right: the steam table's two lids
     for x in (w - 33, w - 20):
         g.cel(x, 27, 6, 3.5, "lgrey", "grey", "white")
-    # the steam: a wavy 1px wisp rising off each lid, in haze with no outline, so it reads as vapor and not
+    # the steam: a wavy 1px wisp rising off each lid, in haze with no outline, so it reads as vapour and not
     # as a knob on the lid; the two wisps wave in opposite phase and steam shifts the wave half a period
     px, edge = raster(g), pixel_edge(g)
     for i, x in enumerate((w - 33, w - 20)):

@@ -17,7 +17,7 @@ bumpers, dark wheel arches. drive (4 frames at DRIVE_MS): a spoke through each h
 and the body dips 1px onto the wheels on frames 1 and 2. ambient-car is the sedan; the other bodies are
 extra keys. The bus is a TTC bus: a white greenhouse and roof pod over a red body with two white stripes,
 six windows, glass front and middle doors split down the middle, a tall windshield under an amber-lit
-destination sign, and its lamps low at the bumpers; side on it shows no pantograph and rides on tyres, so it
+destination sign, and its lamps low at the bumpers; side on it shows no pantograph and rides on tires, so it
 never reads as the streetcar. The cyclist rides an amber helmet, a mauve jersey and navy shorts on a red bike; ride
 (4 frames at RIDE_MS): the cranks turn a quarter a frame with the feet on the pedals, a cross of spokes
 turns a sixteenth, and the back and head sit 1px lower on frames 1 and 3. Its wheels are clear inside, so
@@ -212,12 +212,12 @@ def pedestrians(suffix, step):
 SPOKES = (((0, -2), (0, -1), (0, 1), (0, 2)), ((1, -1), (-1, 1)), ((-2, 0), (-1, 0), (1, 0), (2, 0)),
           ((-1, -1), (1, 1)))
 ROOF = 3            # every car's roof row; the frame keeps 2 clear rows above it and 2 columns each side
-TYRE = 5            # a tyre's radius; it rises 3 rows into the body
+TIRE = 5            # a tire's radius; it rises 3 rows into the body
 
 
 class Car:
     """A car's side profile facing right, in design units. The greenhouse runs from the roof (ROOF) to the
-    row above belt, the body from belt for body rows, and the tyres reach TYRE * 2 - 3 rows past the body to
+    row above belt, the body from belt for body rows, and the tires reach TIRE * 2 - 3 rows past the body to
     the ground row. cabin is the roof's first and last column; back and front are how many columns the
     greenhouse widens per row behind and ahead. Columns are counted from the art's left edge, 2 in from the
     frame's. The extras in q: upper, the greenhouse's paint; pillars and doors, their columns; bands, (x0, x1,
@@ -230,8 +230,8 @@ class Car:
         self.base, self.shade, self.light = paint
         self.q = q
         self.end = belt + body - 1
-        self.cy = self.end - 3 + TYRE + 0.5
-        self.w, self.h = length + 4, self.end + TYRE * 2 - 3 + 2
+        self.cy = self.end - 3 + TIRE + 0.5
+        self.w, self.h = length + 4, self.end + TIRE * 2 - 3 + 2
 
     def span(self, y):
         """The greenhouse's first and last column on row y."""
@@ -300,15 +300,15 @@ class Car:
         rect(L - 3, end - 3, 3, 3, "lgrey")
         rect(0, end - 1, 3, 1, "grey")
         rect(L - 3, end - 1, 3, 1, "grey")
-        # wheel arches, dark inside the body, cut off below it, then the tyres in front of them
+        # wheel arches, dark inside the body, cut off below it, then the tires in front of them
         for cx in self.wheels:
-            rect(cx - TYRE - 1.5, self.cy - TYRE - 1.5 - dip, (TYRE + 1.5) * 2, 1, None)
-            g.ell(cx + 2, self.cy + dip, TYRE + 1.5, TYRE + 1.5, "navy")
+            rect(cx - TIRE - 1.5, self.cy - TIRE - 1.5 - dip, (TIRE + 1.5) * 2, 1, None)
+            g.ell(cx + 2, self.cy + dip, TIRE + 1.5, TIRE + 1.5, "navy")
         g.rect(0, end + 1 + dip, self.w, self.h, None)
         road.lit(g, dict(navy=("slate", None)))
         for cx in self.wheels:
             cx += 2
-            g.ell(cx, self.cy, TYRE, TYRE, "ink")
+            g.ell(cx, self.cy, TIRE, TIRE, "ink")
             g.ell(cx, self.cy, 2.6, 2.6, "grey")
             for dx, dy in SPOKES[roll]:
                 g.rect(cx - 0.5 + dx, self.cy - 0.5 + dy, 1, 1, "dslate")
@@ -347,7 +347,7 @@ def cars(suffix, step):
 
 # The bike in design units: hubs, the bottom bracket, the seat cluster, the head tube's top and bottom.
 REAR, FRONT, BB, SEAT, HEAD, FORK = (9, 38.5), (33, 38.5), (20, 39), (16, 26), (30, 25), (31, 29)
-WHEEL = 8           # a wheel's radius: an ink tyre 1.2 thick round an lgrey rim 0.8 thick, clear inside
+WHEEL = 8           # a wheel's radius: an ink tire 1.2 thick round an lgrey rim 0.8 thick, clear inside
 CRANK = 4
 HIP = (16.5, 22)
 THIGH, SHIN = 10, 11

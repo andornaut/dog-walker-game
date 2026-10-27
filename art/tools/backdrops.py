@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the zone backdrops: the neighborhood band between the top bar and the road.
+"""Draw the zone backdrops: the neighbourhood band between the top bar and the road.
 
 backdrop-<zone>: 360x158 images in the house palette, drawn on screen rows 48 to 205. The
 street ends at a T-junction: the bottom rows continue the pseudo-3D road below the band (the
@@ -377,7 +377,7 @@ def crosses(z, span, period):
 
 def lanes(cv, mark, edge=None, dash=(12, 32), span=6):
     """The stub's lane dividers, 1px wide; dashes stop where a row spans too much road. mark and edge
-    are a color, or a tuple of one per divider, left to right."""
+    are a colour, or a tuple of one per divider, left to right."""
     marks = mark if isinstance(mark, tuple) else (mark,) * len(DIVIDERS)
     edges = edge if isinstance(edge, tuple) else (edge,) * len(DIVIDERS)
     for py in range(STUB, H):
@@ -645,8 +645,8 @@ def crescent_bend(px):
     return round(5 * max(0.0, 1 - ((px + 0.5 - CX) / (W / 2)) ** 2))
 
 
-# ---------- the six neighborhoods ----------
-# The six Toronto neighborhoods, sharing the cross street. Their
+# ---------- the six neighbourhoods ----------
+# The six Toronto neighbourhoods, sharing the cross street. Their
 # darkness ranges from the open sand of The Beaches and Kensington Market's Pedestrian Sunday to Yonge
 # Street's evening and High Park's canopy, and each has its own sky.
 
@@ -693,7 +693,7 @@ def dotted(dots, value):
 
 
 def verge(zone, road, patches=()):
-    """A stub painter for a Toronto neighborhood: road(x, z, span, px, py) inside the road, then its
+    """A stub painter for a Toronto neighbourhood: road(x, z, span, px, py) inside the road, then its
     verge (VERGES), with rough patches as world (x, z, rx, rz) ellipses."""
     v = VERGES[zone]
     walk_to = 10 ** 6 if v["walkTo"] is None else v["walkTo"]
@@ -815,7 +815,7 @@ def cabbagetown():
     for x, y in ((40, 4), (96, 9), (162, 2), (212, 7), (262, 1), (344, 11), (120, 16), (300, 14), (186, 12)):
         if CALM + y < rows[0][1] - 6:
             cv.fill(x, CALM + y, 1, 1, "white")
-    # the old neighborhood behind: brick roofs up a leafy rise, the Necropolis chapel's spire
+    # the old neighbourhood behind: brick roofs up a leafy rise, the Necropolis chapel's spire
     hills(cv, BASE - 40, BASE, "canopy", "olive", 3.1, 6)
     roofline(cv, BASE - 28, ((10, 16, 8), (40, 14, 6), (150, 16, 8), (212, 16, 9), (258, 16, 7),
                              (282, 14, 9), (326, 18, 8)), "dbrick")
@@ -1035,7 +1035,7 @@ def water_tower(cv, tx, low):
 
 
 def sign_board(cv, mid, y, text, board, letters):
-    """A sign board centered on column mid from row y: a coal frame round a board of 9 rows, the text in sign
+    """A sign board centred on column mid from row y: a coal frame round a board of 9 rows, the text in sign
     lettering."""
     w = fonts.sign_width(text) + 8
     x = round(mid - w / 2)
@@ -1044,13 +1044,13 @@ def sign_board(cv, mid, y, text, board, letters):
     word(cv, text, mid, y + 1, letters)
 
 
-# The paintings hung in a gallery's windows: (sky or ground, lower field, a spot of color).
+# The paintings hung in a gallery's windows: (sky or ground, lower field, a spot of colour).
 PAINTINGS = (("azure", "moss", "red"), ("mauve", "peach", "gold"), ("teal", "lilac", "white"),
              ("ochre", "dturq", "cream"))
 
 
 def painting(cv, x, y, w, h, scheme):
-    """A painting in a gold frame shaded ochre on its right and bottom: two fields and a spot of color."""
+    """A painting in a gold frame shaded ochre on its right and bottom: two fields and a spot of colour."""
     a, b, c = scheme
     cv.fill(x, y, w, h, "gold")
     cv.fill(x + w - 1, y, 1, h, "ochre")
@@ -1155,14 +1155,14 @@ def bistro_patio(cv, x0, x1, base, cols):
         cv.fill(px + 2, base - 9, 1, 1, "pink")
 
 
-# Still Dancing's loops of track, from the top: (rows below the cupola, radius, color, tilt).
+# Still Dancing's loops of track, from the top: (rows below the cupola, radius, colour, tilt).
 DANCING_LOOPS = ((6, 9, "red", 0.35), (18, 11, "turquoise", -0.3), (31, 10, "lilac", 0.25),
                  (43, 8, "cream", -0.2))
 
 
 def still_dancing(cv, cx, base, top):
     """Still Dancing, Dennis Oppenheim's sculpture in the square, standing on row base: a coal mast on a
-    tripod, lit ash on its left, ringed by four tilted loops of colored track, their far halves a ramp step
+    tripod, lit ash on its left, ringed by four tilted loops of coloured track, their far halves a ramp step
     darker behind it, under a gold cupola on row top."""
     for fx in (-10, 0, 10):
         cv.line(cx + fx, base, cx, base - 22, "coal")
@@ -1190,7 +1190,7 @@ LOVE_HEART = (".##.##.", "#######", "#######", ".#####.", "..###..", "...#...")
 
 
 def love_sign(cv, cx, base):
-    """The LOVE sign standing on row base, centered on column cx: a ttc heart and the red letters LOVE on a
+    """The LOVE sign standing on row base, centred on column cx: a ttc heart and the red letters LOVE on a
     coal rail on two posts, padlocks hung along the rail."""
     w = fonts.sign_width("LOVE") + 12
     x0, top = round(cx - w / 2), base - 17
@@ -1208,7 +1208,7 @@ def love_sign(cv, cx, base):
 
 def strollers(cv, spots, base, seed):
     """Far passers-by on row base, one at each column in spots: 3 columns wide and 10 rows tall, coal legs,
-    a top of a mixed color shaded on its right column, a face and hair."""
+    a top of a mixed colour shaded on its right column, a face and hair."""
     rnd = random.Random(seed)
     for x in spots:
         top = rnd.choice(("dred", "teal", "cream", "mauve", "navy", "ochre", "forest"))
@@ -1262,7 +1262,7 @@ def distillery():
         return "slate" if hashed(px, py, 31) else "dslate"
 
     # the lane across is cobbled and car-free: dslate setts between brick gutters, with no curbs and no
-    # center line
+    # centre line
     cross(cv, lambda px, py: "dslate", "brick", paving, curb=None)
     street(cv, verge("distillery-district", road))
     lanes(cv, "lgrey", "stone", dash=(22, 64))
