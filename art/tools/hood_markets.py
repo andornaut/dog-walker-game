@@ -796,7 +796,7 @@ def figure(*parts, flash=False):
 
 
 def card_wedding_pose():
-    """Pose: the bride smiling at the left with a pack dog sitting at her side, the photographer's camera at
+    """Pose: the bride smiling at the left with Archie sitting at her side, the photographer's camera at
     the right edge firing its flash at them, hearts rising."""
     import cards
     a = cards.Art()
@@ -804,7 +804,7 @@ def card_wedding_pose():
     a.shadow(18, 62, 30)
     a.paste(figure("bride"), -6, -11)
     a.paste(figure("photographer", flash=True), -10, -12)
-    c = a.put("dog-biscuit", "idle", 36, 62)
+    c = a.dog("archie", "idle", 36, 62)
     a.lead(36, c, 42)
     a.hearts([(26, 2), (38, 12)])
     return a
@@ -827,18 +827,10 @@ def bezier(p0, p1, p2, n=24):
              (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]) for t in (k / n for k in range(n + 1))]
 
 
-def put_dog(a, dog, step, tag, cx, foot, i=0, shadow=True):
-    """dog's depth variant at step (a percentage) put on a card as cards.Art.put puts a dog, returning its collar's
-    row: its own collar height at the step's scale over its feet."""
-    import cards
-    c = a.put(f"dog-{dog}@{step}", tag, cx, foot, i, shadow=shadow)
-    return c + cards.sn.COLLAR - round(cards.sn.collar(dog) * step / 100)
-
-
 def card_wedding_walk_around():
     """Walk around: the shoot posing up the road, drawn small, the flash firing, while the pack swings wide round
-    it in an arc: Biscuit at the bottom pulling out to the right and Kilo far up the road at its widest, a dashed
-    white trail along it from the bottom edge curving back in over the top of the shoot."""
+    it in an arc: Archie leading at the bottom, pulling out to the right, and Kilo far up the road at its widest,
+    a dashed white trail along it from the bottom edge curving back in over the top of the shoot."""
     import cards
     a = cards.Art()
     a.ground("street")
@@ -846,24 +838,24 @@ def card_wedding_walk_around():
     a.shadow(9, 30, 18)
     a.shadow(29, 30, 18)
     a.paste(shoot, 1, 30 - shoot.height)
-    pack = (("kilo", 50, 65, 30, "walk", 2), ("biscuit", 75, 35, 57, "pull", 0))
+    pack = (("kilo", 50, 65, 30, "walk", 2), ("archie", 75, 35, 59, "pull", 0))
     for dog, step, x, foot, tag, i in pack:
         a.shadow(x, foot, cards.sn.frame(f"dog-{dog}@{step}", tag).width)
     arc(a, bezier((30, 62), (104, 30), (26, -6)), "white")
     for dog, step, x, foot, tag, i in pack:
-        c = put_dog(a, dog, step, tag, x, foot, i, shadow=False)
+        c = a.dog(dog, tag, x, foot, i, step, shadow=False)
         a.lead(x, c, 42)
     return a
 
 
 def card_wedding_apologize():
-    """Apologize: the bride at the left, the dog backing off with its head down, and a SORRY! bubble from
+    """Apologize: the bride at the left, Archie backing off with its head down, and a SORRY! bubble from
     off the bottom edge, where the walker is."""
     import cards
     a = cards.Art()
     a.ground("street")
     a.paste(figure("bride"), -6, -11)
-    c = a.put("dog-biscuit", "react", 54, 60)
+    c = a.dog("archie", "react", 54, 60)
     a.lead(54, c, 60)
     a.bubble(36, 3, 36, ["SORRY!"])
     return a
@@ -874,13 +866,13 @@ def crate_image(draw):
 
 
 def card_fish_sniff():
-    """Let them sniff: the spilt crate up the road and the dog nose down at the fish, wavy moss smell lines
+    """Let them sniff: the spilt crate up the road and Archie nose down at the fish, wavy moss smell lines
     rising off them and a heart."""
     import cards
     a = cards.Art()
     a.ground("shops")
     a.put("fish-crates", "idle", 40, 38)
-    c = a.put("dog-biscuit", "walk", 30, 60, 2)
+    c = a.dog("archie", "walk", 30, 60, 2)
     a.lead(30, c, 36)
     a.stink(10, 16, 2, "lime", "moss")
     a.stink(62, 14, 2, "lime", "moss")
@@ -889,7 +881,7 @@ def card_fish_sniff():
 
 
 def card_fish_clean_up():
-    """Help clean up: the crate set back upright and heaped with ice and fish, sparkling clean, the dog
+    """Help clean up: the crate set back upright and heaped with ice and fish, sparkling clean, Archie
     sitting by it."""
     import cards
     a = cards.Art()
@@ -897,7 +889,7 @@ def card_fish_clean_up():
     box = crate_image(fish_box_upright)
     a.shadow(26, 44, 34)
     a.paste(box, 26 - box.width / 2, 44 - box.height + 1)
-    c = a.put("dog-biscuit", "idle", 56, 58)
+    c = a.dog("archie", "idle", 56, 58)
     a.lead(56, c, 62)
     for x, y in ((12, 14), (40, 10), (8, 34), (44, 30)):
         a.sparkle(x, y, "white")
@@ -905,13 +897,13 @@ def card_fish_clean_up():
 
 
 def card_fish_pull_away():
-    """Pull away: the spilt crate at the right and the dog pulled away to the left, the leash taut off the
+    """Pull away: the spilt crate at the right and Archie pulled away to the left, the leash taut off the
     bottom, a red ! by the fish."""
     import cards
     a = cards.Art()
     a.ground("shops")
     a.put("fish-crates", "idle", 54, 38)
-    c = a.put("dog-biscuit", "pull", 22, 56, flip=True)
+    c = a.dog("archie", "pull", 22, 56, flip=True)
     a.lead(22, c, 6)
     a.fill(66, 4, 2, 5, "red")
     a.fill(66, 10, 2, 2, "red")

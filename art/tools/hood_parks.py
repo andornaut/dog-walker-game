@@ -47,16 +47,16 @@ sfx-hit-porch-cat   0.49s  a hiss of pink noise stepping down two bands, then a 
 sfx-hit-capybara    0.42s  a low triangle "huff", then three soft rising triangle chirps
 
 Card illustrations, 75x56, composed from the exported sprites as cards.py composes its own:
-card-porch-cat-shoo         the cat bolting off the left edge past speed lines, Biscuit
+card-porch-cat-shoo         the cat bolting off the left edge past speed lines, Archie
                             standing calm on his leash
-card-porch-cat-treat        the cat lounging over a treat under rising hearts, Duchess sitting
+card-porch-cat-treat        the cat lounging over a treat under rising hearts, Archie sitting
                             calm beside it
-card-porch-cat-bolt         Kilo pulling hard past the lounging cat, speed lines behind it
+card-porch-cat-bolt         Archie pulling hard past the lounging cat, speed lines behind it
 card-capybara-help          the zookeeper in an olive shirt and a bush hat leading the capybara
                             off on a rope, a heart over the capybara
 card-capybara-call-zoo      a phone ringing in a callout over the capybara, chewing on the
-                            trail, Kilo waiting on his leash
-card-capybara-keep-walking  Duchess and Biscuit trotting on up the trail past speed lines, the
+                            trail, Archie waiting on his leash
+card-capybara-keep-walking  Archie and Duchess trotting on up the trail past speed lines, the
                             capybara left behind chewing at the side
 
 Usage:
@@ -636,35 +636,35 @@ def speed_lines(a, pts, col="white", down=False):
 
 
 def porch_cat_shoo():
-    """Shoo: the cat bolts off the left edge past speed lines, Biscuit standing calm on his leash."""
+    """Shoo: the cat bolts off the left edge past speed lines, Archie standing calm on his leash."""
     a = cards.Art()
     a.ground(CABBAGETOWN)
     cat = picture(drawn(ANIMAL, cat_dash, reach=1))
     a.paste(cat, -10, 6, flip=True)
     speed_lines(a, ((36, 14, 7), (39, 19, 9), (34, 24, 6)))
-    c = a.put("dog-biscuit", "idle", 58, 56)
+    c = a.dog("archie", "idle", 58, 56)
     a.lead(58, c, 64)
     return a
 
 
 def porch_cat_treat():
-    """Treat bribe: the cat lounges over a treat under rising hearts, Duchess sitting calm beside it."""
+    """Treat bribe: the cat lounges over a treat under rising hearts, Archie sitting calm beside it."""
     a = cards.Art()
     a.ground(CABBAGETOWN)
     a.put("porch-cat", "idle", 21, 42)
     a.paste(sn.frame("treat", "idle"), 33, 24)
     a.hearts([(14, 4), (26, 1)])
-    c = a.put("dog-duchess", "idle", 62, 56)
-    a.lead(62, c, 68)
+    c = a.dog("archie", "idle", 60, 56)
+    a.lead(60, c, 66)
     return a
 
 
 def porch_cat_bolt():
-    """Bolt past: Kilo pulls hard past the lounging cat, speed lines behind him, the leash taut."""
+    """Bolt past: Archie pulls hard past the lounging cat, speed lines behind him, the leash taut."""
     a = cards.Art()
     a.ground(CABBAGETOWN)
     a.put("porch-cat", "idle", 22, 34)
-    c = a.put("dog-kilo", "pull", 50, 58)
+    c = a.dog("archie", "pull", 50, 58)
     a.lead(48, c, 34, 2)
     speed_lines(a, ((24, 42, 8), (20, 47, 10), (26, 52, 6)))
     return a
@@ -699,26 +699,26 @@ def phone(a, x, y, ring):
 
 
 def capybara_call_zoo():
-    """Call the zoo: a phone rings in a callout over the capybara, chewing on the trail, Kilo waiting on his
+    """Call the zoo: a phone rings in a callout over the capybara, chewing on the trail, Archie waiting on his
     leash."""
     a = cards.Art()
     a.ground(HIGH_PARK)
     a.put("capybara", "idle", 24, 44)
     a.paste(to_image(cards.chrome(Grid(21, 22), 0, 0, 21, 22).px), 4, 2)
     phone(a, 10, 6, True)
-    c = a.put("dog-kilo", "idle", 58, 58)
+    c = a.dog("archie", "idle", 58, 58)
     a.lead(58, c, 62)
     return a
 
 
 def capybara_keep_walking():
-    """Keep walking: Duchess and Biscuit trot on up the trail past speed lines, the capybara left behind,
+    """Keep walking: Archie and Duchess trot on up the trail past speed lines, the capybara left behind,
     chewing at the side."""
     a = cards.Art()
     a.ground(HIGH_PARK)
     a.put("capybara", "idle", 15, 34)
-    c2 = a.put("dog-biscuit", "walk", 63, 46, 2)
-    c1 = a.put("dog-duchess", "walk", 41, 57, 1)
+    c2 = a.dog("duchess", "walk", 63, 46, 2)
+    c1 = a.dog("archie", "walk", 41, 57, 1)
     a.lead(41, c1, 48)
     a.lead(63, c2, 56)
     speed_lines(a, ((27, 46, 6), (58, 48, 6), (68, 48, 5)), down=True)

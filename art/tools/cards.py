@@ -139,6 +139,12 @@ class Art(sn.Scene):
         f = sn.frame(key, tag, i)
         return foot - f.height + f.getbbox()[3] - 1 - sn.COLLAR
 
+    def dog(self, name, tag, cx, foot, i=0, step=100, flip=False, shadow=True):
+        """A pack dog, dog-<name> or its depth variant at step (a percentage), put as put puts it; returns the row
+        of its collar, the dog's own collar height at the step's scale over its feet."""
+        c = self.put(f"dog-{name}" + ("" if step == 100 else f"@{step}"), tag, cx, foot, i, flip, shadow)
+        return c + sn.COLLAR - round(sn.collar(name) * step / 100)
+
     def stink(self, x, y, n, col, sh):
         """n wavy stink lines rising from x, y, every third pixel in sh."""
         for k in range(n):

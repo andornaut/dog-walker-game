@@ -60,12 +60,12 @@ fx-hit-promo-team   the impact star in amber, then camera flashes popping round 
                     shrinks away, confetti in cyan, pink and yellow falling
 
 Cards (75x56 images, composed from the sprites above as cards.py composes its own):
-card-dropped-cone-lick        a pack dog licking the pink puddle round the dropped cone, the kid by it
+card-dropped-cone-lick        Archie licking the pink puddle round the dropped cone, the kid by it
 card-dropped-cone-buy         the kid holding a new cone up under hearts, a callout of -$
-card-dropped-cone-pull-away   a pack dog pulled away from the dropped cone on its leash
-card-promo-team-wave          a pack dog under a spotlight beam, the promoter filming, flashes round it
+card-dropped-cone-pull-away   Archie pulled away from the dropped cone on its leash
+card-promo-team-wave          Archie under a spotlight beam, the promoter filming, flashes round it
 card-promo-team-merch         the promoter's turquoise star tee held up as merch, a callout of -$
-card-promo-team-push-through  a pack dog pulling past the promoter, speed lines behind it
+card-promo-team-push-through  Archie pulling past the promoter, speed lines behind it
 
 Sounds (sounds.py's format, under 0.6s):
 sfx-hit-dropped-cone  0.54s  splat: a pink noise plop over a low falling triangle, then a sad
@@ -833,12 +833,12 @@ def merch_tee():
 
 
 def card_lick():
-    """A pack dog leaning in to lick the pink puddle round the dropped cone, the kid looking on."""
+    """Archie leaning in to lick the pink puddle round the dropped cone, the kid looking on."""
     import cards
     a = cards.Art()
     a.ground("pawsPromenade")
     a.put("dropped-cone", "idle", 20, 60, 1)
-    c = a.put("dog-biscuit", "pull", 50, 57, flip=True)
+    c = a.dog("archie", "pull", 50, 57, flip=True)
     a.lead(50, c, 62)
     a.hearts([(52, 8)])
     return a
@@ -858,12 +858,12 @@ def card_buy():
 
 
 def card_pull_away():
-    """A pack dog pulled away from the dropped cone on its leash."""
+    """Archie pulled away from the dropped cone on its leash."""
     import cards
     a = cards.Art()
     a.ground("pawsPromenade")
     a.put("dropped-cone", "idle", 52, 60)
-    c = a.put("dog-biscuit", "pull", 18, 56, flip=True)
+    c = a.dog("archie", "pull", 18, 56, flip=True)
     a.lead(18, c, 6)
     a.fill(31, 6, 2, 5, "red")
     a.fill(31, 12, 2, 2, "red")
@@ -886,13 +886,13 @@ def beam(a, x0, x1, cx, cy, rx):
 
 
 def card_wave():
-    """A pack dog in a spotlight's pool, the promoter filming it, flashes popping."""
+    """Archie in a spotlight's pool, the promoter filming it, flashes popping."""
     import cards
     a = cards.Art()
     a.ground("homeStretch")
     beam(a, 0, 26, 24, 50, 19)
     a.put("promo-team", "idle", 60, 68)
-    c = a.put("dog-biscuit", "idle", 24, 56, shadow=False)
+    c = a.dog("archie", "idle", 24, 56, shadow=False)
     a.lead(24, c, 18)
     a.sparkle(6, 40, "white")
     a.sparkle(40, 30, "white")
@@ -913,12 +913,12 @@ def card_merch():
 
 
 def card_push_through():
-    """A pack dog pulling past the promoter, speed lines behind it."""
+    """Archie pulling past the promoter, speed lines behind it."""
     import cards
     a = cards.Art()
     a.ground("homeStretch")
     a.put("promo-team", "walk", 56, 68, 1)
-    c = a.put("dog-kilo", "pull", 24, 58)
+    c = a.dog("archie", "pull", 24, 58)
     a.lead(24, c, 12)
     for y, x, w in ((32, 3, 8), (39, 1, 10), (46, 4, 7)):
         a.fill(x, y, w, 1, "white")
