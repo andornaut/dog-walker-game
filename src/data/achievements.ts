@@ -283,7 +283,7 @@ export const ACHIEVEMENTS = [
     badgeLine: "Honk if you love dogs.",
     conditions: [
       {
-        count: 15,
+        count: 20,
         kind: "bumps",
         kinds: [
           "car",
@@ -303,18 +303,18 @@ export const ACHIEVEMENTS = [
         ],
       },
     ],
-    goal: "Bump 15 vehicles",
+    goal: "Bump 20 vehicles",
     id: "fenderBender",
     name: "Fender Bender",
-    shortGoal: "Bump 15 vehicles",
+    shortGoal: "Bump 20 vehicles",
   },
   {
     badgeLine: "Masked bandits, all of them.",
-    conditions: [{ count: 5, kind: "bumps", kinds: ["raccoon"] }],
-    goal: "Bump 5 raccoons",
+    conditions: [{ count: 10, kind: "bumps", kinds: ["raccoon"] }],
+    goal: "Bump 10 raccoons",
     id: "trashPanda",
     name: "Trash Panda",
-    shortGoal: "Bump 5 raccoons",
+    shortGoal: "Bump 10 raccoons",
   },
   {
     badgeLine: "Finders keepers, mostly.",
