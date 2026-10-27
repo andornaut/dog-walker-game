@@ -4,7 +4,7 @@ Every art asset the game needs. Keys are the `public/art/manifest.json` keys. Ty
 
 `<zone>` is a zone's art id: cabbagetown, high-park, distillery-district, kensington-market, the-beaches or yonge-street.
 
-Road sprites have depth variants `<key>@88`, `@75`, `@62` and `@50` (style guide, Depth scaling): every dog, road object, pickup, roadside prop, and ambient sprite but the sky movers.
+Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, `@56` and `@50` (style guide, Depth scaling): every dog, road object, pickup, roadside prop, and ambient sprite but the sky movers.
 
 ## People and dogs
 

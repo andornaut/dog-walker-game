@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the small versions of road sprites that the pseudo-3D road shows at
 each depth step below full size: STEPS, read from shared/depth-steps.json, the
-table the game reads (0.875x, 0.75x, 0.625x and 0.5x). A plain nearest-
+table the game reads (every 1/16 from 0.9375x down to 0.5x). A plain nearest-
 neighbour downscale drops rows and columns, so it loses up to half the 1px
 outline, makes legs blink and freezes 1px bobs. These are redrawn at the small
 size instead: the same drawing functions run on a grid that scales every rect,
@@ -17,8 +17,8 @@ grow taller.
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
 lost-wallet, cone, trash-can, bench, skunk, squirrel, other-dog,
 skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
-drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 42x42 at @88, 36x36
-at @75, 30x30 at @62 and 24x24 at @50.
+drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 45x45 at @94, 42x42 at @88
+and so on down to 24x24 at @50.
 
 Usage:
   minis.py preview OUT.png   every small frame on the zone roads
@@ -43,7 +43,7 @@ from pixel import K, Grid, depth_scales, main, raster  # noqa: E402
 
 
 # (suffix, scale) for every depth step below full size (pixel.depth_scales), the suffix without its @:
-# ("88", 0.875) and so on.
+# ("94", 0.9375), ("88", 0.875) and so on.
 STEPS = tuple((suffix.lstrip("@"), scale) for suffix, scale in depth_scales().items())
 # The steps hazards.py builds itself.
 SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))

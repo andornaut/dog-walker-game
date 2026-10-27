@@ -12,7 +12,7 @@ animal on the ground, a coin or a bone, so none reads as an obstacle, an encount
 Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the road objects are:
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
 every full-size frame is a whole size; depth variants round as the game does (minis.scaled). Full
-size, then @88, @75, @62 and @50:
+size, then every depth step in minis.STEPS (@94 to @50):
 
 roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades with gold tips
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
@@ -59,7 +59,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, Mini, scaled  # noqa: E402
-from pixel import K, dk, edged, main  # noqa: E402
+from pixel import K, dk, edged, main, raster, scale_of  # noqa: E402
 
 SCALE = 1.5
 GROUNDS = (K["green"], K["dgreen"], K["dslate"])
@@ -100,6 +100,14 @@ def gas_lamp():
         g.rect(7, 10, 3, 3, "cream")
         g.rect(11, 10, 1, 10, "coal")
         g.tri((4, 8), (20, 8), (12, 2), "coal")
+        # the roof's eave reaches a pixel past the lantern on each side, where the triangle's widest row
+        # rounds in to the lantern's width
+        px, top = raster(g).px, scaled(8, scale_of(g))
+        lantern = [x for x, c in enumerate(px[top]) if c]
+        eave = [x for x, c in enumerate(px[top - 1]) if c]
+        if eave and eave[0] >= lantern[0] and eave[-1] <= lantern[-1]:
+            for x in range(lantern[0] - 1, lantern[-1] + 2):
+                px[top - 1][x] = K["coal"]
     return w, h, draw
 
 
@@ -533,6 +541,10 @@ def draw_frame(key, step, f):
     draw(g, f)
     fill = g.g.px
     rows = len(fill)
+    # a base rounded onto the frame's bottom row moves up a row, into the clear rows above the top, so its
+    # outline fits
+    if any(fill[-1]) and not any(fill[0]) and not any(fill[1]):
+        fill[:] = fill[1:] + [[None] * len(fill[0])]
     if any(fill[0]) or any(fill[-1]) or any(r[0] or r[-1] for r in fill):
         sys.exit(f"{key} at {step}: the fill touches the frame's edge")
     if rows != size(key, step)[1]:

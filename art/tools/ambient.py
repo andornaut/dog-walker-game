@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Draw the ambient layer: people, traffic and lawn animals that pass by with no collisions and no card.
-Each is a road sprite with @88, @75, @62 and @50 variants, outlined with pixel.road_edge and lit with
-road.LIT's rim on its dark parts; the cross street draws from @50. Side views face right; the game
-flips them to go left.
+Each is a road sprite with a variant at every depth step in minis.STEPS (@94 to @50), outlined with
+pixel.road_edge and lit with road.LIT's rim on its dark parts; the cross street draws from @50. Side
+views face right; the game flips them to go left.
 
 The pedestrian is a student out for a stroll, calm and alone: dark brown hair in a ponytail, sky
 headphones, a red jacket, a green backpack, sky jeans and white sneakers. No dog, no leash and no prop in

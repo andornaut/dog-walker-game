@@ -314,7 +314,7 @@ def _lua(tags, out):
 
 def depth_scales():
     """{suffix: scale} for every depth step below full size in shared/depth-steps.json, the table the game
-    reads: {"@88": 0.875, ...}."""
+    reads: {"@94": 0.9375, "@88": 0.875, ...}."""
     with open(os.path.join(os.path.dirname(__file__), "..", "..", "shared", "depth-steps.json")) as f:
         return {q["suffix"]: q["scale"] for q in json.load(f)["steps"] if q["scale"] < 1}
 
@@ -379,17 +379,16 @@ def seated(key, tags, feet):
 def depth_envelope(w, h, scales):
     """{scale: (width, height)}: the most art each of a w x h sprite's depth steps (scales) may fill. The
     game sizes a road sprite by its frame's larger side, an integer, and draws it from the smallest step at
-    least that size (src/layout/depthScale.ts), so one pixel past a step's side it draws the next larger
-    step scaled down to it. A frame, floor(side x scale + 0.5), can round its shorter side past that,
-    leaving a step's art taller than the next larger step's art drawn at this step's size, so the sprite
-    would shrink as it approached. So each step's art keeps to the next larger step's art scaled to its own
-    side plus one, rounded down, working from full size down the steps."""
-    out, frame, art = {}, (w, h), (w, h)
+    least that size (src/layout/depthScale.ts), so one pixel past a step's side it draws a larger step
+    scaled down to it. A frame, floor(side x scale + 0.5), can round its shorter side past that. So each
+    step's art keeps to the full size scaled to its own side plus one, rounded down, and to the next larger
+    step's art, so no step is bigger than a larger one."""
+    out, art = {}, (w, h)
     for s in sorted(scales, reverse=True):
         fw, fh = math.floor(w * s + 0.5), math.floor(h * s + 0.5)
-        k = (max(fw, fh) + 1) / max(frame)
-        art = (min(fw, math.floor(art[0] * k + 1e-9)), min(fh, math.floor(art[1] * k + 1e-9)))
-        out[s], frame = art, (fw, fh)
+        k = (max(fw, fh) + 1) / max(w, h)
+        art = (min(fw, art[0], math.floor(w * k + 1e-9)), min(fh, art[1], math.floor(h * k + 1e-9)))
+        out[s] = art
     return out
 
 
@@ -527,15 +526,16 @@ def shortened(tags, rows):
 
 def depth_settled(sprites, originals=None):
     """sprites with each depth variant (<key>@<step>) cut to its step's depth_envelope (see squatted) and, for a
-    ground sprite, held to the next larger step L's frame 0 and seated on a feet row from it. The game draws a
-    ground sprite smoothly, from the smallest step at least its true size scaled down
-    (src/layout/depthScale.ts), so the step's frame 0 keeps inside L's opaque rows and columns at this step's
-    scale over L's, rounded half up, and it does not shrink when the drawing switches steps (see shortened and
-    narrowed). Its feet row is L's at side / L's side, rounded up, or the frame's bottom row when that is past
-    it, so the feet move less than 1px when it switches. The others (status overlays) are drawn at their own
-    step, not from L. The full-size sprite is the one in sprites, else in originals ({key: tags}), else the one
-    already exported; so is each step, settled larger steps first. A sprite's steps are the ones in sprites and
-    the ones already exported."""
+    ground sprite, held to its ideal, the full size at its scale, and seated on a feet row from it. The game draws
+    a ground sprite smoothly, from the smallest step at least its true size scaled down
+    (src/layout/depthScale.ts), so the step's frame 0 keeps inside the full size's opaque rows and columns at
+    its scale, rounded half up, and inside the next larger step L's, so no step is bigger than its ideal or
+    than a larger step (see shortened and narrowed). A step a little under its ideal is fine; holding each step
+    to L at its scale instead would compound the rounding down the steps. Its feet row is the full size's at
+    side / full side, rounded up, or the frame's bottom row when that is past it, so the feet move less than
+    1px when it switches. The others (status overlays) are drawn at their own step. The full-size sprite is the
+    one in sprites, else in originals ({key: tags}), else the one already exported; so is each step, settled
+    larger steps first. A sprite's steps are the ones in sprites and the ones already exported."""
     sprites = list(sprites)
     full = {**(originals or {}), **dict(sprites)}
     scales = depth_scales()
@@ -571,17 +571,15 @@ def depth_settled(sprites, originals=None):
             if frame_l is None:
                 print(f"{key}: no {lkey} to settle it by")
                 frame_l = frame0_full
+            top_f, feet_f = opaque_rows([frame0_full]) or (0, len(frame0_full) - 1)
+            left_f, right_f = opaque_cols([frame0_full]) or (0, len(frame0_full[0]) - 1)
             top_l, feet_l = opaque_rows([frame_l]) or (0, len(frame_l) - 1)
             left_l, right_l = opaque_cols([frame_l]) or (0, len(frame_l[0]) - 1)
-            side_l = max(len(frame_l[0]), len(frame_l))
+            side_f = max(len(frame0_full[0]), len(frame0_full))
             side = max(len(tags[0][1][0][0]), len(tags[0][1][0]))
-            # drawn smoothly, L shrinks to this step's scale as it nears the switch, so this step's art keeps
-            # inside L's opaque rows and columns at scale / larger, whole pixels rounded half up
-            k = scale / larger
-            tags = shortened(tags, min(math.floor((feet_l - top_l + 1) * (side + 1) / side_l + 0.5),
-                                       math.floor((feet_l - top_l + 1) * k + 0.5)))
-            tags = narrowed(tags, math.floor((right_l - left_l + 1) * k + 0.5))
-            tags = seated(key, tags, math.ceil(feet_l * side / side_l - 1e-9))
+            tags = shortened(tags, min(math.floor((feet_f - top_f + 1) * scale + 0.5), feet_l - top_l + 1))
+            tags = narrowed(tags, min(math.floor((right_f - left_f + 1) * scale + 0.5), right_l - left_l + 1))
+            tags = seated(key, tags, math.ceil(feet_f * side / side_f - 1e-9))
         settled[key] = tags[0][1][0]
         full[key] = tags
     return [(key, full[key] if key in settled else tags) for key, tags in sprites]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the animal minor obstacles, the Chase, Snatch and Social animals: moving
 minor obstacles (src/assets/spriteKeys.ts). Every sprite
-also has its depth variants at every step in minis.STEPS (@88, @75, @62, @50),
+also has its depth variants at every step in minis.STEPS (@94 to @50),
 redrawn at the step with the same tags, frames and durations. Everything faces the player except the side views
 (hops and the Social dogs' run, facing right, the game mirroring them for
 left) and the flees, which go off up the road, seen from behind. Road outline
@@ -675,6 +675,8 @@ SNATCH = {
     "snatch-raccoon": (raccoon, raccoon_fleeing, FLEE),
     "snatch-seagull": (seagull, seagull_fleeing, SEAGULL_FLEE),
 }
+# road.PERSON_WALK's feet and bob: a snatcher holds its sack, so it has no free arm to swing.
+SNATCH_WALK = [{k: v for k, v in q.items() if k in ("lf", "rf", "bob")} for q in road.PERSON_WALK]
 # The pose arguments that move a part by pixels, snapped to whole pixels at each scale.
 POSE = ("lf", "rf", "bob", "fl", "fr", "bl", "br", "tail", "twitch")
 
@@ -702,7 +704,7 @@ def animals(step):
                     *((tag, [drawn(c, d, **q) for q in qs], ms) for tag, d, qs, ms in extra)]
     for key, (draw, flee, flees) in SNATCH.items():
         t = SNATCH_SIDE[key] / 32 * step
-        yield key, [("walk", [drawn(t, draw, **q) for q in road.PERSON_WALK], road.PERSON_WALK_MS),
+        yield key, [("walk", [drawn(t, draw, **q) for q in SNATCH_WALK], road.PERSON_WALK_MS),
                     ("flee", [drawn(t, flee, **q) for q in flees], FLEE_MS),
                     ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS)]
     d = SOCIAL_SIDE / 32 * step

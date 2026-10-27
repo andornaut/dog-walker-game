@@ -33,7 +33,7 @@ delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider com
                             white headlamp and a phone on the bars; ride (4 frames, 90ms):
                             hazards.CYCLIST_RIDE's pedalling and 1px sway
 
-Each has depth variants @88, @75, @62 and @50 (minis.STEPS), redrawn at the
+Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
 and durations, pose offsets snapped to whole pixels at the small size.
 

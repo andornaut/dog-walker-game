@@ -226,9 +226,9 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 
 ## Depth scaling
 
-Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`: `<key>@88`, `@75`, `@62` and `@50`, each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite smoothly from the smallest of its steps at least its true size, scaled down by at most 1, so it never swaps to a smaller step as it approaches.
+Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`, every 1/16 from 15/16 down to 1/2: `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, `@56` and `@50`, each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite smoothly from the smallest of its steps at least its true size, scaled down by at most 1, so it never swaps to a smaller step as it approaches.
 
-`art/tools/pixel.py` settles every variant as it builds, larger steps first, so a variant never looks bigger than the next larger step drawn at its size and its feet line moves less than 1px at a switch (the rules are in `depth_settled`). A set whose variants depend on another set's (`hazards.py` and `depths.py`) settles on that set's exports, so after changing either, build both again until neither changes.
+`art/tools/pixel.py` settles every variant as it builds, larger steps first, so no variant is bigger than its ideal (the full size at its scale, rounded half up) or than a larger step, and its feet line moves less than 1px at a switch (the rules are in `depth_settled`). A set whose variants depend on another set's (`hazards.py` and `depths.py`) settles on that set's exports, so after changing either, build both again until neither changes.
 
 ## Road strips
 
@@ -250,7 +250,7 @@ An ambient person or lawn animal holds 3:1 on its edge pixels (within 1%) on the
 
 The verges stay clean: bare lawn or paving beyond the sidewalks with the odd prop. `art/tools/roadside.py` draws the props and holds the per-zone placement table (`PLACEMENT`), which `roadside.py table --write` (and `build`) writes to `shared/roadside.json` for the game.
 
-- Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5×. They are front elevations, never flipped, outlined with `road_edge` and no light rim, with one static `idle` frame, so the verges never pull the eye from the road.
+- Sprites are `roadside-<name>`, with `@94` to `@50` variants, laid out on a design grid and drawn at 1.5×. They are front elevations, never flipped, outlined with `road_edge` and no light rim, with one static `idle` frame, so the verges never pull the eye from the road.
 - A prop never reads as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for (the fruit stand has no wheels, unlike the hot dog cart; the transit stop has no shelter; the street lamp lights both ways, since a prop is never flipped).
 - Each side has a slot every 140 road px, slot n at z = 140n. With m = n − offset (left 0, right 1), an even m is a lot and an odd m a gap, and k = floor(m / 2); a side takes gap (gapStart + k) mod 6, left gaps starting at 0 and right at 2. Every lot is empty; gap 0 holds the neighbourhood's tree or street furniture and gap 3 its own prop, so each side has a prop every 6 slots and over both sides one stands every 420 px.
 - Every frame's inner edge is at across 212 or more, past the sidewalk's outer edge at 208. No prop stands within a zone's start strip.
