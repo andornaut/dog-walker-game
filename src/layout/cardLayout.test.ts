@@ -32,17 +32,15 @@ describe("largeCardHeight", () => {
   });
 });
 
-// The illustration sits across the card's middle, as far from either side; the enlarged card
-// draws it at 2x.
+// The illustration sits across the card's middle, an odd pixel left over to its right; the
+// enlarged card draws it at 2x.
 describe("the card's illustration", () => {
   const { art, large, width } = CARD_LAYOUT;
-  it("centres the illustration across a card and the enlarged card", () => {
-    for (const [, x, artWidth, cardWidth] of [
-      ["a card", art.x, art.width, width],
-      ["the enlarged card", large.art.x, art.width * 2, large.width],
-    ] as const) {
-      expect(cardWidth - (x + artWidth)).toBe(x);
-    }
+  it.each([
+    { artWidth: art.width, cardWidth: width, name: "a card", x: art.x },
+    { artWidth: art.width * 2, cardWidth: large.width, name: "the enlarged card", x: large.art.x },
+  ])("centres the illustration across $name", ({ artWidth, cardWidth, x }) => {
+    expect(cardWidth - (x + artWidth) - x).toBe((cardWidth - artWidth) % 2);
   });
 });
 

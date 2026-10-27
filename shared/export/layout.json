@@ -1021,37 +1021,37 @@
       "art": {
         "height": 56,
         "width": 75,
-        "x": 4,
+        "x": 18,
         "y": 16
       },
       "badge": {
         "height": 13,
         "width": 71,
-        "x": 6,
-        "y": 121
+        "x": 20,
+        "y": 134
       },
       "band": {
         "height": 11,
-        "room": 77,
+        "room": 106,
         "y": 2
       },
       "effect": {
-        "height": 42,
-        "width": 71,
+        "height": 55,
+        "width": 100,
         "x": 6,
         "y": 76
       },
       "fires": {
         "size": 16,
-        "x": 4,
-        "y": 119
+        "x": 18,
+        "y": 132
       },
       "forkHome": {
         "gap": 6,
         "height": 44,
         "width": 160
       },
-      "height": 140,
+      "height": 153,
       "large": {
         "art": {
           "x": 8,
@@ -1088,10 +1088,10 @@
       },
       "plaquePadX": 2,
       "row": {
-        "gap": 8
+        "gap": 6
       },
       "warningGap": 2,
-      "width": 83,
+      "width": 112,
       "largeRect": {
         "height": 280,
         "width": 166,
@@ -1101,44 +1101,44 @@
       "rows": [
         [
           {
-            "height": 140,
-            "width": 83,
-            "x": 138,
-            "y": 161
+            "height": 153,
+            "width": 112,
+            "x": 124,
+            "y": 156
           }
         ],
         [
           {
-            "height": 140,
-            "width": 83,
-            "x": 93,
-            "y": 161
+            "height": 153,
+            "width": 112,
+            "x": 65,
+            "y": 156
           },
           {
-            "height": 140,
-            "width": 83,
-            "x": 184,
-            "y": 161
+            "height": 153,
+            "width": 112,
+            "x": 183,
+            "y": 156
           }
         ],
         [
           {
-            "height": 140,
-            "width": 83,
-            "x": 47,
-            "y": 161
+            "height": 153,
+            "width": 112,
+            "x": 6,
+            "y": 156
           },
           {
-            "height": 140,
-            "width": 83,
-            "x": 138,
-            "y": 161
+            "height": 153,
+            "width": 112,
+            "x": 124,
+            "y": 156
           },
           {
-            "height": 140,
-            "width": 83,
-            "x": 229,
-            "y": 161
+            "height": 153,
+            "width": 112,
+            "x": 242,
+            "y": 156
           }
         ]
       ]

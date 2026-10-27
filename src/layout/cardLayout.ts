@@ -13,14 +13,14 @@ import { charmRowHeight } from "./buffLayout";
 // difficulty paws, paws.height tall, sit at the effect's top, the effect paws.gap under them.
 // A plaque's text keeps plaquePadX inside the plaque or its part right of the marker.
 export const CARD_LAYOUT = {
-  art: { height: 56, width: 75, x: 4, y: 16 },
-  badge: { height: 13, width: 71, x: 6, y: 121 },
-  band: { height: 11, room: 77, y: 2 },
-  effect: { height: 42, width: 71, x: 6, y: 76 },
-  fires: { size: 16, x: 4, y: 119 },
+  art: { height: 56, width: 75, x: 18, y: 16 },
+  badge: { height: 13, width: 71, x: 20, y: 134 },
+  band: { height: 11, room: 106, y: 2 },
+  effect: { height: 55, width: 100, x: 6, y: 76 },
+  fires: { size: 16, x: 18, y: 132 },
   // A fork card's Head home button, centred under the paths, gap rows below their charm row.
   forkHome: { gap: 6, height: 44, width: 160 },
-  height: 140,
+  height: 153,
   // The enlarged card's body: a firing warning in the title font at 1x, warningGap over the
   // changes, which take the rest of the body.
   large: {
@@ -35,9 +35,9 @@ export const CARD_LAYOUT = {
   },
   paws: { gap: 4, height: 10 },
   plaquePadX: 2,
-  row: { gap: 8 },
+  row: { gap: 6 },
   warningGap: 2,
-  width: 83,
+  width: 112,
 } as const;
 
 // How many lines of a font at scale fit height: the first line's ink, then a line each.
