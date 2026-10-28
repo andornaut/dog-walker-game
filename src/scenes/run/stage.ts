@@ -5,6 +5,7 @@ import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
 import { laneCentreXs } from "../../layout/lanes";
 import { screenLayout, walkerFootY } from "../../layout/screenLayout";
 import { itemAt } from "../../lib/arrays";
+import type { Point } from "../../lib/rect";
 import { fadeIn, rowsHidden } from "../../road/roadClip";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
@@ -80,14 +81,14 @@ export function showOnRoad(groundY: number, alpha: number, sprite: GameObjects.S
 export type Shadow = (key: string, depth: number, x: number, footY: number) => void;
 
 // The pack's centre at the leading dog's feet, in screen pixels.
-export function packPoint(walk: Walk | undefined): { x: number; y: number } {
+export function packPoint(walk: Walk | undefined): Point {
   const x =
     walk === undefined ? PROJECTION.centreX : laneMotionX(LANE_XS, walk.road.control.motion);
   return { x, y: walkerFootY(LAYOUT.road) - 20 };
 }
 
 // Over the pack at pack: where pops over the pack, its sparkles and its money labels show.
-export function overPack(pack: { x: number; y: number }): { x: number; y: number } {
+export function overPack(pack: Point): Point {
   return { x: pack.x, y: pack.y - 24 };
 }
 
