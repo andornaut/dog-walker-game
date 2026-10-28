@@ -1,7 +1,7 @@
 import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
-import { loadsFirst } from "../assets/atlas/atlasLayout";
+import { loadsFirst } from "../assets/atlasGroups";
 import { type AssetManifest, parseManifest, type SpriteAsset } from "../assets/manifest";
 import {
   addAtlasTextures,

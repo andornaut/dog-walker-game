@@ -4,13 +4,13 @@ import { dirname, join } from "node:path";
 import type { Scene, Textures } from "phaser";
 import { describe, expect, it } from "vitest";
 
-import { keysOf } from "../../lib/records";
-import { sheetFromRows } from "../../testing/sheetImage";
-import { compactFrames, drawPage } from "../atlas/atlasBuild";
-import { layoutAtlases } from "../atlas/atlasLayout";
-import type { RgbaImage } from "../atlas/atlasPixels";
-import type { AssetManifest } from "../manifest";
-import { addAtlasFrame, smoothDepthArt } from "./manifestArt";
+import type { AssetManifest } from "../../../assets/manifest";
+import { addAtlasFrame, smoothDepthArt } from "../../../assets/phaser/manifestArt";
+import { keysOf } from "../../../lib/records";
+import { sheetFromRows } from "../../../testing/sheetImage";
+import { compactFrames, drawPage } from "../atlasBuild";
+import { layoutAtlases } from "../atlasLayout";
+import type { RgbaImage } from "../atlasPixels";
 
 // Phaser's frame and its image render nodes, which place a sprite's quad and pick its texels,
 // loaded from its sources: the package's bundle needs a browser.

@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
-import { ART_MANIFEST } from "../../tools/artManifest";
-import { type AssetManifest, parseManifest } from "../manifest";
+import { ATLAS_MANIFEST_PATH, type AtlasManifest } from "../../assets/atlasManifest";
+import { type AssetManifest, parseManifest } from "../../assets/manifest";
+import { ART_MANIFEST } from "../artManifest";
 import { buildAtlases } from "./atlasBuild";
-import { ATLAS_MANIFEST_PATH, type AtlasManifest } from "./atlasManifest";
 import { contentHash, type HashedArtFile, hashedArtFileName, hashGameArt } from "./hashedArt";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);

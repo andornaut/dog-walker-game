@@ -2,8 +2,6 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { decodePng } from "../assets/atlas/atlasBuild";
-import { opaqueRect } from "../assets/atlas/atlasPixels";
 import { dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
@@ -21,6 +19,8 @@ import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { LONE } from "../testing/packPlaces";
 import { inside } from "../testing/rects";
+import { decodePng } from "../tools/atlas/atlasBuild";
+import { opaqueRect } from "../tools/atlas/atlasPixels";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { maxEffects } from "./effectIcons";

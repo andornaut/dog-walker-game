@@ -1,5 +1,5 @@
-import type { SourceTexture } from "../assets/atlas/atlasLayout";
-import { blankImage, type RgbaImage } from "../assets/atlas/atlasPixels";
+import type { SourceTexture } from "../tools/atlas/atlasLayout";
+import { blankImage, type RgbaImage } from "../tools/atlas/atlasPixels";
 
 // A sprite sheet drawn from text, its frames side by side and named by index: "." is a clear
 // pixel and any other character an opaque colour of its own.

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { blankImage } from "../assets/atlas/atlasPixels";
 import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { depthDraw } from "../layout/depthScale";
 import { project } from "../layout/projection";
 import { walkProjection } from "../runner/walkGeometry";
+import { blankImage } from "./atlas/atlasPixels";
 import { type PreviewArt, sweepDistances, sweepRow } from "./depthPreview";
 
 const { road } = SCREEN_LAYOUT;

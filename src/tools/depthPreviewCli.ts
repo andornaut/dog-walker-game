@@ -7,9 +7,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { decodePng, encodePng } from "../assets/atlas/atlasBuild";
-import { spriteSource } from "../assets/atlas/atlasLayout";
-import { blankImage, type RgbaImage } from "../assets/atlas/atlasPixels";
 import type { AssetManifest } from "../assets/manifest";
 import { backdropKey, depthVariantKey, roadTileKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
@@ -30,6 +27,9 @@ import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { GLYPH_HEIGHT } from "../ui/pixelFont";
 import { ART_DIR, ART_MANIFEST, generateArtManifest, measureAnchor } from "./artManifest";
+import { decodePng, encodePng } from "./atlas/atlasBuild";
+import { spriteSource } from "./atlas/atlasLayout";
+import { blankImage, type RgbaImage } from "./atlas/atlasPixels";
 import {
   cloneImage,
   crop,

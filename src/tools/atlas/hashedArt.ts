@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 
-import { ART_MANIFEST } from "../../tools/artManifest";
-import type { AssetManifest } from "../manifest";
+import { ATLAS_MANIFEST_PATH, type AtlasManifest } from "../../assets/atlasManifest";
+import type { AssetManifest } from "../../assets/manifest";
+import { ART_MANIFEST } from "../artManifest";
 import type { AtlasBuild } from "./atlasBuild";
-import { ATLAS_MANIFEST_PATH, type AtlasManifest } from "./atlasManifest";
 
 // The module a build fills with the game's ArtFileMap (src/assets/artUrl.ts). The dev server's
 // map is empty, so every file loads from its own path there.

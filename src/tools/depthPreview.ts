@@ -1,8 +1,8 @@
-import { blankImage, type RgbaImage } from "../assets/atlas/atlasPixels";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { project, type RoadProjection } from "../layout/projection";
 import type { Rect } from "../lib/rect";
 import { glyphAdvance, normalizePixelText, PIXEL_GLYPHS } from "../ui/pixelFont";
+import { blankImage, type RgbaImage } from "./atlas/atlasPixels";
 
 // npm run art:depth-preview: a road sprite drawn as the game draws it at a sweep of
 // distances, through the walk's projection and depthDraw. These are the pure parts; the

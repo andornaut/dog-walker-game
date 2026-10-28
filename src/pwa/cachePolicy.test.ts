@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { contentHash, hashedArtFileName } from "../assets/atlas/hashedArt";
+import { contentHash, hashedArtFileName } from "../tools/atlas/hashedArt";
 import {
   cachedUrlsOf,
   cacheKeyFor,

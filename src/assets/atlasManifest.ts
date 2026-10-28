@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { parseOrThrow, record } from "../jsonSchema";
+import { parseOrThrow, record } from "./jsonSchema";
 
 // Written by the build next to /art/manifest.json, paths relative to /art/ like it.
 export const ATLAS_MANIFEST_PATH = "atlas-manifest.json";

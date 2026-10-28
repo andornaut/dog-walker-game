@@ -38,7 +38,7 @@ const BOUNDARIES = [
 // by moving the module into a context or the importer out of one. The boundaries above govern
 // src/testing/.
 const CONTEXTS = {
-  assets: ["data", "lib", "tools/artManifest", "tools/files"],
+  assets: ["data", "lib"],
   lib: [],
   road: [
     "assets",
@@ -62,8 +62,8 @@ function folders(path) {
     .map((entry) => entry.name);
 }
 
-// An import names a folder only by its path, so `./atlas/x` inside src/assets/ reads the same as
-// `../atlas/x` from elsewhere: a context's own subfolders are never forbidden to it.
+// An import names a folder only by its path, so `./phaser/x` inside src/assets/ reads the same as
+// `../phaser/x` from elsewhere: a context's own subfolders are never forbidden to it.
 function contextBoundary(context) {
   const allowed = CONTEXTS[context];
   const own = [context, ...folders(`src/${context}`)];

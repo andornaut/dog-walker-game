@@ -2,10 +2,11 @@ import { createHash } from "node:crypto";
 
 import { PNG } from "pngjs";
 
+import { atlasGroupOf } from "../../assets/atlasGroups";
+import type { AtlasManifest } from "../../assets/atlasManifest";
+import { type AssetManifest, parseManifest } from "../../assets/manifest";
 import { getOrInsertComputed } from "../../lib/maps";
-import { type AssetManifest, parseManifest } from "../manifest";
 import {
-  atlasGroupOf,
   EXTRUDE,
   imageSource,
   layoutAtlases,
@@ -14,7 +15,6 @@ import {
   type SourceTexture,
   spriteSource,
 } from "./atlasLayout";
-import type { AtlasManifest } from "./atlasManifest";
 import { blankImage, blitExtruded, opaqueRect, type RgbaImage } from "./atlasPixels";
 import { encodeIndexedPng } from "./indexedPng";
 

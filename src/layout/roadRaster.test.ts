@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { decodePng } from "../assets/atlas/atlasBuild";
 import { roadTileKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
@@ -21,6 +20,7 @@ import {
   VERGES,
   walkFrom,
 } from "../road/roadside";
+import { decodePng } from "../tools/atlas/atlasBuild";
 import { roadProjection, rowScale } from "./projection";
 import {
   drawRoad,

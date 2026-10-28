@@ -2,10 +2,10 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { decodePng } from "../assets/atlas/atlasBuild";
-import { spriteSource } from "../assets/atlas/atlasLayout";
 import { gameData } from "../data";
 import type { EncounterId, MinorObstacleId } from "../data/types";
+import { decodePng } from "../tools/atlas/atlasBuild";
+import { spriteSource } from "../tools/atlas/atlasLayout";
 import { OBSTACLE_SILHOUETTES, obstacleParts, POSE_SILHOUETTES } from "./obstacleArt";
 
 const MANIFEST = JSON.parse(readFileSync("public/art/manifest.json", "utf8")) as {

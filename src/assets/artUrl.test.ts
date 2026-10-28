@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { artFileUrl } from "./artUrl";
-import { hashedArtFileName } from "./atlas/hashedArt";
 
 describe("artFileUrl", () => {
   const hashed = "atlas/run-0.png";
-  const artFiles = new Map([[hashed, hashedArtFileName(hashed, "Bq3x_9-Z")]]);
+  const artFiles = new Map([[hashed, "assets/art/atlas/run-0-Bq3x_9-Z.png"]]);
 
   it.each([
     ["/", hashed, `/${artFiles.get(hashed)}`],

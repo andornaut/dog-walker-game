@@ -1,13 +1,8 @@
 import type { Plugin } from "vite";
 
-import {
-  ART_DIR,
-  ART_MANIFEST,
-  artManifestText,
-  generateArtManifest,
-} from "../../tools/artManifest";
-import { nodeArtFiles, writeIfChanged } from "../../tools/files";
-import type { ArtFileMap } from "../artUrl";
+import type { ArtFileMap } from "../../assets/artUrl";
+import { ART_DIR, ART_MANIFEST, artManifestText, generateArtManifest } from "../artManifest";
+import { nodeArtFiles, writeIfChanged } from "../files";
 import { buildAtlases } from "./atlasBuild";
 import type { RgbaImage } from "./atlasPixels";
 import { ART_FILES_MODULE, hashGameArt } from "./hashedArt";
@@ -24,7 +19,7 @@ interface AtlasPluginApi {
 // packs what is on disk. Then packs every image and sprite frame it lists into a few atlas
 // pages, with an atlas manifest mapping each key and frame to its page and rect. Every file the
 // game loads (both manifests, the pages, the fonts, the sounds and any key the atlas leaves
-// out) goes to the build output under a content-hashed name (src/assets/atlas/hashedArt.ts),
+// out) goes to the build output under a content-hashed name (src/tools/atlas/hashedArt.ts),
 // and the game reads the names from the ART_FILES_MODULE map. The dev server's map is empty.
 // The files under public/art/ are also copied as they are, for the dev server, the art gallery
 // and the site's pages.

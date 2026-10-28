@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
-import { loadsFirst } from "../assets/atlas/atlasLayout";
+import { loadsFirst } from "../assets/atlasGroups";
 import { parseManifest } from "../assets/manifest";
 import * as spriteKeys from "../assets/spriteKeys";
 import { type BaseCue, HOME_CUES, SOUND_KEYS } from "../audio/sound";

@@ -3,7 +3,7 @@ import artFiles from "virtual:art-files";
 
 import { itemAt } from "../../lib/arrays";
 import { artFileUrl } from "../artUrl";
-import { filtersLinear, steppedBases } from "../atlas/atlasLayout";
+import { filtersLinear, steppedBases } from "../atlasGroups";
 import {
   asepriteSheetOf,
   ATLAS_MANIFEST_PATH,
@@ -13,7 +13,7 @@ import {
   type AtlasTexture,
   BASE_FRAME,
   parseAtlasManifest,
-} from "../atlas/atlasManifest";
+} from "../atlasManifest";
 import { type AssetManifest, parseManifest } from "../manifest";
 
 // The URL of an art file by its path under /art/: in a build, its content-hashed copy, so the

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { hashedArtFileName } from "../assets/atlas/hashedArt";
 import { isHashedAssetUrl } from "../pwa/cachePolicy";
+import { hashedArtFileName } from "../tools/atlas/hashedArt";
 import {
   cspHash,
   headersFile,

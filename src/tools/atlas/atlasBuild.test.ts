@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
+import { BASE_FRAME, parseAtlasManifest } from "../../assets/atlasManifest";
+import { parseManifest } from "../../assets/manifest";
 import { sheetFromRows } from "../../testing/sheetImage";
-import { parseManifest } from "../manifest";
 import {
   type AtlasBuild,
   buildAtlases,
@@ -14,7 +15,6 @@ import {
   trimsFrames,
 } from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
-import { BASE_FRAME, parseAtlasManifest } from "./atlasManifest";
 import type { RgbaImage } from "./atlasPixels";
 import { COLOUR_TYPE_INDEXED } from "./indexedPng";
 

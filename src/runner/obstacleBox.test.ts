@@ -2,8 +2,6 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { decodePng } from "../assets/atlas/atlasBuild";
-import { spriteSource } from "../assets/atlas/atlasLayout";
 import { depthVariantKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
@@ -14,6 +12,8 @@ import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
 import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
+import { decodePng } from "../tools/atlas/atlasBuild";
+import { spriteSource } from "../tools/atlas/atlasLayout";
 import { hitDog, type ScaledBox } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { drawnObstacleBox } from "./obstacleBox";

@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 
 import { defineConfig } from "vitest/config";
 
-import { atlasPlugin } from "./src/assets/atlas/atlasPlugin";
 import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
 import { precachePlugin } from "./src/pwa/precachePlugin";
+import { atlasPlugin } from "./src/tools/atlas/atlasPlugin";
 import { gitHead, shortCommit } from "./src/tools/buildVersion";
 import { generatedFilesPlugin } from "./src/tools/generatedFilesPlugin";
 
