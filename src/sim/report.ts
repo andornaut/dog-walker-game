@@ -17,7 +17,7 @@ import {
   picksOf,
   type RunFacts,
 } from "../rules/achievements";
-import { isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
+import { blocksLane, isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
 import { MAX_RUN_DOGS, TALLY_IDS } from "../save/schema";
 import type { PackDogs } from "../state/runState";
 import { type Delivered, DELIVERY_GROUPS, sumDeliveries, type ZoneDelivery } from "./delivery";
@@ -299,16 +299,13 @@ export function simulateCell(
 }
 
 // Every obstacle kind, those that open a card first, then the minor ones, but pull obstacles
-// such as squirrels, which touching does nothing to.
+// such as squirrels, which touching does nothing to: the kinds that block a lane.
 function obstacleKinds(data: Pick<GameData, "encounters" | "minorObstacles">): WalkItemKind[] {
   const kinds = [
     ...Object.keys(data.encounters),
     ...Object.keys(data.minorObstacles),
   ] as WalkItemKind[];
-  return kinds.filter((kind) => {
-    const category = itemCategory(data, kind);
-    return (category === "obstacle" || category === "minor") && !isPullObstacle(data, kind);
-  });
+  return kinds.filter((kind) => blocksLane(data, kind));
 }
 
 function touchedShare(counts: readonly ItemCount[]): number | null {
@@ -347,6 +344,7 @@ function summarizeCell(
     ({ kind }: (typeof counted)[number]) =>
       itemCategory(data, kind) === category;
   const drops = countsOf(inCategory("gear"));
+  const obstacles = obstacleKinds(data);
   const hits = results.reduce((sum, result) => sum + result.hits.all, 0);
   const afterPull = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
   return {
@@ -374,7 +372,7 @@ function summarizeCell(
       countsOf((entry) => inCategory("obstacle")(entry) && !isPullObstacle(data, entry.kind)),
     ),
     kindHitShares: Object.fromEntries(
-      obstacleKinds(data).map((kind) => [
+      obstacles.map((kind) => [
         kind,
         touchedShare(countsOf((entry) => entry.mover === undefined && entry.kind === kind)),
       ]),
@@ -395,7 +393,7 @@ function summarizeCell(
         : choices.filter((choice) => choice.cost > 0).length / choices.length,
     moverHitShares: Object.fromEntries(
       [...new Set(results.flatMap((result) => Object.keys(result.movers) as WalkItemKind[]))]
-        .filter((mover) => obstacleKinds(data).includes(mover))
+        .filter((mover) => obstacles.includes(mover))
         .sort()
         .map((mover) => [mover, touchedShare(countsOf((entry) => entry.mover === mover))]),
     ),
