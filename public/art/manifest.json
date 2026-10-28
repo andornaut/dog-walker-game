@@ -7232,7 +7232,7 @@
       "png": "sprites/market-stall-2.png",
       "json": "sprites/market-stall-2.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 47,
         "opaqueWidth": 112
       }
     },
@@ -7241,7 +7241,7 @@
       "png": "sprites/market-stall-2@50.png",
       "json": "sprites/market-stall-2@50.json",
       "anchor": {
-        "feetY": 17,
+        "feetY": 23,
         "opaqueWidth": 56
       }
     },
@@ -7250,7 +7250,7 @@
       "png": "sprites/market-stall-2@56.png",
       "json": "sprites/market-stall-2@56.json",
       "anchor": {
-        "feetY": 19,
+        "feetY": 26,
         "opaqueWidth": 63
       }
     },
@@ -7259,7 +7259,7 @@
       "png": "sprites/market-stall-2@62.png",
       "json": "sprites/market-stall-2@62.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 29,
         "opaqueWidth": 70
       }
     },
@@ -7268,7 +7268,7 @@
       "png": "sprites/market-stall-2@69.png",
       "json": "sprites/market-stall-2@69.json",
       "anchor": {
-        "feetY": 24,
+        "feetY": 32,
         "opaqueWidth": 77
       }
     },
@@ -7277,7 +7277,7 @@
       "png": "sprites/market-stall-2@75.png",
       "json": "sprites/market-stall-2@75.json",
       "anchor": {
-        "feetY": 26,
+        "feetY": 35,
         "opaqueWidth": 84
       }
     },
@@ -7286,7 +7286,7 @@
       "png": "sprites/market-stall-2@81.png",
       "json": "sprites/market-stall-2@81.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 38,
         "opaqueWidth": 91
       }
     },
@@ -7295,7 +7295,7 @@
       "png": "sprites/market-stall-2@88.png",
       "json": "sprites/market-stall-2@88.json",
       "anchor": {
-        "feetY": 31,
+        "feetY": 41,
         "opaqueWidth": 98
       }
     },
@@ -7304,7 +7304,7 @@
       "png": "sprites/market-stall-2@94.png",
       "json": "sprites/market-stall-2@94.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 44,
         "opaqueWidth": 105
       }
     },
@@ -7313,7 +7313,7 @@
       "png": "sprites/market-stall-3.png",
       "json": "sprites/market-stall-3.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 47,
         "opaqueWidth": 176
       }
     },
@@ -7322,7 +7322,7 @@
       "png": "sprites/market-stall-3@50.png",
       "json": "sprites/market-stall-3@50.json",
       "anchor": {
-        "feetY": 17,
+        "feetY": 23,
         "opaqueWidth": 88
       }
     },
@@ -7331,7 +7331,7 @@
       "png": "sprites/market-stall-3@56.png",
       "json": "sprites/market-stall-3@56.json",
       "anchor": {
-        "feetY": 19,
+        "feetY": 26,
         "opaqueWidth": 99
       }
     },
@@ -7340,7 +7340,7 @@
       "png": "sprites/market-stall-3@62.png",
       "json": "sprites/market-stall-3@62.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 29,
         "opaqueWidth": 110
       }
     },
@@ -7349,7 +7349,7 @@
       "png": "sprites/market-stall-3@69.png",
       "json": "sprites/market-stall-3@69.json",
       "anchor": {
-        "feetY": 24,
+        "feetY": 32,
         "opaqueWidth": 121
       }
     },
@@ -7358,7 +7358,7 @@
       "png": "sprites/market-stall-3@75.png",
       "json": "sprites/market-stall-3@75.json",
       "anchor": {
-        "feetY": 26,
+        "feetY": 35,
         "opaqueWidth": 132
       }
     },
@@ -7367,7 +7367,7 @@
       "png": "sprites/market-stall-3@81.png",
       "json": "sprites/market-stall-3@81.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 38,
         "opaqueWidth": 143
       }
     },
@@ -7376,7 +7376,7 @@
       "png": "sprites/market-stall-3@88.png",
       "json": "sprites/market-stall-3@88.json",
       "anchor": {
-        "feetY": 31,
+        "feetY": 41,
         "opaqueWidth": 154
       }
     },
@@ -7385,7 +7385,7 @@
       "png": "sprites/market-stall-3@94.png",
       "json": "sprites/market-stall-3@94.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 44,
         "opaqueWidth": 165
       }
     },

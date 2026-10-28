@@ -49,14 +49,14 @@ produce-crates      48x48   minor, 1 lane: a pyramid of three wooden produce cra
 clothing-rack       48x48   minor, 1 lane: a rolling rack of vintage clothes on chrome uprights and
                             casters: a mustard corduroy jacket, a plain lilac dress, a denim jacket
                             and a striped tee. idle (4 frames, 450ms): the dress sways 1px on frame 2
-market-stall-2      112x36  minor, 2 lanes: a flea market's folding tables,
-                            one per lane, under a faded teal and cream striped awning with a scalloped
-                            hem on thin coal poles; each clay table stands on crossed legs, laid with
-                            chunky goods: a crate of records with a black record stood up (lilac label,
-                            left out at @69 and smaller, where it would fill the disc), folded clothes,
-                            book spines, glass jars and a lidded box. idle (4 frames, 500ms): the hem's
-                            middle half lifts 1px on frame 2
-market-stall-3      176x36  minor, 3 lanes: the same stall, a table wider
+market-stall-2      112x48  minor, 2 lanes: a flea market's folding tables, one per lane, under a
+                            faded teal and cream striped awning with a deep scalloped hem on thin coal
+                            poles, open air between the hem and the goods; each clay table stands on
+                            crossed legs, laid with chunky goods: a crate of records with a black
+                            record stood up (lilac label, left out at @69 and smaller, where it would
+                            fill the disc), folded clothes, book spines, glass jars and a lidded box.
+                            idle (4 frames, 500ms): the hem's middle half lifts 1px on frame 2
+market-stall-3      176x48  minor, 3 lanes: the same stall, a table wider
 cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding down a lane at the pack,
                             facing it: a wooden box of sunflowers and pink tulips out front over a
                             small front wheel with a lit headlamp on its fork, its rider behind in a
@@ -91,11 +91,11 @@ The road sprites take the road outline rule (pixel.road_edge) and road.LIT's rim
 colours, so their silhouettes hold 3:1 on every road. People, movers and the card obstacles are laid
 out on the 32-unit design grid (the wedding shoot on 224/3 x 48 units, two lanes) and drawn
 road.SCALE (1.5) times bigger on a minis.Mini; the minor obstacles are laid out in obstacles.py's
-layout pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn obstacles.SCALE (1.2)
-times bigger. Each has <key>@<step> for every depth step in minis.STEPS, redrawn the same way at
-its scale times the step, with the original's tags, frames and durations and a full outline. 1px
-motions are in drawn pixels, so they stay 1px at every step. The hit bursts follow hits.py: a
-64-unit design drawn 77/64 times bigger, a plum rim round each part.
+layout pixels (40 for one lane, 30 rows for a lane-spanning one, 40 for the market stall) and
+drawn obstacles.SCALE (1.2) times bigger. Each has <key>@<step> for every depth step in minis.STEPS,
+redrawn the same way at its scale times the step, with the original's tags, frames and durations and
+a full outline. 1px motions are in drawn pixels, so they stay 1px at every step. The hit bursts follow
+hits.py: a 64-unit design drawn 77/64 times bigger, a plum rim round each part.
 
 Usage:
   hood_markets.py preview OUT.png   every frame of every sprite on the zone roads
@@ -849,6 +849,9 @@ def box(g, x, y):
     g.rect(x + 6, y + 3, 1, 4, "bark")
 
 
+# The stall's height in layout pixels: 48 drawn, a whole number of rows at every depth step.
+STALL_H = 40
+
 # The goods on each table, left to right, as (draw, layout width), as many as fit: table k starts the list at
 # 2k (wrapping), so no two tables match.
 GOODS = ((records, 15), (folded, 10), (books, 10), (jars, 9), (box, 9))
@@ -856,14 +859,14 @@ GOODS = ((records, 15), (folded, 10), (books, 10), (jars, 9), (box, 9))
 
 def market_stall(lanes, flap=0):
     """Front elevation across lanes lanes, laid out in obstacles.py's pixels (obstacles.span(lanes) by
-    obstacles.ROW): a flea market's row of folding tables, one per lane, under a striped awning on thin coal
-    poles. The awning runs the whole width in faded dturq and cream stripes, its sloped top over a valance
-    with a scalloped hem; under it each table's clay top, lit driftwood and shaded bark, stands on crossed
-    coal legs, laid with chunky goods: a crate of records with a black record propped up (lilac label),
-    folded clothes, book spines, glass jars and a lidded box. flap lifts the hem's middle half 1 drawn
-    pixel."""
+    STALL_H): a flea market's row of folding tables, one per lane, under a striped awning on thin coal poles.
+    The awning runs the whole width in faded dturq and cream stripes, its sloped top over a deep valance with
+    a scalloped hem, open air under it between the poles; under that each table's clay top, lit driftwood and
+    shaded bark, stands on crossed coal legs, laid with chunky goods: a crate of records with a black record
+    propped up (lilac label), folded clothes, book spines, glass jars and a lidded box. flap lifts the hem's
+    middle half 1 drawn pixel."""
     w = ob.span(lanes)
-    g = edged(Grid(w, ob.ROW))
+    g = edged(Grid(w, STALL_H))
     px, s = raster(g), scale_of(g)
     sy = getattr(g, "sy", s)
 
@@ -876,34 +879,36 @@ def market_stall(lanes, flap=0):
     poles = [2] + [w * k / lanes - 1 for k in range(1, lanes)] + [w - 4]
     # the poles, coal lit ash down their left
     for x in poles:
-        g.rect(x, 6, 2, 23.5, "coal")
-        g.rect(x, 6, 1, 23.5, "ash")
+        g.rect(x, 8, 2, STALL_H - 8.5, "coal")
+        g.rect(x, 8, 1, STALL_H - 8.5, "ash")
     # the tables, one between each pair of poles: crossed legs under a clay top, the goods laid on it
+    table = STALL_H - 12
+    legs, foot = table + 2, STALL_H - 1.5
     for k in range(lanes):
         a, b = poles[k] + 3, poles[k + 1] - 1
         for lx in (a + 3, b - 8):
-            for t in range(10):
-                f = t / 9
-                g.rect(lx + 5 * f, 21 + 7.6 * f, 1.4, 1.4, "coal")
-                g.rect(lx + 5 - 5 * f, 21 + 7.6 * f, 1.4, 1.4, "coal")
+            for t in range(12):
+                f = t / 11
+                g.rect(lx + 5 * f, legs + (foot - legs) * f, 1.4, 1.4, "coal")
+                g.rect(lx + 5 - 5 * f, legs + (foot - legs) * f, 1.4, 1.4, "coal")
         x = a + 2
         goods = GOODS[2 * k % len(GOODS):] + GOODS
         room = b - a - 3
         for draw, gw in goods:
             if gw > room:
                 break
-            draw(g, x, 11)
+            draw(g, x, table - 7)
             x += gw
             room -= gw
-        g.rect(a, 18, b - a, 1, "driftwood")
-        g.rect(a, 19, b - a, 2.5, "clay")
-        g.rect(a, 21, b - a, 1, "bark")
-    # the awning: a sloped top over a valance of stripes 6 layout pixels wide, scalloped along its hem
+        g.rect(a, table, b - a, 1, "driftwood")
+        g.rect(a, table + 1, b - a, 2.5, "clay")
+        g.rect(a, table + 3, b - a, 1, "bark")
+    # the awning: a sloped top over a deep valance of stripes 6 layout pixels wide, scalloped along its hem
     left, right = 0.5, w - 0.5
-    g.tri((left + 3, 0.5), (right - 3, 0.5), (left, 3.5), "dturq")
-    g.tri((right - 3, 0.5), (right, 3.5), (left, 3.5), "dturq")
+    g.tri((left + 4, 0.5), (right - 4, 0.5), (left, 5), "dturq")
+    g.tri((right - 4, 0.5), (right, 5), (left, 5), "dturq")
     x0, x1 = X(left), X(right)
-    top, hem = Y(3.5), Y(7.5)
+    top, hem = Y(5), Y(12)
     stripe = max(4, X(6))
     lift = x0 + (x1 - x0) // 4, x1 - (x1 - x0) // 4
     for x in range(x0, x1):
@@ -914,7 +919,7 @@ def market_stall(lanes, flap=0):
                 px.p(x, y, "driftwood" if n % 2 else "dturq")
         # the scallop: each stripe's hem rounds down to a tab in its middle
         t = ((x - x0) % stripe + 0.5) / stripe
-        tab = round(Y(1.5) * (1 - (2 * t - 1) ** 2))
+        tab = round(Y(2) * (1 - (2 * t - 1) ** 2))
         up = 1 if flap and lift[0] <= x < lift[1] else 0
         for y in range(top, hem + tab - up):
             px.p(x, y, c)
