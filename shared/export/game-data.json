@@ -2199,7 +2199,7 @@
       "maxEmptyRows": 3,
       "maxMovers": 10,
       "maxSlowVehicles": 4,
-      "minorObstaclesFirstZone": 83,
+      "minorObstaclesFirstZone": 90,
       "minorObstaclesGainPerZone": 2,
       "obstaclesFirstZone": 25,
       "obstaclesGainPerZone": 3,

@@ -32,7 +32,7 @@ export const TUNING = {
     maxMovers: 10,
     maxSlowVehicles: 4,
     // Obstacles that open no card, on top of obstaclesFirstZone.
-    minorObstaclesFirstZone: 83,
+    minorObstaclesFirstZone: 90,
     minorObstaclesGainPerZone: 2,
     obstaclesFirstZone: 25,
     obstaclesGainPerZone: 3,
