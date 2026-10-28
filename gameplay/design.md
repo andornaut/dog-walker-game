@@ -149,7 +149,7 @@ Size shows at a glance: on the road, medium dogs are drawn 48 px, large dogs 54 
 
 ### Encounters and debuffs
 
-Ten card obstacles open a choice card: the other dog, the skunk and the thief, in several neighbourhoods, the cheese crates, in the Distillery District and Kensington Market, and one of each neighbourhood's own, which appears only there (the wedding photo shoot also at The Beaches). Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20 ($10 with the Fanny pack). Most hearts options cost each walking dog's owner 1♥; the porch cat's Stand your ground costs only the lead dog's owner.
+Ten card obstacles open a choice card: the other dog, the skunk and the thief, in several neighbourhoods, the cheese crates, in the Distillery District and Kensington Market, and one of each neighbourhood's own, which appears only there (the wedding photo shoot also at The Beaches). A card offers the same options, with the same effects, in every neighbourhood it appears in. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20 ($10 with the Fanny pack). Most hearts options cost each walking dog's owner 1♥; the porch cat's Stand your ground costs only the lead dog's owner.
 
 | Neighbourhood          | Card                | Options                                                                  |
 | ---------------------- | ------------------- | ------------------------------------------------------------------------ |
