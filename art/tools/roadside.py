@@ -54,6 +54,7 @@ the game starts each placed prop at its own point in the loop. The drawings each
 
 roadside-street-lamp     0 1 2 3 2 1   2400 300 250 900 250 300   the lenses fade off and on (LAMP_LENS)
 roadside-gas-lamp        0 1 2 1       2600 250 350 250           the flame dips and recovers (GAS_FLAME)
+roadside-shopfront-*     0 1 2 1       2400 300 600 300           the sign's letters dim and relight (SHOP_LETTERS)
 
 The ground row is the last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge;
 there is no light rim (road.LIT), since the props stand on the verge, never on the road.
@@ -508,6 +509,10 @@ def mural_wall():
     return w, h, draw
 
 
+# The shopfronts' sign letters at each idle frame, lit to dimmed.
+SHOP_LETTERS = ("cream", "tan", "clay")
+
+
 def shopfront(wall, awning, sign, rail):
     """A Kensington vintage shop seen from the street: a painted wall under a walnut coping, a sign board
     lettered in cream, a striped awning with a scalloped hem, a display window onto a rail of second-hand
@@ -524,7 +529,7 @@ def shopfront(wall, awning, sign, rail):
         g.rect(8, 9, 56, 8, sign)
         g.rect(8, 16, 56, 1, dk(sign))
         for i, x in enumerate(range(12, 60, 4)):
-            g.rect(x, 11, 2, 4 if i % 4 else 3, "cream")
+            g.rect(x, 11, 2, 4 if i % 4 else 3, SHOP_LETTERS[f])
         for x in range(6, 66, 6):
             g.rect(x, 19, 3, 7, awning)
             g.rect(x + 3, 19, 3, 7, "cream")
@@ -982,10 +987,10 @@ PROPS = {
     "roadside-mural-wall": (mural_wall(), (0,), STILL_MS, True),
     "roadside-shopfront-ochre": (shopfront("ochre", "red", "forest",
                                            ("cyan", "lilac", "cream", "pink", "lime", "red", "violet")),
-                                 (0,), STILL_MS, True),
+                                 (0, 1, 2, 1), (2400, 300, 600, 300), True),
     "roadside-shopfront-violet": (shopfront("violet", "dturq", "navy",
                                             ("red", "lime", "pink", "cyan", "ochre", "lilac", "cream")),
-                                  (0,), STILL_MS, True),
+                                  (0, 1, 2, 1), (2400, 300, 600, 300), True),
     **{f"roadside-beach-umbrella-{c}": (beach_umbrella(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     **{f"roadside-beach-chair-{c}": (beach_chair(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     "roadside-cafe-patio": (cafe_patio(), (0,), STILL_MS, True),

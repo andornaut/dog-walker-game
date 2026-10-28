@@ -1,11 +1,35 @@
 { "frames": {
-   "roadside-shopfront-ochre@88.aseprite": {
+   "roadside-shopfront-ochre@88 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 95, "h": 84 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 84 },
     "sourceSize": { "w": 95, "h": 84 },
-    "duration": 1000
+    "duration": 2400
+   },
+   "roadside-shopfront-ochre@88 1.aseprite": {
+    "frame": { "x": 95, "y": 0, "w": 95, "h": 84 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 84 },
+    "sourceSize": { "w": 95, "h": 84 },
+    "duration": 300
+   },
+   "roadside-shopfront-ochre@88 2.aseprite": {
+    "frame": { "x": 190, "y": 0, "w": 95, "h": 84 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 84 },
+    "sourceSize": { "w": 95, "h": 84 },
+    "duration": 600
+   },
+   "roadside-shopfront-ochre@88 3.aseprite": {
+    "frame": { "x": 285, "y": 0, "w": 95, "h": 84 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 95, "h": 84 },
+    "sourceSize": { "w": 95, "h": 84 },
+    "duration": 300
    }
  },
  "meta": {
@@ -13,10 +37,10 @@
   "version": "1.2.30-x64",
   "image": "roadside-shopfront-ochre@88.png",
   "format": "RGBA8888",
-  "size": { "w": 95, "h": 84 },
+  "size": { "w": 380, "h": 84 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
   ]
  }
 }
