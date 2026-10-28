@@ -1623,6 +1623,87 @@
       }
     },
     {
+      "key": "brewery-dray",
+      "png": "sprites/brewery-dray.png",
+      "json": "sprites/brewery-dray.json",
+      "anchor": {
+        "feetY": 63,
+        "opaqueWidth": 173
+      }
+    },
+    {
+      "key": "brewery-dray@50",
+      "png": "sprites/brewery-dray@50.png",
+      "json": "sprites/brewery-dray@50.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "brewery-dray@56",
+      "png": "sprites/brewery-dray@56.png",
+      "json": "sprites/brewery-dray@56.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 97
+      }
+    },
+    {
+      "key": "brewery-dray@62",
+      "png": "sprites/brewery-dray@62.png",
+      "json": "sprites/brewery-dray@62.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "brewery-dray@69",
+      "png": "sprites/brewery-dray@69.png",
+      "json": "sprites/brewery-dray@69.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 119
+      }
+    },
+    {
+      "key": "brewery-dray@75",
+      "png": "sprites/brewery-dray@75.png",
+      "json": "sprites/brewery-dray@75.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 130
+      }
+    },
+    {
+      "key": "brewery-dray@81",
+      "png": "sprites/brewery-dray@81.png",
+      "json": "sprites/brewery-dray@81.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 141
+      }
+    },
+    {
+      "key": "brewery-dray@88",
+      "png": "sprites/brewery-dray@88.png",
+      "json": "sprites/brewery-dray@88.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 151
+      }
+    },
+    {
+      "key": "brewery-dray@94",
+      "png": "sprites/brewery-dray@94.png",
+      "json": "sprites/brewery-dray@94.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 162
+      }
+    },
+    {
       "key": "busker",
       "png": "sprites/busker.png",
       "json": "sprites/busker.json",

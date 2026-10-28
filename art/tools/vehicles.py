@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Draw the vehicle minor obstacles: the garbage truck (garbageTruck) and the scooter (scooter), High Park's
-tourist train and Yonge Street's crossing TTC bus. Like obstacles.py's the truck and the scooter are
-billboards from a low camera, a front elevation, squat, with at most a sliver of top surface; the train and
-the bus are crossers, side on. All take the road outline and road.LIT's rim.
+tourist train, Yonge Street's crossing TTC bus and the Distillery District's brewery dray. Like obstacles.py's
+the truck and the scooter are billboards from a low camera, a front elevation, squat, with at most a sliver of
+top surface; the train, the bus and the dray are crossers, side on. All take the road outline and road.LIT's
+rim.
 
 stink-garbage-truck 56x60   a rear-loader garbage truck from behind, its hopper
                             open on bags and a banana peel, the beacon blinking, two flies.
@@ -50,6 +51,21 @@ ttc-bus-crossing    176x64  a TTC bus crossing Yonge Street side on, facing righ
                             1px on frames 1 and 2; cue (3 frames, 120ms): the doors shut, the indicator
                             blinking, the body up off its kneel from frame 1 and the wheels a quarter
                             turned on frame 2
+brewery-dray        176x64  the Distillery District's brewery dray crossing the road side on, facing right
+                            (the game mirrors it for left), on the train's grid: a low electric tug, its
+                            brick red body lit along its top, the lit headlamp (road.headlamp) on its
+                            sloped nose, an open cab under a flat dslate roof with an amber beacon, the
+                            driver in a green cap and shirt at the wheel behind a raked windscreen post,
+                            towing on an ink bar a flatbed on a dslate steel deck with a red tail lamp,
+                            stacked with upright oak kegs in two iron hoops each, two tiers at the back
+                            stepping down to one at the front, a yellow ratchet strap over each step;
+                            black tires with grey hubs, the tug's in dark arches. Told apart from
+                            barrel-stack's barrels on their sides and keg-dolly-worker's steel kegs.
+                            push (4 frames, 100ms): a spoke across each hub turning an eighth a frame,
+                            the tug dipping 1px onto its wheels on frames 1 and 2 and the flatbed
+                            bobbing 1px in turn; idle (4 frames, 400ms): stopped, the driver waving out
+                            of the open cab, the hand swung out on frame 2; cue (3 frames, 120ms): the
+                            roof beacon blinking, the wheels a quarter turned on frame 2
 
 Every key also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5), with
 the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The scooter's
@@ -668,13 +684,144 @@ def ttc_bus_crossing(roll=None, doors=0, kneel=0, blink=0):
     return lit(g, dict(ttc=("red", None)))
 
 
+# ---------- brewery dray ----------
+
+
+# The key, and the dray's design grid: 176x64 at road.SCALE, as the tourist train's.
+DRAY_KEY = "brewery-dray"
+DRAY_W, DRAY_H = TRAIN_W, TRAIN_H
+# The flatbed's rear and front columns and its deck's top row; the kegs' width, height and pitch, the bottom
+# tier's left columns and the top tier's count, stepped up at the back; the tug's rear and front columns, its
+# body's top row and the cab roof's row; the wheels' columns, on the bus's axle and radius.
+DRAY_BED, DRAY_BED_FRONT, DRAY_DECK = 2, 70, 28.5
+DRAY_KEG_W, DRAY_KEG_H, DRAY_KEG_PITCH, DRAY_KEGS, DRAY_TOP_KEGS = 10, 11, 11, 6, 3
+DRAY_TUG, DRAY_TUG_FRONT, DRAY_TUG_TOP, DRAY_ROOF = 73, 114.5, 22.5, 6
+DRAY_WHEELS, DRAY_TUG_WHEELS = (13, 57), (82, 105)
+# Moving: the hubs' spokes turn an eighth a frame (roll), the tug dips 1px onto its wheels on frames 1 and 2 and
+# the flatbed bobs 1px in turn; 4 frames at 100ms, as every drive. Stopped: the driver waves out of the open cab,
+# the hand swung out on frame 2; 4 frames at 400ms. Pulling away: the roof beacon blinks, the wheels a quarter
+# turned on frame 2; 3 frames at 120ms, the train's.
+DRAY_TAGS = (
+    ("push", tuple(dict(roll=r) for r in range(4)), 100),
+    ("idle", (dict(), dict(wave=1), dict(wave=2), dict(wave=1)), 400),
+    ("cue", (dict(blink=1), dict(), dict(roll=1, blink=1)), 120),
+)
+
+
+def keg(g, x, y):
+    """An upright wooden keg side on from its top-left corner (x, y): oak staves lit down the left and shaded
+    down the right, bellied a little at the middle, a pale chime at its top and two dark iron hoops."""
+    w, h = DRAY_KEG_W, DRAY_KEG_H
+    g.rect(x + 1, y, w - 2, h, "brown")
+    g.rect(x, y + 2.5, w, h - 5, "brown")
+    g.rect(x + 1, y + 0.5, 1.5, h - 1, "tan")
+    g.rect(x, y + 2.5, 1, h - 5, "tan")
+    g.rect(x + w - 2.5, y + 0.5, 1.5, h - 1, "dbrown")
+    g.rect(x + w - 1, y + 2.5, 1, h - 5, "dbrown")
+    row(g, x + 1, x + w - 1, y, "tan")
+    for hy in (y + 2.5, y + h - 3.5):
+        g.rect(x, hy, w, 1, "dslate")
+
+
+def flatbed(g):
+    """The flatbed trailer: two tiers of kegs, the top one stepped up over the back, a yellow ratchet strap
+    over each, on a dslate steel deck with a tail lamp at the back."""
+    x0, x1, deck = DRAY_BED, DRAY_BED_FRONT, DRAY_DECK
+    kh, kp = DRAY_KEG_H, DRAY_KEG_PITCH
+    for i in range(DRAY_KEGS):
+        keg(g, x0 + 1 + i * kp, deck - kh)
+    for i in range(DRAY_TOP_KEGS):
+        keg(g, x0 + 1 + i * kp, deck - 2 * kh)
+    # the straps over each tier, a ratchet on each
+    for x, top in ((x0 + 1 + kp + DRAY_KEG_W / 2, deck - 2 * kh), (x0 + 1 + 4.5 * kp + DRAY_KEG_W / 2, deck - kh)):
+        g.rect(x - 0.75, top - 0.5, 1.5, deck - top + 0.5, "yellow")
+        g.rect(x - 1.25, deck - 4.5, 2.5, 2, "dslate")
+    g.rect(x0, deck, x1 - x0, 3, "dslate")
+    row(g, x0, x1, deck, "slate")
+    g.rect(x0 + 2, deck + 3, x1 - x0 - 4, 2, "navy")
+    g.rect(x0 - 0.5, deck + 0.5, 1.5, 2, "red")
+    # the tow bar to the tug
+    g.rect(x1, deck + 3.5, DRAY_TUG - x1 + 1, 1.5, "ink")
+
+
+def tug(g, wave=0, blink=0):
+    """The electric tug, its open cab at the back (left) under a flat roof, the driver at the wheel behind the
+    raked windscreen, the low brick red nose in front with the lit headlamp."""
+    x0, x1, top, roof = DRAY_TUG, DRAY_TUG_FRONT, DRAY_TUG_TOP, DRAY_ROOF
+    # the open cab: its dark inside, the driver in a green cap and shirt
+    g.rect(x0 + 1.5, roof + 2, 25, top - roof - 2, "navy")
+    g.cel(88, 21, 4.2, 3, "forest", None, power=3)
+    face_disc(g, 88, 15.5, 3.2, 3.2, "skin1", "skin2")
+    eyes(g, 88.6, 15.5)
+    g.cel(87.5, 12.2, 3.6, 1.6, "forest", None, power=3)
+    g.rect(88, 12.6, 4.5, 1, "forest")
+    # the steering wheel's rim on its column
+    strand(g, [(93, 22), (96.5, 16.5)], "ink")
+    g.rect(94.5, 16, 3.5, 1.2, "ink")
+    if wave:
+        hx = 92.5 if wave == 1 else 94
+        g.rect(90.5, 17, 1.5, 4, "forest")
+        g.rect(hx - 0.3, 12.5, 1.5, 5, "forest")
+        g.rect(hx - 0.5, 10.5, 2.5, 2.5, "skin1")
+    # the posts and the raked windscreen
+    g.rect(x0, roof + 1, 2, top - roof, "dslate")
+    quad(g, (100.5, roof + 1.5), (102.5, roof + 1.5), (105.5, top), (103.5, top), "dslate")
+    glint(g, 97, roof + 3, roof + 9, "slate")
+    # the flat roof, a step past the posts, and the beacon on it
+    g.rect(x0 - 1, roof, 31, 2, "dslate")
+    row(g, x0 - 1, x0 + 30, roof, "slate")
+    g.rect(86.5, roof - 1.5, 3.5, 1.5, "yellow" if blink else "amber")
+    if blink:
+        row(g, 86.5, 90, roof - 1.5, "white")
+    # the brick red body, lit along its top, the nose sloped down to the bumper
+    g.rect(x0, top, 104 - x0, 34 - top, "brick")
+    quad(g, (104, top), (108, top + 1.5), (x1, top + 4), (x1, 34), "brick")
+    g.rect(104, top + 1, x1 - 104, 33 - top, "brick")
+    row(g, x0, 104, top, "rust")
+    g.rect(x0, 32.5, x1 - x0, 1.5, "dbrick")
+    headlamp(g, x1 - 1.5, top + 6)
+    g.rect(x1 - 2, 29.5, 3, 3, "dslate")
+    row(g, x1 - 2, x1 + 1, 29.5, "slate")
+    for cx in DRAY_TUG_WHEELS:
+        g.ell(cx, BUS_AXLE, BUS_WHEEL + 1.5, BUS_WHEEL + 1.5, "navy")
+    g.rect(0, 34, DRAY_W, DRAY_H, None)
+
+
+def brewery_dray(roll=None, wave=0, blink=0):
+    """The Distillery District's brewery dray side on, facing right (see the docstring): an electric tug pulling
+    a flatbed of wooden kegs. roll (0 to 3) is a push frame: the spokes turn, the tug dips onto its wheels on
+    frames 1 and 2 and the flatbed bobs in turn; wave raises the driver's hand (2 swings it out), blink lights
+    the roof beacon."""
+    g = edged(Grid(DRAY_W, DRAY_H))
+    px = raster(g)
+    moving = roll is not None
+    dip = 1 if roll in (1, 2) else 0
+    alt = 1 if roll in (0, 3) else 0
+    out = [[None] * px.w for _ in range(px.h)]
+
+    def layer(draw, dy):
+        px.px = [[None] * px.w for _ in range(px.h)]
+        draw()
+        for y in range(dy, px.h):
+            for x in range(px.w):
+                c = px.px[y - dy][x]
+                if c:
+                    out[y][x] = c
+
+    layer(lambda: flatbed(g), alt if moving else 0)
+    layer(lambda: [bus_wheel(g, x, roll or 0) for x in DRAY_WHEELS + DRAY_TUG_WHEELS], 0)
+    layer(lambda: tug(g, wave, blink), dip)
+    px.px = out
+    return lit(g, dict(brick=("rust", None), dbrick=("brick", None)))
+
+
 # ---------- build ----------
 
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for each sprite at full size, then at every depth
-    step: the garbage truck on a minis.Mini at TRUCK_SCALE x the step, the scooter, the tourist train and the
-    TTC bus at road.SCALE x the step."""
+    step: the garbage truck on a minis.Mini at TRUCK_SCALE x the step, the scooter, the tourist train, the
+    TTC bus and the brewery dray at road.SCALE x the step."""
     this = sys.modules[__name__]
     drive, drive_ms = obstacles.DRIVE
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
@@ -693,6 +840,10 @@ def sprites():
         s = SCALE * step
         yield f"{BUS_KEY}{suffix}", [(tag, [small(this, s, ttc_bus_crossing, **q).outlined() for q in poses], ms)
                                      for tag, poses, ms in BUS_TAGS]
+    for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
+        s = SCALE * step
+        yield f"{DRAY_KEY}{suffix}", [(tag, [small(this, s, brewery_dray, **q).outlined() for q in poses], ms)
+                                      for tag, poses, ms in DRAY_TAGS]
 
 
 if __name__ == "__main__":

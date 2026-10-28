@@ -1,0 +1,104 @@
+{ "frames": {
+   "brewery-dray@75 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 100
+   },
+   "brewery-dray@75 1.aseprite": {
+    "frame": { "x": 132, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 100
+   },
+   "brewery-dray@75 2.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 100
+   },
+   "brewery-dray@75 3.aseprite": {
+    "frame": { "x": 396, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 100
+   },
+   "brewery-dray@75 4.aseprite": {
+    "frame": { "x": 528, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 400
+   },
+   "brewery-dray@75 5.aseprite": {
+    "frame": { "x": 660, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 400
+   },
+   "brewery-dray@75 6.aseprite": {
+    "frame": { "x": 792, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 400
+   },
+   "brewery-dray@75 7.aseprite": {
+    "frame": { "x": 924, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 400
+   },
+   "brewery-dray@75 8.aseprite": {
+    "frame": { "x": 1056, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 120
+   },
+   "brewery-dray@75 9.aseprite": {
+    "frame": { "x": 1188, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 120
+   },
+   "brewery-dray@75 10.aseprite": {
+    "frame": { "x": 1320, "y": 0, "w": 132, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 48 },
+    "sourceSize": { "w": 132, "h": 48 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "brewery-dray@75.png",
+  "format": "RGBA8888",
+  "size": { "w": 1452, "h": 48 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "cue", "from": 8, "to": 10, "direction": "forward" }
+  ]
+ }
+}
